@@ -123,7 +123,7 @@ beta2 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
     matlabFunction(subs([h3;dh3;ddh3;dddh3], [xdRef vInput1], [XD V1v]),'file','Z3.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ3'});
     matlabFunction(subs([h4;dh4], [xdRef vInput1], [XD V1v]),'file','Z4.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ4'});
 
-    %% Make functions of virtual inputs
+%% Make functions of virtual inputs
 clc
     disp("Start: make functions of virtual inputs.");
     clear dt
