@@ -46,10 +46,11 @@ classdef Logger < handle
             Data=obj.Data;
             save(filename,'Data');
         end
-        function plot(obj,num,target,varargin)
+        function [data]=plot(obj,num,target,varargin)
             % plot(obj,  num, target)
             % num : index of the agent to be plotted
             % target = "p" : variable to be plotted
+            data = [];
             plot_length=1:length(obj.Data.t(obj.Data.t~=0))-1;
             fig_num = 1;
             logger_transpose = 0;
@@ -189,10 +190,10 @@ classdef Logger < handle
                         if sum(contains(obj.items,'input'))>0
                               sp=strcmp(obj.items,'input');
                               tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                              tmps=[tmps{1:end}];
-                        plot(tmps')
+                              plotitem=[tmps{1:end}];
+                        plot(plotitem')
                         title("Input u");
-                        legend(strcat("u",string(1:size(tmps,1))));
+                        legend(strcat("u",string(1:size(plotitem,1))));
                         else
                              warning("ACSL : logger does not include plot target.");
                         end
@@ -204,16 +205,20 @@ classdef Logger < handle
                               else
                                   tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
                               end
-                              tmps=[tmps{1:end}];
-                              plot([tmps]')
+                              plotitem=[tmps{1:end}];
+                              plot([plotitem]')
                               title(target(i));
-                              legend(string(1:min(size(tmps))));
+                              legend(string(1:min(size(plotitem))));
                        else
                             warning("ACSL : logger does not include plot target.");
                        end
                 end
             end
+            if ~isemtpy(plotitem)
+                   data = plotitem;
+            end
         end
+        
     end
 end
 
