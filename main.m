@@ -1,4 +1,4 @@
-%% Drone Â”Ã‡Â—pÂ‹Â¤Â’ÃŠÂƒvÂƒÂÂƒOÂƒÂ‰ÂƒÂ€
+%% Drone ”Ç—p‹¤’ÊƒvƒƒOƒ‰ƒ€
 %% Initialize settings
 % set path
 tmp = matlab.desktop.editor.getActive;
@@ -10,110 +10,129 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-dt = 0.1; % sampling time
+fExp = 0;
+if fExp
+    dt = 0.025; % sampling time
+else
+    dt = 0.025; % sampling time
+end
 sampling = dt;
-fExp = 1;
-%% generate Drone instance
-% Drone classÂ‚ÃŒobjectÂ‚Ã°instanceÂ‰Â»Â‚Â·Â‚Ã©ÂDÂÂ§ÂŒÃ¤Â‘ÃŽÂÃ›Â‚Ã°Â•\Â‚Â·plant propertyÂiModel classÂ‚ÃŒÂƒCÂƒÂ“ÂƒXÂƒ^ÂƒÂ“ÂƒXÂjÂ‚Ã°ÂƒRÂƒÂ“ÂƒXÂƒgÂƒÂ‰ÂƒNÂƒ^Â‚Ã…Â’Ã¨Â‹`Â‚Â·Â‚Ã©ÂD
-%typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))
-%typical_Model_Quat13(N,dt,'plant'); % unit quaternionÂ‚ÃŒÂƒvÂƒÂ‰ÂƒÂ“ÂƒgÂƒÂ‚ÂƒfÂƒÂ‹ : for sim
-%typical_Model_Discrete0(N,dt,'plant') % Â—Â£ÂŽUÂŽÂžÂŠÃ”ÂŽÂ¿Â“_ÂƒÂ‚ÂƒfÂƒÂ‹ : Direct controller Â‚Ã°Â‘zÂ’Ã¨
-%typical_Model_Discrete(N,dt,'plant') % Â—Â£ÂŽUÂŽÂžÂŠÃ”ÂŽÂ¿Â“_ÂƒÂ‚ÂƒfÂƒÂ‹ : PD controller Â‚ÃˆÂ‚Ã‡Â‚Ã°Â‘zÂ’Ã¨
-typical_Model_Lizard_exp(N,dt,'plant',101); % Lizard : for exp
+ts=0;
+if fExp
+    te=1000;
+else
+    te=10;
+end
 
+%% generate Drone instance
+% Drone class‚Ìobject‚ðinstance‰»‚·‚éD§Œä‘ÎÛ‚ð•\‚·plant propertyiModel class‚ÌƒCƒ“ƒXƒ^ƒ“ƒXj‚ðƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Å’è‹`‚·‚éD
+if fExp
+    typical_Model_Lizard_exp(N,dt,'plant',101); % Lizard : for exp
+else
+    %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))
+    typical_Model_Quat13(N,dt,'plant'); % unit quaternion‚Ìƒvƒ‰ƒ“ƒgƒ‚ƒfƒ‹ : for sim
+    %typical_Model_Discrete0(N,dt,'plant') % —£ŽUŽžŠÔŽ¿“_ƒ‚ƒfƒ‹ : Direct controller ‚ð‘z’è
+    %typical_Model_Discrete(N,dt,'plant') % —£ŽUŽžŠÔŽ¿“_ƒ‚ƒfƒ‹ : PD controller ‚È‚Ç‚ð‘z’è
+end
 % set control model
-typical_Model_EulerAngle(N,dt,'model'); % ÂƒIÂƒCÂƒÂ‰Â[ÂŠpÂƒÂ‚ÂƒfÂƒÂ‹
-%typical_Model_Quat13(N,dt,'model') % ÂƒIÂƒCÂƒÂ‰Â[ÂƒpÂƒÂ‰ÂƒÂÂ[Âƒ^Âiunit quaternionÂjÂƒÂ‚ÂƒfÂƒÂ‹
-%typical_Model_Discrete0(N,dt,'model') % Â—Â£ÂŽUÂŽÂžÂŠÃ”ÂƒÂ‚ÂƒfÂƒÂ‹ÂFÂˆÃŠÂ’uÂÂÂ“Ã¼Â—Ã : plantÂ‚ÂªÂ‚SÂ“Ã¼Â—ÃÂƒÂ‚ÂƒfÂƒÂ‹Â‚ÃŒÂŽÂžÂ‚ÃInputTransform_REFtoHL_droneÂ‚Ã°Â—LÂŒÃ¸Â‚Ã‰Â‚Â·Â‚Ã©
-%typical_Model_Discrete(N,dt,'model') % Â—Â£ÂŽUÂŽÂžÂŠÃ”ÂŽÂ¿Â“_ÂƒÂ‚ÂƒfÂƒÂ‹ : plantÂ‚ÂªÂ‚SÂ“Ã¼Â—ÃÂƒÂ‚ÂƒfÂƒÂ‹Â‚ÃŒÂŽÂžÂ‚ÃInputTransform_toHL_droneÂ‚Ã°Â—LÂŒÃ¸Â‚Ã‰Â‚Â·Â‚Ã©
+typical_Model_EulerAngle(N,dt,'model'); % ƒIƒCƒ‰[Špƒ‚ƒfƒ‹
+%typical_Model_Quat13(N,dt,'model') % ƒIƒCƒ‰[ƒpƒ‰ƒ[ƒ^iunit quaternionjƒ‚ƒfƒ‹
+%typical_Model_Discrete0(N,dt,'model') % —£ŽUŽžŠÔƒ‚ƒfƒ‹FˆÊ’u“ü—Í : plant‚ª‚S“ü—Íƒ‚ƒfƒ‹‚ÌŽž‚ÍInputTransform_REFtoHL_drone‚ð—LŒø‚É‚·‚é
+%typical_Model_Discrete(N,dt,'model') % —£ŽUŽžŠÔŽ¿“_ƒ‚ƒfƒ‹ : plant‚ª‚S“ü—Íƒ‚ƒfƒ‹‚ÌŽž‚ÍInputTransform_toHL_drone‚ð—LŒø‚É‚·‚é
+
 %% set input_transform property
-% for exp
 for i = 1:N
-    if isa(agent(i).plant,"Lizard_exp")
-        typical_InputTransform_Thrust2Throttle_drone(agent(i)); % ÂÂ„Â—ÃÂ‚Â©Â‚Ã§ÂƒXÂƒÂÂƒbÂƒgÂƒÂ‹Â‚Ã‰Â•ÃÂŠÂ·
+    if fExp%isa(agent(i).plant,"Lizard_exp")
+        typical_InputTransform_Thrust2Throttle_drone(agent(i)); % „—Í‚©‚çƒXƒƒbƒgƒ‹‚É•ÏŠ·
     end
 end
 
 % for quat-model plant with discrete control model
-%typical_InputTransform_REFtoHL_drone(agent); % ÂˆÃŠÂ’uÂŽwÂ—ÃŸÂ‚Â©Â‚Ã§Â‚SÂ‚Ã‚Â‚ÃŒÂÂ„Â—ÃÂ‚Ã‰Â•ÃÂŠÂ·
-%typical_InputTransform_toHL_drone(agent); % modelÂ‚Ã°ÂŽgÂ‚ÃÂ‚Â½Â‚PÂƒXÂƒeÂƒbÂƒvÂ—\Â‘ÂªÂ’lÂ‚Ã°Â–ÃšÂ•WÂ’lÂ‚Ã†Â‚ÂµÂ‚Ã„Â‚SÂ‚Ã‚Â‚ÃŒÂÂ„Â—ÃÂ‚Ã‰Â•ÃÂŠÂ·
-% Â‚PÂƒXÂƒeÂƒbÂƒvÂ—\Â‘ÂªÂ’lÂ‚Ã°Â–ÃšÂ•WÂ‚Ã†Â‚Â·Â‚Ã©Â‚ÃŒÂ‚Ã…ÂƒQÂƒCÂƒÂ“Â‚Ã°Â‚Â Â‚Ã¨Â“Â¾Â‚ÃˆÂ‚Â¢Â‚Ã™Â‚Ã‡Â‘Ã¥Â‚Â«Â‚Â­Â‚ÂµÂ‚ÃˆÂ‚Â¢Â‚Ã†Â‚ÃŸÂ‚Â¿Â‚Ã¡Â‚ÃŸÂ‚Â¿Â‚Ã¡ÂƒXÂƒsÂ[ÂƒhÂ‚ÂªÂ’xÂ‚Â¢ÂŒÂ‹Â‰ÃŠÂ‚Ã‰Â‚ÃˆÂ‚Ã©ÂD
+%typical_InputTransform_REFtoHL_drone(agent); % ˆÊ’uŽw—ß‚©‚ç‚S‚Â‚Ì„—Í‚É•ÏŠ·
+%typical_InputTransform_toHL_drone(agent); % model‚ðŽg‚Á‚½‚PƒXƒeƒbƒv—\‘ª’l‚ð–Ú•W’l‚Æ‚µ‚Ä‚S‚Â‚Ì„—Í‚É•ÏŠ·
+% ‚PƒXƒeƒbƒv—\‘ª’l‚ð–Ú•W‚Æ‚·‚é‚Ì‚ÅƒQƒCƒ“‚ð‚ ‚è“¾‚È‚¢‚Ù‚Ç‘å‚«‚­‚µ‚È‚¢‚Æ‚ß‚¿‚á‚ß‚¿‚áƒXƒs[ƒh‚ª’x‚¢Œ‹‰Ê‚É‚È‚éD
 %% set environment property
 Env = [];
-%typical_Env_2DCoverage(agent); % ÂdÂ—vÂ“xÂƒ}ÂƒbÂƒvÂÃÂ’Ã¨
+%typical_Env_2DCoverage(agent); % d—v“xƒ}ƒbƒvÝ’è
 %% set sensors property
-clc
 for i = 1:N; agent(i).sensor=[]; end
 %typical_Sensor_LSM9DS1(agent); % IMU sensor
-typical_Sensor_Motive(agent); % motiveÂÃ®Â•Ã± : sim exp Â‹Â¤Â’ÃŠ
-%typical_Sensor_Direct(agent); % ÂÃ³Â‘Ã”Â^Â’l(plant.state)Â@ÂFsimÂ‚ÃŒÂ‚Ã
-%typical_Sensor_RangePos(agent,10); % Â”Â¼ÂŒar (Â‘Ã¦Â“Ã±ÂˆÃ¸ÂÂ”) Â“Ã Â‚ÃŒÂ‘Â¼ÂƒGÂ[ÂƒWÂƒFÂƒÂ“ÂƒgÂ‚ÃŒÂˆÃŠÂ’uÂ‚Ã°ÂŒvÂ‘Âª : sim Â‚ÃŒÂ‚Ã
-%typical_Sensor_RangeD(agent,2); %  Â”Â¼ÂŒar (Â‘Ã¦Â“Ã±ÂˆÃ¸ÂÂ”) Â“Ã Â‚ÃŒÂdÂ—vÂ“xÂ‚Ã°ÂŒvÂ‘Âª : sim Â‚ÃŒÂ‚Ã
-%for i = 1:N; sensor.type= "LiDAR_sim"; sensor.name="lrf";sensor.param=[];agent(i).set_sensor(sensor); end
+typical_Sensor_Motive(agent); % motiveî•ñ : sim exp ‹¤’Ê
+%typical_Sensor_Direct(agent); % ó‘Ô^’l(plant.state)@Fsim‚Ì‚Ý
+%typical_Sensor_RangePos(agent,10); % ”¼Œar (‘æ“ñˆø”) “à‚Ì‘¼ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ðŒv‘ª : sim ‚Ì‚Ý
+%typical_Sensor_RangeD(agent,2); %  ”¼Œar (‘æ“ñˆø”) “à‚Ìd—v“x‚ðŒv‘ª : sim ‚Ì‚Ý
+% for i = 1:N % sim‚Ì‚Ý
+%     sensor.type= "LiDAR_sim";
+%     sensor.name="lrf";sensor.param=[];agent(i).set_sensor(sensor);
+% end
 %% set estimator property
 for i = 1:N; agent(i).estimator=[]; end
 %typical_Estimator_LPF(agent); % lowpass filter
-%typical_Estimator_AD(agent); % ÂŒÃ£Â‘ÃžÂÂ·Â•ÂªÂ‹ÃŸÂŽÂ—Â‚Ã…Â‘Â¬Â“xÂCÂŠpÂ‘Â¬Â“xÂ‚Ã°ÂÂ„Â’Ã¨
-%typical_Estimator_feature_based_EKF(agent); % Â“ÃÂ’Â¥Â“_ÂƒxÂ[ÂƒXEKF
-typical_Estimator_PDAF(agent); % Â“ÃÂ’Â¥Â“_ÂƒxÂ[ÂƒXPDAF
-%typical_Estimator_EKF(agent); % ÂiÂÂ„Â‘ÃŒÂƒxÂ[ÂƒXÂjEKF
-% typical_Estimator_Direct(agent); % DirectÂƒZÂƒÂ“ÂƒTÂ[Â‚Ã†Â‘gÂ‚ÃÂÂ‡Â‚Ã­Â‚Â¹Â‚Ã„Â^Â’lÂ‚Ã°Â—Â˜Â—pÂ‚Â·Â‚Ã©Â@ÂFsim Â‚ÃŒÂ‚Ã
-%for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map ÂXÂVÂ—p ÂdÂ—vÂ“xÂ‚ÃˆÂ‚Ã‡Â‚ÃŒmapÂ‚Ã°ÂŽÂžÂŠÃ”ÂXÂVÂ‚Â·Â‚Ã©
+%typical_Estimator_AD(agent); % Œã‘Þ·•ª‹ßŽ—‚Å‘¬“xCŠp‘¬“x‚ð„’è
+%typical_Estimator_feature_based_EKF(agent); % “Á’¥“_ƒx[ƒXEKF
+typical_Estimator_PDAF(agent); % “Á’¥“_ƒx[ƒXPDAF
+%typical_Estimator_EKF(agent); % i„‘Ìƒx[ƒXjEKF
+%typical_Estimator_Direct(agent); % DirectƒZƒ“ƒT[‚Æ‘g‚Ý‡‚í‚¹‚Ä^’l‚ð—˜—p‚·‚é@Fsim ‚Ì‚Ý
+%for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map XV—p d—v“x‚È‚Ç‚Ìmap‚ðŽžŠÔXV‚·‚é
 %% set reference property
 for i = 1:N; agent(i).reference=[]; end
-%typical_Reference_2DCoverage(agent,Env); % VoronoiÂdÂS
-%typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % ÂŽÂžÂ•ÃÂ‚ÃˆÂ–ÃšÂ•WÂÃ³Â‘Ã”
+%typical_Reference_2DCoverage(agent,Env); % VoronoidS
+typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % Žž•Ï‚È–Ú•Wó‘Ô
 
-% ÂˆÃˆÂ‰ÂºÂ‚ÃÂÃ­Â‚Ã‰Â—LÂŒÃ¸Â‚Ã‰Â‚ÂµÂ‚Ã„Â‚Â¨Â‚Â­Â‚Â±Â‚Ã† "t" : take off, "f" : flight , "l" : landing
-typical_Reference_Point_FH(agent); % Â–ÃšÂ•WÂÃ³Â‘Ã”Â‚Ã°ÂŽwÂ’Ã¨ ÂFÂÃ£Â‚Ã…Â•ÃŠÂ‚ÃŒreferenceÂ‚Ã°ÂÃÂ’Ã¨Â‚ÂµÂ‚Ã„Â‚Â¢Â‚Ã©Â‚Ã†Â‚Â»Â‚Â¿Â‚Ã§Â‚Ã…xdÂ‚ÂªÂÃ£ÂÂ‘Â‚Â«Â‚Â³Â‚ÃªÂ‚Ã©  : sim, exp Â‹Â¤Â’ÃŠ  
+% ˆÈ‰º‚Íí‚É—LŒø‚É‚µ‚Ä‚¨‚­‚±‚Æ "t" : take off, "f" : flight , "l" : landing
+typical_Reference_Point_FH(agent); % –Ú•Wó‘Ô‚ðŽw’è Fã‚Å•Ê‚Ìreference‚ðÝ’è‚µ‚Ä‚¢‚é‚Æ‚»‚¿‚ç‚Åxd‚ªã‘‚«‚³‚ê‚é  : sim, exp ‹¤’Ê
 %% set controller property
 for i = 1:N; agent(i).controller=[]; end
-typical_Controller_HL(agent); % ÂŠKÂ‘wÂŒ^ÂÃ¼ÂŒ`Â‰Â»
-%typical_Controller_MEC(agent); % Model Error Compensator  :  Â–Â¢ÂŽÃ€Â‘Â•
+typical_Controller_HL(agent); % ŠK‘wŒ^üŒ`‰»
+%typical_Controller_MEC(agent); % Model Error Compensator  :  –¢ŽÀ‘•
 %for i = 1:N;  Controller.type="MPC_controller";Controller.name = "mpc";Controller.param={agent(i)}; agent(i).set_controller(Controller);end
-%for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% ÂŽÂŸÂŽÂžÂÂÂ‚Ã‰Â“Ã¼Â—ÃÂ‚ÃŒÂˆÃŠÂ’uÂ‚Ã‰ÂˆÃšÂ“Â®Â‚Â·Â‚Ã©ÂƒÂ‚ÂƒfÂƒÂ‹Â—pÂFÂ–ÃšÂ•WÂˆÃŠÂ’uÂ‚Ã°Â’Â¼ÂÃšÂ“Ã¼Â—ÃÂ‚Ã†Â‚Â·Â‚Ã©
-%for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% ÂŽÂŸÂŽÂžÂÂÂ‚Ã‰Â“Ã¼Â—ÃÂ‚ÃŒÂˆÃŠÂ’uÂ‚Ã‰ÂˆÃšÂ“Â®Â‚Â·Â‚Ã©ÂƒÂ‚ÂƒfÂƒÂ‹Â—pÂFÂ–ÃšÂ•WÂˆÃŠÂ’uÂ‚Ã°Â’Â¼ÂÃšÂ“Ã¼Â—ÃÂ‚Ã†Â‚Â·Â‚Ã©
+%for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% ŽŸŽž‚É“ü—Í‚ÌˆÊ’u‚ÉˆÚ“®‚·‚éƒ‚ƒfƒ‹—pF–Ú•WˆÊ’u‚ð’¼Ú“ü—Í‚Æ‚·‚é
+%for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% ŽŸŽž‚É“ü—Í‚ÌˆÊ’u‚ÉˆÚ“®‚·‚éƒ‚ƒfƒ‹—pF–Ú•WˆÊ’u‚ð’¼Ú“ü—Í‚Æ‚·‚é
+
 %% set connector (global instance)
-% for sim
-%typical_Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
-% for exp
-typical_Connector_Natnet(struct('ClientIP','192.168.1.5')); % Motive
+if fExp
+    typical_Connector_Natnet(struct('ClientIP','192.168.1.5')); % Motive
+else
+    typical_Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
+end
 
 %% initialize
-clc
-% for sim : ÂÂ®Â—Ã±Â‚ÂµÂ‚Â½ÂÂ‰ÂŠÃºÂ’l
-base_pos=[0 0];
-kpos=ceil(sqrt(N));
-cpos=floor(N/kpos);
-rempos=mod(N,kpos);
-[xpos,ypos]=meshgrid(1-floor(kpos/2):ceil(kpos/2),1-floor(cpos/2):ceil(cpos/2));
-gap=1;
-xpos=gap*xpos;
-ypos=gap*ypos;
-arranged_initial_pos=base_pos-[gap gap]+[reshape(xpos,[N-rempos,1]),reshape(ypos,[N-rempos,1]);(1:rempos)'*[gap,0]+[0 gap]*(ceil(cpos/2)+1)];
+if ~fExp
+    % for sim : ®—ñ‚µ‚½‰Šú’l
+    base_pos=[0 0]; % Šî€ˆÊ’u
+    kpos=ceil(sqrt(N));
+    cpos=floor(N/kpos);
+    rempos=mod(N,kpos);
+    [xpos,ypos]=meshgrid(1-floor(kpos/2):ceil(kpos/2),1-floor(cpos/2):ceil(cpos/2));
+    gap=1; % ƒG[ƒWƒFƒ“ƒg‚ÌŠÔŠu
+    xpos=gap*xpos;
+    ypos=gap*ypos;
+    arranged_initial_pos=base_pos-[gap gap]+[reshape(xpos,[N-rempos,1]),reshape(ypos,[N-rempos,1]);(1:rempos)'*[gap,0]+[0 gap]*(ceil(cpos/2)+1)];
+end
 
 if exist('motive')==1; motive.getData({agent,[]});end
+disp("Initialize state");
 for i = 1:N
-    % for exp with motive : initialize by motive info
-    %     agent(i).sensor.motive.do({motive});
-    %     sstate = agent(i).sensor.motive.result.state;
-    %     model.initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
-    %     agent(i).model.set_state(model.initial);
-    %     agent(i).estimator.result.state.set_state(model.initial);
-    
-    % for sim
-    plant.initial = struct('p',[arranged_initial_pos(i,:),0]','q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
-    agent(i).state.set_state(plant.initial);
-    agent(i).model.set_state(plant.initial);
-    for j = 1:length(agent(i).estimator.name)
-        if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
-        agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
+    if fExp
+        % for exp with motive : initialize by motive info
+        agent(i).sensor.motive.do({motive});
+        sstate = agent(i).sensor.motive.result.state;
+        model.initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
+        agent(i).model.set_state(model.initial);
+        agent(i).estimator.result.state.set_state(model.initial);
+    else
+        % for sim
+        plant.initial = struct('p',[arranged_initial_pos(i,:),0]','q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
+        agent(i).state.set_state(plant.initial);
+        agent(i).model.set_state(plant.initial);
+        for j = 1:length(agent(i).estimator.name)
+            if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
+                agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
+            end
         end
     end
 end
 
-ts=0;
-te=10;
 LogData=[
     "reference.result.state.p",
     "estimator.result.state.p",
@@ -121,21 +140,21 @@ LogData=[
     %"estimator.result.state.v",
     %"estimator.result.state.w",
     "sensor.result.state.p",
-         "sensor.result.state.q",
-         "sensor.result.state.v",
-         "sensor.result.state.w",
+    "sensor.result.state.q",
+    "sensor.result.state.v",
+    "sensor.result.state.w",
     %    "reference.result.state.xd",
     "inner_input",
     "input"
     ];
 if ~isempty(agent(1).plant.state)
-    LogData=["plant.state.p";LogData]; % ÂŽÃ€ÂÂ§ÂŒÃ¤Â‘ÃŽÂÃ›Â‚ÃŒÂˆÃŠÂ’u
+    LogData=["plant.state.p";LogData]; % ŽÀ§Œä‘ÎÛ‚ÌˆÊ’u
     if isprop(agent(1).plant.state,'q')
-        LogData=["plant.state.q";LogData]; % ÂŽÃ€ÂÂ§ÂŒÃ¤Â‘ÃŽÂÃ›Â‚ÃŒÂŽpÂÂ¨
+        LogData=["plant.state.q";LogData]; % ŽÀ§Œä‘ÎÛ‚ÌŽp¨
     end
 end
-if exist('motive')==1 % motiveÂ‚Ã°Â—Â˜Â—pÂ‚ÂµÂ‚Ã„Â‚Â¢Â‚Ã©ÂÃªÂÂ‡
-    LogData=[LogData;    "sensor.result.dt"]; % ÂƒZÂƒÂ“ÂƒTÂ[Â“Ã ÂŽÃ¼ÂŠÃº
+if exist('motive')==1 % motive‚ð—˜—p‚µ‚Ä‚¢‚éê‡
+    LogData=[LogData;    "sensor.result.dt"]; % ƒZƒ“ƒT[“àŽüŠú
 end
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;    "reference.result.region";"env.density.param.grid_density"]; % for coverage
@@ -143,29 +162,16 @@ end
 logger=Logger(agent,size(ts:dt:te,2),LogData);
 time =  Time();
 time.t = ts;
-%%  ÂŠeÂŽÃ­do methodÂ‚ÃŒÂˆÃ¸ÂÂ”ÂÃÂ’Ã¨
-% ÂˆÃ¸ÂÂ”Â‚Ã‰ÂŽÃ¦Â‚ÃªÂ‚Ã©Â‚ÃŒÂ‚ÃÂˆÃˆÂ‰ÂºÂ‚ÃŒÂ‚Ã
-% time, motive, FHÂ@Â‚Ã¢Â’Ã¨ÂÂ”Â@Â‚ÃˆÂ‚Ã‡ÂƒOÂƒÂÂ[ÂƒoÂƒÂ‹ÂÃ®Â•Ã±
-% agent ÂŽÂ©Â‘ÃŒÂ‚ÃagentÂ‚ÃŒÂŠeÂƒvÂƒÂÂƒpÂƒeÂƒBÂ“Ã Â‚Ã…selfÂ‚Ã†Â‚ÂµÂ‚Ã„handleÂ‚Ã°Â•Ã›ÂŽÂÂ‚ÂµÂ‚Ã„Â‚Â¢Â‚Ã©Â‚ÃŒÂ‚Ã…do methodÂ‚Ã‰ÂˆÃ¸ÂÂ”Â‚Ã†Â‚ÂµÂ‚Ã„Â“nÂ‚Â·Â•KÂ—vÂ‚ÃÂ–Â³Â‚Â¢ÂD
+%%  ŠeŽído method‚Ìˆø”Ý’è
+% ˆø”‚ÉŽæ‚ê‚é‚Ì‚ÍˆÈ‰º‚Ì‚Ý
+% time, motive, FH@‚â’è”@‚È‚ÇƒOƒ[ƒoƒ‹î•ñ
+% agent Ž©‘Ì‚Íagent‚ÌŠeƒvƒƒpƒeƒB“à‚Åself‚Æ‚µ‚Ähandle‚ð•ÛŽ‚µ‚Ä‚¢‚é‚Ì‚Ådo method‚Éˆø”‚Æ‚µ‚Ä“n‚·•K—v‚Í–³‚¢D
 
 % for simulation
 mparam.occlusion.cond=["time.t >=1.5 && time.t<1.6","agent(1).model.state.p(1) > 2"];
 mparam.occlusion.target={[1],[1]};
 mparam.marker_num = 20;
 mparam=[]; % without occulusion
-if exist('motive')==1; motive.getData({agent,mparam});end
-
-% for i = 1:N; agent(i).sensor.imu.initialize(20);end
-if exist('motive')==1; Smotive={motive};end
-Srpos={agent};
-Simu={[]};
-Sdirect={};
-Srdensity={Env};
-Slrf=Env;
-for i = 1:N
-    param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
-    agent(i).do_sensor(param(i).sensor);
-end
 %% main loop
 %profile on
 disp("while ============================")
@@ -178,7 +184,7 @@ w = waitforbuttonpress;
 try
     while round(time.t,5)<=te
         %while 1 % for exp
-        %%
+        %% sensor
         tic
         if exist('motive')==1; motive.getData({agent,mparam});end
         if exist('motive')==1; Smotive={motive};end
@@ -191,8 +197,8 @@ try
             param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
             agent(i).do_sensor(param(i).sensor);
         end
-       
-        %%
+        
+        %% estimator, reference generator, controller
         for i = 1:N
             agent(i).do_estimator(cell(1,10));
             
@@ -201,25 +207,25 @@ try
             RtimeVarying={time};
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             agent(i).do_reference(param(i).reference);
-             
+            
             agent(i).do_controller(cell(1,10));
         end
-        %%
+        %% logging
         calculation=toc;
         if fExp
-            time.t = time.t+ calculation % for exp
+            time.t = time.t+ calculation; % for exp
         else
             time.t = time.t + dt % for sim
         end
         logger.logging(time.t);
-        %%
+        %% update state
         % with FH
         figure(FH)
         drawnow
-        for i = 1:N % ÂÃ³Â‘Ã”ÂXÂV
+        for i = 1:N % ó‘ÔXV
             model_param.param=agent(i).model.param;
             model_param.FH = FH;
-            if isempty(agent(i).input_transform)        % input_transformÂÃ£Â‚Ã…modelÂ‚ÃŒÂXÂVÂ‚Ã°Â‚Â·Â‚Ã©Â‚ÃŒÂ‚Ã…input_transformÂ‚Ã°Â‚Â·Â‚Ã©ÂÃªÂÂ‡Â‚Ãdo_modelÂ‚ÂµÂ‚ÃˆÂ‚Â¢
+            if isempty(agent(i).input_transform)        % input_transformã‚Åmodel‚ÌXV‚ð‚·‚é‚Ì‚Åinput_transform‚ð‚·‚éê‡‚Ído_model‚µ‚È‚¢
                 agent(i).do_model(model_param);
             end
             
@@ -229,11 +235,14 @@ try
         % for exp
         if fExp
             wait_time =  0.9999*(sampling-calculation);
+            if wait_time <0
+                error("ACSL : sampling time is too short.");
+            end
             time.t = time.t + wait_time;
-            pause(wait_time); %Â@ÂƒZÂƒÂ“ÂƒTÂ[ÂÃ®Â•Ã±ÂŽÃ¦Â“Â¾Â‚Â©Â‚Ã§ÂÂ§ÂŒÃ¤Â“Ã¼Â—ÃÂˆÃ³Â‰ÃÂ‚ÃœÂ‚Ã…Â‚Ã°Â‘ÂÂ‚Â­Â•Ã›Â‚Â¿Â‚Ã‚Â‚Ã‚ÂCÂŽÃ¼ÂŠÃºÂ‚Ã°Â‚Ã…Â‚Â«Â‚Ã©Â‚Â¾Â‚Â¯ÂˆÃªÂ’Ã¨Â‚Ã‰Â•Ã›Â‚Ã‚Â‚Â½Â‚ÃŸ
+            pause(wait_time);  %@ƒZƒ“ƒT[î•ñŽæ“¾‚©‚ç§Œä“ü—Íˆó‰Á‚Ü‚Å‚ð‘‚­•Û‚¿‚Â‚ÂCŽüŠú‚ð‚Å‚«‚é‚¾‚¯ˆê’è‚É•Û‚Â‚½‚ß
         end
     end
-catch ME
+catch ME    % for error 
     % with FH
     for i = 1:N
         agent(i).do_plant(struct('FH',FH),"emergency");
@@ -257,15 +266,15 @@ if isfield(agent(1).reference,'covering')
     tmpsen=@(k,span) arrayfun(@(i)logger.Data.agent{k,sp,i}(1:3),span,'UniformOutput',false);
     %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
     make_animation(1:10:logger.i-1,1:N,@(k,span) draw_voronoi(arrayfun(@(i) logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmpsen(k,span),tmpref(k,span),tmpest(k,span)],Env.param.Vertices),@() Env.show);
-%%
-%    make_animation(1:10:logger.i-1,1,@(k,span) contourf(Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,span}),@() Env.show_setting());
+    %%
+    %    make_animation(1:10:logger.i-1,1,@(k,span) contourf(Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,span}),@() Env.show_setting());
     make_animation(1:10:logger.i-1,1,@(k,span) arrayfun(@(i) contourf( Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,i}),span,'UniformOutput',false), @() Env.show_setting());
 end
 %%
 %close all
 %logger.plot(1,["inner_input"],struct('transpose',1));
 %logger.plot(1,["p","q","v","input","plant.state.p"]);
-logger.plot(1,["p","input"]);
+logger.plot(1,["p","q","input"]);
 %logger.plot(1,["p","q","v","w","u"],struct('time',100));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %%
