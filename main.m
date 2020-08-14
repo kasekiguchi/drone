@@ -5,7 +5,6 @@ tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');
 cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
-rmpath('.\experiment\');
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
@@ -42,11 +41,12 @@ end
 Env = [];
 typical_Env_2DCoverage(agent); % 重要度マップ設定
 %% set sensors property
+clc
 for i = 1:N; agent(i).sensor=[]; end
 %typical_Sensor_LSM9DS1(agent); % IMU sensor
 typical_Sensor_Motive(agent); % motive情報 : sim exp 共通
 %typical_Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
-%typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 typical_Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 %for i = 1:N; sensor.type= "LiDAR_sim"; sensor.name="lrf";sensor.param=[];agent(i).set_sensor(sensor); end
 %% set estimator property
@@ -54,8 +54,8 @@ for i = 1:N; agent(i).estimator=[]; end
 %typical_Estimator_LPF(agent); % lowpass filter
 %typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定
 %typical_Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
-%typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
-typical_Estimator_EKF(agent); % （剛体ベース）EKF
+typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
+%typical_Estimator_EKF(agent); % （剛体ベース）EKF
 % typical_Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 %% set reference property
