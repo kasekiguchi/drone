@@ -122,14 +122,6 @@ classdef (Abstract) ABSTRACT_SYSTEM < handle & dynamicprops
         end
         function do_estimator(obj,param)
             obj.do_sequential("estimator",param);
-            % 推定値でmodelの状態を上書き．
-            if obj.model.state.list==obj.estimator.result.state.list
-                obj.model.state.set_state(obj.estimator.result.state.get());
-            else
-                for i = 1:length(obj.model.state.list)
-                    obj.model.state.set_state(obj.model.state.list(i),obj.estimator.result.state.(obj.model.state.list(i)));
-                end
-            end
         end
         function do_reference(obj,param)
             obj.do_sequential("reference",param);
@@ -139,6 +131,14 @@ classdef (Abstract) ABSTRACT_SYSTEM < handle & dynamicprops
             obj.input=obj.controller.(obj.controller.name(end)).result.input;
         end
         function do_model(obj,param)
+            % 推定値でmodelの状態を上書き．
+            if obj.model.state.list==obj.estimator.result.state.list
+                obj.model.state.set_state(obj.estimator.result.state.get());
+            else
+                for i = 1:length(obj.model.state.list)
+                    obj.model.state.set_state(obj.model.state.list(i),obj.estimator.result.state.(obj.model.state.list(i)));
+                end
+            end
             obj.model.do(obj.input,param);
         end
     end

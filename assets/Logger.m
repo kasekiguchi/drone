@@ -214,7 +214,7 @@ classdef Logger < handle
                        end
                 end
             end
-            if ~isemtpy(plotitem)
+            if ~isempty(plotitem)
                    data = plotitem;
             end
         end
