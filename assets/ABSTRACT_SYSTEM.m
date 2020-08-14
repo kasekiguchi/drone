@@ -64,7 +64,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < handle & dynamicprops
                 if isempty(obj.input_transform)
                     obj.plant.do(obj.input,plant_param);
                 else
-                    obj.inner_input = obj.input_transform.(obj.input_transform.name(1)).do(obj.input,[]);
+                    obj.inner_input = obj.input_transform.(obj.input_transform.name(1)).do(obj.input,plant_param);
                     obj.plant.do(obj.inner_input,plant_param);
                 end
             end

@@ -14,9 +14,9 @@ classdef Lizard_exp < MODEL_CLASS
     
     
     methods
-        function obj = Lizard_exp(self,args)
+        function obj = Lizard_exp(args)
             obj@MODEL_CLASS([],[]);
-            param=args{2};
+            param=args;
             obj.dt = 0.025;
             %% variable set
             obj.flight_phase        = 's';
@@ -26,7 +26,7 @@ classdef Lizard_exp < MODEL_CLASS
             cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
             param.IP=strcat('192.168.',cmdout2(1:regexp(cmdout2,".")),'.',string(100+obj.ESPr_num));
             obj.IP=param.IP;
-            %obj.port=8000+obj.ESPr_num;
+            obj.port=8000+obj.ESPr_num;
             param.port=obj.port;
             obj.espr=UDP_CONNECTOR(param);
             self.connector=obj.espr;

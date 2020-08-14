@@ -12,14 +12,13 @@ userpath('clear');
 N = 1; % number of agents
 dt = 0.1; % sampling time
 sampling = dt;
-fExp = 1;
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))
 %typical_Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
 %typical_Model_Discrete0(N,dt,'plant') % 離散時間質点モデル : Direct controller を想定
 %typical_Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
-typical_Model_Lizard_exp(N,dt,'plant',101); % Lizard : for exp
+typical_Model_Lizard_exp(N,dt,'plant',25); % Lizard : for exp
 
 % set control model
 typical_Model_EulerAngle(N,dt,'model'); % オイラー角モデル
@@ -76,7 +75,7 @@ typical_Controller_HL(agent); % 階層型線形化
 % for sim
 %typical_Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
 % for exp
-typical_Connector_Natnet(struct('ClientIP','192.168.1.5')); % Motive
+typical_Connector_Natnet(struct('ClientIP','192.168.50.4')); % Motive
 
 %% initialize
 clc
@@ -120,9 +119,9 @@ LogData=[
     %"estimator.result.state.v",
     %"estimator.result.state.w",
     "sensor.result.state.p",
-         "sensor.result.state.q",
-         "sensor.result.state.v",
-         "sensor.result.state.w",
+    %     "sensor.result.state.q",
+    %     "sensor.result.state.v",
+    %     "sensor.result.state.w",
     %    "reference.result.state.xd",
     "inner_input",
     "input"
@@ -205,11 +204,8 @@ try
         end
         %%
         calculation=toc;
-        if fExp
-            time.t = time.t+ calculation % for exp
-        else
-            time.t = time.t + dt % for sim
-        end
+        %time.t = time.t+ calculation; % for exp
+        time.t = time.t + dt % for sim
         logger.logging(time.t);
         %%
         % with FH
@@ -226,11 +222,7 @@ try
             agent(i).do_plant(model_param);
         end
         % for exp
-        if fExp
-            wait_time =  0.9999*(sampling-calculation);
-            time.t = time.t + wait_time;
-            pause(wait_time); %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
-        end
+        % pause(0.9999*(sampling-calculation)); %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
     end
 catch ME
     % with FH
