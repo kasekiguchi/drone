@@ -96,7 +96,7 @@ end
         function q = getq(obj,type)
             % type ~= obj.type
             switch type
-                case {"compact", 4}
+                case {"compact"}
                     if obj.type == 4
                         q=obj.q;
                     else
@@ -107,7 +107,7 @@ end
                             q = R2q(value);
                         end
                     end
-                case {"euler" ,3}
+                case {"euler"}
                     if obj.type == 3
                         q=obj.q;
                     else
@@ -118,7 +118,7 @@ end
                             q = Quat2Eul(R2q(value));
                         end
                     end
-                case {"rotmat", 9}
+                case {"rotmat"}
                     if obj.type == 9
                         q=obj.q;
                     else
