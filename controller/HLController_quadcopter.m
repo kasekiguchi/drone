@@ -4,17 +4,19 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
         self
         result
         param
+        Q
     end
     
     methods
         function obj = HLController_quadcopter(self,param)
             obj.self = self;
             obj.param = param;
+            obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         
         function u = do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
-            model = obj.self.model;
+            model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
             if isprop(ref.state,'xd')
@@ -36,8 +38,17 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             %         end
             %     end
             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
-            %x=cell2mat(arrayfun(@(t) state.(t)',string(state.list),'UniformOutput',false))';
-            %x = state.get();%状態ベクトルとして取得
+
+            Rb0=RodriguesQuaternion(Eul2Quat([0;0;param.Base]));
+            Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
+            x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
+            xd(1:3)=Rb0'*xd(1:3);
+            xd(4) = xd(4)-param.Base;
+            xd(5:7)=Rb0'*xd(5:7);
+            xd(9:11)=Rb0'*xd(9:11);
+            xd(13:15)=Rb0'*xd(13:15);
+            xd(17:19)=Rb0'*xd(17:19);
+
             if isfield(Param,'dt')
                 dt = Param.dt;
                 vf = Vfd(dt,x,xd',P,F1);
