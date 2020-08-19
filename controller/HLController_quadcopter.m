@@ -42,7 +42,7 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
             x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]‚É•À‚×‘Ö‚¦
             xd(1:3)=Rb0'*xd(1:3);
-            xd(4) = xd(4)-param.Base;
+            xd(4) = 0;
             xd(5:7)=Rb0'*xd(5:7);
             xd(9:11)=Rb0'*xd(9:11);
             xd(13:15)=Rb0'*xd(13:15);
