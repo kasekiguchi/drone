@@ -24,7 +24,8 @@ classdef Lizard_exp < MODEL_CLASS
             [~,cmdout] = system("ipconfig");
             ipp=regexp(cmdout,"192.168.");
             cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
-            param.IP=strcat('192.168.',cmdout2(1:regexp(cmdout2,".")),'.',string(100+obj.ESPr_num));
+            %param.IP=strcat('192.168.',cmdout2(1:regexp(cmdout2,".")),'.',string(100+obj.ESPr_num));
+            param.IP=strcat('192.168.50.',string(100+obj.ESPr_num));
             obj.IP=param.IP;
             obj.port=8000+obj.ESPr_num;
             param.port=obj.port;
