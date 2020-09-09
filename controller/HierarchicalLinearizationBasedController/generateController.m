@@ -62,7 +62,7 @@ h2 = p1 - xd(1);
 h3 = p2 - xd(2);
 [~,~,yaw] = Quat2Eul(q);
 h4 = yaw - xd(4);
-
+%h4 = 2*(q0*q3 + q1*q2) - xd(4); % Ç±ÇÍÇ≈ÇÕépê®ÇÕïœÇÌÇÁÇ»Ç¢
 %% **************************************** % %
 clc
 dh2 = LieD(h2,f1,x)+diff(h2,t);
@@ -79,7 +79,6 @@ dddh3 = LieD(ddh3,f1,x)+diff(ddh3,t);
 % 	[LieD(h2,g1,x),LieD(h3,g1,x),LieD(h4,g1,x)]
 % 	simplify([LieD(dh2,g1,x),LieD(dh3,g1,x)])
 % 	simplify([LieD(ddh2,g1,x),LieD(ddh3,g1,x)])
-
 %% 
 % % Derive 2nd layer controller
 alpha2 = [LieD(dddh2,f1,x)+diff(dddh2,t); LieD(dddh3,f1,x)+diff(dddh3,t); LieD(dh4,f1,x)+diff(dh4,t)];
