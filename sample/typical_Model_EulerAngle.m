@@ -19,7 +19,7 @@ if strcmp(type,"plant")
         Setting.initial.p = 10*rand(3,1)+[40;20;0];
         Model.param=Setting;
         assignin('base',"Plant",Model);
-        evalin('base',"agent(Plant.id) = Drone(Plant)");
+        evalin('base',"agent(Plant.id) = Drone(Plant);");
     end
 else
     for i = 1:N
