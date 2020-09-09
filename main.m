@@ -10,11 +10,11 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;
+fExp = 1;
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.025; % sampling time
+    dt = 0.1; % sampling time
 end
 sampling = dt;
 ts=0;
@@ -27,7 +27,7 @@ end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    typical_Model_Lizard_exp(N,dt,'plant',101); % Lizard : for exp
+    typical_Model_Lizard_exp(N,dt,'plant',25); % Lizard : for exp
 else
     %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))
     typical_Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
@@ -46,7 +46,7 @@ for i = 1:N
         typical_InputTransform_Thrust2Throttle_drone(agent(i)); % 推力からスロットルに変換
     end
 end
-
+%agent.plant.espr.sendData(Pw(1,1:16));
 % for quat-model plant with discrete control model
 %typical_InputTransform_REFtoHL_drone(agent); % 位置指令から４つの推力に変換
 %typical_InputTransform_toHL_drone(agent); % modelを使った１ステップ予測値を目標値として４つの推力に変換
@@ -70,14 +70,14 @@ for i = 1:N; agent(i).estimator=[]; end
 %typical_Estimator_LPF(agent); % lowpass filter
 %typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定
 %typical_Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
-typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
-%typical_Estimator_EKF(agent); % （剛体ベース）EKF
+%typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
+typical_Estimator_EKF(agent); % （剛体ベース）EKF
 %typical_Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 %% set reference property
 for i = 1:N; agent(i).reference=[]; end
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
-typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
+%typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 typical_Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -119,7 +119,7 @@ for i = 1:N
         sstate = agent(i).sensor.motive.result.state;
         model.initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
         agent(i).model.set_state(model.initial);
-        agent(i).estimator.result.state.set_state(model.initial);
+%        agent(i).estimator.result.state.set_state(model.initial);
     else
         % for sim
         plant.initial = struct('p',[arranged_initial_pos(i,:),0]','q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
@@ -235,11 +235,13 @@ try
         % for exp
         if fExp
             wait_time =  0.9999*(sampling-calculation);
-            if wait_time <0
-                error("ACSL : sampling time is too short.");
-            end
+           if wait_time <0
+%               wait_time
+               %error("ACSL : sampling time is too short.");
+           end
             time.t = time.t + wait_time;
-            pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
+%            time.t = time.t + calculation;
+            %pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
         end
     end
 catch ME    % for error 
