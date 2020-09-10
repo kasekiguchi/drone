@@ -203,7 +203,7 @@ try
             agent(i).do_estimator(cell(1,10));
             
             Rcovering={};%{Env};
-            Rpoint={FH,[1;-1;1.5]};
+            Rpoint={FH,[1;1;0.5]};
             RtimeVarying={time};
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             agent(i).do_reference(param(i).reference);

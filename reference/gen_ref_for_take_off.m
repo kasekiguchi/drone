@@ -9,7 +9,7 @@ Xd  = zeros( 3, 1);
     Xd( 1, 1)   = Xd_old( 1);
     Xd( 2, 1)   = Xd_old( 2);
     Xd( 3, 1)   = Xd_old( 3);
-    if Xd_old(3)<1.5
+    if Xd_old(3)<0.5
         Xd( 3, 1)   = Xd_old(3) + dz;
     end
   %  Xd(4,1)=Xd_old(4);
