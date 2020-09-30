@@ -7,7 +7,7 @@ function R= Rodrigues(u,varargin)
         u = u/th;
     else
         u = u(:)/norm(u); % 単位縦ベクトルに変換
-        th = varargin;
+        th = varargin{1};
     end
     R = u*u'+cos(th)*(eye(3)-u*u')+sin(th)*Skew(u);
 end
