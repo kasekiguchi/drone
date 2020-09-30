@@ -19,9 +19,9 @@ classdef Approximate_Differentiation < ESTIMATOR_CLASS
             obj.result.state=state_copy(model.state); % STATE_CLASSとしてコピー
             obj.previous=state_copy(model.state); % STATE_CLASSとしてコピー
             obj.dt=model.dt;
-            if isfield(param,'list')
-                obj.list = param.list(1,:);
-                obj.return_list = param.list(2,:);
+            if isfield(param{1},'list')
+                obj.list = param{1}.list(1,:);
+                obj.return_list = param{1}.list(2,:);
             end
 %             obj.result.state=STATE_CLASS(struct('state_list',obj.list,'num_list',obj.num_list)); % STATE_CLASSとしてコピー
         end

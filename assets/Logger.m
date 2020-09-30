@@ -194,6 +194,19 @@ classdef Logger < handle
                         plot(plotitem')
                         title("Input u");
                         legend(strcat("u",string(1:size(plotitem,1))));
+                       % ylim([500 2200]);
+                        else
+                             warning("ACSL : logger does not include plot target.");
+                        end
+                    case "inner_input"
+                        if sum(contains(obj.items,'inner_input'))>0
+                              sp=strcmp(obj.items,'inner_input');
+                              tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}',plot_length,'UniformOutput',false);
+                              plotitem=[tmps{1:end}];
+                        plot(plotitem')
+                        title("Input u");
+                        legend(strcat("u",string(1:size(plotitem,1))));
+                       % ylim([1000 1600]);
                         else
                              warning("ACSL : logger does not include plot target.");
                         end

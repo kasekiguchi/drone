@@ -44,7 +44,7 @@ classdef PointReference_FH < REFERENCE_CLASS
                 if strcmp(obj.flag,'t')
                     obj.result.state.p=gen_ref_for_take_off(obj.result.state.p);
                 else % 初めてtake off に入ったとき
-                    sp(3) = 0.19; % 目標位置をちょっと浮いた位置からあげていく
+                    %sp(3) = 0.19; % 目標位置をちょっと浮いた位置からあげていく
                     obj.result.state.p=gen_ref_for_take_off(sp);
                 end
                 if isprop(obj.result.state,'xd')

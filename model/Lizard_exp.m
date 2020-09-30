@@ -7,6 +7,7 @@ classdef Lizard_exp < MODEL_CLASS
         flight_phase % q : quit, s : stop, a : arming, t : take-off, h : hovering, f : flight, l : landing
         %port=25000;
         port=8000;
+        offset = [ 1103, 1103,1103];
     end
     properties
         msg
@@ -54,15 +55,15 @@ classdef Lizard_exp < MODEL_CLASS
                 
                 % stop propeller
                 if cha   == 's'
-                    uroll   = 1100;     upitch  = 1100;     uthr    =  600;     uyaw    = 1100;
+                    uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
                     AUX_1   =  600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
                     msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
                 end
                 
                 % armnig
                 if cha   == 'a'
-                    uroll   = 1100;     upitch  = 1100;     uthr    =  600;     uyaw    = 1100;
-                    AUX_1   = 1600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
+                    uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
+                    AUX_1   = 1100;     AUX_2   =  1100;     AUX_3   =  600;     AUX_4   =  600;
                     msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
                 end
                 if cha   == 'f'
@@ -76,10 +77,30 @@ classdef Lizard_exp < MODEL_CLASS
                 end
             else % 緊急時 プロペラストップ
                % warning("ACSL : Emergency stop!!");
-                uroll   = 1100;     upitch  = 1100;     uthr    =  600;     uyaw    = 1100;
+               
+                uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
                 AUX_1   =  600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
                 msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
             end
+            
+            % 2020/09/24 19:27 修正箇所（宮脇）
+            % Modification_1 : Changing the oder of msg's array
+            % Detail_1 : exchanging msg(1,1) and msg(1,4)
+            % この修正が間違いなのでコメント化する。
+            
+%             buff = msg(1,1);
+%             msg(1,1) = msg(1,4);
+%             msg(1,4) = buff;
+            
+            % 2020/09/26 14:11 修正箇所（宮脇）
+            % Modification_2 : 全チャンネルデータから400を引く
+            % Detail_2 : BetaFlightの設定により、入力データが400加算されるため、msg(1,1)~msg(1,8)から400を引く
+            % Arduino側の設定も-400とした。
+            % #define TIME_HIGH_MIN 600 - 400  // PPM幅の最小
+            % #define TIME_HIGH_MAX 1600 - 400 // PPM幅の最大
+            
+           % msg(1,1:8) = msg(1,1:8) - 400; 
+            
             % make udp data
             for j = 1:1:8
                 pw(1, j + 0)   = fix(msg(1, j) / 100);
@@ -91,6 +112,9 @@ classdef Lizard_exp < MODEL_CLASS
             % send UDP
             obj.espr.sendData(Pw(1,1:16));
             obj.msg=Pw;
+        end
+        function set_param(obj,param)
+            obj.offset = param;
         end
     end
 end
