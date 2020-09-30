@@ -12,6 +12,7 @@ userpath('clear');
 N = 1; % number of agents
 fExp = 1;
 if fExp
+    
     dt = 0.025; % sampling time
 else
     dt = 0.1; % sampling time
@@ -24,12 +25,13 @@ else
     te=10;
 end
 
+
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    typical_Model_Lizard_exp(N,dt,'plant',25); % Lizard : for exp
+    typical_Model_Lizard_exp(N,dt,'plant',24); % Lizard : for exp % 機体番号（ESPrの番号）
 else
-    %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))
+    %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))sa
     typical_Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
     %typical_Model_Discrete0(N,dt,'plant') % 離散時間質点モデル : Direct controller を想定
     %typical_Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
@@ -68,10 +70,10 @@ typical_Sensor_Motive(agent); % motive情報 : sim exp 共通
 %% set estimator property
 for i = 1:N; agent(i).estimator=[]; end
 %typical_Estimator_LPF(agent); % lowpass filter
-%typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定
+typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定
 %typical_Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
 %typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
-typical_Estimator_EKF(agent); % （剛体ベース）EKF
+%typical_Estimator_EKF(agent); % （剛体ベース）EKF
 %typical_Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 %% set reference property
@@ -136,14 +138,15 @@ end
 LogData=[
     "reference.result.state.p",
     "estimator.result.state.p",
-    %"estimator.result.state.q",
-    %"estimator.result.state.v",
-    %"estimator.result.state.w",
+    "estimator.result.state.q",
+    "estimator.result.state.v",
+    "estimator.result.state.w",
     "sensor.result.state.p",
     "sensor.result.state.q",
     "sensor.result.state.v",
     "sensor.result.state.w",
     %    "reference.result.state.xd",
+%     "input_transform.t2t.flight_phase",
     "inner_input",
     "input"
     ];
@@ -203,7 +206,9 @@ try
             agent(i).do_estimator(cell(1,10));
             
             Rcovering={};%{Env};
-            Rpoint={FH,[1;1;0.5]};
+            %Rpoint={FH,[0;0;0.5]};
+            Rpoint={FH,[agent.state.p+[0;0;0];agent.state.q(3)]};%+pi/2
+            
             RtimeVarying={time};
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             agent(i).do_reference(param(i).reference);
@@ -236,8 +241,8 @@ try
         if fExp
             wait_time =  0.9999*(sampling-calculation);
            if wait_time <0
-%               wait_time
-               %error("ACSL : sampling time is too short.");
+               wait_time
+               warning("ACSL : sampling time is too short.");
            end
             time.t = time.t + wait_time;
 %            time.t = time.t + calculation;
@@ -273,14 +278,15 @@ if isfield(agent(1).reference,'covering')
     make_animation(1:10:logger.i-1,1,@(k,span) arrayfun(@(i) contourf( Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,i}),span,'UniformOutput',false), @() Env.show_setting());
 end
 %%
-%close all
-%logger.plot(1,["inner_input"],struct('transpose',1));
+close all
+logger.plot(1,["inner_input"],struct('transpose',1));
 %logger.plot(1,["p","q","v","input","plant.state.p"]);
-logger.plot(1,["p","q","input"]);
-%logger.plot(1,["p","q","v","w","u"],struct('time',100));
+%logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
+logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
+%logger.plot(1,["p","q","v","w","u"],struct('time',170));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %%
 %logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
 
 %%
-%logger.save();
+logger.save();

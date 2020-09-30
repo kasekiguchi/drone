@@ -16,6 +16,7 @@ classdef MODEL_CLASS <  handle
         projection = @(x) x; % 射影が必要な時は設定する．(obsolete ? )
         time_scale % discrete or continuous
         solver = str2func('ode15s') % 指数1　のDAEを解ける．
+        % solver = str2func('ode45') % 指数1　のDAEを解ける．
         ts = 0;
         dt = 0.05;
         % state.list % 例 ["p","q","v","w"]

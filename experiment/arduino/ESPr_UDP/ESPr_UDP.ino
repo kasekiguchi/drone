@@ -11,21 +11,21 @@
 
 uint8_t i;
 
-unsigned int droneNumber = 25; //機体番号を入力
+unsigned int droneNumber = 24; //機体番号を入力
 
-#define OUTPUT_PIN 2 // PPM出力のピン番号
+#define OUTPUT_PIN 2 // PPM出力のピン番号 加速度使うなら０
 
 const char *ssid = "acsl-mse-arl-YAMAHA";
 const char *password = "wifi-acsl-mse";
 
-//アルディーノの値を受け取るMatlabを実行しているPCのIP
-const char *to_udp_address = "192.168.50.4"; //送信先のアドレス
+//アルディーノの値を受け取るMatlabを実行しているPCのIP(自分のPCのIPアドレスを入力する)
+const char *to_udp_address = "192.168.50.72"; //送信先のアドレス
 const int to_udp_port = 8000;               //送信相手のポート番号
 
 // ESPrのIPアドレスの設定
 IPAddress myIP(192, 168, 50, 100+droneNumber);  // 機体により下番号変更
 
-IPAddress gateway(192, 168, 50, 4);//アルディーノの値を受け取るMatlabを実行しているPCのIP
+IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
 const int my_udp_port = 8000+droneNumber;        //開放する自ポート
 
 /////////////////// WiFi関係 ////////////////////
@@ -91,7 +91,8 @@ char packetBuffer[255];
 #define TIME_HIGH_MAX 1600 // PPM幅の最大
 
 uint8_t n_ch = 0;      // 現在の chを保存
-uint8_t t_sum = 0;     // us単位  1周期中の現在の使用時間
+uint16_t t_sum = 0;     // us単位  1周期中の現在の使用時間
+//uint8_t t_sum = 0;     // us単位  1周期中の現在の使用時間
 uint16_t pw[TOTAL_CH]; // ch毎のパルス幅を保存
 
 unsigned long t_now;

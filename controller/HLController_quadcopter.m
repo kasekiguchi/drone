@@ -55,8 +55,10 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
                 vf = Vf(x,xd',P,F1);
             end
             vs = Vs(x,xd',vf,P,F2,F3,F4);
-            obj.result.input = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-
+           tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
+ obj.result.input = [tmp(1);
+     tmp(2);tmp(3);
+     tmp(4)];
 %             if isfield(Param,'dt')
 %                 dt = Param.dt;
 %                 vf = Vfdp(dt,x,xd',P,F1);

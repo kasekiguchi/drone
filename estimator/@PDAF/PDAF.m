@@ -37,11 +37,11 @@ classdef PDAF < ESTIMATOR_CLASS
             obj.param.SNR         = 1.0E-5;                                          % SN ratio for initial value of posterior error covariance matrix
 
             % For experiment for model less
-%             obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
-%             obj.param.sigmav      = [50;50;50;0.9E02;0.9E02;1.8E02];                 % The variance vector of system noise
-%             obj.param.lambda      = 4;                                               % Expected value of Poisson distribution
-%             obj.param.gamma       = 1.2;                                             % Validation region
-%             obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
+            obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
+            obj.param.sigmav      = [50;50;50;0.9E02;0.9E02;1.8E02];                 % The variance vector of system noise
+            obj.param.lambda      = 4;                                               % Expected value of Poisson distribution
+            obj.param.gamma       = 1.2;                                             % Validation region
+            obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
             
              % For experiment for using input model
 %             obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
@@ -51,11 +51,11 @@ classdef PDAF < ESTIMATOR_CLASS
 %             obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
 
             % For simulation
-            obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
-            obj.param.sigmav      = [50;50;50;100;100;200];                          % The variance vector of system noise
-            obj.param.lambda      = 4;                                               % Expected value of Poisson distribution
-            obj.param.gamma       = 1.8;                                             % Validation region
-            obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
+%             obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
+%             obj.param.sigmav      = [50;50;50;100;100;200];                          % The variance vector of system noise
+%             obj.param.lambda      = 4;                                               % Expected value of Poisson distribution
+%             obj.param.gamma       = 1.8;                                             % Validation region
+%             obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
             
             % Common parameter for simulation and experiment
             obj.param.Q           = eye(6).*obj.param.sigmav;                        % Covariance matrix of system noise
