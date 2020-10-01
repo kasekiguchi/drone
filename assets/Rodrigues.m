@@ -2,6 +2,7 @@ function R= Rodrigues(u,varargin)
     % yInputzu, th
     % u : unit vector,  th : angle (rad)
     % th =[] ‚Ì‚Æ‚«‚Í u‚Ì’·‚³‚ª‰ñ“]Šp‚Æ‚È‚é   th = norm(u);
+    u = u(:);
     if isempty(varargin)
         th = norm(u);
         u = u/th;

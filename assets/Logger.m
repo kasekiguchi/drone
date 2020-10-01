@@ -65,127 +65,61 @@ classdef Logger < handle
                     fig_num=varargin{1}.fig_num;
                 end
             end
+            timeList=obj.Data.t(1:length(plot_length));
             fh=figure(fig_num);
             fh.WindowState='maximized';
             frow=ceil(length(target)/3);
             for i = 1:length(target)
                 subplot(frow,3,i);
                 switch target(i)
-                    case "p"
-                        plotitem=[];
+                    case {"p","q","v","w"}
+                        ch = target(i);
+                        plotitem={};
                         plegend=[];
-                        if sum(contains(obj.items,'plant.state.p'))>0
-                              sp=strcmp(obj.items,'plant.state.p');
+                        if sum(contains(obj.items,strcat('plant.state.',ch)))>0
+                              sp=strcmp(obj.items,strcat('plant.state.',ch));
                               tmpp=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpp{1:end}];
+                              %plotitem={plotitem,{[tmpp{1:end}]'}};
+                              plot(timeList,[tmpp{1:end}]');
+                              hold on
                               plegend=[plegend,"1p","2p","3p"];
                         end
-                        if sum(contains(obj.items,'sensor.result.state.p'))>0
-                              sp=strcmp(obj.items,'sensor.result.state.p');
+                        if sum(contains(obj.items,strcat('sensor.result.state.',ch)))>0
+                              sp=strcmp(obj.items,strcat('sensor.result.state.',ch));
                               tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmps{1:end}];
+%                              plotitem={plotitem,{[tmps{1:end}]'}};
+                              plot(timeList,[tmpp{1:end}]');
+                              hold on
                               plegend=[plegend,"1s","2s","3s"];
                         end
-                        if sum(contains(obj.items,'estimator.result.state.p'))>0
-                              ep=strcmp(obj.items,'estimator.result.state.p');
+                        if sum(contains(obj.items,strcat('estimator.result.state.',ch)))>0
+                              ep=strcmp(obj.items,strcat('estimator.result.state.',ch));
                               tmpe=arrayfun(@(i)obj.Data.agent{i,ep,num}(1:3),plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpe{1:end}];
+%                              plotitem={plotitem,{[tmpe{1:end}]'}};%,'LineWidth',1.5];
+                              plot(timeList,[tmpp{1:end}]','LineWidth',1.5);
+                              hold on
                               plegend=[plegend,"1e","2e","3e"];
                         end
-                        if sum(contains(obj.items,'reference.result.state.p'))>0
-                              rp=strcmp(obj.items,'reference.result.state.p');
+                        if sum(contains(obj.items,strcat('reference.result.state.',ch)))>0
+                              rp=strcmp(obj.items,strcat('reference.result.state.',ch));
                               tmpr=arrayfun(@(i)obj.Data.agent{i,rp,num}(1:3),plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpr{1:end}];
+                              %plotitem={plotitem,{[tmpr{1:end}]'}};
+                              plot(timeList,[tmpp{1:end}]','-.');
+                              hold on
                               plegend=[plegend,"1r","2r","3r"];
                         end
-                        plot([plotitem]')
-                        title("Position p");
+%                        plot(plotitem)
+                        if ch == "p"
+                            title("Position p");
+                        elseif ch == "q"
+                            title(strcat("Attitude q : ",string(obj.target(num).model.state.type)));
+                        elseif ch == "v"
+                            title("Velocity v");
+                        else
+                            title("Angular velocity w");
+                        end
                         legend(plegend);
-                    case "q"
-                        plotitem=[];
-                        plegend=[];
-                        if sum(contains(obj.items,'plant.state.q'))>0
-                              sp=strcmp(obj.items,'plant.state.q');
-                              tmpp=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpp{1:end}];
-                               if obj.Data.agent{1,sp,num}==4
-                              plegend=[plegend,"1p","2p","3p","4p"];
-                               else
-                              plegend=[plegend,"1p","2p","3p"];
-                               end
-                        end
-                        if sum(contains(obj.items,'sensor.result.state.q'))>0
-                              sp=strcmp(obj.items,'sensor.result.state.q');
-                              tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmps{1:end}];
-                               if obj.Data.agent{1,sp,num}==4
-                              plegend=[plegend,"1s","2s","3s","4s"];
-                               else
-                              plegend=[plegend,"1s","2s","3s"];
-                               end
-                        end
-                        if sum(contains(obj.items,'estimator.result.state.q'))>0
-                              ep=strcmp(obj.items,'estimator.result.state.q');
-                              tmpe=arrayfun(@(i)obj.Data.agent{i,ep,num},plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpe{1:end}];
-                               if obj.Data.agent{1,sp,num}==4
-                              plegend=[plegend,"1e","2e","3e","4e"];
-                               else
-                              plegend=[plegend,"1e","2e","3e"];
-                               end
-                        end
-                        plot([plotitem]')
-                        legend(plegend);
-                        title(strcat("Attitude q : ",string(obj.target(num).model.state.type)));
-                    case "v"
-                        plotitem=[];
-                        plegend=[];
-                                                if sum(contains(obj.items,'plant.state.v'))>0
-                              sp=strcmp(obj.items,'plant.state.v');
-                              tmpp=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpp{1:end}];
-                              plegend=[plegend,"1p","2p","3p"];
-                        end
-
-                        if sum(contains(obj.items,'sensor.result.state.v'))>0
-                              sp=strcmp(obj.items,'sensor.result.state.v');
-                              tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmps{1:end}];
-                              plegend=[plegend,"1s","2s","3s"];
-                        end
-                        if sum(contains(obj.items,'estimator.result.state.v'))>0
-                              ep=strcmp(obj.items,'estimator.result.state.v');
-                              tmpe=arrayfun(@(i)obj.Data.agent{i,ep,num},plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpe{1:end}];
-                              plegend=[plegend,"1e","2e","3e"];
-                        end
-                        plot([plotitem]')
-                        legend(plegend);
-                        title("Velocity v");
-                    case "w"
-                        plotitem=[];
-                        plegend=[];
-                                                if sum(contains(obj.items,'plant.state.w'))>0
-                              sp=strcmp(obj.items,'plant.state.w');
-                              tmpp=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpp{1:end}];
-                              plegend=[plegend,"1p","2p","3p"];
-                                                end
-                        if sum(contains(obj.items,'sensor.result.state.w'))>0
-                              sp=strcmp(obj.items,'sensor.result.state.w');
-                              tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmps{1:end}];
-                              plegend=[plegend,"1s","2s","3s"];
-                        end
-                        if sum(contains(obj.items,'estimator.result.state.w'))>0
-                              ep=strcmp(obj.items,'estimator.result.state.w');
-                              tmpe=arrayfun(@(i)obj.Data.agent{i,ep,num},plot_length,'UniformOutput',false);
-                              plotitem=[plotitem;tmpe{1:end}];
-                              plegend=[plegend,"1e","2e","3e"];
-                        end
-                        plot([plotitem]')
-                        legend(plegend);
-                        title("Angular velocity w");
+                        hold off
                     case "u"
                         if sum(contains(obj.items,'input'))>0
                               sp=strcmp(obj.items,'input');

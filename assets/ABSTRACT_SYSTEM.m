@@ -78,7 +78,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < handle & dynamicprops
             else
                 obj.set_plant();
             end
-            if ~isempty(obj.plant.state)
+            if ~isempty(obj.plant.state) % ŽÀŒ±‚ÌŽž‚Ímodel‚Ì’l‚ª“ü‚é
                 obj.state=obj.plant.state;
             end
         end
