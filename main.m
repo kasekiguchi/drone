@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 1;
+fExp = 0;
 if fExp
     
     dt = 0.025; % sampling time
@@ -99,32 +99,26 @@ else
 end
 
 %% initialize
-if ~fExp
-    % for sim : 整列した初期値
-    base_pos=[0 0]; % 基準位置
-    kpos=ceil(sqrt(N));
-    cpos=floor(N/kpos);
-    rempos=mod(N,kpos);
-    [xpos,ypos]=meshgrid(1-floor(kpos/2):ceil(kpos/2),1-floor(cpos/2):ceil(cpos/2));
-    gap=1; % エージェントの間隔
-    xpos=gap*xpos;
-    ypos=gap*ypos;
-    arranged_initial_pos=base_pos-[gap gap]+[reshape(xpos,[N-rempos,1]),reshape(ypos,[N-rempos,1]);(1:rempos)'*[gap,0]+[0 gap]*(ceil(cpos/2)+1)];
-end
-
-if exist('motive')==1; motive.getData({agent,[]});end
 disp("Initialize state");
-for i = 1:N
-    if fExp
+if fExp
+    if exist('motive')==1; motive.getData({agent,[]});end
+    for i = 1:N
         % for exp with motive : initialize by motive info
-        agent(i).sensor.motive.do({motive});
+        if isfield(agent(i).sensor,'motive'); agent(i).sensor.motive.do({motive});end
         sstate = agent(i).sensor.motive.result.state;
         model.initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
         agent(i).model.set_state(model.initial);
-%        agent(i).estimator.result.state.set_state(model.initial);
-    else
-        % for sim
-        plant.initial = struct('p',[arranged_initial_pos(i,:),0]','q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
+        for j = 1:length(agent(i).estimator.name)
+            if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
+                agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
+            end
+        end        
+    end
+else
+    % for sim
+    arranged_pos = arranged_position([0,0],N,1,0);
+    for i = 1:N
+        plant.initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
         agent(i).state.set_state(plant.initial);
         agent(i).model.set_state(plant.initial);
         for j = 1:length(agent(i).estimator.name)
@@ -145,7 +139,7 @@ LogData=[
     "sensor.result.state.q",
     "sensor.result.state.v",
     "sensor.result.state.w",
-    %    "reference.result.state.xd",
+%    "reference.result.state.xd",
 %     "input_transform.t2t.flight_phase",
     "inner_input",
     "input"
@@ -279,10 +273,11 @@ if isfield(agent(1).reference,'covering')
 end
 %%
 close all
+clc
 logger.plot(1,["inner_input"],struct('transpose',1));
-%logger.plot(1,["p","q","v","input","plant.state.p"]);
+logger.plot(1,["p","q","v","input","plant.state.p"]);
 %logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
-logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
+%logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
 %logger.plot(1,["p","q","v","w","u"],struct('time',170));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %%
