@@ -11,7 +11,7 @@
 
 uint8_t i;
 
-unsigned int droneNumber = 24; //機体番号を入力
+unsigned int droneNumber = 25; //機体番号を入力
 
 #define OUTPUT_PIN 2 // PPM出力のピン番号 加速度使うなら０
 

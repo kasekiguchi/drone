@@ -1,7 +1,7 @@
 function param = getParameter(varargin)
 % class化したほうが良い．
-mass = 0.2;
-length = 0.1;% モーター間の距離：正方形を仮定している
+mass = 0.2355;
+length = 0.075;% モーター間の距離：正方形を仮定している
 jx = 0.002237568;
 jy = 0.002985236;
 jz = 0.00480374;

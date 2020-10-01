@@ -6,7 +6,7 @@ function typical_Estimator_EKF(agent)
 Estimator.name="ekf";
 Estimator.type="EKF";
 dt = agent(1).model.dt;
-    EKF_param.Q = diag([50;50;50;0.9E02;0.9E02;1.8E02]);%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
+    EKF_param.Q = 100* diag([0.5;0.5;0.5;0.9;0.9;1.8]);%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
     EKF_param.R = diag([[6.716E-5; 7.058E-5; 7.058E-5]/100;[6.716E-5; 7.058E-5; 7.058E-5]/1000]);%eye(6).*1.0E-4;%1.0e-1; % 観測ノイズ（Sensorクラス由来）
     
     n = agent(1).model.dim(1);
