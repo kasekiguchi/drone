@@ -29,7 +29,7 @@ classdef PointReference_FH < REFERENCE_CLASS
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
-            sp = obj.self.model.state.p;
+            sp = obj.self.estimator.result.state.p;
             if strcmp(cha,'l') % landing phase
                 if strcmp(obj.flag,'l')
                     obj.result.state.p=gen_ref_for_landing(obj.result.state.p);

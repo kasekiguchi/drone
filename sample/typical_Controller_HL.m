@@ -3,10 +3,10 @@ function typical_Controller_HL(agent)
 % controller property をController classのインスタンス配列として定義
 dt = agent(1).model.dt;
 Controller_param.P=getParameter();
-Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[100],dt);                                % z  % to takashiba ここはあんまりいじんなくてもいいかも
-Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([1000,1,1,1]),[10],dt); % x
-Controller_param.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([1000,1,1,1]),[10],dt); % y
-Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([1,1]),[100],dt);                       % ヨー角 % ヨー角がやたらぐるぐるするなら入力の重みを大きくする
+Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 
+Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,10,10,1]),[1],dt); % x
+Controller_param.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,10,10,1]),[1],dt); % y
+Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ヨー角 
 % Controller_param.F1=lqr([0 1;0 0],[0;1],diag([1,1]),[1]);
 % Controller_param.F2=lqr([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,1,1,1]),[0.1]);
 % Controller_param.F3=lqr([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,1,1,1]),[0.1]);

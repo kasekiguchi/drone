@@ -50,9 +50,9 @@ classdef EKF < ESTIMATOR_CLASS
             %   param : optional
             model=obj.self.model;
             sensor = obj.self.sensor.result;
-%            xh_pre = obj.result.state.get() + model.method(x,u,model.param) * obj.dt;	% 事前推定
-            xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
             x = obj.result.state.get(); % 前回時刻推定値
+            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定
+%             xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
             if isempty(obj.y.list)
                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
             end

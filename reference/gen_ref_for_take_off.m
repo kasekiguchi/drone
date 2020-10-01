@@ -1,7 +1,7 @@
 function Xd = gen_ref_for_take_off(Xd_old)
 %% Setting
 %—£—¤‚Ì–Ú•W‘¬“x
-take_off_vz     = 0.7;% m/s 
+take_off_vz     = 0.2;% m/s 
 dz = take_off_vz * 0.025;
 %% Variable set
 Xd  = zeros( 3, 1);

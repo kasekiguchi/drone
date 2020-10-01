@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;
+fExp = 1;
 if fExp
     
     dt = 0.025; % sampling time
@@ -80,6 +80,7 @@ typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定
 for i = 1:N; agent(i).reference=[]; end
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
+typical_Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 typical_Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -103,6 +104,7 @@ disp("Initialize state");
 if fExp
     if exist('motive')==1; motive.getData({agent,[]});end
     for i = 1:N
+        agent(i).input = [0;0;0;0];
         % for exp with motive : initialize by motive info
         if isfield(agent(i).sensor,'motive'); agent(i).sensor.motive.do({motive});end
         sstate = agent(i).sensor.motive.result.state;
@@ -112,7 +114,9 @@ if fExp
             if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
                 agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
             end
-        end        
+        end      
+        initp = sstate.p;
+        initq = sstate.q;
     end
 else
     % for sim
@@ -131,6 +135,7 @@ end
 
 LogData=[
     "reference.result.state.p",
+    %"reference.result.state.q",
     "estimator.result.state.p",
     "estimator.result.state.q",
     "estimator.result.state.v",
@@ -201,7 +206,7 @@ try
             
             Rcovering={};%{Env};
             %Rpoint={FH,[0;0;0.5]};
-            Rpoint={FH,[agent.state.p+[0;0;0];agent.state.q(3)]};%+pi/2
+            Rpoint={FH,[initp+[1;0;0.5]]};%-pi/2]};%+pi/2
             
             RtimeVarying={time};
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
@@ -209,14 +214,6 @@ try
             
             agent(i).do_controller(cell(1,10));
         end
-        %% logging
-        calculation=toc;
-        if fExp
-            time.t = time.t+ calculation; % for exp
-        else
-            time.t = time.t + dt % for sim
-        end
-        logger.logging(time.t);
         %% update state
         % with FH
         figure(FH)
@@ -231,17 +228,26 @@ try
             model_param.param=agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
-        % for exp
-        if fExp
+         %% logging
+        calculation=toc;
+
+logger.logging(time.t);
+       % for exp
+       if fExp
             wait_time =  0.9999*(sampling-calculation);
-           if wait_time <0
-               wait_time
-               warning("ACSL : sampling time is too short.");
+            if wait_time <0
+                wait_time
+                warning("ACSL : sampling time is too short.");
            end
-            time.t = time.t + wait_time;
-%            time.t = time.t + calculation;
-            %pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
-        end
+                time.t = time.t + calculation;
+%            else
+%                pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
+%                time.t = time.t + sampling;
+%            end
+       else
+           time.t = time.t + dt % for sim
+       end
+       
     end
 catch ME    % for error 
     % with FH
@@ -274,10 +280,10 @@ end
 %%
 close all
 clc
-logger.plot(1,["inner_input"],struct('transpose',1));
-logger.plot(1,["p","q","v","input","plant.state.p"]);
+% logger.plot(1,["inner_input"],struct('transpose',1));
+logger.plot(1,["p","q","w","v","input","inner_inpaut"    ]);
 %logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
-%logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
+% logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
 %logger.plot(1,["p","q","v","w","u"],struct('time',170));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %%
