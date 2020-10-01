@@ -79,7 +79,6 @@ classdef Logger < handle
                         if sum(contains(obj.items,strcat('plant.state.',ch)))>0
                               sp=strcmp(obj.items,strcat('plant.state.',ch));
                               tmpp=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-                              %plotitem={plotitem,{[tmpp{1:end}]'}};
                               plot(timeList,[tmpp{1:end}]');
                               hold on
                               plegend=[plegend,"1p","2p","3p"];
@@ -87,28 +86,24 @@ classdef Logger < handle
                         if sum(contains(obj.items,strcat('sensor.result.state.',ch)))>0
                               sp=strcmp(obj.items,strcat('sensor.result.state.',ch));
                               tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-%                              plotitem={plotitem,{[tmps{1:end}]'}};
-                              plot(timeList,[tmpp{1:end}]');
+                              plot(timeList,[tmps{1:end}]');
                               hold on
                               plegend=[plegend,"1s","2s","3s"];
                         end
                         if sum(contains(obj.items,strcat('estimator.result.state.',ch)))>0
                               ep=strcmp(obj.items,strcat('estimator.result.state.',ch));
                               tmpe=arrayfun(@(i)obj.Data.agent{i,ep,num}(1:3),plot_length,'UniformOutput',false);
-%                              plotitem={plotitem,{[tmpe{1:end}]'}};%,'LineWidth',1.5];
-                              plot(timeList,[tmpp{1:end}]','LineWidth',1.5);
+                              plot(timeList,[tmpe{1:end}]','LineWidth',1.5);
                               hold on
                               plegend=[plegend,"1e","2e","3e"];
                         end
                         if sum(contains(obj.items,strcat('reference.result.state.',ch)))>0
                               rp=strcmp(obj.items,strcat('reference.result.state.',ch));
                               tmpr=arrayfun(@(i)obj.Data.agent{i,rp,num}(1:3),plot_length,'UniformOutput',false);
-                              %plotitem={plotitem,{[tmpr{1:end}]'}};
-                              plot(timeList,[tmpp{1:end}]','-.');
+                              plot(timeList,[tmpr{1:end}]','-.');
                               hold on
                               plegend=[plegend,"1r","2r","3r"];
                         end
-%                        plot(plotitem)
                         if ch == "p"
                             title("Position p");
                         elseif ch == "q"
@@ -124,10 +119,9 @@ classdef Logger < handle
                         if sum(contains(obj.items,'input'))>0
                               sp=strcmp(obj.items,'input');
                               tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                              plotitem=[tmps{1:end}];
-                        plot(plotitem')
+                        plot(timeList,[tmps{1:end}]')
                         title("Input u");
-                        legend(strcat("u",string(1:size(plotitem,1))));
+                        legend(strcat("u",string(1:size(tmps{1},1))));
                        % ylim([500 2200]);
                         else
                              warning("ACSL : logger does not include plot target.");
@@ -136,11 +130,10 @@ classdef Logger < handle
                         if sum(contains(obj.items,'inner_input'))>0
                               sp=strcmp(obj.items,'inner_input');
                               tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}',plot_length,'UniformOutput',false);
-                              plotitem=[tmps{1:end}];
-                        plot(plotitem')
-                        title("Input u");
-                        legend(strcat("u",string(1:size(plotitem,1))));
-                       % ylim([1000 1600]);
+                        plot(timeList,[tmps{1:end}]')
+                        title("Throttle Input u");
+                        legend(strcat("u",string(1:size(tmps{1},1))));
+                        ylim([1000 2000]);
                         else
                              warning("ACSL : logger does not include plot target.");
                         end
@@ -152,10 +145,9 @@ classdef Logger < handle
                               else
                                   tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
                               end
-                              plotitem=[tmps{1:end}];
-                              plot([plotitem]')
+                            plot(timeList,[tmps{1:end}]')
                               title(target(i));
-                              legend(string(1:min(size(plotitem))));
+                              legend(string(1:size(tmps{1},1)));
                        else
                             warning("ACSL : logger does not include plot target.");
                        end
