@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 1;
+fExp = 1;%1：実機　それ以外：シミュレーション
 if fExp
     
     dt = 0.025; % sampling time
@@ -22,7 +22,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=30;
 end
 
 
@@ -70,17 +70,19 @@ typical_Sensor_Motive(agent); % motive情報 : sim exp 共通
 %% set estimator property
 for i = 1:N; agent(i).estimator=[]; end
 %typical_Estimator_LPF(agent); % lowpass filter
-typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定
+% typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %typical_Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
 %typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
-%typical_Estimator_EKF(agent); % （剛体ベース）EKF
+typical_Estimator_EKF(agent); % （剛体ベース）EKF 10/2 シミュレーション回らない
 %typical_Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 %% set reference property
 for i = 1:N; agent(i).reference=[]; end
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
-typical_Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
+% typical_Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
+typical_Reference_Time_Varying(agent,"Case_study_trajectory",[0;0.4;1]); % ハート形[x;y;z]永久
+% typical_Reference_Time_Varying(agent,"Make_heart_refernce",[0;0.4;1]); % ハート形[x;y;z]高柴
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 typical_Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -205,12 +207,15 @@ try
             agent(i).do_estimator(cell(1,10));
             
             Rcovering={};%{Env};
-            %Rpoint={FH,[0;0;0.5]};
-            Rpoint={FH,[initp+[1;0;0.5]]};%-pi/2]};%+pi/2
+            % for sim
+            Rpoint={FH,[0;0;0.5]};
+            % exp
+%             Rpoint={FH,[initp+[1;0;0.5]]};%-pi/2]};%+pi/2 
             
             RtimeVarying={time};
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             agent(i).do_reference(param(i).reference);
+%             [Make_reference,flag] = Make_heart_reference(i,Make_reference,agent,flag);
             
             agent(i).do_controller(cell(1,10));
         end
@@ -281,13 +286,21 @@ end
 close all
 clc
 % logger.plot(1,["inner_input"],struct('transpose',1));
-logger.plot(1,["p","q","w","v","input","inner_inpaut"    ]);
+logger.plot(1,["p","q","w","v","input","inner_input"    ]);
 %logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
 % logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
 %logger.plot(1,["p","q","v","w","u"],struct('time',170));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %%
 %logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
+%%
+close all
+hold on
 
+heart = cell2mat(logger.Data.agent(:,1)'); % reference.result.state.p
+plot(heart(1,:),heart(2,:)); % xy平面の軌道を描く
+
+heart_result = cell2mat(logger.Data.agent(:,6)'); % reference.result.state.p
+plot(heart_result(1,:),heart_result(2,:)); % xy平面の軌道を描く
 %%
 logger.save();
