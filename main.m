@@ -82,7 +82,6 @@ for i = 1:N; agent(i).reference=[]; end
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
 % typical_Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
 typical_Reference_Time_Varying(agent,"Case_study_trajectory",[0;0.4;1]); % ハート形[x;y;z]永久
-% typical_Reference_Time_Varying(agent,"Make_heart_refernce",[0;0.4;1]); % ハート形[x;y;z]高柴
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 typical_Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
