@@ -44,8 +44,8 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
                 end
             end
             obj.result.local_marker_nums = [arrayfun(@(i) size(obj.result.local_marker{i},1),1:obj.result.rigid_num)];
-            obj.result.on_marker_num = sum(obj.result.local_marker_nums);
-            obj.result.marker_num=obj.result.on_marker_num;
+            obj.on_marker_num = sum(obj.result.local_marker_nums);
+            obj.result.marker_num=obj.on_marker_num;
             if isfield(param,'Flag')
                 obj.Flag = param.Flag;
             end
@@ -111,17 +111,17 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             end
             tmp = arrayfun(@(i) obj.on_marker{i}',1:obj.result.rigid_num,'UniformOutput',false);
             obj.result.marker = [tmp{:}]';
-            if obj.result.marker_num > obj.result.on_marker_num
+            if obj.result.marker_num > obj.on_marker_num
                 if obj.result.rigid_num == 1
-                    cog = sum(obj.result.on_marker{1},1)/obj.result.on_marker_num;
-                    radius=max(obj.result.on_marker{1}-cog);
+                    cog = sum(obj.on_marker{1},1)/obj.on_marker_num;
+                    radius=max(obj.on_marker{1}-cog);
                 else
                     rigid_p = [obj.result.rigid(:).p]'; % ノイズ込みの値
                     cog = sum(rigid_p,1)/obj.result.rigid_num; % 全エージェントの平均位置
                     radius=max(rigid_p-cog);
                 end
                 rng('shuffle');
-                obj.result.marker = [obj.result.marker;(cog +  (2*obj.sigmaw'+abs(radius)/2).* randn(obj.result.marker_num-obj.result.on_marker_num,3))];
+                obj.result.marker = [obj.result.marker;(cog +  (2*obj.sigmaw'+abs(radius)/2).* randn(obj.result.marker_num-obj.on_marker_num,3))];
                 % cog を中心にcogから一番遠いエージェントの半分の距離を分散にばらつく位置にUnLabeledmarkerを配置
             end
             
