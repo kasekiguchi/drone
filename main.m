@@ -95,7 +95,7 @@ typical_Controller_HL(agent); % äKëwå^ê¸å`âª
 
 %% set connector (global instance)
 if fExp
-    typical_Connector_Natnet(struct('ClientIP','192.168.1.5')); % Motive
+    typical_Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',[1])); % Motive
 else
     typical_Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
 end

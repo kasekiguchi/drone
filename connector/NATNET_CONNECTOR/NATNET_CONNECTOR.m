@@ -3,6 +3,7 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
     %  param : HostIP, ClientIP
     properties
         result
+        rigid_list
     end
     properties (NonCopyable = true, SetAccess = private )
         init_time  % first getData time
@@ -22,7 +23,7 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             disp('Connect to Motive')
             %-- connection takes about 0.3 seconds
             %-- setting ClientIP
-            
+            if isfield(info,'rigid_list'); obj.rigid_list = info.rigid_list; end
             obj.NatnetClient = natnet;
             obj.NatnetClient.HostIP	= info.HostIP;
             obj.NatnetClient.ClientIP = info.ClientIP;
