@@ -132,7 +132,7 @@ end
         end
         function q=check_and_convert_q(obj,value)
             if isempty(obj.type)
-                error("ACSL : Attitude is not the state");
+                error("ACSL : Attitude is not in the state");
             else
                 len = length(value);
                 if obj.type==len
