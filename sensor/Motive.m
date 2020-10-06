@@ -16,10 +16,17 @@ classdef Motive < SENSOR_CLASS
             %  このクラスのインスタンスを作成
             %%% Output equation %%%
             obj.self = self;
-            obj.result.state=state_copy(self.model.state); % STATE_CLASSとしてコピー
-            if sum(contains(obj.result.state.list,"q"))==1
-                obj.result.state.list=["p","q"];
-                obj.result.state.num_list=[3,length(obj.result.state.q)]; % modelと合わせる
+%             obj.result.state=state_copy(self.model.state); % STATE_CLASSとしてコピー
+%             if isprop(obj.result.state,'v')
+%                 delete(obj.result.state,'v');
+%             end
+%             if isprop(obj.result.state,'w')
+%                 delete(obj.result.state,'w');
+%             end
+            obj.result.state = STATE_CLASS(struct('state_list',["p","q"],"num_list",[3,4]));
+            if sum(contains(self.model.state.list,"q"))==1
+                obj.result.state.num_list=[3,length(self.model.state.q)]; % modelと合わせる
+                obj.result.state.type = length(self.model.state.q);
             end
         end
         

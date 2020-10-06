@@ -22,6 +22,7 @@ classdef EKF < ESTIMATOR_CLASS
     methods
         function obj = EKF(self,param)
             obj.self= self;
+            obj.self.input = [0;0;0;0];
             model = self.model;
             ELfile=strcat("Jacobian_",model.name);
             if ~exist(ELfile,"file")

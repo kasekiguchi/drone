@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 1;%1：実機　それ以外：シミュレーション
+fExp = 0;%1：実機　それ以外：シミュレーション
 if fExp
     
     dt = 0.025; % sampling time
@@ -61,7 +61,7 @@ for i = 1:N; agent(i).sensor=[]; end
 %typical_Sensor_LSM9DS1(agent); % IMU sensor
 typical_Sensor_Motive(agent); % motive情報 : sim exp 共通
 %typical_Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
-%typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %typical_Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 % for i = 1:N % simのみ
 %     sensor.type= "LiDAR_sim";
@@ -133,7 +133,6 @@ else
         end
     end
 end
-
 LogData=[
     "reference.result.state.p",
     %"reference.result.state.q",
@@ -143,8 +142,8 @@ LogData=[
     "estimator.result.state.w",
     "sensor.result.state.p",
     "sensor.result.state.q",
-    "sensor.result.state.v",
-    "sensor.result.state.w",
+    %"sensor.result.state.v",
+    %"sensor.result.state.w",
 %    "reference.result.state.xd",
 %     "input_transform.t2t.flight_phase",
     "inner_input",
@@ -175,6 +174,11 @@ mparam.occlusion.cond=["time.t >=1.5 && time.t<1.6","agent(1).model.state.p(1) >
 mparam.occlusion.target={[1],[1]};
 mparam.marker_num = 20;
 mparam=[]; % without occulusion
+%%
+Data = load("Log(06-Oct-2020_09_18_33).mat").Data;
+expdata=SENSOR_DATA_EMULATOR(Data);
+expdata.do(0,agent,1)
+
 %% main loop
 %profile on
 disp("while ============================")
@@ -285,7 +289,7 @@ end
 close all
 clc
 % logger.plot(1,["inner_input"],struct('transpose',1));
-logger.plot(1,["p","q","w","v","input","inner_input"    ]);
+logger.plot(1,["p","q","w","v","input"]);%,"inner_input"    ]);
 %logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
 % logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
 %logger.plot(1,["p","q","v","w","u"],struct('time',170));
