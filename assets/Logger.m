@@ -71,7 +71,7 @@ classdef Logger < handle
             logger_transpose = 0;
             if ~isempty(varargin)
                 if isfield(varargin{1},'time')
-                    plot_length = 1:varargin{1}.time-1;
+                    plot_length = 1:find((obj.Data.t-varargin{1}.time)>0,1)-1;
                 end
                 if isfield(varargin{1},'transpose')
                     logger_transpose=1;
@@ -80,7 +80,7 @@ classdef Logger < handle
                     fig_num=varargin{1}.fig_num;
                 end
             end
-            timeList=obj.Data.t(1:length(plot_length));
+            timeList=obj.Data.t(plot_length);
             fh=figure(fig_num);
             fh.WindowState='maximized';
             frow=ceil(length(target)/3);
