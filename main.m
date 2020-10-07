@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレーション
+fExp = 1;%1：実機　それ以外：シミュレーション
 if fExp
     
     dt = 0.025; % sampling time
@@ -22,7 +22,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=20;
 end
 
 
@@ -81,7 +81,7 @@ for i = 1:N; agent(i).reference=[]; end
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
 % typical_Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
-typical_Reference_Time_Varying(agent,"Case_study_trajectory",[0;0.4;1]); % ハート形[x;y;z]永久
+typical_Reference_Time_Varying([1],agent,"Case_study_trajectory",[0;0.4;1]); % ハート形[x;y;z]永久
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 typical_Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -95,7 +95,7 @@ typical_Controller_HL(agent); % 階層型線形化
 
 %% set connector (global instance)
 if fExp
-    typical_Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',[1])); % Motive
+    typical_Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',[1])); % Motive
 else
     typical_Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
 end
@@ -175,10 +175,10 @@ mparam.occlusion.target={[1],[1]};
 mparam.marker_num = 20;
 mparam=[]; % without occulusion
 %%
-Data = load("Log(06-Oct-2020_09_18_33).mat").Data;
-expdata=SENSOR_DATA_EMULATOR(Data);
-expdata.do(0,agent,1)
-
+% Data = load("Log(06-Oct-2020_09_18_33).mat").Data;
+% expdata=SENSOR_DATA_EMULATOR(Data);
+% expdata.do(0,agent,1)
+% 
 %% main loop
 %profile on
 disp("while ============================")
@@ -211,7 +211,7 @@ try
             
             Rcovering={};%{Env};
             % for sim
-            Rpoint={FH,[0;0;0.5]};
+            Rpoint={FH,[0;0;0.5],time.t};
             % exp
 %             Rpoint={FH,[initp+[1;0;0.5]]};%-pi/2]};%+pi/2 
             
@@ -297,13 +297,13 @@ logger.plot(1,["p","q","w","v","input"]);%,"inner_input"    ]);
 %%
 %logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
 %%
-close all
-hold on
-
-heart = cell2mat(logger.Data.agent(:,1)'); % reference.result.state.p
-plot(heart(1,:),heart(2,:)); % xy平面の軌道を描く
-
-heart_result = cell2mat(logger.Data.agent(:,6)'); % reference.result.state.p
-plot(heart_result(1,:),heart_result(2,:)); % xy平面の軌道を描く
+% close all
+% hold on
+% 
+% heart = cell2mat(logger.Data.agent(:,1)'); % reference.result.state.p
+% plot(heart(1,:),heart(2,:)); % xy平面の軌道を描く
+% 
+% heart_result = cell2mat(logger.Data.agent(:,6)'); % reference.result.state.p
+% plot(heart_result(1,:),heart_result(2,:)); % xy平面の軌道を描く
 %%
 logger.save();

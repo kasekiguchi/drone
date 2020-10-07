@@ -4,17 +4,19 @@ classdef PointReference_FH < REFERENCE_CLASS
         flight_phase = 's';
         flag = 's';
         self
+        base_time
+        base_state
     end
     
     methods
         function obj = PointReference_FH(self,varargin)
             % ŽQÆ
             obj.self = self;
-            obj.result.state = STATE_CLASS(struct('state_list',["p"],'num_list',[3]));
+            obj.result.state = STATE_CLASS(struct('state_list',["xd","p"],'num_list',[3]));
         end
         function  result= do(obj,Param,varargin)
             % yInputzvarargin = {Xd(optional)}
-            %  Param = FH,xd
+            %  Param = FH,xd,time.t
             %  Xd (optional) : ‘¼‚Ìreference obj‚Å¶¬‚³‚ê‚½–Ú•W’l
             if ~isempty(varargin)  % ‘¼‚Ìreference obj‚Å‚ÌŽQÆ’l‚ª‚ ‚éê‡
                 Param{2} = varargin{1}.state;
@@ -29,12 +31,11 @@ classdef PointReference_FH < REFERENCE_CLASS
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
-            sp = obj.self.estimator.result.state.p;
             if strcmp(cha,'l') % landing phase
                 if strcmp(obj.flag,'l')
                     obj.result.state.p=gen_ref_for_landing(obj.result.state.p);
                 else% ‰‚ß‚Älanding ‚É“ü‚Á‚½‚Æ‚«
-                    obj.result.state.p=gen_ref_for_landing(sp);
+                    obj.result.state.p=gen_ref_for_landing(obj.self.estimator.result.state.p);
                 end
                 if isprop(obj.result.state,'xd')
                     obj.result.state.xd = obj.result.state.p; % ‚±‚Ì‚æ‚¤‚É‚·‚é‚±‚Æ‚Åf ‚ÌŒã‚Å‚à”½‰f‚³‚ê‚é
@@ -42,14 +43,18 @@ classdef PointReference_FH < REFERENCE_CLASS
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
-                    obj.result.state.p=gen_ref_for_take_off(obj.result.state.p);
+                    %obj.result.state.p=gen_ref_for_take_off(obj.result.state.p);
+%                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,1,10,Param{3}-obj.base_time);
+                    obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1,10,Param{3}-obj.base_time);
                 else % ‰‚ß‚Ätake off ‚É“ü‚Á‚½‚Æ‚«
-                    %sp(3) = 0.19; % –Ú•WˆÊ’u‚ð‚¿‚å‚Á‚Æ•‚‚¢‚½ˆÊ’u‚©‚ç‚ ‚°‚Ä‚¢‚­
-                    obj.result.state.p=gen_ref_for_take_off(sp);
+                    obj.base_time=Param{3};
+                    obj.base_state=obj.self.estimator.result.state.p;
+                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1,10,0);
                 end
-                if isprop(obj.result.state,'xd')
-                    obj.result.state.xd = obj.result.state.p; % ‚±‚Ì‚æ‚¤‚É‚·‚é‚±‚Æ‚Åf ‚ÌŒã‚Å‚à”½‰f‚³‚ê‚é
-                end
+%                 if isprop(obj.result.state,'xd')
+%                     obj.result.state.xd = obj.result.state.p; % ‚±‚Ì‚æ‚¤‚É‚·‚é‚±‚Æ‚Åf ‚ÌŒã‚Å‚à”½‰f‚³‚ê‚é
+%                 end
+                obj.result.state.p = obj.result.state.xd(1:3);
                 obj.flag='t';
             elseif strcmp(cha,'f') % flight phase
                 obj.flag='f';
@@ -59,7 +64,7 @@ classdef PointReference_FH < REFERENCE_CLASS
                     obj.result.state.p = Param{2};
                 end
             else
-                obj.result.state.p = sp;
+                obj.result.state.p = obj.self.estimator.result.state.p;
             end
             result=obj.result;
         end
