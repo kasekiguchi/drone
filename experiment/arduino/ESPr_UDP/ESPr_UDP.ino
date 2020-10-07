@@ -1,5 +1,9 @@
 // 2020/09/04 : 飛行を確認：UDPでの９軸センサー情報取得はオフ
 // 9軸センサー情報を取得するにはsetup, loop のコメントを外し，OUTPUT_PINを0にし，ESPｒへの接続pin を2 -> 0に変更する必要がある．
+// arduino の設定は
+// http://trac.switch-science.com/wiki/esp_dev_arduino_ide
+// CPU Frequency を 160 MHzにしないとFCにPPMを送れない．
+// PPM は　Down pulse
 #include <Arduino.h>
 #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
 #include <WiFiUDP.h>
@@ -11,7 +15,7 @@
 
 uint8_t i;
 
-unsigned int droneNumber = 25; //機体番号を入力
+unsigned int droneNumber = 24; //機体番号を入力
 
 #define OUTPUT_PIN 2 // PPM出力のピン番号 加速度使うなら０
 
@@ -83,48 +87,72 @@ char SENDVAL[255];
 char packetBuffer[255];
 #define TOTAL_INPUT 4      // number of input channels
 #define TOTAL_CH 8         // number of channels
-#define TIME_PERIOD 22500  // PPM信号の周期 // オシロスコープでプロポ信号を計測した結果
-#define TIME_LOW 400       // PPM信号 LOW時の幅　 // 同上
-//#define TIME_HIGH_MIN 700  // PPM幅の最小        // 最小600 に余裕をもたせた値
-//#define TIME_HIGH_MAX 1500 // PPM幅の最大　      // 最大1600 に余裕をもたせた値
-#define TIME_HIGH_MIN 600  // PPM幅の最小
-#define TIME_HIGH_MAX 1600 // PPM幅の最大
+// https://create-it-myself.com/research/study-ppm-spec/
+#define PPM_PERIOD 22500  // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
+//#define TIME_LOW 400       // PPM信号 LOW時の幅　 // 同上
+//#define TIME_HIGH_MIN 700  // PPM幅の最小 [us]       // 最小600 に余裕をもたせた値
+//#define TIME_HIGH_MAX 1500 // PPM幅の最大 [us]      // 最大1600 に余裕をもたせた値
+#define TIME_LOW 300       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
+//#define TIME_HIGH_MIN 700  // PPM幅の最小 [us] // 上のリンク情報に合わせる
+//#define TIME_HIGH_MAX 1700 // PPM幅の最大 [us] // 上のリンク情報に合わせる
+#define TIME_HIGH_MIN 600  // PPM幅の最小 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている
+#define TIME_HIGH_MAX 1600 // PPM幅の最大 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている
 
 uint8_t n_ch = 0;      // 現在の chを保存
 uint16_t t_sum = 0;     // us単位  1周期中の現在の使用時間
-//uint8_t t_sum = 0;     // us単位  1周期中の現在の使用時間
 uint16_t pw[TOTAL_CH]; // ch毎のパルス幅を保存
 
 unsigned long t_now;
-unsigned long t_lost;
+unsigned long last_received_time;
 
-void setup()
-{
-  Serial.begin(115200);
-  delay(1000);
-  connectToWiFi();
 
-  /////////////////// PPM関係 ////////////////////
-  setupPPM();
-  
-  ///////////////9軸関係/////////////////////////////
-//  connectToLSM9DS1();
-}
-
-void loop()
-{
-//  read_calc_LSM9DS1();
-//  if (isReceive_Data_Updated) // 送るのは送ってきた直後の値
-//  {
-//    sendUDP(); 
-//    isReceive_Data_Updated = false;
-//  }
-  receiveUDP();
-}
 
 
 //*********** local functions  *************************//
-void receiveUDP()
+void connectToWiFi()// ---- setup connection to wifi
+{
+  WiFi.begin(ssid, password);
+  WiFi.config(myIP, gateway, subnet);
+  Serial.println("start_connect");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("CONNECTED!");
+
+  Serial.println("WiFi connected");
+  Serial.print("Local IP address: ");
+  Serial.println(myIP);
+  Serial.println(WiFi.localIP());
+}
+
+void setupPPM()// ---------- setup ppm signal configuration
+{
+  udp.begin(my_udp_port);
+
+  pinMode(OUTPUT_PIN, OUTPUT);
+  digitalWrite(OUTPUT_PIN, LOW);
+
+  pw[0] = 1100; // roll
+  pw[1] = 1100; // pitch
+  pw[2] = 600; // throttle
+  pw[3] = 1100; // yaw
+  pw[4] = 600; // AUX1
+  pw[5] = 600; // AUX2
+  pw[6] = 600; // AUX3
+  pw[7] = 600; // AUX4
+
+  // CPUのクロック周波数でPPM信号を制御
+  noInterrupts();
+  timer0_isr_init();
+  timer0_attachInterrupt(Pulse_control);// timer 終了時に呼び出す関数の登録
+  timer0_write(ESP.getCycleCount() + 0.030 * CPU_FRE * 1000000L); // 30 msec (CPU_FRE*10^6 == 1sec) : 次の割り込み時間を設定
+  interrupts();
+  unsigned long last_received_time = ESP.getCycleCount();
+}
+
+void receiveUDP()// ---------- loop function : receive signal by UDP
 {
   int packetSize = udp.parsePacket();
   if (packetSize)
@@ -147,92 +175,20 @@ void receiveUDP()
         Serial.print("]\r\n");
       //Serial.printf("Received %d bytes from %s, port %d\n", packetSize, udp.remoteIP().toString().c_str(), udp.remotePort());
 
-      t_lost = ESP.getCycleCount();
+      last_received_time = ESP.getCycleCount();
       isReceive_Data_Updated = true;
     }
-  else if (ESP.getCycleCount() - t_lost >= 2.000 * CPU_FRE * 1000000L)// Stop propellers after 1s signal lost. 
+  else if (ESP.getCycleCount() - last_received_time >= 2.000 * CPU_FRE * 1000000L)// Stop propellers after 0.5s signal lost. 
   {
-//    for (i = 0; i < TOTAL_INPUT; i++)
-//    {
-//      pw[i] = 1100;
-//    }
     pw[0] = 1100;
     pw[1] = 1100;
     pw[2] = 600; // throttle
     pw[3] = 1100;
-    for (i = TOTAL_INPUT; i < TOTAL_CH; i++)
-    {
-      pw[i] = 600;
-    }
+    pw[4] = 600; // AUX1
+    pw[5] = 600; // AUX2
+    pw[6] = 600; // AUX3
+    pw[7] = 600; // AUX4
   }
-  }
-}
-
-void sendUDP()
-{
-    udp.beginPacket(to_udp_address, to_udp_port);
-    udp.write(SENDVAL);
-    udp.endPacket();
-    Serial.println(SENDVAL);
-}
-
-void connectToWiFi()
-{
-  WiFi.begin(ssid, password);
-  WiFi.config(myIP, gateway, subnet);
-  Serial.println("start_connect");
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("CONNECTED!");
-
-  Serial.println("WiFi connected");
-  Serial.print("Local IP address: ");
-  Serial.println(myIP);
-  Serial.println(WiFi.localIP());
-}
-
-void setupPPM()
-{
-  udp.begin(my_udp_port);
-
-  pinMode(OUTPUT_PIN, OUTPUT);
-  digitalWrite(OUTPUT_PIN, LOW);
-
-  for (i = 0; i < TOTAL_INPUT; i++)
-  {
-    pw[i] = 1100;
-  }
-  pw[2] = 600; // throttle
-  for (i = TOTAL_INPUT; i < TOTAL_CH; i++)
-  {
-    pw[i] = 600;
-  }
-
-  // CPUのクロック周波数でPPM信号を制御
-  noInterrupts();
-  timer0_isr_init();
-  timer0_attachInterrupt(Pulse_control);
-  timer0_write(ESP.getCycleCount() + 0.030 * CPU_FRE * 1000000L); // 30 msec (CPU_FRE*10^6 == 1sec)
-  interrupts();
-  unsigned long t_lost = ESP.getCycleCount();
-}
-
-void connectToLSM9DS1()
-{
-  Wire.begin();             // I2C 開始
-  if (imu.begin() == false) //センサ接続エラー時の表示
-  {
-    Serial.println("Failed to communicate with LSM9DS1.");
-    Serial.println("Double-check wiring.");
-    Serial.println("Default settings in this sketch will "
-                   "work for an out of the box LSM9DS1 "
-                   "Breakout, but may need to be modified "
-                   "if the board jumpers are.");
-    while (1)
-    ;
   }
 }
 
@@ -250,40 +206,64 @@ void Pulse_control()
     digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
     if (n_ch == TOTAL_CH)
     {
-      timer0_write(t_now + (TIME_PERIOD - t_sum) * CPU_FRE * 1L); //時間を指定
+      timer0_write(t_now + (PPM_PERIOD - t_sum) * CPU_FRE * 1L); //PPM１周期分待つ
       t_sum = 0;
       n_ch = 0;
     }
     else
     {
-      if (n_ch == 0 || n_ch == 1 || n_ch == 3)
-      {
-        if (pw[n_ch] < TIME_HIGH_MIN)
+//      if (n_ch == 0 || n_ch == 1 || n_ch == 3 || n_ch == 2)
+      //{
+        if (pw[n_ch]+100 < TIME_HIGH_MIN)
         {
           pw[n_ch] = TIME_HIGH_MIN;
         }
-        else if (pw[n_ch] > TIME_HIGH_MAX)
+        else if (pw[n_ch]+100 > TIME_HIGH_MAX)
         {
           pw[n_ch] = TIME_HIGH_MAX;
         }
-      }
-      else if (n_ch == 2)
+      //}
+      if (n_ch == 6)
       {
-        if (pw[n_ch] < 600)
-        {
-          pw[n_ch] = 600;
-        }
-        else if (pw[n_ch] > TIME_HIGH_MAX)
-        {
-          pw[n_ch] = TIME_HIGH_MAX;
-        }
+        pw[n_ch] = TIME_HIGH_MIN;
       }
-      timer0_write(t_now + pw[n_ch] * CPU_FRE * 1L); //時間を指定
+      if (n_ch == 7)
+      {
+        pw[n_ch] = TIME_HIGH_MAX;
+      }
+      timer0_write(t_now + (100+ pw[n_ch]) * CPU_FRE * 1L); //時間を指定
       t_sum += pw[n_ch];
       n_ch++;
     }
   }
 }
+
+//  -------------- 9軸センサ用 -----------------------
+void connectToLSM9DS1()
+{
+  Wire.begin();             // I2C 開始
+  if (imu.begin() == false) //センサ接続エラー時の表示
+  {
+    Serial.println("Failed to communicate with LSM9DS1.");
+    Serial.println("Double-check wiring.");
+    Serial.println("Default settings in this sketch will "
+                   "work for an out of the box LSM9DS1 "
+                   "Breakout, but may need to be modified "
+                   "if the board jumpers are.");
+    while (1)
+    ;
+  }
+}
+
+void sendUDP()
+{
+    udp.beginPacket(to_udp_address, to_udp_port);
+    udp.write(SENDVAL);
+    udp.endPacket();
+    Serial.println(SENDVAL);
+}
+
+
 void read_calc_LSM9DS1(){
   // Update the sensor values whenever new data is available
   if (imu.gyroAvailable())
@@ -388,4 +368,28 @@ void calc_Attitude(float ax, float ay, float az, float mx, float my, float mz)
   //  Serial.println(roll, 2);
   //  Serial.print("Heading: ");
   //  Serial.println(heading, 2);
+}
+
+// ==================================================================
+void setup()
+{
+  Serial.begin(115200);
+  connectToWiFi();
+
+  /////////////////// PPM関係 ////////////////////
+  setupPPM();
+  
+  ///////////////9軸関係/////////////////////////////
+//  connectToLSM9DS1();
+}
+
+void loop()
+{
+//  read_calc_LSM9DS1();
+//  if (isReceive_Data_Updated) // 送るのは送ってきた直後の値
+//  {
+//    sendUDP(); 
+//    isReceive_Data_Updated = false;
+//  }
+  receiveUDP();
 }
