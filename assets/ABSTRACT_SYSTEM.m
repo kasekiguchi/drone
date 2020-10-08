@@ -1,4 +1,4 @@
-classdef (Abstract) ABSTRACT_SYSTEM < handle & dynamicprops
+classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     % §Œä‘ÎÛ‚Æ‚µ‚Ä‚Ìƒvƒ‰ƒ“ƒgƒ‚ƒfƒ‹‚ÌŽ‚Â‚×‚««Ž¿‚ð‹K’è‚·‚éƒNƒ‰ƒX
     % yPropertiesz plant, model, sensor, estimator, estimator_substance, reference, controller,
     %                         input_tranform, env, (id, input, inner_input, state)

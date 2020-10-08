@@ -1,4 +1,4 @@
-classdef STATE_CLASS < handle & matlab.mixin.SetGet & dynamicprops & matlab.mixin.Copyable
+classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mixin.Copyable
     % Interface class for creating a class taking a state
     % Subclass constructor
     properties
