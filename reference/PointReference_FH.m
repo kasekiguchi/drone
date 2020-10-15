@@ -37,9 +37,9 @@ classdef PointReference_FH < REFERENCE_CLASS
                 else% ‰‚ß‚Älanding ‚É“ü‚Á‚½‚Æ‚«
                     obj.result.state.p=gen_ref_for_landing(obj.self.estimator.result.state.p);
                 end
-                if isprop(obj.result.state,'xd')
+              %  if isprop(obj.result.state,'xd')
                     obj.result.state.xd = obj.result.state.p; % ‚±‚Ì‚æ‚¤‚É‚·‚é‚±‚Æ‚Åf ‚ÌŒã‚Å‚à”½‰f‚³‚ê‚é
-                end
+              %  end
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')

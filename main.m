@@ -29,7 +29,8 @@ end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    typical_Model_Lizard_exp(N,dt,'plant',24); % Lizard : for exp % 機体番号（ESPrの番号）
+    typical_Model_Lizard_exp(N,dt,'plant',"udp",[124]); % Lizard : for exp % 機体番号（ESPrのIP）
+    %typical_Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
     %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))sa
     typical_Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
@@ -61,7 +62,7 @@ for i = 1:N; agent(i).sensor=[]; end
 %typical_Sensor_LSM9DS1(agent); % IMU sensor
 typical_Sensor_Motive(agent); % motive情報 : sim exp 共通
 %typical_Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
-typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+%typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %typical_Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 % for i = 1:N % simのみ
 %     sensor.type= "LiDAR_sim";
@@ -81,7 +82,7 @@ for i = 1:N; agent(i).reference=[]; end
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
 % typical_Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
-typical_Reference_Time_Varying([1],agent,"Case_study_trajectory",[0;0.4;1]); % ハート形[x;y;z]永久
+typical_Reference_Time_Varying([1],agent,"Case_study_trajectory",[2;0;1]); % ハート形[x;y;z]永久
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 typical_Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -112,8 +113,8 @@ if fExp
         model.initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
         agent(i).model.set_state(model.initial);
         for j = 1:length(agent(i).estimator.name)
-            if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
-                agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
+            if isprop(agent(i).estimator.(agent(i).estimator.name(j)),'result')
+                agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(model.initial);
             end
         end      
         initp = sstate.p;
@@ -127,7 +128,7 @@ else
         agent(i).state.set_state(plant.initial);
         agent(i).model.set_state(plant.initial);
         for j = 1:length(agent(i).estimator.name)
-            if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
+            if isprop(agent(i).estimator.(agent(i).estimator.name(j)),'result')
                 agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
             end
         end
@@ -169,11 +170,13 @@ time.t = ts;
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
 
-% for simulation
-mparam.occlusion.cond=["time.t >=1.5 && time.t<1.6","agent(1).model.state.p(1) > 2"];
-mparam.occlusion.target={[1],[1]};
-mparam.marker_num = 20;
-mparam=[]; % without occulusion
+% % for simulation
+% mparam.occlusion.cond=["time.t >=1.5 && time.t<1.6","agent(1).model.state.p(1) > 2"];
+% mparam.occlusion.target={[1],[1]};
+% mparam.marker_num = 20;
+ mparam=[]; % without occulusion
+
+
 %%
 % Data = load("Log(06-Oct-2020_09_18_33).mat").Data;
 % expdata=SENSOR_DATA_EMULATOR(Data);
@@ -208,7 +211,6 @@ try
         %% estimator, reference generator, controller
         for i = 1:N
             agent(i).do_estimator(cell(1,10));
-            
             Rcovering={};%{Env};
             % for sim
             Rpoint={FH,[0;0;0.5],time.t};

@@ -2,7 +2,7 @@ classdef Lizard_exp < MODEL_CLASS
     % Lizard ŽÀŒ±—pƒ‚ƒfƒ‹
     properties% (Access=private)
         ESPr_num
-        espr % connector
+        connector
         IP
         flight_phase % q : quit, s : stop, a : arming, t : take-off, h : hovering, f : flight, l : landing
         %port=25000;
@@ -21,18 +21,23 @@ classdef Lizard_exp < MODEL_CLASS
             obj.dt = 0.025;
             %% variable set
             obj.flight_phase        = 's';
-            obj.ESPr_num = param.num;
-            [~,cmdout] = system("ipconfig");
-            ipp=regexp(cmdout,"192.168.");
-            cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
-            %param.IP=strcat('192.168.',cmdout2(1:regexp(cmdout2,".")),'.',string(100+obj.ESPr_num));
-            param.IP=strcat('192.168.50.',string(100+obj.ESPr_num));
-            obj.IP=param.IP;
-            obj.port=8000+obj.ESPr_num;
-            param.port=obj.port;
-            obj.espr=UDP_CONNECTOR(param);
-            self.connector=obj.espr;
-            fprintf("Drone %s is ready\n",obj.IP);
+            switch param.conn_type
+                case "udp"
+                    obj.ESPr_num = param.num;
+                    [~,cmdout] = system("ipconfig");
+                    ipp=regexp(cmdout,"192.168.");
+                    cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
+                    %param.IP=strcat('192.168.',cmdout2(1:regexp(cmdout2,".")),'.',string(100+obj.ESPr_num));
+                    param.IP=strcat('192.168.50.',string(obj.ESPr_num));
+                    obj.IP=param.IP;
+                    obj.port=8000+obj.ESPr_num;
+                    obj.connector=UDP_CONNECTOR(param);
+                    fprintf("Drone %s is ready\n",obj.IP);
+                case "serial"
+                    obj.port = param.port;
+                    obj.connector=SERIAL_CONNECTOR(param);
+                    fprintf("Drone %d is ready\n",obj.port);
+            end
         end
         function do(obj,u,varargin)
             if length(varargin)==1
