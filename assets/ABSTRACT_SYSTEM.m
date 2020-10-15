@@ -144,13 +144,9 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
     
     methods % set, do property
-        function set_property(obj,prop,args,varargin)
+        function set_property(obj,prop,args)
             subclass=str2func(args.type);
-            if isempty(varargin)
-                obj.(prop).(args.name) = subclass(obj,args.param);
-            else
-                obj.(prop).(args.name) = subclass(obj,args.param,varargin{1});
-            end
+            obj.(prop).(args.name) = subclass(obj,args.param);
             if isfield(obj.(prop),'name')
                 obj.(prop).name = [obj.(prop).name, args.name];
             else
