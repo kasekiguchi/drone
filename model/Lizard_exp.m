@@ -115,7 +115,7 @@ classdef Lizard_exp < MODEL_CLASS
             Pw = uint8(pw);
             
             % send UDP
-            obj.espr.sendData(Pw(1,1:16));
+            obj.connector.sendData(Pw(1,1:16));
             obj.msg=Pw;
         end
         function set_param(obj,param)

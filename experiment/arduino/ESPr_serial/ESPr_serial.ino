@@ -156,7 +156,6 @@ void emergency_stop()
 void setup()
 {
   Serial.begin(115200);
-  //connectToWiFi();
   Serial.print("Start");
   // 緊急停止
   pinMode(EM_PIN, INPUT);
