@@ -29,76 +29,76 @@ end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    typical_Model_Lizard_exp(N,dt,'plant',"udp",[124]); % Lizard : for exp % 機体番号（ESPrのIP）
-    %typical_Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
+    %Model_Lizard_exp(N,dt,'plant',"udp",[124]); % Lizard : for exp % 機体番号（ESPrのIP）
+    Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
-    %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))sa
-    typical_Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
-    %typical_Model_Discrete0(N,dt,'plant') % 離散時間質点モデル : Direct controller を想定
-    %typical_Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
+    %Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))sa
+    Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
+    %Model_Discrete0(N,dt,'plant') % 離散時間質点モデル : Direct controller を想定
+    %Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
 end
 % set control model
-typical_Model_EulerAngle(N,dt,'model'); % オイラー角モデル
-%typical_Model_Quat13(N,dt,'model') % オイラーパラメータ（unit quaternion）モデル
-%typical_Model_Discrete0(N,dt,'model') % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-%typical_Model_Discrete(N,dt,'model') % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+Model_EulerAngle(N,dt,'model'); % オイラー角モデル
+%Model_Quat13(N,dt,'model') % オイラーパラメータ（unit quaternion）モデル
+%Model_Discrete0(N,dt,'model') % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+%Model_Discrete(N,dt,'model') % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
 
 %% set input_transform property
 for i = 1:N
     if fExp%isa(agent(i).plant,"Lizard_exp")
-        typical_InputTransform_Thrust2Throttle_drone(agent(i)); % 推力からスロットルに変換
+        InputTransform_Thrust2Throttle_drone(agent(i)); % 推力からスロットルに変換
     end
 end
 %agent.plant.espr.sendData(Pw(1,1:16));
 % for quat-model plant with discrete control model
-%typical_InputTransform_REFtoHL_drone(agent); % 位置指令から４つの推力に変換
-%typical_InputTransform_toHL_drone(agent); % modelを使った１ステップ予測値を目標値として４つの推力に変換
+%InputTransform_REFtoHL_drone(agent); % 位置指令から４つの推力に変換
+%InputTransform_toHL_drone(agent); % modelを使った１ステップ予測値を目標値として４つの推力に変換
 % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
 %% set environment property
 Env = [];
-%typical_Env_2DCoverage(agent); % 重要度マップ設定
+%Env_2DCoverage(agent); % 重要度マップ設定
 %% set sensors property
 for i = 1:N; agent(i).sensor=[]; end
-%typical_Sensor_LSM9DS1(agent); % IMU sensor
-typical_Sensor_Motive(agent); % motive情報 : sim exp 共通
-%typical_Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
-%typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-%typical_Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
+%Sensor_LSM9DS1(agent); % IMU sensor
+Sensor_Motive(agent); % motive情報 : sim exp 共通
+%Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
+%Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+%Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 % for i = 1:N % simのみ
 %     sensor.type= "LiDAR_sim";
 %     sensor.name="lrf";sensor.param=[];agent(i).set_sensor(sensor);
 % end
 %% set estimator property
 for i = 1:N; agent(i).estimator=[]; end
-%typical_Estimator_LPF(agent); % lowpass filter
-% typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
-%typical_Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
-%typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
-typical_Estimator_EKF(agent); % （剛体ベース）EKF 10/2 シミュレーション回らない
-%typical_Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+%Estimator_LPF(agent); % lowpass filter
+% Estimator_AD(agent); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
+%Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
+%Estimator_PDAF(agent); % 特徴点ベースPDAF
+Estimator_EKF(agent); % （剛体ベース）EKF 10/2 シミュレーション回らない
+%Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 %% set reference property
 for i = 1:N; agent(i).reference=[]; end
-%typical_Reference_2DCoverage(agent,Env); % Voronoi重心
-%typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
-% typical_Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
-typical_Reference_Time_Varying([1],agent,"Case_study_trajectory",[2;0;1]); % ハート形[x;y;z]永久
+%Reference_2DCoverage(agent,Env); % Voronoi重心
+%Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
+% Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
+Reference_Time_Varying([1],agent,"Case_study_trajectory",[2;0;1]); % ハート形[x;y;z]永久
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-typical_Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
 %% set controller property
 for i = 1:N; agent(i).controller=[]; end
-typical_Controller_HL(agent); % 階層型線形化
-%typical_Controller_MEC(agent); % Model Error Compensator  :  未実装
+Controller_HL(agent); % 階層型線形化
+%Controller_MEC(agent); % Model Error Compensator  :  未実装
 %for i = 1:N;  Controller.type="MPC_controller";Controller.name = "mpc";Controller.param={agent(i)}; agent(i).set_controller(Controller);end
 %for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
 %for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
 
 %% set connector (global instance)
 if fExp
-    typical_Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',[1])); % Motive
+    Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',[1])); % Motive
 else
-    typical_Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
+    Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
 end
 
 %% initialize
@@ -163,6 +163,7 @@ if isfield(agent(1).reference,'covering')
     LogData=[LogData;    "reference.result.region";"env.density.param.grid_density"]; % for coverage
 end
 logger=Logger(agent,size(ts:dt:te,2),LogData);
+%%
 time =  Time();
 time.t = ts;
 %%  各種do methodの引数設定
