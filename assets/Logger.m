@@ -20,7 +20,7 @@ classdef Logger < handle
         function obj = Logger(target,row,items)
             obj.target = target;
             obj.N = length(target);
-            obj.n=length(items)+1;% sensor result 全体
+            obj.n=length(items)+3;% ,sensor result 全体, reference result 全体，input
             obj.Data.t = zeros(row,1); % 時間
             obj.Data.agent=cell(row,obj.n,obj.N);
             obj.items=items;
@@ -37,15 +37,19 @@ classdef Logger < handle
                 end
                 obj.Data.agent{obj.i,k,j}=tmp.(str{end});
               end
-              obj.Data.agent{obj.i,obj.n,j}=obj.target(j).sensor.result;
-              obj.Data.agent{obj.i,obj.n,j}.state = state_copy(obj.target(j).sensor.result.state);
+              obj.Data.agent{obj.i,obj.n-2,j}=obj.target(j).sensor.result;
+              obj.Data.agent{obj.i,obj.n-2,j}.state = state_copy(obj.target(j).sensor.result.state);
+              obj.Data.agent{obj.i,obj.n-1,j}=obj.target(j).reference.result;
+              obj.Data.agent{obj.i,obj.n-1,j}.state = state_copy(obj.target(j).reference.result.state);
+              obj.Data.agent{obj.i,obj.n,j}=obj.target(j).input;
             end
             obj.i=obj.i+1;
         end
         function save(obj)
             % Data = {{log},{info}}
             % log : logging data = field t and agent
-            % info : {{items},{sensor names}}
+            %     agent : {k, itme_num, agent_num}
+            % info : {{items},{sensor names},{reference names}}
             % sensor names : {{1st agent's sensor names},{2nd ..},{...}...}
             % i-th agent's sensor names : example {"Motive","RangePos"}
             filename = strrep(strrep(strcat('Data/Log(',datestr(datetime('now')),').mat'),':','_'),' ','_');
@@ -56,9 +60,18 @@ classdef Logger < handle
                 for j = 1:length(isnames)
                     isname = [isname,obj.target(i).sensor.(isnames(j)).name];
                 end
-                sname = [sname,{isname}]
+                sname = [sname,{isname}];
             end
-            Data={obj.Data,{obj.items,sname}};
+            rname = [];
+            for i =1:obj.N % 複数台の場合
+                irnames = obj.target(i).reference.name;
+                irname = [];
+                for j = 1:length(irnames)
+                    irname = [irname,obj.target(i).reference.(irnames(j)).name];
+                end
+                rname = [rname,{irname}];
+            end
+            Data={obj.Data,{obj.items,sname,rname}};
             save(filename,'Data');
         end
         function [data]=plot(obj,num,target,varargin)
