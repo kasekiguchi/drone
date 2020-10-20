@@ -29,8 +29,8 @@ end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    %Model_Lizard_exp(N,dt,'plant',"udp",[124]); % Lizard : for exp % 機体番号（ESPrのIP）
-    Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
+    Model_Lizard_exp(N,dt,'plant',"udp",[124]); % Lizard : for exp % 機体番号（ESPrのIP）
+    %Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
     %Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))sa
     Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
@@ -180,8 +180,10 @@ time.t = ts;
 
 %%
 % Data = load("Log(06-Oct-2020_09_18_33).mat").Data;
-% expdata=SENSOR_DATA_EMULATOR(Data);
-% expdata.do(0,agent,1)
+% expsdata=SENSOR_DATA_EMULATOR(Data);
+% exprdata=REFERENCE_DATA_EMULATOR(Data);
+% expudata=INPUT_DATA_EMULATOR(Data);
+% expsdata.do(0,agent,1)
 % 
 %% main loop
 %profile on
@@ -207,6 +209,7 @@ try
         for i = 1:N
             param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
             agent(i).do_sensor(param(i).sensor);
+            %expsdata.do(time.t,agent,i)
         end
         
         %% estimator, reference generator, controller
@@ -222,8 +225,10 @@ try
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             agent(i).do_reference(param(i).reference);
 %             [Make_reference,flag] = Make_heart_reference(i,Make_reference,agent,flag);
+            %exprdata.do(time.t,agent,i)
             
             agent(i).do_controller(cell(1,10));
+            %expudata.do(time.t,agent,i)
         end
         %% update state
         % with FH
@@ -232,9 +237,7 @@ try
         for i = 1:N % 状態更新
             model_param.param=agent(i).model.param;
             model_param.FH = FH;
-            if isempty(agent(i).input_transform)        % input_transform上でmodelの更新をするのでinput_transformをする場合はdo_modelしない
-                agent(i).do_model(model_param);
-            end
+            agent(i).do_model(model_param);
             
             model_param.param=agent(i).plant.param;
             agent(i).do_plant(model_param);
@@ -242,7 +245,7 @@ try
          %% logging
         calculation=toc;
 
-logger.logging(time.t);
+        logger.logging(time.t);
        % for exp
        if fExp
             wait_time =  0.9999*(sampling-calculation);

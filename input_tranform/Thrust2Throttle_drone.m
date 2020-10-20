@@ -36,10 +36,10 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
             if cha == 't' || cha == 'f' || cha == 'l'
                 u_thr_offset  = obj.param.th_offset;
                 what=obj.self.model.state.w;
-                %obj.self.model.do(obj.self.input,obj.self.model.param);% 1 step —\‘ª
                 P = obj.self.model.param;
-             %   statetmp=obj.self.estimator.result.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.estimator.result.state.get(),obj.self.input,P);% euler approximation
-                 statetmp=obj.self.model.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.model.state.get(),obj.self.input,P);% euler approximation
+%                statetmp=obj.self.estimator.result.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.estimator.result.state.get(),obj.self.input,P);% euler approximation
+                statetmp=obj.self.model.state.get();% do_model‚ÅŽ–‘O—\‘ª‚ð‹‚ß‚Ä‚¢‚éD
+             %    statetmp=obj.self.model.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.model.state.get(),obj.self.input,P);% euler approximation
                 whatp = statetmp(end-2:end);
                 %whatp = obj.self.model.state.w;% ‚PŽžæ‚ÌŽ–‘O—\‘ª
                 T_thr = sum(input);
