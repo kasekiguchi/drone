@@ -1,4 +1,4 @@
-function typical_Sensor_RangePos(agent,r)
+function Sensor_RangePos(agent,r)
 %% sensor class demo : constructor
 % sensor property をSensor classのインスタンス配列として定義
 % rpos : RnagePos_sim

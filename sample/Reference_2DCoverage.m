@@ -1,4 +1,4 @@
-function typical_Reference_2DCoverage(agent,Env)
+function Reference_2DCoverage(agent,Env)
 %% reference class demo
 % reference property をReference classのインスタンス配列として定義
 clear Reference

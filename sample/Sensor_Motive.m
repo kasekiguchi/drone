@@ -1,4 +1,4 @@
-function typical_Sensor_Motive(agent)
+function Sensor_Motive(agent)
 %% sensor class demo : constructor
 % sensor property をSensor classのインスタンス配列として定義
 % rpos : RnagePos_sim

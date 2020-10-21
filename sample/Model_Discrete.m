@@ -1,4 +1,4 @@
-function typical_Model_Discrete(N,dt,type,varargin)
+function Model_Discrete(N,dt,type,varargin)
 % ¿—Ê‚P‚Ì¿“_ƒ‚ƒfƒ‹F—Í“ü—Í
 if ~isempty(varargin)
     Setting = varargin{1};

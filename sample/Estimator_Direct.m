@@ -1,4 +1,4 @@
-function typical_Estimator_Direct(agent)
+function Estimator_Direct(agent)
 
 %% estimator class demo
 % estimator property をEstimator classのインスタンス配列として定義

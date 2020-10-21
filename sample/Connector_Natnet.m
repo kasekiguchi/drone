@@ -1,4 +1,4 @@
-function typical_Connector_Natnet(param)
+function Connector_Natnet(param)
  if isfield(param,'HostIP')
     natnet_param.HostIP = param.HostIP;
  else

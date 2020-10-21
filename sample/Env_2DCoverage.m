@@ -1,4 +1,4 @@
-function typical_Env_2DCoverage(agent)
+function Env_2DCoverage(agent)
 %% environment class demo
 % env property をEnv classのインスタンス配列として定義
 env_param.name="";

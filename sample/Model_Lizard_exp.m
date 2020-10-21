@@ -1,4 +1,4 @@
-function typical_Model_Lizard_exp(N,dt,isPlant,conn_type,id)
+function Model_Lizard_exp(N,dt,isPlant,conn_type,id)
 % N : number of drones
 % dt : sampling time
 % isPlant : "plant"

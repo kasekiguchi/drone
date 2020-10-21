@@ -1,4 +1,4 @@
-function typical_Estimator_PDAF(agent)
+function Estimator_PDAF(agent)
 %% estimator class demo
 % estimator property をEstimator classのインスタンス配列として定義
 Estimator.name="pdaf";

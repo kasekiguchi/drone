@@ -1,4 +1,4 @@
-function typical_Reference_Time_Varying(list,agent,f_name,param)
+function Reference_Time_Varying(list,agent,f_name,param)
 % list: 1:N etc
 % f_name : functin name
 % reference property をReference classのインスタンス配列として定義
