@@ -1,4 +1,4 @@
-function typical_Reference_Point_FH(agent)
+function Reference_Point_FH(agent)
 %% reference class demo
 % reference property をReference classのインスタンス配列として定義
 clear Reference

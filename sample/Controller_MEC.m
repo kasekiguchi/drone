@@ -1,4 +1,4 @@
-function typical_Controller_MEC(agent)
+function Controller_MEC(agent)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
 %Controller.type="DirectController";

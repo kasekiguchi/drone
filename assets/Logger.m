@@ -49,6 +49,8 @@ classdef Logger < handle
             % Data = {{log},{info}}
             % log : logging data = field t and agent
             %     agent : {k, itme_num, agent_num}
+            %          last three itmes are ; sensor.result,
+            %          reference.result, and input
             % info : {{items},{sensor names},{reference names}}
             % sensor names : {{1st agent's sensor names},{2nd ..},{...}...}
             % i-th agent's sensor names : example {"Motive","RangePos"}
@@ -65,11 +67,11 @@ classdef Logger < handle
             rname = [];
             for i =1:obj.N % •¡”‘ä‚Ìê‡
                 irnames = obj.target(i).reference.name;
-                irname = [];
-                for j = 1:length(irnames)
-                    irname = [irname,obj.target(i).reference.(irnames(j)).name];
-                end
-                rname = [rname,{irname}];
+%                 irname = [];
+%                 for j = 1:length(irnames)
+%                     irname = [irname,obj.target(i).reference.(irnames(j)).name];
+%                 end
+                rname = [rname,{irnames}];
             end
             Data={obj.Data,{obj.items,sname,rname}};
             save(filename,'Data');

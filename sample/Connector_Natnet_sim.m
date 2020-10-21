@@ -1,5 +1,5 @@
-function typical_Connector_Natnet_sim(N,dt,noise)
-    % typical_Connector_Natnet_sim(N,dt,num)
+function Connector_Natnet_sim(N,dt,noise)
+    % Connector_Natnet_sim(N,dt,num)
     % N : number of rigid body
     % dt : sampling time
     % num : on_marker_num = 4*N+num

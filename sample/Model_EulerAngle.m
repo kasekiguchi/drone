@@ -1,4 +1,4 @@
-function typical_Model_EulerAngle(N,dt,type,varargin)
+function Model_EulerAngle(N,dt,type,varargin)
 % model class demo : quaternion model with 13 states
 if ~isempty(varargin)
     Setting = varargin{1};

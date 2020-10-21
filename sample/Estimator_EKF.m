@@ -1,4 +1,4 @@
-function typical_Estimator_EKF(agent)
+function Estimator_EKF(agent)
 
 %% estimator class demo
 % estimator property をEstimator classのインスタンス配列として定義

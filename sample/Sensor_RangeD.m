@@ -1,4 +1,4 @@
-function typical_Sensor_RangeD(agent,r)
+function Sensor_RangeD(agent,r)
 %% sensor class demo : constructor
 % sensor property をSensor classのインスタンス配列として定義
 % rdensity : RangeDensity_sim

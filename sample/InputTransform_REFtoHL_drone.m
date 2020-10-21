@@ -1,4 +1,4 @@
-function typical_InputTransform_REFtoHL_drone(agent,varargin)
+function InputTransform_REFtoHL_drone(agent,varargin)
 %% Input transformer
 for i = 1:length(agent)
     agent(i).input_transform=[];

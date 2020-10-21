@@ -1,4 +1,4 @@
-function typical_Estimator_FireMap(agent)
+function Estimator_FireMap(agent)
 
 %% estimator class demo
 % estimator property をEstimator classのインスタンス配列として定義

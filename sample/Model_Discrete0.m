@@ -1,4 +1,4 @@
-function typical_Model_Discrete0(N,dt,type,varargin)
+function Model_Discrete0(N,dt,type,varargin)
 % “ü—ÍˆÊ’u‚ªŸ‚ÌˆÊ’u‚É‚È‚éƒ‚ƒfƒ‹
     %% model class demo : 
 if ~isempty(varargin)

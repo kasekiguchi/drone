@@ -1,4 +1,4 @@
-function typical_Sensor_LSM9DS1(agent)
+function Sensor_LSM9DS1(agent)
 %% sensor class demo : constructor
 % sensor property をSensor classのインスタンス配列として定義
 % rpos : RnagePos_sim

@@ -1,4 +1,4 @@
-function typical_Env_ForestFire(agent,map)
+function Env_ForestFire(agent,map)
 %% environment class demo
 clc
 % env property をEnv classのインスタンス配列として定義

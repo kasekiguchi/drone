@@ -1,4 +1,4 @@
-function typical_Sensor_2DCoverage(agent)
+function Sensor_2DCoverage(agent)
 %% sensor class demo : constructor
 % sensor property をSensor classのインスタンス配列として定義
 % direct : DirectSensor
