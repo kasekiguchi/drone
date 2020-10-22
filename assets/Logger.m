@@ -18,16 +18,26 @@ classdef Logger < handle
     
     methods
         function obj = Logger(target,row,items)
+            % Logger(target,row,items)
+            % target : ログを取る対象　agent(1:3)
+            % row : 確保するデータサイズ　length(ts:dt:te)
+            % items : 保存するデータ ["input","sensor.result.state.p"]
             obj.target = target;
             obj.N = length(target);
-            obj.n=length(items)+3;% ,sensor result 全体, reference result 全体，input
+            obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.result，input
             obj.Data.t = zeros(row,1); % 時間
+            obj.Data.phase = zeros(row,1); % フライトフェーズ　a,t,f,l...
             obj.Data.agent=cell(row,obj.n,obj.N);
             obj.items=items;
         end
         
-        function logging(obj,t)
+        function logging(obj,t,FH)
+            % logging(t,FH)
+            % t : current time
+            % FH : figure handle for keyboard input
             obj.Data.t(obj.i)=t;
+            cha = get(FH, 'currentcharacter');
+            obj.Data.phase(obj.i)=cha;
             for j = 1:obj.N
               for k = 1:length(obj.items)
                 str=strsplit(obj.items{k},'.');
@@ -37,8 +47,10 @@ classdef Logger < handle
                 end
                 obj.Data.agent{obj.i,k,j}=tmp.(str{end});
               end
-              obj.Data.agent{obj.i,obj.n-2,j}=obj.target(j).sensor.result;
-              obj.Data.agent{obj.i,obj.n-2,j}.state = state_copy(obj.target(j).sensor.result.state);
+              obj.Data.agent{obj.i,obj.n-3,j}=obj.target(j).sensor.result;
+              obj.Data.agent{obj.i,obj.n-3,j}.state = state_copy(obj.target(j).sensor.result.state);
+              obj.Data.agent{obj.i,obj.n-2,j}=obj.target(j).estimator.result;
+              obj.Data.agent{obj.i,obj.n-2,j}.state = state_copy(obj.target(j).estimator.result.state);
               obj.Data.agent{obj.i,obj.n-1,j}=obj.target(j).reference.result;
               obj.Data.agent{obj.i,obj.n-1,j}.state = state_copy(obj.target(j).reference.result.state);
               obj.Data.agent{obj.i,obj.n,j}=obj.target(j).input;
@@ -49,9 +61,10 @@ classdef Logger < handle
             % Data = {{log},{info}}
             % log : logging data = field t and agent
             %     agent : {k, itme_num, agent_num}
-            %          last three itmes are ; sensor.result,
+            %          last four itmes are ;
+            %          sensor.result, estimator.result,
             %          reference.result, and input
-            % info : {{items},{sensor names},{reference names}}
+            % info : {{items},{sensor names},{estimator names},{reference names}}
             % sensor names : {{1st agent's sensor names},{2nd ..},{...}...}
             % i-th agent's sensor names : example {"Motive","RangePos"}
             filename = strrep(strrep(strcat('Data/Log(',datestr(datetime('now')),').mat'),':','_'),' ','_');

@@ -128,7 +128,6 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         end
         function do_controller(obj,param)
             obj.do_sequential("controller",param);
-            obj.input=obj.controller.(obj.controller.name(end)).result.input;
         end
         function do_model(obj,param)
             % „’è’l‚Åmodel‚Ìó‘Ô‚ðã‘‚«D
