@@ -10,7 +10,8 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 1;%1：実機　それ以外：シミュレーション
+fExp = 0;%1：実機　それ以外：シミュレーション
+fOffline = 1;
 if fExp
     
     dt = 0.025; % sampling time
@@ -29,7 +30,7 @@ end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    Model_Lizard_exp(N,dt,'plant',"udp",[124]); % Lizard : for exp % 機体番号（ESPrのIP）
+    Model_Lizard_exp(N,dt,'plant',"udp",[25]); % Lizard : for exp % 機体番号（ESPrのIP）
     %Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
     %Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))sa
@@ -72,9 +73,9 @@ Sensor_Motive(agent); % motive情報 : sim exp 共通
 for i = 1:N; agent(i).estimator=[]; end
 %Estimator_LPF(agent); % lowpass filter
 % Estimator_AD(agent); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
-%Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
+Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
 %Estimator_PDAF(agent); % 特徴点ベースPDAF
-Estimator_EKF(agent); % （剛体ベース）EKF 10/2 シミュレーション回らない
+%Estimator_EKF(agent); % （剛体ベース）EKF 
 %Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 %% set reference property
@@ -82,7 +83,7 @@ for i = 1:N; agent(i).reference=[]; end
 %Reference_2DCoverage(agent,Env); % Voronoi重心
 %Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
 % Reference_Time_Varying(agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
-Reference_Time_Varying([1],agent,"Case_study_trajectory",[2;0;1]); % ハート形[x;y;z]永久
+Reference_Time_Varying([1],agent,"Case_study_trajectory",[1;0;1]); % ハート形[x;y;z]永久
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -96,7 +97,7 @@ Controller_HL(agent); % 階層型線形化
 
 %% set connector (global instance)
 if fExp
-    Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',[1])); % Motive
+    Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',[1])); % Motive
 else
     Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
 end
@@ -121,11 +122,24 @@ if fExp
         initq = sstate.q;
     end
 else
+    
+%%
+    if (fOffline)
+        Data = load("Log(21-Oct-2020_18_22_35).mat").Data;
+expsdata=SENSOR_DATA_EMULATOR(Data);
+exprdata=REFERENCE_DATA_EMULATOR(Data);
+expudata=INPUT_DATA_EMULATOR(Data);
+    end
     % for sim
     arranged_pos = arranged_position([0,0],N,1,0);
     for i = 1:N
+if (fOffline)
+    expsdata.do(0,agent,i);
+        plant.initial = struct('p',agent.sensor.result.state.p,'q',agent.sensor.result.state.q,'v',[0;0;0],'w',[0;0;0]);
+else
         plant.initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
-        agent(i).state.set_state(plant.initial);
+end
+agent(i).state.set_state(plant.initial);
         agent(i).model.set_state(plant.initial);
         for j = 1:length(agent(i).estimator.name)
             if isprop(agent(i).estimator.(agent(i).estimator.name(j)),'result')
@@ -135,12 +149,14 @@ else
     end
 end
 LogData=[
+    "model.state.p",
     "reference.result.state.p",
     %"reference.result.state.q",
     "estimator.result.state.p",
     "estimator.result.state.q",
     "estimator.result.state.v",
     "estimator.result.state.w",
+    "estimator.result.Mhat",
     "sensor.result.state.p",
     "sensor.result.state.q",
     %"sensor.result.state.v",
@@ -178,13 +194,6 @@ time.t = ts;
  mparam=[]; % without occulusion
 
 
-%%
-% Data = load("Log(06-Oct-2020_09_18_33).mat").Data;
-% expsdata=SENSOR_DATA_EMULATOR(Data);
-% exprdata=REFERENCE_DATA_EMULATOR(Data);
-% expudata=INPUT_DATA_EMULATOR(Data);
-% expsdata.do(0,agent,1)
-% 
 %% main loop
 %profile on
 disp("while ============================")
@@ -209,7 +218,7 @@ try
         for i = 1:N
             param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
             agent(i).do_sensor(param(i).sensor);
-            %expsdata.do(time.t,agent,i)
+            if (fOffline);    expsdata.do(time.t,agent,i);end
         end
         
         %% estimator, reference generator, controller
@@ -225,10 +234,10 @@ try
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             agent(i).do_reference(param(i).reference);
 %             [Make_reference,flag] = Make_heart_reference(i,Make_reference,agent,flag);
-            %exprdata.do(time.t,agent,i)
+                if (fOffline);exprdata.do(time.t,agent,i);end
             
             agent(i).do_controller(cell(1,10));
-            %expudata.do(time.t,agent,i)
+               if (fOffline); expudata.do(time.t,agent,i);end
         end
         %% update state
         % with FH
@@ -262,7 +271,19 @@ try
            time.t = time.t + dt % for sim
        end
        
+      
     end
+    
+           %% save data
+  %%%%%%%%%%%%% データをtakashibaに保存　（save agentだと1周期分だから）%%%%%%%%%%%%%%%%
+          if agent.estimator.name == "ekf"
+            takashiba = SaveData_EKF_rigid(Data);%EKF_rigid
+          elseif agent.estimator.name == "feature_ekf"
+                  takashiba = SaveData_EKF_feature(Data);%EKF_feature
+          elseif agent.estimator.name ==  "pdaf"
+                  takashiba = SaveData_PDAF(Data);%PADF_feature
+          end
+          TimeCount = TimeCount + 1;
 catch ME    % for error 
     % with FH
     for i = 1:N
@@ -274,6 +295,9 @@ end
 %profile viewer
 %%
 %% plot
+
+ Movie_2D_xy_new(Data)
+
 %%
 if isfield(agent(1).reference,'covering')
     rp=strcmp(logger.items,'reference.result.state.p');
@@ -295,8 +319,8 @@ end
 close all
 clc
 % logger.plot(1,["inner_input"],struct('transpose',1));
-logger.plot(1,["p","q","w","v","input"]);%,"inner_input"    ]);
-%logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
+% logger.plot(1,["p","q","w","v","input"],struct('time',9));%,"inner_input"    ]);
+ logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
 % logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
 %logger.plot(1,["p","q","v","w","u"],struct('time',170));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);

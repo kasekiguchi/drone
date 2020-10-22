@@ -29,10 +29,10 @@ classdef Lizard_exp < MODEL_CLASS
                     %param.IP=strcat('192.168.50.',string(obj.ESPr_num));
                     param.port=8000+obj.ESPr_num;
                     obj.connector=UDP_CONNECTOR(param);
-                    fprintf("Drone %s is ready\n",obj.IP);
+                    fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
                     obj.connector=SERIAL_CONNECTOR(param);
-                    fprintf("Drone %d is ready\n",obj.port);
+                    fprintf("Drone %d is ready\n",param.port);
             end
         end
         function do(obj,u,varargin)

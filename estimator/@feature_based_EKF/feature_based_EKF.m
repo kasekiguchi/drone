@@ -28,7 +28,7 @@ classdef feature_based_EKF < ESTIMATOR_CLASS
             % For simulation for using input model
             param = Param{1};
             if isfield(param,'sigmaw'); obj.param.sigmaw = param.sigmaw; end                                    % The variance vector of observation noise 
-            if isfield(param,'sigmav'); obj.param.sigmav= param.sigmav; else; obj.param.sigmav      = [8.0E-6;8.0E-6;8.0E-6;1.0E-6;1.0E-6;1.0E-6];  end   % The variance vector of system noise
+            if isfield(param,'sigmav'); obj.param.sigmav= param.sigmav; else; obj.param.sigmav      = [8.0E-6;8.0E-6;8.0E-6;1.0E-6;1.0E-6;1.0E-6]*10^9;  end   % The variance vector of system noise
             if isfield(param,'R'); obj.param.R = param.R; else; obj.param.R  = [];  end                           % Observation covariance matrix of all object feature
             if isfield(param,'gamma'); obj.param.gamma = param.gamma; else; obj.param.gamma       = 0.1;        end                                     % Validation region
             if isfield(param,'SNR'); obj.param.SNR = param.SNR; else; obj.param.SNR         = 1.0E-5; end                                         % SN ratio for initial value of posterior error covariance matrix
@@ -103,9 +103,9 @@ classdef feature_based_EKF < ESTIMATOR_CLASS
             %%% Extended Kalman filter %%%
             obj.dt = sensor.dt;                                             % Sampling time
             % Prior estimation with input
-             tmp.Xhbar  = [model.state.p;model.state.getq('euler');model.state.v;model.state.w];
+%              tmp.Xhbar  = [model.state.p;model.state.getq('euler');model.state.v;model.state.w];
             % Prior estimation without input
-%             tmp.Xhbar  = (eye(12)+diag(obj.dt*ones(1,6),6))*obj.result.state.get();
+            tmp.Xhbar  = (eye(12)+diag(obj.dt*ones(1,6),6))*obj.result.state.get();
             A          = expm(obj.JacobianF(model.state.get(),model.param)*obj.dt);                                                        % Discretized linear matrix
             B          = [eye(6)*obj.dt^2;eye(6)*obj.dt];                                                                                  % System noise coefficient matrix
             tmp.dh     = arrayfun(@(k) obj.JacobianH(tmp.Xhbar,obj.local_feature(k,:)'),1:obj.param.on_feature_num,'UniformOutput',false); % Extended linearized matrix of output equations
