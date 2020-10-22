@@ -24,6 +24,7 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             %-- connection takes about 0.3 seconds
             %-- setting ClientIP
             if isfield(info,'rigid_list'); obj.rigid_list = info.rigid_list; end
+            obj.result.rigid(obj.rigid_list) = struct('p',[],'q',[]);
             obj.NatnetClient = natnet;
             obj.NatnetClient.HostIP	= info.HostIP;
             obj.NatnetClient.ClientIP = info.ClientIP;
@@ -73,7 +74,6 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
                 %return
                 warning("ACSL : no rigid body");
             end
-            obj.result.rigid(obj.rigid_list) = struct('p',[],'q',[]);
             
             % get frame from motive
             Frame = obj.NatnetClient.getFrame;

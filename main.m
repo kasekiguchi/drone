@@ -254,7 +254,7 @@ try
          %% logging
         calculation=toc;
 
-        logger.logging(time.t);
+        logger.logging(time.t,FH);
        % for exp
        if fExp
             wait_time =  0.9999*(sampling-calculation);
