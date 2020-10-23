@@ -30,8 +30,20 @@ classdef TimeVaryingReference < REFERENCE_CLASS
             obj.result.state.p = obj.result.state.xd(1:3);
             result=obj.result;
         end
-        function show(obj,param)
-           
+        function show(obj,logger)
+            rp=strcmp(logger.items,"reference.result.state.p");
+            heart = cell2mat(logger.Data.agent(:,rp)'); % reference.result.state.p
+            plot(heart(1,:),heart(2,:)); % xy•½–Ê‚Ì‹O“¹‚ð•`‚­
+            daspect([1 1 1]);
+            hold on
+            ep=strcmp(logger.items,"estimator.result.state.p");
+            heart_result = cell2mat(logger.Data.agent(:,ep)'); % estimator.result.state.p
+            plot(heart_result(1,:),heart_result(2,:)); % xy•½–Ê‚Ì‹O“¹‚ð•`‚­
+            legend(["reference","estimate"]);
+            title('reference and estimated trajectories');
+            xlabel("x [m]");
+            ylabel("y [m]");
+            hold off
         end
     end
 end
