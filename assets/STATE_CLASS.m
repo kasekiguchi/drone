@@ -49,13 +49,13 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                 if isstruct(value) % ② 構造体で成分を指定する場合
                     tmpf=fields(value);
                     for i = 1:length(tmpf)
-if isprop(obj,tmpf{i})
-                        if strcmp(tmpf{i},"q")
-                            obj.q=obj.check_and_convert_q(value.(tmpf{i}));
-                        else
-                            obj.(tmpf{i})=value.(tmpf{i});
+                        if isprop(obj,tmpf{i})
+                            if strcmp(tmpf{i},"q")
+                                obj.q=obj.check_and_convert_q(value.(tmpf{i}));
+                            else
+                                obj.(tmpf{i})=value.(tmpf{i});
+                            end
                         end
-end
                     end
                 else % ③ 状態ベクトルで代入する場合
                     tmpvalue=value;

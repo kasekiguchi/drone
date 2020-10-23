@@ -98,7 +98,7 @@ classdef Logger < handle
             fig_num = 1;
             logger_transpose = 0;
             if ~isempty(varargin)
-                if isfield(varargin{1},'time')
+                if isfield(varargin{1},'time') && ~isempty(varargin{1}.time)% set end time
                     plot_length = 1:find((obj.Data.t-varargin{1}.time)>0,1)-1;
                 end
                 if isfield(varargin{1},'transpose')
@@ -119,28 +119,28 @@ classdef Logger < handle
                         ch = target(i);
                         plotitem={};
                         plegend=[];
-                        if sum(contains(obj.items,strcat('plant.state.',ch)))>0
+                        if sum(strcmp(obj.items,strcat('plant.state.',ch)))>0
                               sp=strcmp(obj.items,strcat('plant.state.',ch));
                               tmpp=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
                               plot(timeList,[tmpp{1:end}]');
                               hold on
                               plegend=[plegend,"1p","2p","3p"];
                         end
-                        if sum(contains(obj.items,strcat('sensor.result.state.',ch)))>0
+                        if sum(strcmp(obj.items,strcat('sensor.result.state.',ch)))>0
                               sp=strcmp(obj.items,strcat('sensor.result.state.',ch));
                               tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
                               plot(timeList,[tmps{1:end}]');
                               hold on
                               plegend=[plegend,"1s","2s","3s"];
                         end
-                        if sum(contains(obj.items,strcat('estimator.result.state.',ch)))>0
+                        if sum(strcmp(obj.items,strcat('estimator.result.state.',ch)))>0
                               ep=strcmp(obj.items,strcat('estimator.result.state.',ch));
                               tmpe=arrayfun(@(i)obj.Data.agent{i,ep,num}(1:3),plot_length,'UniformOutput',false);
                               plot(timeList,[tmpe{1:end}]','LineWidth',1.5);
                               hold on
                               plegend=[plegend,"1e","2e","3e"];
                         end
-                        if sum(contains(obj.items,strcat('reference.result.state.',ch)))>0
+                        if sum(strcmp(obj.items,strcat('reference.result.state.',ch)))>0
                               rp=strcmp(obj.items,strcat('reference.result.state.',ch));
                               tmpr=arrayfun(@(i)obj.Data.agent{i,rp,num}(1:3),plot_length,'UniformOutput',false);
                               plot(timeList,[tmpr{1:end}]','-.');

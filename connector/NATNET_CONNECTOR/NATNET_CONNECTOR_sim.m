@@ -59,7 +59,7 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             %    result = sensor.motive.do(Param)
             % 【Input】
             %  Param{1} : agent obj
-            %  Param{2} : .marker_num > on_marker_numa:
+            %  Param{2} : .marker_num > on_marker_num:
             %  設定するとUnLabeledmarkerが定義される
             %             .occlusion :
             %             設定するとオクルージョンを起こせる．剛体は固定，剛体上のマーカーはランダムに消える

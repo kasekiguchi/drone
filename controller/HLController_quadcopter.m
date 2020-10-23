@@ -14,7 +14,7 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         
-        function u = do(obj,param,~)
+        function result=do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
@@ -60,6 +60,7 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
                 tmp(2);tmp(3);
                 tmp(4)];
             obj.self.input = obj.result.input;
+            result = obj.result;
         end
         function show(obj)
             obj.result
