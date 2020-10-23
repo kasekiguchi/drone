@@ -6,7 +6,7 @@ classdef (Abstract) CONTROLLER_CLASS < handle
     end
     
     methods (Abstract)
-        result = do(obj,param);
+        result= do(obj,param);
         show(obj);
     end
 end

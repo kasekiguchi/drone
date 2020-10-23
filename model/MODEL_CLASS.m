@@ -18,7 +18,7 @@ classdef MODEL_CLASS <  handle
         solver = str2func('ode15s') % 指数1　のDAEを解ける．
         % solver = str2func('ode45') % 指数1　のDAEを解ける．
         ts = 0;
-        dt = 0.05;
+        dt = 0.025;
         % state.list % 例 ["p","q","v","w"]
         % state.num_list % 例 [3,4,3,3]
         param % parameters

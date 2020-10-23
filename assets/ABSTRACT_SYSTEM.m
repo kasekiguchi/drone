@@ -151,6 +151,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             else
                 obj.(prop).name = args.name;
             end
+            obj.(prop).result = [];
         end
         function do_parallel(obj,prop,param)
             % prop : property name
