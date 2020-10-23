@@ -11,7 +11,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
-fOffline = 0; % offline verification with experiment data
+fOffline = 1; % offline verification with experiment data
 if fExp
     
     dt = 0.025; % sampling time
@@ -33,15 +33,15 @@ if fExp
     Model_Lizard_exp(N,dt,'plant',"udp",[25]); % Lizard : for exp % 機体番号（ESPrのIP）
     %Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
-    %Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
-    Model_Suspended_Load(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
+    Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
+    %Model_Suspended_Load(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
     %Model_Discrete0(N,dt,'plant') % 離散時間質点モデル : Direct controller を想定
     %Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
 end
 % set control model
-%Model_EulerAngle(N,dt,'model'); % オイラー角モデル
+Model_EulerAngle(N,dt,'model'); % オイラー角モデル
 %Model_Quat13(N,dt,'model') % オイラーパラメータ（unit quaternion）モデル
-Model_Suspended_Load(N,dt,'model'); % unit quaternionのプラントモデル : for sim
+%Model_Suspended_Load(N,dt,'model'); % unit quaternionのプラントモデル : for sim
 %Model_Discrete0(N,dt,'model') % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
 %Model_Discrete(N,dt,'model') % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
 
@@ -62,7 +62,7 @@ Env = [];
 %% set sensors property
 for i = 1:N; agent(i).sensor=[]; end
 %Sensor_LSM9DS1(agent); % IMU sensor
-Sensor_Motive(agent,{[1,2]}); % motive情報 : sim exp 共通
+Sensor_Motive(agent,{[1]}); % motive情報 : sim exp 共通
 %Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
 %Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
@@ -84,15 +84,15 @@ for i = 1:N; agent(i).reference=[]; end
 %Reference_2DCoverage(agent,Env); % Voronoi重心
 %Reference_Time_Varying([1],agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
 % Reference_Time_Varying([1],agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
-%Reference_Time_Varying([1],agent,"Case_study_trajectory",[1;0;1]); % ハート形[x;y;z]永久
-Reference_Time_Varying_Suspended_Load([1],agent,"Case_study_trajectory",[1;0;1]); % ハート形[x;y;z]永久
+Reference_Time_Varying([1],agent,"Case_study_trajectory",[1;0;1]); % ハート形[x;y;z]永久
+%Reference_Time_Varying_Suspended_Load([1],agent,"Case_study_trajectory",[1;0;1]); % ハート形[x;y;z]永久
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
 %% set controller property
 for i = 1:N; agent(i).controller=[]; end
-%Controller_HL(agent); % 階層型線形化
-Controller_HL_Suspended_Load(agent); % 階層型線形化
+Controller_HL(agent); % 階層型線形化
+%Controller_HL_Suspended_Load(agent); % 階層型線形化
 %Controller_MEC(agent); % Model Error Compensator  :  未実装
 %for i = 1:N;  Controller.type="MPC_controller";Controller.name = "mpc";Controller.param={agent(i)}; agent(i).set_controller(Controller);end
 %for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
