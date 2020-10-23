@@ -1,6 +1,6 @@
 classdef toHL_drone < INPUT_TRANSFORM_CLASS
     % 階層型線形化入力を算出するクラス
-    %   未検討
+    % 別のコントローラでone step 分予測したものをリファレンスとしてHL入力を求めるので，移動速度が遅過ぎて使えない．
     
     properties
         self
