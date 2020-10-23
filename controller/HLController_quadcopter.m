@@ -19,7 +19,7 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]‚É•À‚×‘Ö‚¦
-            if ~isempty(ref.state.xd)
+            if isprop(ref.state,'xd')%~isempty(ref.state.xd)
                 xd = ref.state.xd; % 20ŽŸŒ³‚Ì–Ú•W’l‚É‘Î‰ž‚·‚é‚æ‚¤
             else
                 xd = ref.state.get();

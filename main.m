@@ -11,7 +11,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
-fOffline = 1; % offline verification with experiment data
+fOffline = 0; % offline verification with experiment data
 if fExp
     
     dt = 0.025; % sampling time
@@ -23,7 +23,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=20;
+    te=25;
 end
 
 
@@ -62,7 +62,7 @@ Env = [];
 %% set sensors property
 for i = 1:N; agent(i).sensor=[]; end
 %Sensor_LSM9DS1(agent); % IMU sensor
-Sensor_Motive(agent,{[1]}); % motive情報 : sim exp 共通
+Sensor_Motive(agent,{1,2,3}); % motive情報 : sim exp 共通
 %Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
 %Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
@@ -102,8 +102,8 @@ Controller_HL(agent); % 階層型線形化
 if fExp
     Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',[1])); % Motive
 else
-    %Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
-    Connector_Natnet_sim(2*N,dt,0); % for suspended load
+    Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
+    %Connector_Natnet_sim(2*N,dt,0); % for suspended load
 end
 %% initialize
 disp("Initialize state");
@@ -147,12 +147,12 @@ else
                 agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
             end
         end
-            agent(i).model.initialize(sload,plant.initial.p);    
+  %          agent(i).model.initialize(sload,plant.initial.p);    
     end
 end
 LogData=[
     "model.state.p",
-    "reference.result.state.pL",
+    "reference.result.state.p",
     %"reference.result.state.q",
     "estimator.result.state.p",
     "estimator.result.state.q",
@@ -284,41 +284,17 @@ catch ME    % for error
 end
 %profile viewer
 %%
-if isfield(agent(1).reference,'covering')
-    rp=strcmp(logger.items,'reference.result.state.p');
-    ep=strcmp(logger.items,'estimator.result.state.p');
-    %sp=strcmp(logger.items,'sensor.result.state.p');
-    sp=strcmp(logger.items,'plant.state.p');
-    regionp=strcmp(logger.items,'reference.result.region');
-    gridp=strcmp(logger.items,'env.density.param.grid_density');
-    tmpref=@(k,span) arrayfun(@(i)logger.Data.agent{k,rp,i}(1:3),span,'UniformOutput',false);
-    tmpest=@(k,span) arrayfun(@(i)logger.Data.agent{k,ep,i}(1:3),span,'UniformOutput',false);
-    tmpsen=@(k,span) arrayfun(@(i)logger.Data.agent{k,sp,i}(1:3),span,'UniformOutput',false);
-    %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
-    make_animation(1:10:logger.i-1,1:N,@(k,span) draw_voronoi(arrayfun(@(i) logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmpsen(k,span),tmpref(k,span),tmpest(k,span)],Env.param.Vertices),@() Env.show);
-    %%
-    %    make_animation(1:10:logger.i-1,1,@(k,span) contourf(Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,span}),@() Env.show_setting());
-    make_animation(1:10:logger.i-1,1,@(k,span) arrayfun(@(i) contourf( Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,i}),span,'UniformOutput',false), @() Env.show_setting());
-end
-%%
 close all
 clc
+%agent(1).reference.covering.draw_movie(logger,N,Env)
+agent(1).reference.timeVarying.show(logger)
 % logger.plot(1,["inner_input"],struct('transpose',1));
-logger.plot(1,["reference.result.state.pL","p","q","w","v","input"],struct('time',[]));%,"inner_input"    ]);
+%logger.plot(1,["reference.result.state.pL","p","q","w","v","input"],struct('time',[]));%,"inner_input"    ]);
 % logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
 % logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
-%logger.plot(1,["p","q","v","w","u"],struct('time',170));
+%logger.plot(1,["p","q","v","w"],struct('time',[]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
-%%
 %logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
-%%
-% close all
-% hold on
-%
-% heart = cell2mat(logger.Data.agent(:,1)'); % reference.result.state.p
-% plot(heart(1,:),heart(2,:)); % xy平面の軌道を描く
-%
-% heart_result = cell2mat(logger.Data.agent(:,6)'); % reference.result.state.p
-% plot(heart_result(1,:),heart_result(2,:)); % xy平面の軌道を描く
+
 %%
 logger.save();
