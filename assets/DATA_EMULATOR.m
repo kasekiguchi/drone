@@ -32,6 +32,11 @@ classdef DATA_EMULATOR
             % agent(n).(str).result の情報をData情報で上書き
             tidx = find((obj.time-t)>0,1)-1; % 現在時刻に最も近い過去のデータを参照
             switch str
+                case {"plant", "model"}
+                    list = agent(n).(str).state.list(contains(agent(n).(str).state.list,obj.Data{1}.agent{tidx,end-3,n}.state.list));
+                    for i =list
+                        agent(n).(str).state.set_state(i,obj.Data{1}.agent{tidx,end-3,n}.state.get(i));
+                    end
                 case "sensor"
                     agent(n).(str).result = obj.Data{1}.agent{tidx,end-3,n};
                 case "estimator"

@@ -206,10 +206,12 @@ FH  = figure('position',[0 0 eps eps],'menubar','none');
 w = waitforbuttonpress;
 
 try
+    if (fOffline);    expdata.overwrite("model",time.t,agent,i);end
     while round(time.t,5)<=te
         %while 1 % for exp
         %% sensor
         tic
+        if (fOffline);    expdata.overwrite("plant",time.t,agent,i);end
         if exist('motive')==1
             motive.getData({agent,mparam});
             Smotive={motive};
@@ -222,23 +224,23 @@ try
         for i = 1:N
             param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
             agent(i).do_sensor(param(i).sensor);
-            if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
+            %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
         
         %% estimator, reference generator, controller
         for i = 1:N
             agent(i).do_estimator(cell(1,10));
-            if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
+            %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             Rcovering={};%{Env};
             Rpoint={FH,[0;0;0.5],time.t};
             RtimeVarying={time};
             RtvLoad={time};
             param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             agent(i).do_reference(param(i).reference);
-            if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
+            %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
             
             agent(i).do_controller(cell(1,10));
-            if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+            %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
         %% update state
         % with FH
