@@ -1,5 +1,5 @@
 classdef Motive < SENSOR_CLASS
-    % Motive—pƒNƒ‰ƒXF“o˜^‚³‚ê‚½ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ÆŽp¨‚ª‚í‚©‚é
+    % Motiveç”¨ã‚¯ãƒ©ã‚¹ï¼šç™»éŒ²ã•ã‚ŒãŸã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã¨å§¿å‹¢ãŒã‚ã‹ã‚‹
     %  sensor.motive = Motive(self, ~)
     %       self : agent
     properties
@@ -14,10 +14,10 @@ classdef Motive < SENSOR_CLASS
     
     methods
         function obj = Motive(self,varargin)
-            %  ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
+            %  ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             %%% Output equation %%%
             obj.self = self;
-%             obj.result.state=state_copy(self.model.state); % STATE_CLASS‚Æ‚µ‚ÄƒRƒs[
+%             obj.result.state=state_copy(self.model.state); % STATE_CLASSã¨ã—ã¦ã‚³ãƒ”ãƒ¼
 %             if isprop(obj.result.state,'v')
 %                 delete(obj.result.state,'v');
 %             end
@@ -32,7 +32,7 @@ classdef Motive < SENSOR_CLASS
             
             obj.result.state = STATE_CLASS(struct('state_list',["p","q"],"num_list",[3,4]));
             if sum(contains(self.model.state.list,"q"))==1
-                obj.result.state.num_list=[3,length(self.model.state.q)]; % model‚Æ‡‚í‚¹‚é
+                obj.result.state.num_list=[3,length(self.model.state.q)]; % modelã¨åˆã‚ã›ã‚‹
                 obj.result.state.type = length(self.model.state.q);
             end
         end
@@ -41,7 +41,7 @@ classdef Motive < SENSOR_CLASS
             % result=sensor.motive.do(motive)
             %   set obj.result.state : State_obj,  p : position, q : quaternion
             %   result : 
-            % y“ü—Ízmotive FNATNET_CONNECOTR object 
+            % ã€å…¥åŠ›ã€‘motive ï¼šNATNET_CONNECOTR object 
             data=motive{1}.result;
             if isempty(obj.old_time)
                 obj.old_time = data.time;

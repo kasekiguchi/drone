@@ -1,17 +1,17 @@
 classdef ENV_CLASS_3D < handle & matlab.mixin.SetGet
-    % ŠÂ‹«Ý’è
+    % ç’°å¢ƒè¨­å®š
     properties
-        name % —áFbldg1
-        id % —áF
-        node % s‚ªnode id C—ñ‚ªŠenode‚ÌÀ•W
-        surface % Šes‚ªˆê‚Â‚Ì–Ê‚ð•\‚·D—ñ‚ª–Ê‚ð\¬‚·‚énode id —ñ
+        name % ä¾‹ï¼šbldg1
+        id % ä¾‹ï¼š
+        node % è¡ŒãŒnode id ï¼Œåˆ—ãŒå„nodeã®åº§æ¨™
+        surface % å„è¡ŒãŒä¸€ã¤ã®é¢ã‚’è¡¨ã™ï¼Žåˆ—ãŒé¢ã‚’æ§‹æˆã™ã‚‹node id åˆ—
         param % parameters
         graph
         ns = 1; % number of surface cell
     end
     methods
         function obj = ENV_CLASS(name,id,node,surface)
-            % ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
+            % ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             obj.name = name;
             obj.id = id;
             obj.node=node;

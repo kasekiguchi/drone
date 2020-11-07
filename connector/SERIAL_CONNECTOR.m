@@ -1,5 +1,5 @@
 classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
-  % UDP’ÊM—pƒNƒ‰ƒX
+  % UDPé€šä¿¡ç”¨ã‚¯ãƒ©ã‚¹
   %   
   
   properties
@@ -12,9 +12,9 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
   end
   methods
     function obj = SERIAL_CONNECTOR(param)
-      % ’ÊM‚·‚é‘ÎÛ–ˆ‚ÉƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬‚·‚éD
+      % é€šä¿¡ã™ã‚‹å¯¾è±¡æ¯Žã«ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆã™ã‚‹ï¼Ž
       % param.port : COM num
-      % •K—v‚É‰ž‚¶‚ÄMac, Linux‚É‘Î‰ž‚³‚¹‚éD
+      % å¿…è¦ã«å¿œã˜ã¦Mac, Linuxã«å¯¾å¿œã•ã›ã‚‹ï¼Ž
       obj.port=strcat("COM",string(param.port));
       obj.serial = serialport(obj.port,obj.baudrate,'Timeout',1);
       configureTerminator(obj.serial,"CR/LF");
@@ -26,7 +26,7 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
       result=obj.result;
     end
     function sendData(obj,param)
-      obj.result=[char(param),';'];% •¶Žš—ñ‚ÌI‚í‚è‚ð—z‚ÉŽw’èDterminator ‚ðLF‚É‚·‚ê‚Î•K—v‚È‚¢‚©‚ài•ÏX‚·‚éê‡‚ÍESPr_serial.ino‚à•ÏX‚·‚é‚±‚Æj
+      obj.result=[char(param),';'];% æ–‡å­—åˆ—ã®çµ‚ã‚ã‚Šã‚’é™½ã«æŒ‡å®šï¼Žterminator ã‚’LFã«ã™ã‚Œã°å¿…è¦ãªã„ã‹ã‚‚ï¼ˆå¤‰æ›´ã™ã‚‹å ´åˆã¯ESPr_serial.inoã‚‚å¤‰æ›´ã™ã‚‹ã“ã¨ï¼‰
       write(obj.serial,obj.result,'uint8');
     end
   end

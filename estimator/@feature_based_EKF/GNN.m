@@ -1,8 +1,8 @@
 function param = GNN(obj,param)
     % Determining observations within the validation region
-    %yInputz obj   : object of EKF
+    %ã€Inputã€‘ obj   : object of EKF
     %          param : Structure of EKF
-    %yOutputzparam : Structure of EKF
+    %ã€Outputã€‘param : Structure of EKF
     
     % Feature point prediction of estimated object
     param.Mhatbar                = cell2mat(arrayfun(@(k) obj.H(param.Xhbar,obj.local_feature(k,:)'),1:obj.param.on_feature_num,'UniformOutput',false))';

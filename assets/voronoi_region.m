@@ -1,8 +1,8 @@
 function Vo = voronoi_region(pos, region,span)
-% �yInput�z pos : [x;y;z]�����ɕ��ׂ��s��Cregion : �Ώۗ̈��4��(x,y)���c�ɕ��ׂ��s��Cspan :
-% �Ώۂ̃C���f�b�N�X
-% �yOutput�z�{���m�C�Z����polyshape �Z���z��
-% �ʒu�C�x�N�g���C�C���f�b�N�X���ꂼ��ŋL�����g���������ق����ǂ�
+% 【Input】 pos : [x;y;z]を横に並べた行列，region : 対象領域の4隅(x,y)を縦に並べた行列，span :
+% 対象のインデックス
+% 【Output】ボロノイセルのpolyshape セル配列
+% 位置，ベクトル，インデックスそれぞれで記号を使い分けたほうが良い
 %voronoi(pos(1,:),pos(2,:));
 in=inpolygon(pos(1,:),pos(2,:),region(:,1),region(:,2));
 if sum(in) ~= size(pos,2)

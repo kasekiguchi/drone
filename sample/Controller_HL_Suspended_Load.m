@@ -1,6 +1,6 @@
 function Controller_HL_Suspended_Load(agent)
 %% controller class demo (1) : construct
-% controller property をController classのインスタンス配列として定義
+% controller property 繧辰ontroller class縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ驟榊�励→縺励※螳夂ｾｩ
 dt = agent(1).model.dt;
 Controller_param.P=getParameter_withload();
 Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10000,1]),[1],dt);

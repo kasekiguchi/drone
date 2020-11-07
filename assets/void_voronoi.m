@@ -1,13 +1,13 @@
 function V=void_voronoi(V00,VOID,span)
-% yInputzV00 : polyshape ƒZƒ‹CVOID : void •C span : ‘ÎÛ‚ÌƒCƒ“ƒfƒbƒNƒX
-% yOutputzpolyshapeƒZƒ‹
-% ’¸“_ACBCC‚©‚ç‚È‚é‚Q•Ó‚É‚Â‚¢‚ÄŠpABC‚Ì”¼Šp‚ğtheta‚Æ‚·‚é‚Æ
+% ã€Inputã€‘V00 : polyshape ã‚»ãƒ«ï¼ŒVOID : void å¹…ï¼Œ span : å¯¾è±¡ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+% ã€Outputã€‘polyshapeã‚»ãƒ«
+% é ‚ç‚¹Aï¼ŒBï¼ŒCã‹ã‚‰ãªã‚‹ï¼’è¾ºã«ã¤ã„ã¦è§’ABCã®åŠè§’ã‚’thetaã¨ã™ã‚‹ã¨
 % sin(theta) = sqrt(1- (e,E(BA))^2/|e|^2)
-% e F e13 = E(BA)+E(BC) : ŠpABC‚Ì“ñ“™•ªü•ûŒü‚ÌƒxƒNƒgƒ‹
-% E(BA) : ’PˆÊBAƒxƒNƒgƒ‹CE(BC)‚à“¯—l
-% VOID—Ìˆæk‚ß‚½B“_‚ÌXV“_‚Í
+% e ï¼š e13 = E(BA)+E(BC) : è§’ABCã®äºŒç­‰åˆ†ç·šæ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ«
+% E(BA) : å˜ä½BAãƒ™ã‚¯ãƒˆãƒ«ï¼ŒE(BC)ã‚‚åŒæ§˜
+% VOIDé ˜åŸŸç¸®ã‚ãŸBç‚¹ã®æ›´æ–°ç‚¹ã¯
 % B' = B + (VOID/sin(theta)) e/|e|
-% V00‚ÌŠepolyshape V‚É‘Î‚µ‚Ä@polybuffer(V,-void) ‚ğ‚â‚Á‚Ä‚¢‚é‚Ì‚Æ“™‰¿
+% V00ã®å„polyshape Vã«å¯¾ã—ã¦ã€€polybuffer(V,-void) ã‚’ã‚„ã£ã¦ã„ã‚‹ã®ã¨ç­‰ä¾¡
 V={V00{span}};
 for i = span
     V0 = V00{i}.Vertices;

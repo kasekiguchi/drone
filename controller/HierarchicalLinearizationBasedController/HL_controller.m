@@ -1,7 +1,7 @@
 function u = HL_controller(Xh,Xd,Param)
     % u = HL_controller(Xh,Xd,Param)
-    % Xh : „’è‚µ‚½state obj
-    % Xd : QÆó‘Ô‚Ì\‘¢‘Ì
+    % Xh : æ¨å®šã—ãŸstate obj
+    % Xd : å‚ç…§çŠ¶æ…‹ã®æ§‹é€ ä½“
     % Param : required field : P, F1,F2,F3,F4
     %        P : physical parameters
     %        Fi : feedback gain for i-th virtual subsystem
@@ -12,13 +12,13 @@ function u = HL_controller(Xh,Xd,Param)
     F4 = Param.F4;
     state = Xh;
     ref = Xd;
-    x = [state.getq('compact');state.p;state.v;state.w]; % [q, p, v, w]‚É•À‚×‘Ö‚¦
+    x = [state.getq('compact');state.p;state.v;state.w]; % [q, p, v, w]ã«ä¸¦ã¹æ›¿ãˆ
     if isprop(ref,'xd') || isfield(ref,'xd')
-        xd = ref.xd; % 20ŸŒ³‚Ì–Ú•W’l‚É‘Î‰‚·‚é‚æ‚¤
+        xd = ref.xd; % 20æ¬¡å…ƒã®ç›®æ¨™å€¤ã«å¯¾å¿œã™ã‚‹ã‚ˆã†
     else
         xd = ref.get();
     end
-    xd=[xd;zeros(20-size(xd,1),1)];% ‘«‚è‚È‚¢•ª‚Í‚O‚Å–„‚ß‚éD
+    xd=[xd;zeros(20-size(xd,1),1)];% è¶³ã‚Šãªã„åˆ†ã¯ï¼ã§åŸ‹ã‚ã‚‹ï¼
     
     if isfield(Param,'dt')
         dt = Param.dt;

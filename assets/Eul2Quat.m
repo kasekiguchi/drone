@@ -1,7 +1,7 @@
 function [q] = Eul2Quat(eul)
     % convert euler angle to quaternion
-    % yInputz eul : euler angle
-    % yOutputzq : quaternion
+    % ã€Inputã€‘ eul : euler angle
+    % ã€Outputã€‘q : quaternion
 	phi = eul(1)/2;
     th  = eul(2)/2;
     psi = eul(3)/2;

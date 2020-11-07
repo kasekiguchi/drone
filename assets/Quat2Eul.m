@@ -1,7 +1,7 @@
 function [eul] = Quat2Eul(q)
     % convert quaternion to euler angle
-    % yInputzq : quaternion
-    % yOutputzeul : euler angle
+    % ã€Inputã€‘q : quaternion
+    % ã€Outputã€‘eul : euler angle
     nq=norm(q);
     q0 = q(1)/nq;
     q1 = q(2)/nq;

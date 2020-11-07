@@ -7,7 +7,7 @@ Model.type="Quat13_Model"; % class name
 Model.name="quat"; % print name
 Setting.dim=[13,4,10];
 Setting.input_channel = ["v","w"];
-Setting.method = get_model_name("Quat 13"); % model dynamics‚ÌÀ‘Ì–¼
+Setting.method = get_model_name("Quat 13"); % model dynamicsã®å®Ÿä½“å
 Setting.state_list =  ["q","p","v","w"];
 Setting.initial = struct('p',[0;0;0],'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
 Setting.num_list = [4,3,3,3];
@@ -15,7 +15,7 @@ Setting.dt = dt;
 if strcmp(type,"plant")
     for i = 1:N
         Model.id = i;
-        Setting.param = getParameter("Plant"); % ƒ‚ƒfƒ‹‚Ì•¨—ƒpƒ‰ƒ[ƒ^İ’è
+        Setting.param = getParameter("Plant"); % ãƒ¢ãƒ‡ãƒ«ã®ç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨­å®š
         Setting.initial.p = 10*rand(3,1)+[40;20;0];
         Model.param=Setting;
         assignin('base',"Plant",Model);
@@ -23,7 +23,7 @@ if strcmp(type,"plant")
     end
 else
     for i = 1:N
-        Setting.param = getParameter(); % ƒ‚ƒfƒ‹‚Ì•¨—ƒpƒ‰ƒ[ƒ^İ’è
+        Setting.param = getParameter(); % ãƒ¢ãƒ‡ãƒ«ã®ç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨­å®š
         Model.param=Setting;
         assignin('base',"Model",Model);
         model_set_str=strcat("agent(",string(i),").set_model(Model)");

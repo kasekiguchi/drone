@@ -1,12 +1,12 @@
 function Model_Discrete(N,dt,type,varargin)
-% ¿—Ê‚P‚Ì¿“_ƒ‚ƒfƒ‹F—Í“ü—Í
+% è³ªé‡ï¼‘ã®è³ªç‚¹ãƒ¢ãƒ‡ãƒ«ï¼šåŠ›å…¥åŠ›
 if ~isempty(varargin)
     Setting = varargin{1};
 end
 Setting.dt = dt;
 Model.type="Discrete_Model"; % class name
 Model.name="discrete"; % print name
-Setting.method = get_model_name("Discrete"); % model dynamics‚ÌÀ‘Ì–¼
+Setting.method = get_model_name("Discrete"); % model dynamicsã®å®Ÿä½“å
 dsys = c2d(ss([zeros(3) eye(3);zeros(3,6)],[zeros(3);eye(3)],eye(6),zeros(6,3)),dt);
 Setting.param.A = dsys.A;
 Setting.param.B =dsys.B;
@@ -16,7 +16,7 @@ Setting.state_list = ["p","v"];
 Setting.num_list = [3,3];
 Setting.input_channel = ["v"];
 %Setting.param.A = [zeros(3)];
-%Setting.param.B =eye(3);% x.p = u; Ÿ‚Ì‚Éu ‚ÌˆÊ’u‚És‚­ƒ‚ƒfƒ‹
+%Setting.param.B =eye(3);% x.p = u; æ¬¡ã®æ™‚åˆ»ã«u ã®ä½ç½®ã«è¡Œããƒ¢ãƒ‡ãƒ«
 %Setting.dim = [3,3,0];
 % Setting.initial = struct('p',[0;0;0]);
 % Setting.state_list = ["p"];

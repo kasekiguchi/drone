@@ -1,5 +1,5 @@
 classdef LSM9DS1 < SENSOR_CLASS
-    % ‚XŽ²IMUƒZƒ“ƒT[(LSM9DS1)—pƒNƒ‰ƒX
+    % ï¼™è»¸IMUã‚»ãƒ³ã‚µãƒ¼(LSM9DS1)ç”¨ã‚¯ãƒ©ã‚¹
     % Suppose the sensor mounted on espr implemented ESPr_UDP.ino.
     %  sensor.imu = LSM9DS1(self, ~)
     %       self : agent
@@ -25,8 +25,8 @@ classdef LSM9DS1 < SENSOR_CLASS
             obj.self = self;
             obj.espr = self.plant.espr;
             obj.result.state.state_list=["q","w","a","mag"];
-            obj.result.state.num_list=[length(self.model.state.q),3,3,3]; % model‚Æ‡‚í‚¹‚é
-            obj.result.state=STATE_CLASS(obj.result.state); % STATE_CLASS‚Æ‚µ‚ÄƒRƒs[
+            obj.result.state.num_list=[length(self.model.state.q),3,3,3]; % modelã¨åˆã‚ã›ã‚‹
+            obj.result.state=STATE_CLASS(obj.result.state); % STATE_CLASSã¨ã—ã¦ã‚³ãƒ”ãƒ¼
         end
         function initialize(obj,varargin)
             % calibration
@@ -40,8 +40,8 @@ classdef LSM9DS1 < SENSOR_CLASS
             obj.init_state.a=0;
             obj.init_state.mag=0;
             i=0; j = 0;
-            while i < k && j < 100% 10Œv‘ª‚Ì•½‹Ï‚ð‚Æ‚éD
-                % ‚±‚¿‚ç‚©‚çƒf[ƒ^‚ð‘—‚ç‚È‚¢‚Æƒf[ƒ^‚ð‘—‚Á‚Ä‚±‚È‚¢D
+            while i < k && j < 100% 10è¨ˆæ¸¬ã®å¹³å‡ã‚’ã¨ã‚‹ï¼Ž
+                % ã“ã¡ã‚‰ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’é€ã‚‰ãªã„ã¨ãƒ‡ãƒ¼ã‚¿ã‚’é€ã£ã¦ã“ãªã„ï¼Ž
                 obj.espr.sendData(uint8([11,11,6,11,6,6,6,6,0,0,0,0,0,0,0,0]));
                 pause(0.005);% wait 5ms
                 dataR=obj.espr.getData()';
@@ -66,7 +66,7 @@ classdef LSM9DS1 < SENSOR_CLASS
         function result=do(obj,varargin)
             % result=sensor.imu.do()
             %   result : dt and state = q,w,a,mag
-            trial = 5; % ŽóM‚ªŽ¸”s‚µ‚½Žž‚ÉŒJ‚è•Ô‚·‰ñ”
+            trial = 5; % å—ä¿¡ãŒå¤±æ•—ã—ãŸæ™‚ã«ç¹°ã‚Šè¿”ã™å›žæ•°
             while trial > 0
                 if isempty(obj.init_state)
                     warning("ACSL : initialize first.");
@@ -82,19 +82,19 @@ classdef LSM9DS1 < SENSOR_CLASS
                     obj.result.state.set_state('q',[-str2double(dataS(109:118));str2double(dataS(120:129));-str2double(dataS(131:140))]);
                     obj.result.dt=(obj.time-obj.old_time)/1000;% [s]
                     obj.old_time=obj.time;
-                    obj.result.check = 1;% ’ÊM¬Œ÷
+                    obj.result.check = 1;% é€šä¿¡æˆåŠŸ
                     trial = 0;
                 else
                     trial=trial-1;
-                    obj.self.plant.espr.sendData(obj.self.plant.msg);     % ÅŒã‚É‘—‚Á‚½M†‚ð‘—‚è‚È‚¨‚·D               
+                    obj.self.plant.espr.sendData(obj.self.plant.msg);     % æœ€å¾Œã«é€ã£ãŸä¿¡å·ã‚’é€ã‚ŠãªãŠã™ï¼Ž               
                     pause(0.001);% wait 1ms
-                    obj.result.check = 0;% ’ÊMŽ¸”s
+                    obj.result.check = 0;% é€šä¿¡å¤±æ•—
                 end
             end
             if obj.result.check==0
                 warning("ACSL : Receive udp data failed.");
             end
-            result= obj.result;% ŽóM‚ÉŽ¸”s‚µ‚½‚ç‰ß‹Ž‚Ì’l‚»‚Ì‚Ü‚Ü
+            result= obj.result;% å—ä¿¡ã«å¤±æ•—ã—ãŸã‚‰éŽåŽ»ã®å€¤ãã®ã¾ã¾
         end
         function show(obj,varargin)
             if ~isempty(obj.result)

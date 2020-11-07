@@ -1,5 +1,5 @@
 classdef ROS_CONNECTOR < CONNECTOR_CLASS
-            % yInputzinfo : require following fields
+            % ã€Inputã€‘info : require following fields
             %   subTopicName
             %   pubTopicName
             %   subMsgName
@@ -24,7 +24,7 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
         pubMsgName
     end
     properties(SetAccess=private)
-        TimeOut = 1.e-3; % ‚±‚ÌŽžŠÔ‚Í‚Ç‚±‚©‚çH•K—vH
+        TimeOut = 1.e-3; % ã“ã®æ™‚é–“ã¯ã©ã“ã‹ã‚‰ï¼Ÿå¿…è¦ï¼Ÿ
         IP
         port
     end
@@ -62,13 +62,13 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
         end
         function [ret] = getData(obj)
             %
-            %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+            %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
             if isempty(obj.init_time)
                 obj.init_time = rostime('now');
             end
             t = rostime('now') - obj.init_time;
             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
-            %pause(obj.TimeOut); % •K—vH
+            %pause(obj.TimeOut); % å¿…è¦ï¼Ÿ
             obj.result  = arrayfun(@(i) obj.subscriber.(i).LatestMessage,obj.subTopicName,'UniformOutput',false);
             ret = obj.result;
         end

@@ -1,5 +1,5 @@
 classdef Logger < handle
-    % ƒf[ƒ^•Û‘¶—pƒNƒ‰ƒX
+    % ãƒ‡ãƒ¼ã‚¿ä¿å­˜ç”¨ã‚¯ãƒ©ã‚¹
     % obj = Logger(target,row,items)
     % target : agent
     % row : size(ts:dt:te,2)
@@ -11,7 +11,7 @@ classdef Logger < handle
         Data
         target
         i = 1;
-        N % agent”
+        N % agentæ•°
         items
         n
     end
@@ -19,14 +19,14 @@ classdef Logger < handle
     methods
         function obj = Logger(target,row,items)
             % Logger(target,row,items)
-            % target : ƒƒO‚ðŽæ‚é‘ÎÛ@agent(1:3)
-            % row : Šm•Û‚·‚éƒf[ƒ^ƒTƒCƒY@length(ts:dt:te)
-            % items : •Û‘¶‚·‚éƒf[ƒ^ ["input","sensor.result.state.p"]
+            % target : ãƒ­ã‚°ã‚’å–ã‚‹å¯¾è±¡ã€€agent(1:3)
+            % row : ç¢ºä¿ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€length(ts:dt:te)
+            % items : ä¿å­˜ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ ["input","sensor.result.state.p"]
             obj.target = target;
             obj.N = length(target);
-            obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.resultCinput
-            obj.Data.t = zeros(row,1); % ŽžŠÔ
-            obj.Data.phase = zeros(row,1); % ƒtƒ‰ƒCƒgƒtƒF[ƒY@a,t,f,l...
+            obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.resultï¼Œinput
+            obj.Data.t = zeros(row,1); % æ™‚é–“
+            obj.Data.phase = zeros(row,1); % ãƒ•ãƒ©ã‚¤ãƒˆãƒ•ã‚§ãƒ¼ã‚ºã€€a,t,f,l...
             obj.Data.agent=cell(row,obj.n,obj.N);
             obj.items=items;
         end
@@ -69,7 +69,7 @@ classdef Logger < handle
             % i-th agent's sensor names : example {"Motive","RangePos"}
             filename = strrep(strrep(strcat('Data/Log(',datestr(datetime('now')),').mat'),':','_'),' ','_');
             sname = [];
-            for i =1:obj.N % •¡”‘ä‚Ìê‡
+            for i =1:obj.N % è¤‡æ•°å°ã®å ´åˆ
                 isnames = obj.target(i).sensor.name;
                 isname = [];
                 for j = 1:length(isnames)
@@ -78,7 +78,7 @@ classdef Logger < handle
                 sname = [sname,{isname}];
             end
             rname = [];
-            for i =1:obj.N % •¡”‘ä‚Ìê‡
+            for i =1:obj.N % è¤‡æ•°å°ã®å ´åˆ
                 irnames = obj.target(i).reference.name;
 %                 irname = [];
 %                 for j = 1:length(irnames)

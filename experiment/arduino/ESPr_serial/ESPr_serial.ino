@@ -1,19 +1,23 @@
 // arduino の設定は
 // http://trac.switch-science.com/wiki/esp_dev_arduino_ide
 // CPU Frequency を 160 MHzにしないとFCにPPMを送れない．
+// Crystal, Flas size は書き込み時にボードの設定が表示されるのでそれに合わせる．
 // PPM は　Down pulse
 #include <Arduino.h>
 #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
-//#include <WiFiUDP.h>
+#include <WiFiUDP.h>
 #include <Wire.h> //I2Cライブラリ
-//#include <SPI.h> // I2Cならいらないかも
+#include <SPI.h> // I2Cならいらないかも
 #include <SparkFunLSM9DS1.h>
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
-//#include <math.h>
+#include <math.h>
 
 uint8_t i;
-
-#define EM_PIN 4 // emergency stop pin
+#define PIN_LED 12
+volatile byte state = HIGH;
+//volatile byte isEmergency = false;
+volatile boolean isEmergency = false;
+#define EM_PIN 15 // emergency stop pin
 #define OUTPUT_PIN 2 // ppm output pin
 /////////////////// PPM関係 ////////////////////
 char packetBuffer[255];
@@ -21,7 +25,7 @@ char packetBuffer[255];
 #define TOTAL_CH 8         // number of channels
 // https://create-it-myself.com/research/study-ppm-spec/
 #define PPM_PERIOD 22500  // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
-#define TIME_LOW 300       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
+#define TIME_LOW 400       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
 //#define TIME_HIGH_MIN 700  // PPM幅の最小 [us] // 上のリンク情報に合わせる
 //#define TIME_HIGH_MAX 1700 // PPM幅の最大 [us] // 上のリンク情報に合わせる
 #define TIME_HIGH_MIN 600  // PPM幅の最小 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている
@@ -34,7 +38,6 @@ uint16_t pw[TOTAL_CH]; // ch毎のパルス幅を保存
 unsigned long t_now;
 unsigned long last_received_time;
 boolean isReceive_Data_Updated = false;
-boolean isEmergency = false;
 //*********** local functions  *************************//
 
 void receive_serial()// ---------- loop function : receive signal by UDP
@@ -150,22 +153,32 @@ void emergency_stop()
   pw[5] = 600; // AUX2
   pw[6] = 600; // AUX3
   pw[7] = 600; // AUX4
-  isEmergency = true;
+  //isEmergency = true;
+  isEmergency != isEmergency;
+ // state != state;
+  state = LOW;
 }
 // ==================================================================
 void setup()
 {
   Serial.begin(115200);
-  Serial.print("Start");
-  // 緊急停止
-  pinMode(EM_PIN, INPUT);
-  attachInterrupt(EM_PIN, emergency_stop, RISING); // 緊急停止用　LOWからHIGHで停止
-  /////////////////// PPM関係 ////////////////////
   setupPPM();
+  Serial.print("Start");
+
+  delay(1000);
+  // 緊急停止
+  pinMode( PIN_LED, OUTPUT );
+  digitalWrite( PIN_LED, state );
+  //pinMode(EM_PIN, INPUT_PULLUP); // GND短絡でLOW 開放でHIGH
+  pinMode(EM_PIN, INPUT); 
+  attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　LOWからHIGHで停止
+  //attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, CHANGE); // 緊急停止用　LOWからHIGHで停止
+  /////////////////// PPM関係 ////////////////////
 }
 
 void loop()
 {
+  digitalWrite( PIN_LED, state );
   if (!isEmergency)
   {
     receive_serial();

@@ -1,6 +1,6 @@
 classdef From_ESPr < SENSOR_CLASS
-    %UNTITLED5 ‚±‚ÌƒNƒ‰ƒX‚ÌŠT—v‚ð‚±‚±‚É‹Lq
-    %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+    %UNTITLED5 ã“ã®ã‚¯ãƒ©ã‚¹ã®æ¦‚è¦ã‚’ã“ã“ã«è¨˜è¿°
+    %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
     
     properties
         espr % connector
@@ -9,7 +9,7 @@ classdef From_ESPr < SENSOR_CLASS
     
     methods
         function obj = From_ESPr(self,param)
-            % self : ‚±‚ÌƒZƒ“ƒT[‚ð“‹Ú‚µ‚Ä‚¢‚é‹@‘ÌƒIƒuƒWƒFƒNƒg
+            % self : ã“ã®ã‚»ãƒ³ã‚µãƒ¼ã‚’æ­è¼‰ã—ã¦ã„ã‚‹æ©Ÿä½“ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
             % param : 
             if isfield(self.plant,'espr')
                 obj.espr = self.plant.espr;
@@ -24,11 +24,11 @@ classdef From_ESPr < SENSOR_CLASS
         end
         
         function do(obj,param)
-            %METHOD1 ‚±‚Ìƒƒ\ƒbƒh‚ÌŠT—v‚ð‚±‚±‚É‹Lq
-            %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+            %METHOD1 ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã®æ¦‚è¦ã‚’ã“ã“ã«è¨˜è¿°
+            %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
                    
             % receive UDP
-            %%%%%%%%%%% 9Ž²censor‚Ì’lŽæ“¾%%%%%%%%%%%
+            %%%%%%%%%%% 9è»¸censorã®å€¤å–å¾—%%%%%%%%%%%
                 RData = obj.espr.getData();
                 msg = join(string(char(RData)),'');
                 disp(msg);

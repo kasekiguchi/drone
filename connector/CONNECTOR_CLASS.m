@@ -1,8 +1,8 @@
 classdef (Abstract) CONNECTOR_CLASS < handle
-    % Connector ƒNƒ‰ƒX
-    %   ƒZƒ“ƒT[‚Æ‚Ìˆá‚¢‚Íƒf[ƒ^‚Ì‘—ŽóM‚ª‚ ‚é‚©‚Ç‚¤‚©DFROS‚âWifi‚È‚Ç‚Í‘o•ûŒü’ÊM
-    %   ‹@‘ÌˆË‘¶‚©‚Ç‚¤‚©@FPrime ‚Íglobalî•ñ‚Å‹@‘ÌˆË‘¶‚Å‚Í‚È‚¢
-    %  ƒTƒuƒNƒ‰ƒX‚Å‚ÍgetData(packet), sendData(packet) ‚Ç‚¿‚ç‚©C‚Ü‚½‚Í—¼•û‚ðŽÀ‘•‚·‚é•K—v‚ª‚ ‚éD
+    % Connector ã‚¯ãƒ©ã‚¹
+    %   ã‚»ãƒ³ã‚µãƒ¼ã¨ã®é•ã„ã¯ãƒ‡ãƒ¼ã‚¿ã®é€å—ä¿¡ãŒã‚ã‚‹ã‹ã©ã†ã‹ï¼Žï¼šROSã‚„Wifiãªã©ã¯åŒæ–¹å‘é€šä¿¡
+    %   æ©Ÿä½“ä¾å­˜ã‹ã©ã†ã‹ã€€ï¼šPrime ã¯globalæƒ…å ±ã§æ©Ÿä½“ä¾å­˜ã§ã¯ãªã„
+    %  ã‚µãƒ–ã‚¯ãƒ©ã‚¹ã§ã¯getData(packet), sendData(packet) ã©ã¡ã‚‰ã‹ï¼Œã¾ãŸã¯ä¸¡æ–¹ã‚’å®Ÿè£…ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ï¼Ž
     properties
        % data
     end

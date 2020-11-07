@@ -7,7 +7,7 @@
 %% Define variables
 syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
 syms a1 a2 a3 u u1 u2 u3 u4 T1 T2 T3 T4 real
-p	= [  p1;  p2;  p3];             % Position@Fxb : is•ûŒüCzb FƒzƒoƒŠƒ“ƒO‚ÉãŒü‚«
+p	= [  p1;  p2;  p3];             % Positionã€€ï¼šxb : é€²è¡Œæ–¹å‘ï¼Œzb ï¼šãƒ›ãƒãƒªãƒ³ã‚°æ™‚ã«ä¸Šå‘ã
 dp	= [ dp1; dp2; dp3];             % Velocity
 q	= [  q1;  q2;  q3];        % Euler angle
 ob	= [  o1;  o2;  o3];             % Angular velocity

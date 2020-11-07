@@ -1,5 +1,5 @@
 function state=state_copy(orgstate)
-% STATE_CLASS objectを値としてコピーするための関数
+% STATE_CLASS object繧貞､縺ｨ縺励※繧ｳ繝斐�ｼ縺吶ｋ縺溘ａ縺ｮ髢｢謨ｰ
 state=copy(orgstate);
 F=fieldnames(orgstate);
 for i = 1:length(F)

@@ -1,9 +1,9 @@
 classdef MetaPlayer
-    % Plant�̐^�l�ɃA�N�Z�X���O���t�쐬�̂��߂̏��𒊏o���邽�߂̃��[�U�[�N���X
-    %   property�͂Ȃ�method��static�̂�
+    % Plantの真値にアクセスしグラフ作成のための情報を抽出するためのユーザークラス
+    %   propertyはなくmethodもstaticのみ
     methods (Static)
         function write(target,field,value)
-            %   �ڍא����������ɋL�q
+            %   詳細説明をここに記述
             target.(field)=value;
         end
         function write_subfield(target,field,subfield,value)
@@ -15,8 +15,8 @@ classdef MetaPlayer
         end
         
         function output=read(target,field)
-            %METHOD1 ���̃��\�b�h�̊T�v�������ɋL�q
-            %   �ڍא����������ɋL�q
+            %METHOD1 このメソッドの概要をここに記述
+            %   詳細説明をここに記述
             output=target.(field);
         end
         function do(target,method,args)

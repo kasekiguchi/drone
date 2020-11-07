@@ -1,6 +1,6 @@
 function JacobiF=ExtendedLinearization(file_name,model,varargin)
-    % model method‚ÌŠg’£üŒ`‰»
-    % JacobiF(x,p) : x ó‘ÔC@p •¨—ƒpƒ‰ƒ[ƒ^
+    % model methodã®æ‹¡å¼µç·šå½¢åŒ–
+    % JacobiF(x,p) : x çŠ¶æ…‹ï¼Œã€€p ç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
     n = model.dim(1);
     x = sym('x',[n,1]);
     u = sym('u',[model.dim(2),1]);

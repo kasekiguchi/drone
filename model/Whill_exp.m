@@ -1,5 +1,5 @@
 classdef Whill_exp < MODEL_CLASS
-    % Lizard ŽÀŒ±—pƒ‚ƒfƒ‹
+    % Lizard å®Ÿé¨“ç”¨ãƒ¢ãƒ‡ãƒ«
     properties% (Access=private)
         ros % connector
         IP
@@ -14,7 +14,7 @@ classdef Whill_exp < MODEL_CLASS
     methods
         function obj = Whill_exp(self,args)
             obj@MODEL_CLASS([],[]);
-            param=args{2}; % args{1}‚Ítype
+            param=args{2}; % args{1}ã¯type
             obj.dt = 0.025;
             %% variable set
             obj.flight_phase        = 'f';

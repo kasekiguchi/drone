@@ -1,5 +1,5 @@
 classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
-    % ƒNƒAƒbƒhƒRƒvƒ^[—pŠK‘wŒ^üŒ`‰»‚ðŽg‚Á‚½“ü—ÍŽZo
+    % ã‚¯ã‚¢ãƒƒãƒ‰ã‚³ãƒ—ã‚¿ãƒ¼ç”¨éšŽå±¤åž‹ç·šå½¢åŒ–ã‚’ä½¿ã£ãŸå…¥åŠ›ç®—å‡º
     properties
         self
         result
@@ -15,12 +15,12 @@ classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
         end
         
         function result=do(obj,param,~)
-            % param (optional) : \‘¢‘ÌF•¨—ƒpƒ‰ƒ[ƒ^PCƒQƒCƒ“F1-F4 
+            % param (optional) : æ§‹é€ ä½“ï¼šç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿Pï¼Œã‚²ã‚¤ãƒ³F1-F4 
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
-            x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]‚É•À‚×‘Ö‚¦
+            x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]ã«ä¸¦ã¹æ›¿ãˆ
             if isprop(ref.state,'xd')
-                xd = ref.state.xd; % 20ŽŸŒ³‚Ì–Ú•W’l‚É‘Î‰ž‚·‚é‚æ‚¤
+                xd = ref.state.xd; % 20æ¬¡å…ƒã®ç›®æ¨™å€¤ã«å¯¾å¿œã™ã‚‹ã‚ˆã†
             else
                 xd = ref.state.get();
             end
@@ -37,10 +37,10 @@ classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
             %             xd=[xd;Xd.dv];
             %         end
             %     end
-            xd=[xd;zeros(28-size(xd,1),1)];% ‘«‚è‚È‚¢•ª‚Í‚O‚Å–„‚ß‚éD
+            xd=[xd;zeros(28-size(xd,1),1)];% è¶³ã‚Šãªã„åˆ†ã¯ï¼ã§åŸ‹ã‚ã‚‹ï¼Ž
 
 %             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-%             x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]‚É•À‚×‘Ö‚¦
+%             x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]ã«ä¸¦ã¹æ›¿ãˆ
 %             xd(1:3)=Rb0'*xd(1:3);
 %             xd(4) = 0;
 %             xd(5:7)=Rb0'*xd(5:7);

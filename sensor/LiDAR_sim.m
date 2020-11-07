@@ -1,5 +1,5 @@
 classdef LiDAR_sim < SENSOR_CLASS
-    % –¢ŒŸØF’P‘ŠLiDARi‘S•ûˆÊƒZƒ“ƒT[j‚Ìsimulation—pƒNƒ‰ƒX
+    % æœªæ¤œè¨¼ï¼šå˜ç›¸LiDARï¼ˆå…¨æ–¹ä½ã‚»ãƒ³ã‚µãƒ¼ï¼‰ã®simulationç”¨ã‚¯ãƒ©ã‚¹
     %   lidar = LiDAR(param)
     %   (optional) radius = 1 default 40 m
     %   (optional) angle_range = -pi/2:0.1:pi/2 default -pi:0.1:pi
@@ -9,7 +9,7 @@ classdef LiDAR_sim < SENSOR_CLASS
         self
         interface = @(x) x;
     end
-    properties (Access = private) % construct ‚µ‚½‚ç•Ï‚¦‚È‚¢D
+    properties (Access = private) % construct ã—ãŸã‚‰å¤‰ãˆãªã„ï¼
         radius = 40;
         angle_range = -pi:0.1:pi;
     end
@@ -17,7 +17,7 @@ classdef LiDAR_sim < SENSOR_CLASS
     methods
         function obj = LiDAR_sim(self,param)
             obj.self=self;
-            %  ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğì¬
+            %  ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             % radius, angle_range
             if isfield(param,'interface'); obj.interface = Interface(param.interface);end
             if isfield(param,'radius'); obj.radius = param.radius;         end
@@ -26,39 +26,39 @@ classdef LiDAR_sim < SENSOR_CLASS
         
         function result = do(obj,param)
             % result=lidar.do(param)
-            %   result.region : ƒZƒ“ƒT[—ÌˆæiƒZƒ“ƒT[ˆÊ’u‚ğŒ´“_‚Æ‚µ‚½jpolyshape
-            %   result.length : [1 0]‚©‚ç‚ÌŠp“x‚ªangle,
-            %   angle_range ‚Å‹K’è‚³‚ê‚é•ûŒü‚Ì‹——£‚ğ•À‚×‚½ƒxƒNƒgƒ‹F’P‘ŠLiDAR‚Ìo—Í‚ğ–Í‹[
-            % y“ü—Ízparam = {Env}        Plant F§Œä‘ÎÛC EnvFŠÂ‹«^’l
+            %   result.region : ã‚»ãƒ³ã‚µãƒ¼é ˜åŸŸï¼ˆã‚»ãƒ³ã‚µãƒ¼ä½ç½®ã‚’åŸç‚¹ã¨ã—ãŸï¼‰polyshape
+            %   result.length : [1 0]ã‹ã‚‰ã®è§’åº¦ãŒangle,
+            %   angle_range ã§è¦å®šã•ã‚Œã‚‹æ–¹å‘ã®è·é›¢ã‚’ä¸¦ã¹ãŸãƒ™ã‚¯ãƒˆãƒ«ï¼šå˜ç›¸LiDARã®å‡ºåŠ›ã‚’æ¨¡æ“¬
+            % ã€å…¥åŠ›ã€‘param = {Env}        Plant ï¼šåˆ¶å¾¡å¯¾è±¡ï¼Œ Envï¼šç’°å¢ƒçœŸå€¤
             Plant=obj.self.plant;
             Env=param;
             tmp = obj.angle_range;            
-            pos=Plant.state.p; % Àó‘Ô
+            pos=Plant.state.p; % å®ŸçŠ¶æ…‹
             circ=[obj.radius*cos(tmp);obj.radius*sin(tmp)]';
             if tmp(end)-tmp(1) > pi
-                %sensor_range=polyshape(circ(:,1)+pos(1),circ(:,2)+pos(2)); % ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ğ’†S‚Æ‚µ‚½‰~
-                sensor_range=polyshape(circ(:,1),circ(:,2)); % ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ğ’†S‚Æ‚µ‚½‰~
+                %sensor_range=polyshape(circ(:,1)+pos(1),circ(:,2)+pos(2)); % ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’ä¸­å¿ƒã¨ã—ãŸå††
+                sensor_range=polyshape(circ(:,1),circ(:,2)); % ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’ä¸­å¿ƒã¨ã—ãŸå††
             else
-                %sensor_range=polyshape([pos(1);circ(:,1)+pos(1)],[pos(2);circ(:,2)+pos(2)]); % ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ğ’†S‚Æ‚µ‚½‰~
-                sensor_range=polyshape([0;circ(:,1)],[0;circ(:,2)]); % ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ğ’†S‚Æ‚µ‚½‰~
+                %sensor_range=polyshape([pos(1);circ(:,1)+pos(1)],[pos(2);circ(:,2)+pos(2)]); % ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’ä¸­å¿ƒã¨ã—ãŸå††
+                sensor_range=polyshape([0;circ(:,1)],[0;circ(:,2)]); % ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’ä¸­å¿ƒã¨ã—ãŸå††
             end
-            env = polyshape(Env.param.Vertices-pos(1:2)'); %‘Š‘Î“I‚ÈŠÂ‹«
+            env = polyshape(Env.param.Vertices-pos(1:2)'); %ç›¸å¯¾çš„ãªç’°å¢ƒ
             
             result.region=intersect(sensor_range,env);
-            %% o—Í‚Æ‚µ‚Ä®Œ`
-            %result.region.Vertices=result.region.Vertices-pos(1:2)'; % ‘Š‘Î“I‚È‘ª‹——Ìˆæ
+            %% å‡ºåŠ›ã¨ã—ã¦æ•´å½¢
+            %result.region.Vertices=result.region.Vertices-pos(1:2)'; % ç›¸å¯¾çš„ãªæ¸¬è·é ˜åŸŸ
             
             %lineseg(1:2:size(circ,1)*2,:)=circ;
             %in=intersect(result.region,[lineseg;0 0]);
             for i = 1:length(circ)
                 in=intersect(result.region,[circ(i,:);0 0]);
                 if ~isempty(in)
-                    in=setdiff(in(~isnan(in(:,1)),:),[0 0],'rows'); % ƒŒ[ƒU[‚Æ—Ìˆæ‚ÌŒğ“_
+                    in=setdiff(in(~isnan(in(:,1)),:),[0 0],'rows'); % ãƒ¬ãƒ¼ã‚¶ãƒ¼ã¨é ˜åŸŸã®äº¤ç‚¹
                     [~,mini]=min(vecnorm(in')');
                     result.sensor_points(i,:)=in(mini,:);
                 end
             end
-            result.length=vecnorm(result.sensor_points'); % ƒŒ[ƒU[“_‚Ü‚Å‚Ì‹——£
+            result.length=vecnorm(result.sensor_points'); % ãƒ¬ãƒ¼ã‚¶ãƒ¼ç‚¹ã¾ã§ã®è·é›¢
             %result.region=intersect(polyshape(result.sensor_points(:,1),result.sensor_points(:,2)),env); % 
             obj.result=result;
         end

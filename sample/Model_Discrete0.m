@@ -1,5 +1,5 @@
 function Model_Discrete0(N,dt,type,varargin)
-% 入力位置が次時刻の位置になるモデル
+% 蜈･蜉帑ｽ咲ｽｮ縺梧ｬ｡譎ょ綾縺ｮ菴咲ｽｮ縺ｫ縺ｪ繧九Δ繝�繝ｫ
     %% model class demo : 
 if ~isempty(varargin)
     Setting = varargin{1};
@@ -7,9 +7,9 @@ end
 Setting.dt = dt;
 Model.type="Discrete_Model"; % class name
 Model.name="discrete"; % print name
-Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
+Setting.method = get_model_name("Discrete"); % model dynamics縺ｮ螳滉ｽ灘錐
 Setting.param.A = [zeros(3)];
-Setting.param.B =eye(3);% x.p = u; 次の時刻にu の位置に行くモデル
+Setting.param.B =eye(3);% x.p = u; 谺｡縺ｮ譎ょ綾縺ｫu 縺ｮ菴咲ｽｮ縺ｫ陦後￥繝｢繝�繝ｫ
 Setting.dim = [3,3,0];
 Setting.initial = struct('p',[0;0;0]);
 Setting.state_list = ["p"];

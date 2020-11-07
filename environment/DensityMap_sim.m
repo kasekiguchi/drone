@@ -1,33 +1,33 @@
 classdef DensityMap_sim < ENV_CLASS
-    % ŠÂ‹«Ý’è
-    % —pŒê
-    % map FŽÀƒXƒP[ƒ‹‚Ìƒ}ƒbƒv
-    % grid : ŽÀƒXƒP[ƒ‹ƒ}ƒbƒv‚ÉƒOƒŠƒbƒh‚ðØ‚Á‚½‚à‚Ì
+    % ç’°å¢ƒè¨­å®š
+    % ç”¨èªž
+    % map ï¼šå®Ÿã‚¹ã‚±ãƒ¼ãƒ«ã®ãƒžãƒƒãƒ—
+    % grid : å®Ÿã‚¹ã‚±ãƒ¼ãƒ«ãƒžãƒƒãƒ—ã«ã‚°ãƒªãƒƒãƒ‰ã‚’åˆ‡ã£ãŸã‚‚ã®
     %
     % Properties
     % param : a structure consists of following field
-    %         Vertex % —Ìˆæ‚ð‹K’è‚·‚épolygon ‚Ì’¸“_
-    %         discrete = 1 % —£ŽUŠÂ‹«ƒtƒ‰ƒO F‚Æ‚è‚ ‚¦‚¸—£ŽU‚¾‚¯‚Åi‚ß‚éD
-    %         d % gridŠÔ‹——£
-    %         map_min % polygon‚ð“à•ï‚·‚é’·•ûŒ`•Â•ï‚ÌÅ¬’lÀ•W
-    %         map_max % polygon‚ð“à•ï‚·‚é’·•ûŒ`•Â•ï‚ÌÅ‘å’lÀ•W
-    %         xq % x •ûŒü‚ÌŠegrid‚É‘Î‰ž‚µ‚½ŽÀÀ•WF n x 1
-    %         yq % y •ûŒü‚ÌŠegrid‚É‘Î‰ž‚µ‚½ŽÀÀ•WF n x 1
-    %         phi % phi(i) : (xq(i), yq(i)) ‚ÌˆÊ’u‚Å‚Ìd—v“x‚Ì’lDn x 1  : = reshape(grid_density,[n 1]);
-    %         grid_density % Šegrid “_‚Å‚Ìdensity ’l grid_density(i,j) : ŽÀÀ•W‚Ìd (i, j) ‚ÌˆÊ’u‚É‚ ‚éƒZƒ‹‚Ìd—v“x
-    %         grid_row % grid ‚Ìs” : min:d:max
-    %         grid_col % grid ‚Ì—ñ” : min:d:max
-    %         grid_n % grid ” row x col
-    %         param % property ‚Íname ˆÈŠO‚·‚×‚Äparam‚ÌƒtƒB[ƒ‹ƒh‚É‚µ‚Ä‚¢‚­‚±‚ÆD
+    %         Vertex % é ˜åŸŸã‚’è¦å®šã™ã‚‹polygon ã®é ‚ç‚¹
+    %         discrete = 1 % é›¢æ•£ç’°å¢ƒãƒ•ãƒ©ã‚° ï¼šã¨ã‚Šã‚ãˆãšé›¢æ•£ã ã‘ã§é€²ã‚ã‚‹ï¼Ž
+    %         d % gridé–“è·é›¢
+    %         map_min % polygonã‚’å†…åŒ…ã™ã‚‹é•·æ–¹å½¢é–‰åŒ…ã®æœ€å°å€¤åº§æ¨™
+    %         map_max % polygonã‚’å†…åŒ…ã™ã‚‹é•·æ–¹å½¢é–‰åŒ…ã®æœ€å¤§å€¤åº§æ¨™
+    %         xq % x æ–¹å‘ã®å„gridã«å¯¾å¿œã—ãŸå®Ÿåº§æ¨™ï¼š n x 1
+    %         yq % y æ–¹å‘ã®å„gridã«å¯¾å¿œã—ãŸå®Ÿåº§æ¨™ï¼š n x 1
+    %         phi % phi(i) : (xq(i), yq(i)) ã®ä½ç½®ã§ã®é‡è¦åº¦ã®å€¤ï¼Žn x 1  : = reshape(grid_density,[n 1]);
+    %         grid_density % å„grid ç‚¹ã§ã®density å€¤ grid_density(i,j) : å®Ÿåº§æ¨™ã®d (i, j) ã®ä½ç½®ã«ã‚ã‚‹ã‚»ãƒ«ã®é‡è¦åº¦
+    %         grid_row % grid ã®è¡Œæ•° : min:d:max
+    %         grid_col % grid ã®åˆ—æ•° : min:d:max
+    %         grid_n % grid æ•° row x col
+    %         param % property ã¯name ä»¥å¤–ã™ã¹ã¦paramã®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã«ã—ã¦ã„ãã“ã¨ï¼Ž
     properties
-        name % —áFbldg1
+        name % ä¾‹ï¼šbldg1
         id
         param
     end
     methods
         function obj = DensityMap_sim(~,param)
             obj.param=param;
-            % ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
+            % ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             obj.name = param.name;
             if ~strcmp(obj.name,"none")
                 %obj.Vertex=obj.param.Vertex;

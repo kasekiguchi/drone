@@ -6,9 +6,9 @@ syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 clc
 syms xd1(t) xd2(t) xd3(t) xd4(t) v1(t)
 syms t real
-xd = [xd1(t),xd2(t),xd3(t),xd4(t)]; % reference ‚ğŒã‚ÅŒˆ‚ß‚é‚Í‚±‚Á‚¿
+xd = [xd1(t),xd2(t),xd3(t),xd4(t)]; % reference ã‚’å¾Œã§æ±ºã‚ã‚‹æ™‚ã¯ã“ã£ã¡
 %% 
-p	= [  p1;  p2;  p3];             % Position@Fxb : is•ûŒüCzb FƒzƒoƒŠƒ“ƒO‚ÉãŒü‚«
+p	= [  p1;  p2;  p3];             % Positionã€€ï¼šxb : é€²è¡Œæ–¹å‘ï¼Œzb ï¼šãƒ›ãƒãƒªãƒ³ã‚°æ™‚ã«ä¸Šå‘ã
 dp	= [ dp1; dp2; dp3];             % Velocity
 ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
 q	= [  q0;  q1;  q2;  q3];        % Quaternion
@@ -44,15 +44,15 @@ He = [1/(beta1(1)+e1),-beta1(2)/(beta1(1)+e1),-beta1(3)/(beta1(1)+e1),-beta1(4)/
 % Rz = 0.1;                           % Weight of input
 % Nz = 0;
 % Fz = lqr([0,1;0,0], [0;1], Qz, Rz, Nz);
- %v1 = -Fz * [h1;dh1]; % v1‚ğ–‘O‚ÉŒˆ‚ß‚Ä‚¨‚­‚Í‚±‚Á‚¿
+ %v1 = -Fz * [h1;dh1]; % v1ã‚’äº‹å‰ã«æ±ºã‚ã¦ãŠãæ™‚ã¯ã“ã£ã¡
 %% 2nd layer
 syms v2 v3 v4
-FG = simplify(f+g*H*[-alpha1+v1(t);u2;u3;u4]);	% v1‚ğŒã‚ÅİŒv‚·‚é‚Í‚±‚Á‚¿
+FG = simplify(f+g*H*[-alpha1+v1(t);u2;u3;u4]);	% v1ã‚’å¾Œã§è¨­è¨ˆã™ã‚‹æ™‚ã¯ã“ã£ã¡
 g1 = simplify(MyCoeff(FG,[u2;u3;u4]));
 f1 = subs(FG,[u2,u3,u4],[0,0,0]);
 %simplify(FG-(f1+g1*[v2;v3;v4]))   % For check
 
-% FG = simplify(f+g*(H*(-alpha1+v1(t))+nH*[v2;v3;v4]));	% v1‚ğŒã‚ÅİŒv‚·‚é‚Í‚±‚Á‚¿
+% FG = simplify(f+g*(H*(-alpha1+v1(t))+nH*[v2;v3;v4]));	% v1ã‚’å¾Œã§è¨­è¨ˆã™ã‚‹æ™‚ã¯ã“ã£ã¡
 % g1 = simplify(MyCoeff(FG,[v2;v3;v4]));
 % f1 = subs(FG,[v2,v3,v4],[0,0,0]);
 
@@ -62,7 +62,7 @@ h2 = p1 - xd(1);
 h3 = p2 - xd(2);
 [~,~,yaw] = Quat2Eul(q);
 h4 = yaw - xd(4);
-%h4 = 2*(q0*q3 + q1*q2) - xd(4); % ‚±‚ê‚Å‚Íp¨‚Í•Ï‚í‚ç‚È‚¢
+%h4 = 2*(q0*q3 + q1*q2) - xd(4); % ã“ã‚Œã§ã¯å§¿å‹¢ã¯å¤‰ã‚ã‚‰ãªã„
 %% **************************************** % %
 clc
 dh2 = LieD(h2,f1,x)+diff(h2,t);
@@ -93,12 +93,12 @@ beta2 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
 % Fr = lqr([0,1;0,0], [0;1], Qr, Rr, Nr);
 % if flag.predefinedReference
 %     v2 = [-F4*[h2;dh2;ddh2;dddh2]; -Fxy*[h3;dh3;ddh3;dddh3]; -Fr*[h4;dh4]];
-%     U2 = inv(beta2)*(-alpha2+v2);   % v2 ‚ğ–‘O‚ÉİŒv‚µ‚Ä‚¨‚­‚Í‚±‚Á‚¿
+%     U2 = inv(beta2)*(-alpha2+v2);   % v2 ã‚’äº‹å‰ã«è¨­è¨ˆã—ã¦ãŠãæ™‚ã¯ã“ã£ã¡
 % else
     syms v2(t) v3(t) v4(t)
-    U2 = inv(beta2)*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2‚ğŒã‚ÅİŒv‚·‚é‚Í‚±‚Á‚¿
-    %U2 = beta2/(-alpha2+[v2(t);v3(t);v4(t)]);  % v2‚ğŒã‚ÅİŒv‚·‚é‚Í‚±‚Á‚¿
-    U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2‚ğŒã‚ÅİŒv‚·‚é‚Í‚±‚Á‚¿
+    U2 = inv(beta2)*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2ã‚’å¾Œã§è¨­è¨ˆã™ã‚‹æ™‚ã¯ã“ã£ã¡
+    %U2 = beta2/(-alpha2+[v2(t);v3(t);v4(t)]);  % v2ã‚’å¾Œã§è¨­è¨ˆã™ã‚‹æ™‚ã¯ã“ã£ã¡
+    U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2ã‚’å¾Œã§è¨­è¨ˆã™ã‚‹æ™‚ã¯ã“ã£ã¡
 %end
 %% Initialize xd as an unspecified function of t
 % % If regenerate Uf, Us or Xd functions, evaluate this section.
@@ -185,7 +185,7 @@ function tmp = DeleteCommentLine(fname)
 	end
 end
 function pd = pdiff(flist, vars)
-% % flist‚ğvars‚Å”÷•ª‚µ‚½‚à‚Ì‚ÌƒVƒ“ƒ{ƒŠƒbƒN”z—ñ‚ğ•Ô‚·H
+% % flistã‚’varsã§å¾®åˆ†ã—ãŸã‚‚ã®ã®ã‚·ãƒ³ãƒœãƒªãƒƒã‚¯é…åˆ—ã‚’è¿”ã™ï¼Ÿ
     flist = flist(:);
     vars = vars(:);
 %    pd = arrayfun(@(x) diff(flist(1), x), vars)';

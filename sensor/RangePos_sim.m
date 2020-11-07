@@ -1,25 +1,25 @@
 classdef RangePos_sim < SENSOR_CLASS
-    % RangePos‚Ìsimulation—pƒNƒ‰ƒXF“o˜^‚³‚ê‚½ƒG[ƒWƒFƒ“ƒg‚Ì‚¤‚¿”¼Œa“à‚ÌƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ð•Ô‚·
+    % RangePosã®simulationç”¨ã‚¯ãƒ©ã‚¹ï¼šç™»éŒ²ã•ã‚ŒãŸã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ã†ã¡åŠå¾„å†…ã®ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’è¿”ã™
     %   rpos = RangePos_sim(param)
-    %   (optional) param.r : ”¼Œa
-    %   (optional) param.target : Ž©‹@‚ðŠÜ‚Þ‘ÎÛ”z—ñ
-    %   param.id : ‚±‚ÌƒZƒ“ƒT[‚ðÏ‚ñ‚Å‚¢‚é‹@‘Ì‚Ìid‚Æˆê’v‚³‚¹‚éD
+    %   (optional) param.r : åŠå¾„
+    %   (optional) param.target : è‡ªæ©Ÿã‚’å«ã‚€å¯¾è±¡é…åˆ—
+    %   param.id : ã“ã®ã‚»ãƒ³ã‚µãƒ¼ã‚’ç©ã‚“ã§ã„ã‚‹æ©Ÿä½“ã®idã¨ä¸€è‡´ã•ã›ã‚‹ï¼Ž
     properties
         name = "RangePos";
       %  result
         interface = @(x) x;
-        target % ƒZƒ“ƒVƒ“ƒO‘ÎÛ‚Ìhandle object
-        self % ƒZƒ“ƒT[‚ðÏ‚ñ‚Å‚¢‚é‹@‘Ì‚Ìhandle object
+        target % ã‚»ãƒ³ã‚·ãƒ³ã‚°å¯¾è±¡ã®handle object
+        self % ã‚»ãƒ³ã‚µãƒ¼ã‚’ç©ã‚“ã§ã„ã‚‹æ©Ÿä½“ã®handle object
         result
     end
-    properties (SetAccess = private) % construct ‚µ‚½‚ç•Ï‚¦‚È‚¢’lD
+    properties (SetAccess = private) % construct ã—ãŸã‚‰å¤‰ãˆãªã„å€¤ï¼Ž
         r = 10;
         id
     end
     
     methods
         function obj = RangePos_sim(self,param)
-            %  ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
+            %  ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             obj.self=self;
             if isfield(param,'r'); obj.r= param.r;end
 %            if isfield(param,'target'); obj.target= param.target;end
@@ -27,9 +27,9 @@ classdef RangePos_sim < SENSOR_CLASS
         end
         
         function result = do(obj,varargin)
-            % result=rpos.do(Target) : obj.r “à‚É‚¢‚éTarget‚ÌˆÊ’u‚ð•Ô‚·D
+            % result=rpos.do(Target) : obj.r å†…ã«ã„ã‚‹Targetã®ä½ç½®ã‚’è¿”ã™ï¼Ž
             %   result.state : State_obj,  p : position
-            % y“ü—ÍzTarget FŠÏ‘ª‘ÎÛ‚ÌModel_obj‚ÌƒŠƒXƒg
+            % ã€å…¥åŠ›ã€‘Target ï¼šè¦³æ¸¬å¯¾è±¡ã®Model_objã®ãƒªã‚¹ãƒˆ
             if ~isempty(varargin)
                 Target=varargin{1}{1};
 %                obj.target=Target;
@@ -37,18 +37,18 @@ classdef RangePos_sim < SENSOR_CLASS
                 Target=obj.target;
             end
             obj.target=obj.check_range(Target);
-            obj.result.neighbor=cell2mat(arrayfun(@(i) obj.target(i).state.p,1:length(obj.target),'UniformOutput',false)); % private ƒvƒƒpƒeƒB‚Æ‚µ‚Ä‚ÌplantiŽÀƒVƒXƒeƒ€j‚Ìó‘Ô‚ÉƒAƒNƒZƒXD
+            obj.result.neighbor=cell2mat(arrayfun(@(i) obj.target(i).state.p,1:length(obj.target),'UniformOutput',false)); % private ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã¨ã—ã¦ã®plantï¼ˆå®Ÿã‚·ã‚¹ãƒ†ãƒ ï¼‰ã®çŠ¶æ…‹ã«ã‚¢ã‚¯ã‚»ã‚¹ï¼Ž
             result=obj.result;
         end
         function target=check_range(obj,Target)
-            neighbor.p=cell2mat(arrayfun(@(i) Target(i).state.p,1:length(Target),'UniformOutput',false)); % private ƒvƒƒpƒeƒB‚Æ‚µ‚Ä‚ÌplantiŽÀƒVƒXƒeƒ€j‚Ìó‘Ô‚ÉƒAƒNƒZƒXD
+            neighbor.p=cell2mat(arrayfun(@(i) Target(i).state.p,1:length(Target),'UniformOutput',false)); % private ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã¨ã—ã¦ã®plantï¼ˆå®Ÿã‚·ã‚¹ãƒ†ãƒ ï¼‰ã®çŠ¶æ…‹ã«ã‚¢ã‚¯ã‚»ã‚¹ï¼Ž
 %             if isempty(obj.self)
-%                 obj.self=Target([Target.id]==obj.id); % Ž©‹@‚Ì^’ló‘Ô‚ð‚»‚Ì‚Ü‚Ü“n‚·D
+%                 obj.self=Target([Target.id]==obj.id); % è‡ªæ©Ÿã®çœŸå€¤çŠ¶æ…‹ã‚’ãã®ã¾ã¾æ¸¡ã™ï¼Ž
 %             end
             epos=neighbor.p-obj.self.state.p;
-            len2=sum(epos.*epos,1); % ‰¼‹——£‚ðŒvŽZ
-            rid = logical((len2< obj.r^2)-(len2==0)); % ’ÊM”ÍˆÍ“à‚ÌƒG[ƒWƒFƒ“ƒgIDC‘æ“ñ€‚ÍŽ©‹@‘Ì‚ðœ‚­‚½‚ß
-            target=Target(rid);% ƒZƒ“ƒT[”ÍˆÍ“à‚ÌƒG[ƒWƒFƒ“ƒg‚ð•Ô‚·D
+            len2=sum(epos.*epos,1); % ä»®è·é›¢ã‚’è¨ˆç®—
+            rid = logical((len2< obj.r^2)-(len2==0)); % é€šä¿¡ç¯„å›²å†…ã®ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆIDï¼Œç¬¬äºŒé …ã¯è‡ªæ©Ÿä½“ã‚’é™¤ããŸã‚
+            target=Target(rid);% ã‚»ãƒ³ã‚µãƒ¼ç¯„å›²å†…ã®ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã‚’è¿”ã™ï¼Ž
         end
         function show(obj,varargin)
             if ~isempty(obj.result)

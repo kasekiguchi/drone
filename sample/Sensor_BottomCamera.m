@@ -1,6 +1,6 @@
 function Sensor_BottomCamera(agent)
 %% sensor class demo : constructor
-% sensor property をSensor classのインスタンス配列として定義
+% sensor property 繧担ensor class縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ驟榊�励→縺励※螳夂ｾｩ
 Sensor.name=["Observation"];
 Sensor.type=["BottomCamera"];
 bc_param.Range=[-10 10;% X direction

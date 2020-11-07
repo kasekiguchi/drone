@@ -1,6 +1,6 @@
 function Estimator_LPF(agent)
 %% estimator class demo
-% estimator property をEstimator classのインスタンス配列として定義
+% estimator property 繧脱stimator class縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ驟榊�励→縺励※螳夂ｾｩ
 qnum=agent(1).model.state.num_list(contains(agent(1).model.state.list,["q"]));
 Eparam = struct('LPF_T',0.05,'list',["p","q"],'num_list',[3 qnum]);
 Estimator.type = "LPF";

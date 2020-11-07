@@ -1,5 +1,5 @@
 classdef UDP_CONNECTOR < CONNECTOR_CLASS
-  % UDP’ÊM—pƒNƒ‰ƒX
+  % UDPé€šä¿¡ç”¨ã‚¯ãƒ©ã‚¹
   %   
   
   properties
@@ -13,13 +13,13 @@ classdef UDP_CONNECTOR < CONNECTOR_CLASS
   end
   methods
     function obj = UDP_CONNECTOR(param)
-      % ’ÊM‚·‚é‘ÎÛ–ˆ‚ÉƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬‚·‚éD
-      %  param.IP : ’ÊM‘ÎÛ‚ÌIPƒAƒhƒŒƒX
+      % é€šä¿¡ã™ã‚‹å¯¾è±¡æ¯Žã«ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆã™ã‚‹ï¼Ž
+      %  param.IP : é€šä¿¡å¯¾è±¡ã®IPã‚¢ãƒ‰ãƒ¬ã‚¹
       obj.IP=param.IP;
       if isfield(param,'port')
         obj.port=param.port;
       else
-          %obj.port = 25000;% matlab dsp ‚Ìdefault value
+          %obj.port = 25000;% matlab dsp ã®default value
           obj.port = 8000;% 
       end
       obj.sender=dsp.UDPSender('RemoteIPAddress',char(obj.IP),'RemoteIPPort',obj.port);
@@ -28,12 +28,12 @@ classdef UDP_CONNECTOR < CONNECTOR_CLASS
     end
     
     function result = getData(obj,~)
-      % udp receiver‚Å‚Ìƒf[ƒ^ŽóM
+      % udp receiverã§ã®ãƒ‡ãƒ¼ã‚¿å—ä¿¡
       obj.result = obj.receiver();
       result=obj.result;
     end
     function sendData(obj,param)
-      % udp sender‚Å‚Ìƒf[ƒ^ŽóM
+      % udp senderã§ã®ãƒ‡ãƒ¼ã‚¿å—ä¿¡
       obj.sender(param);
     end
   end

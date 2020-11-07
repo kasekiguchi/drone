@@ -1,15 +1,15 @@
 function  [observe_fun,dobserve_fun,ProbabilityDensityFunction,EstParam] = DroneParam(param)
     EstParam.sigmaw      = param.sigmaw;
-    EstParam.sigmav      = [8.0E-6;8.0E-6;8.0E-6;1.0E-6;1.0E-6;1.0E-6];     % ƒVƒXƒeƒ€ƒmƒCƒY‚Ì•ªUƒxƒNƒgƒ‹
-    EstParam.Q           = eye(6).*EstParam.sigmav;                         % ƒVƒXƒeƒ€ƒmƒCƒY‚Ì‹¤•ªUs—ñ
-    EstParam.Ri          = eye(3).*EstParam.sigmaw;                         % 1‚Â‚Ì“Á’¥“_‚ÌŠÏ‘ªƒmƒCƒY‚Ì‹¤•ªUs—ñ
-    EstParam.InvRi       = inv(EstParam.Ri);                                % 1‚Â‚Ì“Á’¥“_‚ÌŠÏ‘ªƒmƒCƒY‚Ì‹¤•ªUs—ñ‚Ì‹ts—ñ
-    EstParam.R           = [];                                              % ‘ÎÛ‚Ì‘S“Á’¥“_‚ÌŠÏ‘ªƒmƒCƒY‚Ì‹¤•ªUs—ñ
-    EstParam.PD          = 0.8;                                             % ƒ^[ƒQƒbƒgŒŸoŠm—¦
-    EstParam.PG          = 0.8;                                             % ƒQ[ƒgŠm—¦
-    EstParam.lambda      = 1;                                               % ƒ|ƒAƒ\ƒ“•ª•zŠú‘Ò’l
-    EstParam.gamma       = 1.0E0;                                           % —LŒø—Ìˆæ
-    EstParam.SNR         = 1.0E-5;                                          % –ŒãŒë·‹¤•ªUs—ñ‚Ì‰Šú’l
+    EstParam.sigmav      = [8.0E-6;8.0E-6;8.0E-6;1.0E-6;1.0E-6;1.0E-6];     % ã‚·ã‚¹ãƒ†ãƒ ãƒã‚¤ã‚ºã®åˆ†æ•£ãƒ™ã‚¯ãƒˆãƒ«
+    EstParam.Q           = eye(6).*EstParam.sigmav;                         % ã‚·ã‚¹ãƒ†ãƒ ãƒã‚¤ã‚ºã®å…±åˆ†æ•£è¡Œåˆ—
+    EstParam.Ri          = eye(3).*EstParam.sigmaw;                         % 1ã¤ã®ç‰¹å¾´ç‚¹ã®è¦³æ¸¬ãƒã‚¤ã‚ºã®å…±åˆ†æ•£è¡Œåˆ—
+    EstParam.InvRi       = inv(EstParam.Ri);                                % 1ã¤ã®ç‰¹å¾´ç‚¹ã®è¦³æ¸¬ãƒã‚¤ã‚ºã®å…±åˆ†æ•£è¡Œåˆ—ã®é€†è¡Œåˆ—
+    EstParam.R           = [];                                              % å¯¾è±¡ã®å…¨ç‰¹å¾´ç‚¹ã®è¦³æ¸¬ãƒã‚¤ã‚ºã®å…±åˆ†æ•£è¡Œåˆ—
+    EstParam.PD          = 0.8;                                             % ã‚¿ãƒ¼ã‚²ãƒƒãƒˆæ¤œå‡ºç¢ºç‡
+    EstParam.PG          = 0.8;                                             % ã‚²ãƒ¼ãƒˆç¢ºç‡
+    EstParam.lambda      = 1;                                               % ãƒã‚¢ã‚½ãƒ³åˆ†å¸ƒæœŸå¾…å€¤
+    EstParam.gamma       = 1.0E0;                                           % æœ‰åŠ¹é ˜åŸŸ
+    EstParam.SNR         = 1.0E-5;                                          % äº‹å¾Œèª¤å·®å…±åˆ†æ•£è¡Œåˆ—ã®åˆæœŸå€¤
     EstParam.P           = eye(12)*EstParam.SNR;
     
     %%
@@ -17,26 +17,26 @@ function  [observe_fun,dobserve_fun,ProbabilityDensityFunction,EstParam] = Drone
     syms h Dt real
     X_sym = sym('X_sym', [12,1]);
     mx    = sym('mx',    [3,1]);   
-    OFfile="output_function_for_marker_position";                 % ƒ‚ƒfƒ‹‚ÌŠg’£üŒ`‰»
+    OFfile="output_function_for_marker_position";                 % ãƒ¢ãƒ‡ãƒ«ã®æ‹¡å¼µç·šå½¢åŒ–
     if exist(OFfile,"file")
         observe_fun = str2func(OFfile);
         dobserve_fun = str2func(strcat("Jacobian_",OFfile));
     else
-        % ‰ñ“]s—ñ
+        % å›è»¢è¡Œåˆ—
         Rotation_sym    = [cos(X_sym(6)),-sin(X_sym(6)),0;sin(X_sym(6)),cos(X_sym(6)),0;0,0,1]*...
             [cos(X_sym(5)),0,sin(X_sym(5));0,1,0;-sin(X_sym(5)),0,cos(X_sym(5))]*...
             [1,0,0;0,cos(X_sym(4)),-sin(X_sym(4));0,sin(X_sym(4)),cos(X_sym(4))];
-        % 1‚Â‚Ì“Á’¥“_‚ÌŠÏ‘ª•û’ö®(ƒƒ{ƒbƒgÀ•WŒn‚Ì“Á’¥“_ˆÊ’u‚ÆƒOƒ[ƒoƒ‹À•WŒn‚Ì“Á’¥“_ˆÊ’u‚Ì“¯•ÏŠ·s—ñ)
+        % 1ã¤ã®ç‰¹å¾´ç‚¹ã®è¦³æ¸¬æ–¹ç¨‹å¼(ãƒ­ãƒœãƒƒãƒˆåº§æ¨™ç³»ã®ç‰¹å¾´ç‚¹ä½ç½®ã¨ã‚°ãƒ­ãƒ¼ãƒãƒ«åº§æ¨™ç³»ã®ç‰¹å¾´ç‚¹ä½ç½®ã®åŒæ™‚å¤‰æ›è¡Œåˆ—)
         obsmodel_sub     = Rotation_sym * mx + X_sym(1:3);
-        observe_fun  =matlabFunction(obsmodel_sub,'File',"estimator/ExtendedLinearization/output_function_for_marker_position.m",'Vars',{X_sym,mx},'Comments',"yInputsz\n\t pos ([1;1;1]): position of COG of the rigid body\n\t mx (=[1 2 3;1 1 1]): marker position w. r. t. pos");
-        % ŠÏ‘ª•û’ö®‚ÌŠg’£üŒ`‰»
+        observe_fun  =matlabFunction(obsmodel_sub,'File',"estimator/ExtendedLinearization/output_function_for_marker_position.m",'Vars',{X_sym,mx},'Comments',"ã€Inputsã€‘\n\t pos ([1;1;1]): position of COG of the rigid body\n\t mx (=[1 2 3;1 1 1]): marker position w. r. t. pos");
+        % è¦³æ¸¬æ–¹ç¨‹å¼ã®æ‹¡å¼µç·šå½¢åŒ–
         dhi_sub          = pdiff(obsmodel_sub,X_sym);
         dobserve_fun     = matlabFunction(dhi_sub,'File',"estimator/ExtendedLinearization/Jacobian_output_function_for_marker_position.m",'Vars',{X_sym,mx});
     end
-    % Šm—¦–§“xŠÖ”
-    Z          = sym('Z',    [1, 3]);                                       % ŠÏ‘ª’l‚ÌƒVƒ“ƒ{ƒŠƒbƒN
-    hatZ       = sym('hatZ', [1, 3]);                                       % ŠÏ‘ª—\‘ª’l‚ÌƒVƒ“ƒ{ƒŠƒbƒN
-    Cov        = sym('Cov',  [3, 3]);                                       % Œë·‹¤•ªUs—ñ‚ÌƒVƒ“ƒ{ƒŠƒbƒN
+    % ç¢ºç‡å¯†åº¦é–¢æ•°
+    Z          = sym('Z',    [1, 3]);                                       % è¦³æ¸¬å€¤ã®ã‚·ãƒ³ãƒœãƒªãƒƒã‚¯
+    hatZ       = sym('hatZ', [1, 3]);                                       % è¦³æ¸¬äºˆæ¸¬å€¤ã®ã‚·ãƒ³ãƒœãƒªãƒƒã‚¯
+    Cov        = sym('Cov',  [3, 3]);                                       % èª¤å·®å…±åˆ†æ•£è¡Œåˆ—ã®ã‚·ãƒ³ãƒœãƒªãƒƒã‚¯
     PDfunction = 1 / sqrt((2 * pi())^3* det(Cov)) * exp(-1/2 * (Z - hatZ) / (Cov) * (Z - hatZ)');
     ProbabilityDensityFunction = matlabFunction(PDfunction,'Vars',{Z,hatZ,Cov});
 

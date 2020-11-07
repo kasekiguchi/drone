@@ -1,9 +1,9 @@
 classdef EKF < ESTIMATOR_CLASS
    % Extended Kalman filter
     % obj = EKF(model,param)
-    %   model : EKF‚ðŽÀ‘•‚·‚é§Œä‘ÎÛ‚Ì§Œäƒ‚ƒfƒ‹
+    %   model : EKFã‚’å®Ÿè£…ã™ã‚‹åˆ¶å¾¡å¯¾è±¡ã®åˆ¶å¾¡ãƒ¢ãƒ‡ãƒ«
     %   param : required field : Q,R,B,JacobianH
-    %  JacobianH(x,p) : o—Í•û’öŽ®‚ÌŠg’£üŒ`‰»‚µ‚½ŠÖ”‚Ìhandle
+    %  JacobianH(x,p) : å‡ºåŠ›æ–¹ç¨‹å¼ã®æ‹¡å¼µç·šå½¢åŒ–ã—ãŸé–¢æ•°ã®handle
       properties
         %state
         result
@@ -37,12 +37,12 @@ classdef EKF < ESTIMATOR_CLASS
             else
                 obj.y.list = [];
             end
-            obj.H = param.H; % o—Í•û’öŽ®
+            obj.H = param.H; % å‡ºåŠ›æ–¹ç¨‹å¼
             obj.JacobianH = param.JacobianH;
             obj.n = length(model.state.get());
-            obj.Q = param.Q;% •ªŽU
-            obj.R = param.R;% •ªŽU
-            obj.dt = model.dt; % ‚Ý
+            obj.Q = param.Q;% åˆ†æ•£
+            obj.R = param.R;% åˆ†æ•£
+            obj.dt = model.dt; % åˆ»ã¿
             obj.B = param.B;
             obj.result.P = param.P;
         end
@@ -51,13 +51,13 @@ classdef EKF < ESTIMATOR_CLASS
             %   param : optional
             model=obj.self.model;
             sensor = obj.self.sensor.result;
-            x = obj.result.state.get(); % ‘O‰ñŽž„’è’l
-            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% Ž–‘O„’è
-%             xh_pre = model.state.get(); % Ž–‘O„’è F“ü—Í‚ ‚è‚Ìê‡ imodel‚ªXV‚³‚ê‚Ä‚¢‚é‘O’ñj
+            x = obj.result.state.get(); % å‰å›žæ™‚åˆ»æŽ¨å®šå€¤
+            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% äº‹å‰æŽ¨å®š
+%             xh_pre = model.state.get(); % äº‹å‰æŽ¨å®š ï¼šå…¥åŠ›ã‚ã‚Šã®å ´åˆ ï¼ˆmodelãŒæ›´æ–°ã•ã‚Œã¦ã„ã‚‹å‰æï¼‰
             if isempty(obj.y.list)
-                obj.y.list=sensor.state.list; % num_list‚Í‘ã“ü‚µ‚Ä‚Í‚¢‚¯‚È‚¢D
+                obj.y.list=sensor.state.list; % num_listã¯ä»£å…¥ã—ã¦ã¯ã„ã‘ãªã„ï¼Ž
             end
-                state_convert(sensor.state,obj.y);% sensor‚Ì’l‚ðyŒ`Ž®‚É•ÏŠ·
+                state_convert(sensor.state,obj.y);% sensorã®å€¤ã‚’yå½¢å¼ã«å¤‰æ›
             p = model.param;
             if ~isempty(param)
                 F=fieldnames(param);
@@ -72,10 +72,10 @@ classdef EKF < ESTIMATOR_CLASS
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
             C = obj.JacobianH(x,p);
 
-            P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % Ž–‘OŒë·‹¤•ªŽUs—ñ
-            G = (P_pre*C')/(C*P_pre*C'+obj.R); % ƒJƒ‹ƒ}ƒ“ƒQƒCƒ“XV
-            P    = (eye(obj.n)-G*C)*P_pre;	% Ž–ŒãŒë·‹¤•ªŽU
-            tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% Ž–Œã„’è
+            P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % äº‹å‰èª¤å·®å…±åˆ†æ•£è¡Œåˆ—
+            G = (P_pre*C')/(C*P_pre*C'+obj.R); % ã‚«ãƒ«ãƒžãƒ³ã‚²ã‚¤ãƒ³æ›´æ–°
+            P    = (eye(obj.n)-G*C)*P_pre;	% äº‹å¾Œèª¤å·®å…±åˆ†æ•£
+            tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% äº‹å¾ŒæŽ¨å®š
             obj.result.state.set_state(tmpvalue);
             obj.result.G = G;
             obj.result.P = P;

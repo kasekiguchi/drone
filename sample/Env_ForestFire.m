@@ -1,7 +1,7 @@
 function Env_ForestFire(agent,map)
 %% environment class demo
 clc
-% env property ‚ğEnv class‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”z—ñ‚Æ‚µ‚Ä’è‹`
+% env property ã‚’Env classã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹é…åˆ—ã¨ã—ã¦å®šç¾©
 Env.type="ForestFireMap_sim";
 Env.name="firemap";
 Env.param.name="firemap";
@@ -9,7 +9,7 @@ Env.param.D = 1;
 Env.param.map_min = [-50 -50];%[x_min y_min]
 Env.param.map_max = [50 50];%[x_min y_min]
 
-if ~isempty(map) %ƒOƒ[ƒoƒ‹ƒ}ƒbƒv¶¬
+if ~isempty(map) %ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒãƒƒãƒ—ç”Ÿæˆ
     Env.param.v1=1;
     Env.param.v2=29;
     Env.param.w=(Env.param.v1+Env.param.v2)/2;

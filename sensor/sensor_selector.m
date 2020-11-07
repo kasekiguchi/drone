@@ -1,6 +1,6 @@
 function sensor_obj = sensor_selector(type,param)
-% –³—p‚ÈŠÖ”
-%   Ú×à–¾‚ğ‚±‚±‚É‹Lq
+% ç„¡ç”¨ãªé–¢æ•°
+%   è©³ç´°èª¬æ˜ã‚’ã“ã“ã«è¨˜è¿°
 switch type
     case "LiDAR_sim"
         sensor_obj = LiDAR_sim(param);

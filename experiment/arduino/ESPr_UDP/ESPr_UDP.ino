@@ -89,10 +89,10 @@ char packetBuffer[255];
 #define TOTAL_CH 8         // number of channels
 // https://create-it-myself.com/research/study-ppm-spec/
 #define PPM_PERIOD 22500  // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
-//#define TIME_LOW 400       // PPM信号 LOW時の幅　 // 同上
+#define TIME_LOW 400       // PPM信号 LOW時の幅　 // 同上 Futaba はこちら
 //#define TIME_HIGH_MIN 700  // PPM幅の最小 [us]       // 最小600 に余裕をもたせた値
 //#define TIME_HIGH_MAX 1500 // PPM幅の最大 [us]      // 最大1600 に余裕をもたせた値
-#define TIME_LOW 300       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
+//#define TIME_LOW 300       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
 //#define TIME_HIGH_MIN 700  // PPM幅の最小 [us] // 上のリンク情報に合わせる
 //#define TIME_HIGH_MAX 1700 // PPM幅の最大 [us] // 上のリンク情報に合わせる
 #define TIME_HIGH_MIN 600  // PPM幅の最小 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている

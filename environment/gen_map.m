@@ -1,29 +1,29 @@
 function [grid_density,map_max,map_min,xq,yq] = gen_map(Vertex,d,q,sigma)
-% Vertex : ‘ÎÛ—Ìˆæ
-% d : ƒOƒŠƒbƒh•
-% q : d—v“x‚ÌˆÊ’u [xi yi] ‚ğc‚É•À‚×‚é
-% map : ÀƒXƒP[ƒ‹ƒ}ƒbƒv
-% grid : s—ñƒ}ƒbƒv  grid(1,1)=map(0,0),  grid(end,1)=map(map_max(1),1)
-% ƒOƒ‰ƒt•\¦‚·‚é‚Æ‚«‚ÉH•v‚·‚é
-map_max=max(Vertex); % —Ìˆæ‚ğˆÍ‚¤’·•ûŒ`‚Ì‰EãÀ•W
-map_min=min(Vertex); % —Ìˆæ‚ğˆÍ‚¤’·•ûŒ`‚Ì¶‰ºÀ•W
+% Vertex : å¯¾è±¡é ˜åŸŸ
+% d : ã‚°ãƒªãƒƒãƒ‰å¹…
+% q : é‡è¦åº¦ã®ä½ç½® [xi yi] ã‚’ç¸¦ã«ä¸¦ã¹ã‚‹
+% map : å®Ÿã‚¹ã‚±ãƒ¼ãƒ«ãƒãƒƒãƒ—
+% grid : è¡Œåˆ—ãƒãƒƒãƒ—  grid(1,1)=map(0,0),  grid(end,1)=map(map_max(1),1)
+% ã‚°ãƒ©ãƒ•è¡¨ç¤ºã™ã‚‹ã¨ãã«å·¥å¤«ã™ã‚‹
+map_max=max(Vertex); % é ˜åŸŸã‚’å›²ã†é•·æ–¹å½¢ã®å³ä¸Šåº§æ¨™
+map_min=min(Vertex); % é ˜åŸŸã‚’å›²ã†é•·æ–¹å½¢ã®å·¦ä¸‹åº§æ¨™
 [xq,yq]=meshgrid(map_min(1):d:map_max(1),map_min(2):d:map_max(2)); %
-% —Ìˆæ‚ª (-1,-1) ‚©‚ç(2,1)‚Ìê‡
+% é ˜åŸŸãŒ (-1,-1) ã‹ã‚‰(2,1)ã®å ´åˆ
 % xq = [-1,0,1,2;-1,0,1,2;-1,0,1,2],  yq = [-1,-1,-1,-1;0,0,0,0;1,1,1,1];
 xq=xq';
 yq=yq';
 [row,col]=size(xq);
-xv=Vertex(:,1); % —Ìˆæ ’¸“_xÀ•W
-yv=Vertex(:,2); % —Ìˆæ ’¸“_yÀ•W
-in= inpolygon(xq,yq,xv,yv); % map À•W‚ª—Ìˆæ‚ÉŠÜ‚Ü‚ê‚é‚©‚Ì”»•Ê  F—Ìˆæ“à1 —ÌˆæŠO0
-%% d—v“x
-if isempty(q) % q = []  => ˆê—l•ª•z
+xv=Vertex(:,1); % é ˜åŸŸ é ‚ç‚¹xåº§æ¨™
+yv=Vertex(:,2); % é ˜åŸŸ é ‚ç‚¹yåº§æ¨™
+in= inpolygon(xq,yq,xv,yv); % map åº§æ¨™ãŒé ˜åŸŸã«å«ã¾ã‚Œã‚‹ã‹ã®åˆ¤åˆ¥  ï¼šé ˜åŸŸå†…1 é ˜åŸŸå¤–0
+%% é‡è¦åº¦
+if isempty(q) % q = []  => ä¸€æ§˜åˆ†å¸ƒ
     grid_density= ones(size(xq));
 else
-normal_k = sigma/d; % d‚İ—p³‹K•ª•z‚Ìexp“à‚ÌŒW”  0.04
-normal_mat = exp(-normal_k*((reshape(xq,[row*col,1])-q(:,1)').^2+(reshape(yq,[row*col,1])-q(:,2)').^2)); % Šed—v“xi—ñj‚ÌŠeƒOƒŠƒbƒhisj‚Ö‚Ì‰e‹¿i’lj
-normal_map = reshape(sum(normal_mat,2),[row,col]).*in; % ŠeƒOƒŠƒbƒhisj‚Ìd—v“x‚ğs—ñ‚É•ÏŒ`Fin‚ğ‚©‚¯—ÌˆæŠO‚Í‚O
-%grid_density = 255*normal_map/(max(normal_map,[],'all'))+1-50*(~in); % ³‹K‰»‚µ1`256‚Ì’l‚ÖD—ÌˆæŠO‚Í -50
-grid_density = 255*normal_map/(max(normal_map,[],'all'))-50*(~in); % ³‹K‰»‚µ0`255‚Ì’l‚ÖD—ÌˆæŠO‚Í -50
+normal_k = sigma/d; % é‡ã¿ç”¨æ­£è¦åˆ†å¸ƒã®expå†…ã®ä¿‚æ•°  0.04
+normal_mat = exp(-normal_k*((reshape(xq,[row*col,1])-q(:,1)').^2+(reshape(yq,[row*col,1])-q(:,2)').^2)); % å„é‡è¦åº¦ï¼ˆåˆ—ï¼‰ã®å„ã‚°ãƒªãƒƒãƒ‰ï¼ˆè¡Œï¼‰ã¸ã®å½±éŸ¿ï¼ˆå€¤ï¼‰
+normal_map = reshape(sum(normal_mat,2),[row,col]).*in; % å„ã‚°ãƒªãƒƒãƒ‰ï¼ˆè¡Œï¼‰ã®é‡è¦åº¦ã‚’è¡Œåˆ—ã«å¤‰å½¢ï¼šinã‚’ã‹ã‘é ˜åŸŸå¤–ã¯ï¼
+%grid_density = 255*normal_map/(max(normal_map,[],'all'))+1-50*(~in); % æ­£è¦åŒ–ã—1ã€œ256ã®å€¤ã¸ï¼é ˜åŸŸå¤–ã¯ -50
+grid_density = 255*normal_map/(max(normal_map,[],'all'))-50*(~in); % æ­£è¦åŒ–ã—0ã€œ255ã®å€¤ã¸ï¼é ˜åŸŸå¤–ã¯ -50
 end
 end

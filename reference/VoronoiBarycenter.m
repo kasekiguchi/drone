@@ -1,6 +1,6 @@
 classdef VoronoiBarycenter < REFERENCE_CLASS
-    % ƒ{ƒƒmƒCdS‚ğZo‚·‚éƒNƒ‰ƒX
-    %   Ú×à–¾‚ğ‚±‚±‚É‹Lq
+    % ãƒœãƒ­ãƒã‚¤é‡å¿ƒã‚’ç®—å‡ºã™ã‚‹ã‚¯ãƒ©ã‚¹
+    %   è©³ç´°èª¬æ˜ã‚’ã“ã“ã«è¨˜è¿°
     properties
         param
         self
@@ -16,51 +16,51 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             obj.result.state = STATE_CLASS(struct('state_list',["p"],'num_list',[3]));
         end
         function  result= do(obj,Param)
-            % yInputzParam = {sensor,estimator,env,param}
+            % ã€Inputã€‘Param = {sensor,estimator,env,param}
             %  param = range, pos_range, d, void,
-            % yOutputz result = –Ú•W’liƒOƒ[ƒoƒ‹ˆÊ’uj
-            %% ‹¤’Êİ’è‚PF’Pƒƒ{ƒƒmƒCƒZƒ‹Šm’è
+            % ã€Outputã€‘ result = ç›®æ¨™å€¤ï¼ˆã‚°ãƒ­ãƒ¼ãƒãƒ«ä½ç½®ï¼‰
+            %% å…±é€šè¨­å®šï¼‘ï¼šå˜ç´”ãƒœãƒ­ãƒã‚¤ã‚»ãƒ«ç¢ºå®š
             sensor = obj.self.sensor.result;%Param{1}.result;
-            state = obj.self.model.state;%Param{2}.state; % handle ’ˆÓ@—\‘ªó‘Ô
-            env = obj.self.env;%Param{3}.param;             % ŠÂ‹«‚Æ‚µ‚Ä—\‘ª‚µ‚½‚à‚Ì
-%             param = Param{4}; % “r’†‚Å•Ï‚¦‚ç‚ê‚é•K—v‚ª‚ ‚é‚©H
+            state = obj.self.model.state;%Param{2}.state; % handle æ³¨æ„ã€€äºˆæ¸¬çŠ¶æ…‹
+            env = obj.self.env;%Param{3}.param;             % ç’°å¢ƒã¨ã—ã¦äºˆæ¸¬ã—ãŸã‚‚ã®
+%             param = Param{4}; % é€”ä¸­ã§å¤‰ãˆã‚‰ã‚Œã‚‹å¿…è¦ãŒã‚ã‚‹ã‹ï¼Ÿ
 %             if isfield(param,'range'); obj.param.r = param.range;  end
 %             if isfield(param,'pos_range'); obj.param.R = param.pos_range;  end
 %             if isfield(param,'d'); obj.param.d = param.d;  end
 %             if isfield(param,'void'); obj.param.void = param.void;  end
-            r = obj.param.r; % d—v“x‚ğ‘ª‹—‚Å‚«‚éƒŒƒ“ƒW
-            R = obj.param.R; % ’ÊMƒŒƒ“ƒW
-            d= obj.param.d; % ƒOƒŠƒbƒhŠÔŠu
-            void=obj.param.void; % VOID•
+            r = obj.param.r; % é‡è¦åº¦ã‚’æ¸¬è·ã§ãã‚‹ãƒ¬ãƒ³ã‚¸
+            R = obj.param.R; % é€šä¿¡ãƒ¬ãƒ³ã‚¸
+            d= obj.param.d; % ã‚°ãƒªãƒƒãƒ‰é–“éš”
+            void=obj.param.void; % VOIDå¹…
             if isfield(sensor,'neighbor')
-                neighbor=sensor.neighbor; % ’ÊM—Ìˆæ“à‚ÌƒG[ƒWƒFƒ“ƒgˆÊ’u â‘ÎÀ•W
+                neighbor=sensor.neighbor; % é€šä¿¡é ˜åŸŸå†…ã®ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆä½ç½® çµ¶å¯¾åº§æ¨™
             elseif isfield(sensor,'rigid')
                 neighbor=[sensor.rigid(1:size(sensor.rigid,2)~=obj.self.id).p];
             end
-            if ~isempty(neighbor)% ’ÊM”ÍˆÍ‚ÉƒG[ƒWƒFƒ“ƒg‚ª‘¶İ‚·‚é‚©‚Ì”»•Ê
-                neighbor_rpos=neighbor-state.p; % ’ÊM—Ìˆæ“à‚ÌƒG[ƒWƒFƒ“ƒg‚Ì‘Š‘ÎˆÊ’u
-    %        if size(neighbor_rpos,2)>=1 % —×ÚƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u“_d‚İXV
-                % ˆÈ‰º‚ÍŒvZ•‰‰×‚ğ‰º‚°‚ç‚ê‚é‚ªd‚İ•t‚«voronoi‚ğ‚â‚é‚ÆƒZƒ‹Œ`ó‚ª•ö‚ê‚é
-                %     tri=delaunay([0,neighbor_rpos(1,:)],[0,neighbor_rpos(2,:)]); % ©‹@‘Ì(0,0)‚ğ‰Á‚¦‚½ƒhƒƒl[OŠpŒ`•ªŠ„
-                %     tmpid=tri(logical(sum(tri==1,2)),:); % 1 ‚Â‚Ü‚è©‹@‘Ì‚ğŠÜ‚ŞOŠpŒ`‚¾‚¯‚ğæ‚èo‚·D
-                %     tmpid=unique(tmpid(tmpid~=1))-1; % tmpid = —×ÚƒG[ƒWƒFƒ“ƒg‚ÌƒCƒ“ƒfƒbƒNƒX ineighbor_rpos“à‚ÌƒCƒ“ƒfƒbƒNƒX”Ô†j
-                %     neighbor_rpos=neighbor_rpos(:,tmpid); % —×ÚƒG[ƒWƒFƒ“ƒg‚Ì‘Š‘ÎˆÊ’u
-                %     neighbor.pos=neighbor.pos(:,tmpid); % —×ÚƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u
+            if ~isempty(neighbor)% é€šä¿¡ç¯„å›²ã«ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆãŒå­˜åœ¨ã™ã‚‹ã‹ã®åˆ¤åˆ¥
+                neighbor_rpos=neighbor-state.p; % é€šä¿¡é ˜åŸŸå†…ã®ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ç›¸å¯¾ä½ç½®
+    %        if size(neighbor_rpos,2)>=1 % éš£æ¥ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ç‚¹é‡ã¿æ›´æ–°
+                % ä»¥ä¸‹ã¯è¨ˆç®—è² è·ã‚’ä¸‹ã’ã‚‰ã‚Œã‚‹ãŒé‡ã¿ä»˜ãvoronoiã‚’ã‚„ã‚‹ã¨ã‚»ãƒ«å½¢çŠ¶ãŒå´©ã‚Œã‚‹
+                %     tri=delaunay([0,neighbor_rpos(1,:)],[0,neighbor_rpos(2,:)]); % è‡ªæ©Ÿä½“(0,0)ã‚’åŠ ãˆãŸãƒ‰ãƒ­ãƒãƒ¼ä¸‰è§’å½¢åˆ†å‰²
+                %     tmpid=tri(logical(sum(tri==1,2)),:); % 1 ã¤ã¾ã‚Šè‡ªæ©Ÿä½“ã‚’å«ã‚€ä¸‰è§’å½¢ã ã‘ã‚’å–ã‚Šå‡ºã™ï¼
+                %     tmpid=unique(tmpid(tmpid~=1))-1; % tmpid = éš£æ¥ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ ï¼ˆneighbor_rposå†…ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ï¼‰
+                %     neighbor_rpos=neighbor_rpos(:,tmpid); % éš£æ¥ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ç›¸å¯¾ä½ç½®
+                %     neighbor.pos=neighbor.pos(:,tmpid); % éš£æ¥ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®
                 %     neighbor.weight=sensor_obj.output.neighbor.weight(tmpid); % neighbor weight
                 %     neighbor.mass=sensor_obj.output.neighbor.mass(tmpid); % neighbor mass
-                Vn=voronoi_region([[0;0;0],(neighbor_rpos)],[R,R;-R,R;-R,-R;R,-R],1:size(neighbor,2)+1);% neighbors‚Æ‚Ì‚İƒ{ƒƒmƒC•ªŠ„i‘Š‘ÎÀ•Wj
-            else % ’ÊM”ÍˆÍ‚ÉƒG[ƒWƒFƒ“ƒg‚ª‚¢‚È‚¢ê‡
+                Vn=voronoi_region([[0;0;0],(neighbor_rpos)],[R,R;-R,R;-R,-R;R,-R],1:size(neighbor,2)+1);% neighborsã¨ã®ã¿ãƒœãƒ­ãƒã‚¤åˆ†å‰²ï¼ˆç›¸å¯¾åº§æ¨™ï¼‰
+            else % é€šä¿¡ç¯„å›²ã«ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆãŒã„ãªã„å ´åˆ
                 Vn=voronoi_region([0;0;0],[R,R;-R,R;-R,-R;R,-R],1);
             end
-            V=intersect(sensor.region,Vn{1}); % range_regionƒZƒ“ƒT‚ÌŒ‹‰Ê‚Æ‚Ì‹¤’Ê•”•ªi‘Š‘ÎÀ•Wj
-            region=polybuffer(V,-void); % ©—Ìˆæ‚ÌVOIDƒ}[ƒWƒ“‚ğæ‚Á‚½polyshape
+            V=intersect(sensor.region,Vn{1}); % range_regionã‚»ãƒ³ã‚µã®çµæœã¨ã®å…±é€šéƒ¨åˆ†ï¼ˆç›¸å¯¾åº§æ¨™ï¼‰
+            region=polybuffer(V,-void); % è‡ªé ˜åŸŸã®VOIDãƒãƒ¼ã‚¸ãƒ³ã‚’å–ã£ãŸpolyshape
             
             %%
             
             if area(region)<=0 
-                %% —Ìˆæ‚Ì–ÊÏ‚O
-                % ‚±‚±‚É‚­‚é‘½‚­‚Ìê‡‚ªbug‚©Hivoid‚ğæ‚é‚Æ‚ ‚è‚¦‚éj‚È‚ç“®‚©‚È‚¢iref = statej
-                result=[0;0;0]; % ‘Š‘ÎˆÊ’u
+                %% é ˜åŸŸã®é¢ç©ï¼
+                % ã“ã“ã«ãã‚‹å¤šãã®å ´åˆãŒbugã‹ï¼Ÿï¼ˆvoidã‚’å–ã‚‹ã¨ã‚ã‚Šãˆã‚‹ï¼‰ãªã‚‰å‹•ã‹ãªã„ï¼ˆref = stateï¼‰
+                result=[0;0;0]; % ç›¸å¯¾ä½ç½®
                 obj.param.region=region;
                 region_phi=[];
                 yq=[];
@@ -68,34 +68,34 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
                 warning("ACSL : The voronoi region is empty.")
             else
               if ~inpolygon(0,0,region.Vertices(:,1),region.Vertices(:,2))
-                % —Ìˆæ‚ª©‹@‘Ì‚ğŠÜ‚Ü‚È‚¢ivoid‚ğæ‚é‚Æ‚ ‚è‚¦‚éj‚È‚ç“®‚©‚È‚¢iref = statej
-                % ‚±‚±‚É‚­‚é‘½‚­‚Ìê‡‚ªbug‚©H
-                result=[0;0;0]; % ‘Š‘ÎˆÊ’u
+                % é ˜åŸŸãŒè‡ªæ©Ÿä½“ã‚’å«ã¾ãªã„ï¼ˆvoidã‚’å–ã‚‹ã¨ã‚ã‚Šãˆã‚‹ï¼‰ãªã‚‰å‹•ã‹ãªã„ï¼ˆref = stateï¼‰
+                % ã“ã“ã«ãã‚‹å¤šãã®å ´åˆãŒbugã‹ï¼Ÿ
+                result=[0;0;0]; % ç›¸å¯¾ä½ç½®
                 obj.param.region=region;
                 region_phi=[];
                 yq=[];
                 xq=[];
                 warning("ACSL : The agent is out of the voronoi region.")
               end
-                %% ‹¤’Êİ’è‚QF’Pƒƒ{ƒƒmƒCƒZƒ‹‚Ìd‚İŠm’è
+                %% å…±é€šè¨­å®šï¼’ï¼šå˜ç´”ãƒœãƒ­ãƒã‚¤ã‚»ãƒ«ã®é‡ã¿ç¢ºå®š
                 xq = sensor.xq;
                 yq = sensor.yq;
                 region_phi = sensor.grid_density;
-                in = inpolygon(xq,yq,region.Vertices(:,1),region.Vertices(:,2)); % i‘Š‘ÎÀ•Wj‘ª‹——Ìˆæ”»•Ê
-                region_phi = region_phi.*in;  % region_phi(i,j) : grid (i,j) ‚ÌˆÊ’u‚Å‚Ìd—v“xF‘ª‹——ÌˆæŠO‚Í‚O
-                mass=sum(region_phi,'all'); % —Ìˆæ‚Ì¿—Ê
-                cogx=sum(region_phi.*xq,'all')/mass;% ˆêŸƒ‚[ƒƒ“ƒg/¿—Ê
-                cogy=sum(region_phi.*yq,'all')/mass;% ˆêŸƒ‚[ƒƒ“ƒg/¿—Ê
-                result = [cogx;cogy;0]; % ‘Š‘ÎˆÊ’u
+                in = inpolygon(xq,yq,region.Vertices(:,1),region.Vertices(:,2)); % ï¼ˆç›¸å¯¾åº§æ¨™ï¼‰æ¸¬è·é ˜åŸŸåˆ¤åˆ¥
+                region_phi = region_phi.*in;  % region_phi(i,j) : grid (i,j) ã®ä½ç½®ã§ã®é‡è¦åº¦ï¼šæ¸¬è·é ˜åŸŸå¤–ã¯ï¼
+                mass=sum(region_phi,'all'); % é ˜åŸŸã®è³ªé‡
+                cogx=sum(region_phi.*xq,'all')/mass;% ä¸€æ¬¡ãƒ¢ãƒ¼ãƒ¡ãƒ³ãƒˆ/è³ªé‡
+                cogy=sum(region_phi.*yq,'all')/mass;% ä¸€æ¬¡ãƒ¢ãƒ¼ãƒ¡ãƒ³ãƒˆ/è³ªé‡
+                result = [cogx;cogy;0]; % ç›¸å¯¾ä½ç½®
             end
-            % •`‰æ—p•Ï”
+            % æç”»ç”¨å¤‰æ•°
             obj.result.region_phi=region_phi;
             obj.result.xq=xq;
             obj.result.yq=yq;
-            % ‚±‚±‚Ü‚Å‘Š‘ÎÀ•W
+            % ã“ã“ã¾ã§ç›¸å¯¾åº§æ¨™
             obj.result.region=region.Vertices+state.p(1:2)';
-            obj.result.state.p =(result+state.p);%.*[1;1;0]; % dSˆÊ’uiâ‘ÎÀ•Wj
-            obj.result.state.p(3) = 1; % ƒŠƒtƒ@ƒŒƒ“ƒX‚‚³‚Í‚P‚
+            obj.result.state.p =(result+state.p);%.*[1;1;0]; % é‡å¿ƒä½ç½®ï¼ˆçµ¶å¯¾åº§æ¨™ï¼‰
+            obj.result.state.p(3) = 1; % ãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹é«˜ã•ã¯ï¼‘ï½
             result = obj.result;
         end
         function show(obj,param)

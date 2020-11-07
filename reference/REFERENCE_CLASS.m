@@ -1,10 +1,10 @@
 classdef (Abstract) REFERENCE_CLASS < handle
-    %UNTITLED9 ‚±‚ÌƒNƒ‰ƒX‚ÌŠT—v‚ð‚±‚±‚É‹Lq
-    %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+    %UNTITLED9 ã“ã®ã‚¯ãƒ©ã‚¹ã®æ¦‚è¦ã‚’ã“ã“ã«è¨˜è¿°
+    %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
     
     properties
-        %state % –Ú•Wó‘Ô
-        result % ó‘ÔˆÈŠO‚ÌŽZoŒ‹‰Ê
+        %state % ç›®æ¨™çŠ¶æ…‹
+        result % çŠ¶æ…‹ä»¥å¤–ã®ç®—å‡ºçµæžœ
     end
     
     methods (Abstract)

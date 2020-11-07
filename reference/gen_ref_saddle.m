@@ -1,7 +1,7 @@
 function ref = gen_ref_saddle(varargin)
-% T FüŠú
-% origin : ƒTƒhƒ‹‚Ì’†S
-% scale : Še²‚ÌU•
+% T ï¼šå‘¨æœŸ
+% origin : ã‚µãƒ‰ãƒ«ã®ä¸­å¿ƒ
+% scale : å„è»¸ã®æŒ¯å¹…
 if length(varargin) == 1
     param=varargin{1};
 elseif length(varargin)==4
@@ -19,7 +19,7 @@ ly = scale(2); %3.5;
 ly_offset = origin(2);% 3.5;
 lz = scale(3);% 1;
 lz_offset=origin(3);% 1;
-w = 2*pi/T; % T•b‚Åˆêü
+w = 2*pi/T; % Tç§’ã§ä¸€å‘¨
 % xd1 = @(t) lx*cos(w*t-pi)+lx_offset;% x
 % xd2 = @(t) ly*sin(w*t-pi)+ly_offset;% y
 % xd3 = @(t) lz*sin(2*w*t-pi/2)+lz_offset;% z
@@ -29,7 +29,7 @@ ly*sin(w*t-pi)+ly_offset; % y
 lz*sin(2*w*t-pi/2)+lz_offset; % z
 0];%
 
-% ˆ³“|“I‚É’x‚¢‚Ì‚ÅˆÈ‰º‚Ì‚æ‚¤‚È‘‚«•û‚Í‚µ‚È‚¢‚±‚Æ
+% åœ§å€’çš„ã«é…ã„ã®ã§ä»¥ä¸‹ã®ã‚ˆã†ãªæ›¸ãæ–¹ã¯ã—ãªã„ã“ã¨
 % xdf =@(t) [xd1(t),xd2(t),xd3(t),xd4(t)];
 % dxdf =@(tt) subs(diff(xdf(t),t),t,tt);
 % ddxdf =@(tt) subs( diff(dxdf(t),t),t,tt);
@@ -44,7 +44,7 @@ lz*sin(2*w*t-pi/2)+lz_offset; % z
 %     case 'P2P'
 %         Xd.state=double(subs([xd1(t),xd2(t),xd3(t)],t,tt));
 %         Xd.param=param;
-%         ref = @(obj,tt,a,b,c,param) Xd;% a,b,c ‚Íƒ_ƒ~[
+%         ref = @(obj,tt,a,b,c,param) Xd;% a,b,c ã¯ãƒ€ãƒŸãƒ¼
 %     otherwise
 %         warning("Unexpected reference type");
 % end

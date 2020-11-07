@@ -1,5 +1,5 @@
 function [t,y] = euler_approximation(dxdt,tspan,init,option)
-% 状態更新用method : オイラー近似
+% 迥ｶ諷区峩譁ｰ逕ｨmethod : 繧ｪ繧､繝ｩ繝ｼ霑台ｼｼ
     if isfield(option,'dt')
         dt = option.dt
         ts=tspan(1)

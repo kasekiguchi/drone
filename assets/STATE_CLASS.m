@@ -23,18 +23,18 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                     addprop(obj,param.state_list(i));
                 end
             end
-            if sum(contains(obj.list,"q"))
-                obj.type=obj.num_list(contains(obj.list,"q"));
+            if sum(strcmp(obj.list,"q"))
+                obj.type=obj.num_list(strcmp(obj.list,"q"));
             end
         end
     end
     methods %(Access = protected)
         function [] = set_state(obj,varargin)
-            % ‡@@set_state("p",[0;0;0],"v",[0;0;0]);
-            % ‡A@set_state(struct("p",[0;0;0],"v",[0;0;0])); % ‘Só‘ÔƒZƒbƒg‚·‚é‚Æ‚«‚à‚±‚¿‚ç‚ðŽg‚¤‚±‚Æ‚ð„§
-            % ‡B@set_state(x0); % state_list ‚Ç‚¨‚è‚É•À‚ñ‚Å‚¢‚é‚à‚Ì‚Æ‚µ‚Ä‘ã“ü
-            %if mod(length(varargin{1}),2)==0 % ‡@@¬•ª‚ðŽw’è‚µ‚Ä‘ã“ü‚·‚éê‡
-            if mod(length(varargin),2)==0 % ‡@@¬•ª‚ðŽw’è‚µ‚Ä‘ã“ü‚·‚éê‡
+            % â‘ ã€€set_state("p",[0;0;0],"v",[0;0;0]);
+            % â‘¡ã€€set_state(struct("p",[0;0;0],"v",[0;0;0])); % å…¨çŠ¶æ…‹ã‚»ãƒƒãƒˆã™ã‚‹ã¨ãã‚‚ã“ã¡ã‚‰ã‚’ä½¿ã†ã“ã¨ã‚’æŽ¨å¥¨
+            % â‘¢ã€€set_state(x0); % state_list ã©ãŠã‚Šã«ä¸¦ã‚“ã§ã„ã‚‹ã‚‚ã®ã¨ã—ã¦ä»£å…¥
+            %if mod(length(varargin{1}),2)==0 % â‘ ã€€æˆåˆ†ã‚’æŒ‡å®šã—ã¦ä»£å…¥ã™ã‚‹å ´åˆ
+            if mod(length(varargin),2)==0 % â‘ ã€€æˆåˆ†ã‚’æŒ‡å®šã—ã¦ä»£å…¥ã™ã‚‹å ´åˆ
                 %varargin=varargin{1};
                 for i =1:nargin/2
                     if strcmp(varargin{2*i-1},"q")
@@ -46,7 +46,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
             else
                 %value=varargin{1}{1};
                 value=varargin{1};
-                if isstruct(value) % ‡A \‘¢‘Ì‚Å¬•ª‚ðŽw’è‚·‚éê‡
+                if isstruct(value) % â‘¡ æ§‹é€ ä½“ã§æˆåˆ†ã‚’æŒ‡å®šã™ã‚‹å ´åˆ
                     tmpf=fields(value);
                     for i = 1:length(tmpf)
                         if isprop(obj,tmpf{i})
@@ -57,7 +57,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                             end
                         end
                     end
-                else % ‡B ó‘ÔƒxƒNƒgƒ‹‚Å‘ã“ü‚·‚éê‡
+                else % â‘¢ çŠ¶æ…‹ãƒ™ã‚¯ãƒˆãƒ«ã§ä»£å…¥ã™ã‚‹å ´åˆ
                     tmpvalue=value;
                     for i = 1:length(obj.list)
                         if strcmp(obj.list(i),"q")
@@ -74,13 +74,13 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
     end
     methods
         function output = get(obj, varargin)
-            % ‡@@get(); ó‘ÔƒxƒNƒgƒ‹‚ðŽæ‚èo‚·
-            % ‡A@get("p"); î•ñ‚ðŽw’è‚µ‚ÄŽæ‚èo‚·
-            % ‡B@get(["p","v"]); î•ñ‚ð•¡”Žw’è‚µ‚ÄŽæ‚èo‚·
-            % ‡C@get("state"); \‘¢‘Ì‚Æ‚µ‚Äo—Í
-            if isempty(varargin) % ‡@
+            % â‘ ã€€get(); çŠ¶æ…‹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–ã‚Šå‡ºã™
+            % â‘¡ã€€get("p"); æƒ…å ±ã‚’æŒ‡å®šã—ã¦å–ã‚Šå‡ºã™
+            % â‘¢ã€€get(["p","v"]); æƒ…å ±ã‚’è¤‡æ•°æŒ‡å®šã—ã¦å–ã‚Šå‡ºã™
+            % â‘£ã€€get("state"); æ§‹é€ ä½“ã¨ã—ã¦å‡ºåŠ›
+            if isempty(varargin) % â‘ 
                 output = cell2mat(arrayfun(@(t) obj.(t)',string(obj.list),'UniformOutput',false))';
-            else % ‡AC‡B î•ñ‚ðŽw’è‚µ‚ÄŽæ‚èo‚·ê‡
+            else % â‘¡ï¼Œâ‘¢ æƒ…å ±ã‚’æŒ‡å®šã—ã¦å–ã‚Šå‡ºã™å ´åˆ
                 if strcmp(varargin{1},"state")
                     F = fieldnames(obj);
                     for i = 1:length(F)
@@ -139,21 +139,21 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                     q = value;
                 else
                     switch obj.type
-                        case 4 % o—Í‚ªunit quaternion‚Ìê‡
+                        case 4 % å‡ºåŠ›ãŒunit quaternionã®å ´åˆ
                             if len==3
                                 q=Eul2Quat(value);
                             else
                                 value=reshape(value,[3,3])';
                                 q = R2q(value);
                             end
-                        case 3 % o—Í‚ªeuler angle ‚Ìê‡
+                        case 3 % å‡ºåŠ›ãŒeuler angle ã®å ´åˆ
                             if len==4
                                 q=Quat2Eul(value);
                             else
                                 value=reshape(value,[3,3])';
                                 q= Quat2Eul(R2q(value));
                             end
-                        case 9 % o—Í‚ª‰ñ“]s—ñ‚Ìê‡
+                        case 9 % å‡ºåŠ›ãŒå›žè»¢è¡Œåˆ—ã®å ´åˆ
                             if len==4
                                 q= R2v(RodriguesQuaternion(value));
                             else

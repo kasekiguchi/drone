@@ -13,8 +13,8 @@ classdef DirectEstimator < ESTIMATOR_CLASS
         end
         function result=do(obj,~,~)
             % Copy field values corresponding to the field of obj.result.state (=model.state) only.
-            % yInputz
-            % yOutputzvoid
+            % ã€Inputã€‘
+            % ã€Outputã€‘void
             F = fieldnames(obj.result.state);
             for i = 1:length(F)
                 if ~strcmp(F{i},'list') && ~strcmp(F{i},'num_list') && ~strcmp(F{i},'type')

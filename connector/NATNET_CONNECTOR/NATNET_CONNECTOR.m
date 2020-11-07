@@ -57,17 +57,17 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             end
         end
         function ret = getData(obj,~)
-            % yfields of resultz
+            % ã€fields of resultã€‘
             % rigid : (struct array) rigid body info
             % marker : (struct array) all marker position
             % rigid_num % number of rigid bodies
             % marker_num % number of UnLabeledMarker
             % time      % time from init_time
-            %% –{—ˆiMotive‚©‚çExcel‚Åo—Í‚µŠm”F‚·‚é‚Æj
-            %    LabeledMarker : „‘Ìî•ñ¶¬‚ÉŽg‚í‚ê‚éƒ}[ƒJ[î•ñ
-            %    UnlabeledMarker : LabeledMarker+‚»‚êˆÈŠO‚Ìƒ}[ƒJ[î•ñ‚ðŠÜ‚Þî•ñ
-            %  ‚µ‚©‚µCNatnetClient‚ÅgetFrame‚·‚é‚Æ‚±‚ÌŠÖŒW‚ª‹t‚É‚È‚Á‚Ä‚¢‚éD
-            %  ‚¨‚»‚ç‚­‚Ç‚±‚©‚ÅC³‚ª“ü‚é‚Ì‚ÅXV‚ª‚ ‚Á‚½‚ç’ˆÓ
+            %% æœ¬æ¥ï¼ˆMotiveã‹ã‚‰Excelã§å‡ºåŠ›ã—ç¢ºèªã™ã‚‹ã¨ï¼‰
+            %    LabeledMarker : å‰›ä½“æƒ…å ±ç”Ÿæˆã«ä½¿ã‚ã‚Œã‚‹ãƒžãƒ¼ã‚«ãƒ¼æƒ…å ±
+            %    UnlabeledMarker : LabeledMarker+ãã‚Œä»¥å¤–ã®ãƒžãƒ¼ã‚«ãƒ¼æƒ…å ±ã‚’å«ã‚€æƒ…å ±
+            %  ã—ã‹ã—ï¼ŒNatnetClientã§getFrameã™ã‚‹ã¨ã“ã®é–¢ä¿‚ãŒé€†ã«ãªã£ã¦ã„ã‚‹ï¼Ž
+            %  ãŠãã‚‰ãã©ã“ã‹ã§ä¿®æ­£ãŒå…¥ã‚‹ã®ã§æ›´æ–°ãŒã‚ã£ãŸã‚‰æ³¨æ„
             ModelDescription = obj.NatnetClient.getModelDescription;
             obj.result.rigid_num = ModelDescription.RigidBodyCount;
             if ( obj.result.rigid_num < 1 )

@@ -1,11 +1,11 @@
 function eval_read(filename)
-% file‚Ì’†g‚ğˆês‚¸‚ÂÀs‚·‚é‚½‚ß‚ÌŠÖ”
-% test.m ‚Ì’†g‚ªˆÈ‰º‚Æ‚·‚é‚Æ
+% fileã®ä¸­èº«ã‚’ä¸€è¡Œãšã¤å®Ÿè¡Œã™ã‚‹ãŸã‚ã®é–¢æ•°
+% test.m ã®ä¸­èº«ãŒä»¥ä¸‹ã¨ã™ã‚‹ã¨
 % k = 1;
 % for i = 1:5; k=k*i; end
 % k
 % eval_read(filename)  =>  120
-% for •¶‚È‚Ç‚Í‚Ps‚É‘‚­•K—v‚ª‚ ‚éD
+% for æ–‡ãªã©ã¯ï¼‘è¡Œã«æ›¸ãå¿…è¦ãŒã‚ã‚‹ï¼
 fileID = fopen(filename);
 % C = textscan(fileID,'%s %s %f32 %d8 %u %f %f %s %f');
 test=textscan(fileID,"%s",'Delimiter',{'\n'});

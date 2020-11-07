@@ -1,5 +1,5 @@
 classdef Lizard_exp < MODEL_CLASS
-    % Lizard ŽÀŒ±—pƒ‚ƒfƒ‹
+    % Lizard å®Ÿé¨“ç”¨ãƒ¢ãƒ‡ãƒ«
     properties% (Access=private)
         ESPr_num
         connector
@@ -76,7 +76,7 @@ classdef Lizard_exp < MODEL_CLASS
                 if cha   == 't'
                     msg(1,1:8) = u;
                 end
-            else % ‹Ù‹}Žž ƒvƒƒyƒ‰ƒXƒgƒbƒv
+            else % ç·Šæ€¥æ™‚ ãƒ—ãƒ­ãƒšãƒ©ã‚¹ãƒˆãƒƒãƒ—
                % warning("ACSL : Emergency stop!!");
                
                 uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
@@ -84,21 +84,21 @@ classdef Lizard_exp < MODEL_CLASS
                 msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
             end
             
-            % 2020/09/24 19:27 C³‰ÓŠi‹{˜ej
+            % 2020/09/24 19:27 ä¿®æ­£ç®‡æ‰€ï¼ˆå®®è„‡ï¼‰
             % Modification_1 : Changing the oder of msg's array
             % Detail_1 : exchanging msg(1,1) and msg(1,4)
-            % ‚±‚ÌC³‚ªŠÔˆá‚¢‚È‚Ì‚ÅƒRƒƒ“ƒg‰»‚·‚éB
+            % ã“ã®ä¿®æ­£ãŒé–“é•ã„ãªã®ã§ã‚³ãƒ¡ãƒ³ãƒˆåŒ–ã™ã‚‹ã€‚
             
 %             buff = msg(1,1);
 %             msg(1,1) = msg(1,4);
 %             msg(1,4) = buff;
             
-            % 2020/09/26 14:11 C³‰ÓŠi‹{˜ej
-            % Modification_2 : ‘Sƒ`ƒƒƒ“ƒlƒ‹ƒf[ƒ^‚©‚ç400‚ðˆø‚­
-            % Detail_2 : BetaFlight‚ÌÝ’è‚É‚æ‚èA“ü—Íƒf[ƒ^‚ª400‰ÁŽZ‚³‚ê‚é‚½‚ßAmsg(1,1)~msg(1,8)‚©‚ç400‚ðˆø‚­
-            % Arduino‘¤‚ÌÝ’è‚à-400‚Æ‚µ‚½B
-            % #define TIME_HIGH_MIN 600 - 400  // PPM•‚ÌÅ¬
-            % #define TIME_HIGH_MAX 1600 - 400 // PPM•‚ÌÅ‘å
+            % 2020/09/26 14:11 ä¿®æ­£ç®‡æ‰€ï¼ˆå®®è„‡ï¼‰
+            % Modification_2 : å…¨ãƒãƒ£ãƒ³ãƒãƒ«ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰400ã‚’å¼•ã
+            % Detail_2 : BetaFlightã®è¨­å®šã«ã‚ˆã‚Šã€å…¥åŠ›ãƒ‡ãƒ¼ã‚¿ãŒ400åŠ ç®—ã•ã‚Œã‚‹ãŸã‚ã€msg(1,1)~msg(1,8)ã‹ã‚‰400ã‚’å¼•ã
+            % Arduinoå´ã®è¨­å®šã‚‚-400ã¨ã—ãŸã€‚
+            % #define TIME_HIGH_MIN 600 - 400  // PPMå¹…ã®æœ€å°
+            % #define TIME_HIGH_MAX 1600 - 400 // PPMå¹…ã®æœ€å¤§
             
            % msg(1,1:8) = msg(1,1:8) - 400; 
             

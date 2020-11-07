@@ -2,14 +2,14 @@ function x = projection_to_SO3(state)
     x= state;
     if isfield(state,'R')
         x.R=R2v(M2SO3(v2R(state.R)));
-    else % R ‚ğ‚½‚È‚¢ê‡‚Í‰½‚à‚µ‚È‚¢
+    else % R ã‚’æŒãŸãªã„å ´åˆã¯ä½•ã‚‚ã—ãªã„
 %        x(1:9)=R2v(M2SO3(v2R(state(1:9))));
         disp("projection_to_SO3 does nothing.")
     end
 end
 
 %% local functions
-%% SO3‚Ö‚ÌË‰e
+%% SO3ã¸ã®å°„å½±
 function R=M2SO3(M)
 [U,S,V]=svd(M);
 R=U*diag([1,1,det(U*V)])*V';

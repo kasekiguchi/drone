@@ -1,6 +1,6 @@
 function Controller_MEC(agent)
 %% controller class demo (1) : construct
-% controller property をController classのインスタンス配列として定義
+% controller property 繧辰ontroller class縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ驟榊�励→縺励※螳夂ｾｩ
 %Controller.type="DirectController";
 Controller.type="MEC";
 Controller.name="mec";
