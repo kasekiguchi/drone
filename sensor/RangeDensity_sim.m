@@ -1,16 +1,16 @@
 classdef RangeDensity_sim < SENSOR_CLASS
-    % RangeDensity‚Ìsimulation—pƒNƒ‰ƒXF“o˜^‚³‚ê‚½ƒG[ƒWƒFƒ“ƒg‚Ì‚¤‚¿”¼Œa“à‚ÌƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ð•Ô‚·
+    % RangeDensityã®simulationç”¨ã‚¯ãƒ©ã‚¹ï¼šç™»éŒ²ã•ã‚ŒãŸã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ã†ã¡åŠå¾„å†…ã®ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’è¿”ã™
     %   rdensity = RangeDensity_sim(param)
-    %   (optional) param.r : ”¼Œa
-    %   param.id : ‚±‚ÌƒZƒ“ƒT[‚ðÏ‚ñ‚Å‚¢‚é‹@‘Ì‚Ìid‚Æˆê’v‚³‚¹‚éD
+    %   (optional) param.r : åŠå¾„
+    %   param.id : ã“ã®ã‚»ãƒ³ã‚µãƒ¼ã‚’ç©ã‚“ã§ã„ã‚‹æ©Ÿä½“ã®idã¨ä¸€è‡´ã•ã›ã‚‹ï¼Ž
     properties
         name = "";
         result
         interface = @(x) x;
-        target % ŠÏ‘ª‘ÎÛ‚ÌŠÂ‹«
-        self % ƒZƒ“ƒT[‚ðÏ‚ñ‚Å‚¢‚é‹@‘Ì‚Ìhandle object
+        target % è¦³æ¸¬å¯¾è±¡ã®ç’°å¢ƒ
+        self % ã‚»ãƒ³ã‚µãƒ¼ã‚’ç©ã‚“ã§ã„ã‚‹æ©Ÿä½“ã®handle object
     end
-    properties (SetAccess = private) % construct ‚µ‚½‚ç•Ï‚¦‚È‚¢’lD
+    properties (SetAccess = private) % construct ã—ãŸã‚‰å¤‰ãˆãªã„å€¤ï¼Ž
         r = 10;
         id
     end
@@ -18,7 +18,7 @@ classdef RangeDensity_sim < SENSOR_CLASS
     methods
         function obj = RangeDensity_sim(self,param)
             obj.self=self;
-            %  ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
+            %  ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             if isfield(param,'r'); obj.r= param.r;end
             %            if isfield(param,'target'); obj.target= param.target;end
             obj.id= self.id;
@@ -28,49 +28,49 @@ classdef RangeDensity_sim < SENSOR_CLASS
         end
         
         function result = do(obj,varargin)
-            % result=rdensity.do(varargin) : obj.r “à‚Ìdensity map‚ð•Ô‚·D
+            % result=rdensity.do(varargin) : obj.r å†…ã®density mapã‚’è¿”ã™ï¼Ž
             %   result.state : State_obj,  p : position
-            % y“ü—Ízvarargin = {{Env}}      agent : ƒZƒ“ƒT[‚ðÏ‚ñ‚Å‚¢‚é‹@‘Ìobj,    EnvFŠÏ‘ª‘ÎÛ‚ÌEnv_obj
+            % ã€å…¥åŠ›ã€‘varargin = {{Env}}      agent : ã‚»ãƒ³ã‚µãƒ¼ã‚’ç©ã‚“ã§ã„ã‚‹æ©Ÿä½“obj,    Envï¼šè¦³æ¸¬å¯¾è±¡ã®Env_obj
                 param=varargin{1}{1}.param;
 %                obj.self=varargin{1}{1};
-            state=obj.self.state; % ^’l
+            state=obj.self.state; % çœŸå€¤
             env = polyshape(param.Vertices);
             
-            %% ƒZƒ“ƒVƒ“ƒO—Ìˆæ‚ð’è‹`
+            %% ã‚»ãƒ³ã‚·ãƒ³ã‚°é ˜åŸŸã‚’å®šç¾©
             tmp = 0:0.1:2*pi;
-            sensor_range=polyshape(state.p(1)+obj.r*sin(tmp),state.p(2)+obj.r*cos(tmp)); % ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ð’†S‚Æ‚µ‚½‰~
+            sensor_range=polyshape(state.p(1)+obj.r*sin(tmp),state.p(2)+obj.r*cos(tmp)); % ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’ä¸­å¿ƒã¨ã—ãŸå††
             
-            %% —Ìˆæ‚ÆŠÂ‹«‚Ìintersection‚ª‘ª‹——Ìˆæ
-            region=intersect(sensor_range, env); % ‘ª‹——Ìˆæ
-            region.Vertices=region.Vertices-state.p(1:2)'; % ‘Š‘Î“I‚È‘ª‹——Ìˆæ
+            %% é ˜åŸŸã¨ç’°å¢ƒã®intersectionãŒæ¸¬è·é ˜åŸŸ
+            region=intersect(sensor_range, env); % æ¸¬è·é ˜åŸŸ
+            region.Vertices=region.Vertices-state.p(1:2)'; % ç›¸å¯¾çš„ãªæ¸¬è·é ˜åŸŸ
             
-            %% d‚Ý•ª•z
-            pxy=state.p(1:2)'-param.map_min; % —Ìˆæ¶‰º‚©‚çŒ©‚½ƒG[ƒWƒFƒ“ƒgÀ•W
-            pmap_min=max(pxy+[-obj.r,-obj.r],[0,0]); % ƒG[ƒWƒFƒ“ƒg‚ð’†S‚Æ‚µ‚½ƒZƒ“ƒT[ƒŒƒ“ƒW‚Ì’¼•û•ï¶‰ºÀ•W
-            pmap_max=min(pxy+[obj.r,obj.r],param.map_max-param.map_min); % ‰EãÀ•W
-            rpmap_min=pmap_min-pxy; % ‘Š‘ÎÀ•W Fgrid‰»‚·‚é‚½‚ß‚É“à‘¤‚É‚È‚é‚æ‚¤ceil‚µ‚Ä‚¨‚­
-            rpmap_max=pmap_max-pxy; %  ‘Š‘ÎÀ•W Fgrid‰»‚·‚é‚½‚ß‚É“à‘¤‚É‚È‚é‚æ‚¤floor‚µ‚Ä‚¨‚­D
-%             rpmap_min=ceil((pmap_min-pxy)/param.d); % ‘Š‘ÎÀ•W Fgrid‰»‚·‚é‚½‚ß‚É“à‘¤‚É‚È‚é‚æ‚¤ceil‚µ‚Ä‚¨‚­
-%             rpmap_max=floor((pmap_max-pxy)/param.d); %  ‘Š‘ÎÀ•W Fgrid‰»‚·‚é‚½‚ß‚É“à‘¤‚É‚È‚é‚æ‚¤floor‚µ‚Ä‚¨‚­D
-            [xq,yq]=meshgrid(rpmap_min(1):param.d:rpmap_max(1),rpmap_min(2):param.d:rpmap_max(2));% ‘Š‘ÎÀ•W
-            xq=xq';      yq=yq'; % cell index‚Í¶ã‚©‚ç‚¾‚ªCÀ•WŒn‚Í¶‰º‚ªŠî€‚È‚Ì‚ÅÀ•WŒn‚É‡‚í‚¹‚é‚æ‚¤‚É“]’u‚·‚éD
-%    [xq,yq]=meshgrid(rpmap_min(1):param.d:rpmap_max(1),rpmap_max(2):-param.d:rpmap_min(2));% ‘Š‘ÎÀ•W
+            %% é‡ã¿åˆ†å¸ƒ
+            pxy=state.p(1:2)'-param.map_min; % é ˜åŸŸå·¦ä¸‹ã‹ã‚‰è¦‹ãŸã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆåº§æ¨™
+            pmap_min=max(pxy+[-obj.r,-obj.r],[0,0]); % ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã‚’ä¸­å¿ƒã¨ã—ãŸã‚»ãƒ³ã‚µãƒ¼ãƒ¬ãƒ³ã‚¸ã®ç›´æ–¹åŒ…å·¦ä¸‹åº§æ¨™
+            pmap_max=min(pxy+[obj.r,obj.r],param.map_max-param.map_min); % å³ä¸Šåº§æ¨™
+            rpmap_min=pmap_min-pxy; % ç›¸å¯¾åº§æ¨™ ï¼šgridåŒ–ã™ã‚‹ãŸã‚ã«å†…å´ã«ãªã‚‹ã‚ˆã†ceilã—ã¦ãŠã
+            rpmap_max=pmap_max-pxy; %  ç›¸å¯¾åº§æ¨™ ï¼šgridåŒ–ã™ã‚‹ãŸã‚ã«å†…å´ã«ãªã‚‹ã‚ˆã†floorã—ã¦ãŠãï¼Ž
+%             rpmap_min=ceil((pmap_min-pxy)/param.d); % ç›¸å¯¾åº§æ¨™ ï¼šgridåŒ–ã™ã‚‹ãŸã‚ã«å†…å´ã«ãªã‚‹ã‚ˆã†ceilã—ã¦ãŠã
+%             rpmap_max=floor((pmap_max-pxy)/param.d); %  ç›¸å¯¾åº§æ¨™ ï¼šgridåŒ–ã™ã‚‹ãŸã‚ã«å†…å´ã«ãªã‚‹ã‚ˆã†floorã—ã¦ãŠãï¼Ž
+            [xq,yq]=meshgrid(rpmap_min(1):param.d:rpmap_max(1),rpmap_min(2):param.d:rpmap_max(2));% ç›¸å¯¾åº§æ¨™
+            xq=xq';      yq=yq'; % cell indexã¯å·¦ä¸Šã‹ã‚‰ã ãŒï¼Œåº§æ¨™ç³»ã¯å·¦ä¸‹ãŒåŸºæº–ãªã®ã§åº§æ¨™ç³»ã«åˆã‚ã›ã‚‹ã‚ˆã†ã«è»¢ç½®ã™ã‚‹ï¼Ž
+%    [xq,yq]=meshgrid(rpmap_min(1):param.d:rpmap_max(1),rpmap_max(2):-param.d:rpmap_min(2));% ç›¸å¯¾åº§æ¨™
     
-            % ‘ÎÛ—Ìˆæ‚Ìd—v“xƒ}ƒbƒv‚ðŽæ‚èo‚·
+            % å¯¾è±¡é ˜åŸŸã®é‡è¦åº¦ãƒžãƒƒãƒ—ã‚’å–ã‚Šå‡ºã™
             min_grid_cell=floor(pmap_min/param.d);
-            min_grid_cell(min_grid_cell==0)=1; % ‚±‚ê‚ª–³‚¢‚Æ0‚©‚ç‚É‚È‚Á‚Ä‚µ‚Ü‚¤
-            max_grid_cell=min_grid_cell+size(xq)-[1 1]; % region_phi ‚Æ in‚ÌƒTƒCƒY‚ð‡‚í‚¹‚é‚½‚ß
-            region_phi=param.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2));% ‘Š‘Î“I‚Èd—v“xs—ñ
-            in = inpolygon(xq,yq,region.Vertices(:,1),region.Vertices(:,2)); % i‘Š‘ÎÀ•Wj‘ª‹——Ìˆæ”»•Ê
+            min_grid_cell(min_grid_cell==0)=1; % ã“ã‚ŒãŒç„¡ã„ã¨0ã‹ã‚‰ã«ãªã£ã¦ã—ã¾ã†
+            max_grid_cell=min_grid_cell+size(xq)-[1 1]; % region_phi ã¨ inã®ã‚µã‚¤ã‚ºã‚’åˆã‚ã›ã‚‹ãŸã‚
+            region_phi=param.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2));% ç›¸å¯¾çš„ãªé‡è¦åº¦è¡Œåˆ—
+            in = inpolygon(xq,yq,region.Vertices(:,1),region.Vertices(:,2)); % ï¼ˆç›¸å¯¾åº§æ¨™ï¼‰æ¸¬è·é ˜åŸŸåˆ¤åˆ¥
             
 
-            result.grid_density = region_phi.*in-0*(~in);  % region_phi(i,j) : grid (i,j) ‚ÌˆÊ’u‚Å‚Ìd—v“xF‘ª‹——ÌˆæŠO‚Í0
-            %result.grid_pos=-rpmap_min; % region_phi ‚ª’è‹`‚³‚ê‚Ä‚¢‚égrid À•Wã‚Å‚ÌƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’uƒZƒ‹
+            result.grid_density = region_phi.*in-0*(~in);  % region_phi(i,j) : grid (i,j) ã®ä½ç½®ã§ã®é‡è¦åº¦ï¼šæ¸¬è·é ˜åŸŸå¤–ã¯0
+            %result.grid_pos=-rpmap_min; % region_phi ãŒå®šç¾©ã•ã‚Œã¦ã„ã‚‹grid åº§æ¨™ä¸Šã§ã®ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚»ãƒ«
             result.xq=xq;
             result.yq=yq;
             result.map_max=rpmap_max;
             result.map_min=rpmap_min;
-            %% o—Í‚Æ‚µ‚Ä®Œ`
+            %% å‡ºåŠ›ã¨ã—ã¦æ•´å½¢
             result.region=region;
             
             obj.result = result;

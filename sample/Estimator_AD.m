@@ -1,6 +1,6 @@
 function Estimator_AD(agent)
 %% estimator class demo
-% estimator property をEstimator classのインスタンス配列として定義
+% estimator property 繧脱stimator class縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ驟榊�励→縺励※螳夂ｾｩ
 Eparam = struct('LPF_T',0.05,'list',["p","q";"v","w"],'num_list',[3 3; 3 3]);
 Estimator.type = "Approximate_Differentiation";
 Estimator.name = "ad";

@@ -1,6 +1,6 @@
 classdef Singleton < handle
-  % ƒvƒƒOƒ‰ƒ€‚ðŽÀs‚·‚éƒRƒ“ƒsƒ…[ƒ^Ž©g‚Ì‰¼‘zƒNƒ‰ƒX
-  %  singleton pattern‚Å\¬
+  % ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’å®Ÿè¡Œã™ã‚‹ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ã‚¿è‡ªèº«ã®ä»®æƒ³ã‚¯ãƒ©ã‚¹
+  %  singleton patternã§æ§‹æˆ
   
   properties (Access=private,Constant)
     %computer=Singleton();
@@ -12,7 +12,7 @@ classdef Singleton < handle
   
   methods (Access=private)
     function obj = Singleton()
-      % ƒRƒ“ƒXƒgƒ‰ƒNƒ^Fprivate‚É‚·‚é‚±‚Æ‚Åsingleton‚É‚·‚éD
+      % ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ï¼šprivateã«ã™ã‚‹ã“ã¨ã§singletonã«ã™ã‚‹ï¼Ž
       obj.IP="";
     end
   end
@@ -27,7 +27,7 @@ classdef Singleton < handle
       end
     end
   end
-  methods % •K—v‚È‚¢
+  methods % å¿…è¦ãªã„
     function set_properties(obj,param)
       F = fieldnames(param);
       for i = 1:length(F)

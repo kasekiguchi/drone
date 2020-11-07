@@ -1,6 +1,6 @@
 function Estimator_PDAF(agent)
 %% estimator class demo
-% estimator property をEstimator classのインスタンス配列として定義
+% estimator property 繧脱stimator class縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ驟榊�励→縺励※螳夂ｾｩ
 Estimator.name="pdaf";
 Estimator.type="PDAF";
 Estimator.param={struct('sigmaw',1.0E-4*ones(3,1))};%[6.716E-3; 7.058E-3; 7.058E-3])};

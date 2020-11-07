@@ -1,9 +1,9 @@
 classdef PDAF < ESTIMATOR_CLASS
     % Probabilistic data association filter based on feature points
-    % yReceived information from NATNETz
-    %    EThe number of feature points
-    %    EThe feature point position on robot coordinate
-    %    EAll observations from sensor
+    % ã€Received information from NATNETã€‘
+    %    ãƒ»The number of feature points
+    %    ãƒ»The feature point position on robot coordinate
+    %    ãƒ»All observations from sensor
     properties (Access = public)
         %state
         result
@@ -19,9 +19,9 @@ classdef PDAF < ESTIMATOR_CLASS
     end
     methods
         function obj = PDAF(self,Param)
-            %yInputz self : agent  obj
+            %ã€Inputã€‘ self : agent  obj
             %          param : Construct of sensor
-            %yOutputzobj
+            %ã€Outputã€‘obj
             obj.self= self;
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","v","w"],'num_list',[3,3,3,3],'type','euler'));
             %%% Parameter for estimationg as the drone %%%
@@ -78,7 +78,7 @@ classdef PDAF < ESTIMATOR_CLASS
                 % Output equation against one feature
                 %   Simultaneous transformation matrix of feature point position in robot coordinate system and feature point position in global coordinate system
                 obsmodel_sub     = Rotation_sym * mx + X_sym(1:3);
-                obj.H  =matlabFunction(obsmodel_sub,'File',"estimator/ExtendedLinearization/output_function_for_marker_position.m",'Vars',{X_sym,mx},'Comments',"yInputsz\n\t pos ([1;1;1]): position of COG of the rigid body\n\t mx (=[1 2 3;1 1 1]): marker position w. r. t. pos");
+                obj.H  =matlabFunction(obsmodel_sub,'File',"estimator/ExtendedLinearization/output_function_for_marker_position.m",'Vars',{X_sym,mx},'Comments',"ã€Inputsã€‘\n\t pos ([1;1;1]): position of COG of the rigid body\n\t mx (=[1 2 3;1 1 1]): marker position w. r. t. pos");
                 % Extended initialization of output equation of one feature
                 dhi_sub          = pdiff(obsmodel_sub,X_sym);
                 obj.JacobianH    = matlabFunction(dhi_sub,'File',"estimator/ExtendedLinearization/Jacobian_output_function_for_marker_position.m",'Vars',{X_sym,mx});
@@ -101,8 +101,8 @@ classdef PDAF < ESTIMATOR_CLASS
             obj.JacobianF = @(x,~) diag(ones(1,6),6);
         end
         function result = do(obj,param,~)
-            %yInputz  param : optional
-            %yOutputz obj            
+            %ã€Inputã€‘  param : optional
+            %ã€Outputã€‘ obj            
             model  = obj.self.model;                                              % agent.model
             sensor = obj.self.sensor.result;                                              % agent.sensor.result
             if isempty(obj.local_feature)
@@ -155,10 +155,10 @@ classdef PDAF < ESTIMATOR_CLASS
             result=obj.result;
         end
         function show(obj)
-            % ƒRƒ}ƒ“ƒhƒEƒBƒ“ƒh‚É•\Ž¦(Šm”F—p)
+            % ã‚³ãƒžãƒ³ãƒ‰ã‚¦ã‚£ãƒ³ãƒ‰ã«è¡¨ç¤º(ç¢ºèªç”¨)
             disp("validation numumber = ");
             disp(obj.result.ValidationNum);
-            % „’èˆÊ’u‚ð•\Ž¦(‰¼)
+            % æŽ¨å®šä½ç½®ã‚’è¡¨ç¤º(ä»®)
             fprintf("p : %.5f,\t%.5f,\t%.5f\n", obj.result.state.p(1),obj.result.state.p(2),obj.result.state.p(3));
             fprintf("q : %.5f,\t%.5f,\t%.5f\n", obj.result.state.q(1),obj.result.state.q(2),obj.result.state.q(3));
             fprintf("v : %.5f,\t%.5f,\t%.5f\n", obj.result.state.v(1),obj.result.state.v(2),obj.result.state.v(3));

@@ -1,15 +1,15 @@
 classdef TimeVaryingReference < REFERENCE_CLASS
-    % ŽžŠÔŠÖ”‚Æ‚µ‚Ä‚ÌƒŠƒtƒ@ƒŒƒ“ƒX‚ð¶¬‚·‚éƒNƒ‰ƒX
+    % æ™‚é–“é–¢æ•°ã¨ã—ã¦ã®ãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹ã‚’ç”Ÿæˆã™ã‚‹ã‚¯ãƒ©ã‚¹
     % obj = TimeVaryingReference()
     properties
         param
-        func % ŽžŠÔŠÖ”‚Ìƒnƒ“ƒhƒ‹
+        func % æ™‚é–“é–¢æ•°ã®ãƒãƒ³ãƒ‰ãƒ«
         self
     end
     
     methods
         function obj = TimeVaryingReference(self,varargin)
-            % yInputzref_gen, param, "HL"
+            % ã€Inputã€‘ref_gen, param, "HL"
             % ref_gen : reference function generator
             % param : parameter to generate the reference function
             % "HL" : flag to decide the reference for HL
@@ -25,20 +25,20 @@ classdef TimeVaryingReference < REFERENCE_CLASS
             end
         end
         function  result= do(obj,Param)
-            % yInputzParam = {Time.t}
-            obj.result.state.xd = obj.func(Param{1}.t); % –Ú•WdSˆÊ’uiâ‘ÎÀ•Wj
+            % ã€Inputã€‘Param = {Time.t}
+            obj.result.state.xd = obj.func(Param{1}.t); % ç›®æ¨™é‡å¿ƒä½ç½®ï¼ˆçµ¶å¯¾åº§æ¨™ï¼‰
             obj.result.state.p = obj.result.state.xd(1:3);
             result=obj.result;
         end
         function show(obj,logger)
             rp=strcmp(logger.items,"reference.result.state.p");
             heart = cell2mat(logger.Data.agent(:,rp)'); % reference.result.state.p
-            plot(heart(1,:),heart(2,:)); % xy•½–Ê‚Ì‹O“¹‚ð•`‚­
+            plot(heart(1,:),heart(2,:)); % xyå¹³é¢ã®è»Œé“ã‚’æã
             daspect([1 1 1]);
             hold on
             ep=strcmp(logger.items,"estimator.result.state.p");
             heart_result = cell2mat(logger.Data.agent(:,ep)'); % estimator.result.state.p
-            plot(heart_result(1,:),heart_result(2,:)); % xy•½–Ê‚Ì‹O“¹‚ð•`‚­
+            plot(heart_result(1,:),heart_result(2,:)); % xyå¹³é¢ã®è»Œé“ã‚’æã
             legend(["reference","estimate"]);
             title('reference and estimated trajectories');
             xlabel("x [m]");

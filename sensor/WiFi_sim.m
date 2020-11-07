@@ -1,5 +1,5 @@
 classdef WiFi_sim < SENSOR_CLASS
-    % –¢ŒŸØFWiFi’ÊM‚Ìsimulation—pƒNƒ‰ƒX
+    % æœªæ¤œè¨¼ï¼šWiFié€šä¿¡ã®simulationç”¨ã‚¯ãƒ©ã‚¹
     %   espr = WiFi()
     properties
         name = "ESPr";
@@ -9,8 +9,8 @@ classdef WiFi_sim < SENSOR_CLASS
     end
     methods
         function obj = WiFi_sim(varargin)
-            %  ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
-            obj.targets_id = varargin; % ’ÊM‚É•K—v‚È
+            %  ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
+            obj.targets_id = varargin; % é€šä¿¡ã«å¿…è¦ãª
         end
         
         function output = measure(obj,Plants,msg)

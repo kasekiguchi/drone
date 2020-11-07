@@ -9,12 +9,12 @@ classdef Suspended_Load_Model < MODEL_CLASS
             obj= obj@MODEL_CLASS("Suspended_Load_Model",args);
             %obj.id = self.id
             % 
-            %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+            %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
         end
         function initialize(obj,load_obj,pos)
             % initialize(obj,load_obj,pos)
-            % load_obj : load —p„‘ÌƒIƒuƒWƒFƒNƒg
-            % pos : agent ‚Ì‰ŠúˆÊ’u
+            % load_obj : load ç”¨å‰›ä½“ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+            % pos : agent ã®åˆæœŸä½ç½®
             obj.set_state([pos;[1;0;0;0];[0;0;0];[0;0;0];pos+[0;0;-1]*obj.param(end);[0;0;0];[0;0;-1];[0;0;0]]);
             load_obj.model.set_state([obj.state.pL;[0;0;0];[0;0;0];[0;0;0]]);
         end

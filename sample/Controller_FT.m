@@ -1,28 +1,28 @@
-function Controller_HL(agent)
+function Controller_FT(agent)
 %% controller class demo (1) : construct
-% controller property „ÇíController class„ÅÆ„Ç§„É≥„Çπ„Çø„É≥„ÇπÈÖçÂàó„Å®„Åó„Å¶ÂÆöÁæ©
+% controller property ÇController classÇÃÉCÉìÉXÉ^ÉìÉXîzóÒÇ∆ÇµÇƒíËã`
 dt = agent(1).model.dt;
 Controller_param.P=getParameter();
 % % Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 
 % Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([1000,10,10,1]),[1],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([1000,10,10,1]),[1],dt); % ydiag([100,10,10,1])
-% % Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % „É®„ÉºËßí 
+% % Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ÉàÅ[äp 
 Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 
 Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([1000,10,10,1]),[0.8],dt); % xdiag([100,10,10,1])
 Controller_param.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([1000,10,10,1]),[0.8],dt); % ydiag([100,10,10,1])
-Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % „É®„ÉºËßí 
-% Ê•µÈÖçÁΩÆ
+Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ÉàÅ[äp 
+% ã…îzíu
 Eig=[-3.2,-2,-2.5,-2.1];
 % Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 
 % % Controller_param.F2=place(diag([1,1,1],1),[0;0;0;1],Eig);
 % % Controller_param.F3=place(diag([1,1,1],1),[0;0;0;1],Eig);
-% Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % „É®„ÉºËßí 
+% Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ÉàÅ[äp 
 
 
 Controller_param.dt = dt;
  eig(diag([1,1,1],1)-[0;0;0;1]*Controller_param.F2)
-Controller.type="HLController_quadcopter";
-Controller.name="hlcontroller";
+Controller.type="FTController_quadcopter";
+Controller.name="ftcontroller";
 Controller.param=Controller_param;
 for i = 1:length(agent)
     agent(i).set_controller(Controller);

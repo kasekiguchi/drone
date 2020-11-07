@@ -1,10 +1,10 @@
 classdef (Abstract) ESTIMATOR_CLASS < handle
-    % Estimator—p’ŠÛƒNƒ‰ƒX
+    % Estimatorç”¨æŠ½è±¡ã‚¯ãƒ©ã‚¹
     properties (Abstract)
-%        state % „’èŒ‹‰Ê‚Ìó‘Ô
-        result % ó‘ÔˆÈŠO‚Ì„’è’l
-        % sub class‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^“à‚Å STATE_CLASS, RESULT_CLASS‚Æ’è‹`‚·‚é•K—v‚ª‚ ‚éD
-        % ‚»‚¤‚µ‚È‚¢‚Æ‚·‚×‚Ä‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Å‹¤’Ê‚Ìhandle‚ðŽg‚¢‰ñ‚·‚±‚Æ‚É‚È‚éD
+%        state % æŽ¨å®šçµæžœã®çŠ¶æ…‹
+        result % çŠ¶æ…‹ä»¥å¤–ã®æŽ¨å®šå€¤
+        % sub classã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿å†…ã§ STATE_CLASS, RESULT_CLASSã¨å®šç¾©ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ï¼Ž
+        % ãã†ã—ãªã„ã¨ã™ã¹ã¦ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã§å…±é€šã®handleã‚’ä½¿ã„å›žã™ã“ã¨ã«ãªã‚‹ï¼Ž
         self
     end
     properties

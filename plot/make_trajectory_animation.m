@@ -30,7 +30,7 @@ grid on;
 xlim(plot_range.x);
 ylim(plot_range.y);
 zlim(plot_range.z);
-%daspect([1 1 1]) %equal‚Æ“¯‚¶
+%daspect([1 1 1]) %equalã¨åŒã˜
 xlabel('x')
 ylabel('y')
 zlabel('z')

@@ -1,18 +1,18 @@
 classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
-    % §Œä‘ÎÛ‚Æ‚µ‚Ä‚Ìƒvƒ‰ƒ“ƒgƒ‚ƒfƒ‹‚ÌŽ‚Â‚×‚««Ž¿‚ð‹K’è‚·‚éƒNƒ‰ƒX
-    % yPropertiesz plant, model, sensor, estimator, estimator_substance, reference, controller,
+    % åˆ¶å¾¡å¯¾è±¡ã¨ã—ã¦ã®ãƒ—ãƒ©ãƒ³ãƒˆãƒ¢ãƒ‡ãƒ«ã®æŒã¤ã¹ãæ€§è³ªã‚’è¦å®šã™ã‚‹ã‚¯ãƒ©ã‚¹
+    % ã€Propertiesã€‘ plant, model, sensor, estimator, estimator_substance, reference, controller,
     %                         input_tranform, env, (id, input, inner_input, state)
-    %  plant : ŽÀ§Œä‘ÎÛ model obj
-    %  model : §Œäƒ‚ƒfƒ‹ model obj
-    %  sensor : sensor obj \‘¢‘Ì : ƒZƒ“ƒT[‘S‚Ä‚ÌŒ‹‰Ê‚ðsensor.result‚ÉW–ñ
-    %  estimator : „’èŠí % •¡”‚Ìê‡’è‹`‚³‚ê‚½‡”Ô‚ÉŒvŽZ‚³‚ê‚é
-    %  reference : –Ú•Wó‘Ô¶¬ reference obj
-    %                     % •¡”‚Ìê‡’è‹`‚³‚ê‚½‡”Ô‚ÉŒvŽZ‚³‚ê‚é
-    %  controller : §Œäƒ‚ƒfƒ‹‚É‘Î‚·‚é§Œä“ü—ÍŽZo controller obj
-    % •¡”‚Ìê‡’è‹`‚³‚ê‚½‡”Ô‚ÉŒvŽZ‚³‚ê‚é
-    %  input_transform : ŽÀ‘ÎÛ‚É“ü—Í‚Å‚«‚é‚æ‚¤“ü—Í‚ð•ÏŠ·‚·‚é input_transform obj
-    %  env : ƒG[ƒWƒFƒ“ƒg‚ª‘z’è‚µ‚Ä‚¢‚éŠÂ‹«
-    %  yUsagezobj=ABSTRACT_SYSTEM(varargin)
+    %  plant : å®Ÿåˆ¶å¾¡å¯¾è±¡ model obj
+    %  model : åˆ¶å¾¡ãƒ¢ãƒ‡ãƒ« model obj
+    %  sensor : sensor obj æ§‹é€ ä½“ : ã‚»ãƒ³ã‚µãƒ¼å…¨ã¦ã®çµæžœã‚’sensor.resultã«é›†ç´„
+    %  estimator : æŽ¨å®šå™¨ % è¤‡æ•°ã®å ´åˆå®šç¾©ã•ã‚ŒãŸé †ç•ªã«è¨ˆç®—ã•ã‚Œã‚‹
+    %  reference : ç›®æ¨™çŠ¶æ…‹ç”Ÿæˆ reference obj
+    %                     % è¤‡æ•°ã®å ´åˆå®šç¾©ã•ã‚ŒãŸé †ç•ªã«è¨ˆç®—ã•ã‚Œã‚‹
+    %  controller : åˆ¶å¾¡ãƒ¢ãƒ‡ãƒ«ã«å¯¾ã™ã‚‹åˆ¶å¾¡å…¥åŠ›ç®—å‡º controller obj
+    % è¤‡æ•°ã®å ´åˆå®šç¾©ã•ã‚ŒãŸé †ç•ªã«è¨ˆç®—ã•ã‚Œã‚‹
+    %  input_transform : å®Ÿå¯¾è±¡ã«å…¥åŠ›ã§ãã‚‹ã‚ˆã†å…¥åŠ›ã‚’å¤‰æ›ã™ã‚‹ input_transform obj
+    %  env : ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆãŒæƒ³å®šã—ã¦ã„ã‚‹ç’°å¢ƒ
+    %  ã€Usageã€‘obj=ABSTRACT_SYSTEM(varargin)
     %  varargin needs to have fields
     %     type : class name of plant(=model)
     %     name (optional): ~
@@ -20,25 +20,25 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     %                  : agent.plant = str2func(type)({type,param})
     % Notice that property "state" ( : state of a plant) and metod "get_state" are defined in STATE_CLASS
     properties% (Abstract) % General param
-        % ‚±‚±‚©‚çæ‚Ìproperty ‚ÍŠe–¼‘O‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX : —á model
-        model % MODEL_CLASS‚ÌƒCƒ“ƒXƒ^ƒ“ƒXiƒRƒ“ƒgƒ[ƒ‰ƒ‚ƒfƒ‹j
-        sensor % •¡”‚ÌƒZƒ“ƒT‚ðproperty‚Æ‚µ‚ÄŽ‚Â
-        controller % •¡”‚Ìê‡’è‹`‚³‚ê‚½‡”Ô‚ÉŒvŽZ‚³‚ê‚é
-        estimator % •¡”‚Ìê‡’è‹`‚³‚ê‚½‡”Ô‚ÉŒvŽZ‚³‚ê‚é
-        reference % •¡”‚Ìê‡’è‹`‚³‚ê‚½‡”Ô‚ÉŒvŽZ‚³‚ê‚é
+        % ã“ã“ã‹ã‚‰å…ˆã®property ã¯å„åå‰ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ : ä¾‹ model
+        model % MODEL_CLASSã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ï¼ˆã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¢ãƒ‡ãƒ«ï¼‰
+        sensor % è¤‡æ•°ã®ã‚»ãƒ³ã‚µã‚’propertyã¨ã—ã¦æŒã¤
+        controller % è¤‡æ•°ã®å ´åˆå®šç¾©ã•ã‚ŒãŸé †ç•ªã«è¨ˆç®—ã•ã‚Œã‚‹
+        estimator % è¤‡æ•°ã®å ´åˆå®šç¾©ã•ã‚ŒãŸé †ç•ªã«è¨ˆç®—ã•ã‚Œã‚‹
+        reference % è¤‡æ•°ã®å ´åˆå®šç¾©ã•ã‚ŒãŸé †ç•ªã«è¨ˆç®—ã•ã‚Œã‚‹
         connector
         env
-        input_transform % plant ‚Æ model‚Å“ü—Í‚ÌŒ^‚ªˆá‚¤Žž‚É•ÏŠ·‚·‚é‚½‚ß
+        input_transform % plant ã¨ modelã§å…¥åŠ›ã®åž‹ãŒé•ã†æ™‚ã«å¤‰æ›ã™ã‚‹ãŸã‚
     end
     properties% (SetAccess=private) % Input
         input
         inner_input
     end
     properties %(Access = {?Logger,?SENSOR_CLASS,?CONNECTOR_CLASS}) % plant, state
-        %(SetAccess = GetAccess={?SENSOR_CLASS}) % SENSOR_CLASS‚Í“Ç‚ÝŽæ‚è‚Ì‚Ý
+        %(SetAccess = GetAccess={?SENSOR_CLASS}) % SENSOR_CLASSã¯èª­ã¿å–ã‚Šã®ã¿
         id
-        plant % MODEL_CLASS‚ÌƒCƒ“ƒXƒ^ƒ“ƒXiƒvƒ‰ƒ“ƒgƒ‚ƒfƒ‹j
-        state % plant or model ‚Ìstate‚¾‚¯‚ðŽæ‚èo‚µ‚½‚à‚Ì handleƒNƒ‰ƒX‚Å‚Ç‚¿‚ç‚©‚Ìhandle‚É‚È‚Á‚Ä‚¢‚éD
+        plant % MODEL_CLASSã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ï¼ˆãƒ—ãƒ©ãƒ³ãƒˆãƒ¢ãƒ‡ãƒ«ï¼‰
+        state % plant or model ã®stateã ã‘ã‚’å–ã‚Šå‡ºã—ãŸã‚‚ã® handleã‚¯ãƒ©ã‚¹ã§ã©ã¡ã‚‰ã‹ã®handleã«ãªã£ã¦ã„ã‚‹ï¼Ž
     end
     
     %% Plant
@@ -53,7 +53,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
     methods %(Access = private)
         function do_plant(obj,varargin)
-            if length(varargin)>1 %ŽÀŒ±—p
+            if length(varargin)>1 %å®Ÿé¨“ç”¨
                 obj.plant.do(obj.input,[],"emergency");
             else
                 if ~isempty(varargin)
@@ -78,7 +78,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             else
                 obj.set_plant();
             end
-            if ~isempty(obj.plant.state) % ŽÀŒ±‚ÌŽž‚Ímodel‚Ì’l‚ª“ü‚é
+            if ~isempty(obj.plant.state) % å®Ÿé¨“ã®æ™‚ã¯modelã®å€¤ãŒå…¥ã‚‹
                 obj.state=obj.plant.state;
             end
         end
@@ -90,8 +90,8 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         function set_model(obj,args)
             model_subclass=str2func(args.type);
             obj.model = model_subclass(args.param);
-            if isempty(obj.state) % ŽÀŒ±‚Å‚Íplant‚ªstate‚ðŽ‚½‚È‚¢‚½‚ß
-                obj.state=obj.model.state; % handle ‚Ì‹¤—L
+            if isempty(obj.state) % å®Ÿé¨“ã§ã¯plantãŒstateã‚’æŒãŸãªã„ãŸã‚
+                obj.state=obj.model.state; % handle ã®å…±æœ‰
             end
         end
         function set_sensor(obj,args)
@@ -130,7 +130,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.do_sequential("controller",param);
         end
         function do_model(obj,param)
-            % „’è’l‚Åmodel‚Ìó‘Ô‚ðã‘‚«D
+            % æŽ¨å®šå€¤ã§modelã®çŠ¶æ…‹ã‚’ä¸Šæ›¸ãï¼Ž
             if obj.model.state.list==obj.estimator.result.state.list
                 obj.model.state.set_state(obj.estimator.result.state.get());
             else
@@ -157,7 +157,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             % prop : property name
             % param : parameter to do a property
             result = obj.(prop).(obj.(prop).name(1)).do(param{1});
-            for i = 2:length(obj.(prop).name) % (prop).result‚ÉŒ‹‰Ê‚ð‚Ü‚Æ‚ß‚é‚½‚ß
+            for i = 2:length(obj.(prop).name) % (prop).resultã«çµæžœã‚’ã¾ã¨ã‚ã‚‹ãŸã‚
                 tmp=obj.(prop).(obj.(prop).name(i)).do(param{i});
                 F = fieldnames(tmp);
                 for j = 1:length(F)
@@ -183,12 +183,12 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         function do_sequential(obj,prop,param)
             % prop : property name
             % param : parameter to do a property
-            % •¡”“¯‚¶property‚ðÝ’è‚µ‚½ê‡recursive‚ÉŽQÆ’l‚ð‹‚ß‚éD
+            % è¤‡æ•°åŒã˜propertyã‚’è¨­å®šã—ãŸå ´åˆrecursiveã«å‚ç…§å€¤ã‚’æ±‚ã‚ã‚‹ï¼Ž
             % result = prop.prop1.do(param{1})
             % result = prop.prop2.do(param{2},result)
             % result = prop.prop3.do(param{3},result) ...
             result = obj.(prop).(obj.(prop).name(1)).do(param{1});
-            for i = 2:length(obj.(prop).name) % prop.result‚ÉŒ‹‰Ê‚ð‚Ü‚Æ‚ß‚é‚½‚ß
+            for i = 2:length(obj.(prop).name) % prop.resultã«çµæžœã‚’ã¾ã¨ã‚ã‚‹ãŸã‚
                 tmp=obj.(prop).(obj.(prop).name(i)).do(param{i},result);
                 F = fieldnames(tmp);
                 for j = 1:length(F)

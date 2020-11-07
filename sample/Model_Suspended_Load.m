@@ -7,17 +7,17 @@ Model.type="Suspended_Load_Model"; % class name
 Model.name="load"; % print name
 Setting.dim=[25,4,16];
 Setting.input_channel = ["f","M"];
-Setting.method = get_model_name("Load"); % model dynamics‚ÌÀ‘Ì–¼
+Setting.method = get_model_name("Load"); % model dynamicsã®å®Ÿä½“å
 Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL"];
 Setting.initial = struct('p',[0;0;0],'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0],"pL",[0;0;0],"vL",[0;0;0],"pT",[0;0;-1],"wL",[0;0;0]);
 Setting.num_list = [3,4,3,3,3,3,3,3];
 % Setting.type="compact"; % unit quaternionr
 Setting.dt = dt;
-Setting.param = getParameter_withload; % ƒ‚ƒfƒ‹‚Ì•¨—ƒpƒ‰ƒ[ƒ^İ’è
+Setting.param = getParameter_withload; % ãƒ¢ãƒ‡ãƒ«ã®ç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨­å®š
 if strcmp(type,"plant")
     for i = 1:N
         Model.id = i;
-        Setting.param = getParameter_withload("Plant"); % ƒ‚ƒfƒ‹‚Ì•¨—ƒpƒ‰ƒ[ƒ^İ’è
+        Setting.param = getParameter_withload("Plant"); % ãƒ¢ãƒ‡ãƒ«ã®ç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨­å®š
         Setting.initial.p = 10*rand(3,1)+[40;20;0];
         Model.param=Setting;
         assignin('base',"Plant",Model);
@@ -36,7 +36,7 @@ Model.type="EulerAngle_Model"; % class name
 %Model.name="euler"; % print name
 Setting.dim=[12,4,10];
 Setting.input_channel = ["v","w"];
-Setting.method = get_model_name("RPY 12"); % model dynamics‚ÌÀ‘Ì–¼
+Setting.method = get_model_name("RPY 12"); % model dynamicsã®å®Ÿä½“å
 Setting.state_list =  ["p","q","v","w"];
 Setting.initial = struct('p',[0;0;0],'q',[0;0;0],'v',[0;0;0],'w',[0;0;0]);
 Setting.num_list = [3,3,3,3];
@@ -44,7 +44,7 @@ Setting.dt = dt;
 if strcmp(type,"plant")
     for i = 1:N
         Model.id = i;
-        Setting.param = getParameter("Plant"); % ƒ‚ƒfƒ‹‚Ì•¨—ƒpƒ‰ƒ[ƒ^İ’è
+        Setting.param = getParameter("Plant"); % ãƒ¢ãƒ‡ãƒ«ã®ç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨­å®š
         Setting.initial.p = 10*rand(3,1)+[40;20;0];
         Model.param=Setting;
         assignin('base',"Plant",Model);
@@ -52,7 +52,7 @@ if strcmp(type,"plant")
     end
 else
     for i = 1:N
-        Setting.param = getParameter(); % ƒ‚ƒfƒ‹‚Ì•¨—ƒpƒ‰ƒ[ƒ^İ’è
+        Setting.param = getParameter(); % ãƒ¢ãƒ‡ãƒ«ã®ç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨­å®š
         Model.param=Setting;
         assignin('base',"Model",Model);
         model_set_str=strcat("sload(",string(i),").set_model(Model)");

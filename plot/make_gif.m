@@ -1,9 +1,9 @@
 function make_gif(tspan,span,fig,base_fig,varargin)
-% tspan : ŠÔ‹æŠÔ —áF0:10 
-% span : ’–Ú‚·‚éƒG[ƒWƒFƒ“ƒg —áF 1:3
-% fig(k,span) : k ‚Å‚Ìspan•ª‚Ìfig ‚ğ¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹
-% varargin : init_fig : ‰Šúfigure
-%                 name : o—Í‚·‚éfile name
+% tspan : æ™‚é–“åŒºé–“ ä¾‹ï¼š0:10 
+% span : æ³¨ç›®ã™ã‚‹ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆ ä¾‹ï¼š 1:3
+% fig(k,span) : æ™‚åˆ»k ã§ã®spanåˆ†ã®fig ã‚’ç”Ÿæˆã™ã‚‹é–¢æ•°ãƒãƒ³ãƒ‰ãƒ«
+% varargin : init_fig : åˆæœŸfigure
+%                 name : å‡ºåŠ›ã™ã‚‹file name
 
     h = figure;
     sizen = 256;

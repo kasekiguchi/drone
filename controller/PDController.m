@@ -15,9 +15,9 @@ classdef PDController <CONTROLLER_CLASS
         function u = do(obj,param,~)
             % u = do(obj,param,~)
             % param (optional) : Gain
-            % Gain.P, Gain.D : p, d ƒQƒCƒ“
-            state=obj.self.estimator.result.state;       % : iƒOƒ[ƒoƒ‹À•Wj„’èó‘Ô (state object)
-            xd=obj.self.reference.result.state;           % xd : iƒ{ƒfƒBÀ•Wj–Ú•Wó‘Ô (state object) 
+            % Gain.P, Gain.D : p, d ã‚²ã‚¤ãƒ³
+            state=obj.self.estimator.result.state;       % : ï¼ˆã‚°ãƒ­ãƒ¼ãƒãƒ«åº§æ¨™ï¼‰æŽ¨å®šçŠ¶æ…‹ (state object)
+            xd=obj.self.reference.result.state;           % xd : ï¼ˆãƒœãƒ‡ã‚£åº§æ¨™ï¼‰ç›®æ¨™çŠ¶æ…‹ (state object) 
             if ~isempty(param)
                 obj.Gain=param;
             end

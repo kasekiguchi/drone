@@ -1,5 +1,5 @@
 classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
-    % Motive‚Ìsimulation—pƒNƒ‰ƒXF“o˜^‚³‚ê‚½ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ÆŽp¨‚ª‚í‚©‚é
+    % Motiveã®simulationç”¨ã‚¯ãƒ©ã‚¹ï¼šç™»éŒ²ã•ã‚ŒãŸã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã¨å§¿å‹¢ãŒã‚ã‹ã‚‹
     % motive = NATNET_CONNECTOR_sim(param)
     % param :
     %     rigid_num : agnet number
@@ -7,7 +7,7 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
     %     on_marker_num % total number of markers on agents
     %     (optional) local_marker : (cell array)
     %       is local position of on_markers : local_marker{s} = [x1 y1 z1; x2 y2 z2; ...]
-    %     (optional) Flag : Noise‚Ìstructure
+    %     (optional) Flag : Noiseã®structure
     %     (optional) sigmaw : Observation noise variance
     
     properties
@@ -22,7 +22,7 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
         on_marker_num
         dt
     end
-    properties %(GetAccess = ?Motive_sim)%private) % construct ‚µ‚½‚ç•Ï‚¦‚È‚¢’lD
+    properties %(GetAccess = ?Motive_sim)%private) % construct ã—ãŸã‚‰å¤‰ãˆãªã„å€¤ï¼Ž
         Flag = struct('Noise',     0);                                    % '1' = Additional noise exists
         local_marker_default     = [ 0.075, -0.075,  0.015;                               % X, Y. Z
             -0.075, -0.075, -0.015;
@@ -40,7 +40,7 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             else
                 obj.result.local_marker=cell(1,obj.result.rigid_num);
                 for i = 1:obj.result.rigid_num
-                    obj.result.local_marker{i} = obj.local_marker_default; % ‘S‹@‘Ì“¯‚¶ƒ}[ƒJ[”z’u
+                    obj.result.local_marker{i} = obj.local_marker_default; % å…¨æ©Ÿä½“åŒã˜ãƒžãƒ¼ã‚«ãƒ¼é…ç½®
                 end
             end
             obj.result.local_marker_nums = [arrayfun(@(i) size(obj.result.local_marker{i},1),1:obj.result.rigid_num)];
@@ -57,25 +57,25 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
         end
         function result = getData(obj,Param)
             %    result = sensor.motive.do(Param)
-            % yInputz
+            % ã€Inputã€‘
             %  Param{1} : agent obj
             %  Param{2} : .marker_num > on_marker_num:
-            %  Ý’è‚·‚é‚ÆUnLabeledmarker‚ª’è‹`‚³‚ê‚é
+            %  è¨­å®šã™ã‚‹ã¨UnLabeledmarkerãŒå®šç¾©ã•ã‚Œã‚‹
             %             .occlusion :
-            %             Ý’è‚·‚é‚ÆƒIƒNƒ‹[ƒWƒ‡ƒ“‚ð‹N‚±‚¹‚éD„‘Ì‚ÍŒÅ’èC„‘Ìã‚Ìƒ}[ƒJ[‚Íƒ‰ƒ“ƒ_ƒ€‚ÉÁ‚¦‚é
-            %             Žž[1, 1.2]‚Ì”ÍˆÍ‚Å„‘Ì1,2
-            %             CŽž[1.5,1.6]‚Ì”ÍˆÍ‚Å„‘Ì2‚ªƒIƒNƒ‹[ƒWƒ‡ƒ“‚ð‹N‚±‚·—á
+            %             è¨­å®šã™ã‚‹ã¨ã‚ªã‚¯ãƒ«ãƒ¼ã‚¸ãƒ§ãƒ³ã‚’èµ·ã“ã›ã‚‹ï¼Žå‰›ä½“ã¯å›ºå®šï¼Œå‰›ä½“ä¸Šã®ãƒžãƒ¼ã‚«ãƒ¼ã¯ãƒ©ãƒ³ãƒ€ãƒ ã«æ¶ˆãˆã‚‹
+            %             æ™‚åˆ»[1, 1.2]ã®ç¯„å›²ã§å‰›ä½“1,2
+            %             ï¼Œæ™‚åˆ»[1.5,1.6]ã®ç¯„å›²ã§å‰›ä½“2ãŒã‚ªã‚¯ãƒ«ãƒ¼ã‚¸ãƒ§ãƒ³ã‚’èµ·ã“ã™ä¾‹
             %             .occlusion.cond = ["t >= 1.0 && t<1.2","t>=1.5&&t<1.6]
             %             .occlusion.target = {[1,2],[2]}
-            % yfields of resultz
+            % ã€fields of resultã€‘
             % rigid : (struct array) rigid body info
             % marker : all marker position :
             %            row = marker id,
             %            column = position x, y, and z
             % rigid_num % number of rigid bodies
             % marker_num % number of UnLabeledmarker
-            % local_marker_nums % „‘Ìã‚Ìƒ}[ƒJ[‚Ì”i^’lj
-            % local_marker      % „‘ÌdS‚©‚çŒ©‚½ƒ}[ƒJ[‚ÌˆÊ’u
+            % local_marker_nums % å‰›ä½“ä¸Šã®ãƒžãƒ¼ã‚«ãƒ¼ã®æ•°ï¼ˆçœŸå€¤ï¼‰
+            % local_marker      % å‰›ä½“é‡å¿ƒã‹ã‚‰è¦‹ãŸãƒžãƒ¼ã‚«ãƒ¼ã®ä½ç½®
             % time      % time from inittime
             
             if isempty(obj.t_natnet_start)
@@ -92,10 +92,10 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             end
             %% Additional noise for rigid body
             if obj.Flag.Noise == 1 %% Noise %%
-                for k = 1:obj.result.rigid_num % ‘S„‘Ì‚Éˆê—l‚É‰e‹¿
+                for k = 1:obj.result.rigid_num % å…¨å‰›ä½“ã«ä¸€æ§˜ã«å½±éŸ¿
                     rng('shuffle');
                     obj.result.rigid(k).p = obj.result.rigid(k).p + (sqrt(obj.sigmaw) .* randn(3,1));
-                    % Žp¨Šp‚Ö‚Ì‰e‹¿‚Ísigmaw/100
+                    % å§¿å‹¢è§’ã¸ã®å½±éŸ¿ã¯sigmaw/100
                     %obj.result.rigid(k).q = R2q(Rodrigues(sqrt(obj.sigmaw'/100) .* (rand(1,3)-0.5*[1 1 1]))*RodriguesQuaternion(obj.result.rigid(k).q))';
                     obj.result.rigid(k).q = rotm2quat(Rodrigues(sqrt(obj.sigmaw'/100) .* (rand(1,3)-0.5*[1 1 1]))*RodriguesQuaternion(obj.result.rigid(k).q))';
                     %obj.result.rigid(k).q = compact(quaternion(sqrt(obj.sigmaw'/100) .* (rand(1,3)-0.5*[1 1 1]),'rotvec')*quaternion(obj.result.rigid(k).q'))';
@@ -116,21 +116,21 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
                     cog = sum(obj.on_marker{1},1)/obj.on_marker_num;
                     radius=max(obj.on_marker{1}-cog);
                 else
-                    rigid_p = [obj.result.rigid(:).p]'; % ƒmƒCƒYž‚Ý‚Ì’l
-                    cog = sum(rigid_p,1)/obj.result.rigid_num; % ‘SƒG[ƒWƒFƒ“ƒg‚Ì•½‹ÏˆÊ’u
+                    rigid_p = [obj.result.rigid(:).p]'; % ãƒŽã‚¤ã‚ºè¾¼ã¿ã®å€¤
+                    cog = sum(rigid_p,1)/obj.result.rigid_num; % å…¨ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®å¹³å‡ä½ç½®
                     radius=max(rigid_p-cog);
                 end
                 rng('shuffle');
                 obj.result.marker = [obj.result.marker;(cog +  (2*obj.sigmaw'+abs(radius)/2).* randn(obj.result.marker_num-obj.on_marker_num,3))];
-                % cog ‚ð’†S‚Écog‚©‚çˆê”Ô‰“‚¢ƒG[ƒWƒFƒ“ƒg‚Ì”¼•ª‚Ì‹——£‚ð•ªŽU‚É‚Î‚ç‚Â‚­ˆÊ’u‚ÉUnLabeledmarker‚ð”z’u
+                % cog ã‚’ä¸­å¿ƒã«cogã‹ã‚‰ä¸€ç•ªé ã„ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®åŠåˆ†ã®è·é›¢ã‚’åˆ†æ•£ã«ã°ã‚‰ã¤ãä½ç½®ã«UnLabeledmarkerã‚’é…ç½®
             end
             
             %% Additional noise for marker
             if obj.Flag.Noise == 1 %% Noise %%
-                for k = 1:obj.result.rigid_num % ‘S„‘Ì‚Éˆê—l‚É‰e‹¿
+                for k = 1:obj.result.rigid_num % å…¨å‰›ä½“ã«ä¸€æ§˜ã«å½±éŸ¿
                     if ~isempty(obj.on_marker{k})
                         rng('shuffle');
-                        obj.on_marker{k} = obj.on_marker{k}+sqrt(obj.sigmaw') .*randn(size(obj.on_marker{k}));% ‘Sƒ}[ƒJ[‚Éˆê—l‚É‰e‹¿
+                        obj.on_marker{k} = obj.on_marker{k}+sqrt(obj.sigmaw') .*randn(size(obj.on_marker{k}));% å…¨ãƒžãƒ¼ã‚«ãƒ¼ã«ä¸€æ§˜ã«å½±éŸ¿
                     end
                 end
             end
@@ -154,8 +154,8 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
                         obj.result.rigid(s) = obj.previous(s);
                         szt=obj.result.local_marker_nums(s);
                         rng('shuffle');
-                        sz=randi([1,szt]); % Žc‚·” % -1 ‚ð‚·‚é‚Æ‘S•”Á‚·ƒP[ƒX‚àÄŒ»D
-                        if sz==0 % sz‚Å-1‚ð‚·‚é‚Æ‚±‚±‚É—ˆ‚é‚±‚Æ‚à‚ ‚éDŒ»ó•K—v‚È‚¢D
+                        sz=randi([1,szt]); % æ®‹ã™æ•° % -1 ã‚’ã™ã‚‹ã¨å…¨éƒ¨æ¶ˆã™ã‚±ãƒ¼ã‚¹ã‚‚å†ç¾ï¼Ž
+                        if sz==0 % szã§-1ã‚’ã™ã‚‹ã¨ã“ã“ã«æ¥ã‚‹ã“ã¨ã‚‚ã‚ã‚‹ï¼Žç¾çŠ¶å¿…è¦ãªã„ï¼Ž
                             obj.on_marker{s} = [];
                         else
                             obj.on_marker{s}=obj.on_marker{s}(randperm(szt,sz),:);
@@ -165,8 +165,8 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             end
         end
         function [rigidVel,markerVel,previous] = CalcVelocity(obj,state,dt)
-            previous = state;                   % Œ»Ýó‘Ô‚ðŽŸŽž‚ÅŽg—p‚·‚é‚½‚ß•Û‘¶
-            if ~isfield(obj.previous, 'p')      % ‘OŽž‚Ìó‘Ô‚ª‚È‚¢¨‰ŽüŠú‚ÌŽž
+            previous = state;                   % ç¾åœ¨çŠ¶æ…‹ã‚’æ¬¡æ™‚åˆ»ã§ä½¿ç”¨ã™ã‚‹ãŸã‚ä¿å­˜
+            if ~isfield(obj.previous, 'p')      % å‰æ™‚åˆ»ã®çŠ¶æ…‹ãŒãªã„â†’åˆå‘¨æœŸã®æ™‚
                 old = state;
             else
                 old = obj.previous.p;
@@ -176,8 +176,8 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             markerVel = tmp(2:end,:);
         end
         function [AngleVel,previous] = CalcAngleVelocity(obj,state,type,dt)
-            previous = state;               % Œ»Ýó‘Ô‚ðŽŸŽž‚ÅŽg—p‚·‚é‚½‚ß•Û‘¶
-            if ~isfield(obj.previous, 'q')       % ‘OŽž‚Ìó‘Ô‚ª‚È‚¢¨‰ŽüŠú‚ÌŽž
+            previous = state;               % ç¾åœ¨çŠ¶æ…‹ã‚’æ¬¡æ™‚åˆ»ã§ä½¿ç”¨ã™ã‚‹ãŸã‚ä¿å­˜
+            if ~isfield(obj.previous, 'q')       % å‰æ™‚åˆ»ã®çŠ¶æ…‹ãŒãªã„â†’åˆå‘¨æœŸã®æ™‚
                 old = state;
             else
                 old = obj.previous.q;

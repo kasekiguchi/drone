@@ -1,8 +1,8 @@
 function [param] = FilteringStep(obj,param)
     % Update the state using the observation values existing in the validation region
-    %yInputz obj   : object of PDAF
+    %ã€Inputã€‘ obj   : object of PDAF
     %          param : Structure of PDAF
-    %yOutputzparam : Structure of PDAF
+    %ã€Outputã€‘param : Structure of PDAF
     
     % Observation vector against all object features
     ObservationVector = reshape(param.AssociatedObservation',[3*obj.param.on_feature_num,1]);

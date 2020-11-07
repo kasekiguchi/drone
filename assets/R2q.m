@@ -1,7 +1,7 @@
 function q=R2q(R)
     % convert rotation matrix to quaternion
-    % yInputz R : rotation matrix
-    % yOutputzq : quaternion
+    % ã€Inputã€‘ R : rotation matrix
+    % ã€Outputã€‘q : quaternion
     %   R2q is equal to "rotm2quat" but faster than it.
 
 % %     if size(R)~=[3,3]

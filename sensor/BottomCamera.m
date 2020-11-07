@@ -1,5 +1,5 @@
 classdef BottomCamera < SENSOR_CLASS
-    % simulation—pƒNƒ‰ƒXFó‘Ô‚ð‚»‚Ì‚Ü‚Ü•Ô‚·
+    % simulationç”¨ã‚¯ãƒ©ã‚¹ï¼šçŠ¶æ…‹ã‚’ãã®ã¾ã¾è¿”ã™
     properties
         name = "BottomCamera";
         interface = @(x) x;
@@ -13,7 +13,7 @@ classdef BottomCamera < SENSOR_CLASS
             obj.param=param;
         end
         function result = do(obj,FireMap)
-            % y“ü—ÍzTarget FŠÏ‘ª‘ÎÛ‚ÌModel_obj‚ÌƒŠƒXƒg
+            % ã€å…¥åŠ›ã€‘Target ï¼šè¦³æ¸¬å¯¾è±¡ã®Model_objã®ãƒªã‚¹ãƒˆ
             tyome(:,:) = FireMap{1,1}.env.firemap.param.MapX <= round(obj.self.state.p(1)) + obj.param{1,1}.Range(1,2) &...
                          FireMap{1,1}.env.firemap.param.MapX >= round(obj.self.state.p(1)) + obj.param{1,1}.Range(1,1) &...
                          FireMap{1,1}.env.firemap.param.MapY <= round(obj.self.state.p(2)) + obj.param{1,1}.Range(2,2) &...

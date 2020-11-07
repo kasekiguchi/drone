@@ -1,6 +1,6 @@
 function Xd = gen_ref_for_take_off(Xd_old,sp,d,te,t)
 %% Setting
-%—£—¤‚Ì–Ú•W‘¬“x
+%é›¢é™¸ã®ç›®æ¨™é€Ÿåº¦
 take_off_vz     = 0.2;% m/s
 dz = take_off_vz * 0.025;
 %%
@@ -8,10 +8,10 @@ dz = take_off_vz * 0.025;
 %% Variable set
 Xd  = zeros( 20, 1);
 %% Set Xd
-Xd( 1, 1)   = Xd_old( 1);% ‚±‚±‚Å–Ú•WˆÊ’ux
-Xd( 2, 1)   = Xd_old( 2);% ‚±‚±‚Å–Ú•WˆÊ’uy
+Xd( 1, 1)   = Xd_old( 1);% ã“ã“ã§ç›®æ¨™ä½ç½®x
+Xd( 2, 1)   = Xd_old( 2);% ã“ã“ã§ç›®æ¨™ä½ç½®y
 Xd( 3, 1)   = Xd_old( 3);
-%if Xd_old(3)<d % ‚±‚±‚Å–Ú•W‚“x•Ï‚¦‚ç‚ê‚é
+%if Xd_old(3)<d % ã“ã“ã§ç›®æ¨™é«˜åº¦å¤‰ãˆã‚‰ã‚Œã‚‹
 %Xd( 3, 1)   = Xd_old(3) + dz;
 %end
 if t<=te

@@ -1,9 +1,9 @@
 classdef (Abstract) SENSOR_CLASS < handle & matlab.mixin.SetGet & dynamicprops
-    % sensor î•ñ¶¬—pƒX[ƒp[ƒNƒ‰ƒX
+    % sensor æƒ…å ±ç”Ÿæˆç”¨ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚¯ãƒ©ã‚¹
     % Subclass should define concrete method "measure"
-    % subclass‚Å‚Ímarker‚Æ‚¢‚¤Œ¾—t‚ÍŽg‚í‚¸feature‚Å“ˆê‚·‚éD
+    % subclassã§ã¯markerã¨ã„ã†è¨€è‘‰ã¯ä½¿ã‚ãšfeatureã§çµ±ä¸€ã™ã‚‹ï¼Ž
     properties (Abstract)
-        %name % —áFRPLIDAR S1 % ‚Å‚à‚¢‚ç‚È‚¢‚©‚àD
+        %name % ä¾‹ï¼šRPLIDAR S1 % ã§ã‚‚ã„ã‚‰ãªã„ã‹ã‚‚ï¼Ž
         result % sensor output
         self % system obj
     end
@@ -16,9 +16,9 @@ classdef (Abstract) SENSOR_CLASS < handle & matlab.mixin.SetGet & dynamicprops
     end
 %     methods (Static)
 %         function sensor_obj = sensor_selector(type,param)
-%             % •¡”ƒZƒ“ƒT[‚ª‚ ‚éê‡‚É—˜—p‚·‚éŠÖ”
+%             % è¤‡æ•°ã‚»ãƒ³ã‚µãƒ¼ãŒã‚ã‚‹å ´åˆã«åˆ©ç”¨ã™ã‚‹é–¢æ•°
 %             %  sensor_obj=SENSOR_CLASS.sensor_selector(type,param);
-%             %  type : "LiDAR_sim", "RangePos_sim"‚È‚Ç‚Ì”z—ñ
+%             %  type : "LiDAR_sim", "RangePos_sim"ãªã©ã®é…åˆ—
 %             %  param : 
 %             for i = 1: lenthg(type)
 %                 switch type(i)

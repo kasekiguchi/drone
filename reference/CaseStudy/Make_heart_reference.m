@@ -5,9 +5,9 @@ function [Make_reference,flag] = Make_heart_reference(i,Make_reference,agent,fla
                 Make_reference(i,:) = [0;-1;1.0];
             end
             error = Make_reference(i,:) - agent(i).state.p';
-            if -0.3<=error(1) &&  error(1)<=0.3 && -0.3<=error(2) &&  error(2)<=0.3%–Ú•W’l‚Ì‹–—e”ÍˆÍ % && -0.3<=error(3) && error(3) <= 0.3 
+            if -0.3<=error(1) &&  error(1)<=0.3 && -0.3<=error(2) &&  error(2)<=0.3%ç›®æ¨™å€¤ã®è¨±å®¹ç¯„å›² % && -0.3<=error(3) && error(3) <= 0.3 
                     if flag == 2
-                        Make_reference(i,:) = [2;1;1.0];%[x;y;z]‚Ì’l‚ğ•Ï‰»‚³‚¹‚é
+                        Make_reference(i,:) = [2;1;1.0];%[x;y;z]ã®å€¤ã‚’å¤‰åŒ–ã•ã›ã‚‹
                     end
                     if flag == 3
                         Make_reference(i,:) = [1;2;1.0];

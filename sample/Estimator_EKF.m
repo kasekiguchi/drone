@@ -1,28 +1,34 @@
 function Estimator_EKF(agent)
 
 %% estimator class demo
-% estimator property ‚ğEstimator class‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”z—ñ‚Æ‚µ‚Ä’è‹`
-% ‚·‚×‚Ä‚Ì‹@‘Ì‚Å“¯ˆêİ’è
+% estimator property ã‚’Estimator classã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹é…åˆ—ã¨ã—ã¦å®šç¾©
+% ã™ã¹ã¦ã®æ©Ÿä½“ã§åŒä¸€è¨­å®š
 Estimator.name="ekf";
 Estimator.type="EKF";
 dt = agent(1).model.dt;
-n = agent(1).model.dim(1);
-%    EKF_param.Q = 100* diag([0.5;0.5;0.5;0.9;0.9;1.8]);%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % ƒVƒXƒeƒ€ƒmƒCƒYiModelƒNƒ‰ƒX—R—ˆj
-    EKF_param.Q = 100* diag(ones(n,1));%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % ƒVƒXƒeƒ€ƒmƒCƒYiModelƒNƒ‰ƒX—R—ˆj
-    EKF_param.R = diag([[6.716E-5; 7.058E-5; 7.058E-5]/100;[6.716E-5; 7.058E-5; 7.058E-5]/1000]);%eye(6).*1.0E-4;%1.0e-1; % ŠÏ‘ªƒmƒCƒYiSensorƒNƒ‰ƒX—R—ˆj
-%    EKF_param.R = 10^-5*diag(ones(sum(agent(1).sensor.result.state.num_list),1));
-%    EKF_param.JacobianH = @(~,~) eye(n); % Cs—ñ ‘Só‘ÔŠÏ‘ª
-    pqnum = sum(agent(1).model.state.num_list(contains(agent(1).model.state.list,["p","q"]))); % p, q ‚ÌŸŒ³‚Ì˜a
-    EKF_param.JacobianH = @(~,~) [eye(pqnum),zeros(pqnum,n-pqnum)];% Cs—ñ p, qŠÏ‘ª
+n = agent(1).model.dim(1);% çŠ¶æ…‹æ•°
+%output = ["p","q","pL"];
+output = ["p","q"];
 if isfield(agent(1).sensor,'imu')
-    EKF_param.JacobianH = ["w","a"];
+    output = ["w","a"];
 end
+%    EKF_param.Q = 100* diag([0.5;0.5;0.5;0.9;0.9;1.8]);%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % ã‚·ã‚¹ãƒ†ãƒ ãƒã‚¤ã‚ºï¼ˆModelã‚¯ãƒ©ã‚¹ç”±æ¥ï¼‰
+    EKF_param.Q = 100* diag(ones(n,1));%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % ã‚·ã‚¹ãƒ†ãƒ ãƒã‚¤ã‚ºï¼ˆModelã‚¯ãƒ©ã‚¹ç”±æ¥ï¼‰
+    EKF_param.R = diag([[6.716E-5; 7.058E-5; 7.058E-5]/100;[6.716E-5; 7.058E-5; 7.058E-5]/1000]);%eye(6).*1.0E-4;%1.0e-1; % è¦³æ¸¬ãƒã‚¤ã‚ºï¼ˆSensorã‚¯ãƒ©ã‚¹ç”±æ¥ï¼‰
+    %EKF_param.R = diag([[6.716E-5; 7.058E-5; 7.058E-5]/100;[6.716E-5; 7.058E-5; 7.058E-5]/1000;[6.716E-5; 7.058E-5; 7.058E-5]/100]);%eye(6).*1.0E-4;%1.0e-1; % è¦³æ¸¬ãƒã‚¤ã‚ºï¼ˆSensorã‚¯ãƒ©ã‚¹ç”±æ¥ï¼‰
+%    EKF_param.R = 10^-5*diag(ones(sum(agent(1).sensor.result.state.num_list),1));
+%    EKF_param.JacobianH = @(~,~) eye(n); % Cè¡Œåˆ— å…¨çŠ¶æ…‹è¦³æ¸¬
+    output_num = sum(agent(1).model.state.num_list(contains(agent(1).model.state.list,["p","q"]))); % p, q ã®æ¬¡å…ƒã®å’Œ
+    EKF_param.JacobianH = @(~,~) [eye(output_num),zeros(output_num,n-output_num)];% Cè¡Œåˆ— p, qè¦³æ¸¬
+    tmp=arrayfun(@(i) strcmp(agent.state.list,output(i)),1:length(output),'UniformOutput',false);
+    Cmat=kron(cell2mat(tmp'),eye(3));
+%    EKF_param.JacobianH = @(~,~) Cmat; % Cè¡Œåˆ— p, qè¦³æ¸¬
     EKF_param.H = EKF_param.JacobianH;
-    %EKF_param.B = [eye(6)*dt^2;eye(6)*dt];%eye(sum(agent(1).model.state.num_list)); % ƒVƒXƒeƒ€ƒmƒCƒY‚ª‰Á‚í‚éƒ`ƒƒƒ“ƒlƒ‹
-    EKF_param.B = eye(n); % ƒVƒXƒeƒ€ƒmƒCƒY‚ª‰Á‚í‚éƒ`ƒƒƒ“ƒlƒ‹
-    EKF_param.P = eye(n); % ‰Šú‹¤•ªUs—ñ
+    %EKF_param.B = [eye(6)*dt^2;eye(6)*dt];%eye(sum(agent(1).model.state.num_list)); % ã‚·ã‚¹ãƒ†ãƒ ãƒã‚¤ã‚ºãŒåŠ ã‚ã‚‹ãƒãƒ£ãƒ³ãƒãƒ«
+    EKF_param.B = eye(n); % ã‚·ã‚¹ãƒ†ãƒ ãƒã‚¤ã‚ºãŒåŠ ã‚ã‚‹ãƒãƒ£ãƒ³ãƒãƒ«
+    EKF_param.P = eye(n); % åˆæœŸå…±åˆ†æ•£è¡Œåˆ—
     EKF_param.list=["p","q"];
-Estimator.param=EKF_param;
+    Estimator.param=EKF_param;
 for i = 1:length(agent)
     agent(i).set_estimator(Estimator);
 end

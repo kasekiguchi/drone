@@ -1,4 +1,4 @@
-%% Drone ”Ç—p‹¤’ÊƒvƒƒOƒ‰ƒ€
+%% Drone ç­ç”¨å…±é€šãƒ—ãƒ­ã‚°ãƒ©ãƒ 
 %% Initialize settings
 % set path
 tmp = matlab.desktop.editor.getActive;
@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1FÀ‹@@‚»‚êˆÈŠOFƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“
+fExp = 0;%1ï¼šå®Ÿæ©Ÿã€€ãã‚Œä»¥å¤–ï¼šã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
 fOffline = 0; % offline verification with experiment data
 if fExp
     
@@ -28,79 +28,80 @@ end
 
 
 %% generate Drone instance
-% Drone class‚Ìobject‚ğinstance‰»‚·‚éD§Œä‘ÎÛ‚ğ•\‚·plant propertyiModel class‚ÌƒCƒ“ƒXƒ^ƒ“ƒXj‚ğƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Å’è‹`‚·‚éD
+% Drone classã®objectã‚’instanceåŒ–ã™ã‚‹ï¼åˆ¶å¾¡å¯¾è±¡ã‚’è¡¨ã™plant propertyï¼ˆModel classã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ï¼‰ã‚’ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§å®šç¾©ã™ã‚‹ï¼
 if fExp
-    Model_Lizard_exp(N,dt,'plant',"udp",[25]); % Lizard : for exp % ‹@‘Ì”Ô†iESPr‚ÌIPj
-    %Model_Lizard_exp(N,dt,'plant',"serial",[7]); % Lizard : for exp % ‹@‘Ì”Ô†iESPr‚ÌCOM”Ô†j
+    Model_Lizard_exp(N,dt,'plant',"udp",[24]); % Lizard : for exp % æ©Ÿä½“ç•ªå·ï¼ˆESPrã®IPï¼‰
+    %Model_Lizard_exp(N,dt,'plant',"serial",[5]); % Lizard : for exp % æ©Ÿä½“ç•ªå·ï¼ˆESPrã®COMç•ªå·ï¼‰
 else
-    Model_Quat13(N,dt,'plant'); % unit quaternion‚Ìƒvƒ‰ƒ“ƒgƒ‚ƒfƒ‹ : for sim
-    %Model_Suspended_Load(N,dt,'plant'); % unit quaternion‚Ìƒvƒ‰ƒ“ƒgƒ‚ƒfƒ‹ : for sim
-    %Model_Discrete0(N,dt,'plant') % —£UŠÔ¿“_ƒ‚ƒfƒ‹ : Direct controller ‚ğ‘z’è
-    %Model_Discrete(N,dt,'plant') % —£UŠÔ¿“_ƒ‚ƒfƒ‹ : PD controller ‚È‚Ç‚ğ‘z’è
+    Model_Quat13(N,dt,'plant'); % unit quaternionã®ãƒ—ãƒ©ãƒ³ãƒˆãƒ¢ãƒ‡ãƒ« : for sim
+    %Model_Suspended_Load(N,dt,'plant'); % unit quaternionã®ãƒ—ãƒ©ãƒ³ãƒˆãƒ¢ãƒ‡ãƒ« : for sim
+    %Model_Discrete0(N,dt,'plant') % é›¢æ•£æ™‚é–“è³ªç‚¹ãƒ¢ãƒ‡ãƒ« : Direct controller ã‚’æƒ³å®š
+    %Model_Discrete(N,dt,'plant') % é›¢æ•£æ™‚é–“è³ªç‚¹ãƒ¢ãƒ‡ãƒ« : PD controller ãªã©ã‚’æƒ³å®š
 end
 % set control model
-Model_EulerAngle(N,dt,'model'); % ƒIƒCƒ‰[Špƒ‚ƒfƒ‹
-%Model_Quat13(N,dt,'model') % ƒIƒCƒ‰[ƒpƒ‰ƒ[ƒ^iunit quaternionjƒ‚ƒfƒ‹
-%Model_Suspended_Load(N,dt,'model'); % unit quaternion‚Ìƒvƒ‰ƒ“ƒgƒ‚ƒfƒ‹ : for sim
-%Model_Discrete0(N,dt,'model') % —£UŠÔƒ‚ƒfƒ‹FˆÊ’u“ü—Í : plant‚ª‚S“ü—Íƒ‚ƒfƒ‹‚Ì‚ÍInputTransform_REFtoHL_drone‚ğ—LŒø‚É‚·‚é
-%Model_Discrete(N,dt,'model') % —£UŠÔ¿“_ƒ‚ƒfƒ‹ : plant‚ª‚S“ü—Íƒ‚ƒfƒ‹‚Ì‚ÍInputTransform_toHL_drone‚ğ—LŒø‚É‚·‚é
+Model_EulerAngle(N,dt,'model'); % ã‚ªã‚¤ãƒ©ãƒ¼è§’ãƒ¢ãƒ‡ãƒ«
+%Model_Quat13(N,dt,'model') % ã‚ªã‚¤ãƒ©ãƒ¼ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ï¼ˆunit quaternionï¼‰ãƒ¢ãƒ‡ãƒ«
+%Model_Suspended_Load(N,dt,'model'); % unit quaternionã®ãƒ—ãƒ©ãƒ³ãƒˆãƒ¢ãƒ‡ãƒ« : for sim
+%Model_Discrete0(N,dt,'model') % é›¢æ•£æ™‚é–“ãƒ¢ãƒ‡ãƒ«ï¼šä½ç½®ï¼å…¥åŠ› : plantãŒï¼”å…¥åŠ›ãƒ¢ãƒ‡ãƒ«ã®æ™‚ã¯InputTransform_REFtoHL_droneã‚’æœ‰åŠ¹ã«ã™ã‚‹
+%Model_Discrete(N,dt,'model') % é›¢æ•£æ™‚é–“è³ªç‚¹ãƒ¢ãƒ‡ãƒ« : plantãŒï¼”å…¥åŠ›ãƒ¢ãƒ‡ãƒ«ã®æ™‚ã¯InputTransform_toHL_droneã‚’æœ‰åŠ¹ã«ã™ã‚‹
 
 %% set input_transform property
 for i = 1:N
     if fExp%isa(agent(i).plant,"Lizard_exp")
-        InputTransform_Thrust2Throttle_drone(agent(i)); % „—Í‚©‚çƒXƒƒbƒgƒ‹‚É•ÏŠ·
+        InputTransform_Thrust2Throttle_drone(agent(i)); % æ¨åŠ›ã‹ã‚‰ã‚¹ãƒ­ãƒƒãƒˆãƒ«ã«å¤‰æ›
     end
 end
 %agent.plant.espr.sendData(Pw(1,1:16));
 % for quat-model plant with discrete control model
-%InputTransform_REFtoHL_drone(agent); % ˆÊ’uw—ß‚©‚ç‚S‚Â‚Ì„—Í‚É•ÏŠ·
-%InputTransform_toHL_drone(agent); % model‚ğg‚Á‚½‚PƒXƒeƒbƒv—\‘ª’l‚ğ–Ú•W’l‚Æ‚µ‚Ä‚S‚Â‚Ì„—Í‚É•ÏŠ·
-% ‚PƒXƒeƒbƒv—\‘ª’l‚ğ–Ú•W‚Æ‚·‚é‚Ì‚ÅƒQƒCƒ“‚ğ‚ ‚è“¾‚È‚¢‚Ù‚Ç‘å‚«‚­‚µ‚È‚¢‚Æ‚ß‚¿‚á‚ß‚¿‚áƒXƒs[ƒh‚ª’x‚¢Œ‹‰Ê‚É‚È‚éD
+%InputTransform_REFtoHL_drone(agent); % ä½ç½®æŒ‡ä»¤ã‹ã‚‰ï¼”ã¤ã®æ¨åŠ›ã«å¤‰æ›
+%InputTransform_toHL_drone(agent); % modelã‚’ä½¿ã£ãŸï¼‘ã‚¹ãƒ†ãƒƒãƒ—äºˆæ¸¬å€¤ã‚’ç›®æ¨™å€¤ã¨ã—ã¦ï¼”ã¤ã®æ¨åŠ›ã«å¤‰æ›
+% ï¼‘ã‚¹ãƒ†ãƒƒãƒ—äºˆæ¸¬å€¤ã‚’ç›®æ¨™ã¨ã™ã‚‹ã®ã§ã‚²ã‚¤ãƒ³ã‚’ã‚ã‚Šå¾—ãªã„ã»ã©å¤§ããã—ãªã„ã¨ã‚ã¡ã‚ƒã‚ã¡ã‚ƒã‚¹ãƒ”ãƒ¼ãƒ‰ãŒé…ã„çµæœã«ãªã‚‹ï¼
 %% set environment property
 Env = [];
-%Env_2DCoverage(agent); % d—v“xƒ}ƒbƒvİ’è
+%Env_2DCoverage(agent); % é‡è¦åº¦ãƒãƒƒãƒ—è¨­å®š
 %% set sensors property
 for i = 1:N; agent(i).sensor=[]; end
 %Sensor_LSM9DS1(agent); % IMU sensor
-Sensor_Motive(agent,{1,2,3}); % motiveî•ñ : sim exp ‹¤’Ê
-%Sensor_Direct(agent); % ó‘Ô^’l(plant.state)@Fsim‚Ì‚İ
-%Sensor_RangePos(agent,10); % ”¼Œar (‘æ“ñˆø”) “à‚Ì‘¼ƒG[ƒWƒFƒ“ƒg‚ÌˆÊ’u‚ğŒv‘ª : sim ‚Ì‚İ
-%Sensor_RangeD(agent,2); %  ”¼Œar (‘æ“ñˆø”) “à‚Ìd—v“x‚ğŒv‘ª : sim ‚Ì‚İ
-% for i = 1:N % sim‚Ì‚İ
+Sensor_Motive(agent,{1,2,3}); % motiveæƒ…å ± : sim exp å…±é€š
+%Sensor_Direct(agent); % çŠ¶æ…‹çœŸå€¤(plant.state)ã€€ï¼šsimã®ã¿
+%Sensor_RangePos(agent,10); % åŠå¾„r (ç¬¬äºŒå¼•æ•°) å†…ã®ä»–ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®ä½ç½®ã‚’è¨ˆæ¸¬ : sim ã®ã¿
+%Sensor_RangeD(agent,2); %  åŠå¾„r (ç¬¬äºŒå¼•æ•°) å†…ã®é‡è¦åº¦ã‚’è¨ˆæ¸¬ : sim ã®ã¿
+% for i = 1:N % simã®ã¿
 %     sensor.type= "LiDAR_sim";
 %     sensor.name="lrf";sensor.param=[];agent(i).set_sensor(sensor);
 % end
 %% set estimator property
 for i = 1:N; agent(i).estimator=[]; end
 %Estimator_LPF(agent); % lowpass filter
-% Estimator_AD(agent); % Œã‘Ş·•ª‹ß—‚Å‘¬“xCŠp‘¬“x‚ğ„’è@ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚±‚Á‚¿
-%Estimator_feature_based_EKF(agent); % “Á’¥“_ƒx[ƒXEKF
-%Estimator_PDAF(agent); % “Á’¥“_ƒx[ƒXPDAF
-Estimator_EKF(agent); % i„‘Ìƒx[ƒXjEKF
-%Estimator_Direct(agent); % DirectƒZƒ“ƒT[‚Æ‘g‚İ‡‚í‚¹‚Ä^’l‚ğ—˜—p‚·‚é@Fsim ‚Ì‚İ
-%for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map XV—p d—v“x‚È‚Ç‚Ìmap‚ğŠÔXV‚·‚é
+% Estimator_AD(agent); % å¾Œé€€å·®åˆ†è¿‘ä¼¼ã§é€Ÿåº¦ï¼Œè§’é€Ÿåº¦ã‚’æ¨å®šã€€ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã“ã£ã¡
+%Estimator_feature_based_EKF(agent); % ç‰¹å¾´ç‚¹ãƒ™ãƒ¼ã‚¹EKF
+%Estimator_PDAF(agent); % ç‰¹å¾´ç‚¹ãƒ™ãƒ¼ã‚¹PDAF
+Estimator_EKF(agent); % ï¼ˆå‰›ä½“ãƒ™ãƒ¼ã‚¹ï¼‰EKF
+%Estimator_Direct(agent); % Directã‚»ãƒ³ã‚µãƒ¼ã¨çµ„ã¿åˆã‚ã›ã¦çœŸå€¤ã‚’åˆ©ç”¨ã™ã‚‹ã€€ï¼šsim ã®ã¿
+%for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map æ›´æ–°ç”¨ é‡è¦åº¦ãªã©ã®mapã‚’æ™‚é–“æ›´æ–°ã™ã‚‹
 %% set reference property
 for i = 1:N; agent(i).reference=[]; end
-%Reference_2DCoverage(agent,Env); % VoronoidS
-%Reference_Time_Varying([1],agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % •Ï‚È–Ú•Wó‘Ô
-% Reference_Time_Varying([1],agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % •Ï‚È–Ú•Wó‘Ô
-Reference_Time_Varying([1],agent,"Case_study_trajectory",[1;0;1]); % ƒn[ƒgŒ`[x;y;z]‰i‹v
-%Reference_Time_Varying_Suspended_Load([1],agent,"Case_study_trajectory",[1;0;1]); % ƒn[ƒgŒ`[x;y;z]‰i‹v
+%Reference_2DCoverage(agent,Env); % Voronoié‡å¿ƒ
+%Reference_Time_Varying([1],agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % æ™‚å¤‰ãªç›®æ¨™çŠ¶æ…‹
+% Reference_Time_Varying([1],agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % æ™‚å¤‰ãªç›®æ¨™çŠ¶æ…‹
+Reference_Time_Varying([1],agent,"Case_study_trajectory",[1;0;1]); % ãƒãƒ¼ãƒˆå½¢[x;y;z]æ°¸ä¹…
+%Reference_Time_Varying_Suspended_Load([1],agent,"Case_study_trajectory",[1;0;1]); % ãƒãƒ¼ãƒˆå½¢[x;y;z]æ°¸ä¹…
 
-% ˆÈ‰º‚Íí‚É—LŒø‚É‚µ‚Ä‚¨‚­‚±‚Æ "t" : take off, "f" : flight , "l" : landing
-Reference_Point_FH(agent); % –Ú•Wó‘Ô‚ğw’è Fã‚Å•Ê‚Ìreference‚ğİ’è‚µ‚Ä‚¢‚é‚Æ‚»‚¿‚ç‚Åxd‚ªã‘‚«‚³‚ê‚é  : sim, exp ‹¤’Ê
+% ä»¥ä¸‹ã¯å¸¸ã«æœ‰åŠ¹ã«ã—ã¦ãŠãã“ã¨ "t" : take off, "f" : flight , "l" : landing
+Reference_Point_FH(agent); % ç›®æ¨™çŠ¶æ…‹ã‚’æŒ‡å®š ï¼šä¸Šã§åˆ¥ã®referenceã‚’è¨­å®šã—ã¦ã„ã‚‹ã¨ãã¡ã‚‰ã§xdãŒä¸Šæ›¸ãã•ã‚Œã‚‹  : sim, exp å…±é€š
 %% set controller property
 for i = 1:N; agent(i).controller=[]; end
-Controller_HL(agent); % ŠK‘wŒ^üŒ`‰»
-%Controller_HL_Suspended_Load(agent); % ŠK‘wŒ^üŒ`‰»
-%Controller_MEC(agent); % Model Error Compensator  :  –¢À‘•
+%Controller_HL(agent); % éšå±¤å‹ç·šå½¢åŒ–
+Controller_FT(agent); % éšå±¤å‹ç·šå½¢åŒ–
+%Controller_HL_Suspended_Load(agent); % éšå±¤å‹ç·šå½¢åŒ–
+%Controller_MEC(agent); % Model Error Compensator  :  æœªå®Ÿè£…
 %for i = 1:N;  Controller.type="MPC_controller";Controller.name = "mpc";Controller.param={agent(i)}; agent(i).set_controller(Controller);end
-%for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% Ÿ‚É“ü—Í‚ÌˆÊ’u‚ÉˆÚ“®‚·‚éƒ‚ƒfƒ‹—pF–Ú•WˆÊ’u‚ğ’¼Ú“ü—Í‚Æ‚·‚é
-%for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% Ÿ‚É“ü—Í‚ÌˆÊ’u‚ÉˆÚ“®‚·‚éƒ‚ƒfƒ‹—pF–Ú•WˆÊ’u‚ğ’¼Ú“ü—Í‚Æ‚·‚é
+%for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% æ¬¡æ™‚åˆ»ã«å…¥åŠ›ã®ä½ç½®ã«ç§»å‹•ã™ã‚‹ãƒ¢ãƒ‡ãƒ«ç”¨ï¼šç›®æ¨™ä½ç½®ã‚’ç›´æ¥å…¥åŠ›ã¨ã™ã‚‹
+%for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% æ¬¡æ™‚åˆ»ã«å…¥åŠ›ã®ä½ç½®ã«ç§»å‹•ã™ã‚‹ãƒ¢ãƒ‡ãƒ«ç”¨ï¼šç›®æ¨™ä½ç½®ã‚’ç›´æ¥å…¥åŠ›ã¨ã™ã‚‹
 
 %% set connector (global instance)
 if fExp
-    Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',[1])); % Motive
+    Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',[1])); % Motive
 else
     Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
     %Connector_Natnet_sim(2*N,dt,0); % for suspended load
@@ -169,13 +170,13 @@ LogData=[
     "input"
     ];
 if ~isempty(agent(1).plant.state)
-    LogData=["plant.state.p";LogData]; % À§Œä‘ÎÛ‚ÌˆÊ’u
+    LogData=["plant.state.p";LogData]; % å®Ÿåˆ¶å¾¡å¯¾è±¡ã®ä½ç½®
     if isprop(agent(1).plant.state,'q')
-        LogData=["plant.state.q";LogData]; % À§Œä‘ÎÛ‚Ìp¨
+        LogData=["plant.state.q";LogData]; % å®Ÿåˆ¶å¾¡å¯¾è±¡ã®å§¿å‹¢
     end
 end
-if exist('motive')==1 && (fExp) % motive‚ğ—˜—p‚µ‚Ä‚¢‚éê‡
-    LogData=[LogData;    "sensor.result.dt"]; % ƒZƒ“ƒT[“àüŠú
+if exist('motive')==1 && (fExp) % motiveã‚’åˆ©ç”¨ã—ã¦ã„ã‚‹å ´åˆ
+    LogData=[LogData;    "sensor.result.dt"]; % ã‚»ãƒ³ã‚µãƒ¼å†…å‘¨æœŸ
 end
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;    "reference.result.region";"env.density.param.grid_density"]; % for coverage
@@ -184,10 +185,10 @@ logger=Logger(agent,size(ts:dt:te,2),LogData);
 %%
 time =  Time();
 time.t = ts;
-%%  Šeído method‚Ìˆø”İ’è
-% ˆø”‚Éæ‚ê‚é‚Ì‚ÍˆÈ‰º‚Ì‚İ
-% time, motive, FH@‚â’è”@‚È‚ÇƒOƒ[ƒoƒ‹î•ñ
-% agent ©‘Ì‚Íagent‚ÌŠeƒvƒƒpƒeƒB“à‚Åself‚Æ‚µ‚Ähandle‚ğ•Û‚µ‚Ä‚¢‚é‚Ì‚Ådo method‚Éˆø”‚Æ‚µ‚Ä“n‚·•K—v‚Í–³‚¢D
+%%  å„ç¨®do methodã®å¼•æ•°è¨­å®š
+% å¼•æ•°ã«å–ã‚Œã‚‹ã®ã¯ä»¥ä¸‹ã®ã¿
+% time, motive, FHã€€ã‚„å®šæ•°ã€€ãªã©ã‚°ãƒ­ãƒ¼ãƒãƒ«æƒ…å ±
+% agent è‡ªä½“ã¯agentã®å„ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£å†…ã§selfã¨ã—ã¦handleã‚’ä¿æŒã—ã¦ã„ã‚‹ã®ã§do methodã«å¼•æ•°ã¨ã—ã¦æ¸¡ã™å¿…è¦ã¯ç„¡ã„ï¼
 
 % % for simulation
 % mparam.occlusion.cond=["time.t >=1.5 && time.t<1.6","agent(1).model.state.p(1) > 2"];
@@ -246,7 +247,7 @@ try
         % with FH
         figure(FH)
         drawnow
-        for i = 1:N % ó‘ÔXV
+        for i = 1:N % çŠ¶æ…‹æ›´æ–°
             model_param.param=agent(i).model.param;
             model_param.FH = FH;
             agent(i).do_model(model_param);
@@ -267,7 +268,7 @@ try
             end
             time.t = time.t + calculation;
             %            else
-            %                pause(wait_time);  %@ƒZƒ“ƒT[î•ñæ“¾‚©‚ç§Œä“ü—Íˆó‰Á‚Ü‚Å‚ğ‘‚­•Û‚¿‚Â‚ÂCüŠú‚ğ‚Å‚«‚é‚¾‚¯ˆê’è‚É•Û‚Â‚½‚ß
+            %                pause(wait_time);  %ã€€ã‚»ãƒ³ã‚µãƒ¼æƒ…å ±å–å¾—ã‹ã‚‰åˆ¶å¾¡å…¥åŠ›å°åŠ ã¾ã§ã‚’æ—©ãä¿ã¡ã¤ã¤ï¼Œå‘¨æœŸã‚’ã§ãã‚‹ã ã‘ä¸€å®šã«ä¿ã¤ãŸã‚
             %                time.t = time.t + sampling;
             %            end
         else
@@ -287,12 +288,12 @@ end
 close all
 clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
-agent(1).reference.timeVarying.show(logger)
+%agent(1).reference.timeVarying.show(logger)
 % logger.plot(1,["inner_input"],struct('transpose',1));
 %logger.plot(1,["reference.result.state.pL","p","q","w","v","input"],struct('time',[]));%,"inner_input"    ]);
 % logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
 % logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
-%logger.plot(1,["p","q","v","w"],struct('time',[]));
+logger.plot(1,["p","q","v","w"],struct('time',[]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
 

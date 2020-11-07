@@ -1,8 +1,8 @@
 function draw_voronoi(V,span,pos,varargin)
-% yInputzV : polyshapeƒZƒ‹”z—ñC span : ‘ÎÛƒCƒ“ƒfƒbƒNƒXC
-%  pos : span–ˆ‚É"r+","bx","go" ‚Å•\¦
-%   varargin : region : •`‰æ—Ìˆæ,  text = {pos, text} 
-%% •`‰æ
+% ã€Inputã€‘V : polyshapeã‚»ãƒ«é…åˆ—ï¼Œ span : å¯¾è±¡ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ï¼Œ
+%  pos : spanæ¯ã«"r+","bx","go" ã§è¡¨ç¤º
+%   varargin : region : æç”»é ˜åŸŸ,  text = {pos, text} 
+%% æç”»
 daspect([1 1 1]);
 if isfield(varargin,"range")
     region=varargin.range;

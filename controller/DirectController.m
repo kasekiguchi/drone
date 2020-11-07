@@ -1,6 +1,6 @@
 classdef DirectController <CONTROLLER_CLASS    
-%     referenceとして渡された状態を返すコントローラ
-%     質点モデルで参照点に自時刻に行く時に利用
+%     reference縺ｨ縺励※貂｡縺輔ｌ縺溽憾諷九ｒ霑斐☆繧ｳ繝ｳ繝医Ο繝ｼ繝ｩ
+%     雉ｪ轤ｹ繝｢繝�繝ｫ縺ｧ蜿ら�ｧ轤ｹ縺ｫ閾ｪ譎ょ綾縺ｫ陦後￥譎ゅ↓蛻ｩ逕ｨ
     properties
         self
         result

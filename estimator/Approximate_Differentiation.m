@@ -12,18 +12,18 @@ classdef Approximate_Differentiation < ESTIMATOR_CLASS
     
     methods
         function obj = Approximate_Differentiation(self,param)
-            %UNTITLED ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
-            %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+            %UNTITLED ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
+            %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
             obj.self = self;
             model = self.model;
-            obj.result.state=state_copy(model.state); % STATE_CLASS‚Æ‚µ‚ÄƒRƒs[
-            obj.previous=state_copy(model.state); % STATE_CLASS‚Æ‚µ‚ÄƒRƒs[
+            obj.result.state=state_copy(model.state); % STATE_CLASSã¨ã—ã¦ã‚³ãƒ”ãƒ¼
+            obj.previous=state_copy(model.state); % STATE_CLASSã¨ã—ã¦ã‚³ãƒ”ãƒ¼
             obj.dt=model.dt;
             if isfield(param{1},'list')
                 obj.list = param{1}.list(1,:);
                 obj.return_list = param{1}.list(2,:);
             end
-%             obj.result.state=STATE_CLASS(struct('state_list',obj.list,'num_list',obj.num_list)); % STATE_CLASS‚Æ‚µ‚ÄƒRƒs[
+%             obj.result.state=STATE_CLASS(struct('state_list',obj.list,'num_list',obj.num_list)); % STATE_CLASSã¨ã—ã¦ã‚³ãƒ”ãƒ¼
         end
         
         function result=do(obj,param,varargin)
@@ -47,11 +47,11 @@ classdef Approximate_Differentiation < ESTIMATOR_CLASS
             end            
             for i = 1:length(obj.list)
                 if strcmp(obj.list(i),'q')
-                    obj.result.state.set_state(obj.list(i),sensor.q); % ‘S‚Ä‚ÌƒZƒ“ƒT[‚ÉŽp¨î•ñ‚ð•Ô‚·Žž‚Í•K‚¸STATE_CLASS‚Æ‚¢‚¤”›‚è‚ð“ü‚ê‚ê‚Îgetq‚Å‚«‚éD
+                    obj.result.state.set_state(obj.list(i),sensor.q); % å…¨ã¦ã®ã‚»ãƒ³ã‚µãƒ¼ã«å§¿å‹¢æƒ…å ±ã‚’è¿”ã™æ™‚ã¯å¿…ãšSTATE_CLASSã¨ã„ã†ç¸›ã‚Šã‚’å…¥ã‚Œã‚Œã°getqã§ãã‚‹ï¼Ž
                 else
                     obj.result.state.(obj.list(i)) = sensor.(obj.list(i));
                 end
-                % Œã‘Þ”÷•ª
+                % å¾Œé€€å¾®åˆ†
                 obj.result.state.(obj.return_list(i))=(obj.result.state.(obj.list(i))-obj.previous.(obj.list(i)))/obj.dt;
             end
             obj.previous = state_copy(obj.result.state);

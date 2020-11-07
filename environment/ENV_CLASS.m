@@ -1,5 +1,5 @@
 classdef (Abstract) ENV_CLASS < handle & matlab.mixin.SetGet
-    % ENV_CLASS FŠÂ‹«¶¬—p’ŠÛƒNƒ‰ƒX
+    % ENV_CLASS ï¼šç’°å¢ƒç”Ÿæˆç”¨æŠ½è±¡ã‚¯ãƒ©ã‚¹
     %  
     properties
         map

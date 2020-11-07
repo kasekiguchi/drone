@@ -1,7 +1,7 @@
 function Reference_Time_Varying(list,agent,f_name,param)
 % list: 1:N etc
 % f_name : functin name
-% reference property をReference classのインスタンス配列として定義
+% reference property 繧坦eference class縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ驟榊�励→縺励※螳夂ｾｩ
 clear Reference
 Reference.type=["TimeVaryingReference"];
 Reference.name=["timeVarying"];

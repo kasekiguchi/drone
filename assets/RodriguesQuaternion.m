@@ -2,7 +2,7 @@ function [R,L] = RodriguesQuaternion(q)
 % [R,L]=RodriguesQuaternion(q) : convert quaternion to rotaiton matrix
 %  R is the rotation matrix
 %  q is 4th dim vector : [1 0 0 0]
-% R = rotmat(quaternion(q),'frame') ‚Æ“™‰¿Hˆá‚¢‚»‚¤
+% R = rotmat(quaternion(q),'frame') ã¨ç­‰ä¾¡ï¼Ÿé•ã„ãã†
     q  = q(:);
     q0 = q(1);
     q1 = q(2);

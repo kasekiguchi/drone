@@ -1,7 +1,7 @@
 classdef MPC_controller <CONTROLLER_CLASS
-    %MPC_CONTROLLER MPC‚ÌƒRƒ“ƒgƒ[ƒ‰[
-    %   fminicon‚ÅŽ¿“_ƒx[ƒX‚ÌMPC‚ð‚·‚é
-    %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+    %MPC_CONTROLLER MPCã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼
+    %   fminiconã§è³ªç‚¹ãƒ™ãƒ¼ã‚¹ã®MPCã‚’ã™ã‚‹
+    %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
     
     properties
         options
@@ -22,20 +22,20 @@ classdef MPC_controller <CONTROLLER_CLASS
             obj.options.Algorithm			   = 'sqp';
             % obj.options.Display                = 'none';
             obj.options.Diagnostics            = 'off';
-            obj.options.MaxFunctionEvaluations = 1.e+12;%ŠÖ”•]‰¿‚ÌÅ‘å‰ñ”
-            obj.options.MaxIterations		   = Inf;%”½•œ‚ÌÅ‘å‹–—e‰ñ”
-            % obj.options.StepTolerance          = 1.e-12;%x‚ÉŠÖ‚·‚éI—¹‹–—eŒë·
-            obj.options.ConstraintTolerance    = 1.e-3;%§–ñˆá”½‚É‘Î‚·‚é‹–—eŒë·
-            % obj.options.OptimalityTolerance    = 1.e-12;%1 ŽŸ‚ÌÅ“K«‚ÉŠÖ‚·‚éI—¹‹–—eŒë·B
+            obj.options.MaxFunctionEvaluations = 1.e+12;%é–¢æ•°è©•ä¾¡ã®æœ€å¤§å›žæ•°
+            obj.options.MaxIterations		   = Inf;%åå¾©ã®æœ€å¤§è¨±å®¹å›žæ•°
+            % obj.options.StepTolerance          = 1.e-12;%xã«é–¢ã™ã‚‹çµ‚äº†è¨±å®¹èª¤å·®
+            obj.options.ConstraintTolerance    = 1.e-3;%åˆ¶ç´„é•åã«å¯¾ã™ã‚‹è¨±å®¹èª¤å·®
+            % obj.options.OptimalityTolerance    = 1.e-12;%1 æ¬¡ã®æœ€é©æ€§ã«é–¢ã™ã‚‹çµ‚äº†è¨±å®¹èª¤å·®ã€‚
             % obj.options.PlotFcn                = [];
-            %---MPCƒpƒ‰ƒ[ƒ^Ý’è---%
-            obj.param.H  = 10;                % ƒ‚ƒfƒ‹—\‘ª§Œä‚Ìƒzƒ‰ƒCƒ]ƒ“
-            obj.param.dt = 0.25;              % ƒ‚ƒfƒ‹—\‘ª§Œä‚Ì‚ÝŽžŠÔ
+            %---MPCãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨­å®š---%
+            obj.param.H  = 10;                % ãƒ¢ãƒ‡ãƒ«äºˆæ¸¬åˆ¶å¾¡ã®ãƒ›ãƒ©ã‚¤ã‚¾ãƒ³
+            obj.param.dt = 0.25;              % ãƒ¢ãƒ‡ãƒ«äºˆæ¸¬åˆ¶å¾¡ã®åˆ»ã¿æ™‚é–“
             obj.param.input_size = self.model.dim(2);
             obj.param.state_size = self.model.dim(1);
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
-            obj.param.Num = obj.param.H+1; %‰Šúó‘Ô‚Æƒzƒ‰ƒCƒ]ƒ“”‚Ì‡Œv
-            %d‚Ý%
+            obj.param.Num = obj.param.H+1; %åˆæœŸçŠ¶æ…‹ã¨ãƒ›ãƒ©ã‚¤ã‚¾ãƒ³æ•°ã®åˆè¨ˆ
+            %é‡ã¿%
             obj.param.Q = diag(10*ones(1,obj.param.state_size));
             obj.param.R = diag(10*ones(1,obj.param.input_size));
             obj.param.Qf = diag(10*ones(1,obj.param.state_size));
@@ -47,9 +47,9 @@ classdef MPC_controller <CONTROLLER_CLASS
         
         function u = do(obj,param,~)
             % param = {model, reference}
-            % param{1}.state : „’è‚µ‚½state\‘¢‘Ì
-            % param{2}.result.state : ŽQÆó‘Ô‚Ì\‘¢‘Ì % n x Num :  n : number of state,  Num : horizon
-            % param{3} : \‘¢‘Ì
+            % param{1}.state : æŽ¨å®šã—ãŸstateæ§‹é€ ä½“
+            % param{2}.result.state : å‚ç…§çŠ¶æ…‹ã®æ§‹é€ ä½“ % n x Num :  n : number of state,  Num : horizon
+            % param{3} : æ§‹é€ ä½“
             
             %state = state_copy(param{1}.state);
             %model = param{1};
@@ -68,9 +68,9 @@ classdef MPC_controller <CONTROLLER_CLASS
             obj.previous_state = repmat(obj.param.X0,1,obj.param.Num);
             problem.solver    = 'fmincon';
             problem.options   = obj.options;
-            problem.objective = @(x) obj.objective(x, obj.param);  % •]‰¿ŠÖ”
-            problem.nonlcon   = @(x) obj.constraints(x, obj.param);% §–ñðŒ
-            problem.x0		  = [obj.previous_state;obj.previous_input]; % ‰Šúó‘Ô
+            problem.objective = @(x) obj.objective(x, obj.param);  % è©•ä¾¡é–¢æ•°
+            problem.nonlcon   = @(x) obj.constraints(x, obj.param);% åˆ¶ç´„æ¡ä»¶
+            problem.x0		  = [obj.previous_state;obj.previous_input]; % åˆæœŸçŠ¶æ…‹
             %[var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem);
             [var, ~,~,~,~,~,~] = fmincon(problem);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
@@ -81,41 +81,41 @@ classdef MPC_controller <CONTROLLER_CLASS
             
         end
         function [eval] = objective(obj,x, params)
-            % ƒ‚ƒfƒ‹—\‘ª§Œä‚Ì•]‰¿’l‚ðŒvŽZ‚·‚éƒvƒƒOƒ‰ƒ€
+            % ãƒ¢ãƒ‡ãƒ«äºˆæ¸¬åˆ¶å¾¡ã®è©•ä¾¡å€¤ã‚’è¨ˆç®—ã™ã‚‹ãƒ—ãƒ­ã‚°ãƒ©ãƒ 
 
-            %-- MPC‚Å—p‚¢‚é—\‘ªó‘Ô X‚Æ—\‘ª“ü—Í U‚ðÝ’è
+            %-- MPCã§ç”¨ã„ã‚‹äºˆæ¸¬çŠ¶æ…‹ Xã¨äºˆæ¸¬å…¥åŠ› Uã‚’è¨­å®š
             X = x(1:params.state_size, :);
             U = x(params.state_size+1:end, :);
             
-            %-- ó‘Ô‹y‚Ñ“ü—Í‚É‘Î‚·‚é–Ú•Wó‘Ô‚â–Ú•W“ü—Í‚Æ‚ÌŒë·‚ðŒvŽZ
+            %-- çŠ¶æ…‹åŠã³å…¥åŠ›ã«å¯¾ã™ã‚‹ç›®æ¨™çŠ¶æ…‹ã‚„ç›®æ¨™å…¥åŠ›ã¨ã®èª¤å·®ã‚’è¨ˆç®—
             tildeX = X - params.Xr;
             %     tildeU = U - params.Ur;
             tildeU = U;
-            %-- ó‘Ô‹y‚Ñ“ü—Í‚ÌƒXƒe[ƒWƒRƒXƒg‚ðŒvŽZ
+            %-- çŠ¶æ…‹åŠã³å…¥åŠ›ã®ã‚¹ãƒ†ãƒ¼ã‚¸ã‚³ã‚¹ãƒˆã‚’è¨ˆç®—
             stageState = arrayfun(@(L) tildeX(:, L)' * params.Q * tildeX(:, L), 1:params.H);
             stageInput = arrayfun(@(L) tildeU(:, L)' * params.R * tildeU(:, L), 1:params.H);
-            %-- ó‘Ô‚ÌI’[ƒRƒXƒg‚ðŒvŽZ
+            %-- çŠ¶æ…‹ã®çµ‚ç«¯ã‚³ã‚¹ãƒˆã‚’è¨ˆç®—
             terminalState = tildeX(:, end)' * params.Qf * tildeX(:, end);
-            %-- •]‰¿’lŒvŽZ
+            %-- è©•ä¾¡å€¤è¨ˆç®—
             eval = sum(stageState + stageInput) + terminalState;
         end
         function [cineq, ceq] = constraints(obj,x, params)
-            % ƒ‚ƒfƒ‹—\‘ª§Œä‚Ì§–ñðŒ‚ðŒvŽZ‚·‚éƒvƒƒOƒ‰ƒ€
+            % ãƒ¢ãƒ‡ãƒ«äºˆæ¸¬åˆ¶å¾¡ã®åˆ¶ç´„æ¡ä»¶ã‚’è¨ˆç®—ã™ã‚‹ãƒ—ãƒ­ã‚°ãƒ©ãƒ 
             cineq  = zeros(params.state_size, 4*params.H);
-            %-- MPC‚Å—p‚¢‚é—\‘ªó‘Ô X‚Æ—\‘ª“ü—Í U‚ðÝ’è
+            %-- MPCã§ç”¨ã„ã‚‹äºˆæ¸¬çŠ¶æ…‹ Xã¨äºˆæ¸¬å…¥åŠ› Uã‚’è¨­å®š
             X = x(1:params.state_size, :);
             U = x(params.state_size+1:end, :);
             
-            %-- ‰Šúó‘Ô‚ªŒ»ÝŽž‚Æˆê’v‚·‚é‚±‚Æ‚Æó‘Ô•û’öŽ®‚É]‚¤‚±‚Æ‚ðÝ’è
+            %-- åˆæœŸçŠ¶æ…‹ãŒç¾åœ¨æ™‚åˆ»ã¨ä¸€è‡´ã™ã‚‹ã“ã¨ã¨çŠ¶æ…‹æ–¹ç¨‹å¼ã«å¾“ã†ã“ã¨ã‚’è¨­å®š
             %TEMP_predictX = cell2mat(arrayfun(@(N) ode45(@(t,x) params.model(x,U(:,N),params.model_param),[params.dt*(N-2) params.dt*(N-1)],X(:,N-1)),2:params.Num,'UniformOutput',false));
             %PredictX = cell2mat(arrayfun(@(L) TEMP_predictX(L).y(:,end),1:params.H,'UniformOutput',false));
             PredictX = X+obj.param.dt*obj.self.model.method(X,U,obj.param.model_param);
             
             ceq = [X(:, 1) - params.X0, cell2mat(arrayfun(@(L) X(:, L)  -  PredictX(:,L-1), 2:params.Num, 'UniformOutput', false))];
-            %-- —\‘ª“ü—Í‚ª“ü—Í‚Ìã‰ºŒÀ§–ñ‚É]‚¤‚±‚Æ‚ðÝ’è
+            %-- äºˆæ¸¬å…¥åŠ›ãŒå…¥åŠ›ã®ä¸Šä¸‹é™åˆ¶ç´„ã«å¾“ã†ã“ã¨ã‚’è¨­å®š
             %     cineq(:, 1: params.H)	        = cell2mat(arrayfun(@(L) params.U(:, 1) - U(:, L), 1:params.H, 'UniformOutput', false));
             %     cineq(:, params.H+1: 2*params.H)= cell2mat(arrayfun(@(L) U(:, L) - params.U(:, 2), 1:params.H, 'UniformOutput', false));
-            %     %-- —\‘ª“ü—ÍŠÔ‚Å‚Ì•Ï‰»—Ê‚ª•Ï‰»—Ê§–ñˆÈ‰º‚Æ‚È‚é‚±‚Æ‚ðÝ’è
+            %     %-- äºˆæ¸¬å…¥åŠ›é–“ã§ã®å¤‰åŒ–é‡ãŒå¤‰åŒ–é‡åˆ¶ç´„ä»¥ä¸‹ã¨ãªã‚‹ã“ã¨ã‚’è¨­å®š
             %     cineq(:, 2*params.H+1: 3*params.H) = [cell2mat(arrayfun(@(L) -params.S - (U(:, L) - U(:, L-1)) , 2:params.H, 'UniformOutput', false)),  zeros(2,1)];
             %     cineq(:, 3*params.H+1: 4*params.H) = [cell2mat(arrayfun(@(L) (U(:, L) - U(:, L-1)) - params.S  , 2:params.H, 'UniformOutput', false)),  zeros(2,1)];
         end

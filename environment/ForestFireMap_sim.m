@@ -1,34 +1,34 @@
 classdef ForestFireMap_sim < ENV_CLASS 
-    % ŠÂ‹«İ’è
-    % —pŒê
-    % Map F(N+2)~(N+2)‚Ì—£Uƒ}ƒbƒv
+    % ç’°å¢ƒè¨­å®š
+    % ç”¨èª
+    % Map ï¼š(N+2)Ã—(N+2)ã®é›¢æ•£ãƒãƒƒãƒ—
     %
     % Properties
     % param : a structure consists of following field
     %         v1
     %         v2
-    %         w %HumidityiHigh value:Hard to burning / Low value:easy to burningj
-    %         d %Forest divercityiHigh value:Burning rapidly / Low value:Burning Slowlyj
+    %         w %Humidityï¼ˆHigh value:Hard to burning / Low value:easy to burningï¼‰
+    %         d %Forest divercityï¼ˆHigh value:Burning rapidly / Low value:Burning Slowlyï¼‰
     %         N %Space is divided N * N cells
     %         Threshold %[T1 T2 T3 T4] 
     %         (T1<=v<T2)Not burning
     %         (T2<=v<T3)burning 
     %         (T3<=v<T4)burning wildly
     %         (v=T4)burn out 
-    %         Map %‘S‘Ì‚Ìƒ}ƒbƒvî•ñ
-    %         Map_Agent %ŠeƒG[ƒWƒFƒ“ƒg‚ª‚Âƒ}ƒbƒv
-    %         Color_Map %•`‰æ—p‚ÌƒJƒ‰[ƒ}ƒbƒv
-    %         Color_Map_Agent %ŠeƒG[ƒWƒFƒ“ƒg‚ª‚Â•`‰æ—p‚ÌƒJƒ‰[ƒ}ƒbƒv
+    %         Map %å…¨ä½“ã®ãƒãƒƒãƒ—æƒ…å ±
+    %         Map_Agent %å„ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆãŒæŒã¤ãƒãƒƒãƒ—
+    %         Color_Map %æç”»ç”¨ã®ã‚«ãƒ©ãƒ¼ãƒãƒƒãƒ—
+    %         Color_Map_Agent %å„ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆãŒæŒã¤æç”»ç”¨ã®ã‚«ãƒ©ãƒ¼ãƒãƒƒãƒ—
 properties
-        name % —áFbldg1
-        id % —áF
+        name % ä¾‹ï¼šbldg1
+        id % ä¾‹ï¼š
         param
 %         result
     end
     methods
         function obj = ForestFireMap_sim(~,param)
             obj.param=param;
-            % ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğì¬
+            % ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             obj.name = param.name;
             obj.id = obj.param.id;
             obj.param.Nx=(numel(obj.param.map_min(1):obj.param.D:obj.param.map_max(1)));
@@ -61,7 +61,7 @@ properties
         end
 
         function result = do(obj,varargin)
-            if isempty(varargin) %ƒOƒ[ƒoƒ‹ƒ}ƒbƒv‚ÌXV
+            if isempty(varargin) %ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒãƒƒãƒ—ã®æ›´æ–°
             %Wheb v >= threshold(2), v increace constantly.  
             hoge=obj.param.Map>=obj.param.Threshold(2);
             obj.param.Map=obj.param.Map+ hoge.*rand(obj.param.Ny+2,obj.param.Nx+2);
@@ -104,10 +104,10 @@ properties
             obj.param.Map=result.ReMap;
             obj.param.Color_Map=result.ReColor_Map;
             
-            else %ƒG[ƒWƒFƒ“ƒg‚ª‚Âƒ[ƒJƒ‹ƒ}ƒbƒv‚ÌXV
-                %varargin{1,1}{1,1} ƒ}ƒbƒv‚ÌƒZƒ“ƒTî•ñ
-                %varargin{1,2}      ó‘Ô„’è’l
-                %obj.param          ƒG[ƒWƒFƒ“ƒg‚ª‚Âƒ[ƒJƒ‹ƒ}ƒbƒv
+            else %ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆãŒæŒã¤ãƒ­ãƒ¼ã‚«ãƒ«ãƒãƒƒãƒ—ã®æ›´æ–°
+                %varargin{1,1}{1,1} ãƒãƒƒãƒ—ã®ã‚»ãƒ³ã‚µæƒ…å ±
+                %varargin{1,2}      çŠ¶æ…‹æ¨å®šå€¤
+                %obj.param          ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆãŒæŒã¤ãƒ­ãƒ¼ã‚«ãƒ«ãƒãƒƒãƒ—
                 obj.param.Map_agent(obj.param.MapX <= round(varargin{1,2}.state.p(1)) + 10 &...
                                     obj.param.MapX >= round(varargin{1,2}.state.p(1)) - 10 &...
                                     obj.param.MapY <= round(varargin{1,2}.state.p(2)) + 10 &...

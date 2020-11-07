@@ -1,7 +1,7 @@
 classdef MODEL_CLASS <  handle
     % general model class
     % obj = MODEL_CLASS(name,param)
-    %      name : –¼‘Oiobsoletej
+    %      name : åå‰ï¼ˆobsoleteï¼‰
     %      param : structure of 
     %            "state_list" : ['p','v']
     %            "num_list" : [3,3]  
@@ -10,24 +10,24 @@ classdef MODEL_CLASS <  handle
     %            "input_channel" : ['v']
     properties
         result
-        name % model dynamics‚Ì–¼‘O
-        id % ˆêˆÓ‚ÉŒˆ’è‚·‚é‚à‚Ì : integer
+        name % model dynamicsã®åå‰
+        id % ä¸€æ„ã«æ±ºå®šã™ã‚‹ã‚‚ã® : integer
         method % = str2func(name)
-        projection = @(x) x; % ŽË‰e‚ª•K—v‚ÈŽž‚ÍÝ’è‚·‚éD(obsolete ? )
+        projection = @(x) x; % å°„å½±ãŒå¿…è¦ãªæ™‚ã¯è¨­å®šã™ã‚‹ï¼Ž(obsolete ? )
         time_scale % discrete or continuous
-        solver = str2func('ode15s') % Žw”1@‚ÌDAE‚ð‰ð‚¯‚éD
-        % solver = str2func('ode45') % Žw”1@‚ÌDAE‚ð‰ð‚¯‚éD
+        solver = str2func('ode15s') % æŒ‡æ•°1ã€€ã®DAEã‚’è§£ã‘ã‚‹ï¼Ž
+        % solver = str2func('ode45') % æŒ‡æ•°1ã€€ã®DAEã‚’è§£ã‘ã‚‹ï¼Ž
         ts = 0;
         dt = 0.025;
-        % state.list % —á ["p","q","v","w"]
-        % state.num_list % —á [3,4,3,3]
+        % state.list % ä¾‹ ["p","q","v","w"]
+        % state.num_list % ä¾‹ [3,4,3,3]
         param % parameters
         dim % n, m, p :  number of state, input, and physical parameters
         input_channel % ["v","w"]
         noise
     end
     properties %(Access=private)
-        state%=STATE_CLASS(); % ó‘Ô‚Ì\‘¢‘Ì
+        state%=STATE_CLASS(); % çŠ¶æ…‹ã®æ§‹é€ ä½“
     end
     methods
         function obj = MODEL_CLASS(name,param) % constructor
@@ -104,7 +104,7 @@ classdef MODEL_CLASS <  handle
             obj.state.set_state(varargin{1});
         end
         function state = get(obj,varargin)
-            if strcmp(varargin{1},"state") % ‡C
+            if strcmp(varargin{1},"state") % â‘£
                 state = obj.state;
             else
                 state=obj.state.get(varargin{1});

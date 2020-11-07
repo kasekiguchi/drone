@@ -1,13 +1,13 @@
 classdef ForestFireMap < ESTIMATOR_CLASS
-    % ŠÂ‹«Ý’è
-    % —pŒê
+    % ç’°å¢ƒè¨­å®š
+    % ç”¨èªž
     %
     % Properties
     % param : a structure consists of following field
     % result: estimation result
 properties
-%         name % —áFbldg1
-%         id % —áF
+%         name % ä¾‹ï¼šbldg1
+%         id % ä¾‹ï¼š
         param
         result
         self
@@ -16,7 +16,7 @@ properties
         function obj = ForestFireMap(self,param)
             obj.self = self;
             obj.param=param;
-            % ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
+            % ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
             obj.param{1,1}.Nx=(numel(obj.param{1,1}.map_min(1):obj.param{1,1}.D:obj.param{1,1}.map_max(1)));
             obj.param{1,1}.Ny=(numel(obj.param{1,1}.map_min(2):obj.param{1,1}.D:obj.param{1,1}.map_max(2)));
             [obj.param{1,1}.MapX,obj.param{1,1}.MapY]=meshgrid(obj.param{1,1}.map_min(1)-obj.param{1,1}.D:+obj.param{1,1}.D:obj.param{1,1}.map_max(1)+obj.param{1,1}.D,...

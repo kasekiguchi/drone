@@ -1,13 +1,13 @@
 function [ref] = Case_study_trajectory(X0)
-%UNTITLED ‚±‚ÌŠÖ”‚ÌŠT—v‚ğ‚±‚±‚É‹Lq
-%   Ú×à–¾‚ğ‚±‚±‚É‹Lq
+%UNTITLED ã“ã®é–¢æ•°ã®æ¦‚è¦ã‚’ã“ã“ã«è¨˜è¿°
+%   è©³ç´°èª¬æ˜ã‚’ã“ã“ã«è¨˜è¿°
 
 syms t real
 x_0 = X0(1);
 y_0 = X0(2);
 z_0 = X0(3);
 
-s = 4; % s = 2 ¨ period = 4*pi (12 sec)ƒn[ƒg1ü
+s = 4; % s = 2 â†’ period = 4*pi (12 sec)ãƒãƒ¼ãƒˆ1å‘¨
 y_offset = 5;
 r = 0.1;
 

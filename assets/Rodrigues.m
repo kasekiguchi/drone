@@ -1,13 +1,13 @@
 function R= Rodrigues(u,varargin)
-    % yInputzu, th
+    % ã€Inputã€‘u, th
     % u : unit vector,  th : angle (rad)
-    % th =[] ‚Ì‚Æ‚«‚Í u‚Ì’·‚³‚ª‰ñ“]Šp‚Æ‚È‚é   th = norm(u);
+    % th =[] ã®ã¨ãã¯ uã®é•·ã•ãŒå›è»¢è§’ã¨ãªã‚‹   th = norm(u);
     u = u(:);
     if isempty(varargin)
         th = norm(u);
         u = u/th;
     else
-        u = u(:)/norm(u); % ’PˆÊcƒxƒNƒgƒ‹‚É•ÏŠ·
+        u = u(:)/norm(u); % å˜ä½ç¸¦ãƒ™ã‚¯ãƒˆãƒ«ã«å¤‰æ›
         th = varargin{1};
     end
     R = u*u'+cos(th)*(eye(3)-u*u')+sin(th)*Skew(u);

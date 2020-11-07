@@ -1,8 +1,8 @@
 function [param] = FilteringStep(obj,param)
     % Update the state using the observation values existing in the validation region
-    %yInputz obj   : object of PDAF
+    %ã€Inputã€‘ obj   : object of PDAF
     %          param : Structure of PDAF
-    %yOutputzparam : Structure of PDAF
+    %ã€Outputã€‘param : Structure of PDAF
     
     Vi            = cell(1,obj.param.on_feature_num);                       % Initialize innovation for one feature point of interest
     VSumVector    = zeros(3*obj.param.on_feature_num,1);                    % Initialization of weighted innovation for all feature points of interest

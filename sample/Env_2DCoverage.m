@@ -1,26 +1,26 @@
 function Env_2DCoverage(agent)
 %% environment class demo
-% env property ‚ğEnv class‚ÌƒCƒ“ƒXƒ^ƒ“ƒX”z—ñ‚Æ‚µ‚Ä’è‹`
+% env property ã‚’Env classã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹é…åˆ—ã¨ã—ã¦å®šç¾©
 env_param.name="";
 env_param.d = 0.1;
-         %env_param.q	= [25 25];%ƒeƒXƒg’P‘Ì—p
-         %env_param.q	= [60 50;50 60;25 25];%ƒeƒXƒg’P‘Ì—p
-%env_param.q	= [9 74;13 72;13 77;25 45;31 36;32 31;35 38;36 25;40 28;42 24;44 20;49 25;50 28;52 20;54 23;77 88;83 81;84 73;85 78;89 86];%d—v“_ˆÊ’u
+         %env_param.q	= [25 25];%ãƒ†ã‚¹ãƒˆå˜ä½“ç”¨
+         %env_param.q	= [60 50;50 60;25 25];%ãƒ†ã‚¹ãƒˆå˜ä½“ç”¨
+%env_param.q	= [9 74;13 72;13 77;25 45;31 36;32 31;35 38;36 25;40 28;42 24;44 20;49 25;50 28;52 20;54 23;77 88;83 81;84 73;85 78;89 86];%é‡è¦ç‚¹ä½ç½®
 %env_param.q = env_param.q/10;
-% Vertex ‚Íˆê•M‘‚«‚Å”½Œv‰ñ‚è‚É‚È‚é‚æ‚¤‚É•À‚×‚éD
-env_param.q	= [1 0;2, 1;4 -2];%ƒeƒXƒg’P‘Ì—p
+% Vertex ã¯ä¸€ç­†æ›¸ãã§åæ™‚è¨ˆå›ã‚Šã«ãªã‚‹ã‚ˆã†ã«ä¸¦ã¹ã‚‹ï¼
+env_param.q	= [1 0;2, 1;4 -2];%ãƒ†ã‚¹ãƒˆå˜ä½“ç”¨
 % env_param.Vertices=[0 0;100 30;50 100;0 30];
 % env_param.Vertices=[-10 -20;100 0;100 50;0 50];
 % env_param.Vertices=[-10 -20;100 0;100 50;50 80;0 50];
 % env_param.Vertices=[0 0;100 0;100 100;0 100];
 %env_param.Vertices=[0 0;10 0;10 10;0 10];
-env_param.Vertices=[-2 -2.5;5.5 -2.5;5.5 3;-2 3]; % ‘S—Ìˆæ‚ÌƒTƒCƒY
+env_param.Vertices=[-2 -2.5;5.5 -2.5;5.5 3;-2 3]; % å…¨é ˜åŸŸã®ã‚µã‚¤ã‚º
 assignin('base',"env_param",env_param);
 evalin('base',"Env = DensityMap_sim([],env_param);");
 
 for i = 1:length(agent)
     env(i).name = "density";
-    env_param.q = []; % d—v“xî•ñ‚ÍŠÏ‘ª‚µ‚È‚¢‚Æ‚í‚©‚ç‚È‚¢‚Æ‚¢‚¤ƒ}ƒbƒv
+    env_param.q = []; % é‡è¦åº¦æƒ…å ±ã¯è¦³æ¸¬ã—ãªã„ã¨ã‚ã‹ã‚‰ãªã„ã¨ã„ã†ãƒãƒƒãƒ—
     env(i).type = "DensityMap_sim";
     env(i).param = env_param;
     env(i).param.id=i;

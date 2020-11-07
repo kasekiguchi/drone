@@ -1,6 +1,6 @@
 classdef REFtoHL_drone < INPUT_TRANSFORM_CLASS
-    % –Ú•WˆÊ’u‚©‚çŠK‘wŒ^üŒ`‰»“ü—Í‚ðŽZo‚·‚éƒNƒ‰ƒX
-    %   –¢ŒŸ“¢
+    % ç›®æ¨™ä½ç½®ã‹ã‚‰éšŽå±¤åž‹ç·šå½¢åŒ–å…¥åŠ›ã‚’ç®—å‡ºã™ã‚‹ã‚¯ãƒ©ã‚¹
+    %   æœªæ¤œè¨Ž
     
     properties
         self
@@ -48,7 +48,7 @@ classdef REFtoHL_drone < INPUT_TRANSFORM_CLASS
                     obj.state.type = 4;
                 end
             end
-            u = HL_controller(obj.state,struct('xd',input),obj.param); % input ‚ðreference‚Æ‚µ‚½ŠK‘wŒ^üŒ`‰»“ü—ÍŽZo
+            u = HL_controller(obj.state,struct('xd',input),obj.param); % input ã‚’referenceã¨ã—ãŸéšŽå±¤åž‹ç·šå½¢åŒ–å…¥åŠ›ç®—å‡º
         end
     end
 end

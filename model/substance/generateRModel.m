@@ -7,25 +7,25 @@ syms u u1 u2 u3 u4 T1 T2 T3 T4 real
 syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 syms R r11 r12 r13 r21 r22 r23 r31 r32 r33 real
 param.mass = 0.2;
-param.length = 0.1;% ƒ‚[ƒ^[ŠÔ‚Ì‹——£F³•ûŒ`‚ğ‰¼’è‚µ‚Ä‚¢‚é
+param.length = 0.1;% ãƒ¢ãƒ¼ã‚¿ãƒ¼é–“ã®è·é›¢ï¼šæ­£æ–¹å½¢ã‚’ä»®å®šã—ã¦ã„ã‚‹
 param.jx = 0.002237568;
 param.jy = 0.002985236;
 param.jz = 0.00480374;
 param.gravity = 9.81;
-param.km = 0.03010685884691849; % ƒ[ƒ^’è”
-param.k = 0.000008048;          % „—Í’è”
+param.km = 0.03010685884691849; % ãƒ­ãƒ¼ã‚¿å®šæ•°
+param.k = 0.000008048;          % æ¨åŠ›å®šæ•°
 
 physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4};
 physicalParamV		= {param.mass, param.length, param.jx, param.jy, param.jz, param.gravity, param.km, param.km, param.km, param.km, param.k, param.k, param.k, param.k};
-p	= [  p1;  p2;  p3];             % Position@Fxb : is•ûŒüCzb FƒzƒoƒŠƒ“ƒO‚ÉãŒü‚«
+p	= [  p1;  p2;  p3];             % Positionã€€ï¼šxb : é€²è¡Œæ–¹å‘ï¼Œzb ï¼šãƒ›ãƒãƒªãƒ³ã‚°æ™‚ã«ä¸Šå‘ã
 dp	= [ dp1; dp2; dp3];             % Velocity
 ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
 R = [r11 r12 r13;r21 r22 r23;r31 r32 r33];
 ob	= [  o1;  o2;  o3];             % Angular velocity
-T = [T1;T2;T3;T4];                  % Thrust force F³‚ªzb Œü‚«
+T = [T1;T2;T3;T4];                  % Thrust force ï¼šæ­£ãŒzb å‘ã
 % motor configuration 
-% T1 : ¶‘OCT2F¶ŒãCT3F‰EŒãCT4F‰E‘Oix-y•½–Ê‚ÌÛŒÀ‡j
-% T1, T3 ‚Ì‰ñ“]² zb,  T2, T4 : -zb      [0,1,0,1] ‚Å ³‚Ìyaw‰ñ“]
+% T1 : å·¦å‰ï¼ŒT2ï¼šå·¦å¾Œï¼ŒT3ï¼šå³å¾Œï¼ŒT4ï¼šå³å‰ï¼ˆx-yå¹³é¢ã®è±¡é™é †ï¼‰
+% T1, T3 ã®å›è»¢è»¸ zb,  T2, T4 : -zb      [0,1,0,1] ã§ æ­£ã®yawå›è»¢
 tau = [sqrt(2)*l*(T1+T2-T3-T4)/2; sqrt(2)*l*(T2+T3-T1-T4)/2; -km1*T1+km2*T2-km3*T3+km4*T4]; % Torque for body
 % IT=inv([1, 1, 1, 1;simplify(mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),tau,'UniformOutput',false)),1:3,1:4))]);
 %% Translational model

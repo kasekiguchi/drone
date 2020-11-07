@@ -1,5 +1,5 @@
 function pd = pdiff(flist, vars)
-% % flist‚ğvars‚Å”÷•ª‚µ‚½‚à‚Ì‚ÌƒVƒ“ƒ{ƒŠƒbƒN”z—ñ‚ğ•Ô‚·H
+% % flistã‚’varsã§å¾®åˆ†ã—ãŸã‚‚ã®ã®ã‚·ãƒ³ãƒœãƒªãƒƒã‚¯é…åˆ—ã‚’è¿”ã™ï¼Ÿ
     flist = flist(:);
     vars = vars(:);
 %    pd = arrayfun(@(x) diff(flist(1), x), vars)';

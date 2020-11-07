@@ -1,5 +1,5 @@
 classdef DirectSensor < SENSOR_CLASS
-    % simulation—pƒNƒ‰ƒXFó‘Ô‚ð‚»‚Ì‚Ü‚Ü•Ô‚·
+    % simulationç”¨ã‚¯ãƒ©ã‚¹ï¼šçŠ¶æ…‹ã‚’ãã®ã¾ã¾è¿”ã™
     properties
         name = "DirectSensor";
         interface = @(x) x;
@@ -13,7 +13,7 @@ classdef DirectSensor < SENSOR_CLASS
         end
         
         function result = do(obj,~)
-            % y“ü—ÍzTarget FŠÏ‘ª‘ÎÛ‚ÌModel_obj‚ÌƒŠƒXƒg
+            % ã€å…¥åŠ›ã€‘Target ï¼šè¦³æ¸¬å¯¾è±¡ã®Model_objã®ãƒªã‚¹ãƒˆ
             obj.result.state.set_state(obj.self.state.get());
             result=obj.result;
         end

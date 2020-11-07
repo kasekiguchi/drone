@@ -1,5 +1,5 @@
 classdef (Abstract) CONTROLLER_CLASS < handle
-    % ‚±‚ÌƒNƒ‰ƒX‚ÌŠT—v
+    % ã“ã®ã‚¯ãƒ©ã‚¹ã®æ¦‚è¦
     properties (Abstract)
         result
         self

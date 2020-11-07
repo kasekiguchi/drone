@@ -1,15 +1,15 @@
 classdef TimeVaryingReferenceSuspendedLoad < REFERENCE_CLASS
-    % ŽžŠÔŠÖ”‚Æ‚µ‚Ä‚ÌƒŠƒtƒ@ƒŒƒ“ƒX‚ð¶¬‚·‚éƒNƒ‰ƒX
+    % æ™‚é–“é–¢æ•°ã¨ã—ã¦ã®ãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹ã‚’ç”Ÿæˆã™ã‚‹ã‚¯ãƒ©ã‚¹
     % obj = TimeVaryingReference()
     properties
         param
-        func % ŽžŠÔŠÖ”‚Ìƒnƒ“ƒhƒ‹
+        func % æ™‚é–“é–¢æ•°ã®ãƒãƒ³ãƒ‰ãƒ«
         self
     end
     
     methods
         function obj = TimeVaryingReferenceSuspendedLoad(self,varargin)
-            % yInputzref_gen, param, "HL"
+            % ã€Inputã€‘ref_gen, param, "HL"
             % ref_gen : reference function generator
             % param : parameter to generate the reference function
             % "HL" : flag to decide the reference for HL
@@ -25,8 +25,8 @@ classdef TimeVaryingReferenceSuspendedLoad < REFERENCE_CLASS
             end
         end
         function  result= do(obj,Param)
-            % yInputzParam = {Time.t}
-            obj.result.state.xd = obj.func(Param{1}.t); % –Ú•WdSˆÊ’uiâ‘ÎÀ•Wj
+            % ã€Inputã€‘Param = {Time.t}
+            obj.result.state.xd = obj.func(Param{1}.t); % ç›®æ¨™é‡å¿ƒä½ç½®ï¼ˆçµ¶å¯¾åº§æ¨™ï¼‰
             obj.result.state.pL = obj.result.state.xd(1:3);
             obj.result.state.yaw = obj.result.state.xd(4);
             result=obj.result;

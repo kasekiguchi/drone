@@ -1,6 +1,6 @@
 classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
-    %UNTITLED4 ‚±‚ÌƒNƒ‰ƒX‚ÌŠT—v‚ð‚±‚±‚É‹Lq
-    %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+    %UNTITLED4 ã“ã®ã‚¯ãƒ©ã‚¹ã®æ¦‚è¦ã‚’ã“ã“ã«è¨˜è¿°
+    %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
     
     properties
         self
@@ -21,8 +21,8 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
         end
         
         function u = do(obj,input,varargin)
-            %% ŽÀŒ±—p“ü—Í¶¬  uroll, upitch, uthr, uyaw
-            % yInputzvarargin : struct with field FH
+            %% å®Ÿé¨“ç”¨å…¥åŠ›ç”Ÿæˆ  uroll, upitch, uthr, uyaw
+            % ã€Inputã€‘varargin : struct with field FH
             if ~isfield(varargin{1},'FH')
                 error("ACSL : require figure window");
             else
@@ -38,22 +38,22 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
                 what=obj.self.model.state.w;
                 P = obj.self.model.param;
               % statetmp=obj.self.estimator.result.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.estimator.result.state.get(),obj.self.input,P);% euler approximation
-                %statetmp=obj.self.model.state.get();% do_model‚ÅŽ–‘O—\‘ª‚ð‹‚ß‚Ä‚¢‚éD
+                %statetmp=obj.self.model.state.get();% do_modelã§äº‹å‰äºˆæ¸¬ã‚’æ±‚ã‚ã¦ã„ã‚‹ï¼Ž
                  statetmp=obj.self.model.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.model.state.get(),obj.self.input,P);% euler approximation
                 whatp = statetmp(end-2:end);
-                %whatp = obj.self.model.state.w;% ‚PŽžæ‚ÌŽ–‘O—\‘ª
+                %whatp = obj.self.model.state.w;% ï¼‘æ™‚åˆ»å…ˆã®äº‹å‰äºˆæ¸¬
                 T_thr = sum(input);
 
                 
                 uroll       = obj.param.gain(1) * (whatp(1) - what(1))    ;
                 upitch      = obj.param.gain(2) * (whatp(2) - what(2))   ;
-                uthr        = obj.param.gain(4) * (T_thr-obj.thr_hover) + u_thr_offset; % m*g ‚ÅŠ„‚Á‚Ä‚¢‚é
+                uthr        = obj.param.gain(4) * (T_thr-obj.thr_hover) + u_thr_offset; % m*g ã§å‰²ã£ã¦ã„ã‚‹
                 uyaw        = obj.param.gain(3) * (whatp(3) - what(3)) ;
                 uroll = sign(uroll)*min(abs(uroll),500)+ obj.param.roll_offset; %500
                 upitch = sign(upitch)*min(abs(upitch),500)+ obj.param.pitch_offset; 
-                uyaw = -sign(uyaw)*min(abs(uyaw),300)+ obj.param.yaw_offset; % ƒ}ƒCƒiƒX‚Í•K{ betaflight‚Å‚Í³“ü—Í‚ÅŽžŒv‰ñ‚è
+                uyaw = -sign(uyaw)*min(abs(uyaw),300)+ obj.param.yaw_offset; % ãƒžã‚¤ãƒŠã‚¹ã¯å¿…é ˆ betaflightã§ã¯æ­£å…¥åŠ›ã§æ™‚è¨ˆå›žã‚Š
                 % uthr =uthr + u_thr_offset ;%sign(uthr)*min(abs(uthr),100)+ u_thr_offset; 
-                obj.result = [ uroll, upitch, uthr, uyaw, 1600,1600,600,600];
+                obj.result = [ uroll, upitch, uthr, uyaw, 1100,1100,600,600];
             else
                 obj.result = [ obj.param.roll_offset, obj.param.pitch_offset, obj.param.th_offset, obj.param.yaw_offset, 1600,1600,600,600];
             end

@@ -1,8 +1,8 @@
 function [param] = CalculateWeightting(obj,param)
     % Calculating weightting factor against observation in validation region
-    %yInputz obj   : object of PDAF
+    %ã€Inputã€‘ obj   : object of PDAF
     %          param : Structure of PDAF
-    %yOutputzparam : Structure of PDAF
+    %ã€Outputã€‘param : Structure of PDAF
     for k = 1:obj.param.on_feature_num
         % Likelihood ration for occlusion in line 1
         Lr{1,k} = 0;

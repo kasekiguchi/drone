@@ -7,14 +7,14 @@ classdef Drone < ABSTRACT_SYSTEM
     methods
         function obj = Drone(varargin)
             obj=obj@ABSTRACT_SYSTEM({varargin});
-            % ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
-            %   Ú×à–¾‚ð‚±‚±‚É‹Lq
-                        %% ƒhƒ[ƒ“‚ÌƒtƒŒ[ƒ€
+            % ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
+            %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
+                        %% ãƒ‰ãƒ­ãƒ¼ãƒ³ã®ãƒ•ãƒ¬ãƒ¼ãƒ 
             % propeller
-            [px,py,pz]=cylinder(0.06); % ”¼Œa0.2‚Ì‰~’Œ
-            prop = patch('XData',px(1,:)','YData',py(1,:)','ZData',pz(1,:)'); %  ”¼Œa0.2‚Ì‰~’Œ
-            l1=length(prop.Vertices(:,1)); % ‰~’Œ‚Ì’¸“_‚Ì”
-            L = 0.1;% motor ŠÔ‚Ì‹——£/2
+            [px,py,pz]=cylinder(0.06); % åŠå¾„0.2ã®å††æŸ±
+            prop = patch('XData',px(1,:)','YData',py(1,:)','ZData',pz(1,:)'); %  åŠå¾„0.2ã®å††æŸ±
+            l1=length(prop.Vertices(:,1)); % å††æŸ±ã®é ‚ç‚¹ã®æ•°
+            L = 0.1;% motor é–“ã®è·é›¢/2
             H = 0.5;
             p1 = L*[1 1 H];
             p2 = L*[-1 1 H];

@@ -1,6 +1,6 @@
 classdef LPF < ESTIMATOR_CLASS
-    % Žd—l‚ª’è‚Ü‚Á‚Ä‚¢‚È‚¢‚Ì‚Å‚Æ‚Ä‚à’†“r”¼’[
-    %   Œ»ó@Œã‘Þ·•ª‹ßŽ—‚Å”÷•ª’l‚ð‹‚ß‚ç‚ê‚é
+    % ä»•æ§˜ãŒå®šã¾ã£ã¦ã„ãªã„ã®ã§ã¨ã¦ã‚‚ä¸­é€”åŠç«¯
+    %   ç¾çŠ¶ã€€å¾Œé€€å·®åˆ†è¿‘ä¼¼ã§å¾®åˆ†å€¤ã‚’æ±‚ã‚ã‚‰ã‚Œã‚‹
     properties
         list % target of LPF
         num_list
@@ -14,8 +14,8 @@ classdef LPF < ESTIMATOR_CLASS
     
     methods
         function obj = LPF(self,param)
-            %UNTITLED ‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
-            %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+            %UNTITLED ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
+            %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
             obj.self = self;
             obj.dt=obj.self.model.dt;
             obj.T = param.LPF_T;
@@ -26,7 +26,7 @@ classdef LPF < ESTIMATOR_CLASS
                 obj.list = obj.self.model.state.list;
                 obj.num_list = obj.self.model.state.num_list;
             end
-            obj.result.state=STATE_CLASS(struct('state_list',obj.list,'num_list',obj.num_list)); % STATE_CLASS‚Æ‚µ‚ÄƒRƒs[i’l‚Í‚¢‚ê‚È‚¢j
+            obj.result.state=STATE_CLASS(struct('state_list',obj.list,'num_list',obj.num_list)); % STATE_CLASSã¨ã—ã¦ã‚³ãƒ”ãƒ¼ï¼ˆå€¤ã¯ã„ã‚Œãªã„ï¼‰
         end
         
         function [result]=do(obj,param,varargin)           
@@ -37,7 +37,7 @@ classdef LPF < ESTIMATOR_CLASS
                 sensor = obj.self.sensor.result;
             end
             if length(param)==2;       obj.list = param{2};end
-            if isempty(obj.LPF_state) % ‰Šú’l‚ÌÝ’è
+            if isempty(obj.LPF_state) % åˆæœŸå€¤ã®è¨­å®š
                 for i = 1:length(obj.list)
                     obj.LPF_state.(obj.list(i)) = sensor.state.(obj.list(i));
                 end

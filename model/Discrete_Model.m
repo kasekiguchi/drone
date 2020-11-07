@@ -9,7 +9,7 @@ classdef Discrete_Model < MODEL_CLASS
             obj= obj@MODEL_CLASS("Discrete_Model",args);
             %obj.id = self.id
             % 
-            %   Ú×à–¾‚ð‚±‚±‚É‹Lq
+            %   è©³ç´°èª¬æ˜Žã‚’ã“ã“ã«è¨˜è¿°
         end
         
     end

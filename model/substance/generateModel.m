@@ -9,27 +9,27 @@ syms u u1 u2 u3 u4 T1 T2 T3 T4 real
 syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 syms R real
 param.mass = 0.2;
-param.length = 0.1;% ƒ‚[ƒ^[ŠÔ‚Ì‹——£F³•ûŒ`‚ğ‰¼’è‚µ‚Ä‚¢‚é
+param.length = 0.1;% ãƒ¢ãƒ¼ã‚¿ãƒ¼é–“ã®è·é›¢ï¼šæ­£æ–¹å½¢ã‚’ä»®å®šã—ã¦ã„ã‚‹
 param.jx = 0.002237568;
 param.jy = 0.002985236;
 param.jz = 0.00480374;
 param.gravity = 9.81;
-param.km = 0.03010685884691849; % ƒ[ƒ^’è”
-param.k = 0.000008048;          % „—Í’è”
+param.km = 0.03010685884691849; % ãƒ­ãƒ¼ã‚¿å®šæ•°
+param.k = 0.000008048;          % æ¨åŠ›å®šæ•°
 
 physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4};
 physicalParamV		= {param.mass, param.length, param.jx, param.jy, param.jz, param.gravity, param.km, param.km, param.km, param.km, param.k, param.k, param.k, param.k};
-p	= [  p1;  p2;  p3];             % Position@Fxb : is•ûŒüCzb FƒzƒoƒŠƒ“ƒO‚ÉãŒü‚«
+p	= [  p1;  p2;  p3];             % Positionã€€ï¼šxb : é€²è¡Œæ–¹å‘ï¼Œzb ï¼šãƒ›ãƒãƒªãƒ³ã‚°æ™‚ã«ä¸Šå‘ã
 dp	= [ dp1; dp2; dp3];             % Velocity
 ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
 q	= [  q0;  q1;  q2;  q3];        % Quaternion
 ob	= [  o1;  o2;  o3];             % Angular velocity
 [Rb0,L] = RodriguesQuaternion(q);   % Rotation matrix
-T = [T1;T2;T3;T4];                  % Thrust force F³‚ªzb Œü‚«
-% ‘OF‚˜²C@¶Fy²C@ãF‚š²
+T = [T1;T2;T3;T4];                  % Thrust force ï¼šæ­£ãŒzb å‘ã
+% å‰ï¼šï½˜è»¸ï¼Œã€€å·¦ï¼šyè»¸ï¼Œã€€ä¸Šï¼šï½šè»¸
 % motor configuration 
-% T1 : ‰EŒãCT2F‰E‘OCT3F¶ŒãCT4F¶‘Oix-y•½–Ê‚ÌÛŒÀ‡j
-% T2, T3 ‚Ì‰ñ“]•ûŒü‚Í² zb,  T1, T4 : -zb      [1,0,0,1] ‚Å ³‚Ìyaw‰ñ“]
+% T1 : å³å¾Œï¼ŒT2ï¼šå³å‰ï¼ŒT3ï¼šå·¦å¾Œï¼ŒT4ï¼šå·¦å‰ï¼ˆx-yå¹³é¢ã®è±¡é™é †ï¼‰
+% T2, T3 ã®å›è»¢æ–¹å‘ã¯è»¸ zb,  T1, T4 : -zb      [1,0,0,1] ã§ æ­£ã®yawå›è»¢
 tau = [sqrt(2)*l*(T3+T4-T1-T2)/2; sqrt(2)*l*(T1+T3-T2-T4)/2; km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 % IT=inv([1, 1, 1, 1;simplify(mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),tau,'UniformOutput',false)),1:3,1:4))]);
 %% Translational model

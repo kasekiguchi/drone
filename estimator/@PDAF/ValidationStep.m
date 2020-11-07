@@ -1,8 +1,8 @@
 function param = ValidationStep(obj,param)
     % Determining observations within the validation region
-    %yInputz obj   : object of PDAF
+    %ã€Inputã€‘ obj   : object of PDAF
     %          param : Structure of PDAF
-    %yOutputzparam : Structure of PDAF
+    %ã€Outputã€‘param : Structure of PDAF
     
     % Feature point prediction of estimated object
     param.Mhatbar              = cell2mat(arrayfun(@(k) obj.H(param.Xhbar,obj.local_feature(k,:)'),1:obj.param.on_feature_num,'UniformOutput',false))';
