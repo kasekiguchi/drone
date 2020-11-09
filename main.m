@@ -39,12 +39,12 @@ else
     %Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
 end
 % set control model
-Model_EulerAngle(N,dt,'model'); % オイラー角モデル
-%Model_Quat13(N,dt,'model') % オイラーパラメータ（unit quaternion）モデル
+%Model_EulerAngle(N,dt,'model'); % オイラー角モデル
+Model_Quat13(N,dt,'model') % オイラーパラメータ（unit quaternion）モデル
 %Model_Suspended_Load(N,dt,'model'); % unit quaternionのプラントモデル : for sim
 %Model_Discrete0(N,dt,'model') % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
 %Model_Discrete(N,dt,'model') % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
-
+close all
 %% set input_transform property
 for i = 1:N
     if fExp%isa(agent(i).plant,"Lizard_exp")
@@ -76,7 +76,7 @@ for i = 1:N; agent(i).estimator=[]; end
 % Estimator_AD(agent); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
 %Estimator_PDAF(agent); % 特徴点ベースPDAF
-Estimator_EKF(agent); % （剛体ベース）EKF
+Estimator_EKF(agent,["p","q"],[1e-5,1e-8]); % （剛体ベース）EKF
 %Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 %% set reference property
@@ -293,9 +293,10 @@ clc
 %logger.plot(1,["reference.result.state.pL","p","q","w","v","input"],struct('time',[]));%,"inner_input"    ]);
 % logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
 % logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
-logger.plot(1,["p","q","v","w"],struct('time',[]));
+ logger.plot(1,["p","q","v","w"],struct('time',[]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
+%logger.plot(1,["sensor.result.state.p","estimator.result.state.p","sensor.result.state.q","estimator.result.state.q"]);
 
 %%
-logger.save();
+%logger.save();

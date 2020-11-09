@@ -9,13 +9,13 @@ classdef EKF < ESTIMATOR_CLASS
         result
         JacobianF
         JacobianH
-        H
         Q
         R
         dt
         B
         n
         y
+        state % model と同じ状態　cf. result.state は推定値として受け渡すよう？
         self
     end
     
@@ -37,7 +37,6 @@ classdef EKF < ESTIMATOR_CLASS
             else
                 obj.y.list = [];
             end
-            obj.H = param.H; % 出力方程式
             obj.JacobianH = param.JacobianH;
             obj.n = length(model.state.get());
             obj.Q = param.Q;% 分散
@@ -52,8 +51,8 @@ classdef EKF < ESTIMATOR_CLASS
             model=obj.self.model;
             sensor = obj.self.sensor.result;
             x = obj.result.state.get(); % 前回時刻推定値
-            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定
-%             xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
+%            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定%%5
+             xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
             if isempty(obj.y.list)
                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
             end
