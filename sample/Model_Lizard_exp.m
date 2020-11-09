@@ -1,4 +1,4 @@
-function Model_Lizard_exp(N,dt,isPlant,conn_type,id)
+function Model_Lizard_exp(N,dt,~,~,conn_type,id)
 % N : number of drones
 % dt : sampling time
 % isPlant : "plant"
@@ -19,19 +19,16 @@ if strcmp(conn_type,"serial")
     available_ports=serialportlist("available");
     disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
 end
-if strcmp(isPlant,"plant")
-    for i = 1:N
-        Setting.conn_type = conn_type;
-        if strcmp(conn_type,"udp")
-            Setting.num = id(i);
-        elseif strcmp(conn_type,"serial")
-            Setting.port = id(i);
-        end
-        Model.id = i;
-        Model.param=Setting;
-        assignin('base',"Plant",Model);
-        evalin('base',"agent(Plant.id) = Drone(Plant);");
+
+for i = 1:N
+    Setting.conn_type = conn_type;
+    if strcmp(conn_type,"udp")
+        Setting.num = id(i);
+    elseif strcmp(conn_type,"serial")
+        Setting.port = id(i);
     end
-else
-    warning("ACSL : Lizard_exp cannot set as a control model.")
+    Model.id = i;
+    Model.param=Setting;
+    assignin('base',"Plant",Model);
+    evalin('base',"agent(Plant.id) = Drone(Plant);");
 end

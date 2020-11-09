@@ -1,4 +1,4 @@
-function Model_Whill_exp(N,dt,type,varargin)
+function Model_Whill_exp(N,dt,type,initial,varargin)
 Setting.num=1;
 if ~isempty(varargin)
     Setting.num = varargin{1};
