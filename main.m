@@ -25,25 +25,63 @@ if fExp
 else
     te=25;
 end
-
+%% set connector (global instance)
+if fExp
+    rigid_ids = [1];
+    Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',rigid_ids)); % Motive
+else
+    Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
+    %Connector_Natnet_sim(2*N,dt,0); % for suspended load
+end
+%% initialize
+disp("Initialize state");
+if fExp
+    if exist('motive','var')==1; motive.getData({[],[]});end
+    for i = 1:N
+        agent(i).input = [0;0;0;0];
+        % for exp with motive : initialize by motive info
+        if exist('motive','var')==1
+            sstate = motive.result.rigid(rigid_ids(i));
+        end
+        initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
+        
+    end
+else  
+    if (fOffline)
+        Data = load("Log(21-Oct-2020_18_22_35).mat").Data;
+        expdata=DATA_EMULATOR(Data);
+    end
+    % for sim
+    arranged_pos = arranged_position([0,0],N,1,0);
+    for i = 1:N
+        if (fOffline)
+            expdata.overwrite("sensor",0,agent,i);
+            initial = struct('p',agent.sensor.result.state.p,'q',agent.sensor.result.state.q,'v',[0;0;0],'w',[0;0;0]);
+        else
+            initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
+        end
+        agent(i).state.set_state(plant.initial);
+    end
+end
 
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    Model_Lizard_exp(N,dt,'plant',"udp",[24]); % Lizard : for exp % 機体番号（ESPrのIP）
-    %Model_Lizard_exp(N,dt,'plant',"serial",[5]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
+    Model_Lizard_exp(N,dt,'plant',initial,"udp",[24]); % Lizard : for exp % 機体番号（ESPrのIP）
+    %Model_Lizard_exp(N,dt,'plant',initial,"serial",[5]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
-    Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
-    %Model_Suspended_Load(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
-    %Model_Discrete0(N,dt,'plant') % 離散時間質点モデル : Direct controller を想定
-    %Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
+    Model_Quat13(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
+    %Model_Suspended_Load(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
+    %Model_Discrete0(N,dt,'plant',initial) % 離散時間質点モデル : Direct controller を想定
+    %Model_Discrete(N,dt,'plant',initial) % 離散時間質点モデル : PD controller などを想定
 end
+%%
 % set control model
-%Model_EulerAngle(N,dt,'model'); % オイラー角モデル
-Model_Quat13(N,dt,'model') % オイラーパラメータ（unit quaternion）モデル
-%Model_Suspended_Load(N,dt,'model'); % unit quaternionのプラントモデル : for sim
-%Model_Discrete0(N,dt,'model') % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-%Model_Discrete(N,dt,'model') % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+%Model_EulerAngle(N,dt,'model',initial); % オイラー角モデル
+Model_Quat13(N,dt,'model',initial) % オイラーパラメータ（unit quaternion）モデル
+%Model_Suspended_Load(N,dt,'model',initial); % unit quaternionのプラントモデル : for sim
+%Model_Discrete0(N,dt,'model',initial) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+%Model_Discrete(N,dt,'model',initial) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
 close all
 %% set input_transform property
 for i = 1:N
@@ -99,58 +137,8 @@ Controller_FT(agent); % 階層型線形化
 %for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
 %for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
 
-%% set connector (global instance)
-if fExp
-    Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',[1])); % Motive
-else
-    Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
-    %Connector_Natnet_sim(2*N,dt,0); % for suspended load
-end
-%% initialize
-disp("Initialize state");
-if fExp
-    if exist('motive')==1; motive.getData({agent,[]});end
-    for i = 1:N
-        agent(i).input = [0;0;0;0];
-        % for exp with motive : initialize by motive info
-        if isfield(agent(i).sensor,'motive'); agent(i).sensor.motive.do({motive});end
-        sstate = agent(i).sensor.motive.result.state;
-        model.initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
-        agent(i).model.set_state(model.initial);
-        for j = 1:length(agent(i).estimator.name)
-            if isprop(agent(i).estimator.(agent(i).estimator.name(j)),'result')
-                agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(model.initial);
-            end
-        end
-        initp = sstate.p;
-        initq = sstate.q;
-    end
-else
-    
-    %%
-    if (fOffline)
-        Data = load("Log(21-Oct-2020_18_22_35).mat").Data;
-        expdata=DATA_EMULATOR(Data);
-    end
-    % for sim
-    arranged_pos = arranged_position([0,0],N,1,0);
-    for i = 1:N
-        if (fOffline)
-            expdata.overwrite("sensor",0,agent,i);
-            plant.initial = struct('p',agent.sensor.result.state.p,'q',agent.sensor.result.state.q,'v',[0;0;0],'w',[0;0;0]);
-        else
-            plant.initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
-        end
-        agent(i).state.set_state(plant.initial);
-        agent(i).model.set_state(plant.initial);
-        for j = 1:length(agent(i).estimator.name)
-            if isprop(agent(i).estimator.(agent(i).estimator.name(j)),'result')
-                agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
-            end
-        end
-  %          agent(i).model.initialize(sload,plant.initial.p);    
-    end
-end
+
+
 LogData=[
     "model.state.p",
     "reference.result.state.p",

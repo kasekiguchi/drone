@@ -1,4 +1,4 @@
-function Model_Discrete0(N,dt,type,varargin)
+function Model_Discrete0(N,dt,type,initial,varargin)
 % 入力位置が次時刻の位置になるモデル
     %% model class demo : 
 if ~isempty(varargin)
@@ -11,14 +11,14 @@ Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
 Setting.param.A = [zeros(3)];
 Setting.param.B =eye(3);% x.p = u; 次の時刻にu の位置に行くモデル
 Setting.dim = [3,3,0];
-Setting.initial = struct('p',[0;0;0]);
+Setting.initial = initial;%struct('p',[0;0;0]);
 Setting.state_list = ["p"];
 Setting.num_list = [3];
 Setting.input_channel = ["p"];
 if strcmp(type,"plant")
     for i = 1:N
     Model.id = i;
-    Setting.initial.p = 10*rand(3,1)+[40;20;0];
+    %Setting.initial.p = 10*rand(3,1)+[40;20;0];
     Model.param=Setting;
     assignin('base',"Plant",Model);
     evalin('base',"agent(Plant.id) = Drone(Plant)");
