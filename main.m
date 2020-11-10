@@ -54,13 +54,13 @@ else
     % for sim
     arranged_pos = arranged_position([0,0],N,1,0);
     for i = 1:N
-        if (fOffline)
+        if (fOffline)% 未実装
             expdata.overwrite("sensor",0,agent,i);
             initial = struct('p',agent.sensor.result.state.p,'q',agent.sensor.result.state.q,'v',[0;0;0],'w',[0;0;0]);
         else
             initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
         end
-        agent(i).state.set_state(plant.initial);
+%        agent(i).state.set_state(plant.initial);
     end
 end
 
@@ -138,36 +138,15 @@ Controller_FT(agent); % 階層型線形化
 %for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
 
 
-
+%% set logger
+% デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
-    "model.state.p",
-    "reference.result.state.p",
-    %"reference.result.state.q",
-    "estimator.result.state.p",
-    "estimator.result.state.q",
-    "estimator.result.state.v",
-    "estimator.result.state.w",
-    %"estimator.result.Mhat",
-    "sensor.result.state.p",
-    "sensor.result.state.q",
-    %"sensor.result.state.v",
-    %"sensor.result.state.w",
-    %    "reference.result.state.xd",
+    "model.state.p"
     %     "input_transform.t2t.flight_phase",
-    %"inner_input",
-    "input"
+    %"inner_input"
     ];
-if ~isempty(agent(1).plant.state)
-    LogData=["plant.state.p";LogData]; % 実制御対象の位置
-    if isprop(agent(1).plant.state,'q')
-        LogData=["plant.state.q";LogData]; % 実制御対象の姿勢
-    end
-end
-if exist('motive')==1 && (fExp) % motiveを利用している場合
-    LogData=[LogData;    "sensor.result.dt"]; % センサー内周期
-end
 if isfield(agent(1).reference,'covering')
-    LogData=[LogData;    "reference.result.region";"env.density.param.grid_density"]; % for coverage
+    LogData=[LogData;   "env.density.param.grid_density"]; % for coverage
 end
 logger=Logger(agent,size(ts:dt:te,2),LogData);
 %%
@@ -281,7 +260,7 @@ clc
 %logger.plot(1,["reference.result.state.pL","p","q","w","v","input"],struct('time',[]));%,"inner_input"    ]);
 % logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
 % logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
- logger.plot(1,["p","q","v","w"],struct('time',[]));
+ logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',[]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
 %logger.plot(1,["sensor.result.state.p","estimator.result.state.p","sensor.result.state.q","estimator.result.state.q"]);
