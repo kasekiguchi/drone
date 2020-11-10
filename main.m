@@ -256,14 +256,14 @@ close all
 clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 %agent(1).reference.timeVarying.show(logger)
-% logger.plot(1,["inner_input"],struct('transpose',1));
-%logger.plot(1,["reference.result.state.pL","p","q","w","v","input"],struct('time',[]));%,"inner_input"    ]);
-% logger.plot(1,["sensor.result.state.p","estimator.result.state.p","reference.result.state.p","sensor.result.state.q","estimator.result.state.q","input"]);
-% logger.plot(1,["estimator.result.state.p","estimator.result.state.w","reference.result.state.p","estimator.result.state.v","u","inner_input"]);
- logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',[]));
+%logger.plot(1,["pL","p","q","w","v","input"],["e","e","e","e","e",""],struct('time',[]));
+% logger.plot(1,["p","p","p","q","q","input"],["s","e","r","s","e",""]);
+% logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
+ logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
+logger.plot(1,["p1-p2-p3"],["se"],struct('fig_num',2,'row_col',[1 1]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
-%logger.plot(1,["reference.result.state.xd","reference.result.state.p"],struct('time',10));
-%logger.plot(1,["sensor.result.state.p","estimator.result.state.p","sensor.result.state.q","estimator.result.state.q"]);
+%logger.plot(1,["xd1:3","p"],["r","r"],struct('time',10));
+%logger.plot(1,["p","q"],["er","er"]);
 
 %%
 %logger.save();
