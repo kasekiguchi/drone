@@ -11,6 +11,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
+fMotive = 1;% Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 if fExp
     
@@ -26,12 +27,14 @@ else
     te=25;
 end
 %% set connector (global instance)
+if fMotive
 if fExp
     rigid_ids = [1];
     Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',rigid_ids)); % Motive
 else
     Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
     %Connector_Natnet_sim(2*N,dt,0); % for suspended load
+end
 end
 %% initialize
 disp("Initialize state");
@@ -42,9 +45,11 @@ if fExp
         % for exp with motive : initialize by motive info
         if exist('motive','var')==1
             sstate = motive.result.rigid(rigid_ids(i));
+            initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
+        else % とりあえず用
+            arranged_pos = arranged_position([0,0],N,1,0);
+            initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
         end
-        initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
-        
     end
 else  
     if (fOffline)
@@ -54,9 +59,8 @@ else
     % for sim
     arranged_pos = arranged_position([0,0],N,1,0);
     for i = 1:N
-        if (fOffline)% 未実装
-            expdata.overwrite("sensor",0,agent,i);
-            initial = struct('p',agent.sensor.result.state.p,'q',agent.sensor.result.state.q,'v',[0;0;0],'w',[0;0;0]);
+        if (fOffline)
+            initial = struct('p',expdata.Data{1}.agent{1,expdata.si,i}.state.p,'q',expdata.Data{1}.agent{1,expdata.si,i}.state.q,'v',[0;0;0],'w',[0;0;0]);
         else
             initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
         end
@@ -100,8 +104,10 @@ Env = [];
 %% set sensors property
 for i = 1:N; agent(i).sensor=[]; end
 %Sensor_LSM9DS1(agent); % IMU sensor
-Sensor_Motive(agent,{1,2,3}); % motive情報 : sim exp 共通
-%Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
+if fMotive
+    Sensor_Motive(agent,{1,2,3}); % motive情報 : sim exp 共通
+end
+Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
 %Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 % for i = 1:N % simのみ
@@ -168,6 +174,9 @@ mparam=[]; % without occulusion
 %profile on
 disp("while ============================")
 close all;
+if fExp && ~fMotive
+    fprintf(2,"Warning : input will send to drone\n");
+end
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
 
@@ -180,7 +189,7 @@ try
         %% sensor
         tic
         if (fOffline);    expdata.overwrite("plant",time.t,agent,i);end
-        if exist('motive')==1
+        if fMotive
             motive.getData({agent,mparam});
             Smotive={motive};
         end
