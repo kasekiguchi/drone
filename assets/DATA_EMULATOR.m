@@ -8,6 +8,11 @@ classdef DATA_EMULATOR
         N % agent number
   %      rdatanames
         te % 
+        si
+        ei
+        ri
+        ii
+        pi
     end
     
     methods
@@ -24,7 +29,16 @@ classdef DATA_EMULATOR
             obj.time = obj.Data{1}.t;
             obj.te=obj.time(find(obj.time,1,'last'));
 %             obj.rdatanames=obj.Data{2}{3};
-            obj.N=length(obj.Data{2}{2});
+            ids = obj.Data{2}{1}(1);
+            obj.si = ids(1);
+            obj.ei = ids(2);
+            obj.ri = ids(3);
+            obj.ii = ids(4);
+            if length(ids) == 5
+                obj.pi = ids(5);
+            else
+                obj.pi = obj.si;
+            end
         end
         
         function overwrite(obj,str,t,agent,n)
@@ -33,18 +47,18 @@ classdef DATA_EMULATOR
             tidx = find((obj.time-t)>0,1)-1; % 現在時刻に最も近い過去のデータを参照
             switch str
                 case {"plant", "model"}
-                    list = agent(n).(str).state.list(contains(agent(n).(str).state.list,obj.Data{1}.agent{tidx,end-3,n}.state.list));
+                    list = agent(n).(str).state.list(contains(agent(n).(str).state.list,obj.Data{1}.agent{tidx,obj.pi,n}.state.list));
                     for i =list
-                        agent(n).(str).state.set_state(i,obj.Data{1}.agent{tidx,end-3,n}.state.get(i));
+                        agent(n).(str).state.set_state(i,obj.Data{1}.agent{tidx,obj.pi,n}.state.get(i));
                     end
                 case "sensor"
-                    agent(n).(str).result = obj.Data{1}.agent{tidx,end-3,n};
+                    agent(n).(str).result = obj.Data{1}.agent{tidx,obj.si,n};
                 case "estimator"
-                    agent(n).(str).result = obj.Data{1}.agent{tidx,end-2,n};
+                    agent(n).(str).result = obj.Data{1}.agent{tidx,obj.ei,n};
                 case "reference"
-                    agent(n).(str).result = obj.Data{1}.agent{tidx,end-1,n};
+                    agent(n).(str).result = obj.Data{1}.agent{tidx,obj.ri,n};
                 case "input"
-                    agent(n).input = obj.Data{1}.agent{tidx,end,n};
+                    agent(n).input = obj.Data{1}.agent{tidx,obj.ii,n};
             end                    
         end
     end
