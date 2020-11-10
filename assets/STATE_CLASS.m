@@ -96,7 +96,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
         function q = getq(obj,type)
             % type ~= obj.type
             switch type
-                case {"compact"}
+                case {"compact","quat",'4'}
                     if obj.type == 4
                         q=obj.q;
                     else
@@ -107,7 +107,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                             q = R2q(value);
                         end
                     end
-                case {"euler"}
+                case {"euler",'3'}
                     if obj.type == 3
                         q=obj.q;
                     else
@@ -118,7 +118,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                             q = Quat2Eul(R2q(value));
                         end
                     end
-                case {"rotmat"}
+                case {"rotmat","rotm",'9'}
                     if obj.type == 9
                         q=obj.q;
                     else

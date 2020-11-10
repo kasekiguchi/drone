@@ -3,17 +3,22 @@ classdef Logger < handle
     % obj = Logger(target,row,items)
     % target : agent
     % row : size(ts:dt:te,2)
-    % items : [    "plant.state.p",    "model.state.p"  ...] 
+    % items : [    "plant.state.p",    "model.state.p"  ...]
     % At every logging, logger gathers the data listed in items from target
     % obj.Data.t : time
     % obj.Data.agent = {row, item_id, target_id}
     properties
         Data
         target
-        i = 1;
+        i = 1; % time index for logging
         N % agent数
         items
         n
+        si
+        ei
+        ri
+        ii
+        pi
     end
     
     methods
@@ -23,12 +28,21 @@ classdef Logger < handle
             % row : 確保するデータサイズ　length(ts:dt:te)
             % items : 保存するデータ ["input","sensor.result.state.p"]
             obj.target = target;
-            obj.N = length(target);
-            obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.result，input
+            obj.N = length(target); % agent number
             obj.Data.t = zeros(row,1); % 時間
             obj.Data.phase = zeros(row,1); % フライトフェーズ　a,t,f,l...
-            obj.Data.agent=cell(row,obj.n,obj.N);
             obj.items=items;
+            obj.si = length(items)+1;
+            obj.ei = obj.si + 1;
+            obj.ri = obj.ei + 1;
+            obj.ii = obj.ri + 1;
+            if isprop(target(1).plant,'state')
+                obj.pi = obj.ii +1;
+                obj.n=length(items)+5;% ,sensor.result, estimator.result, reference.result，input
+            else
+                obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.result，input
+            end
+            obj.Data.agent=cell(row,obj.n,obj.N);
         end
         
         function logging(obj,t,FH)
@@ -39,21 +53,24 @@ classdef Logger < handle
             cha = get(FH, 'currentcharacter');
             obj.Data.phase(obj.i)=cha;
             for j = 1:obj.N
-              for k = 1:length(obj.items)
-                str=strsplit(obj.items{k},'.');
-                tmp=obj.target(j);
-                for l = 1:length(str)-1
-                   tmp= tmp.(str{l});
+                for k = 1:length(obj.items)
+                    str=strsplit(obj.items{k},'.');
+                    tmp=obj.target(j);
+                    for l = 1:length(str)-1
+                        tmp= tmp.(str{l});
+                    end
+                    obj.Data.agent{obj.i,k,j}=tmp.(str{end});
                 end
-                obj.Data.agent{obj.i,k,j}=tmp.(str{end});
-              end
-              obj.Data.agent{obj.i,obj.n-3,j}=obj.target(j).sensor.result;
-              obj.Data.agent{obj.i,obj.n-3,j}.state = state_copy(obj.target(j).sensor.result.state);
-              obj.Data.agent{obj.i,obj.n-2,j}=obj.target(j).estimator.result;
-              obj.Data.agent{obj.i,obj.n-2,j}.state = state_copy(obj.target(j).estimator.result.state);
-              obj.Data.agent{obj.i,obj.n-1,j}=obj.target(j).reference.result;
-              obj.Data.agent{obj.i,obj.n-1,j}.state = state_copy(obj.target(j).reference.result.state);
-              obj.Data.agent{obj.i,obj.n,j}=obj.target(j).input;
+                obj.Data.agent{obj.i,obj.si,j}=obj.target(j).sensor.result;
+                obj.Data.agent{obj.i,obj.si,j}.state = state_copy(obj.target(j).sensor.result.state);
+                obj.Data.agent{obj.i,obj.ei,j}=obj.target(j).estimator.result;
+                obj.Data.agent{obj.i,obj.ei,j}.state = state_copy(obj.target(j).estimator.result.state);
+                obj.Data.agent{obj.i,obj.ri,j}=obj.target(j).reference.result;
+                obj.Data.agent{obj.i,obj.ri,j}.state = state_copy(obj.target(j).reference.result.state);
+                obj.Data.agent{obj.i,obj.ii,j}=obj.target(j).input;
+                if ~isempty(obj.pi)
+                    obj.Data.agent{obj.i,obj.pi,j}.state = state_copy(obj.target(j).plant.state);
+                end
             end
             obj.i=obj.i+1;
         end
@@ -80,29 +97,28 @@ classdef Logger < handle
             rname = [];
             for i =1:obj.N % 複数台の場合
                 irnames = obj.target(i).reference.name;
-%                 irname = [];
-%                 for j = 1:length(irnames)
-%                     irname = [irname,obj.target(i).reference.(irnames(j)).name];
-%                 end
+                %                 irname = [];
+                %                 for j = 1:length(irnames)
+                %                     irname = [irname,obj.target(i).reference.(irnames(j)).name];
+                %                 end
                 rname = [rname,{irnames}];
             end
             Data={obj.Data,{obj.items,sname,rname}};
             save(filename,'Data');
         end
-        function [data]=plot(obj,num,target,varargin)
-            % plot(obj,  num, target)
-            % num : index of the agent to be plotted
-            % target = "p" : variable to be plotted
+        function [data]=plot(obj,N,target,option,varargin)
+            % plot(obj, agent ids, target string, options,varargin)
+            % agent ids : indices of the agent to be plotted
+            % target string : ["p1","input","q"] : variable to be plotted
+            % options : ["ser","","er"], struct("time",10, "fig_num",2)
+            % fig1 = sensor p1, estimator p1 and reference p1
+            % fig2 = estimator q and reference q
             data = [];
             plot_length=1:length(obj.Data.t(obj.Data.t~=0))-1;
             fig_num = 1;
-            logger_transpose = 0;
-            if ~isempty(varargin)
+            if isstruct(varargin{1})
                 if isfield(varargin{1},'time') && ~isempty(varargin{1}.time)% set end time
                     plot_length = 1:find((obj.Data.t-varargin{1}.time)>0,1)-1;
-                end
-                if isfield(varargin{1},'transpose')
-                    logger_transpose=1;
                 end
                 if isfield(varargin{1},'fig_num')
                     fig_num=varargin{1}.fig_num;
@@ -114,93 +130,84 @@ classdef Logger < handle
             frow=ceil(length(target)/3);
             for i = 1:length(target)
                 subplot(frow,3,i);
-                switch target(i)
-                    case {"p","q","v","w"}
-                        ch = target(i);
-                        plotitem={};
-                        plegend=[];
-                        if sum(strcmp(obj.items,strcat('plant.state.',ch)))>0
-                              sp=strcmp(obj.items,strcat('plant.state.',ch));
-                              tmpp=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-                              plot(timeList,[tmpp{1:end}]');
-                              hold on
-                              plegend=[plegend,"1p","2p","3p"];
+                if ~strcmp(option(i),"") %contains(option(i),["e","s","r","p"])>0
+                    t1=split(target(i),'-');
+                    if strcmp(option(i),":")
+                        s2 = "serp";
+                    else
+                        s2 = option(i);
+                    end
+                    if length(t1) == 1 % 時間応答
+                        s1 = regexprep(t1,"[0-9:]","");
+                        eli =  str2num(strjoin(regexp(t1,"[0-9:]",'match'))); % set element index
+                        if isempty(eli)
+                            eli = ':';
                         end
-                        if sum(strcmp(obj.items,strcat('sensor.result.state.',ch)))>0
-                              sp=strcmp(obj.items,strcat('sensor.result.state.',ch));
-                              tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}(1:3),plot_length,'UniformOutput',false);
-                              plot(timeList,[tmps{1:end}]');
-                              hold on
-                              plegend=[plegend,"1s","2s","3s"];
+                        plegend = [];
+                        for s = ["s","e","r","p"]
+                            if contains(s2,s) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1))>0
+                                tmpdata=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1)(eli),plot_length,'UniformOutput',false);
+                                if strcmp(s,"e")
+                                    plot(timeList,cell2mat(tmpdata)','LineWidth',1.5)
+                                else
+                                    plot(timeList,cell2mat(tmpdata)')
+                                end
+                                hold on
+                                if strcmp(eli,':')
+                                    plegend=[plegend,append(string(1:length(tmpdata{1})),s)];
+                                else
+                                    plegend=[plegend,append(string(eli),s)];
+                                end
+                            end
                         end
-                        if sum(strcmp(obj.items,strcat('estimator.result.state.',ch)))>0
-                              ep=strcmp(obj.items,strcat('estimator.result.state.',ch));
-                              tmpe=arrayfun(@(i)obj.Data.agent{i,ep,num}(1:3),plot_length,'UniformOutput',false);
-                              plot(timeList,[tmpe{1:end}]','LineWidth',1.5);
-                              hold on
-                              plegend=[plegend,"1e","2e","3e"];
-                        end
-                        if sum(strcmp(obj.items,strcat('reference.result.state.',ch)))>0
-                              rp=strcmp(obj.items,strcat('reference.result.state.',ch));
-                              tmpr=arrayfun(@(i)obj.Data.agent{i,rp,num}(1:3),plot_length,'UniformOutput',false);
-                              plot(timeList,[tmpr{1:end}]','-.');
-                              hold on
-                              plegend=[plegend,"1r","2r","3r"];
-                        end
-                        if ch == "p"
+                        if s1 == "p"
                             title("Position p");
-                        elseif ch == "q"
-                            title(strcat("Attitude q : ",string(obj.target(num).model.state.type)));
-                        elseif ch == "v"
+                        elseif s1 == "q"
+                            title(strcat("Attitude q (type : ",string(obj.target(N).model.state.type),")"));
+                        elseif s1 == "v"
                             title("Velocity v");
-                        else
+                        elseif s1 == "w"
                             title("Angular velocity w");
+                        else
+                            title(s1);
                         end
                         legend(plegend);
                         hold off
-                    case "u"
-                        if sum(contains(obj.items,'input'))>0
-                              sp=strcmp(obj.items,'input');
-                              tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                        plot(timeList,[tmps{1:end}]')
-                        title("Input u");
-                        legend(strcat("u",string(1:size(tmps{1},1))));
-                       % ylim([500 2200]);
-                        else
-                             warning("ACSL : logger does not include plot target.");
-                        end
-                    case "inner_input"
-                        if sum(contains(obj.items,'inner_input'))>0
-                              sp=strcmp(obj.items,'inner_input');
-                              tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}',plot_length,'UniformOutput',false);
-                        plot(timeList,[tmps{1:end}]')
-                        title("Throttle Input u");
-                        legend(strcat("u",string(1:size(tmps{1},1))));
-                        ylim([1000 2000]);
-                        else
-                             warning("ACSL : logger does not include plot target.");
-                        end
-                    otherwise
-                        if sum(contains(obj.items,target(i)))>0
-                              sp=strcmp(obj.items,target(i));
-                              if logger_transpose==1
-                                  tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}',plot_length,'UniformOutput',false);
-                              else
-                                  tmps=arrayfun(@(i)obj.Data.agent{i,sp,num},plot_length,'UniformOutput',false);
-                              end
-                            plot(timeList,[tmps{1:end}]')
-                              title(target(i));
-                              legend(string(1:size(tmps{1},1)));
-                       else
-                            warning("ACSL : logger does not include plot target.");
-                       end
-                end
-            end
-            if ~isempty(plotitem)
-                   data = plotitem;
+                    elseif length(t1) == 2 % 平面軌跡
+                    else% 3D 軌跡
+                    end
+                else
+                    switch target(i)
+                        case {"u", "input"}
+                            tmpdata=arrayfun(@(i)obj.Data.agent{i,obj.ii,N},plot_length,'UniformOutput',false);
+                            plot(timeList,[tmpdata{1:end}]')
+                            title("Input u");
+                            legend(strcat("u",string(1:size(tmpdata{1},1))));
+                        case "inner_input"
+                            if sum(contains(obj.items,'inner_input'))>0
+                                sp=strcmp(obj.items,'inner_input');
+                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}',plot_length,'UniformOutput',false);
+                                plot(timeList,[tmps{1:end}]')
+                                title("Throttle Input u");
+                                legend(strcat("u",string(1:size(tmps{1},1))));
+                                ylim([1000 2000]);
+                            else
+                                warning("ACSL : logger does not include plot target.");
+                            end
+                        otherwise
+                            if sum(contains(obj.items,target(i)))>0
+                                sp=strcmp(obj.items,target(i));
+                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,N},plot_length,'UniformOutput',false);
+                                plot(timeList,[tmps{1:end}]')
+                                title(target(i));
+                                legend(string(1:size(tmps{1},1)));
+                            else
+                                warning("ACSL : logger does not include plot target.");
+                            end
+                    end
+                end             
             end
         end
-        
     end
 end
 
