@@ -36,11 +36,11 @@ classdef Logger < handle
             obj.ei = obj.si + 1;
             obj.ri = obj.ei + 1;
             obj.ii = obj.ri + 1;
-            if isprop(target(1).plant,'state')
+            if isempty(target(1).plant.state)
+                obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.result，input
+            else
                 obj.pi = obj.ii +1;
                 obj.n=length(items)+5;% ,sensor.result, estimator.result, reference.result，input
-            else
-                obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.result，input
             end
             obj.Data.agent=cell(row,obj.n,obj.N);
         end
@@ -81,7 +81,8 @@ classdef Logger < handle
             %          last four itmes are ;
             %          sensor.result, estimator.result,
             %          reference.result, and input
-            % info : {{items},{sensor names},{estimator names},{reference names}}
+            % info : {{indices},{items},{sensor names},{estimator names},{reference names}}
+            % indices = [si,ei,ri,ii,pi];
             % sensor names : {{1st agent's sensor names},{2nd ..},{...}...}
             % i-th agent's sensor names : example {"Motive","RangePos"}
             filename = strrep(strrep(strcat('Data/Log(',datestr(datetime('now')),').mat'),':','_'),' ','_');
@@ -103,7 +104,7 @@ classdef Logger < handle
                 %                 end
                 rname = [rname,{irnames}];
             end
-            Data={obj.Data,{obj.items,sname,rname}};
+            Data={obj.Data,{[obj.si,obj.ei,obj.ri,obj.ii,obj.pi],obj.items,sname,rname}};
             save(filename,'Data');
         end
         function [data]=plot(obj,N,target,option,varargin)
