@@ -174,6 +174,9 @@ mparam=[]; % without occulusion
 %profile on
 disp("while ============================")
 close all;
+if fExp && ~fMotive
+    fprintf(2,"Warning : input will send to drone\n");
+end
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
 
