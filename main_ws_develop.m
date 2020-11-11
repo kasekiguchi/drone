@@ -112,7 +112,7 @@ for i = 1:N; agent(i).estimator=[]; end
 %typical_Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
 % typical_Estimator_EKFSLAM(agent)
-typical_Estimator_EKFSLAM_WheelChair(agent);
+Estimator_EKFSLAM_WheelChair(agent);
 %% set reference property
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
