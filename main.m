@@ -75,14 +75,15 @@ if fExp
     %Model_Lizard_exp(N,dt,'plant',initial,"serial",[5]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
     Model_Quat13(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
+    %Model_EulerAngle(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
     %Model_Suspended_Load(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
     %Model_Discrete0(N,dt,'plant',initial) % 離散時間質点モデル : Direct controller を想定
     %Model_Discrete(N,dt,'plant',initial) % 離散時間質点モデル : PD controller などを想定
 end
 %%
 % set control model
-%Model_EulerAngle(N,dt,'model',initial); % オイラー角モデル
-Model_Quat13(N,dt,'model',initial) % オイラーパラメータ（unit quaternion）モデル
+Model_EulerAngle(N,dt,'model',initial); % オイラー角モデル
+%Model_Quat13(N,dt,'model',initial) % オイラーパラメータ（unit quaternion）モデル
 %Model_Suspended_Load(N,dt,'model',initial); % unit quaternionのプラントモデル : for sim
 %Model_Discrete0(N,dt,'model',initial) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
 %Model_Discrete(N,dt,'model',initial) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
@@ -107,7 +108,7 @@ for i = 1:N; agent(i).sensor=[]; end
 if fMotive
     Sensor_Motive(agent,{1,2,3}); % motive情報 : sim exp 共通
 end
-Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
+%Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
 %Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 % for i = 1:N % simのみ
@@ -266,10 +267,10 @@ clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 %agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"],["e","e","e","e","e",""],struct('time',[]));
-% logger.plot(1,["p","p","p","q","q","input"],["s","e","r","s","e",""]);
+logger.plot(1,["p","p","p","q","q"],["s","e","r","s","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
- logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
-logger.plot(1,["p1-p2-p3"],["se"],struct('fig_num',2,'row_col',[1 1]));
+ %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
+%logger.plot(1,["p1-p2-p3"],["se"],struct('fig_num',2,'row_col',[1 1]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',10));
 %logger.plot(1,["p","q"],["er","er"]);

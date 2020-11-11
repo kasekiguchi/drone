@@ -56,7 +56,7 @@ classdef EKF < ESTIMATOR_CLASS
             if isempty(obj.y.list)
                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
             end
-                state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
+            state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             p = model.param;
             if ~isempty(param)
                 F=fieldnames(param);
