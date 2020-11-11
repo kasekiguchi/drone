@@ -111,12 +111,14 @@ classdef Logger < handle
             % plot(obj, agent ids, target string, options,varargin)
             % agent ids : indices of the agent to be plotted
             % target string : ["p1","input","q"] : variable to be plotted
-            % options : ["ser","","er"], struct("time",10, "fig_num",2)
+            % options : ["ser","","er"], struct("time",10, "fig_num",2,"row_col",[1 2])
             % fig1 = sensor p1, estimator p1 and reference p1
             % fig2 = estimator q and reference q
             data = [];
             plot_length=1:length(obj.Data.t(obj.Data.t~=0))-1;
             fig_num = 1;
+            fcol=3;
+            frow=ceil(length(target)/fcol);
             if isstruct(varargin{1})
                 if isfield(varargin{1},'time') && ~isempty(varargin{1}.time)% set end time
                     plot_length = 1:find((obj.Data.t-varargin{1}.time)>0,1)-1;
@@ -124,13 +126,16 @@ classdef Logger < handle
                 if isfield(varargin{1},'fig_num')
                     fig_num=varargin{1}.fig_num;
                 end
+                if isfield(varargin{1},'row_col')
+                    frow = varargin{1}.row_col(1);
+                    fcol = varargin{1}.row_col(2);
+                end
             end
             timeList=obj.Data.t(plot_length);
             fh=figure(fig_num);
             fh.WindowState='maximized';
-            frow=ceil(length(target)/3);
             for i = 1:length(target)
-                subplot(frow,3,i);
+                subplot(frow,fcol,i);
                 if ~strcmp(option(i),"") %contains(option(i),["e","s","r","p"])>0
                     t1=split(target(i),'-');
                     if strcmp(option(i),":")
@@ -172,10 +177,54 @@ classdef Logger < handle
                         else
                             title(s1);
                         end
+                        xlabel("Time [s]");
                         legend(plegend);
                         hold off
-                    elseif length(t1) == 2 % 平面軌跡
-                    else% 3D 軌跡
+                    elseif length(t1) == 2 || length(t1) == 3 % 平面軌跡 or 立体軌跡
+                        s1 = regexprep(t1,"[0-9:]","");
+                        eli =  regexp(t1,"[0-9:]",'match');
+                        plegend = [];
+                        for s = ["s","e","r","p"]
+                            if contains(s2,s) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(1))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(2)))
+                                tmp1data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(1))(str2num(eli{1})),plot_length,'UniformOutput',false);
+                                tmp2data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(2))(str2num(eli{2})),plot_length,'UniformOutput',false);
+                                if length(t1)==3
+                                    if sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(3))) 
+                                        tmp3data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(3))(str2num(eli{3})),plot_length,'UniformOutput',false);
+                                    end
+                                    if strcmp(s,"e")
+                                        plot3(cell2mat(tmp1data)',cell2mat(tmp2data)',cell2mat(tmp3data)','LineWidth',1.5);
+                                    else
+                                        plot3(cell2mat(tmp1data)',cell2mat(tmp2data)',cell2mat(tmp3data)');
+                                    end
+                                else
+                                    if strcmp(s,"e")
+                                        plot(cell2mat(tmp1data)',cell2mat(tmp2data)','LineWidth',1.5)
+                                    else
+                                        plot(cell2mat(tmp1data)',cell2mat(tmp2data)')
+                                    end
+                                end
+                                hold on
+                                if s == "s"
+                                    plegend=[plegend,"sensor"];
+                                elseif s == "e"
+                                    plegend=[plegend,"estimator"];
+                                elseif s1 == "r"
+                                    plegend=[plegend,"reference"];
+                                elseif s1 == "p"
+                                    plegend=[plegend,"plant"];
+                                else
+                                    plegend=[plegend,s];
+                                end
+                            end
+                        end
+                        title(strcat("phase plot : ",string(target(i))));
+                        xlabel(t1{1});
+                        ylabel(t1{2});
+                        if length(t1)==3; zlabel(t1{3});end
+                        legend(plegend);
+                        daspect([1 1 1]);
+                        hold off
                     end
                 else
                     switch target(i)
@@ -183,6 +232,7 @@ classdef Logger < handle
                             tmpdata=arrayfun(@(i)obj.Data.agent{i,obj.ii,N},plot_length,'UniformOutput',false);
                             plot(timeList,[tmpdata{1:end}]')
                             title("Input u");
+                            xlabel("Time [s]");
                             legend(strcat("u",string(1:size(tmpdata{1},1))));
                         case "inner_input"
                             if sum(contains(obj.items,'inner_input'))>0
@@ -191,6 +241,7 @@ classdef Logger < handle
                                 plot(timeList,[tmps{1:end}]')
                                 title("Throttle Input u");
                                 legend(strcat("u",string(1:size(tmps{1},1))));
+                                xlabel("Time [s]");
                                 ylim([1000 2000]);
                             else
                                 warning("ACSL : logger does not include plot target.");
@@ -201,14 +252,14 @@ classdef Logger < handle
                                 tmps=arrayfun(@(i)obj.Data.agent{i,sp,N},plot_length,'UniformOutput',false);
                                 plot(timeList,[tmps{1:end}]')
                                 title(target(i));
+                                xlabel("Time [s]");
                                 legend(string(1:size(tmps{1},1)));
                             else
                                 warning("ACSL : logger does not include plot target.");
                             end
                     end
-                end             
+                end
             end
         end
     end
 end
-
