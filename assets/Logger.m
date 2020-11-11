@@ -119,6 +119,7 @@ classdef Logger < handle
             fig_num = 1;
             fcol=3;
             frow=ceil(length(target)/fcol);
+            if ~isempty(varargin)
             if isstruct(varargin{1})
                 if isfield(varargin{1},'time') && ~isempty(varargin{1}.time)% set end time
                     plot_length = 1:find((obj.Data.t-varargin{1}.time)>0,1)-1;
@@ -130,6 +131,7 @@ classdef Logger < handle
                     frow = varargin{1}.row_col(1);
                     fcol = varargin{1}.row_col(2);
                 end
+            end
             end
             timeList=obj.Data.t(plot_length);
             fh=figure(fig_num);
