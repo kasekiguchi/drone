@@ -12,6 +12,7 @@ userpath('clear');
 N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
 fMotive = 1;% Motiveを使うかどうか
+fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
     
@@ -27,14 +28,16 @@ else
     te=25;
 end
 %% set connector (global instance)
-if fMotive
 if fExp
-    rigid_ids = [1];
-    Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',rigid_ids)); % Motive
+    if fMotive
+        rigid_ids = [1];
+        Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',rigid_ids)); % Motive
+    end
 else
-    Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
-    %Connector_Natnet_sim(2*N,dt,0); % for suspended load
-end
+    if fMotive
+        Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
+        %Connector_Natnet_sim(2*N,dt,0); % for suspended load
+    end
 end
 %% initialize
 disp("Initialize state");
@@ -74,8 +77,8 @@ if fExp
     Model_Lizard_exp(N,dt,'plant',initial,"udp",[24]); % Lizard : for exp % 機体番号（ESPrのIP）
     %Model_Lizard_exp(N,dt,'plant',initial,"serial",[5]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
-    Model_Quat13(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
-    %Model_EulerAngle(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
+    %Model_Quat13(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
+    Model_EulerAngle(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
     %Model_Suspended_Load(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
     %Model_Discrete0(N,dt,'plant',initial) % 離散時間質点モデル : Direct controller を想定
     %Model_Discrete(N,dt,'plant',initial) % 離散時間質点モデル : PD controller などを想定
@@ -107,6 +110,11 @@ for i = 1:N; agent(i).sensor=[]; end
 %Sensor_LSM9DS1(agent); % IMU sensor
 if fMotive
     Sensor_Motive(agent,{1,2,3}); % motive情報 : sim exp 共通
+end
+if fROS
+    for i = 1:N
+        agent(i).set_sensor(Sensor_ROS(struct('HostIP','192.168.50.21')));
+    end
 end
 %Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
 %Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
@@ -267,7 +275,8 @@ clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 %agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"],["e","e","e","e","e",""],struct('time',[]));
-logger.plot(1,["p","p","p","q","q"],["s","e","r","s","e"]);
+logger.plot(1,["v"],["se"]);
+%logger.plot(1,["p","p","p","q","q"],["s","e","r","s","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
  %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
 %logger.plot(1,["p1-p2-p3"],["se"],struct('fig_num',2,'row_col',[1 1]));
