@@ -10,6 +10,10 @@ Setting.input_channel = ["f","M"];
 Setting.method = get_model_name("Load"); % model dynamicsの実体名
 Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL"];
 Setting.initial = initial; %struct('p',[0;0;0],'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0],"pL",[0;0;0],"vL",[0;0;0],"pT",[0;0;-1],"wL",[0;0;0]);
+Setting.initial.pL = [0;0;0];
+Setting.initial.vL = [0;0;0];
+Setting.initial.pT = [0;0;-1];
+Setting.initial.wL = [0;0;0];
 Setting.num_list = [3,4,3,3,3,3,3,3];
 % Setting.type="compact"; % unit quaternionr
 Setting.dt = dt;
@@ -21,29 +25,5 @@ if strcmp(type,"plant")
         Model.param=Setting;
 else
         Model.param=Setting;
-end
-%%%
-Model.type="EulerAngle_Model"; % class name
-%Model.name="euler"; % print name
-Setting.dim=[12,4,10];
-Setting.input_channel = ["v","w"];
-Setting.method = get_model_name("RPY 12"); % model dynamicsの実体名
-Setting.state_list =  ["p","q","v","w"];
-Setting.initial = initial;%struct('p',[0;0;0],'q',[0;0;0],'v',[0;0;0],'w',[0;0;0]);
-Setting.num_list = [3,3,3,3];
-Setting.dt = dt;
-if strcmp(type,"plant")
-        Model.id = id;
-        Setting.param = getParameter("Plant"); % モデルの物理パラメータ設定
-       % Setting.initial.p = 10*rand(3,1)+[40;20;0];
-        Model.param=Setting;
-        assignin('base',"Plant",Model);
-        evalin('base',"sload(Plant.id) = Drone(Plant);");
-else
-        Setting.param = getParameter(); % モデルの物理パラメータ設定
-        Model.param=Setting;
-        assignin('base',"Model",Model);
-        model_set_str=strcat("sload(",string(id),").set_model(Model)");
-        evalin('base',model_set_str);
 end
 end
