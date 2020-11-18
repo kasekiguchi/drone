@@ -9,13 +9,12 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 1; % number of agents
+N = 3; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
 fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
-    
     dt = 0.025; % sampling time
 else
     dt = 0.1; % sampling time
@@ -41,6 +40,8 @@ else
 end
 %% initialize
 disp("Initialize state");
+initial(N) = struct;%('p',[],'q',[],'v',[],'w',[]);
+param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 if fExp
     if exist('motive','var')==1; motive.getData({[],[]});end
     for i = 1:N
@@ -48,13 +49,19 @@ if fExp
         % for exp with motive : initialize by motive info
         if exist('motive','var')==1
             sstate = motive.result.rigid(rigid_ids(i));
-            initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
+            initial(i) = sstate;
+            initial(i).v = [0;0;0];
+            initial(i).w = [0;0;0];%struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
         else % とりあえず用
             arranged_pos = arranged_position([0,0],N,1,0);
-            initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
+            %initial(i) = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
+            initial(i).p = arranged_pos(:,i);
+            initial(i).q = [1;0;0;0];
+            initial(i).v = [0;0;0];
+            initial(i).w  =  [0;0;0];
         end
     end
-else  
+else
     if (fOffline)
         Data = load("Log(21-Oct-2020_18_22_35).mat").Data;
         expdata=DATA_EMULATOR(Data);
@@ -63,96 +70,101 @@ else
     arranged_pos = arranged_position([0,0],N,1,0);
     for i = 1:N
         if (fOffline)
-            initial = struct('p',expdata.Data{1}.agent{1,expdata.si,i}.state.p,'q',expdata.Data{1}.agent{1,expdata.si,i}.state.q,'v',[0;0;0],'w',[0;0;0]);
+            initial(i).p = expdata.Data{1}.agent{1,expdata.si,i}.state.p;
+            initial(i).q = expdata.Data{1}.agent{1,expdata.si,i}.state.q;
+            initial(i).v = [0;0;0];
+            initial(i).w = [0;0;0];
         else
-            initial = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
+            arranged_pos = arranged_position([0,0],N,1,0);
+            %initial(i) = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
+            initial(i).p = arranged_pos(:,i);
+            initial(i).q = [1;0;0;0];
+            initial(i).v = [0;0;0];
+            initial(i).w  =  [0;0;0];
         end
-%        agent(i).state.set_state(plant.initial);
+        %        agent(i).state.set_state(plant.initial);
     end
 end
-
+for i = 1:N
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
-    Model_Lizard_exp(N,dt,'plant',initial,"udp",[24]); % Lizard : for exp % 機体番号（ESPrのIP）
-    %Model_Lizard_exp(N,dt,'plant',initial,"serial",[5]); % Lizard : for exp % 機体番号（ESPrのCOM番号）
+    agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[24])); % Lizard : for exp % 機体番号（ESPrのIP）
+    %agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"serial",[5])); % Lizard : for exp % 機体番号（ESPrのCOM番号）
 else
-    %Model_Quat13(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
-    Model_EulerAngle(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
-    %Model_Suspended_Load(N,dt,'plant',initial); % unit quaternionのプラントモデル : for sim
-    %Model_Discrete0(N,dt,'plant',initial) % 離散時間質点モデル : Direct controller を想定
-    %Model_Discrete(N,dt,'plant',initial) % 離散時間質点モデル : PD controller などを想定
+    agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+    %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+    %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+    %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル : Direct controller を想定
+    %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
 end
-%%
+%% model
 % set control model
-Model_EulerAngle(N,dt,'model',initial); % オイラー角モデル
-%Model_Quat13(N,dt,'model',initial) % オイラーパラメータ（unit quaternion）モデル
-%Model_Suspended_Load(N,dt,'model',initial); % unit quaternionのプラントモデル : for sim
-%Model_Discrete0(N,dt,'model',initial) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-%Model_Discrete(N,dt,'model',initial) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+%agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
+agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
+%agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
+%agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+%agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
 close all
-%% set input_transform property
-for i = 1:N
+    %% set input_transform property
     if fExp%isa(agent(i).plant,"Lizard_exp")
-        InputTransform_Thrust2Throttle_drone(agent(i)); % 推力からスロットルに変換
+        agent(i).input_transform=[];
+        agent(i).set_property("input_transform",InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
     end
-end
-%agent.plant.espr.sendData(Pw(1,1:16));
-% for quat-model plant with discrete control model
-%InputTransform_REFtoHL_drone(agent); % 位置指令から４つの推力に変換
-%InputTransform_toHL_drone(agent); % modelを使った１ステップ予測値を目標値として４つの推力に変換
-% １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
-%% set environment property
-Env = [];
-%Env_2DCoverage(agent); % 重要度マップ設定
-%% set sensors property
-for i = 1:N; agent(i).sensor=[]; end
-%Sensor_LSM9DS1(agent); % IMU sensor
-if fMotive
-    Sensor_Motive(agent,{1,2,3}); % motive情報 : sim exp 共通
-end
-if fROS
-    for i = 1:N
-        agent(i).set_sensor(Sensor_ROS(struct('HostIP','192.168.50.21')));
+    %agent.plant.espr.sendData(Pw(1,1:16));
+    % for quat-model plant with discrete control model
+    %agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換
+    %agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
+    % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
+    %% set environment property
+    Env = [];
+    %agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
+    %% set sensors property
+    agent(i).sensor=[];
+    %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
+    if fMotive
+        agent(i).set_property("sensor",Sensor_Motive(i)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
+    if fROS
+        agent(i).set_property("sensor",Sensor_ROS(struct('HostIP','192.168.50.21')));
+    end
+    
+    %agent(i).set_property("sensor",Sensor_Direct(); % 状態真値(plant.state)　：simのみ
+    %agent(i).set_property("sensor",Sensor_RangePos(i,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    %agent(i).set_property("sensor",Sensor_RangeD(2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
+    %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]);
+    %% set estimator property
+    agent(i).estimator=[];
+    %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
+    %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
+    %agent(i).set_property("estimator",Estimator_feature_based_EKF()); % 特徴点ベースEKF
+    %agent(i).set_property("estimator",Estimator_PDAF()); % 特徴点ベースPDAF
+    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+    %agent(i).set_property("estimator",Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+    %agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
+    %% set reference property
+    agent(i).reference=[];
+    %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
+    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+    % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    
+    % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
+    agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+    %% set controller property
+    agent(i).controller=[];
+     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
+%    agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
+    %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
+    %agent(i).set_property("controller",Controller_MEC()); % Model Error Compensator  :  未実装
+    %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
+    %agent(i).set_property("controller",struct("type","DirectController"; "name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+    %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+%%
+param(i).sensor.list = cell(1,length(agent(i).sensor.name));
+param(i).reference.list = cell(1,length(agent(i).reference.name));
 end
-%Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
-%Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-%Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-% for i = 1:N % simのみ
-%     sensor.type= "LiDAR_sim";
-%     sensor.name="lrf";sensor.param=[];agent(i).set_sensor(sensor);
-% end
-%% set estimator property
-for i = 1:N; agent(i).estimator=[]; end
-%Estimator_LPF(agent); % lowpass filter
-% Estimator_AD(agent); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
-%Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
-%Estimator_PDAF(agent); % 特徴点ベースPDAF
-Estimator_EKF(agent,["p","q"],[1e-5,1e-8]); % （剛体ベース）EKF
-%Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-%for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
-%% set reference property
-for i = 1:N; agent(i).reference=[]; end
-%Reference_2DCoverage(agent,Env); % Voronoi重心
-%Reference_Time_Varying([1],agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
-% Reference_Time_Varying([1],agent,"gen_ref_saddle",{7,[0;0;1],[1,0.5,0]}); % 時変な目標状態
-Reference_Time_Varying([1],agent,"Case_study_trajectory",[1;0;1]); % ハート形[x;y;z]永久
-%Reference_Time_Varying_Suspended_Load([1],agent,"Case_study_trajectory",[1;0;1]); % ハート形[x;y;z]永久
-
-% 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
-%% set controller property
-for i = 1:N; agent(i).controller=[]; end
-%Controller_HL(agent); % 階層型線形化
-Controller_FT(agent); % 階層型線形化
-%Controller_HL_Suspended_Load(agent); % 階層型線形化
-%Controller_MEC(agent); % Model Error Compensator  :  未実装
-%for i = 1:N;  Controller.type="MPC_controller";Controller.name = "mpc";Controller.param={agent(i)}; agent(i).set_controller(Controller);end
-%for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
-%for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
-
-
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
@@ -178,7 +190,6 @@ time.t = ts;
 % mparam.marker_num = 20;
 mparam=[]; % without occulusion
 
-
 %% main loop
 %profile on
 disp("while ============================")
@@ -200,16 +211,19 @@ try
         if (fOffline);    expdata.overwrite("plant",time.t,agent,i);end
         if fMotive
             motive.getData({agent,mparam});
-            Smotive={motive};
         end
-        Srpos={agent};
-        Simu={[]};
-        Sdirect={};
-        Srdensity={Env};
-        Slrf=Env;
         for i = 1:N
-            param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
-            agent(i).do_sensor(param(i).sensor);
+        if fMotive;param(i).sensor.motive={motive};end
+        param(i).sensor.rpos={agent};
+        param(i).sensor.imu={[]};
+        param(i).sensor.direct={};
+        param(i).sensor.rdensity={Env};
+        param(i).sensor.lrf=Env;
+                for j = 1:length(agent(i).sensor.name)
+                        param(i).sensor.list{j}=param(i).sensor.(agent(i).sensor.name(j));
+                end
+%            param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
+            agent(i).do_sensor(param(i).sensor.list);
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
         
@@ -217,12 +231,15 @@ try
         for i = 1:N
             agent(i).do_estimator(cell(1,10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-            Rcovering={};%{Env};
-            Rpoint={FH,[0;0;0.5],time.t};
-            RtimeVarying={time};
-            RtvLoad={time};
-            param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
-            agent(i).do_reference(param(i).reference);
+            param(i).reference.covering={};%{Env};
+            param(i).reference.point={FH,[2;1;0.5],time.t};
+            param(i).reference.timeVarying={time};
+            param(i).reference.tvLoad={time};
+            %param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
+                for j = 1:length(agent(i).reference.name)
+                        param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
+                end
+            agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
             
             agent(i).do_controller(cell(1,10));
@@ -254,6 +271,8 @@ try
             time.t = time.t + calculation;
             %            else
             %                pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
+            % これをやるとpause中が不安定になる．どうしても一定時間にしたいならwhile でsamplingを越えるのを待つなどすればよいかも．
+            % それよりは推定などで，calculationを意識した更新をしてあげた方がよい？
             %                time.t = time.t + sampling;
             %            end
         else
@@ -275,11 +294,11 @@ clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 %agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"],["e","e","e","e","e",""],struct('time',[]));
-logger.plot(1,["v"],["se"]);
+logger.plot(1,["p","q","v","u"],["s","se","e",""]);
 %logger.plot(1,["p","p","p","q","q"],["s","e","r","s","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
- %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
-%logger.plot(1,["p1-p2-p3"],["se"],struct('fig_num',2,'row_col',[1 1]));
+%logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
+logger.plot(1,["p1-p2-p3"],["se"],struct('fig_num',2,'row_col',[1 1]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',10));
 %logger.plot(1,["p","q"],["er","er"]);

@@ -1,4 +1,4 @@
-function Env_2DCoverage(agent)
+function env = Env_2DCoverage()
 %% environment class demo
 % env property をEnv classのインスタンス配列として定義
 env_param.name="";
@@ -18,12 +18,9 @@ env_param.Vertices=[-2 -2.5;5.5 -2.5;5.5 3;-2 3]; % 全領域のサイズ
 assignin('base',"env_param",env_param);
 evalin('base',"Env = DensityMap_sim([],env_param);");
 
-for i = 1:length(agent)
-    env(i).name = "density";
+    env.name = "density";
     env_param.q = []; % 重要度情報は観測しないとわからないというマップ
-    env(i).type = "DensityMap_sim";
-    env(i).param = env_param;
-    env(i).param.id=i;
-    agent(i).set_env(env(i));
-end
+    env.type = "DensityMap_sim";
+    env.param = env_param;
+    env.param.id=id;
 end
