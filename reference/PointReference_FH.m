@@ -61,10 +61,13 @@ classdef PointReference_FH < REFERENCE_CLASS
                 if strcmp(class(Param{2}),"STATE_CLASS")
                     obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
                 else
-                    obj.result.state.p = Param{2};
+                    obj.result.state.xd = Param{2};
+                    obj.result.state.p = obj.result.state.xd;
                 end
             else
-                obj.result.state.p = obj.self.estimator.result.state.p;
+                %obj.result.state.p = obj.self.estimator.result.state.p; %
+                %これだと最悪上がっていく
+                obj.result.state.p = obj.base_state;
             end
             result=obj.result;
         end

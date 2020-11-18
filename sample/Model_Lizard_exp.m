@@ -1,4 +1,4 @@
-function Model_Lizard_exp(N,dt,~,~,conn_type,id)
+function Model = Model_Lizard_exp(dt,~,~,conn_type,id)
 % N : number of drones
 % dt : sampling time
 % isPlant : "plant"
@@ -12,23 +12,19 @@ evalin('base',"clear agent");
 Setting.dt = dt;
 Model.type="Lizard_exp"; % class name
 Model.name="lizard"; % print name
-if length(id)~= N
-    error("ACSL : require id for all drones.");
-end
 if strcmp(conn_type,"serial")
     available_ports=serialportlist("available");
     disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
 end
 
-for i = 1:N
     Setting.conn_type = conn_type;
     if strcmp(conn_type,"udp")
-        Setting.num = id(i);
+        Setting.num = id;
     elseif strcmp(conn_type,"serial")
-        Setting.port = id(i);
+        Setting.port = id;
     end
-    Model.id = i;
+    Model.id = id;
     Model.param=Setting;
-    assignin('base',"Plant",Model);
-    evalin('base',"agent(Plant.id) = Drone(Plant);");
+%     assignin('base',"Plant",Model);
+%     evalin('base',"agent(Plant.id) = Drone(Plant);");
 end
