@@ -1,4 +1,4 @@
-function Reference_Time_Varying_Suspended_Load(f_name,param)
+function Reference = Reference_Time_Varying_Suspended_Load(f_name,param)
 % list: 1:N etc
 % f_name : functin name
 % reference property をReference classのインスタンス配列として定義

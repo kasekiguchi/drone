@@ -55,11 +55,11 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             obj.result.rigid(1:param.rigid_num) = struct();
             obj.on_marker= cell(obj.result.rigid_num);
         end
-        function result = getData(obj,Param)
+        function result = getData(obj,Param1,Param2)
             %    result = sensor.motive.do(Param)
             % 【Input】
-            %  Param{1} : agent obj
-            %  Param{2} : .marker_num > on_marker_num:
+            %  Param1 : agent obj
+            %  Param2 : .marker_num > on_marker_num:
             %  設定するとUnLabeledmarkerが定義される
             %             .occlusion :
             %             設定するとオクルージョンを起こせる．剛体は固定，剛体上のマーカーはランダムに消える
@@ -85,10 +85,16 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             
             %% rigidBodyCount and Labeledmarker
             for s = 1:obj.result.rigid_num
-                Position = Param{1}(s).plant.state.p;
-                obj.on_marker{s} = (Param{1}(s).plant.state.getq('rotmat')*obj.result.local_marker{s}'+Position)';
+                if iscell(Param1)
+                    for k=1:length(Param1{2})
+                        obj.result.rigid(s).(Param1{2}(k)) = Param1{1}(s).plant.state.(Param1{2}(k));
+                    end
+                    Param1 = Param1{1};
+                end
+                Position = Param1(s).plant.state.p;
+                obj.on_marker{s} = (Param1(s).plant.state.getq('rotmat')*obj.result.local_marker{s}'+Position)';
                 obj.result.rigid(s).p  = Position;
-                obj.result.rigid(s).q    = Param{1}(s).plant.state.getq('compact');
+                obj.result.rigid(s).q    = Param1(s).plant.state.getq('compact');
             end
             %% Additional noise for rigid body
             if obj.Flag.Noise == 1 %% Noise %%
@@ -102,12 +108,12 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
                 end
             end
             %% Occulusion
-            if isfield(Param{2},'occlusion')
-                Occlusion(obj,Param{2}.occlusion);
+            if isfield(Param2,'occlusion')
+                Occlusion(obj,Param2.occlusion);
             end
             %% Unlabeledmarker
-            if isfield(Param{2},'marker_num')
-                obj.result.marker_num = Param{2}.marker_num;
+            if isfield(Param2,'marker_num')
+                obj.result.marker_num = Param2.marker_num;
             end
             tmp = arrayfun(@(i) obj.on_marker{i}',1:obj.result.rigid_num,'UniformOutput',false);
             obj.result.marker = [tmp{:}]';

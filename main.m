@@ -101,8 +101,8 @@ for i = 1:N
     end
     %% model
     % set control model
-    %agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
-    agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
+    agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
+    %agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
@@ -131,7 +131,7 @@ for i = 1:N
         agent(i).set_property("sensor",Sensor_ROS(struct('ROSHostIP','192.168.50.21')));
     end
     
-    agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
+    %agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
     %agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
@@ -141,8 +141,8 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
     %agent(i).set_property("estimator",Estimator_feature_based_EKF()); % 特徴点ベースEKF
     %agent(i).set_property("estimator",Estimator_PDAF()); % 特徴点ベースPDAF
-    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
-    agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+    %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference=[];
@@ -296,11 +296,11 @@ clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 %agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"]t,["e","e","e","e","e",""],struct('time',[]));
-logger.plot(1,["pL","p","q","v","u","inner_input"],["se","ser","se","e","",""]);
+logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","p","p","q","q"],["s","e","r","s","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
- logger.plot(1,["p1-p2","pL1-pL2"],["se","se"],struct('fig_num',2,'row_col',[1 2]));
+ logger.plot(1,["p1-p2","pL1-pL2"],["se","p"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
 %logger.plot(1,["p","q"],["er","er"]);
