@@ -1,4 +1,4 @@
-function Model_Suspended_Load(N,dt,type,initial,varargin)
+function Model = Model_Suspended_Load(id,dt,type,initial,varargin)
 % model class demo : quaternion model with 13 states
 if ~isempty(varargin)
     Setting = varargin{1};
@@ -15,21 +15,12 @@ Setting.num_list = [3,4,3,3,3,3,3,3];
 Setting.dt = dt;
 Setting.param = getParameter_withload; % モデルの物理パラメータ設定
 if strcmp(type,"plant")
-    for i = 1:N
-        Model.id = i;
+        Model.id = id;
         Setting.param = getParameter_withload("Plant"); % モデルの物理パラメータ設定
        % Setting.initial.p = 10*rand(3,1)+[40;20;0];
         Model.param=Setting;
-        assignin('base',"Plant",Model);
-        evalin('base',"agent(Plant.id) = Drone(Plant)");
-    end
 else
-    for i = 1:N
         Model.param=Setting;
-        assignin('base',"Model",Model);
-        model_set_str=strcat("agent(",string(i),").set_model(Model)");
-        evalin('base',model_set_str);
-    end
 end
 %%%
 Model.type="EulerAngle_Model"; % class name
@@ -42,21 +33,17 @@ Setting.initial = initial;%struct('p',[0;0;0],'q',[0;0;0],'v',[0;0;0],'w',[0;0;0
 Setting.num_list = [3,3,3,3];
 Setting.dt = dt;
 if strcmp(type,"plant")
-    for i = 1:N
-        Model.id = i;
+        Model.id = id;
         Setting.param = getParameter("Plant"); % モデルの物理パラメータ設定
        % Setting.initial.p = 10*rand(3,1)+[40;20;0];
         Model.param=Setting;
         assignin('base',"Plant",Model);
         evalin('base',"sload(Plant.id) = Drone(Plant);");
-    end
 else
-    for i = 1:N
         Setting.param = getParameter(); % モデルの物理パラメータ設定
         Model.param=Setting;
         assignin('base',"Model",Model);
-        model_set_str=strcat("sload(",string(i),").set_model(Model)");
+        model_set_str=strcat("sload(",string(id),").set_model(Model)");
         evalin('base',model_set_str);
-    end
 end
 end
