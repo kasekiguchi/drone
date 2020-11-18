@@ -85,10 +85,10 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             
             %% rigidBodyCount and Labeledmarker
             for s = 1:obj.result.rigid_num
-                Position = Param{1}(s).state.p;
-                obj.on_marker{s} = (Param{1}(s).state.getq('rotmat')*obj.result.local_marker{s}'+Position)';
+                Position = Param{1}(s).plant.state.p;
+                obj.on_marker{s} = (Param{1}(s).plant.state.getq('rotmat')*obj.result.local_marker{s}'+Position)';
                 obj.result.rigid(s).p  = Position;
-                obj.result.rigid(s).q    = Param{1}(s).state.getq('compact');
+                obj.result.rigid(s).q    = Param{1}(s).plant.state.getq('compact');
             end
             %% Additional noise for rigid body
             if obj.Flag.Noise == 1 %% Noise %%

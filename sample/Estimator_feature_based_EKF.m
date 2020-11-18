@@ -1,4 +1,4 @@
-function Estimator_feature_based_EKF(agent)
+function Estimator = Estimator_feature_based_EKF()
 %% estimator class demo
 % estimator property をEstimator classのインスタンス配列として定義
 Estimator.name="feature_ekf";
@@ -22,9 +22,5 @@ Estimator.param={struct('sigmaw',1.0E-4*ones(3,1))};%[6.716E-3; 7.058E-3; 7.058E
 %             obj.param.sigmav      = [50;50;50;100;100;200];                          % The variance vector of system noise
 %             obj.param.gamma       = 0.1;                                             % Validation region
 %             obj.param.SNR         = 1.0E-5;                                          % SN ratio for initial value of posterior error covariance matrix
-
-for i = 1:length(agent)
-    agent(i).set_estimator(Estimator);
-end
 
 end

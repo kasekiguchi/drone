@@ -33,7 +33,7 @@ classdef RangeDensity_sim < SENSOR_CLASS
             % 【入力】varargin = {{Env}}      agent : センサーを積んでいる機体obj,    Env：観測対象のEnv_obj
                 param=varargin{1}{1}.param;
 %                obj.self=varargin{1}{1};
-            state=obj.self.state; % 真値
+            state=obj.self.plant.state; % 真値
             env = polyshape(param.Vertices);
             
             %% センシング領域を定義

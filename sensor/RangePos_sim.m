@@ -45,7 +45,7 @@ classdef RangePos_sim < SENSOR_CLASS
 %             if isempty(obj.self)
 %                 obj.self=Target([Target.id]==obj.id); % 自機の真値状態をそのまま渡す．
 %             end
-            epos=neighbor.p-obj.self.state.p;
+            epos=neighbor.p-obj.self.plant.state.p;
             len2=sum(epos.*epos,1); % 仮距離を計算
             rid = logical((len2< obj.r^2)-(len2==0)); % 通信範囲内のエージェントID，第二項は自機体を除くため
             target=Target(rid);% センサー範囲内のエージェントを返す．
@@ -57,7 +57,7 @@ classdef RangePos_sim < SENSOR_CLASS
                     points=[states.p];
                     plot(points(:,1),points(:,2),'rx');axis equal;
                 else
-                    disp("p=");obj.self.state.p
+                    disp("p=");obj.self.plant.state.p
                 end
             else
                 disp("do measure first.");
