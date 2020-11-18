@@ -20,7 +20,7 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
         %- Publisher topic -%
         pubTopicNum
         pubTopic
-%         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
+        pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
 %         pubMsg  % 送信msg
     end
     properties(SetAccess=private)
@@ -55,11 +55,11 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
             
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
-                obj.subscriber.(obj.subName(i)) = rossubscriber( obj.subTopic(i),10);
+                obj.subscriber.(obj.subName(i)) = rossubscriber( obj.subTopic(i));
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum
-                    obj.publisher.(obj.pubTopic(i)) = rospublisher(obj.pubTopic(i),10);
+                    obj.publisher.(obj.pubTopic(i)) = rospublisher(obj.pubTopic(i));
                 end
             end
         end
@@ -72,7 +72,7 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
             t = rostime('now') - obj.init_time;
             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                obj.result.(obj.subTopic(i)) = receive(obj.subscriber.(obj.subTopic(i)),10);
+                obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
             end
             ret = obj.result;
         end
@@ -83,11 +83,11 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
             % msg = struct('topic_name1',value1,'topic_name2',value2,...)
             if isstruct(msg)
                 for i = 1:obj.pubTopicNum
-                    send(obj.publisher.(obj.pubTopic(i)), msg.(obj.pubTopic(i))));
+                    send(obj.publisher.(obj.pubName(i)), msg.(obj.pubName(i)));
                 end
             else
                 for i = 1:obj.pubTopicNum
-                    send(obj.publisher.(obj.pubTopic(i)), msg{i});
+                    send(obj.publisher.(obj.pubName(i)), msg{i});
                 end
             end
         end
