@@ -119,6 +119,7 @@ classdef Logger < handle
             fig_num = 1;
             fcol=3;
             frow=ceil(length(target)/fcol);
+            fcolor = 1;
             if ~isempty(varargin)
             if isstruct(varargin{1})
                 if isfield(varargin{1},'time') && ~isempty(varargin{1}.time)% set end time
@@ -131,13 +132,17 @@ classdef Logger < handle
                     frow = varargin{1}.row_col(1);
                     fcol = varargin{1}.row_col(2);
                 end
+                if isfield(varargin{1},'nocolor')
+                    fcolor = 0;
+                end
             end
             end
             timeList=obj.Data.t(plot_length);
             fh=figure(fig_num);
             fh.WindowState='maximized';
-            for i = 1:length(target)
+            for i = 1:length(target)% i : 図番号
                 subplot(frow,fcol,i);
+                %Square_coloring([find(obj.Data.phase==97,1),find(obj.Data.phase==97,1,'last')]);
                 if ~strcmp(option(i),"") %contains(option(i),["e","s","r","p"])>0
                     t1=split(target(i),'-');
                     if strcmp(option(i),":")
@@ -239,12 +244,12 @@ classdef Logger < handle
                         case "inner_input"
                             if sum(contains(obj.items,'inner_input'))>0
                                 sp=strcmp(obj.items,'inner_input');
-                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}',plot_length,'UniformOutput',false);
+                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,N},plot_length,'UniformOutput',false);
                                 plot(timeList,[tmps{1:end}]')
                                 title("Throttle Input u");
                                 legend(strcat("u",string(1:size(tmps{1},1))));
                                 xlabel("Time [s]");
-                                ylim([1000 2000]);
+                                %ylim([1000 2000]);
                             else
                                 warning("ACSL : logger does not include plot target.");
                             end
@@ -259,6 +264,17 @@ classdef Logger < handle
                             else
                                 warning("ACSL : logger does not include plot target.");
                             end
+                    end
+                end
+                if fcolor
+                    if length([find(obj.Data.phase==116,1),find(obj.Data.phase==116,1,'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase==116,1),find(obj.Data.phase==116,1,'last')])); % take off phase
+                    end
+                    if length([find(obj.Data.phase==102,1),find(obj.Data.phase==102,1,'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase==102,1),find(obj.Data.phase==102,1,'last')]),[0.9 1.0 1.0]); % flight phase
+                    end
+                    if length([find(obj.Data.phase==108,1),find(obj.Data.phase==108,1,'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase==108,1),find(obj.Data.phase==108,1,'last')]),[1.0 0.9 1.0]); % landing phase
                     end
                 end
             end
