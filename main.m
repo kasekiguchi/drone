@@ -17,7 +17,7 @@ fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.1; % sampling time
+    dt = 0.025; % sampling time
 end
 sampling = dt;
 ts=0;
@@ -40,7 +40,7 @@ else
 end
 %% initialize
 disp("Initialize state");
-initial(N) = struct;%('p',[],'q',[],'v',[],'w',[]);
+initial(N) = struct;
 param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 if fExp
     if exist('motive','var')==1; motive.getData([],[]);end
@@ -52,10 +52,9 @@ if fExp
             initial(i).p = sstate.p;
             initial(i).q = sstate.q;
             initial(i).v = [0;0;0];
-            initial(i).w = [0;0;0];%struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
+            initial(i).w = [0;0;0];
         else % とりあえず用
             arranged_pos = arranged_position([0,0],N,1,0);
-            %initial(i) = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
             initial(i).p = arranged_pos(:,i);
             initial(i).q = [1;0;0;0];
             initial(i).v = [0;0;0];
@@ -77,13 +76,11 @@ else
             initial(i).w = [0;0;0];
         else
             arranged_pos = arranged_position([0,0],N,1,0);
-            %initial(i) = struct('p',arranged_pos(:,i),'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
             initial(i).p = arranged_pos(:,i);
             initial(i).q = [1;0;0;0];
             initial(i).v = [0;0;0];
             initial(i).w  =  [0;0;0];
         end
-        %        agent(i).state.set_state(plant.initial);
     end
 end
 for i = 1:N
@@ -137,6 +134,8 @@ for i = 1:N
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
     agent(i).estimator=[];
+    %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); % 
+    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-8,1e-5,1e-5])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
     %agent(i).set_property("estimator",Estimator_feature_based_EKF()); % 特徴点ベースEKF
@@ -156,8 +155,8 @@ for i = 1:N
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[];
+    agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
-    %    agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % Model Error Compensator  :  未実装
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
@@ -171,7 +170,6 @@ end
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
     "model.state.p"
-    %     "input_transform.t2t.flight_phase",
     "inner_input"
     ];
 if isfield(agent(1).reference,'covering')
@@ -212,7 +210,8 @@ try
         tic
         if (fOffline);    expdata.overwrite("plant",time.t,agent,i);end
         if fMotive
-            motive.getData({agent,["pL"]},mparam);
+            %motive.getData({agent,["pL"]},mparam);
+            motive.getData(agent,mparam);
         end
         for i = 1:N
             if fMotive;param(i).sensor.motive={motive};end
@@ -224,7 +223,6 @@ try
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j}=param(i).sensor.(agent(i).sensor.name(j));
             end
-            %            param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
             agent(i).do_sensor(param(i).sensor.list);
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
@@ -237,7 +235,6 @@ try
             param(i).reference.point={FH,[2;1;0.5],time.t};
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
-            %param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
             end
@@ -296,11 +293,11 @@ clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 %agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"]t,["e","e","e","e","e",""],struct('time',[]));
-logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
-%logger.plot(1,["p","p","p","q","q"],["s","e","r","s","e"]);
+%logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
+logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
- logger.plot(1,["p1-p2","pL1-pL2"],["se","p"],struct('fig_num',2,'row_col',[1 2]));
+ logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
 %logger.plot(1,["p","q"],["er","er"]);

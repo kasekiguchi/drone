@@ -14,12 +14,13 @@ classdef PointReference_FH < REFERENCE_CLASS
             obj.self = self;
             obj.result.state = STATE_CLASS(struct('state_list',["xd","p"],'num_list',[3]));
         end
-        function  result= do(obj,Param,varargin)
-            % 【Input】varargin = {Xd(optional)}
+        function  result= do(obj,Param,result)
+            % 【Input】result = {Xd(optional)}
             %  Param = FH,xd,time.t
             %  Xd (optional) : 他のreference objで生成された目標値
-            if ~isempty(varargin)  % 他のreference objでの参照値がある場合
-                Param{2} = varargin{1}.state;
+            if nargin~=1 % 他のreference objでの参照値がある場合
+                Param{2} = result.state;
+                state_copy(result.state,obj.result.state);
             end
              if ~strcmp(class(Param{1}),'matlab.ui.Figure')
                  error("ACSL : require figure window");
