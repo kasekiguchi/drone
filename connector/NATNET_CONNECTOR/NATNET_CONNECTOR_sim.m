@@ -86,8 +86,13 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             %% rigidBodyCount and Labeledmarker
             for s = 1:obj.result.rigid_num
                 if iscell(Param1)
-                    for k=1:length(Param1{2})
-                        obj.result.rigid(s).(Param1{2}(k)) = Param1{1}(s).plant.state.(Param1{2}(k));
+                    obj.result.rigid(s+obj.result.rigid_num).p = Param1{1}(s).plant.state.(Param1{2}(1));
+                    if length(Param1{2})==2
+                        obj.result.rigid(s+obj.result.rigid_num).q = Param1{1}(s).plant.state.(Param1{2}(2));
+                    elseif length(Param1{2})>2
+                        for k = 3:length(Param1{2})
+                            obj.result.rigid(s+obj.result.rigid_num).(Param1{2}(k)) = Param1{1}(s).plant.state.(Param1{2}(k));
+                        end
                     end
                     Param1 = Param1{1};
                 end

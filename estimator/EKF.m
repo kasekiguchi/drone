@@ -46,10 +46,12 @@ classdef EKF < ESTIMATOR_CLASS
             obj.result.P = param.P;
         end
         
-        function [result]=do(obj,param,~)
+        function [result]=do(obj,param,sensor)
             %   param : optional
             model=obj.self.model;
-            sensor = obj.self.sensor.result;
+            if nargin == 2
+                sensor = obj.self.sensor.result;
+            end
             x = obj.result.state.get(); % 前回時刻推定値
 %            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定%%5
              xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）

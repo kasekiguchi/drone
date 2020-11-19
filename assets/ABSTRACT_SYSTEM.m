@@ -128,7 +128,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.do_sequential("reference",param);
         end
         function do_controller(obj,param)
-            obj.do_sequential("controller",param);
+            obj.do_parallel("controller",param);
         end
         function do_model(obj,param)
             % 推定値でmodelの状態を上書き．
