@@ -10,14 +10,14 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレーション
+fExp = 1;%1：実機　それ以外：シミュレーション
 fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.025; % sampling time
+    dt = 0.1; % sampling time
 end
 sampling = dt;
 ts=0;
@@ -30,7 +30,7 @@ end
 if fExp
     if fMotive
         rigid_ids = [1];
-        Connector_Natnet(struct('ClientIP','192.168.1.7','rigid_list',rigid_ids)); % Motive
+        Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',rigid_ids)); % Motive
     end
 else
     if fMotive
@@ -87,12 +87,12 @@ for i = 1:N
     %% generate Drone instance
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[5])); % Lizard : for exp % 機体番号（ESPrのIP）
+        agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[25])); % Lizard : for exp % 機体番号（ESPrのIP）
         %agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"serial",[5])); % Lizard : for exp % 機体番号（ESPrのCOM番号）
     else
         %agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+        agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+        %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル : Direct controller を想定
         %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
     end
@@ -114,7 +114,7 @@ for i = 1:N
     %agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換
     %agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
     % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
-    agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
+%     agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
     %% set environment property
     Env = [];
     %agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
@@ -148,14 +148,15 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+%     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_Wall_observation()); % ハート形[x;y;z]永久
     
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[];
-    agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
+%     agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % Model Error Compensator  :  未実装
@@ -235,6 +236,8 @@ try
             param(i).reference.point={FH,[2;1;0.5],time.t};
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
+            param(i).reference.wall={};
+
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
             end
@@ -256,6 +259,8 @@ try
             model_param.param=agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
+        
+%           agent(1).reference.wall.show(); % 機体の移動を毎時刻表示する
         %% logging
         calculation=toc;
         
@@ -294,10 +299,13 @@ clc
 %agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"]t,["e","e","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
-logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
+%logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
+
+logger.plot(1,["p1:3","v","w","q","input"],["se","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
- logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
+%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
+ logger.plot(1,["p1-p2"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
 %logger.plot(1,["p","q"],["er","er"]);
