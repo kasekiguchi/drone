@@ -45,7 +45,6 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 if fExp
     if exist('motive','var')==1; motive.getData([],[]);end
     for i = 1:N
-        agent(i).input = [0;0;0;0];
         % for exp with motive : initialize by motive info
         if exist('motive','var')==1
             sstate = motive.result.rigid(rigid_ids(i));
@@ -90,6 +89,7 @@ for i = 1:N
         agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[25])); % Lizard : for exp % 機体番号（ESPrのIP）
         %agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"serial",[5])); % Lizard : for exp % 機体番号（ESPrのCOM番号）
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
+        agent(i).input = [0;0;0;0];
     else
         %agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
