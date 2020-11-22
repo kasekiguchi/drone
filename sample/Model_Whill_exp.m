@@ -1,4 +1,4 @@
-function Model_Whill_exp(dt,~,~,conn_type,id)
+function Model = Model_Whill_exp(dt,~,~,conn_type,id)
     % dt : sampling time
     % isPlant : "plant"
     % conn_type : connector type : "udp" or "serial"

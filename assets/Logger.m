@@ -192,7 +192,7 @@ classdef Logger < handle
                         eli =  regexp(t1,"[0-9:]",'match');
                         plegend = [];
                         for s = ["s","e","r","p"]
-                            if contains(s2,s) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(1))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(2)))
+                            if contains(s2,s) && ~isempty(obj.(append(s,"i"))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(1))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(2)))
                                 tmp1data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(1))(str2num(eli{1})),plot_length,'UniformOutput',false);
                                 tmp2data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(2))(str2num(eli{2})),plot_length,'UniformOutput',false);
                                 if length(t1)==3
@@ -216,9 +216,9 @@ classdef Logger < handle
                                     plegend=[plegend,"sensor"];
                                 elseif s == "e"
                                     plegend=[plegend,"estimator"];
-                                elseif s1 == "r"
+                                elseif s == "r"
                                     plegend=[plegend,"reference"];
-                                elseif s1 == "p"
+                                elseif s == "p"
                                     plegend=[plegend,"plant"];
                                 else
                                     plegend=[plegend,s];

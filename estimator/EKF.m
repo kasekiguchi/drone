@@ -73,6 +73,15 @@ classdef EKF < ESTIMATOR_CLASS
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
             C = obj.JacobianH(x,p);
 
+            if norm(obj.y.q(3)-model.state.q(3)) > pi
+                if obj.y.q(3) > 0
+                    model.state.set_state("q",model.state.q+[0;0;2*pi]);
+                else
+                    model.state.set_state("q",model.state.q-[0;0;2*pi]);
+                end
+                xh_pre = model.state.get();
+            end
+
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % 事前誤差共分散行列
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散
