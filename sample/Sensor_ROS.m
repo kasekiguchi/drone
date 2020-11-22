@@ -7,5 +7,5 @@ function Sensor=Sensor_ROS(param)
     Sensor.param.num_list = [3,3];
     Sensor.param.subTopic = ["/mavros/local_position/pose"];
     Sensor.param.subName = ["p"];
-    Sensor.ROSHostIP = param.ROSHostIP;
+    Sensor.param.ROSHostIP = param.ROSHostIP; %% check
 end

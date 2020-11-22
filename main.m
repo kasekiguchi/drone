@@ -89,6 +89,7 @@ for i = 1:N
     if fExp
         agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[5])); % Lizard : for exp % 機体番号（ESPrのIP）
         %agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"serial",[5])); % Lizard : for exp % 機体番号（ESPrのCOM番号）
+        %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
     else
         %agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim

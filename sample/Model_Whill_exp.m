@@ -1,20 +1,31 @@
-function Model_Whill_exp(N,dt,type,initial,varargin)
-Setting.num=1;
-if ~isempty(varargin)
-    Setting.num = varargin{1};
-end
-Setting.dt = dt;
-Model.type="Whill_exp"; % class name
-Model.name="whill"; % print name
-
-if strcmp(type,"plant")
-    for i = 1:N
-    Model.id = i;
-    Setting.num = Setting.num+i-1;
-    Model.param=Setting;
-    assignin('base',"Plant",Model);
-    evalin('base',"agent(Plant.id) = Drone(Plant)");
+function Model_Whill_exp(dt,~,~,conn_type,id)
+    % dt : sampling time
+    % isPlant : "plant"
+    % conn_type : connector type : "udp" or "serial"
+    % id : array of identification numbers :
+    %    if conn_type is "udp", id = 124 means IP address 192.168.50.124
+    %    if conn_type is "serial", id = [5, 7] means two drones connected at
+    %    "COM5" and "COM7"
+    Setting.dt = dt;
+    Model.type="Whill_exp"; % class name
+    Model.name="whill"; % print name
+    Setting.conn_type = conn_type;
+    
+    switch conn_type
+        case "udp"
+            Setting.num = id;
+        case "serial"
+            available_ports=serialportlist("available");
+            disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
+            Setting.port = id;
+        case "ros"
+            Setting.param=param;
+            Setting.param.state_list = ["p"];
+            Setting.param.num_list = [3,3];
+            Setting.param.subTopic = ["/mavros/local_position/pose"];
+            Setting.param.subName = ["p"];
+            Setting.param.ROSHostIP = id;
     end
-else
-    warning("ACSL : Whill_exp cannot set as a control model.")
+    Model.id = id;
+    Model.param=Setting;
 end
