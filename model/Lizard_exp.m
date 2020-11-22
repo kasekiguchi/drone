@@ -47,7 +47,6 @@ classdef Lizard_exp < MODEL_CLASS
                     cha   = obj.flight_phase;
                 end
                 obj.flight_phase=cha;
-                
                 switch cha
                     case 'q'  % quit
                         Pw = uint8([fix(obj.offset(1)/100),fix(obj.offset(2)/100),6,fix(obj.offset(3)/100),6,6,6,6,rem(obj.offset(1),100),rem(obj.offset(2),100),0,rem(obj.offset(3),100),0,0,0,0]);
