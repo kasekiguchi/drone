@@ -18,15 +18,14 @@ classdef PointReference_FH < REFERENCE_CLASS
             % 【Input】result = {Xd(optional)}
             %  Param = FH,xd,time.t
             %  Xd (optional) : 他のreference objで生成された目標値
-            if nargin~=1 % 他のreference objでの参照値がある場合
-                Param{2} = result.state;
-                state_copy(result.state,obj.result.state);
+            if isempty( obj.base_state )
+                obj.base_state =obj.self.estimator.result.state.p;
             end
-             if ~strcmp(class(Param{1}),'matlab.ui.Figure')
-                 error("ACSL : require figure window");
-             else
+            if ~strcmp(class(Param{1}),'matlab.ui.Figure')
+                error("ACSL : require figure window");
+            else
                 FH = Param{1};% figure handle
-             end
+            end
             cha = get(FH, 'currentcharacter');
             if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
                 cha   = obj.flight_phase;
@@ -38,29 +37,33 @@ classdef PointReference_FH < REFERENCE_CLASS
                 else% 初めてlanding に入ったとき
                     obj.result.state.p=gen_ref_for_landing(obj.self.estimator.result.state.p);
                 end
-              %  if isprop(obj.result.state,'xd')
-                    obj.result.state.xd = obj.result.state.p; % このようにすることでf の後でも反映される
-              %  end
+                %  if isprop(obj.result.state,'xd')
+                obj.result.state.xd = obj.result.state.p; % このようにすることでf の後でも反映される
+                %  end
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
                     %obj.result.state.p=gen_ref_for_take_off(obj.result.state.p);
-%                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,1,10,Param{3}-obj.base_time);
+                    %                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,1,10,Param{3}-obj.base_time);
                     obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1,10,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
                     obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1,10,0);
                 end
-%                 if isprop(obj.result.state,'xd')
-%                     obj.result.state.xd = obj.result.state.p; % このようにすることでf の後でも反映される
-%                 end
+                %                 if isprop(obj.result.state,'xd')
+                %                     obj.result.state.xd = obj.result.state.p; % このようにすることでf の後でも反映される
+                %                 end
                 obj.result.state.p = obj.result.state.xd(1:3);
                 obj.flag='t';
             elseif strcmp(cha,'f') % flight phase
                 obj.flag='f';
+                if nargin==3 % 他のreference objでの参照値がある場合
+                    Param{2} = result.state;
+                end
                 if strcmp(class(Param{2}),"STATE_CLASS")
-                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
+                    state_copy(Param{2},obj.result.state);
+                    %                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
                 else
                     obj.result.state.xd = Param{2};
                     obj.result.state.p = obj.result.state.xd;
@@ -73,7 +76,7 @@ classdef PointReference_FH < REFERENCE_CLASS
             result=obj.result;
         end
         function show(obj,param)
-           
+            
         end
     end
 end

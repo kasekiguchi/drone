@@ -236,7 +236,7 @@ try
             param(i).reference.point={FH,[2;1;0.5],time.t};
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
-            param(i).reference.wall={};
+            param(i).reference.wall={1};
 
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
@@ -302,10 +302,10 @@ clc
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 
-logger.plot(1,["p1:3","v","w","q","input"],["se","e","e","s",""]);
+logger.plot(1,["p1:3","v","w","q","input"],["re","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
 %  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
- logger.plot(1,["p1-p2"],["sep"],struct('fig_num',2,'row_col',[1 2]));
+%  logger.plot(1,["p1-p2"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
 %logger.plot(1,["p","q"],["er","er"]);
