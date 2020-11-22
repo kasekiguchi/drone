@@ -1,95 +1,77 @@
 classdef Whill_exp < MODEL_CLASS
-    % Lizard 実験用モデル
+    % Whill 実験用モデル
     properties% (Access=private)
-        ros % connector
         IP
-        flight_phase % q : quit, s : stop, a : arming, t : take-off, h : hovering, f : flight, l : landing
-        port=25000;
+        connector
+        phase % q : quit, s : stop, r : run
+        conn_type
     end
     properties
         msg
     end
     
-    
     methods
-        function obj = Whill_exp(self,args)
+        function obj = Whill_exp(args)
             obj@MODEL_CLASS([],[]);
-            param=args{2}; % args{1}はtype
-            obj.dt = 0.025;
+            param=args;
+            obj.dt = 0.025; % check
             %% variable set
-            obj.flight_phase        = 'f';
-            obj.Whill_num = param.num;
-            param.ROSHostIP=strcat('192.168.1.',string(100+obj.Whill_num));
-            param.ROSClientIP=strcat();
-            param.subTopicName = {'/wheelchair/odom', ...
-                '/wheelchair/gyr', ...
-                '/scan', ...
-                '/velodyne_points', ...
-                '/camera/depth/color/points', ...
-                '/wheelchair/pose'};
-            param.pubTopicName = {'/wheelchair/cmd_vel'};
-            param.subMsgName = {'nav_msgs/Odometry', ...
-                'geometry_msgs/Point', ...
-                'sensor_msgs/LaserScan', ...
-                'sensor_msgs/PointCloud2', ...
-                'sensor_msgs/PointCloud2', ...
-                'geometry_msgs/Pose'};
-            param.pubMsgName = {'geometry_msgs/Twist'};
-            obj.ros=ROS_CONNECTOR(param);
-            self.connector=obj.espr;
-            %disp('UDPs is ready.');
+            obj.phase        = 's';
+            obj.conn_type = param.conn_type;
+            switch param.conn_type
+                case "udp"
+                    obj.IP = param.num;
+                    [~,cmdout] = system("ipconfig");
+                    ipp=regexp(cmdout,"192.168.");
+                    cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
+                    param.IP=strcat('192.168.50','.',string(100+obj.IP));
+                    %param.IP=strcat('192.168.',cmdout2(1:regexp(cmdout2,".")),'.',string(100+obj.IP));
+                    %param.IP=strcat('192.168.50.',string(obj.IP));
+                    param.port=8000+obj.IP;
+                    obj.connector=UDP_CONNECTOR(param);
+                    fprintf("Whill %s is ready\n",param.IP);
+                case "serial"
+                    obj.connector=SERIAL_CONNECTOR(param);
+                    fprintf("Whill %d is ready\n",param.port);
+                case "ros"
+                    obj.IP = param.num;
+                    [~,cmdout] = system("ipconfig");
+                    ipp=regexp(cmdout,"192.168.");
+                    cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
+                    param.ROSHostIP=strcat('192.168.50','.',string(100+obj.IP));
+                    obj.connector=ROS_CONNECTOR(param);
+                    fprintf("Whill %d is ready\n",param.port);
+            end
         end
         function do(obj,u,varargin)
-            if ~isfield(varargin{1},'FH')
-                error("ACSL : require figure window");
-            else
-                FH = varargin{1}.FH;% figure handle
-            end
-            cha = get(FH, 'currentcharacter')
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
-                cha   = obj.flight_phase;
-            end
-            obj.flight_phase=cha;
-            
-            % quit
-            if cha == 'q'
-                %            if strcmp(get(FH,'currentcharacter'), 'q')
-                error("quit experiment");
-            end
-            
-            % stop propeller
-            if cha   == 's'
-                uroll   = 1100;     upitch  = 1100;     uthr    =  600;     uyaw    = 1100;
-                AUX_1   =  600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
-                msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
-            end
-            
-            % armnig
-            if cha   == 'a'
-                uroll   = 1100;     upitch  = 1100;     uthr    =  600;     uyaw    = 1100;
-                AUX_1   = 1600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
-                msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
-            end
-            if cha   == 'f'
-                msg(1,1:8) = u;
-            end
-            if cha   == 'l'
-                msg(1,1:8) = u;
-            end
-            if cha   == 't'
-                msg(1,1:8) = u;
-            end
-            % make udp data
-            for j = 1:1:8
-                pw(1, j + 0)   = fix(msg(1, j) / 100);
-                pw(1, j + 8)   = rem(msg(1, j),  100);
+            if length(varargin)==1
+                if ~isfield(varargin{1},'FH')
+                    error("ACSL : require figure window");
+                else
+                    FH = varargin{1}.FH;% figure handle
+                end
+                cha = get(FH, 'currentcharacter');
+                if (cha ~= 'q' && cha ~= 's' && cha ~= 'r')
+                    cha   = obj.phase;
+                end
+                obj.phase=cha;
+                
+                switch cha
+                    case 'q' % quit
+                    error("ACSL : quit experiment");
+                    case's' % stop
+                    case 'r' % run
+                        obj.msg = u;
+                end
+            else % 緊急時
+                return;
             end
             
-            Pw = uint8(pw);
-            
-            % send UDP
-            obj.espr.sendData(Pw(1,1:16));
-            obj.msg=Pw;
+            % send
+            obj.connector.sendData(obj.msg);
+        end
+        function set_param(obj,param)
+            obj.offset = param;
         end
     end
 end
