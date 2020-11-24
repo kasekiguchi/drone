@@ -144,7 +144,7 @@ classdef Logger < handle
                 subplot(frow,fcol,i);
                 %Square_coloring([find(obj.Data.phase==97,1),find(obj.Data.phase==97,1,'last')]);
                 if ~strcmp(option(i),"") %contains(option(i),["e","s","r","p"])>0
-                    t1=split(target(i),'-');
+                    t1=split(target(i),'-'); % 「-」区切りで分割  
                     if strcmp(option(i),":")
                         s2 = "serp";
                     else
@@ -187,7 +187,7 @@ classdef Logger < handle
                         xlabel("Time [s]");
                         legend(plegend);
                         hold off
-                    elseif length(t1) == 2 || length(t1) == 3 % 平面軌跡 or 立体軌跡
+                    elseif length(t1) > 1 % 平面軌跡 or 立体軌跡
                         s1 = regexprep(t1,"[0-9:]","");
                         eli =  regexp(t1,"[0-9:]",'match');
                         plegend = [];
@@ -233,7 +233,7 @@ classdef Logger < handle
                         daspect([1 1 1]);
                         hold off
                     end
-                else
+                else % 対応するoption が空の場合
                     switch target(i)
                         case {"u", "input"}
                             tmpdata=arrayfun(@(i)obj.Data.agent{i,obj.ii,N},plot_length,'UniformOutput',false);
