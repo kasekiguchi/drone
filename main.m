@@ -10,14 +10,14 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 1;%1：実機　それ以外：シミュレーション
+fExp = 0;%1：実機　それ以外：シミュレーション
 fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
-fOffline = 0; % offline verification with experiment data
+fOffline = 1; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.1; % sampling time
+    dt = 0.025; % sampling time
 end
 sampling = dt;
 ts=0;
@@ -61,12 +61,12 @@ if fExp
         end
     end
 else
+    
     if (fOffline)
-        Data = load("Log(21-Oct-2020_18_22_35).mat").Data;
-        expdata=DATA_EMULATOR(Data);
+        %%
+        expdata=DATA_EMULATOR(); % 空の場合最新のデータ
     end
-    % for sim
-    arranged_pos = arranged_position([0,0],N,1,0);
+    %% for sim
     for i = 1:N
         if (fOffline)
             initial(i).p = expdata.Data{1}.agent{1,expdata.si,i}.state.p;
@@ -205,12 +205,21 @@ FH  = figure('position',[0 0 eps eps],'menubar','none');
 w = waitforbuttonpress;
 
 try
-    if (fOffline);    expdata.overwrite("model",time.t,agent,i);end
+    if (fOffline)
+        expdata.overwrite("model",time.t,agent,i);
+        te = expdata.te;
+        offline_time = 1;
+    end
     while round(time.t,5)<=te
         %while 1 % for exp
         %% sensor
         tic
-        if (fOffline);    expdata.overwrite("plant",time.t,agent,i);end
+        if (fOffline)
+            expdata.overwrite("plant",time.t,agent,i);
+            FH.CurrentCharacter = char(expdata.Data{1}.phase(offline_time));
+            time.t = expdata.Data{1}.t(offline_time);
+            offline_time = offline_time + 1;
+        end
         if fMotive
             %motive.getData({agent,["pL"]},mparam);
             motive.getData(agent,mparam);
@@ -281,7 +290,11 @@ try
             %                time.t = time.t + sampling;
             %            end
         else
-            time.t = time.t + dt % for sim
+            if (fOffline)
+                time.t
+            else
+                time.t = time.t + dt % for sim
+            end
         end
     end
 catch ME    % for error
@@ -303,10 +316,10 @@ clc
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 
-logger.plot(1,["p1:3","v","w","q","input"],["re","e","e","s",""]);
+logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
 %  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
-%  logger.plot(1,["p1-p2"],["sep"],struct('fig_num',2,'row_col',[1 2]));
+logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
 %logger.plot(1,["p","q"],["er","er"]);

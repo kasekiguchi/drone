@@ -18,18 +18,20 @@ classdef DATA_EMULATOR
     methods
         function obj = DATA_EMULATOR(data)
             % 実験などで得られたリファレンスデータを使ったシミュレーション用クラス
-            if isstring(data)
+            if nargin == 0
+                tmp1= dir("Data");
+                tmp2=arrayfun(@(i) datetime(tmp1(i).date,"InputFormat",'dd-MM-yyyy HH:mm:ss'),3:length(tmp1));
+                [~,latest_idx] = max(tmp2);
+                obj.Data = load(tmp1(2+latest_idx).name).Data;% 最新のデータを取得
+            elseif isstring(data)
                 obj.Data = load(data);
-            elseif isempty(data)
-                tmp = dir('Data');
-                obj.Data = load(tmp(end).name);% 最新のデータを取得
             else
                 obj.Data = data;
             end
             obj.time = obj.Data{1}.t;
             obj.te=obj.time(find(obj.time,1,'last'));
 %             obj.rdatanames=obj.Data{2}{3};
-            ids = obj.Data{2}{1}(1);
+            ids = obj.Data{2}{1};
             obj.si = ids(1);
             obj.ei = ids(2);
             obj.ri = ids(3);
