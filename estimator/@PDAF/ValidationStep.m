@@ -21,7 +21,7 @@ function param = ValidationStep(obj,param)
        for s = 1:obj.param.feature_num
            nyu(s,1) = error(s,:) * inv(param.Si{k}) * error(s,:)';          % Calculating Mahalanobis distance
        end
-       [row,~]      = find( nyu <= obj.param.gamma);                        % Determine observations within validation region
+       [row,~]      = find( nyu <= obj.gamma);                        % Determine observations within validation region
        [valnum,~]   = size(row);                                            % The number of observation in validation region(include feature point prediction)
        for s = 1:valnum
             % Observation matrix in validation region
