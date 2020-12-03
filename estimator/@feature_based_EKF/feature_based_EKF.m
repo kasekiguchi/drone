@@ -16,28 +16,35 @@ classdef feature_based_EKF < ESTIMATOR_CLASS
         H                              % Output function
         JacobianH                      % Extended linearization of output function
         self
+        y
+        n
     end
     methods
-        function obj = feature_based_EKF(self,Param)
+        function obj = feature_based_EKF(self,param)
             %【Input】 self : agent obj
             %          param : Construct of sensor
             %【Output】obj
             obj.self=self;
+            obj.self.input = [0;0;0;0];
+            model = self.model;
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","v","w"],'num_list',[3,3,3,3],'type','euler'));
-            %%% Parameter for estimationg as the drone %%%
-            % For simulation for using input model
-            param = Param{1};
-            if isfield(param,'sigmaw'); obj.param.sigmaw = param.sigmaw; end                                    % The variance vector of observation noise 
-            if isfield(param,'sigmav'); obj.param.sigmav= param.sigmav; else; obj.param.sigmav      = [8.0E-6;8.0E-6;8.0E-6;1.0E-6;1.0E-6;1.0E-6]*10^9;  end   % The variance vector of system noise
-            if isfield(param,'R'); obj.param.R = param.R; else; obj.param.R  = [];  end                           % Observation covariance matrix of all object feature
-            if isfield(param,'gamma'); obj.param.gamma = param.gamma; else; obj.param.gamma       = 0.1;        end                                     % Validation region
-            if isfield(param,'SNR'); obj.param.SNR = param.SNR; else; obj.param.SNR         = 1.0E-5; end                                         % SN ratio for initial value of posterior error covariance matrix
+            
+            %20201130
+            obj.y= state_copy(model.state);
+            if isfield(param,'list')
+                obj.y.list = param.list;
+            else
+                obj.y.list = [];
+            end
+            
             
             % Common parameter for simulation and experiment
-            obj.param.Q           = eye(6).*obj.param.sigmav;                        % Covariance matrix of system noise
-            obj.param.Ri          = eye(3).*obj.param.sigmaw;                        % Observation covariance matrix of one feature
-            obj.param.InvRi       = inv(obj.param.Ri);                               % Inverse Observation covariance matrix of one feature
-            obj.param.P           = eye(12)*obj.param.SNR;                           % Initial posterior error covariance matrix
+            obj.param.Q           = param.Q;                        % Covariance matrix of system noise
+            obj.param.B           = param.B;                        % Covariance matrix of system noise
+            obj.param.P           = param.P;                           % Initial posterior error covariance matrix
+            obj.param.gamma       = param.gamma;
+            obj.n = length(model.state.get());
+            obj.param.SNR         = param.SNR;
             
             % Output eauation
             X_sym  = sym('X_sym', [12,1]);                                  % The symboric of state
@@ -78,11 +85,23 @@ classdef feature_based_EKF < ESTIMATOR_CLASS
         end
         
         
-        function result = do(obj,param,~)
+        function result = do(obj,param,sensor)
             %【Input】  param : optional
             %【Output】 obj            
             model  = obj.self.model;                                              % agent.model
-            sensor = obj.self.sensor.result;                                              % agent.sensor.result
+            if nargin == 2
+                sensor = obj.self.sensor.result;
+            end
+            x = obj.result.state.get(); % 前回時刻推定値
+            tmp.Xhbar = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
+            if isempty(obj.y.list)
+                obj.y.list=sensor.state.list; % num_listは代入してはいけない．
+            end
+            state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
+            p = model.param;
+            obj.param.Ri          = diag(ones(1,sensor.on_feature_num*3))*10^-4;                        % Observation covariance matrix of one feature
+            obj.param.InvRi       = inv(obj.param.Ri);                               % Inverse Observation covariance matrix of one feature
+            
             if isempty(obj.local_feature)
                 obj.local_feature = sensor.local_feature;                   % Feature point position of estimated object on robot cordinate
             end
@@ -91,10 +110,6 @@ classdef feature_based_EKF < ESTIMATOR_CLASS
                 obj.param.on_feature_num = sensor.on_feature_num;           % The number of estimated object feature
             end
             obj.param.feature_num = size(sensor.feature,1);                 % The number of observation
-            if isempty(obj.param.R)
-                % Observation covariance matrix of all object feature
-                obj.param.R      = eye(obj.param.on_feature_num*3) .*repmat(obj.param.sigmaw,[obj.param.on_feature_num,1]);
-            end
             obj.feature  = sensor.feature;                                  % All observations from sensor
             if isempty(obj.feature)
                 error("ACSL : all marker lost.");
@@ -102,15 +117,23 @@ classdef feature_based_EKF < ESTIMATOR_CLASS
             
             %%% Extended Kalman filter %%%
             obj.dt = sensor.dt;                                             % Sampling time
+            
             % Prior estimation with input
 %              tmp.Xhbar  = [model.state.p;model.state.getq('euler');model.state.v;model.state.w];
             % Prior estimation without input
-            tmp.Xhbar  = (eye(12)+diag(obj.dt*ones(1,6),6))*obj.result.state.get();
-            A          = expm(obj.JacobianF(model.state.get(),model.param)*obj.dt);                                                        % Discretized linear matrix
-            B          = [eye(6)*obj.dt^2;eye(6)*obj.dt];                                                                                  % System noise coefficient matrix
+%             tmp.Xhbar  = (eye(12)+diag(obj.dt*ones(1,6),6))*obj.result.state.get();
+            if norm(obj.y.q(3)-model.state.q(3)) > pi
+                if obj.y.q(3) > 0
+                    model.state.set_state("q",model.state.q+[0;0;2*pi]);
+                else
+                    model.state.set_state("q",model.state.q-[0;0;2*pi]);
+                end
+                tmp.Xhbar = model.state.get();
+            end
+            A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation            
             tmp.dh     = arrayfun(@(k) obj.JacobianH(tmp.Xhbar,obj.local_feature(k,:)'),1:obj.param.on_feature_num,'UniformOutput',false); % Extended linearized matrix of output equations
-            tmp.Pbar   = A * obj.param.P * A' + B * obj.param.Q * B';                                                                      % Prior error covariance matrix
-            tmp.S      = cell2mat(tmp.dh') * tmp.Pbar * cell2mat(tmp.dh')' +  obj.param.R;                                                 % Innovation covariance matrix against rigid 
+            tmp.Pbar   = A * obj.param.P * A' + obj.param.B * obj.param.Q * obj.param.B';                                                                      % Prior error covariance matrix
+            tmp.S      = cell2mat(tmp.dh') * tmp.Pbar * cell2mat(tmp.dh')' +  obj.param.Ri;                                                 % Innovation covariance matrix against rigid 
             
             tmp = GNN(obj,tmp);                                             % Global Nearest Neighbor
             tmp = FilteringStep(obj,tmp);                                   % Filtering step
