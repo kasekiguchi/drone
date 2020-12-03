@@ -29,7 +29,6 @@ classdef feature_based_EKF < ESTIMATOR_CLASS
             model = self.model;
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","v","w"],'num_list',[3,3,3,3],'type','euler'));
             
-            %20201130
             obj.y= state_copy(model.state);
             if isfield(param,'list')
                 obj.y.list = param.list;
