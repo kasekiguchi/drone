@@ -40,6 +40,15 @@ function Estimator = Estimator_EKF(agent,output,var)
             zeros(3,10),dt*eye(3);...
             zeros(3,10),dt*eye(3)];
     end
+    if strcmp(agent.model.name,"Suspended_Load_Model_Euler")
+        EKF_param.Q = eye(12)*1E3;%0.5E-1;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
+        EKF_param.B = [0.5*dt^2*eye(6),zeros(6,6);...%zeros(6,12);%
+            dt*eye(6),zeros(6,6);...
+            zeros(3,6),0.5*dt^2*eye(3),zeros(3,3);...%zeros(3,12);%
+            zeros(3,6),dt*eye(3),zeros(3,3);...
+            zeros(3,12);%zeros(3,9),dt*eye(3);...%zeros(3,12);%
+            zeros(3,9),dt*eye(3)];
+    end
     EKF_param.P = eye(n); % 初期共分散行列
     EKF_param.list=output;
     Estimator.param=EKF_param;

@@ -86,6 +86,9 @@ classdef EKF < ESTIMATOR_CLASS
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散
             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 事後推定
+            if strcmp(agent.model.name,"Suspended_Load_Model_Euler")
+                tmpvalue = [tmpvalue(1:18,1);(tmpvalue(13:15)-tmpvalue(1:3))/norm(tmpvalue(13:15)-tmpvalue(1:3));tmpvalue(22:24,1)];
+            end
             obj.result.state.set_state(tmpvalue);
             obj.result.G = G;
             obj.result.P = P;
