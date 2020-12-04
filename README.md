@@ -1,7 +1,7 @@
 # 共通プログラムを用いた開発の手順
 
 * github上にアカウントを作り，関口先生にアカウントを連絡する．
-* 共通プログラムのcolaborator へのinvitationが送られてくるので承認する．
+* 共通プログラムのcollaborator へのinvitationが送られてくるので承認する．
 * git clone する．
 * localで開発用ブランチを作る．
 * 日々の変更をadd, commitで記録しながら開発を進める．
