@@ -13,7 +13,7 @@ N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
 fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
-fOffline = 1; % offline verification with experiment data
+fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
@@ -86,7 +86,7 @@ for i = 1:N
     %% generate Drone instance
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[25])); % Lizard : for exp % 機体番号（ESPrのIP）
+        agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[i+24])); % Lizard : for exp % 機体番号（ESPrのIP）
         %agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"serial",[5])); % Lizard : for exp % 機体番号（ESPrのCOM番号）
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
@@ -139,9 +139,9 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-8,1e-5,1e-5])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
-    %agent(i).set_property("estimator",Estimator_feature_based_EKF()); % 特徴点ベースEKF
-    %agent(i).set_property("estimator",Estimator_PDAF()); % 特徴点ベースPDAF
-    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
+    agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
+%     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
@@ -151,7 +151,20 @@ for i = 1:N
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_Wall_observation()); % ハート形[x;y;z]永久
+    if fExp == 1
+        if i ==1
+            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
+        else
+            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
+        end
+    else
+         if i ==1
+            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;0])); % ハート形[x;y;z]永久
+        else
+            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
+        end
+    end
+%     agent(i).set_property("reference",Reference_Wall_observation()); % ハート形[x;y;z]永久
     
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
