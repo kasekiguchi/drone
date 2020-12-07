@@ -1,4 +1,4 @@
-function typical_Model_WheelChair(N,dt,type,varargin)
+function typical_Model_WheelChairV(N,dt,type,varargin)
 % model class demo : quaternion model with 13 states
 if ~isempty(varargin)
     Setting = varargin{1};
