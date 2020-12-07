@@ -5,6 +5,7 @@ if ~isempty(varargin)
 end
 Model.type="Suspended_Load_Model_Euler"; % class name
 Model.name="load_euler"; % print name
+Setting.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)];
 Setting.dim=[24,4,16];
 Setting.input_channel = ["f","M"];
 Setting.method = get_model_name("Load_Euler"); % model dynamicsの実体名

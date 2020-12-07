@@ -86,6 +86,7 @@ classdef EKF < ESTIMATOR_CLASS
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散
             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 事後推定
+            tmpvalue = model.projection(tmpvalue);
             obj.result.state.set_state(tmpvalue);
             obj.result.G = G;
             obj.result.P = P;
