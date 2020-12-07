@@ -84,7 +84,8 @@ classdef MODEL_CLASS <  handle
                 end
             end
             if ~isempty(obj.noise)
-                rng('shuffle');
+%                 rng('shuffle');
+                rng(10*obj.param.t);
                 u = u+obj.noise.* randn(size(u));
             end
             if contains(obj.time_scale,'discrete')

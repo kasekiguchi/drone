@@ -1,4 +1,4 @@
-classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
+classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
     % Extended Kalman filter
     % obj = EKF(model,param)
     %   model : EKF郢ァ雋橸スョ貅ッ?ス」?ソス邵コ蜷カ?ス玖崕?スカ陟包ス。陝?スセ髮趣ス。邵コ?スョ陋サ?スカ陟包ス。郢晢ス「郢晢ソス郢晢スォ
@@ -17,7 +17,7 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
     end
     
     methods
-        function obj = EKFSLAM_WheelChair(self,param)
+        function obj = EKFSLAM_WheelChairA(self,param)
             obj.self= self;
             model = self.model;
             %             obj.JacobianF = @(v,theta) [0,0,-v*sin(theta);0,0,v*cos(theta);0,0,0];%
@@ -47,8 +47,8 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
             obj.constant.CluteringThreshold = 0.1; % Split a cluster using distance from next point
             obj.constant.SensorRange = 40; % Max scan range
             %------------------------------------------
-            obj.Analysis.Gram = param.Gram;
-            obj.Analysis.Gram.SaveP(obj.result.P);
+%             obj.Analysis.Gram = param.Gram;
+%             obj.Analysis.Gram.SaveP(obj.result.P);
         end
         
         function [result]=do(obj,param,~)
@@ -70,16 +70,15 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
                 u=[0,0];
             end
             %
-            measured.ranges = sensor.length;
-            measured.angles = sensor.angle - xh_pre(3);%隶匁サ会スス阮呻ソス?スョ隴?スケ陷キ莉」?ス堤ケァ?スシ郢晢スュ邵コ?スィ邵コ蜉ア笳?郢晢スャ郢晢スシ郢ァ?スカ郢晢スシ邵コ?スョ郢ァ?ス「郢晢スウ郢ァ?スー郢晢スォ
-            if iscolumn(measured.ranges)
-                measured.ranges = measured.ranges';% Transposition
+            measured.angles = sensor.angle - xh_pre(3);%
+            if iscolumn(sensor.length)
+                sensor.length = sensor.length';% Transposition
             end
             if iscolumn(measured.angles)
                 measured.angles = measured.angles';% Transposition
             end
             % Convert measurements into lines %Line segment approximation
-            LSA_param = PointCloudToLine(measured.ranges, measured.angles, pre_state, obj.constant);
+            LSA_param = PointCloudToLine(sensor.length, measured.angles, pre_state, obj.constant);
             % Conbine between measurements and map%雋ゑスャ陞ウ螢シ?ソス?ス、邵コ?スィ郢晄ァュ繝」郢晏干?ス帝お?ソス邵コ?スソ陷キ蛹サ?ス冗クコ蟶呻ス?
             obj.map_param = CombiningLines(obj.map_param, LSA_param, obj.constant);
             % Convert map into line parameters%郢ァ?スー郢晢スュ郢晢スシ郢晁?湖晁?趣スァ隶灘生縲帝囎荵昶螺驍ア螢シ?ソス邵コ?スョ郢昜サ」ホ帷ケ晢ス。郢晢スシ郢ァ?スソ
@@ -87,7 +86,7 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
             % association between measurements and map
             %             association_info.index = correspanding wall(line_param) number index
             %            association_info.distance = wall distace
-            association_info = MapAssociation(obj.map_param, line_param, pre_state, measured.ranges, measured.angles, obj.constant);
+            association_info = MapAssociation(obj.map_param, line_param, pre_state, sensor.length, measured.angles, obj.constant);
             association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
             association_available_count = length(association_available_index);%Count
             
@@ -95,7 +94,7 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
             mapstate_count = 2 * size(line_param.d, 1);
             state_count = obj.n + mapstate_count;
             
-            pre_Eststate = [xh_pre(1),xh_pre(2),xh_pre(3),obj.result.Est_state.v,obj.result.Est_state.w];
+            pre_Eststate = xh_pre;
             A = eye(state_count);
             A(1:3,1:5) = [1,0,-sin(pre_Eststate(3))*pre_Eststate(4)*obj.self.model.dt,cos(pre_Eststate(3))*obj.self.model.dt,0;
                 0,1,cos(pre_Eststate(3))*pre_Eststate(4)*obj.self.model.dt,sin(pre_Eststate(3))*obj.self.model.dt,0;
@@ -145,7 +144,7 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
             P_pre  = A*obj.result.P*A' + B*system_noise*B';       % 闔?蜿・辯暮坡?ス、陝セ?スョ陷茨スア陋サ?ソス隰ィ?ス」髯ヲ謔滂ソス?ソス
             G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 郢ァ?スォ郢晢スォ郢晄ァュホヲ郢ァ?スイ郢ァ?ス、郢晢スウ隴厄スエ隴?スー
             %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
-            tmpvalue = xh_m + G * (measured.ranges(association_available_index)' - Y);% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
+            tmpvalue = xh_m + G * (sensor.length(association_available_index)' - Y);% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
             obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 闔?蜿・?スセ迹夲スェ?ス、陝セ?スョ陷茨スア陋サ?ソス隰ィ?ス」
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = tmpvalue(6:2:end, 1);

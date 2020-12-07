@@ -1,41 +1,51 @@
 classdef DataPlot<handle
     %DATAPLOT this class do dataplot
-    %   
+    %
     
-    properties(Access = private)
-        Logger
+    properties
+        logger
         SavePath
-        SaveName
+        SaveDateStr
+        PlotOnOff
+        Condition
     end
     
     properties(Constant)
-        style = 'equal';
-        grid = 'on';
-        box = 'on';
+        %         style = 'equal';
+        %         grid = 'on';
+        %         box = 'on';
         FontSize = 15;
-        Fontname = 'TimesNewRoman'
+        FontName = 'TimesNewRoman'
         FontWeight = 'normal';
+        FuncNames = FuncNameList();
+        %         FuncNames = run('FuncNameList');
+        %         FuncNames = ['XYThetaTureAndEst']
     end
     
     methods
-        function obj = DataPlot(Logger)
+        
+        function obj = DataPlot(Logger,PlotOnOff)
             %DATAPLOT
             %   constructer for obj and path generate
-            obj.Logger = Logger;
-            %makedir
+            obj.logger = Logger;% Data file
+            obj.PlotOnOff = PlotOnOff;%matrix of true and false
+            %             obj.Condition = Condition;% Non logger data and simulation condition
+            %% makedir
             SaveDate = datetime('now');
             SaveDateStr= datestr(SaveDate,'yyyymmdd');
             if exist(SaveDateStr,'file')
                 tmpPath = pwd;
-                tmpPathY = strcat(tmpPath,'\Saves_W','\',SaveDateStr);
+                tmpPathY = strcat(tmpPath,'\ws_Saves','\',SaveDateStr);
                 SaveDateStrD= datestr(SaveDate,'HHMMSS');%日付の文字作成
                 mkdir(tmpPathY,SaveDateStrD);%ディレクトリ作成
                 dataFilePath = genpath(strcat(tmpPathY,'\',SaveDateStrD));
                 addpath(dataFilePath);
             else
                 tmpPath = pwd;
-                tmpPathY = strcat(tmpPath,'\Saves_W');
+                tmpPathY = strcat(tmpPath,'\ws_Saves');
                 mkdir(tmpPathY,SaveDateStr);%年月日のディレクトリ
+                dataFilePath = genpath(strcat(tmpPathY,'\',SaveDateStr));
+                addpath(dataFilePath);%add path of year directry
                 tmpPathD = strcat(tmpPathY,'\',SaveDateStr);
                 SaveDateStrD= datestr(SaveDate,'HHMMSS');
                 mkdir(tmpPathD,SaveDateStrD);%日付と時間のディレクトリ
@@ -43,21 +53,33 @@ classdef DataPlot<handle
                 addpath(dataFilePath);
             end
             obj.SavePath = dataFilePath;
-        end
-        
-        function [] = do(obj,Num)
-            %Num = plot figure numbers
-            i = 0;
-            while i<=Num
-                
-                
-            end
-            obj.Logger
+            obj.SaveDateStr = strcat('ws_Saves\',SaveDateStr,'\',SaveDateStrD);
+            %% Plot Data
+            result = do(obj);
+            %             AutoPPt(result);
             
         end
+        
     end
     
     methods(Access = protected)
+        
+        function result = do(obj)
+            %Num = plot figure numbers
+            Figi = 1;
+            FigNum = 1;
+            while Figi<= length(obj.FuncNames)
+                if obj.PlotOnOff(Figi) ==1
+                    FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
+                    FuncHandleName = strcat('PlotFunc_',FuncName);
+                    FuncHandle = str2func(FuncHandleName);
+                    [FigNum,result] = FuncHandle(obj,FigNum);
+                    Figi = Figi+1;
+                else
+                    Figi = Figi+1;
+                end
+            end
+        end
         
     end
 end

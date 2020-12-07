@@ -198,7 +198,7 @@ while mo_t <= msi
 %model plot%
     tmp_model_square = model_data(:,mo_t) + [1,1.5,1,-1,-1;1,0,-1,-1,1];
     model_square =  polyshape( tmp_model_square');
-    plant_square =  rotate(model_square,180 * modelq_data(mo_t) / pi, model_data(:,mo_t)');
+    model_square =  rotate(model_square,180 * modelq_data(mo_t) / pi, model_data(:,mo_t)');
     fig6(3) = plot(model_square);
 %-------------%
 
@@ -293,16 +293,157 @@ else
         axis equal;
         % xlim([-50 200]);ylim([-20 20]);
         % xlim([0 30])
-        xlabel('t [s]');
+        xlabel('t [s]');ylabel('Entropy');
         %     ylabel('\theta [rad]');
         %     legend('plant','estimate')
         % xticks([-50:20:200]);yticks([-20:20:20])
         ax.FontSize = 15;
         hold off
+        exportgraphics(ax,'Entropy.pdf');
+        movefile('Entropy.pdf',strcat('Saves_W\',save_date_str));
     end
 end
 %% SingEntropy
-tmp_ent = regexp(logger.items,'estimator.ekfslam_WC.result.SingEntropy');
+tmp_ent = regexp(logger.items,'estimator.ekfslam_WC.result.SingP');
+tmp_ent = cellfun(@(c) ~isempty(c),tmp_ent);
+pent = find(tmp_ent );
+if isempty(pent)
+    disp('we dont culculate entropy');
+else
+    pentd = size(logger.Data.agent{1,pent},2);
+    ent_data = zeros(pentd,size(logger.Data.t,1));
+    for pI = 1:pentd
+        ent_data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,pent}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
+    end
+    Time = cell2mat(arrayfun(@(N) logger.Data.t(N),1:size(logger.Data.t,1),'UniformOutput',false));
+
+        figure(9)
+        hold on;
+        ax = gca;
+        grid on
+%         axis equal
+        for pI = 1:5
+            plot(Time,ent_data(pI,:),'Linewidth',2);
+        end
+        grid on;
+%         axis equal;
+        % xlim([-50 200]);ylim([-20 20]);
+        % xlim([0 30])
+        xlabel('t [s]');
+        %     ylabel('\theta [rad]');
+        %     legend('plant','estimate')
+        % xticks([-50:20:200]);yticks([-20:20:20])
+        legend('x','y','theta','v','w');
+        ax.FontSize = 15;
+        saveas(gcf,'SingEnt','pdf');
+        movefile('SingEnt.pdf',strcat('Saves_W\',save_date_str));
+        hold off
+end
+%% MtoKFKL
+tmp_MtoKFKL = regexp(logger.items,'estimator.ekfslam_WC.result.MtoKF_KL');
+tmp_MtoKFKL = cellfun(@(c) ~isempty(c),tmp_MtoKFKL);
+pMtoKFKL = find(tmp_MtoKFKL );
+if isempty(pMtoKFKL)
+    disp('we dont culculate KL');
+else
+pMtoKFKLd = size(logger.Data.agent{1,pMtoKFKL},1);
+MtoKFKL_data = zeros(pMtoKFKLd,size(logger.Data.t,1));
+for pI = 1:pMtoKFKLd
+    MtoKFKL_data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,pMtoKFKL}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
+end
+Time = cell2mat(arrayfun(@(N) logger.Data.t(N),1:size(logger.Data.t,1),'UniformOutput',false));
+for pI = 1:pMtoKFKLd
+    figure(9)
+    hold on;
+    ax = gca;
+    grid on
+    plot(Time,MtoKFKL_data(pI,:),'Linewidth',2);
+    grid on;
+    % xlim([-50 200]);ylim([-20 20]);
+    % xlim([0 30])
+    xlabel('t [s]');ylabel('KL');
+    legend('plant','estimate')
+    % xticks([-50:20:200]);yticks([-20:20:20])
+    ax.FontSize = 15;
+    hold off
+    exportgraphics(ax,'KL.pdf')
+    movefile('KL.pdf',strcat('Saves_W\',save_date_str));
+end
+end
+%% Eig
+tmp_ent = regexp(logger.items,'estimator.ekfslam_WC.result.Eig');
+tmp_ent = cellfun(@(c) ~isempty(c),tmp_ent);
+pent = find(tmp_ent );
+if isempty(pent)
+    disp('we dont culculate Eig');
+else
+    pentd = size(logger.Data.agent{1,pent},2);
+    ent_data = zeros(pentd,size(logger.Data.t,1));
+    for pI = 1:pentd
+        ent_data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,pent}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
+    end
+    Time = cell2mat(arrayfun(@(N) logger.Data.t(N),1:size(logger.Data.t,1),'UniformOutput',false));
+
+        figure(10)
+        hold on;
+        ax = gca;
+        grid on
+%         axis equal
+        for pI = 1:pentd
+            plot(Time,ent_data(pI,:),'Linewidth',2);
+        end
+        grid on;
+%         axis equal;
+        % xlim([-50 200]);ylim([-20 20]);
+        % xlim([0 30])
+        xlabel('t [s]');
+        %     ylabel('\theta [rad]');
+        %     legend('plant','estimate')
+        % xticks([-50:20:200]);yticks([-20:20:20])
+        legend('x','y','theta','v','w');
+        ax.FontSize = 15;
+        exportgraphics(ax,'Eig.pdf')
+        movefile('Eig.pdf',strcat('Saves_W\',save_date_str));
+        hold off
+end
+%%
+tmp_ent = regexp(logger.items,'estimator.ekfslam_WC.result.GramVec');
+tmp_ent = cellfun(@(c) ~isempty(c),tmp_ent);
+pent = find(tmp_ent );
+if isempty(pent)
+    disp('we dont culculate Eig');
+else
+    pentd = size(logger.Data.agent{1,pent},2);
+    ent_data = zeros(pentd,size(logger.Data.t,1));
+    for pI = 1:pentd
+        ent_data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,pent}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
+    end
+    Time = cell2mat(arrayfun(@(N) logger.Data.t(N),1:size(logger.Data.t,1),'UniformOutput',false));
+
+        figure(10)
+        hold on;
+        ax = gca;
+        grid on
+%         axis equal
+        for pI = 1:pentd
+            plot(Time,ent_data(pI,:),'Linewidth',2);
+        end
+        grid on;
+%         axis equal;
+        % xlim([-50 200]);ylim([-20 20]);
+        % xlim([0 30])
+        xlabel('t [s]');
+        %     ylabel('\theta [rad]');
+        %     legend('plant','estimate')
+        % xticks([-50:20:200]);yticks([-20:20:20])
+        legend('x','y','theta','v','w');
+        ax.FontSize = 15;
+        exportgraphics(ax,'GramVec.pdf')
+        movefile('GramVec.pdf',strcat('Saves_W\',save_date_str));
+        hold off
+end
+%% Diff output
+tmp_ent = regexp(logger.items,'estimator.ekfslam_WC.result.diffy');
 tmp_ent = cellfun(@(c) ~isempty(c),tmp_ent);
 pent = find(tmp_ent );
 if isempty(pent)
@@ -314,49 +455,61 @@ else
         ent_data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,pent}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
     end
     Time = cell2mat(arrayfun(@(N) logger.Data.t(N),1:size(logger.Data.t,1),'UniformOutput',false));
-    for pI = 1:pentd
-        figure(9)
+    
+        figure(8)
         hold on;
         ax = gca;
         grid on
-        axis equal
-        plot(Time,ent_data(pI,:),'Linewidth',2);
+%         axis equal
+for pI = 1:3
+    plot(Time,ent_data(pI,:),'Linewidth',2);
+end
         grid on;
-        axis equal;
+%         axis equal;
         % xlim([-50 200]);ylim([-20 20]);
         % xlim([0 30])
         xlabel('t [s]');
         %     ylabel('\theta [rad]');
         %     legend('plant','estimate')
         % xticks([-50:20:200]);yticks([-20:20:20])
+        legend('x','y','theta','v','w','d1','alpha1','d2','alpha2');
         ax.FontSize = 15;
         hold off
-    end
 end
-%% MtoKFKL
-% tmp_MtoKFKL = regexp(logger.items,'estimator.ekfslam_WC.result.MtoKF_KL');
-% tmp_MtoKFKL = cellfun(@(c) ~isempty(c),tmp_MtoKFKL);
-% pMtoKFKL = find(tmp_MtoKFKL );
-% pMtoKFKLd = size(logger.Data.agent{1,pMtoKFKL},1);
-% MtoKFKL_data = zeros(pMtoKFKLd,size(logger.Data.t,1));
-% for pI = 1:pMtoKFKLd
-%     MtoKFKL_data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,pMtoKFKL}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
-% end
-% Time = cell2mat(arrayfun(@(N) logger.Data.t(N),1:size(logger.Data.t,1),'UniformOutput',false));
-% for pI = 1:pMtoKFKLd
-%     figure(9)
-%     hold on;
-%     ax = gca;
-%     grid on
-%     axis equal
-%     plot(Time,MtoKFKL_data(pI,:),'Linewidth',2);
-%     grid on;
-%     axis equal;
-%     % xlim([-50 200]);ylim([-20 20]);
-%     % xlim([0 30])
-%     xlabel('t [s]');ylabel('\theta [rad]');
-%     legend('plant','estimate')
-%     % xticks([-50:20:200]);yticks([-20:20:20])
-%     ax.FontSize = 15;
-%     hold off
-% end
+%%
+tmp_ent = regexp(logger.items,'estimator.ekfslam_WC.result.InFo');
+tmp_ent = cellfun(@(c) ~isempty(c),tmp_ent);
+pent = find(tmp_ent );
+if isempty(pent)
+    disp('we dont culculate entropy');
+else
+    pentd = size(logger.Data.agent{1,pent},1);
+    ent_data = zeros(pentd,size(logger.Data.t,1));
+    for pI = 1:pentd
+        ent_data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,pent}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
+    end
+    Time = cell2mat(arrayfun(@(N) logger.Data.t(N),1:size(logger.Data.t,1),'UniformOutput',false));
+    
+        figure(15)
+        hold on;
+        ax = gca;
+        grid on
+%         axis equal
+for pI = 1:pentd
+    plot(Time,ent_data(pI,:),'Linewidth',2);
+end
+        grid on;
+%         axis equal;
+        xlim([0 20]);
+%         ylim([-20 20]);
+        % xlim([0 30])
+            xlabel('t [s]');ylabel('mutual information');
+        %     ylabel('\theta [rad]');
+        %     legend('plant','estimate')
+        % xticks([-50:20:200]);yticks([-20:20:20])
+%         legend('x','y','theta','v','w','d1','alpha1','d2','alpha2');
+        ax.FontSize = 15;
+        hold off
+        exportgraphics(ax,'MutualInfo.pdf')
+        movefile('MutualInfo.pdf',strcat('Saves_W\',save_date_str));
+end

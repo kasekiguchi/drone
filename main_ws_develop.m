@@ -22,36 +22,17 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=1;
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
     typical_Model_Lizard_exp(N,dt,'plant',25); % Lizard : for exp
 else
-    %typical_Model_EulerAngle(N,dt,'plant',struct('noise',7.058E-5))
-%     typical_Model_Quat13(N,dt,'plant'); % unit quaternionのプラントモデル : for sim
-    typical_Model_WheelChair(N,dt,'plant',struct('noise',4.337E-5));
-    %typical_Model_Discrete0(N,dt,'plant') % 離散時間質点モデル : Direct controller を想定
-    %typical_Model_Discrete(N,dt,'plant') % 離散時間質点モデル : PD controller などを想定
+    typical_Model_WheelChairA(N,dt,'plant',struct('noise',4.337E-5));
 end
 % set control model
-% typical_Model_EulerAngle(N,dt,'model'); % オイラー角モデル
-%typical_Model_Quat13(N,dt,'model') % オイラーパラメータ（unit quaternion）モデル
-%typical_Model_Discrete0(N,dt,'model') % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-%typical_Model_Discrete(N,dt,'model') % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
-typical_Model_WheelChair(N,dt,'model');
-%% set input_transform property
-for i = 1:N
-    if fExp%isa(agent(i).plant,"Lizard_exp")
-        typical_InputTransform_Thrust2Throttle_drone(agent(i)); % 推力からスロットルに変換
-    end
-end
-%agent.plant.espr.sendData(Pw(1,1:16));
-% for quat-model plant with discrete control model
-%typical_InputTransform_REFtoHL_drone(agent); % 位置指令から４つの推力に変換
-%typical_InputTransform_toHL_drone(agent); % modelを使った１ステップ予測値を目標値として４つの推力に変換
-% １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
+typical_Model_WheelChairA(N,dt,'model');
 %% set environment property
 Env = [];
 % fl1 = [-50,10;200,10;200,20;-50,20];
@@ -65,13 +46,18 @@ Env = [];
 % fl2 = [-50,-35;50,-35;50,-45;-50,-45];%x譁ケ蜷代↓髟キ縺?
 % fl3 = [50,-45;55,-45;55,45;50,45];
 
-% fl1 = [-50,20;200,20;200,25;-50,25];
-% fl2 = [-50,-20;200,-20;200,-25;-50,-25];%x direction long passage
+fl1 = [-50,20;200,20;200,25;-50,25];
+fl2 = [-50,-20;200,-20;200,-25;-50,-25];%x direction long passage
 
-fl1 = [-10,-10;-10,20;-9,20;-9,-10;-10,-10];
-fl2 = [-10,-10;20,-10;20,-9;-10,-9;-10,-10];
-fl3 = [20,-10;20,20;19,20;19,-10;20,-10];
-fl4 = [20,20;20,19;-10,19;-10,20;20,20];%mini square room env
+% fl1 = [20,-50;20,200;25,200;25,-50];
+% fl2 = [-20,-50;-20,200;-25,200;-25,-50];%y direction long passage
+
+% fl1 = [];
+
+% fl1 = [-10,-10;-10,20;-9,20;-9,-10;-10,-10];
+% fl2 = [-10,-10;20,-10;20,-9;-10,-9;-10,-10];
+% fl3 = [20,-10;20,20;19,20;19,-10;20,-10];
+% fl4 = [20,20;20,19;-10,19;-10,20;20,20];%mini square room env
 
 % fl1 = [-10,-10;-10,50;-9,50;-9,-10;-10,-10];
 % fl2 = [-10,-10;50,-10;50,-9;-10,-9;-10,-10];
@@ -81,10 +67,9 @@ fl4 = [20,20;20,19;-10,19;-10,20;20,20];%mini square room env
 env_param.Vertices(:,:,1)=fl1;
 env_param.Vertices(:,:,2)=fl2;
 % env_param.Vertices(:,:,3)=fl3;
-% env_param.Vertices(:,:,4)=fl4;
+% env_param.Vertices(:,:,4)=fl4f;
 env_param.name = 'Floor';
 for i=1:N;env(i).name = "Floor";env(i).type = "FloorMap_sim";env(i).param = env_param;agent(i).set_env(env(i));end
-% typical_Env_2DCoverage(agent); % 鬩・蟠趣スヲ竏晢スコ?スヲ郢晄ァュ繝」郢晁挙?スィ?スュ陞ウ?
 % [-2 -2.5;5.5 -2.5;5.5 3;-2 3]
 Env.param.Vertices(:,:,1)=fl1;
 Env.param.Vertices(:,:,2)=fl2;
@@ -92,27 +77,11 @@ Env.param.Vertices(:,:,2)=fl2;
 % Env.param.Vertices(:,:,4)=fl4;
 %% set sensors property
 for i = 1:N; agent(i).sensor=[]; end
-%typical_Sensor_LSM9DS1(agent); % IMU sensor
-% typical_Sensor_Motive(agent); % motive情報 : sim exp 共通
-%typical_Sensor_Direct(agent); % 状態真値(plant.state)　：simのみ
-%typical_Sensor_RangePos(agent,10); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-%typical_Sensor_RangeD(agent,2); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-% for i = 1:N % simのみ
-%     sensor.type= "LiDAR_sim";
-%     sensor.name="lrf";sensor.param=[];agent(i).set_sensor(sensor);
-% end
 typical_Sensor_LiDAR(agent);%LiDAR seosor
 %% set estimator property
 for i = 1:N; agent(i).estimator=[]; end
-%typical_Estimator_LPF(agent); % lowpass filter
-%typical_Estimator_AD(agent); % 後退差分近似で速度，角速度を推定
-%typical_Estimator_feature_based_EKF(agent); % 特徴点ベースEKF
-%typical_Estimator_PDAF(agent); % 特徴点ベースPDAF
-% typical_Estimator_EKF(agent); % （剛体ベース）EKF
-%typical_Estimator_Direct(agent); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-%for i = 1:N;agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[]));end % map 更新用 重要度などのmapを時間更新する
-% typical_Estimator_EKFSLAM(agent)
-Estimator_EKFSLAM_WheelChair(agent);
+Gram = GrammianAnalysis(te,ts,dt);
+Estimator_EKFSLAM_WheelChair(agent,Gram);
 %% set reference property
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
@@ -121,47 +90,15 @@ Estimator_EKFSLAM_WheelChair(agent);
 Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
 %% set controller property
 for i = 1:N; agent(i).controller=[]; end
-% typical_Controller_HL(agent); % 階層型線形化
-%typical_Controller_MEC(agent); % Model Error Compensator  :  未実装
-%for i = 1:N;  Controller.type="MPC_controller";Controller.name = "mpc";Controller.param={agent(i)}; agent(i).set_controller(Controller);end
-%for i = 1:N;  Controller.type="DirectController"; Controller.name="direct";Controller.param=[];agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
-%for i = 1:N;  Controller.type="PDController"; Controller.name="pd";Controller.param=struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]));agent(i).set_controller(Controller);end% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
 for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_controller(Controller);end%
-% for i = 1:N;  Controller.type="DirectController_6";Controller.name="DirectController_6";Controller.param={agent(i)}; agent(i).set_controller(Controller);end% 隹コ?ス。隴弱ｇ邯セ邵コ?スォ陷茨ス・陷牙ク???スョ闖エ蜥イ?スス?スョ邵コ?スォ驕假スサ陷崎シ披?郢ァ荵斟皮ケ??郢晢スォ騾包スィ??スシ螟ょイシ隶灘姓?スス蜥イ?スス?スョ郢ァ蝣、蟲ゥ隰暦ス・陷茨ス・陷牙ク吮?堤クコ蜷カ?ス?
 %% set connector (global instance)
-%% set connector (global instance)
-% if fExp
-%     typical_Connector_Natnet(struct('ClientIP','192.168.1.5')); % Motive
-% else
-%     typical_Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
-% end
 %LiDAR set
 LiDAR = Env;
 %% initialize
 clc
-% for sim : 隰ィ?スエ陋サ蜉ア?シ?邵コ貅キ?譎?謔?陋滂ス、
-base_pos=[0 0];
-kpos=ceil(sqrt(N));
-cpos=floor(N/kpos);
-rempos=mod(N,kpos);
-[xpos,ypos]=meshgrid(1-floor(kpos/2):ceil(kpos/2),1-floor(cpos/2):ceil(cpos/2));
-gap=1;
-xpos=gap*xpos;
-ypos=gap*ypos;
-arranged_initial_pos=base_pos-[gap gap]+[reshape(xpos,[N-rempos,1]),reshape(ypos,[N-rempos,1]);(1:rempos)'*[gap,0]+[0 gap]*(ceil(cpos/2)+1)];
-
-% motive.getData({agent,[]});
 for i = 1:N
-    % for exp with motive : initialize by motive info
-    %     agent(i).sensor.motive.do({motive});
-    %     sstate = agent(i).sensor.motive.result.state;
-    %     model.initial = struct('p',sstate.p,'q',sstate.q,'v',[0;0;0],'w',[0;0;0]);
-    %     agent(i).model.set_state(model.initial);
-    %     agent(i).estimator.result.state.set_state(model.initial);
-    
     % for sim
-%     plant.initial = struct('p',[arranged_initial_pos(i,:),0]','q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0]);
-    plant.initial = struct('p',[0,0]','q',[0]);%WC model
+    plant.initial = struct('p',[0,0]','q',[0],'v',[0],'w',[0]);%WC model
     agent(i).state.set_state(plant.initial);
     agent(i).model.set_state(plant.initial);
     for j = 1:length(agent(i).estimator.name)
@@ -179,13 +116,21 @@ LogData=[
     "estimator.ekfslam_WC.result.P",
     "estimator.ekfslam_WC.result.ErEl_Round",
     "estimator.ekfslam_WC.result.Entropy",
-    "estimator.ekfslam_WC.result.SingEntropy",
+%     "estimator.ekfslam_WC.result.SingP",
+    "estimator.ekfslam_WC.result.G",
+    "env.Floor.param.Vertices",
 %     "estimator.ekfslam_WC.result.PartialX",
 %     "estimator.ekfslam_WC.result.PartialY",
 %     "estimator.ekfslam_WC.result.PartialTheta",
 %     "estimator.ekfslam_WC.result.PartialV",
 %     "estimator.ekfslam_WC.result.PartialW",
 %     "estimator.ekfslam_WC.result.MtoKF_KL",
+%     "estimator.ekfslam_WC.result.Eig",
+%     "estimator.ekfslam_WC.result.InFo",
+%     "estimator.ekfslam_WC.result.Gram",
+%     "estimator.ekfslam_WC.result.GramVec",
+%     "estimator.ekfslam_WC.result.Obs",
+%     "estimator.ekfslam_WC.result.diffy",
 %     "estimator.ekfslam_WC.result.OtoKF_KL",
 %     "estimator.ekfslam_WC.result.laser.ranges",
 %     "estimator.ekfslam_WC.result.laser.angles",
@@ -254,6 +199,7 @@ try
         tic
 %         motive.getData({agent,mparam});
 %         Smotive={motive};
+        Gram.UpdateT
         Srpos={agent};
         Simu={[]};
         Sdirect={};
@@ -285,23 +231,24 @@ try
             
 %            agent(i).do_controller(param(i).controller);
             agent(i).do_controller(cell(1,10));
-            warukaku = 4;
-            kakudo = (1/2)* warukaku;
-            if time.t<1
-                agent(i).input = [1,pi/warukaku];
-            elseif time.t>10 && time.t<11
-                agent(i).input = [1,-pi/kakudo];
-            elseif time.t>30 && time.t<31
-                agent(i).input = [1,pi/kakudo];
-            elseif time.t>50 && time.t<51
-                agent(i).input = [1,-pi/kakudo];
-            elseif time.t>70 && time.t<71
-                agent(i).input = [1,pi/kakudo];
-            elseif time.t>90 && time.t<91
-                agent(i).input = [1,-pi/kakudo];
-            else
-                agent(i).input = [1,0];
-            end
+%             warukaku = 4;
+%             kakudo = (1/2)* warukaku;
+%             if time.t<1
+%                 agent(i).input = [1,pi/warukaku];
+%             elseif time.t>10 && time.t<11
+%                 agent(i).input = [1,-pi/kakudo];
+%             elseif time.t>30 && time.t<31
+%                 agent(i).input = [1,pi/kakudo];
+%             elseif time.t>50 && time.t<51
+%                 agent(i).input = [1,-pi/kakudo];
+%             elseif time.t>70 && time.t<71
+%                 agent(i).input = [1,pi/kakudo];
+%             elseif time.t>90 && time.t<91
+%                 agent(i).input = [1,-pi/kakudo];
+%             else
+%                 agent(i).input = [1,0];
+%             end
+
         end
         %agent(1).estimator.map.show
         %%
@@ -338,8 +285,10 @@ catch ME
     rethrow(ME);
 end
 %profile viewer
-%%
-% logger.save();
-% save('zigzag45deg.mat','logger');
 %% dataplot
-run('dataplot');
+close all;
+PlotOnOff = [1,1,0,0,0];
+Plots = DataPlot(logger,PlotOnOff);
+% run('dataplot');
+%% Save
+
