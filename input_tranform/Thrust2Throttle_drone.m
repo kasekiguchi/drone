@@ -8,6 +8,7 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
         param
         flight_phase
         thr_hover
+        state
     end
     
     methods
@@ -18,6 +19,7 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
             P = self.model.param;
             obj.thr_hover = P(1)*P(6);
             self.plant.set_param([param.roll_offset,param.pitch_offset,param.yaw_offset]);
+            obj.state = state_copy(self.model.state);
         end
         
         function u = do(obj,input,varargin)
@@ -40,9 +42,10 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
               % statetmp=obj.self.estimator.result.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.estimator.result.state.get(),obj.self.input,P);% euler approximation
                 %statetmp=obj.self.model.state.get();% do_modelで事前予測を求めている．
                  statetmp=obj.self.model.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.model.state.get(),obj.self.input,P);% euler approximation
-                whatp = statetmp(end-2:end);
+                obj.state.set_state(statetmp);
+                 whatp = obj.state.w;%statetmp(end-2:end);
                 %whatp = obj.self.model.state.w;% １時刻先の事前予測
-                T_thr = sum(input);
+                T_thr = sum(input); % T_thr = input(1);
 
                 
                 uroll       = obj.param.gain(1) * (whatp(1) - what(1))    ;

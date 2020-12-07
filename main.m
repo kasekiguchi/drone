@@ -101,6 +101,7 @@ for i = 1:N
     % set control model
     agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
     %agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
+    %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
@@ -136,7 +137,7 @@ for i = 1:N
     %% set estimator property
     agent(i).estimator=[];
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
-    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-8,1e-5,1e-5])); % （剛体ベース）EKF
+    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %     agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
@@ -324,7 +325,7 @@ close all
 clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 %agent(1).reference.timeVarying.show(logger)
-%logger.plot(1,["pL","p","q","w","v","input"]t,["e","e","e","e","e",""],struct('time',[]));
+%logger.plot(1,["pL","p","q","w","v","input"],["e","e","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
