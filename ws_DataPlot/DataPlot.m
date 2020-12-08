@@ -55,7 +55,7 @@ classdef DataPlot<handle
             obj.SavePath = dataFilePath;
             obj.SaveDateStr = strcat('ws_Saves\',SaveDateStr,'\',SaveDateStrD);
             %% Plot Data
-            result = do(obj);
+            do(obj);
             %             AutoPPt(result);
             
         end
@@ -64,7 +64,7 @@ classdef DataPlot<handle
     
     methods(Access = protected)
         
-        function result = do(obj)
+        function do(obj)
             %Num = plot figure numbers
             Figi = 1;
             FigNum = 1;
@@ -73,7 +73,7 @@ classdef DataPlot<handle
                     FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
                     FuncHandleName = strcat('PlotFunc_',FuncName);
                     FuncHandle = str2func(FuncHandleName);
-                    [FigNum,result] = FuncHandle(obj,FigNum);
+                    [FigNum] = FuncHandle(obj,FigNum);
                     Figi = Figi+1;
                 else
                     Figi = Figi+1;

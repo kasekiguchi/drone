@@ -1,4 +1,4 @@
-function [FigNum,Ax] = PlotFunc_XYZTureAndEst(obj,FigNum)
+function [FigNum] = PlotFunc_XYZTureAndEst(obj,FigNum)
 labelstr = ['x','y','z'];
 %plant(true)
 [~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.state.p');

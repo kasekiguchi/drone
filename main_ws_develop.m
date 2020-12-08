@@ -8,7 +8,7 @@ cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
 rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
-warning('off', 'all');
+    warning('off', 'all');
 %% general setting
 N = 1; % number of agents
 fExp = 0;%sim=0;exp = 1
@@ -22,17 +22,17 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=1;
+    te=10;
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 if fExp
     typical_Model_Lizard_exp(N,dt,'plant',25); % Lizard : for exp
 else
-    typical_Model_WheelChairA(N,dt,'plant',struct('noise',4.337E-5));
+    typical_Model_WheelChairV(N,dt,'plant',struct('noise',4.337E-5));
 end
 % set control model
-typical_Model_WheelChairA(N,dt,'model');
+typical_Model_WheelChairV(N,dt,'model');
 %% set environment property
 Env = [];
 % fl1 = [-50,10;200,10;200,20;-50,20];
@@ -81,7 +81,7 @@ typical_Sensor_LiDAR(agent);%LiDAR seosor
 %% set estimator property
 for i = 1:N; agent(i).estimator=[]; end
 Gram = GrammianAnalysis(te,ts,dt);
-Estimator_EKFSLAM_WheelChair(agent,Gram);
+Estimator_EKFSLAM_WheelChairV(agent,Gram);
 %% set reference property
 %typical_Reference_2DCoverage(agent,Env); % Voronoi重心
 %typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
