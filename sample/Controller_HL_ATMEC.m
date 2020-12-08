@@ -1,7 +1,6 @@
-function Controller_HL_ATMEC(agent)
+function Controller_HL_ATMEC(dt)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
-dt = agent(1).model.dt;
 Controller_param.P=getParameter();
 
 % HL_Controller

@@ -1,7 +1,6 @@
-function Controller_HL_MEC(agent)
+function Controller_HL_MEC(dt)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
-dt = agent(1).model.dt;
 Controller_param.P=getParameter();
 % Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 
 % Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([1000,10,10,1]),[1],dt); % xdiag([100,10,10,1])
