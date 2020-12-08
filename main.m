@@ -17,7 +17,9 @@ fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.025; % sampling time
+%     dt = 0.1; % sampling time
+    dt = 0.025;
+%     dt = 0.010;
 end
 sampling = dt;
 ts=0;
@@ -150,6 +152,7 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.5]}));
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     if fExp == 1
@@ -174,7 +177,9 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
-    %agent(i).set_property("controller",Controller_MEC()); % Model Error Compensator  :  未実装
+    %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
+    % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
+    agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC : 未完成
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
     %agent(i).set_property("controller",struct("type","DirectController"; "name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
@@ -186,7 +191,22 @@ end
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
     "model.state.p"
-    "inner_input"
+    "reference.result.state.p"
+    "estimator.result.state.p"
+    "sensor.result.state.p"
+    "input"
+    "controller.hlcontrollerATMEC.K"        %AT-MEC
+    "controller.hlcontrollerATMEC.eps"      %ATMEC
+    "controller.hlcontrollerATMEC.epssum"%ATMEC
+    "controller.hlcontrollerATMEC.h"
+    "controller.hlcontrollerATMEC.eta1"
+    "controller.hlcontrollerATMEC.eta2"
+    "controller.hlcontrollerATMEC.Khat"
+    "controller.hlcontrollerATMEC.x_out"
+    "controller.hlcontrollerATMEC.xn_out"
+    "controller.hlcontrollerATMEC.z_out"
+    "controller.hlcontrollerATMEC.zn_out"
+    "controller.hlcontrollerATMEC.v_out"
     ];
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;   "env.density.param.grid_density"]; % for coverage
