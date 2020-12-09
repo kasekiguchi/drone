@@ -1,4 +1,4 @@
-function Controller_HL_ATMEC(dt)
+function Controller=Controller_HL_ATMEC(dt)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
 Controller_param.P=getParameter();
@@ -20,23 +20,23 @@ Controller_param.dt = dt;
  
 Controller.type="HLController_ATMEC";
 Controller.name="hlcontrollerATMEC";
-Controller.param=Controller_param;
+
 
 %% サブシステムモデル
-Controller.param.A2 = [0 1;0 0];
-Controller.param.B2 = [0;1];
-Controller.param.A4 =diag([1 1 1],1);
-Controller.param.B4 = [0;0;0;1];
+Controller_param.A2 = [0 1;0 0];
+Controller_param.B2 = [0;1];
+Controller_param.A4 =diag([1 1 1],1);
+Controller_param.B4 = [0;0;0;1];
 
 %モデルを離散化 x[i+1] = Ad*x[i] + Bd*u[i]
-sys = ss(Controller.param.A2,Controller.param.B2,zeros(2),[0;0]);
+sys = ss(Controller_param.A2,Controller_param.B2,zeros(2),[0;0]);
 d2 = c2d(sys,dt);
-Controller.param.A2d = d2.A;
-Controller.param.B2d = d2.B;
-sys = ss(Controller.param.A4,Controller.param.B4,zeros(4),[0;0;0;0]);
+Controller_param.A2d = d2.A;
+Controller_param.B2d = d2.B;
+sys = ss(Controller_param.A4,Controller_param.B4,zeros(4),[0;0;0;0]);
 d4 = c2d(sys,dt);
-Controller.param.A4d = d4.A;
-Controller.param.B4d = d4.B;
+Controller_param.A4d = d4.A;
+Controller_param.B4d = d4.B;
 
 % c2dを使わない1階微分までの近似計算版
 % A2d = eye(2)+obj.A2*dt;
@@ -56,32 +56,29 @@ Ky = [50, 0, 0, 0];
 % Kx = [0 0 0 0];
 % Ky = [0 0 0 0];
  
-Controller.param.K = [Kz Kx Ky];
+Controller_param.K = [Kz Kx Ky];
 
 %% RLS_param.
 %推定開始時刻
-Controller.param.FRIT_begin = 0;
-Controller.param.RLS_begin = 20;
+Controller_param.FRIT_begin = 0;
+Controller_param.RLS_begin = 20;
 %z
-Controller.param.gamma_z = 10; %初期相関係数
-% Controller.param.alpha_z = 0.01; %ローパスフィルタ強度
-Controller.param.alpha_z = 0; %100%古い情報で更新->更新しない
-Controller.param.lambda_z = 0.99; %忘却係数
-% Controller.param.lambda_z = 1;
+Controller_param.gamma_z = 10; %初期相関係数
+% Controller_param.alpha_z = 0.01; %ローパスフィルタ強度
+Controller_param.alpha_z = 0; %100%古い情報で更新->更新しない
+Controller_param.lambda_z = 0.99; %忘却係数
+% Controller_param.lambda_z = 1;
 %x
-Controller.param.gamma_x = 1.0; %初期相関係数
-Controller.param.alpha_x = 1.0; %ローパスフィルタ強度
-Controller.param.lambda_x = 0.9999; %忘却係数
+Controller_param.gamma_x = 1.0; %初期相関係数
+Controller_param.alpha_x = 1.0; %ローパスフィルタ強度
+Controller_param.lambda_x = 0.9999; %忘却係数
 %y
-Controller.param.gamma_y = 1.0; %初期相関係数
-Controller.param.alpha_y = 1.0; %ローパスフィルタ強度
-Controller.param.lambda_y = 0.9999; %忘却係数
-
-%% set2agent
-for i = 1:length(agent)
-    agent(i).set_controller(Controller);
-end
+Controller_param.gamma_y = 1.0; %初期相関係数
+Controller_param.alpha_y = 1.0; %ローパスフィルタ強度
+Controller_param.lambda_y = 0.9999; %忘却係数
 
 %assignin('base',"Controller_param",Controller_param);
+
+Controller.param=Controller_param;
 
 end
