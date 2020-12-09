@@ -1,4 +1,4 @@
-function Controller_HL_MEC(dt)
+function Controller=Controller_HL_MEC(dt)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
 Controller_param.P=getParameter();
@@ -21,10 +21,6 @@ Controller.param=Controller_param;
 % Controller.param.K = [150.0 50.0 50.0];
 Controller.param.K = [100.0 50.0 50.0];
 % Controller.param.K = [0 0 0];
-
-for i = 1:length(agent)
-    agent(i).set_controller(Controller);
-end
 
 %assignin('base',"Controller_param",Controller_param);
 
