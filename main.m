@@ -26,7 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=25;
+    te=50;
 end
 %% set connector (global instance)
 if fExp
@@ -150,24 +150,24 @@ for i = 1:N
     %% set reference property
     agent(i).reference=[];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.5]}));
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
-    if fExp == 1
-        if i ==1
-            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
-        else
-            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
-        end
-    else
-         if i ==1
-            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;0])); % ハート形[x;y;z]永久
-        else
-            agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
-        end
-    end
+%     if fExp == 1
+%         if i ==1
+%             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
+%         else
+%             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
+%         end
+%     else
+%          if i ==1
+%             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;0])); % ハート形[x;y;z]永久
+%         else
+%             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
+%         end
+%     end
 %     agent(i).set_property("reference",Reference_Wall_observation()); % ハート形[x;y;z]永久
     
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
@@ -175,7 +175,7 @@ for i = 1:N
     %% set controller property
     agent(i).controller=[];
     %agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
-    agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
+%     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
