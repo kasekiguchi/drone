@@ -45,7 +45,7 @@ Controller_param.B4d = d4.B;
 % B4d = dt*obj.B4;
 
 %% MEC_param.
-Kz = [200 50];
+Kz = [200 25];
 % Kz = [100,0];
 % % Kz = [65.5882 61.2427];
 Kx = [50, 0 ,0, 0];
@@ -61,7 +61,7 @@ Controller_param.K = [Kz Kx Ky];
 %% RLS_param.
 %推定開始時刻
 Controller_param.FRIT_begin = 0;
-Controller_param.RLS_begin = 20;
+Controller_param.RLS_begin = 0;
 %z
 Controller_param.gamma_z = 10; %初期相関係数
 % Controller_param.alpha_z = 0.01; %ローパスフィルタ強度

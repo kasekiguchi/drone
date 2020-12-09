@@ -18,15 +18,16 @@ if fExp
     dt = 0.025; % sampling time
 else
 %     dt = 0.1; % sampling time
-    dt = 0.025;
-%     dt = 0.010;
+%     dt = 0.025;
+    dt = 0.010;
+%     dt = 0.001;
 end
 sampling = dt;
 ts=0;
 if fExp
     te=1000;
 else
-    te=50;
+    te=20;
 end
 %% set connector (global instance)
 if fExp
@@ -93,8 +94,8 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
-        %agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+        agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+%         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル : Direct controller を想定
         %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
@@ -143,8 +144,8 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %     agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
-    agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-%     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
+    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
@@ -350,10 +351,10 @@ clc
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 
-logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
+% logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
 %  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
-logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
+% logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
 %logger.plot(1,["p","q"],["er","er"]);
