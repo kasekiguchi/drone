@@ -62,19 +62,19 @@ Controller_param.K = [Kz Kx Ky];
 Controller_param.FRIT_begin = 0;
 Controller_param.RLS_begin = 30;
 %z
-Controller_param.gamma_z = 10; %初期相関係数
-Controller_param.alpha_z = 0.05; %ローパスフィルタ強度
-% Controller_param.alpha_z = 0; %100%古い情報で更新->更新しない
-Controller_param.lambda_z = 0.99; %忘却係数
-% Controller_param.lambda_z = 1;
+Controller_param.gamma.z = 10; %初期相関係数
+Controller_param.alpha.z = 0.05; %ローパスフィルタ強度
+% Controller_param.alpha.z = 0; %100%古い情報で更新->更新しない
+Controller_param.lambda.z = 0.99; %忘却係数
+% Controller_param.lambda.z = 1;
 %x
-Controller_param.gamma_x = 1.0; %初期相関係数
-Controller_param.alpha_x = 1.0; %ローパスフィルタ強度
-Controller_param.lambda_x = 0.9999; %忘却係数
+Controller_param.gamma.x = 1.0; %初期相関係数
+Controller_param.alpha.x = 1.0; %ローパスフィルタ強度
+Controller_param.lambda.x = 0.9999; %忘却係数
 %y
-Controller_param.gamma_y = 1.0; %初期相関係数
-Controller_param.alpha_y = 1.0; %ローパスフィルタ強度
-Controller_param.lambda_y = 0.9999; %忘却係数
+Controller_param.gamma.y = 1.0; %初期相関係数
+Controller_param.alpha.y = 1.0; %ローパスフィルタ強度
+Controller_param.lambda.y = 0.9999; %忘却係数
 
 %assignin('base',"Controller_param",Controller_param);
 
