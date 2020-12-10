@@ -18,8 +18,8 @@ if fExp
     dt = 0.025; % sampling time
 else
 %     dt = 0.1; % sampling time
-%     dt = 0.025;
-    dt = 0.010;
+    dt = 0.025;
+%     dt = 0.010;
 %     dt = 0.001;
 end
 sampling = dt;
@@ -27,7 +27,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=20;
+    te=50;
 end
 %% set connector (global instance)
 if fExp
@@ -345,7 +345,7 @@ end
 close all
 clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
-%agent(1).reference.timeVarying.show(logger)
+% agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"],["e","e","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
@@ -353,7 +353,7 @@ clc
 
 % logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
-%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
+ logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
 % logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));

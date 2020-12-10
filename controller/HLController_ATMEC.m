@@ -13,13 +13,14 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
         B2d
         A4d
         B4d
-        K%MEC補償ゲイン inputの次元に合わせる 参考 大石さん
+        K%補償ゲイン inputの次元に合わせる
         
         dataCount
         RLS_begin
         FRIT_begin
         
         dv1p %1時刻前の補償入力
+        %１時刻前の各仮想入力
         v1p
         v2p
         v3p
@@ -114,9 +115,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             
             model = obj.self.model;
             ref = obj.self.reference.result;
-%             xn = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-            plant = obj.self.estimator;%estimatorの値をシステムの出力とみなす
-%             x  = [plant.result.state.getq('compact');plant.result.state.p;plant.result.state.v;plant.result.state.w]; % [q, p, v, w]に並べ替え
+           plant = obj.self.estimator;%estimatorの値をシステムの出力とみなす
 
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応するよう
@@ -129,13 +128,6 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             F2 = Param.F2;
             F3 = Param.F3;
             F4 = Param.F4;
-            %     xd=Xd.p;
-            %     if isfield(Xd,'v')
-            %         xd=[xd;Xd.v];
-            %         if isfield(Xd,'dv')
-            %             xd=[xd;Xd.dv];
-            %         end
-            %     end
             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
             %x=cell2mat(arrayfun(@(t) state.(t)',string(state.list),'UniformOutput',false))';
             %x = state.get();%状態ベクトルとして取得
@@ -209,9 +201,6 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
 % FRIT
             %FRIT_beginで指定した時間までFRIT,RLSを実行しない
             if(obj.dataCount*dt<obj.FRIT_begin)
-%                 obj.h.z1 = z1n-z1;
-%                 obj.eta1.z1 = [vf(1);(vf(1)-obj.v1p)/dt];
-%                 obj.eta2.z2 = z1;
                 eta.z1 = obj.eta1.z1(1) - F1*(z1 - obj.eta2.z1);
                 epsilon.z1 = Kz*obj.h.z1 - eta.z1;
                 eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
@@ -259,7 +248,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 obj.G.z3 = (obj.G.z3 - obj.g.z3*(obj.h.z3'*obj.G.z3))/obj.lambda_y;
                 Ky_hat = Ky_hat+obj.g.z3'*(eta.z3-Ky_hat*obj.h.z3);
 
-                %ゲイン更新 コメントアウトで通常のMECと同じ=初期補償ゲインのまま
+                %ゲイン更新 コメントアウトで初期補償ゲインのまま=通常のMECと同じ
                 obj.Khat = [Kz_hat Kx_hat Ky_hat];
 
                 if(obj.dataCount*dt>=obj.RLS_begin)
