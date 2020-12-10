@@ -45,13 +45,13 @@ Controller_param.B4d = d4.B;
 % B4d = dt*obj.B4;
 
 %% MEC_param.
-Kz = [200 25];
+% Kz = [200 25];
 % % Kz = [65.5882 61.2427];
 Kx = [50, 0 ,0, 0];
 Ky = [50, 0, 0, 0];
 
 %w/o MEC
-% Kz = [0 0];
+Kz = [0 0];
 % Kx = [0 0 0 0];
 % Ky = [0 0 0 0];
  
