@@ -13,9 +13,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
         B2d
         A4d
         B4d
-        dataCount %稼働時間計算用プログラム実行回数
-        RLS_begin %補償ゲインの更新を始める時間
-        FRIT_begin %補償ゲインの推定を始める時間
+        time % 稼働時間関連の格納
         dv1p %1時刻前の補償入力
         vp%１時刻前の仮想入力
         % RLSアルゴリズム
@@ -72,9 +70,9 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             obj.g.z2=[0;0;0;0];
             obj.g.z3=[0;0;0;0];
             
-            obj.dataCount =0;
-            obj.RLS_begin = param.RLS_begin;
-            obj.FRIT_begin = param.FRIT_begin;
+            obj.time.dataCount =0; %稼働時間計算用プログラム実行回数
+            obj.time.RLS_begin = param.RLS_begin; %補償ゲインの更新を始める時間
+            obj.time.FRIT_begin = param.FRIT_begin;%補償ゲインの推定を始める時間
         end
         
         function result = do(obj,param,varargin) 
@@ -165,10 +163,10 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             Kx_hat = obj.result.Khat(3:6);
             Ky_hat = obj.result.Khat(7:10);
             
-            obj.dataCount=obj.dataCount+1;
+            obj.time.dataCount=obj.time.dataCount+1;
 % FRIT
             %FRIT_beginで指定した時間までFRIT,RLSを実行しない
-            if(obj.dataCount*dt<obj.FRIT_begin)
+            if(obj.time.dataCount*dt<obj.time.FRIT_begin)
                 eta.z1 = obj.eta1.z1(1) - F1*(z1 - obj.eta2.z1);
                 epsilon.z1 = Kz*obj.h.z1 - eta.z1;
                 eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
@@ -176,7 +174,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 eta.z3 = obj.eta1.z3(1) - F3*(z3 - obj.eta2.z3);
                 epsilon.z3 = Ky*obj.h.z3 - eta.z3;
             end
-            if(obj.dataCount*dt>=obj.FRIT_begin)
+            if(obj.time.dataCount*dt>=obj.time.FRIT_begin)
             % １時刻後の状態を離散化した状態方程式から計算
                 %z1
                 obj.h.z1 = IdealModel(obj.A2d,obj.B2d,obj.h.z1,z1n-z1,F1);
@@ -219,7 +217,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 %ゲイン更新 コメントアウトで初期補償ゲインのまま=通常のMECと同じ
                 obj.result.Khat = [Kz_hat Kx_hat Ky_hat];
 
-                if(obj.dataCount*dt>=obj.RLS_begin)
+                if(obj.time.dataCount*dt>=obj.time.RLS_begin)
 %                     alpha = obj.alpha_z; % 12/03 ローパスフィルタを時間で変動させたいな
                     Kz = (1-obj.alpha.z)*Kz+obj.alpha.z*Kz_hat;
                     Kx = (1-obj.alpha.x)*Kx+obj.alpha.x*Kx_hat;
@@ -243,7 +241,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             obj.result.eps.x = epsilon.z2;
             obj.result.eps.y = epsilon.z3;
             %実行した直後であればepssumを初期化 もっといい書き方ないか?
-            if (obj.dataCount ==1) 
+            if (obj.time.dataCount ==1) 
                 obj.result.epssum.z = 0;
                 obj.result.epssum.x = 0;
                 obj.result.epssum.y = 0;
@@ -271,7 +269,6 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             %   理想モデルMを含む計算
             u = F * (ref - state);
             state = A * state + B * u;
-            % state = A*state;
             result = state;
         end
 

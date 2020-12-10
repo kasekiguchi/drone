@@ -59,8 +59,8 @@ Controller_param.K = [Kz Kx Ky];
 
 %% RLS_param.
 %推定開始時刻
-Controller_param.FRIT_begin = 0;
-Controller_param.RLS_begin = 30;
+Controller_param.FRIT_begin = 0;%補償ゲインの更新を始める時間
+Controller_param.RLS_begin = 30;%補償ゲインの推定を始める時間
 %z
 Controller_param.gamma.z = 10; %初期相関係数
 Controller_param.alpha.z = 0.05; %ローパスフィルタ強度
