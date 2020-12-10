@@ -191,6 +191,7 @@ end
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
+    "model.state.p"
     "controller.result"
     ];
 if isfield(agent(1).reference,'covering')

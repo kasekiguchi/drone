@@ -18,9 +18,18 @@ Controller.type="HLController_plusMEC_quadcopter";
 Controller.name="hlcontrollerPlusMEC";
 Controller.param=Controller_param;
 
-% Controller.param.K = [150.0 50.0 50.0];
-Controller.param.K = [100.0 50.0 50.0];
-% Controller.param.K = [0 0 0];
+%% MEC_param.
+% Kz = [200 25];
+% % Kz = [65.5882 61.2427];
+Kx = [50, 0 ,0, 0];
+Ky = [50, 0, 0, 0];
+
+%w/o MEC
+Kz = [0 0];
+% Kx = [0 0 0 0];
+% Ky = [0 0 0 0];
+ 
+Controller.param.K = [Kz Kx Ky];
 
 %assignin('base',"Controller_param",Controller_param);
 
