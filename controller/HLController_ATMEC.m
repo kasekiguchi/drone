@@ -13,28 +13,22 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
         B2d
         A4d
         B4d
-        
-        dataCount
-        RLS_begin
-        FRIT_begin
-        
+        dataCount %稼働時間計算用プログラム実行回数
+        RLS_begin %補償ゲインの更新を始める時間
+        FRIT_begin %補償ゲインの推定を始める時間
         dv1p %1時刻前の補償入力
-        %１時刻前の各仮想入力
-        vp
-
-        % RLSアルゴリズムここから
+        vp%１時刻前の仮想入力
+        % RLSアルゴリズム
         G%相関関数
         g
         gamma %相関関数係数
         lambda%忘却係数
         alpha %ローパスフィルタ強度
-        
         %評価関数計算
         h % =M*(xi_n(i) - xi_a(i))
         % eta = M*v(i)-F(xi_a(i) - M*xi_a(i))
         eta1 % =M*v(i)
         eta2  % =M*xi_a(i)
-        %ここまで
 
     end
     
@@ -257,9 +251,6 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             obj.result.epssum.z = obj.result.epssum.z*obj.lambda.z+obj.result.eps.z^2;
             obj.result.epssum.x = obj.result.epssum.x*obj.lambda.x+obj.result.eps.x^2;
             obj.result.epssum.y = obj.result.epssum.y*obj.lambda.y+obj.result.eps.y^2;
-            %実状態
-            obj.result.x_out = x;
-            obj.result.xn_out =xn;
             %仮想状態
             obj.result.z_out = y;
             obj.result.zn_out = yn;
