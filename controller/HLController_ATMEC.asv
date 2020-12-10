@@ -214,10 +214,6 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
 %                 obj.eta2.z2 = z1;
                 eta.z1 = obj.eta1.z1(1) - F1*(z1 - obj.eta2.z1);
                 epsilon.z1 = Kz*obj.h.z1 - eta.z1;
-                eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
-                epsilon.z2 = Kx*obj.h.z2 - eta.z2;
-                eta.z3 = obj.eta1.z3(1) - F3*(z3 - obj.eta2.z3);
-                epsilon.z3 = Ky*obj.h.z3 - eta.z3;
             end
             if(obj.dataCount*dt>=obj.FRIT_begin)
             % １時刻後の状態を離散化した状態方程式から計算
@@ -230,14 +226,14 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 epsilon.z1 = Kz*obj.h.z1 - eta.z1;
                 %z2
                 obj.h.z2 = IdealModel(obj.A4d,obj.B4d,obj.h.z2,z2n-z2,F2);
-                udu.z2 = [vs(1);(vs(1)-obj.v2p)/dt;0;0];
+                udu.z2 = [vs(1);(vs(1)-obj.v2p)/dt];
                 obj.eta1.z2 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,udu.z2,F2);
                 obj.eta2.z2 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,z2,F2);
                 eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
                 epsilon.z2 = Kx*obj.h.z2 - eta.z2;
                 %z3
                 obj.h.z3 = IdealModel(obj.A4d,obj.B4d,obj.h.z3,z3n-z3,F3);
-                udu.z3 = [vs(2);(vs(2)-obj.v3p)/dt;0;0];
+                udu.z3 = [vs(2);(vs(2)-obj.v3p)/dt];
                 obj.eta1.z3 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,udu.z3,F3);
                 obj.eta2.z3 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,z3,F3);
                 eta.z3 = obj.eta1.z3(1) - F3*(z3 - obj.eta2.z3);
@@ -265,8 +261,8 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 if(obj.dataCount*dt>=obj.RLS_begin)
 %                     alpha = obj.alpha_z; % 12/03 ローパスフィルタを時間で変動させたいな
                     Kz = (1-obj.alpha_z)*Kz+obj.alpha_z*Kz_hat;
-                    Kx = (1-obj.alpha_x)*Kx+obj.alpha_x*Kx_hat;
-                    Ky = (1-obj.alpha_y)*Ky+obj.alpha_y*Ky_hat;
+                    Kｘ = (1-obj.alpha_z)*Kz+obj.alpha_z*Kz_hat;
+                    Kz = (1-obj.alpha_z)*Kz+obj.alpha_z*Kz_hat;
                     obj.K = [Kz Kx Ky];
                 end
             end
