@@ -191,23 +191,7 @@ end
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
-    "model.state.p"
-    "reference.result.state.p"
-    "estimator.result.state.p"
-    "sensor.result.state.p"
-    "input"
-    "controller.hlcontrollerATMEC.K"        %AT-MEC
-    "controller.hlcontrollerATMEC.eps"      %ATMEC
-    "controller.hlcontrollerATMEC.epssum"%ATMEC
-    "controller.hlcontrollerATMEC.h"
-    "controller.hlcontrollerATMEC.eta1"
-    "controller.hlcontrollerATMEC.eta2"
-    "controller.hlcontrollerATMEC.Khat"
-    "controller.hlcontrollerATMEC.x_out"
-    "controller.hlcontrollerATMEC.xn_out"
-    "controller.hlcontrollerATMEC.z_out"
-    "controller.hlcontrollerATMEC.zn_out"
-    "controller.hlcontrollerATMEC.v_out"
+    "controller.result"
     ];
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;   "env.density.param.grid_density"]; % for coverage

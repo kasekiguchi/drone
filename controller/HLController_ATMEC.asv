@@ -58,7 +58,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             %AT-MEC
             %各変数初期化
             obj.vp= [0 0 0];
-            obj.result.Khat = param.K;
+            obj.result.Khat = obj.K;
             obj.h.z1 = [0;0];
             obj.h.z2 = [0;0;0;0];
             obj.h.z3 = [0;0;0;0];
@@ -240,23 +240,9 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             
             %% 動作チェック用
             %評価関数
-            obj.result.h=obj.h;
-            obj.result.eta = eta;
-            obj.result.eta1 = obj.eta1;
-            obj.result.eta2 = obj.eta2;
-            
-            obj.result.eps.z = epsilon.z1;
-            obj.result.eps.x = epsilon.z2;
-            obj.result.eps.y = epsilon.z3;
-            %実行した直後であればepssumを初期化 もっといい書き方ないか?
-            if (obj.dataCount ==1) 
-                obj.result.epssum.z = 0;
-                obj.result.epssum.x = 0;
-                obj.result.epssum.y = 0;
-            end 
-            obj.result.epssum.z = obj.result.epssum.z*obj.lambda.z+obj.result.eps.z^2;
-            obj.result.epssum.x = obj.result.epssum.x*obj.lambda.x+obj.result.eps.x^2;
-            obj.result.epssum.y = obj.result.epssum.y*obj.lambda.y+obj.result.eps.y^2;
+            obj.result.eps = epsilon.z1;
+            if (obj.dataCount ==1) obj.result.epssum = 0;end %実行した直後であればepssumを初期化 もっといい書き方ないかな?
+            obj.result.epssum = obj.result.epssum*obj.lambda.z+obj.result.eps^2;
             %実状態
             obj.result.x_out = x;
             obj.result.xn_out =xn;
@@ -270,11 +256,9 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             obj.self.input = obj.result.input;
             result = obj.result;
         end
-        
         function show(obj)
             obj.result
         end
-        
         function result = IdealModel(A,B,state,ref,F)
             %AT-MEC 補償ゲインチューニングのFRITアルゴリズムの入力変換関数
             %   理想モデルMを含む計算
