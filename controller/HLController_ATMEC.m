@@ -1,5 +1,5 @@
 classdef HLController_ATMEC < CONTROLLER_CLASS
-    % クアッドコプター用階層型線形化を使った入力算出にモデル誤差補償器を導入
+    % クアッドコプター用階層型線形化を使った入力算出にAT-MECを導入
     properties
         self
         result
@@ -260,17 +260,23 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             result = obj.result;
         end
         
-        function show(obj)
-            obj.result
-        end
-        
         function result = IdealModel(A,B,state,ref,F)
-            %AT-MEC 補償ゲインチューニングのFRITアルゴリズムの入力変換関数
-            %   理想モデルMを含む計算
+            % AT-MEC 補償ゲインチューニングのFRITアルゴリズムの理想モデルMを含む計算
+            % IdealModel(A,B,state,ref,F)
+            % A,B : 離散化した状態空間表現係数
+            % state : 更新したい出力
+            % ref : 目標値 M*ref
+            % F : ノミナルコントローラ
             u = F * (ref - state);
             state = A * state + B * u;
             result = state;
         end
+        
+        function show(obj)
+            obj.result
+        end
+        
+
 
     end
 end
