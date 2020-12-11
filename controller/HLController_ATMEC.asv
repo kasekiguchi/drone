@@ -232,17 +232,23 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             
             %% 動作チェック用
             %評価関数
-%             obj.result.h = [obj.h.z1, obj.h.z2, obj.h.z3];
-%             obj.result.eta = [eta.z1, eta.z2, eta.z3];
-%             obj.result.eta1 = [obj.eta1.z1, obj.eta1.z2, obj.eta1.z3];
-%             obj.result.eta2 = [obj.eta2.z1, obj.eta2.z2, obj.eta2.z3];
+            obj.result.h = [obj.h.z, obj.h.x, obj.h.y];
+            obj.result.eta = [eta.z, eta.x, eta.y];
+            obj.result.eta1 = [obj.eta1.z, obj.eta1.x, obj.eta1.y];
+            obj.result.eta2 = [obj.eta2.z, obj.eta2.x, obj.eta2.y];
             
-            obj.result.eps = [epsilon.z1, epsilon.z2, epsilon.z3];
+            obj.result.eps.z = epsilon.z1;
+            obj.result.eps.x = epsilon.z2;
+            obj.result.eps.y = epsilon.z3;
             %実行した直後であればepssumを初期化 もっといい書き方ないか?
             if (obj.time.dataCount ==1) 
-                obj.result.epssum = [0 0 0];
+                obj.result.epssum.z = 0;
+                obj.result.epssum.x = 0;
+                obj.result.epssum.y = 0;
             end 
-            obj.result.epssum = [obj.result.epssum(1)*obj.lambda.z+obj.result.eps(1)^2, obj.result.epssum(2)*obj.lambda.x+obj.result.eps(2)^2, obj.result.epssum(3)*obj.lambda.y+obj.result.eps(3)^2];
+            obj.result.epssum.z = obj.result.epssum.z*obj.lambda.z+obj.result.eps.z^2;
+            obj.result.epssum.x = obj.result.epssum.x*obj.lambda.x+obj.result.eps.x^2;
+            obj.result.epssum.y = obj.result.epssum.y*obj.lambda.y+obj.result.eps.y^2;
             %仮想状態
             obj.result.z_out = y;
             obj.result.zn_out = yn;
