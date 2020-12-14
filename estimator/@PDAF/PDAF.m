@@ -16,9 +16,18 @@ classdef PDAF < ESTIMATOR_CLASS
         H                              % Output function
         JacobianH                      % Extended linearization of output function
         self
+        PD
+        PG
+        lambda
+        gamma
+        Q
+        R
+        Ri
+        InvRi
+        P
     end
     methods
-        function obj = PDAF(self,Param)
+        function obj = PDAF(self,param)
             %【Input】 self : agent  obj
             %          param : Construct of sensor
             %【Output】obj
@@ -26,42 +35,16 @@ classdef PDAF < ESTIMATOR_CLASS
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","v","w"],'num_list',[3,3,3,3],'type','euler'));
             %%% Parameter for estimationg as the drone %%%
             % For simulation
-            param = Param{1};
-            obj.param.sigmaw      = param.sigmaw;                                    % The variance vector of observation noise 
-            obj.param.sigmav      = [8.0E-6;8.0E-6;8.0E-6;1.0E-6;1.0E-6;1.0E-6];     % The variance vector of system noise
-            obj.param.R           = [];                                              % Observation covariance matrix of all object feature
-            obj.param.PD          = 0.8;                                             % Target probability
-            obj.param.PG          = 0.8;                                             % Gate probability
-            obj.param.lambda      = 1;                                               % Expected value of Poisson distribution
-            obj.param.gamma       = 1;                                               % Validation region
-            obj.param.SNR         = 1.0E-5;                                          % SN ratio for initial value of posterior error covariance matrix
-
-            % For experiment for model less
-            obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
-            obj.param.sigmav      = [50;50;50;0.9E02;0.9E02;1.8E02];                 % The variance vector of system noise
-            obj.param.lambda      = 4;                                               % Expected value of Poisson distribution
-            obj.param.gamma       = 1.2;                                             % Validation region
-            obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
-            
-             % For experiment for using input model
-%             obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
-%             obj.param.sigmav      = [50;50;50;6.0E01;6.0E01;6.0E01];                 % The variance vector of system noise
-%             obj.param.lambda      = 4;                                               % Expected value of Poisson distribution
-%             obj.param.gamma       = 1.0;                                             % Validation region
-%             obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
-
-            % For simulation
-%             obj.param.sigmaw      = 1.0E-4*ones(3,1);                                % The variance vector of observation noise 
-%             obj.param.sigmav      = [50;50;50;100;100;200];                          % The variance vector of system noise
-%             obj.param.lambda      = 4;                                               % Expected value of Poisson distribution
-%             obj.param.gamma       = 1.8;                                             % Validation region
-%             obj.param.SNR         = 1.0E-3;                                          % SN ratio for initial value of posterior error covariance matrix
-            
+            obj.PD          = param.PD;                                             % Target probability
+            obj.PG          = param.PG;                                             % Gate probability
+            obj.lambda      = param.lambda ;                                               % Expected value of Poisson distribution
+            obj.gamma       = param.gamma;                                               % Validation region
+      
             % Common parameter for simulation and experiment
-            obj.param.Q           = eye(6).*obj.param.sigmav;                        % Covariance matrix of system noise
-            obj.param.Ri          = eye(3).*obj.param.sigmaw;                        % Observation covariance matrix of one feature
-            obj.param.InvRi       = inv(obj.param.Ri);                               % Inverse Observation covariance matrix of one feature
-            obj.param.P           = eye(12)*obj.param.SNR;                           % Initial posterior error covariance matrix
+            obj.Q           = param.Q;                        % Covariance matrix of system noise
+            obj.Ri          = param.Ri;                        % Observation covariance matrix of one feature
+            obj.InvRi       = param.InvRi;                               % Inverse Observation covariance matrix of one feature
+            obj.P           = param.P;                           % Initial posterior error covariance matrix
             
             % Output eauation
             X_sym  = sym('X_sym', [12,1]);                                  % The symboric of state
@@ -113,15 +96,12 @@ classdef PDAF < ESTIMATOR_CLASS
                 obj.param.on_feature_num = sensor.on_feature_num;           % The number of estimated object feature
             end
             obj.param.feature_num = size(sensor.feature,1);                 % The number of observation
-            if isempty(obj.param.R)
-                % Observation covariance matrix of all object feature
-                obj.param.R      = eye(obj.param.on_feature_num*3) .*repmat(obj.param.sigmaw,[obj.param.on_feature_num,1]);
-            end
+            
             obj.feature  = sensor.feature;                                  % All observations from sensor
             if isempty(obj.feature)
                 error("ACSL : all marker lost.");
             end
-            
+            obj.R = eye(obj.param.on_feature_num*3) .*repmat(1.0E-4*ones(3,1),[obj.param.on_feature_num,1]);% Observation covariance matrix of all feature  
             %%% Probabilistic data association filter %%%
             obj.dt = sensor.dt;                                             % Sampling time
             % Prior estimation with input 
@@ -131,9 +111,9 @@ classdef PDAF < ESTIMATOR_CLASS
             A          = expm(obj.JacobianF(model.state.get(),model.param)*obj.dt);                                                        % Discretized linear matrix
             B          = [eye(6)*obj.dt^2;eye(6)*obj.dt];                                                                                  % System noise coefficient matrix
             tmp.dh     = arrayfun(@(k) obj.JacobianH(tmp.Xhbar,obj.local_feature(k,:)'),1:obj.param.on_feature_num,'UniformOutput',false); % Extended linearized matrix of output equations
-            tmp.Pbar   = A * obj.param.P * A' + B * obj.param.Q * B';                                                                      % Prior error covariance matrix
-            tmp.S      = cell2mat(tmp.dh') * tmp.Pbar * cell2mat(tmp.dh')' +  obj.param.R;                                                 % Innovation covariance matrix against rigid 
-            tmp.Si     = arrayfun(@(k) tmp.dh{k} * tmp.Pbar * tmp.dh{k}' + obj.param.Ri,1:obj.param.on_feature_num,'UniformOutput',false); % Innovation covariance matrix of one feature point
+            tmp.Pbar   = A * obj.P * A' + B * obj.Q * B';                                                                      % Prior error covariance matrix
+            tmp.S      = cell2mat(tmp.dh') * tmp.Pbar * cell2mat(tmp.dh')' +  obj.R;                                                 % Innovation covariance matrix against rigid 
+            tmp.Si     = arrayfun(@(k) tmp.dh{k} * tmp.Pbar * tmp.dh{k}' + obj.Ri,1:obj.param.on_feature_num,'UniformOutput',false); % Innovation covariance matrix of one feature point
             for k = 1:obj.param.on_feature_num
                 [tmpvec,tmpval] = eig(tmp.Si{k});                           % Eigenvalues of the innovation covariance matrix
                 obj.result.Eigenvalues_hold(1,3*(k-1)+1:3*k)=trace(tmpval);
