@@ -22,7 +22,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=30;
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
@@ -98,7 +98,8 @@ LiDAR = Env;
 clc
 for i = 1:N
     % for sim
-    plant.initial = struct('p',[0,0]','q',[0],'v',[0],'w',[0]);%WC model
+%     plant.initial = struct('p',[0,0]','q',[0],'v',[0],'w',[0]);%WC model A
+    plant.initial = struct('p',[0,0]','q',[0]);%WC model V
     agent(i).state.set_state(plant.initial);
     agent(i).model.set_state(plant.initial);
     for j = 1:length(agent(i).estimator.name)
@@ -231,23 +232,23 @@ try
             
 %            agent(i).do_controller(param(i).controller);
             agent(i).do_controller(cell(1,10));
-%             warukaku = 4;
-%             kakudo = (1/2)* warukaku;
-%             if time.t<1
-%                 agent(i).input = [1,pi/warukaku];
-%             elseif time.t>10 && time.t<11
-%                 agent(i).input = [1,-pi/kakudo];
-%             elseif time.t>30 && time.t<31
-%                 agent(i).input = [1,pi/kakudo];
-%             elseif time.t>50 && time.t<51
-%                 agent(i).input = [1,-pi/kakudo];
-%             elseif time.t>70 && time.t<71
-%                 agent(i).input = [1,pi/kakudo];
-%             elseif time.t>90 && time.t<91
-%                 agent(i).input = [1,-pi/kakudo];
-%             else
-%                 agent(i).input = [1,0];
-%             end
+            warukaku = 6;
+            kakudo = (1/2)* warukaku;
+            if time.t<1
+                agent(i).input = [1,pi/warukaku];
+            elseif time.t>10 && time.t<11
+                agent(i).input = [1,-pi/kakudo];
+            elseif time.t>30 && time.t<31
+                agent(i).input = [1,pi/kakudo];
+            elseif time.t>50 && time.t<51
+                agent(i).input = [1,-pi/kakudo];
+            elseif time.t>70 && time.t<71
+                agent(i).input = [1,pi/kakudo];
+            elseif time.t>90 && time.t<91
+                agent(i).input = [1,-pi/kakudo];
+            else
+                agent(i).input = [1,0];
+            end
 
         end
         %agent(1).estimator.map.show
@@ -287,8 +288,9 @@ end
 %profile viewer
 %% dataplot
 close all;
-PlotOnOff = [1,1,0,0,0];
+PlotOnOff = [1,1,0,0,0,1];
 Plots = DataPlot(logger,PlotOnOff);
+%%
 % run('dataplot');
 %% Save
 

@@ -32,11 +32,11 @@ classdef DataPlot<handle
             %             obj.Condition = Condition;% Non logger data and simulation condition
             %% makedir
             SaveDate = datetime('now');
-            SaveDateStr= datestr(SaveDate,'yyyymmdd');
+            SaveDateStr= datestr(SaveDate,'yyyy_mm_dd');
             if exist(SaveDateStr,'file')
                 tmpPath = pwd;
                 tmpPathY = strcat(tmpPath,'\ws_Saves','\',SaveDateStr);
-                SaveDateStrD= datestr(SaveDate,'HHMMSS');%日付の文字作成
+                SaveDateStrD= datestr(SaveDate,'HH_MM_SS');%日付の文字作成
                 mkdir(tmpPathY,SaveDateStrD);%ディレクトリ作成
                 dataFilePath = genpath(strcat(tmpPathY,'\',SaveDateStrD));
                 addpath(dataFilePath);
@@ -47,7 +47,7 @@ classdef DataPlot<handle
                 dataFilePath = genpath(strcat(tmpPathY,'\',SaveDateStr));
                 addpath(dataFilePath);%add path of year directry
                 tmpPathD = strcat(tmpPathY,'\',SaveDateStr);
-                SaveDateStrD= datestr(SaveDate,'HHMMSS');
+                SaveDateStrD= datestr(SaveDate,'HH_MM_SS');
                 mkdir(tmpPathD,SaveDateStrD);%日付と時間のディレクトリ
                 dataFilePath = genpath(strcat(tmpPathD,'\',SaveDateStrD));
                 addpath(dataFilePath);

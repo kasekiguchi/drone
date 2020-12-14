@@ -21,7 +21,7 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
         function obj = EKFSLAM_WheelChair(self,param)
             obj.self= self;
             model = self.model;
-            obj.JacobianF = @(v,theta) [0,0,-v*sin(theta);0,0,v*cos(theta);0,0,0];%
+            obj.JacobianF = @(v,theta) [1,0,-v*sin(theta);0,1,v*cos(theta);0,0,1];%
             % --this state use in only EKFSLAM--
             obj.result.Est_state= STATE_CLASS(struct("state_list",["p","q"],"num_list",[2,1]));
             obj.result.Est_state.p = model.state.p;% x, y
@@ -133,8 +133,17 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
             %%%for analysis%%%%%%%%%%
             obj.Analysis.PrevCov = obj.result.P;
             %%%%%%%%%%%%%%%%%
+            %predictiive step
             system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, size(line_param.d, 1))));
-            P_pre  = A*obj.result.P*A' + B*system_noise*B';       % 
+            P_pre  = A*obj.result.P*A' + B*system_noise*B';       %
+            %%%
+            %correlation coefficient
+            r = cos(2*(pre_Eststate(3) - pi/4));
+            r = sign(r);
+            sigmaxy = P_pre(1,1) * P_pre(2,2) * r;
+            P_pre(1,2) = sigmaxy;
+            P_pre(2,1) = sigmaxy;
+            %observe step
             G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 郢ァ?スォ郢晢スォ郢晄ァュホヲ郢ァ?スイ郢ァ?ス、郢晢スウ隴厄スエ隴?スー
             %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
             tmpvalue = xh_m + G * (measured.ranges(association_available_index)' - Y);% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス

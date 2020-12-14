@@ -19,8 +19,6 @@ grid on
 axis equal
 plot(Time,PlantData(pidx,:),'Linewidth',5);
 plot(Time,EstData(pidx,:),'Linewidth',3);
-grid on;
-axis equal;
 xlabel('t [s]');ylabel(strcat(labelstr(pidx),'[m]'));
 legend('plant','estimate')
 ax.FontSize = obj.FontSize;
