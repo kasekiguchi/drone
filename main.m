@@ -11,7 +11,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
-fMotive = 1;% Motiveを使うかどうか
+fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -77,7 +77,8 @@ else
             initial(i).v = [0;0;0];
             initial(i).w = [0;0;0];
         else
-            arranged_pos = arranged_position([0,0],N,1,0);
+                arranged_pos = formation_pos([0,0],N,0.7,0);%隊列飛行用の初期位置 村井
+%             arranged_pos = arranged_position([0,0],N,1,0);
             initial(i).p = arranged_pos(:,i);
             initial(i).q = [1;0;0;0];
             initial(i).v = [0;0;0];
@@ -94,8 +95,8 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
-        agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-%         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+%         agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+        agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル : Direct controller を想定
         %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
@@ -133,7 +134,7 @@ for i = 1:N
         agent(i).set_property("sensor",Sensor_ROS(struct('ROSHostIP','192.168.50.21')));
     end
     
-    %agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
+    agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
     %agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
@@ -153,7 +154,7 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.5]}));
+%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.5]}));
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
 %     if fExp == 1
@@ -180,10 +181,21 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
-    agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC : 未完成
+%     agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC : 未完成
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
     %agent(i).set_property("controller",struct("type","DirectController"; "name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+    %村井==================================================
+%     if i == 1
+        agent(i).set_property("controller",Controller_HL_MPC_L(dt,arranged_pos));%リーダー機
+%         typical_Controller_HLholizontal_L(agent,arranged_pos); 
+%     elseif i==N
+%         typical_PowerSupply(agent,i);%
+%     else
+%         typical_Controller_HLholizontal_F(agent,i,arranged_pos);
+%     end
+    %================================%
+
     %%
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
     param(i).reference.list = cell(1,length(agent(i).reference.name));
@@ -263,7 +275,7 @@ try
             agent(i).do_estimator(cell(1,10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             param(i).reference.covering={};%{Env};
-            param(i).reference.point={FH,[2;1;0.5],time.t};
+            param(i).reference.point={FH,[0;0;1],time.t};
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
@@ -275,6 +287,7 @@ try
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
             
             agent(i).do_controller(cell(1,10));
+            agent(i).controller.mpc_f.param.agent=agent;%村井
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
         %% update state
@@ -336,9 +349,9 @@ clc
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 
-% logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
+logger.plot(1,["p1:3","v","w","q","input"],["sr","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
- logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
+%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
 % logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
