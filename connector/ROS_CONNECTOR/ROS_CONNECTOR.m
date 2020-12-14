@@ -1,27 +1,27 @@
 classdef ROS_CONNECTOR < CONNECTOR_CLASS
             % 【Input】info : require following fields
-            %   subTopicName
-            %   pubTopicName
-            %   subMsgName
-            %   pubMsgName
+            %   subTopic
+            %   pubTopic
+            %   subName
+            %   pubName
             %   ROSHostIP
             %   ROSClientIP
     properties
+        ROSHostIP
+        %ClientIP
         result
         init_time  % first getData time
-        Node
         subscriber
         publisher
-        subMessage
-        pubMessage
         %- Subscriber topic -%
         subTopicNum
-        subTopicName
-        subMsgName
+        subTopic
+        subName % 受信msg を格納するresult構造体のフィールド（配列）
         %- Publisher topic -%
         pubTopicNum
-        pubTopicName
-        pubMsgName
+        pubTopic
+        pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
+%         pubMsg  % 送信msg
     end
     properties(SetAccess=private)
         TimeOut = 1.e-3; % この時間はどこから？必要？
@@ -33,31 +33,34 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
         function obj = ROS_CONNECTOR(info)
             disp('Preparing connection to robot operating system...');
             %-- Configulations for ROS
-            obj.subTopicName = info.subTopicName;
-            obj.subTopicNum = length(obj.subTopicName);
-            obj.subMsgName = info.subMsgName;
-            obj.pubTopicName = info.pubTopicName;
-            obj.pubTopicNum = length(obj.pubTopicName);
-            obj.pubMsgName = info.pubMsgName;
-            
+            obj.subTopic = info.subTopic;
+            obj.subName = info.subName;
+            obj.subTopicNum = length(obj.subTopic);
+            if isfield(info,'pubTopic')
+                obj.pubTopic = info.pubTopic;
+%                obj.pubName = info.pubName;
+                obj.pubTopicNum = length(obj.pubTopic);
+            end
             %-- Setting the environment variables to connect to ROS
+            obj.ROSHostIP = info.ROSHostIP;
             URI = strcat('http://', info.ROSHostIP, ':11311');
-            setenv('ROS_MASTER_URI', URI);
-            setenv('ROS_IP', info.ROSClientIP);
+%            setenv('ROS_MASTER_URI', URI);
+%            setenv('ROS_IP', info.ROSClientIP);
             
             %-- Connection of ROS core using "rosinit"
             rosshutdown;
             rosinit(URI);
+            %ROSのトピック一覧
+            rostopic list;
             
             %-- Declaring the node, publishers and subscribers
-            obj.Node	 = robotics.ros.Node('/matlab');
             for i = 1:obj.subTopicNum
-                obj.subscriber.(obj.subTopicName(i)) = robotics.ros.Subscriber(obj.Node, obj.SubTopicName(i), obj.subMsgName(i));
-                obj.subMessage.(obj.subTopicName(i)) = rosmessage(obj.subscriber.(obj.subTopicName(i)));
+                obj.subscriber.(obj.subName(i)) = rossubscriber( obj.subTopic(i));
             end
-            for i = 1: obj.pubTopicNum
-                obj.publisher.(obj.pubTopicName(i)) = robotics.ros.Publisher(obj.Node, obj.pubTopicName(i), obj.pubMsgName(i));
-                obj.pubMessage.(obj.pubTopicName(i)) = rosmessage(obj.publisher.(obj.pubTopicName(i)));
+            if isfield(info,'pubTopic')
+                for i = 1: obj.pubTopicNum
+                    obj.publisher.(obj.pubTopic(i)) = rospublisher(obj.pubTopic(i));
+                end
             end
         end
         function [ret] = getData(obj)
@@ -68,22 +71,23 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
             end
             t = rostime('now') - obj.init_time;
             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
-            %pause(obj.TimeOut); % 必要？
-            obj.result  = arrayfun(@(i) obj.subscriber.(i).LatestMessage,obj.subTopicName,'UniformOutput',false);
+            for i = 1:obj.subTopicNum
+                obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
+            end
             ret = obj.result;
         end
         function sendData(obj,msg)
             % send msg : msg is allowed to be following two forms
-            % msg = {msg1, msg2, ...} : order corresponding to pubTopicName
+            % msg = {msg1, msg2, ...} : order corresponding to pubTopic
             % or 
             % msg = struct('topic_name1',value1,'topic_name2',value2,...)
             if isstruct(msg)
                 for i = 1:obj.pubTopicNum
-                    send(obj.publisher.(obj.pubTopicName(i)), msg.(obj.pubTopicName(i))));
+                    send(obj.publisher.(obj.pubName(i)), msg.(obj.pubName(i)));
                 end
             else
                 for i = 1:obj.pubTopicNum
-                    send(obj.publisher.(obj.pubTopicName(i)), msg{i});
+                    send(obj.publisher.(obj.pubName(i)), msg{i});
                 end
             end
         end

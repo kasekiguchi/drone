@@ -1,4 +1,4 @@
-function Sensor_Motive(agent,rigid_num)
+function Sensor = Sensor_Motive(rigid_num)
 %% sensor class demo : constructor
 % sensor property をSensor classのインスタンス配列として定義
 % rpos : RnagePos_sim
@@ -10,9 +10,6 @@ prime_param.ObjFeature=4;
 prime_param.LocalX     = [ 0.075, -0.075,  0.015;              -0.075, -0.075, -0.015;-0.075,  0.075,  0.015;0.075,  0.075, -0.015]; 
 prime_param.LPF_T=10;
 % X, Y. Z
-for i = 1:length(agent)
-    prime_param.rigid_num=rigid_num{i};
+    prime_param.rigid_num=rigid_num;
     Sensor.param=prime_param;
-    agent(i).set_sensor(Sensor);
-end
 end

@@ -56,7 +56,7 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
                 j = j+1;
             end
         end
-        function ret = getData(obj,~)
+        function ret = getData(obj,~,~)
             % 【fields of result】
             % rigid : (struct array) rigid body info
             % marker : (struct array) all marker position

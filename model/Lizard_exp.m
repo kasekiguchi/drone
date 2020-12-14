@@ -47,60 +47,34 @@ classdef Lizard_exp < MODEL_CLASS
                     cha   = obj.flight_phase;
                 end
                 obj.flight_phase=cha;
-                
-                % quit
-                if cha == 'q'
-                    %            if strcmp(get(FH,'currentcharacter'), 'q')
-                    error("quit experiment");
-                end
-                
-                % stop propeller
-                if cha   == 's'
-                    uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
-                    AUX_1   =  600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
-                    msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
-                end
-                
-                % armnig
-                if cha   == 'a'
-                    uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
-                    AUX_1   = 1100;     AUX_2   =  1100;     AUX_3   =  600;     AUX_4   =  600;
-                    msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
-                end
-                if cha   == 'f'
-                    msg(1,1:8) = u;
-                end
-                if cha   == 'l'
-                    msg(1,1:8) = u;
-                end
-                if cha   == 't'
-                    msg(1,1:8) = u;
+                switch cha
+                    case 'q'  % quit
+                        Pw = uint8([fix(obj.offset(1)/100),fix(obj.offset(2)/100),6,fix(obj.offset(3)/100),6,6,6,6,rem(obj.offset(1),100),rem(obj.offset(2),100),0,rem(obj.offset(3),100),0,0,0,0]);
+                        obj.connector.sendData(Pw(1,1:16));
+                        obj.msg=Pw;
+                        error("ACSL : quit experiment");
+                    case 's' % stop pro
+                        uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
+                        AUX_1   =  600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
+                        msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                    case 'a' % arming
+                        uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
+                        AUX_1   = 1100;     AUX_2   =  1100;     AUX_3   =  600;     AUX_4   =  600;
+                        msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                    case 'f' % flight
+                        msg(1,1:8) = u;
+                    case 'l' % landing
+                        msg(1,1:8) = u;
+                    case 't' % take off
+                        msg(1,1:8) = u;
                 end
             else % 緊急時 プロペラストップ
-               % warning("ACSL : Emergency stop!!");
-               
-                uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
-                AUX_1   =  600;     AUX_2   =  600;     AUX_3   =  600;     AUX_4   =  600;
-                msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                % warning("ACSL : Emergency stop!!");
+                Pw = uint8([fix(obj.offset(1)/100),fix(obj.offset(2)/100),6,fix(obj.offset(3)/100),6,6,6,6,rem(obj.offset(1),100),rem(obj.offset(2),100),0,rem(obj.offset(3),100),0,0,0,0]);
+                obj.connector.sendData(Pw(1,1:16));
+                obj.msg=Pw;
+                return;
             end
-            
-            % 2020/09/24 19:27 修正箇所（宮脇）
-            % Modification_1 : Changing the oder of msg's array
-            % Detail_1 : exchanging msg(1,1) and msg(1,4)
-            % この修正が間違いなのでコメント化する。
-            
-%             buff = msg(1,1);
-%             msg(1,1) = msg(1,4);
-%             msg(1,4) = buff;
-            
-            % 2020/09/26 14:11 修正箇所（宮脇）
-            % Modification_2 : 全チャンネルデータから400を引く
-            % Detail_2 : BetaFlightの設定により、入力データが400加算されるため、msg(1,1)~msg(1,8)から400を引く
-            % Arduino側の設定も-400とした。
-            % #define TIME_HIGH_MIN 600 - 400  // PPM幅の最小
-            % #define TIME_HIGH_MAX 1600 - 400 // PPM幅の最大
-            
-           % msg(1,1:8) = msg(1,1:8) - 400; 
             
             % make udp data
             for j = 1:1:8

@@ -38,7 +38,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         %(SetAccess = GetAccess={?SENSOR_CLASS}) % SENSOR_CLASSは読み取りのみ
         id
         plant % MODEL_CLASSのインスタンス（プラントモデル）
-        state % plant or model のstateだけを取り出したもの handleクラスでどちらかのhandleになっている．
+     %   state % plant or model のstateだけを取り出したもの handleクラスでどちらかのhandleになっている．
     end
     
     %% Plant
@@ -64,7 +64,10 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                 if isempty(obj.input_transform)
                     obj.plant.do(obj.input,plant_param);
                 else
-                    obj.inner_input = obj.input_transform.(obj.input_transform.name(1)).do(obj.input,plant_param);
+                    obj.inner_input = obj.input;
+                    for i = 1:length(obj.input_transform.name)
+                        obj.inner_input = obj.input_transform.(obj.input_transform.name(i)).do(obj.inner_input,plant_param);
+                    end
                     obj.plant.do(obj.inner_input,plant_param);
                 end
             end
@@ -78,11 +81,12 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             else
                 obj.set_plant();
             end
-            if ~isempty(obj.plant.state) % 実験の時はmodelの値が入る
-                obj.state=obj.plant.state;
-            end
+%             if ~isempty(obj.plant.state) % 実験の時はmodelの値が入る
+%                 obj.state=obj.plant.state;
+%             end
         end
         function set_input(obj,input)
+% controller result も上書きするべきでは？
             obj.input=input;
         end
     end
@@ -90,31 +94,31 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         function set_model(obj,args)
             model_subclass=str2func(args.type);
             obj.model = model_subclass(args.param);
-            if isempty(obj.state) % 実験ではplantがstateを持たないため
-                obj.state=obj.model.state; % handle の共有
-            end
+%             if isempty(obj.state) % 実験ではplantがstateを持たないため
+%                 obj.state=obj.model.state; % handle の共有
+%             end
         end
-        function set_sensor(obj,args)
-            obj.set_property("sensor",args);
-        end
-        function set_estimator(obj,args)
-            obj.set_property("estimator",args);
-        end
-        function set_env(obj,args)
-            obj.set_property("env",args);
-        end
-        function set_reference(obj,args)
-            obj.set_property("reference",args);
-        end
-        function set_controller(obj,args)
-            obj.set_property("controller",args);
-        end
-        function set_connector(obj,args)
-            obj.set_property("connector",args);
-        end
-        function set_input_transform(obj,args)
-            obj.set_property("input_transform",args);
-        end
+%         function set_sensor(obj,args)
+%             obj.set_property("sensor",args);
+%         end
+%         function set_estimator(obj,args)
+%             obj.set_property("estimator",args);
+%         end
+%         function set_env(obj,args)
+%             obj.set_property("env",args);
+%         end
+%         function set_reference(obj,args)
+%             obj.set_property("reference",args);
+%         end
+%         function set_controller(obj,args)
+%             obj.set_property("controller",args);
+%         end
+%         function set_connector(obj,args)
+%             obj.set_property("connector",args);
+%         end
+%         function set_input_transform(obj,args)
+%             obj.set_property("input_transform",args);
+%         end
     end
     methods % Do methods
         function do_sensor(obj,param)
@@ -127,7 +131,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.do_sequential("reference",param);
         end
         function do_controller(obj,param)
-            obj.do_sequential("controller",param);
+            obj.do_parallel("controller",param);
         end
         function do_model(obj,param)
             % 推定値でmodelの状態を上書き．

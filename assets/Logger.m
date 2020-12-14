@@ -119,6 +119,8 @@ classdef Logger < handle
             fig_num = 1;
             fcol=3;
             frow=ceil(length(target)/fcol);
+            fcolor = 1;
+            if ~isempty(varargin)
             if isstruct(varargin{1})
                 if isfield(varargin{1},'time') && ~isempty(varargin{1}.time)% set end time
                     plot_length = 1:find((obj.Data.t-varargin{1}.time)>0,1)-1;
@@ -130,14 +132,19 @@ classdef Logger < handle
                     frow = varargin{1}.row_col(1);
                     fcol = varargin{1}.row_col(2);
                 end
+                if isfield(varargin{1},'nocolor')
+                    fcolor = 0;
+                end
+            end
             end
             timeList=obj.Data.t(plot_length);
             fh=figure(fig_num);
             fh.WindowState='maximized';
-            for i = 1:length(target)
+            for i = 1:length(target)% i : 図番号
                 subplot(frow,fcol,i);
+                %Square_coloring([find(obj.Data.phase==97,1),find(obj.Data.phase==97,1,'last')]);
                 if ~strcmp(option(i),"") %contains(option(i),["e","s","r","p"])>0
-                    t1=split(target(i),'-');
+                    t1=split(target(i),'-'); % 「-」区切りで分割  
                     if strcmp(option(i),":")
                         s2 = "serp";
                     else
@@ -180,12 +187,12 @@ classdef Logger < handle
                         xlabel("Time [s]");
                         legend(plegend);
                         hold off
-                    elseif length(t1) == 2 || length(t1) == 3 % 平面軌跡 or 立体軌跡
+                    elseif length(t1) > 1 % 平面軌跡 or 立体軌跡
                         s1 = regexprep(t1,"[0-9:]","");
                         eli =  regexp(t1,"[0-9:]",'match');
                         plegend = [];
                         for s = ["s","e","r","p"]
-                            if contains(s2,s) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(1))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(2)))
+                            if contains(s2,s) && ~isempty(obj.(append(s,"i"))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(1))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(2)))
                                 tmp1data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(1))(str2num(eli{1})),plot_length,'UniformOutput',false);
                                 tmp2data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(2))(str2num(eli{2})),plot_length,'UniformOutput',false);
                                 if length(t1)==3
@@ -209,9 +216,9 @@ classdef Logger < handle
                                     plegend=[plegend,"sensor"];
                                 elseif s == "e"
                                     plegend=[plegend,"estimator"];
-                                elseif s1 == "r"
+                                elseif s == "r"
                                     plegend=[plegend,"reference"];
-                                elseif s1 == "p"
+                                elseif s == "p"
                                     plegend=[plegend,"plant"];
                                 else
                                     plegend=[plegend,s];
@@ -226,7 +233,7 @@ classdef Logger < handle
                         daspect([1 1 1]);
                         hold off
                     end
-                else
+                else % 対応するoption が空の場合
                     switch target(i)
                         case {"u", "input"}
                             tmpdata=arrayfun(@(i)obj.Data.agent{i,obj.ii,N},plot_length,'UniformOutput',false);
@@ -237,12 +244,12 @@ classdef Logger < handle
                         case "inner_input"
                             if sum(contains(obj.items,'inner_input'))>0
                                 sp=strcmp(obj.items,'inner_input');
-                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,num}',plot_length,'UniformOutput',false);
+                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,N},plot_length,'UniformOutput',false);
                                 plot(timeList,[tmps{1:end}]')
                                 title("Throttle Input u");
                                 legend(strcat("u",string(1:size(tmps{1},1))));
                                 xlabel("Time [s]");
-                                ylim([1000 2000]);
+                                %ylim([1000 2000]);
                             else
                                 warning("ACSL : logger does not include plot target.");
                             end
@@ -257,6 +264,17 @@ classdef Logger < handle
                             else
                                 warning("ACSL : logger does not include plot target.");
                             end
+                    end
+                end
+                if fcolor
+                    if length([find(obj.Data.phase==116,1),find(obj.Data.phase==116,1,'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase==116,1),find(obj.Data.phase==116,1,'last')])); % take off phase
+                    end
+                    if length([find(obj.Data.phase==102,1),find(obj.Data.phase==102,1,'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase==102,1),find(obj.Data.phase==102,1,'last')]),[0.9 1.0 1.0]); % flight phase
+                    end
+                    if length([find(obj.Data.phase==108,1),find(obj.Data.phase==108,1,'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase==108,1),find(obj.Data.phase==108,1,'last')]),[1.0 0.9 1.0]); % landing phase
                     end
                 end
             end
