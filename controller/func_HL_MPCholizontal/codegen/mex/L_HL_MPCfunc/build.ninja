@@ -1,0 +1,127 @@
+# CompilerName=msvc150
+# Mode=optim
+ninja_required_version = 1.3
+
+# Basic folders
+root = .
+builddir = $root\build\win64
+matlabdir = C:\Program Files\MATLAB\R2020a
+startdir = C:\Users\taku7\Desktop\ç≈êVdrone\controller\func_HL_MPCholizontal
+
+# Toolchain information
+cc = cl
+cxx = cl
+linker = link
+linkerxx = link
+
+cflags =  /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=L_HL_MPCfunc_mex  
+
+cxxflags =   /c /Zp8 /GR /W3 /EHs /nologo /MD /D_CRT_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_DEPRECATE /D_SECURE_SCL=0   /DMATLAB_MEX_FILE  /DMATLAB_MEX_FILE /O2 /Oy- /DNDEBUG /fp:strict /I "$root" /I "$startdir" /I "$root\interface" /I "$matlabdir\extern\include" /I "." -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=L_HL_MPCfunc_mex  
+
+ldflags =  /nologo /manifest   /DLL /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmx.lib libmex.lib libmat.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  /out:"L_HL_MPCfunc_mex.mexw64" /LIBPATH:"$matlabdir\extern\lib\win64\microsoft" libmwblas.lib libmwlapack.lib libemlrt.lib libcovrt.lib libut.lib libmwmathutil.lib  /export:mexFunction /export:mexfilerequiredapiversion /export:emlrtMexFcnProperties /export:L_HL_MPCfunc_initialize /export:L_HL_MPCfunc_terminate /export:L_HL_MPCfunc_atexit /export:L_HL_MPCfunc
+
+# Build Rules
+rule cc
+    command = $cc $cflags $in /Fo$out
+
+rule cxx
+    command = $cxx $cxxflags $in /Fo$out
+
+rule link
+    command = $linker @$out.rsp $ldflags
+    rspfile = $out.rsp
+    rspfile_content = $in
+
+rule linkxx
+    command = $linkerxx $in $ldflags
+
+# Build
+build $builddir\rt_nonfinite.obj : cc $root\rt_nonfinite.c
+build $builddir\L_HL_MPCfunc_data.obj : cc $root\L_HL_MPCfunc_data.c
+build $builddir\L_HL_MPCfunc_initialize.obj : cc $root\L_HL_MPCfunc_initialize.c
+build $builddir\L_HL_MPCfunc_terminate.obj : cc $root\L_HL_MPCfunc_terminate.c
+build $builddir\L_HL_MPCfunc.obj : cc $root\L_HL_MPCfunc.c
+build $builddir\eml_int_forloop_overflow_check.obj : cc $root\eml_int_forloop_overflow_check.c
+build $builddir\fmincon.obj : cc $root\fmincon.c
+build $builddir\checkLinearInputs.obj : cc $root\checkLinearInputs.c
+build $builddir\saveJacobian.obj : cc $root\saveJacobian.c
+build $builddir\xcopy.obj : cc $root\xcopy.c
+build $builddir\evalObjAndConstr.obj : cc $root\evalObjAndConstr.c
+build $builddir\evalObjAndConstrAndDerivatives.obj : cc $root\evalObjAndConstrAndDerivatives.c
+build $builddir\computeConstraints_.obj : cc $root\computeConstraints_.c
+build $builddir\factoryConstruct.obj : cc $root\factoryConstruct.c
+build $builddir\finDiffEvalAndChkErr.obj : cc $root\finDiffEvalAndChkErr.c
+build $builddir\computeFiniteDifferences.obj : cc $root\computeFiniteDifferences.c
+build $builddir\factoryConstruct1.obj : cc $root\factoryConstruct1.c
+build $builddir\factorQRE.obj : cc $root\factorQRE.c
+build $builddir\factorQR.obj : cc $root\factorQR.c
+build $builddir\squareQ_appendCol.obj : cc $root\squareQ_appendCol.c
+build $builddir\factoryConstruct2.obj : cc $root\factoryConstruct2.c
+build $builddir\factor.obj : cc $root\factor.c
+build $builddir\solve.obj : cc $root\solve.c
+build $builddir\computeGrad_StoreHx.obj : cc $root\computeGrad_StoreHx.c
+build $builddir\computeFval_ReuseHx.obj : cc $root\computeFval_ReuseHx.c
+build $builddir\computeFval.obj : cc $root\computeFval.c
+build $builddir\linearForm_.obj : cc $root\linearForm_.c
+build $builddir\factoryConstruct3.obj : cc $root\factoryConstruct3.c
+build $builddir\setProblemType.obj : cc $root\setProblemType.c
+build $builddir\removeAllIneqConstr.obj : cc $root\removeAllIneqConstr.c
+build $builddir\maxConstraintViolation.obj : cc $root\maxConstraintViolation.c
+build $builddir\addAeqConstr.obj : cc $root\addAeqConstr.c
+build $builddir\modifyOverheadPhaseOne_.obj : cc $root\modifyOverheadPhaseOne_.c
+build $builddir\modifyOverheadRegularized_.obj : cc $root\modifyOverheadRegularized_.c
+build $builddir\moveConstraint_.obj : cc $root\moveConstraint_.c
+build $builddir\addBoundToActiveSetMatrix_.obj : cc $root\addBoundToActiveSetMatrix_.c
+build $builddir\updateWorkingSetForNewQP.obj : cc $root\updateWorkingSetForNewQP.c
+build $builddir\computeConstrViolationEq_.obj : cc $root\computeConstrViolationEq_.c
+build $builddir\xasum.obj : cc $root\xasum.c
+build $builddir\driver.obj : cc $root\driver.c
+build $builddir\test_exit.obj : cc $root\test_exit.c
+build $builddir\computeGradLag.obj : cc $root\computeGradLag.c
+build $builddir\xgemv.obj : cc $root\xgemv.c
+build $builddir\ixamax.obj : cc $root\ixamax.c
+build $builddir\computePrimalFeasError.obj : cc $root\computePrimalFeasError.c
+build $builddir\computeDualFeasError.obj : cc $root\computeDualFeasError.c
+build $builddir\computeComplError.obj : cc $root\computeComplError.c
+build $builddir\isDeltaXTooSmall.obj : cc $root\isDeltaXTooSmall.c
+build $builddir\computeLambdaLSQ.obj : cc $root\computeLambdaLSQ.c
+build $builddir\xgeqp3.obj : cc $root\xgeqp3.c
+build $builddir\xnrm2.obj : cc $root\xnrm2.c
+build $builddir\computeQ_.obj : cc $root\computeQ_.c
+build $builddir\xorgqr.obj : cc $root\xorgqr.c
+build $builddir\xtrsv.obj : cc $root\xtrsv.c
+build $builddir\sortLambdaQP.obj : cc $root\sortLambdaQP.c
+build $builddir\step.obj : cc $root\step.c
+build $builddir\normal.obj : cc $root\normal.c
+build $builddir\driver1.obj : cc $root\driver1.c
+build $builddir\PresolveWorkingSet.obj : cc $root\PresolveWorkingSet.c
+build $builddir\RemoveDependentEq_.obj : cc $root\RemoveDependentEq_.c
+build $builddir\xdot.obj : cc $root\xdot.c
+build $builddir\countsort.obj : cc $root\countsort.c
+build $builddir\RemoveDependentIneq_.obj : cc $root\RemoveDependentIneq_.c
+build $builddir\feasibleX0ForWorkingSet.obj : cc $root\feasibleX0ForWorkingSet.c
+build $builddir\xgeqrf.obj : cc $root\xgeqrf.c
+build $builddir\xgemm.obj : cc $root\xgemm.c
+build $builddir\xtrsm.obj : cc $root\xtrsm.c
+build $builddir\xaxpy.obj : cc $root\xaxpy.c
+build $builddir\phaseone.obj : cc $root\phaseone.c
+build $builddir\iterate.obj : cc $root\iterate.c
+build $builddir\xrot.obj : cc $root\xrot.c
+build $builddir\compute_deltax.obj : cc $root\compute_deltax.c
+build $builddir\xpotrf.obj : cc $root\xpotrf.c
+build $builddir\compute_lambda.obj : cc $root\compute_lambda.c
+build $builddir\feasibleratiotest.obj : cc $root\feasibleratiotest.c
+build $builddir\checkStoppingAndUpdateFval.obj : cc $root\checkStoppingAndUpdateFval.c
+build $builddir\relaxed.obj : cc $root\relaxed.c
+build $builddir\assignResidualsToXSlack.obj : cc $root\assignResidualsToXSlack.c
+build $builddir\soc.obj : cc $root\soc.c
+build $builddir\linesearch.obj : cc $root\linesearch.c
+build $builddir\computeDeltaLag.obj : cc $root\computeDeltaLag.c
+build $builddir\BFGSUpdate.obj : cc $root\BFGSUpdate.c
+build $builddir\_coder_L_HL_MPCfunc_api.obj : cc $root\interface\_coder_L_HL_MPCfunc_api.c
+build $builddir\_coder_L_HL_MPCfunc_mex.obj : cc $root\interface\_coder_L_HL_MPCfunc_mex.c
+build $builddir\_coder_L_HL_MPCfunc_info.obj : cc $root\interface\_coder_L_HL_MPCfunc_info.c
+build $builddir\c_mexapi_version.obj : cc $matlabdir\extern\version\c_mexapi_version.c
+
+# Link
+build $root\L_HL_MPCfunc_mex.mexw64 : link $builddir\rt_nonfinite.obj $builddir\L_HL_MPCfunc_data.obj $builddir\L_HL_MPCfunc_initialize.obj $builddir\L_HL_MPCfunc_terminate.obj $builddir\L_HL_MPCfunc.obj $builddir\eml_int_forloop_overflow_check.obj $builddir\fmincon.obj $builddir\checkLinearInputs.obj $builddir\saveJacobian.obj $builddir\xcopy.obj $builddir\evalObjAndConstr.obj $builddir\evalObjAndConstrAndDerivatives.obj $builddir\computeConstraints_.obj $builddir\factoryConstruct.obj $builddir\finDiffEvalAndChkErr.obj $builddir\computeFiniteDifferences.obj $builddir\factoryConstruct1.obj $builddir\factorQRE.obj $builddir\factorQR.obj $builddir\squareQ_appendCol.obj $builddir\factoryConstruct2.obj $builddir\factor.obj $builddir\solve.obj $builddir\computeGrad_StoreHx.obj $builddir\computeFval_ReuseHx.obj $builddir\computeFval.obj $builddir\linearForm_.obj $builddir\factoryConstruct3.obj $builddir\setProblemType.obj $builddir\removeAllIneqConstr.obj $builddir\maxConstraintViolation.obj $builddir\addAeqConstr.obj $builddir\modifyOverheadPhaseOne_.obj $builddir\modifyOverheadRegularized_.obj $builddir\moveConstraint_.obj $builddir\addBoundToActiveSetMatrix_.obj $builddir\updateWorkingSetForNewQP.obj $builddir\computeConstrViolationEq_.obj $builddir\xasum.obj $builddir\driver.obj $builddir\test_exit.obj $builddir\computeGradLag.obj $builddir\xgemv.obj $builddir\ixamax.obj $builddir\computePrimalFeasError.obj $builddir\computeDualFeasError.obj $builddir\computeComplError.obj $builddir\isDeltaXTooSmall.obj $builddir\computeLambdaLSQ.obj $builddir\xgeqp3.obj $builddir\xnrm2.obj $builddir\computeQ_.obj $builddir\xorgqr.obj $builddir\xtrsv.obj $builddir\sortLambdaQP.obj $builddir\step.obj $builddir\normal.obj $builddir\driver1.obj $builddir\PresolveWorkingSet.obj $builddir\RemoveDependentEq_.obj $builddir\xdot.obj $builddir\countsort.obj $builddir\RemoveDependentIneq_.obj $builddir\feasibleX0ForWorkingSet.obj $builddir\xgeqrf.obj $builddir\xgemm.obj $builddir\xtrsm.obj $builddir\xaxpy.obj $builddir\phaseone.obj $builddir\iterate.obj $builddir\xrot.obj $builddir\compute_deltax.obj $builddir\xpotrf.obj $builddir\compute_lambda.obj $builddir\feasibleratiotest.obj $builddir\checkStoppingAndUpdateFval.obj $builddir\relaxed.obj $builddir\assignResidualsToXSlack.obj $builddir\soc.obj $builddir\linesearch.obj $builddir\computeDeltaLag.obj $builddir\BFGSUpdate.obj $builddir\_coder_L_HL_MPCfunc_api.obj $builddir\_coder_L_HL_MPCfunc_mex.obj $builddir\_coder_L_HL_MPCfunc_info.obj $builddir\c_mexapi_version.obj 
