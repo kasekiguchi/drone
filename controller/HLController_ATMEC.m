@@ -177,24 +177,24 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             if(obj.time.dataCount*dt>=obj.time.FRIT_begin)
             % １時刻後の状態を離散化した状態方程式から計算
                 %z1
-                obj.h.z1 = IdealModel(obj.A2d,obj.B2d,obj.h.z1,z1n-z1,F1);
+                obj.h.z1 = obj.IdealModel(obj.A2d,obj.B2d,obj.h.z1,z1n-z1,F1);
                 udu.z1 = [vf(1);(vf(1)-obj.vp(1))/dt];
-                obj.eta1.z1 = IdealModel(obj.A2d,obj.B2d,obj.eta1.z1,udu.z1,F1);
-                obj.eta2.z1 = IdealModel(obj.A2d,obj.B2d,obj.eta2.z1,z1,F1);
+                obj.eta1.z1 = obj.IdealModel(obj.A2d,obj.B2d,obj.eta1.z1,udu.z1,F1);
+                obj.eta2.z1 = obj.IdealModel(obj.A2d,obj.B2d,obj.eta2.z1,z1,F1);
                 eta.z1 = obj.eta1.z1(1) - F1*(z1 - obj.eta2.z1);
                 epsilon.z1 = Kz*obj.h.z1 - eta.z1;
                 %z2
-                obj.h.z2 = IdealModel(obj.A4d,obj.B4d,obj.h.z2,z2n-z2,F2);
+                obj.h.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.h.z2,z2n-z2,F2);
                 udu.z2 = [vs(1);(vs(1)-obj.vp(2))/dt;0;0];
-                obj.eta1.z2 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,udu.z2,F2);
-                obj.eta2.z2 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,z2,F2);
+                obj.eta1.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,udu.z2,F2);
+                obj.eta2.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,z2,F2);
                 eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
                 epsilon.z2 = Kx*obj.h.z2 - eta.z2;
                 %z3
-                obj.h.z3 = IdealModel(obj.A4d,obj.B4d,obj.h.z3,z3n-z3,F3);
+                obj.h.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.h.z3,z3n-z3,F3);
                 udu.z3 = [vs(2);(vs(2)-obj.vp(3))/dt;0;0];
-                obj.eta1.z3 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,udu.z3,F3);
-                obj.eta2.z3 = IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,z3,F3);
+                obj.eta1.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,udu.z3,F3);
+                obj.eta2.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,z3,F3);
                 eta.z3 = obj.eta1.z3(1) - F3*(z3 - obj.eta2.z3);
                 epsilon.z3 = Ky*obj.h.z3 - eta.z3;
 % RLS
@@ -253,7 +253,17 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             obj.self.input = obj.result.input;
             result = obj.result;
         end
-        
+    function result = IdealModel(obj,A,B,state,ref,F)
+        % AT-MEC 補償ゲインチューニングのFRITアルゴリズムの理想モデルMを含む計算
+        % IdealModel(A,B,state,ref,F)
+        % A,B : 離散化した状態空間表現係数
+        % state : 更新したい出力
+        % ref : 目標値 M*ref
+        % F : ノミナルコントローラ
+        u = F * (ref - state);
+        state = A * state + B * u;
+        result = state;
+    end
         function show(obj)
             obj.result
         end
