@@ -8,106 +8,85 @@ cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
 rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
-    warning('off', 'all');
+warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;%sim=0;exp = 1
+fExp = 0;%1：実機　それ以外：シミュレーション
+fMotive = 0;% Motiveを使うかどうか
+fROS = 0;
+fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
     dt = 0.1; % sampling time
+%     dt = 0.025;
+%     dt = 0.010;
+%     dt = 0.001;
 end
 sampling = dt;
 ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=5;
+end
+%% initialize
+initial(N) = struct;
+param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
+%% for sim
+for i = 1:N
+%     arranged_pos = arranged_position([0,0],N,1,0);
+    initial(i).p = [0;0];
+    initial(i).q = [0];
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
+%set plant model
+for i = 1:N
 if fExp
-    typical_Model_Lizard_exp(N,dt,'plant',25); % Lizard : for exp
-else
-    typical_Model_WheelChairV(N,dt,'plant',struct('noise',4.337E-5));
+    else
+        agent(i) = Drone(Model_WheelChairV(i,dt,'plant',struct('p',[0;0],'q',[0]),struct('noise',4.337E-5))); 
 end
-% set control model
-typical_Model_WheelChairV(N,dt,'model');
+ %% model
+    % set control model
+    agent(i).set_model(Model_WheelChairV(N,dt,'model',struct('p',[0;0],'q',[0]))); % オイラー角モデル
+    close all
 %% set environment property
 Env = [];
-% fl1 = [-50,10;200,10;200,20;-50,20];
-% fl2 = [-50,-10;200,-10;200,-20;-50,-20];%x譁ケ蜷代↓髟キ縺?
-
-% fl1 = [-50,10;35,10;35,40;30,40;30,20;-50,20;-50,10];
-% fl3 = [55,10;100,10;100,20;60,20;60,40;55,40;55,10];
-% fl5 = [-50,-10;100,-10;100,-20;-50,-20;-50,-10;100,-10;100,-20];
-
-% fl1 = [-50,35;50,35;50,45;-50,45];
-% fl2 = [-50,-35;50,-35;50,-45;-50,-45];%x譁ケ蜷代↓髟キ縺?
-% fl3 = [50,-45;55,-45;55,45;50,45];
-
-fl1 = [-50,20;200,20;200,25;-50,25];
-fl2 = [-50,-20;200,-20;200,-25;-50,-25];%x direction long passage
-
-% fl1 = [20,-50;20,200;25,200;25,-50];
-% fl2 = [-20,-50;-20,200;-25,200;-25,-50];%y direction long passage
-
-% fl1 = [];
-
-% fl1 = [-10,-10;-10,20;-9,20;-9,-10;-10,-10];
-% fl2 = [-10,-10;20,-10;20,-9;-10,-9;-10,-10];
-% fl3 = [20,-10;20,20;19,20;19,-10;20,-10];
-% fl4 = [20,20;20,19;-10,19;-10,20;20,20];%mini square room env
-
-% fl1 = [-10,-10;-10,50;-9,50;-9,-10;-10,-10];
-% fl2 = [-10,-10;50,-10;50,-9;-10,-9;-10,-10];
-% fl3 = [50,-10;50,50;49,50;49,-10;50,-10];
-% fl4 = [50,50;50,49;-10,49;-10,50;50,50];% big square room env
-
-env_param.Vertices(:,:,1)=fl1;
-env_param.Vertices(:,:,2)=fl2;
-% env_param.Vertices(:,:,3)=fl3;
-% env_param.Vertices(:,:,4)=fl4f;
-env_param.name = 'Floor';
-for i=1:N;env(i).name = "Floor";env(i).type = "FloorMap_sim";env(i).param = env_param;agent(i).set_env(env(i));end
-% [-2 -2.5;5.5 -2.5;5.5 3;-2 3]
-Env.param.Vertices(:,:,1)=fl1;
-Env.param.Vertices(:,:,2)=fl2;
-% Env.param.Vertices(:,:,3)=fl3;
-% Env.param.Vertices(:,:,4)=fl4;
+agent(i).set_property("env",Env_FloorMap_sim(i)); % 重要度マップ設定
 %% set sensors property
-for i = 1:N; agent(i).sensor=[]; end
-typical_Sensor_LiDAR(agent);%LiDAR seosor
+agent(i).sensor=[];
+agent(i).set_property("sensor",Sensor_LiDAR(i));%LiDAR seosor
 %% set estimator property
-for i = 1:N; agent(i).estimator=[]; end
+agent(i).estimator=[];
 Gram = GrammianAnalysis(te,ts,dt);
-Estimator_EKFSLAM_WheelChairV(agent,Gram);
+agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
 %% set reference property
-%typical_Reference_2DCoverage(agent,Env); % Voronoi重心
-%typical_Reference_Time_Varying(agent,"gen_ref_saddle",{5,[0;0;1.5],[2,2,1]}); % 時変な目標状態
-
-% 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-Reference_Point_FH(agent); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+    agent(i).reference=[];
+    
+    % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
+    agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
 %% set controller property
-for i = 1:N; agent(i).controller=[]; end
-for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_controller(Controller);end%
+agent(i).controller=[];
+for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
 %% set connector (global instance)
-%LiDAR set
-LiDAR = Env;
+param(i).sensor.list = cell(1,length(agent(i).sensor.name));
+param(i).reference.list = cell(1,length(agent(i).reference.name));
+end
 %% initialize
 clc
-for i = 1:N
-    % for sim
-%     plant.initial = struct('p',[0,0]','q',[0],'v',[0],'w',[0]);%WC model A
-    plant.initial = struct('p',[0,0]','q',[0]);%WC model V
-    agent(i).state.set_state(plant.initial);
-    agent(i).model.set_state(plant.initial);
-    for j = 1:length(agent(i).estimator.name)
-        if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
-        agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
-        end
-    end
-end
+% for i = 1:N
+%     % for sim
+% %     plant.initial = struct('p',[0,0]','q',[0],'v',[0],'w',[0]);%WC model A
+%     plant.initial = struct('p',[0,0]','q',[0]);%WC model V
+%     agent(i).state.set_state(plant.initial);
+%     agent(i).model.set_state(plant.initial);
+%     for j = 1:length(agent(i).estimator.name)
+%         if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
+%         agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
+%         end
+%     end
+% end
 LogData=[
 %     "reference.result.state.p",
     "estimator.result.state.p",
@@ -166,20 +145,7 @@ time.t = ts;
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
 
-% for simulation
-% mparam.occlusion.cond=["time.t >=1.5 && time.t<1.6","agent(1).model.state.p(1) > 2"];
-% mparam.occlusion.target={[1],[1]};
-% mparam.marker_num = 20;
-% mparam=[]; % without occulusion
-% motive.getData({agent,mparam});
-
-% for i = 1:N; agent(i).sensor.imu.initialize(20);end
-% Smotive={motive};
-SLiDAR = {LiDAR};
-Srpos={agent};
-Simu={[]};
-Sdirect={};
-Srdensity={Env};
+SLiDAR = {Env};
 for i = 1:N
     param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
     agent(i).do_sensor(param(i).sensor);
@@ -204,22 +170,12 @@ try
         Srpos={agent};
         Simu={[]};
         Sdirect={};
-        Srdensity={Env};
         for i = 1:N
             param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
             agent(i).do_sensor(param(i).sensor);
         end
         %%
         for i = 1:N
-%             Edirect={agent(i).sensor}; 
-%             Elpf={agent(i).sensor};
-%             Ead={agent(i).sensor};
-%             Eekf={agent(i).model,agent(i).sensor,[]}; % for euler angle model
-%             Epdaf={agent(i).model,agent(i).sensor}; % for euler angle model
-%             Efeature_ekf={agent(i).model,agent(i).sensor}; % for euler angle model
-%             Emap={agent(i).sensor,agent(i).env};
-%             param(i).estimator=arrayfun(@(k) evalin('base',strcat("E",agent(i).estimator.name(k))),1:length(agent(i).estimator.name),'UniformOutput',false);
-%            agent(i).do_estimator(param(i).estimator);
             agent(i).do_estimator(cell(1,10));
             
             Rcovering={};%{Env};
@@ -232,7 +188,7 @@ try
             
 %            agent(i).do_controller(param(i).controller);
             agent(i).do_controller(cell(1,10));
-            warukaku = 6;
+            warukaku = 4;
             kakudo = (1/2)* warukaku;
             if time.t<1
                 agent(i).input = [1,pi/warukaku];

@@ -1,4 +1,4 @@
-classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
+classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
     % Extended Kalman filter
     % obj = EKF(model,param)
     %   model : EKF郢ァ雋橸スョ貅ッ?ス」?ソス邵コ蜷カ?ス玖崕?スカ陟包ス。陝?スセ髮趣ス。邵コ?スョ陋サ?スカ陟包ス。郢晢ス「郢晢ソス郢晢スォ
@@ -18,7 +18,7 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
     end
     
     methods
-        function obj = EKFSLAM_WheelChair(self,param)
+        function obj = EKFSLAM_WheelChairV(self,param)
             obj.self= self;
             model = self.model;
             obj.JacobianF = @(v,theta) [1,0,-v*sin(theta);0,1,v*cos(theta);0,0,1];%
@@ -139,7 +139,7 @@ classdef EKFSLAM_WheelChair < ESTIMATOR_CLASS
             %%%
             %correlation coefficient
             r = cos(2*(pre_Eststate(3) - pi/4));
-            r = sign(r);
+%             r = sign(r);
             sigmaxy = P_pre(1,1) * P_pre(2,2) * r;
             P_pre(1,2) = sigmaxy;
             P_pre(2,1) = sigmaxy;

@@ -108,8 +108,8 @@ plot(p_Area);
 for i=1:si
     plot([x_s(i),x_e(i)],[y_s(i),y_e(i)],'LineWidth',5,'Color','r');
 end
-plot(model_data(1,end),model_data(2,end),'b>');
-plot(plant_data(1,end),plant_data(2,end),'g>');
+% plot(model_data(1,end),model_data(2,end),'b>');
+% plot(plant_data(1,end),plant_data(2,end),'g>');
 grid on;
 axis equal;
 % xlim([-50 200]);ylim([-20 20]);

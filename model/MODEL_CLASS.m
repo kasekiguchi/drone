@@ -84,11 +84,11 @@ classdef MODEL_CLASS <  handle
                     end
                 end
                 if ~isempty(obj.noise)
-                    if ~isempty(obj.noise.seeds)
-                        rng(obj.noise.gain*obj.param.t);
-                    else
+%                     if ~isempty(obj.noise.seeds)
+%                         rng(obj.noise.gain*obj.param.t);
+%                     else
                         rng('shuffle');
-                    end
+%                     end
                     u = u+obj.noise.* randn(size(u));
                 end
                 if contains(obj.time_scale,'discrete')

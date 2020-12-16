@@ -1,14 +1,14 @@
 classdef FloorMap_sim < ENV_CLASS
     %make room
     properties
-        name % 萓具シ喘ldg1
+        name % 
         id
         param
     end
     methods
         function obj = FloorMap_sim(~,param)
             obj.param=param;
-            % 縺薙?ョ繧ッ繝ゥ繧ケ縺ョ繧、繝ウ繧ケ繧ソ繝ウ繧ケ繧剃ス懈??
+            % 
             obj.name = param.name;
 %             if ~strcmp(obj.name,"none")
 %                 %obj.Vertex=obj.param.Vertex;
