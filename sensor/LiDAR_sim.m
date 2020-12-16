@@ -11,7 +11,7 @@ classdef LiDAR_sim < SENSOR_CLASS
     end
     properties (Access = private) % construct したら変えない．
         radius = 40;
-        angle_range = -pi:0.1:pi;
+        angle_range = -pi:0.01:pi;
     end
     
     methods
@@ -42,7 +42,12 @@ classdef LiDAR_sim < SENSOR_CLASS
                 %sensor_range=polyshape([pos(1);circ(:,1)+pos(1)],[pos(2);circ(:,2)+pos(2)]); % エージェントの位置を中心とした円
                 sensor_range=polyshape([0;circ(:,1)],[0;circ(:,2)]); % エージェントの位置を中心とした円
             end
-            env = polyshape(Env.param.Vertices-pos(1:2)'); %相対的な環境
+            SOE = size(Env.param.Vertices,3);
+%             tmpenv = zeros(1,SOE);
+            for ei = 1:SOE
+                tmpenv(ei) = polyshape(Env.param.Vertices(:,:,ei)-pos(1:2)'); %相対的な環境
+            end
+            env = union(tmpenv(:));
             
             result.region=intersect(sensor_range,env);
             %% 出力として整形
@@ -50,16 +55,24 @@ classdef LiDAR_sim < SENSOR_CLASS
             
             %lineseg(1:2:size(circ,1)*2,:)=circ;
             %in=intersect(result.region,[lineseg;0 0]);
+%             index = zeros(length(circ),1);
+            result.angle = zeros(1,length(obj.angle_range));
             for i = 1:length(circ)
                 in=intersect(result.region,[circ(i,:);0 0]);
                 if ~isempty(in)
                     in=setdiff(in(~isnan(in(:,1)),:),[0 0],'rows'); % レーザーと領域の交点
                     [~,mini]=min(vecnorm(in')');
                     result.sensor_points(i,:)=in(mini,:);
+                    result.angle(i) = obj.angle_range(i);
+%                     index(i) = 1;
+                else
+                    result.sensor_points(i,:) = [0 0];
                 end
             end
             result.length=vecnorm(result.sensor_points'); % レーザー点までの距離
+%             result.angle = obj.angle_range;%レーザー点の角度
             %result.region=intersect(polyshape(result.sensor_points(:,1),result.sensor_points(:,2)),env); % 
+            result.state = {};
             obj.result=result;
         end
         function show(obj,~)
