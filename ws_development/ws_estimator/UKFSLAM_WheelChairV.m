@@ -1,14 +1,15 @@
 classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
     % Unscented Kalman filter
-    %   model : 
+    %   model :
     %   param : required field : Q,R,B,JacobianH
     properties
         result%esitimated parameter
-        Q
-        R
-        dt
-        n
-        self
+        Q%model noise
+        R% observe noise
+        dt%step time
+        n%model dimention
+        k%scaling parameters
+        self%obj self
         constant%Line threadthald parameter
         map_param
         Map_Q
@@ -16,19 +17,18 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
     end
     
     methods
-        function obj = UKFSLAM_WheelChair(self,param)
+        function obj = UKFSLAM_WheelChairV(self,param)
             obj.self= self;
             model = self.model;
             % --this state use in only UKFSLAM--
-            obj.result.Est_state= STATE_CLASS(struct("state_list",["p","q"],"num_list",[2,1]));
-            obj.result.Est_state.p = model.state.p;% x, y
-            obj.result.Est_state.q = model.state.q;% th
+            obj.result.Est_state= [model.state.p;model.state.q];%x, y, theta
             %------------------------------
             obj.result.state= state_copy(model.state);
-            obj.n = length(obj.result.Est_state.get());
+            obj.n = param.dim;%robot state dimension
             obj.Map_Q = param.Map_Q;% map variance
             obj.Q = param.Q;% model variance
             obj.R = param.R;% observation noise variance
+            obj.k = param.k;
             obj.dt = model.dt; % tic time
             obj.result.P = param.P;%covariance
             obj.Analysis.P = param.P;%covariance  for differ entropy
@@ -48,126 +48,189 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
         end
         
         function [result]=do(obj,param,~)
-            %   param : optional
+            %model: nolinear model
             model=obj.self.model;
-            sensor = obj.self.sensor.result;%scan data
-            xh_pre = model.state.get(); %事前推定
-            pre_state = [xh_pre(1),xh_pre(2),xh_pre(3)];%[x,y,theta]
+            %sigma points of previous step 
+            StateCount = length(obj.result.Est_state);
+            PreXh = obj.result.Est_state;%previous estimation
+            CholCov = chol(obj.result.P);%cholesky factoryzation 
+            Kai = [PreXh,...
+                cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
+                cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
+            weight = [obj.k/(StateCount + obj.k), 1/(2*(StateCount + obj.k))];
             
             if isfield(obj.self.controller,'result')
                 if ~isempty(obj.self.controller.result)
                     u = obj.self.controller.result.input;
-                    cparamK = obj.self.model.param.K;
-                    u(1) = u(1)*cparamK;
                 else
                     u=[0,0];
                 end
             else
                 u=[0,0];
             end
+            
+            %sigma point update 
+            sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param),[0 obj.dt],Kai(1:obj.n,i)), 1:2*StateCount + 1);
+            x = linspace(0,obj.dt,10);
+            rKai = arrayfun(@(i) deval(sol(i),x), 1:2*StateCount + 1, 'UniformOutput', false);
+            mKai = Kai(obj.n+1:StateCount,:);
+            Kai = zeros(StateCount,2*StateCount+1);
+            for i = 1:2*StateCount+1
+                Kai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
+            end
+            %Pre estimation [x;y;theta;map's]%事前状態推定
+            PreXh = Kai(:,1) * weight(1)+sum(Kai(:,2:end)*weight(2),2);
+           
+            %Previous Covariance matrix
+            PreCov = weight(1) * (Kai(:,1) - PreXh) * (Kai(:,1) - PreXh)';
+            for i = 2:2*StateCount+1
+                PreCov = PreCov + weight(2) * (Kai(:,i) - PreXh) * (Kai(:,i) - PreXh)';
+            end
+            system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, (StateCount - obj.n)/2 )));
+            B = eye(StateCount) .* obj.dt;%noise channel
+            PreCov = PreCov + B*system_noise*B';%事前誤差共分散行列
+            
+            if length(PreXh) > obj.n
+                PreMap = MapStateToLineEqu(PreXh(obj.n+1:end));
+                obj.map_param.a = PreMap.a;
+                obj.map_param.b = PreMap.b;
+                obj.map_param.c = PreMap.c;
+                % Projection of start and end point on the line
+                MapEnd = FittingEndPoint(obj.map_param, obj.constant);
+                obj.map_param.x = MapEnd.x;
+                obj.map_param.y = MapEnd.y;
+            end
             %
+            sensor = obj.self.sensor.result;%scan data
             measured.ranges = sensor.length;
-            measured.angles = sensor.angle - xh_pre(3);%
             if iscolumn(measured.ranges)
                 measured.ranges = measured.ranges';% Transposition
             end
+            measured.angles = sensor.angle - PreXh(3);%raser angles
             if iscolumn(measured.angles)
                 measured.angles = measured.angles';% Transposition
             end
             % Convert measurements into lines %Line segment approximation
-            LSA_param = PointCloudToLine(measured.ranges, measured.angles, pre_state, obj.constant);
-            % Conbine between measurements and map%雋ゑスャ陞ウ螢シ?ソス?ス、邵コ?スィ郢晄ァュ繝」郢晏干?ス帝お?ソス邵コ?スソ陷キ蛹サ?ス冗クコ蟶呻ス?
-            obj.map_param = CombiningLines(obj.map_param, LSA_param, obj.constant);
-            % Convert map into line parameters%郢ァ?スー郢晢スュ郢晢スシ郢晁?湖晁?趣スァ隶灘生縲帝囎荵昶螺驍ア螢シ?ソス邵コ?スョ郢昜サ」ホ帷ケ晢ス。郢晢スシ郢ァ?スソ
+            LSA_param = PointCloudToLine(measured.ranges, measured.angles, PreXh, obj.constant);
+            % Conbine between measurements and map%
+            obj.map_param = CombiningLines(obj.map_param , LSA_param, obj.constant);
             line_param = LineToLineParameter(obj.map_param);
+
+            StateCount = obj.n + 2 * length(line_param.d);%StateCount update
+            %
+            if length(PreCov) < StateCount
+                % Appearance new line parameter
+                append_count = StateCount - length(PreCov);
+                max_count = length(PreCov);
+                for i = 1:append_count
+                    PreCov(max_count + i, max_count + i) = 1.* 1e-7;
+                end
+            end
+             %共分散行列を再構成
+            % Optimize the map%
+            [obj.map_param, removing_flag] = OptimizeMap(obj.map_param, obj.constant);
+            % Update estimate covariance %
+            if any(removing_flag)
+                exist_flag = sort([1, 2, 3,(find(~removing_flag) - 1) * 2 + 4, (find(~removing_flag) - 1) * 2 + 5]);
+                PreCov = PreCov(exist_flag, exist_flag);
+            end
+            
+            %シグマポイント再計算
+            %sigma points of re calculate
+            PreMh = zeros(2 * length(line_param.d),1);
+            PreMh(1:2:end-1, 1) = line_param.d;
+            PreMh(2:2:end, 1) = line_param.delta;
+            PreXh = [PreXh(1:obj.n);PreMh(1:end)];
+            CholCov = chol(PreCov);%cholesky factoryzation 
+            Kai = [PreXh,...
+                cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
+                cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
+            weight = [obj.k/(StateCount + obj.k), 1/(2*(StateCount + obj.k))]; 
+            %再計算されたシグマポイントで対応付け
             % association between measurements and map
             %             association_info.index = correspanding wall(line_param) number index
             %            association_info.distance = wall distace
-            association_info = MapAssociation(obj.map_param, line_param, pre_state, measured.ranges, measured.angles, obj.constant);
-            association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
-            association_available_count = length(association_available_index);%Count
-            
-            %EKF Algorithm
-            mapstate_count = 2 * size(line_param.d, 1);
-            state_count = obj.n + mapstate_count;
-            
-            pre_Eststate = [xh_pre(1),xh_pre(2),xh_pre(3)];
-            A = eye(state_count);
-            A(1:3,1:3) = obj.JacobianF(u(1),pre_Eststate(3));
-            B = eye(state_count) .* obj.dt;
-            %
-            C = zeros(association_available_count, state_count);
-            Y = zeros(association_available_count, 1);
-            for i = 1:association_available_count
-                curr = association_available_index(i);
-                idx = association_info.index(association_available_index(i));
-                angle = pre_state(3) + measured.angles(curr) - line_param.delta(idx);
-                denon = line_param.d(idx) - pre_state(1) * cos(line_param.delta(idx)) - pre_state(2) * sin(line_param.delta(idx));
-                % Observation value
-                Y(i, 1) = (denon) / cos(angle);
-                % Observation jacobi matrix
-                C(i, 1) = -cos(line_param.delta(idx)) / cos(angle);
-                C(i, 2) = -sin(line_param.delta(idx)) / cos(angle);
-                C(i, 3) = denon * tan(angle) / cos(angle);
-                C(i, 4 + (idx - 1) * 2) = 1 / cos(angle);
-                C(i, 5 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
-                    - denon * tan(angle) / cos(angle);
+            association_info = cell(1,size(Kai,2));
+            association_available_index = cell(1,size(Kai,2));
+            association_available_count = cell(1,size(Kai,2));
+            for i = 1:size(Kai,2)
+            association_info{1,i} = UKFMapAssociation(Kai(1:obj.n,i), Kai(obj.n+1:end,i), measured.ranges, measured.angles, obj.constant,obj.map_param);
+            association_available_index{1,i} = find(association_info{1,i}.index ~= 0);%Index corresponding to the measured value
+            association_available_count{1,i} = length(association_available_index{1,i});%Count
             end
-            %
-            xh_m = zeros(state_count,1);
-            xh_m(1:obj.n,1) = pre_Eststate';
-            xh_m(obj.n+1:2:end, 1) = line_param.d;
-            xh_m(obj.n+2:2:end, 1) = line_param.delta;
-            %
-            if length(obj.result.P) < state_count
-                % Appearance new line parameter
-                append_count = state_count - length(obj.result.P);
-                max_count = length(obj.result.P);
-                for i = 1:append_count
-                    obj.result.P(max_count + i, max_count + i) = 1.* 1e-7;
+            %出力のシグマポイントを計算
+            %sensing step
+            %測定値が取れていないレーザー部分はダミーデータ0をかませる
+            Ita = cell(1,size(Kai,2));
+            j = 1;
+            for i = 1:size(Kai,2)
+            Ita{1,i} = zeros(length(measured.ranges), 1);
+            for m = 1:length(measured.ranges)
+                if isempty(association_available_index{1,i})
+                     j = 1;
+                    continue;
+                elseif m ==association_available_index{1,i}(j)
+                curr = association_available_index{1,i}(j);
+                idx = association_info{1,i}.index(association_available_index{1,i}(j));
+                angle = Kai(3,i) + measured.angles(curr) - Kai(obj.n+2*idx,i);
+                denon = Kai(obj.n+2*(idx-1) + 1,i) - Kai(1,i) * cos(Kai(obj.n+2*idx,i)) - Kai(2,i) * sin(Kai(obj.n+2*idx,i));
+                % Observation value
+                Ita{1,i}(m,1) = (denon) / cos(angle);
+                j = j+1;
+                if j>length(association_available_index{1,i})
+                    j = 1;
+                    continue;
+                end
+                else
+                    
                 end
             end
-            %%%for analysis%%%%%%%%%%
-            obj.Analysis.PrevCov = obj.result.P;
-            %%%%%%%%%%%%%%%%%
-            %predictiive step
-            system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, size(line_param.d, 1))));
-            P_pre  = A*obj.result.P*A' + B*system_noise*B';       %
-            %%%
-            %correlation coefficient
-            r = cos(2*(pre_Eststate(3) - pi/4));
-%             r = sign(r);
-            sigmaxy = P_pre(1,1) * P_pre(2,2) * r;
-            P_pre(1,2) = sigmaxy;
-            P_pre(2,1) = sigmaxy;
-            %observe step
-            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 郢ァ?スォ郢晢スォ郢晄ァュホヲ郢ァ?スイ郢ァ?ス、郢晢スウ隴厄スエ隴?スー
-            %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
-            tmpvalue = xh_m + G * (measured.ranges(association_available_index)' - Y);% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
-            obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 闔?蜿・?スセ迹夲スェ?ス、陝セ?スョ陷茨スア陋サ?ソス隰ィ?ス」
+            j = 1;
+            end
+            %
+            %事前出力推定値
+            PreYh = weight(1) * Ita{1,1};
+            for i = 2:size(Kai,2)
+                PreYh = PreYh + weight(2) * Ita{1,i};
+            end
+            %事前出力誤差共分散行列
+            PreYCov = weight(1) * (Ita{1,1} - PreYh) * (Ita{1,1} - PreYh)';
+             for i = 2:size(Kai,2)
+                PreYCov = PreYCov + weight(2) * (Ita{1,i} - PreYh) * (Ita{1,i} - PreYh)';
+             end
+             %事前状態，出力誤差共分散行列
+             PreXYCov = weight(1) * (Kai(:,1) - PreXh) * (Ita{1,1} - PreYh)';
+             for i = 2:size(Kai,2)
+                PreXYCov = PreXYCov + weight(2) * (Kai(:,i) - PreXh) * (Ita{1,i} - PreYh)';
+             end
+            %カルマンゲイン
+            G = PreXYCov / (PreYCov + obj.R .* eye(length(measured.ranges)) );
+            
+            Xh = PreXh + G*(measured.ranges' - PreYh);
+            obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(length(measured.ranges))) * G';
+            
             % Convert line parameter into line equation "ax + by + c = 0"
-            line_param.d = tmpvalue(4:2:end, 1);
-            line_param.delta = tmpvalue(5:2:end, 1);
+            line_param.d = Xh(obj.n + 1:2:end, 1);
+            line_param.delta = Xh(obj.n+1:2:end, 1);
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param_opt = LineParameterToLine(line_param, obj.constant);
             obj.map_param.a = line_param_opt.a;
             obj.map_param.b = line_param_opt.b;
             obj.map_param.c = line_param_opt.c;
             % Projection of start and end point on the line
-            point_opt = FittingEndPoint(obj.map_param, obj.constant);
-            obj.map_param.x = point_opt.x;
-            obj.map_param.y = point_opt.y;
-            % Optimize the map%郢晄ァュ繝」郢晏干?ソス?スョ邵コ蜷カ?ス願惺蛹サ?ス冗クコ?ソス
+            MapEnd = FittingEndPoint(obj.map_param, obj.constant);
+            obj.map_param.x = MapEnd.x;
+            obj.map_param.y = MapEnd.y;
+            % Optimize the map
             [obj.map_param, removing_flag] = OptimizeMap(obj.map_param, obj.constant);
             % Update estimate covariance %
             if any(removing_flag)
                 exist_flag = sort([1, 2, 3,(find(~removing_flag) - 1) * 2 + 4, (find(~removing_flag) - 1) * 2 + 5]);
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
-            obj.result.state.set_state(tmpvalue);
-            obj.result.Est_state.set_state(tmpvalue);
+            obj.result.state.set_state(Xh);
+            obj.result.Est_state = Xh;
             obj.result.G = G;
-            run('AnalysisEKFInfo');%analysis
             result=obj.result;
         end
         function show()

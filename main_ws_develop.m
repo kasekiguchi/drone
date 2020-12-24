@@ -60,7 +60,8 @@ agent(i).set_property("sensor",Sensor_LiDAR(i));%LiDAR seosor
 %% set estimator property
 agent(i).estimator=[];
 Gram = GrammianAnalysis(te,ts,dt);
-agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
+% agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
+agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
 %% set reference property
     agent(i).reference=[];
     
@@ -91,14 +92,14 @@ LogData=[
 %     "reference.result.state.p",
     "estimator.result.state.p",
     "estimator.result.state.q",
-    "estimator.ekfslam_WC.map_param.x",
-    "estimator.ekfslam_WC.map_param.y",
-    "estimator.ekfslam_WC.result.P",
-    "estimator.ekfslam_WC.result.ErEl_Round",
-    "estimator.ekfslam_WC.result.Entropy",
-%     "estimator.ekfslam_WC.result.SingP",
-    "estimator.ekfslam_WC.result.G",
-    "env.Floor.param.Vertices",
+%     "estimator.ekfslam_WC.map_param.x",
+%     "estimator.ekfslam_WC.map_param.y",
+%     "estimator.ekfslam_WC.result.P",
+%     "estimator.ekfslam_WC.result.ErEl_Round",
+%     "estimator.ekfslam_WC.result.Entropy",
+% %     "estimator.ekfslam_WC.result.SingP",
+%     "estimator.ekfslam_WC.result.G",
+%     "env.Floor.param.Vertices",
 %     "estimator.ekfslam_WC.result.PartialX",
 %     "estimator.ekfslam_WC.result.PartialY",
 %     "estimator.ekfslam_WC.result.PartialTheta",
@@ -188,23 +189,23 @@ try
             
 %            agent(i).do_controller(param(i).controller);
             agent(i).do_controller(cell(1,10));
-            warukaku = 4;
-            kakudo = (1/2)* warukaku;
-            if time.t<1
-                agent(i).input = [1,pi/warukaku];
-            elseif time.t>10 && time.t<11
-                agent(i).input = [1,-pi/kakudo];
-            elseif time.t>30 && time.t<31
-                agent(i).input = [1,pi/kakudo];
-            elseif time.t>50 && time.t<51
-                agent(i).input = [1,-pi/kakudo];
-            elseif time.t>70 && time.t<71
-                agent(i).input = [1,pi/kakudo];
-            elseif time.t>90 && time.t<91
-                agent(i).input = [1,-pi/kakudo];
-            else
-                agent(i).input = [1,0];
-            end
+%             warukaku = 4;
+%             kakudo = (1/2)* warukaku;
+%             if time.t<1
+%                 agent(i).input = [1,pi/warukaku];
+%             elseif time.t>10 && time.t<11
+%                 agent(i).input = [1,-pi/kakudo];
+%             elseif time.t>30 && time.t<31
+%                 agent(i).input = [1,pi/kakudo];
+%             elseif time.t>50 && time.t<51
+%                 agent(i).input = [1,-pi/kakudo];
+%             elseif time.t>70 && time.t<71
+%                 agent(i).input = [1,pi/kakudo];
+%             elseif time.t>90 && time.t<91
+%                 agent(i).input = [1,-pi/kakudo];
+%             else
+%                 agent(i).input = [1,0];
+%             end
 
         end
         %agent(1).estimator.map.show
