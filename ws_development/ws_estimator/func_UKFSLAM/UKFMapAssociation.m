@@ -1,12 +1,10 @@
-function parameter = UKFMapAssociation(state,Lines, measured_distance, measured_angle, Constant,map)
-PreMap = MapStateToLineEqu(Lines);
+function parameter = UKFMapAssociation(state,Lines, measured_distance, measured_angle, Constant,NLP)
+PreMap = MapStateToLineEqu(Lines,NLP);
 map.a = PreMap.a;
 map.b = PreMap.b;
 map.c = PreMap.c;
-% Projection of start and end point on the line
-MapEnd = FittingEndPoint(map, Constant);
-map.x = MapEnd.x;
-map.y = MapEnd.y;
+map.x = PreMap.x;
+map.y = PreMap.y;
 % Initialize each variable
 association_size = length(measured_distance);
 parameter.index = zeros(association_size, 1);

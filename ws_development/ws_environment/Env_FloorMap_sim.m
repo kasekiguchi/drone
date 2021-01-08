@@ -17,6 +17,9 @@ env_param.type = "FloorMap_sim";
 fl1 = [-50,20;200,20;200,25;-50,25];
 fl2 = [-50,-20;200,-20;200,-25;-50,-25];%x direction long passage
 
+% fl1 = [-50,20;-50  + 100*sqrt(2),20 + 100*sqrt(2);-50 - 5/sqrt(2) + 100*sqrt(2),25 + 5/sqrt(2) + 100*sqrt(2);-50 - 5/sqrt(2),25 + 5/sqrt(2)];
+% fl2 = [-50,-20;-50 + 100*sqrt(2),-20 + 100*sqrt(2);-50- 5/sqrt(2) + 100 * sqrt(2),-25- 5/sqrt(2)+100*sqrt(2);-50- 5/sqrt(2),-25- 5/sqrt(2)];%45 deg long passage
+
 % fl1 = [20,-50;20,200;25,200;25,-50];
 % fl2 = [-20,-50;-20,200;-25,200;-25,-50];%y direction long passage
 

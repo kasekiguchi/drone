@@ -37,7 +37,7 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
 %     arranged_pos = arranged_position([0,0],N,1,0);
     initial(i).p = [0;0];
-    initial(i).q = [0];
+    initial(i).q = [pi/4];
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
@@ -46,10 +46,12 @@ for i = 1:N
 if fExp
     else
         agent(i) = Drone(Model_WheelChairV(i,dt,'plant',struct('p',[0;0],'q',[0]),struct('noise',4.337E-5))); 
+%         agent(i) = Drone(Model_WheelChairA(i,dt,'plant',struct('p',[0;0],'q',[0],'v',[0],'w',[0]),struct('noise',4.337E-5)));
 end
  %% model
     % set control model
-    agent(i).set_model(Model_WheelChairV(N,dt,'model',struct('p',[0;0],'q',[0]))); % オイラー角モデル
+    agent(i).set_model(Model_WheelChairV(i,dt,'model',struct('p',[0;0],'q',[0]))); % オイラー角モデル
+% agent(i).set_model(Model_WheelChairA(N,dt,'model',struct('p',[0;0],'q',[0],'v',[0],'w',[0]))); % オイラー角モデル
     close all
 %% set environment property
 Env = [];
@@ -61,6 +63,7 @@ agent(i).set_property("sensor",Sensor_LiDAR(i));%LiDAR seosor
 agent(i).estimator=[];
 Gram = GrammianAnalysis(te,ts,dt);
 % agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
+% agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
 agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
 %% set reference property
     agent(i).reference=[];
@@ -218,7 +221,7 @@ try
         % with FH
         figure(FH)
         drawnow
-        for i = 1:N % 霑・?スカ隲キ蛹コ蟲ゥ隴?スー
+        for i = 1:N %
             model_param.param=agent(i).model.param;
 %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
             model_param.FH = FH;

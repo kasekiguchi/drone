@@ -137,12 +137,13 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, size(line_param.d, 1))));
             P_pre  = A*obj.result.P*A' + B*system_noise*B';       %
             %%%
-            %correlation coefficient
-            r = cos(2*(pre_Eststate(3) - pi/4));
-%             r = sign(r);
-            sigmaxy = P_pre(1,1) * P_pre(2,2) * r;
-            P_pre(1,2) = sigmaxy;
-            P_pre(2,1) = sigmaxy;
+ %%%%%%%%%correlation coefficient
+%             r = cos(2*(pre_Eststate(3) - pi/4));
+% %             r = sign(r);
+%             sigmaxy = P_pre(1,1) * P_pre(2,2) * r;
+%             P_pre(1,2) = sigmaxy;
+%             P_pre(2,1) = sigmaxy;
+%%%%%%%%%%%%%%%%%%%%%
             %observe step
             G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 郢ァ?スォ郢晢スォ郢晄ァュホヲ郢ァ?スイ郢ァ?ス、郢晢スウ隴厄スエ隴?スー
             %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス

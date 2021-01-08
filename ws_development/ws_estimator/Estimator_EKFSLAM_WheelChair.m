@@ -1,10 +1,9 @@
-function Estimator_EKFSLAM_WheelChair(agent,Gram)
+function Estimator = Estimator_EKFSLAM_WheelChair(agent,Gram)
 
 %% estimator class
 Estimator.name="ekfslam_WC";
 Estimator.type="EKFSLAM_WheelChairA";%propose method
 % Estimator.type="CmpEKFSLAM_WheelChair";%the compare method as 3 state
-
 EKF_param.dt = agent(1).model.dt;
 %    EKF_param.Q = eye(3)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % 繧キ繧ケ繝?繝?繝弱う繧コ?シ?Model繧ッ繝ゥ繧ケ逕ア譚・?シ?
 EKF_param.Q = diag([1.0, 1.0, 1.0 10 10]);
@@ -21,9 +20,6 @@ EKF_param.list=["p","v"];
 EKF_param.Gram = Gram;
 %-------------------------------
 Estimator.param=EKF_param;
-for i = 1:length(agent)
-    agent(i).set_estimator(Estimator);
-end
 disp('Execute "do" method with following parameter to operate EKF estimator.');
 disp('param.estimator={{agent(i),agent(i).sensor.result.state.get(["q","p"]),[]}};')
 end
