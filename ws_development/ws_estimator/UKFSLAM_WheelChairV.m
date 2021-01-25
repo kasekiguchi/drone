@@ -37,7 +37,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             
             % the constant value for estimating of the map
             obj.constant = struct; %constant parameter
-            obj.constant.LineThreshold = 0.1; % Under the this threshold, the error from "ax + by + c" is allowed.
+            obj.constant.LineThreshold = 0.6; % Under the this threshold, the error from "ax + by + c" is allowed.
             obj.constant.PointThreshold = 0.1; % Maximum distance between line and points in same cluster
             obj.constant.GroupNumberThreshold = 5; % Minimum points number which is constructed cluster
             obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
@@ -55,7 +55,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             %% sigma points of previous step 
             StateCount = length(obj.result.Est_state);
             PreXh = obj.result.Est_state;%previous estimation
-            CholCov = chol(obj.result.P);%cholesky factoryzation 
+            CholCov = chol(obj.result.P)';%cholesky factoryzation 
             Kai = [PreXh,...
                 cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
                 cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
@@ -83,9 +83,8 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             %Pre estimation [x;y;theta;map's]%事前状態推定
             PreXh = weight(1) .* Kai(:,1);
             for i = 2:size(Kai,2)
-                PreXh = PreXh + Kai(:,i).*weight(2);
+                PreXh = PreXh + weight(2) .*Kai(:,i);
             end
-           
             %Previous Covariance matrix
             PreCov = weight(1) * (Kai(:,1) - PreXh) * (Kai(:,1) - PreXh)';
             for i = 2:size(Kai,2)
@@ -117,20 +116,14 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             % Convert measurements into lines %Line segment approximation
             LSA_param = PointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
             % Conbine between measurements and map%
-            obj.map_param = CombiningLines(obj.map_param , LSA_param, obj.constant);
-            line_param = LineToLineParamAndEndPoint(obj.map_param);
-
-            StateCount = obj.n + obj.NLP * length(line_param.d);%StateCount update           
-             %共分散行列を再構成
+            obj.map_param = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);
             % Optimize the map%
             [obj.map_param, removing_flag] = OptimizeMap(obj.map_param, obj.constant);
-            % Update estimate covariance %
-            if any(removing_flag)
-                exist_flag = sort([1, 2, 3,(find(~removing_flag) - 1) * 6 + 4, (find(~removing_flag) - 1) * 6 + 5]);
-                PreCov = PreCov(exist_flag, exist_flag);
-            end
-            
-             if length(PreCov) < StateCount
+            %線分パラメータに変換
+            line_param = LineToLineParamAndEndPoint(obj.map_param);
+            %StateCount update    
+            StateCount = obj.n + obj.NLP * length(line_param.d);   
+            if length(PreCov) < StateCount
                 % Appearance new line parameter
                 append_count = StateCount - length(PreCov);
                 max_count = length(PreCov);
@@ -138,7 +131,12 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
                     PreCov(max_count + i, max_count + i) = 1.* 1.0E-6;
                 end
              end
-            
+             %共分散行列を再構成            
+            % Update estimate covariance %
+            if any(removing_flag)
+                exist_flag = sort([1, 2, 3,(find(~removing_flag) - 1) * 6 + 4, (find(~removing_flag) - 1) * 6 + 5, (find(~removing_flag) - 1) * 6 + 6, (find(~removing_flag) - 1) * 6 + 7, (find(~removing_flag) - 1) * 6 + 8, (find(~removing_flag) - 1) * 6 + 9]);
+                PreCov = PreCov(exist_flag, exist_flag);
+            end
             %シグマポイント再計算
             %sigma points of re calculate
             PreMh = zeros(obj.NLP * length(line_param.d),1);
@@ -149,7 +147,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             PreMh(5:obj.NLP:end, 1) = line_param.ys;
             PreMh(6:obj.NLP:end, 1) = line_param.ye;
             PreXh = [PreXh(1:obj.n);PreMh(1:end)];
-            CholCov = chol(PreCov);%cholesky factoryzation 
+            CholCov = chol(PreCov)';%cholesky factoryzation 
             Kai = [PreXh,...
                 cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
                 cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
@@ -164,7 +162,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             for i = 1:size(Kai,2)
                 tmp_angles = sensor.angle - Kai(3,i);
                 if iscolumn(tmp_angles)
-                tmp_angles = tmp_angles';% Transposition
+                    tmp_angles = tmp_angles';% Transposition
                 end
                 association_info{1,i} = UKFMapAssociation(Kai(1:obj.n,i), Kai(obj.n+1:end,i), measured.ranges,tmp_angles, obj.constant,obj.NLP);
                 association_available_index{1,i} = find(association_info{1,i}.index ~= 0);%Index corresponding to the measured value
@@ -179,7 +177,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             Ita{1,i} = zeros(length(measured.ranges), 1);
              tmp_angles = sensor.angle - Kai(3,i);
                 if iscolumn(tmp_angles)
-                tmp_angles = tmp_angles';% Transposition
+                    tmp_angles = tmp_angles';% Transposition
                 end
             for m = 1:length(measured.ranges)
                 if isempty(association_available_index{1,i})
@@ -237,14 +235,16 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             MapEnd = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = MapEnd.x;
             obj.map_param.y = MapEnd.y;
-            % Optimize the map
-%             [obj.map_param, removing_flag] = OptimizeMap(obj.map_param, obj.constant);
-%             % Update estimate covariance %
-%             if any(removing_flag)
-%                 exist_flag = sort([1, 2, 3,(find(~removing_flag) - 1) * 6 + 4, (find(~removing_flag) - 1) * 6 + 5]);
-%                 obj.result.P = obj.result.P(exist_flag, exist_flag);
-%             end
-            obj.result.state.set_state(Xh(1:3));
+            
+            [obj.map_param, removing_flag] = OptimizeMap(obj.map_param, obj.constant);
+            
+            if any(removing_flag)
+                exist_flag = sort([1, 2, 3,(find(~removing_flag) - 1) * 6 + 4, (find(~removing_flag) - 1) * 6 + 5, (find(~removing_flag) - 1) * 6 + 6, (find(~removing_flag) - 1) * 6 + 7, (find(~removing_flag) - 1) * 6 + 8, (find(~removing_flag) - 1) * 6 + 9]);
+                PreCov = PreCov(exist_flag, exist_flag);
+            end
+            
+            % return values setting
+            obj.result.state.set_state(Xh);
             obj.result.Est_state = Xh;
             obj.result.G = G;
             result=obj.result;

@@ -140,7 +140,7 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
  %%%%%%%%%correlation coefficient
 %             r = cos(2*(pre_Eststate(3) - pi/4));
 % %             r = sign(r);
-%             sigmaxy = P_pre(1,1) * P_pre(2,2) * r;
+%             sigmaxy = sqrt(P_pre(1,1)) * sqrt(P_pre(2,2)) * r;
 %             P_pre(1,2) = sigmaxy;
 %             P_pre(2,1) = sigmaxy;
 %%%%%%%%%%%%%%%%%%%%%

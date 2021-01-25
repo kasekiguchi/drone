@@ -1,9 +1,27 @@
-function PlotFunc_MapAndVehicleTrueAndEst()
-x_s = agent.estimator.ekfslam_WC.map_param.x(:,1);
-x_e = agent.estimator.ekfslam_WC.map_param.x(:,2);
-y_s = agent.estimator.ekfslam_WC.map_param.y(:,1);
-y_e = agent.estimator.ekfslam_WC.map_param.y(:,2);
-[Index,dimension,data,Flag] = FindDataMatchName(logger,Name)
+function [FigNum] = PlotFunc_MapAndVehicleTrueAndEst(obj,FigNum)
+%% robot State
+[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.state.p');
+if Flag
+    %estimation
+    [~,EstDim,EstData] = FindDataMatchName(obj.logger,'estimator.result.state.p');
+    if ~PlantDim ==EstDim
+        error('Dimention is not match');
+    end
+    [~,PlantqDim,PlantqData,~] = FindDataMatchName(obj.logger,'plant.state.q');
+    [~,EstqDim,EstqData] = FindDataMatchName(obj.logger,'estimator.result.state.q');
+    if ~PlantqDim == EstqDim
+        error('Dimention is not match');
+    end
+    %Time
+    Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
+%% Map State
+[~,EstDim,EstData] = FindDataMatchName(obj.logger,'estimator.result.state.map_param.x');
+[~,EstDim,EstData] = FindDataMatchName(obj.logger,'estimator.result.state.map_param.y');
+% x_s = agent.estimator.ekfslam_WC.map_param.x(:,1);
+% x_e = agent.estimator.ekfslam_WC.map_param.x(:,2);
+% y_s = agent.estimator.ekfslam_WC.map_param.y(:,1);
+% y_e = agent.estimator.ekfslam_WC.map_param.y(:,2);
+[~,EstDim,EstData] = FindDataMatchName(obj.logger,'env.Floor.param.Vertices');
 s_xy = [x_s,y_s];
 e_xy = [x_e,y_e];
 si = size(x_s,1);

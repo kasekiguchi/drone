@@ -6,5 +6,7 @@ FuncNames = [
     "MapMovie",
     "Entropy",
     "RMSE",
+    "AllTureAndEst",
+    "VWTureAndEst",
     ];
 end

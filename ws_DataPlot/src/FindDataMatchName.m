@@ -4,6 +4,8 @@ tmp = cellfun(@(c) ~isempty(c),tmp);
 Index = find(tmp);
 if isempty(Index)
     Flag = false;
+    dimension = 0;
+    data = 0;
 else
     Flag = true;
 dimension = size(logger.Data.agent{1,Index},1);

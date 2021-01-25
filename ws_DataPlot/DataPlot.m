@@ -24,7 +24,7 @@ classdef DataPlot<handle
     
     methods
         
-        function obj = DataPlot(Logger,PlotOnOff)
+        function obj = DataPlot(Logger,PlotOnOff,SaveOnOff)
             %DATAPLOT
             %   constructer for obj and path generate
             obj.logger = Logger;% Data file
@@ -54,6 +54,12 @@ classdef DataPlot<handle
             end
             obj.SavePath = dataFilePath;
             obj.SaveDateStr = strcat('ws_Saves\',SaveDateStr,'\',SaveDateStrD);
+            
+            %% Save data
+            if SaveOnOff
+            save(strcat('Logger',SaveDateStrD,'.mat'),'Logger');
+            movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
+            end
             %% Plot Data
             do(obj);
             %             AutoPPt(result);

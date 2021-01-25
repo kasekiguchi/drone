@@ -1,6 +1,6 @@
 function Param = MapStateToLineEqu(MapParam,NLP)
 %MapParam = [d,alpha,xs,xe,ys,ye];
-MapNum = length(MapParam)/NLP;%because MapParam has 2 param
+MapNum = length(MapParam)/NLP;%because MapParam has 6 param
 Mapdis = MapParam(1:NLP:end);
 Mapdelta = MapParam(2:NLP:end);
 Mapxs = MapParam(3:NLP:end);
