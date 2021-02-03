@@ -16,7 +16,7 @@ classdef FOR_LOAD < ESTIMATOR_CLASS
             end
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","pL","pT"],"num_list",[3,4,3,3]));
             if sum(contains(self.model.state.list,"q"))==1
-                obj.result.state.num_list=[3,length(self.model.state.q),3]; % model‚Æ‡‚í‚¹‚é
+                obj.result.state.num_list=[3,length(self.model.state.q),3,3]; % model‚Æ‡‚í‚¹‚é
                 obj.result.state.type = length(self.model.state.q);
             end
         end

@@ -134,7 +134,48 @@ dq   = L'*ob/2;
 x=[p;q;dp;ob;pl;dpl;pT;ol];
 f=[dp;dq;ddp;dob;dpl;ddpl;dpT;dol];
 matlabFunction(f,'file','with_load_model_for_HL','vars',{x T cell2sym(physicalParam)},'outputs',{'dx'});
-
+%% With load model (Extend)
+syms Length real
+syms b real
+physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, mL, Length, b};
+e3=[0;0;1];
+dol  = cross(-pT,u1*Rb0*e3)/(m*Length); % ケーブル角加速度
+dpT  = cross(ol,pT); % 機体から見たケーブル上の単位長さの位置の速度
+ddpT = cross(dol,pT)+cross(ol,dpT); % 単位長さの位置の加速度
+ddpl  = [0;0;-gravity]+(dot(pT,u1*Rb0*e3)-m*Length*dot(dpT,dpT))*pT/(m+mL); % 牽引物体の加速度
+ddp  = ddpl-Length*ddpT;
+dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4]+inv(Ib)*cross(-b*Rb0*e3,-mL*(ddpl+[0;0;gravity]));
+dq   = L'*ob/2;
+x=[p;q;dp;ob;pl;dpl;pT;ol];
+f=[dp;dq;ddp;dob;dpl;ddpl;dpT;dol];
+U = [u1;u2;u3;u4];
+Fl= subs(f,U,[0;0;0;0]);
+Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
+simplify(f - (Fl+Gl*U))
+% matlabFunction(Fl,'file','FL_extend','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+% matlabFunction(Gl,'file','GL_extend','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
+matlabFunction(f,'file','with_load_model_extend','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+%% With load model (Extend & Euler)
+syms Length real
+syms b real
+physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, mL, Length, b};
+e3=[0;0;1];
+dol  = cross(-pT,u1*ERb0*e3)/(m*Length); % ケーブル角加速度
+dpT  = cross(ol,pT); % 機体から見たケーブル上の単位長さの位置の速度
+ddpT = cross(dol,pT)+cross(ol,dpT); % 単位長さの位置の加速度
+ddpl  = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*Length*dot(dpT,dpT))*pT/(m+mL); % 牽引物体の加速度
+ddp  = ddpl-Length*ddpT;
+dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4]+inv(Ib)*cross(-b*ERb0*e3,-mL*(ddpl+[0;0;gravity]));
+dq   = EL'*ob/2;
+x=[p;er;dp;ob;pl;dpl;pT;ol];
+f=[dp;der;ddp;dob;dpl;ddpl;dpT;dol];
+U = [u1;u2;u3;u4];
+Fl= subs(f,U,[0;0;0;0]);
+Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
+simplify(f - (Fl+Gl*U))
+% matlabFunction(Fl,'file','FL_extend','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+% matlabFunction(Gl,'file','GL_extend','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
+matlabFunction(f,'file','euler_with_load_model_extend','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 %% Local functions
 function m = Mtake(mat,m,n)
     m = mat(m,n);
