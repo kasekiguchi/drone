@@ -270,4 +270,3 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
         
     end
 end
-
