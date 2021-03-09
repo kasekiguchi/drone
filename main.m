@@ -18,8 +18,9 @@ if fExp
     dt = 0.025; % sampling time
 else
 %     dt = 0.1; % sampling time
-%     dt = 0.025;
-    dt = 0.010;
+%     dt = 0.005;
+    dt = 0.025;
+%     dt = 0.010;
 %     dt = 0.001;
 end
 sampling = dt;
@@ -27,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=50;
+    te=100;
 end
 %% set connector (global instance)
 if fExp
@@ -213,7 +214,7 @@ time.t = ts;
 mparam=[]; % without occulusion
 
 %% main loop
-%profile on
+profile on
 disp("while ============================")
 close all;
 if fExp && ~fMotive
@@ -325,7 +326,7 @@ catch ME    % for error
     warning('ACSL : Emergency stop! Check the connection.');
     rethrow(ME);
 end
-%profile viewer
+profile viewer
 %%
 close all
 clc

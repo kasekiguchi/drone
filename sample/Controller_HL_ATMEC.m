@@ -33,6 +33,9 @@ Controller_param.B2 = [0;1];
 Controller_param.A4 =diag([1 1 1],1);
 Controller_param.B4 = [0;0;0;1];
 
+% モデルの想定時間変更
+% dt = dt*5;
+
 %モデルを離散化 x[i+1] = Ad*x[i] + Bd*u[i]
 sys = ss(Controller_param.A2,Controller_param.B2,zeros(2),[0;0]);
 d2 = c2d(sys,dt);
@@ -52,20 +55,20 @@ Controller_param.B4d = d4.B;
 %% ====MEC 補償ゲイン====
 %-------dt = 0.1 s 実験的に求めた最適値-------
 % Kz = [450 0];
-Kx = [50 0 0 0];
-Ky = [50 0 0 0];
+% Kx = [50 0 0 0];
+% Ky = [50 0 0 0];
 
 %---------w/o MEC--------
 Kz = [0 0];
-% Kx = [0 0 0 0];
-% Ky = [0 0 0 0];
+Kx = [0 0 0 0];
+Ky = [0 0 0 0];
  
 Controller_param.K = [Kz Kx Ky];
 
 %% ====FRIT,RLS パラメーター====
 %---------推定, 更新開始時刻----------
-Controller_param.FRIT_begin = 10;%補償ゲインの推定を始める時間
-Controller_param.RLS_begin = 20;%補償ゲインのを更新始める時間
+Controller_param.FRIT_begin = 5;%補償ゲインの推定を始める時間
+Controller_param.RLS_begin = 10;%補償ゲインのを更新始める時間
 %------------------z------------------
 Controller_param.gamma.z = 1; %初期相関係数
 Controller_param.alpha.z = 0.01; %ローパスフィルタ強度
