@@ -1,5 +1,8 @@
-function Sensor = Sensor_LiDAR(id)
+function Sensor = Sensor_LiDAR(id,varargin)
 %% sensor class demo : constructor
+if ~isempty(varargin)
+    LiDAR_param = varargin{1};%ノイズの分散
+end
 % sensor property LiDAR sensor
 % rpos : RnagePos_sim
 Sensor.name=["LiDAR"];

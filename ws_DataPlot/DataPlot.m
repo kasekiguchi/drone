@@ -6,7 +6,6 @@ classdef DataPlot<handle
         logger
         SavePath
         SaveDateStr
-        PlotOnOff
         Condition
     end
     
@@ -17,18 +16,22 @@ classdef DataPlot<handle
         FontSize = 15;
         FontName = 'TimesNewRoman'
         FontWeight = 'normal';
-        FuncNames = FuncNameList();
-        %         FuncNames = run('FuncNameList');
-        %         FuncNames = ['XYThetaTureAndEst']
+        FuncNames = [%     "XYZTureAndEst",
+%     "AttitudesTureAndEst",
+    "MapAndVehicleTrueAndEst",
+    "MapMovie",
+%     "Entropy",
+    "RMSE",
+    "AllTureAndEst",
+    "VWTureAndEst"]
     end
     
     methods
         
-        function obj = DataPlot(Logger,PlotOnOff,SaveOnOff)
+        function obj = DataPlot(Logger,SaveOnOff)
             %DATAPLOT
             %   constructer for obj and path generate
             obj.logger = Logger;% Data file
-            obj.PlotOnOff = PlotOnOff;%matrix of true and false
             %             obj.Condition = Condition;% Non logger data and simulation condition
             %% makedir
             SaveDate = datetime('now');
@@ -57,8 +60,8 @@ classdef DataPlot<handle
             
             %% Save data
             if SaveOnOff
-            save(strcat('Logger',SaveDateStrD,'.mat'),'Logger');
-            movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
+                save(strcat('Logger',SaveDateStrD,'.mat'),'Logger');
+                movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
             end
             %% Plot Data
             do(obj);
@@ -75,15 +78,11 @@ classdef DataPlot<handle
             Figi = 1;
             FigNum = 1;
             while Figi<= length(obj.FuncNames)
-                if obj.PlotOnOff(Figi) ==1
-                    FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
-                    FuncHandleName = strcat('PlotFunc_',FuncName);
-                    FuncHandle = str2func(FuncHandleName);
-                    [FigNum] = FuncHandle(obj,FigNum);
-                    Figi = Figi+1;
-                else
-                    Figi = Figi+1;
-                end
+                FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
+                FuncHandleName = strcat('PlotFunc_',FuncName);
+                FuncHandle = str2func(FuncHandleName);
+                [FigNum] = FuncHandle(obj,FigNum);
+                Figi = Figi+1;
             end
         end
         

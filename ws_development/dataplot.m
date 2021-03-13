@@ -87,10 +87,10 @@ for pI = 1:pqld
     movefile(strcat('figtheta','.pdf'),strcat('Saves_W\',save_date_str));
 end
 %% map_plot
-x_s = agent.estimator.ekfslam_WC.map_param.x(:,1);
-x_e = agent.estimator.ekfslam_WC.map_param.x(:,2);
-y_s = agent.estimator.ekfslam_WC.map_param.y(:,1);
-y_e = agent.estimator.ekfslam_WC.map_param.y(:,2);
+x_s = agent.estimator.ukfslam_WC.map_param.x(:,1);
+x_e = agent.estimator.ukfslam_WC.map_param.x(:,2);
+y_s = agent.estimator.ukfslam_WC.map_param.y(:,1);
+y_e = agent.estimator.ukfslam_WC.map_param.y(:,2);
 s_xy = [x_s,y_s];
 e_xy = [x_e,y_e];
 si = size(x_s,1);

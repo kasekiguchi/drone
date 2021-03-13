@@ -43,7 +43,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             obj.constant.PointThreshold = 0.1; % Maximum distance between line and points in same cluster
             obj.constant.GroupNumberThreshold = 5; % Minimum points number which is constructed cluster
             obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
-            obj.constant.ZeroThreshold = 1e-5; % Under this threshold, it is zero.
+            obj.constant.ZeroThreshold = 1e-3; % Under this threshold, it is zero.
             obj.constant.CluteringThreshold = 0.1; % Split a cluster using distance from next point
             obj.constant.SensorRange = 40; % Max scan range
             %------------------------------------------
@@ -141,7 +141,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             obj.Analysis.PrevCov = obj.result.P;
             %%%%%%%%%%%%%%%%%
             system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, size(line_param.d, 1))));
-            P_pre  = A*obj.result.P*A' + B*system_noise*B';       % 闔?蜿・辯暮坡?ス、陝セ?スョ陷茨スア陋サ?ソス隰ィ?ス」髯ヲ謔滂ソス?ソス
+            P_pre  = A*obj.result.P*A' + B*system_noise*B';       % 
             G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 郢ァ?スォ郢晢スォ郢晄ァュホヲ郢ァ?スイ郢ァ?ス、郢晢スウ隴厄スエ隴?スー
             %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
             tmpvalue = xh_m + G * (sensor.length(association_available_index)' - Y);% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
@@ -168,7 +168,9 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             obj.result.state.set_state(tmpvalue);
             obj.result.Est_state.set_state(tmpvalue);
             obj.result.G = G;
-            run('AnalysisEKFInfo');%analysis
+            obj.result.map_param.x = obj.map_param.x;
+            obj.result.map_param.y = obj.map_param.y;
+%             run('AnalysisEKFInfo');%analysis
             result=obj.result;
         end
         function show()

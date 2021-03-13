@@ -23,7 +23,7 @@ if strcmp(type,"plant")
 %     end
 else
 %     for i = 1:N
-        Setting.param.K = 0.9;
+        Setting.param.K =0.9;
         Model.param=Setting;
 %         assignin('base',"Model",Model);
 %         model_set_str=strcat("agent(",string(i),").set_model(Model)");

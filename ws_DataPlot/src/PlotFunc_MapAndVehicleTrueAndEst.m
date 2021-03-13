@@ -15,37 +15,70 @@ if Flag
     %Time
     Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
 %% Map State
-[~,EstDim,EstData] = FindDataMatchName(obj.logger,'estimator.result.state.map_param.x');
-[~,EstDim,EstData] = FindDataMatchName(obj.logger,'estimator.result.state.map_param.y');
-% x_s = agent.estimator.ekfslam_WC.map_param.x(:,1);
-% x_e = agent.estimator.ekfslam_WC.map_param.x(:,2);
-% y_s = agent.estimator.ekfslam_WC.map_param.y(:,1);
-% y_e = agent.estimator.ekfslam_WC.map_param.y(:,2);
-[~,EstDim,EstData] = FindDataMatchName(obj.logger,'env.Floor.param.Vertices');
-s_xy = [x_s,y_s];
-e_xy = [x_e,y_e];
-si = size(x_s,1);
-figure(5)
-hold on;
-ax = gca;
-SOE = size(Env.param.Vertices,3);
-for ei = 1:SOE
-    tmpenv(ei) = polyshape(Env.param.Vertices(:,:,ei));
+%estimate map x
+tmp = regexp(obj.logger.items,'estimator.result.map_param.x');
+tmp = cellfun(@(c) ~isempty(c),tmp);
+tmpIndex = find(tmp);
+MapDatax = obj.logger.Data.agent{end,tmpIndex};
+MapDimx = size(MapDatax,1);
+%estimate map y
+tmp = regexp(obj.logger.items,'estimator.result.map_param.y');
+tmp = cellfun(@(c) ~isempty(c),tmp);
+tmpIndex = find(tmp);
+MapDatay = obj.logger.Data.agent{end,tmpIndex};
+MapDimy = size(MapDatay,1);
+
+%plant map
+tmp = regexp(obj.logger.items,'env.Floor.param.Vertices');
+tmp = cellfun(@(c) ~isempty(c),tmp);
+Index = find(tmp);
+MapIdx = size(obj.logger.Data.agent{1,Index},3);
+for ei = 1:MapIdx
+    tmpenv(ei) = polyshape(obj.logger.Data.agent{1,Index}(:,:,ei));
 end
 p_Area = union(tmpenv(:));
-% p_Area = polyshape(Env.param.Vertices());
-plot(p_Area);
 
-for i=1:si
-    plot([x_s(i),x_e(i)],[y_s(i),y_e(i)],'LineWidth',5,'Color','r');
+%make figure
+figure(FigNum)
+hold on;
+ax = gca;
+
+plot(p_Area,'FaceColor','blue','FaceAlpha',0.1);
+for i=1:MapDimx
+    plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',5,'Color','r');
 end
-plot(model_data(1,end),model_data(2,end),'b>');
-plot(plant_data(1,end),plant_data(2,end),'g>');
+%plantFinalState
+PlantFinalState = PlantData(:,end);
+PlantFinalStatesquare = PlantFinalState + 2.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
+PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * PlantqData(end) / pi, PlantData(:,end)');
+plot(PlantFinalStatesquare,'FaceColor','green','FaceAlpha',0.1);
+%modelFinalState
+EstFinalState = EstData(:,end);
+EstFinalStatesquare = EstFinalState + 2.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+EstFinalStatesquare =  polyshape( EstFinalStatesquare');
+EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * EstqData(end) / pi, EstData(:,end)');
+plot(EstFinalStatesquare,'FaceColor','green','FaceAlpha',0.1);
+%
+plot(PlantData(1,:),PlantData(2,:),'Color',[0 0.4470 0.7410],'LineWidth',5);
+plot(EstData(1,:),EstData(2,:),'Color',[0.8500 0.3250 0.0980],'LineWidth',4);
+%setting
 grid on;
 axis equal;
 % xlim([-50 200]);ylim([-20 20]);
 xlabel('x [m]');ylabel('y [m]');
-xticks([-50:20:200]);yticks([-20:20:20])
-ax.FontSize = 15;
-hold off
+% xticks([-50:20:200]);yticks([-20:20:20])
+%---テンプレ部分---%
+    ax.FontSize = obj.FontSize;
+    ax.FontName = obj.FontName;
+    ax.FontWeight = obj.FontWeight;
+    hold off
+    exportgraphics(ax,strcat('MapAndTrajectry','.pdf'));
+    movefile(strcat('MapAndTrajectry','.pdf'),obj.SaveDateStr);
+    exportgraphics(ax,strcat('MapAndTrajectry','.emf'));
+    movefile(strcat('MapAndTrajectry','.emf'),obj.SaveDateStr);
+    FigNum = FigNum + 1;
+    %---------------------%
+else
+    disp(strcat('we do not disp Map'));
 end

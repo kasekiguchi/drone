@@ -12,6 +12,7 @@ classdef LiDAR_sim < SENSOR_CLASS
     properties (Access = private) % construct したら変えない．
         radius = 40;
         angle_range = -pi:0.01:pi;
+        noise = 0;
     end
     
     methods
@@ -22,6 +23,7 @@ classdef LiDAR_sim < SENSOR_CLASS
             if isfield(param,'interface'); obj.interface = Interface(param.interface);end
             if isfield(param,'radius'); obj.radius = param.radius;         end
             if isfield(param,'angle_range');  obj.angle_range = param.angle_range;end
+            if isfield(param,'noise');  obj.noise = param.noise;end
         end
         
         function result = do(obj,param)
@@ -30,6 +32,7 @@ classdef LiDAR_sim < SENSOR_CLASS
             %   result.length : [1 0]からの角度がangle,
             %   angle_range で規定される方向の距離を並べたベクトル：単相LiDARの出力を模擬
             % 【入力】param = {Env}        Plant ：制御対象， Env：環境真値
+            rng('shuffle');
             Plant=obj.self.plant;
             Env=param{1};
             tmp = obj.angle_range;            
@@ -56,13 +59,14 @@ classdef LiDAR_sim < SENSOR_CLASS
             %lineseg(1:2:size(circ,1)*2,:)=circ;
             %in=intersect(result.region,[lineseg;0 0]);
 %             index = zeros(length(circ),1);
-            result.angle = zeros(1,length(obj.angle_range));
+            result.angle = obj.angle_range;
             for i = 1:length(circ)
                 in=intersect(result.region,[circ(i,:);0 0]);
                 if ~isempty(in)
                     in=setdiff(in(~isnan(in(:,1)),:),[0 0],'rows'); % レーザーと領域の交点
                     [~,mini]=min(vecnorm(in')');
                     result.sensor_points(i,:)=in(mini,:);
+                    result.sensor_points(i,:) = result.sensor_points(i,:) + (obj.noise).*randn(1,2);
                     result.angle(i) = obj.angle_range(i);
 %                     index(i) = 1;
                 else

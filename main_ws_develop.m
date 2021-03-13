@@ -11,7 +11,7 @@ userpath('clear');
 warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレーション
+fExp = 0;%1：実機　それ以外：シミュレ5rーション
 fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -28,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=60;
+    te=10;
 end
 %% initialize
 initial(N) = struct;
@@ -47,26 +47,26 @@ end
 for i = 1:N
     if fExp
     else
-%                 agent(i) = Drone(Model_WheelChairV(i,dt,'plant',struct('p',[0;0],'q',[0]),struct('noise',4.337E-5)));
-        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',struct('p',[0;0],'q',[0],'v',[0],'w',[0]),struct('noise',4.337E-5)));
+        agent(i) = Drone(Model_WheelChairV(i,dt,'plant',struct('p',[0;0],'q',[0]),struct('noise',7.058E-5)));
+        %         agent(i) = Drone(Model_WheelChairA(i,dt,'plant',struct('p',[-1;0],'q',[0],'v',[0],'w',[0]),struct('noise',4.337E-5)));
     end
     %% model
     % set control model
-%         agent(i).set_model(Model_WheelChairV(i,dt,'model',struct('p',[0;0],'q',[0]))); % オイラー角モデル
-    agent(i).set_model(Model_WheelChairA(N,dt,'model',struct('p',[0;0],'q',[0],'v',[0],'w',[0]))); % オイラー角モデル
+    agent(i).set_model(Model_WheelChairV(i,dt,'model',struct('p',[0;0],'q',[0]))); % オイラー角モデル
+    %     agent(i).set_model(Model_WheelChairA(N,dt,'model',struct('p',[0;0],'q',[0],'v',[0],'w',[0]))); % オイラー角モデル
     close all
     %% set environment property
     Env = [];
     agent(i).set_property("env",Env_FloorMap_sim(i)); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor=[];
-    agent(i).set_property("sensor",Sensor_LiDAR(i));%LiDAR seosor
+    agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-9)) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
     Gram = GrammianAnalysis(te,ts,dt);
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
-    agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
-    % agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
+    %     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
+        agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
     %% set reference property
     agent(i).reference=[];
     
@@ -97,12 +97,13 @@ LogData=[
     %     "reference.result.state.p",
     "estimator.result.state.p",
     "estimator.result.state.q",
-    "estimator.result.state.v",
-    "estimator.result.state.w",
-    "plant.state.v",
-    "plant.state.w",
-    "estimator.ekfslam_WC.map_param.x",
-    "estimator.ekfslam_WC.map_param.y",
+    %     "estimator.result.state.v",
+    %     "estimator.result.state.w",
+    %     "plant.state.v",
+    %     "plant.state.w",
+    "estimator.result.map_param.x",
+    "estimator.result.map_param.y",
+    "env.Floor.param.Vertices",
     %     "estimator.ekfslam_WC.result.P",
     %     "estimator.ekfslam_WC.result.ErEl_Round",
     %     "estimator.ekfslam_WC.result.Entropy",
@@ -169,140 +170,139 @@ FH  = figure('position',[0 0 eps eps],'menubar','none');
 %%
 w = waitforbuttonpress;
 
-try
-    while round(time.t,5)<=te
-        %while 1 % for exp
-        %%
-        tic
-        %         motive.getData({agent,mparam});
-        %         Smotive={motive};
-        Gram.UpdateT
-        Srpos={agent};
-        Simu={[]};
-        Sdirect={};
-        for i = 1:N
-            param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
-            agent(i).do_sensor(param(i).sensor);
-        end
-        %%
-        for i = 1:N
-            agent(i).do_estimator(cell(1,10));
-            
-            Rcovering={};%{Env};
-            Rpoint={FH,[1;-1;1.5]};
-            %             RtimeVarying={time};
-            RPtoPReference = {};
-            param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
-            agent(i).do_reference(param(i).reference);
-            
-            
-            %            agent(i).do_controller(param(i).controller);
-            agent(i).do_controller(cell(1,10));
-            warukaku = 4;
-            kakudo = (1/2)* warukaku;
-                        %for v model
-%                         if time.t<1
-%                             agent(i).input = [1,2 * pi/warukaku];
-%                         elseif time.t>=10 && time.t<11
-%                             agent(i).input = [1,-3* pi/warukaku];
-%                         elseif time.t>=30 && time.t<31
-%                             agent(i).input = [1,3* pi/warukaku];
-%                         elseif time.t>=40 && time.t<41
-%                             agent(i).input = [1,- 3*pi/warukaku];
-%                         elseif time.t>=70 && time.t<71
-%                             agent(i).input = [1,pi/warukaku];
-%                         elseif time.t>90 && time.t<91
-%                             agent(i).input = [1,-pi/warukaku];
-%                         else
-%                             agent(i).input = [1,0];
-%                         end
-% www = 1.1294;
-% wwa = 0.443015;
-%                         if time.t<1
-%                             agent(i).input = [1,www-0.1];
-%                         elseif time.t>=10 && time.t<11
-%                             agent(i).input = [1,-www - wwa];
-%                         elseif time.t>=30 && time.t<31
-%                             agent(i).input = [1,www + wwa];
-%                         elseif time.t>=40 && time.t<41
-%                             agent(i).input = [1,-www - wwa];
-%                         elseif time.t>=70 && time.t<71
-%                             agent(i).input = [1,pi/warukaku];
-%                         elseif time.t>90 && time.t<91
-%                             agent(i).input = [1,-pi/warukaku];
-%                         else
-%                             agent(i).input = [1,0];
-%                         end
-            
-            %for a model
-%             if time.t<=0.5
-%                 agent(i).input = [1/1.2,2 * pi/kakudo];
-%             elseif time.t>0.5&&time.t<=1.1
-%                 agent(i).input = [1/1.2,-2 * pi/kakudo];
-%             elseif time.t>=10 && time.t<=10.5
-%                 agent(i).input = [0,-4 * pi/kakudo];
-%             elseif time.t>10.5 && time.t<11
-%                 agent(i).input = [0,4 * pi/kakudo];
-%             elseif time.t>=30 && time.t<=30.5
-%                 agent(i).input = [0,4 * pi/kakudo];
-%             elseif time.t>30.5 && time.t<31
-%                 agent(i).input = [0,-4 * pi/kakudo];
-%             elseif time.t>=40 && time.t<=40.5
-%                 agent(i).input = [0,-4 * pi/kakudo];
-%             elseif time.t>40.5 && time.t<41
-%                 agent(i).input = [0,4 * pi/kakudo];
-%             else
-%                 agent(i).input = [0,0];
-%             end
-            
-            if time.t<=1.1
-                agent(i).input = [1/1.2,0];
-            else
-                agent(i).input = [0,0];
-            end
-            %                 agent(i).input = [1,pi/warukaku];
-            
-        end
-        %agent(1).estimator.map.show
-        %%
-        calculation=toc;
-        %time.t = time.t+ calculation; % for exp
-        time.t = time.t + dt % for sim
-        logger.logging(time.t,FH);
-        %%
-        % with FH
-        figure(FH)
-        drawnow
-        for i = 1:N %
-            model_param.param=agent(i).model.param;
-            %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
-            model_param.FH = FH;
-            plant_param.param =agent(i).plant.param;
-            plant_param.param.t = time.t;
-            if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
-                agent(i).do_model(model_param);
-            end
-            
-            agent(i).do_plant(plant_param);
-        end
-        % for exp
-        % pause(0.9999*(sampling-calculation)); %邵イ?郢ァ?スサ郢晢スウ郢ァ?スオ郢晢スシ隲??陜」?スア陷ソ髢??スセ蜉アツー郢ァ迚吝ョ幄?包ス。陷茨ス・陷牙ク幃ュり怏?邵コ?スセ邵コ?スァ郢ァ蜻域滋邵コ荳茨スソ譏エ笆?邵コ?ス、邵コ?ス、??スシ謔滓拷隴帶コ假ス堤クコ?スァ邵コ髦ェ?ス狗クコ?邵コ蜿ー?スク?陞ウ螢ケ竊楢将譏エ笆ス邵コ貅假ス?
-    end
-catch ME
-    % with FH
-    
+% try
+while round(time.t,5)<=te
+    %while 1 % for exp
+    %%
+    tic
+    %         motive.getData({agent,mparam});
+    %         Smotive={motive};
+    Gram.UpdateT
+    Srpos={agent};
+    Simu={[]};
+    Sdirect={};
     for i = 1:N
-        agent(i).do_plant(struct('FH',FH),"emergency");
+        param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
+        agent(i).do_sensor(param(i).sensor);
     end
-    warning('ACSL : Emergency stop! Check the connection.');
-    rethrow(ME);
+    %%
+    for i = 1:N
+        agent(i).do_estimator(cell(1,10));
+        
+        Rcovering={};%{Env};
+        Rpoint={FH,[1;-1;1.5]};
+        %             RtimeVarying={time};
+        RPtoPReference = {};
+        param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
+        agent(i).do_reference(param(i).reference);
+        
+        
+        %            agent(i).do_controller(param(i).controller);
+        agent(i).do_controller(cell(1,10));
+        warukaku = 4;
+        kakudo = (1/2)* warukaku;
+        %                         %for v model
+%         if time.t<1
+%             agent(i).input = [1,pi/warukaku];
+%         elseif time.t>10 && time.t<11
+%             agent(i).input = [1,-pi/kakudo];
+%         elseif time.t>30 && time.t<31
+%             agent(i).input = [1,pi/kakudo];
+%         elseif time.t>50 && time.t<51
+%             agent(i).input = [1,-pi/kakudo];
+%         elseif time.t>70 && time.t<71
+%             agent(i).input = [1,pi/kakudo];
+%         elseif time.t>90 && time.t<91
+%             agent(i).input = [1,-pi/kakudo];
+%         else
+%             agent(i).input = [1,0];
+% %         end
+%         www = 1.1294;
+%         wwa = 0.443015;
+%                                 if time.t<1
+%                                     agent(i).input = [1,www-0.1];
+%                                 elseif time.t>=10 && time.t<11
+%                                     agent(i).input = [1,-www - wwa];
+%                                 elseif time.t>=30 && time.t<31
+%                                     agent(i).input = [1,www + wwa];
+%                                 elseif time.t>=40 && time.t<41
+%                                     agent(i).input = [1,-www - wwa];
+%                                 elseif time.t>=70 && time.t<71
+%                                     agent(i).input = [1,pi/warukaku];
+%                                 elseif time.t>90 && time.t<91
+%                                     agent(i).input = [1,-pi/warukaku];
+%                                 else
+%                                     agent(i).input = [1,0];
+%                                 end
+        
+        %for a model
+        %             if time.t<=0.5
+        %                 agent(i).input = [1/1.2,2 * pi/kakudo];
+        %             elseif time.t>0.5&&time.t<=1.1
+        %                 agent(i).input = [1/1.2,-2 * pi/kakudo];
+        %             elseif time.t>=10 && time.t<=10.5
+        %                 agent(i).input = [0,-4 * pi/kakudo];
+        %             elseif time.t>10.5 && time.t<11
+        %                 agent(i).input = [0,4 * pi/kakudo];
+        %             elseif time.t>=30 && time.t<=30.5
+        %                 agent(i).input = [0,4 * pi/kakudo];
+        %             elseif time.t>30.5 && time.t<31
+        %                 agent(i).input = [0,-4 * pi/kakudo];
+        %             elseif time.t>=40 && time.t<=40.5
+        %                 agent(i).input = [0,-4 * pi/kakudo];
+        %             elseif time.t>40.5 && time.t<41
+        %                 agent(i).input = [0,4 * pi/kakudo];
+        %             else
+        %                 agent(i).input = [0,0];
+        %             end
+        
+        %             if time.t<=1.1
+        %                 agent(i).input = [1/1.2,0];
+        %             else
+        %                 agent(i).input = [0,0];
+        %             end
+        %                 agent(i).input = [1,pi/warukaku];
+        
+    end
+    %agent(1).estimator.map.show
+    %%
+    calculation=toc;
+    %time.t = time.t+ calculation; % for exp
+    time.t = time.t + dt % for sim
+    logger.logging(time.t,FH);
+    %%
+    % with FH
+    figure(FH)
+    drawnow
+    for i = 1:N %
+        model_param.param=agent(i).model.param;
+        %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
+        model_param.FH = FH;
+        plant_param.param =agent(i).plant.param;
+        plant_param.param.t = time.t;
+        if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
+            agent(i).do_model(model_param);
+        end
+        
+        agent(i).do_plant(plant_param);
+    end
+    % for exp
+    % pause(0.9999*(sampling-calculation)); %邵イ?郢ァ?スサ郢晢スウ郢ァ?スオ郢晢スシ隲??陜」?スア陷ソ髢??スセ蜉アツー郢ァ迚吝ョ幄?包ス。陷茨ス・陷牙ク幃ュり怏?邵コ?スセ邵コ?スァ郢ァ蜻域滋邵コ荳茨スソ譏エ笆?邵コ?ス、邵コ?ス、??スシ謔滓拷隴帶コ假ス堤クコ?スァ邵コ髦ェ?ス狗クコ?邵コ蜿ー?スク?陞ウ螢ケ竊楢将譏エ笆ス邵コ貅假ス?
 end
+% catch ME
+%     % with FH
+%
+%     for i = 1:N
+%         agent(i).do_plant(struct('FH',FH),"emergency");
+%     end
+%     warning('ACSL : Emergency stop! Check the connection.');
+%     rethrow(ME);
+% end
 %profile viewer
 %% dataplot
 close all;
-PlotOnOff = [0,0,0,0,0,1,1,1];
 SaveOnOff = true;
-Plots = DataPlot(logger,PlotOnOff,SaveOnOff);
+Plots = DataPlot(logger,SaveOnOff);
 %%
 % run('dataplot');
 %% Save
