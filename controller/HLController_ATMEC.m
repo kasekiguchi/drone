@@ -186,14 +186,14 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 %z2
                 obj.h.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.h.z2,z2n-z2,F2);
                 udu.z2 = [vs(1);(vs(1)-obj.vp(2))/dt;0;0];
-                obj.eta1.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,udu.z2,F2);
+                obj.eta1.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta1.z2,udu.z2,F2);
                 obj.eta2.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,z2,F2);
                 eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
                 epsilon.z2 = Kx*obj.h.z2 - eta.z2;
                 %z3
                 obj.h.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.h.z3,z3n-z3,F3);
                 udu.z3 = [vs(2);(vs(2)-obj.vp(3))/dt;0;0];
-                obj.eta1.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,udu.z3,F3);
+                obj.eta1.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta1.z3,udu.z3,F3);
                 obj.eta2.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,z3,F3);
                 eta.z3 = obj.eta1.z3(1) - F3*(z3 - obj.eta2.z3);
                 epsilon.z3 = Ky*obj.h.z3 - eta.z3;

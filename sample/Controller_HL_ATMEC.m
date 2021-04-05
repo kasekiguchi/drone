@@ -71,7 +71,7 @@ Controller_param.FRIT_begin = 5;%補償ゲインの推定を始める時間
 Controller_param.RLS_begin = 10;%補償ゲインのを更新始める時間
 %------------------z------------------
 Controller_param.gamma.z = 1; %初期相関係数
-Controller_param.alpha.z = 0.01; %ローパスフィルタ強度
+Controller_param.alpha.z = 0.001; %ローパスフィルタ強度
 % Controller_param.alpha.z = 0; %100%古い情報で更新->更新しない
 Controller_param.lambda.z = 0.99; %忘却係数
 %------------------x----------------
