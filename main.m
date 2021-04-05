@@ -28,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=100;
+    te=50;
 end
 %% set connector (global instance)
 if fExp
@@ -154,7 +154,7 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0]}));
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
 %     if fExp == 1
@@ -275,7 +275,7 @@ try
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
             
-            agent(i).do_controller(cell(1,10));
+            agent(i).do_controller({time.t,cell(1,9)});
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
         %% update state
