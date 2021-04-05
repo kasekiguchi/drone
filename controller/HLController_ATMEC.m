@@ -43,10 +43,6 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             obj.B2 = param.B2;
             obj.A4 = param.A4;
             obj.B4 = param.B4;
-            obj.A2d = param.A2d;
-            obj.B2d = param.B2d;
-            obj.A4d = param.A4d;
-            obj.B4d = param.B4d;
             %AT-MEC
             %各変数初期化
             obj.vp= [0 0 0];
@@ -70,12 +66,12 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             obj.g.z2=[0;0;0;0];
             obj.g.z3=[0;0;0;0];
             
-            obj.time.dataCount =0; %稼働時間計算用プログラム実行回数
+            obj.time.previous = 0; %1step前の実行時刻初期値
             obj.time.RLS_begin = param.RLS_begin; %補償ゲインの更新を始める時間
             obj.time.FRIT_begin = param.FRIT_begin;%補償ゲインの推定を始める時間
         end
         
-        function result = do(obj,param,varargin) 
+        function result = do(obj,time,varargin) 
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             % varargin : nominal input
             
@@ -163,10 +159,11 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             Kx_hat = obj.result.Khat(3:6);
             Ky_hat = obj.result.Khat(7:10);
             
-            obj.time.dataCount=obj.time.dataCount+1;
-% FRIT
+            DT = time - obj.time.previous; % 現在時刻と１step前の時刻から経過時間を算出
+
+            % FRIT
             %FRIT_beginで指定した時間までFRIT,RLSを実行しない
-            if(obj.time.dataCount*dt<obj.time.FRIT_begin)
+            if(time<obj.time.FRIT_begin)
                 eta.z1 = obj.eta1.z1(1) - F1*(z1 - obj.eta2.z1);
                 epsilon.z1 = Kz*obj.h.z1 - eta.z1;
                 eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
@@ -174,25 +171,42 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 eta.z3 = obj.eta1.z3(1) - F3*(z3 - obj.eta2.z3);
                 epsilon.z3 = Ky*obj.h.z3 - eta.z3;
             end
-            if(obj.time.dataCount*dt>=obj.time.FRIT_begin)
-            % １時刻後の状態を離散化した状態方程式から計算
+            
+            if(time>=obj.time.FRIT_begin)
+                %モデルを離散化 x[i+1] = Ad*x[i] + Bd*u[i]
+                sys = ss(obj.A2,obj.B2,zeros(2),[0;0]);
+                d2 = c2d(sys,DT);
+                obj.A2d = d2.A;
+                obj.B2d = d2.B;
+                sys = ss(obj.A4,obj.B4,zeros(4),[0;0;0;0]);
+                d4 = c2d(sys,DT);
+                obj.A4d = d4.A;
+                obj.B4d = d4.B;
+                
+                % c2dを使わない1階微分までの近似計算版
+                % A2d = eye(2)+obj.A2*dt;
+                % B2d = DT*obj.B2;
+                % A4d = eye(4)+obj.A4*dt;
+                % B4d = DT*obj.B4;
+
+                %１時刻後の状態を離散化した状態方程式から計算
                 %z1
                 obj.h.z1 = obj.IdealModel(obj.A2d,obj.B2d,obj.h.z1,z1n-z1,F1);
-                udu.z1 = [vf(1);(vf(1)-obj.vp(1))/dt];
+                udu.z1 = [vf(1);(vf(1)-obj.vp(1))/DT];
                 obj.eta1.z1 = obj.IdealModel(obj.A2d,obj.B2d,obj.eta1.z1,udu.z1,F1);
                 obj.eta2.z1 = obj.IdealModel(obj.A2d,obj.B2d,obj.eta2.z1,z1,F1);
                 eta.z1 = obj.eta1.z1(1) - F1*(z1 - obj.eta2.z1);
                 epsilon.z1 = Kz*obj.h.z1 - eta.z1;
                 %z2
                 obj.h.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.h.z2,z2n-z2,F2);
-                udu.z2 = [vs(1);(vs(1)-obj.vp(2))/dt;0;0];
+                udu.z2 = [vs(1);(vs(1)-obj.vp(2))/DT;0;0];
                 obj.eta1.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta1.z2,udu.z2,F2);
                 obj.eta2.z2 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z2,z2,F2);
                 eta.z2 = obj.eta1.z2(1) - F2*(z2 - obj.eta2.z2);
                 epsilon.z2 = Kx*obj.h.z2 - eta.z2;
                 %z3
                 obj.h.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.h.z3,z3n-z3,F3);
-                udu.z3 = [vs(2);(vs(2)-obj.vp(3))/dt;0;0];
+                udu.z3 = [vs(2);(vs(2)-obj.vp(3))/DT;0;0];
                 obj.eta1.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta1.z3,udu.z3,F3);
                 obj.eta2.z3 = obj.IdealModel(obj.A4d,obj.B4d,obj.eta2.z3,z3,F3);
                 eta.z3 = obj.eta1.z3(1) - F3*(z3 - obj.eta2.z3);
@@ -217,7 +231,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
                 %ゲイン更新 コメントアウトで初期補償ゲインのまま=通常のMECと同じ
                 obj.result.Khat = [Kz_hat Kx_hat Ky_hat];
 
-                if(obj.time.dataCount*dt>=obj.time.RLS_begin)
+                if(time>=obj.time.RLS_begin)
 %                     alpha = obj.alpha_z; % 12/03 ローパスフィルタを時間で変動させたいな
                     Kz = (1-obj.alpha.z)*Kz+obj.alpha.z*Kz_hat;
                     Kx = (1-obj.alpha.x)*Kx+obj.alpha.x*Kx_hat;
@@ -229,6 +243,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             %previous 更新
             obj.dv1p =dv1; %dv1p更新
             obj.vp = [vf(1) vs(1) vs(2)];
+            obj.time.previous = time;
             
             %% 動作チェック用
             %評価関数
@@ -239,7 +254,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
             
             obj.result.eps = [epsilon.z1, epsilon.z2, epsilon.z3];
             %実行した直後であればepssumを初期化 もっといい書き方ないか?
-            if (obj.time.dataCount ==1) 
+            if (time ==0) 
                 obj.result.epssum = [0 0 0];
             end 
             obj.result.epssum = [obj.result.epssum(1)*obj.lambda.z+obj.result.eps(1)^2, obj.result.epssum(2)*obj.lambda.x+obj.result.eps(2)^2, obj.result.epssum(3)*obj.lambda.y+obj.result.eps(3)^2];

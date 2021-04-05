@@ -33,25 +33,6 @@ Controller_param.B2 = [0;1];
 Controller_param.A4 =diag([1 1 1],1);
 Controller_param.B4 = [0;0;0;1];
 
-% モデルの想定時間変更
-% dt = dt*5;
-
-%モデルを離散化 x[i+1] = Ad*x[i] + Bd*u[i]
-sys = ss(Controller_param.A2,Controller_param.B2,zeros(2),[0;0]);
-d2 = c2d(sys,dt);
-Controller_param.A2d = d2.A;
-Controller_param.B2d = d2.B;
-sys = ss(Controller_param.A4,Controller_param.B4,zeros(4),[0;0;0;0]);
-d4 = c2d(sys,dt);
-Controller_param.A4d = d4.A;
-Controller_param.B4d = d4.B;
-
-% c2dを使わない1階微分までの近似計算版
-% A2d = eye(2)+obj.A2*dt;
-% B2d = dt*obj.B2;
-% A4d = eye(4)+obj.A4*dt;
-% B4d = dt*obj.B4;
-
 %% ====MEC 補償ゲイン====
 %-------dt = 0.1 s 実験的に求めた最適値-------
 % Kz = [450 0];
@@ -71,7 +52,7 @@ Controller_param.FRIT_begin = 5;%補償ゲインの推定を始める時間
 Controller_param.RLS_begin = 10;%補償ゲインのを更新始める時間
 %------------------z------------------
 Controller_param.gamma.z = 1; %初期相関係数
-Controller_param.alpha.z = 0.001; %ローパスフィルタ強度
+Controller_param.alpha.z = 0.01; %ローパスフィルタ強度
 % Controller_param.alpha.z = 0; %100%古い情報で更新->更新しない
 Controller_param.lambda.z = 0.99; %忘却係数
 %------------------x----------------
