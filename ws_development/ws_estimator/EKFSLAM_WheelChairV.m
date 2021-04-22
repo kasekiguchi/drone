@@ -99,22 +99,26 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             A(1:3,1:3) = obj.JacobianF(u(1),pre_Eststate(3));
             B = eye(state_count) .* obj.dt;
             %
-            C = zeros(association_available_count, state_count);
-            Y = zeros(association_available_count, 1);
-            for i = 1:association_available_count
-                curr = association_available_index(i);
-                idx = association_info.index(association_available_index(i));
-                angle = pre_state(3) + measured.angles(curr) - line_param.delta(idx);
-                denon = line_param.d(idx) - pre_state(1) * cos(line_param.delta(idx)) - pre_state(2) * sin(line_param.delta(idx));
-                % Observation value
-                Y(i, 1) = (denon) / cos(angle);
-                % Observation jacobi matrix
-                C(i, 1) = -cos(line_param.delta(idx)) / cos(angle);%x位置に関わる
-                C(i, 2) = -sin(line_param.delta(idx)) / cos(angle);%y位置に関わる
-                C(i, 3) = denon * tan(angle) / cos(angle);%姿勢角thetaに関わる
-                C(i, 4 + (idx - 1) * 2) = 1 / cos(angle);%マップの距離dに関わる
-                C(i, 5 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
-                    - denon * tan(angle) / cos(angle);%マップの角度alphaに関わる．
+            C = zeros(length(measured.angles), state_count);
+            Y = zeros(length(measured.angles), 1);
+            for i = 1:length(measured.angles)
+                if i == association_available_index(i)
+                    curr = association_available_index(i);
+                    idx = association_info.index(association_available_index(i));
+                    angle = pre_state(3) + measured.angles(curr) - line_param.delta(idx);
+                    denon = line_param.d(idx) - pre_state(1) * cos(line_param.delta(idx)) - pre_state(2) * sin(line_param.delta(idx));
+                    % Observation value
+                    Y(i, 1) = (denon) / cos(angle);
+                    % Observation jacobi matrix
+                    C(i, 1) = -cos(line_param.delta(idx)) / cos(angle);%x位置に関わる
+                    C(i, 2) = -sin(line_param.delta(idx)) / cos(angle);%y位置に関わる
+                    C(i, 3) = denon * tan(angle) / cos(angle);%姿勢角thetaに関わる
+                    C(i, 4 + (idx - 1) * 2) = 1 / cos(angle);%マップの距離dに関わる
+                    C(i, 5 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
+                        - denon * tan(angle) / cos(angle);%マップの角度alphaに関わる．
+                else
+                    
+                end
             end
             %
             xh_m = zeros(state_count,1);
@@ -137,19 +141,19 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, size(line_param.d, 1))));
             P_pre  = A*obj.result.P*A' + B*system_noise*B';       %
             %%%
- %%%%%%%%%correlation coefficient
-%             r = cos(2*(pre_Eststate(3) - (pi/4)));
-% %             r = sign(r);
-% %             [~,sigma] = corrcov(P_pre);
-%             sigmaxy = sqrt(P_pre(1,1)) * sqrt(P_pre(2,2)) * r;
-%             P_pre(1,2) = (sigmaxy);
-%             P_pre(2,1) = (sigmaxy);
-%%%%%%%%%%%%%%%%%%%%%
+            %%%%%%%%%correlation coefficient
+            %             r = cos(2*(pre_Eststate(3) - (pi/4)));
+            % %             r = sign(r);
+            % %             [~,sigma] = corrcov(P_pre);
+            %             sigmaxy = sqrt(P_pre(1,1)) * sqrt(P_pre(2,2)) * r;
+            %             P_pre(1,2) = (sigmaxy);
+            %             P_pre(2,1) = (sigmaxy);
+            %%%%%%%%%%%%%%%%%%%%%
             %observe step
-            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); %
-            %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 
-            tmpvalue = xh_m + G * (measured.ranges(association_available_index)' - Y);% 
-            obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 
+            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye( length(measured.ranges) ) ); %
+            %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	%
+            tmpvalue = xh_m + G * (measured.ranges' - Y);%
+            obj.result.P    = (eye(state_count)-G*C)*P_pre;	%
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = tmpvalue(4:2:end, 1);
             line_param.delta = tmpvalue(5:2:end, 1);
@@ -174,7 +178,7 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             obj.result.G = G;
             obj.result.map_param.x = obj.map_param.x;
             obj.result.map_param.y = obj.map_param.y;
-%             run('AnalysisEKFInfo');%analysis
+            %             run('AnalysisEKFInfo');%analysis
             result=obj.result;
         end
         function show()
