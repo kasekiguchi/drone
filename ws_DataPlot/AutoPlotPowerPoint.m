@@ -12,6 +12,8 @@ classdef AutoPlotPowerPoint<handle
             %PLOT_PP このクラスのインスタンスを作成
             %   
             obj.logger = logger;
+            import mlreportgen.ppt.*
+            
         end
         
         function outputArg = method1(obj,inputArg)

@@ -14,7 +14,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
         constant%Line threadthald parameter
         map_param
         Map_Q
-        NLP = 6%Number of Line Params
+        NLP%Number of Line Params
         Analysis%For analysis parameter
     end
     
@@ -34,6 +34,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             obj.dt = model.dt; % tic time
             obj.result.P = param.P;%covariance
             obj.Analysis.P = param.P;%covariance  for differ entropy
+            obj.NLP = param.NLP;%Number of Line Param
             
             % the constant value for estimating of the map
             obj.constant = struct; %constant parameter
@@ -61,21 +62,21 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
                 cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
             weight = [obj.k/(StateCount + obj.k), 1/(2*(StateCount + obj.k))];
             
-           
+            
             if isempty(obj.self.input)
                 u=[0,0];
             else
                 u = obj.self.input;
             end
-%             if isfield(obj.self,'input')
-%                 if ~isempty(obj.self.input)
-%                     u = obj.self.input;
-%                 else
-%                     u=[0,0];
-%                 end
-%             else
-%                 u=[0,0];
-%             end
+            %             if isfield(obj.self,'input')
+            %                 if ~isempty(obj.self.input)
+            %                     u = obj.self.input;
+            %                 else
+            %                     u=[0,0];
+            %                 end
+            %             else
+            %                 u=[0,0];
+            %             end
             
             %% sigma point update
             sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
@@ -108,12 +109,12 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             if iscolumn(measured.ranges)
                 measured.ranges = measured.ranges';% Transposition
             end
-            measured.angles = sensor.angle - PreXh(3);%raser angles
+            measured.angles = sensor.angle - PreXh(3);%raser angles.姿勢角を基準とする．
             if iscolumn(measured.angles)
                 measured.angles = measured.angles';% Transposition
             end
             % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す
-            LSA_param = PointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
+            LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
             % Conbine between measurements and map%前時刻までのマップと観測値を組み合わせる．組み合わさらなかったら新しいマップとして足す．
             obj.map_param = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);%
             %StateCount update
@@ -136,7 +137,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             %共分散行列を再構成
             % Update estimate covariance %
             if any(RemovingFlag)
-                exist_flag = sort([1, 2, 3,(find(~RemovingFlag) - 1) * 6 + 4, (find(~RemovingFlag) - 1) * 6 + 5, (find(~RemovingFlag) - 1) * 6 + 6, (find(~RemovingFlag) - 1) * 6 + 7, (find(~RemovingFlag) - 1) * 6 + 8, (find(~RemovingFlag) - 1) * 6 + 9]);
+                exist_flag = sort([1, 2, 3,(find(~RemovingFlag) - 1) * 2 + 4, (find(~RemovingFlag) - 1) * 2 + 5]);
                 PreCov = PreCov(exist_flag, exist_flag);
             end
             
@@ -147,10 +148,10 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             PreMh = zeros(obj.NLP * length(line_param.d),1);
             PreMh(1:obj.NLP:end, 1) = line_param.d;
             PreMh(2:obj.NLP:end, 1) = line_param.delta;
-            PreMh(3:obj.NLP:end, 1) = line_param.xs;
-            PreMh(4:obj.NLP:end, 1) = line_param.xe;
-            PreMh(5:obj.NLP:end, 1) = line_param.ys;
-            PreMh(6:obj.NLP:end, 1) = line_param.ye;
+            %             PreMh(3:obj.NLP:end, 1) = line_param.xs;
+            %             PreMh(4:obj.NLP:end, 1) = line_param.xe;
+            %             PreMh(5:obj.NLP:end, 1) = line_param.ys;
+            %             PreMh(6:obj.NLP:end, 1) = line_param.ye;
             PreXh = [PreXh(1:obj.n);PreMh(1:end)];
             CholCov = chol(PreCov)';%cholesky factoryzation
             
@@ -161,6 +162,9 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
                 cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
                 cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
             weight = [obj.k/(StateCount + obj.k), 1/( 2*(StateCount + obj.k) )];
+            %再計算されたシグマポイントのマップパラメータごとのマップ端点を計算
+            EndPoint = SigmaLineParamToEndPoint(Kai,obj.map_param,obj.n,obj.constant);
+            
             %再計算されたシグマポイントで対応付け
             % association between measurements and map
             %             association_info.index = correspanding wall(line_param) number index
@@ -173,7 +177,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
                 if iscolumn(tmp_angles)
                     tmp_angles = tmp_angles';% Transposition
                 end
-                association_info{1,i} = UKFMapAssociation(Kai(1:obj.n,i), Kai(obj.n+1:end,i), measured.ranges,tmp_angles, obj.constant,obj.NLP);
+                association_info{1,i} = UKFMapAssociation(Kai(1:obj.n,i), Kai(obj.n+1:end,i), EndPoint{i,1}, measured.ranges,tmp_angles, obj.constant,obj.NLP);
                 association_available_index{1,i} = find(association_info{1,i}.index ~= 0);%Index corresponding to the measured value
                 association_available_count{1,i} = length(association_available_index{1,i});%Count
             end
@@ -190,15 +194,15 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
                     tmp_angles = tmp_angles';% Transposition
                 end
                 if isempty(association_available_index{1,i}(:))
-                        j = 1;
-                        continue
+                    j = 1;
+                    continue
                 end
                 line_param.d = Kai(obj.n + 1:obj.NLP:end,i);
                 line_param.delta = Kai(obj.n + 2:obj.NLP:end,i);
-                line_param.xs = Kai(obj.n + 3:obj.NLP:end,i);
-                line_param.xe = Kai(obj.n + 4:obj.NLP:end,i);
-                line_param.ys = Kai(obj.n + 5:obj.NLP:end,i);
-                line_param.ye = Kai(obj.n + 6:obj.NLP:end,i);
+                %                 line_param.xs = Kai(obj.n + 3:obj.NLP:end,i);
+                %                 line_param.xe = Kai(obj.n + 4:obj.NLP:end,i);
+                %                 line_param.ys = Kai(obj.n + 5:obj.NLP:end,i);
+                %                 line_param.ye = Kai(obj.n + 6:obj.NLP:end,i);
                 for m = 1:length(measured.ranges)%m:レーザの番号
                     if m == association_available_index{1,i}(1,j)
                         curr = association_available_index{1,i}(1,j);
@@ -243,17 +247,17 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             %             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = Xh(obj.n+1:obj.NLP:end, 1);
             line_param.delta = Xh(obj.n+2:obj.NLP:end, 1);
-            line_param.xs = Xh(obj.n+3:obj.NLP:end, 1);
-            line_param.xe = Xh(obj.n+4:obj.NLP:end, 1);
-            line_param.ys = Xh(obj.n+5:obj.NLP:end, 1);
-            line_param.ye = Xh(obj.n+6:obj.NLP:end, 1);
+            %             line_param.xs = Xh(obj.n+3:obj.NLP:end, 1);
+            %             line_param.xe = Xh(obj.n+4:obj.NLP:end, 1);
+            %             line_param.ys = Xh(obj.n+5:obj.NLP:end, 1);
+            %             line_param.ye = Xh(obj.n+6:obj.NLP:end, 1);
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param_opt = LineParamToLineAndEndPoint(line_param);
             obj.map_param.a = line_param_opt.a;
             obj.map_param.b = line_param_opt.b;
             obj.map_param.c = line_param_opt.c;
-            obj.map_param.x = line_param_opt.x;
-            obj.map_param.y = line_param_opt.y;
+            %             obj.map_param.x = line_param_opt.x;
+            %             obj.map_param.y = line_param_opt.y;
             % Projection of start and end point on the line
             MapEnd = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = MapEnd.x;
@@ -266,14 +270,14 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             EstMh = zeros(obj.NLP * length(line_param.d),1);
             EstMh(1:obj.NLP:end, 1) = line_param.d;
             EstMh(2:obj.NLP:end, 1) = line_param.delta;
-            EstMh(3:obj.NLP:end, 1) = line_param.xs;
-            EstMh(4:obj.NLP:end, 1) = line_param.xe;
-            EstMh(5:obj.NLP:end, 1) = line_param.ys;
-            EstMh(6:obj.NLP:end, 1) = line_param.ye;
+            %             EstMh(3:obj.NLP:end, 1) = line_param.xs;
+            %             EstMh(4:obj.NLP:end, 1) = line_param.xe;
+            %             EstMh(5:obj.NLP:end, 1) = line_param.ys;
+            %             EstMh(6:obj.NLP:end, 1) = line_param.ye;
             Xh = [Xh(1:obj.n);EstMh(1:end)];
             
             if any(RemovingFlag)
-                exist_flag = sort([1, 2, 3,(find(~RemovingFlag) - 1) * 6 + 4, (find(~RemovingFlag) - 1) * 6 + 5, (find(~RemovingFlag) - 1) * 6 + 6, (find(~RemovingFlag) - 1) * 6 + 7, (find(~RemovingFlag) - 1) * 6 + 8, (find(~RemovingFlag) - 1) * 6 + 9]);
+                exist_flag = sort([1, 2, 3,(find(~RemovingFlag) - 1) * 2 + 4, (find(~RemovingFlag) - 1) * 2 + 5]);
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
             

@@ -11,8 +11,8 @@ Mapye = MapParam(6:NLP:end);
 Param.a = zeros(MapNum, 1);
 Param.b = zeros(MapNum, 1);
 Param.c = zeros(MapNum, 1);
-Param.x = zeros(MapNum, 2);
-Param.y = zeros(MapNum, 2);
+% Param.x = zeros(MapNum, 2);
+% Param.y = zeros(MapNum, 2);
 % Calculation of each parameter
 for i = 1:MapNum
     % Calculation of inclination of line using relationship of normal vector
@@ -25,15 +25,15 @@ for i = 1:MapNum
         Param.a(i) = delta;
         Param.b(i) = -1;
         Param.c(i) = y - Param.a(i) * x;
-        Param.x(i,:) = [Mapxs(i),Mapxe(i)];
-        Param.y(i,:) = [Mapys(i),Mapye(i)];
+%         Param.x(i,:) = [Mapxs(i),Mapxe(i)];
+%         Param.y(i,:) = [Mapys(i),Mapye(i)];
     else
         % Calculatiobn of "x = by + c"
         Param.a(i) = -1;
         Param.b(i) = 1 / delta;
         Param.c(i) = x - Param.b(i) * y;
-        Param.x(i,:) = [Mapxs(i),Mapxe(i)];
-        Param.y(i,:) = [Mapys(i),Mapye(i)];
+%         Param.x(i,:) = [Mapxs(i),Mapxe(i)];
+%         Param.y(i,:) = [Mapys(i),Mapye(i)];
     end
 end
 end

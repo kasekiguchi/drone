@@ -24,7 +24,7 @@ classdef WheelChair_FF <CONTROLLER_CLASS
             else
                 t = 0;
             end
-            v = 0.1;
+            v = 0.5;
             w = 0;
             obj.result.input = [v,w];
             obj.self.input = obj.result.input;

@@ -28,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=30;
 end
 %% initialize
 initial(N) = struct;
@@ -37,9 +37,9 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
     initial(i).p = [0;0];
-    initial(i).q = [0];
-    initial(i).v = [0];
-    initial(i).w = [0];
+    initial(i).q = [pi/4];
+%     initial(i).v = [0];
+%     initial(i).w = [0];
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
@@ -47,12 +47,12 @@ end
 for i = 1:N
     if fExp
     else
-        agent(i) = Drone(Model_WheelChairV(i,dt,'plant',struct('p',[0;0],'q',[0]),struct('noise',7.058E-5)));
+        agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
         %         agent(i) = Drone(Model_WheelChairA(i,dt,'plant',struct('p',[-1;0],'q',[0],'v',[0],'w',[0]),struct('noise',4.337E-5)));
     end
     %% model
     % set control model
-    agent(i).set_model(Model_WheelChairV(i,dt,'model',struct('p',[0;0],'q',[0]))); % オイラー角モデル
+    agent(i).set_model(Model_WheelChairV(i,dt,'model',initial ) ); % オイラー角モデル
     %     agent(i).set_model(Model_WheelChairA(N,dt,'model',struct('p',[0;0],'q',[0],'v',[0],'w',[0]))); % オイラー角モデル
     close all
     %% set environment property
@@ -64,9 +64,9 @@ for i = 1:N
     %% set estimator property
     agent(i).estimator=[];
     Gram = GrammianAnalysis(te,ts,dt);
-%     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
+    agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
     %     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
-        agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
+%         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
     %% set reference property
     agent(i).reference=[];
     
@@ -204,19 +204,19 @@ while round(time.t,5)<=te
         %                         %for v model
 %         if time.t<1
 %             agent(i).input = [1,pi/warukaku];
-%         elseif time.t>10 && time.t<11
-%             agent(i).input = [1,-pi/kakudo];
-%         elseif time.t>30 && time.t<31
-%             agent(i).input = [1,pi/kakudo];
-%         elseif time.t>50 && time.t<51
-%             agent(i).input = [1,-pi/kakudo];
-%         elseif time.t>70 && time.t<71
-%             agent(i).input = [1,pi/kakudo];
-%         elseif time.t>90 && time.t<91
-%             agent(i).input = [1,-pi/kakudo];
+% %         elseif time.t>10 && time.t<11
+% %             agent(i).input = [1,-pi/kakudo];
+% %         elseif time.t>30 && time.t<31
+% %             agent(i).input = [1,pi/kakudo];
+% %         elseif time.t>50 && time.t<51
+% %             agent(i).input = [1,-pi/kakudo];
+% %         elseif time.t>70 && time.t<71
+% %             agent(i).input = [1,pi/kakudo];
+% %         elseif time.t>90 && time.t<91
+% %             agent(i).input = [1,-pi/kakudo];
 %         else
 %             agent(i).input = [1,0];
-% %         end
+%         end
 %         www = 1.1294;
 %         wwa = 0.443015;
 %                                 if time.t<1

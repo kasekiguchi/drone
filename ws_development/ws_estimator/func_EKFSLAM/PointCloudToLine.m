@@ -90,4 +90,3 @@ function parameter = PointCloudToLine(raw_distance, raw_angle, robot_pose, Const
     parameter.b = b;
     parameter.c = c;
 end
-

@@ -21,7 +21,7 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
         function obj = EKFSLAM_WheelChairV(self,param)
             obj.self= self;
             model = self.model;
-            obj.JacobianF = @(v,theta) [1,0,-vv*sin(theta);0,1,v*cos(theta);0,0,1];%
+            obj.JacobianF = @(v,theta) [1,0,-v*sin(theta);0,1,v*cos(theta);0,0,1];%
             % --this state use in only EKFSLAM--
             obj.result.Est_state= STATE_CLASS(struct("state_list",["p","q"],"num_list",[2,1]));
             obj.result.Est_state.p = model.state.p;% x, y
@@ -114,7 +114,7 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
                 C(i, 3) = denon * tan(angle) / cos(angle);%姿勢角thetaに関わる
                 C(i, 4 + (idx - 1) * 2) = 1 / cos(angle);%マップの距離dに関わる
                 C(i, 5 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
-                    - denon * tan(angle) / cos(angle);%マップの角度に関わる．
+                    - denon * tan(angle) / cos(angle);%マップの角度alphaに関わる．
             end
             %
             xh_m = zeros(state_count,1);
@@ -138,18 +138,18 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             P_pre  = A*obj.result.P*A' + B*system_noise*B';       %
             %%%
  %%%%%%%%%correlation coefficient
-            r = cos(2*(pre_Eststate(3) - (pi/4)));
-%             r = sign(r);
-%             [~,sigma] = corrcov(P_pre);
-            sigmaxy = sqrt(P_pre(1,1)) * sqrt(P_pre(2,2)) * r;
-            P_pre(1,2) = (sigmaxy);
-            P_pre(2,1) = (sigmaxy);
+%             r = cos(2*(pre_Eststate(3) - (pi/4)));
+% %             r = sign(r);
+% %             [~,sigma] = corrcov(P_pre);
+%             sigmaxy = sqrt(P_pre(1,1)) * sqrt(P_pre(2,2)) * r;
+%             P_pre(1,2) = (sigmaxy);
+%             P_pre(2,1) = (sigmaxy);
 %%%%%%%%%%%%%%%%%%%%%
             %observe step
-            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 郢ァ?スォ郢晢スォ郢晄ァュホヲ郢ァ?スイ郢ァ?ス、郢晢スウ隴厄スエ隴?スー
-            %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
-            tmpvalue = xh_m + G * (measured.ranges(association_available_index)' - Y);% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
-            obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 闔?蜿・?スセ迹夲スェ?ス、陝セ?スョ陷茨スア陋サ?ソス隰ィ?ス」
+            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); %
+            %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 
+            tmpvalue = xh_m + G * (measured.ranges(association_available_index)' - Y);% 
+            obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = tmpvalue(4:2:end, 1);
             line_param.delta = tmpvalue(5:2:end, 1);
@@ -162,7 +162,7 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             point_opt = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = point_opt.x;
             obj.map_param.y = point_opt.y;
-            % Optimize the map%郢晄ァュ繝」郢晏干?ソス?スョ邵コ蜷カ?ス願惺蛹サ?ス冗クコ?ソス
+            % Optimize the map%
             [obj.map_param, removing_flag] = OptimizeMap(obj.map_param, obj.constant);
             % Update estimate covariance %
             if any(removing_flag)
