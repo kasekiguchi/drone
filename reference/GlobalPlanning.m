@@ -1,51 +1,103 @@
 classdef GlobalPlanning < REFERENCE_CLASS
-    % 時間関数としてのリファレンスを生成するクラス
-    % obj = TimeVaryingReference()
+    % リファレンスを生成するクラス
+    % obj =
     properties
-        param
+        PolyArea
+        OldGrid
+        GridData
         Flontier
-        result
+        MapParam
         self
+    end
+    
+    properties(Constant)
+        RobotSize = 1;
+        WallThick = 1;
     end
     
     methods
         function obj = GlobalPlanning(self,varargin)
-            % 【Input】ref_gen, param, "HL"
-            % ref_gen : reference function generator
-            % param : parameter to generate the reference function
-            % "HL" : flag to decide the reference for HL
-            obj.func=str2func(varargin{1}{1});
-            obj.func=obj.func(varargin{1}{2});
-            if length(varargin{1})>2
-                if strcmp(varargin{1}{3},"HL")
-                    obj.func = gen_ref_for_HL(obj.func);
-                    obj.result.state=STATE_CLASS(struct('state_list',["xd","p"],'num_list',[20,3]));
-                end
-            else
-                obj.result.state=STATE_CLASS(struct('state_list',["xd","p"],'num_list',[length(obj.func(0)),3]));
-            end
+            % 【Input】 map_param ,
+            obj.self = self;
+            obj.MapParam = varargin{1};%MapParam
+            %             obj.RobotSize = varargin{2};%
+            %             obj.WallThick = varargin{3};%
+            obj.result.state=STATE_CLASS(struct('state_list',["xd"],'num_list',[3]));%x,y,theta
+            obj.PolyArea = polyshape();
         end
+        
         function  result= do(obj,Param)
-            % map paramからマップサイズを読み取る
+            %---Sensor data からpolyshapeを作成---%
+            SensorData = obj.self.sensor.result;%sensor dataを引き出す
+            EstData = obj.self.estimator.result.state;
             
-            %探索ずみ領域を決定
+            %ロボットの現在位置を格納した配列をつくる．
+            State = [];
+            for i = 1:length(EstData.list)
+                if iscolumn(EstData.(EstData.list(i)))
+                    State = [State;EstData.(EstData.list(i))];
+                else
+                    State = [State; EstData.(EstData.list(i))'];
+                end
+            end
+            %観測値0を出してる点をSensorの最大rangeで置き換え
+            LaserRangeidx = SensorData.length>0.1;
             
-            %探索済み領域の外周にグリッドを区切る
+            %観測点を算出
+            SensorPointX = State(1) + SensorData.length(LaserRangeidx).*cos(SensorData.angle(LaserRangeidx));
+            if ~iscolumn(SensorPointX)
+                SensorPointX = SensorPointX';
+            end
+            SensorPointY = State(2) + SensorData.length(LaserRangeidx).*sin(SensorData.angle(LaserRangeidx));
+            if ~iscolumn(SensorPointY)
+                SensorPointY = SensorPointY';
+            end
+            SensorPoint = [SensorPointX,SensorPointY];
             
+            PolySensor = polyshape(SensorPoint);
+            %-------------------------------------------
+            %unionにより旧データと結合%
+            obj.PolyArea = union(obj.PolyArea,PolySensor);
+            %poly bufferで広げ，flontier作成準備
+            PolyBufferArea = polybuffer(obj.PolyArea,obj.WallThick);
+            %---壁面データからpolyshapeを作成---%
+            PolyWall = polyshape();
+            WallPoint = zeros(2,2,size(obj.self.estimator.result.map_param.x,1));
+            for i = 1:size(obj.self.estimator.result.map_param.x,1)
+                WallPoint(1,1,i) = obj.self.estimator.result.map_param.x(i,1);%startのx
+                WallPoint(1,2,i) = obj.self.estimator.result.map_param.y(i,1);%startのy
+                WallPoint(2,1,i) = obj.self.estimator.result.map_param.x(i,2);%endのx
+                WallPoint(2,2,i) = obj.self.estimator.result.map_param.y(i,2);%endのy
+                WallLine = polybuffer(WallPoint(:,:,i),'lines',obj.WallThick,'JointType','miter');
+                PolyWall = union(PolyWall,WallLine);
+            end
+            %--------------------------------%
+            %polybufferで広げたデータと壁面データで差分をとる
+            PolyFnt = subtract(PolyBufferArea,PolyWall);
+            %polybufferで広げる前と広げた後で差分をとる．残った部分をフロンティア候補とする．
+            PolyFnt = subtract(PolyFnt,obj.PolyArea);
+            %---Polyshapeのデータからフロンティアを計算---%
+            MaxX = max(PolyFnt.Vertices(:,1));
+            MaxY = max(PolyFnt.Vertices(:,2));
+            MinX = min(PolyFnt.Vertices(:,1));
+            MinY = min(PolyFnt.Vertices(:,2));
+            
+            [MapGridX,MapGridY] = meshgrid(MinX:obj.RobotSize:MaxX,MinY:obj.RobotSize:MaxY); 
+            FntGrid =cell2mat(arrayfun(@(idx) isinterior(PolyFnt,MapGridX(idx,:),MapGridY(idx,:)),1:size(MapGridX,1),'UniformOutput',false));
+            
+            FntGridX = MapGridX(FntGrid);
+            FntGridY = MapGridY(FntGrid);
+            %-----------------------------------------% 
             %フロンティアの情報利得を計算
             
             %フロンティアの移動コストを計算
-            
+            Dis = sqrt( (FntGridX - State(1)).^2 + (FntGridY - State(2)).^2 ); 
             %最終コストを計算
             
-            %min
-            
-            %
-            
-            
-            %
-            obj.result.state.xd = obj.func(Param{1}.t); % 目標重心位置（絶対座標）
-            obj.result.state.p = obj.result.state.xd(1:3);
+            %minして決定する．
+            [MinDis,MinDisidx] = min(Dis);
+            obj.result = [FntGridX(MinDisidx),FntGridY(MinDisidx)];
+            %resultに代入
             result=obj.result;
         end
         function show(obj,logger)

@@ -28,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=10;
 end
 %% initialize
 initial(N) = struct;
@@ -38,8 +38,8 @@ for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
     initial(i).p = [0;0];
     initial(i).q = [pi/4];
-%     initial(i).v = [0];
-%     initial(i).w = [0];
+    %     initial(i).v = [0];
+    %     initial(i).w = [0];
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
@@ -60,16 +60,16 @@ for i = 1:N
     agent(i).set_property("env",Env_FloorMap_sim(i)); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor=[];
-    agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-9)) )  );%LiDAR seosor
+    agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-9) ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
     Gram = GrammianAnalysis(te,ts,dt);
     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
     %     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
-%         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
+    %         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
     %% set reference property
     agent(i).reference=[];
-    
+    agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
@@ -103,6 +103,11 @@ LogData=[
     %     "plant.state.w",
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
+    %     "estimator.result.PreMapParam.x",
+    %     "estimator.result.PreMapParam.y",
+    %     "estimator.result.PreXh",
+    %     "estimator.result.LSAParam.x",
+    %     "estimator.result.LSAParam.y",
     "env.Floor.param.Vertices",
     %     "estimator.ekfslam_WC.result.P",
     %     "estimator.ekfslam_WC.result.ErEl_Round",
@@ -189,12 +194,14 @@ while round(time.t,5)<=te
     for i = 1:N
         agent(i).do_estimator(cell(1,10));
         
-        Rcovering={};%{Env};
-        Rpoint={FH,[1;-1;1.5]};
-        %             RtimeVarying={time};
-        RPtoPReference = {};
-        param(i).reference=arrayfun(@(k) evalin('base',strcat("R",agent(i).reference.name(k))),1:length(agent(i).reference.name),'UniformOutput',false);
-        agent(i).do_reference(param(i).reference);
+        %Referance Setting
+        param(i).reference.point={FH,[2;1;0.5],time.t};
+        param(i).reference.GlobalPlanning = {1};
+        
+        for j = 1:length(agent(i).reference.name)
+            param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
+        end
+        agent(i).do_reference(param(i).reference.list);
         
         
         %            agent(i).do_controller(param(i).controller);
@@ -202,38 +209,38 @@ while round(time.t,5)<=te
         warukaku = 4;
         kakudo = (1/2)* warukaku;
         %                         %for v model
-%         if time.t<1
-%             agent(i).input = [1,pi/warukaku];
-% %         elseif time.t>10 && time.t<11
-% %             agent(i).input = [1,-pi/kakudo];
-% %         elseif time.t>30 && time.t<31
-% %             agent(i).input = [1,pi/kakudo];
-% %         elseif time.t>50 && time.t<51
-% %             agent(i).input = [1,-pi/kakudo];
-% %         elseif time.t>70 && time.t<71
-% %             agent(i).input = [1,pi/kakudo];
-% %         elseif time.t>90 && time.t<91
-% %             agent(i).input = [1,-pi/kakudo];
-%         else
-%             agent(i).input = [1,0];
-%         end
-%         www = 1.1294;
-%         wwa = 0.443015;
-%                                 if time.t<1
-%                                     agent(i).input = [1,www-0.1];
-%                                 elseif time.t>=10 && time.t<11
-%                                     agent(i).input = [1,-www - wwa];
-%                                 elseif time.t>=30 && time.t<31
-%                                     agent(i).input = [1,www + wwa];
-%                                 elseif time.t>=40 && time.t<41
-%                                     agent(i).input = [1,-www - wwa];
-%                                 elseif time.t>=70 && time.t<71
-%                                     agent(i).input = [1,pi/warukaku];
-%                                 elseif time.t>90 && time.t<91
-%                                     agent(i).input = [1,-pi/warukaku];
-%                                 else
-%                                     agent(i).input = [1,0];
-%                                 end
+        %         if time.t<1
+        %             agent(i).input = [1,pi/warukaku];
+        % %         elseif time.t>10 && time.t<11
+        % %             agent(i).input = [1,-pi/kakudo];
+        % %         elseif time.t>30 && time.t<31
+        % %             agent(i).input = [1,pi/kakudo];
+        % %         elseif time.t>50 && time.t<51
+        % %             agent(i).input = [1,-pi/kakudo];
+        % %         elseif time.t>70 && time.t<71
+        % %             agent(i).input = [1,pi/kakudo];
+        % %         elseif time.t>90 && time.t<91
+        % %             agent(i).input = [1,-pi/kakudo];
+        %         else
+        %             agent(i).input = [1,0];
+        %         end
+        %         www = 1.1294;
+        %         wwa = 0.443015;
+        %                                 if time.t<1
+        %                                     agent(i).input = [1,www-0.1];
+        %                                 elseif time.t>=10 && time.t<11
+        %                                     agent(i).input = [1,-www - wwa];
+        %                                 elseif time.t>=30 && time.t<31
+        %                                     agent(i).input = [1,www + wwa];
+        %                                 elseif time.t>=40 && time.t<41
+        %                                     agent(i).input = [1,-www - wwa];
+        %                                 elseif time.t>=70 && time.t<71
+        %                                     agent(i).input = [1,pi/warukaku];
+        %                                 elseif time.t>90 && time.t<91
+        %                                     agent(i).input = [1,-pi/warukaku];
+        %                                 else
+        %                                     agent(i).input = [1,0];
+        %                                 end
         
         %for a model
         %             if time.t<=0.5
@@ -287,7 +294,7 @@ while round(time.t,5)<=te
         agent(i).do_plant(plant_param);
     end
     % for exp
-    % pause(0.9999*(sampling-calculation)); %邵イ?郢ァ?スサ郢晢スウ郢ァ?スオ郢晢スシ隲??陜」?スア陷ソ髢??スセ蜉アツー郢ァ迚吝ョ幄?包ス。陷茨ス・陷牙ク幃ュり怏?邵コ?スセ邵コ?スァ郢ァ蜻域滋邵コ荳茨スソ譏エ笆?邵コ?ス、邵コ?ス、??スシ謔滓拷隴帶コ假ス堤クコ?スァ邵コ髦ェ?ス狗クコ?邵コ蜿ー?スク?陞ウ螢ケ竊楢将譏エ笆ス邵コ貅假ス?
+    % pause(0.9999*(sampling-calculation)); %
 end
 % catch ME
 %     % with FH

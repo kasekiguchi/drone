@@ -101,6 +101,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             B = eye(StateCount) .* obj.dt;%noise channel
             PreCov = PreCov + B * system_noise * B';%事前誤差共分散行列
             %PreCovの次元数は，ロボットの次元数 + 前時刻のマップパラメータの数に対応
+            obj.result.PreXh = PreXh;
             
             %マップについての更新
             %SLAM algorithm
@@ -117,6 +118,9 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
             % Conbine between measurements and map%前時刻までのマップと観測値を組み合わせる．組み合わさらなかったら新しいマップとして足す．
             obj.map_param = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);%
+            %For Verification
+            obj.result.PreMapParam.x = obj.map_param.x;
+            obj.result.PreMapParam.y = obj.map_param.y;
             %StateCount update
             StateCount = obj.n + obj.NLP * length(obj.map_param.a);
             %map_paramに対応したPreCovにする．
@@ -160,7 +164,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             end
             Kai = [PreXh,...
                 cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
-                cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
+                cell2mat(arrayfun(@(i) PreXh -  sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
             weight = [obj.k/(StateCount + obj.k), 1/( 2*(StateCount + obj.k) )];
             %再計算されたシグマポイントのマップパラメータごとのマップ端点を計算
             EndPoint = SigmaLineParamToEndPoint(Kai,obj.map_param,obj.n,obj.constant);
@@ -203,6 +207,7 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
                 %                 line_param.xe = Kai(obj.n + 4:obj.NLP:end,i);
                 %                 line_param.ys = Kai(obj.n + 5:obj.NLP:end,i);
                 %                 line_param.ye = Kai(obj.n + 6:obj.NLP:end,i);
+                Ita{1,i} = zeros(length(measured.ranges),1);
                 for m = 1:length(measured.ranges)%m:レーザの番号
                     if m == association_available_index{1,i}(1,j)
                         curr = association_available_index{1,i}(1,j);

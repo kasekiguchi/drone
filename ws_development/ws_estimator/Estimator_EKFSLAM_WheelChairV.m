@@ -13,7 +13,7 @@ EKF_param.Q = diag([1.0, 1.0, 1.0]);
 EKF_param.R = 1.0E-3;
 EKF_param.Map_Q = eye(2).*1.0E-6;
 n = agent.model.dim(1);
-EKF_param.P = eye(n); % 蛻晄悄蜈ア蛻?謨」陦悟??
+EKF_param.P = eye(n); %
 %     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;
 EKF_param.list=["p","q"];
 %------ For Analysys---------

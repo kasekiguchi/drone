@@ -21,15 +21,16 @@ function parameter = MapAssociation(map, ~, state, measured_distance, measured_a
     y_end = y - y_e;
     delta = x_laser .* y_line - x_line .* y_laser;
     % Calculation of internal ratio
-    sigma = (y_end .* x_line - y_line .* x_end) ./ delta;
-    mu = (x_laser .* y_end - x_end .* y_laser) ./ delta;
+    sigma = (y_end .* x_line - y_line .* x_end) ./ delta;%レーザが壁と持つ内分比
+    mu = (x_laser .* y_end - x_end .* y_laser) ./ delta;%壁とレーザの内分比
     % Calculation of laser distance
-    dist = sigma .* Constant.SensorRange;
+    Dis = sigma .* Constant.SensorRange;
     % Change the value which fail validation to Invalid value 
-    cond_1 = (sigma >= 0 & sigma <= 1 & mu >= 0 & mu <= 1 & dist >= 0 & dist <= Constant.SensorRange & (abs(dist - measured_distance) < Constant.DistanceThreshold));
-    dist(~cond_1) = inf;
+    %sigmaが0より大きく1より小さい，muが0より大きく1より小さい，理論距離(dist)が0より大きくセンサレンジより小さい，理論距離と測定距離の差が閾値より小さい
+    conditionRation = (sigma >= 0 & sigma <= 1 & mu >= 0 & mu <= 1 & Dis >= 0 & Dis <= Constant.SensorRange & (abs(Dis - measured_distance) < Constant.DistanceThreshold) &  measured_distance > Constant.DistanceThreshold);
+    Dis(~conditionRation) = inf;
     % Searching minimum distance for each laser
-    [min_dist, min_index] = min(dist);
+    [min_dist, min_index] = min(Dis);
     inf_cond = isinf(min_dist);
     min_dist(inf_cond) = 0;
     min_index(inf_cond) = 0;

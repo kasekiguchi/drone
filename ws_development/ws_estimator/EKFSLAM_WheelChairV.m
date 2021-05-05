@@ -1,7 +1,7 @@
 classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
     % Extended Kalman filter
     % obj = EKF(model,param)
-    %   model : EKF郢ァ雋橸スョ貅ッ?ス」?ソス邵コ蜷カ?ス玖崕?スカ陟包ス。陝?スセ髮趣ス。邵コ?スョ陋サ?スカ陟包ス。郢晢ス「郢晢ソス郢晢スォ
+    %   model
     %   param : required field : Q,R,B,JacobianH
     properties
         result%esitimated parameter
@@ -40,9 +40,9 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             obj.constant = struct; %constant parameter
             obj.constant.LineThreshold = 0.1; % Under the this threshold, the error from "ax + by + c" is allowed.
             obj.constant.PointThreshold = 0.1; % Maximum distance between line and points in same cluster
-            obj.constant.GroupNumberThreshold = 5; % Minimum points number which is constructed cluster
+            obj.constant.GroupNumberThreshold = 5; % Minimum points number which is constructed cluster%この数以下の点群はクラスタリングしない
             obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
-            obj.constant.ZeroThreshold = 1e-5; % Under this threshold, it is zero.
+            obj.constant.ZeroThreshold = 1e-3; % Under this threshold, it is zero.
             obj.constant.CluteringThreshold = 0.1; % Split a cluster using distance from next point
             obj.constant.SensorRange = 40; % Max scan range
             %------------------------------------------
@@ -78,10 +78,15 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
                 measured.angles = measured.angles';% Transposition
             end
             % Convert measurements into lines %Line segment approximation
-            LSA_param = PointCloudToLine(measured.ranges, measured.angles, pre_state, obj.constant);
-            % Conbine between measurements and map%雋ゑスャ陞ウ螢シ?ソス?ス、邵コ?スィ郢晄ァュ繝」郢晏干?ス帝お?ソス邵コ?スソ陷キ蛹サ?ス冗クコ蟶呻ス?
-            obj.map_param = CombiningLines(obj.map_param, LSA_param, obj.constant);
-            % Convert map into line parameters%郢ァ?スー郢晢スュ郢晢スシ郢晁?湖晁?趣スァ隶灘生縲帝囎荵昶螺驍ア螢シ?ソス邵コ?スョ郢昜サ」ホ帷ケ晢ス。郢晢スシ郢ァ?スソ
+            LSAParam = PointCloudToLine(measured.ranges, measured.angles, pre_state, obj.constant);
+            obj.result.LSAParam.x = LSAParam.x;
+            obj.result.LSAParam.y = LSAParam.y;
+            % Conbine between measurements and map%
+            obj.map_param = CombiningLines(obj.map_param, LSAParam, obj.constant);
+            %For Verification
+            obj.result.PreMapParam.x = obj.map_param.x;
+            obj.result.PreMapParam.y = obj.map_param.y;
+            % Convert map into line parameters%
             line_param = LineToLineParameter(obj.map_param);
             % association between measurements and map
             %             association_info.index = correspanding wall(line_param) number index
@@ -99,27 +104,23 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             A(1:3,1:3) = obj.JacobianF(u(1),pre_Eststate(3));
             B = eye(state_count) .* obj.dt;
             %
-            C = zeros(length(measured.angles), state_count);
-            Y = zeros(length(measured.angles), 1);
-            for i = 1:length(measured.angles)
-                if i == association_available_index(i)
-                    curr = association_available_index(i);
-                    idx = association_info.index(association_available_index(i));
-                    angle = pre_state(3) + measured.angles(curr) - line_param.delta(idx);
-                    denon = line_param.d(idx) - pre_state(1) * cos(line_param.delta(idx)) - pre_state(2) * sin(line_param.delta(idx));
-                    % Observation value
-                    Y(i, 1) = (denon) / cos(angle);
-                    % Observation jacobi matrix
-                    C(i, 1) = -cos(line_param.delta(idx)) / cos(angle);%x位置に関わる
-                    C(i, 2) = -sin(line_param.delta(idx)) / cos(angle);%y位置に関わる
-                    C(i, 3) = denon * tan(angle) / cos(angle);%姿勢角thetaに関わる
-                    C(i, 4 + (idx - 1) * 2) = 1 / cos(angle);%マップの距離dに関わる
-                    C(i, 5 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
-                        - denon * tan(angle) / cos(angle);%マップの角度alphaに関わる．
-                else
-                    
-                end
-            end
+            C = zeros(association_available_count, state_count);
+            Y = zeros(association_available_count, 1);
+             for i = 1:association_available_count
+                curr = association_available_index(i);
+                idx = association_info.index(association_available_index(i));
+                angle = pre_state(3) + measured.angles(curr) - line_param.delta(idx);
+                denon = line_param.d(idx) - pre_state(1) * cos(line_param.delta(idx)) - pre_state(2) * sin(line_param.delta(idx));
+                % Observation value
+                Y(i, 1) = (denon) / cos(angle);
+                % Observation jacobi matrix
+                C(i, 1) = -cos(line_param.delta(idx)) / cos(angle);%x位置に関わる
+                C(i, 2) = -sin(line_param.delta(idx)) / cos(angle);%y位置に関わる
+                C(i, 3) = denon * tan(angle) / cos(angle);%姿勢角thetaに関わる
+                C(i, 4 + (idx - 1) * 2) = 1 / cos(angle);%マップの距離dに関わる
+                C(i, 5 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
+                    - denon * tan(angle) / cos(angle);%マップの角度alphaに関わる．
+             end
             %
             xh_m = zeros(state_count,1);
             xh_m(1:obj.n,1) = pre_Eststate';
@@ -150,9 +151,9 @@ classdef EKFSLAM_WheelChairV < ESTIMATOR_CLASS
             %             P_pre(2,1) = (sigmaxy);
             %%%%%%%%%%%%%%%%%%%%%
             %observe step
-            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye( length(measured.ranges) ) ); %
+            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count ) ); %
             %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	%
-            tmpvalue = xh_m + G * (measured.ranges' - Y);%
+            tmpvalue = xh_m + G * (measured.ranges(association_available_index)' - Y);%
             obj.result.P    = (eye(state_count)-G*C)*P_pre;	%
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = tmpvalue(4:2:end, 1);
