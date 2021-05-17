@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレーション
+fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -18,6 +18,7 @@ if fExp
     dt = 0.025; % sampling time
 else
 %     dt = 0.1; % sampling time
+%     dt = 0.005;
     dt = 0.025;
 %     dt = 0.010;
 %     dt = 0.001;
@@ -27,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=100;
+    te=50;
 end
 %% set connector (global instance)
 if fExp
@@ -67,7 +68,7 @@ else
     
     if (fOffline)
         %%
-        expdata=DATA_EMULATOR(); % 空の場合最新のデータ
+        expdata=DATA_EMULATOR("isobe_HLonly_Log(18-Dec-2020_12_17_35)"); % 空の場合最新のデータ
     end
     %% for sim
     for i = 1:N
@@ -153,8 +154,8 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.5]}));
-    %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
+%     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
 %     if fExp == 1
 %         if i ==1
@@ -180,7 +181,7 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
-    agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC : 未完成
+    agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
     %agent(i).set_property("controller",struct("type","DirectController"; "name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
@@ -213,7 +214,7 @@ time.t = ts;
 mparam=[]; % without occulusion
 
 %% main loop
-%profile on
+profile on
 disp("while ============================")
 close all;
 if fExp && ~fMotive
@@ -274,7 +275,7 @@ try
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
             
-            agent(i).do_controller(cell(1,10));
+            agent(i).do_controller({time.t,cell(1,9)});
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
         %% update state
@@ -325,20 +326,20 @@ catch ME    % for error
     warning('ACSL : Emergency stop! Check the connection.');
     rethrow(ME);
 end
-%profile viewer
+profile viewer
 %%
 close all
 clc
 %agent(1).reference.covering.draw_movie(logger,N,Env)
 % agent(1).reference.timeVarying.show(logger)
-%logger.plot(1,["pL","p","q","w","v","input"],["e","e","e","e","e",""],struct('time',[]));
+logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 
 % logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
- logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
+%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
 % logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
