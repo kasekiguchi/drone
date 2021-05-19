@@ -14,12 +14,12 @@ env_param.type = "FloorMap_sim";
 % fl2 = [-50,-35;50,-35;50,-45;-50,-45];%x譁ケ蜷代↓髟キ縺?
 % fl3 = [50,-45;55,-45;55,45;50,45];
 
-% fl1 = [-50,20;200,20;200,25;-50,25];
-% fl2 = [-50,-20;200,-20;200,-25;-50,-25];%x direction long passage
+fl1 = [-50,20;200,20;200,25;-50,25];
+fl2 = [-50,-20;200,-20;200,-25;-50,-25];%x direction long passage
 
-long = 100;
-fl1 = [-long/sqrt(2),-long/sqrt(2)-10 ; long/sqrt(2),long/sqrt(2)-10 ; long/sqrt(2),long/sqrt(2)-15 ; -long/sqrt(2),-long/sqrt(2)-15];
-fl2 = [-long/sqrt(2),-long/sqrt(2)+10 ; long/sqrt(2),long/sqrt(2)+10 ; long/sqrt(2),long/sqrt(2)+15 ; -long/sqrt(2),-long/sqrt(2)+15];
+% long = 100;
+% fl1 = [-long/sqrt(2),-long/sqrt(2)-10 ; long/sqrt(2),long/sqrt(2)-10 ; long/sqrt(2),long/sqrt(2)-15 ; -long/sqrt(2),-long/sqrt(2)-15];
+% fl2 = [-long/sqrt(2),-long/sqrt(2)+10 ; long/sqrt(2),long/sqrt(2)+10 ; long/sqrt(2),long/sqrt(2)+15 ; -long/sqrt(2),-long/sqrt(2)+15];
 
 % fl1 = [20,-50;20,200;25,200;25,-50];
 % fl2 = [-20,-50;-20,200;-25,200;-25,-50];%y direction long passage

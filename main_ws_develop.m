@@ -14,6 +14,7 @@ N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレ5rーション
 fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
+
 fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
@@ -74,7 +75,8 @@ for i = 1:N
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[];
-    for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
+    agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
+%     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
     %% set connector (global instance)
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
     param(i).reference.list = cell(1,length(agent(i).reference.name));
@@ -195,9 +197,9 @@ while round(time.t,5)<=te
         agent(i).do_estimator(cell(1,10));
         
         %Referance Setting
-        param(i).reference.point={FH,[2;1;0.5],time.t};
         param(i).reference.GlobalPlanning = {1};
-        
+        param(i).reference.point={FH,[2;1;0.5],time.t};
+ 
         for j = 1:length(agent(i).reference.name)
             param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
         end
