@@ -95,10 +95,10 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
-     %   agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-%         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル : Direct controller を想定
+        agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+        %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
+        %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % 牽引物込みのプラントモデル : for sim
+        %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
     end
     %% model
@@ -107,7 +107,7 @@ for i = 1:N
     %agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
-    agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+    agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     close all
     %% set input_transform property
@@ -117,7 +117,7 @@ for i = 1:N
     end
     %agent.plant.espr.sendData(Pw(1,1:16));
     % for quat-model plant with discrete control model
-    %agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換
+    agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
     %agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
     % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
@@ -214,7 +214,7 @@ time.t = ts;
 mparam=[]; % without occulusion
 
 %% main loop
-profile on
+%profile on
 disp("while ============================")
 close all;
 if fExp && ~fMotive
