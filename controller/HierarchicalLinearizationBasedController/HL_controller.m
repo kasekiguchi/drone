@@ -5,7 +5,7 @@ function u = HL_controller(Xh,Xd,Param)
     % Param : required field : P, F1,F2,F3,F4
     %        P : physical parameters
     %        Fi : feedback gain for i-th virtual subsystem
-    P = Param.P;
+    P = Param.param;
     F1 = Param.F1;
     F2 = Param.F2;
     F3 = Param.F3;
