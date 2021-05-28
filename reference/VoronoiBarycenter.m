@@ -21,7 +21,7 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             % 【Output】 result = 目標値（グローバル位置）
             %% 共通設定１：単純ボロノイセル確定
             sensor = obj.self.sensor.result;%Param{1}.result;
-            state = obj.self.model.state;%Param{2}.state; % handle 注意　予測状態
+            state = obj.self.sensor.result.state;%Param{2}.state; % 
             env = obj.self.env;%Param{3}.param;             % 環境として予測したもの
 %             param = Param{4}; % 途中で変えられる必要があるか？
 %             if isfield(param,'range'); obj.param.r = param.range;  end
