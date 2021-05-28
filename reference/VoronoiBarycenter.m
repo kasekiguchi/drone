@@ -107,10 +107,13 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
                 sp=strcmp(logger.items,'sensor.result.state.p');
                 %sp=strcmp(logger.items,'plant.state.p');
                 regionp=strcmp(logger.items,'reference.result.region');
+                rp = logger.ri;
+                ep = logger.ei;
+                sp = logger.si;
                 gridp=strcmp(logger.items,'env.density.param.grid_density');
-                tmpref=@(k,span) arrayfun(@(i)logger.Data.agent{k,rp,i}(1:3),span,'UniformOutput',false);
-                tmpest=@(k,span) arrayfun(@(i)logger.Data.agent{k,ep,i}(1:3),span,'UniformOutput',false);
-                tmpsen=@(k,span) arrayfun(@(i)logger.Data.agent{k,sp,i}(1:3),span,'UniformOutput',false);
+                tmpref=@(k,span) arrayfun(@(i)logger.Data.agent{k,rp,i}.state.p,span,'UniformOutput',false);
+                tmpest=@(k,span) arrayfun(@(i)logger.Data.agent{k,ep,i}.state.p,span,'UniformOutput',false);
+                tmpsen=@(k,span) arrayfun(@(i)logger.Data.agent{k,sp,i}.state.p,span,'UniformOutput',false);
                 %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
                 make_animation(1:10:logger.i-1,1:N,@(k,span) draw_voronoi(arrayfun(@(i) logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmpsen(k,span),tmpref(k,span),tmpest(k,span)],Env.param.Vertices),@() Env.show);
                 %%

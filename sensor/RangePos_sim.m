@@ -37,11 +37,11 @@ classdef RangePos_sim < SENSOR_CLASS
                 Target=obj.target;
             end
             obj.target=obj.check_range(Target);
-            obj.result.neighbor=cell2mat(arrayfun(@(i) obj.target(i).state.p,1:length(obj.target),'UniformOutput',false)); % private プロパティとしてのplant（実システム）の状態にアクセス．
+            obj.result.neighbor=cell2mat(arrayfun(@(i) obj.target(i).model.state.p,1:length(obj.target),'UniformOutput',false)); % private プロパティとしてのplant（実システム）の状態にアクセス．
             result=obj.result;
         end
         function target=check_range(obj,Target)
-            neighbor.p=cell2mat(arrayfun(@(i) Target(i).state.p,1:length(Target),'UniformOutput',false)); % private プロパティとしてのplant（実システム）の状態にアクセス．
+            neighbor.p=cell2mat(arrayfun(@(i) Target(i).model.state.p,1:length(Target),'UniformOutput',false)); % private プロパティとしてのplant（実システム）の状態にアクセス．
 %             if isempty(obj.self)
 %                 obj.self=Target([Target.id]==obj.id); % 自機の真値状態をそのまま渡す．
 %             end
