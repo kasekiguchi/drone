@@ -1,4 +1,4 @@
-%% Drone 班用共通プログラム
+%% Drone 班用共通プログラム test
 %% Initialize settings
 % set path
 tmp = matlab.desktop.editor.getActive;
