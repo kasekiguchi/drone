@@ -168,8 +168,8 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             obj.result.state.set_state(tmpvalue);
             obj.result.Est_state.set_state(tmpvalue);
             obj.result.G = G;
-            obj.result.map_param.x = obj.map_param.x;
-            obj.result.map_param.y = obj.map_param.y;
+            obj.result.map_param = obj.map_param;
+            obj.result.AssociationInfo = association_info;
 %             run('AnalysisEKFInfo');%analysis
             result=obj.result;
         end

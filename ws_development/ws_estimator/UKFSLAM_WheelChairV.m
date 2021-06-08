@@ -169,63 +169,50 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             %再計算されたシグマポイントのマップパラメータごとのマップ端点を計算
             EndPoint = SigmaLineParamToEndPoint(Kai,obj.map_param,obj.n,obj.constant);
             
-            %再計算されたシグマポイントで対応付け
+            %事前状態推定値を用いてマップと対応付け
             % association between measurements and map
             %             association_info.index = correspanding wall(line_param) number index
             %            association_info.distance = wall distace
-            association_info = cell(1,size(Kai,2));
-            association_available_index = cell(1,size(Kai,2));
-            association_available_count = cell(1,size(Kai,2));
-            for i = 1:size(Kai,2)
-                tmp_angles = sensor.angle - Kai(3,i);
-                if iscolumn(tmp_angles)
-                    tmp_angles = tmp_angles';% Transposition
-                end
-                association_info{1,i} = UKFMapAssociation(Kai(1:obj.n,i), Kai(obj.n+1:end,i), EndPoint{i,1}, measured.ranges,tmp_angles, obj.constant,obj.NLP);
-                association_available_index{1,i} = find(association_info{1,i}.index ~= 0);%Index corresponding to the measured value
-                association_available_count{1,i} = length(association_available_index{1,i});%Count
-            end
+            association_info = UKFMapAssociation(PreXh(1:obj.n),PreMh(1:end), EndPoint{1,1}, measured.ranges,measured.angles, obj.constant,obj.NLP);
+                association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
+                association_available_count = length(association_available_index);%Count
+%             association_info = cell(1,size(Kai,2));
+%             association_available_index = cell(1,size(Kai,2));
+%             association_available_count = cell(1,size(Kai,2));
+%             for i = 1:size(Kai,2)
+%                 tmp_angles = sensor.angle - Kai(3,i);
+%                 if iscolumn(tmp_angles)
+%                     tmp_angles = tmp_angles';% Transposition
+%                 end
+%                 association_info{1,i} = UKFMapAssociation(Kai(1:obj.n,i), Kai(obj.n+1:end,i), EndPoint{i,1}, measured.ranges,tmp_angles, obj.constant,obj.NLP);
+%                 association_available_index{1,i} = find(association_info{1,i}.index ~= 0);%Index corresponding to the measured value
+%                 association_available_count{1,i} = length(association_available_index{1,i});%Count
+%             end
             %出力のシグマポイントを計算
             %sensing step
             %測定値が取れていないレーザー部分はダミーデータ0をかませる
             
             Ita = cell(1,size(Kai,2));
-            j = 1;
             for i = 1:size(Kai,2)%i:シグマポイントの数
-                Ita{1,i} = zeros(length(measured.ranges), 1);
                 tmp_angles = sensor.angle - Kai(3,i);
                 if iscolumn(tmp_angles)
                     tmp_angles = tmp_angles';% Transposition
                 end
-                if isempty(association_available_index{1,i}(:))
-                    j = 1;
-                    continue
-                end
+%                 if isempty(association_available_index{1,i}(:))
+%                     j = 1;
+%                     continue
+%                 end
                 line_param.d = Kai(obj.n + 1:obj.NLP:end,i);
                 line_param.delta = Kai(obj.n + 2:obj.NLP:end,i);
-                %                 line_param.xs = Kai(obj.n + 3:obj.NLP:end,i);
-                %                 line_param.xe = Kai(obj.n + 4:obj.NLP:end,i);
-                %                 line_param.ys = Kai(obj.n + 5:obj.NLP:end,i);
-                %                 line_param.ye = Kai(obj.n + 6:obj.NLP:end,i);
-                Ita{1,i} = zeros(length(measured.ranges),1);
-                for m = 1:length(measured.ranges)%m:レーザの番号
-                    if m == association_available_index{1,i}(1,j)
-                        curr = association_available_index{1,i}(1,j);
-                        idx = association_info{1,i}.index(1,association_available_index{1,i}(1,j));
-                        angle = Kai(3,i) + tmp_angles(curr) - line_param.delta(idx);
-                        denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));
-                        % Observation value
-                        Ita{1,i}(m,1) = (denon) / cos(angle);
-                        j = j+1;
-                        if j>length(association_available_index{1,i}(:))
-                            j = 1;
-                            continue;
-                        end
-                    else
-                        %Ita{1,i}(m,1) = 0
-                    end
+                Ita{1,i} = zeros(association_available_count,1);
+                for m = 1:association_available_count%m:レーザの番号
+                    curr = association_available_index(1,m);
+                    idx = association_info.index(1,association_available_index(1,m));
+                    angle = Kai(3,i) + tmp_angles(curr) - line_param.delta(idx);
+                    denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));
+                    % Observation value
+                    Ita{1,i}(m,1) = (denon) / cos(angle);
                 end
-                j = 1;
             end
             %
             %事前出力推定値
@@ -244,10 +231,10 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
                 PreXYCov = PreXYCov + weight(2) .* (Kai(:,i) - PreXh) * (Ita{1,i}(:) - PreYh)';
             end
             %カルマンゲイン
-            G = PreXYCov /(PreYCov + obj.R .* eye(length(measured.ranges)) );
+            G = PreXYCov /( PreYCov + obj.R .* eye(association_available_count) );
             
-            Xh = PreXh + G*(measured.ranges' - PreYh);
-            obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(length(measured.ranges))) * G';
+            Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
+            obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(association_available_count)) * G';
             
             %             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = Xh(obj.n+1:obj.NLP:end, 1);

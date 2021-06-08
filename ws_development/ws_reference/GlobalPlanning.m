@@ -96,7 +96,8 @@ classdef GlobalPlanning < REFERENCE_CLASS
             
             %minして決定する．
             [MinDis,MinDisidx] = min(Dis);
-            obj.result.state = [FntGridX(MinDisidx),FntGridY(MinDisidx)];
+%             obj.result.state = [FntGridX(MinDisidx),FntGridY(MinDisidx)];
+            obj.result.state = [50,0];
             %resultに代入
             result=obj.result;
         end

@@ -43,9 +43,11 @@ if Flag
     mo_t = 1;
     tmp_max = max(obj.logger.Data.agent{1,Index});
     tmp_min = min(obj.logger.Data.agent{1,Index});
-    xmin = min(tmp_min(:,1,:));
+    % xmin = min(tmp_min(:,1,:));
+    xmin = -50;
     dx = 10;
-    xmax = max(tmp_max(:,1,:));
+    % xmax = max(tmp_max(:,1,:));
+    xmax = 50;
     ymin = min(tmp_min(:,2,:));
     dy = 10;
     ymax = max(tmp_max(:,2,:));
@@ -56,6 +58,7 @@ if Flag
         clf(figure(FigNum));
         xlim([xmin xmax]);ylim([ymin ymax]);
         xticks([xmin:dx:xmax]);yticks([ymin:dy:ymax]);
+        pbaspect([abs(xmin -xmax) abs(ymin -ymax) 1]);
         %     set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize', 15);
         ylabel('\sl y \rm [m]','FontSize',15);
@@ -75,24 +78,26 @@ if Flag
         MapDatay = obj.logger.Data.agent{mo_t,MapYIndex};
         %         MapDimy = size(MapDatay,1);
         for i=1:MapDimx
-            plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',2,'Color','r');
+            PlotMap = plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',2,'Color','r');
         end
         %--------------------------------------%
         %plant plot%
         tmp_plant_square = PlantData(:,mo_t) + [1,1.5,1,-1,-1;1,0,-1,-1,1];
         plant_square =  polyshape( tmp_plant_square');
         plant_square =  rotate(plant_square,180 * PlantqData(mo_t) / pi, PlantData(:,mo_t)');
-        fig6(2) = plot(plant_square);
+        PlotPlant = plot(plant_square);
         %-------------%
         
         %model plot%
         tmp_model_square = EstData(:,mo_t) + [1,1.5,1,-1,-1;1,0,-1,-1,1];
         model_square =  polyshape( tmp_model_square');
         model_square =  rotate(model_square,180 * EstqData(mo_t) / pi, EstData(:,mo_t)');
-        fig6(3) = plot(model_square);
+        PlotEst = plot(model_square);
         %-------------%
-        fig6(4) = plot(p_Area,'FaceColor','red','FaceAlpha',0.1);% true map plot
-        fig6(5) = plot(polybuffer([PlantData(1,mo_t),PlantData(2,mo_t)],'points',40),'FaceColor','blue','FaceAlpha',0.1);%Raser plot
+        Environment = plot(p_Area,'FaceColor','red','FaceAlpha',0.1);% true map plot
+        Sensor = plot(polybuffer([PlantData(1,mo_t),PlantData(2,mo_t)],'points',40),'FaceColor','blue','FaceAlpha',0.1);%Raser plot
+        
+        legend([PlotPlant PlotEst Environment Sensor PlotMap],'Plant','Estimate','Environment','Sensor area','Estimate Map','Location','northoutside','NumColumns',3);
         hold off
         pause(16 * 1e-2);
         mo_t = mo_t+1;
