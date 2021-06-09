@@ -29,7 +29,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=30;
 end
 %% initialize
 initial(N) = struct;
@@ -39,8 +39,8 @@ for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
     initial(i).p = [0;0];
     initial(i).q = [0];
-    %     initial(i).v = [0];
-    %     initial(i).w = [0];
+        initial(i).v = [0;0];
+        initial(i).w = [0];
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
@@ -50,13 +50,15 @@ for i = 1:N
     else
         %         agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
         %                 agent(i) = Drone(Model_WheelChairA(i,dt,'plant',struct('p',[0;0],'q',[0],'v',[0],'w',[0]),struct('noise',4.337E-5)));
-        agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
+%         agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
+agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));
     end
     %% model
     % set control model
     %     agent(i).set_model(Model_WheelChairV(i,dt,'model',initial ) );
     %         agent(i).set_model(Model_WheelChairA(N,dt,'model',struct('p',[0;0],'q',[0],'v',[0],'w',[0])));
-    agent(i).set_model(Model_ODV(N,dt,'model',initial) );
+%     agent(i).set_model(Model_ODV(N,dt,'model',initial) );
+agent(i).set_model(Model_ODVADI(N,dt,'model',initial) );
     close all
     %% set environment property
     Env = [];
@@ -69,7 +71,8 @@ for i = 1:N
     Gram = GrammianAnalysis(te,ts,dt);
     %     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
-    agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
+%     agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
+agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
     %             agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
     %% set reference property
     agent(i).reference=[];
@@ -79,7 +82,8 @@ for i = 1:N
     %% set controller property
     agent(i).controller=[];
 %         agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
-    agent(i).set_property( "controller", Controller_LocalPlanningForODV(i,dt) );
+%     agent(i).set_property( "controller", Controller_LocalPlanningForODV(i,dt) );
+agent(i).set_property( "controller", Controller_LocalPlanningForODVADI(i,dt) );
 %     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
     %% set connector (global instance)
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
@@ -103,10 +107,10 @@ LogData=[
     %     "reference.result.state.p",
     "estimator.result.state.p",
     "estimator.result.state.q",
-%     "estimator.result.state.v",
-%     "estimator.result.state.w",
-%     "plant.state.v",
-%     "plant.state.w",
+    "estimator.result.state.v",
+    "estimator.result.state.w",
+    "plant.state.v",
+    "plant.state.w",
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
     %     "estimator.result.PreMapParam.x",
@@ -272,9 +276,9 @@ while round(time.t,5)<=te
         %                     end
         
 %         if time.t<=1.1
-%             agent(i).input = [1/1.2,0];
+%             agent(i).input = [1/1.2,0,0];
 %         else
-%             agent(i).input = [0,0];
+%             agent(i).input = [0,0,0];
 %         end
     end
     %agent(1).estimator.map.show
@@ -315,7 +319,7 @@ end
 %% dataplot
 close all;
 SaveOnOff = true;
-Plots = DataPlot(logger,SaveOnOff);
+Plots = DataPlot(Logger,SaveOnOff);
 %%
 % run('dataplot');
 %% Save
