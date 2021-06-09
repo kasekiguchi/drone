@@ -27,7 +27,7 @@ classdef REFtoHL_drone < INPUT_TRANSFORM_CLASS
         
         function u = do(obj,input,param)
             if ~isempty(param)
-                obj.param = param;
+                obj.param.P = param.param;
             end
             obj.state.set_state(obj.self.estimator.result.state.get());
             if ~isprop(obj.self.model.state,'v')

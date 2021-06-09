@@ -1,4 +1,4 @@
-function env = Env_2DCoverage()
+function env = Env_2DCoverage(id)
 %% environment class demo
 % env property をEnv classのインスタンス配列として定義
 env_param.name="";

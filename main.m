@@ -1,4 +1,4 @@
-%% Drone 班用共通プログラム
+%% Drone 班用共通プログラム update sekiguchi
 %% Initialize settings
 % set path
 tmp = matlab.desktop.editor.getActive;
@@ -9,9 +9,9 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 1; % number of agents
+N = 3; % number of agents
 fExp = 0 %1：実機　それ以外：シミュレーション
-fMotive = 1;% Motiveを使うかどうか
+fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -28,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=50;
+    te=5;
 end
 %% set connector (global instance)
 if fExp
@@ -96,18 +96,18 @@ for i = 1:N
         agent(i).input = [0;0;0;0];
     else
         agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-%         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル : Direct controller を想定
+        %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
+        %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % 牽引物込みのプラントモデル : for sim
+        %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
     end
     %% model
     % set control model
-    agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
+    %agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
     %agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
-    %agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル：位置＝入力 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+    agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     close all
     %% set input_transform property
@@ -117,13 +117,13 @@ for i = 1:N
     end
     %agent.plant.espr.sendData(Pw(1,1:16));
     % for quat-model plant with discrete control model
-    %agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換
+    agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
     %agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
     % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
     %% set environment property
     Env = [];
-    %agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
+    agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor=[];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
@@ -134,9 +134,9 @@ for i = 1:N
         agent(i).set_property("sensor",Sensor_ROS(struct('ROSHostIP','192.168.50.21')));
     end
     
-    %agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    %agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-    %agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
+    agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
     agent(i).estimator=[];
@@ -146,15 +146,15 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %     agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
 %     agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
-    %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-    %agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
+    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+    agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+    agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference=[];
-    %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
+    agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
+    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
 %     if fExp == 1
@@ -181,9 +181,9 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
-    agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
+    %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
-    %agent(i).set_property("controller",struct("type","DirectController"; "name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+    agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %%
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
@@ -196,7 +196,7 @@ LogData=[
     "controller.result"
     ];
 if isfield(agent(1).reference,'covering')
-    LogData=[LogData;   "env.density.param.grid_density"]; % for coverage
+    LogData=[LogData;     'reference.result.region';  "env.density.param.grid_density"]; % for coverage
 end
 logger=Logger(agent,size(ts:dt:te,2),LogData);
 %%
@@ -214,7 +214,7 @@ time.t = ts;
 mparam=[]; % without occulusion
 
 %% main loop
-profile on
+%profile on
 disp("while ============================")
 close all;
 if fExp && ~fMotive
@@ -326,13 +326,13 @@ catch ME    % for error
     warning('ACSL : Emergency stop! Check the connection.');
     rethrow(ME);
 end
-profile viewer
+%profile viewer
 %%
 close all
 clc
-%agent(1).reference.covering.draw_movie(logger,N,Env)
+agent(1).reference.covering.draw_movie(logger,N,Env)
 % agent(1).reference.timeVarying.show(logger)
-logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
+%logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
