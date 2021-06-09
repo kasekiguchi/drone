@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 3; % number of agents
+N = 4; % number of agents
 fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
@@ -151,7 +151,8 @@ for i = 1:N
     agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference=[];
-    agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
+%     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
+    agent(i).set_property("reference",Reference_agreement(agent(i))); % 合意重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
@@ -225,7 +226,7 @@ FH  = figure('position',[0 0 eps eps],'menubar','none');
 
 w = waitforbuttonpress;
 
-try
+% try
     if (fOffline)
         expdata.overwrite("model",time.t,agent,i);
         te = expdata.te;
@@ -268,6 +269,7 @@ try
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
+            param(i).reference.agreement={};
             
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
@@ -318,19 +320,20 @@ try
             end
         end
     end
-catch ME    % for error
-    % with FH
-    for i = 1:N
-        agent(i).do_plant(struct('FH',FH),"emergency");
-    end
-    warning('ACSL : Emergency stop! Check the connection.');
-    rethrow(ME);
-end
+% catch ME    % for error
+%     % with FH
+%     for i = 1:N
+%         agent(i).do_plant(struct('FH',FH),"emergency");
+%     end
+%     warning('ACSL : Emergency stop! Check the connection.');
+%     rethrow(ME);
+% end
 %profile viewer
 %%
 close all
 clc
-agent(1).reference.covering.draw_movie(logger,N,Env)
+% agent(1).reference.covering.draw_movie(logger,N,Env)
+dataplot(logger);
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
