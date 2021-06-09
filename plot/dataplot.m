@@ -1,16 +1,27 @@
-function dataplot(TC,XC,UC)
-%結果のプロット 
-    t = situation.t1/10;
-%%
+function dataplot(logger)
+%% 行列生成
+    t = logger.Data.t;
+    x = zeros(4,numel(logger.Data.t));
+    y = zeros(4,numel(logger.Data.t));
+for n = 1:numel(logger.Data.t)
+    x(1,n) = logger.Data.agent{n,3,1}.state.p(1,1);
+    x(2,n) = logger.Data.agent{n,3,2}.state.p(1,1);
+    x(3,n) = logger.Data.agent{n,3,3}.state.p(1,1);
+    x(4,n) = logger.Data.agent{n,3,4}.state.p(1,1);
+    y(1,n) = logger.Data.agent{n,3,1}.state.p(2,1);
+    y(2,n) = logger.Data.agent{n,3,2}.state.p(2,1);
+    y(3,n) = logger.Data.agent{n,3,3}.state.p(2,1);
+    y(4,n) = logger.Data.agent{n,3,4}.state.p(2,1);
+end
     %-------------------エージェントのx座標------------------------
     figure(1)
     figure1=figure(1);
     axes1=axes('Parent',figure1);
     hold on
-    fig1 = plot(TC(1,:),XC(1,:),'r-');
-    fig2 = plot(TC(1,:),XC(5,:),'g-');
-    fig3 = plot(TC(1,:),XC(9,:),'b-');
-    fig4 = plot(TC(1,:),XC(13,:),'c-');
+    fig1 = plot(t,x(1,1:numel(logger.Data.t)),'r-');
+    fig2 = plot(t,x(2,1:numel(logger.Data.t)),'g-');
+    fig3 = plot(t,x(3,1:numel(logger.Data.t)),'b-');
+    fig4 = plot(t,x(4,1:numel(logger.Data.t)),'c-');
     hold off
     
     %-------------グラフィックスオブジェクトのプロパティ--------------
@@ -18,10 +29,10 @@ function dataplot(TC,XC,UC)
     set(fig2,'LineWidth',1);
     set(fig3,'LineWidth',1);
     set(fig4,'LineWidth',1);
-    set(axes1,'FontName','Times New Roman','FontSize',24);
+    set(axes1,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([0 situation.t1]);
-    ylim([0 20]);
+    xlim([0,logger.Data.t(end)+1]);
+    ylim([min(x(:,1))-1,max(x(:,1))+1]);
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it x} [m]');
     axis square;
@@ -34,10 +45,10 @@ function dataplot(TC,XC,UC)
     figure2=figure(2);
     axes2=axes('Parent',figure2);
     hold on
-    fig1 = plot(TC(1,:),XC(3,:),'r-');
-    fig2 = plot(TC(1,:),XC(7,:),'g-');
-    fig3 = plot(TC(1,:),XC(11,:),'b-');
-    fig4 = plot(TC(1,:),XC(15,:),'c-');
+    fig1 = plot(t,y(1,1:numel(logger.Data.t)),'r-');
+    fig2 = plot(t,y(2,1:numel(logger.Data.t)),'g-');
+    fig3 = plot(t,y(3,1:numel(logger.Data.t)),'b-');
+    fig4 = plot(t,y(4,1:numel(logger.Data.t)),'c-');
     hold off
     
     %-------------グラフィックスオブジェクトのプロパティ--------------
@@ -45,10 +56,10 @@ function dataplot(TC,XC,UC)
     set(fig2,'LineWidth',1);
     set(fig3,'LineWidth',1);
     set(fig4,'LineWidth',1);
-    set(axes2,'FontName','Times New Roman','FontSize',24);
+    set(axes2,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([0 situation.t1]);
-    ylim([0 30]);
+    xlim([0,logger.Data.t(end)+1]);
+    ylim([min(y(:,1))-1,max(y(:,1))+1]);
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it y} [m]');
     axis square;
@@ -60,10 +71,10 @@ function dataplot(TC,XC,UC)
     figure3=figure(3);
     axes3=axes('Parent',figure3);
     hold on
-    fig1 = plot(XC(1,1),XC(3,1),'r.','MarkerSize',20);
-    fig2 = plot(XC(5,1),XC(7,1),'g.','MarkerSize',20);
-    fig3 = plot(XC(9,1),XC(11,1),'b.','MarkerSize',20);
-    fig4 = plot(XC(13,1),XC(15,1),'c.','MarkerSize',20);
+    fig1 = plot(x(1,1),y(1,1),'r.','MarkerSize',20);
+    fig2 = plot(x(2,1),y(2,1),'g.','MarkerSize',20);
+    fig3 = plot(x(3,1),y(3,1),'b.','MarkerSize',20);
+    fig4 = plot(x(4,1),y(4,1),'c.','MarkerSize',20);
     hold off
     
     %-------------グラフィックスオブジェクトのプロパティ--------------
@@ -71,55 +82,14 @@ function dataplot(TC,XC,UC)
     set(fig2,'LineWidth',1);
     set(fig3,'LineWidth',1);
     set(fig4,'LineWidth',1);
-    set(axes3,'FontName','Times New Roman','FontSize',24);
+    set(axes3,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([0 20]);
-    ylim([0 20]);
+    xlim([min(x(:,1))-1,max(x(:,1))+1]);
+    ylim([min(y(:,1))-1,max(y(:,1))+1]);
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
     axis square;
         legend('Agent1','Agent2','Agent3','Agent4');
-
-    %% 動画作成スレッド
-
-    figure(9)
-
-    % Animation Loop
-    t = 1;
-    v = VideoWriter('goui_gun.avi');
-    open(v);
-    while t <= numel(TC)
-        clf(figure(9)); 
-
-        xlim([0 20.0]);
-        ylim([0 20.0]);
-        set(gca,'FontSize',20);
-        xlabel('\sl x \rm [m]','FontSize',25);
-        ylabel('\sl y \rm [m]','FontSize',25);
-        hold on
-        grid on; 
-        pbaspect([1 1 1]);
-        ax = gca;
-        ax.Box = 'on';
-        ax.GridColor = 'k';
-        ax.GridAlpha = 0.4;
-
-        fig1 = plot(XC(1,t),XC(3,t),'r.','MarkerSize',20);
-        fig2 = plot(XC(5,t),XC(7,t),'g.','MarkerSize',20);
-        fig3 = plot(XC(9,t),XC(11,t),'b.','MarkerSize',20);
-        fig4 = plot(XC(13,t),XC(15,t),'c.','MarkerSize',20);
-        
-        hold off 
-        pause(16 * 1e-3) ; 
-        t = t+10;   
-        frame = getframe(figure(9));
-        writeVideo(v,frame);      
-    end
-    close(v);
-    disp('simulation ended')
-
-
-
 end 
 
 
