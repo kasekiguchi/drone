@@ -15,13 +15,13 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             if isfield(varargin{1},'void'); obj.param.void = varargin{1}.void;  end
             obj.result.state = STATE_CLASS(struct('state_list',["p"],'num_list',[3]));
         end
-        function  result= do(obj,Param)
+        function  result= do(obj,param)
             % 【Input】Param = {sensor,estimator,env,param}
             %  param = range, pos_range, d, void,
             % 【Output】 result = 目標値（グローバル位置）
             %% 共通設定１：単純ボロノイセル確定
             sensor = obj.self.sensor.result;%Param{1}.result;
-            state = obj.self.sensor.result.state;%Param{2}.state; % 
+            state = obj.self.sensor.result.state;%Param{2}.state; % 自身の状態
             env = obj.self.env;%Param{3}.param;             % 環境として予測したもの
 %             param = Param{4}; % 途中で変えられる必要があるか？
 %             if isfield(param,'range'); obj.param.r = param.range;  end
