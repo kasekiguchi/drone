@@ -172,13 +172,13 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                                 if ~isprop(result.state,Fs{k})
                                     addprop(result.state,Fs{k});
                                 end
-                                result.state.set_state(Fs{k},tmp.state.(Fs{k}));
+                                  result.state.set_state(Fs{k},tmp.state.(Fs{k}));
                             end
                         else
-                            result.(F{j})=state_copy(tmp.(F{j}));
+                              result.(F{j})=state_copy(tmp.(F{j}));
                         end
                     else
-                        result.(F{j})=tmp.(F{j});
+                          result.(F{j})=tmp.(F{j});
                     end
                 end
             end
