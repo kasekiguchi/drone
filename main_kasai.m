@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 4; % number of agents
+N = 3; % number of agents
 fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
@@ -28,7 +28,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=5;
+    te=10;
 end
 %% set connector (global instance)
 if fExp
@@ -135,8 +135,8 @@ for i = 1:N
     end
     
     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-    agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_RangePos(i,20)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+%     agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
     agent(i).estimator=[];
@@ -148,11 +148,11 @@ for i = 1:N
 %     agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
     %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
     agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-    agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
+%     agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference=[];
 %     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
-    agent(i).set_property("reference",Reference_agreement(agent(i))); % 合意重心
+    agent(i).set_property("reference",Reference_agreement(agent(i),N)); % 合意重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
@@ -333,7 +333,7 @@ w = waitforbuttonpress;
 close all
 clc
 % agent(1).reference.covering.draw_movie(logger,N,Env)
-dataplot(logger);
+dataplot(logger,N);
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
