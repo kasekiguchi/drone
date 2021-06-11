@@ -5,14 +5,16 @@ classdef consensus_agreement < REFERENCE_CLASS
     properties
         param
         self
+        N
         offset
     end
     
     methods
         %%　計算式
-        function obj = consensus_agreement(self,offset)
+        function obj = consensus_agreement(self,param)
             obj.self = self;
-            obj.offset = offset;
+            obj.N = param.N;
+            obj.offset = param.offset;
             obj.result.state = STATE_CLASS(struct('state_list',["p"],'num_list',[3]));
         end
 
@@ -35,28 +37,32 @@ classdef consensus_agreement < REFERENCE_CLASS
 %             R = obj.param.R; % 通信レンジ
 %             d = obj.param.d; % グリッド間隔
 %             void = obj.param.void; % VOID幅
-            if isfield(sensor,'neighbor')
-                neighbor=sensor.neighbor; % 通信領域内のエージェント位置 絶対座標
-            elseif isfield(sensor,'rigid')
-                neighbor=[sensor.rigid(1:size(sensor.rigid,2)~=obj.self.id).p];
+%             if isfield(sensor,'neighbor')
+%                 neighbor=sensor.neighbor; % 通信領域内のエージェント位置 絶対座標
+%             elseif isfield(sensor,'rigid')
+%                 neighbor=[sensor.rigid(1:size(sensor.rigid,2)~=obj.self.id).p];
+%             end
+%             if ~isempty(neighbor)% 通信範囲にエージェントが存在するかの判別
+%                 neighbor_rpos=neighbor-state.p; % 通信領域内のエージェントの相対位置
+%     %        if size(neighbor_rpos,2)>=1 % 隣接エージェントの位置点重み更新
+%                 % 以下は計算負荷を下げられるが重み付きvoronoiをやるとセル形状が崩れる
+%                 %     tri=delaunay([0,neighbor_rpos(1,:)],[0,neighbor_rpos(2,:)]); % 自機体(0,0)を加えたドロネー三角形分割
+%                 %     tmpid=tri(logical(sum(tri==1,2)),:); % 1 つまり自機体を含む三角形だけを取り出す．
+%                 %     tmpid=unique(tmpid(tmpid~=1))-1; % tmpid = 隣接エージェントのインデックス （neighbor_rpos内のインデックス番号）
+%                 %     neighbor_rpos=neighbor_rpos(:,tmpid); % 隣接エージェントの相対位置
+%                 %     neighbor.pos=neighbor.pos(:,tmpid); % 隣接エージェントの位置
+%                 %     neighbor.weight=sensor_obj.output.neighbor.weight(tmpid); % neighbor weight
+%                 %     neighbor.mass=sensor_obj.output.neighbor.mass(tmpid); % neighbor mass
+% %                 Vn=voronoi_region([[0;0;0],(neighbor_rpos)],[R,R;-R,R;-R,-R;R,-R],1:size(neighbor,2)+1);% neighborsとのみボロノイ分割（相対座標）
+%             else % 通信範囲にエージェントがいない場合
+% %                 Vn=voronoi_region([0;0;0],[R,R;-R,R;-R,-R;R,-R],1);
+%             end
+            if obj.N==3
+            obj.result.state.p = (((state.p+(obj.offset(:,obj.self.id)))+sensor.neighbor(:,1)+sensor.neighbor(:,2))/obj.N); %　3機
             end
-            if ~isempty(neighbor)% 通信範囲にエージェントが存在するかの判別
-                neighbor_rpos=neighbor-state.p; % 通信領域内のエージェントの相対位置
-    %        if size(neighbor_rpos,2)>=1 % 隣接エージェントの位置点重み更新
-                % 以下は計算負荷を下げられるが重み付きvoronoiをやるとセル形状が崩れる
-                %     tri=delaunay([0,neighbor_rpos(1,:)],[0,neighbor_rpos(2,:)]); % 自機体(0,0)を加えたドロネー三角形分割
-                %     tmpid=tri(logical(sum(tri==1,2)),:); % 1 つまり自機体を含む三角形だけを取り出す．
-                %     tmpid=unique(tmpid(tmpid~=1))-1; % tmpid = 隣接エージェントのインデックス （neighbor_rpos内のインデックス番号）
-                %     neighbor_rpos=neighbor_rpos(:,tmpid); % 隣接エージェントの相対位置
-                %     neighbor.pos=neighbor.pos(:,tmpid); % 隣接エージェントの位置
-                %     neighbor.weight=sensor_obj.output.neighbor.weight(tmpid); % neighbor weight
-                %     neighbor.mass=sensor_obj.output.neighbor.mass(tmpid); % neighbor mass
-%                 Vn=voronoi_region([[0;0;0],(neighbor_rpos)],[R,R;-R,R;-R,-R;R,-R],1:size(neighbor,2)+1);% neighborsとのみボロノイ分割（相対座標）
-            else % 通信範囲にエージェントがいない場合
-%                 Vn=voronoi_region([0;0;0],[R,R;-R,R;-R,-R;R,-R],1);
+            if obj.N==4
+            obj.result.state.p = (((state.p+(obj.offset(:,obj.self.id)))+sensor.neighbor(:,1)+sensor.neighbor(:,2)+sensor.neighbor(:,3))/obj.N);%.*[1;1;0]; % 4機
             end
-            
-            obj.result.state.p = (state.p+sensor.neighbor(:,1)+sensor.neighbor(:,2)+sensor.neighbor(:,3))/4;%(state.p+sensor.neighbor(:,1)+sensor.neighbor(:,2)+sensor.neighbor(:,3))/N;%.*[1;1;0]; % 重心位置（絶対座標）
 %             obj.result.state.p(3) = 1; % リファレンス高さは１ｍ
             result = obj.result;
         end
