@@ -1,5 +1,6 @@
-function parameter = CF_ConvertLineParam(MapStruct)
+function parameter = CF_ConvertLineParam(obj)
     % Initialize each variable
+    MapStruct = obj.self.estimator.result.map_param;
     map_size = length(MapStruct.index);
     parameter.d = zeros(map_size, 1);
     parameter.delta = zeros(map_size, 1);

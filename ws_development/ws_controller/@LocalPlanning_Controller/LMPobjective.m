@@ -1,4 +1,4 @@
-function [eval] = LMPobjective(x, params)
+function [eval] = LMPobjective(obj,x, params)
 % 評価値を計算する
 %x(1) : optimal variables omega
 % params.dis%wall distanse

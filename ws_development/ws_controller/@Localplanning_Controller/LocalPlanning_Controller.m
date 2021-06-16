@@ -41,7 +41,7 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             
             %---マップ情報をとる---%
             MapParam = obj.self.estimator.result.map_param;
-            LineParam = CF_ConvertLineParam(obj.self.estimator.result.map_param);
+            LineParam = CF_ConvertLineParam(obj);
             AssociationInfo = obj.self.estimator.result.AssociationInfo;
             %---------------------%
             
@@ -88,10 +88,10 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
 %             params.t = %control tic
             params.DeltaOmega = Deltaomega;
             params.t = obj.Param.t;
-            params.k = 0.5;
+            params.k = 1.5;
             params.u = 2;
             params.v = 1;
-            params.Oldw = obj.self.estimator.result.state.w;
+            params.Oldw = oldinput(2);
             %----------------------------------%
 %             if isfield(obj.result,'Solvex')
 %             if abs(obj.self.estimator.result.state.w - obj.result.Solvex) > 0.1
@@ -102,18 +102,18 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             %観測値差分を評価値として計算
             problem.solver    = 'fminunc';
             problem.options   = obj.options;
-            problem.objective = @(x) LMPobjective(x, params);  % 評価関数
+            problem.objective = @(x) LMPobjective(obj,x, params);  % 評価関数
             problem.x0		  = oldinput(2);
             [Solvex, fval, exitflag, output, grad, hessian] = fminunc(problem);
             
             %入力に印加
 %             if isfield(obj.self.model.state,'v')
                 %加速度次元入力
-                RobotVW = [obj.self.estimator.result.state.v,obj.self.estimator.result.state.w];
-                obj.result.input = [(params.v - RobotVW(1)),(Solvex - RobotVW(2))];
+%                 RobotVW = [obj.self.estimator.result.state.v,obj.self.estimator.result.state.w];
+%                 obj.result.input = [(params.v - RobotVW(1)),(Solvex - RobotVW(2))];
 %             else
                 %速度次元入力
-%                 obj.result.input = [params.v,Solvex];
+                obj.result.input = [params.v,Solvex];
 %             end
 
             %---For analysis---%
@@ -156,9 +156,8 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
     end
     
     methods(Access = private)
-        outStruct = CF_ConvertLineParam(inStruct);
-        out = InputSouse(fai,alpha,theta,t);
-        eval = LMPobjective(x, params);
+        outStruct = CF_ConvertLineParam(obj);
+        eval = LMPobjective(obj,x, params);
     end
     
 end
