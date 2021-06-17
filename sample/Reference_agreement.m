@@ -4,15 +4,10 @@ function Reference = Reference_agreement(agent,N)
     clear Reference
     Reference.type=["consensus_agreement"];
     Reference.name=["agreement"];
-    Reference.param.N=N;
-    if N==3
-    Reference.param.offset=3*[-2*cos(pi/6),2*cos(pi/6),0.0;
-                              -2*sin(pi/6),-2*sin(pi/6),2.0;
-                               0.0,0.0,0.0,];
-    end
-    if N==4
-    Reference.param.offset=4*[-5.0,-5.0,5.0,5.0;
-                              -5.0,5.0,-5.0,5.0;
-                               0.0,0.0,0.0,0.0];
+    pos = linspace(0,2*pi,N+1);
+    Reference.param = zeros(3,N);
+    r = 3;
+    for i=1:N
+        Reference.param(:,i)=N*[r*cos(pos(i));r*sin(pos(i));0.0];
     end
 end
