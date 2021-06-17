@@ -13,13 +13,16 @@ end
     figure(1)
     figure1=figure(1);
     axes1=axes('Parent',figure1);
+    for i=1:N
+        text{i} = append('agent',num2str(i));
+    end
     hold on
     for i=1:N
-%         figi = plot(t,x(i,1:numel(logger.Data.t)));
-    if i==1 figi = plot(t,x(i,1:numel(logger.Data.t)),'r-');end
-    if i==2 figi = plot(t,x(i,1:numel(logger.Data.t)),'g-');end
-    if i==3 figi = plot(t,x(i,1:numel(logger.Data.t)),'b-');end
-    if i==4 figi = plot(t,x(i,1:numel(logger.Data.t)),'c-');end
+        figi = plot(t,x(i,1:numel(logger.Data.t)),'displayname',text{i});
+%     if i==1 figi = plot(t,x(i,1:numel(logger.Data.t)),'r-');end
+%     if i==2 figi = plot(t,x(i,1:numel(logger.Data.t)),'g-');end
+%     if i==3 figi = plot(t,x(i,1:numel(logger.Data.t)),'b-');end
+%     if i==4 figi = plot(t,x(i,1:numel(logger.Data.t)),'c-');end
     end
     hold off
     
@@ -33,12 +36,8 @@ end
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it x} [m]');
     axis square;
-    if N==3
-        legend('Agent1','Agent2','Agent3');
-    end
-    if N==4
-        legend('Agent1','Agent2','Agent3','Agent4');
-    end        
+    legend;
+      
         
 %%        
 %-------------------エージェントのy座標------------------------
@@ -47,11 +46,11 @@ end
     axes2=axes('Parent',figure2);
     hold on
     for i=1:N
-%         figi = plot(t,y(i,1:numel(logger.Data.t)));
-    if i==1 figi = plot(t,y(i,1:numel(logger.Data.t)),'r-');end
-    if i==2 figi = plot(t,y(i,1:numel(logger.Data.t)),'g-');end
-    if i==3 figi = plot(t,y(i,1:numel(logger.Data.t)),'b-');end
-    if i==4 figi = plot(t,y(i,1:numel(logger.Data.t)),'c-');end
+        figi = plot(t,y(i,1:numel(logger.Data.t)),'displayname',text{i});
+%     if i==1 figi = plot(t,y(i,1:numel(logger.Data.t)),'r-');end
+%     if i==2 figi = plot(t,y(i,1:numel(logger.Data.t)),'g-');end
+%     if i==3 figi = plot(t,y(i,1:numel(logger.Data.t)),'b-');end
+%     if i==4 figi = plot(t,y(i,1:numel(logger.Data.t)),'c-');end
     end
     hold off
     
@@ -65,12 +64,7 @@ end
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it y} [m]');
     axis square;
-    if N==3
-        legend('Agent1','Agent2','Agent3');
-    end
-    if N==4
-        legend('Agent1','Agent2','Agent3','Agent4');
-    end
+    legend;
     
 %%  
     %-------------------エージェント初期位置------------------------
@@ -79,10 +73,7 @@ end
     axes3=axes('Parent',figure3);
     hold on
     for i=1:N
-    if i==1 figi = plot(x(1,1),y(1,1),'r.','MarkerSize',20);end
-    if i==2 figi = plot(x(2,1),y(2,1),'g.','MarkerSize',20);end
-    if i==3 figi = plot(x(3,1),y(3,1),'b.','MarkerSize',20);end
-    if i==4 figi = plot(x(4,1),y(4,1),'c.','MarkerSize',20);end
+        figi = plot(x(i,1),y(i,1),'.','MarkerSize',20,'displayname',text{i});
     end
     hold off
     
@@ -97,12 +88,7 @@ end
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
     axis square;
-    if N==3
-        legend('Agent1','Agent2','Agent3');
-    end
-    if N==4
-        legend('Agent1','Agent2','Agent3','Agent4');
-    end
+    legend;
         
     %% 動画作成スレッド
 
@@ -110,8 +96,14 @@ end
 
     % Animation Loop
     t = 1;
-    xave = (x(1,1)+x(2,1)+x(3,1)+x(4,1))/N;
-    yave = (y(1,1)+y(2,1)+y(3,1)+y(4,1))/N;
+    xsum = 0;
+    ysum = 0;
+    for i=1:N
+        xsum = xsum + x(i,1);
+        ysum = ysum + y(i,1);
+    end
+    xave = xsum/N;
+    yave = ysum/N;
     v = VideoWriter('goui_gun.avi');
     open(v);
     while t <= numel(logger.Data.t)
@@ -131,10 +123,7 @@ end
         ax.GridAlpha = 0.4;
 
         for i=1:N
-        if i==1 figi = plot(x(1,t),y(1,t),'r.','MarkerSize',20);end
-        if i==2 figi = plot(x(2,t),y(2,t),'g.','MarkerSize',20);end
-        if i==3 figi = plot(x(3,t),y(3,t),'b.','MarkerSize',20);end
-        if i==4 figi = plot(x(4,t),y(4,t),'c.','MarkerSize',20);end
+            figi = plot(x(i,t),y(i,t),'.','MarkerSize',20);
         end
         
         hold off 
