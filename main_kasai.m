@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 3; % number of agents
+N = randi([2 10]); % number of agents
 fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
@@ -78,7 +78,8 @@ else
             initial(i).v = [0;0;0];
             initial(i).w = [0;0;0];
         else
-            arranged_pos = arranged_position([0,0],N,1,0);
+%             arranged_pos = arranged_position([0,0],N,1,0);
+            arranged_pos = arranged_position_agreement([0,0],N,1);
             initial(i).p = arranged_pos(:,i);
             initial(i).q = [1;0;0;0];
             initial(i).v = [0;0;0];
@@ -123,7 +124,7 @@ for i = 1:N
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
     %% set environment property
     Env = [];
-    agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
+%     agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor=[];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
@@ -135,7 +136,7 @@ for i = 1:N
     end
     
     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,20)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
