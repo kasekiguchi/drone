@@ -3,10 +3,12 @@
 
 uint8_t i;
 #define PIN_LED 13
-volatile int state = HIGH;
+#define EM_PIN 2
+#define RST_PIN 18 // = A4
+volatile int LED_state = HIGH;
 volatile boolean isEmergency = false;
-#define OUTPUT_PIN 2 // ppm output pin
 /////////////////// PPM関係 ////////////////////
+#define OUTPUT_PIN A1 // ppm output pin
 char packetBuffer[255];
 #define TOTAL_INPUT 4      // number of input channels
 #define TOTAL_CH 8         // number of channels
@@ -30,15 +32,17 @@ volatile boolean isReceive_Data_Updated = false;
 void setup()
 {
   Serial.begin(115200); // MATLABの設定と合わせる
-  // Serial.print("Start");
+  Serial.print("Start");
 
   delay(1000);
   setupPPM();
   // 緊急停止
+  pinMode(EM_PIN, INPUT_PULLUP);// emergency_stop を割り当てるピン
+  pinMode(RST_PIN, INPUT_PULLUP);
   pinMode( PIN_LED, OUTPUT );
-  digitalWrite( PIN_LED, state );
+  digitalWrite( PIN_LED, LED_state );
   //attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　LOWからHIGHで停止
-  attachInterrupt(1, emergency_stop, CHANGE); // 緊急停止用　値の変化で対応（短絡から解放）
+  attachInterrupt(0, emergency_stop, CHANGE); // 緊急停止用　値の変化で対応（短絡から5V）(0: 2pin, 1: 3pin)
   last_received_time = micros();
 }
 
@@ -170,7 +174,17 @@ void emergency_stop()
   pw[5] = 600; // AUX2
   pw[6] = 600; // AUX3
   pw[7] = 600; // AUX4
-  isEmergency = true;
-  state = LOW;
-  digitalWrite( PIN_LED, state );
+  if (digitalRead(EM_PIN)==HIGH){// Emergency pin : LOW => HIGH
+    isEmergency = true;
+    LED_state = LOW;
+    digitalWrite( PIN_LED, LED_state );
+   Serial.println("Emergency!!");
+ }else{// Emergency pin : HIGH => LOW
+   software_reset();
+   Serial.println("RECOVERY");
+  }
 }
+void software_reset() {
+  pinMode(RST_PIN, OUTPUT);
+  digitalWrite(RST_PIN, LOW);
+} 
