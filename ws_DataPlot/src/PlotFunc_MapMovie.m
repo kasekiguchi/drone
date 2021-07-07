@@ -38,7 +38,6 @@ if Flag
     %Map plot start
     figure(FigNum)
     hold on;
-    ax = gca;
     % Animation Loop
     mo_t = 1;
     tmp_max = max(obj.logger.Data.agent{1,Index});
@@ -56,20 +55,21 @@ if Flag
     open(v);
     while mo_t <= msi
         clf(figure(FigNum));
+        hold on;
+        grid on;
+        box on
+        ax = gca;
+        ax.FontSize = obj.FontSize;
+        ax.FontName = obj.FontName;
+        ax.FontWeight = obj.FontWeight;
+
         xlim([xmin xmax]);ylim([ymin ymax]);
         xticks([xmin:dx:xmax]);yticks([ymin:dy:ymax]);
         pbaspect([abs(xmin -xmax) abs(ymin -ymax) 1]);
         %     set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize', 15);
         ylabel('\sl y \rm [m]','FontSize',15);
-        hold on
-        grid on;
-        box on
-%         ax.FontSize = obj.FontSize;
-%         ax.FontName = obj.FontName;
-%         ax.FontWeight = obj.FontWeight;
-        %         pbaspect([250 50 1]);
-        %     axis equal
+
         %plot
         %     logger.Data.agent{mot,4}(:,1)
         %------estimation map plot-------------%
@@ -87,7 +87,6 @@ if Flag
         plant_square =  rotate(plant_square,180 * PlantqData(mo_t) / pi, PlantData(:,mo_t)');
         PlotPlant = plot(plant_square);
         %-------------%
-        
         %model plot%
         tmp_model_square = EstData(:,mo_t) + [1,1.5,1,-1,-1;1,0,-1,-1,1];
         model_square =  polyshape( tmp_model_square');
@@ -96,7 +95,12 @@ if Flag
         %-------------%
         Environment = plot(p_Area,'FaceColor','red','FaceAlpha',0.1);% true map plot
         Sensor = plot(polybuffer([PlantData(1,mo_t),PlantData(2,mo_t)],'points',40),'FaceColor','blue','FaceAlpha',0.1);%Raser plot
-        
+        %Trajectory plot%
+%         addpoints(PlantTra,);
+%         addpoints(EstTra,EstData(1,mo_t),EstData(2,mo_t));
+        TraP = plot(PlantData(1,1:mo_t),PlantData(2,1:mo_t),'r-');
+        TraE = plot(EstData(1,1:mo_t),EstData(2,1:mo_t),'b-');
+        %---------------%
         legend([PlotPlant PlotEst Environment Sensor PlotMap],'Plant','Estimate','Environment','Sensor area','Estimate Map','Location','northoutside','NumColumns',3);
         hold off
         pause(16 * 1e-2);

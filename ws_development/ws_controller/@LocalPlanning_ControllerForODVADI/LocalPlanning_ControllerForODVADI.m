@@ -88,10 +88,13 @@ classdef LocalPlanning_ControllerForODVADI <CONTROLLER_CLASS
 %             params.t = %control tic
             params.DeltaTheta = DeltaTheta;
             params.t = obj.Param.t;
-            params.k = 0.5;
-            params.u = 0.3;
-            params.e = 1e-5;%計算失敗を防ぐための
-%             params.Oldw = obj.self.estimator.result.state.w;
+            params.k1 = 1;
+            params.k2 = 1;
+            params.k3 = 1;
+            params.vx = 1;
+            params.vy = 0;
+            params.ipsiron = 1e-5;%計算失敗を防ぐための
+            params.Oldw = obj.self.estimator.result.state.w;
             %----------------------------------%
 %             if isfield(obj.result,'Solvex')
 %             if abs(obj.self.estimator.result.state.w - obj.result.Solvex) > 0.1
@@ -144,6 +147,7 @@ classdef LocalPlanning_ControllerForODVADI <CONTROLLER_CLASS
             %------------------%
 %             end
             obj.self.input = obj.result.input;
+            
             result = obj.result;
         end
         function show(obj)

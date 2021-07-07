@@ -17,7 +17,7 @@ hk1 = (params.dis - params.pos(1).*cos(params.alpha) - params.pos(2).*sin(params
 hk2 = (params.dis - (params.pos(1)+x(1).*cos(params.pos(3)).*params.t)*cos(params.alpha) - (params.pos(2)+x(2).*sin(params.pos(3)).*params.t).*sin(params.alpha))./cos(params.fai - params.alpha +(params.pos(3)+x(3).*params.t));
 
 deltah = (hk1 - hk2) * (hk1 - hk2)';%観測値差分の２乗のsum
-eval = 1/(deltah + params.e) + params.k * abs(atan2(x(2),x(1)) - params.DeltaTheta) + params.u * x(1)^2 + params.u * x(2)^2;%観測値差分の逆数と目標に向かう角速度
+eval = 1/(deltah + params.ipsiron) + params.k1 * (atan2(x(2),x(1)) - params.DeltaTheta)^2 + params.k2 * (x(3) - params.Oldw)^2 + params.k3 * (x(1) - params.vx)^2 + params.k3 * (x(2) - params.vy)^2;%観測値差分の逆数と目標に向かう角速度
 
 % diffomega = diff(invdeltah,omega);%観測値差分の逆数をωで微分
 %     %-- 評価値計算

@@ -35,7 +35,7 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             if ~isempty(obj.self.input)
                 oldinput = obj.self.input;
             else
-                oldinput=[1,1];
+                oldinput=[1,0];
             end
             %-------------------------%
             
@@ -83,15 +83,18 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             %---最適化計算用のパラメータを算出---%
             params.dis = Dis;%wall distanse
             params.alpha = Alpha;%wall angle
-            params.fai = AssoFai;%raser angle
+            params.phi = AssoFai;%raser angle
             params.pos = RobotState;%robot position [x y theta]
 %             params.t = %control tic
             params.DeltaOmega = Deltaomega;
             params.t = obj.Param.t;
-            params.k = 1.5;
-            params.u = 2;
             params.v = 1;
-            params.Oldw = oldinput(2);
+            params.k1 = 1;
+            params.k2 = 1;
+            params.k3 = 1;
+%             params.Oldw = oldinput(2);
+            params.Oldw = obj.self.estimator.result.state.w;
+            params.ipsiron = 1e-5;
             %----------------------------------%
 %             if isfield(obj.result,'Solvex')
 %             if abs(obj.self.estimator.result.state.w - obj.result.Solvex) > 0.1
@@ -103,17 +106,17 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             problem.solver    = 'fminunc';
             problem.options   = obj.options;
             problem.objective = @(x) LMPobjective(obj,x, params);  % 評価関数
-            problem.x0		  = oldinput(2);
+            problem.x0		  = oldinput;
             [Solvex, fval, exitflag, output, grad, hessian] = fminunc(problem);
             
             %入力に印加
 %             if isfield(obj.self.model.state,'v')
                 %加速度次元入力
-%                 RobotVW = [obj.self.estimator.result.state.v,obj.self.estimator.result.state.w];
-%                 obj.result.input = [(params.v - RobotVW(1)),(Solvex - RobotVW(2))];
+                RobotVW = [obj.self.estimator.result.state.v,obj.self.estimator.result.state.w];
+                obj.result.input = [(Solvex(1) - RobotVW(1)),(Solvex(2) - RobotVW(2))];
 %             else
                 %速度次元入力
-                obj.result.input = [params.v,Solvex];
+%                 obj.result.input = [params.v,Solvex];
 %             end
 
             %---For analysis---%
@@ -148,6 +151,7 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             %------------------%
 %             end
             obj.self.input = obj.result.input;
+            obj.result.Eval = EvalResult(Solvex, params);
             result = obj.result;
         end
         function show(obj)

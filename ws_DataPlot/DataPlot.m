@@ -19,6 +19,7 @@ classdef DataPlot<handle
         FuncNames = [%     "XYZTureAndEst",
 %     "AttitudesTureAndEst",
     "MapAndVehicleTrueAndEst",
+%     "Eval",
 %     "MapMovie",
 %     "MapAndPreMapMovie",
 %     "Entropy",

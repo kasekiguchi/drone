@@ -8,10 +8,18 @@ if isempty(Index)
     data = 0;
 else
     Flag = true;
-dimension = size(logger.Data.agent{1,Index},1);
-data = zeros(dimension,size(logger.Data.t,1));
-for pI = 1:dimension
-    data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,Index}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
-end
+    if ~iscolumn(logger.Data.agent{1,Index})
+        dimension = size(logger.Data.agent{1,Index}',1);
+        data = zeros(dimension,size(logger.Data.t,1));
+        for pI = 1:dimension
+            data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,Index}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
+        end
+    else
+        dimension = size(logger.Data.agent{1,Index},1);
+        data = zeros(dimension,size(logger.Data.t,1));
+        for pI = 1:dimension
+            data(pI,:) = cell2mat(arrayfun(@(N) logger.Data.agent{N,Index}(pI),1:size(logger.Data.t,1),'UniformOutput',false));
+        end
+    end
 end
 end

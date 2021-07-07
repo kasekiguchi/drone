@@ -29,7 +29,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=10;
 end
 %% initialize
 initial(N) = struct;
@@ -39,8 +39,8 @@ for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
     initial(i).p = [0;0];
     initial(i).q = [0];
-        initial(i).v = [0];
-        initial(i).w = [0];
+    initial(i).v = [0];
+    initial(i).w = [0];
 end
 %% generate Drone instance
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
@@ -48,10 +48,10 @@ end
 for i = 1:N
     if fExp
     else
-                agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
-%                         agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',4.337E-5)));
-%         agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
-% agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));
+                        agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
+%         agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',4.337E-5)));
+%                 agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
+%         agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));
     end
     %% model
     % set control model
@@ -65,15 +65,16 @@ for i = 1:N
     agent(i).set_property("env",Env_FloorMap_sim(i)); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor=[];
-    agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-9) ) )  );%LiDAR seosor
+    agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-3) ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
     Gram = GrammianAnalysis(te,ts,dt);
-        agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
-%     agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
-%     agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
-% agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
-%                 agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
+%             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),Gram));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),Gram));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
+%     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i),Gram));
+%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
@@ -91,18 +92,6 @@ for i = 1:N
 end
 %% initialize
 clc
-% for i = 1:N
-%     % for sim
-% %     plant.initial = struct('p',[0,0]','q',[0],'v',[0],'w',[0]);%WC model A
-%     plant.initial = struct('p',[0,0]','q',[0]);%WC model V
-%     agent(i).state.set_state(plant.initial);
-%     agent(i).model.set_state(plant.initial);
-%     for j = 1:length(agent(i).estimator.name)
-%         if isfield(agent(i).estimator.(agent(i).estimator.name(j)),'result')
-%         agent(i).estimator.(agent(i).estimator.name(j)).result.state.set_state(plant.initial);
-%         end
-%     end
-% end
 LogData=[
     %     "reference.result.state.p",
     "estimator.result.state.p",
@@ -113,42 +102,10 @@ LogData=[
 %     "plant.state.w",
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
+%     "controller.result.Eval",
     %     "estimator.result.PreMapParam.x",
     %     "estimator.result.PreMapParam.y",
-    %     "estimator.result.PreXh",
-    %     "estimator.result.LSAParam.x",
-    %     "estimator.result.LSAParam.y",
-    %     "controller.result.Fval",
-    %     "controller.result.Exitflag",
     "env.Floor.param.Vertices",
-    %     "estimator.ekfslam_WC.result.P",
-    %     "estimator.ekfslam_WC.result.ErEl_Round",
-    %     "estimator.ekfslam_WC.result.Entropy",
-    % %     "estimator.ekfslam_WC.result.SingP",
-    %     "estimator.ekfslam_WC.result.G",
-    %     "env.Floor.param.Vertices",
-    %     "estimator.ekfslam_WC.result.PartialX",
-    %     "estimator.ekfslam_WC.result.PartialY",
-    %     "estimator.ekfslam_WC.result.PartialTheta",
-    %     "estimator.ekfslam_WC.result.PartialV",
-    %     "estimator.ekfslam_WC.result.PartialW",
-    %     "estimator.ekfslam_WC.result.MtoKF_KL",
-    %     "estimator.ekfslam_WC.result.Eig",
-    %     "estimator.ekfslam_WC.result.InFo",
-    %     "estimator.ekfslam_WC.result.Gram",
-    %     "estimator.ekfslam_WC.result.GramVec",
-    %     "estimator.ekfslam_WC.result.Obs",
-    %     "estimator.ekfslam_WC.result.diffy",
-    %     "estimator.ekfslam_WC.result.OtoKF_KL",
-    %     "estimator.ekfslam_WC.result.laser.ranges",
-    %     "estimator.ekfslam_WC.result.laser.angles",
-    %     "estimator.result.state.q",
-    %     "estimator.result.state.v",
-    %     "estimator.result.state.w",
-    %     "sensor.result.state.p",
-    %     "sensor.result.state.q",
-    %     "sensor.result.state.v",
-    %     "sensor.result.state.w",
     %    "reference.result.state.xd",
     "inner_input",
     "input"
@@ -214,8 +171,7 @@ while round(time.t,5)<=te
             param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
         end
         agent(i).do_reference(param(i).reference.list);
-        
-        
+
         %            agent(i).do_controller(param(i).controller);
         agent(i).do_controller(cell(1,10));
         warukaku = 4;
@@ -236,45 +192,88 @@ while round(time.t,5)<=te
         %         else
         %             agent(i).input = [1,0];
         %         end
-                        www = 1.1294;
-                        wwa = 0.443015;
-                                                if time.t<1
-                                                    agent(i).input = [1,www-0.1];
-                                                elseif time.t>=10 && time.t<11
-                                                    agent(i).input = [1,-www - wwa];
-                                                elseif time.t>=30 && time.t<31
-                                                    agent(i).input = [1,www + wwa];
-                                                elseif time.t>=40 && time.t<41
-                                                    agent(i).input = [1,-www - wwa];
-                                                elseif time.t>=70 && time.t<71
-                                                    agent(i).input = [1,pi/warukaku];
-                                                elseif time.t>90 && time.t<91
-                                                    agent(i).input = [1,-pi/warukaku];
-                                                else
-                                                    agent(i).input = [1,0];
-                                                end
+%         www = 1.1294;
+%         wwa = 0.443015;
+%         if time.t<1
+%             agent(i).input = [1,www-0.1];
+%         elseif time.t>=10 && time.t<11
+%             agent(i).input = [1,-www - wwa];
+%         elseif time.t>=30 && time.t<31
+%             agent(i).input = [1,www + wwa];
+%         elseif time.t>=40 && time.t<41
+%             agent(i).input = [1,-www - wwa];
+%         elseif time.t>=70 && time.t<71
+%             agent(i).input = [1,pi/warukaku];
+%         elseif time.t>90 && time.t<91
+%             agent(i).input = [1,-pi/warukaku];
+%         else
+%             agent(i).input = [1,0];
+%         end
+
+% if time.t<1
+%     agent(i).input = [0,0,www-0.1];
+% elseif time.t>=1 && time.t<10
+%     agent(i).input = [0.4272,0.9042,0];
+% elseif time.t>=10 && time.t<11
+%     agent(i).input = [0,0,-www - wwa];
+% elseif time.t>=11 && time.t<30
+%     agent(i).input = [0.9035,-0.4287,0];
+% elseif time.t>=30 && time.t<31
+%     agent(i).input = [0,0,www + wwa];
+% elseif time.t>=31 && time.t<40
+%     agent(i).input = [0.4272,0.9042,0];
+% elseif time.t>=40 && time.t<41
+%     agent(i).input = [0,0,-www - wwa];
+% elseif time.t>=41 && time.t<70
+%     agent(i).input = [0.9035,-0.4287,0];
+% elseif time.t>=70 && time.t<71
+%     agent(i).input = [0,pi/warukaku];
+% elseif time.t>90 && time.t<91
+%     agent(i).input = [0,-pi/warukaku];
+% else
+%     agent(i).input = [1,0,0];
+% end
         
-        %for a model
-        %                     if time.t<=0.5
-        %                         agent(i).input = [1/1.2,2 * pi/kakudo];
-        %                     elseif time.t>0.5&&time.t<=1.1
-        %                         agent(i).input = [1/1.2,-2 * pi/kakudo];
-        %                     elseif time.t>=10 && time.t<=10.5
-        %                         agent(i).input = [0,-4 * pi/kakudo];
-        %                     elseif time.t>10.5 && time.t<11
-        %                         agent(i).input = [0,4 * pi/kakudo];
-        %                     elseif time.t>=30 && time.t<=30.5
-        %                         agent(i).input = [0,4 * pi/kakudo];
-        %                     elseif time.t>30.5 && time.t<31
-        %                         agent(i).input = [0,-4 * pi/kakudo];
-        %                     elseif time.t>=40 && time.t<=40.5
-        %                         agent(i).input = [0,-4 * pi/kakudo];
-        %                     elseif time.t>40.5 && time.t<41
-        %                         agent(i).input = [0,4 * pi/kakudo];
-        %                     else
-        %                         agent(i).input = [0,0];
-        %                     end
+%         %for a model
+%                             if time.t<=0.5
+%                                 agent(i).input = [1/1.2,2 * pi/kakudo];
+%                             elseif time.t>0.5&&time.t<=1.1
+%                                 agent(i).input = [1/1.2,-2 * pi/kakudo];
+%                             elseif time.t>=10 && time.t<=10.5
+%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                             elseif time.t>10.5 && time.t<11
+%                                 agent(i).input = [0,4 * pi/kakudo];
+%                             elseif time.t>=30 && time.t<=30.5
+%                                 agent(i).input = [0,4 * pi/kakudo];
+%                             elseif time.t>30.5 && time.t<31
+%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                             elseif time.t>=40 && time.t<=40.5
+%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                             elseif time.t>40.5 && time.t<41
+%                                 agent(i).input = [0,4 * pi/kakudo];
+%                             else
+%                                 agent(i).input = [0,0];
+%                             end
         
+% if time.t<=0.5
+%     agent(i).input = [0.4272/1.2,0.9042/1.2,2 * pi/kakudo];
+% elseif time.t>0.5&&time.t<=1.1
+%     agent(i).input = [0.4272/1.2,0.9042/1.2,-2 * pi/kakudo];
+% elseif time.t>=10 && time.t<=10.5
+%     agent(i).input = [-2*0.4272,-2*0.9042,-4 * pi/kakudo];
+% elseif time.t>10.5 && time.t<11
+%     agent(i).input = [2* 0.9035,2*-0.4287,4 * pi/kakudo];
+% elseif time.t>=30 && time.t<=30.5
+%     agent(i).input = [-2* 0.9035,-2*-0.4287,4 * pi/kakudo];
+% elseif time.t>30.5 && time.t<31
+%     agent(i).input = [2*0.4272,2*0.9042,-4 * pi/kakudo];
+% elseif time.t>=40 && time.t<=40.5
+%     agent(i).input = [-2*0.4272,-2*0.9042,-4 * pi/kakudo];
+% elseif time.t>40.5 && time.t<41
+%     agent(i).input = [2* 0.9035,2*-0.4287,4 * pi/kakudo];
+% else
+%     agent(i).input = [0,0,0];
+% end
 %         if time.t<=1.1
 %             agent(i).input = [1/1.2,0,0];
 %         else
@@ -316,11 +315,25 @@ end
 %     rethrow(ME);
 % end
 %profile viewer
-%% dataplot
+%% dataplot 
 close all;
 SaveOnOff = true;
 Plots = DataPlot(logger,SaveOnOff);
-%%
+%% Run class Saves
+% In this section we have created a txt file that writhed out the class names you used
+% Proptype = properties(agent);
+Proptype = ["model","sensor","controller","estimator","reference","env","plant"];
+RunNames = arrayfun(@(N) agent.(Proptype(N)).name , 1:length(Proptype),'UniformOutput',false);
+fileID = fopen('RunNames.txt','w');
+StringSet = '%s ';
+for Propidx = 1:length(Proptype)
+    LongProp = length(Proptype(Propidx));
+    LongRun  = length(RunNames{Propidx});
+    CharSet = repmat(StringSet,[1 LongProp+LongRun]);
+    fprintf(fileID,append(CharSet,'\n'),Proptype(Propidx),RunNames{Propidx});
+end
+fclose(fileID);
+movefile('RunNames.txt',Plots.SaveDateStr);
 % run('dataplot');
 %% Save
 

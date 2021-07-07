@@ -33,7 +33,7 @@ if vFlag
         plot(Time,EstWData(widx,:),'Linewidth',3,'LineStyle','-','Color',plotcolor(vidx + widx,:));
     end
     xlabel('t [s]','Interpreter','latex');ylabel('State value [rad/s]','Interpreter','latex');
-    legend('Plant  $v_x$','Estimate $v_x$','Plant  $v_y$','Estimate $v_y$','Plant $\omega$','Estimate $\omega$','Location','northoutside','NumColumns',3,'Interpreter','latex')
+    legend('Plant  $v_x$','Estimate $v_x$','Plant $\omega$','Estimate $\omega$','Location','northoutside','NumColumns',3,'Interpreter','latex')
     HYaxis = ax.YAxis;
     HYaxis(2).Color = 'k'; %  右軸ラベルの色変更
     %---テンプレ部分---%
