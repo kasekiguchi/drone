@@ -1,14 +1,16 @@
 function dataplot(logger,N)
 %% 行列生成
     t = logger.Data.t;
-    x = zeros(4,numel(logger.Data.t));
-    y = zeros(4,numel(logger.Data.t));
 for n = 1:numel(logger.Data.t)
     for i=1:N
-    x(i,n) = logger.Data.agent{n,3,i}.state.p(1,1);
-    y(i,n) = logger.Data.agent{n,3,i}.state.p(2,1);
+        x(i,n) = logger.Data.agent{n,3,i}.state.p(1,1);
+        y(i,n) = logger.Data.agent{n,3,i}.state.p(2,1);
+    end
+    for i=1:N-1
+        distance(i,n) = sqrt((x(1,n)-(x(1+i,n)))^2+(y(1,n)-(y(1+i,n)))^2);
     end
 end
+    
     %-------------------エージェントのx座標------------------------
     figure(1)
     figure1=figure(1);
@@ -83,13 +85,38 @@ end
     end
     set(axes3,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([min(x(:,1))-1,max(x(:,1))+1]);
-    ylim([min(y(:,1))-1,max(y(:,1))+1]);
+    xlim([-5,5]);
+    ylim([-5,5]);
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
     axis square;
     legend;
         
+    %% エージェント間の距離
+    figure(8)
+    figure8=figure(8);
+    axes8=axes('Parent',figure8);
+    for i=1:N-1
+        text2{i} = append('agent1-',num2str(i+1));
+    end
+    hold on
+    for i=1:N-1
+        figi = plot(t,distance(i,1:numel(logger.Data.t)),'displayname',text2{i});
+    end
+    hold off
+    
+    %-------------グラフィックスオブジェクトのプロパティ--------------
+    for i=1:N
+    set(figi,'LineWidth',1);
+    end
+    set(axes8,'FontName','Times New Roman','FontSize',14);
+    grid on;
+    xlim([0,logger.Data.t(end)+1]);
+    ylim([0,7]);
+    xlabel('Time {\it t} [s]');
+    ylabel('Distance {\it d} [m]');
+    axis square;
+    legend;
     %% 動画作成スレッド
 
     figure(9)
@@ -109,8 +136,8 @@ end
     while t <= numel(logger.Data.t)
         clf(figure(9)); 
 
-        xlim([xave-10.0 xave+10.0]);
-        ylim([yave-10.0 yave+10.0]);
+        xlim([-5,5]);
+        ylim([-5,5]);
         set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
@@ -128,7 +155,71 @@ end
         
         hold off 
         pause(16 * 1e-3) ; 
-        t = t+10;   
+        t = t+2;
+        if t==41
+            figure(4)
+            title('t=1s');
+            grid on;
+            xlim([xave-10.0 xave+10.0]);
+            ylim([yave-10.0 yave+10.0]);
+            set(gca,'FontSize',20);
+            xlabel('\sl x \rm [m]','FontSize',25);
+            ylabel('\sl y \rm [m]','FontSize',25);
+            axis square;
+            hold on
+            for i=1:N
+            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+            end
+            hold off
+        end
+        if t==61
+            figure(5)
+            title('t=1.5s');
+            grid on;
+            xlim([xave-10.0 xave+10.0]);
+            ylim([yave-10.0 yave+10.0]);
+            set(gca,'FontSize',20);
+            xlabel('\sl x \rm [m]','FontSize',25);
+            ylabel('\sl y \rm [m]','FontSize',25);
+            axis square;
+            hold on
+            for i=1:N
+            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+            end
+            hold off
+        end
+        if t==81
+            figure(6)
+            title('t=2s');
+            grid on;
+            xlim([xave-10.0 xave+10.0]);
+            ylim([yave-10.0 yave+10.0]);
+            set(gca,'FontSize',20);
+            xlabel('\sl x \rm [m]','FontSize',25);
+            ylabel('\sl y \rm [m]','FontSize',25);
+            axis square;
+            hold on
+            for i=1:N
+            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+            end
+            hold off
+        end
+        if t==101
+            figure(7)
+            title('t=2.5s');
+            grid on;
+            xlim([xave-10.0 xave+10.0]);
+            ylim([yave-10.0 yave+10.0]);
+            set(gca,'FontSize',20);
+            xlabel('\sl x \rm [m]','FontSize',25);
+            ylabel('\sl y \rm [m]','FontSize',25);
+            axis square;
+            hold on
+            for i=1:N
+            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+            end
+            hold off
+        end
         frame = getframe(figure(9));
         writeVideo(v,frame);      
     end

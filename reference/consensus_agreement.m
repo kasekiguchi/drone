@@ -26,7 +26,8 @@ classdef consensus_agreement < REFERENCE_CLASS
             if ni==0
                 obj.result.state.p = state.p;
             else
-                obj.result.state.p = (state.p+(obj.offset(:,obj.self.id))+sum(sensor.neighbor,2))/(ni+1);
+%                 obj.result.state.p = [1;0;0]+obj.offset(:,obj.self.id);
+                obj.result.state.p = (state.p+(ni+1)*(obj.offset(:,obj.self.id))+sum(sensor.neighbor,2))/(ni+1); %’€Ÿ‡ˆÓ“_‚ğZo
             end
             result = obj.result;
         end
