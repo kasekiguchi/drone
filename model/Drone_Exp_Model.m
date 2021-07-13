@@ -91,7 +91,6 @@ classdef Drone_Exp_Model < MODEL_CLASS
             
             % send msg
             %obj.connector.sendData(Pw(1,1:16));
-            msg
             Pw = gen_msg(msg);
             obj.connector.sendData(Pw);
 

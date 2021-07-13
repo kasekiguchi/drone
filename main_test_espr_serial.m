@@ -11,7 +11,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 1 %1：実機　それ以外：シミュレーション
-fMotive = 0;% Motiveを使うかどうか
+fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -51,7 +51,7 @@ if fExp
     for i = 1:N
         % for exp with motive : initialize by motive info
         if exist('motive','var')==1
-            sstate = motive.result.rigid(rigid_ids(i));
+            sstate = motive.result.rigid(i);
             initial(i).p = sstate.p;
             initial(i).q = sstate.q;
             initial(i).v = [0;0;0];
@@ -91,7 +91,7 @@ for i = 1:N
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
         %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[26])); % for exp % 機体番号（ESPrのIP）
-        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[16])); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[19])); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
@@ -123,7 +123,7 @@ for i = 1:N
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
     %% set environment property
     Env = [];
-    agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
+    %agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor=[];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
@@ -152,7 +152,7 @@ for i = 1:N
     %% set reference property
     agent(i).reference=[];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
-     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
@@ -264,7 +264,7 @@ try
             agent(i).do_estimator(cell(1,10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             param(i).reference.covering={};%{Env};
-            param(i).reference.point={FH,[2;1;0.5],time.t};
+            param(i).reference.point={FH,[0;0;1;-0.2],time.t};
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
@@ -285,7 +285,7 @@ try
         for i = 1:N % 状態更新
             model_param.param=agent(i).model.param;
             model_param.FH = FH;
-            agent(i).do_model(model_param);
+            %agent(i).do_model(model_param);
             
             model_param.param=agent(i).plant.param;
             agent(i).do_plant(model_param);
