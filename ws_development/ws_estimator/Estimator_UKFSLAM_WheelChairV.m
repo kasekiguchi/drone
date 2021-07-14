@@ -1,4 +1,4 @@
-function Estimator = Estimator_UKFSLAM_WheelChairV(agent,Gram)
+function Estimator = Estimator_UKFSLAM_WheelChairV(agent)
 
 %% estimator class
 Estimator.name="ukfslam_WC";
@@ -19,9 +19,6 @@ UKF_param.k = 1;%
 UKF_param.NLP = 2;%Number of Line Param
 %     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;
 UKF_param.list=["p","q"];
-%------ For Analysys---------
-UKF_param.Gram = Gram;
-%-------------------------------
 Estimator.param=UKF_param;
 % for i = 1:length(agent)
 % end

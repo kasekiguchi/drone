@@ -1,4 +1,4 @@
-function Estimator = Estimator_EKFSLAM_WheelChairV(agent,Gram)
+function Estimator = Estimator_EKFSLAM_WheelChairV(agent)
 
 %% estimator class
 Estimator.name="ekfslam_WC";
@@ -16,9 +16,6 @@ n = agent.model.dim(1);
 EKF_param.P = eye(n); %
 %     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;
 EKF_param.list=["p","q"];
-%------ For Analysys---------
-EKF_param.Gram = Gram;
-%-------------------------------
 Estimator.param=EKF_param;
 % for i = 1:length(agent)
 % end

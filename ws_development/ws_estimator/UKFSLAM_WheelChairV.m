@@ -46,8 +46,6 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             obj.constant.CluteringThreshold = 0.1; % Split a cluster using distance from next point
             obj.constant.SensorRange = 40; % Max scan range
             %------------------------------------------
-            obj.Analysis.Gram = param.Gram;
-            obj.Analysis.Gram.SaveP(obj.result.P);
         end
         
         function [result]=do(obj,param,~)

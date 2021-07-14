@@ -1,4 +1,4 @@
-function Estimator = Estimator_EKFSLAM_WheelChair(agent,Gram)
+function Estimator = Estimator_EKFSLAM_WheelChair(agent)
 
 %% estimator class
 Estimator.name="ekfslam_WC";
@@ -16,9 +16,6 @@ n = agent(1).model.dim(1);
 EKF_param.P = eye(n); % 蛻晄悄蜈ア蛻?謨」陦悟??
 %     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;
 EKF_param.list=["p","v"];
-%------ For Analysys---------
-EKF_param.Gram = Gram;
-%-------------------------------
 Estimator.param=EKF_param;
 disp('Execute "do" method with following parameter to operate EKF estimator.');
 disp('param.estimator={{agent(i),agent(i).sensor.result.state.get(["q","p"]),[]}};')

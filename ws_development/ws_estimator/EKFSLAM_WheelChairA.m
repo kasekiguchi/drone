@@ -1,7 +1,7 @@
 classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
     % Extended Kalman filter
     % obj = EKF(model,param)
-    %   model : EKF郢ァ雋橸スョ貅ッ?ス」?ソス邵コ蜷カ?ス玖崕?スカ陟包ス。陝?スセ髮趣ス。邵コ?スョ陋サ?スカ陟包ス。郢晢ス「郢晢ソス郢晢スォ
+    %   model : 
     %   param : required field : Q,R,B,JacobianH
     properties
         result%esitimated parameter
@@ -79,9 +79,9 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             end
             % Convert measurements into lines %Line segment approximation
             LSA_param = PointCloudToLine(sensor.length, measured.angles, pre_state, obj.constant);
-            % Conbine between measurements and map%雋ゑスャ陞ウ螢シ?ソス?ス、邵コ?スィ郢晄ァュ繝」郢晏干?ス帝お?ソス邵コ?スソ陷キ蛹サ?ス冗クコ蟶呻ス?
+            % Conbine between measurements and map%
             obj.map_param = CombiningLines(obj.map_param, LSA_param, obj.constant);
-            % Convert map into line parameters%郢ァ?スー郢晢スュ郢晢スシ郢晁?湖晁?趣スァ隶灘生縲帝囎荵昶螺驍ア螢シ?ソス邵コ?スョ郢昜サ」ホ帷ケ晢ス。郢晢スシ郢ァ?スソ
+            % Convert map into line parameters%
             line_param = LineToLineParameter(obj.map_param);
             % association between measurements and map
             %             association_info.index = correspanding wall(line_param) number index
@@ -123,12 +123,12 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
                     - denon * tan(angle) / cos(angle);
             end
             
-            %郢晄ァュ繝」郢晏干?ス定惺?スォ郢ァ竏壺螺闔?蜿・辯戊滋蝓滂スク?スャ陋滂ス、
+            %
             xh_m = zeros(state_count,1);
             xh_m(1:obj.n,1) = pre_Eststate';
             xh_m(obj.n+1:2:end, 1) = line_param.d;
             xh_m(obj.n+2:2:end, 1) = line_param.delta;
-            %髫ア?ス、陝セ?スョ陷茨スア陋サ?ソス隰ィ?ス」髯ヲ謔滂ソス蜉ア?ソス?スョ郢ァ?スオ郢ァ?ス、郢ァ?スコ陞溽判蟲ゥ?ソス?スシ蝓溽悛邵コ蜉ア?シ樣こ螢シ?ソス邵コ蠕娯旺邵コ?ス」邵コ貅倪?堤クコ?ソス)
+            %
             if length(obj.result.P) < state_count
                 % Appearance new line parameter
                 append_count = state_count - length(obj.result.P);
@@ -142,10 +142,10 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             %%%%%%%%%%%%%%%%%
             system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, size(line_param.d, 1))));
             P_pre  = A*obj.result.P*A' + B*system_noise*B';       % 
-            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 郢ァ?スォ郢晢スォ郢晄ァュホヲ郢ァ?スイ郢ァ?ス、郢晢スウ隴厄スエ隴?スー
-            %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
-            tmpvalue = xh_m + G * (sensor.length(association_available_index)' - Y);% 闔?蜿・?スセ譴ァ閠ウ陞ウ?ソス
-            obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 闔?蜿・?スセ迹夲スェ?ス、陝セ?スョ陷茨スア陋サ?ソス隰ィ?ス」
+            G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 
+            %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 
+            tmpvalue = xh_m + G * (sensor.length(association_available_index)' - Y);% 
+            obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = tmpvalue(6:2:end, 1);
             line_param.delta = tmpvalue(7:2:end, 1);
@@ -158,7 +158,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             point_opt = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = point_opt.x;
             obj.map_param.y = point_opt.y;
-            % Optimize the map%郢晄ァュ繝」郢晏干?ソス?スョ邵コ蜷カ?ス願惺蛹サ?ス冗クコ?ソス
+            % Optimize the map%
             [obj.map_param, removing_flag] = OptimizeMap(obj.map_param, obj.constant);
             % Update estimate covariance %
             if any(removing_flag)
