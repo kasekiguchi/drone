@@ -73,7 +73,7 @@ classdef GradientLocalPlanning_Controller <CONTROLLER_CLASS
                 params.k1 = 1;
                 params.k2 = 1;
                 params.k3 = 1;
-                params.v = 1;
+                params.v = 1 + rand;
                 %             params.Oldw = oldinput(2);
                 params.Oldw = obj.self.estimator.result.state.w;
                 params.ipsiron = 1e-5;

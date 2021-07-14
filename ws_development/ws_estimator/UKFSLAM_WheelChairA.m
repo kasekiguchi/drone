@@ -147,7 +147,7 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             end
             Kai = [PreXh,...
                 cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
-                cell2mat(arrayfun(@(i) PreXh -  sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
+                cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
             weight = [obj.k/(StateCount + obj.k), 1/( 2*(StateCount + obj.k) )];
             %再計算されたシグマポイントのマップパラメータごとのマップ端点を計算
             EndPoint = SigmaLineParamToEndPoint(Kai,obj.map_param,obj.n,obj.constant);
@@ -165,7 +165,7 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             
             Ita = cell(1,size(Kai,2));
             for i = 1:size(Kai,2)%i:シグマポイントの数
-                tmp_angles = sensor.angle - Kai(3,i);
+                tmp_angles = sensor.angle - Kai(3,1);
                 if iscolumn(tmp_angles)
                     tmp_angles = tmp_angles';% Transposition
                 end
@@ -181,7 +181,6 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
                     Ita{1,i}(m,1) = (denon) / cos(angle);
                 end
             end
-            %
             %事前出力推定値
             PreYh = weight(1) .* Ita{1,1}(:);
             for i = 2:size(Kai,2)
@@ -215,11 +214,9 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             MapEnd = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = MapEnd.x;
             obj.map_param.y = MapEnd.y;
-            %
             [obj.map_param, ~,RemovingFlag] = UKFOptimizeMap(obj.map_param, obj.constant);
             line_param = LineToLineParamAndEndPoint(obj.map_param);
-            
-            
+
             EstMh = zeros(obj.NLP * length(line_param.d),1);
             EstMh(1:obj.NLP:end, 1) = line_param.d;
             EstMh(2:obj.NLP:end, 1) = line_param.delta;

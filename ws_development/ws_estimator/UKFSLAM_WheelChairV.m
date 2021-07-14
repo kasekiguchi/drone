@@ -176,25 +176,13 @@ classdef UKFSLAM_WheelChairV < ESTIMATOR_CLASS
             association_info = UKFMapAssociation(PreXh(1:obj.n),PreMh(1:end), EndPoint{1,1}, measured.ranges,measured.angles, obj.constant,obj.NLP);
                 association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
                 association_available_count = length(association_available_index);%Count
-%             association_info = cell(1,size(Kai,2));
-%             association_available_index = cell(1,size(Kai,2));
-%             association_available_count = cell(1,size(Kai,2));
-%             for i = 1:size(Kai,2)
-%                 tmp_angles = sensor.angle - Kai(3,i);
-%                 if iscolumn(tmp_angles)
-%                     tmp_angles = tmp_angles';% Transposition
-%                 end
-%                 association_info{1,i} = UKFMapAssociation(Kai(1:obj.n,i), Kai(obj.n+1:end,i), EndPoint{i,1}, measured.ranges,tmp_angles, obj.constant,obj.NLP);
-%                 association_available_index{1,i} = find(association_info{1,i}.index ~= 0);%Index corresponding to the measured value
-%                 association_available_count{1,i} = length(association_available_index{1,i});%Count
-%             end
             %出力のシグマポイントを計算
             %sensing step
             %測定値が取れていないレーザー部分はダミーデータ0をかませる
             
             Ita = cell(1,size(Kai,2));
             for i = 1:size(Kai,2)%i:シグマポイントの数
-                tmp_angles = sensor.angle - Kai(3,i);
+                tmp_angles = sensor.angle - Kai(3,1);
                 if iscolumn(tmp_angles)
                     tmp_angles = tmp_angles';% Transposition
                 end

@@ -44,7 +44,7 @@ function [opt_map, removing_flag,add_array] = UKFOptimizeMap(map, Constant)
                 % Combining maps
                 param = map;
                 for k = 1:length(matching_list)
-                    tmp = CombiningTwoLines(param, i, map, matching_list(k, 1), Constant);
+                    tmp = UKFCombiningTwoLines(param, i, map, matching_list(k, 1), Constant);
                     param.x(i, :) = tmp.x;
                     param.y(i, :) = tmp.y;
                     removing_flag(matching_list(k, 1)) = true;

@@ -38,7 +38,7 @@ function parameter = UKFCombiningLines(map, measured, Constant)
             flag_index = find(flag_3);
             if ~isempty(flag_index)
                 % Combine map and measurement. Expect for first is not considered because it is the role for 'OptimizeMap' function.
-                param = CombiningTwoLines(map, flag_index(1), measured, i, Constant);
+                param = UKFCombiningTwoLines(map, flag_index(1), measured, i, Constant);
                 map.x(flag_index(1), :) = param.x;
                 map.y(flag_index(1), :) = param.y;
             else

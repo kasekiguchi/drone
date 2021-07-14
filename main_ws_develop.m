@@ -29,7 +29,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=60;
 end
 %% initialize
 initial(N) = struct;
@@ -234,7 +234,7 @@ while round(time.t,5)<=te
 %     agent(i).input = [1,0,0];
 % end
         
-%         %for a model
+        %for a model
 %                             if time.t<=0.5
 %                                 agent(i).input = [1/1.2,2 * pi/kakudo];
 %                             elseif time.t>0.5&&time.t<=1.1

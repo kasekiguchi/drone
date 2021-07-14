@@ -141,17 +141,19 @@ classdef UKFSLAM_WheelChairV_test < ESTIMATOR_CLASS
             %シグマポイント再計算
             % re calculate of sigma points
             % Create samples
-            
             StateCount = size(PreCov,2);
             SigmaNum = 2*StateCount + 1;
             PreMh = zeros(obj.NLP * length(line_param.d),1);
             PreMh(1:obj.NLP:end, 1) = line_param.d;
             PreMh(2:obj.NLP:end, 1) = line_param.delta;
             PreXh = [PreXh(1:obj.n);PreMh(1:end)];
-           
+            
+            Ps = chol(PreCov)' * sqrt(StateCount + obj.k);%cholesky factoryzation
+            Kai = [PreXh, repvec(PreXh,StateCount)+Ps, repvec(PreXh,StateCount)-Ps];%sigma point
+            
             %再計算されたシグマポイントのマップパラメータごとのマップ端点を計算
             EndPoint = SigmaLineParamToEndPoint(PreXh,obj.map_param,obj.n,obj.constant);
-             %事前状態推定値を用いてマップと対応付け
+            %事前状態推定値を用いてマップと対応付け
             % association between measurements and map
             %association_info.index = correspanding wall(line_param) number index
             %association_info.distance = wall distace
@@ -159,56 +161,50 @@ classdef UKFSLAM_WheelChairV_test < ESTIMATOR_CLASS
             association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
             association_available_count = length(association_available_index);%Count
             
-            for m = 1:association_available_count
-                Ps = chol(PreCov)' * sqrt(StateCount + obj.k);%cholesky factoryzation
-                Kai = [PreXh, repvec(PreXh,StateCount)+Ps, repvec(PreXh,StateCount)-Ps];%sigma point
-
-                %出力のシグマポイントを計算
-                %sensing step
-                zs = zeros(size(Kai,2),1);
-                for i = 1:size(Kai,2)%i:シグマポイントの数
-                    tmp_angles = sensor.angle - Kai(3,i);
-                    if iscolumn(tmp_angles)
-                        tmp_angles = tmp_angles';% Transposition
-                    end
-                    line_param.d = Kai(obj.n + 1:obj.NLP:end,i);
-                    line_param.delta = Kai(obj.n + 2:obj.NLP:end,i);
+            Ita = cell(1,size(Kai,2));
+            for i = 1:size(Kai,2)%i:シグマポイントの数
+                tmp_angles = sensor.angle - Kai(3,i);
+                if iscolumn(tmp_angles)
+                    tmp_angles = tmp_angles';% Transposition
+                end
+                
+                line_param.d = Kai(obj.n + 1:obj.NLP:end,i);
+                line_param.delta = Kai(obj.n + 2:obj.NLP:end,i);
+                Ita{1,i} = zeros(association_available_count,1);
+                for m = 1:association_available_count%m:レーザの番号
                     curr = association_available_index(1,m);
                     idx = association_info.index(1,association_available_index(1,m));
                     angle = Kai(3,i) + tmp_angles(curr) - line_param.delta(idx);
                     denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));
                     % Observation value
-                    zs(i,1) = (denon) / cos(angle);
+                    Ita{1,i}(m,1) = (denon) / cos(angle);
                 end
-                % Transform samples according to function 'zfunc' to obtain the predicted observation samples
-                % if isempty(dzfunc), dzfunc = @default_dfunc; end
-                % zs = feval(zfunc, ss, varargin{:}); % compute (possibly discontinuous) transform
-                zz = repvec(measured.ranges(association_available_index(1,m)),SigmaNum);
-                dz = observediff(zz,zs); % compute correct residual
-                zs = zz - dz;               % offset zs from z according to correct residual
-                
-                % Calculate predicted observation mean
-                zm = (obj.k*zs(:,1) + 0.5*sum(zs(:,2:end), 2)) / (StateCount + obj.k);
-                
-                % Calculate observation covariance and the state-observation correlation matrix
-                dx = Kai - repvec(PreXh,SigmaNum);
-                dz = zs - repvec(zm,SigmaNum);
-                Pxz = (2*obj.k*dx(:,1)*dz(:,1)' + dx(:,2:end)*dz(:,2:end)') / (2*(StateCount + obj.k));
-                Pzz = (2*obj.k*dz(:,1)*dz(:,1)' + dz(:,2:end)*dz(:,2:end)') / (2*(StateCount + obj.k));
-                %カルマンゲイン
-                % Compute Kalman gain
-                S = Pzz + obj.R .* eye(size(Kai,2));
-                Sc  = chol(S);  % note: S = Sc'*Sc
-                Sci = inv(Sc);  % note: inv(S) = Sci*Sci'
-                Wc = Pxz * Sci;
-                W  = Wc * Sci';
-                % Perform update
-                PreXh = PreXh + W*(measured.ranges(association_available_index(1,m))' - zm);
-                PreCov = PreCov - Wc*Wc';
             end
-            Xh = PreXh;
-            obj.result.P = PreCov;
-            
+            %
+            % Transform samples according to function 'zfunc' to obtain the predicted observation samples
+            % if isempty(dzfunc), dzfunc = @default_dfunc; end
+            %                 zs = feval(zfunc, ss, varargin{:}); % compute (possibly discontinuous) transform
+            zs = cell2mat(Ita);
+            zz = repvec(measured.ranges(association_available_index)',SigmaNum);
+            dz = observediff(zz,zs); % compute correct residual
+            zs = zz - dz;               % offset zs from z according to correct residual
+            % Calculate predicted observation mean
+            zm = (obj.k*zs(:,1) + 0.5*sum(zs(:,2:end), 2)) / (StateCount + obj.k);
+            %                 % Calculate observation covariance and the state-observation correlation matrix
+            dx = Kai - repvec(PreXh,SigmaNum);
+            dz = zs - repvec(zm,SigmaNum);
+            Pxz = (2*obj.k*dx(:,1)*dz(:,1)' + dx(:,2:end)*dz(:,2:end)') / (2*(StateCount + obj.k));
+            Pzz = (2*obj.k*dz(:,1)*dz(:,1)' + dz(:,2:end)*dz(:,2:end)') / (2*(StateCount + obj.k));
+            %カルマンゲイン
+            % Compute Kalman gain
+            S = Pzz + obj.R .* eye(association_available_count);
+            Sc  = chol(S);  % note: S = Sc'*Sc
+            Sci = inv(Sc);  % note: inv(S) = Sci*Sci'
+            Wc = Pxz * Sci;
+            W  = Wc * Sci';
+            % Perform update
+            Xh = PreXh + W*(measured.ranges(association_available_index(1,m))' - zm);
+            obj.result.P = PreCov - Wc*Wc';
             %Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = Xh(obj.n+1:obj.NLP:end, 1);
             line_param.delta = Xh(obj.n+2:obj.NLP:end, 1);
@@ -243,7 +239,7 @@ classdef UKFSLAM_WheelChairV_test < ESTIMATOR_CLASS
             % return values setting
             obj.result.state.set_state(Xh);
             obj.result.Est_state = Xh;
-%             obj.result.G = W;
+            %             obj.result.G = W;
             obj.result.map_param = obj.map_param;
             obj.result.AssociationInfo = association_info;
             result=obj.result;
