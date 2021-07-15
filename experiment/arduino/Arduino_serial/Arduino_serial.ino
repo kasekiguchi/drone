@@ -1,3 +1,5 @@
+// 問題１：1-4 と 5-8でHIGH値の長さとbetaflight上で認知されるthrottle値の比例定数の符号が反転している
+
 // PPM は　Down pulse
 #include <TimerOne.h>
 
@@ -12,23 +14,28 @@ boolean fReset = false;
 #define OUTPUT_PIN A1 // ppm output pin
 char packetBuffer[255];
 #define TOTAL_INPUT 4      // number of input channels
-#define TOTAL_CH 8         // number of channels
+#define TOTAL_CH 8         // number of channels 
 // https://create-it-myself.com/research/study-ppm-spec/
-#define PPM_PERIOD 22500  // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
+// PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
+#define PPM_PERIOD 22300  // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
 #define TIME_LOW 300       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
 #define CH_MIN 0  // PPM幅の最小 [us] 
 #define CH_NEUTRAL 500 // PPM幅の中間 [us] 
 #define CH_MAX 1000 // PPM幅の最大 [us] 
 // PPM Channelの基本構造
-// TIME_LOW + CH_MAX + CH_OFFSET = 2000 = 2 [ms]
-// TIME_LOW + CH_MIN + CH_OFFSET = 1000 = 1 [ms]
+// TIME_LOW + CH_OFFSET = 2000 = 2 [ms]
+// TIME_LOW + CH_MAX + CH_OFFSET = 1000 = 1 [ms]
 volatile uint16_t CH_OFFSET[TOTAL_CH]; // 各CH毎にOffsetを変えられるように
-（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
+// 上記の問題１に起因して最後の20の係数が反転している
+volatile uint16_t C4_OFFSET; // １－４チャンネル用共通オフセット値 2*CH_MAX - TIME_LOW - 20 = 2000 - 300 - 20
+volatile uint16_t C8_OFFSET; // ５－８チャンネル用共通オフセット値 2*CH_MAX - TIME_LOW + 20 = 2000 - 300 + 20
+
+//（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
 volatile uint16_t TOTAL_CH_OFFSET = 0; // CH_OFFSETの合計
 volatile uint8_t n_ch = TOTAL_CH;      // 現在の chを保存
 volatile uint16_t t_sum = 0;     // us単位  1周期中の現在の使用時間
 volatile uint16_t pw[TOTAL_CH];  // ch毎のパルス幅を保存
-volatile uint16_t phw[TOTAL_CH]; // PPM周期を保つため
+volatile uint16_t phw[TOTAL_CH]; // PPM周期を保つため、Pulse_control内のみで使用
 volatile boolean isReceive_Data_Updated = false;
 volatile uint16_t start_H = 0;
 
@@ -50,6 +57,7 @@ void setup()
   digitalWrite( LED_PIN, LED_state );
   //attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　LOWからHIGHで停止
   attachInterrupt(0, emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）(0: 2pin, 1: 3pin)
+  while(Serial.available() <= 0){}
   last_received_time = micros();
 }
 
@@ -97,7 +105,11 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         {
           pw[i] = CH_MAX;
         }
-        pw[i] = CH_MAX + CH_OFFSET[i] - pw[i];
+        if(i <4){// 上記問題１のため場合分けが必要
+          pw[i] = C4_OFFSET - CH_MAX + pw[i];
+        }else{
+          pw[i] = C8_OFFSET - pw[i];
+        }
         start_H -= (pw[i] + TIME_LOW);
       }
       last_received_time = micros();
@@ -106,15 +118,15 @@ void receive_serial()// ---------- loop function : receive signal by UDP
     }
     else if (micros() - last_received_time >= 500000)// Stop propellers after 0.5s signal lost.
     {
-      pw[0] = CH_MAX + CH_OFFSET[0] - CH_NEUTRAL; // roll
-      pw[1] = CH_MAX + CH_OFFSET[1] - CH_NEUTRAL; // pitch
-      pw[2] = CH_MAX + CH_OFFSET[2] - CH_MIN; // throttle
-      pw[3] = CH_MAX + CH_OFFSET[3] - CH_NEUTRAL; // yaw
-      pw[4] = CH_MAX + CH_OFFSET[4] - CH_MIN; // AUX1
-      pw[5] = CH_MAX + CH_OFFSET[5] - CH_MIN; // AUX2
-      pw[6] = CH_MAX + CH_OFFSET[6] - CH_MIN; // AUX3
-      pw[7] = CH_MAX + CH_OFFSET[7] - CH_MIN; // AUX4
-      start_H = PPM_PERIOD - (8 * CH_MAX + TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - 5 * CH_MIN) - 9 * TIME_LOW;
+      pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
+      pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
+      pw[2] = C4_OFFSET - CH_MAX; // throttle
+      pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
+      pw[4] = C8_OFFSET; // AUX1
+      pw[5] = C8_OFFSET; // AUX2
+      pw[6] = C8_OFFSET; // AUX3
+      pw[7] = C8_OFFSET; // AUX4
+      start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MAX) - 9 * TIME_LOW;
     }
   }
 }
@@ -135,8 +147,8 @@ void Pulse_control()
   }
   else
   {
-    Timer1.setPeriod(phw[n_ch]);// 時間を指定
     digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
+    Timer1.setPeriod(phw[n_ch]);// 時間を指定
     n_ch++;
   }
 }
@@ -145,27 +157,18 @@ void setupPPM()// ---------- setup ppm signal configuration
 {
   pinMode(OUTPUT_PIN, OUTPUT);
   digitalWrite(OUTPUT_PIN, LOW);
-  CH_OFFSET[0] = CH_MAX - TIME_LOW + 15; 
-  CH_OFFSET[1] = CH_MAX - TIME_LOW + 22; 
-  CH_OFFSET[2] = CH_MAX - TIME_LOW + 21; 
-  CH_OFFSET[3] = CH_MAX - TIME_LOW + 22; 
-  CH_OFFSET[4] = CH_MAX - TIME_LOW + 21; 
-  CH_OFFSET[5] =  - TIME_LOW + 21; 
-  CH_OFFSET[6] = CH_MAX - TIME_LOW + 21; 
-  CH_OFFSET[7] = CH_MAX - TIME_LOW + 21;
-  for( i = 0; i < TOTAL_CH; i++)
-  {
-    TOTAL_CH_OFFSET += CH_OFFSET[i];
-  }
-  pw[0] = CH_MAX + CH_OFFSET[0] - CH_NEUTRAL; // roll
-  pw[1] = CH_MAX + CH_OFFSET[1] - CH_NEUTRAL; // pitch
-  pw[2] = CH_MAX + CH_OFFSET[2] - CH_MIN; // throttle
-  pw[3] = CH_MAX + CH_OFFSET[3] - CH_NEUTRAL; // yaw
-  pw[4] = CH_MAX + CH_OFFSET[4] - CH_MIN; // AUX1
-  pw[5] = CH_MAX + CH_OFFSET[5] - CH_MIN; // AUX2
-  pw[6] = CH_MAX + CH_OFFSET[6] - CH_MIN; // AUX3
-  pw[7] = CH_MAX + CH_OFFSET[7] - CH_MIN; // AUX4
-  start_H = PPM_PERIOD - (8 * CH_MAX + TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - 5 * CH_MIN) - 9 * TIME_LOW;
+  C4_OFFSET = 2*CH_MAX - TIME_LOW - 20;// commom offset 
+  C8_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
+  TOTAL_CH_OFFSET = 4*C4_OFFSET + 4*C8_OFFSET;
+  pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
+  pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
+  pw[2] = C4_OFFSET - CH_MAX; // throttle
+  pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
+  pw[4] = C8_OFFSET; // AUX1
+  pw[5] = C8_OFFSET; // AUX2
+  pw[6] = C8_OFFSET; // AUX3
+  pw[7] = C8_OFFSET; // AUX4
+  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MAX) - 9 * TIME_LOW;
   // CPUのクロック周波数でPPM信号を制御
   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定
   Timer1.attachInterrupt(Pulse_control);
@@ -173,15 +176,15 @@ void setupPPM()// ---------- setup ppm signal configuration
 }
 void emergency_stop()
 {
-  pw[0] = CH_MAX + CH_OFFSET[0] - CH_NEUTRAL; // roll
-  pw[1] = CH_MAX + CH_OFFSET[1] - CH_NEUTRAL; // pitch
-  pw[2] = CH_MAX + CH_OFFSET[2] - CH_MIN; // throttle
-  pw[3] = CH_MAX + CH_OFFSET[3] - CH_NEUTRAL; // yaw
-  pw[4] = CH_MAX + CH_OFFSET[4] - CH_MIN; // AUX1
-  pw[5] = CH_MAX + CH_OFFSET[5] - CH_MIN; // AUX2
-  pw[6] = CH_MAX + CH_OFFSET[6] - CH_MIN; // AUX3
-  pw[7] = CH_MAX + CH_OFFSET[7] - CH_MIN; // AUX4
-  start_H = PPM_PERIOD - (8 * CH_MAX + TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - 5 * CH_MIN) - 9 * TIME_LOW;
+  pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
+  pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
+  pw[2] = C4_OFFSET - CH_MAX; // throttle
+  pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
+  pw[4] = C8_OFFSET; // AUX1
+  pw[5] = C8_OFFSET; // AUX2
+  pw[6] = C8_OFFSET; // AUX3
+  pw[7] = C8_OFFSET; // AUX4
+  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MAX) - 9 * TIME_LOW;
   LED_state = LOW;
   isEmergency = true;
   digitalWrite( LED_PIN, LED_state );

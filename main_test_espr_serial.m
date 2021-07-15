@@ -11,7 +11,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 1 %1：実機　それ以外：シミュレーション
-fMotive = 1;% Motiveを使うかどうか
+fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -91,7 +91,7 @@ for i = 1:N
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
         %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[26])); % for exp % 機体番号（ESPrのIP）
-        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[19])); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[18])); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
@@ -192,8 +192,9 @@ end
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
-    "model.state.p"
-    "controller.result"
+    "model.state.p",
+    "controller.result",
+    "inner_input"
     ];
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;     'reference.result.region';  "env.density.param.grid_density"]; % for coverage
@@ -330,12 +331,12 @@ end
 %%
 close all
 clc
-agent(1).reference.covering.draw_movie(logger,N,Env)
+%agent(1).reference.covering.draw_movie(logger,N,Env)
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
-% logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
+logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 
 % logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
