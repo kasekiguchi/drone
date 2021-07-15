@@ -26,7 +26,8 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
       result=obj.result;
     end
     function sendData(obj,param)
-      obj.result=[char(param),';'];% 文字列の終わりを陽に指定．terminator をLFにすれば必要ないかも（変更する場合はArduino_serial.inoも変更すること）
+      %obj.result=[char(param),';'];% 文字列の終わりを陽に指定．terminator をLFにすれば必要ないかも（変更する場合はArduino_serial.inoも変更すること）
+      obj.result=char(param);% 文字列の終わりを陽に指定．terminator をLFにすれば必要ないかも（変更する場合はArduino_serial.inoも変更すること）
       write(obj.serial,obj.result,'uint8');
     end
   end
