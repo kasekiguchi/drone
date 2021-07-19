@@ -70,10 +70,10 @@ classdef GradientLocalPlanning_Controller <CONTROLLER_CLASS
                 %             params.t = %control tic
                 params.DeltaOmega = Deltaomega;
                 params.t = obj.Param.t;
-                params.k1 = 1;
-                params.k2 = 1;
+                params.k1 = 0.5;
+                params.k2 = 0.7;
                 params.k3 = 1;
-                params.v = 1 + rand;
+                params.v = 1;
                 %             params.Oldw = oldinput(2);
                 params.Oldw = obj.self.estimator.result.state.w;
                 params.ipsiron = 1e-5;
@@ -94,7 +94,7 @@ classdef GradientLocalPlanning_Controller <CONTROLLER_CLASS
                 SolveOmega = params.Oldw + Gain * D * params.t;
             else
                 oldinput=[1,0];
-                SolveOmega = oldinput;
+                SolveOmega = oldinput(2);
             end
             
             %入力に印加

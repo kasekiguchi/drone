@@ -7,13 +7,14 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
         self
         options
         Param
+        t
     end
     
     methods
         function obj = LocalPlanning_Controller(self,param)
             obj.self = self;
             
-            obj.Param.t = param.dt;
+            obj.t = param.dt;
             obj.options = optimoptions('fminunc');
             obj.options.UseParallel = false;
             obj.options.Algorithm			   ='quasi-newton';
@@ -63,7 +64,7 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             LineTheta = atan2(Xd(2) - RobotState(2),Xd(1) - RobotState(1));
             Theta = RobotState(3);
             DeltaTheta = LineTheta - Theta;
-            Deltaomega = DeltaTheta/obj.Param.t;%目標位置に向かうための角速度
+            Deltaomega = DeltaTheta/obj.t;%目標位置に向かうための角速度
             %---対応づけしたレーザ（壁にあたってるレーザ）の角度faiおよびその壁のdとalpahaを取得---%
             AssociationAvailableIndex = find(AssociationInfo.index ~= 0);%Index corresponding to the measured value
             AssociationAvailableount = length(AssociationAvailableIndex);%Count
@@ -87,10 +88,10 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             params.pos = RobotState;%robot position [x y theta]
 %             params.t = %control tic
             params.DeltaOmega = Deltaomega;
-            params.t = obj.Param.t;
+            params.t = obj.t;
             params.v = 1;
-            params.k1 = 1;
-            params.k2 = 1;
+            params.k1 = 15;
+            params.k2 = 3;
             params.k3 = 1;
 %             params.Oldw = oldinput(2);
             params.Oldw = obj.self.estimator.result.state.w;
@@ -153,6 +154,7 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             obj.self.input = obj.result.input;
             obj.result.Eval = EvalResult(Solvex, params);
             result = obj.result;
+            obj.Param = params;
         end
         function show(obj)
             

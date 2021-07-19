@@ -13,6 +13,7 @@ classdef WSLogger < handle
         i = 1; % time index for logging
         N % agent数
         items
+        SubFuncitems
         n
         si
         ei
@@ -22,7 +23,7 @@ classdef WSLogger < handle
     end
     
     methods
-        function obj = WSLogger(target,row,items)
+        function obj = WSLogger(target,row,items,subfunc)
             % Logger(target,row,items)
             % target : ログを取る対象　agent(1:3)
             % row : 確保するデータサイズ　length(ts:dt:te)
@@ -43,9 +44,13 @@ classdef WSLogger < handle
                 obj.n=length(items)+5;% ,sensor.result, estimator.result, reference.result，input
             end
             obj.Data.agent=cell(row,obj.n,obj.N);
+            %---subfunc system setup---%
+            obj.SubFuncitems = subfunc;
+            obj.Data.SubFuncData = cell(row,length(subfunc) +1);%+1 equal time logging column
+            %--------------------------%
         end
         
-        function logging(obj,t,FH)
+        function logging(obj,t,FH,doSubFuncFlag)
             % logging(t,FH)
             % t : current time
             % FH : figure handle for keyboard input
@@ -68,8 +73,27 @@ classdef WSLogger < handle
                 end
                 
             end
+            if doSubFuncFlag
+                doSubFunc(obj,t)
+            end
             obj.i=obj.i+1;
         end
+        
+        function doSubFunc(obj,t)
+            %t:current time
+            % FH : figure handle for keyboard input
+            obj.Data.SubFuncData{obj.i,1} = t;
+            for FuncColmn = 1:length(obj.SubFuncitems)
+                SubFuncHandle = str2func(obj.SubFuncitems(FuncColmn));
+                obj.Data.SubFuncData{obj.i,FuncColmn+1} = SubFuncHandle(obj);
+            end
+            
+        end
+    end
+    
+    methods(Access =private)
+        eval = ContEval(obj)
+        
         
     end
 end

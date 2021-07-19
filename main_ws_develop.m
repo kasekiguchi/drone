@@ -29,7 +29,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=60;
+    te=10;
 end
 %% initialize
 initial(N) = struct;
@@ -70,11 +70,11 @@ for i = 1:N
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
 %             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-        agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
@@ -114,6 +114,10 @@ LogData=[
     "inner_input",
     "input"
     ];
+SubFunc = [
+    "ContEval",
+    "TrajectoryErrorDis"
+    ];
 if ~isempty(agent(1).plant.state)
     LogData=["plant.state.p";LogData]; % 実制御対象の位置
     if isprop(agent(1).plant.state,'q')
@@ -126,7 +130,7 @@ end
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;    "reference.result.region";"env.density.param.grid_density"]; % for coverage
 end
-logger=WSLogger(agent,size(ts:dt:te,2),LogData);
+logger=WSLogger(agent,size(ts:dt:te,2),LogData,SubFunc);
 time =  Time();
 time.t = ts;
 %%  各種do methodの引数設定
@@ -238,25 +242,25 @@ while round(time.t,5)<=te
 % end
         
         %for a model
-%                             if time.t<=0.5
-%                                 agent(i).input = [1/1.2,2 * pi/kakudo];
-%                             elseif time.t>0.5&&time.t<=1.1
-%                                 agent(i).input = [1/1.2,-2 * pi/kakudo];
-%                             elseif time.t>=10 && time.t<=10.5
-%                                 agent(i).input = [0,-4 * pi/kakudo];
-%                             elseif time.t>10.5 && time.t<11
-%                                 agent(i).input = [0,4 * pi/kakudo];
-%                             elseif time.t>=30 && time.t<=30.5
-%                                 agent(i).input = [0,4 * pi/kakudo];
-%                             elseif time.t>30.5 && time.t<31
-%                                 agent(i).input = [0,-4 * pi/kakudo];
-%                             elseif time.t>=40 && time.t<=40.5
-%                                 agent(i).input = [0,-4 * pi/kakudo];
-%                             elseif time.t>40.5 && time.t<41
-%                                 agent(i).input = [0,4 * pi/kakudo];
-%                             else
-%                                 agent(i).input = [0,0];
-%                             end
+                            if time.t<=0.5
+                                agent(i).input = [1/1.2,2 * pi/kakudo];
+                            elseif time.t>0.5&&time.t<=1.1
+                                agent(i).input = [1/1.2,-2 * pi/kakudo];
+                            elseif time.t>=10 && time.t<=10.5
+                                agent(i).input = [0,-4 * pi/kakudo];
+                            elseif time.t>10.5 && time.t<11
+                                agent(i).input = [0,4 * pi/kakudo];
+                            elseif time.t>=30 && time.t<=30.5
+                                agent(i).input = [0,4 * pi/kakudo];
+                            elseif time.t>30.5 && time.t<31
+                                agent(i).input = [0,-4 * pi/kakudo];
+                            elseif time.t>=40 && time.t<=40.5
+                                agent(i).input = [0,-4 * pi/kakudo];
+                            elseif time.t>40.5 && time.t<41
+                                agent(i).input = [0,4 * pi/kakudo];
+                            else
+                                agent(i).input = [0,0];
+                            end
         
 % if time.t<=0.5
 %     agent(i).input = [0.4272/1.2,0.9042/1.2,2 * pi/kakudo];
@@ -288,7 +292,8 @@ while round(time.t,5)<=te
     calculation=toc;
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
-    logger.logging(time.t,FH);
+    doSubFuncFlag = true;
+    logger.logging(time.t,FH,doSubFuncFlag);
     %%
     % with FH
     figure(FH)
