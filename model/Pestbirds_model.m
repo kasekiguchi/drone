@@ -1,4 +1,4 @@
-classdef Pestbirds_model < MODEL_CLASS
+classdef PestBirds_Model < MODEL_CLASS
     % Wheelchair model
     % 
 %     properties
@@ -6,7 +6,7 @@ classdef Pestbirds_model < MODEL_CLASS
 %     end
     
     methods
-        function obj = Pestbirds_model(args)
+        function obj = PestBirds_Model(args)
             obj= obj@MODEL_CLASS("Pestbirds_model",args);
             %obj.id = self.id
             % 
