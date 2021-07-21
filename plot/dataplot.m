@@ -85,8 +85,8 @@ end
     end
     set(axes3,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([-5,5]);
-    ylim([-5,5]);
+    xlim([0,120]);
+    ylim([0,120]);
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
     axis square;
@@ -112,7 +112,7 @@ end
     set(axes8,'FontName','Times New Roman','FontSize',14);
     grid on;
     xlim([0,logger.Data.t(end)+1]);
-    ylim([0,7]);
+%     ylim([0,7]);
     xlabel('Time {\it t} [s]');
     ylabel('Distance {\it d} [m]');
     axis square;
@@ -136,8 +136,8 @@ end
     while t <= numel(logger.Data.t)
         clf(figure(9)); 
 
-        xlim([-5,5]);
-        ylim([-5,5]);
+        xlim([0,120]);
+        ylim([0,120]);
         set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
@@ -156,70 +156,70 @@ end
         hold off 
         pause(16 * 1e-3) ; 
         t = t+2;
-        if t==41
-            figure(4)
-            title('t=1s');
-            grid on;
-            xlim([xave-10.0 xave+10.0]);
-            ylim([yave-10.0 yave+10.0]);
-            set(gca,'FontSize',20);
-            xlabel('\sl x \rm [m]','FontSize',25);
-            ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
-            hold on
-            for i=1:N
-            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
-            end
-            hold off
-        end
-        if t==61
-            figure(5)
-            title('t=1.5s');
-            grid on;
-            xlim([xave-10.0 xave+10.0]);
-            ylim([yave-10.0 yave+10.0]);
-            set(gca,'FontSize',20);
-            xlabel('\sl x \rm [m]','FontSize',25);
-            ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
-            hold on
-            for i=1:N
-            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
-            end
-            hold off
-        end
-        if t==81
-            figure(6)
-            title('t=2s');
-            grid on;
-            xlim([xave-10.0 xave+10.0]);
-            ylim([yave-10.0 yave+10.0]);
-            set(gca,'FontSize',20);
-            xlabel('\sl x \rm [m]','FontSize',25);
-            ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
-            hold on
-            for i=1:N
-            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
-            end
-            hold off
-        end
-        if t==101
-            figure(7)
-            title('t=2.5s');
-            grid on;
-            xlim([xave-10.0 xave+10.0]);
-            ylim([yave-10.0 yave+10.0]);
-            set(gca,'FontSize',20);
-            xlabel('\sl x \rm [m]','FontSize',25);
-            ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
-            hold on
-            for i=1:N
-            	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
-            end
-            hold off
-        end
+%         if t==41
+%             figure(4)
+%             title('t=1s');
+%             grid on;
+% %             xlim([xave-10.0 xave+10.0]);
+% %             ylim([yave-10.0 yave+10.0]);
+%             set(gca,'FontSize',20);
+%             xlabel('\sl x \rm [m]','FontSize',25);
+%             ylabel('\sl y \rm [m]','FontSize',25);
+%             axis square;
+%             hold on
+%             for i=1:N
+%             	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+%             end
+%             hold off
+%         end
+%         if t==61
+%             figure(5)
+%             title('t=1.5s');
+%             grid on;
+% %             xlim([xave-10.0 xave+10.0]);
+% %             ylim([yave-10.0 yave+10.0]);
+%             set(gca,'FontSize',20);
+%             xlabel('\sl x \rm [m]','FontSize',25);
+%             ylabel('\sl y \rm [m]','FontSize',25);
+%             axis square;
+%             hold on
+%             for i=1:N
+%             	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+%             end
+%             hold off
+%         end
+%         if t==81
+%             figure(6)
+%             title('t=2s');
+%             grid on;
+% %             xlim([xave-10.0 xave+10.0]);
+% %             ylim([yave-10.0 yave+10.0]);
+%             set(gca,'FontSize',20);
+%             xlabel('\sl x \rm [m]','FontSize',25);
+%             ylabel('\sl y \rm [m]','FontSize',25);
+%             axis square;
+%             hold on
+%             for i=1:N
+%             	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+%             end
+%             hold off
+%         end
+%         if t==101
+%             figure(7)
+%             title('t=2.5s');
+%             grid on;
+% %             xlim([xave-10.0 xave+10.0]);
+% %             ylim([yave-10.0 yave+10.0]);
+%             set(gca,'FontSize',20);
+%             xlabel('\sl x \rm [m]','FontSize',25);
+%             ylabel('\sl y \rm [m]','FontSize',25);
+%             axis square;
+%             hold on
+%             for i=1:N
+%             	figi = plot(x(i,t),y(i,t),'.','MarkerSize',20,'displayname',text{i});
+%             end
+%             hold off
+%         end
         frame = getframe(figure(9));
         writeVideo(v,frame);      
     end
