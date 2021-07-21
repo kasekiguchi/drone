@@ -1,4 +1,4 @@
-function Reference = Reference_agreement(agent,N)
+function Reference = Reference_agreement(N)
     %% reference class demo
     % reference property をReference classのインスタンス配列として定義
     clear Reference
