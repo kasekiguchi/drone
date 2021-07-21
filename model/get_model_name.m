@@ -16,7 +16,7 @@ function model_full_name = get_model_name(sn)
             model_full_name = "with_load_model";
         case "Load_Euler"
             model_full_name = "euler_with_load_model";
-        case "Pest birds"
+        case "PestBirds"
             model_full_name = "pestbirds_linear_model";
         case "Drone"
             model_full_name = "discrete_linear_model";
