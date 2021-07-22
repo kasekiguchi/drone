@@ -9,9 +9,9 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 3; % number of agents
-fExp = 0 %1：実機　それ以外：シミュレーション
-fMotive = 0;% Motiveを使うかどうか
+N = 1; % number of agents
+fExp = 1 %1：実機　それ以外：シミュレーション
+fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -91,7 +91,7 @@ for i = 1:N
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
         %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[26])); % for exp % 機体番号（ESPrのIP）
-        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[16])); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[7])); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
@@ -104,10 +104,10 @@ for i = 1:N
     %% model
     % set control model
     %agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
-    %agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
+    agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
-    agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+    %agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     close all
     %% set input_transform property
@@ -117,7 +117,7 @@ for i = 1:N
     end
     %agent.plant.espr.sendData(Pw(1,1:16));
     % for quat-model plant with discrete control model
-    agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
+    %agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
     %agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
     % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
@@ -134,9 +134,9 @@ for i = 1:N
         agent(i).set_property("sensor",Sensor_ROS(struct('ROSHostIP','192.168.50.21')));
     end
     
-    agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-    agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
+    %agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
+    %agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    %agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
     agent(i).estimator=[];
@@ -146,9 +146,9 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %     agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
 %     agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
-    agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-    agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
+    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+ %   agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+    %agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference=[];
     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
@@ -177,13 +177,13 @@ for i = 1:N
     %% set controller property
     agent(i).controller=[];
     %agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
-%     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
+    agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
-    agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+    %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %%
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
