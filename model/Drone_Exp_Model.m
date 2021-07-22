@@ -49,21 +49,16 @@ classdef Drone_Exp_Model < MODEL_CLASS
                 obj.flight_phase=cha;
                 switch cha
                     case 'q'  % quit
-%                        Pw = uint8([fix(obj.offset(1)/100),fix(obj.offset(2)/100),6,fix(obj.offset(3)/100),6,6,6,6,rem(obj.offset(1),100),rem(obj.offset(2),100),0,rem(obj.offset(3),100),0,0,0,0]);
-%                        obj.connector.sendData(Pw(1,1:16));
-                        Pw = gen_msg([500 500 0 500 0 0 0 0]);
-                        obj.connector.sendData(Pw);
+                        obj.connector.sendData(gen_msg([500 500 0 500 0 0 0 0]));
                         error("ACSL : quit experiment");
                     case 's' % stop pro
-%uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
                         uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
                         AUX_1   =  0;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   = 0;
-                        msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                        msg(1,1:8) = [500,500,0,500,0,0,0,0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
                     case 'a' % arming
-%                        uroll   = obj.offset(1);     upitch  = obj.offset(2);     uthr    =  600;     uyaw    = obj.offset(3);
                         uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
                         AUX_1   = 1000;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   =  0;
-                        msg(1,1:8) = [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                        msg(1,1:8) = [500,500,0,500,1000,0,0,0];%[ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
                     case 'f' % flight
                         msg(1,1:8) = u;
                     case 'l' % landing
@@ -75,9 +70,8 @@ classdef Drone_Exp_Model < MODEL_CLASS
                 % warning("ACSL : Emergency stop!!");
 %                Pw = uint8([fix(obj.offset(1)/100),fix(obj.offset(2)/100),6,fix(obj.offset(3)/100),6,6,6,6,rem(obj.offset(1),100),rem(obj.offset(2),100),0,rem(obj.offset(3),100),0,0,0,0]);
 %                obj.connector.sendData(Pw(1,1:16));
-                Pw = gen_msg([500 500 0 500 0 0 0 0]);
-                obj.connector.sendData(Pw);
-                obj.msg=Pw;
+                obj.msg=[500 500 0 500 0 0 0 0];
+                obj.connector.sendData(gen_msg(obj.msg));
                 return;
             end
 %             
@@ -91,10 +85,8 @@ classdef Drone_Exp_Model < MODEL_CLASS
             
             % send msg
             %obj.connector.sendData(Pw(1,1:16));
-            Pw = gen_msg(msg);
-            obj.connector.sendData(Pw);
-
-            obj.msg=Pw;
+            obj.connector.sendData(gen_msg(msg));
+            obj.msg=msg;
         end
         function set_param(obj,param)
             obj.offset = param;

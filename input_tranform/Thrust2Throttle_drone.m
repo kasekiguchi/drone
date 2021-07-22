@@ -50,11 +50,11 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
                 
                 uroll       = obj.param.gain(1) * (whatp(1) - what(1))    ;
                 upitch      = obj.param.gain(2) * (whatp(2) - what(2))   ;
-                uthr        = obj.param.gain(4) * (T_thr-obj.thr_hover) + u_thr_offset;
+                uthr        = obj.param.gain(4) * (T_thr-obj.thr_hover) + u_thr_offset;% hovering からの偏差をゲイン倍する
                 % ホバリング時から変分にゲイン倍する
                 uyaw        = obj.param.gain(3) * (whatp(3) - what(3)) ;
-                uroll = sign(uroll)*min(abs(uroll),500)+ obj.param.roll_offset; %500
-                upitch = sign(upitch)*min(abs(upitch),500)+ obj.param.pitch_offset; 
+                uroll = sign(uroll)*min(abs(uroll),500)+ obj.param.roll_offset; % offset = 500
+                upitch = sign(upitch)*min(abs(upitch),500)+ obj.param.pitch_offset; % offset = 500
                 uyaw = -sign(uyaw)*min(abs(uyaw),300)+ obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
                 % uthr =uthr + u_thr_offset ;%sign(uthr)*min(abs(uthr),100)+ u_thr_offset; 
                 obj.result = [ uroll, upitch, uthr, uyaw, 1000,0,0,0];
