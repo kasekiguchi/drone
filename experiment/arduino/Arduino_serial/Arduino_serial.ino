@@ -18,7 +18,7 @@ char packetBuffer[255];
 // https://create-it-myself.com/research/study-ppm-spec/
 // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
 #define PPM_PERIOD 22300  // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
-#define TIME_LOW 300       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
+#define TIME_LOW 400       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
 #define CH_MIN 0  // PPM幅の最小 [us] 
 #define CH_NEUTRAL 500 // PPM幅の中間 [us] 
 #define CH_MAX 1000 // PPM幅の最大 [us] 
@@ -48,8 +48,9 @@ void setup()
   Serial.begin(115200); // MATLABの設定と合わせる
   Serial.println("Start");
 
-  delay(1000);
   setupPPM();
+  delay(1000);
+
   // 緊急停止
   pinMode(EM_PIN, INPUT_PULLUP);// emergency_stop を割り当てるピン
   pinMode(RST_PIN, INPUT_PULLUP);
@@ -69,10 +70,10 @@ void loop()
   }
   else
   {
-    if (digitalRead(EM_PIN) == true)
+    if (digitalRead(EM_PIN) == HIGH)
     {
       delay(3000);// delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
-      if (digitalRead(EM_PIN) == true)
+      if (digitalRead(EM_PIN) == HIGH)
       {
         fReset = true;
         Serial.println("Reset available.");
@@ -105,11 +106,11 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         {
           pw[i] = CH_MAX;
         }
-        if(i <4){// 上記問題１のため場合分けが必要
-          pw[i] = C4_OFFSET - CH_MAX + pw[i];
-        }else{
+        //if(i <4){// 上記問題１のため場合分けが必要
+          //pw[i] = C4_OFFSET - CH_MAX + pw[i];
+        //}else{
           pw[i] = C8_OFFSET - pw[i];
-        }
+        //}
         start_H -= (pw[i] + TIME_LOW);
       }
       last_received_time = micros();
@@ -120,7 +121,7 @@ void receive_serial()// ---------- loop function : receive signal by UDP
     {
       pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
       pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
-      pw[2] = C4_OFFSET - CH_MAX; // throttle
+      pw[2] = C4_OFFSET - CH_MIN; // throttle
       pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
       pw[4] = C8_OFFSET; // AUX1
       pw[5] = C8_OFFSET; // AUX2
@@ -157,12 +158,13 @@ void setupPPM()// ---------- setup ppm signal configuration
 {
   pinMode(OUTPUT_PIN, OUTPUT);
   digitalWrite(OUTPUT_PIN, LOW);
-  C4_OFFSET = 2*CH_MAX - TIME_LOW - 20;// commom offset 
+  //C4_OFFSET = 2*CH_MAX - TIME_LOW - 20;// commom offset 
+  C4_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
   C8_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
   TOTAL_CH_OFFSET = 4*C4_OFFSET + 4*C8_OFFSET;
   pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
   pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
-  pw[2] = C4_OFFSET - CH_MAX; // throttle
+  pw[2] = C4_OFFSET - CH_MIN; // throttle
   pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
   pw[4] = C8_OFFSET; // AUX1
   pw[5] = C8_OFFSET; // AUX2
@@ -178,7 +180,7 @@ void emergency_stop()
 {
   pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
   pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
-  pw[2] = C4_OFFSET - CH_MAX; // throttle
+  pw[2] = C4_OFFSET - CH_MIN; // throttle
   pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
   pw[4] = C8_OFFSET; // AUX1
   pw[5] = C8_OFFSET; // AUX2
