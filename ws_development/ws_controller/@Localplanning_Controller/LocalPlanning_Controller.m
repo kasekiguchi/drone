@@ -90,8 +90,8 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             params.DeltaOmega = Deltaomega;
             params.t = obj.t;
             params.v = 1;
-            params.k1 = 15;
-            params.k2 = 3;
+            params.k1 = 0.5;
+            params.k2 = 5;
             params.k3 = 1;
 %             params.Oldw = oldinput(2);
             params.Oldw = obj.self.estimator.result.state.w;

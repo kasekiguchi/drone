@@ -42,6 +42,7 @@ if Flag
     ax = gca;
     %     set(gca,'TickLabelInterpreter','latex')
     grid on
+    ylim([0 10])
 %     axis equal
     for pidx = 1:Dim
         plot(Time,Data(pidx,:),'Linewidth',3,'LineStyle','-','Color',plotcolor(pidx,:));

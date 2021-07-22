@@ -48,7 +48,7 @@ if Flag
 %         plot(Time,Rmse,'Linewidth',3,'LineStyle','-','Color',plotcolor(pidx,:));
 %     end
     bar(Rmse);
-    ylabel('Eval','Interpreter','latex');
+    ylabel('RMSE','Interpreter','latex');
     xlabel('t [s]','Interpreter','latex');
     %---テンプレ部分---%
     ax.FontSize = obj.FontSize;

@@ -113,14 +113,14 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
                 % Observation value
                 Y(i, 1) = (denon) / cos(angle);
                 % Observation jacobi matrix
-                C(i, 1) = -cos(line_param.delta(idx)) / cos(angle);
-                C(i, 2) = -sin(line_param.delta(idx)) / cos(angle);
-                C(i, 3) = denon * tan(angle) / cos(angle);
-                C(i, 4) = 0;
-                C(i, 5) = 0;
-                C(i, 6 + (idx - 1) * 2) = 1 / cos(angle);
+                C(i, 1) = -cos(line_param.delta(idx)) / cos(angle);%diff x position
+                C(i, 2) = -sin(line_param.delta(idx)) / cos(angle);%diff y position
+                C(i, 3) = denon * tan(angle) / cos(angle);%diff theta 
+                C(i, 4) = 0;%diff v
+                C(i, 5) = 0;%diff omega
+                C(i, 6 + (idx - 1) * 2) = 1 / cos(angle);%diff map param d
                 C(i, 7 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
-                    - denon * tan(angle) / cos(angle);
+                    - denon * tan(angle) / cos(angle);% diff map param alpha
             end
             
             %

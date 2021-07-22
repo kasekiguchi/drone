@@ -29,7 +29,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=60;
 end
 %% initialize
 initial(N) = struct;
@@ -82,10 +82,10 @@ for i = 1:N
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[]; 
-%         agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
+        agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
 %     agent(i).set_property( "controller", Controller_LocalPlanningForODV(i,dt) );
 % agent(i).set_property( "controller", Controller_LocalPlanningForODVADI(i,dt) );
-    for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
+%     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
     %% set Analysis property
 %     agent(i).analysis = [];
 %     agent(i).set_property("analysis",Analysis_ContEval());
@@ -242,25 +242,25 @@ while round(time.t,5)<=te
 % end
         
         %for a model
-                            if time.t<=0.5
-                                agent(i).input = [1/1.2,2 * pi/kakudo];
-                            elseif time.t>0.5&&time.t<=1.1
-                                agent(i).input = [1/1.2,-2 * pi/kakudo];
-                            elseif time.t>=10 && time.t<=10.5
-                                agent(i).input = [0,-4 * pi/kakudo];
-                            elseif time.t>10.5 && time.t<11
-                                agent(i).input = [0,4 * pi/kakudo];
-                            elseif time.t>=30 && time.t<=30.5
-                                agent(i).input = [0,4 * pi/kakudo];
-                            elseif time.t>30.5 && time.t<31
-                                agent(i).input = [0,-4 * pi/kakudo];
-                            elseif time.t>=40 && time.t<=40.5
-                                agent(i).input = [0,-4 * pi/kakudo];
-                            elseif time.t>40.5 && time.t<41
-                                agent(i).input = [0,4 * pi/kakudo];
-                            else
-                                agent(i).input = [0,0];
-                            end
+%                             if time.t<=0.5
+%                                 agent(i).input = [1/1.2,2 * pi/kakudo];
+%                             elseif time.t>0.5&&time.t<=1.1
+%                                 agent(i).input = [1/1.2,-2 * pi/kakudo];
+%                             elseif time.t>=10 && time.t<=10.5
+%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                             elseif time.t>10.5 && time.t<11
+%                                 agent(i).input = [0,4 * pi/kakudo];
+%                             elseif time.t>=30 && time.t<=30.5
+%                                 agent(i).input = [0,4 * pi/kakudo];
+%                             elseif time.t>30.5 && time.t<31
+%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                             elseif time.t>=40 && time.t<=40.5
+%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                             elseif time.t>40.5 && time.t<41
+%                                 agent(i).input = [0,4 * pi/kakudo];
+%                             else
+%                                 agent(i).input = [0,0];
+%                             end
         
 % if time.t<=0.5
 %     agent(i).input = [0.4272/1.2,0.9042/1.2,2 * pi/kakudo];
