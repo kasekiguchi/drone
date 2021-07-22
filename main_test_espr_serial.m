@@ -11,11 +11,11 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 1 %1：実機　それ以外：シミュレーション
-fMotive = 0;% Motiveを使うかどうか
+fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
-    dt = 0.25; % sampling time
+    dt = 0.025; % sampling time
 else
 %     dt = 0.1; % sampling time
 %     dt = 0.005;
@@ -33,7 +33,7 @@ end
 %% set connector (global instance)
 if fExp
     if fMotive
-        rigid_ids = [1];
+        rigid_ids = [2];
         Connector_Natnet(struct('ClientIP','192.168.1.9','rigid_list',rigid_ids)); % Motive
     end
 else
@@ -91,7 +91,7 @@ for i = 1:N
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
         %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[26])); % for exp % 機体番号（ESPrのIP）
-        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[18])); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[21])); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
@@ -186,15 +186,16 @@ for i = 1:N
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %%
-    param(i).sensor.list = cell(1,length(agent(i).sensor.name));
-    param(i).reference.list = cell(1,length(agent(i).reference.name));
+    %param(i).sensor.list = cell(1,length(agent(i).sensor.name));
+    %param(i).reference.list = cell(1,length(agent(i).reference.name));
 end
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData=[
     "model.state.p",
     "controller.result",
-    "inner_input"
+    "inner_input",
+    "plant.msg"
     ];
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;     'reference.result.region';  "env.density.param.grid_density"]; % for coverage
@@ -265,7 +266,7 @@ try
             agent(i).do_estimator(cell(1,10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             param(i).reference.covering={};%{Env};
-            param(i).reference.point={FH,[0;0;1;-0.2],time.t};
+            param(i).reference.point={FH,[0;0;0.5],time.t};
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
@@ -286,7 +287,7 @@ try
         for i = 1:N % 状態更新
             model_param.param=agent(i).model.param;
             model_param.FH = FH;
-            %agent(i).do_model(model_param);
+          %  agent(i).do_model(model_param);
             
             model_param.param=agent(i).plant.param;
             agent(i).do_plant(model_param);
@@ -299,11 +300,11 @@ try
         logger.logging(time.t,FH);
         % for exp
         if fExp
-            wait_time =  0.9999*(sampling-calculation);
-            if wait_time <0
-                wait_time
-                warning("ACSL : sampling time is too short.");
-            end
+%             wait_time =  0.9999*(sampling-calculation);
+%             if wait_time <0
+%                 wait_time
+%                 warning("ACSL : sampling time is too short.");
+%            end
             time.t = time.t + calculation;
             %            else
             %                pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
@@ -336,7 +337,8 @@ clc
 %logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
-logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
+%logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
+logger.plot(1,["p","input","inner_input"],["er","",""]);
 
 % logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));

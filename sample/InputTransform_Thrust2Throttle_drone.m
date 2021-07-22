@@ -13,9 +13,9 @@ u_trans_param.name="t2t";
 % % u_trans_param.param.roll_offset = 1104;
 % % u_trans_param.param.pitch_offset = 1104;
 % % u_trans_param.param.yaw_offset = 1104;
-u_trans_param.param.gain =[400;400;400;200]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400] 
-u_trans_param.param.th_offset = 100;         % offset 3s[1021] 4s[900]　発掘[926] % motor推力実験と機体重量から決まるはず
-u_trans_param.param.roll_offset = 500;      % 4s[1104] 発掘[1119]　発掘改善[1100]
+u_trans_param.param.gain =[50;50;50;100]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400] 
+u_trans_param.param.th_offset = 580;         % offset 3s[1021] 4s[900]　発掘[926] % motor推力実験と機体重量から決まるはず
+u_trans_param.param.roll_offset = 508;      % 4s[1104] 発掘[1119]　発掘改善[1100]
 u_trans_param.param.pitch_offset = 500;
 u_trans_param.param.yaw_offset = 500;
 end

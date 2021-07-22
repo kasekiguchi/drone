@@ -18,7 +18,7 @@ char packetBuffer[255];
 // https://create-it-myself.com/research/study-ppm-spec/
 // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
 #define PPM_PERIOD 22300  // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
-#define TIME_LOW 400       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
+#define TIME_LOW 300       // PPM信号 LOW時の幅 [us] // 上のリンク情報に合わせる
 #define CH_MIN 0  // PPM幅の最小 [us] 
 #define CH_NEUTRAL 500 // PPM幅の中間 [us] 
 #define CH_MAX 1000 // PPM幅の最大 [us] 
@@ -37,7 +37,9 @@ volatile uint16_t t_sum = 0;     // us単位  1周期中の現在の使用時間
 volatile uint16_t pw[TOTAL_CH];  // ch毎のパルス幅を保存
 volatile uint16_t phw[TOTAL_CH]; // PPM周期を保つため、Pulse_control内のみで使用
 volatile boolean isReceive_Data_Updated = false;
-volatile uint16_t start_H = 0;
+volatile uint16_t start_H = PPM_PERIOD;
+volatile uint16_t start_Hh = PPM_PERIOD;
+volatile uint16_t start_H0 = PPM_PERIOD;
 
 //////////// シリアル通信が途絶えたとき用 ////////////////////////////////
 volatile unsigned long last_received_time;
@@ -94,7 +96,7 @@ void receive_serial()// ---------- loop function : receive signal by UDP
     Serial.readBytesUntil('¥n', packetBuffer, 2 * TOTAL_CH + 1);
     if (packetBuffer)
     {
-      start_H = PPM_PERIOD;
+      start_H0 = PPM_PERIOD;
       for (i = 0; i < TOTAL_CH; i++)
       {
         pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]);
@@ -111,13 +113,13 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         //}else{
           pw[i] = C8_OFFSET - pw[i];
         //}
-        start_H -= (pw[i] + TIME_LOW);
+        start_H0 -= (pw[i] + TIME_LOW);
       }
       last_received_time = micros();
       isReceive_Data_Updated = true;
-      start_H -= TIME_LOW;// 9 times LOW time in each PPM period
+      start_H = start_H0 - TIME_LOW;// 9 times LOW time in each PPM period
     }
-    else if (micros() - last_received_time >= 500000)// Stop propellers after 0.5s signal lost.
+    else if (micros() - last_received_time >= 5000000)// Stop propellers after 5s signal lost.
     {
       pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
       pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
@@ -127,7 +129,7 @@ void receive_serial()// ---------- loop function : receive signal by UDP
       pw[5] = C8_OFFSET; // AUX2
       pw[6] = C8_OFFSET; // AUX3
       pw[7] = C8_OFFSET; // AUX4
-      start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MAX) - 9 * TIME_LOW;
+      start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
     }
   }
 }
@@ -141,9 +143,10 @@ void Pulse_control()
   }
   else if (n_ch == TOTAL_CH)
   {
-    Timer1.setPeriod(start_H);// start 判定の H 時間待つ
+    Timer1.setPeriod(start_Hh);// start 判定の H 時間待つ
     digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
     n_ch = 0;
+    start_Hh = start_H;
     memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
   }
   else
@@ -170,7 +173,7 @@ void setupPPM()// ---------- setup ppm signal configuration
   pw[5] = C8_OFFSET; // AUX2
   pw[6] = C8_OFFSET; // AUX3
   pw[7] = C8_OFFSET; // AUX4
-  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MAX) - 9 * TIME_LOW;
+  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
   // CPUのクロック周波数でPPM信号を制御
   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定
   Timer1.attachInterrupt(Pulse_control);
@@ -186,7 +189,7 @@ void emergency_stop()
   pw[5] = C8_OFFSET; // AUX2
   pw[6] = C8_OFFSET; // AUX3
   pw[7] = C8_OFFSET; // AUX4
-  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MAX) - 9 * TIME_LOW;
+  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
   LED_state = LOW;
   isEmergency = true;
   digitalWrite( LED_PIN, LED_state );
