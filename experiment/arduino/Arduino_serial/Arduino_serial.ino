@@ -1,5 +1,3 @@
-// 問題１：1-4 と 5-8でHIGH値の長さとbetaflight上で認知されるthrottle値の比例定数の符号が反転している
-
 // PPM は　Down pulse
 #include <TimerOne.h>
 
@@ -25,10 +23,7 @@ char packetBuffer[255];
 // PPM Channelの基本構造
 // TIME_LOW + CH_OFFSET = 2000 = 2 [ms]
 // TIME_LOW + CH_MAX + CH_OFFSET = 1000 = 1 [ms]
-volatile uint16_t CH_OFFSET[TOTAL_CH]; // 各CH毎にOffsetを変えられるように
-// 上記の問題１に起因して最後の20の係数が反転している
-volatile uint16_t C4_OFFSET; // １－４チャンネル用共通オフセット値 2*CH_MAX - TIME_LOW - 20 = 2000 - 300 - 20
-volatile uint16_t C8_OFFSET; // ５－８チャンネル用共通オフセット値 2*CH_MAX - TIME_LOW + 20 = 2000 - 300 + 20
+volatile uint16_t CH_OFFSET; // 共通オフセット値 2*CH_MAX - TIME_LOW + 20 = 2000 - 300 + 20
 
 //（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
 volatile uint16_t TOTAL_CH_OFFSET = 0; // CH_OFFSETの合計
@@ -108,11 +103,7 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         {
           pw[i] = CH_MAX;
         }
-        //if(i <4){// 上記問題１のため場合分けが必要
-          //pw[i] = C4_OFFSET - CH_MAX + pw[i];
-        //}else{
-          pw[i] = C8_OFFSET - pw[i];
-        //}
+        pw[i] = CH_OFFSET - pw[i];
         start_H0 -= (pw[i] + TIME_LOW);
       }
       last_received_time = micros();
@@ -121,14 +112,14 @@ void receive_serial()// ---------- loop function : receive signal by UDP
     }
     else if (micros() - last_received_time >= 5000000)// Stop propellers after 5s signal lost.
     {
-      pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
-      pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
-      pw[2] = C4_OFFSET - CH_MIN; // throttle
-      pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
-      pw[4] = C8_OFFSET; // AUX1
-      pw[5] = C8_OFFSET; // AUX2
-      pw[6] = C8_OFFSET; // AUX3
-      pw[7] = C8_OFFSET; // AUX4
+      pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
+      pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
+      pw[2] = CH_OFFSET - CH_MIN; // throttle
+      pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
+      pw[4] = CH_OFFSET; // AUX1
+      pw[5] = CH_OFFSET; // AUX2
+      pw[6] = CH_OFFSET; // AUX3
+      pw[7] = CH_OFFSET; // AUX4
       start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
     }
   }
@@ -161,18 +152,16 @@ void setupPPM()// ---------- setup ppm signal configuration
 {
   pinMode(OUTPUT_PIN, OUTPUT);
   digitalWrite(OUTPUT_PIN, LOW);
-  //C4_OFFSET = 2*CH_MAX - TIME_LOW - 20;// commom offset 
-  C4_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
-  C8_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
+  CH_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
   TOTAL_CH_OFFSET = 4*C4_OFFSET + 4*C8_OFFSET;
-  pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
-  pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
-  pw[2] = C4_OFFSET - CH_MIN; // throttle
-  pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
-  pw[4] = C8_OFFSET; // AUX1
-  pw[5] = C8_OFFSET; // AUX2
-  pw[6] = C8_OFFSET; // AUX3
-  pw[7] = C8_OFFSET; // AUX4
+  pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
+  pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
+  pw[2] = CH_OFFSET - CH_MIN; // throttle
+  pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
+  pw[4] = CH_OFFSET; // AUX1
+  pw[5] = CH_OFFSET; // AUX2
+  pw[6] = CH_OFFSET; // AUX3
+  pw[7] = CH_OFFSET; // AUX4
   start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
   // CPUのクロック周波数でPPM信号を制御
   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定
@@ -181,14 +170,14 @@ void setupPPM()// ---------- setup ppm signal configuration
 }
 void emergency_stop()
 {
-  pw[0] = C4_OFFSET - CH_NEUTRAL; // roll
-  pw[1] = C4_OFFSET - CH_NEUTRAL; // pitch
-  pw[2] = C4_OFFSET - CH_MIN; // throttle
-  pw[3] = C4_OFFSET - CH_NEUTRAL; // yaw
-  pw[4] = C8_OFFSET; // AUX1
-  pw[5] = C8_OFFSET; // AUX2
-  pw[6] = C8_OFFSET; // AUX3
-  pw[7] = C8_OFFSET; // AUX4
+  pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
+  pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
+  pw[2] = CH_OFFSET - CH_MIN; // throttle
+  pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
+  pw[4] = CH_OFFSET; // AUX1
+  pw[5] = CH_OFFSET; // AUX2
+  pw[6] = CH_OFFSET; // AUX3
+  pw[7] = CH_OFFSET; // AUX4
   start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
   LED_state = LOW;
   isEmergency = true;
