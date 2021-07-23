@@ -11,7 +11,7 @@ userpath('clear');
 warning('off', 'all');
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレ5rーション
+fExp = 0;%1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
 
@@ -82,10 +82,10 @@ for i = 1:N
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[]; 
-        agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
+%         agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
 %     agent(i).set_property( "controller", Controller_LocalPlanningForODV(i,dt) );
 % agent(i).set_property( "controller", Controller_LocalPlanningForODVADI(i,dt) );
-%     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
+    for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
     %% set Analysis property
 %     agent(i).analysis = [];
 %     agent(i).set_property("analysis",Analysis_ContEval());
@@ -116,7 +116,8 @@ LogData=[
     ];
 SubFunc = [
     "ContEval",
-    "TrajectoryErrorDis"
+    "TrajectoryErrorDis",
+    "ObserbSubFIM",
     ];
 if ~isempty(agent(1).plant.state)
     LogData=["plant.state.p";LogData]; % 実制御対象の位置
@@ -281,11 +282,11 @@ while round(time.t,5)<=te
 % else
 %     agent(i).input = [0,0,0];
 % end
-%         if time.t<=1.1
-%             agent(i).input = [1/1.2,0,0];
-%         else
-%             agent(i).input = [0,0,0];
-%         end
+        if time.t<=1.1
+            agent(i).input = [1/1.2,0,0];
+        else
+            agent(i).input = [0,0,0];
+        end
     end
     %agent(1).estimator.map.show
     %%
