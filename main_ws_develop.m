@@ -70,22 +70,26 @@ for i = 1:N
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
 %             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+        agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
-    agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
+    %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
+    WayPoint = [70,0];
+    velocity = 1;
+    convjudge = 0.5;
+    agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[]; 
-%         agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
+        agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
 %     agent(i).set_property( "controller", Controller_LocalPlanningForODV(i,dt) );
 % agent(i).set_property( "controller", Controller_LocalPlanningForODVADI(i,dt) );
-    for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
+%     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
     %% set Analysis property
 %     agent(i).analysis = [];
 %     agent(i).set_property("analysis",Analysis_ContEval());
@@ -115,9 +119,9 @@ LogData=[
     "input"
     ];
 SubFunc = [
-    "ContEval",
-    "TrajectoryErrorDis",
-    "ObserbSubFIM",
+%     "ContEval",
+% %     "TrajectoryErrorDis",
+%     "ObserbSubFIM",
     ];
 if ~isempty(agent(1).plant.state)
     LogData=["plant.state.p";LogData]; % 実制御対象の位置
@@ -172,7 +176,8 @@ while round(time.t,5)<=te
         agent(i).do_estimator(cell(1,10));
         
         %Referance Setting
-        param(i).reference.GlobalPlanning = {1};
+%         param(i).reference.GlobalPlanning = {1};
+        param(i).reference.TrackingWaypointPath = {1};
         param(i).reference.point={FH,[2;1;0.5],time.t};
         
         for j = 1:length(agent(i).reference.name)
@@ -282,11 +287,11 @@ while round(time.t,5)<=te
 % else
 %     agent(i).input = [0,0,0];
 % end
-        if time.t<=1.1
-            agent(i).input = [1/1.2,0,0];
-        else
-            agent(i).input = [0,0,0];
-        end
+%         if time.t<=1.1
+%             agent(i).input = [1/1.2,0,0];
+%         else
+%             agent(i).input = [0,0,0];
+%         end
     end
     %agent(1).estimator.map.show
     %%

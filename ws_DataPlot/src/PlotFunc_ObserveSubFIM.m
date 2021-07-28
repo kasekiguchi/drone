@@ -31,7 +31,7 @@ if Flag
     ax = gca;
     %     set(gca,'TickLabelInterpreter','latex')
     grid on
-    ylim([0 1e4]);
+%     ylim([0 1e4]);
     xlim([0 Time(end)]);
     plot(Time,M,'Linewidth',3,'LineStyle','-','Color',plotcolor(1,:));
     ylabel('InvFimMaxeig','Interpreter','latex');

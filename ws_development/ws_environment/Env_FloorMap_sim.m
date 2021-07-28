@@ -24,7 +24,11 @@ fl2 = [-50,-20;200,-20;200,-25;-50,-25];%x direction long passage
 % fl1 = [20,-50;20,200;25,200;25,-50];
 % fl2 = [-20,-50;-20,200;-25,200;-25,-50];%y direction long passage
 
-% fl1 = [];
+% fl1 = [-50,20;70,20;70,25;-50,25];
+% fl2 = [-50,-20;70,-20;70,-25;-50,-25];
+% fl3 = [70,20;75,20;75,90;70,90];
+% fl4 = [70,-20;90,-20;90,-25;70,-25];
+% fl5 = [90,-25;95,-25;95,90;90,90];%90 deg bend corrido
 
 % fl1 = [-10,-10;-10,20;-9,20;-9,-10;-10,-10];
 % fl2 = [-10,-10;20,-10;20,-9;-10,-9;-10,-10];
@@ -40,6 +44,7 @@ env_param.Vertices(:,:,1)=fl1;
 env_param.Vertices(:,:,2)=fl2;
 % env_param.Vertices(:,:,3)=fl3;
 % env_param.Vertices(:,:,4)=fl4;
+% env_param.Vertices(:,:,5)=fl5;
 assignin('base',"env_param",env_param);
 evalin('base',"Env = FloorMap_sim([],env_param);");
 
