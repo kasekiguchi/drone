@@ -26,9 +26,9 @@ classdef DataPlot<handle
     "RMSE",
     "AllTureAndEst",
     "VWTureAndEst",
-    "ContEval",
+%     "ContEval",
 %     "TrajectoryRMSE",
-    "ObserveSubFIM"
+%     "ObserveSubFIM"
     ]
     end
     

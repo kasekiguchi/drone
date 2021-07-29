@@ -47,7 +47,7 @@ classdef TrackingWaypointPath < REFERENCE_CLASS
             
             %---judgement of covergence for Target Position---%
             if (obj.PreTrack(1) - obj.WayPoint(obj.Flag,1))^2 + (obj.PreTrack(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.Convergencejudge
-                obj.TrackingPoint = obj.WayPoint(obj.Flag)';
+                obj.TrackingPoint = obj.WayPoint(obj.Flag,:)';
             %-------------------------------------------------%
             else
                 %---Make Tracking Point---%

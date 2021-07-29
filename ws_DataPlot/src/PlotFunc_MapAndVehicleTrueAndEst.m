@@ -45,11 +45,11 @@ ax = gca;
 
 tmp_max = max(obj.logger.Data.agent{1,Index});
 tmp_min = min(obj.logger.Data.agent{1,Index});
-% xmin = min(tmp_min(:,1,:));
-xmin = -30;
+xmin = min(tmp_min(:,1,:));
+% xmin = -30;
 dx = 10;
-% xmax = max(tmp_max(:,1,:));
-xmax = 70;
+xmax = max(tmp_max(:,1,:));
+% xmax = 70;
 ymin = min(tmp_min(:,2,:));
 dy = 10;
 ymax = max(tmp_max(:,2,:));
