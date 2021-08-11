@@ -1,0 +1,23 @@
+function result = load_setting
+load.start = [0,0];
+load.width = 6.5;
+load.width = 6.5;
+load.length = 10;
+load.length = 10;
+load.pillar_cog = [5 5];
+load.pollar_width = 0.5;
+load.wall = cell2mat({load.start;load.start+[load.width,0];load.start+[load.width,0]+[0,load.length];load.start+[0,load.length]});
+load.poly = polyshape(load.wall);
+load.poly = polyshape(load.wall);
+if isempty(load.pillar_cog)
+else
+    [num,~]=size(load.pillar_cog);
+        for i = 1:num
+               temp = cell2mat({load.pillar_cog(i,:)-[load.pollar_width,0]+[0,load.pollar_width];...
+                                      load.pillar_cog(i,:)-[load.pollar_width,0]-[0,load.pollar_width];...
+                                                             load.pillar_cog(i,:)+[load.pollar_width,0]-[0,load.pollar_width];...
+                                                                                    load.pillar_cog(i,:)+[load.pollar_width,0]+[0,load.pollar_width]});
+                                                                                           load.poly = addboundary(load.poly, temp);
+                                                                                               end
+                                                                                               end
+                                                                                               result =load;end

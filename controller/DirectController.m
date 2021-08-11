@@ -24,7 +24,6 @@ classdef DirectController <CONTROLLER_CLASS
                 end
             end
             obj.result.input = Ref.get();
-            obj.self.input = obj.result.input;
             u=obj.result;
         end
         function show(obj)

@@ -10,15 +10,10 @@ tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 
 %% Get corner coordinates
-%STL = 'stl_model.stl';
-%STL = '20210217_5F.stl';
-STL = '20210217_ASCII_meshlab.stl';
-%STL = '20210217_Binary_meshlab.stl';
-[TR,fileformat,attributes,solidID] = stlread(STL);
+[TR,fileformat,attributes,solidID] = stlread('stl_model.stl');
 Sp0 = TR.Points; % points list
 St0 = TR.ConnectivityList; % triangles list
-d = 0.0001;
-hrange = min(Sp0(:,3))+d:0.5:max(Sp0(:,3))-d; % the height at which stl is cut.
+hrange = 0:0.5:max(TR.Points(:,3)); % the height at which stl is cut.
 FN = faceNormal(TR); % the list of the vector that normals to the triangle
 h_tids = find(ismember(FN,[0 0 1],'rows'));% horizontal triangle indices
 h_ht=Sp0(St0(h_tids,1),3); % height of the horizontal triangles
@@ -79,11 +74,11 @@ for hi = 1:length(hrange) % カットする高さ毎に処理
         else
             tmpp = eaa(:,id(i+ni));
             i = i + 1;
-    %        tmpi = find(abs(sum(oaa(:,1:end-1)-tmpp))==0);% 始点側でtmppの位置 % ラフだが高速
-      %      if length(tmpi)~=1 % 高速な方でちゃんと求まらない場合はしっかり求める
+            tmpi = find(abs(sum(oaa(:,1:end-1)-tmpp))==0);% 始点側でtmppの位置 % ラフだが高速
+            if length(tmpi)~=1 % 高速な方でちゃんと求まらない場合はしっかり求める
                 tmpii=oaa(:,1:end-1)-tmpp;
                 tmpi = find(diag(tmpii'*tmpii)==0,1);% 始点側でtmppの位置
-        %    end
+            end
             if isempty(tmpi)% 終点に対応した点が無い => ここに入るときはバグが残っている可能性があるので，break pointは設定したままにしておく
                 warning("ACSL:something wrong");
             else
@@ -96,20 +91,20 @@ for hi = 1:length(hrange) % カットする高さ毎に処理
         end
     end
     region(hi)=check_poly(oaa(1:2,id)');
-    for i = 1:length(H_tids)% 高さh 平面上の三角形をマージ
+    for i = 1:length(H_tids)
         region(hi) = union(region(hi),polyshape(Sp0(St0(H_tids,:)',1:2)));
     end
 end
 %%
-check_poly(oaa(1:2,id)')
-plot(region(27))
+
+
 %% stl そのままの表示
-figure(11)
-model = createpde;
-importGeometry(model,STL);
-%pdegplot(model,'FaceLabels','on')
-pdegplot(model)
-%mesh_default = generateMesh(model,'Hmax',20,'Hmin',0.5)
+% figure(11)
+% model = createpde;
+% importGeometry(model,'stl_model.stl');
+% %pdegplot(model,'FaceLabels','on')
+% pdegplot(model)
+% %mesh_default = generateMesh(model,'Hmax',20,'Hmin',0.5)
 %% 三角形分割＋頂点の向き＋面の向き
 % V=vertexNormal(TR);
 % P = incenter(TR);
@@ -125,8 +120,6 @@ pdegplot(model)
 %% データ保存
 save("regions.mat","region")
 %load("regions.mat","region")
-%%
-load("regions.mat")
 %% 動画生成
 maxr=max(TR.Points(:,1:2));
 minr=min(TR.Points(:,1:2));
@@ -142,7 +135,7 @@ function [poly,q]=check_poly(points)
     p = [points(2,:)-points(1,:),0];
     k = 0; % 飛ばすインデックス分
     q = [];% nan の位置を返すよう（debugのためでちゃんと動くなら必要ない）
-    for i = 3:size(points,1)% points は一直線の場合削除していくが，初期points数でfor文は回る
+    for i = 3:size(points,1)
         % i-2からi-1のベクトルp と　i-1からiへのベクトル t に対し，
         % p x t の外積計算をし，ｚ成分が０の時は一直線なので削除する．
         if i+k>size(points,1)
@@ -152,9 +145,6 @@ function [poly,q]=check_poly(points)
             q = [q,i+k];
             p = [points(i+k+2,:)-points(i+k+1,:),0];
             k = k+3;
-        end
-        if i+k > size(points,1) % nan の後に３点以上無い時に発生．なぜこんなことがあるのか謎．stlがうまく作れていない？
-            break;
         end
         t=[points(i+k,:)-points(i-1+k,:),0];
         s=cross(p,t);

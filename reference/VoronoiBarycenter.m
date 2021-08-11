@@ -21,7 +21,7 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             % 【Output】 result = 目標値（グローバル位置）
             %% 共通設定１：単純ボロノイセル確定
             sensor = obj.self.sensor.result;%Param{1}.result;
-            state = obj.self.sensor.result.state;%Param{2}.state; % 
+            state = obj.self.model.state;%Param{2}.state; % handle 注意　予測状態
             env = obj.self.env;%Param{3}.param;             % 環境として予測したもの
 %             param = Param{4}; % 途中で変えられる必要があるか？
 %             if isfield(param,'range'); obj.param.r = param.range;  end
@@ -107,13 +107,10 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
                 sp=strcmp(logger.items,'sensor.result.state.p');
                 %sp=strcmp(logger.items,'plant.state.p');
                 regionp=strcmp(logger.items,'reference.result.region');
-                rp = logger.ri;
-                ep = logger.ei;
-                sp = logger.si;
                 gridp=strcmp(logger.items,'env.density.param.grid_density');
-                tmpref=@(k,span) arrayfun(@(i)logger.Data.agent{k,rp,i}.state.p,span,'UniformOutput',false);
-                tmpest=@(k,span) arrayfun(@(i)logger.Data.agent{k,ep,i}.state.p,span,'UniformOutput',false);
-                tmpsen=@(k,span) arrayfun(@(i)logger.Data.agent{k,sp,i}.state.p,span,'UniformOutput',false);
+                tmpref=@(k,span) arrayfun(@(i)logger.Data.agent{k,rp,i}(1:3),span,'UniformOutput',false);
+                tmpest=@(k,span) arrayfun(@(i)logger.Data.agent{k,ep,i}(1:3),span,'UniformOutput',false);
+                tmpsen=@(k,span) arrayfun(@(i)logger.Data.agent{k,sp,i}(1:3),span,'UniformOutput',false);
                 %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
                 make_animation(1:10:logger.i-1,1:N,@(k,span) draw_voronoi(arrayfun(@(i) logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmpsen(k,span),tmpref(k,span),tmpest(k,span)],Env.param.Vertices),@() Env.show);
                 %%

@@ -1,3 +1,4 @@
+
 classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     % 制御対象としてのプラントモデルの持つべき性質を規定するクラス
     % 【Properties】 plant, model, sensor, estimator, estimator_substance, reference, controller,
@@ -142,6 +143,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                     obj.model.state.set_state(obj.model.state.list(i),obj.estimator.result.state.(obj.model.state.list(i)));
                 end
             end
+            obj.input = obj.controller.result;
             obj.model.do(obj.input,param);
         end
     end
@@ -160,7 +162,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         function do_parallel(obj,prop,param)
             % prop : property name
             % param : parameter to do a property
-            result = obj.(prop).(obj.(prop).name(1)).do(param{1});
+            result = obj.(prop).(obj.(prop).name(1)).do(param);
             for i = 2:length(obj.(prop).name) % (prop).resultに結果をまとめるため
                 tmp=obj.(prop).(obj.(prop).name(i)).do(param{i});
                 F = fieldnames(tmp);
@@ -172,13 +174,13 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                                 if ~isprop(result.state,Fs{k})
                                     addprop(result.state,Fs{k});
                                 end
-                                  result.state.set_state(Fs{k},tmp.state.(Fs{k}));
+                                result.state.set_state(Fs{k},tmp.state.(Fs{k}));
                             end
                         else
-                              result.(F{j})=state_copy(tmp.(F{j}));
+                            result.(F{j})=state_copy(tmp.(F{j}));
                         end
                     else
-                          result.(F{j})=tmp.(F{j});
+                        result.(F{j})=tmp.(F{j});
                     end
                 end
             end
