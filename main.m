@@ -10,7 +10,7 @@ userpath('clear');
 warning('off', 'all');
 %% general setting
 Nh = 10; %number of human
-Nob = 3; %number of obstacles
+Nob = 2; %number of obstacles
 N = Nh+Nob; % number of agents
 %Nの頭のほうは人．後ろのほうを障害物とする．
 FieldSelect = {'straight','Like 6','Like H','TCU 2F','8widths straight','3widths straight','十字路'};
@@ -275,6 +275,13 @@ for i=1:N
             elseif i==4
                 agent(i).plant.state.p(1:2) = [1.5;7];
             end
+        else
+            if i==1
+                agent(i).plant.state.p(1:2) = [2.5;19];
+            else
+                                agent(i).plant.state.p(1:2) = [1.5;19];
+                                
+            end
         end
     else
         agent(i).plant.state.p(1:2) = ObjectInitialize(i,agent(i).env.huma_load.param.txt,Nob,Nh);
@@ -362,13 +369,39 @@ while round(time.t,5)<=te
     % with FH
     figure(FH)
     drawnow
+    ParamA = [];
+    ParamB = [];
+    AllU = zeros(6*Nh+2*Nob,1);
+    AllX = zeros(6*Nh+2*Nob,1);
     for i = 1:N % 状態更新
-        model_param.param=agent(i).model.param;
-        model_param.FH = FH;
-        model_param.input = agent(i).controller.result;
-        agent(i).do_model(model_param);
-        model_param.param=agent(i).plant.param;
-        agent(i).do_plant(model_param);
+%         text = [num2str(i)];
+        AAA = agent(i).model.param.A;
+        BBB = agent(i).model.param.B;
+        ParamA = blkdiag(ParamA,AAA);
+        ParamB = blkdiag(ParamB,BBB);
+        %         AllU = [AllU;agent(i).controller.result];
+        if i<=Nh
+            AllU(6*i-5:6*i) = agent(i).controller.result;
+            AllX(6*i-5:6*i) = [agent(i).plant.state.p;agent(i).plant.state.v];
+        else
+            AllU(6*Nh+2*(i-Nh)-1:6*Nh+2*(i-Nh)) = agent(i).controller.result;
+            AllX(6*Nh+2*(i-Nh)-1:6*Nh+2*(i-Nh)) = agent(i).plant.state.p(1:2);
+        end
+%         model_param.param=agent(i).model.param;
+%         model_param.FH = FH;
+%         model_param.input = agent(i).controller.result;
+%         agent(i).do_model(model_param);
+%         model_param.param=agent(i).plant.param;
+%         agent(i).do_plant(model_param);
+    end
+    Result = ParamA*AllX+ParamB*AllU;
+    parfor i = 1:N % 状態更新
+        if i<=Nh
+            agent(i).plant.state.p = Result(6*i-5:6*i-3);
+            agent(i).plant.state.v = Result(6*i-2:6*i);
+        else
+            agent(i).plant.state.p = [Result(6*Nh+2*(i-Nh)-1:6*Nh+2*(i-Nh));0];
+        end
     end
     %           agent(1).reference.wall.show(); % 機体の移動を毎時刻表示する
     
@@ -402,7 +435,7 @@ while round(time.t,5)<=te
     yasui_fig_human(agent,Nh)
     
     yasui.main_roop_count = yasui.main_roop_count+1;
-    for i=1:Nh
+    parfor i=1:Nh
         ResponeJudgement = Cov_ResponeJudgement(agent(i));
         if ResponeJudgement
             responepoint = Cov_respone(agent(i));

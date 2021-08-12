@@ -86,24 +86,35 @@ classdef slope_input < REFERENCE_CLASS
                 Cov_diffy_slope(x,y,obj.coef{id}(1),obj.coef{id}(2),obj.coef{id}(3),obj.ret{id}(1,1),obj.ret{id}(3,1),obj.ret{id}(1,2),obj.ret{id}(3,2))];
             %slopeの微分値を入力として算出
             input = u;
-            
+            %他の個体の入力の算出
+            AllU = cell2mat(arrayfun(@(i) eye(2)*OtherAgentState{i}(3:4)/norm(OtherAgentState{i}(3:4)),1:Nh,'uniformoutput',false)');
+            AllX = cell2mat(arrayfun(@(i) OtherAgentState{i}(1:2),1:Nh,'uniformoutput',false)');
             % 自分と他者の距離計算
             result = arrayfun(@(i) Cov_distance(OtherAgentState{i}(1:2),state.p(1:2),1),1:Nh);
             tmp = struct2cell(result);
             dis = cell2mat(tmp);
+            
+            Thetaagent2agent = cell2mat(arrayfun(@(i) atan2(u(2),u(1)) - atan2(dis(3,:,i),dis(2,:,i)),1:Nh,'uniformoutput',false));
             %視野角を算出
             ViewLength = 10;
             ViewWidthTheta = 100;
             AvoidWidthTheta = 10;
             [Avoid_range,~,LViewRange,ViewRange] = Cov_view_range(state.p,state.v,AvoidWidthTheta,env,ViewLength,num,OtherAgentState,ViewWidthTheta);
-                        %障害物用の視野角を算出
-            ViewLength = 10;
-            ViewWidthTheta = 10;
-            AvoidWidthTheta = 10;
-            [~,~,LObViewRange,ObViewRange] = Cov_view_range(state.p,state.v,AvoidWidthTheta,env,ViewLength,num,ObstacleState,ViewWidthTheta);
+            %障害物用の視野角を算出
+            ViewLength = 1;
+            ViewWidthTheta = 180;
+            AvoidWidthTheta = 180;
+            [TestRange,~,LObViewRange,ObViewRange] = Cov_view_range(state.p,state.v,AvoidWidthTheta,env,ViewLength,num,ObstacleState,ViewWidthTheta);
             LViewRange = intersect(LViewRange,LObViewRange);
             in_flontAvoid = zeros(1,Nh);
             in_flontViewRange = zeros(1,Nh);
+            %障害物との距離と差分を計算
+            result = arrayfun(@(i) Cov_distance(ObstacleState{i}(1:2),state.p(1:2),1),1:Nob);
+                        tmp = struct2cell(result);
+            %人本体間の距離計算
+            DisAgent2Obs = cell2mat(tmp);
+            [~,nearestObs] = min(DisAgent2Obs(1,:,:));
+            Thetaagent2Obs = atan2(u(2),u(1)) - atan2(DisAgent2Obs(3,:,nearestObs),DisAgent2Obs(2,:,nearestObs));
             parfor i= 1:Nh
                 %前にいて特定の距離以内の個体をカウント
                 if isinterior(Avoid_range,OtherAgentState{i}(1),OtherAgentState{i}(2))&&i~=num
@@ -114,34 +125,48 @@ classdef slope_input < REFERENCE_CLASS
                 end
             end
             in_flontObject = zeros(1,Nob);
+            in_AroundObject= zeros(1,Nob);
             parfor i= 1:Nob
                 %前にいて特定の距離以内の障害物をカウント
-                if isinterior(ObViewRange,ObstacleState{i}(1),ObstacleState{i}(2))
-                    in_flontObject(i) = isinterior(ObViewRange,ObstacleState{i}(1),ObstacleState{i}(2));
-                end
+                in_flontObject(i) = isinterior(ObViewRange,ObstacleState{i}(1),ObstacleState{i}(2));
+                in_AroundObject(i) = isinterior(TestRange,ObstacleState{i}(1),ObstacleState{i}(2));
             end
             if area(LViewRange)==0
                 density = 10;
             else
                 density = sum(in_flontViewRange,2)/area(LViewRange);
             end
-            if density >5
-                v_k = 0.1;
-            else
-                v_k = 0.0013*density^3+0.025*density^2-0.3143*density+0.9;
-            end
-            %             v_k=0.5;
+%             if density >5
+%                 v_k = 0.1;
+%             else
+%                 v_k = 0.0013*density^3+0.025*density^2-0.3143*density+0.9;
+%             end
+                        v_k=1.269*10^(-0.222*density);
             %相対速度の計算
             Rerativevi2vj = cell2mat(arrayfun(@(i) OtherAgentState{i}(3:4)-state.v(1:2),1:Nh,'uniformoutput',false));
             tmppp = cell2mat(arrayfun(@(i) disi2j(2:3,:,i),1:Nh,'uniformoutput',false));
             Vdotdis = dot(Rerativevi2vj,tmppp);
             FT_Avoid = zeros(1,Nh);
+            
+            F = zeros(3,Nh);
+            tmp1 = dis(2,:,:);
+            tmp2 =dis(3,:,:);
             parfor i=1:Nh
                 %視野角内か自分と同じ方向に動いていないものをカウント
                 if in_flontAvoid(i)==1&&num~=i&&Vdotdis(i)>0
                     FT_Avoid(i) = 1;
                 else
                     FT_Avoid(i) = 0;
+                end
+                %遠心力の計算
+                if i~=num
+                    if Thetaagent2agent>=0
+                        F(:,i) = cross([0;0;1],[tmp1(:,:,i);tmp2(:,:,i);0]);
+                        F(:,i) = F(:,i)/norm(F(:,i));
+                    else
+                        F(:,i) = cross([0;0;1],[tmp1(:,:,i);tmp2(:,:,i);0]);
+                        F(:,i) = F(:,i)/norm(F(:,i));
+                    end
                 end
             end
             %相対速度，前にいるかつ自分より遅い判定，個体間距離の合算
@@ -154,38 +179,40 @@ classdef slope_input < REFERENCE_CLASS
                 else
                     DisMinAgentRerative = [num;inf;inf];
                 end
+                
             end
-            %注視点の距離を変化させるための関数
-            VP = 1.;
             %一点注視店の初期化，とりあえず自己位置に作成．
             viewpoint = cell(1,Nh);
-            F = zeros(3,Nh);
             %注視点の初期化．自己位置を代入している．
             ref_point = arrayfun(@(i) eye(length(OtherAgentState{i}))*OtherAgentState{i},1:Nh,'uniformoutput',false);
             if count~=1
                 ObstacleAvoidPotential = cell2mat(arrayfun(@(i) [Cov_diffx_Agent2ObstaclePotential(state.p(1),state.p(2),ObstacleState{i}(1),ObstacleState{i}(2));Cov_diffy_Agent2ObstaclePotential(state.p(1),state.p(2),ObstacleState{i}(1),ObstacleState{i}(2))],1:Nob,'UniformOutput',false));
+                tmpViewPoint = AllX+eye(Nh*2)*AllU;
                 parfor i=1:Nh
-                    %遠心力の計算
-                    if i~=num
-                        F(:,i) = cross([0;0;1],[dis(2,:,i);dis(3,:,i);0]);
-                        F(:,i) = F(:,i)/norm(F(:,i));
-                    end
                     if i==num
                         %i番目の個体の仮注視点をV_kｍ前に作成．
                         viewpoint{i} = OtherAgentState{i}(1:2)+v_k*eye(2)*[input/norm(input)];
                         ref_point{i} = viewpoint{i}(1:2);
                     else
                         %その他個体の注視点を作成
-                        viewpoint{i} = OtherAgentState{i}(1:2)+VP*eye(2)*OtherAgentState{i}(3:4)/norm(OtherAgentState{i}(3:4));
-                        ref_point{i} = viewpoint{i}(1:2);
+                        viewpoint{i} = tmpViewPoint(2*i-1:2*i);
                     end
                 end
+                ObstaclePotential = cell2mat(arrayfun(@(i) Cov_Agent2ObstaclePotential(ref_point{num}(1),ref_point{num}(2),ObstacleState{i}(1),ObstacleState{i}(2)),1:Nob,'UniformOutput',false));
+
                 %障害物中心でかかる遠心力
+                tmp1 = disi2ob(2,:,:);
+                tmp2 = disi2ob(3,:,:);
                 parfor i=1:Nob
                     %遠心力の計算
-                        obF(:,i) = cross([0;0;1],[disi2ob(2,:,i);disi2ob(3,:,i);0]);
+                    if Thetaagent2Obs >=0
+                        obF(:,i) = cross([0;0;-1],[tmp1(:,:,i);tmp2(:,:,i);0]);
                         obF(:,i) = obF(:,i)/norm(obF(:,i));
-                 end
+                    else
+                        obF(:,i) = cross([0;0;1],[tmp1(:,:,i);tmp2(:,:,i);0]);
+                        obF(:,i) = obF(:,i)/norm(obF(:,i));
+                    end
+                end
                 %注視点の間の距離を算出
                 result = arrayfun(@(i) Cov_distance(viewpoint{num}(1:2),viewpoint{i}(1:2),1),1:Nh);%Calclate distance between human and other one.
                 tmp = struct2cell(result);
@@ -195,9 +222,9 @@ classdef slope_input < REFERENCE_CLASS
                 tmp = struct2cell(result);
                 disVi2other = cell2mat(tmp);
                 %i番目の注視点と注視点の反力ポテンシャル
-                ithViewPoint_separate_ViewPoint = cell2mat(arrayfun(@(i) [disVi2V(2:3,:,i)]/(sqrt(disVi2V(2,:,i)^2+disVi2V(3,:,i)^2)^3),1:Nh,'UniformOutput',false));
+                ithViewPoint_separate_ViewPoint = cell2mat(arrayfun(@(i) disVi2V(2:3,:,i)/(sqrt(disVi2V(2,:,i)^2+disVi2V(3,:,i)^2)^3),1:Nh,'UniformOutput',false));
                 %i番目の注視点とその他個体の反力ポテンシャル
-                ithViewPoint_separate_OtherAgent = cell2mat(arrayfun(@(i) [disVi2other(2:3,:,i)]/(sqrt(disVi2other(2,:,i)^2+disVi2other(3,:,i)^2)^3),1:Nh,'UniformOutput',false));
+                ithViewPoint_separate_OtherAgent = cell2mat(arrayfun(@(i) disVi2other(2:3,:,i)/(sqrt(disVi2other(2,:,i)^2+disVi2other(3,:,i)^2)^3),1:Nh,'UniformOutput',false));
                 %i番目の個体とその他個体の反力ポテンシャル
                 agent_separate = cell2mat(arrayfun(@(i) [Cov_diffx_Agent2AgentPotential(state.p(1),state.p(2),OtherAgentState{i}(1),OtherAgentState{i}(2));Cov_diffy_Agent2AgentPotential(state.p(1),state.p(2),OtherAgentState{i}(1),OtherAgentState{i}(2))],1:Nh,'UniformOutput',false));
             else
@@ -234,7 +261,9 @@ classdef slope_input < REFERENCE_CLASS
                 %遠心力の計算
                 if in_flontObject(i)==0
                     obF(:,i) = zeros(3,1);
-                    ObstacleAvoidPotential = zeros(2,1);
+                end
+                if in_AroundObject(i)==0
+                    ObstacleAvoidPotential(:,i) = zeros(2,1);
                 end
             end
             if ~isempty(AvoidRerativeAgentdistance)
@@ -243,8 +272,8 @@ classdef slope_input < REFERENCE_CLASS
                 k2 = 0;%*sign(obj.random);%交通ルール
             end
             if ~isempty(ViewRerativeAgentdistance)
-                k3 = 0.3;
-                k1 = 0.5;%注視転換
+                k3 = 0.4;
+                k1 = 0.6;%注視転換
             else
                 k3=0;
                 k1 =0;%注視転換
@@ -255,13 +284,14 @@ classdef slope_input < REFERENCE_CLASS
                 a= [0;0];
                 b = a;
                 c=a;
+                obstacleinput = a;
             else
                 %これ以前では環境による注視点を算出ここで，人などの外的要因を基にした注視点を算出
                 MaxLabela = Cov_MaxLabel(ithViewPoint_separate_ViewPoint,2);
                 a = k1*((ithViewPoint_separate_ViewPoint(:,MaxLabela)));
-                MaxLabelc = Cov_MaxLabel(F,2);
+                MaxLabelc = Cov_MaxLabel(agent_separate.*F(1:2,:),2);
                 b = k2*(F(1:2,MaxLabelc));
-%                 b = k2*sum(F(1:2,:),2);
+                %                 b = k2*sum(F(1:2,:),2);
                 if norm(b)>300
                     b = b/norm(b)*300;
                 end
@@ -270,21 +300,26 @@ classdef slope_input < REFERENCE_CLASS
                 if norm(c)>300
                     c = c/norm(c)*300;
                 end
-                ppp = -0.2*ObstacleAvoidPotential+0.01*obF(1:2,:);
+                ppp = ObstaclePotential.*obF(1:2,:);
                 MaxLabelc = Cov_MaxLabel(ppp,2);
-                d = 1*(ppp(:,MaxLabelc));
-%                 MaxLabelc = Cov_MaxLabel(ObstacleAvoidPotential,2);
-%                 d = -1*(ObstacleAvoidPotential(:,MaxLabelc));
+                d = 10*(obF(:,MaxLabelc));
+                qqq = -ObstacleAvoidPotential;
+                MaxLabelc = Cov_MaxLabel(qqq,2);
+                obstacleinput = 1*(qqq(:,MaxLabelc));
+                %                 MaxLabelc = Cov_MaxLabel(ObstacleAvoidPotential,2);
+                %                 d = -1*(ObstacleAvoidPotential(:,MaxLabelc));
                 
                 [~,Directionu] = max(abs(u)) ;
                 if Directionu ==2
+                    obstacleinput  = [obstacleinput(1);0];
                     ref_input = [a(1);0]+[b(1);0]+[c(1);0]+[d(1);0]+10*u;
                 elseif Directionu == 1
+                    obstacleinput  = [0;obstacleinput(2)];
                     ref_input = [0;a(2)]+[0;b(2)]+[0;c(2)]+[0;d(2)]+10*u;
                 else
                     ref_input = a+b+c+10*u;
                 end
-                viewpoint{num} = viewpoint{num}+0.1*eye(2)*[ref_input];
+                viewpoint{num} = viewpoint{num}+0.1*eye(2)*ref_input;
                 ref_point{num} = viewpoint{num}(1:2);
                 walk = (ref_point{num}(1:2) - state.p(1:2))/norm(ref_point{num}(1:2) - state.p(1:2),2);
             end
@@ -303,7 +338,7 @@ classdef slope_input < REFERENCE_CLASS
                 mp = sign(agent_separate(2,MaxLabel));
                 agent_separate(2,MaxLabel) = mp*10;
             end
-            agent_input = 0.5*walk+1*acceleration+agent_separate(:,MaxLabel);
+            agent_input = 0.5*walk+1*acceleration+0.5*agent_separate(:,MaxLabel)+1*obstacleinput;
             obj.result.ref_point = ref_point{num};
             %%
             %             make_map(0,obj,other_state,num)
