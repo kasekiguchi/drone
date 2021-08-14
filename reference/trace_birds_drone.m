@@ -3,37 +3,42 @@ classdef trace_birds_drone < REFERENCE_CLASS
     %   詳細説明をここに記述
     
     properties
+        self
         param
     end
     
     methods
-        function obj = trace_birds_drone(varargin)
+        function obj = trace_birds_drone(self,param)
+            obj.self = self;
+            obj.param = param;
             obj.result.state = STATE_CLASS(struct('state_list',["p","v","u"],'num_list',[3]));
         end
         
         function result= do(obj,Param)
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
-            fp=Param{7};%畑の位置保存
-            N = length(Param{3});
-            Na = N - Param{9};
-            num = Param{4};
-            state = Param{3}{num};
+            fp=Param{4};%畑の位置保存
+            N = Param{2};
+            Na = N - Param{3};
+            num = obj.self.id;
+            state = obj.self.plant.state;
+            position_birds = obj.self.sensor.result.neighbor(:,1:Param{3});
+            for i=1:Na
+                position_agents(:,i) = [Param{1,1}(1,Param{3}+i).plant.state.p];
+            end
             tmp = cell(1,N-Na);
             tmp2 = cell(1,Na);
-            birds_speed = cell(1,N-1);
+%             birds_speed = cell(1,N-1);
             for i=1:N-Na
-                tmp{:,i} = Param{3}{i}.p;
-%                 birds_speed{:,i} = Param{3}{i}.v;
+                tmp{:,i} = position_birds(:,i);
             end
+%                 birds_speed{:,i} = Param{3}{i}.v;
             sheep_state = cell2mat(tmp);
             if length(sheep_state(:,1))<3
             sheep_state = vertcat(sheep_state,zeros(1,N-Na));
             end
-            c=1;
-            for i=N-(Na-1):N
-                tmp2{:,c} = Param{3}{i}.p;
-                c=c+1;
+            for c=1:Na
+                tmp2{:,c} = position_agents(:,c);
             end
             agent_state = cell2mat(tmp2);
             tmp= arrayfun(@(i) isequal(agent_state(:,i),state.p),1:Na);                            % Find row number with minimum distance
@@ -93,7 +98,7 @@ classdef trace_birds_drone < REFERENCE_CLASS
             
             i=N-num+1;
             xd = sheep_state(1:2,sort_point(2,i));
-
+%             xd = [10;10];
             tmp = dog_input(state,fp,P,sheep_state,Cog,xd,agent_state,(num-N+Na),Na);
 %             tmp = dog_input(state,fp,P,sheep_state,Cog,xd);
             obj.result.state.u = tmp.result;
@@ -108,7 +113,7 @@ classdef trace_birds_drone < REFERENCE_CLASS
             obj.result.tmp1 = labels;
             obj.result.tmp2 = tmp.tmp2;
             obj.result.tmp3 = numClusters;
-            obj.result .tmp4 = tmp.tmp1;
+            obj.result.tmp4 = tmp.tmp1;
             result = obj.result;
            
         end
