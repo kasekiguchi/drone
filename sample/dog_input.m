@@ -1,11 +1,11 @@
 function result = dog_input(agent,fp,P,other,Cog,xd,other_agent,num,Na)
 %入力の変更，目標位置への入力をそのまま出す．sheep様
 n = 2;%次元数
-k1 = .5;%%重心への移動
+k1=0.5;%%重心への移動
 k2=0.05;%畑への吸引力
-k3=.01;%目標からの反力
-k4 = 0.1;
-k5 = 0.1;
+k3=0.01;%目標からの反力
+k4= 0.1;%他機体からの反力
+k5= 0.1;%鳥からの反力
 tmp = Cog;%どこを正規分布の基準とするか
 state = agent.p;%自己位置
 xd = [xd;state(3)];
