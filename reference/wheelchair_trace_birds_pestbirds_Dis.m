@@ -21,27 +21,27 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             state =  obj.self.plant.state.p;%num番目の鳥の位置
             q = obj.self.plant.state.q;%num番目の鳥のクォータニオン
 %             agent_v = Param{1}.state.v;
-            N = obj.param{1};%mainのN
-            Nb = obj.param{2};%鳥の数
-            drone_state = zeros(3,N-Nb);
-            other_state = [state,obj.self.sensor.result.neighbor,drone_state];%すべての鳥とドローンの情報
-            pre_info{1} = state;%1時刻前の状態
-            pre_info{2} = obj.result.state.u;%1時刻前の入力
+            N = Param{3};%mainのN
+            Nb = Param{4};%鳥の数
+            for i=Nb+1:N
+                drone_state(:,i) = [Param{1,1}(1,i).plant.state.p];
+            end
+            for i=1:N
+                other_state(:,i) = [Param{1,1}(1,i).plant.state.p];%すべての鳥とドローンの情報
+            end
+            pre_info = Param{2};%1時刻前の状態
 %             rs = Param{5}(1);ra = Param{5}(2);
-            rc = obj.param{3}(3); %群れる距離
+            rc = Param{6}(3); %群れる距離
             tarm1 = zeros(2,length(other_state));%鳥の群れる項
             adjust =  zeros(2,length(other_state));%鳥がほかの鳥から離れる
             keep = zeros(2,1);%畑への進行
-            away = zeros(2,length(other_state));
-            go_farm = zeros(2,1);
-            fp = [obj.param{4}];
-            want_falm = obj.param{5};
-            k1 = .2;%%離れる
+            away = zeros(2,length(other_state));%ドローンから離れる
+            fp = [Param{5}];
+            k1 = 0.2;%%離れる
             k2 = 0.1;%%整列
             k3 = 3.;%畑に向かう%1機のとき1にしてた．
             k4 = 23.0;%%逃げる：初期化下で内分点の計算から求めている．
-            k5 = 2;%%畑に向かう
-            [~,count] = size(pre_info{1});
+            [~,count] = size(pre_info.Data.t');
             R=5;
             flont = zeros(1,Nb);
             %%%近づく離れる第一講%%%%%%%%%%%%%%%5
@@ -50,10 +50,13 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             distance = cell2mat(tmp);
             if count >1
 %                keep = pre_info{num}.state(4:6,end)-agent_v;
-               keep = ((fp-state)/norm((fp-state),2)) ;
+               keep = ((fp-state(1:2))/norm((fp-state(1:2)),2)) ;
                 %内積計算
-                agent_v = arrayfun(@(AAA) (pre_info{AAA}.state(1:2,end)-pre_info{AAA}.state(1:2,end-1))/0.1,1:N,'UniformOutput',false);
-                
+                if pre_info.i==1
+                    agent_v = arrayfun(@(AAA) (state(1:2)-[0;0])/0.1,1:N,'UniformOutput',false);
+                else
+                    agent_v = arrayfun(@(AAA) (state(1:2)-pre_info.Data.agent{pre_info.i-1,4,AAA}.state.p(1:2))/0.1,1:N,'UniformOutput',false);
+                end
                 result = arrayfun(@(i) Cov_distance(other_state(:,i),state,1),1:N);
                 tmp = struct2cell(result);
                 dis = cell2mat(tmp);
@@ -61,21 +64,18 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
                 %前にいるやつの把握
                 flont = AA>0;
                 
-                
 %                k5 = 0;%*distance{N}.result/(distance{N}.result + A.result);%%畑へ向かう力
 
             end
-            for i=1:N
-                if i~=num&&i<=Nb&&flont(i)==1
-                    if distance(1,:,i)<rc&&abs(distance(1,:,i))>0.
-                        tarm1(:,i) = -(1-[R^3/distance(1,:,i)^3])*[distance(2:3,:,i)];
-                        adjust(:,i) = agent_v{i} - agent_v{num};                       
-                    end
+            if i~=num&&i<=Nb&&flont(i)==1
+                if distance(1,:,i)<rc&&abs(distance(1,:,i))>0.
+                    tarm1(:,i) = -(1-[R^3/distance(1,:,i)^3])*[distance(2:3,:,i)];
+                    adjust(:,i) = agent_v{i} - agent_v{num};                       
                 end
-                if i>Nb%ドローンから逃げる力
-                    away(:,i) = [distance(2:3,:,i)]/norm(distance(2:3,:,i))^2;
-                end     
             end
+            for i=Nb+1:N%ドローンから逃げる力
+                away(:,i) = [distance(2:3,:,i)]/norm(distance(2:3,:,i))^2;
+            end     
             %%目標位置に向かう用のやつ
             if rand(1)>0.5
                 r= -0.1;
@@ -100,7 +100,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
 %             if norm(input)<5.9
 %                disp(norm(input)) 
 %             end
-            kind_speed = 42 * 10/36;
+            kind_speed = 82 * 10/36;
             ref_point = eye(2)*state(1:2,1) + eye(2)*(kind_speed * (input/norm(input,2)));
             th_xd = atan2(ref_point(2)-state(2),ref_point(1)-state(1));%角速度
 %             figure;
