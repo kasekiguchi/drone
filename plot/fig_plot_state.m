@@ -1,4 +1,4 @@
-function fig_plot_state(agent,fp,cog_state,N,Nb)
+function fig_plot_state(agent,fp,N,Nb)
 %%
            figure(2)
 %            point = dist_plot(agent(N).reference.result.CoG,cog_state.P,fp);
