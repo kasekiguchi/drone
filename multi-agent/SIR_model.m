@@ -54,6 +54,7 @@ classdef SIR_model < handle
             obj.Ii = [0;1;zeros(obj.ti,1)];
             obj.Ri = [zeros(obj.ti+1,1);1];
             obj.n = obj.ti+2;% number of state
+            obj.u = zeros(N,1);
         end
         function init(obj,I,R)
             obj.I = I;
@@ -96,12 +97,13 @@ classdef SIR_model < handle
             obj.S=obj.S & ~R;% update S agents
             obj.I=obj.I & ~R;% update I agents
             obj.R=obj.R | R;% update R agents
+            obj.u = u;
         end
         function next_step_func(obj,u,E)
             %   next_step_func : function to calculate next state
             %       [usage] 
-            %          xn = next_step_func(xc, u);
-            %       where xn : next state, xc : current state, u : inputs
+            %          next_step_func(u, E);
+            %       where u : inputs, E : edge matrix
             obj.transition_to_R(u);
             obj.calc_v(E);
             obj.I(find(obj.x(obj.ti+1:obj.ti+2:end)))=0;
@@ -122,13 +124,13 @@ classdef SIR_model < handle
             hold on
             [X,Y]=meshgrid(1:nx+1,1:ny+1);
             if isfield(W,"S")||isprop(W(1),"S")%(length(W)==1)
-                figure=surf(X,Y,[reshape(0*W.S+1*W.I+2*W.R,[nx,ny]),0*ones(ny,1);0*ones(1,nx+1)]);hold on;
-                mycmap=[0 1 0;1 0 0;0.5 0.5 0.5]; %[Green;Red;Gray];
+                figure=surf(X,Y,[reshape(0*W.S+1*W.I+2*W.R+3*W.u,[nx,ny]),0*ones(ny,1);0*ones(1,nx+1)]);hold on;
+                mycmap=[0 1 0;1 0 0;0.5 0.5 0.5;0 0 1]; %[Green;Red;Gray];
                 cmin=0;
-                cmax=2;
+                cmax=3;
                 caxis([cmin cmax]);
                 colormap(mycmap);
-                colorbar('Ticks',[0,1,2,3],'TickLabels',{'Not burn','Burning','Extinct'})
+                colorbar('Ticks',[0,1,2,3],'TickLabels',{'Not burn','Burning','Extinct','Extincting'})
             else
                 figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
             end
@@ -162,7 +164,7 @@ classdef SIR_model < handle
             end
             %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
             %make_animation(find(logger.k),1,@(k,~) obj.draw_state(nx,ny,reshape(0*logger.S(:,k)+1*logger.I(:,k)+2*logger.R(:,k),[nx,ny])),@()[]);
-            loggerk = @(k) struct("S",logger.S(:,k),"I",logger.I(:,k),"R",logger.R(:,k));
+            loggerk = @(k) struct("S",logger.S(:,k),"I",logger.I(:,k),"R",logger.R(:,k),"u",logger.u(:,k));
             if filename==""
                 F=make_animation(find(logger.k),1,@(k,~) obj.draw_state(nx,ny,loggerk(k)),@()[],output);
             else

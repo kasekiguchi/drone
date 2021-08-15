@@ -11,7 +11,6 @@ function [E,W] = make_grid_graph(nx,ny,gen)
 N = nx*ny;
 [X,Y]=meshgrid(1:nx,1:ny);
 W = gen(X,Y);
-W = W/(max(W,[],'all'));% maxの係数によって燃え広がる速さをチューニングできる．
 N1 = ones(N,1);
 W1 = spdiags(N1,-(ny+1),N,N);W1(1:ny,:)=0;W1(ny+1:ny:N,:)=0;
 W2 = spdiags(N1,-ny,N,N);W2(1:ny,:)=0;
@@ -26,5 +25,10 @@ W9 = (W1(1:N,1:N)|W2(1:N,1:N)|W3(1:N,1:N)|W4(1:N,1:N)|W5(1:N,1:N)|W6(1:N,1:N)|W7
 W10 = reshape(W,[N,1]);
 
 E = W9.*W10;% この計算の遅さは仕方がない
+maxW = max(W,[],'all');
+if maxW > 1
+    W = W/maxW;
+    E = E/maxW;
+end
 end
 
