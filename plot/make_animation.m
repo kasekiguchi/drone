@@ -40,6 +40,7 @@ for k = kspan
     base_fig();
     
     fig(k,span);
+    title(strcat("Time : ",string(k)));
     % update screen
     drawnow %limitrate
     switch output
