@@ -33,7 +33,7 @@ W10 = reshape(W,[N,1]);
 
 E = W9.*W10;% この計算の遅さは仕方がない
 maxW = max(W,[],'all');
-if maxW > 1
+if maxW > 1 | maxv~=1
     W = (maxv*W/maxW);
     E = (maxv*E/maxW);
 end

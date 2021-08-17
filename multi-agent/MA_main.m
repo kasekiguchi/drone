@@ -34,27 +34,11 @@ Il = 30; % length of I
 h = 0.999; % extinction probability
 %% environment definition
 %[E,W] = make_grid_graph(nx,ny,@(x,y)0.1*ones(size(x))); % flat weight
-% [E,W] = make_grid_graph(nx,ny,@(x,y)rand(size(x))); % random weight
- cx = 30;cy = 50; % biased weight
-% [E,W] = make_grid_graph(nx,ny,@(x,y)(-abs(x-cx).^(1.1)+1.3*max(cx,nx-cx)^(1.1)).*(-abs(y-cy).^(1.1)+1.3*max(cy,ny-cy)^(1.1)));
-[E,W] = make_grid_graph(nx,ny,@(x,y) 1.3*max(cx,nx-cx)^(1.1)*1.3*max(cy,ny-cy)^(1.1)*rand(size(x))+(-abs(x-cx).^(1.1)+1.3*max(cx,nx-cx)^(1.1)).*(-abs(y-cy).^(1.1)+1.3*max(cy,ny-cy)^(1.1)),0.05);
+% [E,W] = make_grid_graph(nx,ny,@(x,y)rand(size(x)),0.07); % random weight
+cx = 80;cy = 80; % biased weight
+[E,W] = make_grid_graph(nx,ny,@(x,y) 1.3*max(cx,nx-cx)^(1.1)*1.3*max(cy,ny-cy)^(1.1)*(0.6+0.4*rand(size(x)))+(-abs(x-cx).^(1.1)+1.3*max(cx,nx-cx)^(1.1)).*(-abs(y-cy).^(1.1)+1.3*max(cy,ny-cy)^(1.1)),0.04);
 %[i,j,v]=find(E);
 %G=digraph(i,j,v); % グラフ構造は自明なので描画するメリットはなさそう．
-%% model definition
-map = SIR_model(N,Il,h);
-% init_fx=(floor(nx/2)+20:floor(nx/2)+30)';% Case 4 : V better
-% init_fy=floor(ny/2)+20:floor(ny/2)+25;
-% init_fx=(floor(nx/2)-30:floor(nx/2)-20)';% Case 4 : V2 better
-% init_fy=floor(ny/2)-25:floor(ny/2)-20;
-init_fx=(floor(nx/2)-5:floor(nx/2)+5)';
-init_fy=floor(ny/2)-0:floor(ny/2)+5;
-% init_fx=(floor(nx/2):floor(nx/2))';
-% init_fy=floor(ny/2):floor(ny/2);
-init_I = zeros(N,1);
-init_I(ny*(init_fx-1)+init_fy) = 1;
-init_R = zeros(N,1);
-map.init(init_I,init_R);
-%map.draw_state(nx,ny);
 %% simulation setting
 %map.draw_state(nx,ny,W);
 unum = 10; % 消火点の数
@@ -62,6 +46,7 @@ ke = 200; % シミュレーションステップ
 % 手法選択
 fMethod = "APR"; % Alt Page Rank
 %fMethod = "Weight"; % 重み行列
+map = model_init(N,Il,h,nx,ny,fFPosition);
 %% Targetを直接消火
 clear logger
 logger.k=zeros(1,ke);
@@ -89,7 +74,7 @@ Eig % eigenvalue must be 0 : alt page rank は０固有値に対応した左固�
 %     disp("E'/eigs(E,1)を採用");
 %     pause(0.5);
 % end
- V=V2;
+V=V2;
 if fMethod=="APR"
     % alt page rank に従う場合
     X = V;
@@ -116,9 +101,9 @@ for k = 1:ke
     %profile on
     U = sparse(u,1,1,N,1);
     map.next_step_func(U,E);% map 更新
-    k % 進捗確認    
+    k % 進捗確認
     %profile viewer
-
+    
     % log
     logger.k(k)=k;
     logger.S(:,k) = map.S(:);
@@ -129,22 +114,54 @@ end
 %% graphs
 map.draw_state(nx,ny,map.loggerk(logger,5));
 %% animations
-% if ~isfield(logger,"P")
-%     logger.P = logger.S*0;
-% end
 %map.draw_movie(logger,nx,ny,1,"Extinct_high_weighted_grid_random");
 %map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
-%M=map.draw_movie(logger,nx,ny,2);
-map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
+M=map.draw_movie(logger,nx,ny,2);
+%map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
 %map.draw_movie(logger,nx,ny,1,"Extinct_Weight_Astar_BiasRandom");
 
-%% 消火エージェント考慮
+%% Simulation setting
+unum = 10; % 消火点の数
+ke = 200; % シミュレーションステップ
+% 手法選択
+fMethod = "APR"; % Alt Page Rank
+%fMethod = "Weight"; % 重み行列
 vi = 5; % 消火の必要がない部分を飛ばす距離
 %map.draw_state(nx,ny,map.loggerk(logger,ke));
-%% Alt Page Rank + A star
-clear logger Dpt
-T = sparse(N,1);%初期化
-U = sparse(N,1);%初期化
+fFPosition = 0;
+clear Logger
+for k = 1:100   
+    map = model_init(N,Il,h,nx,ny,fFPosition);
+    [K(k),Logger(k)] = Astar_SIR(N,ke,nx,ny,map,unum,E,W,fMethod,Il,vi);
+end
+%% model init
+function map = model_init(N,Il,h,nx,ny,fFPosition)
+% fFPositionに応じてmap 中心から見て４象限に火災エリアの初期値配置
+map = SIR_model(N,Il,h);
+switch fFPosition
+    case 0
+        init_fx=(floor(nx/2)-5:floor(nx/2)+5)';
+        init_fy=floor(ny/2)-0:floor(ny/2)+5;
+    case 1
+        init_fx=(floor(nx/2)+20:floor(nx/2)+30)';% Case 4 : V better
+        init_fy=floor(ny/2)+20:floor(ny/2)+25;
+    case 2
+        init_fx=(floor(nx/2)-30:floor(nx/2)-20)';% Case 4 : V better
+        init_fy=floor(ny/2)+20:floor(ny/2)+25;
+    case 3
+        init_fx=(floor(nx/2)-30:floor(nx/2)-20)';% Case 4 : V2 better
+        init_fy=floor(ny/2)-25:floor(ny/2)-20;
+    case 4
+        init_fx=(floor(nx/2)+20:floor(nx/2)+30)';% Case 4 : V better
+        init_fy=floor(ny/2)-25:floor(ny/2)-20;
+end
+init_I = zeros(N,1);
+init_I(ny*(init_fx-1)+init_fy) = 1;
+init_R = zeros(N,1);
+map.init(init_I,init_R);
+end
+%% 消火エージェント考慮
+function [k,logger] = Astar_SIR(N,ke,nx,ny,map,unum,E,W,fMethod,Il,vi)
 logger.k=zeros(1,ke);
 logger.S(:,1) = map.S(:);
 logger.I(:,1) = map.I(:);
@@ -171,7 +188,7 @@ else
     Xm = min(W,[],'all');
 end
 k = 1;
-while (k <= ke) & sum(find(map.I)) 
+while (k <= ke) & sum(find(map.I))
     fi= find(map.I);% 燃えているマップのインデックス
     
     % target point t 選択：重要度の高い順にtunum個選択
@@ -189,7 +206,7 @@ while (k <= ke) & sum(find(map.I))
     tmpX = X(fi2)+(Il-map.I(fi2));
     % 燃えているマップの重要度：燃えはじめの方が重要度が高い
     % X = V, Wどちらでも縦ベクトルになる．
-
+    
     u = zeros(tunum,1);% extinguish input indices
     for iu=lt+1:tunum
         [~,I]= max(tmpX);
@@ -238,7 +255,7 @@ while (k <= ke) & sum(find(map.I))
     logger.U(:,k) = map.U(:);
     k = k+1;
 end
-
+end
 %% local function
 function O = performance(V,minV,I,X)
 % V > 1
