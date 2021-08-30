@@ -105,6 +105,7 @@ end
     ylabel('Position {\it y} [m]');
     axis square;
     legend('Location','eastoutside');
+    cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
     exportgraphics(gcf,'initial position trace birds.eps');
 %     %% エージェント間の距離
 %     figure(8)
@@ -144,7 +145,7 @@ end
         xsum = xsum + x(i,1);
         ysum = ysum + y(i,1);
     end
-    v = VideoWriter('tracebirds.avi','MPEG-4');
+    v = VideoWriter('tracebirds','MPEG-4');
     open(v);
     while t <= numel(logger.Data.t)
         clf(figure(9)); 
