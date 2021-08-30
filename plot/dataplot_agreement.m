@@ -91,6 +91,7 @@ end
     ylabel('Position {\it y} [m]');
     axis square;
     legend('Location','best');
+    cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
     exportgraphics(gcf,'Initial position offset.eps');
         
     %% エージェント間の距離
@@ -133,7 +134,7 @@ end
     end
     xave = xsum/N;
     yave = ysum/N;
-    v = VideoWriter('goui_gun.avi');
+    v = VideoWriter('goui_gun','MPEG-4');
     open(v);
     while t <= numel(logger.Data.t)
         clf(figure(9)); 
