@@ -23,9 +23,9 @@ classdef DataPlot<handle
 %     "MapMovie",
 %     "MapAndPreMapMovie",
 %     "Entropy",
-    "RMSE",
-    "AllTureAndEst",
-    "VWTureAndEst",
+%     "RMSE",
+%     "AllTureAndEst",
+%     "VWTureAndEst",
 %     "ContEval",
 %     "TrajectoryRMSE",
 %     "ObserveSubFIM"

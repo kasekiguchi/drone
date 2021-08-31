@@ -1,6 +1,8 @@
-classdef TrackingWaypointPath < REFERENCE_CLASS
-    % リファレンスを生成するクラス
+classdef TrackWpointPathForMPC < REFERENCE_CLASS
+    % リファレンスを生成するクラス,
+    % TrackingWayPointPathForMPC
     % 目標点に向かって一定速度で移動する軌道を生成
+    % mpcのホライゾンすうと合わせる必要あり．
     properties
         WayPoint
         Targetv
@@ -11,11 +13,12 @@ classdef TrackingWaypointPath < REFERENCE_CLASS
         PreTrack
         dt
         WayPointNum
+        Holizon
         self
     end
     
     methods
-        function obj = TrackingWaypointPath(self,varargin)
+        function obj = TrackWpointPathForMPC(self,varargin)
             % 【Input】 map_param ,
             %  目標点の行列を受け取る．それに対応した目標速度を受け取る．
             %　目標点と速度に応じて参照軌道を作成，estimatorの値から収束判定をする．
@@ -26,15 +29,18 @@ classdef TrackingWaypointPath < REFERENCE_CLASS
             obj.Targetv = param{1,2};
             obj.Flag = 1;%WayPointのFlag管理
             obj.Convergencejudge = param{1,3};
-            obj.PreTrack = param{1,4}.p;
+            obj.PreTrack = [param{1,4}.p;param{1,4}.q;param{1,4}.v;param{1,4}.w];
+            obj.Holizon = param{1,5};
             obj.dt = obj.self.model.dt;
             obj.WayPointNum = length(obj.WayPoint);
-            obj.result.state=STATE_CLASS(struct('state_list',["xd"],'num_list',[2]));%x,y
+            obj.result.state=STATE_CLASS(struct('state_list',["xd"],'num_list',[5]));%x,y,theta,v,w
         end
         
         function  result= do(obj,param)
             %---推定器からデータを取得---%
-            EstData = obj.self.estimator.(obj.self.estimator.name).result.state.p;%treat as a colmn vector 
+            EstData = ...
+                [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
+                obj.self.estimator.(obj.self.estimator.name).result.state.v;obj.self.estimator.(obj.self.estimator.name).result.state.w];%treat as a colmn vector 
             %----------------------------%
             
             %---judgement of convergence for estimate position---%
@@ -45,21 +51,39 @@ classdef TrackingWaypointPath < REFERENCE_CLASS
                 end
             end
             %----------------------------------------------------%
-            
+            obj.TrackingPoint = zeros(5,obj.Holizon);%set data size[x ;y ;theta]
+
             %---judgement of covergence for Target Position---%
             if (obj.PreTrack(1) - obj.WayPoint(obj.Flag,1))^2 + (obj.PreTrack(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.Convergencejudge
-                obj.TrackingPoint = obj.WayPoint(obj.Flag,:)';
+                obj.TrackingPoint(:,1) = obj.WayPoint(obj.Flag,:)';
             %-------------------------------------------------%
             else
-                %---Make Tracking Point---%
+                %---Make first Tracking Point---%
                 Tracktheta = atan2(obj.WayPoint(obj.Flag,2)- obj.PreTrack(2),obj.WayPoint(obj.Flag,1) - obj.PreTrack(1));
-                obj.TrackingPoint = obj.PreTrack + [obj.Targetv*obj.dt*cos(Tracktheta);obj.Targetv*obj.dt*sin(Tracktheta)];
+                obj.TrackingPoint(1:2,1) = obj.PreTrack(1:2,1) + [obj.Targetv*obj.dt*cos(Tracktheta);obj.Targetv*obj.dt*sin(Tracktheta)];
+                obj.TrackingPoint(3:5,1) = [obj.WayPoint(obj.Flag,3);obj.Targetv;obj.WayPoint(obj.Flag,5)];
                 %-------------------------%
             end
-
+            
+            %---Tracking point of after 2steps---%
+            for i = 2:obj.Holizon
+                if (obj.TrackingPoint(1,i-1) - obj.WayPoint(obj.Flag,1))^2 + (obj.TrackingPoint(2,i-1) - obj.WayPoint(obj.Flag,2))^2 <= obj.Convergencejudge
+                obj.TrackingPoint(:,i) = obj.WayPoint(obj.Flag,:)';
+            %-------------------------------------------------%
+            else
+                %---Make first Tracking Point---%
+                Tracktheta = atan2(obj.WayPoint(obj.Flag,2)- obj.TrackingPoint(2,i-1),obj.WayPoint(obj.Flag,1) - obj.TrackingPoint(1,i-1));
+                obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(Tracktheta);obj.Targetv*obj.dt*sin(Tracktheta)];
+                obj.TrackingPoint(3:5,i) = [obj.WayPoint(obj.Flag,3);obj.Targetv;obj.WayPoint(obj.Flag,5)];
+                %-------------------------%
+                end
+            end
+            %------------------------------------%
+            
             obj.result.state = obj.TrackingPoint;%treat as a colmn vector
+            obj.self.reference.result.state = obj.TrackingPoint;
             %---Get Data of previous step---%
-            obj.PreTrack = obj.TrackingPoint;
+            obj.PreTrack = obj.TrackingPoint(:,1);
             %-------------------------------%
             %resultに代入
             result=obj.result;

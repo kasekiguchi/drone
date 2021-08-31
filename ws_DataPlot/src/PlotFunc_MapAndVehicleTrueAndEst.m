@@ -45,20 +45,20 @@ ax = gca;
 
 tmp_max = max(obj.logger.Data.agent{1,Index});
 tmp_min = min(obj.logger.Data.agent{1,Index});
-xmin = min(tmp_min(:,1,:));
-% xmin = -30;
+% xmin = min(tmp_min(:,1,:));
+xmin = -30;
 dx = 10;
-xmax = max(tmp_max(:,1,:));
-% xmax = 70;
-ymin = min(tmp_min(:,2,:));
+% xmax = max(tmp_max(:,1,:));
+xmax = 70;
+% ymin = min(tmp_min(:,2,:));
+ymin = -30;
 dy = 10;
-ymax = max(tmp_max(:,2,:));
+% ymax = max(tmp_max(:,2,:));
+ymax = 30;
 
-xlim([xmin xmax]);ylim([ymin ymax]);
-xticks([xmin:dx:xmax]);yticks([ymin:dy:ymax]);
-pbaspect([abs(xmin -xmax) abs(ymin -ymax) 1]);
 
-Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.1);
+
+Wall = plot(p_Area,'FaceColor','red','FaceAlpha',0.1);
 for i=1:MapDimx
     PlotMap = plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',5,'Color','r');
 end
@@ -67,21 +67,24 @@ PlantFinalState = PlantData(:,end);
 PlantFinalStatesquare = PlantFinalState + 2.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
 PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * PlantqData(end) / pi, PlantData(:,end)');
-PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor','green','FaceAlpha',0.1);
+PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %modelFinalState
 EstFinalState = EstData(:,end);
 EstFinalStatesquare = EstFinalState + 2.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 EstFinalStatesquare =  polyshape( EstFinalStatesquare');
 EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * EstqData(end) / pi, EstData(:,end)');
-PlotFinalEst = plot(EstFinalStatesquare,'FaceColor','green','FaceAlpha',0.1);
+PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 %
-PlotPlant = plot(PlantData(1,:),PlantData(2,:),'Color',[0 0.4470 0.7410],'LineWidth',5);
-PlotEst = plot(EstData(1,:),EstData(2,:),'Color',[0.8500 0.3250 0.0980],'LineWidth',4);
+PlotPlant = plot(PlantData(1,:),PlantData(2,:),'Color',[0.5020,0.5020,0.5020],'LineWidth',5);
+PlotEst = plot(EstData(1,:),EstData(2,:),'Color',[0.0745,0.6235,1.0000],'LineWidth',4);
 
-legend([PlotPlant PlotEst PlotFinalPlant PlotFinalEst Wall PlotMap],'Plant Trajectory','Estimated Trajectory','Plant','Estimate','Environment','EstimateMap','Location','northoutside','NumColumns',3);
+legend([PlotPlant PlotEst PlotFinalPlant PlotFinalEst Wall PlotMap],'Plant Trajectory','Estimated Trajectory','Plant','Estimate','Wall','EstimateMap','Location','northoutside','NumColumns',2);
 %setting
 grid on;
-axis equal;
+xlim([xmin xmax]);ylim([ymin ymax]);
+xticks([xmin:dx:xmax]);yticks([ymin:dy:ymax]);
+pbaspect([abs(xmin -xmax) abs(ymin -ymax) 1]);
+% axis equal;
 % xlim([-50 200]);ylim([-20 20]);
 xlabel('x [m]');ylabel('y [m]');
 % xticks([-50:20:200]);yticks([-20:20:20])

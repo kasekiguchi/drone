@@ -33,25 +33,33 @@ if Flag
         tmpenv(ei) = polyshape(obj.logger.Data.agent{1,Index}(:,:,ei));
     end
     p_Area = union(tmpenv(:));
+    %% reference Data
+    tmp = regexp(obj.logger.items,'reference.result.state.p');
+    tmp = cellfun(@(c) ~isempty(c),tmp);
+    Index = find(tmp);
+    RefData = cell2mat(arrayfun(@(N) obj.logger.Data.agent{N,Index}(:,1),1:size(obj.logger.Data.t,1),'UniformOutput',false));
     %% Movie plot
     msi = size(obj.logger.Data.t,1);
     %Map plot start
-    figure(FigNum)
+    ff = figure(FigNum);
+    ff.WindowState = 'maximized' ;
     hold on;
     % Animation Loop
     mo_t = 1;
     tmp_max = max(obj.logger.Data.agent{1,Index});
     tmp_min = min(obj.logger.Data.agent{1,Index});
     % xmin = min(tmp_min(:,1,:));
-    xmin = -50;
+    xmin = -10;
     dx = 10;
     % xmax = max(tmp_max(:,1,:));
-    xmax = 50;
-    ymin = min(tmp_min(:,2,:));
+    xmax = 150;
+    %     ymin = min(tmp_min(:,2,:));
+    ymin = -25;
     dy = 10;
-    ymax = max(tmp_max(:,2,:));
+%     ymax = max(tmp_max(:,2,:));
+    ymax = 25;
     
-    v = VideoWriter(strcat('SLAM_MAPplot.avi'));
+    v = VideoWriter(strcat('SLAM_MAPplot.mp4'),'MPEG-4');
     open(v);
     while mo_t <= msi
         clf(figure(FigNum));
@@ -62,14 +70,14 @@ if Flag
         ax.FontSize = obj.FontSize;
         ax.FontName = obj.FontName;
         ax.FontWeight = obj.FontWeight;
-
+        
         xlim([xmin xmax]);ylim([ymin ymax]);
         xticks([xmin:dx:xmax]);yticks([ymin:dy:ymax]);
         pbaspect([abs(xmin -xmax) abs(ymin -ymax) 1]);
         %     set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize', 15);
         ylabel('\sl y \rm [m]','FontSize',15);
-
+        
         %plot
         %     logger.Data.agent{mot,4}(:,1)
         %------estimation map plot-------------%
@@ -81,35 +89,38 @@ if Flag
             PlotMap = plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',2,'Color','r');
         end
         %--------------------------------------%
-        %plant plot%
+        %---plant plot---%
         tmp_plant_square = PlantData(:,mo_t) + [1,1.5,1,-1,-1;1,0,-1,-1,1];
         plant_square =  polyshape( tmp_plant_square');
         plant_square =  rotate(plant_square,180 * PlantqData(mo_t) / pi, PlantData(:,mo_t)');
-        PlotPlant = plot(plant_square);
-        %-------------%
-        %model plot%
+        PlotPlant = plot(plant_square,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+        %----------------%
+        %---model plot---%
         tmp_model_square = EstData(:,mo_t) + [1,1.5,1,-1,-1;1,0,-1,-1,1];
         model_square =  polyshape( tmp_model_square');
         model_square =  rotate(model_square,180 * EstqData(mo_t) / pi, EstData(:,mo_t)');
-        PlotEst = plot(model_square);
-        %-------------%
+        PlotEst = plot(model_square,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+        %----------------%
+        %---ref plot---%
+        Plotref = plot(RefData(1,mo_t),RefData(2,mo_t),'Color',[0.8588,0.3882,0.2314],'Marker','o','LineWidth',2);
+        %--------------%
         Environment = plot(p_Area,'FaceColor','red','FaceAlpha',0.1);% true map plot
         Sensor = plot(polybuffer([PlantData(1,mo_t),PlantData(2,mo_t)],'points',40),'FaceColor','blue','FaceAlpha',0.1);%Raser plot
         %Trajectory plot%
-%         addpoints(PlantTra,);
-%         addpoints(EstTra,EstData(1,mo_t),EstData(2,mo_t));
-        TraP = plot(PlantData(1,1:mo_t),PlantData(2,1:mo_t),'r-');
-        TraE = plot(EstData(1,1:mo_t),EstData(2,1:mo_t),'b-');
+        %         addpoints(PlantTra,);
+        %         addpoints(EstTra,EstData(1,mo_t),EstData(2,mo_t));
+        TraP = plot(PlantData(1,1:mo_t),PlantData(2,1:mo_t),'Color',[0.5020,0.5020,0.5020],'LineStyle','-','LineWidth',4);
+        TraE = plot(EstData(1,1:mo_t),EstData(2,1:mo_t),'Color',[0.0745,0.6235,1.0000],'LineStyle','-','LineWidth',2);
         %---------------%
-        legend([PlotPlant PlotEst Environment Sensor PlotMap],'Plant','Estimate','Environment','Sensor area','Estimate Map','Location','northoutside','NumColumns',3);
+        legend([PlotPlant PlotEst Plotref TraP TraE Environment Sensor PlotMap],'Plant','Estimate','reference','Plant Trajectory','Estimate Trajectory','Environment','Sensor area','Estimate Map','Location','northoutside','NumColumns',4);
         hold off
-        pause(16 * 1e-2);
+        pause(16 * 1e-3);
         mo_t = mo_t+1;
         frame = getframe(figure(FigNum));
         writeVideo(v,frame);
     end
     close(v);
-    movefile(strcat('SLAM_MAPplot.avi'),obj.SaveDateStr);
+    movefile(strcat('SLAM_MAPplot.mp4'),obj.SaveDateStr);
     disp('simulation ended')
     FigNum = FigNum + 1;
 end

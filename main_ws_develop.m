@@ -20,16 +20,13 @@ if fExp
     dt = 0.025; % sampling time
 else
     dt = 0.1; % sampling time
-    %     dt = 0.025;
-    %     dt = 0.010;
-    %     dt = 0.001;
 end
 sampling = dt;
 ts=0;
 if fExp
     te=1000;
 else
-    te=100;
+    te=60;
 end
 %% initialize
 initial(N) = struct;
@@ -77,17 +74,22 @@ for i = 1:N
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
+    
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
-    WayPoint = [80,0;80,70];
     velocity = 1;
+    
+    WayPoint = [200,0,0,0,0];%[x y theta v omaga]
     convjudge = 0.5;
-    agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
+    Holizon = 10;
+%     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
+    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,convjudge,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[]; 
 %         agent(i).set_property("controller",Controller_LocalPlanning(i,dt));
-        agent(i).set_property("controller",Controller_TrackingFB(i,[1,0;0,1],dt));
+agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));
+%         agent(i).set_property("controller",Controller_TrackingFB(i,[1,0;0,1],dt));
 %     agent(i).set_property( "controller", Controller_LocalPlanningForODV(i,dt) );
 % agent(i).set_property( "controller", Controller_LocalPlanningForODVADI(i,dt) );
 %     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
@@ -102,7 +104,7 @@ end
 %% initialize
 clc
 LogData=[
-    %     "reference.result.state.p",
+        "reference.result.state.p",
     "estimator.result.state.p",
     "estimator.result.state.q",
     "estimator.result.state.v",
@@ -111,6 +113,9 @@ LogData=[
     "plant.state.w",
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
+    "reference.result.state.xd",
+    "controller.result.fval",
+    "controller.result.exitflag",
     %     "controller.result.Eval",
     %     "estimator.result.PreMapParam.x",
     %     "estimator.result.PreMapParam.y",
@@ -121,8 +126,8 @@ LogData=[
     ];
 SubFunc = [
 %     "ContEval",
-% %     "TrajectoryErrorDis",
-%     "ObserbSubFIM",
+%     "TrajectoryErrorDis",
+    "ObserbSubFIM",
     ];
 if ~isempty(agent(1).plant.state)
     LogData=["plant.state.p";LogData]; % 実制御対象の位置
@@ -179,6 +184,7 @@ while round(time.t,5)<=te
         %Referance Setting
 %         param(i).reference.GlobalPlanning = {1};
         param(i).reference.TrackingWaypointPath = {1};
+        param(i).reference.TrackWpointPathForMPC = {1};
         param(i).reference.point={FH,[2;1;0.5],time.t};
         
         for j = 1:length(agent(i).reference.name)
@@ -268,7 +274,7 @@ while round(time.t,5)<=te
 %                             else
 %                                 agent(i).input = [0,0];
 %                             end
-        
+%         
 % if time.t<=0.5
 %     agent(i).input = [0.4272/1.2,0.9042/1.2,2 * pi/kakudo];
 % elseif time.t>0.5&&time.t<=1.1
@@ -332,8 +338,8 @@ end
 %profile viewer
 %% dataplot 
 close all;
-SaveOnOff = true;
-Plots = DataPlot(logger,SaveOnOff);
+SaveOnOff = false;
+Plots = DataPlot(Logger,SaveOnOff);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);

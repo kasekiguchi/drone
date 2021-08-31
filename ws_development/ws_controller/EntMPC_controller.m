@@ -29,7 +29,7 @@ classdef EntMPC_controller <CONTROLLER_CLASS
             % obj.options.OptimalityTolerance    = 1.e-12;%1 次の最適性に関する終了許容誤差。
             % obj.options.PlotFcn                = [];
             %---MPCパラメータ設定---%
-            obj.param.H  = 10;                % モデル予測制御のホライゾン
+            obj.param.H  = 5;                % モデル予測制御のホライゾン
             obj.param.dt = 0.25;              % モデル予測制御の刻み時間
             obj.param.input_size = self.model.dim(2);
             obj.param.state_size = self.model.dim(1);

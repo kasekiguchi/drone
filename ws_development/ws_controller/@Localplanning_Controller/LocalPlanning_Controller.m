@@ -81,6 +81,15 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
             AssoFai = Measured.angles(AssociationAvailableIndex);
             %----------------------------------------------------------------------------------%
             
+            %---Get Reference data---%
+            Ref = obj.self.reference.(obj.self.reference.name(1)).result.state;
+            %------------------------%
+            
+            %---subtract ref---%
+            Subtheta = atan2(Ref(2) - RobotState(2),Ref(1) - RobotState(1));
+            Subvel = sqrt((Ref(1)-RobotState(1))^2 + (Ref(2)-RobotState(2))^2) * cos(Subtheta - RobotState(3));
+            %------------------%
+            
             %---最適化計算用のパラメータを算出---%
             params.dis = Dis;%wall distanse
             params.alpha = Alpha;%wall angle
@@ -89,10 +98,12 @@ classdef LocalPlanning_Controller <CONTROLLER_CLASS
 %             params.t = %control tic
             params.DeltaOmega = Deltaomega;
             params.t = obj.t;
+%             params.v = Subvel;
             params.v = 1;
             params.k1 = 0.5;
-            params.k2 = 5;
+            params.k2 = 1;
             params.k3 = 1;
+            params.R = obj.self.estimator.(obj.self.estimator.name).R;
 %             params.Oldw = oldinput(2);
             params.Oldw = obj.self.estimator.result.state.w;
             params.ipsiron = 1e-5;
