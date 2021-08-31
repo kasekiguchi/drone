@@ -62,6 +62,7 @@ classdef SIR_model < handle
             obj.S(find(I+R))=0;
             obj.x = (obj.x & kron(~I,ones(obj.n,1))) + kron(I,obj.Ii);
             obj.x = sparse((obj.x & kron(~R,ones(obj.n,1))) + kron(R,obj.Ri));
+            obj.U = sparse(obj.N,1);
         end
         function calc_v(obj,E)
             % E : edge matrix
@@ -181,6 +182,31 @@ classdef SIR_model < handle
                 W = struct("S",logger.S(:,k),"I",logger.I(:,k),"R",logger.R(:,k),"U",logger.U(:,k),"P",logger.P(:,k));
             else
                 W = struct("S",logger.S(:,k),"I",logger.I(:,k),"R",logger.R(:,k),"U",logger.U(:,k));
+            end
+        end
+        function save(obj,filename,logger)
+            if isstruct(logger)
+                myfield=fieldnames(logger);
+                %tmp = logger(1);
+                for n = 1:length(myfield)
+                    tmp.(myfield{n}) = {logger.(myfield{n})};
+                end
+                save(filename,'-struct','tmp');
+            else
+                save(filename,'logger');
+            end
+        end
+        function Logger=load(obj,filename)
+            data=load(filename);
+            F = fieldnames(data);
+            if length(F)==1
+                Logger = data.(F{1});
+            else
+                for i = 1:numel(data.(F{1}))
+                    for n = 1:length(F)
+                        Logger(i).(F{n})=data.(F{n}){i};
+                    end
+                end
             end
         end
     end
