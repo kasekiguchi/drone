@@ -1,17 +1,17 @@
 function Model = Model_Drone(id,dt,type,initial,varargin)
 %% model class demo : 
-% "Discrete" "Point mass"    "Quat 13"    "point2"    "RPY 12"    "R 18"    "Quat 17";
+% "Discrete";
 if ~isempty(varargin)
     Setting = varargin{1};
 end
 Setting.dt = dt;
 Setting.param.A =eye(3);             %離散かしたもの
 Setting.param.B = eye(3);
-Model.type="Drone_Model"; % class name
-Model.name="discrete"; % print name
+Model.type="Discrete_Model"; % class name
+Model.name="tracebirds_drone"; % print name
 Setting.dim = [3,3,0];
 Setting.input_channel = ["p","q"];
-Setting.method = get_model_name("Drone_Pestbirds"); % model dynamicsの実体名
+Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
 Setting.initial = initial;%struct('p',[0;0;0]);
 Setting.state_list = ["p"];
 Setting.num_list = [3];
