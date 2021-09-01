@@ -11,26 +11,12 @@ if tex==1
 %             agent(i).set_reference(Reference);
         else
             clear Reference
-            Reference.type=["trace_birds_pestbirds"];
-            Reference.name=["trace_pestbirds"];
-            Reference.param={""};
-%             agent(i).set_reference(Reference);
-        end
-elseif tex==2
-        if id>=Nb+1%最終機体は犬になる予定なのでsheep_refはない
-            clear Reference
-            Reference.type=["trace_birds_drone"];
-            Reference.name=["trace_drone"];
-            Reference.param={""};
-%             agent(i).set_reference(Reference);
-        else
-            clear Reference
             Reference.type=["trace_birds_pestbirds_Dis"];
             Reference.name=["trace_pestbirds"];
             Reference.param={""};
 %             agent(i).set_reference(Reference);
         end
-elseif tex==3
+elseif tex==2
         if id>=Nb+1%最終機体は犬になる予定なのでsheep_refはない
             clear Reference
             Reference.type=["trace_birds_drone"];
