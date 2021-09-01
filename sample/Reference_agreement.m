@@ -1,6 +1,8 @@
 function Reference = Reference_agreement(N)
     %% reference class demo
+    % 合意制御の目標隊列
     % reference property をReference classのインスタンス配列として定義
+    % 返し値は配置したい隊列
     clear Reference
     Reference.type=["consensus_agreement"];
     Reference.name=["agreement"];
