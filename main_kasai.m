@@ -9,8 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-% N = 6; % number of agents
-N = 20; %number of all units
+N = 20; % number of agents（if bird_trace system, number of all units）
 Nb = 16; %number of pestbirds
 Na = N - Nb; %number of agents
 fExp = 0 %1：実機　それ以外：シミュレーション
@@ -87,7 +86,7 @@ else
             if i==1
                 initial_position = arranged_position_trace_birds([60;60],N,Nb,0); %害鳥モデル
             end
-            arranged_pos =  initial_position;
+            arranged_pos =  initial_position; %害鳥モデルの初期値
             initial(i).p = arranged_pos(:,i);
             initial(i).q = [1;0;0;0];
             initial(i).v = [0;0;0];
@@ -122,7 +121,7 @@ for i = 1:N
     %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
 %     agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-    %agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+%     agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     if i<=Nb
         agent(i).set_model(Model_PestBirds(i,dt,'model',initial(i))); % 害鳥のモデル
     else
@@ -179,9 +178,9 @@ for i = 1:N
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     if agent(1).model.name =='Pestbirds_model'
-        agent(i).set_property("reference",Reference_tracebirds(i,Nb,3)); % 害鳥追跡用
-    else
         agent(i).set_property("reference",Reference_tracebirds(i,Nb,2)); % 害鳥追跡用
+    else
+        agent(i).set_property("reference",Reference_tracebirds(i,Nb,1)); % 害鳥追跡用
     end
     
 %     if fExp == 1
