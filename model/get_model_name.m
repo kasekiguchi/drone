@@ -17,9 +17,7 @@ function model_full_name = get_model_name(sn)
         case "Load_Euler"
             model_full_name = "euler_with_load_model";
         case "PestBirds"
-            model_full_name = "pestbirds_linear_model";
-        case "Drone_Pestbirds"
-            model_full_name = "discrete_linear_model";
+            model_full_name = "pestbirds_linear_model";% 害鳥の動作用
 %         "euler","euler_angle_model",12;
 %         "rodrigues","rodrigues_parameter_model",12;
     end
