@@ -132,7 +132,6 @@ for i = 1:N
     if fExp%isa(agent(i).plant,"Lizard_exp")
         agent(i).input_transform=[];
 %         agent(i).set_property("input_transform",InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-        agent(i).set_property("input_transform",typical_InputTransform_Thrust2Throttle_drone()); % 害鳥追跡用
     end
     %agent.plant.espr.sendData(Pw(1,1:16));
     % for quat-model plant with discrete control model
@@ -177,12 +176,7 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
-    if agent(1).model.name =='Pestbirds_model'
-        agent(i).set_property("reference",Reference_tracebirds(i,Nb,2)); % 害鳥追跡用
-    else
-        agent(i).set_property("reference",Reference_tracebirds(i,Nb,1)); % 害鳥追跡用
-    end
-    
+    agent(i).set_property("reference",Reference_tracebirds(i,Nb)); % 害鳥追跡用
 %     if fExp == 1
 %         if i ==1
 %             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
@@ -249,11 +243,6 @@ time.t = ts;
 % mparam.occlusion.target={[1],[1]};
 % mparam.marker_num = 20;
 mparam=[]; % without occulusion
-%% 初期設定とか
-% other_state = cell(1,N);
-% for i=1:N
-%     other_state{1,i}=[agent(i).state];
-% end
 %% main loop
 %profile on
 disp("while ============================")
@@ -333,10 +322,9 @@ w = waitforbuttonpress;
             
             model_param.param=agent(i).plant.param;
             agent(i).do_plant(model_param);
-%             other_state{1,i}=agent(i).estimator.result.state;%位置保存（害鳥追跡用）
         end
         
-%         fig_plot_state(agent,[60;60],N,Nb);%害鳥追跡用
+%         fig_plot_state(agent,[60;60],N,Nb);%害鳥追跡をサンプリング時間で確認する用
         %           agent(1).reference.wall.show(); % 機体の移動を毎時刻表示する
         
         %% logging
