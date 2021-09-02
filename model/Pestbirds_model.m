@@ -1,6 +1,5 @@
 classdef PestBirds_Model < MODEL_CLASS
-    % Wheelchair model
-    % 
+    % Continuous time model
 %     properties
 %         Property1
 %     end
