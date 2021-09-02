@@ -1,4 +1,7 @@
 function dataplot_agreement(logger,N)
+%合意制御のプロット関数
+%引数はログ，全機体数
+%返し値はなく画像を表示，subversionのファイルに.eps形式で画像出力
 %% 行列生成
     t = logger.Data.t;
 for n = 1:numel(logger.Data.t)
