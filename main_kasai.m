@@ -30,7 +30,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=30;
 end
 %% set connector (global instance)
 if fExp
@@ -104,10 +104,10 @@ for i = 1:N
         agent(i).input = [0;0;0;0];
     else
 %         agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-        %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
+%         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
         %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % 牽引物込みのプラントモデル : for sim
-        %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
-        %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
+%         agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
+%         agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
         if i<=Nb
             agent(i) = Drone(Model_PestBirds(i,dt,'plant',initial(i))); % 害鳥のプラントモデル
         else
@@ -116,7 +116,7 @@ for i = 1:N
     end
     %% model
     % set control model
-    %agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
+%     agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
 %     agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
@@ -158,13 +158,13 @@ for i = 1:N
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
     agent(i).estimator=[];
-    %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
-    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
-    %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
-    %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
+%     agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
+%     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
+%     agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %     agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
 %     agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-    %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
     agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %     agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
@@ -196,7 +196,7 @@ for i = 1:N
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[];
-    %agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
+%     agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
 %     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
@@ -218,6 +218,8 @@ LogData=[
     ];
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;     'reference.result.region';  "env.density.param.grid_density"]; % for coverage
+elseif isfield(agent(1).reference,'timeVarying')
+    LogData=[LogData;     "reference.result.state.p"; "estimator.result.state.p"];
 end
 % if ~isempty(agent(1).plant.state)
 %     LogData=["plant.state.p";LogData]; % 実制御対象の位置
@@ -369,7 +371,7 @@ clc
 % dataplot_agreement(logger,N); % 合意制御
 dataplot_tracebirds(logger,N,Nb,[60;60]);%害鳥追跡
 % agent(1).reference.timeVarying.show(logger)
-%logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
+% logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
 %logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
 %logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
