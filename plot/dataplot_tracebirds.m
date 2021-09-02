@@ -175,7 +175,7 @@ end
         for i=1:Nb
             figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
             if t>=2
-                quiver(x(i,t),y(i,t),x(i,t)-x(i,t-1),y(i,t)-y(i,t-1));
+                quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
             end
         end
         for i=Nb+1:N
@@ -200,7 +200,7 @@ end
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
-                    quiver(x(i,t),y(i,t),x(i,t)-x(i,t-1),y(i,t)-y(i,t-1));
+                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
@@ -225,7 +225,7 @@ end
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
-                    quiver(x(i,t),y(i,t),x(i,t)-x(i,t-1),y(i,t)-y(i,t-1));
+                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
@@ -250,7 +250,7 @@ end
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
-                    quiver(x(i,t),y(i,t),x(i,t)-x(i,t-1),y(i,t)-y(i,t-1));
+                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
@@ -275,7 +275,7 @@ end
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
-                    quiver(x(i,t),y(i,t),x(i,t)-x(i,t-1),y(i,t)-y(i,t-1));
+                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
