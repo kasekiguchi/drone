@@ -1,6 +1,7 @@
-classdef pestbirdsController <CONTROLLER_CLASS    
-%     referenceとして渡された状態を返すコントローラ
-%     質点モデルで参照点に自時刻に行く時に利用
+classdef pestbirdsController <CONTROLLER_CLASS   
+%     害鳥追跡用のコントローラ
+%     referenceとして渡された状態を返す
+%     質点モデルで参照点に次時刻に行く時に利用
     properties
         self
         result
@@ -11,27 +12,9 @@ classdef pestbirdsController <CONTROLLER_CLASS
              obj.self = self;
         end
         
-        function u = do(obj,param,~)
-          % param = {state, xd}
-            state=obj.self.model.state;
+        function u = do(obj,~)
             xd=obj.self.reference.result.state;
-            num = obj.self.id;
-            N = obj.param;
-%             F = fieldnames(state);
-%             Ref = copy(state);
-%             for i = 1:length(F)
-%                 if ~strcmp(F{i},'list') && ~strcmp(F{i},'num_list') && ~strcmp(F{i},'type')
-%                     addprop(Ref,F{i});
-%                     if isprop(xd,F{i})
-%                         Ref.(F{i})= xd.(F{i});
-%                     else
-%                         Ref.(F{i})= state.(F{i});
-%                     end
-%                 end
-%             end
-%             obj.result.input = Ref.get();
-
-                obj.result.input = xd.u;
+            obj.result.input = xd.u;
             
             obj.self.input = obj.result.input;
             u = obj.result;
