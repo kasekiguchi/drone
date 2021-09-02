@@ -1,11 +1,14 @@
 function Model = Model_Drone(id,dt,type,initial,varargin)
-%% model class demo : 
+% 離散モデルとは状態数が合わないため改めて害鳥追跡用に作成
+% 引数はエージェント番号，サンプリング時間，モデルかプラントか，初期値
+% 返し値はモデルの型や名前，次元数などの情報
+%% model class demo : Discrete time model
 % "Discrete";
 if ~isempty(varargin)
     Setting = varargin{1};
 end
 Setting.dt = dt;
-Setting.param.A =eye(3);             %離散かしたもの
+Setting.param.A =eye(3);
 Setting.param.B = eye(3);
 Model.type="Discrete_Model"; % class name
 Model.name="tracebirds_drone"; % print name
