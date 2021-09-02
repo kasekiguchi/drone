@@ -1,5 +1,8 @@
 function Model = Model_PestBirds(id,dt,type,initial,varargin)
-% model class demo : quaternion model with 7 states
+% 害鳥用のモデル
+% 引数はエージェント番号，サンプリング時間，モデルかプラントか，初期値
+% 返し値はモデルの型や名前，次元数などの情報
+%% model class demo : quaternion model with 7 states
 if ~isempty(varargin)
     Setting = varargin{1};
 end
