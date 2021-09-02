@@ -1,4 +1,7 @@
 function dataplot_tracebirds(logger,N,Nb,fp)
+%害鳥追跡用のプロット関数
+%引数はログ，ドローンと害鳥の総数，害鳥の総数，畑のエリア
+%返し値はなく画像を表示，subversionのファイルに.eps形式で画像出力
 %% 行列生成
     t = logger.Data.t;
 for n = 1:numel(logger.Data.t)
