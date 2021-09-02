@@ -1,5 +1,5 @@
 function Model = Model_PestBirds(id,dt,type,initial,varargin)
-% model class demo : quaternion model with 13 states
+% model class demo : quaternion model with 7 states
 if ~isempty(varargin)
     Setting = varargin{1};
 end
