@@ -36,10 +36,10 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([5,5,1,1,1]);
-            obj.param.R = diag([1,1]);
-            obj.param.Qf = diag([5,5,1,1,1]);
-            obj.param.T = diag([1,1,1,1,1,1,1,1,1,1]);
+            obj.param.Q = diag([10,10,1,1,1]);
+            obj.param.R = diag([1e-2,1e-5]);
+            obj.param.Qf = diag([30,30,1,1,1]);
+            obj.param.T = diag([5,5,5,5,5,5,5,5,5,5]);
             obj.param.LimFim = 1;
             
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
@@ -47,7 +47,7 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
             obj.model = self.model;
         end
         
-        function u = do(obj,param,~)
+        function result = do(obj,param,~)
             % param = {model, reference}
             % param{1}.state : 推定したstate構造体
             % param{2}.result.state : 参照状態の構造体 % n x Num :  n : number of state,  Num : horizon
@@ -102,7 +102,6 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
             obj.param.alpha = Alpha;
             obj.param.phi = AssoFai;
             obj.param.t = obj.self.model.dt;
-%             obj.param.NoiseR = (1e-3 + 1);
             obj.param.NoiseR = obj.self.estimator.(obj.self.estimator.name).R;
             obj.param.X0 = obj.self.model.state.get();%[state.p;state.q;state.v;state.w];
             obj.param.model = obj.self.model.method;
@@ -111,7 +110,7 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
             problem.solver    = 'fmincon';
             problem.options   = obj.options;
             problem.objective = @(x) obj.objectiveFim(x, obj.param);  % 評価関数
-            problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件
+            problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input]; % 初期状態
             %[var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem);
             [var, fval,exitflag,~,~,~,~] = fmincon(problem);
@@ -119,9 +118,10 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
             obj.self.input = obj.result.input;
             obj.result.fval = fval;
             obj.result.exitflag = exitflag;
-            u = obj.result;
+            obj.result.eachfval = GetobjectiveFimEval(obj,var, obj.param);
 %             disp(exitflag);
-            obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);            
+            obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);  
+            result = obj.result;
         end
         function show(obj)
             
@@ -133,6 +133,7 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
         eval = Trackobjective(obj,x, params);
         eval = objectiveFim(obj,x, params);
         [cineq, ceq] = constraintsOM(obj,x, params);
+        [StageState,StageInput,stageevFim,terminalState] = GetobjectiveFimEval(obj,var, params)
     end
 end
 

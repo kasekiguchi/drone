@@ -113,9 +113,11 @@ LogData=[
     "plant.state.w",
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
+    "estimator.result.P",
     "reference.result.state.xd",
     "controller.result.fval",
     "controller.result.exitflag",
+    "controller.result.eachfval",
     %     "controller.result.Eval",
     %     "estimator.result.PreMapParam.x",
     %     "estimator.result.PreMapParam.y",
@@ -338,8 +340,8 @@ end
 %profile viewer
 %% dataplot 
 close all;
-SaveOnOff = false;
-Plots = DataPlot(Logger,SaveOnOff);
+SaveOnOff = true;
+Plots = DataPlot(logger,SaveOnOff);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
