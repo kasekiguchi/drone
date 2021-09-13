@@ -220,16 +220,16 @@ LogData=[
     "controller.result"
     
     %以下PtoP
-    "reference.result.state.p",
-    "estimator.result.state.p",
-    "estimator.result.state.q",
-    "estimator.result.state.v",
-    "estimator.result.state.w",
-    "sensor.result.state.p",
-    "sensor.result.state.q",
-   "reference.result.state.xd",
-    "inner_input",
-    "input"
+%     "reference.result.state.p",
+%     "estimator.result.state.p",
+%     "estimator.result.state.q",
+%     "estimator.result.state.v",
+%     "estimator.result.state.w",
+%     "sensor.result.state.p",
+%     "sensor.result.state.q",
+%    "reference.result.state.xd",
+%     "inner_input",
+%     "input"
     ];
 if isfield(agent(1).reference,'covering')
     LogData=[LogData;     'reference.result.region';  "env.density.param.grid_density"]; % for coverage

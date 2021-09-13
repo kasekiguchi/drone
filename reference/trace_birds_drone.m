@@ -23,6 +23,11 @@ classdef trace_birds_drone < REFERENCE_CLASS
             num = obj.self.id;
             state = obj.self.plant.state;
             position_birds = obj.self.sensor.result.neighbor(:,1:Param{3});
+            for i=1:numel(fp)
+                    d(:,i)=norm(state.p(1:2)-fp{i});
+            end
+            [~,farm] = min(d);
+            fp = fp{farm};
             for i=1:Na
                 position_agents(:,i) = [Param{1,1}(1,Param{3}+i).plant.state.p];
             end
