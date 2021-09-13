@@ -19,14 +19,14 @@ end
     figure1=figure(1);
     axes1=axes('Parent',figure1);
     for i=1:Nb
-        text{i} = append('bird',num2str(i));
+        text_number{i} = append('bird',num2str(i));
     end
     for i=Nb+1:N
-        text{i} = append('drone',num2str(i-Nb));
+        text_number{i} = append('drone',num2str(i-Nb));
     end
     hold on
     for i=1:N
-        figi = plot(t,x(i,1:numel(logger.Data.t)),'displayname',text{i});
+        figi = plot(t,x(i,1:numel(logger.Data.t)),'displayname',text_number{i});
 %     if i==1 figi = plot(t,x(i,1:numel(logger.Data.t)),'r-');end
 %     if i==2 figi = plot(t,x(i,1:numel(logger.Data.t)),'g-');end
 %     if i==3 figi = plot(t,x(i,1:numel(logger.Data.t)),'b-');end
@@ -54,7 +54,7 @@ end
     axes2=axes('Parent',figure2);
     hold on
     for i=1:N
-        figi = plot(t,y(i,1:numel(logger.Data.t)),'displayname',text{i});
+        figi = plot(t,y(i,1:numel(logger.Data.t)),'displayname',text_number{i});
 %     if i==1 figi = plot(t,y(i,1:numel(logger.Data.t)),'r-');end
 %     if i==2 figi = plot(t,y(i,1:numel(logger.Data.t)),'g-');end
 %     if i==3 figi = plot(t,y(i,1:numel(logger.Data.t)),'b-');end
@@ -82,16 +82,25 @@ end
 
     hold on
             farea = 5;
-            farmx = fp(1);
-            farmy = fp(2);
-            xf = [farmx+farea farmx+farea farmx-farea farmx-farea];
-            yf = [farmy-farea farmy+farea farmy+farea farmy-farea];
-            fill(xf,yf,'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm')
+            n=numel(fp);
+            for i=1:n
+                farmxi = fp{i}(1);
+                farmyi = fp{i}(2);
+                xfi = [farmxi+farea farmxi+farea farmxi-farea farmxi-farea];
+                yfi = [farmyi-farea farmyi+farea farmyi+farea farmyi-farea];
+                fill(xfi,yfi,'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
+            end
+                        
+%             farmx2 = fp{2}(1);
+%             farmy2 = fp{2}(2);
+%             xf2 = [farmx2+farea farmx2+farea farmx2-farea farmx2-farea];
+%             yf2 = [farmy2-farea farmy2+farea farmy2+farea farmy2-farea];
+%             fill(xf2,yf2,'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
     for i=1:Nb
-        figi = plot(x(i,1),y(i,1),'o','MarkerSize',5,'displayname',text{i});
+        figi = plot(x(i,1),y(i,1),'o','MarkerSize',5,'displayname',text_number{i});
     end
     for i=Nb+1:N
-        figi = plot(x(i,1),y(i,1),'x','MarkerSize',5,'displayname',text{i});
+        figi = plot(x(i,1),y(i,1),'x','MarkerSize',5,'displayname',text_number{i});
     end
     hold off
     
@@ -144,6 +153,14 @@ end
     t = 1;
     xsum = 0;
     ysum = 0;
+    for i=1:n
+        P(i) = polyshape([1 5*(i-1)+1;10 5*(i-1)+1;10 5*(i-1)+5;1 5*(i-1)+5]);
+    end
+    MaxHp =10;
+    for i=1:n
+        CurrentHp(i) = MaxHp;
+    end
+    dt = 0.01;
     for i=1:N
         xsum = xsum + x(i,1);
         ysum = ysum + y(i,1);
@@ -153,16 +170,33 @@ end
     while t <= numel(logger.Data.t)
         clf(figure(9)); 
             farea = 5;
-            farmx = fp(1);
-            farmy = fp(2);
-            xf = [farmx+farea farmx+farea farmx-farea farmx-farea];
-            yf = [farmy-farea farmy+farea farmy+farea farmy-farea];
-            fill(xf,yf,'r','FaceAlpha',.2,'EdgeAlpha',.2);
+            for i=1:n
+                farmxi = fp{i}(1);
+                farmyi = fp{i}(2);
+                xf{i} = [farmxi+farea farmxi+farea farmxi-farea farmxi-farea];
+                yf{i} = [farmyi-farea farmyi+farea farmyi+farea farmyi-farea];
+                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
+            end
+            
+            
+            hold on
+            for i=1:n
+                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
+                text(fp{i}(1),fp{i}(2),num2str(i));
+            end
+
+            for i=1:n
+                plot(P(i),'facecolor','none');
+                text(-3,5*(i-1)+2.5,num2str(i));
+            end
+
+            hold off
         xlim([-10,130]);
         ylim([-10,130]);
         set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
+        axis square;
         hold on
 
         grid on; 
@@ -171,12 +205,34 @@ end
         ax.Box = 'on';
         ax.GridColor = 'k';
         ax.GridAlpha = 0.4;
-
+        
         for i=1:Nb
             figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
             if t>=2
                 quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
             end
+            for j=1:n
+            HpBar(j) = polyshape([1 5*(j-1)+1;CurrentHp(j) 5*(j-1)+1;CurrentHp(j) 5*(j-1)+5;1 5*(j-1)+5]);
+                if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2)
+                    CurrentHp(j) = CurrentHp(j)-dt;
+                    HpBar(j) = polyshape([1 5*(j-1)+1;CurrentHp(j) 5*(j-1)+1;CurrentHp(j) 5*(j-1)+5;1 5*(j-1)+5]);
+
+                    xlim([-10,130])
+                    ylim([-10,130])
+                    if CurrentHp(j) <=1
+                        break;
+                    end
+                end
+                if CurrentHp(j)<3
+                    plot(HpBar(j),'facecolor','r')
+                else
+                    plot(HpBar(j),'facecolor','g')
+                end
+            end
+                
+
+                xlim([-10,130])
+                ylim([-10,130])
         end
         for i=Nb+1:N
             figi = plot(x(i,t),y(i,t),'x','MarkerSize',5);
@@ -188,7 +244,7 @@ end
         if t==51
             figure(4)
             title('t=5s');
-            fill(xf,yf,'r','FaceAlpha',.2,'EdgeAlpha',.2);
+            
             grid on;
             xlim([-10 130]);
             ylim([-10 130]);
@@ -197,6 +253,20 @@ end
             ylabel('\sl y \rm [m]','FontSize',25);
             axis square;
             hold on
+            for i=1:n
+                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
+                plot(P(i),'facecolor','none');
+                text(fp{i}(1),fp{i}(2),num2str(i));
+                text(-3,5*(i-1)+2.5,num2str(i));
+            end
+            for j=1:n
+                if CurrentHp(j)<3
+                    plot(HpBar(j),'facecolor','r')
+                else
+                    plot(HpBar(j),'facecolor','g')
+                end
+            end
+            
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
@@ -213,7 +283,7 @@ end
         if t==101
             figure(5)
             title('t=10s');
-            fill(xf,yf,'r','FaceAlpha',.2,'EdgeAlpha',.2);
+            
             grid on;
             xlim([-10 130]);
             ylim([-10 130]);
@@ -222,6 +292,20 @@ end
             ylabel('\sl y \rm [m]','FontSize',25);
             axis square;
             hold on
+            for i=1:n
+                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
+                plot(P(i),'facecolor','none');
+                text(fp{i}(1),fp{i}(2),num2str(i));
+                text(-3,5*(i-1)+2.5,num2str(i));
+            end
+            for j=1:n
+                if CurrentHp(j)<3
+                    plot(HpBar(j),'facecolor','r')
+                else
+                    plot(HpBar(j),'facecolor','g')
+                end
+            end
+            
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
@@ -238,7 +322,7 @@ end
         if t==151
             figure(6)
             title('t=15s');
-            fill(xf,yf,'r','FaceAlpha',.2,'EdgeAlpha',.2);
+            
             grid on;
             xlim([-10 130]);
             ylim([-10 130]);
@@ -247,6 +331,20 @@ end
             ylabel('\sl y \rm [m]','FontSize',25);
             axis square;
             hold on
+            for i=1:n
+                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
+                plot(P(i),'facecolor','none');
+                text(fp{i}(1),fp{i}(2),num2str(i));
+                text(-3,5*(i-1)+2.5,num2str(i));
+            end
+            for j=1:n
+                if CurrentHp(j)<3
+                    plot(HpBar(j),'facecolor','r')
+                else
+                    plot(HpBar(j),'facecolor','g')
+                end
+            end
+            
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
@@ -263,7 +361,7 @@ end
         if t==201
             figure(7)
             title('t=20s');
-            fill(xf,yf,'r','FaceAlpha',.2,'EdgeAlpha',.2);
+            
             grid on;
             xlim([-10 130]);
             ylim([-10 130]);
@@ -272,6 +370,20 @@ end
             ylabel('\sl y \rm [m]','FontSize',25);
             axis square;
             hold on
+            for i=1:n
+                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
+                plot(P(i),'facecolor','none');
+                text(fp{i}(1),fp{i}(2),num2str(i));
+                text(-3,5*(i-1)+2.5,num2str(i));
+            end
+            for j=1:n
+                if CurrentHp(j)<3
+                    plot(HpBar(j),'facecolor','r')
+                else
+                    plot(HpBar(j),'facecolor','g')
+                end
+            end
+            
             for i=1:Nb
                 figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
                 if t>=2
@@ -293,7 +405,6 @@ end
     close(v);
     exportgraphics(gcf,'final position trace birds.eps');
     disp('simulation ended')
-
 end 
 
 
