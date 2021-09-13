@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 1; %number of agents（if bird_trace system else number of all units）
+N = 10; %number of agents（if bird_trace system else number of all units）
 Nb = 8; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(5);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
