@@ -14,7 +14,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             obj.result.state = STATE_CLASS(struct('state_list',["p","v","u"],'num_list',[3]));
         end
         
-        function result= do(obj,Param)
+        function result = do(obj,Param)
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
             num = obj.self.id;%今計算している鳥の番号
@@ -36,7 +36,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             adjust =  zeros(2,length(other_state));%鳥がほかの鳥から離れる
             keep = zeros(2,1);%畑への進行
             away = zeros(2,length(other_state));%ドローンから離れる
-            fp = [Param{5}];
+            fp = Param{5};
             k1 = 0.2;%%離れる
             k2 = 0.1;%%整列
             k3 = 3.;%畑に向かう%1機のとき1にしてた．
@@ -50,6 +50,11 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             distance = cell2mat(tmp);
             if count >1
 %                keep = pre_info{num}.state(4:6,end)-agent_v;
+                for i=1:numel(fp)
+                    d(:,i)=norm(state(1:2)-fp{i});
+                end
+                [~,farm] = min(d);
+                fp = fp{farm};
                keep = ((fp-state(1:2))/norm((fp-state(1:2)),2)) ;
                 %内積計算
                 if pre_info.i==1
@@ -74,7 +79,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
                 end
             end
             for i=Nb+1:N%ドローンから逃げる力
-                away(:,i) = [distance(2:3,:,i)]/norm(distance(2:3,:,i))^2;
+                away(:,i) = (distance(2:3,:,i))/norm(distance(2:3,:,i))^2;
             end     
             %%目標位置に向かう用のやつ
             if rand(1)>0.5
@@ -85,11 +90,23 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             fp = fp + r * rand(1);
             if fp-state(1:2,1)==0
                 go_farm = (fp-state);
-%                 go_farm = ([10;10]-state);
             else
                 go_farm = (fp-state(1:2,1))/norm(fp-state(1:2,1));
-%                 go_farm = ([10;10]-state(1:2,1))/norm([10;10]-state(1:2,1));
             end
+%             %畑の耐久計算
+%             farea = 5;
+%             xf = [fp(1)-farea fp(1)+farea];
+%             yf = [fp(2)-farea fp(2)+farea];
+%             if Param{2}.i == 1
+%                 flag = 0;
+%             end
+%             if xf(1)<state(1) && xf(2)>state(1) && yf(1)<state(2) && yf(2)>state(2)
+%                 if flag == 0
+%                     durable_value = 100;%畑の耐久値
+%                     flag = 1;
+%                 end
+%                 obj.param = durable_value - 0.5;
+%             end
             %目標位置作成
             if count >1&&norm(agent_v{num})~=0
                 input =k1*sum(tarm1,2)/Nb + k2*sum(adjust,2)/Nb + k3*keep + k4*sum(away,2);
@@ -111,13 +128,13 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
 %             ylim([state(2)-3-norm(ref_point-state),state(2)+3+norm(ref_point-state)])
             qtrans = quat2eul(q');
             q3 = qtrans(3);
-            th_dd =th_xd-q3;
+            th_dd = th_xd-q3;
             if th_dd>pi
                 q3=q3+2*pi;
             elseif th_dd<=-pi
                 q3= q3-2*pi;
             end
-                        th_dd =th_xd-q3;
+                        th_dd = th_xd-q3;
             eul = [0,0,th_dd];
             quat = eul2quat(eul);
             v_xd = kind_speed ;
