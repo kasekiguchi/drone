@@ -67,7 +67,7 @@ agent.set_property("sensor",Sensor_Motive(1)); % motive情報 : sim exp 共通 %
 agent.set_property("estimator",Estimator_EKF(agent,["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
 %% set reference property
 rflag = 1;
-ReferencePoints = [0,-1,1.0;2,1,1;1,2,1;0,1,1;-1,2,1;-2,1,1;0,-1,1]';
+ReferencePoints = [0,-1,1;2,1,1;1,2,1;0,1,1;-1,2,1;-2,1,1;0,-1,1]';
 % if fExp == 1
 %     agent.set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
 % else
