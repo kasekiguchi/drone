@@ -12,7 +12,7 @@ userpath('clear');
 N = 10; %number of agents（if bird_trace system else number of all units）
 Nb = 8; %number of pestbirds
 Na = N - Nb; %number of agents
-fp = farm_create(5);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
+fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
 flag_miki = ones(N);%PtoP制御用
 fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
