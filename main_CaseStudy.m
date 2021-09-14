@@ -67,12 +67,12 @@ agent.set_property("sensor",Sensor_Motive(1)); % motive情報 : sim exp 共通 %
 agent.set_property("estimator",Estimator_EKF(agent,["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
 %% set reference property
 rflag = 1;
-ReferencePoints = [0,-1,1;2,1,1;1,2,1;0,1,1;-1,2,1;-2,1,1;0,-1,1]';
-% if fExp == 1
-%     agent.set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
-% else
-%     agent.set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;0])); % ハート形[x;y;z]永久
-% end
+ReferencePoints = [0,-1,1;2,1,1;1,2,1;0,1,1;-1,2,1;-2,1,1;0,-1,1]'; % PtoP制御
+if fExp == 1
+    agent.set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
+else
+    agent.set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;0])); % ハート形[x;y;z]永久
+end
 
 % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 agent.set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
