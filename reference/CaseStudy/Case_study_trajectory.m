@@ -14,7 +14,7 @@ r = 0.1;
 
 x = x_0+r*16*sin(t/s)^3;
 y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
-z = z_0;
+z = 1;
 
 %% 円軌道
 % x = x_0+cos(t/s);
