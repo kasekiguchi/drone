@@ -94,7 +94,7 @@ classdef SIR_model < handle
             % kron(~R,ones(n,1)) : a vector such that subvector
             % corresponding to ('not' R)-th agents position equals 1
             obj.S=obj.S & ~R;% update S agents
-            obj.I=obj.I .* ~R;% update I agents
+            obj.I=obj.I .* ~R;% update I agents % need "*" not "&" because I is a value in [0, ti]
             obj.R=obj.R | R;% update R agents
             obj.U = U;
         end
@@ -103,12 +103,10 @@ classdef SIR_model < handle
             %       [usage]
             %          next_step_func(U, E);
             %       where U : inputs, E : edge matrix
-            obj.transition_to_R(U);
+            obj.transition_to_R(U);% h 以下の確率でUのある燃えているセルを消火（Rに遷移）
             obj.calc_v(E);
             obj.R(obj.I == obj.ti)=1;
             obj.I(obj.I == obj.ti)=0;
-            %             obj.I(find(obj.x(obj.ti+1:obj.ti+2:end)))=0;
-            %             obj.R(find(obj.x(obj.ti+1:obj.ti+2:end)))=1;
             obj.x = obj.A*obj.x+obj.B*obj.v;
             obj.I = obj.I + (obj.I>0);% 火災の進行具合を1-tiの整数で表現
             i=find(obj.v);
@@ -142,6 +140,7 @@ classdef SIR_model < handle
                 colormap(mycmap(cmin:cmax,:));
             else
                 figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
+                colorbar;
             end
             view(2)
             xlabel('\sl x','FontSize',25);

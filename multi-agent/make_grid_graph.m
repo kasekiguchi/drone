@@ -31,6 +31,7 @@ W8 = spdiags(N1,ny+1,N,N);W8(ny:ny:N-ny,:)=0;W8(N-ny+1:N,:)=0;
 W9 = (W1(1:N,1:N)|W2(1:N,1:N)|W3(1:N,1:N)|W4(1:N,1:N)|W5(1:N,1:N)|W6(1:N,1:N)|W7(1:N,1:N)|W8(1:N,1:N));
 W10 = reshape(W,[N,1]);
 
+%E = (W9./sum(W9,2)).*W10;% この計算の遅さは仕方がない
 E = W9.*W10;% この計算の遅さは仕方がない
 maxW = max(W,[],'all');
 if maxW > 1 | maxv~=1
