@@ -235,8 +235,8 @@ end
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
         axis square;
-%         view(-40,-30);%シミュレーション用
-        view(0,0);%高度確認用
+        view(-40,-30);%シミュレーション用
+%         view(0,0);%高度確認用
         hold on
 
         grid on; 
