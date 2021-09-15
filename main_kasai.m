@@ -12,7 +12,7 @@ userpath('clear');
 N = 10; %number of agents（if bird_trace system else number of all units）
 Nb = 8; %number of pestbirds
 Na = N - Nb; %number of agents
-fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
+fp = farm_create(5);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
 flag_miki = ones(N);%PtoP制御用
 fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
@@ -32,7 +32,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=10;
 end
 %% set connector (global instance)
 if fExp
@@ -86,7 +86,7 @@ else
 %             arranged_pos = arranged_position([0,0],N,1,0); %先生の
 %             arranged_pos = arranged_position_agreement([0,0],N,1); %合意制御
             if i==1
-                initial_position = arranged_position_trace_birds([60;60],N,Nb,0); %害鳥モデル
+                initial_position = arranged_position_trace_birds([60;60],N,Nb,10); %害鳥モデル
             end
             arranged_pos =  initial_position; %害鳥モデルの初期値
             initial(i).p = arranged_pos(:,i);

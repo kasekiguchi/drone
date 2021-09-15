@@ -18,7 +18,7 @@ function arranged_pos = arranged_position_trace_birds(fp,N,Nb,z)
         arranged_pos(:,i) = [origin(i,:)';z];
     end
     for i=Nb+1:N
-        arranged_pos(:,i) = [fp(1)+1+0.1*(i-Nb);fp(2)+1+0.1*(i-Nb);z];
+        arranged_pos(:,i) = [fp(1)+1+0.1*(i-Nb);fp(2)+1+0.1*(i-Nb);0];
     end
     
 end

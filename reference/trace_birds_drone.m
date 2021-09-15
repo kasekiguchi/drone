@@ -24,7 +24,7 @@ classdef trace_birds_drone < REFERENCE_CLASS
             state = obj.self.plant.state;
             position_birds = obj.self.sensor.result.neighbor(:,1:Param{3});
             for i=1:numel(fp)
-                    d(:,i)=norm(state.p(1:2)-fp{i});
+                    d(:,i)=norm(state.p-fp{i});
             end
             [~,farm] = min(d);
             fp = fp{farm};
@@ -54,7 +54,7 @@ classdef trace_birds_drone < REFERENCE_CLASS
             [~,m] = size(other_agent);
             if m >0
                 %評価関数
-                tmp = arrayfun(@(j) arrayfun(@(i) Cov_distance(fp,sheep_state(1:2,i),2)+Cov_distance(state.p(1:2),sheep_state(1:2,i),2)-Cov_distance(other_agent(:,j),sheep_state(1:2,i),2)',1:N-Na),1:m,'uniform',false)';
+                tmp = arrayfun(@(j) arrayfun(@(i) Cov_distance(fp,sheep_state(:,i),2)+Cov_distance(state.p,sheep_state(:,i),2)-Cov_distance(other_agent(:,j),sheep_state(:,i),2)',1:N-Na),1:m,'uniform',false)';
                 if length(tmp)<2&&m>0
                     result = cell2mat(tmp);
                 else
@@ -76,7 +76,7 @@ classdef trace_birds_drone < REFERENCE_CLASS
             %群れのクラスタリング
             AA=pointCloud(sheep_state');
             [labels,numClusters]  = pcsegdist(AA,9);
-            Y = pdist(sheep_state');%各点の距離コンビネーションでたぶんやってる
+%             Y = pdist(sheep_state');%各点の距離コンビネーションでたぶんやってる
 %             A = squareform(Y);%引数をワイ対象行列に作り替えている．てか，組み合わせになっている．
 %             Z = linkage(Y);
 %             AAA = inconsistent(Z);

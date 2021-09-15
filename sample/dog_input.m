@@ -55,7 +55,7 @@ for i=1:clas_num
         end
 end
 u1 = (xd - state)/norm(xd - state,2);
-u2 = ([fp;state(3)] - state)/norm([fp;state(3)] - state,2);
+u2 = (fp - state)/norm(fp - state,2);
 KK = arrayfun(@(i) Cov_distance(state,other_agent(:,i),1),1:Na);%ドローン間の反力
 tmp = struct2cell(KK);
 distance = cell2mat(tmp);
@@ -84,12 +84,12 @@ end
 %     result = -(state-[fp+[1;1];0])/norm(state-[fp;0]);
 % end
 % %%%%%%%%%%%%%%%%%%%%%%%入力の一部取り出すよう．mainのほうもONにする%%%%%%%%%%%%%%%%%%%%%5
-if norm([fp;0] - xd,2)<100
+if norm(fp - xd,2)<100
     result.result =k1*u1 + k2*u2 + k3*sum(cell2mat(u3),2)+k4*sum(away,2)+k5*sum(aways,2)/Ns ;
 %     result.result =[0;0;0] ;
 
 else
-    result.result = -(state-[fp+[1;1];0])/norm(state-[fp;0]);
+    result.result = -(state-[fp+[1;1;0]])/norm(state-fp);
 end
 result.tmp1 = [k1*u1;
                 k2*u2;

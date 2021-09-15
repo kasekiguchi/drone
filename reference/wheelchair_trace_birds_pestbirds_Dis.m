@@ -32,10 +32,10 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             pre_info = Param{2};%1時刻前の状態
 %             rs = Param{5}(1);ra = Param{5}(2);
             rc = Param{6}(3); %群れる距離
-            tarm1 = zeros(2,length(other_state));%鳥の群れる項
-            adjust =  zeros(2,length(other_state));%鳥がほかの鳥から離れる
-            keep = zeros(2,1);%畑への進行
-            away = zeros(2,length(other_state));%ドローンから離れる
+            tarm1 = zeros(3,length(other_state));%鳥の群れる項
+            adjust =  zeros(3,length(other_state));%鳥がほかの鳥から離れる
+            keep = zeros(3,1);%畑への進行
+            away = zeros(3,length(other_state));%ドローンから離れる
             fp = Param{5};
             k1 = 0.2;%%離れる
             k2 = 0.1;%%整列
@@ -51,16 +51,16 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             if count >1
 %                keep = pre_info{num}.state(4:6,end)-agent_v;
                 for i=1:numel(fp)
-                    d(:,i)=norm(state(1:2)-fp{i});
+                    d(:,i)=norm(state-fp{i});
                 end
                 [~,farm] = min(d);
                 fp = fp{farm};
-               keep = ((fp-state(1:2))/norm((fp-state(1:2)),2)) ;
+               keep = ((fp-state)/norm((fp-state),2)) ;
                 %内積計算
                 if pre_info.i==1
-                    agent_v = arrayfun(@(AAA) (state(1:2)-[0;0])/0.1,1:N,'UniformOutput',false);
+                    agent_v = arrayfun(@(AAA) (state-[0;0;0])/0.1,1:N,'UniformOutput',false);
                 else
-                    agent_v = arrayfun(@(AAA) (state(1:2)-pre_info.Data.agent{pre_info.i-1,4,AAA}.state.p(1:2))/0.1,1:N,'UniformOutput',false);
+                    agent_v = arrayfun(@(AAA) (state-pre_info.Data.agent{pre_info.i-1,4,AAA}.state.p)/0.1,1:N,'UniformOutput',false);
                 end
                 result = arrayfun(@(i) Cov_distance(other_state(:,i),state,1),1:N);
                 tmp = struct2cell(result);
@@ -74,12 +74,12 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             end
             if i~=num&&i<=Nb&&flont(i)==1
                 if distance(1,:,i)<rc&&abs(distance(1,:,i))>0.
-                    tarm1(:,i) = -(1-[R^3/distance(1,:,i)^3])*[distance(2:3,:,i)];
+                    tarm1(:,i) = -(1-[R^3/distance(1,:,i)^3])*[distance(1:3,:,i)];
                     adjust(:,i) = agent_v{i} - agent_v{num};                       
                 end
             end
             for i=Nb+1:N%ドローンから逃げる力
-                away(:,i) = (distance(2:3,:,i))/norm(distance(2:3,:,i))^2;
+                away(:,i) = (distance(1:3,:,i))/norm(distance(1:3,:,i))^2;
             end     
             %%目標位置に向かう用のやつ
             if rand(1)>0.5
@@ -87,26 +87,14 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             else 
                 r=0.1;
             end
-            fp = fp + r * rand(1);
-            if fp-state(1:2,1)==0
+            fp = fp(1:2) + r * rand(1);
+            fp = [fp;0];
+            if fp-state==0
                 go_farm = (fp-state);
             else
-                go_farm = (fp-state(1:2,1))/norm(fp-state(1:2,1));
+                go_farm = (fp-state)/norm(fp-state);
             end
-%             %畑の耐久計算
-%             farea = 5;
-%             xf = [fp(1)-farea fp(1)+farea];
-%             yf = [fp(2)-farea fp(2)+farea];
-%             if Param{2}.i == 1
-%                 flag = 0;
-%             end
-%             if xf(1)<state(1) && xf(2)>state(1) && yf(1)<state(2) && yf(2)>state(2)
-%                 if flag == 0
-%                     durable_value = 100;%畑の耐久値
-%                     flag = 1;
-%                 end
-%                 obj.param = durable_value - 0.5;
-%             end
+            
             %目標位置作成
             if count >1&&norm(agent_v{num})~=0
                 input =k1*sum(tarm1,2)/Nb + k2*sum(adjust,2)/Nb + k3*keep + k4*sum(away,2);
@@ -118,7 +106,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
 %                disp(norm(input)) 
 %             end
             kind_speed = 82 * 10/36;
-            ref_point = eye(2)*state(1:2,1) + eye(2)*(kind_speed * (input/norm(input,2)));
+            ref_point = eye(3)*state + eye(3)*(kind_speed * (input/norm(input,2)));
             th_xd = atan2(ref_point(2)-state(2),ref_point(1)-state(1));%角速度
 %             figure;
 %             scatter(ref_point(1),ref_point(2),'r')
