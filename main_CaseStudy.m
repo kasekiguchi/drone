@@ -142,4 +142,8 @@ end
 close all
 clc
 logger.plot(1,["p1-p2-p3","v"],["er","e"]);
-save('simulation.mat');
+if fExp
+    save('experiment.mat');
+else
+    save('simulation.mat');
+end

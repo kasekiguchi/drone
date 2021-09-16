@@ -1,7 +1,5 @@
 %%
-clear all
 clc
-close all
 %%
 FigNo=1;
 % ŽÀŒ±Œ‹‰Ê‚ð•\Ž¦‚·‚é¨exp_flag = 1
@@ -22,35 +20,15 @@ end
 %% for exp
 if exp_flag
     Data_exp = load(exp);
-    if sum(contains(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.p')))>0
-        tmp=strcmp(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.p'));
-        Result_exp.Estimator.p = cell2mat(Data_exp.Data{1,1}.agent(:,find(tmp))');
-    end
-    if sum(contains(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.q')))>0
-        tmp=strcmp(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.q'));
-        Result_exp.Estimator.q = cell2mat(Data_exp.Data{1,1}.agent(:,find(tmp))');
-    end
-    if sum(contains(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.v')))>0
-        tmp=strcmp(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.v'));
-        Result_exp.Estimator.v = cell2mat(Data_exp.Data{1,1}.agent(:,find(tmp))');
-    end
-    if sum(contains(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.w')))>0
-        tmp=strcmp(Data_exp.Data{1,2}{1,1},strcat('estimator.result.state.w'));
-        Result_exp.Estimator.w = cell2mat(Data_exp.Data{1,1}.agent(:,find(tmp))');
-    end
-    if sum(contains(Data_exp.Data{1,2}{1,1},strcat('reference.result.state.p')))>0
-        tmp=strcmp(Data_exp.Data{1,2}{1,1},strcat('reference.result.state.p'));
-        Result_exp.Reference.p = cell2mat(Data_exp.Data{1,1}.agent(:,find(tmp))');
-    end
-    if sum(contains(Data_exp.Data{1,2}{1,1},strcat('reference.result.state.xd')))>0
-        tmp=strcmp(Data_exp.Data{1,2}{1,1},strcat('reference.result.state.xd'));
-        if size(cell2mat(Data_exp.Data{1,1}.agent(1,find(tmp))')) == [0,0]
-            Result_exp.Reference.xd = 0;
-        else
-            Result_exp.Reference.xd = cell2mat(Data_exp.Data{1,1}.agent(:,find(tmp))');
+        for i=1:numel(Data_sim.logger.Data.t)
+            Result_exp.Estimator.p(:,i) = Data_sim.logger.Data.agent{i,2}.state.p;
+            Result_exp.Estimator.q(:,i) = Data_sim.logger.Data.agent{i,2}.state.q;
+            Result_exp.Estimator.v(:,i) = Data_sim.logger.Data.agent{i,2}.state.v;
+            Result_exp.Estimator.w(:,i) = Data_sim.logger.Data.agent{i,2}.state.w;
+            Result_exp.Reference.p(:,i) = Data_sim.logger.Data.agent{i,3}.state.p;
+            Result_exp.Reference.xd(:,i) = Data_sim.logger.Data.agent{i,3}.state.xd;
         end
-    end
-
+        
     figure(FigNo)
     hold on
     grid on
@@ -62,104 +40,104 @@ if exp_flag
     set(gca,'FontSize',18)
     set(fig1,'LineWidth',6)
     set(fig2,'LineWidth',3)
-    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',10,'FontName','Times New Roman')
 
     FigNo=FigNo + 1;
     figure(FigNo)
     hold on
     grid on
-    fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.p(1,:));
-    fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.p(1,:));
+    fig1 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.p(1,:));
+    fig2 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.p(1,:));
     xlabel('{\itt} [s]')
     ylabel('{\itx} [m]')
     set(gca,'FontName','Times New Roman')
     set(gca,'FontSize',18)
     set(fig1,'LineWidth',6)
     set(fig2,'LineWidth',3)
-    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',10,'FontName','Times New Roman')
 
     FigNo=FigNo + 1;
     figure(FigNo)
     hold on
     grid on
-    fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.p(2,:));
-    fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.p(2,:));
+    fig1 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.p(2,:));
+    fig2 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.p(2,:));
     xlabel('{\itt} [s]')
     ylabel('{\ity} [m]')
     set(gca,'FontName','Times New Roman')
     set(gca,'FontSize',18)
     set(fig1,'LineWidth',6)
     set(fig2,'LineWidth',3)
-    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',10,'FontName','Times New Roman')
 
     FigNo=FigNo + 1;
     figure(FigNo)
     hold on
     grid on
-    fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.p(3,:));
-    fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.p(3,:));
+    fig1 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.p(3,:));
+    fig2 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.p(3,:));
     xlabel('{\itt} [s]')
     ylabel('{\itz} [m]')
     set(gca,'FontName','Times New Roman')
     set(gca,'FontSize',18)
     set(fig1,'LineWidth',6)
     set(fig2,'LineWidth',3)
-    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+    legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',10,'FontName','Times New Roman')
 
 
-    if sum(contains(Data_exp.Data{1,2}{1,1},strcat('reference.result.state.xd')))>0
-        if size(Result_exp.Reference.xd(:,1)) == [20,1]
-            FigNo=FigNo + 1;
-            figure(FigNo)
-            hold on
-            grid on
-            fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.xd(5,:));
-            fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.v(1,:));
-            xlabel('{\itt} [s]')
-            ylabel('{\itv_x} [m/s]')
-            set(gca,'FontName','Times New Roman')
-            set(gca,'FontSize',18)
-            set(fig1,'LineWidth',6)
-            set(fig2,'LineWidth',3)
-            legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
-
-            FigNo=FigNo + 1;
-            figure(FigNo)
-            hold on
-            grid on
-            fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.xd(6,:));
-            fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.v(2,:));
-            xlabel('{\itt} [s]')
-            ylabel('{\itv_y} [m/s]')
-            set(gca,'FontName','Times New Roman')
-            set(gca,'FontSize',18)
-            set(fig1,'LineWidth',6)
-            set(fig2,'LineWidth',3)
-            legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
-
-            FigNo=FigNo + 1;
-            figure(FigNo)
-            hold on
-            grid on
-            fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.xd(7,:));
-            fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.v(3,:));
-            xlabel('{\itt} [s]')
-            ylabel('{\itv_z} [m/s]')
-            set(gca,'FontName','Times New Roman')
-            set(gca,'FontSize',18)
-            set(fig1,'LineWidth',6)
-            set(fig2,'LineWidth',3)
-            legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
-        end
-    end
+%     if sum(contains(Data_exp.Data{1,2}{1,1},strcat('reference.result.state.xd')))>0
+%         if size(Result_exp.Reference.xd(:,1)) == [20,1]
+%             FigNo=FigNo + 1;
+%             figure(FigNo)
+%             hold on
+%             grid on
+%             fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.xd(5,:));
+%             fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.v(1,:));
+%             xlabel('{\itt} [s]')
+%             ylabel('{\itv_x} [m/s]')
+%             set(gca,'FontName','Times New Roman')
+%             set(gca,'FontSize',18)
+%             set(fig1,'LineWidth',6)
+%             set(fig2,'LineWidth',3)
+%             legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+% 
+%             FigNo=FigNo + 1;
+%             figure(FigNo)
+%             hold on
+%             grid on
+%             fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.xd(6,:));
+%             fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.v(2,:));
+%             xlabel('{\itt} [s]')
+%             ylabel('{\itv_y} [m/s]')
+%             set(gca,'FontName','Times New Roman')
+%             set(gca,'FontSize',18)
+%             set(fig1,'LineWidth',6)
+%             set(fig2,'LineWidth',3)
+%             legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+% 
+%             FigNo=FigNo + 1;
+%             figure(FigNo)
+%             hold on
+%             grid on
+%             fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Reference.xd(7,:));
+%             fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.v(3,:));
+%             xlabel('{\itt} [s]')
+%             ylabel('{\itv_z} [m/s]')
+%             set(gca,'FontName','Times New Roman')
+%             set(gca,'FontSize',18)
+%             set(fig1,'LineWidth',6)
+%             set(fig2,'LineWidth',3)
+%             legend({'Reference','State'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+%         end
+%     end
 
     FigNo=FigNo + 1;
     figure(FigNo)
     hold on
     grid on
-    fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.q(1,:));
-    fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.q(2,:));
-    fig3 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.q(3,:));
+    fig1 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.q(1,:));
+    fig2 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.q(2,:));
+    fig3 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.q(3,:));
     xlabel('{\itt} [s]')
     ylabel('{\it\theta} [rad]')
     set(gca,'FontName','Times New Roman')
@@ -167,15 +145,15 @@ if exp_flag
     set(fig1,'LineWidth',3)
     set(fig2,'LineWidth',3)
     set(fig3,'LineWidth',3)
-    legend({'Roll','Pitch','Yaw'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+    legend({'Roll','Pitch','Yaw'},'Location','southwest','Orientation','horizontal','Fontsize',10,'FontName','Times New Roman')
 
     FigNo=FigNo + 1;
     figure(FigNo)
     hold on
     grid on
-    fig1 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.w(1,:));
-    fig2 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.w(2,:));
-    fig3 = plot(Data_exp.Data{1,1}.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.w(3,:));
+    fig1 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.w(1,:));
+    fig2 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.w(2,:));
+    fig3 = plot(Data_exp.logger.Data.t(1:length(Result_exp.Reference.p)),Result_exp.Estimator.w(3,:));
     xlabel('{\itt} [s]')
     ylabel('{\it\omega} [rad/s]')
     set(gca,'FontName','Times New Roman')
@@ -183,7 +161,7 @@ if exp_flag
     set(fig1,'LineWidth',3)
     set(fig2,'LineWidth',3)
     set(fig3,'LineWidth',3)
-    legend({'Roll','Pitch','Yaw'},'Location','southwest','Orientation','horizontal','Fontsize',18,'FontName','Times New Roman')
+    legend({'Roll','Pitch','Yaw'},'Location','southwest','Orientation','horizontal','Fontsize',10,'FontName','Times New Roman')
 end
 %% for sim
 if sim_flag
