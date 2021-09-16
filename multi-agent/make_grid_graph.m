@@ -15,21 +15,21 @@ arguments
     gen
     maxv = 1
 end
-N = nx*ny;
-[X,Y]=meshgrid(1:nx,1:ny);
-W = gen(X,Y);
+N = nx*ny;                  %全てのグリッド数に対応。数え方は(1,1),(2,1),(3,1)...という順番
+[X,Y]=meshgrid(1:nx,1:ny);  %X,Yはny行nx列のグリッドを作成　Xは同列内(縦)は同数、Yは同行内(横)は同数
+W = gen(X,Y);               %genによって重みの決定を行う
 N1 = ones(N,1);
-W1 = spdiags(N1,-(ny+1),N,N);W1(1:ny,:)=0;W1(ny+1:ny:N,:)=0;
-W2 = spdiags(N1,-ny,N,N);W2(1:ny,:)=0;
-W3 = spdiags(N1,-ny+1,N,N);W3(1:ny,:)=0;W3(2*ny:ny:N,:)=0;
-W4 = spdiags(N1,-1,N,N);W4(1:ny:N,:)=0;
-W5 = spdiags(N1,1,N,N);W5(ny:ny:N,:)=0;%W5(:,ny+1:ny:end) = 0;
+W1 = spdiags(N1,-(ny+1),N,N);W1(1:ny,:)=0;W1(ny+1:ny:N,:)=0;    %N*Nのスパース行列に斜めに1が代入; 1:ny行は0; ny+1番目のグリッドからny個飛ばしで0
+W2 = spdiags(N1,-ny,N,N);W2(1:ny,:)=0;                          %spdiags(A,B,C,D)において、A：入力されたベクトルを用いた対角行列を作成（複数のベクトルを入力した場合n重対角行列を作成する）
+W3 = spdiags(N1,-ny+1,N,N);W3(1:ny,:)=0;W3(2*ny:ny:N,:)=0;      %B：対角番号。正の場合は上に、負の場合は下に対角線が移動する
+W4 = spdiags(N1,-1,N,N);W4(1:ny:N,:)=0;                         %C：スパース行列の行数, D：スパース行列の列数
+W5 = spdiags(N1,1,N,N);W5(ny:ny:N,:)=0;%W5(:,ny+1:ny:end) = 0;  %
 W6 = spdiags(N1,ny-1,N,N);W6(1:ny:N-ny,:)=0;W6(N-ny+1:N,:)=0;
 W7 = spdiags(N1,ny,N,N);W7(N-ny+1:N,:)=0;
-W8 = spdiags(N1,ny+1,N,N);W8(ny:ny:N-ny,:)=0;W8(N-ny+1:N,:)=0;
+W8 = spdiags(N1,ny+1,N,N);W8(ny:ny:N-ny,:)=0;W8(N-ny+1:N,:)=0;  %W1~W8までで周辺グリッドの影響を計算
 
-W9 = (W1(1:N,1:N)|W2(1:N,1:N)|W3(1:N,1:N)|W4(1:N,1:N)|W5(1:N,1:N)|W6(1:N,1:N)|W7(1:N,1:N)|W8(1:N,1:N));
-W10 = reshape(W,[N,1]);
+W9 = (W1(1:N,1:N)|W2(1:N,1:N)|W3(1:N,1:N)|W4(1:N,1:N)|W5(1:N,1:N)|W6(1:N,1:N)|W7(1:N,1:N)|W8(1:N,1:N));   %グリッドの周囲8マス全てから入力を受ける隣接行列を表す
+W10 = reshape(W,[N,1]);                                         %WをN行ベクトルにする。Wは全ての要素が0.1のny行nx列な行列
 
 %E = (W9./sum(W9,2)).*W10;% この計算の遅さは仕方がない
 E = W9.*W10;% この計算の遅さは仕方がない
