@@ -18,8 +18,8 @@
 % s = find(S)や S(s) = 1 などは意味を持つ
 %% Initialize settings
 % set path
-tmp = matlab.desktop.editor.getActive;
-cd(fileparts(tmp.Filename));
+tmp = matlab.desktop.editor.getActive;  %現在表示しているファイルのパスにアクセス
+cd(fileparts(tmp.Filename));    %現在のファイル名
 cd('..');
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');
 cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
@@ -27,10 +27,10 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% configuration
-nx = 100; % x axis grid number
-ny = 100; % y axis grid number
-N = nx*ny; % total grid number
-Il = 30; % length of I
+nx = 100; % x axis grid number       xのセル数
+ny = 100; % y axis grid number       yのセル数
+N = nx*ny; % total grid number       総セル数
+Il = 30; % length of I           Iの期間
 
 %% environment definition
 %[E,W] = make_grid_graph(nx,ny,@(x,y)0.1*ones(size(x))); % flat weight
@@ -42,7 +42,8 @@ Il = 30; % length of I
 %  gi = 1.3;
   pi = 1;
   gi = 0.8;
- [E,W] = make_grid_graph(nx,ny,@(x,y) gi*max(cx,nx-cx)^(pi)*gi*max(cy,ny-cy)^(pi)*(0.3+0.2*rand(size(x)))+(-abs(x-cx).^(pi)+gi*max(cx,nx-cx)^(pi)).*(-abs(y-cy).^(pi)+gi*max(cy,ny-cy)^(pi)),0.04);
+ [E,W] = make_grid_graph(nx,ny,@(x,y) gi*max(cx,nx-cx)^(pi)*gi*max(cy,ny-cy)^(pi)*(0.3+0.2*rand(size(x)))+(-abs(x-cx).^(pi)...
+     +gi*max(cx,nx-cx)^(pi)).*(-abs(y-cy).^(pi)+gi*max(cy,ny-cy)^(pi)),0.04);
  %[i,j,v]=find(E);
 %G=digraph(i,j,v); % グラフ構造は自明なので描画するメリットはなさそう．
 %figure()
@@ -62,7 +63,7 @@ end
 % Directでやる場合はもっと早い燃え広がりでも対応可能
 ke = 200; % シミュレーションステップ
 fFPosition = 0; % flag fire position
-h = 0; % extinction probability
+h = 0; % extinction probability     延焼確率
 map = model_init(N,Il,h,nx,ny,fFPosition);
 clear logger
 logger.k=zeros(1,ke);
