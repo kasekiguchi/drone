@@ -8,7 +8,6 @@ k4= 0.1;%他機体からの反力
 k5= 0.1;%鳥からの反力
 tmp = Cog;%どこを正規分布の基準とするか
 state = agent.p;%自己位置
-xd = [xd;state(3)];
 clas_num = length(Cog);
 [~,Ns] = size(other);
 % k1 = k1/Cog2state;

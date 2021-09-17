@@ -61,7 +61,7 @@ classdef trace_birds_drone < REFERENCE_CLASS
                     result = sum(cell2mat(tmp)) ;%•]‰¿ŠÖ”‚Ì˜a‚ÌŒvŽZ
                 end
             else
-                tmp = arrayfun(@(i) Cov_distance(fp,sheep_state(1:2,i),2)+Cov_distance(state.p(1:2),sheep_state(1:2,i),2),1:N-Na);
+                tmp = arrayfun(@(i) Cov_distance(fp,sheep_state(:,i),2)+Cov_distance(state.p,sheep_state(:,i),2),1:N-Na);
                 result = tmp;
             end
 
@@ -102,7 +102,7 @@ classdef trace_birds_drone < REFERENCE_CLASS
            end
             
             i=N-num+1;
-            xd = sheep_state(1:2,sort_point(2,i));
+            xd = sheep_state(:,sort_point(2,i));
 %             xd = [10;10];
             tmp = dog_input(state,fp,P,sheep_state,Cog,xd,agent_state,(num-N+Na),Na);
 %             tmp = dog_input(state,fp,P,sheep_state,Cog,xd);

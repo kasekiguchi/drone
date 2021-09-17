@@ -45,7 +45,7 @@ end
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it x} [m]');
     axis square;
-    legend;
+    legend('Location','eastoutside');
       
         
 %%        
@@ -73,7 +73,7 @@ end
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it y} [m]');
     axis square;
-    legend;
+    legend('Location','eastoutside');
     
 %%
     %-------------------エージェントのz座標------------------------
@@ -106,7 +106,7 @@ end
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it z} [m]');
     axis square;
-    legend;
+    legend('Location','eastoutside');
  
     %%  
     %-------------------エージェント初期位置------------------------
@@ -235,8 +235,8 @@ end
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
         axis square;
-        view(-40,-30);%シミュレーション用
-%         view(0,0);%高度確認用
+%         view(-40,-30);%シミュレーション用
+        view(0,0);%高度確認用
         hold on
 
         grid on; 

@@ -126,7 +126,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             eul = [0,0,th_dd];
             quat = eul2quat(eul);
             v_xd = kind_speed ;
-            obj.result.state.u = [v_xd;0;eul(3);quat'];%[(x,y),z,omega,q]
+            obj.result.state.u = [v_xd;ref_point(3);eul(3);quat'];%[(x,y),z,omega,q]
             result = obj.result;
         end
         function show(obj,param)
