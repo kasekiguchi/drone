@@ -35,7 +35,7 @@ param.k3 = k3;
 param.k4 = k4;
 if size(varargin) >= 1
     if strcmp(varargin{1},'Plant')% for Plant parameter
-        Param= [mass*1.1, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
+        Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
 %         Param = cell2mat(struct2cell(param))';
     else
         F = varargin{1};
