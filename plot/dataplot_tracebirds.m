@@ -202,6 +202,7 @@ end
         ysum = ysum + y(i,1);
     end
     v = VideoWriter('tracebirds','MPEG-4');
+    v.FrameRate = 10;
     open(v);
     while t <= numel(logger.Data.t)
         clf(figure(9)); 

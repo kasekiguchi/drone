@@ -32,7 +32,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=20;
 end
 %% set connector (global instance)
 if fExp
