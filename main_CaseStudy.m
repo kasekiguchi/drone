@@ -142,8 +142,24 @@ end
 close all
 clc
 logger.plot(1,["p1-p2-p3","v"],["er","e"]);
+%%
 if fExp
-    save('experiment.mat');
+    %save('experiment.mat');
+    logger.save();
 else
-    save('simulation.mat');
+    %save('simulation.mat');
+    logger.save();
 end
+%%
+fExp = 1;
+if fExp
+%    load('experiment.mat');
+    load('Log(22-Sep-2021_11_57_20).mat');
+else
+    load('simulation.mat');
+end
+%%
+logger=Logger(agent,size(ts:dt:te,2),[]);
+logger.plot(1,["p1-p2"],["er"],struct("fig_num",3));
+logger.plot(1,["q1","q2","q3"],["er","e","e"],struct("fig_num",2,"row_col",[3,1]));
+logger.plot(1,["p","p3"],["er","e"],struct("fig_num",1));

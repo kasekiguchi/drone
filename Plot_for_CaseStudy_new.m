@@ -3,9 +3,9 @@ clc
 %%
 FigNo=1;
 % 実験結果を表示する→exp_flag = 1
-exp_flag = 0;
+exp_flag = 1;
 % シミュレーション結果を表示する→sim_flag = 1
-sim_flag = 1;
+sim_flag = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if exp_flag
 % 実験結果のファイル名を記入 例：(['Log(12-Oct-2020_07_52_15).mat'])
@@ -20,15 +20,17 @@ end
 %% for exp
 if exp_flag
     Data_exp = load(exp);
-        for i=1:numel(Data_sim.logger.Data.t)
-            Result_exp.Estimator.p(:,i) = Data_sim.logger.Data.agent{i,2}.state.p;
-            Result_exp.Estimator.q(:,i) = Data_sim.logger.Data.agent{i,2}.state.q;
-            Result_exp.Estimator.v(:,i) = Data_sim.logger.Data.agent{i,2}.state.v;
-            Result_exp.Estimator.w(:,i) = Data_sim.logger.Data.agent{i,2}.state.w;
-            Result_exp.Reference.p(:,i) = Data_sim.logger.Data.agent{i,3}.state.p;
-            Result_exp.Reference.xd(:,i) = Data_sim.logger.Data.agent{i,3}.state.xd;
+    tt = find(Data_exp.logger.Data.t==0,2);
+        for i=1:tt(2)-1
+            Result_exp.Estimator.p(:,i) = Data_exp.logger.Data.agent{i,2}.state.p;
+            Result_exp.Estimator.q(:,i) = Data_exp.logger.Data.agent{i,2}.state.q;
+            Result_exp.Estimator.v(:,i) = Data_exp.logger.Data.agent{i,2}.state.v;
+            Result_exp.Estimator.w(:,i) = Data_exp.logger.Data.agent{i,2}.state.w;
+            Result_exp.Reference.p(:,i) = Data_exp.logger.Data.agent{i,3}.state.p;
+%             Result_exp.Reference.xd(:,i) = Data_exp.logger.Data.agent{i,3}.state.xd;
         end
-        
+    
+    FigNo=FigNo + 1;
     figure(FigNo)
     hold on
     grid on
