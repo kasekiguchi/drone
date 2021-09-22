@@ -21,12 +21,11 @@ while p(i)~=t & i < ke
     else
        A = (E*sparse(p(i,1),1,1,N,1));
        a = find(A);
-       [~,I]=min(w1*F(t,a)+w2*G(A));% a の中で最適なインデックス
+       [~,I]=min(w1*F(t,a));% 目標値tに最も近い点を選ぶ
     end
     i = i+1;
     p(i,1) = a(I);
     tmp(a(I),1) = 1;
 end
-
 end
 
