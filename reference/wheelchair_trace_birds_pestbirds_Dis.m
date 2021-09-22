@@ -37,10 +37,10 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             keep = zeros(3,1);%畑への進行
             away = zeros(3,length(other_state));%ドローンから離れる
             fp = Param{5};
-            k1 = 0.2;%%離れる
+            k1 = 0.1;%%離れる
             k2 = 0.1;%%整列
             k3 = 3.;%畑に向かう%1機のとき1にしてた．
-            k4 = 23.0;%%逃げる：初期化下で内分点の計算から求めている．
+            k4 = 8.0;%%逃げる：初期化下で内分点の計算から求めている．
             [~,count] = size(pre_info.Data.t');
             R=5;
             flont = zeros(1,Nb);

@@ -131,10 +131,10 @@ end
 %             yf2 = [farmy2-farea farmy2+farea farmy2+farea farmy2-farea];
 %             fill(xf2,yf2,'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
     for i=1:Nb
-        figi = plot3(x(i,1),y(i,1),z(i,1),'o','MarkerSize',5,'displayname',text_number{i});
+        figi = plot3(x(i,1),y(i,1),z(i,1),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0],'displayname',text_number{i});
     end
     for i=Nb+1:N
-        figi = plot3(x(i,1),y(i,1),z(i,1),'x','MarkerSize',5,'displayname',text_number{i});
+        figi = plot3(x(i,1),y(i,1),z(i,1),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0],'displayname',text_number{i});
     end
     hold off
     
@@ -212,7 +212,22 @@ end
                 farmyi = fp{i}(2);
                 xf{i} = [farmxi+farea farmxi+farea farmxi-farea farmxi-farea];
                 yf{i} = [farmyi-farea farmyi+farea farmyi+farea farmyi-farea];
-                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
+%                 fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
+                vertices=[xf{i}(3),yf{i}(1),0;      %point1
+                          xf{i}(1),yf{i}(1),0;      %point2
+                          xf{i}(3),yf{i}(2),0;      %point3
+                          xf{i}(1),yf{i}(2),0;      %point4
+                          xf{i}(3),yf{i}(1),0.5;    %point5
+                          xf{i}(1),yf{i}(1),0.5;    %point6
+                          xf{i}(3),yf{i}(2),0.5;    %point7
+                          xf{i}(1),yf{i}(2),0.5];   %point8
+               faces=[1,2,4,3;      %face1
+                      1,3,7,5;      %face2
+                      1,2,6,5;      %face3
+                      2,4,8,6;      %face4
+                      4,3,7,8;      %face5
+                      5,6,7,8];     %face6
+               patch('Faces', faces, 'Vertices', vertices, 'facecolor', 'r');
             end
             
             
@@ -230,7 +245,7 @@ end
             hold off
         xlim([-10,130]);
         ylim([-10,130]);
-        zlim([0,15]);
+        zlim([0,100]);
         set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
@@ -247,19 +262,19 @@ end
         ax.GridAlpha = 0.4;
         
         for i=1:Nb
-            figi = plot3(x(i,t),y(i,t),z(i,t),'o','MarkerSize',5);
+            figi = plot3(x(i,t),y(i,t),z(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,1,0]);
             if t>=2
-                quiver3(x(i,t),y(i,t),z(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)),5*(z(i,t)-z(i,t-1)));
+                quiver3(x(i,t),y(i,t),z(i,t),(x(i,t)-x(i,t-1)),(y(i,t)-y(i,t-1)),(z(i,t)-z(i,t-1)));
             end
             for j=1:n
             HpBar(j) = polyshape([1 5*(j-1)+1;CurrentHp(j) 5*(j-1)+1;CurrentHp(j) 5*(j-1)+5;1 5*(j-1)+5]);
-                if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2)
+                if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2) && z(i,t)>0 && z(i,t)<0.5
                     CurrentHp(j) = CurrentHp(j)-dt;
                     HpBar(j) = polyshape([1 5*(j-1)+1;CurrentHp(j) 5*(j-1)+1;CurrentHp(j) 5*(j-1)+5;1 5*(j-1)+5]);
 
                     xlim([-10,130])
                     ylim([-10,130])
-                    zlim([0,15])
+                    zlim([0,100])
                     if CurrentHp(j) <=1
                         break;
                     end
@@ -274,10 +289,10 @@ end
 
                 xlim([-10,130])
                 ylim([-10,130])
-                zlim([0,15])
+                zlim([0,100])
         end
         for i=Nb+1:N
-            figi = plot3(x(i,t),y(i,t),z(i,t),'x','MarkerSize',5);
+            figi = plot3(x(i,t),y(i,t),z(i,t),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
         end
         
         hold off 
@@ -310,13 +325,13 @@ end
             end
             
             for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
                 if t>=2
-                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
+                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
             end
             hold off
             
@@ -349,13 +364,13 @@ end
             end
             
             for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
                 if t>=2
-                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
+                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
             end
             hold off
             
@@ -388,13 +403,13 @@ end
             end
             
             for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
                 if t>=2
-                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
+                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
             end
             hold off
             
@@ -427,13 +442,13 @@ end
             end
             
             for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
                 if t>=2
-                    quiver(x(i,t),y(i,t),5*(x(i,t)-x(i,t-1)),5*(y(i,t)-y(i,t-1)));
+                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
                 end
             end
             for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5);
+                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
             end
             hold off
             
