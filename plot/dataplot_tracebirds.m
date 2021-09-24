@@ -1,4 +1,4 @@
-function dataplot_tracebirds(logger,N,Nb,fp)
+function dataplot_tracebirds(logger,N,Nb,fp,dt)
 %害鳥追跡用のプロット関数
 %引数はログ，ドローンと害鳥の総数，害鳥の総数，畑のエリア
 %返し値はなく画像を表示，subversionのファイルに.eps形式で画像出力
@@ -24,6 +24,9 @@ end
     end
     for i=Nb+1:N
         text_number{i} = append('drone',num2str(i-Nb));
+    end
+    for i=N+1:N+numel(fp)
+        text_number{i} = append('farm',num2str(i-N));
     end
     hold on
     for i=1:N
@@ -122,20 +125,15 @@ end
                 farmyi = fp{i}(2);
                 xfi = [farmxi+farea farmxi+farea farmxi-farea farmxi-farea];
                 yfi = [farmyi-farea farmyi+farea farmyi+farea farmyi-farea];
-                fill(xfi,yfi,'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
+                fill(xfi,yfi,'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname',text_number{i+N});
+                text(fp{i}(1),fp{i}(2),num2str(i));
             end
-                        
-%             farmx2 = fp{2}(1);
-%             farmy2 = fp{2}(2);
-%             xf2 = [farmx2+farea farmx2+farea farmx2-farea farmx2-farea];
-%             yf2 = [farmy2-farea farmy2+farea farmy2+farea farmy2-farea];
-%             fill(xf2,yf2,'r','FaceAlpha',.2,'EdgeAlpha',.2,'displayname','farm');
-    for i=1:Nb
-        figi = plot3(x(i,1),y(i,1),z(i,1),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0],'displayname',text_number{i});
-    end
-    for i=Nb+1:N
-        figi = plot3(x(i,1),y(i,1),z(i,1),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0],'displayname',text_number{i});
-    end
+            for i=1:Nb
+                figi = plot3(x(i,1),y(i,1),z(i,1),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0],'displayname',text_number{i});
+            end
+            for i=Nb+1:N
+                figi = plot3(x(i,1),y(i,1),z(i,1),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0],'displayname',text_number{i});
+            end
     hold off
     
     %-------------グラフィックスオブジェクトのプロパティ--------------
@@ -145,25 +143,24 @@ end
     set(axes4,'FontName','Times New Roman','FontSize',12);
     grid on;
 
-    xlim([-10,130]);
-    ylim([-10,130]);
-    zlim([0,15]);
+    xlim([30,90]);
+    ylim([30,90]);
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
-    zlabel('Position {\it z} [m]');
+    view(180,-90);
     axis square;
     legend('Location','eastoutside');
     cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
     exportgraphics(gcf,'initial position trace birds.eps');
 %     %% エージェント間の距離
-%     figure(8)
-%     figure8=figure(8);
-%     axes8=axes('Parent',figure8);
-%     for i=1:N-1
+%     figure(5)
+%     figure5=figure(5);
+%     axes5=axes('Parent',figure5);
+%     for i=Nb+1:N-1
 %         text2{i} = append('agent1-',num2str(i+1));
 %     end
 %     hold on
-%     for i=1:N-1
+%     for i=Nb+1:N-1
 %         figi = plot(t,distance(i,1:numel(logger.Data.t)),'displayname',text2{i});
 %     end
 %     hold off
@@ -172,40 +169,37 @@ end
 %     for i=1:N
 %     set(figi,'LineWidth',1);
 %     end
-%     set(axes8,'FontName','Times New Roman','FontSize',14);
+%     set(axes5,'FontName','Times New Roman','FontSize',14);
 %     grid on;
 %     xlim([0,logger.Data.t(end)+1]);
-% %     ylim([0,7]);
+% %     ylim([0,100]);
 %     xlabel('Time {\it t} [s]');
 %     ylabel('Distance {\it d} [m]');
 %     axis square;
 %     legend;
     %% 動画作成スレッド
 
-    figure(9)
+    figure(6)
 
     % Animation Loop
 
     t = 1;
-    xsum = 0;
-    ysum = 0;
+    FigNo=6;
+    view_x=120;
+    view_y=-10;
     for i=1:n
-        P(i) = polyshape([1 5*(i-1)+1;10 5*(i-1)+1;10 5*(i-1)+5;1 5*(i-1)+5]);
+        P(i) = polyshape([1 2.5*(i-1)+1;10 2.5*(i-1)+1;10 2.5*(i-1)+2;1 2.5*(i-1)+2]);
     end
     MaxHp =10;
     for i=1:n
         CurrentHp(i) = MaxHp;
     end
-    dt = 0.01;
-    for i=1:N
-        xsum = xsum + x(i,1);
-        ysum = ysum + y(i,1);
-    end
+    damage_dt = 0.01;
     v = VideoWriter('tracebirds','MPEG-4');
     v.FrameRate = 10;
     open(v);
     while t <= numel(logger.Data.t)
-        clf(figure(9)); 
+        clf(figure(6)); 
         
             farea = 5;
             for i=1:n
@@ -238,25 +232,20 @@ end
                 text(fp{i}(1),fp{i}(2),num2str(i));
             end
 
-            for i=1:n
-                plot(P(i),'facecolor','none');
-                text(-3,5*(i-1)+2.5,num2str(i));
-            end
-
             hold off
-        xlim([-10,130]);
-        ylim([-10,130]);
-        zlim([0,100]);
+        xlim([30,90]);
+        ylim([30,90]);
+        zlim([0,15]);
         set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
-        axis square;
-%         view(-40,-30);%シミュレーション用
-        view(0,0);%高度確認用
+        view(view_x,view_y);%シミュレーション用
+%         view(0,0);%高度確認用
         hold on
 
         grid on; 
-        pbaspect([1 1 1]);
+        grid minor;
+        daspect([1 1 1]);
         ax = gca;
         ax.Box = 'on';
         ax.GridColor = 'k';
@@ -268,30 +257,18 @@ end
                 quiver3(x(i,t),y(i,t),z(i,t),(x(i,t)-x(i,t-1)),(y(i,t)-y(i,t-1)),(z(i,t)-z(i,t-1)));
             end
             for j=1:n
-            HpBar(j) = polyshape([1 5*(j-1)+1;CurrentHp(j) 5*(j-1)+1;CurrentHp(j) 5*(j-1)+5;1 5*(j-1)+5]);
+            HpBar(j) = polyshape([1 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+2;1 2.5*(j-1)+2]);
                 if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2) && z(i,t)>0 && z(i,t)<0.5
-                    CurrentHp(j) = CurrentHp(j)-dt;
-                    HpBar(j) = polyshape([1 5*(j-1)+1;CurrentHp(j) 5*(j-1)+1;CurrentHp(j) 5*(j-1)+5;1 5*(j-1)+5]);
+                    CurrentHp(j) = CurrentHp(j)-damage_dt;
+                    HpBar(j) = polyshape([1 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+2;1 2.5*(j-1)+2]);
 
-                    xlim([-10,130])
-                    ylim([-10,130])
-                    zlim([0,100])
                     if CurrentHp(j) <=1
                         break;
                     end
                 end
-                if CurrentHp(j)<3
-                    plot(HpBar(j),'facecolor','r')
-                else
-                    plot(HpBar(j),'facecolor','g')
-                end
             end
-                
-
-                xlim([-10,130])
-                ylim([-10,130])
-                zlim([0,100])
         end
+        
         for i=Nb+1:N
             figi = plot3(x(i,t),y(i,t),z(i,t),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
         end
@@ -299,163 +276,91 @@ end
         hold off 
         pause(16 * 1e-3) ; 
         t = t+1;
-        if t==51
-            figure(5)
-            title('t=5s');
+        t_sub=1/dt;        
+        if mod(t,t_sub*5)==1
+            FigNo=FigNo+1;
+            figure(FigNo)
+            farea = 5;
+            for i=1:n
+                farmxi = fp{i}(1);
+                farmyi = fp{i}(2);
+                xf{i} = [farmxi+farea farmxi+farea farmxi-farea farmxi-farea];
+                yf{i} = [farmyi-farea farmyi+farea farmyi+farea farmyi-farea];
+                vertices=[xf{i}(3),yf{i}(1),0;      %point1
+                          xf{i}(1),yf{i}(1),0;      %point2
+                          xf{i}(3),yf{i}(2),0;      %point3
+                          xf{i}(1),yf{i}(2),0;      %point4
+                          xf{i}(3),yf{i}(1),0.5;    %point5
+                          xf{i}(1),yf{i}(1),0.5;    %point6
+                          xf{i}(3),yf{i}(2),0.5;    %point7
+                          xf{i}(1),yf{i}(2),0.5];   %point8
+               faces=[1,2,4,3;      %face1
+                      1,3,7,5;      %face2
+                      1,2,6,5;      %face3
+                      2,4,8,6;      %face4
+                      4,3,7,8;      %face5
+                      5,6,7,8];     %face6
+               patch('Faces', faces, 'Vertices', vertices, 'facecolor', 'r');
+            end
             
-            grid on;
-            xlim([-10 130]);
-            ylim([-10 130]);
+            title(['t=',num2str(logger.Data.t(t)),'s']);
+            
+            grid on; 
+            grid minor;
+            daspect([1 1 1]);
+            ax = gca;
+            ax.Box = 'on';
+            ax.GridColor = 'k';
+            ax.GridAlpha = 0.4;
+            xlim([30,90])
+            ylim([30,90])
+            zlim([0,15])
             set(gca,'FontSize',20);
             xlabel('\sl x \rm [m]','FontSize',25);
             ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
+            view(view_x,view_y);
             hold on
             for i=1:n
                 fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
-                plot(P(i),'facecolor','none');
                 text(fp{i}(1),fp{i}(2),num2str(i));
-                text(-3,5*(i-1)+2.5,num2str(i));
-            end
-            for j=1:n
-                if CurrentHp(j)<3
-                    plot(HpBar(j),'facecolor','r')
-                else
-                    plot(HpBar(j),'facecolor','g')
-                end
             end
             
             for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
+                figi = plot3(x(i,t),y(i,t),z(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,1,0]);
                 if t>=2
-                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
+                    quiver3(x(i,t),y(i,t),z(i,t),(x(i,t)-x(i,t-1)),(y(i,t)-y(i,t-1)),(z(i,t)-z(i,t-1)));
                 end
             end
             for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
+                figi = plot3(x(i,t),y(i,t),z(i,t),'^','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
             end
             hold off
             
-            exportgraphics(gcf,'Position trace(t=5s).eps');
-        end
-        if t==101
-            figure(6)
-            title('t=10s');
+            exportgraphics(gcf,['Position trace(t=',num2str(logger.Data.t(t)),'s).eps']);
             
-            grid on;
-            xlim([-10 130]);
-            ylim([-10 130]);
-            set(gca,'FontSize',20);
-            xlabel('\sl x \rm [m]','FontSize',25);
-            ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
+            FigNo=FigNo+1;
+            figure(FigNo)
+            
+            title(['t=',num2str(logger.Data.t(t)),'s']);
             hold on
             for i=1:n
-                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
                 plot(P(i),'facecolor','none');
-                text(fp{i}(1),fp{i}(2),num2str(i));
-                text(-3,5*(i-1)+2.5,num2str(i));
-            end
-            for j=1:n
-                if CurrentHp(j)<3
-                    plot(HpBar(j),'facecolor','r')
-                else
-                    plot(HpBar(j),'facecolor','g')
+                text(0,2.5*(i-1)+1.5,num2str(i));
+                for j=1:n
+                    if CurrentHp(j)<3
+                        plot(HpBar(j),'facecolor','r')
+                    else
+                        plot(HpBar(j),'facecolor','g')
+                    end
                 end
             end
-            
-            for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
-                if t>=2
-                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
-                end
-            end
-            for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
-            end
+            xlim([-1 11]);
+            ylim([0 HpBar(n).Vertices(2,2)+1]);
             hold off
             
-            exportgraphics(gcf,'Position trace(t=10s).eps');
+            exportgraphics(gcf,['Farm Durable Value(t=',num2str(logger.Data.t(t)),'s).eps']);
         end
-        if t==151
-            figure(7)
-            title('t=15s');
-            
-            grid on;
-            xlim([-10 130]);
-            ylim([-10 130]);
-            set(gca,'FontSize',20);
-            xlabel('\sl x \rm [m]','FontSize',25);
-            ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
-            hold on
-            for i=1:n
-                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
-                plot(P(i),'facecolor','none');
-                text(fp{i}(1),fp{i}(2),num2str(i));
-                text(-3,5*(i-1)+2.5,num2str(i));
-            end
-            for j=1:n
-                if CurrentHp(j)<3
-                    plot(HpBar(j),'facecolor','r')
-                else
-                    plot(HpBar(j),'facecolor','g')
-                end
-            end
-            
-            for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
-                if t>=2
-                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
-                end
-            end
-            for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
-            end
-            hold off
-            
-            exportgraphics(gcf,'Position trace(t=15s).eps');
-        end
-        if t==201
-            figure(8)
-            title('t=20s');
-            
-            grid on;
-            xlim([-10 130]);
-            ylim([-10 130]);
-            set(gca,'FontSize',20);
-            xlabel('\sl x \rm [m]','FontSize',25);
-            ylabel('\sl y \rm [m]','FontSize',25);
-            axis square;
-            hold on
-            for i=1:n
-                fill(xf{i},yf{i},'r','FaceAlpha',.2,'EdgeAlpha',.2);
-                plot(P(i),'facecolor','none');
-                text(fp{i}(1),fp{i}(2),num2str(i));
-                text(-3,5*(i-1)+2.5,num2str(i));
-            end
-            for j=1:n
-                if CurrentHp(j)<3
-                    plot(HpBar(j),'facecolor','r')
-                else
-                    plot(HpBar(j),'facecolor','g')
-                end
-            end
-            
-            for i=1:Nb
-                figi = plot(x(i,t),y(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
-                if t>=2
-                    quiver(x(i,t),y(i,t),3*(x(i,t)-x(i,t-1)),3*(y(i,t)-y(i,t-1)));
-                end
-            end
-            for i=Nb+1:N
-                figi = plot(x(i,t),y(i,t),'x','MarkerSize',5,'MarkerFaceColor',[0,1,0]);
-            end
-            hold off
-            
-            exportgraphics(gcf,'Position trace(t=20s).eps');
-        end
-        frame = getframe(figure(9));
+        frame = getframe(figure(6));
         writeVideo(v,frame);      
 
     end
@@ -464,7 +369,3 @@ end
     exportgraphics(gcf,'final position trace birds.eps');
     disp('simulation ended')
 end 
-
-
-
-

@@ -1,5 +1,5 @@
 function arranged_pos = arranged_position_trace_birds(fp,N,Nb,z)
-    spone_distance = 60;
+    spone_distance = 30;
     area_spone = arrayfun(@(th) fp+(spone_distance+0)*[cos(th);sin(th)],0*pi/180:1*pi/180:360*pi/180,'UniformOutput',false);
     % base_pos=[100 60];%N=1‚Ìagent‚ÌêŠ‚ğw’è‚µ‚Ä‚¢‚éD
     AA = randsample(length(area_spone),1);

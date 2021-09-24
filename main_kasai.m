@@ -12,7 +12,7 @@ userpath('clear');
 N = 10; %number of agents（if bird_trace system else number of all units）
 Nb = 8; %number of pestbirds
 Na = N - Nb; %number of agents
-fp = farm_create(5);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
+fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
 flag_miki = ones(N);%PtoP制御用
 fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
@@ -388,7 +388,7 @@ close all
 clc
 % agent(1).reference.covering.draw_movie(logger,N,Env)
 % dataplot_agreement(logger,N); % 合意制御
-dataplot_tracebirds(logger,N,Nb,fp);%害鳥追跡
+dataplot_tracebirds(logger,N,Nb,fp,dt);%害鳥追跡
 % dataplot_PtoP(logger);%PtoP制御
 % agent(1).reference.timeVarying.show(logger)
 % logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
@@ -405,4 +405,4 @@ dataplot_tracebirds(logger,N,Nb,fp);%害鳥追跡
 %logger.plot(1,["p","q"],["er","er"]);
 
 %%
-%logger.save();
+% logger.save();
