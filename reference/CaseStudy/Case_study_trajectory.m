@@ -19,7 +19,7 @@ z = 1;
 %% 円軌道
 % x = x_0+cos(t/s);
 % y = y_0+sin(t/s);
-% z = z_0;
+% z = 1;
 
 ref=@(t)[x;y;z;0];
 end
