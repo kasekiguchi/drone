@@ -259,12 +259,11 @@ end
             for j=1:n
             HpBar(j) = polyshape([1 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+2;1 2.5*(j-1)+2]);
                 if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2) && z(i,t)>0 && z(i,t)<0.5
-                    CurrentHp(j) = CurrentHp(j)-damage_dt;
-                    HpBar(j) = polyshape([1 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+2;1 2.5*(j-1)+2]);
-
                     if CurrentHp(j) <=1
                         break;
                     end
+                    CurrentHp(j) = CurrentHp(j)-damage_dt;
+                    HpBar(j) = polyshape([1 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+2;1 2.5*(j-1)+2]);
                 end
             end
         end

@@ -65,7 +65,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
                 result = arrayfun(@(i) Cov_distance(other_state(:,i),state,1),1:N);
                 tmp = struct2cell(result);
                 dis = cell2mat(tmp);
-                AA = arrayfun(@(i) dot( agent_v{num}(1:2),dis(2:3,:,i)),1:Nb);
+                AA = arrayfun(@(i) dot(agent_v{num}(1:2),dis(2:3,:,i)),1:Nb);
                 %‘O‚É‚¢‚é‚â‚Â‚Ì”cˆ¬
                 flont = AA>0;
                 
