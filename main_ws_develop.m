@@ -3,8 +3,7 @@
 % set path
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
-[~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');
-cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
+[~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
 rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
@@ -26,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=60;
+    te=30;
 end
 %% initialize
 initial(N) = struct;
@@ -34,7 +33,7 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-    initial(i).p = [0;0];
+    initial(i).p = [0;8];
     initial(i).q = [0];
     initial(i).v = [0];
     initial(i).w = [0];
@@ -59,7 +58,7 @@ for i = 1:N
     close all
     %% set environment property
     Env = [];
-    agent(i).set_property("env",Env_FloorMap_sim(i)); % 重要度マップ設定
+    agent(i).set_property("env",Env_FloorMap_sim_fromstl(i,'3F.stl')); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor=[];
     agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-3) ) )  );%LiDAR seosor
@@ -67,18 +66,18 @@ for i = 1:N
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
 %             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-        agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
     velocity = 1;
     
-    WayPoint = [200,0,0,0,0];%[x y theta v omaga]
+    WayPoint = [45,8,0,0,0];%[x y theta v omaga]
     convjudge = 0.5;
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));

@@ -121,21 +121,21 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             end
             
             % Optimize the map%
-            [obj.map_param, RemovingFlag] = UKFOptimizeMap(obj.map_param, obj.constant);%ここですぐ減らされている．
-            %線分パラメータに変換
+            [obj.map_param, RegistFlag] = UKFOptimizeMap(obj.map_param, obj.constant);%ここですぐ減らされている．
+            %convert to Line parameter that consisted from d and delta
             line_param = LineToLineParamAndEndPoint(obj.map_param);
             
             %共分散行列を再構成
             % Update estimate covariance %
-            if any(RemovingFlag)
-                exist_flag = sort([1, 2, 3, 4, 5, (find(~RemovingFlag) - 1) * 2 + 6, (find(~RemovingFlag) - 1) * 2 + 7]);
+            if any(RegistFlag)
+                exist_flag = sort([1, 2, 3, 4, 5, (find(~RegistFlag) - 1) * 2 + 6, (find(~RegistFlag) - 1) * 2 + 7]);
                 PreCov = PreCov(exist_flag, exist_flag);
             end
             
             %UKF Algorithm
             %シグマポイント再計算
             % re calculate of sigma points
-            StateCount = size(PreCov,2);
+            StateCount = obj.n + obj.NLP * length(line_param.d);
             PreMh = zeros(obj.NLP * length(line_param.d),1);
             PreMh(1:obj.NLP:end, 1) = line_param.d;
             PreMh(2:obj.NLP:end, 1) = line_param.delta;
@@ -145,6 +145,7 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             if length(CholCov)~= length(PreXh)
                 disp('error');
             end
+            
             Kai = [PreXh,...
                 cell2mat(arrayfun(@(i) PreXh + sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false)),...
                 cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) .* CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
@@ -157,8 +158,8 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             %             association_info.index = correspanding wall(line_param) number index
             %            association_info.distance = wall distace
             association_info = UKFMapAssociation(PreXh(1:obj.n),PreMh(1:end), EndPoint{1,1}, measured.ranges,measured.angles, obj.constant,obj.NLP);
-                association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
-                association_available_count = length(association_available_index);%Count
+            association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
+            association_available_count = length(association_available_index);%Count
             %出力のシグマポイントを計算
             %sensing step
             %測定値が取れていないレーザー部分はダミーデータ0をかませる
@@ -198,13 +199,12 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             end
             %カルマンゲイン
             G = PreXYCov /( PreYCov + obj.R .* eye(association_available_count) );
-            
             Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
             obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(association_available_count)) * G';
             
-            %             % Convert line parameter into line equation "ax + by + c = 0"
-            line_param.d = Xh(obj.n+1:obj.NLP:end, 1);
-            line_param.delta = Xh(obj.n+2:obj.NLP:end, 1);
+            % Convert line parameter into line equation "ax + by + c = 0"
+            line_param.d = Xh(obj.n+1:obj.NLP:end,1);
+            line_param.delta = Xh(obj.n+2:obj.NLP:end,1);
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param_opt = LineParamToLineAndEndPoint(line_param);
             obj.map_param.a = line_param_opt.a;
@@ -214,28 +214,32 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             MapEnd = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = MapEnd.x;
             obj.map_param.y = MapEnd.y;
-            [obj.map_param, ~,RemovingFlag] = UKFOptimizeMap(obj.map_param, obj.constant);
-            line_param = LineToLineParamAndEndPoint(obj.map_param);
-
+            [obj.map_param,RegistFlag] = UKFOptimizeMap(obj.map_param, obj.constant);
+            line_param = LineToLineParamAndEndPoint(obj.map_param);%lineparam d and delta and endpoint is calculated
+            
+            MapEnd.x = obj.map_param.x;
+            MapEnd.y = obj.map_param.y;
+            
             EstMh = zeros(obj.NLP * length(line_param.d),1);
             EstMh(1:obj.NLP:end, 1) = line_param.d;
             EstMh(2:obj.NLP:end, 1) = line_param.delta;
             Xh = [Xh(1:obj.n);EstMh(1:end)];
             
-            if any(RemovingFlag)
-                exist_flag = sort([1, 2, 3, 4, 5,(find(~RemovingFlag) - 1) * 2 + 6, (find(~RemovingFlag) - 1) * 2 + 7]);
+            if any(RegistFlag)
+                exist_flag = sort([1, 2, 3, 4, 5,(find(~RegistFlag) - 1) * 2 + 6, (find(~RegistFlag) - 1) * 2 + 7]);
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
             
             if length(obj.result.P) ~= length(Xh)
                 disp('error');
             end
+            
             % return values setting
             obj.result.state.set_state(Xh);
             obj.result.Est_state = Xh;
             obj.result.G = G;
             obj.result.map_param = obj.map_param;
-            obj.result.AssociationInfo = association_info;
+            obj.result.AssociationInfo = UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), MapEnd, measured.ranges,measured.angles, obj.constant,obj.NLP);
             result=obj.result;
         end
         function show()

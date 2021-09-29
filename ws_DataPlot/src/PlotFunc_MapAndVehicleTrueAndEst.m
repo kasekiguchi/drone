@@ -58,19 +58,19 @@ ymax = 30;
 
 
 
-Wall = plot(p_Area,'FaceColor','red','FaceAlpha',0.1);
+Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
 for i=1:MapDimx
-    PlotMap = plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',5,'Color','r');
+    PlotMap = plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',3,'Color','r');
 end
 %plantFinalState
 PlantFinalState = PlantData(:,end);
-PlantFinalStatesquare = PlantFinalState + 2.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
 PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * PlantqData(end) / pi, PlantData(:,end)');
 PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %modelFinalState
 EstFinalState = EstData(:,end);
-EstFinalStatesquare = EstFinalState + 2.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 EstFinalStatesquare =  polyshape( EstFinalStatesquare');
 EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * EstqData(end) / pi, EstData(:,end)');
 PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);

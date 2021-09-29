@@ -13,20 +13,22 @@ function [opt_map, removing_flag] = OptimizeMap(map, Constant)
         % Searching the line which is able to be conbined
         if map.a(i) > -1 && map.a(i) < 1
             % When the line is not vertical, comparing with 'y' values
-            flag_1 = vecnorm(map.y(i, 1) - map.y(:, 1), 2, 2) < Constant.LineThreshold;
-            flag_2 = vecnorm(map.y(i, 2) - map.y(:, 2), 2, 2) < Constant.LineThreshold;
-            flag_3 = IsOverlap(map.x(i, 1), map.x(i, 2), map.x(:, 1), map.x(:, 2));
+            flag_1 = all(abs(map.a(i,:) * map.x + map.b(i,:) * map.y + map.c(i,:)) < Constant.LineThreshold, 2);
+            flag_2 = vecnorm(map.y(i, 1) - map.y(:, 1), 2, 2) < Constant.LineThreshold;
+            flag_3 = vecnorm(map.y(i, 2) - map.y(:, 2), 2, 2) < Constant.LineThreshold;
+            flag_4 = IsOverlap(map.x(i, 1), map.x(i, 2), map.x(:, 1), map.x(:, 2));
         else
             % When the line is vertical, comparing with 'x' values
-            flag_1 = vecnorm(map.x(i, 1) - map.x(:, 1), 2, 2) < Constant.LineThreshold;
-            flag_2 = vecnorm(map.x(i, 2) - map.x(:, 2), 2, 2) < Constant.LineThreshold;
-            flag_3 = IsOverlap(map.y(i, 1), map.y(i, 2), map.y(:, 1), map.y(:, 2));
+            flag_1 = all(abs(map.a(i,:) * map.x + map.b(i,:) * map.y + map.c(i,:)) < Constant.LineThreshold, 2);
+            flag_2 = vecnorm(map.x(i, 1) - map.x(:, 1), 2, 2) < Constant.LineThreshold;
+            flag_3 = vecnorm(map.x(i, 2) - map.x(:, 2), 2, 2) < Constant.LineThreshold;
+            flag_4 = IsOverlap(map.y(i, 1), map.y(i, 2), map.y(:, 1), map.y(:, 2));
         end
         % Checking the non-self index
-        flag_4 = true(size(map.index, 1), 1);
-        flag_4(i) = false;
+        flag_5 = true(size(map.index, 1), 1);
+        flag_5(i) = false;
         % Making condition
-        cond = flag_1 & flag_2 & flag_3 & flag_4;
+        cond = flag_1 & flag_2 & flag_3 & flag_4 & flag_5;
         % Extracting index from condition
         matching_list = find(cond);
         add_array(1, cond) = true;

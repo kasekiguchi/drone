@@ -53,7 +53,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
         
         function [result]=do(obj,param,~)
             %   param : optional
-            model=obj.self.model;
+            model = obj.self.model;%ロボット事前状態
             sensor = obj.self.sensor.result;%scan data
             xh_pre = model.state.get(); %事前推定
             pre_state = [xh_pre(1),xh_pre(2),xh_pre(3)];%[x,y,theta]
@@ -62,7 +62,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
                 if ~isempty(obj.self.controller.result)
                     u = obj.self.controller.result.input;
                     cparamK = obj.self.model.param.K;
-                    u(1) = u(1)*cparamK;
+                    u(1) = u(1) * cparamK;
                 else
                     u=[0,0];
                 end
@@ -90,7 +90,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
             association_available_count = length(association_available_index);%Count
             
-            %EKF Algorithm
+            %observation step
             mapstate_count = 2 * size(line_param.d, 1);
             state_count = obj.n + mapstate_count;
             
@@ -102,8 +102,8 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             %             A(1:3,1:3) = obj.JacobianF(u(1),xh_pre(3)); % Euler approximation
             B = eye(state_count) .* obj.dt;
             %
-            C = zeros(association_available_count, state_count);
-            Y = zeros(association_available_count, 1);
+            C = zeros(association_available_count, state_count);%配列用意
+            Y = zeros(association_available_count, 1);%配列用意
             %             C = diag([obj.JacobianH(x,p),eye(mapstate_count)*obj.dt]);
             for i = 1:association_available_count
                 curr = association_available_index(i);
@@ -122,8 +122,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
                 C(i, 7 + (idx - 1) * 2) = (pre_state(1) * sin(line_param.delta(idx)) - pre_state(2) * cos(line_param.delta(idx))) / cos(angle) ...
                     - denon * tan(angle) / cos(angle);% diff map param alpha
             end
-            
-            %
+            %事後状態推定のための値を格納
             xh_m = zeros(state_count,1);
             xh_m(1:obj.n,1) = pre_Eststate';
             xh_m(obj.n+1:2:end, 1) = line_param.d;
@@ -141,15 +140,15 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             obj.Analysis.PrevCov = obj.result.P;
             %%%%%%%%%%%%%%%%%
             system_noise = diag(horzcat(diag(obj.Q)', repmat(diag(obj.Map_Q)', 1, size(line_param.d, 1))));
-            P_pre  = A*obj.result.P*A' + B*system_noise*B';       % 
+            P_pre  = A*obj.result.P*A' + B*system_noise*B';       % 事前共分散行列
             G = (P_pre*C')/(C*P_pre*C'+ obj.R .* eye(association_available_count)); % 
             %             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 
             tmpvalue = xh_m + G * (sensor.length(association_available_index)' - Y);% 
             obj.result.P    = (eye(state_count)-G*C)*P_pre;	% 
+            
             % Convert line parameter into line equation "ax + by + c = 0"
             line_param.d = tmpvalue(6:2:end, 1);
             line_param.delta = tmpvalue(7:2:end, 1);
-            % Convert line parameter into line equation "ax + by + c = 0"
             line_param_opt = LineParameterToLine(line_param, obj.constant);
             obj.map_param.a = line_param_opt.a;
             obj.map_param.b = line_param_opt.b;
@@ -165,11 +164,12 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
                 exist_flag = sort([1, 2, 3, 4, 5,(find(~removing_flag) - 1) * 2 + 6, (find(~removing_flag) - 1) * 2 + 7]);
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
+            
             obj.result.state.set_state(tmpvalue);
             obj.result.Est_state.set_state(tmpvalue);
             obj.result.G = G;
             obj.result.map_param = obj.map_param;
-            obj.result.AssociationInfo = association_info;
+            obj.result.AssociationInfo = MapAssociation(obj.map_param, line_param, tmpvalue(1:3), sensor.length, measured.angles, obj.constant);
 %             run('AnalysisEKFInfo');%analysis
             result=obj.result;
         end

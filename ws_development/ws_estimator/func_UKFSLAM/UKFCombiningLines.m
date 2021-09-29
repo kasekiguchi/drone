@@ -26,16 +26,23 @@ function parameter = UKFCombiningLines(map, measured, Constant)
                 continue;
             end
             % Checking the error from line of map less than threshold
-            flag_1 = all(abs(map.a * measured.x(i, :) + map.b * measured.y(i, :) + map.c) < Constant.LineThreshold, 2);
+            Flag1 = all(abs(map.a * measured.x(i, :) + map.b * measured.y(i, :) + map.c) < Constant.LineThreshold, 2);
             % Checking the overlap of each line
             if measured.a(i) > -1 && measured.a(i) < 1  
-                flag_2 = IsOverlap(measured.x(i, 1), measured.x(i, 2), map.x(:, 1), map.x(:, 2));
+                Flag2 = IsOverlap(measured.x(i, 1), measured.x(i, 2), map.x(:, 1), map.x(:, 2));
             else
-                flag_2 = IsOverlap(measured.y(i, 1), measured.y(i, 2), map.y(:, 1), map.y(:, 2));
+                Flag2 = IsOverlap(measured.y(i, 1), measured.y(i, 2), map.y(:, 1), map.y(:, 2));
             end
+            % checking line distance            
+            ssFlag3 = sqrt((map.x(:, 1) - measured.x(i,1)).^2 + (map.y(:, 1) - measured.y(i,1)).^2)< Constant.LineThreshold;%マップの始点との距離
+            seFlag3 = sqrt((map.x(:, 1) - measured.x(i,2)).^2 + (map.y(:, 1) - measured.y(i,2)).^2)< Constant.LineThreshold;%\\
+            esFlag3 = sqrt((map.x(:, 2) - measured.x(i,1)).^2 + (map.y(:, 2) - measured.y(i,1)).^2)< Constant.LineThreshold;%マップの終点との距離
+            eeFlag3 = sqrt((map.x(:, 2) - measured.x(i,2)).^2 + (map.y(:, 2) - measured.y(i,2)).^2)< Constant.LineThreshold;%\\
+            
+            Flag3 = ssFlag3 | seFlag3 | esFlag3 | eeFlag3;
             % Searching valid values
-            flag_3 = flag_1 & flag_2;
-            flag_index = find(flag_3);
+            Flag4 = Flag1 & Flag2 & Flag3;
+            flag_index = find(Flag4);
             if ~isempty(flag_index)
                 % Combine map and measurement. Expect for first is not considered because it is the role for 'OptimizeMap' function.
                 param = UKFCombiningTwoLines(map, flag_index(1), measured, i, Constant);

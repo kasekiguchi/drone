@@ -1,15 +1,14 @@
-function [opt_map, removing_flag,add_array] = UKFOptimizeMap(map, Constant)
+function [OptMap, RegistFlag] = UKFOptimizeMap(map, Constant)
     % Initialize each variable
-    opt_map = struct;
-    opt_map.index = [];
-    opt_map.x = [];
-    opt_map.y = [];
-    opt_map.a = [];
-    opt_map.b = [];
-    opt_map.c = [];
-    add_array = false(1, length(map.index));
-    removing_flag = false(1, length(map.index));
-    MatchNum = 1;
+    OptMap = struct;
+    OptMap.index = [];
+    OptMap.x = [];
+    OptMap.y = [];
+    OptMap.a = [];
+    OptMap.b = [];
+    OptMap.c = [];
+    RegistFlag = false(1, length(map.index));
+%     removing_flag = false(1, length(map.index));
     for i = 1:length(map.index)
         % Searching the line which is able to be conbined
         if map.a(i) > -1 && map.a(i) < 1
@@ -30,16 +29,16 @@ function [opt_map, removing_flag,add_array] = UKFOptimizeMap(map, Constant)
         Conditions = flag_1 & flag_2 & flag_3 & flag_4;
         % Extracting index from condition
         matching_list = find(Conditions);
-        add_array(1, Conditions) = MatchNum;
-        if ~add_array(1, i)
+        RegistFlag(1, Conditions) = true;
+        if ~RegistFlag(1, i)
             if isempty(matching_list)
                 % Appending
-                opt_map.index(end + 1, :) = map.index(i, :);
-                opt_map.x(end + 1, :) = map.x(i, :);
-                opt_map.y(end + 1, :) = map.y(i, :);
-                opt_map.a(end + 1, :) = map.a(i, :);
-                opt_map.b(end + 1, :) = map.b(i, :);
-                opt_map.c(end + 1, :) = map.c(i, :);
+                OptMap.index(end + 1, :) = map.index(i, :);
+                OptMap.x(end + 1, :) = map.x(i, :);
+                OptMap.y(end + 1, :) = map.y(i, :);
+                OptMap.a(end + 1, :) = map.a(i, :);
+                OptMap.b(end + 1, :) = map.b(i, :);
+                OptMap.c(end + 1, :) = map.c(i, :);
             else
                 % Combining maps
                 param = map;
@@ -47,16 +46,15 @@ function [opt_map, removing_flag,add_array] = UKFOptimizeMap(map, Constant)
                     tmp = UKFCombiningTwoLines(param, i, map, matching_list(k, 1), Constant);
                     param.x(i, :) = tmp.x;
                     param.y(i, :) = tmp.y;
-                    removing_flag(matching_list(k, 1)) = true;
-%                     MatchNum = MatchNum+1;
+%                     removing_flag(matching_list(k)) = true;
                 end
                 % Appending
-                opt_map.index(end + 1, :) = param.index(i, :);
-                opt_map.x(end + 1, :) = param.x(i, :);
-                opt_map.y(end + 1, :) = param.y(i, :);
-                opt_map.a(end + 1, :) = param.a(i, :);
-                opt_map.b(end + 1, :) = param.b(i, :);
-                opt_map.c(end + 1, :) = param.c(i, :);
+                OptMap.index(end + 1, :) = param.index(i, :);
+                OptMap.x(end + 1, :) = param.x(i, :);
+                OptMap.y(end + 1, :) = param.y(i, :);
+                OptMap.a(end + 1, :) = param.a(i, :);
+                OptMap.b(end + 1, :) = param.b(i, :);
+                OptMap.c(end + 1, :) = param.c(i, :);
             end
         end
     end

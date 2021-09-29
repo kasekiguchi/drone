@@ -52,7 +52,7 @@ if Flag
     xmin = -10;
     dx = 10;
     % xmax = max(tmp_max(:,1,:));
-    xmax = 150;
+    xmax = 70;
     %     ymin = min(tmp_min(:,2,:));
     ymin = -25;
     dy = 10;

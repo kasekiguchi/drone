@@ -10,21 +10,6 @@ classdef FloorMap_sim < ENV_CLASS
             obj.param=param;
             % 
             obj.name = param.name;
-%             if ~strcmp(obj.name,"none")
-%                 %obj.Vertex=obj.param.Vertex;
-%                 if isfield(obj.param,'sigma')
-%                     density_sigma=obj.param.sigma;
-%                 else
-%                     density_sigma=0.04;
-%                     obj.param.sigma=0.04;
-%                 end
-%                 %[obj.grid_density,obj.map_max,obj.map_min,obj.xq,obj.yq,obj.phi]=gen_map(Vertex,d,density_pos,density_sigma);
-%                 [obj.param.grid_density,obj.param.map_max,obj.param.map_min,obj.param.xq,obj.param.yq]=gen_map(obj.param.Vertices,obj.param.d,obj.param.q,density_sigma);
-%                 %obj.d=obj.param.d;
-%                 obj.param.discrete=1;
-%                 obj.param.grid_row=length(obj.param.map_min(1):obj.param.d:obj.param.map_max(1));
-%                 obj.param.grid_col=length(obj.param.map_min(2):obj.param.d:obj.param.map_max(2));
-%                 obj.param.grid_n = obj.param.grid_row*obj.param.grid_col;%length(obj.row)*length(obj.col);
 %             end
         end
         function [] = show(obj,varargin)
