@@ -149,7 +149,7 @@ if fExp
     %save('experiment.mat');
     logger.save();
 else
-    %save('simulation.mat');
+    save('simulation.mat');
 end
 %%
 if fExp
