@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=10;
 end
 %% initialize
 initial(N) = struct;
@@ -117,6 +117,9 @@ LogData=[
     "controller.result.fval",
     "controller.result.exitflag",
     "controller.result.eachfval",
+    "sensor.result.sensor_points",
+    "sensor.result.angle",
+    "sensor.result.length",
     %     "controller.result.Eval",
     %     "estimator.result.PreMapParam.x",
     %     "estimator.result.PreMapParam.y",

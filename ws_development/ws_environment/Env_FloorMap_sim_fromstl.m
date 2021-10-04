@@ -26,8 +26,13 @@ Rpoint = Csize * (PP.Vertices - minpoint) + minpoint;
 % RPoint = [Rpoint(:,1) - minpoint(1),Rpoint(:,2)- minpoint(2)];
 % RPoint = Rpoint(:,2) - ;
 % RPP = polyshape(Rpoint);
-%%
-env_param.Vertices(:,:,1) = Rpoint;
+%% polybuffer for obstacles
+Points = [12, 9;11, 10;13, 7.5];
+Obpoly = polybuffer(Points,'points',0.25);
+%% vertices settting
+AllVertices = [Rpoint;NaN(1,2);Obpoly.Vertices];
+env_param.Vertices(:,:,1) = AllVertices;
+% env_param.Vertices(:,:,2) = Obpoly.Vertices;
 assignin('base',"env_param",env_param);
 evalin('base',"Env = FloorMap_sim([],env_param);");
 
