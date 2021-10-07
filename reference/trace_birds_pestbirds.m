@@ -1,5 +1,5 @@
-classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
-    %EXAMPLE_WAYPOINT このクラスの概要をここに記述
+classdef trace_birds_pestbirds < REFERENCE_CLASS
+    % このクラスの概要をここに記述
     % 速度次元の入力モデル
     
     properties
@@ -8,7 +8,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
     end
     
     methods
-        function obj = wheelchair_trace_birds_pestbirds_Dis(self,param)
+        function obj = trace_birds_pestbirds(self,param)
             obj.self = self;
             obj.param = param;
             obj.result.state = STATE_CLASS(struct('state_list',["p","v","u"],'num_list',[3]));
@@ -18,13 +18,13 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
             num = obj.self.id;%今計算している鳥の番号
-            state =  obj.self.plant.state.p;%num番目の鳥の位置
-            q = obj.self.plant.state.q;%num番目の鳥のクォータニオン
+            state =  obj.self.estimator.result.state.p;%num番目の鳥の位置
+            %q = obj.self.plant.state.q;%num番目の鳥のクォータニオン
 %             agent_v = Param{1}.state.v;
             N = Param{3};%mainのN
             Nb = Param{4};%鳥の数
             for i=Nb+1:N
-                drone_state(:,i) = [Param{1,1}(1,i).plant.state.p];
+                drone_state(:,i) = [Param{1,1}(1,i).plant.state.p];%ドローンの情報
             end
             for i=1:N
                 other_state(:,i) = [Param{1,1}(1,i).plant.state.p];%すべての鳥とドローンの情報
@@ -35,12 +35,16 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
             tarm1 = zeros(3,length(other_state));%鳥の群れる項
             adjust =  zeros(3,length(other_state));%鳥がほかの鳥から離れる
             keep = zeros(3,1);%畑への進行
-            away = zeros(3,length(other_state));%ドローンから離れる
+            away = zeros(3,length(drone_state));%ドローンから離れる
             fp = Param{5};
-            k1 = 0.1;%%離れる
-            k2 = 0.1;%%整列
-            k3 = 3.;%畑に向かう%1機のとき1にしてた．
-            k4 = 8.0;%%逃げる：初期化下で内分点の計算から求めている．
+            k1 = 0.5;%%離れる
+            k2 = 1;%%整列
+            if state(3)~=0
+                k3 = 2;%畑に向かう%1機のとき1にしてた．
+            else
+                k3 = 0;
+            end
+            k4 = 1;%%逃げる：初期化下で内分点の計算から求めている．
             [~,count] = size(pre_info.Data.t');
             R=5;
             flont = zeros(1,Nb);
@@ -55,7 +59,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
                 end
                 [~,farm] = min(d);
                 fp = fp{farm};
-               keep = ((fp-state)/norm((fp-state),2)) ;
+               keep = ((fp-state)/norm(fp-state)) ;
                 %内積計算
                 if pre_info.i==1
                     agent_v = arrayfun(@(AAA) (state-[0;0;0])/0.1,1:N,'UniformOutput',false);
@@ -79,7 +83,7 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
                 end
             end
             for i=Nb+1:N%ドローンから逃げる力
-                away(:,i) = (distance(1:3,:,i))/norm(distance(1:3,:,i))^2;
+                away(:,i) = (distance(1:3,:,i))/norm(distance(1:3,:,i));
             end     
             %%目標位置に向かう用のやつ
             if rand(1)>0.5
@@ -105,28 +109,27 @@ classdef wheelchair_trace_birds_pestbirds_Dis < REFERENCE_CLASS
 %             if norm(input)<5.9
 %                disp(norm(input)) 
 %             end
-            kind_speed = 82 * 10/36;
-            ref_point = eye(3)*state + eye(3)*(kind_speed * (input/norm(input,2)));
-            th_xd = atan2(ref_point(2)-state(2),ref_point(1)-state(1));%角速度
+%             kind_speed = 82 * 10/36;%鳥の平均飛行速度
+%             ref_point = fp;
+%             th_xd = atan2(ref_point(2)-state(2),ref_point(1)-state(1));%角速度
 %             figure;
 %             scatter(ref_point(1),ref_point(2),'r')
 %             hold on;
 %             scatter(state(1),state(2),'b')
 %             xlim([state(1)-norm(ref_point-state)-3,state(1)+norm(ref_point-state)+3])
 %             ylim([state(2)-3-norm(ref_point-state),state(2)+3+norm(ref_point-state)])
-            qtrans = quat2eul(q');
-            q3 = qtrans(3);
-            th_dd = th_xd-q3;
-            if th_dd>pi
-                q3=q3+2*pi;
-            elseif th_dd<=-pi
-                q3= q3-2*pi;
-            end
-                        th_dd = th_xd-q3;
-            eul = [0,0,th_dd];
-            quat = eul2quat(eul);
-            v_xd = kind_speed ;
-            obj.result.state.u = [v_xd;ref_point(3);eul(3);quat'];%[(x,y),z,omega,q]
+%             qtrans = quat2eul(q');
+%             q3 = qtrans(3);
+%             th_dd = th_xd-q3;
+%             if th_dd>pi
+%                 q3=q3+2*pi;
+%             elseif th_dd<=-pi
+%                 q3= q3-2*pi;
+%             end
+%                         th_dd = th_xd-q3;
+%             eul = [0,0,th_dd];
+%             quat = eul2quat(eul);
+            obj.result.state.u = 0.8*input;%[xr,yr,zr]
             result = obj.result;
         end
         function show(obj,param)

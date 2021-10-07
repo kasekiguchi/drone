@@ -8,7 +8,7 @@ function Reference = Reference_tracebirds(id,Nb)
                 Reference.param={""};
     else%‚±‚±‚ÍŠQ’¹‚Ì•ªŠò
                 clear Reference
-                Reference.type=["wheelchair_trace_birds_pestbirds_Dis"];
+                Reference.type=["trace_birds_pestbirds"];
                 Reference.name=["trace_pestbirds"];
                 Reference.param={""};
     end

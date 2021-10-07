@@ -151,7 +151,7 @@ end
     axis square;
     legend('Location','eastoutside');
     cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
-    exportgraphics(gcf,'initial position trace birds.eps');
+%     exportgraphics(gcf,'initial position trace birds.eps');
 %     %% エージェント間の距離
 %     figure(5)
 %     figure5=figure(5);
@@ -253,9 +253,9 @@ end
         
         for i=1:Nb
             figi = plot3(x(i,t),y(i,t),z(i,t),'o','MarkerSize',5,'MarkerFaceColor',[1,1,0]);
-            if t>=2
-                quiver3(x(i,t),y(i,t),z(i,t),(x(i,t)-x(i,t-1)),(y(i,t)-y(i,t-1)),(z(i,t)-z(i,t-1)));
-            end
+%             if t>=2
+%                 quiver3(x(i,t),y(i,t),z(i,t),(x(i,t)-x(i,t-1)),(y(i,t)-y(i,t-1)),(z(i,t)-z(i,t-1)));
+%             end
             for j=1:n
             HpBar(j) = polyshape([1 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+2;1 2.5*(j-1)+2]);
                 if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2) && z(i,t)>0 && z(i,t)<0.5
@@ -276,7 +276,7 @@ end
         pause(16 * 1e-3) ; 
         t = t+1;
         t_sub=1/dt;        
-        if mod(t,t_sub*5)==1
+        if mod(t,t_sub*10)==1
             FigNo=FigNo+1;
             figure(FigNo)
             farea = 5;
@@ -335,7 +335,7 @@ end
             end
             hold off
             
-            exportgraphics(gcf,['Position trace(t=',num2str(logger.Data.t(t)),'s).eps']);
+%             exportgraphics(gcf,['Position trace(t=',num2str(logger.Data.t(t)),'s).eps']);
             
             FigNo=FigNo+1;
             figure(FigNo)
@@ -357,7 +357,7 @@ end
             ylim([0 HpBar(n).Vertices(2,2)+1]);
             hold off
             
-            exportgraphics(gcf,['Farm Durable Value(t=',num2str(logger.Data.t(t)),'s).eps']);
+%             exportgraphics(gcf,['Farm Durable Value(t=',num2str(logger.Data.t(t)),'s).eps']);
         end
         frame = getframe(figure(6));
         writeVideo(v,frame);      

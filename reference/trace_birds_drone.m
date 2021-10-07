@@ -1,5 +1,5 @@
 classdef trace_birds_drone < REFERENCE_CLASS
-    %EXAMPLE_WAYPOINT 鳥を追い出すための動作用クラス．
+    % 鳥を追い出すための動作用クラス．
     %   詳細説明をここに記述
     
     properties
@@ -107,10 +107,9 @@ classdef trace_birds_drone < REFERENCE_CLASS
             tmp = dog_input(state,fp,P,sheep_state,Cog,xd,agent_state,(num-N+Na),Na);
 %             tmp = dog_input(state,fp,P,sheep_state,Cog,xd);
             obj.result.state.u = tmp.result;
-            Target = xd;
 %             Target = [x;y];
 %             Target = Param{4};
-            obj.result.state.p = [Target;0];
+            obj.result.state.p = xd;
             obj.result.state.v = [0;0;0];
 %             obj.result.state.u = [0;0;0];
             obj.result.CoG = Cog;

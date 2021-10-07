@@ -6,16 +6,16 @@ function Model = Model_PestBirds(id,dt,type,initial,varargin)
 if ~isempty(varargin)
     Setting = varargin{1};
 end
+Setting.dt = dt;
+Setting.param.A = eye(3);
 Model.type="PestBirds_Model"; % class name
 %Model.name="euler"; % print name
-Setting.param.A = eye(3);
-Setting.dim=[3,2,0];
-Setting.input_channel = ["p","q"];
+Setting.dim=[3,0,0];
 Setting.method = get_model_name("PestBirds"); % model dynamicsの実体名
-Setting.state_list =  ["p","q"];
 Setting.initial = initial;
-Setting.num_list = [3,4];
-Setting.dt = dt;
+Setting.state_list =  ["p"];
+Setting.num_list = [3];
+Setting.input_channel = ["p"];
 if strcmp(type,"plant")
         Model.id = id;
 %         Setting.initial.p = [0;0;0];
