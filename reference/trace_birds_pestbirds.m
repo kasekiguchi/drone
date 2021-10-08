@@ -19,8 +19,6 @@ classdef trace_birds_pestbirds < REFERENCE_CLASS
             %   詳細説明をここに記述
             num = obj.self.id;%今計算している鳥の番号
             state =  obj.self.estimator.result.state.p;%num番目の鳥の位置
-            %q = obj.self.plant.state.q;%num番目の鳥のクォータニオン
-%             agent_v = Param{1}.state.v;
             N = Param{3};%mainのN
             Nb = Param{4};%鳥の数
             for i=Nb+1:N
@@ -36,22 +34,18 @@ classdef trace_birds_pestbirds < REFERENCE_CLASS
             adjust =  zeros(3,length(other_state));%鳥がほかの鳥から離れる
             keep = zeros(3,1);%畑への進行
             away = zeros(3,length(drone_state));%ドローンから離れる
-            fp = Param{5};
-            k1 = 0.5;%%離れる
+            fp = Param{5};%畑エリア
+            k1 = 1;%%離れる
             k2 = 1;%%整列
-            if state(3)~=0
-                k3 = 2;%畑に向かう%1機のとき1にしてた．
-            else
-                k3 = 0;
-            end
-            k4 = 1;%%逃げる：初期化下で内分点の計算から求めている．
+            k3 = 3;%畑に向かう%1機のとき1にしてた．
+            k4 = 1;%ドローンから逃げる
             [~,count] = size(pre_info.Data.t');
             R=5;
             flont = zeros(1,Nb);
             %%%近づく離れる第一講%%%%%%%%%%%%%%%5
             result = arrayfun(@(i) Cov_distance(state,other_state(:,i),1),1:N);%鳥とその他（ドローンを含む）の距離計算
             tmp = struct2cell(result);
-            distance = cell2mat(tmp);
+            distance = cell2mat(tmp);%[distance;dx;dy;dz];
             if count >1
 %                keep = pre_info{num}.state(4:6,end)-agent_v;
                 for i=1:numel(fp)
@@ -59,7 +53,7 @@ classdef trace_birds_pestbirds < REFERENCE_CLASS
                 end
                 [~,farm] = min(d);
                 fp = fp{farm};
-               keep = ((fp-state)/norm(fp-state)) ;
+               keep = (fp-state)/norm(fp-state) ;
                 %内積計算
                 if pre_info.i==1
                     agent_v = arrayfun(@(AAA) (state-[0;0;0])/0.1,1:N,'UniformOutput',false);
@@ -71,19 +65,19 @@ classdef trace_birds_pestbirds < REFERENCE_CLASS
                 dis = cell2mat(tmp);
                 AA = arrayfun(@(i) dot(agent_v{num}(1:2),dis(2:3,:,i)),1:Nb);
                 %前にいるやつの把握
-                flont = AA>0;
+                flont = AA;
                 
 %                k5 = 0;%*distance{N}.result/(distance{N}.result + A.result);%%畑へ向かう力
 
             end
             if i~=num&&i<=Nb&&flont(i)==1
-                if distance(1,:,i)<rc&&abs(distance(1,:,i))>0.
-                    tarm1(:,i) = -(1-[R^3/distance(1,:,i)^3])*[distance(1:3,:,i)];
+                if distance(1,:,i)<rc&&distance(1,:,i)>0.
+                    tarm1(:,i) = -(1-[R^3/distance(1,:,i)^3])*[distance(1,:,i)];
                     adjust(:,i) = agent_v{i} - agent_v{num};                       
                 end
             end
             for i=Nb+1:N%ドローンから逃げる力
-                away(:,i) = (distance(1:3,:,i))/norm(distance(1:3,:,i));
+                away(:,i) = (distance(2:4,:,i))/norm(distance(2:4,:,i));
             end     
             %%目標位置に向かう用のやつ
             if rand(1)>0.5
@@ -92,7 +86,7 @@ classdef trace_birds_pestbirds < REFERENCE_CLASS
                 r=0.1;
             end
             fp = fp(1:2) + r * rand(1);
-            fp = [fp;0];
+            fp = [fp;1];
             if fp-state==0
                 go_farm = (fp-state);
             else
@@ -129,11 +123,10 @@ classdef trace_birds_pestbirds < REFERENCE_CLASS
 %                         th_dd = th_xd-q3;
 %             eul = [0,0,th_dd];
 %             quat = eul2quat(eul);
-            obj.result.state.u = 0.8*input;%[xr,yr,zr]
+            obj.result.state.u = input;
             result = obj.result;
         end
         function show(obj,param)
-%             draw_voronoi({obj.result.region},1,[param.p(1:2),obj.result.p(1:2)]);
         end
     end
 end

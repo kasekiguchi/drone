@@ -29,12 +29,11 @@ end
         text_number{i} = append('farm',num2str(i-N));
     end
     hold on
-    for i=1:N
+    for i=1:Nb
         figi = plot(t,x(i,1:numel(logger.Data.t)),'displayname',text_number{i});
-%     if i==1 figi = plot(t,x(i,1:numel(logger.Data.t)),'r-');end
-%     if i==2 figi = plot(t,x(i,1:numel(logger.Data.t)),'g-');end
-%     if i==3 figi = plot(t,x(i,1:numel(logger.Data.t)),'b-');end
-%     if i==4 figi = plot(t,x(i,1:numel(logger.Data.t)),'c-');end
+    end
+    for i=Nb+1:N
+        figi = plot(t,x(i,1:numel(logger.Data.t)),'--','displayname',text_number{i});
     end
     hold off
     
@@ -44,10 +43,11 @@ end
     end
     set(axes1,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([0,logger.Data.t(end)+1]);
+    axis square
+    xlim([0,logger.Data.t(end)]);
+    ylim([30,90]);
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it x} [m]');
-    axis square;
     legend('Location','eastoutside');
       
         
@@ -57,12 +57,11 @@ end
     figure2=figure(2);
     axes2=axes('Parent',figure2);
     hold on
-    for i=1:N
+    for i=1:Nb
         figi = plot(t,y(i,1:numel(logger.Data.t)),'displayname',text_number{i});
-%     if i==1 figi = plot(t,y(i,1:numel(logger.Data.t)),'r-');end
-%     if i==2 figi = plot(t,y(i,1:numel(logger.Data.t)),'g-');end
-%     if i==3 figi = plot(t,y(i,1:numel(logger.Data.t)),'b-');end
-%     if i==4 figi = plot(t,y(i,1:numel(logger.Data.t)),'c-');end
+    end
+    for i=Nb+1:N
+        figi = plot(t,y(i,1:numel(logger.Data.t)),'--','displayname',text_number{i});
     end
     hold off
     
@@ -72,10 +71,11 @@ end
     end
     set(axes2,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([0,logger.Data.t(end)+1]);
+    axis square
+    xlim([0,logger.Data.t(end)]);
+    ylim([30,90]);
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it y} [m]');
-    axis square;
     legend('Location','eastoutside');
     
 %%
@@ -90,12 +90,11 @@ end
         text_number{i} = append('drone',num2str(i-Nb));
     end
     hold on
-    for i=1:N
+    for i=1:Nb
         figi = plot(t,z(i,1:numel(logger.Data.t)),'displayname',text_number{i});
-%     if i==1 figi = plot(t,x(i,1:numel(logger.Data.t)),'r-');end
-%     if i==2 figi = plot(t,x(i,1:numel(logger.Data.t)),'g-');end
-%     if i==3 figi = plot(t,x(i,1:numel(logger.Data.t)),'b-');end
-%     if i==4 figi = plot(t,x(i,1:numel(logger.Data.t)),'c-');end
+    end
+    for i=Nb+1:N
+        figi = plot(t,z(i,1:numel(logger.Data.t)),'--','displayname',text_number{i});
     end
     hold off
     
@@ -105,10 +104,10 @@ end
     end
     set(axes3,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([0,logger.Data.t(end)+1]);
+    axis square
+    xlim([0,logger.Data.t(end)]);
     xlabel('Time {\it t} [s]');
     ylabel('Position {\it z} [m]');
-    axis square;
     legend('Location','eastoutside');
  
     %%  
@@ -142,13 +141,12 @@ end
     end
     set(axes4,'FontName','Times New Roman','FontSize',12);
     grid on;
-
+    daspect([1 1 1]);
     xlim([30,90]);
     ylim([30,90]);
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
     view(180,-90);
-    axis square;
     legend('Location','eastoutside');
     cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
 %     exportgraphics(gcf,'initial position trace birds.eps');
@@ -212,10 +210,10 @@ end
                           xf{i}(1),yf{i}(1),0;      %point2
                           xf{i}(3),yf{i}(2),0;      %point3
                           xf{i}(1),yf{i}(2),0;      %point4
-                          xf{i}(3),yf{i}(1),0.5;    %point5
-                          xf{i}(1),yf{i}(1),0.5;    %point6
-                          xf{i}(3),yf{i}(2),0.5;    %point7
-                          xf{i}(1),yf{i}(2),0.5];   %point8
+                          xf{i}(3),yf{i}(1),1;    %point5
+                          xf{i}(1),yf{i}(1),1;    %point6
+                          xf{i}(3),yf{i}(2),1;    %point7
+                          xf{i}(1),yf{i}(2),1];   %point8
                faces=[1,2,4,3;      %face1
                       1,3,7,5;      %face2
                       1,2,6,5;      %face3
@@ -239,8 +237,7 @@ end
         set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
-        view(view_x,view_y);%シミュレーション用
-%         view(0,0);%高度確認用
+        view(view_x,view_y);
         hold on
 
         grid on; 
@@ -258,7 +255,7 @@ end
 %             end
             for j=1:n
             HpBar(j) = polyshape([1 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+1;CurrentHp(j) 2.5*(j-1)+2;1 2.5*(j-1)+2]);
-                if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2) && z(i,t)>0 && z(i,t)<0.5
+                if x(i,t)>xf{j}(3) && x(i,t)<xf{j}(1) && y(i,t)>yf{j}(1) && y(i,t)<yf{j}(2) && z(i,t)>0 && z(i,t)<1
                     if CurrentHp(j) <=1
                         break;
                     end
@@ -348,6 +345,8 @@ end
                 for j=1:n
                     if CurrentHp(j)<3
                         plot(HpBar(j),'facecolor','r')
+                    elseif CurrentHp(j)>3 && CurrentHp(j)<5
+                        plot(HpBar(j),'facecolor','y')
                     else
                         plot(HpBar(j),'facecolor','g')
                     end

@@ -22,6 +22,7 @@ if flag ==1
 distance.result = result;
 distance.dx = dx;
 distance.dy = dy;
+distance.dz = dz;
 else
     distance = result;
 end
