@@ -11,6 +11,7 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
         model
         result
         self
+        SolverName
     end
     
     methods
@@ -37,9 +38,9 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
             obj.param.Q = diag([10,10,1,1,1]);
-            obj.param.R = diag([1e-2,1e-5]);
+            obj.param.R = diag([1e-1,1e-2]);
             obj.param.Qf = diag([15,15,1,1,1]);
-            obj.param.T = diag([10,5,5,5,5,5,5,5,5,5]);
+            obj.param.T = diag([5,5,5,5,5,5,5,5,5,5]);
 %             obj.param.Th = diag([1,1]);
             obj.param.LimFim = 1;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
@@ -122,6 +123,7 @@ classdef TrackingMPC_Controller <CONTROLLER_CLASS
             obj.result.eachfval = GetobjectiveFimEval(obj,var, obj.param);
 %             disp(exitflag);
             obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);  
+            obj.SolverName = func2str(problem.objective);
             result = obj.result;
         end
         function show(obj)

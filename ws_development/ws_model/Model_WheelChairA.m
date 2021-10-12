@@ -16,14 +16,14 @@ if strcmp(type,"plant")
 %     for i = 1:N
         Model.id = i;
 %         Setting.initial.p = [0;0];
-        Setting.param.K = 1;
+        Setting.param.K = 0.9;
         Model.param=Setting;
 %         assignin('base',"Plant",Model);
 %         evalin('base',"agent(Plant.id) = Drone(Plant)");
 %     end
 else
 %     for i = 1:N
-        Setting.param.K =0.9;
+        Setting.param.K = 1;
         Model.param=Setting;
 %         assignin('base',"Model",Model);
 %         model_set_str=strcat("agent(",string(i),").set_model(Model)");

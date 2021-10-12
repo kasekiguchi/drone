@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=30;
 end
 %% initialize
 initial(N) = struct;
@@ -33,7 +33,8 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-    initial(i).p = [0;8];
+        initial(i).p = [-45;8];
+%     initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];
     initial(i).w = [0];
@@ -52,13 +53,14 @@ for i = 1:N
     %% model
     % set control model
 %         agent(i).set_model(Model_WheelChairV(i,dt,'model',initial ) );
-            agent(i).set_model( Model_WheelChairA(N,dt,'model',initial) );
+            agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
 %     agent(i).set_model(Model_ODV(N,dt,'model',initial) );
 % agent(i).set_model(Model_ODVADI(N,dt,'model',initial) );
     close all
     %% set environment property
     Env = [];
-    agent(i).set_property("env",Env_FloorMap_sim_fromstl(i,'3F.stl')); % 重要度マップ設定
+    agent(i).set_property("env",Env_FloorMap_sim_fromstl(i,'3F.stl'));
+% agent(i).set_property("env",Env_FloorMap_sim(i)); 
     %% set sensors property
     agent(i).sensor=[];
     agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-3) ) )  );%LiDAR seosor
@@ -75,10 +77,14 @@ for i = 1:N
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
-    velocity = 1;
-    
-    WayPoint = [45,8,0,0,0];%[x y theta v omaga]
-    convjudge = 0.5;
+    velocity = 0.5;
+     WayPoint = [104,8,0,0,0];
+%     WayPoint = [104,8,0,0,0;
+%         104,15,pi/2,0,0;
+%         6,15,pi,0,0;
+%         6,8,3*pi/2,0,0;
+%         104,8,2*pi,0,0];%[x y theta v omaga]
+    convjudge = 0.5;%収束判断
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,convjudge,initial,Holizon));
@@ -113,6 +119,8 @@ LogData=[
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
     "estimator.result.P",
+    "estimator.result.AssociationInfo.index",
+    "estimator.result.AssociationInfo.distance",
     "reference.result.state.xd",
     "controller.result.fval",
     "controller.result.exitflag",

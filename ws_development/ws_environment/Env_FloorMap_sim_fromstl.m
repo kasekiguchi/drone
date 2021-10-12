@@ -18,6 +18,7 @@ for i = 2:length(St0)
     PP = union( PP,polyshape(SS(:,:,i)) );
 end
 PP = rotate(PP,90);
+% PP = translate(PP,[50 0]);
 %% 縮尺変更
 [~,idx] = min(PP.Vertices(:,1));
 minpoint = PP.Vertices(idx,:);%[x,y]
@@ -27,11 +28,11 @@ Rpoint = Csize * (PP.Vertices - minpoint) + minpoint;
 % RPoint = Rpoint(:,2) - ;
 % RPP = polyshape(Rpoint);
 %% polybuffer for obstacles
-Points = [12, 9;11, 10;13, 7.5];
-Obpoly = polybuffer(Points,'points',0.25);
+% Points = [12, 9;11, 10;13, 7.5];
+% Obpoly = polybuffer(Points,'points',0.25);
 %% vertices settting
-AllVertices = [Rpoint;NaN(1,2);Obpoly.Vertices];
-env_param.Vertices(:,:,1) = AllVertices;
+% AllVertices = [Rpoint];
+env_param.Vertices(:,:,1) = Rpoint;
 % env_param.Vertices(:,:,2) = Obpoly.Vertices;
 assignin('base',"env_param",env_param);
 evalin('base',"Env = FloorMap_sim([],env_param);");
