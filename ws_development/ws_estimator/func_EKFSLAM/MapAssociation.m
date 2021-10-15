@@ -25,9 +25,15 @@ function parameter = MapAssociation(map, ~, state, measured_distance, measured_a
     mu = (x_laser .* y_end - x_end .* y_laser) ./ delta;%壁とレーザの内分比
     % Calculation of laser distance
     Dis = sigma .* Constant.SensorRange;
+    %Calculation 
+    DisStart = sqrt((x_s - x).^2 + (y_s - y).^2);
+    DisEnd = sqrt((x_e - x).^2 + (y_e - y).^2);
+    MaxDisP = max([DisStart,DisEnd]')';%遠い方の端点との距離を計算
     % Change the value which fail validation to Invalid value 
     %sigmaが0より大きく1より小さい，muが0より大きく1より小さい，理論距離(dist)が0より大きくセンサレンジより小さい，理論距離と測定距離の差が閾値より小さい
-    conditionRation = (sigma >= 0 & sigma <= 1 & mu >= 0 & mu <= 1 & Dis >= 0 & Dis <= Constant.SensorRange & (abs(Dis - measured_distance) < Constant.DistanceThreshold) &  measured_distance > Constant.DistanceThreshold);
+    conditionRation = (sigma > 0 & sigma < 1 & mu > 0 & mu < 1 ...
+        & Dis >= 0 & Dis <= Constant.SensorRange & (abs(Dis - measured_distance) < Constant.DistanceThreshold)...
+        &  measured_distance > Constant.DistanceThreshold & measured_distance < MaxDisP);
     Dis(~conditionRation) = inf;
     % Searching minimum distance for each laser
     [min_dist, min_index] = min(Dis);

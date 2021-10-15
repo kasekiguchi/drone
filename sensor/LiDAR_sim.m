@@ -10,7 +10,7 @@ classdef LiDAR_sim < SENSOR_CLASS
         interface = @(x) x;
     end
     properties (Access = private) % construct したら変えない．
-        radius = 40;
+        radius = 20;
         angle_range = -pi:0.01:pi;
     end
     

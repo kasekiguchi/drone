@@ -10,36 +10,126 @@ association_size = length(measured_distance);
 parameter.index = zeros(association_size, 1);
 parameter.sign = zeros(association_size, 1);
 % Define variable about start and end point of map and laser
-x_s = map.x(:, 1);
-x_e = map.x(:, 2);
-x = state(1);
-x_m = x + Constant.SensorRange * cos(state(3) + measured_angle);
-y_s = map.y(:, 1);
-y_e = map.y(:, 2);
-y = state(2);
-y_m = y + Constant.SensorRange * sin(state(3) + measured_angle);
+Xs = map.x(:, 1);
+Xe = map.x(:, 2);
+Rx = state(1);
+Xm = Rx + Constant.SensorRange * cos(state(3) + measured_angle);
+Ys = map.y(:, 1);
+Ye = map.y(:, 2);
+Ry = state(2);
+Ym = Ry + Constant.SensorRange * sin(state(3) + measured_angle);
 % Calculation of temporary variable
-x_line = x_s - x_e;
-y_line = y_s - y_e;
-x_laser = x_m - x;
-y_laser = y_m - y;
-x_end = x - x_e;
-y_end = y - y_e;
+x_line = Xs - Xe;
+y_line = Ys - Ye;
+x_laser = Xm - Rx;
+y_laser = Ym - Ry;
+x_end = Rx - Xe;
+y_end = Ry - Ye;
 delta = x_laser .* y_line - x_line .* y_laser;
 % Calculation of internal ratio
-sigma = (y_end .* x_line - y_line .* x_end) ./ delta;
-mu = (x_laser .* y_end - x_end .* y_laser) ./ delta;
+sigma = (y_end .* x_line - y_line .* x_end) ./ delta;%レーザが壁と持つ内分比
+mu = (x_laser .* y_end - x_end .* y_laser) ./ delta;%壁とレーザの内分比
 % Calculation of laser distance
-dist = sigma .* Constant.SensorRange;
+Dis = sigma .* Constant.SensorRange;
+%Calculation
+DisStart = sqrt((Xs - Rx).^2 + (Ys - Ry).^2);
+DisEnd = sqrt((Xe - Rx).^2 + (Ye - Ry).^2);
+MaxDisP = max([DisStart,DisEnd]')';%遠い方の端点との距離を計算
 % Change the value which fail validation to Invalid value
-cond_1 = (sigma >= 0 & sigma <= 1 & mu >= 0 & mu <= 1 & dist >= 0 & dist <= Constant.SensorRange & (abs(dist - measured_distance) < Constant.DistanceThreshold));
-dist(~cond_1) = inf;
+%sigmaが0より大きく1より小さい，muが0より大きく1より小さい，
+%理論距離(dist)が0より大きくセンサレンジより小さい，
+%理論距離と測定距離の差が閾値より小さい
+%遠いほうの端点よりも距離が近い
+conditionRation = (sigma > 0 & sigma < 1 & mu > 0 & mu < 1 ...
+    & Dis >= 0 & Dis <= Constant.SensorRange & (abs(Dis - measured_distance) < Constant.DistanceThreshold)...
+    &  measured_distance > Constant.DistanceThreshold);
+Dis(~conditionRation) = inf;
 % Searching minimum distance for each laser
-[min_dist, min_index] = min(dist);
+[min_dist, min_index] = min(Dis);
 inf_cond = isinf(min_dist);
 min_dist(inf_cond) = 0;
 min_index(inf_cond) = 0;
+%condition re calculate
+Ts = atan2(Ys - Ry,Xs -Rx) - state(3);%reference point as front of robot for theta start point 
+Te = atan2(Ye - Ry,Xe -Rx) - state(3);%theta end point
+TJudge = abs(Ts - Te) < pi;%レーザの始点と終点の角度がpi以上大きいかを判断，大きい場合はチェックルールが変わる．
+[~,Tsidx] = min(abs(Ts - measured_angle),[],2);%ロボットと端点の始点の直線に最も近い角度を持つレーザのインデックス
+[~,Teidx] = min(abs(Te - measured_angle),[],2);%ロボットと端点の終点の直線に最も近い角度を持つレーザのインデックス
+[Tmin,~] = min([Tsidx,Teidx],[],2);%小さい方のインデックス
+[Tmax,~] = max([Tsidx,Teidx],[],2);%デカい方のインデックス
+%各直線に対応付けされたレーザを表示
+%---対応付けされている直線を表示---%
+Elements = nonzeros(min_index);
+ei = 1;
+Estock = [];
+while ei <length(Elements)
+    stock = min(Elements);
+    Elements = Elements(stock ~= Elements);
+    Estock = [Estock,stock];
+end
+%-------------------------------%
+for ci = 1:length(Estock)
+    FTidx = find(min_index==Estock(ci));%壁に対応付けされたレーザのインデックス
+    if TJudge(ci) == false
+        Overidx = find(Tmin(ci)<FTidx & Tmax(ci)>FTidx);%条件に合わないレーザの探索
+        min_index(Overidx) = 0;%条件に合わないレーザをはじく
+%         FF = find(0>FTidx & FTidx<Tmin(ci) | Tmax(ci)>FTidx & FTidx<length(measured_angle));
+    else
+        Overidx = find(0>FTidx & FTidx<Tmin(ci) | Tmax(ci)>FTidx & FTidx<length(measured_angle));
+        min_index(Overidx) = 0;%
+%         FF = find(FTidx>Tmin(ci) & Tmax(ci)>FTidx);%条件を満たすものはとおす，満たさないものはfalseにする
+    end
+end
 % assign returuning value by calculated value
 parameter.index = min_index;
 parameter.distance = min_dist;
+% % Initialize each variable
+% association_size = length(measured_distance);
+% parameter.index = zeros(association_size, 1);
+% parameter.sign = zeros(association_size, 1);
+% % Define variable about start and end point of map and laser
+% Xs = map.x(:, 1);%start
+% Xe = map.x(:, 2);%end
+% Rx = state(1);%Robot x
+% Xm = Rx + Constant.SensorRange * cos(state(3) + measured_angle);
+% Ys = map.y(:, 1);
+% Ye = map.y(:, 2);
+% Ry = state(2);
+% Ym = Ry + Constant.SensorRange * sin(state(3) + measured_angle);
+%
+% % Calculation of temporary variable
+% % a = (Ry - Ym)./(Rx - Xm);
+% % b =1;
+% % c = Ry - a*Rx;
+% % Yp = (a.*map.c - map.a.*c)./(map.a*b - a.*map.b);
+% % Xp = (map.c./map.a) + (map.b./map.a).*Yp;
+% x_line = Xs - Xe;
+% y_line = Ys - Ye;
+% x_laser = Xm - Rx;
+% y_laser = Ym - Ry;
+% x_end = Rx - Xe;
+% y_end = Ry - Ye;
+% delta = x_laser .* y_line - x_line .* y_laser;
+% % Calculation of internal ratio
+% % sigma = CalcDistance(Xp,Yp,Rx,Ry)./(CalcDistance(Xp,Yp,Rx,Ry)+CalcDistance(Xm,Ym,Xp,Yp));
+% % mu = CalcDistance(Xp,Yp,Xe,Ye)./(CalcDistance(Xp,Yp,Xe,Ye)+CalcDistance(Xp,Yp,Xs,Ys));
+% sigma = (y_end .* x_line - y_line .* x_end) ./ delta;
+% mu = (x_laser .* y_end - x_end .* y_laser) ./ delta;
+% % Calculation of laser distance
+% dist = sigma .* Constant.SensorRange;
+% % Change the value which fail validation to Invalid value
+% cond_1 = (sigma >= 0 & sigma <= 1 & mu >= 0 & mu <= 1 & dist >= 0 & dist <= Constant.SensorRange & (abs(dist - measured_distance) < Constant.DistanceThreshold));
+% dist(~cond_1) = inf;
+% % Searching minimum distance for each laser
+% [min_dist, min_index] = min(dist);
+% inf_cond = isinf(min_dist);
+% min_dist(inf_cond) = 0;
+% min_index(inf_cond) = 0;
+% % assign returuning value by calculated value
+% parameter.index = min_index;
+% parameter.distance = min_dist;
 end
+% function Dis = CalcDistance(x1,y1,x2,y2)
+% %calculate Euclidean distance
+% Dis = sqrt( (x1-x2).^2 + (y1-y2).^2);
+% end

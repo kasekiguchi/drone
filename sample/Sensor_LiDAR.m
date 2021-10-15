@@ -4,7 +4,7 @@ function Sensor = Sensor_LiDAR(id,param)
 % rpos : RnagePos_sim
 Sensor.name=["LiDAR"];
 Sensor.type=["LiDAR_sim"];
-LiDAR_param.radius = 40;
+LiDAR_param.radius = 20;
 LiDAR_param.angle_range = -pi:0.01:pi;
 LiDAR_param.noise = param.noise;
 % X, Y. Z

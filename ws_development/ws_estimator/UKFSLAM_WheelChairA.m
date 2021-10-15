@@ -39,10 +39,10 @@ classdef UKFSLAM_WheelChairA < ESTIMATOR_CLASS
             obj.constant.LineThreshold = 0.3; % Under the this threshold, the error from "ax + by + c" is allowed.
             obj.constant.PointThreshold = 0.1; % Maximum distance between line and points in same cluster
             obj.constant.GroupNumberThreshold = 5; % Minimum points number which is constructed cluster
-            obj.constant.DistanceThreshold = 5e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
+            obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
             obj.constant.ZeroThreshold = 1e-3; % Under this threshold, it is zero.
-            obj.constant.CluteringThreshold = 0.1; % Split a cluster using distance from next point
-            obj.constant.SensorRange = 40; % Max scan range
+            obj.constant.CluteringThreshold = 0.5; % Split a cluster using distance from next point
+            obj.constant.SensorRange = 20; % Max scan range
             %------------------------------------------
         end
         
