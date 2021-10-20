@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=400;
+    te=10;
 end
 %% initialize
 initial(N) = struct;
@@ -70,11 +70,11 @@ for i = 1:N
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
 %             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-        agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
     
@@ -375,4 +375,3 @@ fclose(fileID);
 movefile('RunNames.txt',Plots.SaveDateStr);
 % run('dataplot');
 %% Save
-

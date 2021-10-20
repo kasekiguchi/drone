@@ -6,8 +6,10 @@ Controller_param.H = Holizon;
 
 % Controller.type="LocalPlanning_Controller";
 % Controller.name="LocalPlanning_Controller";
-Controller.type="TrackingMPC_Controller";
-Controller.name="TrackingMPC_Controller";
+% Controller.type="TrackingMPC_Controller";
+% Controller.name="TrackingMPC_Controller";
+Controller.type="TrackingMPCMEX_Controller";
+Controller.name="TrackingMPCMEX_Controller";
 Controller.param=Controller_param;
 
 %assignin('base',"Controller_param",Controller_param);

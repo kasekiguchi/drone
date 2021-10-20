@@ -1,0 +1,530 @@
+[
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   fminconMEX_Trackobjective_data.c -o build/win64/fminconMEX_Trackobjective_data.o",
+    "file": "fminconMEX_Trackobjective_data.c",
+    "output": "build/win64/fminconMEX_Trackobjective_data.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   rt_nonfinite.c -o build/win64/rt_nonfinite.o",
+    "file": "rt_nonfinite.c",
+    "output": "build/win64/rt_nonfinite.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   fminconMEX_Trackobjective_initialize.c -o build/win64/fminconMEX_Trackobjective_initialize.o",
+    "file": "fminconMEX_Trackobjective_initialize.c",
+    "output": "build/win64/fminconMEX_Trackobjective_initialize.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   fminconMEX_Trackobjective_terminate.c -o build/win64/fminconMEX_Trackobjective_terminate.o",
+    "file": "fminconMEX_Trackobjective_terminate.c",
+    "output": "build/win64/fminconMEX_Trackobjective_terminate.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   fminconMEX_Trackobjective.c -o build/win64/fminconMEX_Trackobjective.o",
+    "file": "fminconMEX_Trackobjective.c",
+    "output": "build/win64/fminconMEX_Trackobjective.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   fmincon.c -o build/win64/fmincon.o",
+    "file": "fmincon.c",
+    "output": "build/win64/fmincon.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   factoryConstruct.c -o build/win64/factoryConstruct.o",
+    "file": "factoryConstruct.c",
+    "output": "build/win64/factoryConstruct.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   factoryConstruct1.c -o build/win64/factoryConstruct1.o",
+    "file": "factoryConstruct1.c",
+    "output": "build/win64/factoryConstruct1.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeObjective_.c -o build/win64/computeObjective_.o",
+    "file": "computeObjective_.c",
+    "output": "build/win64/computeObjective_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   eml_int_forloop_overflow_check.c -o build/win64/eml_int_forloop_overflow_check.o",
+    "file": "eml_int_forloop_overflow_check.c",
+    "output": "build/win64/eml_int_forloop_overflow_check.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   TrackobjectiveMEX.c -o build/win64/TrackobjectiveMEX.o",
+    "file": "TrackobjectiveMEX.c",
+    "output": "build/win64/TrackobjectiveMEX.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   checkVectorNonFinite.c -o build/win64/checkVectorNonFinite.o",
+    "file": "checkVectorNonFinite.c",
+    "output": "build/win64/checkVectorNonFinite.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   factoryConstruct2.c -o build/win64/factoryConstruct2.o",
+    "file": "factoryConstruct2.c",
+    "output": "build/win64/factoryConstruct2.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeConstrViolationIneq_.c -o build/win64/computeConstrViolationIneq_.o",
+    "file": "computeConstrViolationIneq_.c",
+    "output": "build/win64/computeConstrViolationIneq_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   ixamax.c -o build/win64/ixamax.o",
+    "file": "ixamax.c",
+    "output": "build/win64/ixamax.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computePrimalFeasError.c -o build/win64/computePrimalFeasError.o",
+    "file": "computePrimalFeasError.c",
+    "output": "build/win64/computePrimalFeasError.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeDualFeasError.c -o build/win64/computeDualFeasError.o",
+    "file": "computeDualFeasError.c",
+    "output": "build/win64/computeDualFeasError.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeComplError.c -o build/win64/computeComplError.o",
+    "file": "computeComplError.c",
+    "output": "build/win64/computeComplError.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   isDeltaXTooSmall.c -o build/win64/isDeltaXTooSmall.o",
+    "file": "isDeltaXTooSmall.c",
+    "output": "build/win64/isDeltaXTooSmall.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xdot.c -o build/win64/xdot.o",
+    "file": "xdot.c",
+    "output": "build/win64/xdot.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xnrm2.c -o build/win64/xnrm2.o",
+    "file": "xnrm2.c",
+    "output": "build/win64/xnrm2.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xasum.c -o build/win64/xasum.o",
+    "file": "xasum.c",
+    "output": "build/win64/xasum.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeMeritFcn.c -o build/win64/computeMeritFcn.o",
+    "file": "computeMeritFcn.c",
+    "output": "build/win64/computeMeritFcn.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   fillLambdaStruct.c -o build/win64/fillLambdaStruct.o",
+    "file": "fillLambdaStruct.c",
+    "output": "build/win64/fillLambdaStruct.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   interface/_coder_fminconMEX_Trackobjective_api.c -o build/win64/_coder_fminconMEX_Trackobjective_api.o",
+    "file": "interface/_coder_fminconMEX_Trackobjective_api.c",
+    "output": "build/win64/_coder_fminconMEX_Trackobjective_api.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   interface/_coder_fminconMEX_Trackobjective_mex.c -o build/win64/_coder_fminconMEX_Trackobjective_mex.o",
+    "file": "interface/_coder_fminconMEX_Trackobjective_mex.c",
+    "output": "build/win64/_coder_fminconMEX_Trackobjective_mex.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeConstraints_.c -o build/win64/computeConstraints_.o",
+    "file": "computeConstraints_.c",
+    "output": "build/win64/computeConstraints_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeFiniteDifferences.c -o build/win64/computeFiniteDifferences.o",
+    "file": "computeFiniteDifferences.c",
+    "output": "build/win64/computeFiniteDifferences.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   finDiffEvalAndChkErr.c -o build/win64/finDiffEvalAndChkErr.o",
+    "file": "finDiffEvalAndChkErr.c",
+    "output": "build/win64/finDiffEvalAndChkErr.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xcopy.c -o build/win64/xcopy.o",
+    "file": "xcopy.c",
+    "output": "build/win64/xcopy.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   initActiveSet.c -o build/win64/initActiveSet.o",
+    "file": "initActiveSet.c",
+    "output": "build/win64/initActiveSet.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   setProblemType.c -o build/win64/setProblemType.o",
+    "file": "setProblemType.c",
+    "output": "build/win64/setProblemType.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   modifyOverheadPhaseOne_.c -o build/win64/modifyOverheadPhaseOne_.o",
+    "file": "modifyOverheadPhaseOne_.c",
+    "output": "build/win64/modifyOverheadPhaseOne_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   driver.c -o build/win64/driver.o",
+    "file": "driver.c",
+    "output": "build/win64/driver.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   test_exit.c -o build/win64/test_exit.o",
+    "file": "test_exit.c",
+    "output": "build/win64/test_exit.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeGradLag.c -o build/win64/computeGradLag.o",
+    "file": "computeGradLag.c",
+    "output": "build/win64/computeGradLag.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xgemv.c -o build/win64/xgemv.o",
+    "file": "xgemv.c",
+    "output": "build/win64/xgemv.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   updateWorkingSetForNewQP.c -o build/win64/updateWorkingSetForNewQP.o",
+    "file": "updateWorkingSetForNewQP.c",
+    "output": "build/win64/updateWorkingSetForNewQP.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeLambdaLSQ.c -o build/win64/computeLambdaLSQ.o",
+    "file": "computeLambdaLSQ.c",
+    "output": "build/win64/computeLambdaLSQ.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   factorQRE.c -o build/win64/factorQRE.o",
+    "file": "factorQRE.c",
+    "output": "build/win64/factorQRE.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xgeqp3.c -o build/win64/xgeqp3.o",
+    "file": "xgeqp3.c",
+    "output": "build/win64/xgeqp3.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeQ_.c -o build/win64/computeQ_.o",
+    "file": "computeQ_.c",
+    "output": "build/win64/computeQ_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xorgqr.c -o build/win64/xorgqr.o",
+    "file": "xorgqr.c",
+    "output": "build/win64/xorgqr.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xtrsv.c -o build/win64/xtrsv.o",
+    "file": "xtrsv.c",
+    "output": "build/win64/xtrsv.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   sortLambdaQP.c -o build/win64/sortLambdaQP.o",
+    "file": "sortLambdaQP.c",
+    "output": "build/win64/sortLambdaQP.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   saveJacobian.c -o build/win64/saveJacobian.o",
+    "file": "saveJacobian.c",
+    "output": "build/win64/saveJacobian.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   normal.c -o build/win64/normal.o",
+    "file": "normal.c",
+    "output": "build/win64/normal.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   driver1.c -o build/win64/driver1.o",
+    "file": "driver1.c",
+    "output": "build/win64/driver1.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   PresolveWorkingSet.c -o build/win64/PresolveWorkingSet.o",
+    "file": "PresolveWorkingSet.c",
+    "output": "build/win64/PresolveWorkingSet.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   ComputeNumDependentEq_.c -o build/win64/ComputeNumDependentEq_.o",
+    "file": "ComputeNumDependentEq_.c",
+    "output": "build/win64/ComputeNumDependentEq_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   IndexOfDependentEq_.c -o build/win64/IndexOfDependentEq_.o",
+    "file": "IndexOfDependentEq_.c",
+    "output": "build/win64/IndexOfDependentEq_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   countsort.c -o build/win64/countsort.o",
+    "file": "countsort.c",
+    "output": "build/win64/countsort.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   moveConstraint_.c -o build/win64/moveConstraint_.o",
+    "file": "moveConstraint_.c",
+    "output": "build/win64/moveConstraint_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   feasibleX0ForWorkingSet.c -o build/win64/feasibleX0ForWorkingSet.o",
+    "file": "feasibleX0ForWorkingSet.c",
+    "output": "build/win64/feasibleX0ForWorkingSet.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xgeqrf.c -o build/win64/xgeqrf.o",
+    "file": "xgeqrf.c",
+    "output": "build/win64/xgeqrf.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xgemm.c -o build/win64/xgemm.o",
+    "file": "xgemm.c",
+    "output": "build/win64/xgemm.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xtrsm.c -o build/win64/xtrsm.o",
+    "file": "xtrsm.c",
+    "output": "build/win64/xtrsm.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   factorQR.c -o build/win64/factorQR.o",
+    "file": "factorQR.c",
+    "output": "build/win64/factorQR.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   maxConstraintViolation.c -o build/win64/maxConstraintViolation.o",
+    "file": "maxConstraintViolation.c",
+    "output": "build/win64/maxConstraintViolation.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   removeAllIneqConstr.c -o build/win64/removeAllIneqConstr.o",
+    "file": "removeAllIneqConstr.c",
+    "output": "build/win64/removeAllIneqConstr.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeFval.c -o build/win64/computeFval.o",
+    "file": "computeFval.c",
+    "output": "build/win64/computeFval.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   linearForm_.c -o build/win64/linearForm_.o",
+    "file": "linearForm_.c",
+    "output": "build/win64/linearForm_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   iterate.c -o build/win64/iterate.o",
+    "file": "iterate.c",
+    "output": "build/win64/iterate.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeGrad_StoreHx.c -o build/win64/computeGrad_StoreHx.o",
+    "file": "computeGrad_StoreHx.c",
+    "output": "build/win64/computeGrad_StoreHx.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xaxpy.c -o build/win64/xaxpy.o",
+    "file": "xaxpy.c",
+    "output": "build/win64/xaxpy.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeFval_ReuseHx.c -o build/win64/computeFval_ReuseHx.o",
+    "file": "computeFval_ReuseHx.c",
+    "output": "build/win64/computeFval_ReuseHx.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   squareQ_appendCol.c -o build/win64/squareQ_appendCol.o",
+    "file": "squareQ_appendCol.c",
+    "output": "build/win64/squareQ_appendCol.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xrot.c -o build/win64/xrot.o",
+    "file": "xrot.c",
+    "output": "build/win64/xrot.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   deleteColMoveEnd.c -o build/win64/deleteColMoveEnd.o",
+    "file": "deleteColMoveEnd.c",
+    "output": "build/win64/deleteColMoveEnd.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   compute_deltax.c -o build/win64/compute_deltax.o",
+    "file": "compute_deltax.c",
+    "output": "build/win64/compute_deltax.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   factor.c -o build/win64/factor.o",
+    "file": "factor.c",
+    "output": "build/win64/factor.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xpotrf.c -o build/win64/xpotrf.o",
+    "file": "xpotrf.c",
+    "output": "build/win64/xpotrf.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   solve.c -o build/win64/solve.o",
+    "file": "solve.c",
+    "output": "build/win64/solve.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   xscal.c -o build/win64/xscal.o",
+    "file": "xscal.c",
+    "output": "build/win64/xscal.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   compute_lambda.c -o build/win64/compute_lambda.o",
+    "file": "compute_lambda.c",
+    "output": "build/win64/compute_lambda.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   feasibleratiotest.c -o build/win64/feasibleratiotest.o",
+    "file": "feasibleratiotest.c",
+    "output": "build/win64/feasibleratiotest.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   addBoundToActiveSetMatrix_.c -o build/win64/addBoundToActiveSetMatrix_.o",
+    "file": "addBoundToActiveSetMatrix_.c",
+    "output": "build/win64/addBoundToActiveSetMatrix_.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   updatePenaltyParam.c -o build/win64/updatePenaltyParam.o",
+    "file": "updatePenaltyParam.c",
+    "output": "build/win64/updatePenaltyParam.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   addAeqConstr.c -o build/win64/addAeqConstr.o",
+    "file": "addAeqConstr.c",
+    "output": "build/win64/addAeqConstr.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   relaxed.c -o build/win64/relaxed.o",
+    "file": "relaxed.c",
+    "output": "build/win64/relaxed.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   soc.c -o build/win64/soc.o",
+    "file": "soc.c",
+    "output": "build/win64/soc.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeLinearResiduals.c -o build/win64/computeLinearResiduals.o",
+    "file": "computeLinearResiduals.c",
+    "output": "build/win64/computeLinearResiduals.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   linesearch.c -o build/win64/linesearch.o",
+    "file": "linesearch.c",
+    "output": "build/win64/linesearch.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   computeDeltaLag.c -o build/win64/computeDeltaLag.o",
+    "file": "computeDeltaLag.c",
+    "output": "build/win64/computeDeltaLag.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   BFGSUpdate.c -o build/win64/BFGSUpdate.o",
+    "file": "BFGSUpdate.c",
+    "output": "build/win64/BFGSUpdate.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   fminconMEX_Trackobjective_emxutil.c -o build/win64/fminconMEX_Trackobjective_emxutil.o",
+    "file": "fminconMEX_Trackobjective_emxutil.c",
+    "output": "build/win64/fminconMEX_Trackobjective_emxutil.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   interface/_coder_fminconMEX_Trackobjective_info.c -o build/win64/_coder_fminconMEX_Trackobjective_info.o",
+    "file": "interface/_coder_fminconMEX_Trackobjective_info.c",
+    "output": "build/win64/_coder_fminconMEX_Trackobjective_info.o"
+  },
+  {
+    "directory": "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2020b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\" -I \"C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\codegen\\mex\\fminconMEX_Trackobjective\\interface\" -I \"C:\\Program Files\\MATLAB\\R2020b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1   \"C:/Program Files/MATLAB/R2020b/extern/version/c_mexapi_version.c\" -o build/win64/c_mexapi_version.o",
+    "file": "C:/Program Files/MATLAB/R2020b/extern/version/c_mexapi_version.c",
+    "output": "build/win64/c_mexapi_version.o"
+  }
+]
