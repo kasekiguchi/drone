@@ -94,11 +94,12 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.previous_state = repmat(obj.param.X0,1,obj.param.Num);
             problem.solver    = 'fmincon';
             problem.options   = obj.options;
-            problem.objective = @(x) obj.objectiveFim(x, obj.param);  % 評価関数
-            problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
+%             problem.objective = @(x) obj.objectiveFim(x, obj.param);  % 評価関数
+%             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input]; % 初期状態
             % obj.options.PlotFcn                = [];
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective_mex(problem.x0,obj.param,obj.self.estimator.(obj.self.estimator.name).R);
+%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;
             obj.result.fval = fval;
@@ -106,7 +107,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.result.eachfval = GetobjectiveFimEval(var, obj.param,obj.self.estimator.(obj.self.estimator.name).R);
 %             disp(exitflag);
             obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);  
-            obj.SolverName = func2str(problem.objective);
+%             obj.SolverName = func2str(problem.objective);
             result = obj.result;
         end
         

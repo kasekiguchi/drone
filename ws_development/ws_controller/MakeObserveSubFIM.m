@@ -18,8 +18,9 @@ r = (hk1 - hk2);%観測値差分
 %% Make FIM
 partial1 = diff(r,v);
 partial2 = diff(r,omega);
-P = [partial1,partial2];
-PP = P'*P;
+P = [partial1;partial2];
+PP = P*P';
+PP = simplify(PP);
 %% make matlabFunctions DeltahDiff
 outputs = {'PP'};
 filename = 'FIM_ObserbSub';
