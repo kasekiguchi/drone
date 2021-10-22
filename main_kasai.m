@@ -9,8 +9,8 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 16; %number of agents（if bird_trace system else number of all units）
-Nb = 14; %number of pestbirds
+N = 2; %number of agents（if bird_trace system else number of all units）
+Nb = 1; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
 flag_miki = ones(N);%PtoP制御用
@@ -270,7 +270,7 @@ end
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
 
-w = waitforbuttonpress;
+% w = waitforbuttonpress;
 
 % try
     if (fOffline)

@@ -72,6 +72,7 @@ classdef MODEL_CLASS <  handle
                 if isfield(varargin{1},'FH')
                     if ~isempty(varargin{1}.FH)
                           cha = get(varargin{1}.FH, 'currentcharacter');
+                          cha = 'f';
                           if (cha == 'q' || cha == 's' || cha == 'a')
                               return
                           end

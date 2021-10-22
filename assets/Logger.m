@@ -50,7 +50,8 @@ classdef Logger < handle
             % t : current time
             % FH : figure handle for keyboard input
             obj.Data.t(obj.i)=t;
-            cha = get(FH, 'currentcharacter');
+%             cha = get(FH, 'currentcharacter');
+            cha = 'f';
             obj.Data.phase(obj.i)=cha;
             for j = 1:obj.N
                 for k = 1:length(obj.items)
