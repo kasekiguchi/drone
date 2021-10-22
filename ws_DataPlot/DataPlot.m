@@ -18,7 +18,7 @@ classdef DataPlot<handle
         FontWeight = 'normal';
         FuncNames = [%     "XYZTureAndEst",
 %     "AttitudesTureAndEst",
-%     "TrackMPCEval",
+    "TrackMPCEval",
     "MapAndVehicleTrueAndEst",
 %     "Eval",
 %     "Covxv",

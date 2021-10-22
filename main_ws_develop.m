@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=120;
 end
 %% initialize
 initial(N) = struct;

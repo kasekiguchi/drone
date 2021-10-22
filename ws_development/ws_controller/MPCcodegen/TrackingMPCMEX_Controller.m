@@ -25,9 +25,9 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([10,10,1,1,1]);
+            obj.param.Q = diag([5,5,1,1,1]);
             obj.param.R = diag([1e-2,1e-5]);
-            obj.param.Qf = diag([15,15,1,1,1]);
+            obj.param.Qf = diag([10,10,1,1,1]);
             obj.param.T = diag([10,5,5,5,5,5,5,5,5,5]);
 %             obj.param.Th = diag([1,1]);
 %             obj.param.LimFim = 1;
@@ -71,14 +71,16 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             
             %---対応づけしたレーザ（壁にあたってるレーザ）の角度faiおよびその壁のdとalpahaを取得---%
             AssociationAvailableIndex = find(AssociationInfo.index ~= 0);%Index corresponding to the measured value
+%             Flag = AssociationInfo.index';
+%             Flag(Flag~=0) = 1;%on off FLag Matrix
             AssociationAvailableount = length(AssociationAvailableIndex);%Count
             Dis = zeros(1,length(Measured.angles));
             Alpha = zeros(1,length(Measured.angles));
             for i = 1:AssociationAvailableount
                 MesuredRef = AssociationAvailableIndex(i);
                 idx = AssociationInfo.index(AssociationAvailableIndex(i));
-                Dis(MesuredRef) = LineParam.d(idx);
-                Alpha(MesuredRef) = LineParam.delta(idx);
+                Dis(MesuredRef) = LineParam.d(idx);%対応付けした距離を代入
+                Alpha(MesuredRef) = LineParam.delta(idx);%対応付けしたalphaを代入
             end
             Dis = Dis(Dis~=0);
             Alpha = Alpha(Alpha~=0);
@@ -98,7 +100,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input]; % 初期状態
             % obj.options.PlotFcn                = [];
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective_mex(problem.x0,obj.param,obj.self.estimator.(obj.self.estimator.name).R);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.self.estimator.(obj.self.estimator.name).R);
 %             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;

@@ -47,6 +47,7 @@ tildeU = U;
 %
 evFim = zeros(1,params.H);
 for j = 1:params.H
+%     arrayfun(@(L) FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j), X(5,j), params.dt, params.dis(L), params.alpha(L), params.phi(L)),1:length(params.dis));
     Fim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j), X(5,j), params.dt, params.dis(1), params.alpha(1), params.phi(1));
 %     arrayfun(@(N) FIM_ObserbSub(X(1,1), X(2,1), X(3,1), X(4,1), X(5,1), params.t, params.dis(N), params.alpha(N), params.phi(N)),1:length(params.dis),'UniformOutput',false);
     for i = 2:length(params.dis)
