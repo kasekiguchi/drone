@@ -9,8 +9,8 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 2; %number of agents（if bird_trace system else number of all units）
-Nb = 1; %number of pestbirds
+N = 4; %number of agents（if bird_trace system else number of all units）
+Nb = 3; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
 flag_miki = ones(N);%PtoP制御用
@@ -32,7 +32,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=2;
 end
 %% set connector (global instance)
 if fExp
