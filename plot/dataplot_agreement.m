@@ -95,7 +95,7 @@ end
     axis square;
     legend('Location','best');
     cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
-    exportgraphics(gcf,'Initial position offset.eps');
+%     exportgraphics(gcf,'Initial position offset.eps');
         
     %% エージェント間の距離
     figure(8)
@@ -122,7 +122,7 @@ end
     ylabel('Distance {\it d} [m]');
     axis square;
     legend('Location','eastoutside');
-    exportgraphics(gcf,'distance of agents.eps');
+%     exportgraphics(gcf,'distance of agents.eps');
     %% 動画作成スレッド
 
     figure(9)
@@ -178,7 +178,7 @@ end
             end
             hold off
             
-            exportgraphics(gcf,'Position offset(t=1).eps');
+%             exportgraphics(gcf,'Position offset(t=1).eps');
         end
         if t==61
             figure(5)
@@ -196,7 +196,7 @@ end
             end
             hold off
             
-            exportgraphics(gcf,'Position offset(t=1.5).eps');
+%             exportgraphics(gcf,'Position offset(t=1.5).eps');
         end
         if t==81
             figure(6)
@@ -214,7 +214,7 @@ end
             end
             hold off
             
-            exportgraphics(gcf,'Position offset(t=2).eps');
+%             exportgraphics(gcf,'Position offset(t=2).eps');
         end
         if t==101
             figure(7)
@@ -232,13 +232,13 @@ end
             end
             hold off
             
-            exportgraphics(gcf,'Position offset(t=2.5).eps');
+%             exportgraphics(gcf,'Position offset(t=2.5).eps');
         end
         frame = getframe(figure(9));
         writeVideo(v,frame);      
     end
     close(v);
-    exportgraphics(gcf,'Final position offset.eps');
+%     exportgraphics(gcf,'Final position offset.eps');
     disp('simulation ended')
 
 end 

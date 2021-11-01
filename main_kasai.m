@@ -32,7 +32,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=2;
+    te=10;
 end
 %% set connector (global instance)
 if fExp
@@ -84,11 +84,11 @@ else
             initial(i).w = [0;0;0];
         else
 %             arranged_pos = arranged_position([0,0],N,1,0); %先生の
-%             arranged_pos = arranged_position_agreement([0,0],N,1); %合意制御
-            if i==1
-                initial_position = arranged_position_trace_birds([60;60],N,Nb,10); %害鳥モデル
-            end
-            arranged_pos =  initial_position; %害鳥モデルの初期値
+            arranged_pos = arranged_position_agreement([0,0],N,1); %合意制御
+%             if i==1
+%                 initial_position = arranged_position_trace_birds([60;60],N,Nb,10); %害鳥モデル
+%             end
+%             arranged_pos =  initial_position; %害鳥モデルの初期値
             initial(i).p = arranged_pos(:,i);
             initial(i).q = [1;0;0;0];
             initial(i).v = [0;0;0];
@@ -105,16 +105,16 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
-%         agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+        agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
 %         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
         %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % 牽引物込みのプラントモデル : for sim
 %         agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
 %         agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
-        if i<=Nb
-            agent(i) = Drone(Model_PestBirds(i,dt,'plant',initial(i))); % 害鳥のプラントモデル
-        else
-            agent(i) = Drone(Model_Drone(i,dt,'plant',initial(i))); % ドローンのプラントモデル
-        end
+%         if i<=Nb
+%             agent(i) = Drone(Model_PestBirds(i,dt,'plant',initial(i))); % 害鳥のプラントモデル
+%         else
+%             agent(i) = Drone(Model_Drone(i,dt,'plant',initial(i))); % ドローンのプラントモデル
+%         end
     end
     %% model
     % set control model
@@ -122,13 +122,13 @@ for i = 1:N
 %     agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
-%     agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+    agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
 %     agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
-    if i<=Nb
-        agent(i).set_model(Model_PestBirds(i,dt,'model',initial(i))); % 害鳥のモデル
-    else
-        agent(i).set_model(Model_Drone(i,dt,'model',initial(i))); % ドローンのモデル
-    end
+%     if i<=Nb
+%         agent(i).set_model(Model_PestBirds(i,dt,'model',initial(i))); % 害鳥のモデル
+%     else
+%         agent(i).set_model(Model_Drone(i,dt,'model',initial(i))); % ドローンのモデル
+%     end
     close all
     %% set input_transform property
     if fExp%isa(agent(i).plant,"Lizard_exp")
@@ -137,7 +137,7 @@ for i = 1:N
     end
     %agent.plant.espr.sendData(Pw(1,1:16));
     % for quat-model plant with discrete control model
-%     agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
+    agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
 %     agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
     % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
@@ -172,14 +172,14 @@ for i = 1:N
     %% set reference property
     agent(i).reference=[];
 %     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
-%     agent(i).set_property("reference",Reference_agreement(N)); % 合意重心
+    agent(i).set_property("reference",Reference_agreement(N)); % 合意重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;1])); % ハート形[x;y;z]永久
     Make_Reference = zeros(i,3);
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_tracebirds(i,Nb)); % 害鳥追跡用
+%     agent(i).set_property("reference",Reference_tracebirds(i,Nb)); % 害鳥追跡用
 %     if fExp == 1
 %         if i ==1
 %             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[-1;0;1])); % ハート形[x;y;z]永久
@@ -206,9 +206,9 @@ for i = 1:N
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
-%     agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+    agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
-    agent(i).set_property("controller",Controller_tracebirds(N)); % 害鳥追跡用
+%     agent(i).set_property("controller",Controller_tracebirds(N)); % 害鳥追跡用
     %%
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
     param(i).reference.list = cell(1,length(agent(i).reference.name));
@@ -387,8 +387,8 @@ FH  = figure('position',[0 0 eps eps],'menubar','none');
 close all
 clc
 % agent(1).reference.covering.draw_movie(logger,N,Env)
-% dataplot_agreement(logger,N); % 合意制御
-dataplot_tracebirds(logger,N,Nb,fp,dt);%害鳥追跡
+dataplot_agreement(logger,N); % 合意制御
+% dataplot_tracebirds(logger,N,Nb,fp,dt);%害鳥追跡
 % dataplot_PtoP(logger);%PtoP制御
 % agent(1).reference.timeVarying.show(logger)
 % logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
