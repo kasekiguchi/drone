@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=120;
+    te=60;
 end
 %% initialize
 initial(N) = struct;
@@ -34,7 +34,7 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
 %         initial(i).p = [-45;8];
-        initial(i).p = [-2;-2];
+        initial(i).p = [-3;-3];
 %     initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];
@@ -70,26 +70,27 @@ for i = 1:N
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
 %             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+        agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
-    velocity = 0.5;
+    velocity = 1;
+%     WayPoint = [100,0,0,0,0];
 %      WayPoint = [55,8,0,0,0;
 %          55,15,pi/2,0,0;
 %          -45,15,pi,0,0;
 %          -45,8,3*pi/2,0,0;
 %          55,8,2*pi,0,0];%[x y theta v omaga]
-    WayPoint = [47,-2,0,0,0;
-        47,47,pi/2,0,0;
-        -2,47,pi,0,0;
-        -2,-2,3*pi/2,0,0;
-        47,-2,2*pi,0,0];
+    WayPoint = [48,-3,0,0,0;
+        48,48,pi/2,0,0;
+        -3,48,pi,0,0;
+        -3,-3,3*pi/2,0,0;
+        48,-3,2*pi,0,0];
     convjudge = 0.5;%収束判断
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
@@ -134,9 +135,9 @@ LogData=[
     "sensor.result.sensor_points",
     "sensor.result.angle",
     "sensor.result.length",
-    %     "controller.result.Eval",
-    %     "estimator.result.PreMapParam.x",
-    %     "estimator.result.PreMapParam.y",
+%         "controller.result.Eval",
+%         "estimator.result.PreMapParam.x",
+%         "estimator.result.PreMapParam.y",
     "env.Floor.param.Vertices",
     %    "reference.result.state.xd",
     "inner_input",
@@ -292,7 +293,7 @@ while round(time.t,5)<=te
 %                             else
 %                                 agent(i).input = [0,0];
 %                             end
-%         
+% %         
 % if time.t<=0.5
 %     agent(i).input = [0.4272/1.2,0.9042/1.2,2 * pi/kakudo];
 % elseif time.t>0.5&&time.t<=1.1
