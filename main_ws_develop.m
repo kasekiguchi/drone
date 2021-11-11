@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=60;
+    te=240;
 end
 %% initialize
 initial(N) = struct;
@@ -34,7 +34,7 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
 %         initial(i).p = [-45;8];
-        initial(i).p = [-3;-3];
+        initial(i).p = [-5;-5];
 %     initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];
@@ -70,27 +70,27 @@ for i = 1:N
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
 %             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-        agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
-    velocity = 1;
+    velocity = 0.5;
 %     WayPoint = [100,0,0,0,0];
 %      WayPoint = [55,8,0,0,0;
 %          55,15,pi/2,0,0;
 %          -45,15,pi,0,0;
 %          -45,8,3*pi/2,0,0;
 %          55,8,2*pi,0,0];%[x y theta v omaga]
-    WayPoint = [48,-3,0,0,0;
-        48,48,pi/2,0,0;
-        -3,48,pi,0,0;
-        -3,-3,3*pi/2,0,0;
-        48,-3,2*pi,0,0];
+    WayPoint = [55,-5,0,0,0;
+        55,55,pi/2,0,0;
+        -5,55,pi,0,0;
+        -5,-5,3*pi/2,0,0;
+        55,-5,2*pi,0,0];
     convjudge = 0.5;%収束判断
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
