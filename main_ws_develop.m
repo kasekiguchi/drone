@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=380;
+    te=30;
 end
 %% initialize
 initial(N) = struct;
@@ -358,7 +358,8 @@ end
 %% dataplot 
 close all;
 SaveOnOff = true;
-Plots = DataPlot(Logger,SaveOnOff);
+Plots = DataPlot(logger,SaveOnOff);
+disp(calculation);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
