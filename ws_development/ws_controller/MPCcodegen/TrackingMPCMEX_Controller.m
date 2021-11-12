@@ -25,10 +25,10 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([10,10,10,10,10]);
-            obj.param.R = diag([1e-10,1e-10]);
-            obj.param.Qf = diag([15,15,15,15,15]);
-            obj.param.T = diag([10,5,5,5,5,5,5,5,5,5]);
+            obj.param.Q = diag([10,10,1,1,1]);
+            obj.param.R = diag([1e-1,1e-1]);
+            obj.param.Qf = diag([15,15,1,1,1]);
+            obj.param.T = diag([5,5,5,5,5,5,5,5,5,5]);
 %             obj.param.Th = diag([1,1]);
 %             obj.param.LimFim = 1;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
@@ -100,7 +100,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input]; % 初期状態
             % obj.options.PlotFcn                = [];
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective_mex(problem.x0,obj.param,1.0e-2);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective_mex(problem.x0,obj.param,1.0e-4);
 %             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;

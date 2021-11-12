@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=240;
+    te=380;
 end
 %% initialize
 initial(N) = struct;
@@ -34,7 +34,7 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
 %         initial(i).p = [-45;8];
-        initial(i).p = [-5;-5];
+        initial(i).p = [-2;-2];
 %     initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];
@@ -86,11 +86,11 @@ for i = 1:N
 %          -45,15,pi,0,0;
 %          -45,8,3*pi/2,0,0;
 %          55,8,2*pi,0,0];%[x y theta v omaga]
-    WayPoint = [55,-5,0,0,0;
-        55,55,pi/2,0,0;
-        -5,55,pi,0,0;
-        -5,-5,3*pi/2,0,0;
-        55,-5,2*pi,0,0];
+    WayPoint = [48,-2,0,0,0;
+        48,48,pi/2,0,0;
+        -2,48,pi,0,0;
+        -2,-2,3*pi/2,0,0;
+        48,-2,2*pi,0,0];
     convjudge = 0.5;%収束判断
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
@@ -358,7 +358,7 @@ end
 %% dataplot 
 close all;
 SaveOnOff = true;
-Plots = DataPlot(logger,SaveOnOff);
+Plots = DataPlot(Logger,SaveOnOff);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
