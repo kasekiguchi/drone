@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=30;
+    te=100;
 end
 %% initialize
 initial(N) = struct;
@@ -179,14 +179,16 @@ disp("while ============================")
 close all;
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
+% cha = get(FH, 'currentcharacter');
+% FH.currentcharacter = 'f';
 %%
-w = waitforbuttonpress;
-
+% w = waitforbuttonpress;
+tic
 % try
 while round(time.t,5)<=te
     %while 1 % for exp
     %%
-    tic
+    
     %         motive.getData({agent,mparam});
     %         Smotive={motive};
     Srpos={agent};
@@ -321,7 +323,7 @@ while round(time.t,5)<=te
     end
     %agent(1).estimator.map.show
     %%
-    calculation=toc;
+    
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
@@ -345,6 +347,7 @@ while round(time.t,5)<=te
     % for exp
     % pause(0.9999*(sampling-calculation)); %
 end
+calculation=toc;
 % catch ME
 %     % with FH
 %
@@ -359,6 +362,7 @@ end
 close all;
 SaveOnOff = true;
 Plots = DataPlot(logger,SaveOnOff);
+%%
 disp(calculation);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
