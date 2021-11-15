@@ -71,7 +71,8 @@ classdef MODEL_CLASS <  handle
                 if size(varargin)>0 % might too specialized to Drone system
                     if isfield(varargin{1},'FH')
                         if ~isempty(varargin{1}.FH)
-                            cha = get(varargin{1}.FH, 'currentcharacter');
+                            cha = 'f';
+%                             cha = get(varargin{1}.FH, 'currentcharacter');
                             if (cha == 'q' || cha == 's' || cha == 'a')
                                 return
                             end

@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=120;
+    te=100;
 end
 %% initialize
 initial(N) = struct;
@@ -80,16 +80,17 @@ for i = 1:N
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
     velocity = 0.5;
+%     WayPoint = [100,0,0,0,0];
 %      WayPoint = [55,8,0,0,0;
 %          55,15,pi/2,0,0;
 %          -45,15,pi,0,0;
 %          -45,8,3*pi/2,0,0;
 %          55,8,2*pi,0,0];%[x y theta v omaga]
-    WayPoint = [47,-2,0,0,0;
-        47,47,pi/2,0,0;
-        -2,47,pi,0,0;
+    WayPoint = [48,-2,0,0,0;
+        48,48,pi/2,0,0;
+        -2,48,pi,0,0;
         -2,-2,3*pi/2,0,0;
-        47,-2,2*pi,0,0];
+        48,-2,2*pi,0,0];
     convjudge = 0.5;%収束判断
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
@@ -134,9 +135,9 @@ LogData=[
     "sensor.result.sensor_points",
     "sensor.result.angle",
     "sensor.result.length",
-    %     "controller.result.Eval",
-    %     "estimator.result.PreMapParam.x",
-    %     "estimator.result.PreMapParam.y",
+%         "controller.result.Eval",
+%         "estimator.result.PreMapParam.x",
+%         "estimator.result.PreMapParam.y",
     "env.Floor.param.Vertices",
     %    "reference.result.state.xd",
     "inner_input",
@@ -178,14 +179,16 @@ disp("while ============================")
 close all;
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
+% cha = get(FH, 'currentcharacter');
+% FH.currentcharacter = 'f';
 %%
-w = waitforbuttonpress;
-
+% w = waitforbuttonpress;
+tic
 % try
 while round(time.t,5)<=te
     %while 1 % for exp
     %%
-    tic
+    
     %         motive.getData({agent,mparam});
     %         Smotive={motive};
     Srpos={agent};
@@ -292,7 +295,7 @@ while round(time.t,5)<=te
 %                             else
 %                                 agent(i).input = [0,0];
 %                             end
-%         
+% %         
 % if time.t<=0.5
 %     agent(i).input = [0.4272/1.2,0.9042/1.2,2 * pi/kakudo];
 % elseif time.t>0.5&&time.t<=1.1
@@ -320,7 +323,7 @@ while round(time.t,5)<=te
     end
     %agent(1).estimator.map.show
     %%
-    calculation=toc;
+    
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
@@ -344,6 +347,7 @@ while round(time.t,5)<=te
     % for exp
     % pause(0.9999*(sampling-calculation)); %
 end
+calculation=toc;
 % catch ME
 %     % with FH
 %
@@ -356,8 +360,10 @@ end
 %profile viewer
 %% dataplot 
 close all;
-SaveOnOff = false;
-Plots = DataPlot(Logger,SaveOnOff);
+SaveOnOff = true;
+Plots = DataPlot(logger,SaveOnOff);
+%%
+disp(calculation);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);

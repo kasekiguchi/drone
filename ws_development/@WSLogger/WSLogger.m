@@ -31,7 +31,7 @@ classdef WSLogger < handle
             obj.target = target;
             obj.N = length(target); % agent number
             obj.Data.t = zeros(row,1); % 時間
-            obj.Data.phase = zeros(row,1); % フライトフェーズ　a,t,f,l...
+%             obj.Data.phase = zeros(row,1); % フライトフェーズ　a,t,f,l...
             obj.items=items;
             obj.si = length(items)+1;
             obj.ei = obj.si + 1;
@@ -55,8 +55,8 @@ classdef WSLogger < handle
             % t : current time
             % FH : figure handle for keyboard input
             obj.Data.t(obj.i)=t;
-            cha = get(FH, 'currentcharacter');
-            obj.Data.phase(obj.i)=cha;
+%             cha = get(FH, 'currentcharacter');
+%             obj.Data.phase(obj.i)=cha;
             for j = 1:obj.N
                 
                 for k = 1:length(obj.items)

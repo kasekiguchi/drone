@@ -12,6 +12,15 @@ pwall = [0,0;45,0;45,45;0,45];
 pwallpoly = polyshape(pwall);
 Pwalls = union(Poutwall,pwallpoly);
 
+% pout = [-10,-10;60,-10;60,60;-10,60];
+% Poutpoly = polyshape(pout);
+% pin = [-9,-9;59,-9;59,59;-9,59];
+% Pinpoly = polyshape(pin);
+% Poutwall = subtract(Poutpoly,Pinpoly);
+% pwall = [0,0;50,0;50,50;0,50];
+% pwallpoly = polyshape(pwall);
+% Pwalls = union(Poutwall,pwallpoly);
+
 env_param.Vertices(:,:,1) = Pwalls.Vertices;
 assignin('base',"env_param",env_param);
 evalin('base',"Env = FloorMap_sim([],env_param);");
