@@ -356,8 +356,8 @@ end
 %profile viewer
 %% dataplot 
 close all;
-SaveOnOff = true;
-Plots = DataPlot(logger,SaveOnOff);
+SaveOnOff = false;
+Plots = DataPlot(Logger,SaveOnOff);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);

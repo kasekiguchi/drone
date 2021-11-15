@@ -49,12 +49,12 @@ tmp_min = min(obj.logger.Data.agent{1,Index});
 xmin = -10;
 dx = 10;
 % xmax = max(tmp_max(:,1,:));
-xmax = 60;
+xmax = 100;
 % ymin = min(tmp_min(:,2,:));
-ymin = -10;
+ymin = -30;
 dy = 10;
 % ymax = max(tmp_max(:,2,:));
-ymax = 60;
+ymax = 30;
 
 
 
@@ -62,23 +62,26 @@ Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
 for i=1:MapDimx
     PlotMap = plot([MapDatax(i,1),MapDatax(i,2)],[MapDatay(i,1),MapDatay(i,2)],'LineWidth',3,'Color','r');
 end
+PlotPlant = plot(PlantData(1,:),PlantData(2,:),'Color',[0.5020,0.5020,0.5020],'LineWidth',5);
+PlotEst = plot(EstData(1,:),EstData(2,:),'Color',[0.0745,0.6235,1.0000],'LineWidth',4);
+ref = plot([0 100],[0 0],'k--','LineWidth',2);
 %plantFinalState
 PlantFinalState = PlantData(:,end);
-PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+PlantFinalStatesquare = PlantFinalState + 1.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
 PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * PlantqData(end) / pi, PlantData(:,end)');
 PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %modelFinalState
 EstFinalState = EstData(:,end);
-EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+EstFinalStatesquare = EstFinalState + 1.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 EstFinalStatesquare =  polyshape( EstFinalStatesquare');
 EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * EstqData(end) / pi, EstData(:,end)');
 PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 %
-PlotPlant = plot(PlantData(1,:),PlantData(2,:),'Color',[0.5020,0.5020,0.5020],'LineWidth',5);
-PlotEst = plot(EstData(1,:),EstData(2,:),'Color',[0.0745,0.6235,1.0000],'LineWidth',4);
 
-legend([PlotPlant PlotEst PlotFinalPlant PlotFinalEst Wall PlotMap],'Plant Trajectory','Estimated Trajectory','Plant','Estimate','Wall','EstimateMap','Location','northoutside','NumColumns',2);
+
+
+legend([PlotFinalPlant PlotFinalEst Wall PlotMap ref],'True','Estimate','Wall','EstimateMap','Reference','Location','northoutside','NumColumns',2);
 %setting
 grid on;
 xlim([xmin xmax]);ylim([ymin ymax]);
