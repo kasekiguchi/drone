@@ -5,12 +5,17 @@ if ~isempty(varargin)
 end
 Model.type="Wheelchair_Model"; % class name
 %Model.name="euler"; % print name
-Setting.dim=[5,2,0];
-Setting.input_channel= ["v","w"];
-Setting.method = 'WheelChair_AAlpha_model'; % model dynamicsの実体名
-Setting.state_list =  ["p","q",'v','w'];
+% Setting.dim=[5,2,0];
+Setting.dim=[4,2,0];
+% Setting.input_channel= ["a","alpha"];
+Setting.input_channel= ["a","w"];
+% Setting.method = 'WheelChair_AAlpha_model'; % model dynamicsの実体名
+Setting.method = 'WheelChair_Aomega_model'; % model dynamicsの実体名
+% Setting.state_list =  ["p","q",'v','w'];
+Setting.state_list =  ["p","q",'v'];
 Setting.initial = initial;
-Setting.num_list = [2,1,1,1];
+% Setting.num_list = [2,1,1,1];
+Setting.num_list = [2,1,1];
 Setting.dt = dt;
 if strcmp(type,"plant")
 %     for i = 1:N

@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=500;
+    te=10;
 end
 %% initialize
 initial(N) = struct;
@@ -88,15 +88,15 @@ for i = 1:N
 %          -45,15,pi,0,0;
 %          -45,8,3*pi/2,0,0;
 %          55,8,2*pi,0,0];%[x y theta v omaga]
-    WayPoint = [48,-2,0,0,0;
-        48,-2,pi/2,0,0;
-        48,48,pi/2,0,0;
-        48,48,pi,0,0;
-        -2,48,pi,0,0;
-        -2,48,3*pi/2,0,0;
-        -2,-2,3*pi/2,0,0;
-        -2,-2,pi,0,0;
-        48,-2,2*pi,0,0];
+    WayPoint = [48,-2,0,0;
+        48,-2,pi/2,0;
+        48,48,pi/2,0;
+        48,48,pi,0;
+        -2,48,pi,0;
+        -2,48,3*pi/2,0;
+        -2,-2,3*pi/2,0;
+        -2,-2,pi,0;
+        48,-2,2*pi,0];
     convjudgeV = 0.5;%収束判断
     convjudgeW = 0.2;%収束判断
     Holizon = 10;
@@ -127,9 +127,9 @@ LogData=[
     "estimator.result.state.p",
     "estimator.result.state.q",
     "estimator.result.state.v",
-    "estimator.result.state.w",
+%     "estimator.result.state.w",
     "plant.state.v",
-    "plant.state.w",
+%     "plant.state.w",
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
     "estimator.result.P",

@@ -7,7 +7,7 @@ RobotState = [obj.target.estimator.result.state.p(1) , obj.target.estimator.resu
 
 %---Get paramerter u---%
 if cell2mat(strfind(obj.target.model.state.list,'v'))
-    u = [obj.target.estimator.result.state.v,obj.target.estimator.result.state.w];
+    u = [obj.target.estimator.result.state.v,obj.target.input(2)];
 else
     u = obj.target.input;
 end

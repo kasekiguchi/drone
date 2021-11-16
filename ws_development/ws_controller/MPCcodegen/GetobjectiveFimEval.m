@@ -12,9 +12,9 @@ tildeU = U;
 %
 evFim = zeros(1,params.H);
 for j = 1:params.H
-    Fim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j), X(5,j), params.dt, params.dis(1), params.alpha(1), params.phi(1));
+    Fim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j), U(2,j), params.dt, params.dis(1), params.alpha(1), params.phi(1));
     for i = 2:length(params.dis)
-        Fim = Fim + FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j), X(5,j), params.dt, params.dis(i), params.alpha(i), params.phi(i) );
+        Fim = Fim + FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j), U(2,j), params.dt, params.dis(i), params.alpha(i), params.phi(i) );
     end
     Fim = (1/(2*NoiseR))*Fim;
     InvFim = inv(Fim);
