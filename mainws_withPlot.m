@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=300;
+    te=500;
 end
 %% initialize
 initial(N) = struct;
@@ -89,14 +89,19 @@ for i = 1:N
 %          -45,8,3*pi/2,0,0;
 %          55,8,2*pi,0,0];%[x y theta v omaga]
     WayPoint = [48,-2,0,0,0;
+        48,-2,pi/2,0,0;
         48,48,pi/2,0,0;
+        48,48,pi,0,0;
         -2,48,pi,0,0;
+        -2,48,3*pi/2,0,0;
         -2,-2,3*pi/2,0,0;
+        -2,-2,pi,0,0;
         48,-2,2*pi,0,0];
-    convjudge = 0.5;%収束判断
+    convjudgeV = 0.5;%収束判断
+    convjudgeW = 0.2;%収束判断
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
-    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudge,initial,Holizon));
+    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
@@ -181,6 +186,7 @@ disp("while ============================")
 close all;
 % disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
+NowResult = figure;
 %%
 % w = waitforbuttonpress;
 tic
@@ -215,111 +221,6 @@ while round(time.t,5)<=te
 
         %            agent(i).do_controller(param(i).controller);
         agent(i).do_controller(cell(1,10));
-        warukaku = 4;
-        kakudo = (1/2)* warukaku;
-        %                         %for v model
-        %         if time.t<1
-        %             agent(i).input = [1,pi/warukaku];
-        % %         elseif time.t>10 && time.t<11
-        % %             agent(i).input = [1,-pi/kakudo];
-        % %         elseif time.t>30 && time.t<31
-        % %             agent(i).input = [1,pi/kakudo];
-        % %         elseif time.t>50 && time.t<51
-        % %             agent(i).input = [1,-pi/kakudo];
-        % %         elseif time.t>70 && time.t<71
-        % %             agent(i).input = [1,pi/kakudo];
-        % %         elseif time.t>90 && time.t<91
-        % %             agent(i).input = [1,-pi/kakudo];
-        %         else
-        %             agent(i).input = [1,0];
-        %         end
-%         www = 1.1294;
-%         wwa = 0.443015;
-%         if time.t<1
-%             agent(i).input = [1,www-0.1];
-%         elseif time.t>=10 && time.t<11
-%             agent(i).input = [1,-www - wwa];
-%         elseif time.t>=30 && time.t<31
-%             agent(i).input = [1,www + wwa];
-%         elseif time.t>=40 && time.t<41
-%             agent(i).input = [1,-www - wwa];
-%         elseif time.t>=70 && time.t<71
-%             agent(i).input = [1,pi/warukaku];
-%         elseif time.t>90 && time.t<91
-%             agent(i).input = [1,-pi/warukaku];
-%         else
-%             agent(i).input = [1,0];
-%         end
-
-% if time.t<1
-%     agent(i).input = [0,0,www-0.1];
-% elseif time.t>=1 && time.t<10
-%     agent(i).input = [0.4272,0.9042,0];
-% elseif time.t>=10 && time.t<11
-%     agent(i).input = [0,0,-www - wwa];
-% elseif time.t>=11 && time.t<30
-%     agent(i).input = [0.9035,-0.4287,0];
-% elseif time.t>=30 && time.t<31
-%     agent(i).input = [0,0,www + wwa];
-% elseif time.t>=31 && time.t<40
-%     agent(i).input = [0.4272,0.9042,0];
-% elseif time.t>=40 && time.t<41
-%     agent(i).input = [0,0,-www - wwa];
-% elseif time.t>=41 && time.t<70
-%     agent(i).input = [0.9035,-0.4287,0];
-% elseif time.t>=70 && time.t<71
-%     agent(i).input = [0,pi/warukaku];
-% elseif time.t>90 && time.t<91
-%     agent(i).input = [0,-pi/warukaku];
-% else
-%     agent(i).input = [1,0,0];
-% end
-        
-        %for a model
-%                             if time.t<=0.5
-%                                 agent(i).input = [1/1.2,2 * pi/kakudo];
-%                             elseif time.t>0.5&&time.t<=1.1
-%                                 agent(i).input = [1/1.2,-2 * pi/kakudo];
-%                             elseif time.t>=10 && time.t<=10.5
-%                                 agent(i).input = [0,-4 * pi/kakudo];
-%                             elseif time.t>10.5 && time.t<11
-%                                 agent(i).input = [0,4 * pi/kakudo];
-%                             elseif time.t>=30 && time.t<=30.5
-%                                 agent(i).input = [0,4 * pi/kakudo];
-%                             elseif time.t>30.5 && time.t<31
-%                                 agent(i).input = [0,-4 * pi/kakudo];
-%                             elseif time.t>=40 && time.t<=40.5
-%                                 agent(i).input = [0,-4 * pi/kakudo];
-%                             elseif time.t>40.5 && time.t<41
-%                                 agent(i).input = [0,4 * pi/kakudo];
-%                             else
-%                                 agent(i).input = [0,0];
-%                             end
-% %         
-% if time.t<=0.5
-%     agent(i).input = [0.4272/1.2,0.9042/1.2,2 * pi/kakudo];
-% elseif time.t>0.5&&time.t<=1.1
-%     agent(i).input = [0.4272/1.2,0.9042/1.2,-2 * pi/kakudo];
-% elseif time.t>=10 && time.t<=10.5
-%     agent(i).input = [-2*0.4272,-2*0.9042,-4 * pi/kakudo];
-% elseif time.t>10.5 && time.t<11
-%     agent(i).input = [2* 0.9035,2*-0.4287,4 * pi/kakudo];
-% elseif time.t>=30 && time.t<=30.5
-%     agent(i).input = [-2* 0.9035,-2*-0.4287,4 * pi/kakudo];
-% elseif time.t>30.5 && time.t<31
-%     agent(i).input = [2*0.4272,2*0.9042,-4 * pi/kakudo];
-% elseif time.t>=40 && time.t<=40.5
-%     agent(i).input = [-2*0.4272,-2*0.9042,-4 * pi/kakudo];
-% elseif time.t>40.5 && time.t<41
-%     agent(i).input = [2* 0.9035,2*-0.4287,4 * pi/kakudo];
-% else
-%     agent(i).input = [0,0,0];
-% end
-%         if time.t<=1.1
-%             agent(i).input = [1/1.2,0,0];
-%         else
-%             agent(i).input = [0,0,0];
-%         end
     end
     %agent(1).estimator.map.show
     %%
@@ -344,6 +245,10 @@ while round(time.t,5)<=te
         
         agent(i).do_plant(plant_param);
     end
+    %---now result plot---%
+     NowResultPlot(agent,NowResult);
+     drawnow
+    %---------------------%
     % for exp
     % pause(0.9999*(sampling-calculation)); %
 end
@@ -380,4 +285,32 @@ end
 fclose(fileID);
 movefile('RunNames.txt',Plots.SaveDateStr);
 % run('dataplot');
-%% Save
+%% Local function
+function [] = NowResultPlot(agent,NowResult)
+    figure(NowResult)
+    clf(NowResult)
+    grid on
+    axis equal
+    hold on
+MapIdx = size(agent.env.Floor.param.Vertices,3);
+for ei = 1:MapIdx
+    tmpenv(ei) = polyshape(agent.env.Floor.param.Vertices(:,:,ei));
+end
+p_Area = union(tmpenv(:));
+%plantFinalState
+PlantFinalState = agent.plant.state.p(:,end);
+PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
+PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
+PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+%modelFinalState
+EstFinalState = agent.estimator.result.state.p(:,end);
+EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+EstFinalStatesquare =  polyshape( EstFinalStatesquare');
+EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * agent.estimator.result.state.q(end) / pi, agent.estimator.result.state.p(:,end)');
+PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+
+Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+
+hold off
+end
