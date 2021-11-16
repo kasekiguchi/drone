@@ -2,7 +2,7 @@
 clear all;clc;close all;
 LaserNum = 629;
 x = sym('x','real');
-    y = sym('y','real');
+y = sym('y','real');
 theta = sym('theta','real');
 v = sym('v','real');
 omega = sym('omega','real');
