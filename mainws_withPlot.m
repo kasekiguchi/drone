@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=500;
 end
 %% initialize
 initial(N) = struct;
@@ -266,7 +266,7 @@ calculation=toc;
 %% dataplot 
 close all;
 SaveOnOff = true;
-Plots = DataPlot(logger,SaveOnOff);
+Plots = DataPlot(Logger,SaveOnOff);
 %%
 disp(calculation);
 %% Run class Saves

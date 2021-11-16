@@ -58,12 +58,12 @@ if Flag
     xmin = -10;
     dx = 10;
     % xmax = max(tmp_max(:,1,:));
-    xmax = 70;
+    xmax = 60;
     %     ymin = min(tmp_min(:,2,:));
-    ymin = -30;
+    ymin = -10;
     dy = 10;
 %     ymax = max(tmp_max(:,2,:));
-    ymax = 30;
+    ymax = 60;
     
     v = VideoWriter(strcat('SLAM_MAPplot.mp4'),'MPEG-4');
     open(v);

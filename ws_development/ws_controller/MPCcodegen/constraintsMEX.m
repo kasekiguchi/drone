@@ -6,12 +6,12 @@ cineq  = zeros(params.state_size, 4*params.H);
 X = x(1:params.state_size, :);
 U = x(params.state_size+1:end, :);
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定
-PredictX = zeros(5,params.H);
+PredictX = zeros(4,params.H);
 for L = 1:params.H
     PredictX(:,L) = X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param);
 end
 % PredictX = cell2mat(arrayfun(@(L) X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param) , 1:params.H,'UniformOutput' , false));
-tmpceq = zeros(5,params.H);
+tmpceq = zeros(4,params.H);
 for L = 2:params.Num
     tmpceq(:,L-1) = X(:, L)  -  PredictX(:,L-1);
 end
@@ -25,5 +25,5 @@ ceq = [X(:, 1) - params.X0, tmpceq];
 end
 function dX = Model(x,u,param)
     u(1) = param.K * u(1);
-    dX = [x(4)*cos(x(3));x(4)*sin(x(3));x(5);u(1);u(2)];
+    dX = [x(4)*cos(x(3));x(4)*sin(x(3));u(2);u(1)];
 end
