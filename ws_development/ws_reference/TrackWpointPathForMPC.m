@@ -34,7 +34,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
             obj.ConvergencejudgeV = param{1,4};
             obj.ConvergencejudgeW = param{1,5};
 %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
-            obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;];
+            obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];
             obj.Holizon = param{1,7};
             obj.dt = obj.self.model.dt;
             obj.WayPointNum = length(obj.WayPoint);
@@ -49,49 +49,48 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
             %----------------------------%
             
             %---judgement of convergence for estimate position---%
-            if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(obj.PreTrack(3,1) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW
+            if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(EstData(3) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW
                 obj.Flag = obj.Flag+1;
                 if obj.Flag >= obj.WayPointNum
                     obj.Flag = obj.WayPointNum;
                 end
             end
             %----------------------------------------------------%
-            obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta]
+            obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
 
             %---judgement of covergence for Target Position---%
-            if (obj.PreTrack(1) - obj.WayPoint(obj.Flag,1))^2 + (obj.PreTrack(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(obj.PreTrack(3,1) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW
+            if (obj.PreTrack(1) - obj.WayPoint(obj.Flag,1))^2 + (obj.PreTrack(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(EstData(3) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW
                 obj.TrackingPoint(:,1) = obj.WayPoint(obj.Flag,:)';
             %-------------------------------------------------%
             else
                 %---Make first Tracking Point---%
                 Tracktheta = atan2(obj.WayPoint(obj.Flag,2)- obj.PreTrack(2),obj.WayPoint(obj.Flag,1) - obj.PreTrack(1));
                 obj.TrackingPoint(1:2,1) = obj.PreTrack(1:2,1) + [obj.Targetv*obj.dt*cos(Tracktheta);obj.Targetv*obj.dt*sin(Tracktheta)];
-                if abs(obj.PreTrack(3,1) - obj.WayPoint(obj.Flag,3)) > obj.ConvergencejudgeW
-                    obj.TrackingPoint(3,1) = obj.PreTrack(3,1) + sign(obj.WayPoint(obj.Flag,3) - obj.PreTrack(3,1)) * obj.Targetw*obj.dt;
+                if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(EstData(3) - obj.WayPoint(obj.Flag,3)) > obj.ConvergencejudgeW
+                    obj.TrackingPoint(3,1) = EstData(3) + (obj.WayPoint(obj.Flag,3) - EstData(3)) * obj.Targetw;
                 else
                     obj.TrackingPoint(3,1) = obj.WayPoint(obj.Flag,3);
                 end
-                
                 obj.TrackingPoint(4,1) = obj.Targetv;
                 %-------------------------%
             end
             
             %---Tracking point of after 2steps---%
             for i = 2:obj.Holizon
-                if (obj.TrackingPoint(1,i-1) - obj.WayPoint(obj.Flag,1))^2 + (obj.TrackingPoint(2,i-1) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV
-                obj.TrackingPoint(:,i) = obj.WayPoint(obj.Flag,:)';
-            %-------------------------------------------------%
-            else
-                %---Make first Tracking Point---%
-                Tracktheta = atan2(obj.WayPoint(obj.Flag,2)- obj.TrackingPoint(2,i-1),obj.WayPoint(obj.Flag,1) - obj.TrackingPoint(1,i-1));
-                obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(Tracktheta);obj.Targetv*obj.dt*sin(Tracktheta)];
-                if abs(obj.TrackingPoint(3,i-1) - obj.WayPoint(obj.Flag,3)) > obj.ConvergencejudgeW
-                    obj.TrackingPoint(3,i) = obj.PreTrack(3,1) + sign(obj.WayPoint(obj.Flag,3) - obj.TrackingPoint(3,i-1)) * obj.Targetw*obj.dt;
+                if (obj.TrackingPoint(1,i-1) - obj.WayPoint(obj.Flag,1))^2 + (obj.TrackingPoint(2,i-1) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(obj.TrackingPoint(3,i-1) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW
+                    obj.TrackingPoint(:,i) = obj.WayPoint(obj.Flag,:)';
+                    %-------------------------------------------------%
                 else
-                    obj.TrackingPoint(3,1) = obj.WayPoint(obj.Flag,3);
-                end
-                obj.TrackingPoint(4,i) = obj.Targetv;
-                %-------------------------%
+                    %---Make first Tracking Point---%
+                    Tracktheta = atan2(obj.WayPoint(obj.Flag,2)- obj.TrackingPoint(2,i-1),obj.WayPoint(obj.Flag,1) - obj.TrackingPoint(1,i-1));
+                    obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(Tracktheta);obj.Targetv*obj.dt*sin(Tracktheta)];
+                    if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(obj.TrackingPoint(3,i-1) - obj.WayPoint(obj.Flag,3)) > obj.ConvergencejudgeW
+                        obj.TrackingPoint(3,i) = obj.TrackingPoint(3,i-1) + (obj.WayPoint(obj.Flag,3) - obj.TrackingPoint(3,i-1)) * obj.Targetw;
+                    else
+                        obj.TrackingPoint(3,i) = obj.WayPoint(obj.Flag,3);
+                    end
+                    obj.TrackingPoint(4,i) = obj.Targetv;
+                    %-------------------------%
                 end
             end
             %------------------------------------%

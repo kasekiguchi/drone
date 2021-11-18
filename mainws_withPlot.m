@@ -80,14 +80,19 @@ for i = 1:N
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
     velocity = 0.5;
-    w_velocity = 0.05;
+    w_velocity = 0.01;
     
 %     WayPoint = [100,0,0,0,0];
 %      WayPoint = [55,8,0,0,0;
 %          55,15,pi/2,0,0;
 %          -45,15,pi,0,0;
-%          -45,8,3*pi/2,0,0;
+%          -45,8,3*pi/2,0,0;f
 %          55,8,2*pi,0,0];%[x y theta v omaga]
+%  WayPoint = [48,-2,0,0;
+%         48,48,pi/2,0;
+%         -2,48,pi,0;
+%         -2,-2,-pi/2,0;
+%         48,-2,0,0];
     WayPoint = [48,-2,0,0;
         48,-2,pi/2,0;
         48,48,pi/2,0;
@@ -95,10 +100,10 @@ for i = 1:N
         -2,48,pi,0;
         -2,48,3*pi/2,0;
         -2,-2,3*pi/2,0;
-        -2,-2,pi,0;
-        48,-2,2*pi,0];
+        -2,-2,0,0;
+        48,-2,0,0];
     convjudgeV = 0.5;%収束判断
-    convjudgeW = 0.2;%収束判断
+    convjudgeW = 0.1;%収束判断
     Holizon = 10;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
@@ -147,7 +152,7 @@ LogData=[
 %         "estimator.result.PreMapParam.y",
     "env.Floor.param.Vertices",
     %    "reference.result.state.xd",
-    "inner_input",
+%     "inner_input",
     "input"
     ];
 SubFunc = [
@@ -266,7 +271,7 @@ calculation=toc;
 %% dataplot 
 close all;
 SaveOnOff = true;
-Plots = DataPlot(Logger,SaveOnOff);
+Plots = DataPlot(logger,SaveOnOff);
 %%
 disp(calculation);
 %% Run class Saves

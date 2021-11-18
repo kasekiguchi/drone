@@ -49,12 +49,12 @@ tmp_min = min(obj.logger.Data.agent{1,Index});
 xmin = -10;
 dx = 10;
 % xmax = max(tmp_max(:,1,:));
-xmax = 100;
+xmax = 60;
 % ymin = min(tmp_min(:,2,:));
-ymin = -30;
+ymin = -10;
 dy = 10;
 % ymax = max(tmp_max(:,2,:));
-ymax = 30;
+ymax = 60;
 
 
 
@@ -64,7 +64,7 @@ for i=1:MapDimx
 end
 PlotPlant = plot(PlantData(1,:),PlantData(2,:),'Color',[0.5020,0.5020,0.5020],'LineWidth',5);
 PlotEst = plot(EstData(1,:),EstData(2,:),'Color',[0.0745,0.6235,1.0000],'LineWidth',4);
-ref = plot([0 100],[0 0],'k--','LineWidth',2);
+% ref = plot([0 100],[0 0],'k--','LineWidth',2);
 %plantFinalState
 PlantFinalState = PlantData(:,end);
 PlantFinalStatesquare = PlantFinalState + 1.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
@@ -81,7 +81,7 @@ PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'Face
 
 
 
-legend([PlotFinalPlant PlotFinalEst Wall PlotMap ref],'True','Estimate','Wall','EstimateMap','Reference','Location','northoutside','NumColumns',2);
+legend([PlotFinalPlant PlotFinalEst Wall PlotMap],'True','Estimate','Wall','EstimateMap','Location','northoutside','NumColumns',2);
 %setting
 grid on;
 xlim([xmin xmax]);ylim([ymin ymax]);

@@ -7,6 +7,8 @@ Reference.type=["TrackWpointPathForMPC"];
 Reference.name=["TrackWpointPathForMPC"];
 %for i = 1:length(agent)
     Reference.param={WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon};
+% Reference.param={WayPoint,velocity,convjudgeV,initial,Holizon};
+
    % agent(i).set_reference(Reference);
 %end
 end

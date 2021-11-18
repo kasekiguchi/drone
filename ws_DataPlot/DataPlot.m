@@ -19,7 +19,7 @@ classdef DataPlot<handle
         FuncNames = [%     "XYZTureAndEst",
 %     "AttitudesTureAndEst",
 %     "TrackMPCEval",
-%     "MapAndVehicleTrueAndEst",
+    "MapAndVehicleTrueAndEst",
 %     "Eval",
 %     "Covxv",
     "MapMovie",
@@ -29,6 +29,7 @@ classdef DataPlot<handle
     "AllTureAndEst",
     "VWTureAndEst",
     "AllSquareError",
+    "Input",
 %     "ContEval",
 %     "TrajectoryRMSE",
 %     "ObserveSubFIM"
