@@ -18,19 +18,35 @@ classdef consensus_agreement < REFERENCE_CLASS
 
             
        %% 目標位置
-        function  result= do(obj,param)
+        function  result= do(obj,Param)
             sensor = obj.self.sensor.result;%Param{1}.result;　%　他の機体の位置
             state = obj.self.estimator.result.state;%Param{2}.state; % 自己位置
 
             ni = size(sensor.neighbor,2);%センサレンジ内にある他機体の位置情報
-            consensus_point = [0;0;0]; %合意重心
-            if ni==0 %近くに他の機体がいない
-                obj.result.state.p = state.p;
+%             consensus_point = [0;0;0]; %合意重心
+            if obj.self.id == 1
+                r=3;
+                theta = linspace(0,2*pi,(Param{2}/Param{3})+1);
+                x = r*cos(theta(Param{1}.i));
+                y = r*sin(theta(Param{1}.i));
+                z = 0;
+                obj.result.state.p = [x;y;z];
             else
-                obj.result.state.p = consensus_point+obj.offset(:,obj.self.id); %合意重心を設定して隊列を形成
-%                 obj.result.state.p = (state.p+(ni+1)*(obj.offset(:,obj.self.id))+sum(sensor.neighbor,2))/(ni+1); %逐次合意重心を算出
+                if ni==0 %近くに他の機体がいない
+                    obj.result.state.p = state.p;
+                else
+                    r=3;
+                    theta = linspace(0,2*pi,(Param{2}/Param{3})+1);
+                    x = r*cos(theta(Param{1}.i));
+                    y = r*sin(theta(Param{1}.i));
+                    z = 0;
+                    obj.result.state.p = [x;y;z]+obj.offset(:,obj.self.id); %合意重心を設定して隊列を形成
+                    
+%                     obj.result.state.p = (state.p+(ni+1)*(obj.offset(:,obj.self.id))+sum(sensor.neighbor,2))/(ni+1); %逐次合意重心を算出
+                end
             end
-            result = obj.result;
+
+            result = obj.result; %返し値（次の目標位置）
         end
         
         function show(obj,param)

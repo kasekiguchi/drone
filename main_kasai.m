@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 4; %number of agents（if bird_trace system else number of all units）
+N = 6; %number of agents（if bird_trace system else number of all units）
 Nb = 3; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
@@ -32,13 +32,13 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=40;
 end
 %% set connector (global instance)
 if fExp
     if fMotive
         rigid_ids = [1];
-        Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',rigid_ids)); % Motive
+        Connector_Natnet(struct('ClientIP','192.168.1.6','rigid_list',rigid_ids)); % Motive
     end
 else
     if fMotive
@@ -73,7 +73,7 @@ else
     
     if (fOffline)
         %%
-        expdata=DATA_EMULATOR("isobe_HLonly_Log(18-Dec-2020_12_17_35)"); % 空の場合最新のデータ
+%         expdata=DATA_EMULATOR("isobe_HLonly_Log(18-Dec-2020_12_17_35)"); % 空の場合最新のデータ
     end
     %% for sim
     for i = 1:N
@@ -155,7 +155,7 @@ for i = 1:N
     end
     
     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,1000)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_RangePos(i,2)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
@@ -315,7 +315,7 @@ FH  = figure('position',[0 0 eps eps],'menubar','none');
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
-            param(i).reference.agreement={};
+            param(i).reference.agreement={logger,te,dt};
             param(i).reference.trace_drone={agent,N,Nb,fp,[0.7,1.2,30]};
             param(i).reference.trace_pestbirds={agent,logger,N,Nb,fp,[0.7,1.2,30]};
             
@@ -397,7 +397,7 @@ dataplot_agreement(logger,N); % 合意制御
 % logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
 
 % logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
-%logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
+% logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
 %  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
 %  logger.plot(1,["p1-p2"],["r"]);
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
