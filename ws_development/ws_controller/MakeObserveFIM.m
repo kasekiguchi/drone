@@ -22,8 +22,9 @@ PP = [partial1;partial2;partial3]*[partial1;partial2;partial3]';
 % for Sumi=2:629
 %     PP = PP + P{1,Sumi};
 % end
-%% make matlabFunctions DeltahDiff
+%% make matlabFunctions h
 outputs = {'PP'};
 filename = 'FIM_Observe';
 vars = {x, y, theta, d, alpha, phi};
 matlabFunction(PP, 'file', filename, 'vars',vars , 'outputs', outputs);
+%%

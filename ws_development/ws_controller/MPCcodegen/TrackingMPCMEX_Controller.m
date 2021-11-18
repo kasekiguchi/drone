@@ -9,6 +9,8 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
         previous_input
         previous_state
         model
+        NoiseR
+        SensorRange
         result
         self
         SolverName
@@ -29,6 +31,8 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.R = diag([2,2]);
             obj.param.Qf = diag([10,10,1,1]);
             obj.param.T = diag([10,10,10,10,10,10,10,10,10,10]);
+            obj.NoiseR = 2.0e-2;%param of Fisher Information matrix
+            obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
 %             obj.param.Th = diag([1,1]);
 %             obj.param.LimFim = 1;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
@@ -100,7 +104,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input]; % 初期状態
             % obj.options.PlotFcn                = [];
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective_mex(problem.x0,obj.param,2.0e-2);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange);
 %             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;

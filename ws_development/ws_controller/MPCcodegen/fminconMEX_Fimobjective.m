@@ -1,7 +1,7 @@
 % -------------------------------------------------------------------------
 %Author Sota Wada; Date 2021_10_21
 % -------------------------------------------------------------------------
-function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_Fimobjective(x0,param,NoiseR)
+function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_Fimobjective(x0,param,NoiseR,SensorRange)
 assert(isa(x0,'double'));assert(all(size(x0)==	[6,11]));
 assert(isa(param,'struct'));
 assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
@@ -22,6 +22,7 @@ assert(isa(param.X0,'double'));assert(all(size(param.X0)==	[4,1]));
 assert(isa(param.model_param,'struct'));
 assert(isa(param.model_param.K,'double'));assert(all(size(param.model_param.K)==	[1,1]));
 assert(isa(NoiseR,'double'));assert(all(size(NoiseR)==	[1,1]));
+assert(isa(SensorRange,'double'));assert(all(size(SensorRange)==	[1,1]));
     options = optimoptions('fmincon',...
         'MaxIterations',                 1000000000,...
         'MaxFunctionEvaluations',        1000000000,...
@@ -32,11 +33,11 @@ assert(isa(NoiseR,'double'));assert(all(size(NoiseR)==	[1,1]));
         'SpecifyConstraintGradient',     false,...
         'Algorithm',                     'sqp');
     % 最大反復回数, 評価関数の最大値, 制約の許容誤差, 最適性の許容誤差, ステップサイズの下限, 評価関数の勾配設定, 制約条件の勾配設定, SQPアルゴリズムの指定
-    evalfunc = @(x)FimobjectiveMEX(x,param,NoiseR);
+    evalfunc = @(x)FimobjectiveMEX(x,param,NoiseR,SensorRange);
     nonlcon  = @(x)constraintsMEX(x,param);
     [x,fval,exitflag,output,lambda,grad,hessian] = fmincon(evalfunc,x0,[],[],[],[],[],[],nonlcon,options);
 end
-function [eval] = FimobjectiveMEX(x, params,NoiseR)
+function [eval] = FimobjectiveMEX(x, params,NoiseR,SensorRange)
 % モデル予測制御の評価値を計算するプログラム
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
 X = x(1:params.state_size, :);
@@ -47,11 +48,13 @@ tildeU = U;
 %
 evFim = zeros(1,params.H);
 for j = 1:params.H
-%     arrayfun(@(L) FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j), X(5,j), params.dt, params.dis(L), params.alpha(L), params.phi(L)),1:length(params.dis));
-    Fim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j), params.dt, params.dis(1), params.alpha(1), params.phi(1));
-%     arrayfun(@(N) FIM_ObserbSub(X(1,1), X(2,1), X(3,1), X(4,1), X(5,1), params.t, params.dis(N), params.alpha(N), params.phi(N)),1:length(params.dis),'UniformOutput',false);
-    for i = 2:length(params.dis)
-        Fim = Fim + FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j), params.dt, params.dis(i), params.alpha(i), params.phi(i) );
+    H = (params.dis(:) - X(1,j).*cos(params.alpha(:)) - X(2,j).*sin(params.alpha(:)))./cos(params.phi(:) - params.alpha(:) + X(3,j));%observation
+%     RangeLogic = H<SensorRange;
+    RangeLogic = (tanh(SensorRange - H)+1)/2;
+    tmpFim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j), params.dt, params.dis(:), params.alpha(:), params.phi(:));
+    Fim = RangeLogic(1) * tmpFim(1:2,:);
+    for i = 2:length(tmpFim)/2
+        Fim = Fim + RangeLogic(i) * tmpFim(2*i-1:2*i,:);
     end
     Fim = (1/(2*NoiseR))*Fim;
     InvFim = inv(Fim);
