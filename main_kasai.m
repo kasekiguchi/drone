@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 6; %number of agents（if bird_trace system else number of all units）
+N = 2; %number of agents（if bird_trace system else number of all units）
 Nb = 3; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
@@ -155,7 +155,7 @@ for i = 1:N
     end
     
     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,2)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_RangePos(i,1.5)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
@@ -315,7 +315,7 @@ FH  = figure('position',[0 0 eps eps],'menubar','none');
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
-            param(i).reference.agreement={logger,te,dt};
+            param(i).reference.agreement={logger,N};
             param(i).reference.trace_drone={agent,N,Nb,fp,[0.7,1.2,30]};
             param(i).reference.trace_pestbirds={agent,logger,N,Nb,fp,[0.7,1.2,30]};
             
@@ -406,3 +406,4 @@ dataplot_agreement(logger,N); % 合意制御
 
 %%
 % logger.save();
+save(simdata-1,logger);

@@ -9,8 +9,8 @@ for n = 1:numel(logger.Data.t)
         x(i,n) = logger.Data.agent{n,3,i}.state.p(1,1);
         y(i,n) = logger.Data.agent{n,3,i}.state.p(2,1);
     end
-    for i=1:N-1
-        distance(i,n) = sqrt((x(1,n)-(x(1+i,n)))^2+(y(1,n)-(y(1+i,n)))^2);
+    for i=1:N
+        distance(i,n) = sqrt((x(1,n)-(x(i,n)))^2+(y(1,n)-(y(i,n)))^2);
     end
 end
     
@@ -88,8 +88,8 @@ end
     end
     set(axes3,'FontName','Times New Roman','FontSize',14);
     grid on;
-    xlim([-5,5]);
-    ylim([-5,5]);
+    xlim([-2,2]);
+    ylim([-2,2]);
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
     axis square;
@@ -101,11 +101,11 @@ end
     figure(8)
     figure8=figure(8);
     axes8=axes('Parent',figure8);
-    for i=1:N-1
-        text2{i} = append('agent1-',num2str(i+1));
+    for i=1:N
+        text2{i} = append('agent1-',num2str(i));
     end
     hold on
-    for i=1:N-1
+    for i=1:N
         figi = plot(t,distance(i,1:numel(logger.Data.t)),'displayname',text2{i});
     end
     hold off
@@ -143,8 +143,8 @@ end
     while t <= numel(logger.Data.t)
         clf(figure(9)); 
 
-        xlim([-5,5]);
-        ylim([-5,5]);
+        xlim([-2,2]);
+        ylim([-2,2]);
         set(gca,'FontSize',20);
         xlabel('\sl x \rm [m]','FontSize',25);
         ylabel('\sl y \rm [m]','FontSize',25);
@@ -167,8 +167,8 @@ end
 %             figure(4)
 %             title('t=1s');
 %             grid on;
-%             xlim([-5 5]);
-%             ylim([-5 5]);
+%             xlim([-2 2]);
+%             ylim([-2 2]);
 %             set(gca,'FontSize',20);
 %             xlabel('\sl x \rm [m]','FontSize',25);
 %             ylabel('\sl y \rm [m]','FontSize',25);
@@ -185,8 +185,8 @@ end
 %             figure(5)
 %             title('t=1.5s');
 %             grid on;
-%             xlim([-5 5]);
-%             ylim([-5 5]);
+%             xlim([-2 2]);
+%             ylim([-2 2]);
 %             set(gca,'FontSize',20);
 %             xlabel('\sl x \rm [m]','FontSize',25);
 %             ylabel('\sl y \rm [m]','FontSize',25);
@@ -203,8 +203,8 @@ end
 %             figure(6)
 %             title('t=2s');
 %             grid on;
-%             xlim([-5 5]);
-%             ylim([-5 5]);
+%             xlim([-2 2]);
+%             ylim([-2 2]);
 %             set(gca,'FontSize',20);
 %             xlabel('\sl x \rm [m]','FontSize',25);
 %             ylabel('\sl y \rm [m]','FontSize',25);
@@ -221,8 +221,8 @@ end
 %             figure(7)
 %             title('t=2.5s');
 %             grid on;
-%             xlim([-5 5]);
-%             ylim([-5 5]);
+%             xlim([-2 2]);
+%             ylim([-2 2]);
 %             set(gca,'FontSize',20);
 %             xlabel('\sl x \rm [m]','FontSize',25);
 %             ylabel('\sl y \rm [m]','FontSize',25);

@@ -8,9 +8,9 @@ function Reference = Reference_agreement(N)
     Reference.name=["agreement"];
     pos = linspace(0,2*pi,N); %円形に配置
     Reference.param = zeros(3,N);
-    r = 1; %隊列の半径
+    r = 0.5; %隊列の半径
     for i=1:N
-        Reference.param(:,i)=[r*cos(pos(i));r*sin(pos(i));0.0];
+        Reference.param(:,i)=[r*cos(pos(i));r*sin(pos(i));1.0];
     end
 %     l = 5;
 %     pos = linspace(0,l,N); %左向きV字
