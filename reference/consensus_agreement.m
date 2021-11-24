@@ -30,9 +30,6 @@ classdef consensus_agreement < REFERENCE_CLASS
                 x = r*cos(theta(Param{1}.i));
                 y = r*sin(theta(Param{1}.i));
                 z = 1;
-                if state.p - [0;0;0] < 1
-                    obj.result.state.p = -0.01*(state.p - [x;y;z]);
-                end
                 obj.result.state.p = [x;y;z];
             else
                 if ni==0 %近くに他の機体がいない
@@ -43,7 +40,19 @@ classdef consensus_agreement < REFERENCE_CLASS
                     x = r*cos(theta(Param{1}.i));
                     y = r*sin(theta(Param{1}.i));
                     z = 1;
-                    obj.result.state.p = [x;y;z]+obj.offset(:,obj.self.id); %合意重心を設定して隊列を形成
+                    for i=1:ni
+                        Po(:,i) = 1/sqrt((state.p(1) - sensor.neighbor(1,i))^2+(state.p(3) - sensor.neighbor(3,i))^2+(state.p(3) - sensor.neighbor(3,i))^2); %障害物（他機体）のポテンシャル関数
+                    end
+                    Xd = [x;y;z]+obj.offset(:,obj.self.id); %目標座標
+                    for i=2:Param{2}
+                        Pd(:,i) = -1/sqrt((state.p(1) - Xd(1))^2+(state.p(2) - Xd(2))^2+(state.p(3) - Xd(3))^2); %目標値のポテンシャル関数
+                    end
+                    wo = 1;
+                    wd = 1;
+                    for i = 2:Param{2}
+                        P(:,i) = wo*sum(Po,2) + wd*Pd(:,i);
+                    end
+                    obj.result.state.p = [x;y;z]+obj.offset(:,obj.self.id);;%-diff(P(:,obj.self.id)); %合意重心を設定して隊列を形成
                     
 %                     obj.result.state.p = (state.p+(ni+1)*(obj.offset(:,obj.self.id))+sum(sensor.neighbor,2))/(ni+1); %逐次合意重心を算出
                 end

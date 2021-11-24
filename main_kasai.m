@@ -9,12 +9,12 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 2; %number of agents（if bird_trace system else number of all units）
+N = 1; %number of agents（if bird_trace system else number of all units）
 Nb = 3; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
 flag_miki = ones(N);%PtoP制御用
-fExp = 0 %1：実機　それ以外：シミュレーション
+fExp = 1 %1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -406,4 +406,7 @@ dataplot_agreement(logger,N); % 合意制御
 
 %%
 % logger.save();
-save(simdata-1,logger);
+% cd 'C:\Users\kasai\OneDrive - 東京都市大学[City University]\ドキュメント\GitHub\drone\シミュレーション結果\合意制御'
+% save('simdata-1.mat');
+%%
+% load('1.mat');
