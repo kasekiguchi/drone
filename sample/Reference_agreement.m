@@ -10,7 +10,7 @@ function Reference = Reference_agreement(N)
     Reference.param = zeros(3,N);
     r = 0.5; %隊列の半径
     for i=1:N
-        Reference.param(:,i)=[r*cos(pos(i));r*sin(pos(i));1.0];
+        Reference.param(:,i)=[r*cos(pos(i));r*sin(pos(i));0.0];
     end
 %     l = 5;
 %     pos = linspace(0,l,N); %左向きV字
