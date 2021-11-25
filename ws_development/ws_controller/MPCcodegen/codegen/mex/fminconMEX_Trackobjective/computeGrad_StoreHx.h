@@ -23,6 +23,6 @@
 
 /* Function Declarations */
 void computeGrad_StoreHx(const emlrtStack *sp, i_struct_T *obj, const real_T H
-  [5929], const emxArray_real_T *f, const emxArray_real_T *x);
+  [4356], const emxArray_real_T *f, const emxArray_real_T *x);
 
 /* End of code generation (computeGrad_StoreHx.h) */

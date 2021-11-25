@@ -28,6 +28,6 @@ void driver(const emlrtStack *sp, d_struct_T *TrialState, k_struct_T
             *FiniteDifferences, c_struct_T *memspace, j_struct_T *WorkingSet,
             g_struct_T *QRManager, h_struct_T *CholManager, i_struct_T
             *QPObjective, const emxArray_real_T *fscales_cineq_constraint,
-            real_T Hessian[5929]);
+            real_T Hessian[4356]);
 
 /* End of code generation (driver.h) */

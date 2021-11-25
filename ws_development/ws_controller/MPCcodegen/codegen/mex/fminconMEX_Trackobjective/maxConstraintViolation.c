@@ -65,8 +65,8 @@ real_T b_maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
           emlrtDynamicBoundsCheckR2012b(idx + 1, 1, i, &kc_emlrtBCI, &st);
         }
 
-        if ((idx + 78 < 1) || (idx + 78 > x->size[0])) {
-          emlrtDynamicBoundsCheckR2012b(idx + 78, 1, x->size[0], &kc_emlrtBCI,
+        if ((idx + 67 < 1) || (idx + 67 > x->size[0])) {
+          emlrtDynamicBoundsCheckR2012b(idx + 67, 1, x->size[0], &kc_emlrtBCI,
             &st);
         }
 
@@ -75,7 +75,7 @@ real_T b_maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
           emlrtDynamicBoundsCheckR2012b(idx + 1, 1, i, &kc_emlrtBCI, &st);
         }
 
-        obj->maxConstrWorkspace->data[idx] -= x->data[idx + 77];
+        obj->maxConstrWorkspace->data[idx] -= x->data[idx + 66];
         i = obj->maxConstrWorkspace->size[0];
         if ((idx + 1 < 1) || (idx + 1 > i)) {
           emlrtDynamicBoundsCheckR2012b(idx + 1, 1, i, &kc_emlrtBCI, &st);
@@ -89,7 +89,7 @@ real_T b_maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
     b_xcopy(obj->sizes[1], obj->beq, obj->maxConstrWorkspace);
     b_st.site = &ce_emlrtRSI;
     d_xgemv(obj->sizes[1], obj->Aeq, obj->ldA, x, obj->maxConstrWorkspace);
-    offsetEq2 = (obj->sizes[2] + obj->sizes[1]) + 77;
+    offsetEq2 = (obj->sizes[2] + obj->sizes[1]) + 66;
     b_st.site = &ce_emlrtRSI;
     if ((1 <= obj->sizes[1]) && (obj->sizes[1] > 2147483646)) {
       c_st.site = &s_emlrtRSI;
@@ -102,7 +102,7 @@ real_T b_maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
         emlrtDynamicBoundsCheckR2012b(idx + 1, 1, i, &kc_emlrtBCI, &st);
       }
 
-      i = (mIneq + idx) + 78;
+      i = (mIneq + idx) + 67;
       if ((i < 1) || (i > x->size[0])) {
         emlrtDynamicBoundsCheckR2012b(i, 1, x->size[0], &kc_emlrtBCI, &st);
       }
@@ -244,7 +244,7 @@ real_T maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
       b_st.site = &ce_emlrtRSI;
       b_xcopy(obj->sizes[2], obj->bineq, obj->maxConstrWorkspace);
       b_st.site = &ce_emlrtRSI;
-      f_xgemv(77, obj->sizes[2], obj->Aineq, obj->ldA, x, ix0,
+      f_xgemv(66, obj->sizes[2], obj->Aineq, obj->ldA, x, ix0,
               obj->maxConstrWorkspace);
       b_st.site = &ce_emlrtRSI;
       if ((1 <= obj->sizes[2]) && (obj->sizes[2] > 2147483646)) {
@@ -259,7 +259,7 @@ real_T maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
         }
 
         i = x->size[0] * x->size[1];
-        i1 = (ix0 + idx) + 77;
+        i1 = (ix0 + idx) + 66;
         if ((i1 < 1) || (i1 > i)) {
           emlrtDynamicBoundsCheckR2012b(i1, 1, i, &kc_emlrtBCI, &st);
         }
@@ -282,9 +282,9 @@ real_T maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
     b_st.site = &ce_emlrtRSI;
     b_xcopy(obj->sizes[1], obj->beq, obj->maxConstrWorkspace);
     b_st.site = &ce_emlrtRSI;
-    f_xgemv(77, obj->sizes[1], obj->Aeq, obj->ldA, x, ix0,
+    f_xgemv(66, obj->sizes[1], obj->Aeq, obj->ldA, x, ix0,
             obj->maxConstrWorkspace);
-    offsetEq2 = (obj->sizes[2] + obj->sizes[1]) + 76;
+    offsetEq2 = (obj->sizes[2] + obj->sizes[1]) + 65;
     b_st.site = &ce_emlrtRSI;
     if ((1 <= obj->sizes[1]) && (obj->sizes[1] > 2147483646)) {
       c_st.site = &s_emlrtRSI;
@@ -298,7 +298,7 @@ real_T maxConstraintViolation(const emlrtStack *sp, j_struct_T *obj, const
       }
 
       i = x->size[0] * x->size[1];
-      i1 = ((ix0 + mIneq) + idx) + 77;
+      i1 = ((ix0 + mIneq) + idx) + 66;
       if ((i1 < 1) || (i1 > i)) {
         emlrtDynamicBoundsCheckR2012b(i1, 1, i, &kc_emlrtBCI, &st);
       }

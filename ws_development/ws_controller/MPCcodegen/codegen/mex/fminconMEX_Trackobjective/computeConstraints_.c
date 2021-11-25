@@ -50,7 +50,7 @@ static emlrtRTEInfo jb_emlrtRTEI = { 1,/* lineNo */
 /* Function Definitions */
 int32_T computeConstraints_(const emlrtStack *sp, const struct0_T
   obj_nonlcon_tunableEnvironment[1], int32_T obj_mCineq, int32_T obj_mCeq, const
-  real_T x[77], emxArray_real_T *Cineq_workspace, int32_T ineq0, emxArray_real_T
+  real_T x[66], emxArray_real_T *Cineq_workspace, int32_T ineq0, emxArray_real_T
   *Ceq_workspace, int32_T eq0)
 {
   emlrtStack b_st;
@@ -126,7 +126,7 @@ int32_T computeConstraints_(const emlrtStack *sp, const struct0_T
   }
 
   ineqEnd = i1 - i;
-  i1 = 5 * varargout_2->size[1];
+  i1 = varargout_2->size[1] << 2;
   if (ineqEnd != i1) {
     emlrtSubAssignSizeCheck1dR2017a(ineqEnd, i1, &f_emlrtECI, sp);
   }

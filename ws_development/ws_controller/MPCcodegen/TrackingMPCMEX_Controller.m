@@ -104,8 +104,8 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input]; % 初期状態
             % obj.options.PlotFcn                = [];
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange);
-%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
+%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;
             obj.result.fval = fval;

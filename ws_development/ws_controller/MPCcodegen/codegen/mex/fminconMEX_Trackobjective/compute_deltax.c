@@ -59,7 +59,7 @@ static emlrtBCInfo dd_emlrtBCI = { -1, /* iFirst */
 };
 
 /* Function Definitions */
-void compute_deltax(const emlrtStack *sp, const real_T H[5929], d_struct_T
+void compute_deltax(const emlrtStack *sp, const real_T H[4356], d_struct_T
                     *solution, c_struct_T *memspace, const g_struct_T *qrmanager,
                     h_struct_T *cholmanager, const i_struct_T *objective)
 {

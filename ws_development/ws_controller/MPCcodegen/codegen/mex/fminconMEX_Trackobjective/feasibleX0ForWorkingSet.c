@@ -335,8 +335,8 @@ boolean_T feasibleX0ForWorkingSet(const emlrtStack *sp, emxArray_real_T
               }
 
               i = workspace->size[0] * workspace->size[1];
-              if ((idx + 78 < 1) || (idx + 78 > i)) {
-                emlrtDynamicBoundsCheckR2012b(idx + 78, 1, i, &kc_emlrtBCI,
+              if ((idx + 67 < 1) || (idx + 67 > i)) {
+                emlrtDynamicBoundsCheckR2012b(idx + 67, 1, i, &kc_emlrtBCI,
                   &b_st);
               }
 
@@ -346,7 +346,7 @@ boolean_T feasibleX0ForWorkingSet(const emlrtStack *sp, emxArray_real_T
               }
 
               workingset->maxConstrWorkspace->data[idx] -= workspace->data[idx +
-                77];
+                66];
               i = workingset->maxConstrWorkspace->size[0];
               if ((idx + 1 < 1) || (idx + 1 > i)) {
                 emlrtDynamicBoundsCheckR2012b(idx + 1, 1, i, &kc_emlrtBCI, &b_st);
@@ -362,7 +362,7 @@ boolean_T feasibleX0ForWorkingSet(const emlrtStack *sp, emxArray_real_T
           c_st.site = &ce_emlrtRSI;
           d_xgemv(workingset->sizes[1], workingset->Aeq, workingset->ldA,
                   workspace, workingset->maxConstrWorkspace);
-          offsetEq2 = (workingset->sizes[2] + workingset->sizes[1]) + 77;
+          offsetEq2 = (workingset->sizes[2] + workingset->sizes[1]) + 66;
           c_st.site = &ce_emlrtRSI;
           if ((1 <= workingset->sizes[1]) && (workingset->sizes[1] > 2147483646))
           {
@@ -377,7 +377,7 @@ boolean_T feasibleX0ForWorkingSet(const emlrtStack *sp, emxArray_real_T
             }
 
             i = workspace->size[0] * workspace->size[1];
-            i1 = (mIneq + idx) + 78;
+            i1 = (mIneq + idx) + 67;
             if ((i1 < 1) || (i1 > i)) {
               emlrtDynamicBoundsCheckR2012b(i1, 1, i, &kc_emlrtBCI, &b_st);
             }

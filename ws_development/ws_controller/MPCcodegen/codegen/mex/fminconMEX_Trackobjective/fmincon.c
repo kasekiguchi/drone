@@ -89,13 +89,13 @@ static emlrtRTEInfo t_emlrtRTEI = { 1, /* lineNo */
 
 /* Function Definitions */
 void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
-             const real_T x0[77], const struct0_T nonlcon_tunableEnvironment[1],
-             real_T x[77], real_T *fval, real_T *exitflag, real_T
+             const real_T x0[66], const struct0_T nonlcon_tunableEnvironment[1],
+             real_T x[66], real_T *fval, real_T *exitflag, real_T
              *output_iterations, real_T *output_funcCount, char_T
              output_algorithm[3], real_T *output_constrviolation, real_T
              *output_stepsize, real_T *output_lssteplength, real_T
-             *output_firstorderopt, struct3_T *lambda, real_T grad[77], real_T
-             Hessian[5929])
+             *output_firstorderopt, struct3_T *lambda, real_T grad[66], real_T
+             Hessian[4356])
 {
   c_struct_T memspace;
   d_struct_T TrialState;
@@ -112,7 +112,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   i_struct_T QPObjective;
   j_struct_T WorkingSet;
   k_struct_T MeritFunction;
-  real_T b_TrialState[77];
+  real_T b_TrialState[66];
   real_T absxk;
   real_T b_y;
   real_T scale;
@@ -127,7 +127,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   int32_T mNonlinIneq;
   int32_T maxDims;
   int32_T nVarMax;
-  boolean_T varargin_1[77];
+  boolean_T varargin_1[66];
   boolean_T exitg1;
   boolean_T y;
   st.prev = sp;
@@ -142,7 +142,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   output_algorithm[2] = 'p';
   st.site = &b_emlrtRSI;
   b_st.site = &c_emlrtRSI;
-  for (i = 0; i < 77; i++) {
+  for (i = 0; i < 66; i++) {
     absxk = x0[i];
     varargin_1[i] = ((!muDoubleScalarIsInf(absxk)) && (!muDoubleScalarIsNaN
       (absxk)));
@@ -151,7 +151,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   y = true;
   k = 0;
   exitg1 = false;
-  while ((!exitg1) && (k < 77)) {
+  while ((!exitg1) && (k < 66)) {
     if (!varargin_1[k]) {
       y = false;
       exitg1 = true;
@@ -178,10 +178,10 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
        Num, nonlcon_tunableEnvironment[0].X0, nonlcon_tunableEnvironment[0].
        model_param.K, x0, varargout_1, varargout_2);
   mNonlinIneq = varargout_1->size[0] * varargout_1->size[1];
-  mNonlinEq = 5 * varargout_2->size[1];
+  mNonlinEq = varargout_2->size[1] << 2;
   mConstrMax_tmp = mNonlinEq << 1;
   mConstrMax = (((mNonlinIneq + mNonlinEq) + mConstrMax_tmp) + mNonlinIneq) + 1;
-  nVarMax = (mConstrMax_tmp + mNonlinIneq) + 78;
+  nVarMax = (mConstrMax_tmp + mNonlinIneq) + 67;
   maxDims = muIntScalarMax_sint32(nVarMax, mConstrMax);
   st.site = &b_emlrtRSI;
   factoryConstruct(&st, nVarMax, mConstrMax, mNonlinIneq, mNonlinEq, mNonlinIneq,
@@ -190,7 +190,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   FcnEvaluator.mCeq = mNonlinEq;
   FcnEvaluator.objfun.tunableEnvironment[0] = fun_tunableEnvironment[0];
   FcnEvaluator.nonlcon.tunableEnvironment[0] = nonlcon_tunableEnvironment[0];
-  FcnEvaluator.nVar = 77;
+  FcnEvaluator.nVar = 66;
   FcnEvaluator.NonFiniteSupport = true;
   FcnEvaluator.SpecifyObjectiveGradient = false;
   FcnEvaluator.SpecifyConstraintGradient = false;
@@ -211,7 +211,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   i = FiniteDifferences.cEq_2->size[0];
   FiniteDifferences.cEq_2->size[0] = mNonlinEq;
   emxEnsureCapacity_real_T(sp, FiniteDifferences.cEq_2, i, &q_emlrtRTEI);
-  FiniteDifferences.nVar = 77;
+  FiniteDifferences.nVar = 66;
   FiniteDifferences.mIneq = mNonlinIneq;
   FiniteDifferences.mEq = mNonlinEq;
   FiniteDifferences.numEvals = 0;
@@ -220,7 +220,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   FiniteDifferences.FiniteDifferenceType = 0;
   emxFree_real_T(&varargout_1);
   emxFree_real_T(&varargout_2);
-  for (k = 0; k < 77; k++) {
+  for (k = 0; k < 66; k++) {
     TrialState.xstarsqp[k] = x0[k];
     FiniteDifferences.hasUB[k] = false;
     FiniteDifferences.hasLB[k] = false;
@@ -281,7 +281,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   QPObjective.prev_hasLinear = false;
   QPObjective.gammaScalar = 0.0;
   QPObjective.hasLinear = true;
-  QPObjective.nvar = 77;
+  QPObjective.nvar = 66;
   QPObjective.objtype = 3;
   i = memspace.workspace_double->size[0] * memspace.workspace_double->size[1];
   memspace.workspace_double->size[0] = maxDims;
@@ -305,7 +305,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   b_factoryConstruct(&st, mNonlinIneq, mNonlinEq, nVarMax, mConstrMax,
                      &WorkingSet);
   st.site = &b_emlrtRSI;
-  memcpy(&b_TrialState[0], &TrialState.xstarsqp[0], 77U * sizeof(real_T));
+  memcpy(&b_TrialState[0], &TrialState.xstarsqp[0], 66U * sizeof(real_T));
   b_st.site = &h_emlrtRSI;
   computeObjective_(&b_st, FcnEvaluator.objfun.tunableEnvironment, b_TrialState,
                     &TrialState.sqpFval, &mConstrMax_tmp);
@@ -370,7 +370,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   }
 
   for (idx = 0; idx < mConstrMax_tmp; idx++) {
-    for (b_i = 0; b_i < 77; b_i++) {
+    for (b_i = 0; b_i < 66; b_i++) {
       i = WorkingSet.Aeq->size[0] * WorkingSet.Aeq->size[1];
       mConstrMax = maxDims + b_i;
       if ((mConstrMax < 1) || (mConstrMax > i)) {
@@ -431,7 +431,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
   emxFreeStruct_struct_T3(&CholManager);
   emxFreeStruct_struct_T2(&QRManager);
   emxFreeStruct_struct_T1(&FiniteDifferences);
-  for (k = 0; k < 77; k++) {
+  for (k = 0; k < 66; k++) {
     x[k] = TrialState.xstarsqp[k];
     absxk = muDoubleScalarAbs(TrialState.delta_x->data[k]);
     if (absxk > scale) {
@@ -450,7 +450,7 @@ void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
                    WorkingSet.indexLB, WorkingSet.sizes, lambda->eqnonlin,
                    lambda->ineqnonlin, lambda->lower, lambda->upper);
   emxFreeStruct_struct_T6(&WorkingSet);
-  for (k = 0; k < 77; k++) {
+  for (k = 0; k < 66; k++) {
     grad[k] = TrialState.grad->data[k];
   }
 

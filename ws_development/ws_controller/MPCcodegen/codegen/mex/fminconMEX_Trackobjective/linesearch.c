@@ -41,7 +41,7 @@ static emlrtBCInfo rd_emlrtBCI = { -1, /* iFirst */
 };
 
 static emlrtBCInfo sd_emlrtBCI = { 1,  /* iFirst */
-  77,                                  /* iLast */
+  66,                                  /* iLast */
   1,                                   /* lineNo */
   1,                                   /* colNo */
   "",                                  /* aName */
@@ -51,7 +51,7 @@ static emlrtBCInfo sd_emlrtBCI = { 1,  /* iFirst */
 };
 
 static emlrtBCInfo td_emlrtBCI = { 1,  /* iFirst */
-  77,                                  /* iLast */
+  66,                                  /* iLast */
   1,                                   /* lineNo */
   1,                                   /* colNo */
   "",                                  /* aName */
@@ -74,7 +74,7 @@ void linesearch(const emlrtStack *sp, boolean_T *evalWellDefined, int32_T
 {
   emlrtStack b_st;
   emlrtStack st;
-  real_T b_TrialState[77];
+  real_T b_TrialState[66];
   real_T phi_alpha;
   int32_T exitg1;
   int32_T idx;
@@ -136,8 +136,8 @@ void linesearch(const emlrtStack *sp, boolean_T *evalWellDefined, int32_T
         } else {
           st.site = &wf_emlrtRSI;
           for (idx = 0; idx < WorkingSet_nVar; idx++) {
-            if ((idx + 1 < 1) || (idx + 1 > 77)) {
-              emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 77, &sd_emlrtBCI, sp);
+            if ((idx + 1 < 1) || (idx + 1 > 66)) {
+              emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 66, &sd_emlrtBCI, sp);
             }
 
             status = TrialState->delta_x->size[0];
@@ -145,8 +145,8 @@ void linesearch(const emlrtStack *sp, boolean_T *evalWellDefined, int32_T
               emlrtDynamicBoundsCheckR2012b(idx + 1, 1, status, &rd_emlrtBCI, sp);
             }
 
-            if ((idx + 1 < 1) || (idx + 1 > 77)) {
-              emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 77, &td_emlrtBCI, sp);
+            if ((idx + 1 < 1) || (idx + 1 > 66)) {
+              emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 66, &td_emlrtBCI, sp);
             }
 
             TrialState->xstarsqp[idx] = TrialState->xstarsqp_old[idx] +
@@ -154,7 +154,7 @@ void linesearch(const emlrtStack *sp, boolean_T *evalWellDefined, int32_T
           }
 
           st.site = &wf_emlrtRSI;
-          memcpy(&b_TrialState[0], &TrialState->xstarsqp[0], 77U * sizeof(real_T));
+          memcpy(&b_TrialState[0], &TrialState->xstarsqp[0], 66U * sizeof(real_T));
           b_st.site = &tf_emlrtRSI;
           computeObjective_(&b_st, c_FcnEvaluator_objfun_tunableEn, b_TrialState,
                             &TrialState->sqpFval, &status);

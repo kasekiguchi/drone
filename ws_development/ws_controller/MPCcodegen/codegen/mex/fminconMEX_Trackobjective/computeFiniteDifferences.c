@@ -42,7 +42,7 @@ static emlrtBCInfo eb_emlrtBCI = { -1, /* iFirst */
 /* Function Definitions */
 boolean_T computeFiniteDifferences(const emlrtStack *sp, e_struct_T *obj, real_T
   fCurrent, const emxArray_real_T *cIneqCurrent, int32_T ineq0, const
-  emxArray_real_T *cEqCurrent, int32_T eq0, real_T xk[77], emxArray_real_T
+  emxArray_real_T *cEqCurrent, int32_T eq0, real_T xk[66], emxArray_real_T
   *gradf, emxArray_real_T *JacCineqTrans, int32_T CineqColStart, emxArray_real_T
   *JacCeqTrans, int32_T CeqColStart)
 {
@@ -71,7 +71,7 @@ boolean_T computeFiniteDifferences(const emlrtStack *sp, e_struct_T *obj, real_T
   b_st.site = &cb_emlrtRSI;
   idx = 0;
   exitg1 = false;
-  while ((!exitg1) && (idx < 77)) {
+  while ((!exitg1) && (idx < 66)) {
     deltaX = 1.4901161193847656E-8 * (1.0 - 2.0 * (real_T)(xk[idx] < 0.0)) *
       muDoubleScalarMax(muDoubleScalarAbs(xk[idx]), 1.0);
     b_st.site = &cb_emlrtRSI;

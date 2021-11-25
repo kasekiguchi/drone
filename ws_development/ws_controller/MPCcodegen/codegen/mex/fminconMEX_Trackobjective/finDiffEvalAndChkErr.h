@@ -26,6 +26,6 @@ boolean_T finDiffEvalAndChkErr(const emlrtStack *sp, const struct0_T
   obj_objfun_tunableEnvironment[1], const struct0_T
   obj_nonlin_tunableEnvironment[1], int32_T obj_mIneq, int32_T obj_mEq, real_T
   *fplus, emxArray_real_T *cIneqPlus, emxArray_real_T *cEqPlus, int32_T dim,
-  real_T delta, real_T xk[77]);
+  real_T delta, real_T xk[66]);
 
 /* End of code generation (finDiffEvalAndChkErr.h) */

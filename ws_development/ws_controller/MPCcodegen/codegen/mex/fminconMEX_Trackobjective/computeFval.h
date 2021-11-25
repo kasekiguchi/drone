@@ -23,7 +23,7 @@
 
 /* Function Declarations */
 real_T computeFval(const emlrtStack *sp, const i_struct_T *obj, emxArray_real_T *
-                   workspace, const real_T H[5929], const emxArray_real_T *f,
+                   workspace, const real_T H[4356], const emxArray_real_T *f,
                    const emxArray_real_T *x);
 
 /* End of code generation (computeFval.h) */

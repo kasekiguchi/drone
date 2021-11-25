@@ -35,7 +35,7 @@ static emlrtBCInfo bb_emlrtBCI = { -1, /* iFirst */
 };
 
 static emlrtBCInfo cb_emlrtBCI = { 1,  /* iFirst */
-  77,                                  /* iLast */
+  66,                                  /* iLast */
   1,                                   /* lineNo */
   1,                                   /* colNo */
   "",                                  /* aName */
@@ -55,8 +55,8 @@ void fillLambdaStruct(const emlrtStack *sp, int32_T mNonlinIneq, int32_T
                       mNonlinEq, const emxArray_real_T *TrialState_lambdasqp,
                       const emxArray_int32_T *WorkingSet_indexLB, const int32_T
                       WorkingSet_sizes[5], emxArray_real_T *lambda_eqnonlin,
-                      emxArray_real_T *lambda_ineqnonlin, real_T lambda_lower[77],
-                      real_T lambda_upper[77])
+                      emxArray_real_T *lambda_ineqnonlin, real_T lambda_lower[66],
+                      real_T lambda_upper[66])
 {
   emlrtStack b_st;
   emlrtStack st;
@@ -82,8 +82,8 @@ void fillLambdaStruct(const emlrtStack *sp, int32_T mNonlinIneq, int32_T
     lambda_ineqnonlin->data[lambda_idx] = 0.0;
   }
 
-  memset(&lambda_lower[0], 0, 77U * sizeof(real_T));
-  memset(&lambda_upper[0], 0, 77U * sizeof(real_T));
+  memset(&lambda_lower[0], 0, 66U * sizeof(real_T));
+  memset(&lambda_upper[0], 0, 66U * sizeof(real_T));
   lambda_idx = 1;
   st.site = &bg_emlrtRSI;
   if ((1 <= mNonlinEq) && (mNonlinEq > 2147483646)) {
@@ -146,8 +146,8 @@ void fillLambdaStruct(const emlrtStack *sp, int32_T mNonlinIneq, int32_T
     }
 
     if ((WorkingSet_indexLB->data[idx] < 1) || (WorkingSet_indexLB->data[idx] >
-         77)) {
-      emlrtDynamicBoundsCheckR2012b(WorkingSet_indexLB->data[idx], 1, 77,
+         66)) {
+      emlrtDynamicBoundsCheckR2012b(WorkingSet_indexLB->data[idx], 1, 66,
         &cb_emlrtBCI, sp);
     }
 

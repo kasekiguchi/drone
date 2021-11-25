@@ -57,7 +57,7 @@ void c_xcopy(const emlrtStack *sp, int32_T n, emxArray_real_T *y)
   }
 }
 
-void d_xcopy(const emlrtStack *sp, int32_T n, const real_T x[77],
+void d_xcopy(const emlrtStack *sp, int32_T n, const real_T x[66],
              emxArray_real_T *y)
 {
   emlrtStack b_st;
@@ -93,7 +93,7 @@ void e_xcopy(int32_T n, const emxArray_real_T *x, emxArray_real_T *y)
   dcopy(&n_t, &x->data[0], &incx_t, &y->data[0], &incy_t);
 }
 
-void f_xcopy(const emlrtStack *sp, int32_T n, real_T y[5929], int32_T iy0)
+void f_xcopy(const emlrtStack *sp, int32_T n, real_T y[4356], int32_T iy0)
 {
   emlrtStack b_st;
   emlrtStack c_st;

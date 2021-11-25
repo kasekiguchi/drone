@@ -62,7 +62,7 @@ static emlrtBCInfo wb_emlrtBCI = { -1, /* iFirst */
 };
 
 /* Function Definitions */
-void b_driver(const emlrtStack *sp, const real_T H[5929], const emxArray_real_T *
+void b_driver(const emlrtStack *sp, const real_T H[4356], const emxArray_real_T *
               f, d_struct_T *solution, c_struct_T *memspace, j_struct_T
               *workingset, g_struct_T *qrmanager, h_struct_T *cholmanager,
               i_struct_T *objective, b_struct_T *options, int32_T

@@ -24,10 +24,10 @@
 /* Function Declarations */
 void b_xcopy(int32_T n, const emxArray_real_T *x, emxArray_real_T *y);
 void c_xcopy(const emlrtStack *sp, int32_T n, emxArray_real_T *y);
-void d_xcopy(const emlrtStack *sp, int32_T n, const real_T x[77],
+void d_xcopy(const emlrtStack *sp, int32_T n, const real_T x[66],
              emxArray_real_T *y);
 void e_xcopy(int32_T n, const emxArray_real_T *x, emxArray_real_T *y);
-void f_xcopy(const emlrtStack *sp, int32_T n, real_T y[5929], int32_T iy0);
+void f_xcopy(const emlrtStack *sp, int32_T n, real_T y[4356], int32_T iy0);
 void xcopy(int32_T n, const emxArray_real_T *x, int32_T ix0, emxArray_real_T *y,
            int32_T iy0);
 

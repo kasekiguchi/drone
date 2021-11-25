@@ -23,7 +23,7 @@
 #include <string.h>
 
 /* Function Declarations */
-void normal(const emlrtStack *sp, const real_T Hessian[5929], const
+void normal(const emlrtStack *sp, const real_T Hessian[4356], const
             emxArray_real_T *grad, d_struct_T *TrialState, k_struct_T
             *MeritFunction, c_struct_T *memspace, j_struct_T *WorkingSet,
             g_struct_T *QRManager, h_struct_T *CholManager, i_struct_T

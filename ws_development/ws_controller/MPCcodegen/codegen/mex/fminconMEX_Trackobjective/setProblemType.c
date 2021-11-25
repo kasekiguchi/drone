@@ -65,7 +65,7 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
   c_st.tls = b_st.tls;
   switch (PROBLEM_TYPE) {
    case 3:
-    obj->nVar = 77;
+    obj->nVar = 66;
     obj->mConstr = obj->mConstrOrig;
     for (i = 0; i < 5; i++) {
       obj->sizes[i] = obj->sizesNormal[i];
@@ -77,7 +77,7 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
     break;
 
    case 1:
-    obj->nVar = 78;
+    obj->nVar = 67;
     obj->mConstr = obj->mConstrOrig + 1;
     for (i = 0; i < 5; i++) {
       obj->sizes[i] = obj->sizesPhaseOne[i];
@@ -104,10 +104,10 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
 
     if (obj->probType != 4) {
       st.site = &jb_emlrtRSI;
-      mIneq = obj->sizes[2] + 77;
+      mIneq = obj->sizes[2] + 66;
       mEq = obj->sizes[1];
-      offsetEq1 = obj->sizes[2] + 77;
-      offsetEq2 = (obj->sizes[2] + obj->sizes[1]) + 77;
+      offsetEq1 = obj->sizes[2] + 66;
+      offsetEq2 = (obj->sizes[2] + obj->sizes[1]) + 66;
       b_st.site = &lb_emlrtRSI;
       b_st.site = &lb_emlrtRSI;
       if ((1 <= obj->sizes[2]) && (obj->sizes[2] > 2147483646)) {
@@ -115,15 +115,15 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
         check_forloop_overflow_error(&c_st);
       }
 
-      for (idx_col = 0; idx_col <= mIneq - 78; idx_col++) {
-        idx_lb = idx_col + 77;
+      for (idx_col = 0; idx_col <= mIneq - 67; idx_col++) {
+        idx_lb = idx_col + 66;
         b_st.site = &lb_emlrtRSI;
-        if ((78 <= idx_col + 77) && (idx_col + 77 > 2147483646)) {
+        if ((67 <= idx_col + 66) && (idx_col + 66 > 2147483646)) {
           c_st.site = &s_emlrtRSI;
           check_forloop_overflow_error(&c_st);
         }
 
-        for (idx_row = 78; idx_row <= idx_lb; idx_row++) {
+        for (idx_row = 67; idx_row <= idx_lb; idx_row++) {
           i = obj->Aineq->size[0];
           if (idx_row > i) {
             emlrtDynamicBoundsCheckR2012b(idx_row, 1, i, &hb_emlrtBCI, &st);
@@ -138,8 +138,8 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
         }
 
         i = obj->Aineq->size[0];
-        if ((idx_col + 78 < 1) || (idx_col + 78 > i)) {
-          emlrtDynamicBoundsCheckR2012b(idx_col + 78, 1, i, &hb_emlrtBCI, &st);
+        if ((idx_col + 67 < 1) || (idx_col + 67 > i)) {
+          emlrtDynamicBoundsCheckR2012b(idx_col + 67, 1, i, &hb_emlrtBCI, &st);
         }
 
         i = obj->Aineq->size[1];
@@ -147,11 +147,11 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
           emlrtDynamicBoundsCheckR2012b(idx_col + 1, 1, i, &hb_emlrtBCI, &st);
         }
 
-        obj->Aineq->data[(idx_col + obj->Aineq->size[0] * idx_col) + 77] = -1.0;
-        idx_lb = idx_col + 79;
+        obj->Aineq->data[(idx_col + obj->Aineq->size[0] * idx_col) + 66] = -1.0;
+        idx_lb = idx_col + 68;
         b = obj->nVar;
         b_st.site = &lb_emlrtRSI;
-        if ((idx_col + 79 <= obj->nVar) && (obj->nVar > 2147483646)) {
+        if ((idx_col + 68 <= obj->nVar) && (obj->nVar > 2147483646)) {
           c_st.site = &s_emlrtRSI;
           check_forloop_overflow_error(&c_st);
         }
@@ -180,12 +180,12 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
 
       for (idx_col = 0; idx_col < mEq; idx_col++) {
         b_st.site = &lb_emlrtRSI;
-        if ((78 <= mIneq) && (mIneq > 2147483646)) {
+        if ((67 <= mIneq) && (mIneq > 2147483646)) {
           c_st.site = &s_emlrtRSI;
           check_forloop_overflow_error(&c_st);
         }
 
-        for (idx_row = 78; idx_row <= offsetEq1; idx_row++) {
+        for (idx_row = 67; idx_row <= offsetEq1; idx_row++) {
           i = obj->Aeq->size[0];
           if (idx_row > i) {
             emlrtDynamicBoundsCheckR2012b(idx_row, 1, i, &hb_emlrtBCI, &st);
@@ -402,7 +402,7 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
         }
       }
 
-      idx_lb = 77;
+      idx_lb = 66;
       b = obj->sizesRegularized[3];
       b_st.site = &lb_emlrtRSI;
       if ((1 <= obj->sizesRegularized[3]) && (obj->sizesRegularized[3] >
@@ -422,14 +422,14 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
         obj->indexLB->data[idxGlobalColStart - 1] = idx_lb;
       }
 
-      b = (obj->sizes[2] + (obj->sizes[1] << 1)) + 77;
+      b = (obj->sizes[2] + (obj->sizes[1] << 1)) + 66;
       b_st.site = &lb_emlrtRSI;
-      if ((78 <= b) && (b > 2147483646)) {
+      if ((67 <= b) && (b > 2147483646)) {
         c_st.site = &s_emlrtRSI;
         check_forloop_overflow_error(&c_st);
       }
 
-      for (idxGlobalColStart = 78; idxGlobalColStart <= b; idxGlobalColStart++)
+      for (idxGlobalColStart = 67; idxGlobalColStart <= b; idxGlobalColStart++)
       {
         i = obj->lb->size[0];
         if (idxGlobalColStart > i) {
@@ -463,13 +463,13 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
           }
 
           idx_local_tmp = obj->Wlocalidx->data[idx_col - 1];
-          idx_local = idx_local_tmp + 78;
-          idxGlobalColStart = idx_local_tmp + 76;
+          idx_local = idx_local_tmp + 67;
+          idxGlobalColStart = idx_local_tmp + 65;
           b_st.site = &lb_emlrtRSI;
-          if (78 > obj->Wlocalidx->data[idx_col - 1] + 76) {
+          if (67 > obj->Wlocalidx->data[idx_col - 1] + 65) {
             overflow = false;
           } else {
-            overflow = (obj->Wlocalidx->data[idx_col - 1] + 76 > 2147483646);
+            overflow = (obj->Wlocalidx->data[idx_col - 1] + 65 > 2147483646);
           }
 
           if (overflow) {
@@ -477,7 +477,7 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
             check_forloop_overflow_error(&c_st);
           }
 
-          for (idx_row = 78; idx_row <= idxGlobalColStart; idx_row++) {
+          for (idx_row = 67; idx_row <= idxGlobalColStart; idx_row++) {
             i = obj->ATwset->size[0];
             if (idx_row > i) {
               emlrtDynamicBoundsCheckR2012b(idx_row, 1, i, &hb_emlrtBCI, &st);
@@ -493,8 +493,8 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
           }
 
           i = obj->ATwset->size[0];
-          if ((idx_local_tmp + 77 < 1) || (idx_local_tmp + 77 > i)) {
-            emlrtDynamicBoundsCheckR2012b(idx_local_tmp + 77, 1, i, &hb_emlrtBCI,
+          if ((idx_local_tmp + 66 < 1) || (idx_local_tmp + 66 > i)) {
+            emlrtDynamicBoundsCheckR2012b(idx_local_tmp + 66, 1, i, &hb_emlrtBCI,
               &st);
           }
 
@@ -504,10 +504,10 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
           }
 
           obj->ATwset->data[(idx_local_tmp + obj->ATwset->size[0] * (idx_col - 1))
-            + 76] = -1.0;
+            + 65] = -1.0;
           idxGlobalColStart = obj->nVar;
           b_st.site = &lb_emlrtRSI;
-          if ((idx_local_tmp + 78 <= obj->nVar) && (obj->nVar > 2147483646)) {
+          if ((idx_local_tmp + 67 <= obj->nVar) && (obj->nVar > 2147483646)) {
             c_st.site = &s_emlrtRSI;
             check_forloop_overflow_error(&c_st);
           }
@@ -531,12 +531,12 @@ void setProblemType(const emlrtStack *sp, j_struct_T *obj, int32_T PROBLEM_TYPE)
          default:
           idxGlobalColStart = obj->nVar;
           b_st.site = &lb_emlrtRSI;
-          if ((78 <= obj->nVar) && (obj->nVar > 2147483646)) {
+          if ((67 <= obj->nVar) && (obj->nVar > 2147483646)) {
             c_st.site = &s_emlrtRSI;
             check_forloop_overflow_error(&c_st);
           }
 
-          for (idx_row = 78; idx_row <= idxGlobalColStart; idx_row++) {
+          for (idx_row = 67; idx_row <= idxGlobalColStart; idx_row++) {
             i = obj->ATwset->size[0];
             if (idx_row > i) {
               emlrtDynamicBoundsCheckR2012b(idx_row, 1, i, &hb_emlrtBCI, &st);

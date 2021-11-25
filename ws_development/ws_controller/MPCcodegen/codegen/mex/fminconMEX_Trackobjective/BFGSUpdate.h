@@ -22,7 +22,7 @@
 #include <string.h>
 
 /* Function Declarations */
-boolean_T BFGSUpdate(int32_T nvar, real_T Bk[5929], const emxArray_real_T *sk,
+boolean_T BFGSUpdate(int32_T nvar, real_T Bk[4356], const emxArray_real_T *sk,
                      emxArray_real_T *yk, emxArray_real_T *workspace);
 
 /* End of code generation (BFGSUpdate.h) */

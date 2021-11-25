@@ -69,15 +69,15 @@ typedef struct {
   real_T state_size;
   real_T total_size;
   real_T Num;
-  real_T Q[25];
+  real_T Q[16];
   real_T R[4];
-  real_T Qf[25];
+  real_T Qf[16];
   real_T T[100];
-  real_T Xr[55];
+  real_T Xr[44];
   emxArray_real_T_1x629 dis;
   emxArray_real_T_1x629 alpha;
   emxArray_real_T_1x629 phi;
-  real_T X0[5];
+  real_T X0[4];
   struct1_T model_param;
 } struct0_T;
 
@@ -193,8 +193,8 @@ typedef struct emxArray_ptrdiff_t emxArray_ptrdiff_t;
 typedef struct {
   emxArray_real_T *eqnonlin;
   emxArray_real_T *ineqnonlin;
-  real_T lower[77];
-  real_T upper[77];
+  real_T lower[66];
+  real_T upper[66];
 } struct3_T;
 
 #endif                                 /*typedef_struct3_T*/
@@ -212,8 +212,8 @@ typedef struct {
   int32_T iNonEq0;
   real_T sqpFval;
   real_T sqpFval_old;
-  real_T xstarsqp[77];
-  real_T xstarsqp_old[77];
+  real_T xstarsqp[66];
+  real_T xstarsqp_old[66];
   emxArray_real_T *cIneq;
   emxArray_real_T *cIneq_old;
   emxArray_real_T *cEq;
@@ -264,8 +264,8 @@ typedef struct {
   int32_T numEvals;
   boolean_T SpecifyObjectiveGradient;
   boolean_T SpecifyConstraintGradient;
-  boolean_T hasLB[77];
-  boolean_T hasUB[77];
+  boolean_T hasLB[66];
+  boolean_T hasUB[66];
   boolean_T hasBounds;
   int32_T FiniteDifferenceType;
 } e_struct_T;

@@ -23,12 +23,12 @@
 
 /* Function Declarations */
 void fmincon(const emlrtStack *sp, const struct0_T fun_tunableEnvironment[1],
-             const real_T x0[77], const struct0_T nonlcon_tunableEnvironment[1],
-             real_T x[77], real_T *fval, real_T *exitflag, real_T
+             const real_T x0[66], const struct0_T nonlcon_tunableEnvironment[1],
+             real_T x[66], real_T *fval, real_T *exitflag, real_T
              *output_iterations, real_T *output_funcCount, char_T
              output_algorithm[3], real_T *output_constrviolation, real_T
              *output_stepsize, real_T *output_lssteplength, real_T
-             *output_firstorderopt, struct3_T *lambda, real_T grad[77], real_T
-             Hessian[5929]);
+             *output_firstorderopt, struct3_T *lambda, real_T grad[66], real_T
+             Hessian[4356]);
 
 /* End of code generation (fmincon.h) */

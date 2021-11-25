@@ -52,7 +52,7 @@ boolean_T finDiffEvalAndChkErr(const emlrtStack *sp, const struct0_T
   obj_objfun_tunableEnvironment[1], const struct0_T
   obj_nonlin_tunableEnvironment[1], int32_T obj_mIneq, int32_T obj_mEq, real_T
   *fplus, emxArray_real_T *cIneqPlus, emxArray_real_T *cEqPlus, int32_T dim,
-  real_T delta, real_T xk[77])
+  real_T delta, real_T xk[66])
 {
   emlrtStack b_st;
   emlrtStack st;
@@ -105,7 +105,7 @@ boolean_T finDiffEvalAndChkErr(const emlrtStack *sp, const struct0_T
 
     emxFree_real_T(&varargout_1);
     i = cEqPlus->size[0];
-    idx = 5 * varargout_2->size[1];
+    idx = varargout_2->size[1] << 2;
     if (i != idx) {
       emlrtSubAssignSizeCheck1dR2017a(i, idx, &g_emlrtECI, sp);
     }

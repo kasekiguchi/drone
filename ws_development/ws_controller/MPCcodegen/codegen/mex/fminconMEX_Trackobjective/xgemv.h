@@ -32,7 +32,7 @@ void e_xgemv(int32_T m, int32_T n, const emxArray_real_T *A, int32_T lda, const
              emxArray_real_T *x, emxArray_real_T *y);
 void f_xgemv(int32_T m, int32_T n, const emxArray_real_T *A, int32_T lda, const
              emxArray_real_T *x, int32_T ix0, emxArray_real_T *y);
-void g_xgemv(int32_T m, int32_T n, const real_T A[5929], int32_T lda, const
+void g_xgemv(int32_T m, int32_T n, const real_T A[4356], int32_T lda, const
              emxArray_real_T *x, emxArray_real_T *y);
 void h_xgemv(int32_T m, int32_T n, const emxArray_real_T *A, int32_T lda, const
              emxArray_real_T *x, int32_T ix0, emxArray_real_T *y, int32_T iy0);

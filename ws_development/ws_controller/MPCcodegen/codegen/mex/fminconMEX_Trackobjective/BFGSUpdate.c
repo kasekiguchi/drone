@@ -17,7 +17,7 @@
 #include <stddef.h>
 
 /* Function Definitions */
-boolean_T BFGSUpdate(int32_T nvar, real_T Bk[5929], const emxArray_real_T *sk,
+boolean_T BFGSUpdate(int32_T nvar, real_T Bk[4356], const emxArray_real_T *sk,
                      emxArray_real_T *yk, emxArray_real_T *workspace)
 {
   ptrdiff_t incx_t;
@@ -44,7 +44,7 @@ boolean_T BFGSUpdate(int32_T nvar, real_T Bk[5929], const emxArray_real_T *sk,
   TRANSA = 'N';
   m_t = (ptrdiff_t)nvar;
   n_t = (ptrdiff_t)nvar;
-  lda_t = (ptrdiff_t)77;
+  lda_t = (ptrdiff_t)66;
   incx_t = (ptrdiff_t)1;
   incy_t = (ptrdiff_t)1;
   dgemv(&TRANSA, &m_t, &n_t, &theta, &Bk[0], &lda_t, &sk->data[0], &incx_t,
@@ -91,7 +91,7 @@ boolean_T BFGSUpdate(int32_T nvar, real_T Bk[5929], const emxArray_real_T *sk,
     n_t = (ptrdiff_t)nvar;
     incx_t = (ptrdiff_t)1;
     incy_t = (ptrdiff_t)1;
-    lda_t = (ptrdiff_t)77;
+    lda_t = (ptrdiff_t)66;
     dger(&m_t, &n_t, &theta, &workspace->data[0], &incx_t, &workspace->data[0],
          &incy_t, &Bk[0], &lda_t);
     theta = 1.0 / dotSY;
@@ -99,7 +99,7 @@ boolean_T BFGSUpdate(int32_T nvar, real_T Bk[5929], const emxArray_real_T *sk,
     n_t = (ptrdiff_t)nvar;
     incx_t = (ptrdiff_t)1;
     incy_t = (ptrdiff_t)1;
-    lda_t = (ptrdiff_t)77;
+    lda_t = (ptrdiff_t)66;
     dger(&m_t, &n_t, &theta, &yk->data[0], &incx_t, &yk->data[0], &incy_t, &Bk[0],
          &lda_t);
   }

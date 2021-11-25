@@ -24,7 +24,7 @@
 /* Function Declarations */
 void b_xgemm(int32_T m, int32_T k, const emxArray_real_T *A, int32_T lda, const
              emxArray_real_T *B, int32_T ldb, emxArray_real_T *C, int32_T ldc);
-void c_xgemm(int32_T m, int32_T n, int32_T k, const real_T A[5929], int32_T lda,
+void c_xgemm(int32_T m, int32_T n, int32_T k, const real_T A[4356], int32_T lda,
              const emxArray_real_T *B, int32_T ib0, int32_T ldb, emxArray_real_T
              *C, int32_T ldc);
 void d_xgemm(int32_T m, int32_T n, int32_T k, const emxArray_real_T *A, int32_T

@@ -73,7 +73,7 @@ static emlrtBCInfo kd_emlrtBCI = { -1, /* iFirst */
 };
 
 static emlrtBCInfo ld_emlrtBCI = { 1,  /* iFirst */
-  77,                                  /* iLast */
+  66,                                  /* iLast */
   1,                                   /* lineNo */
   1,                                   /* colNo */
   "",                                  /* aName */
@@ -103,7 +103,7 @@ static emlrtBCInfo nd_emlrtBCI = { -1, /* iFirst */
 };
 
 /* Function Definitions */
-void relaxed(const emlrtStack *sp, const real_T Hessian[5929], const
+void relaxed(const emlrtStack *sp, const real_T Hessian[4356], const
              emxArray_real_T *grad, d_struct_T *TrialState, k_struct_T
              *MeritFunction, c_struct_T *memspace, j_struct_T *WorkingSet,
              g_struct_T *QRManager, h_struct_T *CholManager, i_struct_T
@@ -151,11 +151,11 @@ void relaxed(const emlrtStack *sp, const real_T Hessian[5929], const
   }
 
   for (idx = 0; idx < nVarOrig; idx++) {
-    if ((idx + 1 < 1) || (idx + 1 > 77)) {
-      emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 77, &ld_emlrtBCI, sp);
+    if ((idx + 1 < 1) || (idx + 1 > 66)) {
+      emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 66, &ld_emlrtBCI, sp);
     }
 
-    beta += Hessian[idx + 77 * idx];
+    beta += Hessian[idx + 66 * idx];
   }
 
   beta /= (real_T)WorkingSet->nVar;

@@ -22,7 +22,7 @@
 #include <string.h>
 
 /* Function Declarations */
-void factor(const emlrtStack *sp, h_struct_T *obj, const real_T A[5929], int32_T
+void factor(const emlrtStack *sp, h_struct_T *obj, const real_T A[4356], int32_T
             ndims, int32_T ldA);
 
 /* End of code generation (factor.h) */

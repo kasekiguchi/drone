@@ -26,7 +26,7 @@ void fillLambdaStruct(const emlrtStack *sp, int32_T mNonlinIneq, int32_T
                       mNonlinEq, const emxArray_real_T *TrialState_lambdasqp,
                       const emxArray_int32_T *WorkingSet_indexLB, const int32_T
                       WorkingSet_sizes[5], emxArray_real_T *lambda_eqnonlin,
-                      emxArray_real_T *lambda_ineqnonlin, real_T lambda_lower[77],
-                      real_T lambda_upper[77]);
+                      emxArray_real_T *lambda_ineqnonlin, real_T lambda_lower[66],
+                      real_T lambda_upper[66]);
 
 /* End of code generation (fillLambdaStruct.h) */

@@ -80,7 +80,7 @@ static emlrtRTEInfo ub_emlrtRTEI = { 1,/* lineNo */
 };
 
 /* Function Definitions */
-boolean_T soc(const emlrtStack *sp, const real_T Hessian[5929], const
+boolean_T soc(const emlrtStack *sp, const real_T Hessian[4356], const
               emxArray_real_T *grad, d_struct_T *TrialState, c_struct_T
               *memspace, j_struct_T *WorkingSet, g_struct_T *QRManager,
               h_struct_T *CholManager, i_struct_T *QPObjective, const b_struct_T

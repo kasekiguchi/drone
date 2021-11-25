@@ -17,7 +17,7 @@
 /* Variable Definitions */
 static emlrtRSInfo t_emlrtRSI = { 12,  /* lineNo */
   "@(L) tildeU(:, L)\' * params.R * tildeU(:, L)",/* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
 };
 
 static emlrtRSInfo u_emlrtRSI = { 48,  /* lineNo */
@@ -28,7 +28,7 @@ static emlrtRSInfo u_emlrtRSI = { 48,  /* lineNo */
 static emlrtDCInfo n_emlrtDCI = { 12,  /* lineNo */
   38,                                  /* colNo */
   "@(L) tildeU(:, L)\' * params.R * tildeU(:, L)",/* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
@@ -38,7 +38,7 @@ static emlrtBCInfo o_emlrtBCI = { 1,   /* iFirst */
   38,                                  /* colNo */
   "tildeU",                            /* aName */
   "@(L) tildeU(:, L)\' * params.R * tildeU(:, L)",/* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
@@ -60,8 +60,8 @@ real_T c_anon(const emlrtStack *sp, const real_T tildeU_data[], const int32_T
 {
   emlrtStack b_st;
   emlrtStack st;
-  real_T b_tildeU_data[7];
-  real_T c_tildeU_data[7];
+  real_T b_tildeU_data[6];
+  real_T c_tildeU_data[6];
   int32_T i;
   st.prev = sp;
   st.tls = sp->tls;

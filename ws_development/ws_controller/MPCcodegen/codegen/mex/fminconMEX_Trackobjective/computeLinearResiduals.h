@@ -22,7 +22,7 @@
 #include <string.h>
 
 /* Function Declarations */
-void computeLinearResiduals(const real_T x[77], int32_T nVar, emxArray_real_T
+void computeLinearResiduals(const real_T x[66], int32_T nVar, emxArray_real_T
   *workspaceIneq, int32_T mLinIneq, const emxArray_real_T *AineqT, int32_T ldAi,
   emxArray_real_T *workspaceEq, int32_T mLinEq, const emxArray_real_T *AeqT,
   int32_T ldAe);

@@ -24,7 +24,7 @@ static emlrtRSInfo wb_emlrtRSI = { 1,  /* lineNo */
 };
 
 static emlrtBCInfo y_emlrtBCI = { 1,   /* iFirst */
-  77,                                  /* iLast */
+  66,                                  /* iLast */
   1,                                   /* lineNo */
   1,                                   /* colNo */
   "",                                  /* aName */
@@ -44,7 +44,7 @@ static emlrtBCInfo ab_emlrtBCI = { -1, /* iFirst */
 };
 
 /* Function Definitions */
-boolean_T isDeltaXTooSmall(const emlrtStack *sp, const real_T xCurrent[77],
+boolean_T isDeltaXTooSmall(const emlrtStack *sp, const real_T xCurrent[66],
   const emxArray_real_T *delta_x, int32_T nVar)
 {
   emlrtStack b_st;
@@ -66,8 +66,8 @@ boolean_T isDeltaXTooSmall(const emlrtStack *sp, const real_T xCurrent[77],
   idx = 0;
   exitg1 = false;
   while ((!exitg1) && (idx <= nVar - 1)) {
-    if ((idx + 1 < 1) || (idx + 1 > 77)) {
-      emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 77, &y_emlrtBCI, sp);
+    if ((idx + 1 < 1) || (idx + 1 > 66)) {
+      emlrtDynamicBoundsCheckR2012b(idx + 1, 1, 66, &y_emlrtBCI, sp);
     }
 
     if ((idx + 1 < 1) || (idx + 1 > delta_x->size[0])) {

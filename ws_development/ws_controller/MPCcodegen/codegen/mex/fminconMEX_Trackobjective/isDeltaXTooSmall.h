@@ -22,7 +22,7 @@
 #include <string.h>
 
 /* Function Declarations */
-boolean_T isDeltaXTooSmall(const emlrtStack *sp, const real_T xCurrent[77],
+boolean_T isDeltaXTooSmall(const emlrtStack *sp, const real_T xCurrent[66],
   const emxArray_real_T *delta_x, int32_T nVar);
 
 /* End of code generation (isDeltaXTooSmall.h) */

@@ -25,7 +25,7 @@ static emlrtRSInfo i_emlrtRSI = { 1,   /* lineNo */
 
 /* Function Definitions */
 void computeObjective_(const emlrtStack *sp, const struct0_T
-  obj_objfun_tunableEnvironment[1], const real_T x[77], real_T *fval, int32_T
+  obj_objfun_tunableEnvironment[1], const real_T x[66], real_T *fval, int32_T
   *status)
 {
   emlrtStack b_st;

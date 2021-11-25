@@ -24,7 +24,7 @@
 /* Function Declarations */
 int32_T computeConstraints_(const emlrtStack *sp, const struct0_T
   obj_nonlcon_tunableEnvironment[1], int32_T obj_mCineq, int32_T obj_mCeq, const
-  real_T x[77], emxArray_real_T *Cineq_workspace, int32_T ineq0, emxArray_real_T
+  real_T x[66], emxArray_real_T *Cineq_workspace, int32_T ineq0, emxArray_real_T
   *Ceq_workspace, int32_T eq0);
 
 /* End of code generation (computeConstraints_.h) */

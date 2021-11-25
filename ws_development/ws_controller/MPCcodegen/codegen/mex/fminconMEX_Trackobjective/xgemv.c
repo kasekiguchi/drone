@@ -101,7 +101,7 @@ void d_xgemv(int32_T n, const emxArray_real_T *A, int32_T lda, const
     alpha1 = 1.0;
     beta1 = -1.0;
     TRANSA = 'T';
-    m_t = (ptrdiff_t)77;
+    m_t = (ptrdiff_t)66;
     n_t = (ptrdiff_t)n;
     lda_t = (ptrdiff_t)lda;
     incx_t = (ptrdiff_t)1;
@@ -161,7 +161,7 @@ void f_xgemv(int32_T m, int32_T n, const emxArray_real_T *A, int32_T lda, const
   }
 }
 
-void g_xgemv(int32_T m, int32_T n, const real_T A[5929], int32_T lda, const
+void g_xgemv(int32_T m, int32_T n, const real_T A[4356], int32_T lda, const
              emxArray_real_T *x, emxArray_real_T *y)
 {
   ptrdiff_t incx_t;

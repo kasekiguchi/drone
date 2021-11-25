@@ -3,16 +3,15 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * computeObjective_.h
+ * _coder_fminconMEX_Trackobjective_api.h
  *
- * Code generation for function 'computeObjective_'
+ * Code generation for function '_coder_fminconMEX_Trackobjective_api'
  *
  */
 
 #pragma once
 
 /* Include files */
-#include "fminconMEX_Trackobjective_types.h"
 #include "rtwtypes.h"
 #include "emlrt.h"
 #include "mex.h"
@@ -22,8 +21,7 @@
 #include <string.h>
 
 /* Function Declarations */
-void computeObjective_(const emlrtStack *sp, const struct0_T
-  obj_objfun_tunableEnvironment[1], const real_T x[66], real_T *fval, int32_T
-  *status);
+void fminconMEX_Trackobjective_api(const mxArray * const prhs[2], int32_T nlhs,
+  const mxArray *plhs[7]);
 
-/* End of code generation (computeObjective_.h) */
+/* End of code generation (_coder_fminconMEX_Trackobjective_api.h) */

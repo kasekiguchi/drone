@@ -44,7 +44,7 @@ static emlrtBCInfo s_emlrtBCI = { 1,   /* iFirst */
 };
 
 static emlrtBCInfo t_emlrtBCI = { 1,   /* iFirst */
-  77,                                  /* iLast */
+  66,                                  /* iLast */
   1,                                   /* lineNo */
   1,                                   /* colNo */
   "",                                  /* aName */
@@ -115,8 +115,8 @@ real_T computePrimalFeasError(const emlrtStack *sp, int32_T mLinIneq, int32_T
       emlrtDynamicBoundsCheckR2012b(finiteLB->data[idx], 1, 0, &s_emlrtBCI, sp);
     }
 
-    if ((finiteLB->data[idx] < 1) || (finiteLB->data[idx] > 77)) {
-      emlrtDynamicBoundsCheckR2012b(finiteLB->data[idx], 1, 77, &t_emlrtBCI, sp);
+    if ((finiteLB->data[idx] < 1) || (finiteLB->data[idx] > 66)) {
+      emlrtDynamicBoundsCheckR2012b(finiteLB->data[idx], 1, 66, &t_emlrtBCI, sp);
     }
   }
 

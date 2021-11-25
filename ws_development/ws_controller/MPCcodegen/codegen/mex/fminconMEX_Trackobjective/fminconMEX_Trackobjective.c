@@ -23,37 +23,37 @@
 /* Variable Definitions */
 static emlrtRSInfo emlrtRSI = { 36,    /* lineNo */
   "fminconMEX_Trackobjective",         /* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pathName */
 };
 
 static emlrtRSInfo f_emlrtRSI = { 35,  /* lineNo */
   "@(x)constraintsMEX(x,param)",       /* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pathName */
 };
 
 static emlrtRSInfo g_emlrtRSI = { 11,  /* lineNo */
   "constraintsMEX",                    /* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pathName */
 };
 
 static emlrtRSInfo j_emlrtRSI = { 34,  /* lineNo */
   "@(x)TrackobjectiveMEX(x,param)",    /* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pathName */
 };
 
 static emlrtRSInfo k_emlrtRSI = { 11,  /* lineNo */
   "TrackobjectiveMEX",                 /* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
 };
 
 static emlrtRSInfo l_emlrtRSI = { 12,  /* lineNo */
   "TrackobjectiveMEX",                 /* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
 };
 
 static emlrtRSInfo m_emlrtRSI = { 16,  /* lineNo */
   "TrackobjectiveMEX",                 /* fcnName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pathName */
 };
 
 static emlrtRSInfo n_emlrtRSI = { 40,  /* lineNo */
@@ -104,63 +104,63 @@ static emlrtRSInfo y_emlrtRSI = { 194, /* lineNo */
 static emlrtRTEInfo emlrtRTEI = { 18,  /* lineNo */
   33,                                  /* colNo */
   "fminconMEX_Trackobjective",         /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
 };
 
 static emlrtRTEInfo b_emlrtRTEI = { 18,/* lineNo */
   70,                                  /* colNo */
   "fminconMEX_Trackobjective",         /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
 };
 
 static emlrtRTEInfo c_emlrtRTEI = { 19,/* lineNo */
   35,                                  /* colNo */
   "fminconMEX_Trackobjective",         /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
 };
 
 static emlrtRTEInfo d_emlrtRTEI = { 19,/* lineNo */
   73,                                  /* colNo */
   "fminconMEX_Trackobjective",         /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
 };
 
 static emlrtRTEInfo e_emlrtRTEI = { 20,/* lineNo */
   33,                                  /* colNo */
   "fminconMEX_Trackobjective",         /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
 };
 
 static emlrtRTEInfo f_emlrtRTEI = { 20,/* lineNo */
   70,                                  /* colNo */
   "fminconMEX_Trackobjective",         /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\fminconMEX_Trackobjective.m"/* pName */
 };
 
 static emlrtBCInfo b_emlrtBCI = { 1,   /* iFirst */
-  7,                                   /* iLast */
+  6,                                   /* iLast */
   6,                                   /* lineNo */
   9,                                   /* colNo */
   "x",                                 /* aName */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtBCInfo c_emlrtBCI = { 1,   /* iFirst */
-  7,                                   /* iLast */
+  6,                                   /* iLast */
   7,                                   /* lineNo */
   7,                                   /* colNo */
   "x",                                 /* aName */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtRTEInfo i_emlrtRTEI = { 10,/* lineNo */
   9,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtBCInfo d_emlrtBCI = { 1,   /* iFirst */
@@ -169,7 +169,7 @@ static emlrtBCInfo d_emlrtBCI = { 1,   /* iFirst */
   25,                                  /* colNo */
   "X",                                 /* aName */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
@@ -177,13 +177,13 @@ static emlrtECInfo emlrtECI = { -1,    /* nDims */
   11,                                  /* lineNo */
   21,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtRTEInfo j_emlrtRTEI = { 15,/* lineNo */
   9,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtBCInfo e_emlrtBCI = { 1,   /* iFirst */
@@ -192,7 +192,7 @@ static emlrtBCInfo e_emlrtBCI = { 1,   /* iFirst */
   26,                                  /* colNo */
   "X",                                 /* aName */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
@@ -202,7 +202,7 @@ static emlrtBCInfo f_emlrtBCI = { -1,  /* iFirst */
   16,                                  /* colNo */
   "PredictX",                          /* aName */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
@@ -212,7 +212,7 @@ static emlrtBCInfo g_emlrtBCI = { -1,  /* iFirst */
   44,                                  /* colNo */
   "PredictX",                          /* aName */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
@@ -220,14 +220,14 @@ static emlrtECInfo b_emlrtECI = { -1,  /* nDims */
   16,                                  /* lineNo */
   21,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtECInfo c_emlrtECI = { -1,  /* nDims */
   18,                                  /* lineNo */
   8,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtBCInfo h_emlrtBCI = { -1,  /* iFirst */
@@ -236,7 +236,7 @@ static emlrtBCInfo h_emlrtBCI = { -1,  /* iFirst */
   14,                                  /* colNo */
   "tmpceq",                            /* aName */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
@@ -246,97 +246,97 @@ static emlrtBCInfo i_emlrtBCI = { -1,  /* iFirst */
   7,                                   /* colNo */
   "u",                                 /* aName */
   "Model",                             /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtBCInfo j_emlrtBCI = { -1,  /* iFirst */
   -1,                                  /* iLast */
   28,                                  /* lineNo */
-  48,                                  /* colNo */
+  43,                                  /* colNo */
   "u",                                 /* aName */
   "Model",                             /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtBCInfo k_emlrtBCI = { -1,  /* iFirst */
   -1,                                  /* iLast */
   28,                                  /* lineNo */
-  53,                                  /* colNo */
+  48,                                  /* colNo */
   "u",                                 /* aName */
   "Model",                             /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtDCInfo emlrtDCI = { 4,     /* lineNo */
   16,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtDCInfo b_emlrtDCI = { 4,   /* lineNo */
   16,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   4                                    /* checkKind */
 };
 
 static emlrtDCInfo c_emlrtDCI = { 4,   /* lineNo */
   35,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtDCInfo d_emlrtDCI = { 4,   /* lineNo */
   35,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   4                                    /* checkKind */
 };
 
 static emlrtDCInfo e_emlrtDCI = { 9,   /* lineNo */
   20,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtDCInfo f_emlrtDCI = { 9,   /* lineNo */
   20,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   4                                    /* checkKind */
 };
 
 static emlrtDCInfo g_emlrtDCI = { 14,  /* lineNo */
   18,                                  /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtDCInfo h_emlrtDCI = { 4,   /* lineNo */
   1,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtDCInfo i_emlrtDCI = { 9,   /* lineNo */
   1,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtDCInfo j_emlrtDCI = { 14,  /* lineNo */
   1,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
@@ -346,14 +346,14 @@ static emlrtBCInfo l_emlrtBCI = { 1,   /* iFirst */
   38,                                  /* colNo */
   "tildeX",                            /* aName */
   "@(L) tildeX(:, L)\' * params.Q * tildeX(:, L)",/* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtDCInfo k_emlrtDCI = { 11,  /* lineNo */
   38,                                  /* colNo */
   "@(L) tildeX(:, L)\' * params.Q * tildeX(:, L)",/* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
@@ -361,72 +361,72 @@ static emlrtECInfo d_emlrtECI = { 2,   /* nDims */
   16,                                  /* lineNo */
   12,                                  /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
 };
 
 static emlrtECInfo e_emlrtECI = { 2,   /* nDims */
   7,                                   /* lineNo */
   10,                                  /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
 };
 
 static emlrtBCInfo m_emlrtBCI = { 1,   /* iFirst */
-  7,                                   /* iLast */
+  6,                                   /* iLast */
   5,                                   /* lineNo */
   7,                                   /* colNo */
   "x",                                 /* aName */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtDCInfo l_emlrtDCI = { 5,   /* lineNo */
   7,                                   /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtBCInfo n_emlrtBCI = { 1,   /* iFirst */
-  7,                                   /* iLast */
+  6,                                   /* iLast */
   4,                                   /* lineNo */
   9,                                   /* colNo */
   "x",                                 /* aName */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtDCInfo m_emlrtDCI = { 4,   /* lineNo */
   9,                                   /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m",/* pName */
   1                                    /* checkKind */
 };
 
 static emlrtRTEInfo u_emlrtRTEI = { 4, /* lineNo */
   1,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtRTEInfo v_emlrtRTEI = { 9, /* lineNo */
   1,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtRTEInfo w_emlrtRTEI = { 14,/* lineNo */
   1,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtRTEInfo x_emlrtRTEI = { 18,/* lineNo */
   1,                                   /* colNo */
   "constraintsMEX",                    /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\constraintsMEX.m"/* pName */
 };
 
 static emlrtRTEInfo bb_emlrtRTEI = { 28,/* lineNo */
@@ -444,42 +444,41 @@ static emlrtRTEInfo cb_emlrtRTEI = { 52,/* lineNo */
 static emlrtRTEInfo db_emlrtRTEI = { 16,/* lineNo */
   12,                                  /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
 };
 
 static emlrtRTEInfo eb_emlrtRTEI = { 11,/* lineNo */
   1,                                   /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
 };
 
 static emlrtRTEInfo fb_emlrtRTEI = { 12,/* lineNo */
   1,                                   /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
 };
 
 static emlrtRTEInfo gb_emlrtRTEI = { 11,/* lineNo */
   69,                                  /* colNo */
   "TrackobjectiveMEX",                 /* fName */
-  "C:\\Users\\Rigil\\OneDrive - tcu.ac.jp (1)\\git_hub\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
+  "C:\\Users\\Rigil\\Desktop\\MyProject\\drone\\ws_development\\ws_controller\\MPCcodegen\\TrackobjectiveMEX.m"/* pName */
 };
 
 /* Function Definitions */
 void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
-          param_state_size, real_T param_Num, const real_T param_X0[5], real_T
-          param_model_param_K, const real_T x[77], emxArray_real_T *varargout_1,
+          param_state_size, real_T param_Num, const real_T param_X0[4], real_T
+          param_model_param_K, const real_T x[66], emxArray_real_T *varargout_1,
           emxArray_real_T *varargout_2)
 {
   emlrtStack b_st;
   emlrtStack st;
   emxArray_real_T *PredictX;
   emxArray_real_T *tmpceq;
-  real_T x_data[7];
-  real_T b_param_dt[5];
-  real_T b_param_dt_tmp;
+  real_T x_data[6];
+  real_T b_param_dt_idx_0_tmp;
   real_T d;
-  real_T param_dt_tmp;
+  real_T param_dt_idx_0_tmp;
   int32_T L;
   int32_T i;
   int32_T i1;
@@ -501,36 +500,36 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
     emlrtNonNegativeCheckR2012b(param_state_size, &b_emlrtDCI, &st);
   }
 
-  param_dt_tmp = (int32_T)muDoubleScalarFloor(param_state_size);
-  if (param_state_size != param_dt_tmp) {
+  param_dt_idx_0_tmp = (int32_T)muDoubleScalarFloor(param_state_size);
+  if (param_state_size != param_dt_idx_0_tmp) {
     emlrtIntegerCheckR2012b(param_state_size, &emlrtDCI, &st);
   }
 
   i = varargout_1->size[0] * varargout_1->size[1];
   varargout_1->size[0] = (int32_T)param_state_size;
   emxEnsureCapacity_real_T(&st, varargout_1, i, &u_emlrtRTEI);
-  b_param_dt_tmp = 4.0 * param_H;
-  if (!(b_param_dt_tmp >= 0.0)) {
-    emlrtNonNegativeCheckR2012b(b_param_dt_tmp, &d_emlrtDCI, &st);
+  b_param_dt_idx_0_tmp = 4.0 * param_H;
+  if (!(b_param_dt_idx_0_tmp >= 0.0)) {
+    emlrtNonNegativeCheckR2012b(b_param_dt_idx_0_tmp, &d_emlrtDCI, &st);
   }
 
-  d = (int32_T)muDoubleScalarFloor(b_param_dt_tmp);
-  if (b_param_dt_tmp != d) {
-    emlrtIntegerCheckR2012b(b_param_dt_tmp, &c_emlrtDCI, &st);
+  d = (int32_T)muDoubleScalarFloor(b_param_dt_idx_0_tmp);
+  if (b_param_dt_idx_0_tmp != d) {
+    emlrtIntegerCheckR2012b(b_param_dt_idx_0_tmp, &c_emlrtDCI, &st);
   }
 
   i = varargout_1->size[0] * varargout_1->size[1];
-  varargout_1->size[1] = (int32_T)b_param_dt_tmp;
+  varargout_1->size[1] = (int32_T)b_param_dt_idx_0_tmp;
   emxEnsureCapacity_real_T(&st, varargout_1, i, &u_emlrtRTEI);
-  if (param_state_size != param_dt_tmp) {
+  if (param_state_size != param_dt_idx_0_tmp) {
     emlrtIntegerCheckR2012b(param_state_size, &h_emlrtDCI, &st);
   }
 
-  if (b_param_dt_tmp != d) {
-    emlrtIntegerCheckR2012b(b_param_dt_tmp, &h_emlrtDCI, &st);
+  if (b_param_dt_idx_0_tmp != d) {
+    emlrtIntegerCheckR2012b(b_param_dt_idx_0_tmp, &h_emlrtDCI, &st);
   }
 
-  loop_ub = (int32_T)param_state_size * (int32_T)b_param_dt_tmp;
+  loop_ub = (int32_T)param_state_size * (int32_T)b_param_dt_idx_0_tmp;
   for (i = 0; i < loop_ub; i++) {
     varargout_1->data[i] = 0.0;
   }
@@ -539,33 +538,33 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
   if (1.0 > param_state_size) {
     i = 0;
   } else {
-    if (((int32_T)param_state_size < 1) || ((int32_T)param_state_size > 7)) {
-      emlrtDynamicBoundsCheckR2012b((int32_T)param_state_size, 1, 7, &b_emlrtBCI,
+    if (((int32_T)param_state_size < 1) || ((int32_T)param_state_size > 6)) {
+      emlrtDynamicBoundsCheckR2012b((int32_T)param_state_size, 1, 6, &b_emlrtBCI,
         &st);
     }
 
     i = (int32_T)param_state_size;
   }
 
-  if (param_state_size + 1.0 > 7.0) {
+  if (param_state_size + 1.0 > 6.0) {
     i1 = 0;
     i2 = -1;
   } else {
     if (((int32_T)param_state_size + 1 < 1) || ((int32_T)param_state_size + 1 >
-         7)) {
-      emlrtDynamicBoundsCheckR2012b((int32_T)param_state_size + 1, 1, 7,
+         6)) {
+      emlrtDynamicBoundsCheckR2012b((int32_T)param_state_size + 1, 1, 6,
         &c_emlrtBCI, &st);
     }
 
     i1 = (int32_T)param_state_size;
-    i2 = 6;
+    i2 = 5;
   }
 
   emxInit_real_T(&st, &PredictX, 2, &v_emlrtRTEI, true);
 
   /* -- èâä˙èÛë‘Ç™åªç›éûçèÇ∆àÍívÇ∑ÇÈÇ±Ç∆Ç∆èÛë‘ï˚íˆéÆÇ…è]Ç§Ç±Ç∆Çê›íË */
   i3 = PredictX->size[0] * PredictX->size[1];
-  PredictX->size[0] = 5;
+  PredictX->size[0] = 4;
   emxEnsureCapacity_real_T(&st, PredictX, i3, &v_emlrtRTEI);
   if (!(param_H >= 0.0)) {
     emlrtNonNegativeCheckR2012b(param_H, &f_emlrtDCI, &st);
@@ -583,7 +582,7 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
     emlrtIntegerCheckR2012b(param_H, &i_emlrtDCI, &st);
   }
 
-  loop_ub = 5 * (int32_T)param_H;
+  loop_ub = (int32_T)param_H << 2;
   for (i4 = 0; i4 < loop_ub; i4++) {
     PredictX->data[i4] = 0.0;
   }
@@ -597,8 +596,8 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
       emlrtDynamicBoundsCheckR2012b(i5, 1, 11, &d_emlrtBCI, &st);
     }
 
-    if (i != 5) {
-      emlrtSizeEqCheck1DR2012b(i, 5, &emlrtECI, &st);
+    if (i != 4) {
+      emlrtSizeEqCheck1DR2012b(i, 4, &emlrtECI, &st);
     }
 
     b_st.site = &g_emlrtRSI;
@@ -607,35 +606,33 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
       emlrtDynamicBoundsCheckR2012b(1, 1, i5, &i_emlrtBCI, &b_st);
     }
 
-    loop_ub = i1 + 7 * L;
-    if (1 > i5) {
-      emlrtDynamicBoundsCheckR2012b(1, 1, i5, &j_emlrtBCI, &b_st);
-    }
-
+    loop_ub = i1 + 6 * L;
     if (2 > i5) {
-      emlrtDynamicBoundsCheckR2012b(2, 1, i5, &k_emlrtBCI, &b_st);
+      emlrtDynamicBoundsCheckR2012b(2, 1, i5, &j_emlrtBCI, &b_st);
     }
 
-    for (i5 = 0; i5 < 5; i5++) {
-      x_data[i5] = x[i5 + 7 * L];
+    if (1 > i5) {
+      emlrtDynamicBoundsCheckR2012b(1, 1, i5, &k_emlrtBCI, &b_st);
     }
 
-    param_dt_tmp = x[7 * L + 2];
-    b_param_dt_tmp = x[7 * L + 3];
-    b_param_dt[0] = param_dt * (b_param_dt_tmp * muDoubleScalarCos(param_dt_tmp));
-    b_param_dt[1] = param_dt * (b_param_dt_tmp * muDoubleScalarSin(param_dt_tmp));
-    b_param_dt[2] = param_dt * x[7 * L + 4];
-    b_param_dt[3] = param_dt * (param_model_param_K * x[loop_ub]);
-    b_param_dt[4] = param_dt * x[loop_ub + 1];
+    for (i5 = 0; i5 < 4; i5++) {
+      x_data[i5] = x[i5 + 6 * L];
+    }
+
+    param_dt_idx_0_tmp = x[6 * L + 2];
+    b_param_dt_idx_0_tmp = x[6 * L + 3];
     if (((int32_T)(L + 1U) < 1) || ((int32_T)(L + 1U) > PredictX->size[1])) {
       emlrtDynamicBoundsCheckR2012b((int32_T)(L + 1U), 1, PredictX->size[1],
         &f_emlrtBCI, &st);
     }
 
-    for (i5 = 0; i5 < 5; i5++) {
-      PredictX->data[i5 + 5 * L] = x_data[i5] + b_param_dt[i5];
-    }
-
+    PredictX->data[4 * L] = x_data[0] + param_dt * (b_param_dt_idx_0_tmp *
+      muDoubleScalarCos(param_dt_idx_0_tmp));
+    PredictX->data[4 * L + 1] = x_data[1] + param_dt * (b_param_dt_idx_0_tmp *
+      muDoubleScalarSin(param_dt_idx_0_tmp));
+    PredictX->data[4 * L + 2] = x_data[2] + param_dt * x[loop_ub + 1];
+    PredictX->data[4 * L + 3] = x_data[3] + param_dt * (param_model_param_K *
+      x[loop_ub]);
     if (*emlrtBreakCheckR2012bFlagVar != 0) {
       emlrtBreakCheckR2012b(&st);
     }
@@ -645,7 +642,7 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
 
   /*  PredictX = cell2mat(arrayfun(@(L) X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param) , 1:params.H,'UniformOutput' , false)); */
   i1 = tmpceq->size[0] * tmpceq->size[1];
-  tmpceq->size[0] = 5;
+  tmpceq->size[0] = 4;
   emxEnsureCapacity_real_T(&st, tmpceq, i1, &w_emlrtRTEI);
   if (param_H != i3) {
     emlrtIntegerCheckR2012b(param_H, &g_emlrtDCI, &st);
@@ -659,7 +656,7 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
     emlrtIntegerCheckR2012b(param_H, &j_emlrtDCI, &st);
   }
 
-  loop_ub = 5 * (int32_T)param_H;
+  loop_ub = (int32_T)param_H << 2;
   for (i1 = 0; i1 < loop_ub; i1++) {
     tmpceq->data[i1] = 0.0;
   }
@@ -672,12 +669,12 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
       emlrtDynamicBoundsCheckR2012b(L + 2, 1, 11, &e_emlrtBCI, &st);
     }
 
-    if (i != 5) {
-      emlrtSizeEqCheck1DR2012b(i, 5, &b_emlrtECI, &st);
+    if (i != 4) {
+      emlrtSizeEqCheck1DR2012b(i, 4, &b_emlrtECI, &st);
     }
 
-    for (i2 = 0; i2 < 5; i2++) {
-      x_data[i2] = x[i2 + 7 * (L + 1)];
+    for (i2 = 0; i2 < 4; i2++) {
+      x_data[i2] = x[i2 + 6 * (L + 1)];
     }
 
     if (((int32_T)(L + 1U) < 1) || ((int32_T)(L + 1U) > PredictX->size[1])) {
@@ -690,38 +687,42 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
         &h_emlrtBCI, &st);
     }
 
-    for (i2 = 0; i2 < 5; i2++) {
-      i3 = i2 + 5 * L;
-      tmpceq->data[i3] = x_data[i2] - PredictX->data[i3];
-    }
-
+    tmpceq->data[4 * L] = x_data[0] - PredictX->data[4 * L];
+    i2 = 4 * L + 1;
+    tmpceq->data[i2] = x_data[1] - PredictX->data[i2];
+    i2 = 4 * L + 2;
+    tmpceq->data[i2] = x_data[2] - PredictX->data[i2];
+    i2 = 4 * L + 3;
+    tmpceq->data[i2] = x_data[3] - PredictX->data[i2];
     if (*emlrtBreakCheckR2012bFlagVar != 0) {
       emlrtBreakCheckR2012b(&st);
     }
   }
 
   emxFree_real_T(&PredictX);
-  if (i != 5) {
-    emlrtSizeEqCheck1DR2012b(i, 5, &c_emlrtECI, &st);
+  if (i != 4) {
+    emlrtSizeEqCheck1DR2012b(i, 4, &c_emlrtECI, &st);
   }
 
-  for (i = 0; i < 5; i++) {
+  for (i = 0; i < 4; i++) {
     x_data[i] = x[i];
   }
 
   i = varargout_2->size[0] * varargout_2->size[1];
-  varargout_2->size[0] = 5;
+  varargout_2->size[0] = 4;
   varargout_2->size[1] = tmpceq->size[1] + 1;
   emxEnsureCapacity_real_T(&st, varargout_2, i, &x_emlrtRTEI);
-  for (i = 0; i < 5; i++) {
-    varargout_2->data[i] = x_data[i] - param_X0[i];
-  }
-
+  varargout_2->data[0] = x_data[0] - param_X0[0];
+  varargout_2->data[1] = x_data[1] - param_X0[1];
+  varargout_2->data[2] = x_data[2] - param_X0[2];
+  varargout_2->data[3] = x_data[3] - param_X0[3];
   loop_ub = tmpceq->size[1];
   for (i = 0; i < loop_ub; i++) {
-    for (i1 = 0; i1 < 5; i1++) {
-      varargout_2->data[i1 + 5 * (i + 1)] = tmpceq->data[i1 + 5 * i];
-    }
+    i1 = 4 * (i + 1);
+    varargout_2->data[i1] = tmpceq->data[4 * i];
+    varargout_2->data[i1 + 1] = tmpceq->data[4 * i + 1];
+    varargout_2->data[i1 + 2] = tmpceq->data[4 * i + 2];
+    varargout_2->data[i1 + 3] = tmpceq->data[4 * i + 3];
   }
 
   emxFree_real_T(&tmpceq);
@@ -736,8 +737,8 @@ void anon(const emlrtStack *sp, real_T param_H, real_T param_dt, real_T
 }
 
 real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
-              const real_T param_Q[25], const real_T param_R[4], const real_T
-              param_Qf[25], const real_T param_Xr[55], const real_T x[77])
+              const real_T param_Q[16], const real_T param_R[4], const real_T
+              param_Qf[16], const real_T param_Xr[44], const real_T x[66])
 {
   emlrtStack b_st;
   emlrtStack c_st;
@@ -749,10 +750,9 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
   emxArray_real_T *stageInput;
   emxArray_real_T *stageState;
   emxArray_real_T *y;
-  real_T x_data[77];
-  real_T tildeX[55];
+  real_T x_data[66];
+  real_T tildeX[44];
   real_T b_tildeX;
-  real_T d;
   real_T inputExamples_idx_0;
   real_T varargout_1;
   int32_T iv[2];
@@ -761,6 +761,7 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
   int32_T i;
   int32_T i1;
   int32_T i2;
+  int32_T i3;
   int32_T k;
   int32_T loop_ub;
   int32_T n;
@@ -791,15 +792,15 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
       emlrtIntegerCheckR2012b(param_state_size, &m_emlrtDCI, &st);
     }
 
-    if (((int32_T)param_state_size < 1) || ((int32_T)param_state_size > 7)) {
-      emlrtDynamicBoundsCheckR2012b((int32_T)param_state_size, 1, 7, &n_emlrtBCI,
+    if (((int32_T)param_state_size < 1) || ((int32_T)param_state_size > 6)) {
+      emlrtDynamicBoundsCheckR2012b((int32_T)param_state_size, 1, 6, &n_emlrtBCI,
         &st);
     }
 
     vlen = (int32_T)param_state_size;
   }
 
-  if (param_state_size + 1.0 > 7.0) {
+  if (param_state_size + 1.0 > 6.0) {
     i = 0;
     i1 = 0;
   } else {
@@ -809,31 +810,31 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
     }
 
     if (((int32_T)(param_state_size + 1.0) < 1) || ((int32_T)(param_state_size +
-          1.0) > 7)) {
-      emlrtDynamicBoundsCheckR2012b((int32_T)(param_state_size + 1.0), 1, 7,
+          1.0) > 6)) {
+      emlrtDynamicBoundsCheckR2012b((int32_T)(param_state_size + 1.0), 1, 6,
         &m_emlrtBCI, &st);
     }
 
     i = (int32_T)(param_state_size + 1.0) - 1;
-    i1 = 7;
+    i1 = 6;
   }
 
   /* -- èÛë‘ãyÇ—ì¸óÕÇ…ëŒÇ∑ÇÈñ⁄ïWèÛë‘Ç‚ñ⁄ïWì¸óÕÇ∆ÇÃåÎç∑ÇåvéZ */
   iv[0] = vlen;
   iv[1] = 11;
-  iv1[0] = 5;
+  iv1[0] = 4;
   iv1[1] = 11;
-  if (vlen != 5) {
+  if (vlen != 4) {
     emlrtSizeEqCheckNDR2012b(&iv[0], &iv1[0], &e_emlrtECI, &st);
   }
 
   for (i2 = 0; i2 < 11; i2++) {
-    for (vlen = 0; vlen < 5; vlen++) {
-      x_data[vlen + 5 * i2] = x[vlen + 7 * i2];
+    for (i3 = 0; i3 < 4; i3++) {
+      x_data[i3 + 4 * i2] = x[i3 + 6 * i2];
     }
   }
 
-  for (i2 = 0; i2 < 55; i2++) {
+  for (i2 = 0; i2 < 44; i2++) {
     tildeX[i2] = x_data[i2] - param_Xr[i2];
   }
 
@@ -903,24 +904,25 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
   for (k = 0; k < n; k++) {
     d_st.site = &q_emlrtRSI;
     e_st.site = &e_emlrtRSI;
-    d = y->data[k];
-    if (d != (int32_T)muDoubleScalarFloor(d)) {
-      emlrtIntegerCheckR2012b(d, &k_emlrtDCI, &e_st);
+    inputExamples_idx_0 = y->data[k];
+    if (inputExamples_idx_0 != (int32_T)muDoubleScalarFloor(inputExamples_idx_0))
+    {
+      emlrtIntegerCheckR2012b(inputExamples_idx_0, &k_emlrtDCI, &e_st);
     }
 
-    if (((int32_T)d < 1) || ((int32_T)d > 11)) {
-      emlrtDynamicBoundsCheckR2012b((int32_T)d, 1, 11, &l_emlrtBCI, &e_st);
+    if (((int32_T)inputExamples_idx_0 < 1) || ((int32_T)inputExamples_idx_0 > 11))
+    {
+      emlrtDynamicBoundsCheckR2012b((int32_T)inputExamples_idx_0, 1, 11,
+        &l_emlrtBCI, &e_st);
     }
 
     b_tildeX = 0.0;
-    for (i2 = 0; i2 < 5; i2++) {
-      inputExamples_idx_0 = 0.0;
-      for (vlen = 0; vlen < 5; vlen++) {
-        inputExamples_idx_0 += tildeX[vlen + 5 * ((int32_T)d - 1)] *
-          param_Q[vlen + 5 * i2];
-      }
-
-      b_tildeX += inputExamples_idx_0 * tildeX[i2 + 5 * ((int32_T)d - 1)];
+    i2 = ((int32_T)inputExamples_idx_0 - 1) << 2;
+    for (i3 = 0; i3 < 4; i3++) {
+      vlen = i3 << 2;
+      b_tildeX += (((tildeX[i2] * param_Q[vlen] + tildeX[i2 + 1] * param_Q[vlen
+                     + 1]) + tildeX[i2 + 2] * param_Q[vlen + 2]) + tildeX[i2 + 3]
+                   * param_Q[vlen + 3]) * tildeX[i3 + i2];
     }
 
     stageState->data[k] = b_tildeX;
@@ -967,7 +969,7 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
   x_size[1] = 11;
   for (i1 = 0; i1 < 11; i1++) {
     for (i2 = 0; i2 < vlen; i2++) {
-      x_data[i2 + vlen * i1] = x[(i + i2) + 7 * i1];
+      x_data[i2 + vlen * i1] = x[(i + i2) + 6 * i1];
     }
   }
 
@@ -994,7 +996,7 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
     x_size[1] = 11;
     for (i1 = 0; i1 < 11; i1++) {
       for (i2 = 0; i2 < loop_ub; i2++) {
-        x_data[i2 + vlen * i1] = x[(i + i2) + 7 * i1];
+        x_data[i2 + vlen * i1] = x[(i + i2) + 6 * i1];
       }
     }
   }
@@ -1044,13 +1046,11 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
 
   emxFree_real_T(&stageState);
   b_tildeX = 0.0;
-  for (i = 0; i < 5; i++) {
-    d = 0.0;
-    for (i1 = 0; i1 < 5; i1++) {
-      d += tildeX[i1 + 50] * param_Qf[i1 + 5 * i];
-    }
-
-    b_tildeX += d * tildeX[i + 50];
+  for (i = 0; i < 4; i++) {
+    i1 = i << 2;
+    b_tildeX += (((tildeX[40] * param_Qf[i1] + tildeX[41] * param_Qf[i1 + 1]) +
+                  tildeX[42] * param_Qf[i1 + 2]) + tildeX[43] * param_Qf[i1 + 3])
+      * tildeX[i + 40];
   }
 
   varargout_1 = inputExamples_idx_0 + b_tildeX;
@@ -1058,9 +1058,9 @@ real_T b_anon(const emlrtStack *sp, real_T param_H, real_T param_state_size,
   return varargout_1;
 }
 
-void fminconMEX_Trackobjective(const emlrtStack *sp, const real_T x0[77], const
-  struct0_T *param, real_T x[77], real_T *fval, real_T *exitflag, struct2_T
-  *output, struct3_T *lambda, real_T grad[77], real_T hessian[5929])
+void fminconMEX_Trackobjective(const emlrtStack *sp, const real_T x0[66], const
+  struct0_T *param, real_T x[66], real_T *fval, real_T *exitflag, struct2_T
+  *output, struct3_T *lambda, real_T grad[66], real_T hessian[4356])
 {
   emlrtStack st;
   struct0_T evalfunc_tunableEnvironment[1];

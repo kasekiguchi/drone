@@ -34,8 +34,8 @@ void b_factoryConstruct(const emlrtStack *sp, int32_T mIneq, int32_T mEq,
   obj->mConstr = obj_tmp;
   obj->mConstrOrig = obj_tmp;
   obj->mConstrMax = mConstrMax;
-  obj->nVar = 77;
-  obj->nVarOrig = 77;
+  obj->nVar = 66;
+  obj->nVarOrig = 66;
   obj->nVarMax = nVarMax;
   obj->ldA = nVarMax;
   emxInit_real_T(sp, &r, 1, &ab_emlrtRTEI, true);
