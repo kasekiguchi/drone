@@ -18,8 +18,8 @@
 % s = find(S)や S(s) = 1 などは意味を持つ
 %% Initialize settings
 % set path
-tmp = matlab.desktop.editor.getActive;  %現在表示しているファイルのパスにアクセス
-cd(fileparts(tmp.Filename));    %現在のファイル名
+tmp = matlab.desktop.editor.getActive;
+cd(fileparts(tmp.Filename));
 cd('..');
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');
 cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
@@ -27,10 +27,10 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% configuration
-nx = 100; % x axis grid number       xのセル数
-ny = 100; % y axis grid number       yのセル数
-N = nx*ny; % total grid number       総セル数
-Il = 30; % length of I           Iの期間
+nx = 130; % x axis grid number
+ny = 130; % y axis grid number
+N = nx*ny; % total grid number
+Il = 30; % length of I
 
 %% environment definition
 %[E,W] = make_grid_graph(nx,ny,@(x,y)0.1*ones(size(x))); % flat weight
@@ -42,29 +42,31 @@ Il = 30; % length of I           Iの期間
 %  gi = 1.3;
   pi = 1;
   gi = 0.8;
- [E,W] = make_grid_graph(nx,ny,@(x,y) gi*max(cx,nx-cx)^(pi)*gi*max(cy,ny-cy)^(pi)*(0.3+0.2*rand(size(x)))+(-abs(x-cx).^(pi)...
-     +gi*max(cx,nx-cx)^(pi)).*(-abs(y-cy).^(pi)+gi*max(cy,ny-cy)^(pi)),0.04);
+%  [E,E2,W] = make_grid_graph(nx,ny,@(x,y) gi*max(cx,nx-cx)^(pi)*gi*max(cy,ny-cy)^(pi)*(0.3+0.2*rand(size(x)))+(-abs(x-cx).^(pi)+gi*max(cx,nx-cx)^(pi)).*(-abs(y-cy).^(pi)+gi*max(cy,ny-cy)^(pi)),0.04);
+ [E,E2,W] = make_grid_graph(nx,ny,0.01,0.04);
  %[i,j,v]=find(E);
 %G=digraph(i,j,v); % グラフ構造は自明なので描画するメリットはなさそう．
 %figure()
-if find(W<=0)
+if find(W<0)
     disp("不適切な重み");
     map.draw_state(nx,ny,W);
 else
     disp("OK");
 end
 %%
-%    L = speye(size(E)) - E/eigs(E,1);
-%     [V,Eig,Flag]=eigs(L',1,'smallestabs','Tolerance',1e-20); % V : alt page rank
-%     [V2,Eig2,Flag2]=eigs(E'/eigs(E,1),1,'largestreal','Tolerance',1e-20);
-%     map.draw_state(nx,ny,reshape(V,[nx,ny]));% V2だとAPRが負になることがある．Vの方が数値的に安定そう．符号自由度についてはVの方が悪そうなのになぜだろう？
+   L = speye(size(E)) - E/eigs(E,1);
+    [V,Eig,Flag]=eigs(L',1,'smallestabs','Tolerance',1e-20); % V : alt page rank
+    %[V2,Eig2,Flag2]=eigs(E'/eigs(E,1),1,'largestreal','Tolerance',1e-20);
+    %map.draw_state(nx,ny,reshape(V,[nx,ny]));% V2だとAPRが負になることがある．Vの方が数値的に安定そう．符号自由度についてはVの方が悪そうなのになぜだろう？
 %% 消火しない場合の燃え広がり方 (h = 0)
 % 200ステップで端に行かない程度の重みがAstar でやる場合適切
 % Directでやる場合はもっと早い燃え広がりでも対応可能
-ke = 200; % シミュレーションステップ
-fFPosition = 0; % flag fire position
-h = 0; % extinction probability     延焼確率
-map = model_init(N,Il,h,nx,ny,fFPosition);
+ke = 300; % シミュレーションステップ
+fFPosition = 6; % flag fire position
+h = 0; % extinction probability
+W_vec = reshape(W,N,1);
+map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);
+%%
 clear logger
 logger.k=zeros(1,ke);
 logger.S(:,1) = map.S(:);
@@ -83,11 +85,13 @@ for k = 1:ke
     logger.U(:,k) = map.U(:);
 end
 %% graphs
-map.draw_state(nx,ny,map.loggerk(logger,200));
-%map.draw_state(nx,ny,W);
+%map.draw_state(nx,ny,map.loggerk(logger,1));
+% nx = 100; %実際のマップ上での表示範囲
+% ny = 100; %実際のマップ上での表示範囲
+map.draw_state(nx,ny,W);
 %% animations
 
-%map.draw_movie(logger,nx,ny,1,"Extinct_high_weighted_grid_random");
+map.draw_movie(logger,nx,ny,1,"2021Nov24_飛び火_改良版10");    %natural_expansion
 %map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
 %M=map.draw_movie(logger,nx,ny,2);
 %map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
@@ -95,10 +99,11 @@ map.draw_state(nx,ny,map.loggerk(logger,200));
 
 %% Monte-Carlo simulation
 unum = 10; % 消火点の数
-ke = 400; % シミュレーションステップ
+ke = 300; % シミュレーションステップ
 kn = 100;% number of Monte-Carlo simulation
 % 手法選択
-fMethod = "APR"; % Alt Page Rank
+fMethod = "WAPR"; % Weighted Alt Page Rank
+%fMethod = "APR"; % Alt Page Rank
 %fMethod = "Weight"; % 重み行列
 fDynamics = "Astar"; % 消火方法：A star or Direct
 %fDynamics = "Direct"; % 消火方法：A star or Direct
@@ -108,7 +113,7 @@ fFPosition = 0;
 h = 0.9;
 clear Logger
 
-if fMethod=="APR"
+if fMethod=="WAPR"
     % 重み拡張したもの
     L = speye(size(E)) - E/eigs(E,1);
     [V,Eig,Flag]=eigs(L',1,'smallestabs','Tolerance',1e-20); % V : alt page rank
@@ -118,39 +123,98 @@ if fMethod=="APR"
     X = V;
     Xm = min(0,min(V));% 最低のrank
     XM = max(V);% 最高のrank
+elseif fMethod == "APR"
+    % 重み拡張したもの
+    L = speye(size(E2)) - E2;
+    [V,Eig,Flag]=eigs(L',1,'smallestabs','Tolerance',1e-20); % V : alt page rank
+    %[V2,Eig2,Flag2]=eigs(E'/eigs(E,1),1,'largestreal','Tolerance',1e-20); % V : alt page rank
+    %V=V2;
+    % alt page rank に従う場合
+    X = V;
+    Xm = min(0,min(V));% 最低のrank
+    XM = max(V);% 最高のrank        
 else
     % 重みに従う場合
     X = W;
     Xm = min(W,[],'all');
     XM = max(W,[],'all');
 end
-w2 = 1/((XM-Xm)/max(nx,ny));
+w2 = 1/((XM-Xm)/max(nx,ny))
+%% MC simulation
 for k = 1:kn
-    k
-    map = model_init(N,Il,h,nx,ny,fFPosition);% initialize
-    [K(k),Logger(k)] = Astar_SIR(N,ke,nx,ny,map,unum,E,X,Xm,Il,vi,1,w2,fDynamics); % simulation
+    k;
+    map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);% initialize
+    [K(k),Logger(k)] = Astar_SIR(N,ke,nxr,nyr,map,unum,E,X,Xm,Il,vi,1,w2,fDynamics); % simulation
     K(k)
 end
 %%
 tmp=[];
 for i = 1:100
-tmp(i)=sum(Logger2(i).R(:,end));
+tmp(i)=sum(Logger(i).R(:,end));
 end
 sum(tmp)/100
+sum(K>300)
+%% MCの平均時間遷移グラフ
+log = Logger3;
+logk = K3;
+ke = 300;
+for i = 1:ke
+    I = find(logk>i);
+    II = find(logk<=i);
+    tmpS(i) = 0;
+    tmpR(i) = 0;
+    tmpU(i) = 0;
+    for j = II
+        log(j).S(:,i) = log(j).S(:,i-1);
+        log(j).R(:,i) = log(j).R(:,i-1);
+        log(j).U(:,i) = log(j).U(:,i-1);
+    end
+    for j = 1:100
+        tmpS(i)=tmpS(i)+sum(log(j).S(:,i));
+        tmpR(i)=tmpR(i)+sum(log(j).R(:,i));
+        tmpU(i)=tmpU(i)+sum(log(j).U(:,i));
+    end
+    tmpS(i) = tmpS(i)/100;
+    tmpR(i) = tmpR(i)/100;
+    tmpU(i) = tmpU(i)/100;
+    tmpI(i)=10000-tmpS(i)-tmpR(i);
+end
+%%
+% tmpS= sum(logger.S);
+% tmpR= sum(logger.R);
+% tmpI= 10000-tmpS-tmpR;
+%%
+plot(1:ke,tmpS,'--g','LineWidth',5);
+hold on 
+plot(1:ke,tmpI,'-.r','LineWidth',5);
+plot(1:ke,tmpR,'Color',[0.2 0.2 0.2],'LineWidth',5);
+legend('N','F','E');
+ xlabel('\sl Time step k','FontSize',25);
+            ylabel('\sl Number','FontSize',25);
+            set(gca,'FontSize',20);
+            ax = gca;
+            ax.Box = 'on';
+hold off
 %%
 sum(K>300)
-map.save('Logger_WAPR_ver0_Astar_100_30_09_006_10_5_1_2.mat',Logger);
-map.save('K_WAPR_ver0_Astar_100_30_09_006_10_5_1_2.mat',K);
-%map.save('Logger_APR_Astar_100_30_09_004_10_5.mat',Logger);
-%map.save('K_APR_Astar_100_30_09_004_10_5.mat',K);
+SIR_model.save('Logger_APR_ver0_Astar_100_30_09_004_10_5_1_w2.mat',Logger);
+SIR_model.save('K_APR_ver0_Astar_100_30_09_004_10_5_1_w2.mat',K);
+% SIR_model.save('Logger_APR_Astar_100_30_09_004_10_5.mat',Logger);
+% SIR_model.save('K_APR_Astar_100_30_09_004_10_5.mat',K);
 %%
-Logger2=map.load('Logger_W_ver0_Astar_100_30_09_004_10_5_9_1.mat');
-K2 = map.load('K_W_ver0_Astar_100_30_09_004_10_5_9_1.mat');
-%M=map.draw_movie(Logger(2),nx,ny,2);
-%tt=map.load('Logger_APR_Astar_100_30_09_004_10_5.mat')
+Logger1=SIR_model.load('Logger_WAPR_ver0_Astar_100_30_09_004_10_5_1_w2.mat');
+K1 = SIR_model.load('K_WAPR_ver0_Astar_100_30_09_004_10_5_1_w2.mat');
+Logger2=SIR_model.load('Logger_W_ver0_Astar_100_30_09_004_10_5_1_w2.mat');
+K2 = SIR_model.load('K_W_ver0_Astar_100_30_09_004_10_5_1_w2.mat');
+Logger3=SIR_model.load('Logger_APR_ver0_Astar_100_30_09_004_10_5_1_w2.mat');
+K3 = SIR_model.load('K_APR_ver0_Astar_100_30_09_004_10_5_1_w2.mat');
+%M=SIR_model.draw_movie(Logger(2),nx,ny,2);
+%tt=SIR_model.load('Logger_APR_Astar_100_30_09_004_10_5.mat')
+%%
+map.draw_state(nx,ny,reshape(V,[nx,ny]))
 %% local functions
 %% model init
-function map= model_init(N,Il,h,nx,ny,fFPosition)
+function map= model_init(N,Il,h,nx,ny,fFPosition,W_vec)
 % fFPositionに応じてmap 中心から見て４象限に火災エリアの初期値配置
 switch fFPosition
     case 0
@@ -168,10 +232,19 @@ switch fFPosition
     case 4
         init_fx=(floor(nx/2)+20:floor(nx/2)+30)';
         init_fy=floor(ny/2)-25:floor(ny/2)-20;
+    case 5
+        init_fx=(floor(nx/2):floor(nx/2)+4)';
+        init_fy=floor(1):floor(1)+2;
+    case 6
+        init_fx=50;
+        init_fy=10;
 end
 init_I = sparse(N,1);
-r=randi(20,numel(init_fx),numel(init_fy))-10;
-init_I(ny*(init_fx-1)+init_fy+r) = 1;
+% r=randi(20,numel(init_fx),numel(init_fy))-10;
+r=randi(1,numel(init_fx),numel(init_fy));
+W_vec2 = logical(mod(W_vec,0));     %W_vecを0と1のみのlogical値に変換．これをしないと初期引火点が何時までも消火しない
+init_I(ny*(init_fx-1)+init_fy+r) = 1.*W_vec2(ny*(init_fx-1)+init_fy+r);   %Advice:Wを10000の行列に変換し、1にかければいいのでは？
+% init_I(ny*(init_fx-1)+init_fy+r) = 1;   %Advice:Wを10000の行列に変換し、1にかければいいのでは？
 init_R = sparse(N,1);
 map = SIR_model(N,Il,h);
 map.init(init_I,init_R);

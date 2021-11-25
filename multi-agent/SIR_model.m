@@ -113,9 +113,11 @@ classdef SIR_model < handle
             obj.S(i) = 0;
             obj.I(i) = 1;
         end
-        function figure=draw_state(obj,nx,ny,W)
+    end
+    methods (Static)
+        function figure=draw_state(nx,ny,W)
             arguments
-                obj SIR_model
+%                obj SIR_model
                 nx {mustBeInteger}
                 ny {mustBeInteger}
                 W = obj
@@ -140,13 +142,14 @@ classdef SIR_model < handle
                 colormap(mycmap(cmin:cmax,:));
             else
                 figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
+%               set(gca,'Zscale','log')
                 colorbar;
             end
             view(2)
             xlabel('\sl x','FontSize',25);
             ylabel('\sl y','FontSize',25);
-            xlim([1,nx+1]);
-            ylim([1,ny+1]);
+            xlim([1,101]);  %nx+1
+            ylim([1,101]);  %ny+1
             set(gca,'FontSize',20);
             ax = gca;
             ax.Box = 'on';
@@ -155,7 +158,7 @@ classdef SIR_model < handle
             axis square
             hold off
         end
-        function F=draw_movie(obj,logger,nx,ny,output,filename)
+        function F=draw_movie(logger,nx,ny,output,filename)
             % draw/generate movie
             % logger : struct with fields S, I, R matrices
             % nx : x axis grid number
@@ -163,7 +166,7 @@ classdef SIR_model < handle
             % output(optional) : 1 means output file (default 0)
             % filename(optional) : output file name
             arguments
-                obj
+                %obj
                 logger
                 nx
                 ny
@@ -171,31 +174,31 @@ classdef SIR_model < handle
                 filename = "";
             end
             if filename==""
-                F=make_animation(find(logger.k),1,@(k,~) obj.draw_state(nx,ny,obj.loggerk(logger,k)),@()[],output);
+                F=make_animation(find(logger.k),1,@(k,~) SIR_model.draw_state(nx,ny,SIR_model.loggerk(logger,k)),@()[],output);
             else
-                F=make_animation(find(logger.k),1,@(k,~) obj.draw_state(nx,ny,obj.loggerk(logger,k)),@()[],output,filename);
+                F=make_animation(find(logger.k),1,@(k,~) SIR_model.draw_state(nx,ny,SIR_model.loggerk(logger,k)),@()[],output,filename);
             end
         end
-        function W=loggerk(obj,logger,k)
+        function W=loggerk(logger,k)
             if isfield(logger,"P")||isprop(logger(1),"P")
                 W = struct("S",logger.S(:,k),"I",logger.I(:,k),"R",logger.R(:,k),"U",logger.U(:,k),"P",logger.P(:,k));
             else
                 W = struct("S",logger.S(:,k),"I",logger.I(:,k),"R",logger.R(:,k),"U",logger.U(:,k));
             end
         end
-        function save(obj,filename,logger)
+        function save(filename,logger)
             if isstruct(logger)
                 myfield=fieldnames(logger);
                 %tmp = logger(1);
                 for n = 1:length(myfield)
                     tmp.(myfield{n}) = {logger.(myfield{n})};
                 end
-                save(filename,'-struct','tmp');
+                save(filename,'-struct','tmp','-v7.3');
             else
                 save(filename,'logger');
             end
         end
-        function Logger=load(obj,filename)
+        function Logger=load(filename)
             data=load(filename);
             F = fieldnames(data);
             if length(F)==1
