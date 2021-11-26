@@ -26,8 +26,8 @@ classdef PointReference_FH < REFERENCE_CLASS
             else
                 FH = Param{1};% figure handle
             end
-%             cha = get(FH, 'currentcharacter');
-            cha = 'f';
+            cha = get(FH, 'currentcharacter');
+%             cha = 'f'; %ショートカット用
             if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
                 cha   = obj.flight_phase;
             end

@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 3; %number of agents（if bird_trace system else number of all units）
+N = 1; %number of agents（if bird_trace system else number of all units）
 Nb = 3; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
@@ -84,7 +84,7 @@ else
             initial(i).w = [0;0;0];
         else
 %             arranged_pos = arranged_position([0,0],N,1,0); %先生の
-            arranged_pos = arranged_position_agreement([0,0],N,1); %合意制御
+            arranged_pos = arranged_position_agreement([0,0],N,0); %合意制御
 %             if i==1
 %                 initial_position = arranged_position_trace_birds([60;60],N,Nb,10); %害鳥モデル
 %             end
@@ -105,8 +105,8 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
-        agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
-%         agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
+%         agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+        agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
         %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % 牽引物込みのプラントモデル : for sim
 %         agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
 %         agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
@@ -118,26 +118,30 @@ for i = 1:N
     end
     %% model
     % set control model
-%     agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
+    if fExp
+        agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
+    else
+    agent(i).set_model(Model_EulerAngle(i,dt,'model',initial(i))); % オイラー角モデル
 %     agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load_Euler(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
     %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); % unit quaternionのプラントモデル : for sim
-    agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+%     agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
 %     agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
 %     if i<=Nb
 %         agent(i).set_model(Model_PestBirds(i,dt,'model',initial(i))); % 害鳥のモデル
 %     else
 %         agent(i).set_model(Model_Drone(i,dt,'model',initial(i))); % ドローンのモデル
 %     end
+    end
     close all
     %% set input_transform property
     if fExp%isa(agent(i).plant,"Lizard_exp")
         agent(i).input_transform=[];
-%         agent(i).set_property("input_transform",InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+        agent(i).set_property("input_transform",InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
     end
     %agent.plant.espr.sendData(Pw(1,1:16));
     % for quat-model plant with discrete control model
-    agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
+%     agent(i).set_property("input_transform",InputTransform_REFtoHL_drone(dt)); % 位置指令から４つの推力に変換 : Direct controller（入力＝目標位置） を想定
 %     agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
     % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
@@ -160,15 +164,19 @@ for i = 1:N
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
     agent(i).estimator=[];
+    if fExp
+        agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+    else
 %     agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
 %     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
 %     agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
 %     agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
 %     agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
 %     agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-%     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
-    agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q"],[1e-5,1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %     agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
+    end
     %% set reference property
     agent(i).reference=[];
 %     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
@@ -178,7 +186,7 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;1])); % ハート形[x;y;z]永久
     Make_Reference = zeros(i,3);
-    %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+%     agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
 %     agent(i).set_property("reference",Reference_tracebirds(i,Nb)); % 害鳥追跡用
 %     if fExp == 1
 %         if i ==1
@@ -199,16 +207,20 @@ for i = 1:N
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[];
+    if fExp
+        agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
+    else
 %     agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
-%     agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
-    %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
+    agent(i).set_property("controller",Controller_HL(dt)); % 階層型線形化
+%     agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
-    agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+%     agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
 %     agent(i).set_property("controller",Controller_tracebirds(N)); % 害鳥追跡用
+    end
     %%
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
     param(i).reference.list = cell(1,length(agent(i).reference.name));
@@ -270,7 +282,7 @@ end
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
 
-% w = waitforbuttonpress;
+w = waitforbuttonpress;
 
 % try
     if (fOffline)
