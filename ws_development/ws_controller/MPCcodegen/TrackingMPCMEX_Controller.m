@@ -27,9 +27,9 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([5,5,1,1]);
-            obj.param.R = diag([2,2]);
-            obj.param.Qf = diag([10,10,1,1]);
+            obj.param.Q = diag([1,1,1,1]);
+            obj.param.R = diag([1,1]);
+            obj.param.Qf = diag([3,3,1,1]);
             obj.param.T = diag([10,10,10,10,10,10,10,10,10,10]);
             obj.NoiseR = 2.0e-2;%param of Fisher Information matrix
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
@@ -78,16 +78,16 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             Flag = AssociationInfo.index';
 %             Flag(Flag~=0) = 1;%on off FLag Matrix
             AssociationAvailableount = length(AssociationAvailableIndex);%Count
-            Dis = zeros(1,length(Measured.angles));
-            Alpha = zeros(1,length(Measured.angles));
+            Dis = inf(1,length(Measured.angles));
+            Alpha = inf(1,length(Measured.angles));
             for i = 1:AssociationAvailableount
                 MesuredRef = AssociationAvailableIndex(i);
                 idx = AssociationInfo.index(AssociationAvailableIndex(i));
                 Dis(MesuredRef) = LineParam.d(idx);%対応付けした距離を代入
                 Alpha(MesuredRef) = LineParam.delta(idx);%対応付けしたalphaを代入
             end
-            Dis = Dis(Dis~=0);
-            Alpha = Alpha(Alpha~=0);
+            Dis = Dis(Dis~=inf);
+            Alpha = Alpha(Alpha~=inf);
             AssoFai = Measured.angles(AssociationAvailableIndex);
             %----------------------------------------------------------------------------------%
             %obj.param.t = t;

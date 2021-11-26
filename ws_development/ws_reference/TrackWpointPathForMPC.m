@@ -18,11 +18,15 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
         Flag
         ChangeFlag
         NextMapParamidx
+        OldMapParamidx
         CrossPoint
         RaneChangePoint
         zerojudge
         TargetAngle
         MapParamidx
+        NextMapParamSelected
+        MapParamSelected
+        OldMapParamSelected
         PreTrack
         dt
         WayPointNum
@@ -103,13 +107,39 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                 obj.Flag =1;
                 tmp = find(InRange);
                 obj.MapParamidx = tmp(Team(:,Selectedidx));
+                obj.MapParamSelected.a = obj.self.estimator.result.map_param.a(obj.MapParamidx);
+                obj.MapParamSelected.b = obj.self.estimator.result.map_param.b(obj.MapParamidx);
+                obj.MapParamSelected.c = obj.self.estimator.result.map_param.c(obj.MapParamidx);
+                obj.MapParamSelected.x = obj.self.estimator.result.map_param.x(obj.MapParamidx,:);%[始点，終点]
+                obj.MapParamSelected.y = obj.self.estimator.result.map_param.y(obj.MapParamidx,:);
             else
                 %% running or curve
+                [obj.MapParamidx] = SearchNearLine(obj.MapParamSelected,obj.self.estimator.result.map_param,obj.zerojudge);
+                if ~isempty(obj.OldMapParamidx)
+                    [obj.OldMapParamidx] = SearchNearLine(obj.OldMapParamSelected,obj.self.estimator.result.map_param,obj.zerojudge);
+                end
+                if ~isempty(obj.NextMapParamidx)
+                    [obj.NextMapParamidx] = SearchNearLine(obj.NextMapParamSelected,obj.self.estimator.result.map_param,obj.zerojudge);
+                end
                 if obj.ChangeFlag == 1
                     if (EstData(1) - obj.CrossPoint(1))^2 + (EstData(2) - obj.CrossPoint(2))^2 <= obj.ConvergencejudgeV
                         %収束してる
+                        obj.OldMapParamidx = obj.MapParamidx;
+                        obj.OldMapParamSelected.a = obj.self.estimator.result.map_param.a(obj.OldMapParamidx);
+                        obj.OldMapParamSelected.b = obj.self.estimator.result.map_param.b(obj.OldMapParamidx);
+                        obj.OldMapParamSelected.c = obj.self.estimator.result.map_param.c(obj.OldMapParamidx);
+                        obj.OldMapParamSelected.x = obj.self.estimator.result.map_param.x(obj.OldMapParamidx,:);%[始点，終点]
+                        obj.OldMapParamSelected.y = obj.self.estimator.result.map_param.y(obj.OldMapParamidx,:);
+                        %%%
                         obj.MapParamidx = obj.NextMapParamidx;
+                        obj.MapParamSelected.a = obj.self.estimator.result.map_param.a(obj.MapParamidx);
+                        obj.MapParamSelected.b = obj.self.estimator.result.map_param.b(obj.MapParamidx);
+                        obj.MapParamSelected.c = obj.self.estimator.result.map_param.c(obj.MapParamidx);
+                        obj.MapParamSelected.x = obj.self.estimator.result.map_param.x(obj.MapParamidx,:);%[始点，終点]
+                        obj.MapParamSelected.y = obj.self.estimator.result.map_param.y(obj.MapParamidx,:);
+                        %%%
                         obj.TargetAngle = obj.TargetAngle + (pi/2);
+                        obj.ChangeFlag = 0;
                         %---線に乗ったreferenceを吐き出す---%
                         obj.TrackingPoint = zeros(4,obj.Holizon);%ホライゾン数分の目標値
                         NmpXY = MidlePoint(EstData,obj.SensorRange,obj.Rsize,obj.MapParamidx,...
@@ -132,15 +162,18 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                         [~,idx] = min(vecnorm([EstData(1) - NmpXY{1,1}(1,:);EstData(2) - NmpXY{1,1}(2,:)],2,1));%
                         obj.TrackingPoint(:,1) = [NmpXY{1,1}(1,idx);NmpXY{1,1}(2,idx);obj.TargetAngle;obj.Targetv];%
                         %----------------------------------%
-                        dotPointX = [obj.TrackingPoint(1,1):obj.Rsize:obj.CrossPoint(1)];
-                        dotPointY = [obj.TrackingPoint(2,1):obj.Rsize:obj.CrossPoint(2)];
+%                         dotPointX = [obj.TrackingPoint(1,1):obj.Rsize/10:obj.CrossPoint(1)];
+%                         dotPointY = [obj.TrackingPoint(2,1):obj.Rsize/10:obj.CrossPoint(2)];
+%                         TDis = zeros(length(dotPointX),length(dotPointY));
                         for i = 2:obj.Holizon
-                            tmp = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(obj.TargetAngle);obj.Targetv*obj.dt*sin(obj.TargetAngle)];
-                            [~,idx] = min(vecnorm([tmp(1) - dotPointX;tmp(2) - dotPointY],2,1));
-                            if idx ==length(dotPointX)
-                                obj.TrackingPoint(:,i) = [dotPointX(idx);dotPointX(idx);obj.TargetAngle;0];%収束するまで括りつける
+                            obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(obj.TargetAngle);obj.Targetv*obj.dt*sin(obj.TargetAngle)];
+                            if (obj.TrackingPoint(1,i) - obj.CrossPoint(1))^2 + (obj.TrackingPoint(2,i) - obj.CrossPoint(2))^2 <= obj.ConvergencejudgeV
+                                obj.TrackingPoint(1:2,i) =obj.CrossPoint;
+                                obj.TrackingPoint(3,i) = obj.TargetAngle;
+                                obj.TrackingPoint(4,i) = 0;
                             else
-                                obj.TrackingPoint(:,i) = [dotPointX(idx);dotPointX(idx);obj.TargetAngle;obj.Targetv];%まだ収束点まで到達していない
+                                obj.TrackingPoint(3,i) = obj.TargetAngle;
+                                obj.TrackingPoint(4,i) = obj.Targetv;
                             end
                         end
                     end
@@ -154,7 +187,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                     %---------------------%
                     %---今乗っている線以外の線を探す---%
                     [MatchA,MatchB,MatchC,MatchXs,MatchXe,MatchYs,MatchYe,InRange]...
-                        = SearchLine(EstData,LineXs,LineXe,LineYs,LineYe,obj.SensorRange,obj.MapParamidx,obj.self.estimator.result.map_param);
+                        = SearchLine(EstData,LineXs,LineXe,LineYs,LineYe,obj.SensorRange,obj.MapParamidx,obj.OldMapParamidx,obj.self.estimator.result.map_param);
                     %-------------------------------------------%
                     %---今乗っている線以外の線の中線を探しその端点を返す---%
                     Team = JudgingTeamOfLines(MatchA,MatchB,MatchC,MatchXs,MatchXe,MatchYs,MatchYe,obj.zerojudge);%線の組を判断
@@ -187,7 +220,15 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                             [obj.ChangeFlag,TeamNum,obj.CrossPoint] = judgeingOverWall(obj.TrackingPoint(:,i),obj.TrackingPoint(:,i-1),mXs,mXe,mYs,mYe,MatchA,MatchB,MatchC);
                             if obj.ChangeFlag == 1
                                 tmp = find(InRange);
+                                [~,idx] = min(vecnorm([obj.TrackingPoint(1,i) - mpXY{1,TeamNum}(1,:);obj.TrackingPoint(2,i) - mpXY{1,TeamNum}(2,:)],2,1));
+                                obj.CrossPoint = [mpXY{1,TeamNum}(1,idx);mpXY{1,TeamNum}(2,idx)];
                                 obj.NextMapParamidx = tmp(Team(:,TeamNum));
+                                %パラメータを保存
+                                obj.NextMapParamSelected.a = obj.self.estimator.result.map_param.a(obj.NextMapParamidx);
+                                obj.NextMapParamSelected.b = obj.self.estimator.result.map_param.b(obj.NextMapParamidx);
+                                obj.NextMapParamSelected.c = obj.self.estimator.result.map_param.c(obj.NextMapParamidx);
+                                obj.NextMapParamSelected.x = obj.self.estimator.result.map_param.x(obj.NextMapParamidx,:);%[始点，終点]
+                                obj.NextMapParamSelected.y = obj.self.estimator.result.map_param.y(obj.NextMapParamidx,:);
                                 obj.TrackingPoint(1:2,i) = obj.CrossPoint;
                                 obj.TrackingPoint(3,i) = obj.TargetAngle;
                                 obj.TrackingPoint(4,i) = 0;%収束させる
@@ -265,12 +306,14 @@ end
 %------------------------------------------%
 end
 
-function [MatchA,MatchB,MatchC,MatchXs,MatchXe,MatchYs,MatchYe,InRange] = SearchLine(EstData,LineXs,LineXe,LineYs,LineYe,SensorRange,MapParamidx,MapParam)
+function [MatchA,MatchB,MatchC,MatchXs,MatchXe,MatchYs,MatchYe,InRange] = SearchLine(EstData,LineXs,LineXe,LineYs,LineYe,SensorRange,MapParamidx,OldMapParamidx,MapParam)
 JudgeSRs = (EstData(1) - LineXs).^2 + (EstData(2) - LineYs).^2 <= SensorRange^2;
 JudgeSRe = (EstData(1) - LineXe).^2 + (EstData(2) - LineYe).^2 <= SensorRange^2;
 OnLine = true(length(JudgeSRe),1);
 OnLine(MapParamidx) = false;
-InRange = (JudgeSRs | JudgeSRe) & OnLine;
+OldLine = true(length(JudgeSRe),1);
+OldLine(OldMapParamidx) = false;
+InRange = (JudgeSRs | JudgeSRe) & OnLine & OldLine;
 MatchA = MapParam.a(InRange);%線のパラメータ
 MatchB = MapParam.b(InRange);
 MatchC = MapParam.c(InRange);
@@ -296,20 +339,67 @@ else
     c = -b * NowPoint(2) + NowPoint(1);
 end
 %---a,b,cを使って判定---%
-% ts = a * MatchXs + b * MatchYs + c;
-% te = a * MatchXe + b * MatchYe + c;
-ts = MatchA *NowPoint(1)  + MatchB * NowPoint(2) + MatchC;
-te = MatchA *NextPoint(1)  + MatchB * NextPoint(2) + MatchC;
+ts = a * MatchXs + b * MatchYs + c;
+te = a * MatchXe + b * MatchYe + c;
+% ts = MatchA *NowPoint(1)  + MatchB * NowPoint(2) + MatchC;
+% te = MatchA *NextPoint(1)  + MatchB * NextPoint(2) + MatchC;
 tt = ts.*te;
 tt = find(tt < 0);
 if ~isempty(tt(:))
     OverWall = true;
-    y = (MatchA(tt)*c - a*MatchC(tt))/(a*MatchB(tt) - MatchA(tt)*b);
-    x = (-b/a)*y - c;
+    PreA2 = (MatchYe(tt) - MatchYs(tt)) / (MatchXe(tt) - MatchXs(tt));
+    if PreA2 > -1 && PreA2 < 1
+        % Calculation of each coeffient in "y = ax + c"
+        b2 = -1;
+        a2 = PreA2;
+        c2 = -a* (MatchXs(tt)) + MatchYs(tt);
+    else
+        % Calculation of each coeffient in "x = by + c"
+        a2 = -1;
+        b2 = (MatchXe(tt) - MatchXs(tt))/(MatchYe(tt) - MatchYs(tt));
+        c2 = -b * MatchYs(tt) + MatchXs(tt);
+    end
+    
+    y = (a2*c - a*c2)/(a*b2 - a2*b);
+    x = (-b*y-c)/a;
     CrossPoint = [x,y];
 else
     OverWall = false;
     CrossPoint = [0,0];
 end
 %-----------------------%
+end
+function [MapParamidx] = SearchNearLine(MapParamSelected,MapParam,zerojudge)
+AA = (MapParamSelected.a(1) - MapParam.a(:)).^2 < zerojudge;
+BB = (MapParamSelected.b(1) - MapParam.b(:)).^2 < zerojudge;
+CC = (MapParamSelected.c(1) - MapParam.c(:)).^2 < zerojudge;
+AABBCC1 = AA & BB & CC;
+
+if length(find(AABBCC1))>1
+%     SearNea1 = vecnorm([MapParamSelected.x(1,1) - MapParam.x(AABBCC,1),MapParamSelected.x(1,2) - MapParam.x(AABBCC,2)],2,2);
+%     SearNea2 = vecnorm([MapParamSelected.x(2,1) - MapParam.x(AABBCC,1),MapParamSelected.x(2,2) - MapParam.x(AABBCC,2)],2,2);
+%     [~,idx] = max(SearNea);
+%     SS = find(AABBCC);
+tmp = find(AABBCC1);
+idx1 = tmp(1);
+else
+    idx1 = find(AABBCC1);
+end
+
+AA = (MapParamSelected.a(2) - MapParam.a(:)).^2 < zerojudge;
+BB = (MapParamSelected.b(2) - MapParam.b(:)).^2 < zerojudge;
+CC = (MapParamSelected.c(2) - MapParam.c(:)).^2 < zerojudge;
+AABBCC2 = AA & BB & CC;
+
+if length(find(AABBCC2))>1
+%     SearNea1 = vecnorm([MapParamSelected.x(1,1) - MapParam.x(AABBCC,1),MapParamSelected.x(1,2) - MapParam.x(AABBCC,2)],2,2);
+%     SearNea2 = vecnorm([MapParamSelected.x(2,1) - MapParam.x(AABBCC,1),MapParamSelected.x(2,2) - MapParam.x(AABBCC,2)],2,2);
+%     [~,idx] = max(SearNea);
+%     SS = find(AABBCC);
+tmp = find(AABBCC2);
+idx2 = tmp(1);
+else
+    idx2 = find(AABBCC1);
+end
+MapParamidx = [idx1;idx2];
 end
