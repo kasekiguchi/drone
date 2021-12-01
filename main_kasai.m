@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 1; %number of agents（if bird_trace system else number of all units）
+N = 3; %number of agents（if bird_trace system else number of all units）
 Nb = 3; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
@@ -32,7 +32,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=50;
+    te=80;
 end
 %% set connector (global instance)
 if fExp
@@ -159,7 +159,7 @@ for i = 1:N
     end
     
     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,1)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_RangePos(i,1.5)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
@@ -185,7 +185,7 @@ for i = 1:N
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;1])); % ハート形[x;y;z]永久
-    Make_Reference = zeros(i,3);
+%     Make_Reference = zeros(i,3);
 %     agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
 %     agent(i).set_property("reference",Reference_tracebirds(i,Nb)); % 害鳥追跡用
 %     if fExp == 1
@@ -327,12 +327,12 @@ w = waitforbuttonpress;
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
-            param(i).reference.agreement={logger,N,te,dt};
+            param(i).reference.agreement={logger,N,initial};
             param(i).reference.trace_drone={agent,N,Nb,fp,[0.7,1.2,30]};
             param(i).reference.trace_pestbirds={agent,logger,N,Nb,fp,[0.7,1.2,30]};
             
-            [Make_Reference,flag_miki] = Make_heart_reference(i,Make_Reference,agent,flag_miki);
-            param(i).reference.point={FH,Make_Reference(i,:)',time.t};
+%             [Make_Reference,flag_miki] = Make_heart_reference(i,Make_Reference,agent,flag_miki);
+%             param(i).reference.point={FH,Make_Reference(i,:)',time.t};
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j}=param(i).reference.(agent(i).reference.name(j));
             end

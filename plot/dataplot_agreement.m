@@ -8,9 +8,10 @@ for n = 1:numel(logger.Data.t)
     for i=1:N
         x(i,n) = logger.Data.agent{n,3,i}.state.p(1,1);
         y(i,n) = logger.Data.agent{n,3,i}.state.p(2,1);
+        z(i,n) = logger.Data.agent{n,3,i}.state.p(3,1);
     end
     for i=1:N
-        distance(i,n) = sqrt((x(1,n)-(x(i,n)))^2+(y(1,n)-(y(i,n)))^2);
+        distance(i,n) = sqrt((x(1,n)-(x(i,n)))^2+(y(1,n)-(y(i,n)))^2+(z(1,n)-(z(i,n)))^2);
     end
 end
     
@@ -71,14 +72,18 @@ end
     axis square;
     legend;
     
-%%  
-    %-------------------エージェント初期位置------------------------
+%%
+%-------------------エージェントのz座標------------------------
     figure(3)
     figure3=figure(3);
     axes3=axes('Parent',figure3);
     hold on
     for i=1:N
-        figi = plot(x(i,1),y(i,1),'.','MarkerSize',20,'displayname',text{i});
+        figi = plot(t,z(i,1:numel(logger.Data.t)),'displayname',text{i});
+%     if i==1 figi = plot(t,y(i,1:numel(logger.Data.t)),'r-');end
+%     if i==2 figi = plot(t,y(i,1:numel(logger.Data.t)),'g-');end
+%     if i==3 figi = plot(t,y(i,1:numel(logger.Data.t)),'b-');end
+%     if i==4 figi = plot(t,y(i,1:numel(logger.Data.t)),'c-');end
     end
     hold off
     
@@ -88,13 +93,35 @@ end
     end
     set(axes3,'FontName','Times New Roman','FontSize',14);
     grid on;
+    xlim([0,logger.Data.t(end)+1]);
+    xlabel('Time {\it t} [s]');
+    ylabel('Position {\it z} [m]');
+    axis square;
+    legend;
+%%  
+    %-------------------エージェント初期位置------------------------
+    figure(4)
+    figure4=figure(4);
+    axes4=axes('Parent',figure4);
+    hold on
+    for i=1:N
+        figi = plot3(x(i,1),y(i,1),z(i,1),'.','MarkerSize',20,'displayname',text{i});
+    end
+    hold off
+    
+    %-------------グラフィックスオブジェクトのプロパティ--------------
+    for i=1:N
+    set(figi,'LineWidth',1);
+    end
+    set(axes4,'FontName','Times New Roman','FontSize',14);
+    grid on;
     xlim([-2,2]);
     ylim([-2,2]);
     xlabel('Position {\it x} [m]');
     ylabel('Position {\it y} [m]');
     axis square;
     legend('Location','best');
-    cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
+%     cd 'C:\Users\kasai\Desktop\work\work_svn\bachelor\thesis\fig'
 %     exportgraphics(gcf,'Initial position offset.eps');
         
     %% エージェント間の距離
