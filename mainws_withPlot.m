@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=500;
+    te=100;
 end
 %% initialize
 initial(N) = struct;
@@ -34,7 +34,7 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
 %         initial(i).p = [-45;8];
-        initial(i).p = [30;-2];
+        initial(i).p = [0;-2];
 %     initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];

@@ -11,6 +11,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
         model
         NoiseR
         SensorRange
+        RangeGain
         result
         self
         SolverName
@@ -27,11 +28,12 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([1,1,1,1]);
+            obj.param.Q = diag([8,8,8,8]);
             obj.param.R = diag([1,1]);
-            obj.param.Qf = diag([3,3,1,1]);
-            obj.param.T = diag([10,10,10,10,10,10,10,10,10,10]);
-            obj.NoiseR = 2.0e-2;%param of Fisher Information matrix
+            obj.param.Qf = diag([12,12,12,12]);
+            obj.param.T = diag([1,1,1,1,1,1,1,1,1,1]);
+            obj.NoiseR = 1.0e-3;%param of Fisher Information matrix
+            obj.RangeGain = 8;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
 %             obj.param.Th = diag([1,1]);
 %             obj.param.LimFim = 1;
@@ -104,13 +106,13 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input]; % 初期状態
             % obj.options.PlotFcn                = [];
-%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange);
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective_mex(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
+%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective_mex(problem.x0,obj.param);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;
             obj.result.fval = fval;
             obj.result.exitflag = exitflag;
-            obj.result.eachfval = GetobjectiveFimEval(var, obj.param,obj.self.estimator.(obj.self.estimator.name).R);
+            obj.result.eachfval = GetobjectiveFimEval(var, obj.param,obj.NoiseR);
 %             disp(exitflag);
             obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);  
 %             obj.SolverName = func2str(problem.objective);

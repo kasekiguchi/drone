@@ -1,7 +1,7 @@
 % -------------------------------------------------------------------------
 %Author Sota Wada; Date 2021_10_21
 % -------------------------------------------------------------------------
-function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_Fimobjective(x0,param,NoiseR,SensorRange)
+function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_Fimobjective(x0,param,NoiseR,SensorRange,RangeGain)
 assert(isa(x0,'double'));assert(all(size(x0)==	[6,11]));
 assert(isa(param,'struct'));
 assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
@@ -23,6 +23,7 @@ assert(isa(param.model_param,'struct'));
 assert(isa(param.model_param.K,'double'));assert(all(size(param.model_param.K)==	[1,1]));
 assert(isa(NoiseR,'double'));assert(all(size(NoiseR)==	[1,1]));
 assert(isa(SensorRange,'double'));assert(all(size(SensorRange)==	[1,1]));
+assert(isa(RangeGain,'double'));assert(all(size(RangeGain)==	[1,1]));
     options = optimoptions('fmincon',...
         'MaxIterations',                 1000000000,...
         'MaxFunctionEvaluations',        1000000000,...
@@ -33,11 +34,11 @@ assert(isa(SensorRange,'double'));assert(all(size(SensorRange)==	[1,1]));
         'SpecifyConstraintGradient',     false,...
         'Algorithm',                     'sqp');
     % 最大反復回数, 評価関数の最大値, 制約の許容誤差, 最適性の許容誤差, ステップサイズの下限, 評価関数の勾配設定, 制約条件の勾配設定, SQPアルゴリズムの指定
-    evalfunc = @(x)FimobjectiveMEX(x,param,NoiseR,SensorRange);
+    evalfunc = @(x)FimobjectiveMEX(x,param,NoiseR,SensorRange,RangeGain);
     nonlcon  = @(x)constraintsMEX(x,param);
     [x,fval,exitflag,output,lambda,grad,hessian] = fmincon(evalfunc,x0,[],[],[],[],[],[],nonlcon,options);
 end
-function [eval] = FimobjectiveMEX(x, params,NoiseR,SensorRange)
+function [eval] = FimobjectiveMEX(x, params,NoiseR,SensorRange,RangeGain)
 % モデル予測制御の評価値を計算するプログラム
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
 X = x(1:params.state_size, :);
@@ -50,7 +51,7 @@ evFim = zeros(1,params.H);
 for j = 1:params.H
     H = (params.dis(:) - X(1,j).*cos(params.alpha(:)) - X(2,j).*sin(params.alpha(:)))./cos(params.phi(:) - params.alpha(:) + X(3,j));%observation
 %     RangeLogic = H<SensorRange;
-    RangeLogic = (tanh(SensorRange - H)+1)/2;
+    RangeLogic = (tanh(RangeGain*(SensorRange - H))+1)/2;
     tmpFim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j), params.dt, params.dis(:), params.alpha(:), params.phi(:));
     Fim = RangeLogic(1) * tmpFim(1:2,:);
     for i = 2:length(tmpFim)/2

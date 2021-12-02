@@ -3,7 +3,7 @@
 
 cfg = coder.config('mex');
 % argInputValue = {problem.x0,obj.param};
-inputArgs=[ {'fminconMEX_Trackobjective'};                     % ファイル名
+inputArgs=[ {'fminconMEX_Fimobjective'};                     % ファイル名
                 {'-config'};{cfg};              % 作成された設定を指定
                 {'-report'};                    % 出力結果レポートを作成
 %                 {'-args'};{argInputValue};    % assertを使用しない場合にはargInputValueに入れる
