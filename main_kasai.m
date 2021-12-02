@@ -151,17 +151,19 @@ for i = 1:N
     %% set sensors property
     agent(i).sensor=[];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
+    if fExp
     if fMotive
         agent(i).set_property("sensor",Sensor_Motive(i)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
     if fROS
         agent(i).set_property("sensor",Sensor_ROS(struct('ROSHostIP','192.168.50.21')));
     end
-    
+    else
     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
     agent(i).set_property("sensor",Sensor_RangePos(i,1.5)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
+    end
     %% set estimator property
     agent(i).estimator=[];
     if fExp
@@ -327,7 +329,7 @@ w = waitforbuttonpress;
             param(i).reference.timeVarying={time};
             param(i).reference.tvLoad={time};
             param(i).reference.wall={1};
-            param(i).reference.agreement={logger,N,initial};
+            param(i).reference.agreement={logger,N,time.t};
             param(i).reference.trace_drone={agent,N,Nb,fp,[0.7,1.2,30]};
             param(i).reference.trace_pestbirds={agent,logger,N,Nb,fp,[0.7,1.2,30]};
             

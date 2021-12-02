@@ -25,19 +25,35 @@ classdef consensus_agreement < REFERENCE_CLASS
             ni = size(sensor.neighbor,2);%センサレンジ内にある他機体の位置情報
 %             consensus_point = [0;0;0]; %合意重心
             if obj.self.id == 1
-                r=1;
-                theta= linspace(0,2*pi,1000);
-                obj.result.state.xd = [r*cos(theta(Param{1}.i));r*sin(theta(Param{1}.i));0.5];
+                x_0 = 0;
+                y_0 = 0;
+                z_0 = 0;
+                t = Param{3};
+
+                s = 4;
+
+                x = x_0+sin(t/s);
+                y = y_0+cos(t/s);
+                z = 1;
+                obj.result.state.xd = [x;y;z];
             else
                 if ni==0 %近くに他の機体がいない
-                    obj.result.state.xd = [state.p(1:2);0];
+                    obj.result.state.xd = state.p;
                 else
-                    r=1;
                     Wo = 0.1;
-                    Wd = 0.1;
-                    theta= linspace(0,2*pi,1000);
-                    round=zeros(2,1);
-                    P = obj.offset(:,obj.self.id)+[r*cos(theta(Param{1}.i));r*sin(theta(Param{1}.i));0.5]; %目標位置
+                    Wd = 0.2;
+                    x_0 = 0;
+                    y_0 = 0;
+                    z_0 = 0;
+                    t = Param{3};
+
+                    s = 4; % s = 2 → period = 4*pi (12 sec)ハート1周
+
+                    x = x_0+sin(t/s);
+                    y = y_0+cos(t/s);
+                    z = 1;
+                    round = zeros(2,1);
+                    P = obj.offset(:,obj.self.id)+[x;y;z]; %目標位置
                     for i=1:ni
                         for j=1:2
                         Ao=-((state.p(1,1)-sensor.neighbor(1,i))^2+(state.p(2,1)-sensor.neighbor(2,i))^2)^(-3/2)*(state.p(j,1)-sensor.neighbor(j,i));
