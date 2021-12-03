@@ -153,7 +153,8 @@ void setupPPM()// ---------- setup ppm signal configuration
   pinMode(OUTPUT_PIN, OUTPUT);
   digitalWrite(OUTPUT_PIN, LOW);
   CH_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
-  TOTAL_CH_OFFSET = 4*C4_OFFSET + 4*C8_OFFSET;
+  //TOTAL_CH_OFFSET = 4*C4_OFFSET + 4*C8_OFFSET;
+  TOTAL_CH_OFFSET = 8*CH_OFFSET;
   pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
   pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
   pw[2] = CH_OFFSET - CH_MIN; // throttle
