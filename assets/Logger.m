@@ -31,16 +31,19 @@ classdef Logger < handle
             obj.N = length(target); % agent number
             obj.Data.t = zeros(row,1); % 時間
             obj.Data.phase = zeros(row,1); % フライトフェーズ　a,t,f,l...
-            obj.items=items;
+            obj.items=[items;"sensor";"estimator";"reference"];
+            %obj.items=items;
             obj.si = length(items)+1;
             obj.ei = obj.si + 1;
             obj.ri = obj.ei + 1;
             obj.ii = obj.ri + 1;
             if isempty(target(1).plant.state)
                 obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.result，input
+                obj.items=[obj.items;"input"];
             else
                 obj.pi = obj.ii +1;
                 obj.n=length(items)+5;% ,sensor.result, estimator.result, reference.result，input
+                obj.items=[obj.items;"plant";"input"];
             end
             obj.Data.agent=cell(row,obj.n,obj.N);
         end
@@ -53,7 +56,7 @@ classdef Logger < handle
             cha = get(FH, 'currentcharacter');
             obj.Data.phase(obj.i)=cha;
             for j = 1:obj.N
-                for k = 1:length(obj.items)
+                for k = 1:find(obj.items=="sensor")-1
                     str=strsplit(obj.items{k},'.');
                     tmp=obj.target(j);
                     for l = 1:length(str)-1
