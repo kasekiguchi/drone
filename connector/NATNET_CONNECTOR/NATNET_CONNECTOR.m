@@ -39,21 +39,19 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             obj.result.rigid_num = ModelDescription.RigidBodyCount;
             omnum = 0;
             obj.on_marker = cell(1,obj.result.rigid_num);
-            j = 1;
-            for i = obj.rigid_list
-                obj.on_marker_nums(j) = ModelDescription.MarkerSet(i).MarkerCount;
-                obj.on_marker{j} = zeros(obj.on_marker_nums(j),3);
-                for k = 1:obj.on_marker_nums(j)
+            for i = 1:length(obj.rigid_list)
+                obj.on_marker_nums(i) = ModelDescription.MarkerSet(obj.rigid_list(i)).MarkerCount;
+                obj.on_marker{i} = zeros(obj.on_marker_nums(i),3);
+                for k = 1:obj.on_marker_nums(i)
                     marker=Frame.LabeledMarker(omnum+k);
 %                    marker=Frame.UnlabeledMarker(omnum+k);
-                    obj.on_marker{i}(k,:) = [marker.x, -marker.z, marker.y];
+                    obj.on_marker{obj.rigid_list(i)}(k,:) = [marker.x, -marker.z, marker.y];
                 end
-                body = Frame.RigidBody(i);
-                obj.result.local_marker_nums(j) = ModelDescription.MarkerSet(i).MarkerCount;
-                %obj.result.local_marker{i} = double(rotmat(quaternion([body.qw body.qx -body.qz body.qy]),'frame')'*(obj.on_marker{i}-double([body.x, -body.z, body.y]))')';
-                obj.result.local_marker{j} = double(RodriguesQuaternion([body.qw body.qx -body.qz body.qy]')'*(obj.on_marker{i}-double([body.x, -body.z, body.y]))')';
-                omnum = omnum+obj.on_marker_nums(j);
-                j = j+1;
+                body = Frame.RigidBody(obj.rigid_list(i));
+                obj.result.local_marker_nums(i) = ModelDescription.MarkerSet(obj.rigid_list(i)).MarkerCount;
+                %obj.result.local_marker{obj.rigid_list(i)} = double(rotmat(quaternion([body.qw body.qx -body.qz body.qy]),'frame')'*(obj.on_marker{obj.rigid_list(i)}-double([body.x, -body.z, body.y]))')';
+                obj.result.local_marker{i} = double(RodriguesQuaternion([body.qw body.qx -body.qz body.qy]')'*(obj.on_marker{obj.rigid_list(i)}-double([body.x, -body.z, body.y]))')';
+                omnum = omnum+obj.on_marker_nums(i);
             end
         end
         function ret = getData(obj,~,~)
@@ -90,13 +88,12 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             % %Get obj.Data and Organize
             % %also organizing obj.Data in the same way in main.m
             j = 1;
-            for i = obj.rigid_list
-                body = Frame.RigidBody(i);
-                obj.result.rigid(j).p = double([body.x; -body.z; body.y]);
+            for i = 1:length(obj.rigid_list)
+                body = Frame.RigidBody(obj.rigid_list(i));
+                obj.result.rigid(i).p = double([body.x; -body.z; body.y]);
                 
                 %% quaternion
-                obj.result.rigid(j).q = double([body.qw; body.qx; -body.qz; body.qy]);
-                j = j+1;
+                obj.result.rigid(i).q = double([body.qw; body.qx; -body.qz; body.qy]);
             end
             obj.result.marker = zeros(obj.result.marker_num,3);
             for i = 1:obj.result.marker_num
