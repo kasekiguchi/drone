@@ -14,11 +14,13 @@ assert(isa(param.Q,'double'));assert(all(size(param.Q)==	[4,4]));
 assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
 assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
 assert(isa(param.T,'double'));assert(all(size(param.T)==	[10,10]));
+assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
 assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,11]));
 assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
 assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));
 assert(isa(param.phi,'double'));assert(all(size(param.phi)>=	[1,1]));assert(all(size(param.phi)<=	[1,629]));
 assert(isa(param.X0,'double'));assert(all(size(param.X0)==	[4,1]));
+assert(isa(param.U0,'double'));assert(all(size(param.U0)==	[2,1]));
 assert(isa(param.model_param,'struct'));
 assert(isa(param.model_param.K,'double'));assert(all(size(param.model_param.K)==	[1,1]));
 assert(isa(NoiseR,'double'));assert(all(size(NoiseR)==	[1,1]));
@@ -59,8 +61,8 @@ for j = 1:params.H
     end
     Fim = (1/(2*NoiseR))*Fim;
     InvFim = inv(Fim);
-    evFim(1,j) = trace(InvFim);
-%     evFim(1,j) = real(max(eig(InvFim)));
+%     evFim(1,j) = trace(InvFim);
+    evFim(1,j) = real(max(eig(InvFim)));
 end
 %-- 状態及び入力のステージコストを計算
 stageState = arrayfun(@(L) tildeX(:, L)' * params.Q * tildeX(:, L), 1:params.H);
@@ -107,7 +109,7 @@ end
 function [cineq, ceq] = constraintsMEX(x, params)
 % モデル予測制御の制約条件を計算するプログラム
 %constraints only model
-cineq  = zeros(params.state_size, 4*params.H);
+cineq  = zeros(4, params.Num);
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
 X = x(1:params.state_size, :);
 U = x(params.state_size+1:end, :);
@@ -117,17 +119,16 @@ for L = 1:params.H
     PredictX(:,L) = X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param);
 end
 % PredictX = cell2mat(arrayfun(@(L) X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param) , 1:params.H,'UniformOutput' , false));
-tmpceq = zeros(4,params.H);
+tmpceq = zeros(params.state_size,params.H);
 for L = 2:params.Num
-    tmpceq(:,L-1) = X(:, L)  -  PredictX(:,L-1);
+    tmpceq(1:params.state_size,L-1) = X(:, L)  -  PredictX(:,L-1);
 end
-ceq = [X(:, 1) - params.X0, tmpceq];
-%-- 予測入力が入力の上下限制約に従うことを設定
-%     cineq(:, 1: params.H)	        = cell2mat(arrayfun(@(L) params.U(:, 1) - U(:, L), 1:params.H, 'UniformOutput', false));
-%     cineq(:, params.H+1: 2*params.H)= cell2mat(arrayfun(@(L) U(:, L) - params.U(:, 2), 1:params.H, 'UniformOutput', false));
+ceq = [X(:, 1) - params.X0, tmpceq];%初期時刻を現在状態に固定，モデルに従う制約
 %     %-- 予測入力間での変化量が変化量制約以下となることを設定
-%     cineq(:, 2*params.H+1: 3*params.H) = [cell2mat(arrayfun(@(L) -params.S - (U(:, L) - U(:, L-1)) , 2:params.H, 'UniformOutput', false)),  zeros(2,1)];
-%     cineq(:, 3*params.H+1: 4*params.H) = [cell2mat(arrayfun(@(L) (U(:, L) - U(:, L-1)) - params.S  , 2:params.H, 'UniformOutput', false)),  zeros(2,1)];
+cineq(1,:) = [-params.S(1) - (U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) - (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量制約下限
+cineq(2,:) = [-params.S(2) - (U(2,1) - params.U0(2)),arrayfun(@(L) - params.S(2) - (U(2,L) - U(2,L-1)),2:params.Num)];%角速度の変化量制約　下限
+cineq(3,:) = [-params.S(1) + (U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) + (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量上限
+cineq(4,:) = [-params.S(2) + (U(2,1) - params.U0(1)),arrayfun(@(L) - params.S(2) + (U(2,L) - U(2,L-1)),2:params.Num)];%角速度入力の変化量上限
 end
 % function dX = Model(x,u,param)
 %     u(1) = param.K * u(1);
