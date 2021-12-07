@@ -19,15 +19,13 @@ classdef consensus_agreement < REFERENCE_CLASS
             
        %% 目標位置
         function  result= do(obj,Param)
-            sensor = obj.self.sensor.result;%Param{1}.result;　%　他の機体の位置
+            sensor = obj.self.sensor.motive.result.rigid;%Param{1}.result;　%　他の機体の位置
             state = obj.self.estimator.result.state;%Param{2}.state; % 自己位置
 
-            ni = size(sensor.neighbor,2);%センサレンジ内にある他機体の位置情報
 %             consensus_point = [0;0;0]; %合意重心
-            if obj.self.id == 1
+            if obj.self.sensor.motive.rigid_num == 1
                 x_0 = 0;
                 y_0 = 0;
-                z_0 = 0;
                 t = Param{3};
 
                 s = 4;
@@ -37,14 +35,13 @@ classdef consensus_agreement < REFERENCE_CLASS
                 z = 1;
                 obj.result.state.xd = [x;y;z];
             else
-                if ni==0 %近くに他の機体がいない
+                if norm(state.p - sensor(1).p)>1.5 %近くにリーダー機体がいない
                     obj.result.state.xd = state.p;
                 else
                     Wo = 0.1;
-                    Wd = 0.2;
+                    Wd = 0.18;
                     x_0 = 0;
                     y_0 = 0;
-                    z_0 = 0;
                     t = Param{3};
 
                     s = 4; % s = 2 → period = 4*pi (12 sec)ハート1周
@@ -52,67 +49,24 @@ classdef consensus_agreement < REFERENCE_CLASS
                     x = x_0+sin(t/s);
                     y = y_0+cos(t/s);
                     z = 1;
-                    round = zeros(2,1);
                     P = obj.offset(:,obj.self.id)+[x;y;z]; %目標位置
-                    for i=1:ni
-                        for j=1:2
-                        Ao=-((state.p(1,1)-sensor.neighbor(1,i))^2+(state.p(2,1)-sensor.neighbor(2,i))^2)^(-3/2)*(state.p(j,1)-sensor.neighbor(j,i));
-                        Ad=((state.p(1,1)-P(1,1))^2+(state.p(2,1)-P(2,1))^2)^(-3/2)*(state.p(j,1)-P(j,1));
-                        round(j,1)=round(j,1)+Wo*Ao+Wd*Ad;
-                        end
-                    end
                     gradPx = 0;
                     gradPy = 0;
-                    gradPz = 0;
-                    for i=1:ni
-                        gradPx = gradPx+Wd*(2*state.p(1)-2*P(1,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(1) - 2*sensor.neighbor(1,i)))/(2*((state.p(1) - sensor.neighbor(1,i))^2 + (state.p(2) - sensor.neighbor(2,i))^2 + (state.p(3) - sensor.neighbor(3,i))^2)^(3/2));
-                        gradPy = gradPy+Wd*(2*state.p(2)-2*P(2,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(2) - 2*sensor.neighbor(2,i)))/(2*((state.p(1) - sensor.neighbor(1,i))^2 + (state.p(2) - sensor.neighbor(2,i))^2 + (state.p(3) - sensor.neighbor(3,i))^2)^(3/2));
-                        gradPz = gradPz+Wd*(2*state.p(3)-2*P(3,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(3) - 2*sensor.neighbor(3,i)))/(2*((state.p(1) - sensor.neighbor(1,i))^2 + (state.p(2) - sensor.neighbor(2,i))^2 + (state.p(3) - sensor.neighbor(3,i))^2)^(3/2));
+                    if obj.self.sensor.motive.rigid_num == 2
+                        gradPx = gradPx+Wd*(2*state.p(1)-2*P(1,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(1) - 2*sensor(1).p(1)))/(2*((state.p(1) - sensor(1).p(1))^2 + (state.p(2) - sensor(1).p(2))^2 + (state.p(3) - sensor(1).p(3))^2)^(3/2));
+                        gradPy = gradPy+Wd*(2*state.p(2)-2*P(2,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(2) - 2*sensor(1).p(2)))/(2*((state.p(1) - sensor(1).p(1))^2 + (state.p(2) - sensor(1).p(2))^2 + (state.p(3) - sensor(1).p(3))^2)^(3/2));
+                        gradPx = gradPx+Wd*(2*state.p(1)-2*P(1,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(1) - 2*sensor(3).p(1)))/(2*((state.p(1) - sensor(3).p(1))^2 + (state.p(2) - sensor(3).p(2))^2 + (state.p(3) - sensor(3).p(3))^2)^(3/2));
+                        gradPy = gradPy+Wd*(2*state.p(2)-2*P(2,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(2) - 2*sensor(3).p(2)))/(2*((state.p(1) - sensor(3).p(1))^2 + (state.p(2) - sensor(3).p(2))^2 + (state.p(3) - sensor(3).p(3))^2)^(3/2));
+                    else
+                        gradPx = gradPx+Wd*(2*state.p(1)-2*P(1,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(1) - 2*sensor(1).p(1)))/(2*((state.p(1) - sensor(1).p(1))^2 + (state.p(2) - sensor(1).p(2))^2 + (state.p(3) - sensor(1).p(3))^2)^(3/2));
+                        gradPy = gradPy+Wd*(2*state.p(2)-2*P(2,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(2) - 2*sensor(1).p(2)))/(2*((state.p(1) - sensor(1).p(1))^2 + (state.p(2) - sensor(1).p(2))^2 + (state.p(3) - sensor(1).p(3))^2)^(3/2));
+                        gradPx = gradPx+Wd*(2*state.p(1)-2*P(1,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(1) - 2*sensor(2).p(1)))/(2*((state.p(1) - sensor(2).p(1))^2 + (state.p(2) - sensor(2).p(2))^2 + (state.p(3) - sensor(2).p(3))^2)^(3/2));
+                        gradPy = gradPy+Wd*(2*state.p(2)-2*P(2,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(2) - 2*sensor(2).p(2)))/(2*((state.p(1) - sensor(2).p(1))^2 + (state.p(2) - sensor(2).p(2))^2 + (state.p(3) - sensor(2).p(3))^2)^(3/2));
                     end
-                    obj.result.state.xd = [state.p(1)-gradPx;state.p(2)-gradPy;0.5];%[state.p(1)+round(1);state.p(2)+round(2);0.5]; %合意重心を設定して隊列を形成
+                    obj.result.state.xd = [state.p(1)-gradPx;state.p(2)-gradPy;0.5]; %フォロワー機の目標座標
                 end
             end
             
-%             if obj.self.id == 1
-%                 theta = linspace(0,2*pi,Param{3}/Param{4}+1);
-%                 x = cos(theta(Param{1}.i));
-%                 y = sin(theta(Param{1}.i));
-%                 z = 1;
-%                 round=zeros(2,1);
-%                 for i=0:1:ni-1
-%                     Ao=-((state.p(1,1)-sensor.neighbor(1,i))^2+(state.p(2,1)-sensor.neighbor(2,i))^2)^(-3/2);
-%                     Ad=((state.p(1,1)-x)^2+(state.p(2,1)-y)^2)^(-3/2)*(state.p(1,1)-x);
-%                 obj.result.state.xd = [x;y;z];
-%             else
-%                 if ni==0 %近くに他の機体がいない
-%                     obj.result.state.xd = state.p;
-%                 else
-%                     theta = linspace(0,2*pi,Param{3}/Param{4}+1);
-%                     x = cos(theta(Param{1}.i));
-%                     y = sin(theta(Param{1}.i));
-%                     z = 1;
-% %                     for i=1:ni
-% %                         Po(:,i) = 1/sqrt((state.p(1) - sensor.neighbor(1,i))^2+(state.p(3) - sensor.neighbor(3,i))^2+(state.p(3) - sensor.neighbor(3,i))^2); %障害物（他機体）のポテンシャル関数
-% %                     end
-% %                     Xd = [x;y;z]+obj.offset(:,obj.self.id); %目標座標
-% %                     for i=2:Param{2}
-% %                         Pd(:,i) = -1/sqrt((state.p(1) - Xd(1))^2+(state.p(2) - Xd(2))^2+(state.p(3) - Xd(3))^2); %目標値のポテンシャル関数
-% %                     end
-% %                     wo = 1;
-% %                     wd = 1;
-% %                     for i = 2:Param{2}
-% %                         P(:,i) = wo*sum(Po,2) + wd*Pd(:,i);
-% %                     end
-%                     obj.result.state.xd = [x;y;z]+obj.offset(:,obj.self.id); %合意重心を設定して隊列を形成
-%                     
-% %                     obj.result.state.p = (state.p+(ni+1)*(obj.offset(:,obj.self.id))+sum(sensor.neighbor,2))/(ni+1); %逐次合意重心を算出
-%                 end
-%             end
-%                 theta = linspace(0,2*pi,Param{3}/Param{4}+1);
-%                 x = cos(theta(Param{1}.i));
-%                 y = sin(theta(Param{1}.i));
-%                 z = 1;
-%                 obj.result.state.xd = [x;y;z];
             result = obj.result; %返し値（次の目標位置）
         end
         

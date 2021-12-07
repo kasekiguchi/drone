@@ -14,8 +14,8 @@ Nb = 3; %number of pestbirds
 Na = N - Nb; %number of agents
 fp = farm_create(6);%畑のエリア生成．（）内の数は畑の数(1～9)．害鳥追跡用
 flag_miki = ones(N);%PtoP制御用
-fExp = 0 %1：実機　それ以外：シミュレーション
-fMotive = 0;% Motiveを使うかどうか
+fExp = 0 %：実機　それ以外：シミュレーション
+fMotive = 1;% Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -151,19 +151,16 @@ for i = 1:N
     %% set sensors property
     agent(i).sensor=[];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
-    if fExp
     if fMotive
         agent(i).set_property("sensor",Sensor_Motive(i)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
     if fROS
         agent(i).set_property("sensor",Sensor_ROS(struct('ROSHostIP','192.168.50.21')));
     end
-    else
-    agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,1.5)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+%     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
+%     agent(i).set_property("sensor",Sensor_RangePos(i,1.5)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
-    end
     %% set estimator property
     agent(i).estimator=[];
     if fExp
