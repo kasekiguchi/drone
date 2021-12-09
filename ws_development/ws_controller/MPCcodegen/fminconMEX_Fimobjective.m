@@ -2,7 +2,7 @@
 %Author Sota Wada; Date 2021_10_21
 % -------------------------------------------------------------------------
 function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_Fimobjective(x0,param,NoiseR,SensorRange,RangeGain)
-assert(isa(x0,'double'));assert(all(size(x0)==	[6,11]));
+assert(isa(x0,'double'));assert(all(size(x0)==	[8,11]));
 assert(isa(param,'struct'));
 assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
 assert(isa(param.dt,'double'));assert(all(size(param.dt)==	[1,1]));
@@ -15,6 +15,7 @@ assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
 assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
 assert(isa(param.T,'double'));assert(all(size(param.T)==	[10,10]));
 assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
+assert(isa(param.WoS,'double'));assert(all(size(param.WoS)==	[2,2]));
 assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,11]));
 assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
 assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));
@@ -44,35 +45,40 @@ function [eval] = FimobjectiveMEX(x, params,NoiseR,SensorRange,RangeGain)
 % モデル予測制御の評価値を計算するプログラム
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
 X = x(1:params.state_size, :);
-U = x(params.state_size+1:end, :);
+U = x(params.state_size+1:params.total_size, :);
+S = x(params.total_size+1:end,:);
 %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
 tildeX = X - params.Xr;
 tildeU = U;
 %
 evFim = zeros(1,params.H);
+% evFim = zeros(2,2*params.H);
 for j = 1:params.H
     H = (params.dis(:) - X(1,j).*cos(params.alpha(:)) - X(2,j).*sin(params.alpha(:)))./cos(params.phi(:) - params.alpha(:) + X(3,j));%observation
 %     RangeLogic = H<SensorRange;
     RangeLogic = (tanh(RangeGain*(SensorRange - H))+1)/2;
     tmpFim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j), params.dt, params.dis(:), params.alpha(:), params.phi(:));
-    Fim = RangeLogic(1) * tmpFim(1:2,:);
+    Fim = RangeLogic(1) .* tmpFim(1:2,:);
     for i = 2:length(tmpFim)/2
-        Fim = Fim + RangeLogic(i) * tmpFim(2*i-1:2*i,:);
+        Fim = Fim + RangeLogic(i) .* tmpFim(2*i-1:2*i,:);
     end
     Fim = (1/(2*NoiseR))*Fim;
     InvFim = inv(Fim);
-%     evFim(1,j) = trace(InvFim);
-    evFim(1,j) = real(max(eig(InvFim)));
+        evFim(1,j) = trace(InvFim);
+    %     evFim(1,j) = real(max(eig(InvFim)));
+%     evFim(:,2*j-1:2*j) = InvFim' * params.T * InvFim;
 end
 %-- 状態及び入力のステージコストを計算
 stageState = arrayfun(@(L) tildeX(:, L)' * params.Q * tildeX(:, L), 1:params.H);
 stageInput = arrayfun(@(L) tildeU(:, L)' * params.R * tildeU(:, L), 1:params.H);
+stageSlack = arrayfun(@(L) S(:,L)' * params.WoS * S(:,L), 1:params.Num);
 % stageevFim = arrayfun(@(L) evFim(:,L)' * params.Th * evFim(:,L), 1:params.H);
+% stageevFim = arrayfun(@(L) evFim(:,2*L-1:2*L)* params.T * evFim(:,2*L-1:2*L)' ,1:params.H);
 stageevFim = evFim* params.T * evFim';
 %-- 状態の終端コストを計算
 terminalState = tildeX(:, end)' * params.Qf * tildeX(:, end);
 %-- 評価値計算
-eval = sum(stageState + stageInput) + sum(stageevFim) + terminalState;
+eval = sum(stageState + stageInput) + sum(stageSlack) + sum(stageevFim) + terminalState;
 end
 function PP = FIM_ObserbSub(x,y,theta,v,omega,t,d1,alpha1,phi1)
 %FIM_OBSERBSUB
@@ -112,7 +118,8 @@ function [cineq, ceq] = constraintsMEX(x, params)
 cineq  = zeros(4, params.Num);
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
 X = x(1:params.state_size, :);
-U = x(params.state_size+1:end, :);
+U = x(params.state_size+1:params.total_size, :);
+S = x(params.total_size+1:end,:);
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定
 PredictX = zeros(4,params.H);
 for L = 1:params.H
@@ -125,10 +132,12 @@ for L = 2:params.Num
 end
 ceq = [X(:, 1) - params.X0, tmpceq];%初期時刻を現在状態に固定，モデルに従う制約
 %     %-- 予測入力間での変化量が変化量制約以下となることを設定
-cineq(1,:) = [-params.S(1) - (U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) - (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量制約下限
-cineq(2,:) = [-params.S(2) - (U(2,1) - params.U0(2)),arrayfun(@(L) - params.S(2) - (U(2,L) - U(2,L-1)),2:params.Num)];%角速度の変化量制約　下限
-cineq(3,:) = [-params.S(1) + (U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) + (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量上限
-cineq(4,:) = [-params.S(2) + (U(2,1) - params.U0(1)),arrayfun(@(L) - params.S(2) + (U(2,L) - U(2,L-1)),2:params.Num)];%角速度入力の変化量上限
+cineq(1,:) = [-params.S(1)-S(1,1)-(U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) -S(1,L) - (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量制約下限
+cineq(2,:) = [-params.S(2)-S(2,1)-(U(2,1) - params.U0(2)),arrayfun(@(L) - params.S(2) -S(2,L) - (U(2,L) - U(2,L-1)),2:params.Num)];%角速度の変化量制約　下限
+cineq(3,:) = [-params.S(1)-S(1,1)+(U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) -S(1,L) + (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量上限
+cineq(4,:) = [-params.S(2)-S(2,1)+(U(2,1) - params.U0(2)),arrayfun(@(L) - params.S(2) -S(2,L) + (U(2,L) - U(2,L-1)),2:params.Num)];%角速度入力の変化量上限
+cineq(5,:) = arrayfun(@(L) -S(1,L),1:params.Num);
+cineq(6,:) = arrayfun(@(L) -S(2,L),1:params.Num);
 end
 % function dX = Model(x,u,param)
 %     u(1) = param.K * u(1);

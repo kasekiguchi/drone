@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=100;
+    te=500;
 end
 %% initialize
 initial(N) = struct;
@@ -79,8 +79,8 @@ for i = 1:N
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
-    velocity = 0.5;
-    w_velocity = 0.01;
+    velocity = 1;
+    w_velocity = 0.5;
     
 %     WayPoint = [100,0,0,0,0];
 %      WayPoint = [55,8,0,0,0;
@@ -297,6 +297,7 @@ function [] = NowResultPlot(agent,NowResult)
     grid on
     axis equal
     hold on
+    
 MapIdx = size(agent.env.Floor.param.Vertices,3);
 for ei = 1:MapIdx
     tmpenv(ei) = polyshape(agent.env.Floor.param.Vertices(:,:,ei));
@@ -314,8 +315,11 @@ EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 EstFinalStatesquare =  polyshape( EstFinalStatesquare');
 EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * agent.estimator.result.state.q(end) / pi, agent.estimator.result.state.p(:,end)');
 PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
-
+%reference state
+RefState = agent.reference.result.state.p(1:2,:);
+Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',2);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-
+xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
+% pbaspect([20 20 1])
 hold off
 end

@@ -40,7 +40,7 @@ if Flag
         % pbaspect([abs(xmin -xmax) abs(ymin -ymax) 1]);
         % axis equal;
         xlim([min(Time) max(Time)]);
-        ylim([0 1]);
+        ylim([0 5]);
         xlabel('t [s]');ylabel('Eval');
         % xticks([-50:20:200]);yticks([-20:20:20])
         %---テンプレ部分---%
