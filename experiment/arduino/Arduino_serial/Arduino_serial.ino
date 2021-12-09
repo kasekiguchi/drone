@@ -3,13 +3,14 @@
 
 uint8_t i;
 #define LED_PIN 13
-#define EM_PIN 2
+#define GLED_PIN 14 // A0
+#define RLED_PIN 15 // A1
+#define EM_PIN 3 // 2 or 3のみ
 #define RST_PIN 18 // = A4
-volatile int LED_state = HIGH;
 volatile boolean isEmergency = false;
 boolean fReset = false;
 /////////////////// PPM関係 ////////////////////
-#define OUTPUT_PIN A1 // ppm output pin
+#define OUTPUT_PIN 2 // ppm output pin
 char packetBuffer[255];
 #define TOTAL_INPUT 4      // number of input channels
 #define TOTAL_CH 8         // number of channels 
@@ -42,19 +43,22 @@ volatile unsigned long last_received_time;
 // ==================================================================
 void setup()
 {
+  delay(2000);// ここにあった方がreset後安定する
   Serial.begin(115200); // MATLABの設定と合わせる
   Serial.println("Start");
-
-  setupPPM();
-  delay(1000);
-
-  // 緊急停止
+  pinMode(LED_PIN, OUTPUT );
+  digitalWrite( LED_PIN, HIGH );
+  pinMode(GLED_PIN, OUTPUT );
+  digitalWrite( GLED_PIN, HIGH );
+  pinMode(RLED_PIN, OUTPUT );
+  digitalWrite( RLED_PIN, LOW );
   pinMode(EM_PIN, INPUT_PULLUP);// emergency_stop を割り当てるピン
   pinMode(RST_PIN, INPUT_PULLUP);
-  pinMode(LED_PIN, OUTPUT );
-  digitalWrite( LED_PIN, LED_state );
-  //attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　LOWからHIGHで停止
-  attachInterrupt(0, emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）(0: 2pin, 1: 3pin)
+
+  setupPPM();// ppm 出力開始
+
+  // 緊急停止
+  attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
   while(Serial.available() <= 0){}
   last_received_time = micros();
 }
@@ -63,20 +67,22 @@ void loop()
 {
   if (!isEmergency)
   {
-    receive_serial();
+      receive_serial();
   }
   else
   {
-    if (digitalRead(EM_PIN) == HIGH)
+    if (digitalRead(EM_PIN) == HIGH && fReset == false)
     {
       delay(3000);// delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
       if (digitalRead(EM_PIN) == HIGH)
       {
-        fReset = true;
         Serial.println("Reset available.");
+        digitalWrite( LED_PIN, HIGH );
+        digitalWrite( RLED_PIN, LOW );
+        fReset = true;
       }
     }
-    else if (fReset == true && digitalRead(EM_PIN) == false)
+    else if (fReset == true && digitalRead(EM_PIN) == false)// reset可能の状態で非常停止ボタンを戻したらリセット
     {
       software_reset();
     }
@@ -105,6 +111,11 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         }
         pw[i] = CH_OFFSET - pw[i];
         start_H0 -= (pw[i] + TIME_LOW);
+
+        if (i == 4 && pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
+          digitalWrite( RLED_PIN, HIGH );
+        }
+        
       }
       last_received_time = micros();
       isReceive_Data_Updated = true;
@@ -114,7 +125,7 @@ void receive_serial()// ---------- loop function : receive signal by UDP
     {
       pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
       pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-      pw[2] = CH_OFFSET - CH_MIN; // throttle
+      pw[2] = CH_OFFSET - CH_MIN;     // throttle
       pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
       pw[4] = CH_OFFSET; // AUX1
       pw[5] = CH_OFFSET; // AUX2
@@ -153,11 +164,10 @@ void setupPPM()// ---------- setup ppm signal configuration
   pinMode(OUTPUT_PIN, OUTPUT);
   digitalWrite(OUTPUT_PIN, LOW);
   CH_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
-  //TOTAL_CH_OFFSET = 4*C4_OFFSET + 4*C8_OFFSET;
   TOTAL_CH_OFFSET = 8*CH_OFFSET;
   pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
   pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-  pw[2] = CH_OFFSET - CH_MIN; // throttle
+  pw[2] = CH_OFFSET - CH_MIN;     // throttle
   pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
   pw[4] = CH_OFFSET; // AUX1
   pw[5] = CH_OFFSET; // AUX2
@@ -171,23 +181,26 @@ void setupPPM()// ---------- setup ppm signal configuration
 }
 void emergency_stop()
 {
-  pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
-  pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-  pw[2] = CH_OFFSET - CH_MIN; // throttle
-  pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
-  pw[4] = CH_OFFSET; // AUX1
-  pw[5] = CH_OFFSET; // AUX2
-  pw[6] = CH_OFFSET; // AUX3
-  pw[7] = CH_OFFSET; // AUX4
-  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
-  LED_state = LOW;
-  isEmergency = true;
-  digitalWrite( LED_PIN, LED_state );
-  Serial.println("EMERGENCY !! ");
+  if(!isEmergency){
+    pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
+    pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
+    pw[2] = CH_OFFSET - CH_MIN;     // throttle
+    pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
+    pw[4] = CH_OFFSET; // AUX1
+    pw[5] = CH_OFFSET; // AUX2
+    pw[6] = CH_OFFSET; // AUX3
+    pw[7] = CH_OFFSET; // AUX4
+    start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
+    isEmergency = true;
+    digitalWrite( LED_PIN, LOW );
+    digitalWrite( GLED_PIN, LOW );
+    Serial.println("EMERGENCY !! ");
+  }
 }
 void software_reset() {
-  pinMode(RST_PIN, OUTPUT);
   Serial.println("Reset!");
+  delay(500);
+  pinMode(RST_PIN, OUTPUT);
   digitalWrite(RST_PIN, LOW);
   Serial.println("RECOVERY");// resetするので表示されないのが正しい挙動
 }
