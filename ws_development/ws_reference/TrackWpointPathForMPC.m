@@ -11,6 +11,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
         ConvergencejudgeW
         TrackingPoint
         InitialPoint
+        PointFlag
         Flag
         PreTrack
         dt
@@ -30,6 +31,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
             obj.WayPoint = param{1,1};% line is flag num
             obj.Targetv = param{1,2};
             obj.Targetw = param{1,3};
+            obj.PointFlag = 0;
             obj.Flag = 1;%WayPointのFlag管理
             obj.ConvergencejudgeV = param{1,4};
             obj.ConvergencejudgeW = param{1,5};
@@ -49,8 +51,18 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
             %----------------------------%
             
             %---judgement of convergence for estimate position---%
-            if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(EstData(3) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW
+            % convergence point check
+            if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && obj.PointFlag == 0
+                obj.PointFlag = 1;
+            end
+            
+            if obj.PointFlag == 1 && abs(EstData(4) - obj.WayPoint(obj.Flag,4)) < 0.05
+                obj.PointFlag =2;
+            end
+            
+            if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(EstData(3) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW && obj.PointFlag ==2
                 obj.Flag = obj.Flag+1;
+                obj.PointFlag = 0;
                 if obj.Flag >= obj.WayPointNum
                     obj.Flag = obj.WayPointNum;
                 end
@@ -71,7 +83,11 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                 else
                     obj.TrackingPoint(3,1) = obj.WayPoint(obj.Flag,3);
                 end
-                obj.TrackingPoint(4,1) = obj.Targetv;
+                if obj.PointFlag ==0
+                    obj.TrackingPoint(4,1) = obj.Targetv;
+                else
+                    obj.TrackingPoint(4,1) = 0;
+                end
                 %-------------------------%
             end
             
@@ -89,7 +105,11 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                     else
                         obj.TrackingPoint(3,i) = obj.WayPoint(obj.Flag,3);
                     end
-                    obj.TrackingPoint(4,i) = obj.Targetv;
+                    if obj.PointFlag ==0
+                        obj.TrackingPoint(4,1) = obj.Targetv;
+                    else
+                        obj.TrackingPoint(4,1) = 0;
+                    end
                     %-------------------------%
                 end
             end

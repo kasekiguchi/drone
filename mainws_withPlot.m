@@ -79,7 +79,7 @@ for i = 1:N
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
-    velocity = 1;
+    velocity = 0.5;
     w_velocity = 0.5;
     
 %     WayPoint = [100,0,0,0,0];
