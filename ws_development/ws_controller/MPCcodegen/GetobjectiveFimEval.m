@@ -21,7 +21,8 @@ for j = 1:params.H
     end
     Fim = (1/(2*NoiseR))*Fim;
     InvFim = inv(Fim);
-    evFim(1,j) = max(eig(InvFim));
+%     evFim(1,j) = max(eig(InvFim));
+evFim(1,j) = trace(InvFim);
 end
 %-- 状態及び入力のステージコストを計算
 stageState = arrayfun(@(L) tildeX(:, L)' * params.Q * tildeX(:, L), 1:params.H);

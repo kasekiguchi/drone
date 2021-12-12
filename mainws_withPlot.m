@@ -104,7 +104,7 @@ for i = 1:N
         48,-2,0,0];
     convjudgeV = 0.5;%収束判断
     convjudgeW = 0.1;%収束判断
-    Holizon = 10;
+    Holizon = 2;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
@@ -317,7 +317,7 @@ EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * agent.estimator.result.s
 PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 %reference state
 RefState = agent.reference.result.state.p(1:2,:);
-Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',2);
+Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
 xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
 % pbaspect([20 20 1])

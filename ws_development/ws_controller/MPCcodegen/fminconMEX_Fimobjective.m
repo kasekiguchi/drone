@@ -2,7 +2,7 @@
 %Author Sota Wada; Date 2021_10_21
 % -------------------------------------------------------------------------
 function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_Fimobjective(x0,param,NoiseR,SensorRange,RangeGain)
-assert(isa(x0,'double'));assert(all(size(x0)==	[8,11]));
+assert(isa(x0,'double'));assert(all(size(x0)==	[8,3]));
 assert(isa(param,'struct'));
 assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
 assert(isa(param.dt,'double'));assert(all(size(param.dt)==	[1,1]));
@@ -13,11 +13,11 @@ assert(isa(param.Num,'double'));assert(all(size(param.Num)==	[1,1]));
 assert(isa(param.Q,'double'));assert(all(size(param.Q)==	[4,4]));
 assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
 assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
-assert(isa(param.T,'double'));assert(all(size(param.T)==	[10,10]));
+assert(isa(param.T,'double'));assert(all(size(param.T)==	[2,2]));
 assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
 assert(isa(param.WoS,'double'));assert(all(size(param.WoS)==	[2,2]));
-assert(isa(param.Evfim,'double'));assert(all(size(param.Evfim) == [1,10]));
-assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,11]));
+assert(isa(param.Evfim,'double'));assert(all(size(param.Evfim) == [1,2]));
+assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,3]));
 assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
 assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));
 assert(isa(param.phi,'double'));assert(all(size(param.phi)>=	[1,1]));assert(all(size(param.phi)<=	[1,629]));
@@ -124,7 +124,9 @@ S = x(params.total_size+1:end,:);
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定
 PredictX = zeros(4,params.H);
 for L = 1:params.H
-    PredictX(:,L) = X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param);
+    tmp = ode45(@(t,x) Model(x,U(:,L),params.model_param),[0 params.dt],X(:,L));
+    PredictX(:,L) = tmp.y(:,end);
+    %     PredictX(:,L) = X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param);
 end
 % PredictX = cell2mat(arrayfun(@(L) X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param) , 1:params.H,'UniformOutput' , false));
 tmpceq = zeros(params.state_size,params.H);

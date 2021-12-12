@@ -28,13 +28,13 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([2,2,1,1]);
+            obj.param.Q = diag([20,20,1,1]);
             obj.param.R = diag([1,1]);
-            obj.param.Qf = diag([6,6,2,1]);
-            obj.param.T = diag([30,30,30,30,30,30,30,30,30,30]);
-            obj.param.S = [1,0.5];
+            obj.param.Qf = diag([20,20,1,1]);
+            obj.param.T = diag([30,30]);
+            obj.param.S = [1,0.2];
             obj.param.WoS = diag([10,10]);
-            obj.param.Evfim = [30,30,30,30,30,30,30,30,30,30];
+            obj.param.Evfim = [10,10];
             obj.NoiseR = 1.0e-3;%param of Fisher Information matrix
             obj.RangeGain = 10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
@@ -60,7 +60,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             %state = state_copy(param{1}.state);
             %model = param{1};
             ref = obj.self.reference.result.state;
-            obj.param.Xr = [obj.self.model.state.get(),ref.xd];
+            obj.param.Xr = [obj.self.estimator.result.state.get(),ref.xd];
             %---マップ情報をとる---%
             LineParam = CFMEX_ConvertLineParam(obj.self.estimator.result.map_param);
             AssociationInfo = obj.self.estimator.result.AssociationInfo;
@@ -110,7 +110,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
             problem.x0		  = [obj.previous_state;obj.previous_input;zeros(2,obj.param.Num)]; % 初期状態
             % obj.options.PlotFcn                = [];
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective_mex(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
 %             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;
