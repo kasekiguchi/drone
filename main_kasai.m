@@ -100,8 +100,8 @@ for i = 1:N
     %% generate Drone instance
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"udp",[i+24])); % Lizard : for exp % 機体番号（ESPrのIP）
-        %agent(i) = Drone(Model_Lizard_exp(dt,'plant',initial(i),"serial",[5])); % Lizard : for exp % 機体番号（ESPrのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[i+24])); % Lizard : for exp % 機体番号（ESPrのIP）
+        %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"serial",[5])); % Lizard : for exp % 機体番号（ESPrのCOM番号）
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
