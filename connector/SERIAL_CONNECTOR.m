@@ -1,11 +1,11 @@
 classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
-  % UDP通信用クラス
+  % Serial通信用クラス
   %   
   
   properties
     result
     serial
-    baudrate = 115200;
+    baudrate = 115200; % Arduinoと合わせる
   end
   properties(SetAccess=private)
     port
@@ -26,7 +26,7 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
       result=obj.result;
     end
     function sendData(obj,param)
-      obj.result=[char(param),';'];% 文字列の終わりを陽に指定．terminator をLFにすれば必要ないかも（変更する場合はESPr_serial.inoも変更すること）
+      obj.result=[char(param),';'];% 文字列の終わりを陽に指定．terminator をLFにすれば必要ないかも（変更する場合はArduino_serial.inoも変更すること）
       write(obj.serial,obj.result,'uint8');
     end
   end
