@@ -70,6 +70,7 @@ classdef trace_birds_pestbirds < REFERENCE_CLASS
 %                k5 = 0;%*distance{N}.result/(distance{N}.result + A.result);%%”¨‚ÖŒü‚©‚¤—Í
 
             end
+            % ‹ÃW“ü—Í
             if i~=num&&i<=Nb&&flont(i)==1
                 if distance(1,:,i)<rc&&distance(1,:,i)>0.
                     tarm1(:,i) = -(1-[R^3/distance(1,:,i)^3])*[distance(1,:,i)];
