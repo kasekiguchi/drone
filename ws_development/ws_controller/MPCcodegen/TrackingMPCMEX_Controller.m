@@ -28,10 +28,10 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([20,20,1,1]);
+            obj.param.Q = diag([1,1,1,1]);
             obj.param.R = diag([1,1]);
             obj.param.Qf = diag([1,1,1,1]);
-            obj.param.T = diag([1,1]);
+            obj.param.T = diag([50]);
             obj.param.S = [1,0.2];
             obj.param.WoS = diag([10,10]);
             obj.param.Evfim = [10];%今は使ってない
