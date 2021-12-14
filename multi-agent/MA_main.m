@@ -91,7 +91,7 @@ end
 map.draw_state(nx,ny,W);
 %% animations
 
-map.draw_movie(logger,nx,ny,1,"2021Nov25_飛び火_改良版1");    %natural_expansion
+ map.draw_movie(logger,nx,ny,1,"2021Dec13_延焼_3-4セル拡張版_微風Ver2");    %natural_expansion
 %map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
 %M=map.draw_movie(logger,nx,ny,2);
 %map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
