@@ -104,7 +104,7 @@ for i = 1:N
         48,-2,0,0];
     convjudgeV = 0.5;%収束判断
     convjudgeW = 0.1;%収束判断
-    Holizon = 2;
+    Holizon = 1;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
