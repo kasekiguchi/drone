@@ -60,7 +60,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                 obj.PointFlag =2;
             end
             
-            if (EstData(1) - obj.WayPoint(obj.Flag,1))^2 + (EstData(2) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV && abs(EstData(3) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW && obj.PointFlag ==2
+            if abs(EstData(3) - obj.WayPoint(obj.Flag,3)) < obj.ConvergencejudgeW && obj.PointFlag ==2
                 obj.Flag = obj.Flag+1;
                 obj.PointFlag = 0;
                 if obj.Flag >= obj.WayPointNum
