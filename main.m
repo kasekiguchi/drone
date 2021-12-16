@@ -9,8 +9,8 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 1; % number of agents
-fExp = 1 %1：実機　それ以外：シミュレーション
+N = 2; % number of agents
+fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -20,7 +20,7 @@ if fExp
 else
     %     dt = 0.1; % sampling time
     %     dt = 0.005;
-    dt = 0.025;
+    dt = 0.25;
     %     dt = 0.010;
     %     dt = 0.001;
 end
@@ -31,20 +31,21 @@ ts = 0;
 if fExp
     te = 1000;
 else
-    te = 5;
+    te = 50;
 end
 
 %% set connector (global instance)
 if fExp
 
     if fMotive
-        rigid_ids = [1];
-        Connector_Natnet(struct('ClientIP', '192.168.1.6', 'rigid_list', rigid_ids)); % Motive
+        rigid_ids = [1,2];
+        Connector_Natnet(struct('ClientIP', '192.168.1.9', 'rigid_list', rigid_ids)); % Motive
     end
 
 else
 
     if fMotive
+        rigid_ids = 1:N;
         Connector_Natnet_sim(N, dt, 0); % 3rd arg is a flag for noise (1 : active )
         %Connector_Natnet_sim(2*N,dt,0); % for suspended load
     end
@@ -104,7 +105,7 @@ else
 
 end
 if fExp
-    COM = [13];
+    COM = [25,3];
     if length(COM)~=N
         error("ACSL : All drones should assigned COM port.");
     end
@@ -153,7 +154,7 @@ for i = 1:N
     agent(i).sensor = [];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
     if fMotive
-        agent(i).set_property("sensor", Sensor_Motive(i)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
+        agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i),motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
     if fROS
@@ -197,6 +198,7 @@ for i = 1:N
     %         end
     %     end
     %     agent(i).set_property("reference",Reference_Wall_observation()); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_agreement(N)); % Voronoi重心
 
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -204,6 +206,8 @@ for i = 1:N
     agent(i).controller = [];
     %agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
     agent(i).set_property("controller", Controller_HL(dt)); % 階層型線形化
+    HLControlSetting=Controller_HL(dt);
+    HLParam = HLControlSetting.param;
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
@@ -282,7 +286,7 @@ try
         end
 
         for i = 1:N
-            if fMotive; param(i).sensor.motive = {motive}; end
+            if fMotive; param(i).sensor.motive = {}; end
             param(i).sensor.rpos = {agent};
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
@@ -306,6 +310,7 @@ try
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
+            param(i).reference.agreement = {logger,N,time.t};
 
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
@@ -314,7 +319,7 @@ try
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
-            agent(i).do_controller({time.t, cell(1, 9)});
+            agent(i).do_controller({time.t, HLParam});
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
 
@@ -393,7 +398,7 @@ clc
 % logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
-%logger.plot(1,["p","q"],["er","er"]);
+logger.plot(1,["p"],["e"]);
 
 %%
 %logger.save();
