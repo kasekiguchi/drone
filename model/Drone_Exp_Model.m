@@ -25,8 +25,6 @@ classdef Drone_Exp_Model < MODEL_CLASS
                     ipp=regexp(cmdout,"192.168.");
                     cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
                     param.IP=strcat('192.168.50','.',string(100+obj.ESPr_num));
-                    %param.IP=strcat('192.168.',cmdout2(1:regexp(cmdout2,".")),'.',string(100+obj.ESPr_num));
-                    %param.IP=strcat('192.168.50.',string(obj.ESPr_num));
                     param.port=8000+obj.ESPr_num;
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
@@ -67,24 +65,11 @@ classdef Drone_Exp_Model < MODEL_CLASS
                         msg(1,1:8) = u;
                 end
             else % 緊急時 プロペラストップ
-                % warning("ACSL : Emergency stop!!");
-%                Pw = uint8([fix(obj.offset(1)/100),fix(obj.offset(2)/100),6,fix(obj.offset(3)/100),6,6,6,6,rem(obj.offset(1),100),rem(obj.offset(2),100),0,rem(obj.offset(3),100),0,0,0,0]);
-%                obj.connector.sendData(Pw(1,1:16));
                 obj.msg=[500 500 0 500 0 0 0 0];
                 obj.connector.sendData(gen_msg(obj.msg));
+                warning("ACSL : Emergency stop!!");
                 return;
             end
-%             
-%             % make udp data
-%             for j = 1:1:8
-%                 pw(1, j + 0)   = fix(msg(1, j) / 100);
-%                 pw(1, j + 8)   = rem(msg(1, j),  100);
-%             end
-%             
-%             Pw = uint8(pw);
-            
-            % send msg
-            %obj.connector.sendData(Pw(1,1:16));
             obj.connector.sendData(gen_msg(msg));
             obj.msg=msg;
         end

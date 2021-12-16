@@ -7,7 +7,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     %% transmitter system
     u_trans_param.param.gain = [800; 800; 800; 400]; %
     % 500 = neutral
-    u_trans_param.param.th_offset = 400; % check throttle at hovering
+    u_trans_param.param.th_offset = 450; % check throttle at hovering
     u_trans_param.param.roll_offset = 500; %
     u_trans_param.param.pitch_offset = 500; %
     u_trans_param.param.yaw_offset = 500; %

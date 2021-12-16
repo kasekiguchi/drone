@@ -94,7 +94,7 @@ void receive_serial()// ---------- loop function : receive signal by UDP
   // ch : 0 - 1000 is converted to 1000 - 2000 throttle on FC
   if (Serial.available() > 0)
   {
-    Serial.readBytesUntil('¥n', packetBuffer, 2 * TOTAL_CH + 1);
+    Serial.readBytesUntil(';', packetBuffer, 2 * TOTAL_CH + 1);
     if (packetBuffer)
     {
       start_H0 = PPM_PERIOD;
