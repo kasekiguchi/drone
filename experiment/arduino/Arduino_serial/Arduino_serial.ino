@@ -3,8 +3,12 @@
 
 uint8_t i;
 #define LED_PIN 13
-#define GLED_PIN 14 // A0
-#define RLED_PIN 15 // A1
+// [ Green Red ] : HIGHで消灯、LOWで点滅
+// 飛行可能（初期状態）： [ LOW HIGH ]
+// Arming           :  [ LOW LOW  ]
+// Emergence        :  [ HIGH LOW ]
+#define GLED_PIN 15 // A1
+#define RLED_PIN 14 // A0
 #define EM_PIN 3 // 2 or 3のみ
 #define RST_PIN 18 // = A4
 volatile boolean isEmergency = false;
@@ -49,9 +53,9 @@ void setup()
   pinMode(LED_PIN, OUTPUT );
   digitalWrite( LED_PIN, HIGH );
   pinMode(GLED_PIN, OUTPUT );
-  digitalWrite( GLED_PIN, HIGH );
+  digitalWrite( GLED_PIN, LOW );
   pinMode(RLED_PIN, OUTPUT );
-  digitalWrite( RLED_PIN, LOW );
+  digitalWrite( RLED_PIN, HIGH );
   pinMode(EM_PIN, INPUT_PULLUP);// emergency_stop を割り当てるピン
   pinMode(RST_PIN, INPUT_PULLUP);
 
@@ -78,7 +82,8 @@ void loop()
       {
         Serial.println("Reset available.");
         digitalWrite( LED_PIN, HIGH );
-        digitalWrite( RLED_PIN, LOW );
+        digitalWrite( RLED_PIN, HIGH );
+        digitalWrite( GLED_PIN, LOW );
         fReset = true;
       }
     }
@@ -112,8 +117,17 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         pw[i] = CH_OFFSET - pw[i];
         start_H0 -= (pw[i] + TIME_LOW);
 
-        if (i == 4 && pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
-          digitalWrite( RLED_PIN, HIGH );
+        if (i == 4)
+        {
+          if(pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
+            Serial.println("Arming");
+            digitalWrite( GLED_PIN, LOW );
+            digitalWrite( RLED_PIN, LOW );
+          }else{
+            Serial.println("Ready");
+            digitalWrite( GLED_PIN, LOW );
+            digitalWrite( RLED_PIN, HIGH );            
+          }
         }
         
       }
@@ -132,6 +146,8 @@ void receive_serial()// ---------- loop function : receive signal by UDP
       pw[6] = CH_OFFSET; // AUX3
       pw[7] = CH_OFFSET; // AUX4
       start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
+          digitalWrite( GLED_PIN, HIGH );
+          digitalWrite( RLED_PIN, LOW );
     }
   }
 }
@@ -193,7 +209,8 @@ void emergency_stop()
     start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
     isEmergency = true;
     digitalWrite( LED_PIN, LOW );
-    digitalWrite( GLED_PIN, LOW );
+    digitalWrite( RLED_PIN, LOW );
+    digitalWrite( GLED_PIN, HIGH );
     Serial.println("EMERGENCY !! ");
   }
 }
