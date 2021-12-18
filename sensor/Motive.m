@@ -10,6 +10,7 @@ classdef Motive < SENSOR_CLASS
         interface = @(x) x;
         old_time
         rigid_num % rigid indices
+        motive
     end
     
     methods
@@ -17,6 +18,7 @@ classdef Motive < SENSOR_CLASS
             %  このクラスのインスタンスを作成
             %%% Output equation %%%
             obj.self = self;
+            obj.motive = varargin{1}.motive;
 %             obj.result.state=state_copy(self.model.state); % STATE_CLASSとしてコピー
 %             if isprop(obj.result.state,'v')
 %                 delete(obj.result.state,'v');
@@ -37,12 +39,12 @@ classdef Motive < SENSOR_CLASS
             end
         end
         
-        function result=do(obj,motive)
+        function result=do(obj,~)
             % result=sensor.motive.do(motive)
             %   set obj.result.state : State_obj,  p : position, q : quaternion
             %   result : 
             % 【入力】motive ：NATNET_CONNECOTR object 
-            data=motive{1}.result;
+            data=obj.motive.result;
             if isempty(obj.old_time)
                 obj.old_time = data.time;
             end
