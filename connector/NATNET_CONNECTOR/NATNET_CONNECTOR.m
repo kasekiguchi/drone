@@ -24,7 +24,7 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             %-- connection takes about 0.3 seconds
             %-- setting ClientIP
             if isfield(info,'rigid_list'); obj.rigid_list = info.rigid_list; end
-            obj.result.rigid(obj.rigid_list) = struct('p',[],'q',[]);
+            obj.result.rigid(length(obj.rigid_list)) = struct('p',[],'q',[]);
             obj.NatnetClient = natnet;
             obj.NatnetClient.HostIP	= info.HostIP;
             obj.NatnetClient.ClientIP = info.ClientIP;
@@ -39,18 +39,18 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             obj.result.rigid_num = ModelDescription.RigidBodyCount;
             omnum = 0;
             obj.on_marker = cell(1,obj.result.rigid_num);
-            for i = 1:length(obj.rigid_list)
-                obj.on_marker_nums(i) = ModelDescription.MarkerSet(obj.rigid_list(i)).MarkerCount;
+            for i = obj.rigid_list
+                obj.on_marker_nums(i) = ModelDescription.MarkerSet(i).MarkerCount;
                 obj.on_marker{i} = zeros(obj.on_marker_nums(i),3);
                 for k = 1:obj.on_marker_nums(i)
                     marker=Frame.LabeledMarker(omnum+k);
 %                    marker=Frame.UnlabeledMarker(omnum+k);
-                    obj.on_marker{obj.rigid_list(i)}(k,:) = [marker.x, -marker.z, marker.y];
+                    obj.on_marker{i}(k,:) = [marker.x, -marker.z, marker.y];
                 end
-                body = Frame.RigidBody(obj.rigid_list(i));
-                obj.result.local_marker_nums(i) = ModelDescription.MarkerSet(obj.rigid_list(i)).MarkerCount;
-                %obj.result.local_marker{obj.rigid_list(i)} = double(rotmat(quaternion([body.qw body.qx -body.qz body.qy]),'frame')'*(obj.on_marker{obj.rigid_list(i)}-double([body.x, -body.z, body.y]))')';
-                obj.result.local_marker{i} = double(RodriguesQuaternion([body.qw body.qx -body.qz body.qy]')'*(obj.on_marker{obj.rigid_list(i)}-double([body.x, -body.z, body.y]))')';
+                body = Frame.RigidBody(i);
+                obj.result.local_marker_nums(i) = ModelDescription.MarkerSet(i).MarkerCount;
+                %obj.result.local_marker{i} = double(rotmat(quaternion([body.qw body.qx -body.qz body.qy]),'frame')'*(obj.on_marker{i}-double([body.x, -body.z, body.y]))')';
+                obj.result.local_marker{i} = double(RodriguesQuaternion([body.qw body.qx -body.qz body.qy]')'*(obj.on_marker{i}-double([body.x, -body.z, body.y]))')';
                 omnum = omnum+obj.on_marker_nums(i);
             end
         end
@@ -88,8 +88,8 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             % %Get obj.Data and Organize
             % %also organizing obj.Data in the same way in main.m
             j = 1;
-            for i = 1:length(obj.rigid_list)
-                body = Frame.RigidBody(obj.rigid_list(i));
+            for i = obj.rigid_list
+                body = Frame.RigidBody(i);
                 obj.result.rigid(i).p = double([body.x; -body.z; body.y]);
                 
                 %% quaternion

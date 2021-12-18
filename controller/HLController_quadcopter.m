@@ -24,7 +24,11 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             else
                 xd = ref.state.get();
             end
-            Param= obj.param;
+            if isempty(param)
+                Param = param;
+            else
+                Param= obj.param;
+            end
             P = Param.P;
             F1 = Param.F1;
             F2 = Param.F2;
