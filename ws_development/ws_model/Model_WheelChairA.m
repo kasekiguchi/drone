@@ -21,7 +21,7 @@ if strcmp(type,"plant")
 %     for i = 1:N
         Model.id = i;
 %         Setting.initial.p = [0;0];
-        Setting.param.K = 0.9;
+        Setting.param.K = 0.8;
         Model.param=Setting;
 %         assignin('base',"Plant",Model);
 %         evalin('base',"agent(Plant.id) = Drone(Plant)");

@@ -59,6 +59,13 @@ partial2 = diff(r,omega);
 % end
 P = [partial1;partial2];
 APP = P*P';
+%%
+PV = partial1*partial1;
+%%
+partial1 = diff(r,v);
+partial2 = diff(r,theta);
+P = [partial1;partial2];
+PVT = P*P';
 %% make matlabFunctions DeltahDiff
 outputs = {'PP'};
 filename = 'FIM_ObserbSubVOmegaRungeKutta';
@@ -67,6 +74,14 @@ matlabFunction(PP, 'file', filename, 'vars', {x, y, theta, v, omega, t, d, alpha
 outputs = {'APP'};
 filename = 'FIM_ObserbSubAOmegaRungeKutta';
 matlabFunction(APP, 'file', filename, 'vars', {x, y, theta, v, omega, a, t, d, alpha, phi}, 'outputs', outputs);
+%%
+outputs = {'PV'};
+filename = 'FIMOV_ObserbSubAOmegaRungeKutta';
+matlabFunction(PV, 'file', filename, 'vars', {x, y, theta, v, omega, a, t, d, alpha, phi}, 'outputs', outputs);
+%%
+outputs = {'PVT'};
+filename = 'FIMVT_ObserbSubAOmegaRungeKutta';
+matlabFunction(PVT, 'file', filename, 'vars', {x, y, theta, v, omega, a, t, d, alpha, phi}, 'outputs', outputs);
 %% Local function
 function dX = VOmegaModel(x,u)
     dX = [u(1)*cos(x(3));u(1)*sin(x(3));u(2)];

@@ -30,8 +30,9 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             %重み%
             obj.param.Q = diag([15,15,1,1]);
             obj.param.R = diag([1,1]);
-            obj.param.Qf = diag([17,17,1,1]);
-            obj.param.T = diag([30]);
+            obj.param.Qf = diag([18,18,1,1]);
+%             obj.param.Qf = diag([17,17,1,1]);
+            obj.param.T = diag([40]);
             obj.param.S = [1,0.7];
             obj.param.WoS = diag([10,10]);
             obj.param.Evfim = [10];%今は使ってない

@@ -2,7 +2,8 @@ function [eval] = TrackobjectiveMEX(x, params)
 % モデル予測制御の評価値を計算するプログラム
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
 X = x(1:params.state_size, :);
-U = x(params.state_size+1:end, :);
+U = x(params.state_size+1:params.total_size, :);
+S = x(params.total_size+1:end,:);
 %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
 tildeX = X - params.Xr;
 %     tildeU = U - params.Ur;
