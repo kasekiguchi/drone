@@ -31,7 +31,7 @@ ts = 0;
 if fExp
     te = 1000;
 else
-    te = 50;
+    te = 10;
 end
 
 %% set connector (global instance)
@@ -198,7 +198,7 @@ for i = 1:N
     %         end
     %     end
     %     agent(i).set_property("reference",Reference_Wall_observation()); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_agreement(N)); % Voronoi重心
+    agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
 
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -222,16 +222,18 @@ end
 
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
-LogData = [
-        "model.state.p"
+LogData = [% agentのメンバー関係以外のデータ
+        ];
+LogAgentData = [% 下のLogger コンストラクタで設定している対象agentに共通するdefault以外のデータ
+        %"model.state.p"
         "controller.result"
         ];
 
 if isfield(agent(1).reference, 'covering')
-    LogData = [LogData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
+    LogAgentData = [LogAgentData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
 end
 
-logger = Logger(agent, size(ts:dt:te, 2), LogData);
+logger = Logger(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %%
 time = Time();
 time.t = ts;
@@ -342,7 +344,7 @@ try
         %% logging
         calculation = toc;
 
-        logger.logging(time.t, FH);
+        logger.logging(time.t, FH, agent);
         % for exp
         if fExp
             wait_time = 0.9999 * (sampling - calculation);
@@ -387,18 +389,12 @@ close all
 clc
 %agent(1).reference.covering.draw_movie(logger, N, Env)
 % agent(1).reference.timeVarying.show(logger)
-%logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
-%logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
-%logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
-% logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
-
-% logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
-%logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
-%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
-% logger.plot(1,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
-%logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
-%logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
-logger.plot(1,["p"],["e"]);
-
+%logger.plot({1,"sensor.imu.result.state.q",""},{1,"sensor.imu.result.state.w",""},{1,"sensor.imu.result.state.a",""});
+%logger.plot({1,["p"],["e"]});
+%tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"reference.result.state.xd","e",'time',[1 2]));
+%tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"input","",'time',[1 2]));
+%logger.data(1,"state.p","e","time",[0 3])
+logger.plot({1,"p1","e"},{2,["p"],["se"]},{1,"estimator.result.state.p",""},{2,"state.v","e"},'time',[0,2],'fig_num',2);
+%logger.plot({2,"p","se"},{1,"p1-p2-p3","es"},'fig_num',2);
 %%
 %logger.save();
