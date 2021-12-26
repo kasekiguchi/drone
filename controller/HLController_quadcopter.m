@@ -43,6 +43,8 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             %     end
             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
             
+            % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
+            % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
             x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
             xd(1:3)=Rb0'*xd(1:3);

@@ -11,7 +11,7 @@ classdef ConsensusAgreement < REFERENCE_CLASS
     
     methods
         %%@ŒvŽZŽ®
-        function obj = consensus_agreement(self,param)
+        function obj = ConsensusAgreement(self,param)
             obj.self = self;
             obj.offset = param;
             obj.result.state = STATE_CLASS(struct('state_list',["p","xd"],'num_list',[3]));

@@ -1,7 +1,7 @@
 classdef Logger < handle
     % データ保存用クラス
     % obj = Logger(target,row,items)
-    % target : agent
+    % target : 保存対象の agent indices : example 2:4 : default 1:N
     % row : size(ts:dt:te,2)
     % items : [    "plant.state.p",    "model.state.p"  ...]
     % At every logging, logger gathers the data listed in items from target
@@ -9,75 +9,85 @@ classdef Logger < handle
     % obj.Data.agent = {row, item_id, target_id}
     properties
         Data
-        target
-        i = 1; % time index for logging
-        N % agent数
+        k = 0; % time index for logging
+        target % 保存対象の agent indices : example 2:4 : default 1:N
         items
-        n
-        si
-        ei
-        ri
-        ii
-        pi
+        item_num
+        agent_items
+        fExp
+        sname = "sensor";
+        ename = "estimator";
+        rname = "reference";
     end
     
     methods
-        function obj = Logger(target,row,items)
+        function obj = Logger(target,number,fExp,items,agent_items)
             % Logger(target,row,items)
-            % target : ログを取る対象　agent(1:3)
-            % row : 確保するデータサイズ　length(ts:dt:te)
-            % items : 保存するデータ ["input","sensor.result.state.p"]
+            % target : ログを取る対象　example 1:3, usage agent(obj.target)
+            % number : 確保するデータサイズ　length(ts:dt:te)
+            % agent_items : default以外で保存するデータ ["inner_input"]
+            % items  : agent 以外で保存するデータの名前
+            %         以下のように名前と保存するものの対応が取れていなくても可
+            %         logger=Logger(~,~,"innerInput",~);
+            %         logger.logging(t,FH,agent,motive);
             obj.target = target;
-            obj.N = length(target); % agent number
-            obj.Data.t = zeros(row,1); % 時間
-            obj.Data.phase = zeros(row,1); % フライトフェーズ　a,t,f,l...
-            obj.items=[items;"sensor";"estimator";"reference"];
-            %obj.items=items;
-            obj.si = length(items)+1;
-            obj.ei = obj.si + 1;
-            obj.ri = obj.ei + 1;
-            obj.ii = obj.ri + 1;
-            if isempty(target(1).plant.state)
-                obj.n=length(items)+4;% ,sensor.result, estimator.result, reference.result，input
-                obj.items=[obj.items;"input"];
-            else
-                obj.pi = obj.ii +1;
-                obj.n=length(items)+5;% ,sensor.result, estimator.result, reference.result，input
-                obj.items=[obj.items;"plant";"input"];
-            end
-            obj.Data.agent=cell(row,obj.n,obj.N);
+            obj.Data.t = zeros(number,1); % 時間
+            obj.Data.phase = zeros(number,1); % フライトフェーズ　a,t,f,l...
+            obj.fExp = fExp;
+            obj.items=items;
+            obj.item_num = length(items);
+            obj.agent_items = agent_items;
+            obj.Data.agent=struct();
         end
         
-        function logging(obj,t,FH)
+        function logging(obj,t,FH,agent,items)
             % logging(t,FH)
             % t : current time
             % FH : figure handle for keyboard input
-            obj.Data.t(obj.i)=t;
+            arguments
+                obj
+                t
+                FH
+                agent
+            end
+            arguments(Repeating)
+                items
+            end
+            obj.k=obj.k+1;
+            obj.Data.t(obj.k)=t;
             cha = get(FH, 'currentcharacter');
-            obj.Data.phase(obj.i)=cha;
-            for j = 1:obj.N
-                for k = 1:find(obj.items=="sensor")-1
-                    str=strsplit(obj.items{k},'.');
-                    tmp=obj.target(j);
-                    for l = 1:length(str)-1
-                        tmp= tmp.(str{l});
-                    end
-                    obj.Data.agent{obj.i,k,j}=tmp.(str{end});
+            obj.Data.phase(obj.k)=cha;
+            if length(items)~=length(obj.items)
+                warning("ACSL : number of logging data is wrong");
+            end
+            for i = obj.items
+                obj.Data.(obj.items(i))(obj.k,:)=items{i};
+                % 注：サイズの固定されている数値データだけ保存可能
+            end
+            for n = obj.target
+                for i = 1:length(obj.agent_items)
+                    str=strsplit(obj.agent_items(i),'.');
+                    tmp=agent(n);
+                    obj.Data.agent(n).(str{1}){obj.k}=tmp.(str{1});
                 end
-                obj.Data.agent{obj.i,obj.si,j}=obj.target(j).sensor.result;
-                obj.Data.agent{obj.i,obj.si,j}.state = state_copy(obj.target(j).sensor.result.state);
-                obj.Data.agent{obj.i,obj.ei,j}=obj.target(j).estimator.result;
-                obj.Data.agent{obj.i,obj.ei,j}.state = state_copy(obj.target(j).estimator.result.state);
-                obj.Data.agent{obj.i,obj.ri,j}=obj.target(j).reference.result;
-                obj.Data.agent{obj.i,obj.ri,j}.state = state_copy(obj.target(j).reference.result.state);
-                obj.Data.agent{obj.i,obj.ii,j}=obj.target(j).input;
-                if ~isempty(obj.pi)
-                    obj.Data.agent{obj.i,obj.pi,j}.state = state_copy(obj.target(j).plant.state);
+                obj.Data.agent(n).sensor.result{obj.k}=agent(n).sensor.result;
+                obj.Data.agent(n).estimator.result{obj.k}=agent(n).sensor.result;
+                obj.Data.agent(n).reference.result{obj.k}=agent(n).sensor.result;
+                obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
+                obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
+                obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
+                obj.Data.agent(n).input{obj.k}=agent(n).input;
+                
+                if obj.fExp
+                    obj.Data.agent(n).inner_input{obj.k}=agent(n).inner_input;
+                else
+                    obj.Data.agent(n).plant.state = state_copy(agent(n).plant.state);
                 end
             end
-            obj.i=obj.i+1;
         end
         function save(obj)
+            % TODO : need to modify to be compatible with the change on
+            % 2021/12/26
             % Data = {{log},{info}}
             % log : logging data = field t and agent
             %     agent : {k, itme_num, agent_num}
@@ -90,7 +100,7 @@ classdef Logger < handle
             % i-th agent's sensor names : example {"Motive","RangePos"}
             filename = strrep(strrep(strcat('Data/Log(',datestr(datetime('now')),').mat'),':','_'),' ','_');
             sname = [];
-            for i =1:obj.N % 複数台の場合
+            for i =obj.target % 複数台の場合
                 isnames = obj.target(i).sensor.name;
                 isname = [];
                 for j = 1:length(isnames)
@@ -99,7 +109,7 @@ classdef Logger < handle
                 sname = [sname,{isname}];
             end
             rname = [];
-            for i =1:obj.N % 複数台の場合
+            for i =obj.target % 複数台の場合
                 irnames = obj.target(i).reference.name;
                 %                 irname = [];
                 %                 for j = 1:length(irnames)
@@ -107,167 +117,197 @@ classdef Logger < handle
                 %                 end
                 rname = [rname,{irnames}];
             end
-            Data={obj.Data,{[obj.si,obj.ei,obj.ri,obj.ii,obj.pi],obj.items,sname,rname}};
+            Data={obj.Data,{[obj.si,obj.ei,obj.ri,obj.ki,obj.pi],obj.items,sname,rname}};
             save(filename,'Data');
         end
-        function [data]=plot(obj,N,target,option,varargin)
-            % plot(obj, agent ids, target string, options,varargin)
+        function [data]=data(obj, n, variable, attribute, option)
+            % n : agent index
+            % variable : var name or path to var from agent
+            %            or path from result if attribute is set.
+            % attribute : "s","e","r","p","i"
+            % option time : time range
+            % Examples
+            % time : data('t',[],[])
+            % state : data(1,"p","e")                      : agent1's estimated position
+            %         data(2,"state.xd","r")               : agent2's reference xd
+            %         data(1,"sensor.result.state.q",[])       : agent1's measured attitude
+            % input : data(1,[],"i") or data(1,"input",[]) : agent1's input data
+            % data(1,"p","r","time",[0,2])                 : take the data in time span [0 2]
+            % PROBLEM : data(0,'t','') does not work
+            arguments
+                obj
+                n
+                variable string = "p"
+                attribute string = "e"
+                option.time (1,2) double = [0 obj.Data.t(obj.k)]
+            end
+            [variable,vrange] = obj.full_var_name(variable,attribute);
+            attribute = "";
+            data_range = find((obj.Data.t-option.time(1))>0,1)-1:find((obj.Data.t-option.time(2))>=0,1);
+            if sum(strcmp(n,{'time','t'}))  % 時間軸データ
+                data=obj.Data.t(data_range);
+            elseif n == 0                   % obj.itmesのデータ
+                variable = split(variable,'.'); % member毎に分割
+                data = [obj.Data.(variable{1})];
+                for j=2:length(variable)
+                    data = [data.(variable{j})];
+                end
+                data = [data{1,data_range}]';
+            else                            % agentに関するデータ
+                variable = split(variable,'.'); % member毎に分割
+                data = [obj.Data.agent(n)];
+                for j=1:length(variable)
+                    data = [data.(variable{j})];
+                    if iscell(data)     % 時間方向はcell配列
+                        data = [data{1,data_range}]';
+                        data = obj.return_state_prop(variable(j+1:end),data);
+                        break
+                    end
+                end
+            end
+            if ~isempty(vrange)
+                data = obj.mtake(data,[],vrange);
+            end
+        end
+        function data=return_state_prop(obj,variable,data)
+            for j=1:length(variable)
+                data=[data.(variable(j))];
+                if strcmp(variable(j),'state')
+                    for k = 1:length(data)
+                        ndata(k,:)=data(k).(variable(j+1));
+                    end
+                    data = ndata;
+                    break % WRN : stateから更に深い構造には対応していない
+                end
+            end
+        end
+        function plot(obj,list,option)
             % agent ids : indices of the agent to be plotted
-            % target string : ["p1","input","q"] : variable to be plotted
-            % options : ["ser","","er"], struct("time",10, "fig_num",2,"row_col",[1 2])
+            % variable string : variable to be plotted
+            %     example ["p1","input","q"]
+            %         p : position, q : attitude, v : velocity, w : angular
+            %         velocity
+            %         p1 : first element of p, p1:2 : first two elements
+            %         p1-p2 : phase plot p1 vs p2
+            %         p1-p2-p3 : 3D phase plot p1, p2, p3
+            % attribute
+            %     example ["ser","","er"]
+            %         s : sensor, e : estimator, r : reference
+            % option
+            %     example struct("time",[0 10], "fig_num",2,"row_col",[1 2])
+            %         time : time span
+            %         fig_num : figure number
+            %         row_col : row and column number of subplot
+            % usage plot(1,["p1","input","q"],["ser","","er"],struct("time",10, "fig_num",2,"row_col",[1 3]))
             % fig1 = sensor p1, estimator p1 and reference p1
-            % fig2 = estimator q and reference q
-            data = [];
-            plot_length=1:length(obj.Data.t(obj.Data.t~=0))-1;
-            fig_num = 1;
-            fcol=3;
-            frow=ceil(length(target)/fcol);
-            fcolor = 1;
-            if ~isempty(varargin)
-            if isstruct(varargin{1})
-                if isfield(varargin{1},'time') && ~isempty(varargin{1}.time)% set end time
-                    plot_length = 1:find((obj.Data.t-varargin{1}.time)>0,1)-1;
-                end
-                if isfield(varargin{1},'fig_num')
-                    fig_num=varargin{1}.fig_num;
-                end
-                if isfield(varargin{1},'row_col')
-                    frow = varargin{1}.row_col(1);
-                    fcol = varargin{1}.row_col(2);
-                end
-                if isfield(varargin{1},'nocolor')
-                    fcolor = 0;
-                end
+            % fig2 = input
+            % fig3 = estimator q and reference q
+            % In figure window 2, figures are aligned "fig1,fig2,fig3"
+            % order in one row. Each figure has time span [0 10].s
+            arguments
+                obj
             end
+            arguments(Repeating)
+                list
+                %                variable string = "p"
+                %                attribute string = "e"
             end
-            timeList=obj.Data.t(plot_length);
+            arguments
+                option.time (1,2) double = [0 obj.Data.t(obj.k)]
+                option.fig_num {mustBeNumeric} = 1
+                option.row_col (1,2) {mustBeNumeric} = [ceil(length(list)/min(length(list),3)) min(length(list),3)]
+                option.color {mustBeNumeric} = 1
+                option.hold {mustBeNumeric} = 0
+            end
+            trange = option.time;     % time range
+            fig_num = option.fig_num; % figure number
+            frow = option.row_col(1); % subfigure row number
+            fcol = option.row_col(2); % subfigure col number
+            fcolor = option.color;    % on/off flag for phase coloring
+            fhold = option.hold;      % on/off flag for holding (only active to last subfigure)
+            
+            t = obj.data("t",'','',"time",trange); % time data
             fh=figure(fig_num);
             fh.WindowState='maximized';
-            for i = 1:length(target)% i : 図番号
-                subplot(frow,fcol,i);
-                %Square_coloring([find(obj.Data.phase==97,1),find(obj.Data.phase==97,1,'last')]);
-                if ~strcmp(option(i),"") %contains(option(i),["e","s","r","p"])>0
-                    t1=split(target(i),'-'); % 「-」区切りで分割  
-                    if strcmp(option(i),":")
-                        s2 = "serp";
-                    else
-                        s2 = option(i);
-                    end
-                    if length(t1) == 1 % 時間応答
-                        s1 = regexprep(t1,"[0-9:]","");
-                        eli =  str2num(strjoin(regexp(t1,"[0-9:]",'match'))); % set element index
-                        if isempty(eli)
-                            eli = ':';
+            
+            for fi = 1:length(list)% fi : 図番号
+                subplot(frow,fcol,fi);
+                plegend=[];
+                N = list{fi}{1};         % indices of variable drones. example : [1 2]
+                param = list{fi}{2};     % p,q,v,w, etc
+                attribute = list{fi}{3}; % e,s,r,p
+               if strcmp(attribute,""); attribute = " ";end
+                for n = N
+                    for a = 1:strlength(attribute)
+                        ps=split(param,'-'); % 「-」区切りで分割
+                        att = extract(attribute,a);
+                        switch length(ps)
+                            case 1 % 時間応答（時間を省略）
+                                tmpx = t;
+                                tmpy = obj.data(n,ps,att,"time",trange);
+                            case 2 % 縦横軸明記
+                                tmpx = obj.data(n,ps(1),att,"time",trange);
+                                tmpy = obj.data(n,ps(2),att,"time",trange);
+                            case 3 % ３次元プロット
+                                tmpx = obj.data(n,ps(1),att,"time",trange);
+                                tmpy = obj.data(n,ps(2),att,"time",trange);
+                                tmpz = obj.data(n,ps(3),att,"time",trange);
                         end
-                        plegend = [];
-                        for s = ["s","e","r","p"]
-                            if contains(s2,s) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1))>0
-                                tmpdata=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1)(eli),plot_length,'UniformOutput',false);
-                                if strcmp(s,"e")
-                                    plot(timeList,cell2mat(tmpdata)','LineWidth',1.5)
-                                else
-                                    plot(timeList,cell2mat(tmpdata)')
-                                end
-                                hold on
-                                if strcmp(eli,':')
-                                    plegend=[plegend,append(string(1:length(tmpdata{1})),s)];
-                                else
-                                    plegend=[plegend,append(string(eli),s)];
-                                end
-                            end
-                        end
-                        if s1 == "p"
-                            title("Position p");
-                        elseif s1 == "q"
-                            title(strcat("Attitude q (type : ",string(obj.target(N).model.state.type),")"));
-                        elseif s1 == "v"
-                            title("Velocity v");
-                        elseif s1 == "w"
-                            title("Angular velocity w");
+                        
+                        % plot
+                        if length(ps) == 3
+                            plot3(tmpx,tmpy,tmpz);
                         else
-                            title(s1);
+                            plot(tmpx,tmpy);
                         end
-                        xlabel("Time [s]");
-                        legend(plegend);
-                        hold off
-                    elseif length(t1) > 1 % 平面軌跡 or 立体軌跡
-                        s1 = regexprep(t1,"[0-9:]","");
-                        eli =  regexp(t1,"[0-9:]",'match');
-                        plegend = [];
-                        for s = ["s","e","r","p"]
-                            if contains(s2,s) && ~isempty(obj.(append(s,"i"))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(1))) && sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(2)))
-                                tmp1data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(1))(str2num(eli{1})),plot_length,'UniformOutput',false);
-                                tmp2data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(2))(str2num(eli{2})),plot_length,'UniformOutput',false);
-                                if length(t1)==3
-                                    if sum(contains(obj.Data.agent{1,obj.(append(s,"i")),N}.state.list,s1(3))) 
-                                        tmp3data=arrayfun(@(i)obj.Data.agent{i,obj.(append(s,"i")),N}.state.(s1(3))(str2num(eli{3})),plot_length,'UniformOutput',false);
-                                    end
-                                    if strcmp(s,"e")
-                                        plot3(cell2mat(tmp1data)',cell2mat(tmp2data)',cell2mat(tmp3data)','LineWidth',1.5);
-                                    else
-                                        plot3(cell2mat(tmp1data)',cell2mat(tmp2data)',cell2mat(tmp3data)');
-                                    end
-                                else
-                                    if strcmp(s,"e")
-                                        plot(cell2mat(tmp1data)',cell2mat(tmp2data)','LineWidth',1.5)
-                                    else
-                                        plot(cell2mat(tmp1data)',cell2mat(tmp2data)')
-                                    end
-                                end
-                                hold on
-                                if s == "s"
-                                    plegend=[plegend,"sensor"];
-                                elseif s == "e"
-                                    plegend=[plegend,"estimator"];
-                                elseif s == "r"
-                                    plegend=[plegend,"reference"];
-                                elseif s == "p"
-                                    plegend=[plegend,"plant"];
-                                else
-                                    plegend=[plegend,s];
-                                end
-                            end
-                        end
-                        title(strcat("phase plot : ",string(target(i))));
-                        xlabel(t1{1});
-                        ylabel(t1{2});
-                        if length(t1)==3; zlabel(t1{3});end
-                        legend(plegend);
-                        daspect([1 1 1]);
-                        hold off
-                    end
-                else % 対応するoption が空の場合
-                    switch target(i)
-                        case {"u", "input"}
-                            tmpdata=arrayfun(@(i)obj.Data.agent{i,obj.ii,N},plot_length,'UniformOutput',false);
-                            plot(timeList,[tmpdata{1:end}]')
-                            title("Input u");
+                        hold on
+                        
+                        % set title label legend
+                        if length(ps)==1
+                            ps = ["t",ps];
                             xlabel("Time [s]");
-                            legend(strcat("u",string(1:size(tmpdata{1},1))));
-                        case "inner_input"
-                            if sum(contains(obj.items,'inner_input'))>0
-                                sp=strcmp(obj.items,'inner_input');
-                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,N},plot_length,'UniformOutput',false);
-                                plot(timeList,[tmps{1:end}]')
-                                title("Throttle Input u");
-                                legend(strcat("u",string(1:size(tmps{1},1))));
-                                xlabel("Time [s]");
-                                %ylim([1000 2000]);
-                            else
-                                warning("ACSL : logger does not include plot target.");
+                        else
+                            xlabel(ps(1));
+                        end
+                        switch ps(2)
+                            case "p"
+                                title(strcat("Position p of agent",string(n)));
+                            case "q"
+                                title(strcat("Attitude q of agent",string(n)));
+                            case "v"
+                                title(strcat("Velocity v of agent",string(n)));
+                            case "w"
+                                title(strcat("Angular velocity w of agent",string(n)));
+                            case "input"
+                                title(strcat("Input u of agent",string(n)));
+                            otherwise
+                                title(ps(2));
+                        end
+                        if ps(1)~="t"
+                            title(strcat("phase plot : ",string(param)));
+                            switch att
+                                case "s"
+                                    plegend=[plegend,"sensor"];
+                                case "e"
+                                    plegend=[plegend,"estimator"];
+                                case "r"
+                                    plegend=[plegend,"reference"];
+                                case "p"
+                                    plegend=[plegend,"plant"];
+                                otherwise
+                                    plegend=[plegend,att];
                             end
-                        otherwise
-                            if sum(contains(obj.items,target(i)))>0
-                                sp=strcmp(obj.items,target(i));
-                                tmps=arrayfun(@(i)obj.Data.agent{i,sp,N},plot_length,'UniformOutput',false);
-                                plot(timeList,[tmps{1:end}]')
-                                title(target(i));
-                                xlabel("Time [s]");
-                                legend(string(1:size(tmps{1},1)));
-                            else
-                                warning("ACSL : logger does not include plot target.");
-                            end
+                            daspect([1 1 1]);
+                        else
+                            plegend=[plegend,append(string(1:size(tmpy,2)),att)];
+                        end
+                        ylabel(ps(2));
+                        if length(ps)==3; zlabel(ps(3));end
                     end
+                end
+                legend(plegend);
+                if ~fhold
+                    hold off
                 end
                 if fcolor
                     if length([find(obj.Data.phase==116,1),find(obj.Data.phase==116,1,'last')]) == 2
@@ -280,6 +320,54 @@ classdef Logger < handle
                         Square_coloring(obj.Data.t([find(obj.Data.phase==108,1),find(obj.Data.phase==108,1,'last')]),[1.0 0.9 1.0]); % landing phase
                     end
                 end
+            end
+        end
+        function [name,vrange]=full_var_name(obj,var,att)
+            switch att
+                case 's' % sensor
+                    name = "sensor.result";
+                case 'e' % estimator
+                    name = "estimator.result";
+                case 'r' % reference
+                    name = "reference.result";
+                case 'p' % plant
+                    name = "plant.result";
+                case 'i' %
+                    name = "input";
+                otherwise
+                    name = "";
+            end
+            variable = regexprep(var,"[0-9:]","");
+            vrange =  regexp(var,"[0-9:]",'match');
+            if ~isempty(vrange)
+                vrange = str2num(vrange);
+            end
+            switch variable
+                case 'p'
+                    name = strcat(name,".state.p");
+                case 'q'
+                    name = strcat(name,".state.q");
+                case 'v'
+                    name = strcat(name,".state.v");
+                case 'w'
+                    name = strcat(name,".state.w");
+                case 'input'
+                    name = "input";
+                otherwise
+                    if ~isempty(variable)
+                        if ~contains(variable,"result") % attribute が指定されている場合
+                            name = strcat(name,'.',variable);
+                        else
+                            name = variable;
+                        end
+                    end
+            end
+        end
+        function X = mtake(obj,x,row,col)
+            if isempty(row)
+                X = x(:,col);
+            else
+                X = x(row,col);
             end
         end
     end
