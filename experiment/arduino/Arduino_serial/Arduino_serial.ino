@@ -1,4 +1,7 @@
 // PPM は　Down pulse
+// 各チャンネルは H (= CH_OFFSET - pw)と　L (= TIME_LOW)からなる
+// TOTAL_CH_W = sum(H[i]+L[i])
+// PPM 1周期は start_H + TOTAL_CH_H + TIME_LOW からなる
 #include <TimerOne.h>
 
 uint8_t i;
@@ -39,7 +42,7 @@ volatile uint16_t phw[TOTAL_CH]; // PPM周期を保つため、Pulse_control内�
 volatile boolean isReceive_Data_Updated = false;
 volatile uint16_t start_H = PPM_PERIOD;
 volatile uint16_t start_Hh = PPM_PERIOD;
-volatile uint16_t start_H0 = PPM_PERIOD;
+volatile uint16_t TOTAL_CH_W;
 
 //////////// シリアル通信が途絶えたとき用 ////////////////////////////////
 volatile unsigned long last_received_time;
@@ -47,7 +50,7 @@ volatile unsigned long last_received_time;
 // ==================================================================
 void setup()
 {
-  delay(2000);// ここにあった方がreset後安定する
+  //delay(2000);// ここにあった方がreset後安定する
   Serial.begin(115200); // MATLABの設定と合わせる
   Serial.println("Start");
   pinMode(LED_PIN, OUTPUT );
@@ -77,7 +80,7 @@ void loop()
   {
     if (digitalRead(EM_PIN) == HIGH && fReset == false)
     {
-      delay(3000);// delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
+      delay(5000);// delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
       if (digitalRead(EM_PIN) == HIGH)
       {
         Serial.println("Reset available.");
@@ -102,7 +105,7 @@ void receive_serial()// ---------- loop function : receive signal by UDP
     Serial.readBytesUntil(';', packetBuffer, 2 * TOTAL_CH + 1);
     if (packetBuffer)
     {
-      start_H0 = PPM_PERIOD;
+      TOTAL_CH_W = PPM_PERIOD;
       for (i = 0; i < TOTAL_CH; i++)
       {
         pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]);
@@ -114,8 +117,9 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         {
           pw[i] = CH_MAX;
         }
+        
         pw[i] = CH_OFFSET - pw[i];
-        start_H0 -= (pw[i] + TIME_LOW);
+        TOTAL_CH_W -= (pw[i] + TIME_LOW);
 
         if (i == 4)
         {
@@ -133,9 +137,9 @@ void receive_serial()// ---------- loop function : receive signal by UDP
       }
       last_received_time = micros();
       isReceive_Data_Updated = true;
-      start_H = start_H0 - TIME_LOW;// 9 times LOW time in each PPM period
+      start_H = TOTAL_CH_W - TIME_LOW;// 9 times LOW time in each PPM period
     }
-    else if (micros() - last_received_time >= 5000000)// Stop propellers after 5s signal lost.
+    else if (micros() - last_received_time >= 500000)// Stop propellers after 0.5s signal lost.
     {
       pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
       pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
@@ -161,11 +165,15 @@ void Pulse_control()
   }
   else if (n_ch == TOTAL_CH)
   {
-    Timer1.setPeriod(start_Hh);// start 判定の H 時間待つ
-    digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
     n_ch = 0;
     start_Hh = start_H;
-    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
+//    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
+    for(i = 0; i < TOTAL_CH; i++)// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
+    {
+      phw[i] =  pw[i];
+    }
+    Timer1.setPeriod(start_Hh);// start 判定の H 時間待つ
+    digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
   }
   else
   {
