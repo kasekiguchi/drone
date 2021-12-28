@@ -209,8 +209,6 @@ classdef Logger < handle
             end
             arguments(Repeating)
                 list
-                %                variable string = "p"
-                %                attribute string = "e"
             end
             arguments
                 option.time (1,2) double = [0 obj.Data.t(obj.k)]
