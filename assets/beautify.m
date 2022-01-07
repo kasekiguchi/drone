@@ -15,20 +15,11 @@ arguments
 end
 formatter_path = "assets\python\matlab_formatter.py";
 
-% MENTION : 以下のようにwsl で nkfするのが確実だが、一般ユーザーを考えるとpythonでchardetを使ったほうが敷居が低そう。
-% wsl を全員入れるのを徹底しても良さそう。
-% [~,o] = system(strcat("wsl.exe nkf -g ",file));
-% if ~strcmp(o,"UTF-8")
-%  system(strcat("wsl.exe nkf -w --overwrite ",file));
-% end
 if strcmp(endl,"None")
   command = strcat("python ",formatter_path," ",file," --indentWidth=4 --separateBlocks=False --indentMode=-1");
   [a,o]=system(command);
-  %movefile("tmp",file,'f')
-else % TODO : Under construction
+else
   command = strcat("python ",formatter_path," ",file," --indentWidth=4 --startLine=",string(startl)," --endLine=",string(endl)," --separateBlocks=False --indentMode=-1");
   [a,o] = system(command);
-  %system(strcat("sed -e '",string(startl),",",string(endl),"s/*/",o,"/g' ",file))
 end
-%system(strcat("wsl.exe nkf -w --overwrite ",file));
 end
