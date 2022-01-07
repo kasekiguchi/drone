@@ -1,7 +1,7 @@
 classdef Logger < handle
-    % ƒf[ƒ^•Û‘¶—pƒNƒ‰ƒX
+    % ãƒ‡ãƒ¼ã‚¿ä¿å­˜ç”¨ã‚¯ãƒ©ã‚¹
     % obj = Logger(target,row,items)
-    % target : •Û‘¶‘ÎÛ‚Ì agent indices : example 2:4 : default 1:N
+    % target : ä¿å­˜å¯¾è±¡ã® agent indices : example 2:4 : default 1:N
     % row : size(ts:dt:te,2)
     % items : [    "plant.state.p",    "model.state.p"  ...]
     % At every logging, logger gathers the data listed in items from target
@@ -10,10 +10,10 @@ classdef Logger < handle
     properties
         Data
         k = 0;      % time index for logging
-        target      % •Û‘¶‘ÎÛ‚Ì agent indices : example 2:4 : default 1:N
-        items       % ’Ç‰Á‚Å•Û‘¶‚·‚éƒAƒCƒeƒ€–¼
-        item_num    % ’Ç‰Á•Û‘¶‚ÌƒAƒCƒeƒ€”
-        agent_items % resultˆÈŠO‚Å’Ç‰Á•Û‘¶‚·‚éagent“à‚Ì•Ï”
+        target      % ä¿å­˜å¯¾è±¡ã® agent indices : example 2:4 : default 1:N
+        items       % è¿½åŠ ã§ä¿å­˜ã™ã‚‹ã‚¢ã‚¤ãƒ†ãƒ å
+        item_num    % è¿½åŠ ä¿å­˜ã®ã‚¢ã‚¤ãƒ†ãƒ æ•°
+        agent_items % resultä»¥å¤–ã§è¿½åŠ ä¿å­˜ã™ã‚‹agentå†…ã®å¤‰æ•°
         fExp
         sname = "sensor";
         ename = "estimator";
@@ -23,16 +23,16 @@ classdef Logger < handle
     methods
         function obj = Logger(target, number, fExp, items, agent_items)
             % Logger(target,row,items)
-            % target : ƒƒO‚ğæ‚é‘ÎÛ@example 1:3, usage agent(obj.target)
-            % number : Šm•Û‚·‚éƒf[ƒ^ƒTƒCƒY@length(ts:dt:te)
-            % agent_items : defaultˆÈŠO‚Å•Û‘¶‚·‚éƒf[ƒ^ ["inner_input"]
-            % items  : agent ˆÈŠO‚Å•Û‘¶‚·‚éƒf[ƒ^‚Ì–¼‘O
-            %         ˆÈ‰º‚Ì‚æ‚¤‚É–¼‘O‚Æ•Û‘¶‚·‚é‚à‚Ì‚Ì‘Î‰‚ªæ‚ê‚Ä‚¢‚È‚­‚Ä‚à‰Â
+            % target : ãƒ­ã‚°ã‚’å–ã‚‹å¯¾è±¡ã€€example 1:3, usage agent(obj.target)
+            % number : ç¢ºä¿ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€length(ts:dt:te)
+            % agent_items : defaultä»¥å¤–ã§ä¿å­˜ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ ["inner_input"]
+            % items  : agent ä»¥å¤–ã§ä¿å­˜ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã®åå‰
+            %         ä»¥ä¸‹ã®ã‚ˆã†ã«åå‰ã¨ä¿å­˜ã™ã‚‹ã‚‚ã®ã®å¯¾å¿œãŒå–ã‚Œã¦ã„ãªãã¦ã‚‚å¯
             %         logger=Logger(~,~,"innerInput",~);
             %         logger.logging(t,FH,agent,motive);
             obj.target = target;
-            obj.Data.t = zeros(number, 1);     % ŠÔ
-            obj.Data.phase = zeros(number, 1); % ƒtƒ‰ƒCƒgƒtƒF[ƒY@a,t,f,l...
+            obj.Data.t = zeros(number, 1);     % æ™‚é–“
+            obj.Data.phase = zeros(number, 1); % ãƒ•ãƒ©ã‚¤ãƒˆãƒ•ã‚§ãƒ¼ã‚ºã€€a,t,f,l...
             obj.fExp = fExp;
             obj.items = items;
             obj.item_num = length(items);
@@ -62,7 +62,7 @@ classdef Logger < handle
             end
             for i = obj.items
                 obj.Data.(obj.items(i))(obj.k, :) = items{i};
-                % ’FƒTƒCƒY‚ÌŒÅ’è‚³‚ê‚Ä‚¢‚é”’lƒf[ƒ^‚¾‚¯•Û‘¶‰Â”\
+                % æ³¨ï¼šã‚µã‚¤ã‚ºã®å›ºå®šã•ã‚Œã¦ã„ã‚‹æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã ã‘ä¿å­˜å¯èƒ½
             end
             for n = obj.target
                 for i = 1:length(obj.agent_items)
@@ -100,7 +100,7 @@ classdef Logger < handle
             % i-th agent's sensor names : example {"Motive","RangePos"}
             filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
             sname = [];
-            for i = obj.target % •¡”‘ä‚Ìê‡
+            for i = obj.target % è¤‡æ•°å°ã®å ´åˆ
                 isnames = obj.target(i).sensor.name;
                 isname = [];
                 for j = 1:length(isnames)
@@ -109,7 +109,7 @@ classdef Logger < handle
                 sname = [sname, {isname}];
             end
             rname = [];
-            for i = obj.target % •¡”‘ä‚Ìê‡
+            for i = obj.target % è¤‡æ•°å°ã®å ´åˆ
                 irnames = obj.target(i).reference.name;
                 %                 irname = [];
                 %                 for j = 1:length(irnames)
@@ -144,21 +144,21 @@ classdef Logger < handle
             [variable, vrange] = obj.full_var_name(variable, attribute);
             attribute = "";
             data_range = find((obj.Data.t - option.time(1)) > 0, 1) - 1:find((obj.Data.t - option.time(2)) >= 0, 1);
-            if sum(strcmp(n, {'time', 't'}))     % ŠÔ²ƒf[ƒ^
+            if sum(strcmp(n, {'time', 't'}))     % æ™‚é–“è»¸ãƒ‡ãƒ¼ã‚¿
                 data = obj.Data.t(data_range);
-            elseif n == 0                        % obj.itmes‚Ìƒf[ƒ^
-                variable = split(variable, '.'); % member–ˆ‚É•ªŠ„
+            elseif n == 0                        % obj.itmesã®ãƒ‡ãƒ¼ã‚¿
+                variable = split(variable, '.'); % memberæ¯ã«åˆ†å‰²
                 data = [obj.Data.(variable{1})];
                 for j = 2:length(variable)
                     data = [data.(variable{j})];
                 end
                 data = [data{1, data_range}]';
-            else                                 % agent‚ÉŠÖ‚·‚éƒf[ƒ^
-                variable = split(variable, '.'); % member–ˆ‚É•ªŠ„
+            else                                 % agentã«é–¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+                variable = split(variable, '.'); % memberæ¯ã«åˆ†å‰²
                 data = [obj.Data.agent(n)];
                 for j = 1:length(variable)
                     data = [data.(variable{j})];
-                    if iscell(data) % ŠÔ•ûŒü‚Ícell”z—ñ
+                    if iscell(data) % æ™‚é–“æ–¹å‘ã¯cellé…åˆ—
                         data = [data{1, data_range}]';
                         data = obj.return_state_prop(variable(j + 1:end), data);
                         break
@@ -177,7 +177,7 @@ classdef Logger < handle
                         ndata(k, :) = data(k).(variable(j + 1));
                     end
                     data = ndata;
-                    break % WRN : state‚©‚çX‚É[‚¢\‘¢‚É‚Í‘Î‰‚µ‚Ä‚¢‚È‚¢
+                    break % WRN : stateã‹ã‚‰æ›´ã«æ·±ã„æ§‹é€ ã«ã¯å¯¾å¿œã—ã¦ã„ãªã„
                 end
             end
         end
@@ -228,7 +228,7 @@ classdef Logger < handle
             fh = figure(fig_num);
             fh.WindowState = 'maximized';
 
-            for fi = 1:length(list)      % fi : }”Ô†
+            for fi = 1:length(list)      % fi : å›³ç•ªå·
                 subplot(frow, fcol, fi);
                 plegend = [];
                 N = list{fi}{1};         % indices of variable drones. example : [1 2]
@@ -237,16 +237,16 @@ classdef Logger < handle
                 if strcmp(attribute, ""); attribute = " "; end
                 for n = N
                     for a = 1:strlength(attribute)
-                        ps = split(param, '-'); % u-v‹æØ‚è‚Å•ªŠ„
+                        ps = split(param, '-'); % ã€Œ-ã€åŒºåˆ‡ã‚Šã§åˆ†å‰²
                         att = extract(attribute, a);
                         switch length(ps)
-                            case 1 % ŠÔ‰“šiŠÔ‚ğÈ—ªj
+                            case 1 % æ™‚é–“å¿œç­”ï¼ˆæ™‚é–“ã‚’çœç•¥ï¼‰
                                 tmpx = t;
                                 tmpy = obj.data(n, ps, att, "time", trange);
-                            case 2 % c‰¡²–¾‹L
+                            case 2 % ç¸¦æ¨ªè»¸æ˜è¨˜
                                 tmpx = obj.data(n, ps(1), att, "time", trange);
                                 tmpy = obj.data(n, ps(2), att, "time", trange);
-                            case 3 % ‚RŸŒ³ƒvƒƒbƒg
+                            case 3 % ï¼“æ¬¡å…ƒãƒ—ãƒ­ãƒƒãƒˆ
                                 tmpx = obj.data(n, ps(1), att, "time", trange);
                                 tmpy = obj.data(n, ps(2), att, "time", trange);
                                 tmpz = obj.data(n, ps(3), att, "time", trange);
@@ -353,7 +353,7 @@ classdef Logger < handle
                     name = "input";
                 otherwise
                     if ~isempty(variable)
-                        if ~contains(variable, "result") % attribute ‚ªw’è‚³‚ê‚Ä‚¢‚éê‡
+                        if ~contains(variable, "result") % attribute ãŒæŒ‡å®šã•ã‚Œã¦ã„ã‚‹å ´åˆ
                             name = strcat(name, '.', variable);
                         else
                             name = variable;
