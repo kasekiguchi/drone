@@ -13,6 +13,7 @@ uint8_t i;
 #define RST_PIN 18 // = A4
 volatile boolean isEmergency = false;
 boolean fReset = false;
+boolean fInitial = true;
 /////////////////// PPM関係 ////////////////////
 #define OUTPUT_PIN 2 // ppm output pin
 char packetBuffer[255];
@@ -65,6 +66,7 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
   while(Serial.available() <= 0){}
   last_received_time = micros();
+  
 }
 
 void loop()
@@ -120,10 +122,19 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         if (i == 4)
         {
           if(pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
+            if (fInitial == true){
+            Serial.println("Deactivate arming");
+            digitalWrite( GLED_PIN, HIGH );
+            digitalWrite( RLED_PIN, LOW );            
+            }else{
             Serial.println("Arming");
             digitalWrite( GLED_PIN, LOW );
             digitalWrite( RLED_PIN, LOW );
+            }
           }else{
+            if (fInitial == true){
+              fInitial = false;
+            }
             Serial.println("Ready");
             digitalWrite( GLED_PIN, LOW );
             digitalWrite( RLED_PIN, HIGH );            
