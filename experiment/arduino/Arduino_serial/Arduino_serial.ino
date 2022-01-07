@@ -1,14 +1,22 @@
 // PPM は　Down pulse
+// 各チャンネルは H (= CH_OFFSET - pw)と　L (= TIME_LOW)からなる
+// TOTAL_CH_W = sum(H[i]+L[i])
+// PPM 1周期は start_H + TOTAL_CH_H + TIME_LOW からなる
 #include <TimerOne.h>
 
 uint8_t i;
 #define LED_PIN 13
-#define GLED_PIN 14 // A0
-#define RLED_PIN 15 // A1
+// [ Green Red ] : HIGHで消灯、LOWで点滅
+// 飛行可能（初期状態）： [ LOW HIGH ]
+// Arming           :  [ LOW LOW  ]
+// Emergence        :  [ HIGH LOW ]
+#define GLED_PIN 15 // A1
+#define RLED_PIN 14 // A0
 #define EM_PIN 3 // 2 or 3のみ
 #define RST_PIN 18 // = A4
 volatile boolean isEmergency = false;
 boolean fReset = false;
+boolean fInitial = true;
 /////////////////// PPM関係 ////////////////////
 #define OUTPUT_PIN 2 // ppm output pin
 char packetBuffer[255];
@@ -35,7 +43,7 @@ volatile uint16_t phw[TOTAL_CH]; // PPM周期を保つため、Pulse_control内�
 volatile boolean isReceive_Data_Updated = false;
 volatile uint16_t start_H = PPM_PERIOD;
 volatile uint16_t start_Hh = PPM_PERIOD;
-volatile uint16_t start_H0 = PPM_PERIOD;
+volatile uint16_t TOTAL_CH_W;
 
 //////////// シリアル通信が途絶えたとき用 ////////////////////////////////
 volatile unsigned long last_received_time;
@@ -43,15 +51,15 @@ volatile unsigned long last_received_time;
 // ==================================================================
 void setup()
 {
-  delay(2000);// ここにあった方がreset後安定する
+  //delay(2000);// ここにあった方がreset後安定する
   Serial.begin(115200); // MATLABの設定と合わせる
   Serial.println("Start");
   pinMode(LED_PIN, OUTPUT );
   digitalWrite( LED_PIN, HIGH );
   pinMode(GLED_PIN, OUTPUT );
-  digitalWrite( GLED_PIN, HIGH );
+  digitalWrite( GLED_PIN, LOW );
   pinMode(RLED_PIN, OUTPUT );
-  digitalWrite( RLED_PIN, LOW );
+  digitalWrite( RLED_PIN, HIGH );
   pinMode(EM_PIN, INPUT_PULLUP);// emergency_stop を割り当てるピン
   pinMode(RST_PIN, INPUT_PULLUP);
 
@@ -61,6 +69,7 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
   while(Serial.available() <= 0){}
   last_received_time = micros();
+  
 }
 
 void loop()
@@ -73,12 +82,13 @@ void loop()
   {
     if (digitalRead(EM_PIN) == HIGH && fReset == false)
     {
-      delay(3000);// delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
+      delay(5000);// delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
       if (digitalRead(EM_PIN) == HIGH)
       {
         Serial.println("Reset available.");
         digitalWrite( LED_PIN, HIGH );
-        digitalWrite( RLED_PIN, LOW );
+        digitalWrite( RLED_PIN, HIGH );
+        digitalWrite( GLED_PIN, LOW );
         fReset = true;
       }
     }
@@ -94,10 +104,10 @@ void receive_serial()// ---------- loop function : receive signal by UDP
   // ch : 0 - 1000 is converted to 1000 - 2000 throttle on FC
   if (Serial.available() > 0)
   {
-    Serial.readBytesUntil('¥n', packetBuffer, 2 * TOTAL_CH + 1);
+    Serial.readBytesUntil(';', packetBuffer, 2 * TOTAL_CH + 1);
     if (packetBuffer)
     {
-      start_H0 = PPM_PERIOD;
+      TOTAL_CH_W = PPM_PERIOD;
       for (i = 0; i < TOTAL_CH; i++)
       {
         pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]);
@@ -109,19 +119,38 @@ void receive_serial()// ---------- loop function : receive signal by UDP
         {
           pw[i] = CH_MAX;
         }
+        
         pw[i] = CH_OFFSET - pw[i];
-        start_H0 -= (pw[i] + TIME_LOW);
+        TOTAL_CH_W -= (pw[i] + TIME_LOW);
 
-        if (i == 4 && pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
-          digitalWrite( RLED_PIN, HIGH );
+        if (i == 4)
+        {
+          if(pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
+            if (fInitial == true){
+            Serial.println("Deactivate arming");
+            digitalWrite( GLED_PIN, HIGH );
+            digitalWrite( RLED_PIN, LOW );            
+            }else{
+            Serial.println("Arming");
+            digitalWrite( GLED_PIN, LOW );
+            digitalWrite( RLED_PIN, LOW );
+            }
+          }else{
+            if (fInitial == true){
+              fInitial = false;
+            }
+            Serial.println("Ready");
+            digitalWrite( GLED_PIN, LOW );
+            digitalWrite( RLED_PIN, HIGH );            
+          }
         }
         
       }
       last_received_time = micros();
       isReceive_Data_Updated = true;
-      start_H = start_H0 - TIME_LOW;// 9 times LOW time in each PPM period
+      start_H = TOTAL_CH_W - TIME_LOW;// 9 times LOW time in each PPM period
     }
-    else if (micros() - last_received_time >= 5000000)// Stop propellers after 5s signal lost.
+    else if (micros() - last_received_time >= 500000)// Stop propellers after 0.5s signal lost.
     {
       pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
       pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
@@ -132,6 +161,8 @@ void receive_serial()// ---------- loop function : receive signal by UDP
       pw[6] = CH_OFFSET; // AUX3
       pw[7] = CH_OFFSET; // AUX4
       start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
+          digitalWrite( GLED_PIN, HIGH );
+          digitalWrite( RLED_PIN, LOW );
     }
   }
 }
@@ -145,11 +176,15 @@ void Pulse_control()
   }
   else if (n_ch == TOTAL_CH)
   {
-    Timer1.setPeriod(start_Hh);// start 判定の H 時間待つ
-    digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
     n_ch = 0;
     start_Hh = start_H;
-    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
+//    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
+    for(i = 0; i < TOTAL_CH; i++)// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
+    {
+      phw[i] =  pw[i];
+    }
+    Timer1.setPeriod(start_Hh);// start 判定の H 時間待つ
+    digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
   }
   else
   {
@@ -193,7 +228,8 @@ void emergency_stop()
     start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
     isEmergency = true;
     digitalWrite( LED_PIN, LOW );
-    digitalWrite( GLED_PIN, LOW );
+    digitalWrite( RLED_PIN, LOW );
+    digitalWrite( GLED_PIN, HIGH );
     Serial.println("EMERGENCY !! ");
   }
 }

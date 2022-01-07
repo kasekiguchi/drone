@@ -83,6 +83,9 @@ classdef MODEL_CLASS <  handle
                 %else
                     %obj.param = varargin{1};
                 end
+                if isfield(varargin{1},'dt')
+                    obj.dt = varargin{1}.dt;
+                end
             end
             if ~isempty(obj.noise)
                 rng('shuffle');

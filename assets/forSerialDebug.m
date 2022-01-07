@@ -8,17 +8,11 @@
 % ch : time varying channel 
 % Expected result : transmitter signal increase by time
 
-% clear all
-COM = [3]; % change to fit your system
-initial = struct;
-initial.p = [0;0;0];
-initial.q = [1;0;0;0];
-initial.v = [0;0;0];
-initial.w = [0;0;0];
-dt = 0.025;
+clear all
+COM = [26]; % change to fit your system
 if ~exist('agent')
-for i = COM
-    agent = Drone(Model_Drone_Exp(dt, 'plant', [0;0;0], "serial", [COM(i)])); % for exp % 機体番号（ArduinoのCOM番号）
+for i = 1:length(COM)
+    agent = Drone(Model_Drone_Exp(1, 'plant', [0;0;0], "serial", [COM(i)])); % for exp % 機体番号（ArduinoのCOM番号）
 end
 end
 %% 各チャンネルの動作チェック用

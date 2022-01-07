@@ -1,14 +1,11 @@
-function Connector_Natnet(param)
- if isfield(param,'HostIP')
-    natnet_param.HostIP = param.HostIP;
- else
-    natnet_param.HostIP = '192.168.1.35';
- end
- if isfield(param,'rigid_list')
-    natnet_param.rigid_list = param.rigid_list;
- end
+function motive = Connector_Natnet(natnet_param)
+% create NATNET_CONNECTOR instance as motive
+arguments
+  natnet_param.ClientIP string = "192.168.1.9"
+  natnet_param.rigid_list = ""
+  natnet_param.HostIP string = "192.168.1.35"
+  natnet_param.yaws = 0
+end
 
- natnet_param.ClientIP = param.ClientIP;%'192.168.1.6';
- motive=NATNET_CONNECTOR(natnet_param);
- assignin('base',"motive",motive);
+ motive=NATNET_CONNECTOR("HostIP",natnet_param.HostIP,"ClientIP",natnet_param.ClientIP,"rigid_list",natnet_param.rigid_list,'yaws',natnet_param.yaws);
 end
