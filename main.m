@@ -329,7 +329,7 @@ try
     for i = 1:N % 状態更新
       model_param.param = agent(i).model.param;
       model_param.FH = FH;
-      agent(i).do_model(model_param);
+      agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
       model_param.param = agent(i).plant.param;
       agent(i).do_plant(model_param);

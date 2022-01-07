@@ -4,7 +4,6 @@ classdef Drone_Exp_Model < MODEL_CLASS
         ESPr_num
         connector
         flight_phase % q : quit, s : stop, a : arming, t : take-off, h : hovering, f : flight, l : landing
-        offset = [ 1103, 1103,1103];
     end
     properties
         msg
@@ -72,9 +71,6 @@ classdef Drone_Exp_Model < MODEL_CLASS
             end
             obj.connector.sendData(gen_msg(msg));
             obj.msg=msg;
-        end
-        function set_param(obj,param)
-            obj.offset = param;
         end
     end
 end

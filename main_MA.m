@@ -1,4 +1,4 @@
-%% Drone 班用共通プログラム : Motiveを使った実験用
+%% Drone 班用共通プログラム : Motiveを使った複数機体実験用
 %% Initialize settings
 % set path
 tmp = matlab.desktop.editor.getActive;
@@ -14,8 +14,9 @@ ts = 0;
 te = 1000;
 
 %% set connector (global instance)
-rigid_ids = [1,2];
-Connector_Natnet(struct('ClientIP', '192.168.1.9', 'rigid_list', rigid_ids)); % Motive
+%rigid_ids = [1,2];
+%Connector_Natnet(struct('ClientIP', '192.168.1.9', 'rigid_list', rigid_ids)); % Motive
+[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.9'); % set ClientIP
 
 %% initialize
 disp("Initialize state");
