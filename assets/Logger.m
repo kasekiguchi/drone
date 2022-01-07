@@ -1,7 +1,7 @@
 classdef Logger < handle
-    % ãƒ‡ãƒ¼ã‚¿ä¿å­˜ç”¨ã‚¯ãƒ©ã‚¹
+    % ƒf[ƒ^•Û‘¶—pƒNƒ‰ƒX
     % obj = Logger(target,row,items)
-    % target : ä¿å­˜å¯¾è±¡ã® agent indices : example 2:4 : default 1:N
+    % target : •Û‘¶‘ÎÛ‚Ì agent indices : example 2:4 : default 1:N
     % row : size(ts:dt:te,2)
     % items : [    "plant.state.p",    "model.state.p"  ...]
     % At every logging, logger gathers the data listed in items from target
@@ -10,7 +10,7 @@ classdef Logger < handle
     properties
         Data
         k = 0; % time index for logging
-        target % ä¿å­˜å¯¾è±¡ã® agent indices : example 2:4 : default 1:N
+        target % •Û‘¶‘ÎÛ‚Ì agent indices : example 2:4 : default 1:N
         items
         item_num
         agent_items
@@ -19,28 +19,28 @@ classdef Logger < handle
         ename = "estimator";
         rname = "reference";
     end
-    
+
     methods
-        function obj = Logger(target,number,fExp,items,agent_items)
+        function obj = Logger(target, number, fExp, items, agent_items)
             % Logger(target,row,items)
-            % target : ãƒ­ã‚°ã‚’å–ã‚‹å¯¾è±¡ã€€example 1:3, usage agent(obj.target)
-            % number : ç¢ºä¿ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã€€length(ts:dt:te)
-            % agent_items : defaultä»¥å¤–ã§ä¿å­˜ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ ["inner_input"]
-            % items  : agent ä»¥å¤–ã§ä¿å­˜ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã®åå‰
-            %         ä»¥ä¸‹ã®ã‚ˆã†ã«åå‰ã¨ä¿å­˜ã™ã‚‹ã‚‚ã®ã®å¯¾å¿œãŒå–ã‚Œã¦ã„ãªãã¦ã‚‚å¯
+            % target : ƒƒO‚ğæ‚é‘ÎÛ@example 1:3, usage agent(obj.target)
+            % number : Šm•Û‚·‚éƒf[ƒ^ƒTƒCƒY@length(ts:dt:te)
+            % agent_items : defaultˆÈŠO‚Å•Û‘¶‚·‚éƒf[ƒ^ ["inner_input"]
+            % items  : agent ˆÈŠO‚Å•Û‘¶‚·‚éƒf[ƒ^‚Ì–¼‘O
+            %         ˆÈ‰º‚Ì‚æ‚¤‚É–¼‘O‚Æ•Û‘¶‚·‚é‚à‚Ì‚Ì‘Î‰‚ªæ‚ê‚Ä‚¢‚È‚­‚Ä‚à‰Â
             %         logger=Logger(~,~,"innerInput",~);
             %         logger.logging(t,FH,agent,motive);
             obj.target = target;
-            obj.Data.t = zeros(number,1); % æ™‚é–“
-            obj.Data.phase = zeros(number,1); % ãƒ•ãƒ©ã‚¤ãƒˆãƒ•ã‚§ãƒ¼ã‚ºã€€a,t,f,l...
+            obj.Data.t = zeros(number, 1);     % ŠÔ
+            obj.Data.phase = zeros(number, 1); % ƒtƒ‰ƒCƒgƒtƒF[ƒY@a,t,f,l...
             obj.fExp = fExp;
-            obj.items=items;
+            obj.items = items;
             obj.item_num = length(items);
             obj.agent_items = agent_items;
-            obj.Data.agent=struct();
+            obj.Data.agent = struct();
         end
-        
-        function logging(obj,t,FH,agent,items)
+
+        function logging(obj, t, FH, agent, items)
             % logging(t,FH)
             % t : current time
             % FH : figure handle for keyboard input
@@ -50,36 +50,36 @@ classdef Logger < handle
                 FH
                 agent
             end
-            arguments(Repeating)
+            arguments (Repeating)
                 items
             end
-            obj.k=obj.k+1;
-            obj.Data.t(obj.k)=t;
+            obj.k = obj.k + 1;
+            obj.Data.t(obj.k) = t;
             cha = get(FH, 'currentcharacter');
-            obj.Data.phase(obj.k)=cha;
-            if length(items)~=length(obj.items)
+            obj.Data.phase(obj.k) = cha;
+            if length(items) ~= length(obj.items)
                 warning("ACSL : number of logging data is wrong");
             end
             for i = obj.items
-                obj.Data.(obj.items(i))(obj.k,:)=items{i};
-                % æ³¨ï¼šã‚µã‚¤ã‚ºã®å›ºå®šã•ã‚Œã¦ã„ã‚‹æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã ã‘ä¿å­˜å¯èƒ½
+                obj.Data.(obj.items(i))(obj.k, :) = items{i};
+                % ’FƒTƒCƒY‚ÌŒÅ’è‚³‚ê‚Ä‚¢‚é”’lƒf[ƒ^‚¾‚¯•Û‘¶‰Â”\
             end
             for n = obj.target
                 for i = 1:length(obj.agent_items)
-                    str=strsplit(obj.agent_items(i),'.');
-                    tmp=agent(n);
-                    obj.Data.agent(n).(str{1}){obj.k}=tmp.(str{1});
+                    str = strsplit(obj.agent_items(i), '.');
+                    tmp = agent(n);
+                    obj.Data.agent(n).(str{1}){obj.k} = tmp.(str{1});
                 end
-                obj.Data.agent(n).sensor.result{obj.k}=agent(n).sensor.result;
-                obj.Data.agent(n).estimator.result{obj.k}=agent(n).sensor.result;
-                obj.Data.agent(n).reference.result{obj.k}=agent(n).sensor.result;
+                obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
+                obj.Data.agent(n).estimator.result{obj.k} = agent(n).sensor.result;
+                obj.Data.agent(n).reference.result{obj.k} = agent(n).sensor.result;
                 obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
                 obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
                 obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
-                obj.Data.agent(n).input{obj.k}=agent(n).input;
-                
+                obj.Data.agent(n).input{obj.k} = agent(n).input;
+
                 if obj.fExp
-                    obj.Data.agent(n).inner_input{obj.k}=agent(n).inner_input;
+                    obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
                 else
                     obj.Data.agent(n).plant.state = state_copy(agent(n).plant.state);
                 end
@@ -98,29 +98,29 @@ classdef Logger < handle
             % indices = [si,ei,ri,ii,pi];
             % sensor names : {{1st agent's sensor names},{2nd ..},{...}...}
             % i-th agent's sensor names : example {"Motive","RangePos"}
-            filename = strrep(strrep(strcat('Data/Log(',datestr(datetime('now')),').mat'),':','_'),' ','_');
+            filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
             sname = [];
-            for i =obj.target % è¤‡æ•°å°ã®å ´åˆ
+            for i = obj.target % •¡”‘ä‚Ìê‡
                 isnames = obj.target(i).sensor.name;
                 isname = [];
                 for j = 1:length(isnames)
-                    isname = [isname,obj.target(i).sensor.(isnames(j)).name];
+                    isname = [isname, obj.target(i).sensor.(isnames(j)).name];
                 end
-                sname = [sname,{isname}];
+                sname = [sname, {isname}];
             end
             rname = [];
-            for i =obj.target % è¤‡æ•°å°ã®å ´åˆ
+            for i = obj.target % •¡”‘ä‚Ìê‡
                 irnames = obj.target(i).reference.name;
                 %                 irname = [];
                 %                 for j = 1:length(irnames)
                 %                     irname = [irname,obj.target(i).reference.(irnames(j)).name];
                 %                 end
-                rname = [rname,{irnames}];
+                rname = [rname, {irnames}];
             end
-            Data={obj.Data,{[obj.si,obj.ei,obj.ri,obj.ki,obj.pi],obj.items,sname,rname}};
-            save(filename,'Data');
+            Data = {obj.Data, {[obj.si, obj.ei, obj.ri, obj.ki, obj.pi], obj.items, sname, rname}};
+            save(filename, 'Data');
         end
-        function [data]=data(obj, n, variable, attribute, option)
+        function [data] = data(obj, n, variable, attribute, option)
             % n : agent index
             % variable : var name or path to var from agent
             %            or path from result if attribute is set.
@@ -139,49 +139,49 @@ classdef Logger < handle
                 n
                 variable string = "p"
                 attribute string = "e"
-                option.time (1,2) double = [0 obj.Data.t(obj.k)]
+                option.time (1, 2) double = [0 obj.Data.t(obj.k)]
             end
-            [variable,vrange] = obj.full_var_name(variable,attribute);
+            [variable, vrange] = obj.full_var_name(variable, attribute);
             attribute = "";
-            data_range = find((obj.Data.t-option.time(1))>0,1)-1:find((obj.Data.t-option.time(2))>=0,1);
-            if sum(strcmp(n,{'time','t'}))  % æ™‚é–“è»¸ãƒ‡ãƒ¼ã‚¿
-                data=obj.Data.t(data_range);
-            elseif n == 0                   % obj.itmesã®ãƒ‡ãƒ¼ã‚¿
-                variable = split(variable,'.'); % memberæ¯ã«åˆ†å‰²
+            data_range = find((obj.Data.t - option.time(1)) > 0, 1) - 1:find((obj.Data.t - option.time(2)) >= 0, 1);
+            if sum(strcmp(n, {'time', 't'}))     % ŠÔ²ƒf[ƒ^
+                data = obj.Data.t(data_range);
+            elseif n == 0                        % obj.itmes‚Ìƒf[ƒ^
+                variable = split(variable, '.'); % member–ˆ‚É•ªŠ„
                 data = [obj.Data.(variable{1})];
-                for j=2:length(variable)
+                for j = 2:length(variable)
                     data = [data.(variable{j})];
                 end
-                data = [data{1,data_range}]';
-            else                            % agentã«é–¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
-                variable = split(variable,'.'); % memberæ¯ã«åˆ†å‰²
+                data = [data{1, data_range}]';
+            else                                 % agent‚ÉŠÖ‚·‚éƒf[ƒ^
+                variable = split(variable, '.'); % member–ˆ‚É•ªŠ„
                 data = [obj.Data.agent(n)];
-                for j=1:length(variable)
+                for j = 1:length(variable)
                     data = [data.(variable{j})];
-                    if iscell(data)     % æ™‚é–“æ–¹å‘ã¯cellé…åˆ—
-                        data = [data{1,data_range}]';
-                        data = obj.return_state_prop(variable(j+1:end),data);
+                    if iscell(data) % ŠÔ•ûŒü‚Ícell”z—ñ
+                        data = [data{1, data_range}]';
+                        data = obj.return_state_prop(variable(j + 1:end), data);
                         break
                     end
                 end
             end
             if ~isempty(vrange)
-                data = obj.mtake(data,[],vrange);
+                data = obj.mtake(data, [], vrange);
             end
         end
-        function data=return_state_prop(obj,variable,data)
-            for j=1:length(variable)
-                data=[data.(variable(j))];
-                if strcmp(variable(j),'state')
+        function data = return_state_prop(obj, variable, data)
+            for j = 1:length(variable)
+                data = [data.(variable(j))];
+                if strcmp(variable(j), 'state')
                     for k = 1:length(data)
-                        ndata(k,:)=data(k).(variable(j+1));
+                        ndata(k, :) = data(k).(variable(j + 1));
                     end
                     data = ndata;
-                    break % WRN : stateã‹ã‚‰æ›´ã«æ·±ã„æ§‹é€ ã«ã¯å¯¾å¿œã—ã¦ã„ãªã„
+                    break % WRN : state‚©‚çX‚É[‚¢\‘¢‚É‚Í‘Î‰‚µ‚Ä‚¢‚È‚¢
                 end
             end
         end
-        function plot(obj,list,option)
+        function plot(obj, list, option)
             % agent ids : indices of the agent to be plotted
             % variable string : variable to be plotted
             %     example ["p1","input","q"]
@@ -207,100 +207,100 @@ classdef Logger < handle
             arguments
                 obj
             end
-            arguments(Repeating)
+            arguments (Repeating)
                 list
             end
             arguments
-                option.time (1,2) double = [0 obj.Data.t(obj.k)]
+                option.time (1, 2) double = [0 obj.Data.t(obj.k)]
                 option.fig_num {mustBeNumeric} = 1
-                option.row_col (1,2) {mustBeNumeric} = [ceil(length(list)/min(length(list),3)) min(length(list),3)]
+                option.row_col (1, 2) {mustBeNumeric} = [ceil(length(list) / min(length(list), 3)) min(length(list), 3)]
                 option.color {mustBeNumeric} = 1
                 option.hold {mustBeNumeric} = 0
             end
-            trange = option.time;     % time range
-            fig_num = option.fig_num; % figure number
-            frow = option.row_col(1); % subfigure row number
-            fcol = option.row_col(2); % subfigure col number
-            fcolor = option.color;    % on/off flag for phase coloring
-            fhold = option.hold;      % on/off flag for holding (only active to last subfigure)
-            
-            t = obj.data("t",'','',"time",trange); % time data
-            fh=figure(fig_num);
-            fh.WindowState='maximized';
-            
-            for fi = 1:length(list)% fi : å›³ç•ªå·
-                subplot(frow,fcol,fi);
-                plegend=[];
+            trange = option.time;                      % time range
+            fig_num = option.fig_num;                  % figure number
+            frow = option.row_col(1);                  % subfigure row number
+            fcol = option.row_col(2);                  % subfigure col number
+            fcolor = option.color;                     % on/off flag for phase coloring
+            fhold = option.hold;                       % on/off flag for holding (only active to last subfigure)
+
+            t = obj.data("t", '', '', "time", trange); % time data
+            fh = figure(fig_num);
+            fh.WindowState = 'maximized';
+
+            for fi = 1:length(list)      % fi : }”Ô†
+                subplot(frow, fcol, fi);
+                plegend = [];
                 N = list{fi}{1};         % indices of variable drones. example : [1 2]
                 param = list{fi}{2};     % p,q,v,w, etc
                 attribute = list{fi}{3}; % e,s,r,p
-               if strcmp(attribute,""); attribute = " ";end
+                if strcmp(attribute, ""); attribute = " "; end
                 for n = N
                     for a = 1:strlength(attribute)
-                        ps=split(param,'-'); % ã€Œ-ã€åŒºåˆ‡ã‚Šã§åˆ†å‰²
-                        att = extract(attribute,a);
+                        ps = split(param, '-'); % u-v‹æØ‚è‚Å•ªŠ„
+                        att = extract(attribute, a);
                         switch length(ps)
-                            case 1 % æ™‚é–“å¿œç­”ï¼ˆæ™‚é–“ã‚’çœç•¥ï¼‰
+                            case 1 % ŠÔ‰“šiŠÔ‚ğÈ—ªj
                                 tmpx = t;
-                                tmpy = obj.data(n,ps,att,"time",trange);
-                            case 2 % ç¸¦æ¨ªè»¸æ˜è¨˜
-                                tmpx = obj.data(n,ps(1),att,"time",trange);
-                                tmpy = obj.data(n,ps(2),att,"time",trange);
-                            case 3 % ï¼“æ¬¡å…ƒãƒ—ãƒ­ãƒƒãƒˆ
-                                tmpx = obj.data(n,ps(1),att,"time",trange);
-                                tmpy = obj.data(n,ps(2),att,"time",trange);
-                                tmpz = obj.data(n,ps(3),att,"time",trange);
+                                tmpy = obj.data(n, ps, att, "time", trange);
+                            case 2 % c‰¡²–¾‹L
+                                tmpx = obj.data(n, ps(1), att, "time", trange);
+                                tmpy = obj.data(n, ps(2), att, "time", trange);
+                            case 3 % ‚RŸŒ³ƒvƒƒbƒg
+                                tmpx = obj.data(n, ps(1), att, "time", trange);
+                                tmpy = obj.data(n, ps(2), att, "time", trange);
+                                tmpz = obj.data(n, ps(3), att, "time", trange);
                         end
-                        
+
                         % plot
                         if length(ps) == 3
-                            plot3(tmpx,tmpy,tmpz);
+                            plot3(tmpx, tmpy, tmpz);
                         else
-                            plot(tmpx,tmpy);
+                            plot(tmpx, tmpy);
                         end
                         hold on
-                        
+
                         % set title label legend
-                        if length(ps)==1
-                            ps = ["t",ps];
+                        if length(ps) == 1
+                            ps = ["t", ps];
                             xlabel("Time [s]");
                         else
                             xlabel(ps(1));
                         end
                         switch ps(2)
                             case "p"
-                                title(strcat("Position p of agent",string(n)));
+                                title(strcat("Position p of agent", string(n)));
                             case "q"
-                                title(strcat("Attitude q of agent",string(n)));
+                                title(strcat("Attitude q of agent", string(n)));
                             case "v"
-                                title(strcat("Velocity v of agent",string(n)));
+                                title(strcat("Velocity v of agent", string(n)));
                             case "w"
-                                title(strcat("Angular velocity w of agent",string(n)));
+                                title(strcat("Angular velocity w of agent", string(n)));
                             case "input"
-                                title(strcat("Input u of agent",string(n)));
+                                title(strcat("Input u of agent", string(n)));
                             otherwise
                                 title(ps(2));
                         end
-                        if ps(1)~="t"
-                            title(strcat("phase plot : ",string(param)));
+                        if ps(1) ~= "t"
+                            title(strcat("phase plot : ", string(param)));
                             switch att
                                 case "s"
-                                    plegend=[plegend,"sensor"];
+                                    plegend = [plegend, "sensor"];
                                 case "e"
-                                    plegend=[plegend,"estimator"];
+                                    plegend = [plegend, "estimator"];
                                 case "r"
-                                    plegend=[plegend,"reference"];
+                                    plegend = [plegend, "reference"];
                                 case "p"
-                                    plegend=[plegend,"plant"];
+                                    plegend = [plegend, "plant"];
                                 otherwise
-                                    plegend=[plegend,att];
+                                    plegend = [plegend, att];
                             end
                             daspect([1 1 1]);
                         else
-                            plegend=[plegend,append(string(1:size(tmpy,2)),att)];
+                            plegend = [plegend, append(string(1:size(tmpy, 2)), att)];
                         end
                         ylabel(ps(2));
-                        if length(ps)==3; zlabel(ps(3));end
+                        if length(ps) == 3; zlabel(ps(3)); end
                     end
                 end
                 legend(plegend);
@@ -308,19 +308,19 @@ classdef Logger < handle
                     hold off
                 end
                 if fcolor
-                    if length([find(obj.Data.phase==116,1),find(obj.Data.phase==116,1,'last')]) == 2
-                        Square_coloring(obj.Data.t([find(obj.Data.phase==116,1),find(obj.Data.phase==116,1,'last')])); % take off phase
+                    if length([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')])); % take off phase
                     end
-                    if length([find(obj.Data.phase==102,1),find(obj.Data.phase==102,1,'last')]) == 2
-                        Square_coloring(obj.Data.t([find(obj.Data.phase==102,1),find(obj.Data.phase==102,1,'last')]),[0.9 1.0 1.0]); % flight phase
+                    if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
                     end
-                    if length([find(obj.Data.phase==108,1),find(obj.Data.phase==108,1,'last')]) == 2
-                        Square_coloring(obj.Data.t([find(obj.Data.phase==108,1),find(obj.Data.phase==108,1,'last')]),[1.0 0.9 1.0]); % landing phase
+                    if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
+                        Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
                     end
                 end
             end
         end
-        function [name,vrange]=full_var_name(obj,var,att)
+        function [name, vrange] = full_var_name(obj, var, att)
             switch att
                 case 's' % sensor
                     name = "sensor.result";
@@ -335,37 +335,37 @@ classdef Logger < handle
                 otherwise
                     name = "";
             end
-            variable = regexprep(var,"[0-9:]","");
-            vrange =  regexp(var,"[0-9:]",'match');
+            variable = regexprep(var, "[0-9:]", "");
+            vrange = regexp(var, "[0-9:]", 'match');
             if ~isempty(vrange)
                 vrange = str2num(vrange);
             end
             switch variable
                 case 'p'
-                    name = strcat(name,".state.p");
+                    name = strcat(name, ".state.p");
                 case 'q'
-                    name = strcat(name,".state.q");
+                    name = strcat(name, ".state.q");
                 case 'v'
-                    name = strcat(name,".state.v");
+                    name = strcat(name, ".state.v");
                 case 'w'
-                    name = strcat(name,".state.w");
+                    name = strcat(name, ".state.w");
                 case 'input'
                     name = "input";
                 otherwise
                     if ~isempty(variable)
-                        if ~contains(variable,"result") % attribute ãŒæŒ‡å®šã•ã‚Œã¦ã„ã‚‹å ´åˆ
-                            name = strcat(name,'.',variable);
+                        if ~contains(variable, "result") % attribute ‚ªw’è‚³‚ê‚Ä‚¢‚éê‡
+                            name = strcat(name, '.', variable);
                         else
                             name = variable;
                         end
                     end
             end
         end
-        function X = mtake(obj,x,row,col)
+        function X = mtake(obj, x, row, col)
             if isempty(row)
-                X = x(:,col);
+                X = x(:, col);
             else
-                X = x(row,col);
+                X = x(row, col);
             end
         end
     end
