@@ -9,11 +9,11 @@ classdef Logger < handle
     % obj.Data.agent = {row, item_id, target_id}
     properties
         Data
-        k = 0; % time index for logging
-        target % 保存対象の agent indices : example 2:4 : default 1:N
-        items
-        item_num
-        agent_items
+        k = 0;      % time index for logging
+        target      % 保存対象の agent indices : example 2:4 : default 1:N
+        items       % 追加で保存するアイテム名
+        item_num    % 追加保存のアイテム数
+        agent_items % result以外で追加保存するagent内の変数
         fExp
         sname = "sensor";
         ename = "estimator";
