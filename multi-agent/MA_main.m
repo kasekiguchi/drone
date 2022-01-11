@@ -61,7 +61,7 @@ end
 %% 消火しない場合の燃え広がり方 (h = 0)
 % 200ステップで端に行かない程度の重みがAstar でやる場合適切
 % Directでやる場合はもっと早い燃え広がりでも対応可能
-ke = 300; % シミュレーションステップ
+ke = 250; % シミュレーションステップ
 fFPosition = 6; % flag fire position
 h = 0; % extinction probability
 W_vec = reshape(W,N,1);
@@ -74,15 +74,86 @@ logger.I(:,1) = map.I(:);
 logger.R(:,1) = map.R(:);
 logger.U(:,1) = map.U(:);
 
+
 for k = 1:ke
     map.next_step_func(0,E);% map 更新
-    k
     % log
+    k
     logger.k(k)=k;
     logger.S(:,k) = map.S(:);
     logger.I(:,k) = map.I(:);
     logger.R(:,k) = map.R(:);
     logger.U(:,k) = map.U(:);
+    %手動設定[飛び火＆長距離延焼]
+    if k == 23      %11:21
+        tbh1 = nx*56 + 48;
+        map.I(tbh1) =1 ;
+    end
+    if k == 42      %11:58
+        tbh2 = nx*34 + 56;
+        map.I(tbh2) =1 ;
+    end
+    if k == 50      %12:14
+        tbh3 = nx*30 + 73;
+        map.I(tbh3) =1 ;
+    end
+    if k == 68      %12:49
+        tbh4 = nx*70 + 48;
+        map.I(tbh4) =1 ;
+    end
+    if k == 74      %13:00
+        tbh5 = nx*69 + 89;
+        map.I(tbh5) =1 ;
+    end
+    if k == 87      %13:26
+        tbh6 = nx*78 + 58;
+        map.I(tbh6) =1 ;
+    end
+    if k == 89      %13:30  道路を跨いだ長距離延焼
+        ens = nx*33 + 90;
+        map.I(ens) =1 ;
+    end
+    if k == 97      %13:45
+        tbh7 = nx*39 + 47;
+        map.I(tbh7) =1 ;
+    end
+    if k == 108      %14:07
+        tbh8 = nx*81 + 50;
+        map.I(tbh8) =1 ;
+    end
+    if k == 116      %14:24
+        tbh9 = nx*24 + 95;
+        map.I(tbh9) =1 ;
+    end
+    if k == 151      %15:33
+        tbh10 = nx*25 + 85;
+        map.I(tbh10) =1 ;
+    end
+    if k == 78      %13:07
+        tbh11 = nx*54 + 56;
+        map.I(tbh11) =1 ;
+    end
+    if k == 79      %13:08
+        tbh12 = nx*64 + 64;
+        map.I(tbh12) =1 ;
+    end
+    if k == 90      %13:31
+        tbh13 = nx*71 + 70;
+        map.I(tbh13) =1 ;
+    end
+    if k == 90      %13:31
+        tbh14 = nx*70 + 81;
+        map.I(tbh14) =1 ;
+    end
+    if k == 97      %13:44
+        tbh15 = nx*78 + 65;
+        map.I(tbh15) =1 ;
+    end
+    %手動設定[消火活動]
+%     if k == 12      %11:00
+%         syk1 = nx*56 + 48;
+%         map.I(tbh1) = 0 ;
+%     end
 end
 %% graphs
 %map.draw_state(nx,ny,map.loggerk(logger,1));
@@ -91,15 +162,15 @@ end
 map.draw_state(nx,ny,W);
 %% animations
 
- map.draw_movie(logger,nx,ny,1,"2021Dec13_延焼_3-4セル拡張版_微風Ver2");    %natural_expansion
+map.draw_movie(logger,nx,ny,1,"2022Jan11_自然延焼_手動飛び火_マップ更新_2");    %natural_expansion 
 %map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
 %M=map.draw_movie(logger,nx,ny,2);
 %map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
 %map.draw_movie(logger,nx,ny,1,"Extinct_Weight_Astar_BiasRandom");
 
 %% Monte-Carlo simulation
-unum = 10; % 消火点の数
-ke = 300; % シミュレーションステップ
+unum = 10; % 消火点の数（10機のUAV）
+ke = 250; % シミュレーションステップ
 kn = 100;% number of Monte-Carlo simulation
 % 手法選択
 fMethod = "WAPR"; % Weighted Alt Page Rank
@@ -144,7 +215,7 @@ w2 = 1/((XM-Xm)/max(nx,ny))
 for k = 1:kn
     k;
     map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);% initialize
-    [K(k),Logger(k)] = Astar_SIR(N,ke,nxr,nyr,map,unum,E,X,Xm,Il,vi,1,w2,fDynamics); % simulation
+    [K(k),Logger(k)] = Astar_SIR(N,ke,nx,ny,map,unum,E,X,Xm,Il,vi,1,w2,fDynamics); % simulation
     K(k)
 end
 %%
@@ -243,8 +314,9 @@ init_I = sparse(N,1);
 % r=randi(20,numel(init_fx),numel(init_fy))-10;
 r=randi(1,numel(init_fx),numel(init_fy));
 W_vec2 = logical(mod(W_vec,0));     %W_vecを0と1のみのlogical値に変換．これをしないと初期引火点が何時までも消火しない
-init_I(ny*(init_fx-1)+init_fy+r) = 1.*W_vec2(ny*(init_fx-1)+init_fy+r);   %Advice:Wを10000の行列に変換し、1にかければいいのでは？
 % init_I(ny*(init_fx-1)+init_fy+r) = 1;   %Advice:Wを10000の行列に変換し、1にかければいいのでは？
+% init_I(ny*(init_fx-1)+init_fy+r) = 1.*W_vec2(ny*(init_fx-1)+init_fy+r);   %Wを100*100の行列に変換し、1にかけてる
+init_I(ny*(init_fx-1)+init_fy) = 1.*W_vec2(ny*(init_fx-1)+init_fy);
 init_R = sparse(N,1);
 map = SIR_model(N,Il,h);
 map.init(init_I,init_R);
@@ -273,7 +345,7 @@ logger.I(:,1) = map.I(:);
 logger.R(:,1) = map.R(:);
 logger.U(:,1) = map.U(:);
 logger.P = sparse(N,ke);
-E1 = E>0;
+E1 = E>0;   %E>0となる要素のみによるlogical配列
 p = arranged_position([10,10],unum,2,0);
 p = (p(1,:)'-1)*ny + p(2,:)';% init position indices
 pt = zeros(unum,1);
