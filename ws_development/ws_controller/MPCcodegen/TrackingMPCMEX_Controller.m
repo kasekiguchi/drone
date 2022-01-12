@@ -32,9 +32,9 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.R = diag([1,1]);
             obj.param.Qf = diag([18,18,1,1]);
 %             obj.param.Qf = diag([17,17,1,1]);
-            obj.param.T = diag([40]);
+            obj.param.T = diag([40,40,40]);%Fisherのやつ
             obj.param.S = [1,0.7];
-            obj.param.WoS = diag([10,10]);
+            obj.param.WoS = diag([10,10]);%今は使ってない
             obj.param.Evfim = [10];%今は使ってない
             obj.NoiseR = 1.0e-3;%param of Fisher Information matrix
             obj.RangeGain = 10;%gain of sigmoid function for sensor range logic

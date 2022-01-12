@@ -1,4 +1,4 @@
-function Estimator = Estimator_UKFSLAM_WheelChairA(agent)
+function Estimator = Estimator_UKFSLAM_WheelChairA(agent,SensorRange)
 
 %% estimator class
 Estimator.name="ukfslam_WC";
@@ -15,6 +15,7 @@ UKF_param.dim = n;
 UKF_param.P = eye(n); %
 UKF_param.k = 1;%
 UKF_param.NLP = 2;%Number of Line Param
+UKF_param.SensorRange = SensorRange;
 %     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;
 % UKF_param.list=["p","q","v", "w"];
 UKF_param.list=["p","q","v"];

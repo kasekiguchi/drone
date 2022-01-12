@@ -34,8 +34,8 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
 %         initial(i).p = [-45;8];
-        initial(i).p = [0;-2];
-%     initial(i).p = [0;0];
+%         initial(i).p = [0;-2];
+    initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];
     initial(i).w = [0];
@@ -46,35 +46,35 @@ end
 for i = 1:N
     if fExp
     else
-%                         agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
-        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',4.337E-5)));
+                        agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
+%         agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',4.337E-5)));
 %                 agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
 %         agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));
     end
     %% model
     % set control model
-%         agent(i).set_model(Model_WheelChairV(i,dt,'model',initial ) );
-            agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
+        agent(i).set_model(Model_WheelChairV(i,dt,'model',initial ) );
+%             agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
 %     agent(i).set_model(Model_ODV(N,dt,'model',initial) );
 % agent(i).set_model(Model_ODVADI(N,dt,'model',initial) );
     close all
     %% set environment property
     Env = [];
 %     agent(i).set_property("env",Env_FloorMap_sim_fromstl(i,'3F.stl'));
-%     agent(i).set_property("env",Env_FloorMap_sim(i)); 
-    agent(i).set_property("env",Env_FloorMap_sim_circle(i)); 
+    agent(i).set_property("env",Env_FloorMap_sim(i)); 
+%     agent(i).set_property("env",Env_FloorMap_sim_circle(i)); 
     %% set sensors property
     agent(i).sensor=[];
     agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-3) ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
-%             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
+            agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
     %% set reference property
     agent(i).reference=[];
     
@@ -106,7 +106,7 @@ for i = 1:N
     convjudgeW = 0.1;%収束判断
     Holizon = 1;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
-    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
+%     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
@@ -131,7 +131,7 @@ LogData=[
         "reference.result.state.p",
     "estimator.result.state.p",
     "estimator.result.state.q",
-    "estimator.result.state.v",
+%     "estimator.result.state.v",
 %     "estimator.result.state.w",
     "plant.state.v",
 %     "plant.state.w",
@@ -140,10 +140,10 @@ LogData=[
     "estimator.result.P",
     "estimator.result.AssociationInfo.index",
     "estimator.result.AssociationInfo.distance",
-    "reference.result.state.xd",
-    "controller.result.fval",
-    "controller.result.exitflag",
-    "controller.result.eachfval",
+%     "reference.result.state.xd",
+%     "controller.result.fval",
+%     "controller.result.exitflag",
+%     "controller.result.eachfval",
     "sensor.result.sensor_points",
     "sensor.result.angle",
     "sensor.result.length",
@@ -158,7 +158,7 @@ LogData=[
 SubFunc = [
 %     "ContEval",
 %     "TrajectoryErrorDis",
-    "ObserbSubFIM",
+%     "ObserbSubFIM",
     ];
 if ~isempty(agent(1).plant.state)
     LogData=["plant.state.p";LogData]; % 実制御対象の位置

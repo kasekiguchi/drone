@@ -117,7 +117,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
                     
                     %---Tracking point of after 2steps---%
                     for i = 2:obj.Holizon
-                        if (obj.TrackingPoint(1,i-1) - obj.WayPoint(obj.Flag,1))^2 + (obj.TrackingPoint(2,i-1) - obj.WayPoint(obj.Flag,2))^2 <= obj.ConvergencejudgeV
+                        if (obj.TrackingPoint(1,i-1) - obj.WayPoint(1,1))^2 + (obj.TrackingPoint(2,i-1) - obj.WayPoint(2,1))^2 <= obj.ConvergencejudgeV
                             obj.TrackingPoint(:,i) = obj.WayPoint;
                         else
                             obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(obj.Tracktheta);obj.Targetv*obj.dt*sin(obj.Tracktheta)];

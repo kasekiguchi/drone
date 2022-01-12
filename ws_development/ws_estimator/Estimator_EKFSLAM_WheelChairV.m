@@ -1,4 +1,4 @@
-function Estimator = Estimator_EKFSLAM_WheelChairV(agent)
+function Estimator = Estimator_EKFSLAM_WheelChairV(agent,range)
 
 %% estimator class
 Estimator.name="ekfslam_WC";
@@ -14,6 +14,7 @@ EKF_param.R = 1.0E-3;
 EKF_param.Map_Q = eye(2).*1.0E-6;
 n = agent.model.dim(1);
 EKF_param.P = eye(n); %
+EKF_param.range = range;
 %     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;
 EKF_param.list=["p","q"];
 Estimator.param=EKF_param;

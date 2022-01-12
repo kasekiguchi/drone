@@ -23,7 +23,7 @@ classdef DataPlot<handle
             %     "Eval",
             %     "Covxv",
             "ExitFlag",
-            "MapMovie",
+%             "MapMovie",
             %     "MapAndPreMapMovie",
             %     "Entropy",
             "RMSE",

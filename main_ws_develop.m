@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=300;
+    te=650;
 end
 %% initialize
 initial(N) = struct;
@@ -65,38 +65,49 @@ for i = 1:N
     agent(i).set_property("env",Env_FloorMap_sim_circle(i)); 
     %% set sensors property
     agent(i).sensor=[];
-    agent(i).set_property("sensor",Sensor_LiDAR(i, struct('noise',realsqrt(1.0E-3) ) )  );%LiDAR seosor
+    SensorRange = 20;
+    agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',realsqrt(1.0E-3) ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
-%             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+%             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i),SensorRange));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),SensorRange));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i)));
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));
     %% set reference property
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
     velocity = 0.5;
-    w_velocity = 0.05;
+    w_velocity = 0.5;
     
 %     WayPoint = [100,0,0,0,0];
 %      WayPoint = [55,8,0,0,0;
 %          55,15,pi/2,0,0;
 %          -45,15,pi,0,0;
-%          -45,8,3*pi/2,0,0;
+%          -45,8,3*pi/2,0,0;f
 %          55,8,2*pi,0,0];%[x y theta v omaga]
-    WayPoint = [48,-2,0,0,0;
-        48,48,pi/2,0,0;
-        -2,48,pi,0,0;
-        -2,-2,3*pi/2,0,0;
-        48,-2,2*pi,0,0];
-    convjudge = 0.5;%収束判断
-    Holizon = 10;
+ WayPoint = [48,-2,0,0;
+        48,48,pi/2,0;
+        -2,48,pi,0;
+        -2,-2,-pi/2,0;
+        48,-2,0,0];
+%     WayPoint = [48,-2,0,0;
+%         48,-2,pi/2,0;
+%         48,48,pi/2,0;
+%         48,48,pi,0;
+%         -2,48,pi,0;
+%         -2,48,3*pi/2,0;
+%         -2,-2,3*pi/2,0;
+%         -2,-2,0,0;
+%         48,-2,0,0];
+    convjudgeV = 0.5;%収束判断
+    convjudgeW = 0.1;%収束判断
+    Holizon = 3;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
-    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudge,initial,Holizon));
+    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
@@ -106,7 +117,7 @@ agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));
 %         agent(i).set_property("controller",Controller_TrackingFB(i,[1,0;0,1],dt));
 %     agent(i).set_property( "controller", Controller_LocalPlanningForODV(i,dt) );
 % agent(i).set_property( "controller", Controller_LocalPlanningForODVADI(i,dt) );
-%     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
+%     Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);%
     %% set Analysis property
 %     agent(i).analysis = [];
 %     agent(i).set_property("analysis",Analysis_ContEval());
@@ -122,18 +133,18 @@ LogData=[
     "estimator.result.state.p",
     "estimator.result.state.q",
     "estimator.result.state.v",
-    "estimator.result.state.w",
+%     "estimator.result.state.w",
     "plant.state.v",
-    "plant.state.w",
+%     "plant.state.w",
     "estimator.result.map_param.x",
     "estimator.result.map_param.y",
     "estimator.result.P",
     "estimator.result.AssociationInfo.index",
     "estimator.result.AssociationInfo.distance",
     "reference.result.state.xd",
-    "controller.result.fval",
+%     "controller.result.fval",
     "controller.result.exitflag",
-    "controller.result.eachfval",
+%     "controller.result.eachfval",
     "sensor.result.sensor_points",
     "sensor.result.angle",
     "sensor.result.length",
@@ -142,13 +153,13 @@ LogData=[
 %         "estimator.result.PreMapParam.y",
     "env.Floor.param.Vertices",
     %    "reference.result.state.xd",
-    "inner_input",
+%     "inner_input",
     "input"
     ];
 SubFunc = [
 %     "ContEval",
 %     "TrajectoryErrorDis",
-    "ObserbSubFIM",
+%     "ObserbSubFIM",
     ];
 if ~isempty(agent(1).plant.state)
     LogData=["plant.state.p";LogData]; % 実制御対象の位置
@@ -250,6 +261,7 @@ while round(time.t,5)<=te
 %         else
 %             agent(i).input = [1,0];
 %         end
+%  agent(i).input = [1,0,0];
 
 % if time.t<1
 %     agent(i).input = [0,0,www-0.1];
@@ -277,23 +289,23 @@ while round(time.t,5)<=te
         
         %for a model
 %                             if time.t<=0.5
-%                                 agent(i).input = [1/1.2,2 * pi/kakudo];
+%                                 agent(i).input = [1/1.2;2 * pi/kakudo];
 %                             elseif time.t>0.5&&time.t<=1.1
-%                                 agent(i).input = [1/1.2,-2 * pi/kakudo];
+%                                 agent(i).input = [1/1.2;-2 * pi/kakudo];
 %                             elseif time.t>=10 && time.t<=10.5
-%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                                 agent(i).input = [0;-4 * pi/kakudo];
 %                             elseif time.t>10.5 && time.t<11
-%                                 agent(i).input = [0,4 * pi/kakudo];
+%                                 agent(i).input = [0;4 * pi/kakudo];
 %                             elseif time.t>=30 && time.t<=30.5
-%                                 agent(i).input = [0,4 * pi/kakudo];
+%                                 agent(i).input = [0;4 * pi/kakudo];
 %                             elseif time.t>30.5 && time.t<31
-%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                                 agent(i).input = [0;-4 * pi/kakudo];
 %                             elseif time.t>=40 && time.t<=40.5
-%                                 agent(i).input = [0,-4 * pi/kakudo];
+%                                 agent(i).input = [0;-4 * pi/kakudo];
 %                             elseif time.t>40.5 && time.t<41
-%                                 agent(i).input = [0,4 * pi/kakudo];
+%                                 agent(i).input = [0;4 * pi/kakudo];
 %                             else
-%                                 agent(i).input = [0,0];
+%                                 agent(i).input = [0;0];
 %                             end
 % %         
 % if time.t<=0.5

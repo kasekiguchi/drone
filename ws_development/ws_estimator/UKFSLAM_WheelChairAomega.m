@@ -42,7 +42,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
             obj.constant.ZeroThreshold = 1e-3; % Under this threshold, it is zero.
             obj.constant.CluteringThreshold = 0.5; % Split a cluster using distance from next point
-            obj.constant.SensorRange = 20; % Max scan range
+            obj.constant.SensorRange = param.SensorRange; % Max scan range
             %------------------------------------------
         end
         
@@ -58,7 +58,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
                 cell2mat(arrayfun(@(i) PreXh - sqrt(StateCount + obj.k) * CholCov(:,i) , 1:StateCount , 'UniformOutput' , false))];%sigma point
             weight = [obj.k/(StateCount + obj.k), 1/(2*(StateCount + obj.k))];
             if isempty(obj.self.input)
-                u=[0,0];
+                u=[0;0];
             else
                 u = obj.self.input;
             end

@@ -45,7 +45,7 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
             obj.constant.ZeroThreshold = 1e-3; % Under this threshold, it is zero.
             obj.constant.CluteringThreshold = 0.5; % Split a cluster using distance from next point
-            obj.constant.SensorRange = 20; % Max scan range
+            obj.constant.SensorRange = param.range; % Max scan range
             %------------------------------------------
 %             obj.Analysis.Gram = param.Gram;
 %             obj.Analysis.Gram.SaveP(obj.result.P);
@@ -61,13 +61,13 @@ classdef EKFSLAM_WheelChairA < ESTIMATOR_CLASS
             if isfield(obj.self.controller,'result')
                 if ~isempty(obj.self.controller.result)
                     u = obj.self.controller.result.input;
-                    cparamK = obj.self.model.param.K;
-                    u(1) = u(1) * cparamK;
+%                     cparamK = obj.self.model.param.K;
+%                     u(1) = u(1) * cparamK;
                 else
-                    u=[0,0];
+                    u=[0;0];
                 end
             else
-                u=[0,0];
+                u=[0;0];
             end
             %
             measured.angles = sensor.angle - xh_pre(3);%
