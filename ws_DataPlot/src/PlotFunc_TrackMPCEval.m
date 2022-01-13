@@ -25,7 +25,8 @@ if Flag
     ColorCodes = [0.3922,0.8314,0.0745;...
                    0.3020,0.7451,0.9333;...
                    0.8510,0.3255,0.0980;...
-                   0.4941,0.1843,0.5569];
+                   0.4941,0.1843,0.5569;...
+                   0.3922,0.8314,0.0745];
     %make figure
     for fi = 1:NameSize
         figure(FigNum)
@@ -40,7 +41,7 @@ if Flag
         % pbaspect([abs(xmin -xmax) abs(ymin -ymax) 1]);
         % axis equal;
         xlim([min(Time) max(Time)]);
-        ylim([0 5]);
+%         ylim([0 5]);
         xlabel('t [s]');ylabel('Eval');
         % xticks([-50:20:200]);yticks([-20:20:20])
         %---テンプレ部分---%
