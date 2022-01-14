@@ -28,8 +28,13 @@ classdef Drone_Exp_Model < MODEL_CLASS
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
+                    if isnumeric(param.port)
+                        param.port = strcat("COM",string(param.port));
+                    else
+                        param.port = char(param.port);
+                    end
                     obj.connector=SERIAL_CONNECTOR(param);
-                    fprintf("Drone %d is ready\n",param.port);
+                    fprintf("Drone %s is ready\n",param.port);
             end
         end
         function do(obj,u,varargin)

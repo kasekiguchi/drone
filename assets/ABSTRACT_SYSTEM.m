@@ -274,7 +274,7 @@ end
 
 function mustBeInPropList(s)
 
-    if ~(sum(strcmp(s, {'model', 'sensor', 'estimator', 'controller', 'reference', 'connector', 'env'})))
+    if ~(sum(strcmp(s, {'model', 'sensor', 'estimator', 'controller', 'reference', 'connector', 'env','input_transform'})))
         eidType = 'mustBeInPropList:notProp';
         msgType = 'ACSL : Input must be a property of this class.';
         throwAsCaller(MException(eidType, msgType))
