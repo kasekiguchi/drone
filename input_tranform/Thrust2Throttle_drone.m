@@ -43,15 +43,18 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
             obj.flight_phase = cha;
 
             if cha == 't' || cha == 'f' || cha == 'l'
-                throttle_offset = obj.param.throttle_offset;
-                what = obj.self.model.state.w;
+                throttle_offset = obj.param.th_offset;
+                %what = obj.self.model.state.w;
+                what = obj.self.estimator.result.state.w;
                 P = obj.self.model.param;
                 % statetmp=obj.self.estimator.result.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.estimator.result.state.get(),obj.self.input,P);% euler approximation
                 %statetmp=obj.self.model.state.get();% do_modelで事前予測を求めている．
-                statetmp = obj.self.model.state.get() + obj.self.model.dt * obj.self.model.method(obj.self.model.state.get(), obj.self.input, P); % euler approximation
-                obj.state.set_state(statetmp);
-                whatn = obj.state.w; %statetmp(end-2:end);
-                %whatn = obj.self.model.state.w;% １時刻先の事前予測
+                
+%                 statetmp = obj.self.model.state.get() + obj.self.model.dt * obj.self.model.method(obj.self.model.state.get(), obj.self.input, P); % euler approximation
+%                 obj.state.set_state(statetmp);
+%                 whatn = obj.state.w; %statetmp(end-2:end);
+                
+                whatn = obj.self.model.state.w;% １時刻先の事前予測
                 T_thr = sum(input); % T_thr = input(1);
 
                 % TODO : 以下であるべきでは？　要チェック

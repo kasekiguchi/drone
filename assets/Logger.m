@@ -57,9 +57,10 @@ classdef Logger < handle
             obj.Data.t(obj.k) = t;
             cha = get(FH, 'currentcharacter');
             obj.Data.phase(obj.k) = cha;
-            if length(items) ~= length(obj.items)
-                warning("ACSL : number of logging data is wrong");
-            end
+% TODO : activate warning            
+%            if isempty(items{1}) | length(items) ~= length(obj.items)
+%                 warning("ACSL : number of logging data is wrong");
+%             end
             for i = obj.items
                 obj.Data.(obj.items(i))(obj.k, :) = items{i};
                 % 注：サイズの固定されている数値データだけ保存可能
@@ -143,7 +144,7 @@ classdef Logger < handle
             end
             [variable, vrange] = obj.full_var_name(variable, attribute);
             attribute = "";
-            data_range = find((obj.Data.t - option.time(1)) > 0, 1) - 1:find((obj.Data.t - option.time(2)) >= 0, 1);
+            data_range = find((obj.Data.t - option.time(1)) > 0, 1):find((obj.Data.t - option.time(2)) >= 0, 1);
             if sum(strcmp(n, {'time', 't'}))     % 時間軸データ
                 data = obj.Data.t(data_range);
             elseif n == 0                        % obj.itmesのデータ

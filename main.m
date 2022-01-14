@@ -9,8 +9,8 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 2;   % number of agents
-fExp = 0 %1：実機　それ以外：シミュレーション
+N = 1;   % number of agents
+fExp = 1 %1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -35,7 +35,15 @@ if fExp
   if fMotive
     %rigid_ids = [1,2];
     %motive = Connector_Natnet('ClientIP', '192.168.1.9', 'rigid_list', rigid_ids); % Motive
-    [COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.9')
+    %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.9')
+%% set connector (global instance)
+rigid_ids = [1];
+motive = Connector_Natnet('ClientIP', '192.168.1.9'); % Motive
+COMs = "COM29";
+%[COMs,rigid_ids,motive,initial_yaw_angles] = build_MASystem_with_motive('192.168.1.9'); % set ClientIP
+N = length(COMs);
+initial_yaw_angles = [0];
+motive.getData([],[]);
   end
 
 else
@@ -150,7 +158,7 @@ for i = 1:N
   agent(i).sensor = [];
   %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
   if fMotive
-    agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i),motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
+    agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i),initial_yaw_angles(i),motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
   end
 
   if fROS

@@ -20,7 +20,7 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
         param {mustBeSpecifiedStructure}
         option.baudrate = 115200 % Arduinoと合わせる
       end
-      obj.port=strcat("COM",string(param.port));
+      obj.port=param.port;
       obj.baudrate = option.baudrate;
       obj.serial = serialport(obj.port,obj.baudrate,'Timeout',1);
       configureTerminator(obj.serial,"CR/LF");

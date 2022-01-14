@@ -8,15 +8,19 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 %% general setting
-N = 2; % number of agents
+%N = 1; % number of agents
 dt = 0.025; % sampling time
 ts = 0;
 te = 1000;
 
 %% set connector (global instance)
-%rigid_ids = [1,2];
-%Connector_Natnet(struct('ClientIP', '192.168.1.9', 'rigid_list', rigid_ids)); % Motive
-[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.9'); % set ClientIP
+rigid_ids = [1];
+motive = Connector_Natnet('ClientIP', '192.168.1.9'); % Motive
+COMs = "COM29";
+%[COMs,rigid_ids,motive,initial_yaw_angles] = build_MASystem_with_motive('192.168.1.9'); % set ClientIP
+N = length(COMs);
+initial_yaw_angles = [0];
+motive.getData([],[]);
 
 %% initialize
 disp("Initialize state");
@@ -32,14 +36,14 @@ for i = 1:N
     initial(i).v = [0; 0; 0];
     initial(i).w = [0; 0; 0];
 end
-COM = [25,3];%25,3
-if length(COM)~=N
+%COMs = [25,3];%25,3
+if length(COMs)~=N
     error("ACSL : All drones should assigned COM port.");
 end
 for i = 1:N
     %% generate Drone instance
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
-    agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COM(i))); % for exp % 機体番号（ArduinoのCOM番号）
+    agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
     agent(i).input = [0; 0; 0; 0];
 
     %% model
@@ -51,7 +55,7 @@ for i = 1:N
 
     %% set sensors property
     agent(i).sensor = [];
-    agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i),motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
+    agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i),initial_yaw_angles(i),motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     %% set estimator property
     agent(i).estimator = [];
     agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-3, 1e-5])); % （剛体ベース）EKF
@@ -60,7 +64,7 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_agreement(N)); % Voronoi重心
+%    agent(i).set_property("reference",Reference_agreement(N)); % Voronoi重心
 
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -76,15 +80,18 @@ end
 
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
-LogData = [
-    "inner_input"
-        ];
+LogData = [% agentのメンバー関係以外のデータ
+  ];
+LogAgentData = [% 下のLogger コンストラクタで設定している対象agentに共通するdefault以外のデータ
+  %"model.state.p"
+  "controller.result"
+  ];
 
 if isfield(agent(1).reference, 'covering')
-    LogData = [LogData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
+  LogAgentData = [LogAgentData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
 end
 
-logger = Logger(agent, size(ts:dt:te, 2), LogData);
+logger = Logger(1:N, size(ts:dt:te, 2), 1, LogData, LogAgentData);
 %%
 time = Time();
 time.t = ts;
@@ -137,8 +144,8 @@ try
 %            param.reference.tvLoad = {time};
 %            param.reference.wall = {1};
 %  Point referenceに対応したparameterはcell配列の最後に配置する。
-            param.reference.list{1} = {logger,N,time.t};
-            param.reference.list{2} = {FH, [2; 1; 1], time.t};
+            %param.reference.list{1} = {logger,N,time.t};
+            param.reference.list{1} = {FH, [2; 1; 1], time.t};
         for i = 1:N
             agent(i).do_reference(param.reference.list);
         end
@@ -167,7 +174,7 @@ try
         %% logging
         calculation1 = toc(tStart);
         time.t = time.t + calculation1;
-        logger.logging(time.t, FH);
+        logger.logging(time.t, FH,agent,[]);
         calculation2 = toc(tStart);
         time.t = time.t + calculation2 - calculation1;
     end
@@ -194,13 +201,14 @@ clc
 
 % logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);
 %logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
-%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_num',2,'row_col',[1 2]));
+%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_nu
+% m',2,'row_col',[1 2]));
  %logger.plot(2,["p1-p2-p3"],["sep"],struct('fig_num',2,'row_col',[1 2]));
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["xd1:3","p"],["r","r"],struct('time',12));
 %logger.plot(1,["p","q","v"],["e","e","e"]);
 %logger.plot(1,["p","q","v","input","w"],["re","e","e","","e"]);
-logger.plot(1,["p"],["r"]);
+logger.plot({1,"q","s"},{1,"q","e"},{1,'v','e'},{1,'w','e'},{1,"input",""});
 
 %%
 %logger.save();

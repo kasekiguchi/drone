@@ -3,8 +3,6 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
     %  param : HostIP, ClientIP
     properties
         result
-        rigid_list
-        initq
     end
     properties (NonCopyable = true, SetAccess = private )
         init_time  % first getData time
@@ -21,10 +19,8 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
     methods
         function obj = NATNET_CONNECTOR(info)
           arguments
-            info.HostIP string
-            info.ClientIP string
-            info.rigid_list string = ""
-            info.yaws double = 0
+            info.HostIP char
+            info.ClientIP char
           end
             %-- connection NatNetClient
             disp('Connect to Motive')
@@ -41,17 +37,11 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             ModelDescription = obj.NatnetClient.getModelDescription;
             % get frame from motive
             Frame = obj.NatnetClient.getFrame;
-            obj.initq = quaternion(eul2quat([info.yaws 0 0]));% eul2quat default is ZYX
             obj.result.rigid_num = ModelDescription.RigidBodyCount;
             omnum = 0;
             obj.on_marker = cell(1,obj.result.rigid_num);
-            if strcmp(info.rigid_list,"")
-              obj.rigid_list = 1:obj.result.rigid_num;
-            else
-              obj.rigid_list = info.rigid_list;
-            end
-            obj.result.rigid(length(obj.rigid_list)) = struct('p',[],'q',[]);
-            for i = obj.rigid_list
+            obj.result.rigid(obj.result.rigid_num) = struct('p',[],'q',[]);
+            for i = 1:obj.result.rigid_num
                 obj.on_marker_nums(i) = ModelDescription.MarkerSet(i).MarkerCount;
                 obj.on_marker{i} = zeros(obj.on_marker_nums(i),3);
                 for k = 1:obj.on_marker_nums(i)
@@ -99,16 +89,12 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             
             % %Get obj.Data and Organize
             % %also organizing obj.Data in the same way in main.m
-            j = 1;
-            for i = obj.rigid_list
+            for i = 1:obj.result.rigid_num
                 body = Frame.RigidBody(i);
                 obj.result.rigid(i).p = double([body.x; -body.z; body.y]); % 軸の対応関係注意
                 
                 %% quaternion
-                tmpq = quaternion([body.qw; body.qx; -body.qz; body.qy]); % 軸の対応関係注意
-                tmpq = tmpq*obj.initq(i);  % 剛体定義時の誤差修正
-                [Q(1),Q(2),Q(3),Q(4)] = parts(tmpq);
-                obj.result.rigid(i).q = Q;
+                obj.result.rigid(i).q = double([body.qw, body.qx, -body.qz, body.qy]'); % 軸の対応関係注意
             end
             obj.result.marker = zeros(obj.result.marker_num,3);
             for i = 1:obj.result.marker_num
