@@ -22,7 +22,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     properties % (Abstract) % General param
         % ここから先のproperty は各名前のクラスのインスタンス : 例 model
         model % MODEL_CLASSのインスタンス（コントローラモデル）
-        sensor % 複数のセンサをpropertyとして持つ
+        sensor % 複数のセンサをpropertyとして持つ、並列で扱われる
         controller % 複数の場合定義された順番に計算される
         estimator % 複数の場合定義された順番に計算される
         reference % 複数の場合定義された順番に計算される
@@ -36,33 +36,27 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         inner_input
     end
 
-    properties %(Access = {?Logger,?SENSOR_CLASS,?CONNECTOR_CLASS}) % plant, state
-        %(SetAccess = GetAccess={?SENSOR_CLASS}) % SENSOR_CLASSは読み取りのみ
+    properties
         id
         plant % MODEL_CLASSのインスタンス（プラントモデル）
     end
 
     %% Plant
-    methods (Access = private) % set plant
-
-        function set_plant(obj, args)
-
+    methods
+        function obj = ABSTRACT_SYSTEM(args)
             arguments
-                obj
-                args {mustBePlantStructure}
+                args.type
+                args.name
+                args.param = []
+                args.id = 0
             end
-
-            if isfield(args, 'id')
-                obj.id = args.id;
-            end
-
             plant_subclass = str2func(args.type);
             obj.plant = plant_subclass(args.param);
         end
 
     end
 
-    methods %(Access = private)
+    methods
 
         function do_plant(obj, varargin)
 
@@ -95,17 +89,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
 
     %% General
-    methods % Constructor
-
-        function obj = ABSTRACT_SYSTEM(varargin)
-
-            if ~isempty(varargin{1}{1})
-                obj.set_plant(varargin{1}{1}{1});
-            else
-                obj.set_plant();
-            end
-
-        end
+    methods
 
         function set_input(obj, input)
             % controller result も上書きするべきでは？
@@ -117,6 +101,16 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     methods % Set methods
 
         function set_model(obj, args)
+          obj.c_set_model(args{:});
+        end
+        function c_set_model(obj,args)
+          arguments
+              obj
+              args.type
+              args.name
+              args.param = []
+              args.id = 0
+            end
             model_subclass = str2func(args.type);
             obj.model = model_subclass(args.param);
         end
