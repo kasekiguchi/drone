@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1;   % number of agents
-fExp = 1 %1：実機　それ以外：シミュレーション
+fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -29,6 +29,7 @@ if fExp
 else
   te = 10;
 end
+initial_yaw_angles = [0];
 
 %% set connector (global instance)
 if fExp
@@ -108,6 +109,7 @@ else
   end
 
 end
+%%
 if fExp
   %COMs = [25,3];
   if length(COMs)~=N
@@ -123,20 +125,20 @@ for i = 1:N
     %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
     agent(i).input = [0; 0; 0; 0];
   else
-    agent(i) = Drone(Model_Quat13(i, dt, 'plant', initial(i))); % unit quaternionのプラントモデル : for sim
-    %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
-    %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % 牽引物込みのプラントモデル : for sim
-    %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
-    %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
+    agent(i) = Drone(Model_Quat13(dt, 'plant', initial(i),i)); % unit quaternionのプラントモデル : for sim
+    %agent(i) = Drone(Model_EulerAngle(dt,'plant',initial(i),i)); % euler angleのプラントモデル : for sim
+    %agent(i) = Drone(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
+    %agent(i) = Drone(Model_Discrete0(dt,'plant',initial(i),i)); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
+    %agent(i) = Drone(Model_Discrete(dt,'plant',initial(i),i)); % 離散時間質点モデル : PD controller などを想定
   end
 
   %% model
   % set control model
-  agent(i).set_model(Model_EulerAngle(i, dt, 'model', initial(i))); % オイラー角モデル
-  %agent(i).set_model(Model_Quat13(i,dt,'model',initial(i))); % オイラーパラメータ（unit quaternion）モデル
-  %agent(i).set_model(Model_Suspended_Load(i,dt,'model',initial(i))); %牽引物込みモデル
-  %agent(i).set_model(Model_Discrete0(i,dt,'model',initial(i))) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-  %agent(i).set_model(Model_Discrete(i,dt,'model',initial(i))) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+  agent(i).set_model(Model_EulerAngle(dt, 'model', initial(i),i)); % オイラー角モデル
+  %agent(i).set_model(Model_Quat13(dt,'model',initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
+  %agent(i).set_model(Model_Suspended_Load(dt,'model',initial(i),i)); %牽引物込みモデル
+  %agent(i).set_model(Model_Discrete0(dt,'model',initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+  %agent(i).set_model(Model_Discrete(dt,'model',initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
   close all
   %% set input_transform property
   if fExp %isa(agent(i).plant,"Lizard_exp")
@@ -197,11 +199,11 @@ for i = 1:N
   %          if i ==1
   %             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;0])); % ハート形[x;y;z]永久
   %         else
-  %             agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
+               agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0.5;0;1])); % ハート形[x;y;z]永久
   %         end
   %     end
   %     agent(i).set_property("reference",Reference_Wall_observation()); % ハート形[x;y;z]永久
-  agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
+  %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
 
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -397,7 +399,8 @@ clc
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"reference.result.state.xd","e",'time',[1 2]));
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"input","",'time',[1 2]));
 %logger.data(1,"state.p","e","time",[0 3])
-logger.plot({1,"p1","e"},{2,["p"],["se"]},{1,"estimator.result.state.p",""},{2,"state.v","e"},'time',[0,2],'fig_num',2);
+%logger.plot({1,"p1","e"},{2,["p"],["se"]},{1,"estimator.result.state.p",""},{2,"state.v","e"},'time',[0,2],'fig_num',2);
 %logger.plot({2,"p","se"},{1,"p1-p2-p3","es"},'fig_num',2);
+logger.plot({1,"p","e"})
 %%
 %logger.save();

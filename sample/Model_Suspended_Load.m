@@ -1,10 +1,12 @@
-function Model = Model_Suspended_Load(id,dt,type,initial,varargin)
-% model class demo : quaternion model with 13 states
-if ~isempty(varargin)
-    Setting = varargin{1};
+function Model = Model_Suspended_Load(dt,plant_or_model,initial,id)
+arguments
+  dt
+  plant_or_model
+  initial
+  id = 0
 end
-Model.type="Suspended_Load_Model"; % class name
-Model.name="load"; % print name
+type="Suspended_Load_Model"; % class name
+name="load"; % print name
 Setting.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)];
 Setting.dim=[24,4,19];
 Setting.input_channel = ["f","M"];
@@ -22,11 +24,7 @@ Setting.dt = dt;
 Setting.param = getParameter_withload; % モデルの物理パラメータ設定
 Setting.initial.pL = Setting.initial.p+Setting.param(16)*Setting.initial.pT+[Setting.param(17);Setting.param(18);-Setting.param(19)];
 if strcmp(type,"plant")
-        Model.id = id;
         Setting.param = getParameter_withload("Plant"); % モデルの物理パラメータ設定
-       % Setting.initial.p = 10*rand(3,1)+[40;20;0];
-        Model.param=Setting;
-else
-        Model.param=Setting;
 end
+Model = {"type",type,"name",name,"param",Setting,"id",id};
 end
