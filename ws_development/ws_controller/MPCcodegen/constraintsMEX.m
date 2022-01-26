@@ -20,15 +20,15 @@ for L = 2:params.Num
 end
 ceq = [X(:, 1) - params.X0, tmpceq];
 %---入力の情怪訝制約を設定---%
-cineq(1,:) = arrayfun(@(L) -params.S(1)+U(1,L),1:params.Num);%速度入力の上限
-cineq(2,:) = arrayfun(@(L) -params.S(2)+U(2,L),1:params.Num);%角速度の上限
-cineq(3,:) = arrayfun(@(L) -params.S(1)-U(1,L),1:params.Num);%速度入力の下限
-cineq(4,:) = arrayfun(@(L) -params.S(2)-U(2,L),1:params.Num);%角速度の下限
+% cineq(1,:) = arrayfun(@(L) -params.S(1)+U(1,L),1:params.Num);%速度入力の上限
+% cineq(2,:) = arrayfun(@(L) -params.S(2)+U(2,L),1:params.Num);%角速度の上限
+% cineq(3,:) = arrayfun(@(L) -params.S(1)-U(1,L),1:params.Num);%速度入力の下限
+% cineq(4,:) = arrayfun(@(L) -params.S(2)-U(2,L),1:params.Num);%角速度の下限
 
 cineq(5,:) = arrayfun(@(L) -S(1,L),1:params.Num);
 cineq(6,:) = arrayfun(@(L) -S(2,L),1:params.Num);
 end
 function dX = Model(x,u,param)
-    u(1) = param.K * u(1);
+    u = param.K * u;
     dX = [x(4)*cos(x(3));x(4)*sin(x(3));u(2);u(1)];
 end

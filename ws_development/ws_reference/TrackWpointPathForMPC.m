@@ -80,7 +80,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
             switch obj.PointFlag
                 case 0
                     NextPoint = obj.PreTrack(1:2,1) + [obj.SensorRange*cos(obj.Tracktheta);obj.SensorRange*sin(obj.Tracktheta)];
-                    [OverWall,~,CrossPoint] = judgeingOverWall(EstData(1:2,:),NextPoint,MatchXs,MatchXe,MatchYs,MatchYe,MatchA,MatchB,MatchC);
+                    [OverWall,~,CrossPoint] = judgeingOverWall(obj.PreTrack(1:2,1),NextPoint,MatchXs,MatchXe,MatchYs,MatchYe,MatchA,MatchB,MatchC);
                     if OverWall == true
                         obj.PointFlag = 1;
                         NextWayPoint = CrossPoint + [obj.Crossbuffer*cos(obj.Tracktheta+pi);obj.Crossbuffer*sin(obj.Tracktheta+pi)];%目標点の手前obj.Crossbuffer分
@@ -211,7 +211,7 @@ if ~isempty(tt(:))
     b2 = MatchB(tt);
     c2 = MatchC(tt);
     y = (a2*c - a*c2)/(a*b2 - a2*b);
-    x = (-b*y-c)/a;
+    x = (-b2*y-c2)/a2;
     CrossPoint = [x;y];
 else
     OverWall = false;

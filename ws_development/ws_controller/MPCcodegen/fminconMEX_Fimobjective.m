@@ -2,7 +2,7 @@
 %Author Sota Wada; Date 2021_10_21
 % -------------------------------------------------------------------------
 function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_Fimobjective(x0,param,NoiseR,SensorRange,RangeGain)
-assert(isa(x0,'double'));assert(all(size(x0)==	[8,2]));
+assert(isa(x0,'double'));assert(all(size(x0)==	[8,3]));
 assert(isa(param,'struct'));
 assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
 assert(isa(param.dt,'double'));assert(all(size(param.dt)==	[1,1]));
@@ -13,11 +13,11 @@ assert(isa(param.Num,'double'));assert(all(size(param.Num)==	[1,1]));
 assert(isa(param.Q,'double'));assert(all(size(param.Q)==	[4,4]));
 assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
 assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
-assert(isa(param.T,'double'));assert(all(size(param.T)==	[1,1]));
+assert(isa(param.T,'double'));assert(all(size(param.T)==	[2,2]));
 assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
 assert(isa(param.WoS,'double'));assert(all(size(param.WoS)==	[2,2]));
 assert(isa(param.Evfim,'double'));assert(all(size(param.Evfim) == [1,1]));
-assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,2]));
+assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,3]));
 assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
 assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));
 assert(isa(param.phi,'double'));assert(all(size(param.phi)>=	[1,1]));assert(all(size(param.phi)<=	[1,629]));
@@ -58,16 +58,16 @@ for j = 1:params.H
     H = (params.dis(:) - X(1,j).*cos(params.alpha(:)) - X(2,j).*sin(params.alpha(:)))./cos(params.phi(:) - params.alpha(:) + X(3,j));%observation
 %     RangeLogic = H<SensorRange;
     RangeLogic = (tanh(RangeGain*(SensorRange - H))+1)/2;
-    tmpFim = FIMVT_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(:), params.alpha(:), params.phi(:));
+%     tmpFim = FIMVT_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(:), params.alpha(:), params.phi(:));
 %     tmpFim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(:), params.alpha(:), params.phi(:));
-    Fim = RangeLogic(1) .* tmpFim(1:2,:);
-    for i = 2:length(tmpFim)/2
-        Fim = Fim + RangeLogic(i) .* tmpFim(2*i-1:2*i,:);
+    Fim = RangeLogic(1) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
+    for i = 2:length(params.dis)
+        Fim = Fim + RangeLogic(i) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
     end
     Fim = (1/(2*NoiseR))*Fim;
     InvFim = inv(Fim);
     evFim(1,j) = trace(InvFim);
-    %     evFim(1,j) = real(max(eig(InvFim)));
+%         evFim(1,j) = real(max(eig(InvFim)));
 %     evFim(:,2*j-1:2*j) = InvFim' * params.T * InvFim;
 end
 %-- 状態及び入力のステージコストを計算
@@ -363,10 +363,10 @@ ceq = [X(:, 1) - params.X0, tmpceq];%初期時刻を現在状態に固定，モ�
 %     %     evFim(:,2*j-1:2*j) = InvFim' * params.T * InvFim;
 % end
 %---入力の情怪訝制約を設定---%
-cineq(1,:) = arrayfun(@(L) -params.S(1)+U(1,L),1:params.Num);%速度入力の上限
-cineq(2,:) = arrayfun(@(L) -params.S(2)+U(2,L),1:params.Num);%角速度の上限
-cineq(3,:) = arrayfun(@(L) -params.S(1)-U(1,L),1:params.Num);%速度入力の下限
-cineq(4,:) = arrayfun(@(L) -params.S(2)-U(2,L),1:params.Num);%角速度の下限
+% cineq(1,:) = arrayfun(@(L) -params.S(1)+U(1,L),1:params.Num);%速度入力の上限
+% cineq(2,:) = arrayfun(@(L) -params.S(2)+U(2,L),1:params.Num);%角速度の上限
+% cineq(3,:) = arrayfun(@(L) -params.S(1)-U(1,L),1:params.Num);%速度入力の下限
+% cineq(4,:) = arrayfun(@(L) -params.S(2)-U(2,L),1:params.Num);%角速度の下限
 % cineq(3,:) = [-params.S(1)-S(1,1)+(U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) -S(1,L) + (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量上限
 % cineq(4,:) = [-params.S(2)-S(2,1)+(U(2,1) - params.U0(2)),arrayfun(@(L) - params.S(2) -S(2,L) + (U(2,L) - U(2,L-1)),2:params.Num)];%角速度入力の変化量上限
 cineq(5,:) = arrayfun(@(L) -S(1,L),1:params.Num);

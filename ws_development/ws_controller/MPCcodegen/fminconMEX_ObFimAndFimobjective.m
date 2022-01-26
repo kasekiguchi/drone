@@ -2,7 +2,7 @@
 %Author Sota Wada; Date 2021_10_21
 % -------------------------------------------------------------------------
 function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_ObFimAndFimobjective(x0,param,NoiseR,SensorRange,RangeGain)
-assert(isa(x0,'double'));assert(all(size(x0)==	[8,2]));
+assert(isa(x0,'double'));assert(all(size(x0)==	[8,4]));
 assert(isa(param,'struct'));
 assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
 assert(isa(param.dt,'double'));assert(all(size(param.dt)==	[1,1]));
@@ -13,11 +13,11 @@ assert(isa(param.Num,'double'));assert(all(size(param.Num)==	[1,1]));
 assert(isa(param.Q,'double'));assert(all(size(param.Q)==	[4,4]));
 assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
 assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
-assert(isa(param.T,'double'));assert(all(size(param.T)==	[1,1]));
+assert(isa(param.T,'double'));assert(all(size(param.T)==	[3,3]));
 assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
 assert(isa(param.WoS,'double'));assert(all(size(param.WoS)==	[2,2]));
 assert(isa(param.Evfim,'double'));assert(all(size(param.Evfim) == [1,1]));
-assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,2]));
+assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,4]));
 assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
 assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));
 assert(isa(param.phi,'double'));assert(all(size(param.phi)>=	[1,1]));assert(all(size(param.phi)<=	[1,629]));
@@ -61,14 +61,14 @@ for j = 1:params.H
 %     tmpFim = FIMVT_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(:), params.alpha(:), params.phi(:));
 %     tmpobFim = FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(1), params.alpha(1), params.phi(1));
 %     tmpFim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(:), params.alpha(:), params.phi(:));
-    Fim = RangeLogic(1) * FIMVT_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
-    obFim = FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(1), params.alpha(1), params.phi(1));
+    Fim = RangeLogic(1) * FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
+    obFim = RangeLogic(1) * FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(1), params.alpha(1), params.phi(1));
     for i = 2:length(params.dis)
-        Fim = Fim + RangeLogic(i) * FIMVT_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
-        obFim = obFim + FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(i), params.alpha(i), params.phi(i));
+        Fim = Fim + RangeLogic(i) * FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
+        obFim = obFim + RangeLogic(i) * FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(i), params.alpha(i), params.phi(i));
     end
     Fim = (1/(2*NoiseR))*Fim;
-    obFim = (1/(2*NoiseR))*obFim;
+    obFim = (1/(2*NoiseR))*([obFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
     InvFim = inv(Fim);
     InvobFim = inv(obFim);
     evFim(1,j) = trace(InvobFim)*trace(InvFim);

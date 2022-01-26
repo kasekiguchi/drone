@@ -37,7 +37,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             % the constant value for estimating of the map
             obj.constant = struct; %constant parameter
             obj.constant.LineThreshold = 0.3; % Under the this threshold, the error from "ax + by + c" is allowed.
-            obj.constant.PointThreshold = 0.1; % Maximum distance between line and points in same cluster
+            obj.constant.PointThreshold = 0.2; % Maximum distance between line and points in same cluster
             obj.constant.GroupNumberThreshold = 5; % Minimum points number which is constructed cluster
             obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
             obj.constant.ZeroThreshold = 1e-3; % Under this threshold, it is zero.

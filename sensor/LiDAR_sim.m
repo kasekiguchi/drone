@@ -7,6 +7,8 @@ classdef LiDAR_sim < SENSOR_CLASS
         name = "LiDAR";
         result
         self
+        noise
+        t
         interface = @(x) x;
     end
     properties (Access = private) % construct したら変えない．
@@ -17,11 +19,13 @@ classdef LiDAR_sim < SENSOR_CLASS
     methods
         function obj = LiDAR_sim(self,param)
             obj.self=self;
+            obj.t = 0.1;
             %  このクラスのインスタンスを作成
             % radius, angle_range
             if isfield(param,'interface'); obj.interface = Interface(param.interface);end
             if isfield(param,'radius'); obj.radius = param.radius;         end
             if isfield(param,'angle_range');  obj.angle_range = param.angle_range;end
+            if isfield(param,'noise');  obj.noise = param.noise;end
         end
         
         function result = do(obj,param)
@@ -69,7 +73,9 @@ classdef LiDAR_sim < SENSOR_CLASS
                     result.sensor_points(i,:) = [0 0];
                 end
             end
-            result.length=vecnorm(result.sensor_points'); % レーザー点までの距離
+            rng(2*obj.t);
+            result.length=vecnorm(result.sensor_points') + obj.noise * randn(1,length(result.sensor_points)); % レーザー点までの距離
+            obj.t = obj.t + 0.1;
 %             result.angle = obj.angle_range;%レーザー点の角度
             %result.region=intersect(polyshape(result.sensor_points(:,1),result.sensor_points(:,2)),env); % 
             result.state = {};

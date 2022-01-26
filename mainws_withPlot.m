@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=650;
+    te=550;
 end
 %% initialize
 initial(N) = struct;
@@ -47,7 +47,7 @@ for i = 1:N
     if fExp
     else
 %                         agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
-        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',4.337E-5)));
+        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',2))));
 %                 agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
 %         agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));
     end
@@ -66,12 +66,12 @@ for i = 1:N
     %% set sensors property
     agent(i).sensor=[];
     SensorRange = 20;
-    agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',realsqrt(1.0E-3) ) )  );%LiDAR seosor
+    agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
 %     Gram = GrammianAnalysis(te,ts,dt);
 %             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i)));
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),SensorRange));
 %         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
 %     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
 %     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
@@ -105,7 +105,7 @@ for i = 1:N
         48,-2,0,0];
     convjudgeV = 0.5;%収束判断
     convjudgeW = 0.1;%収束判断
-    Holizon = 1;
+    Holizon = 3;
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
@@ -132,7 +132,7 @@ LogData=[
         "reference.result.state.p",
     "estimator.result.state.p",
     "estimator.result.state.q",
-%     "estimator.result.state.v",
+    "estimator.result.state.v",
 %     "estimator.result.state.w",
     "plant.state.v",
 %     "plant.state.w",
@@ -142,8 +142,8 @@ LogData=[
     "estimator.result.AssociationInfo.index",
     "estimator.result.AssociationInfo.distance",
 %     "reference.result.state.xd",
-%     "controller.result.fval",
-%     "controller.result.exitflag",
+    "controller.result.fval",
+    "controller.result.exitflag",
     "controller.result.eachfval",
     "sensor.result.sensor_points",
     "sensor.result.angle",
