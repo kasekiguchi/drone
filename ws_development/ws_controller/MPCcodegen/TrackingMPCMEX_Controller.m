@@ -28,15 +28,15 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([15,15,1,1]);
+            obj.param.Q = diag([10,10,1,1]);
             obj.param.R = diag([1,1]);
-            obj.param.Qf = diag([18,18,1,1]);
+            obj.param.Qf = diag([12,12,1,1]);
 %             obj.param.Qf = diag([17,17,1,1]);
-            obj.param.T = diag([40,40,40]);%Fisherのやつ
+            obj.param.T = diag([90,90,90]);%Fisherのやつ
             obj.param.S = [1,0.7];
             obj.param.WoS = diag([10,10]);%今は使ってない
             obj.param.Evfim = [10];%今は使ってない
-            obj.NoiseR = 1.0e-2;%param of Fisher Information matrix
+            obj.NoiseR = 3.0e-3;%param of Fisher Information matrix
             obj.RangeGain = 10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
 %             obj.param.Th = diag([1,1]);

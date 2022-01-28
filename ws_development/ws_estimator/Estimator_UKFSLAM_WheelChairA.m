@@ -13,7 +13,7 @@ UKF_param.Map_Q =1.0E-6;
 n = agent.model.dim(1);
 UKF_param.dim = n;
 UKF_param.P = eye(n); %
-UKF_param.k = 10;%
+UKF_param.k = 50;%
 UKF_param.NLP = 2;%Number of Line Param
 UKF_param.SensorRange = SensorRange;
 %     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;

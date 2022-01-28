@@ -13,10 +13,10 @@ if vFlag
     grid on
     axis equal
         plot(Time,Input(1,:),'Linewidth',3,'LineStyle',':','Color',plotcolor(1,:));
-    ylabel('State value [m/$s^2$]','Interpreter','latex');
+    ylabel('$a$ [m/$s^2$]','Interpreter','latex');
     yyaxis right
         plot(Time,Input(2,:),'Linewidth',3,'LineStyle',':','Color',plotcolor(2,:));
-    xlabel('t [s]','Interpreter','latex');ylabel('State value [rad/s]','Interpreter','latex');
+    xlabel('t [s]','Interpreter','latex');ylabel('$\omega$ [rad/s]','Interpreter','latex');
     legend('$v$','$w$','Location','northoutside','NumColumns',3,'Interpreter','latex')
     HYaxis = ax.YAxis;
     HYaxis(2).Color = 'k'; %  右軸ラベルの色変更
