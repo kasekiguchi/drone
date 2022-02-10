@@ -3,7 +3,7 @@ function Estimator = Estimator_EKFSLAM_WheelChair(agent,range)
 %% estimator class
 Estimator.name="ekfslam_WC";
 Estimator.type="EKFSLAM_WheelChairAOmega";%propose method
-EKF_param.Q = diag([1.0, 1.0, 1, 1e-1]);
+EKF_param.Q = diag([1.0, 1.0, 1.0, 1e-1]);
 % Estimator.type="EKFSLAM_WheelChairA";%propose method
 % EKF_param.Q = diag([1.0, 1.0, 1, 1, 1]);
 % Estimator.type="CmpEKFSLAM_WheelChair";%the compare method as 3 state

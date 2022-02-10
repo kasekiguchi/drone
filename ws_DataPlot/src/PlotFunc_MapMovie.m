@@ -104,18 +104,18 @@ if Flag
         tmp_plant_square = PlantData(:,mo_t) + Rscale.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
         plant_square =  polyshape( tmp_plant_square');
         plant_square =  rotate(plant_square,180 * PlantqData(mo_t) / pi, PlantData(:,mo_t)');
-        PlotPlant = plot(plant_square,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+        PlotPlant = plot(plant_square,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.7);
         %----------------%
         %---model plot---%
         tmp_model_square = EstData(:,mo_t) + Rscale.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
         model_square =  polyshape( tmp_model_square');
         model_square =  rotate(model_square,180 * EstqData(mo_t) / pi, EstData(:,mo_t)');
-        PlotEst = plot(model_square,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+        PlotEst = plot(model_square,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.7);
         %----------------%
         %---ref plot---%
         Plotref = plot(RefData(1,mo_t),RefData(2,mo_t),'o','Color',[0.8588,0.3882,0.2314],'LineWidth',2);
         %--------------%
-        Environment = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);% true map plot
+        Environment = plot(p_Area,'FaceColor','blue','FaceAlpha',0.1);% true map plot
 %         Sensor = plot(polybuffer([PlantData(1,mo_t),PlantData(2,mo_t)],'points',40),'FaceColor','blue','FaceAlpha',0.1);%Raser plot
         %Trajectory plot%
         %         addpoints(PlantTra,);

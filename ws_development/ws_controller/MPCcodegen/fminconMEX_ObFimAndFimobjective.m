@@ -69,7 +69,8 @@ for j = 1:params.H
     end
     Fim = (1/(2*NoiseR))*Fim;
     obFim = (1/(2*NoiseR))*([obFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
-    InvFim = inv(Fim);
+    InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim) +1e-8);
+%     InvFim = inv(Fim);
     InvobFim = inv(obFim);
     evFim(1,j) = trace(InvobFim)*trace(InvFim);
     %     evFim(1,j) = real(max(eig(InvFim)));
