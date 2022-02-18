@@ -62,9 +62,7 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             end
             vs = Vs(x,xd',vf,P,F2,F3,F4);
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            obj.result.input = [tmp(1);
-                tmp(2);tmp(3);
-                tmp(4)];
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
             result = obj.result;
         end

@@ -2,12 +2,17 @@ function Param = getParameter(varargin)
 % class化したほうが良い．
 % M, L, J x3, g, km x4, k x4
 %mass = 0.266;
-mass = 0.320;% DIATONE
-Length = 0.075;% モーター間の距離：正方形を仮定している
-Lx = 0.07;
-Ly = 0.07;
-lx = 0.035;
-ly = 0.035;
+mass = 0.269;% DIATONE
+Length = 0.1;% モーター間の距離：正方形を仮定している
+Lx = 0.1;
+Ly = 0.1;
+lx = 0.05;
+ly = 0.05;
+% Length = 0.075;% モーター間の距離：正方形を仮定している
+% Lx = 0.075;
+% Ly = 0.075;
+% lx = Lx/2;
+% ly = Ly/2;
 jx = 0.002237568;
 jy = 0.002985236;
 jz = 0.00480374;
@@ -45,7 +50,8 @@ param.k4 = k4;
 if size(varargin) >= 1
     if strcmp(varargin{1},'Plant')% for Plant parameter
 %        Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
-        Param= [mass, Lx,Ly,lx,ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
+%        Param= [mass, Length,Lx,Ly,lx,ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
+        Param= [mass,Lx,Ly,lx,ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
 %         Param = cell2mat(struct2cell(param))';
     else
         F = varargin{1};

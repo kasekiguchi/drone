@@ -35,7 +35,7 @@ classdef PointReference_FH < REFERENCE_CLASS
                 if strcmp(obj.flag,'l')
                     obj.result.state.p=gen_ref_for_landing(obj.result.state.p);
                 else% 初めてlanding に入ったとき
-                    obj.result.state.p=gen_ref_for_landing(obj.self.estimator.result.state.p);
+                    obj.result.state.p=gen_ref_for_landing(obj.self.reference.result.state.p);
                 end
                 %  if isprop(obj.result.state,'xd')
                 obj.result.state.xd = obj.result.state.p; % このようにすることでf の後でも反映される
