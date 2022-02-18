@@ -10,8 +10,8 @@ syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 syms R real
 param.mass = 0.2;
 param.length = 0.1;% モーター間の距離：正方形を仮定している
-param.Lx = 0.05; % x軸方向のモーター間距離
-param.Ly = 0.05; % y軸方向のモーター間距離
+param.Lx = 0.1; % x軸方向のモーター間距離
+param.Ly = 0.1; % y軸方向のモーター間距離
 param.lx = 0.05; % x軸方向 重心からモーター１間距離
 param.ly = 0.05; % y軸方向 重心からモーター１間距離
 param.jx = 0.002237568;

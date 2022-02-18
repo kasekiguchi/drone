@@ -82,7 +82,7 @@ classdef Logger < handle
                 if obj.fExp
                     obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
                 else
-                    obj.Data.agent(n).plant.state = state_copy(agent(n).plant.state);
+                    obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
                 end
             end
         end
@@ -147,7 +147,7 @@ classdef Logger < handle
             data_range = find((obj.Data.t - option.time(1)) > 0, 1):find((obj.Data.t - option.time(2)) >= 0, 1);
             if sum(strcmp(n, {'time', 't'}))     % 時間軸データ
                 data = obj.Data.t(data_range);
-            elseif n == 0                        % obj.itmesのデータ
+            elseif n == 0                        % n : agent number.  n=0 => obj.itmesのデータ
                 variable = split(variable, '.'); % member毎に分割
                 data = [obj.Data.(variable{1})];
                 for j = 2:length(variable)
@@ -157,13 +157,20 @@ classdef Logger < handle
             else                                 % agentに関するデータ
                 variable = split(variable, '.'); % member毎に分割
                 data = [obj.Data.agent(n)];
-                for j = 1:length(variable)
-                    data = [data.(variable{j})];
-                    if iscell(data) % 時間方向はcell配列
-                        data = [data{1, data_range}]';
-                        data = obj.return_state_prop(variable(j + 1:end), data);
-                        break
-                    end
+                switch variable
+                    case "inner_input" % 横ベクトルの場合
+                            data = [data.(variable)];
+                            data = [data{1, data_range}];
+                            data = reshape(data,[8,length(data)/8])';
+                    otherwise
+                        for j = 1:length(variable)
+                            data = [data.(variable{j})];
+                            if iscell(data) % 時間方向はcell配列
+                                data = [data{1, data_range}]';
+                                data = obj.return_state_prop(variable(j + 1:end), data);
+                                break
+                            end
+                        end
                 end
             end
             if ~isempty(vrange)
@@ -230,7 +237,7 @@ classdef Logger < handle
             fh.WindowState = 'maximized';
 
             for fi = 1:length(list)      % fi : 図番号
-                subplot(frow, fcol, fi);
+                spfi = subplot(frow, fcol, fi);
                 plegend = [];
                 N = list{fi}{1};         % indices of variable drones. example : [1 2]
                 param = list{fi}{2};     % p,q,v,w, etc
@@ -304,20 +311,26 @@ classdef Logger < handle
                         if length(ps) == 3; zlabel(ps(3)); end
                     end
                 end
-                legend(plegend);
+                lgd = legend(plegend);
                 if ~fhold
                     hold off
                 end
                 if fcolor
+                    txt = {''};
                     if length([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')])); % take off phase
+%                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
+                        txt = {txt{:},'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
                     end
                     if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
+                        txt = {txt{:},'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
                     end
                     if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
+                        txt = {txt{:},'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
                     end
+                    text(spfi.XLim(2)-(spfi.XLim(2)-spfi.XLim(1))*0.25,spfi.YLim(2)+(spfi.YLim(2)-spfi.YLim(1))*0.1,txt);
                 end
             end
         end
@@ -333,8 +346,8 @@ classdef Logger < handle
                     name = "plant.result";
                 case 'i' %
                     name = "input";
-                otherwise
-                    name = "";
+                 otherwise
+                     name = "";
             end
             variable = regexprep(var, "[0-9:]", "");
             vrange = regexp(var, "[0-9:]", 'match');
@@ -354,7 +367,7 @@ classdef Logger < handle
                     name = "input";
                 otherwise
                     if ~isempty(variable)
-                        if ~contains(variable, "result") % attribute が指定されている場合
+                        if ~contains(variable, "result") &  name ~= ""  % attribute が指定されている場合
                             name = strcat(name, '.', variable);
                         else
                             name = variable;
