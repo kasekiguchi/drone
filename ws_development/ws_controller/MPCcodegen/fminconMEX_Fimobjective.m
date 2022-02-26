@@ -58,14 +58,17 @@ for j = 1:params.H
     H = (params.dis(:) - X(1,j).*cos(params.alpha(:)) - X(2,j).*sin(params.alpha(:)))./cos(params.phi(:) - params.alpha(:) + X(3,j));%observation
 %     RangeLogic = H<SensorRange;
     RangeLogic = (tanh(RangeGain*(SensorRange - H))+1)/2;
+    Fim = RangeLogic(1) * FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j),X(4,j),U(2,j),U(1,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
 %     tmpFim = FIMVT_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(:), params.alpha(:), params.phi(:));
 %     tmpFim = FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(:), params.alpha(:), params.phi(:));
-    Fim = RangeLogic(1) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
+%     Fim = RangeLogic(1) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
     for i = 2:length(params.dis)
-        Fim = Fim + RangeLogic(i) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
+        Fim = Fim + RangeLogic(i) * FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j),X(4,j),U(2,j),U(1,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
+%         Fim = Fim + RangeLogic(i) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
     end
     Fim = (1/(2*NoiseR))*Fim;
-    InvFim = inv(Fim);
+    InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));
+%     InvFim = inv(Fim);
     evFim(1,j) = trace(InvFim);
 %         evFim(1,j) = real(max(eig(InvFim)));
 %     evFim(:,2*j-1:2*j) = InvFim' * params.T * InvFim;
@@ -363,10 +366,10 @@ ceq = [X(:, 1) - params.X0, tmpceq];%初期時刻を現在状態に固定，モ�
 %     %     evFim(:,2*j-1:2*j) = InvFim' * params.T * InvFim;
 % end
 %---入力の情怪訝制約を設定---%
-% cineq(1,:) = arrayfun(@(L) -params.S(1)+U(1,L),1:params.Num);%速度入力の上限
-% cineq(2,:) = arrayfun(@(L) -params.S(2)+U(2,L),1:params.Num);%角速度の上限
-% cineq(3,:) = arrayfun(@(L) -params.S(1)-U(1,L),1:params.Num);%速度入力の下限
-% cineq(4,:) = arrayfun(@(L) -params.S(2)-U(2,L),1:params.Num);%角速度の下限
+cineq(1,:) = arrayfun(@(L) -params.S(1)+U(1,L),1:params.Num);%速度入力の上限
+cineq(2,:) = arrayfun(@(L) -params.S(2)+U(2,L),1:params.Num);%角速度の上限
+cineq(3,:) = arrayfun(@(L) -params.S(1)-U(1,L),1:params.Num);%速度入力の下限
+cineq(4,:) = arrayfun(@(L) -params.S(2)-U(2,L),1:params.Num);%角速度の下限
 % cineq(3,:) = [-params.S(1)-S(1,1)+(U(1,1) - params.U0(1)),arrayfun(@(L) - params.S(1) -S(1,L) + (U(1,L) - U(1,L-1)),2:params.Num)];%速度入力の変化量上限
 % cineq(4,:) = [-params.S(2)-S(2,1)+(U(2,1) - params.U0(2)),arrayfun(@(L) - params.S(2) -S(2,L) + (U(2,L) - U(2,L-1)),2:params.Num)];%角速度入力の変化量上限
 cineq(5,:) = arrayfun(@(L) -S(1,L),1:params.Num);

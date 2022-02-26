@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=500;
+    te=60;
 end
 %% initialize
 initial(N) = struct;
@@ -33,8 +33,8 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-%         initial(i).p = [-45;8];
-        initial(i).p = [0;-2];
+        initial(i).p = [-45;8];
+%         initial(i).p = [0;-2];
 %     initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];
@@ -60,12 +60,12 @@ for i = 1:N
     close all
     %% set environment property
     Env = [];
-%     agent(i).set_property("env",Env_FloorMap_sim_fromstl(i,'3F.stl'));
+    agent(i).set_property("env",Env_FloorMap_sim_fromstl(i,'3F.stl'));
 %     agent(i).set_property("env",Env_FloorMap_sim(i)); 
-    agent(i).set_property("env",Env_FloorMap_sim_circle(i)); 
+%     agent(i).set_property("env",Env_FloorMap_sim_circle(i)); 
     %% set sensors property
     agent(i).sensor=[];
-    SensorRange = 20;
+    SensorRange = 40;
     agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
@@ -80,7 +80,7 @@ for i = 1:N
     agent(i).reference=[];
     
     %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
-    velocity = 0.5;
+    velocity = 1;
     w_velocity = 0.5;
     
 %     WayPoint = [100,0,0,0,0];
@@ -159,7 +159,7 @@ LogData=[
 SubFunc = [
 %     "ContEval",
 %     "TrajectoryErrorDis",
-%     "ObserbSubFIM",
+    "ObserbSubFIM",
     ];
 if ~isempty(agent(1).plant.state)
     LogData=["plant.state.p";LogData]; % 実制御対象の位置
