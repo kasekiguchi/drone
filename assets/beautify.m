@@ -7,7 +7,8 @@ function beautify(file,startl,endl)
 % Example : beautify("reference/TimeVaryingReference.m")
 % 
 % matlab_formatter.py requires chardet package. 
-% 
+% install python3.8 at Microsoft Store 
+% matlab>> system("pip3.8 install chardet")
 arguments
   file string
   startl {mustBeInteger} = 1
@@ -16,10 +17,10 @@ end
 formatter_path = "assets\python\matlab_formatter.py";
 
 if strcmp(endl,"None")
-  command = strcat("python ",formatter_path," ",file," --indentWidth=4 --separateBlocks=False --indentMode=-1");
+  command = strcat("python3.8 ",formatter_path," ",file," --indentWidth=4 --separateBlocks=False --indentMode=-1");
   [a,o]=system(command);
 else
-  command = strcat("python ",formatter_path," ",file," --indentWidth=4 --startLine=",string(startl)," --endLine=",string(endl)," --separateBlocks=False --indentMode=-1");
+  command = strcat("python3.8 ",formatter_path," ",file," --indentWidth=4 --startLine=",string(startl)," --endLine=",string(endl)," --separateBlocks=False --indentMode=-1");
   [a,o] = system(command);
 end
 end
