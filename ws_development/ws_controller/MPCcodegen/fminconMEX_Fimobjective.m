@@ -15,8 +15,6 @@ assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
 assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
 assert(isa(param.T,'double'));assert(all(size(param.T)==	[2,2]));
 assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
-assert(isa(param.WoS,'double'));assert(all(size(param.WoS)==	[2,2]));
-assert(isa(param.Evfim,'double'));assert(all(size(param.Evfim) == [1,1]));
 assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,3]));
 assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
 assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));

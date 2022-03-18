@@ -35,13 +35,13 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             obj.NLP = param.NLP;%Number of Line Param
             
             % the constant value for estimating of the map
-            obj.constant = struct; %constant parameter
-            obj.constant.LineThreshold = 0.3; % Under the this threshold, the error from "ax + by + c" is allowed.
-            obj.constant.PointThreshold = 0.2; % Maximum distance between line and points in same cluster
-            obj.constant.GroupNumberThreshold = 5; % Minimum points number which is constructed cluster
-            obj.constant.DistanceThreshold = 1e-1; % If the error between calculated and measured distance is under this distance, is it available calculated value
-            obj.constant.ZeroThreshold = 1e-3; % Under this threshold, it is zero.
-            obj.constant.CluteringThreshold = 0.5; % Split a cluster using distance from next point
+            obj.constant = struct; %定数パラメータ設定
+            obj.constant.LineThreshold = 0.3; %"ax + by + c"の誤差を許容する閾値
+            obj.constant.PointThreshold = 0.2; %
+            obj.constant.GroupNumberThreshold = 5; % クラスタを構成する最小の点数
+            obj.constant.DistanceThreshold = 1e-1; % センサ値と計算値の許容誤差，対応付けに使用
+            obj.constant.ZeroThreshold = 1e-3; % ゼロとみなす閾値
+            obj.constant.CluteringThreshold = 0.5; % 同じクラスタとみなす最大距離
             obj.constant.SensorRange = param.SensorRange; % Max scan range
             %------------------------------------------
         end
@@ -88,7 +88,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             %PreCovの次元数は，ロボットの次元数 + 前時刻のマップパラメータの数に対応
             obj.result.PreXh = PreXh;
             
-            %マップについての更新
+            %---センサ情報の処理-------------------------------------------------------------%
             %SLAM algorithm
             sensor = obj.self.sensor.result;%scan data
             measured.ranges = sensor.length;
@@ -122,6 +122,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             [obj.map_param, RegistFlag] = UKFOptimizeMap(obj.map_param, obj.constant);%ここですぐ減らされている．
             %convert to Line parameter that consisted from d and delta
             line_param = LineToLineParamAndEndPoint(obj.map_param);
+            %-----------------------------------------------------------------%
             
             %共分散行列を再構成
             % Update estimate covariance %
@@ -200,15 +201,16 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
             obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(association_available_count)) * G';
             
-            % Convert line parameter into line equation "ax + by + c = 0"
+            %---事後処理------------------------------------------------%
+            %マップパラメータを格納
             line_param.d = Xh(obj.n+1:obj.NLP:end,1);
             line_param.delta = Xh(obj.n+2:obj.NLP:end,1);
-            % Convert line parameter into line equation "ax + by + c = 0"
+            % % 直線の方程式 "ax + by + c = 0"に変換
             line_param_opt = LineParamToLineAndEndPoint(line_param);
             obj.map_param.a = line_param_opt.a;
             obj.map_param.b = line_param_opt.b;
             obj.map_param.c = line_param_opt.c;
-            % Projection of start and end point on the line
+            % 端点を線上に射影
             MapEnd = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = MapEnd.x;
             obj.map_param.y = MapEnd.y;
@@ -223,14 +225,12 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             EstMh(2:obj.NLP:end, 1) = line_param.delta;
             Xh = [Xh(1:obj.n);EstMh(1:end)];
             
+            %共分散行列のサイズを調整
             if any(RegistFlag)
                 exist_flag = sort([1, 2, 3, 4,(find(~RegistFlag) - 1) * 2 + 5, (find(~RegistFlag) - 1) * 2 + 6]);
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
-            
-            if length(obj.result.P) ~= length(Xh)
-                disp('error');
-            end
+            %-------------------------------------------------------------%
             
             % return values setting
             obj.result.state.set_state(Xh);

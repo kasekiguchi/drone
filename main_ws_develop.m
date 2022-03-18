@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=650;
+    te=60;
 end
 %% initialize
 initial(N) = struct;
@@ -34,8 +34,8 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
 %         initial(i).p = [-45;8];
-        initial(i).p = [-2;-2];
-%     initial(i).p = [0;0];
+%         initial(i).p = [-2;-2];
+    initial(i).p = [0;0];
     initial(i).q = [0];
     initial(i).v = [0];
     initial(i).w = [0];
@@ -61,8 +61,8 @@ for i = 1:N
     %% set environment property
     Env = [];
 %     agent(i).set_property("env",Env_FloorMap_sim_fromstl(i,'3F.stl'));
-%     agent(i).set_property("env",Env_FloorMap_sim(i)); 
-    agent(i).set_property("env",Env_FloorMap_sim_circle(i)); 
+    agent(i).set_property("env",Env_FloorMap_sim(i)); 
+%     agent(i).set_property("env",Env_FloorMap_sim_circle(i)); 
     %% set sensors property
     agent(i).sensor=[];
     SensorRange = 20;
@@ -83,31 +83,12 @@ for i = 1:N
     velocity = 0.5;
     w_velocity = 0.5;
     
-%     WayPoint = [100,0,0,0,0];
-%      WayPoint = [55,8,0,0,0;
-%          55,15,pi/2,0,0;
-%          -45,15,pi,0,0;
-%          -45,8,3*pi/2,0,0;f
-%          55,8,2*pi,0,0];%[x y theta v omaga]
- WayPoint = [48,-2,0,0;
-        48,48,pi/2,0;
-        -2,48,pi,0;
-        -2,-2,-pi/2,0;
-        48,-2,0,0];
-%     WayPoint = [48,-2,0,0;
-%         48,-2,pi/2,0;
-%         48,48,pi/2,0;
-%         48,48,pi,0;
-%         -2,48,pi,0;
-%         -2,48,3*pi/2,0;
-%         -2,-2,3*pi/2,0;
-%         -2,-2,0,0;
-%         48,-2,0,0];
+    WayPoint = [0,0,0,0];%目標位置の初期値
     convjudgeV = 0.5;%収束判断
     convjudgeW = 0.1;%収束判断
-    Holizon = 3;
+    Holizon = 3;%MPCのホライゾン数
 %     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
-    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
+    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property

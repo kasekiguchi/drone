@@ -23,24 +23,20 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             %---MPCパラメータ設定---%
             obj.param.H  = param.H;                % モデル予測制御のホライゾン
             obj.param.dt = param.dt;              % モデル予測制御の刻み時間
-            obj.param.input_size = self.model.dim(2);
+            obj.param.input_size = self.model.dim(2);%
             obj.param.state_size = self.model.dim(1);
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([15,15,1,1]);
-            obj.param.R = diag([1,1]);
-            obj.param.Qf = diag([18,18,1,1]);
+            obj.param.Q = diag([15,15,1,1]);%状態の重み
+            obj.param.R = diag([1,1]);%入力の重み
+            obj.param.Qf = diag([18,18,1,1]);%終端状態の重み
 %             obj.param.Qf = diag([17,17,1,1]);
-            obj.param.T = diag([40,40,40]);%Fisherのやつ
-            obj.param.S = [1,0.7];
-            obj.param.WoS = diag([10,10]);%今は使ってない
-            obj.param.Evfim = [10];%今は使ってない
+            obj.param.T = diag([40,40,40]);%Fisherの重み
+            obj.param.S = [1,0.7];%入力の上下限
             obj.NoiseR = 3.0e-3;%param of Fisher Information matrix
             obj.RangeGain = 10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
-%             obj.param.Th = diag([1,1]);
-%             obj.param.LimFim = 1;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
             obj.model = self.model;
         end
@@ -57,11 +53,10 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             else
                 oldinput=[1,0];
             end
-            %-------------------------%
-            %state = state_copy(param{1}.state);
-            %model = param{1};
+            %---reference情報を取得---%
             ref = obj.self.reference.result.state;
             obj.param.Xr = [obj.self.estimator.result.state.get(),ref.xd];
+            %-------------------------%
             %---マップ情報をとる---%
             LineParam = CFMEX_ConvertLineParam(obj.self.estimator.result.map_param);
             AssociationInfo = obj.self.estimator.result.AssociationInfo;
@@ -96,7 +91,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             Alpha = Alpha(Alpha~=inf);
             AssoFai = Measured.angles(AssociationAvailableIndex);
             %----------------------------------------------------------------------------------%
-            %obj.param.t = t;
+            %---各種パラメータを格納---%
             obj.param.dis = Dis;
             obj.param.alpha = Alpha;
             obj.param.phi = AssoFai;
@@ -104,21 +99,22 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.X0 = obj.self.model.state.get();%[state.p;state.q;state.v;state.w];
             obj.param.U0 = obj.previous_input(:,1);%現在時刻の入力
             obj.param.model_param = obj.self.model.param;
+            %------------------------%
             obj.previous_state = repmat(obj.param.X0,1,obj.param.Num);
             problem.solver    = 'fmincon';
             problem.options   = obj.options;
-%             problem.objective = @(x) obj.objectiveFim(x, obj.param);  % 評価関数
-%             problem.nonlcon   = @(x) obj.constraintsOM(x, obj.param);% 制約条件OM = only model
-            problem.x0		  = [obj.previous_state;obj.previous_input;zeros(2,obj.param.Num)]; % 初期状態
+            problem.x0		  = [obj.previous_state;obj.previous_input;zeros(2,obj.param.Num)]; % 最適化計算の初期状態
             % obj.options.PlotFcn                = [];
+            %---評価関数と制約条件を設定した関数MEX化するときはここをやる---%
             [var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
 %             [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
 %             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);
+            %------------------------------------%
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;
             obj.result.fval = fval;
             obj.result.exitflag = exitflag;
-            obj.result.eachfval = GetobjectiveFimEval(var, obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
+            obj.result.eachfval = GetobjectiveFimEval(var, obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%評価関数の値の計算 for plot
 %             disp(exitflag);
             obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);  
 %             obj.SolverName = func2str(problem.objective);

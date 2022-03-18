@@ -5,7 +5,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
     % mpcのホライゾンすうと合わせる必要あり．
     %PointFlag =0;端点なしただ動く
     %PpintFlag = 1;端点を見つけたとき
-    %PointFlag = 2;
+    %PointFlag = 2;%目標位置に入ったあと
     properties
         WayPoint
         Targetv
@@ -35,7 +35,7 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
             %  we make target of new section by convergence judgement
             obj.self = self;
             param = varargin{1};
-            obj.WayPoint = [0,0,0,0];% line is flag num
+            obj.WayPoint = param{1,1};%
             obj.Targetv = param{1,2};
             obj.TargetGainw = param{1,3};
             obj.PointFlag = 0;
