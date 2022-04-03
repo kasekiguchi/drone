@@ -77,8 +77,6 @@ classdef LiDAR_sim < SENSOR_CLASS
             rng(2*obj.t);
             result.length=vecnorm(result.sensor_points') + obj.noise * randn(1,length(result.sensor_points)); % レーザー点までの距離
             obj.t = obj.t + 0.1;
-%             result.angle = obj.angle_range;%レーザー点の角度
-            %result.region=intersect(polyshape(result.sensor_points(:,1),result.sensor_points(:,2)),env); % 
             result.state = {};
             obj.result=result;
         end

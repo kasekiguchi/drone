@@ -1,4 +1,7 @@
 function parameter = UKFPointCloudToLine(RaserDis, RaserAngle, State, Constant)
+% 点群データをクラスタリングして直線の方程式に変換する関数
+% レーザセンサのデータ形式としてレンジ外のものは0値を出すと仮定
+% 論文の3.2.1および3.2.2に該当
     %% Clustering
     % 非ゼロの値をさがす
     Startidx = 1;% index of start point of before search

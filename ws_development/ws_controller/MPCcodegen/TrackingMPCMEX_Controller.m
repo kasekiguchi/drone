@@ -42,10 +42,6 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
         end
         
         function result = do(obj,param,~)
-            % param = {model, reference}
-            % param{1}.state : 推定したstate構造体
-            % param{2}.result.state : 参照状態の構造体 % n x Num :  n : number of state,  Num : horizon
-            % param{3} : 構造体
             %---ロボットの状態をとる---%
             RobotState = [obj.self.estimator.result.state.p(1) , obj.self.estimator.result.state.p(2) , obj.self.estimator.result.state.q];
             if ~isempty(obj.self.input)
@@ -106,9 +102,9 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             problem.x0		  = [obj.previous_state;obj.previous_input;zeros(2,obj.param.Num)]; % 最適化計算の初期状態
             % obj.options.PlotFcn                = [];
             %---評価関数と制約条件を設定した関数MEX化するときはここをやる---%
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
-%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);
-%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分と観測値のFIMを用いたコントローラ，最終的な提案手法
+%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分のFIMを使ったコントローラ
+%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);%目標値追従のみのコントローラ，比較手法
             %------------------------------------%
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;

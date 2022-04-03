@@ -103,9 +103,6 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
             % Conbine between measurements and map%前時刻までのマップと観測値を組み合わせる．組み合わさらなかったら新しいマップとして足す．
             obj.map_param = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);%
-            %For Verification
-            obj.result.PreMapParam.x = obj.map_param.x;
-            obj.result.PreMapParam.y = obj.map_param.y;
             %StateCount update
             StateCount = obj.n + obj.NLP * length(obj.map_param.a);
             %map_paramに対応したPreCovにする．
@@ -121,7 +118,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             % Optimize the map%
             [obj.map_param, RegistFlag] = UKFOptimizeMap(obj.map_param, obj.constant);%ここですぐ減らされている．
             %convert to Line parameter that consisted from d and delta
-            line_param = LineToLineParamAndEndPoint(obj.map_param);
+            line_param = LineToLineParamAndEndPoint(obj.map_param);%dalpha
             %-----------------------------------------------------------------%
             
             %共分散行列を再構成

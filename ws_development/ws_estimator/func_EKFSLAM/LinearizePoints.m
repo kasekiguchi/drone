@@ -1,4 +1,6 @@
 function [a, b, c, x0, y0] = LinearizePoints(x, y)
+% 最小二乗法を用いて点群を直線の方程式に変案
+% 直線の傾きに応じて線分の算出方法を変更
     if length(x) > 1
         % Pre-calculation of inclination using start and end point.
         x_pre = [min(x), max(x)];

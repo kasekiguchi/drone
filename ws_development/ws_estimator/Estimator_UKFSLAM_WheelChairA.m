@@ -12,15 +12,12 @@ UKF_param.Map_Q =1.0E-6;%マップのシステムノイズ
 n = agent.model.dim(1);%ロボットモデルの状態数を呼び出し
 UKF_param.dim = n;
 UKF_param.P = eye(n); %初期時刻の共分散行列
-UKF_param.k = 1;%
+UKF_param.k = 1;%スケーリングパラメータ
 UKF_param.NLP = 2;%Number of Line Param
 UKF_param.SensorRange = SensorRange;%センサレンジを呼び出し
-%     EKF_param.P(1,2) = 0.1;EKF_param.P(2,1) = 0.1;
 % UKF_param.list=["p","q","v", "w"];
 UKF_param.list=["p","q","v"];
 Estimator.param=UKF_param;
-% for i = 1:length(agent)
-% end
 disp('Execute "do" method with following parameter to operate UKF estimator.');
 disp('param.estimator={{agent(i),agent(i).sensor.result.state.get(["q","p"]),[]}};')
 end

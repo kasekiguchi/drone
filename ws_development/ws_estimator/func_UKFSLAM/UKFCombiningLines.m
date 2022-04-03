@@ -1,4 +1,6 @@
 function parameter = UKFCombiningLines(map, measured, Constant)
+% 既存線分と観測線分の統合を行う
+% 論文の3.2.3に該当
     if isempty(map)
         parameter = struct;
         parameter.index = [];

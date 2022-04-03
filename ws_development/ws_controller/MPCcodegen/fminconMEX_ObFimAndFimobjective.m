@@ -72,8 +72,6 @@ end
 %-- 状態及び入力のステージコストを計算
 stageState = arrayfun(@(L) tildeX(:, L)' * params.Q * tildeX(:, L), 1:params.H);
 stageInput = arrayfun(@(L) tildeU(:, L)' * params.R * tildeU(:, L), 1:params.H);
-% stageevFim = arrayfun(@(L) evFim(:,L)' * params.Th * evFim(:,L), 1:params.H);
-% stageevFim = arrayfun(@(L) evFim(:,2*L-1:2*L)* params.T * evFim(:,2*L-1:2*L)' ,1:params.H);
 stageevFim = evFim* params.T * evFim';
 %-- 状態の終端コストを計算
 terminalState = tildeX(:, end)' * params.Qf * tildeX(:, end);

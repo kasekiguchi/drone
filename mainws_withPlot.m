@@ -45,10 +45,10 @@ end
 for i = 1:N
     if fExp
     else
-%                         agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
-        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));
-%                 agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
-%         agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));
+%                         agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));%速度次元車両モデル
+        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
+%                 agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));%速度次元全方向移動ロボットモデル
+%         agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));%加速度次元全方向移動ロボットモデル
     end
     %% model
     % set control model
@@ -68,17 +68,14 @@ for i = 1:N
     agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
-%     Gram = GrammianAnalysis(te,ts,dt);
-%             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),SensorRange));
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));
-%     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));
-%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));
-    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));
+%             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));%速度次元車両モデルのEKFSLAM
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),SensorRange));%加速度次元車両モデルのEKFSLAM
+%         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));%全方向移動ロボットのEKFSLAM
+%     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));%加速度次元入力全方向移動ロボットモデルの
+%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));%速度次元入力モデルのukfslam
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference=[];
-    
-    %     agent(i).set_property("reference",Reference_GlobalPlanning(agent(i).estimator));
     velocity = 1;
     w_velocity = 0.5;
     
@@ -86,7 +83,6 @@ for i = 1:N
     convjudgeV = 0.5;%収束判断
     convjudgeW = 0.1;%収束判断
     Holizon = 3;%MPCのホライゾン数
-%     agent(i).set_property("reference",Reference_TrackingWaypointPath(WayPoint,velocity,convjudge,initial));
     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
@@ -167,9 +163,6 @@ tic
 while round(time.t,5)<=te
     %while 1 % for exp
     %%
-    
-    %         motive.getData({agent,mparam});
-    %         Smotive={motive};
     Srpos={agent};
     Simu={[]};
     Sdirect={};
