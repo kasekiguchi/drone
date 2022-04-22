@@ -70,9 +70,9 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
                 upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset; % offset = 500
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
                 % uthr =uthr + u_throttle_offset ;%sign(uthr)*min(abs(uthr),100)+ u_throttle_offset;
-                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 0];
+                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
             else
-                obj.result = [obj.param.roll_offset, obj.param.pitch_offset, obj.param.th_offset, obj.param.yaw_offset, 1000, 0, 0, 0];
+                obj.result = [obj.param.roll_offset, obj.param.pitch_offset, 0, obj.param.yaw_offset, 1000, 0, 0, 0];
             end
 
             u = obj.result;
