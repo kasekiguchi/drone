@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1;   % number of agents
-fExp = 0 %1：実機　それ以外：シミュレーション
+fExp = 1 %1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -36,12 +36,12 @@ if fExp
     if fMotive
         %rigid_ids = [1,2];
         %motive = Connector_Natnet('ClientIP', '192.168.1.9', 'rigid_list', rigid_ids); % Motive
-        %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.9')
+        %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.6')
         %% set connector (global instance)
         rigid_ids = [1];
-        motive = Connector_Natnet('ClientIP', '192.168.1.9'); % Motive
+        motive = Connector_Natnet('ClientIP', '192.168.1.9'); % Motive 7 : hara
         COMs = "COM29";
-        %[COMs,rigid_ids,motive,initial_yaw_angles] = build_MASystem_with_motive('192.168.1.9'); % set ClientIP
+        %[COMs,rigid_ids,motive,initial_yaw_angles] = build_MASystem_with_motive('192.168.1.6'); % set ClientIP
         N = length(COMs);
         motive.getData([],[]);
     end
@@ -119,9 +119,9 @@ for i = 1:N
     %% generate Drone instance
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[26])); % for exp % 機体番号（ESPrのIP）
+        %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
         %agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
-        agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM21")); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
@@ -359,15 +359,15 @@ try
             time.t = time.t + calculation2 - calculation1;
 
             %% logging
-            calculation = toc;
-            wait_time = 0.9999 * (sampling - calculation);
+%             calculation = toc;
+%             wait_time = 0.9999 * (sampling - calculation);
+% 
+%             if wait_time < 0
+%                 wait_time
+%                 warning("ACSL : sampling time is too short.");
+%             end
+%            time.t = time.t + calculation;
 
-            if wait_time < 0
-                wait_time
-                warning("ACSL : sampling time is too short.");
-            end
-
-            time.t = time.t + calculation;
             %            else
             %                pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
             % これをやるとpause中が不安定になる．どうしても一定時間にしたいならwhile でsamplingを越えるのを待つなどすればよいかも．
@@ -408,7 +408,7 @@ clc
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"reference.result.state.xd","e",'time',[1 2]));
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"input","",'time',[1 2]));
 %logger.data(1,"state.p","e","time",[0 3])
-logger.plot({1,"p","er"},{1,"state.v","ep"},{1,"state.q","ep"},{1,"state.w","ep"},{1,"input",""})
+logger.plot({1,"p","er"},{1,"input",""})
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %%
