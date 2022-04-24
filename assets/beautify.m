@@ -10,11 +10,19 @@ function beautify(file,startl,endl)
 % install python3.8 at Microsoft Store 
 % matlab>> system("pip3.8 install chardet")
 arguments
-  file string
+  file string = "initialize"
   startl {mustBeInteger} = 1
   endl = "None"
 end
 formatter_path = "assets\python\matlab_formatter.py";
+if strcmp(file,"initialize")
+   [a,~]=system("pip3.8 install chardet");
+   if a~=0
+       disp("install python3.8 from Microsoft store");
+   else
+       disp("ready to beautify: beautify('file_name')");
+   end
+end
 
 if strcmp(endl,"None")
   command = strcat("python3.8 ",formatter_path," ",file," --indentWidth=4 --separateBlocks=False --indentMode=-1");

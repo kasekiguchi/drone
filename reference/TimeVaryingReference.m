@@ -1,5 +1,5 @@
 classdef TimeVaryingReference < REFERENCE_CLASS
-    % 時間関数としてのリファレンスを生成するクラス 
+    % 時間関数としてのリファレンスを生成するクラス
     % obj = TimeVaryingReference()
     properties
         param
