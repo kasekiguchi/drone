@@ -330,7 +330,11 @@ classdef Logger < handle
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
                         txt = {txt{:},'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
                     end
-                    text(spfi.XLim(2)-(spfi.XLim(2)-spfi.XLim(1))*0.25,spfi.YLim(2)+(spfi.YLim(2)-spfi.YLim(1))*0.1,txt);
+                    if length(list) <= 3
+                        text(spfi.XLim(2)-(spfi.XLim(2)-spfi.XLim(1))*0.25,spfi.YLim(2)+(spfi.YLim(2)-spfi.YLim(1))*0.05,txt);
+                    else
+                        text(spfi.XLim(2)-(spfi.XLim(2)-spfi.XLim(1))*0.25,spfi.YLim(2)+(spfi.YLim(2)-spfi.YLim(1))*0.1,txt);
+                    end
                 end
             end
         end
