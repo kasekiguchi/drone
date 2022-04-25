@@ -87,6 +87,10 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             for s = 1:obj.result.rigid_num
                 if iscell(Param1)
                     obj.result.rigid(s+obj.result.rigid_num).p = Param1{1}(s).plant.state.(Param1{2}(1));
+                    if obj.Flag.Noise == 1 %% Noise %%
+                        rng('shuffle');
+                        obj.result.rigid(s+obj.result.rigid_num).p = obj.result.rigid(s+obj.result.rigid_num).p + (sqrt(obj.sigmaw) .* randn(3,1));
+                    end
                     if length(Param1{2})==2
                         obj.result.rigid(s+obj.result.rigid_num).q = Param1{1}(s).plant.state.(Param1{2}(2));
                     elseif length(Param1{2})>2
