@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1;   % number of agents
-fExp = 1 %1：実機　それ以外：シミュレーション
+fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -411,5 +411,6 @@ clc
 logger.plot({1,"p","er"},{1,"input",""})
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
+%plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
 %%
 %logger.save();
