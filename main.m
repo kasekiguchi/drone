@@ -404,13 +404,14 @@ clc
 %agent(1).reference.covering.draw_movie(logger, N, Env)
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot({1,"sensor.imu.result.state.q",""},{1,"sensor.imu.result.state.w",""},{1,"sensor.imu.result.state.a",""});
-%logger.plot({1,["p"],["e"]});
+%logger.plot({1,"p","e"},{1,"q","s"},"row_col",[2,1]);
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"reference.result.state.xd","e",'time',[1 2]));
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"input","",'time',[1 2]));
 %logger.data(1,"state.p","e","time",[0 3])
-logger.plot({1,"p","er"},{1,"input",""})
+%logger.plot({1,"p1-p2-p3","er"},{1,"input",""})
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
+logger.plot({1,"p1:2:3","ser"},{1,"input",""},{1,"q","e"},{1,"p1-p2","s"},{1,"p1-p2-p3","e"},"time",[4,10], "fig_num",2,"row_col",[2 3])
 %%
 %logger.save();
