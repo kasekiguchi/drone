@@ -38,7 +38,7 @@ if fExp
     %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.9')
 %% set connector (global instance)
 rigid_ids = [1];
-motive = Connector_Natnet('ClientIP', '192.168.1.7'); % Motive
+motive = Connector_Natnet('ClientIP', '192.168.1.9'); % Motive
 COMs = "COM29";
 %[COMs,rigid_ids,motive,initial_yaw_angles] = build_MASystem_with_motive('192.168.1.9'); % set ClientIP
 N = length(COMs);
