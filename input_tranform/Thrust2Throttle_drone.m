@@ -44,35 +44,35 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
 
             if cha == 't' || cha == 'f' || cha == 'l'
                 throttle_offset = obj.param.th_offset;
-                %what = obj.self.model.state.w;
-                what = obj.self.estimator.result.state.w;
-                P = obj.self.model.param;
+                %wh = obj.self.model.state.w;
+                wh = obj.self.estimator.result.state.w;
+                %P = obj.self.model.param;
                 % statetmp=obj.self.estimator.result.state.get()+obj.self.model.dt*obj.self.model.method(obj.self.estimator.result.state.get(),obj.self.input,P);% euler approximation
                 %statetmp=obj.self.model.state.get();% do_modelで事前予測を求めている．
                 
 %                 statetmp = obj.self.model.state.get() + obj.self.model.dt * obj.self.model.method(obj.self.model.state.get(), obj.self.input, P); % euler approximation
 %                 obj.state.set_state(statetmp);
-%                 whatn = obj.state.w; %statetmp(end-2:end);
+%                 whn = obj.state.w; %statetmp(end-2:end);
                 
-                whatn = obj.self.model.state.w;% １時刻先の事前予測
+                whn = obj.self.model.state.w;% １時刻先の事前予測
                 T_thr = sum(input); % T_thr = input(1);
 
                 % TODO : 以下であるべきでは？　要チェック
-                %what = obj.self.estimator.result.state.w; % 現在の角速度推定値
-                %whatn = obj.self.model.state.w;           % 現時刻に算出した入力による1step 未来の値(do_model ですでに予測値を算出している)
+                %wh = obj.self.estimator.result.state.w; % 現在の角速度推定値
+                %whn = obj.self.model.state.w;           % 現時刻に算出した入力による1step 未来の値(do_model ですでに予測値を算出している)
 
-                uroll = obj.param.gain(1) * (whatn(1) - what(1));
-                upitch = obj.param.gain(2) * (whatn(2) - what(2));
-                uthr = obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset; % hovering からの偏差をゲイン倍する
+                uroll = obj.param.gain(1) * (whn(1) - wh(1));
+                upitch = obj.param.gain(2) * (whn(2) - wh(2));
+                uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset); % hovering からの偏差をゲイン倍する
                 % ホバリング時から変分にゲイン倍する
-                uyaw = obj.param.gain(3) * (whatn(3) - what(3));
+                uyaw = obj.param.gain(3) * (whn(3) - wh(3));
                 uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset; % offset = 500
                 upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset; % offset = 500
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
                 % uthr =uthr + u_throttle_offset ;%sign(uthr)*min(abs(uthr),100)+ u_throttle_offset;
-                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 0];
+                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
             else
-                obj.result = [obj.param.roll_offset, obj.param.pitch_offset, obj.param.th_offset, obj.param.yaw_offset, 1000, 0, 0, 0];
+                obj.result = [obj.param.roll_offset, obj.param.pitch_offset, 0, obj.param.yaw_offset, 1000, 0, 0, 0];
             end
 
             u = obj.result;
