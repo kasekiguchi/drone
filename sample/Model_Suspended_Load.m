@@ -7,7 +7,7 @@ arguments
 end
 type="Suspended_Load_Model"; % class name
 name="load"; % print name
-Setting.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)];
+Setting.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)-dot(x(19:21)/norm(x(19:21)),x(22:24))*x(19:21)/norm(x(19:21))];
 Setting.dim=[24,4,19];
 Setting.input_channel = ["f","M"];
 Setting.method = get_model_name("Load"); % model dynamicsの実体名
