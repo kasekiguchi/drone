@@ -82,7 +82,7 @@ classdef Logger < handle
                 if obj.fExp
                     obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
                 else
-                    obj.Data.agent(n).plant.state = state_copy(agent(n).plant.state);
+                    obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
                 end
             end
         end
@@ -121,7 +121,7 @@ classdef Logger < handle
             Data = {obj.Data, {[obj.si, obj.ei, obj.ri, obj.ki, obj.pi], obj.items, sname, rname}};
             save(filename, 'Data');
         end
-        function [data] = data(obj, n, variable, attribute, option)
+        function [data,vrange] = data(obj, n, variable, attribute, option)
             % n : agent index
             % variable : var name or path to var from agent
             %            or path from result if attribute is set.
@@ -147,7 +147,7 @@ classdef Logger < handle
             data_range = find((obj.Data.t - option.time(1)) > 0, 1):find((obj.Data.t - option.time(2)) >= 0, 1);
             if sum(strcmp(n, {'time', 't'}))     % 時間軸データ
                 data = obj.Data.t(data_range);
-            elseif n == 0                        % obj.itmesのデータ
+            elseif n == 0                        % n : agent number.  n=0 => obj.itmesのデータ
                 variable = split(variable, '.'); % member毎に分割
                 data = [obj.Data.(variable{1})];
                 for j = 2:length(variable)
@@ -157,13 +157,20 @@ classdef Logger < handle
             else                                 % agentに関するデータ
                 variable = split(variable, '.'); % member毎に分割
                 data = [obj.Data.agent(n)];
-                for j = 1:length(variable)
-                    data = [data.(variable{j})];
-                    if iscell(data) % 時間方向はcell配列
-                        data = [data{1, data_range}]';
-                        data = obj.return_state_prop(variable(j + 1:end), data);
-                        break
-                    end
+                switch variable
+                    case "inner_input" % 横ベクトルの場合
+                            data = [data.(variable)];
+                            data = [data{1, data_range}];
+                            data = reshape(data,[8,length(data)/8])';
+                    otherwise
+                        for j = 1:length(variable)
+                            data = [data.(variable{j})];
+                            if iscell(data) % 時間方向はcell配列
+                                data = [data{1, data_range}]';
+                                data = obj.return_state_prop(variable(j + 1:end), data);
+                                break
+                            end
+                        end
                 end
             end
             if ~isempty(vrange)
@@ -183,28 +190,38 @@ classdef Logger < handle
             end
         end
         function plot(obj, list, option)
-            % agent ids : indices of the agent to be plotted
-            % variable string : variable to be plotted
-            %     example ["p1","input","q"]
-            %         p : position, q : attitude, v : velocity, w : angular
-            %         velocity
+            % list : setting for subplot
+            % option : setting for all figure
+            %
+            % list consists of cell array
+            %   each cell has agent id, plot target or state, and attribute
+            % example {2,"p","es"}
+            %         agent id = 2       : plot 2nd agent data
+            %         plot target = "p"  : position
+            %         attribute = "es"   : estimator and sensor data
+            %
+            % plot target allows following form
+            %         p : position, q : attitude, 
+            %         v : velocity, w : angular velocity
             %         p1 : first element of p, p1:2 : first two elements
             %         p1-p2 : phase plot p1 vs p2
             %         p1-p2-p3 : 3D phase plot p1, p2, p3
-            % attribute
-            %     example ["ser","","er"]
-            %         s : sensor, e : estimator, r : reference
+            % attribute consists of 
+            %         s : sensor, e : estimator, r : reference, 
+            %         p : plant (only simulation)
             % option
-            %     example struct("time",[0 10], "fig_num",2,"row_col",[1 2])
             %         time : time span
             %         fig_num : figure number
             %         row_col : row and column number of subplot
-            % usage plot(1,["p1","input","q"],["ser","","er"],struct("time",10, "fig_num",2,"row_col",[1 3]))
-            % fig1 = sensor p1, estimator p1 and reference p1
-            % fig2 = input
-            % fig3 = estimator q and reference q
-            % In figure window 2, figures are aligned "fig1,fig2,fig3"
-            % order in one row. Each figure has time span [0 10].s
+            % 
+            % usage plot({1,"p1:2:3","ser"},{2,"input",""},{1,"q","e"},
+            %               {2,"p1-p2"},"time",[4 10], "fig_num",2,"row_col",[2 2])
+            %       fig1 = agent1's p1,p3 data w.r.t sensor, estimator and reference
+            %       fig2 = agent2's input
+            %       fig3 = agent1's estimator q
+            %       fig4 = agent2's phase plot
+            %       In figure window 2, figures are aligned "[fig1, fig2; fig3, fig4]"
+            %       order in one row. Each figure has time span [4 10].s
             arguments
                 obj
             end
@@ -228,9 +245,17 @@ classdef Logger < handle
             t = obj.data("t", '', '', "time", trange); % time data
             fh = figure(fig_num);
             fh.WindowState = 'maximized';
+            switch frow
+                case 1
+                    yoffset = 0.05;
+                case 2
+                    yoffset = 0.1;
+                otherwise
+                    yoffset = 0;
+            end
 
             for fi = 1:length(list)      % fi : 図番号
-                subplot(frow, fcol, fi);
+                spfi = subplot(frow, fcol, fi);
                 plegend = [];
                 N = list{fi}{1};         % indices of variable drones. example : [1 2]
                 param = list{fi}{2};     % p,q,v,w, etc
@@ -243,7 +268,7 @@ classdef Logger < handle
                         switch length(ps)
                             case 1 % 時間応答（時間を省略）
                                 tmpx = t;
-                                tmpy = obj.data(n, ps, att, "time", trange);
+                                [tmpy,vrange] = obj.data(n, ps, att, "time", trange);
                             case 2 % 縦横軸明記
                                 tmpx = obj.data(n, ps(1), att, "time", trange);
                                 tmpy = obj.data(n, ps(2), att, "time", trange);
@@ -260,6 +285,11 @@ classdef Logger < handle
                             plot(tmpx, tmpy);
                         end
                         hold on
+
+                        switch length(ps)
+                            case 3
+                                yoffset = - 1.2;
+                        end
 
                         % set title label legend
                         if length(ps) == 1
@@ -298,26 +328,38 @@ classdef Logger < handle
                             end
                             daspect([1 1 1]);
                         else
-                            plegend = [plegend, append(string(1:size(tmpy, 2)), att)];
+                            if isempty(vrange)
+                                vrange = string(1:size(tmpy, 2));
+                            else
+                                vrange = string(vrange);
+                            end
+                            plegend = [plegend, append(vrange, att)];
                         end
                         ylabel(ps(2));
                         if length(ps) == 3; zlabel(ps(3)); end
                     end
                 end
-                legend(plegend);
+                lgd = legend(plegend);
                 if ~fhold
                     hold off
                 end
                 if fcolor
+                    txt = {''};
                     if length([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')])); % take off phase
+%                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
+                        txt = {txt{:},'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
                     end
                     if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
+                        txt = {txt{:},'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
                     end
                     if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
+                        txt = {txt{:},'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
                     end
+
+                    text(spfi.XLim(2)-(spfi.XLim(2)-spfi.XLim(1))*0.25,spfi.YLim(2)+(spfi.YLim(2)-spfi.YLim(1))*yoffset,txt);
                 end
             end
         end
@@ -333,13 +375,13 @@ classdef Logger < handle
                     name = "plant.result";
                 case 'i' %
                     name = "input";
-                otherwise
-                    name = "";
+                 otherwise
+                     name = "";
             end
             variable = regexprep(var, "[0-9:]", "");
             vrange = regexp(var, "[0-9:]", 'match');
             if ~isempty(vrange)
-                vrange = str2num(vrange);
+                vrange = str2num(strjoin(vrange));
             end
             switch variable
                 case 'p'
@@ -354,7 +396,7 @@ classdef Logger < handle
                     name = "input";
                 otherwise
                     if ~isempty(variable)
-                        if ~contains(variable, "result") % attribute が指定されている場合
+                        if ~contains(variable, "result") &  name ~= ""  % attribute が指定されている場合
                             name = strcat(name, '.', variable);
                         else
                             name = variable;

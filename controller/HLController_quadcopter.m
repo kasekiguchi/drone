@@ -19,10 +19,11 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-            if isprop(ref.state,'xd')%~isempty(ref.state.xd)
-                xd = ref.state.xd; % 20次元の目標値に対応するよう
-            else
-                xd = ref.state.get();
+            xd = ref.state.get();
+            if isprop(ref.state,'xd')
+                if ~isempty(ref.state.xd)
+                    xd = ref.state.xd; % 20次元の目標値に対応するよう
+                end
             end
             if isempty(param)
                 Param = param;
@@ -62,9 +63,7 @@ classdef HLController_quadcopter < CONTROLLER_CLASS
             end
             vs = Vs(x,xd',vf,P,F2,F3,F4);
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            obj.result.input = [tmp(1);
-                tmp(2);tmp(3);
-                tmp(4)];
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
             result = obj.result;
         end
