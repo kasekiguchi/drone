@@ -73,6 +73,7 @@ classdef EKF < ESTIMATOR_CLASS
                 xh_pre = model.state.get();
             end
 
+            %obj.B = diag([ones(1,6)*obj.dt^2,ones(1,6)*obj.dt]); % to be check
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % 事前誤差共分散行列
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散

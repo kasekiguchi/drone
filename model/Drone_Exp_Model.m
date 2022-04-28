@@ -4,7 +4,6 @@ classdef Drone_Exp_Model < MODEL_CLASS
         ESPr_num
         connector
         flight_phase % q : quit, s : stop, a : arming, t : take-off, h : hovering, f : flight, l : landing
-        offset = [ 1103, 1103,1103];
     end
     properties
         msg
@@ -29,8 +28,13 @@ classdef Drone_Exp_Model < MODEL_CLASS
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
+                    if isnumeric(param.port)
+                        param.port = strcat("COM",string(param.port));
+                    else
+                        param.port = char(param.port);
+                    end
                     obj.connector=SERIAL_CONNECTOR(param);
-                    fprintf("Drone %d is ready\n",param.port);
+                    fprintf("Drone %s is ready\n",param.port);
             end
         end
         function do(obj,u,varargin)
@@ -73,8 +77,11 @@ classdef Drone_Exp_Model < MODEL_CLASS
             obj.connector.sendData(gen_msg(msg));
             obj.msg=msg;
         end
-        function set_param(obj,param)
-            obj.offset = param;
+        function arming(obj)
+            obj.connector.sendData(gen_msg([500 500 0 500 1000 0 0 0 0]));
+        end
+        function stop(obj)
+            obj.connector.sendData(gen_msg([500 500 0 500 0 0 0 0 0]));
         end
     end
 end

@@ -34,27 +34,20 @@ classdef PointReference_FH < REFERENCE_CLASS
             obj.flight_phase=cha;
             if strcmp(cha,'l') % landing phase
                 if strcmp(obj.flag,'l')
-                    obj.result.state.p=gen_ref_for_landing(obj.result.state.p);
+                    obj.result.state.xd=gen_ref_for_landing(obj.result.state.p);
                 else% 初めてlanding に入ったとき
-                    obj.result.state.p=gen_ref_for_landing(obj.self.estimator.result.state.p);
+                    obj.result.state.xd=gen_ref_for_landing(obj.self.reference.result.state.p);
                 end
-                %  if isprop(obj.result.state,'xd')
-                obj.result.state.xd = obj.result.state.p; % このようにすることでf の後でも反映される
-                %  end
+                obj.result.state.p = obj.result.state.xd; % このようにすることでf の後でも反映される
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
-                    %obj.result.state.p=gen_ref_for_take_off(obj.result.state.p);
-                    %                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,1,10,Param{3}-obj.base_time);
                     obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1,10,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
                     obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1,10,0);
                 end
-                %                 if isprop(obj.result.state,'xd')
-                %                     obj.result.state.xd = obj.result.state.p; % このようにすることでf の後でも反映される
-                %                 end
                 obj.result.state.p = obj.result.state.xd(1:3);
                 obj.flag='t';
             elseif strcmp(cha,'f') % flight phase
@@ -73,6 +66,7 @@ classdef PointReference_FH < REFERENCE_CLASS
                 %obj.result.state.p = obj.self.estimator.result.state.p; %
                 %これだと最悪上がっていく
                 obj.result.state.p = obj.base_state;
+                obj.result.state.xd = obj.base_state;
             end
             result=obj.result;
         end

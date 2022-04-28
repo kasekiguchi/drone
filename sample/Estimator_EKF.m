@@ -27,27 +27,14 @@ function Estimator = Estimator_EKF(agent,output,var)
     if agent.model.state.type == 3 % 姿勢がオイラー角の場合
 %        EKF_param.B = [eye(6)*dt^2;eye(6)*dt]; % システムノイズが加わるチャンネル
         EKF_param.B = [eye(6)*0.01;eye(6)*0.1]; % システムノイズが加わるチャンネル
+         %EKF_param.B = diag([ones(1,6)*dt^2,ones(1,6)*dt]); % to be check
+         %EKF_param.Q = diag([ones(1,3)*1E5,ones(1,3)*1E5,ones(1,3)*1E6,ones(1,3)*1E6]);% -2 -3 -4 1
     elseif  agent.model.state.type == 4 % 姿勢がオイラーパラメータの場合
         EKF_param.B = [eye(6)*dt^2;zeros(1,6);eye(6)*dt]; % システムノイズが加わるチャンネル
     end
     if strcmp(agent.model.name,"Suspended_Load_Model")
-        EKF_param.Q = eye(13)*1E3;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
-        EKF_param.B = [dt^2*eye(7),zeros(7,6);...
-            dt^2*eye(3),zeros(3,10);...
-            zeros(3,13);...
-            zeros(3,7),dt*eye(3),zeros(3,3);...
-            zeros(3,7),dt*eye(3),zeros(3,3);...
-            zeros(3,10),dt*eye(3);...
-            zeros(3,10),dt*eye(3)];
-    end
-    if strcmp(agent.model.name,"Suspended_Load_Model_Euler")
-        EKF_param.Q = eye(12)*1E3;%0.5E-1;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
-        EKF_param.B = [0.5*dt^2*eye(6),zeros(6,6);...%zeros(6,12);%
-            dt*eye(6),zeros(6,6);...
-            zeros(3,6),0.5*dt^2*eye(3),zeros(3,3);...%zeros(3,12);%
-            zeros(3,6),dt*eye(3),zeros(3,3);...
-            zeros(3,12);%zeros(3,9),dt*eye(3);...%zeros(3,12);%
-            zeros(3,9),dt*eye(3)];
+        EKF_param.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
+        EKF_param.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]);
     end
     EKF_param.P = eye(n); % 初期共分散行列
     EKF_param.list=output;

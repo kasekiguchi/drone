@@ -11,27 +11,21 @@ classdef Motive < SENSOR_CLASS
         old_time
         rigid_num % rigid indices
         motive
+        initq
     end
     
     methods
-        function obj = Motive(self,varargin)
-            %  このクラスのインスタンスを作成
+        function obj = Motive(self,args)
+            arguments
+                self
+                args
+            end
             %%% Output equation %%%
             obj.self = self;
-            obj.motive = varargin{1}.motive;
-%             obj.result.state=state_copy(self.model.state); % STATE_CLASSとしてコピー
-%             if isprop(obj.result.state,'v')
-%                 delete(obj.result.state,'v');
-%             end
-%             if isprop(obj.result.state,'w')
-%                 delete(obj.result.state,'w');
-%             end
-            if ~isempty(varargin)
-                if isfield(varargin{1},'rigid_num')
-                    obj.rigid_num = varargin{1}.rigid_num;
-                end
-            end
-            
+            obj.motive = args.motive;
+            obj.rigid_num = args.rigid_num;
+            obj.initq = quaternion(Eul2Quat([args.initial_yaw_angle 0 0])');
+
             obj.result.state = STATE_CLASS(struct('state_list',["p","q"],"num_list",[3,4]));
             if sum(contains(self.model.state.list,"q"))==1
                 obj.result.state.num_list=[3,length(self.model.state.q)]; % modelと合わせる
@@ -50,7 +44,10 @@ classdef Motive < SENSOR_CLASS
             end
             id = obj.rigid_num(1);
             if sum(contains(obj.result.state.list,"q"))==1
-                obj.result.state.set_state('q',data.rigid(id).q);
+                tmpq = quaternion(data.rigid(id).q');
+                tmpq = conj(obj.initq)*tmpq;
+                [Q(1) Q(2) Q(3) Q(4)] = parts(tmpq);
+                obj.result.state.set_state('q',Q');
             end
             obj.result.state.set_state('p',data.rigid(id).p);
             obj.result.rigid=data.rigid;
