@@ -11,6 +11,7 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
         param  % offsets and gains
         flight_phase % flight phase input to figure handle FH
         hover_thrust_force % hovering時のthrust force
+        hover_thrust_force_SuspendedLoad % hovering時のthrust force
         state
     end
 
@@ -22,6 +23,10 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
             obj.flight_phase = 's';
             P = self.model.param;
             obj.hover_thrust_force = P(1) * P(9);
+            if self.model.name == "Suspended_Load_Model"
+                obj.hover_thrust_force = P(1) * P(6);
+                obj.hover_thrust_force_SuspendedLoad = (P(1)+P(15)) * P(6);
+            end
             obj.state = state_copy(self.model.state);
         end
 
@@ -66,6 +71,20 @@ classdef Thrust2Throttle_drone < INPUT_TRANSFORM_CLASS
                 uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset); % hovering からの偏差をゲイン倍する
                 % ホバリング時から変分にゲイン倍する
                 uyaw = obj.param.gain(3) * (whn(3) - wh(3));
+                if obj.self.model.name == "Suspended_Load_Model"
+                    T_thr = input(1);
+                    if cha == 'f'
+                        uroll = obj.param.gain_SuspendedLoad(1) * (whn(1) - wh(1));
+                        upitch = obj.param.gain_SuspendedLoad(2) * (whn(2) - wh(2));
+                        uthr = max(0,obj.param.gain_SuspendedLoad(4) * (T_thr - obj.hover_thrust_force) + throttle_offset); % hovering からの偏差をゲイン倍する
+                        uyaw = obj.param.gain_SuspendedLoad(3) * (whn(3) - wh(3));
+                    else
+                        uroll = obj.param.gain(1) * (whn(1) - wh(1));
+                        upitch = obj.param.gain(2) * (whn(2) - wh(2));
+                        uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force_SuspendedLoad) + throttle_offset_SuspendedLoad); % hovering からの偏差をゲイン倍する
+                        uyaw = obj.param.gain(3) * (whn(3) - wh(3));
+                    end
+                end
                 uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset; % offset = 500
                 upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset; % offset = 500
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
