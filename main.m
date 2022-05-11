@@ -11,7 +11,7 @@ userpath('clear');
 %% general setting
 N = 1;   % number of agents
 fExp = 0 %1：実機　それ以外：シミュレーション
-fMotive = 1; % Motiveを使うかどうか
+fMotive = 0; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 
@@ -166,7 +166,7 @@ for i = 1:N
         agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
     end
 
-    %agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
+    agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
     %agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
@@ -178,15 +178,15 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
     %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
     %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-    agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-5, 1e-8])); % （剛体ベース）EKF
-    %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+%     agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-5, 1e-8])); % （剛体ベース）EKF
+    agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
-    % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
+%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
     %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %     if fExp == 1
@@ -412,6 +412,6 @@ clc
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-logger.plot({1,"p1:2:3","ser"},{1,"input",""},{1,"q","e"},{1,"p1-p2","s"},{1,"p1-p2-p3","e"},"time",[4,10], "fig_num",2,"row_col",[2 3])
+logger.plot({1,"p1:3","ser"},{1,"v1:3","e"},{1,"input",""},{1,"p1-p2-p3","ser"},"fig_num",2,"row_col",[2 2])
 %%
 %logger.save();
