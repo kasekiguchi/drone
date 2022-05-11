@@ -23,7 +23,7 @@ Setting.num_list = [3,3,3,3,3,3,3,3];
 Setting.dt = dt;
 Setting.param = getParameter_withload; % モデルの物理パラメータ設定
 Setting.initial.pL = Setting.initial.p+Setting.param(16)*Setting.initial.pT+[Setting.param(17);Setting.param(18);-Setting.param(19)];
-if strcmp(type,"plant")
+if strcmp(plant_or_model,"plant")
         Setting.param = getParameter_withload("Plant"); % モデルの物理パラメータ設定
 end
 Model = {"type",type,"name",name,"param",Setting,"id",id};

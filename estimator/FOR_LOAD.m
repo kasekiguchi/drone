@@ -26,7 +26,7 @@ classdef FOR_LOAD < ESTIMATOR_CLASS
             obj.result.state.p = obj.self.sensor.result.rigid(obj.rigid_num(1)).p;
             obj.result.state.q = obj.self.sensor.result.rigid(obj.rigid_num(1)).q;
             obj.result.state.pL = obj.self.sensor.result.rigid(obj.rigid_num(2)).p;
-            obj.result.state.pT = (obj.result.state.pL-obj.result.state.p)/norm(obj.result.state.pL-obj.result.state.p);
+            obj.result.state.pT = (obj.result.state.pL-obj.result.state.p-[obj.self.model.param(17);obj.self.model.param(18);-obj.self.model.param(19)])/norm(obj.result.state.pL-obj.result.state.p-[obj.self.model.param(17);obj.self.model.param(18);-obj.self.model.param(19)]);
             result = obj.result;
         end
         function show()
