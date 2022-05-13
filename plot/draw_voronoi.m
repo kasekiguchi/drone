@@ -1,12 +1,13 @@
-function draw_voronoi(V,span,pos,region,text)
-% 【Input】V : polyshapeセル配列， span : 対象インデックス，
-%  pos : span毎に"r+","bx","go" で表示
+function draw_voronoi(V,pos,region,text)
+% 【Input】V : polyshapeセル配列
+%  pos = [sx1 sy1 sz1 sx2 sy2 sz2 ....;
+%         rx1 ry1 rz1 rx2 ry2 rz2 ....;...]
+% : 各行の位置を"r+","bx","go" で表示
 %  region : 描画領域,
 %  text = {pos, text}　で　posの位置に <=text を表示
 %% 描画
 arguments
     V
-    span
     pos
     region = []
     text = []
@@ -17,7 +18,8 @@ if ~isempty(region)
     ylim([min(region(:,2)),max(region(:,2))]);
 end
 hold on
-for i = span
+num=length(V);
+for i = 1:num
     if isa(V{i},'polyshape')
         plot(V{i});
     else
@@ -26,19 +28,18 @@ for i = span
         %end
     end
 end
-num=length(span);
 lt = ["r+","bx","go"];
 if iscell(pos)
     pos = [pos{1,:}];
 end
-for i =1: round(size(pos,2)/size(span,2),0)
-    plot(pos(1,1:num:end),pos(1,2:num:end),lt(i))
+for i =1: size(pos,1)
+    plot(pos(i,1:3:end),pos(i,2:3:end),lt(i))
 end
 if ~isempty(text)
     tvar=text;
     tpos=tvar{1};
     tval=tvar{2};
-    for i =span
+    for i =1:num
         text(tpos(1,i),tpos(2,i),strcat('\leftarrow ',num2str(tval{i})));
     end
 end
