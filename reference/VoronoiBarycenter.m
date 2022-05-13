@@ -21,10 +21,9 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             %% 共通設定１：単純ボロノイセル確定
             sensor = obj.self.sensor.result;
             state = obj.self.estimator.result.state;
-            env = obj.self.estimator.map.env;             % 環境として予測したもの
-            r = obj.param.r; % 重要度を測距できるレンジ
+%            r = obj.param.r; % 重要度を測距できるレンジ
             R = obj.param.R; % 通信レンジ
-            d= obj.param.d; % グリッド間隔
+ %           d= obj.param.d; % グリッド間隔
             void=obj.param.void; % VOID幅
             if isfield(sensor,'neighbor')
                 neighbor=sensor.neighbor; % 通信領域内のエージェント位置 絶対座標
@@ -103,14 +102,16 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
                 epdata = cell2mat(arrayfun(@(i) logger.data(i,"p","e"),span,'UniformOutput',false));
                 spdata = cell2mat(arrayfun(@(i) logger.data(i,"p","s"),span,'UniformOutput',false));
                 %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
+                % Voronoi 被覆の様子
                 make_animation(1:10:logger.k-1,...
                     @(k) draw_voronoi( ...
                     arrayfun(@(i) logger.Data.agent(i).reference.result{k}.region,span,'UniformOutput',false) ...
                                 ,[spdata(k,:);rpdata(k,:);epdata(k,:)] ...
-                                ,Env.param.Vertices) ...
+                                ,Env.Vertices) ...
                     ,@() Env.show);
-                %%
-                make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(Env.param.xq,Env.param.yq,logger.Data.agent(i).estimator.result{k}.param.grid_density),span,'UniformOutput',false), @() Env.show_setting());
+
+                % エージェントが保存している環境地図
+                %make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(Env.xq,Env.yq,logger.Data.agent(i).estimator.result{k}.grid_density),span,'UniformOutput',false), @() Env.show_setting());
         end
     end
 end
