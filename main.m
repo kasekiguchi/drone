@@ -98,7 +98,8 @@ else
             initial(i).v = [0; 0; 0];
             initial(i).w = [0; 0; 0];
         else
-            arranged_pos = arranged_position([0, 0], N, 1, 0);
+            %arranged_pos = arranged_position([0, 0], N, 1, 0);
+            arranged_pos = arranged_position([10, 10], N, 3, 0);
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];
@@ -235,10 +236,11 @@ LogAgentData = [% 下のLogger コンストラクタで設定している対象a
     "controller.result"
     ];
 
-if isfield(agent(1).reference, 'covering')
-    LogAgentData = [LogAgentData; "env.density.param.grid_density"]; % for coverage
-    %LogAgentData = [LogAgentData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
-end
+%if isfield(agent(1).reference, 'covering')
+    %LogAgentData = [LogAgentData; "env"]; % for coverage
+    %LogAgentData = [LogAgentData; "env.density.param.grid_density"]; % for coverage
+   % LogAgentData = [LogAgentData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
+%end
 
 logger = Logger(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %%
@@ -350,7 +352,7 @@ try
 
         %           agent(1).reference.wall.show(); % 機体の移動を毎時刻表示する
 
-    agent(1).reference.covering.show(agent(2).plant.state)
+%    agent(1).reference.covering.show(agent(1).plant.state)
         % for exp
         if fExp
             %% logging
@@ -415,6 +417,6 @@ VoronoiBarycenter.draw_movie(logger, N, Env)
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-logger.plot({1,"p1:2","sr"},{2,"p1:2","er"})
+logger.plot({1,"p1:2","sr"},'fig_num',2)
 %%
 %logger.save();
