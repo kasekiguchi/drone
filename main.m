@@ -31,6 +31,8 @@ else
 end
 initial_yaw_angles = [0];
 
+%% generate environment
+Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
 %% set connector (global instance)
 if fExp
     if fMotive
@@ -98,7 +100,7 @@ else
             initial(i).v = [0; 0; 0];
             initial(i).w = [0; 0; 0];
         else
-            %arranged_pos = arranged_position([0, 0], N, 1, 0);
+            arranged_pos = arranged_position([0, 0], N, 1, 0);
             arranged_pos = arranged_position([10, 10], N, 3, 0);
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
@@ -153,9 +155,6 @@ for i = 1:N
     %agent(i).set_property("input_transform",InputTransform_toHL_drone(dt)); % modelを使った１ステップ予測値を目標値として４つの推力に変換
     % １ステップ予測値を目標とするのでゲインをあり得ないほど大きくしないとめちゃめちゃスピードが遅い結果になる．
     %agent(i).set_property("input_transform",struct("type","Thrust2ForceTorque","name","toft","param",1)); % 1: 各モータ推力を[合計推力，トルク入力]へ変換，　2: 1の逆
-    %% set environment property
-    %Env = [];
-    agent(i).set_property("env",Env_2DCoverage(i)); % 重要度マップ設定
     %% set sensors property
     agent(i).sensor = [];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
@@ -181,7 +180,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
     %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-5, 1e-8])); % （剛体ベース）EKF
     agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-    agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',[])); % map 更新用 重要度などのmapを時間更新する
+    agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
@@ -417,6 +416,6 @@ VoronoiBarycenter.draw_movie(logger, N, Env)
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-logger.plot({1,"p1:2","sr"},'fig_num',2)
+%logger.plot({1,"p1:2","sr"},'fig_num',2)
 %%
 %logger.save();
