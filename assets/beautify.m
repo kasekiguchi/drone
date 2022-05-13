@@ -1,4 +1,4 @@
-function beautify(file,startl,endl)
+function [a,o] = beautify(file,startl,endl)
 % beautify the matlab source file
 % 【Usage】set formatter_path, and then do following command at command window
 % beautify(path_to_target_file)
