@@ -15,19 +15,13 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             if isfield(varargin{1},'void'); obj.param.void = varargin{1}.void;  end
             obj.result.state = STATE_CLASS(struct('state_list',["p"],'num_list',[3]));
         end
-        function  result= do(obj,Param)
-            % 【Input】Param = {sensor,estimator,env,param}
+        function  result= do(obj,~)
             %  param = range, pos_range, d, void,
             % 【Output】 result = 目標値（グローバル位置）
             %% 共通設定１：単純ボロノイセル確定
-            sensor = obj.self.sensor.result;%Param{1}.result;
-            state = obj.self.sensor.result.state;%Param{2}.state; % 
-            env = obj.self.env;%Param{3}.param;             % 環境として予測したもの
-%             param = Param{4}; % 途中で変えられる必要があるか？
-%             if isfield(param,'range'); obj.param.r = param.range;  end
-%             if isfield(param,'pos_range'); obj.param.R = param.pos_range;  end
-%             if isfield(param,'d'); obj.param.d = param.d;  end
-%             if isfield(param,'void'); obj.param.void = param.void;  end
+            sensor = obj.self.sensor.result;
+            state = obj.self.sensor.result.state;
+            env = obj.self.env;             % 環境として予測したもの
             r = obj.param.r; % 重要度を測距できるレンジ
             R = obj.param.R; % 通信レンジ
             d= obj.param.d; % グリッド間隔
@@ -37,6 +31,7 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             elseif isfield(sensor,'rigid')
                 neighbor=[sensor.rigid(1:size(sensor.rigid,2)~=obj.self.id).p];
             end
+            % ここから相対座標
             if ~isempty(neighbor)% 通信範囲にエージェントが存在するかの判別
                 neighbor_rpos=neighbor-state.p; % 通信領域内のエージェントの相対位置
     %        if size(neighbor_rpos,2)>=1 % 隣接エージェントの位置点重み更新
@@ -57,26 +52,20 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             
             %%
             
+                result=[0;0;0]; % 相対位置
+                obj.param.region=region;
+                region_phi=[];
+                yq=[];
+                xq=[];
             if area(region)<=0 
                 %% 領域の面積０
-                % ここにくる多くの場合がbugか？（voidを取るとありえる）なら動かない（ref = state）
-                result=[0;0;0]; % 相対位置
-                obj.param.region=region;
-                region_phi=[];
-                yq=[];
-                xq=[];
+                % ここにくる多くの場合はbugか？（voidを取るとありえる）なら動かない（ref = state）
                 warning("ACSL : The voronoi region is empty.")
-            else
-              if ~inpolygon(0,0,region.Vertices(:,1),region.Vertices(:,2))
+            elseif ~inpolygon(0,0,region.Vertices(:,1),region.Vertices(:,2))
                 % 領域が自機体を含まない（voidを取るとありえる）なら動かない（ref = state）
                 % ここにくる多くの場合がbugか？
-                result=[0;0;0]; % 相対位置
-                obj.param.region=region;
-                region_phi=[];
-                yq=[];
-                xq=[];
                 warning("ACSL : The agent is out of the voronoi region.")
-              end
+            else
                 %% 共通設定２：単純ボロノイセルの重み確定
                 xq = sensor.xq;
                 yq = sensor.yq;
@@ -99,26 +88,25 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             result = obj.result;
         end
         function show(obj,param)
-            draw_voronoi({obj.result.region},1,[param.p(1:2),obj.result.p(1:2)]);
+            draw_voronoi({obj.result.region},1,[param.p(1:2),obj.result.state.p(1:2)]);
         end
-        function draw_movie(obj,logger,N,Env)
-                rp=strcmp(logger.items,'reference.result.state.p');
-                ep=strcmp(logger.items,'estimator.result.state.p');
-                sp=strcmp(logger.items,'sensor.result.state.p');
-                %sp=strcmp(logger.items,'plant.state.p');
-                regionp=strcmp(logger.items,'reference.result.region');
-                rp = logger.ri;
-                ep = logger.ei;
-                sp = logger.si;
-                gridp=strcmp(logger.items,'env.density.param.grid_density');
-                tmpref=@(k,span) arrayfun(@(i)logger.Data.agent{k,rp,i}.state.p,span,'UniformOutput',false);
-                tmpest=@(k,span) arrayfun(@(i)logger.Data.agent{k,ep,i}.state.p,span,'UniformOutput',false);
-                tmpsen=@(k,span) arrayfun(@(i)logger.Data.agent{k,sp,i}.state.p,span,'UniformOutput',false);
+    end
+    methods (Static)
+        function draw_movie(logger,N,Env)
+                rpdata = cell2mat(arrayfun(@(i) logger.data(i,"p","r"),1:N,'UniformOutput',false));
+                epdata = cell2mat(arrayfun(@(i) logger.data(i,"p","e"),1:N,'UniformOutput',false));
+                spdata = cell2mat(arrayfun(@(i) logger.data(i,"p","s"),1:N,'UniformOutput',false));
                 %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
-                make_animation(1:10:logger.i-1,1:N,@(k,span) draw_voronoi(arrayfun(@(i) logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmpsen(k,span),tmpref(k,span),tmpest(k,span)],Env.param.Vertices),@() Env.show);
+                %make_animation(1:10:logger.i-1,1:N,@(k,span) draw_voronoi(arrayfun(@(i) logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmpsen(k,span),tmpref(k,span),tmpest(k,span)],Env.param.Vertices),@() Env.show);
+                make_animation(1:10:logger.k-1,1:N, ...
+                    @(k,span) draw_voronoi( ...
+                    arrayfun(@(i) logger.Data.agent(i).reference.result{k}.region,span,'UniformOutput',false) ...
+                                ,span ...
+                                ,[spdata(k,span),rpdata(k,span),epdata(k,span)] ...
+                                ,Env.param.Vertices) ...
+                    ,@() Env.show);
                 %%
-                %    make_animation(1:10:logger.i-1,1,@(k,span) contourf(Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,span}),@() Env.show_setting());
-                make_animation(1:10:logger.i-1,1,@(k,span) arrayfun(@(i) contourf( Env.param.xq,Env .param.yq,logger.Data.agent{k,gridp,i}),span,'UniformOutput',false), @() Env.show_setting());            
+                make_animation(1:10:logger.k-1,1,@(k,span) arrayfun(@(i) contourf( Env.param.xq,Env.param.yq,logger.Data.agent(i).env{k}.density.param.grid_density),span,'UniformOutput',false), @() Env.show_setting());            
         end
     end
 end
