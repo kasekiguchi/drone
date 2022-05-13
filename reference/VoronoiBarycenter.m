@@ -21,7 +21,7 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
             %% 共通設定１：単純ボロノイセル確定
             sensor = obj.self.sensor.result;
             state = obj.self.estimator.result.state;
-            env = obj.self.env;             % 環境として予測したもの
+            env = obj.self.estimator.map.env;             % 環境として予測したもの
             r = obj.param.r; % 重要度を測距できるレンジ
             R = obj.param.R; % 通信レンジ
             d= obj.param.d; % グリッド間隔
@@ -92,19 +92,25 @@ classdef VoronoiBarycenter < REFERENCE_CLASS
         end
     end
     methods (Static)
-        function draw_movie(logger,N,Env)
-                rpdata = cell2mat(arrayfun(@(i) logger.data(i,"p","r"),1:N,'UniformOutput',false));
-                epdata = cell2mat(arrayfun(@(i) logger.data(i,"p","e"),1:N,'UniformOutput',false));
-                spdata = cell2mat(arrayfun(@(i) logger.data(i,"p","s"),1:N,'UniformOutput',false));
+        function draw_movie(logger,N,Env,span)
+            arguments
+                logger
+                N
+                Env
+                span = 1:N
+            end
+                rpdata = cell2mat(arrayfun(@(i) logger.data(i,"p","r"),span,'UniformOutput',false));
+                epdata = cell2mat(arrayfun(@(i) logger.data(i,"p","e"),span,'UniformOutput',false));
+                spdata = cell2mat(arrayfun(@(i) logger.data(i,"p","s"),span,'UniformOutput',false));
                 %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
                 make_animation(1:10:logger.k-1,...
                     @(k) draw_voronoi( ...
-                    arrayfun(@(i) logger.Data.agent(i).reference.result{k}.region,1:N,'UniformOutput',false) ...
+                    arrayfun(@(i) logger.Data.agent(i).reference.result{k}.region,span,'UniformOutput',false) ...
                                 ,[spdata(k,:);rpdata(k,:);epdata(k,:)] ...
                                 ,Env.param.Vertices) ...
                     ,@() Env.show);
                 %%
-                make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(epdata(k,3*(i-1)+1)+logger.Data.agent(i).sensor.result{k}.xq,epdata(k,3*(i-1)+2)+logger.Data.agent(i).sensor.result{k}.yq,logger.Data.agent(i).sensor.result{k}.grid_density),1:N,'UniformOutput',false), @() Env.show_setting());            
+                make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(Env.param.xq,Env.param.yq,logger.Data.agent(i).estimator.result{k}.param.grid_density),span,'UniformOutput',false), @() Env.show_setting());
         end
     end
 end

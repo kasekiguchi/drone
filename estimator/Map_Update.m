@@ -8,13 +8,15 @@ classdef Map_Update < ESTIMATOR_CLASS
     methods
         function obj = Map_Update(self,param)
             obj.self = self;
+            obj.env = param;
+            obj.env.param.grid_density(:,:) = 0;
         end
         
         function [result]=do(obj,param,varargin)
             % param
             % varargin : 他の推定器で推定した状態
             sensor = obj.self.sensor.result;
-            env = obj.self.env.(obj.self.env.name(1));
+            env = obj.env;
             if ~isempty(varargin)
                 state = varargin{1}.state;
             else
