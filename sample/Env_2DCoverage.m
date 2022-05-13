@@ -12,9 +12,9 @@ env.Vertices=[-10 -20;100 -20;100 100;-10 100];
 %env.Vertices = env.Vertices/10;
 
 % 小さい領域
-% env.d = 0.1;
-% env.q	= [1 0;2, 1;4 -2];
-% env.Vertices=[-2 -2.5;5.5 -2.5;5.5 3;-2 3]; 
+env.d = 0.1;
+env.q	= [1 0;2, 1;4 -2];
+env.Vertices=[-2 -2.5;5.5 -2.5;5.5 3;-2 3]; 
 
 in = inpolygon(env.q(:,1),env.q(:,2),env.Vertices(:,1),env.Vertices(:,2));
 if prod(in) == 0

@@ -9,16 +9,16 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %% general setting
-N = 4;   % number of agents
+N = 1;   % number of agents
 fExp = 0 %1：実機　それ以外：シミュレーション
-fMotive = 0; % Motiveを使うかどうか
+fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.25;% sampling time
+    dt = 0.025;% sampling time
 end
 
 sampling = dt;
@@ -27,9 +27,8 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 100;
+    te = 20;
 end
-initial_yaw_angles = [0];
 
 %% generate environment
 Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
@@ -101,7 +100,6 @@ else
             initial(i).w = [0; 0; 0];
         else
             arranged_pos = arranged_position([0, 0], N, 1, 0);
-            arranged_pos = arranged_position([10, 10], N, 3, 0);
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];
@@ -159,6 +157,9 @@ for i = 1:N
     agent(i).sensor = [];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
     if fMotive
+        if ~exist('initial_yaw_angles')
+            initial_yaw_angles = zeros(1,N);
+        end
         agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i),initial_yaw_angles(i),motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
@@ -166,9 +167,9 @@ for i = 1:N
         agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
     end
 
-    agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
-    agent(i).set_property("sensor",Sensor_RangePos(i,10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-    agent(i).set_property("sensor",Sensor_RangeD(2)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
+%     agent(i).set_property("sensor",Sensor_Direct()); % 状態真値(plant.state)　：simのみ
+%     agent(i).set_property("sensor",Sensor_RangePos(i,1)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+%     agent(i).set_property("sensor",Sensor_RangeD(1)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",struct("type","LiDAR_sim","name","lrf","param",[]));
     %% set estimator property
     agent(i).estimator = [];
@@ -178,12 +179,12 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
     %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
     %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-    %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-5, 1e-8])); % （剛体ベース）EKF
-    agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-    agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
+    agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-5, 1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+%      agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
-    agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
+%     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
@@ -221,7 +222,7 @@ for i = 1:N
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
-    %%
+    %% 必要か？ : TODO
     param(i).sensor.list = cell(1, length(agent(i).sensor.name));
     param(i).reference.list = cell(1, length(agent(i).reference.name));
 end
@@ -231,15 +232,7 @@ end
 LogData = [% agentのメンバー関係以外のデータ
     ];
 LogAgentData = [% 下のLogger コンストラクタで設定している対象agentに共通するdefault以外のデータ
-    %"model.state.p"
-    "controller.result"
     ];
-
-%if isfield(agent(1).reference, 'covering')
-    %LogAgentData = [LogAgentData; "env"]; % for coverage
-    %LogAgentData = [LogAgentData; "env.density.param.grid_density"]; % for coverage
-   % LogAgentData = [LogAgentData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
-%end
 
 logger = Logger(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %%
@@ -316,7 +309,7 @@ try
         for i = 1:N
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-            param(i).reference.covering = [];%{Env};
+            param(i).reference.covering = [];
             param(i).reference.point = {FH, [2; 1; 1], time.t};
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
@@ -404,7 +397,7 @@ end
 %%
 close all
 clc
-VoronoiBarycenter.draw_movie(logger, N, Env)
+%VoronoiBarycenter.draw_movie(logger, N, Env,1:N)
 %%
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot({1,"sensor.imu.result.state.q",""},{1,"sensor.imu.result.state.w",""},{1,"sensor.imu.result.state.a",""});
@@ -416,6 +409,6 @@ VoronoiBarycenter.draw_movie(logger, N, Env)
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-%logger.plot({1,"p1:2","sr"},'fig_num',2)
+logger.plot({1,"p1:2","sr"},'fig_num',2)
 %%
 %logger.save();
