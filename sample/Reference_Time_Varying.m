@@ -3,7 +3,7 @@ function Reference = Reference_Time_Varying(f_name,param)
 % f_name : functin name
 % reference property をReference classのインスタンス配列として定義
 clear Reference
-Reference.type=["TimeVaryingReference"];
+Reference.type=["TIME_VARYING_REFERENCE"];
 Reference.name=["timeVarying"];
 Reference.param={f_name,param,"HL"};
 end

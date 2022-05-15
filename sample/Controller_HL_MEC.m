@@ -15,7 +15,7 @@ Controller_param.dt = dt;
  eig(diag([1,1,1],1)-[0;0;0;1]*Controller_param.F2)
  
 Controller.type="HLController_plusMEC_quadcopter";
-Controller.name="hlcontrollerPlusMEC";
+Controller.name="hlcPlusMEC";
 Controller.param=Controller_param;
 
 %% MEC_param.

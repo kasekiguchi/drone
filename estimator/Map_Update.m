@@ -1,4 +1,4 @@
-classdef Map_Update < ESTIMATOR_CLASS
+classdef MAP_UPDATE < ESTIMATOR_CLASS
     properties
         result
         env
@@ -6,7 +6,7 @@ classdef Map_Update < ESTIMATOR_CLASS
     end
 
     methods
-        function obj = Map_Update(self, param)
+        function obj = MAP_UPDATE(self, param)
             obj.self = self;
             obj.env = param;
             obj.env.grid_density(:, :) = 0;

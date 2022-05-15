@@ -1,15 +1,15 @@
-classdef Logger < handle
+classdef LOGGER < handle % handleクラスにしないとmethodの中で値を変えられない
     % データ保存用クラス
-    % obj = Logger(target,row,items)
+    % obj = LOGGER(target,row,items)
     % target : 保存対象の agent indices : example 2:4 : default 1:N
     % row : size(ts:dt:te,2)
     % items : [    "plant.state.p",    "model.state.p"  ...]
-    % At every logging, logger gathers the data listed in items from target
+    % At every logging, LOGGER gathers the data listed in items from target
     % obj.Data.t : time
     % obj.Data.agent = {row, item_id, target_id}
     properties
         Data
-        k = 0;      % time index for logging
+        k;      % time index for logging
         target      % 保存対象の agent indices : example 2:4 : default 1:N
         items       % 追加で保存するアイテム名
         item_num    % 追加保存のアイテム数
@@ -21,15 +21,16 @@ classdef Logger < handle
     end
 
     methods
-        function obj = Logger(target, number, fExp, items, agent_items)
-            % Logger(target,row,items)
+        function obj = LOGGER(target, number, fExp, items, agent_items)
+            % LOGGER(target,row,items)
             % target : ログを取る対象　example 1:3, usage agent(obj.target)
             % number : 確保するデータサイズ　length(ts:dt:te)
             % agent_items : default以外で保存するデータ ["inner_input"]
             % items  : agent 以外で保存するデータの名前
             %         以下のように名前と保存するものの対応が取れていなくても可
-            %         logger=Logger(~,~,"innerInput",~);
-            %         logger.logging(t,FH,agent,motive);
+            %         LOGGER=LOGGER(~,~,"innerInput",~);
+            %         LOGGER.logging(t,FH,agent,motive);
+            obj.k = 0;
             obj.target = target;
             obj.Data.t = zeros(number, 1);     % 時間
             obj.Data.phase = zeros(number, 1); % フライトフェーズ　a,t,f,l...

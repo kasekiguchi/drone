@@ -4,7 +4,7 @@ function Reference = Reference_Agreement(N)
     % reference property をReference classのインスタンス配列として定義
     % 返し値は配置したい隊列
     clear Reference
-    Reference.type=["ConsensusAgreement"];
+    Reference.type=["CONSENSUS_AGREEMENT"];
     Reference.name=["agreement"];
     pos = linspace(0,2*pi,N); %円形に配置
     Reference.param = zeros(3,N);
