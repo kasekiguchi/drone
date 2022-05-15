@@ -159,13 +159,6 @@ try
         for i = 1:N
             agent(i).do_reference(param.reference.list);
         end
-        % dtc はやらなくても良いかも
-        if exist("tControl","var")
-            dtc = toc(tControl);
-        else
-            dtc = 0;
-        end
-        tControl = tic;
         HLParam.dt = dte;% あくまで推定結果を元に入力を算出するため
         for i = 1:N
             agent(i).do_controller({HLParam,[]});

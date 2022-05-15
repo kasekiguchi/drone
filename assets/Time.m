@@ -1,4 +1,4 @@
-classdef Time < handle
+classdef TIME < handle
     % handle化するためだけのクラス
     
     properties

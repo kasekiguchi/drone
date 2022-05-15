@@ -48,8 +48,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                 args.param = []
                 args.id = 0
             end
-            plant_subclass = str2func(args.type);
-            obj.plant = plant_subclass(args.param);
+            obj.plant = MODEL_CLASS(args.type,args.param);
         end
 
     end
@@ -97,7 +96,11 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
 
     methods % Set methods
-
+        function set_estimator(obj, prop, args)
+            obj.set_property(prop,args);
+            % modelの状態でestimatorの状態を生成
+            obj.estimator.result.state = state_copy(obj.model.state);
+        end
         function set_model(obj, args)
           obj.c_set_model(args{:});
         end
@@ -109,8 +112,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
               args.param = []
               args.id = 0
             end
-            model_subclass = str2func(args.type);
-            obj.model = model_subclass(args.param);
+            obj.model = MODEL_CLASS(args.type,args.param);
         end
 
     end
@@ -135,7 +137,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
 
         function do_model(obj, param)
             % 推定値でmodelの状態を上書きした上でmodelのdo method を実行
-            if obj.model.state.list == obj.estimator.result.state.list
+            if obj.model.state.list == obj.estimator.result.state.list % TODO　１回目の時に右辺が定義されていないのでは？
                 obj.model.state.set_state(obj.estimator.result.state.get());
             else
 

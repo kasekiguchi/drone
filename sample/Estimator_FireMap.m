@@ -3,7 +3,7 @@ function Estimator_FireMap(agent)
 %% estimator class demo
 % estimator property をEstimator classのインスタンス配列として定義
 Estimator.name="firemap";
-Estimator.type="ForestFireMap";
+Estimator.type="FOREST_FIRE_MAP";
 est.D = 1;
 est.map_min = [-50 -50];%[x_min y_min]
 est.map_max = [50 50];%[x_min y_min]
