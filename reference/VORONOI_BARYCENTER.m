@@ -48,7 +48,6 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
             end
             V = intersect(sensor.region, Vn{1}); % range_regionセンサの結果との共通部分（相対座標）
             region = polybuffer(V, -void);       % 自領域のVOIDマージンを取ったpolyshape
-
             %%
 
             result = [0; 0; 0];                  % 相対位置
@@ -86,11 +85,32 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
             obj.result.state.p(3) = 1;               % リファレンス高さは１ｍ
             result = obj.result;
         end
-        function show(obj, param)
-            draw_voronoi({obj.result.region}, 1, [param.p(1:2), obj.result.state.p(1:2)]);
+        function show(obj, Env)
+            arguments
+                obj
+                Env = polyshape(obj.result.region);
+            end
+            draw_voronoi({polyshape(obj.result.region)},[obj.result.state.p';obj.self.estimator.result.state.p'],Env.Vertices);
         end
     end
     methods (Static)
+        function show_k(logger, N, Env, span,k)
+            arguments
+                logger
+                N
+                Env
+                span = 1:N
+                k = 1
+            end
+            rpdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "r"), span, 'UniformOutput', false));
+            epdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "e"), span, 'UniformOutput', false));
+            spdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "s"), span, 'UniformOutput', false));
+            draw_voronoi( ...
+                arrayfun(@(i) logger.Data.agent(i).reference.result{k}.region, span, 'UniformOutput', false) ...
+                , [spdata(k, :); rpdata(k, :); epdata(k, :)] ...
+                , Env.Vertices);
+        end
+        
         function draw_movie(logger, N, Env, span)
             arguments
                 logger
@@ -98,17 +118,8 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
                 Env
                 span = 1:N
             end
-            rpdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "r"), span, 'UniformOutput', false));
-            epdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "e"), span, 'UniformOutput', false));
-            spdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "s"), span, 'UniformOutput', false));
-            %make_gif(1:1:ke,1:N,@(k,span) draw_voronoi(arrayfun(@(i)  logger.Data.agent{k,regionp,i},span,'UniformOutput',false),span,[tmppos(k,span),tmpref(k,span)],Vertices),@() Env.draw,fig_param);
             % Voronoi 被覆の様子
-            make_animation(1:10:logger.k - 1, ...
-            @(k) draw_voronoi( ...
-                arrayfun(@(i) logger.Data.agent(i).reference.result{k}.region, span, 'UniformOutput', false) ...
-                , [spdata(k, :); rpdata(k, :); epdata(k, :)] ...
-                , Env.Vertices) ...
-                , @() Env.show);
+            make_animation(1:10:logger.k - 1,@(k) VORONOI_BARYCENTER.show_k(logger, N, Env, span,k), @() Env.show);
 
             % エージェントが保存している環境地図
             %make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(Env.xq,Env.yq,logger.Data.agent(i).estimator.result{k}.grid_density),span,'UniformOutput',false), @() Env.show_setting());
