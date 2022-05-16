@@ -1,7 +1,7 @@
 classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     % 制御対象としてのプラントモデルの持つべき性質を規定するクラス
     % 【Properties】 plant, model, sensor, estimator, estimator_substance, reference, controller,
-    %                         input_tranform, env, (id, input, inner_input, state)
+    %                         input_tranform, (id, input, inner_input, state)
     %  plant : 実制御対象 model obj
     %  model : 制御モデル model obj
     %  sensor : sensor obj 構造体 : センサー全ての結果をsensor.resultに集約
@@ -11,7 +11,6 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     %  controller : 制御モデルに対する制御入力算出 controller obj
     % 複数の場合定義された順番に計算される
     %  input_transform : 実対象に入力できるよう入力を変換する input_transform obj
-    %  env : エージェントが想定している環境
     %  【Usage】obj=ABSTRACT_SYSTEM(varargin)
     %  varargin needs to have fields
     %     type : class name of plant(=model)
@@ -27,7 +26,6 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         estimator % 複数の場合定義された順番に計算される
         reference % 複数の場合定義された順番に計算される
         connector
-        env
         input_transform % plant と modelで入力の型が違う時に変換するため
     end
 
@@ -268,7 +266,7 @@ end
 
 function mustBeInPropList(s)
 
-    if ~(sum(strcmp(s, {'model', 'sensor', 'estimator', 'controller', 'reference', 'connector', 'env','input_transform'})))
+    if ~(sum(strcmp(s, {'model', 'sensor', 'estimator', 'controller', 'reference', 'connector', 'input_transform'})))
         eidType = 'mustBeInPropList:notProp';
         msgType = 'ACSL : Input must be a property of this class.';
         throwAsCaller(MException(eidType, msgType))

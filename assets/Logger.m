@@ -66,14 +66,15 @@ classdef Logger < handle
                 % 注：サイズの固定されている数値データだけ保存可能
             end
             for n = obj.target
-                for i = 1:length(obj.agent_items)
+                for i = 1:length(obj.agent_items) % sensor,estimator,reference以外のみ
                     str = strsplit(obj.agent_items(i), '.');
                     tmp = agent(n);
                     obj.Data.agent(n).(str{1}){obj.k} = tmp.(str{1});
                 end
                 obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
-                obj.Data.agent(n).estimator.result{obj.k} = agent(n).sensor.result;
-                obj.Data.agent(n).reference.result{obj.k} = agent(n).sensor.result;
+                obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
+                obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
+
                 obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
                 obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
                 obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
