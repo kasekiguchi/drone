@@ -184,11 +184,12 @@ for i = 1:N
 %      agent(i).set_property("estimator",struct('type',"Map_Update",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
+%     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%直線
 %     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
-    %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+        agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %     if fExp == 1
     %         if i ==1
@@ -210,7 +211,7 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    %agent(i).set_property("controller",Controller_FT(dt)); % 階層型線形化
+%     agent(i).set_property("controller",Controller_FT(dt)); %階層型線形化+有限整定制御
     agent(i).set_property("controller", Controller_HL(dt)); % 階層型線形化
     HLControlSetting=Controller_HL(dt);
     HLParam = HLControlSetting.param;
@@ -409,6 +410,6 @@ clc
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-logger.plot({1,"p1:2","sr"},'fig_num',2)
+logger.plot({1,"p1:2","sr"},{1,"p1-p2","sr"},'fig_num',2)
 %%
 %logger.save();

@@ -35,11 +35,17 @@ classdef FTController_quadcopter < CONTROLLER_CLASS
             ky=[3.16,6.79,40.54,12.27];%後でparamに格納
             ky=F3;
             kz=[2.23,2.28];
+            kz=F1;
             kpsi=[1.41,1.35];
-            ax=[0.692,0.75,0.818,0.9];%alpha
-            ay=[0.692,0.75,0.818,0.9];
-            az=[0.692,0.75];
-            apsi=[0.692,0.75];
+            kpsi=F4;
+%             ax=[0.692,0.75,0.818,0.9];%alpha
+%             ay=[0.692,0.75,0.818,0.9];
+%             az=[0.692,0.75];
+%             apsi=[0.692,0.75];
+            ax = Param.ax;
+            ay = Param.ay;
+            az = Param.az;
+            apsi = Param.apsi;
 %             ax=[1,1,1,1];%SMCへのスイッチ
 %             ay=[1,1,1,1];
 %             az=[1,1];
@@ -68,19 +74,23 @@ classdef FTController_quadcopter < CONTROLLER_CLASS
             else
                 vf = Vf(x,xd',P,F1);
             end
-%             vs = Vs(x,xd',vf,P,F2,F3,F4);
+             %z方向:FT
             z1=Z1(x,xd',P);%z方向
+%             uz=-kz(1)*sign(z1(1))*abs(z1(1))^az(1)-(kz(2)*sign(z1(2))*abs(z1(2))^az(2));
+%             vf(1)=uz;%FT
+
+%             vs = Vs(x,xd',vf,P,F2,F3,F4);
+%             z1=Z1(x,xd',P);%z方向
             z2=Z2(x,xd',vf,P);%x方向
             z3=Z3(x,xd',vf,P);%y方向
             z4=Z4(x,xd',vf,P);%yaw
             %x1-x4をｚの成分を出す形に
             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
-            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式
-            uz=-kz(1)*sign(z1(1))*abs(z1(1))^az(1)-(kz(2)*sign(z1(2))*abs(z1(2))^az(2));%(19)式
-
-            upsi=-F4*z4;
-            %upsi=-kpsi(1)*sign(z1(1))*abs(z1(1))^apsi(1)-(kpsi(2)*sign(z2(1))*abs(z2(1)))^apsi(2);%F4*Z4;%今回はこれで()
-            vs =[ux,uy,uz,upsi];
+            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式          
+            %upsi:HL or FT
+            upsi=-F4*z4;%HL
+            %upsi=-kpsi(1)*sign(z1(1))*abs(z1(1))^apsi(1)-(kpsi(2)*sign(z2(1))*abs(z2(1)))^apsi(2);%F4*Z4;%今回はこれで()%FT
+            vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);
                 tmp(2);tmp(3);
