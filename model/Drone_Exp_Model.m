@@ -56,11 +56,11 @@ classdef Drone_Exp_Model < MODEL_CLASS
                     case 's' % stop pro
                         uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
                         AUX_1   =  0;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   = 0;
-                        msg(1,1:8) = [1100,1100,0,1100,0,0,0,0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                        msg(1,1:8) = [500,500,0,500,0,0,0,0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
                     case 'a' % arming
                         uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
                         AUX_1   = 1000;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   =  0;
-                        msg(1,1:8) = [1100,1100,0,1100,1000,0,0,0];%[ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                        msg(1,1:8) = [500,500,0,500,1000,0,0,0];%[ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
                     case 'f' % flight
                         msg(1,1:8) = u;
                     case 'l' % landing
@@ -69,7 +69,7 @@ classdef Drone_Exp_Model < MODEL_CLASS
                         msg(1,1:8) = u;
                 end
             else % 緊急時 プロペラストップ
-                obj.msg=[1100 1100 0 1100 0 0 0 0];
+                obj.msg=[500 500 0 500 0 0 0 0];
                 obj.connector.sendData(gen_msg(obj.msg));
                 warning("ACSL : Emergency stop!!");
                 return;

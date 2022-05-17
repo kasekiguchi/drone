@@ -15,10 +15,10 @@ k2 = 0.000008048;          % 推力定数
 k3 = 0.000008048;          % 推力定数
 k4 = 0.000008048;          % 推力定数
 loadmass = 0.0556;            % 牽引物体の重さ
-L = 0.57;                   % 紐の長さ
-ex = 0.0;                  % 紐の取り付け位置
-ey = 0.00;                  % 紐の取り付け位置
-ez = 0.045;                  % 紐の取り付け位置0.078 0.045
+L = 0.44;                   % 紐の長さ
+ex = 0.01;                  % 紐の取り付け位置
+ey = 0.004;                  % 紐の取り付け位置
+ez = 0.07;                  % 紐の取り付け位置
 % T = k*w^2  
 % T : thrust , w : angular velocity of rotor
 % M = km * T = km* k * w^2
@@ -26,7 +26,7 @@ ez = 0.045;                  % 紐の取り付け位置0.078 0.045
 Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4 ,loadmass, L, ex, ey, ez];
 if size(varargin) >= 1
     if strcmp(varargin{1},'Plant')% for Plant parameter
-        Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, loadmass, L, ex+0.001, ey, ez];
+        Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, loadmass, L, ex, ey, ez];
     end
 
 % if size(varargin) >= 1

@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 %% general setting
 N = 1;   % number of agents
-fExp = 1 %1：実機　それ以外：シミュレーション
+fExp = 0 %1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -40,8 +40,8 @@ if fExp
         %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.6')
         %% set connector (global instance)
         rigid_ids = [1];
-        motive = Connector_Natnet('ClientIP', '192.168.1.5'); % Motive 7 : hara
-        COMs = "COM31";
+        motive = Connector_Natnet('ClientIP', '192.168.1.9'); % Motive 7 : hara
+        COMs = "COM29";
         %[COMs,rigid_ids,motive,initial_yaw_angles] = build_MASystem_with_motive('192.168.1.6'); % set ClientIP
         N = length(COMs);
         motive.getData([],[]);
@@ -120,9 +120,9 @@ for i = 1:N
     %% generate Drone instance
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
+        %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
         %agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
-%         agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM1")); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
@@ -187,7 +187,7 @@ for i = 1:N
 %     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
+    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
     %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %     if fExp == 1
