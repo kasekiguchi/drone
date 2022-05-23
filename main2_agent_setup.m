@@ -3,8 +3,8 @@ for i = 1:N
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
         %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
-        %agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
-        agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
+        %agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
@@ -17,8 +17,8 @@ for i = 1:N
 
     %% model
     % set control model
-    %agent(i).set_model(Model_EulerAngle(dt, 'model', initial(i), i)); % オイラー角モデル
-    agent(i).set_model(Model_Quat13(dt,'model',initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
+    agent(i).set_model(Model_EulerAngle(dt, 'model', initial(i), i)); % オイラー角モデル
+    %agent(i).set_model(Model_Quat13(dt,'model',initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,'model',initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,'model',initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする

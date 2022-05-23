@@ -67,12 +67,12 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
-    %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    %agent(i).set_property("reference",Reference_TIME_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+    %agent(i).set_property("reference",Reference_TIME_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %    agent(i).set_property("reference",Reference_agreement(N)); % Voronoi重心
 
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-    %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    %agent(i).set_property("reference",Reference_TIME_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
@@ -89,7 +89,7 @@ param.sensor.list = cell(1, length(agent(1).sensor.name));
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [% agentのメンバー関係以外のデータ
     ];
-LogAgentData = [% 下のLogger コンストラクタで設定している対象agentに共通するdefault以外のデータ
+LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
     %"model.state.p"
     "controller.result"
     "inner_input"
@@ -100,9 +100,9 @@ if isfield(agent(1).reference, 'covering')
     LogAgentData = [LogAgentData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
 end
 
-logger = Logger(1:N, size(ts:dt:te, 2), 1, LogData, LogAgentData);
+logger = LOGGER(1:N, size(ts:dt:te, 2), 1, LogData, LogAgentData);
 %%
-time = Time();
+time = TIME();
 time.t = ts;
 %%
 % 引数に取れるのは以下のみ
@@ -214,7 +214,8 @@ close all
 %logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
 %logger.plot(1,["p","q","v"],["e","e","e"]);
 %logger.plot(1,["p","q","v","input","w"],["re","e","e","","e"]);
-logger.plot({1,"p","ser"},{1,"q","e"},{1,'v','e'},{1,'w','e'},{1,"input",""},{1,"inner_input",""});
+logger.plot({1,"p","ser"},{1,"q","e"},{1,'v','e'},{1,'w','e'}, ...
+    {1,"input",""},{1,"inner_input",""});
 %logger.plot({1,"p","e"},{1,"q","e"},{1,'v','e'},{1,'w','e'},{1,"input",""},'time',[10,15]);
 %logger.plot({1,["p1-p2-p3"],["se"]},'fig_num',3,'color',0);
 
