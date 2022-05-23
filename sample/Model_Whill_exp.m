@@ -13,8 +13,9 @@ arguments
   conn_type
   id 
 end
-type="WHILL_EXP"; % model name
-name="whill"; % print name
+Model.id = id;
+Model.type="WHILL_EXP_MODEL"; % model name
+Model.name="whill"; % print name
 setting.conn_type = conn_type;
 setting.dt = dt;
 
@@ -32,5 +33,5 @@ switch conn_type
     setting.param.subName = ["p"];
     setting.param.ROSHostIP = id;
 end
-Model = {"type",type,"name",name,"param",setting,"id",id};
+Model.param = setting;
 end

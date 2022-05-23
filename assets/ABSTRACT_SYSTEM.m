@@ -43,12 +43,9 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     methods
         function obj = ABSTRACT_SYSTEM(args)
             arguments
-                args.type
-                args.name
-                args.param = []
-                args.id = 0
+                args
             end
-            obj.plant = MODEL_CLASS(args.type,args.param);
+            obj.plant = MODEL_CLASS(args);
         end
 
     end
@@ -102,19 +99,8 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.estimator.result.state = state_copy(obj.model.state);
         end
         function set_model(obj, args)
-          obj.c_set_model(args{:});
+          obj.model = MODEL_CLASS(args);
         end
-        function c_set_model(obj,args)
-          arguments
-              obj
-              args.type
-              args.name
-              args.param = []
-              args.id = 0
-            end
-            obj.model = MODEL_CLASS(args.type,args.param);
-        end
-
     end
 
     methods % Do methods

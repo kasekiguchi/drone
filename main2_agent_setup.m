@@ -17,8 +17,8 @@ for i = 1:N
 
     %% model
     % set control model
-    agent(i).set_model(Model_EulerAngle(dt, 'model', initial(i), i)); % オイラー角モデル
-    %agent(i).set_model(Model_Quat13(dt,'model',initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
+    %agent(i).set_model(Model_EulerAngle(dt, 'model', initial(i), i)); % オイラー角モデル
+    agent(i).set_model(Model_Quat13(dt,'model',initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,'model',initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,'model',initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする

@@ -1,4 +1,4 @@
-classdef Drone_Exp_Model < MODEL_CLASS
+classdef DRONE_EXP_MODEL < MODEL_CLASS
     % Lizard 実験用モデル
     properties% (Access=private)
         ESPr_num
@@ -11,9 +11,9 @@ classdef Drone_Exp_Model < MODEL_CLASS
     
     
     methods
-        function obj = Drone_Exp_Model(args)
-            obj@MODEL_CLASS([],[]);
-            param=args;
+        function obj = DRONE_EXP_MODEL(args)
+            obj@MODEL_CLASS(args);
+            param=args.param;
             obj.dt = 0.025;
             %% variable set
             obj.flight_phase        = 's';
