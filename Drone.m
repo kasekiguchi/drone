@@ -5,8 +5,14 @@ classdef Drone < ABSTRACT_SYSTEM
         fig
     end
     methods
-        function obj = Drone(var)
-            obj=obj@ABSTRACT_SYSTEM(var{:});
+        function obj = Drone(args)
+            arguments
+                args
+            end
+                obj=obj@ABSTRACT_SYSTEM(args);
+            if contains(args.type,"EXP")
+                obj.plant = DRONE_EXP_MODEL(args);
+            end
             % ドローン用のクラス
             % フレームとしての機能はABSTRACT_SYSTEMに記載
             % ドローン独自の部分はmodel,controllerクラスなどを参照

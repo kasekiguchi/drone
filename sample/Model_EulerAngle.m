@@ -10,8 +10,10 @@ function Model = Model_EulerAngle(dt, plant_or_model, initial, id)
         initial        % 初期値
         id             % 個体識別番号
     end
-    type = "EulerAngle_Model";                 % model name
-    name = "euler";                            % print name
+    Model.id = id;
+    Model.type = "EULER_ANGLE_MODEL";                 % model name
+    %Model.type = "MODEL_CLASS";                 % model name
+    Model.name = "euler";                            % print name
     Setting.dim = [12, 4, 17];
     Setting.input_channel = ["v", "w"];
     Setting.method = get_model_name("RPY 12"); % model dynamicsの実体名
@@ -24,5 +26,5 @@ function Model = Model_EulerAngle(dt, plant_or_model, initial, id)
     else
         Setting.param = getParameter();        % モデルの物理パラメータ設定
     end
-    Model = {"type", type, "name", name, "param", Setting, "id", id};
+    Model.param = Setting;
 end

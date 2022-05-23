@@ -1,10 +1,10 @@
 %% Drone 班用共通プログラム update sekiguchi
 %% Initialize settings
 % set path
-tmp = matlab.desktop.editor.getActive;
-cd(fileparts(tmp.Filename));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+activeFile = matlab.desktop.editor.getActive;
+cd(fileparts(activeFile.Filename));
+[~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
@@ -166,6 +166,6 @@ clc
 %logger.plot({1,"p1-p2-p3","er"},{1,"input",""})
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-%logger.plot({1, "p1:2", "sr"})
+logger.plot({1, "p1:2", "sr"})
 %%
 %logger.save();

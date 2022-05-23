@@ -6,8 +6,9 @@ arguments
   initial
   id
 end
-type="Quat13_Model"; % model name
-name="quat"; % print name
+Model.id = id;
+Model.type="Quat13_Model"; % model name
+Model.name="quat"; % print name
 Setting.dim=[13,4,17];
 Setting.input_channel = ["v","w"];
 Setting.method = get_model_name("Quat 13"); % model dynamicsの実体名
@@ -20,5 +21,5 @@ if strcmp(plant_or_model,"plant")
 else
   Setting.param = getParameter(); % モデルの物理パラメータ設定
 end
-Model = {"type",type,"name",name,"param",Setting,"id",id};
+Model.param = Setting;
 end
