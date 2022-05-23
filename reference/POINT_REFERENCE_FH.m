@@ -41,11 +41,11 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
-                    obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1,10,Param{3}-obj.base_time);
+                    obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1-obj.base_state(3),10,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
-                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1,10,0);
+                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),10,0);
                 end
                 obj.result.state.p = obj.result.state.xd(1:3);
                 obj.flag='t';
