@@ -1,3 +1,5 @@
+%% comment
+%観測値のみのFisher情報量を算出する関数を吐き出すプログラム
 %% variables setting
 clear all;clc;close all;
 % LaserNum = 1;

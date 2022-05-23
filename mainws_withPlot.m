@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=300;
+    te=550;
 end
 %% initialize
 initial(N) = struct;
@@ -68,15 +68,10 @@ for i = 1:N
     agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
     %% set estimator property
     agent(i).estimator=[];
-%             agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChairV(agent(i)));%速度次元車両モデルのEKFSLAM
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_WheelChair(agent(i),SensorRange));%加速度次元車両モデルのEKFSLAM
-%         agent(i).set_property("estimator",Estimator_EKFSLAM_ODV(agent(i)));%全方向移動ロボットのEKFSLAM
-%     agent(i).set_property("estimator",Estimator_EKFSLAM_ODVADI(agent(i)));%加速度次元入力全方向移動ロボットモデルの
-%     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairV(agent(i)));%速度次元入力モデルのukfslam
     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference=[];
-    velocity = 1;
+    velocity = 0.5;
     w_velocity = 0.5;
     
     WayPoint = [0,0,0,0];%目標位置の初期値
@@ -88,9 +83,7 @@ for i = 1:N
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller=[]; 
-agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
-%FFコントローラ
-%     for i = 1:N;  Controller.type="WheelChair_FF";Controller.name="WheelChair_FF";Controller.param={agent(i)}; agent(i).set_property('controller',Controller);end%
+    agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
     %% set connector (global instance)
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
     param(i).reference.list = cell(1,length(agent(i).reference.name));

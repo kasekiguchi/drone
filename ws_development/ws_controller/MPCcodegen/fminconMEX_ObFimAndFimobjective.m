@@ -62,9 +62,10 @@ for j = 1:params.H
         Fim = Fim + RangeLogic(i) * FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),U(1,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
         obFim = obFim + RangeLogic(i) * FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(i), params.alpha(i), params.phi(i));
     end
-    Fim = (1/(2*NoiseR))*Fim;%観測値差分のFisher情報行列計算
-    obFim = (1/(2*NoiseR))*([obFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);%観測値のFisher情報行列
-    InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim) +1e-5);
+%     Fim = (1/(2*NoiseR+diag([1,1])))*Fim;
+    Fim = Fim/(2*NoiseR);%観測値差分のFisher情報行列計算
+    obFim = (1/(NoiseR))*([obFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);%観測値のFisher情報行列
+    InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));
 %     InvFim = inv(Fim);
     InvobFim = inv(obFim);
     evFim(1,j) = trace(InvobFim)*trace(InvFim);%評価値計算

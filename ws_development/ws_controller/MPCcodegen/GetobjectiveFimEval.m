@@ -26,7 +26,7 @@ for j = 1:params.H
     end
     Fim = (1/(2*NoiseR))*Fim;
     ObFim = (1/(2*NoiseR))*([ObFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
-    InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim)+1e-5);
+    InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));
     InvObFim = inv(ObFim);
 %     evFim(1,j) = max(eig(InvFim));
 evFim(1,j) = trace(InvFim);

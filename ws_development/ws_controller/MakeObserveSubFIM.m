@@ -1,3 +1,6 @@
+%% Comment
+%観測値差分についてのFihser情報量を産出するMatlab Functionを産出するプログラム
+%AOmegaで作っているのが提案手法,加速度と角速度入力のモデルの意,'FIM_ObserbSubAOmegaRungeKutta'というファイル名で吐き出している
 %% variables setting
 clear all;clc;close all;
 LaserNum = 1;
