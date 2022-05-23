@@ -1,7 +1,7 @@
 %% general setting
 N = 4; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
-fMotive = 1; % Motiveを使うかどうか
+fMotive = 0; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
 

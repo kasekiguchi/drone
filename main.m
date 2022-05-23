@@ -155,7 +155,7 @@ end
 %%
 close all
 clc
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %%
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot({1,"sensor.imu.result.state.q",""},{1,"sensor.imu.result.state.w",""},{1,"sensor.imu.result.state.a",""});
