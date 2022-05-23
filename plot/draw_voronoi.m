@@ -3,8 +3,8 @@ function draw_voronoi(V,pos,region,text)
 %  pos = [sx1 sy1 sz1 sx2 sy2 sz2 ....;
 %         rx1 ry1 rz1 rx2 ry2 rz2 ....;...]
 % : 各行の位置を"r+","bx","go" で表示
-%  region : 描画領域,
-%  text = {pos, text}　で　posの位置に <=text を表示
+%  region(optional) : 描画領域,
+%  text(optional) = {pos, text}　で　posの位置に <=text を表示
 %% 描画
 arguments
     V

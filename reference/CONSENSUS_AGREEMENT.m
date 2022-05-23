@@ -1,4 +1,4 @@
-classdef ConsensusAgreement < REFERENCE_CLASS
+classdef CONSENSUS_AGREEMENT < REFERENCE_CLASS
     % 合意重心を指定して隊列を形成するクラス
     % 指定すれば各時刻における合意重心の算出も可能
     
@@ -11,7 +11,7 @@ classdef ConsensusAgreement < REFERENCE_CLASS
     
     methods
         %%　計算式
-        function obj = ConsensusAgreement(self,param)
+        function obj = CONSENSUS_AGREEMENT(self,param)
             obj.self = self;
             obj.offset = param;
             obj.result.state = STATE_CLASS(struct('state_list',["p","xd"],'num_list',[3]));

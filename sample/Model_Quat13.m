@@ -6,7 +6,7 @@ arguments
   initial
   id
 end
-type="Quat13_Model"; % class name
+type="Quat13_Model"; % model name
 name="quat"; % print name
 Setting.dim=[13,4,17];
 Setting.input_channel = ["v","w"];

@@ -1,4 +1,4 @@
-classdef Whill_exp < MODEL_CLASS
+classdef WHILL_EXP < MODEL_CLASS
     % Whill 実験用モデル
     properties% (Access=private)
         IP
@@ -11,7 +11,7 @@ classdef Whill_exp < MODEL_CLASS
     end
     
     methods
-        function obj = Whill_exp(args)
+        function obj = WHILL_EXP(args)
             obj@MODEL_CLASS([],[]);
             param=args;
             obj.dt = 0.025; % check
