@@ -123,31 +123,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             Data = {obj.Data, {[obj.si, obj.ei, obj.ri, obj.ki, obj.pi], obj.items, sname, rname}};
             save(filename, 'Data');
         end
-        function [data, vrange] = data(obj, target, variable, attribute, option)
-            % n : agent indices
-            % variable : var name or path to var from agent
-            %            or path from result if attribute is set.
-            % attribute : "s","e","r","p","i"
-            % option time : time range
-            % Examples
-            % time : data('t',[],[])
-            % state : data(1:2,"p","e")                      : agent1's estimated position
-            %         data(2,"state.xd","r")               : agent2's reference xd
-            %         data(1,"sensor.result.state.q",[])       : agent1's measured attitude
-            % input : data(1,[],"i") or data(1,"input",[]) : agent1's input data
-            % data(1,"p","r","time",[0,2])                 : take the data in time span [0 2]
-            % PROBLEM : data(0,'t','') does not work
-            arguments
-                obj
-                target
-                variable string = "p"
-                attribute string = "e"
-                option.time (1, 2) double = [0 obj.Data.t(obj.k)]
-            end  
-            data = cell2mat(arrayfun(@(i) obj.data_org(i, variable, attribute,"time",option.time), target, 'UniformOutput', false));
-            [~, vrange] = obj.full_var_name(variable, attribute);
-        end
-        function [data, vrange] = data_org(obj, n, variable, attribute, option)
+        function [data, vrange] = data(obj, n, variable, attribute, option)
             % n : agent index
             % variable : var name or path to var from agent
             %            or path from result if attribute is set.
@@ -204,7 +180,6 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
         end
         function data = return_state_prop(obj, variable, data)
-            % function for data_org
             for j = 1:length(variable)
                 data = [data.(variable(j))];
                 if strcmp(variable(j), 'state')
