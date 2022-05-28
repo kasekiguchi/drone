@@ -8,8 +8,8 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
-        agent(i) = Drone(Model_Quat13(dt, 'plant', initial(i),i)); % unit quaternionのプラントモデル : for sim
-        %agent(i) = Drone(Model_EulerAngle(dt, 'plant', initial(i), i));                % euler angleのプラントモデル : for sim
+        %agent(i) = Drone(Model_Quat13(dt, 'plant', initial(i),i)); % unit quaternionのプラントモデル : for sim
+        agent(i) = Drone(Model_EulerAngle(dt, 'plant', initial(i), i));                % euler angleのプラントモデル : for sim
         %agent(i) = Drone(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = Drone(Model_Discrete0(dt,'plant',initial(i),i)); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %agent(i) = Drone(Model_Discrete(dt,'plant',initial(i),i)); % 離散時間質点モデル : PD controller などを想定
@@ -67,7 +67,7 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
