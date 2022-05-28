@@ -155,8 +155,7 @@ end
 %%
 close all
 clc
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%%
+%% plot 
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot({1,"sensor.imu.result.state.q",""},{1,"sensor.imu.result.state.w",""},{1,"sensor.imu.result.state.a",""});
 logger.plot({1,"p","er"});
@@ -167,5 +166,8 @@ logger.plot({1,"p","er"});
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
 %logger.plot({1, "p1:2", "sr"})
+%% animation
+%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+DRAW_DRONE_MOTION(logger,"frame_size",[0.2,0.2],"rotor_r",0.05,"animation",true);
 %%
 %logger.save();
