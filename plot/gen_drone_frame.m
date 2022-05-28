@@ -21,7 +21,7 @@ pfnum = 0;%length(Frame.Faces(1,:));
 Frame.Faces = [pvnum+[1 2 3 4 NaN(1,pfnum-4)];pvnum+5+[1 2 3 4 NaN(1,pfnum-4)]];
 Frame.FaceVertexCData=zeros(length(Frame.Vertices),1);
 fig =[Prop;Frame];
-save('plot/frame/drone_frame_01_05.mat','fig','-nocompression');
+%save('plot/frame/drone_frame_01_05.mat','fig','-nocompression');
 
 %%
 close all 
@@ -32,13 +32,14 @@ colorbar;
 %%
 syms dir [1 3] real
 syms deg real
-%matlabFunction(rotate([pp;pf],dir,deg),'File','drone_frame.m',"Vars",{dir deg});
+syms model
+matlabFunction(rotate([pp;pf],dir,deg),'File','drone_frame.m',"Vars",{dir deg});
+%matlabFunction(rotate(model,dir,deg),'File','drone_frame.m',"Vars",{model dir deg});
 %%
 close all
 hold on; 
 pp =patch(Prop,'FaceAlpha',0.3);
 pf =patch(Frame,'EdgeColor','flat','FaceColor','none','LineWidth',0.2);
-%%
 drone = [pp;pf];
 obj_plot(drone,[0 0 0],Rodrigues([0 pi/2 0]))
 grid on; daspect([1 1 1]);view([1 1 1])
