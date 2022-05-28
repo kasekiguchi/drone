@@ -1,6 +1,6 @@
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
 fOffline = 0; % offline verification with experiment data
@@ -8,7 +8,7 @@ fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.25; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
+    dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
 end
 
 sampling = dt;
@@ -17,7 +17,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 20;
+    te = 10;
 end
 
 %% generate environment
