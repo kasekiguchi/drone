@@ -1,5 +1,5 @@
 %% general setting
-N = 1; % number of agents
+N = 4; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fROS = 0;
