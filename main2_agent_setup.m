@@ -2,26 +2,26 @@ for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        %agent(i) = DRONE(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
-        agent(i) = DRONE(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
-        %agent(i) = DRONE(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
-        %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
+        %agent(i) = DRONE(Model_Drone_Exp(dt,initial(i),"udp",[25]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
+        agent(i) = DRONE(Model_Drone_Exp(dt,initial(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
+        %agent(i) = DRONE(Model_Drone_Exp(dt,initial(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
+        %agent(i) = Whill(Model_Whill_Exp(dt,initial(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
-        %agent(i) = DRONE(Model_Quat13(dt, 'plant', initial(i),i)); % unit quaternionのプラントモデル : for sim
-        agent(i) = DRONE(Model_EulerAngle(dt, 'plant', initial(i), i));                % euler angleのプラントモデル : for sim
+        agent(i) = DRONE(Model_Quat13(dt,initial(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
+        %agent(i) = DRONE(Model_EulerAngle(dt,initial(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
-        %agent(i) = DRONE(Model_Discrete0(dt,'plant',initial(i),i)); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
-        %agent(i) = DRONE(Model_Discrete(dt,'plant',initial(i),i)); % 離散時間質点モデル : PD controller などを想定
+        %agent(i) = DRONE(Model_Discrete0(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
+        %agent(i) = DRONE(Model_Discrete(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル : PD controller などを想定
     end
 
     %% model
     % set control model
-    agent(i).set_model(Model_EulerAngle(dt, 'model', initial(i), i)); % オイラー角モデル
-    %agent(i).set_model(Model_Quat13(dt,'model',initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
+    agent(i).set_model(Model_EulerAngle(dt,initial(i), i)); % オイラー角モデル
+    %agent(i).set_model(Model_Quat13(dt,initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial(i),i)); %牽引物込みモデル
-    %agent(i).set_model(Model_Discrete0(dt,'model',initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-    %agent(i).set_model(Model_Discrete(dt,'model',initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+    %agent(i).set_model(Model_Discrete0(dt,initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+    %agent(i).set_model(Model_Discrete(dt,initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     close all
     %% set input_transform property
     if fExp                                                                               % isa(agent(i).plant,"Lizard_exp")

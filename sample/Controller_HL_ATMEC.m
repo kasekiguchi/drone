@@ -1,8 +1,6 @@
 function Controller=Controller_HL_ATMEC(dt)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
-Controller_param.P=getParameter();
-
 %% ====HL_Controller====
 % %-------------定量誤差大-------------
 % Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 

@@ -17,6 +17,7 @@ classdef HLController_plusMEC_quadcopter < CONTROLLER_CLASS
         function obj = HLController_plusMEC_quadcopter(self,param,~)
             obj.self = self;
             obj.param = param;
+            obj.param.P = self.parameter.get();
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             %MEC’Ç‰Á
             obj.dv1p = 0;

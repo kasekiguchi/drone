@@ -1,7 +1,7 @@
 function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     % input transformation from thrust force to throttle level for
     % drone Prop. input
-    u_trans_param.type = "Thrust2Throttle_drone";
+    u_trans_param.type = "THRUST2THROTTLE_DRONE";
     u_trans_param.name = "t2t";
 
     %% transmitter system
