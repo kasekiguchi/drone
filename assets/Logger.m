@@ -9,7 +9,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
     % obj.Data.agent = {row, item_id, target_id}
     properties
         Data
-        k;      % time index for logging
+        k;          % time index for logging
         target      % 保存対象の agent indices : example 2:4 : default 1:N
         items       % 追加で保存するアイテム名
         item_num    % 追加保存のアイテム数
@@ -58,10 +58,10 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             obj.Data.t(obj.k) = t;
             cha = get(FH, 'currentcharacter');
             obj.Data.phase(obj.k) = cha;
-% TODO : activate warning            
-%            if isempty(items{1}) | length(items) ~= length(obj.items)
-%                 warning("ACSL : number of logging data is wrong");
-%             end
+            % TODO : activate warning
+            %            if isempty(items{1}) | length(items) ~= length(obj.items)
+            %                 warning("ACSL : number of logging data is wrong");
+            %             end
             for i = obj.items
                 obj.Data.(obj.items(i))(obj.k, :) = items{i};
                 % 注：サイズの固定されている数値データだけ保存可能
@@ -123,7 +123,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             Data = {obj.Data, {[obj.si, obj.ei, obj.ri, obj.ki, obj.pi], obj.items, sname, rname}};
             save(filename, 'Data');
         end
-        function [data,vrange] = data(obj, n, variable, attribute, option)
+        function [data, vrange] = data(obj, n, variable, attribute, option)
             % n : agent index
             % variable : var name or path to var from agent
             %            or path from result if attribute is set.
@@ -161,9 +161,9 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 data = [obj.Data.agent(n)];
                 switch variable
                     case "inner_input" % 横ベクトルの場合
-                            data = [data.(variable)];
-                            data = [data{1, data_range}];
-                            data = reshape(data,[8,length(data)/8])';
+                        data = [data.(variable)];
+                        data = [data{1, data_range}];
+                        data = reshape(data, [8, length(data) / 8])';
                     otherwise
                         for j = 1:length(variable)
                             data = [data.(variable{j})];
@@ -203,19 +203,19 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             %         attribute = "es"   : estimator and sensor data
             %
             % plot target allows following form
-            %         p : position, q : attitude, 
+            %         p : position, q : attitude,
             %         v : velocity, w : angular velocity
             %         p1 : first element of p, p1:2 : first two elements
             %         p1-p2 : phase plot p1 vs p2
             %         p1-p2-p3 : 3D phase plot p1, p2, p3
-            % attribute consists of 
-            %         s : sensor, e : estimator, r : reference, 
+            % attribute consists of
+            %         s : sensor, e : estimator, r : reference,
             %         p : plant (only simulation)
             % option
             %         time : time span
             %         fig_num : figure number
             %         row_col : row and column number of subplot
-            % 
+            %
             % usage plot({1,"p1:2:3","ser"},{2,"input",""},{1,"q","e"},
             %               {2,"p1-p2"},"time",[4 10], "fig_num",2,"row_col",[2 2])
             %       fig1 = agent1's p1,p3 data w.r.t sensor, estimator and reference
@@ -270,7 +270,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                         switch length(ps)
                             case 1 % 時間応答（時間を省略）
                                 tmpx = t;
-                                [tmpy,vrange] = obj.data(n, ps, att, "time", trange);
+                                [tmpy, vrange] = obj.data(n, ps, att, "time", trange);
                             case 2 % 縦横軸明記
                                 tmpx = obj.data(n, ps(1), att, "time", trange);
                                 tmpy = obj.data(n, ps(2), att, "time", trange);
@@ -290,7 +290,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
                         switch length(ps)
                             case 3
-                                yoffset = - 1.2;
+                                yoffset =- 1.2;
                         end
 
                         % set title label legend
@@ -349,19 +349,19 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     txt = {''};
                     if length([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')])); % take off phase
-%                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
-                        txt = {txt{:},'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+                        %                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
+                        txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
                     end
                     if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
-                        txt = {txt{:},'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
+                        txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
                     end
                     if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
                         Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
-                        txt = {txt{:},'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+                        txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
                     end
 
-                    text(spfi.XLim(2)-(spfi.XLim(2)-spfi.XLim(1))*0.25,spfi.YLim(2)+(spfi.YLim(2)-spfi.YLim(1))*yoffset,txt);
+                    text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
                 end
             end
         end
@@ -377,8 +377,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     name = "plant.result";
                 case 'i' %
                     name = "input";
-                 otherwise
-                     name = "";
+                otherwise
+                    name = "";
             end
             variable = regexprep(var, "[0-9:]", "");
             vrange = regexp(var, "[0-9:]", 'match');
@@ -398,7 +398,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     name = "input";
                 otherwise
                     if ~isempty(variable)
-                        if ~contains(variable, "result") &  name ~= ""  % attribute が指定されている場合
+                        if ~contains(variable, "result") & name ~= "" % attribute が指定されている場合
                             name = strcat(name, '.', variable);
                         else
                             name = variable;

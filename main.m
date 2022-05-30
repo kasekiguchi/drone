@@ -1,10 +1,10 @@
 %% Drone 班用共通プログラム update sekiguchi
 %% Initialize settings
 % set path
-tmp = matlab.desktop.editor.getActive;
-cd(fileparts(tmp.Filename));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+activeFile = matlab.desktop.editor.getActive;
+cd(fileparts(activeFile.Filename));
+[~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
@@ -67,7 +67,7 @@ end
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [2; 1; 1], time.t};
+            param(i).reference.point = {FH, [0; 0; 1], time.t};
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -155,11 +155,10 @@ end
 %%
 close all
 clc
-VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%%
+%% plot 
 % agent(1).reference.timeVarying.show(logger)
 %logger.plot({1,"sensor.imu.result.state.q",""},{1,"sensor.imu.result.state.w",""},{1,"sensor.imu.result.state.a",""});
-%logger.plot({1,"p","e"},{1,"q","s"},"row_col",[2,1]);
+logger.plot({1,"p","er"});
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"reference.result.state.xd","e",'time',[1 2]));
 %tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"input","",'time',[1 2]));
 %logger.data(1,"state.p","e","time",[0 3])
@@ -167,5 +166,8 @@ VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
 %logger.plot({1, "p1:2", "sr"})
+%% animation
+%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+DRAW_DRONE_MOTION(logger,"frame_size",[0.2,0.2],"rotor_r",0.05,"animation",true);
 %%
 %logger.save();
