@@ -31,14 +31,12 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
             result = obj.result;
         end
         function show(obj, logger)
-            rp = strcmp(logger.items, "reference.result.state.p");
-            heart = cell2mat(logger.Data.agent(:, rp)');        % reference.result.state.p
-            plot(heart(1, :), heart(2, :));                     % xy平面の軌道を描く
+            rp = logger.data(1,"p","r");
+            plot3(rp(:,1), rp(:,2), rp(:,3));                     % xy平面の軌道を描く
             daspect([1 1 1]);
             hold on
-            ep = strcmp(logger.items, "estimator.result.state.p");
-            heart_result = cell2mat(logger.Data.agent(:, ep)'); % estimator.result.state.p
-            plot(heart_result(1, :), heart_result(2, :));       % xy平面の軌道を描く
+            ep = logger.data(1,"p","e");
+            plot3(ep(:,1), ep(:,2), ep(:,3));       % xy平面の軌道を描く
             legend(["reference", "estimate"]);
             title('reference and estimated trajectories');
             xlabel("x [m]");
