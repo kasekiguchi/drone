@@ -13,11 +13,6 @@ classdef DRONE < ABSTRACT_SYSTEM
             if contains(args.type,"EXP")
                 obj.plant = DRONE_EXP_MODEL(args);
             end
-            % ドローン用のクラス
-            % フレームとしての機能はABSTRACT_SYSTEMに記載
-            % ドローン独自の部分はmodel,controllerクラスなどを参照
-            %% 描画用ドローンの図
-            obj.fig = load('plot/frame/drone_frame_01_05.mat').fig;
         end
     end
     methods (Static)
