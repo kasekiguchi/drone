@@ -1,3 +1,7 @@
+%% set timer
+time = TIME();
+time.t = ts;
+
 % 引数に取れるのは以下のみ
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
