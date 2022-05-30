@@ -310,6 +310,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                             plot3(tmpx, tmpy, tmpz);
                         else
                             plot(tmpx, tmpy);
+                            xlim([min(tmpx),max(tmpx)]);
                         end
                         hold on
 
