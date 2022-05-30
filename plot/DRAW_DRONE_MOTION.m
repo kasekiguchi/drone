@@ -140,7 +140,7 @@ classdef DRAW_DRONE_MOTION
             q = reshape(q,size(q,1),size(q,2)/length(param.target),length(param.target));
             u = reshape(u,size(u,1),4,length(param.target));
             r = reshape(r,size(r,1),3,length(param.target));
-            for n = param.target
+            for n = 1:length(param.target)
                 switch size(q(:,:,n),2)
                     case 3
                         Q1 = quaternion(q(:,:,n),'euler','ZYX','frame');
@@ -165,9 +165,9 @@ classdef DRAW_DRONE_MOTION
 
             t = logger.data("t");
             for i = 1:length(t)-1
-                for n = param.target
-                plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
-                    obj.draw(obj.frame(n),obj.thrust(n,:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                for n = 1:length(param.target)
+                    plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
+                    obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
                     if param.realtime
                         pause(t(i+1)-t(i));
                     else

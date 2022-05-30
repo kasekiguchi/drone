@@ -20,19 +20,18 @@ classdef DRONE < ABSTRACT_SYSTEM
             obj.fig = load('plot/frame/drone_frame_01_05.mat').fig;
         end
     end
-    methods
-        function show(obj)
-            %rad = norm(rot);
-            %dir = rot/rad;
-            if isprop(obj.state,'q')
-                pp =patch(obj.fig(1),'FaceAlpha',0.3);
-                pf =patch(obj.fig(2),'EdgeColor','flat','FaceColor','none','LineWidth',0.2);
-                
-                pobj=[pp;pf];
-                for i = 1:length(pobj)
-                    pobj(i).Vertices = (obj.state.getq('rotmat')*pobj(i).Vertices')'+obj.state.p';
-                end
+    methods (Static)
+        function animation(logger,param)
+            % obj.animation(logger,param)
+            % logger : LOGGER class instance
+            % param.realtime (optional) : t-or-f : logger.data('t')を使うか
+            % param.target = 1:4 描画するドローンのインデックス
+            arguments
+                logger
+                param.target = 1;
             end
+            [~,p,~]=getParameter();
+            DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target);
         end
     end
 end
