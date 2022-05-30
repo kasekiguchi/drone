@@ -1,9 +1,10 @@
+physicalParam = DRONE_PARAM("DIATONE"); % 物理パラメータ設定
 for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
         %agent(i) = DRONE(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
-        agent(i) = DRONE(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
+        agent(i) = DRONE(Model_Drone_Exp(dt, physicalParam.get("plant"), initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];

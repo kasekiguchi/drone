@@ -3,16 +3,18 @@ classdef DRONE < ABSTRACT_SYSTEM
     properties %(Access = private)
         %id = 0;
         fig
+        paramter
     end
     methods
         function obj = DRONE(args)
             arguments
                 args
             end
-                obj=obj@ABSTRACT_SYSTEM(args);
+            obj=obj@ABSTRACT_SYSTEM(args);
             if contains(args.type,"EXP")
                 obj.plant = DRONE_EXP_MODEL(args);
             end
+            obj.parameter = str2func(args.setParameter);
         end
     end
     methods (Static)
