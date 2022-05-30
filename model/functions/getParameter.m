@@ -1,13 +1,13 @@
-function Param = getParameter(varargin)
+function [Param,param,paramName] = getParameter(varargin)
 % class化したほうが良い．
 % M, L, J x3, g, km x4, k x4
 %mass = 0.266;
 mass = 0.269;% DIATONE
 Length = 0.1;% モーター間の距離：正方形を仮定している
-Lx = 0.1;
-Ly = 0.1;
-lx = 0.05;
-ly = 0.05;
+Lx = 0.117; 
+Ly = 0.0932;
+lx = Lx/2;%0.05;
+ly = Ly/2;%0.05;
 % Length = 0.075;% モーター間の距離：正方形を仮定している
 % Lx = 0.075;
 % Ly = 0.075;
@@ -47,6 +47,8 @@ param.k1 = k1;
 param.k2 = k2;
 param.k3 = k3;
 param.k4 = k4;
+param.rotor_r = 0.0392;
+paramName = string(fieldnames(param)');
 if size(varargin) >= 1
     if strcmp(varargin{1},'Plant')% for Plant parameter
 %        Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
@@ -55,7 +57,7 @@ if size(varargin) >= 1
 %         Param = cell2mat(struct2cell(param))';
     else
         F = varargin{1};
-        Param = zeros(1,length([F]));
+        Param = zeros(length([F]));
         for i = 1:length(F)
             Param(i) = param.(F{i});
         end

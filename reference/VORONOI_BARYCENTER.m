@@ -4,16 +4,19 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
     properties
         param
         self
+        fShow
     end
 
     methods
-        function obj = VORONOI_BARYCENTER(self, varargin)
+        function obj = VORONOI_BARYCENTER(self, param)
+            arguments
+                self
+                param
+            end            
             obj.self = self;
-            if isfield(varargin{1}, 'r'); obj.param.r = varargin{1}.r; end
-            if isfield(varargin{1}, 'R'); obj.param.R = varargin{1}.R; else obj.param.R = 100; end
-            if isfield(varargin{1}, 'd'); obj.param.d = varargin{1}.d; end
-            if isfield(varargin{1}, 'void'); obj.param.void = varargin{1}.void; end
+            obj.param = param;
             obj.result.state = STATE_CLASS(struct('state_list', ["p"], 'num_list', [3]));
+            obj.fShow = param.fShow;
         end
         function result = do(obj, ~)
             %  param = range, pos_range, d, void,
@@ -84,12 +87,17 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
             obj.result.state.p = (result + state.p); % .*[1;1;0]; % 重心位置（絶対座標）
             obj.result.state.p(3) = 1;               % リファレンス高さは１ｍ
             result = obj.result;
+            if obj.fShow
+                obj.show();
+            end
         end
         function show(obj, Env)
             arguments
                 obj
                 Env = polyshape(obj.result.region);
             end
+            clf(figure(2));
+            set( gca, 'FontSize', 26); % 文字の大きさ設定
             draw_voronoi({polyshape(obj.result.region)},[obj.result.state.p';obj.self.estimator.result.state.p'],Env.Vertices);
         end
     end
