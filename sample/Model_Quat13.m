@@ -1,8 +1,7 @@
-function Model = Model_Quat13(dt,plant_or_model,initial,id)
+function Model = Model_Quat13(dt,initial,id)
 % model class demo : quaternion model with 13 states
 arguments
   dt
-  plant_or_model
   initial
   id
 end
@@ -16,10 +15,5 @@ Setting.state_list =  ["q","p","v","w"];
 Setting.initial = initial;
 Setting.num_list = [4,3,3,3];
 Setting.dt = dt;
-if strcmp(plant_or_model,"plant")
-  Setting.param = getParameter("Plant"); % モデルの物理パラメータ設定
-else
-  Setting.param = getParameter(); % モデルの物理パラメータ設定
-end
 Model.param = Setting;
 end

@@ -11,6 +11,7 @@ classdef HLC < CONTROLLER_CLASS
         function obj = HLC(self,param)
             obj.self = self;
             obj.param = param;
+            obj.param.P = self.parameter.get();
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         

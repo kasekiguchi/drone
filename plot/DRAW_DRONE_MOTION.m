@@ -15,7 +15,7 @@ classdef DRAW_DRONE_MOTION
         function obj = DRAW_DRONE_MOTION(logger,param)
             % 【usage】 obj = DRAW_DRONE_MOTION(logger,param)
             % logger : LOGGER class instance
-            % param.frame_size : drone size [lx,ly]
+            % param.frame_size : drone size [Lx,Ly]
             % param.rotor_r : rotor radius r
             % param.plot_ref : reference plot true or not
             arguments
@@ -34,6 +34,9 @@ classdef DRAW_DRONE_MOTION
             L = param.frame_size;
             figure();
             ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
+            xlabel(ax,"x [m]");
+            ylabel(ax,"y [m]");
+            zlabel(ax,"z [m]");
             obj.fig = ax;
 
             view(3)
@@ -55,13 +58,12 @@ classdef DRAW_DRONE_MOTION
             % arm setup
             [x,y,z] = cylinder(0.01);
             z = z*vecnorm(d)*2;
-            R1 = rotmat(quaternion([1,1,0]*pi/(2*sqrt(2)),"rotvec"),'frame');
-            R2 = rotmat(quaternion([-1,1,0]*pi/(2*sqrt(2)),"rotvec"),'frame');
-            F1 = [R1*[x(1,:);y(1,:);z(1,:)];R1*[x(2,:);y(2,:);z(2,:)]]+[d(1);-d(2);0;d(1);-d(2);0];
-            F2 = [R2*[x(1,:);y(1,:);z(1,:)];R2*[x(2,:);y(2,:);z(2,:)]]+[d(1);d(2);0;d(1);d(2);0];
-
+            R1 = rotmat(quaternion([L(2),-L(1),0]*pi/(vecnorm(L)*2),"rotvec"),'point');
+            R2 = rotmat(quaternion([L(2),L(1),0]*pi/(vecnorm(L)*2),"rotvec"),'point');
+            F1 = [R1*[x(1,:);y(1,:);z(1,:)];R1*[x(2,:);y(2,:);z(2,:)]]+[d(1);d(2);0;d(1);d(2);0];
+            F2 = [R2*[x(1,:);y(1,:);z(1,:)];R2*[x(2,:);y(2,:);z(2,:)]]+[-d(1);d(2);0;-d(1);d(2);0];
             for n = param.target
-                for i = 1:4
+                for i = 4:-1:1
                     h(n,i) = surface(ax,xr+rp(i,1),yr+rp(i,2),zr+rp(i,3),'FaceColor',c(i)); % rotor 描画
                     T(n,i) = quiver3(ax,rp(i,1),rp(i,2),rp(i,3),0,0,1,'FaceColor',c(i)); % 推力ベクトル描画
                     tt(n,i) = hgtransform('Parent',ax); set(T(n,i),'Parent',tt(n,i)); % 推力を慣性座標と紐づけ
@@ -110,7 +112,8 @@ classdef DRAW_DRONE_MOTION
                     S1 = makehgtform('xrotate',pi);
                     S = makehgtform('scale',[1,1,-u(i)])*S1;
                 else
-                    S = zeros(4);
+                    S = eye(4);
+                    S(3,3) = 1e-5;
                 end
                 set(thrust(i),'Matrix',Txyz*R*S);
             end

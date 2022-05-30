@@ -27,6 +27,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         reference % 複数の場合定義された順番に計算される
         connector
         input_transform % plant と modelで入力の型が違う時に変換するため
+        parameter % 物理パラメータ用クラス
     end
 
     properties % (SetAccess=private) % Input
@@ -41,45 +42,40 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
 
     %% Plant
     methods
-        function obj = ABSTRACT_SYSTEM(args)
+        function obj = ABSTRACT_SYSTEM(args,param)
             arguments
                 args
+                param
             end
+            obj.parameter = param;
             obj.plant = MODEL_CLASS(args);
+            obj.plant.param = obj.parameter.get("all","plant");
         end
-
     end
 
     methods
 
-        function do_plant(obj, varargin)
+        function do_plant(obj, plant_param, emergency)
+            arguments
+                obj
+                plant_param = [];
+                emergency = [];
+            end
 
-            if length(varargin) > 1 %実験用
+            if ~isempty(emergency) % 実験緊急事態
                 obj.plant.do(obj.input, [], "emergency");
             else
-
-                if ~isempty(varargin)
-                    plant_param = varargin{1};
-                else
-                    plant_param = [];
-                end
-
                 if isempty(obj.input_transform)
                     obj.plant.do(obj.input, plant_param);
                 else
                     obj.inner_input = obj.input;
-
                     for i = 1:length(obj.input_transform.name)
                         obj.inner_input = obj.input_transform.(obj.input_transform.name(i)).do(obj.inner_input, plant_param);
                     end
-
                     obj.plant.do(obj.inner_input, plant_param);
                 end
-
             end
-
         end
-
     end
 
     %% General
@@ -100,6 +96,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         end
         function set_model(obj, args)
           obj.model = MODEL_CLASS(args);
+          obj.model.param = obj.parameter.get();
         end
     end
 
@@ -228,6 +225,10 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.(prop).result = result;
         end
 
+        function set_model_error(obj,p,v)
+            obj.parameter.set_model_error(p,v);
+            obj.plant.param = obj.parameter.get("all","plant");
+        end
     end
 
 end

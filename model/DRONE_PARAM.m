@@ -1,6 +1,12 @@
 classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
     % ドローンの物理パラメータ管理用クラス
-    % 
+    % T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
+    % 前：ｘ軸，　左：y軸，　上：ｚ軸
+    % motor configuration 
+    % T1 : 右後，T2：右前，T3：左後，T4：左前（x-y平面の象限順）
+    % T2, T3 の回転方向は軸 zb,  T1, T4 : -zb      [1,0,0,1] で 正のyaw回転
+    % tau = [(Ly - ly)*(T3+T4)-ly*(T1+T2); lx*(T1+T3)-(Lx-lx)*(T2+T4); km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
+
     properties
         parameter % 制御モデル用パラメータ
         parameter_name % 物理パラメータの名前
@@ -38,9 +44,9 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.Ly = 0.0932;
                 param.lx = 0.117/2;%0.05;
                 param.ly = 0.0932/2;%0.05;
-                param.jx = 0.002237568;
-                param.jy = 0.002985236;
-                param.jz = 0.00480374;
+                param.jx = 0.02237568;
+                param.jy = 0.02985236;
+                param.jz = 0.0480374;
                 param.gravity = 9.81;
                 param.km1 = 0.0301; % ロータ定数
                 param.km2 = 0.0301; % ロータ定数
@@ -104,6 +110,9 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                     v = obj.(p);
                 end
             end
+        end
+        function set_model_error(obj,p,v)
+            obj.model_error(strcmp(obj.parameter_name,p)) = v;
         end
     end
 end
