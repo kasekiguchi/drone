@@ -101,8 +101,6 @@ end
             agent(i).do_plant(model_param);
         end
 
-        %agent(1).reference.wall.show(); % 機体の移動を毎時刻表示する
-        %agent(1).reference.covering.show(agent(1).plant.state)
         % for exp
         if fExp
             %% logging
@@ -155,17 +153,10 @@ end
 %%
 close all
 clc
-%% plot 
-% agent(1).reference.timeVarying.show(logger)
-%logger.plot({1,"sensor.imu.result.state.q",""},{1,"sensor.imu.result.state.w",""},{1,"sensor.imu.result.state.a",""});
+% plot 
 logger.plot({1,"p","er"});
-%tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"reference.result.state.xd","e",'time',[1 2]));
-%tmp=plot(logger.data("t","","",'time',[1 2]),logger.data(1,"input","",'time',[1 2]));
-%logger.data(1,"state.p","e","time",[0 3])
-%logger.plot({1,"p1-p2-p3","er"},{1,"input",""})
-%logger.plot({1,"p","e"})
-%plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-%logger.plot({1, "p1:2", "sr"})
+% agent(1).reference.timeVarying.show(logger)
+
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1:N);

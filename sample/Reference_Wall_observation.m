@@ -101,6 +101,7 @@ region0 = regions(0); %一旦，いろんな形を下の関数に入れて使用する
             xlim([-2 17]);ylim([-2 17]);
         end
     end
+Reference.param.fShow = 1;
 Reference.param.region0 = region0; % region0をWALL_REFERENCEに入れます
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
