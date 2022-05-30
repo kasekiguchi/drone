@@ -11,7 +11,7 @@ classdef WALL_REFERENCE < REFERENCE_CLASS
         region2
         area1
         area2
-        showflag
+        fShow
         vrtx_len_limit
     end
     methods % リファレンスクラス
@@ -81,7 +81,7 @@ classdef WALL_REFERENCE < REFERENCE_CLASS
             area_params.didx = 1; % 曲面上で壁面を1周し終えた時のケア
             area_params.ka = 1; % 画面記録用.showで使用
             nan_indices=find(isnan(region2.Vertices(:,1)));%nanの位置づけ nanの行が入る
-            obj.showflag = 0;
+            obj.fShow = pparam.fShow;
             %% area の並び換え
             area_num = length(nan_indices)+1;% エリアの数
             if area_num ~= 1 % 複数エリアがある場合
@@ -133,9 +133,12 @@ classdef WALL_REFERENCE < REFERENCE_CLASS
             obj.result.state.p  = [obj.area_params.rpos;target_height{1};atan2(obj.area_params.Apos(2)-obj.area_params.rpos(2),obj.area_params.Apos(1)-obj.area_params.rpos(1))];
             obj.result.state.xd = [obj.area_params.rpos;target_height{1};atan2(obj.area_params.Apos(2)-obj.area_params.rpos(2),obj.area_params.Apos(1)-obj.area_params.rpos(1))];
             result = obj.result;
+            if obj.fShow
+                obj.show();
+            end
         end
         function show(obj,param) % mainでwhile回すたびにplot表示させる部分
-            %             if (obj.area_params.fAreaComplete==2 && obj.area_params.update==1)  || obj.showflag == 1
+            %             if (obj.area_params.fAreaComplete==2 && obj.area_params.update==1)  || obj.fShow == 1
             clf(figure(2));
             %%%%%%%%%%%%%%%%%%%%%%%% ↓グラフで目標位置を設定  %%%%%%%%%%%%%%%%%%%%%%%%
             %       plot(Target.Point(1,:),Target.Point(2,:),'k:o', 'MarkerSize',20,'MarkerEdgeColor','black','MarkerFaceColor','green','DisplayName','Target Point');
@@ -173,7 +176,7 @@ classdef WALL_REFERENCE < REFERENCE_CLASS
             hold off;
             % M(obj.area_params.ka) = getframe(gcf);
             % obj.area_params.ka = obj.area_params.ka + 1;
-            obj.showflag = 1;
+            obj.fShow = 1;
             %             end
         end
         function draw_movie(obj,logger) % 動画を部分（未完成）
