@@ -1,12 +1,12 @@
-function Model = Model_EulerAngle(dt, plant_or_model, initial, id)
+function Model = Model_EulerAngle(dt, param, initial, id)
     % quadcopter model : euler angle
     %         dt             % サンプリング間隔
-    %         plant_or_model % 制御対象か制御モデルか
+    %         param % 制御対象か制御モデルか
     %         initial        % 初期値
     %         id             % 個体識別番号
     arguments
         dt             % サンプリング間隔
-        plant_or_model % 制御対象か制御モデルか
+        param % 制御対象か制御モデルか
         initial        % 初期値
         id             % 個体識別番号
     end
@@ -21,10 +21,6 @@ function Model = Model_EulerAngle(dt, plant_or_model, initial, id)
     Setting.initial = initial;                 % struct('p', [0; 0; 0], 'q', [0; 0; 0], 'v', [0; 0; 0], 'w', [0; 0; 0]);
     Setting.num_list = [3, 3, 3, 3];
     Setting.dt = dt;
-    if strcmp(plant_or_model, "plant")
-        Setting.param = getParameter("Plant"); % モデルの物理パラメータ設定
-    else
-        Setting.param = getParameter();        % モデルの物理パラメータ設定
-    end
+    Setting.param = param;
     Model.param = Setting;
 end
