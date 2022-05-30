@@ -1,18 +1,18 @@
 for i = 1:N
     %% generate Drone instance
-    % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
+    % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
-        agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
-        %agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
+        %agent(i) = DRONE(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
+        agent(i) = DRONE(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
+        %agent(i) = DRONE(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
-        %agent(i) = Drone(Model_Quat13(dt, 'plant', initial(i),i)); % unit quaternionのプラントモデル : for sim
-        agent(i) = Drone(Model_EulerAngle(dt, 'plant', initial(i), i));                % euler angleのプラントモデル : for sim
-        %agent(i) = Drone(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
-        %agent(i) = Drone(Model_Discrete0(dt,'plant',initial(i),i)); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
-        %agent(i) = Drone(Model_Discrete(dt,'plant',initial(i),i)); % 離散時間質点モデル : PD controller などを想定
+        %agent(i) = DRONE(Model_Quat13(dt, 'plant', initial(i),i)); % unit quaternionのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle(dt, 'plant', initial(i), i));                % euler angleのプラントモデル : for sim
+        %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
+        %agent(i) = DRONE(Model_Discrete0(dt,'plant',initial(i),i)); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
+        %agent(i) = DRONE(Model_Discrete(dt,'plant',initial(i),i)); % 離散時間質点モデル : PD controller などを想定
     end
 
     %% model

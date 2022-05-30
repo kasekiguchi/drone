@@ -1,11 +1,11 @@
-classdef Drone < ABSTRACT_SYSTEM
+classdef DRONE < ABSTRACT_SYSTEM
     % Drone class
     properties %(Access = private)
         %id = 0;
         fig
     end
     methods
-        function obj = Drone(args)
+        function obj = DRONE(args)
             arguments
                 args
             end
