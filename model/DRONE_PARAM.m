@@ -98,16 +98,20 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 plant = "model"
             end
             if strcmp(plant,"plant") % 制御対象の真値 : 制御モデル(parameter) + モデル誤差(model_error)
-                if strcmp(p,"all")
+                if strcmp(p,"all") % 非推奨
                     v = obj.parameter + obj.model_error;
                 else
-                    v = obj.(p) + obj.model_error(strcmp(obj.parameter_name,p));
+                    for i = length(p):-1:1
+                        v(i) = obj.(p(i)) + obj.model_error(strcmp(obj.parameter_name,p(i)));
+                    end
                 end
             else % 制御モデルで想定している値
-                if strcmp(p,"all")
+                if strcmp(p,"all") % 非推奨
                     v = obj.parameter;
                 else
-                    v = obj.(p);
+                    for i = length(p):-1:1
+                        v(i) = obj.(p(i));
+                    end
                 end
             end
         end
