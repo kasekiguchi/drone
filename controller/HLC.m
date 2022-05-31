@@ -5,12 +5,14 @@ classdef HLC < CONTROLLER_CLASS
         result
         param
         Q
+        parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
     end
     
     methods
         function obj = HLC(self,param)
             obj.self = self;
             obj.param = param;
+            obj.param.P = self.parameter.get(obj.parameter_name);
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         

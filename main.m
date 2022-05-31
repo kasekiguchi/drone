@@ -10,6 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
 run("main2_agent_setup.m");
+%agent.set_model_error("ly",0.02);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -18,9 +19,6 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
             ];
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
-%% set timer
-time = TIME();
-time.t = ts;
 %% main loop
 run("main3_loop_setup.m");
 
@@ -67,7 +65,7 @@ end
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0; 0; 1], time.t};
+            param(i).reference.point = {FH, [0; 0; 0], time.t};
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};

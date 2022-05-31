@@ -1,4 +1,4 @@
-classdef Thrust2ForceTorque < INPUT_TRANSFORM_CLASS
+classdef THRUST2FORCE_TORQUE < INPUT_TRANSFORM_CLASS
     % 階層型線形化入力を算出するクラス
     % 別のコントローラでone step 分予測したものをリファレンスとしてHL入力を求めるので，移動速度が遅過ぎて使えない．
     
@@ -10,10 +10,16 @@ classdef Thrust2ForceTorque < INPUT_TRANSFORM_CLASS
     end
     
     methods
-        function obj = Thrust2ForceTorque(self,param)
-            l = getParameter("Length");
-            km = getParameter("km1");
-            obj.IT = [1 1 1 1;sqrt(2)*l*[-1 -1 1 1]/2; sqrt(2)*l*[1 -1 1 -1]/2; km*[1 -1 -1 1]];
+        function obj = THRUST2FORCE_TORQUE(self,param)
+            Lx = self.parameter.Lx;
+            Ly = self.parameter.Ly;
+            lx = self.parameter.lx;
+            ly = self.parameter.ly;
+            km1 = self.parameter.km1;           
+            km2 = self.parameter.km2;           
+            km3 = self.parameter.km3;           
+            km4 = self.parameter.km4;           
+            obj.IT = [1 1 1 1;-ly, -ly, (Ly - ly), (Ly - ly); lx, -(Lx-lx), lx, -(Lx-lx); km1, -km2, -km3, km4];
             obj.IIT = inv(obj.IT);
             obj.dir = param;
         end

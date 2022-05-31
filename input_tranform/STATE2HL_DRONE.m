@@ -1,6 +1,6 @@
-classdef REFtoHL_drone < INPUT_TRANSFORM_CLASS
-    % 目標位置から階層型線形化入力を算出するクラス
-    %   未検討
+classdef STATE2HL_DRONE < INPUT_TRANSFORM_CLASS
+    % 階層型線形化入力を算出するクラス
+    % 別のコントローラでone step 分予測したものをリファレンスとしてHL入力を求めるので，移動速度が遅過ぎて使えない．
     
     properties
         self
@@ -11,9 +11,10 @@ classdef REFtoHL_drone < INPUT_TRANSFORM_CLASS
     end
     
     methods
-        function obj = REFtoHL_drone(self,param)
+        function obj = STATE2HL_DRONE(self,param)
             obj.self = self;
             obj.param = param;
+            obj.param.P = self.parameter.get();
             obj.flight_phase = 's';
             obj.state=state_copy(obj.self.model.state);
             if ~isprop(obj.state,'v')
@@ -27,7 +28,7 @@ classdef REFtoHL_drone < INPUT_TRANSFORM_CLASS
         
         function u = do(obj,input,param)
             if ~isempty(param)
-                obj.param.P = param.param;
+                obj.param = param;
             end
             obj.state.set_state(obj.self.estimator.result.state.get());
             if ~isprop(obj.self.model.state,'v')
@@ -48,7 +49,8 @@ classdef REFtoHL_drone < INPUT_TRANSFORM_CLASS
                     obj.state.type = 4;
                 end
             end
-            u = HL_controller(obj.state,struct('xd',input),obj.param); % input をreferenceとした階層型線形化入力算出
+            obj.self.model.do(input,param);
+            u = HL_controller(obj.state,struct('xd',[obj.self.model.state.p]),obj.param); % input をreferenceとした階層型線形化入力算出
         end
     end
 end
