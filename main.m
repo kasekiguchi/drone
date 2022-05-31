@@ -154,11 +154,11 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","er"});
+% logger.plot({1,"p","er"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1:N);
+% agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
