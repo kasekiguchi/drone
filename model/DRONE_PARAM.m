@@ -116,7 +116,9 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
             end
         end
         function set_model_error(obj,p,v)
-            obj.model_error(strcmp(obj.parameter_name,p)) = v;
+            for i = length(p):-1:1
+                obj.model_error(strcmp(obj.parameter_name,p(i))) = v(i);
+            end
         end
     end
 end
