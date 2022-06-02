@@ -7,6 +7,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
     end
     properties
         msg
+        arming_msg % [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
     end
     
     
@@ -19,6 +20,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             obj.flight_phase        = 's';
             switch param.conn_type
                 case "udp"
+                    obj.arming_msg = [1100 1100 0 1100 1000 0 0 0 0];
                     obj.ESPr_num = param.num;
                     [~,cmdout] = system("ipconfig");
                     ipp=regexp(cmdout,"192.168.");
@@ -28,6 +30,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
+                    obj.arming_msg = [500 500 0 500 1000 0 0 0 0];
                     if isnumeric(param.port)
                         param.port = strcat("COM",string(param.port));
                     else
@@ -56,11 +59,11 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                     case 's' % stop pro
                         uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
                         AUX_1   =  0;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   = 0;
-                        msg(1,1:8) = [500,500,0,500,0,0,0,0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                        msg(1,1:8) = [500,500,0,500,0,0,0,0];
                     case 'a' % arming
                         uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
                         AUX_1   = 1000;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   =  0;
-                        msg(1,1:8) = [500,500,0,500,1000,0,0,0];%[ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                        msg(1,1:8) = obj.arming_msg;
                     case 'f' % flight
                         msg(1,1:8) = u;
                     case 'l' % landing
@@ -78,7 +81,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             obj.msg=msg;
         end
         function arming(obj)
-            obj.connector.sendData(gen_msg([500 500 0 500 1000 0 0 0 0]));
+            obj.connector.sendData(gen_msg(obj.arming_msg));
         end
         function stop(obj)
             obj.connector.sendData(gen_msg([500 500 0 500 0 0 0 0 0]));
