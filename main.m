@@ -1,4 +1,4 @@
-%% Drone 班用共通プログラム update sekiguchi
+%% Drone 班用共通 update sekiguchi
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
