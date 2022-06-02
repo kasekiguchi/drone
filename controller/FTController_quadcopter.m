@@ -11,6 +11,7 @@ classdef FTController_quadcopter < CONTROLLER_CLASS
         function obj = FTController_quadcopter(self,param)
             obj.self = self;
             obj.param = param;
+            obj.param.P = self.parameter.get();            
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         

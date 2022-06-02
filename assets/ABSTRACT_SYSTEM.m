@@ -27,6 +27,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         reference % 複数の場合定義された順番に計算される
         connector
         input_transform % plant と modelで入力の型が違う時に変換するため
+        parameter % 物理パラメータ用クラス
     end
 
     properties % (SetAccess=private) % Input
@@ -41,49 +42,40 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
 
     %% Plant
     methods
-        function obj = ABSTRACT_SYSTEM(args)
+        function obj = ABSTRACT_SYSTEM(args,param)
             arguments
-                args.type
-                args.name
-                args.param = []
-                args.id = 0
+                args
+                param
             end
-            plant_subclass = str2func(args.type);
-            obj.plant = plant_subclass(args.param);
+            obj.parameter = param;
+            obj.plant = MODEL_CLASS(args);
+            obj.plant.param = obj.parameter.get("all","plant");
         end
-
     end
 
     methods
 
-        function do_plant(obj, varargin)
+        function do_plant(obj, plant_param, emergency)
+            arguments
+                obj
+                plant_param = [];
+                emergency = [];
+            end
 
-            if length(varargin) > 1 %実験用
+            if ~isempty(emergency) % 実験緊急事態
                 obj.plant.do(obj.input, [], "emergency");
             else
-
-                if ~isempty(varargin)
-                    plant_param = varargin{1};
-                else
-                    plant_param = [];
-                end
-
                 if isempty(obj.input_transform)
                     obj.plant.do(obj.input, plant_param);
                 else
                     obj.inner_input = obj.input;
-
                     for i = 1:length(obj.input_transform.name)
                         obj.inner_input = obj.input_transform.(obj.input_transform.name(i)).do(obj.inner_input, plant_param);
                     end
-
                     obj.plant.do(obj.inner_input, plant_param);
                 end
-
             end
-
         end
-
     end
 
     %% General
@@ -97,22 +89,15 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
 
     methods % Set methods
-
+        function set_estimator(obj, prop, args)
+            obj.set_property(prop,args);
+            % modelの状態でestimatorの状態を生成
+            obj.estimator.result.state = state_copy(obj.model.state);
+        end
         function set_model(obj, args)
-          obj.c_set_model(args{:});
+          obj.model = MODEL_CLASS(args);
+          obj.model.param = obj.parameter.get();
         end
-        function c_set_model(obj,args)
-          arguments
-              obj
-              args.type
-              args.name
-              args.param = []
-              args.id = 0
-            end
-            model_subclass = str2func(args.type);
-            obj.model = model_subclass(args.param);
-        end
-
     end
 
     methods % Do methods
@@ -135,7 +120,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
 
         function do_model(obj, param)
             % 推定値でmodelの状態を上書きした上でmodelのdo method を実行
-            if obj.model.state.list == obj.estimator.result.state.list
+            if obj.model.state.list == obj.estimator.result.state.list % TODO　１回目の時に右辺が定義されていないのでは？
                 obj.model.state.set_state(obj.estimator.result.state.get());
             else
 
@@ -240,6 +225,10 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.(prop).result = result;
         end
 
+        function set_model_error(obj,p,v)
+            obj.parameter.set_model_error(p,v);
+            obj.plant.param = obj.parameter.get("all","plant");
+        end
     end
 
 end

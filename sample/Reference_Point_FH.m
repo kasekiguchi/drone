@@ -1,12 +1,10 @@
 function Reference = Reference_Point_FH(~)
-%% reference class demo
-% reference property をReference classのインスタンス配列として定義
+%% 必須のリファレンス生成用
+% Figure handleを使って a,t,f,l,s,q のキーボード入力によって動作を変えるために必要
+% 単体ではfで目標点を生成
+% 組み合わせることでf を押したときにこれより前に設定したリファレンスになる
 clear Reference
-%Reference.type="PointReference";
-Reference.type=["PointReference_FH"];
+Reference.type=["POINT_REFERENCE_FH"];
 Reference.name=["point"];
-%for i = 1:length(agent)
-    Reference.param=[];
-   % agent(i).set_reference(Reference);
-%end
+Reference.param=[];
 end
