@@ -27,7 +27,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 20;
+    te =8;
 end
 
 %% generate environment
@@ -120,9 +120,9 @@ for i = 1:N
     %% generate Drone instance
     % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        %agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
+        agent(i) = Drone(Model_Drone_Exp(dt,'plant',initial(i),"udp",[25])); % for exp % 機体番号（ESPrのIP）
         %agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", COMs(i))); % for exp % 機体番号（ArduinoのCOM番号）
-        agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
+%         agent(i) = Drone(Model_Drone_Exp(dt, 'plant', initial(i), "serial", "COM31")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,'plant',initial(i),"ros",[21])); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
@@ -185,11 +185,12 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
 %     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%直線
+    agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%直線
 %     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
     % agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{7,[0;0;1],[1,0.5,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[1,1,0.]}));
-        agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+%         agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %     if fExp == 1
     %         if i ==1
@@ -410,6 +411,6 @@ clc
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-logger.plot({1,"p1:2","sr"},{1,"p1-p2","sr"},'fig_num',2)
+logger.plot({1,"p","er"},{1,"input","er"},'fig_num',2)
 %%
 %logger.save();
