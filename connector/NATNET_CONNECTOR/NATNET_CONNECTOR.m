@@ -3,7 +3,6 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
     %  param : HostIP, ClientIP
     properties
         result
-        rigid_list
     end
     properties (NonCopyable = true, SetAccess = private )
         init_time  % first getData time
@@ -19,12 +18,14 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
 
     methods
         function obj = NATNET_CONNECTOR(info)
+          arguments
+            info.HostIP char
+            info.ClientIP char
+          end
             %-- connection NatNetClient
             disp('Connect to Motive')
             %-- connection takes about 0.3 seconds
             %-- setting ClientIP
-            if isfield(info,'rigid_list'); obj.rigid_list = info.rigid_list; end
-            obj.result.rigid(obj.rigid_list) = struct('p',[],'q',[]);
             obj.NatnetClient = natnet;
             obj.NatnetClient.HostIP	= info.HostIP;
             obj.NatnetClient.ClientIP = info.ClientIP;
@@ -39,21 +40,20 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             obj.result.rigid_num = ModelDescription.RigidBodyCount;
             omnum = 0;
             obj.on_marker = cell(1,obj.result.rigid_num);
-            j = 1;
-            for i = obj.rigid_list
-                obj.on_marker_nums(j) = ModelDescription.MarkerSet(i).MarkerCount;
-                obj.on_marker{j} = zeros(obj.on_marker_nums(j),3);
-                for k = 1:obj.on_marker_nums(j)
+            obj.result.rigid(obj.result.rigid_num) = struct('p',[],'q',[]);
+            for i = 1:obj.result.rigid_num
+                obj.on_marker_nums(i) = ModelDescription.MarkerSet(i).MarkerCount;
+                obj.on_marker{i} = zeros(obj.on_marker_nums(i),3);
+                for k = 1:obj.on_marker_nums(i)
                     marker=Frame.LabeledMarker(omnum+k);
 %                    marker=Frame.UnlabeledMarker(omnum+k);
                     obj.on_marker{i}(k,:) = [marker.x, -marker.z, marker.y];
                 end
                 body = Frame.RigidBody(i);
-                obj.result.local_marker_nums(j) = ModelDescription.MarkerSet(i).MarkerCount;
+                obj.result.local_marker_nums(i) = ModelDescription.MarkerSet(i).MarkerCount;
                 %obj.result.local_marker{i} = double(rotmat(quaternion([body.qw body.qx -body.qz body.qy]),'frame')'*(obj.on_marker{i}-double([body.x, -body.z, body.y]))')';
-                obj.result.local_marker{j} = double(RodriguesQuaternion([body.qw body.qx -body.qz body.qy]')'*(obj.on_marker{i}-double([body.x, -body.z, body.y]))')';
-                omnum = omnum+obj.on_marker_nums(j);
-                j = j+1;
+                obj.result.local_marker{i} = double(RodriguesQuaternion([body.qw body.qx -body.qz body.qy]')'*(obj.on_marker{i}-double([body.x, -body.z, body.y]))')';
+                omnum = omnum+obj.on_marker_nums(i);
             end
         end
         function ret = getData(obj,~,~)
@@ -89,14 +89,12 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             
             % %Get obj.Data and Organize
             % %also organizing obj.Data in the same way in main.m
-            j = 1;
-            for i = obj.rigid_list
+            for i = 1:obj.result.rigid_num
                 body = Frame.RigidBody(i);
-                obj.result.rigid(j).p = double([body.x; -body.z; body.y]);
+                obj.result.rigid(i).p = double([body.x; -body.z; body.y]); % 軸の対応関係注意
                 
                 %% quaternion
-                obj.result.rigid(j).q = double([body.qw; body.qx; -body.qz; body.qy]);
-                j = j+1;
+                obj.result.rigid(i).q = double([body.qw, body.qx, -body.qz, body.qy]'); % 軸の対応関係注意
             end
             obj.result.marker = zeros(obj.result.marker_num,3);
             for i = 1:obj.result.marker_num

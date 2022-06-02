@@ -1,4 +1,4 @@
-function Connector_Natnet_sim(N,dt,noise)
+function motive = Connector_Natnet_sim(N,dt,noise)
     % Connector_Natnet_sim(N,dt,num)
     % N : number of rigid body
     % dt : sampling time
@@ -16,6 +16,5 @@ end
 %     [ 0.075, -0.075,  0.015;-0.075, -0.075, -0.015; -0.075,  0.075,  0.015; 0.075,  0.075, -0.015; 0.075,  0.07, -0.015]};
 
 natnet_param.sigmaw = [6.716E-5; 7.058E-5; 7.058E-5];
-motive=NATNET_CONNECTOR_sim(natnet_param);
-assignin('base',"motive",motive);
+motive=NATNET_CONNECTOR_SIM(natnet_param);
 end

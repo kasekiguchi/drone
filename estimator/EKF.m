@@ -48,6 +48,7 @@ classdef EKF < ESTIMATOR_CLASS
         
         function [result]=do(obj,param,sensor)
             %   param : optional
+            if ~isempty(param) obj.dt = param; end
             model=obj.self.model;
             if nargin == 2
                 sensor = obj.self.sensor.result;
@@ -60,16 +61,6 @@ classdef EKF < ESTIMATOR_CLASS
             end
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             p = model.param;
-            if ~isempty(param)
-                F=fieldnames(param);
-                for i = 1: length(F)
-                    if strcmp(F{i},"P")
-                        obj.result.(F{i}) = param.(F{i}); %
-                    else
-                        obj.(F{i}) = param.(F{i}); %
-                    end
-                end
-            end
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
             C = obj.JacobianH(x,p);
 
@@ -82,6 +73,7 @@ classdef EKF < ESTIMATOR_CLASS
                 xh_pre = model.state.get();
             end
 
+            %obj.B = diag([ones(1,6)*obj.dt^2,ones(1,6)*obj.dt]); % to be check
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % 事前誤差共分散行列
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散
@@ -90,6 +82,7 @@ classdef EKF < ESTIMATOR_CLASS
             obj.result.state.set_state(tmpvalue);
             obj.result.G = G;
             obj.result.P = P;
+            obj.result.dt = obj.dt;
             result=obj.result;
         end
         function show()

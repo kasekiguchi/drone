@@ -1046,4 +1046,4 @@ Log*
 !connector/NATNET_CONNECTOR/*.dll
 *.prj
 /codegen/
-
+assemblypath.txt

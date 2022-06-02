@@ -13,8 +13,8 @@ classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
-            l = getParameter("Length");
-            km = getParameter("km1");
+            l = param.P(2);
+            km = param.P(7);
             obj.IT = [1 1 1 1;sqrt(2)*l*[-1 -1 1 1]/2; sqrt(2)*l*[1 -1 1 -1]/2; km*[1 -1 -1 1]];
         end
         
@@ -93,7 +93,7 @@ classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
 %             vs = Vsp(x,xd',vf,P,F2,F3,F4);
 %             obj.result = Ufp(x,xd',vf,P) + Usp(x,xd',vf,vs',P);
             cha = obj.self.reference.point.flag;
-            tmpHL = obj.self.controller.hlcontroller.result.input;
+            tmpHL = obj.self.controller.hlc.result.input;
             obj.result.input = obj.IT*tmpHL;
             if strcmp(cha,'f')
                 obj.result.input = uf +[0;us(2:4)];
