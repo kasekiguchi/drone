@@ -1,14 +1,13 @@
-function Model = Model_Discrete0(dt,~,initial,id)
+function Model = Model_Discrete0(dt,initial,id)
 % 入力位置が次時刻の位置になるモデル
     %% model class demo : 
 arguments
   dt
-  ~
   initial
   id
 end
 Setting.dt = dt;
-type="Discrete_Model"; % class name
+type="DISCRETE_MODEL"; % class name
 name="discrete"; % print name
 Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
 Setting.param.A = [zeros(3)];

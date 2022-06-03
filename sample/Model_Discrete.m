@@ -1,13 +1,12 @@
-function Model= Model_Discrete(dt,~,initial,id)
+function Model= Model_Discrete(dt,initial,id)
 % 質量１の質点モデル：力入力
 arguments
   dt
-  ~
   initial
   id
 end
 Setting.dt = dt;
-type="Discrete_Model"; % class name
+type="DISCRETE_MODEL"; % class name
 name="discrete"; % print name
 Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
 dsys = c2d(ss([zeros(3) eye(3);zeros(3,6)],[zeros(3);eye(3)],eye(6),zeros(6,3)),dt);

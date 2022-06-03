@@ -34,6 +34,7 @@ classdef HLController_ATMEC < CONTROLLER_CLASS
         function obj = HLController_ATMEC(self,param,~)
             obj.self = self;
             obj.param = param;
+            obj.param.P = self.parameter.get();            
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             %MEC
             obj.dv1p = 0;

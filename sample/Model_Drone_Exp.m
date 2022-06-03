@@ -15,8 +15,9 @@ arguments
   id
 end
 Setting.dt = dt;
-type="Drone_Exp_Model"; % class name
-name="lizard"; % print name
+Model.id = id;
+Model.type="DRONE_EXP_MODEL"; % class name
+Model.name="lizard"; % print name
 Setting.conn_type = conn_type;
 if strcmp(conn_type,"udp")
   Setting.num = id;
@@ -25,5 +26,5 @@ elseif strcmp(conn_type,"serial")
   disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
   Setting.port = id;
 end
-Model = {"type",type,"name",name,"param",Setting,"id",id};
+Model.param = Setting;
 end
