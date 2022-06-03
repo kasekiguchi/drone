@@ -74,8 +74,8 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
+%     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     HLControlSetting = Controller_HL(dt);
     HLParam = HLControlSetting.param;
 

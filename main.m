@@ -81,7 +81,8 @@ end
             % controller
             param(i).controller.hlc = {time.t, HLParam};
             for j = 1:length(agent(i).controller.name)
-                param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
+                param(i).controller.list{j} = agent(i).controller.name(j);
+%                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
