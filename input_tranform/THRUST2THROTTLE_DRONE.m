@@ -19,6 +19,9 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
         function obj = THRUST2THROTTLE_DRONE(self, param)
             obj.self = self;
             obj.param = param;
+            obj.param.roll_offset = self.plant.arming_msg(1);
+            obj.param.pitch_offset = self.plant.arming_msg(2);
+            obj.param.yaw_offset = self.plant.arming_msg(4);
             obj.param.P = self.parameter.get();
             obj.flight_phase = 's';
             P = self.model.param;
@@ -67,8 +70,8 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                 uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset); % hovering からの偏差をゲイン倍する
                 % ホバリング時から変分にゲイン倍する
                 uyaw = obj.param.gain(3) * (whn(3) - wh(3));
-                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset; % offset = 500
-                upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset; % offset = 500
+                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset; 
+                upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
                 % uthr =uthr + u_throttle_offset ;%sign(uthr)*min(abs(uthr),100)+ u_throttle_offset;
                 obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
