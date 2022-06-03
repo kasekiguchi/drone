@@ -124,6 +124,42 @@ syms v2(t) v3(t) v4(t)
     V1v = {V1 dV1 ddV1 dddV1 ddddV1 dddddV1};
     xdRef = [xd dxd ddxd dddxd ddddxd dddddxd ddddddxd];
     vInput1 = [v1(t) diff(v1(t),t) diff(v1(t),t,2) diff(v1(t),t,3) diff(v1(t),t,4) diff(v1(t),t,5)];
+%%
+dpl2 = LieD(pl2,f1,x)+diff(pl2,t);
+ddpl2 = LieD(dpl2,f1,x)+diff(dpl2,t);
+dddpl2 =LieD(ddpl2,f1,x)+diff(ddpl2,t);
+d4pl2 = LieD(dddpl2,f1,x)+diff(dddpl2,t);
+d5pl2 = LieD(d4pl2,f1,x)+diff(d4pl2,t);
+d6pl2 = LieD(d5pl2,f1,x)+diff(d5pl2,t)+LieD(d5pl2,g1,x)*[u2;u3;u4];
+%%
+dpl1 = LieD(pl1,f1,x)+diff(pl1,t);
+ddpl1 = LieD(dpl1,f1,x)+diff(dpl1,t);
+dddpl1 =LieD(ddpl1,f1,x)+diff(ddpl1,t);
+d4pl1 = LieD(dddpl1,f1,x)+diff(dddpl1,t);
+d5pl1 = LieD(d4pl1,f1,x)+diff(d4pl1,t);
+d6pl1 = LieD(d5pl1,f1,x)+diff(d5pl1,t)+LieD(d5pl1,g1,x)*[u2;u3;u4];
+%%
+Input = [u1;u2;u3;u4];
+% matlabFunction(subs([d6pl2], [xdRef vInput1], [XD V1v]),'file','d6pL2.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cd6pl2'});
+% matlabFunction(subs([d6pl1], [xdRef vInput1], [XD V1v]),'file','d6pL1.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cd6pl1'});
+%%
+% matlabFunction(subs([dpl2 ddpl2 dddpl2 d4pl2 d5pl2 d6pl2], [xdRef vInput1], [XD V1v]),'file','d6pl2.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cd6pl2'});
+% matlabFunction(subs([dpl1 ddpl1 dddpl1 d4pl1 d5pl1 d6pl1], [xdRef vInput1], [XD V1v]),'file','d6pl1.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cd6pl1'});
+%%
+E = [ex;ey;ez];
+fd61 = d6pL1(x,cell2sym(XD),Input,cell2sym(V1v),physicalParam);
+Fe1 = subs(fd61,E,[0;0;0]);
+Ge1 = [subs(subs(fd61,[ey;ez],[0;0]),ex,1)-Fe1,subs(subs(fd61,[ex;ez],[0;0]),ey,1)-Fe1,subs(subs(fd61,[ex;ey],[0;0]),ez,1)-Fe1];
+%%
+fd62 = d6pL2(x,cell2sym(XD),Input,cell2sym(V1v),physicalParam);
+Fe2 = subs(fd62,E,[0;0;0]);
+Ge2 = [subs(subs(fd62,[ey;ez],[0;0]),ex,1)-Fe2,subs(subs(fd62,[ex;ez],[0;0]),ey,1)-Fe2,subs(subs(fd62,[ex;ey],[0;0]),ez,1)-Fe2];
+%%
+matlabFunction(Fe1,'file','Fe1.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cFe1'});
+matlabFunction(Ge1,'file','Ge1.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cGe1'});
+%%
+matlabFunction(Fe2,'file','Fe2.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cFe2'});
+matlabFunction(Ge2,'file','Ge2.m','vars',{x cell2sym(XD) Input cell2sym(V1v) physicalParam},'outputs',{'cGe2'});
     %% Make functions of z
 % % If either model, virtual output or parameters is changed, then evaluate this section.
     disp("Start: make functions of virtual states.");

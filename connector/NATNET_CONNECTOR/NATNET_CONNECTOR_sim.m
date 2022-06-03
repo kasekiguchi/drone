@@ -103,12 +103,14 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
             end
             %% Additional noise for rigid body
             if obj.Flag.Noise == 1 %% Noise %%
-                for k = 1:obj.result.rigid_num % 全剛体に一様に影響
+                for k = 1:length(obj.result.rigid) % 全剛体に一様に影響
                     rng('shuffle');
                     obj.result.rigid(k).p = obj.result.rigid(k).p + (sqrt(obj.sigmaw) .* randn(3,1));
                     % 姿勢角への影響はsigmaw/100
                     %obj.result.rigid(k).q = R2q(Rodrigues(sqrt(obj.sigmaw'/100) .* (rand(1,3)-0.5*[1 1 1]))*RodriguesQuaternion(obj.result.rigid(k).q))';
-                    obj.result.rigid(k).q = rotm2quat(Rodrigues(sqrt(obj.sigmaw'/100) .* (rand(1,3)-0.5*[1 1 1]))*RodriguesQuaternion(obj.result.rigid(k).q))';
+                    if ~isempty(obj.result.rigid(k).q)
+                        obj.result.rigid(k).q = rotm2quat(Rodrigues(sqrt(obj.sigmaw'/100) .* (rand(1,3)-0.5*[1 1 1]))*RodriguesQuaternion(obj.result.rigid(k).q))';
+                    end
                     %obj.result.rigid(k).q = compact(quaternion(sqrt(obj.sigmaw'/100) .* (rand(1,3)-0.5*[1 1 1]),'rotvec')*quaternion(obj.result.rigid(k).q'))';
                 end
             end
