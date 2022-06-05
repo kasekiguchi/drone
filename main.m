@@ -8,7 +8,7 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
-
+%%
 run("main1_setting.m");
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
@@ -80,9 +80,9 @@ end
 
             % controller
             param(i).controller.hlc = {time.t, HLParam};
+            param(i).controller.ftc = {time.t, HLParam};
             for j = 1:length(agent(i).controller.name)
-                param(i).controller.list{j} = agent(i).controller.name(j);
-%                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
+                param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
@@ -155,7 +155,7 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","er"});
+logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % agent(1).reference.timeVarying.show(logger)
 
 

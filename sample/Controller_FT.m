@@ -42,8 +42,8 @@ Controller_param.apsi=alpha(1:2,1);
 
 Controller_param.dt = dt;
  eig(diag([1,1,1],1)-[0;0;0;1]*Controller_param.F2)
-Controller.type="FTController_quadcopter";
-Controller.name="ftcontroller";
+Controller.type="FTC";
+Controller.name="ftc";
 Controller.param=Controller_param;
 
 %assignin('base',"Controller_param",Controller_param);
