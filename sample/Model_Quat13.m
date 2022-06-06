@@ -16,4 +16,5 @@ Setting.initial = initial;
 Setting.num_list = [4,3,3,3];
 Setting.dt = dt;
 Model.param = Setting;
+Model.parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","rotor_r"];
 end
