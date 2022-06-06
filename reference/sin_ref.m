@@ -3,17 +3,17 @@ function [ref] = sin_ref(X0)
 %入力の切換の速さを確認
 %   詳細説明をここに記述
 
-syms t real
+syms  t real
 x_0 = X0(1);
 y_0 = X0(2);
 z_0 = X0(3);
 
-T=4-0.1*t;
+T=6-0.1*t;
 if T==0.1
     T=0.1;
 end
-% f=1/T;
-f=0.55; 
+f=1/T;
+% f=0.55; 
 % x = x_0+0.02*sin(2*pi*1.1*t);
 x = x_0+0.5*sin(2*pi*f*t);
 y = y_0;

@@ -5,7 +5,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     u_trans_param.name = "t2t";
 
     %% transmitter system
-    u_trans_param.param.gain = [600; 600; 400; 120]; % serial : 500 = neutral  udp : 1100
+    u_trans_param.param.gain = [800; 800; 800; 380]; % serial : 500 = neutral  udp : 1100
     u_trans_param.param.th_offset = 380;             % check throttle at hovering
 
 %     u_trans_param.param.gain = [1000; 1000; 400; 40]; %

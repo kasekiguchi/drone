@@ -33,6 +33,9 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
             obj.result.state.p = obj.result.state.xd(1:3);
             result = obj.result;
             else
+            obj.result.state.xd = obj.func(Param{1}.t); % 目標重心位置（絶対座標）
+            obj.result.state.p = obj.result.state.xd(1:3);
+            result = obj.result;
                 obj.t=Param{1}.t;
             end
         end
