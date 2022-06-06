@@ -5,6 +5,7 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
         param
         func % 時間関数のハンドル
         self
+        t
     end
 
     methods
@@ -26,9 +27,14 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
         end
         function result = do(obj, Param)
             % 【Input】Param = {Time.t}
-            obj.result.state.xd = obj.func(Param{1}.t); % 目標重心位置（絶対座標）
+            cha = get(Param{2}, 'currentcharacter');
+            if cha=='f'
+            obj.result.state.xd = obj.func(Param{1}.t-obj.t); % 目標重心位置（絶対座標）
             obj.result.state.p = obj.result.state.xd(1:3);
             result = obj.result;
+            else
+                obj.t=Param{1}.t;
+            end
         end
         function show(obj, logger)
             rp = logger.data(1,"p","r");

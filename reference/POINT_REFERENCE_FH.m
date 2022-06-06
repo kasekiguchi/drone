@@ -49,12 +49,17 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 end
                 obj.result.state.p = obj.result.state.xd(1:3);
                 obj.flag='t';
+                
             elseif strcmp(cha,'f') % flight phase
                 obj.flag='f';
                 if nargin==3 % 他のreference objでの参照値がある場合
                     Param{2} = result.state;
                 end
                 if strcmp(class(Param{2}),"STATE_CLASS")
+%                     obj.base_time=Param{3};
+%                     obj.base_state=obj.self.estimator.result.state.p;
+%                     obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),10,0);
+                    
                     state_copy(Param{2},obj.result.state);
                     %                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
                 else
@@ -62,6 +67,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                     obj.result.state.p = obj.result.state.xd;
                 end
             else
+                
                 %obj.result.state.p = obj.self.estimator.result.state.p; %
                 %これだと最悪上がっていく
                 obj.result.state.p = obj.base_state;
