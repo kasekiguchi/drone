@@ -10,7 +10,7 @@ for i = 1:N
     else
 %         agent(i) = DRONE(Model_Quat13(dt,initial(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
         %agent(i) = DRONE(Model_EulerAngle(dt,initial(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
-        agent(i) = DRONE(Model_Suspended_Load(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 牽引物込みのプラントモデル : for sim
+        agent(i) = DRONE(Model_Suspended_Load(dt,initial(i),i,DRONE_PARAM("DIATONE")),DRONE_PARAM("DIATONE","parameter_name",["mass","Length","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass","cableL","ex","ey","ez"])); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %agent(i) = DRONE(Model_Discrete(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル : PD controller などを想定
     end
@@ -19,7 +19,7 @@ for i = 1:N
     % set control model
 %     agent(i).set_model(Model_EulerAngle(dt,initial(i), i)); % オイラー角モデル
     %agent(i).set_model(Model_Quat13(dt,initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
-    agent(i).set_model(Model_Suspended_Load(dt,initial(i),i)); %牽引物込みモデル
+    agent(i).set_model(Model_Suspended_Load(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     close all
@@ -65,7 +65,7 @@ for i = 1:N
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
-    %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
