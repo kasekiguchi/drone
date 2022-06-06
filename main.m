@@ -38,8 +38,8 @@ end
         end
 
         if fMotive
-            %motive.getData({agent,["pL"]},mparam);
-            motive.getData(agent, mparam);
+            motive.getData({agent,["pL"]},mparam);
+%             motive.getData(agent, mparam);
         end
 
         for i = 1:N
@@ -78,6 +78,7 @@ end
 
             % controller
             param(i).controller.hlc = {time.t, HLParam};
+            param(i).controller.hl_load = {time.t, HL_LoadParam};
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end

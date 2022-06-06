@@ -27,7 +27,8 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
             obj.flight_phase = 's';
             P = self.model.param;
             obj.hover_thrust_force = P(1) * P(9);
-            if self.model.name == "Suspended_Load_Model"
+            if self.model.name == "load"
+                P = self.parameter.get(["mass","Length","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass","cableL","ex","ey","ez"]);
                 obj.hover_thrust_force = P(1) * P(6);
                 obj.hover_thrust_force_SuspendedLoad = (P(1)+P(15)) * P(6);
             end
@@ -75,7 +76,7 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                 uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset); % hovering からの偏差をゲイン倍する
                 % ホバリング時から変分にゲイン倍する
                 uyaw = obj.param.gain(3) * (whn(3) - wh(3));
-                if obj.self.model.name == "Suspended_Load_Model"
+                if obj.self.model.name == "load"
                     throttle_offset_SuspendedLoad = obj.param.th_offset_SuspendedLoad;
                     T_thr = input(1);
                     if cha == 'f'

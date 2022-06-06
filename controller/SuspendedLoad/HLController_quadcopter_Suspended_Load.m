@@ -6,15 +6,17 @@ classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
         param
         Q
         IT
+        parameter_name = ["mass","Length","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass","cableL","ex","ey","ez"];
     end
     
     methods
         function obj = HLController_quadcopter_Suspended_Load(self,param)
             obj.self = self;
             obj.param = param;
+            obj.param.P = self.parameter.get(obj.parameter_name);
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
-            l = param.P(2);
-            km = param.P(7);
+            l = obj.param.P(2);
+            km = obj.param.P(7);
             obj.IT = [1 1 1 1;sqrt(2)*l*[-1 -1 1 1]/2; sqrt(2)*l*[1 -1 1 -1]/2; km*[1 -1 -1 1]];
         end
         
@@ -28,7 +30,11 @@ classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
             else
                 xd = ref.state.get();
             end
-            Param= obj.param;
+            if isempty(param)
+                Param = param;
+            else
+                Param= obj.param;
+            end
             P = Param.P;
             F1 = Param.F1;
             F2 = Param.F2;

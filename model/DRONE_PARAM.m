@@ -29,6 +29,12 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
         k3
         k4
         rotor_r
+        Length
+        loadmass
+        cableL
+        ex
+        ey
+        ez
         % T = k*w^2
         % T : thrust , w : angular velocity of rotor
         % M = km * T = km* k * w^2
@@ -57,6 +63,12 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.k3 = 0.000008;          % 推力定数
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
+                param.Length = 0.075;
+                param.loadmass = 0.0556;
+                param.cableL = 0.44;
+                param.ex = 0.00;
+                param.ey = 0.00;
+                param.ez = 0.045;
                 param.model_error = [];
             end
         obj.mass = param.mass;
@@ -77,6 +89,12 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
         obj.k3 = param.k3;
         obj.k4 = param.k4;
         obj.rotor_r = param.rotor_r;
+        obj.Length = param.Length;
+        obj.loadmass = param.loadmass;
+        obj.cableL = param.cableL;
+        obj.ex = param.ex;
+        obj.ey = param.ey;
+        obj.ez = param.ez;
         obj.parameter_name = string(properties(obj)');
         obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
         obj.parameter_name(strcmp(obj.parameter_name,"parameter_name")) = [];
