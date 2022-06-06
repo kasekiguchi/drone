@@ -49,7 +49,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             end
             obj.parameter = param;
             obj.plant = MODEL_CLASS(args);
-            obj.plant.param = obj.parameter.get("all","plant");
+            obj.plant.param = obj.parameter.get(obj.parameter.parameter_name,"plant");
         end
     end
 
@@ -96,7 +96,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         end
         function set_model(obj, args)
           obj.model = MODEL_CLASS(args);
-          obj.model.param = obj.parameter.get();
+          obj.model.param = obj.parameter.get(args.parameter_name);
         end
     end
 

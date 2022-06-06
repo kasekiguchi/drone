@@ -1,5 +1,6 @@
 classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
     % ドローンの物理パラメータ管理用クラス
+    % 以下のconfigurationはclass_description.pptxも参照すること．
     % T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
     % 前：ｘ軸，　左：y軸，　上：ｚ軸
     % motor configuration 
@@ -44,8 +45,9 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
     methods
         function obj = DRONE_PARAM(name,param)
             arguments
-                name
-                param.mass = 0.269;% DIATONE
+                name % DIATONE
+                param.parameter_name = [];
+                param.mass = 0.269;
                 param.Lx = 0.117;
                 param.Ly = 0.0932;
                 param.lx = 0.117/2;%0.05;
@@ -95,13 +97,17 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
         obj.ex = param.ex;
         obj.ey = param.ey;
         obj.ez = param.ez;
-        obj.parameter_name = string(properties(obj)');
-        obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
-        obj.parameter_name(strcmp(obj.parameter_name,"parameter_name")) = [];
-        obj.parameter_name(strcmp(obj.parameter_name,"model_error")) = [];
-        for i = obj.parameter_name
-                obj.parameter=[obj.parameter,obj.(i)];
-                obj.model_error = [obj.model_error,0];
+        if isempty(param.parameter_name)
+            obj.parameter_name = string(properties(obj)');
+            obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
+            obj.parameter_name(strcmp(obj.parameter_name,"parameter_name")) = [];
+            obj.parameter_name(strcmp(obj.parameter_name,"model_error")) = [];
+        else
+            obj.parameter_name = param.parameter_name;
+        end
+        for i = length(obj.parameter_name):-1:1
+            obj.parameter(i)=obj.(obj.parameter_name(i));
+            obj.model_error(i) = 0;
         end
         if ~isempty(param.model_error)
             obj.model_error = param.model_error;
