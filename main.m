@@ -76,8 +76,8 @@ end
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
-            % controller
-            param(i).controller.hlc = {time.t, HLParam};
+            % controller 
+            param(i).controller.hlc = {time.t, HLParam};    % MPC変数定義にする
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -94,7 +94,7 @@ end
             model_param.param = agent(i).model.param;
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
-
+            % ここでモデルの計算
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
@@ -151,7 +151,7 @@ end
 %%
 close all
 clc
-% plot 
+% plot p:position, er:roll/pitch/yaw, 
 logger.plot({1,"p","er"});
 % agent(1).reference.timeVarying.show(logger)
 
@@ -159,4 +159,4 @@ logger.plot({1,"p","er"});
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1:N);
 %%
-%logger.save();
+% logger.save();

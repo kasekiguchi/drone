@@ -20,7 +20,7 @@ classdef MODEL_CLASS <  handle
         ts = 0;
         dt = 0.025;
         % state.list % 例 ["p","q","v","w"]
-        % state.num_list % 例 [3,4,3,3]
+        % state.num_list % 例 [3,4,3,3]  % 次元数？
         param % parameters
         dim % n, m, p :  number of state, input, and physical parameters
         input_channel % ["v","w"]
@@ -48,7 +48,7 @@ classdef MODEL_CLASS <  handle
                 obj.method=str2func(param.method);
                 obj.time_scale = 'continuous';
                 if contains(name,"Discrete")
-                    obj.time_scale = 'discrete';
+                    obj.time_scale = 'discrete';    % 制約？
                 end
                 F = fieldnames(param);
                 for j = 1:length(F)
@@ -99,6 +99,7 @@ classdef MODEL_CLASS <  handle
                 else
                     if isfield(obj.param,'solver_option')
                         [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get(),varargin{1}.solver_option);
+                        printf("%f\n", u);
                     else
                         [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get());
                     end

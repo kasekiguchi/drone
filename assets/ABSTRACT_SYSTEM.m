@@ -129,7 +129,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                 end
 
             end
-
+            % モデルの計算の実行
             obj.model.do(obj.input, param);
         end
 
