@@ -12,7 +12,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
         function obj = POINT_REFERENCE_FH(self,varargin)
             % 参照
             obj.self = self;
-            obj.result.state = STATE_CLASS(struct('state_list',["xd","p"],'num_list',[3]));
+            obj.result.state = STATE_CLASS(struct('state_list',["xd","p","pL"],'num_list',[3]));
         end
         function  result= do(obj,Param,result)
             % 【Input】result = {Xd(optional)}
@@ -38,6 +38,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                     obj.result.state.xd=gen_ref_for_landing(obj.self.reference.result.state.p);
                 end
                 obj.result.state.p = obj.result.state.xd; % このようにすることでf の後でも反映される
+                obj.result.state.pL = obj.result.state.xd;
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
@@ -48,6 +49,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                     obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),10,0);
                 end
                 obj.result.state.p = obj.result.state.xd(1:3);
+                obj.result.state.pL = obj.result.state.xd(1:3);
                 obj.flag='t';
             elseif strcmp(cha,'f') % flight phase
                 obj.flag='f';
@@ -60,11 +62,13 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 else
                     obj.result.state.xd = Param{2};
                     obj.result.state.p = obj.result.state.xd;
+                    obj.result.state.pL = obj.result.state.xd;
                 end
             else
                 %obj.result.state.p = obj.self.estimator.result.state.p; %
                 %これだと最悪上がっていく
                 obj.result.state.p = obj.base_state;
+                obj.result.state.pL = obj.base_state;
                 obj.result.state.xd = obj.base_state;
             end
             result=obj.result;
