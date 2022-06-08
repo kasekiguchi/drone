@@ -53,7 +53,7 @@ dobg = simplify(inv(Ib)*T2T);
 %% SS equation
 % % Usage: dx=f+g*u
 x = [q;p;dp;ob];            % 13 states / 状態ベクトル
-u1 = 1; u2 = 1; u3 = 1; u4 = 1;
+% u1 = 1; u2 = 1; u3 = 1; u4 = 1;
 u = [u1;u2;u3;u4];  % 
 f = [dq;dp;ddpf;dobf];      % [L'*ob/2; v; -ge_z; inv(Ib)*(-Skew(ob)*Ib*ob)]
 g = [zeros(4,4);zeros(3,4);ddpG;dobg];

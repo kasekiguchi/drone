@@ -99,7 +99,6 @@ classdef MODEL_CLASS <  handle
                 else
                     if isfield(obj.param,'solver_option')
                         [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get(),varargin{1}.solver_option);
-                        printf("%f\n", u);
                     else
                         [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get());
                     end

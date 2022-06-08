@@ -66,7 +66,7 @@ classdef HLC < CONTROLLER_CLASS
             vs = Vs(x,xd',vf,P,F2,F3,F4);
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
-            obj.self.input = obj.result.input;
+            obj.self.input = obj.result.input;  % 入力算出
             result = obj.result;
         end
         function show(obj)
