@@ -102,7 +102,7 @@ classdef MODEL_CLASS <  handle
                     else
                         [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get());
                     end
-                    obj.set_state(obj.projection(tmpx(end,:)'));
+                    obj.set_state(obj.projection(tmpx(end,:)'))
                 end
                 obj.result = obj.state;
             end

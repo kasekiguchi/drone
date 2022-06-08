@@ -66,7 +66,7 @@ end
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [10; 10; 10], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [5; 5; 5], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -101,30 +101,36 @@ end
             ts = 0;
 %             p_monte = agent.model.state.p
             % 入力のサンプルから評価
-            Q_monte = 1.5;  R_monte = 1;
-            fun = @(p_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p) % 評価関数
-%             fun = @(u1, u2, u3, u4) u1^2 - 50*u2 + 2225*u3 + u4; % 評価関数
-            Rmax = 0.269 * 9.81 / 4;  % 乱数の値の範囲
+            ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
+            Q_monte_x = 10000; Q_monte_y = 1; Q_monte_z = 1;
+            Q_monte = [Q_monte_x 0 0; 0 Q_monte_y 0; 0 0 Q_monte_z];
+            R_monte = 1;
+%             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); % 評価関数
+            fun = @(p_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p); % 評価関数
+%             Rmax = 0.269 * 9.81 / 4;  % 乱数の値の範囲
             sample = 10;   % サンプル数
-            % ホバリングから±10%の範囲
-            a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * 0.1;
-            b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * 0.1;
+            % ホバリングから±sigma%の範囲
+            sigma = 0.0005;
+            a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;
+            b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
             % 入力 u
             u1(: ,1) = (b-a).*rand(sample,1) + a;
             u2(: ,1) = (b-a).*rand(sample,1) + a;
             u3(: ,1) = (b-a).*rand(sample,1) + a;
             u4(: ,1) = (b-a).*rand(sample,1) + a;
             u = [u1 u2 u3 u4];
-            
+            Adata = zeros(sample, 4);
             for monte = 1 : sample
-                [t_monte,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
-                p_monte = [ 3, 3, 3]';
-                Adata(monte) = arrayfun(fun, p_monte); % 評価値算出
+                [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
+                P_monte = tmpx(end,:);  % ある入力での位置 x, y, z
+%                 Adata(monte, 1:3) = arrayfun(fun, P_monte(1:3)', u(monte, :)')';  % 評価値(x, y, z)算出
+                Adata(monte, 1) = fun(P_monte(1:3)');  % 評価値(x, y, z)算出
+%                 Adata(monte, 2) = sum(Adata(monte, 1:3));           % 評価値をどう評価するか　/　ここでは，各成分評価値の合計
             end
 %             tmpx = tmpx * 10^5;
             
-            [~,min_index] = min(Adata(:));   % 最小値算出
-            agent.input = Xdata(min_index, 1) % 入力の取得
+            [~,min_index] = min(Adata(:, 1));   % 評価値の合計の最小値インデックス算出
+            agent.input = u(min_index, :)';     % 最適な入力の取得
 %             u(:, 5) = agent.model.solver(@(t,x) agent.model.method(x, u,agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
             % 算出
 %             Xdata(:, 5) = arrayfun(fun, u1(:), u2(:), u3(:), u4(:));               % 評価関数
