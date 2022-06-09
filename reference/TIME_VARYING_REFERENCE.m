@@ -31,7 +31,7 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
 %             cha = get(Param{2}, 'currentcharacter');
             %flightになってからreferenceの時間を開始する
             if obj.cha=='f'
-                obj.result.state.p(1:2) = 0;%?
+%                 obj.result.state.p(1:2) = 0;%?
                 obj.result.state.xd = obj.func(Param{1}.t-obj.t); % 目標重心位置（絶対座標）
                 obj.result.state.p = obj.result.state.xd(1:3);
                 result = obj.result;
