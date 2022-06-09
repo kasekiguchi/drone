@@ -56,10 +56,6 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                     Param{2} = result.state;
                 end
                 if strcmp(class(Param{2}),"STATE_CLASS")
-%                     obj.base_time=Param{3};
-%                     obj.base_state=obj.self.estimator.result.state.p;
-%                     obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),10,0);
-                    
                     state_copy(Param{2},obj.result.state);
                     %                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
                 else

@@ -79,18 +79,25 @@ classdef FTC < CONTROLLER_CLASS
             z1=Z1(x,xd',P);%z方向
 %             uz=-kz(1)*sign(z1(1))*abs(z1(1))^az(1)-(kz(2)*sign(z1(2))*abs(z1(2))^az(2));
 %             vf(1)=uz;%FT
-
 %             vs = Vs(x,xd',vf,P,F2,F3,F4);
 %             z1=Z1(x,xd',P);%z方向
+
+        %x,y,psiの状態変数の値
             z2=Z2(x,xd',vf,P);%x方向
             z3=Z3(x,xd',vf,P);%y方向
             z4=Z4(x,xd',vf,P);%yaw
-            %x1-x4をｚの成分を出す形に
+        %x,y,psiの入力
+          %入力の切換速度の確認
+%           a=10^10;
+%             ux=-kx(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(kx(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(kx(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(kx(4)*tanh(a*z2(4))*abs(z2(4))^ax(4));%（17）式
+%             uy=-ky(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(ky(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(ky(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(ky(4)*tanh(a*z3(4))*abs(z3(4))^ay(4));%(19)式          
+              
+          %有限整定
             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式          
         %upsi:HL or FT
             upsi=-F4*z4;%HL
-            %upsi=-kpsi(1)*sign(z1(1))*abs(z1(1))^apsi(1)-(kpsi(2)*sign(z2(1))*abs(z2(1)))^apsi(2);%F4*Z4;%今回はこれで()%FT
+%             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
             
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
