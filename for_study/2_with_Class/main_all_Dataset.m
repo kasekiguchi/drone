@@ -12,6 +12,7 @@ fprintf('%s 開始\n',date.start);
 nn = NNHL;
 %% 普遍的な変数の定義
 rng(1) % 乱数固定
+init_step = 300; % 取り出すステップ数
 nn.t = 0:0.01:10; % シミュレーション時間
 figf = 1;
 % 第1ネットワーク(x→z)
@@ -50,18 +51,25 @@ fprintf('学習完了\n');
 % fprintf('微調整完了\n');
 %% 微調整(2022/05/27~) NEW
 % 立ち上がり部分のみ(0 s ~ 3 s)を取り出して学習
+% アイデア：取り出すステップ数を変えられるようにしたらどうか？
 z_train_init = {};
 xt_train_init = {};
 for i = 1:7 % 飛行周期
-    for j = 1:300
-        for k = 1:300
-            for l = 1:32
-                z_train_init{1,}(,1) = z_train{1,}(,1);
-                xt_train_init{1,}(,1) = xt_train{1,}(,1);
+    for j = 1:300 % データ数
+        for k = 1:init_step % 先頭から使用する分(フルでいう1001に対応)
+            for l = 1:32 % 状態数
+                z_train_init{1,k+(j-1)*init_step+(i-1)*300*init_step}(l,1) = ...
+                    z_train{1,k+(j-1)*1001+(i-1)*300*1001}(l,1);
+                if l <= 12
+                    xt_train_init{1,k+(j-1)*init_step+(i-1)*300*init_step}(l,1) = ...
+                        xt_train{1,k+(j-1)*1001+(i-1)*300*1001}(l,1);
+                end
             end
         end
     end
 end
+%%
+net2 = train(net2, z_train_init, xt_train_init,'useParallel','yes','useGPU','only');
 fprintf('微調整完了\n');
 %% 学習時間計測終了
 fprintf('学習する際の');

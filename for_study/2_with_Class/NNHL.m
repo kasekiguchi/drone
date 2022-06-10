@@ -49,7 +49,8 @@ classdef NNHL < handle
                 'MaxEpochs',10,...
                 'EncoderTransferFunction','satlin',...
                 'DecoderTransferFunction','purelin',...
-                'Scale',false);
+                'Scale',false, ...
+                'UseGPU',true);
             aenet = network;
             aenet.numInputs = 1;
             aenet.numLayers = 2;
@@ -71,7 +72,7 @@ classdef NNHL < handle
             aenet.LW{2,1} = autoenc.DecoderWeights;
             aenet.b{2} = autoenc.DecoderBiases;
             aenet.trainParam.epochs = 500;
-            ae = train(aenet,x,x);
+            ae = train(aenet,x,x,'useParallel','yes','useGPU','only');
         end
 
         function xn = calculate_Hidden(~, ae, x)
@@ -113,7 +114,7 @@ classdef NNHL < handle
             net.LW{2,1} = ae2.IW{1,1};
             net.b{2} = ae2.b{1};
             net.trainParam.epochs = 1000;
-            tnet = train(net,x,t);
+            tnet = train(net,x,t,'useParallel','yes','useGPU','only');
         end
 
         function f = plot_Result(obj, result,F)
@@ -212,9 +213,6 @@ classdef NNHL < handle
                 end
             end
         end
-
-        
-        
     end
 end
 
