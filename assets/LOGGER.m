@@ -70,7 +70,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 for i = 1:length(obj.agent_items) % sensor,estimator,reference以外のみ
                     str = strsplit(obj.agent_items(i), '.');
                     tmp = agent(n);
-                    obj.Data.agent(n).(str{1}){obj.k} = tmp.(str{1});
+%                     obj.Data.agent(n).(str{1}){obj.k} = tmp.(str{1});
+                    obj.Data.agent(n).(str{1}).result{obj.k} = tmp.(str{1});
                 end
                 obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
                 obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
