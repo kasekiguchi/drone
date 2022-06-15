@@ -1,4 +1,4 @@
-function Model= Model_Drone_Exp(dt,~,~,conn_type,id)
+function Model= Model_Drone_Exp(dt,~,conn_type,id)
 % dt : sampling time
 % isPlant : "plant"
 % conn_type : connector type : "udp" or "serial"
@@ -9,7 +9,6 @@ function Model= Model_Drone_Exp(dt,~,~,conn_type,id)
 %    "COM5" and "COM7"
 arguments
   dt
-  ~
   ~
   conn_type
   id
