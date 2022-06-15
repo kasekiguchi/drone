@@ -5,7 +5,7 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
         param
         func % 時間関数のハンドル
         self
-        t
+        t=[];
         cha='s';
     end
 
@@ -27,14 +27,16 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
             end
         end
         function result = do(obj, Param)  
-            obj.t=Param{1}.t;
-            obj.cha = get(Param{2}, 'currentcharacter');
-             if obj.cha=='f'    %flightからreferenceの時間を開始
+            %Param={time,FH}
+           obj.cha = get(Param{2}, 'currentcharacter');
+           if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
                 obj.result.state.xd = obj.func(Param{1}.t-obj.t); % 目標重心位置（絶対座標）
-             end
-            obj.result.state.xd = obj.func(Param{1}.t); % 目標重心位置（絶対座標）
-            obj.result.state.p = obj.result.state.xd(1:3);
-            result = obj.result;     
+           else
+                obj.t=Param{1}.t;
+                obj.result.state.xd = obj.func(Param{1}.t); % 目標重心位置（絶対座標）
+           end
+           obj.result.state.p = obj.result.state.xd(1:3);
+           result = obj.result;     
         end
         function show(obj, logger)
             rp = logger.data(1,"p","r");
