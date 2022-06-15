@@ -5,12 +5,12 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
 #include <WiFiUDP.h>
-//#define CPU_FRE 160 // CPUクロック周波数 [MHz]
+#define CPU_FRE 160 // CPUクロック周波数 [MHz]
 
 
 // PWM
 #define PWMA 2
-#define PWM_FREQ 144000 // PWM frequency: 1000Hz(1kHz)
+#define PWM_FREQ 24000 // PWM frequency: 1000Hz(1kHz)
 #define PWM_RANGE 100 // PWM range: 100
 uint16_t SPEED = 0; //33;// arming のduty比
 
@@ -68,8 +68,7 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
     int len = udp.read(packetBuffer, packetSize);
     if (len > 0)
     {
-      //SPEED = ;
-      SPEED = 70 * min(int(packetBuffer[0]), 100) / 100; //33 + 37*min(int(packetBuffer[0]),100)/100; // FC からのPWM波形を計測した結果
+      SPEED = 70 * min(int(packetBuffer[0]), 100) / 100; 
       Serial.print("Received duty rate:[");
       Serial.print(" ");
       Serial.print(SPEED);
@@ -81,7 +80,6 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
       isReceive_Data_Updated = true;
       analogWrite(PWMA, SPEED);
     }
-    /*
      else if (ESP.getCycleCount() - last_received_time >= 0.500 * CPU_FRE * 1000000L)// Stop propellers after 0.5s signal lost.
     {
       Serial.print("Set :[");
@@ -90,7 +88,7 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
       Serial.print(" ");
       Serial.print("]\r\n");
       analogWrite(PWMA, 0);
-    }*/
+    }
   }
 }
 
@@ -103,7 +101,7 @@ void setup() {
   analogWriteFreq(PWM_FREQ);
   analogWriteRange(PWM_RANGE);
 
-  analogWrite(PWMA, 0);
+  analogWrite(PWMA, 1);
 
   udp.begin(my_udp_port);
   unsigned long last_received_time = ESP.getCycleCount();
