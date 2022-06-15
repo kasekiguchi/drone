@@ -8,17 +8,17 @@
 #include <WiFiUDP.h>
 #include <Wire.h> //I2Cライブラリ
 #include <SPI.h> // I2Cならいらないかも
-#include <SparkFunLSM9DS1.h>
+//#include <SparkFunLSM9DS1.h>
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 #include <math.h>
 
 uint8_t i;
 
-unsigned int droneNumber = 25; //機体番号を入力
+unsigned int droneNumber = 32; //機体番号を入力
 
 #define OUTPUT_PIN 2 // PPM出力のピン番号 加速度使うなら０
 
-const char *ssid = "acsl-mse-arl-YAMAHA";
+const char *ssid = "ACSLexperimentWiFi";
 const char *password = "wifi-acsl-mse";
 
 //アルディーノの値を受け取るMatlabを実行しているPCのIP(自分のPCのIPアドレスを入力する)
