@@ -1,4 +1,4 @@
-%%　実機実験プロット
+%%　DataPlot
 %pos = cell2mat(logger.Data.agent.sigma(1,:)'); %cell2matでcell配列を行列に変換，:,1が列全選択
 %tn = find(logger.Data.t,1,'last');
 %posn=length(pos);
@@ -361,14 +361,14 @@ end
 
 %% make folder
 %変更しない
-ExportFolder='C:\Users\81809\OneDrive\デスクトップ\ACSL\卒業研究\results';
+ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
 DataFig='figure';%データか図か
 
 %変更
 % subfolder='sim';%sim or exp
 subfolder='exp';%sim or exp
-ExpSimName="remasui2";%実験,シミュレーション名
-date='0518';%日付
+ExpSimName="aaaa";%実験,シミュレーション名
+date=datetime('now','Format','MMDD');%日付
 contents="FTHL_hovering_15";%実験,シミュレーション内容
 FolderName=fullfile(ExportFolder,subfolder,ExpSimName,DataFig);%保存先のpath
 
