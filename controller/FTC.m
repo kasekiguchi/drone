@@ -88,7 +88,7 @@ classdef FTC < CONTROLLER_CLASS
             z4=Z4(x,xd',vf,P);%yaw
         %x,y,psiの入力
           %入力の切換速度の確認
-%           a=10^10;
+%           a=10;%a>2
 %             ux=-kx(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(kx(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(kx(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(kx(4)*tanh(a*z2(4))*abs(z2(4))^ax(4));%（17）式
 %             uy=-ky(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(ky(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(ky(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(ky(4)*tanh(a*z3(4))*abs(z3(4))^ay(4));%(19)式          
               
