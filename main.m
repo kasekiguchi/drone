@@ -65,7 +65,7 @@ end
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0; 0; 0], time.t};
+            param(i).reference.point = {FH, [0; 0; 0.5], time.t};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};

@@ -47,11 +47,11 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
             arguments
                 name % DIATONE
                 param.parameter_name = [];
-                param.mass = 0.5236;
-                param.Lx = 0.195;
-                param.Ly = 0.195;
-                param.lx = 0.195/2;%0.05;
-                param.ly = 0.195/2;%0.05;
+                param.mass = 0.269;
+                param.Lx = 0.117;
+                param.Ly = 0.0932;
+                param.lx = 0.117/2;%0.05;
+                param.ly = 0.0932/2;%0.05;
                 param.jx = 0.02237568;
                 param.jy = 0.02985236;
                 param.jz = 0.0480374;
@@ -67,7 +67,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.rotor_r = 0.0392;
                 param.Length = 0.075;
                 param.loadmass = 0.0556;
-                param.cableL = 0.43;
+                param.cableL = 0.44;
                 param.ex = 0.0;
                 param.ey = 0.0;
                 param.ez = 0.045;
