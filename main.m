@@ -91,6 +91,7 @@ end
             param(i).reference.point = {FH, rp, time.t};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
+            param(i).reference.tbug = {};
             param(i).reference.wall = {1};
             param(i).reference.agreement = {logger, N, time.t};
             for j = 1:length(agent(i).reference.name)
