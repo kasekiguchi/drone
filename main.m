@@ -71,8 +71,9 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
             % reference
+            rp=[4;0;0];
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [4; -4; 0], time.t};
+            param(i).reference.point = {FH, rp, time.t};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
