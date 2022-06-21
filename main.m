@@ -85,12 +85,15 @@ end
                 if abs(dtheta1) < 0.1    % 閾値はセンサ分解能 0.1より決定
                     rtheta = sensor.angle(k-1);      % 目標角
                     l = sensor.length(k-1);          % 目標方向の測距距離
+                    index = k - 1;
+                   
                     break
                 end
             end
             
             if l < 2.
-                % 障害物あり T-bug
+                sensor.sensor_points(index,:)
+                sensor.sensor_points(index+1,:)% 障害物あり T-bug
                 
             else
                 % 障害物なし
