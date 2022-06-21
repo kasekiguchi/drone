@@ -34,6 +34,12 @@ classdef LiDAR_sim < SENSOR_CLASS
             Env=param;
             tmp = obj.angle_range;            
             pos=Plant.state.p; % 実状態
+            if isprop(Plant.state,"q")
+                front = Plant.state.q(3); % オイラー角を想定
+                R = [cos(front),-sin(front);sin(front),cos(front)]'; % ボディ座標から見るため転置
+            else
+                R = eye(2);
+            end
             circ=[obj.radius*cos(tmp);obj.radius*sin(tmp)]';
             if tmp(end)-tmp(1) > pi
                 sensor_range=polyshape(circ(:,1),circ(:,2)); % エージェントの位置を中心とした円
@@ -63,6 +69,8 @@ classdef LiDAR_sim < SENSOR_CLASS
                     result.sensor_points(i,:) = [0 0];
                 end
             end
+            result.region.Vertices = (R*result.region.Vertices')';
+            result.sensor_points = (R*result.sensor_points')';
             result.length=vecnorm(result.sensor_points'); % レーザー点までの距離
             %result.state = {};
             obj.result=result;
