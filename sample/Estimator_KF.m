@@ -7,17 +7,13 @@ function Estimator = Estimator_KF(agent,output,var)
     Estimator.name="kf";
     Estimator.type="KF";
     dt = agent.model.dt;
-    if isfield(agent(1).sensor,'imu')
-        output = ["w","a"];
-    end
     tmp=arrayfun(@(i) strcmp(agent.model.state.list,output(i)),1:length(output),'UniformOutput',false);
-    syms dummy1 dummy2
     col = agent.model.state.num_list;
-    output_num =  6;
+    output_num =  cell2mat(arrayfun(@(i) col(tmp{i}),1:length(tmp),"UniformOutput",false));
     n = agent.model.dim(1);% 状態数
     m = agent.model.dim(2);% 入力数
     KF_param.Q = 1E-3*eye(m);
-    KF_param.R = 1E-2*eye(output_num);
+    KF_param.R = 1E-2*eye(sum(output_num));
     %%
     KF_param.P = eye(n); % 初期共分散行列
     KF_param.A = agent.parameter.A;
