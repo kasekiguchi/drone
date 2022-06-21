@@ -74,7 +74,7 @@ end
             
             
             % reference
-            rp=[4;0;0];     % 目標座標
+            rp=[4;-4;0];     % 目標座標
 
             state = agent.model.state.p'; % 自己位置
             sensor = agent.sensor.result; % センサ情報
@@ -108,7 +108,7 @@ end
             end
 
             rs.p = rp; % 目標位置
-            rs.q = [0;0;-1]; % 目標姿勢
+            rs.q = [0;0;time.t]; % 目標姿勢
             rs.v = [0;0;0]; % 目標速度
 
             param(i).reference.covering = [];
