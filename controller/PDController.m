@@ -35,6 +35,7 @@ classdef PDController <CONTROLLER_CLASS
             if isfield(Err,'v') && isfield(obj.Gain,'D')
                 obj.result.input=obj.result.input+obj.Gain.D*Err.v;
             end
+            obj.self.input = obj.result.input;
             u = obj.result;
         end 
         function show(obj)

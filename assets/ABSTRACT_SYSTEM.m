@@ -163,7 +163,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             result = obj.(prop).(obj.(prop).name(1)).do(param{1});
 
             for i = 2:length(obj.(prop).name) % (prop).resultに結果をまとめるため
-                tmp = obj.(prop).(obj.(prop).name(i)).do(param{i});
+                tmp = obj.(prop).(obj.(prop).name(i)).do(param{i}); % = result
                 F = fieldnames(tmp);
 
                 for j = 1:length(F)
