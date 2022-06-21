@@ -12,7 +12,7 @@ for i = 1:N
         %agent(i) = DRONE(Model_EulerAngle(dt,initial(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
-        initial(i).q = [ 0.9988         0         0    0.0500];
+        initial(i).q = compact(quaternion([0 0 pi/2],'rotvec'));%[ 0.9988         0         0    0.0500];
         [M,P]=Model_Discrete(dt,initial(i),i);
         agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
     end

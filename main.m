@@ -72,43 +72,8 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             
-            
-            % reference
-            rp=[4;-4;0];     % 目標座標
-
-            state = agent.model.state.p'; % 自己位置
-            sensor = agent.sensor.result; % センサ情報
-            Xd = rp - state;
-            d = vecnorm(Xd);              % 目標との距離
-            theta = atan2(Xd(2), Xd(1));  % 角度 rad
-            for k=2:length(sensor.angle)
-                dtheta1 = theta - sensor.angle(k-1); % 現状使うほう
-                dtheta2 = theta - sensor.angle(k);   % 追々使うかも
-                if abs(dtheta1) < 0.1    % 閾値はセンサ分解能 0.1より決定
-                    rtheta = sensor.angle(k-1);      % 目標角
-                    l = sensor.length(k-1);          % 目標方向の測距距離
-                    index = k - 1;
-                   
-                    break
-                end
-            end
-            
-            if l < 2.% 障害物あり T-bug
-                sensorP_R       = sensor.sensor_points(index-1,:);
-                sensorP_index   = sensor.sensor_points(index,:);     
-                sensorP_L       = sensor.sensor_points(index+1,:);   
-                
-                dLen_left = vecnorm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
-                dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
-                if dLen_left < 0.15 && dLen_right < 0.15
-                    
-                end
-            else
-                % 障害物なし
-            end
-
-            rs.p = rp; % 目標位置
-            rs.q = [0;0;time.t]; % 目標姿勢
+            rs.p = [4;-4;0]; % 目標位置
+            rs.q = [0;0;-pi/2]; % 目標姿勢
             rs.v = [0;0;0]; % 目標速度
 
             param(i).reference.covering = [];
@@ -201,7 +166,7 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","e"},{1,"v","e"},{1,"input",""});
+logger.plot({1,"p","e"},{1,"q3","e"},{1,"input",""});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
