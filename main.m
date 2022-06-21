@@ -72,16 +72,16 @@ end
             
             
             % reference
-            rp=[4;0;0];
+            rp=[4;0;0];     % 目標座標
   
             state = agent.model.state.p'; % 自己位置
             sensor = agent.sensor.result; % センサ情報
             Xd = rp - state;
             d = vecnorm(Xd);              % 目標との距離
             theta = atan2(Xd(2), Xd(1));  % 角度 rad
-            for i=2:length(sensor.angle)
-                dtheta1 = theta - sensor.angle(i-1); % 現状使うほう
-                dtheta2 = theta - sensor.angle(i);   % 追々使うかも
+            for k=2:length(sensor.angle)
+                dtheta1 = theta - sensor.angle(k-1); % 現状使うほう
+                dtheta2 = theta - sensor.angle(k);   % 追々使うかも
                 if abs(dtheta1) < 0.1    % 閾値はセンサ分解能 0.1より決定
                     
                 end
