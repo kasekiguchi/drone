@@ -75,9 +75,14 @@ end
             rp=[4;0;0];
   
             state = agent.model.state.p'; % 自己位置
+            sensor = agent.sensor.result; % センサ情報
             Xd = rp - state;
             d = vecnorm(Xd);              % 目標との距離
             theta = atan2(Xd(2), Xd(1));  % 角度
+            for i=2:length(sensor.angle)
+                dtheta1 = theta - sensor.angle(i-1);
+                dtheta2 = theta - sensor.angle(i);
+                if 
             param(i).reference.covering = [];
             param(i).reference.point = {FH, rp, time.t};
             param(i).reference.timeVarying = {time,FH};
