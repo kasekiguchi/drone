@@ -9,11 +9,13 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
+
 tmp = [0 0;0 10;10 10;10 0]-[5 5];
-Env.param.Vertices = [tmp;NaN NaN;0.6*tmp]
+Env.param.Vertices = [tmp;NaN NaN;0.6*tmp];
 initial.p = [1,1,0]'-[5,5,0]';
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
+plot(polyshape(Env.param.Vertices))
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -24,10 +26,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
-% PFH = figure(2);
-% plot(polyshape(Env.param.Vertices));
-%         agent.sensor.lrf.show(PFH);
-%hold on
+PFH=figure();
 try
     while round(time.t, 5) <= te
         %% sensor
@@ -62,7 +61,9 @@ end
             agent(i).do_sensor(param(i).sensor.list);
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
-
+        figure(PFH);
+        hold off
+        agent.sensor.lrf.show();
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator
