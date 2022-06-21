@@ -1,26 +1,25 @@
 %%　DataPlot
 %pos = cell2mat(logger.Data.agent.sigma(1,:)'); %cell2matでcell配列を行列に変換，:,1が列全選択
-%tn = find(logger.Data.t,1,'last');
-%posn=length(pos);
-% time=size(1,posn);
-% time = logger.Data.t';
 clear 
 %%
 %import
 %選択
-fsingle=10;%figureの数が一つの時１
+fsingle=1;%figureの数が一つの時１
 ff=10;%flightのみは１
 fHLorFT=1;%単体の時,HLは1
 
 % 単体
 if fsingle==1
+    %loggerの名前が変わっているとき
+    name=logger;
+%     name=remasui2_0518_FT_hovering_15;
+    %
     if fHLorFT==1
         HLorFT='HL';
     else
         HLorFT='FT';
     end
-    name=logger;
-%     name=remasui2_0518_FT_hovering_15;
+    
     
     t0 = name.Data.t';
     k0=name.k;
@@ -363,14 +362,13 @@ end
 %変更しない
 ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
 DataFig='figure';%データか図か
-
+date=string(datetime('now','Format','MMdd'));%日付
 %変更
 % subfolder='sim';%sim or exp
 subfolder='exp';%sim or exp
-ExpSimName="aaaa";%実験,シミュレーション名
-date=datetime('now','Format','MMDD');%日付
-contents="FTHL_hovering_15";%実験,シミュレーション内容
-FolderName=fullfile(ExportFolder,subfolder,ExpSimName,DataFig);%保存先のpath
+ExpSimName='aaaa';%実験,シミュレーション名
+contents='FTHL_hovering_15';%実験,シミュレーション内容
+FolderName=fullfile(ExportFolder,ExpSimName,subfolder,DataFig);%保存先のpath
 
 %フォルダができてないとき
 mkdir(FolderName);
@@ -379,7 +377,7 @@ addpath(genpath(ExportFolder));
 n=length(f);
 SaveTitle=strings(1,n);
 for i=1:7 %保存する図を選ぶ場合[1:"x-y" 2:"t-x" 3:"t-y" 4:"error" 5:"input" 6:"attitude" 7:"velocity" 8:"angular_velocity" 9:"3D"]
-    SaveTitle(i)=strcat(ExpSimName,'_',date,'_',contents,'_',FigName(i));
+    SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(i));
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jpg');
     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'fig');
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
@@ -388,7 +386,7 @@ end
 i=0;%figiureの番号
 SaveTitle=strings(1,1);
     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(i));
-%     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'png');
+%     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jng');
     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'fig');
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
 %%

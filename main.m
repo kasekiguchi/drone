@@ -167,23 +167,28 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
+fsave=1;
+if fsave
 %変更しない
-% ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
-% DataFig='figure';%データか図か
-% 
-% %変更
-% % subfolder='sim';%sim or exp
-% subfolder='sample';%sim or exp
-% ExpSimName="a=10";%実験,シミュレーション名
-% date=datetime('now','Format','MMDD');%日付
-% % contents="FTHL_hovering_15";%実験,シミュレーション内容
-% FolderName=fullfile(ExportFolder,subfolder,date);%保存先のpath
-% 
-% %フォルダができてないとき
-% mkdir(FolderName);
-% addpath(genpath(ExportFolder));
-% %save
-% SaveTitle=strcat(ExpSimName,'_',date);
-%     saveas(1, fullfile(FolderName, SaveTitle(i) ),'jpg');
+ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
+DataFig='figure';%データか図か
+date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
+
+%変更
+% subfolder='sim';%sim or exp
+subfolder='sample';%sim or exp
+ExpSimName="a";%実験,シミュレーション名
+% contents="FTHL_hovering_15";%実験,シミュレーション内容
+FolderName=fullfile(ExportFolder,subfolder,strcat(ExpSimName,date));%保存先のpath
+
+%フォルダができてないとき
+
+    mkdir(FolderName);
+    addpath(genpath(ExportFolder));
+
+%save
+SaveTitle=strcat(date,'_',ExpSimName);
+    saveas(1, fullfile(FolderName, SaveTitle ),'jpg');
 %     saveas(1, fullfile(FolderName, SaveTitle ),'fig');
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
+end

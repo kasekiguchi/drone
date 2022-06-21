@@ -1,24 +1,51 @@
 t=-2:0.001:2;
 k=2;
 uft2=-k.*sign(t).*abs(t).^0.2;
-% uft4=-k.*sign(t).*abs(t).^0.4;
-uftt2=-k.*tanh(10*t).*abs(t).^0.4;
-% uftt4=-k.*tanh(t).*abs(t).^0.4;
+uft4=-k.*sign(t).*abs(t).^0.9;
+ta=-k*tanh(1.2.*t);
+% uftt2=-k.*tanh(10*t).*abs(t).^0.4;
+uftt4=-k.*tanh(10.*t).*abs(t).^0.7;
 uHL=-k.*t;
+udtanh2=2*abs(t).^(1/5).*(tanh(t).^2 - 1) - (2.*sign(t).*tanh(t))./(5*abs(t).^(4/5));%0.2
+udtanh4=2*abs(t).^(2/5).*(tanh(t).^2 - 1) - (4.*sign(t).*tanh(t))./(5*abs(t).^(3/5));%04
+c=1;
+k=k*2;
+unew=-k/2.*(tanh(c.*t)+t);%;-k/2.*(sign(2.*t)+t);
+dunew=(k.*(c*(tanh(c.*t).^2 - 1) - 1))./2;
+ddunew=-c^2*k.*tanh(c.*t).*(tanh(c.*t).^2 - 1);
 
+i=1;
+for t=-2:0.001:2
+    uddt4(i)=(8*sign(t)*(tanh(t)^2 - 1))/(5*abs(t)^(3/5)) - 4*abs(t)^(2/5)*tanh(t)*(tanh(t)^2 - 1) - (8*dirac(t)*tanh(t))/(5*abs(t)^(3/5)) + (12*sign(t)^2*tanh(t))/(25*abs(t)^(8/5));
+    i=i+1;
+end
+%%
+t=-2:0.001:2;
 hold on
 grid on
-plot(t,uft2);
-% plot(t,uft4);
-plot(t,uftt2);
+% plot(t,uft2);
+plot(t,uft4);
+% plot(t,uftt2);
 % plot(t,uftt4);
-plot(t,uHL);
+plot(t,ta);
+% plot(t,udtanh2);
+% plot(t,udtanh4);
+% plot(t,uddt4);
+% plot(t,unew);
+% plot(t,dunew);
+% plot(t,ddunew);
+% plot(t,uHL);
 
 xlabel('x')
 ylabel('u')
-legend('FT 02','FT 04','SF')
+legend('FT','FT d','FT dd','FB')
 % legend('FT 02','FT 04','FTt 02','FTt 04')
 hold off
+%%
+syms k c t real;
+udtanh=diff(2*abs(t).^(2/5).*(tanh(t).^2 - 1) - (4.*sign(t).*tanh(t))./(5*abs(t).^(3/5)),t);
+dunew=diff(-k/2.*(tanh(c.*t)+t),t);
+ddunew=diff(dunew);
 %%
 syms a k t n
 an=0.4;%*ones(size(tn));

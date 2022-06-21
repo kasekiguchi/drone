@@ -20,6 +20,7 @@ legend('sgmd','d','dd','ddd');
 grid on
 %% tanh
 at=2;
+x = -2:0.01:2;
 x2 = 2*x;
 th = tanh(at*x);
 sgmd2=1./(1+exp(-at*x2));%f(2x)の時のシグモイド関数
