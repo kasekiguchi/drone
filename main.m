@@ -69,9 +69,15 @@ end
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-
+            
+            
             % reference
             rp=[4;0;0];
+  
+            state = agent.model.state.p'; % 自己位置
+            Xd = rp - state;
+            d = vecnorm(Xd);              % 目標との距離
+            theta = atan2(Xd(2), Xd(1));  % 角度
             param(i).reference.covering = [];
             param(i).reference.point = {FH, rp, time.t};
             param(i).reference.timeVarying = {time,FH};
