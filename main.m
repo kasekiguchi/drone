@@ -91,10 +91,16 @@ end
                 end
             end
             
-            if l < 2.
-                sensor.sensor_points(index,:)
-                sensor.sensor_points(index+1,:)% 障害物あり T-bug
+            if l < 2.% 障害物あり T-bug
+                sensorP_R       = sensor.sensor_points(index-1,:);
+                sensorP_index   = sensor.sensor_points(index,:);     
+                sensorP_L       = sensor.sensor_points(index+1,:);   
                 
+                dLen_left = vecnorm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
+                dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
+                if dLen_left < 0.15 && dLen_right < 0.15
+                    
+                end
             else
                 % 障害物なし
             end
