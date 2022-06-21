@@ -9,7 +9,7 @@ classdef LiDAR_sim < SENSOR_CLASS
         self
         interface = @(x) x;
     end
-    properties (Access = private) % construct したら変えない．
+    properties %(Access = private) % construct したら変えない．
         radius = 40;
         angle_range = -pi:0.01:pi;
     end
@@ -64,13 +64,16 @@ classdef LiDAR_sim < SENSOR_CLASS
                 end
             end
             result.length=vecnorm(result.sensor_points'); % レーザー点までの距離
-            result.state = {};
+            %result.state = {};
             obj.result=result;
         end
         function show(obj,~)
             if ~isempty(obj.result)
                 points(1:2:2*size(obj.result.sensor_points,1),:)=obj.result.sensor_points;
-                plot([points(:,1);0],[points(:,2);0],'r-');hold on; plot(obj.result.region);axis equal;
+                plot([points(:,1);0],[points(:,2);0],'r-');
+                hold on; 
+                plot(obj.result.region);
+                axis equal;
             else
                 disp("do measure first.");
             end
