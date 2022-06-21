@@ -168,27 +168,38 @@ agent(1).animation(logger,"target",1:N);
 %logger.save();
 %% make folder&save
 fsave=1;
-if fsave
-%変更しない
-ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
-DataFig='figure';%データか図か
-date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
-
-%変更
-% subfolder='sim';%sim or exp
-subfolder='sample';%sim or exp
-ExpSimName="a";%実験,シミュレーション名
-% contents="FTHL_hovering_15";%実験,シミュレーション内容
-FolderName=fullfile(ExportFolder,subfolder,strcat(ExpSimName,date));%保存先のpath
-
-%フォルダができてないとき
-
-    mkdir(FolderName);
-    addpath(genpath(ExportFolder));
-
-%save
-SaveTitle=strcat(date,'_',ExpSimName);
-    saveas(1, fullfile(FolderName, SaveTitle ),'jpg');
-%     saveas(1, fullfile(FolderName, SaveTitle ),'fig');
-%     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
+if fsave==1
+    %変更しない
+    ExportFolder='D:\student\momose';
+    % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
+    DataFig='figure';%データか図か
+    date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
+    date2=string(datetime('now','Format','yyyy_MMdd'));%日付
+    %変更
+    % subfolder='exp';%sim or e
+    % subfolder='sim';%sim or exp
+    subfolder='sample';%sim or exp
+    
+    ExpSimName='近似';%実験,シミュレーション名
+    contents='FT_kx';%実験,シミュレーション内容
+    FolderName=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
+    SaveTitle=strcat(date,'_',contents);%ファイルの名前作成
+    %フォルダができてないとき
+    
+        mkdir(FolderName);
+        addpath(genpath(ExportFolder));
+    
+    % save logger and agent
+        eval([contents '= logger']);%loggerの名前をcontentsに変更
+        save(fullfile(FolderName, SaveTitle),contents);
+      
+        agent_contents=strcat('agent_',contents);
+        SaveTitle2=strcat(date,'_',agent_contents);
+        eval([agent_contents '=agent']);
+        save(fullfile(FolderName, SaveTitle2),agent_contents);
+    %savefig
+%     SaveTitle=strcat(date,'_',ExpSimName);
+%         saveas(1, fullfile(FolderName, SaveTitle ),'jpg');
+    %     saveas(1, fullfile(FolderName, SaveTitle ),'fig');
+    %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
 end

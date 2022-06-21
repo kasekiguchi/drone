@@ -26,7 +26,7 @@ Eig=[-3.2,-2,-2.5,-2.1];
 anum=4;%•Ï”‚Ì”
 alpha=zeros(anum+1,1);
 alpha(anum+1)=1;
-alpha(anum)=0.8;%alpha‚Ì‰Šú’l
+alpha(anum)=0.9;%alpha‚Ì‰Šú’l
 
 for a=anum-1:-1:1
     alpha(a)=(alpha(a+2)*alpha(a+1))/(2*alpha(a+2)-alpha(a+1));

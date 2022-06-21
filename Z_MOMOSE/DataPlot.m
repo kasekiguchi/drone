@@ -11,7 +11,7 @@ fHLorFT=1;%単体の時,HLは1
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
-    name=logger;
+    name=tanh_al09a6_kx;
 %     name=remasui2_0518_FT_hovering_15;
     %
     if fHLorFT==1
