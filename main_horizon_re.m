@@ -110,10 +110,12 @@ end
             delta = 0.000;   % プロペラの補正
 %             sigma_xy = 0.0005;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
-            % 入力 u 入力の初期化ちゃんと
-            u1(: ,1) = (b-a).*rand(sample,1) + a;               u2(: ,1) = (b-a).*rand(sample,1) + a + delta;
-            u3(: ,1) = (b-a).*rand(sample,1) + a;               u4(: ,1) = (b-a).*rand(sample,1) + a + delta;
-            u = [u1 u2 u3 u4];  % 予測ステップでは同様の入力を用いる
+            % 入力 u
+            u = [0 0 0 0];  % 初期化
+%             u1(: ,1) = (b-a).*rand(sample,1) + a;               u2(: ,1) = (b-a).*rand(sample,1) + a + delta;
+%             u3(: ,1) = (b-a).*rand(sample,1) + a;               u4(: ,1) = (b-a).*rand(sample,1) + a + delta;
+%             u = [u1 u2 u3 u4];  % 予測ステップでは同様の入力を用いる
+            u = (b-a).*rand(sample,4) + a;  
             % 配列定義
             Adata = cell(sample, sample);  % 2horizon = 2乗のサイズの配列
             P_monte = cell(sample, horizon);

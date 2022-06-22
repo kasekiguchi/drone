@@ -24,7 +24,6 @@ fInput = 0;
 run("main3_loop_setup.m");
 
 try
-    tic
     while round(time.t, 5) <= te
         %% sensor
         %    tic
@@ -58,6 +57,7 @@ end
             agent(i).do_sensor(param(i).sensor.list);
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
+        
 
         %% estimator, reference generator, controller
         for i = 1:N
@@ -84,94 +84,75 @@ end
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
-            %if (fOffline); expudata.overwrite("input",time.t,agent,i);end   
+            %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+            % 強制的に入力を決定
+       
             tic
             % MPC controller
             % ts探し
-            horizon = 2;
-            rng(0,'twister');
             ts = 0;
 %             p_monte = agent.model.state.p
             % 入力のサンプルから評価
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-            Q_monte_x = 1; Q_monte_y = 1; Q_monte_z = 10000000;
-            Q_monte = [Q_monte_x 0 0; 0 Q_monte_y 0; 0 0 Q_monte_z];
-            R_monte = 1;    VQ_monte = 100;    WQ_monte = 1;
+            Q_monte_x = 1; Q_monte_y = 1; Q_monte_z = 1000000;
+            Q_monte = diag([Q_monte_x, Q_monte_y, Q_monte_z]);
+            VQ_monte_x = 1000; VQ_monte_y = 1000; VQ_monte_z = 1000;
+            VQ_monte = diag([VQ_monte_x, VQ_monte_y, VQ_monte_z]);
+            R_monte = 1;    
             % 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
 %             fun = @(p_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p); 
             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte; 
-%             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte+w_monte'*WQ_monte*w_monte; 
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
-            sample = 20;   % サンプル数
             % ホバリングから±sigma%の範囲
-            sigma = 0.1;
-            delta = 0.000;   % プロペラの補正
-%             sigma_xy = 0.0005;
+            rng('shuffle')
+            sigma = 0.3;
+            delta1 = 0.0; delta2 = 0.0; delta3 = 0.0; delta4 = 0.0;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
-            % 入力 u 入力の初期化ちゃんと
-            u1(: ,1) = (b-a).*rand(sample,1) + a;               u2(: ,1) = (b-a).*rand(sample,1) + a + delta;
-            u3(: ,1) = (b-a).*rand(sample,1) + a;               u4(: ,1) = (b-a).*rand(sample,1) + a + delta;
-            u = [u1 u2 u3 u4];  % 予測ステップでは同様の入力を用いる
-            % 配列定義
-            Adata = cell(sample, sample);  % 2horizon = 2乗のサイズの配列
-            P_monte = cell(sample, horizon);
-            V_monte = cell(sample, horizon);
-            State_monte = cell(sample, 1);
-            fZpos = zeros(sample, horizon);
-            fStart = 0;
-            fSub = 0;   fSub_f = 0;
+            sample = 10;   % サンプル数
+            u = (b-a).*rand(sample,4) + a        
+%             a_xy = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma_xy;     b_xy = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma_xy;
+            % 入力 u
+%             u = [0 0 0 0];
+%             u1(: ,1) = (b-a).*rand(sample,1) + a + delta1;               u2(: ,1) = (b-a).*rand(sample,1) + a + delta2;
+%             u3(: ,1) = (b-a).*rand(sample,1) + a + delta3;               u4(: ,1) = (b-a).*rand(sample,1) + a + delta4;
+%             u = [u1 u2 u3 u4];
             
-            % 座標の表示
-            fprintf("%f\t %f\t %f\n", agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), agent.estimator.result.state.p(3))
-            % calculate MPC
-            horizon = 1;
+            
+            % 配列定義
+            Adata = zeros(sample, 1);   % 評価値
+            P_monte = zeros(sample, 3); % ある入力での位置
+            V_monte = zeros(sample, 3); % ある入力での速度
+            fZpos = zeros(sample, 1);
             for monte = 1 : sample
                 [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
-                State_monte{monte, horizon} = tmpx(end, :);   % モデルの状態の記録
-            end
-            
-            % 予測ステップ
-            horizon = 2;
-            for monte = 1: sample
-                for horimonte = 1 : sample
-                    % ホライゾンの計算中は微分方程式の解を状態として用いる
-                    [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],State_monte{monte, horizon-1}');
-%                     P_monte{monte, horizon} = tmpx(end, 1:3);  % ある入力での位置 x, y, z
-%                     V_monte{monte, horizon} = tmpx(end, 7:9);  % ある入力での速度 vx, vy, vz
-                    State_monte{monte, horimonte} = tmpx(end, :);   % モデルの状態の更新
-%                     Adata(monte, horimonte) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v
-                     if Fsub(tmpx(end, 1:3)')
-                         Adata{monte, horimonte} = fun(tmpx(end, 1:3)', tmpx(end, 7:9)');
-                    else
-                        Adata{monte, horimonte} = 10^10;
-        %                         Adata{monte, horimonte} = fun(tmpx(end, 1:3)', tmpx(end, 7:9)', tmpx(end, 4:6)');
-                    end
-                    if tmpx(end, 3) < 0
-%                         fSub = fSub + 1;
-                        disp("Stop!!");               % エラーを吐かせて終了させる
-%                         if fSub > 30
-%                             printf("stop simulation");
-%                         end
-%                     else
-%                         fprintf("%3f, %f, %f\n", tmpx(end, 1), tmpx(end, 2), tmpx(end, 3))
-                    end
+                P_monte(monte, :) = tmpx(end, 1:3);  % ある入力での位置 x, y, z
+                V_monte(monte, :) = tmpx(end, 7:9);  % ある入力での速度 vx, vy, vz
+                if Fsub(P_monte(monte, 3)) == 1
+%                     Adata(monte, 1) = fun(P_monte(monte, 1:3)');    % p / 評価値(x, y, z)算出
+                    Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v
+%                     fZpos(monte, 1) = 0;
+                else
+                    Adata(monte, 1) = 10^10;
+                    fZpos(monte, 1) = 1
                 end
             end
+            toc
             
-           
             
-            
-            calT = toc;
-            minAdata = zeros(sample, 1);
-            Adata = cell2mat(Adata);
-            for mindata = 1: sample
-                [minAdata_col, min_col] = min(Adata(mindata, :));
-                minAdata(mindata, 1) = minAdata_col;
-            end
-            [~,min_index] = min(minAdata(:, 1));   % 評価値の合計の最小値インデックス算出
+%                 Adata(monte, 1:3) = arrayfun(fun, P_monte(1:3)', u(monte, :)')';  % 評価値(x, y, z)算出
+            [~,min_index] = min(Adata(:, 1));   % 評価値の合計の最小値インデックス算出
+            u(min_index, 4) = u(min_index, 4) + delta4;
             agent.input = u(min_index, :)';     % 最適な入力の取得
+            if fZpos(min_index, 1) == 1
+                printf("Stop!!");               % エラーを吐かせて終了させる
+            end
+%             if  P_monte(min_index, 3) > 0
+%                 agent.input = u(min_index, :)';     % 最適な入力の取得
+%             else
+%                 agent.input = [0; 0; 0; 0];            % z < 0 なら　u = 0
+%             end
         end
         
         %% update state
@@ -225,7 +206,6 @@ end
         end
 
     end
-    toc
 
 catch ME % for error
     % with FH
@@ -242,10 +222,13 @@ end
 close all
 clc
 % plot p:position, er:roll/pitch/yaw, 
+figure(1)
 logger.plot({1,"p", "er"});
 % logger.plot({1,"v", "e"});
+% logger.plot({1,"input", ""});
 % agent(1).reference.timeVarying.show(logger)
-saveas(gcf,'Data/20220616_horizon.png')
+saveas(gcf,'Data/20220616_no_horizon.png')
+
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1);
