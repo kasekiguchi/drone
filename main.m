@@ -33,11 +33,14 @@ PFH=figure();
 I = eye(9);
 A = agent.model.param.A;
 B = agent.model.param.B;
-C = I
+C = I;
+u = zeros(6,1);
 
 x_th = zeros(9,1);
 P_th = I;
-Q = 
+Q = 0.1*I;
+R = 0.05*I;
+
 %%%%%%%%%%%
 try
     while round(time.t, 5) <= te
@@ -84,13 +87,16 @@ end
 
            
             %ここから
+            z_t = agent.sensor.
             x_thm = A * x_th + B * u;
             P_thm = A * P_th * A' + Q;
-            K_t = (P_thm * C') / (C * P_thm * C' + Q);
+            K_t = (P_thm * C') / (C * P_thm * C' + R);
             x_th = x_thm +K_t * (z_t - C * x_thm ); 
             P_th = ( I - K_t*C )*P_thm;
-            
-            
+            agent.estimator.result.state.p = x_th(1:3);
+            agent.estimator.result.state.v = x_th(4:6);
+            agent.estimator.result.state.q = x_th(7:9);
+             
             rs.p = [4;-4;0]; % 目標位置
             rs.q = [0;0;-pi/2]; % 目標姿勢
             rs.v = [0;0;0]; % 目標速度
