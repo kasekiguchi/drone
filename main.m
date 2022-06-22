@@ -30,15 +30,15 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 run("main3_loop_setup.m");
 PFH=figure();
 %%%%%%初期定義
-I = eye(9);
-A = agent.model.param.A;
-B = agent.model.param.B;
-C = I;
-u = zeros(6,1);
-x_h = zeros(9,1);
-P_h = I;
-Q = 0.1*I;
-R = 0.05*I;
+I = eye(9);                             %単位行列
+A = agent.model.param.A;                %システム行列A
+B = agent.model.param.B;                %システム行列B
+C = I;                                  %観測行列
+u = zeros(6,1);                         %入力
+x_h = zeros(9,1);                       %状態の初期定義
+P_h = I;                                %共分差行列の初期定義
+Q = 0.001*I;                              %システムノイズ
+R = 0.05*I;                             %観測ノイズ
 %%%%%%%%%%%
 try
     while round(time.t, 5) <= te
@@ -83,13 +83,16 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             %ここからKFの計算
-            z = agent.sensor.result.state.get
-            u = agent.input
-            x_hm = A * x_h + B * u;
-            P_hm = A * P_h * A' + Q;
-            K = (P_hm * C') / (C * P_hm * C' + R);
-            x_h = x_hm +K * (z - C * x_hm ); 
-            P_h = ( I - K*C )*P_hm;
+            z = agent.sensor.result.state.get;          %観測値
+            u = agent.input;                            %入力
+            %%予測ステップ
+            x_hm = A * x_h + B * u;                     %事前推定値
+            P_hm = A * P_h * A' + Q;                    %事前誤差共分散
+            %%フィルタリングステップ
+            K = (P_hm * C') / (C * P_hm * C' + R);      %カルマンゲイン
+            x_h = x_hm +K * (z - C * x_hm );            %事後推定値
+            P_h = ( I - K*C )*P_hm;                     %事後誤差共分散
+            %%リザルトの更新
             agent.estimator.result.state.p = x_h(1:3);
             agent.estimator.result.state.v = x_h(4:6);
             agent.estimator.result.state.q = x_h(7:9);
