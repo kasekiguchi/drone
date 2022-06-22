@@ -35,12 +35,10 @@ A = agent.model.param.A;
 B = agent.model.param.B;
 C = I;
 u = zeros(6,1);
-
-x_th = zeros(9,1);
-P_th = I;
+x_h = zeros(9,1);
+P_h = I;
 Q = 0.1*I;
 R = 0.05*I;
-
 %%%%%%%%%%%
 try
     while round(time.t, 5) <= te
@@ -84,18 +82,17 @@ end
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-
-           
-            %ここから
-            z_t = agent.sensor.
-            x_thm = A * x_th + B * u;
-            P_thm = A * P_th * A' + Q;
-            K_t = (P_thm * C') / (C * P_thm * C' + R);
-            x_th = x_thm +K_t * (z_t - C * x_thm ); 
-            P_th = ( I - K_t*C )*P_thm;
-            agent.estimator.result.state.p = x_th(1:3);
-            agent.estimator.result.state.v = x_th(4:6);
-            agent.estimator.result.state.q = x_th(7:9);
+            %ここからKFの計算
+            z = agent.sensor.result.state.get
+            u = agent.input
+            x_hm = A * x_h + B * u;
+            P_hm = A * P_h * A' + Q;
+            K = (P_hm * C') / (C * P_hm * C' + R);
+            x_h = x_hm +K * (z - C * x_hm ); 
+            P_h = ( I - K*C )*P_hm;
+            agent.estimator.result.state.p = x_h(1:3);
+            agent.estimator.result.state.v = x_h(4:6);
+            agent.estimator.result.state.q = x_h(7:9);
              
             rs.p = [4;-4;0]; % 目標位置
             rs.q = [0;0;-pi/2]; % 目標姿勢

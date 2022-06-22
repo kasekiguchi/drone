@@ -48,7 +48,7 @@ for i = 1:N
     end
 
     %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
-    agent(i).set_property("sensor",Sensor_Direct(0.05)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
+    agent(i).set_property("sensor",Sensor_Direct(0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     agent(i).set_property("sensor",Sensor_LiDAR(i));
