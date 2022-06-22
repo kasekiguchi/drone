@@ -29,6 +29,16 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
 PFH=figure();
+%%%%%%初期定義
+I = eye(9);
+A = agent.model.param.A;
+B = agent.model.param.B;
+C = I
+
+x_th = zeros(9,1);
+P_th = I;
+Q = 
+%%%%%%%%%%%
 try
     while round(time.t, 5) <= te
         %% sensor
@@ -72,13 +82,7 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
-            A = agent.model.param.A;
-            B = agent.model.param.B;
-            x_th = agent.estimator.result;
-            I = eye(9);
-            P_th = I;
-            Q = 
-
+           
             %ここから
             x_thm = A * x_th + B * u;
             P_thm = A * P_th * A' + Q;
