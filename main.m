@@ -72,7 +72,12 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
-            A = agent.model
+            A = agent.model.param.A;
+            B = agent.model.param.B;
+            x_th = agent.estimator.result;
+            I = eye(9);
+            P_th = I;
+            Q = 
 
             %ここから
             x_thm = A * x_th + B * u;
