@@ -89,14 +89,13 @@ end
             % MPC controller
             % ts探し
             horizon = 2;
-            rng(0,'twister');
             ts = 0;
 %             p_monte = agent.model.state.p
             % 入力のサンプルから評価
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-            Q_monte_x = 1; Q_monte_y = 1; Q_monte_z = 10000000;
+            Q_monte_x = 1; Q_monte_y = 1; Q_monte_z = 1;
             Q_monte = [Q_monte_x 0 0; 0 Q_monte_y 0; 0 0 Q_monte_z];
-            R_monte = 1;    VQ_monte = 100;    WQ_monte = 1;
+            R_monte = 1;    VQ_monte = 1;    WQ_monte = 1;
             % 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
 %             fun = @(p_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p); 
@@ -104,16 +103,17 @@ end
 %             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte+w_monte'*WQ_monte*w_monte; 
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
-            sample = 20;   % サンプル数
+            sample = 10;   % サンプル数
             % ホバリングから±sigma%の範囲
-            sigma = 0.1;
+            sigma = 0.3;
             delta = 0.000;   % プロペラの補正
+            rng('shuffle')
 %             sigma_xy = 0.0005;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
             % 入力 u 入力の初期化ちゃんと
             u1(: ,1) = (b-a).*rand(sample,1) + a;               u2(: ,1) = (b-a).*rand(sample,1) + a + delta;
             u3(: ,1) = (b-a).*rand(sample,1) + a;               u4(: ,1) = (b-a).*rand(sample,1) + a + delta;
-            u = [u1 u2 u3 u4];  % 予測ステップでは同様の入力を用いる
+            u = [u1 u2 u3 u4]  % 予測ステップでは同様の入力を用いる
             % 配列定義
             Adata = cell(sample, sample);  % 2horizon = 2乗のサイズの配列
             P_monte = cell(sample, horizon);

@@ -103,7 +103,7 @@ end
 %             p_monte = agent.model.state.p
             % 入力のサンプルから評価
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-            Q_monte_x = 1; Q_monte_y = 1; Q_monte_z = 1;
+            Q_monte_x = 1; Q_monte_y = 1; Q_monte_z = 1000000;
             Q_monte = [Q_monte_x 0 0; 0 Q_monte_y 0; 0 0 Q_monte_z];
             R_monte = 1;    VQ_monte = 1;
             % 評価関数
@@ -112,9 +112,9 @@ end
             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte; 
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
-            sample = 10;   % サンプル数
+            sample = 500;   % サンプル数
             % ホバリングから±sigma%の範囲
-            sigma = 0.5;
+            sigma = 0.15;
             delta1 = 0.0; delta2 = 0.0; delta3 = 0.0; delta4 = 0.0;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
 %             a_xy = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma_xy;     b_xy = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma_xy;
@@ -227,7 +227,7 @@ clc
 logger.plot({1,"p", "er"});
 % logger.plot({1,"v", "e"});
 % agent(1).reference.timeVarying.show(logger)
-saveas(gcf,'Data/20220616_no_horizon.png')
+saveas(gcf,'Data/20220622_no_horizon_1.png')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

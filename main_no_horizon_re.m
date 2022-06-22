@@ -93,11 +93,12 @@ end
             ts = 0;
 %             p_monte = agent.model.state.p
             % 入力のサンプルから評価
-            ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-            Q_monte_x = 1; Q_monte_y = 1; Q_monte_z = 1000000;
-            Q_monte = diag([Q_monte_x, Q_monte_y, Q_monte_z]);
-            VQ_monte_x = 1000; VQ_monte_y = 1000; VQ_monte_z = 1000;
-            VQ_monte = diag([VQ_monte_x, VQ_monte_y, VQ_monte_z]);
+%             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
+%             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
+%             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
+            
+            Q_monte = diag([1, 1, 1000000]);
+            VQ_monte = diag([1, 1, 1]);
             R_monte = 1;    
             % 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
@@ -107,17 +108,17 @@ end
             Fsub = @(sub_monte1) sub_monte1 > 0;
             % ホバリングから±sigma%の範囲
             rng('shuffle')
-            sigma = 0.3;
+            sigma = 0.15;
             delta1 = 0.0; delta2 = 0.0; delta3 = 0.0; delta4 = 0.0;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
-            sample = 10;   % サンプル数
-            u = (b-a).*rand(sample,4) + a        
+            sample = 500;   % サンプル数
+%             u = (b-a).*rand(sample,4) + a;        
 %             a_xy = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma_xy;     b_xy = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma_xy;
             % 入力 u
 %             u = [0 0 0 0];
-%             u1(: ,1) = (b-a).*rand(sample,1) + a + delta1;               u2(: ,1) = (b-a).*rand(sample,1) + a + delta2;
-%             u3(: ,1) = (b-a).*rand(sample,1) + a + delta3;               u4(: ,1) = (b-a).*rand(sample,1) + a + delta4;
-%             u = [u1 u2 u3 u4];
+            u1(: ,1) = (b-a).*rand(sample,1) + a + delta1;               u2(: ,1) = (b-a).*rand(sample,1) + a + delta2;
+            u3(: ,1) = (b-a).*rand(sample,1) + a + delta3;               u4(: ,1) = (b-a).*rand(sample,1) + a + delta4;
+            u = [u1 u2 u3 u4];
             
             
             % 配列定義
@@ -143,7 +144,7 @@ end
             
 %                 Adata(monte, 1:3) = arrayfun(fun, P_monte(1:3)', u(monte, :)')';  % 評価値(x, y, z)算出
             [~,min_index] = min(Adata(:, 1));   % 評価値の合計の最小値インデックス算出
-            u(min_index, 4) = u(min_index, 4) + delta4;
+            u(min_index, 4) = u(min_index, 4);
             agent.input = u(min_index, :)';     % 最適な入力の取得
             if fZpos(min_index, 1) == 1
                 printf("Stop!!");               % エラーを吐かせて終了させる
@@ -227,7 +228,7 @@ logger.plot({1,"p", "er"});
 % logger.plot({1,"v", "e"});
 % logger.plot({1,"input", ""});
 % agent(1).reference.timeVarying.show(logger)
-saveas(gcf,'Data/20220616_no_horizon.png')
+saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
