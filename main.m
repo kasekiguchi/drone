@@ -71,10 +71,15 @@ end
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
+
+            A = agent.model
+
             %ここから
-            x_tm = A * x_th + B * u;
+            x_thm = A * x_th + B * u;
             P_thm = A * P_th * A' + Q;
-            K_t = (P_thm * C') * inv(C * P_thm * C' + Q);
+            K_t = (P_thm * C') / (C * P_thm * C' + Q);
+            x_th = x_thm +K_t * (z_t - C * x_thm ); 
+            P_th = ( I - K_t*C )*P_thm;
             
             
             rs.p = [4;-4;0]; % 目標位置
