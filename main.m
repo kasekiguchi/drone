@@ -72,7 +72,10 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             %ここから
-            x_tm = A * x_tm(t-1) + B * u;
+            x_tm = A * x_th + B * u;
+            P_thm = A * P_th * A' + Q;
+            K_t = (P_thm * C') * inv(C * P_thm * C' + Q);
+            
             
             rs.p = [4;-4;0]; % 目標位置
             rs.q = [0;0;-pi/2]; % 目標姿勢
@@ -168,7 +171,7 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","e"},{1,"q3","e"},{1,"input",""});
+logger.plot({1,"p","ep"},{1,"q3","ep"},{1,"input",""});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
