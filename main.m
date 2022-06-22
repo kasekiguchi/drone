@@ -71,6 +71,8 @@ end
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
+            %ここから
+            x_tm = A * x_tm(t-1) + B * u;
             
             rs.p = [4;-4;0]; % 目標位置
             rs.q = [0;0;-pi/2]; % 目標姿勢
