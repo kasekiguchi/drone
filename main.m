@@ -9,15 +9,8 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
-
-% for mob1
-tmp = [0 0;0 10;10 10;10 0]-[5 5];
-Env.param.Vertices = [tmp;NaN NaN;0.6*tmp];
-initial.p = [1,1,0]'-[5,5,0]';
-rs = STATE_CLASS(struct('state_list',["p","v","q"],'num_list',[3,3,3]));
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
-plot(polyshape(Env.param.Vertices))
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -28,18 +21,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
-PFH=figure();
-%%%%%%初期定義
-I = eye(9);                             %単位行列
-A = agent.model.param.A;                %システム行列A
-B = agent.model.param.B;                %システム行列B
-C = I;                                  %観測行列
-u = zeros(6,1);                         %入力
-x_h = zeros(9,1);                       %状態の初期定義
-P_h = I;                                %共分差行列の初期定義
-Q = 0.001*I;                              %システムノイズ
-R = 0.05*I;                             %観測ノイズ
-%%%%%%%%%%%
+
 try
     while round(time.t, 5) <= te
         %% sensor
@@ -74,39 +56,20 @@ end
             agent(i).do_sensor(param(i).sensor.list);
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
-        figure(PFH);
-        hold off
-        agent.sensor.lrf.show();
+
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-            %ここからKFの計算
-            z = agent.sensor.result.state.get;          %観測値
-            u = agent.input;                            %入力
-            %%予測ステップ
-            x_hm = A * x_h + B * u;                     %事前推定値
-            P_hm = A * P_h * A' + Q;                    %事前誤差共分散
-            %%フィルタリングステップ
-            K = (P_hm * C') / (C * P_hm * C' + R);      %カルマンゲイン
-            x_h = x_hm +K * (z - C * x_hm );            %事後推定値
-            P_h = ( I - K*C )*P_hm;                     %事後誤差共分散
-            %%リザルトの更新
-            agent.estimator.result.state.p = x_h(1:3);
-            agent.estimator.result.state.v = x_h(4:6);
-            agent.estimator.result.state.q = x_h(7:9);
-             
-            rs.p = [4;-4;0]; % 目標位置
-            rs.q = [0;0;-pi/2]; % 目標姿勢
-            rs.v = [0;0;0]; % 目標速度
 
+            % reference
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, rs, time.t};
+            param(i).reference.point = {FH, [0; 0; 0], time.t};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
-            param(i).reference.tbug = {};
             param(i).reference.wall = {1};
+            param(i).reference.tbug = {};
             param(i).reference.agreement = {logger, N, time.t};
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
@@ -137,7 +100,7 @@ end
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
-        %drawnow
+
         % for exp
         if fExp
             %% logging
@@ -191,11 +154,11 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","ep"},{1,"q3","ep"},{1,"input",""});
+logger.plot({1,"p","er"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).animation(logger,"target",1:N);
+agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();

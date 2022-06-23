@@ -1,14 +1,13 @@
 %% general setting
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
-fMotive = 0; % Motiveを使うかどうか
+fMotive = 1; % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
 if fExp
     dt = 0.025; % sampling time
 else
     dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
-    dt = 0.1;
 end
 
 sampling = dt;
@@ -20,8 +19,6 @@ else
     te = 10;
 end
 
-%% generate environment
-%Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
 %% set connector (global instance)
 if fMotive
     if fExp
