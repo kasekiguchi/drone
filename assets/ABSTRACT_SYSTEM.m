@@ -89,11 +89,6 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
 
     methods % Set methods
-        function set_estimator(obj, prop, args)
-            obj.set_property(prop,args);
-            % modelの状態でestimatorの状態を生成
-            obj.estimator.result.state = state_copy(obj.model.state);
-        end
         function set_model(obj, args)
           obj.model = MODEL_CLASS(args);
           obj.model.param = obj.parameter.get(args.parameter_name);
