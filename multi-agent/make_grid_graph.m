@@ -166,658 +166,126 @@ W18_4 = spdiags(N4,3*ny-3,N,N);W18_4(N-3*ny+1:N,:)=0;W18_4(1:ny:N,:)=0;WW18_4(2:
 W19_4 = spdiags(N4,3*ny+3,N,N);W19_4(N-3*ny:N,:)=0;W19_4(ny:ny:N,:)=0;W19_4(ny-1:ny:N,:)=0;W19_4(ny-2:ny:N,:)=0;W19_4(N-2*ny:N,:)=0;
 
 
-%飛び火用隣接行列（南からの風、風速9～11m/s）
-NT = (1/3000).*N1;
-W1_lt = spdiags(NT,-26,N,N); 
-for i = 1:26
-	W1_lt(i:ny:N,:)=0;
+%% 飛び火用隣接行列
+% 南からの風、風速9～11m/s
+acell = 3;  %1cell直径m
+area = acell * nx; %map直径m
+mapc = round(area/30);  % map correction マップ補正
+mapd = 8;  % map difference マップ差異（マップごとに異なる）
+windv = 12 + mapc;  %wind velocity
+winda = 0 + mapd;  %wind angle 22.5°刻み
+Til = (pi()/8) * winda;  %角度の設定 Tilt
+% 0:南 1:南南西 2:南西 3:西南西 4:西 5:西北西 6:北西 7:北北西 
+% 8:北 9:北北東 10:北東 11:東北東 12:東 13:東南東 14:南東 15:南南東
+if winda >=16
+    winda = rem(winda,16);
 end
-W2_lt = spdiags(NT,-27,N,N); 
-for i = 1:27
-	W2_lt(i:ny:N,:)=0;
+if winda>=9 && 15>=winda    %東西判定
+    windEW = abs(windv);
+elseif winda>=1 && 7>=winda
+    windEW = -abs(windv);
 end
-W3_lt = spdiags(NT,-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
+if rem(winda,8) == 0
+    windEW = 0;
 end
-W4_lt = spdiags(NT,-29,N,N); 
-for i = 1:29
-	W4_lt(i:ny:N,:)=0;
+if winda>=13 || 3>=winda    %南北判定
+    windSN = abs(windv);
+elseif winda>=5 && 11>=winda
+    windSN = -abs(windv);
 end
-W5_lt = spdiags(NT,-30,N,N); 
-for i = 1:30
-	W5_lt(i:ny:N,:)=0;
+if winda == 4 || winda == 12
+    windSN = 0;
 end
-W6_lt = spdiags(NT,-31,N,N); 
-for i = 1:31
-	W6_lt(i:ny:N,:)=0;
-end
-W11_lt = spdiags(NT,-(2*ny+26),N,N); 
-for i = 1:26
-	W1_lt(2*ny+i:ny:N,:)=0;
-end
-W12_lt = spdiags(NT,-(2*ny+27),N,N); 
-for i = 1:27
-	W1_lt(2*ny+i:ny:N,:)=0;
-end
-W13_lt = spdiags(NT,-(2*ny+28),N,N); 
-for i = 1:28
-	W1_lt(2*ny+i:ny:N,:)=0;
-end
-W14_lt = spdiags(NT,-(2*ny+29),N,N); 
-for i = 1:29
-	W1_lt(2*ny+i:ny:N,:)=0;
-end
-W15_lt = spdiags(NT,-(2*ny+30),N,N); 
-for i = 1:30
-	W1_lt(2*ny+i:ny:N,:)=0;
-end
-W16_lt = spdiags(NT,-(2*ny+31),N,N); 
-for i = 1:31
-	W1_lt(2*ny+i:ny:N,:)=0;
-end
-W111_lt = spdiags(NT,-(4*ny+27),N,N); 
-for i = 1:27
-	W1_lt(4*ny+i:ny:N,:)=0;
-end
-W112_lt = spdiags(NT,-(4*ny+28),N,N); 
-for i = 1:28
-	W1_lt(4*ny+i:ny:N,:)=0;
-end
-W113_lt = spdiags(NT,-(4*ny+29),N,N); 
-for i = 1:29
-	W1_lt(4*ny+i:ny:N,:)=0;
-end
-W114_lt = spdiags(NT,-(4*ny+30),N,N); 
-for i = 1:30
-	W1_lt(4*ny+i:ny:N,:)=0;
-end
-W1111_lt = spdiags(NT,-(6*ny+28),N,N); 
-for i = 1:28
-	W1_lt(6*ny+i:ny:N,:)=0;
-end
-W1112_lt = spdiags(NT,-(6*ny+29),N,N); 
-for i = 1:29
-	W1_lt(6*ny+i:ny:N,:)=0;
-end
-W11b_lt = spdiags(N2,2*ny-26,N,N); 
-for i = 1:26
-	W1_lt(i:ny:N,:)=0;
-end
-W12b_lt = spdiags(N2,2*ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W13b_lt = spdiags(N2,2*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W14b_lt = spdiags(N2,2*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W15b_lt = spdiags(N2,2*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W16b_lt = spdiags(N2,2*ny-31,N,N); 
-for i = 1:31
-	W1_lt(i:ny:N,:)=0;
-end
-W111b_lt = spdiags(NT,4*ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W112b_lt = spdiags(NT,4*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W113b_lt = spdiags(NT,4*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W114b_lt = spdiags(NT,4*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W1111b_lt = spdiags(NT, 6*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W1112b_lt = spdiags(NT, 6*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
+n1 = 1 + mapc; n2 = 1 + mapc;
+x1 = 0; x2 = 2; x3 = -x2;
+y1 = 0; y2 = 1; y3 = 2*y2;
+xv = [x1 x2 x1 x3 x1];
+yv = [y1 y2 y3 y2 y1];
 
-
-NTl = (1/4500).*N1;
-W21_lt = spdiags(NTl,-(ny+23),N,N); 
-for i = 1:23
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W22_lt = spdiags(NTl,-(ny+24),N,N); 
-for i = 1:24
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W23_lt = spdiags(NTl,-(ny+25),N,N); 
-for i = 1:25
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W24_lt = spdiags(NTl,-(ny+26),N,N); 
-for i = 1:26
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W25_lt = spdiags(NTl,-(ny+27),N,N); 
-for i = 1:27
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W26_lt = spdiags(NTl,-(ny+28),N,N); 
-for i = 1:28
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W27_lt = spdiags(NTl,-(ny+29),N,N); 
-for i = 1:29
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W28_lt = spdiags(NTl,-(ny+30),N,N); 
-for i = 1:30
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W29_lt = spdiags(NTl,-(ny+31),N,N); 
-for i = 1:31
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W20_lt = spdiags(NTl,-(ny+32),N,N); 
-for i = 1:32
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W2ele_lt = spdiags(NTl,-(ny+33),N,N); 
-for i = 1:33
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W2twe_lt = spdiags(NTl,-(ny+34),N,N); 
-for i = 1:34
-	W1_lt(ny+i:ny:N,:)=0;
-end
-W221_lt = spdiags(NTl,-(3*ny+23),N,N); 
-for i = 1:23
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W222_lt = spdiags(NTl,-(3*ny+24),N,N); 
-for i = 1:24
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W223_lt = spdiags(NTl,-(3*ny+25),N,N); 
-for i = 1:25
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W224_lt = spdiags(NTl,-(3*ny+26),N,N); 
-for i = 1:26
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W225_lt = spdiags(NTl,-(3*ny+27),N,N); 
-for i = 1:27
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W226_lt = spdiags(NTl,-(3*ny+28),N,N); 
-for i = 1:28
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W227_lt = spdiags(NTl,-(3*ny+29),N,N); 
-for i = 1:29
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W228_lt = spdiags(NTl,-(3*ny+30),N,N); 
-for i = 1:30
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W229_lt = spdiags(NTl,-(3*ny+31),N,N); 
-for i = 1:31
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W220_lt = spdiags(NTl,-(3*ny+32),N,N); 
-for i = 1:32
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W22ele_lt = spdiags(NTl,-(3*ny+33),N,N); 
-for i = 1:33
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W22twe_lt = spdiags(NTl,-(3*ny+34),N,N); 
-for i = 1:34
-	W1_lt(3*ny+i:ny:N,:)=0;
-end
-W2221_lt = spdiags(NTl,-(5*ny+24),N,N); 
-for i = 1:24
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2222_lt = spdiags(NTl,-(5*ny+25),N,N); 
-for i = 1:25
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2223_lt = spdiags(NTl,-(5*ny+26),N,N); 
-for i = 1:26
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2224_lt = spdiags(NTl,-(5*ny+27),N,N); 
-for i = 1:27
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2225_lt = spdiags(NTl,-(5*ny+28),N,N); 
-for i = 1:28
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2226_lt = spdiags(NTl,-(5*ny+29),N,N); 
-for i = 1:29
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2227_lt = spdiags(NTl,-(5*ny+30),N,N); 
-for i = 1:30
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2228_lt = spdiags(NTl,-(5*ny+31),N,N); 
-for i = 1:31
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2229_lt = spdiags(NTl,-(5*ny+32),N,N); 
-for i = 1:32
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W2220_lt = spdiags(NTl,-(5*ny+33),N,N); 
-for i = 1:33
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W222ele_lt = spdiags(NTl,-(5*ny+34),N,N); 
-for i = 1:34
-	W1_lt(5*ny+i:ny:N,:)=0;
-end
-W22221_lt = spdiags(NTl,-(7*ny+25),N,N); 
-for i = 1:25
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22222_lt = spdiags(NTl,-(7*ny+26),N,N); 
-for i = 1:26
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22223_lt = spdiags(NTl,-(7*ny+27),N,N); 
-for i = 1:27
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22224_lt = spdiags(NTl,-(7*ny+28),N,N); 
-for i = 1:28
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22225_lt = spdiags(NTl,-(7*ny+29),N,N); 
-for i = 1:29
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22226_lt = spdiags(NTl,-(7*ny+30),N,N); 
-for i = 1:30
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22227_lt = spdiags(NTl,-(7*ny+31),N,N); 
-for i = 1:31
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22228_lt = spdiags(NTl,-(7*ny+32),N,N); 
-for i = 1:32
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W22229_lt = spdiags(NTl,-(7*ny+33),N,N); 
-for i = 1:33
-	W1_lt(7*ny+i:ny:N,:)=0;
-end
-W222221_lt = spdiags(NTl,-(9*ny+26),N,N); 
-for i = 1:26
-	W1_lt(9*ny+i:ny:N,:)=0;
-end
-W222222_lt = spdiags(NTl,-(9*ny+27),N,N); 
-for i = 1:27
-	W1_lt(9*ny+i:ny:N,:)=0;
-end
-W222223_lt = spdiags(NTl,-(9*ny+28),N,N); 
-for i = 1:28
-	W1_lt(9*ny+i:ny:N,:)=0;
-end
-W222224_lt = spdiags(NTl,-(9*ny+29),N,N); 
-for i = 1:29
-	W1_lt(9*ny+i:ny:N,:)=0;
-end
-W222225_lt = spdiags(NTl,-(9*ny+30),N,N); 
-for i = 1:30
-	W1_lt(9*ny+i:ny:N,:)=0;
-end
-W222226_lt = spdiags(NTl,-(9*ny+31),N,N); 
-for i = 1:31
-	W1_lt(9*ny+i:ny:N,:)=0;
-end
-W222227_lt = spdiags(NTl,-(9*ny+32),N,N); 
-for i = 1:32
-	W1_lt(9*ny+i:ny:N,:)=0;
-end
-W2222221_lt = spdiags(NTl,-(11*ny+27),N,N); 
-for i = 1:27
-	W1_lt(11*ny+i:ny:N,:)=0;
-end
-W2222222_lt = spdiags(NTl,-(11*ny+28),N,N); 
-for i = 1:28
-	W1_lt(11*ny+i:ny:N,:)=0;
-end
-W2222223_lt = spdiags(NTl,-(11*ny+29),N,N); 
-for i = 1:29
-	W1_lt(11*ny+i:ny:N,:)=0;
-end
-W2222224_lt = spdiags(NTl,-(11*ny+30),N,N); 
-for i = 1:30
-	W1_lt(11*ny+i:ny:N,:)=0;
-end
-W2222225_lt = spdiags(NTl,-(11*ny+31),N,N); 
-for i = 1:31
-	W1_lt(11*ny+i:ny:N,:)=0;
-end
-W22222221_lt = spdiags(NTl,-(13*ny+28),N,N); 
-for i = 1:28
-	W1_lt(13*ny+i:ny:N,:)=0;
-end
-W22222222_lt = spdiags(NTl,-(13*ny+29),N,N); 
-for i = 1:29
-	W1_lt(13*ny+i:ny:N,:)=0;
-end
-W22222223_lt = spdiags(NTl,-(13*ny+30),N,N); 
-for i = 1:30
-	W1_lt(13*ny+i:ny:N,:)=0;
-end
-W222222221_lt = spdiags(NTl,-(15*ny+29),N,N); 
-for i = 1:29
-	W1_lt(15*ny+i:ny:N,:)=0;
-end
-
-
-W21b_lt = spdiags(NTl,ny-23,N,N); 
-for i = 1:23
-	W1_lt(i:ny:N,:)=0;
-end
-W22b_lt = spdiags(NTl,ny-24,N,N); 
-for i = 1:24
-	W1_lt(i:ny:N,:)=0;
-end
-W23b_lt = spdiags(NTl,ny-25,N,N); 
-for i = 1:25
-	W1_lt(i:ny:N,:)=0;
-end
-W24b_lt = spdiags(NTl,ny-26,N,N); 
-for i = 1:26
-	W1_lt(i:ny:N,:)=0;
-end
-W25b_lt = spdiags(NTl,ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W26b_lt = spdiags(NTl,ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W27b_lt = spdiags(NTl,ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W28b_lt = spdiags(NTl,ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W29b_lt = spdiags(NTl,ny-31,N,N); 
-for i = 1:31
-	W1_lt(i:ny:N,:)=0;
-end
-W20b_lt = spdiags(NTl,ny-32,N,N); 
-for i = 1:32
-	W1_lt(i:ny:N,:)=0;
-end
-W2eleb_lt = spdiags(NTl,ny-33,N,N); 
-for i = 1:33
-	W1_lt(i:ny:N,:)=0;
-end
-W2tweb_lt = spdiags(NTl,ny-34,N,N); 
-for i = 1:34
-	W1_lt(i:ny:N,:)=0;
-end
-W221b_lt = spdiags(NTl,3*ny-23,N,N); 
-for i = 1:23
-	W1_lt(i:ny:N,:)=0;
-end
-W222b_lt = spdiags(NTl,3*ny-24,N,N); 
-for i = 1:24
-	W1_lt(i:ny:N,:)=0;
-end
-W223b_lt = spdiags(NTl,3*ny-25,N,N); 
-for i = 1:25
-	W1_lt(i:ny:N,:)=0;
-end
-W224b_lt = spdiags(NTl,3*ny-26,N,N); 
-for i = 1:26
-	W1_lt(i:ny:N,:)=0;
-end
-W225b_lt = spdiags(NTl,3*ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W226b_lt = spdiags(NTl,3*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W227b_lt = spdiags(NTl,3*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W228b_lt = spdiags(NTl,3*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W229b_lt = spdiags(NTl,3*ny-31,N,N); 
-for i = 1:31
-	W1_lt(i:ny:N,:)=0;
-end
-W220b_lt = spdiags(NTl,3*ny-32,N,N); 
-for i = 1:32
-	W1_lt(i:ny:N,:)=0;
-end
-W22eleb_lt = spdiags(NTl,3*ny-33,N,N); 
-for i = 1:33
-	W1_lt(i:ny:N,:)=0;
-end
-W22tweb_lt = spdiags(NTl,3*ny-34,N,N); 
-for i = 1:34
-	W1_lt(i:ny:N,:)=0;
-end
-W2221b_lt = spdiags(NTl,5*ny-24,N,N); 
-for i = 1:24
-	W1_lt(i:ny:N,:)=0;
-end
-W2222b_lt = spdiags(NTl,5*ny-25,N,N); 
-for i = 1:25
-	W1_lt(i:ny:N,:)=0;
-end
-W2223b_lt = spdiags(NTl,5*ny-26,N,N); 
-for i = 1:26
-	W1_lt(i:ny:N,:)=0;
-end
-W2224b_lt = spdiags(NTl,5*ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W2225b_lt = spdiags(NTl,5*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W2226b_lt = spdiags(NTl,5*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W2227b_lt = spdiags(NTl,5*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W2228b_lt = spdiags(NTl,5*ny-31,N,N); 
-for i = 1:31
-	W1_lt(i:ny:N,:)=0;
-end
-W2229b_lt = spdiags(NTl,5*ny-32,N,N); 
-for i = 1:32
-	W1_lt(i:ny:N,:)=0;
-end
-W2220b_lt = spdiags(NTl,5*ny-33,N,N); 
-for i = 1:33
-	W1_lt(i:ny:N,:)=0;
-end
-W222eleb_lt = spdiags(NTl,5*ny-34,N,N); 
-for i = 1:34
-	W1_lt(i:ny:N,:)=0;
-end
-W22221b_lt = spdiags(NTl,7*ny-25,N,N); 
-for i = 1:25
-	W1_lt(i:ny:N,:)=0;
-end
-W22222b_lt = spdiags(NTl,7*ny-26,N,N); 
-for i = 1:26
-	W1_lt(i:ny:N,:)=0;
-end
-W22223b_lt = spdiags(NTl,7*ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W22224b_lt = spdiags(NTl,7*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W22225b_lt = spdiags(NTl,7*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W22226b_lt = spdiags(NTl,7*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W22227b_lt = spdiags(NTl,7*ny-31,N,N); 
-for i = 1:31
-	W1_lt(i:ny:N,:)=0;
-end
-W22228b_lt = spdiags(NTl,7*ny-32,N,N); 
-for i = 1:32
-	W1_lt(i:ny:N,:)=0;
-end
-W22229b_lt = spdiags(NTl,7*ny-33,N,N); 
-for i = 1:33
-	W1_lt(i:ny:N,:)=0;
-end
-W222221b_lt = spdiags(NTl,9*ny-26,N,N); 
-for i = 1:26
-	W1_lt(i:ny:N,:)=0;
-end
-W222222b_lt = spdiags(NTl,9*ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W222223b_lt = spdiags(NTl,9*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W222224b_lt = spdiags(NTl,9*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W222225b_lt = spdiags(NTl,9*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W222226b_lt = spdiags(NTl,9*ny-31,N,N); 
-for i = 1:31
-	W1_lt(i:ny:N,:)=0;
-end
-W222227b_lt = spdiags(NTl,9*ny-32,N,N); 
-for i = 1:32
-	W1_lt(i:ny:N,:)=0;
-end
-W2222221b_lt = spdiags(NTl,11*ny-27,N,N); 
-for i = 1:27
-	W1_lt(i:ny:N,:)=0;
-end
-W2222222b_lt = spdiags(NTl,11*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W2222223b_lt = spdiags(NTl,11*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W2222224b_lt = spdiags(NTl,11*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W2222225b_lt = spdiags(NTl,11*ny-31,N,N); 
-for i = 1:31
-	W1_lt(i:ny:N,:)=0;
-end
-W22222221b_lt = spdiags(NTl,13*ny-28,N,N); 
-for i = 1:28
-	W1_lt(i:ny:N,:)=0;
-end
-W22222222b_lt = spdiags(NTl,13*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-W22222223b_lt = spdiags(NTl,13*ny-30,N,N); 
-for i = 1:30
-	W1_lt(i:ny:N,:)=0;
-end
-W222222221b_lt = spdiags(NTl,15*ny-29,N,N); 
-for i = 1:29
-	W1_lt(i:ny:N,:)=0;
-end
-
+for i = 1:length(xv)
+    cyc = [cos(Til), -sin(Til);sin(Til),cos(Til)]*[xv(i) yv(i)]';
+    xv(i) = cyc(1);
+    yv(i) = cyc(2);
+end
+nx0 = nx/2; ny0 = ny/2;
+ori = ny*(nx0-1) + nx0;
+[xq,yq] = meshgrid(1:1:nx);
+xv1 = n1*xv + nx0 + windEW*abs(sin(Til));
+yv1 = n2*yv + ny0 + windSN*abs(cos(Til));
+in = inpolygon(xq,yq,xv1,yv1);
+in = logical(in);
+p = nnz(in) %範囲内のセル数
+% plot(xv1,yv1)
+% hold on
+% plot(xq(in),yq(in),'r+')
+% plot(xq(~in),yq(~in),'bo')
+% plot(nx0,ny0,'m*')
+% hold off
+% ax = gca;
+% ax.YDir = 'reverse';
+% xlim([0 nx+1])
+% ylim([0 ny+1])
+%% 図形内の行列番号の取出し
+A = zeros(N,1);
+posi = zeros(p,1);
+for i = 1:N
+    if in(i)>0
+        A(i) = i;
+    end
+end
+adp = A(A~=0);
+posi = adp - ori;    %対象点と原点間の距離
+%% 隣接行列生成部
+% uad:上下にどれだけズレているのか
+% uad2:下一桁の数字=>上下判別用
+NT = ones(N,1);
+WF = zeros(N);
+for i = 1:p
+    CC = zeros(N);
+    if adp(i)/nx==0
+        uad = nx0;
+        uad2 = nx;
+    else
+        uad2 = abs(rem(adp(i),nx));
+        if uad2>nx0
+            uad = abs(rem(adp(i),nx0));
+        else
+            uad = nx0 - abs(rem(adp(i),nx0));
+        end
+    end
+    CC = spdiags(NT,posi(i),N,N);
+    if uad2>nx0 || uad2==0
+        % 下半分に位置している場合
+        for j = 1:uad
+            CC(:,j:ny:N)=0;
+        end
+    elseif nx0>uad2 && uad2>=1
+        % 上半分に位置してる場合
+        for j = 0:uad-1
+            CC(:,ny-j:ny:N)=0;
+        end
+    end
+    WF = sparse(WF|CC);
+end
+nnz(WF);
+%% 最終隣接行列　延焼&飛び火
 %自然延焼時重み    W1(1)W2(4),W3(9),W4(16)
 %延焼阻止線時重み  W1(1)W2(4),W3(27),W4(64)
 W9 = (W1(1:N,1:N)|W2(1:N,1:N)|W3(1:N,1:N)|W4(1:N,1:N)|W5(1:N,1:N)|W6(1:N,1:N)|W7(1:N,1:N)|W8(1:N,1:N));
-W17_2 = (1/4).*(W1_2(1:N,1:N)|W2_2(1:N,1:N)|W3_2(1:N,1:N)|W4_2(1:N,1:N)|W5_2(1:N,1:N)|W6_2(1:N,1:N)|W7_2(1:N,1:N)|W8_2(1:N,1:N)|...
+W17_2 = (1/16).*(W1_2(1:N,1:N)|W2_2(1:N,1:N)|W3_2(1:N,1:N)|W4_2(1:N,1:N)|W5_2(1:N,1:N)|W6_2(1:N,1:N)|W7_2(1:N,1:N)|W8_2(1:N,1:N)|...
     W9_2(1:N,1:N)|W10_2(1:N,1:N)|W11_2(1:N,1:N)|W12_2(1:N,1:N)|W13_2(1:N,1:N)|W14_2(1:N,1:N)|W15_2(1:N,1:N)|W16_2(1:N,1:N));
-W21_3 = (1/9).*(W1_3(1:N,1:N)|W2_3(1:N,1:N)|W3_3(1:N,1:N)|W4_3(1:N,1:N)|W5_3(1:N,1:N)|W6_3(1:N,1:N)|W7_3(1:N,1:N)|...
+W21_3 = (1/27).*(W1_3(1:N,1:N)|W2_3(1:N,1:N)|W3_3(1:N,1:N)|W4_3(1:N,1:N)|W5_3(1:N,1:N)|W6_3(1:N,1:N)|W7_3(1:N,1:N)|...
     W8_3(1:N,1:N)|W9_3(1:N,1:N)|W10_3(1:N,1:N)|W11_3(1:N,1:N)|W12_3(1:N,1:N)|W13_3(1:N,1:N)|W14_3(1:N,1:N)|...
     W15_3(1:N,1:N)|W16_3(1:N,1:N)|W17_3(1:N,1:N)|W18_3(1:N,1:N)|W19_3(1:N,1:N)|W20_3(1:N,1:N));
-W25_4 = (1/16).*(W1_4(1:N,1:N)|W2_4(1:N,1:N)|W3_4(1:N,1:N)|W4_4(1:N,1:N)|W5_4(1:N,1:N)|W6_4(1:N,1:N)|W7_4(1:N,1:N)|W8_4(1:N,1:N)|...
+W25_4 = (1/64).*(W1_4(1:N,1:N)|W2_4(1:N,1:N)|W3_4(1:N,1:N)|W4_4(1:N,1:N)|W5_4(1:N,1:N)|W6_4(1:N,1:N)|W7_4(1:N,1:N)|W8_4(1:N,1:N)|...
     W9_4(1:N,1:N)|W10_4(1:N,1:N)|W11_4(1:N,1:N)|W12_4(1:N,1:N)|W13_4(1:N,1:N)|W14_4(1:N,1:N)|W15_4(1:N,1:N)|W16_4(1:N,1:N)|...
     W17_4(1:N,1:N)|W18_4(1:N,1:N)|W19_4(1:N,1:N)|W20_4(1:N,1:N)|W21_4(1:N,1:N)|W22_4(1:N,1:N)|W23_4(1:N,1:N)|W24_4(1:N,1:N));
-WS1 = (1/3000).*(W1_lt(1:N,1:N)|W2_lt(1:N,1:N)|W3_lt(1:N,1:N)|W4_lt(1:N,1:N)|W5_lt(1:N,1:N)|W6_lt(1:N,1:N)|...
-    W11_lt(1:N,1:N)|W12_lt(1:N,1:N)|W13_lt(1:N,1:N)|W14_lt(1:N,1:N)|W15_lt(1:N,1:N)|W16_lt(1:N,1:N)|...
-    W111_lt(1:N,1:N)|W112_lt(1:N,1:N)|W113_lt(1:N,1:N)|W114_lt(1:N,1:N)|W1111_lt(1:N,1:N)|W1112_lt(1:N,1:N)|...
-    W11b_lt(1:N,1:N)|W12b_lt(1:N,1:N)|W13b_lt(1:N,1:N)|W14b_lt(1:N,1:N)|W15b_lt(1:N,1:N)|W16b_lt(1:N,1:N)|...
-    W111b_lt(1:N,1:N)|W112b_lt(1:N,1:N)|W113b_lt(1:N,1:N)|W114b_lt(1:N,1:N)|W1111b_lt(1:N,1:N)|W1112b_lt(1:N,1:N));
-WS2 = (1/4500).*(W21_lt(1:N,1:N)|W22_lt(1:N,1:N)|W23_lt(1:N,1:N)|W24_lt(1:N,1:N)|W25_lt(1:N,1:N)|W26_lt(1:N,1:N)|...
-    W27_lt(1:N,1:N)|W28_lt(1:N,1:N)|W29_lt(1:N,1:N)|W20_lt(1:N,1:N)|W2ele_lt(1:N,1:N)|W2twe_lt(1:N,1:N)|...
-    W221_lt(1:N,1:N)|W222_lt(1:N,1:N)|W223_lt(1:N,1:N)|W224_lt(1:N,1:N)|W225_lt(1:N,1:N)|W226_lt(1:N,1:N)|...
-    W227_lt(1:N,1:N)|W228_lt(1:N,1:N)|W229_lt(1:N,1:N)|W220_lt(1:N,1:N)|W22ele_lt(1:N,1:N)|W22twe_lt(1:N,1:N)|...
-    W2221_lt(1:N,1:N)|W2222_lt(1:N,1:N)|W2223_lt(1:N,1:N)|W2224_lt(1:N,1:N)|W2225_lt(1:N,1:N)|W2226_lt(1:N,1:N)|...
-    W2227_lt(1:N,1:N)|W2228_lt(1:N,1:N)|W2229_lt(1:N,1:N)|W2220_lt(1:N,1:N)|W222ele_lt(1:N,1:N)|...
-    W22221_lt(1:N,1:N)|W22222_lt(1:N,1:N)|W22223_lt(1:N,1:N)|W22224_lt(1:N,1:N)|W22225_lt(1:N,1:N)|W22226_lt(1:N,1:N)|...
-    W22227_lt(1:N,1:N)|W22228_lt(1:N,1:N)|W22229_lt(1:N,1:N)|...
-    W222221_lt(1:N,1:N)|W222222_lt(1:N,1:N)|W222223_lt(1:N,1:N)|W222224_lt(1:N,1:N)|W222225_lt(1:N,1:N)|W222226_lt(1:N,1:N)|W222227_lt(1:N,1:N)|...
-    W2222221_lt(1:N,1:N)|W2222222_lt(1:N,1:N)|W2222223_lt(1:N,1:N)|W2222224_lt(1:N,1:N)|W2222225_lt(1:N,1:N)|...
-    W22222221_lt(1:N,1:N)|W22222222_lt(1:N,1:N)|W22222223_lt(1:N,1:N)|W222222221_lt(1:N,1:N)|...
-    W21b_lt(1:N,1:N)|W22b_lt(1:N,1:N)|W23b_lt(1:N,1:N)|W24b_lt(1:N,1:N)|W25b_lt(1:N,1:N)|W26b_lt(1:N,1:N)|...
-    W27b_lt(1:N,1:N)|W28b_lt(1:N,1:N)|W29b_lt(1:N,1:N)|W20b_lt(1:N,1:N)|W2eleb_lt(1:N,1:N)|W2tweb_lt(1:N,1:N)|...
-    W221b_lt(1:N,1:N)|W222b_lt(1:N,1:N)|W223b_lt(1:N,1:N)|W224b_lt(1:N,1:N)|W225b_lt(1:N,1:N)|W226b_lt(1:N,1:N)|...
-    W227b_lt(1:N,1:N)|W228b_lt(1:N,1:N)|W229b_lt(1:N,1:N)|W220b_lt(1:N,1:N)|W22eleb_lt(1:N,1:N)|W22tweb_lt(1:N,1:N)|...
-    W2221b_lt(1:N,1:N)|W2222b_lt(1:N,1:N)|W2223b_lt(1:N,1:N)|W2224b_lt(1:N,1:N)|W2225b_lt(1:N,1:N)|W2226b_lt(1:N,1:N)|...
-    W2227b_lt(1:N,1:N)|W2228b_lt(1:N,1:N)|W2229b_lt(1:N,1:N)|W2220b_lt(1:N,1:N)|W222eleb_lt(1:N,1:N)|...
-    W22221b_lt(1:N,1:N)|W22222b_lt(1:N,1:N)|W22223b_lt(1:N,1:N)|W22224b_lt(1:N,1:N)|W22225b_lt(1:N,1:N)|...
-    W22226b_lt(1:N,1:N)|W22227b_lt(1:N,1:N)|W22228b_lt(1:N,1:N)|W22229b_lt(1:N,1:N)|...
-    W222221b_lt(1:N,1:N)|W222222b_lt(1:N,1:N)|W222223b_lt(1:N,1:N)|W222224b_lt(1:N,1:N)|W222225b_lt(1:N,1:N)|W222226b_lt(1:N,1:N)|W222227b_lt(1:N,1:N)|...
-    W2222221b_lt(1:N,1:N)|W2222222b_lt(1:N,1:N)|W2222223b_lt(1:N,1:N)|W2222224b_lt(1:N,1:N)|W2222225b_lt(1:N,1:N)|...
-    W22222221b_lt(1:N,1:N)|W22222222b_lt(1:N,1:N)|W22222223b_lt(1:N,1:N)|W222222221b_lt(1:N,1:N));
+WF = (1/10000).*WF;
 
-
-WW = W9 + W17_2;                                %2セル延焼
-WWW = W9 + W17_2 + WS1+ WS2;                    %2セル延焼+飛び火
-WWN = W9 + W17_2 + W21_3 + W25_4 + WS1+ WS2;    %自然延焼Nature　4セル延焼+飛び火
-WWNc = W9 + W17_2 + W21_3 + W25_4;              %無風時自然延焼Nature　4セル延焼
+WW = W9 + W17_2;          %2セル延焼
+WWW = W9 + W17_2 + WF;    %2セル延焼+飛び火
+WWN = W9 + W17_2 + W21_3 + W25_4 + WF;   %自然延焼Nature　4セル延焼+飛び火
+WWNc = W9 + W17_2 + W21_3 + W25_4;       %無風時自然延焼Nature　4セル延焼
 W10 = reshape(W,[N,1]);
 
 % この計算の遅さは仕方がない

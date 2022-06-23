@@ -156,8 +156,8 @@ end
 % nx=100, ny=100 でマップ上に表示
 map.draw_state(nx,ny,W)
 %% animations
-% map.draw_movie(logger,nx,ny,1);
-map.draw_movie(logger,nx,ny,1,"2022Feb23_Natural_Log44");    %natural_expansion 
+map.draw_movie(logger,nx,ny,1);
+% map.draw_movie(logger,nx,ny,1,"2022Feb23_Natural_Log44");    %natural_expansion 
 %map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
 %M=map.draw_movie(logger,nx,ny,2);
 %map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
