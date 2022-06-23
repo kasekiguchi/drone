@@ -131,9 +131,10 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
             end
         end
         function q=check_and_convert_q(obj,value)
-            if isempty(obj.type)
-                error("ACSL : Attitude is not in the state");
-            else
+            if isempty(obj.type)                
+                warning("ACSL : Attitude is not in the state");
+                obj.type = length(value);
+            end
                 len = length(value);
                 if obj.type==len
                     q = value;
@@ -161,7 +162,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                             end
                     end
                 end
-            end
+            
         end
     end
 end

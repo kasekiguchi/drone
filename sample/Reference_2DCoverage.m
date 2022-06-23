@@ -13,5 +13,5 @@ function Reference = Reference_2DCoverage(agent,Env,param)
     if isfield(agent.sensor,'rdensity'); Reference.param.r = agent.sensor.rdensity.r; else warning("ACSL : required RANGE_DENSITY_SIM (Sensor_RangeD)"); end
     if isfield(agent.sensor,'rpos'); Reference.param.R = agent.sensor.rpos.r; else warning("ACSL : required RANGE_POS_SIM (Sensor_RangePos)"); end
     if isfield(Env,'d'); Reference.param.d = Env.d;  end
-    Reference.param.fShow = 1;
+    Reference.param.fShow = 0;
 end
