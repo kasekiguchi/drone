@@ -11,13 +11,16 @@ syms p [3 1] real % Global 3d position
 syms dp [3 1] real % velocity
 syms ddp [3 1] real % acceleration
 syms q [3 1] real % body-z, right-left wheel rotation
-syms ob [3 1] real % body angular velocity wrt q
+syms ob [3 1] real % body angular velocities wrt q (not angular velocity vector)
 % ob + = y-axis : positive ob means move forward.
 syms u [2 1] real % right-left wheel torque
 physicalParam = {M,W,J,jw,r};
 Rb0 = [cos(q1),-sin(q1),0;sin(q1),cos(q1),0;0,0,1];
-F = sum(u)/r;       % Drive force
-tau = W*(u1-u2)/(2*r); % torque
+% u1 - r*F1 = jw*dob(2);
+F1 = (u1 - jw*dob(2))/r;
+F2 = (u2 - jw*dob(3))/r;
+F = F1+F2;       % Drive force
+tau = (W/2)*(F1-F2); % torque
 %% Translational model
 ddpf = [0;0;-gravity];
 ddpg = Rb0*[0;0;(T1+T2+T3+T4)/m];
