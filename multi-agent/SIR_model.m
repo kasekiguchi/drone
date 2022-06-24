@@ -39,8 +39,8 @@ classdef SIR_model < handle
             obj.N = N;
             obj.ti = ti;
             obj.h = h;
-            obj.x = zeros(N*(ti+2),1);
-            obj.x(1:(ti+2):end,1) = 1;% 初期状態は全エージェントがS
+            obj.x = zeros(N*(ti+2),1); %全てのセルに(ti+2)のベクトルを用意
+            obj.x(1:(ti+2):end,1) = 1;% 初期状態は全エージェントがS　＝　1列目だけ1
             obj.x = obj.x;
             
             Ai = [[1;0],zeros(2,ti+1);zeros(ti,1),eye(ti),[zeros(ti-1,1);1]];

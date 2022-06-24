@@ -172,8 +172,8 @@ acell = 3;  %1cell直径m
 area = acell * nx; %map直径m
 mapc = round(area/30);  % map correction マップ補正
 mapd = 8;  % map difference マップ差異（マップごとに異なる）
-windv = 12 + mapc;  %wind velocity
-winda = 0 + mapd;  %wind angle 22.5°刻み
+windv = 5 + mapc;  %wind velocity
+winda = 2 + mapd;  %wind angle 22.5°刻み
 Til = (pi()/8) * winda;  %角度の設定 Tilt
 % 0:南 1:南南西 2:南西 3:西南西 4:西 5:西北西 6:北西 7:北北西 
 % 8:北 9:北北東 10:北東 11:東北東 12:東 13:東南東 14:南東 15:南南東
@@ -181,9 +181,9 @@ if winda >=16
     winda = rem(winda,16);
 end
 if winda>=9 && 15>=winda    %東西判定
-    windEW = abs(windv);
-elseif winda>=1 && 7>=winda
     windEW = -abs(windv);
+elseif winda>=1 && 7>=winda
+    windEW = abs(windv);
 end
 if rem(winda,8) == 0
     windEW = 0;
@@ -203,7 +203,7 @@ xv = [x1 x2 x1 x3 x1];
 yv = [y1 y2 y3 y2 y1];
 
 for i = 1:length(xv)
-    cyc = [cos(Til), -sin(Til);sin(Til),cos(Til)]*[xv(i) yv(i)]';
+    cyc = [cos(Til), sin(Til);-sin(Til),cos(Til)]*[xv(i) yv(i)]';
     xv(i) = cyc(1);
     yv(i) = cyc(2);
 end
@@ -215,16 +215,19 @@ yv1 = n2*yv + ny0 + windSN*abs(cos(Til));
 in = inpolygon(xq,yq,xv1,yv1);
 in = logical(in);
 p = nnz(in) %範囲内のセル数
-% plot(xv1,yv1)
-% hold on
-% plot(xq(in),yq(in),'r+')
-% plot(xq(~in),yq(~in),'bo')
-% plot(nx0,ny0,'m*')
-% hold off
-% ax = gca;
-% ax.YDir = 'reverse';
-% xlim([0 nx+1])
-% ylim([0 ny+1])
+%% 飛び火範囲確認
+% 何故か左右が逆に出る
+plot(xv1,yv1)
+hold on
+plot(xq(in),yq(in),'r+')
+plot(xq(~in),yq(~in),'bo')
+plot(nx0,ny0,'m*')
+hold off
+ax = gca;
+ax.XDir = 'reverse';
+ax.YDir = 'reverse';
+xlim([0 nx+1])
+ylim([0 ny+1])
 %% 図形内の行列番号の取出し
 A = zeros(N,1);
 posi = zeros(p,1);
@@ -280,11 +283,11 @@ W21_3 = (1/27).*(W1_3(1:N,1:N)|W2_3(1:N,1:N)|W3_3(1:N,1:N)|W4_3(1:N,1:N)|W5_3(1:
 W25_4 = (1/64).*(W1_4(1:N,1:N)|W2_4(1:N,1:N)|W3_4(1:N,1:N)|W4_4(1:N,1:N)|W5_4(1:N,1:N)|W6_4(1:N,1:N)|W7_4(1:N,1:N)|W8_4(1:N,1:N)|...
     W9_4(1:N,1:N)|W10_4(1:N,1:N)|W11_4(1:N,1:N)|W12_4(1:N,1:N)|W13_4(1:N,1:N)|W14_4(1:N,1:N)|W15_4(1:N,1:N)|W16_4(1:N,1:N)|...
     W17_4(1:N,1:N)|W18_4(1:N,1:N)|W19_4(1:N,1:N)|W20_4(1:N,1:N)|W21_4(1:N,1:N)|W22_4(1:N,1:N)|W23_4(1:N,1:N)|W24_4(1:N,1:N));
-WF = (1/10000).*WF;
+WF = (1/1000).*WF;
 
 WW = W9 + W17_2;          %2セル延焼
 WWW = W9 + W17_2 + WF;    %2セル延焼+飛び火
-WWN = W9 + W17_2 + W21_3 + W25_4 + WF;   %自然延焼Nature　4セル延焼+飛び火
+WWN = W9 + WF;   %自然延焼Nature　4セル延焼+飛び火
 WWNc = W9 + W17_2 + W21_3 + W25_4;       %無風時自然延焼Nature　4セル延焼
 W10 = reshape(W,[N,1]);
 

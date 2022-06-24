@@ -63,7 +63,7 @@ end
 % 200ステップで端に行かない程度の重みがAstar でやる場合適切
 % Directでやる場合はもっと早い燃え広がりでも対応可能
 ken = 200; % シミュレーションステップ ke_natural
-fFPosition = 6; % flag fire position
+fFPosition = 7; % flag fire position
 h = 0; % extinction probability
 map_extra = nx * ny - nx_app * ny_app ;     %見えない部分の総セル数
 W_vec = reshape(W,N,1);
@@ -154,7 +154,7 @@ end
 %% graphs
 % map.draw_state(nx,ny,map.loggerk(logger,10));  %loggerk内の数字は何ステップ目の状態化を表す
 % nx=100, ny=100 でマップ上に表示
-map.draw_state(nx,ny,W)
+% map.draw_state(nx,ny,W)   %建物重みマップの表示
 %% animations
 map.draw_movie(logger,nx,ny,1);
 % map.draw_movie(logger,nx,ny,1,"2022Feb23_Natural_Log44");    %natural_expansion 
@@ -314,6 +314,9 @@ switch fFPosition
     case 6
         init_fx=50;
         init_fy=10;
+    case 7
+        init_fx=52;
+        init_fy=52;
 end
 init_I = sparse(N,1);
 % r=randi(20,numel(init_fx),numel(init_fy))-10;
