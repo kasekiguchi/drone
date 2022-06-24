@@ -65,14 +65,14 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference
-            if time.t <= 1
-                ry = 1 * (time.t)^2+0.1;
+            if time.t <= 5 &&  (time.t/2)^2+0.1 <= 1
+                ry = (time.t/2)^2+0.1;
             else
                 ry = 1.;
             end
 %             ry = 1.0;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [1; 1; ry], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [0; 0; ry], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -103,16 +103,21 @@ end
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
 %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
             
-            Q_monte = diag([10, 10, 100]);
+            Q_monte = diag([100, 1, 100]);
             VQ_monte = diag([1, 1, 1]);
+            WQ_monte = diag([10, 10, 1]);
             QQ_monte = diag([1, 1, 1]);
             R_monte = 1;    
             % 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
 %             fun = @(p_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p); 
 %             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
-            fun = @(p_monte, v_monte, q_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)...
+%             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)...
+%                 +v_monte'*VQ_monte*v_monte...
+%                 +w_monte'*WQ_monte*w_monte; 
+            fun = @(p_monte, q_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)...
                 +v_monte'*VQ_monte*v_monte...
+                +w_monte'*WQ_monte*w_monte...
                 +q_monte'*QQ_monte*q_monte; 
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
@@ -132,15 +137,16 @@ end
             Adata = zeros(sample, 1);   % 評価値
             P_monte = zeros(sample, 3); % ある入力での位置
             V_monte = zeros(sample, 3); % ある入力での速度
-            Q_monte = zeros(sample, 3); % ある入力での姿勢角
+            W_monte = zeros(sample, 3); % ある入力での姿勢角
             fZpos = zeros(sample, 1);
             for monte = 1 : sample
                 [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
                 P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
+                Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
                 V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
-                Q_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢角
+                W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
                 if Fsub(P_monte(monte, 3)') == 1
-                    Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)', Q_monte(monte, 1:3)');    % p, v，ｑ;
+                    Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)');    % p, v，ｑ;
                 else
                     Adata(monte, 1) = 10^10;
                     fZpos(monte, 1) = 1;
@@ -226,6 +232,8 @@ clc
 figure(1)
 logger.plot({1,"p", "er"});
 % logger.plot({1,"v", "e"});
+% logger.plot({1,"q", "e"});
+% logger.plot({1,"w", "e"});
 % logger.plot({1,"input", ""});
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
