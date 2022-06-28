@@ -100,8 +100,11 @@ end
             u4_ten = reshape(u_4, Params.H, Params.sample);
         end
     %-- 分散によるノイズを格納，入力の広がりを決定
-%         n1 = normrnd(zeros(Params.H,Params.sample), sigmax);
-%         n2 = normrnd(zeros(Params.H,Params.sample), sigmay);
+        n1 = normrnd(zeros(Params.H,Params.sample), sigma1);
+        n2 = normrnd(zeros(Params.H,Params.sample), sigma2);
+        n3 = normrnd(zeros(Params.H,Params.sample), sigma3);
+        n4 = normrnd(zeros(Params.H,Params.sample), sigma4);
+        
 
     %-- 各方向の入力列を格納
         u1 = u1_ten;
@@ -153,11 +156,6 @@ end
             % MPC controller
             % ts探し
             ts = 0;
-%             p_monte = agent.model.state.p
-            % 入力のサンプルから評価
-%             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-%             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
-%             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
             
             Q_monte = diag([100, 1, 100]);
             VQ_monte = diag([1, 1, 1]);
@@ -165,12 +163,6 @@ end
             QQ_monte = diag([1, 1, 1]);
             R_monte = 1;    
             % 評価関数
-%             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
-%             fun = @(p_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p); 
-%             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
-%             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte; 
             fun = @(p_monte, q_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)...
                 +v_monte'*VQ_monte*v_monte...
                 +w_monte'*WQ_monte*w_monte...
@@ -178,16 +170,7 @@ end
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
             % ホバリングから±sigma%の範囲
-            
-            
             Evaluationtra = zeros(1, Params.sample);
-%             u = (b-a).*rand(Params.sample,4) + a;   
-            
-            % 入力 u
-%             u = [0 0 0 0];
-%             u1(: ,1) = (b-a).*rand(sample,1) + a;               u2(: ,1) = (b-a).*rand(sample,1) + a;
-%             u3(: ,1) = (b-a).*rand(sample,1) + a;               u4(: ,1) = (b-a).*rand(sample,1) + a;
-%             u = [u1 u2 u3 u4];
    
             % 配列定義
             Adata = zeros(Params.sample, 1);   % 評価値

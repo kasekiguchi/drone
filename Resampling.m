@@ -4,6 +4,8 @@ function [ppu1, ppu2, ppu3, ppu4, pw] = Resampling(Params,ppu,pw)
     
     %減った分のパーティクルの数の分だけ一番最後のパーティクルの値を複製
     %ただし重みは0とし加重平均では考慮されないものとする．
+    %尤度と閾値を比較
+    %柴田先輩卒論p.16-18
     pw_size = size(pw,2);       % L_norm のサイズ
     ppu_size = size(ppu,3);     % sample
     if pw_size ~= Params.sample
