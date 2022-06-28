@@ -1,7 +1,6 @@
-function make_gif(tspan,span,fig,base_fig,varargin)
+function make_gif(tspan,fig,base_fig,varargin)
 % tspan : 時間区間 例：0:10 
-% span : 注目するエージェント 例： 1:3
-% fig(k,span) : 時刻k でのspan分のfig を生成する関数ハンドル
+% fig(k) : 時刻k でのfigure を生成する関数ハンドル
 % varargin : init_fig : 初期figure
 %                 name : 出力するfile name
 
@@ -23,7 +22,7 @@ function make_gif(tspan,span,fig,base_fig,varargin)
         base_fig();
          hold on
 
-        fig(n,span);
+        fig(n);
         % Write gif
         drawnow;
         frame = getframe(h);

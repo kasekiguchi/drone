@@ -147,7 +147,7 @@ tips_pos=q(:,1)+reshape(sum(tmp2,2),n+1,m)';% UAV1,2 とリンク接点位置
 tips=matlabFunction(subs(tips_pos,physicalParam,physicalParamV),'Vars',{vars'});
 close all
 %clc
-make_animation(1:stept:length(time),[1],@(k,span) fig3(tips(y(k,:)),[-1,10],[-5,10],[-5,10]),@(h) [],0)
+make_animation(1:stept:length(time),@(k) fig3(tips(y(k,:)),[-1,10],[-5,10],[-5,10]),@(h) [],0)
 %%
 plot(time,y(:,19).^2+y(:,20).^2)
 %% local function
@@ -171,10 +171,9 @@ end
 function m = mtake(mat,m,n)
     m=mat(m,n);
 end
-function [] = make_animation(kspan,span,fig,base_fig,video_flag)
+function [] = make_animation(kspan,fig,base_fig,video_flag)
     % kspan : 時間
-    % span : エージェント数
-    %fig : fig(k,span) ：時刻ｋの図
+    %fig : fig(k) ：時刻ｋの図
     % base_fig : 背景
     h =figure;
     h;
@@ -188,7 +187,7 @@ function [] = make_animation(kspan,span,fig,base_fig,video_flag)
     for k = kspan
         base_fig(h);
         
-        fig(k,span);
+        fig(k);
       %   update screen
         drawnow %limitrate
     if video_flag
