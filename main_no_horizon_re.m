@@ -67,18 +67,18 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference
-            rr = [1., 1., 1.];
-            if (time.t/2)^2+0.1 <= rr(3)  
-                rz = (time.t/2)^2+0.1;
-            else; rz = 1;
-            end
+%             rr = [1., 1., 1.];
+%             if (time.t/2)^2+0.1 <= rr(3)  
+%                 rz = (time.t/2)^2+0.1;
+%             else; rz = 1;
+%             end
 %             if (time.t/6)^2+0.1 <= rr(2)
 %                 rx = (time.t/6)^2+0.1;
 %                 ry = (time.t/6)^2+0.1;
 %             else; rx = 1.; ry = 1.;
 %             end
             rx = 0.0; ry = 0.0; 
-%             rz = 1.0;
+            rz = 1.0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -110,7 +110,7 @@ end
 %             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
 %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
-            % 重みを変化させる
+            % 重みを変化させる ref[1, 1, 1]用
 %             if min(abs(agent.model.state.v(1:2))) < 0.3
 %                 fV = 0;
 %                 Q_monte  = diag([100, 100, 1]);
@@ -137,15 +137,15 @@ end
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
             funP = @(p_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p); 
             funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
-            fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
+%             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
 %             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
 %                 +v_monte'*VQ_monte*v_monte...
 %                 +w_monte'*WQ_monte*w_monte; 
-%             fun = @(p_monte, q_monte, v_monte, w_monte) ...
-%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte...
-%                 +q_monte'*QQ_monte*q_monte; 
+            fun = @(p_monte, q_monte, v_monte, w_monte) ...
+                (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
+                +v_monte'*VQ_monte*v_monte...
+                +w_monte'*WQ_monte*w_monte...
+                +q_monte'*QQ_monte*q_monte; 
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
             % 状態の表示
@@ -180,8 +180,8 @@ end
                 V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
                 W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
                 if Fsub(P_monte(monte, 3)') == 1
-%                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)');    % p, v，ｑ;
-                    Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v，ｑ;
+                    Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)');    % p, v，ｑ;
+%                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v，ｑ;
                 else
                     Adata(monte, 1) = 10^10;
                     fZpos(monte, 1) = 1;
@@ -270,10 +270,10 @@ clc
 fprintf("%f秒\n", time.t / 0.025 * calT)
 % plot p:position, er:roll/pitch/yaw, 
 figure(1)
-logger.plot({1,"p", "er"});
+% logger.plot({1,"p", "er"});
 
 % logger.plot({1,"v", "e"});
-% logger.plot({1,"q", "e"});
+logger.plot({1,"q", "e"});
 % logger.plot({1,"w", "e"});
 % logger.plot({1,"input", ""});
 % logger.plot(1,["p","v","w","q","input"],["er","e","e","e",""]);
