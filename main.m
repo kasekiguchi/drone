@@ -8,6 +8,13 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
+
+%% general setting
+N = 1; % number of agents
+fExp = 1 % 1：実機　それ以外：シミュレーション
+fMotive = 1; % Motiveを使うかどうか
+fOffline = 0; % offline verification with experiment data
+
 run("main1_setting.m");
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
