@@ -2,7 +2,7 @@ dt = 1;
 agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,131]),DRONE_PARAM("DIATONE"));
 %%
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');
-
+disp("Press Enter");
 w = waitforbuttonpress;
 disp("start");
 try
@@ -19,6 +19,7 @@ for i = 1:70
         %pause(0.01);
         t = toc(Timer);
     end
+    i
     agent.plant.connector.sendData(uint8(i));
 end
 catch ME
