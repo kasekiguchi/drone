@@ -8,17 +8,19 @@
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 
 char packetBuffer[1];
-unsigned int droneNumber = 31; //機体番号を入力
-const char *ssid = "ACSLexperimentWiFi";//"acsl-mse-arl-YAMAHA";
-const char *password = "wifi-acsl-mse";
+unsigned int droneNumber = 131; //機体番号を入力
+//const char *ssid = "ACSLexperimentWiFi";//"acsl-mse-arl-YAMAHA";
+//const char *password = "wifi-acsl-mse";
+const char *ssid = "ACSL-Drone-Hotspot";//"acsl-mse-arl-YAMAHA";
+const char *password = "1qaz2wsx";
 
 /////////////////// WiFi関係 ////////////////////
 WiFiUDP udp;
 
 // ESPrのIPアドレスの設定
-IPAddress myIP(192, 168, 50, 100 + droneNumber); // 機体により下番号変更
+IPAddress myIP(192, 168, 50, droneNumber); // 機体により下番号変更
 IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
-const int my_udp_port = 8000 + droneNumber;        //開放する自ポート
+const int my_udp_port = 8000;        //開放する自ポート
 IPAddress subnet(255, 255, 255, 0);
 
 uint8_t old_receive_data = 0;

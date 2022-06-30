@@ -92,15 +92,15 @@ void setup() {
   //sBus.begin(SSerial);
   sBus.begin();
 
-//  connectToWiFi();
-//  udp.begin(my_udp_port);
+  connectToWiFi();
+  udp.begin(my_udp_port);
   unsigned long last_received_time = ESP.getCycleCount();
 
   Serial.println("\nSoftware serial test started");
 }
 
 void loop() {
-//  receiveUDP();
+  receiveUDP();
     sBus.FeedLine();
     delay(500);
     Serial.print(".");
