@@ -1,4 +1,3 @@
-// 2020/09/04 : 飛行を確認：UDPでの９軸センサー情報取得はオフ
 // arduino の設定は
 // http://trac.switch-science.com/wiki/esp_dev_arduino_ide
 // CPU Frequency を 160 MHzにしないとFCにPPMを送れない．
@@ -6,41 +5,27 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
 #include <WiFiUDP.h>
-#include <Wire.h> //I2Cライブラリ
-#include <SPI.h> // I2Cならいらないかも
-//#include <SparkFunLSM9DS1.h>
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 #include <math.h>
 
 uint8_t i;
-
-unsigned int droneNumber = 32; //機体番号を入力
-
-#define OUTPUT_PIN 2 // PPM出力のピン番号 加速度使うなら０
-
-const char *ssid = "ACSLexperimentWiFi";
-const char *password = "wifi-acsl-mse";
-
-//アルディーノの値を受け取るMatlabを実行しているPCのIP(自分のPCのIPアドレスを入力する)
-const char *to_udp_address = "192.168.50.72"; //送信先のアドレス
-const int to_udp_port = 8000;               //送信相手のポート番号
+unsigned int droneNumber = 132; //機体番号を入力
 
 /////////////////// WiFi関係 ////////////////////
 // ESPrのIPアドレスの設定
-IPAddress myIP(192, 168, 50, 100+droneNumber);  // 機体により下番号変更
+//const char *ssid = "ACSLexperimentWiFi";
+//const char *password = "wifi-acsl-mse";
+const char *ssid = "ACSL-Drone-Hotspot";
+const char *password = "1qaz2wsx";
+IPAddress myIP(192, 168, 50, droneNumber);  // 機体により下番号変更
 
 IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
-const int my_udp_port = 8000+droneNumber;        //開放する自ポート
+const int my_udp_port = 8000;        //開放する自ポート
 IPAddress subnet(255, 255, 255, 0);
 
 WiFiUDP udp;
 
 boolean connected = false;
-unsigned long tmptmp;
-uint8_t old_receive_data = 0;
-uint32_t now_time = 0;
-int16_t interval = 100;    //UDPデータ送信間隔
-boolean isReceive_Data_Updated = false;
 
 /////////////////// PPM関係 ////////////////////
 char packetBuffer[255];
@@ -48,9 +33,11 @@ char packetBuffer[255];
 #define TOTAL_CH 8         // number of channels
 // https://create-it-myself.com/research/study-ppm-spec/
 #define PPM_PERIOD 22500  // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
-#define TIME_LOW 400       // PPM信号 LOW時の幅　 // 同上 Futaba はこちら
+#define TIME_LOW 300       // PPM信号 LOW時の幅　 // 同上 Futaba はこちら
 #define TIME_HIGH_MIN 0  // PPM幅の最小 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている
 #define TIME_HIGH_MAX 1000 // PPM幅の最大 [us] : MATLAB側のプログラムを変えないように最後に100を足すようにしている
+
+#define OUTPUT_PIN 2 // PPM出力のピン番号 加速度使うなら０
 
 uint8_t n_ch = 0;      // 現在の chを保存
 uint16_t t_sum = 0;     // us単位  1周期中の現在の使用時間
@@ -127,9 +114,8 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
       //Serial.printf("Received %d bytes from %s, port %d\n", packetSize, udp.remoteIP().toString().c_str(), udp.remotePort());
 
       last_received_time = ESP.getCycleCount();
-      isReceive_Data_Updated = true;
     }
-  else if (ESP.getCycleCount() - last_received_time >= 2.000 * CPU_FRE * 1000000L)// Stop propellers after 0.5s signal lost. 
+  else if (ESP.getCycleCount() - last_received_time >= 0.500 * CPU_FRE * 1000000L)// Stop propellers after 0.5s signal lost. 
   {
     pw[0] = 500;
     pw[1] = 500;
@@ -165,11 +151,11 @@ void Pulse_control()
     {
 //      if (n_ch == 0 || n_ch == 1 || n_ch == 3 || n_ch == 2)
       //{
-        if (pw[n_ch]+100 < TIME_HIGH_MIN)
+        if (pw[n_ch] < TIME_HIGH_MIN)
         {
           pw[n_ch] = TIME_HIGH_MIN;
         }
-        else if (pw[n_ch]+100 > TIME_HIGH_MAX)
+        else if (pw[n_ch] > TIME_HIGH_MAX)
         {
           pw[n_ch] = TIME_HIGH_MAX;
         }
@@ -182,7 +168,7 @@ void Pulse_control()
       {
         pw[n_ch] = TIME_HIGH_MAX;
       }
-      timer0_write(t_now + (700+ pw[n_ch]) * CPU_FRE * 1L); //時間を指定
+      timer0_write(t_now + (700+ pw[n_ch]) * CPU_FRE * 1L -10); //時間を指定
       t_sum += pw[n_ch];
       n_ch++;
     }

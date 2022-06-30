@@ -1,8 +1,9 @@
 clear all  
-agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [25]),DRONE_PARAM("DIATONE"));
+agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,132]),DRONE_PARAM("DIATONE"));
  disp("arming");
 pause(1);
- agent.plant.connector.sendData(uint8([1100,1100,0,1100,0,0,0,0]));
+%%
+agent.plant.connector.sendData(gen_msg([500,500,0,400,1000,0,0,0]));
  
  %%
  FH = figure('position', [0 0 eps eps], 'menubar', 'none');
