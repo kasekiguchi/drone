@@ -47,7 +47,7 @@ classdef MODEL_CLASS <  handle
                 obj.input_channel = param.input_channel;
                 obj.method=str2func(param.method);
                 obj.time_scale = 'continuous';
-                if contains(name,"Discrete")
+                if contains(name,"iscrete")
                     obj.time_scale = 'discrete';
                 end
                 F = fieldnames(param);

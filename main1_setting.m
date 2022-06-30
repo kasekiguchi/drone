@@ -19,8 +19,6 @@ else
     te = 100;
 end
 
-%% generate environment
-Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
 %% set connector (global instance)
 if fMotive
     if fExp

@@ -69,6 +69,7 @@ end
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
+            param(i).reference.tbug = {};
             param(i).reference.agreement = {logger, N, time.t};
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
@@ -79,6 +80,7 @@ end
             % controller
             param(i).controller.hlc = {time.t, HLParam};
             param(i).controller.hl_load = {time.t, HL_LoadParam};
+            param(i).controller.pd = {};
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
