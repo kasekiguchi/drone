@@ -48,6 +48,7 @@ end
             param(i).sensor.rpos = {agent};
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
+            param(i).sensor.for_load = {};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
             for j = 1:length(agent(i).sensor.name)
@@ -65,7 +66,7 @@ end
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0; 0; 0], time.t};
+            param(i).reference.point = {FH, [0; 0; 0.5], time.t};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};

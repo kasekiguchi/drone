@@ -49,7 +49,7 @@ for i = 1:N
         end
         agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
-
+    agent(i).set_property("sensor",Estimator_Suspended_Load([i,i+N])); %
     %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
     %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
@@ -64,15 +64,15 @@ for i = 1:N
 %     agent(i).set_estimator("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-5, 1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], [1e-5])); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
-    agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
-    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-8,1e-10,1e-8,1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
+    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-16,1e-20,1e-16,1e-14])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",{[0;0;1],2})); % ハート形[x;y;z]永久
-%     agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",{[0;0;1],2})); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",{[0;0;0.5],2})); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
