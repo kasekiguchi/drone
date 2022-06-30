@@ -12,15 +12,15 @@ uint16_t msg;
 char packetBuffer[1];
 
 /////////////////// WiFi関係 ////////////////////
-unsigned int droneNumber = 32; //機体番号を入力
+unsigned int droneNumber = 132; //機体番号を入力
 
 const char *ssid = "ACSLexperimentWiFi";
 const char *password = "wifi-acsl-mse";
 // ESPrのIPアドレスの設定
-IPAddress myIP(192, 168, 50, 100+droneNumber);  // 機体により下番号変更
+IPAddress myIP(192, 168, 50, droneNumber);  // 機体により下番号変更
 
 IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
-const int my_udp_port = 8000+droneNumber;        //開放する自ポート
+const int my_udp_port = 8000;        //開放する自ポート
 IPAddress subnet(255, 255, 255, 0);
 
 // 値を受け取るMatlabを実行しているPCのIP(自分のPCのIPアドレスを入力する)
@@ -105,8 +105,6 @@ void setup()
   Serial.begin(115200);
   connectToWiFi();
   udp.begin(my_udp_port);
-
-  
 }
 
 void loop()
