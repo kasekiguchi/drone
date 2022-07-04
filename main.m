@@ -11,8 +11,8 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
-fMotive = 0; % Motiveを使うかどうか
+fExp = 0 % 1：実機　それ以外：シミュレーション
+fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
 run("main1_setting.m");
@@ -28,6 +28,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
+xf = [0;0;0];
 
 try
     while round(time.t, 5) <= te

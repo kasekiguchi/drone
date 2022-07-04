@@ -81,7 +81,8 @@ for i = 1:N
     %% set controller property
     agent(i).controller = [];
     %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    %agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     HLControlSetting = Controller_HL(dt);
     HLParam = HLControlSetting.param;
 
