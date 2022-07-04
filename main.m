@@ -23,7 +23,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
-
+fff=1;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 try
     while round(time.t, 5) <= te
         %% sensor
@@ -65,7 +65,7 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
-            % reference
+            % reference  
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [0; 0; 0], time.t};
             param(i).reference.timeVarying = {time,FH};
@@ -76,6 +76,15 @@ end
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
             agent(i).do_reference(param(i).reference.list);
+            
+            %仮でreferenceを変更する
+            if FH.CurrentCharacter == "f"%take off してからflightしないとだめ
+                if fff==1
+                    xf = agent.reference.result.state.p - agent.estimator.result.state.p;
+                    fff=0;
+                end
+            end
+            agent.reference.result.state.p = agent.reference.result.state.p + xf;
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
             % controller
@@ -85,6 +94,7 @@ end
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
+            %%ここに入れる
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
 
