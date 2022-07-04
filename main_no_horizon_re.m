@@ -23,6 +23,9 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 fInput = 0;
 fV = 0;
 fVcount = 1;
+fWeight = 0; % 重みを変化させる場合 fWeight = 1
+fFirst = 0; % 一回のみ回す場合
+remove_flag = 0; % 終了判定
 run("main3_loop_setup.m");
 
 try
@@ -66,19 +69,19 @@ end
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-            % reference
-%             rr = [1., 1., 1.];
-%             if (time.t/2)^2+0.1 <= rr(3)  
-%                 rz = (time.t/2)^2+0.1;
-%             else; rz = 1;
-%             end
+            % reference 目標値
+            rr = [1., 1., 1.];
+            if (time.t/2)^2+0.1 <= rr(3)  
+                rz = (time.t/2)^2+0.1;
+            else; rz = 1;
+            end
 %             if (time.t/6)^2+0.1 <= rr(2)
 %                 rx = (time.t/6)^2+0.1;
 %                 ry = (time.t/6)^2+0.1;
 %             else; rx = 1.; ry = 1.;
 %             end
-            rx = 0.0; ry = 0.0; 
-            rz = 1.0;
+            rx = 1.0; ry = 1.0; 
+%             rz = 1.0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -110,29 +113,36 @@ end
 %             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
 %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
+
             % 重みを変化させる ref[1, 1, 1]用
-%             if min(abs(agent.model.state.v(1:2))) < 0.3
-%                 fV = 0;
-%                 Q_monte  = diag([100, 100, 1]);
-%                 VQ_monte = diag([1, 1, 1]);
-%                 WQ_monte = diag([0.1, 0.1, 1]);
-%                 QQ_monte = diag([1, 1, 1]);
-%             else
-%                 if fVcount
-%                     fV_time = time.t;
-%                     fVcount = 0;
-%                 end
-%                 fV = 1;
-%                 Q_monte  = diag([1, 1, 100]);
-%                 VQ_monte = diag([100, 100, 1]);
-%                 WQ_monte = diag([1, 1, 1]);
-%                 QQ_monte = diag([1, 1, 1]);
-%             end
-            PQ_monte  = diag([1, 1, 100]);
-            VQ_monte = diag([1000, 1000, 1]);
-            WQ_monte = diag([1, 1, 1]);
-            QQ_monte = diag([1, 1, 1]);
+            if fWeight == 1 
+                % 重みの速度変化
+                if min(abs(agent.model.state.v(1:2))) < 0.3
+                    fV = 0;
+                    PQ_monte  = diag([100, 100, 1]);
+                    VQ_monte = diag([1, 1, 1]);
+                    WQ_monte = diag([0.1, 0.1, 1]);
+                    QQ_monte = diag([1, 1, 1]);
+                else
+                    if fVcount
+                        fV_time = time.t;
+                        fVcount = 0;
+                    end
+                    fV = 1;
+                    PQ_monte  = diag([1, 1, 1]); % 1 1 100
+                    VQ_monte = diag([1, 1, 1]); % 100 100 1
+                    WQ_monte = diag([1, 1, 1]);
+                    QQ_monte = diag([1, 1, 1]);
+                end
+            else
+                PQ_monte  = diag([100, 100, 100]);  % 1 1 100
+                VQ_monte = diag([100, 100, 100]);   % 1000 1000 1
+                WQ_monte = diag([1, 1, 1]);
+                QQ_monte = diag([1, 1, 1]);
+                UdiffQ_monte = diag([1, 1, 1, 1]);
+            end
             R_monte = 1;    
+            
             % 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
             funP = @(p_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p); 
@@ -146,6 +156,19 @@ end
                 +v_monte'*VQ_monte*v_monte...
                 +w_monte'*WQ_monte*w_monte...
                 +q_monte'*QQ_monte*q_monte; 
+%             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
+%                 +v_monte'*VQ_monte*v_monte...
+%                 +w_monte'*WQ_monte*w_monte...
+%                 +q_monte'*QQ_monte*q_monte...
+%                 +u_monte'*R_monte*u_monte; 
+            % 入力差
+%             fun = @(p_monte, q_monte, v_monte, w_monte, udiff_monte) ...
+%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
+%                 +v_monte'*VQ_monte*v_monte...
+%                 +w_monte'*WQ_monte*w_monte...
+%                 +q_monte'*QQ_monte*q_monte...
+%                 +udiff_monte'*UdiffQ_monte*udiff_monte; 
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
             % 状態の表示
@@ -157,37 +180,44 @@ end
             % ホバリングから±sigma%の範囲
             rng('shuffle')
             sigma = 0.15;
-            a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
+            a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;    b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
             sample = 100;   % サンプル数
             u = (b-a).*rand(sample,4) + a;        
-            % 入力 u
-%             u = [0 0 0 0];
-%             u1(: ,1) = (b-a).*rand(sample,1) + a;               u2(: ,1) = (b-a).*rand(sample,1) + a;
-%             u3(: ,1) = (b-a).*rand(sample,1) + a;               u4(: ,1) = (b-a).*rand(sample,1) + a;
-%             u = [u1 u2 u3 u4];
    
             % 配列定義
             Adata = zeros(sample, 1);   % 評価値
-            P_monte = zeros(sample, 3); % ある入力での位置
-            V_monte = zeros(sample, 3); % ある入力での速度
-            W_monte = zeros(sample, 3); % ある入力での姿勢角
-            Q_monte = zeros(sample, 3);
+%             P_monte = zeros(sample, 3); % ある入力での位置
+%             V_monte = zeros(sample, 3); % ある入力での速度
+%             W_monte = zeros(sample, 3); % ある入力での姿勢角
+%             Q_monte = zeros(sample, 3);
+            Udiff_monte = zeros(4, sample);
             fZpos = zeros(sample, 1);
             for monte = 1 : sample
                 [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
-                P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
-                Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
-                V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
-                W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
-                if Fsub(P_monte(monte, 3)') == 1
-                    Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)');    % p, v，ｑ;
+%                 P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
+%                 Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
+%                 V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
+%                 W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
+                  % 入力の差
+%                 if fFirst == 0
+%                     Udiff_monte(:, monte) = 0;
+%                 else
+%                     Udiff_monte(:, monte) = abs(agent.input - u(monte, :)'); % 縦ベクトル u1 u2 u3 u4
+%                 end
+%                 fprintf("udfi : %f\n", Udiff_monte(monte, :))
+                if Fsub(tmpx(end, 3)') == 1
+                    Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
 %                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v，ｑ;
+%                     Adata(monte, 1) = fun(P_monte(monte, :)', Q_monte(monte, :)', V_monte(monte, :)', W_monte(monte, :)', u(monte, :)');    % p, v，ｑ, w, u;
+%                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)', Udiff_monte(:, monte));    % p, v，ｑ, w, udiff;
                 else
                     Adata(monte, 1) = 10^10;
                     fZpos(monte, 1) = 1;
                 end
+                fFirtst = 1;
+                
             end
-            PE = funP(P_monte(monte, 1:3)'); VE = funV(V_monte(monte, 1:3)');
+            PE = funP(tmpx(end, 1:3)'); VE = funV(tmpx(end, 1:3)');
             fprintf("pos : %f\t velo : %f\t", PE, VE)
             calT = toc;
 
@@ -196,7 +226,8 @@ end
             fprintf("u: %f %f %f %f\t", u(min_index, 1), u(min_index, 2), u(min_index, 3), u(min_index, 4))
 %             agent.input = [u(min_index, 2) u(min_index, 2) u(min_index, 2) u(min_index, 2)]';   % 挙動確認用
             if fZpos(min_index, 1) == 1
-                printf("Stop!!");               % エラーを吐かせて終了させる fprintfが本物
+%                 printf("Stop!!");               % エラーを吐かせて終了させる fprintfが本物
+                remove_flag = 1;
             end
         end
         
@@ -249,6 +280,9 @@ end
             end
 
         end
+        if remove_flag == 1
+            break
+        end
 
     end
 
@@ -267,19 +301,15 @@ end
 close all
 clc
 % calculate time
-fprintf("%f秒\n", time.t / 0.025 * calT)
+% fprintf("%f秒\n", time.t / 0.025 * calT)
 % plot p:position, er:roll/pitch/yaw, 
-figure(1)
-% logger.plot({1,"p", "er"});
-
-% logger.plot({1,"v", "e"});
-logger.plot({1,"q", "e"});
-% logger.plot({1,"w", "e"});
-% logger.plot({1,"input", ""});
-% logger.plot(1,["p","v","w","q","input"],["er","e","e","e",""]);
-% xlabel("Time [s]", 'Fontsize', 25); ylabel("p", 'Fontsize', 25); 
-title("");
-set(gca,'FontSize',25); 
+% figure(1)
+Fontsize = 15;
+logger.plot({1,"p", "er"}, "fig_num",1); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"v", "e"},"fig_num",2); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"q", "e"},"fig_num",3); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"w", "e"},"fig_num",4); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"input", ""},"fig_num",5); set(gca,'FontSize',Fontsize);  title("");
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 

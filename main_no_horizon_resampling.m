@@ -21,7 +21,30 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 fInput = 0;
-Count_sigma = 0; 
+%-- パラメータ
+%         dt = 0.05;          % - 離散時間幅（チューニング必要かも）
+%         Te = 5;	            % - シミュレーション時間
+        x0 = [0.0; 0.0; 0.0];    % - 初期状態
+        u0 = [0.0; 0.0; 0.0; 0.0];    % - 初期状態
+%         ur = [0.0; 0.0];    % - 目標速度
+        Particle_num = 10; % - 粒子数（要チューニング）
+%         Csigma = 0.001;     % - 予測ステップごとに変化する分散値の上昇定数(未来は先に行くほど不確定だから予測ステップが進む度に標準偏差を大きくしていく、工夫だからやらなくても問題ないと思う)
+        Count_sigma = 0;
+        Initu1 = 0.269 * 9.81 / 4;      % - 初期推定解 ホバリングとする
+        Initu2 = 0.269 * 9.81 / 4;      % - 初期推定解
+        Initu3 = 0.269 * 9.81 / 4;      % - 初期推定解 
+        Initu4 = 0.269 * 9.81 / 4;      % - 初期推定解
+        umax = 1.0;         % - 入力の最大値、入力制約と最大入力の抑制項のときに使う
+%-- 構造体へ格納
+        Params.x0 = x0;
+        Params.sample = Particle_num;
+        Params.Csigma = Csigma;
+        Params.reset_flag = 0;
+        Params.PredStep = repmat(dt*3, Params.H, 1); % - ホライズンの半分後半の予測ステップ幅を大きく(未来は先に行くほど不確定だから予測ステップ幅を大きくしていく、工夫だからやらなくても問題ないと思う)
+        Params.PredStep(1:Params.H/2, 1) = dt;
+        Params.umax = umax;
+        Params.H = 1;
+        
 run("main3_loop_setup.m");
 
 try
@@ -62,8 +85,7 @@ end
 
         %% estimator, reference generator, controller
         % 20220627 追記部分/////////////////////////
-        Params.sample = 10;   % サンプル数
-        Params.H = 1;
+        
 %         u1 = (b-a).*rand(Params.H,Params.sample) + a;
 %         u2 = (b-a).*rand(Params.H,Params.sample) + a;
 %         u3 = (b-a).*rand(Params.H,Params.sample) + a;
@@ -74,10 +96,10 @@ end
 %         u4 = reshape(u4, [1, size(u4)]);
 %         u = [u1; u2; u3; u4];
     %-- 準最適化入力を格納
-        rng('shuffle')
-        sigma = 0.15;
-        a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
-        Initu = (b-a).*rand(Params.H,Params.sample) + a;
+%         rng('shuffle')
+%         sigma = 0.15;
+%         a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;           b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
+%         Initu = (b-a).*rand(Params.H,Params.sample) + a;
 %         Initu = 0.269 * 9.81 / 4;
         if Count_sigma == 0 
 %             u1_ten = repmat(Initu, Params.H, Params.sample);
@@ -149,6 +171,8 @@ end
             end
             agent(i).do_controller(param(i).controller.list);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+            
+            
             % 強制的に入力を決定
             fprintf("%f %f %f \t %f %f %f\n", agent.model.state.p(1), agent.model.state.p(2), agent.model.state.p(3),...
                 agent.reference.result.state.p(1), agent.reference.result.state.p(2), agent.reference.result.state.p(3))
@@ -157,13 +181,13 @@ end
             % ts探し
             ts = 0;
             
-            Q_monte = diag([100, 1, 100]);
+            PQ_monte = diag([100, 1, 100]);
             VQ_monte = diag([1, 1, 1]);
             WQ_monte = diag([10, 10, 1]);
             QQ_monte = diag([1, 1, 1]);
             R_monte = 1;    
             % 評価関数
-            fun = @(p_monte, q_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)...
+            fun = @(p_monte, q_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
                 +v_monte'*VQ_monte*v_monte...
                 +w_monte'*WQ_monte*w_monte...
                 +q_monte'*QQ_monte*q_monte; 
@@ -174,18 +198,18 @@ end
    
             % 配列定義
             Adata = zeros(Params.sample, 1);   % 評価値
-            P_monte = zeros(Params.sample, 3); % ある入力での位置
-            V_monte = zeros(Params.sample, 3); % ある入力での速度
-            W_monte = zeros(Params.sample, 3); % ある入力での姿勢角
+%             P_monte = zeros(Params.sample, 3); % ある入力での位置
+%             V_monte = zeros(Params.sample, 3); % ある入力での速度
+%             W_monte = zeros(Params.sample, 3); % ある入力での姿勢角
             fZpos = zeros(Params.sample, 1);
             for monte = 1 : Params.sample
                 [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, :, monte),agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
-                P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
-                Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
-                V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
-                W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
-                if Fsub(P_monte(monte, 3)') == 1
-                    Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)');    % p, v，ｑ;
+%                 P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
+%                 Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
+%                 V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
+%                 W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
+                if Fsub(tmpx(end, 1:3)') == 1
+                    Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
                 else
                     Adata(monte, 1) = 10^2;
                     fZpos(monte, 1) = 1;
