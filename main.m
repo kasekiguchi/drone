@@ -18,7 +18,6 @@ run("main2_agent_setup.m");
 LogData = [     % agentのメンバー関係以外のデータ
         ];
 LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
-    "controller"
             ];
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
@@ -167,21 +166,21 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=1;
+fsave=10;
 if fsave==1
     %変更しない
-    ExportFolder='D:\student\momose';
-    % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
+%     ExportFolder='D:\student\momose';%実験用pcのパス
+    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
     %変更
-    % subfolder='exp';%sim or e
-    % subfolder='sim';%sim or exp
-    subfolder='sample';%sim or exp
+%     subfolder='exp';%sim or exp or sample
+    % subfolder='sim';%sim or exp or sample
+    subfolder='sample';%sim or exp or sample
     
-    ExpSimName='近似';%実験,シミュレーション名
-    contents='FT_kx';%実験,シミュレーション内容
+    ExpSimName='aaaaaaaa';%実験,シミュレーション名
+    contents='abb';%実験,シミュレーション内容
     FolderName=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
     SaveTitle=strcat(date,'_',contents);%ファイルの名前作成
     %フォルダができてないとき
@@ -190,12 +189,14 @@ if fsave==1
         addpath(genpath(ExportFolder));
     
     % save logger and agent
-        eval([contents '= logger']);%loggerの名前をcontentsに変更
-        save(fullfile(FolderName, SaveTitle),contents);
+        logger_contents=strcat('logger_',contents);
+        SaveTitle=strcat(date,'_',logger_contents);    
+        eval([logger_contents '= logger;']);%loggerの名前をlogger_contentsに変更
+        save(fullfile(FolderName, SaveTitle),logger_contents);
       
         agent_contents=strcat('agent_',contents);
         SaveTitle2=strcat(date,'_',agent_contents);
-        eval([agent_contents '=agent']);
+        eval([agent_contents '=agent;']);%agentの名前をagent_contentsに変更
         save(fullfile(FolderName, SaveTitle2),agent_contents);
     %savefig
 %     SaveTitle=strcat(date,'_',ExpSimName);

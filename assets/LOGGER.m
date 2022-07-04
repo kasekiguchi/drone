@@ -18,6 +18,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         sname = "sensor";
         ename = "estimator";
         rname = "reference";
+        cname = "controller";%付け足した
     end
 
     methods
@@ -75,6 +76,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
                 obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
                 obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
+                obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;%controllerも保存
 
                 obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
                 obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);

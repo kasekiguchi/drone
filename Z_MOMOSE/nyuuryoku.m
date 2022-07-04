@@ -1,5 +1,5 @@
 t=-2:0.001:2;
-k=2;
+k=1;
 uft2=-k.*sign(t).*abs(t).^0.2;
 uft4=-k.*sign(t).*abs(t).^0.9;
 ta=-k*tanh(1.2.*t);
@@ -8,37 +8,62 @@ uftt4=-k.*tanh(10.*t).*abs(t).^0.7;
 uHL=-k.*t;
 udtanh2=2*abs(t).^(1/5).*(tanh(t).^2 - 1) - (2.*sign(t).*tanh(t))./(5*abs(t).^(4/5));%0.2
 udtanh4=2*abs(t).^(2/5).*(tanh(t).^2 - 1) - (4.*sign(t).*tanh(t))./(5*abs(t).^(3/5));%04
+%zの入力にしようとするやつ
 c=1;
 k=k*2;
 unew=-k/2.*(tanh(c.*t)+t);%;-k/2.*(sign(2.*t)+t);
 dunew=(k.*(c*(tanh(c.*t).^2 - 1) - 1))./2;
 ddunew=-c^2*k.*tanh(c.*t).*(tanh(c.*t).^2 - 1);
 
-i=1;
-for t=-2:0.001:2
-    uddt4(i)=(8*sign(t)*(tanh(t)^2 - 1))/(5*abs(t)^(3/5)) - 4*abs(t)^(2/5)*tanh(t)*(tanh(t)^2 - 1) - (8*dirac(t)*tanh(t))/(5*abs(t)^(3/5)) + (12*sign(t)^2*tanh(t))/(25*abs(t)^(8/5));
-    i=i+1;
-end
+%6/23 実験でよかった近似の入力とそのパラメータ
+% k=82;
+% utanh=-k*abs(t).^0.6923.*tanh(6.*t)-k.*t;
+% uori=-k*abs(t).^0.6923.*sign(t)-k.*t;
+% uabs=-k*tanh(1.2*t)-k.*t;
+
+k=1;
+utanh=-k*abs(t).^0.7.*tanh(6.0*t)-k.*t;
+uori=-k*abs(t).^0.7.*sign(t)-k.*t;
+uabs=-k*tanh(1.2*t)-k.*t;
+uHL=-k.*t;
+
+%% 0629x^atanh
+syms dt
+fsyms=abs(dt).^0.5.*tanh(dt);
+f=double(subs(fsyms,dt,t));
+df=diff(fsyms);
+t1=0.001:0.1:2;
+df=subs(df,dt,t1);
+% i=1;
+% for t=-2:0.001:2
+%     uddt4(i)=(8*sign(t)*(tanh(t)^2 - 1))/(5*abs(t)^(3/5)) - 4*abs(t)^(2/5)*tanh(t)*(tanh(t)^2 - 1) - (8*dirac(t)*tanh(t))/(5*abs(t)^(3/5)) + (12*sign(t)^2*tanh(t))/(25*abs(t)^(8/5));
+%     i=i+1;
+% end
 %%
 t=-2:0.001:2;
 hold on
 grid on
-% plot(t,uft2);
-plot(t,uft4);
+plot(t,uft2);
+% plot(t,uft4);
 % plot(t,uftt2);
 % plot(t,uftt4);
-plot(t,ta);
+% plot(t,ta);
 % plot(t,udtanh2);
 % plot(t,udtanh4);
 % plot(t,uddt4);
 % plot(t,unew);
 % plot(t,dunew);
 % plot(t,ddunew);
-% plot(t,uHL);
+plot(t,uHL);
+% plot(t,uori);
+% plot(t,utanh);
+% plot(t,uabs);
+plot(t,f);
+plot(t1,df);
 
-xlabel('x')
+xlabel('error')
 ylabel('u')
-legend('FT','FT d','FT dd','FB')
+legend('FB','u_{FT} ','u_{sgn}','u_{abs}')
 % legend('FT 02','FT 04','FTt 02','FTt 04')
 hold off
 %%

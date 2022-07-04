@@ -63,10 +63,26 @@ classdef HLC < CONTROLLER_CLASS
             else
                 vf = Vf(x,xd',P,F1);
             end
+            
+            z1=Z1(x,xd',P);%z方向
+            z2=Z2(x,xd',vf,P);%x方向
+            z3=Z3(x,xd',vf,P);%y方向
+            z4=Z4(x,xd',vf,P);%yaw
+            ux=-F2*z2;
+            uy=-F3*z3;
+            upsi=-F4*z4;
+            
             vs = Vs(x,xd',vf,P,F2,F3,F4);
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
+             %サブシステムの入力
+            obj.result.uHL = [vf(1);ux;uy;upsi];
+            %サブシステムの状態
+            obj.result.z1 = z1;
+            obj.result.z2 = z2;
+            obj.result.z3 = z3;
+            obj.result.z4 = z4;
             result = obj.result;
         end
         function show(obj)
