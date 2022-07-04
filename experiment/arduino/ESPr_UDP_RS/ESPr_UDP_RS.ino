@@ -1,3 +1,5 @@
+// UDP 通信テンプレート
+// receive and send
 // arduino の設定は
 // http://trac.switch-science.com/wiki/esp_dev_arduino_ide
 // CPU Frequency を 160 MHzにしないとFCにPPMを送れない．
