@@ -26,6 +26,7 @@ function Estimator = Estimator_EKF(agent,output,var)
     %%
     if agent.model.state.type == 3 % 姿勢がオイラー角の場合
 %        EKF_param.B = [eye(6)*dt^2;eye(6)*dt]; % システムノイズが加わるチャンネル
+        %EKF_param.B = [eye(6)*0.01;eye(6)*0.1]; % システムノイズが加わるチャンネル
         EKF_param.B = [eye(6)*0.01;eye(6)*0.1]; % システムノイズが加わるチャンネル
          %EKF_param.B = diag([ones(1,6)*dt^2,ones(1,6)*dt]); % to be check
          %EKF_param.Q = diag([ones(1,3)*1E5,ones(1,3)*1E5,ones(1,3)*1E6,ones(1,3)*1E6]);% -2 -3 -4 1
@@ -36,6 +37,7 @@ function Estimator = Estimator_EKF(agent,output,var)
         EKF_param.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
         EKF_param.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]);
     end
+    
     EKF_param.P = eye(n); % 初期共分散行列
     EKF_param.list=output;
     Estimator.param=EKF_param;

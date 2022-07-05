@@ -28,11 +28,11 @@ classdef HLC < CONTROLLER_CLASS
                 end
             end
             if isempty(param)
-                Param = param;
+                Param = obj.param;
             else
-                Param= obj.param;
+                Param= param{2};
             end
-            P = Param.P;
+            P = obj.param.P;
             F1 = Param.F1;
             F2 = Param.F2;
             F3 = Param.F3;
