@@ -59,6 +59,9 @@ volatile uint16_t TOTAL_CH_W;
 unsigned long t_now;
 volatile unsigned long last_received_time;
 
+// マイクロ秒をクロック数に換算 (@CPU_FREMHz)
+#define USEC2CLOCK(us)    (us * CPU_FRE*1L)
+
 //*********** local functions  *************************//
 void connectToWiFi()// ---- setup connection to wifi
 {
@@ -84,22 +87,23 @@ void setupPPM()// ---------- setup ppm signal configuration
 
   pinMode(OUTPUT_PIN, OUTPUT);
   digitalWrite(OUTPUT_PIN, LOW);
-  CH_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset 
+  CH_OFFSET = 0;//2*CH_MAX - TIME_LOW + 20;// commom offset 
   TOTAL_CH_OFFSET = 8*CH_OFFSET;
-  pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
-  pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-  pw[2] = CH_OFFSET - CH_MIN;     // throttle
-  pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
+  pw[0] = CH_OFFSET;// - CH_NEUTRAL; // roll
+  pw[1] = CH_OFFSET;// - CH_NEUTRAL; // pitch
+  pw[2] = CH_OFFSET;// - CH_MIN;     // throttle
+  pw[3] = CH_OFFSET;// - CH_NEUTRAL; // yaw
   pw[4] = CH_OFFSET; // AUX1
   pw[5] = CH_OFFSET; // AUX2
   pw[6] = CH_OFFSET; // AUX3
   pw[7] = CH_OFFSET; // AUX4
-  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
+  //start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
+  start_H = PPM_PERIOD - TOTAL_CH_OFFSET - 9 * TIME_LOW;
   // CPUのクロック周波数でPPM信号を制御
   noInterrupts();
   timer0_isr_init();
   timer0_attachInterrupt(Pulse_control);// timer 終了時に呼び出す関数の登録
-  timer0_write(ESP.getCycleCount() + 0.030 * CPU_FRE * 1000000L); // 30 msec (CPU_FRE*10^6 == 1sec) : 次の割り込み時間を設定
+  timer0_write(ESP.getCycleCount() + USEC2CLOCK(PPM_PERIOD)); // 22.5 msec (CPU_FRE*10^6 == 1sec) : 次の割り込み時間を設定
   interrupts();
   unsigned long last_received_time = ESP.getCycleCount();
 }
@@ -126,20 +130,25 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
           pw[i] = CH_MAX;
         }
         
-        pw[i] = CH_OFFSET - pw[i];
+        //pw[i] = CH_OFFSET - pw[i];
+        //pw[i] = TIME_LOW - pw[i];
         TOTAL_CH_W -= (pw[i] + TIME_LOW);        
+        Serial.print("pw[ ");
+        Serial.print(i);
+        Serial.print(" ]");
+        Serial.println(pw[i]);
       }
 
       last_received_time = ESP.getCycleCount();
       isReceive_Data_Updated = true;
       start_H = TOTAL_CH_W - TIME_LOW;// 9 times LOW time in each PPM period      
     }
-  else if (ESP.getCycleCount() - last_received_time >= 0.500 * CPU_FRE * 1000000L)// Stop propellers after 0.5s signal lost. 
+  else if (ESP.getCycleCount() - last_received_time >= USEC2CLOCK(500000))// Stop propellers after 500000 us = 0.5s signal lost. 
     {
-      pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
-      pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-      pw[2] = CH_OFFSET - CH_MIN;     // throttle
-      pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
+      pw[0] = CH_OFFSET;// - CH_NEUTRAL; // roll
+      pw[1] = CH_OFFSET;// - CH_NEUTRAL; // pitch
+      pw[2] = CH_OFFSET;// - CH_MIN;     // throttle
+      pw[3] = CH_OFFSET;// - CH_NEUTRAL; // yaw
       pw[4] = CH_OFFSET; // AUX1
       pw[5] = CH_OFFSET; // AUX2
       pw[6] = CH_OFFSET; // AUX3
@@ -154,12 +163,14 @@ void Pulse_control()
   t_now = ESP.getCycleCount(); // 現在の周波数のカウントを取得
   if (digitalRead(OUTPUT_PIN) == HIGH)
   {
-    timer0_write(t_now + TIME_LOW * CPU_FRE * 1L); // 次の割込み時間を指定
+    timer0_write(t_now + USEC2CLOCK(TIME_LOW)); // 次の割込み時間を指定
     digitalWrite(OUTPUT_PIN, LOW);                 // PPM -> LOW
     t_sum += TIME_LOW;
   }
   else if (n_ch == TOTAL_CH)
   {
+    timer0_write(t_now + USEC2CLOCK(start_Hh));// start 判定の H 時間待つ
+    digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
     n_ch = 0;
     start_Hh = start_H;
 //    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
@@ -167,12 +178,10 @@ void Pulse_control()
     {
       phw[i] =  pw[i];
     }
-    timer0_write(t_now + start_Hh * CPU_FRE * 1L);// start 判定の H 時間待つ
-    digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
   }
   else
   {
-    timer0_write(t_now + phw[n_ch] * CPU_FRE * 1L);// 時間を指定
+    timer0_write(t_now + USEC2CLOCK(phw[n_ch]));// 時間を指定
     digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
     n_ch++;
   }
