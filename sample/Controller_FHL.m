@@ -19,9 +19,6 @@ syms sz3 [4 1] real
 syms sF3 [1 4] real
 syms sz4 [2 1] real
 syms sF4 [1 2] real
-% [Ac2,Bc2,~,~] = ssdata(c2d(ss([0,1,0,0;0,0,1,0;0,0,0,1;0,0,0,0],[0;0;0;1],[1,0,0,0],[0]),dt));
-% [Ac3,Bc3,~,~] = ssdata(c2d(ss([0,1,0,0;0,0,1,0;0,0,0,1;0,0,0,0],[0;0;0;1],[1,0,0,0],[0]),dt));
-% [Ac4,Bc4,~,~] = ssdata(c2d(ss([0,1;0,0],[0;1],[1,0],[0]),dt));
 Controller_param.Vs = matlabFunction([-sF2*sz2;-sF3*sz3;-sF4*sz4],"Vars",{sz2,sz3,sz4,sF2,sF3,sF4});
  
 Controller.type="FUNCTIONAL_HLC";
