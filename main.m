@@ -23,6 +23,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
+xf = [0;0;0];
 fff=1;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 try
     while round(time.t, 5) <= te
@@ -94,7 +95,6 @@ end
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
-            %%ここに入れる
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
 

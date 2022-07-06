@@ -43,7 +43,7 @@ df=subs(df,dt,t1);
 t=-2:0.001:2;
 hold on
 grid on
-plot(t,uft2);
+% plot(t,uft2);
 % plot(t,uft4);
 % plot(t,uftt2);
 % plot(t,uftt4);
@@ -55,11 +55,11 @@ plot(t,uft2);
 % plot(t,dunew);
 % plot(t,ddunew);
 plot(t,uHL);
-% plot(t,uori);
-% plot(t,utanh);
-% plot(t,uabs);
-plot(t,f);
-plot(t1,df);
+plot(t,uori);
+plot(t,utanh);
+plot(t,uabs);
+% plot(t,f);
+% plot(t1,df);
 
 xlabel('error')
 ylabel('u')
