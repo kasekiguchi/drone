@@ -8,8 +8,8 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_Exp(dt,initial(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
-        agent(i) = DRONE(Model_Quat13(dt,initial(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        %agent(i) = DRONE(Model_EulerAngle(dt,initial(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
+%         agent(i) = DRONE(Model_Quat13(dt,initial(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle(dt,initial(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %agent(i) = DRONE(Model_Discrete(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル : PD controller などを想定
@@ -65,19 +65,20 @@ for i = 1:N
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
-    %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
-    %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
+%     agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
+%     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     HLControlSetting = Controller_HL(dt);
     HLParam = HLControlSetting.param;
 
+    
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC

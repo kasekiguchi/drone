@@ -78,6 +78,7 @@ end
 
             % controller
             param(i).controller.hlc = {time.t, HLParam};
+            param(i).controller.ftcontroller = {time.t, HLParam};
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end

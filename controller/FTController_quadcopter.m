@@ -81,11 +81,9 @@ classdef FTController_quadcopter < CONTROLLER_CLASS
 
             upsi=-F4*z4;
             %upsi=-kpsi(1)*sign(z1(1))*abs(z1(1))^apsi(1)-(kpsi(2)*sign(z2(1))*abs(z2(1)))^apsi(2);%F4*Z4;%今回はこれで()
-            vs =[ux,uy,uz,upsi];
-            tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            obj.result.input = [tmp(1);
-                tmp(2);tmp(3);
-                tmp(4)];
+            vs =[ux,uy,upsi];
+            tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);%Uf一層目の入力を元のシステムに変換，Us二層目の入力を元のシステムに変換(トルク)
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];%元に戻した入力(トルク)
             obj.self.input = obj.result.input;
             result = obj.result;
 

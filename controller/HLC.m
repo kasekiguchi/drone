@@ -50,20 +50,20 @@ classdef HLC < CONTROLLER_CLASS
             % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
             x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-            xd(1:3)=Rb0'*xd(1:3);
-            xd(4) = 0;
-            xd(5:7)=Rb0'*xd(5:7);
-            xd(9:11)=Rb0'*xd(9:11);
-            xd(13:15)=Rb0'*xd(13:15);
-            xd(17:19)=Rb0'*xd(17:19);
+            xd(1:3)=Rb0'*xd(1:3); %位置
+            xd(4) = 0; %yaw
+            xd(5:7)=Rb0'*xd(5:7); %一層位置
+            xd(9:11)=Rb0'*xd(9:11); %二層位置
+            xd(13:15)=Rb0'*xd(13:15); %三層位置
+            xd(17:19)=Rb0'*xd(17:19); %四層位置
             
             if isfield(Param,'dt')
                 dt = Param.dt;
-                vf = Vfd(dt,x,xd',P,F1);
+                vf = Vfd(dt,x,xd',P,F1);%第一層サブシステムの入力
             else
                 vf = Vf(x,xd',P,F1);
             end
-            vs = Vs(x,xd',vf,P,F2,F3,F4);
+            vs = Vs(x,xd',vf,P,F2,F3,F4);%第二層サブシステムの入力
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
