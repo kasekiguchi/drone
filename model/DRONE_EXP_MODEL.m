@@ -21,19 +21,12 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             obj.flight_phase        = 's';
             switch param.conn_type
                 case "udp"
-                   % obj.arming_msg = [1100 1100 0 1100 1000 0 0 0 0];
                     obj.ESPr_num = param.num;
-                    [~,cmdout] = system("ipconfig");
-                    ipp=regexp(cmdout,"192.168.");
-                    cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
-                 %   param.IP=strcat('192.168','.',string(obj.ESPr_num(1)),'.',string(obj.ESPr_num(2)));
                     param.IP = char("192.168." + obj.ESPr_num(1) + "." + obj.ESPr_num(2));
-                    %param.port=8000+obj.ESPr_num;
                     param.port=8000;
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
-%                    obj.arming_msg = [500 500 0 500 1000 0 0 0 0];
                     if isnumeric(param.port)
                         param.port = strcat("COM",string(param.port));
                     else

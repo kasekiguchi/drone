@@ -6,7 +6,7 @@ for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,110]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
+        agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
@@ -81,8 +81,8 @@ for i = 1:N
     %% set controller property
     agent(i).controller = [];
     %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    %agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
-    agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
+    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
     %HLControlSetting = Controller_HL(dt);
     HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;
