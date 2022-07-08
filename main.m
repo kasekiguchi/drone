@@ -68,7 +68,7 @@ end
 
             % reference  
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0; 0; 0], time.t};
+            param(i).reference.point = {FH, [0; 0; 0], time.t};%reference.pointの目標位置を指定できる
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -178,23 +178,22 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=10;
+fsave=1;
 if fsave==1
     %変更しない
-%     ExportFolder='D:\student\momose';%実験用pcのパス
-    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+%     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
     %変更
-%     subfolder='exp';%sim or exp or sample
+    subfolder='exp';%sim or exp or sample
     % subfolder='sim';%sim or exp or sample
-    subfolder='sample';%sim or exp or sample
+%     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='aaaaaaaa';%実験,シミュレーション名
-    contents='abb';%実験,シミュレーション内容
+    ExpSimName='reference確認';%実験,シミュレーション名
+    contents='HL_ptop_x1';%実験,シミュレーション内容
     FolderName=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
-    SaveTitle=strcat(date,'_',contents);%ファイルの名前作成
     %フォルダができてないとき
     
         mkdir(FolderName);

@@ -1,6 +1,6 @@
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+fExp = 1 % 1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -16,7 +16,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 2;
+    te = 20;
 end
 
 %% generate environment
@@ -29,7 +29,7 @@ if fMotive
         %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.6')
         %% set connector (global instance)
         rigid_ids = [1];
-        motive = Connector_Natnet('ClientIP', '192.168.1.5'); % Motive 7 : hara
+        motive = Connector_Natnet('ClientIP', '192.168.1.8'); % Motive 7 : hara
         COMs = "COM21";
         %[COMs,rigid_ids,motive,initial_yaw_angles] = build_MASystem_with_motive('192.168.1.6'); % set ClientIP
         N = length(COMs);

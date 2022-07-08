@@ -26,7 +26,7 @@ syms sz4 [2 1] real
 syms sF4 [1 2] real
 Controller_param.Vs = matlabFunction([-sF2*[sz2;x(end-2)];-sF3*[sz3;x(end-1)];-sF4*sz4],"Vars",{sz2,sz3,sz4,sF2,sF3,sF4,x});
 
-FT =1;%有限整定を使う場合1
+FT =0;%有限整定を使う場合1
 if FT == 1
     % 入力のalphaを計算
     anum=4;%変数の数

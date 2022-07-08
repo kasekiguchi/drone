@@ -5,6 +5,8 @@ classdef FTC < CONTROLLER_CLASS
         result
         param
         Q
+        Vf
+        Vs
     end
     
     methods
@@ -13,6 +15,8 @@ classdef FTC < CONTROLLER_CLASS
             obj.param = param;
             obj.param.P = self.parameter.get();            
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
+            obj.Vf = param.Vf; % ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹
+            obj.Vs = param.Vs; % ŠK‘w‚Q‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹ 
         end
         
         function result = do(obj,param,~)
@@ -31,13 +35,13 @@ classdef FTC < CONTROLLER_CLASS
             F2 = Param.F2;
             F3 = Param.F3;
             F4 = Param.F4;
-            kx=[3.16,6.79,40.54,12.27];%ƒQƒCƒ“
+%             kx=[3.16,6.79,40.54,12.27];%ƒQƒCƒ“
             kx=F2;
-            ky=[3.16,6.79,40.54,12.27];%Œã‚Åparam‚ÉŠi”[
+%             ky=[3.16,6.79,40.54,12.27];%Œã‚Åparam‚ÉŠi”[
             ky=F3;
-            kz=[2.23,2.28];
+%             kz=[2.23,2.28];
             kz=F1;
-            kpsi=[1.41,1.35];
+%             kpsi=[1.41,1.35];
             kpsi=F4;
 %             ax=[0.692,0.75,0.818,0.9];%alpha
 %             ay=[0.692,0.75,0.818,0.9];
