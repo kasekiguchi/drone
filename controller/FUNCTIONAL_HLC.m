@@ -1,4 +1,4 @@
-classdef FunctionalHLC < CONTROLLER_CLASS
+classdef FUNCTIONAL_HLC < CONTROLLER_CLASS
     % クアッドコプター用階層型線形化を使った入力算出
     properties
         self
@@ -11,7 +11,7 @@ classdef FunctionalHLC < CONTROLLER_CLASS
     end
     
     methods
-        function obj = FunctionalHLC(self,param)
+        function obj = FUNCTIONAL_HLC(self,param)
             obj.self = self;
             obj.param = param;
             obj.param.P = self.parameter.get(obj.parameter_name);
@@ -32,11 +32,11 @@ classdef FunctionalHLC < CONTROLLER_CLASS
                 end
             end
             if isempty(param)
-                Param = param;
+                Param = obj.param;
             else
-                Param= obj.param;
+                Param= param{2};
             end
-            P = Param.P;
+            P = obj.param.P;
             F1 = Param.F1;
             F2 = Param.F2;
             F3 = Param.F3;
@@ -70,7 +70,7 @@ classdef FunctionalHLC < CONTROLLER_CLASS
             vs = obj.Vs(z2,z3,z4,F2,F3,F4);
 
             %% calc actual input
-            tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
+            tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
             result = obj.result;

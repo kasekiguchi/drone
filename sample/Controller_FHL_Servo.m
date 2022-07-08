@@ -25,8 +25,33 @@ syms sF3 [1 5] real
 syms sz4 [2 1] real
 syms sF4 [1 2] real
 Controller_param.Vs = matlabFunction([-sF2*[sz2;x(end-2)];-sF3*[sz3;x(end-1)];-sF4*sz4],"Vars",{sz2,sz3,sz4,sF2,sF3,sF4,x});
- 
-Controller.type="FUNCTIONAL_HLC_SERVO";
-Controller.name="hlc";
-Controller.param=Controller_param;
+
+FT =1;%有限整定を使う場合1
+if FT == 1
+    % 入力のalphaを計算
+    anum=4;%変数の数
+    alpha=zeros(anum+1,1);
+    alpha(anum+1)=1;
+    alpha(anum)=0.9;%alphaの初期値
+
+    for a=anum-1:-1:1
+        alpha(a)=(alpha(a+2)*alpha(a+1))/(2*alpha(a+2)-alpha(a+1));
+    end
+    Controller_param.alpha=alpha(anum);
+    Controller_param.ax=alpha;
+    Controller_param.ay=alpha;
+    % Controller_param.az=alpha(anum-1:anum,1);
+    % Controller_param.apsi=alpha(anum-1:anum,1);
+    %masui
+    Controller_param.az=alpha(1:2,1);
+    Controller_param.apsi=alpha(1:2,1);
+
+    Controller_param.dt = dt;
+     eig(diag([1,1,1],1)-[0;0;0;1]*Controller_param.F2)
+    Controller.type="FT";
+else
+    Controller.type="FUNCTIONAL_HLC_SERVO";
+end
+    Controller.name="hlc";
+    Controller.param=Controller_param;
 end

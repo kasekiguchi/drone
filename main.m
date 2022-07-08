@@ -79,18 +79,20 @@ end
             agent(i).do_reference(param(i).reference.list);
             
             %仮でreferenceを変更する
-            if FH.CurrentCharacter == "f"%take off してからflightしないとだめ
-                if fff==1
-                    xf = agent.reference.result.state.p - agent.estimator.result.state.p;
-                    fff=0;
-                end
-            end
-            agent.reference.result.state.p = agent.reference.result.state.p + xf;
+%             if FH.CurrentCharacter == "f"%take off してからflightしないとだめ
+%                 if fff==1
+%                     xf = agent.reference.result.state.p - agent.estimator.result.state.p;
+%                     fff=0;
+%                 end
+%             end
+%             agent.reference.result.state.p = agent.reference.result.state.p + xf;
+            
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
             % controller
             param(i).controller.hlc = {time.t, HLParam};
-            param(i).controller.ftc = {time.t, HLParam};
+%             param(i).controller.ftc = {time.t, HLParam};
+%             param(i).controller.pd = {};
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end

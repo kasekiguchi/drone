@@ -47,17 +47,7 @@ classdef FTC < CONTROLLER_CLASS
             ay = Param.ay;
             az = Param.az;
             apsi = Param.apsi;
-%             ax=[1,1,1,1];%SMCへのスイッチ
-%             ay=[1,1,1,1];
-%             az=[1,1];
-%             apsi=[1,1];
-            %     xd=Xd.p;
-            %     if isfield(Xd,'v')
-            %         xd=[xd;Xd.v];
-            %         if isfield(Xd,'dv')
-            %             xd=[xd;Xd.dv];
-            %         end
-            %     end
+            
             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
 
             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
@@ -69,25 +59,28 @@ classdef FTC < CONTROLLER_CLASS
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
 
-            if isfield(Param,'dt')
-                dt = Param.dt;
-                vf = Vfd(dt,x,xd',P,F1);
-            else
-                vf = Vf(x,xd',P,F1);
-            end
-             %z方向:FT
+            %%%%%%%%%%%%%%%%%%%
+             %% calc Z
+            z1 = Z1(x,xd',P);
+            vf = obj.Vf(z1,F1);
+            %x,y,psiの状態変数の値
+            z1=Z1(x,xd',P);%z方向
+            z2=Z2(x,xd',vf,P);%x方向
+            z3=Z3(x,xd',vf,P);%y方向
+            z4=Z4(x,xd',vf,P);%yaw
+            %vs = obj.Vs(z2,z3,z4,F2,F3,F4);
+            %%%%%%%%%%%%%%%%%%%
+            
+%%%%%%%%%%%%%%%%%%%%%%%            
+            %z方向:FT
 %             z1=Z1(x,xd',P);%z方向
 %             uz=-kz(1)*sign(z1(1))*abs(z1(1))^az(1)-(kz(2)*sign(z1(2))*abs(z1(2))^az(2));
 %             vf(1)=uz;%FT
 %             vs = Vs(x,xd',vf,P,F2,F3,F4);
 %             z1=Z1(x,xd',P);%z方向
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        %x,y,psiの状態変数の値
-            z1=Z1(x,xd',P);%z方向
-            z2=Z2(x,xd',vf,P);%x方向
-            z3=Z3(x,xd',vf,P);%y方向
-            z4=Z4(x,xd',vf,P);%yaw
-        %x,y,psiの入力
+%% x,y,psiの入力
           %近似1(sgnを近似)
 %           a=6;%a>2,alpha=0.9,a=6の時いい感じになる
 %             ux=-kx(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(kx(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(kx(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(kx(4)*tanh(a*z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1);%-F2*z2;%（17）式
@@ -110,7 +103,8 @@ classdef FTC < CONTROLLER_CLASS
         %upsi:HL or FT
             upsi=-F4*z4;%HL
 %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
-            
+%
+%%            
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];

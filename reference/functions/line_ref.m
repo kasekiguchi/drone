@@ -12,6 +12,11 @@ x = x_0+0.2*t;
 y = y_0;
 z = z_0;
 
+%PtoP
+x = x_0+3;
+y = y_0;
+z = z_0;
+
 ref=@(t)[x;y;z;0];%謎x,y,z are function of t.
 
 % x = x0+0.2*t;
