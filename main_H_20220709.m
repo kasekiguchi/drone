@@ -25,11 +25,25 @@ fV = 0;
 fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
-remove_flag = 0; % 終了判定
+fRemove = 0;    % 終了判定
+sample = 100;
+H = 25;
+            % --配列定義
+            Adata = zeros(sample, H);   % 評価値
+%             P_monte = zeros(sample, 3); % ある入力での位置
+%             V_monte = zeros(sample, 3); % ある入力での速度
+%             W_monte = zeros(sample, 3); % ある入力での姿勢角
+%             Q_monte = zeros(sample, 3);
+            Udiff_monte = zeros(4, sample);
+            fZpos = zeros(sample, 1);
+%             fSubIndex = zeros(sample, 1);
+%             fSubIndex = (1:sample)';
+            fSubIndex = zeros(sample, 1);
 run("main3_loop_setup.m");
 
 try
     while round(time.t, 5) <= te
+        tic
         %% sensor
         %    tic
         tStart = tic;
@@ -75,12 +89,12 @@ end
                 rz = (time.t/2)^2+0.1;
             else; rz = 1;
             end
-%             if (time.t/6)^2+0.1 <= rr(2)
-%                 rx = (time.t/6)^2+0.1;
-%                 ry = (time.t/6)^2+0.1;
-%             else; rx = 1.; ry = 1.;
-%             end
-            rx = 0.0; ry = 0.0; 
+            if (time.t/6)^2+0.1 <= rr(2)
+                rx = (time.t/6)^2+0.1;
+                ry = (time.t/6)^2+0.1;
+            else; rx = 1.; ry = 1.;
+            end
+%             rx = 0.0; ry = 0.0; 
 %             rz = 1.0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
@@ -104,7 +118,7 @@ end
             % 強制的に入力を決定
             
                 
-            tic
+            
             % MPC controller
             % ts探し
             ts = 0;
@@ -135,13 +149,14 @@ end
                     QQ_monte = diag([1, 1, 1]);
                 end
             else
-                PQ_monte  = diag([1, 1, 100]);  % 1 1 100
-                VQ_monte = diag([1000, 1000, 1]);   % 1000 1000 1
+                PQ_monte  = diag([1, 1, 1]);  % 1 1 100
+                VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
                 WQ_monte = diag([1, 1, 1]);
                 QQ_monte = diag([1, 1, 1]);
                 UdiffQ_monte = diag([1, 1, 1, 1]);
+                R_monte = diag([1, 1, 1]);  
             end
-            R_monte = 1;    
+              
             
             % 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
@@ -181,54 +196,89 @@ end
             rng('shuffle')
             sigma = 0.15;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;    b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
-            sample = 100;   % サンプル数
-            u = (b-a).*rand(sample,4) + a;        
-   
-            % 配列定義
-            Adata = zeros(sample, 1);   % 評価値
-%             P_monte = zeros(sample, 3); % ある入力での位置
-%             V_monte = zeros(sample, 3); % ある入力での速度
-%             W_monte = zeros(sample, 3); % ある入力での姿勢角
-%             Q_monte = zeros(sample, 3);
-            Udiff_monte = zeros(4, sample);
-            fZpos = zeros(sample, 1);
-            for monte = 1 : sample
-                [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
-%                 P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
-%                 Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
-%                 V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
-%                 W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
-                  % 入力の差
-%                 if fFirst == 0
-%                     Udiff_monte(:, monte) = 0;
-%                 else
-%                     Udiff_monte(:, monte) = abs(agent.input - u(monte, :)'); % 縦ベクトル u1 u2 u3 u4
-%                 end
-%                 fprintf("udfi : %f\n", Udiff_monte(monte, :))
-                if Fsub(tmpx(end, 3)') == 1
-                    Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
-%                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v，ｑ;
-%                     Adata(monte, 1) = fun(P_monte(monte, :)', Q_monte(monte, :)', V_monte(monte, :)', W_monte(monte, :)', u(monte, :)');    % p, v，ｑ, w, u;
-%                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)', Udiff_monte(:, monte));    % p, v，ｑ, w, udiff;
-                else
-                    Adata(monte, 1) = 10^10;
-                    fZpos(monte, 1) = 1;
-                end
-                fFirtst = 1;
+%             sample = 100;   % サンプル数
+%             H = 2;
+%             u = (b-a).*rand(sample,4*H) + a;
+            
+            %-- ランダムサンプリング　(4 * H * ParticleNum)
+                u1 = (b-a).*rand(H,sample) + a;
+                u2 = (b-a).*rand(H,sample) + a;
+                u3 = (b-a).*rand(H,sample) + a;
+                u4 = (b-a).*rand(H,sample) + a;
+                u1 = reshape(u1, [1, size(u1)]);
+                u2 = reshape(u2, [1, size(u2)]);
+                u3 = reshape(u3, [1, size(u3)]);
+                u4 = reshape(u4, [1, size(u4)]);
+                u = [u1; u2; u3; u4];
+                u_size = size(u, 3);
+            %-- 全予測軌道のパラメータの格納変数を定義
+                % position
+                p_data_1 = zeros(H, sample);
+                p_data_1 = reshape(p_data_1, [1, size(p_data_1)]);
+                p_data_2 = zeros(H, sample);
+                p_data_2 = reshape(p_data_2, [1, size(p_data_2)]);
+                p_data_3 = zeros(H, sample);
+                p_data_3 = reshape(p_data_3, [1, size(p_data_3)]);
+                p_data = [p_data_1; p_data_2; p_data_3];
                 
-            end
-            PE = funP(tmpx(end, 1:3)'); VE = funV(tmpx(end, 1:3)');
-            fprintf("pos : %f\t velo : %f\t", PE, VE)
-            calT = toc;
+                % velocity
+                v_data_1 = zeros(H, sample);
+                v_data_1 = reshape(v_data_1, [1, size(v_data_1)]);
+                v_data_2 = zeros(H, sample);
+                v_data_2 = reshape(v_data_2, [1, size(v_data_2)]);
+                v_data_3 = zeros(H, sample);
+                v_data_3 = reshape(v_data_3, [1, size(v_data_3)]);
+                v_data = [v_data_1; v_data_2; v_data_3];
+                
+                % angular
+                q_data_1 = zeros(H, sample);
+                q_data_1 = reshape(q_data_1, [1, size(q_data_1)]);
+                q_data_2 = zeros(H, sample);
+                q_data_2 = reshape(q_data_2, [1, size(q_data_2)]);
+                q_data_3 = zeros(H, sample);
+                q_data_3 = reshape(q_data_3, [1, size(q_data_3)]);
+                q_data = [q_data_1; q_data_2; q_data_3];
+                
+                % angular velocity
+                w_data_1 = zeros(H, sample);
+                w_data_1 = reshape(w_data_1, [1, size(w_data_1)]);
+                w_data_2 = zeros(H, sample);
+                w_data_2 = reshape(w_data_2, [1, size(w_data_2)]);
+                w_data_3 = zeros(H, sample);
+                w_data_3 = reshape(w_data_3, [1, size(w_data_3)]);
+                w_data = [w_data_1; w_data_2; w_data_3];
+                
+                % all
+                state_data = [p_data; q_data; v_data; w_data];
 
-            [~,min_index] = min(Adata(:, 1));   % 評価値の合計の最小値インデックス算出
-            agent.input = u(min_index, :)';     % 最適な入力の取得
-            fprintf("u: %f %f %f %f\t", u(min_index, 1), u(min_index, 2), u(min_index, 3), u(min_index, 4))
-%             agent.input = [u(min_index, 2) u(min_index, 2) u(min_index, 2) u(min_index, 2)]';   % 挙動確認用
-            if fZpos(min_index, 1) == 1
-%                 printf("Stop!!");               % エラーを吐かせて終了させる fprintfが本物
-                remove_flag = 1;
-            end
+            % --現在の状態
+                previous_state = agent.estimator.result.state.get();% 前の状態の取得
+            
+            %-- 微分方程式による予測軌道計算
+                for m = 1:u_size
+                    x0 = previous_state;
+                    state_data(:, 1, m) = x0;
+                    for h = 1:H-1
+                        [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+dt],x0);
+                        x0 = tmpx(end, :);
+                        state_data(:, h+1, m) = x0;
+                    end
+                end
+            
+            %-- 評価値計算
+                Evaluationtra = zeros(1, u_size);
+                for m = 1:u_size
+%                     Adata(1, m) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
+                    Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
+                        state_data(4:6, end, m), ...
+                        state_data(7:9, end, m), ...
+                        state_data(10:12, end, m));    % p, v，ｑ, w;
+            
+                end
+                [Bestcost, BestcostID] = min(Evaluationtra);
+            
+            %-- 入力への代入
+                agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
         end
         
         %% update state
@@ -280,10 +330,10 @@ end
             end
 
         end
-        if remove_flag == 1
+        if fRemove == 1
             break
         end
-
+        calT = toc % 1ステップ（25ms）にかかる計算時間
     end
 
 catch ME % for error
