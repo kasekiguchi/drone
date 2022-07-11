@@ -3,27 +3,37 @@ classdef TSCF_VEHICLE < CONTROLLER_CLASS
     properties
         self
         result
-        param
-        parameter_name = [];
+        F1
+        F2
+        eps = 0.001;
     end
     
     methods
         function obj = TSCF_VEHICLE(self,param)
             obj.self = self;
-            obj.param = param;
-            obj.param.P = self.parameter.get(obj.parameter_name);
+            obj.F1 = param.F1;
+            obj.F2 = param.F2;
         end
         
         function result=do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
-            x = model.state.get(); % = [p;q];
-            xd = ref.state.get();
-            F1 = Param.F1;
-            F2 = Param.F2;
-            
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+            p = model.state.p(1:2);
+            r = ref.state.p(1:2);
+            if isprop(ref.state,'v')
+                Vr = ref.state.v(1:2);
+            else
+                Vr = [0;0];
+            end
+            th = model.state.q(3);
+            e = [cos(th);sin(th)];
+            ep = [-sin(th);cos(th)];
+            dp = r - p;
+            u1=obj.F1*(Vr+dp)'*e;
+            u2=obj.F2*(Vr+dp)'*ep/(u1+obj.eps);
+
+            obj.result.input = [u1*e;0;0;0;u2];
             obj.self.input = obj.result.input;
             result = obj.result;
         end

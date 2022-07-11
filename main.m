@@ -88,6 +88,7 @@ end
             % controller
             param(i).controller.hlc = {time.t};
             param(i).controller.pd = {};
+            param(i).controller.tscf = {time.t};
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
