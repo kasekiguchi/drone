@@ -26,12 +26,12 @@ classdef DRAW_WHILL
             % param.plot_ref : reference plot true or not
             arguments
                 data
-                param.frame_size = [1.5,1,1.2]
-                param.L = 1.5;
-                param.W = 1;
+                param.frame_size = [1,0.5,1.2]
+                param.L = 1;
+                param.W = 0.5;
                 param.H = 1.2;
-                param.r = 0.2;
-                param.ww = 0.15;
+                param.r = 0.13;
+                param.ww = 0.06;
                 param.animation = false;
             end
             tM = max(data,[],1);
@@ -71,8 +71,8 @@ classdef DRAW_WHILL
             % seat
             Lx = L;
             Ly = W - ww;
-            [X,Y,Z]=ellipsoid(Lx/2,0,0.5,Ly/2,Ly/2,0.1);
-            seat(3) = surface(ax,X,Y,Z,'FaceColor','#555555');
+            [X,Y,Z]=ellipsoid(Lx/2,0,0.5,Ly/2,Ly/2,0.05);
+            seat(3) = surface(ax,X,Y,Z,'FaceColor','#AAAAAA','EdgeColor','#555555');
             
             % back
             Lx = 0.1;
@@ -93,12 +93,16 @@ classdef DRAW_WHILL
 
             % wheel
             R = rotmat(quaternion([1,0,0]*pi/2,"rotvec"),'point');
-            [xr,yr,zr] = cylinder(r);
+            [xr,yr,zr] = cylinder([0;r;r;0]);
+            zr(2,:) = 0;
+            zr(3,:) = 1;
             zr = zr*ww-ww/2;
             d = [Lx,-Ly/2-ww/2,r;Lx,Ly/2+ww/2,r;0,-Ly/2-ww/2,r;0,Ly/2+ww/2,r];
             for i = 1:4
-                 F = [R*[xr(1,:);yr(1,:);zr(1,:)];R*[xr(2,:);yr(2,:);zr(2,:)]]+[d(i,:)';d(i,:)'];
-                 h(i) = surface(ax,[F(1,:);F(4,:)],[F(2,:);F(5,:)],[F(3,:);F(6,:)],'FaceColor','#333333');
+                 %F = [R*[xr(1,:);yr(1,:);zr(1,:)];R*[xr(2,:);yr(2,:);zr(2,:)]]+[d(i,:)';d(i,:)'];
+                 F = [R*[xr(1,:);yr(1,:);zr(1,:)];R*[xr(2,:);yr(2,:);zr(2,:)];R*[xr(3,:);yr(3,:);zr(3,:)];R*[xr(4,:);yr(4,:);zr(4,:)]] ...
+                 +[d(i,:)';d(i,:)';d(i,:)';d(i,:)'];
+                 h(i) = surface(ax,[F(1,:);F(4,:);F(7,:);F(10,:)],[F(2,:);F(5,:);F(8,:);F(11,:)],[F(3,:);F(6,:);F(9,:);F(12,:)],'FaceColor','#AAA');
             end
 
             t = hgtransform('Parent',ax); 
@@ -117,17 +121,18 @@ classdef DRAW_WHILL
                 p
                 q
             end
-            body = obj.body;
             % Rotation matrix
             R = makehgtform('axisrotate',[0,0,1],q);
             % Translational matrix
             Txyz = makehgtform('translate',p);
-            set(body,'Matrix',Txyz*R);
+            set(obj.body,'Matrix',Txyz*R);
             drawnow
         end
         function animation(obj,data,param)
-            % obj.animation(logger,param)
-            % logger : LOGGER class instance
+            % data : field t, p, q
+            %   t : time
+            %   p : 3D position
+            %   q : yaw angle
             % param.realtime (optional) : t-or-f : logger.data('t')を使うか
             arguments
                 obj

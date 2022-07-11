@@ -12,7 +12,7 @@ classdef WHILL < ABSTRACT_SYSTEM
             end
             obj=obj@ABSTRACT_SYSTEM(args,param);
             if contains(args.type,"EXP")
-                obj.plant = DRONE_EXP_MODEL(args);
+                obj.plant = WHILL_EXP_MODEL(args);
             end
             obj.parameter = param;
         end
@@ -28,8 +28,12 @@ classdef WHILL < ABSTRACT_SYSTEM
                 logger
                 param.target = 1;
             end
-            p = obj.parameter;
-            DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target);
+            data.t = logger.data("t");
+            data.p = logger.data(param.target,"p","e");
+            data.p(3,:) = 2;
+            data.q = logger.data(param.target,"q","e");            
+            vehicle = DRAW_WHILL(data.p);
+            vehicle.animation(data)
         end
     end
 end

@@ -25,6 +25,9 @@ function Estimator = Estimator_EKF(agent,output,var)
     elseif  agent.model.state.type == 4 % 姿勢がオイラーパラメータの場合
         EKF_param.B = [eye(6)*dt^2;zeros(1,6);eye(6)*dt]; % システムノイズが加わるチャンネル
     end
+
+%    EKF_param.B = diag([dt^2,dt^2,0,0,0,dt]);
+    
     if strcmp(agent.model.name,"Suspended_Load_Model")
         EKF_param.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
         EKF_param.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]);
