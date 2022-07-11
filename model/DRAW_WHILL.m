@@ -142,7 +142,7 @@ classdef DRAW_WHILL
             end
             t = data.t;
             p = data.p;
-            q = data.q;
+            q = data.q(:,3);
 
             if param.gif
                 sizen = 256;
