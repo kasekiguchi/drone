@@ -80,7 +80,7 @@ end
 %                 ry = (time.t/6)^2+0.1;
 %             else; rx = 1.; ry = 1.;
 %             end
-            rx = 1.0; ry = 1.0; 
+            rx = 0.0; ry = 0.0; 
 %             rz = 1.0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
@@ -109,6 +109,9 @@ end
             % ts探し
             ts = 0;
 %             p_monte = agent.model.state.p
+            state_monte = agent.model.state;
+            ref_monte = agent.reference.result.state;
+            Params.ref_input = 0.269 * 9.81 / 4;
             % 入力のサンプルから評価
 %             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
@@ -135,69 +138,64 @@ end
                     QQ_monte = diag([1, 1, 1]);
                 end
             else
-                PQ_monte  = diag([100, 100, 100]);  % 1 1 100
-                VQ_monte = diag([100, 100, 100]);   % 1000 1000 1
-                WQ_monte = diag([1, 1, 1]);
-                QQ_monte = diag([1, 1, 1]);
-                UdiffQ_monte = diag([1, 1, 1, 1]);
+                Params.PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
+                Params.VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
+                Params.WQ_monte = diag([1, 1, 1]);
+                Params.QQ_monte = 100*diag([1, 1, 1]);
+                Params.R_monte = 1/100;    
+%                 UdiffQ_monte = diag([1, 1, 1, 1]);
             end
-            R_monte = 1;    
+            
             
             % 評価関数
-%             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
-            funP = @(p_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p); 
-            funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
-%             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
-%             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte; 
-            fun = @(p_monte, q_monte, v_monte, w_monte) ...
-                (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-                +v_monte'*VQ_monte*v_monte...
-                +w_monte'*WQ_monte*w_monte...
-                +q_monte'*QQ_monte*q_monte; 
-%             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte...
-%                 +q_monte'*QQ_monte*q_monte...
-%                 +u_monte'*R_monte*u_monte; 
-            % 入力差
-%             fun = @(p_monte, q_monte, v_monte, w_monte, udiff_monte) ...
-%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte...
-%                 +q_monte'*QQ_monte*q_monte...
-%                 +udiff_monte'*UdiffQ_monte*udiff_monte; 
+%             fun = FunctionOpt(7, agent, Params);
+%             "pu";                1
+%             "pv";                2
+%             "pvw";               3
+%             "pqvw";              4
+%             "pqvwu";             5
+%             "pqvwu_diff";        6
+%             "pqvwu_ref";         7
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
             % 状態の表示
             fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
-                agent.model.state.p(1), agent.model.state.p(2), agent.model.state.p(3),...
-                agent.model.state.v(1), agent.model.state.v(2), agent.model.state.v(3),...
-                agent.reference.result.state.p(1), agent.reference.result.state.p(2), agent.reference.result.state.p(3),...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
                 fV);
             % ホバリングから±sigma%の範囲
             rng('shuffle')
             sigma = 0.15;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;    b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
             sample = 100;   % サンプル数
-            u = (b-a).*rand(sample,4) + a;        
+            H = 1;
+%             u = (b-a).*rand(sample,4) + a;  
+            u1 = (b-a).*rand(H,sample) + a;
+            u2 = (b-a).*rand(H,sample) + a;
+            u3 = (b-a).*rand(H,sample) + a;
+            u4 = (b-a).*rand(H,sample) + a;
+            u1 = reshape(u1, [1, size(u1)]);
+            u2 = reshape(u2, [1, size(u2)]);
+            u3 = reshape(u3, [1, size(u3)]);
+            u4 = reshape(u4, [1, size(u4)]);
+            u = [u1; u2; u3; u4];   % 4 * horizon * sample
    
             % 配列定義
             Adata = zeros(sample, 1);   % 評価値
-%             P_monte = zeros(sample, 3); % ある入力での位置
-%             V_monte = zeros(sample, 3); % ある入力での速度
-%             W_monte = zeros(sample, 3); % ある入力での姿勢角
-%             Q_monte = zeros(sample, 3);
-            Udiff_monte = zeros(4, sample);
+            Params.P_monte = zeros(sample, 3); % ある入力での位置
+            Params.V_monte = zeros(sample, 3); % ある入力での速度
+            Params.W_monte = zeros(sample, 3); % ある入力での姿勢角
+            Params.Q_monte = zeros(sample, 3);
+%             Udiff_monte = zeros(4, sample);
             fZpos = zeros(sample, 1);
+            
             for monte = 1 : sample
-                [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(monte, :)',agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
-%                 P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
-%                 Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
-%                 V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
-%                 W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
+                [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, :, monte),agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
+                Params.P_monte(monte, :) = tmpx(end, 1:3);     % ある入力での位置 x, y, z
+                Params.Q_monte(monte, :) = tmpx(end, 4:6);     % 姿勢角
+                Params.V_monte(monte, :) = tmpx(end, 7:9);     % ある入力での速度 vx, vy, vz
+                Params.W_monte(monte, :) = tmpx(end, 10:12);   % ある入力での姿勢の角速度
                   % 入力の差
 %                 if fFirst == 0
 %                     Udiff_monte(:, monte) = 0;
@@ -205,25 +203,25 @@ end
 %                     Udiff_monte(:, monte) = abs(agent.input - u(monte, :)'); % 縦ベクトル u1 u2 u3 u4
 %                 end
 %                 fprintf("udfi : %f\n", Udiff_monte(monte, :))
+                % 
                 if Fsub(tmpx(end, 3)') == 1
-                    Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
+%                     Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
 %                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v，ｑ;
-%                     Adata(monte, 1) = fun(P_monte(monte, :)', Q_monte(monte, :)', V_monte(monte, :)', W_monte(monte, :)', u(monte, :)');    % p, v，ｑ, w, u;
+%                     Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)', u(:, :, monte));    % p, v，ｑ, w, u;
 %                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)', Udiff_monte(:, monte));    % p, v，ｑ, w, udiff;
+                    [fun, Adata(monte, 1)] = FunctionOpt(4, agent, Params, u(:,:,monte));
                 else
-                    Adata(monte, 1) = 10^10;
+                    Adata(monte, 1) = NaN;
                     fZpos(monte, 1) = 1;
                 end
                 fFirtst = 1;
                 
             end
-            PE = funP(tmpx(end, 1:3)'); VE = funV(tmpx(end, 1:3)');
-            fprintf("pos : %f\t velo : %f\t", PE, VE)
             calT = toc;
 
             [~,min_index] = min(Adata(:, 1));   % 評価値の合計の最小値インデックス算出
-            agent.input = u(min_index, :)';     % 最適な入力の取得
-            fprintf("u: %f %f %f %f\t", u(min_index, 1), u(min_index, 2), u(min_index, 3), u(min_index, 4))
+            agent.input = u(:, :, min_index);     % 最適な入力の取得
+            fprintf("u: %f %f %f %f\t", u(1, :, min_index), u(2, :, min_index), u(3, :, min_index), u(4, :, min_index))
 %             agent.input = [u(min_index, 2) u(min_index, 2) u(min_index, 2) u(min_index, 2)]';   % 挙動確認用
             if fZpos(min_index, 1) == 1
 %                 printf("Stop!!");               % エラーを吐かせて終了させる fprintfが本物
