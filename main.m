@@ -73,7 +73,7 @@ end
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [3; 2; 1], time.t};
+            param(i).reference.point = {FH, [0; 0; 1], time.t};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -164,7 +164,7 @@ close all
 clc
 % plot 
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","per"},{1,"input",""});
+logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation

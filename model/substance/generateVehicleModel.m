@@ -21,6 +21,12 @@ F1 = (u1 - jw*dob(2))/r;
 F2 = (u2 - jw*dob(3))/r;
 F = F1+F2;       % Drive force
 tau = (W/2)*(F1-F2); % torque
+%%
+x = [p(1:2);q(3)];
+f = [V*cos(q(3));V*sin(q(3));ob(3)];
+
+
+
 %% Translational model
 ddpf = [0;0;-gravity];
 ddpg = Rb0*[0;0;(T1+T2+T3+T4)/m];
