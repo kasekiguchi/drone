@@ -30,6 +30,7 @@ run("main3_loop_setup.m");
 
 try
     while round(time.t, 5) <= te
+        tic
         %% sensor
         %    tic
         tStart = tic;
@@ -104,13 +105,13 @@ end
             % 強制的に入力を決定
 
 
-            tic
+            
             % MPC controller
             % ts探し
             ts = 0;
 %             p_monte = agent.model.state.p
             state_monte = agent.model.state;
-            ref_monte = agent.reference.result.state;
+%             ref_monte = agent.reference.result.state;
             Params.ref_input = 0.269 * 9.81 / 4;
             % 入力のサンプルから評価
 %             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
@@ -122,26 +123,26 @@ end
                 % 重みの速度変化
                 if min(abs(agent.model.state.v(1:2))) < 0.3
                     fV = 0;
-                    PQ_monte  = diag([100, 100, 1]);
-                    VQ_monte = diag([1, 1, 1]);
-                    WQ_monte = diag([0.1, 0.1, 1]);
-                    QQ_monte = diag([1, 1, 1]);
+                    Params.PQ_monte  = diag([100, 100, 1]);
+                    Params.VQ_monte = diag([1, 1, 1]);
+                    Params.WQ_monte = diag([0.1, 0.1, 1]);
+                    Params.QQ_monte = diag([1, 1, 1]);
                 else
                     if fVcount
                         fV_time = time.t;
                         fVcount = 0;
                     end
                     fV = 1;
-                    PQ_monte  = diag([1, 1, 1]); % 1 1 100
-                    VQ_monte = diag([1, 1, 1]); % 100 100 1
-                    WQ_monte = diag([1, 1, 1]);
-                    QQ_monte = diag([1, 1, 1]);
+                    Params.PQ_monte  = diag([1, 1, 1]); % 1 1 100
+                    Params.VQ_monte = diag([1, 1, 1]); % 100 100 1
+                    Params.WQ_monte = diag([1, 1, 1]);
+                    Params.QQ_monte = diag([1, 1, 1]);
                 end
             else
                 Params.PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
                 Params.VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
-                Params.WQ_monte = diag([1, 1, 1]);
-                Params.QQ_monte = 100*diag([1, 1, 1]);
+                Params.WQ_monte = 100*diag([1, 1, 1]);
+                Params.QQ_monte = diag([1, 1, 1]);
                 Params.R_monte = 1/100;
 %                 UdiffQ_monte = diag([1, 1, 1, 1]);
             end
@@ -156,6 +157,46 @@ end
 %             "pqvwu";             5
 %             "pqvwu_diff";        6
 %             "pqvwu_ref";         7
+            % 評価関数をまとめている関数
+            ref_monte = agent.reference.result.state;
+            % 重み
+            PQ_monte = Params.PQ_monte;
+            VQ_monte = Params.VQ_monte;
+            WQ_monte = Params.WQ_monte;
+            QQ_monte = Params.QQ_monte;
+            R_monte = Params.R_monte;
+            ref_input = Params.ref_input;
+
+            % 評価関数
+        %     FuncArray = cell(10, 1);
+%             fun = @(p_monte, u_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+%                     +(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
+%             fun = @(p_monte, v_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)+v_monte'*VQ_monte*v_monte;
+%             fun = @(p_monte, q_monte, v_monte, w_monte) ...
+%                     (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+%                     +v_monte'*VQ_monte*v_monte...
+%                     +w_monte'*WQ_monte*w_monte...
+%                     +q_monte'*QQ_monte*q_monte; 
+        %     fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+        %             (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+        %             +v_monte'*VQ_monte*v_monte...
+        %             +w_monte'*WQ_monte*w_monte...
+        %             +q_monte'*QQ_monte*q_monte...
+        %             +u_monte'*R_monte*u_monte; 
+        %     fun = @(p_monte, q_monte, v_monte, w_monte, udiff_monte) ...
+        %             (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+        %             +v_monte'*VQ_monte*v_monte...
+        %             +w_monte'*WQ_monte*w_monte...
+        %             +q_monte'*QQ_monte*q_monte...
+        %             +udiff_monte'*UdiffQ_monte*udiff_monte; 
+            fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+                    (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+                    +v_monte'*VQ_monte*v_monte...
+                    +w_monte'*WQ_monte*w_monte...
+                    +q_monte'*QQ_monte*q_monte...
+                    +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
+        
+        
             % 制約条件
             Fsub = @(sub_monte1) sub_monte1 > 0;
             % 状態の表示
@@ -168,7 +209,7 @@ end
             rng('shuffle')
             sigma = 0.15;
             a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;    b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
-            sample = 100;   % サンプル数
+            sample = 2500;   % サンプル数
             H = 1;
 %             u = (b-a).*rand(sample,4) + a;
             u1 = (b-a).*rand(H,sample) + a;
@@ -207,9 +248,9 @@ end
                 if Fsub(tmpx(end, 3)') == 1
 %                     Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
 %                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', V_monte(monte, 1:3)');    % p, v，ｑ;
-%                     Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)', u(:, :, monte));    % p, v，ｑ, w, u;
+                    Adata(monte, 1) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)', u(:, :, monte));    % p, v，ｑ, w, u;
 %                     Adata(monte, 1) = fun(P_monte(monte, 1:3)', Q_monte(monte, 1:3)', V_monte(monte, 1:3)', W_monte(monte, 1:3)', Udiff_monte(:, monte));    % p, v，ｑ, w, udiff;
-                    [fun, Adata(monte, 1)] = FunctionOpt(4, agent, Params, u(:,:,monte));
+%                     [fun, Adata(monte, 1)] = FunctionOpt(4, agent, Params, u(:,:,monte));
                 else
                     Adata(monte, 1) = NaN;
                     fZpos(monte, 1) = 1;
@@ -217,7 +258,7 @@ end
                 fFirtst = 1;
 
             end
-            calT = toc;
+            
 
             [~,min_index] = min(Adata(:, 1));   % 評価値の合計の最小値インデックス算出
             agent.input = u(:, :, min_index);     % 最適な入力の取得
@@ -278,6 +319,7 @@ end
             end
 
         end
+        calT = toc
         if remove_flag == 1
             break
         end

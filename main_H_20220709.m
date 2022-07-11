@@ -122,9 +122,10 @@ end
             % MPC controller
             % ts探し
             ts = 0;
-%             p_monte = agent.model.state.p
+            state_monte = agent.model.state;
+            ref_monte = agent.reference.result.state;
             % 入力のサンプルから評価
-%             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
+            ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
 %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
 
@@ -149,28 +150,28 @@ end
                     QQ_monte = diag([1, 1, 1]);
                 end
             else
-                PQ_monte  = diag([1, 1, 1]);  % 1 1 100
+                PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
                 VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
                 WQ_monte = diag([1, 1, 1]);
                 QQ_monte = diag([1, 1, 1]);
                 UdiffQ_monte = diag([1, 1, 1, 1]);
-                R_monte = diag([1, 1, 1]);  
+                R_monte = diag([1, 1, 1, 1]);  
             end
               
             
-            % 評価関数
+            %-- 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
-            funP = @(p_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p); 
+            funP = @(p_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p); 
             funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
 %             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
 %             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
 %                 +v_monte'*VQ_monte*v_monte...
 %                 +w_monte'*WQ_monte*w_monte; 
-            fun = @(p_monte, q_monte, v_monte, w_monte) ...
-                (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-                +v_monte'*VQ_monte*v_monte...
-                +w_monte'*WQ_monte*w_monte...
-                +q_monte'*QQ_monte*q_monte; 
+%             fun = @(p_monte, q_monte, v_monte, w_monte) ...
+%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
+%                 +v_monte'*VQ_monte*v_monte...
+%                 +w_monte'*WQ_monte*w_monte...
+%                 +q_monte'*QQ_monte*q_monte; 
 %             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
 %                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
 %                 +v_monte'*VQ_monte*v_monte...
@@ -184,23 +185,31 @@ end
 %                 +w_monte'*WQ_monte*w_monte...
 %                 +q_monte'*QQ_monte*q_monte...
 %                 +udiff_monte'*UdiffQ_monte*udiff_monte; 
-            % 制約条件
-            Fsub = @(sub_monte1) sub_monte1 > 0;
-            % 状態の表示
+            
+            % 入力を含めた ref_input:ホバリング
+            fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+                    (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+                    +v_monte'*VQ_monte*v_monte...
+                    +w_monte'*WQ_monte*w_monte...
+                    +q_monte'*QQ_monte*q_monte...
+                    +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
+            %-- 制約条件
+                Fsub = @(sub_monte1) sub_monte1 > 0;
+                subCheck = zeros(sample, 1);
+            %-- 状態の表示
             fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
-                agent.model.state.p(1), agent.model.state.p(2), agent.model.state.p(3),...
-                agent.model.state.v(1), agent.model.state.v(2), agent.model.state.v(3),...
-                agent.reference.result.state.p(1), agent.reference.result.state.p(2), agent.reference.result.state.p(3),...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
                 fV);
-            % ホバリングから±sigma%の範囲
-            rng('shuffle')
-            sigma = 0.15;
-            a = 0.269 * 9.81 / 4 - 0.269 * 9.81 / 4 * sigma;    b = 0.269 * 9.81 / 4 + 0.269 * 9.81 / 4 * sigma;
-%             sample = 100;   % サンプル数
-%             H = 2;
+            %-- ホバリングから±sigma%の範囲
+                rng('shuffle')
+                sigma = 0.15;
+                a = (1-sigma)*0.269*9.81/4;
+                b = (1+sigma)*0.269*9.81/4;
 %             u = (b-a).*rand(sample,4*H) + a;
             
-            %-- ランダムサンプリング　(4 * H * ParticleNum)
+            %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
                 u1 = (b-a).*rand(H,sample) + a;
                 u2 = (b-a).*rand(H,sample) + a;
                 u3 = (b-a).*rand(H,sample) + a;
@@ -210,45 +219,16 @@ end
                 u3 = reshape(u3, [1, size(u3)]);
                 u4 = reshape(u4, [1, size(u4)]);
                 u = [u1; u2; u3; u4];
-                u_size = size(u, 3);
-            %-- 全予測軌道のパラメータの格納変数を定義
-                % position
-                p_data_1 = zeros(H, sample);
-                p_data_1 = reshape(p_data_1, [1, size(p_data_1)]);
-                p_data_2 = zeros(H, sample);
-                p_data_2 = reshape(p_data_2, [1, size(p_data_2)]);
-                p_data_3 = zeros(H, sample);
-                p_data_3 = reshape(p_data_3, [1, size(p_data_3)]);
-                p_data = [p_data_1; p_data_2; p_data_3];
-                
-                % velocity
-                v_data_1 = zeros(H, sample);
-                v_data_1 = reshape(v_data_1, [1, size(v_data_1)]);
-                v_data_2 = zeros(H, sample);
-                v_data_2 = reshape(v_data_2, [1, size(v_data_2)]);
-                v_data_3 = zeros(H, sample);
-                v_data_3 = reshape(v_data_3, [1, size(v_data_3)]);
-                v_data = [v_data_1; v_data_2; v_data_3];
-                
-                % angular
-                q_data_1 = zeros(H, sample);
-                q_data_1 = reshape(q_data_1, [1, size(q_data_1)]);
-                q_data_2 = zeros(H, sample);
-                q_data_2 = reshape(q_data_2, [1, size(q_data_2)]);
-                q_data_3 = zeros(H, sample);
-                q_data_3 = reshape(q_data_3, [1, size(q_data_3)]);
-                q_data = [q_data_1; q_data_2; q_data_3];
-                
-                % angular velocity
-                w_data_1 = zeros(H, sample);
-                w_data_1 = reshape(w_data_1, [1, size(w_data_1)]);
-                w_data_2 = zeros(H, sample);
-                w_data_2 = reshape(w_data_2, [1, size(w_data_2)]);
-                w_data_3 = zeros(H, sample);
-                w_data_3 = reshape(w_data_3, [1, size(w_data_3)]);
-                w_data = [w_data_1; w_data_2; w_data_3];
-                
-                % all
+                u_size = size(u, 3);    % sample
+            %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
+                p_data = zeros(H, sample);
+                p_data = repmat(reshape(p_data, [1, size(p_data)]), 3, 1);
+                v_data = zeros(H, sample);
+                v_data = repmat(reshape(v_data, [1, size(v_data)]), 3, 1);
+                q_data = zeros(H, sample);
+                q_data = repmat(reshape(q_data, [1, size(q_data)]), 3, 1);
+                w_data = zeros(H, sample);
+                w_data = repmat(reshape(w_data, [1, size(w_data)]), 3, 1);
                 state_data = [p_data; q_data; v_data; w_data];
 
             % --現在の状態
@@ -262,17 +242,26 @@ end
                         [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+dt],x0);
                         x0 = tmpx(end, :);
                         state_data(:, h+1, m) = x0;
+                        if tmpx(end, 3) < 0
+                            subCheck(m) = 1;    % 制約外なら flag = 1
+                            break;              % ホライズン途中でも制約外で終了
+                        end
                     end
                 end
             
             %-- 評価値計算
                 Evaluationtra = zeros(1, u_size);
                 for m = 1:u_size
-%                     Adata(1, m) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
-                    Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
-                        state_data(4:6, end, m), ...
-                        state_data(7:9, end, m), ...
-                        state_data(10:12, end, m));    % p, v，ｑ, w;
+                    if subCheck(m)
+                        Evaluationtra(1, m) = NaN;  % 制約外
+                    else
+%                         Adata(1, m) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
+                        Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
+                            state_data(4:6, end, m), ...
+                            state_data(7:9, end, m), ...
+                            state_data(10:12, end, m),...
+                            u(:, end, m));    % p, v，ｑ, w, u;
+                    end
             
                 end
                 [Bestcost, BestcostID] = min(Evaluationtra);
