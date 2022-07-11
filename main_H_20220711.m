@@ -26,8 +26,6 @@ fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
-sample = 100;
-H = 25;
             % --配列定義
             Adata = zeros(sample, H);   % 評価値
 %             P_monte = zeros(sample, 3); % ある入力での位置
@@ -226,35 +224,35 @@ end
                 % 重みの速度変化
                 if min(abs(agent.model.state.v(1:2))) < 0.3
                     fV = 0;
-                    PQ_monte  = diag([100, 100, 1]);
-                    VQ_monte = diag([1, 1, 1]);
-                    WQ_monte = diag([0.1, 0.1, 1]);
-                    QQ_monte = diag([1, 1, 1]);
+                    Params.Weight.P  = diag([100, 100, 1]);
+                    Params.Weight.Q = diag([1, 1, 1]);
+                    Params.Weight.V = diag([0.1, 0.1, 1]);
+                    Params.Weight.W = diag([1, 1, 1]);
                 else
                     if fVcount
                         fV_time = time.t;
                         fVcount = 0;
                     end
                     fV = 1;
-                    PQ_monte  = diag([1, 1, 1]); % 1 1 100
-                    VQ_monte = diag([1, 1, 1]); % 100 100 1
-                    WQ_monte = diag([1, 1, 1]);
-                    QQ_monte = diag([1, 1, 1]);
+                    Params.Weight.P  = diag([1, 1, 1]); % 1 1 100
+                    Params.Weight.Q = diag([1, 1, 1]); % 100 100 1
+                    Params.Weight.V = diag([1, 1, 1]);
+                    Params.Weight.W = diag([1, 1, 1]);
                 end
             else
-                PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
-                VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
-                WQ_monte = diag([1, 1, 1]);
-                QQ_monte = diag([1, 1, 1]);
-                UdiffQ_monte = diag([1, 1, 1, 1]);
-                R_monte = diag([1, 1, 1, 1]);  
+                Params.Weight.P  = 1000*diag([1, 1, 1]);  % 1 1 100
+                Params.Weight.Q = diag([1, 1, 1]);   % 1000 1000 1
+                Params.Weight.V = diag([1, 1, 1]);
+                Params.Weight.W = diag([1, 1, 1]);
+%                 UdiffQ_monte = diag([1, 1, 1, 1]);
+                Params.Weight.R = diag([1, 1, 1, 1]);  
             end
               
             
             %-- 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
-            funP = @(p_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p); 
-            funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
+%             funP = @(p_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p); 
+%             funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
 %             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
 %             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
 %                 +v_monte'*VQ_monte*v_monte...
@@ -280,11 +278,11 @@ end
             
             % 入力を含めた ref_input:ホバリング
             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-                    (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
-                    +v_monte'*VQ_monte*v_monte...
-                    +w_monte'*WQ_monte*w_monte...
-                    +q_monte'*QQ_monte*q_monte...
-                    +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
+                    (p_monte - ref_monte.p)'*Params.Weight.P*(p_monte - ref_monte.p)...
+                    +v_monte'*Params.Weight.V*v_monte...
+                    +w_monte'*Params.Weight.W*w_monte...
+                    +q_monte'*Params.Weight.Q*q_monte...
+                    +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input);
             %-- 制約条件
                 Fsub = @(sub_monte1) sub_monte1 > 0;
                 subCheck = zeros(sample, 1);
@@ -312,7 +310,7 @@ end
                 u4 = reshape(u4, [1, size(u4)]);
                 u = [u1; u2; u3; u4];
                 u_size = size(u, 3);    % sample
-            %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
+            %-- 全予測軌道のパラメータの格納変数を定義,  repmat で短縮
                 p_data = zeros(H, sample);
                 p_data = repmat(reshape(p_data, [1, size(p_data)]), 3, 1);
                 v_data = zeros(H, sample);
