@@ -1,0 +1,129 @@
+# CompilerName=mingw64
+# Mode=optim
+ninja_required_version = 1.3
+
+# Basic folders
+root = .
+builddir = $root/build/win64
+matlabdir = C:/Program Files/MATLAB/R2020b
+startdir = C:/Users/Rigil/Desktop/MyProject/drone/ws_development/ws_controller/MPCcodegen
+
+# Toolchain information
+cc = C:\ProgramData\MATLAB\SupportPackages\R2020b\3P.instrset\mingw_w64.instrset\bin\gcc
+cxx = C:\ProgramData\MATLAB\SupportPackages\R2020b\3P.instrset\mingw_w64.instrset\bin\g++
+linker = C:\ProgramData\MATLAB\SupportPackages\R2020b\3P.instrset\mingw_w64.instrset\bin\gcc
+linkerxx = C:\ProgramData\MATLAB\SupportPackages\R2020b\3P.instrset\mingw_w64.instrset\bin\g++
+
+cflags =  -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I "C:\Users\Rigil\Desktop\MyProject\drone\ws_development\ws_controller\MPCcodegen\codegen\mex\fminconMEX_Trackobjective" -I "C:\Users\Rigil\Desktop\MyProject\drone\ws_development\ws_controller\MPCcodegen" -I "C:\Users\Rigil\Desktop\MyProject\drone\ws_development\ws_controller\MPCcodegen\codegen\mex\fminconMEX_Trackobjective\interface" -I "C:\Program Files\MATLAB\R2020b\extern\include" -I "." -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1  
+
+cxxflags =  -c -fexceptions -fno-omit-frame-pointer -std=c++11 -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c++11 -I "C:\Users\Rigil\Desktop\MyProject\drone\ws_development\ws_controller\MPCcodegen\codegen\mex\fminconMEX_Trackobjective" -I "C:\Users\Rigil\Desktop\MyProject\drone\ws_development\ws_controller\MPCcodegen" -I "C:\Users\Rigil\Desktop\MyProject\drone\ws_development\ws_controller\MPCcodegen\codegen\mex\fminconMEX_Trackobjective\interface" -I "C:\Program Files\MATLAB\R2020b\extern\include" -I "." -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=fminconMEX_Trackobjective_mex -D__USE_MINGW_ANSI_STDIO=1  
+
+ldflags =  -m64 -Wl,--no-undefined -shared -static -L"C:\Program Files\MATLAB\R2020b\extern\lib\win64\mingw64" -llibmx -llibmex -llibmat -lm -llibmwlapack -llibmwblas -o "fminconMEX_Trackobjective_mex.mexw64" -L"$matlabdir\extern\lib\win64\mingw64" -llibmwblas -llibmwlapack -llibemlrt -llibcovrt -llibut -llibmwmathutil  -Wl,--version-script,fminconMEX_Trackobjective_mex.map
+
+# Build Rules
+rule cc
+    command = $cc $cflags $in -o $out
+
+rule cxx
+    command = $cxx $cxxflags $in -o $out
+
+rule link
+    command = $linker @$out.rsp $ldflags
+    rspfile = $out.rsp
+    rspfile_content = $in
+
+rule linkxx
+    command = $linkerxx $in $ldflags
+
+# Build
+build $builddir/fminconMEX_Trackobjective_data.o : cc $root/fminconMEX_Trackobjective_data.c
+build $builddir/rt_nonfinite.o : cc $root/rt_nonfinite.c
+build $builddir/fminconMEX_Trackobjective_initialize.o : cc $root/fminconMEX_Trackobjective_initialize.c
+build $builddir/fminconMEX_Trackobjective_terminate.o : cc $root/fminconMEX_Trackobjective_terminate.c
+build $builddir/fminconMEX_Trackobjective.o : cc $root/fminconMEX_Trackobjective.c
+build $builddir/fmincon.o : cc $root/fmincon.c
+build $builddir/factoryConstruct.o : cc $root/factoryConstruct.c
+build $builddir/factoryConstruct1.o : cc $root/factoryConstruct1.c
+build $builddir/computeObjective_.o : cc $root/computeObjective_.c
+build $builddir/eml_int_forloop_overflow_check.o : cc $root/eml_int_forloop_overflow_check.c
+build $builddir/TrackobjectiveMEX.o : cc $root/TrackobjectiveMEX.c
+build $builddir/checkVectorNonFinite.o : cc $root/checkVectorNonFinite.c
+build $builddir/factoryConstruct2.o : cc $root/factoryConstruct2.c
+build $builddir/computeConstrViolationIneq_.o : cc $root/computeConstrViolationIneq_.c
+build $builddir/ixamax.o : cc $root/ixamax.c
+build $builddir/computePrimalFeasError.o : cc $root/computePrimalFeasError.c
+build $builddir/computeDualFeasError.o : cc $root/computeDualFeasError.c
+build $builddir/computeComplError.o : cc $root/computeComplError.c
+build $builddir/isDeltaXTooSmall.o : cc $root/isDeltaXTooSmall.c
+build $builddir/xdot.o : cc $root/xdot.c
+build $builddir/xnrm2.o : cc $root/xnrm2.c
+build $builddir/xasum.o : cc $root/xasum.c
+build $builddir/computeMeritFcn.o : cc $root/computeMeritFcn.c
+build $builddir/fillLambdaStruct.o : cc $root/fillLambdaStruct.c
+build $builddir/_coder_fminconMEX_Trackobjective_api.o : cc $root/interface/_coder_fminconMEX_Trackobjective_api.c
+build $builddir/_coder_fminconMEX_Trackobjective_mex.o : cc $root/interface/_coder_fminconMEX_Trackobjective_mex.c
+build $builddir/computeConstraints_.o : cc $root/computeConstraints_.c
+build $builddir/computeFiniteDifferences.o : cc $root/computeFiniteDifferences.c
+build $builddir/finDiffEvalAndChkErr.o : cc $root/finDiffEvalAndChkErr.c
+build $builddir/xcopy.o : cc $root/xcopy.c
+build $builddir/initActiveSet.o : cc $root/initActiveSet.c
+build $builddir/setProblemType.o : cc $root/setProblemType.c
+build $builddir/modifyOverheadPhaseOne_.o : cc $root/modifyOverheadPhaseOne_.c
+build $builddir/driver.o : cc $root/driver.c
+build $builddir/test_exit.o : cc $root/test_exit.c
+build $builddir/computeGradLag.o : cc $root/computeGradLag.c
+build $builddir/xgemv.o : cc $root/xgemv.c
+build $builddir/updateWorkingSetForNewQP.o : cc $root/updateWorkingSetForNewQP.c
+build $builddir/computeLambdaLSQ.o : cc $root/computeLambdaLSQ.c
+build $builddir/factorQRE.o : cc $root/factorQRE.c
+build $builddir/xgeqp3.o : cc $root/xgeqp3.c
+build $builddir/computeQ_.o : cc $root/computeQ_.c
+build $builddir/xorgqr.o : cc $root/xorgqr.c
+build $builddir/xtrsv.o : cc $root/xtrsv.c
+build $builddir/sortLambdaQP.o : cc $root/sortLambdaQP.c
+build $builddir/saveJacobian.o : cc $root/saveJacobian.c
+build $builddir/normal.o : cc $root/normal.c
+build $builddir/driver1.o : cc $root/driver1.c
+build $builddir/PresolveWorkingSet.o : cc $root/PresolveWorkingSet.c
+build $builddir/ComputeNumDependentEq_.o : cc $root/ComputeNumDependentEq_.c
+build $builddir/IndexOfDependentEq_.o : cc $root/IndexOfDependentEq_.c
+build $builddir/countsort.o : cc $root/countsort.c
+build $builddir/moveConstraint_.o : cc $root/moveConstraint_.c
+build $builddir/feasibleX0ForWorkingSet.o : cc $root/feasibleX0ForWorkingSet.c
+build $builddir/xgeqrf.o : cc $root/xgeqrf.c
+build $builddir/xgemm.o : cc $root/xgemm.c
+build $builddir/xtrsm.o : cc $root/xtrsm.c
+build $builddir/factorQR.o : cc $root/factorQR.c
+build $builddir/maxConstraintViolation.o : cc $root/maxConstraintViolation.c
+build $builddir/removeAllIneqConstr.o : cc $root/removeAllIneqConstr.c
+build $builddir/computeFval.o : cc $root/computeFval.c
+build $builddir/linearForm_.o : cc $root/linearForm_.c
+build $builddir/iterate.o : cc $root/iterate.c
+build $builddir/computeGrad_StoreHx.o : cc $root/computeGrad_StoreHx.c
+build $builddir/xaxpy.o : cc $root/xaxpy.c
+build $builddir/computeFval_ReuseHx.o : cc $root/computeFval_ReuseHx.c
+build $builddir/squareQ_appendCol.o : cc $root/squareQ_appendCol.c
+build $builddir/xrot.o : cc $root/xrot.c
+build $builddir/deleteColMoveEnd.o : cc $root/deleteColMoveEnd.c
+build $builddir/compute_deltax.o : cc $root/compute_deltax.c
+build $builddir/factor.o : cc $root/factor.c
+build $builddir/xpotrf.o : cc $root/xpotrf.c
+build $builddir/solve.o : cc $root/solve.c
+build $builddir/xscal.o : cc $root/xscal.c
+build $builddir/compute_lambda.o : cc $root/compute_lambda.c
+build $builddir/feasibleratiotest.o : cc $root/feasibleratiotest.c
+build $builddir/addBoundToActiveSetMatrix_.o : cc $root/addBoundToActiveSetMatrix_.c
+build $builddir/updatePenaltyParam.o : cc $root/updatePenaltyParam.c
+build $builddir/addAeqConstr.o : cc $root/addAeqConstr.c
+build $builddir/relaxed.o : cc $root/relaxed.c
+build $builddir/soc.o : cc $root/soc.c
+build $builddir/computeLinearResiduals.o : cc $root/computeLinearResiduals.c
+build $builddir/linesearch.o : cc $root/linesearch.c
+build $builddir/computeDeltaLag.o : cc $root/computeDeltaLag.c
+build $builddir/BFGSUpdate.o : cc $root/BFGSUpdate.c
+build $builddir/fminconMEX_Trackobjective_emxutil.o : cc $root/fminconMEX_Trackobjective_emxutil.c
+build $builddir/_coder_fminconMEX_Trackobjective_info.o : cc $root/interface/_coder_fminconMEX_Trackobjective_info.c
+build $builddir/c_mexapi_version.o : cc $matlabdir/extern/version/c_mexapi_version.c
+
+# Link
+build $root\fminconMEX_Trackobjective_mex.mexw64 : link $builddir/fminconMEX_Trackobjective_data.o $builddir/rt_nonfinite.o $builddir/fminconMEX_Trackobjective_initialize.o $builddir/fminconMEX_Trackobjective_terminate.o $builddir/fminconMEX_Trackobjective.o $builddir/fmincon.o $builddir/factoryConstruct.o $builddir/factoryConstruct1.o $builddir/computeObjective_.o $builddir/eml_int_forloop_overflow_check.o $builddir/TrackobjectiveMEX.o $builddir/checkVectorNonFinite.o $builddir/factoryConstruct2.o $builddir/computeConstrViolationIneq_.o $builddir/ixamax.o $builddir/computePrimalFeasError.o $builddir/computeDualFeasError.o $builddir/computeComplError.o $builddir/isDeltaXTooSmall.o $builddir/xdot.o $builddir/xnrm2.o $builddir/xasum.o $builddir/computeMeritFcn.o $builddir/fillLambdaStruct.o $builddir/_coder_fminconMEX_Trackobjective_api.o $builddir/_coder_fminconMEX_Trackobjective_mex.o $builddir/computeConstraints_.o $builddir/computeFiniteDifferences.o $builddir/finDiffEvalAndChkErr.o $builddir/xcopy.o $builddir/initActiveSet.o $builddir/setProblemType.o $builddir/modifyOverheadPhaseOne_.o $builddir/driver.o $builddir/test_exit.o $builddir/computeGradLag.o $builddir/xgemv.o $builddir/updateWorkingSetForNewQP.o $builddir/computeLambdaLSQ.o $builddir/factorQRE.o $builddir/xgeqp3.o $builddir/computeQ_.o $builddir/xorgqr.o $builddir/xtrsv.o $builddir/sortLambdaQP.o $builddir/saveJacobian.o $builddir/normal.o $builddir/driver1.o $builddir/PresolveWorkingSet.o $builddir/ComputeNumDependentEq_.o $builddir/IndexOfDependentEq_.o $builddir/countsort.o $builddir/moveConstraint_.o $builddir/feasibleX0ForWorkingSet.o $builddir/xgeqrf.o $builddir/xgemm.o $builddir/xtrsm.o $builddir/factorQR.o $builddir/maxConstraintViolation.o $builddir/removeAllIneqConstr.o $builddir/computeFval.o $builddir/linearForm_.o $builddir/iterate.o $builddir/computeGrad_StoreHx.o $builddir/xaxpy.o $builddir/computeFval_ReuseHx.o $builddir/squareQ_appendCol.o $builddir/xrot.o $builddir/deleteColMoveEnd.o $builddir/compute_deltax.o $builddir/factor.o $builddir/xpotrf.o $builddir/solve.o $builddir/xscal.o $builddir/compute_lambda.o $builddir/feasibleratiotest.o $builddir/addBoundToActiveSetMatrix_.o $builddir/updatePenaltyParam.o $builddir/addAeqConstr.o $builddir/relaxed.o $builddir/soc.o $builddir/computeLinearResiduals.o $builddir/linesearch.o $builddir/computeDeltaLag.o $builddir/BFGSUpdate.o $builddir/fminconMEX_Trackobjective_emxutil.o $builddir/_coder_fminconMEX_Trackobjective_info.o $builddir/c_mexapi_version.o 

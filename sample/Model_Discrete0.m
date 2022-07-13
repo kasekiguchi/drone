@@ -1,15 +1,12 @@
-function Model = Model_Discrete0(dt,~,initial,id)
+function Model = Model_Discrete0(id,dt,type,initial,varargin)
 % 入力位置が次時刻の位置になるモデル
     %% model class demo : 
-arguments
-  dt
-  ~
-  initial
-  id
+if ~isempty(varargin)
+    Setting = varargin{1};
 end
 Setting.dt = dt;
-type="Discrete_Model"; % class name
-name="discrete"; % print name
+Model.type="Discrete_Model"; % class name
+Model.name="discrete"; % print name
 Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
 Setting.param.A = [zeros(3)];
 Setting.param.B =eye(3);% x.p = u; 次の時刻にu の位置に行くモデル
@@ -18,5 +15,13 @@ Setting.initial = initial;%struct('p',[0;0;0]);
 Setting.state_list = ["p"];
 Setting.num_list = [3];
 Setting.input_channel = ["p"];
-Model = {"type",type,"name",name,"param",Setting,"id",id};
+if strcmp(type,"plant")
+    Model.id = id;
+    %Setting.initial.p = 10*rand(3,1)+[40;20;0];
+    Model.param=Setting;
+else
+    Model.name=["discrete"];
+    Model.param=Setting;
+end
+
 end

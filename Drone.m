@@ -5,12 +5,11 @@ classdef Drone < ABSTRACT_SYSTEM
         fig
     end
     methods
-        function obj = Drone(var)
-            obj=obj@ABSTRACT_SYSTEM(var{:});
-            % ドローン用のクラス
-            % フレームとしての機能はABSTRACT_SYSTEMに記載
-            % ドローン独自の部分はmodel,controllerクラスなどを参照
-            %% 描画用ドローンの図
+        function obj = Drone(varargin)
+            obj=obj@ABSTRACT_SYSTEM({varargin});
+            % このクラスのインスタンスを作成
+            %   詳細説明をここに記述
+                        %% ドローンのフレーム
             obj.fig = load('plot/frame/drone_frame_01_05.mat').fig;
         end
     end

@@ -2,9 +2,9 @@ classdef MODEL_CLASS <  handle
     % general model class
     % obj = MODEL_CLASS(name,param)
     %      name : 名前（obsolete）
-    %      param : structure of 
+    %      param : structure of
     %            "state_list" : ['p','v']
-    %            "num_list" : [3,3]  
+    %            "num_list" : [3,3]
     %            "initial" (optional)     : struct('p',[0;0;0],'v',[0;0;0])
     %            "dim"         : n, m, p :  number of state, input, and physical parameters
     %            "input_channel" : ['v']
@@ -68,39 +68,41 @@ classdef MODEL_CLASS <  handle
         end
         function []=do(obj,u,varargin)
             if size(varargin)~=2
-            if size(varargin)>0 % might too specialized to Drone system
-                if isfield(varargin{1},'FH')
-                    if ~isempty(varargin{1}.FH)
-                          cha = get(varargin{1}.FH, 'currentcharacter');
-                          if (cha == 'q' || cha == 's' || cha == 'a')
-                              return
-                          end
+                if size(varargin)>0 % might too specialized to Drone system
+                    if isfield(varargin{1},'FH')
+                        if ~isempty(varargin{1}.FH)
+                            cha = 'f';
+%                             cha = get(varargin{1}.FH, 'currentcharacter');
+                            if (cha == 'q' || cha == 's' || cha == 'a')
+                                return
+                            end
+                        end
+                    end
+                    if isfield(varargin{1},'param')
+                        obj.param = varargin{1}.param;
+                        %else
+                        %obj.param = varargin{1};
                     end
                 end
-                if isfield(varargin{1},'param')
-                    obj.param = varargin{1}.param;
-                %else
-                    %obj.param = varargin{1};
+                if ~isempty(obj.noise)
+                    if ~isempty(obj.noise.seed)
+                        rng(obj.noise.seed*obj.param.t);
+                    else
+                        rng('shuffle');
+                    end
+                    u = u+obj.noise.value* randn(size(u));
                 end
-                if isfield(varargin{1},'dt')
-                    obj.dt = varargin{1}.dt;
-                end
-            end
-            if ~isempty(obj.noise)
-                rng('shuffle');
-                u = u+obj.noise.* randn(size(u));
-            end
-            if contains(obj.time_scale,'discrete')
-                obj.set_state(obj.projection(obj.method(obj.state.get(),u,obj.param)));
-            else
-                if isfield(obj.param,'solver_option')
-                    [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get(),varargin{1}.solver_option);
+                if contains(obj.time_scale,'discrete')
+                    obj.set_state(obj.projection(obj.method(obj.state.get(),u,obj.param)));
                 else
-                    [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get());
+                    if isfield(obj.param,'solver_option')
+                        [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get(),varargin{1}.solver_option);
+                    else
+                        [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get());
+                    end
+                    obj.set_state(obj.projection(tmpx(end,:)'));
                 end
-                obj.set_state(obj.projection(tmpx(end,:)'));
-            end
-            obj.result = obj.state;
+                obj.result = obj.state;
             end
         end
         function []=set_state(obj,varargin)

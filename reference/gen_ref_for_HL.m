@@ -6,9 +6,7 @@ dxd =diff(xd,t);
 ddxd =diff(dxd,t);
 dddxd =diff(ddxd,t);
 ddddxd =diff(dddxd,t);
-dddddxd =diff(ddddxd,t);
-ddddddxd =diff(dddddxd,t);
 %Xd.state=double(subs([xd,dxd,ddxd,dddxd,ddddxd],t,tt));
 %Xd.param = param;
-ref = matlabFunction([xd;dxd;ddxd;dddxd;ddddxd;dddddxd;ddddddxd],'vars',t);
+ref = matlabFunction([xd;dxd;ddxd;dddxd;ddddxd],'vars',t);
 end
