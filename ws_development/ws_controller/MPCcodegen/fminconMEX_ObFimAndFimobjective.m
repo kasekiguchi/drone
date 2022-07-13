@@ -2,30 +2,30 @@
 %Author Sota Wada; Date 2021_10_21
 % -------------------------------------------------------------------------
 function [x,fval,exitflag,output,lambda,grad,hessian] = fminconMEX_ObFimAndFimobjective(x0,param,NoiseR,SensorRange,RangeGain)
-assert(isa(x0,'double'));assert(all(size(x0)==	[8,4]));
-assert(isa(param,'struct'));
-assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
-assert(isa(param.dt,'double'));assert(all(size(param.dt)==	[1,1]));
-assert(isa(param.input_size,'double'));assert(all(size(param.input_size)==	[1,1]));
-assert(isa(param.state_size,'double'));assert(all(size(param.state_size)==	[1,1]));
-assert(isa(param.total_size,'double'));assert(all(size(param.total_size)==	[1,1]));
-assert(isa(param.Num,'double'));assert(all(size(param.Num)==	[1,1]));
-assert(isa(param.Q,'double'));assert(all(size(param.Q)==	[4,4]));
-assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
-assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
-assert(isa(param.T,'double'));assert(all(size(param.T)==	[3,3]));
-assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
-assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,4]));
-assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
-assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));
-assert(isa(param.phi,'double'));assert(all(size(param.phi)>=	[1,1]));assert(all(size(param.phi)<=	[1,629]));
-assert(isa(param.X0,'double'));assert(all(size(param.X0)==	[4,1]));
-assert(isa(param.U0,'double'));assert(all(size(param.U0)==	[2,1]));
-assert(isa(param.model_param,'struct'));
-assert(isa(param.model_param.K,'double'));assert(all(size(param.model_param.K)==	[2,2]));
-assert(isa(NoiseR,'double'));assert(all(size(NoiseR)==	[1,1]));
-assert(isa(SensorRange,'double'));assert(all(size(SensorRange)==	[1,1]));
-assert(isa(RangeGain,'double'));assert(all(size(RangeGain)==	[1,1]));
+% assert(isa(x0,'double'));assert(all(size(x0)==	[8,4]));
+% assert(isa(param,'struct'));
+% assert(isa(param.H,'double'));assert(all(size(param.H)==	[1,1]));
+% assert(isa(param.dt,'double'));assert(all(size(param.dt)==	[1,1]));
+% assert(isa(param.input_size,'double'));assert(all(size(param.input_size)==	[1,1]));
+% assert(isa(param.state_size,'double'));assert(all(size(param.state_size)==	[1,1]));
+% assert(isa(param.total_size,'double'));assert(all(size(param.total_size)==	[1,1]));
+% assert(isa(param.Num,'double'));assert(all(size(param.Num)==	[1,1]));
+% assert(isa(param.Q,'double'));assert(all(size(param.Q)==	[4,4]));
+% assert(isa(param.R,'double'));assert(all(size(param.R)==	[2,2]));
+% assert(isa(param.Qf,'double'));assert(all(size(param.Qf)==	[4,4]));
+% assert(isa(param.T,'double'));assert(all(size(param.T)==	[3,3]));
+% assert(isa(param.S,'double'));assert(all(size(param.S)==	[1,2]));
+% assert(isa(param.Xr,'double'));assert(all(size(param.Xr)==	[4,4]));
+% assert(isa(param.dis,'double'));assert(all(size(param.dis)>=	[1,1]));assert(all(size(param.dis)<=	[1,629]));
+% assert(isa(param.alpha,'double'));assert(all(size(param.alpha)>=[1,1]));assert(all(size(param.alpha)<=	[1,629]));
+% assert(isa(param.phi,'double'));assert(all(size(param.phi)>=	[1,1]));assert(all(size(param.phi)<=	[1,629]));
+% assert(isa(param.X0,'double'));assert(all(size(param.X0)==	[4,1]));
+% assert(isa(param.U0,'double'));assert(all(size(param.U0)==	[2,1]));
+% assert(isa(param.model_param,'struct'));
+% assert(isa(param.model_param.K,'double'));assert(all(size(param.model_param.K)==	[2,2]));
+% assert(isa(NoiseR,'double'));assert(all(size(NoiseR)==	[1,1]));
+% assert(isa(SensorRange,'double'));assert(all(size(SensorRange)==	[1,1]));
+% assert(isa(RangeGain,'double'));assert(all(size(RangeGain)==	[1,1]));
     options = optimoptions('fmincon',...
         'MaxIterations',                 1000000000,...
         'MaxFunctionEvaluations',        1000000000,...
