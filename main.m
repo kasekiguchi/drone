@@ -58,14 +58,18 @@ end
         end
 
         %% estimator, reference generator, controller
-        for i = 1:N
+        for i = 1:N %機体数
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-
+            x = 5;
+            y = 0;
+            z = 1;
             % reference
+            s=TANGENT_BUG;
+            xyz=s.do(agent);
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0; 0; 0], time.t};
+            param(i).reference.point = {FH, xyz, time.t};%目標位置
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -85,6 +89,7 @@ end
             end
             agent(i).do_controller(param(i).controller.list);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+     
         end
 
         %% update state
