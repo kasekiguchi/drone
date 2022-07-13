@@ -55,7 +55,6 @@ classdef TrackWpointPathForMPC < REFERENCE_CLASS
             obj.dt = obj.self.model.dt;
             obj.WayPointNum = length(obj.WayPoint);
             obj.result.state=STATE_CLASS(struct('state_list',["xd"],'num_list',[4]));%x,y,theta,v
-            obj.Flag = 0;
         end
         
         function  result= do(obj,param)
