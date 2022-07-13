@@ -10,8 +10,6 @@ Model.name="three_vehicle"; % print name
 Model.id = id;
 Setting.dt = dt;
 Setting.method = "three_state_vehicle_model"; % model dynamicsの実体名
-%% 
-dsys = c2d(ss([zeros(3) eye(3);zeros(3,6)],[zeros(3);eye(3)],eye(6),zeros(6,3)),dt);
 Setting.dim = [6,2,1];
 Setting.state_list = ["p","q"]; % [x;y;th];
 Setting.num_list = [3,3];

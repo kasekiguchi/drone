@@ -27,11 +27,7 @@ classdef HLC < CONTROLLER_CLASS
                     xd = ref.state.xd; % 20次元の目標値に対応するよう
                 end
             end
-            if isempty(param)
-                Param = obj.param;
-            else
-                Param= param{2};
-            end
+            Param = obj.param;
             P = obj.param.P;
             F1 = Param.F1;
             F2 = Param.F2;

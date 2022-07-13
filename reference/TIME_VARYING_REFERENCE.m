@@ -26,10 +26,10 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
             if length(args) > 2
                 if strcmp(args{3}, "HL")
                     obj.func = gen_ref_for_HL(obj.func);
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v"], 'num_list', [20, 3, 3]));
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));
                 end
             else
-                obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v"], 'num_list', [length(obj.func(0)), 3, 3]));
+                obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
             end
             syms t real
             obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
@@ -46,7 +46,8 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
            obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
            obj.result.state.v = obj.dfunc(t);
-           result = obj.result;     
+           obj.result.state.q(3) = atan2(obj.result.state.v(2),obj.result.state.v(1));
+           result = obj.result;
         end
         function show(obj, logger)
             rp = logger.data(1,"p","r");
