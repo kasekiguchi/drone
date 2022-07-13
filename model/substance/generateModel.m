@@ -6,14 +6,10 @@
 %% Define variables
 syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
 syms u u1 u2 u3 u4 T1 T2 T3 T4 real
-syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
+syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 syms R real
 param.mass = 0.2;
 param.length = 0.1;% モーター間の距離：正方形を仮定している
-param.Lx = 0.1; % x軸方向のモーター間距離
-param.Ly = 0.1; % y軸方向のモーター間距離
-param.lx = 0.05; % x軸方向 重心からモーター１間距離
-param.ly = 0.05; % y軸方向 重心からモーター１間距離
 param.jx = 0.002237568;
 param.jy = 0.002985236;
 param.jz = 0.00480374;
@@ -21,8 +17,8 @@ param.gravity = 9.81;
 param.km = 0.03010685884691849; % ロータ定数
 param.k = 0.000008048;          % 推力定数
 
-physicalParam = {m, Lx, Ly, lx, ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4};
-physicalParamV		= {param.mass, param.Lx, param.Ly, param.lx, param.ly, param.jx, param.jy, param.jz, param.gravity, param.km, param.km, param.km, param.km, param.k, param.k, param.k, param.k};
+physicalParam = {m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4};
+physicalParamV		= {param.mass, param.length, param.jx, param.jy, param.jz, param.gravity, param.km, param.km, param.km, param.km, param.k, param.k, param.k, param.k};
 p	= [  p1;  p2;  p3];             % Position　：xb : 進行方向，zb ：ホバリング時に上向き
 dp	= [ dp1; dp2; dp3];             % Velocity
 ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
@@ -34,8 +30,7 @@ T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
 % motor configuration 
 % T1 : 右後，T2：右前，T3：左後，T4：左前（x-y平面の象限順）
 % T2, T3 の回転方向は軸 zb,  T1, T4 : -zb      [1,0,0,1] で 正のyaw回転
-tau = [(Lx - lx)*(T3+T4)-lx*(T1+T2); ly*(T1+T3)-(Ly-ly)*(T2+T4); km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
-%tau = [sqrt(2)*l*(T3+T4-T1-T2)/2; sqrt(2)*l*(T1+T3-T2-T4)/2; km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
+tau = [sqrt(2)*l*(T3+T4-T1-T2)/2; sqrt(2)*l*(T1+T3-T2-T4)/2; km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 % IT=inv([1, 1, 1, 1;simplify(mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),tau,'UniformOutput',false)),1:3,1:4))]);
 %% Translational model
 ddpf = [0;0;-gravity];

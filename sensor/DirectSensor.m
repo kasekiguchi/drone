@@ -9,14 +9,12 @@ classdef DirectSensor < SENSOR_CLASS
     methods
         function obj = DirectSensor(self,~)
             obj.self=self;
-%            obj.result.state = state_copy(self.plant.state);
-            obj.result.state = state_copy(self.model.state);
+            obj.result.state = state_copy(self.plant.state);
         end
         
         function result = do(obj,~)
             % 【入力】Target ：観測対象のModel_objのリスト
-%            obj.result.state.set_state(obj.self.plant.state.get());
-            obj.result.state.set_state(obj.self.model.state.get());
+            obj.result.state.set_state(obj.self.plant.state.get());
             result=obj.result;
         end
         function show(obj,varargin)

@@ -1,27 +1,21 @@
 classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
   % Serial通信用クラス
-  % getData()     : 受信
-  % sendData(msg) : msg を送信
+  %   
   
   properties
     result
     serial
-    baudrate
+    baudrate = 115200; % Arduinoと合わせる
   end
   properties(SetAccess=private)
     port
   end
   methods
-    function obj = SERIAL_CONNECTOR(param,option)
+    function obj = SERIAL_CONNECTOR(param)
       % 通信する対象毎にインスタンスを作成する．
       % param.port : COM num
       % 必要に応じてMac, Linuxに対応させる．
-      arguments
-        param {mustBeSpecifiedStructure}
-        option.baudrate = 115200 % Arduinoと合わせる
-      end
-      obj.port=param.port;
-      obj.baudrate = option.baudrate;
+      obj.port=strcat("COM",string(param.port));
       obj.serial = serialport(obj.port,obj.baudrate,'Timeout',1);
       configureTerminator(obj.serial,"CR/LF");
     end
@@ -38,10 +32,3 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
   end
 end
 
-function mustBeSpecifiedStructure(s)
-    if ~(isfield(s, 'port'))
-        eidType = 'mustBeStructure:notStructure';
-        msgType = 'ACSL : Input must be a structure with specified fields.';
-        throwAsCaller(MException(eidType, msgType))
-    end
-end

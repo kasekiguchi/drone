@@ -1,14 +1,11 @@
-function Model= Model_Discrete(dt,~,initial,id)
+function Model_Discrete(id,dt,type,initial,varargin)
 % 質量１の質点モデル：力入力
-arguments
-  dt
-  ~
-  initial
-  id
+if ~isempty(varargin)
+    Setting = varargin{1};
 end
 Setting.dt = dt;
-type="Discrete_Model"; % class name
-name="discrete"; % print name
+Model.type="Discrete_Model"; % class name
+Model.name="discrete"; % print name
 Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
 dsys = c2d(ss([zeros(3) eye(3);zeros(3,6)],[zeros(3);eye(3)],eye(6),zeros(6,3)),dt);
 Setting.param.A = dsys.A;
@@ -25,5 +22,12 @@ Setting.input_channel = ["v"];
 % Setting.state_list = ["p"];
 % Setting.num_list = [3];
 % Setting.input_channel = ["p"];
-Model = {"type",type,"name",name,"param",Setting,"id",id};
+if strcmp(type,"plant")
+    Model.id = id;
+   %Setting.initial.p = 10*rand(3,1)+[40;20;0];
+    Model.param=Setting;
+else
+    Model.name=["discrete"];
+    Model.param=Setting;
+end
 end

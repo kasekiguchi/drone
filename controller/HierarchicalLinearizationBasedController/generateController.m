@@ -1,7 +1,7 @@
 %% Define the nonlinear physical model of a quadrotor
 syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
 syms u u1 u2 u3 u4 T1 T2 T3 T4 real
-syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
+syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 %% Controller design
 clc
 syms xd1(t) xd2(t) xd3(t) xd4(t) v1(t)
@@ -14,7 +14,7 @@ ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
 q	= [  q0;  q1;  q2;  q3];        % Quaternion
 ob	= [  o1;  o2;  o3];             % Angular velocity
 x = [q;p;dp;ob];
-physicalParam = [m, Lx, Ly, lx, ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
+physicalParam = [m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
 f = F(x,physicalParam);
 g = G(x,physicalParam);
 %g= [g1 g2 g3 g4];
