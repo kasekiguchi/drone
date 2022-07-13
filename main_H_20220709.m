@@ -26,7 +26,7 @@ fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
-sample = 10;    % 上手くいったとき：50のときもある
+sample = 500;    % 上手くいったとき：50のときもある
 H = 20;
             % --配列定義
             Adata = zeros(sample, H);   % 評価値
@@ -98,7 +98,7 @@ end
 %             ry = 0.0; 
 %             rz = 0.0;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0; 0; rz], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [sin(time.t); cos(time.t); rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
