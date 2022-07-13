@@ -1,7 +1,6 @@
 classdef DRONE < ABSTRACT_SYSTEM
     % Drone class
     properties %(Access = private)
-        %id = 0;
         fig
     end
     methods
