@@ -85,7 +85,11 @@ end
             end
             agent(i).do_controller(param(i).controller.list);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+            agent.model.state = [0;0;1;0;0;0;0;0;0;0;0;0];
+            agent.input = [0; 0; 0; 0];
         end
+        
+
 
         %% update state
         % with FH

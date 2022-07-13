@@ -175,13 +175,10 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値
             rr = [1., 1., 1.];
-            if (time.t/2)^2+0.1 <= rr(3)  
-                rz = (time.t/2)^2+0.1;
+            if (time.t/2)^2+0.1 <= rr(3);  rz = (time.t/2)^2+0.1;
             else; rz = 1;
             end
-            if (time.t/6)^2+0.1 <= rr(2)
-                rx = (time.t/6)^2+0.1;
-                ry = (time.t/6)^2+0.1;
+            if (time.t/6)^2+0.1 <= rr(2);  rx = (time.t/2)^2+0.1;ry = (time.t/2)^2+0.1;  
             else; rx = 1.; ry = 1.;
             end
 %             rx = 0.0; ry = 0.0; 
@@ -220,7 +217,7 @@ end
 %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
 
             % 重みを変化させる ref[1, 1, 1]用
-            if fWeight == 1 
+            if fWeight == 1
                 % 重みの速度変化
                 if min(abs(agent.model.state.v(1:2))) < 0.3
                     fV = 0;

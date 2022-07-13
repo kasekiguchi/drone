@@ -26,8 +26,8 @@ fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
-sample = 300;
-H = 5;
+sample = 10;    % 上手くいったとき：50のときもある
+H = 20;
             % --配列定義
             Adata = zeros(sample, H);   % 評価値
 %             P_monte = zeros(sample, 3); % ある入力での位置
@@ -84,20 +84,21 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値
-            rr = [1., 1., 1.];
+            rr = [1., 0., 1.];
             if (time.t/2)^2+0.1 <= rr(3)  
                 rz = (time.t/2)^2+0.1;
             else; rz = 1;
             end
-            if (time.t/6)^2+0.1 <= rr(2)
-                rx = (time.t/6)^2+0.1;
-                ry = (time.t/6)^2+0.1;
-            else; rx = 1.; ry = 1.;
-            end
-%             rx = 0.0; ry = 0.0; 
-%             rz = 1.0;
+%             if (time.t/2)^2+0.1 <= rr(1)
+%                 rx = (time.t/2)^2+0.1;
+% %                 ry = (time.t/2)^2+0.1;
+%             else; rx = 1.; %ry = 1.;f
+%             end
+%             rx = 0.0; 
+%             ry = 0.0; 
+%             rz = 0.0;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [0; 0; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -124,6 +125,8 @@ end
             ts = 0;
             state_monte = agent.model.state;
             ref_monte = agent.reference.result.state;
+            %-- 速度の基準
+                vref = 0.20;
             % 入力のサンプルから評価
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
@@ -153,7 +156,9 @@ end
                 PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
                 VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
                 WQ_monte = diag([1, 1, 1]);
-                QQ_monte = diag([1, 1, 1]);
+%                 QQ_q = -100*(norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))))+100
+                QQ_monte = 100*diag([1, 1, 1]);
+                
                 UdiffQ_monte = diag([1, 1, 1, 1]);
                 R_monte = diag([1, 1, 1, 1]);  
             end
@@ -161,8 +166,8 @@ end
             
             %-- 評価関数
 %             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
-            funP = @(p_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p); 
-            funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
+%             funP = @(p_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p); 
+%             funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
 %             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
 %             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
 %                 +v_monte'*VQ_monte*v_monte...
@@ -187,9 +192,15 @@ end
 %                 +udiff_monte'*UdiffQ_monte*udiff_monte; 
             
             % 入力を含めた ref_input:ホバリング
+%             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+%                     (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+%                     +v_monte'*VQ_monte*v_monte...
+%                     +w_monte'*WQ_monte*w_monte...
+%                     +q_monte'*QQ_monte*q_monte...
+%                     +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
                     (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
-                    +v_monte'*VQ_monte*v_monte...
+                    +(v_monte - vref)'*VQ_monte*(v_monte - vref)...
                     +w_monte'*WQ_monte*w_monte...
                     +q_monte'*QQ_monte*q_monte...
                     +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
@@ -204,6 +215,13 @@ end
                 fV);
             %-- ホバリングから±sigma%の範囲
                 rng('shuffle')
+%                 positionN = (norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))));
+%                 if positionN > 1
+%                     positionN = 0.99;
+%                 elseif positionN < 0
+%                     positionN = 0.001;
+%                 end 
+%                 sigma = positionN + 0.01;
                 sigma = 0.15;
                 a = (1-sigma)*0.269*9.81/4;
                 b = (1+sigma)*0.269*9.81/4;
@@ -237,9 +255,9 @@ end
             %-- 微分方程式による予測軌道計算
                 for m = 1:u_size
                     x0 = previous_state;
-                    state_data(:, 1, m) = x0;
+                    state_data(:, 1, m) = previous_state;
                     for h = 1:H-1
-                        [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+dt],x0);
+                        [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+0.1],x0);
                         x0 = tmpx(end, :);
                         state_data(:, h+1, m) = x0;
                         if tmpx(end, 3) < 0
@@ -270,6 +288,7 @@ end
                 agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
         end
         if isnan(Evaluationtra)
+            warning("ACSL : Emergency stop!");
             break;
         end
         
@@ -341,7 +360,7 @@ end
 %profile viewer
 %%
 close all
-clc
+% clc
 % calculate time
 % fprintf("%f秒\n", time.t / 0.025 * calT)
 % plot p:position, er:roll/pitch/yaw, 
