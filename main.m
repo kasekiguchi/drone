@@ -10,9 +10,11 @@ userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
 
+% for mob1
 tmp = [0 0;0 10;10 10;10 0]-[5 5];
 Env.param.Vertices = [tmp;NaN NaN;0.6*tmp];
 initial.p = [1,1,0]'-[5,5,0]';
+rs = STATE_CLASS(struct('state_list',["p","v","q"],'num_list',[3,3,3]));
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
 plot(polyshape(Env.param.Vertices))
@@ -72,8 +74,8 @@ end
             
             
             % reference
-            rp=[4;0;0];     % 目標座標
-  
+            rp=[4;-4;0];     % 目標座標
+
             state = agent.model.state.p'; % 自己位置
             sensor = agent.sensor.result; % センサ情報
             Xd = rp - state;
@@ -116,8 +118,12 @@ end
                 end
             end
 
+            rs.p = rp; % 目標位置
+            rs.q = [0;0;time.t]; % 目標姿勢
+            rs.v = [0;0;0]; % 目標速度
+
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, rp, time.t};
+            param(i).reference.point = {FH, rs, time.t};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.tbug = {};
