@@ -95,50 +95,54 @@ end
 
             anchor_R = index;%右
             anchor_L = index;%左
-            while( l < 2.)% 障害物あり T-bug 右
-                sensorP_R       = sensor.sensor_points(anchor_R-1,:);
-                sensorP_index   = sensor.sensor_points(anchor_R,:);      
-                
-                dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
-                % 同一物体として認識
-                if dLen_right < 0.15
-                    anchor_R = anchor_R - 1;  % 右にずらす
-                else
-                    break;
+            if( l < 2.)% 障害物あり T-bug 右
+                while(1)
+                    sensorP_R       = sensor.sensor_points(anchor_R-1,:);
+                    sensorP_index   = sensor.sensor_points(anchor_R,:);      
+                    
+                    dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
+                    % 同一物体として認識
+                    if dLen_right < 0.15
+                        anchor_R = anchor_R - 1;  % 右にずらす
+                    else
+                        break;
+                    end
                 end
-                
-            end
 
-            while( l < 2.)% 障害物あり T-bug　左
-                sensorP_index   = sensor.sensor_points(anchor_L,:);     
-                sensorP_L       = sensor.sensor_points(anchor_L+1,:);   
-                
-                dLen_left = vecnorm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
-                
-                % 同一物体として認識
-                if dLen_left < 0.15 
-                    anchor_L = anchor_L + 1;  % 左にずらす
-                else
-                    break;
+                while(1)
+                    sensorP_index   = sensor.sensor_points(anchor_L,:);     
+                    sensorP_L       = sensor.sensor_points(anchor_L+1,:);   
+                    
+                    dLen_left = vecnorm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
+                    
+                    % 同一物体として認識
+                    if dLen_left < 0.15 
+                        anchor_L = anchor_L + 1;  % 左にずらす
+                    else
+                        break;
+                    end
                 end
-            end
-% 
-%             sensorP_R; % anchor_R 座標
-%             sensorP_L; % anchor_L 座標
-            dS_AnchorR = vecnorm(state-sensorP_R); % 現在位置-anchor_R 距離
-            dS_AnchorL = vecnorm(state-sensorP_L); % 現在位置-anchor_L 距離
-            dR_AnchorR = vecnorm(rp-sensorP_R);
-            dR_AnchorL = vecnorm(rp-sensorP_R);
-            route_R = dS_AnchorR+dR_AnchorR;
-            route_L = dS_AnchorL+dR_AnchorL;
-            if route_R < route_L
-                ref_tbug = sensorP_R;
+            
+    % 
+    %             sensorP_R; % anchor_R 座標
+    %             sensorP_L; % anchor_L 座標
+                dS_AnchorR = vecnorm(state(1:2)-sensorP_R); % 現在位置-anchor_R 距離
+                dS_AnchorL = vecnorm(state(1:2)-sensorP_L); % 現在位置-anchor_L 距離
+                dR_AnchorR = vecnorm(rp(1:2)-sensorP_R);
+                dR_AnchorL = vecnorm(rp(1:2)-sensorP_R);
+                route_R = dS_AnchorR+dR_AnchorR;
+                route_L = dS_AnchorL+dR_AnchorL;
+                if route_R < route_L %右の方が短い
+                    ref_tbug = sensorP_R';
+                else
+                    ref_tbug = sensorP_L';
+                end
             else
-                ref_tbug = sensorP_L;
+                ref_tbug = rp(1:2);
             end
 
-            rs.p = ref_tbug; % 目標位置
-            rs.q = [0;0;time.t]; % 目標姿勢
+            rs.p = [ref_tbug;0]; % 目標位置
+            rs.q = [0;0;0]; % 目標姿勢
             rs.v = [0;0;0]; % 目標速度
 
             param(i).reference.covering = [];
@@ -231,7 +235,7 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","e"},{1,"v","e"},{1,"input",""});
+logger.plot({1,"p","er"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
