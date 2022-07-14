@@ -5,20 +5,67 @@
 * git clone する．
 * localで開発用ブランチを作る．
 * 日々の変更をadd, commitで記録しながら開発を進める．
-* ちゃんと動くようになったらリモートにpushする（　git push origin branch-name　）
-* github上でpull requestをおこなう．
+* 定期的にリモートにpushする（　git push origin branch-name　）
+* 手法の実装として一通り動くようになったらpull requestをおこなう．
 
-# 用語集
+# ルール
+
+共通プログラムの書き方のルール
+
+## 【変数名】
+
+目的：名前だけである程度の情報を得られるようにする．
+
+| 属性 | 命名ルール | 例 |
+|---|---|---|
+|クラス名|大文字＋アンダーバー 区切り| C_MPC|
+|プロパティ，クラスインスタンス|小文字＋大文字区切り|weightQ|
+|メソッド，自作関数|小文字＋アンダーバー区切り|gen_noise()，initialize_states()|
+|base workspace 変数|小文字大文字区切り（極力区切りが必要ないようにする）|agent|
+|フラグ|f＋大文字始まり＋大文字区切り|fInitialPosition|
+
+１単語の場合は以下のようにする
+| 属性 | 命名ルール | 例 |
+|---|---|---|
+|関数（method）| 動詞 | do |
+|変数（property）| 名詞 | model |
+
+【例外】
+
+* 高頻度に使うもので共通認識にすべきものはこの限りではない．
+ 例えば共通プログラムでは"N"をエージェントの数としている．
+* tmpなど意味の無い言葉は極力使わない．使う場合もスコープを最小に保ち一画面で見渡せる範囲に留めること．
+* for文で使う i, j ももっと適切な名前が無いか考えよう．
+例えば行列の行方向の繰り返しならi より row の方が明確になる場合もある．
+ただ，長くなりすぎるとこの文字列がうるさくなりすぎるのでバランスが必要．
 
 ## プログラムの中で使われる用語
 
-|単語 | 意味 |
-|---|---|
-|agent| Drone classのインスタンス |
-| obj | class instance |
-|self | "agent" など obj : sensor class内でのみ使って良い|
-|param | parameter |
-|f*** | *** 用フラグ |
+|単語 | 意味 | 例 |
+|---|---|---|
+|agent| Drone classのインスタンス ||
+| obj | class instance ||
+|self | 各プロパティに設定するagent instance ||
+|param | parameter | |
+|f*** | *** 用フラグ | fExp |
+
+# agent
+
+1機のドローンを表すクラスインスタンスをagentとしている．
+agentはプロパティとして飛行に必要な以下のプロパティを持っている
+
+|プロパティ名 | 役割 | 属性* | 備考 |
+| plant | 制御対象 | single ||
+| model | 制御モデル | single | TODO:estimatorに合わせる |
+| sensor | センサー | parallel ||
+| estimator | 推定器 | cascade ||
+| reference | 参照軌道 or 経路| cascade ||
+| controller | 制御器 | cascade ||
+| input_transform | 入力変換 | single ||
+| connector | 外部デバイスとの通信器 | parallel ||
+| parameter | 物理パラメータ | single | TODO:モデルのあり方によって変える |
+
+属性については下で説明する．
 
 ## プロパティに設定するクラスについて
 
@@ -62,7 +109,19 @@ resultは全てのセンサー値を集約したもの．ただし重複する�
 
 オシロスコープで各信号を確認することで以下がわかる
 
+FUTABA トレーナーコードでの信号はPPM
+
 FUTABA recieverからの信号はSBUS
 <https://rikei-tawamure.com/entry/2020/03/17/120606>
 
 PixharkからESC(Tekko32 F3 ESC(35A))はDshot150
+
+# 新しい機体の導入法
+
+TODO：ゲインのチューニングの際指標となるデータの生成
+
+1. throttle以外の入力変換のゲインを0，offsetも0にしてtake offする（throttleのゲインは小さい値からチューニングが必要）
+2. take off で浮上しなければ最終のthrottle値をoffsetに設定
+3. 2を繰り返し浮上させる．（水平に流れるのですぐlandingさせること）
+4. リファレンス変化中に浮上すれば浮上した時のthrottle値から少し小さい値をthrottleのoffsetに設定する．
+5. roll, pitch, yawのゲインをチューニングする．
