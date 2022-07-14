@@ -56,9 +56,9 @@ classdef EKF < ESTIMATOR_CLASS
             x = obj.result.state.get(); % 前回時刻推定値
 %            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定%%5
              xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
-            if isempty(obj.y.list)
-                obj.y.list=sensor.state.list; % num_listは代入してはいけない．
-            end
+%             if isempty(obj.y.list)
+%                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
+%             end
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             p = model.param;
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
@@ -73,7 +73,6 @@ classdef EKF < ESTIMATOR_CLASS
                 xh_pre = model.state.get();
             end
 
-            %obj.B = diag([ones(1,6)*obj.dt^2,ones(1,6)*obj.dt]); % to be check
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % 事前誤差共分散行列
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散
