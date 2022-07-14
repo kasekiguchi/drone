@@ -90,19 +90,30 @@ end
                     break
                 end
             end
-            
-            if l < 2.% 障害物あり T-bug
-                sensorP_R       = sensor.sensor_points(index-1,:);
-                sensorP_index   = sensor.sensor_points(index,:);     
-                sensorP_L       = sensor.sensor_points(index+1,:);   
+
+            anchor_R = index;%右
+            anchor_L = index;%左
+            while( l < 2.)% 障害物あり T-bug 右
+                sensorP_R       = sensor.sensor_points(anchor_R-1,:);
+                sensorP_index   = sensor.sensor_points(anchor_R,:);      
+                
+                dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
+                % 同一物体として認識
+                if dLen_right < 0.15
+                    anchor_R = index - 1;  % 右にずらす
+                end
+            end
+
+            while( l < 2.)% 障害物あり T-bug　左
+                sensorP_index   = sensor.sensor_points(anchor_L,:);     
+                sensorP_L       = sensor.sensor_points(anchor_L+1,:);   
                 
                 dLen_left = vecnorm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
-                dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
-                if dLen_left < 0.15 && dLen_right < 0.15
-                    
+                
+                % 同一物体として認識
+                if dLen_left < 0.15 
+                    anchor_L = index + 1;  % 左にずらす
                 end
-            else
-                % 障害物なし
             end
 
             param(i).reference.covering = [];
