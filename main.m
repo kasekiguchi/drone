@@ -76,7 +76,7 @@ end
             % reference
             rp=[4;-4;0];     % 目標座標
 
-            state = agent.model.state.p'; % 自己位置
+            state = agent.estimator.result.state.p'; % 自己位置
             sensor = agent.sensor.result; % センサ情報
             Xd = rp - state;
             d = vecnorm(Xd);              % 目標との距離
@@ -122,8 +122,22 @@ end
                     break;
                 end
             end
+% 
+%             sensorP_R; % anchor_R 座標
+%             sensorP_L; % anchor_L 座標
+            dS_AnchorR = vecnorm(state-sensorP_R); % 現在位置-anchor_R 距離
+            dS_AnchorL = vecnorm(state-sensorP_L); % 現在位置-anchor_L 距離
+            dR_AnchorR = vecnorm(rp-sensorP_R);
+            dR_AnchorL = vecnorm(rp-sensorP_R);
+            route_R = dS_AnchorR+dR_AnchorR;
+            route_L = dS_AnchorL+dR_AnchorL;
+            if route_R < route_L
+                ref_tbug = sensorP_R;
+            else
+                ref_tbug = sensorP_L;
+            end
 
-            rs.p = rp; % 目標位置
+            rs.p = ref_tbug; % 目標位置
             rs.q = [0;0;time.t]; % 目標姿勢
             rs.v = [0;0;0]; % 目標速度
 
