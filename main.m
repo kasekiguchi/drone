@@ -102,8 +102,11 @@ end
                 dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
                 % 同一物体として認識
                 if dLen_right < 0.15
-                    anchor_R = index - 1;  % 右にずらす
+                    anchor_R = anchor_R - 1;  % 右にずらす
+                else
+                    break;
                 end
+                
             end
 
             while( l < 2.)% 障害物あり T-bug　左
@@ -114,7 +117,9 @@ end
                 
                 % 同一物体として認識
                 if dLen_left < 0.15 
-                    anchor_L = index + 1;  % 左にずらす
+                    anchor_L = anchor_L + 1;  % 左にずらす
+                else
+                    break;
                 end
             end
 
