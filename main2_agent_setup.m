@@ -65,14 +65,14 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], [1e-5])); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %     agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
-    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-16,1e-20,1e-16,1e-14])); % （剛体ベース）EKF
+    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",{[0;0;1],2})); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",{[0;0;0.5],2})); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",{[0;0;0.5],1})); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久

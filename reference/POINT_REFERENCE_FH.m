@@ -35,7 +35,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 if strcmp(obj.flag,'l')
                     obj.result.state.xd=gen_ref_for_landing(obj.result.state.p);
                 else% 初めてlanding に入ったとき
-                    obj.result.state.xd=gen_ref_for_landing(obj.self.reference.result.state.p);
+                    obj.result.state.xd=gen_ref_for_landing(obj.self.reference.result.state.p+[0;0;obj.self.model.param(16)]);
                 end
                 obj.result.state.p = obj.result.state.xd; % このようにすることでf の後でも反映される
                 obj.result.state.pL = obj.result.state.xd;

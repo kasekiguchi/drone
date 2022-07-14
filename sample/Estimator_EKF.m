@@ -33,8 +33,8 @@ function Estimator = Estimator_EKF(agent,output,var)
         EKF_param.B = [eye(6)*dt^2;zeros(1,6);eye(6)*dt]; % システムノイズが加わるチャンネル
     end
     if strcmp(agent.model.name,"load")
-        EKF_param.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-2); % システムノイズ（Modelクラス由来）
-        EKF_param.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0*eye(3);dt*eye(3)]);
+        EKF_param.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5); % システムノイズ（Modelクラス由来）
+        EKF_param.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);
     end
     EKF_param.P = eye(n); % 初期共分散行列
     EKF_param.list=output;
