@@ -28,8 +28,6 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
-xf = [0;0;0];
-
 try
     while round(time.t, 5) <= te
         %% sensor
@@ -97,7 +95,6 @@ end
         end
 
         %% update state
-        % with FH
         figure(FH)
         drawnow
 
@@ -165,11 +162,13 @@ close all
 clc
 % plot 
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
+logger.plot({1,"p","pe"},{1,"q","pe"});
 % agent(1).reference.timeVarying.show(logger)
+
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure());
 agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
