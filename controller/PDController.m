@@ -36,7 +36,7 @@ classdef PDController <CONTROLLER_CLASS
                 obj.result.input=obj.result.input+obj.Gain.D*Err.v;
             end
             if isfield(Err,'q') && isfield(obj.Gain,'Q')
-                obj.result.input=[obj.result.input;obj.Gain.D*Err.q];
+                obj.result.input=[obj.result.input;obj.Gain.Q*Err.q];
             end
             obj.self.input = obj.result.input;
             u = obj.result;

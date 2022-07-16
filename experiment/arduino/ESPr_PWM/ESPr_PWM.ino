@@ -7,37 +7,29 @@
 #include <WiFiUDP.h>
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 
+char packetBuffer[1];
 
-// PWM
+/////////////////// WiFi関係 ////////////////////
+unsigned int droneNumber = 131; //機体番号を入力
+//const char *ssid = "ACSLexperimentWiFi";//"acsl-mse-arl-YAMAHA";
+//const char *password = "wifi-acsl-mse";
+const char *ssid = "ACSL-Drone-Hotspot";//"acsl-mse-arl-YAMAHA";
+const char *password = "1qaz2wsx";
+WiFiUDP udp;
+
+// ESPrのIPアドレスの設定
+IPAddress myIP(192, 168, 50, droneNumber); // 機体により下番号変更
+IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
+const int my_udp_port = 8000;        //開放する自ポート
+IPAddress subnet(255, 255, 255, 0);
+
+unsigned long last_received_time;
+
+////////////// PWM ////////////////////
 #define PWMA 2
 #define PWM_FREQ 24000 // PWM frequency: 1000Hz(1kHz)
 #define PWM_RANGE 100 // PWM range: 100
 uint16_t SPEED = 0; //33;// arming のduty比
-
-char packetBuffer[1];
-
-unsigned int droneNumber = 31; //機体番号を入力
-
-#define OUTPUT_PIN 2 // PPM出力のピン番号 加速度使うなら０
-
-const char *ssid = "ACSLexperimentWiFi";//"acsl-mse-arl-YAMAHA";
-const char *password = "wifi-acsl-mse";
-
-/////////////////// WiFi関係 ////////////////////
-WiFiUDP udp;
-
-// ESPrのIPアドレスの設定
-IPAddress myIP(192, 168, 50, 100 + droneNumber); // 機体により下番号変更
-IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
-const int my_udp_port = 8000 + droneNumber;        //開放する自ポート
-IPAddress subnet(255, 255, 255, 0);
-
-
-//boolean connected = false;
-uint8_t old_receive_data = 0;
-boolean isReceive_Data_Updated = false;
-
-unsigned long last_received_time;
 
 
 //*********** local functions  *************************//
@@ -77,7 +69,6 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
       //Serial.printf("Received %d bytes from %s, port %d\n", packetSize, udp.remoteIP().toString().c_str(), udp.remotePort());
 
       last_received_time = ESP.getCycleCount();
-      isReceive_Data_Updated = true;
       analogWrite(PWMA, SPEED);
     }
      else if (ESP.getCycleCount() - last_received_time >= 0.500 * CPU_FRE * 1000000L)// Stop propellers after 0.5s signal lost.

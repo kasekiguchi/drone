@@ -135,8 +135,10 @@ classdef DRAW_DRONE_MOTION
                 param.gif = 0;
             end
 
-            p = logger.data(param.target,"p","e");
-            q = logger.data(param.target,"q","e");
+            %p = logger.data(param.target,"p","e");
+            %q = logger.data(param.target,"q","e");
+            p = logger.data(param.target,"p","p");
+            q = logger.data(param.target,"q","p");
             u = logger.data(param.target,"input");
             r = logger.data(param.target,"p","r");
             p = reshape(p,size(p,1),3,length(param.target));

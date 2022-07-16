@@ -5,8 +5,8 @@ classdef EKF < ESTIMATOR_CLASS
     %   param : required field : Q,R,B,JacobianH
     %  JacobianH(x,p) : 出力方程式の拡張線形化した関数のhandle
       properties
-        %state
         result
+            % state : estimated state
         JacobianF
         JacobianH
         Q
@@ -15,15 +15,14 @@ classdef EKF < ESTIMATOR_CLASS
         B
         n
         y
-        state % model と同じ状態　cf. result.state は推定値として受け渡すよう？
         self
     end
     
     methods
         function obj = EKF(self,param)
             obj.self= self;
-            obj.self.input = [0;0;0;0];
             model = self.model;
+            obj.self.input = zeros(model.dim(2),1);            
             ELfile=strcat("Jacobian_",model.name);
             if ~exist(ELfile,"file")
                 obj.JacobianF=ExtendedLinearization(ELfile,model);
@@ -46,19 +45,17 @@ classdef EKF < ESTIMATOR_CLASS
             obj.result.P = param.P;
         end
         
-        function [result]=do(obj,param,sensor)
+        function [result]=do(obj,param)
             %   param : optional
             if ~isempty(param) obj.dt = param; end
             model=obj.self.model;
-            if nargin == 2
-                sensor = obj.self.sensor.result;
-            end
+            sensor = obj.self.sensor.result;
             x = obj.result.state.get(); % 前回時刻推定値
 %            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定%%5
              xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
-            if isempty(obj.y.list)
-                obj.y.list=sensor.state.list; % num_listは代入してはいけない．
-            end
+%             if isempty(obj.y.list)
+%                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
+%             end
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             p = model.param;
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
@@ -73,7 +70,6 @@ classdef EKF < ESTIMATOR_CLASS
                 xh_pre = model.state.get();
             end
 
-            %obj.B = diag([ones(1,6)*obj.dt^2,ones(1,6)*obj.dt]); % to be check
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % 事前誤差共分散行列
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散

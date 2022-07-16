@@ -31,13 +31,10 @@ classdef HLController_plusMEC_quadcopter < CONTROLLER_CLASS
             
             model = obj.self.model;
             ref = obj.self.reference.result;
-           plant = obj.self.estimator;%estimatorの値をシステムの出力とみなす
+            plant = obj.self.estimator;%estimatorの値をシステムの出力とみなす
 
-            if isprop(ref.state,'xd')
-                xd = ref.state.xd; % 20次元の目標値に対応するよう
-            else
-                xd = ref.state.get();
-            end
+            xd = ref.state.get();
+
             Param= obj.param;
             P = Param.P;
             F1 = Param.F1;
