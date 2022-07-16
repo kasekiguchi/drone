@@ -12,7 +12,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
         function obj = POINT_REFERENCE_FH(self,varargin)
             % 参照
             obj.self = self;
-            obj.result.state = STATE_CLASS(struct('state_list',["xd","p"],'num_list',[3]));
+            obj.result.state = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3]));
         end
         function  result= do(obj,Param,result)
             % 【Input】result = {Xd(optional)}
@@ -33,21 +33,19 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
             obj.flight_phase=cha;
             if strcmp(cha,'l') % landing phase
                 if strcmp(obj.flag,'l')
-                    obj.result.state.xd=gen_ref_for_landing(obj.result.state.p);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing(obj.result.state.p,Param{4});
                 else% 初めてlanding に入ったとき
-                    obj.result.state.xd=gen_ref_for_landing(obj.self.reference.result.state.p);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing(obj.self.reference.result.state.p,Param{4});
                 end
-                obj.result.state.p = obj.result.state.xd; % このようにすることでf の後でも反映される
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
-                    obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1-obj.base_state(3),10,Param{3}-obj.base_time);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1-obj.base_state(3),10,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
-                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),10,0);
+                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),10,0);
                 end
-                obj.result.state.p = obj.result.state.xd(1:3);
                 obj.flag='t';
             elseif strcmp(cha,'f') % flight phase
                 obj.flag='f';
@@ -56,16 +54,11 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 end
                 if strcmp(class(Param{2}),"STATE_CLASS")
                     state_copy(Param{2},obj.result.state);
-                    %                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
                 else
-                    obj.result.state.xd = Param{2};
-                    obj.result.state.p = obj.result.state.xd;
+                    obj.result.state.p = Param{2};
                 end
             else
-                %obj.result.state.p = obj.self.estimator.result.state.p; %
-                %これだと最悪上がっていく
                 obj.result.state.p = obj.base_state;
-                obj.result.state.xd = obj.base_state;
             end
             result=obj.result;
         end
