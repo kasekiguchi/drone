@@ -43,8 +43,9 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
                 obj.t=Param{1}.t;
                 t = obj.t;
            end
-           obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-           obj.result.state.p = obj.result.state.xd(1:3);
+           %obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           %obj.result.state.p = obj.result.state.xd(1:3);
+           obj.result.state.p = obj.func(t);
            obj.result.state.v = obj.dfunc(t);
            obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            result = obj.result;
