@@ -160,7 +160,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
             [variable, vrange] = obj.full_var_name(variable, attribute);
             attribute = "";
-            data_range = find((obj.Data.t - option.time(1)) > 0, 1):find((obj.Data.t - option.time(2)) >= 0, 1);
+            data_range = find((obj.Data.t - option.time(1)) > 0, 1)-1:find((obj.Data.t - option.time(2)) >= 0, 1);
             if sum(strcmp(n, {'time', 't'}))     % 時間軸データ
                 data = obj.Data.t(data_range);
             elseif n == 0                        % n : agent number.  n=0 => obj.itmesのデータ
