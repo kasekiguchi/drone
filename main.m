@@ -21,9 +21,9 @@ run("main2_agent_setup.m");
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
-        ];
+    ];
 LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
-            ];
+    ];
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
@@ -33,9 +33,9 @@ try
         %% sensor
         %    tic
         tStart = tic;
-if time.t == 9
-    time.t;
-end
+        if time.t == 9
+            time.t;
+        end
         if (fOffline)
             expdata.overwrite("plant", time.t, agent, i);
             FH.CurrentCharacter = char(expdata.Data{1}.phase(offline_time));
@@ -103,7 +103,7 @@ end
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
-%            agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
+            %            agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
@@ -111,11 +111,9 @@ end
         % for exp
         if fExp
             %% logging
+            logger.logging(time.t, FH, agent, []);
             calculation1 = toc(tStart);
             time.t = time.t + calculation1;
-            logger.logging(time.t, FH, agent, []);
-            calculation2 = toc(tStart);
-            time.t = time.t + calculation2 - calculation1;
 
             %% logging
             %             calculation = toc;
@@ -160,7 +158,7 @@ end
 %%
 close all
 clc
-% plot 
+% plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 logger.plot({1,"p","pe"},{1,"q","pe"});
 % agent(1).reference.timeVarying.show(logger)
@@ -168,7 +166,7 @@ logger.plot({1,"p","pe"},{1,"q","pe"});
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure());
-agent(1).animation(logger,"target",1:N);
+agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+%agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();

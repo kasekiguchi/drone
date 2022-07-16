@@ -68,29 +68,61 @@ classdef PARTICLE_FILTER < ESTIMATOR_CLASS
         function show(obj,p,xhp,opts)
             % draw 3d position estimation result
             % opts.xp : true position
+            % [example] 
+            % agent.estimator.pf.show("flag",mod(time.t,0.2)<dt,"xp",agent.plant.state.p,"y",agent.sensor.result.state.p);
+            % agent.estimator.pf.show("flag",mod(time.t,0.2)<dt)
             arguments
                 obj
-                p = obj.result.state.p
+                p = []
                 xhp = obj.result.xhp
-                opts.FH = obj.FH
+                opts.FH = []
                 opts.xp = []
                 opts.flag = 1;
+                opts.state_char = "p"
+                opts.y = []
+                opts.ref = false
             end
-            obj.FH = figure(opts.FH);
+            if isempty(opts.FH) % figureを削除した時のケア：show 単体で使うときに必要
+                obj.FH = figure(10);
+            else
+                obj.FH = figure(opts.FH);
+            end
             hold on; grid on; axis equal
             view([1 1 1]);
-            if opts.flag == 1
-                plot3(xhp(1,:),xhp(2,:),xhp(3,:),'.g');
-                obj.drawErrorEllipse(p,cov(xhp(1:3,:)'));
+         
+            if isempty(p) % output変数の指定
+                if isempty(opts.state_char)
+                    p = obj.result.state.p;
+                else
+                    p = obj.result.state.(opts.state_char);
+                end
             end
-            plot3(p(1),p(2),p(3),'xm');
+            if opts.flag == 1
+                plot3(xhp(1,:),xhp(2,:),xhp(3,:),'.g'); % particle 表示
+                obj.drawErrorEllipse(p,cov(xhp(1:3,:)')); % 誤差楕円表示
+            end
+            plot3(p(1),p(2),p(3),'xm'); % 3次元のデータであることが前提
             if isempty(opts.xp)
-                legend('PF samples','PF Confidence','PF est.');
-            else
-                y = obj.y.p; % global coordinate
-                plot3(opts.xp(1),opts.xp(2),'-b');
-                plot3([opts.xp(1,1) y(1,1)],[opts.xp(2,1) y(2,1)],[opts.xp(3,1) y(3,1)],'--or');
-                legend('PF samples','PF Confidence','PF est.','True position','True/observation');
+                if opts.ref
+                    legend('ref','PF samples','PF Confidence','PF est.');
+                else
+                    legend('PF samples','PF Confidence','PF est.');
+                end
+            else % 真値データと比較できる場合
+                plot3(opts.xp(1),opts.xp(2),opts.xp(3),'-b');
+                if opts.flag == 1
+                    if isempty(opts.y)
+                        y = obj.y.(opts.state_char);
+                    else
+                        y = opts.y;
+                    end
+                    plot3([opts.xp(1) y(1)],[opts.xp(2) y(2)],[opts.xp(3) y(3)],'--or');
+                end
+                if opts.ref
+                    legend('ref','PF samples','PF Confidence','PF est.','True position','True/observation');
+                else
+                    legend('PF samples','PF Confidence','PF est.','True position','True/observation');
+                end
             end
             drawnow
             %            daspect([1 1 1]);
@@ -106,16 +138,31 @@ classdef PARTICLE_FILTER < ESTIMATOR_CLASS
                 param.gif = false;
                 opts.xp = [] % true value
                 opts.y = [] % measured position
-                opts.FH = obj.FH
+                opts.FH = []
+                opts.state_char = "p"
             end
-            t = logger.data("t");
-            p = logger.data(param.target,"p","e");
-            pp = logger.data(param.target,"estimator.result.xhp"); % particle position matrix
-            r = logger.data(param.target,"p","r");
-            plot3(r(:,1),r(:,2),r(:,3),'k');
+            if isempty(opts.FH) % figureを削除した時のケア：show 単体で使うときに必要
+                obj.FH = figure(10);
+            else
+                obj.FH = figure(opts.FH);
+            end
 
+            t = logger.data("t");
+            p = logger.data(param.target,opts.state_char,"e");
+            if class(obj.self.plant)=="MODEL_CLASS" && isempty(opts.xp)
+                pt = logger.data(param.target,opts.state_char,"p");            
+                y = logger.data(param.target,opts.state_char,"s");
+            end
+            pp = logger.data(param.target,"estimator.result.xhp"); % particle position matrix
+            fRef = false;
+            if opts.state_char == "p"
+                r = logger.data(param.target,"p","r");
+                plot3(r(:,1),r(:,2),r(:,3),'k');
+                fRef = true;
+            end
+            data_range=sum(obj.y.num_list(1:find(obj.y.list==opts.state_char)-1))+1:sum(obj.y.num_list(1:find(obj.y.list==opts.state_char)));
             for i = 1:length(t)-1
-                obj.show(p(i,:),pp(1:3,obj.sample*(i-1)+1:obj.sample*i),"flag",mod(t(i),0.2)<obj.dt,"FH",opts.FH)
+                obj.show(p(i,:),pp(data_range,obj.sample*(i-1)+1:obj.sample*i),"flag",mod(t(i),0.2)<obj.dt,"FH",obj.FH,"state_char",opts.state_char,"xp",pt(i,:),"y",y(i,:),"ref",fRef);
                 if param.realtime
                     delta = toc(tRealtime);
                     if t(i+1)-t(i) > delta
