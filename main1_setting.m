@@ -34,7 +34,7 @@ if fMotive
     end
 end
 
-%% initial_stateize
+%% set initial state 
 disp("Initialize state");
 initial_state(N) = struct;
 param(N) = struct('sensor', struct, 'estimator', struct, 'reference', struct);

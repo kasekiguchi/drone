@@ -1,6 +1,6 @@
-classdef Motive < SENSOR_CLASS
+classdef MOTIVE < SENSOR_CLASS
     % Motive用クラス：登録されたエージェントの位置と姿勢がわかる
-    %  sensor.motive = Motive(self, ~)
+    %  sensor.motive = MOTIVE(self, ~)
     %       self : agent
     properties
         name      = "Motive";
@@ -15,7 +15,7 @@ classdef Motive < SENSOR_CLASS
     end
     
     methods
-        function obj = Motive(self,args)
+        function obj = MOTIVE(self,args)
             arguments
                 self
                 args

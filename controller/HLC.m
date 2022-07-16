@@ -16,30 +16,16 @@ classdef HLC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         
-        function result=do(obj,param,~)
-            % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
+        function result=do(obj,~,~)
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
             xd = ref.state.get();
-            if isprop(ref.state,'xd')
-                if ~isempty(ref.state.xd)
-                    xd = ref.state.xd; % 20次元の目標値に対応するよう
-                end
-            end
-            Param = obj.param;
             P = obj.param.P;
-            F1 = Param.F1;
-            F2 = Param.F2;
-            F3 = Param.F3;
-            F4 = Param.F4;
-            %     xd=Xd.p;
-            %     if isfield(Xd,'v')
-            %         xd=[xd;Xd.v];
-            %         if isfield(Xd,'dv')
-            %             xd=[xd;Xd.dv];
-            %         end
-            %     end
+            F1 = obj.param.F1;
+            F2 = obj.param.F2;
+            F3 = obj.param.F3;
+            F4 = obj.param.F4;
             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
             
             % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
@@ -53,8 +39,8 @@ classdef HLC < CONTROLLER_CLASS
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
             
-            if isfield(Param,'dt')
-                dt = Param.dt;
+            if isfield(obj.param,'dt')
+                dt = obj.param.dt;
                 vf = Vfd(dt,x,xd',P,F1);
             else
                 vf = Vf(x,xd',P,F1);
