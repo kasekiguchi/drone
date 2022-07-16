@@ -26,8 +26,8 @@ fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
-sample = 500;    % 上手くいったとき：50のときもある
-H = 20;
+sample = 10;    % 上手くいったとき：50のときもある
+H = 3;
             % --配列定義
             Adata = zeros(sample, H);   % 評価値
 %             P_monte = zeros(sample, 3); % ある入力での位置
@@ -379,3 +379,20 @@ logger.plot({1,"input", ""},"fig_num",5); set(gca,'FontSize',Fontsize);  title("
 agent(1).animation(logger,"target",1);
 %%
 % logger.save();
+
+%% 制御モデル
+function [Ad, Bd, Cd, Dd]  = MassModel(Td)
+        %-- 連続系線形システム
+                Ac = [1.0, 0.0;
+                      0.0, 1.0];
+                Bc = [1.0, 0.0;
+                      0.0, 1.0];
+                Cc = diag([1, 1]);
+                Dc = 0;
+                sys = ss(Ac, Bc, Cc, Dc);
+
+        %-- 離散系システム
+                dsys = c2d(sys, Td); % - 連続系から離散系への変換
+                [Ad, Bd, Cd, Dd] = ssdata(dsys);
+
+    end

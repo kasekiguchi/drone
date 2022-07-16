@@ -80,12 +80,20 @@ mt2 = [t8.*(jx.*o1.*o2-jy.*o1.*o2)+km1.*t8.*u1-km2.*t8.*u2-km3.*t8.*u3+km4.*t8.*
 % subsIn2 = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
 
 
-% f = [mt1; mt2]; f(1)
+f = [mt1; mt2];
+% 近似線形化
+A = subs([diff(f,x(1)),diff(f,x(2)),diff(f,x(3)),diff(f,x(4)),...
+    diff(f,x(5)),diff(f,x(6)),diff(f,x(7)),diff(f,x(8)),...
+    diff(f,x(9)),diff(f,x(10)),diff(f,x(11)),diff(f,x(12))], ...
+    [x;u],0*[x;u]);
+B = subs([diff(f,u(1)), diff(f,u(2)), diff(f,u(3)), diff(f,u(4))], [x;u],0*[x;u]);
+
+dx = A * x + B * u;
 % taylor(f(1), 'Order', 3)
 
-dx = [mt1; mt2];
+% dx = [mt1; mt2];
 %% 近似線形化
-%-- 平衡点/ X = 0 0 1 0 0 0 0 0 0 0 0 0, u = ホバリング＊４
+%-- 平衡点/ X = 0 0 0 0 0 0 0 0 0 0 0 0, u = 0＊４
 %-- 状態：p   q   v   w
 %--      123 456 789 10,11,12
 %--       rollとか dp   o
