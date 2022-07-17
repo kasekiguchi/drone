@@ -27,7 +27,8 @@ fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
 sample = 10;    % 上手くいったとき：50のときもある
-H = 3;
+H = 20;
+model_dt = 0.1;
             % --配列定義
             Adata = zeros(sample, H);   % 評価値
 %             P_monte = zeros(sample, 3); % ある入力での位置
@@ -39,7 +40,15 @@ H = 3;
 %             fSubIndex = zeros(sample, 1);
 %             fSubIndex = (1:sample)';
             fSubIndex = zeros(sample, 1);
+            Params.dt = model_dt;
 run("main3_loop_setup.m");
+
+%-- 予測モデルのシステム行列
+        [MPC_Ad, MPC_Bd, MPC_Cd, MPC_Dd] = MassModel(Params.dt);
+            Params.A = MPC_Ad;
+            Params.B = MPC_Bd;
+            Params.C = MPC_Cd;
+            Params.D = MPC_Dd;
 
 try
     while round(time.t, 5) <= te
@@ -257,10 +266,11 @@ end
                     x0 = previous_state;
                     state_data(:, 1, m) = previous_state;
                     for h = 1:H-1
-                        [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+0.1],x0);
-                        x0 = tmpx(end, :);
+%                         [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+0.1],x0);
+                        tmpx = Params.A * previous_state + Params.B * u(:, h, m);
+                        x0 = tmpx;
                         state_data(:, h+1, m) = x0;
-                        if tmpx(end, 3) < 0
+                        if tmpx(3) < 0
                             subCheck(m) = 1;    % 制約外なら flag = 1
                             break;              % ホライズン途中でも制約外で終了
                         end
@@ -383,11 +393,38 @@ agent(1).animation(logger,"target",1);
 %% 制御モデル
 function [Ad, Bd, Cd, Dd]  = MassModel(Td)
         %-- 連続系線形システム
-                Ac = [1.0, 0.0;
-                      0.0, 1.0];
-                Bc = [1.0, 0.0;
-                      0.0, 1.0];
-                Cc = diag([1, 1]);
+%                 Ac = [1.0, 0.0;
+%                       0.0, 1.0];
+                Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                         0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+
+%                 Bc = [1.0, 0.0;
+%                       0.0, 1.0];
+                
+                Bc = [0 0 0 0;
+                      0 0 0 0;
+                      0 0 0 0;
+                      0 0 0 0;
+                      0 0 0 0;
+                      0 0 0 0;
+                      0 0 0 0;
+                      0 0 0 0;
+                      1000/269 1000/269 1000/269 1000/269;
+                      -2.0826 -2.0826 2.0826 2.0826;
+                      1.9596 -1.9596 1.9596 -1.9596;
+                      0.6266 0.6266 0.6266 0.6266];
+
+                Cc = diag([1 1 1 1 1 1 1 1 1 1 1 1]);
                 Dc = 0;
                 sys = ss(Ac, Bc, Cc, Dc);
 
