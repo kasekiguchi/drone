@@ -30,15 +30,39 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 run("main3_loop_setup.m");
 PFH=figure();
 %%%%%%初期定義
-I = eye(9);                             %単位行列
-A = agent.model.param.A;                %システム行列A
-B = agent.model.param.B;                %システム行列B
-C = I;                                  %観測行列
+I = eye(45);                             %単位行列
+A = [agent.model.param.A zeros(9,36)
+    zeros(36,9) eye(36)];                %システム行列A
+
+B = [agent.model.param.B
+    zeros(36,6)];                %システム行列B
+% C = I;                                 %観測行列
+C = [eye(9) zeros(9,36) 
+  repmat([-1 0 0 0 0 0 0 0 0;0 -1 0 0 0 0 0 0 0],18,1) eye(36)];
 u = zeros(6,1);                         %入力
-x_h = zeros(9,1);                       %状態の初期定義
-P_h = I;                                %共分差行列の初期定義
-Q = 0.001*I;                              %システムノイズ
-R = 0.05*I;                             %観測ノイズ
+x_h = zeros(45,1);                       %状態の初期定義
+P_h = eye(45);                                %共分差行列の初期定義
+Q = 0.001*eye(45);                              %システムノイズ
+R = 0.05*eye(45);                             %観測ノイズ
+landmark = [-3 -3
+    -2 -3
+    -1 -3
+    0 -3
+    1 -3
+    2 -3
+    3 -3
+    -5 -5
+    -4 -5
+    -3 -5
+    -2 -5
+    -1 -5
+    0 -5
+    1 -5
+    2 -5
+    3 -5
+    4 -5
+    5 -5];%landmark座標（4点）
+
 %%%%%%%%%%%
 try
     while round(time.t, 5) <= te
@@ -83,7 +107,10 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             %ここからKFの計算
-            z = agent.sensor.result.state.get;          %観測値
+            z = agent.sensor.result.state.get  ;          %観測値
+            markerr=landmark- agent.model.state.p(1:2)' + randn([18 2])*0.05;  %agent.nodel.stateがモデルの真値なのか
+            z = [z;reshape(markerr',[36,1])];
+            
             u = agent.input;                            %入力
             %%予測ステップ
             x_hm = A * x_h + B * u;                     %事前推定値
