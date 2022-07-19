@@ -55,25 +55,19 @@ for i = 1:N
             agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
 
     close all
-    if fROS 
-        %% set sensor property
-        agent(i).sensor = [];
-        LiDAR_sensor = ros2node("/LiDAR_Data",30);
-        LiDAR_sensor_Sub = ros2subscriber(LiDAR_sensor,"/scan");
-        agent(i).set_property("sensor",LiDAR_sensor_Sub);
-        %% set estimator property
-        agent(i).estimator = [];
-        agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),));
-
-    else
     %% set environment property
         Env = [];
     
         agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
         %% set sensors property
         agent(i).sensor=[];
-        SensorRange = 20;
-        agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
+        if fROS
+            Sensor = ros2node("/scan",30);
+            agent(i).set_property("sensor",Sensor_ROS2);
+        else
+            SensorRange = 20;
+            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
+        end
         %% set estimator property
         agent(i).estimator=[];
         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
@@ -86,16 +80,21 @@ for i = 1:N
         convjudgeV = 1.0;%収束判断　
         convjudgeW = 0.5;%収束判断　
         Holizon = 10;%MPCのホライゾン数
-        agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
-        % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-        agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
-        %% set controller property
-        agent(i).controller=[]; 
-        agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
+
+        if fROS
+            agent(i).set_
+        else
+            agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
+            % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
+            agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+            %% set controller property
+            agent(i).controller=[]; 
+            agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
+        end
         %% set connector (global instance)
         param(i).sensor.list = cell(1,length(agent(i).sensor.name));
-        param(i).reference.list = cell(1,length(agent(i).reference.name));
-    end
+        param(i).reference.list = cewxawll(1,length(agent(i).reference.name));
+    
 end
 %% initialize
 clc
