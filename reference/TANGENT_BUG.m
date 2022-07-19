@@ -11,8 +11,8 @@ classdef TANGENT_BUG
         waypoint %通過点
         target_position %疑似目標位置
         forward %ドローンが向かう座標
-        r %
-        angle
+        r %現在位置から目標位置までの距離
+        angle %ドローンの姿勢角
     end
     
     methods
@@ -37,7 +37,7 @@ classdef TANGENT_BUG
             %   詳細説明をここに記述
             obj.state = agent.model.state.p.';
             obj.angle = agent.model.state.q;
-            obj.r = distance(obj.state(1),obj.state(2),obj.goal(1),obj.goal(2));
+            obj.r = obj.distance(obj.state(1),obj.state(2),obj.goal(1),obj.goal(2));
             obj.angle = atan2((obj.goal(2) - obj.state(2)),(obj.goal(1) - obj.state(1)));
             X = abs(obj.obstacle(1) - obj.state(1));
             Y = abs(obj.obstacle(2) - obj.state(2));  
@@ -46,10 +46,10 @@ classdef TANGENT_BUG
                 f = 1;
             end
             if (f == 1)
-                [obj.waypoint.A(1),obj.waypoint.A(2),obj.waypoint.B(1),obj.waypoint.B(2)] = conection(obj.state(1),obj.state(2),obj.obstacle(1),obj.obstacle(2),obj.radius);
+                [obj.waypoint.A(1),obj.waypoint.A(2),obj.waypoint.B(1),obj.waypoint.B(2)] = obj.conection(obj.state(1),obj.state(2),obj.obstacle(1),obj.obstacle(2),obj.radius);
                 obj.target_position(1) = obj.waypoint.A(1);
                 obj.target_position(2) = obj.waypoint.A(2);
-                obj.forward = transformation(obj.state(1),obj.state(2),obj.angle,obj.obstacle(1),obj.obstacle(2));
+                obj.forward = obj.transformation(obj.state(1),obj.state(2),obj.angle,obj.obstacle(1),obj.obstacle(2));
                 x = obj.forward(1);
                 y = obj.forward(2);
                 
@@ -79,7 +79,7 @@ classdef TANGENT_BUG
             position = [x,y];
         end
         
-        function contact = conection(~,x,y,X,Y,r) %接点の算出
+        function [A_x,A_y,B_x,B_y] = conection(obj,x,y,X,Y,r) %接点の算出
             % x,y:ドローンの自己位置
             % X,Y:障害物の座標
             % r: 円の半径
@@ -91,7 +91,7 @@ classdef TANGENT_BUG
             A_y = ((b*D + a*sqrt((a^2 + b^2)*obj.radius^2 - D^2))/a^2 + b^2) + Y;
             B_x = ((a*D + b*sqrt((a^2 + b^2)*obj.radius^2 - D^2))/a^2 + b^2) + X;
             B_y = ((b*D - a*sqrt((a^2 + b^2)*obj.radius^2 - D^2))/a^2 + b^2) + Y;
-            contact = [A_x,A_y,B_x,B_y];            
+%             contact = [A_x,A_y,B_x,B_y];            
         end
     end
 end

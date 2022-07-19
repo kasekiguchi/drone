@@ -66,10 +66,10 @@ end
             y = 0;
             z = 1;
             % reference
-            s=TANGENT_BUG;
-            xyz=s.do(agent);
+            %s=TANGENT_BUG;
+            %xyz=s.do(agent);
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, xyz, time.t};%目標位置
+            param(i).reference.point = {FH, [0 0 0], time.t};%目標位置
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -158,8 +158,9 @@ end
 %%
 close all
 clc
-% plot 
+% plot f
 logger.plot({1,"p","er"});
+% logger.plot({1,"p1-p2","er"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
@@ -167,3 +168,5 @@ logger.plot({1,"p","er"});
 agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
+
+
