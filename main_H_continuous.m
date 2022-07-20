@@ -24,7 +24,7 @@ fInput = 0;
 fV = 0;
 fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
-fFirst = 0; % 一回のみ回す場合
+fFirst = 1; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
 sample = 10;    % 上手くいったとき：50のときもある
 H = 20;
@@ -87,19 +87,19 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値
-%             rr = [1., 1., 1.];
-%             if (time.t/2)^2+0.1 <= rr(3)  
-%                 rz = (time.t/2)^2+0.1;
-%             else; rz = 1;
-%             end
-%             if (time.t/2)^2+0.1 <= rr(1)
-%                 rx = (time.t/2)^2+0.1;
-%                 ry = (time.t/2)^2+0.1;
-%             else; rx = 1.; ry = 1.;
-%             end
-            rx = 0; 
-            ry = 0; 
-            rz = 0.0;
+            rr = [1., 1., 1.];
+            if (time.t/2)^2+0.1 <= rr(3)  
+                rz = (time.t/2)^2+0.1;
+            else; rz = 1;
+            end
+            if (time.t/2)^2+0.1 <= rr(1)
+                rx = (time.t/2)^2+0.1;
+                ry = (time.t/2)^2+0.1;
+            else; rx = 1.; ry = 1.;
+            end
+%             rx = 0; 
+%             ry = 0; 
+%             rz = 0.0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -228,16 +228,32 @@ end
 %                     positionN = 0.001;
 %                 end 
 %                 sigma = positionN + 0.01;
+            %-- 一様分布
                 sigma = 0.15;
                 a = (1-sigma)*0.269*9.81/4;
                 b = (1+sigma)*0.269*9.81/4;
 %             u = (b-a).*rand(sample,4*H) + a;
+            %-- 正規分布に変更
+                sigma = 0.1;              % sigma
+%                 if fFirst
+%                     ave = 0.269*9.81/4;     % average
+%                     fFirst = 0;
+%                 else
+%                     ave = mean(agent.input);    % リサンプリングとして前の入力を平均値とする
+%                 end
+                ave = 0.269*9.81/4;
+                %y = sigma.*randn(sample,1) + ave;   % 正規分布の乱数
             
             %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
-                u1 = (b-a).*rand(H,sample) + a;
-                u2 = (b-a).*rand(H,sample) + a;
-                u3 = (b-a).*rand(H,sample) + a;
-                u4 = (b-a).*rand(H,sample) + a;
+%                 u1 = (b-a).*rand(H,sample) + a;
+%                 u2 = (b-a).*rand(H,sample) + a;
+%                 u3 = (b-a).*rand(H,sample) + a;
+%                 u4 = (b-a).*rand(H,sample) + a;
+
+                u1 = sigma.*randn(H, sample) + ave;
+                u2 = sigma.*randn(H, sample) + ave;
+                u3 = sigma.*randn(H, sample) + ave;
+                u4 = sigma.*randn(H, sample) + ave;
                 u1 = reshape(u1, [1, size(u1)]);
                 u2 = reshape(u2, [1, size(u2)]);
                 u3 = reshape(u3, [1, size(u3)]);
@@ -371,13 +387,13 @@ close all
 % clc
 % calculate time
 % fprintf("%f秒\n", time.t / 0.025 * calT)
-% plot p:position, er:roll/pitch/yaw, 
+% plot p:position, e:estimate, r:reference, 
 % figure(1)
 Fontsize = 15;
-logger.plot({1,"p", "er"}, "fig_num",1); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"v", "e"},"fig_num",2); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"q", "e"},"fig_num",3); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"w", "e"},"fig_num",4); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"p", "er"},  "fig_num",1); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"v", "e"},   "fig_num",2); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"q", "e"},   "fig_num",3); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"w", "e"},   "fig_num",4); set(gca,'FontSize',Fontsize);  title("");
 logger.plot({1,"input", ""},"fig_num",5); set(gca,'FontSize',Fontsize);  title("");
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')

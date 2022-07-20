@@ -7,7 +7,7 @@ fOffline = 0; % offline verification with experiment data
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.001; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
+    dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
 end
 
 sampling = dt;
@@ -16,7 +16,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 40; % default: 10
+    te = 10; % default: 10
 end
 
 %% generate environment
@@ -83,7 +83,7 @@ else
             initial(i).v = [0; 0; 0];
             initial(i).w = [0; 0; 0];
         else
-            arranged_pos = arranged_position([0, 1], N, 1, 1);% [x, y], 機数，1, z
+            arranged_pos = arranged_position([0, 0], N, 1, 0);% [x, y], 機数，1, z
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];
