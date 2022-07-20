@@ -20,52 +20,29 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
-
 fInput = 0;
 fV = 0;
 fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
-sample = 1;    % 上手くいったとき：50のときもある
+sample = 10;    % 上手くいったとき：50のときもある
 H = 20;
 model_dt = 0.1;
             % --配列定義
-                Adata = zeros(sample, H);   % 評価値
-    %             P_monte = zeros(sample, 3); % ある入力での位置
-    %             V_monte = zeros(sample, 3); % ある入力での速度
-    %             W_monte = zeros(sample, 3); % ある入力での姿勢角
-    %             Q_monte = zeros(sample, 3);
-                Udiff_monte = zeros(4, sample);
-                fZpos = zeros(sample, 1);
-    %             fSubIndex = zeros(sample, 1);
-    %             fSubIndex = (1:sample)';
-                fSubIndex = zeros(sample, 1);
-                Params.dt = model_dt;
-            
-            %-- drone model param
-                param.mass = 0.269;% DIATONE
-                param.Lx = 0.117;
-                param.Ly = 0.0932;
-                param.lx = 0.117/2;%0.05;
-                param.ly = 0.0932/2;%0.05;
-                param.jx = 0.02237568;
-                param.jy = 0.02985236;
-                param.jz = 0.0480374;
-                param.gravity = 9.81;
-                param.km1 = 0.0301; % ロータ定数
-                param.km2 = 0.0301; % ロータ定数
-                param.km3 = 0.0301; % ロータ定数
-                param.km4 = 0.0301; % ロータ定数
+            Adata = zeros(sample, H);   % 評価値
+%             P_monte = zeros(sample, 3); % ある入力での位置
+%             V_monte = zeros(sample, 3); % ある入力での速度
+%             W_monte = zeros(sample, 3); % ある入力での姿勢角
+%             Q_monte = zeros(sample, 3);
+            Udiff_monte = zeros(4, sample);
+            fZpos = zeros(sample, 1);
+%             fSubIndex = zeros(sample, 1);
+%             fSubIndex = (1:sample)';
+            fSubIndex = zeros(sample, 1);
+            Params.dt = model_dt;
             
 run("main3_loop_setup.m");
-
-%-- 予測モデルのシステム行列
-        [MPC_Ad, MPC_Bd, MPC_Cd, MPC_Dd] = MassModel(Params.dt);
-            Params.A = MPC_Ad;
-            Params.B = MPC_Bd;
-            Params.C = MPC_Cd;
-            Params.D = MPC_Dd;
 
 try
     while round(time.t, 5) <= te
@@ -110,19 +87,19 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値
-            rr = [1., 0., 1.];
-            if (time.t/2)^2+0.1 <= rr(3)  
-                rz = (time.t/2)^2+0.1;
-            else; rz = 1;
-            end
-            if (time.t/2)^2+0.1 <= rr(1)
-                rx = (time.t/2)^2+0.1;
-                ry = (time.t/2)^2+0.1;
-            else; rx = 1.; ry = 1.;
-            end
-%             rx = 0.0; 
-%             ry = 0.0; 
-%             rz = 0.0;
+%             rr = [1., 1., 1.];
+%             if (time.t/2)^2+0.1 <= rr(3)  
+%                 rz = (time.t/2)^2+0.1;
+%             else; rz = 1;
+%             end
+%             if (time.t/2)^2+0.1 <= rr(1)
+%                 rx = (time.t/2)^2+0.1;
+%                 ry = (time.t/2)^2+0.1;
+%             else; rx = 1.; ry = 1.;
+%             end
+            rx = 0; 
+            ry = 0; 
+            rz = 0.0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -155,6 +132,7 @@ end
                 vref = 0.20;
             % 入力のサンプルから評価
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
+            previous_input = agent.input;
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
 %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
 
@@ -209,13 +187,14 @@ end
 %                 +w_monte'*WQ_monte*w_monte...
 %                 +q_monte'*QQ_monte*q_monte...
 %                 +u_monte'*R_monte*u_monte; 
-            % 入力差
-%             fun = @(p_monte, q_monte, v_monte, w_monte, udiff_monte) ...
-%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte...
-%                 +q_monte'*QQ_monte*q_monte...
-%                 +udiff_monte'*UdiffQ_monte*udiff_monte; 
+            % 入力差 ：　状態＋入力差＋ホバリング入力との差
+            fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+                (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
+                +v_monte'*VQ_monte*v_monte...
+                +w_monte'*WQ_monte*w_monte...
+                +q_monte'*QQ_monte*q_monte...
+                +(u_monte - ref_input)'*R_monte*(u_monte - ref_input)...
+                +(u_monte - previous_input)'*UdiffQ_monte*(u_monte - previous_input); 
             
             % 入力を含めた ref_input:ホバリング
 %             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
@@ -224,12 +203,13 @@ end
 %                     +w_monte'*WQ_monte*w_monte...
 %                     +q_monte'*QQ_monte*q_monte...
 %                     +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
-            fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-                    (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
-                    +(v_monte - vref)'*VQ_monte*(v_monte - vref)...
-                    +w_monte'*WQ_monte*w_monte...
-                    +q_monte'*QQ_monte*q_monte...
-                    +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
+            % 速度項あり
+%               fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+%                     (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p)...
+%                     +(v_monte - vref)'*VQ_monte*(v_monte - vref)...
+%                     +w_monte'*WQ_monte*w_monte...
+%                     +q_monte'*QQ_monte*q_monte...
+%                     +(u_monte - ref_input)'*R_monte*(u_monte - ref_input);
             %-- 制約条件
                 Fsub = @(sub_monte1) sub_monte1 > 0;
                 subCheck = zeros(sample, 1);
@@ -240,7 +220,7 @@ end
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
                 fV);
             %-- ホバリングから±sigma%の範囲
-                rng('shuffle')
+%                 rng('shuffle')
 %                 positionN = (norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))));
 %                 if positionN > 1
 %                     positionN = 0.99;
@@ -248,13 +228,12 @@ end
 %                     positionN = 0.001;
 %                 end 
 %                 sigma = positionN + 0.01;
-                
-%                 u = (b-a).*rand(sample,4*H) + a;
+                sigma = 0.15;
+                a = (1-sigma)*0.269*9.81/4;
+                b = (1+sigma)*0.269*9.81/4;
+%             u = (b-a).*rand(sample,4*H) + a;
             
             %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
-                sigma = 0.0;
-                a = (1-sigma)*0.269*9.81/5;
-                b = (1+sigma)*0.269*9.81/5;
                 u1 = (b-a).*rand(H,sample) + a;
                 u2 = (b-a).*rand(H,sample) + a;
                 u3 = (b-a).*rand(H,sample) + a;
@@ -279,16 +258,14 @@ end
             % --現在の状態
                 previous_state = agent.estimator.result.state.get();% 前の状態の取得
             
-            %-- 状態方程式による予測軌道計算
+            %-- 微分方程式による予測軌道計算
                 for m = 1:u_size
                     x0 = previous_state;
-                    state_data(:, 1, m) = x0;  
+                    state_data(:, 1, m) = previous_state;
                     for h = 1:H-1
-%                         [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+0.1],x0);
-                        % x[k+1] = Ax[k] + Bu[k]
-                        tmpx = Params.A * previous_state + Params.B * u(:, h, m);
-                        x0 = tmpx;
-                        x0'
+                        [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+0.1],x0);
+%                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
+                        x0 = tmpx(end, :);
                         state_data(:, h+1, m) = x0;
                         if tmpx(3) < 0
                             subCheck(m) = 1;    % 制約外なら flag = 1
@@ -316,6 +293,7 @@ end
             
             %-- 入力への代入
                 agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
+                
         end
         if isnan(Evaluationtra)
             warning("ACSL : Emergency stop!");
@@ -409,82 +387,3 @@ logger.plot({1,"input", ""},"fig_num",5); set(gca,'FontSize',Fontsize);  title("
 agent(1).animation(logger,"target",1);
 %%
 % logger.save();
-
-%% 制御モデル
-function [Ad, Bd, Cd, Dd]  = MassModel(Td)
-        %-- 連続系線形システム
-%         Lx = params.Lx;
-%         Ly = params.Ly;
-%         lx = params.lx;%0.05;
-%         ly = params.ly;%0.05;
-%         xx = params.jx;
-%         xy = params.jy;
-%         xz = params.jz;
-%         gravity = params.gravity;
-%         km1 = params.km1; % ロータ定数
-%         km2 = params.km2; % ロータ定数
-%         km3 = params.km3; % ロータ定数
-%         km4 = params.km4; % ロータ定数
-        
-        %-- DIATONE MODEL PARAM
-            Lx = 0.117;
-            Ly = 0.0932;
-            lx = 0.117/2;%0.05;
-            ly = 0.0932/2;%0.05;
-            xx = 0.02237568;    % jx
-            xy = 0.02985236;    % jy
-            xz = 0.0480374;     % jz
-            gravity = 9.81;     % gravity
-            km1 = 0.0301; % ロータ定数
-            km2 = 0.0301; % ロータ定数
-            km3 = 0.0301; % ロータ定数
-            km4 = 0.0301; % ロータ定数
-            %-- 平衡点：原点
-            Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
-              %-- 平衡点：　1m上空でホバリング [0 0 1 0 0 0 0 0 0 0 0 0 0 hover hover hover hover]
-%             Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-%                      0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
-
-            Bc = [    0,        0,        0,        0;
-                      0,        0,        0,        0;
-                      0,        0,        0,        0;
-                      0,        0,        0,        0;
-                      0,        0,        0,        0;
-                      0,        0,        0,        0;
-                      0,        0,        0,        0;
-                      0,        0,        0,        0;
-                      1000/269, 1000/269,   1000/269,   1000/269;
-                      ly/xx,   -ly/xx,     (Ly-ly)/xx,   (Ly-ly)/xx;
-                      lx/(xy),  -(Lx-lx)/xy,lx/xy,      -(Lx-lx)/xy;
-                      km1/xz,   -km2/xz,    -km3/xz,    km4/xz];
-
-            Cc = diag([1 1 1 1 1 1 1 1 1 1 1 1]);
-            Dc = 0;
-            sys = ss(Ac, Bc, Cc, Dc);
-
-        %-- 離散系システム
-                dsys = c2d(sys, Td); % - 連続系から離散系への変換
-                [Ad, Bd, Cd, Dd] = ssdata(dsys);
-
-    end
