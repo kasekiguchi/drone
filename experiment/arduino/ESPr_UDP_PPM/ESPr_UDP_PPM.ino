@@ -14,10 +14,10 @@ unsigned int droneNumber = 132; //機体番号を入力
 
 /////////////////// WiFi関係 ////////////////////
 // ESPrのIPアドレスの設定
-//const char *ssid = "ACSLexperimentWiFi";
-//const char *password = "wifi-acsl-mse";
-const char *ssid = "ACSL-Drone-Hotspot";
-const char *password = "1qaz2wsx";
+const char *ssid = "ACSLexperimentWiFi";
+const char *password = "wifi-acsl-mse";
+//const char *ssid = "ACSL-Drone-Hotspot";
+//const char *password = "1qaz2wsx";
 IPAddress myIP(192, 168, 50, droneNumber);  // 機体により下番号変更
 
 IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
@@ -124,10 +124,10 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
         }
         
         TOTAL_CH_W += pw[i];        
-        /*Serial.print("pw[ ");
+        Serial.print("pw[ ");
         Serial.print(i);
         Serial.print(" ]");
-        Serial.println(pw[i]);*/
+        Serial.println(pw[i]);
       }
 
       start_H = PPM_PERIOD - TOTAL_CH_W - 8*CH_OFFSET - 9*TIME_LOW;// 9 times LOW time in each PPM period      
@@ -154,7 +154,7 @@ void Pulse_control()
     }
     digitalWrite(OUTPUT_PIN, HIGH); //PPM -> HIGH
     timer0_write(t_now + USEC2CLOCK(start_Hh));// start 判定の H 時間待つ
-    Serial.println(start_Hh);
+    //Serial.println(start_Hh);
   }
   else
   {
