@@ -22,7 +22,7 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
       end
       obj.port=param.port;
       obj.baudrate = option.baudrate;
-      obj.serial = serialport(obj.port,obj.baudrate,'Timeout',1);
+      obj.serial = serialport(obj.port,obj.baudrate);%,'Timeout',1);
       configureTerminator(obj.serial,"CR/LF");
     end
     
@@ -32,8 +32,8 @@ classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
       result=obj.result;
     end
     function sendData(obj,param)
-      obj.result=[char(param),';'];% 文字列の終わりを陽に指定．terminator をLFにすれば必要ないかも（変更する場合はArduino_serial.inoも変更すること）
-      write(obj.serial,obj.result,'uint8');
+      obj.result = param;
+      write(obj.serial,obj.result,"uint8");
     end
   end
 end
