@@ -74,11 +74,11 @@ end
             
             
             % reference
-            rp=[4;-4;0];     % 目標座標
+            rp=[4;0;0];     % 目標座標
 
             state = agent.estimator.result.state.p'; % 自己位置
             sensor = agent.sensor.result; % センサ情報
-            Xd = rp - state;
+            Xd = rp - state';%配列の列ベクトルと行ベクトルになっていたので転置して直した
 %             d = norm(Xd);              % 目標との距離
             theta = atan2(Xd(2), Xd(1));  % 角度 rad
             for k=2:length(sensor.angle)
@@ -137,13 +137,19 @@ end
                 b=a - state(1:2);
                 sensor_r = 0.5;
                 if route_R < route_L %右の方が短い
-                    ref_tbug = sensorP_R'+(b/norm(b)*(norm(sensor_r) - norm(b)))';
+                    ref_tbug = sensorP_R'+(b/norm(b)*(norm(sensor_r) - norm(b)))';%ドローン自体にマージンをとる
                 else
                     ref_tbug = sensorP_L'+(b/norm(b)*(norm(sensor_r) - norm(b)))';
                 end
             else
-                ref_tbug = rp(1:2);
+                [~,I] = min(sensor.length);
+                a=sensor.sensor_points(I,:);
+                b=a - state(1:2);
+                sensor_r = 0.5;
+                ref_tbug = rp(1:2)+(b/norm(b)*(norm(sensor_r) - norm(b)))';
             end
+            
+            % todo 座標変換
 
             rs.p = [ref_tbug;0]; % 目標位置
             rs.q = [0;0;0]; % 目標姿勢
