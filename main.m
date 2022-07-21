@@ -133,10 +133,13 @@ end
                 route_R = dS_AnchorR+dR_AnchorR;
                 route_L = dS_AnchorL+dR_AnchorL;
                 [~,I] = min(sensor.length);
+                a=sensor.sensor_points(I,:);
+                b=a - state(1:2);
+                sensor_r = 0.5;
                 if route_R < route_L %右の方が短い
-                    ref_tbug = sensorP_R';
+                    ref_tbug = sensorP_R'+(b/norm(b)*(norm(sensor_r) - norm(b)))';
                 else
-                    ref_tbug = sensorP_L';
+                    ref_tbug = sensorP_L'+(b/norm(b)*(norm(sensor_r) - norm(b)))';
                 end
             else
                 ref_tbug = rp(1:2);
