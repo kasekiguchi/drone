@@ -8,9 +8,15 @@ Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 Cc4 = [1 0 0 0];
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
-Controller_param.F1=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([100,1,1]),0.1,dt);                                % 
-Controller_param.F2=lqrd([Ac4,zeros(4,1);-Cc4,0],[Bc4;0],diag([100,100,10,1,0.01]),0.1,dt); % xdiag([100,10,10,1])
-Controller_param.F3=lqrd([Ac4,zeros(4,1);-Cc4,0],[Bc4;0],diag([100,100,10,1,0.01]),0.1,dt); % ydiag([100,10,10,1])
+
+%newsarvo
+Controller_param.F1=[lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt),-0.25];                                % z 
+Controller_param.F2=[lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,10,1]),[0.01],dt),-0.25]; % xdiag([100,10,10,1])
+Controller_param.F3=[lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,10,1]),[0.01],dt),-0.25]; % ydiag([100,10,10,1])
+
+% Controller_param.F1=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([100,1,1]),0.1,dt);                                % 
+% Controller_param.F2=lqrd([Ac4,zeros(4,1);-Cc4,0],[Bc4;0],diag([100,100,10,1,0.01]),0.1,dt); % xdiag([100,10,10,1])
+% Controller_param.F3=lqrd([Ac4,zeros(4,1);-Cc4,0],[Bc4;0],diag([100,100,10,1,0.01]),0.1,dt); % ydiag([100,10,10,1])
 Controller_param.F4=lqrd(Ac2,Bc2,diag([100,10]),0.1,dt);                       % ヨー角 
 syms x [3 1] real % Model_EulerAngle_Servoを使う前提
 syms sz1 [2 1] real

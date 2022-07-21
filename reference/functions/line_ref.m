@@ -13,9 +13,9 @@ z_0 = X0(3);
 % z = z_0;
 
 %PtoP
-x = x_0+1;
+x = x_0+0.2*sin(2*pi/10*t);
 y = y_0;
-z = z_0;
+z = z_0+0.2*cos(2*pi/10*t);
 
 ref=@(t)[x;y;z;0];%謎x,y,z are function of t.
 
