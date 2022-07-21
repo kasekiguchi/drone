@@ -79,7 +79,7 @@ end
             state = agent.estimator.result.state.p'; % 自己位置
             sensor = agent.sensor.result; % センサ情報
             Xd = rp - state;
-%             d = vecnorm(Xd);              % 目標との距離
+%             d = norm(Xd);              % 目標との距離
             theta = atan2(Xd(2), Xd(1));  % 角度 rad
             for k=2:length(sensor.angle)
                 dtheta1 = theta - sensor.angle(k-1); % 現状使うほう
@@ -100,7 +100,7 @@ end
                     sensorP_R       = sensor.sensor_points(anchor_R-1,:);
                     sensorP_index   = sensor.sensor_points(anchor_R,:);      
                     
-                    dLen_right = vecnorm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
+                    dLen_right = norm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
                     % 同一物体として認識
                     if dLen_right < 0.15
                         anchor_R = anchor_R - 1;  % 右にずらす
@@ -113,7 +113,7 @@ end
                     sensorP_index   = sensor.sensor_points(anchor_L,:);     
                     sensorP_L       = sensor.sensor_points(anchor_L+1,:);   
                     
-                    dLen_left = vecnorm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
+                    dLen_left = norm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
                     
                     % 同一物体として認識
                     if dLen_left < 0.15 
@@ -126,12 +126,13 @@ end
     % 
     %             sensorP_R; % anchor_R 座標
     %             sensorP_L; % anchor_L 座標
-                dS_AnchorR = vecnorm(state(1:2)-sensorP_R); % 現在位置-anchor_R 距離
-                dS_AnchorL = vecnorm(state(1:2)-sensorP_L); % 現在位置-anchor_L 距離
-                dR_AnchorR = vecnorm(rp(1:2)-sensorP_R);
-                dR_AnchorL = vecnorm(rp(1:2)-sensorP_R);
+                dS_AnchorR = norm(state(1:2)-sensorP_R); % 現在位置-anchor_R 距離
+                dS_AnchorL = norm(state(1:2)-sensorP_L); % 現在位置-anchor_L 距離
+                dR_AnchorR = norm(rp(1:2)-sensorP_R);
+                dR_AnchorL = norm(rp(1:2)-sensorP_R);
                 route_R = dS_AnchorR+dR_AnchorR;
                 route_L = dS_AnchorL+dR_AnchorL;
+                [~,I] = min(sensor.length);
                 if route_R < route_L %右の方が短い
                     ref_tbug = sensorP_R';
                 else
