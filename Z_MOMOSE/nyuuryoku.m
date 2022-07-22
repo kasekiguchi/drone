@@ -71,6 +71,25 @@ syms k c t real;
 udtanh=diff(2*abs(t).^(2/5).*(tanh(t).^2 - 1) - (4.*sign(t).*tanh(t))./(5*abs(t).^(3/5)),t);
 dunew=diff(-k/2.*(tanh(c.*t)+t),t);
 ddunew=diff(dunew);
+%% 7/12入力の微分方程式を解くぜ
+x0=1;
+tspan=0:0.01:4;
+k=1;
+a=0.5;
+[T,X] = ode45(@(t,x) -k*sign(x)*abs(x)^a,tspan,x0);
+plot(T,X)
+%%
+syms ap positive
+syms an negative
+syms x(t) k 
+odep=diff(x)== -k*sign(x)*abs(x)^ap;
+odeo=diff(x)== -k*sign(x)*abs(x)^1;
+oden=diff(x)== -k*sign(x)*abs(x)^an;
+
+Sp= dsolve(odep)
+So= dsolve(odeo)
+Sn= dsolve(oden)
+
 %%
 syms a k t n
 an=0.4;%*ones(size(tn));

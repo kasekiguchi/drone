@@ -35,7 +35,7 @@ if FT == 1
     alpha(anum)=0.9;%alphaの初期値
 
     for a=anum-1:-1:1
-        alpha(a)=(alpha(a+2)*alpha(a+1))/(2*alpha(a+2)-alpha(a+1));
+        alpha(a)=(alpha(a+2)*alpha(a+1))/(2*alpha(a+2)-alpha(a+1));%alphaを求める漸化式
     end
     Controller_param.alpha=alpha(anum);
     Controller_param.ax=alpha;

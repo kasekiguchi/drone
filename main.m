@@ -11,7 +11,7 @@ userpath('clear');
 %%
 run("main1_setting.m");
 run("main2_agent_setup.m");
-%agent.set_model_error("ly",0.02);
+% agent.set_model_error("lx",0.005);
 
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -178,37 +178,39 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=1;
+fsave=10;
 if fsave==1
     %変更しない
-    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-%     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
     %変更
-    subfolder='exp';%sim or exp or sample
-    % subfolder='sim';%sim or exp or sample
+%     subfolder='exp';%sim or exp or sample
+    subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='reference確認';%実験,シミュレーション名
-    contents='HL_ptop_x1';%実験,シミュレーション内容
-    FolderName=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
+    ExpSimName='zに有限整定制御適用';%実験,シミュレーション名
+    contents='tanh_a_2_x_01_z_05';%実験,シミュレーション内容
+    FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
+    FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
     %フォルダができてないとき
     
-        mkdir(FolderName);
+        mkdir(FolderNamed);
+        mkdir(FolderNamef);
         addpath(genpath(ExportFolder));
     
     % save logger and agent
         logger_contents=strcat('logger_',contents);
         SaveTitle=strcat(date,'_',logger_contents);    
         eval([logger_contents '= logger;']);%loggerの名前をlogger_contentsに変更
-        save(fullfile(FolderName, SaveTitle),logger_contents);
+        save(fullfile(FolderNamed, SaveTitle),logger_contents);
       
         agent_contents=strcat('agent_',contents);
         SaveTitle2=strcat(date,'_',agent_contents);
         eval([agent_contents '=agent;']);%agentの名前をagent_contentsに変更
-        save(fullfile(FolderName, SaveTitle2),agent_contents);
+        save(fullfile(FolderNamed, SaveTitle2),agent_contents);
     %savefig
 %     SaveTitle=strcat(date,'_',ExpSimName);
 %         saveas(1, fullfile(FolderName, SaveTitle ),'jpg');

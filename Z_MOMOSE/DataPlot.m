@@ -5,14 +5,14 @@ clear
 %import
 %選択
 fsingle=1;%figureの数が一つの時１
-ff=1;%flightのみは１
+ff=10;%flightのみは１
 fHLorFT=10;%単体の時,HLは1
 
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
     name=logger;
-%     name=tanh_al09a6_kx;
+%     name=logger_HL_srv_rf_02t;
 %     name=remasui2_0518_FT_hovering_15;
     %
     if fHLorFT==1
@@ -51,6 +51,7 @@ if fsingle==1
     z2=zeros(4,tn);
     z3=zeros(4,tn);
     z4=zeros(2,tn);
+    ininp=zeros(8,tn);
     j=1;
     for i=k0f:1:k0e
         time(j)=ti0(i)-tt0;
@@ -61,11 +62,12 @@ if fsingle==1
         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q;
         vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v;
         w(:,j)=name.Data.agent.estimator.result{1,i}.state.w;
-%         uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
-%         z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
-%         z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
-%         z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
-%         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
+        uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
+        z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
+        z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
+        z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
+        z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
+        %ininp(:,j)=name.Data.agent.inner_input{1, i};
         j=j+1;
     end
 else
@@ -148,7 +150,7 @@ else
 end
 
 % figure
-FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4"];
+FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "t-p" "inner_input"];
 if fsingle==1
     f(1)=figure('Name',FigName(1));
     hold on
@@ -158,7 +160,7 @@ if fsingle==1
     title(HLorFT)
     xlabel('x[m]')
     ylabel('y[m]')
-    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
     hold off
 
     f(2)=figure('Name',FigName(2));
@@ -306,6 +308,26 @@ if fsingle==1
     legend('psi','dpsi')
     hold off
     
+    f(16)=figure('Name',FigName(16));
+    hold on
+    plot(time,ref,time,est);
+    grid on
+    title(HLorFT)
+    xlabel('time[s]')
+    ylabel('p')
+    legend('x ref','y ref','z ref','x est','y est','z est')
+    hold off
+    
+    f(17)=figure('Name',FigName(17));
+    hold on
+    plot(time,ininp);
+    grid on
+    title(HLorFT)
+    xlabel('time[s]')
+    ylabel('inner input')
+%     legend('')
+    hold off
+    
 else
 % 比較
     f(1)=figure('Name',FigName(1));
@@ -422,32 +444,40 @@ end
 
 %% make folder
 %変更しない
-ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';
-DataFig='figure';%データか図か
-date=string(datetime('now','Format','MMdd'));%日付
+%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+        ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    DataFig='figure';%データか図か
+    date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
+    date2=string(datetime('now','Format','yyyy_MMdd'));%日付
+    
 %変更
 % subfolder='sim';%sim or exp
-subfolder='exp';%sim or exp
-ExpSimName='FT近似';%実験名,シミュレーション名
-contents='FT_kx_ff';%実験,シミュレーション内容
-if strcmp(subfolder,'exp')
-    ExpSimName=strcat(ExpSimName,'_fig');
-    FolderName=fullfile(ExportFolder,subfolder,ExpSimName);%保存先のpath
-else
-    FolderName=fullfile(ExportFolder,subfolder,ExpSimName,DataFig);%保存先のpath    
-end
-
+subfolder='sim';%sim or exp
+ExpSimName='zに有限整定制御適用';%実験名,シミュレーション名
+contents='tanh_a_2_x_01_z_05';%実験,シミュレーション内容
+% if strcmp(subfolder,'exp')
+%     ExpSimName=strcat(ExpSimName,'_fig');
+%     FolderNamed=fullfile(ExportFolder,subfolder,ExpSimName);%保存先のpath
+% else
+%     FolderName=fullfile(ExportFolder,subfolder,strcat(date,'_',ExpSimName),'data');%保存先のpath
+    FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
+    FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
+% end
 %フォルダができてないとき
-% mkdir(FolderName);
-% addpath(genpath(ExportFolder));
+
+    mkdir(FolderNamed);
+    mkdir(FolderNamef);
+    addpath(genpath(ExportFolder));
+%フォルダをrmる
+%     rmpath(genpath(ExportFolder))
 %% save 
 n=length(f);
 SaveTitle=strings(1,n);
-for i=1:7 %保存する図を選ぶ場合[1:"x-y" 2:"t-x" 3:"t-y" 4:"t-z" 5:"error" 6:"input" 7:"attitude" 8:"velocity" 9:"angular_velocity" 10:"3D"]
-    if i==2 || i==6 || i==5%保存したいものを書く
+for i=1:17 %保存する図を選ぶ場合[1:"x-y" 2:"t-x" 3:"t-y" 4:"t-z" 5:"error" 6:"input" 7:"attitude" 8:"velocity" 9:"angular_velocity" 10:"3D"]
+    if i==2 || i==6 || i==5 || i== 16 || i==17%保存したいものを書く
     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(i));
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jpg');
-    saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'fig');
+    saveas(f(i), fullfile(FolderNamef, SaveTitle(i) ),'fig');
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
     end
 end
@@ -457,6 +487,5 @@ i=6;%figiureの番号
 SaveTitle=strings(1,1);
     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(i));
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jng');
-    saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'fig');
+    saveas(f(i), fullfile(FolderNamef, SaveTitle(i) ),'fig');
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
-%%

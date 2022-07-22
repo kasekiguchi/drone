@@ -7,6 +7,7 @@ classdef FTC < CONTROLLER_CLASS
         Q
         Vf
         Vs
+        VfFT
     end
     
     methods
@@ -17,6 +18,7 @@ classdef FTC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.Vf = param.Vf; % 階層１の入力を生成する関数ハンドル
             obj.Vs = param.Vs; % 階層２の入力を生成する関数ハンドル 
+            obj.VfFT = param.VfFT;% 階層１の入力を生成する関数ハンドルFT用
         end
         
         function result = do(obj,param,~)
@@ -40,7 +42,7 @@ classdef FTC < CONTROLLER_CLASS
 %             ky=[3.16,6.79,40.54,12.27];%後でparamに格納
             ky=F3;
 %             kz=[2.23,2.28];
-            kz=F1;
+            %kz=F1;
 %             kpsi=[1.41,1.35];
             kpsi=F4;
 %             ax=[0.692,0.75,0.818,0.9];%alpha
@@ -64,26 +66,20 @@ classdef FTC < CONTROLLER_CLASS
             xd(17:19)=Rb0'*xd(17:19);
 
             %%%%%%%%%%%%%%%%%%%
-             %% calc Z
+%% calc Z
             z1 = Z1(x,xd',P);
+          %z方向:FB
             vf = obj.Vf(z1,F1);
+          %z方向:FT
+            a = 2;
+%             vf = obj.VfFT(z1,F1,a);
             %x,y,psiの状態変数の値
-            z1=Z1(x,xd',P);%z方向
             z2=Z2(x,xd',vf,P);%x方向
             z3=Z3(x,xd',vf,P);%y方向
             z4=Z4(x,xd',vf,P);%yaw
             %vs = obj.Vs(z2,z3,z4,F2,F3,F4);
             %%%%%%%%%%%%%%%%%%%
             
-%%%%%%%%%%%%%%%%%%%%%%%            
-            %z方向:FT
-%             z1=Z1(x,xd',P);%z方向
-%             uz=-kz(1)*sign(z1(1))*abs(z1(1))^az(1)-(kz(2)*sign(z1(2))*abs(z1(2))^az(2));
-%             vf(1)=uz;%FT
-%             vs = Vs(x,xd',vf,P,F2,F3,F4);
-%             z1=Z1(x,xd',P);%z方向
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %% x,y,psiの入力
           %近似1(sgnを近似)
 %           a=6;%a>2,alpha=0.9,a=6の時いい感じになる
@@ -91,14 +87,14 @@ classdef FTC < CONTROLLER_CLASS
 %             uy=-ky(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(ky(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(ky(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(ky(4)*tanh(a*z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1);%-F3*z3;%(19)式          
 
           %近似2(|x|^alphaを近似＋併用)
-%           a=1.2;%a>1(1だと0の近くでfbと同じになる)
-%             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2*z2;%F2(1)*z2(1);%（17）式
-%             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3*z3;%F3(1)*z3(1);%(19)式          
+          a=1.2;%a>1(1だと0の近くでfbと同じになる)
+            ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2*z2;%F2(1)*z2(1);%（17）式
+            uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3*z3;%F3(1)*z3(1);%(19)式          
 %             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2(1)*z2(1);%（17）式
 %             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3(1)*z3(1);%(19)式   
           %有限整定
-            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
-            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
+%             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
+%             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
 %             ux=-F2*z2;
 %             uy=-F3*z3;
         %併用

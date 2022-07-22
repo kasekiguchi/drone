@@ -13,7 +13,31 @@ syms sF1 [1 2] real
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,[1,0],[0]),dt));
 Controller_param.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
 %óLå¿êÆíËêßå‰ópÇÃVfÇèëÇ≠
-% Controller_param.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
+syms a real
+th=0;dth=0;ddth =0; dddth=0;
+for i=1:2
+    fz = 1/(1+exp(-a*2*sz1(i)));
+    tanh = 2*fz-1;
+    dtanh = 4*a*fz*(1-fz);
+    ddtanh = 8*a^2*fz*(1-fz)*(1*2*fz);
+    dddtanh = 16*a^3*fz*(1-fz)*(1-6*fz+6*fz^2);
+    
+    th = th + tanh;
+    dth = dth + dtanh;
+    ddth = ddth + ddtanh;
+    dddth = dddth + dddtanh;
+end
+A = Ad1-Bd1*sF1;
+Az = A*sz1;
+AAz = A*Az;
+AAAz = A*AAz;
+
+Controller_param.VfFT = matlabFunction([-sF1*(th+1)*sz1, -sF1*(dth+1)*Az, -sF1*(ddth*Az.^2+(dth+1)*AAz), -sF1*(dddth*Az.^3+3*ddth*Az.*AAz+(dth+1)*AAAz)],"Vars",{sz1,sF1,a});
+%
+% syms al z(t) []positive
+% uFT = -k*sign(sz(i))*abs(sz1(i))^al
+% duFT = diff(uFT,)
+
 syms sz2 [4 1] real
 syms sF2 [1 4] real
 syms sz3 [4 1] real

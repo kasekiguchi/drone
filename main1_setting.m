@@ -1,6 +1,6 @@
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -16,7 +16,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 20;
+    te = 15;
 end
 
 %% generate environment
@@ -83,7 +83,7 @@ else
             initial(i).v = [0; 0; 0];
             initial(i).w = [0; 0; 0];
         else
-            arranged_pos = arranged_position([0, 0], N, 1, 0);
+            arranged_pos = arranged_position([0,0], N, 1, 0);
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];
