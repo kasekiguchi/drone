@@ -24,6 +24,7 @@ classdef FUNCTIONAL_HLC_SERVO < CONTROLLER_CLASS
         
         function result=do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
+            cha = obj.self.reference.point.flag;
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w, z]に並べ替え
@@ -64,7 +65,8 @@ classdef FUNCTIONAL_HLC_SERVO < CONTROLLER_CLASS
             xd(9:11)=Rb0'*xd(9:11);
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
-            
+           
+%             if strcmp(cha,'f')
 %             if t > 20
                 obj.z = obj.z + xd(1:3)-x(5:7);
 %             end

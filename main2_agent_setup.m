@@ -78,7 +78,7 @@ for i = 1:N
     agent(i).controller = [];
     agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
-%     agent(i).set_property("controller", Controller_FHL(dt));  %入力を簡単にいじれる                              % 階層型線形化
+%     agent(i).set_property("controller", Controller_FHL(dt));  %入力を簡単にいじれる % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % servo階層型線形化
      %HLControlSetting = Controller_HL(dt);
       HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;

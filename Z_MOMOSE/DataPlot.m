@@ -62,11 +62,11 @@ if fsingle==1
         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q;
         vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v;
         w(:,j)=name.Data.agent.estimator.result{1,i}.state.w;
-        uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
-        z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
-        z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
-        z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
-        z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
+%         uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
+%         z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
+%         z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
+%         z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
+%         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
         %ininp(:,j)=name.Data.agent.inner_input{1, i};
         j=j+1;
     end
@@ -444,17 +444,18 @@ end
 
 %% make folder
 %変更しない
-%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-        ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+%         ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
     
 %変更
 % subfolder='sim';%sim or exp
-subfolder='sim';%sim or exp
-ExpSimName='zに有限整定制御適用';%実験名,シミュレーション名
-contents='tanh_a_2_x_01_z_05';%実験,シミュレーション内容
+subfolder='exp';%sim or exp
+ExpSimName='有限整定制御近似';%実験名,シミュレーション名
+% contents='FT_apx_max';%実験,シミュレーション内容
+contents='FT_PP11';%実験,シミュレーション内容
 % if strcmp(subfolder,'exp')
 %     ExpSimName=strcat(ExpSimName,'_fig');
 %     FolderNamed=fullfile(ExportFolder,subfolder,ExpSimName);%保存先のpath
@@ -474,7 +475,7 @@ contents='tanh_a_2_x_01_z_05';%実験,シミュレーション内容
 n=length(f);
 SaveTitle=strings(1,n);
 for i=1:17 %保存する図を選ぶ場合[1:"x-y" 2:"t-x" 3:"t-y" 4:"t-z" 5:"error" 6:"input" 7:"attitude" 8:"velocity" 9:"angular_velocity" 10:"3D"]
-    if i==2 || i==6 || i==5 || i== 16 || i==17%保存したいものを書く
+    if i==2 || i==6 || i==5 || i== 16% || i==17%保存したいものを書く
     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(i));
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jpg');
     saveas(f(i), fullfile(FolderNamef, SaveTitle(i) ),'fig');
