@@ -229,19 +229,19 @@ end
 %                 end 
 %                 sigma = positionN + 0.01;
             %-- 一様分布
-                sigma = 0.15;
-                a = (1-sigma)*0.269*9.81/4;
-                b = (1+sigma)*0.269*9.81/4;
+%                 sigma = 0.15;    
+%                 a = (1-sigma)*0.269*9.81/4;
+%                 b = (1+sigma)*0.269*9.81/4;
 %             u = (b-a).*rand(sample,4*H) + a;
             %-- 正規分布に変更
                 sigma = 0.1;              % sigma
-%                 if fFirst
-%                     ave = 0.269*9.81/4;     % average
-%                     fFirst = 0;
-%                 else
-%                     ave = mean(agent.input);    % リサンプリングとして前の入力を平均値とする
-%                 end
-                ave = 0.269*9.81/4;
+                if fFirst
+                    ave = 0.269*9.81/4;     % average
+                    fFirst = 0;
+                else
+                    ave = mean(agent.input);    % リサンプリングとして前の入力を平均値とする
+                end
+%                 ave = 0.269*9.81/4;
                 %y = sigma.*randn(sample,1) + ave;   % 正規分布の乱数
             
             %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
@@ -249,7 +249,7 @@ end
 %                 u2 = (b-a).*rand(H,sample) + a;
 %                 u3 = (b-a).*rand(H,sample) + a;
 %                 u4 = (b-a).*rand(H,sample) + a;
-
+                % abs(normrnd(zeros(H,sample), sigma))
                 u1 = sigma.*randn(H, sample) + ave;
                 u2 = sigma.*randn(H, sample) + ave;
                 u3 = sigma.*randn(H, sample) + ave;
@@ -283,7 +283,7 @@ end
 %                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
                         x0 = tmpx(end, :);
                         state_data(:, h+1, m) = x0;
-                        if tmpx(3) < 0
+                        if tmpx(3) < 0.
                             subCheck(m) = 1;    % 制約外なら flag = 1
                             break;              % ホライズン途中でも制約外で終了
                         end

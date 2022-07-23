@@ -26,17 +26,7 @@ fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 0; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
-            % --配列定義
-            Adata = zeros(sample, H);   % 評価値
-%             P_monte = zeros(sample, 3); % ある入力での位置
-%             V_monte = zeros(sample, 3); % ある入力での速度
-%             W_monte = zeros(sample, 3); % ある入力での姿勢角
-%             Q_monte = zeros(sample, 3);
-            Udiff_monte = zeros(4, sample);
-            fZpos = zeros(sample, 1);
-%             fSubIndex = zeros(sample, 1);
-%             fSubIndex = (1:sample)';
-            fSubIndex = zeros(sample, 1);
+            
 %% Setup
     %-- パラメータ
 %         dt = 0.05;          % - 離散時間幅（チューニング必要かも）
@@ -51,21 +41,24 @@ fRemove = 0;    % 終了判定
         Initu2 = 0.269 * 9.81 / 4;      % - 初期推定解
         Initu3 = 0.269 * 9.81 / 4;      % - 初期推定解
         Initu4 = 0.269 * 9.81 / 4;      % - 初期推定解
+%         Initu = 0.269 * 9.81 / 4;      % - 初期推定解
         umax = 1.0;         % - 入力の最大値、入力制約と最大入力の抑制項のときに使う
         InitSigma_u1 = 0.03; % - 初期の分散（要チューニング）
         InitSigma_u2 = 0.03; % - 初期の分散（要チューニング）
         InitSigma_u3 = 0.03; % - 初期の分散（要チューニング）
         InitSigma_u4 = 0.03; % - 初期の分散（要チューニング）
+%         InitSgima = 0.03;
         
 
     %-- MPC関連
-        Params.H = 26;                         % - ホライゾン（チューニング）
+        Params.H = 20;                         % - ホライゾン（チューニング）
         Params.dt = 0.1;                       % - 予測ステップ幅（チューニング）
-        Params.Weight.P = diag([1.0; 1.0; 1.0]);    % 座標
+        Params.Weight.P = 1000 * diag([1.0; 1.0; 1.0]);    % 座標
         Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
         Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
-        Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
-        Params.Weight.R = diag([0.01; 0.01; 0.01; 0.01]); % 入力
+        Params.Weight.Q = 100 * diag([1.0; 1.0; 1.0]);    % 姿勢角
+        Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+        Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
         %%- モデル予測制御の最大入力を超過しないよう抑制する項に対するステージコスト重み（要チューニング）
         %%- 西川先輩の修論に載ってる、今回は重み0にして項の役割をなくした
             Params.Weight.Rs = 0.0;                
@@ -97,36 +90,19 @@ fRemove = 0;    % 終了判定
 %             Params.D = MPC_Dd;
         
                
-    %-- データ配列初期化
+    % --配列定義
+            Adata = zeros(Params.Particle_num, Params.H);   % 評価値
+%             P_monte = zeros(Params.Particle_num, 3); % ある入力での位置
+%             V_monte = zeros(Params.Particle_num, 3); % ある入力での速度
+%             W_monte = zeros(Params.Particle_num, 3); % ある入力での姿勢角
+%             Q_monte = zeros(Params.Particle_num, 3);
+            Udiff_monte = zeros(4, Params.Particle_num);
+            fZpos = zeros(Params.Particle_num, 1);
+%             fSubIndex = zeros(Params.Particle_num, 1);
+%             fSubIndex = (1:Params.Particle_num)';
+            fSubIndex = zeros(Params.Particle_num, 1);
         x = x0;
 %         u = u0;
-
-%         idx = 0;
-%         dataNum = 8;
-%         data.state           = zeros(round(Te/dt + 1), dataNum);
-%         data.state(idx+1, 1) = idx * dt; % - 現在時刻
-%         data.state(idx+1, 2) = x(1);     % - 状態 x
-%         data.state(idx+1, 3) = x(2);     % - 状態 y
-%         data.state(idx+1, 4) = 0;        % - 入力 ux  
-%         data.state(idx+1, 5) = 0;        % - 入力 uy
-%         data.state(idx+1, 6) = 0;        % - ux,uyのノルム
-%         data.state(idx+1, 7) = 0;        % - 目標状態 xr
-%         data.state(idx+1, 8) = 0;        % - 目標状態 yr        
-%         data.path{idx+1}  = {}; % - 全サンプル全ホライズンの値
-%         data.pathJ{idx+1} = {}; % - 全サンプルの評価値
-%         data.state(idx+1, 1) = idx * dt; % - 現在時刻
-%         data.state(idx+1, 2) = x(1);     % - 状態 x
-%         data.state(idx+1, 3) = x(2);     % - 状態 y
-%         data.state(idx+1, 4) = 0;        % - 入力 ux  
-%         data.state(idx+1, 5) = 0;        % - 入力 uy
-%         data.state(idx+1, 6) = 0;        % - ux,uyのノルム
-%         data.state(idx+1, 7) = 0;        % - 目標状態 xr
-%         data.state(idx+1, 8) = 0;        % - 目標状態 yr
-%         data.bestcost(idx+1) = 0;        % - もっともよい評価値
-%         data.bestx(idx+1, :) = repelem(x(1), Params.H); % - もっともよい評価の軌道x成分
-%         data.besty(idx+1, :) = repelem(x(2), Params.H); % - もっともよい評価の軌道y成分
-%         data.sigmax(idx+1, :) = 0; % - xの標準偏差の値
-%         data.sigmay(idx+1, :) = 0; % - yの標準偏差の値  
         
         sigma_cnt = 1:Params.H; % - 標準偏差の上昇に使ってる
 run("main3_loop_setup.m");
@@ -167,7 +143,61 @@ end
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
         
+        %% -- resampling
+        %-- MPCでパラメータを配列に格納
+%             Params.Ur = ur;
+%             Params.Xr = xr;
+%             Params.X0 = x;
+%             Params.input_size = input_size;
+%             Params.state_size = state_size;
+        %-- MPCのホライズン間の分散
+            if Count_sigma == 0 || Count_sigma ==1
+                sigma1 = repmat(InitSigma_u1 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; % - 初期時刻
+                sigma2 = repmat(InitSigma_u2 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
+                sigma3 = repmat(InitSigma_u3 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; 
+                sigma4 = repmat(InitSigma_u4 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; 
+            else
+                sigma1 = repmat(sigmanext_1 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; % - 初期時刻以降
+                sigma2 = repmat(sigmanext_2 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
+                sigma3 = repmat(sigmanext_3 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
+                sigma4 = repmat(sigmanext_4 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
+            end
 
+        %-- 準最適化入力を格納
+            if Count_sigma == 0 
+                u1_ten = repmat(Initu1, Params.H, Particle_num);
+                u2_ten = repmat(Initu2, Params.H, Particle_num);
+                u3_ten = repmat(Initu3, Params.H, Particle_num);
+                u4_ten = repmat(Initu4, Params.H, Particle_num);
+                %-- fminconで算出した値を代入、初期推定解だけ勾配法を用いて算出するパターンもある
+                %-- こういう一例があることを知って欲しいから残しておいた
+                    % ux_ten = repmat(u_previous_opt(1,:)', 1, Particle_num);
+                    % uy_ten = repmat(u_previous_opt(1,:)', 1, Particle_num);
+            else
+                u1_ten = reshape(u_1, size(n1)); % - 初期時刻以降，準最適化入力を格納
+                u2_ten = reshape(u_2, size(n2));
+                u3_ten = reshape(u_3, size(n3)); 
+                u4_ten = reshape(u_4, size(n4));
+            end
+
+        %-- 分散によるノイズを格納，入力の広がりを決定
+            n1 = normrnd(zeros(Params.H,Particle_num), sigma1);
+            n2 = normrnd(zeros(Params.H,Particle_num), sigma2);
+            n3 = normrnd(zeros(Params.H,Particle_num), sigma3);
+            n4 = normrnd(zeros(Params.H,Particle_num), sigma4);
+
+        %-- 各方向の入力列を格納
+            u1 = u1_ten + n1;
+            u2 = u2_ten + n2;
+            u3 = u3_ten + n3;
+            u4 = u4_ten + n4;
+            u1 = reshape(u1, [1, size(u1)]);
+            u2 = reshape(u2, [1, size(u2)]);
+            u3 = reshape(u3, [1, size(u3)]);
+            u4 = reshape(u4, [1, size(u4)]);
+            u = [u1; u2; u3; u4];
+        
+        
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator
@@ -178,10 +208,10 @@ end
             if (time.t/2)^2+0.1 <= rr(3);  rz = (time.t/2)^2+0.1;
             else; rz = 1;
             end
-            if (time.t/6)^2+0.1 <= rr(2);  rx = (time.t/2)^2+0.1;ry = (time.t/2)^2+0.1;  
-            else; rx = 1.; ry = 1.;
-            end
-%             rx = 0.0; ry = 0.0; 
+%             if (time.t/2)^2+0.1 <= rr(2);  rx = (time.t/2)^2+0.1;  ry = (time.t/2)^2+0.1;  
+%             else; rx = 1.; ry = 1.;
+%             end
+            rx = 0.0; ry = 0.0; 
 %             rz = 1.0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
@@ -206,83 +236,29 @@ end
             
                 
             
-            % MPC controller
+      %-- モンテカルロモデル予測制御 controller
             % ts探し
             ts = 0;
-            state_monte = agent.model.state;
-            ref_monte = agent.reference.result.state;
-            % 入力のサンプルから評価
-            ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-%             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
-%             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
-
-            % 重みを変化させる ref[1, 1, 1]用
-            if fWeight == 1
-                % 重みの速度変化
-                if min(abs(agent.model.state.v(1:2))) < 0.3
-                    fV = 0;
-                    Params.Weight.P  = diag([100, 100, 1]);
-                    Params.Weight.Q = diag([1, 1, 1]);
-                    Params.Weight.V = diag([0.1, 0.1, 1]);
-                    Params.Weight.W = diag([1, 1, 1]);
-                else
-                    if fVcount
-                        fV_time = time.t;
-                        fVcount = 0;
-                    end
-                    fV = 1;
-                    Params.Weight.P  = diag([1, 1, 1]); % 1 1 100
-                    Params.Weight.Q = diag([1, 1, 1]); % 100 100 1
-                    Params.Weight.V = diag([1, 1, 1]);
-                    Params.Weight.W = diag([1, 1, 1]);
-                end
-            else
-                Params.Weight.P  = 1000*diag([1, 1, 1]);  % 1 1 100
-                Params.Weight.Q = diag([1, 1, 1]);   % 1000 1000 1
-                Params.Weight.V = diag([1, 1, 1]);
-                Params.Weight.W = diag([1, 1, 1]);
-%                 UdiffQ_monte = diag([1, 1, 1, 1]);
-                Params.Weight.R = diag([1, 1, 1, 1]);  
-            end
-              
+            %-- 使うものいろいろ定義
+                state_monte = agent.model.state;
+                ref_monte = agent.reference.result.state;
+                previous_state = agent.estimator.result.state.get();    % 前の状態の取得
+                previous_input = agent.input;
+                ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
             
             %-- 評価関数
-%             fun = @(p_monte, u_monte) (p_monte - agent.reference.result.state.p)'*Q_monte*(p_monte - agent.reference.result.state.p)+(u_monte - ref_input)'*R_monte*(u_monte - ref_input); 
-%             funP = @(p_monte) (p_monte - ref_monte.p)'*PQ_monte*(p_monte - ref_monte.p); 
-%             funV = @(v_monte) (v_monte'*VQ_monte*v_monte); 
-%             fun = @(p_monte, v_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)+v_monte'*VQ_monte*v_monte;
-%             fun = @(p_monte, v_monte, w_monte) (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte; 
-%             fun = @(p_monte, q_monte, v_monte, w_monte) ...
-%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte...
-%                 +q_monte'*QQ_monte*q_monte; 
-%             fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte...
-%                 +q_monte'*QQ_monte*q_monte...
-%                 +u_monte'*R_monte*u_monte; 
-            % 入力差
-%             fun = @(p_monte, q_monte, v_monte, w_monte, udiff_monte) ...
-%                 (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-%                 +v_monte'*VQ_monte*v_monte...
-%                 +w_monte'*WQ_monte*w_monte...
-%                 +q_monte'*QQ_monte*q_monte...
-%                 +udiff_monte'*UdiffQ_monte*udiff_monte; 
-            
-            % 入力を含めた ref_input:ホバリング
-            fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-                    (p_monte - ref_monte.p)'*Params.Weight.P*(p_monte - ref_monte.p)...
+                % 入力差 ：　状態＋入力差＋ホバリング入力との差
+                fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+                    (p_monte - agent.reference.result.state.p)'*Params.Weight.P*(p_monte - agent.reference.result.state.p)...
                     +v_monte'*Params.Weight.V*v_monte...
                     +w_monte'*Params.Weight.W*w_monte...
                     +q_monte'*Params.Weight.Q*q_monte...
-                    +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input);
+                    +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input)...
+                    +(u_monte - previous_input)'*Params.Weight.RP*(u_monte - previous_input); 
+            
             %-- 制約条件
                 Fsub = @(sub_monte1) sub_monte1 > 0;
-                subCheck = zeros(sample, 1);
+                subCheck = zeros(Params.Particle_num, 1);
             %-- 状態の表示
             fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
@@ -294,38 +270,37 @@ end
                 sigma = 0.15;
                 a = (1-sigma)*0.269*9.81/4;
                 b = (1+sigma)*0.269*9.81/4;
-%             u = (b-a).*rand(sample,4*H) + a;
+%             u = (b-a).*rand(Params.Particle_num,4*Params.H) + a;
             
-            %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
-                u1 = (b-a).*rand(H,sample) + a;
-                u2 = (b-a).*rand(H,sample) + a;
-                u3 = (b-a).*rand(H,sample) + a;
-                u4 = (b-a).*rand(H,sample) + a;
-                u1 = reshape(u1, [1, size(u1)]);
-                u2 = reshape(u2, [1, size(u2)]);
-                u3 = reshape(u3, [1, size(u3)]);
-                u4 = reshape(u4, [1, size(u4)]);
-                u = [u1; u2; u3; u4];
-                u_size = size(u, 3);    % sample
+%             %-- ランダムサンプリング　(4 * Params.H * ParticleNum) リサンプリングなし
+%                 u1 = (b-a).*rand(Params.H,Params.Particle_num) + a;
+%                 u2 = (b-a).*rand(Params.H,Params.Particle_num) + a;
+%                 u3 = (b-a).*rand(Params.H,Params.Particle_num) + a;
+%                 u4 = (b-a).*rand(Params.H,Params.Particle_num) + a;
+%                 u1 = reshape(u1, [1, size(u1)]);
+%                 u2 = reshape(u2, [1, size(u2)]);
+%                 u3 = reshape(u3, [1, size(u3)]);
+%                 u4 = reshape(u4, [1, size(u4)]);
+%                 u = [u1; u2; u3; u4];
+                u_size = size(u, 3);    % Params.Particle_num
             %-- 全予測軌道のパラメータの格納変数を定義,  repmat で短縮
-                p_data = zeros(H, sample);
+                p_data = zeros(Params.H, Params.Particle_num);
                 p_data = repmat(reshape(p_data, [1, size(p_data)]), 3, 1);
-                v_data = zeros(H, sample);
+                v_data = zeros(Params.H, Params.Particle_num);
                 v_data = repmat(reshape(v_data, [1, size(v_data)]), 3, 1);
-                q_data = zeros(H, sample);
+                q_data = zeros(Params.H, Params.Particle_num);
                 q_data = repmat(reshape(q_data, [1, size(q_data)]), 3, 1);
-                w_data = zeros(H, sample);
+                w_data = zeros(Params.H, Params.Particle_num);
                 w_data = repmat(reshape(w_data, [1, size(w_data)]), 3, 1);
                 state_data = [p_data; q_data; v_data; w_data];
 
-            % --現在の状態
-                previous_state = agent.estimator.result.state.get();% 前の状態の取得
+            
             
             %-- 微分方程式による予測軌道計算
                 for m = 1:u_size
                     x0 = previous_state;
                     state_data(:, 1, m) = x0;
-                    for h = 1:H-1
+                    for h = 1:Params.H-1
                         [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+dt],x0);
                         x0 = tmpx(end, :);
                         state_data(:, h+1, m) = x0;
@@ -356,6 +331,32 @@ end
             %-- 入力への代入
                 agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
         end
+        
+        %-- 最小評価値の入力をリサンプリング，格納,次時刻の分散決定
+            if fRemove == 0
+                [Params, L_norm] = Normalize(Params, Evaluationtra);     % 評価値を正規化
+%                 [u_y, ~, u_x] = Resampling(Params, u1, L_norm);
+                [u_1, u_2, u_3, u_4, ~] = Resampling(Params, u, L_norm);
+            end
+            
+        %-- 次時刻の分散の決定
+        %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
+            if Count_sigma == 0 % - 最初は全時刻の評価値がないから現時刻/現時刻にしてる
+                Bestcost_pre = Bestcost;
+                Bestcost_now = Bestcost;
+            else
+                Bestcost_pre = Bestcost_now;
+                Bestcost_now = Bestcost;
+            end
+            sigmanext_1 = sigma1(1,1) * (Bestcost_now/Bestcost_pre);
+            sigmanext_2 = sigma2(1,1) * (Bestcost_now/Bestcost_pre);
+            sigmanext_3 = sigma3(1,1) * (Bestcost_now/Bestcost_pre);
+            sigmanext_4 = sigma4(1,1) * (Bestcost_now/Bestcost_pre);
+%             sigmanext_x = sigmax(1,1);
+%             sigmanext_y = sigmay(1,1);
+        
+        Count_sigma = Count_sigma + 1;
+        %--- edit by 小松
         
         %% update state
         % with FH

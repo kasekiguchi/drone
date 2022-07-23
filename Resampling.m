@@ -1,6 +1,6 @@
 function [ppu1, ppu2, ppu3, ppu4, pw] = Resampling(Params,ppu,pw)
     %RESAMPLING この関数の概要をここに記述
-    NP = Params.sample;   % パーティクル数
+    NP = Params.Particle_num   % パーティクル数
     
     %減った分のパーティクルの数の分だけ一番最後のパーティクルの値を複製
     %ただし重みは0とし加重平均では考慮されないものとする．
@@ -8,13 +8,13 @@ function [ppu1, ppu2, ppu3, ppu4, pw] = Resampling(Params,ppu,pw)
     %柴田先輩卒論p.16-18
     pw_size = size(pw,2);       % L_norm のサイズ
     ppu_size = size(ppu,3);     % particle
-    if pw_size ~= Params.sample
+    if pw_size ~= Params.Particle_num
         size_diff = NP - pw_size;
         pw(1,(NP - size_diff + 1):NP) = zeros(1,size_diff);
         ppu(:,:,(NP - size_diff + 1):NP) = repmat(ppu(:,:,pw_size),1,1,size_diff);
     end
     
-    if ppu_size ~= Params.sample
+    if ppu_size ~= Params.Particle_num
         size_diff = NP - ppu_size;
         pw(1,(NP - size_diff + 1):NP) = zeros(1,size_diff);
         ppu(:,:,(NP - size_diff + 1):NP) = repmat(ppu(:,:,ppu_size),1,1,size_diff);

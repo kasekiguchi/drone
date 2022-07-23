@@ -111,18 +111,18 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値
             rr = [1., 0., 1.];
-            if (time.t/2)^2+0.1 <= rr(3)  
-                rz = (time.t/2)^2+0.1;
-            else; rz = 1;
-            end
-            if (time.t/2)^2+0.1 <= rr(1)
-                rx = (time.t/2)^2+0.1;
-                ry = (time.t/2)^2+0.1;
-            else; rx = 1.; ry = 1.;
-            end
-%             rx = 0.0; 
-%             ry = 0.0; 
-%             rz = 0.0;
+%             if (time.t/2)^2+0.1 <= rr(3)  
+%                 rz = (time.t/2)^2+0.1;
+%             else; rz = 1;
+%             end
+%             if (time.t/2)^2+0.1 <= rr(1)
+%                 rx = (time.t/2)^2+0.1;
+%                 ry = (time.t/2)^2+0.1;
+%             else; rx = 1.; ry = 1.;
+%             end
+            rx = 0.0; 
+            ry = 0.0; 
+            rz = 0.5;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -252,13 +252,26 @@ end
 %                 u = (b-a).*rand(sample,4*H) + a;
             
             %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
-                sigma = 0.0;
-                a = (1-sigma)*0.269*9.81/3;
-                b = (1+sigma)*0.269*9.81/3;
-                u1 = (b-a).*rand(H,sample) + a;
-                u2 = (b-a).*rand(H,sample) + a;
-                u3 = (b-a).*rand(H,sample) + a;
-                u4 = (b-a).*rand(H,sample) + a;
+%                 sigma = 0.0;
+%                 a = (1-sigma)*0.269*9.81/3;
+%                 b = (1+sigma)*0.269*9.81/3;
+%                 u1 = (b-a).*rand(H,sample) + a;
+%                 u2 = (b-a).*rand(H,sample) + a;
+%                 u3 = (b-a).*rand(H,sample) + a;
+%                 u4 = (b-a).*rand(H,sample) + a;
+            %-- 正規分布によるサンプリング
+            	sigma = 0.1;              % sigma
+                if fFirst
+                    ave = 0.269*9.81/4;     % average
+                    fFirst = 0;
+                else
+                    ave = mean(agent.input);    % リサンプリングとして前の入力を平均値とする
+                end
+%                 ave = 0.269*9.81/4;
+                u1 = sigma.*randn(H, sample) + ave;
+                u2 = sigma.*randn(H, sample) + ave;
+                u3 = sigma.*randn(H, sample) + ave;
+                u4 = sigma.*randn(H, sample) + ave;
                 u1 = reshape(u1, [1, size(u1)]);
                 u2 = reshape(u2, [1, size(u2)]);
                 u3 = reshape(u3, [1, size(u3)]);
@@ -288,7 +301,7 @@ end
                         % x[k+1] = Ax[k] + Bu[k]
                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
                         x0 = tmpx;
-                        x0'
+                        
                         state_data(:, h+1, m) = x0;
                         if tmpx(3) < 0.
                             subCheck(m) = 1;    % 制約外なら flag = 1
@@ -481,6 +494,8 @@ function [Ad, Bd, Cd, Dd]  = MassModel(Td)
 
             Cc = diag([1 1 1 1 1 1 1 1 1 1 1 1]);
             Dc = 0;
+            % 可制御性，可観測
+            
             sys = ss(Ac, Bc, Cc, Dc);
 
         %-- 離散系システム

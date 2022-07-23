@@ -1,6 +1,6 @@
 function [obj, pw_new] = Normalize(obj,pw)
     %重みベクトルを正規化する関数
-	NP = obj.sample;
+	NP = obj.Particle_num;
 % 	pwnotcollision = 1./pw(pw<10);
 %     pwnotcollision = exp(-pw(pw<10));
 %     pwnotcollisionID = pw < 10;
