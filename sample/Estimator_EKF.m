@@ -36,6 +36,14 @@ function Estimator = Estimator_EKF(agent,output,var)
         EKF_param.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5); % システムノイズ（Modelクラス由来）
         EKF_param.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);
     end
+    if strcmp(agent.model.name,"load_parameter_estimation")
+        EKF_param.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
+        EKF_param.B = [[blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);zeros(3,12)],[zeros(9,3);1000*eye(3);zeros(12,3);eye(3)]];%[blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)],[eye(3)])];
+    end
+    if strcmp(agent.model.name,"load_parameter_estimation_exey")
+        EKF_param.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5,eye(2)*1E-8); % システムノイズ（Modelクラス由来）
+        EKF_param.B = [[blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);zeros(2,12)],[zeros(9,2);455.1973*eye(2);zeros(13,2);eye(2)]];%[blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)],[eye(3)])];
+    end
     EKF_param.P = eye(n); % 初期共分散行列
     EKF_param.list=output;
     Estimator.param=EKF_param;

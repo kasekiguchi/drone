@@ -24,7 +24,9 @@ for i = 1:N
     % set control model
 %     agent(i).set_model(Model_EulerAngle(dt,initial(i), i)); % オイラー角モデル
     %agent(i).set_model(Model_Quat13(dt,initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
-    agent(i).set_model(Model_Suspended_Load(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
+%     agent(i).set_model(Model_Suspended_Load(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
+    agent(i).set_model(Model_Suspended_Load_parameter_estimation(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
+%     agent(i).set_model(Model_Suspended_Load_parameter_estimation_exey(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     close all
@@ -63,16 +65,16 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
 %     agent(i).set_estimator("estimator", Estimator_EKF(agent(i), ["p", "q"], [1e-5, 1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], [1e-5])); % （質点）EKF
-    %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+%     agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
 %     agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[2,2,1]})); % 時変な目標状態
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",{[0;0;1],2})); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",{[0;0;0.5],1})); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",{[0;0;1],2})); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
