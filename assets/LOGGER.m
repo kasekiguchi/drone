@@ -145,7 +145,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 variable string = "p"
                 attribute string = "e"
                 option.time (1, 2) double = [0 obj.Data.t(obj.k)]
-            end  
+            end
             data = cell2mat(arrayfun(@(i) obj.data_org(i, variable, attribute,"time",option.time), target, 'UniformOutput', false));
             [~, vrange] = obj.full_var_name(variable, attribute);
         end
@@ -326,7 +326,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                             case "w"
                                 title(strcat("Angular velocity w of agent", string(n)));
                             case "z"
-                                title(strcat("Position error integration of agent", string(n)));
+                                title(strcat("Error integration of agent", string(n)));
                             case "input"
                                 title(strcat("Input u of agent", string(n)));
                             otherwise
@@ -343,6 +343,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                                     plegend = [plegend, "reference"];
                                 case "p"
                                     plegend = [plegend, "plant"];
+                                case "c"
+                                    plegend = [plegend, "controller"];
                                 otherwise
                                     plegend = [plegend, att];
                             end
@@ -393,6 +395,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     name = "reference.result";
                 case 'p' % plant
                     name = "plant.result";
+                case 'c' % controller
+                    name = "controller.result";
                 case 'i' %
                     name = "input";
                 otherwise
@@ -412,8 +416,6 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     name = strcat(name, ".state.v");
                 case 'w'
                     name = strcat(name, ".state.w");
-                case 'z'
-                    name = strcat(name, ".state.z");
                 case 'input'
                     name = "input";
                 otherwise
