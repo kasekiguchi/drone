@@ -1,9 +1,13 @@
 function Estimator = Estimator_EKF(agent,output,opts)
-    % output ：出力のリスト　例 ["p","q"]
-    % var : 各出力に対するセンサーの観測ノイズs
-    %% estimator class demo
-    % estimator property をEstimator classのインスタンス配列として定義
-    % すべての機体で同一設定
+    % Inputs : agent, output, opts
+    % agent : DRONE class instance
+    % output : 出力方程式の拡張線形化した関数ハンドル（状態とパラメータを引数とする関数）
+    %           or 出力に含む状態 ["p","q"]など
+    % opts : オプション引数
+    %    B : システムノイズの入るチャンネル行列
+    %    P : 初期誤差共分散行列
+    %    Q : システムノイズの共分散行列推定値
+    %    R : 観測ノイズの共分散行列推定値
     arguments
         agent
         output = ["p","q"]
