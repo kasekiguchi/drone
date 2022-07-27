@@ -153,6 +153,9 @@ classdef DRAW_WHILL
             tRealtime = tic;
             for i = 1:length(t)-1
                 obj.draw(p(i,:),q(i))
+                if mod(t(i),0.1)<0.001
+                    title("Time : " + t(i));
+                end
                 if param.realtime
                     delta = toc(tRealtime);
                     if t(i+1)-t(i) > delta

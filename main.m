@@ -86,7 +86,7 @@ try
             % controller
             param(i).controller.hlc = {time.t};
             param(i).controller.pd = {};
-            param(i).controller.tscf = {time.t};
+            param(i).controller.tscf = {dt,time.t};
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -103,7 +103,6 @@ try
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
-                      agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
@@ -160,7 +159,7 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"rigid.q","s"},{1,"q","e"});
+logger.plot({1,"p","er"},{1,"q","e"});
 % agent(1).reference.timeVarying.show(logger)
 
 

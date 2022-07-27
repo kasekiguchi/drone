@@ -13,6 +13,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
             % 参照
             obj.self = self;
             obj.result.state = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3]));
+            obj.result.state.v = [0;0;0];
         end
         function  result= do(obj,Param,result)
             % 【Input】result = {Xd(optional)}
