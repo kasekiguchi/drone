@@ -76,13 +76,13 @@ end
             % reference
             rp=[4;0;0];     % 目標座標
 
-            state = agent.estimator.result.state.p'; % 自己位置
+            state = agent.estimator.result.state.p; % 自己位置 列ベクトル
             sensor = agent.sensor.result; % センサ情報
-            Xd = rp - state';%配列の列ベクトルと行ベクトルになっていたので転置して直した
-%             d = norm(Xd);              % 目標との距離
-            theta = atan2(Xd(2), Xd(1));  % 角度 rad
+            Xd = rp - state;%配列の列ベクトルと行ベクトルになっていたので転置して直した
+%             d = norm(Xd);               % 目標との距離
+            theta = atan2(Xd(2), Xd(1));  % 目標方向 [rad]
             for k=2:length(sensor.angle)
-                dtheta1 = theta - sensor.angle(k-1); % 現状使うほう
+                dtheta1 = theta - sensor.angle(k-1);   % 現状使うほう 目標方向との差の角度
 %                 dtheta2 = theta - sensor.angle(k);   % 追々使うかも
                 if abs(dtheta1) < 0.1    % 閾値はセンサ分解能 0.1より決定
 %                     rtheta = sensor.angle(k-1);      % 目標角
@@ -92,31 +92,34 @@ end
                     break
                 end
             end
-
+            
             anchor_R = index;%右
             anchor_L = index;%左
             if( l < 2.)% 障害物あり T-bug 右
                 while(1)
-                    sensorP_R       = sensor.sensor_points(anchor_R-1,:);
-                    sensorP_index   = sensor.sensor_points(anchor_R,:);      
+                    sensorP_R       = sensor.sensor_points(anchor_R+1,:)';   % indexの右の点の座標
+                    sensorP_index   = sensor.sensor_points(anchor_R,:)';     % 目標方向の点の座標  
                     
-                    dLen_right = norm(sensorP_index- sensorP_R);     %正面とその右隣の端点距離
+                    dLen_right = norm(sensorP_index- sensorP_R)     %正面とその右隣の端点距離
                     % 同一物体として認識
-                    if dLen_right < 0.15
+                    if dLen_right < 0.5     % 閾値が小さくて回っていないのかも 0.15 -> 0.5
                         anchor_R = anchor_R - 1;  % 右にずらす
                     else
                         break;
                     end
+%                     if anchor_R == 1
+%                         anchor_R = 63;
+%                     end
                 end
 
                 while(1)
-                    sensorP_index   = sensor.sensor_points(anchor_L,:);     
-                    sensorP_L       = sensor.sensor_points(anchor_L+1,:);   
+                    sensorP_index   = sensor.sensor_points(anchor_L,:)';     
+                    sensorP_L       = sensor.sensor_points(anchor_L-1,:)';   
                     
                     dLen_left = norm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
                     
                     % 同一物体として認識
-                    if dLen_left < 0.15 
+                    if dLen_left < 0.5 
                         anchor_L = anchor_L + 1;  % 左にずらす
                     else
                         break;
@@ -142,7 +145,7 @@ end
                     ref_tbug = sensorP_L'+(b/norm(b)*(norm(sensor_r) - norm(b)))';
                 end
             else
-                [~,I] = min(sensor.length);
+                [~,I] = min(sensor.length); % センサ値の最小値
                 a=sensor.sensor_points(I,:);
                 b=a - state(1:2);
                 sensor_r = 0.5;
