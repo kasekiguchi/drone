@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
-
+%%
 % for mob1
 tmp = [0 0;0 10;10 10;10 0]-[5 5];
 Env.param.Vertices = [tmp;NaN NaN;0.6*tmp];
@@ -78,6 +78,7 @@ end
 
             state = agent.estimator.result.state.p; % 自己位置 列ベクトル
             sensor = agent.sensor.result; % センサ情報
+            sensor.sensor_points = sensor.sensor_points+state(1:2)';%グローバル座標系に直す
             Xd = rp - state;%配列の列ベクトルと行ベクトルになっていたので転置して直した
 %             d = norm(Xd);               % 目標との距離
             theta = atan2(Xd(2), Xd(1));  % 目標方向 [rad]
@@ -97,7 +98,7 @@ end
             anchor_L = index;%左
             if( l < 2.)% 障害物あり T-bug 右
                 while(1)
-                    sensorP_R       = sensor.sensor_points(anchor_R+1,:)';   % indexの右の点の座標
+                    sensorP_R       = sensor.sensor_points(anchor_R-1,:)';   % indexの右の点の座標%グローバル座標系に直す
                     sensorP_index   = sensor.sensor_points(anchor_R,:)';     % 目標方向の点の座標  
                     
                     dLen_right = norm(sensorP_index- sensorP_R)     %正面とその右隣の端点距離
@@ -113,8 +114,8 @@ end
                 end
 
                 while(1)
-                    sensorP_index   = sensor.sensor_points(anchor_L,:)';     
-                    sensorP_L       = sensor.sensor_points(anchor_L-1,:)';   
+                    sensorP_index   = sensor.sensor_points(anchor_L,:)';%グローバル座標系に直す     
+                    sensorP_L       = sensor.sensor_points(anchor_L+1,:)';   
                     
                     dLen_left = norm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
                     
