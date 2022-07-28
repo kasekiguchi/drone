@@ -1,4 +1,5 @@
 %% Drone 班用共通プログラム update sekiguchi
+%-- 連続時間で着陸するモデル
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
@@ -31,23 +32,33 @@ fLanding_comp = 0;
 fc = 0;     % 着陸したときだけx，y座標を取得
 sample = 10;    % 上手くいったとき：50のときもある
 H = 20;
-model_dt = 0.1;
+model_dt = 0.05;
 idx = 0;
+totalT = 0;
             % --配列定義
-            Adata = zeros(sample, H);   % 評価値
-%             P_monte = zeros(sample, 3); % ある入力での位置
-%             V_monte = zeros(sample, 3); % ある入力での速度
-%             W_monte = zeros(sample, 3); % ある入力での姿勢角
-%             Q_monte = zeros(sample, 3);
-            Udiff_monte = zeros(4, sample);
-            fZpos = zeros(sample, 1);
-%             fSubIndex = zeros(sample, 1);
-%             fSubIndex = (1:sample)';
-            fSubIndex = zeros(sample, 1);
-            Params.dt = model_dt;
+                Adata = zeros(sample, H);   % 評価値
+    %             P_monte = zeros(sample, 3); % ある入力での位置
+    %             V_monte = zeros(sample, 3); % ある入力での速度
+    %             W_monte = zeros(sample, 3); % ある入力での姿勢角
+    %             Q_monte = zeros(sample, 3);
+                Udiff_monte = zeros(4, sample);
+                fZpos = zeros(sample, 1);
+    %             fSubIndex = zeros(sample, 1);
+    %             fSubIndex = (1:sample)';
+                fSubIndex = zeros(sample, 1);
+                Params.dt = model_dt;
             %-- data
                 data.bestcost(idx+1) = 0;           % - もっともよい評価値
                 data.pathJ{idx+1} = 0;              % - 全サンプルの評価値
+            %-- 重み
+                PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
+                VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
+                WQ_monte = diag([1, 1, 1]);
+%                 QQ_q = -100*(norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))))+100
+                QQ_monte = diag([1, 1, 1]);
+
+                UdiffQ_monte = diag([1, 1, 1, 1]);
+                R_monte = diag([1, 1, 1, 1]);  
 
 run("main3_loop_setup.m");
 
@@ -106,7 +117,7 @@ end
                     ry = (time.t/2)^2+0.1;
                 else; rx = 1.; ry = 1.;
                 end
-            else
+            else% 着陸するやつ
                 % 4 == 0.3m/sほどになる
                 rr = [0., 0., 0.];
                 if 0 < time.t && time.t < 0.1
@@ -124,9 +135,12 @@ end
             rx = 0; 
             ry = 0; 
 %             rz = 0.0;
-%             if fLanding_comp == 1
-%                 rx = currentX; ry = currentY; rz = 0;
-%             end
+            
+            %-- 着陸後コントローラー変える:目標位置も変更
+                if fLanding_comp == 1
+                    rx = currentX; ry = currentY; rz = 0;
+                end
+            %--
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -148,7 +162,7 @@ end
                 agent(i).do_controller(param(i).controller.list);
                 %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
             else
-                % MPC controller
+                %-- MCMPC controller
                 % ts探し
                     ts = 0;
                     state_monte = agent.model.state;
@@ -160,99 +174,45 @@ end
 %                         vref = [0; 0; 0];
 %                     end
                     vref = [0;0;0];
-                % 入力のサンプルから評価
+       
                 ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
                 previous_input = agent.input;
-    %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
-    %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
-
-                % 重みを変化させる ref[1, 1, 1]用
-                if fWeight == 1 
-                    % 重みの速度変化
-                    if min(abs(agent.model.state.v(1:2))) < 0.3
-                        fV = 0;
-                        PQ_monte  = diag([100, 100, 1]);
-                        VQ_monte = diag([1, 1, 1]);
-                        WQ_monte = diag([0.1, 0.1, 1]);
-                        QQ_monte = diag([1, 1, 1]);
-                    else
-                        if fVcount
-                            fV_time = time.t;
-                            fVcount = 0;
-                        end
-                        fV = 1;
-                        PQ_monte  = diag([1, 1, 1]); % 1 1 100
-                        VQ_monte = diag([1, 1, 1]); % 100 100 1
-                        WQ_monte = diag([1, 1, 1]);
-                        QQ_monte = diag([1, 1, 1]);
-                    end
-                else
-                    PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
-                    VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
-                    WQ_monte = diag([1, 1, 1]);
-    %                 QQ_q = -100*(norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))))+100
-                    QQ_monte = 100*diag([1, 1, 1]);
-
-                    UdiffQ_monte = diag([1, 1, 1, 1]);
-                    R_monte = diag([1, 1, 1, 1]);  
-                end
-
-
                 %-- 評価関数
                 % 入力差 ：　状態＋入力差＋ホバリング入力との差
-                fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-                    (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-                    +(v_monte-vref)'*VQ_monte*(v_monte-vref)...
-                    +w_monte'*WQ_monte*w_monte...
-                    +q_monte'*QQ_monte*q_monte...
-                    +(u_monte - ref_input)'*R_monte*(u_monte - ref_input)...
-                    +(u_monte - previous_input)'*UdiffQ_monte*(u_monte - previous_input); 
+                    fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+                        (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
+                        +(v_monte-vref)'*VQ_monte*(v_monte-vref)...
+                        +w_monte'*WQ_monte*w_monte...
+                        +q_monte'*QQ_monte*q_monte...
+                        +(u_monte - ref_input)'*R_monte*(u_monte - ref_input)...
+                        +(u_monte - previous_input)'*UdiffQ_monte*(u_monte - previous_input); 
                 %-- 制約条件
                     Fsub = @(sub_monte1) sub_monte1 > 0;
                     subCheck = zeros(sample, 1);
                 %-- 状態の表示
-                fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
-                    state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                    state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                    ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
-                    fV);
-                %-- ホバリングから±sigma%の範囲
-    %                 rng('shuffle')
-    %                 positionN = (norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))));
-    %                 if positionN > 1
-    %                     positionN = 0.99;
-    %                 elseif positionN < 0
-    %                     positionN = 0.001;
-    %                 end 
-    %                 sigma = positionN + 0.01;
-                %-- 一様分布
-    %                 sigma = 0.15;    
-    %                 a = (1-sigma)*0.269*9.81/4;
-    %                 b = (1+sigma)*0.269*9.81/4;
-    %             u = (b-a).*rand(sample,4*H) + a;
-                %-- 正規分布に変更
+                    fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
+                        state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                        state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                        ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
+                        fV);
+                %-- 正規分布によるサンプリング
                     sigma = 0.1;              % sigma
-                    if fFirst
-                        ave1 = 0.269*9.81/4;      % average
-                        ave2 = ave1;
-                        ave3 = ave1;
-                        ave4 = ave1;
-                        fFirst = 0;
-                    else
-                        ave1 = agent.input(1);    % リサンプリングとして前の入力を平均値とする
-                        ave2 = agent.input(2);
-                        ave3 = agent.input(3);
-                        ave4 = agent.input(4);
-                    end
+                    %-- リサンプリング
+                        % 入力それぞれで標準偏差変更
+                        if fFirst
+                            ave1 = 0.269*9.81/4;      % average
+                            ave2 = ave1;
+                            ave3 = ave1;
+                            ave4 = ave1;
+                            fFirst = 0;
+                        else
+                            ave1 = agent.input(1);    % リサンプリングとして前の入力を平均値とする
+                            ave2 = agent.input(2);
+                            ave3 = agent.input(3);
+                            ave4 = agent.input(4);
+                        end
+                    %-- 
     %                 ave = 0.269*9.81/4;
-                    %y = sigma.*randn(sample,1) + ave;   % 正規分布の乱数
-
-                %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
-    %                 u1 = (b-a).*rand(H,sample) + a;
-    %                 u2 = (b-a).*rand(H,sample) + a;
-    %                 u3 = (b-a).*rand(H,sample) + a;
-    %                 u4 = (b-a).*rand(H,sample) + a;
-                    % abs(normrnd(zeros(H,sample), sigma))
                     u1 = sigma.*randn(H, sample) + ave1;
                     u2 = sigma.*randn(H, sample) + ave2;
                     u3 = sigma.*randn(H, sample) + ave3;
@@ -278,29 +238,26 @@ end
                     previous_state = agent.estimator.result.state.get();% 前の状態の取得
 
                 %-- 着陸(z < 0.05)したら入力なくして(シミュレーション上は入力＝ホバリング)地面にいる．
-%                     if previous_state(3) < 0.05
-%                         fLanding_comp = 1;
-%                         break;
-%                     end
-%                     if agent.model.state.p(3) < 0.05
-%                         if fc ~= 1
-%                             currentX = agent.model.state.p(1);
-%                             currentY = agent.model.state.p(2);
-%                             fc = 1;
-%                         end
-%                         fLanding_comp = 1;
-%                         break;
-%                     end
+                    if agent.model.state.p(3) < 0.05
+                        if fc ~= 1
+                            currentX = agent.model.state.p(1);
+                            currentY = agent.model.state.p(2);
+                            fc = 1;
+                        end
+                        fLanding_comp = 1;
+                        break;
+                    end
 
                 %-- 微分方程式による予測軌道計算
                     for m = 1:u_size
                         x0 = previous_state;
                         state_data(:, 1, m) = previous_state;
                         for h = 1:H-1
-                            [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+0.1],x0);
+                            [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+model_dt],x0);
     %                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
                             x0 = tmpx(end, :);
                             state_data(:, h+1, m) = x0;
+                            %-- 地面に沈んで終わらないように
     %                         if tmpx(3) < 0.
     %                             subCheck(m) = 1;    % 制約外なら flag = 1
     %                             break;              % ホライズン途中でも制約外で終了
@@ -395,6 +352,7 @@ end
             break
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
+        totalT = totalT + calT;
     end
 
 catch ME % for error
@@ -412,7 +370,7 @@ end
 close all
 % clc
 % calculate time
-% fprintf("%f秒\n", time.t / 0.025 * calT)
+fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
 Fontsize = 15;

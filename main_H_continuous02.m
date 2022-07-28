@@ -1,4 +1,5 @@
 %% Drone 班用共通プログラム update sekiguchi
+% 連続時間のノーマルなシミュレーション：目標位置，初期位置だけ変更する
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
@@ -20,37 +21,38 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
-fInput = 0;
-fV = 0;
-fVcount = 1;
-fWeight = 0; % 重みを変化させる場合 fWeight = 1
-fFirst = 1; % 一回のみ回す場合
-fRemove = 0;    % 終了判定
-fLanding = 0;
-fLanding_comp = 0;
-fc = 0;     % 着陸したときだけx，y座標を取得
-sample = 10;    % 上手くいったとき：50のときもある
-H = 20;
-model_dt = 0.1;
-totalT = 0;
-            % --配列定義
-            Adata = zeros(sample, H);   % 評価値
-%             P_monte = zeros(sample, 3); % ある入力での位置
-%             V_monte = zeros(sample, 3); % ある入力での速度
-%             W_monte = zeros(sample, 3); % ある入力での姿勢角
-%             Q_monte = zeros(sample, 3);
-            Udiff_monte = zeros(4, sample);
-            fZpos = zeros(sample, 1);
-%             fSubIndex = zeros(sample, 1);
-%             fSubIndex = (1:sample)';
-            fSubIndex = zeros(sample, 1);
-            Params.dt = model_dt;
+
+%-- Flag
+    fInput = 0;
+    fV = 0;
+    fVcount = 1;
+    fWeight = 0; % 重みを変化させる場合 fWeight = 1
+    fFirst = 1; % 一回のみ回す場合
+    fRemove = 0;    % 終了判定
+    fLanding = 0;   % 1: 初期位置変更すること
+    fLanding_comp = 0;
+    fc = 0;     % 着陸したときだけx，y座標を取得
+%-- 変数定義    
+    sample = 20;    % 上手くいったとき：50のときもある
+    H = 20;
+    model_dt = 0.1;
+    totalT = 0;
+    Initsigma = 0.01;
+    idx = 0;
+% --配列定義
+    Adata = zeros(sample, H);   % 評価値
+    Udiff_monte = zeros(4, sample);
+    fZpos = zeros(sample, 1);
+    fSubIndex = zeros(sample, 1);
+    Params.dt = model_dt;
+    sigmaData = zeros(te/dt, 1);
             
 run("main3_loop_setup.m");
 
 try
     while round(time.t, 5) <= te
         tic
+        idx = idx + 1;
         %% sensor
         %    tic
         tStart = tic;
@@ -93,13 +95,13 @@ end
             % reference 目標値
             if fLanding == 0
                 rr = [1., 1., 1.];
-                if (time.t/2)^2+0.1 <= rr(3)  
-                    rz = (time.t/2)^2+0.1;
+                if (time.t/4)^2+0.1 <= rr(3)  
+                    rz = (time.t/4)^2+0.1;
                 else; rz = 1;
                 end
                 if (time.t/2)^2+0.1 <= rr(1)
-                    rx = (time.t/2)^2+0.1;
-                    ry = (time.t/2)^2+0.1;
+                    rx = (time.t/4)^2+0.1;
+                    ry = (time.t/4)^2+0.1;
                 else; rx = 1.; ry = 1.;
                 end
             else
@@ -201,14 +203,30 @@ end
                     ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
                     fV);
             %-- 正規分布に変更
-                sigma = 0.1;              % sigma
+                %-- リサンプリング 平均を変える
+%                 if fFirst
+%                     sigma = Initsigma;  
+%                     ave = 0.269*9.81/4;     % average
+%                     fFirst = 0;
+%                 else
+%                     sigma = Initsigma;  
+%                     ave = mean(agent.input);
+%                 end
+                
+                %-- 標準偏差を変える
                 if fFirst
-                    ave = 0.269*9.81/4;     % average
+                    sigma = Initsigma;
                     fFirst = 0;
                 else
-                    ave = mean(agent.input);
+                    if sigmanext > 0.5
+                        sigmanext = 0.5;
+                    elseif sigmanext < 0
+                        sigmanext = 0.001;
+                    end
+                    sigma = sigmanext;
                 end
-%                 ave = 0.269*9.81/4;
+                ave = 0.269*9.81/4;
+                sigmaData(idx, 1) = sigma;
                 %y = sigma.*randn(sample,1) + ave;   % 正規分布の乱数
 
             %-- ランダムサンプリング　(4 * H * ParticleNum) リサンプリングなし
@@ -253,26 +271,27 @@ end
 %                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
                         x0 = tmpx(end, :);
                         state_data(:, h+1, m) = x0;
-%                         if tmpx(3) < 0.
-%                             subCheck(m) = 1;    % 制約外なら flag = 1
-%                             break;              % ホライズン途中でも制約外で終了
-%                         end
+                        if tmpx(3) < 0.
+                            subCheck(m) = 1;    % 制約外なら flag = 1
+                            break;              % ホライズン途中でも制約外で終了
+                        end
                     end
                 end
+%                 state_data(3, end, :)
 
                 %-- 評価値計算
                     Evaluationtra = zeros(1, u_size);
                     for m = 1:u_size
-    %                     if subCheck(m)
-    %                         Evaluationtra(1, m) = NaN;  % 制約外
-    %                     else
+                        if subCheck(m)
+                            Evaluationtra(1, m) = NaN;  % 制約外
+                        else
     %                         Adata(1, m) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
                             Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
                                 state_data(4:6, end, m), ...
                                 state_data(7:9, end, m), ...
                                 state_data(10:12, end, m),...
                                 u(:, end, m));    % p, v，ｑ, w, u;
-    %                     end
+                        end
                     end
 
 
@@ -280,13 +299,26 @@ end
 
                 %-- 入力への代入
                     agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
+                
+                %-- 評価値のソート
+                    sortEval = sort(Evaluationtra)
            
                 
         end
         if isnan(Evaluationtra)
-            warning("ACSL : Emergency stop!");
+            warning("ACSL : Emergency stop! falling");
             break;
         end
+        
+        %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
+            if idx == 0 || idx == 1 % - 最初は全時刻の評価値がないから現時刻/現時刻にしてる
+                Bestcost_pre = Bestcost;
+                Bestcost_now = Bestcost;
+            else
+                Bestcost_pre = Bestcost_now;
+                Bestcost_now = Bestcost;
+            end
+            sigmanext = sigma * (Bestcost_now/Bestcost_pre);
         
         %% update state
         % with FH
@@ -333,15 +365,16 @@ end
             if (fOffline)
                 time.t
             else
-                time.t = time.t + dt % for sim
+                time.t = time.t + dt; % for sim
             end
 
         end
         if fRemove == 1
             break
         end
-        calT = toc % 1ステップ（25ms）にかかる計算時間
+        calT = toc; % 1ステップ（25ms）にかかる計算時間
         totalT = totalT + calT;
+        fprintf("time.t : %f, calT : %f, sigma : %f\n", time.t, calT, sigma)
     end
 
 catch ME % for error

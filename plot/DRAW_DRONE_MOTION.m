@@ -32,7 +32,7 @@ classdef DRAW_DRONE_MOTION
             M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
             m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
             L = param.frame_size;
-            figure();   disp("Press Enter key to start video");   pause();
+            figure();   %disp("Press Enter key to start video");   pause();
             ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
             xlabel(ax,"x [m]");
             ylabel(ax,"y [m]");
