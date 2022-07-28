@@ -1,6 +1,6 @@
 function [ppu1, ppu2, ppu3, ppu4, pw] = Resampling(Params,ppu,pw)
     %RESAMPLING この関数の概要をここに記述
-    NP = Params.Particle_num   % パーティクル数
+    NP = Params.Particle_num;   % パーティクル数
     
     %減った分のパーティクルの数の分だけ一番最後のパーティクルの値を複製
     %ただし重みは0とし加重平均では考慮されないものとする．

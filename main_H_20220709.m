@@ -152,9 +152,9 @@ end
             state_monte = agent.model.state;
             ref_monte = agent.reference.result.state;
             %-- 速度の基準
-                vref = 0.20;
+                vref = 0.0;
             % 入力のサンプルから評価
-            ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
+                ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
 %             Q_monte_x = 10000; Q_monte_y = 10000; Q_monte_z = 10000;
 %             VQ_monte_x = 10; VQ_monte_y = 10; VQ_monte_z = 1;
 
@@ -409,11 +409,11 @@ close all
 % plot p:position, er:roll/pitch/yaw, 
 % figure(1)
 Fontsize = 15;
-logger.plot({1,"p", "er"}, "fig_num",1); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"v", "e"},"fig_num",2); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"q", "e"},"fig_num",3); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"w", "e"},"fig_num",4); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"input", ""},"fig_num",5); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"p", "er"},  "fig_num",1); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"v", "e"},   "fig_num",2); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"q", "e"},   "fig_num",3); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"w", "e"},   "fig_num",4); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"input", ""},"fig_num",5,"time",[0 5]); set(gca,'FontSize',Fontsize);  title("");
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
@@ -442,42 +442,44 @@ function [Ad, Bd, Cd, Dd]  = MassModel(Td)
         %-- DIATONE MODEL PARAM
             Lx = 0.117;
             Ly = 0.0932;
-            lx = 0.117/2;%0.05;
-            ly = 0.0932/2;%0.05;
+            lx = 0.117/2;       %0.05;
+            ly = 0.0932/2;      %0.05;
             xx = 0.02237568;    % jx
             xy = 0.02985236;    % jy
+%             xx = 100 * 0.02237568;    % jx
+%             xy = 100 * 0.02985236;    % jy
             xz = 0.0480374;     % jz
             gravity = 9.81;     % gravity
-            km1 = 0.0301; % ロータ定数
-            km2 = 0.0301; % ロータ定数
-            km3 = 0.0301; % ロータ定数
-            km4 = 0.0301; % ロータ定数
+            km1 = 0.0301;       % ロータ定数
+            km2 = 0.0301;       % ロータ定数
+            km3 = 0.0301;       % ロータ定数
+            km4 = 0.0301;       % ロータ定数
             %-- 平衡点：原点
-%             Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
-              %-- 平衡点：　1m上空でホバリング [0 0 1 0 0 0 0 0 0 0 0 0 0 hover hover hover hover]
             Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
                      0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-                     0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+              %-- 平衡点：　1m上空でホバリング [0 0 1 0 0 0 0 0 0 0 0 0 0 hover hover hover hover]
+%             Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+%                      0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
 
             Bc = [    0,        0,        0,        0;
                       0,        0,        0,        0;
@@ -495,7 +497,8 @@ function [Ad, Bd, Cd, Dd]  = MassModel(Td)
             Cc = diag([1 1 1 1 1 1 1 1 1 1 1 1]);
             Dc = 0;
             % 可制御性，可観測
-            
+            Uc = [Bc Ac*Bc Ac^2*Bc Ac^3*Bc Ac^4*Bc Ac^5*Bc Ac^6*Bc Ac^7*Bc Ac^8*Bc Ac^9*Bc Ac^10*Bc Ac^11*Bc];
+            Uo = [Cc;Cc*Ac;Cc*Ac^2;Cc*Ac^3;Cc*Ac^4;Cc*Ac^5;Cc*Ac^6;Cc*Ac^7;Cc*Ac^8;Cc*Ac^9;Cc*Ac^10;Cc*Ac^11];
             sys = ss(Ac, Bc, Cc, Dc);
 
         %-- 離散系システム

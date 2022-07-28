@@ -36,7 +36,7 @@ countSub = 0;
         x0 = agent.model.state.p;    % - 初期状態
 %         u0 = [0.0; 0.0];    % - 初期状態
 %         ur = [0.0; 0.0];    % - 目標速度
-        Particle_num = 2000; % - 粒子数（要チューニング）
+        Particle_num = 20; % - 粒子数（要チューニング）
         Csigma = 0.001;     % - 予測ステップごとに変化する分散値の上昇定数(未来は先に行くほど不確定だから予測ステップが進む度に標準偏差を大きくしていく、工夫だからやらなくても問題ないと思う)
 %         Csigma = 0.;
         Count_sigma = 0;
@@ -46,20 +46,17 @@ countSub = 0;
         Initu4 = 0.269 * 9.81 / 4;      % - 初期推定解
 %         Initu = 0.269 * 9.81 / 4;      % - 初期推定解
         umax = 1.0;         % - 入力の最大値、入力制約と最大入力の抑制項のときに使う
-        InitSigma_u1 = 0.00; % - 初期の分散（要チューニング）
-        InitSigma_u2 = 0.00; % - 初期の分散（要チューニング）
-        InitSigma_u3 = 0.00; % - 初期の分散（要チューニング）
-        InitSigma_u4 = 0.00; % - 初期の分散（要チューニング）
+        InitSigma = 0.001; % - 初期の分散（要チューニング）
 %         InitSgima = 0.03;
         idx = 0;
         
 
     %-- MPC関連
-        Params.H = 2;                         % - ホライゾン（チューニング）
+        Params.H = 20;                         % - ホライゾン（チューニング）
         Params.dt = 0.1;                       % - 予測ステップ幅（チューニング）
         Params.Weight.P = 1000 * diag([1.0; 1.0; 1.0]);    % 座標
         Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-        Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
+        Params.Weight.Q = 100 * diag([1.0; 1.0; 1.0]);    % 姿勢角
         Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
         Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
         Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
@@ -96,6 +93,10 @@ countSub = 0;
     %-- data
         data.bestcost(idx+1) = 0;           % - もっともよい評価値
         data.pathJ{idx+1} = 0;              % - 全サンプルの評価値
+%         data.sigma1(idx, :) = 0;
+%         data.sigma2(idx, :) = 0;
+%         data.sigma3(idx, :) = 0;
+%         data.sigma4(idx, :) = 0;
         
                
     % --配列定義
@@ -161,67 +162,6 @@ end
 %             Params.X0 = x;
 %             Params.input_size = input_size;
 %             Params.state_size = state_size;
-        %-- MPCのホライズン間の分散
-            sigmaMax = 3;   sigmaMin = 0.0001;
-            if Count_sigma == 0 || Count_sigma ==1
-                sigma1 = repmat(InitSigma_u1 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; % - 初期時刻
-                sigma2 = repmat(InitSigma_u2 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
-                sigma3 = repmat(InitSigma_u3 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; 
-                sigma4 = repmat(InitSigma_u4 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; 
-            else
-                if [sigmanext_1; sigmanext_2; sigmanext_3; sigmanext_4] > sigmaMax
-                    sigmanext_1 = sigmaMax;
-                    sigmanext_2 = sigmaMax;
-                    sigmanext_3 = sigmaMax;
-                    sigmanext_4 = sigmaMax;
-                elseif [sigmanext_1; sigmanext_2; sigmanext_3; sigmanext_4] < sigmaMin
-                    sigmanext_1 = sigmaMin;
-                    sigmanext_2 = sigmaMin;
-                    sigmanext_3 = sigmaMin;
-                    sigmanext_4 = sigmaMin;
-                else
-                    sigma1 = repmat(sigmanext_1 + Csigma * (sigma_cnt - 1), Particle_num, 1)'; % - 初期時刻以降
-                    sigma2 = repmat(sigmanext_2 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
-                    sigma3 = repmat(sigmanext_3 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
-                    sigma4 = repmat(sigmanext_4 + Csigma * (sigma_cnt - 1), Particle_num, 1)';
-                end
-            end
-
-        %-- 準最適化入力を格納
-            if Count_sigma == 0 
-                u1_ten = repmat(Initu1, Params.H, Particle_num);
-                u2_ten = repmat(Initu2, Params.H, Particle_num);
-                u3_ten = repmat(Initu3, Params.H, Particle_num);
-                u4_ten = repmat(Initu4, Params.H, Particle_num);
-                %-- fminconで算出した値を代入、初期推定解だけ勾配法を用いて算出するパターンもある
-                %-- こういう一例があることを知って欲しいから残しておいた
-                    % ux_ten = repmat(u_previous_opt(1,:)', 1, Particle_num);
-                    % uy_ten = repmat(u_previous_opt(1,:)', 1, Particle_num);
-            else
-                u1_ten = reshape(u_1, size(n1)); % - 初期時刻以降，準最適化入力を格納
-                u2_ten = reshape(u_2, size(n2));
-                u3_ten = reshape(u_3, size(n3)); 
-                u4_ten = reshape(u_4, size(n4));
-            end
-
-        %-- 分散によるノイズを格納，入力の広がりを決定
-            fprintf("sigma: %f, %f, %f, %f\n", sigma1(1), sigma2(1), sigma3(1), sigma4(1))
-            sigmaD(idx, :) = [sigma1(1), sigma2(1), sigma3(1), sigma4(1)];
-            n1 = normrnd(zeros(Params.H,Particle_num), sigma1);
-            n2 = normrnd(zeros(Params.H,Particle_num), sigma2);
-            n3 = normrnd(zeros(Params.H,Particle_num), sigma3);
-            n4 = normrnd(zeros(Params.H,Particle_num), sigma4);
-
-        %-- 各方向の入力列を格納
-            u1 = u1_ten + n1;
-            u2 = u2_ten + n2;
-            u3 = u3_ten + n3;
-            u4 = u4_ten + n4;
-            u1 = reshape(u1, [1, size(u1)]);
-            u2 = reshape(u2, [1, size(u2)]);
-            u3 = reshape(u3, [1, size(u3)]);
-            u4 = reshape(u4, [1, size(u4)]);
-            u = [u1; u2; u3; u4];
         
         
         %% estimator, reference generator, controller
@@ -292,7 +232,7 @@ end
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
                 fV);
             %-- 一様分布
-                rng('shuffle')
+%                 rng('shuffle')
 %                 sigma = 0.15;
 %                 a = (1-sigma)*0.269*9.81/4;
 %                 b = (1+sigma)*0.269*9.81/4;
@@ -301,18 +241,35 @@ end
 %                 u3 = (b-a).*rand(Params.H,Params.Particle_num) + a;
 %                 u4 = (b-a).*rand(Params.H,Params.Particle_num) + a;
             %-- 正規分布に変更
-%                 sigma = 0.01;              % sigma
-%                 ave = 0.269*9.81/4;
-%                 u1 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-%                 u2 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-%                 u3 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-%                 u4 = sigma.*randn(Params.H, Params.Particle_num) + ave;
+                if Count_sigma == 0
+                    sigma1 = InitSigma;              % sigma
+                    sigma2 = InitSigma;
+                    sigma3 = InitSigma;
+                    sigma4 = InitSigma;
+                    input_pre = ref_input;
+                    input_now = ref_input;
+                    Bestcost_pre = 0;
+                    Bestcost_now = 0;
+                else
+                    % input_pre,  input_now
+                    sigma1 = sigma1 * (Bestcost_now/Bestcost_pre);
+                    sigma2 = sigma2 * (Bestcost_now/Bestcost_pre);
+                    sigma3 = sigma3 * (Bestcost_now/Bestcost_pre);
+                    sigma4 = sigma4 * (Bestcost_now/Bestcost_pre);
+                end
+                ave = 0.269*9.81/4;
+                u1 = sigma1.*randn(Params.H, Params.Particle_num) + ave;
+                u2 = sigma2.*randn(Params.H, Params.Particle_num) + ave;
+                u3 = sigma3.*randn(Params.H, Params.Particle_num) + ave;
+                u4 = sigma4.*randn(Params.H, Params.Particle_num) + ave;
+                
+                data.sigma1(idx) = sigma1;
             %-- 配列の変形
-%                 u1 = reshape(u1, [1, size(u1)]);
-%                 u2 = reshape(u2, [1, size(u2)]);
-%                 u3 = reshape(u3, [1, size(u3)]);
-%                 u4 = reshape(u4, [1, size(u4)]);
-%                 u = [u1; u2; u3; u4];
+                u1 = reshape(u1, [1, size(u1)]);
+                u2 = reshape(u2, [1, size(u2)]);
+                u3 = reshape(u3, [1, size(u3)]);
+                u4 = reshape(u4, [1, size(u4)]);
+                u = [u1; u2; u3; u4];
                 u_size = size(u, 3);    % Params.Particle_num
             %-- 全予測軌道のパラメータの格納変数を定義,  repmat で短縮
                 p_data = zeros(Params.H, Params.Particle_num);
@@ -373,30 +330,10 @@ end
             break
         end
         
-        %-- 最小評価値の入力をリサンプリング，格納,次時刻の分散決定
-            if fRemove == 0
-                [Params, L_norm] = Normalize(Params, Evaluationtra);     % 評価値を正規化
-%                 [u_y, ~, u_x] = Resampling(Params, u1, L_norm);
-                [u_1, u_2, u_3, u_4, ~] = Resampling(Params, u, L_norm);
-            end
-            
-        %-- 次時刻の分散の決定
-        %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
-            if Count_sigma == 0 % - 最初は全時刻の評価値がないから現時刻/現時刻にしてる
-                Bestcost_pre = Bestcost;
-                Bestcost_now = Bestcost;
-            else
-                Bestcost_pre = Bestcost_now;
-                Bestcost_now = Bestcost;
-                fprintf("score: %f, %f\n", Bestcost_pre, Bestcost_now)
-            end
-            sigmanext_1 = sigma1(1,1) * (Bestcost_now/Bestcost_pre);
-            sigmanext_2 = sigma2(1,1) * (Bestcost_now/Bestcost_pre);
-            sigmanext_3 = sigma3(1,1) * (Bestcost_now/Bestcost_pre);
-            sigmanext_4 = sigma4(1,1) * (Bestcost_now/Bestcost_pre);
-%             sigmanext_x = sigmax(1,1);
-%             sigmanext_y = sigmay(1,1);
-        
+        input_pre = input_now;
+        input_now = agent.input;
+        Bestcost_pre = Bestcost_now;
+        Bestcost_now = Bestcost;
         Count_sigma = Count_sigma + 1;
         
         %-- データ保存
