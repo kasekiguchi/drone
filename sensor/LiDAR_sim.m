@@ -80,8 +80,8 @@ classdef LiDAR_sim < SENSOR_CLASS
         end
         function show(obj,~)
             if ~isempty(obj.result)
-                points(1:2:2*size(obj.result.sensor_points,1),:)=obj.result.sensor_points;
-                plot([points(:,1);0],[points(:,2);0],'r-');
+                points(1:2:2*size(obj.result.sensor_points,1),:)= obj.result.sensor_points; + obj.self.plant.state.p(1:2)';%グローバルに変換
+                plot([points(:,1);0],[points(:,2);0],'r-'); 
                 hold on; 
                 plot(obj.result.region);
                 plot(obj.head_dir);
