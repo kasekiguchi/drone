@@ -103,7 +103,7 @@ end
                     
                     dLen_right = norm(sensorP_index- sensorP_R)     %正面とその右隣の端点距離
                     % 同一物体として認識
-                    if dLen_right < 0.5     % 閾値が小さくて回っていないのかも 0.15 -> 0.5
+                    if dLen_right < 0.5 && dLen_right > 0.2     % 閾値が小さくて回っていないのかも 0.15 -> 0.5
                         anchor_R = anchor_R - 1;  % 右にずらす
                     else
                         break;
@@ -120,7 +120,7 @@ end
                     dLen_left = norm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
                     
                     % 同一物体として認識
-                    if dLen_left < 0.5 
+                    if dLen_left < 0.5 && dLen_left > 0.2
                         anchor_L = anchor_L + 1;  % 左にずらす
                     else
                         break;
