@@ -19,10 +19,17 @@ plot(x,dddsgmd);
 legend('sgmd','d','dd','ddd');
 grid on
 %% tanh
+syms x1 at1
+dth=diff(tanh(at1*x1),x1);
 at=2;
 x = -2:0.01:2;
 x2 = 2*x;
-th = tanh(at*x);
+th = tanh(at*x);%.*tanh(3*x);
+j=1;
+for i=x
+    dt(j) =double(subs(dth,[at1 x1],[at i]));
+    j=j+1;
+end
 sgmd2=1./(1+exp(-at*x2));%f(2x)の時のシグモイド関数
 tanh2sg = 2*sgmd2-1;%tanhをシグモイドで表す
 dtanh2sg = 4*at*sgmd2.*(1-sgmd2);
@@ -32,11 +39,12 @@ dddtanh2sg = 16*at^3*sgmd2.*(1-sgmd2).*(1-6*sgmd2+6*sgmd2.^2);
 figure(2)
 hold on
 plot(x,th);
+plot(x,dt);
 plot(x,tanh2sg);
 plot(x,dtanh2sg)
 plot(x,ddtanh2sg)
 plot(x,dddtanh2sg)
-% plot(x,x);
-% plot(x,-16*x);
-legend('tanh','tanh2sg','d','dd','ddd');
+plot(x,x);
+plot(x,-16*x);
+legend('tanh','dt','tanh2sg','d','dd','ddd');
 grid on

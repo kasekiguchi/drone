@@ -79,28 +79,225 @@ e(1,imax2)
         title(titlex(i)+"元の入力との差")
 end
 %%
-%元の入力と近似の入力の差を取り二乗しそれを積分する
-e= -0.1:0.001:0.1;
-alp = [0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000];%初期値0.9有限整定のべき乗
+% %元の入力と近似の入力の差を取り二乗しそれを積分する
+% alp = double([0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000]);%初期値0.9有限整定のべき乗
+% k = double([82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445]);%FBゲイン
+% 
+% syms f1 f2 a1 a2 %alp k
+% syms e positive
+% utanh = -f1*tanh(a1*e)-f2*tanh(a2*e)-k(1)*e;
+% u = -k(1)*sign(e)*(e)^alp(1);
+% sigma(f1, f2, a1, a2, e) = (u - utanh)^2;
+% % e= -0.1:0.001:0.1;
+% 
+% % sigma = subs(sigma,[alps,ks],[alp(1),k(1)]);
+% insigma = int(sigma,e,[0 1]);
+% % double(insiguma);
+% finsigma = insigma == 0;
+% % sol = solve(finsigma,)
+%%
+% alp = double([0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000]);%初期値0.9有限整定のべき乗
+% k = double([82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445]);%FBゲイン
+% alp = double([0.6923;0.75;0.8181;0.9]);%初期値0.9有限整定のべき乗
+% k = double([82.37,132.1,64.79,13.94]);%FBゲイン
+% 
+% syms k real%alp k
+% syms f1 f2 a1 a2 e alp positive
+% sgmd1=1/(1+exp(-a1*e));%f(2x)の時のシグモイド関数
+% sgmd2=1/(1+exp(-a2*e));%f(2x)の時のシグモイド関数
+% tanh1 = 2*sgmd1-1;%tanhをシグモイドで表す
+% tanh2 = 2*sgmd2-1;%tanhをシグモイドで表す
+% 
+% utanh = -f1*tanh1-f2*tanh2-k(1)*e;
+% % utanh = -f1*tanh(a1*e)-f2*tanh(a2*e)-k(1)*e;
+% u = -k(1)*sign(e)*(e)^alp(1);
+% % sigma = (u - utanh)^2;
+% sigma = abs(u - utanh);
+% isigma = int(sigma,e);
+% % u2=(-k(1)*sign(e)*(e)^alp(1))^2;
+% % uutanh=-2*u*utanh;
+% % utanh2=utanh^2;
+% % intu2=double
+% % sigma = subs(sigma,[],[alp(1),k(1)]);
+% 
+% inx1_2 = int((e*k)^2,e,0,1);
+% % intuutanh =
+% 
+% insigma = int(sigma,e,[0 1]);
+% 
+% prob = optimproblem('ObjectiveSense','min');
+% x = optimvar('x',4);
+% % insig = subs(insigma,[f1, f2, a1, a2],x);
+% % insig = int((x(5)*k(1) + x(1)*tanh(x(2)*x(5)) + x(3)*tanh(x(4)*x(5)) - x(5)^alp(1)*k(1))^2, x(5), 0, 1);
+% insig = subs(isigma,e,1);
+% cons1 = insig >= 0;
+% cons2 = insig <= 2;
+% prob.Constraints.cons1 = cons1;
+% prob.Constraints.cons2 = cons2;
+% show(prob)
+% sol = solve(prob);
+%%
+% alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
+% k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
+% % alp = [0.6923;0.75;0.8181;0.9];%初期値0.9有限整定のべき乗
+% % k = [82.37,132.1,64.79,13.94];%FBゲイン
+% syms f1 f2 a1 a2 e  positive
+% x0=[1,1,1,1];
+% utanh = -f1*tanh(a1*e)-f2*tanh(a2*e)-k(1)*e;
+% u = -k(1)*sign(e)*(e)^alp(1);
+% sigma = abs(u - utanh);
+% isigma = int(sigma,e); 
+% f=subs(isigma,e,1)-subs(isigma,e,0);
+% clear f1 f2 a1 a2
+% % fun=@(f1, f2, a1, a2)(f1*sign(f1*tanh(a1)) + f2*tanh(a2))*log(cosh(a1)))/a1 - (25345249*sign(f1*tanh(a1) + f2*tanh(a2)))/3384600 + (f2*sign(f1*tanh(a1) + f2*tanh(a2))*log(cosh(a2)))/a2;
+% % x = fminunc(fun,x0);
+%% forループ tanh一つ
+% alp = [0.6923;0.75;0.8181;0.9];%初期値0.9有限整定のべき乗
+% k = [82.37,132.1,64.79,13.94];%FBゲイン
+alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
 k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
 
-syms f1 f2 a1 a2 e
-utanh = -f1*tanh(a1*e)-f2*tanh(a2*e)-k(1)*e;
-u = -k(1)*sign(e)*abs(e)^alp(1);
-sigma = (u - utanh)^2;
-insigma = int(sigma,e,[0,1]);
-%% フーリエ変換してみよう->だめそうtanhで頑張る
-syms k e alp w
-f = -k*sign(e)*abs(e)^alp;
-f_f = fourier(f);
-ff = matlabFunction(f_f,"Vars",{k,e,alp,w});
+x=@(f1,a1)(integral(@(e)( abs(-k(1)*abs(e).^alp(1)+f1*tanh(a1*e)+k(1)*e)),0,0.1));
 
-e= -0.10:0.001:0.10;
-alp = [0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000];
-a = [3,4,4,4];
-k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];
+dt=0.5;
+old=x(0,0);
+for i=0:dt:20
+    for j=0:dt:40
+        new=x(i,j);
+        if(old>new)
+            old=new;
+            ff1=i;
+            aa1=j;
+        end
+    end
+end
 
-ufri1 = ff(k(1),e,alp(1),1);
+clear e utanh u sigma
+% e= -0.5:0.001:0.5;      
+e= -0.1:0.001:0.1;
+utanh(1,:)=-ff1*tanh(aa1*e)-k(1)*e;
+u(1,:)=-k(1)*sign(e).*abs(e).^alp(1);
+sigma=utanh-u;
+plot(e,utanh,e,u,e,sigma)
+grid on
+legend('utanh','u','誤差')
+s=2*(x(ff1,aa1))
+%% fminserch tanh一つ
+clear e utanh u ufb sigma
+titlex=["x","dx","ddx","dddx"];
+anum=4;%変数の数
+alp=zeros(anum+1,1);
+alp(anum+1)=1;
+alp(anum)=0.9;%alphaの初期値
+for a=anum-1:-1:1
+    alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
+end
 
-%     up2(i) = polyval(e,up(i));
-%     plot(e,up2(2))
+% alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
+k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
+
+x0=[0,0];
+fval2=zeros(4,1);
+gain=["","f1","a1"];
+er=0.1; %近似する範囲を指定
+for i=1:4
+fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + k(i)*e ) ,0, er));
+[x,fval] = fminsearch(fun,x0) ;
+fval2(i) = 2*fval
+gain(i+1,:)=[titlex(i),x];
+
+% e= -0.5:0.001:0.5;      
+e= -1:0.001:1;
+ufb(i,:)= -k(i)*e;
+utanh(i,:)= - x(1)*tanh(x(2)*e) - k(i)*e;
+u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
+sigma(i,:)=utanh(i,:)-u(i,:);
+figure(i)
+plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:))
+grid on
+legend('ufb','utanh','u','誤差')
+title(titlex(i));
+end
+%% fminserch tanh二つ
+clear e utanh u ufb sigma
+titlex=["x","dx","ddx","dddx"];
+anum=4;%変数の数
+alp=zeros(anum+1,1);
+alp(anum+1)=1;
+alp(anum)=0.9;%alphaの初期値
+for a=anum-1:-1:1
+    alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
+end
+
+% alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
+k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
+x0=[5,5,5,5];
+% x0=[10,10,10,10];
+fval2=zeros(4,1);
+gain=["","f1","a1","f2","a2"];
+er=0.3;
+for i=1%:4
+fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
+% options = optimset('MaxFunEvals',2e5);%普通は200*(number of variables) (既定値) 
+% options = optimset('PlotFcns','optimplotfval','TolX',1e-4);
+% options = optimset('PlotFcns','optimplotfval');
+% [x,fval] = fminsearch(fun,x0,options) ;
+[x,fval] = fminsearch(fun,x0) ;
+fval2(i) = 2*fval
+gain(i+1,:)=[titlex(i),x];
+
+% e= -0.5:0.001:0.5;      
+e= -1:0.001:1;
+ufb(i,:)= -k(i)*e;
+utanh(i,:)= - x(1)*tanh(x(2)*e)- x(3)*tanh(x(4)*e) - k(i)*e;
+u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
+sigma(i,:)=utanh(i,:)-u(i,:);
+figure(i+1)
+plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:))
+grid on
+legend('ufb','utanh','u','誤差')
+end
+
+%%
+syms a b c d e
+k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
+alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
+
+sigma = int(abs( -k(1)*abs(e).^alp(1) + a*tanh(b*e) + c*tanh(d*e) + k(1)*e ) ,e,0, 0.1);
+% sigma = integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er);
+
+%% 時間かかりすぎ
+% alp = [0.6923;0.75;0.8181;0.9];%初期値0.9有限整定のべき乗
+% k = [82.37,132.1,64.79,13.94];%FBゲイン
+% 
+% x=@(f1,a1,f2,a2)(integral(@(e) abs( -k(1)*abs(e).^alp(1) + f1*tanh(a1*e) + f2*tanh(a2*e) + k(1)*e ) ,0, 0.1));
+% 
+% dt=1;
+% old=x(0,0,0,0);
+% for i=0:dt:20%f1
+%     for j=0:dt:40%a1
+%         for k=0:dt:20%f2
+%             for l=0:dt:40%a2
+%                 new=x(i,j,k,l);
+%                 if(old>new)
+%                     old=new;
+%                     ff1=i;
+%                     aa1=j;
+%                     ff2=k;
+%                     aa2=l;
+%                 end
+%             end
+%         end
+%     end
+% end
+%%
+% clear e utanh u sigma
+% % e= -0.5:0.001:0.5;      
+% e= -0.1:0.001:0.1;
+% utanh(1,:)=-ff1*tanh(aa1*e)-ff2*tanh(aa2*e)-k(1)*e;
+% u(1,:)=-k(1)*sign(e).*abs(e).^alp(1);
+% sigma=utanh-u;
+% plot(e,utanh,e,u,e,sigma)
+% grid on
+% legend('utanh','u','誤差')
+% s=2*(x(ff1,aa1,ff2,aa2))
