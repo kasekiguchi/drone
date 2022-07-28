@@ -74,7 +74,7 @@ end
             
             
             % reference
-            rp=[4;0;0];     % 目標座標
+            rp=[0;4;0];     % 目標座標
 
             state = agent.estimator.result.state.p; % 自己位置 列ベクトル
             sensor = agent.sensor.result; % センサ情報
@@ -103,8 +103,12 @@ end
                     
                     dLen_right = norm(sensorP_index- sensorP_R)     %正面とその右隣の端点距離
                     % 同一物体として認識
-                    if dLen_right < 0.5 && dLen_right > 0.2     % 閾値が小さくて回っていないのかも 0.15 -> 0.5
+                    
+                    %if dLen_right < 0.5 && dLen_right > 0.2     % 閾値が小さくて回っていないのかも 0.15 -> 0.5
+                    if norm(sensorP_R-state(1:2))<2.
                         anchor_R = anchor_R - 1;  % 右にずらす
+                    elseif anchor_R == 1
+                        anchor_R=63;
                     else
                         break;
                     end
@@ -120,8 +124,11 @@ end
                     dLen_left = norm(sensorP_L- sensorP_index);      %正面とその左隣の端点距離
                     
                     % 同一物体として認識
-                    if dLen_left < 0.5 && dLen_left > 0.2
+%                     if dLen_left < 0.5 && dLen_left > 0.2
+                    if norm(sensorP_L-state(1:2))<2.
                         anchor_L = anchor_L + 1;  % 左にずらす
+                    elseif anchor_L == 63
+                        anchor_L=1;
                     else
                         break;
                     end
@@ -133,24 +140,24 @@ end
                 dS_AnchorR = norm(state(1:2)-sensorP_R); % 現在位置-anchor_R 距離
                 dS_AnchorL = norm(state(1:2)-sensorP_L); % 現在位置-anchor_L 距離
                 dR_AnchorR = norm(rp(1:2)-sensorP_R);
-                dR_AnchorL = norm(rp(1:2)-sensorP_R);
+                dR_AnchorL = norm(rp(1:2)-sensorP_L);
                 route_R = dS_AnchorR+dR_AnchorR;
                 route_L = dS_AnchorL+dR_AnchorL;
                 [~,I] = min(sensor.length);
-                a=sensor.sensor_points(I,:);
+                a=sensor.sensor_points(I,:)';
                 b=a - state(1:2);
-                sensor_r = 0.5;
+                sensor_r = 0.2;
                 if route_R < route_L %右の方が短い
-                    ref_tbug = sensorP_R'+(b/norm(b)*(norm(sensor_r) - norm(b)))';%ドローン自体にマージンをとる
+                    ref_tbug = sensorP_R+state(1:2)+(b/norm(b)*(norm(sensor_r) - norm(b)));%ドローン自体にマージンをとる
                 else
-                    ref_tbug = sensorP_L'+(b/norm(b)*(norm(sensor_r) - norm(b)))';
+                    ref_tbug = sensorP_L+state(1:2)+(b/norm(b)*(norm(sensor_r) - norm(b)));
                 end
             else
                 [~,I] = min(sensor.length); % センサ値の最小値
-                a=sensor.sensor_points(I,:);
+                a=sensor.sensor_points(I,:)';
                 b=a - state(1:2);
-                sensor_r = 0.5;
-                ref_tbug = rp(1:2)+(b/norm(b)*(norm(sensor_r) - norm(b)))';
+                sensor_r = 0.2;
+                ref_tbug = rp(1:2)+(b/norm(b)*(norm(sensor_r) - norm(b)));
             end
             
             % todo 座標変換
