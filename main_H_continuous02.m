@@ -33,11 +33,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fLanding_comp = 0;
     fc = 0;     % 着陸したときだけx，y座標を取得
 %-- 変数定義    
-    sample = 20;    % 上手くいったとき：50のときもある
-    H = 20;
-    model_dt = 0.1;
+    sample = 50;    % 上手くいったとき：50のときもある
+    H = 10;         % 20
+    model_dt = 0.1; % 0.1
     totalT = 0;
-    Initsigma = 0.01;
+    Initsigma = 0.1;
     idx = 0;
 % --配列定義
     Adata = zeros(sample, H);   % 評価値
@@ -220,8 +220,8 @@ end
                 else
                     if sigmanext > 0.5
                         sigmanext = 0.5;
-                    elseif sigmanext < 0
-                        sigmanext = 0.001;
+                    elseif sigmanext < 0.005
+                        sigmanext = 0.005;
                     end
                     sigma = sigmanext;
                 end
