@@ -1,5 +1,5 @@
 %% Drone 班用共通プログラム update sekiguchi
-%-- 連続時間で着陸するモデル
+%-- 連続時間で着陸するモデル　リサンプリングつき
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
@@ -31,7 +31,7 @@ fLanding = 1;   % 着陸かどうか
 fLanding_comp = 0;
 fCount_landing = 0;
 fc = 0;     % 着陸したときだけx，y座標を取得
-sample = 50;    % 上手くいったとき：50のときもある
+sample = 100;    % 上手くいったとき：50のときもある
 H = 20;
 model_dt = 0.1;
 idx = 0;
@@ -156,7 +156,7 @@ end
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
             
-            if fLanding_comp == 1   % 着陸したら従来のコントローラー
+%             if fLanding_comp == 1   % 着陸したら従来のコントローラー
                 % controller 
                 param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
                 for j = 1:length(agent(i).controller.name)
@@ -164,7 +164,7 @@ end
                 end
                 agent(i).do_controller(param(i).controller.list);
                 %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
-            else
+%             else
                 %-- MCMPC controller
                 % ts探し
                     ts = 0;
@@ -176,10 +176,10 @@ end
 %                     else
 %                         vref = [0; 0; 0];
 %                     end
-                    vref = [0;0;0];
+                    vref = [0; 0; 0.50];
        
-                ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-                previous_input = agent.input;
+                    ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
+                    previous_input = agent.input;
                 %-- 評価関数
                 % 入力差 ：　状態＋入力差＋ホバリング入力との差
                     fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
@@ -249,7 +249,7 @@ end
                             fLanding_comp = 1;
                             break;
                         else
-                            fCount_lnading = fCount_landing + 1;
+                            fCount_landing = fCount_landing + 1;
                         end
                     end
 
@@ -263,26 +263,26 @@ end
                             x0 = tmpx(end, :);
                             state_data(:, h+1, m) = x0;
                             %-- 地面に沈んで終わらないように
-    %                         if tmpx(3) < 0.
-    %                             subCheck(m) = 1;    % 制約外なら flag = 1
-    %                             break;              % ホライズン途中でも制約外で終了
-    %                         end
+%                             if tmpx(3) < 0.05
+%                                 subCheck(m) = 1;    % 制約外なら flag = 1
+%                                 break;              % ホライズン途中でも制約外で終了
+%                             end
                         end
                     end
 
                 %-- 評価値計算
                     Evaluationtra = zeros(1, u_size);
                     for m = 1:u_size
-    %                     if subCheck(m)
-    %                         Evaluationtra(1, m) = NaN;  % 制約外
-    %                     else
+%                         if subCheck(m)
+%                             Evaluationtra(1, m) = NaN;  % 制約外
+%                         else
     %                         Adata(1, m) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
                             Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
                                 state_data(4:6, end, m), ...
                                 state_data(7:9, end, m), ...
                                 state_data(10:12, end, m),...
                                 u(:, end, m));    % p, v，ｑ, w, u;
-    %                     end
+%                         end
                     end
 
 
@@ -290,7 +290,7 @@ end
 
                 %-- 入力への代入
                     agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
-            end
+%             end % landing: ON
                 
         end
         %-- 全てのサンプルが棄却されたら終了
@@ -389,12 +389,12 @@ close all
 fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
-Fontsize = 15;
-logger.plot({1,"p", "er"},  "fig_num",1); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"v", "e"},   "fig_num",2); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"q", "e"},   "fig_num",3); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"w", "e"},   "fig_num",4); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"input", ""},"fig_num",5); set(gca,'FontSize',Fontsize);  title("");
+Fontsize = 15;  timeMax = 10;
+logger.plot({1,"p", "er"},  "fig_num",1, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"v", "e"},   "fig_num",2, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"q", "e"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"input", ""},"fig_num",5, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
 % size_best = length(data.bestcost);
 % figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '*'); xlim([0 inf]);ylim([0 100]);
 % figure(9); plot(1:sample, data.pathJ{1, 1}, '*');
