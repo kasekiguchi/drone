@@ -71,6 +71,7 @@ fc = 0;     % 着陸したときだけx，y座標を取得
                 data.bestcost(idx+1) = 0;           % - もっともよい評価値
                 data.pathJ{idx+1} = 0;              % - 全サンプルの評価値
                 data.sigma(idx+1) = 0;
+                data.state{idx+1} = 0;
 
 run("main3_loop_setup.m");
 
@@ -152,7 +153,6 @@ end
                 if fLanding_comp == 1
                     rx = currentX; ry = currentY; rz = 0;
                 end
-            %--
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -322,6 +322,7 @@ end
             data.bestcost(idx) = Bestcost; 
             data.pathJ{idx} = Evaluationtra; % - 全サンプルの評価値
             data.sigma(idx) = sigma;
+            data.state{idx} = state_data(:, 1, BestcostID);
 
         %% update state
         % with FH
@@ -398,15 +399,16 @@ fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
 Fontsize = 15;  timeMax = 10;
-logger.plot({1,"p", "er"},  "fig_num",1, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"v", "e"},   "fig_num",2, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"q", "e"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
-logger.plot({1,"input", ""},"fig_num",5, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
+logger.plot({1,"p", "er"},  "fig_num",1, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+logger.plot({1,"v", "e"},   "fig_num",2, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity"); legend("x.vel", "y.vel", "z.vel");
+logger.plot({1,"q", "e"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude"); legend("roll", "pitch", "yaw");
+logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity"); legend("roll.vel", "pitch.vel", "yaw.vel");
+logger.plot({1,"input", ""},"fig_num",5, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title("");
 % size_best = length(data.bestcost);
 % figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '*'); xlim([0 inf]);ylim([0 100]);
 % figure(9); plot(1:Params.Particle_num, data.pathJ{1, 1}, '*');
-
+%% axes プロパティから線の太さ，スタイルなど変更可能
+plot(logger.Data.t, data.sigma, 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize);
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
