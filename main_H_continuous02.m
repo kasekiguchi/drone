@@ -1,4 +1,5 @@
 %% Drone 班用共通プログラム update sekiguchi
+% これを基に変更すればよい
 % 連続時間のノーマルなシミュレーション：目標位置，初期位置だけ変更する
 %% Initialize settings
 % set path

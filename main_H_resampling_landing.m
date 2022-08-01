@@ -31,37 +31,46 @@ fLanding = 1;   % 着陸かどうか
 fLanding_comp = 0;
 fCount_landing = 0;
 fc = 0;     % 着陸したときだけx，y座標を取得
-sample = 100;    % 上手くいったとき：50のときもある
-H = 20;
-model_dt = 0.1;
-idx = 0;
-totalT = 0;
-Initsigma = 0.1;
+% sample = 100;    % 上手くいったとき：50のときもある
+% H = 20;
+% model_dt = 0.1;
+
+
             % --配列定義
-                Adata = zeros(sample, H);   % 評価値
-    %             P_monte = zeros(sample, 3); % ある入力での位置
-    %             V_monte = zeros(sample, 3); % ある入力での速度
-    %             W_monte = zeros(sample, 3); % ある入力での姿勢角
-    %             Q_monte = zeros(sample, 3);
-                Udiff_monte = zeros(4, sample);
-                fZpos = zeros(sample, 1);
-    %             fSubIndex = zeros(sample, 1);
-    %             fSubIndex = (1:sample)';
-                fSubIndex = zeros(sample, 1);
-                Params.dt = model_dt;
+%                 Adata = zeros(sample, H);   % 評価値
+%                 Udiff_monte = zeros(4, sample);
+%                 fZpos = zeros(sample, 1);
+%                 fSubIndex = zeros(sample, 1);
+
+            %-- MPC関連 変数定義 
+                Params.Particle_num = 100;
+                Params.H = 20;
+                Params.dt = 0.1;
+                idx = 0;
+                totalT = 0;
+                Initsigma = 0.1;
+                
+            %-- 重み
+%                 PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
+%                 VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
+%                 WQ_monte = diag([1, 1, 1]);
+% %                 QQ_q = -100*(norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))))+100
+%                 QQ_monte = diag([1, 1, 1]);
+% 
+%                 UdiffQ_monte = diag([1, 1, 1, 1]);
+%                 R_monte = diag([1, 1, 1, 1]);  
+                
+                Params.Weight.P = 1000 * diag([1.0; 1.0; 1.0]);    % 座標
+                Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
+                Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
+                Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
+                Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+                Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
+                
             %-- data
                 data.bestcost(idx+1) = 0;           % - もっともよい評価値
                 data.pathJ{idx+1} = 0;              % - 全サンプルの評価値
                 data.sigma(idx+1) = 0;
-            %-- 重み
-                PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
-                VQ_monte = diag([1, 1, 1]);   % 1000 1000 1
-                WQ_monte = diag([1, 1, 1]);
-%                 QQ_q = -100*(norm(abs(state_monte.p(1:2) - ref_monte.p(1:2))))+100
-                QQ_monte = diag([1, 1, 1]);
-
-                UdiffQ_monte = diag([1, 1, 1, 1]);
-                R_monte = diag([1, 1, 1, 1]);  
 
 run("main3_loop_setup.m");
 
@@ -177,21 +186,20 @@ end
 %                         vref = [0; 0; 0];
 %                     end
                     vref = [0; 0; 0.50];
-       
                     ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
                     previous_input = agent.input;
                 %-- 評価関数
                 % 入力差 ：　状態＋入力差＋ホバリング入力との差
                     fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-                        (p_monte - agent.reference.result.state.p)'*PQ_monte*(p_monte - agent.reference.result.state.p)...
-                        +(v_monte-vref)'*VQ_monte*(v_monte-vref)...
-                        +w_monte'*WQ_monte*w_monte...
-                        +q_monte'*QQ_monte*q_monte...
-                        +(u_monte - ref_input)'*R_monte*(u_monte - ref_input)...
-                        +(u_monte - previous_input)'*UdiffQ_monte*(u_monte - previous_input); 
+                        (p_monte - agent.reference.result.state.p)'*Params.Weight.P*(p_monte - agent.reference.result.state.p)...
+                        +(v_monte-vref)'*Params.Weight.V*(v_monte-vref)...
+                        +w_monte'*Params.Weight.W*w_monte...
+                        +q_monte'*Params.Weight.Q*q_monte...
+                        +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input)...
+                        +(u_monte - previous_input)'*Params.Weight.RP*(u_monte - previous_input); 
                 %-- 制約条件
                     Fsub = @(sub_monte1) sub_monte1 > 0;
-                    subCheck = zeros(sample, 1);
+                    subCheck = zeros(Params.Particle_num, 1);
                 %-- 状態の表示
                     fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
                         state_monte.p(1), state_monte.p(2), state_monte.p(3),...
@@ -214,24 +222,24 @@ end
     %                 sigmaData(idx, 1) = sigma;
                     %-- 
     %                 ave = 0.269*9.81/4;
-                    u1 = sigma.*randn(H, sample) + ave;
-                    u2 = sigma.*randn(H, sample) + ave;
-                    u3 = sigma.*randn(H, sample) + ave;
-                    u4 = sigma.*randn(H, sample) + ave;
+                    u1 = sigma.*randn(Params.H, Params.Particle_num) + ave;
+                    u2 = sigma.*randn(Params.H, Params.Particle_num) + ave;
+                    u3 = sigma.*randn(Params.H, Params.Particle_num) + ave;
+                    u4 = sigma.*randn(Params.H, Params.Particle_num) + ave;
                     u1 = reshape(u1, [1, size(u1)]);
                     u2 = reshape(u2, [1, size(u2)]);
                     u3 = reshape(u3, [1, size(u3)]);
                     u4 = reshape(u4, [1, size(u4)]);
                     u = [u1; u2; u3; u4];
-                    u_size = size(u, 3);    % sample
+                    u_size = size(u, 3);    % Params.Particle_num
                 %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
-                    p_data = zeros(H, sample);
+                    p_data = zeros(Params.H, Params.Particle_num);
                     p_data = repmat(reshape(p_data, [1, size(p_data)]), 3, 1);
-                    v_data = zeros(H, sample);
+                    v_data = zeros(Params.H, Params.Particle_num);
                     v_data = repmat(reshape(v_data, [1, size(v_data)]), 3, 1);
-                    q_data = zeros(H, sample);
+                    q_data = zeros(Params.H, Params.Particle_num);
                     q_data = repmat(reshape(q_data, [1, size(q_data)]), 3, 1);
-                    w_data = zeros(H, sample);
+                    w_data = zeros(Params.H, Params.Particle_num);
                     w_data = repmat(reshape(w_data, [1, size(w_data)]), 3, 1);
                     state_data = [p_data; q_data; v_data; w_data];
 
@@ -257,8 +265,8 @@ end
                     for m = 1:u_size
                         x0 = previous_state;
                         state_data(:, 1, m) = previous_state;
-                        for h = 1:H-1
-                            [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+model_dt],x0);
+                        for h = 1:Params.H-1
+                            [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+Params.dt],x0);
     %                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
                             x0 = tmpx(end, :);
                             state_data(:, h+1, m) = x0;
@@ -397,7 +405,7 @@ logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize
 logger.plot({1,"input", ""},"fig_num",5, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  title("");
 % size_best = length(data.bestcost);
 % figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '*'); xlim([0 inf]);ylim([0 100]);
-% figure(9); plot(1:sample, data.pathJ{1, 1}, '*');
+% figure(9); plot(1:Params.Particle_num, data.pathJ{1, 1}, '*');
 
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')

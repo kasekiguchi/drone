@@ -1,4 +1,5 @@
 %% Drone 班用共通プログラム update sekiguchi
+% low variance resampling によるリサンプリングのモデル
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
