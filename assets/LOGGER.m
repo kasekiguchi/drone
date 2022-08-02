@@ -18,6 +18,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         sname = "sensor";
         ename = "estimator";
         rname = "reference";
+        cname = "controller";
     end
 
     methods
@@ -76,6 +77,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
                 obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
                 obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
+                obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
 
                 obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
                 obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
@@ -125,16 +127,16 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             save(filename, 'Data');
         end
         function [data, vrange] = data(obj, target, variable, attribute, option)
-            % n : agent indices
+            % target : agent indices
             % variable : var name or path to var from agent
             %            or path from result if attribute is set.
             % attribute : "s","e","r","p","i"
             % option time : time range
             % Examples
             % time : data('t',[],[])
-            % state : data(1:2,"p","e")                      : agent1's estimated position
+            % state : data(1:2,"p","e")                    : agent1's estimated position
             %         data(2,"state.xd","r")               : agent2's reference xd
-            %         data(1,"sensor.result.state.q",[])       : agent1's measured attitude
+            %         data(1,"sensor.result.state.q",[])   : agent1's measured attitude
             % input : data(1,[],"i") or data(1,"input",[]) : agent1's input data
             % data(1,"p","r","time",[0,2])                 : take the data in time span [0 2]
             % PROBLEM : data(0,'t','') does not work
@@ -150,18 +152,6 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         end
         function [data, vrange] = data_org(obj, n, variable, attribute, option)
             % n : agent index
-            % variable : var name or path to var from agent
-            %            or path from result if attribute is set.
-            % attribute : "s","e","r","p","i"
-            % option time : time range
-            % Examples
-            % time : data('t',[],[])
-            % state : data(1,"p","e")                      : agent1's estimated position
-            %         data(2,"state.xd","r")               : agent2's reference xd
-            %         data(1,"sensor.result.state.q",[])       : agent1's measured attitude
-            % input : data(1,[],"i") or data(1,"input",[]) : agent1's input data
-            % data(1,"p","r","time",[0,2])                 : take the data in time span [0 2]
-            % PROBLEM : data(0,'t','') does not work
             arguments
                 obj
                 n
@@ -171,7 +161,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
             [variable, vrange] = obj.full_var_name(variable, attribute);
             attribute = "";
-            data_range = find((obj.Data.t - option.time(1)) > 0, 1):find((obj.Data.t - option.time(2)) >= 0, 1);
+            data_range = find((obj.Data.t - option.time(1)) > 0, 1)-1:find((obj.Data.t - option.time(2)) >= 0, 1);
             if sum(strcmp(n, {'time', 't'}))     % 時間軸データ
                 data = obj.Data.t(data_range);
             elseif n == 0                        % n : agent number.  n=0 => obj.itmesのデータ
@@ -210,7 +200,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 data = [data.(variable(j))];
                 if strcmp(variable(j), 'state')
                     for k = 1:length(data)
-                        ndata(k, :) = data(k).(variable(j + 1));
+                        ndata(k, :) = data(k).(variable(j + 1))(1:data(k).num_list);
                     end
                     data = ndata;
                     break % WRN : stateから更に深い構造には対応していない
@@ -336,6 +326,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                                 title(strcat("Velocity v of agent", string(n)));
                             case "w"
                                 title(strcat("Angular velocity w of agent", string(n)));
+                            case "z"
+                                title(strcat("Position error integration of agent", string(n)));
                             case "input"
                                 title(strcat("Input u of agent", string(n)));
                             otherwise
@@ -421,6 +413,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     name = strcat(name, ".state.v");
                 case 'w'
                     name = strcat(name, ".state.w");
+                case 'z'
+                    name = strcat(name, ".state.z");
                 case 'input'
                     name = "input";
                 otherwise

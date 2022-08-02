@@ -9,9 +9,10 @@ classdef LiDAR_sim < SENSOR_CLASS
         self
         interface = @(x) x;
     end
-    properties (Access = private) % construct したら変えない．
+    properties %(Access = private) % construct したら変えない．
         radius = 40;
         angle_range = -pi:0.01:pi;
+        head_dir = nsidedpoly(3, 'Center', [0 ,0], 'SideLength', 0.5);
     end
     
     methods
@@ -22,6 +23,7 @@ classdef LiDAR_sim < SENSOR_CLASS
             if isfield(param,'interface'); obj.interface = Interface(param.interface);end
             if isfield(param,'radius'); obj.radius = param.radius;         end
             if isfield(param,'angle_range');  obj.angle_range = param.angle_range;end
+            obj.head_dir.Vertices = ([0 1;-1 0]*obj.head_dir.Vertices')'; 
         end
         
         function result = do(obj,param)
@@ -32,8 +34,15 @@ classdef LiDAR_sim < SENSOR_CLASS
             % 【入力】param = {Env}        Plant ：制御対象， Env：環境真値
             Plant=obj.self.plant;
             Env=param;
-            tmp = obj.angle_range;            
             pos=Plant.state.p; % 実状態
+            if isprop(Plant.state,"q")
+                front = Plant.state.q(3); % オイラー角を想定
+                R = [cos(front),-sin(front);sin(front),cos(front)]'; % ボディ座標から見るため転置
+            else
+                front = 0;
+                R = eye(2);
+            end
+            tmp = obj.angle_range+front;            
             circ=[obj.radius*cos(tmp);obj.radius*sin(tmp)]';
             if tmp(end)-tmp(1) > pi
                 sensor_range=polyshape(circ(:,1),circ(:,2)); % エージェントの位置を中心とした円
@@ -63,14 +72,20 @@ classdef LiDAR_sim < SENSOR_CLASS
                     result.sensor_points(i,:) = [0 0];
                 end
             end
+            result.region.Vertices = (R*result.region.Vertices')';
+            result.sensor_points = (R*result.sensor_points')';
             result.length=vecnorm(result.sensor_points'); % レーザー点までの距離
-            result.state = {};
+            %result.state = {};
             obj.result=result;
         end
         function show(obj,~)
             if ~isempty(obj.result)
                 points(1:2:2*size(obj.result.sensor_points,1),:)=obj.result.sensor_points;
-                plot([points(:,1);0],[points(:,2);0],'r-');hold on; plot(obj.result.region);axis equal;
+                plot([points(:,1);0],[points(:,2);0],'r-');
+                hold on; 
+                plot(obj.result.region);
+                plot(obj.head_dir);
+                axis equal;
             else
                 disp("do measure first.");
             end
