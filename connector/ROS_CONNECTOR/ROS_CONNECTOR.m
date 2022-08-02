@@ -6,6 +6,7 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
             %   pubName
             %   ROSHostIP
             %   ROSClientIP
+            %　ここの拡張を行う
     properties
         ROSHostIP
         %ClientIP
