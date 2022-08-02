@@ -19,10 +19,11 @@ run("main1_setting.m");
 
 % for mob1
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
-tmp = [2 -1;2 0.5;2.5 0.5;2.5 -1];
+wall1 = [2 -1;2 0.5;2.5 0.5;2.5 -1];
+wall2 = [2 1;2 2;2.5 2;2.5 1];
 room = [-2 -5;-2 4;7 4;7 -5];
 % Env.param.Vertices = [tmp;NaN NaN;0.6*tmp]; %モビング時の障害物
-Env.param.Vertices = [tmp;NaN NaN;room]; %Tbug時の障害物
+Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
 initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
 run("main2_agent_setup.m");
@@ -76,7 +77,7 @@ try
         end
         figure(PFH);
         hold off
-        agent.sensor.lrf.show();
+        %agent.sensor.lrf.show();
         %% estimator, reference generator, controller
         for i = 1:N %機体数
             % estimator
@@ -93,7 +94,7 @@ try
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
-            param(i).reference.tbug = {};
+            param(i).reference.tbug = {time.t};
             param(i).reference.agreement = {logger, N, time.t};
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
@@ -114,6 +115,7 @@ try
         end
 
         %% update state
+        agent.reference.tbug.show(Env);
         figure(FH)
         drawnow
 
@@ -122,11 +124,10 @@ try
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
-                      agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
+            %          agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
-
         % for exp
         if fExp
             %% logging

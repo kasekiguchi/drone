@@ -10,8 +10,9 @@ classdef LiDAR_sim < SENSOR_CLASS
         interface = @(x) x;
     end
     properties %(Access = private) % construct したら変えない．
+        pitch = 0.1;
         radius = 40;
-        angle_range = -pi:0.01:pi;
+        angle_range
         head_dir = nsidedpoly(3, 'Center', [0 ,0], 'SideLength', 0.5);
     end
     
@@ -22,7 +23,8 @@ classdef LiDAR_sim < SENSOR_CLASS
             % radius, angle_range
             if isfield(param,'interface'); obj.interface = Interface(param.interface);end
             if isfield(param,'radius'); obj.radius = param.radius;         end
-            if isfield(param,'angle_range');  obj.angle_range = param.angle_range;end
+            if isfield(param,'pitch');  obj.pitch = param.pitch;end
+            obj.angle_range = -pi:obj.pitch:pi;
             obj.head_dir.Vertices = ([0 1;-1 0]*obj.head_dir.Vertices')'; 
         end
         
@@ -83,6 +85,7 @@ classdef LiDAR_sim < SENSOR_CLASS
                 points(1:2:2*size(obj.result.sensor_points,1),:)=obj.result.sensor_points;
                 plot([points(:,1);0],[points(:,2);0],'r-');
                 hold on; 
+                text(points(1,1),points(1,2),'1','Color','b','FontSize',10);
                 plot(obj.result.region);
                 plot(obj.head_dir);
                 axis equal;

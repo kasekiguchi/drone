@@ -4,8 +4,9 @@ function Sensor = Sensor_LiDAR(id)
 % rpos : RnagePos_sim
 Sensor.name=["lrf"];
 Sensor.type=["LiDAR_sim"];
-LiDAR_param.radius = 40;
-LiDAR_param.angle_range = -pi:0.1:pi;
+LiDAR_param.radius = 10;
+LiDAR_param.pitch = 0.1;
+
 % X, Y. Z
 % for i = 1:length(agent)
     Sensor.param.id = id;
