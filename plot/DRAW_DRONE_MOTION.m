@@ -25,6 +25,7 @@ classdef DRAW_DRONE_MOTION
                 param.plot_ref = true;
                 param.animation = false;
                 param.target = 1;
+                param.env = [];
             end
             data = logger.data(param.target,"p","e");
             tM = max(data);
@@ -82,7 +83,7 @@ classdef DRAW_DRONE_MOTION
             obj.frame = t;
             obj.thrust = tt;
             if param.animation
-                obj.animation(logger,"realtime",true,"target",param.target);
+                obj.animation(logger,"realtime",true,"target",param.target,"env",param.env);
             end
         end
 
@@ -133,6 +134,7 @@ classdef DRAW_DRONE_MOTION
                 param.realtime = false;
                 param.target = 1;
                 param.gif = 0;
+                param.env = [];
             end
 
             p = logger.data(param.target,"p","e");
@@ -164,6 +166,9 @@ classdef DRAW_DRONE_MOTION
                 sizen = 256;
                 delaytime = 0;
                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
+            end
+            if ~isempty(param.env)
+                param.env.plot();
             end
 
             t = logger.data("t");
