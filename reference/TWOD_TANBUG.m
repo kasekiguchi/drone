@@ -330,13 +330,13 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 points = points + obj.state.p(1:2)';
                 plot(points(:,1),points(:,2),'r-');
                 hold on; 
-                text(points(1,1),points(1,2),'1','Color','b','FontSize',10);
+%                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);
                 %plot(obj.self.sensor.result.region);
                 %plot(obj.head_dir);
                 plot(obj.state.p(1),obj.state.p(2),'b*');
                 plot(obj.result.state.p(1),obj.result.state.p(2),'go');
                 local_tp = R*obj.local_tp(1:2);
-                plot(obj.state.p(1)+local_tp(1)+circ(:,1),obj.state.p(2)+local_tp(2)+circ(:,2));
+%                 plot(obj.state.p(1)+local_tp(1)+circ(:,1),obj.state.p(2)+local_tp(2)+circ(:,2));
                 plot(obj.goal(1),obj.goal(2),"ys");
                 axis equal;
             end

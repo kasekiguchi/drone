@@ -180,7 +180,9 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","er"},{1,"q","e"});
+% logger.plot({1,"p","er"},{1,"q","e"});
+logger.plot({1,"p","er"});
+% logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 % logger.plot({1,"p1-p2","er"});
 % agent(1).reference.timeVarying.show(logger)
