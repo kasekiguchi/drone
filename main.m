@@ -28,7 +28,7 @@ initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
-plot(polyshape(Env.param.Vertices))
+plot(polyshape(Env.param.Vertices));
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -191,7 +191,7 @@ logger.plot({1,"p","er"});
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N);
+agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
 %logger.save();
 
 

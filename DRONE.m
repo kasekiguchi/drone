@@ -27,9 +27,10 @@ classdef DRONE < ABSTRACT_SYSTEM
                 obj
                 logger
                 param.target = 1;
+                param.env = [];
             end
-            p = obj.parameter;
-            DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target);
+            p = obj.parameter;            
+            DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target,"env",param.env);
         end
     end
 end
