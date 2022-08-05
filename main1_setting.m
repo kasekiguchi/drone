@@ -1,6 +1,6 @@
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+fExp = 1 % 1：実機　それ以外：シミュレーション
 fMotive = 1; % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -16,7 +16,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 15;
+    te = 25;
 end
 
 %% generate environment

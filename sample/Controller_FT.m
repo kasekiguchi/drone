@@ -77,11 +77,15 @@ Controller_param.ay=alpha;
 Controller_param.az=alpha(1:2,1);
 Controller_param.apsi=alpha(1:2,1);
 %% ‹ß—‚Ìƒpƒ‰ƒ[ƒ^
-aprxm=10;
+fff=10;%%%%%%%%%%%%%%%%%%%%%%
+faprxm1=1;%%%%%%%%%%%%%%%%%%%%
+
 k=Controller_param.F2;
-gain_ser1=0;
-gain_ser2=0;
-if aprxm==1
+gain_ser1=zeros(4,2);
+gain_ser2=zeros(4,4);
+
+if fff==1
+if faprxm1==1
     %fminserch tanh 1‚Â
     x0=[2,2];
     fvals12=zeros(4,1);
@@ -106,6 +110,7 @@ else
         fvals22(i) = 2*fval;
         gain_ser2(i,:)=x;% gain_ser2(4*4)["f1","a1","f2","a2"]*[x;dx;ddx;dddx]
     end
+end
 end
 Controller_param.gain1=gain_ser1;
 Controller_param.gain2=gain_ser2;

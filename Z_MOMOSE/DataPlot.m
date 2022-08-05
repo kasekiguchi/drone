@@ -453,7 +453,7 @@ end
 %変更
 % subfolder='sim';%sim or exp
 subfolder='exp';%sim or exp
-ExpSimName='有限整定制御近似';%実験名,シミュレーション名
+ExpSimName='tanh1_2_近似';%実験名,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
 contents='FT_PP11';%実験,シミュレーション内容
 % if strcmp(subfolder,'exp')

@@ -85,51 +85,54 @@ classdef FTC < CONTROLLER_CLASS
             %%%%%%%%%%%%%%%%%%%
             
 %% x,y,psiの入力
+n =1;% 1:有限整定 4:tanh1 5:tanh2
+switch n
+        case 1
 %有限整定
-%             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
-%             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
+            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
+            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
 %             ux=-F2*z2;
 %             uy=-F3*z3;
             %併用
 %             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1));%（17）式
 %             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1));%(19)式  
+        case 2
 %近似1(sgnを近似)
           %           a=6;%a>2,alpha=0.9,a=6の時いい感じになる.６月の報告会
 %             ux=-kx(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(kx(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(kx(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(kx(4)*tanh(a*z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1);%-F2*z2;%（17）式
 %             uy=-ky(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(ky(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(ky(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(ky(4)*tanh(a*z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1);%-F3*z3;%(19)式          
-
+        case 3
 %近似2(|x|^alphaを近似＋併用)
 %           a=1.2;%a>1(1だと0の近くでfbと同じになる)
 %             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2*z2;%F2(1)*z2(1);%（17）式
 %             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3*z3;%F3(1)*z3(1);%(19)式          
 %             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2(1)*z2(1);%（17）式
 %             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3(1)*z3(1);%(19)式   
-          
-%近似3
+        case 4
+%近似3 tanh1
           %近似普通誤差0.1x
-            g = [0.105, 0.08, 0.055, 0.028];
-            a = [20, 18, 16, 15];
-            f= F2.*g;%F3.*gも同じ値
+%             g = [0.105, 0.08, 0.055, 0.028];
+%             a = [20, 18, 16, 15];
+%             f= F2.*g;%F3.*gも同じ値
           %近似Fbとの入力誤差が一番大きくなるところ[0.3, 0.3160, 0.3320, 0.3490]での近似x
     %         g = [0.135, 0.105, 0.075, 0.035];
     %         a = [9.5, 9, 9.5, 9.5];
           %最小化で求める
-%             f=obj.gain1(:,1);
-%             a=obj.gain1(:,2);
-%         f= F2.*g;%F3.*gも同じ値
+            f=obj.gain1(:,1);
+            a=obj.gain1(:,2);
 
-%             ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
-%             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
+            ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
+            uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
             %-F3*z3;%(19)式
-            
-%近似4tanh2
+        case 5
+% 近似4tanh2
             f1=obj.gain2(:,1);
             a1=obj.gain2(:,2);
             f2=obj.gain2(:,3);
             a2=obj.gain2(:,4);
             ux= -f1(1)*tanh(a1(1)*z2(1))-f2(1)*tanh(a2(1)*z2(1)) -f1(2)*tanh(a1(2)*z2(2))-f2(2)*tanh(a2(2)*z2(2)) -f1(3)*tanh(a1(3)*z2(3))-f2(3)*tanh(a2(3)*z2(3)) -f1(4)*tanh(a1(4)*z2(4))-f2(4)*tanh(a2(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
             uy= -f1(1)*tanh(a1(1)*z3(1))-f2(1)*tanh(a2(1)*z3(1)) -f1(2)*tanh(a1(2)*z3(2))-f2(2)*tanh(a2(2)*z3(2)) -f1(3)*tanh(a1(3)*z3(3))-f2(3)*tanh(a2(3)*z3(3)) -f1(4)*tanh(a1(4)*z3(4))-f2(4)*tanh(a2(4)*z3(4))-F3*z3;%-F3*z3;%（17）式
-            
+end
 %upsi:HL or FT
             upsi=-F4*z4;%HL
 %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT

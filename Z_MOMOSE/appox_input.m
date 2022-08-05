@@ -114,7 +114,7 @@ fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + k(i)*e ) 
 fvals12(i) = 2*fval
 gain_ser1(i+1,:)=[titlex(i),x];
 
-e= -0.1:0.001:0.1;      
+e= -1:0.001:1;      
 % e= -2:0.001:2;
 ufb(i,:)= -k(i)*e;
 utanh(i,:)= - x(1)*tanh(x(2)*e) - k(i)*e;%%
@@ -151,7 +151,7 @@ k=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 x0=[7,10,2,100];
 fvals22=zeros(4,1);
 gain_ser2=["","f1","a1","f2","a2"];
-er=0.2;
+er=1;
 for i=1:4
 fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
 options = optimset('MaxFunEvals',1e5);%普通は200*(number of variables) (既定値) 
@@ -163,7 +163,7 @@ fvals22(i) = 2*fval
 gain_ser2(i+1,:)=[titlex(i),x];
 
 % e= -0.1:0.001:0.1;      
-e= -2:0.001:2;
+e= -1:0.001:1;
 ufb(i,:)= -k(i)*e;
 utanh(i,:)= - x(1)*tanh(x(2)*e)- x(3)*tanh(x(4)*e) - k(i)*e;
 u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);

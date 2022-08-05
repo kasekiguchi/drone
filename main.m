@@ -11,7 +11,7 @@ userpath('clear');
 %%
 run("main1_setting.m");
 run("main2_agent_setup.m");
-% agent.set_model_error("lx",-0.004);%モデル誤差与えられる
+% agent.set_model_error("lx",-0.01);%モデル誤差与えられる
 
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -166,8 +166,8 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
-% logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
+% logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)
 
@@ -179,7 +179,7 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=10;
+fsave=1;
 if fsave==1
     %変更しない
     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
@@ -192,9 +192,9 @@ if fsave==1
 %     subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='有限整定制御近似';%実験,シミュレーション名
+    ExpSimName='tanh1_2_近似';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
-contents='FT_PP11';%実験,シミュレーション内容
+contents='FT';%実験,シミュレーション内容
 
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
