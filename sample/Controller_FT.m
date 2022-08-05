@@ -13,26 +13,26 @@ syms sF1 [1 2] real
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,[1,0],[0]),dt));
 Controller_param.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
 %有限整定制御用のVfを書く
-syms a real
-th=0;dth=0;ddth =0; dddth=0;
-for i=1:2
-    fz = 1/(1+exp(-a*2*sz1(i)));
-    tanh = 2*fz-1;
-    dtanh = 4*a*fz*(1-fz);
-    ddtanh = 8*a^2*fz*(1-fz)*(1*2*fz);
-    dddtanh = 16*a^3*fz*(1-fz)*(1-6*fz+6*fz^2);
-    
-    th = th + tanh;
-    dth = dth + dtanh;
-    ddth = ddth + ddtanh;
-    dddth = dddth + dddtanh;
-end
-A = Ad1-Bd1*sF1;
-Az = A*sz1;
-AAz = A*Az;
-AAAz = A*AAz;
-
-Controller_param.VfFT = matlabFunction([-sF1*(th+1)*sz1, -sF1*(dth+1)*Az, -sF1*(ddth*Az.^2+(dth+1)*AAz), -sF1*(dddth*Az.^3+3*ddth*Az.*AAz+(dth+1)*AAAz)],"Vars",{sz1,sF1,a});
+% syms a real
+% th=0;dth=0;ddth =0; dddth=0;
+% for i=1:2
+%     fz = 1/(1+exp(-a*2*sz1(i)));
+%     tanh = 2*fz-1;
+%     dtanh = 4*a*fz*(1-fz);
+%     ddtanh = 8*a^2*fz*(1-fz)*(1*2*fz);
+%     dddtanh = 16*a^3*fz*(1-fz)*(1-6*fz+6*fz^2);
+%     
+%     th = th + tanh;
+%     dth = dth + dtanh;
+%     ddth = ddth + ddtanh;
+%     dddth = dddth + dddtanh;
+% end
+% A = Ad1-Bd1*sF1;
+% Az = A*sz1;
+% AAz = A*Az;
+% AAAz = A*AAz;
+% 
+% Controller_param.VfFT = matlabFunction([-sF1*(th+1)*sz1, -sF1*(dth+1)*Az, -sF1*(ddth*Az.^2+(dth+1)*AAz), -sF1*(dddth*Az.^3+3*ddth*Az.*AAz+(dth+1)*AAAz)],"Vars",{sz1,sF1,a});
 %
 % syms al z(t) []positive
 % uFT = -k*sign(sz(i))*abs(sz1(i))^al
@@ -76,7 +76,40 @@ Controller_param.ay=alpha;
 %masui
 Controller_param.az=alpha(1:2,1);
 Controller_param.apsi=alpha(1:2,1);
-
+%% 近似のパラメータ
+aprxm=10;
+k=Controller_param.F2;
+gain_ser1=0;
+gain_ser2=0;
+if aprxm==1
+    %fminserch tanh 1つ
+    x0=[2,2];
+    fvals12=zeros(4,1);
+    er=0.1; %近似する範囲を指定
+    gain_ser1=zeros(4,2);
+    for i=1:4
+        fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alpha(i) + x(1)*tanh(x(2)*e) + k(i)*e ) ,0, er));
+        [x,fval] = fminsearch(fun,x0) ;
+        fvals12(i) = 2*fval;
+        gain_ser1(i,:)=x;% gain_ser1(4*2)["f1","a1"]*[x;dx;ddx;dddx]
+    end
+else
+    %fminserch tanh 2つ
+    x0=[5,5,5,5];
+    fvals22=zeros(4,1); 
+    er=0.1; %近似する範囲を指定
+    gain_ser2=zeros(4,4);
+    for i=1:4
+        fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alpha(i) + x(1)*tanh(x(2)*e)+ x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
+        options = optimset('MaxFunEvals',1e5);
+        [x,fval] = fminsearch(fun,x0,options);
+        fvals22(i) = 2*fval;
+        gain_ser2(i,:)=x;% gain_ser2(4*4)["f1","a1","f2","a2"]*[x;dx;ddx;dddx]
+    end
+end
+Controller_param.gain1=gain_ser1;
+Controller_param.gain2=gain_ser2;
+%%
 Controller_param.dt = dt;
  eig(diag([1,1,1],1)-[0;0;0;1]*Controller_param.F2)
 Controller.type="FTC";

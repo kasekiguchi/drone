@@ -11,7 +11,7 @@ userpath('clear');
 %%
 run("main1_setting.m");
 run("main2_agent_setup.m");
-% agent.set_model_error("lx",0.005);
+% agent.set_model_error("lx",-0.004);%モデル誤差与えられる
 
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -166,7 +166,8 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
+logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+% logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)
 
@@ -178,7 +179,7 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=1;
+fsave=10;
 if fsave==1
     %変更しない
     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
