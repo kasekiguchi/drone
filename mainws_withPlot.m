@@ -45,7 +45,7 @@ end
 for i = 1:N
     if fExp
     else
-        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
+        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
 
     end
     %% model
@@ -126,7 +126,7 @@ if ~isempty(agent(1).plant.state)
     end
 end
 logger=WSLogger(agent,size(ts:dt:te,2),LogData,SubFunc);
-time =  Time();
+time =  TIME();
 time.t = ts;
 %%  各種do methodの引数設定
 % 引数に取れるのは以下のみ
@@ -220,7 +220,7 @@ calculation=toc;
 %profile viewer
 %% dataplot 自作
 close all;
-SaveOnOff = true; %trueでデータをはく
+SaveOnOff = false; %trueでデータをはく
 Plots = DataPlot(logger,SaveOnOff);
 %%
 disp(calculation);
