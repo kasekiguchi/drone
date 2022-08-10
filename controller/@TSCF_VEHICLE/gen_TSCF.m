@@ -18,13 +18,24 @@ dpr2 = Vrv(2);
 dd = simplify(pdiff(d,[p1;p2;th;pr1;pr2;V;Vr;thr])*[dp1;dp2;dth;dpr1;dpr2;dV;dVr;dthr])
 ddd =  simplify(pdiff(dd,[p1;p2;th;pr1;pr2;V;Vr;thr])*[dp1;dp2;dth;dpr1;dpr2;dV;dVr;dthr])
 %%
-syms Z real
+syms Z D real
 er1 = Rodrigues([0,0,1],thr)*[1;0;0]
 er2 = Rodrigues([0,0,1],thr)*[0;1;0]
 solz = solve([dp(1:2)==-Z*er2(1:2);dp'*er1==0],[Z;p2])
-z = sqrt(dp(1)^2+dp(2)^2)*cos(thr-th);
+%z = sqrt(dp(1)^2+dp(2)^2)*cos(thr-th);
+%dz =  simplify(pdiff(z,[p1;p2;th;pr1;pr2;V;Vr;thr])*[dp1;dp2;dth;dpr1;dpr2;dV;dVr;dthr])
+%%
+eq= Z*er2+D*er1 - dp ==0;
+eq1 = lhs(eq(1));
+eq2 = lhs(eq(2));
+sol=solve(eq(1:2),[D,Z]);
+%z = simplify(sol.Z);
+d = simplify(sol.D);
+z = simplify(Z*eq1-D*eq2);
 dz =  simplify(pdiff(z,[p1;p2;th;pr1;pr2;V;Vr;thr])*[dp1;dp2;dth;dpr1;dpr2;dV;dVr;dthr])
-
+dd =  simplify(pdiff(d,[p1;p2;th;pr1;pr2;V;Vr;thr])*[dp1;dp2;dth;dpr1;dpr2;dV;dVr;dthr])
+syms F1 F2 real
+sol2=solve([dz==-F1*z;dd==-F2*d],[V,dth])
 %z1 = solz.Z
 %z2 = solz.Z
 %%

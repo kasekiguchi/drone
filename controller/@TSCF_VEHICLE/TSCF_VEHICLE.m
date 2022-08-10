@@ -44,8 +44,8 @@ classdef TSCF_VEHICLE < CONTROLLER_CLASS
             dp = r - p;
             V = obj.result.input(1);
             dth = obj.result.input(6);
-            u1 = obj.input_vel(p,th,r,thr,V,Vr,obj.F1,param{1}); % 2 x 1
-            u2 = obj.input_delta(p,u1,th,dth,r,thr,dthr,obj.F2);
+            u1 = obj.input_vel(p,th,r,thr,V,Vr,obj.F1,obj.F2,param{1}); % 2 x 1
+            u2 = obj.input_delta(p,Vr,th,dth,r,thr,dthr,obj.F1,obj.F2);
             %obj.result.input = [u1*e;0;0;0;u2];
             obj.result.input = [u1(1);0;0;0;0;u2];
             obj.self.input = obj.result.input;
