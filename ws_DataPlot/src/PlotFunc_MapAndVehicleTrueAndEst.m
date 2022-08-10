@@ -19,13 +19,14 @@ if Flag
 tmp = regexp(obj.logger.items,'estimator.result.map_param.x');
 tmp = cellfun(@(c) ~isempty(c),tmp);
 tmpIndex = find(tmp);
-MapDatax = obj.logger.Data.agent{end,tmpIndex};
+teid = find(obj.logger.Data.t,1,'last');
+MapDatax = obj.logger.Data.agent{teid,tmpIndex};
 MapDimx = size(MapDatax,1);
 %estimate map y
 tmp = regexp(obj.logger.items,'estimator.result.map_param.y');
 tmp = cellfun(@(c) ~isempty(c),tmp);
 tmpIndex = find(tmp);
-MapDatay = obj.logger.Data.agent{end,tmpIndex};
+MapDatay = obj.logger.Data.agent{teid,tmpIndex};
 MapDimy = size(MapDatay,1);
 
 %plant map
