@@ -73,7 +73,7 @@ for i = 1:N
     WayPoint = [0,0,0,0];%目標位置の初期値
     convjudgeV = 1.0;%収束判断　
     convjudgeW = 0.5;%収束判断　
-    Holizon = 10;%MPCのホライゾン数
+    Holizon = 3;%MPCのホライゾン数
     agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
