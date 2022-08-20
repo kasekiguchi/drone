@@ -15,10 +15,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         item_num    % 追加保存のアイテム数
         agent_items % result以外で追加保存するagent内の変数
         fExp
-        sname = "sensor";
-        ename = "estimator";
-        rname = "reference";
-        cname = "controller";
+        overwrite_target = ["sensor"];
     end
 
     methods
@@ -31,15 +28,33 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             %         以下のように名前と保存するものの対応が取れていなくても可
             %         LOGGER=LOGGER(~,~,"innerInput",~);
             %         LOGGER.logging(t,FH,agent,motive);
-            obj.k = 0;
-            obj.target = target;
-            obj.Data.t = zeros(number, 1);     % 時間
-            obj.Data.phase = zeros(number, 1); % フライトフェーズ　a,t,f,l...
-            obj.fExp = fExp;
-            obj.items = items;
-            obj.item_num = length(items);
-            obj.agent_items = agent_items;
-            obj.Data.agent = struct();
+            arguments
+                target
+                number = []
+                fExp = []
+                items = []
+                agent_items = []
+            end
+            if isstring(target)
+                tmp=load(target);
+                log = tmp.log;
+                fn = fieldnames(log);
+                for i = fn'
+                    obj.(i{1}) = log.(i{1});
+                end
+                if ~isempty(number)
+                    obj.overwrite_target = number;
+                end
+            else
+                obj.k = 0;
+                obj.target = target;
+                obj.Data.t = zeros(number, 1);     % 時間
+                obj.Data.phase = zeros(number, 1); % フライトフェーズ　a,t,f,l...
+                obj.fExp = fExp;
+                obj.items = items;
+                obj.agent_items = agent_items;
+                obj.Data.agent = struct();
+            end
         end
 
         function logging(obj, t, FH, agent, items)
@@ -55,14 +70,13 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             arguments (Repeating)
                 items
             end
+            cha = get(FH, 'currentcharacter');
+            if isempty(cha)
+                error("ACSL : FH is empty");
+            end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
-            cha = get(FH, 'currentcharacter');
             obj.Data.phase(obj.k) = cha;
-            % TODO : activate warning
-            %            if isempty(items{1}) | length(items) ~= length(obj.items)
-            %                 warning("ACSL : number of logging data is wrong");
-            %             end
             for i = obj.items
                 obj.Data.(obj.items(i))(obj.k, :) = items{i};
                 % 注：サイズの固定されている数値データだけ保存可能
@@ -91,40 +105,50 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
         end
         function save(obj)
-            % TODO : need to modify to be compatible with the change on
-            % 2021/12/26
-            % Data = {{log},{info}}
-            % log : logging data = field t and agent
-            %     agent : {k, itme_num, agent_num}
-            %          last four itmes are ;
-            %          sensor.result, estimator.result,
-            %          reference.result, and input
-            % info : {{indices},{items},{sensor names},{estimator names},{reference names}}
-            % indices = [si,ei,ri,ii,pi];
-            % sensor names : {{1st agent's sensor names},{2nd ..},{...}...}
-            % i-th agent's sensor names : example {"Motive","RangePos"}
+            % save log.Data keeping its structure as a file Data/Log(datetime).mat
+            % retrieve it by logger = LOGGER.load("file.mat");
             filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
-            sname = [];
-            for i = obj.target % 複数台の場合
-                isnames = obj.target(i).sensor.name;
-                isname = [];
-                for j = 1:length(isnames)
-                    isname = [isname, obj.target(i).sensor.(isnames(j)).name];
+            drange = 1:find(obj.Data.phase,1,'last');
+            obj.Data.t = obj.Data.t(drange);
+            obj.Data.phase = obj.Data.phase(drange);
+            obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
+            obj.Data.agent.estimator.result = obj.Data.agent.estimator.result(drange);
+            obj.Data.agent.reference.result = obj.Data.agent.reference.result(drange);
+            obj.Data.agent.input = obj.Data.agent.input(drange);
+            obj.Data.agent.plant.result = obj.Data.agent.plant.result(drange);
+            log.Data = obj.Data;
+            fn = fieldnames(obj);
+            for i = fn'
+                if ~strcmp(i{1},"Data")
+                    log.(i{1}) = obj.(i{1});
                 end
-                sname = [sname, {isname}];
             end
-            rname = [];
-            for i = obj.target % 複数台の場合
-                irnames = obj.target(i).reference.name;
-                %                 irname = [];
-                %                 for j = 1:length(irnames)
-                %                     irname = [irname,obj.target(i).reference.(irnames(j)).name];
-                %                 end
-                rname = [rname, {irnames}];
-            end
-            Data = {obj.Data, {[obj.si, obj.ei, obj.ri, obj.ki, obj.pi], obj.items, sname, rname}};
-            save(filename, 'Data');
+            save(filename, 'log');
         end
+        function overwrite(obj,str,t,agent,n)
+            % overwrite(str,t,agent,n)
+            % agent(n).(str).result の情報をData情報で上書き
+            if contains(obj.overwrite_target,str)
+                tidx = find((obj.time-t)>0,1)-1; % 現在時刻に最も近い過去のデータを参照
+                switch str
+                    case "sensor"
+                        agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
+                        agent(n).sensor.result.state = state_copy(obj.Data.agent(n).sensor.result{tidx}.state);
+                    case "estimator"
+                        agent(n).estimator.result = obj.Data.agent(n).estimator.result{tidx};
+                        agent(n).estimator.result.state = state_copy(obj.Data.agent(n).estimator.result{tidx}.state);
+                    case "reference"
+                        agent(n).reference.result = obj.Data.agent(n).reference.result{tidx};
+                        agent(n).reference.result.state = state_copy(obj.Data.agent(n).reference.result{tidx}.state);
+                    case "controller"
+                        agent(n).controller.result = obj.Data.agent(n).controller.result{tidx};
+                        agent(n).input = obj.Data.agent(n).input{tidx};
+                    case "plant"
+                        agent(n).plant.result.state = state_copy(obj.Data.agent(n).plant.result{tidx}.state);
+                end
+            end
+        end
+        
         function [data, vrange] = data(obj, target, variable, attribute, option)
             % target : agent indices
             % variable : var name or path to var from agent

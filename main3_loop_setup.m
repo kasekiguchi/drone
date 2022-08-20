@@ -26,7 +26,7 @@ FH = figure('position', [0 0 eps eps], 'menubar', 'none');
 w = waitforbuttonpress;
 
 if (fOffline)
-    expdata.overwrite("model", time.t, agent, i);
-    te = expdata.te;
+    logger.overwrite("model", time.t, agent, i);
+    te = logger.Data.t(end);
     offline_time = 1;
 end

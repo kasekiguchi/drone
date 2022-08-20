@@ -13,19 +13,25 @@ userpath('clear');
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
-fOffline = 0; % offline verification with experiment data
+fOffline = 1; % offline verification with experiment data
 
 run("main1_setting.m");
-run("main2_agent_setup.m");
-%agent.set_model_error("ly",0.02);
-%% set logger
+
+% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
     ];
 LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
     ];
 
-logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+if (fOffline)
+    logger = LOGGER("Data/Log(21-Aug-2022_06_16_24).mat",["sensor","estimator"]);
+else
+    logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+end
+%
+run("main2_agent_setup.m");
+%agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
 try
@@ -33,13 +39,10 @@ try
         %% sensor
         %    tic
         tStart = tic;
-        if time.t == 9
-            time.t;
-        end
         if (fOffline)
-            expdata.overwrite("plant", time.t, agent, i);
-            FH.CurrentCharacter = char(expdata.Data{1}.phase(offline_time));
-            time.t = expdata.Data{1}.t(offline_time);
+            logger.overwrite("plant", time.t, agent, i);
+            FH.CurrentCharacter = char(logger.Data.phase(offline_time));
+            time.t = logger.Data.t(offline_time);
             offline_time = offline_time + 1;
         end
 
@@ -60,14 +63,14 @@ try
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
             agent(i).do_sensor(param(i).sensor.list);
-            %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
+            if (fOffline); logger.overwrite("sensor",time.t,agent,i);end
         end
 
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator
             agent(i).do_estimator(cell(1, 10));
-            %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
+            if (fOffline); logger.overwrite("estimator",time.t,agent,i); end
 
             % reference
             param(i).reference.covering = [];
@@ -81,7 +84,7 @@ try
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
             agent(i).do_reference(param(i).reference.list);
-            %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
+            if (fOffline); logger.overwrite("reference",time.t,agent,i);end
 
             % controller
             param(i).controller.hlc = {time.t};
@@ -91,7 +94,7 @@ try
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
-            %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+            if (fOffline); logger.overwrite("input",time.t,agent,i);end
         end
 
         %% update state
@@ -103,7 +106,7 @@ try
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
-                      agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
+            %          agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
