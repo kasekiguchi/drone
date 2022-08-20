@@ -1,3 +1,47 @@
+%% set initial state 
+disp("Initialize state");
+param(N) = struct('sensor', struct, 'estimator', struct, 'reference', struct);
+
+if fExp
+initial_state(N) = struct;
+if exist('motive', 'var') == 1; motive.getData([], []); end
+
+    for i = 1:N
+        % for exp with motive : initial_stateize by motive info
+        if exist('motive', 'var') == 1
+            sstate = motive.result.rigid(rigid_ids(i));
+            initial_state(i).p = sstate.p;
+            initial_state(i).q = sstate.q;
+            initial_state(i).v = [0; 0; 0];
+            initial_state(i).w = [0; 0; 0];
+        else % とりあえず用
+            arranged_pos = arranged_position([0, 0], N, 1, 0);
+            initial_state(i).p = arranged_pos(:, i);
+            initial_state(i).q = [1; 0; 0; 0];
+            initial_state(i).v = [0; 0; 0];
+            initial_state(i).w = [0; 0; 0];
+        end
+
+    end
+
+else
+
+    %% for sim
+    for i = 1:N
+        if (fOffline)
+            clear initial_state
+            initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
+        else
+            arranged_pos = arranged_position([0, 0], N, 1, 0);
+            initial_state(i).p = arranged_pos(:, i);
+            initial_state(i).q = [1; 0; 0; 0];
+            initial_state(i).v = [0; 0; 0];
+            initial_state(i).w = [0; 0; 0];
+        end
+
+    end
+
+end
 %% generate environment
 %Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
 Env = [];
