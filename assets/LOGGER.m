@@ -128,8 +128,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         function overwrite(obj,str,t,agent,n)
             % overwrite(str,t,agent,n)
             % agent(n).(str).result の情報をData情報で上書き
-            if contains(obj.overwrite_target,str)
-                tidx = find((obj.time-t)>0,1)-1; % 現在時刻に最も近い過去のデータを参照
+            if sum(contains(obj.overwrite_target,str)+strcmp(obj.overwrite_target,"all"))>0
+                tidx = find((obj.Data.t-t)>=0,1); % 現在時刻に最も近い過去のデータを参照
                 switch str
                     case "sensor"
                         agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
@@ -223,7 +223,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 data = [data.(variable(j))];
                 if strcmp(variable(j), 'state')
                     for k = 1:length(data)
-                        ndata(k, :) = data(k).(variable(j + 1))(1:data(k).num_list);
+                        ndata(k, :) = data(k).(variable(j + 1))(1:data(k).num_list(strcmp(data(k).list,variable(j+1))));
                     end
                     data = ndata;
                     break % WRN : stateから更に深い構造には対応していない
