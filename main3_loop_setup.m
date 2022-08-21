@@ -27,6 +27,6 @@ w = waitforbuttonpress;
 
 if (fOffline)
     logger.overwrite("model", time.t, agent, i);
-    te = logger.Data.t(end);
+    te = logger.Data.t(logger.k);
     offline_time = 1;
 end
