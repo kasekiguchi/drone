@@ -2,7 +2,7 @@ function [Index,dimension,data,Flag] = FindDataMatchName(logger,Name)
 tmp = regexp(logger.items,Name);
 tmp = cellfun(@(c) ~isempty(c),tmp);
 Index = find(tmp);
-teid = find(logger.Data.t,1,'last');
+teid = find(logger.Data.t,1,'last')-1;
 if isempty(Index)
     Flag = false;
     dimension = 0;

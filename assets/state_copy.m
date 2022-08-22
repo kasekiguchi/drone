@@ -1,5 +1,9 @@
 function state=state_copy(orgstate,targetstate)
     % STATE_CLASS objectを値としてコピーするための関数
+    if isempty(orgstate)
+        state = [];
+        return;
+    else
     state=copy(orgstate);
     F=fieldnames(orgstate);
     for i = 1:length(F)
@@ -17,4 +21,5 @@ function state=state_copy(orgstate,targetstate)
             end
         end
     end
+end
 end
