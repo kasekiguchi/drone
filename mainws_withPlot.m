@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=350;
+    te=1500;
 end
 %% initialize
 initial(N) = struct;
@@ -46,13 +46,10 @@ for i = 1:N
     if fExp
     else
         agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
-
     end
     %% model
     % set control model
-
             agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
-
     close all
     %% set environment property
     Env = [];
@@ -84,6 +81,16 @@ for i = 1:N
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
     param(i).reference.list = cell(1,length(agent(i).reference.name));
 end
+%%
+% load('C:\Users\kasek\Documents\GitHub\drone\ws_Saves\2022_08_17\12_23_35\Logger12_23_35.mat');
+% id = 4122;
+% agent.plant.state.set_state(logger.Data.agent{id,25}.state.get());
+% agent.estimator.result.state.set_state( ...
+%     "p",logger.Data.agent{id,2} ...
+%     "q",logger.Data.agent{id,3} ...
+%     "v",logger.Data.agent{id,4});
+% agent.estimator.ukfslam_WC.(einitial);
+
 %% initialize
 clc
 LogData=[
@@ -125,7 +132,15 @@ if ~isempty(agent(1).plant.state)
         LogData=["plant.state.q";LogData]; % 実制御対象の姿勢
     end
 end
-logger=WSLogger(agent,size(ts:dt:te,2),LogData,SubFunc);
+%logger=WSLogger(agent,size(ts:dt:te,2),LogData,SubFunc);
+% デフォルトでsensor, estimator, reference,のresultと inputのログはとる
+LogData = [     % agentのメンバー関係以外のデータ
+        ];
+LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
+            ];
+
+logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+
 time =  TIME();
 time.t = ts;
 %%  各種do methodの引数設定
@@ -138,15 +153,23 @@ for i = 1:N
     param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
     agent(i).do_sensor(param(i).sensor);
 end
+%% 続きから
+% time.t = time.t - dt;
+% logger.overwrite("plant", time.t, agent, 1);
+% logger.overwrite("estimator", time.t, agent, 1);
+% logger.overwrite("sensor", time.t, agent, 1);
+% logger.overwrite("reference", time.t, agent, 1);
+% logger.overwrite("controller", time.t, agent, 1);
+% logger.overwrite("input", time.t, agent, 1);
 %% main loop
 %profile on
 disp("while ============================")
 close all;
 % disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
-NowResult = figure;
-%%
-% w = waitforbuttonpress;
+%NowResult = figure;
+%
+ w = waitforbuttonpress;
 tic
 % tryf
 while round(time.t,5)<=te
@@ -180,10 +203,11 @@ while round(time.t,5)<=te
     %agent(1).estimator.map.show
     %%
     
+    logger.logging(time.t,FH, agent, []);
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
-    logger.logging(time.t,FH,doSubFuncFlag);
+    %logger.logging(time.t,FH,doSubFuncFlag);
     %%
     % with FH
     figure(FH)
@@ -201,8 +225,8 @@ while round(time.t,5)<=te
         agent(i).do_plant(plant_param);
     end
     %---now result plot---%
-     NowResultPlot(agent,NowResult);
-     drawnow
+     %NowResultPlot(agent,NowResult);
+     %drawnow
     %---------------------%
     % for exp
     % pause(0.9999*(sampling-calculation)); %
@@ -223,7 +247,11 @@ close all;
 SaveOnOff = false; %trueでデータをはく
 Plots = DataPlot(logger,SaveOnOff);
 %%
-disp(calculation);
+%disp(calculation);
+figure()
+logger.plot({1,"q","e"});
+%%
+logger.save()
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);

@@ -9,7 +9,8 @@ if ~PlantDim ==EstDim
     error('Dimention is not match');
 end
 %Time
-Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
+teid = find(obj.logger.Data.t,1,'last')-1;
+Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:teid,'UniformOutput',false));
 for pidx = 1:PlantDim
 figure(FigNum)
 % figcf = gcf;
@@ -17,8 +18,8 @@ hold on;
 ax = gca;
 grid on
 axis equal
-plot(Time,PlantData(pidx,:),'Linewidth',5);
-plot(Time,EstData(pidx,:),'Linewidth',3);
+plot(Time,PlantData(pidx,1:teid),'Linewidth',5);
+plot(Time,EstData(pidx,1:teid),'Linewidth',3);
 grid on;
 axis equal;
 xlabel('t [s]');ylabel(strcat(labelstr(pidx),'[m]'));
