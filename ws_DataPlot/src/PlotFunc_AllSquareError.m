@@ -5,7 +5,7 @@ plotcolor = [0 0.4470 0.7410;
     0.4660 0.6740 0.1880;
     0.6350 0.0780 0.1840];
 %plant(true)
-[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.state.p');
+[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.p');
 if Flag
     %estimation
     [~,EstDim,EstData] = FindDataMatchName(obj.logger,'estimator.result.state.p');
@@ -16,13 +16,14 @@ if Flag
     %     [~,EstVDim,EstVData,veFlag] = FindDataMatchName(obj.logger,'estimator.result.state.v');
     %     [~,PlantWDim,PlantWData,wFlag] = FindDataMatchName(obj.logger,'plant.state.w');
     %     [~,EstWDim,EstWData,weFlag] = FindDataMatchName(obj.logger,'estimator.result.state.w');
-    [~,PlantqDim,PlantqData,~] = FindDataMatchName(obj.logger,'plant.state.q');
+    [~,PlantqDim,PlantqData,~] = FindDataMatchName(obj.logger,'plant.result.state.q');
     [~,EstqDim,EstqData] = FindDataMatchName(obj.logger,'estimator.result.state.q');
     if ~PlantqDim == EstqDim
         error('Dimention is not match');
     end
     %Time
-    Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
+    %Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));\
+    Time = obj.logger.data(0,'t',[]);
     %under code make figure
     for fi = 1:(PlantDim)
         figure(FigNum)

@@ -1,7 +1,8 @@
 function [Index,dimension,data,Flag] = FindDataMatchName(logger,Name)
-tmp = regexp(logger.items,Name);
-tmp = cellfun(@(c) ~isempty(c),tmp);
-Index = find(tmp);
+% tmp = regexp(logger.items,Name);
+% tmp = cellfun(@(c) ~isempty(c),tmp);
+% Index = find(tmp);
+Index = [];
 teid = find(logger.Data.t,1,'last')-1;
 if isempty(Index)
     Flag = false;
@@ -23,4 +24,7 @@ else
         end
     end
 end
+Flag = true;
+data = logger.data(1,Name,[])';
+dimension = size(data,1);
 end
