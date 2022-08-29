@@ -1,5 +1,5 @@
 %% Drone 班用共通プログラム update sekiguchi
-%-- 連続時間で着陸するモデル　リサンプリングつき 今研究で使っているファイル
+%-- main_H_resampling_landing の改善版　評価関数に∑を追加
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
@@ -119,6 +119,11 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値
+            
+            % 現在時刻での目標値を配列に格納する
+            % 
+            
+            %---------------------------------
             if fLanding == 0
                 rr = [1., 1., 1.];
                 if (time.t/2)^2+0.1 <= rr(3)  
@@ -290,6 +295,8 @@ end
                                 state_data(7:9, end, m), ...
                                 state_data(10:12, end, m),...
                                 u(:, end, m));    % p, v，ｑ, w, u;
+                            eve = EvaluationFunction_MC(state_data(:,:,m), u(:,:,m), Params, agent);
+                            Evaluationtra(1,m) = eve;
 %                         end
                     end
 
@@ -398,11 +405,11 @@ close all
 fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
-Fontsize = 15;  timeMax = 10;
-logger.plot({1,"p", "er"},  "fig_num",1, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-logger.plot({1,"v", "e"},   "fig_num",2, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "e"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+Fontsize = 15;  timeMax = 5;
+logger.plot({1,"p", "er"},  "fig_num",1, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+logger.plot({1,"v", "e"},   "fig_num",2, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity"); legend("x.vel", "y.vel", "z.vel");
+logger.plot({1,"q", "e"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude"); legend("roll", "pitch", "yaw");
+logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title("");
 % size_best = length(data.bestcost);
 % figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '*'); xlim([0 inf]);ylim([0 100]);
@@ -421,7 +428,7 @@ for i= 1:size(logger.Data.t)
     diff(:, i) = logger.Data.agent.estimator.result{1,i}.state.p - logger.Data.agent.reference.result{1,i}.state.p;
 end
 figure(8)
-plot(logger.Data.t, diff', 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Difference of position [m]"); set(gca,'FontSize',Fontsize);
+plot(logger.Data.t, diff', 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Difference of position"); set(gca,'FontSize',Fontsize);
 legend("x.diff", "y.diff", "z.diff"); grid on;
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
