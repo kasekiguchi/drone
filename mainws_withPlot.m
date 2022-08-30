@@ -8,11 +8,12 @@ rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
 warning('off', 'all');
+%%
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレーション
+fExp = 1;%1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
-fROS = 0;
+fROS = 1;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -44,32 +45,27 @@ end
 %set plant model
 for i = 1:N
     if fExp
-        agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[30])); % Lizard : for exp % 機体番号（ESPrのIP）
+        agent(i) = Drone(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
         agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
-
     end
     %% model
     % set control model
-
-            agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
-
+    agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
     close all
     %% set environment property
         Env = [];
-    
         agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
-        %% set sensors property
-        agent(i).sensor=[];
+        %% set ROS2 property
         if fROS
-            Sensor = ros2node("/scan",30);
-            agent(i).set_property("sensor",Sensor_ROS2);
+            agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
         else
             SensorRange = 20;
             agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
         end
         %% set estimator property
         agent(i).estimator=[];
+%         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelExp(agent(i),SensorRange))
         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
         %% set reference property
         agent(i).reference=[];
@@ -79,18 +75,14 @@ for i = 1:N
         WayPoint = [0,0,0,0];%目標位置の初期値
         convjudgeV = 1.0;%収束判断　
         convjudgeW = 0.5;%収束判断　
-        Holizon = 10;%MPCのホライゾン数
-
-        if fROS
-            agent(i).set_
-        else
-            agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
-            % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-            agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
-            %% set controller property
-            agent(i).controller=[]; 
-            agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
-        end
+        Holizon = 3;%MPCのホライゾ
+        agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
+        % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
+        agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+        %% set controller property
+        agent(i).controller=[]; 
+        agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
+     
         %% set connector (global instance)
         param(i).sensor.list = cell(1,length(agent(i).sensor.name));
         param(i).reference.list = cewxawll(1,length(agent(i).reference.name));
