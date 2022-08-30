@@ -37,7 +37,8 @@ if Flag
     tmp = regexp(obj.logger.items,'reference.result.state.p');
     tmp = cellfun(@(c) ~isempty(c),tmp);
     Index = find(tmp);
-    RefData = cell2mat(arrayfun(@(N) obj.logger.Data.agent{N,Index}(:,1),1:size(obj.logger.Data.t,1),'UniformOutput',false));
+    teid = find(obj.logger.Data.t,1,'last')-1;
+    RefData = cell2mat(arrayfun(@(N) obj.logger.Data.agent{N,Index}(:,1),1:teid,'UniformOutput',false));
     %% sonsor Data
     tmp = regexp(obj.logger.items,'sensor.result.sensor_points');
     tmp = cellfun(@(c) ~isempty(c),tmp);

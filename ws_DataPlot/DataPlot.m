@@ -16,15 +16,16 @@ classdef DataPlot<handle
         FontSize = 15;
         FontName = 'TimesNewRoman'
         FontWeight = 'normal';
-        FuncNames = [%     "XYZTureAndEst",
+        FuncNames = [
+%            "XYZTureAndEst",
             %     "AttitudesTureAndEst",
-%             "TrackMPCEval",
-            "MapAndVehicleTrueAndEst",
-            %     "Eval",
+            %             "TrackMPCEval",
+%            "MapAndVehicleTrueAndEst",
+            "Eval",
             %     "Covxv",
             "ExitFlag",
-%              "MapMovie",
-                 "MapAndPreMapMovie",
+            %              "MapMovie",
+            %     "MapAndPreMapMovie",
             %     "Entropy",
             "RMSE",
             "AllTureAndEst",
