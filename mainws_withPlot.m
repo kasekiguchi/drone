@@ -34,9 +34,9 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-        initial(i).p = [0;-2];%四角経路
+        initial(i).p = [14;1];%四角経路
 %     initial(i).p = [0;0];%直進経路
-    initial(i).q = [0];
+    initial(i).q = [pi/2];
     initial(i).v = [0];
     initial(i).w = [0];
 end
@@ -166,6 +166,7 @@ end
 %logger=WSLogger(agent,size(ts:dt:te,2),LogData,SubFunc);
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
+    "env_vertices"
         ];
 LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
             ];
@@ -196,11 +197,11 @@ end
 %profile on
 disp("while ============================")
 close all;
-% disp('Press Enter key to start.');
+disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
-%NowResult = figure;
 %
  w = waitforbuttonpress;
+NowResult = figure;
 tic
 % tryf
 while round(time.t,5)<=te
@@ -234,7 +235,7 @@ while round(time.t,5)<=te
     %agent(1).estimator.map.show
     %%
     
-    logger.logging(time.t,FH, agent, []);
+    logger.logging(time.t,FH, agent, Env.param.Vertices);
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
@@ -256,8 +257,8 @@ while round(time.t,5)<=te
         agent(i).do_plant(plant_param);
     end
     %---now result plot---%
-     %NowResultPlot(agent,NowResult);
-     %drawnow
+     NowResultPlot(agent,NowResult);
+     drawnow
     %---------------------%
     % for exp
     % pause(0.9999*(sampling-calculation)); %
@@ -280,7 +281,7 @@ Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calculation);
 figure()
-logger.plot({1,"q","e"});
+logger.plot({1,"p1:2","er"});
 %%
 logger.save()
 %% Run class Saves
@@ -325,9 +326,15 @@ EstFinalStatesquare =  polyshape( EstFinalStatesquare');
 EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * agent.estimator.result.state.q(end) / pi, agent.estimator.result.state.p(:,end)');
 PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 %reference state
-RefState = agent.reference.result.state.p(1:2,:);
+RefState = agent.reference.result.state.p(1:3,:);
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+
+fWall = agent.reference.result.focusedLine;
+plot(fWall(:,1),fWall(:,2),'r-');
+O = agent.reference.result.O;
+plot(O(1),O(2),'r*');
+quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
 xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
 % pbaspect([20 20 1])
 hold off
