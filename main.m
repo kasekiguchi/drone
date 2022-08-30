@@ -28,7 +28,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
-try
+% try
     while round(time.t, 5) <= te
         %% sensor
         %    tic
@@ -71,6 +71,7 @@ try
 
             % reference
             param(i).reference.covering = [];
+            param(i).reference.covering_3D = [];
             param(i).reference.point = {FH, [2; 1; 1], time.t,dt};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
@@ -144,15 +145,15 @@ try
 
     end
 
-catch ME % for error
-    % with FH
-    for i = 1:N
-        agent(i).do_plant(struct('FH', FH), "emergency");
-    end
-
-    warning('ACSL : Emergency stop! Check the connection.');
-    rethrow(ME);
-end
+% catch ME % for error
+%     % with FH
+%     for i = 1:N
+%         agent(i).do_plant(struct('FH', FH), "emergency");
+%     end
+% 
+%     warning('ACSL : Emergency stop! Check the connection.');
+%     rethrow(ME);
+% end
 
 %profile viewer
 %%
