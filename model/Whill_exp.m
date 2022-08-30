@@ -1,7 +1,7 @@
 classdef Whill_exp < MODEL_CLASS
     % Whill 実験用モデル
     properties% (Access=private)
-        IP
+        ID
         connector
         phase % q : quit, s : stop, r : run
         conn_type
@@ -17,8 +17,8 @@ classdef Whill_exp < MODEL_CLASS
             obj.dt = 0.025; % check
             %% variable set
             obj.phase        = 's';
-            obj.conn_type = param.conn_type;
-            switch param.conn_type
+            obj.conn_type = param.param.conn_type;
+            switch param.param.conn_type
                 case "udp"
                     obj.IP = param.num;
                     [~,cmdout] = system("ipconfig");
@@ -34,27 +34,23 @@ classdef Whill_exp < MODEL_CLASS
                     obj.connector=SERIAL_CONNECTOR(param);
                     fprintf("Whill %d is ready\n",param.port);
                 case "ros"
-                    obj.IP = param.num;
-                    [~,cmdout] = system("ipconfig");
-                    ipp=regexp(cmdout,"192.168.");
-                    cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
-                    param.ROSHostIP=strcat('192.168.50','.',string(100+obj.IP));
-%                     param.subTopicName = {'/wheelchair/odom', ...
-%                         '/wheelchair/gyr', ...
-%                         '/scan', ...
-%                         '/velodyne_points', ...
-%                         '/camera/depth/color/points', ...
-%                         '/wheelchair/pose'};
-%                     param.pubTopicName = {'/wheelchair/cmd_vel'};
-%                     param.subMsgName = {'nav_msgs/Odometry', ...
-%                         'geometry_msgs/Point', ...
-%                         'sensor_msgs/LaserScan', ...
-%                         'sensor_msgs/PointCloud2', ...
-%                         'sensor_msgs/PointCloud2', ...
-%                         'geometry_msgs/Pose'};
-%                     param.pubMsgName = {'geometry_msgs/Twist'};
-                    obj.connector=ROS_CONNECTOR(param);
-                    fprintf("Whill %d is ready\n",param.port);
+                    obj.ID  = param.param.param.num;
+                    param.DomainID = param.id;
+                    param.subTopicName = {'/odom',...
+                        '/scan'};
+                    param.pubTopicName = {'/cmd_vel'};
+                    param.subMsgName = {'nav_msgs/Odometry',...
+                        'sensor_msgs/LaserScan'};
+                    param.pubMsgName = {'geometry_msgs/Twist'};
+                    subnum = length(param.subTopicName);
+                    pubnum = length(param.pubTopicName);
+                    for i = 1:subnum
+                        param.subTopic(i) = ros2node("/submatlab",param.DomainID);
+                    end
+                    for i = 1:pubnum
+                        param.pubTopic(i) = ros2node("/pubmatlab",param.DomainID);
+                    end
+                    obj.connector=ROS2_CONNECTOR(param);
             end
         end
         function do(obj,u,varargin)

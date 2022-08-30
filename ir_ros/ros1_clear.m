@@ -9,4 +9,7 @@ clear subodmety
 clear Pubcmd_vel
 clear scandata
 clear cmd_msg
+clear Cmd_vel
+clear Cmd_vel_pub
+clear all
 clc

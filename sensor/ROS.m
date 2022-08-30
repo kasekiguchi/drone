@@ -11,7 +11,7 @@ classdef ROS < SENSOR_CLASS
     
     methods
         function obj = ROS(self,param)
-            obj.ros = ROS_CONNECTOR(param);
+            obj.ros = ROS2_CONNECTOR(param);
             %  このクラスのインスタンスを作成
             obj.self = self;
             if isfield(param,'state_list')
