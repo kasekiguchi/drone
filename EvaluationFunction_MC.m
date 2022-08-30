@@ -5,48 +5,40 @@ function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
    
    %-- モデル予測制御の評価値を計算するプログラム
         %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-            Unorm = zeros(1,params.H);
-            X = x;
+%             Unorm = zeros(1,params.H);
+            Xp = x(1:3, :, :);
+            Xv = x(4:6, :, :);
+            Xqw = x(7:12, :, :);
             U = u;
             H = 1:params.H;
+            ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
+            ref_v = [0; 0; 0.50];
             
-        for j = 1:params.H            
-            Unorm(1, j) = norm(U(:, j));            
-        end
+%         for j = 1:params.H            
+%             Unorm(1, j) = norm(U(:, j));            
+%         end
 
         %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
-            tildeX = X - Agent.reference.result.state.p;
-%             tildeX = X - params.Xr;
-%             tildeU = U - params.Ur;
+            tildeXp = Xp - Agent.reference.result.state.p;  % 位置
+            tildeXv = Xv - ref_v;                           % 速度
+            tildeXqw = Xqw;                                 % 原点との差分ととらえる
+            tildeUpre = U - Agent.input;
+            tildeUref = U - ref_input;
             
-        %-- 状態及び入力のステージコストを計算
-            stageState = arrayfun(@(L) tildeX(:, L)' * params.Weight.Q * tildeX(:, L), 1:params.H-1);
-            stageInput = arrayfun(@(L) tildeU(:, L)' * params.Weight.R * tildeU(:, L), 1:params.H-1);
-            
-        %-- 西川先輩の充電量の項の名残、
-            %指数関数で急激な変化
-            %stageElectric = arrayfun(@(L) params.Weight.Re*exp(-(X(5, L) - 75)), 1:params.H-1);
-            %ソフトプラス関数
-            
-%             ■ 充電量 ■
-%             stageElectric = arrayfun(@(L) params.Weight.Re*log(1+exp(-(X(5, L) - 75)))^2, 1:params.H-1);
-%             stageInput2 = arrayfun(@(L) params.Weight.Rs*log(1+exp(-(-Unorm(1, L) + 4)))^2, 1:params.H-1);
-            
-            stageInput2 = arrayfun(@(L) Unorm(1, L) - params.umax, 1:params.H-1);
-            
-            for i = 1:params.H-1
-                if stageInput2(i) <= 0
-                    stageInput2(i) = 0;                    
-                else
-                    stageInput2(i) = params.Weight.Rs * stageInput2(i)^2;                    
-                end
-            end
+        %-- 状態及び入力のステージコストを計算 長くなるから分割
+            stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * params.Weight.P   * tildeXp(:, L),   1:params.H-1);
+            stageStateV  = arrayfun(@(L) tildeXv(:, L)'   * params.Weight.V   * tildeXv(:, L),   1:params.H-1);
+            stageStateQW = arrayfun(@(L) tildeXqw(:, L)'  * params.Weight.QW  * tildeXqw(:, L),  1:params.H-1);
+            stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * params.Weight.RP  * tildeUpre(:, L), 1:params.H-1);
+            stageInputR  = arrayfun(@(L) tildeUref(:, L)' * params.Weight.R   * tildeUref(:, L), 1:params.H-1);
             
         %-- 状態の終端コストを計算
-            terminalState = tildeX(:, end)' * params.Weight.Qf * tildeX(:, end);
-            
+            terminalState = tildeXp(:, end)' * params.Weight.P * tildeXp(:, end)...
+                +tildeXv(:, end)'   * params.Weight.V   * tildeXv(:, end)...
+                +tildeXqw(:, end)'  * params.Weight.QW  * tildeXqw(:, end);
+
         %-- 評価値計算
-            MCeval = sum(stageState + stageInput + stageInput2) + terminalState;
-%             MCeval = sum(stageState + stageInput + stageElectric) + terminalState;
+            MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputP + stageInputR)...
+                + terminalState;
 end
 
