@@ -1,11 +1,11 @@
-classdef Drone < ABSTRACT_SYSTEM
+classdef DRONE < ABSTRACT_SYSTEM
     % Drone class
     properties %(Access = private)
         %id = 0;
         fig
     end
     methods
-        function obj = Drone(varargin)
+        function obj = DRONE(varargin)
             obj=obj@ABSTRACT_SYSTEM({varargin});
             % このクラスのインスタンスを作成
             %   詳細説明をここに記述
