@@ -11,9 +11,9 @@ warning('off', 'all');
 %%
 %% general setting
 N = 1; % number of agents
-fExp = 1;%1：実機　それ以外：シミュレーション
+fExp = 0;%1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
-fROS = 1;
+fROS = 0;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -26,7 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=1500;
+    te=40;
 end
 %% initialize
 initial(N) = struct;
@@ -47,19 +47,13 @@ for i = 1:N
     if fExp
         agent(i) = Drone(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
-<<<<<<< HEAD
-        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
-    end
-    %% model
-    % set control model
-    agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
-=======
         agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
     end
     %% model
     % set control model
-            agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
->>>>>>> 832e8c9c3a2760a8db1152f80634ac20f522c2e2
+        agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
+        
+
     close all
     %% set environment property
         Env = [];
@@ -93,24 +87,8 @@ for i = 1:N
      
         %% set connector (global instance)
         param(i).sensor.list = cell(1,length(agent(i).sensor.name));
-        param(i).reference.list = cewxawll(1,length(agent(i).reference.name));
+        param(i).reference.list = cell(1,length(agent(i).reference.name));
     
-<<<<<<< HEAD
-=======
-    WayPoint = [0,0,0,0];%目標位置の初期値
-    convjudgeV = 1.0;%収束判断　
-    convjudgeW = 0.5;%収束判断　
-    Holizon = 3;%MPCのホライゾン数
-    agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
-    % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-    agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
-    %% set controller property
-    agent(i).controller=[]; 
-    agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
-    %% set connector (global instance)
-    param(i).sensor.list = cell(1,length(agent(i).sensor.name));
-    param(i).reference.list = cell(1,length(agent(i).reference.name));
->>>>>>> 832e8c9c3a2760a8db1152f80634ac20f522c2e2
 end
 %%
 % load('C:\Users\kasek\Documents\GitHub\drone\ws_Saves\2022_08_17\12_23_35\Logger12_23_35.mat');

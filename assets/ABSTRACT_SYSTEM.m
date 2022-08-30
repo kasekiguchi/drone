@@ -48,7 +48,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                 obj.id=args.id;
             end
             plant_subclass=str2func(args.type);
-            obj.plant = plant_subclass(args);
+            obj.plant = plant_subclass(args.param);
         end
     end
     methods %(Access = private)
