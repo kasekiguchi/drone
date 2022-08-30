@@ -1,4 +1,4 @@
-function Model = Model_Whill_exp(dt,~,~,conn_type,id)
+function Model = Model_Whill_exp(dt,~,~,param,conn_type,id)
     % dt : sampling time
     % isPlant : "plant"
     % conn_type : connector type : "udp" or "serial"
@@ -21,10 +21,10 @@ function Model = Model_Whill_exp(dt,~,~,conn_type,id)
         case "ros"
             Setting.param=param;
             Setting.param.state_list = ["p"];
-            Setting.param.num_list = [3,3];
+            Setting.param.num = [3,3];
             Setting.param.subTopic = ["/mavros/local_position/pose"];
             Setting.param.subName = ["p"];
-            Setting.param.ROSHostIP = id;
+            Setting.param.DomainID = id;
     end
     Model.id = id;
     Model.param=Setting;
