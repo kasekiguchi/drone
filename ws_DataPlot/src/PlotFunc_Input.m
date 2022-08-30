@@ -4,8 +4,7 @@ plotcolor = [0.3010 0.7450 0.9330;0.6010 0.8450 0.7330;0.6350 0.0780 0.1840; ];
 [~,~,Input,vFlag] = FindDataMatchName(obj.logger,'input');
 if vFlag
     %Time
-    %Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
-    Time = obj.logger.data(0,'t',[]);
+    Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
     %under code make figure
     figure(FigNum)
     hold on;

@@ -1,15 +1,13 @@
 function [FigNum] = PlotFunc_MapAndVehicleTrueAndEst(obj,FigNum)
 %% robot State
-%[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.state.p');
-[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.p');
+[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.state.p');
 if Flag
     %estimation
     [~,EstDim,EstData] = FindDataMatchName(obj.logger,'estimator.result.state.p');
     if ~PlantDim ==EstDim
         error('Dimention is not match');
     end
-%    [~,PlantqDim,PlantqData,~] = FindDataMatchName(obj.logger,'plant.state.q');
-    [~,PlantqDim,PlantqData,~] = FindDataMatchName(obj.logger,'plant.result.state.q');
+    [~,PlantqDim,PlantqData,~] = FindDataMatchName(obj.logger,'plant.state.q');
     [~,EstqDim,EstqData] = FindDataMatchName(obj.logger,'estimator.result.state.q');
     if ~PlantqDim == EstqDim
         error('Dimention is not match');
@@ -18,41 +16,36 @@ if Flag
     Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
 %% Map State
 %estimate map x
-% tmp = regexp(obj.logger.items,'estimator.result.map_param.x');
-% tmp = cellfun(@(c) ~isempty(c),tmp);
-% tmpIndex = find(tmp);
+tmp = regexp(obj.logger.items,'estimator.result.map_param.x');
+tmp = cellfun(@(c) ~isempty(c),tmp);
+tmpIndex = find(tmp);
 teid = find(obj.logger.Data.t,1,'last');
-%MapDatax = obj.logger.Data.agent{teid,tmpIndex};
-MapDatax = obj.logger.data(1,'estimator.result.map_param.x',[]);
+MapDatax = obj.logger.Data.agent{teid,tmpIndex};
 MapDimx = size(MapDatax,1);
 %estimate map y
-% tmp = regexp(obj.logger.items,'estimator.result.map_param.y');
-% tmp = cellfun(@(c) ~isempty(c),tmp);
-% tmpIndex = find(tmp);
-% MapDatay = obj.logger.Data.agent{teid,tmpIndex};
-MapDatay = obj.logger.data(1,'estimator.result.map_param.y',[]);
+tmp = regexp(obj.logger.items,'estimator.result.map_param.y');
+tmp = cellfun(@(c) ~isempty(c),tmp);
+tmpIndex = find(tmp);
+MapDatay = obj.logger.Data.agent{teid,tmpIndex};
 MapDimy = size(MapDatay,1);
 
 %plant map
-%tmp = regexp(obj.logger.items,'env.Floor.param.Vertices');
-% tmp = regexp(obj.logger.items,'env_vertices');
-% tmp = cellfun(@(c) ~isempty(c),tmp);
-% Index = find(tmp);
-% MapIdx = size(obj.logger.Data.agent{1,Index},3);
-% for ei = 1:MapIdx
-%     tmpenv(ei) = polyshape(obj.logger.Data.agent{1,Index}(:,:,ei));
-% end
-% p_Area = union(tmpenv(:));
-tmpenv = obj.logger.data(0,'env_vertices',[]);
-p_Area = polyshape(tmpenv{1});
+tmp = regexp(obj.logger.items,'env.Floor.param.Vertices');
+tmp = cellfun(@(c) ~isempty(c),tmp);
+Index = find(tmp);
+MapIdx = size(obj.logger.Data.agent{1,Index},3);
+for ei = 1:MapIdx
+    tmpenv(ei) = polyshape(obj.logger.Data.agent{1,Index}(:,:,ei));
+end
+p_Area = union(tmpenv(:));
 
 %make figure
 figure(FigNum)
 hold on;
 ax = gca;
 
-% tmp_max = max(obj.logger.Data.agent{1,Index});
-% tmp_min = min(obj.logger.Data.agent{1,Index});
+tmp_max = max(obj.logger.Data.agent{1,Index});
+tmp_min = min(obj.logger.Data.agent{1,Index});
 % xmin = min(tmp_min(:,1,:));
 xmin = -10;
 dx = 5;
