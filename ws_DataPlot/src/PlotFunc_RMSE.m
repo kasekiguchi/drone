@@ -1,6 +1,6 @@
 function [FigNum] = PlotFunc_RMSE(obj,FigNum)
 %Plant
-[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.state.p');
+[~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.p');
 if Flag
 %Estimation;
 [~,~,EstData,~] = FindDataMatchName(obj.logger,'estimator.result.state.p');
@@ -10,7 +10,7 @@ for ri = 1:PlantDim
 end
 
 %plant(true)
-[~,PlantqDim,PlantqData,Flag] = FindDataMatchName(obj.logger,'plant.state.q');
+[~,PlantqDim,PlantqData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.q');
 if Flag
 %estimation
 [~,~,EstqData,~] = FindDataMatchName(obj.logger,'estimator.result.state.q');
