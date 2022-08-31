@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 
 %% general setting
-N = 1; % number of agents
+N = 3; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
