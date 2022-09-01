@@ -57,7 +57,7 @@ for i = 1:N
         agent(i).input = [0; 0; 0; 0];
     else
         %agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,1,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
