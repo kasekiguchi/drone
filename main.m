@@ -16,7 +16,10 @@ fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
 run("main1_setting.m");
+initial.state.p = [0;-2];
 run("main2_agent_setup.m");
+agent.set_model_error("K",diag([0.9,1]));%誤差の値
+
 %agent.set_model_error("ly",0.02);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
