@@ -67,7 +67,7 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             result = state.p - cent';
 
             % 描画用変数
-            obj.result.state.p = state.p - 0.1*result;
+            obj.result.state.p = state.p - 0.5*result;
             result = obj.result;
             if obj.fShow
                 obj.show();

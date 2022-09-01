@@ -161,7 +161,7 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","er"},{1,"q","e"});
+logger.plot({1,"p","ser"},{1,"q","se"},{1,"input",""});
 % agent(1).reference.timeVarying.show(logger)
 
 
