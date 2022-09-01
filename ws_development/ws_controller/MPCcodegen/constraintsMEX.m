@@ -10,7 +10,7 @@ S = x(params.total_size+1:end,:);
 PredictX = zeros(4,params.H);
 for L = 1:params.H
     %     PredictX(:,L) = X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param);
-    tmp = ode45(@(t,x) Model(x,U(:,L),params.model_param),[0 params.dt],X(:,L));
+    tmp = ode45(@(t,x) Model(x,U(:,L),params.model_param),[0 params.dt*params.step],X(:,L));
     PredictX(:,L) = tmp.y(:,end);
 end
 % PredictX = cell2mat(arrayfun(@(L) X(:,L) +params.dt*Model(X(:,L),U(:,L),params.model_param) , 1:params.H,'UniformOutput' , false));
@@ -30,5 +30,5 @@ cineq(6,:) = arrayfun(@(L) -S(2,L),1:params.Num);
 end
 function dX = Model(x,u,param)
     u = param.K * u;
-    dX = [x(4)*cos(x(3));x(4)*sin(x(3));u(2);u(1)];
+    dX = [x(4)*cos(x(3));x(4)*sin(x(3));u(2);u(1) - param.D*x(4)];
 end

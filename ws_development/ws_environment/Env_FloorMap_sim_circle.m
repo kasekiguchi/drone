@@ -33,14 +33,14 @@ Pwalls = union(Poutwall,pwallpoly);
 
 %%
 
-% pout = [-5,-5;95,-5;95,95;-5,95];
-% Poutpoly = polyshape(pout);
-% pin = [-6,-6;96,-6;96,96;-6,96];
-% Pinpoly = polyshape(pin);
-% Poutwall = subtract(Pinpoly,Poutpoly);
-% pwall = [0,0;90,0;90,90;0,90];
-% pwallpoly = polyshape(pwall);
-% Pwalls = union(Poutwall,pwallpoly);
+pout = [-5,-5;95,-5;95,95;-5,95];
+Poutpoly = polyshape(pout);
+pin = [-6,-6;96,-6;96,96;-6,96];
+Pinpoly = polyshape(pin);
+Poutwall = subtract(Pinpoly,Poutpoly);
+pwall = [0,0;90,0;90,90;0,90];
+pwallpoly = polyshape(pwall);
+Pwalls = union(Poutwall,pwallpoly);
 
 env_param.Vertices(:,:,1) = Pwalls.Vertices;
 assignin('base',"env_param",env_param);

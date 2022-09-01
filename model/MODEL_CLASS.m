@@ -90,7 +90,7 @@ classdef MODEL_CLASS <  handle
                     else
                         rng('shuffle');
                     end
-                    u = u+obj.noise.value* randn(size(u));
+                    u = u+obj.noise.value.*randn(size(u));
                 end
                 if contains(obj.time_scale,'discrete')
                     obj.set_state(obj.projection(obj.method(obj.state.get(),u,obj.param)));

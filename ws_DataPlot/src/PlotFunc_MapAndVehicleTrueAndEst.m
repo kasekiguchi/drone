@@ -15,7 +15,8 @@ if Flag
         error('Dimention is not match');
     end
     %Time
-    Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
+    %Time = cell2mat(arrayfun(@(N) obj.logger.Data.t(N),1:size(obj.logger.Data.t,1),'UniformOutput',false));
+    Time = obj.logger.data(0,'t','');
 %% Map State
 %estimate map x
 % tmp = regexp(obj.logger.items,'estimator.result.map_param.x');
