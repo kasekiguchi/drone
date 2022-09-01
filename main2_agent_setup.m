@@ -76,11 +76,18 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-%     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
-%     agent(i).set_property("controller", Controller_FHL(dt));  %入力を簡単にいじれる % 階層型線形化
-%     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % servo階層型線形化
-     %HLControlSetting = Controller_HL(dt);
+    n=1;
+    switch n
+        case 1 % 有限時間整定制御
+            agent(i).set_property("controller",Controller_FT(dt));
+        case 2 % 階層型線形化
+            agent(i).set_property("controller", Controller_HL(dt));                                
+        case 3 %入力を簡単にいじれる % 階層型線形化
+            agent(i).set_property("controller", Controller_FHL(dt));  
+        case 4 % servo階層型線形化
+            agent(i).set_property("controller", Controller_FHL_Servo(dt));                                
+    end 
+      %HLControlSetting = Controller_HL(dt);
       HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化

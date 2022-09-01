@@ -11,7 +11,7 @@ userpath('clear');
 %%
 run("main1_setting.m");
 run("main2_agent_setup.m");
-% agent.set_model_error("lx",-0.01);%モデル誤差与えられる
+agent.set_model_error("lx",-0.01);%モデル誤差与えられる
 
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -23,7 +23,6 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
-
 try
     while round(time.t, 5) <= te
         %% sensor
@@ -65,7 +64,14 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
-            % reference  
+            % reference 
+            if fExp ~=1 %シミュレーションのみ
+                if time.t<=15
+                    FH.CurrentCharacter = 't';
+                else
+                    FH.CurrentCharacter = 'f';%phaseをいじれる
+                end
+            end
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [0; 0; 0], time.t};%reference.pointの目標位置を指定できる
             param(i).reference.timeVarying = {time,FH};
@@ -166,8 +172,8 @@ end
 close all
 clc
 % plot 
-% logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
-logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
+logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+% logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)
 
@@ -179,7 +185,7 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=1;
+fsave=10;
 if fsave==1
     %変更しない
     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス

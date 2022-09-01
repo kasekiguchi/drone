@@ -107,26 +107,28 @@ x0=[2,2];
 fvals12=zeros(4,1);
 gain_ser1=["","f1","a1"];
 % gain_ser1=["","f1","a1","k1"];
-er=1; %近似する範囲を指定
-for i=1:4
+er=0.1; %近似する範囲を指定
+for i=1%:4
 fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + k(i)*e ) ,0, er));
 [x,fval] = fminsearch(fun,x0) ;
 fvals12(i) = 2*fval
 gain_ser1(i+1,:)=[titlex(i),x];
 
-e= -1:0.001:1;      
-% e= -2:0.001:2;
+% e= -1:0.001:1;      
+e= -2:0.001:2;
 ufb(i,:)= -k(i)*e;
 utanh(i,:)= - x(1)*tanh(x(2)*e) - k(i)*e;%%
 u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
-sigma(i,:)=utanh(i,:)-u(i,:);
+% sigma(i,:)=utanh(i,:)-u(i,:);
 fig=figure(i);
-plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
+% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
+plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),'LineWidth',2);
+
 grid on
 legend('FB','近似','FT','誤差')
 % title(titlex(i));
 
-fosi=18;%defolt 9
+fosi=14;%defolt 9
 set(gca,'FontSize',fosi)
 xlabel('error','FontSize',fosi);
 ylabel('input','FontSize',fosi);
@@ -146,14 +148,15 @@ Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 dt=0.025;
 k=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-
+k2=1*k;
 % x0=[5,5,5,5];
 x0=[7,10,2,100];
 fvals22=zeros(4,1);
 gain_ser2=["","f1","a1","f2","a2"];
-er=1;
+er=0.5;
 for i=1:4
-fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
+% fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
+fun=@(x)(integral(@(e) abs( -k2(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
 options = optimset('MaxFunEvals',1e5);%普通は200*(number of variables) (既定値) 
 % options = optimset('PlotFcns','optimplotfval','TolX',1e-4);
 % options = optimset('PlotFcns','optimplotfval');
@@ -163,17 +166,22 @@ fvals22(i) = 2*fval
 gain_ser2(i+1,:)=[titlex(i),x];
 
 % e= -0.1:0.001:0.1;      
-e= -1:0.001:1;
+e= -4:0.001:2;
 ufb(i,:)= -k(i)*e;
 utanh(i,:)= - x(1)*tanh(x(2)*e)- x(3)*tanh(x(4)*e) - k(i)*e;
-u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
+u(i,:)=-k2(i)*sign(e).*abs(e).^alp(i);
 sigma(i,:)=utanh(i,:)-u(i,:);
+uufb(i,:)=u(i,:)+ufb(i,:);
+
 figure(i)
 plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2)
+% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),e,uufb(i,:),'LineWidth',2);
+% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,uufb(i,:),'LineWidth',2);%誤差なし
 grid on
 legend('ufb','utanh','u','誤差')
+% legend('ufb','utanh','u','FT+FB')%誤差なし
 
-fosi=18;%defolt 9
+fosi=14;%defolt 9
 set(gca,'FontSize',fosi)
 xlabel('error','FontSize',fosi);
 ylabel('input','FontSize',fosi);

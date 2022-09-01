@@ -63,7 +63,7 @@ Controller_param.Vs = matlabFunction([-sF2*sz2;-sF3*sz3;-sF4*sz4],"Vars",{sz2,sz
 anum=4;%•Ï”‚Ì”
 alpha=zeros(anum+1,1);
 alpha(anum+1)=1;
-alpha(anum)=0.9;%alpha‚Ì‰Šú’l
+alpha(anum)=0.8;%alpha‚Ì‰Šú’l
 
 for a=anum-1:-1:1
     alpha(a)=(alpha(a+2)*alpha(a+1))/(2*alpha(a+2)-alpha(a+1));

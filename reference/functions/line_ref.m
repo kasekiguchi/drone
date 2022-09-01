@@ -16,10 +16,10 @@ z = z_0;
 % y = y_0+1;
 % z = z_0;
 r=1;
-T=2;
-% x = x_0+r*cos(2*pi*t/T);
-% y = y_0+r*sin(2*pi*t/T);
-% z = z_0;%+0.4*sin(2*pi*t/(T/2));
+T=6;
+x = x_0+r*cos(2*pi*t/T);
+y = y_0+r*sin(2*pi*t/T);
+z = z_0;%+0.4*sin(2*pi*t/(T/2));
 
 ref=@(t)[x;y;z;0];%謎x,y,z are function of t.
 
