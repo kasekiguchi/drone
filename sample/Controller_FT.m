@@ -122,6 +122,6 @@ Controller.type="FTC";
 Controller.name="hlc";
 Controller.param=Controller_param;
 
-%assignin('base',"Controller_param",Controller_param);
+%assignin('base',"Controller_param",Controller_param); 
 
 end

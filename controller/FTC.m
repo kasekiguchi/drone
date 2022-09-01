@@ -27,9 +27,10 @@ classdef FTC < CONTROLLER_CLASS
         
         function result = do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
+            t = param{1};
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
-            x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
+             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応するよう
             else
@@ -89,13 +90,24 @@ n =1;% 1:有限整定 4:tanh1 5:tanh2
 switch n
         case 1
 %有限整定
-            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
-            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
-%             ux=-F2*z2;
-%             uy=-F3*z3;
+% 
+%             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
+%             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
+%             ux=1*ux;
+%             uy=1*uy;
+%             
+            ux=-1*F2*z2;
+            uy=-1*F3*z3;
             %併用
 %             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1));%（17）式
 %             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1));%(19)式  
+            %外乱ダメ
+%             ux=ux+8*sin(2*pi*t/0.2);%30以下なら有限整定がいい
+%             uy=uy+10*cos(2*pi*t/1);
+%             ux=ux+2;
+%             if t>=2 && t<=2.1　
+%                     ux=ux+1/0.025;
+%             end
         case 2
 %近似1(sgnを近似)
           %           a=6;%a>2,alpha=0.9,a=6の時いい感じになる.６月の報告会
@@ -137,13 +149,21 @@ end
             upsi=-F4*z4;%HL
 %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
 %
+%% 外乱(加速度で与える)
+            dst = 0;
+%             dst=8*sin(2*pi*t/0.2);%30以下なら有限整定がいい
+%             dst=dst+10*cos(2*pi*t/1);
+%             dst=2;
+%             if t>=2 && t<=2.1　
+%                     dst=1/0.025;
+%             end
 %%            
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
             %サブシステムの入力
-            obj.result.uHL = [vf(1);ux;uy;upsi];
+            obj.result.uHL = [vf(1);ux;uy;upsi;dst];
             %サブシステムの状態
             obj.result.z1 = z1;
             obj.result.z2 = z2;

@@ -11,7 +11,8 @@ userpath('clear');
 %%
 run("main1_setting.m");
 run("main2_agent_setup.m");
-agent.set_model_error("lx",-0.01);%モデル誤差与えられる
+% agent.set_model_error("lx",-0.01);%モデル誤差与えられる
+% agent.set_model_error("dst",[0;0;0]);%外乱
 
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -66,7 +67,7 @@ end
 
             % reference 
             if fExp ~=1 %シミュレーションのみ
-                if time.t<=15
+                if time.t<=5
                     FH.CurrentCharacter = 't';
                 else
                     FH.CurrentCharacter = 'f';%phaseをいじれる

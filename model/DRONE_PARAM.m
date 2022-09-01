@@ -29,10 +29,12 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
         k3
         k4
         rotor_r
+        dst
         % T = k*w^2
         % T : thrust , w : angular velocity of rotor
         % M = km * T = km* k * w^2
         % M : zb moment  ：そのため普通の意味でのロータ定数とは違う
+        % dst : disturbance(外乱)
     end
 
     methods
@@ -58,6 +60,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
                 param.model_error = [];
+               param.dst = [0,0,0];
             end
         obj.mass = param.mass;
         obj.Lx = param.Lx;
@@ -77,6 +80,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
         obj.k3 = param.k3;
         obj.k4 = param.k4;
         obj.rotor_r = param.rotor_r;
+        obj.dst = param.dst;
         obj.parameter_name = string(properties(obj)');
         obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
         obj.parameter_name(strcmp(obj.parameter_name,"parameter_name")) = [];

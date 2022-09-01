@@ -18,6 +18,7 @@ classdef HLC < CONTROLLER_CLASS
         
         function result=do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
+            t = param{1};
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
@@ -68,11 +69,20 @@ classdef HLC < CONTROLLER_CLASS
             z2=Z2(x,xd',vf,P);%x方向
             z3=Z3(x,xd',vf,P);%y方向
             z4=Z4(x,xd',vf,P);%yaw
+            
+            %手動で入力を作成
             ux=-F2*z2;
             uy=-F3*z3;
             upsi=-F4*z4;
+            %外乱
+%                 ux=ux+5*sin(2*pi*t/2);
+                ux=ux+2;
+%                 if t>=2 && t<=2.1
+%                     ux=ux+1/0.025;
+%                 end
+            vs =[ux,uy,upsi];
             
-            vs = Vs(x,xd',vf,P,F2,F3,F4);
+%             vs = Vs(x,xd',vf,P,F2,F3,F4);
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
