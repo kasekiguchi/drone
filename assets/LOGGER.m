@@ -15,11 +15,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         item_num    % 追加保存のアイテム数
         agent_items % result以外で追加保存するagent内の変数
         fExp
-        overwrite_target = ["sensor"];
+        overwrite_target = ["all"];
     end
 
     methods
-        function obj = LOGGER(target, number, fExp, items, agent_items)
+        function obj = LOGGER(target, number, fExp, items, agent_items,option)
             % LOGGER(target,row,items)
             % target : ログを取る対象　example 1:3, usage agent(obj.target)
             % number : 確保するデータサイズ　length(ts:dt:te)
@@ -34,6 +34,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 fExp = []
                 items = []
                 agent_items = []
+                option.overwrite_target = []
             end
             if isstring(target)
                 tmp=load(target);
@@ -43,7 +44,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     obj.(i{1}) = log.(i{1});
                 end
                 if ~isempty(number)
-                    obj.overwrite_target = number;
+                    obj.overwrite_target = option.overwrite_target;
                 end
             else
                 obj.k = 0;
@@ -77,7 +78,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
             cha = get(FH, 'currentcharacter');
             if isempty(cha)
-                error("ACSL : FH is empty");
+%                error("ACSL : FH is empty");
+cha = obj.Data.phase(obj.k);
             end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
@@ -134,7 +136,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             % overwrite(str,t,agent,n)
             % agent(n).(str).result の情報をData情報で上書き
             if sum(contains(obj.overwrite_target,str)+strcmp(obj.overwrite_target,"all"))>0
-                tidx = find((obj.Data.t-t)>=0,1); % 現在時刻に最も近い過去のデータを参照
+                %tidx = find((obj.Data.t-t)>=0,1); % 現在時刻に最も近い過去のデータを参照
+                [~,tidx] = min(abs(obj.Data.t-t)); % 現在時刻に最も近い過去のデータを参照
                 switch str
                     case "sensor"
                         agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
@@ -149,7 +152,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                         agent(n).controller.result = obj.Data.agent(n).controller.result{tidx};
                         agent(n).input = obj.Data.agent(n).input{tidx};
                     case "plant"
-                        agent(n).plant.result.state = state_copy(obj.Data.agent(n).plant.result{tidx}.state);
+                        agent(n).plant.state = state_copy(obj.Data.agent(n).plant.result{tidx}.state);
                 end
             end
         end
@@ -230,7 +233,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         function data = return_state_prop(obj, variable, data)
             % function for data_org
             for j = 1:length(variable)
-                data = [data.(variable(j))];
+                %data = [data.(variable(j))];
+                data = vertcat(data.(variable(j)));
                 if strcmp(variable(j), 'state')
                     for k = 1:length(data)
                         ndata(k, :, :) = data(k).(variable(j + 1))(1:data(k).num_list(strcmp(data(k).list,variable(j+1))),:);

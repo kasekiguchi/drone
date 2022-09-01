@@ -25,7 +25,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=1500;
+    te=200;
 end
 %% initialize
 initial(N) = struct;
@@ -33,9 +33,12 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-        initial(i).p = [14;1];%四角経路
+       initial(i).p = [0;-2];%四角経路
+       initial(i).q = [0];
+       %initial(i).p = [92;0];%四角経路
+       %initial(i).q = [pi/2];
 %     initial(i).p = [0;0];%直進経路
-    initial(i).q = [pi/2];
+    
     initial(i).v = [0];
     initial(i).w = [0];
 end
@@ -45,7 +48,7 @@ end
 for i = 1:N
     if fExp
     else
-        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
+        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',[2]))));%加速度次元車両モデル seed = 5
     end
     %% model
     % set control model
@@ -64,7 +67,7 @@ for i = 1:N
     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference=[];
-    velocity = 0.5;%目標速度
+    velocity = 1.2;%目標速度
     w_velocity = 0.7;%曲がるときの目標角速度
     
     WayPoint = [0,0,0,0];%目標位置の初期値
@@ -155,25 +158,40 @@ for i = 1:N
     agent(i).do_sensor(param(i).sensor);
 end
 %% 続きから
-% time.t = time.t - dt;
+%logger2 = logger;
+%time.t = time.t - dt;
+% logger = logger2;
+% tid = 1632;
+% time.t = logger.Data.t(tid)
 % logger.overwrite("plant", time.t, agent, 1);
-% logger.overwrite("estimator", time.t, agent, 1);
+% logger.overwrite("estimator", time.t, agent, 1); 
+% agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
+% agent.estimator.ukfslam_WC.result = agent.estimator.result;
 % logger.overwrite("sensor", time.t, agent, 1);
 % logger.overwrite("reference", time.t, agent, 1);
 % logger.overwrite("controller", time.t, agent, 1);
 % logger.overwrite("input", time.t, agent, 1);
+% agent.estimator.result.state.get
+% agent.input
+% agent.reference.TrackWpointPathForMPC.show(agent.reference.result);
+% agent.estimator.ukfslam_WC.show
+% time.t = time.t + dt;
 %% main loop
-%profile on
-disp("while ============================")
+disp("while ==========  ==================")
 close all;
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
 %
  w = waitforbuttonpress;
 NowResult = figure;
+plot_flag= true;
 tic
 % tryf
 while round(time.t,5)<=te
+%profile on
+    if time.t >= 99.8
+        time.t
+    end
     %while 1 % for exp
     %%
     Srpos={agent};
@@ -211,8 +229,8 @@ while round(time.t,5)<=te
     %logger.logging(time.t,FH,doSubFuncFlag);
     %%
     % with FH
-    figure(FH)
-    drawnow
+%    figure(FH)
+%    drawnow
     for i = 1:N %
         model_param.param=agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
@@ -222,15 +240,16 @@ while round(time.t,5)<=te
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
-        
         agent(i).do_plant(plant_param);
     end
     %---now result plot---%
-     NowResultPlot(agent,NowResult);
-     drawnow
+     NowResultPlot(agent,NowResult,plot_flag);
+     plot_flag = false;
+     %drawnow
     %---------------------%
     % for exp
     % pause(0.9999*(sampling-calculation)); %
+    %profile viewer
 end
 calculation=toc;
 % catch ME
@@ -242,15 +261,14 @@ calculation=toc;
 %     warning('ACSL : Emergency stop! Check the connection.');
 %     rethrow(ME);
 % end
-%profile viewer
 %% dataplot 自作
 close all;
-SaveOnOff = false; %trueでデータをはく
+SaveOnOff = true; %trueでデータをはく
 Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calculation);
-figure()
-logger.plot({1,"p1:2","er"});
+logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+%logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
 logger.save()
 %% Run class Saves
@@ -270,13 +288,14 @@ fclose(fileID);
 movefile('RunNames.txt',Plots.SaveDateStr);
 % run('dataplot');
 %% Local function
-function [] = NowResultPlot(agent,NowResult)
-    figure(NowResult)
+function [] = NowResultPlot(agent,NowResult,flag)
+%if(flag)
+figure(NowResult)
+%end
     clf(NowResult)
     grid on
     axis equal
     hold on
-    
 MapIdx = size(agent.env.Floor.param.Vertices,3);
 for ei = 1:MapIdx
     tmpenv(ei) = polyshape(agent.env.Floor.param.Vertices(:,:,ei));
@@ -304,7 +323,8 @@ plot(fWall(:,1),fWall(:,2),'r-');
 O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
-xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
+%xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
+xlim([EstFinalState(1)-10, EstFinalState(1)+10]);ylim([EstFinalState(2)-10,EstFinalState(2)+10])
 % pbaspect([20 20 1])
 hold off
 end

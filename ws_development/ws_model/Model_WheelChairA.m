@@ -26,6 +26,7 @@ if strcmp(type,"plant")
         Model.id = i;
 %         Setting.initial.p = [0;0];
         Setting.param.K = diag([0.9,1]);%誤差の値
+        Setting.param.D = 0.1;%誤差の値
         Model.param=Setting;
 %         assignin('base',"Plant",Model);
 %         evalin('base',"agent(Plant.id) = Drone(Plant)");
@@ -33,6 +34,7 @@ if strcmp(type,"plant")
 else
 %     for i = 1:N
         Setting.param.K = diag([1,1]);
+        Setting.param.D = 0.15;%誤差の値
         Model.param=Setting;
 %         assignin('base',"Model",Model);
 %         model_set_str=strcat("agent(",string(i),").set_model(Model)");

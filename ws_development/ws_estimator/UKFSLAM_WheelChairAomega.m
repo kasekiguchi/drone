@@ -64,14 +64,21 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             end
             
             %% sigma point update
-            sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
-            x = linspace(0,obj.dt,10);
-            rKai = arrayfun(@(i) deval(sol(i),x), 1:2*StateCount + 1, 'UniformOutput', false);%ロボットのシグマポイント（モデルで動きを出したやつ）
-            mKai = Kai(obj.n+1:end,:);%マップのシグマポイント
-            Kai = zeros(StateCount,2*StateCount+1);
-            for i = 1:2*StateCount+1
-                Kai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
-            end
+            sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*obj.n+1);
+            x = linspace(0,obj.dt,10); 
+            %rKai = arrayfun(@(i) deval(sol(i),x), 1:2*obj.n + 1, 'UniformOutput', false);%ロボットのシグマポイント（モデルで動きを出したやつ）
+            %mKai = Kai(obj.n+1:end,:);%マップのシグマポイント
+%             Kai = zeros(StateCount,2*StateCount+1);
+%             for i = 1:2*StateCount+1
+%                 Kai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
+%             end
+            tmp = [sol.stats];
+            tmp = [tmp.nsteps]+1;
+            tmpid = arrayfun(@(i) sum(tmp(1:i)),1:length(tmp));
+            tmp = [sol.y];
+            rKai = tmp(1:obj.n,tmpid);
+            Kai(1:obj.n,:) = repmat(rKai(:,1),1,2*StateCount+1);
+            Kai(1:obj.n,1:2*obj.n+1) = rKai;
             %Pre estimation [x;y;theta;map's]%事前状態推定
             PreXh = weight(1) .* Kai(:,1);
             for i = 2:size(Kai,2)
@@ -102,6 +109,14 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す
             LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
             % Conbine between measurements and map%前時刻までのマップと観測値を組み合わせる．組み合わさらなかったら新しいマップとして足す．
+            % x, y が全て０のLSA_paramを削除 UKFCombiningLinesで使っているフィールドだけ削除
+            tmpid=sum([LSA_param.x,LSA_param.y],2)==0; 
+            LSA_param.x(tmpid,:) = [];
+            LSA_param.y(tmpid,:) = [];
+            LSA_param.a(tmpid,:) = [];
+            LSA_param.b(tmpid,:) = [];
+            LSA_param.c(tmpid,:) = [];
+            LSA_param.index(tmpid,:) = [];
             obj.map_param = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);%既存の地図との統合
             %StateCount update
             StateCount = obj.n + obj.NLP * length(obj.map_param.a);
@@ -207,16 +222,16 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             obj.map_param.a = line_param_opt.a;
             obj.map_param.b = line_param_opt.b;
             obj.map_param.c = line_param_opt.c;
+            % sekiguchi 追加
+            obj.map_param.x = line_param_opt.x; 
+            obj.map_param.y = line_param_opt.y;
             % 端点を線上に射影
             MapEnd = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = MapEnd.x;
             obj.map_param.y = MapEnd.y;
             [obj.map_param,RegistFlag] = UKFOptimizeMap(obj.map_param, obj.constant);
             line_param = LineToLineParamAndEndPoint(obj.map_param);%lineparam d and delta and endpoint is calculated
-            
-            MapEnd.x = obj.map_param.x;
-            MapEnd.y = obj.map_param.y;
-            
+                        
             EstMh = zeros(obj.NLP * length(line_param.d),1);
             EstMh(1:obj.NLP:end, 1) = line_param.d;
             EstMh(2:obj.NLP:end, 1) = line_param.delta;
@@ -228,18 +243,65 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
             %-------------------------------------------------------------%
-            
+
+            % 同一直線を統合
+            ABC = [obj.map_param.a,obj.map_param.b,obj.map_param.c];
+            X = obj.map_param.x;
+            Y = obj.map_param.y;
+            [~,ia,ic] = uniquetol(ABC,'ByRows',true);
+            obj.map_param.a = obj.map_param.a(ia);
+            obj.map_param.b = obj.map_param.b(ia);
+            obj.map_param.c = obj.map_param.c(ia);
+            obj.map_param.x = obj.map_param.x(ia,:);
+            obj.map_param.y = obj.map_param.y(ia,:);
+            for i = 1:length(ia)
+                did = find(ic==i); % duplicated ids
+                obj.map_param.x(i,1) = min(X(did,:),[],'all');
+                obj.map_param.x(i,2) = max(X(did,:),[],'all');
+                if obj.map_param.a(i)*obj.map_param.b(i) > 0 % 右下がり
+                    obj.map_param.y(i,1) = max(Y(did,:),[],'all');
+                    obj.map_param.y(i,2) = min(Y(did,:),[],'all');
+                else % 右上がり
+                    obj.map_param.y(i,1) = min(Y(did,:),[],'all');
+                    obj.map_param.y(i,2) = max(Y(did,:),[],'all');
+                end
+            end
+
+
             % return values setting
             obj.result.state.set_state(Xh);
             obj.result.Est_state = Xh;
             obj.result.G = G;
             obj.result.map_param = obj.map_param;
-            obj.result.AssociationInfo = UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), MapEnd, measured.ranges,measured.angles, obj.constant,obj.NLP);
+            obj.result.AssociationInfo = UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), obj.map_param, measured.ranges,measured.angles, obj.constant,obj.NLP);
             result=obj.result;
         end
-        function show()
-            
+        function show(obj,result)
+            arguments
+                obj
+                result = []
+            end
+            if isempty(result)
+                result = obj.result;
+            end
+            l = obj.map_param;
+            l = obj.point2line([l.x,l.y]);
+            p = result.state.p;
+            th = result.state.q;
+            plot(l.x,l.y);
+            hold on            
+            plot(p(1),p(2),'ro');
+            quiver(p(1),p(2),cos(th),sin(th),'Color','r');  
+            hold off
         end
-        
+        function l = point2line(obj,P)
+            % P = [xs,xe,ys,ye]
+            % return l = struct(x,y)
+            % plot(x,y) : line plot from (xs,ys) to (xe,ye)
+            x = [P(:,1:2),NaN(size(P,1),1)];
+            y = [P(:,3:4),NaN(size(P,1),1)];
+            l.x = reshape(x',numel(x),1);
+            l.y = reshape(y',numel(y),1);
+        end
     end
 end

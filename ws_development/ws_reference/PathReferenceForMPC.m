@@ -55,30 +55,32 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
             obj.Holizon = param{1,7};
-            obj.step = 2;
+            obj.step = 1;
             obj.SensorRange = 20;
             obj.dt = obj.self.model.dt;
             obj.WayPointNum = length(obj.WayPoint);
-            obj.result.state=STATE_CLASS(struct('state_list',["xd","p"],'num_list',[4,4]));%x,y,theta,v
+            obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
             obj.Flag = 0;
         end
         
         function  result= do(obj,param)
             %---推定器からデータを取得---%
-            EstData = ...
-                [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
-                obj.self.estimator.(obj.self.estimator.name).result.state.v];%treat as a colmn vector
+%             EstData = ...
+%                 [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
+%                 obj.self.estimator.(obj.self.estimator.name).result.state.v];%treat as a colmn vector
+            EstData = obj.self.estimator.result.state.get();
             LineXs = obj.self.estimator.result.map_param.x(:,1); %lineの始点のx座標
             LineXe = obj.self.estimator.result.map_param.x(:,2); %lineの終点のx座標
             LineYs = obj.self.estimator.result.map_param.y(:,1); %lineの始点のy座標
             LineYe = obj.self.estimator.result.map_param.y(:,2); %lineの終点のy座標
+            lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 0.02; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
             %----------------------------%
             %EstDataは推定のロボットの位置
             %EstData(1)は推定のロボットのX座標、EstDAta(2)は推定のロボットのy座標
             %---SensorRange内に端点が入っているかを判定---%%今のセンサレンジで見える壁を引っ張て来ている
             JudgeSRs = (EstData(1) - LineXs).^2 + (EstData(2) - LineYs).^2 <= obj.SensorRange^2; %円の公式を使い始点がセンサレンジ内にあるかの判定
             JudgeSRe = (EstData(1) - LineXe).^2 + (EstData(2) - LineYe).^2 <= obj.SensorRange^2; %円の公式を使い終点がセンサレンジ内にあるかの判定
-            InRange = JudgeSRs|JudgeSRe; %レンジ内なら1、レンジ外なら0
+            InRange = (JudgeSRs|JudgeSRe)&lineids; %レンジ内なら1、レンジ外なら0
             MatchA = obj.self.estimator.result.map_param.a(InRange); %端点がレンジ内に入っている直線の方程式a
             MatchB = obj.self.estimator.result.map_param.b(InRange); %端点がレンジ内に入っている直線の方程式b
             MatchC = obj.self.estimator.result.map_param.c(InRange); %端点がレンジ内に入っている直線の方程式c
@@ -167,78 +169,24 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 end
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
             end
-            %---judgement of convergence for estimate position---%
-%             switch obj.PointFlag
-%                 case 0
-%                     %一定姿勢角，一定速度でreferenceを生成
-%                     NextPoint = obj.PreTrack(1:2,1) + [obj.SensorRange*cos(obj.Tracktheta);obj.SensorRange*sin(obj.Tracktheta)]; %obj.PreTrack(1:2,1)は現在位置
-%                     [OverWall,~,CrossPoint] = judgeingOverWall(obj.PreTrack(1:2,1),NextPoint,MatchXs,MatchXe,MatchYs,MatchYe,MatchA,MatchB,MatchC);
-%                     
-%                     if OverWall == true
-%                         obj.PointFlag = 1;
-%                         NextWayPoint = CrossPoint + [obj.Crossbuffer*cos(obj.Tracktheta+pi);obj.Crossbuffer*sin(obj.Tracktheta+pi)];%目標点の手前obj.Crossbuffer分
-%                         obj.WayPoint = [NextWayPoint;obj.Tracktheta;0];%収束すべき目標位置
-%                     end
-%                     obj.TrackingPoint(1:2,1) = obj.PreTrack(1:2,1) + [obj.Targetv*obj.dt*cos(obj.Tracktheta);obj.Targetv*obj.dt*sin(obj.Tracktheta)];
-%                     obj.TrackingPoint(3,1) = obj.Tracktheta;
-%                     obj.TrackingPoint(4,1) = obj.Targetv;
-%                     disp(obj.Tracktheta)
-%                     for i = 2:obj.Holizon
-%                         obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(obj.Tracktheta);obj.Targetv*obj.dt*sin(obj.Tracktheta)];
-%                         obj.TrackingPoint(3,i) = obj.Tracktheta;
-%                         obj.TrackingPoint(4,i) = obj.Targetv;
-%                     end
-%                 case 1
-%                     %見つけた目標点に収束しているかを判定,位置と速度の収束判定
-%                     disp(obj.Tracktheta)
-%                     if (obj.PreTrack(1) - obj.WayPoint(1))^2 + (obj.PreTrack(2) - obj.WayPoint(2))^2 <= obj.ConvergencejudgeV
-%                         
-%                         Flag2track = obj.Tracktheta + obj.Rolltheta;
-%                         obj.Tracktheta = obj.Tracktheta + obj.Rolltheta;
-%                         obj.TrackingPoint(1:2,1) = obj.PreTrack(1:2,1) + [obj.Targetv*obj.dt*cos(obj.Tracktheta);obj.Targetv*obj.dt*sin(obj.Tracktheta)];
-%                         obj.PointFlag = 0;
-% 
-%                         if abs(EstData(3) - Flag2track) > obj.ConvergencejudgeW
-%                             obj.TrackingPoint(3,1) = EstData(3) + (Flag2track - EstData(3)) * obj.TargetGainw;
-%                         else
-%                              obj.TrackingPoint(3,1) = Flag2track;
-%                         end
-%                         
-% 
-% %                         %-------------------------------------------------%
-%                     else
-%                         %---Make first Tracking Point---%
-%                         obj.TrackingPoint(1:2,1) = obj.PreTrack(1:2,1) + [obj.Targetv*obj.dt*cos(obj.Tracktheta);obj.Targetv*obj.dt*sin(obj.Tracktheta)];
-%                         obj.TrackingPoint(3,1) = obj.WayPoint(3);
-%                         if obj.PointFlag == 0 || obj.PointFlag == 1
-%                            obj.TrackingPoint(4,1) = obj.Targetv;
-%                         else
-%                            obj.TrackingPoint(4,1) = 0;
-%                         end
-%                         %-------------------------%
-%                     end
-%                     
-%                     %---Tracking point of after 2steps---%
-%                     for i = 2:obj.Holizon
-%                         if (obj.TrackingPoint(1,i-1) - obj.WayPoint(1,1))^2 + (obj.TrackingPoint(2,i-1) - obj.WayPoint(2,1))^2 <= obj.ConvergencejudgeV %円の公式を使っての収束判定
-%                             Flag2track = obj.Tracktheta + obj.Rolltheta; 
-%                             obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(obj.Tracktheta);obj.Targetv*obj.dt*sin(obj.Tracktheta)];
-%                              if abs(obj.TrackingPoint(3,i-1) - Flag2track) > obj.ConvergencejudgeW
-%                                 obj.TrackingPoint(3,i) = obj.TrackingPoint(3,i-1) + (Flag2track - obj.TrackingPoint(3,i-1)) * obj.TargetGainw;
-%                              else
-%                                 obj.TrackingPoint(3,i) = Flag2track;
-%                              end
-% 
-%                             else
-%                                 obj.TrackingPoint(1:2,i) = obj.TrackingPoint(1:2,i-1) + [obj.Targetv*obj.dt*cos(obj.Tracktheta);obj.Targetv*obj.dt*sin(obj.Tracktheta)];
-%                                 obj.TrackingPoint(3,i) = obj.Tracktheta;
-%                         end
-%                     end
-%                 otherwise
-%             end
+            q = EstData(3);
+            qr = obj.TrackingPoint(3,:);
+            tmp = q - qr > 4;
+            if sum(tmp) > 0
+                tmp
+            end
+            qr(tmp) = qr(tmp)+2*pi;
+            tmp = q - qr < -4;
+            if sum(tmp) > 0
+                tmp
+            end
+            qr(tmp) = qr(tmp)-2*pi;      
+            obj.TrackingPoint(3,:) = qr;
 
             obj.result.state.set_state("xd",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("p",obj.TrackingPoint);%treat as a colmn vector
+            obj.result.state.set_state("q",obj.TrackingPoint(3,1));%treat as a colmn vector
+            obj.result.state.set_state("v",obj.TrackingPoint(4,1));%treat as a colmn vector
             %obj.self.reference.result.state = obj.TrackingPoint;
             %---Get Data of previous step---%
             obj.PreTrack = obj.TrackingPoint(:,1);
@@ -247,11 +195,30 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.result.focusedLine = [[MatchXs(ids(1));MatchXe(ids(1));NaN;MatchXs(ids(2));MatchXe(ids(2))],[MatchYs(ids(1));MatchYe(ids(1));NaN;MatchYs(ids(2));MatchYe(ids(2))]];
             obj.result.O = O;
             obj.result.th = th;
+            obj.result.step = obj.step;
             result=obj.result;            
         end
         
-        function show(obj,logger)
-            
+        function show(obj,result)
+            arguments
+                obj
+                result = []
+            end
+            if isempty(result)
+                result = obj.result;
+            end
+            l = result.focusedLine;
+            p = result.O;
+            th = result.th;
+            rp = result.state.p(1:2,:);
+            rth = result.state.p(3,:);
+            plot(l(:,1),l(:,2));
+            hold on            
+            plot(rp(1,:),rp(2,:),'yo','LineWidth',1);
+            quiver(rp(1,:),rp(2,:),2*cos(rth),2*sin(rth),'Color','y');         
+            plot(p(1),p(2),'ro');
+            quiver(p(1),p(2),cos(th),sin(th),'Color','r');  
+            hold off
         end
     end
 end
