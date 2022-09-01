@@ -1,0 +1,16 @@
+            Topic                        MessageType           
+    ______________________    _________________________________
+
+    {'/battery_state'    }    {'sensor_msgs/BatteryState'     }
+    {'/cmd_vel'          }    {'geometry_msgs/Twist'          }
+    {'/imu'              }    {'sensor_msgs/Imu'              }
+    {'/joint_states'     }    {'sensor_msgs/JointState'       }
+    {'/magnetic_field'   }    {'sensor_msgs/MagneticField'    }
+    {'/odom'             }    {'nav_msgs/Odometry'            }
+    {'/parameter_events' }    {'rcl_interfaces/ParameterEvent'}
+    {'/robot_description'}    {'std_msgs/String'              }
+    {'/rosout'           }    {'rcl_interfaces/Log'           }
+    {'/scan'             }    {'sensor_msgs/LaserScan'        }
+    {'/sensor_state'     }    {'turtlebot3_msgs/SensorState'  }
+    {'/tf'               }    {'tf2_msgs/TFMessage'           }
+    {'/tf_static'        }    {'tf2_msgs/TFMessage'           }
