@@ -1,4 +1,4 @@
-classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
+classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
     % ドローンの物理パラメータ管理用クラス
     % 以下のconfigurationはclass_description.pptxも参照すること．
     % T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
@@ -9,9 +9,9 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
     % tau = [(Ly - ly)*(T3+T4)-ly*(T1+T2); lx*(T1+T3)-(Lx-lx)*(T2+T4); km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 
     properties
-        parameter % 制御モデル用パラメータ
+        parameter % 制御モデル用パラメータ : 値ベクトル
         parameter_name % 物理パラメータの名前
-        model_error % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ
+        model_error % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ : 構造体
         mass % DIATONE
         Lx 
         Ly 
@@ -59,6 +59,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.k3 = 0.000008;          % 推力定数
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
+                param.additional = []; % プロパティに無いパラメータを追加する場合
                 param.model_error = [];
             end
         obj.mass = param.mass;
@@ -87,9 +88,22 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
         else
             obj.parameter_name = param.parameter_name;
         end
-        for i = length(obj.parameter_name):-1:1
-            obj.parameter(i)=obj.(obj.parameter_name(i));
-            obj.model_error(i) = 0;
+        if ~isempty(param.additional)
+            fn = fieldnames(param.additional);
+            for i = 1:length(fn)
+                addprop(obj,fn{i});
+                obj.parameter_name = [obj.parameter_name, fn{i}];
+                obj.(fn{i}) = param.additional.(fn{i});
+            end
+        end
+        for i = 1:length(obj.parameter_name)
+            if isprop(obj,obj.parameter_name(i))
+                obj.parameter=[obj.parameter;obj.(obj.parameter_name(i))];
+            else % propertyに無いパラメータを設定する場合
+                addprop(obj,parameter_name(i));
+                obj.(parameter_name(i)) = param.additional.(parameter_name(i));
+            end
+%            obj.model_error(i) = zeros(size(obj.(obj.parameter_name(i))));
         end
         if ~isempty(param.model_error)
             obj.model_error = param.model_error;
@@ -107,23 +121,35 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 if strcmp(p,"all") % 非推奨
                     v = obj.parameter + obj.model_error;
                 else
-                    for i = length(p):-1:1
-                        v(i) = obj.(p(i)) + obj.model_error(strcmp(obj.parameter_name,p(i)));
+                    v = [];
+                    for i = 1:length(p)
+                        if isfield(obj.model_error,p(i))
+                            v = [v,obj.(p(i)) + obj.model_error.(p(i))];
+                        else
+                            v = [v,obj.(p(i))];
+                        end
                     end
                 end
             else % 制御モデルで想定している値
                 if strcmp(p,"all") % 非推奨
                     v = obj.parameter;
                 else
-                    for i = length(p):-1:1
-                        v(i) = obj.(p(i));
+                    v = [];
+                    for i = 1:length(p)
+                        v = [v,obj.(p(i))_];
                     end
                 end
             end
         end
         function set_model_error(obj,p,v)
-            for i = length(p):-1:1
-                obj.model_error(strcmp(obj.parameter_name,p(i))) = v(i);
+            if iscell(v)
+                for i = 1:length(p)
+                    obj.model_error.(p(i)) = v{i};
+                end
+            else
+                for i = 1:length(p)
+                    obj.model_error.(p(i)) = v(i);
+                end
             end
         end
     end

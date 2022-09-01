@@ -13,7 +13,7 @@ userpath('clear');
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
-fOffline = 1; % offline verification with experiment data
+fOffline = 0; % offline verification with experiment data
 
 run("main1_setting.m");
 
