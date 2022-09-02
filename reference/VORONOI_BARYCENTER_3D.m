@@ -47,8 +47,8 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             end
             [v,c] = voronoin(Ps); % 3次元ボロノイ分割
             %% 共通設定２：3次元ボロノイセルの重み確定
-            [k,~] = convhull(v(c{obj.id},1),v(c{obj.id},2),v(c{obj.id},3),'Simplify',true); % エージェント周りのボロノイ空間
-            TR = triangulation(k,v(c{obj.id},1),v(c{obj.id},2),v(c{obj.id},3)); % 三角形分割
+            [k{obj.id},~] = convhull(v(c{obj.id},1),v(c{obj.id},2),v(c{obj.id},3),'Simplify',true); % エージェント周りのボロノイ空間
+            TR = triangulation(k{obj.id},v(c{obj.id},1),v(c{obj.id},2),v(c{obj.id},3)); % 三角形分割
             F = faceNormal(TR); % 三角形分割した面に対する法線ベクトル
             Ptri = incenter(TR); % 三角形分割した面の内心
 
@@ -67,7 +67,7 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             result = state.p - cent';
 
             % 描画用変数
-            obj.result.state.p = state.p - 0.5*result;
+            obj.result.state.p = state.p - 0.1 * result;
             result = obj.result;
             if obj.fShow
                 obj.show();
