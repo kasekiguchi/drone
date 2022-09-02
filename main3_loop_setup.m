@@ -28,7 +28,7 @@ if fExp
 end
 
 if (fOffline)
-    expdata.overwrite("model", time.t, agent, i);
-    te = expdata.te;
+    logger.overwrite("model", time.t, agent, i);
+    te = logger.Data.t(logger.k);
     offline_time = 1;
 end

@@ -49,7 +49,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             end
             obj.parameter = param;
             obj.plant = MODEL_CLASS(args);
-            obj.plant.param = obj.parameter.get("all","plant");
+            obj.plant.param = obj.parameter.get(obj.parameter.parameter_name,"plant");
         end
     end
 
@@ -89,14 +89,9 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
 
     methods % Set methods
-        function set_estimator(obj, prop, args)
-            obj.set_property(prop,args);
-            % modelの状態でestimatorの状態を生成
-            obj.estimator.result.state = state_copy(obj.model.state);
-        end
         function set_model(obj, args)
           obj.model = MODEL_CLASS(args);
-          obj.model.param = obj.parameter.get();
+          obj.model.param = obj.parameter.get(args.parameter_name);
         end
     end
 
@@ -163,7 +158,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             result = obj.(prop).(obj.(prop).name(1)).do(param{1});
 
             for i = 2:length(obj.(prop).name) % (prop).resultに結果をまとめるため
-                tmp = obj.(prop).(obj.(prop).name(i)).do(param{i});
+                tmp = obj.(prop).(obj.(prop).name(i)).do(param{i}); % = result
                 F = fieldnames(tmp);
 
                 for j = 1:length(F)
