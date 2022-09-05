@@ -47,7 +47,7 @@ for i = 1:N
     if fExp
     else
 %                         agent(i) = Drone(Model_WheelChairV(i,dt,'plant',initial,struct('noise',7.058E-5)));
-        agent(i) = Drone(Model_WheelChairA(i,dt,'plant',initial,struct('noise',4.337E-5)));
+        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',4.337E-5)));
 %                 agent(i) = Drone(Model_ODV(i,dt,'plant',initial,struct('noise',4.337E-5)));
 %         agent(i) = Drone(Model_ODVADI(i,dt,'plant',initial,struct('noise',4.337E-5)));
     end

@@ -56,7 +56,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
             obj.Holizon = param{1,7};
             obj.step = 1;
-            obj.SensorRange = 20;
+            obj.SensorRange = self.sensor.LiDAR.radius;
             obj.dt = obj.self.model.dt;
             obj.WayPointNum = length(obj.WayPoint);
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
@@ -172,14 +172,8 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             q = EstData(3);
             qr = obj.TrackingPoint(3,:);
             tmp = q - qr > 4;
-            if sum(tmp) > 0
-                tmp
-            end
             qr(tmp) = qr(tmp)+2*pi;
             tmp = q - qr < -4;
-            if sum(tmp) > 0
-                tmp
-            end
             qr(tmp) = qr(tmp)-2*pi;      
             obj.TrackingPoint(3,:) = qr;
 

@@ -70,7 +70,8 @@ for j = 1:params.H
     end
 %     Fim = (1/(2*NoiseR+diag([1,1])))*Fim;
     Fim = Fim/(2*NoiseR);%観測値差分のFisher情報行列計算
-    obFim = (1/(NoiseR))*([obFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);%観測値のFisher情報行列
+    %obFim = (1/(NoiseR))*([obFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);%観測値のFisher情報行列
+    obFim = (1/(NoiseR))*([obFim + 1e-2]);%観測値のFisher情報行列
     InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));%逆行列の計算
 %     InvFim = inv(Fim);
     InvobFim = inv(obFim);
