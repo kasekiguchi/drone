@@ -111,10 +111,18 @@ cha = obj.Data.phase(obj.k);
                 end
             end
         end
-        function save(obj)
+        function save(obj,name)
             % save log.Data keeping its structure as a file Data/Log(datetime).mat
             % retrieve it by logger = LOGGER.load("file.mat");
-            filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
+            arguments
+                obj
+                name = []
+            end
+            if isempty(name)
+                filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
+            else
+                filename = strrep(strrep(strcat('Data/',name,'_Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
+            end
             drange = 1:find(obj.Data.phase,1,'last');
             obj.Data.t = obj.Data.t(drange);
             obj.Data.phase = obj.Data.phase(drange);

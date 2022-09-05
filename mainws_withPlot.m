@@ -26,7 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=200;
+    te=500;
 end
 %% initialize
 initial(N) = struct;
@@ -71,7 +71,7 @@ for i = 1:N
             agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
         else
             SensorRange = 20;
-            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
+            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-2 ) )  );%LiDAR seosor
         end
 
     %% set estimator property
@@ -85,7 +85,7 @@ for i = 1:N
 
         
         WayPoint = [0,0,0,0];%目標位置の初期値
-        convjudgeV = 1.0;%収束判断　
+        convjudgeV = 0.5;%収束判断　% 0.5
         convjudgeW = 0.5;%収束判断　
         Holizon = 3;%MPCのホライゾ
         agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
@@ -286,7 +286,7 @@ Plots = DataPlot(logger,SaveOnOff);
 logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save()
+logger.save("AROB2022_Proposed_200s")
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);

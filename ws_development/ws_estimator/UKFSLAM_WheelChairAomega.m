@@ -64,21 +64,20 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             end
             
             %% sigma point update
-            sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*obj.n+1);
-            x = linspace(0,obj.dt,10); 
-            %rKai = arrayfun(@(i) deval(sol(i),x), 1:2*obj.n + 1, 'UniformOutput', false);%ロボットのシグマポイント（モデルで動きを出したやつ）
-            %mKai = Kai(obj.n+1:end,:);%マップのシグマポイント
-%             Kai = zeros(StateCount,2*StateCount+1);
-%             for i = 1:2*StateCount+1
-%                 Kai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
-%             end
+%           sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
+%            x = linspace(0,obj.dt,10);
+%            rKai = arrayfun(@(i) deval(sol(i),x), 1:2*StateCount + 1, 'UniformOutput', false);%ロボットのシグマポイント（モデルで動きを出したやつ）
+%            mKai = Kai(obj.n+1:end,:);%マップのシグマポイント
+% %           Kai = zeros(StateCount,2*StateCount+1);
+%            for i = 1:2*StateCount+1
+%                aKai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
+%            end
+            sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
             tmp = [sol.stats];
             tmp = [tmp.nsteps]+1;
             tmpid = arrayfun(@(i) sum(tmp(1:i)),1:length(tmp));
             tmp = [sol.y];
-            rKai = tmp(1:obj.n,tmpid);
-            Kai(1:obj.n,:) = repmat(rKai(:,1),1,2*StateCount+1);
-            Kai(1:obj.n,1:2*obj.n+1) = rKai;
+            Kai(1:obj.n,:) = tmp(1:obj.n,tmpid);
             %Pre estimation [x;y;theta;map's]%事前状態推定
             PreXh = weight(1) .* Kai(:,1);
             for i = 2:size(Kai,2)
