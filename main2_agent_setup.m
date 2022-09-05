@@ -51,6 +51,7 @@ for i = 1:N
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
         agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）%"udp",[25]
+         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,125]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）%"udp",[25]
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
@@ -68,8 +69,8 @@ for i = 1:N
     %% model
     % set control model
 
-%     agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
-        agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱
+    agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
+%         agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱 only sim
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
@@ -136,7 +137,7 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    n=2;
+    n=1;
     switch n
         case 1 % 有限時間整定制御
             agent(i).set_property("controller",Controller_FT(dt));

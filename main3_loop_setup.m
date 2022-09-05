@@ -22,10 +22,11 @@ end
 
 disp('Press Enter key to start.');
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');
-
-if fExp
+% 
+% if fExp
+%     w = waitforbuttonpress;%キーボード入力はいるまで停止
+% end
     w = waitforbuttonpress;%キーボード入力はいるまで停止
-end
 
 if (fOffline)
     logger.overwrite("model", time.t, agent, i);

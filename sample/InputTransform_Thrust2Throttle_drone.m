@@ -12,13 +12,18 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
 %     u_trans_param.param.th_offset = 960;         % offset 3s[1021] 4s[900]　発掘[926]
 %     u_trans_param.param.gain_SuspendedLoad =[500;500;500;150]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
 %     u_trans_param.param.th_offset_SuspendedLoad = 1150;         % offset 3s[1021] 4s[900]　発掘[926]
-    u_trans_param.param.gain = [600; 600; 600; 150]; % serial : 500 = neutral  udp : 1100
-    u_trans_param.param.th_offset = 1000;             % check throttle at hovering    
+
+%     u_trans_param.param.gain = [600; 600; 600; 150]; % serial : 500 = neutral  udp : 1100
+%     u_trans_param.param.th_offset = 1000;             % check throttle at hovering    
+
+    u_trans_param.param.gain = [600; 600; 600; 80]; % serial : 500 = neutral  udp : 1100
+    u_trans_param.param.th_offset = 300;             % check throttle at hovering    
 %   u_trans_param.param.gain =[200;200;200;84]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
 %   u_trans_param.param.th_offset = 360;         % offset 3s[1021] 4s[900]　発掘[926]
-    u_trans_param.param.gain_SuspendedLoad =[500;500;500;100]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
-    u_trans_param.param.th_offset_SuspendedLoad = 1110;         % offset 3s[1021] 4s[900]　発掘[926]
 
+% u_trans_param.param.gain_SuspendedLoad =[500;500;500;100]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+%     u_trans_param.param.th_offset_SuspendedLoad = 1110;         % offset 3s[1021] 4s[900]　発掘[926]
+% 
 
 %     u_trans_param.param.gain = [1000; 1000; 400; 40]; %
 %     % 500 = neutral
