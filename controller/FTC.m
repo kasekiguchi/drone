@@ -5,6 +5,7 @@ classdef FTC < CONTROLLER_CLASS
         result
         param
         Q
+        parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
         Vf
         Vs
         VfFT
@@ -16,7 +17,7 @@ classdef FTC < CONTROLLER_CLASS
         function obj = FTC(self,param)
             obj.self = self;
             obj.param = param;
-            obj.param.P = self.parameter.get();            
+            obj.param.P = self.parameter.get(obj.parameter_name);            
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.Vf = param.Vf; % 階層１の入力を生成する関数ハンドル
             obj.Vs = param.Vs; % 階層２の入力を生成する関数ハンドル 
@@ -29,13 +30,10 @@ classdef FTC < CONTROLLER_CLASS
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             t = param{1};
             model = obj.self.estimator.result;
-            ref = obj.self.reference.result;
-             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-            if isprop(ref.state,'xd')
-                xd = ref.state.xd; % 20次元の目標値に対応するよう
-            else
-                xd = ref.state.get();
-            end
+            ref = obj.self.reference.result; 
+            x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
+            xd = ref.state.get();
+             
             Param= obj.param;
             P = Param.P;
             F1 = Param.F1;
@@ -150,8 +148,8 @@ end
 %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
 %
 %% 外乱(加速度で与える)
-            dst = 0;
-%             dst=8*sin(2*pi*t/0.2);%30以下なら有限整定がいい
+            dst = 0.1;
+%             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=2;
 %             if t>=2 && t<=2.1　
@@ -160,10 +158,11 @@ end
 %%            
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];
+%             ob j.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
             %サブシステムの入力
-            obj.result.uHL = [vf(1);ux;uy;upsi;dst];
+            obj.result.uHL = [vf(1);ux;uy;upsi];
             %サブシステムの状態
             obj.result.z1 = z1;
             obj.result.z2 = z2;

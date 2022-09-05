@@ -67,8 +67,17 @@ classdef HLC < CONTROLLER_CLASS
             vs =[ux,uy,upsi];
             
 %             vs = Vs(x,xd',vf,P,F2,F3,F4);
+           %% 外乱(加速度で与える)
+            dst = 0.1;
+%             dst=8*sin(2*pi*t/0.2);%
+%             dst=dst+10*cos(2*pi*t/1);
+%             dst=2;
+%             if t>=2 && t<=2.1　
+%                     dst=1/0.025;
+%             end
+%%
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];
             obj.self.input = obj.result.input;
              %サブシステムの入力
             obj.result.uHL = [vf(1);ux;uy;upsi];

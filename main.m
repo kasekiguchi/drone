@@ -29,10 +29,11 @@ if (fOffline)
 else
     logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
-%
+%外乱 disturbance
+dstr=[1,0,0];%外乱[x,y,z]
 run("main2_agent_setup.m");
-%agent.set_model_error("ly",0.02);
-% agent.set_model_error("dst",[0;0;0]);%外乱
+% agent.set_model_error("ly",0.02);
+agent(1).set_model_error("B",{[zeros(1,6),-dstr,zeros(1,3)]});%コメントアウトしない
 %% main loop
 run("main3_loop_setup.m");
 try
@@ -98,7 +99,7 @@ try
             if (fOffline); logger.overwrite("reference",time.t,agent,i);end
 
             % controller
-            param(i).controller.hlc = {time.t, HLParam};
+            param(i).controller.hlc = {time.t};
             param(i).controller.pd = {};
             param(i).controller.tscf = {time.t};
 %             param(i).controller.ftc = {time.t, HLParam};
@@ -176,6 +177,7 @@ clc
 
 % plot 
 logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+% logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)

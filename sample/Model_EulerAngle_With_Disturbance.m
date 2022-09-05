@@ -21,4 +21,6 @@ function Model = Model_EulerAngle_With_Disturbance(dt, initial, id)
     Setting.num_list = [3, 3, 3, 3];
     Setting.dt = dt;
     Model.param = Setting;
+    Model.parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","rotor_r","B"];
+
 end

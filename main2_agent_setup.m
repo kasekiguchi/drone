@@ -56,8 +56,8 @@ for i = 1:N
         %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
-        %agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,1,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
+%         agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[zeros(1,6),dstr,zeros(1,3)])));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
@@ -68,8 +68,8 @@ for i = 1:N
     %% model
     % set control model
 
-    agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
-    %     agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial(i), i)); % オイラー角モデル
+%     agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
+        agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
@@ -136,7 +136,7 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    n=1;
+    n=2;
     switch n
         case 1 % 有限時間整定制御
             agent(i).set_property("controller",Controller_FT(dt));
