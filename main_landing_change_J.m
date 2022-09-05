@@ -27,7 +27,7 @@ fVcount = 1;
 fWeight = 0; % 重みを変化させる場合 fWeight = 1
 fFirst = 1; % 一回のみ回す場合
 fRemove = 0;    % 終了判定
-fLanding = 1;   % 着陸かどうか 目標軌道を変更する
+fLanding = 0;   % 着陸かどうか 目標軌道を変更する
 fLanding_comp = 0;
 fCount_landing = 0;
 fc = 0;     % 着陸したときだけx，y座標を取得
@@ -43,12 +43,12 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 fSubIndex = zeros(sample, 1);
 
             %-- MPC関連 変数定義 
-                Params.Particle_num = 11;  
-                Params.H = 5;          % 20
+                Params.Particle_num = 200; 
+                Params.H = 10;          % 20
                 Params.dt = 0.1;        % 0.1
                 idx = 0;
                 totalT = 0;
-                Initsigma = 0.1;
+                Initsigma = 0.01;
                 
             %-- 重み
 %                 PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
@@ -63,18 +63,18 @@ fc = 0;     % 着陸したときだけx，y座標を取得
                 Params.Weight.P = 1000 * diag([1.0; 1.0; 1.0]);    % 座標
                 Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
                 Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
-                Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
+                Params.Weight.W = 100 * diag([1.0; 1.0; 1.0]);    % 角速度
                 Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
                 Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
                 
-                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
+                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 100.0; 100.0; 100.0]);  % 1ステップ前の入力との差
                 
             %-- data
                 data.bestcost(idx+1) = 0;           % - もっともよい評価値
                 data.pathJ{idx+1} = 0;              % - 全サンプルの評価値
                 data.sigma(idx+1) = 0;
                 data.state{idx+1} = 0;
-                data.acc(idx+1) = 0;                % - 加速度
+                data.acc{idx+1} = 0;                % - 加速度
 
 run("main3_loop_setup.m");
 
@@ -125,18 +125,24 @@ end
 %             rx = 0; 
 %             ry = 0; 
 %             rz = 1.0;
-            
+            rx = 0; ry = 0; rz = 0.5;
 %             rr = [1., 1., 1.];
 %             if (time.t/4)^2+0.1 <= rr(3)  
 %                 rz = (time.t/4)^2+0.1;
 %             else; rz = 1;
+            end
+%             rx = sin(time.t/2); ry = cos(time.t/2);
+            rx = 0.5;   ry = 0.5;
+            
+%             if time.t >= 5 && time.t < 6
+%                 rx = 1; ry = 1;
 %             end
 %             if (time.t/2)^2+0.1 <= rr(1)
 %                 rx = (time.t/4)^2+0.1;
 %                 ry = (time.t/4)^2+0.1;
 %             else; rx = 1.; ry = 1.;
 %             end
-            rx = 0; ry = 0; rz = 0;
+            
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -151,11 +157,11 @@ end
             
 
                 % controller 
-                param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
-                for j = 1:length(agent(i).controller.name)
-                    param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
-                end
-                agent(i).do_controller(param(i).controller.list);
+%                 param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
+%                 for j = 1:length(agent(i).controller.name)
+%                     param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
+%                 end
+%                 agent(i).do_controller(param(i).controller.list);
                 %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
 
                 %-- MCMPC controller
@@ -167,8 +173,11 @@ end
                     vref = [0; 0; 0.50];
                     ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
                     previous_input = agent.input;
-                %-- 評価関数
-                % 入力差 ：　状態＋入力差＋ホバリング入力との差
+                %-- 制約条件
+                    Fsub = @(sub_monte1) sub_monte1 > 0;
+                    subCheck = zeros(Params.Particle_num, 1);
+                
+                    %-- 中間発表時
                     fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
                         (p_monte - ref_monte.p)'*Params.Weight.P*(p_monte - ref_monte.p)...
                         +(v_monte-vref)'*Params.Weight.V*(v_monte-vref)...
@@ -176,9 +185,6 @@ end
                         +q_monte'*Params.Weight.Q*q_monte...
                         +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input)...
                         +(u_monte - previous_input)'*Params.Weight.RP*(u_monte - previous_input); 
-                %-- 制約条件
-                    Fsub = @(sub_monte1) sub_monte1 > 0;
-                    subCheck = zeros(Params.Particle_num, 1);
                 %-- 状態の表示
                     fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
                         state_monte.p(1), state_monte.p(2), state_monte.p(3),...
@@ -186,27 +192,41 @@ end
                         ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
                         fV);
                 %-- 正規分布によるサンプリング
+                    % リサンプリング 分散を評価値にしたがって変更　＆　平均を前ステップの入力にする
                     if fFirst
+                        ave1 = 0.269*9.81/4;      % average
+                        ave2 = ave1;
+                        ave3 = ave1;
+                        ave4 = ave1;
                         sigma = Initsigma;
                         fFirst = 0;
                     else
+                        ave1 = agent.input(1);    % リサンプリングとして前の入力を平均値とする
+                        ave2 = agent.input(2);
+                        ave3 = agent.input(3);
+                        ave4 = agent.input(4);
                         if sigmanext > 0.5
-                            sigmanext = 0.5;
+                            sigmanext = 0.5;    % 上限
                         elseif sigmanext < 0.005
-                            sigmanext = 0.005;
+                            sigmanext = 0.005;  % 下限
                         end
                         sigma = sigmanext;
                     end
-                    ave = 0.269*9.81/4;
-                    u1 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-                    u2 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-                    u3 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-                    u4 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-                    u1 = reshape(u1, [1, size(u1)]);
-                    u2 = reshape(u2, [1, size(u2)]);
-                    u3 = reshape(u3, [1, size(u3)]);
-                    u4 = reshape(u4, [1, size(u4)]);
-                    u = [u1; u2; u3; u4];
+%                     ave = 0.269*9.81/4;
+                    u1 = sigma.*randn(Params.H, Params.Particle_num) + ave1;
+                    u2 = sigma.*randn(Params.H, Params.Particle_num) + ave2;
+                    u3 = sigma.*randn(Params.H, Params.Particle_num) + ave3;
+                    u4 = sigma.*randn(Params.H, Params.Particle_num) + ave4;
+%                     u1 = reshape(u1, [1, size(u1)]);    % TODO: reshape -> 
+%                     u2 = reshape(u2, [1, size(u2)]);
+%                     u3 = reshape(u3, [1, size(u3)]);
+%                     u4 = reshape(u4, [1, size(u4)]);
+%                     u = [u1; u2; u3; u4];
+                    u(4, 1:Params.H, 1:Params.Particle_num) = u4;   % reshape
+                    u(3, :, :) = u3;    % size
+                    u(2, :, :) = u2;
+                    u(1, :, :) = u1;
+                    
                     u_size = size(u, 3);    % Params.Particle_num
                 %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
                     p_data = zeros(Params.H, Params.Particle_num);
@@ -221,11 +241,17 @@ end
 
                 %-- 現在の状態
                     previous_state = agent.estimator.result.state.get();% 前の状態の取得
+                %-- 外乱
+%                     if time.t >= 5 && time.t <= 5.5
+%                         agent.input = [0.269*9.81/3.9; 0.269*9.81/3.9; 0.269*9.81/4; 0.269*9.81/4];
+%                         break;
+%                     end
 
                 %-- 微分方程式による予測軌道計算
                     for m = 1:u_size
                         x0 = previous_state;
                         state_data(:, 1, m) = previous_state;
+%                         fF = 1;
                         for h = 1:Params.H-1
                             FigTime = time.t;
                             [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+Params.dt],x0);
@@ -234,8 +260,10 @@ end
                             state_data(:, h+1, m) = x0;
                             %-- 地面に沈んで終わらないように
                             if fLanding == 0
-                                if tmpx(3) < 0.0
-                                    subCheck(m) = 1;    % 制約外なら flag = 1
+%                                 if fF && tmpx(3) < 0.0
+                                if state_data(3, 1, m) < 0.0
+                                    subCheck(m) = 0;    % 制約外なら flag = 1
+%                                     fF = 0;
                                     break;              % ホライズン途中でも制約外で終了
                                 end
                             else
@@ -250,14 +278,14 @@ end
                         if subCheck(m)
                             Evaluationtra(1, m) = NaN;  % 制約外
                         else
-%                             Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
-%                                 state_data(4:6, end, m), ...
-%                                 state_data(7:9, end, m), ...
-%                                 state_data(10:12, end, m),...
-%                                 u(:, end, m));    % p, v，ｑ, w, u;
+                            Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
+                                state_data(4:6, end, m), ...
+                                state_data(7:9, end, m), ...
+                                state_data(10:12, end, m),...
+                                u(:, end, m));    % p, v，ｑ, w, u;
                             
-                            eve = EvaluationFunction_MC(state_data(:, :, m), u(:, :, m), Params, agent);
-                            Evaluationtra(1, m) = eve;
+%                             eve = EvaluationFunction_MC(state_data(:, :, m), u(:, :, m), Params, agent);
+%                             Evaluationtra(1, m) = eve;
                         end
                     end
 
@@ -267,9 +295,9 @@ end
                     agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
                 %-- 評価値のソート
                     sortEval = sort(Evaluationtra);
-                    sortEval(length(Evaluationtra)-10:length(Evaluationtra))
+%                     sortEval(length(Evaluationtra)-10:length(Evaluationtra))
         
-        end
+        
         %-- 全てのサンプルが棄却されたら終了
             if isnan(Evaluationtra)
                 warning("ACSL : Emergency stop!");
@@ -289,15 +317,15 @@ end
         
         %-- 加速度算出
             accT = dt;
-            accZ = agent.model.state.p(3) - previous_state(3); 
-            acc = accZ / accT;
+            accP = agent.model.state.p - previous_state(1:3); 
+            acc = accP / accT;
         
         %-- データ保存
             data.bestcost(idx) = Bestcost; 
             data.pathJ{idx} = Evaluationtra; % - 全サンプルの評価値
             data.sigma(idx) = sigma;
             data.state{idx} = state_data(:, 1, BestcostID);
-            data.acc(idx) = acc;
+            data.acc{idx} = acc;
 
         %% update state
         % with FH
@@ -349,7 +377,7 @@ end
 
         end
         if fRemove == 1
-            break
+            break;
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
         totalT = totalT + calT;
@@ -370,35 +398,51 @@ end
 close all
 % clc
 % calculate time
-% fprintf("%f秒\n", totalT)
+fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
-Fontsize = 15;  timeMax = FigTime;
+Fontsize = 15;  timeMax = te;
+%%
 logger.plot({1,"p", "er"},  "fig_num",1, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 logger.plot({1,"v", "e"},   "fig_num",2, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 logger.plot({1,"q", "e"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title("");
+%% errorで終了したとき
+Fontsize = 15;  timeMax = te;
 size_best = length(data.bestcost);
-figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '*'); xlim([0 inf]);ylim([0 100]);
+figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]);
 % figure(9); plot(1:Params.Particle_num, data.pathJ{1, 1}, '*');
 % axes プロパティから線の太さ，スタイルなど変更可能
-% figure(7)
-% plot(logger.Data.t, data.sigma, 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
+figure(7)
+plot(logger.Data.t(1:size_best,:), data.sigma, 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
 % 差分のグラフを描画
 % logger.Data.agent.estimator.result{1,:}.state.p logger.Data.agent.reference.result{1,100}.state.p
-for i= 1:size(logger.Data.t)
+for i= 1:size_best
     Edata(:, i) = logger.Data.agent.estimator.result{1,i}.state.p;
     Rdata(:, i) = logger.Data.agent.reference.result{1,i}.state.p;
     diff(:, i) = logger.Data.agent.estimator.result{1,i}.state.p - logger.Data.agent.reference.result{1,i}.state.p;
 end
-figure(8)
-% plot(logger.Data.t, diff', 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Difference of position [m]"); set(gca,'FontSize',Fontsize);
-% legend("x.diff", "y.diff", "z.diff"); grid on;
-figure(9); plot(logger.Data.t, data.acc, 'LineWidth', 2); xlabel("Time[s]"); ylabel("acceleration [m/s^2]"); set(gca,'FontSize',Fontsize); grid on;
+% difference of reference and estimator
+figure(9)
+plot(logger.Data.t(1:size_best,:), diff, 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Difference of position [m]"); set(gca,'FontSize',Fontsize);
+legend("x.diff", "y.diff", "z.diff"); grid on;
+% acceleration
+figure(10); plot(logger.Data.t(1:size_best,:), data.acc, 'LineWidth', 2); xlabel("Time[s]"); ylabel("acceleration [m/s^2]");set(gca,'FontSize',Fontsize); grid on;
+% estimator and reference 
+figure(11); plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
+ylim([0, inf+1.0]); xlim([0 inf]); hold on;
+plot(logger.Data.t(1:size_best,:), Rdata, '--', 'LineWidth', 2);
+hold off;
+%%
+% size_best = length(data.bestcost);
+% for i= 1:size_best
+%     Rdata(:, i) = logger.Data.agent.reference.result{1,i}.state.p;
+% end
+% figure(10); plot(logger.Data.t(1:size_best,:), Rdata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("reference [m/s^2]"); set(gca,'FontSize',Fontsize); grid on;
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1);

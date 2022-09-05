@@ -13,6 +13,9 @@ function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
             H = 1:params.H;
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
             ref_v = [0; 0; 0.50];
+            P = Agent.estimator.result.state.p;
+            V = Agent.estimator.result.state.v;
+            
             
 %         for j = 1:params.H            
 %             Unorm(1, j) = norm(U(:, j));            
@@ -32,13 +35,22 @@ function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
             stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * params.Weight.RP  * tildeUpre(:, L), 1:params.H-1);
             stageInputR  = arrayfun(@(L) tildeUref(:, L)' * params.Weight.R   * tildeUref(:, L), 1:params.H-1);
             
+            
         %-- 状態の終端コストを計算
             terminalState = tildeXp(:, end)' * params.Weight.P * tildeXp(:, end)...
                 +tildeXv(:, end)'   * params.Weight.V   * tildeXv(:, end)...
                 +tildeXqw(:, end)'  * params.Weight.QW  * tildeXqw(:, end);
-
+            
+%         if state.p(3) > 0.3  
         %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputP + stageInputR)...
                 + terminalState;
+%         else
+%             % Vzに対して評価値を変化させる
+%             if 
+%             verticleZ = 
+%             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputP + stageInputR + verticleZ)...
+%                 + terminalState;
+%         end
 end
 

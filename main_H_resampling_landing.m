@@ -43,12 +43,13 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 fSubIndex = zeros(sample, 1);
 
             %-- MPC関連 変数定義 
-                Params.Particle_num = 500;
-                Params.H = 2;
+                Params.Particle_num = 10;
+                Params.H = 5;
                 Params.dt = 0.1;
                 idx = 0;
                 totalT = 0;
                 Initsigma = 0.1;
+                SumSubCheck = 0;
                 
             %-- 重み
 %                 PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
@@ -60,17 +61,18 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 UdiffQ_monte = diag([1, 1, 1, 1]);
 %                 R_monte = diag([1, 1, 1, 1]);  
                 
-                Params.Weight.P = 1000 * diag([1.0; 1.0; 1.0]);    % 座標
+                Params.Weight.P = diag([1000.0; 1000.0; 1.0]);    % 座標
                 Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-                Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
-                Params.Weight.W = 100 * diag([1.0; 1.0; 1.0]);    % 角速度
+%                 Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
+%                 Params.Weight.W = 100 * diag([1.0; 1.0; 1.0]);    % 角速度
                 Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
                 Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
-                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1000.0; 1000.0; 1000.0]);  % 1ステップ前の入力との差
+                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 100.0; 100.0; 100.0]);  % 1ステップ前の入力との差
                 
             %-- data
                 data.bestcost(idx+1) = 0;           % - もっともよい評価値
                 data.pathJ{idx+1} = 0;              % - 全サンプルの評価値
+                data.path{idx+1} = 0;
                 data.sigma(idx+1) = 0;
                 data.state{idx+1} = 0;
                 data.acc(idx+1) = 0;
@@ -136,22 +138,23 @@ end
                 % 4 == 0.3m/sほどになる
                 rr = [0., 0., 0.];
                 if 0 < time.t && time.t < 0.1
-                    rz = 1;
+                    rz = arranged_pos(3);
                 elseif 0.1 <= time.t && time.t < 4
                     rz = (((time.t - 0.1)/4)-1)^2;
                 else; rz = rr(3);
                 end
 
-                if 0 < time.t && time.t < 0.1
-                    rx = agent.model.state.p(1); ry = agent.model.state.p(2);
-                elseif 0.1 <= time.t && time.t < 4
-                    rx = (((time.t - 0.1)/4)-1)^2; ry = (((time.t - 0.1)/4)-1)^2;
-                else
-                    rx = rr(1); ry = rr(2);f
-                end
+
+%                 if 0 < time.t && time.t < 0.1
+%                     rx = arranged_pos(1); ry = arranged_pos(2);
+%                 elseif 0.1 <= time.t && time.t < 6
+%                     rx = (((time.t - 0.1)/6)-1)^2; ry = (((time.t - 0.1)/6)-1)^2;
+%                 else
+%                     rx = rr(1); ry = rr(2);
+%                 end
             end
-%             rx = rr(1); 
-%             ry = rr(2); 
+            rx = sin(time.t/4); 
+            ry = cos(time.t/4); 
 %             rz = 0.0;
             
             %-- 着陸後コントローラー変える:目標位置も変更
@@ -193,44 +196,43 @@ end
                     vref = [0; 0; 0.50];
                     ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
                     previous_input = agent.input;
-                %-- 評価関数
-                % 入力差 ：　状態＋入力差＋ホバリング入力との差
-%                     fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-%                         (p_monte - agent.reference.result.state.p)'*Params.Weight.P*(p_monte - agent.reference.result.state.p)...
-%                         +(v_monte-vref)'*Params.Weight.V*(v_monte-vref)...
-%                         +w_monte'*Params.Weight.W*w_monte...
-%                         +q_monte'*Params.Weight.Q*q_monte...
-%                         +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input)...
-%                         +(u_monte - previous_input)'*Params.Weight.RP*(u_monte - previous_input); 
                 %-- 制約条件
                     Fsub = @(sub_monte1) sub_monte1 > 0;
                     subCheck = zeros(Params.Particle_num, 1);
                 %-- 状態の表示
-                    fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f fV: %d\n",...
+                    fprintf("pos: %f %f %f \t vel: %f %f %f \t ref: %f %f %f C: %d\n",...
                         state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                         state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                         ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
-                        fV);
+                        SumSubCheck);
                 %-- 正規分布によるサンプリング
                     if fFirst
+                        ave1 = 0.269*9.81/4;      % average
+                        ave2 = ave1;
+                        ave3 = ave1;
+                        ave4 = ave1;
                         sigma = Initsigma;
                         fFirst = 0;
                     else
+                        ave1 = agent.input(1);    % リサンプリングとして前の入力を平均値とする
+                        ave2 = agent.input(2);
+                        ave3 = agent.input(3);
+                        ave4 = agent.input(4);
                         if sigmanext > 0.5
-                            sigmanext = 0.5;
+                            sigmanext = 0.5;    % 上限
                         elseif sigmanext < 0.005
-                            sigmanext = 0.005;
+                            sigmanext = 0.005;  % 下限
                         end
                         sigma = sigmanext;
                     end
-                    ave = 0.269*9.81/4;
+%                     ave = 0.269*9.81/4;
     %                 sigmaData(idx, 1) = sigma;
                     %-- 
     %                 ave = 0.269*9.81/4;
-                    u1 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-                    u2 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-                    u3 = sigma.*randn(Params.H, Params.Particle_num) + ave;
-                    u4 = sigma.*randn(Params.H, Params.Particle_num) + ave;
+                    u1 = sigma.*randn(Params.H, Params.Particle_num) + ave1;
+                    u2 = sigma.*randn(Params.H, Params.Particle_num) + ave2;
+                    u3 = sigma.*randn(Params.H, Params.Particle_num) + ave3;
+                    u4 = sigma.*randn(Params.H, Params.Particle_num) + ave4;
                     u1 = reshape(u1, [1, size(u1)]);
                     u2 = reshape(u2, [1, size(u2)]);
                     u3 = reshape(u3, [1, size(u3)]);
@@ -252,7 +254,7 @@ end
                     previous_state = agent.estimator.result.state.get();% 前の状態の取得
 
                 %-- 着陸(z < 0.05)したら入力なくして(シミュレーション上は入力＝ホバリング)地面にいる．
-                    if agent.model.state.p(3) < 0.001
+                    if agent.model.state.p(3) < 0.000001
 %                         if fCount_landing > 10
                             if fc ~= 1
                                 currentX = agent.model.state.p(1);
@@ -280,25 +282,29 @@ end
 %                                 subCheck(m) = 1;    % 制約外なら flag = 1
 %                                 break;              % ホライズン途中でも制約外で終了
 %                             end
+                            subCheck(m) = 0;
                         end
                     end
 
                 %-- 評価値計算
+                    SumSubCheck = sum(subCheck > 0);
                     Evaluationtra = zeros(1, u_size);
                     for m = 1:u_size
-%                         if subCheck(m)
-%                             Evaluationtra(1, m) = NaN;  % 制約外
-%                         else
+                        if subCheck(m)
+                            Evaluationtra(1, m) = NaN;  % 制約外
+                        else
     %                         Adata(1, m) = fun(tmpx(end, 1:3)', tmpx(end, 4:6)', tmpx(end, 7:9)', tmpx(end, 10:12)');    % p, v，ｑ, w;
 %                         Evaluationtra(1, m) = fun(state_data(1:3, end, m), ...
 %                             state_data(4:6, end, m), ...
 %                             state_data(7:9, end, m), ...
 %                             state_data(10:12, end, m),...
 %                             u(:, end, m));    % p, v，ｑ, w, u;
-%                         end
                         eve = EvaluationFunction_MC(state_data(:, :, m), u(:, :, m), Params, agent);
                         Evaluationtra(1, m) = eve;
+                        end
                     end
+                    % TODO: 高度が高い時は横移動するようにしたい
+                    % TODO: 高度によって，縦移動のみに対して罰則を追加→縦に移動してプログラムが正常に終了してしまうため．
 
 
                     [Bestcost, BestcostID] = min(Evaluationtra);
@@ -333,6 +339,7 @@ end
             data.pathJ{idx} = Evaluationtra; % - 全サンプルの評価値
             data.sigma(idx) = sigma;
             data.state{idx} = state_data(:, 1, BestcostID);
+            data.path{idx} = state_data;
             data.acc(idx) = acc;
 
         %% update state
