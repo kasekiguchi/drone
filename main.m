@@ -77,18 +77,7 @@ end
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
             fInput = fInput + 1;
-            if fInput < 90
-                agent.input = [0.269 * 9.81 / 4+0.01 0.269 * 9.81 / 4+0.01 0.269 * 9.81 / 4+0.01 0.269 * 9.81 / 4+0.01]';
-            elseif fInput < 120
-                agent.input = [0.269 * 9.81 / 4-0.05 0.269 * 9.81 / 4-0.05 0.269 * 9.81 / 4-0.05 0.269 * 9.81 / 4-0.05]';
-                
-            elseif fInput < 131
-                agent.input = [0.269 * 9.81 / 4+0.1 0.269 * 9.81 / 4+0.1 0.269 * 9.81 / 4+0.1 0.269 * 9.81 / 4+0.1]';
-            elseif fInput < 135
-                agent.input = [0.269 * 9.81 / 4-0.1 0.269 * 9.81 / 4-0.1 0.269 * 9.81 / 4-0.1 0.269 * 9.81 / 4-0.1]';
-            else
-                agent.input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
-            end
+            agent.input = [0.269*9.81/4-0.01; 0.269*9.81/4+0.01; 0.269*9.81/4+0.01; 0.269*9.81/4-0.01];
         end  
         %% update state
         % with FH
@@ -157,7 +146,8 @@ end
 close all
 clc
 % plot p:position, er:roll/pitch/yaw, 
-logger.plot({1,"p", "er"});
+% logger.plot({1,"p", "er"});
+logger.plot({1,"q", "e"});
 % logger.plot({1,"v", "e"});
 % agent(1).reference.timeVarying.show(logger)
 

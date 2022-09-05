@@ -43,8 +43,8 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 fSubIndex = zeros(sample, 1);
 
             %-- MPC関連 変数定義 
-                Params.Particle_num = 100;  
-                Params.H = 10;
+                Params.Particle_num = 2000;  %500
+                Params.H = 20;  % 10
                 Params.dt = 0.1;
                 idx = 0;
                 totalT = 0;
@@ -60,13 +60,13 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 UdiffQ_monte = diag([1, 1, 1, 1]);
 %                 R_monte = diag([1, 1, 1, 1]);  
                 
-                Params.Weight.P = 1000 * diag([1.0; 1.0; 1.0]);    % 座標
+                Params.Weight.P = diag([1000.0; 1000.0; 1.0]);    % 座標
                 Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-                Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
-                Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
+%                 Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
+%                 Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
                 Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
                 Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
-                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 100.0; 100.0; 100.0]);  % 1ステップ前の入力との差
+                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1.0]);  % 姿勢角、角速度
                 
             %-- data
                 data.bestcost(idx+1) = 0;           % - もっともよい評価値
@@ -134,6 +134,11 @@ end
                 ry = (time.t/4)^2+0.1;
             else; rx = 0.; ry = 0.;
             end
+
+            if time.t >= 10 && time.t <= 10.5
+                rx = 0.5; ry = 0.5;
+            end
+%             rz = 1; rx = 0; ry = 0;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -148,11 +153,13 @@ end
             
 
                 % controller 
-                param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
-                for j = 1:length(agent(i).controller.name)
-                    param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
-                end
-                agent(i).do_controller(param(i).controller.list);
+%-- HL controller
+%                 param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
+%                 for j = 1:length(agent(i).controller.name)
+%                     param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
+%                 end
+%                 agent(i).do_controller(param(i).controller.list);
+%-- HL controller
                 %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
 
                 %-- MCMPC controller
@@ -166,13 +173,13 @@ end
                     previous_input = agent.input;
                 %-- 評価関数
                 % 入力差 ：　状態＋入力差＋ホバリング入力との差
-                    fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
-                        (p_monte - agent.reference.result.state.p)'*Params.Weight.P*(p_monte - agent.reference.result.state.p)...
-                        +(v_monte-vref)'*Params.Weight.V*(v_monte-vref)...
-                        +w_monte'*Params.Weight.W*w_monte...
-                        +q_monte'*Params.Weight.Q*q_monte...
-                        +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input)...
-                        +(u_monte - previous_input)'*Params.Weight.RP*(u_monte - previous_input); 
+%                     fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
+%                         (p_monte - agent.reference.result.state.p)'*Params.Weight.P*(p_monte - agent.reference.result.state.p)...
+%                         +(v_monte-vref)'*Params.Weight.V*(v_monte-vref)...
+%                         +w_monte'*Params.Weight.W*w_monte...
+%                         +q_monte'*Params.Weight.Q*q_monte...
+%                         +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input)...
+%                         +(u_monte - previous_input)'*Params.Weight.RP*(u_monte - previous_input); 
                 %-- 制約条件
                     Fsub = @(sub_monte1) sub_monte1 > 0;
                     subCheck = zeros(Params.Particle_num, 1);
@@ -183,6 +190,7 @@ end
                         ref_monte.p(1), ref_monte.p(2), ref_monte.p(3),...
                         fV);
                 %-- 正規分布によるサンプリング
+                    % 平均　＋　標準偏差を変更する
                     if fFirst
                         ave1 = 0.269*9.81/4;      % average
                         ave2 = ave1;
@@ -203,15 +211,32 @@ end
                         sigma = sigmanext;
                     end
 %                     ave = 0.269*9.81/4;
+%                     RandN = randn(Params.H, Params.Particle_num);
                     u1 = sigma.*randn(Params.H, Params.Particle_num) + ave1;
                     u2 = sigma.*randn(Params.H, Params.Particle_num) + ave2;
                     u3 = sigma.*randn(Params.H, Params.Particle_num) + ave3;
                     u4 = sigma.*randn(Params.H, Params.Particle_num) + ave4;
-                    u1 = reshape(u1, [1, size(u1)]);
-                    u2 = reshape(u2, [1, size(u2)]);
-                    u3 = reshape(u3, [1, size(u3)]);
-                    u4 = reshape(u4, [1, size(u4)]);
-                    u = [u1; u2; u3; u4];
+                    u1(u1<0) = 0;
+                    u2(u2<0) = 0;
+                    u3(u3<0) = 0;
+                    u4(u4<0) = 0;
+%                     for H = 1:Params.H
+%                         for N = 1:Params.Particle_num
+%                             if u1(H, N) < 0; u1(H, N) = 1; end
+%                             if u2(H, N) < 0; u2(H, N) = 1; end
+%                             if u3(H, N) < 0; u3(H, N) = 1; end
+%                             if u4(H, N) < 0; u4(H, N) = 1; end
+%                         end
+%                     end
+                    u(4, 1:Params.H, 1:Params.Particle_num) = u4;   % reshape
+                    u(3, :, :) = u3;    % size
+                    u(2, :, :) = u2;
+                    u(1, :, :) = u1;
+%                     u1 = reshape(u1, [1, size(u1)]);
+%                     u2 = reshape(u2, [1, size(u2)]);
+%                     u3 = reshape(u3, [1, size(u3)]);
+%                     u4 = reshape(u4, [1, size(u4)]);
+%                     u = [u1; u2; u3; u4];
                     u_size = size(u, 3);    % Params.Particle_num
                 %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
                     p_data = zeros(Params.H, Params.Particle_num);
@@ -238,11 +263,15 @@ end
                             x0 = tmpx(end, :);
                             state_data(:, h+1, m) = x0;
                             %-- 地面に沈んで終わらないように
-                            if state_data(3, 1, m) < 0.0
+                            if state_data(3, 1, m) < 0. %tmpx(3)
                                 subCheck(m) = 1;    % 制約外なら flag = 1
                                 break;              % ホライズン途中でも制約外で終了
                             end
                         end
+%                         if state_data(3, 1, m) < 0.0
+%                             subCheck(m) = 1;    % 制約外なら flag = 1
+%                             break;              % ホライズン途中でも制約外で終了
+%                         end
                     end
 
                 %-- 評価値計算
@@ -287,6 +316,7 @@ end
             data.pathJ{idx} = Evaluationtra; % - 全サンプルの評価値
             data.sigma(idx) = sigma;
             data.state{idx} = state_data(:, 1, BestcostID);
+%             data.input{idx} = agent.input;
 
         %% update state
         % with FH
@@ -359,34 +389,44 @@ end
 close all
 % clc
 % calculate time
-% fprintf("%f秒\n", totalT)
+fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
-Fontsize = 15;  timeMax = FigTime;
+Fontsize = 15;  timeMax = te;
 logger.plot({1,"p", "er"},  "fig_num",1, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 logger.plot({1,"v", "e"},   "fig_num",2, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "e"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-logger.plot({1,"w", "e"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+logger.plot({1,"q", "p"},   "fig_num",3, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+logger.plot({1,"w", "p"},   "fig_num",4, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5, "time", [0 timeMax]); set(gca,'FontSize',Fontsize);  grid on; title("");
+%% errorで終了したとき
+Fontsize = 15;  timeMax = te;
 size_best = length(data.bestcost);
-figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '*'); xlim([0 inf]);ylim([0 100]);
+figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]);
 % figure(9); plot(1:Params.Particle_num, data.pathJ{1, 1}, '*');
 % axes プロパティから線の太さ，スタイルなど変更可能
 figure(7)
-plot(logger.Data.t(1:size_best,:), data.sigma, 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
+plot(logger.Data.t(1:size_best,:), data.sigma, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
 % agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
 % 差分のグラフを描画
 % logger.Data.agent.estimator.result{1,:}.state.p logger.Data.agent.reference.result{1,100}.state.p
-for i= 1:size(logger.Data.t)
+for i= 1:size_best
     Edata(:, i) = logger.Data.agent.estimator.result{1,i}.state.p;
     Rdata(:, i) = logger.Data.agent.reference.result{1,i}.state.p;
     diff(:, i) = logger.Data.agent.estimator.result{1,i}.state.p - logger.Data.agent.reference.result{1,i}.state.p;
 end
+% difference of reference and estimator
 figure(9)
-plot(logger.Data.t, diff', 'LineWidth', 2); xlim([0 5]); xlabel("Time [s]"); ylabel("Difference of position [m]"); set(gca,'FontSize',Fontsize);
+plot(logger.Data.t(1:size_best,:), diff, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Difference of position [m]"); set(gca,'FontSize',Fontsize);
 legend("x.diff", "y.diff", "z.diff"); grid on;
+% acceleration
+% figure(10); plot(logger.Data.t(1:size_best,:), data.acc, 'LineWidth', 2); xlabel("Time[s]"); ylabel("acceleration [m/s^2]");set(gca,'FontSize',Fontsize); grid on;
+% estimator and reference 
+figure(11); plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
+ylim([0, inf+1.0]); xlim([0 inf]); hold on;
+plot(logger.Data.t(1:size_best,:), Rdata, '--', 'LineWidth', 2);
+hold off;
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1);

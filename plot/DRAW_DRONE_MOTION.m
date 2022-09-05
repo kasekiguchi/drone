@@ -146,7 +146,7 @@ classdef DRAW_DRONE_MOTION
             for n = 1:length(param.target)
                 switch size(q(:,:,n),2)
                     case 3
-                        Q1 = quaternion(q(:,:,n),'euler','ZYX','frame');
+                        Q1 = quaternion(q(:,:,n),'euler','XYZ','frame');
                     case 4
                         Q1 = quaternion(q(:,:,n));
                     case 9

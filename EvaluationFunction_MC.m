@@ -10,11 +10,11 @@ function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
             Xv = x(4:6, :, :);
             Xqw = x(7:12, :, :);
             U = u;
-            H = 1:params.H;
+%             H = 1:params.H;
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
             ref_v = [0; 0; 0.50];
-            P = Agent.estimator.result.state.p;
-            V = Agent.estimator.result.state.v;
+%             P = Agent.estimator.result.state.p;
+%             V = Agent.estimator.result.state.v;
             
             
 %         for j = 1:params.H            

@@ -8,8 +8,8 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_Exp(dt,initial(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
-        agent(i) = DRONE(Model_Quat13(dt,initial(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        %agent(i) = DRONE(Model_EulerAngle(dt,initial(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
+%         agent(i) = DRONE(Model_Quat13(dt,initial(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle(dt,initial(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %agent(i) = DRONE(Model_Discrete(dt,initial(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル : PD controller などを想定
