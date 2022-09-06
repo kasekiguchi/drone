@@ -112,7 +112,6 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
 %[ip,d,MatchXs,MatchYs,MatchXe,MatchYe]
             [~,ids]=mink(d(wid),2);
             ids=wid(ids);
-            if check_line_validity([MatchXs(ids);MatchXe(ids)],[MatchYs(ids);MatchYe(ids)])            
             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
             l2 = [a(ids(2)),b(ids(2)),c(ids(2))]*sign(b(ids(2)));
             if l1*l2'<0
@@ -156,6 +155,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 end
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
             else % ほぼ平行な場合
+            if check_line_validity([MatchXs(ids);MatchXe(ids)],[MatchYs(ids);MatchYe(ids)])            
                 obj.O = [];
                 rl = (l1+l2)/2; % reference line
                 tmpl = perp(rl,[x;y]); % 機体を通るrl の垂線
@@ -169,6 +169,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                     tmp(:,i) = [tmp0;tmpt0];
                 end
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
+            end
             end
             q = EstData(3);
             qr = obj.TrackingPoint(3,:);
@@ -189,7 +190,6 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             %resultに代入
             obj.result.O = O;
             obj.result.th = th;
-            end
             obj.result.focusedLine = [[MatchXs(ids(1));MatchXe(ids(1));NaN;MatchXs(ids(2));MatchXe(ids(2))],[MatchYs(ids(1));MatchYe(ids(1));NaN;MatchYs(ids(2));MatchYe(ids(2))]];
             obj.result.step = obj.step;
             result=obj.result;            
