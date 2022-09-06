@@ -153,7 +153,7 @@ k2=1*k;
 x0=[7,10,2,100];
 fvals22=zeros(4,1);
 gain_ser2=["","f1","a1","f2","a2"];
-er=0.5;
+er=1;
 for i=1:4
 % fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
 fun=@(x)(integral(@(e) abs( -k2(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
@@ -294,6 +294,54 @@ plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:))
 grid on
 legend('ufb','utanh','u','誤差')
 end
+%% fminserch tanh一つ zサブシステム
+clear e utanh u ufb sigma
+titlex=["x","dx","ddx","dddx"];
+anum=4;%変数の数
+alp=zeros(anum+1,1);
+alp(anum+1)=1;
+alp(anum)=0.9;%alphaの初期値
+for a=anum-1:-1:1
+    alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
+end
+
+Ac2 = [0,1;0,0];
+Bc2 = [0;1];
+dt=0.025;
+k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
+
+x0=[2,2];
+fvals12z=zeros(2,1);
+gain_ser1z=["","f1","a1"];
+% gain_ser1=["","f1","a1","k1"];
+er=0.1; %近似する範囲を指定
+for i=1:2
+fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + k(i)*e ) ,0, er));
+[x,fval] = fminsearch(fun,x0) ;
+fvals12z(i) = 2*fval
+gain_ser1z(i+1,:)=[titlex(i),x];
+
+e= -1:0.001:1;      
+% e= -2:0.001:2;
+ufb(i,:)= -k(i)*e;
+utanh(i,:)= - x(1)*tanh(x(2)*e) - k(i)*e;%%
+u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
+% sigma(i,:)=utanh(i,:)-u(i,:);
+fig=figure(i);
+% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
+plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),'LineWidth',2);
+
+grid on
+legend('FB','近似','FT','誤差')
+% title(titlex(i));
+
+fosi=14;%defolt 9
+set(gca,'FontSize',fosi)
+xlabel('error','FontSize',fosi);
+ylabel('input','FontSize',fosi);
+
+end
+
 
 %%
 % %元の入力と近似の入力の差を取り二乗しそれを積分する

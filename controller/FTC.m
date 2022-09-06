@@ -74,15 +74,8 @@ classdef FTC < CONTROLLER_CLASS
           %z方向:FB
 %             vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
           %z方向:FT
-%             f1=obj.gain2(:,1); 
-%             a1=obj.gain2(:,2);
-%             f2=obj.gain2(:,3);
-%             a2=obj.gain2(:,4);
-%             vf = obj.VfFT(f1,a1,f2,a2,,F1,z1);%%%%%%%%%%%%%%%%%%
-
-            f1=obj.gain1(1:2,1)';
-            a1=obj.gain1(1:2,2)';
-            vf = obj.VfFT(f1,a1,F1,z1);%%%%%%%%%%%%%%%%%%
+%             vf = obj.VfFT(F1,z1);%%%%%%%%%%%%%%%%%%
+            vf = obj.VfFT(z1);%%%%%%%%%%%%%%%%%%
             %x,y,psiの状態変数の値
             z2=Z2(x,xd',vf,P);%x方向
             z3=Z3(x,xd',vf,P);%y方向
@@ -95,8 +88,8 @@ switch n
         case 1
 %有限整定
 % 
-            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
-            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
+%             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
+%             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
 %             ux=1*ux;
 %             uy=1*uy;
 %             
@@ -160,9 +153,9 @@ end
 %             dst=0.5*sin(2*pi*t/0.5);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=2;
-            if t>=5 && t<=5.025
-                    dst=1/0.025;
-            end
+%             if t>=5 && t<=5.025
+%                     dst=1/0.025;
+%             end
 %%            
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);

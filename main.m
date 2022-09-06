@@ -77,11 +77,11 @@ try
 
             % reference 
             if fExp ~=1 %シミュレーションのみ
-                if time.t<=5
-                    FH.CurrentCharacter = 't';
-                else
+%                 if time.t<=0
+%                     FH.CurrentCharacter = 't';
+%                 else
                     FH.CurrentCharacter = 'f';%phaseをいじれる
-                end
+%                 end
             end
             param(i).reference.covering = [];
 

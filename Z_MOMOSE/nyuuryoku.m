@@ -117,7 +117,7 @@ hold off
 syms  x sz(t)
 sz(t)=t;
 a=20;
-xx=-1:0.1:1;
+xx=-1:0.05:1;
 fz = 1/(1+exp(-a*2*sz));
     tanh1 = 2*fz-1;
     dtanh1 = 4*a*fz*(1-fz);
@@ -187,11 +187,12 @@ fplot(dddub,ts)
 syms sz1 [2 1]
 Ac2 = [0,1;0,0];
 Bc2 = [0;1];
-f1=[8.29378,10.2001];
-a=[20.7437,19.1444];
+%alpha=0.9 e=0.1
+f1=[2.8626 , 0.622153];
+a=[20.7437, 19.141];
 k=[28.4298558254086,8.05867722851289];
 u=0;du=0;ddu=0;dddu=0;
-    for i = 1:2
+    for i = 1%:2
         fza = 1/(1+exp(-a(i)*2*sz1(i)));
         tanha = 2*fza-1;
         dtanha = 4*a(i)*fza*(1-fza);
@@ -206,6 +207,13 @@ u=0;du=0;ddu=0;dddu=0;
             dddz = Ac2*ddz + Bc2*ddu;
         dddu = dddu -f1(i)*dddtanha*(dz(i))^3 -3*f1(i)*ddtanha*dz(i)*ddz(i) -f1(i)*dtanha*dddz(i) -k(i)*dddz(i);
     end
+    ee=-1:0.05:1;
+    hold on
+    figure(2)
+    plot(ee,subs(u,sz1(1),ee))
+    plot(ee,subs(du,sz1(1),ee))
+    plot(ee,subs(ddu,sz1(1),ee))
+    plot(ee,subs(dddu,sz1(1),ee))
 %% ディラックのΔ関数で無理やり微分
 
 syms  t a k
