@@ -40,7 +40,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.sensor = [0,0];
             
             obj.state_initial = [0,0,0]';
-            obj.goal = [5,0,0]';% global goal position
+            obj.goal = [6,0,0]';% global goal position
             obj.obstacle = [2,0,0]';
             obj.radius = self.sensor.lrf.radius;
             obj.margin = 0.5;
