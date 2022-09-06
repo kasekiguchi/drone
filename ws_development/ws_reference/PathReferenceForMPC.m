@@ -112,6 +112,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
 %[ip,d,MatchXs,MatchYs,MatchXe,MatchYe]
             [~,ids]=mink(d(wid),2);
             ids=wid(ids);
+            if check_line_validity([MatchXs(ids);MatchXe(ids)],[MatchYs(ids);MatchYe(ids)])            
             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
             l2 = [a(ids(2)),b(ids(2)),c(ids(2))]*sign(b(ids(2)));
             if l1*l2'<0
@@ -186,9 +187,10 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.PreTrack = obj.TrackingPoint(:,1);
             %-------------------------------%
             %resultに代入
-            obj.result.focusedLine = [[MatchXs(ids(1));MatchXe(ids(1));NaN;MatchXs(ids(2));MatchXe(ids(2))],[MatchYs(ids(1));MatchYe(ids(1));NaN;MatchYs(ids(2));MatchYe(ids(2))]];
             obj.result.O = O;
             obj.result.th = th;
+            end
+            obj.result.focusedLine = [[MatchXs(ids(1));MatchXe(ids(1));NaN;MatchXs(ids(2));MatchXe(ids(2))],[MatchYs(ids(1));MatchYe(ids(1));NaN;MatchYs(ids(2));MatchYe(ids(2))]];
             obj.result.step = obj.step;
             result=obj.result;            
         end
@@ -207,8 +209,8 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             rp = result.state.p(1:2,:);
             rth = result.state.p(3,:);
             plot(l(1:2,1),l(1:2,2),'LineWidth',3,'Color','b');
+            hold on
             plot(l(4:5,1),l(4:5,2),'LineWidth',2,'Color','r');
-            hold on            
             plot(rp(1,:),rp(2,:),'yo','LineWidth',1);
             quiver(rp(1,:),rp(2,:),2*cos(rth),2*sin(rth),'Color','y');         
             plot(p(1),p(2),'ro');
@@ -283,4 +285,16 @@ else
 end
 %-----------------------%
 end
-
+function t_or_f = check_line_validity(x,y)
+% x = [x1,x3,x2,x4]', y = [y1,y3,y2,y4]'
+% 線分：X1-X2, X3-X4　が交点を持つ場合０　無ければ１を返す．
+   X1 = [x(1);y(1)];
+   X2 = [x(3);y(3)];
+   X3 = [x(2);y(2)];
+   X4 = [x(4);y(4)];
+   X31=X3-X1; X31 = [X31(2);-X31(1)];
+   X41=X4-X1; X41 = [X41(2);-X41(1)];
+   X13=X1-X3; X13 = [X13(2);-X13(1)];
+   X23=X2-X3; X23 = [X23(2);-X23(1)];
+   t_or_f = ~(((X2-X1)'*X31*X41'*(X2-X1) < 0) & ((X4-X3)'*X13*X23'*(X4-X3)<0));
+end
