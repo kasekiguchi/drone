@@ -79,7 +79,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             cha = get(FH, 'currentcharacter');
             if isempty(cha)
 %                error("ACSL : FH is empty");
-cha = obj.Data.phase(obj.k);
+                cha = obj.Data.phase(obj.k);
             end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
