@@ -113,6 +113,99 @@ grid on
 plot(tn,tanh);
 plot(tn,sgn);
 hold off
+%% tanhとシグモイドのtanhの比較9/6
+syms  x sz(t)
+sz(t)=t;
+a=20;
+xx=-1:0.1:1;
+fz = 1/(1+exp(-a*2*sz));
+    tanh1 = 2*fz-1;
+    dtanh1 = 4*a*fz*(1-fz);
+    ddtanh1 = 8*a^2*fz*(1-fz)*(1-2*fz);
+    dddtanh1 = 16*a^3*fz*(1-fz)*(1-6*fz+6*fz^2);
+    
+    ta = tanh(a*x);
+    dta = diff(ta,x);
+    ddta = diff(ta,x,2);
+    dddta = diff(ta,x,3);
+hold on 
+fplot(tanh1,[-1 1])
+plot(xx,subs(ta,x,xx))
+fplot(dtanh1,[-1 1])
+plot(xx,subs(dta,x,xx))
+fplot(ddtanh1,[-1 1])
+plot(xx,subs(ddta,x,xx))
+fplot(dddtanh1,[-1 1])
+plot(xx,subs(dddta,x,xx))
+
+%% 入力の近似tanh1
+syms k a 
+x(t)=t
+u = -k*tanh(a*x)-k*x;
+du = diff(u,t)
+ddu = diff(u,t,2)
+dddu = diff(u,t,3)
+
+a1=1;k1=1;
+ts = [-2,2];
+ub = subs(u,[a,k],[a1,k1]);
+dub = subs(du,[a,k],[a1,k1]);
+ddub = subs(ddu,[a,k],[a1,k1]);
+dddub = subs(dddu,[a,k],[a1,k1]);
+figure(1)
+fplot(ub,ts)
+figure(2)
+fplot(dub,ts)
+figure(3)
+fplot(ddub,ts)
+figure(4)
+fplot(dddub,ts)
+%% 入力の近似tanh2
+syms f k a g b x(t)
+x(t)=t;
+u = -f*tanh(a*x)-k*x-g*tanh(b*x);
+du = diff(u,t)
+ddu = diff(u,t,2)
+dddu = diff(u,t,3)
+
+a1=1;f1=1;b1=4;g1=4;k1=6;
+ts = [-2,2];
+ub = subs(u,[a,k,b,g],[a1,k1,b1,g1,f1]);
+dub = subs(du,[a,k,b,g],[a1,k1,b1,g1]);
+ddub = subs(ddu,[a,k,b,g],[a1,k1,b1,g1]);
+dddub = subs(dddu,[a,k,b,g],[a1,k1,b1,g1]);
+figure(1)
+fplot(ub,ts)
+figure(2)
+fplot(dub,ts)
+figure(3)
+fplot(ddub,ts)
+figure(4)
+fplot(dddub,ts)
+%% 第一層に入れる近似入力
+% syms a b f1 g1 k [1 2] real 
+syms sz1 [2 1]
+Ac2 = [0,1;0,0];
+Bc2 = [0;1];
+f1=[8.29378,10.2001];
+a=[20.7437,19.1444];
+k=[28.4298558254086,8.05867722851289];
+u=0;du=0;ddu=0;dddu=0;
+    for i = 1:2
+        fza = 1/(1+exp(-a(i)*2*sz1(i)));
+        tanha = 2*fza-1;
+        dtanha = 4*a(i)*fza*(1-fza);
+        ddtanha = 8*a(i)^2*fza*(1-fza)*(1-2*fza);
+        dddtanha = 16*a(i)^3*fza*(1-fza)*(1-6*fza+6*fza^2);
+
+        u = u -f1(i)*tanha -k(i)*sz1(i);
+            dz = Ac2*sz1 + Bc2*u;
+        du = du -f1(i)*dtanha*dz(i) -k(i)*dz(i);
+            ddz = Ac2*dz + Bc2*du;
+        ddu = ddu -f1(i)*ddtanha*(dz(i))^2 -f1(i)*dtanha*ddz(i) -k(i)*ddz(i);
+            dddz = Ac2*ddz + Bc2*ddu;
+        dddu = dddu -f1(i)*dddtanha*(dz(i))^3 -3*f1(i)*ddtanha*dz(i)*ddz(i) -f1(i)*dtanha*dddz(i) -k(i)*dddz(i);
+    end
 %% ディラックのΔ関数で無理やり微分
 
 syms  t a k

@@ -69,6 +69,7 @@ classdef HLC < CONTROLLER_CLASS
 %             vs = Vs(x,xd',vf,P,F2,F3,F4);
            %% 外乱(加速度で与える)
             dst = 0.1;
+%             dst=0.5*sin(2*pi*t/2);%
 %             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=2;

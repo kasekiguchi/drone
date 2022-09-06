@@ -25,7 +25,6 @@ if exist('motive', 'var') == 1; motive.getData([], []); end
     end
 
 else
-
     %% for sim
     for i = 1:N
         if (fOffline)

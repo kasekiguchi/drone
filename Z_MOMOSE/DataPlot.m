@@ -42,7 +42,7 @@ if fsingle==1
     ref=zeros(3,tn);
     est=zeros(3,tn);
     err=zeros(3,tn);
-    inp=zeros(4,tn);
+    inp=zeros(5,tn);
     att=zeros(3,tn);
     vel=zeros(3,tn);
     w=zeros(3,tn);
@@ -55,18 +55,18 @@ if fsingle==1
     j=1;
     for i=k0f:1:k0e
         time(j)=ti0(i)-tt0;
-        ref(:,j)=name.Data.agent.reference.result{1,i}.state.p;
-        est(:,j)=name.Data.agent.estimator.result{1,i}.state.p;
+        ref(:,j)=name.Data.agent.reference.result{1,i}.state.p(1:3);
+        est(:,j)=name.Data.agent.estimator.result{1,i}.state.p(1:3);
         err(:,j)=est(:,j)-ref(:,j);%誤差
         inp(:,j)=name.Data.agent.input{1,i};
-        att(:,j)=name.Data.agent.estimator.result{1,i}.state.q;
-        vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v;
-        w(:,j)=name.Data.agent.estimator.result{1,i}.state.w;
-%         uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
-%         z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
-%         z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
-%         z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
-%         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
+        att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
+        vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v(1:3);
+        w(:,j)=name.Data.agent.estimator.result{1,i}.state.w(1:3);
+        uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
+        z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
+        z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
+        z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
+        z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
         %ininp(:,j)=name.Data.agent.inner_input{1, i};
         j=j+1;
     end

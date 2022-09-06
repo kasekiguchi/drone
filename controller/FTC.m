@@ -21,9 +21,9 @@ classdef FTC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.Vf = param.Vf; % ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹
             obj.Vs = param.Vs; % ŠK‘w‚Q‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹ 
-%             obj.VfFT = param.VfFT;% ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹FT—p
-            obj.gain1 = param.gain1;
-            obj.gain2 = param.gain2;
+            obj.VfFT = param.VfFT;% ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹FT—p
+            obj.gain1 = param.gain1;%tanh1
+            obj.gain2 = param.gain2;%tanh2
         end
         
         function result = do(obj,param,~)
@@ -68,20 +68,26 @@ classdef FTC < CONTROLLER_CLASS
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
 
-            %%%%%%%%%%%%%%%%%%%
+            
 %% calc Z
             z1 = Z1(x,xd',P);
           %z•ûŒü:FB
-            vf = obj.Vf(z1,F1);
+%             vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
           %z•ûŒü:FT
-            a = 2;
-%             vf = obj.VfFT(z1,F1,a);
+%             f1=obj.gain2(:,1); 
+%             a1=obj.gain2(:,2);
+%             f2=obj.gain2(:,3);
+%             a2=obj.gain2(:,4);
+%             vf = obj.VfFT(f1,a1,f2,a2,,F1,z1);%%%%%%%%%%%%%%%%%%
+
+            f1=obj.gain1(1:2,1)';
+            a1=obj.gain1(1:2,2)';
+            vf = obj.VfFT(f1,a1,F1,z1);%%%%%%%%%%%%%%%%%%
             %x,y,psi‚Ìó‘Ô•Ï”‚Ì’l
             z2=Z2(x,xd',vf,P);%x•ûŒü
             z3=Z3(x,xd',vf,P);%y•ûŒü
             z4=Z4(x,xd',vf,P);%yaw
-            %vs = obj.Vs(z2,z3,z4,F2,F3,F4);
-            %%%%%%%%%%%%%%%%%%%
+            %vs = obj.Vs(z2,z3,z4,F2,F3,F4);%%%%%%%%%%%%%%%%%%%
             
 %% x,y,psi‚Ì“ü—Í
 n =1;% 1:—LŒÀ®’è 4:tanh1 5:tanh2
@@ -89,8 +95,8 @@ switch n
         case 1
 %—LŒÀ®’è
 % 
-%             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%i17jŽ®
-%             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)Ž®       
+            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%i17jŽ®
+            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)Ž®       
 %             ux=1*ux;
 %             uy=1*uy;
 %             
@@ -148,13 +154,15 @@ end
 %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%¡‰ñ‚Í‚±‚ê‚Å()%FT
 %
 %% ŠO—(‰Á‘¬“x‚Å—^‚¦‚é)
-            dst = 0.1;
-%             dst=8*sin(2*pi*t/0.2);%
+            dst = 0.0;
+%             dst_y = 0;
+%             dst_z=0;
+%             dst=0.5*sin(2*pi*t/0.5);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=2;
-%             if t>=2 && t<=2.1@
-%                     dst=1/0.025;
-%             end
+            if t>=5 && t<=5.025
+                    dst=1/0.025;
+            end
 %%            
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);

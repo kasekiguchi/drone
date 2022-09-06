@@ -12,32 +12,56 @@ syms sz1 [2 1] real
 syms sF1 [1 2] real
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,[1,0],[0]),dt));
 Controller_param.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
-%有限整定制御用のVfを書く
-% syms a real
-% th=0;dth=0;ddth =0; dddth=0;
-% for i=1:2
-%     fz = 1/(1+exp(-a*2*sz1(i)));
-%     tanh = 2*fz-1;
-%     dtanh = 4*a*fz*(1-fz);
-%     ddtanh = 8*a^2*fz*(1-fz)*(1*2*fz);
-%     dddtanh = 16*a^3*fz*(1-fz)*(1-6*fz+6*fz^2);
-%     
-%     th = th + tanh;
-%     dth = dth + dtanh;
-%     ddth = ddth + ddtanh;
-%     dddth = dddth + dddtanh;
-% end
-% A = Ad1-Bd1*sF1;
-% Az = A*sz1;
-% AAz = A*Az;
-% AAAz = A*AAz;
-% 
-% Controller_param.VfFT = matlabFunction([-sF1*(th+1)*sz1, -sF1*(dth+1)*Az, -sF1*(ddth*Az.^2+(dth+1)*AAz), -sF1*(dddth*Az.^3+3*ddth*Az.*AAz+(dth+1)*AAAz)],"Vars",{sz1,sF1,a});
-%
-% syms al z(t) []positive
-% uFT = -k*sign(sz(i))*abs(sz1(i))^al
-% duFT = diff(uFT,)
+%有限整定の近似微分　一層
+syms a b f1 g1 k [1 2] real 
+fsingle = 1;%%%%%%%%%%%%%%%%%%%%
+u=0;du=0;ddu=0;dddu=0;
+if fsingle 
+    for i = 1:2
+        fza = 1/(1+exp(-a(i)*2*sz1(i)));
+        tanha = 2*fza-1;
+        dtanha = 4*a(i)*fza*(1-fza);
+        ddtanha = 8*a(i)^2*fza*(1-fza)*(1-2*fza);
+        dddtanha = 16*a(i)^3*fza*(1-fza)*(1-6*fza+6*fza^2);
 
+        u = u -f1(i)*tanha -k(i)*sz1(i);
+            dz = Ac2*sz1 + Bc2*u;
+        du = du -f1(i)*dtanha*dz(i) -k(i)*dz(i);
+            ddz = Ac2*dz + Bc2*du;
+        ddu = ddu -f1(i)*ddtanha*(dz(i))^2 -f1(i)*dtanha*ddz(i) -k(i)*ddz(i);
+            dddz = Ac2*ddz + Bc2*ddu;
+        dddu = dddu -f1(i)*dddtanha*(dz(i))^3 -3*f1(i)*ddtanha*dz(i)*ddz(i) -f1(i)*dtanha*dddz(i) -k(i)*dddz(i);
+
+    end
+    Controller_param.VfFT = matlabFunction([u,du,ddu,dddu],"Vars",{f1,a,k,sz1});
+else    
+    for i = 1:2
+        fza = 1/(1+exp(-a(i)*2*z(i)));
+        tanha = 2*fza-1;
+        dtanha = 4*a(i)*fza*(1-fza);
+        ddtanha = 8*a(i)^2*fza*(1-fza)*(1*2*fza);
+        dddtanha = 16*a(i)^3*fza*(1-fza)*(1-6*fza+6*fza^2);
+
+        fzb = 1/(1+exp(-b(i)*2*z(i)));
+        tanhb = 2*fzb-1;
+        dtanhb = 4*b(i)*fzb*(1-fzb);
+        ddtanhb = 8*b(i)^2*fzb*(1-fzb)*(1*2*fzb);
+        dddtanhb = 16*b(i)^3*fzb*(1-fzb)*(1-6*fzb+6*fzb^2);
+
+        u = u -f1(i)*tanha -g1(i)*tanhb -k(i)*sz(i);
+            dz = Ac*sz1 + Bc*u;
+        du = du -f1(i)*dtanha*a(i)*dz(i) -g1(i)*dtanhb*b(i)*dz(i) -k(i)*dz(i);
+            ddz = Ac*dz + Bc*du;
+        ddu = ddu -f1(i)*ddtanha*(a(i)*dz(i))^2 -g1(i)*ddtanhb*(b(i)*dz(i))^2 -f1(i)*dtanha*a(i)*ddz(i) -g1(i)*dtanhb*b(i)*ddz(i) -k(i)*dz(i);
+            dddz = Ac*ddz + Bc*ddu;
+        dddu = dddu -f1(i)*dddtanha*(a(i)*dz(i))^3 -g1(i)*dddtanhb*(b(i)*dz(i))^3 -3*f1(i)*ddtanha*a(i)^2*dz(i)*ddz(i) -3*g1(i)*dtanhb*b(i)^2*dz(i)*ddz(i) -f1(i)*dtanha*a(i)*dddz(i) -g1(i)*dtanhb*b(i)*dddz(i)-k(i)*dz(i);
+
+    end
+    Controller_param.VfFT = matlabFunction([u,du,ddu,dddu],"Vars",{f1,a,g1,b,k,sz1});
+end
+
+
+%% 二層
 syms sz2 [4 1] real
 syms sF2 [1 4] real
 syms sz3 [4 1] real
@@ -63,7 +87,7 @@ Controller_param.Vs = matlabFunction([-sF2*sz2;-sF3*sz3;-sF4*sz4],"Vars",{sz2,sz
 anum=4;%変数の数
 alpha=zeros(anum+1,1);
 alpha(anum+1)=1;
-alpha(anum)=0.8;%alphaの初期値
+alpha(anum)=0.9;%alphaの初期値
 
 for a=anum-1:-1:1
     alpha(a)=(alpha(a+2)*alpha(a+1))/(2*alpha(a+2)-alpha(a+1));
@@ -77,10 +101,10 @@ Controller_param.ay=alpha;
 Controller_param.az=alpha(1:2,1);
 Controller_param.apsi=alpha(1:2,1);
 %% 近似のパラメータ
-fff=10;%%%%%%%%%%%%%%%%%%%%%%
+fff=1;%%%%%%%%%%%%%%%%%%%%%%
 faprxm1=1;%%%%%%%%%%%%%%%%%%%%
 
-k=Controller_param.F2;
+kf2=Controller_param.F2;
 gain_ser1=zeros(4,2);
 gain_ser2=zeros(4,4);
 
@@ -92,7 +116,7 @@ if faprxm1==1
     er=0.1; %近似する範囲を指定
     gain_ser1=zeros(4,2);
     for i=1:4
-        fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alpha(i) + x(1)*tanh(x(2)*e) + k(i)*e ) ,0, er));
+        fun=@(x)(integral(@(e) abs( -kf2(i)*abs(e).^alpha(i) + x(1)*tanh(x(2)*e) + kf2(i)*e ) ,0, er));
         [x,fval] = fminsearch(fun,x0) ;
         fvals12(i) = 2*fval;
         gain_ser1(i,:)=x;% gain_ser1(4*2)["f1","a1"]*[x;dx;ddx;dddx]
