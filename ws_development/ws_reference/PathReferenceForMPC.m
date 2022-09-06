@@ -73,7 +73,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             LineXe = obj.self.estimator.result.map_param.x(:,2); %lineの終点のx座標
             LineYs = obj.self.estimator.result.map_param.y(:,1); %lineの始点のy座標
             LineYe = obj.self.estimator.result.map_param.y(:,2); %lineの終点のy座標
-            lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 0.02; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
+            lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 0.1; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
             %----------------------------%
             %EstDataは推定のロボットの位置
             %EstData(1)は推定のロボットのX座標、EstDAta(2)は推定のロボットのy座標
@@ -206,7 +206,8 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             th = result.th;
             rp = result.state.p(1:2,:);
             rth = result.state.p(3,:);
-            plot(l(:,1),l(:,2));
+            plot(l(1:2,1),l(1:2,2),'LineWidth',3,'Color','b');
+            plot(l(4:5,1),l(4:5,2),'LineWidth',2,'Color','r');
             hold on            
             plot(rp(1,:),rp(2,:),'yo','LineWidth',1);
             quiver(rp(1,:),rp(2,:),2*cos(rth),2*sin(rth),'Color','y');         

@@ -187,7 +187,9 @@ cha = obj.Data.phase(obj.k);
                 attribute string = "e"
                 option.ranget (1, 2) double = [0 obj.Data.t(obj.k)]
             end
-            if strcmp(target, {'time', 't'}) | target == 0
+            if sum(strcmp(target, {'time', 't'}))                
+                data = obj.data_org(0,'t','',"ranget",option.ranget);
+            elseif target == 0
                 data = obj.data_org(0,variable,attribute,"ranget",option.ranget);
             else
                 data = cell2mat(arrayfun(@(i) obj.data_org(i, variable, attribute,"ranget",option.ranget), target, 'UniformOutput', false));
