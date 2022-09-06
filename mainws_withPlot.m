@@ -177,7 +177,7 @@ end
 %logger2 = logger;
 %time.t = time.t - dt;
 % logger = logger2;
-% tid = 1632;
+% tid = 135;
 % time.t = logger.Data.t(tid)
 % logger.overwrite("plant", time.t, agent, 1);
 % logger.overwrite("estimator", time.t, agent, 1); 
@@ -188,9 +188,11 @@ end
 % logger.overwrite("controller", time.t, agent, 1);
 % logger.overwrite("input", time.t, agent, 1);
 % agent.estimator.result.state.get
-% agent.input
-% agent.reference.TrackWpointPathForMPC.show(agent.reference.result);
-% agent.estimator.ukfslam_WC.show
+% %agent.input
+% 
+%agent.sensor.LiDAR.show
+%agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
+%agent.estimator.ukfslam_WC.show
 % time.t = time.t + dt;
 %% main loop
 disp("while ==========  ==================")
@@ -283,7 +285,7 @@ SaveOnOff = true; %trueでデータをはく
 Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calculation);
-logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+logger.plot({1,"p1:2","e"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
 logger.save("AROB2022_Proposed_200s")
