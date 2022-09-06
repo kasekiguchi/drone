@@ -60,16 +60,17 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3, 3]));
          
             obj.path_length = zeros(size(self.sensor.lrf.angle_range));
-            as = 0:obj.pitch:2*pi;
+            as = 0:obj.pitch:2*pi; %センサの分解能（行列）
             obj.margin = obj.margin;
-            tmp = find((obj.radius*sin(as) >= obj.margin).*(as <= pi/2));
+            %仮想通路の生成
+            tmp = find((obj.radius*sin(as) >= obj.margin).*(as <= pi/2));%ドローンの前方左側90°のインデックス
             obj.path_length(tmp) = obj.margin./sin(as(tmp));
             obj.path_length(1:find(obj.path_length,1)-1) = obj.radius;
             
-            tmp = find((obj.radius*sin(as) <= -obj.margin).*(as >= 3*pi/2));
+            tmp = find((obj.radius*sin(as) <= -obj.margin).*(as >= 3*pi/2));%ドローンの前方右側90°のインデックス
             obj.path_length(tmp) = -obj.margin./sin(as(tmp));
             obj.path_length(find(obj.path_length,1,'last')+1:end) = obj.radius;
-            %plot(obj.path_length.*cos(as),obj.path_length.*sin(as),"o");
+%             plot(obj.path_length.*cos(as),obj.path_length.*sin(as),"o");
             obj.margin = obj.margin;
         end
         
@@ -81,17 +82,17 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
-            obj.l_points = obj.sensor.sensor_points;
+            obj.l_points = obj.sensor.sensor_points; %座標データ
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
-            l_goal_angle = atan2(l_goal(2),l_goal(1));
+            l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
             [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近いレーザーインデックス
             path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離
             path_length(path_length>goal_length)=goal_length;
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合                
                 % edge_ids = 近い端点のindex配列
-                nlength = circshift(obj.length,1);
-                edge_ids = find(abs(nlength-obj.length) > obj.threshold);
+                nlength = circshift(obj.length,1); %１つずらした距離データ
+                edge_ids = find(abs(nlength-obj.length) > obj.threshold); %閾値を超えるindexの算出
                 tmp = obj.length(edge_ids) > nlength(edge_ids);
                 edge_ids(tmp) = edge_ids(tmp) - 1;
                 edge_ids(edge_ids==0) = length(nlength);
@@ -302,7 +303,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             obj.tid
 %         end
 
-
+%%
         function show(obj,env)
             arguments
                 obj
