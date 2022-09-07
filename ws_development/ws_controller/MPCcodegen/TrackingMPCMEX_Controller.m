@@ -43,6 +43,8 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.RangeGain = 10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
+            obj.result.previous_state = [];
+            obj.result.previous_input = obj.previous_input;
             obj.model = self.model;
         end
         
@@ -98,13 +100,16 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.phi = AssoFai;
 %             obj.param.NoiseR = obj.self.estimator.(obj.self.estimator.name).R;
             obj.param.X0 = obj.self.estimator.result.state.get();%[state.p;state.q;state.v;state.w];
-            obj.param.U0 = obj.previous_input(:,1);%現在時刻の入力
+            obj.param.U0 = oldinput;%obj.previous_input(:,1);%現在時刻の入力
             obj.param.model_param = obj.self.model.param;
             %------------------------%
-            if isempty(obj.previous_state)
+            if isempty(obj.result.previous_state)
                 obj.previous_state = repmat(obj.param.X0,1,obj.param.Num);                
+            else
+                obj.previous_state = obj.result.previous_state;
+                obj.previous_input = obj.result.previous_input;
             end
-            obj.previous_state(:,1) = obj.param.X0;
+            obj.previous_state(:,1) = obj.param.X0;% 1時刻前の予測値から現在時刻だけ現在推定値に置き換え．
             problem.solver    = 'fmincon';
             problem.options   = obj.options;
             problem.x0		  = [obj.previous_state;obj.previous_input;zeros(2,obj.param.Num)]; % 最適化計算の初期状態
@@ -124,6 +129,8 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.previous_input = [var(obj.param.state_size + 1:obj.param.total_size, 2:end),var(obj.param.state_size + 1:obj.param.total_size, end)];  
             obj.previous_state = var(1:obj.param.state_size,1:end);%[var(1:obj.param.state_size,2:end),var(1:obj.param.state_size,end)]; % 次時刻の最適化計算の初期値：一時刻ずらし最後二つは同じ状態
 %             obj.SolverName = func2str(problem.objective);
+            obj.result.previous_state = obj.previous_state;
+            obj.result.previous_input = obj.previous_input;
             result = obj.result;
         end
         
