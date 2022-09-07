@@ -31,7 +31,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
         R = eye(2)
         th = [];
     end
-    
+
     methods
         function obj = PathReferenceForMPC(self,varargin)
             % 【Input】 map_param ,
@@ -62,18 +62,18 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
             obj.Flag = 0;
         end
-        
+
         function  result= do(obj,param)
             %---推定器からデータを取得---%
-%             EstData = ...
-%                 [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
-%                 obj.self.estimator.(obj.self.estimator.name).result.state.v];%treat as a colmn vector
+            %             EstData = ...
+            %                 [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
+            %                 obj.self.estimator.(obj.self.estimator.name).result.state.v];%treat as a colmn vector
             EstData = obj.self.estimator.result.state.get();
             LineXs = obj.self.estimator.result.map_param.x(:,1); %lineの始点のx座標
             LineXe = obj.self.estimator.result.map_param.x(:,2); %lineの終点のx座標
             LineYs = obj.self.estimator.result.map_param.y(:,1); %lineの始点のy座標
             LineYe = obj.self.estimator.result.map_param.y(:,2); %lineの終点のy座標
-            lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 0.1; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
+            lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 1; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
             %----------------------------%
             %EstDataは推定のロボットの位置
             %EstData(1)は推定のロボットのX座標、EstDAta(2)は推定のロボットのy座標
@@ -89,28 +89,37 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             MatchYs = obj.self.estimator.result.map_param.y(InRange,1);
             MatchYe = obj.self.estimator.result.map_param.y(InRange,2); %センサレンジ内に入っているlineの始点・終点のy座標を持ってきている
             %-------------------------------------------%
-            
-            obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v] 
+
+            obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
             %wvec=[MatchXe-MatchXs,MatchYe-MatchYs]; % wall vector
             % Current time reference position calced at previous time
             x = EstData(1);
             y = EstData(2);
-%plot(reshape([MatchXs,MatchXe,NaN(size(MatchXs,1),1)]',[3*size(MatchXs,1),1]),reshape([MatchYs,MatchYe,NaN(size(MatchYs,1),1)]',[3*size(MatchYs,1),1]),x,y,'ro');
+            %plot(reshape([MatchXs,MatchXe,NaN(size(MatchXs,1),1)]',[3*size(MatchXs,1),1]),reshape([MatchYs,MatchYe,NaN(size(MatchYs,1),1)]',[3*size(MatchYs,1),1]),x,y,'ro');
             % estimated lines
             a = MatchA;
             b = MatchB;
-            c = MatchC;           
+            c = MatchC;
             k = (a.^2 - b.^2);% tmp const
+            aeqbids=abs(k)< 1E-4; % k が０となるインデックス
+
             X= -(x.*b.^2 + a.*y.*b + a.*c); % ./(a.^2 - b.^2) % 垂線の足*k a=bの特異性を除くため
             Y= (y.*a.^2 + b.*x.*a + b.*c); % ./(a.^2 - b.^2)
-            del=[X - k.*x,Y - k.*y]; % (垂線の足への相対ベクトル)*k
-            ds = [MatchXs-x,MatchYs-y].*k; % wall 始点への相対ベクトル
-            de = [MatchXe-x,MatchYe-y].*k; % wall 終点への相対ベクトル
-            ip = sum((ds - del).*(de - del),2); % 内積
-            wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス
+            X(~aeqbids) = X(~aeqbids).*k(~aeqbids);
+            Y(~aeqbids) = Y(~aeqbids).*k(~aeqbids);
+            X(aeqbids) = (x(aeqbids)+y(aeqbids)-c(aeqbids)/a(aeqbids))/2;
+            Y(aeqbids) = (x(aeqbids)+y(aeqbids)+c(aeqbids)/a(aeqbids))/2;
+
+            del=[X - x,Y - y]; % (垂線の足への相対ベクトル)
+            ds = [MatchXs-x,MatchYs-y]; % wall 始点への相対ベクトル
+            de = [MatchXe-x,MatchYe-y]; % wall 終点への相対ベクトル
+            ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
+            wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
             d = sum(del.^2,2);%abs(MatchC)./sqrt(MatchA.^2+MatchB.^2);
-%[ip,d,MatchXs,MatchYs,MatchXe,MatchYe]
-            [~,ids]=mink(d(wid),2);
+            %[ip,d,MatchXs,MatchYs,MatchXe,MatchYe]
+            [~,idm]=min(d(wid)); % 一番近い壁面
+            [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
+            ids=[idm,idm2];
             ids=wid(ids);
             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
             l2 = [a(ids(2)),b(ids(2)),c(ids(2))]*sign(b(ids(2)));
@@ -123,30 +132,47 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
 
             O = [x;y];
             th = EstData(3);
-            if abs(prod(a(ids)+prod(b(ids))))<1e-2 % ほぼ直交している場合（傾きの積が-1の式より）
+            if abs(prod(a(ids))+prod(b(ids)))<1e-2 % ほぼ直交している場合（傾きの積が-1の式より）
                 % 入りと出で同じ幅の通路を前提としてしまっている．
                 % 初期値が垂直二等分線上でもその場で回転するだけになる．
                 %p12 = cr(l1,l2);
                 if isempty(obj.O)
-                if (l1*[x;y;1])*(l2*[x;y;1])<0 % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
-                    l3 = (l1+l2)/2;
-                else
-                    l3 = (l1-l2)/2;
-                end
-                l4 = perp(l1,[rx;ry]);
-                obj.O = cr(l4,l3);
-                obj.R = vecnorm(obj.O-[rx;ry]);
-                obj.th = obj.step*obj.Targetv/obj.R;
+                    e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
+                    e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
+                    [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
+                    [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
+                    if sum(abs(e1(id1,:)-e2(id2,:))) < 1 % lineの近い方の距離が近い => 直交して交わる
+                        if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
+                            % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
+                            l3 = (l1+l2)/2;
+                        else
+                            l3 = (l1-l2)/2;
+                        end
+                        l4 = perp(l1,[rx;ry]);
+                        obj.O = cr(l4,l3);% 回転中心
+                        obj.R = vecnorm(obj.O-[rx;ry]);
+                    else % 遠い => 交わらない線分：推定が失敗してくると生じる
+                        de1 = vecnorm(e1(id1,:)'-[rx;ry]);
+                        de2 = vecnorm(e2(id2,:)'-[rx;ry]);
+                        if de1 < de2
+                            obj.O = (e1(id1,:) + [x y])';
+                            obj.R = de1;
+                        else
+                            obj.O = (e2(id2,:) + [x y])';
+                            obj.R = de2;
+                        end
+                    end
+                    obj.th = obj.step*obj.Targetv/obj.R;
                 end
                 th = obj.th;
                 O = obj.O;
                 R = obj.R;
                 Rmat = [cos(th),-sin(th);sin(th),cos(th)];
                 tmp0 = [x;y]-O;
-                tmp0 = tmp0/vecnorm(tmp0);
-                tmp = cross([0;0;1],[tmp0;0]);
-                tmpt0 = atan2(tmp(2),tmp(1));
-                tmp0 = R*tmp0;
+                tmp0 = tmp0/vecnorm(tmp0);% 回転中心から機体の位置方向の単位ベクトル
+                tmp = cross([0;0;1],[tmp0;0]);% 機体の進むべき向き
+                tmpt0 = atan2(tmp(2),tmp(1));% 現在時刻の目標姿勢角
+                tmp0 = R*tmp0; % 現在時刻の目標位置
                 tmp(:,1) = [tmp0+O;tmpt0];
                 for i = 2:obj.Holizon
                     tmp0 = Rmat*tmp0;
@@ -155,13 +181,19 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 end
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
             else % ほぼ平行な場合
-            if check_line_validity([MatchXs(ids);MatchXe(ids)],[MatchYs(ids);MatchYe(ids)])            
+                %if check_line_validity([MatchXs(ids);MatchXe(ids)],[MatchYs(ids);MatchYe(ids)])
                 obj.O = [];
-                rl = (l1+l2)/2; % reference line
+                if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
+                    % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
+                    rl = (l1+l2)/2;
+                else
+                    rl = (l1-l2)/2;
+                end
+                %rl = (l1+l2)/2; % reference line
                 tmpl = perp(rl,[x;y]); % 機体を通るrl の垂線
                 tmp0 = cr(rl,tmpl); % 機体からrlへの垂線の足
                 %tmp0 = [x;y];
-                rl = rl*sign([rl(2),-rl(1)]*[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように             
+                rl = rl*sign([rl(2),-rl(1)]*[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
                 tmpt0 = atan2(-rl(1),rl(2));
                 tmp(:,1) = [tmp0;tmpt0];
                 for i = 2:obj.Holizon
@@ -169,14 +201,14 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                     tmp(:,i) = [tmp0;tmpt0];
                 end
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
-            end
+                %end
             end
             q = EstData(3);
             qr = obj.TrackingPoint(3,:);
             tmp = q - qr > 4;
             qr(tmp) = qr(tmp)+2*pi;
             tmp = q - qr < -4;
-            qr(tmp) = qr(tmp)-2*pi;      
+            qr(tmp) = qr(tmp)-2*pi;
             obj.TrackingPoint(3,:) = qr;
 
             obj.result.state.set_state("xd",obj.TrackingPoint);%treat as a colmn vector
@@ -192,9 +224,9 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.result.th = th;
             obj.result.focusedLine = [[MatchXs(ids(1));MatchXe(ids(1));NaN;MatchXs(ids(2));MatchXe(ids(2))],[MatchYs(ids(1));MatchYe(ids(1));NaN;MatchYs(ids(2));MatchYe(ids(2))]];
             obj.result.step = obj.step;
-            result=obj.result;            
+            result=obj.result;
         end
-        
+
         function show(obj,result)
             arguments
                 obj
@@ -212,9 +244,9 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             hold on
             plot(l(4:5,1),l(4:5,2),'LineWidth',2,'Color','r');
             plot(rp(1,:),rp(2,:),'yo','LineWidth',1);
-            quiver(rp(1,:),rp(2,:),2*cos(rth),2*sin(rth),'Color','y');         
+            quiver(rp(1,:),rp(2,:),2*cos(rth),2*sin(rth),'Color','y');
             plot(p(1),p(2),'ro');
-            quiver(p(1),p(2),cos(th),sin(th),'Color','r');  
+            quiver(p(1),p(2),cos(th),sin(th),'Color','r');
             hold off
         end
     end
@@ -225,19 +257,19 @@ L = [-l(2), l(1), l(2)*p(1)-l(1)*p(2)];
 end
 function p = cr(l1,l2)
 % l1 と l2の交点
- a1 = l1(1);
- b1 = l1(2);
- c1 = l1(3);
- a2 = l2(1);
- b2 = l2(2);
- c2 = l2(3);
- d = (a1*b2 - a2*b1);
- if d == 0
-     error("ACSL : l1 and l2 are parallel");
- else
+a1 = l1(1);
+b1 = l1(2);
+c1 = l1(3);
+a2 = l2(1);
+b2 = l2(2);
+c2 = l2(3);
+d = (a1*b2 - a2*b1);
+if d == 0
+    error("ACSL : l1 and l2 are parallel");
+else
     p(1,1) = (b1*c2 - b2*c1)/d;
     p(2,1) = -(a1*c2 - a2*c1)/d;
- end
+end
 end
 function [OverWall,tt,CrossPoint] = judgeingOverWall(NowPoint,NextPoint,MatchXs,MatchXe,MatchYs,MatchYe,MatchA,MatchB,MatchC)
 %Linecheck
@@ -288,13 +320,13 @@ end
 function t_or_f = check_line_validity(x,y)
 % x = [x1,x3,x2,x4]', y = [y1,y3,y2,y4]'
 % 線分：X1-X2, X3-X4　が交点を持つ場合０　無ければ１を返す．
-   X1 = [x(1);y(1)];
-   X2 = [x(3);y(3)];
-   X3 = [x(2);y(2)];
-   X4 = [x(4);y(4)];
-   X31=X3-X1; X31 = [X31(2);-X31(1)];
-   X41=X4-X1; X41 = [X41(2);-X41(1)];
-   X13=X1-X3; X13 = [X13(2);-X13(1)];
-   X23=X2-X3; X23 = [X23(2);-X23(1)];
-   t_or_f = ~(((X2-X1)'*X31*X41'*(X2-X1) < 0) & ((X4-X3)'*X13*X23'*(X4-X3)<0));
+X1 = [x(1);y(1)];
+X2 = [x(3);y(3)];
+X3 = [x(2);y(2)];
+X4 = [x(4);y(4)];
+X31=X3-X1; X31 = [X31(2);-X31(1)];
+X41=X4-X1; X41 = [X41(2);-X41(1)];
+X13=X1-X3; X13 = [X13(2);-X13(1)];
+X23=X2-X3; X23 = [X23(2);-X23(1)];
+t_or_f = ~(((X2-X1)'*X31*X41'*(X2-X1) < 0) & ((X4-X3)'*X13*X23'*(X4-X3)<0));
 end

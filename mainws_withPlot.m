@@ -176,28 +176,32 @@ end
 %% 続きから
 %logger2 = logger;
 %time.t = time.t - dt;
-% logger = logger2;
-% tid = 1240  ;
-% time.t = logger.Data.t(tid)
-% logger.overwrite("plant", time.t, agent, 1);
-% logger.overwrite("estimator", time.t, agent, 1); 
-% agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
-% agent.estimator.ukfslam_WC.result = agent.estimator.result;
-% logger.overwrite("sensor", time.t, agent, 1);
-% agent.sensor.LiDAR.result = agent.sensor.result;
-% logger.overwrite("reference", time.t, agent, 1);
-% logger.overwrite("controller", time.t, agent, 1);
-% logger.overwrite("input", time.t, agent, 1);
-% agent.estimator.result.state.get
-% %agent.input
-% % 
-% close all
-% agent.sensor.LiDAR.show()
-% figure()
-% agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
-% figure()
-% agent.estimator.ukfslam_WC.show
-% time.t = time.t + dt;
+logger = logger2;
+tid = find(logger.Data.t,1,'last')
+tid = 1893;
+time.t = logger.Data.t(tid);
+logger.overwrite("plant", time.t, agent, 1);
+logger.overwrite("estimator", time.t, agent, 1); 
+agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
+agent.estimator.ukfslam_WC.result = agent.estimator.result;
+logger.overwrite("sensor", time.t, agent, 1);
+agent.sensor.LiDAR.result = agent.sensor.result;
+logger.overwrite("reference", time.t, agent, 1);
+logger.overwrite("controller", time.t, agent, 1);
+agent.controller.TrackingMPCMEX_Controller.self = agent;
+agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
+logger.overwrite("input", time.t, agent, 1);
+agent.estimator.result.state.get
+%agent.input
+% 
+close all
+agent.sensor.LiDAR.show()
+figure()
+agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
+axis equal
+figure()
+agent.estimator.ukfslam_WC.show
+%time.t = time.t + dt;
 %% main loop
 disp("while ==========  ==================")
 close all;
@@ -211,7 +215,7 @@ tic
 % tryf
 while round(time.t,5)<=te
 %profile on
-    if time.t >= 99.8
+    if time.t >= 191.8
         time.t
     end
     %while 1 % for exp
