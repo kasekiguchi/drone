@@ -176,13 +176,13 @@ end
 %% 続きから
 logger.save("tmp");
 %%
- log = load("Data/tmp_Log(08-Sep-2022_07_44_57).mat");
- clear logger
- logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
- logger.Data = log.log.Data;
+%  log = load("Data/tmp_Log(08-Sep-2022_07_44_57).mat");
+%  clear logger
+%  logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+%  logger.Data = log.log.Data;
 %%
-tid = find(logger.Data.t,1,'last')
-% tid = 1800;
+% tid = find(logger.Data.t,1,'last')
+tid = 2292;
 time.t = logger.Data.t(tid)
 logger.overwrite("plant", time.t, agent, 1);
 logger.overwrite("estimator", time.t, agent, 1); 
@@ -197,7 +197,7 @@ agent.controller.TrackingMPCMEX_Controller.self = agent;
 agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
 logger.overwrite("input", time.t, agent, 1);
 agent.estimator.result.state.get
-%agent.input
+agent.input
 % 
 close all
 agent.sensor.LiDAR.show()
@@ -294,14 +294,14 @@ calculation=toc;
 % end
 %% dataplot 自作
 close all;
-SaveOnOff = true; %trueでデータをはく
+SaveOnOff = false; %trueでデータをはく
 Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calculation);
 logger.plot({1,"p1:2","er"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save("AROB2022_Proposed_200s")
+logger.save("AROB2022_Comp_300s")
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
