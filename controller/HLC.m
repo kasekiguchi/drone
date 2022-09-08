@@ -58,17 +58,11 @@ classdef HLC < CONTROLLER_CLASS
             ux=-F2*z2;
             uy=-F3*z3;
             upsi=-F4*z4;
-            %外乱
-%                 ux=ux+5*sin(2*pi*t/2);
-                ux=ux+2;
-%                 if t>=2 && t<=2.1
-%                     ux=ux+1/0.025;
-%                 end
             vs =[ux,uy,upsi];
             
 %             vs = Vs(x,xd',vf,P,F2,F3,F4);
            %% 外乱(加速度で与える)
-            dst = 0.1;
+            dst = 0;
 %             dst=0.5*sin(2*pi*t/2);%
 %             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);

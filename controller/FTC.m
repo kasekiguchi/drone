@@ -21,7 +21,7 @@ classdef FTC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.Vf = param.Vf; % ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹
             obj.Vs = param.Vs; % ŠK‘w‚Q‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹ 
-            obj.VfFT = param.VfFT;% ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹FT—p
+%             obj.VfFT = param.VfFT;% ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹FT—p
             obj.gain1 = param.gain1;%tanh1
             obj.gain2 = param.gain2;%tanh2
         end
@@ -72,10 +72,10 @@ classdef FTC < CONTROLLER_CLASS
 %% calc Z
             z1 = Z1(x,xd',P);
           %z•ûŒü:FB
-%             vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
+            vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
           %z•ûŒü:FT
-%             vf = obj.VfFT(F1,z1);%%%%%%%%%%%%%%%%%%
-            vf = obj.VfFT(z1);%%%%%%%%%%%%%%%%%%
+%             vf = obj.VfFT(F1,z1);%%%%%%%%%%%%%%%%%%xy
+%             vf = obj.VfFT(z1);%%%%%%%%%%%%%%%%%%xyz
             %x,y,psi‚Ìó‘Ô•Ï”‚Ì’l
             z2=Z2(x,xd',vf,P);%x•ûŒü
             z3=Z3(x,xd',vf,P);%y•ûŒü
@@ -88,13 +88,13 @@ switch n
         case 1
 %—LŒÀ®’è
 % 
-%             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%i17jŽ®
-%             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)Ž®       
+            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%i17jŽ®
+            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)Ž®       
 %             ux=1*ux;
 %             uy=1*uy;
 %             
-            ux=-1*F2*z2;
-            uy=-1*F3*z3;
+%             ux=-1*F2*z2;
+%             uy=-1*F3*z3;
             %•¹—p
 %             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1));%i17jŽ®
 %             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1));%(19)Ž®  
