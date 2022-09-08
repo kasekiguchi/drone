@@ -118,13 +118,44 @@ cha = obj.Data.phase(obj.k);
                 obj
                 name = []
                 opt.range = 1:length(obj.Data.phase);%find(obj.Data.phase,1,'last');
+                opt.separate = false;
             end
             drange=opt.range;
             if isempty(name)
-                filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
+                tmpname = strrep(strrep(strcat('Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
             else
-                filename = strrep(strrep(strcat('Data/',name,'_Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
-            end            
+                tmpname = strrep(strrep(strcat('',name,'_Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
+            end
+            if opt.separate
+                dirname ="Data/" + tmpname;
+                mkdir(dirname);
+                filename = dirname + "/Data.mat";
+                Data.t = obj.Data.t;
+                Data.phase = obj.Data.phase;
+                save(filename,"Data");
+                    sensor = obj.Data.agent.sensor;
+                    save(dirname + "/sensor.mat","sensor");
+                    estimator = obj.Data.agent.estimator;
+                    save(dirname + "/estimator.mat","estimator");
+                    reference = obj.Data.agent.reference;
+                    save(dirname + "/reference.mat","reference");
+                    input = obj.Data.agent.input;
+                    save(dirname + "/input.mat","input");
+                    controller = obj.Data.agent.controller;
+                    save(dirname + "/controller.mat","controller");
+                    plant = obj.Data.agent.plant;
+                    save(dirname + "/plant.mat","plant");
+            else
+                list = "Data/" + filename + ".mat";
+                log.Data = obj.Data;
+                fn = fieldnames(obj);
+                for i = fn'
+                    if ~strcmp(i{1},"Data")
+                        log.(i{1}) = obj.(i{1});
+                    end
+                end
+                save(filename, 'log');
+            end
 %             obj.Data.t = obj.Data.t(drange);
 %             obj.Data.phase = obj.Data.phase(drange);
 %             obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
@@ -132,14 +163,6 @@ cha = obj.Data.phase(obj.k);
 %             obj.Data.agent.reference.result = obj.Data.agent.reference.result(drange);
 %             obj.Data.agent.input = obj.Data.agent.input(drange);
 %             obj.Data.agent.plant.result = obj.Data.agent.plant.result(drange);
-            log.Data = obj.Data;
-            fn = fieldnames(obj);
-            for i = fn'
-                if ~strcmp(i{1},"Data")
-                    log.(i{1}) = obj.(i{1});
-                end
-            end
-            save(filename, 'log');
         end
         function overwrite(obj,str,t,agent,n)
             % overwrite(str,t,agent,n)
