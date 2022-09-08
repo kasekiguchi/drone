@@ -29,7 +29,7 @@ else
     te=300;
 end
 %% initialize
-initial(N) = struct;
+initial(N) = struct;    
 param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
@@ -174,7 +174,7 @@ for i = 1:N
     agent(i).do_sensor(param(i).sensor);
 end
 %% 続きから
-logger.save("tmp");
+%logger.save("tmp");
 %%
 %  log = load("Data/tmp_Log(08-Sep-2022_07_44_57).mat");
 %  clear logger
@@ -182,30 +182,30 @@ logger.save("tmp");
 %  logger.Data = log.log.Data;
 %%
 % tid = find(logger.Data.t,1,'last')
-tid = 2292;
-time.t = logger.Data.t(tid)
-logger.overwrite("plant", time.t, agent, 1);
-logger.overwrite("estimator", time.t, agent, 1); 
-agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
-agent.estimator.ukfslam_WC.result = agent.estimator.result;
-logger.overwrite("sensor", time.t, agent, 1);
-agent.sensor.LiDAR.result = agent.sensor.result;
-logger.overwrite("reference", time.t, agent, 1);
-agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
-logger.overwrite("controller", time.t, agent, 1);
-agent.controller.TrackingMPCMEX_Controller.self = agent;
-agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
-logger.overwrite("input", time.t, agent, 1);
-agent.estimator.result.state.get
-agent.input
-% 
-close all
-agent.sensor.LiDAR.show()
-figure()
-agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
-axis equal
-figure()
-agent.estimator.ukfslam_WC.show
+% tid = 2292;
+% time.t = logger.Data.t(tid)
+% logger.overwrite("plant", time.t, agent, 1);
+% logger.overwrite("estimator", time.t, agent, 1); 
+% agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
+% agent.estimator.ukfslam_WC.result = agent.estimator.result;
+% logger.overwrite("sensor", time.t, agent, 1);
+% agent.sensor.LiDAR.result = agent.sensor.result;
+% logger.overwrite("reference", time.t, agent, 1);
+% agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
+% logger.overwrite("controller", time.t, agent, 1);
+% agent.controller.TrackingMPCMEX_Controller.self = agent;
+% agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
+% logger.overwrite("input", time.t, agent, 1);
+% agent.estimator.result.state.get
+% agent.input
+% % 
+% close all
+% agent.sensor.LiDAR.show()
+% figure()
+% agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
+% axis equal
+% figure()
+% agent.estimator.ukfslam_WC.show
 %time.t = time.t + dt;
 %% main loop
 disp("while ==========  ==================")
@@ -301,7 +301,7 @@ Plots = DataPlot(logger,SaveOnOff);
 logger.plot({1,"p1:2","er"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save("AROB2022_Comp_300s")
+logger.save("AROB2022_Comp_300s","separate",true);
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
