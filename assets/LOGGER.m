@@ -117,7 +117,7 @@ cha = obj.Data.phase(obj.k);
             arguments
                 obj
                 name = []
-                opt.range = 1:find(obj.Data.phase,1,'last');
+                opt.range = 1:length(obj.Data.phase);%find(obj.Data.phase,1,'last');
             end
             drange=opt.range;
             if isempty(name)
@@ -125,13 +125,13 @@ cha = obj.Data.phase(obj.k);
             else
                 filename = strrep(strrep(strcat('Data/',name,'_Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
             end            
-            obj.Data.t = obj.Data.t(drange);
-            obj.Data.phase = obj.Data.phase(drange);
-            obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
-            obj.Data.agent.estimator.result = obj.Data.agent.estimator.result(drange);
-            obj.Data.agent.reference.result = obj.Data.agent.reference.result(drange);
-            obj.Data.agent.input = obj.Data.agent.input(drange);
-            obj.Data.agent.plant.result = obj.Data.agent.plant.result(drange);
+%             obj.Data.t = obj.Data.t(drange);
+%             obj.Data.phase = obj.Data.phase(drange);
+%             obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
+%             obj.Data.agent.estimator.result = obj.Data.agent.estimator.result(drange);
+%             obj.Data.agent.reference.result = obj.Data.agent.reference.result(drange);
+%             obj.Data.agent.input = obj.Data.agent.input(drange);
+%             obj.Data.agent.plant.result = obj.Data.agent.plant.result(drange);
             log.Data = obj.Data;
             fn = fieldnames(obj);
             for i = fn'
