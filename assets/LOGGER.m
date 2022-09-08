@@ -28,6 +28,10 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             %         以下のように名前と保存するものの対応が取れていなくても可
             %         LOGGER=LOGGER(~,~,"innerInput",~);
             %         LOGGER.logging(t,FH,agent,motive);
+            % 【ログの呼び出し】
+            % LOGGER.saveで保存したデータを呼び出してloggerとして登録することができる．
+            % logger=LOGGER("Data/filename.mat")
+            % logger=LOGGER("Data/dirname");
             arguments
                 target
                 number = []
@@ -37,11 +41,31 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 option.overwrite_target = []
             end
             if isstring(target)
+                if contains(target,"Data.mat") | ~contains(target,".mat");
+                if contains(target,"Data.mat")
+                   target = erase(target,"/Data.mat");
+                end
+                    tmp = load(target + "/Data.mat");
+                    obj.Data = tmp.Data;
+                    tmp = load(target + "/sensor.mat");
+                    obj.Data.agent.sensor = tmp.sensor;
+                    tmp = load(target + "/estimator.mat");
+                    obj.Data.agent.estimator = tmp.estimator;
+                    tmp = load(target + "/reference.mat");
+                    obj.Data.agent.reference = tmp.reference;
+                    tmp = load(target + "/input.mat");
+                    obj.Data.agent.input = tmp.input;
+                    tmp = load(target + "/controller.mat");
+                    obj.Data.agent.controller = tmp.controller;
+                    tmp = load(target + "/plant.mat");
+                    obj.Data.agent.plant = tmp.plant;
+                else
                 tmp=load(target);
                 log = tmp.log;
                 fn = fieldnames(log);
                 for i = fn'
                     obj.(i{1}) = log.(i{1});
+                end
                 end
                 if ~isempty(number)
                     obj.overwrite_target = option.overwrite_target;
@@ -136,7 +160,7 @@ cha = obj.Data.phase(obj.k);
                     sensor = obj.Data.agent.sensor;
                     save(dirname + "/sensor.mat","sensor");
                     estimator = obj.Data.agent.estimator;
-                    save(dirname + "/estimator.mat","estimator");
+                    save(dirname + "/estimator.mat","estimator","-v7.3");
                     reference = obj.Data.agent.reference;
                     save(dirname + "/reference.mat","reference");
                     input = obj.Data.agent.input;
@@ -156,13 +180,6 @@ cha = obj.Data.phase(obj.k);
                 end
                 save(filename, 'log');
             end
-%             obj.Data.t = obj.Data.t(drange);
-%             obj.Data.phase = obj.Data.phase(drange);
-%             obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
-%             obj.Data.agent.estimator.result = obj.Data.agent.estimator.result(drange);
-%             obj.Data.agent.reference.result = obj.Data.agent.reference.result(drange);
-%             obj.Data.agent.input = obj.Data.agent.input(drange);
-%             obj.Data.agent.plant.result = obj.Data.agent.plant.result(drange);
         end
         function overwrite(obj,str,t,agent,n)
             % overwrite(str,t,agent,n)

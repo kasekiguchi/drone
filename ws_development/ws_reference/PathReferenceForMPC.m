@@ -65,47 +65,104 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
         end
 
         function  result= do(obj,param)
-            %---推定器からデータを取得---%
-            %             EstData = ...
-            %                 [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
-            %                 obj.self.estimator.(obj.self.estimator.name).result.state.v];%treat as a colmn vector
-            EstData = obj.self.estimator.result.state.get();
-            LineXs = obj.self.estimator.result.map_param.x(:,1); %lineの始点のx座標
-            LineXe = obj.self.estimator.result.map_param.x(:,2); %lineの終点のx座標
-            LineYs = obj.self.estimator.result.map_param.y(:,1); %lineの始点のy座標
-            LineYe = obj.self.estimator.result.map_param.y(:,2); %lineの終点のy座標
-            lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 1; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
-            %----------------------------%
-            %EstDataは推定のロボットの位置
-            %EstData(1)は推定のロボットのX座標、EstDAta(2)は推定のロボットのy座標
-            %---SensorRange内に端点が入っているかを判定---%%今のセンサレンジで見える壁を引っ張て来ている
-            %JudgeSRs = (EstData(1) - LineXs).^2 + (EstData(2) - LineYs).^2 <= obj.SensorRange^2; %円の公式を使い始点がセンサレンジ内にあるかの判定
-            %JudgeSRe = (EstData(1) - LineXe).^2 + (EstData(2) - LineYe).^2 <= obj.SensorRange^2; %円の公式を使い終点がセンサレンジ内にあるかの判定
-            %InRange = (JudgeSRs|JudgeSRe)&lineids; %レンジ内なら1、レンジ外なら0
-            x = EstData(1);
-            y = EstData(2);
-            a = obj.self.estimator.result.map_param.a;
-            b = obj.self.estimator.result.map_param.b;
-            c = obj.self.estimator.result.map_param.c;
-            JudgeD = (a.*x+b.*y+c).^2./(a.^2+b.^2)<= obj.SensorRange^2;
-            InRange = JudgeD&lineids; %レンジ内なら1、レンジ外なら0
-            MatchA = obj.self.estimator.result.map_param.a(InRange); %端点がレンジ内に入っている直線の方程式a
-            MatchB = obj.self.estimator.result.map_param.b(InRange); %端点がレンジ内に入っている直線の方程式b
-            MatchC = obj.self.estimator.result.map_param.c(InRange); %端点がレンジ内に入っている直線の方程式c
-            MatchXs = obj.self.estimator.result.map_param.x(InRange,1);
-            MatchXe = obj.self.estimator.result.map_param.x(InRange,2); %センサレンジ内に入っているlineの始点・終点のx座標を持ってきている
-            MatchYs = obj.self.estimator.result.map_param.y(InRange,1);
-            MatchYe = obj.self.estimator.result.map_param.y(InRange,2); %センサレンジ内に入っているlineの始点・終点のy座標を持ってきている
-            %-------------------------------------------%
+             EstData = obj.self.estimator.result.state.get();
+             pe = EstData(1:2);
+             the = EstData(3);
+
+%% そもそも推定値を使わずリファレンスを作る．
+            sensor = obj.self.sensor.result;
+            LP = UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0], obj.self.estimator.ukfslam_WC.constant);
+            % x, y が全て０のLPを削除 UKFCombiningLinesで使っているフィールドだけ削除
+            tmpid=sum([LP.x,LP.y],2)==0; 
+            LP.x(tmpid,:) = [];
+            LP.y(tmpid,:) = [];
+            LP.a(tmpid,:) = [];
+            LP.b(tmpid,:) = [];
+            LP.c(tmpid,:) = [];
+            LP.index(tmpid,:) = [];
+
+            % 同一直線を統合
+            ABC = [LP.a,LP.b,LP.c];
+            X = LP.x;
+            Y = LP.y;
+            %[~,ia,ic] = uniquetol(ABC,'ByRows',true);
+            [~,ia,ic] = uniquetol(sign(ABC(:,3)).*ABC./vecnorm(ABC(:,1:2),2,2),'ByRows',true);
+            LP.index = LP.index(ia,:);
+            LP.a = LP.a(ia);
+            LP.b = LP.b(ia);
+            LP.c = LP.c(ia);
+            LP.x = LP.x(ia,:);
+            LP.y = LP.y(ia,:);
+            for i = 1:length(ia)
+                did = find(ic==i); % duplicated ids
+                LP.x(i,1) = min(X(did,:),[],'all');
+                LP.x(i,2) = max(X(did,:),[],'all');
+                if LP.a(i)*LP.b(i) > 0 % 右下がり
+                    LP.y(i,1) = max(Y(did,:),[],'all');
+                    LP.y(i,2) = min(Y(did,:),[],'all');
+                else % 右上がり
+                    LP.y(i,1) = min(Y(did,:),[],'all');
+                    LP.y(i,2) = max(Y(did,:),[],'all');
+                end
+            end
+
+            a = LP.a;
+            b = LP.b;
+            c = LP.c;
+            Xs = LP.x(:,1);
+            Xe = LP.x(:,2);
+            Ys = LP.y(:,1);
+            Ye = LP.y(:,2);
+            lineids = abs(Xe - Xs) + abs(Ye - Ys) > 1; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
+            a = a(lineids);
+            b = b(lineids);
+            c = c(lineids);
+            Xs = Xs(lineids);
+            Xe = Xe(lineids);
+            Ys = Ys(lineids);
+            Ye = Ye(lineids);
+            x = 0;
+            y = 0;
+%             %---推定器からデータを取得---%
+%             %             EstData = ...
+%             %                 [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
+%             %                 obj.self.estimator.(obj.self.estimator.name).result.state.v];%treat as a colmn vector
+%             LineXs = obj.self.estimator.result.map_param.x(:,1); %lineの始点のx座標
+%             LineXe = obj.self.estimator.result.map_param.x(:,2); %lineの終点のx座標
+%             LineYs = obj.self.estimator.result.map_param.y(:,1); %lineの始点のy座標
+%             LineYe = obj.self.estimator.result.map_param.y(:,2); %lineの終点のy座標
+%             lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 1; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
+%             %----------------------------%
+%             %EstDataは推定のロボットの位置
+%             %EstData(1)は推定のロボットのX座標、EstDAta(2)は推定のロボットのy座標
+%             %---SensorRange内に端点が入っているかを判定---%%今のセンサレンジで見える壁を引っ張て来ている
+%             %JudgeSRs = (EstData(1) - LineXs).^2 + (EstData(2) - LineYs).^2 <= obj.SensorRange^2; %円の公式を使い始点がセンサレンジ内にあるかの判定
+%             %JudgeSRe = (EstData(1) - LineXe).^2 + (EstData(2) - LineYe).^2 <= obj.SensorRange^2; %円の公式を使い終点がセンサレンジ内にあるかの判定
+%             %InRange = (JudgeSRs|JudgeSRe)&lineids; %レンジ内なら1、レンジ外なら0
+%             x = EstData(1);
+%             y = EstData(2);
+%             a = obj.self.estimator.result.map_param.a;
+%             b = obj.self.estimator.result.map_param.b;
+%             c = obj.self.estimator.result.map_param.c;
+%             JudgeD = (a.*x+b.*y+c).^2./(a.^2+b.^2)<= obj.SensorRange^2;
+%             InRange = JudgeD&lineids; %レンジ内なら1、レンジ外なら0
+%             A = obj.self.estimator.result.map_param.a(InRange); %端点がレンジ内に入っている直線の方程式a
+%             B = obj.self.estimator.result.map_param.b(InRange); %端点がレンジ内に入っている直線の方程式b
+%             C = obj.self.estimator.result.map_param.c(InRange); %端点がレンジ内に入っている直線の方程式c
+%             Xs = obj.self.estimator.result.map_param.x(InRange,1);
+%             Xe = obj.self.estimator.result.map_param.x(InRange,2); %センサレンジ内に入っているlineの始点・終点のx座標を持ってきている
+%             Ys = obj.self.estimator.result.map_param.y(InRange,1);
+%             Ye = obj.self.estimator.result.map_param.y(InRange,2); %センサレンジ内に入っているlineの始点・終点のy座標を持ってきている
+%             %-------------------------------------------%
 
             obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
-            %wvec=[MatchXe-MatchXs,MatchYe-MatchYs]; % wall vector
+            %wvec=[Xe-Xs,Ye-Ys]; % wall vector
             % Current time reference position calced at previous time
-            %plot(reshape([MatchXs,MatchXe,NaN(size(MatchXs,1),1)]',[3*size(MatchXs,1),1]),reshape([MatchYs,MatchYe,NaN(size(MatchYs,1),1)]',[3*size(MatchYs,1),1]),x,y,'ro');
+            %plot(reshape([Xs,Xe,NaN(size(Xs,1),1)]',[3*size(Xs,1),1]),reshape([Ys,Ye,NaN(size(Ys,1),1)]',[3*size(Ys,1),1]),x,y,'ro');
             % estimated lines
-            a = MatchA;
-            b = MatchB;
-            c = MatchC;
+%             a = A;
+%             b = B;
+%             c = C;
             
             k = (a.^2 - b.^2);% tmp const
             aeqbids=abs(k)< 1E-4; % k が０となるインデックス
@@ -118,12 +175,12 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             Y(aeqbids) = (x(aeqbids)+y(aeqbids)+c(aeqbids)/a(aeqbids))/2;
 
             del=[X - x,Y - y]; % (垂線の足への相対ベクトル)
-            ds = [MatchXs-x,MatchYs-y]; % wall 始点への相対ベクトル
-            de = [MatchXe-x,MatchYe-y]; % wall 終点への相対ベクトル
+            ds = [Xs-x,Ys-y]; % wall 始点への相対ベクトル
+            de = [Xe-x,Ye-y]; % wall 終点への相対ベクトル
             ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
             wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
-            d = sum(del.^2,2);%abs(MatchC)./sqrt(MatchA.^2+MatchB.^2); % 壁面までの距離
-            %[ip,d,MatchXs,MatchYs,MatchXe,MatchYe]
+            d = sum(del.^2,2);%abs(C)./sqrt(A.^2+B.^2); % 壁面までの距離
+            %[ip,d,Xs,Ys,Xe,Ye]
             [~,idm]=min(d(wid)); % 一番近い壁面
             [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
             ids=[idm,idm2];
@@ -172,9 +229,10 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                         end
                     end
                     obj.th = obj.step*obj.Targetv/obj.R;
+                    obj.O = obj.O + pe;
                 end
                 th = obj.th;
-                O = obj.O;
+                O = obj.O-pe;
                 R = obj.R;
                 Rmat = [cos(th),-sin(th);sin(th),cos(th)];
                 tmp0 = [x;y]-O;
@@ -190,7 +248,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 end
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
             else % ほぼ平行な場合
-                %if check_line_validity([MatchXs(ids);MatchXe(ids)],[MatchYs(ids);MatchYe(ids)])
+                %if check_line_validity([Xs(ids);Xe(ids)],[Ys(ids);Ye(ids)])
                 obj.O = [];
                 if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                     % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
@@ -212,7 +270,8 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
                 %end
             end
-            q = EstData(3);
+            % ここから絶対座標に戻す．
+            q = the;
             qr = obj.TrackingPoint(3,:);
             tmp = q - qr > 4;
             qr(tmp) = qr(tmp)+2*pi;
@@ -220,22 +279,24 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             qr(tmp) = qr(tmp)-2*pi;
             obj.TrackingPoint(3,:) = qr;
 
+            if vecnorm(obj.result.PreTrack- obj.TrackingPoint(:,1))>1
+                O;
+            end
+            obj.PreTrack = obj.TrackingPoint(:,1);
+            obj.result.PreTrack = obj.TrackingPoint(:,1);
+
+            obj.TrackingPoint(1:2,:) = obj.TrackingPoint(1:2,:) + pe;
             obj.result.state.set_state("xd",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("p",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("q",obj.TrackingPoint(3,1));%treat as a colmn vector
             obj.result.state.set_state("v",obj.TrackingPoint(4,1));%treat as a colmn vector
             %obj.self.reference.result.state = obj.TrackingPoint;
             %---Get Data of previous step---%
-            if vecnorm(obj.result.PreTrack- obj.TrackingPoint(:,1))>1
-                O;
-            end
-            obj.PreTrack = obj.TrackingPoint(:,1);
-            obj.result.PreTrack = obj.TrackingPoint(:,1);
             %-------------------------------%
             %resultに代入
-            obj.result.O = O;
+            obj.result.O = O + pe;
             obj.result.th = th;
-            obj.result.focusedLine = [[MatchXs(ids(1));MatchXe(ids(1));NaN;MatchXs(ids(2));MatchXe(ids(2))],[MatchYs(ids(1));MatchYe(ids(1));NaN;MatchYs(ids(2));MatchYe(ids(2))]];
+            obj.result.focusedLine = [[Xs(ids(1));Xe(ids(1));NaN;Xs(ids(2));Xe(ids(2))],[Ys(ids(1));Ye(ids(1));NaN;Ys(ids(2));Ye(ids(2))]]+pe';
             obj.result.step = obj.step;
             result=obj.result;
         end
@@ -284,12 +345,12 @@ else
     p(2,1) = -(a1*c2 - a2*c1)/d;
 end
 end
-function [OverWall,tt,CrossPoint] = judgeingOverWall(NowPoint,NextPoint,MatchXs,MatchXe,MatchYs,MatchYe,MatchA,MatchB,MatchC)
+function [OverWall,tt,CrossPoint] = judgeingOverWall(NowPoint,NextPoint,Xs,Xe,Ys,Ye,A,B,C)
 %Linecheck
-checklist = zeros(size(MatchXs,1),1);
-for i = 1:size(MatchXs,1)
-    tmpC = [MatchXs(i,1);MatchYs(i,1)];
-    tmpD = [MatchXe(i,1);MatchYe(i,1)];
+checklist = zeros(size(Xs,1),1);
+for i = 1:size(Xs,1)
+    tmpC = [Xs(i,1);Ys(i,1)];
+    tmpD = [Xe(i,1);Ye(i,1)];
     tc = (NowPoint(1) - NextPoint(1))*(tmpC(2) - NowPoint(2))+ (NowPoint(2) - NextPoint(2))*(NowPoint(1) - tmpC(1));
     td = (NowPoint(1) - NextPoint(1))*(tmpD(2) - NowPoint(2))+ (NowPoint(2) - NextPoint(2))*(NowPoint(1) - tmpD(1));
     tt1 = tc*td;
@@ -318,9 +379,9 @@ end
 tt = find(checklist>0);
 if ~isempty(tt(:)) %ttが空ではないとき1,ttが空のとき0
     OverWall = true;
-    a2 = MatchA(tt); %MatchA(1)
-    b2 = MatchB(tt); %MatchB(1)
-    c2 = MatchC(tt); %MatchC(1)
+    a2 = A(tt); %A(1)
+    b2 = B(tt); %B(1)
+    c2 = C(tt); %C(1)
     y = (a2*c - a*c2)/(a*b2 - a2*b);
     x = (-b2*y-c2)/a2;
     CrossPoint = [x;y];
