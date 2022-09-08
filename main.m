@@ -65,8 +65,18 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
             % reference
+            rz = 0; rx = 0; ry = 1;
+            if time.t >= 10
+                FH.CurrentCharacter = 'f';
+            end
+            if time.t >= 18
+                FH.CurrentCharacter = 'h';
+            end
+            if time.t >= 20
+                FH.CurrentCharacter = 'l';
+            end
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [1; 1; 1], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -75,9 +85,17 @@ end
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
             agent(i).do_reference(param(i).reference.list);
+
+            % controller 
+            param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
+            for j = 1:length(agent(i).controller.name)
+                param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
+            end
+            agent(i).do_controller(param(i).controller.list);
+
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
-            fInput = fInput + 1;
-            agent.input = [0.269*9.81/4-0.01; 0.269*9.81/4+0.01; 0.269*9.81/4+0.01; 0.269*9.81/4-0.01];
+%             fInput = fInput + 1;
+%             agent.input = [0.269*9.81/4-0.01; 0.269*9.81/4+0.01; 0.269*9.81/4+0.01; 0.269*9.81/4-0.01];
         end  
         %% update state
         % with FH
@@ -147,9 +165,16 @@ close all
 clc
 % plot p:position, er:roll/pitch/yaw, 
 % logger.plot({1,"p", "er"});
-logger.plot({1,"q", "e"});
+% logger.plot({1,"q", "e"});
 % logger.plot({1,"v", "e"});
 % agent(1).reference.timeVarying.show(logger)
+
+Fontsize = 15;  timeMax = te;
+logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

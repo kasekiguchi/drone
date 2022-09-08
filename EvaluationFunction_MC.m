@@ -1,5 +1,5 @@
 function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
-%UNTITLED この関数の概要をここに記述
+%UNTITLED この関数の概要をここに記述    ref, HLref_input
 %   詳細説明をここに記述
    % 評価関数
    
@@ -10,6 +10,9 @@ function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
             Xv = x(4:6, :, :);
             Xqw = x(7:12, :, :);
             U = u;
+%             Rp = ref(:, :);
+%             HLref_input = HLref_input(:, :);
+
 %             H = 1:params.H;
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
             ref_v = [0; 0; 0.50];
@@ -22,18 +25,26 @@ function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
 %         end
 
         %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
+%-- 通常
             tildeXp = Xp - Agent.reference.result.state.p;  % 位置
             tildeXv = Xv - ref_v;                           % 速度
             tildeXqw = Xqw;                                 % 原点との差分ととらえる
             tildeUpre = U - Agent.input;
             tildeUref = U - ref_input;
+
+%-- HL controller reference
+%             tildeXp = Xp - Rp(1:3, :);                                     % 位置 HLとの差
+%             tildeXv = Xv - Rp(7:9, :);                                     % 速度 HLとの差
+%             tildeXqw = Xqw - [Rp(4:6, :); Rp(10:12, :)];         % HL controller referenceとの差
+%             tildeUpre = U - HLref_input(:, :);                          % HL の　inputとの比較
+%             tildeUref = U - ref_input;                                      % hovering input との比較
             
         %-- 状態及び入力のステージコストを計算 長くなるから分割
-            stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * params.Weight.P   * tildeXp(:, L),   1:params.H-1);
-            stageStateV  = arrayfun(@(L) tildeXv(:, L)'   * params.Weight.V   * tildeXv(:, L),   1:params.H-1);
+            stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * params.Weight.P         * tildeXp(:, L),   1:params.H-1);
+            stageStateV  = arrayfun(@(L) tildeXv(:, L)'   * params.Weight.V         * tildeXv(:, L),   1:params.H-1);
             stageStateQW = arrayfun(@(L) tildeXqw(:, L)'  * params.Weight.QW  * tildeXqw(:, L),  1:params.H-1);
-            stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * params.Weight.RP  * tildeUpre(:, L), 1:params.H-1);
-            stageInputR  = arrayfun(@(L) tildeUref(:, L)' * params.Weight.R   * tildeUref(:, L), 1:params.H-1);
+            stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * params.Weight.RP      * tildeUpre(:, L), 1:params.H-1);
+            stageInputR  = arrayfun(@(L) tildeUref(:, L)' * params.Weight.R        * tildeUref(:, L), 1:params.H-1);
             
             
         %-- 状態の終端コストを計算

@@ -43,12 +43,12 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 fSubIndex = zeros(sample, 1);
 
             %-- MPC関連 変数定義 
-                Params.Particle_num = 500;  %500
-                Params.H = 20;  % 10
+                Params.Particle_num = 100;  %500
+                Params.H = 10;  % 10
                 Params.dt = 0.1;
                 idx = 0;
                 totalT = 0;
-                Initsigma = 0.01;
+                Initsigma = 0.01;   % num <= 500 くらいまでは 0.1 では大きすぎる
                 
             %-- 重み
 %                 PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
@@ -124,35 +124,21 @@ end
 %             rx = 0; 
 %             ry = 0; 
 %             rz = 1.0;
-            
-%             rr = [0., 0., 1.];
-%             if (time.t/4)^2+0.1 <= rr(3)  
-%                 rz = (time.t/4)^2+0.1;
-%             else; rz = 1;
-%             end
-%             if (time.t/2)^2+0.1 <= rr(1)
-%                 rx = (time.t/4)^2+0.1;
-%                 ry = (time.t/4)^2+0.1;
-%             else; rx = 0.; ry = 0.;
-%             end
 
-%             if time.t >= 10 && time.t < 10.5
-%                 rx = 0.1; ry = 0.1;
-%             elseif time.t >= 10.5 && time.t < 11
-%                 rx = 0.3; ry = 0.3;
-%             end
+%TODO
+
             rz = 0; rx = 0; ry = 1;
-            if time.t >= 10
-                FH.CurrentCharacter = 'f';
-            end
-            if time.t >= 18
-                FH.CurrentCharacter = 'h';
-            end
-            if time.t >= 20
-                FH.CurrentCharacter = 'l';
-            end
+%             if time.t >= 7
+%                 FH.CurrentCharacter = 'f';
+%             end
+%             if time.t >= 9
+%                 FH.CurrentCharacter = 'h';
+%             end
+%             if time.t >= 10
+%                 FH.CurrentCharacter = 'l';
+%             end
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [rx;ry;rz], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -162,7 +148,6 @@ end
             end
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
-            
 
                 % controller 
 %-- HL controller

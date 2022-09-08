@@ -41,11 +41,11 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
-                    obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1-obj.base_state(3),7,Param{3}-obj.base_time);
+                    obj.result.state.xd=gen_ref_for_take_off(obj.result.state.p,obj.base_state,1-obj.base_state(3),10,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
-                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),7,0);   % 1: 目標高度, 10秒で離陸
+                    obj.result.state.xd=gen_ref_for_take_off(obj.base_state,obj.base_state,1-obj.base_state(3),10,0);   % 1: 目標高度, 10秒で離陸
                 end
                 obj.result.state.p = obj.result.state.xd(1:3);
                 obj.flag='t';
@@ -63,7 +63,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 end
             elseif strcmp(cha,'h')
                 obj.flag='h';
-                obj.result.state.xd = [1; 0; 1];
+                obj.result.state.xd = [0; 0; 1];
                 obj.result.state.p = obj.result.state.xd;
             else
                 %obj.result.state.p = obj.self.estimator.result.state.p; %
