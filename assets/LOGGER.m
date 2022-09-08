@@ -111,19 +111,20 @@ cha = obj.Data.phase(obj.k);
                 end
             end
         end
-        function save(obj,name)
+        function save(obj,name,opt)
             % save log.Data keeping its structure as a file Data/Log(datetime).mat
             % retrieve it by logger = LOGGER.load("file.mat");
             arguments
                 obj
                 name = []
+                opt.range = 1:find(obj.Data.phase,1,'last');
             end
+            drange=opt.range;
             if isempty(name)
                 filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
             else
                 filename = strrep(strrep(strcat('Data/',name,'_Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
-            end
-            drange = 1:find(obj.Data.phase,1,'last');
+            end            
             obj.Data.t = obj.Data.t(drange);
             obj.Data.phase = obj.Data.phase(drange);
             obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
@@ -150,17 +151,22 @@ cha = obj.Data.phase(obj.k);
                     case "sensor"
                         agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
                         agent(n).sensor.result.state = state_copy(obj.Data.agent(n).sensor.result{tidx}.state);
+                        %obj.Data.agent(n).sensor.result(tidx+1:end) = []; 
                     case "estimator"
                         agent(n).estimator.result = obj.Data.agent(n).estimator.result{tidx};
                         agent(n).estimator.result.state = state_copy(obj.Data.agent(n).estimator.result{tidx}.state);
+                        %obj.Data.agent(n).estimator.result(tidx+1:end) = [];
                     case "reference"
                         agent(n).reference.result = obj.Data.agent(n).reference.result{tidx};
                         agent(n).reference.result.state = state_copy(obj.Data.agent(n).reference.result{tidx}.state);
+                        %obj.Data.agent(n).reference.result(tidx+1:end) = [];
                     case "controller"
                         agent(n).controller.result = obj.Data.agent(n).controller.result{tidx};
                         agent(n).input = obj.Data.agent(n).input{tidx};
+                        %obj.Data.agent(n).controller.result(tidx+1:end) = [];
                     case "plant"
                         agent(n).plant.state = state_copy(obj.Data.agent(n).plant.result{tidx}.state);
+                        %obj.Data.agent(n).plant.result(tidx+1:end) = [];
                 end
             end
         end
@@ -346,8 +352,9 @@ cha = obj.Data.phase(obj.k);
                         % plot
                         if length(ps) == 3
                             plot3(tmpx, tmpy, tmpz);
-                        else
-                            plot(tmpx, tmpy(:,:,1));
+                        else % todo
+                            tmpx = unique(tmpx);
+                            plot(tmpx, tmpy(1:size(tmpx,1),:,1));
                             xlim([min(tmpx),max(tmpx)]);
                         end
                         hold on

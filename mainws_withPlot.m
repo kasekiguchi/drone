@@ -26,7 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=500;
+    te=300;
 end
 %% initialize
 initial(N) = struct;
@@ -174,12 +174,16 @@ for i = 1:N
     agent(i).do_sensor(param(i).sensor);
 end
 %% 続きから
-%logger2 = logger;
-%time.t = time.t - dt;
-logger = logger2;
+logger.save("tmp");
+%%
+ log = load("Data/tmp_Log(08-Sep-2022_07_44_57).mat");
+ clear logger
+ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+ logger.Data = log.log.Data;
+%%
 tid = find(logger.Data.t,1,'last')
-tid = 1893;
-time.t = logger.Data.t(tid);
+% tid = 1800;
+time.t = logger.Data.t(tid)
 logger.overwrite("plant", time.t, agent, 1);
 logger.overwrite("estimator", time.t, agent, 1); 
 agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
@@ -187,6 +191,7 @@ agent.estimator.ukfslam_WC.result = agent.estimator.result;
 logger.overwrite("sensor", time.t, agent, 1);
 agent.sensor.LiDAR.result = agent.sensor.result;
 logger.overwrite("reference", time.t, agent, 1);
+agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
 logger.overwrite("controller", time.t, agent, 1);
 agent.controller.TrackingMPCMEX_Controller.self = agent;
 agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;

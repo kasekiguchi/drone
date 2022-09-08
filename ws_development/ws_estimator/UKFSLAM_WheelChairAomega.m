@@ -247,7 +247,9 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             ABC = [obj.map_param.a,obj.map_param.b,obj.map_param.c];
             X = obj.map_param.x;
             Y = obj.map_param.y;
-            [~,ia,ic] = uniquetol(ABC,'ByRows',true);
+            %[~,ia,ic] = uniquetol(ABC,'ByRows',true);
+            [~,ia,ic] = uniquetol(sign(ABC(:,3)).*ABC./vecnorm(ABC(:,1:2),2,2),'ByRows',true);
+            obj.map_param.index = obj.map_param.index(ia,:);
             obj.map_param.a = obj.map_param.a(ia);
             obj.map_param.b = obj.map_param.b(ia);
             obj.map_param.c = obj.map_param.c(ia);
