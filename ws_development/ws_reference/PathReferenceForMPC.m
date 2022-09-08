@@ -54,6 +54,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.ConvergencejudgeW = param{1,5};
             %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
+            obj.result.PreTrack = obj.PreTrack;
             obj.Holizon = param{1,7};
             obj.step = 1;
             obj.SensorRange = self.sensor.LiDAR.radius;
@@ -78,9 +79,16 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             %EstDataは推定のロボットの位置
             %EstData(1)は推定のロボットのX座標、EstDAta(2)は推定のロボットのy座標
             %---SensorRange内に端点が入っているかを判定---%%今のセンサレンジで見える壁を引っ張て来ている
-            JudgeSRs = (EstData(1) - LineXs).^2 + (EstData(2) - LineYs).^2 <= obj.SensorRange^2; %円の公式を使い始点がセンサレンジ内にあるかの判定
-            JudgeSRe = (EstData(1) - LineXe).^2 + (EstData(2) - LineYe).^2 <= obj.SensorRange^2; %円の公式を使い終点がセンサレンジ内にあるかの判定
-            InRange = (JudgeSRs|JudgeSRe)&lineids; %レンジ内なら1、レンジ外なら0
+            %JudgeSRs = (EstData(1) - LineXs).^2 + (EstData(2) - LineYs).^2 <= obj.SensorRange^2; %円の公式を使い始点がセンサレンジ内にあるかの判定
+            %JudgeSRe = (EstData(1) - LineXe).^2 + (EstData(2) - LineYe).^2 <= obj.SensorRange^2; %円の公式を使い終点がセンサレンジ内にあるかの判定
+            %InRange = (JudgeSRs|JudgeSRe)&lineids; %レンジ内なら1、レンジ外なら0
+            x = EstData(1);
+            y = EstData(2);
+            a = obj.self.estimator.result.map_param.a;
+            b = obj.self.estimator.result.map_param.b;
+            c = obj.self.estimator.result.map_param.c;
+            JudgeD = (a.*x+b.*y+c).^2./(a.^2+b.^2)<= obj.SensorRange^2;
+            InRange = JudgeD&lineids; %レンジ内なら1、レンジ外なら0
             MatchA = obj.self.estimator.result.map_param.a(InRange); %端点がレンジ内に入っている直線の方程式a
             MatchB = obj.self.estimator.result.map_param.b(InRange); %端点がレンジ内に入っている直線の方程式b
             MatchC = obj.self.estimator.result.map_param.c(InRange); %端点がレンジ内に入っている直線の方程式c
@@ -93,13 +101,12 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
             %wvec=[MatchXe-MatchXs,MatchYe-MatchYs]; % wall vector
             % Current time reference position calced at previous time
-            x = EstData(1);
-            y = EstData(2);
             %plot(reshape([MatchXs,MatchXe,NaN(size(MatchXs,1),1)]',[3*size(MatchXs,1),1]),reshape([MatchYs,MatchYe,NaN(size(MatchYs,1),1)]',[3*size(MatchYs,1),1]),x,y,'ro');
             % estimated lines
             a = MatchA;
             b = MatchB;
             c = MatchC;
+            
             k = (a.^2 - b.^2);% tmp const
             aeqbids=abs(k)< 1E-4; % k が０となるインデックス
 
@@ -115,7 +122,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             de = [MatchXe-x,MatchYe-y]; % wall 終点への相対ベクトル
             ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
             wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
-            d = sum(del.^2,2);%abs(MatchC)./sqrt(MatchA.^2+MatchB.^2);
+            d = sum(del.^2,2);%abs(MatchC)./sqrt(MatchA.^2+MatchB.^2); % 壁面までの距離
             %[ip,d,MatchXs,MatchYs,MatchXe,MatchYe]
             [~,idm]=min(d(wid)); % 一番近い壁面
             [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
@@ -127,8 +134,8 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 l2 = -l2;
             end
             % Current time reference position calced at previous time
-            rx = obj.PreTrack(1);
-            ry = obj.PreTrack(2);
+            rx = obj.result.PreTrack(1);
+            ry = obj.result.PreTrack(2);
 
             O = [x;y];
             th = EstData(3);
@@ -139,9 +146,9 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 if isempty(obj.O)
                     e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
                     e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
-                    [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
-                    [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
-                    if sum(abs(e1(id1,:)-e2(id2,:))) < 1 % lineの近い方の距離が近い => 直交して交わる
+                    p = cr(l1,l2);
+                    tmp=[e1;e2]+[x,y]-p';
+                    if sum(vecnorm(tmp,2,2) < 0.5) % lineの近い方の距離が近い => 直交して交わる
                         if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                             % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
                             l3 = (l1+l2)/2;
@@ -152,6 +159,8 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                         obj.O = cr(l4,l3);% 回転中心
                         obj.R = vecnorm(obj.O-[rx;ry]);
                     else % 遠い => 交わらない線分：推定が失敗してくると生じる
+                    [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
+                    [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
                         de1 = vecnorm(e1(id1,:)'-[rx;ry]);
                         de2 = vecnorm(e2(id2,:)'-[rx;ry]);
                         if de1 < de2
@@ -217,7 +226,11 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.result.state.set_state("v",obj.TrackingPoint(4,1));%treat as a colmn vector
             %obj.self.reference.result.state = obj.TrackingPoint;
             %---Get Data of previous step---%
+            if vecnorm(obj.result.PreTrack- obj.TrackingPoint(:,1))>1
+                O;
+            end
             obj.PreTrack = obj.TrackingPoint(:,1);
+            obj.result.PreTrack = obj.TrackingPoint(:,1);
             %-------------------------------%
             %resultに代入
             obj.result.O = O;
