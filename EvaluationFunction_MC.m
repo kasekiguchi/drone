@@ -1,4 +1,4 @@
-function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
+function [MCeval] = EvaluationFunction_MC(x, u, params, Agent, ref, HLref_input)
 %UNTITLED この関数の概要をここに記述    ref, HLref_input
 %   詳細説明をここに記述
    % 評価関数
@@ -10,8 +10,8 @@ function [MCeval] = EvaluationFunction_MC(x, u, params, Agent)
             Xv = x(4:6, :, :);
             Xqw = x(7:12, :, :);
             U = u;
-%             Rp = ref(:, :);
-%             HLref_input = HLref_input(:, :);
+            Rp = ref(:, :);
+            HLref_input = HLref_input(:, :);
 
 %             H = 1:params.H;
             ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';

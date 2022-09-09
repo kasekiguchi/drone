@@ -43,12 +43,15 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 fSubIndex = zeros(sample, 1);
 
             %-- MPC関連 変数定義 
-                Params.Particle_num = 100;  %500
+                Params.Particle_num = 200;  %500
                 Params.H = 10;  % 10
                 Params.dt = 0.1;
                 idx = 0;
                 totalT = 0;
                 Initsigma = 0.01;   % num <= 500 くらいまでは 0.1 では大きすぎる
+
+                HL_x = zeros(12, Params.H-1);
+                HL_input = zeros(4, Params.H-1);
                 
             %-- 重み
 %                 PQ_monte  = 1000*diag([1, 1, 1]);  % 1 1 100
@@ -66,7 +69,7 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
                 Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
                 Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
-                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 100.0]);  % 姿勢角、角速度
+                Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
                 
             %-- data
                 data.bestcost(idx+1) = 0;           % - もっともよい評価値
@@ -128,11 +131,11 @@ end
 %TODO
 
             rz = 0; rx = 0; ry = 1;
-%             if time.t >= 7
-%                 FH.CurrentCharacter = 'f';
-%             end
-%             if time.t >= 9
-%                 FH.CurrentCharacter = 'h';
+            if time.t >= 10
+                FH.CurrentCharacter = 'f';
+            end
+%             if time.t >= 20
+%                 FH.CurrentCharacter = 'l';
 %             end
 %             if time.t >= 10
 %                 FH.CurrentCharacter = 'l';
@@ -247,7 +250,7 @@ end
                             x0 = tmpx(end, :);
                             state_data(:, h+1, m) = x0;
                             %-- 地面に沈んで終わらないように
-                            if state_data(3, 1, m) < 0. %tmpx(3)
+                            if state_data(3, 1, m) < -0.05 %tmpx(3)
                                 subCheck(m) = 1;    % 制約外なら flag = 1
                                 break;              % ホライズン途中でも制約外で終了
                             end
@@ -264,7 +267,7 @@ end
                         if subCheck(m)
                             Evaluationtra(1, m) = NaN;  % 制約外
                         else
-                            eve = EvaluationFunction_MC(state_data(:, :, m), u(:, :, m), Params, agent);
+                            eve = EvaluationFunction_MC(state_data(:, :, m), u(:, :, m), Params, agent, HL_x, HL_input);
                             Evaluationtra(1, m) = eve;
                         end
                     end
@@ -390,7 +393,7 @@ figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf])
 % axes プロパティから線の太さ，スタイルなど変更可能
 figure(7)
 plot(logger.Data.t(1:size_best,:), data.sigma, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
-% agent(1).reference.timeVarying.show(logger)
+agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
 % 差分のグラフを描画

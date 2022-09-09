@@ -44,7 +44,7 @@ fc = 0;     % 着陸したときだけx，y座標を取得
                 Initsigma = 0.01;
 
             %-- 配列定義
-                HL_x(:, 1) = [0 0 0 0 0 0 0 0 0 0 0 0]';
+%                 HL_x(:, 1) = [0 0 0 0 0 0 0 0 0 0 0 0]';
                 HL_input(:, 1) = [0 0 0 0]';
 
             %-- 重み    
@@ -141,12 +141,14 @@ end
 
             %HL method->q, w　0.1秒ごとにモデルの姿勢角等が必要なため、それぞれで回して（入力をそれぞれで得る）姿勢角も取得する
                 rx = 0; ry = 0;
+                HL_x(:, 1) = agent.estimator.result.state.get();
                 for HLi = 1:Params.H-1
                     HLt = time.t + 0.1*HLi;
                     if (HLt/6)^2+0.1 <= 1.0 
                         rz = (HLt/6)^2+0.1
                     else; rz = 1;
                     end
+                    rx = 0; ry = 0;
                     
                     % reference
                     param(i).reference.covering = [];
@@ -168,7 +170,8 @@ end
                     agent(i).do_controller(param(i).controller.list);
 
                     % 状態予測
-                    [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, agent.input,agent.parameter.get()),[ts ts+dt],agent.estimator.result.state.get());
+                    % x0 -> tmpx 
+                    [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, agent.input,agent.parameter.get()),[ts ts+dt],HL_x(:, HLi));
                     HL_x(:, HLi+1) = tmpx(1:12)';    % 0.1秒ごとの姿勢角、姿勢角速度を取得
                     HL_input(:, HLi+1) = agent.input; % inputも保存する
                 end
@@ -193,6 +196,7 @@ end
                         rz = (time.t/6)^2+0.1;
                     else; rz = 1;
                     end
+                    rx = 0; ry = 0;
                     param(i).reference.covering = [];
                     param(i).reference.point = {FH, [rx;ry;rz], time.t};  % 目標値[x, y, z]
                     param(i).reference.timeVarying = {time};
@@ -414,8 +418,8 @@ fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
 logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "p"},   "fig_num",3); ylim([-0.01 0.03]);%set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+logger.plot({1,"q", "e"},   "fig_num",3); ylim([-0.01 0.03]);%set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+logger.plot({1,"w", "e"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
 %% errorで終了したとき
 Fontsize = 15;  timeMax = te;
@@ -425,7 +429,7 @@ figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf])
 % axes プロパティから線の太さ，スタイルなど変更可能
 figure(7)
 plot(logger.Data.t(1:size_best,:), data.sigma, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
-% agent(1).reference.timeVarying.show(logger)
+agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
 % 差分のグラフを描画

@@ -7,16 +7,21 @@ xg = X(1); %目標値
 yg = X(2);
 zg = X(3);
 T = X(4);   % 目標到達までの時間
-r = xg;  % 目標値
-r0 = 0; % 現在地
+rx = xg;  % 目標値
+rz = zg;
+rx0 = 0; % 現在地
+rz0 = 1;
 
-a = -2/T^3 * (r-r0);
-b = 3/T^2 * (r-r0);
-
+a = -2/T^3 * (rx-rx0);
+b = 3/T^2 * (rx-rx0);
 x = a*(t-10)^3+b*(t-10)^2 ; % 目標値関数
-y = yg;
-z = zg;
+y = a*(t-10)^3+b*(t-10)^2 ;
+a = -2/T^3 * (rz-rz0);
+b = 3/T^2 * (rz-rz0);
+z = a*(t-10)^3+b*(t-10)^2+rz0 ;
 
+
+% fprintf("xyz: %f %f %f\n", x, y, z);
 ref=@(t)[x;y;z;0];  % xyz yaw
 end
 
