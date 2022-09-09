@@ -121,7 +121,7 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
-     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
+%      agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
 %     agent(i).set_property("reference",Reference_Time_Varying("PtoP_ref",[0,0,1]));%PtoP
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 
@@ -136,7 +136,7 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    n=2;
+    n=3;
     switch n
         case 1 % 有限時間整定制御
             agent(i).set_property("controller",Controller_FT(dt));
