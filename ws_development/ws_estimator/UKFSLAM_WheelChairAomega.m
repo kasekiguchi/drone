@@ -272,7 +272,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             % return values setting
             obj.result.state.set_state(Xh);
             obj.result.Est_state = Xh;
-            obj.result.G = G;
+            %obj.result.G = G;
             obj.result.map_param = obj.map_param;
             obj.result.AssociationInfo = UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), obj.map_param, measured.ranges,measured.angles, obj.constant,obj.NLP);
             result=obj.result;
