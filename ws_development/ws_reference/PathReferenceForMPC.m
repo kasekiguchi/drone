@@ -27,7 +27,8 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
         step
         self
         w
-        O = []
+        O = [] % 回転中心
+        r  % 回転半径
         R = eye(2)
         th = [];
     end
@@ -128,7 +129,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
 
             obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
             
-%            k = (a.^2 - b.^2);% tmp const
+%            k = (a.^2 + b.^2);% tmp const
 %            aeqbids=abs(k)< 1E-4; % k が０となるインデックス
 %             X= -(x.*b.^2 + a.*y.*b + a.*c); % ./(a.^2 - b.^2) % 垂線の足*k a=bの特異性を除くため
 %             Y= (y.*a.^2 + b.*x.*a + b.*c); % ./(a.^2 - b.^2)
@@ -136,7 +137,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
 %             Y(~aeqbids) = Y(~aeqbids)./k(~aeqbids);
 %             X(aeqbids) = (x(aeqbids)+y(aeqbids)-c(aeqbids)/a(aeqbids))/2;
 %             Y(aeqbids) = (x(aeqbids)+y(aeqbids)+c(aeqbids)/a(aeqbids))/2;
-            del = [-a.*c,-b.*c]./(a.^2+b.^2);
+            del = [-a.*c,-b.*c]./(a.^2+b.^2); % 垂線の足
 
             %del=[X - x,Y - y]; % (垂線の足への相対ベクトル)
 %             ds = [Xs-x,Ys-y]; % wall 始点への相対ベクトル
@@ -151,17 +152,17 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
             ids=[idm,idm2];
             ids=wid(ids);
-            l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
-            l2 = [a(ids(2)),b(ids(2)),c(ids(2))]*sign(b(ids(2)));
+%             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
+%             l2 = [a(ids(2)),b(ids(2)),c(ids(2))]*sign(b(ids(2)));
+            l1 = [a(ids(1)),b(ids(1)),c(ids(1))]/vecnorm([a(ids(1)),b(ids(1))]);%*sign(b(ids(1)));
+            l2 = [a(ids(2)),b(ids(2)),c(ids(2))]/vecnorm([a(ids(2)),b(ids(2))]);%*sign(b(ids(2)));
             if l1*l2'<0
                 l2 = -l2;
             end
             % Current time reference position calced at previous time
-            rx = obj.result.PreTrack(1) - pe(1);
+            rx = obj.result.PreTrack(1) - pe(1); % relative position
             ry = obj.result.PreTrack(2) - pe(2);
 
-            O = [x;y];
-            th = 0;%EstData(3);
             if abs(prod(a(ids))+prod(b(ids)))<1e-2 % ほぼ直交している場合（傾きの積が-1の式より）
                 % 入りと出で同じ幅の通路を前提としてしまっている．
                 % 初期値が垂直二等分線上でもその場で回転するだけになる．
@@ -170,60 +171,66 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                     e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
                     e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
                     p = cr(l1,l2);
-                    tmp=[e1;e2]+[x,y]-p';
+                    tmp=[e1;e2]-p';
                     if sum(vecnorm(tmp,2,2) < 0.5) % lineの近い方の距離が近い => 直交して交わる
-                        if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
+                        %if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
+                        if l1(3)*l2(3) < 0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                             % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
                             l3 = (l1+l2)/2;
                         else
                             l3 = (l1-l2)/2;
                         end
                         l4 = perp(l1,[rx;ry]);
-                        obj.O = cr(l4,l3);% 回転中心
-                        obj.R = vecnorm(obj.O-[rx;ry]);
+                        obj.O = cr(l4,l3);% 回転中心：相対座標
+                        obj.r = vecnorm(obj.O-[rx;ry]);
                     else % 遠い => 交わらない線分：推定が失敗してくると生じる
-                    [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
-                    [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
+                        [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
+                        [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
                         de1 = vecnorm(e1(id1,:)'-[rx;ry]);
                         de2 = vecnorm(e2(id2,:)'-[rx;ry]);
                         if de1 < de2
                             obj.O = (e1(id1,:) + [x y])';
-                            obj.R = de1;
+                            obj.r = de1;
                         else
                             obj.O = (e2(id2,:) + [x y])';
-                            obj.R = de2;
+                            obj.r = de2;
                         end
                     end
-                    obj.th = obj.step*obj.Targetv/obj.R;
-                    obj.O = obj.O + pe;
+                    obj.th = obj.step*obj.Targetv/obj.r;
+                    obj.O = obj.O + pe; % 絶対座標位置
                 end
                 th = obj.th;
-                O = obj.O-pe;
-                R = obj.R;
+                R = [cos(the), -sin(the);sin(the), cos(the)];
+                O = R'*(obj.O-pe);%ボディから見た回転中心位置ベクトルの位置に変換
+                r = obj.r;
                 Rmat = [cos(th),-sin(th);sin(th),cos(th)];
-                tmp0 = [x;y]-O;
+                tmp0 = -O;%[x;y]-O;
                 tmp0 = tmp0/vecnorm(tmp0);% 回転中心から機体の位置方向の単位ベクトル
                 tmp = cross([0;0;1],[tmp0;0]);% 機体の進むべき向き
                 tmpt0 = atan2(tmp(2),tmp(1));% 現在時刻の目標姿勢角
-                tmp0 = R*tmp0; % 現在時刻の目標位置
-                tmp(:,1) = [tmp0+O;tmpt0];
+                tmp0 = r*tmp0; % Oから見た現在時刻の目標位置
+                tmp(:,1) = [tmp0 + O;tmpt0];
                 for i = 2:obj.Holizon
                     tmp0 = Rmat*tmp0;
                     tmpt0 = tmpt0 + th;
                     tmp(:,i) = [tmp0+O;tmpt0];
                 end
-                obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
+                obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))]; %　相対座標
             else % ほぼ平行な場合
                 %if check_line_validity([Xs(ids);Xe(ids)],[Ys(ids);Ye(ids)])
-                obj.O = [];
-                if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
+                obj.O = []; th = [];
+                %if (l1*[x;y;1])*(l2*[x;y;1])<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
+                if l1(3)*l2(3)<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                     % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
                     rl = (l1+l2)/2;
                 else
                     rl = (l1-l2)/2;
                 end
                 %rl = (l1+l2)/2; % reference line
-                tmpl = perp(rl,[x;y]); % 機体を通るrl の垂線
+                tmpl = perp(rl,[0;0]); % 機体を通るrl の垂線
+                if sum(tmpl) == 0
+                    rl;
+                end
                 tmp0 = cr(rl,tmpl); % 機体からrlへの垂線の足
                 %tmp0 = [x;y];
                 rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
@@ -236,34 +243,37 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 obj.TrackingPoint = [tmp;obj.Targetv*ones(1,size(tmp,2))];
                 %end
             end
+
             % ここから絶対座標に戻す．
-            q = the;
+            R = [cos(the),-sin(the);sin(the),cos(the)];
+            obj.TrackingPoint(1:2,:) = R*obj.TrackingPoint(1:2,:) + pe;
+            obj.TrackingPoint(3,:) = obj.TrackingPoint(3,:) + the;
+
             qr = obj.TrackingPoint(3,:);
-            tmp = q - qr > 4;
+            tmp = the - qr > 4;
             qr(tmp) = qr(tmp)+2*pi;
-            tmp = q - qr < -4;
+            tmp = the - qr < -4;
             qr(tmp) = qr(tmp)-2*pi;
             obj.TrackingPoint(3,:) = qr;
 
-            if vecnorm(obj.result.PreTrack - EstData - obj.TrackingPoint(:,1))>1
-                O;
-            end
-
-            R = [cos(the),sin(the);-sin(the),cos(the)]';
-            obj.TrackingPoint(1:2,:) = R*obj.TrackingPoint(1:2,:) + pe;
-            obj.TrackingPoint(3,:) = obj.TrackingPoint(3,:) + the;
             obj.result.state.set_state("xd",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("p",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("q",obj.TrackingPoint(3,1));%treat as a colmn vector
             obj.result.state.set_state("v",obj.TrackingPoint(4,1));%treat as a colmn vector
+            if vecnorm(obj.result.PreTrack - obj.TrackingPoint(:,1))>1
+                obj.O;
+            end
             obj.PreTrack = obj.TrackingPoint(:,1);
             obj.result.PreTrack = obj.TrackingPoint(:,1);
             %obj.self.reference.result.state = obj.TrackingPoint;
             %---Get Data of previous step---%
             %-------------------------------%
             %resultに代入
-
-            obj.result.O = O + pe;% 回転中心
+            if isempty(obj.O)                
+                obj.result.O = pe;
+            else
+                obj.result.O = obj.O;% 回転中心（絶対座標）
+            end
             obj.result.th = th; % 回転角
             obj.result.focusedLine = (R*[[Xs(ids(1));Xe(ids(1));NaN;Xs(ids(2));Xe(ids(2))],[Ys(ids(1));Ye(ids(1));NaN;Ys(ids(2));Ye(ids(2))]]')'+pe';
             obj.result.step = obj.step;
@@ -279,8 +289,6 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 result = obj.result;
             end
             l = result.focusedLine;
-            p = result.O;
-            th = result.th;
             rp = result.state.p(1:2,:);
             rth = result.state.p(3,:);
             plot(l(1:2,1),l(1:2,2),'LineWidth',3,'Color','b');
@@ -288,6 +296,10 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             plot(l(4:5,1),l(4:5,2),'LineWidth',2,'Color','r');
             plot(rp(1,:),rp(2,:),'yo','LineWidth',1);
             quiver(rp(1,:),rp(2,:),2*cos(rth),2*sin(rth),'Color','y');
+            p = result.O;
+            plot(p(1),p(2),'r*');
+            p = obj.self.estimator.result.state.p;
+            th = obj.self.estimator.result.state.q;
             plot(p(1),p(2),'ro');
             quiver(p(1),p(2),cos(th),sin(th),'Color','r');
             hold off
