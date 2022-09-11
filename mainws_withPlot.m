@@ -36,8 +36,8 @@ for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
        %initial(i).p = [89;-2.5];%四角経路
        %initial(i).p = [89;-2];%四角経路
-       initial(i).p = [89;-2];%四角経路
-       initial(i).q = [-0.05];
+       initial(i).p = [0;-2];%四角経路
+       initial(i).q = [0];
 %     initial(i).p = [0;0];%直進経路
     
     initial(i).v = [0];
