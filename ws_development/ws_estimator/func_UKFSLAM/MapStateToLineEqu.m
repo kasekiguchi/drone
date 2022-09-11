@@ -1,6 +1,7 @@
 function Param = MapStateToLineEqu(MapParam,NLP)
 %MapParam = [d,alpha,xs,xe,ys,ye];
 % return Param = struct(a,b,c)
+% 関口確認済み
 d = MapParam(1:NLP:end);
 th = MapParam(2:NLP:end);
 ep = [cos(th),sin(th)]; % 直線に対する垂線の単位ベクトル

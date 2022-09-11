@@ -7,9 +7,9 @@ function [OptMap, RegistFlag] = UKFOptimizeMap(map, Constant)
     OptMap.a = [];
     OptMap.b = [];
     OptMap.c = [];
-    RegistFlag = false(1, length(map.index));
+    RegistFlag = false(1, size(map.index,1));
 %     removing_flag = false(1, length(map.index));
-    for i = 1:length(map.index)
+    for i = 1:size(map.index,1)
         % Searching the line which is able to be conbined
         if map.a(i) > -1 && map.a(i) < 1
             % When the line is not vertical, comparing with 'y' values

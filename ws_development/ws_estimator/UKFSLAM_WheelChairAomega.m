@@ -36,7 +36,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             
             % the constant value for estimating of the map
             obj.constant = struct; %定数パラメータ設定
-            obj.constant.LineThreshold = 0.3; %"ax + by + c"の誤差を許容する閾値
+            obj.constant.LineThreshold = 0.3;%0.3; %"ax + by + c"の誤差を許容する閾値
             obj.constant.PointThreshold = 0.2; %
             obj.constant.GroupNumberThreshold = 5; % クラスタを構成する最小の点数
             obj.constant.DistanceThreshold = 1e-1; % センサ値と計算値の許容誤差，対応付けに使用
@@ -101,7 +101,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             if iscolumn(measured.ranges)
                 measured.ranges = measured.ranges';% Transposition
             end
-            measured.angles = sensor.angle + PreXh(3) * (sensor.angle~=0);%laser angles.姿勢角を基準とする．絶対角
+            measured.angles = sensor.angle + PreXh(3) * (sensor.length~=0);%laser angles.姿勢角を基準とする．絶対角
             if iscolumn(measured.angles)
                 measured.angles = measured.angles';% Transposition
             end
@@ -169,7 +169,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             % association_info.index = correspanding wall(line_param) number index
             % association_info.distance = wall distace
             association_info = UKFMapAssociation(PreXh(1:obj.n),PreMh(1:end), EndPoint{1,1}, measured.ranges,measured.angles, obj.constant,obj.NLP);
-            association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
+            association_available_index = find((association_info.index ~= 0)&(sensor.length~=0));%Index corresponding to the measured value
             association_available_count = length(association_available_index);%Count
             %出力のシグマポイントを計算
             %sensing step
@@ -177,23 +177,17 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             
             Ita = cell(1,size(Kai,2));
             for i = 1:size(Kai,2)%i:シグマポイントの数
-%                 tmp_angles = sensor.angle + PreXh(3) * (sensor.angle~=0);% = sensor.angle - Kai(3,1);
-%                 if iscolumn(tmp_angles)
-%                     tmp_angles = tmp_angles';% Transposition
-%                 end
                 line_param.d = Kai(obj.n + 1:obj.NLP:end,i);
                 line_param.delta = Kai(obj.n + 2:obj.NLP:end,i);
                 Ita{1,i} = zeros(association_available_count,1);
                 for m = 1:association_available_count%m:レーザの番号
                     curr = association_available_index(1,m);
                     idx = association_info.index(1,association_available_index(1,m)); % どの壁に対応づけられているか
-                    %angle = Kai(3,i) + measured.angles(curr) - line_param.delta(idx);
-%                    angle = measured.angles(curr) - line_param.delta(idx); % measured.anglesを絶対角にしているのでKai(3,i)は不要
-                    % 厳密には
                     angle = Kai(3,i) + sensor.angle(curr) - line_param.delta(idx); % measured.anglesを絶対角にしているのでKai(3,i)は不要
-%                    angle = tmp_angles(curr) - line_param.delta(idx);
-                    denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));
-                    % Observation value
+                    %angle = measured.angles(curr) - line_param.delta(idx); % measured.anglesを絶対角にしているのでKai(3,i)は不要
+                    %angle = sign(measured.ranges(curr))*(measured.angles(curr) - line_param.delta(idx)); % measured.anglesを絶対角にしているのでKai(3,i)は不要                   
+                    denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));% 車両から直線までの距離
+                    % Observation value Ita : denon = Ita * cos(angle)
                     Ita{1,i}(m,1) = (denon) / cos(angle);
                 end
             end
@@ -216,7 +210,8 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             end
             %カルマンゲイン
             G = PreXYCov /( PreYCov + obj.R .* eye(association_available_count) );
-            Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
+            %Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
+            Xh = PreXh + G * (sensor.length(association_available_index)' - PreYh);
             obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(association_available_count)) * G';
             
             %---事後処理------------------------------------------------%
