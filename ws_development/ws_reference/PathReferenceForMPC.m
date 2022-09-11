@@ -80,31 +80,33 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             LP.b(tmpid,:) = [];
             LP.c(tmpid,:) = [];
             LP.index(tmpid,:) = [];
+            %tl=size(LP.x,1);
+            %plot(reshape([LP.x,NaN(tl,1)],[3*tl,1]),reshape([LP.y,NaN(tl,1)],[3*tl,1]));axis equal;
 
             % 同一直線を統合
-            ABC = [LP.a,LP.b,LP.c];
-            X = LP.x;
-            Y = LP.y;
-            %[~,ia,ic] = uniquetol(ABC,'ByRows',true);
-            [~,ia,ic] = uniquetol(sign(ABC(:,3)).*ABC./vecnorm(ABC(:,1:2),2,2),'ByRows',true);
-            LP.index = LP.index(ia,:);
-            LP.a = LP.a(ia);
-            LP.b = LP.b(ia);
-            LP.c = LP.c(ia);
-            LP.x = LP.x(ia,:);
-            LP.y = LP.y(ia,:);
-            for i = 1:length(ia)
-                did = find(ic==i); % duplicated ids
-                LP.x(i,1) = min(X(did,:),[],'all');
-                LP.x(i,2) = max(X(did,:),[],'all');
-                if LP.a(i)*LP.b(i) > 0 % 右下がり
-                    LP.y(i,1) = max(Y(did,:),[],'all');
-                    LP.y(i,2) = min(Y(did,:),[],'all');
-                else % 右上がり
-                    LP.y(i,1) = min(Y(did,:),[],'all');
-                    LP.y(i,2) = max(Y(did,:),[],'all');
-                end
-            end
+%             ABC = [LP.a,LP.b,LP.c];
+%             X = LP.x;
+%             Y = LP.y;
+%             %[~,ia,ic] = uniquetol(ABC,'ByRows',true);
+%             [~,ia,ic] = uniquetol(sign(ABC(:,3)).*ABC./vecnorm(ABC(:,1:2),2,2),'ByRows',true);
+%             LP.index = LP.index(ia,:);
+%             LP.a = LP.a(ia);
+%             LP.b = LP.b(ia);
+%             LP.c = LP.c(ia);
+%             LP.x = LP.x(ia,:);
+%             LP.y = LP.y(ia,:);
+%             for i = 1:length(ia)
+%                 did = find(ic==i); % duplicated ids
+%                 LP.x(i,1) = min(X(did,:),[],'all');
+%                 LP.x(i,2) = max(X(did,:),[],'all');
+%                 if LP.a(i)*LP.b(i) > 0 % 右下がり
+%                     LP.y(i,1) = max(Y(did,:),[],'all');
+%                     LP.y(i,2) = min(Y(did,:),[],'all');
+%                 else % 右上がり
+%                     LP.y(i,1) = min(Y(did,:),[],'all');
+%                     LP.y(i,2) = max(Y(did,:),[],'all');
+%                 end
+%             end
 
             a = LP.a;
             b = LP.b;
@@ -123,60 +125,24 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             Ye = Ye(lineids);
             x = 0;
             y = 0;
-%             %---推定器からデータを取得---%
-%             %             EstData = ...
-%             %                 [obj.self.estimator.(obj.self.estimator.name).result.state.p;obj.self.estimator.(obj.self.estimator.name).result.state.q;...
-%             %                 obj.self.estimator.(obj.self.estimator.name).result.state.v];%treat as a colmn vector
-%             LineXs = obj.self.estimator.result.map_param.x(:,1); %lineの始点のx座標
-%             LineXe = obj.self.estimator.result.map_param.x(:,2); %lineの終点のx座標
-%             LineYs = obj.self.estimator.result.map_param.y(:,1); %lineの始点のy座標
-%             LineYe = obj.self.estimator.result.map_param.y(:,2); %lineの終点のy座標
-%             lineids = abs(LineXe - LineXs) + abs(LineYe - LineYs) > 1; % lineと認識する長さ：約1.4cm 以上ないとlineとみなさないようにする．TODO
-%             %----------------------------%
-%             %EstDataは推定のロボットの位置
-%             %EstData(1)は推定のロボットのX座標、EstDAta(2)は推定のロボットのy座標
-%             %---SensorRange内に端点が入っているかを判定---%%今のセンサレンジで見える壁を引っ張て来ている
-%             %JudgeSRs = (EstData(1) - LineXs).^2 + (EstData(2) - LineYs).^2 <= obj.SensorRange^2; %円の公式を使い始点がセンサレンジ内にあるかの判定
-%             %JudgeSRe = (EstData(1) - LineXe).^2 + (EstData(2) - LineYe).^2 <= obj.SensorRange^2; %円の公式を使い終点がセンサレンジ内にあるかの判定
-%             %InRange = (JudgeSRs|JudgeSRe)&lineids; %レンジ内なら1、レンジ外なら0
-%             x = EstData(1);
-%             y = EstData(2);
-%             a = obj.self.estimator.result.map_param.a;
-%             b = obj.self.estimator.result.map_param.b;
-%             c = obj.self.estimator.result.map_param.c;
-%             JudgeD = (a.*x+b.*y+c).^2./(a.^2+b.^2)<= obj.SensorRange^2;
-%             InRange = JudgeD&lineids; %レンジ内なら1、レンジ外なら0
-%             A = obj.self.estimator.result.map_param.a(InRange); %端点がレンジ内に入っている直線の方程式a
-%             B = obj.self.estimator.result.map_param.b(InRange); %端点がレンジ内に入っている直線の方程式b
-%             C = obj.self.estimator.result.map_param.c(InRange); %端点がレンジ内に入っている直線の方程式c
-%             Xs = obj.self.estimator.result.map_param.x(InRange,1);
-%             Xe = obj.self.estimator.result.map_param.x(InRange,2); %センサレンジ内に入っているlineの始点・終点のx座標を持ってきている
-%             Ys = obj.self.estimator.result.map_param.y(InRange,1);
-%             Ye = obj.self.estimator.result.map_param.y(InRange,2); %センサレンジ内に入っているlineの始点・終点のy座標を持ってきている
-%             %-------------------------------------------%
 
             obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
-            %wvec=[Xe-Xs,Ye-Ys]; % wall vector
-            % Current time reference position calced at previous time
-            %plot(reshape([Xs,Xe,NaN(size(Xs,1),1)]',[3*size(Xs,1),1]),reshape([Ys,Ye,NaN(size(Ys,1),1)]',[3*size(Ys,1),1]),x,y,'ro');
-            % estimated lines
-%             a = A;
-%             b = B;
-%             c = C;
             
-            k = (a.^2 - b.^2);% tmp const
-            aeqbids=abs(k)< 1E-4; % k が０となるインデックス
+%            k = (a.^2 - b.^2);% tmp const
+%            aeqbids=abs(k)< 1E-4; % k が０となるインデックス
+%             X= -(x.*b.^2 + a.*y.*b + a.*c); % ./(a.^2 - b.^2) % 垂線の足*k a=bの特異性を除くため
+%             Y= (y.*a.^2 + b.*x.*a + b.*c); % ./(a.^2 - b.^2)
+%             X(~aeqbids) = X(~aeqbids)./k(~aeqbids);
+%             Y(~aeqbids) = Y(~aeqbids)./k(~aeqbids);
+%             X(aeqbids) = (x(aeqbids)+y(aeqbids)-c(aeqbids)/a(aeqbids))/2;
+%             Y(aeqbids) = (x(aeqbids)+y(aeqbids)+c(aeqbids)/a(aeqbids))/2;
+            del = [-a.*c,-b.*c]./(a.^2+b.^2);
 
-            X= -(x.*b.^2 + a.*y.*b + a.*c); % ./(a.^2 - b.^2) % 垂線の足*k a=bの特異性を除くため
-            Y= (y.*a.^2 + b.*x.*a + b.*c); % ./(a.^2 - b.^2)
-            X(~aeqbids) = X(~aeqbids).*k(~aeqbids);
-            Y(~aeqbids) = Y(~aeqbids).*k(~aeqbids);
-            X(aeqbids) = (x(aeqbids)+y(aeqbids)-c(aeqbids)/a(aeqbids))/2;
-            Y(aeqbids) = (x(aeqbids)+y(aeqbids)+c(aeqbids)/a(aeqbids))/2;
-
-            del=[X - x,Y - y]; % (垂線の足への相対ベクトル)
-            ds = [Xs-x,Ys-y]; % wall 始点への相対ベクトル
-            de = [Xe-x,Ye-y]; % wall 終点への相対ベクトル
+            %del=[X - x,Y - y]; % (垂線の足への相対ベクトル)
+%             ds = [Xs-x,Ys-y]; % wall 始点への相対ベクトル
+%             de = [Xe-x,Ye-y]; % wall 終点への相対ベクトル
+            ds = [Xs,Ys]; % wall 始点への相対ベクトル
+            de = [Xe,Ye]; % wall 終点への相対ベクトル
             ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
             wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
             d = sum(del.^2,2);%abs(C)./sqrt(A.^2+B.^2); % 壁面までの距離
@@ -191,11 +157,11 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 l2 = -l2;
             end
             % Current time reference position calced at previous time
-            rx = obj.result.PreTrack(1);
-            ry = obj.result.PreTrack(2);
+            rx = obj.result.PreTrack(1) - pe(1);
+            ry = obj.result.PreTrack(2) - pe(2);
 
             O = [x;y];
-            th = EstData(3);
+            th = 0;%EstData(3);
             if abs(prod(a(ids))+prod(b(ids)))<1e-2 % ほぼ直交している場合（傾きの積が-1の式より）
                 % 入りと出で同じ幅の通路を前提としてしまっている．
                 % 初期値が垂直二等分線上でもその場で回転するだけになる．
@@ -260,7 +226,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 tmpl = perp(rl,[x;y]); % 機体を通るrl の垂線
                 tmp0 = cr(rl,tmpl); % 機体からrlへの垂線の足
                 %tmp0 = [x;y];
-                rl = rl*sign([rl(2),-rl(1)]*[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
+                rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
                 tmpt0 = atan2(-rl(1),rl(2));
                 tmp(:,1) = [tmp0;tmpt0];
                 for i = 2:obj.Holizon
@@ -279,24 +245,27 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             qr(tmp) = qr(tmp)-2*pi;
             obj.TrackingPoint(3,:) = qr;
 
-            if vecnorm(obj.result.PreTrack- obj.TrackingPoint(:,1))>1
+            if vecnorm(obj.result.PreTrack - EstData - obj.TrackingPoint(:,1))>1
                 O;
             end
-            obj.PreTrack = obj.TrackingPoint(:,1);
-            obj.result.PreTrack = obj.TrackingPoint(:,1);
 
-            obj.TrackingPoint(1:2,:) = obj.TrackingPoint(1:2,:) + pe;
+            R = [cos(the),sin(the);-sin(the),cos(the)]';
+            obj.TrackingPoint(1:2,:) = R*obj.TrackingPoint(1:2,:) + pe;
+            obj.TrackingPoint(3,:) = obj.TrackingPoint(3,:) + the;
             obj.result.state.set_state("xd",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("p",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("q",obj.TrackingPoint(3,1));%treat as a colmn vector
             obj.result.state.set_state("v",obj.TrackingPoint(4,1));%treat as a colmn vector
+            obj.PreTrack = obj.TrackingPoint(:,1);
+            obj.result.PreTrack = obj.TrackingPoint(:,1);
             %obj.self.reference.result.state = obj.TrackingPoint;
             %---Get Data of previous step---%
             %-------------------------------%
             %resultに代入
-            obj.result.O = O + pe;
-            obj.result.th = th;
-            obj.result.focusedLine = [[Xs(ids(1));Xe(ids(1));NaN;Xs(ids(2));Xe(ids(2))],[Ys(ids(1));Ye(ids(1));NaN;Ys(ids(2));Ye(ids(2))]]+pe';
+
+            obj.result.O = O + pe;% 回転中心
+            obj.result.th = th; % 回転角
+            obj.result.focusedLine = (R*[[Xs(ids(1));Xe(ids(1));NaN;Xs(ids(2));Xe(ids(2))],[Ys(ids(1));Ye(ids(1));NaN;Ys(ids(2));Ye(ids(2))]]')'+pe';
             obj.result.step = obj.step;
             result=obj.result;
         end
