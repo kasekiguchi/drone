@@ -101,12 +101,13 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             if iscolumn(measured.ranges)
                 measured.ranges = measured.ranges';% Transposition
             end
-            measured.angles = sensor.angle - PreXh(3);%raser angles.姿勢角を基準とする．
+            measured.angles = sensor.angle + PreXh(3) * (sensor.angle~=0);%laser angles.姿勢角を基準とする．絶対角
             if iscolumn(measured.angles)
                 measured.angles = measured.angles';% Transposition
             end
             % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す
-            LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
+            LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh, obj.constant);
+            %LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, [PreXh(1:2);0], obj.constant);
             % Conbine between measurements and map%前時刻までのマップと観測値を組み合わせる．組み合わさらなかったら新しいマップとして足す．
             % x, y が全て０のLSA_paramを削除 UKFCombiningLinesで使っているフィールドだけ削除
             tmpid=sum([LSA_param.x,LSA_param.y],2)==0; 
@@ -176,25 +177,31 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             
             Ita = cell(1,size(Kai,2));
             for i = 1:size(Kai,2)%i:シグマポイントの数
-                tmp_angles = sensor.angle - Kai(3,1);
-                if iscolumn(tmp_angles)
-                    tmp_angles = tmp_angles';% Transposition
-                end
+%                 tmp_angles = sensor.angle + PreXh(3) * (sensor.angle~=0);% = sensor.angle - Kai(3,1);
+%                 if iscolumn(tmp_angles)
+%                     tmp_angles = tmp_angles';% Transposition
+%                 end
                 line_param.d = Kai(obj.n + 1:obj.NLP:end,i);
                 line_param.delta = Kai(obj.n + 2:obj.NLP:end,i);
                 Ita{1,i} = zeros(association_available_count,1);
                 for m = 1:association_available_count%m:レーザの番号
                     curr = association_available_index(1,m);
-                    idx = association_info.index(1,association_available_index(1,m));
-                    angle = Kai(3,i) + tmp_angles(curr) - line_param.delta(idx);
+                    idx = association_info.index(1,association_available_index(1,m)); % どの壁に対応づけられているか
+                    %angle = Kai(3,i) + measured.angles(curr) - line_param.delta(idx);
+%                    angle = measured.angles(curr) - line_param.delta(idx); % measured.anglesを絶対角にしているのでKai(3,i)は不要
+                    % 厳密には
+                    angle = Kai(3,i) + sensor.angle(curr) - line_param.delta(idx); % measured.anglesを絶対角にしているのでKai(3,i)は不要
+%                    angle = tmp_angles(curr) - line_param.delta(idx);
                     denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));
                     % Observation value
                     Ita{1,i}(m,1) = (denon) / cos(angle);
                 end
             end
+
+            
             %事前出力推定値
             PreYh = weight(1) .* Ita{1,1}(:);
-            for i = 2:size(Kai,2)
+            for i = 2:size(Kai,2) % TODO : for 文なくす．
                 PreYh = PreYh + weight(2) .* Ita{1,i}(:);
             end
             %事前出力誤差共分散行列
@@ -286,7 +293,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
                 result = obj.result;
             end
             l = obj.map_param;
-            l = obj.point2line([l.x,l.y]);
+            l = obj.point2line(l.x,l.y);
             p = result.state.p;
             th = result.state.q;
             plot(l.x,l.y);
@@ -295,12 +302,12 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             quiver(p(1),p(2),cos(th),sin(th),'Color','r');  
             hold off
         end
-        function l = point2line(obj,P)
-            % P = [xs,xe,ys,ye]
+        function l = point2line(obj,Px,Py)
+            % Px = [xs,xe],  Py = [ys,ye]
             % return l = struct(x,y)
             % plot(x,y) : line plot from (xs,ys) to (xe,ye)
-            x = [P(:,1:2),NaN(size(P,1),1)];
-            y = [P(:,3:4),NaN(size(P,1),1)];
+            x = [Px,NaN(size(Px,1),1)];
+            y = [Py,NaN(size(Py,1),1)];
             l.x = reshape(x',numel(x),1);
             l.y = reshape(y',numel(y),1);
         end

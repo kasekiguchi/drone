@@ -3,7 +3,7 @@ function Sensor = Sensor_LiDAR(id,SensorRange,param)
 % sensor property LiDAR sensor
 % rpos : RnagePos_sim
 Sensor.name=["LiDAR"];
-Sensor.type=["LiDAR_sim"];
+Sensor.type=["LiDAR_SIM"];
 LiDAR_param.radius = SensorRange;
 LiDAR_param.angle_range = -pi:0.01:pi;
 LiDAR_param.noise = param.noise;

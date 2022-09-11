@@ -34,8 +34,8 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-       initial(i).p = [0;-2];%四角経路
-       initial(i).q = [0];
+       initial(i).p = [92;1];%四角経路
+       initial(i).q = [pi/2-0.05];
        %initial(i).p = [92;0];%四角経路
        %initial(i).q = [pi/2];
 %     initial(i).p = [0;0];%直進経路
@@ -262,6 +262,11 @@ while round(time.t,5)<=te
     % with FH
 %    figure(FH)
 %    drawnow
+    %---now result plot---%
+     NowResultPlot(agent,NowResult,plot_flag);
+     plot_flag = false;
+     %drawnow
+    %---------------------%
     for i = 1:N %
         model_param.param=agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
@@ -273,11 +278,6 @@ while round(time.t,5)<=te
         end
         agent(i).do_plant(plant_param);
     end
-    %---now result plot---%
-     NowResultPlot(agent,NowResult,plot_flag);
-     plot_flag = false;
-     %drawnow
-    %---------------------%
     % for exp
     % pause(0.9999*(sampling-calculation)); %
     %profile viewer
@@ -321,7 +321,10 @@ movefile('RunNames.txt',Plots.SaveDateStr);
 %% Local function
 function [] = NowResultPlot(agent,NowResult,flag)
 %if(flag)
+%agent.estimator.ukfslam_WC.show;
+%hold on
 figure(NowResult)
+
 %end
     clf(NowResult)
     grid on
@@ -348,7 +351,6 @@ PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'Face
 RefState = agent.reference.result.state.p(1:3,:);
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-
 fWall = agent.reference.result.focusedLine;
 plot(fWall(:,1),fWall(:,2),'r-');
 O = agent.reference.result.O;
