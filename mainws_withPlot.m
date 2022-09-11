@@ -34,11 +34,10 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-       %initial(i).p = [89;-2.5];%四角経路
-       %initial(i).p = [89;-2];%四角経路
+       initial(i).p = [89;-2];%四角経路
+       initial(i).q = [0];
        initial(i).p = [0;-2];%四角経路
        initial(i).q = [0];
-%     initial(i).p = [0;0];%直進経路
     
     initial(i).v = [0];
     initial(i).w = [0];
@@ -71,7 +70,7 @@ for i = 1:N
             agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
         else
             SensorRange = 20;
-            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-2 ) )  );%LiDAR seosor
+            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
         end
 
     %% set estimator property
@@ -298,7 +297,7 @@ calculation=toc;
 % Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calculation);
-logger.plot({1,"p1:2","er"},{1,"q","er"},{1,"v","er"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
 logger.save("AROB2022_Comp_300s","separate",true);  

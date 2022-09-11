@@ -68,12 +68,23 @@ for i = 1:length(Lc)
         t = linefit(XY(s:s+d,:)); % tmp line
         f = abs((t(1).*XY(s+d+1:end,1) + t(2).*XY(s+d+1:end,2) + t(3))/vecnorm(t(1:2))); % 直線までの射影距離
         tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
+        ns = s+d;
         if isempty(tid) % ラインから外れている点が無くなればクラスタの最後までの点を使って直線を導出
             ns = e;
+            t = linefit(XY(s:ns,:)); % tmp line
         else
-            ns = s+d+tid - 1;% -1; % 外れている点のひとつ前まではlineに含む
+            while tid > 1
+                ns = ns + tid - 1;% -1; % 外れている点のひとつ前まではlineに含む
+                t = linefit(XY(s:ns,:)); % tmp line
+                f = abs((t(1).*XY(ns+1:end,1) + t(2).*XY(ns+1:end,2) + t(3))/vecnorm(t(1:2))); % 直線までの射影距離
+                tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
+        if isempty(tid) % ラインから外れている点が無くなればクラスタの最後までの点を使って直線を導出
+            ns = e;
+            t = linefit(XY(s:ns,:)); % tmp line
+        end                
+            end
         end
-        l(k,:) = linefit(XY(s:ns,:));
+        l(k,:) = t;
         lc(k) = i;
         perp = projection(l(k,:),[XY(s,:);XY(ns,:)]);
         X(k,:) = perp(:,1)';%[XY(s,1),XY(ns,1)];
@@ -124,11 +135,11 @@ function l = linefit(XY)
 v = var(XY); % 分散
 tmpid = v < 1e-3;
 if sum(tmpid) == 0 % x + by + c = 0
-        l = [1,(pinv([XY(:,2),ones(size(XY,1),1)])*(-XY(:,1)))'];
+    l = [1,(pinv([XY(:,2),ones(size(XY,1),1)])*(-XY(:,1)))'];
 else  % x = c or y = c
-        [~,tmpid] = min(v);
-        tmpid = [1:2]==tmpid;
-        l = [-tmpid,mean(XY(:,tmpid))];
+    [~,tmpid] = min(v);
+    tmpid = [1:2]==tmpid;
+    l = [-tmpid,mean(XY(:,tmpid))];
 end
 l = l/vecnorm(l(1:2));
 end
