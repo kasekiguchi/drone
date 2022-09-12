@@ -180,8 +180,8 @@ end
 %  logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %  logger.Data = log.log.Data;
 %%
-% tid = find(logger.Data.t,1,'last')
-% tid = 51;
+%  tid = find(logger.Data.t,1,'last')-27;
+%  tid = 624;
 % time.t = logger.Data.t(tid)
 % logger.overwrite("plant", time.t, agent, 1);
 % logger.overwrite("estimator", time.t, agent, 1); 
@@ -203,8 +203,8 @@ end
 % figure()
 % agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
 % axis equal
-% figure()
-% agent.estimator.ukfslam_WC.show
+%figure()
+%agent.estimator.ukfslam_WC.show
 %time.t = time.t + dt;
 %% main loop
 disp("while ==========  ==================")
@@ -296,7 +296,7 @@ calculation=toc;
 % SaveOnOff = false; %trueでデータをはく
 % Plots = DataPlot(logger,SaveOnOff);
 %%
-%disp(calculation);
+%disp(calcuflation);
 logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
