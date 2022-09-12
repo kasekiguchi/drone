@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
 run("main2_agent_setup.m");
-%agent.set_model_error("ly",0.02);
+% agent.set_model_error("ex",-0.03);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -59,9 +59,15 @@ end
         end
 
         %% estimator, reference generator, controller
+        if exist("tEstimator","var")
+            dte = toc(tEstimator);
+        else
+            dte = 0;
+        end
+        tEstimator = tic;
         for i = 1:N
             % estimator
-            agent(i).do_estimator(cell(1, 10));
+            agent(i).do_estimator({dte,dte});
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
             % reference
@@ -80,6 +86,7 @@ end
 
             % controller
             param(i).controller.hlc = {time.t, HLParam};
+            HL_LoadParam.dt = agent.estimator.result.dt;
             param(i).controller.hl_load = {time.t, HL_LoadParam};
             param(i).controller.pd = {};
             for j = 1:length(agent(i).controller.name)
@@ -156,7 +163,7 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","ser"},{1,"v","e"},{1,"q","se"},{1,"w","e"},{1,"state.pL","er"},{1,"state.vL","e"},{1,"state.pT","e"},{1,"state.wL","e"},{1,"input",""});
+logger.plot({1,"p","ser"},{1,"v","e"},{1,"q","se"},{1,"w1:2","e"},{1,"state.pL","ser"},{1,"state.vL","e"},{1,"state.pT","se"},{1,"state.wL","e"},{1,"input",""});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation

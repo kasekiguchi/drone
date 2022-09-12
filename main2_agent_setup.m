@@ -67,7 +67,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], [1e-5])); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
-    agent(i).set_property("estimator",Estimator_EKF_PE(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_EKF_PE(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property

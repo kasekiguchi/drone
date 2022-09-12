@@ -17,6 +17,7 @@ classdef EKF_PE < ESTIMATOR_CLASS
         y
         state % model と同じ状態　cf. result.state は推定値として受け渡すよう？
         self
+        projection
     end
     
     methods
@@ -45,6 +46,7 @@ classdef EKF_PE < ESTIMATOR_CLASS
             obj.B = param.B;
             obj.result.P = param.P;
             obj.result.e = [0;0;0];
+            obj.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)-dot(x(19:21)/norm(x(19:21)),x(22:24))*x(19:21)/norm(x(19:21));x(25:27)];
         end
         
         function [result]=do(obj,param,sensor)
@@ -65,22 +67,12 @@ classdef EKF_PE < ESTIMATOR_CLASS
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
             C = obj.JacobianH(x,p);
 
-            if norm(obj.y.q(3)-model.state.q(3)) > pi
-                if obj.y.q(3) > 0
-                    model.state.set_state("q",model.state.q+[0;0;2*pi]);
-                else
-                    model.state.set_state("q",model.state.q-[0;0;2*pi]);
-                end
-                xh_pre = model.state.get();
-            end
-
             %obj.B = diag([ones(1,6)*obj.dt^2,ones(1,6)*obj.dt]); % to be check
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % 事前誤差共分散行列
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
             P    = (eye(obj.n)-G*C)*P_pre;	% 事後誤差共分散
             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 事後推定
-            projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)-dot(x(19:21)/norm(x(19:21)),x(22:24))*x(19:21)/norm(x(19:21));x(25:27)];
-            tmpvalue = projection(tmpvalue);
+            tmpvalue = obj.projection(tmpvalue);
             obj.result.state.set_state(tmpvalue(1:24,1));
             obj.result.e = tmpvalue(25:27,1);
             obj.result.G = G;
