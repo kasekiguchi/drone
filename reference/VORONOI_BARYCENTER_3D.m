@@ -43,7 +43,7 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             elseif ~isempty(neighbor) && obj.id == 3
                 Ps = [neighbor(:,1)';neighbor(:,2)';state.p';Ps];
             else
-                Ps =[state.p';Ps];
+                Ps = [state.p';Ps];
             end
             [v,c] = voronoin(Ps); % 3次元ボロノイ分割
             %% 共通設定２：3次元ボロノイセルの重み確定
@@ -56,18 +56,17 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             bx = [reshape(qx,[numel(qx),1]),reshape(qy,[numel(qx),1]),reshape(qz,[numel(qx),1])];
 
             % 領域質量
-            zo = max(sum(Ptri.*F,2) - (F*bx') < 0,[],1) == 0;
-            phi_d = normpdf(vecnorm(obj.param.phi0 - bx(zo,:),2,2),0,1); % 重み位置と領域内ボクセルとの距離の正規分布関数
+            zo = find(max(sum(Ptri.*F,2) - (F*bx') < 0,[],1) == 0);
+            phi_d = normpdf(vecnorm(obj.param.phi0 - bx(zo,:),2,2),0,0.5); % 重み位置と領域内ボクセルとの距離の正規分布関数
             weight_bx = bx(zo,:).*phi_d; % 重み付きボクセル
             dmass = sum(weight_bx,1); % 各方向の重みを合算
             mass = sum(phi_d,"all"); % 全部の重みを合算
 
             % 領域重心
             cent = dmass / mass; % 重心
-            result = state.p - cent';
 
             % 描画用変数
-            obj.result.state.p = state.p - 0.1 * result;
+            obj.result.state.p = cent';
             result = obj.result;
             if obj.fShow
                 obj.show();
