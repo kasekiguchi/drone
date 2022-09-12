@@ -1,3 +1,47 @@
+%% set initial state 
+disp("Initialize state");
+param(N) = struct('sensor', struct, 'estimator', struct, 'reference', struct);
+
+if fExp
+initial_state(N) = struct;
+if exist('motive', 'var') == 1; motive.getData([], []); end
+
+    for i = 1:N
+        % for exp with motive : initial_stateize by motive info
+        if exist('motive', 'var') == 1
+            sstate = motive.result.rigid(rigid_ids(i));
+            initial_state(i).p = sstate.p;
+            initial_state(i).q = sstate.q;
+            initial_state(i).v = [0; 0; 0];
+            initial_state(i).w = [0; 0; 0];
+        else % とりあえず用
+            arranged_pos = arranged_position([0, 0], N, 1, 0);
+            initial_state(i).p = arranged_pos(:, i);
+            initial_state(i).q = [1; 0; 0; 0];
+            initial_state(i).v = [0; 0; 0];
+            initial_state(i).w = [0; 0; 0];
+        end
+
+    end
+
+else
+
+    %% for sim
+    for i = 1:N
+        if (fOffline)
+            clear initial_state
+            initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
+        else
+            arranged_pos = arranged_position([0, 0], N, 1, 0);
+            initial_state(i).p = arranged_pos(:, i);
+            initial_state(i).q = [1; 0; 0; 0];
+            initial_state(i).v = [0; 0; 0];
+            initial_state(i).w = [0; 0; 0];
+        end
+
+    end
+
+end
 %% generate environment
 %Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
 Env = Map3D_sim(Env_3DCoverage()); % 3次元重要度マップ設定
@@ -14,7 +58,7 @@ for i = 1:N
         agent(i).input = [0; 0; 0; 0];
     else
         %agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,1,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %[M,P]=Model_Discrete(dt,initial_state(i),i);

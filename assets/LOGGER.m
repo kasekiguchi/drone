@@ -15,14 +15,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         item_num    % 追加保存のアイテム数
         agent_items % result以外で追加保存するagent内の変数
         fExp
-        sname = "sensor";
-        ename = "estimator";
-        rname = "reference";
-        cname = "controller";
+        overwrite_target = ["all"];
     end
 
     methods
-        function obj = LOGGER(target, number, fExp, items, agent_items)
+        function obj = LOGGER(target, number, fExp, items, agent_items,option)
             % LOGGER(target,row,items)
             % target : ログを取る対象　example 1:3, usage agent(obj.target)
             % number : 確保するデータサイズ　length(ts:dt:te)
@@ -31,15 +28,39 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             %         以下のように名前と保存するものの対応が取れていなくても可
             %         LOGGER=LOGGER(~,~,"innerInput",~);
             %         LOGGER.logging(t,FH,agent,motive);
-            obj.k = 0;
-            obj.target = target;
-            obj.Data.t = zeros(number, 1);     % 時間
-            obj.Data.phase = zeros(number, 1); % フライトフェーズ　a,t,f,l...
-            obj.fExp = fExp;
-            obj.items = items;
-            obj.item_num = length(items);
-            obj.agent_items = agent_items;
-            obj.Data.agent = struct();
+            arguments
+                target
+                number = []
+                fExp = []
+                items = []
+                agent_items = []
+                option.overwrite_target = []
+            end
+            if isstring(target)
+                tmp=load(target);
+                log = tmp.log;
+                fn = fieldnames(log);
+                for i = fn'
+                    obj.(i{1}) = log.(i{1});
+                end
+                if ~isempty(number)
+                    obj.overwrite_target = option.overwrite_target;
+                end
+            else
+                obj.k = 0;
+                obj.target = target;
+                obj.Data.t = zeros(number, 1);     % 時間
+                obj.Data.phase = zeros(number, 1); % フライトフェーズ　a,t,f,l...
+                obj.fExp = fExp;
+                obj.items = items;
+                if ~isempty(items)
+                    for i = items
+                        obj.Data.(i) = {};
+                    end
+                end
+                obj.agent_items = agent_items;
+                obj.Data.agent = struct();
+            end
         end
 
         function logging(obj, t, FH, agent, items)
@@ -55,16 +76,16 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             arguments (Repeating)
                 items
             end
+            cha = get(FH, 'currentcharacter');
+            if isempty(cha)
+%                error("ACSL : FH is empty");
+cha = obj.Data.phase(obj.k);
+            end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
-            cha = get(FH, 'currentcharacter');
             obj.Data.phase(obj.k) = cha;
-            % TODO : activate warning
-            %            if isempty(items{1}) | length(items) ~= length(obj.items)
-            %                 warning("ACSL : number of logging data is wrong");
-            %             end
-            for i = obj.items
-                obj.Data.(obj.items(i))(obj.k, :) = items{i};
+            for i = 1:length(obj.items)
+                obj.Data.(obj.items(i)){obj.k} = items{i};
                 % 注：サイズの固定されている数値データだけ保存可能
             end
             for n = obj.target
@@ -92,62 +113,80 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
         end
         function save(obj)
-            % TODO : need to modify to be compatible with the change on
-            % 2021/12/26
-            % Data = {{log},{info}}
-            % log : logging data = field t and agent
-            %     agent : {k, itme_num, agent_num}
-            %          last four itmes are ;
-            %          sensor.result, estimator.result,
-            %          reference.result, and input
-            % info : {{indices},{items},{sensor names},{estimator names},{reference names}}
-            % indices = [si,ei,ri,ii,pi];
-            % sensor names : {{1st agent's sensor names},{2nd ..},{...}...}
-            % i-th agent's sensor names : example {"Motive","RangePos"}
+            % save log.Data keeping its structure as a file Data/Log(datetime).mat
+            % retrieve it by logger = LOGGER.load("file.mat");
             filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
-            sname = [];
-            for i = obj.target % 複数台の場合
-                isnames = obj.target(i).sensor.name;
-                isname = [];
-                for j = 1:length(isnames)
-                    isname = [isname, obj.target(i).sensor.(isnames(j)).name];
+            drange = 1:find(obj.Data.phase,1,'last');
+            obj.Data.t = obj.Data.t(drange);
+            obj.Data.phase = obj.Data.phase(drange);
+            obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
+            obj.Data.agent.estimator.result = obj.Data.agent.estimator.result(drange);
+            obj.Data.agent.reference.result = obj.Data.agent.reference.result(drange);
+            obj.Data.agent.input = obj.Data.agent.input(drange);
+            obj.Data.agent.plant.result = obj.Data.agent.plant.result(drange);
+            log.Data = obj.Data;
+            fn = fieldnames(obj);
+            for i = fn'
+                if ~strcmp(i{1},"Data")
+                    log.(i{1}) = obj.(i{1});
                 end
-                sname = [sname, {isname}];
             end
-            rname = [];
-            for i = obj.target % 複数台の場合
-                irnames = obj.target(i).reference.name;
-                %                 irname = [];
-                %                 for j = 1:length(irnames)
-                %                     irname = [irname,obj.target(i).reference.(irnames(j)).name];
-                %                 end
-                rname = [rname, {irnames}];
-            end
-            Data = {obj.Data, {[obj.si, obj.ei, obj.ri, obj.ki, obj.pi], obj.items, sname, rname}};
-            save(filename, 'Data');
+            save(filename, 'log');
         end
+        function overwrite(obj,str,t,agent,n)
+            % overwrite(str,t,agent,n)
+            % agent(n).(str).result の情報をData情報で上書き
+            if sum(contains(obj.overwrite_target,str)+strcmp(obj.overwrite_target,"all"))>0
+                %tidx = find((obj.Data.t-t)>=0,1); % 現在時刻に最も近い過去のデータを参照
+                [~,tidx] = min(abs(obj.Data.t-t)); % 現在時刻に最も近い過去のデータを参照
+                switch str
+                    case "sensor"
+                        agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
+                        agent(n).sensor.result.state = state_copy(obj.Data.agent(n).sensor.result{tidx}.state);
+                    case "estimator"
+                        agent(n).estimator.result = obj.Data.agent(n).estimator.result{tidx};
+                        agent(n).estimator.result.state = state_copy(obj.Data.agent(n).estimator.result{tidx}.state);
+                    case "reference"
+                        agent(n).reference.result = obj.Data.agent(n).reference.result{tidx};
+                        agent(n).reference.result.state = state_copy(obj.Data.agent(n).reference.result{tidx}.state);
+                    case "controller"
+                        agent(n).controller.result = obj.Data.agent(n).controller.result{tidx};
+                        agent(n).input = obj.Data.agent(n).input{tidx};
+                    case "plant"
+                        agent(n).plant.state = state_copy(obj.Data.agent(n).plant.result{tidx}.state);
+                end
+            end
+        end
+        
         function [data, vrange] = data(obj, target, variable, attribute, option)
             % target : agent indices
             % variable : var name or path to var from agent
             %            or path from result if attribute is set.
             % attribute : "s","e","r","p","i"
-            % option time : time range
+            % option ranget : time range
             % Examples
-            % time : data('t',[],[])
+            % time : data(0,'t',[])
             % state : data(1:2,"p","e")                    : agent1's estimated position
             %         data(2,"state.xd","r")               : agent2's reference xd
             %         data(1,"sensor.result.state.q",[])   : agent1's measured attitude
             % input : data(1,[],"i") or data(1,"input",[]) : agent1's input data
-            % data(1,"p","r","time",[0,2])                 : take the data in time span [0 2]
-            % PROBLEM : data(0,'t','') does not work
+            % items : data(0,"item_name",[])               : items which
+            %               does not depend on agent requires first input 0
+            % data(1,"p","r","ranget",[0,2])               : take the data in time span [0 2]
             arguments
                 obj
                 target
                 variable string = "p"
                 attribute string = "e"
-                option.time (1, 2) double = [0 obj.Data.t(obj.k)]
-            end  
-            data = cell2mat(arrayfun(@(i) obj.data_org(i, variable, attribute,"time",option.time), target, 'UniformOutput', false));
+                option.ranget (1, 2) double = [0 obj.Data.t(obj.k)]
+            end
+            if sum(strcmp(target, {'time', 't'}))                
+                data = obj.data_org(0,'t','',"ranget",option.ranget);
+            elseif target == 0
+                data = obj.data_org(0,variable,attribute,"ranget",option.ranget);
+            else
+                data = cell2mat(arrayfun(@(i) obj.data_org(i, variable, attribute,"ranget",option.ranget), target, 'UniformOutput', false));
+            end
             [~, vrange] = obj.full_var_name(variable, attribute);
         end
         function [data, vrange] = data_org(obj, n, variable, attribute, option)
@@ -157,11 +196,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 n
                 variable string = "p"
                 attribute string = "e"
-                option.time (1, 2) double = [0 obj.Data.t(obj.k)]
+                option.ranget (1, 2) double = [0 obj.Data.t(obj.k)]
             end
             [variable, vrange] = obj.full_var_name(variable, attribute);
             attribute = "";
-            data_range = find((obj.Data.t - option.time(1)) > 0, 1)-1:find((obj.Data.t - option.time(2)) >= 0, 1);
+            data_range = find((obj.Data.t - option.ranget(1)) > 0, 1)-1:find((obj.Data.t - option.ranget(2)) >= 0, 1);
             if sum(strcmp(n, {'time', 't'}))     % 時間軸データ
                 data = obj.Data.t(data_range);
             elseif n == 0                        % n : agent number.  n=0 => obj.itmesのデータ
@@ -170,7 +209,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 for j = 2:length(variable)
                     data = [data.(variable{j})];
                 end
-                data = [data{1, data_range}]';
+                data = data(data_range);
             else                                 % agentに関するデータ
                 variable = split(variable, '.'); % member毎に分割
                 data = [obj.Data.agent(n)];
@@ -197,10 +236,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         function data = return_state_prop(obj, variable, data)
             % function for data_org
             for j = 1:length(variable)
-                data = [data.(variable(j))];
+                %data = [data.(variable(j))];
+                data = vertcat(data.(variable(j)));
                 if strcmp(variable(j), 'state')
                     for k = 1:length(data)
-                        ndata(k, :) = data(k).(variable(j + 1))(1:data(k).num_list);
+                        ndata(k, :, :) = data(k).(variable(j + 1))(1:data(k).num_list(strcmp(data(k).list,variable(j+1))),:);
                     end
                     data = ndata;
                     break % WRN : stateから更に深い構造には対応していない
@@ -228,7 +268,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             %         s : sensor, e : estimator, r : reference,
             %         p : plant (only simulation)
             % option
-            %         time : time span
+            %         trange : time span
             %         fig_num : figure number
             %         row_col : row and column number of subplot
             %
@@ -253,14 +293,14 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 option.color {mustBeNumeric} = 1
                 option.hold {mustBeNumeric} = 0
             end
-            trange = option.time;                      % time range
+            ranget = option.time;                      % time range
             fig_num = option.fig_num;                  % figure number
             frow = option.row_col(1);                  % subfigure row number
             fcol = option.row_col(2);                  % subfigure col number
             fcolor = option.color;                     % on/off flag for phase coloring
             fhold = option.hold;                       % on/off flag for holding (only active to last subfigure)
 
-            t = obj.data("t", '', '', "time", trange); % time data
+            t = obj.data(0,"t",[], "ranget", ranget); % time data
             fh = figure(fig_num);
             fh.WindowState = 'maximized';
             switch frow
@@ -286,21 +326,21 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                         switch length(ps)
                             case 1 % 時間応答（時間を省略）
                                 tmpx = t;
-                                [tmpy, vrange] = obj.data(n, ps, att, "time", trange);
+                                [tmpy, vrange] = obj.data(n, ps, att, "ranget", ranget);
                             case 2 % 縦横軸明記
-                                tmpx = obj.data(n, ps(1), att, "time", trange);
-                                tmpy = obj.data(n, ps(2), att, "time", trange);
+                                tmpx = obj.data(n, ps(1), att, "ranget", ranget);
+                                tmpy = obj.data(n, ps(2), att, "ranget", ranget);
                             case 3 % ３次元プロット
-                                tmpx = obj.data(n, ps(1), att, "time", trange);
-                                tmpy = obj.data(n, ps(2), att, "time", trange);
-                                tmpz = obj.data(n, ps(3), att, "time", trange);
+                                tmpx = obj.data(n, ps(1), att, "ranget", ranget);
+                                tmpy = obj.data(n, ps(2), att, "ranget", ranget);
+                                tmpz = obj.data(n, ps(3), att, "ranget", ranget);
                         end
 
                         % plot
                         if length(ps) == 3
                             plot3(tmpx, tmpy, tmpz);
                         else
-                            plot(tmpx, tmpy);
+                            plot(tmpx, tmpy(:,:,1));
                             xlim([min(tmpx),max(tmpx)]);
                         end
                         hold on
