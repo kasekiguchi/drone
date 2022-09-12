@@ -54,6 +54,7 @@ run("main3_loop_setup.m");
             param(i).sensor.rpos = {agent};
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
+            param(i).sensor.rcoverage_3D = {Env};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
             for j = 1:length(agent(i).sensor.name)
