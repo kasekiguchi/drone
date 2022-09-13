@@ -7,7 +7,7 @@ function Param = LineToLineParamAndEndPoint(map)
     Param.xe = zeros(map_size, 1);
     Param.ys = zeros(map_size, 1);
     Param.ye = zeros(map_size, 1);
-    for i = 1:length(map.index)
+    for i = 1:size(map.index,1)
         % Calculation of distance using the formula of distance between point and line
         Param.d(i) = abs(map.c(i)) / sqrt(map.a(i) ^ 2 + map.b(i) ^ 2);
         % Calculation of angle using the formula of normal vector

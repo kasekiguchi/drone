@@ -28,16 +28,23 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag([10,10,1,1]);%状態の重み
-            obj.param.R = diag([1,1]);%入力の重み
-            obj.param.Qf = diag([12,12,1,1]);%終端状態の重み
+%             obj.param.Q = diag([10,10,0.1,1000]);%状態の重み 10,10,1,100
+%             obj.param.R = 0.01*diag([1,10]);%入力の重み % 0.01*diag([1,1])
+%             obj.param.Qf = diag([10,10,0.1,1000]);%終端状態の重み % 12,12,1,1
+            obj.param.Q = diag([10,10,1,100]);%状態の重み 10,10,1,100
+            obj.param.R = 0.01*diag([1,1]);%入力の重み % 0.01*diag([1,1])
+            obj.param.Qf = diag([12,12,1,1]);%終端状態の重み % 12,12,1,1
 %             obj.param.Qf = diag([17,17,1,1])
-            obj.param.T = diag([90,90,90]);%Fisherの重み
-            obj.param.S = [1,0.7];%入力の上下限
-            obj.NoiseR = 1.0e-3;%param of Fisher Information matrix
+            obj.param.T = 100*eye(param.H);%Fisherの重み
+            obj.param.S = [1,0.7];%入力の上下限 % 1,0.7
+            strs=self.reference.name;        
+            obj.param.step = self.reference.(strs(contains(strs,"MPC"))).step;
+            obj.NoiseR = 1.0e-2;%param of Fisher Information matrix % 1.0e-2
             obj.RangeGain = 10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
+            obj.result.previous_state = [];
+            obj.result.previous_input = obj.previous_input;
             obj.model = self.model;
         end
         
@@ -92,19 +99,25 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.alpha = Alpha;
             obj.param.phi = AssoFai;
 %             obj.param.NoiseR = obj.self.estimator.(obj.self.estimator.name).R;
-            obj.param.X0 = obj.self.model.state.get();%[state.p;state.q;state.v;state.w];
-            obj.param.U0 = obj.previous_input(:,1);%現在時刻の入力
+            obj.param.X0 = obj.self.estimator.result.state.get();%[state.p;state.q;state.v;state.w];
+            obj.param.U0 = oldinput;%obj.previous_input(:,1);%現在時刻の入力
             obj.param.model_param = obj.self.model.param;
             %------------------------%
-            obj.previous_state = repmat(obj.param.X0,1,obj.param.Num);
+            if isempty(obj.result.previous_state)
+                obj.previous_state = repmat(obj.param.X0,1,obj.param.Num);                
+            else
+                obj.previous_state = obj.result.previous_state;
+                obj.previous_input = obj.result.previous_input;
+            end
+            obj.previous_state(:,1) = obj.param.X0;% 1時刻前の予測値から現在時刻だけ現在推定値に置き換え．
             problem.solver    = 'fmincon';
             problem.options   = obj.options;
             problem.x0		  = [obj.previous_state;obj.previous_input;zeros(2,obj.param.Num)]; % 最適化計算の初期状態
             % obj.options.PlotFcn                = [];
             %---評価関数と制約条件を設定した関数MEX化するときはここをやる---%
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分と観測値のFIMを用いたコントローラ，最終的な提案手法
-%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分のFIMを使ったコントローラ
-%             [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);%目標値追従のみのコントローラ，比較手法
+            %[var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分と観測値のFIMを用いたコントローラ，最終的な提案手法
+%            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分のFIMを使ったコントローラ
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);%目標値追従のみのコントローラ，比較手法
             %------------------------------------%
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;
@@ -112,8 +125,12 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.result.exitflag = exitflag;
             obj.result.eachfval = GetobjectiveFimEval(var, obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%評価関数の値の計算 for plot
 %             disp(exitflag);
-            obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);  
+            %obj.previous_input = var(obj.param.state_size + 1:obj.param.total_size, :);  
+            obj.previous_input = [var(obj.param.state_size + 1:obj.param.total_size, 2:end),var(obj.param.state_size + 1:obj.param.total_size, end)];  
+            obj.previous_state = var(1:obj.param.state_size,1:end);%[var(1:obj.param.state_size,2:end),var(1:obj.param.state_size,end)]; % 次時刻の最適化計算の初期値：一時刻ずらし最後二つは同じ状態
 %             obj.SolverName = func2str(problem.objective);
+            obj.result.previous_state = obj.previous_state;
+            obj.result.previous_input = obj.previous_input;
             result = obj.result;
         end
         

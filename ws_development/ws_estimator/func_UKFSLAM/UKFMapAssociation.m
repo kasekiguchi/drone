@@ -1,4 +1,12 @@
 function parameter = UKFMapAssociation(state,Lines,EndPoint, measured_distance, measured_angle, Constant,NLP)
+% state : ビークルの事前推定状態
+% Lines : mapの事前推定値
+% EndPoint : line 端点座標
+% measured_distance : レーザー計測距離
+% measured_angle : レーザー照射角度 : 絶対座標にしてある．
+% Constant :各種定数
+% NLP : number of line parameter
+
 PreMap = MapStateToLineEqu(Lines,NLP);
 map.a = PreMap.a;
 map.b = PreMap.b;
@@ -8,16 +16,18 @@ map.y = EndPoint.y;
 % Initialize each variable
 association_size = length(measured_distance);
 parameter.index = zeros(association_size, 1);
-parameter.sign = zeros(association_size, 1);
+%parameter.sign = zeros(association_size, 1);
 % Define variable about start and end point of map and laser
 Xs = map.x(:, 1);
 Xe = map.x(:, 2);
 Rx = state(1);
-Xm = Rx + Constant.SensorRange * cos(state(3) + measured_angle);
+%Xm = Rx + Constant.SensorRange * cos(state(3) + measured_angle);
+Xm = Rx + Constant.SensorRange * cos(measured_angle);
 Ys = map.y(:, 1);
 Ye = map.y(:, 2);
 Ry = state(2);
-Ym = Ry + Constant.SensorRange * sin(state(3) + measured_angle);
+%Ym = Ry + Constant.SensorRange * sin(state(3) + measured_angle);
+Ym = Ry + Constant.SensorRange * sin(measured_angle);
 % Calculation of temporary variable
 x_line = Xs - Xe;
 y_line = Ys - Ye;
@@ -50,8 +60,8 @@ inf_cond = isinf(min_dist);
 min_dist(inf_cond) = 0;
 min_index(inf_cond) = 0;
 %condition re calculate
-Ts = atan2(Ys - Ry,Xs -Rx) - state(3);%reference point as front of robot for theta start point 
-Te = atan2(Ye - Ry,Xe -Rx) - state(3);%theta end point
+Ts = atan2(Ys - Ry,Xs -Rx);% - state(3);%reference point as front of robot for theta start point 
+Te = atan2(Ye - Ry,Xe -Rx);% - state(3);%theta end point
 TJudge = abs(Ts - Te) < pi;%レーザの始点と終点の角度がpi以上大きいかを判断，大きい場合はチェックルールが変わる．
 [~,Tsidx] = min(abs(Ts - measured_angle),[],2);%ロボットと端点の始点の直線に最も近い角度を持つレーザのインデックス
 [~,Teidx] = min(abs(Te - measured_angle),[],2);%ロボットと端点の終点の直線に最も近い角度を持つレーザのインデックス

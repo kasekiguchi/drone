@@ -15,11 +15,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         item_num    % 追加保存のアイテム数
         agent_items % result以外で追加保存するagent内の変数
         fExp
-        overwrite_target = ["sensor"];
+        overwrite_target = ["all"];
     end
 
     methods
-        function obj = LOGGER(target, number, fExp, items, agent_items)
+        function obj = LOGGER(target, number, fExp, items, agent_items,option)
             % LOGGER(target,row,items)
             % target : ログを取る対象　example 1:3, usage agent(obj.target)
             % number : 確保するデータサイズ　length(ts:dt:te)
@@ -28,22 +28,47 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             %         以下のように名前と保存するものの対応が取れていなくても可
             %         LOGGER=LOGGER(~,~,"innerInput",~);
             %         LOGGER.logging(t,FH,agent,motive);
+            % 【ログの呼び出し】
+            % LOGGER.saveで保存したデータを呼び出してloggerとして登録することができる．
+            % logger=LOGGER("Data/filename.mat")
+            % logger=LOGGER("Data/dirname");
             arguments
                 target
                 number = []
                 fExp = []
                 items = []
                 agent_items = []
+                option.overwrite_target = []
             end
             if isstring(target)
+                if contains(target,"Data.mat") | ~contains(target,".mat");
+                if contains(target,"Data.mat")
+                   target = erase(target,"/Data.mat");
+                end
+                    tmp = load(target + "/Data.mat");
+                    obj.Data = tmp.Data;
+                    tmp = load(target + "/sensor.mat");
+                    obj.Data.agent.sensor = tmp.sensor;
+                    tmp = load(target + "/estimator.mat");
+                    obj.Data.agent.estimator = tmp.estimator;
+                    tmp = load(target + "/reference.mat");
+                    obj.Data.agent.reference = tmp.reference;
+                    tmp = load(target + "/input.mat");
+                    obj.Data.agent.input = tmp.input;
+                    tmp = load(target + "/controller.mat");
+                    obj.Data.agent.controller = tmp.controller;
+                    tmp = load(target + "/plant.mat");
+                    obj.Data.agent.plant = tmp.plant;
+                else
                 tmp=load(target);
                 log = tmp.log;
                 fn = fieldnames(log);
                 for i = fn'
                     obj.(i{1}) = log.(i{1});
                 end
+                end
                 if ~isempty(number)
-                    obj.overwrite_target = number;
+                    obj.overwrite_target = option.overwrite_target;
                 end
             else
                 obj.k = 0;
@@ -77,7 +102,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
             cha = get(FH, 'currentcharacter');
             if isempty(cha)
-                error("ACSL : FH is empty");
+%                error("ACSL : FH is empty");
+            cha = obj.Data.phase(obj.k);
             end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
@@ -109,47 +135,78 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 end
             end
         end
-        function save(obj)
+        function save(obj,name,opt)
             % save log.Data keeping its structure as a file Data/Log(datetime).mat
             % retrieve it by logger = LOGGER.load("file.mat");
-            filename = strrep(strrep(strcat('Data/Log(', datestr(datetime('now')), ').mat'), ':', '_'), ' ', '_');
-            drange = 1:find(obj.Data.phase,1,'last');
-            obj.Data.t = obj.Data.t(drange);
-            obj.Data.phase = obj.Data.phase(drange);
-            obj.Data.agent.sensor.result = obj.Data.agent.sensor.result(drange);
-            obj.Data.agent.estimator.result = obj.Data.agent.estimator.result(drange);
-            obj.Data.agent.reference.result = obj.Data.agent.reference.result(drange);
-            obj.Data.agent.input = obj.Data.agent.input(drange);
-            obj.Data.agent.plant.result = obj.Data.agent.plant.result(drange);
-            log.Data = obj.Data;
-            fn = fieldnames(obj);
-            for i = fn'
-                if ~strcmp(i{1},"Data")
-                    log.(i{1}) = obj.(i{1});
-                end
+            arguments
+                obj
+                name = []
+                opt.range = 1:length(obj.Data.phase);%find(obj.Data.phase,1,'last');
+                opt.separate = false;
             end
-            save(filename, 'log');
+            drange=opt.range;
+            if isempty(name)
+                tmpname = strrep(strrep(strcat('Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
+            else
+                tmpname = strrep(strrep(strcat('',name,'_Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
+            end
+            if opt.separate
+                dirname ="Data/" + tmpname;
+                mkdir(dirname);
+                filename = dirname + "/Data.mat";
+                Data.t = obj.Data.t;
+                Data.phase = obj.Data.phase;
+                save(filename,"Data");
+                    sensor = obj.Data.agent.sensor;
+                    save(dirname + "/sensor.mat","sensor");
+                    estimator = obj.Data.agent.estimator;
+                    save(dirname + "/estimator.mat","estimator","-v7.3");
+                    reference = obj.Data.agent.reference;
+                    save(dirname + "/reference.mat","reference");
+                    input = obj.Data.agent.input;
+                    save(dirname + "/input.mat","input");
+                    controller = obj.Data.agent.controller;
+                    save(dirname + "/controller.mat","controller");
+                    plant = obj.Data.agent.plant;
+                    save(dirname + "/plant.mat","plant");
+            else
+                list = "Data/" + filename + ".mat";
+                log.Data = obj.Data;
+                fn = fieldnames(obj);
+                for i = fn'
+                    if ~strcmp(i{1},"Data")
+                        log.(i{1}) = obj.(i{1});
+                    end
+                end
+                save(filename, 'log');
+            end
         end
         function overwrite(obj,str,t,agent,n)
             % overwrite(str,t,agent,n)
             % agent(n).(str).result の情報をData情報で上書き
             if sum(contains(obj.overwrite_target,str)+strcmp(obj.overwrite_target,"all"))>0
-                tidx = find((obj.Data.t-t)>=0,1); % 現在時刻に最も近い過去のデータを参照
+                %tidx = find((obj.Data.t-t)>=0,1); % 現在時刻に最も近い過去のデータを参照
+                [~,tidx] = min(abs(obj.Data.t-t)); % 現在時刻に最も近い過去のデータを参照
                 switch str
                     case "sensor"
                         agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
                         agent(n).sensor.result.state = state_copy(obj.Data.agent(n).sensor.result{tidx}.state);
+                        %obj.Data.agent(n).sensor.result(tidx+1:end) = []; 
                     case "estimator"
                         agent(n).estimator.result = obj.Data.agent(n).estimator.result{tidx};
                         agent(n).estimator.result.state = state_copy(obj.Data.agent(n).estimator.result{tidx}.state);
+                        %obj.Data.agent(n).estimator.result(tidx+1:end) = [];
                     case "reference"
                         agent(n).reference.result = obj.Data.agent(n).reference.result{tidx};
                         agent(n).reference.result.state = state_copy(obj.Data.agent(n).reference.result{tidx}.state);
+                        %obj.Data.agent(n).reference.result(tidx+1:end) = [];
                     case "controller"
                         agent(n).controller.result = obj.Data.agent(n).controller.result{tidx};
                         agent(n).input = obj.Data.agent(n).input{tidx};
+                        %obj.Data.agent(n).controller.result(tidx+1:end) = [];
                     case "plant"
-                        agent(n).plant.result.state = state_copy(obj.Data.agent(n).plant.result{tidx}.state);
+                        agent(n).plant.state = state_copy(obj.Data.agent(n).plant.result{tidx}.state);
+                        %obj.Data.agent(n).plant.result(tidx+1:end) = [];
                 end
             end
         end
@@ -176,7 +233,9 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 attribute string = "e"
                 option.ranget (1, 2) double = [0 obj.Data.t(obj.k)]
             end
-            if strcmp(target, {'time', 't'}) | target == 0
+            if sum(strcmp(target, {'time', 't'}))                
+                data = obj.data_org(0,'t','',"ranget",option.ranget);
+            elseif target == 0
                 data = obj.data_org(0,variable,attribute,"ranget",option.ranget);
             else
                 data = cell2mat(arrayfun(@(i) obj.data_org(i, variable, attribute,"ranget",option.ranget), target, 'UniformOutput', false));
@@ -230,7 +289,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         function data = return_state_prop(obj, variable, data)
             % function for data_org
             for j = 1:length(variable)
-                data = [data.(variable(j))];
+                %data = [data.(variable(j))];
+                data = vertcat(data.(variable(j)));
                 if strcmp(variable(j), 'state')
                     for k = 1:length(data)
                         ndata(k, :, :) = data(k).(variable(j + 1))(1:data(k).num_list(strcmp(data(k).list,variable(j+1))),:);
@@ -332,8 +392,9 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                         % plot
                         if length(ps) == 3
                             plot3(tmpx, tmpy, tmpz);
-                        else
-                            plot(tmpx, tmpy(:,:,1));
+                        else % todo
+                            tmpx = unique(tmpx);
+                            plot(tmpx, tmpy(1:size(tmpx,1),:,1));
                             xlim([min(tmpx),max(tmpx)]);
                         end
                         hold on

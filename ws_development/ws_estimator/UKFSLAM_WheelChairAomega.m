@@ -36,7 +36,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             
             % the constant value for estimating of the map
             obj.constant = struct; %定数パラメータ設定
-            obj.constant.LineThreshold = 0.3; %"ax + by + c"の誤差を許容する閾値
+            obj.constant.LineThreshold = 0.3;%0.3; %"ax + by + c"の誤差を許容する閾値
             obj.constant.PointThreshold = 0.2; %
             obj.constant.GroupNumberThreshold = 5; % クラスタを構成する最小の点数
             obj.constant.DistanceThreshold = 1e-1; % センサ値と計算値の許容誤差，対応付けに使用
@@ -64,14 +64,20 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             end
             
             %% sigma point update
+%           sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
+%            x = linspace(0,obj.dt,10);
+%            rKai = arrayfun(@(i) deval(sol(i),x), 1:2*StateCount + 1, 'UniformOutput', false);%ロボットのシグマポイント（モデルで動きを出したやつ）
+%            mKai = Kai(obj.n+1:end,:);%マップのシグマポイント
+% %           Kai = zeros(StateCount,2*StateCount+1);
+%            for i = 1:2*StateCount+1
+%                aKai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
+%            end
             sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
-            x = linspace(0,obj.dt,10);
-            rKai = arrayfun(@(i) deval(sol(i),x), 1:2*StateCount + 1, 'UniformOutput', false);%ロボットのシグマポイント（モデルで動きを出したやつ）
-            mKai = Kai(obj.n+1:end,:);%マップのシグマポイント
-            Kai = zeros(StateCount,2*StateCount+1);
-            for i = 1:2*StateCount+1
-                Kai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
-            end
+            tmp = [sol.stats];
+            tmp = [tmp.nsteps]+1;
+            tmpid = arrayfun(@(i) sum(tmp(1:i)),1:length(tmp));
+            tmp = [sol.y];
+            Kai(1:obj.n,:) = tmp(1:obj.n,tmpid);
             %Pre estimation [x;y;theta;map's]%事前状態推定
             PreXh = weight(1) .* Kai(:,1);
             for i = 2:size(Kai,2)
@@ -95,13 +101,22 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             if iscolumn(measured.ranges)
                 measured.ranges = measured.ranges';% Transposition
             end
-            measured.angles = sensor.angle - PreXh(3);%raser angles.姿勢角を基準とする．
+            measured.angles = sensor.angle + PreXh(3) * (sensor.length~=0);%laser angles.姿勢角を基準とする．絶対角
             if iscolumn(measured.angles)
                 measured.angles = measured.angles';% Transposition
             end
             % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す
-            LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh(1:3), obj.constant);
+            LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, PreXh, obj.constant);
+            %LSA_param = UKFPointCloudToLine(measured.ranges, measured.angles, [PreXh(1:2);0], obj.constant);
             % Conbine between measurements and map%前時刻までのマップと観測値を組み合わせる．組み合わさらなかったら新しいマップとして足す．
+            % x, y が全て０のLSA_paramを削除 UKFCombiningLinesで使っているフィールドだけ削除
+            tmpid=sum([LSA_param.x,LSA_param.y],2)==0; 
+            LSA_param.x(tmpid,:) = [];
+            LSA_param.y(tmpid,:) = [];
+            LSA_param.a(tmpid,:) = [];
+            LSA_param.b(tmpid,:) = [];
+            LSA_param.c(tmpid,:) = [];
+            LSA_param.index(tmpid,:) = [];
             obj.map_param = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);%既存の地図との統合
             %StateCount update
             StateCount = obj.n + obj.NLP * length(obj.map_param.a);
@@ -154,7 +169,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             % association_info.index = correspanding wall(line_param) number index
             % association_info.distance = wall distace
             association_info = UKFMapAssociation(PreXh(1:obj.n),PreMh(1:end), EndPoint{1,1}, measured.ranges,measured.angles, obj.constant,obj.NLP);
-            association_available_index = find(association_info.index ~= 0);%Index corresponding to the measured value
+            association_available_index = find((association_info.index ~= 0)&(sensor.length~=0));%Index corresponding to the measured value
             association_available_count = length(association_available_index);%Count
             %出力のシグマポイントを計算
             %sensing step
@@ -162,25 +177,25 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             
             Ita = cell(1,size(Kai,2));
             for i = 1:size(Kai,2)%i:シグマポイントの数
-                tmp_angles = sensor.angle - Kai(3,1);
-                if iscolumn(tmp_angles)
-                    tmp_angles = tmp_angles';% Transposition
-                end
                 line_param.d = Kai(obj.n + 1:obj.NLP:end,i);
                 line_param.delta = Kai(obj.n + 2:obj.NLP:end,i);
                 Ita{1,i} = zeros(association_available_count,1);
                 for m = 1:association_available_count%m:レーザの番号
                     curr = association_available_index(1,m);
-                    idx = association_info.index(1,association_available_index(1,m));
-                    angle = Kai(3,i) + tmp_angles(curr) - line_param.delta(idx);
-                    denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));
-                    % Observation value
+                    idx = association_info.index(1,association_available_index(1,m)); % どの壁に対応づけられているか
+                    angle = Kai(3,i) + sensor.angle(curr) - line_param.delta(idx); % measured.anglesを絶対角にしているのでKai(3,i)は不要
+                    %angle = measured.angles(curr) - line_param.delta(idx); % measured.anglesを絶対角にしているのでKai(3,i)は不要
+                    %angle = sign(measured.ranges(curr))*(measured.angles(curr) - line_param.delta(idx)); % measured.anglesを絶対角にしているのでKai(3,i)は不要                   
+                    denon = line_param.d(idx) - Kai(1,i) * cos(line_param.delta(idx)) - Kai(2,i) * sin(line_param.delta(idx));% 車両から直線までの距離
+                    % Observation value Ita : denon = Ita * cos(angle)
                     Ita{1,i}(m,1) = (denon) / cos(angle);
                 end
             end
+
+            
             %事前出力推定値
             PreYh = weight(1) .* Ita{1,1}(:);
-            for i = 2:size(Kai,2)
+            for i = 2:size(Kai,2) % TODO : for 文なくす．
                 PreYh = PreYh + weight(2) .* Ita{1,i}(:);
             end
             %事前出力誤差共分散行列
@@ -195,7 +210,8 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             end
             %カルマンゲイン
             G = PreXYCov /( PreYCov + obj.R .* eye(association_available_count) );
-            Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
+            %Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
+            Xh = PreXh + G * (sensor.length(association_available_index)' - PreYh);
             obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(association_available_count)) * G';
             
             %---事後処理------------------------------------------------%
@@ -207,16 +223,16 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             obj.map_param.a = line_param_opt.a;
             obj.map_param.b = line_param_opt.b;
             obj.map_param.c = line_param_opt.c;
+            % sekiguchi 追加
+            obj.map_param.x = line_param_opt.x; 
+            obj.map_param.y = line_param_opt.y;
             % 端点を線上に射影
             MapEnd = FittingEndPoint(obj.map_param, obj.constant);
             obj.map_param.x = MapEnd.x;
             obj.map_param.y = MapEnd.y;
             [obj.map_param,RegistFlag] = UKFOptimizeMap(obj.map_param, obj.constant);
             line_param = LineToLineParamAndEndPoint(obj.map_param);%lineparam d and delta and endpoint is calculated
-            
-            MapEnd.x = obj.map_param.x;
-            MapEnd.y = obj.map_param.y;
-            
+                        
             EstMh = zeros(obj.NLP * length(line_param.d),1);
             EstMh(1:obj.NLP:end, 1) = line_param.d;
             EstMh(2:obj.NLP:end, 1) = line_param.delta;
@@ -228,18 +244,67 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
             %-------------------------------------------------------------%
-            
+
+            % 同一直線を統合
+            ABC = [obj.map_param.a,obj.map_param.b,obj.map_param.c];
+            X = obj.map_param.x;
+            Y = obj.map_param.y;
+            %[~,ia,ic] = uniquetol(ABC,'ByRows',true);
+            [~,ia,ic] = uniquetol(sign(ABC(:,3)).*ABC./vecnorm(ABC(:,1:2),2,2),'ByRows',true);
+            obj.map_param.index = obj.map_param.index(ia,:);
+            obj.map_param.a = obj.map_param.a(ia);
+            obj.map_param.b = obj.map_param.b(ia);
+            obj.map_param.c = obj.map_param.c(ia);
+            obj.map_param.x = obj.map_param.x(ia,:);
+            obj.map_param.y = obj.map_param.y(ia,:);
+            for i = 1:length(ia)
+                did = find(ic==i); % duplicated ids
+                obj.map_param.x(i,1) = min(X(did,:),[],'all');
+                obj.map_param.x(i,2) = max(X(did,:),[],'all');
+                if obj.map_param.a(i)*obj.map_param.b(i) > 0 % 右下がり
+                    obj.map_param.y(i,1) = max(Y(did,:),[],'all');
+                    obj.map_param.y(i,2) = min(Y(did,:),[],'all');
+                else % 右上がり
+                    obj.map_param.y(i,1) = min(Y(did,:),[],'all');
+                    obj.map_param.y(i,2) = max(Y(did,:),[],'all');
+                end
+            end
+
+
             % return values setting
             obj.result.state.set_state(Xh);
             obj.result.Est_state = Xh;
-            obj.result.G = G;
+            %obj.result.G = G;
             obj.result.map_param = obj.map_param;
-            obj.result.AssociationInfo = UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), MapEnd, measured.ranges,measured.angles, obj.constant,obj.NLP);
+            obj.result.AssociationInfo = UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), obj.map_param, measured.ranges,measured.angles, obj.constant,obj.NLP);
             result=obj.result;
         end
-        function show()
-            
+        function show(obj,result)
+            arguments
+                obj
+                result = []
+            end
+            if isempty(result)
+                result = obj.result;
+            end
+            l = obj.map_param;
+            l = obj.point2line(l.x,l.y);
+            p = result.state.p;
+            th = result.state.q;
+            plot(l.x,l.y);
+            hold on            
+            plot(p(1),p(2),'ro');
+            quiver(p(1),p(2),cos(th),sin(th),'Color','r');  
+            hold off
         end
-        
+        function l = point2line(obj,Px,Py)
+            % Px = [xs,xe],  Py = [ys,ye]
+            % return l = struct(x,y)
+            % plot(x,y) : line plot from (xs,ys) to (xe,ye)
+            x = [Px,NaN(size(Px,1),1)];
+            y = [Py,NaN(size(Py,1),1)];
+            l.x = reshape(x',numel(x),1);
+            l.y = reshape(y',numel(y),1);
+        end
     end
 end
