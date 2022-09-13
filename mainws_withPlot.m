@@ -7,17 +7,13 @@ cd(fileparts(tmp.Filename));
 rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
-<<<<<<< HEAD
 warning('off', 'all');
-=======
-warning('off', 'all'); 
-%%
->>>>>>> 5a034dc90909376735318d154576aa3dbe38f996
+
 %% general setting
 N = 1; % number of agents
-fExp = 1;%1：実機　それ以外：シミュレーション
+fExp = 0;%1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
-fROS = 1;
+fROS = 0;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -30,11 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-<<<<<<< HEAD
     te=10;
-=======
-    te=300;
->>>>>>> 5a034dc90909376735318d154576aa3dbe38f996
 end
 %% initialize
 initial(N) = struct;    
@@ -42,17 +34,13 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-<<<<<<< HEAD
-        initial(i).p = [0;0];%四角経路
-%     initial(i).p = [0;0];%直進経路
-    initial(i).q = [0];
-=======
-       initial(i).p = [89;-2];%四角経路
+
+       initial(i).p = [0;0];%四角経路
+%      initial(i).p = [0;0];%直進経路
        initial(i).q = [0];
        initial(i).p = [0;-2];%四角経路
        initial(i).q = [0];
-    
->>>>>>> 5a034dc90909376735318d154576aa3dbe38f996
+
     initial(i).v = [0];
     initial(i).w = [0];
 end
@@ -295,14 +283,10 @@ while round(time.t,5)<=te
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
-<<<<<<< HEAD
         if ~isa(agent(i).plant,"Whill_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
 
-=======
->>>>>>> 5a034dc90909376735318d154576aa3dbe38f996
-        agent(i).do_plant(plant_param);
     end
     % for exp
     % pause(0.9999*(sampling-calculation)); %

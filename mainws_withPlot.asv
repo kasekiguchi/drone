@@ -7,7 +7,12 @@ cd(fileparts(tmp.Filename));
 rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
+<<<<<<< HEAD
 warning('off', 'all');
+=======
+warning('off', 'all'); 
+%%
+>>>>>>> 5a034dc90909376735318d154576aa3dbe38f996
 %% general setting
 N = 1; % number of agents
 fExp = 1;%1：実機　それ以外：シミュレーション
@@ -28,14 +33,18 @@ else
     te=10;
 end
 %% initialize
-initial(N) = struct;
+initial(N) = struct;    
 param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-        initial(i).p = [0;0];%四角経路
-%     initial(i).p = [0;0];%直進経路
-    initial(i).q = [0];
+
+       initial(i).p = [0;0];%四角経路
+%      initial(i).p = [0;0];%直進経路
+       initial(i).q = [0];
+       initial(i).p = [0;-2];%四角経路
+       initial(i).q = [0];
+
     initial(i).v = [0];
     initial(i).w = [0];
 end
@@ -46,7 +55,7 @@ for i = 1:N
     if fExp
         agent(i) = DRONE(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
-        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',5))));%加速度次元車両モデル
+        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',[2]))));%加速度次元車両モデル seed = 5
     end
     %% model
     % set control model
@@ -55,8 +64,13 @@ for i = 1:N
 
     close all
     %% set environment property
-        Env = [];
-        agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
+    Env = [];
+
+    agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
+    %% set sensors property
+    agent(i).sensor=[];
+    SensorRange = 20;
+
         %% set ROS2 property
         if fROS
             SensorRange = 20;
@@ -65,17 +79,19 @@ for i = 1:N
             SensorRange = 20;
             agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
         end
-        %% set estimator property
-        agent(i).estimator=[];
+
+    %% set estimator property
+    agent(i).estimator=[];
 %         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelExp(agent(i),SensorRange))
-        agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
-        %% set reference property
-        agent(i).reference=[];
-        velocity = 0.5;%目標速度
-        w_velocity = 0.7;%曲がるときの目標角速度
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
+    %% set reference property
+    agent(i).reference=[];
+    velocity = 1.2;%目標速度
+    w_velocity = 0.7;%曲がるときの目標角速度
+
         
         WayPoint = [0,0,0,0];%目標位置の初期値
-        convjudgeV = 1.0;%収束判断　
+        convjudgeV = 0.5;%収束判断　% 0.5
         convjudgeW = 0.5;%収束判断　
         Holizon = 3;%MPCのホライゾ
         agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
@@ -168,25 +184,55 @@ for i = 1:N
     agent(i).do_sensor(param(i).sensor);
 end
 %% 続きから
-% time.t = time.t - dt;
+%logger.save("tmp");
+%%
+%  log = load("Data/tmp_Log(08-Sep-2022_07_44_57).mat");
+%  clear logger
+%  logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+%  logger.Data = log.log.Data;
+%%
+%  tid = find(logger.Data.t,1,'last')-27;
+%  tid = 624;
+% time.t = logger.Data.t(tid)
 % logger.overwrite("plant", time.t, agent, 1);
-% logger.overwrite("estimator", time.t, agent, 1);
+% logger.overwrite("estimator", time.t, agent, 1); 
+% agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
+% agent.estimator.ukfslam_WC.result = agent.estimator.result;
 % logger.overwrite("sensor", time.t, agent, 1);
+% agent.sensor.LiDAR.result = agent.sensor.result;
 % logger.overwrite("reference", time.t, agent, 1);
+% agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
 % logger.overwrite("controller", time.t, agent, 1);
+% agent.controller.TrackingMPCMEX_Controller.self = agent;
+% agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
 % logger.overwrite("input", time.t, agent, 1);
+% agent.estimator.result.state.get
+% agent.input
+% % 
+% close all
+% agent.sensor.LiDAR.show()
+% figure()
+% agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
+% axis equal
+%figure()
+%agent.estimator.ukfslam_WC.show
+%time.t = time.t + dt;
 %% main loop
-%profile on
-disp("while ============================")
+disp("while ==========  ==================")
 close all;
 disp('Press Enter key to start.');
 FH  = figure('position',[0 0 eps eps],'menubar','none');
 %
  w = waitforbuttonpress;
 NowResult = figure;
+plot_flag= true;
 tic
 % tryf
 while round(time.t,5)<=te
+%profile on
+    if time.t >= 191.8
+        time.t
+    end
     %while 1 % for exp
     %%
     rqSrpos={agent};
@@ -224,8 +270,13 @@ while round(time.t,5)<=te
     %logger.logging(time.t,FH,doSubFuncFlag);
     %%
     % with FH
-    figure(FH)
-    drawnow
+%    figure(FH)
+%    drawnow
+    %---now result plot---%
+     NowResultPlot(agent,NowResult,plot_flag);
+     plot_flag = false;
+     %drawnow
+    %---------------------%
     for i = 1:N %
         model_param.param=agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
@@ -236,18 +287,18 @@ while round(time.t,5)<=te
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
+<<<<<<< HEAD
         if ~isa(agent(i).plant,"Whill_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
 
+=======
+>>>>>>> 5a034dc90909376735318d154576aa3dbe38f996
         agent(i).do_plant(plant_param);
     end
-    %---now result plot---%
-     NowResultPlot(agent,NowResult);
-     drawnow
-    %---------------------%
     % for exp
     % pause(0.9999*(sampling-calculation)); %
+    %profile viewer
 end
 calculation=toc;
 % catch ME
@@ -259,17 +310,16 @@ calculation=toc;
 %     warning('ACSL : Emergency stop! Check the connection.');
 %     rethrow(ME);
 % end
-%profile viewer
 %% dataplot 自作
-close all;
-SaveOnOff = false; %trueでデータをはく
-Plots = DataPlot(logger,SaveOnOff);
+% close all;
+% SaveOnOff = false; %trueでデータをはく
+% Plots = DataPlot(logger,SaveOnOff);
 %%
-%disp(calculation);
-figure()
-logger.plot({1,"p1:2","er"});
+%disp(calcuflation);
+logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+%logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save()
+logger.save("AROB2022_Comp_300s","separate",true);  
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
@@ -287,13 +337,17 @@ fclose(fileID);
 movefile('RunNames.txt',Plots.SaveDateStr);
 % run('dataplot');
 %% Local function
-function [] = NowResultPlot(agent,NowResult)
-    figure(NowResult)
+function [] = NowResultPlot(agent,NowResult,flag)
+%if(flag)
+%agent.estimator.ukfslam_WC.show;
+%hold on
+figure(NowResult)
+
+%end
     clf(NowResult)
     grid on
     axis equal
     hold on
-    
 MapIdx = size(agent.env.Floor.param.Vertices,3);
 for ei = 1:MapIdx
     tmpenv(ei) = polyshape(agent.env.Floor.param.Vertices(:,:,ei));
@@ -317,13 +371,13 @@ PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'Face
 RefState = agent.reference.result.state.p(1:3,:);
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-
 fWall = agent.reference.result.focusedLine;
 plot(fWall(:,1),fWall(:,2),'r-');
 O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
-xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
+%xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
+xlim([EstFinalState(1)-10, EstFinalState(1)+10]);ylim([EstFinalState(2)-10,EstFinalState(2)+10])
 % pbaspect([20 20 1])
 hold off
 end
