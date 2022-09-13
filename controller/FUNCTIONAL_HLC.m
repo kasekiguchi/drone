@@ -60,10 +60,19 @@ classdef FUNCTIONAL_HLC < CONTROLLER_CLASS
             z3 = Z3(x,xd',vf,P);
             z4 = Z4(x,xd',vf,P);
             vs = obj.Vs(z2,z3,z4,F2,F3,F4);
-
+ %% 外乱(加速度で与える)
+                        dst = -5;
+%             dst=0.5*sin(2*pi*t/2);%
+%             dst=8*sin(2*pi*t/0.2);%
+%             dst=dst+10*cos(2*pi*t/1);
+%             dst=2;
+%             if t>=2 && t<=2.1　
+%                     dst=1/0.025;
+%             end
             %% calc actual input
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];
+%             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
             result = obj.result;
         end

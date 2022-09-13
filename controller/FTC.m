@@ -21,7 +21,7 @@ classdef FTC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.Vf = param.Vf; % ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹
             obj.Vs = param.Vs; % ŠK‘w‚Q‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹ 
-%             obj.VfFT = param.VfFT;% ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹FT—p
+            obj.VfFT = param.VfFT;% ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹FT—p
             obj.gain1 = param.gain1;%tanh1
             obj.gain2 = param.gain2;%tanh2
         end
@@ -72,10 +72,10 @@ classdef FTC < CONTROLLER_CLASS
 %% calc Z
             z1 = Z1(x,xd',P);
           %z•ûŒü:FB
-            vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
+%             vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
           %z•ûŒü:FT
 %             vf = obj.VfFT(F1,z1);%%%%%%%%%%%%%%%%%%xy
-%             vf = obj.VfFT(z1);%%%%%%%%%%%%%%%%%%xyz
+            vf = obj.VfFT(z1);%%%%%%%%%%%%%%%%%%xyz
             %x,y,psi‚Ìó‘Ô•Ï”‚Ì’l
             z2=Z2(x,xd',vf,P);%x•ûŒü
             z3=Z3(x,xd',vf,P);%y•ûŒü
@@ -147,7 +147,7 @@ end
 %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%¡‰ñ‚Í‚±‚ê‚Å()%FT
 %
 %% ŠO—(‰Á‘¬“x‚Å—^‚¦‚é)
-            dst = 0.0;
+            dst = 0.8;
 %             dst_y = 0;
 %             dst_z=0;
 %             dst=0.5*sin(2*pi*t/0.5);%

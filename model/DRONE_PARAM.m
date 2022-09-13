@@ -123,7 +123,13 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
                 if strcmp(p,"all")
                     p = obj.parameter_name;
                 end
-                
+                v = [];
+                for i = 1:length(p)
+                    v = [v,obj.(p(i))];
+                end
+           else % 制御モデルで想定している値: 真値(parameter) + モデル誤差(model_error)
+                if strcmp(p,"all") % 非推奨
+                    p = obj.parameter_name;
                     v = [];
                     for i = 1:length(p)
                         if isfield(obj.model_error,p(i))
@@ -132,9 +138,6 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
                             v = [v,obj.(p(i))];
                         end
                     end
-            else % 制御モデルで想定している値: 真値(parameter) + モデル誤差(model_error)
-                if strcmp(p,"all") % 非推奨
-                    v = obj.parameter;
                 else
                     v = [];
                     for i = 1:length(p)

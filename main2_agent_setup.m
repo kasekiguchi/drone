@@ -68,8 +68,8 @@ for i = 1:N
     %% model
     % set control model
 
-    agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
-%         agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱 only sim
+%     agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
+        agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱 only sim
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
@@ -121,11 +121,11 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
-%      agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
+     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
 %     agent(i).set_property("reference",Reference_Time_Varying("PtoP_ref",[0,0,1]));%PtoP
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
+%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[1,1,0.15]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;0],[2,2,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
