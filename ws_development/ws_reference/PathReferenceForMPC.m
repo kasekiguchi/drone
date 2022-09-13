@@ -130,29 +130,6 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
 
             obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
             
-<<<<<<< HEAD
-            obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v] 
-            %wvec=[MatchXe-MatchXs,MatchYe-MatchYs]; % wall vector
-            % Current time reference position calced at previous time
-            x = EstData(1);
-            y = EstData(2);
-%plot(reshape([MatchXs,MatchXe,NaN(size(MatchXs,1),1)]',[3*size(MatchXs,1),1]),reshape([MatchYs,MatchYe,NaN(size(MatchYs,1),1)]',[3*size(MatchYs,1),1]),x,y,'ro');
-            % estimated lines
-            a = MatchA;
-            b = MatchB;
-            c = MatchC;        
-            k = (a.^2 - b.^2);% tmp const
-            X= -(x.*b.^2 + a.*y.*b + a.*c); % ./(a.^2 - b.^2) % 垂線の足*k a=bの特異性を除くため
-            Y= (y.*a.^2 + b.*x.*a + b.*c); % ./(a.^2 - b.^2)
-            del=[X - k.*x,Y - k.*y]; % (垂線の足への相対ベクトル)*k
-            ds = [MatchXs-x,MatchYs-y].*k; % wall 始点への相対ベクトル
-            de = [MatchXe-x,MatchYe-y].*k; % wall 終点への相対ベクトル
-            ip = sum((ds - del).*(de - del),2); % 内積
-            wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス
-            d = sum(del.^2,2);%abs(MatchC)./sqrt(MatchA.^2+MatchB.^2);
-%[ip,d,MatchXs,MatchYs,MatchXe,MatchYe]
-            [~,ids]=mink(d(wid),2);
-=======
 %            k = (a.^2 + b.^2);% tmp const
 %            aeqbids=abs(k)< 1E-4; % k が０となるインデックス
 %             X= -(x.*b.^2 + a.*y.*b + a.*c); % ./(a.^2 - b.^2) % 垂線の足*k a=bの特異性を除くため
@@ -175,7 +152,6 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             [~,idm]=min(d(wid)); % 一番近い壁面
             [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
             ids=[idm,idm2];
->>>>>>> 5a034dc90909376735318d154576aa3dbe38f996
             ids=wid(ids);
 %             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
 %             l2 = [a(ids(2)),b(ids(2)),c(ids(2))]*sign(b(ids(2)));

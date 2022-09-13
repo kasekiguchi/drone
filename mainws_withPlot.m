@@ -26,7 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=10;
+    te=100;
 end
 %% initialize
 initial(N) = struct;    
@@ -35,10 +35,8 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
 
-       initial(i).p = [0;0];%四角経路
+       initial(i).p = [0;-2.5];%四角経路
 %      initial(i).p = [0;0];%直進経路
-       initial(i).q = [0];
-       initial(i).p = [0;-2];%四角経路
        initial(i).q = [0];
 
     initial(i).v = [0];
@@ -65,7 +63,6 @@ for i = 1:N
     agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
     %% set sensors property
     agent(i).sensor=[];
-    SensorRange = 20;
 
         %% set ROS2 property
         if fROS
