@@ -97,7 +97,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             % estimated lines
             a = MatchA;
             b = MatchB;
-            c = MatchC;           
+            c = MatchC;        
             k = (a.^2 - b.^2);% tmp const
             X= -(x.*b.^2 + a.*y.*b + a.*c); % ./(a.^2 - b.^2) % 垂線の足*k a=bの特異性を除くため
             Y= (y.*a.^2 + b.*x.*a + b.*c); % ./(a.^2 - b.^2)

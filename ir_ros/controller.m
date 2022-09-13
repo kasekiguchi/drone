@@ -26,11 +26,12 @@ while(1)
         Cmd_vel_msg.linear.x = 0.0; 
         Cmd_vel_msg.angular.z = 0.0;
         send(Cmd_vel_pub,Cmd_vel_msg);
-        break;
+        
     elseif k == 'q' 
         Cmd_vel_msg.linear.x = 0.0; 
         Cmd_vel_msg.angular.z = 0.0;
         send(Cmd_vel_pub,Cmd_vel_msg);
+        break;
     end
 
     
