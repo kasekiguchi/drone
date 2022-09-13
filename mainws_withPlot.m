@@ -282,7 +282,7 @@ while round(time.t,5)<=te
         if ~isa(agent(i).plant,"Whill_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
-
+        agent(i).do_plant(plant_param);
     end
     % for exp
     % pause(0.9999*(sampling-calculation)); %
