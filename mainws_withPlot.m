@@ -274,7 +274,6 @@ while round(time.t,5)<=te
         model_param.param=agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
         model_param.FH = FH;
-        plant_param.FH = FH;
         plant_param.param =agent(i).plant.param;
         plant_param.param.t = time.t;
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
