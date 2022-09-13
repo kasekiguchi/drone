@@ -26,12 +26,24 @@ classdef ROS < SENSOR_CLASS
             end
         end
         
-        function result=do(obj)
+        function result=do(obj,param)
             % result=sensor.motive.do(motive)
             %   set obj.result.state : State_obj,  p : position, q : quaternion
             %   result : 
             % 【入力】motive ：NATNET_CONNECOTR object 
-            data=obj.ros.getData();
+            data = obj.ros.getData;
+            data.ranges = fillmissing(data.ranges,'previous');
+            data.intensities = fillmissing(data.intensities,'previous');
+            angle_num  = size(data.ranges);
+%             angle_num = data.angle_max/data.angle_increment;
+            j = 1;
+            data.angle(j,1) = data.angle_min;
+            for j = 2:angle_num(1,1)
+                data.angle(j,1) = data.angle(j-1) + data.angle_increment; 
+            end
+            data.angle = double(data.angle);
+            data.length = double(data.ranges);
+            data.intensities = double(data.intensities);
             F=fieldnames(data);
             for i = 1: length(F)
                 switch F{i}
