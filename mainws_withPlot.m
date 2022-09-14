@@ -228,7 +228,7 @@ while round(time.t,5)<=te
     end
     %while 1 % for exp
     %%
-    rqSrpos={agent};
+    Srpos={agent};
     Simu={[]};
     Sdirect={};
     for i = 1:N
