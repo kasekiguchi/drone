@@ -68,12 +68,12 @@ classdef Whill_exp < MODEL_CLASS
                 obj.msg = ros2message('geometry_msgs/Twist');
                 switch cha
                     case 'q' % quit
-                        obj.msg.linear.x = 0;
-                        obj.msg.angular.z = 0;
+                        obj.msg.linear.x = 0.0;
+                        obj.msg.angular.z = 0.0;
                         error("ACSL : quit experiment");
                     case's' % stop
-                        obj.msg.linear.x = 0;
-                        obj.msg.angular.z = 0;
+                        obj.msg.linear.x = 0.0;
+                        obj.msg.angular.z = 0.0;
                     case 'r' % run
                         obj.msg.linear.x = u(1);
                         obj.msg.angular.z = u(2);

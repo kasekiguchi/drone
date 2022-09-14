@@ -1,5 +1,5 @@
 function Sensor=Sensor_ROS(param)
-    Sensor.name=["ros"];
+    Sensor.name=["LiDAR"];
     Sensor.type=["ROS"];
     % X, Y. Z
     Sensor.param=param;
