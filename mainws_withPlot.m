@@ -12,7 +12,7 @@ warning('off', 'all');
 %% general setting
 N = 1; % number of agents
 fExp = 1;%1：実機　それ以外：シミュレーション
-fMotive = 0;% Motiveを使うかどうか
+fMotive = 1;% Motiveを使うかどうか
 fROS = 1;
 
 fOffline = 0; % offline verification with experiment data
@@ -27,6 +27,18 @@ if fExp
     te=1000;
 else
     te=100;
+end
+%% set connector (global instance)
+if fExp
+    if fMotive
+        rigid_ids = [1];
+        Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',rigid_ids)); % Motive
+    end
+else
+    if fMotive
+        Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
+        %Connector_Natnet_sim(2*N,dt,0); % for suspended load
+    end
 end
 %% initialize
 initial(N) = struct;    
@@ -206,6 +218,8 @@ end
 %figure()
 %agent.estimator.ukfslam_WC.show
 %time.t = time.t + dt;
+mparam=[]; %without occulusion
+
 %% main loop
 disp("while ==========  ==================")
 close all;
@@ -227,7 +241,12 @@ while round(time.t,5)<=te
     Srpos={agent};
     Simu={[]};
     Sdirect={};
+    if fMotive
+        %motive.getData({agent,["pL"]},mparam);
+        motive.getData(agent,mparam);
+    end
     for i = 1:N
+        if fMotive;param(i).sensor.motive={motive};end
         param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
         agent(i).do_sensor(param(i).sensor);
     end
@@ -298,7 +317,8 @@ calculation=toc;
 % Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calcuflation);
-logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+% logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+LOGGER.plot({1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
 logger.save("AROB2022_Comp_300s","separate",true);  
@@ -339,7 +359,7 @@ p_Area = union(tmpenv(:));
 % PlantFinalState = agent.plant.state.p(:,end);
 % PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 % PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
-% % PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
+% PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
 % PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %modelFinalState
 EstFinalState = agent.estimator.result.state.p(:,end);
