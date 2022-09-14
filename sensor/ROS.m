@@ -1,12 +1,13 @@
 classdef ROS < SENSOR_CLASS
     %       self : agent
     properties
-        name      = "ROS";
+        name      = "LiDAR";
         ros
         result
         state
         self
         fState % subscribeにstate情報を含むか
+        radius
     end
     
     methods
@@ -16,14 +17,16 @@ classdef ROS < SENSOR_CLASS
             obj.self = self;
             if isfield(param,'state_list')
                 obj.fState = 1;
-            if obj.fState
-                obj.result.state = STATE_CLASS(struct('state_list',param.state_list,"num_list",param.num_list));
+                if obj.fState
+                    obj.result.state = STATE_CLASS(struct('state_list',param.state_list,"num_list",param.num_list));
+                end
+                if sum(contains(self.model.state.list,"q"))==1 && sum(contains(param.state_list,"q"))==1
+                    obj.result.state.num_list(contains(param.state_list,"q")) = length(self.model.state.q); % modelと合わせる
+                    obj.result.state.type = length(self.model.state.q);
+                end
             end
-            if sum(contains(self.model.state.list,"q"))==1 && sum(contains(param.state_list,"q"))==1
-                obj.result.state.num_list(contains(param.state_list,"q")) = length(self.model.state.q); % modelと合わせる
-                obj.result.state.type = length(self.model.state.q);
-            end
-            end
+            data = obj.ros.getData;
+            obj.radius = data.range_max;
         end
         
         function result=do(obj,param)
@@ -41,9 +44,10 @@ classdef ROS < SENSOR_CLASS
             for j = 2:angle_num(1,1)
                 data.angle(j,1) = data.angle(j-1) + data.angle_increment; 
             end
-            data.angle = double(data.angle);
-            data.length = double(data.ranges);
-            data.intensities = double(data.intensities);
+            data.angle = double((data.angle)');
+            data.length = double((data.ranges)');
+            data.intensities = double((data.intensities)');
+            data.radius = double((data.range_max)');
             F=fieldnames(data);
             for i = 1: length(F)
                 switch F{i}

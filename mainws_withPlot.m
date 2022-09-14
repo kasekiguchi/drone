@@ -11,13 +11,13 @@ warning('off', 'all');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレーション
+fExp = 1;%1：実機　それ以外：シミュレーション
 fMotive = 0;% Motiveを使うかどうか
-fROS = 0;
+fROS = 1;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
-    dt = 0.025; % sampling time
+    dt = 0.05; % sampling time
 else
     dt = 0.1; % sampling time
 end
@@ -72,7 +72,7 @@ for i = 1:N
             SensorRange = 20;
             agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
         end
-
+        
     %% set estimator property
     agent(i).estimator=[];
 %         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelExp(agent(i),SensorRange))
@@ -166,11 +166,7 @@ time.t = ts;
 % 引数に取れるのは以下のみ
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
-if fROS
-    Sros = {Env};
-else
-    SLiDAR = {Env};
-end
+SLiDAR = {Env};
 
 for i = 1:N
     param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
@@ -214,7 +210,7 @@ end
 disp("while ==========  ==================")
 close all;
 disp('Press Enter key to start.');
-FH  = figure('position',[0 0 eps eps],'menubar','none');
+FH = figure('position',[0 0 eps eps],'menubar','none');
 %
  w = waitforbuttonpress;
 NowResult = figure;
@@ -228,7 +224,7 @@ while round(time.t,5)<=te
     end
     %while 1 % for exp
     %%
-    rqSrpos={agent};
+    Srpos={agent};
     Simu={[]};
     Sdirect={};
     for i = 1:N
@@ -274,12 +270,10 @@ while round(time.t,5)<=te
         model_param.param=agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
         model_param.FH = FH;
+        plant_param.FH = FH;
         plant_param.param =agent(i).plant.param;
         plant_param.param.t = time.t;
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
-            agent(i).do_model(model_param);
-        end
-        if ~isa(agent(i).plant,"Whill_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
         agent(i).do_plant(plant_param);
@@ -343,12 +337,10 @@ end
 p_Area = union(tmpenv(:));
 %plantFinalState
 % PlantFinalState = agent.plant.state.p(:,end);
-PlantFinalState = agent.model.state.p(:,end);
-PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
-PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
-% PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
-PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.model.state.q(end) / pi, agent.model.state.p(:,end)');
-PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+% PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+% PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
+% % PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
+% PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %modelFinalState
 EstFinalState = agent.estimator.result.state.p(:,end);
 EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
