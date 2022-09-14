@@ -17,6 +17,7 @@ classdef EKF < ESTIMATOR_CLASS
         y
         state % model と同じ状態　cf. result.state は推定値として受け渡すよう？
         self
+        time
     end
     
     methods
@@ -44,15 +45,19 @@ classdef EKF < ESTIMATOR_CLASS
             obj.dt = model.dt; % 刻み
             obj.B = param.B;
             obj.result.P = param.P;
+            obj.time = tic;
         end
         
-        function [result]=do(obj,param,sensor)
+        function [result]=do(obj,param,~)
             %   param : optional
-            if ~isempty(param) obj.dt = param; end
-            model=obj.self.model;
-            if nargin == 2
-                sensor = obj.self.sensor.result;
+            if isempty(param)
+                obj.dt = toc(obj.time);
+                obj.time = tic;
+            else
+                obj.dt = param;
             end
+            model=obj.self.model;
+            sensor = obj.self.sensor.result;
             x = obj.result.state.get(); % 前回時刻推定値
 %            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定%%5
              xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）

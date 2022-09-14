@@ -10,7 +10,8 @@ userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
 run("main2_agent_setup.m");
-% agent.set_model_error("ex",-0.03);
+agent.set_model_error("ex",-0.05);
+agent.set_model_error("ey",-0.05);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -59,15 +60,9 @@ end
         end
 
         %% estimator, reference generator, controller
-        if exist("tEstimator","var")
-            dte = toc(tEstimator);
-        else
-            dte = 0;
-        end
-        tEstimator = tic;
         for i = 1:N
             % estimator
-            agent(i).do_estimator({dte,dte});
+            agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
             % reference
