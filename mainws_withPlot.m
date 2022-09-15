@@ -376,7 +376,6 @@ Ewally = reshape([Ewall.y,NaN(size(Ewall.y,1),1)]',3*size(Ewall.y,1),1);
 %reference state
 RefState = agent.reference.result.state.p(1:3,:);
 fWall = agent.reference.result.focusedLine;
-
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
 plot(Ewallx,Ewally,'g-');
