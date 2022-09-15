@@ -27,7 +27,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -64,6 +64,11 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                     obj.result.state.p = obj.result.state.xd;
                     obj.result.state.pL = obj.result.state.xd;
                 end
+            elseif strcmp(cha,'h')
+                obj.flag='h';
+                obj.result.state.xd = Param{2};
+                obj.result.state.p = obj.result.state.xd;
+                obj.result.state.pL = obj.result.state.xd;
             else
                 %obj.result.state.p = obj.self.estimator.result.state.p; %
                 %これだと最悪上がっていく

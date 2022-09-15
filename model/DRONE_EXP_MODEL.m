@@ -48,7 +48,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                     FH = varargin{1}.FH;% figure handle
                 end
                 cha = get(FH, 'currentcharacter');
-                if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
+                if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha == 'h')
                     cha   = obj.flight_phase;
                 end
                 obj.flight_phase=cha;
@@ -69,6 +69,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                     case 'l' % landing
                         msg(1,1:8) = u;
                     case 't' % take off
+                        msg(1,1:8) = u;
+                    case 'h'
                         msg(1,1:8) = u;
                 end
             else % 緊急時 プロペラストップ

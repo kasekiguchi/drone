@@ -24,9 +24,9 @@ for i = 1:N
     % set control model
     %agent(i).set_model(Model_EulerAngle(dt,initial(i), i)); % オイラー角モデル
     %agent(i).set_model(Model_Quat13(dt,initial(i),i)); % オイラーパラメータ（unit quaternion）モデル
-    agent(i).set_model(Model_Suspended_Load(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
+    %agent(i).set_model(Model_Suspended_Load(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
     %agent(i).set_model(Model_Suspended_Load_parameter_estimation(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
-    %agent(i).set_model(Model_Suspended_Load_parameter_estimation_exey(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
+    agent(i).set_model(Model_Suspended_Load_parameter_estimation_exey(dt,initial(i),i,DRONE_PARAM("DIATONE"))); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     close all
@@ -67,8 +67,9 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], [1e-5])); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
+    agent(i).set_property("estimator",Estimator_EKF_PE2(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
 %     agent(i).set_property("estimator",Estimator_EKF_PE(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
-    agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
+%     agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-10,1e-12,1e-10,1e-8])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];

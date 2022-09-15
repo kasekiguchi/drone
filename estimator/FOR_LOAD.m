@@ -26,15 +26,15 @@ classdef FOR_LOAD < SENSOR_CLASS
             obj.result.state.p = obj.self.sensor.motive.result.rigid(obj.rigid_num(1)).p;
             obj.result.state.q = obj.self.sensor.motive.result.rigid(obj.rigid_num(1)).q;
             cha = obj.self.reference.point.flag;
-            obj.result.state.pL = obj.result.state.p + [obj.self.model.param(17);obj.self.model.param(18);-obj.self.model.param(19)] -[0;0;obj.self.model.param(16)];
-%             obj.result.state.pL = obj.result.state.p -[0;0;obj.self.model.param(16)];% For:PE-Model
+%             obj.result.state.pL = obj.result.state.p + [obj.self.model.param(17);obj.self.model.param(18);-obj.self.model.param(19)] -[0;0;obj.self.model.param(16)];
+            obj.result.state.pL = obj.result.state.p -[0;0;obj.self.model.param(16)];% For:PE-Model
             if obj.result.state.pL(3) >= 0.1%strcmp(cha,'f')||strcmp(cha,'l')
                 obj.result.state.pL = obj.self.sensor.motive.result.rigid(obj.rigid_num(2)).p;
             end
             R = RodriguesQuaternion(obj.result.state.q);
-            obj.result.state.pT = (obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)])/norm(obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)]);
+%             obj.result.state.pT = (obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)])/norm(obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)]);
 %             obj.result.state.pT = (obj.result.state.pL-obj.result.state.p-R*[obj.self.estimator.ekf.result.state.e(1);obj.self.estimator.ekf.result.state.e(2);obj.self.estimator.ekf.result.state.e(3)])/norm(obj.result.state.pL-obj.result.state.p-R*[obj.self.estimator.ekf.result.state.e(1);obj.self.estimator.ekf.result.state.e(2);obj.self.estimator.ekf.result.state.e(3)]);
-%             obj.result.state.pT = (obj.result.state.pL-obj.result.state.p)/norm(obj.result.state.pL-obj.result.state.p);% For:PE-Model
+            obj.result.state.pT = (obj.result.state.pL-obj.result.state.p)/norm(obj.result.state.pL-obj.result.state.p);% For:PE-Model
             result = obj.result;
         end
         function show()
