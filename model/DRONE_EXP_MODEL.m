@@ -1,4 +1,3 @@
-
 classdef DRONE_EXP_MODEL < MODEL_CLASS
     % Lizard 実験用モデル
     properties% (Access=private)
