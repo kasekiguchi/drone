@@ -50,7 +50,7 @@ classdef ROS_CONNECTOR < CONNECTOR_CLASS
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
                 obj.subTopic(i) = ros2node("/subName(i)",obj.DomainID);
-                obj.subscriber.(obj.subName(i)) = ros2subscriber( obj.subTopic(i));
+                obj.subscriber.(obj.subName(i)) = ros2subscriber( obj.zsubTopic(i));
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum

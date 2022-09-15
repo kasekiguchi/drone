@@ -17,8 +17,8 @@ classdef Whill_exp < MODEL_CLASS
             obj.dt = 0.025; % check
             %% variable set
             obj.phase        = 's';
-            obj.conn_type = param.param.conn_type;
-            switch param.param.conn_type
+            obj.conn_type = param.conn_type;
+            switch param.conn_type
                 case "udp"
                     obj.IP = param.num;
                     [~,cmdout] = system("ipconfig");
@@ -34,8 +34,8 @@ classdef Whill_exp < MODEL_CLASS
                     obj.connector=SERIAL_CONNECTOR(param);
                     fprintf("Whill %d is ready\n",param.port);
                 case "ros"
-                    obj.ID  = param.param.param.num;
-                    param.DomainID = param.id;
+                    obj.ID  = param.param.DomainID;
+                    param.DomainID = param.param.DomainID;
                     param.subTopicName = {'/odom',...
                         '/scan'};
                     param.pubTopicName = {'/cmd_vel'};
@@ -65,20 +65,25 @@ classdef Whill_exp < MODEL_CLASS
                     cha   = obj.phase;
                 end
                 obj.phase=cha;
-                
+                obj.msg = ros2message('geometry_msgs/Twist');
                 switch cha
                     case 'q' % quit
-                    error("ACSL : quit experiment");
+                        obj.msg.linear.x = 0.0;
+                        obj.msg.angular.z = 0.0;
+                        error("ACSL : quit experiment");
                     case's' % stop
+                        obj.msg.linear.x = 0.0;
+                        obj.msg.angular.z = 0.0;
                     case 'r' % run
-                        obj.msg = u;
+                        obj.msg.linear.x = u(1);
+                        obj.msg.angular.z = u(2);
                 end
             else % 緊急時
                 return;
             end
             
             % send
-            obj.connector.sendData(obj.msg);
+            obj.connector.sendData(obj);
         end
         function set_param(obj,param)
             obj.offset = param;   

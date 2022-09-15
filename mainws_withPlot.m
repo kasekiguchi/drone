@@ -7,17 +7,17 @@ cd(fileparts(tmp.Filename));
 rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
-warning('off', 'all'); 
-%%
+warning('off', 'all');
+
 %% general setting
 N = 1; % number of agents
-fExp = 0;%1：実機　それ以外：シミュレーション
-fMotive = 0;% Motiveを使うかどうか
-fROS = 0;
+fExp = 1;%1：実機　それ以外：シミュレーション
+fMotive = 1;% Motiveを使うかどうか
+fROS = 1;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
-    dt = 0.025; % sampling time
+    dt = 0.05; % sampling time
 else
     dt = 0.1; % sampling time
 end
@@ -26,7 +26,19 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=300;
+    te=100;
+end
+%% set connector (global instance)
+if fExp
+    if fMotive
+        rigid_ids = [1];
+        Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',rigid_ids)); % Motive
+    end
+else
+    if fMotive
+        Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
+        %Connector_Natnet_sim(2*N,dt,0); % for suspended load
+    end
 end
 %% initialize
 initial(N) = struct;    
@@ -34,7 +46,9 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-       initial(i).p = [89;-2];%四角経路
+
+       initial(i).p = [0;-2.5];%四角経路
+%      initial(i).p = [0;0];%直進経路
        initial(i).q = [0];
        initial(i).p = [0;-2];%四角経路
        initial(i).q = [0];
@@ -49,7 +63,7 @@ end
 %set plant model
 for i = 1:N
     if fExp
-        agent(i) = Drone(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
+        agent(i) = DRONE(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
         agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',1E-4,'seed',[1]))));%加速度次元車両モデル 4.337E-5, seed = 5
     end
@@ -65,16 +79,16 @@ for i = 1:N
     agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
     %% set sensors property
     agent(i).sensor=[];
-    SensorRange = 20;
 
         %% set ROS2 property
         if fROS
+            SensorRange = 20;
             agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
         else
             SensorRange = 20;
             agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
         end
-
+        
     %% set estimator property
     agent(i).estimator=[];
 %         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelExp(agent(i),SensorRange))
@@ -168,8 +182,8 @@ time.t = ts;
 % 引数に取れるのは以下のみ
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
-
 SLiDAR = {Env};
+
 for i = 1:N
     param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
     agent(i).do_sensor(param(i).sensor);
@@ -208,11 +222,13 @@ end
 % figure()
 % agent.estimator.ukfslam_WC.show
 %time.t = time.t + dt;
+mparam=[]; %without occulusion
+
 %% main loop
 disp("while ==========  ==================")
 close all;
 disp('Press Enter key to start.');
-FH  = figure('position',[0 0 eps eps],'menubar','none');
+FH = figure('position',[0 0 eps eps],'menubar','none');
 %
  w = waitforbuttonpress;
 NowResult = figure;
@@ -229,7 +245,12 @@ while round(time.t,5)<=te
     Srpos={agent};
     Simu={[]};
     Sdirect={};
+    if fMotive
+        %motive.getData({agent,["pL"]},mparam);
+        motive.getData(agent,mparam);
+    end
     for i = 1:N
+        if fMotive;param(i).sensor.motive={motive};end
         param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
         agent(i).do_sensor(param(i).sensor);
     end
@@ -272,6 +293,7 @@ while round(time.t,5)<=te
         model_param.param=agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
         model_param.FH = FH;
+        plant_param.FH = FH;
         plant_param.param =agent(i).plant.param;
         plant_param.param.t = time.t;
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
@@ -337,11 +359,11 @@ for ei = 1:MapIdx
 end
 p_Area = union(tmpenv(:));
 %plantFinalState
-PlantFinalState = agent.plant.state.p(:,end);
-PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
-PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
-PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
-PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+% PlantFinalState = agent.plant.state.p(:,end);
+% PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+% PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
+% PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
+% PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %modelFinalState
 EstFinalState = agent.estimator.result.state.p(:,end);
 EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];

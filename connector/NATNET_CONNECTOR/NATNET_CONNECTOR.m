@@ -26,7 +26,7 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             if isfield(info,'rigid_list'); obj.rigid_list = info.rigid_list; end
             obj.result.rigid(obj.rigid_list) = struct('p',[],'q',[]);
             obj.NatnetClient = natnet;
-            obj.NatnetClient.HostIP	= info.HostIP;
+            obj.NatnetClient.HostIP = info.HostIP;
             obj.NatnetClient.ClientIP = info.ClientIP;
             obj.NatnetClient.ConnectionType = 'Multicast';
             obj.NatnetClient.connect;

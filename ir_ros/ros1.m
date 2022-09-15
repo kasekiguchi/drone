@@ -12,9 +12,8 @@ cmd_msg.linear.x = 0.00;
 cmd_msg.angular.z = 0.00;
 send(Pubcmd_vel,cmd_msg);
 
-%
+
 % cmd_msg.linear.x = 0.0;
 % cmd_msg.angular.z = 0.0;
 % send(Pubcmd_vel,cmd_msg);
-% run("ros1_cl
-
+% run("ros1_clear");

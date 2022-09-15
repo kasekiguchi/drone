@@ -10,6 +10,6 @@ Ukf_param.k = 800;
 Ukf_param.NLP = 2;%Number of Line Param
 Ukf_param.SensorRange = SensorRange;%センサレンジを呼び出し
 Ukf_param.list=["p","q","v"];
-Estimator.param=UKF_param;
+Estimator.param=Ukf_param;
 
 end
