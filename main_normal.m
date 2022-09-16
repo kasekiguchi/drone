@@ -43,7 +43,7 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 fSubIndex = zeros(sample, 1);
 
             %-- MPC関連 変数定義 
-                Params.Particle_num = 200;  %500
+                Params.Particle_num = 200;  %200
                 Params.H = 10;  % 10
                 Params.dt = 0.1;
                 idx = 0;
@@ -63,7 +63,7 @@ fc = 0;     % 着陸したときだけx，y座標を取得
 %                 UdiffQ_monte = diag([1, 1, 1, 1]);
 %                 R_monte = diag([1, 1, 1, 1]);  
                 
-                Params.Weight.P = diag([1000.0; 1000.0; 100.0]);    % 座標
+                Params.Weight.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
                 Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
 %                 Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
 %                 Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
@@ -212,14 +212,13 @@ end
                     end
 %                     ave = 0.269*9.81/4;
 %                     RandN = randn(Params.H, Params.Particle_num);
+                    umax = 0.269 * 9.81 / 2;
                     u1 = sigma.*randn(Params.H, Params.Particle_num) + ave1;
                     u2 = sigma.*randn(Params.H, Params.Particle_num) + ave2;
                     u3 = sigma.*randn(Params.H, Params.Particle_num) + ave3;
                     u4 = sigma.*randn(Params.H, Params.Particle_num) + ave4;
-                    u1(u1<0) = 0;   % 負の入力を阻止
-                    u2(u2<0) = 0;
-                    u3(u3<0) = 0;
-                    u4(u4<0) = 0;
+                    u1(u1<0) = 0;             u2(u2<0) = 0;              u3(u3<0) = 0;             u4(u4<0) = 0;% 負の入力=0
+                    u1(u1>umax) = umax; u2(u2>umax) = umax; u3(u3>umax) = umax; u4(u4>umax) = umax;% 入力最大値
                     u(4, 1:Params.H, 1:Params.Particle_num) = u4;   % reshape
                     u(3, :, :) = u3;   
                     u(2, :, :) = u2;
