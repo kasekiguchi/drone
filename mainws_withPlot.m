@@ -36,8 +36,8 @@ for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
        initial(i).p = [89;-2];%四角経路
        initial(i).q = [0];
-       initial(i).p = [0;-2];%四角経路
-       initial(i).q = [0];
+%          initial(i).p = [0;-2];%四角経路
+%          initial(i).q = [-pi];
 %         initial(i).p = [92;1];%四角経路
 %         initial(i).q = [pi/2];
     
@@ -51,7 +51,7 @@ for i = 1:N
     if fExp
         agent(i) = Drone(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
-        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',1E-4,'seed',[1]))));%加速度次元車両モデル 4.337E-5, seed = 5
+        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',5E-5,'seed',[1]))));%加速度次元車両モデル 4.337E-5, seed = 5
     end
     %% model
     % set control model
@@ -221,7 +221,7 @@ tic
 % tryf
 while round(time.t,5)<=te
 %profile on
-    if time.t >= 191.8
+        if time.t >= 191.8
         time.t
     end
     %while 1 % for exp
@@ -299,7 +299,7 @@ calculation=toc;
 % Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calcuflation);
-logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2],"time",[0,160]);
+logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
 logger.save("AROB2022_Prop_200s","separate",true);  
@@ -363,7 +363,7 @@ O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
 %xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
-xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
+    xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
 % pbaspect([20 20 1])
 hold off
 end
