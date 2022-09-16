@@ -117,7 +117,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             %---評価関数と制約条件を設定した関数MEX化するときはここをやる---%
             [var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分と観測値のFIMを用いたコントローラ，最終的な提案手法
 %            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分のFIMを使ったコントローラ
-            %[var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);%目標値追従のみのコントローラ，比較手法
+         %   [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);%目標値追従のみのコントローラ，比較手法
             %------------------------------------%
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;

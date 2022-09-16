@@ -1,4 +1,4 @@
-classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
+classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
     % Motiveのsimulation用クラス：登録されたエージェントの位置と姿勢がわかる
     % motive = NATNET_CONNECTOR_sim(param)
     % param :
@@ -32,7 +32,7 @@ classdef NATNET_CONNECTOR_sim < CONNECTOR_CLASS
     end
     
     methods
-        function obj = NATNET_CONNECTOR_sim(param)
+        function obj = NATNET_CONNECTOR_SIM(param)
             obj.dt = param.dt;
             obj.result.rigid_num=param.rigid_num;
             if isfield(param,'local_marker')
