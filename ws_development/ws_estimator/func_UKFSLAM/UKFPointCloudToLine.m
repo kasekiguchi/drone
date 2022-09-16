@@ -51,7 +51,7 @@ Lc(tmpid) = [];
 
 % クラスタ毎に直線を求める
 d = C.GroupNumberThreshold;
-k = 1;
+k = 1; % 直線の数 ~= クラスタの数
 lc = []; % lineがどのクラスタに属するか
 for i = 1:length(Lc)
     s0 = sids(i);
@@ -64,7 +64,8 @@ for i = 1:length(Lc)
     s = 1;
     e = Lc(i); % s0 + e = e0 % 以降eは固定
 
-    while s+d <= e
+    while s+1.5*d <= e
+        s = s+floor(d/2);
         t = linefit(XY(s:s+d,:)); % tmp line
         f = abs((t(1).*XY(s+d+1:end,1) + t(2).*XY(s+d+1:end,2) + t(3))/vecnorm(t(1:2))); % 直線までの射影距離
         tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
@@ -78,10 +79,10 @@ for i = 1:length(Lc)
                 t = linefit(XY(s:ns,:)); % tmp line
                 f = abs((t(1).*XY(ns+1:end,1) + t(2).*XY(ns+1:end,2) + t(3))/vecnorm(t(1:2))); % 直線までの射影距離
                 tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
-        if isempty(tid) % ラインから外れている点が無くなればクラスタの最後までの点を使って直線を導出
-            ns = e;
-            t = linefit(XY(s:ns,:)); % tmp line
-        end                
+                if isempty(tid) % ラインから外れている点が無くなればクラスタの最後までの点を使って直線を導出
+                    ns = e;
+                    t = linefit(XY(s:ns,:)); % tmp line
+                end
             end
         end
         l(k,:) = t;
