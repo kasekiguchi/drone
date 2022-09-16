@@ -11,9 +11,9 @@ warning('off', 'all');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1;%1：実機　それ以外：シミュレーション
-fMotive = 1;% Motiveを使うかどうか
-fROS = 1;
+fExp = 0;%1：実機　それ以外：シミュレーション
+fMotive = 0;% Motiveを使うかどうか
+fROS = 0;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
@@ -321,7 +321,7 @@ calculation=toc;
 % Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calcuflation);
-logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2],"time",[0,160]);
+logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
 logger.save("AROB2022_Prop_200s","separate",true);  
