@@ -40,7 +40,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             strs=self.reference.name;        
             obj.param.step = self.reference.(strs(contains(strs,"MPC"))).step;
             obj.NoiseR = 1e-2;%param of Fisher Information matrix % 1.0e-2
-            obj.RangeGain = 10;%gain of sigmoid function for sensor range logic
+            obj.RangeGain = 5;%10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
             obj.result.previous_state = [];
