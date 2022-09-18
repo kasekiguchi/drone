@@ -90,8 +90,10 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
                 Dis(MesuredRef) = LineParam.d(idx);%対応付けした距離を代入
                 Alpha(MesuredRef) = LineParam.delta(idx);%対応付けしたalphaを代入
             end
-            Dis = Dis(Dis~=inf);
-            Alpha = Alpha(Alpha~=inf);
+%             Dis = Dis(Dis~=inf);
+%             Alpha = Alpha(Alpha~=inf);
+            Dis = Dis(AssociationAvailableIndex);
+             Alpha = Alpha(AssociationAvailableIndex);
             AssoFai = Measured.angles(AssociationAvailableIndex);
             %----------------------------------------------------------------------------------%
             %---各種パラメータを格納---%

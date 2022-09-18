@@ -20,18 +20,18 @@ classdef DataPlot<handle
 %            "XYZTureAndEst",
             %     "AttitudesTureAndEst",
             %             "TrackMPCEval",
-            "MapAndVehicleTrueAndEst",
-%            "Eval",
+            %"MapAndVehicleTrueAndEst",
+            "Eval",
             %     "Covxv",
 %            "ExitFlag",
             %              "MapMovie",
             %     "MapAndPreMapMovie",
             %     "Entropy",
-            %"RMSE",
+            "RMSE",
 %            "AllTureAndEst",
             %"VWTureAndEst",
             %"AllSquareError",
-            %"Input",
+            "Input",
             %     "ContEval",
             %     "TrajectoryRMSE",
             %     "ObserveSubFIM"
@@ -40,7 +40,7 @@ classdef DataPlot<handle
     
     methods
         
-        function obj = DataPlot(Logger,SaveOnOff)
+        function obj = DataPlot(Logger,SaveOnOff,name,param)
             %DATAPLOT
             %   constructer for obj and path generate
             obj.logger = Logger;% Data file
@@ -76,7 +76,7 @@ classdef DataPlot<handle
                 movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
             end
             %% Plot Data
-            do(obj);
+            do(obj,name,param);
             %             AutoPPt(result);
             
         end
@@ -85,15 +85,15 @@ classdef DataPlot<handle
     
     methods(Access = protected)
         
-        function do(obj)
+        function do(obj,Name,param)
             %Num = plot figure numbers
             Figi = 1;
             FigNum = 1;
-            while Figi<= length(obj.FuncNames)
-                FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
-                FuncHandleName = strcat('PlotFunc_',FuncName);
+            while Figi<= length(Name)
+                %FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
+                FuncHandleName = strcat('PlotFunc_',Name(Figi));
                 FuncHandle = str2func(FuncHandleName);
-                [FigNum] = FuncHandle(obj,FigNum);
+                [FigNum] = FuncHandle(obj,param{Figi});
                 Figi = Figi+1;
             end
         end
