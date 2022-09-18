@@ -40,7 +40,7 @@ classdef DataPlot<handle
     
     methods
         
-        function obj = DataPlot(Logger,SaveOnOff,name,param)
+        function obj = DataPlot(Logger,dirname,prename,name,param)
             %DATAPLOT
             %   constructer for obj and path generate
             obj.logger = Logger;% Data file
@@ -68,15 +68,16 @@ classdef DataPlot<handle
                 addpath(dataFilePath);
             end
             obj.SavePath = dataFilePath;
-            obj.SaveDateStr = strcat('ws_Saves\',SaveDateStr,'\',SaveDateStrD);
+            %obj.SaveDateStr = strcat('ws_Saves\',SaveDateStr,'\',SaveDateStrD);
+            obj.SaveDateStr = dirname;
             
             %% Save data
-            if SaveOnOff
-                save(strcat('Logger',SaveDateStrD,'.mat'),'Logger');
-                movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
-            end
+%             if SaveOnOff
+%                 save(strcat('Logger',SaveDateStrD,'.mat'),'Logger');
+%                 movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
+%             end
             %% Plot Data
-            do(obj,name,param);
+            do(obj,prename,name,param);
             %             AutoPPt(result);
             
         end
@@ -85,7 +86,7 @@ classdef DataPlot<handle
     
     methods(Access = protected)
         
-        function do(obj,Name,param)
+        function do(obj,prename,Name,param)
             %Num = plot figure numbers
             Figi = 1;
             FigNum = 1;
@@ -93,7 +94,7 @@ classdef DataPlot<handle
                 %FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
                 FuncHandleName = strcat('PlotFunc_',Name(Figi));
                 FuncHandle = str2func(FuncHandleName);
-                [FigNum] = FuncHandle(obj,param{Figi});
+                [FigNum] = FuncHandle(obj,param{Figi},prename);
                 Figi = Figi+1;
             end
         end
