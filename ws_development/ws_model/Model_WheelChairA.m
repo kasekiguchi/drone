@@ -25,7 +25,7 @@ if strcmp(type,"plant")
 %     for i = 1:N
         Model.id = i;
 %         Setting.initial.p = [0;0];
-        Setting.param.K = diag([0.9,1]);%誤差の値
+        Setting.param.K = diag([1,1]);%誤差の値
         Setting.param.D = 0.1;%誤差の値
         Model.param=Setting;
 %         assignin('base',"Plant",Model);
