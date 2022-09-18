@@ -87,7 +87,7 @@ classdef LiDAR_SIM < SENSOR_CLASS
                 rng(2*obj.seed);
                 obj.seed = obj.seed + 0.1;
             end
-            result.length=vecnorm(result.sensor_points') + obj.noise * randn(1,length(result.sensor_points)).*sign(result.angle); % レーザー点までの距離
+            result.length=vecnorm(result.sensor_points') + obj.noise * randn(1,length(result.sensor_points));%.*sign(result.angle); % レーザー点までの距離
             obj.result=result;
         end
         function show(obj,~)

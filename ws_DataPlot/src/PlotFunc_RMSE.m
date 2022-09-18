@@ -1,4 +1,4 @@
-function [FigNum] = PlotFunc_RMSE(obj,FigNum)
+function [FigNum] = PlotFunc_RMSE(obj,FigNum,prename)
 %Plant
 [~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.p');
 if Flag
@@ -42,11 +42,11 @@ ax.FontSize = obj.FontSize;
 ax.FontName = obj.FontName;
 ax.FontWeight = obj.FontWeight;
 hold off
-
-exportgraphics(ax,strcat('RMSE','.pdf'));
-movefile('RMSE.pdf',obj.SaveDateStr);
-exportgraphics(ax,'RMSE.emf');
-movefile('RMSE.emf',obj.SaveDateStr);
+[rmse;qrmse]
+exportgraphics(ax,strcat(prename,'RMSE','.pdf'));
+movefile(strcat(prename,'RMSE.pdf'),obj.SaveDateStr);
+% exportgraphics(ax,'RMSE.emf');
+% movefile('RMSE.emf',obj.SaveDateStr);
 FigNum = FigNum + 1;
 else
     disp('We do not calculate RMSE');

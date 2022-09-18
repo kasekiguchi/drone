@@ -1,4 +1,4 @@
-function [FigNum] = PlotFunc_Input(obj,FigNum)
+function [FigNum] = PlotFunc_Input(obj,FigNum,prename)
 plotcolor = [0.3010 0.7450 0.9330;0.6010 0.8450 0.7330;0.6350 0.0780 0.1840; ];
 %plant(true)
 %[~,~,Input,vFlag] = FindDataMatchName(obj.logger,'input');
@@ -27,10 +27,10 @@ if 1%vFlag
     ax.FontName = obj.FontName;
     ax.FontWeight = obj.FontWeight;
     hold off
-    exportgraphics(ax,strcat('Input','.pdf'));
-    movefile(strcat('Input','.pdf'),obj.SaveDateStr);
-    exportgraphics(ax,strcat('Input','.emf'));
-    movefile(strcat('Input','.emf'),obj.SaveDateStr);
+    exportgraphics(ax,strcat(prename,'Input','.pdf'));
+    movefile(strcat(prename,'Input','.pdf'),obj.SaveDateStr);
+%     exportgraphics(ax,strcat('Input','.emf'));
+%     movefile(strcat('Input','.emf'),obj.SaveDateStr);
     FigNum = FigNum + 1;
     %---------------------%
 else

@@ -1,9 +1,9 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
-logger = LOGGER("Data/AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-
-
+logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
+name = 'comp_';
+dirname = "AROB";
 close all
 %% time response
 trange = [0,20];
@@ -30,14 +30,23 @@ xlabel("$t$ [s]",'Interpreter','latex');
 ylabel("$x$, $y$ [m]",'Interpreter','latex');
 xlim(trange)
 ylim([-5,30])
+ax = gca;
+
+filename = strcat(name,'xy_[0,20]','.pdf');
+exportgraphics(ax,filename);
+movefile(filename,dirname);
+
 subplot(2,1,2);
 plot(t,v,t,ve,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
 legend("true $v$","est. $v$",'Interpreter','latex','location','southeast');
 xlabel("$t$ [s]",'Interpreter','latex');
 ylabel("$v$ [m/s]",'Interpreter','latex');
-xlim(trange)
-ylim([0,2])
-
+xlim(trange);
+ylim([0,2]);
+ax = gca;
+filename = strcat(name,'v_[0,20]','.pdf');
+exportgraphics(ax,filename);
+movefile(filename,dirname);
 %% trajectory
 close all 
 t = logger.data(0,"t","");
@@ -61,6 +70,7 @@ is_area=[is_area,is_area(end)+[find(p(si:end,1)<=75,1),find(p(si:end,1)<=15,1)-1
 si = is_area(end)+1;
 is_area=[is_area,is_area(end)+[find(p(si:end,1)>=15,1),find(p(si:end,1)>=75,1)-1,find(p(si:end,2)>=15,1),find(p(si:end,2)>=75,1)-1]];
 
+
 p_Area=polyshape(logger.Data.env_vertices{1});
     grid on
     axis equal
@@ -81,11 +91,9 @@ Ewall = map_param(end);
 Ewallx = reshape([Ewall.x,NaN(size(Ewall.x,1),1)]',3*size(Ewall.x,1),1);
 Ewally = reshape([Ewall.y,NaN(size(Ewall.y,1),1)]',3*size(Ewall.y,1),1);
 
-ah = area([-5 15 15 75 75 95],[15 15 -5 -5 15 15;60 60 100 100 60 60]',-5,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
-ah(1).FaceColor = [1 1 1];
 
-Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',1);
-plot(Ewallx,Ewally,'r-');
+ah = area([-5 15 15 75 75 95],[15 15 -5 -5 15 15;60 60 100 100 60 60]',-100,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
+ah(1).FaceColor = [1 1 1];
 
 plot(p(:,1),p(:,2),'Color','#333333');
 plot(pe(:,1),pe(:,2),'Color','#4DBEEE');
@@ -94,9 +102,18 @@ plot(pe(:,1),pe(:,2),'Color','#4DBEEE');
     ymin = min(-5,min(Ewally));
     ymax = max(95,max(Ewally));
     xlim([xmin-5, xmax+5]);ylim([ymin-5,ymax+5])
+Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',1);
+plot(Ewallx,Ewally,'r-');
+ah = area([-5 15 15 75 75 95],-30*[1 1 1 1 1 1]',-100,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
 xlabel("$x$ [m]","Interpreter","latex");
 ylabel("$y$ [m]","Interpreter","latex");
+legend("","","","","True trajectory","Est. trajectory","True walls","Est. walls","Insufficient area",'Location','northoutside','NumColumns',3,'Interpreter','latex')
 hold off
+
+ax = gca;
+filename = strcat(name,'MapAndTrajectory','.pdf');
+exportgraphics(ax,filename);
+movefile(filename,dirname);
 %%
-Plots = DataPlot(logger,true,"Eval",{is_area});
-Plots = DataPlot(logger,true,["RMSE","Input"],{2,3});
+Plots = DataPlot(logger,dirname,name,"Eval",{is_area});
+Plots = DataPlot(logger,dirname,name,["RMSE","Input"],{2,3});

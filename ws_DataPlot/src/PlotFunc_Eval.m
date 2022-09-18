@@ -1,4 +1,4 @@
-function [FigNum] = PlotFunc_Eval(obj,param)
+function [FigNum] = PlotFunc_Eval(obj,param,prename)
 plotcolor = [0.3010 0.7450 0.9330;0.6010 0.8450 0.7330;0.6350 0.0780 0.1840;0.9010 0.7450 0.9330;0.4010 0.7450 0.4330];
 FigNum = 0;
 %plant(true)
@@ -38,10 +38,10 @@ if vFlag
     ax.FontWeight = obj.FontWeight;
     ylim([0,60]);
     hold off
-    exportgraphics(ax,strcat('Eval','.pdf'));
-    movefile(strcat('Eval','.pdf'),obj.SaveDateStr);
-    exportgraphics(ax,strcat('Eval','.emf'));
-    movefile(strcat('Eval','.emf'),obj.SaveDateStr);
+    exportgraphics(ax,strcat(prename,'Eval','.pdf'));
+    movefile(strcat(prename,'Eval','.pdf'),obj.SaveDateStr);
+%     exportgraphics(ax,strcat('Eval','.emf'));
+%     movefile(strcat('Eval','.emf'),obj.SaveDateStr);
     FigNum = FigNum + 1;
     %---------------------%
 else

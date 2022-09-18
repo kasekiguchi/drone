@@ -361,7 +361,7 @@ O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
 %xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
-if flag == "all"
+if isstring(flag)
     xmin = min(-5,min(Ewallx));
     xmax = max(95,max(Ewallx));
     ymin = min(-5,min(Ewally));
