@@ -302,7 +302,7 @@ calculation=toc;
 logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save("AROB2022_PROP300s","separate",true);  
+logger.save("AROB2022_Comp300s","separate",true);  
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
@@ -322,12 +322,9 @@ fclose(fileID);
 % run('dataplot');
 %% Local function
 function [] = NowResultPlot(agent,NowResult,flag)
-%if(flag)
-%agent.estimator.ukfslam_WC.show;
-%hold on
+
 figure(NowResult)
 
-%end
     clf(NowResult)
     grid on
     axis equal
@@ -358,13 +355,23 @@ fWall = agent.reference.result.focusedLine;
 
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-plot(Ewallx,Ewally,'g-');
-plot(fWall(:,1),fWall(:,2),'r-');
+    plot(Ewallx,Ewally,'g-');
+    plot(fWall(:,1),fWall(:,2),'r-');
 O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
 %xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
+if flag == "all"
+    xmin = min(-5,min(Ewallx));
+    xmax = max(95,max(Ewallx));
+    ymin = min(-5,min(Ewally));
+    ymax = max(95,max(Ewally));
+    xlim([xmin-5, xmax+5]);ylim([ymin-5,ymax+5])
+else
     xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
+end
+xlabel("$x$ [m]","Interpreter","latex");
+ylabel("$y$ [m]","Interpreter","latex");
 % pbaspect([20 20 1])
 hold off
 end

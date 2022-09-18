@@ -5,12 +5,18 @@ plotcolor = [0 0.4470 0.7410;
     0.4660 0.6740 0.1880;
     0.6350 0.0780 0.1840];
 %plant(true)
-tmp = regexp(obj.logger.SubFuncitems,'ContEval');
-if length(obj.logger.SubFuncitems) > 1%subfunc have more than 1 item;
-    tmp = cellfun(@(c) ~isempty(c),tmp);
-else
-    tmp = arrayfun(@(c) ~isempty(c),tmp);
-end
+SubFunc = [
+     "ContEval",
+     "TrajectoryErrorDis",
+     "ObserbSubFIM",
+    ];
+tmp = regexp(SubFunc,'ContEval');
+ if length(SubFunc) > 1%subfunc have more than 1 item;
+     tmp = cellfun(@(c) ~isempty(c),tmp);
+ else
+     tmp = arrayfun(@(c) ~isempty(c),tmp);
+ end
+tmp = ContEval;
 Index = find(tmp)+1;
 if isempty(Index)
     Flag = false;

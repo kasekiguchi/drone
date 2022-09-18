@@ -40,13 +40,16 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 agent_items = []
                 option.overwrite_target = []
             end
-            if isstring(target)
-                if contains(target,"Data.mat") | ~contains(target,".mat");
-                if contains(target,"Data.mat")
-                   target = erase(target,"/Data.mat");
-                end
+            if isstring(target) % save で保存されたデータを呼び出す場合
+                if contains(target,"Data.mat") | ~contains(target,".mat") % separate で保存された場合
+                    if contains(target,"Data.mat")
+                        target = erase(target,"/Data.mat");
+                    end
                     tmp = load(target + "/Data.mat");
-                    obj.Data = tmp.Data;
+                    fn = fieldnames(obj);
+                for i = fn'
+                     obj.(i{1}) = tmp.log.(i{1});
+                end
                     tmp = load(target + "/sensor.mat");
                     obj.Data.agent.sensor = tmp.sensor;
                     tmp = load(target + "/estimator.mat");
@@ -59,13 +62,13 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     obj.Data.agent.controller = tmp.controller;
                     tmp = load(target + "/plant.mat");
                     obj.Data.agent.plant = tmp.plant;
-                else
-                tmp=load(target);
-                log = tmp.log;
-                fn = fieldnames(log);
-                for i = fn'
-                    obj.(i{1}) = log.(i{1});
-                end
+                else % 一つのファイルとして保存した場合
+                    tmp=load(target);
+                    log = tmp.log;
+                    fn = fieldnames(log);
+                    for i = fn'
+                        obj.(i{1}) = log.(i{1});
+                    end
                 end
                 if ~isempty(number)
                     obj.overwrite_target = option.overwrite_target;
@@ -102,8 +105,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
             cha = get(FH, 'currentcharacter');
             if isempty(cha)
-%                error("ACSL : FH is empty");
-            cha = obj.Data.phase(obj.k);
+                %                error("ACSL : FH is empty");
+                cha = obj.Data.phase(obj.k);
             end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
@@ -156,19 +159,33 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 filename = dirname + "/Data.mat";
                 Data.t = obj.Data.t;
                 Data.phase = obj.Data.phase;
-                save(filename,"Data");
-                    sensor = obj.Data.agent.sensor;
-                    save(dirname + "/sensor.mat","sensor");
-                    estimator = obj.Data.agent.estimator;
-                    save(dirname + "/estimator.mat","estimator","-v7.3");
-                    reference = obj.Data.agent.reference;
-                    save(dirname + "/reference.mat","reference");
-                    input = obj.Data.agent.input;
-                    save(dirname + "/input.mat","input");
-                    controller = obj.Data.agent.controller;
-                    save(dirname + "/controller.mat","controller");
-                    plant = obj.Data.agent.plant;
-                    save(dirname + "/plant.mat","plant");
+                fn = fieldnames(obj);
+                for i = fn'
+                    if ~strcmp(i{1},"Data")
+                        log.(i{1}) = obj.(i{1});
+                    end
+                end
+                log.Data=Data;
+                fn = fieldnames(obj.Data);
+                for i = fn'
+                    if ~strcmp(i{1},"t") &  ~strcmp(i{1},"phase") &  ~strcmp(i{1},"agent")
+                        log.Data.(i{1}) = obj.Data.(i{1});
+                    end
+                end
+
+                save(filename,"log");
+                sensor = obj.Data.agent.sensor;
+                save(dirname + "/sensor.mat","sensor");
+                estimator = obj.Data.agent.estimator;
+                save(dirname + "/estimator.mat","estimator","-v7.3");
+                reference = obj.Data.agent.reference;
+                save(dirname + "/reference.mat","reference");
+                input = obj.Data.agent.input;
+                save(dirname + "/input.mat","input");
+                controller = obj.Data.agent.controller;
+                save(dirname + "/controller.mat","controller");
+                plant = obj.Data.agent.plant;
+                save(dirname + "/plant.mat","plant");
             else
                 list = "Data/" + filename + ".mat";
                 log.Data = obj.Data;
@@ -191,7 +208,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                     case "sensor"
                         agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
                         agent(n).sensor.result.state = state_copy(obj.Data.agent(n).sensor.result{tidx}.state);
-                        %obj.Data.agent(n).sensor.result(tidx+1:end) = []; 
+                        %obj.Data.agent(n).sensor.result(tidx+1:end) = [];
                     case "estimator"
                         agent(n).estimator.result = obj.Data.agent(n).estimator.result{tidx};
                         agent(n).estimator.result.state = state_copy(obj.Data.agent(n).estimator.result{tidx}.state);
@@ -210,7 +227,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 end
             end
         end
-        
+
         function [data, vrange] = data(obj, target, variable, attribute, option)
             % target : agent indices
             % variable : var name or path to var from agent
@@ -233,7 +250,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 attribute string = "e"
                 option.ranget (1, 2) double = [0 obj.Data.t(obj.k)]
             end
-            if sum(strcmp(target, {'time', 't'}))                
+            if sum(strcmp(target, {'time', 't'}))
                 data = obj.data_org(0,'t','',"ranget",option.ranget);
             elseif target == 0
                 data = obj.data_org(0,variable,attribute,"ranget",option.ranget);
