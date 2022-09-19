@@ -40,7 +40,7 @@ classdef DataPlot<handle
     
     methods
         
-        function obj = DataPlot(Logger,dirname,prename,name,param)
+        function obj = DataPlot(Logger,dirname,prename,name,param,trange)
             %DATAPLOT
             %   constructer for obj and path generate
             obj.logger = Logger;% Data file
@@ -77,7 +77,7 @@ classdef DataPlot<handle
 %                 movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
 %             end
             %% Plot Data
-            do(obj,prename,name,param);
+            do(obj,prename,name,param,trange);
             %             AutoPPt(result);
             
         end
@@ -86,7 +86,7 @@ classdef DataPlot<handle
     
     methods(Access = protected)
         
-        function do(obj,prename,Name,param)
+        function do(obj,prename,Name,param,trange)
             %Num = plot figure numbers
             Figi = 1;
             FigNum = 1;
@@ -94,7 +94,7 @@ classdef DataPlot<handle
                 %FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
                 FuncHandleName = strcat('PlotFunc_',Name(Figi));
                 FuncHandle = str2func(FuncHandleName);
-                [FigNum] = FuncHandle(obj,param{Figi},prename);
+                [FigNum] = FuncHandle(obj,param{Figi},prename,trange);
                 Figi = Figi+1;
             end
         end

@@ -1,4 +1,4 @@
-function [FigNum] = PlotFunc_RMSE(obj,FigNum,prename)
+function [FigNum] = PlotFunc_RMSE(obj,FigNum,prename,~)
 %Plant
 [~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.p');
 if Flag
