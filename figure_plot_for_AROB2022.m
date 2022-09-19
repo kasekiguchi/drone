@@ -1,9 +1,10 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
-%logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_56_46)");%
-logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-name = 'comp_';
+logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_56_46)");%
+name = 'prop_';
+%logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
+%name = 'comp_';
 dirname = "AROB";
 close all
 %% time response
