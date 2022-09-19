@@ -1,8 +1,9 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
-logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_56_46)");%AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-name = 'prop_';
+%logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_56_46)");%
+logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
+name = 'comp_';
 dirname = "AROB";
 close all
 %% time response
@@ -24,6 +25,7 @@ is_area=find(p(:,1)>=15,1);
 %subplot(3,1,1);
 area([t(1),t(is_area(1)),t(is_area(1)),t(end)],[-10,-10,40,40]',-10,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
 hold on
+pbaspect([3 1 1]);
 grid on
 plot(t,p,t,pe);%,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
 area([t(1),t(is_area(1)),t(is_area(1)),t(end)],-10*[1,1,1,1]',-10,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
@@ -43,6 +45,7 @@ movefile(filename,dirname);
 %subplot(3,1,2);
 area([t(1),t(is_area(1)),t(is_area(1)),t(end)],[-2,-2,10,10]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
 hold on
+pbaspect([3 1 1]);
 grid on
 plot(t,v,t,ve);%,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
 area([t(1),t(is_area(1)),t(is_area(1)),t(end)],-2*[1,1,1,1]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
@@ -60,6 +63,7 @@ movefile(filename,dirname);
 %subplot(3,1,3);
 area([t(1),t(is_area(1)),t(is_area(1)),t(end)],[-2,-2,1,1]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
 hold on
+pbaspect([3 1 1]);
 grid on
 plot(t,q,t,qe)
 % dummy
