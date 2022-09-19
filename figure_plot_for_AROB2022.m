@@ -1,12 +1,12 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
-logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-name = 'comp_';
+logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_56_46)");%AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
+name = 'prop_';
 dirname = "AROB";
 close all
 %% time response
-trange = [0,20];
+trange = [0,30];
 t = logger.data(0,"t","","ranget",trange);
 p = logger.data(1,"p","p","ranget",trange);
 q = logger.data(1,"q","p","ranget",trange);
@@ -20,31 +20,58 @@ vr = logger.data(1,"v","r","ranget",trange);
 u = logger.data(1,"input","","ranget",trange);
 
 is_area=find(p(:,1)>=15,1);
-figure
-subplot(2,1,1);
-plot(t,p,t,pe,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
-legend("true $x$","true $y$","est. $x$","est. $y$",'Interpreter','latex','location','east')
+%figure
+%subplot(3,1,1);
+area([t(1),t(is_area(1)),t(is_area(1)),t(end)],[-10,-10,40,40]',-10,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
 hold on
-Square_coloring([t(1),t(end)], [1 0.5 0.5],[75,75],15);
+grid on
+plot(t,p,t,pe);%,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
+area([t(1),t(is_area(1)),t(is_area(1)),t(end)],-10*[1,1,1,1]',-10,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
+legend("","true $x$","true $y$","est. $x$","est. $y$","Insufficient area",'Interpreter','latex','location','east')
+%hold on
+%Square_coloring([t(1),t(end)], [1 0.5 0.5],[75,75],15);
 xlabel("$t$ [s]",'Interpreter','latex');
 ylabel("$x$, $y$ [m]",'Interpreter','latex');
 xlim(trange)
-ylim([-5,30])
+ylim([-5,40])
 ax = gca;
-
-filename = strcat(name,'xy_[0,20]','.pdf');
+hold off
+filename = strcat(name,'xy_[0,30]','.pdf');
 exportgraphics(ax,filename);
 movefile(filename,dirname);
 
-subplot(2,1,2);
-plot(t,v,t,ve,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
-legend("true $v$","est. $v$",'Interpreter','latex','location','southeast');
+%subplot(3,1,2);
+area([t(1),t(is_area(1)),t(is_area(1)),t(end)],[-2,-2,10,10]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
+hold on
+grid on
+plot(t,v,t,ve);%,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
+area([t(1),t(is_area(1)),t(is_area(1)),t(end)],-2*[1,1,1,1]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
+legend("","true $v$","est. $v$","Insufficient area",'Interpreter','latex','location','southeast');
 xlabel("$t$ [s]",'Interpreter','latex');
 ylabel("$v$ [m/s]",'Interpreter','latex');
 xlim(trange);
 ylim([0,2]);
 ax = gca;
-filename = strcat(name,'v_[0,20]','.pdf');
+hold off
+filename = strcat(name,'v_[0,30]','.pdf');
+exportgraphics(ax,filename);
+movefile(filename,dirname);
+
+%subplot(3,1,3);
+area([t(1),t(is_area(1)),t(is_area(1)),t(end)],[-2,-2,1,1]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
+hold on
+grid on
+plot(t,q,t,qe)
+% dummy
+area([t(1),t(is_area(1)),t(is_area(1)),t(end)],-2*[1,1,1,1]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
+legend("","true $\theta$","est. $\theta$","Insufficient area",'Interpreter','latex','location','northwest');
+xlabel("$t$ [s]",'Interpreter','latex');
+ylabel("$\theta$ [rad]",'Interpreter','latex');
+xlim(trange);   
+ylim([-0.5,0.5]);
+ax = gca;
+hold off
+filename = strcat(name,'th_[0,30]','.pdf');
 exportgraphics(ax,filename);
 movefile(filename,dirname);
 %% trajectory
@@ -115,5 +142,6 @@ filename = strcat(name,'MapAndTrajectory','.pdf');
 exportgraphics(ax,filename);
 movefile(filename,dirname);
 %%
-Plots = DataPlot(logger,dirname,name,"Eval",{is_area});
-Plots = DataPlot(logger,dirname,name,["RMSE","Input"],{2,3});
+close all
+Plots = DataPlot(logger,dirname,name,"Eval",{is_area},[0,30   ]);
+Plots = DataPlot(logger,dirname,name,["RMSE","Input"],{2,3},[0,30]);
