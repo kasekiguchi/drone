@@ -200,10 +200,10 @@ ax = gca;
 filename = strcat(name, '1s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
-% 50s
-snapshot(30,logger,agent,0)
+% 0s
+snapshot(20,logger,agent,0)
 ax = gca;
-filename = strcat(name, '30s', '.pdf');
+filename = strcat(name, '20s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
 
