@@ -2,11 +2,12 @@ tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~,tmp]=regexp(genpath('.'),'\.\\\.git.*?;','match','split');cellfun(@(xx) addpath(xx),tmp,'UniformOutput',false);
 logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_56_46)");%
+%%
 name = 'prop_';
 %logger = LOGGER("Data/AROB2022_Comp300s_Log(19-Sep-2022_05_18_59)");%AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
 %name = 'comp_';
 dirname = "AROB";
-close all
+%close all
 %% time response
 trange = [0,30];
 t = logger.data(0,"t","","ranget",trange);
@@ -52,7 +53,7 @@ plot(t,v,t,ve);%,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
 area([t(1),t(is_area(1)),t(is_area(1)),t(end)],-2*[1,1,1,1]',-2,'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
 legend("","true $v$","est. $v$","Insufficient area",'Interpreter','latex','location','southeast');
 xlabel("$t$ [s]",'Interpreter','latex');
-ylabel("$v$ [m/s]",'Interpreter','latex');
+ylabel("$v$ [m/s]",'Interpreter','latex');  
 xlim(trange);
 ylim([0,2]);
 ax = gca;
@@ -80,7 +81,7 @@ filename = strcat(name,'th_[0,30]','.pdf');
 exportgraphics(ax,filename);
 movefile(filename,dirname);
 %% trajectory
-close all 
+%close all 
 t = logger.data(0,"t","");
 trange = [0,t(end)];
 p = logger.data(1,"p","p","ranget",trange);
@@ -97,11 +98,11 @@ map_param = logger.data(1,"map_param","e","ranget",trange);
 
 % insufficient information area
 is_area=[find(p(:,1)>=15,1),find(p(:,1)>=75,1)-1,find(p(:,2)>=15,1),find(p(:,2)>=75,1)-1];
-si = is_area(end)+1;
+si = is_area(end)+10;
 is_area=[is_area,is_area(end)+[find(p(si:end,1)<=75,1),find(p(si:end,1)<=15,1)-1,find(p(si:end,2)<=75,1),find(p(si:end,2)<=15,1)-1]];
-si = is_area(end)+1;
+si = is_area(end)+10;
 is_area=[is_area,is_area(end)+[find(p(si:end,1)>=15,1),find(p(si:end,1)>=75,1)-1,find(p(si:end,2)>=15,1),find(p(si:end,2)>=75,1)-1]];
-
+%%
 
 p_Area=polyshape(logger.Data.env_vertices{1});
     grid on
@@ -147,6 +148,7 @@ filename = strcat(name,'MapAndTrajectory','.pdf');
 exportgraphics(ax,filename);
 movefile(filename,dirname);
 %%
-close all
-Plots = DataPlot(logger,dirname,name,"Eval",{is_area},[0,30   ]);
-Plots = DataPlot(logger,dirname,name,["RMSE","Input"],{2,3},[0,30]);
+%close all
+figure
+Plots = DataPlot(logger,dirname,name,"Eval",{is_area(1)},[0,  50 ]);
+%Plots = DataPlot(logger,dirname,name,["RMSE","Input"],{2,3},[0,30]);

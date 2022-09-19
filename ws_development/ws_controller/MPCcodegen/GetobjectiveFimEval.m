@@ -21,11 +21,11 @@ for j = 1:params.H
     ObFim = RangeLogic(1) * FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(1), params.alpha(1), params.phi(1));
     for i = 2:length(params.dis)
         Fim = Fim + RangeLogic(i) * FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j),X(4,j),U(2,j),U(1,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
-%         Fim = Fim + RangeLogic(i) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
+%         Fim = Fim + RangeLogic(i) * FIM_Ob    serbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
         ObFim = ObFim + RangeLogic(i) * FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(i), params.alpha(i), params.phi(i));
     end
-    Fim = (1/(2*NoiseR))*Fim;
-    ObFim = (1/(NoiseR))*(ObFim + 1e-3*eye(3));%[ObFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
+    Fim = (1/(2*NoiseR))*(Fim+1e-4*eye(2));
+    ObFim = (1/(NoiseR))*(ObFim + 1e-4*eye(3));%[ObFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
     InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));
     InvObFim = inv(ObFim);
 %     evFim(1,j) = max(eig(InvFim));
