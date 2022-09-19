@@ -36,7 +36,7 @@ for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
        initial(i).p = [89;-2];%四角経路
        initial(i).q = [0];
-          initial(i).p = [0;-2];%四角経路
+          initial(i).p = [0;-1];%四角経路
           initial(i).q = [0];
 %         initial(i).p = [92;1];%四角経路
 %         initial(i).q = [pi/2];
@@ -81,7 +81,7 @@ for i = 1:N
     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference=[];
-    velocity = 1.2;%目標速度
+    velocity = 1;%目標速度
     w_velocity = 0.7;%曲がるときの目標角速度
 
         
@@ -221,7 +221,7 @@ tic
 % tryf
 while round(time.t,5)<=te
 %profile on
-        if time.t >= 191.8
+    if time.t >= 191.8
         time.t
     end
     %while 1 % for exp
@@ -302,7 +302,7 @@ calculation=toc;
 logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save("AROB2022_Comp300s","separate",true);  
+logger.save("AROB2022_Prop300s","separate",true);  
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
@@ -311,7 +311,7 @@ RunNames = arrayfun(@(N) agent.(Proptype(N)).name , 1:length(Proptype),'UniformO
 fileID = fopen('RunNames.txt','w');
 StringSet = '%s ';
 for Propidx = 1:length(Proptype)
-    LongProp = length(Proptype(Propidx));
+    LongProp = length(Proptype(Propidx));   
     LongRun  = length(RunNames{Propidx});
     CharSet = repmat(StringSet,[1 LongProp+LongRun]);
     fprintf(fileID,append(CharSet,'\n'),Proptype(Propidx),RunNames{Propidx});

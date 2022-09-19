@@ -328,7 +328,7 @@ b2 = l2(2);
 c2 = l2(3);
 d = (a1*b2 - a2*b1);
 if d == 0
-    error("ACSL : l1 and l2 are parallel");
+        error("ACSL : l1 and l2 are parallel");
 else
     p(1,1) = (b1*c2 - b2*c1)/d;
     p(2,1) = -(a1*c2 - a2*c1)/d;
