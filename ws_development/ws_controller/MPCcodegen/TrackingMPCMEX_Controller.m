@@ -49,6 +49,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
         end
         
         function result = do(obj,param,~)
+            tic
             %---ロボットの状態をとる---%
             RobotState = [obj.self.estimator.result.state.p(1) , obj.self.estimator.result.state.p(2) , obj.self.estimator.result.state.q];
             if ~isempty(obj.self.input)
@@ -134,6 +135,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             obj.SolverName = func2str(problem.objective);
             obj.result.previous_state = obj.previous_state;
             obj.result.previous_input = obj.previous_input;
+            obj.result.calc_time = toc;
             result = obj.result;
         end
         

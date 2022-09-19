@@ -2,11 +2,15 @@ tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split'); cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 logger = LOGGER("Data/AROB2022_Prop300s_Log(20-Sep-2022_05_23_14)")%
-name = 'prop_';
+%%
+%name = 'prop_';
 %logger = LOGGER("AROB2022_Prop300s_Log(19-Sep-2022_21_27_21)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-%name = 'comp_';
+name = 'comp_';
 dirname = "AROB";
 close all
+%%
+ct = logger.data(1,"controller.result.calc_time","c");
+sum(ct)/length(ct)
 %% time response
 trange = [0, 30];
 t = logger.data(0, "t", "", "ranget", trange);
