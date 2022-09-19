@@ -25,7 +25,7 @@ for j = 1:params.H
         ObFim = ObFim + RangeLogic(i) * FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(i), params.alpha(i), params.phi(i));
     end
     Fim = (1/(2*NoiseR))*Fim;
-    ObFim = (1/(NoiseR))*(obFim + 1e-3*eye(3));%[ObFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
+    ObFim = (1/(NoiseR))*(ObFim + 1e-3*eye(3));%[ObFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
     InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));
     InvObFim = inv(ObFim);
 %     evFim(1,j) = max(eig(InvFim));
