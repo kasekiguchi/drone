@@ -43,7 +43,7 @@ if vFlag
     ax.FontSize = obj.FontSize;
     ax.FontName = obj.FontName;
     ax.FontWeight = obj.FontWeight;
-    pbaspect([3 1 1]);
+    pbaspect([2 1 1]);
     %ylim([0,100]);
     hold off
     exportgraphics(ax,strcat(prename,'Eval','.pdf'));
