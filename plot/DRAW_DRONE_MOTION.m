@@ -140,10 +140,11 @@ classdef DRAW_DRONE_MOTION
             p = logger.data(param.target,"p","p");
             q = logger.data(param.target,"q","p");
             u = logger.data(param.target,"input");
+            nu = length(logger.Data.agent.input{1}); % number of input
             r = logger.data(param.target,"p","r");
             p = reshape(p,size(p,1),3,length(param.target));
             q = reshape(q,size(q,1),size(q,2)/length(param.target),length(param.target));
-            u = reshape(u,size(u,1),4,length(param.target));
+            u = reshape(u,size(u,1),nu,length(param.target));
             r = reshape(r,size(r,1),3,length(param.target));
             for n = 1:length(param.target)
                 switch size(q(:,:,n),2)

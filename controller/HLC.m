@@ -16,7 +16,10 @@ classdef HLC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         
-        function result=do(obj,~,~)
+        function result=do(obj,param,~)
+            % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
+            t = param{1};
+
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
@@ -45,10 +48,39 @@ classdef HLC < CONTROLLER_CLASS
             else
                 vf = Vf(x,xd',P,F1);
             end
-            vs = Vs(x,xd',vf,P,F2,F3,F4);
+            
+            z1=Z1(x,xd',P);%z方向
+            z2=Z2(x,xd',vf,P);%x方向
+            z3=Z3(x,xd',vf,P);%y方向
+            z4=Z4(x,xd',vf,P);%yaw
+            
+            %手動で入力を作成
+            ux=-F2*z2;
+            uy=-F3*z3;
+            upsi=-F4*z4;
+            vs =[ux,uy,upsi];
+            
+%             vs = Vs(x,xd',vf,P,F2,F3,F4);
+           %% 外乱(加速度で与える)
+            dst = 0;
+%             dst=0.5*sin(2*pi*t/2);%
+%             dst=8*sin(2*pi*t/0.2);%
+%             dst=dst+10*cos(2*pi*t/1);
+%             dst=2;
+%             if t>=2 && t<=2.1　
+%                     dst=1/0.025;
+%             end
+%%
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];
             obj.self.input = obj.result.input;
+             %サブシステムの入力
+            obj.result.uHL = [vf(1);ux;uy;upsi];
+            %サブシステムの状態
+            obj.result.z1 = z1;
+            obj.result.z2 = z2;
+            obj.result.z3 = z3;
+            obj.result.z4 = z4;
             result = obj.result;
         end
         function show(obj)

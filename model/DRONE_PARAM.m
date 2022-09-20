@@ -80,6 +80,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
         obj.k3 = param.k3;
         obj.k4 = param.k4;
         obj.rotor_r = param.rotor_r;
+        
         if isempty(param.parameter_name)
             obj.parameter_name = string(properties(obj)');
             obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
@@ -98,7 +99,8 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
         end
         for i = 1:length(obj.parameter_name)
             if isprop(obj,obj.parameter_name(i))
-                obj.parameter=[obj.parameter;obj.(obj.parameter_name(i))];
+                obj.parameter=[obj.parameter,obj.(obj.parameter_name(i))];
+%                 obj.parameter=[obj.parameter;obj.(obj.parameter_name(i))];
             else % propertyに無いパラメータを設定する場合
                 addprop(obj,parameter_name(i));
                 obj.(parameter_name(i)) = param.additional.(parameter_name(i));
@@ -117,10 +119,17 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
                 p = "all";
                 plant = "model"
             end
-            if strcmp(plant,"plant") % 制御対象の真値 : 制御モデル(parameter) + モデル誤差(model_error)
+            if strcmp(plant,"model") 
+                if strcmp(p,"all")
+                    p = obj.parameter_name;
+                end
+                v = [];
+                for i = 1:length(p)
+                    v = [v,obj.(p(i))];
+                end
+           else % 制御モデルで想定している値: 真値(parameter) + モデル誤差(model_error)
                 if strcmp(p,"all") % 非推奨
-                    v = obj.parameter + obj.model_error;
-                else
+                    p = obj.parameter_name;
                     v = [];
                     for i = 1:length(p)
                         if isfield(obj.model_error,p(i))
@@ -129,14 +138,11 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
                             v = [v,obj.(p(i))];
                         end
                     end
-                end
-            else % 制御モデルで想定している値
-                if strcmp(p,"all") % 非推奨
-                    v = obj.parameter;
                 else
                     v = [];
                     for i = 1:length(p)
-                        v = [v,obj.(p(i))_];
+%                         v = [v,obj.(p(i))_];
+                          v = [v,obj.(p(i))];
                     end
                 end
             end
