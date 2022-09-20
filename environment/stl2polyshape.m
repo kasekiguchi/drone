@@ -130,7 +130,7 @@ load("regions.mat")
 %% 動画生成
 maxr=max(TR.Points(:,1:2));
 minr=min(TR.Points(:,1:2));
-make_animation(1:length(hrange),[1],@(k,span) fig(region(k),maxr,minr),@(h) [],1)
+make_animation(1:length(hrange),@(k) fig(region(k),maxr,minr),@(h) [],1)
 
 %% local functions
 % 1直線状の点の簡略化
@@ -254,10 +254,9 @@ function flag = check_singular(A)
 end
 
 % 動画作成用
-function [] = make_animation(kspan,span,fig,base_fig,video_flag)
+function [] = make_animation(kspan,fig,base_fig,video_flag)
     % kspan : 時間
-    % span : エージェント数
-    %fig : fig(k,span) ：時刻ｋの図
+    %fig : fig(k) ：時刻ｋの図
     % base_fig : 背景
     h =figure;
     h;
@@ -271,7 +270,7 @@ function [] = make_animation(kspan,span,fig,base_fig,video_flag)
     for k = kspan
         base_fig(h);
         
-        fig(k,span);
+        fig(k);
         %   update screen
         drawnow %limitrate
         if video_flag

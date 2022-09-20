@@ -13,24 +13,25 @@ arguments
   conn_type
   id 
 end
-type="Whill_exp"; % class name
-name="whill"; % print name
-Setting.conn_type = conn_type;
-Setting.dt = dt;
+Model.id = id;
+Model.type="WHILL_EXP_MODEL"; % model name
+Model.name="whill"; % print name
+setting.conn_type = conn_type;
+setting.dt = dt;
 
 switch conn_type
   case "udp"
-    Setting.num = id;
+    setting.num = id;
   case "serial"
     available_ports=serialportlist("available");
     disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
-    Setting.port = id;
+    setting.port = id;
   case "ros"
-    Setting.param.state_list = ["p"];
-    Setting.param.num_list = [3,3];
-    Setting.param.subTopic = ["/mavros/local_position/pose"];
-    Setting.param.subName = ["p"];
-    Setting.param.ROSHostIP = id;
+    setting.param.state_list = ["p"];
+    setting.param.num_list = [3,3];
+    setting.param.subTopic = ["/mavros/local_position/pose"];
+    setting.param.subName = ["p"];
+    setting.param.ROSHostIP = id;
 end
-Model = {"type",type,"name",name,"param",Setting,"id",id};
+Model.param = setting;
 end
