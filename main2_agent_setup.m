@@ -58,6 +58,7 @@ for i = 1:N
     agent(i).set_property("sensor",Sensor_RangePos(i,'r',10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     agent(i).set_property("sensor",Sensor_Map_3D('d',10)); % 測定距離d（第二引数宇）内の重要度を計測 : sim のみ 
+    agent(i).set_property("sensor",Sensor_Bounding('d',2)); % boxの大きさ指定（d : 一辺の半分の長さ）
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
     %% set estimator property
     agent(i).estimator = [];

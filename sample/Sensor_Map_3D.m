@@ -4,7 +4,7 @@ arguments
     param.d = 3;
 end
 % sensor class demo : constructor
-% sensor popertyをSensor classのインスタンス配列として定義
+% sensor propertyをSensor classのインスタンス配列として定義
 % rcoverage_3D : RANGE_COVERAGE_SIM
 Sensor.name = ["rcoverage_3D"];
 Sensor.type = ["RANGE_COVERAGE_SIM"];

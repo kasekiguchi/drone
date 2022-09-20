@@ -54,6 +54,7 @@ run("main3_loop_setup.m");
             param(i).sensor.rpos = {agent};
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
+            param(i).sensor.bounding = {time};
             param(i).sensor.rcoverage_3D = {Env};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
@@ -99,6 +100,7 @@ run("main3_loop_setup.m");
         %% update state
         figure(FH)
         drawnow
+        agent(1).sensor.bounding.show
 
         for i = 1:N                         % 状態更新
             model_param.param = agent(i).model.param;
@@ -169,6 +171,7 @@ logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""},{2,"p","er"},{2,"q","e"},{2,
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N);
+% agent(1).animation(logger,"target",1:N);
+
 %%
 %logger.save();
