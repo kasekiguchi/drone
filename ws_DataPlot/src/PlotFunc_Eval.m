@@ -25,7 +25,7 @@ if vFlag
 
     param(param>=length(Time)) = [];
     is_area=[0,Time(reshape([param;param],[1,2*length(param)]))',Time(end)];
-    is_area_v = repmat([0 0 100 100],1,length(is_area)/2);
+    is_area_v = repmat([0 0 200 200],1,length(is_area)/2);
     area(is_area,is_area_v(1:length(is_area)),'FaceColor','#EEAAAA','FaceAlpha',0.5,'EdgeColor','none');
     plot(Time,[EvalData.(fn{2})],'Linewidth',3,'LineStyle','-','Color',plotcolor(2,:));
     plot(Time,[EvalData.(fn{3})],'Linewidth',3,'LineStyle','-','Color',plotcolor(3,:));

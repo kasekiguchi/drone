@@ -1,11 +1,10 @@
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split'); cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-logger = LOGGER("Data/AROB2022_Prop300s_Log(20-Sep-2022_05_23_14)")%
-%%
-%name = 'prop_';
+logger = LOGGER("Data/AROB2022_Prop300s_Log(20-Sep-2022_05_23_14)");
+name = 'prop_';
 %logger = LOGGER("AROB2022_Prop300s_Log(19-Sep-2022_21_27_21)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-name = 'comp_';
+%name = 'prop_';
 dirname = "AROB";
 close all
 %%
@@ -30,7 +29,7 @@ is_area = find(p(:, 1) >= 15, 1);
 %subplot(3,1,1);
 area([t(1), t(is_area(1)), t(is_area(1)), t(end)], [-10, -10, 40, 40]', -10, 'FaceColor', '#EEAAAA', 'FaceAlpha', 0.5, 'EdgeColor', 'none');
 hold on
-pbaspect([3 1 1]);
+pbaspect([2 1 1]);
 grid on
 p = plot(t, p(:,1),'k-',t, p(:,2),'k-.', t, pe(:,1),'b--',t, pe(:,2),'g--','LineWidth',2); %,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
 p(1).LineWidth = 1;
@@ -49,10 +48,10 @@ filename = strcat(name, 'xy_[0,30]', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
 
-%% subplot(3,1,2);
+    %% subplot(3,1,2);
 area([t(1), t(is_area(1)), t(is_area(1)), t(end)], [-2, -2, 10, 10]', -2, 'FaceColor', '#EEAAAA', 'FaceAlpha', 0.5, 'EdgeColor', 'none');
 hold on
-pbaspect([3 1 1]);
+pbaspect([2 1 1]);
 grid on
 p = plot(t, v,'k-', t, ve,'b--','LineWidth',2); %,[t(is_area(1));t(is_area(1))],[-100;100],'k-.');
 p(1).LineWidth = 1;
@@ -71,7 +70,7 @@ movefile(filename, dirname);
 %% subplot(3,1,3);
 area([t(1), t(is_area(1)), t(is_area(1)), t(end)], [-2, -2, 1, 1]', -2, 'FaceColor', '#EEAAAA', 'FaceAlpha', 0.5, 'EdgeColor', 'none');
 hold on
-pbaspect([3 1 1]);
+pbaspect([2 1 1]);
 grid on
 p = plot(t, q,'k-', t, qe,'b--','LineWidth',2);
 p(1).LineWidth = 1;
@@ -188,8 +187,10 @@ movefile(filename, dirname);
 %%
 close all
 figure
-Plots = DataPlot(logger, dirname, name, "Eval", {is_area(1)}, [0, 50]);
-Plots = DataPlot(logger,dirname,name,["RMSE","Input"],{2,3},[0,30]);
+%Plots = DataPlot(logger,dirname,name,"RMSE",{2},[0,20]);
+Plots = DataPlot(logger,dirname,name,"Input",{2},[0,30]);
+Plots = DataPlot(logger, dirname, name, "Eval", {is_area(1)}, [0, 30]);
+
 %% snapshot
 name = "prop_"
 close all
