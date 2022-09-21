@@ -62,6 +62,7 @@ run("main3_loop_setup.m");
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
             agent(i).do_sensor(param(i).sensor.list);
+            agent(i).sensor.bounding.show(agent(1))
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
 
