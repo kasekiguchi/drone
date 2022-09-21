@@ -23,19 +23,22 @@ classdef IMAGE_BOUNDING_BOX_SIM < SENSOR_CLASS
             % result.state : State_obj,  p : position   q : quaternion
             state = obj.self.plant.state; % 真値
             t = param{1}.t;
-            env = polyshape(obj.d*[-1 -1 1 1],obj.d*[1 -1 -1 1]);
+            result.env = polyshape(obj.d*[-1 -1 1 1],obj.d*[1 -1 -1 1]);
             
             result.polyin = polyshape([0 0 1 1],[1 0 0 1]);
             result.polyout = translate(result.polyin,[cos(t),sin(t)]);
-            result.poly = intersect(env,result.polyout);
+            result.poly = intersect(result.env,result.polyout);
 
             obj.result = result;
         end
 
-        function show(obj)
+        function show(obj,~)
             axis equal
             xlim([-3,3]);
             ylim([-3,3]);
+            hold on
+            plot(obj.result.env,'FaceColor','none')
+            plot(obj.result.polyin)
             plot(obj.result.poly)
         end
     end
