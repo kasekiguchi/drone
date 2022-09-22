@@ -28,18 +28,6 @@ if fExp
 else
     te=300;
 end
-%% set connector (global instance)
-if fExp
-    if fMotive
-        rigid_ids = [1];
-        Connector_Natnet(struct('ClientIP','192.168.1.5','rigid_list',rigid_ids)); % Motive
-    end
-else
-    if fMotive
-        Connector_Natnet_sim(N,dt,0); % 3rd arg is a flag for noise (1 : active )
-        %Connector_Natnet_sim(2*N,dt,0); % for suspended load
-    end
-end
 %% initialize
 initial(N) = struct;    
 param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
@@ -66,6 +54,11 @@ for i = 1:N
         agent(i) = DRONE(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
         agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',1E-4,'seed',[1]))));%加速度次元車両モデル 4.337E-5, seed = 5
+    end
+    if fMotive
+        state  = agent(i).plant.connector.getData;
+        agent(i).plant.state.p = [state.pose.position.x,state.pose.position.z]
+        agent(i).plant.state.q = [state.pose.orientation.x]
     end
     %% model
     % set control model
@@ -245,12 +238,7 @@ while round(time.t,5)<=te
     Srpos={agent};
     Simu={[]};
     Sdirect={};
-    if fMotive
-        %motive.getData({agent,["pL"]},mparam);
-        motive.getData(agent,mparam);
-    end
     for i = 1:N
-        if fMotive;param(i).sensor.motive={motive};end
         param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
         agent(i).do_sensor(param(i).sensor);
     end
@@ -279,6 +267,11 @@ while round(time.t,5)<=te
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
+    if fMotive
+        state = agent(i).plant.connector.getData
+        agent(i).plant.state.p = [state.pose.position.x;state.pose.position.z]
+        agent(i).plant.state.q = [state.pose.orientation.y]
+    end
     %logger.logging(time.t,FH,doSubFuncFlag);
     %%
     % with FH
