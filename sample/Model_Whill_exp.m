@@ -22,7 +22,7 @@ function Model = Model_Whill_exp(dt,~,~,param,conn_type,id)
             Setting.param=param;
             Setting.param.state_list = ["p"];
             Setting.param.num = [3,3];
-            Setting.param.subTopic = ["/mavros/local_position/pose"];
+            Setting.param.subTopic = ['/Robot_1/pose'];
             Setting.param.subName = ["p"];
             Setting.param.DomainID = id;
     end

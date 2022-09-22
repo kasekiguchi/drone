@@ -1,3 +1,4 @@
+
 classdef Whill_exp < MODEL_CLASS
     % Whill 実験用モデル
     properties% (Access=private)
@@ -36,11 +37,13 @@ classdef Whill_exp < MODEL_CLASS
                 case "ros"
                     obj.ID  = param.param.DomainID;
                     param.DomainID = param.param.DomainID;
-                    param.subTopicName = {'/odom',...
-                        '/scan'};
+%                     param.subTopicName = {'/odom'};
+%                     param.subMsgName = {'nav_msgs/Odometry' };
+
+                        param.subTopicName = {'/Robot_1/pose'};
+                        param.subMsgName = {'geometry_msgs/PoseStamped'};
+
                     param.pubTopicName = {'/cmd_vel'};
-                    param.subMsgName = {'nav_msgs/Odometry',...
-                        'sensor_msgs/LaserScan'};
                     param.pubMsgName = {'geometry_msgs/Twist'};
                     subnum = length(param.subTopicName);
                     pubnum = length(param.pubTopicName);
@@ -52,6 +55,7 @@ classdef Whill_exp < MODEL_CLASS
                     end
                     obj.connector=ROS2_CONNECTOR(param);
             end
+%             = obj.connector.getData;
         end
         function do(obj,u,varargin)
             if length(varargin)==1
@@ -77,6 +81,8 @@ classdef Whill_exp < MODEL_CLASS
                     case 'r' % run
                         obj.msg.linear.x = u(1);
                         obj.msg.angular.z = u(2);
+%                          obj.msg.linear.x = 0;
+%                          obj.msg.angular.z = 0;
                 end
             else % 緊急時
                 return;
