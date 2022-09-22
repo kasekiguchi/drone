@@ -16,6 +16,6 @@ end
 %     [ 0.075, -0.075,  0.015;-0.075, -0.075, -0.015; -0.075,  0.075,  0.015; 0.075,  0.075, -0.015; 0.075,  0.07, -0.015]};
 
 natnet_param.sigmaw = [6.716E-5; 7.058E-5; 7.058E-5];
-motive=NATNET_CONNECTOR_sim(natnet_param);
+motive=NATNET_CONNECTOR_SIM(natnet_param);
 assignin('base',"motive",motive);
 end

@@ -26,7 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=100;
+    te=300;
 end
 %%
 % %% set connector (global instance)
@@ -55,7 +55,11 @@ for i = 1:N
        initial(i).q = [0];
 %         initial(i).p = [92;1];%四角経路
 %         initial(i).q = [pi/2];
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> b58ad7d9a3b49ad26a8290bf207098720d6adf40
     initial(i).v = [0];
     initial(i).w = [0];
 end
@@ -66,7 +70,7 @@ for i = 1:N
     if fExp
         agent(i) = DRONE(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
-        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',4.337E-5,'seed',[2]))));%加速度次元車両モデル seed = 5
+        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',1E-4,'seed',[1]))));%加速度次元車両モデル 4.337E-5, seed = 5
     end
     if fMotive
         state  = agent(i).plant.connector.getData;
@@ -203,7 +207,7 @@ end
 %  logger.Data = log.log.Data;
 %%
 %  tid = find(logger.Data.t,1,'last')-27;
-%  tid = 624;
+% tid = 1400;
 % time.t = logger.Data.t(tid)
 % logger.overwrite("plant", time.t, agent, 1);
 % logger.overwrite("estimator", time.t, agent, 1); 
@@ -225,8 +229,8 @@ end
 % figure()
 % agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
 % axis equal
-%figure()
-%agent.estimator.ukfslam_WC.show
+% figure()
+% agent.estimator.ukfslam_WC.show
 %time.t = time.t + dt;
 mparam=[]; %without occulusion
 
@@ -328,11 +332,10 @@ calculation=toc;
 % Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calcuflation);
-% logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
-LOGGER.plot({1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save("AROB2022_Comp_300s","separate",true);  
+logger.save("AROB2022_Prop_200s","separate",true);  
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
@@ -378,17 +381,21 @@ EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 EstFinalStatesquare =  polyshape( EstFinalStatesquare');
 EstFinalStatesquare =  rotate(EstFinalStatesquare,180 * agent.estimator.result.state.q(end) / pi, agent.estimator.result.state.p(:,end)');
 PlotFinalEst = plot(EstFinalStatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+Ewall = agent.estimator.result.map_param;
+Ewallx = reshape([Ewall.x,NaN(size(Ewall.x,1),1)]',3*size(Ewall.x,1),1);
+Ewally = reshape([Ewall.y,NaN(size(Ewall.y,1),1)]',3*size(Ewall.y,1),1);
 %reference state
 RefState = agent.reference.result.state.p(1:3,:);
+fWall = agent.reference.result.focusedLine;
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-fWall = agent.reference.result.focusedLine;
+plot(Ewallx,Ewally,'g-');
 plot(fWall(:,1),fWall(:,2),'r-');
 O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
 %xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
-xlim([EstFinalState(1)-10, EstFinalState(1)+10]);ylim([EstFinalState(2)-10,EstFinalState(2)+10])
+xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
 % pbaspect([20 20 1])
 hold off
 end

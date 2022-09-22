@@ -69,7 +69,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
              EstData = obj.self.estimator.result.state.get();
              pe = EstData(1:2);
              the = EstData(3);
-
+             R = [cos(the), -sin(the);sin(the), cos(the)];
 %% そもそも推定値を使わずリファレンスを作る．
             sensor = obj.self.sensor.result;
             LP = UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0], obj.self.estimator.ukfslam_WC.constant);
@@ -146,7 +146,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             de = [Xe,Ye]; % wall 終点への相対ベクトル
             ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
             wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
-            d = sum(del.^2,2);%abs(C)./sqrt(A.^2+B.^2); % 壁面までの距離
+            d = vecnorm(del,2,2); % 壁面までの距離
             %[ip,d,Xs,Ys,Xe,Ye]
             [~,idm]=min(d(wid)); % 一番近い壁面
             [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
@@ -163,7 +163,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             rx = obj.result.PreTrack(1) - pe(1); % relative position
             ry = obj.result.PreTrack(2) - pe(2);
 
-            if abs(prod(a(ids))+prod(b(ids)))<1e-2 % ほぼ直交している場合（傾きの積が-1の式より）
+            if abs(prod(a(ids))+prod(b(ids)))<1e-1 % ほぼ直交している場合（傾きの積が-1の式より）
                 % 入りと出で同じ幅の通路を前提としてしまっている．
                 % 初期値が垂直二等分線上でもその場で回転するだけになる．
                 %p12 = cr(l1,l2);
@@ -197,7 +197,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                         end
                     end
                     obj.th = obj.step*obj.Targetv/obj.r;
-                    obj.O = obj.O + pe; % 絶対座標位置
+                    obj.O = R*obj.O + pe; % 絶対座標位置
                 end
                 th = obj.th;
                 R = [cos(the), -sin(the);sin(the), cos(the)];
@@ -260,7 +260,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.result.state.set_state("p",obj.TrackingPoint);%treat as a colmn vector
             obj.result.state.set_state("q",obj.TrackingPoint(3,1));%treat as a colmn vector
             obj.result.state.set_state("v",obj.TrackingPoint(4,1));%treat as a colmn vector
-            if vecnorm(obj.result.PreTrack - obj.TrackingPoint(:,1))>1
+            if vecnorm(obj.result.PreTrack - obj.TrackingPoint(:,1))>3
                 obj.O;
             end
             obj.PreTrack = obj.TrackingPoint(:,1);

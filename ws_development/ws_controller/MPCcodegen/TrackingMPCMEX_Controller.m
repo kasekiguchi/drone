@@ -33,13 +33,13 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             obj.param.Qf = diag([10,10,0.1,1000]);%終端状態の重み % 12,12,1,1
             obj.param.Q = diag([10,10,1,100]);%状態の重み 10,10,1,100
             obj.param.R = 0.01*diag([1,1]);%入力の重み % 0.01*diag([1,1])
-            obj.param.Qf = diag([12,12,1,1]);%終端状態の重み % 12,12,1,1
+            obj.param.Qf = diag([10,10,1,1]);%終端状態の重み % 12,12,1,1
 %             obj.param.Qf = diag([17,17,1,1])
             obj.param.T = 100*eye(param.H);%Fisherの重み
-            obj.param.S = [1,0.7];%入力の上下限 % 1,0.7
+            obj.param.S = [1,1];%入力の上下限 % 1,0.7
             strs=self.reference.name;        
             obj.param.step = self.reference.(strs(contains(strs,"MPC"))).step;
-            obj.NoiseR = 1.0e-2;%param of Fisher Information matrix % 1.0e-2
+            obj.NoiseR = 1.5e-2;%param of Fisher Information matrix % 1.0e-2
             obj.RangeGain = 10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
@@ -68,7 +68,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             %---センサ情報をとる---%
             Sensor = obj.self.sensor.result;
             Measured.ranges = Sensor.length;
-            Measured.angles = Sensor.angle - RobotState(3);%
+            Measured.angles = Sensor.angle;% - RobotState(3);%
             if iscolumn(Measured.ranges)
                 Measured.ranges = Measured.ranges';% Transposition
             end
@@ -115,9 +115,9 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             problem.x0		  = [obj.previous_state;obj.previous_input;zeros(2,obj.param.Num)]; % 最適化計算の初期状態
             % obj.options.PlotFcn                = [];
             %---評価関数と制約条件を設定した関数MEX化するときはここをやる---%
-%             [var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分と観測値のFIMを用いたコントローラ，最終的な提案手法
+            [var,fval,exitflag,~,~,~,~] = fminconMEX_ObFimAndFimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分と観測値のFIMを用いたコントローラ，最終的な提案手法
 %            [var,fval,exitflag,~,~,~,~] = fminconMEX_Fimobjective(problem.x0,obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain);%観測値差分のFIMを使ったコントローラ
-            [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);%目標値追従のみのコントローラ，比較手法
+         %   [var,fval,exitflag,~,~,~,~] = fminconMEX_Trackobjective(problem.x0,obj.param);%目標値追従のみのコントローラ，比較手法
             %------------------------------------%
             obj.result.input = var(obj.param.state_size + 1:obj.param.total_size, 1);
             obj.self.input = obj.result.input;
