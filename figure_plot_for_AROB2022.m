@@ -1,7 +1,7 @@
-tmp = matlab.desktop.editor.getActive;
-cd(fileparts(tmp.Filename));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split'); cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-logger = LOGGER("Data/AROB2022_Prop300s_Log(20-Sep-2022_05_23_14)");
+%tmp = matlab.desktop.editor.getActive;
+%cd(fileparts(tmp.Filename));
+%[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split'); cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+%logger = LOGGER("Data/AROB2022_Prop300s_Log(Final)");
 name = 'prop_';
 %logger = LOGGER("AROB2022_Prop300s_Log(19-Sep-2022_21_27_21)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
 %name = 'prop_';
@@ -205,10 +205,10 @@ ax = gca;
 filename = strcat(name, '1s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
-% 0s
-snapshot(20,logger,agent,0)
+% 30s
+snapshot(30,logger,agent,0)
 ax = gca;
-filename = strcat(name, '20s', '.pdf');
+filename = strcat(name, '30s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
 

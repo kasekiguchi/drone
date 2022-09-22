@@ -26,7 +26,7 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=300;
+    te=400;
 end
 %% initialize
 initial(N) = struct;    
@@ -72,7 +72,7 @@ for i = 1:N
             agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
         else
             SensorRange = 20;
-            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
+            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ,'seed',2)));%LiDAR seosor
         end
 
     %% set estimator property
@@ -182,31 +182,36 @@ end
 %  logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %  logger.Data = log.log.Data;
 %%
+
+if 0
 %  tid = find(logger.Data.t,1,'last')-27;
-% tid = 1400;
-% time.t = logger.Data.t(tid)
-% logger.overwrite("plant", time.t, agent, 1);
-% logger.overwrite("estimator", time.t, agent, 1); 
-% agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
-% agent.estimator.ukfslam_WC.result = agent.estimator.result;
-% logger.overwrite("sensor", time.t, agent, 1);
-% agent.sensor.LiDAR.result = agent.sensor.result;
-% logger.overwrite("reference", time.t, agent, 1);
-% agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
-% logger.overwrite("controller", time.t, agent, 1);
-% agent.controller.TrackingMPCMEX_Controller.self = agent;
-% agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
-% logger.overwrite("input", time.t, agent, 1);
-% agent.estimator.result.state.get
-% agent.input
-% % 
-% close all
-% agent.sensor.LiDAR.show()
+tid = 120;
+time.t = logger.Data.t(tid)
+logger.overwrite("plant", time.t, agent, 1);
+logger.overwrite("estimator", time.t, agent, 1); 
+agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
+agent.estimator.ukfslam_WC.result = agent.estimator.result;
+logger.overwrite("sensor", time.t, agent, 1);
+agent.sensor.LiDAR.result = agent.sensor.result;
+logger.overwrite("reference", time.t, agent, 1);
+agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
+logger.overwrite("controller", time.t, agent, 1);
+agent.controller.TrackingMPCMEX_Controller.self = agent;
+agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
+logger.overwrite("input", time.t, agent, 1);
+agent.estimator.result.state.get
+agent.input
+% 
+close all
+fh=figure();
+NowResultPlot(agent,fh,false);
+%agent.sensor.LiDAR.show()
 % figure()
 % agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
 % axis equal
 % figure()
 % agent.estimator.ukfslam_WC.show
+end
 %time.t = time.t + dt;
 %% main loop
 disp("while ==========  ==================")
@@ -266,6 +271,7 @@ while round(time.t,5)<=te
     %---now result plot---%
      NowResultPlot(agent,NowResult,plot_flag);
      plot_flag = false;
+     length(agent.estimator.result.PreXh)
      %drawnow
     %---------------------%
     for i = 1:N %
@@ -340,6 +346,7 @@ PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
 PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
 PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+%    agent.sensor.LiDAR.show(PlantFinalState,agent.plant.state.q(end));
 %modelFinalState
 EstFinalState = agent.estimator.result.state.p(:,end);
 EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
@@ -356,7 +363,7 @@ fWall = agent.reference.result.focusedLine;
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
     plot(Ewallx,Ewally,'g-');
-    plot(fWall(:,1),fWall(:,2),'r-');
+    plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
 O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));

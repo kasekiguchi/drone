@@ -90,14 +90,24 @@ classdef LiDAR_SIM < SENSOR_CLASS
             result.length=vecnorm(result.sensor_points') + obj.noise * randn(1,length(result.sensor_points));%.*sign(result.angle); % レーザー点までの距離
             obj.result=result;
         end
-        function show(obj,~)
+        function show(obj,p,q)
+            arguments
+                obj
+                p = [0;0];
+                q = 0;
+            end
             if ~isempty(obj.result)
                 points(1:2:2*size(obj.result.sensor_points,1),:)= obj.result.sensor_points;
+                R = [cos(q),-sin(q);sin(q),cos(q)];
+                %points = (R'*(points'-p))';
+                points = (R*points'+p)';
                 plot([points(:,1);0],[points(:,2);0],'r-'); 
                 hold on; 
                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);
-                plot(obj.result.region);
-                plot(obj.head_dir);
+                region = polyshape((R*obj.result.region.Vertices'+p)');
+                plot(region);
+                head_dir = polyshape((R*obj.head_dir.Vertices'+p)');
+                plot(head_dir);
                 axis equal;
             else
                 disp("do measure first.");

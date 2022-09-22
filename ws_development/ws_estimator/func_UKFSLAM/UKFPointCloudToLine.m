@@ -21,6 +21,8 @@ C = Constant;
 Dn = circshift(D,-1);
 dD = Dn - D; % 要素i はD(i+1) - D(i), 最後だけ D(1) - D(end)
 gids = abs(dD) > C.CluteringThreshold; % gap indices
+%dDn = circshift(dD,-1);
+%gids = abs(dDn-dD) > C.CluteringThreshold;
 zids = D==0; % zero indices
 
 cids = find(~(gids | zids));% 次の点とつながるインデックス：連続している塊がクラスタ

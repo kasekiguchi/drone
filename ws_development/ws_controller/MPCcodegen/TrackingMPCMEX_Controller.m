@@ -35,7 +35,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.R = 0.01*diag([1,1]);%入力の重み % 0.01*diag([1,1])
             obj.param.Qf = diag([10,10,0.1,100]);%終端状態の重み % 12,12,1,1
 %             obj.param.Qf = diag([17,17,1,1])
-            obj.param.T = 100*eye(param.H);%Fisherの重み
+            obj.param.T = 10*eye(param.H);%Fisherの重み
             obj.param.S = [1,1];%入力の上下限 % 1,0.7
             strs=self.reference.name;        
             obj.param.step = self.reference.(strs(contains(strs,"MPC"))).step;
