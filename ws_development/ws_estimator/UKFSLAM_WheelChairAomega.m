@@ -36,12 +36,12 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             
             % the constant value for estimating of the map
             obj.constant = struct; %定数パラメータ設定
-            obj.constant.LineThreshold = 0.1;%0.3; %"ax + by + c"の誤差を許容する閾値
-            obj.constant.PointThreshold = 0.2; %
+            obj.constant.LineThreshold = 0.1;%0.3;%0.3; %"ax + by + c"の誤差を許容する閾値
+            obj.constant.PointThreshold = 0.2;%0.2; %
             obj.constant.GroupNumberThreshold = 20; % クラスタを構成する最小の点数
-            obj.constant.DistanceThreshold = 1e-1; % センサ値と計算値の許容誤差，対応付けに使用
+            obj.constant.DistanceThreshold = 1e-2;%1e-1; % センサ値と計算値の許容誤差，対応付けに使用
             obj.constant.ZeroThreshold = 1e-3; % ゼロとみなす閾値
-            obj.constant.CluteringThreshold = 0.5; % 同じクラスタとみなす最大距離
+            obj.constant.CluteringThreshold = 2;%0.5;%0.5; % 同じクラスタとみなす最大距離
             obj.constant.SensorRange = param.SensorRange; % Max scan range
             %------------------------------------------
         end

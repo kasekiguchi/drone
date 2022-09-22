@@ -151,6 +151,9 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             %[ip,d,Xs,Ys,Xe,Ye]
             [~,idm]=min(d(wid)); % 一番近い壁面
             [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
+            if idm ==idm2
+                error("ACSL : something wrong");
+            end
             ids=[idm,idm2];
             ids=wid(ids);
 %             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
