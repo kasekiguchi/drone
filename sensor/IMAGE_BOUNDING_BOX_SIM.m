@@ -56,6 +56,7 @@ classdef IMAGE_BOUNDING_BOX_SIM < SENSOR_CLASS
             figure(2)
             t = 1;
             v = VideoWriter('bounding_movie','MPEG-4');
+            v.FrameRate = 40;
             v.Quality = 100;
             open(v);
             while t<numel(logger.Data.t)
@@ -82,6 +83,7 @@ classdef IMAGE_BOUNDING_BOX_SIM < SENSOR_CLASS
                 writeVideo(v,frame);
             end
             close(v);
+            disp("Simulation ended.");
         end
     end
 end
