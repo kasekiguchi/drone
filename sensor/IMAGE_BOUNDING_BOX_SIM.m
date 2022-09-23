@@ -52,11 +52,14 @@ classdef IMAGE_BOUNDING_BOX_SIM < SENSOR_CLASS
         end
 
         function movie(obj,logger)
+            cd('Data');
+            figure(2)
             t = 1;
             v = VideoWriter('bounding_movie','MPEG-4');
             v.Quality = 100;
             open(v);
             while t<numel(logger.Data.t)
+                clf(figure(2))
                 disp('.');
 
                 hold on
@@ -68,14 +71,14 @@ classdef IMAGE_BOUNDING_BOX_SIM < SENSOR_CLASS
                 xlim([-3,3]);
                 ylim([-3,3]);
                 xlabel('Position {\it x} [m]');
-                ylabel('Position [\it y} [m]');
+                ylabel('Position {\it y} [m]');
 
                 plot(logger.Data.agent(1).sensor.result{t}.env,'FaceColor','none')
                 plot(logger.Data.agent(1).sensor.result{t}.polyin)
                 plot(logger.Data.agent(1).sensor.result{t}.poly)
                 hold off
                 t = t + 1;
-                frame = getframe(gca);
+                frame = getframe(figure(2));
                 writeVideo(v,frame);
             end
             close(v);
