@@ -75,15 +75,18 @@ for i = 1:N
     %% set controller property
     agent(i).controller = [];
     %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    agent(i).set_property("controller", Controller_HL(1));                                % 階層型線形化
-    HLControlSetting = Controller_HL(1);
-    HLParam = HLControlSetting.param;
+%     agent(i).set_property("controller", Controller_HL(1));                                % 階層型線形化
+%     HLControlSetting = Controller_HL(1);
+%     HLParam = HLControlSetting.param;
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
-    %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
+    %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i
+    %-- sample 通さずに実行
+    agent(i).set_property("controller",struct("type","MCMPC_controller","name","mcmpc","param",{agent(i)}));
+%     agent(i).set_property("controller",Controller_MCMPC(dt)); % sampleを通す方
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %% 必要か？実験で確認 : TODO

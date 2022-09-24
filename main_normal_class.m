@@ -31,13 +31,15 @@ fLanding = 0;   % 着陸かどうか 目標軌道を変更する
 fLanding_comp = 0;
 fCount_landing = 0;
 fc = 0;     % 着陸したときだけx，y座標を取得
+totalT = 0;
+idx = 0;
 
 run("main3_loop_setup.m");
 
 try
     while round(time.t, 5) <= te
         tic
-%         idx = idx + 1;
+        idx = idx + 1;
         %% sensor
         %    tic
         tStart = tic;
@@ -101,10 +103,13 @@ end
 %             if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
             %controller
-%             param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
-%             for j = 1:length(agent(i).controller.name)
-%                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
-%             end
+            % sample を通る
+%             param(i).controller.mcmpc = {};    % 入力算出 / controller.name = hlc
+            % sample を通さず
+            param(i).controller.mcmpc = {time.t, fFirst, idx};    % 入力算出 / controller.name = hlc
+            for j = 1:length(agent(i).controller.name)
+                param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
+            end
             agent(i).do_controller(param(i).controller.list);
 %             if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
