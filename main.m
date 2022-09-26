@@ -10,8 +10,8 @@ userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
 run("main2_agent_setup.m");
-agent.set_model_error("ex",-0.05);
-agent.set_model_error("ey",-0.05);
+% agent.set_model_error("ex",-0.05);
+% agent.set_model_error("ey",-0.05);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ

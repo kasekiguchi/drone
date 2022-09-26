@@ -18,6 +18,7 @@ classdef EKF_PE < ESTIMATOR_CLASS
         state % model と同じ状態　cf. result.state は推定値として受け渡すよう？
         self
         projection
+        time
     end
     
     methods
@@ -25,7 +26,7 @@ classdef EKF_PE < ESTIMATOR_CLASS
             obj.self= self;
             obj.self.input = [0;0;0;0];
             model = self.model;
-            ELfile=strcat("Jacobian_","load_parameter_estimation");
+            ELfile=strcat("Jacobian_","load_parameter_estimation_exey");
             if ~exist(ELfile,"file")
                 obj.JacobianF=ExtendedLinearization(ELfile,model);
             else
@@ -39,31 +40,37 @@ classdef EKF_PE < ESTIMATOR_CLASS
                 obj.y.list = [];
             end
             obj.JacobianH = param.JacobianH;
-            obj.n = 27;
+            obj.n = 26;
             obj.Q = param.Q;% 分散
             obj.R = param.R;% 分散
             obj.dt = model.dt; % 刻み
             obj.B = param.B;
             obj.result.P = param.P;
-            obj.result.e = [0;0;0];
-            obj.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)-dot(x(19:21)/norm(x(19:21)),x(22:24))*x(19:21)/norm(x(19:21));x(25:27)];
+            obj.result.e = [0;0];
+            obj.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)-dot(x(19:21)/norm(x(19:21)),x(22:24))*x(19:21)/norm(x(19:21));x(25:26)];
+            obj.time = tic;
         end
         
         function [result]=do(obj,param,sensor)
             %   param : optional
-            if ~isempty(param) obj.dt = param; end
+            if isempty(param)
+                obj.dt = toc(obj.time);
+                obj.time = tic;
+            else
+                obj.dt = param;
+            end
             model=obj.self.model;
             if nargin == 2
                 sensor = obj.self.sensor.result;
             end
-            x = [obj.result.state.get(["p","q","v","w","pL","vL","pT","wL"]);obj.result.e]; % 前回時刻推定値
+            x = [obj.self.estimator.ekf.result.state.get(["p","q","v","w","pL","vL","pT","wL"]);obj.result.e]; % 前回時刻推定値
 %            xh_pre = obj.result.state.get() + model.method(x,obj.self.input,model.param) * obj.dt;	% 事前推定%%5
              xh_pre = [model.state.get(["p","q","v","w","pL","vL","pT","wL"]);obj.result.e]; % 事前推定 ：入力ありの場合 （modelが更新されている前提）
             if isempty(obj.y.list)
                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
             end
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
-            p = obj.self.parameter.get(["mass","Length","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass","cableL"]);
+            p = obj.self.parameter.get(["mass","Length","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","loadmass","cableL","ez"]);
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
             C = obj.JacobianH(x,p);
 
@@ -74,9 +81,14 @@ classdef EKF_PE < ESTIMATOR_CLASS
             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 事後推定
             tmpvalue = obj.projection(tmpvalue);
             obj.result.state.set_state(tmpvalue(1:24,1));
-            obj.result.e = tmpvalue(25:27,1);
             obj.result.G = G;
-            obj.result.P = P;
+            if strcmp(obj.self.reference.point.flag,'f')
+                obj.result.e = tmpvalue(25:26,1);
+                obj.result.P = P;
+            else
+                obj.result.e = obj.self.parameter.get(["ex","ey"])';
+                obj.result.P = obj.result.P;
+            end
             obj.result.dt = obj.dt;
             result=obj.result;
         end
