@@ -19,11 +19,11 @@ run("main1_setting.m");
 % for mob1
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
 wall1 = [2 -1;2 0.5;2.5 0.5;2.5 -1];
-wall2 = [4 -0.5;4 3;4.5 3;4.5 -0.5];
+wall2 = [4 0;2 0.5;7 0.5;7 0];
 room = [-2 -5;-2 4;7 4;7 -5];
 % Env.param.Vertices = [tmp;NaN NaN;0.6*tmp]; %モビング時の障害物
-% Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
-Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
+Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
+% Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
 initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
 run("main2_agent_setup.m");

@@ -11,7 +11,7 @@ classdef LiDAR_sim < SENSOR_CLASS
     end
     properties %(Access = private) % construct したら変えない．
         pitch = 0.1;
-        radius = 40;
+        radius = 10;
         angle_range
         head_dir = nsidedpoly(3, 'Center', [0 ,0], 'SideLength', 0.5);
     end

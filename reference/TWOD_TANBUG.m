@@ -41,7 +41,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             
             obj.state_initial = [0,0,0]';
             obj.goal = [6,0,0]';% global goal position
-            obj.obstacle = [2,0,0]';
+            obj.obstacle = [2,0,0]';% 障害物座標
             obj.radius = self.sensor.lrf.radius;
             obj.margin = 0.5;
             obj.threshold = obj.margin*2;
@@ -60,14 +60,14 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3, 3]));
          
             obj.path_length = zeros(size(self.sensor.lrf.angle_range));
-            as = 0:obj.pitch:2*pi; %センサの分解能（行列）
+            as = 0:obj.pitch:2*pi; %センサの分解能(ラジアン)（行列）
             obj.margin = obj.margin;
             %仮想通路の生成
-            tmp = find((obj.radius*sin(as) >= obj.margin).*(as <= pi/2));%ドローンの前方左側90°のインデックス
+            tmp = find((obj.radius*sin(as) >= obj.margin).*(as <= pi/2));% 2～16列目のインデックスを算出
             obj.path_length(tmp) = obj.margin./sin(as(tmp));
             obj.path_length(1:find(obj.path_length,1)-1) = obj.radius;
             
-            tmp = find((obj.radius*sin(as) <= -obj.margin).*(as >= 3*pi/2));%ドローンの前方右側90°のインデックス
+            tmp = find((obj.radius*sin(as) <= -obj.margin).*(as >= 3*pi/2));%49～63列目のインデックスを算出
             obj.path_length(tmp) = -obj.margin./sin(as(tmp));
             obj.path_length(find(obj.path_length,1,'last')+1:end) = obj.radius;
 %             plot(obj.path_length.*cos(as),obj.path_length.*sin(as),"o");
@@ -86,20 +86,21 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
-            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近いレーザーインデックス
+            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
             path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離
             path_length(path_length>goal_length)=goal_length;
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合                
                 % edge_ids = 近い端点のindex配列
                 nlength = circshift(obj.length,1); %１つずらした距離データ
-                edge_ids = find(abs(nlength-obj.length) > obj.threshold); %閾値を超えるindexの算出
+                edge_ids = find(abs(nlength-obj.length) > obj.threshold); %近い端点のindex配列
                 tmp = obj.length(edge_ids) > nlength(edge_ids);
                 edge_ids(tmp) = edge_ids(tmp) - 1;
-                edge_ids(edge_ids==0) = length(nlength);
+%                 edge_ids(edge_ids==0) = length(nlength);
 
 
                 te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
-                [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
+%                 [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
+                [~,tmp] = min((obj.length(edge_ids)-goal_length*cos(te_angle)));
                 % TODO : b + c > d + e  <==> b^2 + c^2 > d^2 + e^2 が成り立つ前提：要チェック
                 tid = edge_ids(tmp);
 
@@ -331,13 +332,13 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 points = points + obj.state.p(1:2)';
                 plot(points(:,1),points(:,2),'r-');
                 hold on; 
-%                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);
+                text(points(1,1),points(1,2),'1','Color','b','FontSize',10);
                 %plot(obj.self.sensor.result.region);
                 %plot(obj.head_dir);
                 plot(obj.state.p(1),obj.state.p(2),'b*');
                 plot(obj.result.state.p(1),obj.result.state.p(2),'go');
                 local_tp = R*obj.local_tp(1:2);
-%                 plot(obj.state.p(1)+local_tp(1)+circ(:,1),obj.state.p(2)+local_tp(2)+circ(:,2));
+                plot(obj.state.p(1)+local_tp(1)+circ(:,1),obj.state.p(2)+local_tp(2)+circ(:,2));
                 plot(obj.goal(1),obj.goal(2),"ys");
                 axis equal;
             end
