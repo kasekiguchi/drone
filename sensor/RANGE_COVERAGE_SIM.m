@@ -24,6 +24,7 @@ classdef RANGE_COVERAGE_SIM < SENSOR_CLASS
             % result.state : State_obj,  p : position
             % 【入力】varargin = {{Env}}      agent : センサーを積んでいる機体obj,    Env：観測対象のEnv_obj
             Env = varargin{1}{1};
+            time = varargin{1}{2};
             state = obj.self.plant.state; % 真値
             sensor = obj.self.sensor.rpos.result; % rposセンサの値を貰う用
             param = obj.self.reference.covering_3D.param;
@@ -62,7 +63,7 @@ classdef RANGE_COVERAGE_SIM < SENSOR_CLASS
 
             % 領域質量
             zo = find(max(sum(Ptri.*F,2) - (F*param.bx') < 0,[],1) == 0);
-            phi_d = normpdf(vecnorm(param.q - param.bx(zo,:),2,2),0,0.6); % 重み位置と領域内ボクセルとの距離の正規分布関数
+            phi_d = normpdf(vecnorm(param.q.*[cos(time.t),sin(time.t),abs(sin(time.t))] - param.bx(zo,:),2,2),0,0.6); % 重み位置と領域内ボクセルとの距離の正規分布関数
             weight_bx = param.bx(zo,:).*phi_d; % 重み付きボクセル
             dmass = sum(weight_bx,1); % 各方向の重みを合算
             mass = sum(phi_d,"all"); % 全部の重みを合算

@@ -55,7 +55,7 @@ run("main3_loop_setup.m");
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
             param(i).sensor.bounding = {time};
-            param(i).sensor.rcoverage_3D = {Env};
+            param(i).sensor.rcoverage_3D = {Env,time};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
             for j = 1:length(agent(i).sensor.name)
@@ -164,14 +164,14 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""},{2,"p","er"},{2,"q","e"},{2,"input",""},{3,"p","er"},{3,"q","e"},{3,"input",""},"row_col",[3 3]);
+% logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""},{2,"p","er"},{2,"q","e"},{2,"input",""},{3,"p","er"},{3,"q","e"},{3,"input",""},"row_col",[3 3]);
 % agent(1).reference.timeVarying.show(logger)
 
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-% agent(1).animation(logger,"target",1:N);
-agent(1).sensor.bounding.movie(logger);
+agent(1).animation(logger,"target",1:N,"gif",1,"Motive_ref",1);
+% agent(1).sensor.bounding.movie(logger);
 %%
 %logger.save();

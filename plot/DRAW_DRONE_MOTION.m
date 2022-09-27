@@ -25,6 +25,8 @@ classdef DRAW_DRONE_MOTION
                 param.plot_ref = true;
                 param.animation = false;
                 param.target = 1;
+                param.gif = 0;
+                param.Motive_ref = 0;
             end
             data = logger.data(param.target,"p","e");
             tM = max(data);
@@ -37,7 +39,7 @@ classdef DRAW_DRONE_MOTION
             xlabel(ax,"x [m]");
             ylabel(ax,"y [m]");
             zlabel(ax,"z [m]");
-            obj.fig = ax;
+            obj.fig = figure(1);
 
             view(3)
             grid on
@@ -82,7 +84,7 @@ classdef DRAW_DRONE_MOTION
             obj.frame = t;
             obj.thrust = tt;
             if param.animation
-                obj.animation(logger,"realtime",true,"target",param.target);
+                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref);
             end
         end
 
@@ -133,6 +135,7 @@ classdef DRAW_DRONE_MOTION
                 param.realtime = false;
                 param.target = 1;
                 param.gif = 0;
+                param.Motive_ref = 0;
             end
 
             %p = logger.data(param.target,"p","e");
@@ -170,10 +173,22 @@ classdef DRAW_DRONE_MOTION
 
             t = logger.data("t");
             tRealtime = tic;
-            for i = 1:length(t)-1
+            if param.Motive_ref
                 for n = 1:length(param.target)
-                    plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
-                    obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                    f(n) = animatedline('Color','r','MaximumNumPoints',15); % 目標軌道の描画点の制限
+                end
+            end
+            for i = 1:length(t)-1
+                if param.Motive_ref
+                    for n = 1:length(param.target)
+                        addpoints(f(n),r(i,1,n),r(i,2,n),r(i,3,n));
+                        obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                    end
+                else
+                    for n = 1:length(param.target)
+                        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
+                        obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                    end
                 end
                 if param.realtime
                     delta = toc(tRealtime);
