@@ -41,7 +41,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             obj.constant.GroupNumberThreshold = 20; % クラスタを構成する最小の点数
             obj.constant.DistanceThreshold = 1e-2;%1e-1; % センサ値と計算値の許容誤差，対応付けに使用
             obj.constant.ZeroThreshold = 1e-3; % ゼロとみなす閾値
-            obj.constant.CluteringThreshold = 2;%0.5;%0.5; % 同じクラスタとみなす最大距離
+            obj.constant.CluteringThreshold = 2;%0.5; % 同じクラスタとみなす最大距離 通路幅/2より大きくすると曲がり角で問題が起こる
             obj.constant.SensorRange = param.SensorRange; % Max scan range
             %------------------------------------------
         end
@@ -276,7 +276,11 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             obj.result.Est_state = Xh;
             %obj.result.G = G;
             obj.result.map_param = obj.map_param;
+                      %association_info = UKFMapAssociation(PreXh(1:obj.n),PreMh(1:end), EndPoint{1,1}, measured.ranges,measured.angles, obj.constant,obj.NLP);
             obj.result.AssociationInfo = UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), obj.map_param, measured.ranges,measured.angles, obj.constant,obj.NLP);
+            if isempty(find(obj.result.AssociationInfo.index ~= 0))
+                error("ACSL:somthing wrong");
+            end
             result=obj.result;
         end
         function show(obj,result)

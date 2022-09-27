@@ -96,6 +96,9 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             Dis = Dis(AssociationAvailableIndex);
              Alpha = Alpha(AssociationAvailableIndex);
             AssoFai = Measured.angles(AssociationAvailableIndex);
+            if isempty(Dis)
+                error("ACSL: something wrong");
+            end
             %----------------------------------------------------------------------------------%
             %---各種パラメータを格納---%
             obj.param.dis = Dis;

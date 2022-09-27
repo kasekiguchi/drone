@@ -1,17 +1,17 @@
 %tmp = matlab.desktop.editor.getActive;
 %cd(fileparts(tmp.Filename));
 %[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split'); cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-%logger = LOGGER("Data/AROB2022_Prop300s_Log(Final)");
+%logger = LOGGER("Data/AROB2022_Prop400s_Log(Final)");
 name = 'prop_';
-%logger = LOGGER("AROB2022_Prop300s_Log(19-Sep-2022_21_27_21)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-%name = 'prop_';
+%logger = LOGGER("Data/AROB2022_Comp400s_Log(Final)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
+%name = 'comp_';
 dirname = "AROB";
 close all
 %%
 ct = logger.data(1,"controller.result.calc_time","c");
 sum(ct)/length(ct)
 %% time response
-trange = [0, 30];
+trange = [0, 30];   
 t = logger.data(0, "t", "", "ranget", trange);
 p = logger.data(1, "p", "p", "ranget", trange);
 q = logger.data(1, "q", "p", "ranget", trange);
@@ -60,7 +60,7 @@ legend("", "true $v$", "est. $v$", "Insufficient area", 'Interpreter', 'latex', 
 xlabel("$t$ [s]", 'Interpreter', 'latex');
 ylabel("$v$ [m/s]", 'Interpreter', 'latex');
 xlim(trange);
-ylim([0, 1.5]);
+ylim([0.5, 1.5]);
 ax = gca;
 hold off
 filename = strcat(name, 'v_[0,30]', '.pdf');
@@ -187,12 +187,12 @@ movefile(filename, dirname);
 %%
 close all
 figure
-%Plots = DataPlot(logger,dirname,name,"RMSE",{2},[0,20]);
-Plots = DataPlot(logger,dirname,name,"Input",{2},[0,30]);
-Plots = DataPlot(logger, dirname, name, "Eval", {is_area(1)}, [0, 30]);
+Plots = DataPlot(logger,dirname,name,"RMSE",{2},[0,20]);
+%Plots = DataPlot(logger,dirname,name,"Input",{2},[0,30]);
+%Plots = DataPlot(logger, dirname, name, "Eval", {is_area(1)}, [0, 30]);
 
 %% snapshot
-name = "prop_"
+%name = "comp_"
 close all
 initial.p = [0,-1];
 initial.q = 0;
@@ -206,9 +206,9 @@ filename = strcat(name, '1s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
 % 30s
-snapshot(30,logger,agent,0)
+snapshot(34,logger,agent,0)
 ax = gca;
-filename = strcat(name, '30s', '.pdf');
+filename = strcat(name, '34s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
 
