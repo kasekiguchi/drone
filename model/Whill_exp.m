@@ -40,8 +40,8 @@ classdef Whill_exp < MODEL_CLASS
 %                     param.subTopicName = {'/odom'};
 %                     param.subMsgName = {'nav_msgs/Odometry' };
 
-                        param.subTopicName = {'/Robot_1/pose'};
-                        param.subMsgName = {'geometry_msgs/PoseStamped'};
+                    param.subTopicName = {'/Robot_1/pose'};
+                    param.subMsgName = {'geometry_msgs/PoseStamped'};
 
                     param.pubTopicName = {'/cmd_vel'};
                     param.pubMsgName = {'geometry_msgs/Twist'};
@@ -79,12 +79,14 @@ classdef Whill_exp < MODEL_CLASS
                         obj.msg.linear.x = 0.0;
                         obj.msg.angular.z = 0.0;
                     case 'r' % run
-                        obj.msg.linear.x = u(1);
-                        obj.msg.angular.z = u(2);
-%                          obj.msg.linear.x = 0;
-%                          obj.msg.angular.z = 0;
+                        obj.msg.linear.x = 0;
+                        obj.msg.angular.z = 0;
+%                         obj.msg.linear.x = u(1);
+%                         obj.msg.angular.z = u(2);
                 end
             else % 緊急時
+                obj.msg.linear.x = 0.0;
+                obj.msg.angular.z = 0.0;
                 return;
             end
             

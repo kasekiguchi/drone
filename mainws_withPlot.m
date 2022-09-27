@@ -17,7 +17,7 @@ fROS = 0;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
-    dt = 0.025; % sampling time
+    dt = 1.0; % sampling time
 else
     dt = 0.1; % sampling time
 end
@@ -39,8 +39,8 @@ for i = 1:N
        initial(i).p = [0;-2.5];%四角経路
 %      initial(i).p = [0;0];%直進経路
        initial(i).q = [0];
-       initial(i).p = [0;-2];%四角経路
-       initial(i).q = [0];
+%        initial(i).p = [-2.5;1.2];%四角経路 jiken
+%        initial(i).q = [0];
 %         initial(i).p = [92;1];%四角経路
 %         initial(i).q = [pi/2];
 
@@ -59,8 +59,8 @@ for i = 1:N
     end
     if fMotive
         state  = agent(i).plant.connector.getData;
-        agent(i).plant.state.p = [state.pose.position.x,state.pose.position.z]
-        agent(i).plant.state.q = [state.pose.orientation.x]
+        agent(i).plant.state.p = [state.pose.position.x,state.pose.position.z];
+        agent(i).plant.state.q = [state.pose.orientation.y];
     end
     %% model
     % set control model
@@ -217,7 +217,7 @@ end
 % figure()
 % agent.estimator.ukfslam_WC.show
 %time.t = time.t + dt;
-mparam=[]; %without occulusion
+%mparam=[]; %without occulusion
 
 %% main loop
 disp("while ==========  ==================")
@@ -244,7 +244,7 @@ while round(time.t,5)<=te
         param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
         agent(i).do_sensor(param(i).sensor);
     end
-
+    
     %%
     for i = 1:N
         agent(i).do_estimator(cell(1,10));
@@ -271,9 +271,9 @@ while round(time.t,5)<=te
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
     if fMotive
-        state = agent(i).plant.connector.getData
-        agent(i).plant.state.p = [state.pose.position.x;state.pose.position.z]
-        agent(i).plant.state.q = [state.pose.orientation.y]
+        state = agent(i).plant.connector.getData;
+        agent(i).plant.state.p = [state.pose.position.x;state.pose.position.z];
+        agent(i).plant.state.q = [state.pose.orientation.y];
     end
     %logger.logging(time.t,FH,doSubFuncFlag);
     %%
