@@ -1,6 +1,6 @@
 function parameter = UKFMapAssociation(state,Lines,EndPoint, measured_distance, measured_angle, Constant,NLP)
-% state : ビークルの事前推定状態
-% Lines : mapの事前推定値
+% state : ビークルの(事前)推定状態 : global
+% Lines : mapの(事前)推定値 : global
 % EndPoint : line 端点座標
 % measured_distance : レーザー計測距離
 % measured_angle : レーザー照射角度 : 絶対座標にしてある．
