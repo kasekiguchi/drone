@@ -21,8 +21,10 @@ for i = 1:MapSize
     % Calculation of inclination of line using relationship of normal vector
     delta = -1 / tan(SigmaPoint(2*i,j));
     % Calculation of intersection point
-    x = SigmaPoint(2*i-1,j) * cos(SigmaPoint(2*i,j));
-    y = SigmaPoint(2*i-1,j) * sin(SigmaPoint(2*i,j));
+    x = SigmaPoint(2*i-1 + RobotStateNum,j) * cos(SigmaPoint(2*i + RobotStateNum,j));
+    y = SigmaPoint(2*i-1 + RobotStateNum,j) * sin(SigmaPoint(2*i + RobotStateNum,j));
+%     x = SigmaPoint(2*i-1,j) * cos(SigmaPoint(2*i,j));
+%     y = SigmaPoint(2*i-1,j) * sin(SigmaPoint(2*i,j));
     if abs(delta) < pi()
         % Calculatiobn of "y = ax + c"
         parameter.a(i) = delta;

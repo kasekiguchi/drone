@@ -66,9 +66,9 @@ for i = 1:length(Lc)
     s = 1;
     e = Lc(i); % s0 + e = e0 % 以降eは固定
 
-    while s+1.5*d <= e
-    %while s+d <= e
-        s = s + floor(d/2);
+    %while s+1.5*d <= e
+    while s+d <= e
+        %s = s + floor(d/2);
         t = linefit(XY(s:s+d,:)); % tmp line
         f = abs(t(1).*XY(s+d+1:end,1) + t(2).*XY(s+d+1:end,2) + t(3)); % 直線までの射影距離
         tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
