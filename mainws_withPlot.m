@@ -226,7 +226,7 @@ tic
 % tryf
 while round(time.t,5)<=te
 %profile on
-    if time.t >= 191.8
+        if time.t >= 191.8
         time.t
     end
     %while 1 % for exp

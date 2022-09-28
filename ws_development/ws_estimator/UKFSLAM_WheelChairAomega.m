@@ -43,6 +43,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             obj.constant.ZeroThreshold = 1e-3; % ゼロとみなす閾値
             obj.constant.CluteringThreshold = 2;%0.5; % 同じクラスタとみなす最大距離 通路幅/2より大きくすると曲がり角で問題が起こる
             obj.constant.SensorRange = param.SensorRange; % Max scan range
+            obj.constant.LineDistance = 0.5; % 既存マップ端点からこれ以上離れた線分は別の線分とみなす．
             %------------------------------------------
         end
         
@@ -117,7 +118,12 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             LSA_param.b(tmpid,:) = [];
             LSA_param.c(tmpid,:) = [];
             LSA_param.index(tmpid,:) = [];
-            obj.map_param = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);%既存の地図との統合
+            map_param2 = UKFCombiningLines(obj.map_param , LSA_param, obj.constant);%既存の地図との統合
+            if isempty(find(map_param2.index>629,1))
+                obj.map_param = map_param2;
+            else
+                error("ACSL:somthing wrong");
+            end
             %StateCount update
             StateCount = obj.n + obj.NLP * length(obj.map_param.a);
             %map_paramに対応したPreCovにする．

@@ -1,11 +1,11 @@
-function parameter = UKFPointCloudToLine(LaserDis, LaserAngle, State, Constant)
+function parameter = UKFPointCloudToLine(LaserDis, LaserAngle, State, C)
 % 点群データをクラスタリングして直線の方程式に変換する関数
 % レーザセンサのデータ形式としてレンジ外のものは0値を出すと仮定
 % 論文の3.2.1および3.2.2に該当
 % LaserDis : LaserAngle に対応した距離
 % LaserAngle : 絶対座標で表したLaser照射角度
 % State : 状態
-% Constant : 各種定数
+% C : 各種定数
 % [output] parameter は以下のフィールドを持つ
 % a,b,c : 直線のパラメータ
 % x, y : 各行[始点, 終点] のx, y 座標
@@ -14,7 +14,7 @@ function parameter = UKFPointCloudToLine(LaserDis, LaserAngle, State, Constant)
 D = LaserDis;
 A = LaserAngle;
 S = State;
-C = Constant;
+C = C;
 
 % 以下10程度のデータで確認してみること
 %D = [3:0.1:3.2,4:0.1:4.3,2.8:0.1:3];
@@ -70,7 +70,7 @@ for i = 1:length(Lc)
     %while s+d <= e
         s = s + floor(d/2);
         t = linefit(XY(s:s+d,:)); % tmp line
-        f = abs((t(1).*XY(s+d+1:end,1) + t(2).*XY(s+d+1:end,2) + t(3))/vecnorm(t(1:2))); % 直線までの射影距離
+        f = abs(t(1).*XY(s+d+1:end,1) + t(2).*XY(s+d+1:end,2) + t(3)); % 直線までの射影距離
         tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
         ns = s+d;
         if isempty(tid) % ラインから外れている点が無くなればクラスタの最後までの点を使って直線を導出
@@ -80,7 +80,7 @@ for i = 1:length(Lc)
             while tid > 1
                 ns = ns + tid - 1;% -1; % 外れている点のひとつ前まではlineに含む
                 t = linefit(XY(s:ns,:)); % tmp line
-                f = abs((t(1).*XY(ns+1:end,1) + t(2).*XY(ns+1:end,2) + t(3))/vecnorm(t(1:2))); % 直線までの射影距離
+                f = abs(t(1).*XY(ns+1:end,1) + t(2).*XY(ns+1:end,2) + t(3)); % 直線までの射影距離
                 tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
                 if isempty(tid) % ラインから外れている点が無くなればクラスタの最後までの点を使って直線を導出
                     ns = e;
@@ -118,7 +118,7 @@ parameter.b = l(:,2);
 parameter.c = d;
 parameter.x = X + S(1)*[1,1];
 parameter.y = Y + S(2)*[1,1];
-parameter.index = index;
+parameter.index = mod(index,length(D));
 
 end
 
@@ -133,28 +133,3 @@ else % x = c or y = c
 end
 end
 
-function l = linefit(XY)
-% XY : 1列目がx, 2列目がy に関するデータ
-% 最小二乗近似で直線の式(a,b,c)を算出
-v = var(XY); % 分散
-tmpid = v < 1e-3;
-if sum(tmpid) == 0 % x + by + c = 0
-    l = [1,(pinv([XY(:,2),ones(size(XY,1),1)])*(-XY(:,1)))'];
-else  % x = c or y = c
-    [~,tmpid] = min(v);
-    tmpid = [1:2]==tmpid;
-    l = [-tmpid,mean(XY(:,tmpid))];
-end
-l = l/vecnorm(l(1:2));
-end
-function p = projection(l,XY)
-% return projection point from point XY to line l
-% XY = [x1,y1;x2 y2; ...]
-x = XY(:,1);
-y = XY(:,2);
-a = l(1);
-b = l(2);
-c = l(3);
-d = a^2+b^2;
-p = [b^2*x-a*b*y-a*c,-a*b*x+a^2*y-b*c]/d;
-end
