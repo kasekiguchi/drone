@@ -1,22 +1,33 @@
-function [FigNum] = PlotFunc_RMSE(obj,FigNum)
+function [FigNum] = PlotFunc_RMSE(obj,FigNum,prename,~)
 %Plant
 [~,PlantDim,PlantData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.p');
 if Flag
-%Estimation;
-[~,~,EstData,~] = FindDataMatchName(obj.logger,'estimator.result.state.p');
-rmse = zeros(PlantDim,1);
-for ri = 1:PlantDim
-    rmse(ri) = sqrt(sum((EstData(ri,:) - PlantData(ri,:)).^2)/length(EstData(ri,:)));
+    %Estimation;
+    [~,~,EstData,~] = FindDataMatchName(obj.logger,'estimator.result.state.p');
+    rmse = zeros(PlantDim,1);
+    for ri = 1:PlantDim
+        rmse(ri) = sqrt(sum((EstData(ri,:) - PlantData(ri,:)).^2)/length(EstData(ri,:)));
+    end
 end
-
 %plant(true)
 [~,PlantqDim,PlantqData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.q');
 if Flag
-%estimation
-[~,~,EstqData,~] = FindDataMatchName(obj.logger,'estimator.result.state.q');
-qrmse = zeros(PlantqDim,1);
-for ri = 1:PlantqDim
-    qrmse(ri) = sqrt(sum((EstqData(ri,:) - PlantqData(ri,:)).^2)/length(EstqData(ri,:)));
+    %estimation
+    [~,~,EstqData,~] = FindDataMatchName(obj.logger,'estimator.result.state.q');
+    qrmse = zeros(PlantqDim,1);
+    for ri = 1:PlantqDim
+        qrmse(ri) = sqrt(sum((EstqData(ri,:) - PlantqData(ri,:)).^2)/length(EstqData(ri,:)));
+    end
+end
+% v
+[~,PlantqDim,PlantqData,Flag] = FindDataMatchName(obj.logger,'plant.result.state.v');
+if Flag
+    %estimation
+    [~,~,EstqData,~] = FindDataMatchName(obj.logger,'estimator.result.state.v');
+    vrmse = zeros(PlantqDim,1);
+    for ri = 1:PlantqDim
+        vrmse(ri) = sqrt(sum((EstqData(ri,:) - PlantqData(ri,:)).^2)/length(EstqData(ri,:)));
+    end
 end
 figure(FigNum)
 hold on;
@@ -42,13 +53,12 @@ ax.FontSize = obj.FontSize;
 ax.FontName = obj.FontName;
 ax.FontWeight = obj.FontWeight;
 hold off
-
-exportgraphics(ax,strcat('RMSE','.pdf'));
-movefile('RMSE.pdf',obj.SaveDateStr);
-exportgraphics(ax,'RMSE.emf');
-movefile('RMSE.emf',obj.SaveDateStr);
+rmse
+qrmse
+vrmse
+exportgraphics(ax,strcat(prename,'RMSE','.pdf'));
+movefile(strcat(prename,'RMSE.pdf'),obj.SaveDateStr);
+% exportgraphics(ax,'RMSE.emf');
+% movefile('RMSE.emf',obj.SaveDateStr);
 FigNum = FigNum + 1;
-else
-    disp('We do not calculate RMSE');
-end
 end

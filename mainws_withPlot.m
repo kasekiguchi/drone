@@ -7,8 +7,8 @@ cd(fileparts(tmp.Filename));
 rmpath('.\experiment\');
 close all hidden; clear all;clc;
 userpath('clear');
-warning('off', 'all');
-
+warning('off', 'all'); 
+%%
 %% general setting
 N = 1; % number of agents
 fExp = 0;%1：実機　それ以外：シミュレーション
@@ -17,7 +17,7 @@ fROS = 0;
 
 fOffline = 0; % offline verification with experiment data
 if fExp
-    dt = 1.0; % sampling time
+    dt = 0.025; % sampling time
 else
     dt = 0.1; % sampling time
 end
@@ -26,25 +26,21 @@ ts=0;
 if fExp
     te=1000;
 else
-    te=300;
+    te=400;
 end
-
 %% initialize
 initial(N) = struct;    
 param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-
-       initial(i).p = [0;-2.5];%四角経路
-%      initial(i).p = [0;0];%直進経路
+       initial(i).p = [89;-2];%四角経路
        initial(i).q = [0];
-%        initial(i).p = [-2.5;1.2];%四角経路 jiken
-%        initial(i).q = [0];
+          initial(i).p = [0;-1];%四角経路
+          initial(i).q = [0];
 %         initial(i).p = [92;1];%四角経路
 %         initial(i).q = [pi/2];
-
-
+    
     initial(i).v = [0];
     initial(i).w = [0];
 end
@@ -53,14 +49,9 @@ end
 %set plant model
 for i = 1:N
     if fExp
-        agent(i) = DRONE(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
+        agent(i) = Drone(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
-        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial,struct('noise',struct('value',1E-4,'seed',[1]))));%加速度次元車両モデル 4.337E-5, seed = 5
-    end
-    if fMotive
-        state  = agent(i).plant.connector.getData;
-        agent(i).plant.state.p = [state.pose.position.x,state.pose.position.z];
-        agent(i).plant.state.q = [state.pose.orientation.y];
+        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial));%,struct('noise',struct('value',5E-5,'seed',[4]))));%加速度次元車両モデル 4.337E-5, seed = 5
     end
     %% model
     % set control model
@@ -74,23 +65,23 @@ for i = 1:N
     agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
     %% set sensors property
     agent(i).sensor=[];
+    SensorRange = 20;
 
         %% set ROS2 property
         if fROS
-            SensorRange = 20;
             agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
         else
             SensorRange = 20;
-            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ) )  );%LiDAR seosor
+            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ,'seed',3)));%LiDAR seosor
         end
-        
+
     %% set estimator property
     agent(i).estimator=[];
 %         agent(i).set_property("estimator",Estimator_UKFSLAM_WheelExp(agent(i),SensorRange))
     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference=[];
-    velocity = 1.2;%目標速度
+    velocity = 1;%目標速度
     w_velocity = 0.7;%曲がるときの目標角速度
 
         
@@ -177,8 +168,8 @@ time.t = ts;
 % 引数に取れるのは以下のみ
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
-SLiDAR = {Env};
 
+SLiDAR = {Env};
 for i = 1:N
     param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
     agent(i).do_sensor(param(i).sensor);
@@ -191,39 +182,42 @@ end
 %  logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %  logger.Data = log.log.Data;
 %%
+
+if 0
 %  tid = find(logger.Data.t,1,'last')-27;
-% tid = 1400;
-% time.t = logger.Data.t(tid)
-% logger.overwrite("plant", time.t, agent, 1);
-% logger.overwrite("estimator", time.t, agent, 1); 
-% agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
-% agent.estimator.ukfslam_WC.result = agent.estimator.result;
-% logger.overwrite("sensor", time.t, agent, 1);
-% agent.sensor.LiDAR.result = agent.sensor.result;
-% logger.overwrite("reference", time.t, agent, 1);
-% agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
-% logger.overwrite("controller", time.t, agent, 1);
-% agent.controller.TrackingMPCMEX_Controller.self = agent;
-% agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
-% logger.overwrite("input", time.t, agent, 1);
-% agent.estimator.result.state.get
-% agent.input
-% % 
-% close all
-% agent.sensor.LiDAR.show()
+tid = 120;
+time.t = logger.Data.t(tid)
+logger.overwrite("plant", time.t, agent, 1);
+logger.overwrite("estimator", time.t, agent, 1); 
+agent.estimator.ukfslam_WC.map_param = agent.estimator.result.map_param;
+agent.estimator.ukfslam_WC.result = agent.estimator.result;
+logger.overwrite("sensor", time.t, agent, 1);
+agent.sensor.LiDAR.result = agent.sensor.result;
+logger.overwrite("reference", time.t, agent, 1);
+agent.reference.TrackWpointPathForMPC.result.PreTrack = agent.reference.result.state.p;
+logger.overwrite("controller", time.t, agent, 1);
+agent.controller.TrackingMPCMEX_Controller.self = agent;
+agent.controller.TrackingMPCMEX_Controller.result = agent.controller.result;
+logger.overwrite("input", time.t, agent, 1);
+agent.estimator.result.state.get
+agent.input
+% 
+close all
+fh=figure();
+NowResultPlot(agent,fh,false);
+%agent.sensor.LiDAR.show()
 % figure()
 % agent.reference.TrackWpointPathForMPC.show(agent.reference.result)
 % axis equal
 % figure()
 % agent.estimator.ukfslam_WC.show
+end
 %time.t = time.t + dt;
-%mparam=[]; %without occulusion
-
 %% main loop
 disp("while ==========  ==================")
 close all;
 disp('Press Enter key to start.');
-FH = figure('position',[0 0 eps eps],'menubar','none');
+FH  = figure('position',[0 0 eps eps],'menubar','none');
 %
  w = waitforbuttonpress;
 NowResult = figure;
@@ -244,7 +238,6 @@ while round(time.t,5)<=te
         param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
         agent(i).do_sensor(param(i).sensor);
     end
-    
     %%
     for i = 1:N
         agent(i).do_estimator(cell(1,10));
@@ -270,11 +263,6 @@ while round(time.t,5)<=te
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
-    if fMotive
-        state = agent(i).plant.connector.getData;
-        agent(i).plant.state.p = [state.pose.position.x;state.pose.position.z];
-        agent(i).plant.state.q = [state.pose.orientation.y];
-    end
     %logger.logging(time.t,FH,doSubFuncFlag);
     %%
     % with FH
@@ -283,13 +271,13 @@ while round(time.t,5)<=te
     %---now result plot---%
      NowResultPlot(agent,NowResult,plot_flag);
      plot_flag = false;
+     length(agent.estimator.result.PreXh)
      %drawnow
     %---------------------%
     for i = 1:N %
         model_param.param=agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
         model_param.FH = FH;
-        plant_param.FH = FH;
         plant_param.param =agent(i).plant.param;
         plant_param.param.t = time.t;
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
@@ -320,7 +308,7 @@ calculation=toc;
 logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 %logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
-logger.save("AROB2022_Prop_200s","separate",true);  
+logger.save("AROB2022_Prop400s2","separate",true);  
 %% Run class Saves
 % In this section we have created a txt file that writhed out the class names you used
 % Proptype = properties(agent);
@@ -329,22 +317,20 @@ RunNames = arrayfun(@(N) agent.(Proptype(N)).name , 1:length(Proptype),'UniformO
 fileID = fopen('RunNames.txt','w');
 StringSet = '%s ';
 for Propidx = 1:length(Proptype)
-    LongProp = length(Proptype(Propidx));
+    LongProp = length(Proptype(Propidx));   
     LongRun  = length(RunNames{Propidx});
     CharSet = repmat(StringSet,[1 LongProp+LongRun]);
     fprintf(fileID,append(CharSet,'\n'),Proptype(Propidx),RunNames{Propidx});
 end
 fclose(fileID);
-movefile('RunNames.txt',Plots.SaveDateStr);
+%%
+%movefile('RunNames.txt',"mov");
 % run('dataplot');
 %% Local function
 function [] = NowResultPlot(agent,NowResult,flag)
-%if(flag)
-%agent.estimator.ukfslam_WC.show;
-%hold on
+
 figure(NowResult)
 
-%end
     clf(NowResult)
     grid on
     axis equal
@@ -360,6 +346,7 @@ PlantFinalStatesquare = PlantFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 PlantFinalStatesquare =  polyshape( PlantFinalStatesquare');
 PlantFinalStatesquare =  rotate(PlantFinalStatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
 PlotFinalPlant = plot(PlantFinalStatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+%    agent.sensor.LiDAR.show(PlantFinalState,agent.plant.state.q(end));
 %modelFinalState
 EstFinalState = agent.estimator.result.state.p(:,end);
 EstFinalStatesquare = EstFinalState + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
@@ -372,15 +359,26 @@ Ewally = reshape([Ewall.y,NaN(size(Ewall.y,1),1)]',3*size(Ewall.y,1),1);
 %reference state
 RefState = agent.reference.result.state.p(1:3,:);
 fWall = agent.reference.result.focusedLine;
+
 Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-plot(Ewallx,Ewally,'g-');
-plot(fWall(:,1),fWall(:,2),'r-');
+    plot(Ewallx,Ewally,'g-');
+    plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
 O = agent.reference.result.O;
 plot(O(1),O(2),'r*');
 quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
 %xlim([PlantFinalState(1)-10, PlantFinalState(1)+10]);ylim([PlantFinalState(2)-10,PlantFinalState(2)+10])
-xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
+if isstring(flag)
+    xmin = min(-5,min(Ewallx));
+    xmax = max(95,max(Ewallx));
+    ymin = min(-5,min(Ewally));
+    ymax = max(95,max(Ewally));
+    xlim([xmin-5, xmax+5]);ylim([ymin-5,ymax+5])
+else
+    xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
+end
+xlabel("$x$ [m]","Interpreter","latex");
+ylabel("$y$ [m]","Interpreter","latex");
 % pbaspect([20 20 1])
 hold off
 end
