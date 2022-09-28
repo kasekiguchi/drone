@@ -2,9 +2,10 @@
 %cd(fileparts(tmp.Filename));
 %[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split'); cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %logger = LOGGER("Data/AROB2022_Prop400s_Log(Final)");
-name = 'prop_';
-%logger = LOGGER("Data/AROB2022_Comp400s_Log(Final)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
-%name = 'comp_';
+%logger=LOGGER("Data/Log(31-Aug-2022_18_46_59).mat");
+%name = 'prop_';
+logger = LOGGER("Data/AROB2022_Comp400s_Log(submit)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
+name = 'comp_';
 dirname = "AROB";
 close all
 %%
@@ -184,6 +185,53 @@ ax = gca;
 filename = strcat(name, 'MapAndTrajectory', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
+%%
+tid = 301;
+PlantFinalState = p(tid, :);
+PlantFinalStatesquare = PlantFinalState + 0.5 .* [1, 1.5, 1, -1, -1; 1, 0, -1, -1, 1]';
+PlantFinalStatesquare = polyshape(PlantFinalStatesquare);
+PlantFinalStatesquare = rotate(PlantFinalStatesquare, 180 * q(end) / pi, p(end, :));
+PlotFinalPlant = plot(PlantFinalStatesquare, 'FaceColor', [0.5020, 0.5020, 0.5020], 'FaceAlpha', 0.5);
+
+grid on
+axis equal
+hold on
+%modelFinalState
+EstFinalState = pe(tid, :);
+EstFinalStatesquare = EstFinalState + 0.5 .* [1, 1.5, 1, -1, -1; 1, 0, -1, -1, 1]';
+EstFinalStatesquare = polyshape(EstFinalStatesquare);
+EstFinalStatesquare = rotate(EstFinalStatesquare, 180 * qe(end) / pi, pe(end, :));
+PlotFinalEst = plot(EstFinalStatesquare, 'FaceColor', [0.0745, 0.6235, 1.0000], 'FaceAlpha', 0.5);
+Ewall = map_param(tid);
+Ewallx = reshape([Ewall.x, NaN(size(Ewall.x, 1), 1)]', 3 * size(Ewall.x, 1), 1);
+Ewally = reshape([Ewall.y, NaN(size(Ewall.y, 1), 1)]', 3 * size(Ewall.y, 1), 1);
+
+plot(polyshape([15 15 75 75;-5 0 0 -5]'),"FaceColor","#EEAAAA","LineStyle",'none',"FaceAlpha",0.5);
+plot(polyshape([-5 -5 0 0;15 75 75 15]'),"FaceColor","#EEAAAA","LineStyle",'none',"FaceAlpha",0.5);
+plot(polyshape([90 90 95 95;15 75 75 15]'),"FaceColor","#EEAAAA","LineStyle",'none',"FaceAlpha",0.5);
+plot(polyshape([15 15 75 75;90 95 95 90]'),"FaceColor","#EEAAAA","LineStyle",'none',"FaceAlpha",0.5);
+
+plot(p(1:tid, 1), p(1:tid, 2), 'Color', '#333333','LineWidth',2);
+plot(pe(1:tid, 1), pe(1:tid, 2), 'Color', '#4DBEEE','LineWidth',2);
+xmin = 0;
+xmax = 35;
+ymin = 0;
+ymax = -5;
+xlim([xmin - 5, xmax + 5]); ylim([ymin - 5, ymax + 5])
+Wall = plot(p_Area, 'FaceColor', 'blue', 'FaceAlpha', 0.5);
+plot(Ewallx, Ewally, 'r-');
+ah = area([-5 15 15 75 75 95], -30 * [1 1 1 1 1 1]', -100, 'FaceColor', '#EEAAAA', 'FaceAlpha', 0.5, 'EdgeColor', 'none');
+xlabel("$x$ [m]", "Interpreter", "latex");
+ylabel("$y$ [m]", "Interpreter", "latex");
+legend("", "","", "", "", "", "True trajectory", "Est. trajectory", "True walls", "Est. walls", "Insufficient area", 'Location', 'northoutside', 'NumColumns', 3, 'Interpreter', 'latex')
+hold off
+
+ax = gca;
+filename = strcat(name, 'MapAndTrajectory_part', '.pdf');
+exportgraphics(ax, filename);
+movefile(filename, dirname);
+
+
 %%
 close all
 figure
