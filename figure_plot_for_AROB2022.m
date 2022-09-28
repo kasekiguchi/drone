@@ -2,7 +2,7 @@
 %cd(fileparts(tmp.Filename));
 %[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split'); cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %logger = LOGGER("Data/AROB2022_Prop400s_Log(Final)");
-name = 'prop_';
+name = 'comp_';
 %logger = LOGGER("Data/AROB2022_Comp400s_Log(Final)"); %AROB2022_Comp300s_Log(18-Sep-2022_23_40_39)");
 %name = 'comp_';
 dirname = "AROB";
@@ -206,9 +206,9 @@ filename = strcat(name, '1s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
 % 30s
-snapshot(34,logger,agent,0)
+snapshot(30,logger,agent,0)
 ax = gca;
-filename = strcat(name, '34s', '.pdf');
+filename = strcat(name, '30s', '.pdf');
 exportgraphics(ax, filename);
 movefile(filename, dirname);
 

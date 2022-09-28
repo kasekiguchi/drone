@@ -216,8 +216,8 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             end
             %カルマンゲイン
             G = PreXYCov /( PreYCov + obj.R .* eye(association_available_count) );
-            %Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
-            Xh = PreXh + G * (sensor.length(association_available_index)' - PreYh);
+            Xh = PreXh + G * (measured.ranges(association_available_index)' - PreYh);
+            %Xh = PreXh + G * (sensor.length(association_available_index)' - PreYh);
             obj.result.P = PreCov - G * (PreYCov + obj.R .* eye(association_available_count)) * G';
             
             %---事後処理------------------------------------------------%
