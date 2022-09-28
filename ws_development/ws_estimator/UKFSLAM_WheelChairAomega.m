@@ -175,7 +175,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
             % association_info.index = correspanding wall(line_param) number index
             % association_info.distance = wall distace
             association_info = UKFMapAssociation(PreXh(1:obj.n),PreMh(1:end), EndPoint{1,1}, measured.ranges,measured.angles, obj.constant,obj.NLP);
-            association_available_index = find((association_info.index ~= 0)&(sensor.length~=0));%Index corresponding to the measured value
+            association_available_index = find((association_info.index ~= 0)&(sensor.length >= 1e-4));%(sensor.length~=0));%Index corresponding to the measured value
             association_available_count = length(association_available_index);%Count
             %出力のシグマポイントを計算
             %sensing step
