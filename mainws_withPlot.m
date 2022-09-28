@@ -38,8 +38,10 @@ for i = 1:N
        initial(i).q = [0];
           initial(i).p = [0;-1];%四角経路
           initial(i).q = [0];
-%         initial(i).p = [92;1];%四角経路
-%         initial(i).q = [pi/2];
+          initial(i).p = [89.5;-2.5];%四角経路
+          initial(i).q = [0];
+          %initial(i).p = [92;1];%四角経路
+          %          initial(i).q = [pi/2];
     
     initial(i).v = [0];
     initial(i).w = [0];
@@ -184,8 +186,8 @@ end
 %%
 
 if 0
-%  tid = find(logger.Data.t,1,'last')-27;
-tid = 120;
+  %tid = find(logger.Data.t,1,'last')-2;
+tid = 58;
 time.t = logger.Data.t(tid)
 logger.overwrite("plant", time.t, agent, 1);
 logger.overwrite("estimator", time.t, agent, 1); 
