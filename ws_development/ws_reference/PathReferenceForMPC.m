@@ -150,6 +150,9 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             %[ip,d,Xs,Ys,Xe,Ye]
             [~,idm]=min(d(wid)); % 一番近い壁面
             [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
+            if idm ==idm2
+                error("ACSL : something wrong");
+            end
             ids=[idm,idm2];
             ids=wid(ids);
 %             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]*sign(b(ids(1))); % y係数を正とする
@@ -160,8 +163,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 l2 = -l2;
             end
             % Current time reference position calced at previous time
-            rx = obj.result.PreTrack(1) - pe(1); % relative position
-            ry = obj.result.PreTrack(2) - pe(2);
+            rp = R'*(obj.result.PreTrack(1:2) - pe);
 
             if abs(prod(a(ids))+prod(b(ids)))<1e-1 % ほぼ直交している場合（傾きの積が-1の式より）
                 % 入りと出で同じ幅の通路を前提としてしまっている．
@@ -180,14 +182,14 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                         else
                             l3 = (l1-l2)/2;
                         end
-                        l4 = perp(l1,[rx;ry]);
+                        l4 = perp(l1,rp);
                         obj.O = cr(l4,l3);% 回転中心：相対座標
-                        obj.r = vecnorm(obj.O-[rx;ry]);
+                        obj.r = vecnorm(obj.O-rp);
                     else % 遠い => 交わらない線分：推定が失敗してくると生じる
                         [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
                         [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
-                        de1 = vecnorm(e1(id1,:)'-[rx;ry]);
-                        de2 = vecnorm(e2(id2,:)'-[rx;ry]);
+                        de1 = vecnorm(e1(id1,:)'-rp);
+                        de2 = vecnorm(e2(id2,:)'-rp);
                         if de1 < de2
                             obj.O = (e1(id1,:) + [x y])';
                             obj.r = de1;
@@ -196,7 +198,10 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                             obj.r = de2;
                         end
                     end
-                    obj.th = obj.step*obj.Targetv/obj.r;
+                    tmp = cross([0;0;1],[-obj.O;0]);% 相対座標系における機体の進むべき向き
+                    % tmp(1)が正：Oが機体の左にあり反時計回りに回転
+                    % tmp(2)が負：Oが機体の右にあり時計回りに回転
+                    obj.th = sign(tmp(1))*obj.step*obj.Targetv/obj.r;
                     obj.O = R*obj.O + pe; % 絶対座標位置
                 end
                 th = obj.th;
@@ -208,6 +213,9 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 tmp0 = tmp0/vecnorm(tmp0);% 回転中心から機体の位置方向の単位ベクトル
                 tmp = cross([0;0;1],[tmp0;0]);% 機体の進むべき向き
                 tmpt0 = atan2(tmp(2),tmp(1));% 現在時刻の目標姿勢角
+                if sign(tmp(1))<0
+                    tmpt0 = tmpt0+pi;
+                end
                 tmp0 = r*tmp0; % Oから見た現在時刻の目標位置
                 tmp(:,1) = [tmp0 + O;tmpt0];
                 for i = 2:obj.Holizon
@@ -320,7 +328,7 @@ b2 = l2(2);
 c2 = l2(3);
 d = (a1*b2 - a2*b1);
 if d == 0
-    error("ACSL : l1 and l2 are parallel");
+        error("ACSL : l1 and l2 are parallel");
 else
     p(1,1) = (b1*c2 - b2*c1)/d;
     p(2,1) = -(a1*c2 - a2*c1)/d;

@@ -6,9 +6,9 @@ d = MapParam(1:NLP:end);
 th = MapParam(2:NLP:end);
 ep = [cos(th),sin(th)]; % 直線に対する垂線の単位ベクトル
 xp = d.*ep;
-Param.a = -ep(:,2);
-Param.b = ep(:,1);
-Param.c = -(Param.a.*xp(:,1) + Param.b.*xp(:,2));
+Param.a = ep(:,1);%-ep(:,2);
+Param.b = ep(:,2);%ep(:,1);
+Param.c = -(Param.a.*xp(:,1) + Param.b.*xp(:,2)); %s c = -(ax+by)
 
 % MapNum = length(MapParam)/NLP;%because MapParam has 6 param
 % Mapdis = MapParam(1:NLP:end);

@@ -20,18 +20,18 @@ classdef DataPlot<handle
 %            "XYZTureAndEst",
             %     "AttitudesTureAndEst",
             %             "TrackMPCEval",
-            "MapAndVehicleTrueAndEst",
-%            "Eval",
+            %"MapAndVehicleTrueAndEst",
+            "Eval",
             %     "Covxv",
 %            "ExitFlag",
             %              "MapMovie",
             %     "MapAndPreMapMovie",
             %     "Entropy",
-            %"RMSE",
+            "RMSE",
 %            "AllTureAndEst",
             %"VWTureAndEst",
             %"AllSquareError",
-            %"Input",
+            "Input",
             %     "ContEval",
             %     "TrajectoryRMSE",
             %     "ObserveSubFIM"
@@ -40,7 +40,7 @@ classdef DataPlot<handle
     
     methods
         
-        function obj = DataPlot(Logger,SaveOnOff)
+        function obj = DataPlot(Logger,dirname,prename,name,param,trange)
             %DATAPLOT
             %   constructer for obj and path generate
             obj.logger = Logger;% Data file
@@ -68,15 +68,16 @@ classdef DataPlot<handle
                 addpath(dataFilePath);
             end
             obj.SavePath = dataFilePath;
-            obj.SaveDateStr = strcat('ws_Saves\',SaveDateStr,'\',SaveDateStrD);
+            %obj.SaveDateStr = strcat('ws_Saves\',SaveDateStr,'\',SaveDateStrD);
+            obj.SaveDateStr = dirname;
             
             %% Save data
-            if SaveOnOff
-                save(strcat('Logger',SaveDateStrD,'.mat'),'Logger');
-                movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
-            end
+%             if SaveOnOff
+%                 save(strcat('Logger',SaveDateStrD,'.mat'),'Logger');
+%                 movefile(strcat('Logger',SaveDateStrD,'.mat'),obj.SaveDateStr);
+%             end
             %% Plot Data
-            do(obj);
+            do(obj,prename,name,param,trange);
             %             AutoPPt(result);
             
         end
@@ -85,15 +86,15 @@ classdef DataPlot<handle
     
     methods(Access = protected)
         
-        function do(obj)
+        function do(obj,prename,Name,param,trange)
             %Num = plot figure numbers
             Figi = 1;
             FigNum = 1;
-            while Figi<= length(obj.FuncNames)
-                FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
-                FuncHandleName = strcat('PlotFunc_',FuncName);
+            while Figi<= length(Name)
+                %FuncName = obj.FuncNames(Figi);%we decide function name in the loop of this step.
+                FuncHandleName = strcat('PlotFunc_',Name(Figi));
                 FuncHandle = str2func(FuncHandleName);
-                [FigNum] = FuncHandle(obj,FigNum);
+                [FigNum] = FuncHandle(obj,param{Figi},prename,trange);
                 Figi = Figi+1;
             end
         end
