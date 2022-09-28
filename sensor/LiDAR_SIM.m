@@ -15,6 +15,7 @@ classdef LiDAR_SIM < SENSOR_CLASS
         radius = 20;
         pitch = 0.01;
         angle_range
+        dead_zone = 0.2;
         head_dir = nsidedpoly(3, 'Center', [0 ,0], 'SideLength', 0.5);
     end
     
@@ -88,6 +89,10 @@ classdef LiDAR_SIM < SENSOR_CLASS
                 obj.seed = obj.seed + 0.1;
             end
             result.length=vecnorm(result.sensor_points') + obj.noise * randn(1,length(result.sensor_points));%.*sign(result.angle); % レーザー点までの距離
+            del_ids=find((abs(result.length) < obj.dead_zone));
+            result.length(del_ids) = 0;
+            result.sensor_points(del_ids,:) = zeros(length(del_ids),2);
+            result.angle(del_ids) = 0;
             obj.result=result;
         end
         function show(obj,p,q)
