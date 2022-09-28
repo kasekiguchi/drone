@@ -8,9 +8,9 @@ yg = X(2);
 zg = X(3);
 T = X(4);   % 目標到達までの時間
 rx = xg;  % 目標値
-rz = zg;
+rz = 1;
 rx0 = 0; % 現在地
-rz0 = 1;
+rz0 = 0;
 
 % a = -2/T^3 * (rx-rx0);
 % b = 3/T^2 * (rx-rx0);
@@ -20,10 +20,10 @@ a = -2/T^3 * (rz-rz0);
 b = 3/T^2 * (rz-rz0);
 % x = cos(t-10)-1;
 % y = sin(t-10);
-z = a*(t-10)^3+b*(t-10)^2+rz0 ;
+z = a*(t)^3+b*(t)^2+rz0;
 % z = 1;
-x = cos((t-10)/2)-1;
-y = sin((t-10)/2);
+x = 0;
+y = 0;
 
 % fprintf("xyz: %f %f %f\n", x, y, z);
 ref=@(t)[x;y;z;0];  % xyz yaw

@@ -131,7 +131,7 @@ end
 %TODO
 
             rz = 0; rx = 0; ry = 1;
-            if time.t >= 10
+            if time.t >= 2
                 FH.CurrentCharacter = 'f';
             end
 %             if time.t >= 20
