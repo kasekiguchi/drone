@@ -171,7 +171,7 @@ clc
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N,"gif",1,"Motive_ref",1);
+agent(1).animation(logger,"target",1:N);
 % agent(1).sensor.bounding.movie(logger);
 %%
 %logger.save();

@@ -27,6 +27,7 @@ classdef DRAW_DRONE_MOTION
                 param.target = 1;
                 param.gif = 0;
                 param.Motive_ref = 0;
+                param.fig_num = 1;
             end
             data = logger.data(param.target,"p","e");
             tM = max(data);
@@ -39,7 +40,7 @@ classdef DRAW_DRONE_MOTION
             xlabel(ax,"x [m]");
             ylabel(ax,"y [m]");
             zlabel(ax,"z [m]");
-            obj.fig = figure(1);
+            obj.fig = figure(param.fig_num);
 
             view(3)
             grid on
@@ -84,7 +85,7 @@ classdef DRAW_DRONE_MOTION
             obj.frame = t;
             obj.thrust = tt;
             if param.animation
-                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref);
+                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num);
             end
         end
 
@@ -136,6 +137,7 @@ classdef DRAW_DRONE_MOTION
                 param.target = 1;
                 param.gif = 0;
                 param.Motive_ref = 0;
+                param.fig_num = 1;
             end
 
             %p = logger.data(param.target,"p","e");
