@@ -1,4 +1,4 @@
-function [OptMap, RegistFlag] = UKFOptimizeMap(map, Constant)
+function [OptMap, RegistFlag] = UKFOptimizeMap(map, C)
     % Initialize each variable
     OptMap = struct;
     OptMap.index = [];
@@ -10,21 +10,25 @@ function [OptMap, RegistFlag] = UKFOptimizeMap(map, Constant)
     RegistFlag = false(1, size(map.index,1));
 %     removing_flag = false(1, length(map.index));
     for i = 1:size(map.index,1)
-        % Searching the line which is able to be conbined
+        % Searching the line which is able to be combined
         if map.a(i) > -1 && map.a(i) < 1
             % When the line is not vertical, comparing with 'y' values
-            flag_1 = vecnorm(map.y(i, 1) - map.y(:, 1), 2, 2) < Constant.LineThreshold;
-            flag_2 = vecnorm(map.y(i, 2) - map.y(:, 2), 2, 2) < Constant.LineThreshold;
+            flag_1 = vecnorm(map.y(i, 1) - map.y(:, 1), 2, 2) < C.LineThreshold;
+            flag_2 = vecnorm(map.y(i, 2) - map.y(:, 2), 2, 2) < C.LineThreshold;
             flag_3 = IsOverlap(map.x(i, 1), map.x(i, 2), map.x(:, 1), map.x(:, 2));
         else
             % When the line is vertical, comparing with 'x' values
-            flag_1 = vecnorm(map.x(i, 1) - map.x(:, 1), 2, 2) < Constant.LineThreshold;
-            flag_2 = vecnorm(map.x(i, 2) - map.x(:, 2), 2, 2) < Constant.LineThreshold;
+            flag_1 = vecnorm(map.x(i, 1) - map.x(:, 1), 2, 2) < C.LineThreshold;
+            flag_2 = vecnorm(map.x(i, 2) - map.x(:, 2), 2, 2) < C.LineThreshold;
             flag_3 = IsOverlap(map.y(i, 1), map.y(i, 2), map.y(:, 1), map.y(:, 2));
         end
         % Checking the non-self and non-before index
         flag_4 = true(size(map.index, 1), 1);
         flag_4(1:i,1) = false;%現在のマップ番号および以前のマップ番号のインデックスをfalseに（対エラー用）
+
+        %flag_1 = IsClose(map.x(i,:),map.y(i,:),map.x,map.y,C.LineDistance);
+        %Conditions = flag_1 & flag_4;
+
         % Making condition
         Conditions = flag_1 & flag_2 & flag_3 & flag_4;
         % Extracting index from condition
@@ -43,7 +47,7 @@ function [OptMap, RegistFlag] = UKFOptimizeMap(map, Constant)
                 % Combining maps
                 param = map;
                 for k = 1:length(matching_list)
-                    tmp = UKFCombiningTwoLines(param, i, map, matching_list(k, 1), Constant);
+                    tmp = UKFCombiningTwoLines(param, i, map, matching_list(k, 1), C);
                     param.x(i, :) = tmp.x;
                     param.y(i, :) = tmp.y;
 %                     removing_flag(matching_list(k)) = true;
