@@ -46,13 +46,13 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
 
             cha = get(FH, 'currentcharacter');
 
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't' && cha ~= 'h')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't' && cha ~= 'h' && cha ~= 'k')
                 cha = obj.flight_phase;
             end
 
             obj.flight_phase = cha;
 
-            if cha == 't' || cha == 'f' || cha == 'l' || cha == 'h'
+            if cha == 't' || cha == 'f' || cha == 'l' || cha == 'h' || cha == 'k'
                 throttle_offset = obj.param.th_offset;
                 %wh = obj.self.model.state.w;
                 wh = obj.self.estimator.result.state.w;
@@ -79,7 +79,7 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                 if obj.self.model.name == "load" || obj.self.model.name == "load_parameter_estimation_exey"
                     throttle_offset_SuspendedLoad = obj.param.th_offset_SuspendedLoad;
                     T_thr = input(1);
-                    if cha == 'f' || cha == 'h'
+                    if cha == 'f' || cha == 'h' || cha == 'k'
                         uroll = obj.param.gain_SuspendedLoad(1) * (whn(1) - wh(1));
                         upitch = obj.param.gain_SuspendedLoad(2) * (whn(2) - wh(2));
                         uthr = max(0,obj.param.gain_SuspendedLoad(4) * (T_thr - obj.hover_thrust_force_SuspendedLoad) + throttle_offset_SuspendedLoad); % hovering からの偏差をゲイン倍する

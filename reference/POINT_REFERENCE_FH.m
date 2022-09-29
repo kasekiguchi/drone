@@ -27,7 +27,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h' && cha ~= 'k')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -66,9 +66,30 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 end
             elseif strcmp(cha,'h')
                 obj.flag='h';
-                obj.result.state.xd = Param{2};
-                obj.result.state.p = obj.result.state.xd;
-                obj.result.state.pL = obj.result.state.xd;
+                if nargin==3 % 他のreference objでの参照値がある場合
+                    Param{2} = result.state;
+                end
+                if strcmp(class(Param{2}),"STATE_CLASS")
+                    state_copy(Param{2},obj.result.state);
+                    %                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
+                else
+                    obj.result.state.xd = Param{2};
+                    obj.result.state.p = obj.result.state.xd;
+                    obj.result.state.pL = obj.result.state.xd;
+                end
+            elseif strcmp(cha,'k') % flight phase
+                obj.flag='k';
+                if nargin==3 % 他のreference objでの参照値がある場合
+                    Param{2} = result.state;
+                end
+                if strcmp(class(Param{2}),"STATE_CLASS")
+                    state_copy(Param{2},obj.result.state);
+                    %                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
+                else
+                    obj.result.state.xd = Param{2};
+                    obj.result.state.p = obj.result.state.xd;
+                    obj.result.state.pL = obj.result.state.xd;
+                end
             else
                 %obj.result.state.p = obj.self.estimator.result.state.p; %
                 %これだと最悪上がっていく

@@ -72,6 +72,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                         msg(1,1:8) = u;
                     case 'h'
                         msg(1,1:8) = u;
+                    case 'k'
+                        msg(1,1:8) = u;
                 end
             else % 緊急時 プロペラストップ
                 obj.msg=[500 500 0 500 0 0 0 0];

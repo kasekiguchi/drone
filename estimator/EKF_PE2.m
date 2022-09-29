@@ -114,6 +114,9 @@ classdef EKF_PE2 < ESTIMATOR_CLASS
             obj.result.Gt = G;
             obj.result.Pt = P;
             if strcmp(obj.self.reference.point.flag,'f')%||strcmp(obj.self.reference.point.flag,'h')
+                obj.result.state.set_state([tmpvaluet;tmpvalue(25:26)]);
+            elseif strcmp(obj.self.reference.point.flag,'k')
+                tmpvalue(25:26) = obj.result.state.e;
                 obj.result.state.set_state(tmpvalue);
             else
                 obj.result.state.set_state([tmpvaluet;p(1,17:18)']);
