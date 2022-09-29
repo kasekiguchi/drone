@@ -22,25 +22,25 @@ env_param.type = "FloorMap_sim";
 % pwallpoly = polyshape(pwall);
 % Pwalls = union(Poutwall,pwallpoly);
 %%
-% pout = [-5,-5;95,-5;95,95;-5,95];
-% Poutpoly = polyshape(pout);
-% pin = [-6,-6;96,-6;96,96;-6,96];
-% Pinpoly = polyshape(pin);
-% Poutwall = subtract(Pinpoly,Poutpoly);
-% pwall = [0,0;90,0;90,90;0,90];
-% pwallpoly = polyshape(pwall);
-% Pwalls = union(Poutwall,pwallpoly);
+pout = [-5,-5;95,-5;95,95;-5,95];
+Poutpoly = polyshape(pout);
+pin = [-6,-6;96,-6;96,96;-6,96];
+Pinpoly = polyshape(pin);
+Poutwall = subtract(Pinpoly,Poutpoly);
+pwall = [0,0;90,0;90,90;0,90];
+pwallpoly = polyshape(pwall);
+Pwalls = union(Poutwall,pwallpoly);
 
 %%
 % 
-pout = [-10,-1.5;95,-1.5;95,95;-10,95];
-Poutpoly = polyshape(pout);
-pin = [-11,-2.5;96,-2.6;96,96;-11,96];
-Pinpoly = polyshape(pin);
-Poutwall = subtract(Pinpoly,Poutpoly);
-pwall = [-5,3.5;90,3.5;90,90;-5,90];
-pwallpoly = polyshape(pwall);
-Pwalls = union(Poutwall,pwallpoly);
+% pout = [-10,-1.5;95,-1.5;95,95;-10,95];
+% Poutpoly = polyshape(pout);
+% pin = [-11,-2.5;96,-2.6;96,96;-11,96];
+% Pinpoly = polyshape(pin);
+% Poutwall = subtract(Pinpoly,Poutpoly);
+% pwall = [-5,3.5;90,3.5;90,90;-5,90];
+% pwallpoly = polyshape(pwall);
+% Pwalls = union(Poutwall,pwallpoly);
 
 %%
 env_param.Vertices(:,:,1) = Pwalls.Vertices;

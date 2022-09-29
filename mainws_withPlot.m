@@ -53,6 +53,11 @@ for i = 1:N
     else
         agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial));%,struct('noise',struct('value',5E-5,'seed',[4]))));%加速度次元車両モデル 4.337E-5, seed = 5
     end
+    if fMotive
+        state  = agent(i).plant.connector.getData;
+        agent(i).plant.state.p = [state.pose.position.x,state.pose.position.z];
+        agent(i).plant.state.q = [state.pose.orientation.y];
+    end
     %% model
     % set control model
         agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
@@ -95,7 +100,7 @@ for i = 1:N
         %% set controller property
         agent(i).controller=[]; 
         agent(i).set_property("controller",Controller_TrackingMPC(i,dt,Holizon));%MPCコントローラ
-     
+        
         %% set connector (global instance)
         param(i).sensor.list = cell(1,length(agent(i).sensor.name));
         param(i).reference.list = cell(1,length(agent(i).reference.name));
@@ -255,10 +260,15 @@ while round(time.t,5)<=te
 
         %            agent(i).do_controller(param(i).controller);
         agent(i).do_controller(cell(1,10));
+        if fMotive
+            state = agent(i).plant.connector.getData;
+            agent(i).plant.state.p = [state.pose.position.x;state.pose.position.z];
+            agent(i).plant.state.q = [state.pose.orientation.y];
+        end
     end
     %agent(1).estimator.map.show
     %%
-    
+     
     logger.logging(time.t,FH, agent, Env.param.Vertices);
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
@@ -305,8 +315,9 @@ calculation=toc;
 % Plots = DataPlot(logger,SaveOnOff);
 %%
 %disp(calcuflation);
-logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
-%logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
+% logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+logger.plot({1,"p1:2","er"},{1,"q","er"},{1,"v","er"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+% logger.plot({1,"p1:2","erp"},{1,"q","erp"},{1,"v","erp"},{1,"input",""},"fig_num",3,"time",[99.8,100.2],"row_col",[2,2]);
 %%
 logger.save("AROB2022_Prop400s2","separate",true);  
 %% Run class Saves
@@ -375,7 +386,8 @@ if isstring(flag)
     ymax = max(95,max(Ewally));
     xlim([xmin-5, xmax+5]);ylim([ymin-5,ymax+5])
 else
-    xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
+    xlim([EstFinalState(1)-5, EstFinalState(1)+10]);ylim([EstFinalState(2)-5,EstFinalState(2)+10])
+%     xlim([EstFinalState(1)-25, EstFinalState(1)+25]);ylim([EstFinalState(2)-25,EstFinalState(2)+25])
 end
 xlabel("$x$ [m]","Interpreter","latex");
 ylabel("$y$ [m]","Interpreter","latex");

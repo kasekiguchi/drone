@@ -95,10 +95,10 @@ for i = 1:N
         %agent(i) = Whill(Model_Whill_exp(dt,'plant',initial(i),"ros",[21])); % Lizard : for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0;0;0];
     else
-        agent(i) = Drone(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
+%         agent(i) = DRONE(Model_Quat13(i,dt,'plant',initial(i))); % unit quaternionのプラントモデル : for sim
         %agent(i) = Drone(Model_EulerAngle(i,dt,'plant',initial(i))); % euler angleのプラントモデル : for sim
         %agent(i) = Drone(Model_Suspended_Load(i,dt,'plant',initial(i))); % 牽引物込みのプラントモデル : for sim
-        %agent(i) = Drone(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
+        agent(i) = DRONE(Model_Discrete0(i,dt,'plant',initial(i))); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %agent(i) = Drone(Model_Discrete(i,dt,'plant',initial(i))); % 離散時間質点モデル : PD controller などを想定
     end
     %% model
@@ -182,8 +182,8 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
-    %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
-    agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+    agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
+%     agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %%
     param(i).sensor.list = cell(1,length(agent(i).sensor.name));
