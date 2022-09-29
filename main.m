@@ -10,9 +10,10 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+fExp = 1 % 1：実機　それ以外：シミュレーション
 fMotive = 0 % Motiveを使うかどうか
-fOffline = 0; % offline verification with experiment data
+fOffline = 0;% offline verification with experiment data
+fROS
 
 run("main1_setting.m");
 
