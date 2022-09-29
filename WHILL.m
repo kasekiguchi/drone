@@ -5,17 +5,18 @@ classdef WHILL < ABSTRACT_SYSTEM
         fig
     end
     methods
-        function obj = WHILL(args)
+        function obj = WHILL(args,param)
             arguments
                 args
+                param
             end
-                obj=obj@ABSTRACT_SYSTEM(args);
+                obj=obj@ABSTRACT_SYSTEM(args,param);
             if contains(args.type,"EXP")
                 obj.plant = WHILL_EXP_MODEL(args);
             end
             % ドローン用のクラス
             % フレームとしての機能はABSTRACT_SYSTEMに記載
-            % ドローン独自の部分はmodel,controllerクラスなどを参照
+            % ドローン独自の部分はmodel,controllerクラスなどを参照           
         end
     end
     methods

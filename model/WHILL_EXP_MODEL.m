@@ -12,13 +12,13 @@ classdef WHILL_EXP_MODEL < MODEL_CLASS
     
     methods
         function obj = WHILL_EXP_MODEL(args)
-            obj@MODEL_CLASS([],[]);
+            obj@MODEL_CLASS(args);
             param=args;
             obj.dt = 0.025; % check
             %% variable set
             obj.phase        = 's';
-            obj.conn_type = param.conn_type;
-            switch param.conn_type
+            obj.conn_type = param.param.conn_type;
+            switch param.param.conn_type
                 case "udp"
                     obj.IP = param.num;
                     [~,cmdout] = system("ipconfig");
@@ -34,26 +34,25 @@ classdef WHILL_EXP_MODEL < MODEL_CLASS
                     obj.connector=SERIAL_CONNECTOR(param);
                     fprintf("Whill %d is ready\n",param.port);
                 case "ros"
-                                        obj.ID  = param.param.DomainID;
-                    param.DomainID = param.param.DomainID;
-%                     param.subTopicName = {'/odom'};
-%                     param.subMsgName = {'nav_msgs/Odometry' };
+                    obj.id  = param.param.param.DomainID;
+                    param.subTopicName = {'/odom'};
+                    param.subMsgName = {'nav_msgs/Odometry' };
 
-                    param.subTopicName = {'/Robot_1/pose'};
-                    param.subMsgName = {'geometry_msgs/PoseStamped'};
+%                     param.subTopicName = {'/Robot_1/pose'};
+%                     param.subMsgName = {'geometry_msgs/PoseStamped'};
 
                     param.pubTopicName = {'/cmd_vel'};
                     param.pubMsgName = {'geometry_msgs/Twist'};
                     subnum = length(param.subTopicName);
                     pubnum = length(param.pubTopicName);
                     for i = 1:subnum
-                        param.subTopic(i) = ros2node("/submatlab",param.DomainID);
+                        param.subTopic(i) = ros2node("/submatlab",obj.id);
                     end
                     for i = 1:pubnum
-                        param.pubTopic(i) = ros2node("/pubmatlab",param.DomainID);
+                        param.pubTopic(i) = ros2node("/pubmatlab",obj.id);
                     end
                     obj.connector=ROS2_CONNECTOR(param);
-                    fprintf("Whill %d is ready\n",param.port);
+                    fprintf("Whill %d is ready\n",param.DomainID);
             end
         end
         function do(obj,u,varargin)
