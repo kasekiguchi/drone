@@ -49,7 +49,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
         end
         
         function result = do(obj,param,~)
-            tic
+            tic %stop watch start
             %---ロボットの状態をとる---%
             RobotState = [obj.self.estimator.result.state.p(1) , obj.self.estimator.result.state.p(2) , obj.self.estimator.result.state.q];
             if ~isempty(obj.self.input)

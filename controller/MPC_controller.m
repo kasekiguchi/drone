@@ -29,17 +29,19 @@ classdef MPC_controller <CONTROLLER_CLASS
             % obj.options.OptimalityTolerance    = 1.e-12;%1 次の最適性に関する終了許容誤差。
             % obj.options.PlotFcn                = [];
             %---MPCパラメータ設定---%
-            obj.param.H  = 10;                % モデル予測制御のホライゾン
-            obj.param.dt = 0.25;              % モデル予測制御の刻み時間
+            obj.param.H  = param.H;                % モデル予測制御のホライゾン
+            obj.param.dt = param.dt;              % モデル予測制御の刻み時間
             obj.param.input_size = self.model.dim(2);
             obj.param.state_size = self.model.dim(1);
             obj.param.total_size = obj.param.input_size + obj.param.state_size;
             obj.param.Num = obj.param.H+1; %初期状態とホライゾン数の合計
             %重み%
-            obj.param.Q = diag(10*ones(1,obj.param.state_size));
-            obj.param.R = diag(10*ones(1,obj.param.input_size));
-            obj.param.Qf = diag(10*ones(1,obj.param.state_size));
-            
+            obj.param.Q = diag([10,10,0.1,100]);%状態の重み 10,10,1,100
+            obj.param.R = 0.01*diag([1,1]);%入力の重み % 0.01*diag([1,1])
+            obj.param.Qf = diag([10,10,0.1,100]);%終端状態の重み % 12,12,1,1
+            obj.NoiseR = 1e-2;%param of Fisher Information matrix % 1.0e-2
+            obj.RangeGain = 10;%10;%gain of sigmoid function for sensor range logic
+            obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
 
             obj.model = self.model;

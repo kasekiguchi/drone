@@ -49,7 +49,7 @@ end
 %set plant model
 for i = 1:N
     if fExp
-        agent(i) = Drone(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
+        agent(i) = DRONE(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
         agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial));%,struct('noise',struct('value',5E-5,'seed',[4]))));%加速度次元車両モデル 4.337E-5, seed = 5
     end
