@@ -10,7 +10,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
-run("main2_agent_setup.m");
+run("main2_agent_setup_class.m");
 %agent.set_model_error("ly",0.02);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -90,8 +90,10 @@ end
 %             if time.t >= 10
 %                 FH.CurrentCharacter = 'l';
 %             end
+            xr = reference(time, 10, 0.1);
+            xr(3, end) = xr(3, end) + 0.01;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, xr(:, end), time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -106,13 +108,23 @@ end
             % sample を通る
 %             param(i).controller.mcmpc = {};    % 入力算出 / controller.name = hlc
             % sample を通さず
-            param(i).controller.mcmpc = {time.t, fFirst, idx};    % 入力算出 / controller.name = hlc
+            %-- resampling {time.t, fFirst, idx, sigmanext} とする
+           
+            param(i).controller.mcmpc = {fFirst, idx, time.t, xr};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
 %             if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
+
+        %-- データ保存
+            data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+            data.sigma(idx) = agent.controller.result.sigma;
+            data.bestcost(idx) = agent.controller.result.bestcost;
+%             data.state{idx} = state_data(:, 1, BestcostID);
+%             data.input{idx} = u;
+
         %% update state
         % with FH
         figure(FH)
@@ -194,14 +206,14 @@ logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid o
 logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
 %% errorで終了したとき
+agent(1).reference.timeVarying.show(logger)
 Fontsize = 15;  timeMax = te;
 size_best = length(data.bestcost);
-figure(8); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]);
+figure(9); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]); xlabel("Time [s]"); ylabel("Evaluation"); set(gca,'FontSize',Fontsize); grid on;
 % figure(9); plot(1:Params.Particle_num, data.pathJ{1, 1}, '*');
 % axes プロパティから線の太さ，スタイルなど変更可能
-figure(7)
+figure(8)
 plot(logger.Data.t(1:size_best,:), data.sigma, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
-agent(1).reference.timeVarying.show(logger)
 % saveas(gcf,'Data/20220622_no_horizon_re_1.png')
 
 % 差分のグラフを描画
@@ -212,12 +224,13 @@ for i= 1:size_best
     diff(:, i) = logger.Data.agent.estimator.result{1,i}.state.p - logger.Data.agent.reference.result{1,i}.state.p;
 end
 % difference of reference and estimator
-figure(9)
+figure(10)
 plot(logger.Data.t(1:size_best,:), diff, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Difference of position [m]"); set(gca,'FontSize',Fontsize);
 legend("x.diff", "y.diff", "z.diff"); grid on;
 % acceleration
 % figure(10); plot(logger.Data.t(1:size_best,:), data.acc, 'LineWidth', 2); xlabel("Time[s]"); ylabel("acceleration [m/s^2]");set(gca,'FontSize',Fontsize); grid on;
 % estimator and reference 
+Rdata(3, :) = Rdata(3, :) + 0.01; % 初期値の0.01を足す
 figure(11); plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
 ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
 plot(logger.Data.t(1:size_best,:), Rdata, '--', 'LineWidth', 2);
@@ -228,3 +241,24 @@ agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();
+function xr = reference(time, H, dt)
+    xr = zeros(3, H);
+    rz = 1; % 目標
+    rz0 = 0;% スタート
+    T = 10; % かける時間
+    StartT = 0;
+    a = -2/T^3 * (rz-rz0);
+    b = 3/T^2 * (rz-rz0);
+%     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
+%     X = subs(z, t, Tv);
+    %-- ホライゾンごとのreference
+    if time.t <= 10
+        for h = 1:H
+            xr(:, h) = [0;0;a*((time.t-StartT)+dt*h)^3+b*((time.t-StartT)+dt*h)^2+rz0];
+        end
+    else
+        for h = 1:H
+            xr(:, h) = [0;0;1];
+        end
+    end
+end
