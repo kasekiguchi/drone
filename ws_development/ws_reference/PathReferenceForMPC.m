@@ -23,7 +23,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
         dt
         SensorRange
         WayPointNum
-        Holizon
+        Horizon
         step
         self
         w
@@ -54,11 +54,12 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             obj.ConvergencejudgeV = param{1,4};
             obj.ConvergencejudgeW = param{1,5};
             %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
-            obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
+            %obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
+            obj.PreTrack = obj.self.model.state.get();%位置,姿勢,速さ
             obj.result.PreTrack = obj.PreTrack;
-            obj.Holizon = param{1,7};
+            obj.Horizon = param{1,6};
             obj.step = 1;
-            obj.SensorRange = self.sensor.LiDAR.radius;
+            obj.SensorRange = param{1,7};
             obj.dt = obj.self.model.dt;
             obj.WayPointNum = length(obj.WayPoint);
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
@@ -128,7 +129,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
             x = 0;
             y = 0;
 
-            obj.TrackingPoint = zeros(4,obj.Holizon);%set data size[x ;y ;theta;v]
+            obj.TrackingPoint = zeros(4,obj.Horizon);%set data size[x ;y ;theta;v]
             
 %            k = (a.^2 + b.^2);% tmp const
 %            aeqbids=abs(k)< 1E-4; % k が０となるインデックス
@@ -218,7 +219,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 end
                 tmp0 = r*tmp0; % Oから見た現在時刻の目標位置
                 tmp(:,1) = [tmp0 + O;tmpt0];
-                for i = 2:obj.Holizon
+                for i = 2:obj.Horizon
                     tmp0 = Rmat*tmp0;
                     tmpt0 = tmpt0 + th;
                     tmp(:,i) = [tmp0+O;tmpt0];
@@ -244,7 +245,7 @@ classdef PathReferenceForMPC < REFERENCE_CLASS
                 rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
                 tmpt0 = atan2(-rl(1),rl(2));
                 tmp(:,1) = [tmp0;tmpt0];
-                for i = 2:obj.Holizon
+                for i = 2:obj.Horizon
                     tmp0 = tmp0+obj.step*obj.Targetv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
                     tmp(:,i) = [tmp0;tmpt0];
                 end

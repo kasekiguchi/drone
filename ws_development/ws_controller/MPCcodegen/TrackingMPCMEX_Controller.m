@@ -38,7 +38,7 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
             obj.param.T = 10*eye(param.H);%Fisherの重み
             obj.param.S = [1,1];%入力の上下限 % 1,0.7
             strs=self.reference.name;        
-            obj.param.step = self.reference.(strs(contains(strs,"MPC"))).step;
+            obj.param.step = self.reference.(strs(contains(strs,"mpc"))).step;
             obj.NoiseR = 1e-2;%param of Fisher Information matrix % 1.0e-2
             obj.RangeGain = 10;%10;%gain of sigmoid function for sensor range logic
             obj.SensorRange = self.estimator.(self.estimator.name).constant.SensorRange;
@@ -107,7 +107,8 @@ classdef TrackingMPCMEX_Controller <CONTROLLER_CLASS
 %             obj.param.NoiseR = obj.self.estimator.(obj.self.estimator.name).R;
             obj.param.X0 = obj.self.estimator.result.state.get();%[state.p;state.q;state.v;state.w];
             obj.param.U0 = oldinput;%obj.previous_input(:,1);%現在時刻の入力
-            obj.param.model_param = obj.self.model.param;
+            %obj.param.model_param = obj.self.model.param;
+            obj.param.model_param = obj.self.parameter;
             %------------------------%
             if isempty(obj.result.previous_state)
                 obj.previous_state = repmat(obj.param.X0,1,obj.param.Num);                

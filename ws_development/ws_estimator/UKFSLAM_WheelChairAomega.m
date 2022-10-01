@@ -73,7 +73,7 @@ classdef UKFSLAM_WheelChairAomega < ESTIMATOR_CLASS
 %            for i = 1:2*StateCount+1
 %                aKai(:,i) = [rKai{1,i}(:,end);mKai(:,i)];%Kai = sigma point;
 %            end
-            sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,model.param), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
+            sol = arrayfun(@(i) ode45(@(t,x) model.method(x,u,obj.self.parameter), [0 obj.dt], Kai(1:obj.n,i)), 1:2*StateCount+1);
             tmp = [sol.stats];
             tmp = [tmp.nsteps]+1;
             tmpid = arrayfun(@(i) sum(tmp(1:i)),1:length(tmp));

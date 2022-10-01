@@ -1,4 +1,4 @@
-function env = Env_FloorMap_sim_circle(id)
+function env_param = Env_FloorMapSquare(id)
 %% environment class demo
 % env property をEnv classのインスタンス配列として定義
 env_param.name = 'Floor';
@@ -42,11 +42,6 @@ pwall = [0,0;90,0;90,90;0,90];
 pwallpoly = polyshape(pwall);
 Pwalls = union(Poutwall,pwallpoly);
 
-env_param.Vertices(:,:,1) = Pwalls.Vertices;
-assignin('base',"env_param",env_param);
-evalin('base',"Env = FloorMap_sim([],env_param);");
-env.name = "Floor";
-env.type = "FloorMap_sim";
-env.param = env_param;
-env.param.id=id;
+env_param.param.Vertices(:,:,1) = Pwalls.Vertices;
+env_param.id=id;
 end

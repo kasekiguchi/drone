@@ -12,7 +12,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
-fMotive = 1 % Motiveを使うかどうか
+fMotive = 0 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
 run("main1_setting.m");
@@ -35,6 +35,8 @@ run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
+
+CheckFH = figure();
 
 try
 
@@ -62,7 +64,7 @@ try
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
             param(i).sensor.rdensity = {Env};
-            param(i).sensor.lrf = Env;
+            param(i).sensor.lrf = {Env.param};
 
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
@@ -85,6 +87,7 @@ try
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
             param(i).reference.tbug = {};
+            param(i).reference.path_ref_mpc = {1};
             param(i).reference.agreement = {logger, N, time.t};
 
             for j = 1:length(agent(i).reference.name)
@@ -98,6 +101,7 @@ try
             param(i).controller.hlc = {time.t};
             param(i).controller.pd = {};
             param(i).controller.tscf = {time.t};
+            param(i).controller.ref_track = {};
 
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -107,17 +111,19 @@ try
             if (fOffline); logger.overwrite("input", time.t, agent, i); end
         end
 
+        agent.reference.path_ref_mpc.FHPlot(Env,CheckFH,[]);
+        length(agent.estimator.result.PreXh)
         %% update state
         figure(FH)
         drawnow
 
         for i = 1:N % 状態更新
-            model_param.param = agent(i).model.param;
+            model_param.param = agent(i).parameter;%agent(i).model.param;
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
             %          agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
-            model_param.param = agent(i).plant.param;
+            model_param.param = agent(i).parameter;%agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
 
@@ -181,3 +187,4 @@ logger.plot({1, "q1", "e"});
 agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
+%logger.save("AROB2022_Prop400s2","separate",true);

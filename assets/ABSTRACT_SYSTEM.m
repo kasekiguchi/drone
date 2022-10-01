@@ -68,9 +68,16 @@ methods
             plant_param = [];
             emergency = [];
         end
-
+        if ~isempty(plant_param)
+            switch class(plant_param)
+                case 'double'
+                case 'struct'                   
+                otherwise % class instanceの場合
+                    plant_param.plant_or_model = "plant";
+            end
+        end
         if ~isempty(emergency) % 実験緊急事態
-            obj.plant.do(obj.input, [], "emergency");
+%            obj.plant.do(obj.input, [], "emergency");
         else
 
             if isempty(obj.input_transform)
@@ -86,7 +93,14 @@ methods
             end
 
         end
-
+        if ~isempty(plant_param)
+            switch class(plant_param)
+                case 'double'
+                case 'struct'                   
+                otherwise % class instanceの場合
+                    plant_param.plant_or_model = "model";
+            end
+        end
     end
 
 end
@@ -106,18 +120,6 @@ methods % Set methods
     function set_model(obj, args)
         obj.model = MODEL_CLASS(args);
         obj.model.param = obj.parameter.get(args.parameter_name);
-    end
-
-end
-
-methods % Set methods
-
-    function set_model(obj, args)
-        model_subclass = str2func(args.type);
-        obj.model = model_subclass(args.param);
-        %             if isempty(obj.state) % 実験ではplantがstateを持たないため
-        %                 obj.state=obj.model.state; % handle の共有
-        %             end
     end
 
 end
@@ -242,7 +244,7 @@ methods % set, do property
 
     function set_model_error(obj, p, v)
         obj.parameter.set_model_error(p, v);
-        obj.plant.param = obj.parameter.get("all", "plant");
+        obj.plant.param = obj.parameter.get(obj.parameter.parameter_name, "plant");
     end
 
 end

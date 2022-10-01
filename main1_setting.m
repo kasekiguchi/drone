@@ -2,7 +2,8 @@
 if fExp
     dt = 0.025; % sampling time
 else
-    dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
+    %dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
+    dt = 0.1; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
 end
 
 sampling = dt;
