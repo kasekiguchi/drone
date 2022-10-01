@@ -1,10 +1,10 @@
-function beautify(file,startl,endl)
+function [a,o] = beautify(file,startl,endl)
 % beautify the matlab source file
 % 【Usage】set formatter_path, and then do following command at command window
 % beautify(path_to_target_file)
 % path_to_target_file : relative path to the target file from the working folder
 % 
-% Example : beautify("reference/TimeVaryingReference.m")
+% Example : beautify("reference/TIME_VARYING_REFERENCE.m")
 % 
 % matlab_formatter.py requires chardet package. 
 % install python3.8 at Microsoft Store 

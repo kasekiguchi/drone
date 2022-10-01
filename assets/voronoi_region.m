@@ -1,6 +1,7 @@
 function Vo = voronoi_region(pos, region,span)
-% 【Input】 pos : [x;y;z]を横に並べた行列，region : 対象領域の4隅(x,y)を縦に並べた行列，span :
-% 対象のインデックス
+% 【Input】 pos : [x;y;z]を横に並べた行列，
+%           region : 対象領域の4隅(x,y)を縦に並べた行列，
+%           span : 対象のインデックス
 % 【Output】ボロノイセルのpolyshape セル配列
 % 位置，ベクトル，インデックスそれぞれで記号を使い分けたほうが良い
 %voronoi(pos(1,:),pos(2,:));
