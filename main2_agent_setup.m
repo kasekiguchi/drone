@@ -123,7 +123,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
     %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
-    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),agent(i).sensor.lrf.radius));%加速度次元入力モデルのukfslam車両も全方向も可
+    agent(i).set_property("estimator",Estimator_UKF2DSLAM_Vehicle(agent(i),agent(i).sensor.lrf.radius));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
