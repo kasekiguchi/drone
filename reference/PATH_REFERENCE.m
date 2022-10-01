@@ -45,7 +45,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             % ここから相対座標上での議論
             sensor = obj.self.sensor.result;
             % 相対座標でのline parameterを算出
-            LP = UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0], obj.self.estimator.ukfslam_WC.constant);
+            LP = UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0], obj.self.estimator.ukfslam.constant);
             % x, y が全て０のLPを削除 UKFCombiningLinesで使っているフィールドだけ削除
             tmpid=sum([LP.x,LP.y],2)==0;
             LP.x(tmpid,:) = [];
