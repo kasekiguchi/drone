@@ -1,14 +1,12 @@
-function [F] = make_animation(kspan,span,fig,base_fig,output,FileName,FH)
+function [F] = make_animation(kspan,fig,base_fig,output,FileName,FH)
 % animation 表示用
 % kspan : 描画する離散時間配列
-% span :  描画対象とするagentのインデックス配列
 % fig : 各時刻の描画を行う関数
-%   fig(k,span)
+%   fig(k)
 %   k : 時刻
 % base_fig : 背景描画を行う関数
 arguments
     kspan (:,:) double
-    span {mustBeInteger}
     fig
     base_fig
     output = 0
@@ -39,7 +37,7 @@ hold on
 for k = kspan
     base_fig();
     
-    fig(k,span);
+    fig(k);
     % update screen
     drawnow %limitrate
     switch output

@@ -1,31 +1,46 @@
 classdef DRONE < ABSTRACT_SYSTEM
-    % Drone class
-    properties %(Access = private)
-        %id = 0;
-        fig
-    end
-    methods
-        function obj = DRONE(varargin)
-            obj=obj@ABSTRACT_SYSTEM({varargin});
-            % このクラスのインスタンスを作成
-            %   詳細説明をここに記述
-                        %% ドローンのフレーム
-            obj.fig = load('plot/frame/drone_frame_01_05.mat').fig;
+% Drone class
+properties %(Access = private)
+    fig
+end
+
+methods
+
+    function obj = DRONE(args, param)
+
+        arguments
+            args
+            param
         end
-    end
-    methods
-        function show(obj)
-            %rad = norm(rot);
-            %dir = rot/rad;
-            if isprop(obj.state,'q')
-                pp =patch(obj.fig(1),'FaceAlpha',0.3);
-                pf =patch(obj.fig(2),'EdgeColor','flat','FaceColor','none','LineWidth',0.2);
-                
-                pobj=[pp;pf];
-                for i = 1:length(pobj)
-                    pobj(i).Vertices = (obj.state.getq('rotmat')*pobj(i).Vertices')'+obj.state.p';
-                end
-            end
+
+        obj = obj@ABSTRACT_SYSTEM(args, param);
+
+        if contains(args.type, "EXP")
+            obj.plant = DRONE_EXP_MODEL(args);
         end
+
+        obj.parameter = param;
     end
+
+end
+
+methods
+
+    function animation(obj, logger, param)
+        % obj.animation(logger,param)
+        % logger : LOGGER class instance
+        % param.realtime (optional) : t-or-f : logger.data('t')を使うか
+        % param.target = 1:4 描画するドローンのインデックス
+        arguments
+            obj
+            logger
+            param.target = 1;
+        end
+
+        p = obj.parameter;
+        DRAW_DRONE_MOTION(logger, "frame_size", [p.Lx, p.Ly], "rotor_r", p.rotor_r, "animation", true, "target", param.target);
+    end
+
+end
+
 end

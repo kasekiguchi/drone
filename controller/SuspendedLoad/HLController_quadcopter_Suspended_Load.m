@@ -93,7 +93,7 @@ classdef HLController_quadcopter_Suspended_Load < CONTROLLER_CLASS
 %             vs = Vsp(x,xd',vf,P,F2,F3,F4);
 %             obj.result = Ufp(x,xd',vf,P) + Usp(x,xd',vf,vs',P);
             cha = obj.self.reference.point.flag;
-            tmpHL = obj.self.controller.hlcontroller.result.input;
+            tmpHL = obj.self.controller.hlc.result.input;
             obj.result.input = obj.IT*tmpHL;
             if strcmp(cha,'f')
                 obj.result.input = uf +[0;us(2:4)];
