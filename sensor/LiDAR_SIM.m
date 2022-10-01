@@ -22,7 +22,7 @@ end
 
 methods
 
-    function obj = LiDAR_SIM(self, param)
+    function obj = LiDAR_SIM(self, param)        
         obj.self = self;
         %  このクラスのインスタンスを作成
         % radius, angle_range

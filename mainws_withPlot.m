@@ -47,34 +47,34 @@ for i = 1:N
     initial(i).w = [0];
 end
 %% generate Drone instance
+
 % Drone classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
 %set plant model
 for i = 1:N
     if fExp
         agent(i) = Drone(Model_Whill_exp(dt,'plant',initial(i),param,"ros",30)); % Lizard : for exp % 機体番号（ESPrのIP
     else
-        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial));%,struct('noise',struct('value',5E-5,'seed',[4]))));%加速度次元車両モデル 4.337E-5, seed = 5
+        %agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,1,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
+        agent(i) = DRONE(Model_Vehicle45(dt,initial,i),VEHICLE_PARAM("VEHICLE4","additional",struct("K",diag([1,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
+%        agent(i) = DRONE(Model_WheelChairA(i,dt,'plant',initial));%,struct('noise',struct('value',5E-5,'seed',[4]))));%加速度次元車両モデル 4.337E-5, seed = 5
     end
     %% model
     % set control model
-        agent(i).set_model(Model_WheelChairA(i,dt,'model',initial) );
-        
+    agent(i).set_model(Model_Vehicle45(dt,initial,i));
+    agent.set_model_error("K",diag([-0.1,0]));        
 
-    close all
-    %% set environment property
-    Env = [];
-
-    agent(i).set_property("env",Env_FloorMap_sim_circle(i)); %四角経路
+%% set environment property
+    Env = FLOOR_MAP([],Env_FloorMapSquare); %四角経路
     %% set sensors property
     agent(i).sensor=[];
-    SensorRange = 20;
 
         %% set ROS2 property
         if fROS
             agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
         else
-            SensorRange = 20;
-            agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ,'seed',3)));%LiDAR seosor
+            %SensorRange = 20;
+            %agent(i).set_property("sensor",Sensor_LiDAR(i, SensorRange,struct('noise',1.0E-3 ,'seed',3)));%LiDAR seosor
+            agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-3 ,'seed',3));
         end
 
     %% set estimator property
@@ -83,15 +83,7 @@ for i = 1:N
     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference=[];
-    velocity = 1;%目標速度
-    w_velocity = 0.7;%曲がるときの目標角速度
-
-        
-        WayPoint = [0,0,0,0];%目標位置の初期値
-        convjudgeV = 0.5;%収束判断　% 0.5
-        convjudgeW = 0.5;%収束判断　
-        Holizon = 3;%MPCのホライゾ
-        agent(i).set_property("reference",Reference_TrackWpointPathForMPC(WayPoint,velocity,w_velocity,convjudgeV,convjudgeW,initial,Holizon));
+        agent(i).set_property("reference",Reference_TrackWpointPathForMPC(initial,agent.sensor.lrf.radius));
         % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
         agent(i).set_property("reference",Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
         %% set controller property
@@ -138,7 +130,7 @@ LogData=[
 %         "controller.result.Eval",
 %         "estimator.result.PreMapParam.x",
 %         "estimator.result.PreMapParam.y",
-    "env.Floor.param.Vertices",
+    %"Env.floor.param.Vertices",
     %    "reference.result.state.xd",
 %     "inner_input",
     "input"
@@ -171,7 +163,7 @@ time.t = ts;
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
 
-SLiDAR = {Env};
+Slrf = {Env.param};
 for i = 1:N
     param(i).sensor=arrayfun(@(k) evalin('base',strcat("S",agent(i).sensor.name(k))),1:length(agent(i).sensor.name),'UniformOutput',false);
     agent(i).do_sensor(param(i).sensor);
@@ -246,8 +238,7 @@ while round(time.t,5)<=te
         
         %Referance Setting
 %         param(i).reference.GlobalPlanning = {1};
-        param(i).reference.TrackingWaypointPath = {1};
-        param(i).reference.TrackWpointPathForMPC = {1};
+        param(i).reference.path_ref_mpc = {1};
         param(i).reference.point={FH,[2;1;0.5],time.t};
         
         for j = 1:length(agent(i).reference.name)
@@ -261,7 +252,7 @@ while round(time.t,5)<=te
     %agent(1).estimator.map.show
     %%
     
-    logger.logging(time.t,FH, agent, Env.param.Vertices);
+    logger.logging(time.t,FH, agent, Env.floor.Vertices);
     %time.t = time.t+ calculation; % for exp
     time.t = time.t + dt % for sim
     doSubFuncFlag = true;
@@ -271,17 +262,17 @@ while round(time.t,5)<=te
 %    figure(FH)
 %    drawnow
     %---now result plot---%
-     NowResultPlot(agent,NowResult,plot_flag);
+     NowResultPlot(agent,Env,NowResult,plot_flag);
      plot_flag = false;
      length(agent.estimator.result.PreXh)
      %drawnow
     %---------------------%
     for i = 1:N %
-        model_param.param=agent(i).model.param;
+        model_param.param=agent(i).parameter;%agent(i).model.param;
         %             model_param.param.B = Model.param.param.B .*0.95;%モデルとの違い
         model_param.FH = FH;
-        plant_param.param =agent(i).plant.param;
-        plant_param.param.t = time.t;
+        plant_param.param =agent(i).parameter;%plant.param;
+        %plant_param.param.t = time.t;
         if ~isa(agent(i).plant,"Lizard_exp")        % Thrust2Throttle邵コ?スァ邵コ?スッinput_transform闕ウ鄙ォ縲知odel邵コ?スョ隴厄スエ隴?スー郢ァ蛛オ?シ?邵コ?スヲ邵コ?郢ァ?
             agent(i).do_model(model_param);
         end
@@ -329,7 +320,7 @@ fclose(fileID);
 %movefile('RunNames.txt',"mov");
 % run('dataplot');
 %% Local function
-function [] = NowResultPlot(agent,NowResult,flag)
+function [] = NowResultPlot(agent,Env,NowResult,flag)
 
 figure(NowResult)
 
@@ -337,9 +328,9 @@ figure(NowResult)
     grid on
     axis equal
     hold on
-MapIdx = size(agent.env.Floor.param.Vertices,3);
+MapIdx = size(Env.floor.Vertices,3);
 for ei = 1:MapIdx
-    tmpenv(ei) = polyshape(agent.env.Floor.param.Vertices(:,:,ei));
+    tmpenv(ei) = polyshape(Env.floor.Vertices(:,:,ei));
 end
 p_Area = union(tmpenv(:));
 %plantFinalState

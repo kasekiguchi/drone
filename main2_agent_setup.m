@@ -44,7 +44,8 @@ else
 end
 %% generate environment
 %Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
-Env = [];
+%Env = [];
+Env = FLOOR_MAP([],Env_FloorMapSquare); %四角経路
 
 for i = 1:N
     %% generate Drone instance
@@ -57,22 +58,28 @@ for i = 1:N
         agent(i).input = [0; 0; 0; 0];
     else
         %agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,1,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
+        %agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,1,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
+        initial_state(i).p = [0;-1];
+        initial_state(i).q = 0;
+        initial_state(i).v = 0;
+        agent(i) = DRONE(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","additional",struct("K",diag([1,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
     end
 
     %% model
     % set control model
-    agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
+    %agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     %agent(i).set_model(Model_Three_Vehicle(dt,initial_state(i),i)); % for exp % 機体番号（ESPrのIP）
+    agent(i).set_model(Model_Vehicle45(dt,initial_state(i),i));
+    agent.set_model_error("K",diag([-0.1,0]));        
     close all
     %% set input_transform property
     if fExp                                                                               % isa(agent(i).plant,"Lizard_exp")
@@ -101,13 +108,14 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
+    agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-3 ,'seed',3));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
     %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
     %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-    agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"])); % （剛体ベース）EKF
+    %agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"],"B",diag([dt^2,dt^2,0,0,0,dt]))); %
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
@@ -115,6 +123,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
     %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
+    agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),agent(i).sensor.lrf.radius));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
@@ -125,14 +134,16 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
+    agent(i).set_property("reference",Reference_PathCenter(agent.sensor.lrf.radius));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
     %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    %agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
+    agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
