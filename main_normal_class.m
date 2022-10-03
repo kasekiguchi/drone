@@ -33,7 +33,8 @@ fCount_landing = 0;
 fc = 0;     % 着陸したときだけx，y座標を取得
 totalT = 0;
 idx = 0;
-
+HO = 10;   %Params.H
+DT = 0.1;  %Params.dt
 run("main3_loop_setup.m");
 
 try
@@ -81,16 +82,16 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
             rz = 0; rx = 0; ry = 1;
-            if time.t >= 10
-                FH.CurrentCharacter = 'f';
-            end
+%             if time.t >= 10
+%                 FH.CurrentCharacter = 'f';
+%             end
 %             if time.t >= 20
 %                 FH.CurrentCharacter = 'l';
 %             end
 %             if time.t >= 10
 %                 FH.CurrentCharacter = 'l';
 %             end
-            xr = reference(time, 10, 0.1);
+            xr = reference(time, HO, DT);
             xr(3, end) = xr(3, end) + 0.01;
             param(i).reference.covering = [];
             param(i).reference.point = {FH, xr(:, end), time.t};  % 目標値[x, y, z]
@@ -110,7 +111,7 @@ end
             % sample を通さず
             %-- resampling {time.t, fFirst, idx, sigmanext} とする
            
-            param(i).controller.mcmpc = {fFirst, idx, time.t, xr};    % 入力算出 / controller.name = hlc
+            param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end

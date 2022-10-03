@@ -20,7 +20,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             %---MPCパラメータ設定---%
             obj.param.H  = 10;                % モデル予測制御のホライゾン
             obj.param.dt = 0.1;              % モデル予測制御の刻み時間
-            obj.param.particle_num = 200;
+            obj.param.particle_num = 500;
             %重み%
             obj.param.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
             obj.param.V = diag([1.0; 1.0; 1.0]);    % 速度
@@ -49,10 +49,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         %-- main()的な
         % u fFirst
         function result = do(obj,param)
-            fFirst = param{1};
-            idx = param{2};
-            t = param{3};
-            xr = param{4};
+%             fFirst = param{1};
+            idx = param{1};
+%             t = param{3};
+            xr = param{2};
             %-- reference
 %             obj.state.ref = obj.self.reference.result.state.p;  % reference
             obj.state.ref = xr;

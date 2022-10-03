@@ -438,6 +438,16 @@ agent(1).animation(logger,"target",1);
 %%
 % logger.save();
 
+
+function xr_h = reference_h(param, params, time, t, Agent)
+    % time varying の　referenceをホライズンごとのreferenceに変換する
+    for i = 1:params.H
+        time.t = t + params.dt * i;
+        param(1).reference.timevarying = {time};
+        xr_h(:, i) = Agent.reference.result.state.p;
+    end
+end
+
 function xr = reference(params, time)
     xr = zeros(3, params.H);
     rz = 1; % 目標
