@@ -63,8 +63,13 @@ for i = 1:N
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
+
+%==============================================================================================================
+    agent(i).set_property("reference",Reference_Time_Varying("jirei_zentai",[0,0,1]));%事例研究全体実験
+%==============================================================================================================
+
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
-     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
+%      agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
 %     agent(i).set_property("reference",Reference_Time_Varying("PtoP_ref",[0,0,1]));%PtoP
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1.5],[2,2,1]})); % 時変な目標状態
@@ -76,9 +81,13 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
+%     agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
-%     agent(i).set_property("controller", Controller_FHL(dt));  %入力を簡単にいじれる % 階層型線形化
+
+%==============================================================================================================
+    agent(i).set_property("controller", Controller_FHL(dt));  %入力を簡単にいじれる % 階層型線形化%事例研究全体実験
+%==============================================================================================================
+
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % servo階層型線形化
      %HLControlSetting = Controller_HL(dt);
       HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;
