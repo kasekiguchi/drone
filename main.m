@@ -55,14 +55,14 @@ run("main3_loop_setup.m");
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
             param(i).sensor.bounding = {time};
-            param(i).sensor.rcoverage_3D = {Env,time};
+            param(i).sensor.rcoverage_3D = [];
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
             agent(i).do_sensor(param(i).sensor.list);
-            agent(i).sensor.bounding.show(agent(1))
+%             agent(i).sensor.bounding.show(agent(1))
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
 
@@ -74,7 +74,8 @@ run("main3_loop_setup.m");
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.covering_3D = [];
+            param(i).reference.covering_3D = [time];
+            param(i).reference.birdmove = [time];
             param(i).reference.point = {FH, [2; 1; 1], time.t,dt};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
@@ -171,7 +172,7 @@ clc
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N);
+agent(1).animation(logger,"target",1:N,"Motive_ref",1);
 % agent(1).sensor.bounding.movie(logger);
 %%
 %logger.save();

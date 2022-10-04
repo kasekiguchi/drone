@@ -55,10 +55,10 @@ for i = 1:N
 
     %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
 %     agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
-    agent(i).set_property("sensor",Sensor_RangePos(i,'r',10)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    agent(i).set_property("sensor",Sensor_RangePos(i,'r',20)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-    agent(i).set_property("sensor",Sensor_Map_3D('d',10)); % 測定距離d（第二引数宇）内の重要度を計測 : sim のみ 
-    agent(i).set_property("sensor",Sensor_Bounding('d',2)); % boxの大きさ指定（d : 一辺の半分の長さ）
+%     agent(i).set_property("sensor",Sensor_Map_3D('d',10)); % 測定距離d（第二引数宇）内の重要度を計測 : sim のみ 
+%     agent(i).set_property("sensor",Sensor_Bounding('d',2)); % boxの大きさ指定（d : 一辺の半分の長さ）
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
     %% set estimator property
     agent(i).estimator = [];
@@ -76,14 +76,13 @@ for i = 1:N
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
-    %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
-    agent(i).set_property("reference",Reference_3DCoverage(agent(i),Env,'q',[1 1 1])); % Voronoi重心(3D)
+%     agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;0],[2,2,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
-    %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
+    agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通

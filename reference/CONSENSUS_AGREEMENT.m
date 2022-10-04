@@ -35,7 +35,7 @@ classdef CONSENSUS_AGREEMENT < REFERENCE_CLASS
                 x = x_0+sin(t/s);
                 y = y_0+cos(t/s);
                 z = 1;
-                obj.result.state.xd = [x;y;z];
+                obj.result.state.p = [x;y;z];
             else
                 Wo = 0.1;
                 Wd = 0.18;
