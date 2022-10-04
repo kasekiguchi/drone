@@ -65,18 +65,8 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
             % reference
-            rz = 0; rx = 0; ry = 1;
-            if time.t >= 10
-                FH.CurrentCharacter = 'f';
-            end
-            if time.t >= 18
-                FH.CurrentCharacter = 'h';
-            end
-            if time.t >= 20
-                FH.CurrentCharacter = 'l';
-            end
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [rx; ry; rz], time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [0; 0; 1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -167,17 +157,17 @@ clc
 % logger.plot({1,"p", "er"});
 % logger.plot({1,"q", "e"});
 % logger.plot({1,"v", "e"});
-% agent(1).reference.timeVarying.show(logger)
+agent(1).reference.timeVarying.show(logger)
 
 Fontsize = 15;  timeMax = te;
-logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
+% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+% logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"target",1);
 %%
 % logger.save();
