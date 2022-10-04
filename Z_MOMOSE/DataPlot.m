@@ -12,11 +12,11 @@ fHLorFT=10;%単体の時,HLは1
 if fsingle==1
     %loggerの名前が変わっているとき
     name=logger;
-%     name=logger_HL_srv_rf_02t;
+%     name=logger_FB_lqr_dst1;
 %     name=remasui2_0518_FT_hovering_15;
     %
     if fHLorFT==1
-        HLorFT='HL';
+        HLorFT='FB';
     else
         HLorFT='FT';
     end
@@ -52,6 +52,7 @@ if fsingle==1
     z3=zeros(4,tn);
     z4=zeros(2,tn);
     ininp=zeros(8,tn);
+    vf=zeros(4,tn);
     j=1;
     for i=k0f:1:k0e
         time(j)=ti0(i)-tt0;
@@ -68,6 +69,7 @@ if fsingle==1
         z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
         %ininp(:,j)=name.Data.agent.inner_input{1, i};
+        vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
         j=j+1;
     end
 else
@@ -150,7 +152,7 @@ else
 end
 
 % figure
-FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "t-p" "inner_input"];
+FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "t-p" "inner_input" "vf"];
 if fsingle==1
     f(1)=figure('Name',FigName(1));
     hold on
@@ -265,7 +267,7 @@ if fsingle==1
     title(HLorFT)
     xlabel('time[s]')
     ylabel('inputHL')
-    legend('1','2','3','4')
+    legend('z','x','y','yaw')
     hold off
     
     f(12)=figure('Name',FigName(12));
@@ -326,6 +328,16 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('inner input')
 %     legend('')
+    hold off
+    
+    f(18)=figure('Name',FigName(18));
+    hold on
+    plot(time,vf);
+    grid on
+    title(HLorFT)
+    xlabel('time[s]')
+    ylabel('vf')
+    legend('zu','dzu','ddzu','dddzu')
     hold off
     
 else

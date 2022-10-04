@@ -30,11 +30,12 @@ else
     logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
 %外乱 disturbance
-dstr=[0,0,0];%外乱[x,y,z]
+dstr=[0,1,0];%外乱[x,y,z]
 run("main2_agent_setup.m");
-% agent.set_model_error("ly",0.02);%モデル誤差
-agent.set_model_error("mass",0.01);%モデル誤差
-agent(1).set_model_error("B",{[zeros(1,6),-dstr,zeros(1,3)]});%only sim
+% agent.set_model_error("k1",0.1);%モデル誤差
+% agent.set_model_error("ly",-0.01);%モデル誤差
+agent.set_model_error("mass",0.1);%モデル誤差
+agent(i).set_model_error("B",{[zeros(1,6),dstr,zeros(1,3)]});%only sim
 %% main loop
 run("main3_loop_setup.m");
 disp("enter while loop");
@@ -179,6 +180,8 @@ clc
 
 % plot 
 logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+
+% logger.plot({1," p","er"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"inner_input",""});
@@ -186,9 +189,9 @@ logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 
 
 %% animation
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N);
+% VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+% agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+% agent(1).animation(logger,"target",1:N);
 
 %%
 %logger.save();
@@ -196,20 +199,20 @@ agent(1).animation(logger,"target",1:N);
 fsave=10;
 if fsave==1
     %変更しない
-    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-%     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='data';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
-    %変更
-    subfolder='exp';%sim or exp or sample
-%     subfolder='sim';%sim or exp or sample
+%変更==============================================================================
+%     subfolder='exp';%sim or exp or sample
+    subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='tanh1_2_近似';%実験,シミュレーション名
+    ExpSimName='定常外乱';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
-contents='FT';%実験,シミュレーション内容
-
+contents='FB_gain_dst1';%実験,シミュレーション内容
+%======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
     %フォルダができてないとき
@@ -224,10 +227,11 @@ contents='FT';%実験,シミュレーション内容
         eval([logger_contents '= logger;']);%loggerの名前をlogger_contentsに変更
         save(fullfile(FolderNamed, SaveTitle),logger_contents);
       
-        agent_contents=strcat('agent_',contents);
-        SaveTitle2=strcat(date,'_',agent_contents);
-        eval([agent_contents '=agent;']);%agentの名前をagent_contentsに変更
-        save(fullfile(FolderNamed, SaveTitle2),agent_contents);
+%         agent_contents=strcat('agent_',contents);
+%         SaveTitle2=strcat(date,'_',agent_contents);
+%         eval([agent_contents '=agent;']);%agentの名前をagent_contentsに変更
+%         save(fullfile(FolderNamed, SaveTitle2),agent_contents);
+
     %savefig
 %     SaveTitle=strcat(date,'_',ExpSimName);
 %         saveas(1, fullfile(FolderName, SaveTitle ),'jpg');

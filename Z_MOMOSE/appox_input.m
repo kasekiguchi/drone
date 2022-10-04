@@ -93,7 +93,7 @@ titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.9;%alphaの初期値
+alp(anum)=0.86;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -101,28 +101,41 @@ end
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 dt=0.025;
-k=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-
-x0=[2,2];
+k=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+%k(3:4)=[80 40];
+kft=k;
+kft(1)=1*kft(1);
+% kgain=0.8;
+% x0=[2,2];
+x0=[2,2,2];
 fvals12=zeros(4,1);
-gain_ser1=["","f1","a1"];
+gain_ser1=["","f1","a1","k"];
 % gain_ser1=["","f1","a1","k1"];
-er=0.1; %近似する範囲を指定
+er=[0 1]; %近似する範囲を指定
+ee=er;
 for i=1:4
-fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + k(i)*e ) ,0, er));
+%     if i~=5
+%             er=[0.1 0.3];
+%     else
+%             er=ee;
+%     end
+% fun=@(x)(integral(@(e) abs( -kft(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + kgain*k(i)*e ) ,er(1), er(2)));
+fun=@(x)(integral(@(e) abs( -kft(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,er(1), er(2)));
+
 [x,fval] = fminsearch(fun,x0) ;
 fvals12(i) = 2*fval
 gain_ser1(i+1,:)=[titlex(i),x];
 
 % e= -1:0.001:1;      
-e= -2:0.001:2;
+e= -5:0.001:5;
 ufb(i,:)= -k(i)*e;
-utanh(i,:)= - x(1)*tanh(x(2)*e) - k(i)*e;%%
-u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
-% sigma(i,:)=utanh(i,:)-u(i,:);
+% utanh(i,:)= - x(1)*tanh(x(2)*e) - kgain*k(i)*e;%%
+utanh(i,:)= - x(1)*tanh(x(2)*e) -x(3)*e;%%
+u(i,:)=-kft(i)*sign(e).*abs(e).^alp(i);
+sigma(i,:)=utanh(i,:)-u(i,:);
 fig=figure(i);
-% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
-plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),'LineWidth',2);
+plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
+% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),'LineWidth',2);
 
 grid on
 legend('FB','近似','FT','誤差')
@@ -140,7 +153,7 @@ titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.9;%alphaの初期値
+alp(anum)=0.8;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -153,10 +166,10 @@ k2=1*k;
 x0=[7,10,2,100];
 fvals22=zeros(4,1);
 gain_ser2=["","f1","a1","f2","a2"];
-er=1;
+er=[0.1 0.4];
 for i=1:4
 % fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
-fun=@(x)(integral(@(e) abs( -k2(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
+fun=@(x)(integral(@(e) abs( -k2(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,er(1), er(2)));
 options = optimset('MaxFunEvals',1e5);%普通は200*(number of variables) (既定値) 
 % options = optimset('PlotFcns','optimplotfval','TolX',1e-4);
 % options = optimset('PlotFcns','optimplotfval');
@@ -300,7 +313,7 @@ titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.9;%alphaの初期値
+alp(anum)=0.86;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -310,13 +323,13 @@ Bc2 = [0;1];
 dt=0.025;
 k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
 
-x0=[2,2];
+x0=[2,2,2];
 fvals12z=zeros(2,1);
-gain_ser1z=["","f1","a1"];
+gain_ser1z=["","f1","a1","k1"];
 % gain_ser1=["","f1","a1","k1"];
-er=0.1; %近似する範囲を指定
+er=1; %近似する範囲を指定
 for i=1:2
-fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + k(i)*e ) ,0, er));
+fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,0, er));
 [x,fval] = fminsearch(fun,x0) ;
 fvals12z(i) = 2*fval
 gain_ser1z(i+1,:)=[titlex(i),x];
@@ -324,7 +337,7 @@ gain_ser1z(i+1,:)=[titlex(i),x];
 e= -1:0.001:1;      
 % e= -2:0.001:2;
 ufb(i,:)= -k(i)*e;
-utanh(i,:)= - x(1)*tanh(x(2)*e) - k(i)*e;%%
+utanh(i,:)= - x(1)*tanh(x(2)*e) - x(3)*e;%%
 u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
 % sigma(i,:)=utanh(i,:)-u(i,:);
 fig=figure(i);
@@ -341,8 +354,78 @@ xlabel('error','FontSize',fosi);
 ylabel('input','FontSize',fosi);
 
 end
+%% fmincon tanh二つ zサブシステム
+clear e utanh u ufb sigma
+titlex=["x","dx","ddx","dddx"];
+anum=4;%変数の数
+alp=zeros(anum+1,1);
+alp(anum+1)=1;
+alp(anum)=0.8;%alphaの初期値
+for a=anum-1:-1:1
+    alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
+end
 
+Ac2 = [0,1;0,0];
+Bc2 = [0;1];
+dt=0.025;
+k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
 
+x0=[7,10,2,100];
+% x0=[5,5,5,5];
+fvalc22=zeros(2,1);
+gain_con2=["","f1","a1","f2","a2"];
+er=0.9;
+for i=1:2
+fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er));
+options = optimoptions(@fmincon,'OptimalityTolerance',1.0e-9);
+
+[x,fval] = fmincon(fun,x0) ;
+fvalc22(i) = 2*fval
+gain_con2(i+1,:)=[titlex(i),x];
+
+% e= -0.5:0.001:0.5;      
+e= -1:0.001:1;
+ufb(i,:)= -k(i)*e;
+utanh(i,:)= - x(1)*tanh(x(2)*e)- x(3)*tanh(x(4)*e) - k(i)*e;
+u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
+sigma(i,:)=utanh(i,:)-u(i,:);
+
+fig=figure(i);
+% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:))
+% grid on
+% legend('ufb','utanh','u','誤差')
+% 
+plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),'LineWidth',2);
+
+grid on
+legend('FB','近似','FT','誤差')
+% title(titlex(i));
+
+fosi=14;%defolt 9
+set(gca,'FontSize',fosi)
+xlabel('error','FontSize',fosi);
+ylabel('input','FontSize',fosi);
+
+end
+%% smc
+dt=0.025;
+Ac4 = diag([1,1,1],1);
+Bc4 = [0;0;0;1];
+A11=diag([1,1],1);
+    A12=[0;0;1];
+    K = lqrd(A11,A12,diag([1,1,1]),1,dt);
+    S=[K 1];
+    SA=S*Ac4;
+    SB=S*Bc4; 
+    q=10;
+    e=-1:0.01:1;
+    s=length(e);
+    u=zeros(1,s);
+    for i=1:s
+        u(i)=-inv(SB)*(SA*e(i)+q*tanh(S*e(i)));
+        
+    end
+    plot(e,u);
 %%
 % %元の入力と近似の入力の差を取り二乗しそれを積分する
 % alp = double([0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000]);%初期値0.9有限整定のべき乗

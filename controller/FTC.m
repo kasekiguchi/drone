@@ -11,6 +11,8 @@ classdef FTC < CONTROLLER_CLASS
         VfFT
         gain1
         gain2
+        fzFT
+        fzapr
     end
     
     methods
@@ -21,9 +23,10 @@ classdef FTC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.Vf = param.Vf; % 階層１の入力を生成する関数ハンドル
             obj.Vs = param.Vs; % 階層２の入力を生成する関数ハンドル 
-            obj.VfFT = param.VfFT;% 階層１の入力を生成する関数ハンドルFT用
+%             obj.VfFT = param.VfFT;% 階層１の入力を生成する関数ハンドルFT用
             obj.gain1 = param.gain1;%tanh1
             obj.gain2 = param.gain2;%tanh2
+            obj.fzapr = param.fzapr;
         end
         
         function result = do(obj,param,~)
@@ -71,11 +74,13 @@ classdef FTC < CONTROLLER_CLASS
             
 %% calc Z
             z1 = Z1(x,xd',P);
-          %z方向:FB
-%             vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
-          %z方向:FT
-%             vf = obj.VfFT(F1,z1);%%%%%%%%%%%%%%%%%%xy
-            vf = obj.VfFT(z1);%%%%%%%%%%%%%%%%%%xyz
+            if obj.fzapr ~= 1
+              %z方向:FB
+                vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%xy
+            else
+              %z方向:FT
+                vf = obj.Vf(z1);%%%%%%%%%%%%%%%%%%xyz
+            end
             %x,y,psiの状態変数の値
             z2=Z2(x,xd',vf,P);%x方向
             z3=Z3(x,xd',vf,P);%y方向
@@ -83,13 +88,20 @@ classdef FTC < CONTROLLER_CLASS
             %vs = obj.Vs(z2,z3,z4,F2,F3,F4);%%%%%%%%%%%%%%%%%%%
             
 %% x,y,psiの入力
-n =1;% 1:有限整定 4:tanh1 5:tanh2
+n =4;% 1:有限整定 4:tanh1 5:tanh2 （2,3は使わない）
+% gain_xy=2;%1m/s^2なら2くらいがいい
 switch n
         case 1
 %有限整定
 % 
-            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%（17）式
-            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)式       
+% f=obj.gain1(:,1);
+%             a=obj.gain1(:,2);
+gain_xy=1;
+            ux = -gain_xy*kx(1)*sign(z2(1))*abs(z2(1))^ax(1) -kx(2)*sign(z2(2))*abs(z2(2))^ax(2) -kx(3)*sign(z2(3))*abs(z2(3))^ax(3) -kx(4)*sign(z2(4))*abs(z2(4))^ax(4);%（17）式
+            uy = -gain_xy*ky(1)*sign(z3(1))*abs(z3(1))^ay(1) -ky(2)*sign(z3(2))*abs(z3(2))^ay(2) -ky(3)*sign(z3(3))*abs(z3(3))^ay(3) -ky(4)*sign(z3(4))*abs(z3(4))^ay(4);%(19)式       
+%             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2)) -f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2(3:4)*z2(3:4);%（17）式
+%             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2)) -f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3(3:4)*z3(3:4);%(19)式       
+
 %             ux=1*ux;
 %             uy=1*uy;
 %             
@@ -129,10 +141,17 @@ switch n
           %最小化で求める
             f=obj.gain1(:,1);
             a=obj.gain1(:,2);
+            kapr=obj.gain1(:,3)';
+gain_xy=1;
+%             ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
+%             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
+            ux=-gain_xy*f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-kapr*z2;%-F2*z2;%（17）式
+            uy=-gain_xy*f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-kapr*z3;%-F2*z2;%（17）式
 
-            ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
-            uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
-            %-F3*z3;%(19)式
+%              ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-F2*z2;%-F2*z2;%（17）式
+%             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-F3*z3;%-F2*z2;%（17）式
+               
+        %-F3*z3;%(19)式
         case 5
 % 近似4tanh2
             f1=obj.gain2(:,1);
@@ -147,14 +166,17 @@ end
 %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
 %
 %% 外乱(加速度で与える)
-            dst = 0.8;
+            dst = -1;
+%             if t>=1
+%                 dst=0;
+%             end
 %             dst_y = 0;
 %             dst_z=0;
 %             dst=0.5*sin(2*pi*t/0.5);%
 %             dst=dst+10*cos(2*pi*t/1);
-%             dst=2;
-%             if t>=5 && t<=5.025
-%                     dst=1/0.025;
+%             dst=0;
+%             if t>=4 && t<=4.1
+%                     dst=2;
 %             end
 %%            
             vs =[ux,uy,upsi];
@@ -169,6 +191,7 @@ end
             obj.result.z2 = z2;
             obj.result.z3 = z3;
             obj.result.z4 = z4;
+            obj.result.vf = vf;
             result = obj.result;
         end
         function show(obj)

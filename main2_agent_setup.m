@@ -57,7 +57,7 @@ for i = 1:N
         agent(i).input = [0; 0; 0; 0];
     else
 %         agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        agent(i) = DRONE(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[zeros(1,6),dstr,zeros(1,3)])));                % euler angleのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",zeros(1,12))));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
@@ -136,16 +136,25 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    n=3;
+    n=1;
     switch n
         case 1 % 有限時間整定制御
-            agent(i).set_property("controller",Controller_FT(dt));
+            fzapr = 1;%z方向に適用するか:1 else:~1
+            fzsingle = 1;%tanhが一つか:1 tanh2:~1
+            fxyapr = 1;%%%xy近似するか:1 else:~1
+            fxysingle = 1;%%% tanh1:1 or tanh2 :~1
+            alp = 0.86;%alphaの値 %0.85以下まで下げてz方向負に外乱を与えるとy方向が発散する
+            erz=[0 1];%近似する範囲z
+            erxy=[0 1];%近似する範囲xy
+            agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
         case 2 % 階層型線形化
             agent(i).set_property("controller", Controller_HL(dt));                                
         case 3 %入力を簡単にいじれる % 階層型線形化
             agent(i).set_property("controller", Controller_FHL(dt));  
         case 4 % servo階層型線形化
             agent(i).set_property("controller", Controller_FHL_Servo(dt));                                
+        case 5 % SMC
+            agent(i).set_property("controller", Controller_SMC(dt)); 
     end 
       %HLControlSetting = Controller_HL(dt);
       %HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;

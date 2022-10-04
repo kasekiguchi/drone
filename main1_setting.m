@@ -3,6 +3,7 @@ if fExp
     dt = 0.025; % sampling time
 else
     dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
+    %FTは入力の変化が早いので0.01とかの方がいい
 end
 
 sampling = dt;
@@ -11,7 +12,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 15;
+    te = 10;
 end
 
 %% set connector (global instance)
