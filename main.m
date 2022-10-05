@@ -99,7 +99,7 @@ try
 
             % controller
             param(i).controller.hlc = {time.t};
-            param(i).controller.pd = {};
+            param(i).controller.pid = {};
             param(i).controller.tscf = {time.t};
             param(i).controller.ref_track = {};
 
@@ -110,20 +110,21 @@ try
             agent(i).do_controller(param(i).controller.list);
             if (fOffline); logger.overwrite("input", time.t, agent, i); end
         end
-
+        %agent.input = [0;0.3];
         agent.reference.path_ref_mpc.FHPlot(Env,CheckFH,[]);
-        length(agent.estimator.result.PreXh)
+%main
+% length(agent.estimator.result.PreXh)
         %% update state
         figure(FH)
         drawnow
 
         for i = 1:N % 状態更新
-            model_param.param = agent(i).parameter;%agent(i).model.param;
+            model_param.param = agent(i).model.param;
             model_param.FH = FH;
-            agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
+            %agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
             %          agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
-            model_param.param = agent(i).parameter;%agent(i).plant.param;
+            model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
 
@@ -151,6 +152,7 @@ try
             %                time.t = time.t + sampling;
             %            end
         else
+            logger.logging(time.t, FH, agent, []);
 
             if (fOffline)
                 time.t
@@ -178,7 +180,9 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1, "q1", "e"});
+%logger.plot({1, "q1", "e"});
+logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation

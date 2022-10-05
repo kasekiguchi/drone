@@ -1,9 +1,9 @@
-function parameter = UKFMapAssociation(obj,state,Lines,EndPoint, measured_distance, measured_angle)
+function parameter = UKFMapAssociation(obj,state,Lines,EndPoint, L, La)
 % state : ビークルの(事前)推定状態 : global
 % Lines : mapの(事前)推定値 : global
 % EndPoint : line 端点座標
-% measured_distance : レーザー計測距離
-% measured_angle : レーザー照射角度 : 絶対座標にしてある．
+% L : レーザー計測距離
+% La : レーザー照射角度 : 絶対座標にしてある．
 % C :各種定数
 % NLP : number of line parameter
 % TODO : min_dist ~= min_dist2 による違いを探る
@@ -16,20 +16,20 @@ map.c = PreMap.c;
 map.x = EndPoint.x;
 map.y = EndPoint.y;
 % Initialize each variable
-association_size = length(measured_distance);
+association_size = length(L);
 parameter.index = zeros(association_size, 1);
 %parameter.sign = zeros(association_size, 1);
 % Define variable about start and end point of map and laser
 Xs = map.x(:, 1);
 Xe = map.x(:, 2);
 Rx = state(1);
-%Xm = Rx + C.SensorRange * cos(state(3) + measured_angle);
-Xm = Rx + C.SensorRange * cos(measured_angle).*(measured_angle~=0);
+%Xm = Rx + C.SensorRange * cos(state(3) + La);
+Xm = Rx + C.SensorRange * cos(La).*(La~=0);
 Ys = map.y(:, 1);
 Ye = map.y(:, 2);   
 Ry = state(2);
-%Ym = Ry + C.SensorRange * sin(state(3) + measured_angle);
-Ym = Ry + C.SensorRange * sin(measured_angle).*(measured_angle~=0);
+%Ym = Ry + C.SensorRange * sin(state(3) + La);
+Ym = Ry + C.SensorRange * sin(La).*(La~=0);
 % Calculation of temporary variable
 x_line = Xs - Xe;
 y_line = Ys - Ye;
@@ -54,8 +54,8 @@ MaxDisP = max([DisStart,DisEnd]')';%遠い方の端点との距離を計算
 %理論距離と測定距離の差が閾値より小さい
 %遠いほうの端点よりも距離が近い
 conditionRation = (sigma > 0 & sigma < 1 & mu > 0 & mu < 1 ...
-    & Dis >= 0 & Dis <= C.SensorRange & (abs(Dis - measured_distance) < C.DistanceThreshold)...
-    &  measured_distance > C.DistanceThreshold);
+    & Dis >= 0 & Dis <= C.SensorRange & (abs(Dis - L) < C.DistanceThreshold)...
+    &  L > C.DistanceThreshold);
 Dis(~conditionRation) = inf;
 % Searching minimum distance for each laser
 
@@ -68,8 +68,8 @@ min_index(inf_cond) = 0;
 Ts = atan2(Ys - Ry,Xs -Rx);% - state(3);%reference point as front of robot for theta start point 
 Te = atan2(Ye - Ry,Xe -Rx);% - state(3);%theta end point
 TJudge = abs(Ts - Te) < pi;%レーザの始点と終点の角度がpi以上大きいかを判断，大きい場合はチェックルールが変わる．
-[~,Tsidx] = min(abs(Ts - measured_angle),[],2);%ロボットと端点の始点の直線に最も近い角度を持つレーザのインデックス
-[~,Teidx] = min(abs(Te - measured_angle),[],2);%ロボットと端点の終点の直線に最も近い角度を持つレーザのインデックス
+[~,Tsidx] = min(abs(Ts - La),[],2);%ロボットと端点の始点の直線に最も近い角度を持つレーザのインデックス
+[~,Teidx] = min(abs(Te - La),[],2);%ロボットと端点の終点の直線に最も近い角度を持つレーザのインデックス
 [Tmin,~] = min([Tsidx,Teidx],[],2);%小さい方のインデックス
 [Tmax,~] = max([Tsidx,Teidx],[],2);%デカい方のインデックス
 %各直線に対応付けされたレーザを表示
@@ -89,7 +89,7 @@ for ci = 1:length(Estock)
         Overidx = Tmin(ci)<FTidx & Tmax(ci)>FTidx;%条件に合わないレーザの探索
         min_index(Overidx) = 0;%条件に合わないレーザをはじく
     else
-        Overidx = 0>FTidx & FTidx<Tmin(ci) | Tmax(ci)>FTidx & FTidx<length(measured_angle);
+        Overidx = 0>FTidx & FTidx<Tmin(ci) | Tmax(ci)>FTidx & FTidx<length(La);
         min_index(Overidx) = 0;%
     end
 end
@@ -134,6 +134,6 @@ Dis = sigma .* C.SensorRange;
 del_ids = min_dist2 ==Inf;
 min_index2(del_ids)=0;
 min_dist2(del_ids) =0;
-parameter.index = min_index2;
-parameter.distance = min_dist2;
+parameter.id = min_index2;
+parameter.d = min_dist2;
 end

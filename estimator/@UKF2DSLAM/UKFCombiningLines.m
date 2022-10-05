@@ -8,21 +8,21 @@ C = obj.constant;
 if isempty(map)
     parameter = s;
 else
-    for i = 1:size(s.index,1)
+    for i = 1:size(s.id,1)
         % Select matching line : all をとることで始点と終点両方が満たしているもののみ取り出す．
         close_ids = find(all(abs(map.a * s.x(i, :) + map.b * s.y(i, :) + map.c) < C.LineThreshold, 2));
         % Check the distance of line segments in map and s
         lap_ids = IsClose(s.x(i,:),s.y(i,:),map.x(close_ids,:),map.y(close_ids,:),C.LineDistance); % close_idsのなかのid
         match_ids = close_ids(lap_ids);
-        flag_index= match_ids;
-        if ~isempty(flag_index) % 結合すべきラインがある場合
+        flag_id= match_ids;
+        if ~isempty(flag_id) % 結合すべきラインがある場合
             % Combine map and measurement. Expect for first is not considered because it is the role for 'OptimizeMap' function.
-            param = UKFCombiningTwoLines(obj, flag_index(1), s, i, C);
-            map.x(flag_index(1), :) = param.x;
-            map.y(flag_index(1), :) = param.y;
+            param = UKFCombiningTwoLines(obj, flag_id(1), s, i, C);
+            map.x(flag_id(1), :) = param.x;
+            map.y(flag_id(1), :) = param.y;
         else
             % Append the measurement into the map
-            map.index(end + 1, :) = s.index(i, :);
+            map.id(end + 1, :) = s.id(i, :);
             map.x(end + 1, :) = s.x(i, :);
             map.y(end + 1, :) = s.y(i, :);
             map.a(end + 1, :) = s.a(i, :);

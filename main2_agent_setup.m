@@ -64,10 +64,10 @@ for i = 1:N
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-        initial_state(i).p = [0;-1];
-        initial_state(i).q = 0;
+        initial_state(i).p = [92;1];%[92;1];%
+        initial_state(i).q = pi/2;%pi/2-0.05;
         initial_state(i).v = 0;
-        agent(i) = DRONE(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","additional",struct("K",diag([1,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
+        agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
     end
 
     %% model
@@ -78,8 +78,7 @@ for i = 1:N
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     %agent(i).set_model(Model_Three_Vehicle(dt,initial_state(i),i)); % for exp % 機体番号（ESPrのIP）
-    agent(i).set_model(Model_Vehicle45(dt,initial_state(i),i));
-    agent.set_model_error("K",diag([-0.1,0]));        
+    agent(i).set_model(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([1,1]),"D",0.1)));
     close all
     %% set input_transform property
     if fExp                                                                               % isa(agent(i).plant,"Lizard_exp")
@@ -108,7 +107,7 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
-    agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-3 ,'seed',3));
+    agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-5 ,'seed',3));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -143,7 +142,7 @@ for i = 1:N
     %agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
-    agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
+    %agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
@@ -153,6 +152,7 @@ for i = 1:N
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
+    agent(i).set_property("controller",Controller_PID(dt));
     %% 必要か？実験で確認 : TODO
     param(i).sensor.list = cell(1, length(agent(i).sensor.name));
     param(i).reference.list = cell(1, length(agent(i).reference.name));

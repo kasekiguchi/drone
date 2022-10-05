@@ -13,6 +13,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
         O = [] % 回転中心
         r  % 回転半径
         th = [];
+        constant
     end
 
     methods
@@ -34,6 +35,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             obj.SensorRange = param{1,3};
             obj.dt = obj.self.model.dt;
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
+            obj.constant = param{1,4};
         end
 
         function  result= do(obj,param)
@@ -45,7 +47,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             % ここから相対座標上での議論
             sensor = obj.self.sensor.result;
             % 相対座標でのline parameterを算出
-            LP = UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0], obj.self.estimator.ukfslam.constant);
+            LP = UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0], obj.constant);
             % x, y が全て０のLPを削除 UKFCombiningLinesで使っているフィールドだけ削除
             tmpid=sum([LP.x,LP.y],2)==0;
             LP.x(tmpid,:) = [];
@@ -75,7 +77,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
 
             ref = zeros(4,obj.Horizon);%set data size[x ;y ;theta;v]
 
-            del = [-a.*c,-b.*c]./(a.^2+b.^2); % 垂線の足
+            del = -[a.*c,b.*c]./(a.^2+b.^2); % 垂線の足
 
             ds = [Xs,Ys]; % wall 始点
             de = [Xe,Ye]; % wall 終点
@@ -235,12 +237,6 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
 
         function [] = FHPlot(obj,Env,FH,flag)
             agent = obj.self;
-            figure(FH)
-
-            clf(FH)
-            grid on
-            axis equal
-            hold on
             MapIdx = size(Env.floor.Vertices,3);
             for ei = 1:MapIdx
                 tmpenv(ei) = polyshape(Env.floor.Vertices(:,:,ei));
@@ -248,27 +244,43 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             p_Area = union(tmpenv(:));
             %plantFinalState
             pstate = agent.plant.state.p(:,end);
+            pstateq = agent.plant.state.q(:,end);
             pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
             pstatesquare =  polyshape(pstatesquare');
-            pstatesquare =  rotate(pstatesquare,180 * agent.plant.state.q(end) / pi, agent.plant.state.p(:,end)');
-            plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
-            %    agent.sensor.LiDAR.show(pstate,agent.plant.state.q(end));
+            pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
+
             %modelFinalState
             estate = agent.estimator.result.state.p(:,end);
+            estateq = agent.estimator.result.state.q(:,end);
             estatesquare = estate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
             estatesquare =  polyshape( estatesquare');
-            estatesquare =  rotate(estatesquare,180 * agent.estimator.result.state.q(end) / pi, agent.estimator.result.state.p(:,end)');
-            plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+            estatesquare =  rotate(estatesquare,180 * estateq / pi, estate');
+            if isfield(agent.estimator.result,'map_param')
             Ewall = agent.estimator.result.map_param;
             Ewallx = reshape([Ewall.x,NaN(size(Ewall.x,1),1)]',3*size(Ewall.x,1),1);
             Ewally = reshape([Ewall.y,NaN(size(Ewall.y,1),1)]',3*size(Ewall.y,1),1);
+            else
+                Ewallx = nan;
+                Ewally = nan;
+            end
             %reference state
             RefState = agent.reference.result.state.p(1:3,:);
             fWall = agent.reference.result.focusedLine;
 
-            Ref = plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-            Wall = plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-            plot(Ewallx,Ewally,'g-');
+            figure(FH)
+
+            clf(FH)
+            grid on
+            axis equal
+            obj.self.show(["sensor","lrf"],[pstate;pstateq]);
+            hold on
+            plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+            %    agent.sensor.LiDAR.show();
+            plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+
+            plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
+            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+            plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
             O = agent.reference.result.O;
             plot(O(1),O(2),'r*');
