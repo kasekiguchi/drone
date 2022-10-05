@@ -49,12 +49,12 @@ methods
 
         arguments
             args
-            param
+            param % parameter class
         end
-
-        obj.parameter = param;
         obj.plant = MODEL_CLASS(args);
-        obj.plant.param = obj.parameter.get(obj.parameter.parameter_name, "plant");
+        addprop(obj.plant,"parameter");
+        obj.plant.parameter = param;
+        obj.plant.param = param.get();
     end
 
 end
@@ -117,9 +117,10 @@ end
 
 methods % Set methods
 
-    function set_model(obj, args)
+    function set_model(obj, args, param)
         obj.model = MODEL_CLASS(args);
-        obj.model.param = obj.parameter.get(args.parameter_name);
+        obj.parameter = param;
+        obj.model.param = obj.parameter.get();
     end
 
 end
@@ -243,10 +244,54 @@ methods % set, do property
     end
 
     function set_model_error(obj, p, v)
-        obj.parameter.set_model_error(p, v);
-        obj.plant.param = obj.parameter.get(obj.parameter.parameter_name, "plant");
+        % update plant parameter
+        % plant = model + error;
+        ps=obj.parameter.get(p,'struct');
+        if isstruct(v)
+            for i = v
+                ps.(i) = ps.(i) + v.(i);
+            end
+        else
+            ps.(p) = ps.(p) + v;
+        end
+        obj.plant.parameter.set(p,ps);
+        obj.plant.param = obj.plant.parameter.get();
     end
 
+    function update_model_param(obj, p, v)
+        % update model parameter
+        % this update doesn't affect plant parameter
+        % p : str array : target parameter
+        % v : struct : with updated value
+        % parameter.(p(i)) = v.(p(i)) 
+        % example
+        % obj.update_model_param(["mass","l"],struct("mass",1,"l",1));
+        obj.parameter.set(p,v);
+        obj.model.param = obj.parameter.get();
+    end
+
+    function show(obj,str,params)
+        arguments
+            obj
+            str
+            params = [];
+        end
+        nl = obj.(str(1)).name;
+        if isempty(params)
+            params = cell(size(nl));
+        end
+        if length(str) > 1
+            tmp = obj;
+            for i = str
+                tmp = tmp.(i);
+            end
+            tmp.show(params);
+        else
+            for i = 1:length(nl)
+                obj.(str).(nl(i)).show(params{i});
+            end
+        end
+    end
 end
 
 end

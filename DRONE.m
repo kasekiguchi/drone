@@ -18,8 +18,6 @@ methods
         if contains(args.type, "EXP")
             obj.plant = DRONE_EXP_MODEL(args);
         end
-
-        obj.parameter = param;
     end
 
 end

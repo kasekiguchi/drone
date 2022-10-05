@@ -16,24 +16,22 @@ classdef TSCF_VEHICLE < CONTROLLER_CLASS
         end
         
         function result=do(obj,param,~)
-            % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
+            % param.strans : 状態変換
+            % param.rtrans : リファレンス変換
             model = obj.self.estimator.result;
-            ref = obj.self.reference.result;
-            p = model.state.p(1:2);
-            r = ref.state.p(1:2);
-            if isprop(ref.state,'v')
-                Vr = ref.state.v(1:2);
-            else
-                Vr = [0;0];
-            end
-            th = model.state.q(3);
+            ref = obj.self.reference.result(:,end); % MPC reference に対応するため
+            [p,v,th] = param.strans(model.state);
+            [rp,rv,rth] = param.rtrans(ref.state);
+
             e = [cos(th);sin(th)];
             ep = [-sin(th);cos(th)];
             dp = r - p;
             u1=obj.F1*(Vr+dp)'*e;
             u2=obj.F2*(Vr+dp)'*ep/(u1+obj.eps);
 
-            obj.result.input = [u1*e;0;0;0;u2];
+            obj.result.input(1) = u1*e; % 速度 or 加速度
+            obj.result.input(end) = u2; % 角速度 or 各加速度
+
             obj.self.input = obj.result.input;
             result = obj.result;
         end

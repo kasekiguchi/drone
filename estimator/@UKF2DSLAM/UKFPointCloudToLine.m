@@ -9,7 +9,7 @@ function parameter = UKFPointCloudToLine(obj,D, A, S)
 % [output] parameter は以下のフィールドを持つ
 % a,b,c : 直線のパラメータ
 % x, y : 各行[始点, 終点] のx, y 座標
-% index : 各行[始点, 終点] のレーザーindex
+% id : 各行[始点, 終点] のレーザーid
 
 C = obj.constant;
 
@@ -25,9 +25,9 @@ zids = D==0; % zero indices
 cids = find(~(gids | zids));% 次の点とつながるインデックス：連続している塊がクラスタ
 cnids = circshift(cids,-1);
 cpids = circshift(cids,1);
-eids = cids(find((cnids - cids)~=1))+1; % クラスタ終わりインデックス
+eids = cids((cnids - cids)~=1)+1; % クラスタ終わりインデックス
 tmp = (cids - cpids);
-sids = cids(find(tmp~=1)); % クラスタ始めインデックス
+sids = cids(tmp~=1); % クラスタ始めインデックス
 fLoop = 0;
 if tmp(sids(1)) == 1 - length(D)% ループしているか判別 : true でループ
     fLoop = 1;
@@ -90,7 +90,7 @@ for i = 1:length(Lc)
         perp = projection(l(k,:),[XY(s,:);XY(ns,:)]);
         X(k,:) = perp(:,1)';%[XY(s,1),XY(ns,1)];
         Y(k,:) = perp(:,2)';%[XY(s,2),XY(ns,2)];
-        index(k,:) = [s0+s,s0+ns];
+        id(k,:) = [s0+s,s0+ns];
         k = k+1;
         s = ns + 1;
     end
@@ -103,7 +103,7 @@ X(tmpid,:) = [];
 Y(tmpid,:) = [];
 l(tmpid,:) = [];
 lc(tmpid) = [];
-index(tmpid,:) = [];
+id(tmpid,:) = [];
 
 % Store the parameters
 % body 座標から慣性座標に変換（姿勢については考慮済みなので平行移動する）
@@ -115,7 +115,7 @@ parameter.b = l(:,2);
 parameter.c = d;
 parameter.x = X + S(1)*[1,1];
 parameter.y = Y + S(2)*[1,1];
-parameter.index = mod(index,length(D));
+parameter.id = mod(id,length(D));
 
 end
 

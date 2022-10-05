@@ -40,7 +40,10 @@ classdef DRAW_WHILL
             m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
             B = param.frame_size;
             figure();
-            ax = axes('XLim',[m(1)-B(1) M(1)+B(1)],'YLim',[m(2)-B(2) M(2)+B(2)],'ZLim',[0 M(3)+B(3)]);
+            if length(M) > 2
+                B(3) = M(3) + B(3);
+            end
+            ax = axes('XLim',[m(1)-B(1) M(1)+B(1)],'YLim',[m(2)-B(2) M(2)+B(2)],'ZLim',[0 B(3)]);
             xlabel(ax,"x [m]");
             ylabel(ax,"y [m]");
             zlabel(ax,"z [m]");
@@ -141,8 +144,11 @@ classdef DRAW_WHILL
                 param.gif = 0;
             end
             t = data.t;
-            p = data.p;
-            q = data.q(:,3);
+            p = data.p;           
+            q = data.q(:,end);
+            if size(p,2) < 3
+                p = [p,zeros(size(p,1),1)];
+            end
 
             if param.gif
                 sizen = 256;

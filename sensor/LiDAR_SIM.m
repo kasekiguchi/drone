@@ -92,7 +92,6 @@ methods
 
         result.region.Vertices = (R * result.region.Vertices')';
         result.sensor_points = (R * result.sensor_points')';
-        result.state = {};
 
         if isempty(obj.seed)
             rng('shuffle');
@@ -109,12 +108,15 @@ methods
         obj.result = result;
     end
 
-    function show(obj, p, q)
-
+    function show(obj, pq,q)
         arguments
             obj
-            p = [0; 0];
+            pq
             q = 0;
+        end
+        p = pq(1:2);
+        if length(pq) >2
+            q = pq(end);
         end
 
         if ~isempty(obj.result)
@@ -122,7 +124,9 @@ methods
             R = [cos(q), -sin(q); sin(q), cos(q)];
             %points = (R'*(points'-p))';
             points = (R * points' + p)';
-            plot([points(:, 1); 0], [points(:, 2); 0], 'r-');
+            pp = pplot([points(:, 1); p(1)], [points(:, 2); p(2)]);
+            set(pp,'EdgeAlpha',0.05);
+            set(pp,'EdgeColor','g');
             hold on;
             text(points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
             region = polyshape((R * obj.result.region.Vertices' + p)');
@@ -137,5 +141,18 @@ methods
     end
 
 end
+
+end
+function [ p ] = pplot(x,y,z)
+%PPLOT Draw line as patch
+
+if nargin==2
+    z=0;
+end
+
+x=reshape(x,[],1);
+y=reshape(y,[],1);
+
+p=patch([x;flipud(x)],[y;flipud(y)],z*ones(2*size(x,1),1),'b');
 
 end
