@@ -94,7 +94,7 @@ end
             xr = reference(time, HO, DT);
             xr(3, end) = xr(3, end) + 0.01;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, xr(:, end), time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, xr(:, 1), time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -125,6 +125,13 @@ end
             data.bestcost(idx) = agent.controller.result.bestcost;
 %             data.state{idx} = state_data(:, 1, BestcostID);
 %             data.input{idx} = u;
+            state_monte = agent.estimator.result.state;
+            ref_monte = agent.reference.result.state;
+            fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
+                    state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                    state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                    state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
+                    ref_monte.p(1), ref_monte.p(2), ref_monte.p(3));
 
         %% update state
         % with FH
@@ -207,7 +214,7 @@ logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid o
 logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
 %% errorで終了したとき
-agent(1).reference.timeVarying.show(logger)
+% agent(1).reference.timeVarying.show(logger)
 Fontsize = 15;  timeMax = te;
 size_best = length(data.bestcost);
 figure(9); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]); xlabel("Time [s]"); ylabel("Evaluation"); set(gca,'FontSize',Fontsize); grid on;
@@ -253,7 +260,7 @@ function xr = reference(time, H, dt)
 %     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
 %     X = subs(z, t, Tv);
     %-- ホライゾンごとのreference
-    if time.t <= 10
+    if xr(3,end) < 1.0
         for h = 1:H
             xr(:, h) = [0;0;a*((time.t-StartT)+dt*h)^3+b*((time.t-StartT)+dt*h)^2+rz0];
         end
