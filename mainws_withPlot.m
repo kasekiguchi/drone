@@ -34,12 +34,12 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-       initial(i).p = [89;-2];%四角経路
+%        initial(i).p = [1;-4];%四角経路
        initial(i).q = [0];
-          initial(i).p = [0;-1];%四角経路
+          initial(i).p = [0;-2.5];%四角経路
           initial(i).q = [0];
 %         initial(i).p = [92;1];%四角経路
-%         initial(i).q = [pi/2];
+        initial(i).q = [pi/3];
     
     initial(i).v = [0];
     initial(i).w = [0];
@@ -86,7 +86,7 @@ for i = 1:N
     agent(i).set_property("estimator",Estimator_UKFSLAM_WheelChairA(agent(i),SensorRange));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference=[];
-    velocity = 1;%目標速度
+    velocity = 0.5;%目標速度
     w_velocity = 0.7;%曲がるときの目標角速度
 
         

@@ -16,14 +16,14 @@ classdef PtoP_contoller <CONTROLLER_CLASS
             obj.self = self;
             obj.param.H = param.H;
             obj.param.dt = param.dt;
+            obj.param.k_1 = 1;
+            obj.param.k_2 = 1;
         end
         
         function result = do(obj,param)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
             ref = obj.self.reference.result.state;
             obj.param.Xr = [obj.self.estimator.result.state.get(),ref.xd];
-            
+%             state = ;
             result = obj.result;
 
         end
