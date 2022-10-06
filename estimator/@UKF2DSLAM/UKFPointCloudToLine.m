@@ -99,6 +99,9 @@ end
 
 % 適切に求まらなかった直線を削除 % TODO : そもそも何で生じるのか確認
 tmpid=sum([X,Y],2)==0;
+if sum(tmpid)~=0
+    error("ACSL : something wrong");
+end
 X(tmpid,:) = [];
 Y(tmpid,:) = [];
 l(tmpid,:) = [];

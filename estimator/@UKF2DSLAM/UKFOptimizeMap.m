@@ -47,7 +47,8 @@ function [OptMap, RegistFlag] = UKFOptimizeMap(obj)
                 % Combining maps
                 param = map;
                 for k = 1:length(matching_list)
-                    tmp = UKFCombiningTwoLines(param, i, map, matching_list(k, 1), C);
+                    %tmp = obj.UKFCombiningTwoLines(param, i, map, matching_list(k, 1), C);
+                    tmp = obj.UKFCombiningTwoLines(i, map, matching_list(k, 1));
                     param.x(i, :) = tmp.x;
                     param.y(i, :) = tmp.y;
                 end

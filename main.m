@@ -1,4 +1,4 @@
-%% Drone 班用共通プログラム update sekiguchi
+%% Drone 班用共通プログラム
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
@@ -101,7 +101,8 @@ try
             param(i).controller.hlc = {time.t};
             param(i).controller.pid = {};
             param(i).controller.tscf = {time.t};
-            param(i).controller.ref_track = {};
+            param(i).controller.mpc = {};
+
 
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -110,10 +111,7 @@ try
             agent(i).do_controller(param(i).controller.list);
             if (fOffline); logger.overwrite("input", time.t, agent, i); end
         end
-        %agent.input = [0;0.3];
         agent.reference.path_ref_mpc.FHPlot(Env,CheckFH,[]);
-%main
-% length(agent.estimator.result.PreXh)
         %% update state
         figure(FH)
         drawnow
