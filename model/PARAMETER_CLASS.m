@@ -53,7 +53,11 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
                         if ismatrix(val)
                             val = reshape(val,[1,numel(val)]);
                         end
-                        v = [v,val];
+                        if exist("v","var")
+                            v = [v,val];
+                        else
+                            v = val;
+                        end
                     else
                         v.(p(i))= obj.(p(i));
                     end
@@ -73,9 +77,9 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
                     if strcmp(obj.type,"row")
                         val = obj.(obj.parameter_name(i));
                         if size(val,2) > 1
-                            val = reshape(val,[numel(val),1]);
+                            val = reshape(val,[1,numel(val)]);
                         end
-                        obj.parameter=[obj.parameter;val];
+                        obj.parameter=[obj.parameter, val];
                     else
                         obj.parameter.(obj.parameter_name(i)) = obj.(obj.parameter_name(i));
                     end

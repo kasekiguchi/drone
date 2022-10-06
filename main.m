@@ -12,7 +12,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
-fMotive = 0 % Motiveを使うかどうか
+fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
 run("main1_setting.m");
@@ -111,7 +111,7 @@ try
             agent(i).do_controller(param(i).controller.list);
             if (fOffline); logger.overwrite("input", time.t, agent, i); end
         end
-        agent.reference.path_ref_mpc.FHPlot(Env,CheckFH,[]);
+        %agent.reference.path_ref_mpc.FHPlot(Env,CheckFH,[]);
         %% update state
         figure(FH)
         drawnow
@@ -119,7 +119,7 @@ try
         for i = 1:N % 状態更新
             model_param.param = agent(i).model.param;
             model_param.FH = FH;
-            %agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
+            agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
             %          agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
             model_param.param = agent(i).plant.param;
