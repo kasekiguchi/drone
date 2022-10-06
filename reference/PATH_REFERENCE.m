@@ -31,7 +31,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             obj.PreTrack = obj.self.model.state.get();%位置,姿勢,速さ
             obj.result.PreTrack = obj.PreTrack;
             obj.Horizon = param{1,2};
-            obj.step = 10;
+            obj.step = 3;
             obj.SensorRange = param{1,3};
             obj.dt = obj.self.model.dt;
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
@@ -47,7 +47,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             % ここから相対座標上での議論
             sensor = obj.self.sensor.result;
             % 相対座標でのline parameterを算出
-            LP = UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0], obj.constant);
+            LP = obj.self.estimator.ukfslam.UKFPointCloudToLine(sensor.length, sensor.angle, [0;0;0]);
             % x, y が全て０のLPを削除 UKFCombiningLinesで使っているフィールドだけ削除
             tmpid=sum([LP.x,LP.y],2)==0;
             LP.x(tmpid,:) = [];
@@ -55,7 +55,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             LP.a(tmpid,:) = [];
             LP.b(tmpid,:) = [];
             LP.c(tmpid,:) = [];
-            LP.index(tmpid,:) = [];
+            LP.id(tmpid,:) = [];
 
             a = LP.a;
             b = LP.b;

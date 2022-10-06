@@ -64,8 +64,8 @@ for i = 1:N
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-        initial_state(i).p = [92;1];%[92;1];%
-        initial_state(i).q = pi/2;%pi/2-0.05;
+        initial_state(i).p = [0;-1];%[92;1];%
+        initial_state(i).q = 0;%pi/2-0.05;
         initial_state(i).v = 0;
         agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
     end
@@ -107,7 +107,7 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
-    agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-5 ,'seed',3));
+    agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -122,7 +122,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
     %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
-    agent(i).set_property("estimator",Estimator_UKF2DSLAM_Vehicle(agent(i),agent(i).sensor.lrf.radius));%加速度次元入力モデルのukfslam車両も全方向も可
+    agent(i).set_property("estimator",Estimator_UKF2DSLAM_Vehicle(agent(i)));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
@@ -133,7 +133,7 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_PathCenter(agent.sensor.lrf.radius));
+    agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
@@ -150,9 +150,11 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller", struct("type","TSCF_VEHICLE","name","tscf","param",struct("F1",0.3,"F2",0.2)));
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
+    agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
-    agent(i).set_property("controller",Controller_PID(dt));
+    %agent(i).set_property("controller",Controller_PID(dt));
+    %agent(i).set_property("controller",Controller_APID(dt));
     %% 必要か？実験で確認 : TODO
     param(i).sensor.list = cell(1, length(agent(i).sensor.name));
     param(i).reference.list = cell(1, length(agent(i).reference.name));
