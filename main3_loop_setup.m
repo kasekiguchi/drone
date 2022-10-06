@@ -21,7 +21,11 @@ if fExp && ~fMotive
 end
 
 disp('Press Enter key to start.');
-FH = figure('position', [0 0 eps eps], 'menubar', 'none');
+if ~fDebug | fExp
+    FH = figure('position', [0 0 eps eps], 'menubar', 'none');
+else
+    FH = figure();
+end
 
 w = waitforbuttonpress;
 
