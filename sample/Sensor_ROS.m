@@ -5,7 +5,8 @@ function Sensor=Sensor_ROS(param)
     Sensor.param=param;
     Sensor.param.state_list = ["p"];
     Sensor.param.num_list = [3,3];
-    Sensor.param.subTopic = ["/mavros/local_position/pose"];
-    Sensor.param.subName = ["p"];
-    Sensor.param.ROSHostIP = param.ROSHostIP; %% check
+    Sensor.param.subTopic = ros2node("/sensormatlab",param.DomainID);
+    Sensor.param.subTopicName = ["/sensor_state"];
+    Sensor.param.subMsgName = {'turtlebot3_msgs/SensorState'};
+    Sensor.param.DomainID = param.DomainID; %% check
 end
