@@ -98,7 +98,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
         end
         for i = 1:length(obj.parameter_name)
             if isprop(obj,obj.parameter_name(i))
-                obj.parameter=[obj.parameter;obj.(obj.parameter_name(i))];
+                obj.parameter=[obj.parameter,obj.(obj.parameter_name(i))];
             else % propertyに無いパラメータを設定する場合
                 addprop(obj,parameter_name(i));
                 obj.(parameter_name(i)) = param.additional.(parameter_name(i));
@@ -136,7 +136,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames& dynamicprops
                 else
                     v = [];
                     for i = 1:length(p)
-                        v = [v,obj.(p(i))_];
+                        v = [v,obj.(p(i))];
                     end
                 end
             end
