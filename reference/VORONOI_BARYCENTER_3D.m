@@ -27,7 +27,8 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             %% 共通設定１：ボロノイセル確定
             sensor = obj.self.sensor.result;
             state = obj.self.estimator.result.state;
-            time = Param;
+            N = Param{1};
+            Nb = Param{2};
             if isfield(sensor,'neighbor')
                 neighbor = sensor.neighbor; % 通信領域内の他機体位置　グローバル座標
             elseif isfield(sensor,'rigid')
@@ -36,12 +37,10 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
 
             %% 重み分布
             % 対象領域の重要度を計算
-            if ~isempty(neighbor) && obj.id == 1
-                Ps = [state.p';neighbor(:,1)';neighbor(:,2)';obj.param.Vertices];
-            elseif ~isempty(neighbor) && obj.id == 2
-                Ps = [neighbor(:,1)';state.p';neighbor(:,2)';obj.param.Vertices];
-            elseif ~isempty(neighbor) && obj.id == 3
-                Ps = [neighbor(:,1)';neighbor(:,2)';state.p';obj.param.Vertices];
+            if ~isempty(neighbor)
+                Ps = [state.p';neighbor(:,1:N - Nb -1)'];
+                Ps = circshift(Ps,[obj.id - 1,0]);
+                Ps = [Ps;obj.param.Vertices];
             else
                 Ps = [state.p';obj.param.Vertices];
             end
