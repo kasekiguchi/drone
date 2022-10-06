@@ -62,7 +62,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- 目標値等
 %     Params.ref_input = [0.269 * 9.81 / 4+0.1; 0.269 * 9.81 / 4+0.1; 0.269 * 9.81 / 4+0.1; 0.269 * 9.81 / 4+0.1];
-    Params.ref_input = [0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4];
+%     Params.ref_input = [0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4];
+    ur = [0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4];
     Params.ref_v = [0; 0; 0.50];
 %     previous_state  = zeros(16, Params.H);
 
@@ -154,17 +155,13 @@ end
                 ref_monte = agent.reference.result.state;
             %-- 入力の基準
                 previous_input = agent.input;
-                                 
-            %-- 制約条件
-                Fsub = @(sub_monte1) sub_monte1 > 0;
-                subCheck = zeros(Params.Particle_num, 1);
+                Params.ur = ur;
             %-- 状態の表示
                 fprintf("pos: %f %f %f \t vel: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f",...
                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                     agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                     ref_monte.p(1), ref_monte.p(2), ref_monte.p(3));
-
             %-- 初期値の設定
                 if idx == 1
                     initial_u1 = 0.269 * 9.81 / 4;   % 初期値
@@ -178,10 +175,7 @@ end
                     initial_u4 = agent.input(4);
                 end
                 x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
-                previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
-%                 if idx == 1
-%                     previous_state = [agent.estimator.result.state.get(); agent.input]; % 前の状態の取得
-%                 end
+%                 previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
 
                 problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
                 problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
@@ -275,7 +269,7 @@ agent(1).animation(logger,"target",1);
 %%
 % logger.save();
 function xr = Reference(params, time)
-    xr = zeros(params.total_size, params.H);
+    xr = zeros(params.state_size, params.H);
     rz = 1; % 目標
     rz0 = 0;% スタート
     T = 10; % かける時間
@@ -289,14 +283,11 @@ function xr = Reference(params, time)
         for h = 1:params.H
             xr(1:3, h) = [0;0;a*((time.t-StartT)+params.dt*h)^3+b*((time.t-StartT)+params.dt*h)^2+rz0];
             xr(4:12,h) = [0;0;0;0;0;0.5;0;0;0];
-%             xr(13:16,h) = params.ref_input+1;
-            xr(13:16,h) = [params.ref_input];
         end
     else
         for h = 1:params.H
             xr(1:3, h) = [0;0;1];   % 位置
             xr(4:12,h) = [0;0;0;0;0;0.5;0;0;0];   % 位置以外 
-            xr(13:16,h) = params.ref_input;     % 入力
         end
     end
 end
@@ -318,7 +309,7 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     tildeXw = Xw - params.xr(10:12,:);
     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
     tildeUpre = U - Agent.input;
-    tildeUref = U - params.ref_input;
+    tildeUref = U - params.ur;
     
 %-- 状態及び入力のステージコストを計算 長くなるから分割
     stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * params.Weight.P         * tildeXp(:, L),   1:params.H-1);
