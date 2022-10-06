@@ -12,8 +12,9 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
-fMotive = 1 % Motiveを使うかどうか
+fMotive = 0 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
+fDebug = 1;
 
 run("main1_setting.m");
 
@@ -35,8 +36,6 @@ run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
-
-CheckFH = figure();
 
 try
 
@@ -111,7 +110,10 @@ try
             agent(i).do_controller(param(i).controller.list);
             if (fOffline); logger.overwrite("input", time.t, agent, i); end
         end
-        %agent.reference.path_ref_mpc.FHPlot(Env,CheckFH,[]);
+
+        if fDebug
+            agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+        end
         %% update state
         figure(FH)
         drawnow
