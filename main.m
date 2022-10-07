@@ -191,7 +191,7 @@ logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 %% animation
 % VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 % agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-% agent(1).animation(logger,"target",1:N);
+agent(1).animation(logger,"target",1:N);
 
 %%
 %logger.save();

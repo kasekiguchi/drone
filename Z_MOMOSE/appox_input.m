@@ -93,7 +93,7 @@ titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.86;%alphaの初期値
+alp(anum)=0.84;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -101,7 +101,7 @@ end
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 dt=0.025;
-k=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+k=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 %k(3:4)=[80 40];
 kft=k;
 kft(1)=1*kft(1);
@@ -324,20 +324,23 @@ dt=0.025;
 k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
 
 x0=[2,2,2];
+% x0=[2,2];
 fvals12z=zeros(2,1);
 gain_ser1z=["","f1","a1","k1"];
-% gain_ser1=["","f1","a1","k1"];
+% gain_ser1z=["","f1","k1"];
 er=1; %近似する範囲を指定
 for i=1:2
 fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,0, er));
+% fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + tanh(x(1)*e) + x(2)*e ) ,0, er));
 [x,fval] = fminsearch(fun,x0) ;
 fvals12z(i) = 2*fval
 gain_ser1z(i+1,:)=[titlex(i),x];
 
-e= -1:0.001:1;      
-% e= -2:0.001:2;
+% e= -1:0.001:1;      
+e= -2:0.001:2;
 ufb(i,:)= -k(i)*e;
 utanh(i,:)= - x(1)*tanh(x(2)*e) - x(3)*e;%%
+% utanh(i,:)= - tanh(x(1)*e) - x(2)*e;%%
 u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
 % sigma(i,:)=utanh(i,:)-u(i,:);
 fig=figure(i);
@@ -407,6 +410,24 @@ xlabel('error','FontSize',fosi);
 ylabel('input','FontSize',fosi);
 
 end
+%% 
+syms z(t) ub A F K
+syms sz  real
+syms dsz  real
+syms ddsz real
+syms dddsz real
+ub=-F*tanh(A*z(t)) -K*z(t)
+dub = diff(ub,t)
+ddub = diff(dub,t)
+dddub = diff(ddub,t)
+
+u = subs(ub,z,sz)
+%z(t) diff(z(t), t)
+du = subs(dub,[z(t) diff(z(t), t)],[sz dsz])
+%z(t) diff(z(t), t) diff(z(t), t, t)
+ddu = subs(ddub,[z(t) diff(z, t) diff(z(t), t, t)],[sz dsz ddsz])
+%z(t) diff(z(t), t) diff(z(t), t, t) diff(z(t), t, t, t)
+dddu = subs(dddub,[z(t) diff(z(t), t) diff(z(t), t, t) diff(z(t), t, t, t)],[sz dsz ddsz dddsz])
 %% smc
 dt=0.025;
 Ac4 = diag([1,1,1],1);

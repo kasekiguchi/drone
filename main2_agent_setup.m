@@ -121,11 +121,11 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
-     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
+%      agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
 %     agent(i).set_property("reference",Reference_Time_Varying("PtoP_ref",[0,0,1]));%PtoP
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 
-%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[1,1,0.15]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{8,[0;0;1],[1,1,0.2]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;0],[2,2,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
@@ -143,7 +143,7 @@ for i = 1:N
             fzsingle = 1;%tanhが一つか:1 tanh2:~1
             fxyapr = 1;%%%xy近似するか:1 else:~1
             fxysingle = 1;%%% tanh1:1 or tanh2 :~1
-            alp = 0.86;%alphaの値 %0.85以下まで下げてz方向負に外乱を与えるとy方向が発散する
+            alp = 0.85;%alphaの値 0.8だとゲインの位置の重みを大きくすると発散
             erz=[0 1];%近似する範囲z
             erxy=[0 1];%近似する範囲xy
             agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));

@@ -13,6 +13,7 @@ classdef FTC < CONTROLLER_CLASS
         gain2
         fzFT
         fzapr
+        n
     end
     
     methods
@@ -27,6 +28,12 @@ classdef FTC < CONTROLLER_CLASS
             obj.gain1 = param.gain1;%tanh1
             obj.gain2 = param.gain2;%tanh2
             obj.fzapr = param.fzapr;
+            
+            if param.fxyapr==1
+                obj.n = 4;
+            else
+                obj.n = 1;
+            end
         end
         
         function result = do(obj,param,~)
@@ -88,9 +95,9 @@ classdef FTC < CONTROLLER_CLASS
             %vs = obj.Vs(z2,z3,z4,F2,F3,F4);%%%%%%%%%%%%%%%%%%%
             
 %% x,y,psiの入力
-n =4;% 1:有限整定 4:tanh1 5:tanh2 （2,3は使わない）
+% 1:有限整定 4:tanh1 5:tanh2 （2,3は使わない）
 % gain_xy=2;%1m/s^2なら2くらいがいい
-switch n
+switch obj.n
         case 1
 %有限整定
 % 
@@ -175,10 +182,16 @@ end
 %             dst=0.5*sin(2*pi*t/0.5);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=0;
-%             if t>=4 && t<=4.1
+%             if t>=5 && t<=5.1
 %                     dst=2;
 %             end
-%%            
+%特定の位置で外乱を与える
+%             dst=1;xxx0=0.5;TT=0.5;%TT外乱を与える区間
+%             xxx=model.state.p(1)-xxx0;
+%             if xxx>=0 && xxx<=TT 
+%                     dst=-sin(2*pi*xxx/(TT*2));
+%             end
+%%
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];

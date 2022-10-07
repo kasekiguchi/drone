@@ -5,11 +5,11 @@ Bc2 = [0;1];
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 Controller_param.F1=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt);                                % 
-Controller_param.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-Controller_param.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+% Controller_param.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+% Controller_param.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % óLå¿êÆíËóp
-% Controller_param.F2=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-% Controller_param.F3=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
+Controller_param.F2=lqrd(Ac4,Bc4,diag([2000,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+Controller_param.F3=lqrd(Ac4,Bc4,diag([2000,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 Controller_param.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ÉàÅ[äp 
 syms sz1 [2 1] real
 syms sF1 [1 2] real
@@ -46,6 +46,9 @@ syms tanha [1 2] real
 syms dtanha [1 2] real
 syms ddtanha [1 2] real
 syms dddtanha [1 2] real
+
+syms z(t) ub 
+syms zF1 [1 3]
 if fzsingle == 1
         xz0 = [2,2,2];
         fvals12z = zeros(2,1);
@@ -58,30 +61,53 @@ if fzsingle == 1
             fvals12z(i) = 2*fval;
             f1(i,:)=x;
         end
+    if   1
     for i = 1:2
         fza(i) =  1 / ( 1 + exp(-f1(i,2) * 2*sz1(i)));
         tanha(i) = 2*fza(i)-1;
         dtanha(i) = 4*f1(i,end-1)*fza(i)*(1-fza(i));
         ddtanha(i) = 8*f1(i,end-1)^2*fza(i)*(1-fza(i))*(1-2*fza(i));
         dddtanha(i) = 16*f1(i,end-1)^3*fza(i)*(1-fza(i))*(1-6*fza(i)+6*fza(i)^2);
+        
     end
-    
     for i = 1:2
         u = u -f1(i,1)*tanha(i) -f1(i,3)*sz1(i);
     end
-            dz = Ac2*sz1 + Bc2*u;
+            dz = Ad1*sz1 + Bd1*u;
     for i = 1:2
         du = du -f1(i,1)*dtanha(i)*dz(i) -f1(i,3)*dz(i);
     end
-            ddz = Ac2*dz + Bc2*du;
+            ddz = Ad1*dz + Bd1*du;
     for i = 1:2
         ddu = ddu -f1(i,1)*ddtanha(i)*(dz(i))^2 -f1(i,1)*dtanha(i)*ddz(i) -f1(i,3)*ddz(i);
     end
-        dddz = Ac2*ddz + Bc2*ddu;
+        dddz = Ad1*ddz + Bd1*ddu;
     for i = 1:2
             dddu = dddu -f1(i,1)*dddtanha(i)*(dz(i))^3 -3*f1(i,1)*ddtanha(i)*dz(i)*ddz(i) -f1(i,1)*dtanha(i)*dddz(i) -f1(i,3)*dddz(i);
     end
-    %%%%%%%%%%%%%%%%
+    else
+    %===========================================diffÇÇ¬Ç©Ç¡ÇΩ
+    ub = - zF1(1)*tanh(zF1(2)*z(t)) - zF1(3)*z(t);
+    dub = diff(ub,t);
+    ddub = diff(dub,t);
+    dddub = diff(ddub,t);
+    
+    for i=1:2
+        u = u + subs(ub,[zF1 z],[f1(i,:) sz1(i)]);
+    end
+    dz = Ad1*sz1 + Bd1*u;
+    for i=1:2
+        du = du + subs(dub,[zF1 z diff(z, t)],[f1(i,:) sz1(i) dz(i)]);
+    end
+    ddz = Ad1*dz + Bd1*du;
+    for i=1:2
+        ddu = ddu + subs(ddub,[zF1 z diff(z, t) diff(z, t, t)],[f1(i,:) sz1(i) dz(i) ddz(i)]);
+    end
+    dddz = Ad1*ddz + Bd1*ddu;
+    for i=1:2
+        dddu = dddu + subs(dddub,[zF1 z diff(z, t) diff(z, t, t) diff(z, t, t, t)],[f1(i,:) sz1(i) dz(i) ddz(i) dddz(i)]);
+    end
+    end
     
     Controller_param.Vf = matlabFunction([u,du,ddu,dddu],"Vars",{sz1});
 else    
@@ -112,11 +138,11 @@ else
         dddtanhb = 16*f2(i,4)^3*fzb*(1-fzb)*(1-6*fzb+6*fzb^2);
 
         u = u -f2(i,1)*tanha(i) -f2(i,3)*tanhb -k(i)*sz1(i);
-            dz = Ac2*sz1 + Bc2*u;
+            dz = Ad1*sz1 + Bd1*u;
         du = du -f2(i,1)*dtanha(i)*f2(i,2)*dz(i) -f2(i,3)*dtanhb*f2(i,4)*dz(i) -k(i)*dz(i);
-            ddz = Ac2*dz + Bc2*du;
+            ddz = Ad1*dz + Bd1*du;
         ddu = ddu -f2(i,1)*ddtanha(i)*(f2(i,2)*dz(i))^2 -f2(i,3)*ddtanhb*(f2(i,4)*dz(i))^2 -f2(i,1)*dtanha(i)*f2(i,2)*ddz(i) -f2(i,3)*dtanhb*f2(i,4)*ddz(i) -k(i)*ddz(i);
-            dddz = Ac2*ddz + Bc2*ddu;
+            dddz = Ad1*ddz + Bd1*ddu;
         dddu = dddu -f2(i,1)*dddtanha(i)*(f2(i,2)*dz(i))^3 -f2(i,3)*dddtanhb*(f2(i,4)*dz(i))^3 -3*f2(i,1)*ddtanha(i)*f2(i,2)^2*dz(i)*ddz(i) -3*f2(i,3)*dtanhb*f2(i,4)^2*dz(i)*ddz(i) -f2(i,1)*dtanha(i)*f2(i,2)*dddz(i) -f2(i,3)*dtanhb*f2(i,4)*dddz(i)-k(i)*dddz(i);
 
     end
@@ -150,9 +176,9 @@ Controller_param.Vs = matlabFunction([-sF2*sz2;-sF3*sz3;-sF4*sz4],"Vars",{sz2,sz
 
 kf2=Controller_param.F3;
 % kf2(1)=3*kf2(1);
+Controller_param.fxyapr=fxyapr;
 gain_ser1=zeros(4,3);
 gain_ser2=zeros(4,5);
-
 if fxyapr==1
 if fxysingle==1
     %fminserch tanh 1Ç¬
