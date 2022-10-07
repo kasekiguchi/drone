@@ -140,28 +140,23 @@ end
 %             if time.t >= 10
 %                 FH.CurrentCharacter = 'l';
 %             end
-            xr = reference(Params, time);
+%             xr = reference(Params, time);
+% param, params, time, t, Agent
+            realTime = time.t;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, xr(:, end), time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
             param(i).reference.agreement = {logger, N, time.t};
+            xr = reference_h(param(i), Params, time, time.t, agent);
+            time.t = realTime;
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
             agent(i).do_reference(param(i).reference.list);
-            %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
-                % controller 
-%-- HL controller
-%                 param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
-%                 for j = 1:length(agent(i).controller.name)
-%                     param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
-%                 end
-%                 agent(i).do_controller(param(i).controller.list);
-%-- HL controller
-                %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+            %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
                 %-- MCMPC controller
                 % ts探し
@@ -441,9 +436,16 @@ agent(1).animation(logger,"target",1);
 
 function xr_h = reference_h(param, params, time, t, Agent)
     % time varying の　referenceをホライズンごとのreferenceに変換する
+    % params.dt = 0.1;
+    xr_h = zeros(3, params.H);
     for i = 1:params.H
         time.t = t + params.dt * i;
         param(1).reference.timevarying = {time};
+%         xr_h(:, i) = Agent.reference.result.state.p;
+        for j = 1:length(Agent(1).reference.name)
+            param(1).reference.list{j} = param(1).reference.(Agent(1).reference.name(j));
+        end
+        Agent(1).do_reference(param(1).reference.list);
         xr_h(:, i) = Agent.reference.result.state.p;
     end
 end
@@ -459,6 +461,8 @@ function xr = reference(params, time)
 %     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
 %     X = subs(z, t, Tv);
     %-- ホライゾンごとのreference
+    x = 0;
+    y = 0;
     if time.t <= 10
         for h = 1:params.H
             xr(:, h) = [0;0;a*((time.t-StartT)+params.dt*h)^3+b*((time.t-StartT)+params.dt*h)^2+rz0];
