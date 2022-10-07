@@ -67,15 +67,16 @@ for i = 1:N
 
     %% model
     % set control model
-
-%     agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
+    if fExp
+        agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
+    else
         agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱 only sim
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     %agent(i).set_model(Model_Three_Vehicle(dt,initial_state(i),i)); % for exp % 機体番号（ESPrのIP）
-
+    end
     close all
     %% set input_transform property
     if fExp                                                                               % isa(agent(i).plant,"Lizard_exp")
@@ -136,7 +137,7 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    n=1;
+    n=3;
     switch n
         case 1 % 有限時間整定制御
             fzapr = 1;%z方向に適用するか:1 else:~1

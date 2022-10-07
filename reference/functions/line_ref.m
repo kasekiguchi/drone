@@ -15,11 +15,32 @@ z = z_0+0.1*t;
 % x = x_0+0.0;
 % y = y_0;
 % % z = 0;
-% r=1;
-T=6;
+% r=2;
+% T=12;
 % x = x_0+r*cos(2*pi*t/T);
 % y = y_0+r*sin(2*pi*t/T);
-% z = z_0+0.4*sin(2*pi*t/T);
+% z = z_0;%+0.4*sin(2*pi*t/T);
+
+%-------------------------------------------------------------------
+%アステロイド
+% a=1;
+% x=a*cos(2*pi*t/T)^3 ;
+% y=a*sin(2*pi*t/T)^3 ;
+% z=z_0;
+
+%リサージュ
+% A=1;B=1;a=1;b=2;d=0;
+% x=A*sin(a*2*pi*t/T+d);
+% y=B*sin(b*2*pi*t/T);
+% z=z_0;
+
+%バラ曲線　いい感じ
+% a=2;b=1;
+% x=1.5*sin((a*2*pi*t/T)/b)*cos(2*pi*t/T);
+% y=1.5*sin((a*2*pi*t/T)/b)*sin(2*pi*t/T);
+% z=z_0;
+
+% ref=@(t,x0,y0,z0)[x;y;z;0];%謎x,y,z are function of t.
 
 ref=@(t)[x;y;z;0];%謎x,y,z are function of t.
 
