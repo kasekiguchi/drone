@@ -59,7 +59,6 @@ conditionRation = (sigma > 0 & sigma < 1 & mu > 0 & mu < 1 ...
 Dis(~conditionRation) = inf;
 % Searching minimum distance for each laser
 
-
 [min_dist, min_index] = min(Dis);
 inf_cond = isinf(min_dist);
 min_dist(inf_cond) = 0;

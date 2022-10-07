@@ -19,7 +19,8 @@ UKF_param.list=agent.model.state.list;
 
 % the constant value for estimating of the map
 UKF_param.constant = struct; %定数パラメータ設定
-UKF_param.constant.LineThreshold = 0.3;%0.3;%0.3; %"ax + by + c"の誤差を許容する閾値
+UKF_param.constant.LineThreshold = 0.3;%0.3; % 点群から直線を求める時に直線に含む点の直線からの距離閾値
+UKF_param.constant.SegmentThreshold = 0.5;% 線分からの距離：線分を直線に統合するかの基準
 UKF_param.constant.PointThreshold = 0.2;%0.2; %
 UKF_param.constant.GroupNumberThreshold = 5; % クラスタを構成する最小の点数
 UKF_param.constant.DistanceThreshold = 1e-2;%1e-1; % センサ値と計算値の許容誤差，対応付けに使用

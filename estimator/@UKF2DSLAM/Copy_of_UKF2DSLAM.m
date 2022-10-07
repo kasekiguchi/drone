@@ -82,11 +82,11 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             measured.ranges = sensor.length;
             measured.angles = sensor.angle + PreXh(3); %laser angles.姿勢角を基準とする．絶対角
             measured.angles(sensor.length==0) = 0;
-            % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す           
-            LSA_param = PC2LDA(measured.ranges, measured.angles, PreXh, obj.constant);
+            % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す
+            LSA_param = obj.UKFPointCloudToLine(measured.ranges, measured.angles, PreXh);
 
             % Conbine between measurements and map%前時刻までのマップと観測値を組み合わせる．組み合わさらなかったら新しいマップとして足す．
-            obj.map_param = obj.UKFCombiningLines(LSA_param,PreXh);%既存の地図との統合
+            obj.map_param = obj.UKFCombiningLines(LSA_param);%既存の地図との統合
             % sn update
             sn = obj.n + obj.NLP * length(obj.map_param.a);
 
@@ -157,8 +157,8 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 [L(:,i),I] = min(Lhat,[],2); % R^(Nx1) : レーザー計測距離
                 L(isnan(L(:,i)),i) = 0;
                 L(sensor.length==0,i) = 0; % レーザー情報が無いレーザーは０
-                L = max(L,sensor.length'); % line 情報(a,b,c)だけから判断しているので途切れる壁をこのままでは考慮していないので
-                % sensor値で上書きしているので厳密ではない: TODO                
+                L = max(L,sensor.length'); % line 情報(a,b,c)だけから判断しているので途切れる壁をこのままでは考慮していないので（厳密ではない）: TODO
+                %[L(:,i),I] = min(Lhat,[],2); % R^(Nx1) : レーザー計測距離
                 if i == 1
                     PreYh = weight(1) .* L(:,1);
                     %     assoc

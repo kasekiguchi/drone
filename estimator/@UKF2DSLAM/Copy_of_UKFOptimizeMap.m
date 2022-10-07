@@ -4,12 +4,14 @@ function [OptMap, RegistFlag] = UKFOptimizeMap(obj)
     C = obj.constant;
     % Initialize each variable
     OptMap = struct;
+    %OptMap.id = [];
     OptMap.x = [];
     OptMap.y = [];
     OptMap.a = [];
     OptMap.b = [];
     OptMap.c = [];
     RegistFlag = false(1, size(map.a,1));
+%     removing_flag = false(1, length(map.id));
     for i = 1:size(map.a,1)
         % Searching the line which is able to be combined
         if map.a(i) > -1 && map.a(i) < 1
@@ -35,6 +37,7 @@ function [OptMap, RegistFlag] = UKFOptimizeMap(obj)
         if ~RegistFlag(1, i)
             if isempty(matching_list)
                 % Appending
+                %OptMap.id(end + 1, :) = map.id(i, :);
                 OptMap.x(end + 1, :) = map.x(i, :);
                 OptMap.y(end + 1, :) = map.y(i, :);
                 OptMap.a(end + 1, :) = map.a(i, :);
@@ -44,12 +47,13 @@ function [OptMap, RegistFlag] = UKFOptimizeMap(obj)
                 % Combining maps
                 param = map;
                 for k = 1:length(matching_list)
-                    j = matching_list(k, 1);
-                    tmp = extract_max_line_segment([map.x(i,:)',map.y(i,:)';map.x(j,:)',map.y(j,:)']);
+                    %tmp = obj.UKFCombiningTwoLines(param, i, map, matching_list(k, 1), C);
+                    tmp = obj.UKFCombiningTwoLines(i, map, matching_list(k, 1));
                     param.x(i, :) = tmp.x;
                     param.y(i, :) = tmp.y;
                 end
                 % Appending
+                %OptMap.id(end + 1, :) = param.id(i, :);
                 OptMap.x(end + 1, :) = param.x(i, :);
                 OptMap.y(end + 1, :) = param.y(i, :);
                 OptMap.a(end + 1, :) = param.a(i, :);
