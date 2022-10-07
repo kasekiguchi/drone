@@ -8,8 +8,11 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
     end
     properties
         msg
-        arming_msg = [500 500 0 500 1000 0 0 0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
-        stop_msg = [500 500 0 500 0 0 0 0];
+%         arming_msg = [500 500 0 500 1000 0 0 0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+%         stop_msg = [500 500 0 500 1000 0 0 0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+                
+        arming_msg = [1100 1100 0 1100 1000 0 0 0];%No.1プロポ
+        stop_msg = [1100 1100 0 1100 0 0 0 0];
     end
     
     
@@ -24,7 +27,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                 case "udp"
                     obj.ESPr_num = param.num;
                     param.IP = char("192.168." + obj.ESPr_num(1) + "." + obj.ESPr_num(2));
-                    param.port=8000;
+%                     param.port=8000;
+                    param.port=8000+obj.ESPr_num(2)-100;
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
@@ -81,7 +85,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             obj.connector.sendData(gen_msg(obj.arming_msg));
         end
         function stop(obj)
-            obj.connector.sendData(gen_msg([500 500 0 500 0 0 0 0]));
+            obj.connector.sendData(gen_msg(stop_msg));
         end
     end
 end
