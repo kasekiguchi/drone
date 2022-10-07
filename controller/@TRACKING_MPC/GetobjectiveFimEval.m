@@ -4,7 +4,6 @@ params = obj.param;
 NoiseR = obj.NoiseR;
 SensorRange = obj.SensorRange;
 RangeGain= obj.RangeGain;
- obj.param,obj.NoiseR,obj.SensorRange,obj.RangeGain
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
 X = x(1:params.state_size, :);
 U = x(params.state_size+1:params.state_size+params.input_size, :);
