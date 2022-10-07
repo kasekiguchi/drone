@@ -61,9 +61,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.total_size = Params.state_size + Params.input_size;
 
 %-- 目標値等
-%     Params.ref_input = [0.269 * 9.81 / 4+0.1; 0.269 * 9.81 / 4+0.1; 0.269 * 9.81 / 4+0.1; 0.269 * 9.81 / 4+0.1];
-%     Params.ref_input = [0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4];
-    ur = [0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4; 0.269 * 9.81 / 4];
+    ur = 0.269*9.81/4 * ones(4, 1);
     Params.ref_v = [0; 0; 0.50];
 %     previous_state  = zeros(16, Params.H);
 
@@ -163,18 +161,18 @@ end
                     agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                     ref_monte.p(1), ref_monte.p(2), ref_monte.p(3));
             %-- 初期値の設定
-                if idx == 1
-                    initial_u1 = 0.269 * 9.81 / 4;   % 初期値
-                    initial_u2 = initial_u1;
-                    initial_u3 = initial_u1;
-                    initial_u4 = initial_u1;
-                else
-                    initial_u1 = agent.input(1);
-                    initial_u2 = agent.input(2);
-                    initial_u3 = agent.input(3);
-                    initial_u4 = agent.input(4);
-                end
-                x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
+%                 if idx == 1
+%                     initial_u1 = 0.269 * 9.81 / 4;   % 初期値
+%                     initial_u2 = initial_u1;
+%                     initial_u3 = initial_u1;
+%                     initial_u4 = initial_u1;
+%                 else
+%                     initial_u1 = agent.input(1);
+%                     initial_u2 = agent.input(2);
+%                     initial_u3 = agent.input(3);
+%                     initial_u4 = agent.input(4);
+%                 end
+%                 x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
 %                 previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
 
                 problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
@@ -186,7 +184,7 @@ end
                 [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem);
                 % A, b : 線形不等式,   previous_state : 初期値, 
 %                 [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(fun, previous_state, A, b, [], [], [], [], [], options);
-                previous_state = var;
+                previous_state = var
                 fprintf("\tfval : %f\n", fval)
 %                 fprintf("var : %f %f %f %f %f %f %f %f %f %f %f %f %f\n", var(1:12), output.bestfeasible.fval)
             %-- 入力への代入
@@ -194,7 +192,7 @@ end
         
         end   
         %-- データ保存
-            Evaluation = fval;
+            data.bestcast = fval;
 %             data.bestcost(idx) = output.bestfeasible.fval; 
 %             data.pathJ{idx} = output.bestfeasible.fval; % - 全サンプルの評価値
 %             data.sigma(idx) = sigma;
@@ -256,11 +254,11 @@ fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
 Fontsize = 15;  timeMax = te;
-logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+logger.plot({1,"p", "er"},  "fig_num",1); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
+logger.plot({1,"input", ""},"fig_num",5); ylim([0 1.0]); %set(gca,'FontSize',Fontsize);  grid on; title(""); 
 figure(8); plot(logger.Data.t, data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]); xlabel("Time [s]"); ylabel("Evaluation"); set(gca,'FontSize',Fontsize);  grid on;
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
