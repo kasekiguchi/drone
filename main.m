@@ -8,6 +8,11 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
+
+%=================================================================
+% s -> a -> t -> f -> l -> s -> q (qをすぐ押せるようにしとく)
+%=================================================================
+
 %%
 run("main1_setting.m");
 run("main2_agent_setup.m");

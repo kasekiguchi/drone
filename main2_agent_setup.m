@@ -67,6 +67,7 @@ for i = 1:N
 %==============================================================================================================
     agent(i).set_property("reference",Reference_Time_Varying("jirei_zentai",[0,0,1]));%事例研究全体実験
 %==============================================================================================================
+ %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory______",[0,0,1]));%事例研究全体実験
 
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
 %      agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
