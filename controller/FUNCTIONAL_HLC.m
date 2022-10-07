@@ -71,11 +71,11 @@ classdef FUNCTIONAL_HLC < CONTROLLER_CLASS
 %             end
 
 %特定の位置で外乱を与える
-%             dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
-%             xxx=model.state.p(1)-xxx0;
-%             if xxx>=0 && xxx<=TT 
-%                     dst=-sin(2*pi*xxx/(TT*2))^1;
-%             end
+            dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
+            xxx=model.state.p(1)-xxx0;
+            if xxx>=0 && xxx<=TT 
+                    dst=-sin(2*pi*xxx/(TT*2))^1;
+            end
             %% calc actual input
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];

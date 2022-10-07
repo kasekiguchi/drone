@@ -186,11 +186,11 @@ end
 %                     dst=2;
 %             end
 %“Á’è‚ÌˆÊ’u‚ÅŠO—‚ð—^‚¦‚é
-%             dst=1;xxx0=0.5;TT=0.5;%TTŠO—‚ð—^‚¦‚é‹æŠÔ
-%             xxx=model.state.p(1)-xxx0;
-%             if xxx>=0 && xxx<=TT 
-%                     dst=-sin(2*pi*xxx/(TT*2));
-%             end
+            dst=0;xxx0=0.5;TT=0.5;%TTŠO—‚ð—^‚¦‚é‹æŠÔ
+            xxx=model.state.p(1)-xxx0;
+            if xxx>=0 && xxx<=TT 
+                    dst=-sin(2*pi*xxx/(TT*2));
+            end
 %%
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);

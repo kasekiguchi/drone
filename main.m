@@ -30,7 +30,7 @@ else
     logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
 %外乱 disturbance
-dstr=[0,0,0];%外乱[x,y,z]
+dstr=[0,1,0];%外乱[x,y,z]
 run("main2_agent_setup.m");
 % agent.set_model_error("k1",0.1);%モデル誤差
 % agent.set_model_error("ly",-0.01);%モデル誤差
@@ -184,7 +184,7 @@ logger.plot({1,"p","er"},{1, "q", "e"},{1, "v", "e"},{1, "input", "e"});
 % logger.plot({1," p","er"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
-logger.plot({1,"inner_input",""});
+logger.plot({1,"inner_input",""}, "fig_num",2);
 % agent(1).reference.timeVarying.show(logger)
 
 
@@ -196,22 +196,22 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=10;
+fsave=1;
 if fsave==1
     %変更しない
-%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+%     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='data';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
-%     subfolder='exp';%sim or exp or sample
-    subfolder='sim';%sim or exp or sample
+    subfolder='exp';%sim or exp or sample
+%     subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='定常外乱';%実験,シミュレーション名
+    ExpSimName='ゲインチューニング';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
-contents='FB_gain_dst1';%実験,シミュレーション内容
+contents='FT_05k10101_bad';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath

@@ -49,8 +49,8 @@ for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-%         agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）%"udp",[25]
-         agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,125]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）%"udp",[25]
+        agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）%"udp",[25]
+%          agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,125]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）%"udp",[25]
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
@@ -140,7 +140,7 @@ for i = 1:N
     n=3;
     switch n
         case 1 % 有限時間整定制御
-            fzapr = 1;%z方向に適用するか:1 else:~1
+            fzapr = 10;%z方向に適用するか:1 else:~1
             fzsingle = 1;%tanhが一つか:1 tanh2:~1
             fxyapr = 1;%%%xy近似するか:1 else:~1
             fxysingle = 1;%%% tanh1:1 or tanh2 :~1
