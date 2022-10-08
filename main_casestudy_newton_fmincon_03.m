@@ -29,11 +29,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Initsigma = 0.01;   % num <= 500 くらいまでは 0.1 では大きすぎる
     
 %-- 重み
-    Params.Weight.P = diag([1.0; 1.0; 1000.0]);    % 座標   1000 1000 100
+    Params.Weight.P = diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
     Params.Weight.V = diag([1.0; 1.0; 1000.0]);    % 速度
     Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
     Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
-    Params.Weight.R = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+    Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
     Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
     
@@ -86,6 +86,13 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     nonlcon = [];
     initial_state = agent.estimator.result.state.get();
     x = initial_state;
+
+%-- 予測モデルのシステム行列
+    [MPC_Ad, MPC_Bd, MPC_Cd, MPC_Dd] = MassModel(Params.dt);
+        Params.A = MPC_Ad;
+        Params.B = MPC_Bd;
+        Params.C = MPC_Cd;
+        Params.D = MPC_Dd;
     
 
 run("main3_loop_setup.m");
@@ -156,7 +163,7 @@ end
             %-- 入力の基準
                 previous_input = agent.input;
                 Params.ur = ur;
-                Params.xr = xr;
+%                 Params.xr = xr;
                 Params.X0= x;
             %-- 状態の表示
                 fprintf("pos: %f %f %f \t vel: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f",...
@@ -177,14 +184,12 @@ end
                     initial_u4 = agent.input(4);
                 end
                 x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
-                previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
+%                 previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
                 % previous_state の1行目
                 
-                problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
-                problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
-                problem.nonlcon   = @(x) Constraints(x, Params, agent);          % 制約条件
-
-                fun = @(x) Objective(x, Params, agent);
+                problem.x0		  = previous_state;                         % 状態，入力を初期値とする            
+                problem.objective = @(x) Objective(x, Params, agent);       % 評価関数
+                problem.nonlcon   = @(x) Constraints(x, Params);            % 制約条件
 
                 [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem);
                 % A, b : 線形不等式,   previous_state : 初期値, 
@@ -331,10 +336,10 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     eval = sum(stageState + terminalState) + terminalState;
 end
 
-function [c, ceq] = Constraints(x, params, Agent)
+function [c, ceq] = Constraints(x, params)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, 1*params.H);
-    ceq_ode = zeros(params.state_size, params.H);
+%     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
     X = x(1:params.state_size, :);          % 12 * Params.H 
@@ -342,14 +347,87 @@ function [c, ceq] = Constraints(x, params, Agent)
 
 %- ダイナミクス拘束
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
-%-- 連続の式をダイナミクス拘束に使う
-    for L = 2:params.H
-        xx = X(:, L);
-        xu = U(:, L);
-        [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],params.X0);
-        ceq_ode(:, L) = tmpx(end, :)';   % tmpx : 縦ベクトル？ 
-    end
-    ceq = [X(:, 1) - params.X0, ceq_ode];
+% [~,tmpx]=Agent.model.solver(@(t,X(:,L) agent.model.method(X(:,L), U(:,L),Agent.parameter.get()),[ts ts+params.dt],params.X0);
+%     ceq = [X(:, 1) - params.X0, cell2mat(arrayfun(@(L) )]
+    ceq = [X(:, 1) - params.X0, cell2mat(arrayfun(@(L) X(:, L)  - (params.A * X(:, L-1) + params.B * U(:, L-1)), 2:params.H, 'UniformOutput', false))];
     c(:, 1) = [];
+%     c = -x(3, :);
+
+%-- 連続の式を使う方
+%     for L = 2:params.H
+%         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(X(:,L), U(:,L), Agent.parameter.get()), [0 0+params.dt],params.X0);
+%         ceq_ode(:, L) = tmpx;   % tmpx : 縦ベクトル？ 
+%     end
+%     ceq = [X(:, 1) - params.X0, ceq_ode];
     
+end
+
+function [Ad, Bd, Cd, Dd]  = MassModel(Td)
+        
+%-- DIATONE MODEL PARAM
+    Lx = 0.117;
+    Ly = 0.0932;
+    lx = 0.117/2;       %0.05;
+    ly = 0.0932/2;      %0.05;
+    xx = 0.02237568;    % jx
+    xy = 0.02985236;    % jy
+%             xx = 100 * 0.02237568;    % jx
+%             xy = 100 * 0.02985236;    % jy
+    xz = 0.0480374;     % jz
+    gravity = 9.81;     % gravity
+    km1 = 0.0301;       % ロータ定数
+    km2 = 0.0301;       % ロータ定数
+    km3 = 0.0301;       % ロータ定数
+    km4 = 0.0301;       % ロータ定数
+    %-- 平衡点：原点
+            Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+      %-- 平衡点：　1m上空でホバリング [0 0 1 0 0 0 0 0 0 0 0 0 0 hover hover hover hover]
+%     Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+%              0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
+%              0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+
+    Bc = [    0,        0,        0,        0;
+              0,        0,        0,        0;
+              0,        0,        0,        0;
+              0,        0,        0,        0;
+              0,        0,        0,        0;
+              0,        0,        0,        0;
+              0,        0,        0,        0;
+              0,        0,        0,        0;
+              1000/269, 1000/269,   1000/269,   1000/269;
+              ly/xx,   -ly/xx,     (Ly-ly)/xx,   (Ly-ly)/xx;
+              lx/(xy),  -(Lx-lx)/xy,lx/xy,      -(Lx-lx)/xy;
+              km1/xz,   -km2/xz,    -km3/xz,    km4/xz];
+
+    Cc = diag([1 1 1 1 1 1 1 1 1 1 1 1]);
+    Dc = 0;
+    % 可制御性，可観測
+%     Uc = [Bc Ac*Bc Ac^2*Bc Ac^3*Bc Ac^4*Bc Ac^5*Bc Ac^6*Bc Ac^7*Bc Ac^8*Bc Ac^9*Bc Ac^10*Bc Ac^11*Bc];
+%     Uo = [Cc;Cc*Ac;Cc*Ac^2;Cc*Ac^3;Cc*Ac^4;Cc*Ac^5;Cc*Ac^6;Cc*Ac^7;Cc*Ac^8;Cc*Ac^9;Cc*Ac^10;Cc*Ac^11];
+    sys = ss(Ac, Bc, Cc, Dc);
+
+%-- 離散系システム
+        dsys = c2d(sys, Td); % - 連続系から離散系への変換
+        [Ad, Bd, Cd, Dd] = ssdata(dsys);
+
 end
