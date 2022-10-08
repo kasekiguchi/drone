@@ -158,18 +158,18 @@ end
 
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
-                %-- MCMPC controller
-                % ts探し
-                    
-                    ts = 0;
-                    state_monte = agent.model.state;
-                    ref_monte = agent.reference.result.state;
-                %-- 速度の基準
-                    vref = [0; 0; 0.50];
-                    ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
-                    previous_input = agent.input;
-                %-- 評価関数
-                % 入力差 ：　状態＋入力差＋ホバリング入力との差
+        %-- MCMPC controller
+        % ts探し
+            
+            ts = 0;
+            state_monte = agent.model.state;
+            ref_monte = agent.reference.result.state;
+        %-- 速度の基準
+            vref = [0; 0; 0.50];
+            ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]'; % ホバリングの目標入力
+            previous_input = agent.input;
+        %-- 評価関数
+        % 入力差 ：　状態＋入力差＋ホバリング入力との差
 %                     fun = @(p_monte, q_monte, v_monte, w_monte, u_monte) ...
 %                         (p_monte - agent.reference.result.state.p)'*Params.Weight.P*(p_monte - agent.reference.result.state.p)...
 %                         +(v_monte-vref)'*Params.Weight.V*(v_monte-vref)...
@@ -177,104 +177,104 @@ end
 %                         +q_monte'*Params.Weight.Q*q_monte...
 %                         +(u_monte - ref_input)'*Params.Weight.R*(u_monte - ref_input)...
 %                         +(u_monte - previous_input)'*Params.Weight.RP*(u_monte - previous_input); 
-                %-- 制約条件
-                    Fsub = @(sub_monte1) sub_monte1 > 0;
-                    subCheck = zeros(Params.Particle_num, 1);
-                %-- 状態の表示
-                    fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
-                        state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                        state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                        state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
-                        ref_monte.p(1), ref_monte.p(2), ref_monte.p(3));
-                %-- 正規分布によるサンプリング
-                    % 平均　＋　標準偏差を変更する
-                    if fFirst
-                        ave1 = 0.269*9.81/4;      % average
-                        ave2 = ave1;
-                        ave3 = ave1;
-                        ave4 = ave1;
-                        sigma = Initsigma;
-                        fFirst = 0;
-                    else
-                        ave1 = agent.input(1);    % リサンプリングとして前の入力を平均値とする
-                        ave2 = agent.input(2);
-                        ave3 = agent.input(3);
-                        ave4 = agent.input(4);
-                        if sigmanext > 0.5
-                            sigmanext = 0.5;    % 上限
-                        elseif sigmanext < 0.005
-                            sigmanext = 0.005;  % 下限
-                        end
-                        sigma = sigmanext;
-                    end
+        %-- 制約条件
+            Fsub = @(sub_monte1) sub_monte1 > 0;
+            subCheck = zeros(Params.Particle_num, 1);
+        %-- 状態の表示
+            fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
+                ref_monte.p(1), ref_monte.p(2), ref_monte.p(3));
+        %-- 正規分布によるサンプリング
+            % 平均　＋　標準偏差を変更する
+            if fFirst
+                ave1 = 0.269*9.81/4;      % average
+                ave2 = ave1;
+                ave3 = ave1;
+                ave4 = ave1;
+                sigma = Initsigma;
+                fFirst = 0;
+            else
+                ave1 = agent.input(1);    % リサンプリングとして前の入力を平均値とする
+                ave2 = agent.input(2);
+                ave3 = agent.input(3);
+                ave4 = agent.input(4);
+                if sigmanext > 0.5
+                    sigmanext = 0.5;    % 上限
+                elseif sigmanext < 0.005
+                    sigmanext = 0.005;  % 下限
+                end
+                sigma = sigmanext;
+            end
 %                     ave = 0.269*9.81/4;
 %                     RandN = randn(Params.H, Params.Particle_num);
-                    umax = 0.269 * 9.81 / 2;
-                    u1 = sigma.*randn(Params.H, Params.Particle_num) + ave1;
-                    u2 = sigma.*randn(Params.H, Params.Particle_num) + ave2;
-                    u3 = sigma.*randn(Params.H, Params.Particle_num) + ave3;
-                    u4 = sigma.*randn(Params.H, Params.Particle_num) + ave4;
-                    u1(u1<0) = 0;             u2(u2<0) = 0;              u3(u3<0) = 0;             u4(u4<0) = 0;% 負の入力=0
-                    u1(u1>umax) = umax; u2(u2>umax) = umax; u3(u3>umax) = umax; u4(u4>umax) = umax;% 入力最大値
-                    u(4, 1:Params.H, 1:Params.Particle_num) = u4;   % reshape
-                    u(3, :, :) = u3;   
-                    u(2, :, :) = u2;
-                    u(1, :, :) = u1;
-                    u_size = size(u, 3);    % Params.Particle_num
-                %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
-                    p_data = zeros(Params.H, Params.Particle_num);
-                    p_data = repmat(reshape(p_data, [1, size(p_data)]), 3, 1);
-                    v_data = zeros(Params.H, Params.Particle_num);
-                    v_data = repmat(reshape(v_data, [1, size(v_data)]), 3, 1);
-                    q_data = zeros(Params.H, Params.Particle_num);
-                    q_data = repmat(reshape(q_data, [1, size(q_data)]), 3, 1);
-                    w_data = zeros(Params.H, Params.Particle_num);
-                    w_data = repmat(reshape(w_data, [1, size(w_data)]), 3, 1);
-                    state_data = [p_data; q_data; v_data; w_data];
+            umax = 0.269 * 9.81 / 2;
+            u1 = sigma.*randn(Params.H, Params.Particle_num) + ave1;
+            u2 = sigma.*randn(Params.H, Params.Particle_num) + ave2;
+            u3 = sigma.*randn(Params.H, Params.Particle_num) + ave3;
+            u4 = sigma.*randn(Params.H, Params.Particle_num) + ave4;
+            u1(u1<0) = 0;             u2(u2<0) = 0;              u3(u3<0) = 0;             u4(u4<0) = 0;% 負の入力=0
+            u1(u1>umax) = umax; u2(u2>umax) = umax; u3(u3>umax) = umax; u4(u4>umax) = umax;% 入力最大値
+            u(4, 1:Params.H, 1:Params.Particle_num) = u4;   % reshape
+            u(3, :, :) = u3;   
+            u(2, :, :) = u2;
+            u(1, :, :) = u1;
+            u_size = size(u, 3);    % Params.Particle_num
+        %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
+            p_data = zeros(Params.H, Params.Particle_num);
+            p_data = repmat(reshape(p_data, [1, size(p_data)]), 3, 1);
+            v_data = zeros(Params.H, Params.Particle_num);
+            v_data = repmat(reshape(v_data, [1, size(v_data)]), 3, 1);
+            q_data = zeros(Params.H, Params.Particle_num);
+            q_data = repmat(reshape(q_data, [1, size(q_data)]), 3, 1);
+            w_data = zeros(Params.H, Params.Particle_num);
+            w_data = repmat(reshape(w_data, [1, size(w_data)]), 3, 1);
+            state_data = [p_data; q_data; v_data; w_data];
 
-                %-- 現在の状態
-                    previous_state = agent.estimator.result.state.get();% 前の状態の取得
+        %-- 現在の状態
+            previous_state = agent.estimator.result.state.get();% 前の状態の取得
 
-                %-- 微分方程式による予測軌道計算
-                    for m = 1:u_size
-                        x0 = previous_state;
-                        state_data(:, 1, m) = previous_state;
-                        for h = 1:Params.H-1
-                            FigTime = time.t;
-                            [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+Params.dt],x0);
-    %                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
-                            x0 = tmpx(end, :);
-                            state_data(:, h+1, m) = x0;
-                            %-- 地面に沈んで終わらないように
-                            if state_data(3, 1, m) < -0.05 %tmpx(3)
-                                subCheck(m) = 1;    % 制約外なら flag = 1
-                                break;              % ホライズン途中でも制約外で終了
-                            end
-                        end
+        %-- 微分方程式による予測軌道計算
+            for m = 1:u_size
+                x0 = previous_state;
+                state_data(:, 1, m) = previous_state;
+                for h = 1:Params.H-1
+                    FigTime = time.t;
+                    [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+Params.dt],x0);
+%                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
+                    x0 = tmpx(end, :);
+                    state_data(:, h+1, m) = x0;
+                    %-- 地面に沈んで終わらないように
+                    if state_data(3, 1, m) < -0.05 %tmpx(3)
+                        subCheck(m) = 1;    % 制約外なら flag = 1
+                        break;              % ホライズン途中でも制約外で終了
+                    end
+                end
 %                         if state_data(3, 1, m) < 0.0
 %                             subCheck(m) = 1;    % 制約外なら flag = 1
 %                             break;              % ホライズン途中でも制約外で終了
 %                         end
-                    end
+            end
 
-                %-- 評価値計算
-                    Evaluationtra = zeros(1, u_size);
-                    for m = 1:u_size
-                        if subCheck(m)
-                            Evaluationtra(1, m) = NaN;  % 制約外
-                        else
-                            eve = EvaluationFunction_MC_reference(state_data(:, :, m), u(:, :, m), Params, agent, xr);
-                            Evaluationtra(1, m) = eve;
-                        end
-                    end
+        %-- 評価値計算
+            Evaluationtra = zeros(1, u_size);
+            for m = 1:u_size
+                if subCheck(m)
+                    Evaluationtra(1, m) = NaN;  % 制約外
+                else
+                    eve = EvaluationFunction_MC_reference(state_data(:, :, m), u(:, :, m), Params, agent, xr);
+                    Evaluationtra(1, m) = eve;
+                end
+            end
 
-                    [Bestcost, BestcostID] = min(Evaluationtra);
+            [Bestcost, BestcostID] = min(Evaluationtra);
 
-                %-- 入力への代入
-                    agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
-                %-- 評価値のソート
-%                     sortEval = sort(Evaluationtra);
-%                     sortEval(length(Evaluationtra)-10:length(Evaluationtra))
+        %-- 入力への代入
+            agent.input = u(:, 1, BestcostID);     % 最適な入力の取得
+        %-- 評価値のソート
+%             sortEval = sort(Evaluationtra);
+%             sortEval(length(Evaluationtra)-10:length(Evaluationtra))
         
         end
         %-- 全てのサンプルが棄却されたら終了
