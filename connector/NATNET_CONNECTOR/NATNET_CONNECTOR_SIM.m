@@ -1,6 +1,6 @@
 classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
-    % Motiveのsimulation用クラス：登録されたエージェントの位置と姿勢がわかる
-    % motive = NATNET_CONNECTOR_sim(param)
+    % MotiveのSimulation用クラス：登録されたエージェントの位置と姿勢がわかる
+    % motive = NATNET_CONNECTOR_SIM(param)
     % param :
     %     rigid_num : agnet number
     %     marker_num % number of UnLabeledmarker
@@ -22,7 +22,7 @@ classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
         on_marker_num
         dt
     end
-    properties %(GetAccess = ?Motive_sim)%private) % construct したら変えない値．
+    properties %(GetAccess = ?Motive_SIM)%private) % construct したら変えない値．
         Flag = struct('Noise',     0);                                    % '1' = Additional noise exists
         local_marker_default     = [ 0.075, -0.075,  0.015;                               % X, Y. Z
             -0.075, -0.075, -0.015;
@@ -114,7 +114,7 @@ classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
             end
             %% Occulusion
             if isfield(Param2,'occlusion')
-                Occlusion(obj,Param2.occlusion);
+                occlusion(obj,Param2.occlusion);
             end
             %% Unlabeledmarker
             if isfield(Param2,'marker_num')
@@ -156,7 +156,9 @@ classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
                 disp("do measure first.");
             end
         end
-        function Occlusion(obj,param)
+    end
+    methods (Static)
+        function occlusion(obj,param)
             for i = 1:length(param.cond)
                 if evalin('base',param.cond(i))
                     disp(strcat("occlusion is occurring to agent ",string(param.target{i})));
@@ -174,33 +176,6 @@ classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
                     end
                 end
             end
-        end
-        function [rigidVel,markerVel,previous] = CalcVelocity(obj,state,dt)
-            previous = state;                   % 現在状態を次時刻で使用するため保存
-            if ~isfield(obj.previous, 'p')      % 前時刻の状態がない→初周期の時
-                old = state;
-            else
-                old = obj.previous.p;
-            end
-            tmp = (state - old)/dt;
-            rigidVel = tmp(1,:)';
-            markerVel = tmp(2:end,:);
-        end
-        function [AngleVel,previous] = CalcAngleVelocity(obj,state,type,dt)
-            previous = state;               % 現在状態を次時刻で使用するため保存
-            if ~isfield(obj.previous, 'q')       % 前時刻の状態がない→初周期の時
-                old = state;
-            else
-                old = obj.previous.q;
-            end
-            if strcmp(type ,"euler")
-                euler=state;
-                euler_old=old;
-            else
-                euler     = Quat2Eul(state);
-                euler_old = Quat2Eul(old);
-            end
-            AngleVel  = (euler - euler_old)/dt;
         end
     end
 end

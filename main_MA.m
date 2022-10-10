@@ -67,12 +67,12 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
-    %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    %agent(i).set_property("reference",Reference_TIME_Varying("gen_ref_saddle",{5,[0;0;1.5],[2,2,1]})); % 時変な目標状態
+    %agent(i).set_property("reference",Reference_TIME_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %    agent(i).set_property("reference",Reference_agreement(N)); % Voronoi重心
 
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-    %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    %agent(i).set_property("reference",Reference_TIME_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
@@ -89,7 +89,7 @@ param.sensor.list = cell(1, length(agent(1).sensor.name));
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [% agentのメンバー関係以外のデータ
     ];
-LogAgentData = [% 下のLogger コンストラクタで設定している対象agentに共通するdefault以外のデータ
+LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
     %"model.state.p"
     "controller.result"
     "inner_input"
@@ -100,9 +100,9 @@ if isfield(agent(1).reference, 'covering')
     LogAgentData = [LogAgentData; 'reference.result.region'; "env.density.param.grid_density"]; % for coverage
 end
 
-logger = Logger(1:N, size(ts:dt:te, 2), 1, LogData, LogAgentData);
+logger = LOGGER(1:N, size(ts:dt:te, 2), 1, LogData, LogAgentData);
 %%
-time = Time();
+time = TIME();
 time.t = ts;
 %%
 % 引数に取れるのは以下のみ
@@ -148,10 +148,6 @@ try
             agent(i).do_estimator({dte,dte});
         end
 
-        %            param.reference.covering = {}; %{Env};
-        %            param.reference.timeVarying = {time};
-        %            param.reference.tvLoad = {time};
-        %            param.reference.wall = {1};
         %  Point referenceに対応したparameterはcell配列の最後に配置する。
         %param.reference.list{1} = {logger,N,time.t};
         %param.reference.list{1} = {time};
@@ -159,13 +155,6 @@ try
         for i = 1:N
             agent(i).do_reference(param.reference.list);
         end
-        % dtc はやらなくても良いかも
-        if exist("tControl","var")
-            dtc = toc(tControl);
-        else
-            dtc = 0;
-        end
-        tControl = tic;
         HLParam.dt = dte;% あくまで推定結果を元に入力を算出するため
         for i = 1:N
             agent(i).do_controller({HLParam,[]});
@@ -173,7 +162,7 @@ try
         if norm(agent(i).input) > 10
             error("ACSL : too large input! Check the algorithm")
         end
-% 
+ 
         %% update state
         % with FH
         figure(FH)
@@ -206,24 +195,8 @@ end
 %profile viewer
 %%
 close all
-%clc
-%agent(1).reference.covering.draw_movie(logger, N, Env)
-% agent(1).reference.timeVarying.show(logger)
-%logger.plot(1,["pL","p","q","w","v","input"],["er","er","e","e","e",""],struct('time',[]));
-%logger.plot(1,["pL","p","q","v","u","inner_input"],["p","ser","se","e","",""]);
-%logger.plot(1,["p","pL","pT","q","v","w"],["se","serp","ep","sep","e","e"]);
-% logger.plot(1,["p","q","v","w","u","inner_input"],["e","e","e","e","",""]);
-
-% logger.plot(1,["p1:3","v","w","q","input"],["ser","e","e","s",""]);a
-%logger.plot(1,["p","input","q1:2:4"],["se","","e"],struct('time',10));
-%  logger.plot(1,["p1-p2-p3","pL1-pL2"],["sep","p"],struct('fig_nu
-% m',2,'row_col',[1 2]));
-%logger.plot(1,["sensor.imu.result.state.q","sensor.imu.result.state.w","sensor.imu.result.state.a"]);
-%logger.plot(1,["p","q","v"],["e","e","e"]);
-%logger.plot(1,["p","q","v","input","w"],["re","e","e","","e"]);
-logger.plot({1,"p","ser"},{1,"q","e"},{1,'v','e'},{1,'w','e'},{1,"input",""},{1,"inner_input",""});
-%logger.plot({1,"p","e"},{1,"q","e"},{1,'v','e'},{1,'w','e'},{1,"input",""},'time',[10,15]);
-%logger.plot({1,["p1-p2-p3"],["se"]},'fig_num',3,'color',0);
+logger.plot({1,"p","ser"},{1,"q","e"},{1,'v','e'},{1,'w','e'}, ...
+    {1,"input",""},{1,"inner_input",""});
 
 %%
 %logger.save();
