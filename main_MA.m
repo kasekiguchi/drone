@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 %% general setting
 N = 6; % number of total units
-Nb = 1; % number of birds
+Nb = 5; % number of birds
 fExp = 0 % 実機フラグ
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
@@ -19,7 +19,7 @@ run("main2_agent_setup.m");
 %% set bird
 for i = N-Nb+1:N
     % Initial position
-    arranged_pos = arranged_position([1, 1], N+Nb, 1, 0);
+    arranged_pos = arranged_position([1, 1], N, 1, 0);
     initial_state(i).p = arranged_pos(:, i);
     initial_state(i).q = [1; 0; 0; 0];
     initial_state(i).v = [0; 0; 0];
@@ -30,7 +30,7 @@ for i = N-Nb+1:N
     
     % Reference
     agent(i).reference = [];
-    agent(i).set_property("reference",Reference_Bird()); % Voronoi重心                           % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+    agent(i).set_property("reference",Reference_Bird(Nb)); % Voronoi重心                           % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
 end
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -83,7 +83,7 @@ run("main3_loop_setup.m");
             % reference
             param(i).reference.covering = [];
             param(i).reference.covering_3D = {N,Nb};
-            param(i).reference.birdmove = [time];
+            param(i).reference.birdmove = {time,N,Nb};
             param(i).reference.point = {FH, [2; 1; 1], time.t,dt};
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
@@ -174,5 +174,5 @@ clc
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N,"Motive_ref",1,"gif",1);
+agent(1).animation(logger,"target",1:N,"Motive_ref",1,"mp4",1);
 % agent(1).sensor.bounding.movie(logger);
