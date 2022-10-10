@@ -34,7 +34,7 @@ param(N) = struct('sensor',struct,'estimator',struct,'reference',struct);
 %% for sim
 for i = 1:N
     %     arranged_pos = arranged_position([0,0],N,1,0);
-       initial(i).p = [89;-2];%四角経路
+%        initial(i).p = [89;-2];%四角経路
        initial(i).q = [0];
           initial(i).p = [0;-1];%四角経路
           initial(i).q = [0];

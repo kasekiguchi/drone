@@ -2,8 +2,11 @@ clear all ;
 clc;
 test1 = ros2node("/test1",30);
 
-for i = 1:10
-    scandata_Sub = ros2subscriber(test1,"/Robot_1/pose",...
+for i = 1:1
+%     scandata_Sub = ros2subscriber(test1,"/darknet_ros/bounding_boxes
+% ",...
+%         "History","keepall","Reliability","besteffort");
+    scandata_Sub = ros2subscriber(test1,"/darknet_ros/detection_image",...
         "History","keepall","Reliability","besteffort");
 %     scandata_Sub2 = ros2subscriber(test2,"/Robot_2/pose",...
 %         "History","keepall","Reliability","besteffort");
