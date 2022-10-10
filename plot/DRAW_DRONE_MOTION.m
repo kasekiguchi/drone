@@ -25,7 +25,9 @@ classdef DRAW_DRONE_MOTION
                 param.plot_ref = true;
                 param.animation = false;
                 param.target = 1;
-                param.env = [];
+                param.gif = 0;
+                param.Motive_ref = 0;
+                param.fig_num = 1;
             end
             data = logger.data(param.target,"p","e");
             tM = max(data);
@@ -38,7 +40,7 @@ classdef DRAW_DRONE_MOTION
             xlabel(ax,"x [m]");
             ylabel(ax,"y [m]");
             zlabel(ax,"z [m]");
-            obj.fig = ax;
+            obj.fig = figure(param.fig_num);
 
             view(3)
             grid on
@@ -83,7 +85,7 @@ classdef DRAW_DRONE_MOTION
             obj.frame = t;
             obj.thrust = tt;
             if param.animation
-                obj.animation(logger,"realtime",true,"target",param.target,"env",param.env);
+                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num);
             end
         end
 
@@ -134,21 +136,24 @@ classdef DRAW_DRONE_MOTION
                 param.realtime = false;
                 param.target = 1;
                 param.gif = 0;
-                param.env = [];
+                param.Motive_ref = 0;
+                param.fig_num = 1;
             end
 
-            p = logger.data(param.target,"p","e");
-            q = logger.data(param.target,"q","e");
+            %p = logger.data(param.target,"p","e");
+            %q = logger.data(param.target,"q","e");
+            p = logger.data(param.target,"p","p");
+            q = logger.data(param.target,"q","p");
             u = logger.data(param.target,"input");
             r = logger.data(param.target,"p","r");
             p = reshape(p,size(p,1),3,length(param.target));
             q = reshape(q,size(q,1),size(q,2)/length(param.target),length(param.target));
             u = reshape(u,size(u,1),4,length(param.target));
-            r = reshape(r,size(r,1),size(r,2),length(param.target));
+            r = reshape(r,size(r,1),3,length(param.target));
             for n = 1:length(param.target)
                 switch size(q(:,:,n),2)
                     case 3
-                        Q1 = quaternion(q(:,:,n),'euler','ZYX','frame');
+                        Q1 = quaternion(q(:,:,n),'euler','XYZ','frame');
                     case 4
                         Q1 = quaternion(q(:,:,n));
                     case 9
@@ -167,16 +172,25 @@ classdef DRAW_DRONE_MOTION
                 delaytime = 0;
                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
             end
-            if ~isempty(param.env)
-                param.env.plot();
-            end
 
             t = logger.data("t");
             tRealtime = tic;
-            for i = 1:length(t)-1
+            if param.Motive_ref
                 for n = 1:length(param.target)
-                    plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
-                    obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                    f(n) = animatedline('Color','r','MaximumNumPoints',15); % 目標軌道の描画点の制限
+                end
+            end
+            for i = 1:length(t)-1
+                if param.Motive_ref
+                    for n = 1:length(param.target)
+                        addpoints(f(n),r(i,1,n),r(i,2,n),r(i,3,n));
+                        obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                    end
+                else
+                    for n = 1:length(param.target)
+                        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
+                        obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                    end
                 end
                 if param.realtime
                     delta = toc(tRealtime);

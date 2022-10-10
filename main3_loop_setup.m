@@ -21,12 +21,16 @@ if fExp && ~fMotive
 end
 
 disp('Press Enter key to start.');
-FH = figure('position', [0 0 eps eps], 'menubar', 'none');
+if ~fDebug | fExp
+    FH = figure('position', [0 0 eps eps], 'menubar', 'none');
+else
+    FH = figure();
+end
 
 w = waitforbuttonpress;
 
 if (fOffline)
-    expdata.overwrite("model", time.t, agent, i);
-    te = expdata.te;
+    logger.overwrite("model", time.t, agent, i);
+    te = logger.Data.t(logger.k);
     offline_time = 1;
 end

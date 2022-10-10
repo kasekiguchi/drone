@@ -49,7 +49,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
-                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
+                obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
                     "History","keepall","Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
@@ -68,7 +68,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                obj.result = receive(obj.subscriber.subtopic,10);
+                obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
             end
             ret = obj.result;
         end
@@ -81,13 +81,11 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             
             if isstruct(msg)
                 for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic, msg.msg);
+                    send(obj.publisher.(obj.pubName(i)), msg.(obj.pubName(i)));
                 end
             else
                 for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic, msg.msg);
+                    send(obj.publisher.(obj.pubName(i)), msg{i});
                 end
             end
         end

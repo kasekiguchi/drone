@@ -3,7 +3,7 @@ function Sensor = Sensor_Motive(rigid_num,initial_yaw_angle,motive)
 % sensor property をSensor classのインスタンス配列として定義
 % rpos : RnagePos_sim
 Sensor.name=["motive"];
-Sensor.type=["Motive"];
+Sensor.type=["MOTIVE"];
 prime_param.Flag = struct('Noise',0,'Occlusion', 0); % '1' : Active, '0' : none
 prime_param.ObjFeature=4;
 prime_param.LocalX     = [ 0.075, -0.075,  0.015;  -0.075, -0.075, -0.015;-0.075,  0.075,  0.015;0.075,  0.075, -0.015]; 

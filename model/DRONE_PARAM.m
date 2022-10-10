@@ -1,4 +1,4 @@
-classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
+classdef DRONE_PARAM < PARAMETER_CLASS
     % ドローンの物理パラメータ管理用クラス
     % 以下のconfigurationはclass_description.pptxも参照すること．
     % T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
@@ -9,9 +9,6 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
     % tau = [(Ly - ly)*(T3+T4)-ly*(T1+T2); lx*(T1+T3)-(Lx-lx)*(T2+T4); km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 
     properties
-        parameter % 制御モデル用パラメータ
-        parameter_name % 物理パラメータの名前
-        model_error % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ
         mass % DIATONE
         Lx 
         Ly 
@@ -37,10 +34,10 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
     end
 
     methods
-        function obj = DRONE_PARAM(name,param)
+        function obj = DRONE_PARAM(name,type,param)
             arguments
                 name % DIATONE
-                param.parameter_name = [];
+                type = "row";
                 param.mass = 0.269;
                 param.Lx = 0.117;
                 param.Ly = 0.0932;
@@ -59,72 +56,10 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.k3 = 0.000008;          % 推力定数
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
-                param.model_error = [];
+                param.additional = []; % プロパティに無いパラメータを追加する場合
             end
-        obj.mass = param.mass;
-        obj.Lx = param.Lx;
-        obj.Ly = param.Ly;
-        obj.lx = param.lx;
-        obj.ly = param.ly;
-        obj.jx = param.jx;
-        obj.jy = param.jy;
-        obj.jz = param.jz;
-        obj.gravity = param.gravity;
-        obj.km1 = param.km1;
-        obj.km2 = param.km2;
-        obj.km3 = param.km3;
-        obj.km4 = param.km4;
-        obj.k1 = param.k1;
-        obj.k2 = param.k2;
-        obj.k3 = param.k3;
-        obj.k4 = param.k4;
-        obj.rotor_r = param.rotor_r;
-        if isempty(param.parameter_name)
-            obj.parameter_name = string(properties(obj)');
-            obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
-            obj.parameter_name(strcmp(obj.parameter_name,"parameter_name")) = [];
-            obj.parameter_name(strcmp(obj.parameter_name,"model_error")) = [];
-        else
-            obj.parameter_name = param.parameter_name;
-        end
-        for i = length(obj.parameter_name):-1:1
-            obj.parameter(i)=obj.(obj.parameter_name(i));
-            obj.model_error(i) = 0;
-        end
-        if ~isempty(param.model_error)
-            obj.model_error = param.model_error;
-        end
-        end        
-    end
-    methods
-        function v = get(obj,p,plant)
-            arguments
-                obj
-                p = "all";
-                plant = "model"
-            end
-            if strcmp(plant,"plant") % 制御対象の真値 : 制御モデル(parameter) + モデル誤差(model_error)
-                if strcmp(p,"all") % 非推奨
-                    v = obj.parameter + obj.model_error;
-                else
-                    for i = length(p):-1:1
-                        v(i) = obj.(p(i)) + obj.model_error(strcmp(obj.parameter_name,p(i)));
-                    end
-                end
-            else % 制御モデルで想定している値
-                if strcmp(p,"all") % 非推奨
-                    v = obj.parameter;
-                else
-                    for i = length(p):-1:1
-                        v(i) = obj.(p(i));
-                    end
-                end
-            end
-        end
-        function set_model_error(obj,p,v)
-            for i = length(p):-1:1
-                obj.model_error(strcmp(obj.parameter_name,p(i))) = v(i);
-            end
+            obj = obj@PARAMETER_CLASS(name,type,param);
         end
     end
+
 end
