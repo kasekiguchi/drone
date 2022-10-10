@@ -23,9 +23,14 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
         function result = do(obj,Param)
             sensor = obj.self.sensor.motive.result.rigid;
             state = obj.self.estimator.result.state;
+            time = Param{1};
+            N = Param{2};
+            Nb = Param{3};
 
-            if obj.id > 3
-                obj.result.state.p = [cos(Param.t);sin(Param.t);abs(sin(Param.t))];
+            if obj.id == N - Nb + 1
+                obj.result.state.p = [cos(time.t);sin(time.t);abs(sin(time.t))];
+            elseif obj.id > N - Nb + 1
+                obj.result.state.p = obj.param(:,obj.id - (N - Nb)) + sensor(N-Nb+1).p;
             end
 
             result = obj.result;
