@@ -1,4 +1,4 @@
-classdef Drone_Exp_Model < MODEL_CLASS
+classdef DRONE_EXP_MODEL < MODEL_CLASS
     % Lizard 実験用モデル
     properties% (Access=private)
         ESPr_num
@@ -7,24 +7,23 @@ classdef Drone_Exp_Model < MODEL_CLASS
     end
     properties
         msg
+        arming_msg = [500 500 0 500 1000 0 0 0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+        stop_msg = [500 500 0 500 0 0 0 0];
     end
     
     
     methods
-        function obj = Drone_Exp_Model(args)
-            obj@MODEL_CLASS([],[]);
-            param=args;
+        function obj = DRONE_EXP_MODEL(args)
+            obj@MODEL_CLASS(args);
+            param=args.param;
             obj.dt = 0.025;
             %% variable set
             obj.flight_phase        = 's';
             switch param.conn_type
                 case "udp"
                     obj.ESPr_num = param.num;
-                    [~,cmdout] = system("ipconfig");
-                    ipp=regexp(cmdout,"192.168.");
-                    cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
-                    param.IP=strcat('192.168.50','.',string(100+obj.ESPr_num));
-                    param.port=8000+obj.ESPr_num;
+                    param.IP = char("192.168." + obj.ESPr_num(1) + "." + obj.ESPr_num(2));
+                    param.port=8000;
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
@@ -51,16 +50,16 @@ classdef Drone_Exp_Model < MODEL_CLASS
                 obj.flight_phase=cha;
                 switch cha
                     case 'q'  % quit
-                        obj.connector.sendData(gen_msg([500 500 0 500 0 0 0 0]));
+                        obj.connector.sendData(gen_msg(obj.stop_msg));
                         error("ACSL : quit experiment");
                     case 's' % stop pro
-                        uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
-                        AUX_1   =  0;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   = 0;
-                        msg(1,1:8) = [500,500,0,500,0,0,0,0];% [ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+%                        uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
+%                        AUX_1   =  0;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   = 0;
+                        msg(1,1:8) = obj.stop_msg;
                     case 'a' % arming
-                        uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
-                        AUX_1   = 1000;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   =  0;
-                        msg(1,1:8) = [500,500,0,500,1000,0,0,0];%[ uroll, upitch, uthr, uyaw, AUX_1, AUX_2, AUX_3, AUX_4];
+%                        uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;
+%                        AUX_1   = 1000;     AUX_2   =  0;     AUX_3   =  0;     AUX_4   =  0;
+                        msg(1,1:8) = obj.arming_msg;
                     case 'f' % flight
                         msg(1,1:8) = u;
                     case 'l' % landing
@@ -69,8 +68,8 @@ classdef Drone_Exp_Model < MODEL_CLASS
                         msg(1,1:8) = u;
                 end
             else % 緊急時 プロペラストップ
-                obj.msg=[500 500 0 500 0 0 0 0];
                 obj.connector.sendData(gen_msg(obj.msg));
+                obj.msg = obj.stop_msg;
                 warning("ACSL : Emergency stop!!");
                 return;
             end
@@ -78,10 +77,10 @@ classdef Drone_Exp_Model < MODEL_CLASS
             obj.msg=msg;
         end
         function arming(obj)
-            obj.connector.sendData(gen_msg([500 500 0 500 1000 0 0 0 0]));
+            obj.connector.sendData(gen_msg(obj.arming_msg));
         end
         function stop(obj)
-            obj.connector.sendData(gen_msg([500 500 0 500 0 0 0 0 0]));
+            obj.connector.sendData(gen_msg([500 500 0 500 0 0 0 0]));
         end
     end
 end

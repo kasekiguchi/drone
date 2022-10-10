@@ -1,8 +1,6 @@
 function Controller=Controller_HL_ATMEC(dt)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
-Controller_param.P=getParameter();
-
 %% ====HL_Controller====
 % %-------------定量誤差大-------------
 % Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 
@@ -24,7 +22,7 @@ Controller_param.dt = dt;
  eig(diag([1,1,1],1)-[0;0;0;1]*Controller_param.F2)
  
 Controller.type="HLController_ATMEC";
-Controller.name="hlcontrollerATMEC";
+Controller.name="hlcATMEC";
 
 
 %% ====サブシステムモデル====
@@ -63,8 +61,6 @@ Controller_param.lambda.x = 0.99; %忘却係数
 Controller_param.gamma.y = 1; %初期相関係数
 Controller_param.alpha.y = 0.01; %ローパスフィルタ強度
 Controller_param.lambda.y = 0.99; %忘却係数
-
-%assignin('base',"Controller_param",Controller_param);
 
 Controller.param=Controller_param;
 

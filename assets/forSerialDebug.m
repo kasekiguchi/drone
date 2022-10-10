@@ -1,14 +1,14 @@
 %% for serial debug
-% How to use
-% 1. Connect the drone with battery on betaflight configulator
-% 2. Do "Initialize settings" on main.m
-% 3. Execute this file
-% 4. Check the transmitter signal on betaflight
-% Function : send time varying message to transmitter system
-% ch : time varying channel 
-% Expected result : transmitter signal increase by time
-
+disp("How to use");
+disp("1. Connect the drone with battery on betaflight configulator");
+disp("2. Do 'Initialize settings' on main.m");
+disp("3. Execute this file");
+disp("4. Check the transmitter signal on betaflight");
+disp("Function : send time varying message to transmitter system");
+disp("ch : time varying channel ");
+disp("Expected result : transmitter signal increase by time");
 clear all
+%%
 COM = [26]; % change to fit your system
 if ~exist('agent')
 for i = 1:length(COM)

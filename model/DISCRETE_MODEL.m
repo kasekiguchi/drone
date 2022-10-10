@@ -1,11 +1,11 @@
-classdef Discrete_Model < MODEL_CLASS
+classdef DISCRETE_MODEL < MODEL_CLASS
     % Discrete time model
 %     properties
 %         Property1
 %     end
     
     methods
-        function obj = Discrete_Model(args)
+        function obj = DISCRETE_MODEL(args)
             obj= obj@MODEL_CLASS("Discrete_Model",args);
             %obj.id = self.id
             % 
