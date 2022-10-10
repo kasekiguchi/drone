@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -30,11 +30,11 @@ else
     logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
 %外乱 disturbance
-dstr=[0,1,0];%外乱[x,y,z]
+dstr=[0,0,0];%外乱[x,y,z]
 run("main2_agent_setup.m");
 % agent.set_model_error("k1",0.1);%モデル誤差
 % agent.set_model_error("ly",-0.01);%モデル誤差
-% agent.set_model_error("mass",0.1);%モデル誤差
+agent.set_model_error("mass",0.1);%モデル誤差
 agent(i).set_model_error("B",{[zeros(1,6),dstr,zeros(1,3)]});%only sim
 %% main loop
 run("main3_loop_setup.m");
@@ -184,7 +184,7 @@ logger.plot({1,"p","er"},{1, "q", "e"},{1, "v", "e"},{1, "input", "e"});
 % logger.plot({1," p","er"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
-logger.plot({1,"inner_input",""}, "fig_num",2);
+% logger.plot({1,"inner_input",""}, "fig_num",2);
 % agent(1).reference.timeVarying.show(logger)
 
 

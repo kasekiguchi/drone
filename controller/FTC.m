@@ -181,16 +181,16 @@ end
 %             dst_z=0;
 %             dst=0.5*sin(2*pi*t/0.5);%
 %             dst=dst+10*cos(2*pi*t/1);
-            dst=0;
-            if t>=5 && t<=5.1
-                    dst=-2;
-            end
+            dst=-5;
+%             if t>=5 && t<=5.1
+%                     dst=-2;
+%             end
 %“Á’è‚ÌˆÊ’u‚ÅŠO—‚ð—^‚¦‚é
-            dst=0;xxx0=0.5;TT=0.5;%TTŠO—‚ð—^‚¦‚é‹æŠÔ
-            xxx=model.state.p(1)-xxx0;
-            if xxx>=0 && xxx<=TT 
-                    dst=-sin(2*pi*xxx/(TT*2));
-            end
+%             dst=0;xxx0=0.5;TT=0.5;%TTŠO—‚ð—^‚¦‚é‹æŠÔ
+%             xxx=model.state.p(1)-xxx0;
+%             if xxx>=0 && xxx<=TT 
+%                     dst=-sin(2*pi*xxx/(TT*2));
+%             end
 %%
             vs =[ux,uy,upsi];
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
