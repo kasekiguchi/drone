@@ -1,4 +1,4 @@
-classdef MODEL_CLASS <  handle
+classdef MODEL_CLASS < dynamicprops
     % general model class
     % obj = MODEL_CLASS(name,param)
     %      name : 名前（obsolete）
@@ -23,97 +23,163 @@ classdef MODEL_CLASS <  handle
         % state.num_list % 例 [3,4,3,3]
         param % parameters
         dim % n, m, p :  number of state, input, and physical parameters
-        input_channel % ["v","w"]
+        input_channel % ["v", "w"]
         noise
+        fig
     end
+
     properties %(Access=private)
-        state%=STATE_CLASS(); % 状態の構造体
+        state %=STATE_CLASS(); % 状態の構造体
     end
+
     methods
-        function obj = MODEL_CLASS(name,param) % constructor
-            if ~isempty(name)
-                if isempty(regexp(name,"exp", 'once'))
-                    obj.state=STATE_CLASS(param);
-                    if isfield(param,'initial')
-                        obj.set_state(param.initial);
-                    end
-                    obj.name = name;
-                    obj.dim=param.dim;
-                    obj.input_channel = param.input_channel;
-                    obj.method=str2func(param.method);
-                    obj.time_scale = 'continuous';
-                    if contains(name,"Discrete")
-                        obj.time_scale = 'discrete';
-                    end
-                    F = fieldnames(param);
-                    for j = 1:length(F)
-                        if ~strcmp(F{j},'initial') && ~strcmp(F{j},'state_list') && ~strcmp(F{j},'num_list')&& ~strcmp(F{j},'method') && ~strcmp(F{j},'time_scale')
-                            if strcmp(F{j},'solver')
-                                obj.solver = str2func(param.solver);
-                            else
-                                obj.(F{j}) = param.(F{j});
-                            end
-                        end
-                    end
-                end
+
+        function obj = MODEL_CLASS(args) % constructor
+
+            arguments
+                args
             end
+
+            if isempty(regexp(args.type, "EXP", 'once'))
+                param = args.param;
+                name = args.name;
+                obj.state = STATE_CLASS(param);
+
+                if isfield(param, 'initial')
+                    obj.set_state(param.initial);
+                end
+
+                obj.name = name;
+                obj.dim = param.dim;
+                obj.input_channel = param.input_channel;
+
+                if isstring(param.method)
+                    obj.method = str2func(param.method);
+                else
+                    obj.method = param.method;
+                end
+
+                obj.time_scale = 'continuous';
+
+                if contains(name, "iscrete")
+                    obj.time_scale = 'discrete';
+                end
+
+                F = fieldnames(param);
+
+                for j = 1:length(F)
+
+                    if ~strcmp(F{j}, 'initial') && ~strcmp(F{j}, 'state_list') && ~strcmp(F{j}, 'num_list') && ~strcmp(F{j}, 'method') && ~strcmp(F{j}, 'time_scale')
+
+                        if strcmp(F{j}, 'solver')
+                            obj.solver = str2func(param.solver);
+                        else
+                            obj.(F{j}) = param.(F{j});
+                        end
+
+                    end
+
+                end
+
+            end
+
         end
-        function [] =show_do_setting(obj)
-            if contains(obj.time_scale,'discrete')
+
+        function [] = show_do_setting(obj)
+
+            if contains(obj.time_scale, 'discrete')
                 disp("discrete time model");
             else
                 disp(['continuous time model', obj.name]);
-                disp(['ts = ', num2str(obj.ts),'    dt = ',num2str(obj.dt)]);
+                disp(['ts = ', num2str(obj.ts), '    dt = ', num2str(obj.dt)]);
             end
+
         end
-        function []=do(obj,u,varargin)
-            if size(varargin)~=2
-                if size(varargin)>0 % might too specialized to Drone system
-                    if isfield(varargin{1},'FH')
-                        if ~isempty(varargin{1}.FH)
-                            cha = 'f';
-%                             cha = get(varargin{1}.FH, 'currentcharacter');
-                            if (cha == 'q' || cha == 's' || cha == 'a')
-                                return
-                            end
-                        end
+
+        function [] = do(obj, u, opts)
+            arguments
+                obj
+                u
+                opts = []
+            end
+            if isfield(opts, 'FH')
+
+                if ~isempty(opts.FH)
+                    cha = get(opts.FH, 'currentcharacter');
+
+                    if (cha == 'q' || cha == 's' || cha == 'a')
+                        return
                     end
-                    if isfield(varargin{1},'param')
-                        obj.param = varargin{1}.param;
-                        %else
-                        %obj.param = varargin{1};
-                    end
+
                 end
-                if ~isempty(obj.noise)
-                    if ~isempty(obj.noise.seed)
-                        rng(obj.noise.seed*obj.param.t);
-                    else
-                        rng('shuffle');
-                    end
-                    u = u+obj.noise.value.*randn(size(u));
-                end
-                if contains(obj.time_scale,'discrete')
-                    obj.set_state(obj.projection(obj.method(obj.state.get(),u,obj.param)));
+
+            end
+
+            if isfield(opts, 'param')
+                obj.param = opts.param;
+            end
+
+            if isfield(opts, 'dt')
+                obj.dt = opts.dt;
+            end
+
+            if ~isempty(obj.noise)
+
+                if ~isempty(obj.noise.seed)
+                    rng(obj.noise.seed * obj.param.t);
                 else
-                    if isfield(obj.param,'solver_option')
-                        [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get(),varargin{1}.solver_option);
-                    else
-                        [~,tmpx]=obj.solver(@(t,x) obj.method(x, u,obj.param),[obj.ts obj.ts+obj.dt],obj.state.get());
-                    end
-                    obj.set_state(obj.projection(tmpx(end,:)'));
+                    rng('shuffle');
                 end
-                obj.result = obj.state;
+
+                u = u + obj.noise.value .* randn(size(u));
             end
+
+            % 状態更新
+            if contains(obj.time_scale, 'discrete')
+                obj.set_state(obj.projection(obj.method(obj.state.get(), u, obj.param)));
+            else
+
+                if isfield(obj.param, 'solver_option')
+                    [~, tmpx] = obj.solver(@(t, x) obj.method(x, u, obj.param), [obj.ts obj.ts + obj.dt], obj.state.get(), opts.solver_option);
+                else
+                    [~, tmpx] = obj.solver(@(t, x) obj.method(x, u, obj.param), [obj.ts obj.ts + obj.dt], obj.state.get());
+                end
+
+                obj.set_state(obj.projection(tmpx(end, :)'));
+            end
+
+            obj.result = obj.state;
         end
-        function []=set_state(obj,varargin)
+
+        function [] = set_state(obj, varargin)
             obj.state.set_state(varargin{1});
         end
-        function state = get(obj,varargin)
-            if strcmp(varargin{1},"state") % ④
+
+        function state = get(obj, varargin)
+
+            if strcmp(varargin{1}, "state") % ④
                 state = obj.state;
             else
-                state=obj.state.get(varargin{1});
+                state = obj.state.get(varargin{1});
             end
+
         end
+
+        function show(obj)
+            %rad = norm(rot);
+            %dir = rot/rad;
+            pp = patch(obj.fig(1), 'FaceAlpha', 0.3);
+            pf = patch(obj.fig(2), 'EdgeColor', 'flat', 'FaceColor', 'none', 'LineWidth', 0.2);
+
+            pobj = [pp; pf];
+
+            for i = 1:length(pobj)
+                pobj(i).Vertices = (obj.state.getq('rotmat') * pobj(i).Vertices')' + obj.state.p';
+            end
+
+            %rotate(obj,dir,180*rad/pi,orig+trans);
+        end
+
     end
+
 end
