@@ -25,6 +25,7 @@ classdef DRONE < ABSTRACT_SYSTEM
             % param.gif = 0 or 1 gif画像として出力するか選択（1で出力＆Dataフォルダに保存）
             % param.Motive_ref = 0 or 1 動画内の目標軌道をMotiveみたいに徐々に消える形にするか選択（1でMotiveモード）
             % param.fig_num = 1 gif出力するfigure番号の選択（デフォルトはfigure１）
+            % param.mp4 = 0 or 1 mp4形式として出力するか選択（1で出力＆Dataフォルダに保存）
             arguments
                 obj
                 logger
@@ -32,9 +33,10 @@ classdef DRONE < ABSTRACT_SYSTEM
                 param.gif = 0;
                 param.Motive_ref = 0;
                 param.fig_num = 1;
+                param.mp4 = 0;
             end
             p = obj.parameter;
-            DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num);
+            DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
         end
     end
 end
