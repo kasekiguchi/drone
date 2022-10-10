@@ -61,14 +61,14 @@ classdef FUNCTIONAL_HLC < CONTROLLER_CLASS
             z4 = Z4(x,xd',vf,P);
             vs = obj.Vs(z2,z3,z4,F2,F3,F4);
  %% 外乱(加速度で与える)
-                        dst = -1;
+%                         dst = -1;
 %             dst=0.5*sin(2*pi*t/2);%
 %             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);
-%             dst=0;
-%             if t>=4 && t<=4.1
-%                     dst=2;
-%             end
+            dst=0;
+            if t>=5 && t<=5.1
+                    dst=-2;
+            end
 
 %特定の位置で外乱を与える
             dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間

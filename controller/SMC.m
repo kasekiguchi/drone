@@ -68,13 +68,13 @@ classdef SMC < CONTROLLER_CLASS
 % %%            
 
             q=10;%circle
-            k=30;
+            k=2;
             alp=0.7;%0<alp<1
             %定常到達則
-            ux=-inv(SB)*(SA*z2+q*sign(sigmax));%sign
-            uy=-inv(SB)*(SA*z3+q*sign(sigmay));
-%             ux=-inv(SB)*(SA*z2+q*tanh(sigmax));%tanh
-%             uy=-inv(SB)*(SA*z3+q*tanh(sigmay));
+%             ux=-inv(SB)*(SA*z2+q*sign(sigmax));%sign
+%             uy=-inv(SB)*(SA*z3+q*sign(sigmay));
+            ux=-inv(SB)*(SA*z2+q*tanh(sigmax));%tanh
+            uy=-inv(SB)*(SA*z3+q*tanh(sigmay));
              %比例到達則
 %              ux=-inv(SB)*(SA*z2+q*sign(sigmax)+k*sigmax);%sgn
 %              uy=-inv(SB)*(SA*z3+q*sign(sigmay)+k*sigmay);
@@ -95,9 +95,9 @@ classdef SMC < CONTROLLER_CLASS
 %             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=2;
-%             if t>=6 && t<=6.1
-%                     dst=10;
-%             end
+            if t>=5 && t<=5.1
+                    dst=-2;
+            end
             %% calc actual input
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];
@@ -111,6 +111,8 @@ classdef SMC < CONTROLLER_CLASS
             obj.result.z3 = z3;
             obj.result.z4 = z4;
             obj.result.vf = vf;
+            obj.result.sigmax = sigmax;
+            obj.result.sigmay = sigmay;
             result = obj.result;
         end
         function show(obj)

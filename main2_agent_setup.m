@@ -137,7 +137,7 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    n=3;
+    n=5;
     switch n
         case 1 % 有限時間整定制御
             fzapr = 10;%z方向に適用するか:1 else:~1
@@ -155,7 +155,8 @@ for i = 1:N
         case 4 % servo階層型線形化
             agent(i).set_property("controller", Controller_FHL_Servo(dt));                                
         case 5 % SMC
-            agent(i).set_property("controller", Controller_SMC(dt)); 
+            sn=1;%極配置法:1 最適:2
+            agent(i).set_property("controller", Controller_SMC(dt,sn)); 
     end 
       %HLControlSetting = Controller_HL(dt);
       %HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;

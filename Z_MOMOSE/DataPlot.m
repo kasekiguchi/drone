@@ -53,6 +53,8 @@ if fsingle==1
     z4=zeros(2,tn);
     ininp=zeros(8,tn);
     vf=zeros(4,tn);
+    sigmax=zeros(1,tn);
+    sigmay=zeros(1,tn);
     j=1;
     for i=k0f:1:k0e
         time(j)=ti0(i)-tt0;
@@ -70,6 +72,8 @@ if fsingle==1
         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
         %ininp(:,j)=name.Data.agent.inner_input{1, i};
         vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
+        sigmax(:,j)=name.Data.agent.controller.result{1, i}.sigmax;
+        sigmay(:,j)=name.Data.agent.controller.result{1, i}.sigmay;
         j=j+1;
     end
 else
@@ -152,7 +156,7 @@ else
 end
 
 % figure
-FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "t-p" "inner_input" "vf"];
+FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "t-p" "inner_input" "vf" "sigma"];
 fosi=14;%デフォルト9，フォントサイズ変更
 if fsingle==1
     f(1)=figure('Name',FigName(1));
@@ -269,6 +273,7 @@ if fsingle==1
     ylabel('y[m]')
     zlabel('z[m]')
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    daspect([1,1,1]);
     hold off
     
     f(11)=figure('Name',FigName(11));
@@ -359,6 +364,16 @@ if fsingle==1
     legend('zu','dzu','ddzu','dddzu')
     hold off
     
+    f(19)=figure('Name',FigName(19));
+    hold on
+    plot(time,sigmax,time,sigmay,'LineWidth',2);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('sigma')
+    legend('sigmax','sigmay')
+    hold off
 else
 % 比較
     f(1)=figure('Name',FigName(1));
