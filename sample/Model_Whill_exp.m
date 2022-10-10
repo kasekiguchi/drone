@@ -1,4 +1,4 @@
-function Model = Model_Whill_exp(dt,~,~,conn_type,id)
+function Model = Model_Whill_exp(dt,~,conn_type,id)
 % dt : sampling time
 % isPlant : "plant"
 % conn_type : connector type : "udp" or "serial"
@@ -9,11 +9,10 @@ function Model = Model_Whill_exp(dt,~,~,conn_type,id)
 arguments
   dt
   ~
-  ~
   conn_type
   id 
 end
-Model.id = id;
+Model.DomainID = id;
 Model.type="WHILL_EXP_MODEL"; % model name
 Model.name="whill"; % print name
 setting.conn_type = conn_type;
@@ -27,11 +26,12 @@ switch conn_type
     disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
     setting.port = id;
   case "ros"
+%     Setting.param=param;
     setting.param.state_list = ["p"];
-    setting.param.num_list = [3,3];
-    setting.param.subTopic = ["/mavros/local_position/pose"];
+    setting.param.num = [3,3];
+    setting.param.subTopic = ['/Robot_1/pose'];
     setting.param.subName = ["p"];
-    setting.param.ROSHostIP = id;
+    setting.param.DomainID = id;
 end
 Model.param = setting;
 end
