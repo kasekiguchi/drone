@@ -154,7 +154,6 @@ gain_xy=1;
 %             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
             ux=-gain_xy*f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-kapr*z2;%-F2*z2;%（17）式
             uy=-gain_xy*f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-kapr*z3;%-F2*z2;%（17）式
-
 %              ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-F2*z2;%-F2*z2;%（17）式
 %             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-F3*z3;%-F2*z2;%（17）式
                

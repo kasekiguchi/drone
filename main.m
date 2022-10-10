@@ -179,7 +179,7 @@ close all
 clc
 
 % plot 
-logger.plot({1,"p","er"},{1, "q", "e"},{1, "v", "e"},{1, "input", "e"});
+logger.plot({1,"p","r"},{1, "q", "e"},{1, "v", "e"},{1, "input", ""});
 
 % logger.plot({1," p","er"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
@@ -196,7 +196,7 @@ agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 %% make folder&save
-fsave=1;
+fsave=0;
 if fsave==1
     %変更しない
     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
