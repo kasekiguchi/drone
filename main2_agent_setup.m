@@ -138,8 +138,19 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+
+
+    fzapr = 1;%z方向に適用するか:1 else:~1
+            fzsingle = 1;%tanhが一つか:1 tanh2:~1
+            fxyapr = 1;%%%xy近似するか:1 else:~1
+            fxysingle = 1;%%% tanh1:1 or tanh2 :~1
+            alp = 0.9;%alphaの値 0.8だとゲインの位置の重みを大きくすると発散
+            erz=[0 1];%近似する範囲z
+            erxy=[0 1];%近似する範囲xy
+            agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
+
+%    agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
+    %agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 
