@@ -98,6 +98,7 @@ try
 
             % controller
             param(i).controller.hlc = {time.t};
+            param(i).controller.ftc = {time.t};
             param(i).controller.pid = {};
             param(i).controller.tscf = {time.t};
             param(i).controller.mpc = {};
@@ -118,15 +119,6 @@ try
         figure(FH)
         drawnow
 
-        for i = 1:N % 状態更新
-            model_param.param = agent(i).model.param;
-            model_param.FH = FH;
-            agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
-
-            %          agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
-            model_param.param = agent(i).plant.param;
-            agent(i).do_plant(model_param);
-        end
 
         % for exp
         if fExp
@@ -160,6 +152,15 @@ try
                 time.t = time.t + dt % for sim
             end
 
+        end
+        for i = 1:N % 状態更新
+            model_param.param = agent(i).model.param;
+            model_param.FH = FH;
+            agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
+
+            %          agent(i).input = agent(i).input - [0.1;0.01;0;0]; % 定常外乱
+            model_param.param = agent(i).plant.param;
+            agent(i).do_plant(model_param);
         end
 
     end
