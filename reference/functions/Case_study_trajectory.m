@@ -15,6 +15,11 @@ x = x_0+r*16*sin(t/s)^3;
 y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
 z = z_0;
 
+T=10;
+x = x_0+1.5*cos(2*pi*t/T);
+y = y_0+1.5*sin(2*pi*t/T);%r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
+z = z_0;
+
 ref=@(t)[x;y;z;0];
 end
 

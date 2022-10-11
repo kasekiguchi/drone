@@ -90,6 +90,7 @@ FigName= ["t-p" "t-x" "t-y" "t-z" "velocity" "attitude" "angular_velocity" "inpu
     xlabel('x [m]','FontSize',fosi)
     ylabel('y [m]','FontSize',fosi)
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
+    daspect([1 1 1])
     hold off
     
 
@@ -285,10 +286,14 @@ FigName= ["t-p" "t-x" "t-y" "t-z" "velocity" "attitude" "angular_velocity" "inpu
 %変更
 % subfolder='sim';%sim or exp
 % subfolder='exp';%sim or exp
-subfolder='result_A班';
+%===================================================
+subfolder='result_C班';
+%===================================================
 ExpSimName='全体実験';%実験名,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
-contents='うんこマン';%B3の名前
+%===================================================
+contents='yokota';%B3の名前
+%===================================================
 %     FolderName=fullfile(ExportFolder,subfolder,strcat(date,'_',ExpSimName),'data');%保存先のpath
 %     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
 %     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
