@@ -18,7 +18,6 @@ properties (SetAccess = private) % construct したら変えない．
     angle_range
     dead_zone = 0.2;
     head_dir = nsidedpoly(3, 'Center', [0, 0], 'SideLength', 0.5);
-    f3Dmotion = false;
 end
 
 methods
@@ -34,7 +33,6 @@ methods
         obj.head_dir.Vertices = ([0 1; -1 0] * obj.head_dir.Vertices')';
         if isfield(param, 'noise'); obj.noise = param.noise; end
         if isfield(param, 'seed'); obj.seed = param.seed; end
-        if isfield(param, '3Dmotion'); obj.f3Dmotion = true; end
     end
 
     function result = do(obj, param)
@@ -48,14 +46,8 @@ methods
         pos = Plant.state.p; % 実状態
 
         if isprop(Plant.state, "q")
-            if obj.f3Dmotion
-                R = Plant.state.getq(9);
-                tmp = Plant.state.getq(3);
-                yaw = tmp(3);
-            else
-                yaw = Plant.state.q(end); % オイラー角を想定
-                R = [cos(yaw), -sin(yaw); sin(yaw), cos(yaw)]'; % ボディ座標から見るため転置
-            end
+            yaw = Plant.state.q(end); % オイラー角を想定
+            R = [cos(yaw), -sin(yaw); sin(yaw), cos(yaw)]'; % ボディ座標から見るため転置
         else
             yaw = 0;
             R = eye(2);
@@ -149,5 +141,18 @@ methods
     end
 
 end
+
+end
+function [ p ] = pplot(x,y,z)
+%PPLOT Draw line as patch
+
+if nargin==2
+    z=0;
+end
+
+x=reshape(x,[],1);
+y=reshape(y,[],1);
+
+p=patch([x;flipud(x)],[y;flipud(y)],z*ones(2*size(x,1),1),'b');
 
 end
