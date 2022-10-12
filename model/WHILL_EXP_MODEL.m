@@ -43,21 +43,19 @@ methods
                 %cmdout2 = cmdout(ipp(1) + 8:ipp(1) + 11);
                 %param.ROSHostIP = strcat('192.168.50', '.', string(100 + obj.IP));
                 param.DomainID = obj.IP;
-                param.subTopicName = {'/odom', ...
-                                '/scan'};
+                param.subTopicName = {'/odom'};
                 param.pubTopicName = {'/cmd_vel'};
-                param.subMsgName = {'nav_msgs/Odometry', ...
-                                'sensor_msgs/LaserScan'};
+                param.subMsgName = {'nav_msgs/Odometry'};
                 param.pubMsgName = {'geometry_msgs/Twist'};
                 subnum = length(param.subTopicName);
                 pubnum = length(param.pubTopicName);
 
                 for i = 1:subnum
-                    param.subTopic(i) = ros2node("/submatlab", obj.IP);
+                    param.subTopic(i) = ros2node("/submatlab",param.DomainID);
                 end
 
                 for i = 1:pubnum
-                    param.pubTopic(i) = ros2node("/pubmatlab", obj.IP);
+                    param.pubTopic(i) = ros2node("/pubmatlab", param.DomainID);
                 end
 
                 obj.connector = ROS2_CONNECTOR(param);
