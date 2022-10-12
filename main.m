@@ -34,6 +34,7 @@ end
 %
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
+agent.set_model_error("mass",0.1);
 %% main loop
 run("main3_loop_setup.m");
 
@@ -180,9 +181,9 @@ end
 close all
 clc
 % plot
-%logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
+logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
+% logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,2]);
 
 % agent(1).reference.timeVarying.show(logger)
 
