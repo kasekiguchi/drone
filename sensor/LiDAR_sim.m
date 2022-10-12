@@ -15,7 +15,6 @@ classdef LiDAR_sim < SENSOR_CLASS
         angle_range
         head_dir = nsidedpoly(3, 'Center', [0 ,0], 'SideLength', 0.5);
     end
-    
     methods
         function obj = LiDAR_sim(self,param)
             obj.self=self;
@@ -25,9 +24,8 @@ classdef LiDAR_sim < SENSOR_CLASS
             if isfield(param,'radius'); obj.radius = param.radius;         end
             if isfield(param,'pitch');  obj.pitch = param.pitch;end
             obj.angle_range = -pi:obj.pitch:pi;
-            obj.head_dir.Vertices = ([0 1;-1 0]*obj.head_dir.Vertices')'; 
+            obj.head_dir.Vertices = ([0 1;-1 0]*obj.head_dir.Vertices')';
         end
-        
         function result = do(obj,param)
             % result=lidar.do(param)
             %   result.region : センサー領域（センサー位置を原点とした）polyshape
@@ -44,7 +42,7 @@ classdef LiDAR_sim < SENSOR_CLASS
                 front = 0;
                 R = eye(2);
             end
-            tmp = obj.angle_range+front;            
+            tmp = obj.angle_range+front;
             circ=[obj.radius*cos(tmp);obj.radius*sin(tmp)]';
             if tmp(end)-tmp(1) > pi
                 sensor_range=polyshape(circ(:,1),circ(:,2)); % エージェントの位置を中心とした円
@@ -57,11 +55,9 @@ classdef LiDAR_sim < SENSOR_CLASS
                 tmpenv(ei) = polyshape(Env.param.Vertices(:,:,ei)-pos(1:2)'); %相対的な環境
             end
             env = union(tmpenv(:));%polyshapeを結合
-            
             result.region=intersect(sensor_range,env);
             %% 出力として整形
             %result.region.Vertices=result.region.Vertices-pos(1:2)'; % 相対的な測距領域
-            
             result.angle = zeros(1,length(obj.angle_range));
             for i = 1:length(circ)
                 in=intersect(result.region,[circ(i,:);0 0]);
@@ -84,7 +80,7 @@ classdef LiDAR_sim < SENSOR_CLASS
             if ~isempty(obj.result)
                 points(1:2:2*size(obj.result.sensor_points,1),:)=obj.result.sensor_points;
                 plot([points(:,1);0],[points(:,2);0],'r-');
-                hold on; 
+                hold on;
                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);
                 plot(obj.result.region);
                 plot(obj.head_dir);
@@ -95,3 +91,12 @@ classdef LiDAR_sim < SENSOR_CLASS
         end
     end
 end
+
+
+
+
+
+
+
+
+

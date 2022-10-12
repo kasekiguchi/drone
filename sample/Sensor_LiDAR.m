@@ -9,7 +9,7 @@ end
 %% sensor class demo : constructor
 % sensor property 2D LiDAR sensor
 Sensor.name = ["lrf"];
-Sensor.type = ["LiDAR_SIM"];
+Sensor.type = ["LiDAR_sim"];
 Sensor.param.radius = param.radius;
 Sensor.param.angle_range = param.angle_range;
 Sensor.param.seed = param.seed;
