@@ -176,7 +176,7 @@ methods
         %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
         %
         %% 外乱(加速度で与える)
-        %             dst = -1;
+                    dst = -1;
         %             if t>=1
         %                 dst=0;
         %             end
@@ -184,10 +184,10 @@ methods
         %             dst_z=0;
         %             dst=0.5*sin(2*pi*t/0.5);%
         %             dst=dst+10*cos(2*pi*t/1);
-        dst = -2;
-                    if t>=5 && t<=5.1
-                            dst=-2;
-                    end
+%         dst = -2;
+%                     if t>=5 && t<=5.1
+%                             dst=-2;
+%                     end
         %特定の位置で外乱を与える
         %             dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
         %             xxx=model.state.p(1)-xxx0;
