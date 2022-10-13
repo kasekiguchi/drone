@@ -33,8 +33,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.Weight.V = diag([1.0; 1.0; 1000.0]);    % 速度
     Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
     Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
-    Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
+    Params.Weight.R = 0.001 * diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+    Params.Weight.RP = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
     Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
     
 %-- data
@@ -266,7 +266,7 @@ fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
 logger.plot({1,"p", "er"},  "fig_num",1); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+logger.plot({1,"q", "p"},   "fig_num",3); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5); ylim([0 1.0]); %set(gca,'FontSize',Fontsize);  grid on; title(""); 
 figure(8); plot(logger.Data.t, data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]); xlabel("Time [s]"); ylabel("Evaluation"); set(gca,'FontSize',Fontsize);  grid on;
@@ -287,15 +287,22 @@ function xr = Reference(params, time)
 %     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
 %     X = subs(z, t, Tv);
     %-- ホライゾンごとのreference
+    %-- velocity#########################################################
+    syms t H real
+    zf = a*((t-StartT)+params.dt*H)^3+b*((t-StartT)+params.dt*H)^2+rz0;
+    zfdt = diff(zf, t); % 微分
+    %####################################################################
     if time.t <= 10
         for h = 1:params.H
             xr(1:3, h) = [0;0;a*((time.t-StartT)+params.dt*h)^3+b*((time.t-StartT)+params.dt*h)^2+rz0];
             xr(4:12,h) = [0;0;0;0;0;0.5;0;0;0];
+            xr(7:9, h) = [0;0;subs(zfdt, [t, H], [time.t, h])]; % 速度
         end
     else
         for h = 1:params.H
             xr(1:3, h) = [0;0;1];   % 位置
             xr(4:12,h) = [0;0;0;0;0;0.5;0;0;0];   % 位置以外 
+            xr(7:9, h) = [0;0;subs(zfdt, [t, H], [time.t, h])]; % 速度
         end
     end
 end
@@ -339,27 +346,13 @@ end
 function [c, ceq] = Constraints(x, params)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, 1*params.H);
-%     ceq_ode = zeros(params.state_size, params.H);
-
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
     X = x(1:params.state_size, :);          % 12 * Params.H 
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
-
-%- ダイナミクス拘束
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
-% [~,tmpx]=Agent.model.solver(@(t,X(:,L) agent.model.method(X(:,L), U(:,L),Agent.parameter.get()),[ts ts+params.dt],params.X0);
-%     ceq = [X(:, 1) - params.X0, cell2mat(arrayfun(@(L) )]
-    ceq = [X(:, 1) - params.X0, cell2mat(arrayfun(@(L) X(:, L)  - (params.A * X(:, L-1) + params.B * U(:, L-1)), 2:params.H, 'UniformOutput', false))];
+    ceq = [X(:, 1) - params.X0, cell2mat(arrayfun(@(L) X(:, L)  - params.dt*(params.A * X(:, L-1) + params.B * U(:, L-1)), 2:params.H, 'UniformOutput', false))];
     c(:, 1) = [];
 %     c = -x(3, :);
-
-%-- 連続の式を使う方
-%     for L = 2:params.H
-%         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(X(:,L), U(:,L), Agent.parameter.get()), [0 0+params.dt],params.X0);
-%         ceq_ode(:, L) = tmpx;   % tmpx : 縦ベクトル？ 
-%     end
-%     ceq = [X(:, 1) - params.X0, ceq_ode];
-    
 end
 
 function [Ad, Bd, Cd, Dd]  = MassModel(Td)
@@ -380,31 +373,31 @@ function [Ad, Bd, Cd, Dd]  = MassModel(Td)
     km3 = 0.0301;       % ロータ定数
     km4 = 0.0301;       % ロータ定数
     %-- 平衡点：原点
-            Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-                     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+%             Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
       %-- 平衡点：　1m上空でホバリング [0 0 1 0 0 0 0 0 0 0 0 0 0 hover hover hover hover]
-%     Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-%              0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
-%              0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+    Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+             0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+             0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
+             0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
 
     Bc = [    0,        0,        0,        0;
               0,        0,        0,        0;
