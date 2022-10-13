@@ -63,8 +63,16 @@ methods
 
         %% calc actual input
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
-        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)];
+        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4);-1];
         obj.self.input = obj.result.input;
+         %サブシステムの入力
+        obj.result.uHL = [vf(1);vs];
+        %サブシステムの状態
+        obj.result.z1 = z1;
+        obj.result.z2 = z2;
+        obj.result.z3 = z3;
+        obj.result.z4 = z4;
+        obj.result.vf = vf;
         result = obj.result;
     end
 

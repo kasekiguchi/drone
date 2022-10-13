@@ -14,6 +14,16 @@ syms sF1 [1 2] real
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,[1,0],[0]),dt));
 Controller_param.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
 
+    A11=diag(1);
+    A12=[0;0;1];
+    K = lqrd(A11,A12,diag([100,10,10]),0.01,dt);
+    [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
+    S=[K 1];
+    Controller_param.S=S;
+    Controller_param.SA=S*Ac4;
+    Controller_param.SB=S*Bc4; 
+
+
 syms sz2 [4 1] real
 syms sF2 [1 4] real
 syms sz3 [4 1] real

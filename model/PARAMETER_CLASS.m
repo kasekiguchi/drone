@@ -72,6 +72,7 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
             obj.update_parameter();
         end
         function update_parameter(obj)
+            obj.parameter = [];
             for i = 1:length(obj.parameter_name)
                 if isprop(obj,obj.parameter_name(i))
                     if strcmp(obj.type,"row")

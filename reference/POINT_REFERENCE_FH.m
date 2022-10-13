@@ -31,8 +31,8 @@ methods
             FH = Param{1}; % figure handle
         end
 
-        %             cha = get(FH, 'currentcharacter');
-        cha = 'f';
+                    cha = get(FH, 'currentcharacter');
+%         cha = 'f';
 
         if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')
             cha = obj.flight_phase;
@@ -52,11 +52,11 @@ methods
         elseif strcmp(cha, 't') % take off phase
 
             if strcmp(obj.flag, 't')
-                [obj.result.state.p, obj.result.state.v] = gen_ref_for_take_off(obj.result.state.p, obj.base_state, 1 - obj.base_state(3), 10, Param{3} - obj.base_time);
+                [obj.result.state.p, obj.result.state.v] = gen_ref_for_take_off(obj.result.state.p, obj.base_state, 1 - obj.base_state(3), 5, Param{3} - obj.base_time);
             else % 初めてtake off に入ったとき
                 obj.base_time = Param{3};
                 obj.base_state = obj.self.estimator.result.state.p;
-                [obj.result.state.p, obj.result.state.v] = gen_ref_for_take_off(obj.base_state, obj.base_state, 1 - obj.base_state(3), 10, 0);
+                [obj.result.state.p, obj.result.state.v] = gen_ref_for_take_off(obj.base_state, obj.base_state, 1 - obj.base_state(3), 5, 0);
             end
 
             obj.flag = 't';

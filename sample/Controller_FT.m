@@ -14,7 +14,7 @@ Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 syms sz1 [2 1] real
 syms sF1 [1 2] real
 [Ad1, Bd1, ~, ~] = ssdata(c2d(ss(Ac2, Bc2, [1, 0], [0]), dt));
-Controller_param.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
+% Controller_param.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
 %% 入力のalphaを計算
 
 anum = 4; %変数の数
@@ -66,38 +66,38 @@ if fzapr == 1
         end
 
         if 0
-
-            for i = 1:2
-                fza(i) = 1 / (1 + exp(-f1(i, 2) * 2 * sz1(i)));
-                tanha(i) = 2 * fza(i) - 1;
-                dtanha(i) = 4 * f1(i, end - 1) * fza(i) * (1 - fza(i));
-                ddtanha(i) = 8 * f1(i, end - 1)^2 * fza(i) * (1 - fza(i)) * (1 - 2 * fza(i));
-                dddtanha(i) = 16 * f1(i, end - 1)^3 * fza(i) * (1 - fza(i)) * (1 - 6 * fza(i) + 6 * fza(i)^2);
-
-            end
-
-            for i = 1:2
-                u = u -f1(i, 1) * tanha(i) -f1(i, 3) * sz1(i);
-            end
-
-            dz = Ad1 * sz1 + Bd1 * u;
-
-            for i = 1:2
-                du = du -f1(i, 1) * dtanha(i) * dz(i) -f1(i, 3) * dz(i);
-            end
-
-            ddz = Ad1 * dz + Bd1 * du;
-
-            for i = 1:2
-                ddu = ddu -f1(i, 1) * ddtanha(i) * (dz(i))^2 -f1(i, 1) * dtanha(i) * ddz(i) -f1(i, 3) * ddz(i);
-            end
-
-            dddz = Ad1 * ddz + Bd1 * ddu;
-
-            for i = 1:2
-                dddu = dddu -f1(i, 1) * dddtanha(i) * (dz(i))^3 -3 * f1(i, 1) * ddtanha(i) * dz(i) * ddz(i) -f1(i, 1) * dtanha(i) * dddz(i) -f1(i, 3) * dddz(i);
-            end
-
+% 
+%             for i = 1:2
+%                 fza(i) = 1 / (1 + exp(-f1(i, 2) * 2 * sz1(i)));
+%                 tanha(i) = 2 * fza(i) - 1;
+%                 dtanha(i) = 4 * f1(i, end - 1) * fza(i) * (1 - fza(i));
+%                 ddtanha(i) = 8 * f1(i, end - 1)^2 * fza(i) * (1 - fza(i)) * (1 - 2 * fza(i));
+%                 dddtanha(i) = 16 * f1(i, end - 1)^3 * fza(i) * (1 - fza(i)) * (1 - 6 * fza(i) + 6 * fza(i)^2);
+% 
+%             end
+% 
+%             for i = 1:2
+%                 u = u -f1(i, 1) * tanha(i) -f1(i, 3) * sz1(i);
+%             end
+% 
+%             dz = Ad1 * sz1 + Bd1 * u;
+% 
+%             for i = 1:2
+%                 du = du -f1(i, 1) * dtanha(i) * dz(i) -f1(i, 3) * dz(i);
+%             end
+% 
+%             ddz = Ad1 * dz + Bd1 * du;
+% 
+%             for i = 1:2
+%                 ddu = ddu -f1(i, 1) * ddtanha(i) * (dz(i))^2 -f1(i, 1) * dtanha(i) * ddz(i) -f1(i, 3) * ddz(i);
+%             end
+% 
+%             dddz = Ad1 * ddz + Bd1 * ddu;
+% 
+%             for i = 1:2
+%                 dddu = dddu -f1(i, 1) * dddtanha(i) * (dz(i))^3 -3 * f1(i, 1) * ddtanha(i) * dz(i) * ddz(i) -f1(i, 1) * dtanha(i) * dddz(i) -f1(i, 3) * dddz(i);
+%             end
+% 
         else
             %===========================================diffをつかった
             ub =- zF1(1) * tanh(zF1(2) * z(t)) - zF1(3) * z(t);
@@ -174,7 +174,7 @@ if fzapr == 1
 
         Controller_param.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
     end
-
+    
 end
 
 %% 二層

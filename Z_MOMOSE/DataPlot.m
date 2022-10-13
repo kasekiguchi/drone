@@ -72,8 +72,8 @@ if fsingle==1
         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
         %ininp(:,j)=name.Data.agent.inner_input{1, i};
         vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
-        sigmax(:,j)=name.Data.agent.controller.result{1, i}.sigmax;
-        sigmay(:,j)=name.Data.agent.controller.result{1, i}.sigmay;
+%         sigmax(:,j)=name.Data.agent.controller.result{1, i}.sigmax;
+%         sigmay(:,j)=name.Data.agent.controller.result{1, i}.sigmay;
         j=j+1;
     end
 else
@@ -158,23 +158,26 @@ end
 % figure
 FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "t-p" "inner_input" "vf" "sigma"];
 fosi=14;%デフォルト9，フォントサイズ変更
+LW = 2;%linewidth
 if fsingle==1
-    f(1)=figure('Name',FigName(1));
+    i=0;
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(ref(1,:),ref(2,:),'LineWidth',2);
-    plot(est(1,:),est(2,:),'LineWidth',2);
+    plot(ref(1,:),ref(2,:),'LineWidth',LW);
+    plot(est(1,:),est(2,:),'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
     xlabel('x[m]')
     ylabel('y[m]')
+    daspect([1,1,1])
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
     hold off
 
-    f(2)=figure('Name',FigName(2));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,ref(1,:),'LineWidth',2);
-    plot(time,est(1,:),'LineWidth',2);
+    plot(time,ref(1,:),'LineWidth',LW);
+    plot(time,est(1,:),'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -183,10 +186,10 @@ if fsingle==1
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     hold off
 
-    f(3)=figure('Name',FigName(3));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,ref(2,:),'LineWidth',2);
-    plot(time,est(2,:),'LineWidth',2);
+    plot(time,ref(2,:),'LineWidth',LW);
+    plot(time,est(2,:),'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -195,10 +198,10 @@ if fsingle==1
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     hold off
     
-    f(4)=figure('Name',FigName(4));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,ref(3,:),'LineWidth',2);
-    plot(time,est(3,:),'LineWidth',2);
+    plot(time,ref(3,:),'LineWidth',LW);
+    plot(time,est(3,:),'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -207,9 +210,9 @@ if fsingle==1
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     hold off
     
-    f(5)=figure('Name',FigName(5));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,err,'LineWidth',2);
+    plot(time,err,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -218,9 +221,9 @@ if fsingle==1
     legend('x','y','z')
     hold off
     
-    f(6)=figure('Name',FigName(6));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,inp,'LineWidth',2);
+    plot(time,inp,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -229,9 +232,9 @@ if fsingle==1
     legend('1','2','3','4')
     hold off
 
-    f(7)=figure('Name',FigName(7));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,att,'LineWidth',2);
+    plot(time,att,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -240,9 +243,9 @@ if fsingle==1
     legend('x','y','z')
     hold off
 
-    f(8)=figure('Name',FigName(8));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,vel,'LineWidth',2);
+    plot(time,vel,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -251,9 +254,9 @@ if fsingle==1
     legend('x','y','z')
     hold off
 
-    f(9)=figure('Name',FigName(9));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,w,'LineWidth',2);
+    plot(time,w,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -262,23 +265,24 @@ if fsingle==1
     legend('x','y','z')
     hold off
 
-    f(10)=figure('Name',FigName(10));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot3(ref(1,:),ref(2,:),ref(3,:),'LineWidth',2);
-    plot3(est(1,:),est(2,:),est(3,:),'LineWidth',2);
+    plot3(ref(1,:),ref(2,:),ref(3,:),'LineWidth',LW);
+    plot3(est(1,:),est(2,:),est(3,:),'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
     xlabel('x[m]')
     ylabel('y[m]')
     zlabel('z[m]')
+    daspect([1,1,1])
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     daspect([1,1,1]);
     hold off
     
-    f(11)=figure('Name',FigName(11));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,uHL,'LineWidth',2);
+    plot(time,uHL,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -287,9 +291,9 @@ if fsingle==1
     legend('z','x','y','yaw')
     hold off
     
-    f(12)=figure('Name',FigName(12));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,z1,'LineWidth',2);
+    plot(time,z1,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -298,9 +302,9 @@ if fsingle==1
     legend('z','dz')
     hold off
     
-    f(13)=figure('Name',FigName(13));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,z2,'LineWidth',2);
+    plot(time,z2,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -309,9 +313,9 @@ if fsingle==1
     legend('x','dx','ddx','dddx')
     hold off
     
-    f(14)=figure('Name',FigName(14));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,z3,'LineWidth',2);
+    plot(time,z3,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -320,9 +324,9 @@ if fsingle==1
     legend('y','dy','ddy','dddy')
     hold off
     
-    f(15)=figure('Name',FigName(15));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,z4,'LineWidth',2);
+    plot(time,z4,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -331,9 +335,9 @@ if fsingle==1
     legend('psi','dpsi')
     hold off
     
-    f(16)=figure('Name',FigName(16));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,ref,time,est,'LineWidth',2);
+    plot(time,ref,time,est,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -342,9 +346,9 @@ if fsingle==1
     legend('x ref','y ref','z ref','x est','y est','z est')
     hold off
     
-    f(17)=figure('Name',FigName(17));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,ininp,'LineWidth',2);
+    plot(time,ininp,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -353,9 +357,9 @@ if fsingle==1
 %     legend('')
     hold off
     
-    f(18)=figure('Name',FigName(18));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,vf,'LineWidth',2);
+    plot(time,vf,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -364,9 +368,9 @@ if fsingle==1
     legend('zu','dzu','ddzu','dddzu')
     hold off
     
-    f(19)=figure('Name',FigName(19));
+    f(i+1)=figure('Name',FigName(i+1));
     hold on
-    plot(time,sigmax,time,sigmay,'LineWidth',2);
+    plot(time,sigmax,time,sigmay,'LineWidth',LW);
     grid on
     title(HLorFT)
     set(gca,'FontSize',fosi)
@@ -378,10 +382,10 @@ else
 % 比較
     f(1)=figure('Name',FigName(1));
     hold on
-    plot(ref1(1,:),ref1(2,:),'LineWidth',2);
-    plot(ref2(1,:),ref2(2,:),'LineWidth',2);
-    plot(est1(1,:),est1(2,:),'LineWidth',2);
-    plot(est2(1,:),est2(2,:),'LineWidth',2);
+    plot(ref1(1,:),ref1(2,:),'LineWidth',LW);
+    plot(ref2(1,:),ref2(2,:),'LineWidth',LW);
+    plot(est1(1,:),est1(2,:),'LineWidth',LW);
+    plot(est2(1,:),est2(2,:),'LineWidth',LW);
     grid on
     set(gca,'FontSize',fosi)
     xlabel('x[m]')
@@ -391,10 +395,10 @@ else
 
     f(2)=figure('Name',FigName(2));
     hold on
-    plot(time1,ref1(1,:),'LineWidth',2);
-    plot(time2,ref2(1,:),'LineWidth',2);
-    plot(time1,est1(1,:),'LineWidth',2);
-    plot(time2,est2(1,:),'LineWidth',2);
+    plot(time1,ref1(1,:),'LineWidth',LW);
+    plot(time2,ref2(1,:),'LineWidth',LW);
+    plot(time1,est1(1,:),'LineWidth',LW);
+    plot(time2,est2(1,:),'LineWidth',LW);
     grid on
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
@@ -404,10 +408,10 @@ else
     
     f(3)=figure('Name',FigName(3));
     hold on
-    plot(time1,ref1(2,:),'LineWidth',2);
-    plot(time2,ref2(2,:),'LineWidth',2);
-    plot(time1,est1(2,:),'LineWidth',2);
-    plot(time2,est2(2,:),'LineWidth',2);
+    plot(time1,ref1(2,:),'LineWidth',LW);
+    plot(time2,ref2(2,:),'LineWidth',LW);
+    plot(time1,est1(2,:),'LineWidth',LW);
+    plot(time2,est2(2,:),'LineWidth',LW);
     grid on
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
@@ -417,10 +421,10 @@ else
     
     f(4)=figure('Name',FigName(4));
     hold on
-    plot(time1,ref1(3,:),'LineWidth',2);
-    plot(time2,ref2(3,:),'LineWidth',2);
-    plot(time1,est1(3,:),'LineWidth',2);
-    plot(time2,est2(3,:),'LineWidth',2);
+    plot(time1,ref1(3,:),'LineWidth',LW);
+    plot(time2,ref2(3,:),'LineWidth',LW);
+    plot(time1,est1(3,:),'LineWidth',LW);
+    plot(time2,est2(3,:),'LineWidth',LW);
     grid on
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
@@ -430,8 +434,8 @@ else
     
     f(5)=figure('Name',FigName(5));
     hold on
-    plot(time1,err1,'LineWidth',2);
-    plot(time2,err2,'LineWidth',2);
+    plot(time1,err1,'LineWidth',LW);
+    plot(time2,err2,'LineWidth',LW);
     grid on
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
@@ -485,10 +489,10 @@ else
 
     f(10)=figure('Name',FigName(10));
     hold on
-    plot3(ref1(1,:),ref1(2,:),ref1(3,:),'LineWidth',2);
-    plot3(ref2(1,:),ref2(2,:),ref2(3,:),'LineWidth',2);
-    plot3(est1(1,:),est1(2,:),est1(3,:),'LineWidth',2);
-    plot3(est2(1,:),est2(2,:),est2(3,:),'LineWidth',2);
+    plot3(ref1(1,:),ref1(2,:),ref1(3,:),'LineWidth',LW);
+    plot3(ref2(1,:),ref2(2,:),ref2(3,:),'LineWidth',LW);
+    plot3(est1(1,:),est1(2,:),est1(3,:),'LineWidth',LW);
+    plot3(est2(1,:),est2(2,:),est2(3,:),'LineWidth',LW);
     grid on
     set(gca,'FontSize',fosi)
     xlabel('x[m]')
