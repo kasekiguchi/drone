@@ -244,7 +244,7 @@ end
                         state_data(:, 1, m) = previous_state;
                         for h = 1:Params.H-1
                             FigTime = time.t;
-                            [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+Params.dt],x0);
+                            [~,tmpx]= agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+Params.dt],x0);
     %                         tmpx = Params.A * previous_state + Params.B * u(:, h, m);
                             x0 = tmpx(end, :);
                             state_data(:, h+1, m) = x0;

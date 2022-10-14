@@ -22,7 +22,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- MPC関連 変数定義 
     Params.Particle_num = 200;  %200
-    Params.H = 3;  % 10
+    Params.H = 2;  % 10
     Params.dt = 0.1;
     idx = 0;
     totalT = 0;
@@ -34,7 +34,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
     Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
     Params.Weight.R = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
+    Params.Weight.RP = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
     Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
     
 %-- data
@@ -146,6 +146,7 @@ end
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
     %-- newton and sqp MPC controller
+        x = agent.estimator.result.state.get();
         %-- MPCパラメータを構造体に格納
             Params.ts = 0;
             Params.xr = xr;
@@ -154,11 +155,7 @@ end
         %-- 状態の表示
             state_monte = agent.model.state;
             ref_monte = agent.reference.result.state;
-            fprintf("pos: %f %f %f \t vel: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f",...
-                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
-                ref_monte.p(1), ref_monte.p(2), ref_monte.p(3));
+            
         %-- 初期値の設定
             if idx == 1
                 initial_u1 = 0.269 * 9.81 / 4;   % 初期値
@@ -189,7 +186,14 @@ end
             if var(Params.state_size+1:Params.total_size, end) > 1.0
                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
             end
-            agent.input = var(Params.state_size+1:Params.total_size, 2);
+            
+
+            fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
+                ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
+
+            agent.input = var(Params.state_size+1:Params.total_size, 1);    % 2なら飛んだ
     
         end   
         %-- データ保存
@@ -294,7 +298,7 @@ function xr = Reference(params, time)
         for h = 1:params.H
             xr(1:3, h) = [0;0;1];   % 位置
             xr(4:12,h) = [0;0;0;0;0;0;0;0;0];   % 位置以外 
-            xr(7:9, h) = [0;0;subs(zfdt, [t, H], [time.t, h])]; % 速度
+            xr(7:9, h) = [0;0;0]; % 速度
             xr(13:16,h)= params.ur;
         end
     end
@@ -353,8 +357,10 @@ function [c, ceq] = Constraints(x, params, Agent, time)
         xu = U(:, L-1);
         xp = params.X0;
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],params.X0);
+%         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-        ceq_ode(:, L) = X(:, L-1) - tmpx(end, :)';   % tmpx : 縦ベクトル？   
+        ceq_ode(:, L) = X(:, L-1) - tmpx(end, :)';   % tmpx : 縦ベクトル？
+%         xp2 = tmpx(end, :)';
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
 %     c(:, 1) = [];
