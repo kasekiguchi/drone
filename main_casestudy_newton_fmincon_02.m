@@ -22,7 +22,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- MPC関連 変数定義 
     Params.Particle_num = 200;  %200
-    Params.H = 2;  % 10
+    Params.H = 5;  % 10
     Params.dt = 0.1;
     idx = 0;
     totalT = 0;
@@ -85,8 +85,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     x = agent.estimator.result.state.get();
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
     
-
 run("main3_loop_setup.m");
+
 
 try
     while round(time.t, 5) <= te
@@ -146,7 +146,7 @@ end
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
     %-- newton and sqp MPC controller
-        x = agent.estimator.result.state.get();
+        x = agent.estimator.result.state.get(); % これ追加10/14　よくなった気がする
         %-- MPCパラメータを構造体に格納
             Params.ts = 0;
             Params.xr = xr;
@@ -264,7 +264,7 @@ logger.plot({1,"p", "er"},  "fig_num",1); set(gca,'FontSize',Fontsize);  grid on
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 logger.plot({1,"input", ""},"fig_num",5); ylim([0 1.0]); %set(gca,'FontSize',Fontsize);  grid on; title(""); 
-% figure(8); plot(logger.Data.t, data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]); xlabel("Time [s]"); ylabel("Evaluation"); set(gca,'FontSize',Fontsize);  grid on;
+figure(8); plot(logger.Data.t, data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]); xlabel("Time [s]"); ylabel("Evaluation"); set(gca,'FontSize',Fontsize);  grid on;
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1);
@@ -289,7 +289,7 @@ function xr = Reference(params, time)
     %####################################################################
     if time.t <= 10
         for h = 1:params.H
-            xr(1:3, h) = [0;0;a*((time.t-StartT)+params.dt*h)^3+b*((time.t-StartT)+params.dt*h)^2+rz0];
+            xr(1:3, h) = [0;time.t / 5;a*((time.t-StartT)+params.dt*h)^3+b*((time.t-StartT)+params.dt*h)^2+rz0];
             xr(4:12,h) = [0;0;0;0;0;0;0;0;0];
             xr(7:9, h) = [0;0;subs(zfdt, [t, H], [time.t, h])]; % 速度
             xr(13:16,h)= params.ur;
@@ -359,7 +359,12 @@ function [c, ceq] = Constraints(x, params, Agent, time)
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],params.X0);
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-        ceq_ode(:, L) = X(:, L-1) - tmpx(end, :)';   % tmpx : 縦ベクトル？
+%         if L == 2
+%             [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
+%         else
+%             [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],tmpx(end, :)');
+%         end
+        ceq_ode(:, L) = X(:, L) - tmpx(end, :)';   % tmpx : 縦ベクトル？
 %         xp2 = tmpx(end, :)';
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
