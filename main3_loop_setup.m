@@ -11,6 +11,7 @@ time.t = ts;
 % mparam.occlusion.target={[1],[1]};
 % mparam.marker_num = 20;
 mparam = [];    % without occulusion
+bparam = [];    % bird param
 
 %profile on
 disp("while ============================")

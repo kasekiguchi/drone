@@ -38,7 +38,7 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             %% 重み分布
             % 対象領域の重要度を計算
             if ~isempty(neighbor)
-                Ps = [state.p';neighbor(:,1:N - Nb -1)'];
+                Ps = [state.p';neighbor'];
                 Ps = circshift(Ps,[obj.id - 1,0]);
                 Ps = [Ps;obj.param.Vertices];
             else

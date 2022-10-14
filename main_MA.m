@@ -8,30 +8,16 @@ cellfun(@(xx) addpath(xx), activefile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 %% general setting
-N = 6; % number of total units
-Nb = 5; % number of birds
+N = 2; % number of total units
+Nb = 3; % number of birds
 fExp = 0 % 実機フラグ
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
+run("main1_bird_setting.m");
 run("main1_setting.m");
+run("main2_bird_setup.m");
 run("main2_agent_setup.m");
-%% set bird
-for i = N-Nb+1:N
-    % Initial position
-    arranged_pos = arranged_position([1, 1], N, 1, 0);
-    initial_state(i).p = arranged_pos(:, i);
-    initial_state(i).q = [1; 0; 0; 0];
-    initial_state(i).v = [0; 0; 0];
-    initial_state(i).w = [0; 0; 0];
-
-    % Model
-    agent(i).set_model(Model_Bird(dt,initial_state(i),i)) % 鳥のモデル（離散時間モデル）
-    
-    % Reference
-    agent(i).reference = [];
-    agent(i).set_property("reference",Reference_Bird(Nb)); % Voronoi重心                           % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
-end
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -54,6 +40,9 @@ run("main3_loop_setup.m");
         if fMotive
             %motive.getData({agent,["pL"]},mparam);
             motive.getData(agent, mparam);
+            if Nb ~= 0
+                motive_bird.getData(bird, bparam);
+            end
         end
 
         for i = 1:N
@@ -70,6 +59,24 @@ run("main3_loop_setup.m");
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
             agent(i).do_sensor(param(i).sensor.list);
+%             agent(i).sensor.bounding.show(agent(1))
+            %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
+        end
+
+        for i = 1:Nb
+            % sensor
+            if fMotive; param_bird(i).sensor.motive = {}; end
+            param_bird(i).sensor.rpos = {agent};
+            param_bird(i).sensor.imu = {[]};
+            param_bird(i).sensor.direct = {};
+            param_bird(i).sensor.bounding = {time};
+            param_bird(i).sensor.rcoverage_3D = {N,Nb};
+            param_bird(i).sensor.rdensity = {Env};
+            param_bird(i).sensor.lrf = Env;
+            for j = 1:length(bird(i).sensor.name)
+                param_bird(i).sensor.list{j} = param_bird(i).sensor.(bird(i).sensor.name(j));
+            end
+            bird(i).do_sensor(param_bird(i).sensor.list);
 %             agent(i).sensor.bounding.show(agent(1))
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
@@ -107,6 +114,38 @@ run("main3_loop_setup.m");
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
 
+        for i = 1:Nb
+            % estimator
+            bird(i).do_estimator(cell(1, 10));
+            %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
+
+            % reference
+            param_bird(i).reference.covering = [];
+            param_bird(i).reference.covering_3D = {N,Nb};
+            param_bird(i).reference.birdmove = {time,N,Nb};
+            param_bird(i).reference.point = {FH, [2; 1; 1], time.t,dt};
+            param_bird(i).reference.timeVarying = {time,FH};
+            param_bird(i).reference.tvLoad = {time};
+            param_bird(i).reference.wall = {1};
+            param_bird(i).reference.tbug = {};
+            param_bird(i).reference.agreement = {logger, N, time.t};
+            for j = 1:length(bird(i).reference.name)
+                param_bird(i).reference.list{j} = param_bird(i).reference.(bird(i).reference.name(j));
+            end
+            bird(i).do_reference(param_bird(i).reference.list);
+            %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
+
+            % controller
+            param_bird(i).controller.hlc = {time.t};
+            param_bird(i).controller.pd = {};
+            param_bird(i).controller.tscf = {time.t};
+            for j = 1:length(bird(i).controller.name)
+                param_bird(i).controller.list{j} = param_bird(i).controller.(bird(i).controller.name(j));
+            end
+            bird(i).do_controller(param_bird(i).controller.list);
+            %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+        end
+
         %% update state
         figure(FH)
         drawnow
@@ -121,10 +160,20 @@ run("main3_loop_setup.m");
             agent(i).do_plant(model_param);
         end
 
+        for i = 1:Nb                        % 状態更新
+            model_bird_param.param = bird(i).model.param;
+            model_bird_param.FH = FH;
+            bird(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
+
+                      bird(i).input = bird(i).input - [0.1;0.01;0;0]; % 定常外乱
+            model_bird_param.param = bird(i).plant.param;
+            bird(i).do_plant(model_param);
+        end
+
         % for exp
         if fExp
             %% logging
-            logger.logging(time.t, FH, agent, []);
+            logger.logging(time.t, FH, agent, bird, []);
             calculation1 = toc(tStart);
             time.t = time.t + calculation1;
 
@@ -145,7 +194,7 @@ run("main3_loop_setup.m");
             %                time.t = time.t + sampling;
             %            end
         else
-            logger.logging(time.t, FH, agent);
+            logger.logging(time.t, FH, agent, bird);
             time.t = time.t + dt
         end
 
@@ -174,5 +223,6 @@ clc
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N,"Motive_ref",1,"mp4",1);
+% agent(1).animation(logger,"target",1:N,"Motive_ref",1);
+bird(1).animation(logger,N,Nb,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",1);
 % agent(1).sensor.bounding.movie(logger);

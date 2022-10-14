@@ -27,10 +27,10 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             N = Param{2};
             Nb = Param{3};
 
-            if obj.id == N - Nb + 1
+            if obj.id == 1
                 obj.result.state.p = [cos(time.t);sin(time.t);abs(sin(time.t))];
-            elseif obj.id > N - Nb + 1
-                obj.result.state.p = obj.param(:,obj.id - (N - Nb)) + sensor(N-Nb+1).p;
+            else
+                obj.result.state.p = obj.param(:,obj.id) + sensor(1).p;
             end
 
             result = obj.result;
