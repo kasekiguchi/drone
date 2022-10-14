@@ -93,7 +93,7 @@ titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.84;%alphaの初期値
+alp(anum)=0.9;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end

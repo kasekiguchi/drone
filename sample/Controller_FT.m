@@ -14,7 +14,7 @@ Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 syms sz1 [2 1] real
 syms sF1 [1 2] real
 [Ad1, Bd1, ~, ~] = ssdata(c2d(ss(Ac2, Bc2, [1, 0], [0]), dt));
-% Controller_param.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
+Controller_param.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
 %% 入力のalphaを計算
 
 anum = 4; %変数の数
@@ -104,6 +104,7 @@ if fzapr == 1
             dub = diff(ub, t);
             ddub = diff(dub, t);
             dddub = diff(ddub, t);
+           
 
             for i = 1:2
                 u = u + subs(ub, [zF1 z], [f1(i, :) sz1(i)]);
