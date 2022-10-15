@@ -84,6 +84,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     x = previous_state;
     x = agent.estimator.result.state.get();
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
+
+    xr = zeros(Params.state_size+Params.input_size, Params.H);
     
 run("main3_loop_setup.m");
 
@@ -133,7 +135,7 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値       
         %-- 目標軌道生成
-            xr = Reference(Params, time);
+            xr = Reference(Params, time, xr);
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [xr(1:3, end)], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -271,38 +273,37 @@ agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();
-function xr = Reference(params, time)
-    xr = zeros(params.state_size+params.input_size, params.H);
-    rz = 1; % 目標
-    rz0 = 0;% スタート
-    T = 10; % かける時間
-    StartT = 0;
-    a = -2/T^3 * (rz-rz0);
-    b = 3/T^2 * (rz-rz0);
-%     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
-%     X = subs(z, t, Tv);
-    %-- ホライゾンごとのreference
-    %-- velocity#########################################################
-        syms t H real
-        zf = a*((t-StartT)+params.dt*H)^3+b*((t-StartT)+params.dt*H)^2+rz0;
-        zfdt = diff(zf, t); % 微分
-    %####################################################################
-    if time.t <= 10
-        for h = 1:params.H
-            xr(1:3, h) = [0;time.t / 5;a*((time.t-StartT)+params.dt*h)^3+b*((time.t-StartT)+params.dt*h)^2+rz0];
-            xr(4:12,h) = [0;0;0;0;0;0;0;0;0];
-            xr(7:9, h) = [0;0;subs(zfdt, [t, H], [time.t, h])]; % 速度
-            xr(13:16,h)= params.ur;
-        end
-    else
-        for h = 1:params.H
-            xr(1:3, h) = [0;0;1];   % 位置
-            xr(4:12,h) = [0;0;0;0;0;0;0;0;0];   % 位置以外 
-            xr(7:9, h) = [0;0;0]; % 速度
-            xr(13:16,h)= params.ur;
-        end
-    end
-end
+% function xr = Reference(params, time, xr)
+%     rz = 1; % 目標
+%     rz0 = 0;% スタート
+%     T = 10; % かける時間
+%     StartT = 0;
+%     a = -2/T^3 * (rz-rz0);
+%     b = 3/T^2 * (rz-rz0);
+% %     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
+% %     X = subs(z, t, Tv);
+%     %-- ホライゾンごとのreference
+%     %-- velocity#########################################################
+%         syms t H real
+%         zf = a*((t-StartT)+params.dt*H)^3+b*((t-StartT)+params.dt*H)^2+rz0;
+%         zfdt = diff(zf, t); % 微分
+%     %####################################################################
+%     if xr(3,1) < 1.0
+%         for h = 1:params.H
+%             xr(1:3, h) = [0;0;a*((time.t-StartT)+params.dt*h)^3+b*((time.t-StartT)+params.dt*h)^2+rz0];
+%             xr(4:12,h) = [0;0;0;0;0;0;0;0;0];
+%             xr(7:9, h) = [0;0;subs(zfdt, [t, H], [time.t, h])]; % 速度
+%             xr(13:16,h)= params.ur;
+%         end
+%     else
+%         for h = 1:params.H
+%             xr(1:3, h) = [0;(time.t-10) / 10;1];   % 位置
+%             xr(4:12,h) = [0;0;0;0;0;0;0;0;0];   % 位置以外 
+%             xr(7:9, h) = [0;0;0]; % 速度
+%             xr(13:16,h)= params.ur;
+%         end
+%     end
+% end
 
 function [eval] = Objective(x, params, Agent) % x : p q v w input
 %-- 評価計算をする関数
@@ -359,13 +360,7 @@ function [c, ceq] = Constraints(x, params, Agent, time)
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],params.X0);
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-%         if L == 2
-%             [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-%         else
-%             [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],tmpx(end, :)');
-%         end
         ceq_ode(:, L) = X(:, L) - tmpx(end, :)';   % tmpx : 縦ベクトル？
-%         xp2 = tmpx(end, :)';
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
 %     c(:, 1) = [];
