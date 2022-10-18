@@ -153,7 +153,7 @@ titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.8;%alphaの初期値
+alp(anum)=0.9;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -307,13 +307,35 @@ plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:))
 grid on
 legend('ufb','utanh','u','誤差')
 end
+%%
+clear e utanh u ufb sigma
+anum=4;%変数の数
+alp=zeros(anum+1,1);
+alp(anum+1)=1;
+alp(anum)=0.9;%alphaの初期値
+for a=anum-1:-1:1
+    alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
+end
+
+Ac2 = [0,1;0,0];
+Bc2 = [0;1];
+dt=0.025;
+k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
+
+syms fz1(t) fz2(t) 
+    u=-k(1) *sign(fz1(t))* abs(fz1(t)).^alp(1) -k(2) *sign(fz2(t))* abs(fz2(t)).^alp(2)
+    du=diff(u,t)
+    ddu=diff(du,t)
+    dddu=diff(ddu,t)
+    
+    
 %% fminserch tanh一つ zサブシステム
 clear e utanh u ufb sigma
 titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.86;%alphaの初期値
+alp(anum)=0.9;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -328,7 +350,7 @@ x0=[2,2,2];
 fvals12z=zeros(2,1);
 gain_ser1z=["","f1","a1","k1"];
 % gain_ser1z=["","f1","k1"];
-er=1; %近似する範囲を指定
+er=10; %近似する範囲を指定
 for i=1:2
 fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,0, er));
 % fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + tanh(x(1)*e) + x(2)*e ) ,0, er));
@@ -443,10 +465,19 @@ A11=diag([1,1],1);
     s=length(e);
     u=zeros(1,s);
     for i=1:s
-        u(i)=-inv(SB)*(SA*e(i)+q*tanh(S*e(i)));
-        
+%         u(i)=-inv(SB)*(SA*e(i)+q*tanh(S*e(i)));
+        u(i)=sign(e(i));
     end
-    plot(e,u);
+    plot(e,u,'LineWidth',2);
+
+grid on
+% taitl('符号関数')
+% title(titlex(i));
+
+fosi=14;%defolt 9
+set(gca,'FontSize',fosi)
+xlabel('x','FontSize',fosi);
+ylabel('y','FontSize',fosi);
 %%
 % %元の入力と近似の入力の差を取り二乗しそれを積分する
 % alp = double([0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000]);%初期値0.9有限整定のべき乗

@@ -128,10 +128,10 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_UKF2DSLAM_Vehicle(agent(i)));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference = [];
-    agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[0;0;1]));
+%     agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[0;0;1]));
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
-%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;0],[2,2,0]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
@@ -142,11 +142,10 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-
-
-            fzapr = 1;%z方向に適用するか:1 else:~1
+    
+            fzapr = 10;%z方向に適用するか:1 元の入力を微分2 else:~1
             fzsingle = 1;%tanhが一つか:1 tanh2:~1
-            fxyapr = 1;%%%xy近似するか:1 else:~1
+            fxyapr = 10;%%%xy近似するか:1 else:~1
             fxysingle = 1;%%% tanh1:1 or tanh2 :~1
             alp = 0.9;%alphaの値 0.8だとゲインの位置の重みを大きくすると発散
             erz=[0 1];%近似する範囲z

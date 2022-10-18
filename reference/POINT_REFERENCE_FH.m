@@ -31,8 +31,8 @@ methods
             FH = Param{1}; % figure handle
         end
 
-%                     cha = get(FH, 'currentcharacter');
-        cha = 'f';
+                    cha = get(FH, 'currentcharacter');
+%         cha = 'f';
 
         if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')
             cha = obj.flight_phase;
