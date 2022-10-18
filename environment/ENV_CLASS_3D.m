@@ -10,7 +10,7 @@ classdef ENV_CLASS_3D < handle & matlab.mixin.SetGet
         ns = 1; % number of surface cell
     end
     methods
-        function obj = ENV_CLASS(name,id,node,surface)
+        function obj = ENV_CLASS_3D(name,id,node,surface)
             % このクラスのインスタンスを作成
             obj.name = name;
             obj.id = id;
