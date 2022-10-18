@@ -1,10 +1,10 @@
-%% set initial state 
+%% set initial state
 disp("Initialize state");
 param(N) = struct('sensor', struct, 'estimator', struct, 'reference', struct);
 
 if fExp
-initial_state(N) = struct;
-if exist('motive', 'var') == 1; motive.getData([], []); end
+    initial_state(N) = struct;
+    if exist('motive', 'var') == 1; motive.getData([], []); end
 
     for i = 1:N
         % for exp with motive : initial_stateize by motive info
@@ -64,10 +64,10 @@ for i = 1:N
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-%         initial_state(i).p = [0;-1];%[92;1];%
-%         initial_state(i).q = 0;%pi/2-0.05;
-%         initial_state(i).v = 0;
-%         agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
+        %         initial_state(i).p = [0;-1];%[92;1];%
+        %         initial_state(i).q = 0;%pi/2-0.05;
+        %         initial_state(i).v = 0;
+        %         agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
     end
 
     %% model
@@ -99,7 +99,7 @@ for i = 1:N
         if ~exist('initial_yaw_angles')
             initial_yaw_angles = zeros(1, N);
         end
-       agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
+        agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
     %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
@@ -108,8 +108,8 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
     %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
-    env = stlread('3F.stl');
-    agent(i).set_property("sensor",Sensor_LiDAR3D(i,'env',env));%,'noise',1.0E-2 ,'seed',3));
+    %env = stlread('3F.stl');
+    %agent(i).set_property("sensor",Sensor_LiDAR3D(i,'env',env));%,'noise',1.0E-2 ,'seed',3));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -128,8 +128,7 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;0],[5,20,0]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
@@ -142,17 +141,17 @@ for i = 1:N
     agent(i).controller = [];
 
 
-    fzapr = 1;%z方向に適用するか:1 else:~1
-            fzsingle = 1;%tanhが一つか:1 tanh2:~1
-            fxyapr = 1;%%%xy近似するか:1 else:~1
-            fxysingle = 1;%%% tanh1:1 or tanh2 :~1
-            alp = 0.9;%alphaの値 0.8だとゲインの位置の重みを大きくすると発散
-            erz=[0 1];%近似する範囲z
-            erxy=[0 1];%近似する範囲xy
-            agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
+%     fzapr = 1;%z方向に適用するか:1 else:~1
+%     fzsingle = 1;%tanhが一つか:1 tanh2:~1
+%     fxyapr = 1;%%%xy近似するか:1 else:~1
+%     fxysingle = 1;%%% tanh1:1 or tanh2 :~1
+%     alp = 0.9;%alphaの値 0.8だとゲインの位置の重みを大きくすると発散
+%     erz=[0 1];%近似する範囲z
+%     erxy=[0 1];%近似する範囲xy
+%     agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
 
-%    agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-    %agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
+    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 
