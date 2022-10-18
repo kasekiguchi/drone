@@ -332,7 +332,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 points = points + obj.state.p(1:2)';
                 plot(points(:,1),points(:,2),'r-');
                 hold on; 
-%                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
+                text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
                 %plot(obj.self.sensor.result.region);
                 %plot(obj.head_dir);
                 plot(obj.state.p(1),obj.state.p(2),'b*');
