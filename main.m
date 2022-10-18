@@ -14,7 +14,7 @@ N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
-fDebug = 0;
+fDebug = 1;
 
 run("main1_setting.m");
 
@@ -64,6 +64,7 @@ try
             param(i).sensor.direct = {};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = {Env.param};
+            param(i).sensor.lidar = {};
 
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
@@ -113,7 +114,8 @@ try
         end
 
         if fDebug
-            agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+            %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+            agent.sensor.lidar.show(FH,agent.plant.state.p,1); 
         end
         %% update state
         figure(FH)
@@ -189,7 +191,7 @@ logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N);
+agent(1).animation(logger, "target", 1:N,"gif",true);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
