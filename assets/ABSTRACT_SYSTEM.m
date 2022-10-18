@@ -270,26 +270,28 @@ methods % set, do property
         obj.model.param = obj.parameter.get();
     end
 
-    function fh=show(obj,str,params)
+    function fh=show(obj,str,opt)
+        % requires each target class' show method accept
+        % "logger","FH","t","param" option inputs
         arguments
             obj
             str
-            params = [];
+            opt.FH = [];
+            opt.logger = [];
+            opt.t = [];
+            opt.param = [];
         end
-        nl = obj.(str(1)).name; % sensorすべてのshowを実行したい場合などに対応：要らない
-        if isempty(params)
-            params = cell(size(nl));
-        end
-        if length(str) > 1
-            tmp = obj;
-            for i = str
-                tmp = tmp.(i);
+        tmp = obj;
+        for j = 1:size(str,1)
+            if iscell(opt.param)
+                param = opt.param{j};
+            else
+                param = opt.param;
             end
-            fh = tmp.show(params{:});
-        else
-            for i = 1:length(nl)
-                fh = obj.(str).(nl(i)).show(params{i});
-            end
+        for i = str(j,:)
+            tmp = tmp.(i);
+        end       
+        fh = tmp.show("logger",opt.logger,"FH",opt.FH,"t",opt.t,"param",param);
         end
     end
 end
