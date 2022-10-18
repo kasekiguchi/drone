@@ -104,30 +104,45 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
             obj.result = result;
         end
 
-        function fh=show(obj, FH,p,R,po,fField)
+        function fh=show(obj, opt)
             arguments
                 obj
-                FH
-                p = obj.self.plant.state.p;
-                R = [];
-                po = obj.result.sensor_points;
-                fField = true;
+                opt.fField = true;
+                opt.fLocal = true; % ボディ座標から見たセンサー情報
+                opt.FH = [];
+                opt.logger = [];
+                opt.t = 1;
+                opt.p = obj.self.plant.state.p;
+                opt.R = obj.self.plant.state.q;
+                opt.po = obj.result.sensor_points;
+                opt.param = [];
             end
-            if isstruct(FH)
-                p = FH.p;
-                R = FH.R;
-                po = FH.po;
-                fh = figure(FH.fig_num);
-            elseif isa(FH,"LOGGER")
-                logger = FH;
-                fh = figure(p);
-                t = R;
-                p = logger.Data.agent.plant.result{t}.state.p;
-                R = logger.Data.agent.plant.result{t}.state.q;
-                po = logger.Data.agent.sensor.result{t}.sensor_points;
+            if ~isempty(opt.logger)
+                fh = figure(opt.FH);
+                logger = opt.logger;
+                p = logger.Data.agent.plant.result{opt.t}.state.p;
+                R = logger.Data.agent.plant.result{opt.t}.state.q;
+                po = logger.Data.agent.sensor.result{opt.t}.sensor_points;
+                if isfield(opt.param,"fField")
+                    opt.fField = opt.param.fField;
+                end
+                opt.fLocal = false;
             else
-                fh=figure(FH);
+                p = opt.p;
+                R = opt.R;
+                po = opt.po;
+                fh=figure(opt.FH);
             end
+            if ~isempty(opt.param)
+                fn = fieldnames(opt.param);
+                for i = 1:length(fn)
+                    opt.(fn{i}) = opt.param.(fn{i});
+                end
+            end
+            switch length(R)
+                case 4
+                    R = rotmat(quaternion(R(:)'),'frame');
+            end                
             ax = fh.CurrentAxes;
             fh.WindowState = 'maximized';
             clf(fh);
@@ -141,7 +156,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
             e = obj.E(:,32);
             d = obj.result.length(32);
             quiver3(p(1),p(2),p(3),0.5*d*e(1),0.5*d*e(2),0.5*d*e(3)); % ほぼ前
-            if fField
+            if opt.fField
                 bld.Faces=obj.cn;
                 bld.Vertices=obj.ps;
                 bld.FaceAlpha = 0.5;           % remove the transparency
@@ -149,7 +164,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
                 bld.LineStyle = '-'; %'none';      % remove the lines
                 patch(bld);
             end
-            if ~isempty(R) % ボディ座標系
+            if opt.fLocal % ボディ座標系
                 po = R'*po-p(:);
             end
             plot3(p(1),p(2),p(3),'bx');

@@ -166,11 +166,6 @@ classdef DRAW_DRONE_MOTION
 
             %p = logger.data(param.target,"p","e");
             %q = logger.data(param.target,"q","e");
-                    opt.fig_num = param.fig_num;
-                    opt.R = [];
-                    po = logger.data(param.target,"sensor_points","s");
-
-
             p = logger.data(param.target,"p","p");
             q = logger.data(param.target,"q","p");
             u = logger.data(param.target,"input");
@@ -215,10 +210,12 @@ classdef DRAW_DRONE_MOTION
                 else
                     plot3(r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
                 end
-                %opt.p=p(i,:,param.target);
-                %opt.po=po(3*(i-1)+1:3*i,:,param.target);
-                param.self.show(["sensor","lidar"],logger,gcf,i);
-                obj=obj.gen_frame("frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,gcf);
+                if ~isempty(param.opt_plot)
+                    param.self.show(param.opt_plot,"logger",logger,"FH",gcf,"t",i);
+                end
+                if ~isvalid(obj.frame)
+                    obj=obj.gen_frame("frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,gcf);
+                end
                 obj.draw(param.target,p(i,:,param.target),Q(i,:,param.target),u(i,:,param.target));
                 if param.realtime
                     delta = toc(tRealtime);

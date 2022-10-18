@@ -115,7 +115,7 @@ try
 
         if fDebug
             %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-            agent.sensor.lidar.show(FH,agent.plant.state.p,1); 
+            agent.show(["sensor","lidar"],"FH",FH,"param",struct("fLocal",false));
         end
         %% update state
         figure(FH)
@@ -191,7 +191,7 @@ logger.plot({1,"p1:2","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N,"gif",true);
+agent(1).animation(logger, "target", 1:N,"opt_plot",["sensor","lidar"]);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
