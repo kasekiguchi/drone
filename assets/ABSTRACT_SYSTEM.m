@@ -270,13 +270,13 @@ methods % set, do property
         obj.model.param = obj.parameter.get();
     end
 
-    function show(obj,str,params)
+    function fh=show(obj,str,params)
         arguments
             obj
             str
             params = [];
         end
-        nl = obj.(str(1)).name;
+        nl = obj.(str(1)).name; % sensorすべてのshowを実行したい場合などに対応：要らない
         if isempty(params)
             params = cell(size(nl));
         end
@@ -285,10 +285,10 @@ methods % set, do property
             for i = str
                 tmp = tmp.(i);
             end
-            tmp.show(params);
+            fh = tmp.show(params{:});
         else
             for i = 1:length(nl)
-                obj.(str).(nl(i)).show(params{i});
+                fh = obj.(str).(nl(i)).show(params{i});
             end
         end
     end

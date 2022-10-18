@@ -3,6 +3,8 @@ $$
 \gdef\bm#1{\bf #1}
 \gdef\smatrix#1{\begin{bmatrix} #1 \end{bmatrix}}%行列簡略化
 \gdef\pmat#1{\begin{pmatrix} #1 \end{pmatrix}}%行列簡略化
+\gdef\R{\mathbb{R}}
+\gdef\one{\mathbb{1}}
 $$
 
 # 平面の扱い
@@ -30,6 +32,30 @@ $ ax + by + cz + d = [a,b,c,d][x;y;z;1] = 0$
 p2L_distanceなら１つの点から複数直線までの距離を計算する関数
 
 ## 基本的な性質は二次元空間上の直線と同じ
+
+## 方向ベクトルと面分との交点
+
+方向ベクトル : $e$ (単位ベクトル)
+面分：$p_1, p_2, p_3 \in \R^3$
+
+交点を持つ場合
+$$ de = a p_1 + b p_2 + c p_3$$
+と表せる．ただし$[a,b,c]$の長さは1．
+係数についてまとめると
+
+$$\smatrix{a\\b\\c\\-d} = \smatrix{P&e\\\one&0}^{-1}\smatrix{0\\0\\0\\1}$$
+ブロック行列の逆行列から
+
+$$\smatrix{a\\b\\c\\-d} = \smatrix{\ast& -P^{-1}eS^{-1}\\\ast&S^{-1}}\smatrix{0\\0\\0\\1}$$
+ここで$S = -\one P^{-1}e$ である．
+
+以上より
+$$\smatrix{a\\b\\c\\-d} = \frac{1}{S}\smatrix{-P^{-1}e\\1}$$
+
+交点座標は $p = de = -\frac{1}{S}e$.
+
+$[a,b,c]^T$の和は１となる．
+さらに各成分が$[0,1]$の範囲なら$p$ は面分$[p_1,p_2,p_3]$の内分点である．
 
 ## 単位球面への等距離射影
 

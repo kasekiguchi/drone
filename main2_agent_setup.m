@@ -108,6 +108,8 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
     %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
+    env = stlread('3F.stl');
+    agent(i).set_property("sensor",Sensor_LiDAR3D(i,'env',env));%,'noise',1.0E-2 ,'seed',3));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -127,7 +129,7 @@ for i = 1:N
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;0],[2,2,0]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;0],[5,20,0]})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
