@@ -13,24 +13,24 @@ for i = 1:N
         agent(i).input = [0; 0; 0; 0];
     else
         %agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        %agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE"));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-        agent(i) = WHILL(Model_Vehicle_AW(dt, initial_state(i), i), WO_PROPERTY_PARAM()); %
+        %agent(i) = WHILL(Model_Vehicle_AW(dt, initial_state(i), i), WO_PROPERTY_PARAM()); %
     end
 
     %% model
     % set control model
-    %agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
+    agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     %agent(i).set_model(Model_Three_Vehicle(dt,initial_state(i),i)); % for exp % 機体番号（ESPrのIP）
-    agent(i).set_model(Model_Vehicle_AW(dt, initial_state(i), i)); %
+    %agent(i).set_model(Model_Vehicle_AW(dt, initial_state(i), i)); %
     close all
     %% set input_transform property
     if fExp % isa(agent(i).plant,"Lizard_exp")
@@ -67,8 +67,8 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
     %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
     %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-    %agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"])); % （剛体ベース）EKF
-    agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
+    agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"])); % （剛体ベース）EKF
+    %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
@@ -98,7 +98,7 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     %agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
-    agent(i).set_property("controller", struct("type", "TSCF_VEHICLE", "name", "tscf", "param", struct("F1", [1.0000 1.7321] * 3/4, "F2", [0.1000 0.4583]))); %)));
+    %agent(i).set_property("controller", struct("type", "TSCF_VEHICLE", "name", "tscf", "param", struct("F1", [1.0000 1.7321] * 3/4, "F2", [0.1000 0.4583]))); %)));
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
