@@ -34,6 +34,13 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
             % ②　set_state(struct("p",[0;0;0],"v",[0;0;0])); % 全状態セットするときもこちらを使うことを推奨
             % ③　set_state(x0); % state_list どおりに並んでいるものとして代入
             %if mod(length(varargin{1}),2)==0 % ①　成分を指定して代入する場合
+            if isa(varargin{1},"STATE_CLASS")
+                value = varargin{1};
+                tmpf=fields(value);
+                for i = 1:length(tmpf)
+                    obj.(tmpf{i})=value.(tmpf{i});
+                end
+            else
             if mod(length(varargin),2)==0 % ①　成分を指定して代入する場合
                 %varargin=varargin{1};
                 for i =1:nargin/2
@@ -69,6 +76,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                     end
                     if ~isempty(tmpvalue);    warning("ACSL : check compatibility with state.list"); end
                 end
+            end
             end
         end
     end
@@ -160,6 +168,8 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                             else
                                 q= R2v(RodriguesQuaternion(Eul2Quat(value)));
                             end
+                        otherwise
+                            q = value;
                     end
                 end
             

@@ -97,8 +97,8 @@ end
 function u = utrans_throttle2thrust(v)
 % v = [total thrust; roll ; pitch ; yaw torques]
 % u = thrust of propeller 1,2,3,4
-u = [v(1)/4 - v(2)/4 + v(3)/4 + v(4)/4;
-    v(1)/4 - v(2)/4 - v(3)/4 - v(4)/4;
-    v(1)/4 + v(2)/4 + v(3)/4 - v(4)/4;
-    v(1)/4 + v(2)/4 - v(3)/4 + v(4)/4];
+u = [v(1) / 4 - v(2) / 4 + v(3) / 4 + v(4) / 4;
+    v(1) / 4 - v(2) / 4 - v(3) / 4 - v(4) / 4;
+    v(1) / 4 + v(2) / 4 + v(3) / 4 - v(4) / 4;
+    v(1) / 4 + v(2) / 4 - v(3) / 4 + v(4) / 4];
 end
