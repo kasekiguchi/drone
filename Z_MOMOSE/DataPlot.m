@@ -5,7 +5,7 @@ clear
 %import
 %選択
 fsingle=1;%figureの数が一つの時１
-ff=10;%flightのみは１
+ff=10;%flightの0みは１
 fHLorFT=10;%単体の時,HLは1
 
 % 単体
@@ -160,8 +160,8 @@ FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_
 fosi=14;%デフォルト9，フォントサイズ変更
 LW = 2;%linewidth
 if fsingle==1
-    i=0;
-    f(i+1)=figure('Name',FigName(i+1));
+    i=1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(ref(1,:),ref(2,:),'LineWidth',LW);
     plot(est(1,:),est(2,:),'LineWidth',LW);
@@ -173,8 +173,9 @@ if fsingle==1
     daspect([1,1,1])
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
     hold off
-
-    f(i+1)=figure('Name',FigName(i+1));
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,ref(1,:),'LineWidth',LW);
     plot(time,est(1,:),'LineWidth',LW);
@@ -185,8 +186,9 @@ if fsingle==1
     ylabel('x[m]')
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     hold off
-
-    f(i+1)=figure('Name',FigName(i+1));
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,ref(2,:),'LineWidth',LW);
     plot(time,est(2,:),'LineWidth',LW);
@@ -198,7 +200,8 @@ if fsingle==1
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     hold off
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,ref(3,:),'LineWidth',LW);
     plot(time,est(3,:),'LineWidth',LW);
@@ -208,9 +211,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('z[m]')
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
-    hold off
+    hold off    
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,err,'LineWidth',LW);
     grid on
@@ -219,9 +223,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('error[m]')
     legend('x','y','z')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,inp,'LineWidth',LW);
     grid on
@@ -230,9 +235,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('input')%単位はN？
     legend('1','2','3','4')
-    hold off
-
-    f(i+1)=figure('Name',FigName(i+1));
+    hold off    
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,att,'LineWidth',LW);
     grid on
@@ -241,9 +247,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('attitude [rad]')
     legend('x','y','z')
-    hold off
-
-    f(i+1)=figure('Name',FigName(i+1));
+    hold off    
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,vel,'LineWidth',LW);
     grid on
@@ -252,9 +259,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('velocity[m/s]')
     legend('x','y','z')
-    hold off
-
-    f(i+1)=figure('Name',FigName(i+1));
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,w,'LineWidth',LW);
     grid on
@@ -263,9 +271,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('angular velocity[rad/s]')
     legend('x','y','z')
-    hold off
+    hold off     
 
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot3(ref(1,:),ref(2,:),ref(3,:),'LineWidth',LW);
     plot3(est(1,:),est(2,:),est(3,:),'LineWidth',LW);
@@ -278,9 +287,10 @@ if fsingle==1
     daspect([1,1,1])
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     daspect([1,1,1]);
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,uHL,'LineWidth',LW);
     grid on
@@ -289,9 +299,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('inputHL')
     legend('z','x','y','yaw')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,z1,'LineWidth',LW);
     grid on
@@ -300,9 +311,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('z1')
     legend('z','dz')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,z2,'LineWidth',LW);
     grid on
@@ -311,9 +323,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('z2')
     legend('x','dx','ddx','dddx')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,z3,'LineWidth',LW);
     grid on
@@ -322,9 +335,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('z3')
     legend('y','dy','ddy','dddy')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,z4,'LineWidth',LW);
     grid on
@@ -333,9 +347,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('z4')
     legend('psi','dpsi')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,ref,time,est,'LineWidth',LW);
     grid on
@@ -344,9 +359,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('p [m]')
     legend('x ref','y ref','z ref','x est','y est','z est')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,ininp,'LineWidth',LW);
     grid on
@@ -355,9 +371,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('inner input')
 %     legend('')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,vf,'LineWidth',LW);
     grid on
@@ -366,9 +383,10 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('vf')
     legend('zu','dzu','ddzu','dddzu')
-    hold off
+    hold off     
     
-    f(i+1)=figure('Name',FigName(i+1));
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
     hold on
     plot(time,sigmax,time,sigmay,'LineWidth',LW);
     grid on
@@ -377,7 +395,7 @@ if fsingle==1
     xlabel('time[s]')
     ylabel('sigma')
     legend('sigmax','sigmay')
-    hold off
+    hold off     
 else
 % 比較
     f(1)=figure('Name',FigName(1));

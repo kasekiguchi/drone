@@ -116,15 +116,16 @@ hold off
 %% tanhとシグモイドのtanhの比較9/6
 syms  x sz(t)
 sz(t)=t;
-a=20;
+a=-0.6;
+k=-27;
 xx=-1:0.05:1;
 fz = 1/(1+exp(-a*2*sz));
-    tanh1 = 2*fz-1;
-    dtanh1 = 4*a*fz*(1-fz);
-    ddtanh1 = 8*a^2*fz*(1-fz)*(1-2*fz);
-    dddtanh1 = 16*a^3*fz*(1-fz)*(1-6*fz+6*fz^2);
+    tanh1 = k*(2*fz-1);
+    dtanh1 = k*4*a*fz*(1-fz);
+    ddtanh1 = k*8*a^2*fz*(1-fz)*(1-2*fz);
+    dddtanh1 = k*16*a^3*fz*(1-fz)*(1-6*fz+6*fz^2);
     
-    ta = tanh(a*x);
+    ta = k*tanh(a*x);
     dta = diff(ta,x);
     ddta = diff(ta,x,2);
     dddta = diff(ta,x,3);

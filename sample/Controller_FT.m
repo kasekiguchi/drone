@@ -110,22 +110,22 @@ if fzapr == 1
                 u = u + subs(ub, [zF1 z], [f1(i, :) sz1(i)]);
             end
 
-            %            dz = Ad1*sz1 + Bd1*u;
-            dz = Ac2 * sz1 + Bc2 * u;
+                       dz = Ad1*sz1 + Bd1*u;
+%             dz = Ac2 * sz1 + Bc2 * u;
 
             for i = 1:2
                 du = du + subs(dub, [zF1 z diff(z, t)], [f1(i, :) sz1(i) dz(i)]);
             end
 
-            %            ddz = Ad1*dz + Bd1*du;
-            ddz = Ac2 * dz + Bc2 * du;
+                       ddz = Ad1*dz + Bd1*du;
+%             ddz = Ac2 * dz + Bc2 * du;
 
             for i = 1:2
                 ddu = ddu + subs(ddub, [zF1 z diff(z, t) diff(z, t, t)], [f1(i, :) sz1(i) dz(i) ddz(i)]);
             end
 
-            %            dddz = Ad1*ddz + Bd1*ddu;
-            dddz = Ac2 * ddz + Bc2 * ddu;
+                       dddz = Ad1*ddz + Bd1*ddu;
+%             dddz = Ac2 * ddz + Bc2 * ddu;
 
             for i = 1:2
                 dddu = dddu + subs(dddub, [zF1 z diff(z, t) diff(z, t, t) diff(z, t, t, t)], [f1(i, :) sz1(i) dz(i) ddz(i) dddz(i)]);

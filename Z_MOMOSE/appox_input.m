@@ -350,7 +350,7 @@ x0=[2,2,2];
 fvals12z=zeros(2,1);
 gain_ser1z=["","f1","a1","k1"];
 % gain_ser1z=["","f1","k1"];
-er=10; %近似する範囲を指定
+er=8; %近似する範囲を指定
 for i=1:2
 fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,0, er));
 % fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + tanh(x(1)*e) + x(2)*e ) ,0, er));
@@ -359,7 +359,7 @@ fvals12z(i) = 2*fval
 gain_ser1z(i+1,:)=[titlex(i),x];
 
 % e= -1:0.001:1;      
-e= -2:0.001:2;
+e= -20:0.001:20;
 ufb(i,:)= -k(i)*e;
 utanh(i,:)= - x(1)*tanh(x(2)*e) - x(3)*e;%%
 % utanh(i,:)= - tanh(x(1)*e) - x(2)*e;%%
@@ -379,6 +379,7 @@ xlabel('error','FontSize',fosi);
 ylabel('input','FontSize',fosi);
 
 end
+gain_ser1z
 %% fmincon tanh二つ zサブシステム
 clear e utanh u ufb sigma
 titlex=["x","dx","ddx","dddx"];

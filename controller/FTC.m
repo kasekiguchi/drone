@@ -90,7 +90,27 @@ methods
             %z方向:FT
             vf = obj.Vf(z1); % % % % % % % % % % % % % % % % % %xyz
         end
-
+        c=1;
+%         if vf(4)>=c 
+%             vf(4)=c;
+% %             vf(3)=c;
+%         elseif vf(4)<=-c
+%             vf(4)=-c;
+% %             vf(3)=-c;
+%         end
+%         if vf(3)>=c
+% %             vf(4)=c;
+%             vf(3)=c;
+%         elseif vf(3)<=-c
+% %             vf(4)=-c;
+%             vf(3)=-c;
+%         end
+        if abs(vf(4))>=c 
+            vf(4)=vf(4)/c;
+        end
+        if abs(vf(3))>=c
+            vf(3)=vf(3)/c;
+        end
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向
