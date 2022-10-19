@@ -111,7 +111,7 @@ methods
     function show(obj, pq,q)
         arguments
             obj
-            pq %pは2次元(x,y)，qは1次元(姿勢角)，pqは3次元(p+q)
+            pq
             q = 0;
         end
         p = pq(1:2);
