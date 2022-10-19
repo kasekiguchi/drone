@@ -26,6 +26,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
     ];
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+logger_bird = LOGGER(1:Nb, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 run("main3_loop_setup.m");
 % try
@@ -173,7 +174,7 @@ run("main3_loop_setup.m");
         % for exp
         if fExp
             %% logging
-            logger.logging(time.t, FH, agent, bird, []);
+            logger.logging(time.t, FH, agent, []);
             calculation1 = toc(tStart);
             time.t = time.t + calculation1;
 
@@ -194,7 +195,8 @@ run("main3_loop_setup.m");
             %                time.t = time.t + sampling;
             %            end
         else
-            logger.logging(time.t, FH, agent, bird);
+            logger.logging(time.t, FH, agent);
+            logger_bird.logging(time.t, FH, bird);
             time.t = time.t + dt
         end
 
@@ -224,5 +226,5 @@ clc
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger,"target",1:N,"Motive_ref",1);
-bird(1).animation(logger,N,Nb,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",1);
+bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",1);
 % agent(1).sensor.bounding.movie(logger);

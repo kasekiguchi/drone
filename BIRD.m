@@ -17,7 +17,7 @@ classdef BIRD < ABSTRACT_SYSTEM
         end
     end
     methods
-        function animation(obj,logger,N,Nb,param)
+        function animation(obj,logger,logger_bird,param)
             % obj.animation(logger,param)
             % logger : LOGGER class instance
             % param.realtime (optional) : t-or-f : logger.data('t')を使うか
@@ -29,8 +29,7 @@ classdef BIRD < ABSTRACT_SYSTEM
             arguments
                 obj
                 logger
-                N
-                Nb
+                logger_bird
                 param.drone = 1;
                 param.bird = 1;
                 param.gif = 0;
@@ -39,7 +38,7 @@ classdef BIRD < ABSTRACT_SYSTEM
                 param.mp4 = 0;
             end
             p = obj.parameter;
-            DRAW_BIRD_MOTION(logger,N,Nb,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"drone",param.drone,"bird",param.bird,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
+            DRAW_BIRD_MOTION(logger,logger_bird,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"drone",param.drone,"bird",param.bird,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
         end
     end
 end
