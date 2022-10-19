@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 
 %% general setting
-N = 3; % number of agents
+N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0;% offline verification with experiment data
@@ -24,7 +24,7 @@ wall2 = [4 0;4 3;4.5 3;4.5 0];
 % wall2 = [4 0;2 0.5;7 0.5;7 0];%没
 room = [-2 -5;-2 4;7 4;7 -5];
 % Env.param.Vertices = [tmp;NaN NaN;0.6*tmp]; %モビング時の障害物
-Env = [wall1;NaN NaN;room]; %Tbug時の障害物
+Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
 % Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
 initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
@@ -70,7 +70,7 @@ try
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
             param(i).sensor.rdensity = {Env};
-            param(i).sensor.lrf = Env;
+            param(i).sensor.lrf = {Env};
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
@@ -117,7 +117,7 @@ try
         end
 
         %% update state
-%         agent.reference.tbug.show(Env);
+        agent.reference.tbug.show(Env);
         figure(FH)
         drawnow
 

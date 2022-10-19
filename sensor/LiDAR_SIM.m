@@ -33,6 +33,7 @@ methods
         obj.head_dir.Vertices = ([0 1; -1 0] * obj.head_dir.Vertices')';
         if isfield(param, 'noise'); obj.noise = param.noise; end
         if isfield(param, 'seed'); obj.seed = param.seed; end
+        
     end
 
     function result = do(obj, param)
@@ -105,6 +106,7 @@ methods
         result.length(del_ids) = 0;
         result.sensor_points(del_ids, :) = zeros(length(del_ids), 2);
         result.angle(del_ids) = 0;
+        obj.result.state =[];
         obj.result = result;
     end
 
