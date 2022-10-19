@@ -70,7 +70,9 @@ try
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
             param(i).sensor.rdensity = {Env};
-            param(i).sensor.lrf = {Env};
+            param(i).sensor.lrf = {Env.param};
+            param(i).sensor.lidar = {};
+
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
@@ -116,6 +118,10 @@ try
      
         end
 
+        if fDebug
+            %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+            agent.show(["sensor","lidar"],"FH",FH,"param",struct("fLocal",false));
+        end
         %% update state
         agent.reference.tbug.show(Env);
         figure(FH)
@@ -192,8 +198,10 @@ logger.plot({1,"p1-p2","er"},{2,"p1-p2","er"});
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+agent(1).animation(logger, "target", 1:N);%,"opt_plot",["sensor","lidar"]);
 % agent(1).animation(logger,"target",1:N,"Env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
+%%
 %logger.save();
 
 
