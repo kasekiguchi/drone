@@ -82,7 +82,23 @@ v = state.v;
 w = state.w(:, end);
 end
 
+function [p, q, v, w] = strans_4(state)
+% STATEクラス変数を以下に変換する関数
+% p : 1 dim
+% q : 3 dim（オイラー角）
+% v : 1 dim
+% w : 3 dim
+p = sum(state.p);
+q = state.getq('3');
+v = vecnorm(state.v);
+w = state.w(:, end);
+end
+
 function u = utrans_throttle2thrust(v)
-u1+u2+u3+u4 = v1;
-(u1+u3)-(u2+u4) = v2;
+% v = [total thrust; roll ; pitch ; yaw torques]
+% u = thrust of propeller 1,2,3,4
+u = [v(1)/4 - v(2)/4 + v(3)/4 + v(4)/4;
+    v(1)/4 - v(2)/4 - v(3)/4 - v(4)/4;
+    v(1)/4 + v(2)/4 + v(3)/4 - v(4)/4;
+    v(1)/4 + v(2)/4 - v(3)/4 + v(4)/4];
 end
