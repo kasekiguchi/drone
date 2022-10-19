@@ -1,7 +1,8 @@
 classdef LiDAR_SIM < SENSOR_CLASS
-%   単相LiDAR（全方位センサー）のsimulation用クラス
+% 未検証：単相LiDAR（全方位センサー）のsimulation用クラス
 %   lidar = LiDAR(param)
-%   (optional) radius = 1 default 20 m
+%   (optional) radius = 1 default 40 m
+%   (optional) angle_range = -pi/2:0.1:pi/2 default -pi:0.1:pi
 properties
     name = "LiDAR";
     result
@@ -46,14 +47,14 @@ methods
         pos = Plant.state.p; % 実状態
 
         if isprop(Plant.state, "q")
-            yaw = Plant.state.q(end); % オイラー角を想定
-            R = [cos(yaw), -sin(yaw); sin(yaw), cos(yaw)]'; % ボディ座標から見るため転置
+            front = Plant.state.q(end); % オイラー角を想定
+            R = [cos(front), -sin(front); sin(front), cos(front)]'; % ボディ座標から見るため転置
         else
-            yaw = 0;
+            front = 0;
             R = eye(2);
         end
 
-        tmp = obj.angle_range + yaw;
+        tmp = obj.angle_range + front;
         circ = [obj.radius * cos(tmp); obj.radius * sin(tmp)]';
 
         if tmp(end) - tmp(1) > pi
@@ -142,5 +143,18 @@ methods
     end
 
 end
+
+end
+function [ p ] = pplot(x,y,z)
+%PPLOT Draw line as patch
+
+if nargin==2
+    z=0;
+end
+
+x=reshape(x,[],1);
+y=reshape(y,[],1);
+
+p=patch([x;flipud(x)],[y;flipud(y)],z*ones(2*size(x,1),1),'b');
 
 end
