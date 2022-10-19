@@ -6,7 +6,7 @@ for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
+        agent(i) = DRONE(Model_Drone_Exp(dt, initial_state(i), "udp", [50, 132]), DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
@@ -19,7 +19,7 @@ for i = 1:N
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-        agent(i) = WHILL(Model_Vehicle_AW(dt,initial_state(i),i),WO_PROPERTY_PARAM()); % 
+        agent(i) = WHILL(Model_Vehicle_AW(dt, initial_state(i), i), WO_PROPERTY_PARAM()); %
     end
 
     %% model
@@ -30,10 +30,10 @@ for i = 1:N
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
     %agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     %agent(i).set_model(Model_Three_Vehicle(dt,initial_state(i),i)); % for exp % 機体番号（ESPrのIP）
-    agent(i).set_model(Model_Vehicle_AW(dt,initial_state(i),i)); % 
+    agent(i).set_model(Model_Vehicle_AW(dt, initial_state(i), i)); %
     close all
     %% set input_transform property
-    if fExp                                                                               % isa(agent(i).plant,"Lizard_exp")
+    if fExp % isa(agent(i).plant,"Lizard_exp")
         agent(i).input_transform = [];
         agent(i).set_property("input_transform", InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
     end
@@ -48,9 +48,11 @@ for i = 1:N
     agent(i).sensor = [];
     %agent(i).set_property("sensor",Sensor_LSM9DS1()); % IMU sensor
     if fMotive
+
         if ~exist('initial_yaw_angles')
             initial_yaw_angles = zeros(1, N);
         end
+
         agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
@@ -66,7 +68,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
     %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
     %agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"])); % （剛体ベース）EKF
-    agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"],"B",diag([dt^2,dt^2,0,0,0,dt]))); % for vehicle model
+    agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
@@ -77,14 +79,14 @@ for i = 1:N
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
     %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orgi",[0;0;1],"size",[2,2,0.5]})); % 時変な目標状態
-    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",20,"orig",[0;10;0],"size",[10,10,0],"phase",-pi/2})); % 時変な目標状態
+    agent(i).set_property("reference", Reference_Time_Varying("gen_ref_saddle", {"freq", 20, "orig", [0; 10; 0], "size", [10, 10, 0], "phase", -pi / 2})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-    agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+    agent(i).set_property("reference", Reference_Point_FH()); % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
     %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
@@ -96,10 +98,12 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     %agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
-    agent(i).set_property("controller", struct("type","TSCF_VEHICLE","name","tscf","param",struct("F1",[ 1.0000    1.7321]*3/4,"F2",[0.1000    0.4583])));%)));
+    agent(i).set_property("controller", struct("type", "TSCF_VEHICLE", "name", "tscf", "param", struct("F1", [1.0000 1.7321] * 3/4, "F2", [0.1000 0.4583]))); %)));
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
+    agent(i).set_property("controller", Controller_PID(dt));
+    %agent(i).set_property("controller",Controller_APID(dt));
     %% 必要か？実験で確認 : TODO
     param(i).sensor.list = cell(1, length(agent(i).sensor.name));
     param(i).reference.list = cell(1, length(agent(i).reference.name));
