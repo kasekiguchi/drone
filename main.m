@@ -70,7 +70,7 @@ try
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
             param(i).sensor.rdensity = {Env};
-            param(i).sensor.lrf = {Env.param};
+            param(i).sensor.lrf = {Env};
             param(i).sensor.lidar = {};
 
             for j = 1:length(agent(i).sensor.name)
@@ -120,10 +120,11 @@ try
 
         if fDebug
             %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-            agent.show(["sensor","lidar"],"FH",FH,"param",struct("fLocal",false));
+%             agent.show(["sensor","lidar"],"FH",FH,"param",struct("fLocal",false));
+            agent.reference.tbug.show(Env);
         end
         %% update state
-        agent.reference.tbug.show(Env);
+        
         figure(FH)
         drawnow
 
@@ -188,11 +189,11 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-% logger.plot({1,"p","er"},{1,"q","e"});
+logger.plot({1,"p","er"},{1,"q","e"});
 % logger.plot({1,"p","er"});
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
-logger.plot({1,"p1-p2","er"},{2,"p1-p2","er"});
+% logger.plot({1,"p1-p2","er"},{2,"p1-p2","er"});
 % agent(1).reference.timeVarying.show(logger)
 
 
