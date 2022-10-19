@@ -2,6 +2,7 @@
 if fExp
     dt = 0.025; % sampling time
 else
+    %dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
     dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
 end
 
@@ -34,55 +35,3 @@ if fMotive
     end
 end
 
-%% set initial state 
-disp("Initialize state");
-initial_state(N) = struct;
-param(N) = struct('sensor', struct, 'estimator', struct, 'reference', struct);
-
-if fExp
-    if exist('motive', 'var') == 1; motive.getData([], []); end
-
-    for i = 1:N
-        % for exp with motive : initial_stateize by motive info
-        if exist('motive', 'var') == 1
-            sstate = motive.result.rigid(rigid_ids(i));
-            initial_state(i).p = sstate.p;
-            initial_state(i).q = sstate.q;
-            initial_state(i).v = [0; 0; 0];
-            initial_state(i).w = [0; 0; 0];
-        else % とりあえず用
-            arranged_pos = arranged_position([0, 0], N, 1, 0);
-            initial_state(i).p = arranged_pos(:, i);
-            initial_state(i).q = [1; 0; 0; 0];
-            initial_state(i).v = [0; 0; 0];
-            initial_state(i).w = [0; 0; 0];
-        end
-
-    end
-
-else
-
-    if (fOffline)
-        %%
-        expdata = DATA_EMULATOR("isobe_HLonly_Log(18-Dec-2020_12_17_35)"); % 空の場合最新のデータ
-    end
-
-    %% for sim
-    for i = 1:N
-
-        if (fOffline)
-            initial_state(i).p = expdata.Data{1}.agent{1, expdata.si, i}.state.p;
-            initial_state(i).q = expdata.Data{1}.agent{1, expdata.si, i}.state.q;
-            initial_state(i).v = [0; 0; 0];
-            initial_state(i).w = [0; 0; 0];
-        else
-            arranged_pos = arranged_position([0, 0], N, 1, 0);
-            initial_state(i).p = arranged_pos(:, i);
-            initial_state(i).q = [1; 0; 0; 0];
-            initial_state(i).v = [0; 0; 0];
-            initial_state(i).w = [0; 0; 0];
-        end
-
-    end
-
-end
