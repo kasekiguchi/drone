@@ -40,7 +40,6 @@ methods
 
     function result = do(obj, param, ~)
         % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
-        t = param{1};
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
         x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
@@ -105,12 +104,12 @@ methods
 % %             vf(4)=-c;
 %             vf(3)=-c;
 %         end
-        if abs(vf(4))>=c 
-            vf(4)=vf(4)/c;
-        end
-        if abs(vf(3))>=c
-            vf(3)=vf(3)/c;
-        end
+%         if abs(vf(4))>=c 
+%             vf(4)=vf(4)/c;
+%         end
+%         if abs(vf(3))>=c
+%             vf(3)=vf(3)/c;
+%         end
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向
@@ -204,9 +203,11 @@ methods
         %             dst_z=0;
         %             dst=0.5*sin(2*pi*t/0.5);%
         %             dst=dst+10*cos(2*pi*t/1);
-%         dst = -2;
-%                     if t>=5 && t<=5.1
-%                             dst=-2;
+        %一時的な外乱
+%         t = param{1};
+%         dst = 0;
+%                     if t>=10 && t<=10.5
+%                             dst=-3;
 %                     end
         %特定の位置で外乱を与える
         %             dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間

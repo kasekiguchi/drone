@@ -33,10 +33,10 @@ end
 
 %f
 run("main2_agent_setup.m");
-agent.set_model_error("ly",0.02);
-agent.set_model_error("lx",0.02);
-agent.set_model_error("mass",0.1);
-% agent(i).set_model_error("B",[zeros(1,6),[0,0,1],zeros(1,3)]);%only sim
+% agent.set_model_error("ly",0.01);
+% agent.set_model_error("lx",0.01);
+% agent.set_model_error("mass",0.05);
+agent(i).set_model_error("B",[zeros(1,6),[1,0,1],zeros(1,3)]);%only sim
 %% main loop
 run("main3_loop_setup.m");
 
@@ -83,13 +83,13 @@ try
             if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
             % reference
-%             if fExp~=1
-%                 if time.t<=5
-%                     FH.CurrentCharacter = 't';
-%                 else
-%                     FH.CurrentCharacter = 'f';
-%                 end
-%             end
+            if fExp~=1
+                if time.t<=5
+                    FH.CurrentCharacter = 't';
+                else
+                    FH.CurrentCharacter = 'f';
+                end
+            end
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [2; 1; 1], time.t, dt};
             param(i).reference.timeVarying = {time, FH};
@@ -203,3 +203,46 @@ agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
+%% make folder&save
+fsave=0;
+if fsave==1
+    %変更しない
+%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    DataFig='data';%データか図か
+    date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
+    date2=string(datetime('now','Format','yyyy_MMdd'));%日付
+%変更==============================================================================
+    subfolder='sim';%sim or exp or sample
+%     subfolder='sim';%sim or exp or sample
+%     subfolder='sample';%sim or exp or sample
+    
+    ExpSimName='FT_xyz_model_error';%実験,シミュレーション名
+%     contents='appox_error01';%実験,シミュレーション内容
+contents='FB';%実験,シミュレーション内容
+%======================================================================================
+    FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
+    FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
+    %フォルダができてないとき
+    
+        mkdir(FolderNamed);
+        mkdir(FolderNamef);
+        addpath(genpath(ExportFolder));
+    
+    % save logger and agent
+        logger_contents=strcat('logger_',contents);
+        SaveTitle=strcat(date,'_',logger_contents);    
+        eval([logger_contents '= logger;']);%loggerの名前をlogger_contentsに変更
+        save(fullfile(FolderNamed, SaveTitle),logger_contents);
+      
+%         agent_contents=strcat('agent_',contents);
+%         SaveTitle2=strcat(date,'_',agent_contents);
+%         eval([agent_contents '=agent;']);%agentの名前をagent_contentsに変更
+%         save(fullfile(FolderNamed, SaveTitle2),agent_contents);
+
+    %savefig
+%     SaveTitle=strcat(date,'_',ExpSimName);
+%         saveas(1, fullfile(FolderName, SaveTitle ),'jpg');
+    %     saveas(1, fullfile(FolderName, SaveTitle ),'fig');
+    %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
+end

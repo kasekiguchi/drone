@@ -5,7 +5,7 @@ clear
 %import
 %選択
 fsingle=1;%figureの数が一つの時１
-ff=10;%flightの0みは１
+ff=1;%flightのみは１
 fHLorFT=10;%単体の時,HLは1
 
 % 単体
@@ -287,6 +287,7 @@ if fsingle==1
     daspect([1,1,1])
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     daspect([1,1,1]);
+    campos([-45,-45,60]);
     hold off     
     
     i=i+1;
@@ -396,6 +397,13 @@ if fsingle==1
     ylabel('sigma')
     legend('sigmax','sigmay')
     hold off     
+    
+    %二乗誤差平均
+    MSE_x=immse(ref(1,:),est(1,:))
+    MSE_y=immse(ref(2,:),est(2,:))
+    MSE_z=immse(ref(3,:),est(3,:))
+    MSE = ["MSE_x"  "MSE_y" "MSE_z" ;
+                    MSE_x  MSE_y MSE_z]
 else
 % 比較
     f(1)=figure('Name',FigName(1));
@@ -522,26 +530,22 @@ end
 
 %% make folder
 %変更しない
-    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-%         ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+        ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
     
 %変更
 % subfolder='sim';%sim or exp
-subfolder='exp';%sim or exp
-ExpSimName='tanh1_2_近似';%実験名,シミュレーション名
+subfolder='sim';%sim or exp
+ExpSimName='FT_xyz_model_error';%実験名,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
-contents='FT_PP11';%実験,シミュレーション内容
-% if strcmp(subfolder,'exp')
-%     ExpSimName=strcat(ExpSimName,'_fig');
-%     FolderNamed=fullfile(ExportFolder,subfolder,ExpSimName);%保存先のpath
-% else
-%     FolderName=fullfile(ExportFolder,subfolder,strcat(date,'_',ExpSimName),'data');%保存先のpath
-    FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
-    FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
-% end
+contents='FB';%実験,シミュレーション内容
+
+FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
+FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
+
 %フォルダができてないとき
 
     mkdir(FolderNamed);
@@ -552,13 +556,12 @@ contents='FT_PP11';%実験,シミュレーション内容
 %% save 
 n=length(f);
 SaveTitle=strings(1,n);
-for i=1:17 %保存する図を選ぶ場合[1:"x-y" 2:"t-x" 3:"t-y" 4:"t-z" 5:"error" 6:"input" 7:"attitude" 8:"velocity" 9:"angular_velocity" 10:"3D"]
-    if i==2 || i==6 || i==5 || i== 16% || i==17%保存したいものを書く
-    SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(i));
-%     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jpg');
-    saveas(f(i), fullfile(FolderNamef, SaveTitle(i) ),'fig');
-%     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
-    end
+na=[1 2 3 4 5 6 7 8 9 10]; %保存する図を選ぶ場合[1:"x-y" 2:"t-x" 3:"t-y" 4:"t-z" 5:"error" 6:"input" 7:"attitude" 8:"velocity" 9:"angular_velocity" 10:"3D"]
+for i=1:length(na)
+    SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(na(i)));
+%     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'jpg');
+    saveas(f(na(i)), fullfile(FolderNamef, SaveTitle(i) ),'fig');
+%     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'eps');
 end
 %% single save
 i=6;%figiureの番号
