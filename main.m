@@ -173,8 +173,20 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+%logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % agent(1).reference.timeVarying.show(logger)
+logger.plot({1,"p1","er"},"fig_num",1);
+legend("off")
+xlabel('Time[s]','FontSize',25)
+ylabel('Position[m]','FontSize',25)
+logger.plot({1,"p2","er"},"fig_num",2);
+legend("off")
+xlabel('Time[s]','FontSize',25)
+ylabel('Position[m]','FontSize',25)
+logger.plot({1,"p3","er"},"fig_num",3);
+legend("off")
+xlabel('Time[s]','FontSize',25)
+ylabel('Position[m]','FontSize',25)
 
 
 %% animation
