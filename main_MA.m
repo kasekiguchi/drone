@@ -226,5 +226,5 @@ clc
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger,"target",1:N,"Motive_ref",1);
-bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",1);
+bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",0);
 % agent(1).sensor.bounding.movie(logger);

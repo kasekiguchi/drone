@@ -55,10 +55,15 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
 
             % 領域質量
             zo = find(max(sum(Ptri.*F,2) - (F*obj.param.bx') < 0,[],1) == 0);
-            phi_d = normpdf(vecnorm(bird_cent' - obj.param.bx(zo,:),2,2),0,0.6); % 重み位置と領域内ボクセルとの距離の正規分布関数
-            weight_bx = obj.param.bx(zo,:).*phi_d; % 重み付きボクセル
+%             phi_d = normpdf(vecnorm(bird_cent' - obj.param.bx(zo,:),2,2),0,0.6); % 重み位置と領域内ボクセルとの距離の正規分布関数
+%             weight_bx = obj.param.bx(zo,:).*phi_d; % 重み付きボクセル
+            for i = 1:Nb
+                phi(:,i) = normpdf(vecnorm(sensor.bird_pos(:,i)' - obj.param.bx(zo,:),2,2),0,0.6); % 重み位置と領域内ボクセルとの距離の正規分布関数
+            end
+            phi_all = sum(phi,2);
+            weight_bx = obj.param.bx(zo,:).*phi_all; % 重み付きボクセル
             dmass = sum(weight_bx,1); % 各方向の重みを合算
-            mass = sum(phi_d,"all"); % 全部の重みを合算
+            mass = sum(phi_all,"all"); % 全部の重みを合算
 
             % 領域重心
             cent = dmass / mass; % 重心

@@ -235,7 +235,7 @@ classdef DRAW_BIRD_MOTION
                     f(n) = animatedline('Color','r','MaximumNumPoints',15); % 目標軌道の描画点の制限
                 end
                 for n = 1:length(param.bird)
-                    f_b(n) = animatedline('Color','k','MaximumNumPoints',15); % 目標軌道の描画点の制限
+                    f_b(n) = animatedline('Color','none','MaximumNumPoints',15); % 目標軌道の描画点の制限
                 end
             end
             for i = 1:length(t)-1
