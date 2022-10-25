@@ -332,11 +332,11 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 points = points + obj.state.p(1:2)';
                 plot(points(:,1),points(:,2),'r-');
                 hold on; 
-                text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
+%                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
                 %plot(obj.self.sensor.result.region);
                 %plot(obj.head_dir);
                 plot(obj.state.p(1),obj.state.p(2),'b*');
-%                 plot(obj.result.state.p(1),obj.result.state.p(2),'ro');%referenceの表示
+                plot(obj.result.state.p(1),obj.result.state.p(2),'bo');%referenceの表示
                 local_tp = R*obj.local_tp(1:2);
 %                 plot(obj.state.p(1)+local_tp(1)+circ(:,1),obj.state.p(2)+local_tp(2)+circ(:,2));%接点を生成するための円
                 plot(obj.goal(1),obj.goal(2),"ks","MarkerFaceColor",[0.5,0.5,0.5]);

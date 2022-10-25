@@ -24,8 +24,8 @@ wall2 = [4 0;4 3;4.5 3;4.5 0];
 % wall2 = [4 0;2 0.5;7 0.5;7 0];%没
 room = [-2 -5;-2 4;7 4;7 -5];
 % Env.param.Vertices = [tmp;NaN NaN;0.6*tmp]; %モビング時の障害物
-Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
-% Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
+% Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
+Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
 initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
 run("main2_agent_setup.m");
@@ -189,8 +189,8 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","er"},{1,"q","e"});
-% logger.plot({1,"p","er"});
+% logger.plot({1,"p","er"},{1,"q","e"});
+logger.plot({1,"p","er"});
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 % logger.plot({1,"p1-p2","er"},{2,"p1-p2","er"});
@@ -200,7 +200,7 @@ logger.plot({1,"p","er"},{1,"q","e"});
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N);%,"opt_plot",["sensor","lidar"]);
+% agent(1).animation(logger, "target", 1:N);%,"opt_plot",["sensor","lidar"]);
 % agent(1).animation(logger,"target",1:N,"Env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
 %%
 %logger.save();

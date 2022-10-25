@@ -165,7 +165,7 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
-    %agent(i).set_property("controller",Controller_PID(dt));
+%     agent(i).set_property("controller",Controller_PID(dt));
     %agent(i).set_property("controller",Controller_APID(dt));
     %% 必要か？実験で確認 : TODO
 %     param(i).sensor.list = cell(1, length(agent(i).sensor.name));
