@@ -21,20 +21,30 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
-fInput = 0;
-fV = 0;
-fVcount = 1;
-fWeight = 0; % 重みを変化させる場合 fWeight = 1
-fFirst = 1; % 一回のみ回す場合
-fRemove = 0;    % 終了判定
-fLanding = 0;   % 着陸かどうか 目標軌道を変更する
-fLanding_comp = 0;
-fCount_landing = 0;
-fc = 0;     % 着陸したときだけx，y座標を取得
-totalT = 0;
-idx = 0;
-HO = 10;   %Params.H
-DT = 0.1;  %Params.dt
+    fInput = 0;
+    fV = 0;
+    fVcount = 1;
+    fWeight = 0; % 重みを変化させる場合 fWeight = 1
+    fFirst = 1; % 一回のみ回す場合
+    fRemove = 0;    % 終了判定
+    fLanding = 0;   % 着陸かどうか 目標軌道を変更する
+    fLanding_comp = 0;
+    fCount_landing = 0;
+    fc = 0;     % 着陸したときだけx，y座標を取得
+    totalT = 0;
+    idx = 0;
+
+    %-- 初期設定 controller.mと同期させる
+    Params.H = 10;   %Params.H
+    Params.dt = 0.1;  %Params.dt
+    %-- 配列サイズの定義
+    Params.state_size = 12;
+    Params.input_size = 4;
+    Params.total_size = 16;
+    % Reference.mを使えるようにする
+    Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
+    xr0 = zeros(Params.state_size, Params.H);
+
 run("main3_loop_setup.m");
 
 try
@@ -47,6 +57,9 @@ try
 if time.t == 9
     time.t;
 end
+        % CurrentCharacter Check
+            fprintf("key input : %c", FH.CurrentCharacter)
+        % ----------------------
         if (fOffline)
             expdata.overwrite("plant", time.t, agent, i);
             FH.CurrentCharacter = char(expdata.Data{1}.phase(offline_time));
@@ -81,20 +94,11 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
-            rz = 0; rx = 0; ry = 1;
-%             if time.t >= 10
-%                 FH.CurrentCharacter = 'f';
-%             end
-%             if time.t >= 20
-%                 FH.CurrentCharacter = 'l';
-%             end
-%             if time.t >= 10
-%                 FH.CurrentCharacter = 'l';
-%             end
-            xr = reference(time, HO, DT);
-            xr(3, end) = xr(3, end) + 0.01;
+            xr = Reference(Params, time);
+            xr_save(:, idx) = xr(1:3, 1); % xr: referenceの保存
+%             xr(3, end) = xr(3, end) + 0.01;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, xr(:, 1), time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, xr(1:3, 1), time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -103,31 +107,18 @@ end
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
             agent(i).do_reference(param(i).reference.list);
-%             if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
-            %controller
-            % sample を通る
-%             param(i).controller.mcmpc = {};    % 入力算出 / controller.name = hlc
-            % sample を通さず
-            %-- resampling {time.t, fFirst, idx, sigmanext} とする
-           
             param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
-%             if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
-% 
-%         if agnet.controller.result.fRemove == 1
-%             warning("ACSL : Emergency stop!");
-%             break;
-%         end
 
         %-- データ保存
-            data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-            data.sigma(idx) = agent.controller.result.sigma;
-            data.bestcost(idx) = agent.controller.result.bestcost;
+%             data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+%             data.sigma(idx) = agent.controller.result.sigma;
+%             data.bestcost(idx) = agent.controller.result.bestcost;
 %             data.state{idx} = state_data(:, 1, BestcostID);
 %             data.input{idx} = u;
             state_monte = agent.estimator.result.state;
@@ -217,61 +208,47 @@ logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid o
 logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
-%% errorで終了したとき
-% agent(1).reference.timeVarying.show(logger)
-Fontsize = 15;  timeMax = te;
-size_best = length(data.bestcost);
-figure(9); plot(logger.Data.t(1:size_best,:), data.bestcost, '.'); xlim([0 inf]);ylim([0 inf]); xlabel("Time [s]"); ylabel("Evaluation"); set(gca,'FontSize',Fontsize); grid on;
-% figure(9); plot(1:Params.Particle_num, data.pathJ{1, 1}, '*');
-% axes プロパティから線の太さ，スタイルなど変更可能
-figure(8)
-plot(logger.Data.t(1:size_best,:), data.sigma, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Sigma"); set(gca,'FontSize',Fontsize); grid on;
-% saveas(gcf,'Data/20220622_no_horizon_re_1.png')
+logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+%% animation
+%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"gif", 1);
 
-% 差分のグラフを描画
-% logger.Data.agent.estimator.result{1,:}.state.p logger.Data.agent.reference.result{1,100}.state.p
+%%
+size_best = length(logger.Data.t);
 for i= 1:size_best
     Edata(:, i) = logger.Data.agent.estimator.result{1,i}.state.p;
     Rdata(:, i) = logger.Data.agent.reference.result{1,i}.state.p;
     diff(:, i) = logger.Data.agent.estimator.result{1,i}.state.p - logger.Data.agent.reference.result{1,i}.state.p;
 end
-% difference of reference and estimator
-figure(10)
-plot(logger.Data.t(1:size_best,:), diff, 'LineWidth', 2); xlim([0 inf]); xlabel("Time [s]"); ylabel("Difference of position [m]"); set(gca,'FontSize',Fontsize);
-legend("x.diff", "y.diff", "z.diff"); grid on;
-% acceleration
-% figure(10); plot(logger.Data.t(1:size_best,:), data.acc, 'LineWidth', 2); xlabel("Time[s]"); ylabel("acceleration [m/s^2]");set(gca,'FontSize',Fontsize); grid on;
-% estimator and reference 
-Rdata(3, :) = Rdata(3, :) + 0.01; % 初期値の0.01を足す
 figure(11); plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
 ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
 plot(logger.Data.t(1:size_best,:), Rdata, '--', 'LineWidth', 2);
 hold off;
-%% animation
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
-% agent(1).animation(logger,"gif", 1);
+
+%% plot reference
+% figure(12); plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
+% ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
+% rz_R = 0.05; % 目標
+% rz0_R = 1;% スタート
+% T_R = 10; % かける時間
+% Tv_R = 0:0.01:T_R;
+% StartT_R = 0;
+% a_R = -2/T_R^3 * (rz_R-rz0_R);
+% b_R = 3/T_R^2 * (rz_R-rz0_R);
+% syms t real
+% z_R = a_R*(t-StartT_R)^3+b_R*(t-StartT_R)^2+rz0_R;
+% Z_R = subs(z_R, t, Tv_R);
+% plot(Tv_R, Z_R, 'LineWidth', 2, 'LineStyle', '--'); 
+% legend("x.state", "y.state", "z.state", "z.reference");
+% hold off;
+
+%% plot reference xr_save
+figure(12); 
+plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
+ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
+plot(logger.Data.t(1:size_best,:), xr_save, 'LineWidth', 2, 'LineStyle', '--');
+legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+hold off;
 %%
 % logger.save();
-function xr = reference(time, H, dt)
-    xr = zeros(3, H);
-    rz = 1; % 目標
-    rz0 = 0;% スタート
-    T = 10; % かける時間
-    StartT = 0;
-    a = -2/T^3 * (rz-rz0);
-    b = 3/T^2 * (rz-rz0);
-%     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
-%     X = subs(z, t, Tv);
-    %-- ホライゾンごとのreference
-    if xr(3,end) < 1.0
-        for h = 1:H
-            xr(:, h) = [0;0;a*((time.t-StartT)+dt*h)^3+b*((time.t-StartT)+dt*h)^2+rz0];
-        end
-    else
-        for h = 1:H
-            xr(:, h) = [0;0;1];
-        end
-    end
-end
