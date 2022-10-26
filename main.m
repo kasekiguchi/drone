@@ -191,6 +191,7 @@ clc
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 % logger.plot({1,"p","er"},{1,"q","e"});
 logger.plot({1,"p","er"});
+legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 % logger.plot({1,"p1-p2","er"},{2,"p1-p2","er"});
