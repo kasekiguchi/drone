@@ -243,8 +243,10 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             end
             p_Area = union(tmpenv(:));
             %plantFinalState
-            pstate = agent.plant.state.p(:,end);
-            pstateq = agent.plant.state.q(:,end);
+%             pstate = agent.plant.state.p(:,end);
+%             pstateq = agent.plant.state.q(:,end);
+            pstate = agent.estimator.result.state.p(:,end);
+            pstateq = agent.estimator.result.state.q(:,end);
             pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
             pstatesquare =  polyshape(pstatesquare');
             pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
@@ -279,7 +281,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+            %plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
             plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
             O = agent.reference.result.O;

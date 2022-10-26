@@ -71,7 +71,7 @@ methods
                 obj.Data.agent.plant = tmp.plant;
             else % 一つのファイルとして保存した場合
                 tmp = load(target);
-                log = tmp.log;
+                log = tmp.logger;
                 fn = fieldnames(log);
 
                 for i = fn'

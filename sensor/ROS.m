@@ -1,12 +1,16 @@
 classdef ROS < SENSOR_CLASS
     %       self : agent
     properties
-        name      = "ROS";
+        name      = "LiDAR";
         ros
         result
         state
         self
         fState % subscribeにstate情報を含むか
+        radius
+        angle_range
+        front
+        sensor_point
     end
     
     methods
@@ -16,22 +20,60 @@ classdef ROS < SENSOR_CLASS
             obj.self = self;
             if isfield(param,'state_list')
                 obj.fState = 1;
-            if obj.fState
-                obj.result.state = STATE_CLASS(struct('state_list',param.state_list,"num_list",param.num_list));
+                if obj.fState
+                    obj.result.state = STATE_CLASS(struct('state_list',param.state_list,"num_list",param.num_list));
+                end
+                if sum(contains(self.model.state.list,"q"))==1 && sum(contains(param.state_list,"q"))==1
+                    obj.result.state.num_list(contains(param.state_list,"q")) = length(self.model.state.q); % modelと合わせる
+                    obj.result.state.type = length(self.model.state.q);
+                end
             end
-            if sum(contains(self.model.state.list,"q"))==1 && sum(contains(param.state_list,"q"))==1
-                obj.result.state.num_list(contains(param.state_list,"q")) = length(self.model.state.q); % modelと合わせる
-                obj.result.state.type = length(self.model.state.q);
+            data = obj.ros.getData;
+            obj.radius = data.range_max;
+            angle_num  = size(data.ranges);
+%             angle_num = data.angle_max/data.angle_increment;
+            j = 1;
+            data.angle(j,1) = data.angle_min;
+            for j = 2:angle_num(1,1)
+                data.angle(j,1) = data.angle(j-1) + data.angle_increment; 
             end
-            end
+            obj.angle_range = double(data.angle');
+           
+            
         end
         
-        function result=do(obj)
+        function result=do(obj,param)
             % result=sensor.motive.do(motive)
             %   set obj.result.state : State_obj,  p : position, q : quaternion
             %   result : 
             % 【入力】motive ：NATNET_CONNECOTR object 
-            data=obj.ros.getData();
+            data = obj.ros.getData;
+            data.ranges = fillmissing(data.ranges,'previous');
+            data.intensities = fillmissing(data.intensities,'previous');
+            angle_num  = size(data.ranges);
+%             angle_num = data.angle_max/data.angle_increment;
+            j = 1;
+            data.angle(j,1) = data.angle_min;
+            for j = 2:angle_num(1,1)
+                data.angle(j,1) = data.angle(j-1) + data.angle_increment; 
+            end
+            data.angle = double((data.angle)');
+            data.length = double((data.ranges)');
+            data.intensities = double((data.intensities)');
+            data.radius = double((data.range_max)');
+            if ~isempty(obj.self.estimator.ukfslam.result.state.q)
+                front = obj.self.estimator.ukfslam.result.state.q;
+            else
+                front = 0;
+            end
+            tmp = data.angle +front;
+            cric = [data.radius * cos(tmp);data.radius * sin(tmp)]';
+            for i = 1:size(data.length,2)
+                a = data.length(i)*sin(tmp(1,i));
+                b = data.length(i)*cos(tmp(1,i));
+                obj.result.sensor_points(i,:) = [b,a];
+            end
+
             F=fieldnames(data);
             for i = 1: length(F)
                 switch F{i}
@@ -49,11 +91,44 @@ classdef ROS < SENSOR_CLASS
             end
             result= obj.result;
         end
-        function show(obj,varargin)
-            if ~isempty(obj.result)
-            else
-                disp("do measure first.");
-            end
+%         function show(obj,varargin)
+%             if ~isempty(obj.result)
+%             else
+%                 disp("do measure first.");
+%             end
+%         end
+        function show(obj, pq,q)
+        arguments
+            obj
+            pq
+            q = 0;
         end
+        p = pq(1:2);
+        if length(pq) >2
+            q = pq(end);
+        end
+
+        if ~isempty(obj.result)
+            points(1:2:2 * size(obj.result.sensor_points, 1), :) = obj.result.sensor_points;
+            R = [cos(q), -sin(q); sin(q), cos(q)];
+%             points = (R'*(points'-p))';
+%             points = (R * points' + p)';
+            points = (points'-p)';
+            points = (points' + p)';
+            pp = plot([points(:, 1); p(1)], [points(:, 2); p(2)]);
+%             set(pp,'EdgeAlpha',0.05);
+%             set(pp,'EdgeColor','g');
+            hold on;
+            text(points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
+%             region = polyshape((R * obj.result.region.Vertices' + p)');
+%             plot(region);%132,133 coment out
+%             head_dir = polyshape((R * obj.head_dir.Vertices' + p)');
+%             plot(head_dir);
+            axis equal;
+        else
+            disp("do measure first.");
+        end
+        end
+
     end
 end

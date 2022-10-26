@@ -82,6 +82,17 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             measured.ranges = sensor.length;
             measured.angles = sensor.angle + PreXh(3); %laser angles.姿勢角を基準とする．絶対角
             measured.angles(sensor.length==0) = 0;
+            if size(obj.EL0(:,1),(1)) ~= size(sensor.length,(2))
+                if size(obj.EL0(:,1),(1)) < size(sensor.length,(2))
+                    S = size(obj.EL0(:,1));
+                    sensor.length = sensor.length(:,1:S(1));
+                else 
+                    S =size(sensor.length);
+                    obj.EL0 = obj.EL0(1:S(2),:);
+                    obj.R = obj.R(1,1)*eye(size(obj.EL0,1));
+                end
+
+            end
             % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す           
             LSA_param = PC2LDA(measured.ranges, measured.angles, PreXh, obj.constant);
 
@@ -134,7 +145,8 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 cell2mat(arrayfun(@(i) PreXh - sqrt(sn + obj.k) .* CholCov(:,i) , 1:sn , 'UniformOutput' , false))];%sigma point
             weight = [obj.k/(sn + obj.k), 1/( 2*(sn + obj.k) )];
  
-            % シグマポイントに対応した出力予測値：各予測位置からのレーザー長さ
+            % シグマポイントに対応し
+            % た出力予測値：各予測位置からのレーザー長さ
             th = 0;
             EL = obj.EL0;
             for i = 1:size(Kai,2)
@@ -215,9 +227,9 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             if isempty(find(obj.result.AssociationInfo.id ~= 0, 1))
                 error("ACSL:somthing wrong on map assoc");
             end
-            if vecnorm(obj.result.state.p-obj.self.plant.state.p)>1
-                %error("ACSL:estimation is fail");
-            end
+%             if vecnorm(obj.result.state.p-obj.self.plant.state.p)>1
+%                 %error("ACSL:estimation is fail");
+%             end
             result=obj.result;
         end
         function show(obj,result)
