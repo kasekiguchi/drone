@@ -143,7 +143,7 @@ for i = 1:N
     %% set controller property
     agent(i).controller = [];
     
-            fzapr = 1;%z方向に適用するか:1 元の入力を微分2 else:~1
+            fzapr = 1;%z方向に適用するか:1 else:~1
             fzsingle = 1;%tanhが一つか:1 tanh2:~1
             fxyapr = 10;%%%xy近似するか:1 else:~1
             fxysingle = 1;%%% tanh1:1 or tanh2 :~1

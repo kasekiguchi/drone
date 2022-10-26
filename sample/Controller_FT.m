@@ -21,24 +21,16 @@ anum = 4; %変数の数
 alpha = zeros(anum + 1, 1);
 alpha(anum + 1) = 1;
 alpha(anum) = alp; %alphaの初期値
-
 for a = anum - 1:-1:1
     alpha(a) = (alpha(a + 2) * alpha(a + 1)) / (2 * alpha(a + 2) - alpha(a + 1));
 end
-
 Controller_param.alpha = alpha(anum);
 Controller_param.ax = alpha;
 Controller_param.ay = alpha;
-% Controller_param.az=alpha(anum-1:anum,1);
-% Controller_param.apsi=alpha(anum-1:anum,1);
-%masui
 Controller_param.az = alpha(1:2, 1);
 Controller_param.apsi = alpha(1:2, 1);
 %% 有限整定の近似微分　一層
 syms k [1 2] real
-%
-% fzFT = 10;%z方向に適用するか
-% fsingle = 1;%%%%%%%%%%%%%%%%%%%%
 Controller_param.fzapr = fzapr;
 
 if fzapr == 1
@@ -64,8 +56,6 @@ if fzapr == 1
             fvals12z(i) = 2 * fval;
             f1(i, :) = x;
         end
-
-        if 0
 % 
 %             for i = 1:2
 %                 fza(i) = 1 / (1 + exp(-f1(i, 2) * 2 * sz1(i)));
@@ -98,8 +88,7 @@ if fzapr == 1
 %                 dddu = dddu -f1(i, 1) * dddtanha(i) * (dz(i))^3 -3 * f1(i, 1) * ddtanha(i) * dz(i) * ddz(i) -f1(i, 1) * dtanha(i) * dddz(i) -f1(i, 3) * dddz(i);
 %             end
 % 
-        else 
-            %===========================================diffをつかった
+%diffを用いた===========================================
             ub =- zF1(1) * tanh(zF1(2) * z(t)) - zF1(3) * z(t);
             dub = diff(ub, t);
             ddub = diff(dub, t);
@@ -109,29 +98,18 @@ if fzapr == 1
             for i = 1:2
                 u = u + subs(ub, [zF1 z], [f1(i, :) sz1(i)]);
             end
-
                        dz = Ad1*sz1 + Bd1*u;
-%             dz = Ac2 * sz1 + Bc2 * u;
-
             for i = 1:2
                 du = du + subs(dub, [zF1 z diff(z, t)], [f1(i, :) sz1(i) dz(i)]);
             end
-
                        ddz = Ad1*dz + Bd1*du;
-%             ddz = Ac2 * dz + Bc2 * du;
-
             for i = 1:2
                 ddu = ddu + subs(ddub, [zF1 z diff(z, t) diff(z, t, t)], [f1(i, :) sz1(i) dz(i) ddz(i)]);
             end
-
                        dddz = Ad1*ddz + Bd1*ddu;
-%             dddz = Ac2 * ddz + Bc2 * ddu;
-
             for i = 1:2
                 dddu = dddu + subs(dddub, [zF1 z diff(z, t) diff(z, t, t) diff(z, t, t, t)], [f1(i, :) sz1(i) dz(i) ddz(i) dddz(i)]);
             end
-
-        end
 
         Controller_param.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
     else
