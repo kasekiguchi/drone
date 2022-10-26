@@ -59,8 +59,8 @@ for i = 1:N
         %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0; 0; 0; 0];
     else
-        agent(i) = DRONE(Model_Quat13(dt, initial_state(i), i), DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        %agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,0,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
+        %agent(i) = DRONE(Model_Quat13(dt, initial_state(i), i), DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
+        agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,0,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
@@ -112,8 +112,8 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
     %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
-    %env = stlread('3F.stl');
-    %agent(i).set_property("sensor",Sensor_LiDAR3D(i,'env',env));%,'noise',1.0E-2 ,'seed',3));
+    env = stlread('3F.stl');
+    agent(i).set_property("sensor",Sensor_LiDAR3D(i,'env',env,'theta_range',pi/2 +(-pi/12:0.034:pi/12),'phi_range',-pi:0.007:pi,'noise',3.0E-2 ,'seed',3)); % VLP-16
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -132,8 +132,8 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
-    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orgi",[0;0;1],"size",[2,2,0.5]})); % 時変な目標状態
-    agent(i).set_property("reference", Reference_Time_Varying("gen_ref_saddle", {"freq", 20, "orig", [0; 10; 0], "size", [10, 10, 0], "phase", -pi / 2})); % 時変な目標状態
+    %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]})); % 時変な目標状態
+    %agent(i).set_property("reference", Reference_Time_Varying("gen_ref_saddle", {"freq", 20, "orig", [0; 10; 0], "size", [10, 10, 0], "phase", -pi / 2})); % 時変な目標状態
     %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
@@ -168,7 +168,8 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
-    agent(i).set_property("controller", Controller_PID(dt));
+    %agent(i).set_property("controller", Controller_PID(dt));
+    agent(i).set_property("controller", Controller_PID_based(dt));
     %agent(i).set_property("controller",Controller_APID(dt));
     %% 必要か？実験で確認 : TODO
     param(i).sensor.list = cell(1, length(agent(i).sensor.name));
