@@ -30,7 +30,7 @@ else
     for i = 1:N
         if (fOffline)
             clear initial_state
-            initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
+%             initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
         else
             arranged_pos = arranged_position([0, 0], N, 1, 0);
             initial_state(i).p = arranged_pos(:, i);
@@ -51,11 +51,15 @@ for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
+%         agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
+        initial_state(i).p = [0;0.0];%[92;1];%
+        initial_state(i).q = 0;%pi/2-0.05;
+        initial_state(i).v = 0;
         agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",30),VEHICLE_PARAM("VEHICLE4")); % for exp % 機体番号（ESPrのIP）
-        agent(i).input = [0; 0; 0; 0];
+        agent(i).input = [0;0];
+%         agent(i).input = [0; 0; 0; 0];
     else
 %         agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
         %agent(i) = DRONE(Model_EulerAngle(dt,initial_state(i), i),DRONE_PARAM("DIATONE","additional",struct("B",[0,0,0,0,0,0,0,0,0,0,0,0])));                % euler angleのプラントモデル : for sim
@@ -67,7 +71,7 @@ for i = 1:N
         initial_state(i).p = [0;-1.0];%[92;1];%
         initial_state(i).q = 0;%pi/2-0.05;
         initial_state(i).v = 0;
-        agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),,"struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
+        agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                 % euler angleのプラントモデル : for sim
     end
 
     %% model
@@ -81,10 +85,10 @@ for i = 1:N
     agent(i).set_model(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([1,1]),"D",0.1)));
     close all
     %% set input_transform property
-    if fExp                                                                               % isa(agent(i).plant,"Lizard_exp")
-        agent(i).input_transform = [];
-        agent(i).set_property("input_transform", InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-    end
+%     if fExp                                                                               % isa(agent(i).plant,"Lizard_exp")
+%         agent(i).input_transform = [];
+%         agent(i).set_property("input_transform", InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+%     end
 
     %agent.plant.espr.sendData(Pw(1,1:16));
     % for quat-model plant with discrete control model
@@ -102,11 +106,11 @@ for i = 1:N
        agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
-    %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
+    agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
     %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-    agent(i).set_property("sensor",Sensor_LiDAR(i));
+%     agent(i).set_property("sensor",Sensor_LiDAR(i));
     %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
     %% set estimator property
     agent(i).estimator = [];

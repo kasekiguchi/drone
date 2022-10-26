@@ -53,8 +53,8 @@ methods
             R = eye(2);
         end
 
-        tmp = obj.angle_range + front;
-        circ = [obj.radius * cos(tmp); obj.radius * sin(tmp)]';
+        tmp = obj.angle_range + front; % add the sensor angle and the plant atitude angle
+        circ = [obj.radius * cos(tmp); obj.radius * sin(tmp)]'; % センサの座標
 
         if tmp(end) - tmp(1) > pi
             sensor_range = polyshape(circ(:, 1), circ(:, 2)); % エージェントの位置を中心とした円
@@ -130,7 +130,7 @@ methods
             hold on;
             text(points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
             region = polyshape((R * obj.result.region.Vertices' + p)');
-            plot(region);
+            plot(region);%132,133 coment out
             head_dir = polyshape((R * obj.head_dir.Vertices' + p)');
             plot(head_dir);
             axis equal;
