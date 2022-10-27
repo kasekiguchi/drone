@@ -60,6 +60,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
             th = obj.theta_range;
             phi = obj.phi_range;
             obj.E = [kron(sin(th),cos(phi));kron(sin(th),sin(phi));kron(cos(th),ones(1,size(phi,2)))];
+            % E : 3 x (th x phi) 
         end
 
         function result = do(obj, param)
@@ -98,7 +99,16 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
             del_ids = find((result.length < obj.dead_zone) | (result.length > obj.radius));
             result.length(del_ids) = NaN;
             result.sensor_points = p + result.length.*e;
-            result.sensor_points(:,del_ids) = NaN(3,length(del_ids));            
+            result.sensor_points(:,del_ids) = NaN(3,length(del_ids));       
+            loc = reshape((result.length.*obj.E)',[size(obj.theta_range,2),size(obj.phi_range,2),3]);
+            result.Location = loc;
+            result.Count = length(result.length);
+            result.XLimits = [min(loc(:,:,1),[],"all"),max(loc(:,:,1),[],"all")];
+            result.YLimits = [min(loc(:,:,2),[],"all"),max(loc(:,:,2),[],"all")];
+            result.ZLimits = [min(loc(:,:,3),[],"all"),max(loc(:,:,3),[],"all")];
+            result.Color = [];
+            result.Normal = [];
+            result.Intensity = uint8(255*(1-result.length/obj.radius)); % 距離に応じて減衰するというモデル
             obj.result = result;            
         end
 

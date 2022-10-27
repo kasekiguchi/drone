@@ -11,10 +11,10 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
-fMotive = 1 % Motiveを使うかどうか
-fOffline = 0; % offline verification with experiment data
-fDebug = 0;
+fExp = 0; % 1: experiment   0: numerical simulation
+fMotive = 1; % 1: active
+fOffline = 0; % 1: active : offline verification with saved data
+fDebug = 0; % 1: active : for debug function
 
 run("main1_setting.m");
 
@@ -102,7 +102,7 @@ try
             param(i).controller.hlc = {time.t};
             param(i).controller.ftc = {time.t};
             param(i).controller.pid = {};
-            param(i).controller.tscf = {dt,time.t};
+            param(i).controller.tscf = {dt, time.t};
             param(i).controller.mpc = {};
 
             for j = 1:length(agent(i).controller.name)
@@ -122,7 +122,7 @@ try
         figure(FH)
         drawnow
 
-        for i = 1:N % 状態更新
+        for i = 1:N                         % 状態更新
             model_param.param = agent(i).model.param;
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
@@ -165,7 +165,6 @@ try
 
         end
 
-
     end
 
 catch ME % for error
@@ -192,7 +191,7 @@ logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-%agent(1).animation(logger, "target", 1:N); %,"opt_plot", ["sensor", "lidar"]);
+agent(1).animation(logger, "target", 1:N,"opt_plot", ["sensor", "lidar"]);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
