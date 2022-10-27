@@ -29,7 +29,7 @@ data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.
 %-----------------------input----------------------
 data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N},1:data.N,'UniformOutput',false))';
 
-%% Set observables and Input
+%% Set Dataset and Input
 for i=1:1:data.N -1
     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
     data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
