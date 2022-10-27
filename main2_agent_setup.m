@@ -68,8 +68,8 @@ for i = 1:N
     %% model
     % set control model
 
-%     agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
-        agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱 only sim
+    agent(i).set_model(Model_EulerAngle(dt,initial_state(i), i)); % オイラー角モデル
+%         agent(i).set_model(Model_EulerAngle_With_Disturbance(dt,initial_state(i), i)); % オイラー角モデル 外乱 only sim
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
@@ -100,10 +100,10 @@ for i = 1:N
     end
 
     %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
-    agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
+%     agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-    agent(i).set_property("sensor",Sensor_LiDAR(i));
+%     agent(i).set_property("sensor",Sensor_LiDAR(i));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -121,7 +121,7 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
-     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
+%      agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
 %     agent(i).set_property("reference",Reference_Time_Varying("PtoP_ref",[0,0,1]));%PtoP
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 
@@ -136,17 +136,17 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    n=3;
-    switch n
-        case 1 % 有限時間整定制御
-            agent(i).set_property("controller",Controller_FT(dt));
-        case 2 % 階層型線形化
+%     n=3;
+%     switch n
+%         case 1 % 有限時間整定制御
+%             agent(i).set_property("controller",Controller_FT(dt));
+%         case 2 % 階層型線形化
             agent(i).set_property("controller", Controller_HL(dt));                                
-        case 3 %入力を簡単にいじれる % 階層型線形化
-            agent(i).set_property("controller", Controller_FHL(dt));  
-        case 4 % servo階層型線形化
-            agent(i).set_property("controller", Controller_FHL_Servo(dt));                                
-    end 
+%         case 3 %入力を簡単にいじれる % 階層型線形化
+%             agent(i).set_property("controller", Controller_FHL(dt));  
+%         case 4 % servo階層型線形化
+%             agent(i).set_property("controller", Controller_FHL_Servo(dt));                                
+%     end 
       %HLControlSetting = Controller_HL(dt);
       %HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;
 

@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+fExp = 1 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -99,7 +99,7 @@ try
             end
             param(i).reference.covering = [];
 
-            param(i).reference.point = {FH, [0; 0; 1], time.t,dt};%reference.pointの目標位置を指定できる
+            param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);0.4], time.t,dt};%reference.pointの目標位置を指定できる
 
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
@@ -193,7 +193,7 @@ clc
 % plot 
 logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
-% logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
+logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)
 
