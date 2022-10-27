@@ -10,6 +10,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         noise
         seed = [] % noise 用
         interface = @(x) x;
+        theta_range
+        phi_range
     end
 
     properties (SetAccess = private) % construct したら変えない．
@@ -53,11 +55,12 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
                 obj.ic = incenter(TR); % 三角形の内心
                 obj.fn = faceNormal(TR);  % 法線ベクトル（外向き）
             end
-            %phi = 0:0.1:2*pi;
-            phi = -pi:0.1:pi;
-            th =pi/2 +(-pi/12:0.034:pi/12);
-            %e = [sin(th);sin(th);cos(th)].*[cos(phi);sin(phi);ones(1,size(phi,2))]
+            obj.phi_range = param.phi_range;
+            obj.theta_range = param.theta_range;
+            th = obj.theta_range;
+            phi = obj.phi_range;
             obj.E = [kron(sin(th),cos(phi));kron(sin(th),sin(phi));kron(cos(th),ones(1,size(phi,2)))];
+            % E : 3 x (th x phi) 
         end
 
         function result = do(obj, param)
@@ -67,7 +70,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
             %   angle_range で規定される方向の距離を並べたベクトル：単相LiDARの出力を模擬
             % 【入力】param = {Env}        Plant ：制御対象， Env：環境真値
             Plant = obj.self.plant;
-%             if param.env % 実装まだ TODO
+%             if param.env % 環境変化に対応する用：実装まだ TODO
 %                 env = param.env;
 %             else
 %                 env = obj.env;
@@ -80,15 +83,10 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
             Pi = obj.inverse_matrices(p,ip1);
             e = R*obj.E;
             %ip2 = rp*e > 0; % 「内積が正の壁」がレーザー方向にある壁
-            %dw = vecnorm(rp(ip,:),2,2); % 壁までの距離 : TODO : 長い壁面の場合棄却されてしまう
-            %in = dw < obj.L ; % in range
-            %Ip = find(ip);
-            %ids = Ip(in); % 候補の壁面インデックス
             ids = ip1;% & ip2;
 
             %% cell array形式：0.22s
             d=cell2mat(arrayfun(@(i) obj.cross_point(e(:,i),Pi),1:size(e,2),'UniformOutput',false));
-            result.sensor_points = p + d.*e;
 
             if isempty(obj.seed)
                 rng('shuffle');
@@ -99,9 +97,19 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
 
             result.length = d + obj.noise * randn(size(d)); %.*sign(result.angle); % レーザー点までの距離
             del_ids = find((result.length < obj.dead_zone) | (result.length > obj.radius));
-            result.length(del_ids) = 0;
-            result.sensor_points(:,del_ids) = zeros(3,length(del_ids));
-            obj.result = result;
+            result.length(del_ids) = NaN;
+            result.sensor_points = p + result.length.*e;
+            result.sensor_points(:,del_ids) = NaN(3,length(del_ids));       
+            loc = reshape((result.length.*obj.E)',[size(obj.theta_range,2),size(obj.phi_range,2),3]);
+            result.Location = loc;
+            result.Count = length(result.length);
+            result.XLimits = [min(loc(:,:,1),[],"all"),max(loc(:,:,1),[],"all")];
+            result.YLimits = [min(loc(:,:,2),[],"all"),max(loc(:,:,2),[],"all")];
+            result.ZLimits = [min(loc(:,:,3),[],"all"),max(loc(:,:,3),[],"all")];
+            result.Color = [];
+            result.Normal = [];
+            result.Intensity = uint8(255*(1-result.length/obj.radius)); % 距離に応じて減衰するというモデル
+            obj.result = result;            
         end
 
         function fh=show(obj, opt)

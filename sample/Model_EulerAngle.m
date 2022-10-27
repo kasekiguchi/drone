@@ -11,7 +11,6 @@ arguments
 end
 Model.id = id;
 Model.type = "EULER_ANGLE_MODEL";                 % model name
-%Model.type = "MODEL_CLASS";                 % model name
 Model.name = "euler";                            % print name
 Setting.dim = [12, 4, 17];
 Setting.input_channel = ["v", "w"];
