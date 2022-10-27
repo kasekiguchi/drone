@@ -154,7 +154,7 @@ void Pulse_control()
     }
     digitalWrite(OUTPUT_PIN, HIGH);             // PPM -> HIGH
     timer0_write(t_now + USEC2CLOCK(start_Hh)); // start 判定の H 時間待つ
-    Serial.println(start_Hh);
+    // Serial.println(start_Hh);
   }
   else
   {

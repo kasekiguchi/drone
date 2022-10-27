@@ -1,7 +1,7 @@
 clear all  
 agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,132]),DRONE_PARAM("DIATONE"));
-pause(1);
-    agent.plant.connector.sendData(gen_msg([500,500,0,500,0,0,0,0]));% arming
+%%
+agent.plant.connector.sendData(gen_msg([500,500,0,500,0,0,0,0]));% arming
 %%
 % disp("roll")
 % for i = 0:10:500
