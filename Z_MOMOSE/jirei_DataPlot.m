@@ -287,12 +287,12 @@ FigName= ["t-p" "t-x" "t-y" "t-z" "velocity" "attitude" "angular_velocity" "inpu
 % subfolder='sim';%sim or exp
 % subfolder='exp';%sim or exp
 %===================================================
-subfolder='result_C班';
+subfolder='result_sakura';
 %===================================================
-ExpSimName='全体実験';%実験名,シミュレーション名
+ExpSimName='sakura';%実験名,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
 %===================================================
-contents='yokota';%B3の名前
+contents='No8';%your name
 %===================================================
 %     FolderName=fullfile(ExportFolder,subfolder,strcat(date,'_',ExpSimName),'data');%保存先のpath
 %     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
@@ -314,6 +314,6 @@ indent = [1,5,6,7,8,9,10];%保存したいものを書く
 for i=1:length(indent) 
     j=indent(i);
     SaveTitle(j)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(j));
-    saveas(f(j), fullfile(FolderNamef, SaveTitle(j) ),'fig');
+    saveas(f(j), fullfile(FolderNamef, SaveTitle(j) ),'pdf');%拡張子変えられる、saveas関数
 end
 

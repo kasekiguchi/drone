@@ -82,6 +82,27 @@ end
             end
             agent(i).do_reference(param(i).reference.list);
             
+            if FH.CurrentCharacter == 'f'
+                if time.t < 10 
+                    ref = [0;0;1;0];
+                elseif time.t < 15 && time.t > 10
+                    ref = [1.5;0;1;0];
+                elseif time.t < 20 && time.t 15
+                    ref = [1.5;1.5;1;0];
+                elseif time.t < 25 && time.t >20
+                    ref = [-1.5;1.5;1;0];
+                elseif time.t < 30 && time.t > 25
+                    ref = [-1.5;-1.5;1;0];
+                elseif time.t < 35 && time.t > 30
+                    ref = [1.5;-1.5;1;0];
+                else
+                    ref = [1.5;0;1;0];
+                end
+    
+                agent(i).reference.result.state.p = ref(1:3);
+                agent(i).reference.result.state.xd = ref(1:3);
+            end
+%             
             %仮でreferenceを変更する
 %             if FH.CurrentCharacter == "f"%take off してからflightしないとだめ
 %                 if fff==1
@@ -179,7 +200,7 @@ logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "v", "e"},{1, "q", "e"},{1, "input
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1:N);
+agent(1).animation(logger,"target",1:N);s
 
 %%
 %logger.save();

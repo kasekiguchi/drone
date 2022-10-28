@@ -20,10 +20,13 @@ z_0 = X0(3);
 % 条件はx,yぞれぞれが-1.5m～1.5mに収まること
 
 T=4;
-sita=t/T;
-x=x_0+sin(sita)*sin(sita)*sin(sita);
-y=y_0+cos(sita)*cos(sita)*cos(sita);
+% sita=t/T;
+x=x_0+sin(pi*t/T);
+y=y_0+cos(pi*t/T);
 z=1;
+% x=x_0+sin(sita)*sin(sita)*sin(sita);
+% y=y_0+cos(sita)*cos(sita)*cos(sita);
+% z=1;
 
 ref=@(t)[x;y;z;0];
 end
