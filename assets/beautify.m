@@ -25,10 +25,10 @@ if strcmp(file,"initialize")
 end
 
 if strcmp(endl,"None")
-  command = strcat("python3.8 ",formatter_path," ",file," --indentWidth=4 --separateBlocks=False --indentMode=-1");
+  command = strcat("python3.8 ",formatter_path," ",file," --indentWidth=2 --separateBlocks=False --indentMode=-1");
   [a,o]=system(command);
 else
-  command = strcat("python3.8 ",formatter_path," ",file," --indentWidth=4 --startLine=",string(startl)," --endLine=",string(endl)," --separateBlocks=False --indentMode=-1");
+  command = strcat("python3.8 ",formatter_path," ",file," --indentWidth=2 --startLine=",string(startl)," --endLine=",string(endl)," --separateBlocks=False --indentMode=-1");
   [a,o] = system(command);
 end
 end
