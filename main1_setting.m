@@ -16,7 +16,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 15; % default: 10
+    te = 25; % default: 10
 end
 
 %% generate environment

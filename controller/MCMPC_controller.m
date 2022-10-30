@@ -20,7 +20,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             %---MPCパラメータ設定---%
             obj.param.H  = 10;                % モデル予測制御のホライゾン
             obj.param.dt = 0.1;              % モデル予測制御の刻み時間
-            obj.param.particle_num = 200;
+            obj.param.particle_num = 5000;
             obj.param.subCheck = zeros(obj.param.particle_num, 1);
             obj.param.fRemove = 0;
             %重み%

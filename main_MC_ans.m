@@ -58,7 +58,7 @@ if time.t == 9
     time.t;
 end
         % CurrentCharacter Check
-            fprintf("key input : %c", FH.CurrentCharacter)
+%             fprintf("key input : %c", FH.CurrentCharacter)
         % ----------------------
         if (fOffline)
             expdata.overwrite("plant", time.t, agent, i);
@@ -244,6 +244,7 @@ hold off;
 % hold off;
 
 %% plot reference xr_save
+size_best = length(logger.Data.t);
 figure(12); 
 plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
 ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
