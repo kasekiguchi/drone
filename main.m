@@ -11,10 +11,10 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
+fExp = 1; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 1; % 1: active : for debug function
+fDebug = 0; % 1: active : for debug function
 run("main1_setting.m");
 
 % set logger
@@ -183,14 +183,14 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot({1, "p", "ser"}, {1, "q", "se"}, {1, "v", "e"}, {1, "input", ""}, {1,"inner_input",""});
 
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+% agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
