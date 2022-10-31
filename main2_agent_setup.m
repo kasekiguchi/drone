@@ -150,12 +150,12 @@ for i = 1:N
             alp = 0.85;%alphaの値 0.8だとゲインの位置の重みを大きくすると発散
             erz=[0 1];%近似する範囲z
             erxy=[0 1];%近似する範囲xy
-            agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
+%             agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
 
 %    agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
-    %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
+   agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 %          agent(i).set_property("controller", Controller_SMC(dt)); 
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
