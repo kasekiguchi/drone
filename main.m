@@ -36,7 +36,7 @@ run("main2_agent_setup.m");
 % agent.set_model_error("ly",0.02);
 % agent.set_model_error("lx",0.02);
 % agent.set_model_error("mass",0.1);
-agent(i).set_model_error("B",[zeros(1,6),[1,1,1],zeros(1,3)]);%only sim
+agent(i).set_model_error("B",[zeros(1,6),[0.3,0,0],zeros(1,3)]);%only sim
 % 外乱設定[x,y,z]にかかる様にする．
 
 %% main loop
@@ -194,8 +194,8 @@ clc
 % plot
 % logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 % logger.plot({1, "q1", "e"});
-logger.plot({1, "p1", "er"},{1,"input",""});
-% logger.plot({1,"p1:2","pe"},{1,"p","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
+% logger.plot({1, "p1", "er"},{1,"input",""});
+logger.plot({1,"p1:2","pe"},{1,"p","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
 % logger.plot({1,"p1:2","per"},{1,"p","per"},{1,"v","per"},{1,"input",""},"fig_num",1,"row_col",[2,3]);
 % agent(1).reference.timeVarying.show(logger)
 

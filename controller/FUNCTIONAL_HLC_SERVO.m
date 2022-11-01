@@ -48,9 +48,9 @@ classdef FUNCTIONAL_HLC_SERVO < CONTROLLER_CLASS
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
             
-            if t > 5
-                obj.z = obj.z + xd(1:3)-x(5:7);
-            end
+%             if t > 5
+%                 obj.z = obj.z + xd(1:3)-x(5:7);
+%             end
             %% calc Z
             z1 = Z1(x,xd',P);
             vf = obj.Vf(z1,F1,obj.z);
