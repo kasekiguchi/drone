@@ -20,7 +20,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             %---MPCパラメータ設定---%
             obj.param.H  = 10;                % モデル予測制御のホライゾン
             obj.param.dt = 0.1;              % モデル予測制御の刻み時間
-            obj.param.particle_num = 5000;
+            obj.param.particle_num = 200;
             obj.param.subCheck = zeros(obj.param.particle_num, 1);
             obj.param.fRemove = 0;
             %重み%
@@ -29,8 +29,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.param.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
             obj.param.W = diag([1.0; 1.0; 1.0]);    % 角速度
             obj.param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-            obj.param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
-            obj.param.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
+            obj.param.RP = 0  * diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+            obj.param.QW = diag([0.010,; 0.010; 0.010; 0.010; 0.010; 1000.0]);  % 姿勢角、角速度
             obj.input.Initsigma = 0.01;
             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
             obj.input.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';

@@ -45,6 +45,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
     xr0 = zeros(Params.state_size, Params.H);
 
+    fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
+
 run("main3_loop_setup.m");
 
 try
@@ -116,9 +118,9 @@ end
         end
 
         %-- データ保存
-%             data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-%             data.sigma(idx) = agent.controller.result.sigma;
-%             data.bestcost(idx) = agent.controller.result.bestcost;
+            data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+            data.sigma(idx) = agent.controller.result.sigma;
+            data.bestcost(idx) = agent.controller.result.bestcost;
 %             data.state{idx} = state_data(:, 1, BestcostID);
 %             data.input{idx} = u;
             state_monte = agent.estimator.result.state;
@@ -127,7 +129,7 @@ end
                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                     state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
-                    ref_monte.p(1), ref_monte.p(2), ref_monte.p(3));
+                    xr(1,1), xr(2,1), xr(3,1));
 
         %% update state
         % with FH
@@ -204,52 +206,31 @@ fprintf("%f秒\n", totalT)
 % plot p:position, e:estimate, r:reference, 
 % figure(1)
 Fontsize = 15;  timeMax = te;
-logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+% logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+logger.plot({1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},"fig_num",1,"row_col",[2,2])
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"gif", 1);
 
-%%
-size_best = length(logger.Data.t);
-for i= 1:size_best
-    Edata(:, i) = logger.Data.agent.estimator.result{1,i}.state.p;
-    Rdata(:, i) = logger.Data.agent.reference.result{1,i}.state.p;
-    diff(:, i) = logger.Data.agent.estimator.result{1,i}.state.p - logger.Data.agent.reference.result{1,i}.state.p;
-end
-figure(11); plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
-ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
-plot(logger.Data.t(1:size_best,:), Rdata, '--', 'LineWidth', 2);
-hold off;
-
-%% plot reference
-% figure(12); plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
-% ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
-% rz_R = 0.05; % 目標
-% rz0_R = 1;% スタート
-% T_R = 10; % かける時間
-% Tv_R = 0:0.01:T_R;
-% StartT_R = 0;
-% a_R = -2/T_R^3 * (rz_R-rz0_R);
-% b_R = 3/T_R^2 * (rz_R-rz0_R);
-% syms t real
-% z_R = a_R*(t-StartT_R)^3+b_R*(t-StartT_R)^2+rz0_R;
-% Z_R = subs(z_R, t, Tv_R);
-% plot(Tv_R, Z_R, 'LineWidth', 2, 'LineStyle', '--'); 
-% legend("x.state", "y.state", "z.state", "z.reference");
-% hold off;
-
 %% plot reference xr_save
-size_best = length(logger.Data.t);
-figure(12); 
-plot(logger.Data.t(1:size_best,:), Edata, 'LineWidth', 2); xlabel("Time[s]"); ylabel("coodinates [m]");set(gca,'FontSize',Fontsize); grid on;
-ylim([-inf, inf+1.0]); xlim([0 inf]); hold on;
-plot(logger.Data.t(1:size_best,:), xr_save, 'LineWidth', 2, 'LineStyle', '--');
-legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-hold off;
+size_best = size(data.bestcost, 2);
+Edata = logger.data(1, "p", "e")';
+Rdata = xr_save(:, 1:size(Edata, 2));
+Diff = Edata - Rdata;
+% plot(p, er)
+figure(6); 
+plot(logger.data('t', [], [])', Edata, '-', logger.data('t', [], [])', Rdata, '--', 'LineWidth', 2)
+legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",'Location','northwest');
+set(gca,'FontSize',15);  grid on; title(""); ylabel("Est, Ref [m]"); xlabel("time [s]"); xlim([0 te])
+% plot(p, diff)
+figure(7);
+plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+legend("x.diff", "y.diff", "z.diff", 'Location', 'southeast');
+set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 te])
 %%
 % logger.save();
