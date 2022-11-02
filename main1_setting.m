@@ -1,4 +1,3 @@
-
 if fExp
     dt = 0.025; % sampling time
 else
@@ -34,4 +33,3 @@ if fMotive
         %motive = Connector_Natnet_sim(2*N,dt,0); % for suspended load
     end
 end
-

@@ -9,7 +9,7 @@
 /////////////////// WiFi関係 ////////////////////
 #include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
 #include <WiFiUDP.h>
-char packetBuffer[1];
+char packetBuffer[1023];
 unsigned int droneNumber = 33; //機体番号を入力
 const char *ssid = "ACSLexperimentWiFi";//"acsl-mse-arl-YAMAHA";
 const char *password = "wifi-acsl-mse";
@@ -18,7 +18,7 @@ WiFiUDP udp;
 // ESPrのIPアドレスの設定
 IPAddress myIP(192, 168, 50, 100 + droneNumber); // 機体により下番号変更
 IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
-const int my_udp_port = 8000 + droneNumber;        //開放する自ポート
+const int my_udp_port = 8000;        //開放する自ポート
 IPAddress subnet(255, 255, 255, 0);
 
 uint8_t old_receive_data = 0;
@@ -64,7 +64,7 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
     if (len > 0)
     {
       msg = int(packetBuffer[0]); 
-      Serial.print("Received message ");
+      Serial.print("UDP Received message ");
       Serial.print(" ");
       Serial.print(msg);
       Serial.print(" ");
@@ -88,6 +88,7 @@ void receiveUDP()// ---------- loop function : receive signal by UDP
 void setup() {
   Serial.begin(115200);
   SSerial.begin(9600);
+  SSerial.setTimeout(2000);
   connectToWiFi();
   udp.begin(my_udp_port);
   unsigned long last_received_time = ESP.getCycleCount();
@@ -96,9 +97,21 @@ void setup() {
 }
 
 void loop() {
+  String aa;
+  int f;
   receiveUDP();    
-  while (SSerial.available() > 0) {
+  while (SSerial.available()) {
+   // aa = SSerial.readStringUntil('\n');
+    //aa = SSerial.read();
     Serial.println("Received from SS : " + SSerial.readStringUntil('\n'));
+    if (SSerial.overflow())
+    {
+      f = 1;
+    }else{
+      f = 0;
+      }
+    
+    Serial.println("Overflow : " + String(f));
     yield();
   }
 }
