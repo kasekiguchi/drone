@@ -13,7 +13,7 @@ N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 1; % 1: active : for debug function
+fDebug = 0; % 1: active : for debug function
 run("main1_setting.m");
 % for mob1
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
@@ -21,8 +21,10 @@ wall1 = [2 -1;2 0.5;2.5 0.5;2.5 -1];
 % wall2 = [4 0;4 3;4.5 3;4.5 0];
 % wall2 = [4 0;2 0.5;7 0.5;7 0];%没
 room = [-2 -5;-2 4;7 4;7 -5];
+room0 = [-2.5 -5.5;-2.5 4.5;7.5 4.5;7.5 -5.5];
 % Env.param.Vertices = [tmp;NaN NaN;0.6*tmp]; %モビング時の障害物
-Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
+Env.param.Vertices = [wall1;NaN NaN;room;NaN NaN;room0]; %Tbug時の障害物
+plot(polyshape(Env.param.Vertices))
 % Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
 initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
@@ -75,7 +77,7 @@ try
       param(i).sensor.imu = {[]};
       param(i).sensor.direct = {};
       param(i).sensor.rdensity = {Env};
-      param(i).sensor.lrf = {Env.param};
+      param(i).sensor.lrf = {Env};
       param(i).sensor.lidar = {};
 
       for j = 1:length(agent(i).sensor.name)
@@ -126,8 +128,8 @@ try
 
     if fDebug
       %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-      agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
-%       agent.reference.tbug.show(Env);
+      %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
+       agent.show(["reference","tbug"],"FH",FH,"param",Env)
     end
 
     %% update state
@@ -195,12 +197,13 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-% logger.plot({1,"p","er"},{1,"q","e"});
+logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
 % logger.plot({1,"p","er"});
 % legend("x.state", "y.state", "z.state","x.reference", "y.reference", "z.reference");
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
-logger.plot({1,"p1-p2","er"});
+%%
+% logger.plot({1,"p1-p2","er"});
 hold on
 plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
