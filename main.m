@@ -127,6 +127,7 @@ try
     if fDebug
       %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
       agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
+%       agent.reference.tbug.show(Env);
     end
 
     %% update state
@@ -214,7 +215,7 @@ hold off
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-% agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
 % agent(1).animation(logger,"target",1:N,"Env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
 %%
 %logger.save();
