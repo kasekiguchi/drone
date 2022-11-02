@@ -51,7 +51,7 @@ classdef OBJECT3D
             obj.C = C;
         end
 
-        function outputArg = plot(obj,args)
+        function plot(obj,args)
             arguments
                 obj
                 args.alpha = obj.alpha
