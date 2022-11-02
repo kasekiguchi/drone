@@ -5,14 +5,14 @@ clear
 %import
 %選択
 fsingle=1;%figureの数が一つの時１
-ff=1;%flightのみは１
+ff=10;%flightのみは１
 fHLorFT=1;%単体の時,HLは1
 
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
 %     name=logger;
-    name=logger_FT_09;
+    name=logger_FT_c_09;
 %     name=logger_HL_c;
 %     name=remasui2_0518_FT_hovering_15;
     %
@@ -67,10 +67,10 @@ if fsingle==1
         ref(:,j)=name.Data.agent.reference.result{1,i}.state.p(1:3);
         est(:,j)=name.Data.agent.estimator.result{1,i}.state.p(1:3);
         err(:,j)=est(:,j)-ref(:,j);%誤差
-%         inp(:,j)=name.Data.agent.input{1,i};
-%         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
-%         vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v(1:3);
-%         w(:,j)=name.Data.agent.estimator.result{1,i}.state.w(1:3);
+        inp(:,j)=name.Data.agent.input{1,i};
+        att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
+        vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v(1:3);
+        w(:,j)=name.Data.agent.estimator.result{1,i}.state.w(1:3);
 %         uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
 %         z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
 %         z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
