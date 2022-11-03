@@ -1,20 +1,16 @@
 function Estimator = Estimator_EKF(agent,output,opts)
-    % Inputs : agent, output, opts
-    % agent : DRONE class instance
-    % output : 出力方程式の拡張線形化した関数ハンドル（状態とパラメータを引数とする関数）
-    %           or 出力に含む状態 ["p","q"]など
-    % opts : オプション引数
-    %    B : システムノイズの入るチャンネル行列
-    %    P : 初期誤差共分散行列
-    %    Q : システムノイズの共分散行列推定値
-    %    R : 観測ノイズの共分散行列推定値
+    % output ：出力のリスト　例 ["p","q"]
+    % var : 各出力に対するセンサーの観測ノイズs
+    %% estimator class demo
+    % estimator property をEstimator classのインスタンス配列として定義
+    % すべての機体で同一設定
     arguments
         agent
         output = ["p","q"]
         opts.B = []
         opts.P = []
         opts.Q = []
-        opts.R = diag([1e-1*ones(1,3), 1e-2*ones(1,3)]);%diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
+        opts.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
     end
     Estimator.name="ekf";
     Estimator.type="EKF";
@@ -39,7 +35,7 @@ function Estimator = Estimator_EKF(agent,output,opts)
         EKF_param.P = opts.P;
     end
     if isempty(opts.Q)
-        EKF_param.Q = 1E-3*diag([1E3,1E3,1E3,1E5,1E5,1E5]);%eye(6)*1E3;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
+        EKF_param.Q = diag([1E3,1E3,1E3,1E5,1E5,1E5]);%eye(6)*1E3;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
     else
         EKF_param.Q = opts.Q;
     end
@@ -72,4 +68,3 @@ function mat = zeroone(row,col,idx)
         error("ACSL : invalid size");
     end
 end
-
