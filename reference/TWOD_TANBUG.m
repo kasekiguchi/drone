@@ -35,17 +35,18 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
         function obj = TWOD_TANBUG(self, varargin)
             %obj.state = [0,0,0];
 
-            %obj.pitch = self.sensor.lrf.pitch;
-            tmp = self.sensor.lidar.phi_range;
-            obj.pitch = tmp(2)-tmp(1);
+            obj.pitch = self.sensor.lrf.pitch;
+%             tmp = self.sensor.lidar.phi_range;%3D
+%             obj.pitch = tmp(2)-tmp(1);%3D
 
             obj.sensor = [0,0];
             
             obj.state_initial = [0,0,0]';
-            obj.goal = [10,-6,0]';% global goal position
+            obj.goal = [6,0,0]';%2Dgoal
+%             obj.goal = [10,-6,0]';% global goal position
             obj.obstacle = [2,0,0]';% 障害物座標
-%            obj.radius = self.sensor.lrf.radius;
-             obj.radius = self.sensor.lidar.radius;
+           obj.radius = self.sensor.lrf.radius;
+%              obj.radius = self.sensor.lidar.radius;%3D
             obj.margin = 0.5;
             obj.threshold = obj.margin*2;
             obj.d = 0;
@@ -62,8 +63,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3, 3]));
          
-%            obj.path_length = zeros(size(self.sensor.lrf.angle_range));
-            obj.path_length = zeros(size(self.sensor.lidar.phi_range));
+           obj.path_length = zeros(size(self.sensor.lrf.angle_range));
+%             obj.path_length = zeros(size(self.sensor.lidar.phi_range));%3D
             as = 0:obj.pitch:2*pi; %センサの分解能(ラジアン)（行列）
             obj.margin = obj.margin;
             %仮想通路の生成
@@ -90,8 +91,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
-%            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
-             [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
+           [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
+%            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
             path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離
             path_length(path_length>goal_length)=goal_length;
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合                

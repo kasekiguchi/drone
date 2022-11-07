@@ -13,7 +13,7 @@ N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 0; % 1: active : for debug function
+fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
 % for mob1
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
@@ -218,7 +218,7 @@ hold off
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+% agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
 % agent(1).animation(logger,"target",1:N,"Env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
 %%
 %logger.save();
