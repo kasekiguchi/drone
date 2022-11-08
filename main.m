@@ -12,7 +12,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 1; % 1: active
+fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
@@ -36,6 +36,7 @@ run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
+
 
 try
 
@@ -67,9 +68,9 @@ try
       param(i).sensor.lidar = {};
 
       for j = 1:length(agent(i).sensor.name)
+          
         param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
       end
-
       agent(i).do_sensor(param(i).sensor.list);
       if (fOffline); logger.overwrite("sensor", time.t, agent, i); end
     end
@@ -113,8 +114,9 @@ try
     end
 
     if fDebug
-      %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-      agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
+        agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+% %       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+%       agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
     end
 
     %% update state
@@ -183,14 +185,14 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot({1, "p", "per"}, {1, "q", "pe"}, {1, "v", "pe"}, {1, "input", "pe"}, "fig_num", 5, "row_col", [2, 2]);
 
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lrf"]);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
