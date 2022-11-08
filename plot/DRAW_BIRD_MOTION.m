@@ -34,9 +34,14 @@ classdef DRAW_BIRD_MOTION
                 param.fig_num = 1;
                 param.mp4 = 0;
             end
-            data = logger_bird.data(param.drone,"p","e");
-            tM = max(data);
-            tm = min(data);
+            data_drone = logger.data(param.drone,"p","e");
+            data_bird = logger_bird.data(param.bird,"p","e");
+            droneM = max(data_drone);
+            dronem = min(data_drone);
+            birdM = max(data_bird);
+            birdm = min(data_bird);
+            tM = [droneM,birdM];
+            tm = [dronem,birdm];
             M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
             m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
             L = param.frame_size;
@@ -223,6 +228,8 @@ classdef DRAW_BIRD_MOTION
                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').mp4'),':','_'),' ','_');
                 v = VideoWriter(filename,"MPEG-4");
                 if param.mp4
+                    v.Quality = 100;
+                    v.FrameRate = 40; % dtの逆数
                     open(v);
                     writeAnimation(v);
                 end

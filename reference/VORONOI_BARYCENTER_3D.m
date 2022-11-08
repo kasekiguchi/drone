@@ -52,6 +52,9 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             F = faceNormal(TR); % 三角形分割した面に対する法線ベクトル
             Ptri = incenter(TR); % 三角形分割した面の内心
             bird_cent = sum(sensor.bird_pos,2) / Nb;
+            x = obj.param.qx;
+            y = obj.param.qy;
+            z = obj.param.qz;
 
             % 領域質量
             zo = find(max(sum(Ptri.*F,2) - (F*obj.param.bx') < 0,[],1) == 0);
@@ -71,6 +74,9 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
 
             % 描画用変数
             obj.result.state.p = xd;
+            obj.result.qx = x;
+            obj.result.qy = y;
+            obj.result.qz = z;
             result = obj.result;
             if obj.fShow
                 obj.show();

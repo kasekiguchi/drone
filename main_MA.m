@@ -8,8 +8,8 @@ cellfun(@(xx) addpath(xx), activefile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 %% general setting
-N = 2; % number of total units
-Nb = 3; % number of birds
+N = 1; % number of total units
+Nb = 1; % number of birds
 fExp = 0 % 実機フラグ
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data

@@ -30,9 +30,9 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             if obj.id == 1
                 obj.result.state.p = [cos(time.t);sin(time.t);abs(sin(time.t))];
             elseif obj.id == 2
-                obj.result.state.p = [sin(time.t);cos(time.t);abs(sin(time.t))];
+                obj.result.state.p = [sin(time.t);sin(time.t);2];
             else
-                obj.result.state.p = [cos(time.t);cos(time.t);1];
+                obj.result.state.p = [sin(time.t);sin(time.t);1];
             end
 
             result = obj.result;
