@@ -274,14 +274,14 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             clf(FH)
             grid on
             axis equal
-            obj.self.show(["sensor","lrf"],[pstate;pstateq]);
+%             obj.self.show(["sensor","lrf"],[pstate;pstateq]);
             hold on
             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
             %    agent.sensor.LiDAR.show();
             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-            %plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
             plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
             O = agent.reference.result.O;
@@ -295,8 +295,8 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 xlim([xmin-5, xmax+5]);
                 ylim([ymin-5,ymax+5]);
             else
-                xlim([estate(1)-25, estate(1)+25]);
-                ylim([estate(2)-25,estate(2)+25]);
+                xlim([estate(1)-10, estate(1)+10]);
+                ylim([estate(2)-10,estate(2)+10]);
             end
             xlabel("$x$ [m]","Interpreter","latex");
             ylabel("$y$ [m]","Interpreter","latex");
