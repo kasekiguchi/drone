@@ -42,11 +42,11 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.sensor = [0,0];
             
             obj.state_initial = [0,0,0]';
-            obj.goal = [6,0,0]';%2Dgoal
-%             obj.goal = [10,-6,0]';% global goal position
+%             obj.goal = [6,0,0]';%2Dgoal
+            obj.goal = [10,-6,0]';% global goal position
             obj.obstacle = [2,0,0]';% 障害物座標
            obj.radius = self.sensor.lrf.radius;
-%              obj.radius = self.sensor.lidar.radius;%3D
+%             obj.radius = self.sensor.lidar.radius;%3D
             obj.margin = 0.5;
             obj.threshold = obj.margin*2;
             obj.d = 0;
@@ -96,12 +96,12 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離
             path_length(path_length>goal_length)=goal_length;
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合                
-                % edge_ids = 近い端点のindex配列
+                % edge_ids = 隣との距離の差が大きいところのindex配列（端点）
                 nlength = circshift(obj.length,1); %１つずらした距離データ
-                edge_ids = find(abs(nlength-obj.length) > obj.threshold); %近い端点のindex配列
-                tmp = obj.length(edge_ids) > nlength(edge_ids);
+                edge_ids = find(abs(nlength-obj.length) > obj.threshold); %隣との距離の差が大きいところのindex配列（端点）
+                tmp = obj.length(edge_ids) > nlength(edge_ids);%ドローンから見て左側の距離が長い場合の配列
                 edge_ids(tmp) = edge_ids(tmp) - 1;
-%                 edge_ids(edge_ids==0) = length(nlength);
+                edge_ids(edge_ids==0) = length(nlength);
 
 
                 te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
@@ -111,7 +111,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 tid = edge_ids(tmp);
 
                 Length = [obj.length(end),obj.length,obj.length(1)];
-                edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];
+                edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
                 if Length(tid+2) > Length(tid) % 左回りで避ける
                     %tid = obj.width_check(tid,-1);
                     [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
@@ -345,7 +345,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 points = points + obj.state.p(1:2)';
                 plot(points(:,1),points(:,2),'r-');
                 hold on; 
-%                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
+                text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
                 %plot(obj.self.sensor.result.region);
                 %plot(obj.head_dir);
                 plot(obj.state.p(1),obj.state.p(2),'b*');
