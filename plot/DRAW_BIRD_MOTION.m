@@ -167,6 +167,10 @@ classdef DRAW_BIRD_MOTION
 
             %p = logger.data(param.target,"p","e");
             %q = logger.data(param.target,"q","e");
+            for n = 1:length(param.drone)
+                agent{n} = logger.Data.agent(n);
+            end
+            fi = [];
             p = logger.data(param.drone,"p","p");
             q = logger.data(param.drone,"q","p");
             u = logger.data(param.drone,"input");
@@ -247,9 +251,14 @@ classdef DRAW_BIRD_MOTION
             end
             for i = 1:length(t)-1
                 if param.Motive_ref
+                    if ~isempty(fi)
+                            delete(fi);
+                    end
                     for n = 1:length(param.drone)
                         addpoints(f(n),r(i,1,n),r(i,2,n),r(i,3,n));
                         obj.draw(obj.frame(param.drone(n)),obj.thrust(param.drone(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                        
+                        fi(n)=trisurf(agent{n}.reference.result{i}.k{n},agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},1),agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},2),agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},3),'Facecolor','r','Facealpha',0.3);
                     end
                     for n = 1:length(param.bird)
                         addpoints(f_b(n),r_b(i,1,n),r_b(i,2,n),r_b(i,3,n));

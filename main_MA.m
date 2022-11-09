@@ -8,8 +8,8 @@ cellfun(@(xx) addpath(xx), activefile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 %% general setting
-N = 1; % number of total units
-Nb = 1; % number of birds
+N = 2; % number of total units
+Nb = 3; % number of birds
 fExp = 0 % 実機フラグ
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
@@ -226,5 +226,5 @@ clc
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger,"target",1:N,"Motive_ref",1);
-bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",0);
+bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",1);
 % agent(1).sensor.bounding.movie(logger);

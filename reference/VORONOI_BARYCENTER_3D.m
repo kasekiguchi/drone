@@ -77,6 +77,9 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             obj.result.qx = x;
             obj.result.qy = y;
             obj.result.qz = z;
+            obj.result.k{obj.id} = k{obj.id};
+            obj.result.v = v;
+            obj.result.c = c;
             result = obj.result;
             if obj.fShow
                 obj.show();
