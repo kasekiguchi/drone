@@ -61,9 +61,15 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
 %             phi_d = normpdf(vecnorm(bird_cent' - obj.param.bx(zo,:),2,2),0,0.6); % 重み位置と領域内ボクセルとの距離の正規分布関数
 %             weight_bx = obj.param.bx(zo,:).*phi_d; % 重み付きボクセル
             for i = 1:Nb
-                phi(:,i) = normpdf(vecnorm(sensor.bird_pos(:,i)' - obj.param.bx(zo,:),2,2),0,0.6); % 重み位置と領域内ボクセルとの距離の正規分布関数
+                phi(:,i) = normpdf(vecnorm(sensor.bird_pos(:,i)' - obj.param.bx(zo,:),2,2),0,0.6); % 鳥の重み位置と領域内ボクセルとの距離の正規分布関数
             end
-            phi_all = sum(phi,2);
+            drone_pos = [state.p,neighbor];
+            for j = 1:N
+                phi_drone(:,j) = normpdf(vecnorm(drone_pos(:,j)' - obj.param.bx(zo,:),2,2),0,0.6); % ドローンの重み位置と領域内ボクセルとの距離の正規分布関数
+            end
+            phi_bird_all = sum(phi,2);
+            phi_drone_all = sum(phi_drone,2);
+            phi_all = phi_bird_all - phi_drone_all;
             weight_bx = obj.param.bx(zo,:).*phi_all; % 重み付きボクセル
             dmass = sum(weight_bx,1); % 各方向の重みを合算
             mass = sum(phi_all,"all"); % 全部の重みを合算
