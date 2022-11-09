@@ -3,7 +3,7 @@ function env_param = Env_FloorMapSquare()
 % env property をEnv classのインスタンス配列として定義
 env_param.name = 'floor';
 env_param.type = "FLOOR_MAP";
-pout = [-5,-5;50,-5;50,50;-5,50];
+pout = [-2.5,-2.5;50,-2.5;50,50;-2.5,50];
 Poutpoly = polyshape(pout);
 pin = [-6,-6;51,-6;51,51;-6,51];
 Pinpoly = polyshape(pin);

@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
+fExp = 1; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
@@ -25,7 +25,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(21-Aug-2022_06_16_24).mat", ["sensor", "estimator"]);
+  logger = LOGGER("Data/Log(22_Nov_9).mat", ["sensor", "estimator"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
@@ -185,7 +185,7 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "per"}, {1, "q", "pe"}, {1, "v", "pe"}, {1, "input", "pe"}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
 
 % agent(1).reference.timeVarying.show(logger)
 
@@ -194,5 +194,5 @@ logger.plot({1, "p", "per"}, {1, "q", "pe"}, {1, "v", "pe"}, {1, "input", "pe"},
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lrf"]);
 %%
-%logger.save();
+logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

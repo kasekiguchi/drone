@@ -45,9 +45,13 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
            
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
 
-            obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
-            obj.self.input = obj.result.input;
-            u = obj.result;
+%             obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
+            obj.result.input = [0;0];
+%             obj.self.input = obj.result.input;
+            obj.self.input = [0;0];
+
+%             u = obj.result;
+            u = [0;0];
             obj.ei = obj.ei + obj.e*obj.dt;
         end
         function show(obj)
