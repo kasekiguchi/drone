@@ -199,6 +199,8 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             end
             obj.PreTrack = ref(:,1);
             obj.result.PreTrack = ref(:,1);
+%             obj.PreTrack = [0;0;0;0];
+%             obj.result.PreTrack = [0;0;0;0];
             if isempty(obj.O)
                 obj.result.O = pe;
             else
@@ -281,7 +283,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+%             plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
             plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
             O = agent.reference.result.O;
