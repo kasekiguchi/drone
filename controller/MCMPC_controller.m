@@ -24,13 +24,21 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.param.subCheck = zeros(obj.param.particle_num, 1);
             obj.param.fRemove = 0;
             %重み%
-            obj.param.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
-            obj.param.V = diag([1.0; 1.0; 1.0]);    % 速度
-            obj.param.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
-            obj.param.W = diag([1.0; 1.0; 1.0]);    % 角速度
+            %% 離陸
+%             obj.param.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
+%             obj.param.V = diag([1.0; 1.0; 1.0]);    % 速度
+%             obj.param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+%             obj.param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+%             obj.param.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
+
+            %% 円旋回
+            obj.param.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
+            obj.param.V = diag([100.0; 100.0; 1.0]);    % 速度
             obj.param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-            obj.param.RP = 0  * diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-            obj.param.QW = diag([0.010,; 0.010; 0.010; 0.010; 0.010; 1000.0]);  % 姿勢角、角速度
+            obj.param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+            obj.param.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
+
+            %%
             obj.input.Initsigma = 0.01;
             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
             obj.input.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
@@ -46,6 +54,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
             obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data];  
+
+            obj.param.fRemove = 0;
         end
         
         %-- main()的な
@@ -73,6 +83,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 end
                 obj.input.sigma = obj.input.nextsigma;
             end
+            rng ('shuffle');
             obj.input.u1 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave1;
             obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave2;
             obj.input.u3 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave3;
@@ -90,9 +101,14 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
             %-- 状態予測
             [obj.state.predict_state, obj.param.subCheck] = obj.predict();
-            if obj.param.subCheck == 1
+            if obj.state.predict_state(3, 1, :) < 0
                 obj.param.fRemove = 1;
             end
+            
+            %-- 制約条件
+            ConstInput = Constraints();
+
+
             %-- 評価値計算
             for m = 1:obj.input.u_size
                 obj.input.eval = obj.objective(m);
@@ -110,8 +126,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 obj.input.Bestcost_pre = obj.input.Bestcost_now;
                 obj.input.Bestcost_now = Bestcost;
             end
+            
             obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
             obj.self.input = obj.result.input;
+            obj.result.fRemove = obj.param.fRemove;
             obj.result.sigma = obj.input.nextsigma;
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.bestcost = Bestcost;
@@ -148,13 +166,21 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             U = obj.input.u(:,:,m);         %12 * 10
             
             %-- 状態および入力に対する目標状態や目標入力との誤差計算
+%             tildeXp = X(1:3,:,m) - obj.state.ref(1:3, :);  % 位置   agent.refenrece.result.state.p
+%             tildeXv = X(7:9,:,m) - obj.input.ref_v;                           % 速度
+%             tildeXq = X(4:6,:,m);
+%             tildeXw = X(10:12,:,m); 
+
+            %% xr
             tildeXp = X(1:3,:,m) - obj.state.ref(1:3, :);  % 位置   agent.refenrece.result.state.p
-            tildeXv = X(7:9,:,m) - obj.input.ref_v;                           % 速度
-            tildeXq = X(4:6,:,m);
-            tildeXw = X(10:12,:,m); 
+            tildeXq = X(4:6,:,m) - obj.state.ref(4:6, :);
+            tildeXv = X(7:9,:,m) - obj.state.ref(7:9, :);  % 速度
+            tildeXw = X(10:12,:,m) - obj.state.ref(10:12, :); 
+
+            %%
             tildeXqw = [tildeXq; tildeXw];
             tildeUpre = U - obj.self.input;       % agent.input
-            tildeUref = U - obj.input.ref_input;
+            tildeUref = U - obj.state.ref(13:16, :);
 
             %-- 状態及び入力のステージコストを計算
             stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
@@ -171,28 +197,12 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef)...
                 + terminalState;
         end
-
-%         function xr = generate_reference(obj, t)
-%             xr = zeros(3, obj.param.H);
-%             rz = 1; % 目標
-%             rz0 = 0;% スタート
-%             T = 10; % かける時間
-%             StartT = 0;
-%             a = -2/T^3 * (rz-rz0);
-%             b = 3/T^2 * (rz-rz0);
-%         %     z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
-%         %     X = subs(z, t, Tv);
-%             %-- ホライゾンごとのreference
-%             if t <= 10
-%                 for h = 1:obj.param.H
-%                     xr(:, h) = [0;0;a*((t-StartT)+obj.param.dt*h)^3+b*((t-StartT)+obj.param.dt*h)^2+rz0];
-%                 end
-%             else
-%                 for h = 1:obj.param.H
-%                     xr(:, h) = [0;0;1];
-%                 end
-%             end
-%         end
     end
 end
 
+%% 制約条件
+% 制約内の入力列を取り出す
+function ConstInput = Constraints(obj)
+%    CP(2) > -0.5  条件
+    obj.
+end

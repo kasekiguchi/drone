@@ -1,4 +1,57 @@
 % referenceを生成する関数
+
+%% Timevarying
+% param : agentの中身いじるパラメータ
+% t : reference生成時の現在時刻
+% T : time.t そのステップの現在時刻
+
+function xr = Reference(params, T, Agent)
+    % timevaryingをホライズンごとのreferenceに変換する
+    % params.dt = 0.1;
+    xr = zeros(params.total_size, params.H);    % initialize
+
+    % 時間関数の取得→時間を代入してリファレンス生成
+    RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
+    for h = 0:params.H-1
+        t = T + params.dt * h; % reference生成時の時刻をずらす
+        Ref = RefTime(t);
+        if T <= 10
+            % 追従項
+            xr(1:3, h+1) = Ref(1:3);
+            xr(7:9, h+1) = Ref(5:7);
+        else
+            % 追従項
+            xr(1:3, h+1) = [0;0;0.001];
+            xr(7:9, h+1) = [0;0;0];
+        end
+        % 抑制項
+        xr(4:6, h+1) =   [0; 0; 0];
+        xr(10:12, h+1) = [0; 0; 0];
+
+        xr(13:16, h+1) = params.ur;
+    end
+    
+    % Attitude : HLの角度
+%     start = T/params.dt + 1;
+%     fin = start + params.H-1;
+%     xr(4:6, 1:params.H) = params.qHL(start:fin, :)';
+%     xr(10:12, 1:params.H) = params.wHL(start:fin, :)';
+end
+
+%% Reference from HL
+% function xr = Reference(params, T, x)
+%     xr = zeros(params.total_size, params.H);    % initialize
+%     if T ~= 0
+%         start = round(T/params.dT);
+%         fin = start + params.H-1;
+%         xr(1:3, 1:params.H) = x(1:3,start:fin);
+%         xr(4:6, 1:params.H) = x(4:6,start:fin);
+%         xr(7:9, 1:params.H) = x(7:9,start:fin);
+%         xr(10:12, 1:params.H) = x(10:12,start:fin);
+%         xr(13:16, 1:params.H) = repmat(params.ur, 1, params.H);
+%     end
+% end
+
 %% 着陸
 % function xr = Reference(params, time)
 %     xr = zeros(params.total_size, params.H);
@@ -106,18 +159,18 @@
 % end
 
 %% 円旋回
-function xr = Reference(params, time)
-    syms t H real
-    xr = zeros(params.total_size, params.H);
-%-- flight
-    xf = cos(t * H / 5)-1;
-    yf = sin(t * H / 5);
-    xfdt = diff(xf, t);
-    yfdt = diff(yf, t);
-    for h = 1:params.H
-        xr(1:3, h) = [subs(xf, [t, H], [time.t, h]);subs(yf, [t, H], [time.t, h]);1.0];
-        xr(4:12,h) = [0;0;0;0;0;0;0;0;0];
-        xr(7:9, h) = [subs(xfdt, [t, H], [time.t, h]);subs(yfdt, [t, H], [time.t, h]);0]; % 速度
-        xr(13:16,h)= params.ur;
-    end
-end
+% function xr = Reference(params, time)
+%     syms t H real
+%     xr = zeros(params.total_size, params.H);
+% %-- flight
+%     xf = cos(t + params.dt * H);
+%     yf = sin(t + params.dt * H);
+%     xfdt = diff(xf, t);
+%     yfdt = diff(yf, t);
+%     for h = 1:params.H
+%         xr(1:3, h) = [subs(xf, [t, H], [time.t, h]);subs(yf, [t, H], [time.t, h]);1.0];
+%         xr(4:12,h) = [0;0;0;0;0;0;0;0;0];
+%         xr(7:9, h) = [subs(xfdt, [t, H], [time.t, h]);subs(yfdt, [t, H], [time.t, h]);0]; % 速度
+%         xr(13:16,h)= params.ur;
+%     end
+% end

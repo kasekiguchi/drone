@@ -37,6 +37,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     %-- 初期設定 controller.mと同期させる
     Params.H = 10;   %Params.H
     Params.dt = 0.1;  %Params.dt
+    Params.dT = dt;
     %-- 配列サイズの定義
     Params.state_size = 12;
     Params.input_size = 4;
@@ -45,7 +46,18 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
     xr0 = zeros(Params.state_size, Params.H);
 
+    % X of HL
+    load('Data/Circle_HL.mat', 'QHL','WHL','PHL','VHL');
+    Params.qHL = QHL';
+    Params.wHL = WHL';
+    Params.pHL = PHL';
+    Params.vHL = VHL';
+    X = [PHL'; QHL'; VHL'; WHL'];
+
+    data.xr{idx+1} = 0;
+
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
+    %%
 
 run("main3_loop_setup.m");
 
@@ -96,11 +108,8 @@ end
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
-            xr = Reference(Params, time);
-            xr_save(:, idx) = xr(1:3, 1); % xr: referenceの保存
-%             xr(3, end) = xr(3, end) + 0.01;
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, xr(1:3, 1), time.t};  % 目標値[x, y, z]
+            param(i).reference.point = {FH, [1;1;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -110,6 +119,11 @@ end
             end
             agent(i).do_reference(param(i).reference.list);
 
+            % timevarygin -> generated reference
+            xr = Reference(Params, time.t, agent);
+            % reference from HL
+%             xr = Reference(Params, time.t, X);
+            % controller
             param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -118,13 +132,17 @@ end
         end
 
         %-- データ保存
+            data.xr{idx} = xr;
+
             data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
             data.sigma(idx) = agent.controller.result.sigma;
             data.bestcost(idx) = agent.controller.result.bestcost;
+            
 %             data.state{idx} = state_data(:, 1, BestcostID);
 %             data.input{idx} = u;
             state_monte = agent.estimator.result.state;
             ref_monte = agent.reference.result.state;
+
             fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
@@ -180,11 +198,57 @@ end
             end
 
         end
+        fRemove = agent.controller.result.fRemove;
         if fRemove == 1
+            warning("Emergency Stop!!!")
             break
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
         totalT = totalT + calT;
+        
+        %% 逐次プロット
+        figure(10);
+        clf
+        Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
+        TvC = 0:Params.dt:te;
+        %% take off
+%         rz = 1; % 目標
+%         rz0 = 0;% スタート
+%         T = 10; % かける時間
+%         a = -2/T^3 * (rz-rz0);
+%         b = 3/T^2 * (rz-rz0);
+%         CRz = a*(TvC).^3+b*(TvC).^2+rz0;
+%         plot(Tv, xr(3, :), '-', 'LineWidth', 2);hold on;
+%         plot(TvC, CRz, '--', 'LineWidth', 1);
+%         plot(time.t, agent.estimator.result.state.p(3), 'h', 'MarkerSize', 20);
+%         hold off;
+%         legend("xr.z", "h.z", "Location", "southeast");
+
+        %% circle
+        CRx = cos(TvC/2);
+        CRy = sin(TvC/2);
+        
+%         TvC = 0:Params.dT:te-0.025;
+%         CRx = X(1, :);
+%         CRy = X(2, :);
+
+        plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
+        plot(Tv, xr(2, :), '-', 'LineWidth', 2);
+
+        plot(TvC, CRx, '--', 'LineWidth', 1);
+        plot(TvC, CRy, '--', 'LineWidth', 1);
+        plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
+        plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
+        hold off;
+        xlabel("Time [s]"); ylabel("Reference [m]");
+        legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
+%         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
+        xlim([0 te]); ylim([-inf inf+0.1]); 
+
+        fprintf("sigma: %f\n", data.sigma(idx))
+
+        %%
+        drawnow 
     end
 
 catch ME % for error
@@ -200,6 +264,13 @@ end
 %profile viewer
 %%
 close all
+
+size_best = size(data.bestcost, 2);
+Edata = logger.data(1, "p", "e")';
+
+Rdata = logger.data(1, "p", "r")';
+Diff = Edata - Rdata;
+
 % clc
 % calculate time
 fprintf("%f秒\n", totalT)
@@ -211,26 +282,27 @@ Fontsize = 15;  timeMax = te;
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
-logger.plot({1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},"fig_num",1,"row_col",[2,2])
+logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
+
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"gif", 1);
 
 %% plot reference xr_save
-size_best = size(data.bestcost, 2);
-Edata = logger.data(1, "p", "e")';
-Rdata = xr_save(:, 1:size(Edata, 2));
-Diff = Edata - Rdata;
+
 % plot(p, er)
 figure(6); 
+Rdata = X(1:3, 1:size(Edata, 2));
 plot(logger.data('t', [], [])', Edata, '-', logger.data('t', [], [])', Rdata, '--', 'LineWidth', 2)
 legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",'Location','northwest');
 set(gca,'FontSize',15);  grid on; title(""); ylabel("Est, Ref [m]"); xlabel("time [s]"); xlim([0 te])
 % plot(p, diff)
-figure(7);
-plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-legend("x.diff", "y.diff", "z.diff", 'Location', 'southeast');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 te])
+
+%% Difference of Pos
+% figure(7);
+% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 te])
 %%
 % logger.save();

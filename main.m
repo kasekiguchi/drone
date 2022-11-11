@@ -171,3 +171,7 @@ agent(1).reference.timeVarying.show(logger)
 agent(1).animation(logger,"target",1);
 %%
 % logger.save();
+QHL = logger.data(1,"q","p");
+WHL = logger.data(1,"w","p");
+PHL = logger.data(1,"p","e");
+VHL = logger.data(1,"v","e");
