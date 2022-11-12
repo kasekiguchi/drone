@@ -267,15 +267,10 @@ close all
 
 size_best = size(data.bestcost, 2);
 Edata = logger.data(1, "p", "e")';
-
 Rdata = logger.data(1, "p", "r")';
 Diff = Edata - Rdata;
 
-% clc
-% calculate time
 fprintf("%f秒\n", totalT)
-% plot p:position, e:estimate, r:reference, 
-% figure(1)
 Fontsize = 15;  timeMax = te;
 % logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
@@ -284,25 +279,15 @@ Fontsize = 15;  timeMax = te;
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
+%% Difference of Pos
+figure(7);
+plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1);
-% agent(1).animation(logger,"gif", 1);
 
-%% plot reference xr_save
-
-% plot(p, er)
-figure(6); 
-Rdata = X(1:3, 1:size(Edata, 2));
-plot(logger.data('t', [], [])', Edata, '-', logger.data('t', [], [])', Rdata, '--', 'LineWidth', 2)
-legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",'Location','northwest');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Est, Ref [m]"); xlabel("time [s]"); xlim([0 te])
-% plot(p, diff)
-
-%% Difference of Pos
-% figure(7);
-% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
-% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 te])
 %%
 % logger.save();

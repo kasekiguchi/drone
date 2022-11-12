@@ -85,8 +85,8 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i
     %-- sample 通さずに実行
-    agent(i).set_property("controller",struct("type","MCMPC_controller","name","mcmpc","param",{agent(i)}));
-%     agent(i).set_property("controller",Controller_MCMPC(dt)); % sampleを通す方
+%     agent(i).set_property("controller",struct("type","MCMPC_controller","name","mcmpc","param",{agent(i)}));
+    agent(i).set_property("controller",Controller_MCMPC(dt)); % sampleを通す方
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-1*diag([1,1,3]),"D",-1*diag([1,1,3]))));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %% 必要か？実験で確認 : TODO

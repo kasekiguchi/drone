@@ -14,35 +14,18 @@ classdef MCMPC_controller <CONTROLLER_CLASS
     end
     
     methods
-        function obj = MCMPC_controller(self, ~)
+        function obj = MCMPC_controller(self, param)
             %-- 変数定義
-            obj.self = self;
+            obj.self = self; 
             %---MPCパラメータ設定---%
-            obj.param.H  = 10;                % モデル予測制御のホライゾン
-            obj.param.dt = 0.1;              % モデル予測制御の刻み時間
-            obj.param.particle_num = 200;
+            obj.param = param;
             obj.param.subCheck = zeros(obj.param.particle_num, 1);
             obj.param.fRemove = 0;
-            %重み%
-            %% 離陸
-%             obj.param.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
-%             obj.param.V = diag([1.0; 1.0; 1.0]);    % 速度
-%             obj.param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-%             obj.param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-%             obj.param.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
-
-            %% 円旋回
-            obj.param.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
-            obj.param.V = diag([100.0; 100.0; 1.0]);    % 速度
-            obj.param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-            obj.param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-            obj.param.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
-
             %%
-            obj.input.Initsigma = 0.01;
+            obj.input.Initsigma = param.Initsigma;
             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
-            obj.input.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
-            obj.input.ref_v = [0; 0; 0.50];
+            obj.input.ref_input = param.ref_input;
+%             obj.input.ref_v = [0; 0; 0.50];
             obj.model = self.model;
             %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
             obj.state.p_data = zeros(obj.param.H, obj.param.particle_num);
@@ -54,8 +37,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
             obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data];  
-
-            obj.param.fRemove = 0;
         end
         
         %-- main()的な
@@ -106,8 +87,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             end
             
             %-- 制約条件
-            ConstInput = Constraints();
-
+            % 制約条件外なら棄却
+%             obj.state.predict_state(obj.state.predict_state(2, :) <= -0.5, :) = NaN;
 
             %-- 評価値計算
             for m = 1:obj.input.u_size
@@ -198,11 +179,4 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 + terminalState;
         end
     end
-end
-
-%% 制約条件
-% 制約内の入力列を取り出す
-function ConstInput = Constraints(obj)
-%    CP(2) > -0.5  条件
-    obj.
 end

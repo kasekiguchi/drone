@@ -1,5 +1,37 @@
 % referenceを生成する関数
 
+%% Timevarying　着陸含む
+% param : agentの中身いじるパラメータ
+% t : reference生成時の現在時刻
+% T : time.t そのステップの現在時刻
+
+% function xr = Reference(params, T, Agent)
+%     % timevaryingをホライズンごとのreferenceに変換する
+%     % params.dt = 0.1;
+%     xr = zeros(params.total_size, params.H);    % initialize
+% 
+%     % 時間関数の取得→時間を代入してリファレンス生成
+%     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
+%     for h = 0:params.H-1
+%         t = T + params.dt * h; % reference生成時の時刻をずらす
+%         Ref = RefTime(t);
+%         if T <= 10
+%             % 追従項
+%             xr(1:3, h+1) = Ref(1:3);
+%             xr(7:9, h+1) = Ref(5:7);
+%         else
+%             % 追従項
+%             xr(1:3, h+1) = [0;0;0.001];
+%             xr(7:9, h+1) = [0;0;0];
+%         end
+%         % 抑制項
+%         xr(4:6, h+1) =   [0; 0; 0];
+%         xr(10:12, h+1) = [0; 0; 0];
+% 
+%         xr(13:16, h+1) = params.ur;
+%     end
+% end
+
 %% Timevarying
 % param : agentの中身いじるパラメータ
 % t : reference生成時の現在時刻
@@ -15,27 +47,15 @@ function xr = Reference(params, T, Agent)
     for h = 0:params.H-1
         t = T + params.dt * h; % reference生成時の時刻をずらす
         Ref = RefTime(t);
-        if T <= 10
-            % 追従項
-            xr(1:3, h+1) = Ref(1:3);
-            xr(7:9, h+1) = Ref(5:7);
-        else
-            % 追従項
-            xr(1:3, h+1) = [0;0;0.001];
-            xr(7:9, h+1) = [0;0;0];
-        end
+        % 追従項
+        xr(1:3, h+1) = Ref(1:3);
+        xr(7:9, h+1) = Ref(5:7);
         % 抑制項
         xr(4:6, h+1) =   [0; 0; 0];
         xr(10:12, h+1) = [0; 0; 0];
 
         xr(13:16, h+1) = params.ur;
     end
-    
-    % Attitude : HLの角度
-%     start = T/params.dt + 1;
-%     fin = start + params.H-1;
-%     xr(4:6, 1:params.H) = params.qHL(start:fin, :)';
-%     xr(10:12, 1:params.H) = params.wHL(start:fin, :)';
 end
 
 %% Reference from HL
