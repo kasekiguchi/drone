@@ -225,9 +225,9 @@ end
 %         legend("xr.z", "h.z", "Location", "southeast");
 
         %% circle
-        CRx = cos(TvC/2);
-        CRy = sin(TvC/2);
-        
+        CRx = cos(TvC);
+        CRy = sin(TvC);
+%         
 %         TvC = 0:Params.dT:te-0.025;
 %         CRx = X(1, :);
 %         CRy = X(2, :);

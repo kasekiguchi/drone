@@ -5,7 +5,7 @@ function Controller = Controller_MCMPC(~)
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
     Controller_param.particle_num = 200;
-    Controller_param.Initsigma = 0.05;
+    Controller_param.Initsigma = 0.1;
     Controller_param.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
 
     %% 離陸

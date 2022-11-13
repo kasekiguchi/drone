@@ -22,7 +22,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- MPC関連 変数定義 
     Params.H = 5;  % 10
-    Params.dt = 0.1;
+    Params.dt = 0.25;
     idx = 0;
     totalT = 0;
     
@@ -43,10 +43,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     %% 円旋回
-    Params.Weight.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
-    Params.Weight.V = diag([100.0; 100.0; 1.0]);    % 速度
+    Params.Weight.P = diag([10.0; 10.0; 1000.0]);    % 座標   1000 1000 100
+    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+    Params.Weight.RP = 100*diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
     Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
     
 %-- data
@@ -69,7 +69,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     options = optimoptions(options,'Diagnostics','off');
 %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
     options = optimoptions(options,'MaxIterations',         1.e+9);     % 最大反復回数
-    options = optimoptions(options,'ConstraintTolerance',1.e-9);%制約違反に対する許容誤差
+    options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
     
     %-- fmincon設定
     options.Algorithm = 'sqp';  % 逐次二次計画法
@@ -81,6 +81,9 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
 
     xr = zeros(Params.state_size+Params.input_size, Params.H);
+
+    %-- パラメータ確認
+    Params
     
 run("main3_loop_setup.m");
 
