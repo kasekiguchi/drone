@@ -93,14 +93,18 @@ try
             if fExp ~=1 %シミュレーションのみ
                 if time.t<=5
                     FH.CurrentCharacter = 't';
-                else
+                elseif time.t < 8
                     FH.CurrentCharacter = 'f';%phaseをいじれる
+                elseif time.t < 11
+                    FH.CurrentCharacter = 'g';%phaseをいじれる
+                else
+                    FH.CurrentCharacter = 'h';%phaseをいじれる
                 end
             end
             param(i).reference.covering = [];
 
-            param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);0.4], time.t,dt};%reference.pointの目標位置を指定できる
-
+            %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
+            param(i).reference.point = {FH, [1;1.25;1], time.t,dt};%reference.pointの目標位置を指定できる
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
