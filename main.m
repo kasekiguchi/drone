@@ -104,7 +104,7 @@ try
             param(i).reference.covering = [];
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
-            param(i).reference.point = {FH, [1;1.25;1], time.t,dt};%reference.pointの目標位置を指定できる
+            param(i).reference.point = {FH, [1;1.25;2.4], time.t,dt};%reference.pointの目標位置を指定できる
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};

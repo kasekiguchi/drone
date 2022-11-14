@@ -40,11 +40,11 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,2-obj.base_state(3),15,Param{3}-obj.base_time);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,2.4-obj.base_state(3),8,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
-                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,2-obj.base_state(3),15,0);
+                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,2.4-obj.base_state(3),8,0);
                 end
                 obj.flag='t';
                 
@@ -59,15 +59,14 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                     obj.result.state.p = Param{2};
                 end
             elseif strcmp(cha,'h') % flight phase
+                if strcmp(obj.flag,'h')
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,3-obj.base_state(3),4,Param{3}-obj.base_time);
+                else % 初めてtake off に入ったとき
+                    obj.base_time=Param{3};
+                    obj.base_state=obj.self.estimator.result.state.p;
+                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,3-obj.base_state(3),4,0);
+                end
                 obj.flag='h';
-                if nargin==3 % 他のreference objでの参照値がある場合
-                    Param{2} = result.state;
-                end
-                if strcmp(class(Param{2}),"STATE_CLASS")
-                    state_copy(Param{2},obj.result.state);
-                else
-                    obj.result.state.p = [2;2.5;1.5];
-                end
             elseif strcmp(cha,'g') % flight phase
                 obj.flag='g';
                 if nargin==3 % 他のreference objでの参照値がある場合
@@ -76,7 +75,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 if strcmp(class(Param{2}),"STATE_CLASS")
                     state_copy(Param{2},obj.result.state);
                 else
-                    obj.result.state.p = [2;2.5;1];
+                    obj.result.state.p = [2;2.5;2.4];
                 end
             else
                 obj.result.state.p = obj.base_state;
