@@ -20,6 +20,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         pubTopicNum
         pubTopic
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
+        pubMsg
 %         pubMsg  % 送信msg
     end
 
@@ -32,10 +33,12 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         function obj = ROS2_CONNECTOR(info)
             disp('Preparing connection to robot operating system...');
             %-- Configulations for ROS
+            setenv("ROS_DOMAIN_ID","30");
             obj.subTopic = info.subTopic;
             obj.subName = info.subTopicName;
             obj.subTopicNum = length(obj.subTopic);
             obj.subMsg = info.subMsgName;
+            obj.pubMsg = info.pubMsgName
             if isfield(info,'pubTopic')
                 obj.pubTopic = info.pubTopic;
                 obj.pubName = info.pubTopicName;
@@ -54,7 +57,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum 
-                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{1,i});
+                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1},obj.pubMsg{i,1});
                 end
             end
         end
@@ -68,7 +71,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                obj.result = receive(obj.subscriber.subtopic,10);
+                obj.result = receive(obj.subscriber.subtopic(i),10);
             end
             ret = obj.result;
         end
@@ -82,12 +85,12 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             if isstruct(msg)
                 for i = 1:obj.pubTopicNum
                     
-                    send(obj.publisher.pubTopic, msg);
+                    send(obj.publisher.pubTopic(i), msg);
                 end
             else
                 for i = 1:obj.pubTopicNum
                     
-                    send(obj.publisher.pubTopic, msg);
+                    send(obj.publisher.pubTopic(i), msg);
                 end
             end
         end
