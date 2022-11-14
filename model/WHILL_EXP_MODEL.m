@@ -43,11 +43,11 @@ methods
                 %cmdout2 = cmdout(ipp(1) + 8:ipp(1) + 11);
                 %param.ROSHostIP = strcat('192.168.50', '.', string(100 + obj.IP));
                 param.DomainID = obj.IP;
-                param.subTopicName = {'/odom', ...
-                                '/scan'};
+                param.subTopicName = {'/odom'};
+%                 param.subTopicName = {'/cmd_vel'};
                 param.pubTopicName = {'/cmd_vel'};
-                param.subMsgName = {'nav_msgs/Odometry', ...
-                                'sensor_msgs/LaserScan'};
+                param.subMsgName = {'nav_msgs/Odometry'};
+%                 param.subMsgName = {'geometry_msgs/Twist'};
                 param.pubMsgName = {'geometry_msgs/Twist'};
                 subnum = length(param.subTopicName);
                 pubnum = length(param.pubTopicName);
@@ -61,6 +61,8 @@ methods
                 end
 
                 obj.connector = ROS2_CONNECTOR(param);
+%                 odom_sub = ros2subscriber(param.subTopic(1),"/odom");
+%                 receive(odom_sub,2);
                 fprintf("Whill %d is ready\n", obj.IP);
         end
 
@@ -117,7 +119,12 @@ function do(obj, u, varargin)
 
         else % 緊急時
             obj.msg.linear.x = 0.0;
+            obj.msg.linear.y = 0.0;
+            obj.msg.linear.z = 0.0;
+            obj.msg.angular.x = 0.0;
+            obj.msg.angular.y = 0.0;
             obj.msg.angular.z = 0.0;
+            obj.connector.sendData(obj.msg);
             return;
         end
 

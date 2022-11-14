@@ -199,8 +199,6 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             end
             obj.PreTrack = ref(:,1);
             obj.result.PreTrack = ref(:,1);
-%             obj.PreTrack = [0;0;0;0];
-%             obj.result.PreTrack = [0;0;0;0];
             if isempty(obj.O)
                 obj.result.O = pe;
             else
@@ -297,8 +295,8 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 xlim([xmin-5, xmax+5]);
                 ylim([ymin-5,ymax+5]);
             else
-                xlim([estate(1)-10, estate(1)+10]);
-                ylim([estate(2)-10,estate(2)+10]);
+                xlim([estate(1)-7, estate(1)+7]);
+                ylim([estate(2)-5,estate(2)+5]);
             end
             xlabel("$x$ [m]","Interpreter","latex");
             ylabel("$y$ [m]","Interpreter","latex");

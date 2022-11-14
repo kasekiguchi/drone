@@ -25,7 +25,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(22_Nov_9).mat", ["sensor", "estimator"]);
+  logger = LOGGER("Data/Log(22_Nov_11_6).mat", ["sensor","input"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
