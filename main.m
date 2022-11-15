@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1; % 1: experiment   0: numerical simulation
+fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
@@ -190,8 +190,8 @@ logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", "e"}, "fi
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+% VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+% agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lrf"]);
 %%
 logger.save();
