@@ -43,11 +43,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     %% 円旋回
-    Params.Weight.P = diag([10.0; 10.0; 1000.0]);    % 座標   1000 1000 100
-    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
+    Params.Weight.P = diag([100.0; 100.0; 1000.0]);    % 座標   1000 1000 100
+    Params.Weight.V = diag([100.0; 100.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = 100*diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
     
 %-- data
     data.bestcost(idx+1) = 0;           % - もっともよい評価値
@@ -180,7 +180,7 @@ end
             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);          % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem);
             % 制御入力の決定
-            previous_state = var   % 初期値の書き換え
+            previous_state = var;   % 初期値の書き換え
             fprintf("\tfval : %f\n", fval)
         %TODO: 1列目のvarが一切変動しない問題に対処
             if var(Params.state_size+1:Params.total_size, end) > 1.0
