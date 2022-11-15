@@ -91,11 +91,11 @@ try
 
             % reference 
             if fExp ~=1 %シミュレーションのみ
-                if time.t<=5
+                if time.t<=8
                     FH.CurrentCharacter = 't';
-                elseif time.t < 8
+                elseif time.t < 10
                     FH.CurrentCharacter = 'f';%phaseをいじれる
-                elseif time.t < 11
+                elseif time.t < 13
                     FH.CurrentCharacter = 'g';%phaseをいじれる
                 else
                     FH.CurrentCharacter = 'h';%phaseをいじれる
@@ -104,7 +104,7 @@ try
             param(i).reference.covering = [];
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
-            param(i).reference.point = {FH, [1;1.25;2.4], time.t,dt};%reference.pointの目標位置を指定できる
+            param(i).reference.point = {FH, [1.15;1.25;2.4], time.t,dt};%reference.pointの目標位置を指定できる
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -114,6 +114,7 @@ try
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
             agent(i).do_reference(param(i).reference.list);
+            
 
             if (fOffline); logger.overwrite("reference",time.t,agent,i);end
 
