@@ -75,7 +75,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             x = 0;
             y = 0;
 
-            ref = zeros(4,obj.Horizon);%set data size[x ;y ;theta;v]
+            ref = zeros(3,obj.Horizon);%set data size[x ;y ;theta;v]
 
             del = -[a.*c,b.*c]./(a.^2+b.^2); % 垂線の足
 
@@ -193,11 +193,11 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             obj.result.state.set_state("xd",ref);%treat as a colmn vector
             obj.result.state.set_state("p",ref);%treat as a colmn vector
             obj.result.state.set_state("q",ref(3,1));%treat as a colmn vector
-            obj.result.state.set_state("v",ref(4,1));%treat as a colmn vector
-            if vecnorm(obj.result.PreTrack - ref(:,1))>3
+%             obj.result.state.set_state("v",ref(4,1));%treat as a colmn vector
+            if vecnorm(obj.result.PreTrack - ref(1:3,1))>3
                 obj.O;
             end
-            obj.PreTrack = ref(:,1);
+            obj.PreTrack = ref(1:3,1);
             obj.result.PreTrack = ref(:,1);
             if isempty(obj.O)
                 obj.result.O = pe;

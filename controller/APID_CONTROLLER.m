@@ -47,12 +47,9 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
              
 
             obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
-%             obj.result.input = [0;0];
-            obj.self.input = obj.result.input;
-%             obj.self.input = [0;0];
 
+            obj.self.input = obj.result.input;
             u = obj.result;
-%             u = [0;0];
             obj.ei = obj.ei + obj.e*obj.dt;
         end
         function show(obj)
