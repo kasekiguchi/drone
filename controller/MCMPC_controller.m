@@ -115,17 +115,19 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
             else
 %                 obj.result.input = obj.self.input;
-                ConstInput1 = obj.input.sigma.*randn() + obj.param.ref_input(1);
-                ConstInput2 = obj.input.sigma.*randn() + obj.param.ref_input(2);
-                ConstInput3 = obj.input.sigma.*randn() + obj.param.ref_input(3);
-                ConstInput4 = obj.input.sigma.*randn() + obj.param.ref_input(4);
-                obj.result.input = [ConstInput1; ConstInput2; ConstInput3; ConstInput4];
+%                 ConstInput1 = obj.input.sigma.*randn() + obj.param.ref_input(1);
+%                 ConstInput2 = obj.input.sigma.*randn() + obj.param.ref_input(2);
+%                 ConstInput3 = obj.input.sigma.*randn() + obj.param.ref_input(3);
+%                 ConstInput4 = obj.input.sigma.*randn() + obj.param.ref_input(4);
+%                 obj.result.input = [ConstInput1; ConstInput2; ConstInput3; ConstInput4];
+                obj.result.input = obj.self.input;
                 obj.input.nextsigma = obj.input.Constsigma;
             end
             obj.result.removeF = removeF;
             
             obj.self.input = obj.result.input;
             obj.result.fRemove = obj.param.fRemove;
+            obj.result.path = obj.state.state_data;
             obj.result.sigma = obj.input.nextsigma;
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.bestcost = Bestcost;
@@ -138,7 +140,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function [removeF] = constraints(obj)
 %             NP = obj.param.particle_num;
             % 状態制約
-            removeFe = (obj.state.state_data(2, 1, :) >= 0.2);
+            removeFe = (obj.state.state_data(2, 1, :) <= -0.5);
             % 棄却するサンプル番号を算出
             removeX = find(removeFe);
 %             Fe_size = size(removeFe_check);

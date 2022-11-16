@@ -20,14 +20,14 @@ syms t real
 % y = 0;
 
 %% circle
-% x = cos(t/2);
-% y = sin(t/2);
-% z = 1;
+x = cos(t/2);
+y = sin(t/2);
+z = 1;
 
-%% risa-ju
-x = 5*cos(2*t/3) + 2*cos(t)-7;
-y = -5*sin(2*t/3) + 2*sin(t);
-z = 1.0;
+%% star
+% x = 5*cos(2*t/3) + 2*cos(t)-7;
+% y = -5*sin(2*t/3) + 2*sin(t);
+% z = 1.0;
 
 %% landing
 % T = 10;  % Time

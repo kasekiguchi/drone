@@ -54,7 +54,12 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.vHL = VHL';
     X = [PHL'; QHL'; VHL'; WHL'];
 
+    % データ保存初期化
     data.xr{idx+1} = 0;
+    data.path{idx+1} = 0;
+    data.pathJ{idx+1} = 0;
+    data.sigma(idx+1) = 0;
+    data.bestcost(idx+1) = 0;
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
     %%
@@ -133,7 +138,7 @@ end
 
         %-- データ保存
             data.xr{idx} = xr;
-
+            data.path{idx} = agent.controller.result.path;
             data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
             data.sigma(idx) = agent.controller.result.sigma;
             data.bestcost(idx) = agent.controller.result.bestcost;
@@ -212,10 +217,10 @@ end
         totalT = totalT + calT;
         
         %% 逐次プロット
-%         figure(10);
-%         clf
-%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-%         TvC = 0:Params.dt:te;
+        figure(10);
+        clf
+        Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
+        TvC = 0:Params.dt:te;
         %% take off
 %         rz = 1; % 目標
 %         rz0 = 0;% スタート
@@ -230,30 +235,30 @@ end
 %         legend("xr.z", "h.z", "Location", "southeast");
 
         %% circle
-%         CRx = cos(TvC/2);
-%         CRy = sin(TvC/2);
-% %         
-% %         TvC = 0:Params.dT:te-0.025;
-% %         CRx = X(1, :);
-% %         CRy = X(2, :);
-% 
-%         plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
-%         plot(Tv, xr(2, :), '-', 'LineWidth', 2);
-% 
-%         plot(TvC, CRx, '--', 'LineWidth', 1);
-%         plot(TvC, CRy, '--', 'LineWidth', 1);
-%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-%         hold off;
-%         xlabel("Time [s]"); ylabel("Reference [m]");
-%         legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
-% %         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
-%         xlim([0 te]); ylim([-inf inf+0.1]); 
-% 
-%         fprintf("sigma: %f\n", data.sigma(idx))
+        CRx = cos(TvC/2);
+        CRy = sin(TvC/2);
+%         
+%         TvC = 0:Params.dT:te-0.025;
+%         CRx = X(1, :);
+%         CRy = X(2, :);
+
+        plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
+        plot(Tv, xr(2, :), '-', 'LineWidth', 2);
+
+        plot(TvC, CRx, '--', 'LineWidth', 1);
+        plot(TvC, CRy, '--', 'LineWidth', 1);
+        plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
+        plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
+        hold off;
+        xlabel("Time [s]"); ylabel("Reference [m]");
+        legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
+%         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
+        xlim([0 te]); ylim([-inf inf+0.1]); 
+
+        fprintf("sigma: %f\n", data.sigma(idx))
 
         %%
-%         drawnow 
+        drawnow 
     end
 
 catch ME % for error
@@ -277,12 +282,12 @@ Diff = Edata - Rdata;
 
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
-% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
-logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
+% logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
 %% Difference of Pos
 figure(7);
