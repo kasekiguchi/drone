@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 %% general setting
 N = 2; % number of total units
-Nb = 3; % number of birds
+Nb = 5; % number of birds
 fExp = 0 % 実機フラグ
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
@@ -18,6 +18,7 @@ run("main1_bird_setting.m");
 run("main1_setting.m");
 run("main2_bird_setup.m");
 run("main2_agent_setup.m");
+run("main2_bird_setup2.m");
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -71,7 +72,7 @@ run("main3_loop_setup.m");
             param_bird(i).sensor.imu = {[]};
             param_bird(i).sensor.direct = {};
             param_bird(i).sensor.bounding = {time};
-            param_bird(i).sensor.rcoverage_3D = {N,Nb};
+            param_bird(i).sensor.rcoverage_bird_3D = {N,Nb};
             param_bird(i).sensor.rdensity = {Env};
             param_bird(i).sensor.lrf = Env;
             for j = 1:length(bird(i).sensor.name)
@@ -226,5 +227,5 @@ clc
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger,"target",1:N,"Motive_ref",1);
-bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",1);
+bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",0);
 % agent(1).sensor.bounding.movie(logger);

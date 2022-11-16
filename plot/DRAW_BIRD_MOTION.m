@@ -52,7 +52,7 @@ classdef DRAW_BIRD_MOTION
             zlabel(ax,"z [m]");
             obj.fig = figure(param.fig_num);
 
-            view(3)
+            view(40,20)
             grid on
             daspect([1 1 1]);
             hold on
@@ -187,6 +187,7 @@ classdef DRAW_BIRD_MOTION
             q_b = reshape(q_b,size(q_b,1),size(q_b,2)/length(param.bird),length(param.bird));
             u_b = reshape(u_b,size(u_b,1),4,length(param.bird));
             r_b = reshape(r_b,size(r_b,1),3,length(param.bird));
+            farm = logger_bird.Data.agent(1).reference.result{1}.farm;
             for n = 1:length(param.drone)
                 switch size(q(:,:,n),2)
                     case 3
@@ -243,10 +244,10 @@ classdef DRAW_BIRD_MOTION
             tRealtime = tic;
             if param.Motive_ref
                 for n = 1:length(param.drone)
-                    f(n) = animatedline('Color','r','MaximumNumPoints',15); % 目標軌道の描画点の制限
+                    f(n) = animatedline('Color','r','MaximumNumPoints',15); % ドローンの目標軌道の描画点の制限
                 end
                 for n = 1:length(param.bird)
-                    f_b(n) = animatedline('Color','none','MaximumNumPoints',15); % 目標軌道の描画点の制限
+                    f_b(n) = animatedline('Color','none','MaximumNumPoints',15); % 鳥の目標軌道の描画点の制限
                 end
             end
             for i = 1:length(t)-1
@@ -262,6 +263,7 @@ classdef DRAW_BIRD_MOTION
                     for n = 1:length(param.bird)
                         addpoints(f_b(n),r_b(i,1,n),r_b(i,2,n),r_b(i,3,n));
                         obj.draw(obj.frame_bird(param.bird(n)),obj.thrust_bird(param.bird(n),:),p_b(i,:,n),Q_b(i,:,n),u_b(i,:,n));
+                        plot3(farm(1),farm(2),farm(3),'bs','MarkerFaceColor','b');
                     end
                 else
                     for n = 1:length(param.drone)
