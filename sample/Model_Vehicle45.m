@@ -19,12 +19,20 @@ Model.type="VEHICLE_MODEL"; % class name
 % Setting.num_list = [2,1,1,1];
 %---------------------------%
 %---入力がaとomegaのモデル---%
-Model.name="vehicle4"; % print name
-Setting.dim=[4,2,0];
-Setting.input_channel= ["a","w"];
-Setting.method = "vehicle_accel_omega_input_model"; % model dynamicsの実体名
-Setting.state_list =  ["p","q",'v'];
-Setting.num_list = [2,1,1];
+% Model.name="vehicle4"; % print name
+% Setting.dim=[4,2,0];
+% Setting.input_channel= ["a","w"];
+% Setting.method = "vehicle_accel_omega_input_model"; % model dynamicsの実体名
+% Setting.state_list =  ["p","q",'v'];
+% Setting.num_list = [2,1,1];
+%---------------------------%
+%---入力がvとomegaのモデル---%
+Model.name="vehicle3"; % print name
+Setting.dim=[3,2,0];
+Setting.input_channel= ["v","w"];
+Setting.method = "vehicle_velocity_omega_input_model"; % model dynamicsの実体名
+Setting.state_list =  ["p","q"];
+Setting.num_list = [2,1];
 %---------------------------%
 Setting.initial = initial;
 Setting.dt = dt;
