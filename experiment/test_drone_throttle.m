@@ -21,7 +21,7 @@ agent.plant.connector.sendData(gen_msg([500,500,0,500,1000,0,0,0]));% arming
 pause(5);
 %%
 try
-for i = 0:5:throttle
+for i = 0:10:throttle
     t = 0;
     Timer = tic;
     
