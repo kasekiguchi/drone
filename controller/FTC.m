@@ -195,7 +195,7 @@ methods
         %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
         %
         %% 外乱(加速度で与える)
-%                     dst = -1;
+                    dst = 0;
         %             if t>=1
         %                 dst=0;
         %             end
@@ -211,11 +211,11 @@ methods
 %                             dst=-3;
 %                     end
         %特定の位置で外乱を与える
-                    dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
-                    xxx=model.state.p(1)-xxx0;
-                    if xxx>=0 && xxx<=TT
-                            dst=-5*sin(2*pi*xxx/(TT*2));
-                    end
+%                     dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
+%                     xxx=model.state.p(1)-xxx0;
+%                     if xxx>=0 && xxx<=TT
+%                             dst=-5*sin(2*pi*xxx/(TT*2));
+%                     end
         %%
         vs = [ux, uy, upsi];
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs', P);

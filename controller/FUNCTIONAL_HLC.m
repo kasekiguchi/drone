@@ -64,18 +64,18 @@ methods
         %%
 %         dst=-1;
 %         t = param{1};
-%         dst = 0;
+        dst = 0;
 %                     if t>=10 && t<=10.5
 %                             dst=-3;
 %                     end
         
 % dst=-1*sin(2*pi*t/1);
  %特定の位置で外乱を与える
-                    dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
-                    xxx=model.state.p(1)-xxx0;
-                    if xxx>=0 && xxx<=TT
-                            dst=-5*sin(2*pi*xxx/(TT*2));
-                    end
+%                     dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
+%                     xxx=model.state.p(1)-xxx0;
+%                     if xxx>=0 && xxx<=TT
+%                             dst=-5*sin(2*pi*xxx/(TT*2));
+%                     end
         %% calc actual input
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4);dst];
