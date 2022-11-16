@@ -57,7 +57,7 @@ for i = 1:N
         initial_state(i).p = [0;0];%[92;1];%
         initial_state(i).q = 0;%pi/2-0.05;
         initial_state(i).v = 0;
-        agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",30),VEHICLE_PARAM("VEHICLE4")); % for exp % 機体番号（ESPrのIP）
+        agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",30),VEHICLE_PARAM("VEHICLE3")); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0];
 %         agent(i).input = [0; 0; 0; 0];
     else
