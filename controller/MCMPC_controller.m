@@ -16,15 +16,17 @@ classdef MCMPC_controller <CONTROLLER_CLASS
     methods
         function obj = MCMPC_controller(self, param)
             %-- 変数定義
-            obj.self = self; 
+            obj.self = self;
             %---MPCパラメータ設定---%
             obj.param = param;
             obj.param.subCheck = zeros(obj.param.particle_num, 1);
             obj.param.fRemove = 0;
+
             %%
             obj.input.Initsigma = param.Initsigma;
+            obj.input.Constsigma = param.Constsigma;
             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
-            obj.input.ref_input = param.ref_input;
+%             obj.input.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
 %             obj.input.ref_v = [0; 0; 0.50];
             obj.model = self.model;
             %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
@@ -37,6 +39,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
             obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data];  
+
+            obj.param.fRemove = 0;
         end
         
         %-- main()的な
@@ -86,29 +90,40 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 obj.param.fRemove = 1;
             end
             
-            %-- 制約条件
-            % 制約条件外なら棄却
-%             obj.state.predict_state(obj.state.predict_state(2, :) <= -0.5, :) = NaN;
-
             %-- 評価値計算
             for m = 1:obj.input.u_size
                 obj.input.eval = obj.objective(m);
                 obj.input.Evaluationtra(1,m) = obj.input.eval;
             end
             [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-            %-- 入力への代入
-            obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
-            %-- resampling
-            %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
-            if idx == 1 || idx == 2 % - 最初は全時刻の評価値がないから現時刻/現時刻にしてる
-                obj.input.Bestcost_pre = Bestcost;
-                obj.input.Bestcost_now = Bestcost;
-            else
-                obj.input.Bestcost_pre = obj.input.Bestcost_now;
-                obj.input.Bestcost_now = Bestcost;
-            end
+
+            %-- 制約条件
+%             [removeF] = obj.constraints();
+            removeF = 1;
             
-            obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
+            if removeF ~= 0
+                obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
+                %-- resampling
+                %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
+                if idx == 1 || idx == 2 % - 最初は全時刻の評価値がないから現時刻/現時刻にしてる
+                    obj.input.Bestcost_pre = Bestcost;
+                    obj.input.Bestcost_now = Bestcost;
+                else
+                    obj.input.Bestcost_pre = obj.input.Bestcost_now;
+                    obj.input.Bestcost_now = Bestcost;
+                end
+                obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
+            else
+%                 obj.result.input = obj.self.input;
+                ConstInput1 = obj.input.sigma.*randn() + obj.param.ref_input(1);
+                ConstInput2 = obj.input.sigma.*randn() + obj.param.ref_input(2);
+                ConstInput3 = obj.input.sigma.*randn() + obj.param.ref_input(3);
+                ConstInput4 = obj.input.sigma.*randn() + obj.param.ref_input(4);
+                obj.result.input = [ConstInput1; ConstInput2; ConstInput3; ConstInput4];
+                obj.input.nextsigma = obj.input.Constsigma;
+            end
+            obj.result.removeF = removeF;
+            
             obj.self.input = obj.result.input;
             obj.result.fRemove = obj.param.fRemove;
             obj.result.sigma = obj.input.nextsigma;
@@ -118,6 +133,24 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         end
         function show(obj)
             obj.result
+        end
+
+        function [removeF] = constraints(obj)
+%             NP = obj.param.particle_num;
+            % 状態制約
+            removeFe = (obj.state.state_data(2, 1, :) >= 0.2);
+            % 棄却するサンプル番号を算出
+            removeX = find(removeFe);
+%             Fe_size = size(removeFe_check);
+            % サンプル番号の重なりをなくす
+%             removeX = unique(removeFe_check);
+            % 制約違反の入力サンプル(入力列)を棄却
+            obj.input.u(:,:,removeX) = NaN;
+            obj.state.state_data(:, :, removeX) = NaN;
+            % 全制約違反による分散リセットを確認するフラグ  
+%             if isnan(obj.input.u(:, :, removeX)); obj.input.u(:, :, removeX) = []; end
+%             if isnan(obj.state.state_data(:, :, removeX)); obj.state.state_data(:, :, removeX) = []; end
+            removeF = obj.param.particle_num - size(removeX, 1); % 0 -> 全棄却
         end
 
         function [predict_state, subCheck] = predict(obj)
@@ -130,13 +163,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                     [~,tmpx]=obj.self.model.solver(@(t,x) obj.self.model.method(x, obj.input.u(:, h, m),obj.self.parameter.get()),[ts ts+obj.param.dt],x0);
                     x0 = tmpx(end, :);
                     obj.state.state_data(:, h+1, m) = x0;
-
-                    %##########2022/10/21#####################
-%                     if x0(3) < 0.05
-%                         obj.param.subCheck(m) = 1;    % 制約外なら flag = 1
-%                         break;              % ホライズン途中でも制約外で終了
-%                     end
-                    %#########################################
                 end
             end
             predict_state = obj.state.state_data;
@@ -145,12 +171,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function [MCeval] = objective(obj, m)   % obj.~とする
             X = obj.state.state_data;       %12 * 10
             U = obj.input.u(:,:,m);         %12 * 10
-            
-            %-- 状態および入力に対する目標状態や目標入力との誤差計算
-%             tildeXp = X(1:3,:,m) - obj.state.ref(1:3, :);  % 位置   agent.refenrece.result.state.p
-%             tildeXv = X(7:9,:,m) - obj.input.ref_v;                           % 速度
-%             tildeXq = X(4:6,:,m);
-%             tildeXw = X(10:12,:,m); 
 
             %% xr
             tildeXp = X(1:3,:,m) - obj.state.ref(1:3, :);  % 位置   agent.refenrece.result.state.p
@@ -180,3 +200,4 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         end
     end
 end
+

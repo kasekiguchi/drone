@@ -137,6 +137,11 @@ end
             data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
             data.sigma(idx) = agent.controller.result.sigma;
             data.bestcost(idx) = agent.controller.result.bestcost;
+
+            removeF = agent.controller.result.removeF;
+            if removeF == 0
+                disp('State Constraint Violation!')
+            end
             
 %             data.state{idx} = state_data(:, 1, BestcostID);
 %             data.input{idx} = u;
@@ -207,10 +212,10 @@ end
         totalT = totalT + calT;
         
         %% 逐次プロット
-        figure(10);
-        clf
-        Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-        TvC = 0:Params.dt:te;
+%         figure(10);
+%         clf
+%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
+%         TvC = 0:Params.dt:te;
         %% take off
 %         rz = 1; % 目標
 %         rz0 = 0;% スタート
@@ -225,30 +230,30 @@ end
 %         legend("xr.z", "h.z", "Location", "southeast");
 
         %% circle
-        CRx = cos(TvC);
-        CRy = sin(TvC);
-%         
-%         TvC = 0:Params.dT:te-0.025;
-%         CRx = X(1, :);
-%         CRy = X(2, :);
-
-        plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
-        plot(Tv, xr(2, :), '-', 'LineWidth', 2);
-
-        plot(TvC, CRx, '--', 'LineWidth', 1);
-        plot(TvC, CRy, '--', 'LineWidth', 1);
-        plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-        plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-        hold off;
-        xlabel("Time [s]"); ylabel("Reference [m]");
-        legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
-%         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
-        xlim([0 te]); ylim([-inf inf+0.1]); 
-
-        fprintf("sigma: %f\n", data.sigma(idx))
+%         CRx = cos(TvC/2);
+%         CRy = sin(TvC/2);
+% %         
+% %         TvC = 0:Params.dT:te-0.025;
+% %         CRx = X(1, :);
+% %         CRy = X(2, :);
+% 
+%         plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
+%         plot(Tv, xr(2, :), '-', 'LineWidth', 2);
+% 
+%         plot(TvC, CRx, '--', 'LineWidth', 1);
+%         plot(TvC, CRy, '--', 'LineWidth', 1);
+%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
+%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
+%         hold off;
+%         xlabel("Time [s]"); ylabel("Reference [m]");
+%         legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
+% %         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
+%         xlim([0 te]); ylim([-inf inf+0.1]); 
+% 
+%         fprintf("sigma: %f\n", data.sigma(idx))
 
         %%
-        drawnow 
+%         drawnow 
     end
 
 catch ME % for error
