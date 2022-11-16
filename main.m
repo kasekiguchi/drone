@@ -13,7 +13,7 @@ N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 1; % 1: active : for debug function
+fDebug = 0; % 1: active : for debug function
 run("main1_setting.m");
 % for mob1
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
@@ -197,26 +197,26 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
+logger.plot({1,"p","er"},{1,"q","e"},{1,"p1-p2","er"});
 % logger.plot({1,"p","er"});
 % legend("x.state", "y.state", "z.state","x.reference", "y.reference", "z.reference");
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 %%
-% logger.plot({1,"p1-p2","er"});
+logger.plot({1,"p1-p2","er"});
 hold on
-plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
+% plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
 xlabel('x')
 ylabel('y')
-legend("estimate", "reference", "obstacle");
+% legend("estimate", "reference", "obstacle");
 % legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 % agent(1).reference.timeVarying.show(logger)
 
 
 %% animation
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)DF
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
 % agent(1).animation(logger,"target",1:N,"Env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
