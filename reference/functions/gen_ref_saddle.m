@@ -1,15 +1,24 @@
 function ref = gen_ref_saddle(param)
-arguments
-    param.freq = 10% 周期
-    param.orig = [0 0 1]% サドルの中心
-    param.size = [1 1 0] % 各軸の振幅
-    param.phase = -pi % 位相
-end
+% if length(varargin) == 1
+%     param=varargin{1};
+% elseif length(varargin)==4
+%     param=varargin;
+% end
+% arguments
+%     param.freq = 10% 周期
+%     param.orig = [0 0 1]% サドルの中心
+%     param.size = [1 1 0] % 各軸の振幅
+%     param.phase = -pi % 位相
+% end
 
-T = param.freq;
-origin = param.orig;
-scale = param.size;
-phase = param.phase;
+% T = param.freq;
+% origin = param.orig;
+% scale = param.size;
+% phase = param.phase;
+T = param{1};
+origin = param{2};
+scale = param{3};
+phase = -pi;
 syms t real
 syms lx ly real
 lx = scale(1); % 4

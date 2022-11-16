@@ -335,7 +335,7 @@ titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.7;%alphaの初期値
+alp(anum)=0.8;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -344,8 +344,7 @@ Ac2 = [0,1;0,0];
 Bc2 = [0;1];
 dt=0.025;
 k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt)/20; % xdiag([100,10,10,1])
-
-x0=[2,2,2];
+x0=[2,5,6];
 % x0=[2,2];
 fvals12z=zeros(2,1);
 gain_ser1z=["","f1","a1","k1"];
@@ -355,11 +354,12 @@ for i=1:2
 fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,0, er));
 % fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + tanh(x(1)*e) + x(2)*e ) ,0, er));
 [x,fval] = fminsearch(fun,x0) ;
+% [x,fval] = fmincon(fun,x0) ;
 fvals12z(i) = 2*fval
 gain_ser1z(i+1,:)=[titlex(i),x];
 
 % e= -1:0.001:1;      
-e= -1.5:0.001:1.5;
+e= -2:0.001:2;
 ufb(i,:)= -k(i)*e;
 utanh(i,:)= - x(1)*tanh(x(2)*e) - x(3)*e;%%
 % utanh(i,:)= - tanh(x(1)*e) - x(2)*e;%%
@@ -367,7 +367,7 @@ u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
 % sigma(i,:)=utanh(i,:)-u(i,:);
 fig=figure(i);
 % plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
-% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),'LineWidth',2);
+% plot(e,utanh(i,:),e,u(i,:),e,ufb(i,:),'LineWidth',2);
 % plot(e,utanh(i,:),e,u(i,:),'LineWidth',2);
 plot(e,ufb(i,:),e,u(i,:),'LineWidth',2);
 grid on
@@ -375,6 +375,9 @@ grid on
 % legend('FB','近似','FT','誤差')
 % title(titlex(i));
 legend('Liner state feedback','Finite time settling')
+% legend('Approximation','Finite time settling','Linear state feedback')
+% legend('Approximation','Finite time settling')
+
 
 fosi=16;%defolt 9
 set(gca,'FontSize',fosi)

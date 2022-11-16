@@ -5,14 +5,14 @@ clear
 %import
 %選択
 fsingle=1;%figureの数が一つの時１
-ff=10;%flightのみは１
+ff=1;%flightのみは１
 fHLorFT=1;%単体の時,HLは1
 
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
-%     name=logger;
-    name=logger_FT_c_09;
+    name=logger;
+%     name=logger_FT_c_09;
 %     name=logger_HL_c;
 %     name=remasui2_0518_FT_hovering_15;
     %
@@ -48,7 +48,7 @@ if fsingle==1
     ref=zeros(3,tn);
     est=zeros(3,tn);
     err=zeros(3,tn);
-    inp=zeros(4,tn);
+%     inp=zeros(4,tn);
     att=zeros(3,tn);
     vel=zeros(3,tn);
     w=zeros(3,tn);
@@ -174,11 +174,24 @@ else
 end
 
 % figure
-FigName=["x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "t-p" "inner_input" "vf" "sigma"];
+FigName=["t-p" "x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma"];
 fosi=14;%デフォルト9，フォントサイズ変更
 LW = 2;%linewidth
 if fsingle==1
+   
     i=1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,ref,time,est,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('p [m]')
+    legend('x ref','y ref','z ref','x est','y est','z est')
+    hold off    
+    
+    i=i+1;
     f(i)=figure('Name',FigName(i));
     hold on
     plot(ref(1,:),ref(2,:),'LineWidth',LW);
@@ -230,192 +243,180 @@ if fsingle==1
     ylabel('z[m]')
     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
     hold off    
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,err,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('error[m]')
-%     legend('x','y','z')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,inp,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('input')%単位はN？
-%     legend('1','2','3','4')
-%     hold off    
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,att,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('attitude [rad]')
-%     legend('x','y','z')
-%     hold off    
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,vel,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('velocity[m/s]')
-%     legend('x','y','z')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,w,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('angular velocity[rad/s]')
-%     legend('x','y','z')
-%     hold off     
-% 
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot3(ref(1,:),ref(2,:),ref(3,:),'LineWidth',LW);
-%     plot3(est(1,:),est(2,:),est(3,:),'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('x[m]')
-%     ylabel('y[m]')
-%     zlabel('z[m]')
-%     daspect([1,1,1])
-%     legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
-%     daspect([1,1,1]);
-%     campos([-45,-45,60]);
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,uHL,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('inputHL')
-%     legend('z','x','y','yaw')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,z1,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('z1')
-%     legend('z','dz')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,z2,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('z2')
-%     legend('x','dx','ddx','dddx')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,z3,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('z3')
-%     legend('y','dy','ddy','dddy')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,z4,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('z4')
-%     legend('psi','dpsi')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,ref,time,est,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('p [m]')
-%     legend('x ref','y ref','z ref','x est','y est','z est')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,ininp,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('inner input')
-% %     legend('')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,vf,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('vf')
-%     legend('zu','dzu','ddzu','dddzu')
-%     hold off     
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time,sigmax,time,sigmay,'LineWidth',LW);
-%     grid on
-%     title(HLorFT)
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('sigma')
-%     legend('sigmax','sigmay')
-%     hold off     
-%     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,err,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('error[m]')
+    legend('x','y','z')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,inp,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('input')%単位はN？
+    legend('1','2','3','4')
+    hold off    
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,att,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('attitude [rad]')
+    legend('x','y','z')
+    hold off    
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,vel,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('velocity[m/s]')
+    legend('x','y','z')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,w,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('angular velocity[rad/s]')
+    legend('x','y','z')
+    hold off     
+
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot3(ref(1,:),ref(2,:),ref(3,:),'LineWidth',LW);
+    plot3(est(1,:),est(2,:),est(3,:),'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('x[m]')
+    ylabel('y[m]')
+    zlabel('z[m]')
+    daspect([1,1,1])
+    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    daspect([1,1,1]);
+    campos([-45,-45,60]);
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,uHL,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('inputHL')
+    legend('z','x','y','yaw')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,z1,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('z1')
+    legend('z','dz')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,z2,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('z2')
+    legend('x','dx','ddx','dddx')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,z3,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('z3')
+    legend('y','dy','ddy','dddy')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,z4,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('z4')
+    legend('psi','dpsi')
+    hold off      
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,ininp,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('inner input')
+%     legend('')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,vf,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('vf')
+    legend('zu','dzu','ddzu','dddzu')
+    hold off     
+    
+    i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot(time,sigmax,time,sigmay,'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('time[s]')
+    ylabel('sigma')
+    legend('sigmax','sigmay')
+    hold off     
+    
     %二乗誤差平均
     RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
     RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
@@ -579,7 +580,8 @@ FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure
 %% save 
 n=length(f);
 SaveTitle=strings(1,n);
-na=[1 2 3 4 5 6 7 8 9 10]; %保存する図を選ぶ場合[1:"x-y" 2:"t-x" 3:"t-y" 4:"t-z" 5:"error" 6:"input" 7:"attitude" 8:"velocity" 9:"angular_velocity" 10:"3D"]
+%保存する図を選ぶ場合[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
+na=[1 2 3 4 5 6 7 8 9 10]; 
 for i=1:length(na)
     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(na(i)));
 %     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'jpg');

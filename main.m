@@ -5,7 +5,7 @@ activeFile = matlab.desktop.editor.getActive;
 cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
-close all hidden; clear all; clc;
+close all hidden; clear ; clc;
 userpath('clear');
 % warning('off', 'all');
 
@@ -33,10 +33,10 @@ end
 
 %f
 run("main2_agent_setup.m");
-% agent.set_model_error("ly",0.01);
-% agent.set_model_error("lx",0.01);
+agent.set_model_error("ly",-0.00932);
+agent.set_model_error("lx",0.0117);
 % agent.set_model_error("mass",0.05);
-agent(i).set_model_error("B",[zeros(1,6),[1,0,1],zeros(1,3)]);%only sim
+agent(i).set_model_error("B",[zeros(1,6),[0,0,0],zeros(1,3)]);%only sim , add disturbance [x,y,z]
 %% main loop
 run("main3_loop_setup.m");
 

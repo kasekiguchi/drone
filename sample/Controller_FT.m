@@ -8,8 +8,8 @@ Controller_param.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt); %
 % Controller_param.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % 有限整定用
-Controller_param.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller_param.F2 = lqrd(Ac4, Bc4, diag([100, 100, 10, 1]), [0.01], dt)*3; % xdiag([100,10,10,1])
+Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 100, 10, 1]), [0.01], dt)*3; % ydiag([100,10,10,1])
 Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 syms sz1 [2 1] real
 syms sF1 [1 2] real
@@ -153,26 +153,6 @@ if fzapr == 1
 
         Controller_param.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
     end
-
-% elseif    fzapr==2 そのまま微分
-%     syms fz1(t) fz2(t) 
-%     fsz1=[fz1;fz2];
-%     
-%     k = Controller_param.F1;
-%     u=-k(1) *sign(fz1(t))* abs(fz1(t)).^alpha(1) -k(2) *sign(fz2(t))* abs(fz2(t)).^alpha(2);
-%     du=diff(u,t);
-%     ddu=diff(du,t);
-%     dddu=diff(ddu,t);
-%     
-%     u = subs(u,fsz1,sz1);
-%     dz = Ac2 * sz1 + Bc2 * u;
-%     du=subs(du,[fsz1 diff(fsz1,t)],[sz1 dz]);
-%     ddz= Ac2 * dz + Bc2 * du;
-%      ddu=subs(ddu,[fsz1 diff(fsz1,t) diff(fsz1,t,t)],[sz1 dz ddz]);
-%     dddz= Ac2 * ddz + Bc2 * ddu;
-%     dddu=subs(dddu,[fsz1 diff(fsz1,t) diff(fsz1,t,t) diff(fsz1,t,t,t)],[sz1 dz ddz dddz]);
-%     
-%     Controller_param.Vfap = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
 end
 
 %% 二層
