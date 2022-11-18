@@ -185,8 +185,8 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
-
+% logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "input", "e"},{1,"estimator.ukfslam.show",""}, "fig_num", 5, "row_col", [2, 2]);
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
