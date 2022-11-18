@@ -7,12 +7,12 @@ clear
 fsingle=1;%figureの数が一つの時１
 ff=1;%flightのみは１
 fHLorFT=1;%単体の時,HLは1
-
+fexp=0;
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
     name=logger;
-%     name=logger_FT_c_09;
+%     name=logger_FB_codin0;
 %     name=logger_HL_c;
 %     name=remasui2_0518_FT_hovering_15;
     %
@@ -71,13 +71,15 @@ if fsingle==1
         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
         vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v(1:3);
         w(:,j)=name.Data.agent.estimator.result{1,i}.state.w(1:3);
-%         uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
-%         z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
-%         z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
-%         z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
-%         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
-        %ininp(:,j)=name.Data.agent.inner_input{1, i};
-%         vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
+        uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
+        z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
+        z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
+        z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
+        z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
+        if fexp==1
+            ininp(:,j)=name.Data.agent.inner_input{1, i};
+        end
+        vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
 %         sigmax(:,j)=name.Data.agent.controller.result{1, i}.sigmax;
 %         sigmay(:,j)=name.Data.agent.controller.result{1, i}.sigmay;
         j=j+1;
