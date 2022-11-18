@@ -4,6 +4,7 @@
 % set path
 activeFile = matlab.desktop.editor.getActive;
 cd(fileparts(activeFile.Filename));
+DATAdir = cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
@@ -20,6 +21,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
             ];
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+
 %% main loop
     fInput = 0;
     fV = 0;
@@ -56,10 +58,39 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     % データ保存初期化
     data.xr{idx+1} = 0;
-    data.path{idx+1} = 0;
-    data.pathJ{idx+1} = 0;
+    data.path{idx+1} = 0;   % - 全サンプル全ホライズンの値
+    data.pathJ{idx+1} = 0;  % - 全サンプルの評価値
     data.sigma(idx+1) = 0;
     data.bestcost(idx+1) = 0;
+
+    dataNum = 11;
+    data.state           = zeros(round(te/dt + 1), dataNum);       
+    data.state(idx+1, 1) = idx * dt; % - 現在時刻
+    data.state(idx+1, 2) = initial.p(1);   % - 状態 x
+    data.state(idx+1, 3) = initial.p(2);   % - 状態 y
+    data.state(idx+1, 4) = initial.p(3);   % - 状態 z
+    data.state(idx+1, 5) = agent.input(1);  % - 入力 u1
+    data.state(idx+1, 6) = agent.input(2);  % - 入力 u2
+    data.state(idx+1, 7) = agent.input(3);  % - 入力 u3
+    data.state(idx+1, 8) = agent.input(4);  % - 入力 u4
+    data.state(idx+1, 9) = 0;    % - 目標状態 xr
+    data.state(idx+1, 10) = 0;   % - 目標状態 yr
+    data.state(idx+1, 11) = 0;   % - 目標状態 zr
+    data.bestx(idx+1, :) = repelem(initial.p(1), Params.H); % - もっともよい評価の軌道x成分
+    data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
+    data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
+
+    %     data.state(idx+1, 2) = x(1);     % - 状態 x
+    %     data.state(idx+1, 3) = x(2);     % - 状態 y
+    %     data.state(idx+1, 4) = 0;        % - 入力 ux  
+    %     data.state(idx+1, 5) = 0;        % - 入力 uy
+    %     data.state(idx+1, 6) = 0;        % - ux,uyのノルム
+    %     data.state(idx+1, 7) = 0;        % - 目標状態 xr
+    %     data.state(idx+1, 8) = 0;        % - 目標状態 yr
+    %     data.bestx(idx+1, :) = repelem(x(1), Params.H); % - もっともよい評価の軌道x成分
+    %     data.besty(idx+1, :) = repelem(x(2), Params.H); % - もっともよい評価の軌道y成分
+    %     data.sigmax(idx+1, :) = 0; % - xの標準偏差の値
+    %     data.sigmay(idx+1, :) = 0; % - yの標準偏差の値
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
     %%
@@ -137,27 +168,44 @@ end
         end
 
         %-- データ保存
-            data.xr{idx} = xr;
-            data.path{idx} = agent.controller.result.path;
-            data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-            data.sigma(idx) = agent.controller.result.sigma;
-            data.bestcost(idx) = agent.controller.result.bestcost;
+        state_data = agent.controller.result.path;
+        BestcostID = agent.controller.result.BestcostID;
+        data.path{idx} = state_data;
+        data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+        data.sigma(idx) = agent.controller.result.sigma;
+        data.bestcost(idx) = agent.controller.result.bestcost;
 
-            removeF = agent.controller.result.removeF;
-            if removeF == 0
-                disp('State Constraint Violation!')
-            end
-            
+        data.state(idx+1, 1) = idx * dt; % - 現在時刻
+        data.state(idx+1, 2) = agent.estimator.result.state.p(1);   % - 状態 x
+        data.state(idx+1, 3) = agent.estimator.result.state.p(2);   % - 状態 y
+        data.state(idx+1, 4) = agent.estimator.result.state.p(3);   % - 状態 z
+        data.state(idx+1, 5) = agent.input(1);  % - 入力 u1
+        data.state(idx+1, 6) = agent.input(2);  % - 入力 u2
+        data.state(idx+1, 7) = agent.input(3);  % - 入力 u3
+        data.state(idx+1, 8) = agent.input(4);  % - 入力 u4
+        data.state(idx+1, 9)  = xr(1, 1);    % - 目標状態 xr
+        data.state(idx+1, 10) = xr(2, 1);   % - 目標状態 yr
+        data.state(idx+1, 11) = xr(3, 1);   % - 目標状態 zr
+        data.bestx(idx+1, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
+        data.besty(idx+1, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
+        data.bestz(idx+1, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
+
+
+        removeF = agent.controller.result.removeF;
+        if removeF == 0
+            disp('State Constraint Violation!')
+        end
+        
 %             data.state{idx} = state_data(:, 1, BestcostID);
 %             data.input{idx} = u;
-            state_monte = agent.estimator.result.state;
-            ref_monte = agent.reference.result.state;
+        state_monte = agent.estimator.result.state;
+        ref_monte = agent.reference.result.state;
 
-            fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
-                    state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                    state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                    state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
-                    xr(1,1), xr(2,1), xr(3,1));
+        fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
+                xr(1,1), xr(2,1), xr(3,1));
 
         %% update state
         % with FH
@@ -283,7 +331,7 @@ Diff = Edata - Rdata;
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
 logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
@@ -294,6 +342,16 @@ figure(7);
 plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
 legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
 set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+
+%% 動画生成
+%  ディレクトリ生成
+% mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation1
+% mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation_omega
+% mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata video
+Outputdir = 'C:\Users\student\Documents\GitHub\drone\DATAdir\simdata';
+PlotMov       % 2次元プロット
+% PlotMovXYZ  % 3次元プロット
+% save()
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

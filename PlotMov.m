@@ -5,8 +5,7 @@
 	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v2'));
 	open(writerObj);
 
-	for count = 1:length(0:dt:te)-1
-        %%
+	for count = 1:size(data.pathJ,2)
 %         count = 50;
         clf(figure(999))
 		fig = figure(999);
@@ -39,12 +38,15 @@
 % 		end
 		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.2f'),' s'];
-		text(5.2,2.5,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
+        % circle : -0.27,1.3
+		text(-0.27,1.1,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])    %5.2, 2.5
 		grid on
-% 		ax.YLim = [-2.0 4];
-% 		ax.XLim = [0 10];
-        ax.YLim = [-1.0 2];
-		ax.XLim = [0 15];
+        % circle
+%       ax.YLim = [-1.2 1.2];
+% 		ax.XLim = [-1.2 1.2];
+        % heart
+        ax.YLim = [-3 1];
+        ax.XLim = [-1 3];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
