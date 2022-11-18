@@ -111,7 +111,7 @@ x0=[2,2,2];
 fvals12=zeros(4,1);
 gain_ser1=["","f1","a1","k"];
 % gain_ser1=["","f1","a1","k1"];
-er=[0 1]; %近似する範囲を指定
+er=[0 0.5]; %近似する範囲を指定
 ee=er;
 for i=1:4
 %     if i~=5
@@ -126,8 +126,8 @@ fun=@(x)(integral(@(e) abs( -kft(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e 
 fvals12(i) = 2*fval
 gain_ser1(i+1,:)=[titlex(i),x];
 
-% e= -1:0.001:1;      
-e= -5:0.001:5;
+e= -1:0.001:1;      
+% e= -5:0.001:5;
 ufb(i,:)= -k(i)*e;
 % utanh(i,:)= - x(1)*tanh(x(2)*e) - kgain*k(i)*e;%%
 utanh(i,:)= - x(1)*tanh(x(2)*e) -x(3)*e;%%
@@ -367,9 +367,9 @@ u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
 % sigma(i,:)=utanh(i,:)-u(i,:);
 fig=figure(i);
 % plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
-% plot(e,utanh(i,:),e,u(i,:),e,ufb(i,:),'LineWidth',2);
+plot(e,utanh(i,:),e,u(i,:),e,ufb(i,:),'LineWidth',2);
 % plot(e,utanh(i,:),e,u(i,:),'LineWidth',2);
-plot(e,ufb(i,:),e,u(i,:),'LineWidth',2);
+% plot(e,ufb(i,:),e,u(i,:),'LineWidth',2);
 grid on
 % legend('近似','FT')
 % legend('FB','近似','FT','誤差')

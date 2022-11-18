@@ -204,7 +204,7 @@ agent(1).animation(logger, "target", 1:N);
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
 %% make folder&save
-fsave=10;
+fsave=1;
 if fsave==1
     %変更しない
     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
@@ -217,9 +217,9 @@ if fsave==1
 %     subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='FT_xyz';%実験,シミュレーション名
+    ExpSimName='FT_xyz2';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
-contents='FB_xyz2_saddle';%実験,シミュレーション内容
+contents='FB_ptp_saddle';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
