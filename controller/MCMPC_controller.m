@@ -25,6 +25,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             %%
             obj.input.Initsigma = param.Initsigma;
             obj.input.Constsigma = param.Constsigma;
+            obj.input.Maxsigma = param.Maxsigma;
+            obj.input.Minsigma = param.Minsigma;
+
             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
 %             obj.input.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
 %             obj.input.ref_v = [0; 0; 0.50];
@@ -61,10 +64,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 ave2 = obj.self.input(2);
                 ave3 = obj.self.input(3);
                 ave4 = obj.self.input(4);
-                if obj.input.nextsigma > 0.5
-                    obj.input.nextsigma = 0.5;    % 上限
-                elseif obj.input.nextsigma < 0.005
-                    obj.input.nextsigma = 0.005;  % 下限
+                if obj.input.nextsigma > obj.input.Maxsigma
+                    obj.input.nextsigma = obj.input.Maxsigma;    % 上限
+                elseif obj.input.nextsigma < obj.input.Minsigma
+                    obj.input.nextsigma = obj.input.Minsigma;  % 下限
                 end
                 obj.input.sigma = obj.input.nextsigma;
             end
@@ -98,8 +101,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
 
             %-- 制約条件
-%             [removeF] = obj.constraints();
-            removeF = 1;
+            [removeF] = obj.constraints();
+%             removeF = 1;
             
             if removeF ~= 0
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
@@ -126,6 +129,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.result.removeF = removeF;
             
             obj.self.input = obj.result.input;
+            obj.result.BestcostID = BestcostID;
             obj.result.fRemove = obj.param.fRemove;
             obj.result.path = obj.state.state_data;
             obj.result.sigma = obj.input.nextsigma;
