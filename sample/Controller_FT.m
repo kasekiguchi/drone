@@ -8,8 +8,11 @@ Controller_param.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt); %
 % Controller_param.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % 有限整定用
-Controller_param.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller_param.F2 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller_param.F3 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+% Controller_param.F2(1)=Controller_param.F2(1)*1.5;
+% Controller_param.F3(1)=Controller_param.F3(1)*1.5; 
+
 Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 syms sz1 [2 1] real
 syms sF1 [1 2] real

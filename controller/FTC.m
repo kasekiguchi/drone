@@ -196,6 +196,9 @@ methods
         %
         %% 外乱(加速度で与える)
                     dst = 0;
+                    %確率の外乱
+%                     rng("shuffle");
+%                     dst = 1*randn(1);
         %             if t>=1
         %                 dst=0;
         %             end

@@ -305,7 +305,7 @@ if ~(isfield(s, 'type') && isfield(s, 'param'))
     msgType = 'ACSL : Input must be a structure with specified fields.';
     throwAsCaller(MException(eidType, msgType))
 end
-
+ 
 end
 
 function mustBeSpecifiedStructure(s)
