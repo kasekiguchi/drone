@@ -48,8 +48,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D
-            obj.margin = 0.4;
-            obj.threshold = obj.margin*2;
+            obj.margin = 0.5;
+            obj.threshold = obj.margin*4;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
             obj.waypoint.top = [0,0,0]';
@@ -89,6 +89,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.past.state.p = obj.result.state.p; %一時刻前の目標位置
             obj.past.state.v = obj.result.state.v; %一時刻前の速さ
             yaw = obj.state.q(3);
+            as = 0:obj.pitch:2*pi;
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
@@ -98,8 +99,14 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
 %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
-            path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離
+            path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離            
             path_length(path_length>goal_length)=goal_length;
+%%
+%             hold on
+%             plot(path_length.*cos(as),path_length.*sin(as),"o")
+%             plot(obj.length.*cos(as),obj.length.*sin(as),"o")
+%             hold off
+%%
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合
                 reference_length = obj.past.state.p([1,2,3],:) - obj.state.p;
                 if vecnorm(reference_length) < 0.1
