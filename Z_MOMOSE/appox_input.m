@@ -327,7 +327,64 @@ syms fz1(t) fz2(t)
     du=diff(u,t)
     ddu=diff(du,t)
     dddu=diff(ddu,t)
-    
+
+%% fminserch tanh一つ zサブシステムaaaa
+clear e utanh u ufb sigma
+titlex=["x","dx","ddx","dddx"];
+anum=4;%変数の数
+alp=zeros(anum+1,1);
+alp(anum+1)=1;
+alp(anum)=0.8;%alphaの初期値
+for a=anum-1:-1:1
+    alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
+end
+
+Ac2 = [0,1;0,0];
+Bc2 = [0;1];
+dt=0.025;
+k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
+x0=[1,1];
+% x0=[2,2];
+fvals12z=zeros(2,1);
+gain_ser1z=["","f","d"];
+% gain_ser1z=["","f1","k1"];
+er=0.2; %近似する範囲を指定
+for i=1:2
+fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) +x(1)* e/(abs(e)+x(2)) ) ,0, er));
+% fun=@(x)(integral(@(e) abs( -k(i)*abs(e).^alp(i) + tanh(x(1)*e) + x(2)*e ) ,0, er));
+[x,fval] = fminsearch(fun,x0) ;
+% [x,fval] = fmincon(fun,x0) ;
+fvals12z(i) = 2*fval
+gain_ser1z(i+1,:)=[titlex(i),x];
+
+% e= -1:0.001:1;      
+e= -2:0.001:2;
+ufb(i,:)= -k(i)*e;
+ua(i,:)= -x(1)* e./(abs(e)+x(2));%%
+% utanh(i,:)= - tanh(x(1)*e) - x(2)*e;%%
+u(i,:)=-k(i)*sign(e).*abs(e).^alp(i);
+% sigma(i,:)=utanh(i,:)-u(i,:);
+fig=figure(i);
+% plot(e,ufb(i,:),e,utanh(i,:),e,u(i,:),e,sigma(i,:),'LineWidth',2);
+plot(e,ua(i,:),e,u(i,:),e,ufb(i,:),'LineWidth',2);
+% plot(e,ua(i,:),'LineWidth',2);
+% plot(e,ufb(i,:),e,u(i,:),'LineWidth',2);
+grid on
+% legend('近似','FT')
+% legend('FB','近似','FT','誤差')
+% title(titlex(i));
+% legend('Liner state feedback','Finite time settling')
+legend('Approximation','Finite time settling','Linear state feedback')
+% legend('Approximation','Finite time settling')
+
+
+fosi=16;%defolt 9
+set(gca,'FontSize',fosi)
+xlabel('error','FontSize',fosi);
+ylabel('input','FontSize',fosi);
+
+end
+gain_ser1z
     
 %% fminserch tanh一つ zサブシステム
 clear e utanh u ufb sigma

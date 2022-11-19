@@ -11,7 +11,10 @@ fHLorFT=1;%単体の時,HLは1
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
-    name=logger;
+%   name=logger;
+        name=logger_FB_saddle;
+%         name=logger_FB_xyz2_saddle;
+        name=logger_FT_xy_saddle;
 %     name=logger_FT_c_09;
 %     name=logger_HL_c;
 %     name=remasui2_0518_FT_hovering_15;
@@ -48,7 +51,7 @@ if fsingle==1
     ref=zeros(3,tn);
     est=zeros(3,tn);
     err=zeros(3,tn);
-%     inp=zeros(4,tn);
+    inp=zeros(5,tn);
     att=zeros(3,tn);
     vel=zeros(3,tn);
     w=zeros(3,tn);
@@ -71,13 +74,13 @@ if fsingle==1
         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
         vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v(1:3);
         w(:,j)=name.Data.agent.estimator.result{1,i}.state.w(1:3);
-%         uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
-%         z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
-%         z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
-%         z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
-%         z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
-        %ininp(:,j)=name.Data.agent.inner_input{1, i};
-%         vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
+        uHL(:,j)=name.Data.agent.controller.result{1, i}.uHL;
+        z1(:,j)=name.Data.agent.controller.result{1, i}.z1;
+        z2(:,j)=name.Data.agent.controller.result{1, i}.z2;
+        z3(:,j)=name.Data.agent.controller.result{1, i}.z3;
+        z4(:,j)=name.Data.agent.controller.result{1, i}.z4;
+%         ininp(:,j)=name.Data.agent.inner_input{1, i};
+        vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
 %         sigmax(:,j)=name.Data.agent.controller.result{1, i}.sigmax;
 %         sigmay(:,j)=name.Data.agent.controller.result{1, i}.sigmay;
         j=j+1;
@@ -172,6 +175,14 @@ else
         j=j+1;
     end
 end
+
+%二乗誤差平均
+    RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
+    RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
+    RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
+    RMSE = ["RMSE_x" "RMSE_y" "RMSE_z" ;
+                    RMSE_x RMSE_y RMSE_z]
+
 
 % figure
 FigName=["t-p" "x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma"];
@@ -416,13 +427,6 @@ if fsingle==1
     ylabel('sigma')
     legend('sigmax','sigmay')
     hold off     
-    
-    %二乗誤差平均
-    RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
-    RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
-    RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
-    RMSE = ["RMSE_x" "RMSE_y" "RMSE_z" ;
-                    RMSE_x RMSE_y RMSE_z]
 else
 % 比較
     f(1)=figure('Name',FigName(1));
