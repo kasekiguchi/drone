@@ -7,12 +7,13 @@ clear
 fsingle=1;%figureの数が一つの時１
 ff=1;%flightのみは１
 fHLorFT=1;%単体の時,HLは1
-fexp=0;
+fexp=1;%実験のデータかどうか
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
-    name=logger;
-%     name=logger_FB_codin0;
+%     name=logger;
+%     name=logger_FB500_codin45;
+    name=logger_FB_codin0;
 %         name=logger_FB_saddle;
 %         name=logger_FB_xyz2_saddle;
 %         name=logger_FT_xy_saddle;
@@ -568,13 +569,13 @@ end
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
     
-%変更
+%変更========================================================
 % subfolder='sim';%sim or exp
 subfolder='sim';%sim or exp
-ExpSimName='FT_xyz_model_error';%実験名,シミュレーション名
+ExpSimName='FTxyz3';%実験名,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
-contents='FB';%実験,シミュレーション内容
-
+contents='FB_90_c';%実験,シミュレーション内容
+%==========================================================
 FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
 FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
 
@@ -589,7 +590,7 @@ FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure
 n=length(f);
 SaveTitle=strings(1,n);
 %保存する図を選ぶ場合[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
-na=[1 2 3 4 5 6 7 8 9 10]; 
+na=[1 3 4 5 11]; 
 for i=1:length(na)
     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(na(i)));
 %     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'jpg');

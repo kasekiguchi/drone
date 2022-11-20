@@ -3,13 +3,13 @@ function Controller = Controller_FT(dt, fzapr, fzsingle, fxyapr, fxysingle, alp,
 Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
-Bc4 = [0; 0; 0; 1];
+Bc4 = [0; 0; 0; 1.0];
 Controller_param.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt); %
 % Controller_param.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % 有限整定用
-Controller_param.F2 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller_param.F3 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller_param.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
 % Controller_param.F2(1)=Controller_param.F2(1)*1.5;
 % Controller_param.F3(1)=Controller_param.F3(1)*1.5; 
 

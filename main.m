@@ -13,7 +13,7 @@ userpath('clear');
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
-fOffline = 0; % offline verification with experiment data
+fOffline = 0; % offline verification with experient data
 fDebug = 0;
 
 run("main1_setting.m");
@@ -36,7 +36,7 @@ run("main2_agent_setup.m");
 % agent.set_model_error("ly",-0.00932);
 % agent.set_model_error("lx",0.0117);
 % agent.set_model_error("mass",0.05);
-% agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[1,1,0]]);%only sim , add disturbance [x,y,z]
+agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[1,1,0]]);%only sim , add disturbance [x,y,z], [roll, pitch, yaw]
 %% main loop
 run("main3_loop_setup.m");
 
@@ -193,7 +193,9 @@ clc
 % logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
 % logger.plot({1,"p1:2","pe"},{1,"p","per"},{1,"q","pe"},{1,"v","pe"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
-logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
+logger.plot({1,"p","er"},"fig_num",2);
+logger.plot({1,"input",""},"fig_num",3);
+logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
@@ -204,7 +206,7 @@ agent(1).animation(logger, "target", 1:N);
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
 %% make folder&save
-fsave=1;
+fsave=10;
 if fsave==1
     %変更しない
     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス

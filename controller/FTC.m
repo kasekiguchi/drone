@@ -89,27 +89,6 @@ methods
             %z方向:FT
             vf = obj.Vf(z1); % % % % % % % % % % % % % % % % % %xyz
         end
-        c=1;
-%         if vf(4)>=c 
-%             vf(4)=c;
-% %             vf(3)=c;
-%         elseif vf(4)<=-c
-%             vf(4)=-c;
-% %             vf(3)=-c;
-%         end
-%         if vf(3)>=c
-% %             vf(4)=c;
-%             vf(3)=c;
-%         elseif vf(3)<=-c
-% %             vf(4)=-c;
-%             vf(3)=-c;
-%         end
-%         if abs(vf(4))>=c 
-%             vf(4)=vf(4)/c;
-%         end
-%         if abs(vf(3))>=c
-%             vf(3)=vf(3)/c;
-%         end
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向
@@ -128,17 +107,17 @@ methods
                 gain_xy = 1;
                 ux = -gain_xy * kx(1) * sign(z2(1)) * abs(z2(1))^ax(1) -kx(2) * sign(z2(2)) * abs(z2(2))^ax(2) -kx(3) * sign(z2(3)) * abs(z2(3))^ax(3) -kx(4) * sign(z2(4)) * abs(z2(4))^ax(4); %（17）式
                 uy = -gain_xy * ky(1) * sign(z3(1)) * abs(z3(1))^ay(1) -ky(2) * sign(z3(2)) * abs(z3(2))^ay(2) -ky(3) * sign(z3(3)) * abs(z3(3))^ay(3) -ky(4) * sign(z3(4)) * abs(z3(4))^ay(4); %(19)式
-                %             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2)) -f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2(3:4)*z2(3:4);%（17）式
-                %             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2)) -f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3(3:4)*z3(3:4);%(19)式
-
-                %             ux=1*ux;
-                %             uy=1*uy;
+%                             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2)) -f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%（17）式
+%                             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2)) -f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%(19)式
+% 
+%                             ux=0.6*ux;
+%                             uy=0.6*uy;
                 %
-                %             ux=-1*F2*z2;
-                %             uy=-1*F3*z3;
+%                             ux=-1*F2*z2;
+%                             uy=-1*F3*z3;
                 %併用
-                %             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1));%（17）式
-                %             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1));%(19)式
+%                             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2*z2);%（17）式
+%                             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3*z3);%(19)式
                 %外乱ダメ
                 %             ux=ux+8*sin(2*pi*t/0.2);%30以下なら有限整定がいい
                 %             uy=uy+10*cos(2*pi*t/1);
@@ -195,7 +174,10 @@ methods
         %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
         %
         %% 外乱(加速度で与える)
-                    dst = 0;
+        %=======================================
+        %定常外乱：並進方向は0.2m/s^2くらい，回転方向は3rad/s^2(180deg/s^2)
+        %=======================================
+                    dst = 4;
                     %確率の外乱
 %                     rng("shuffle");
 %                     dst = 1*randn(1);

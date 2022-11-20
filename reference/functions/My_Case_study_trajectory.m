@@ -7,28 +7,28 @@ x_0 = X0(1);
 y_0 = X0(2);
 z_0 = X0(3);
 
-x = x_0+0.3;
-y = y_0+0.2;
-z = z_0-0.2;
+x = x_0+0.1;
+y = y_0+0.15;
+z = z_0-0.0;
 
 %PtoP
 % x = x_0+0.0;
 % y = y_0;
-% % z = 0;
-r=1;
-T=8;
-x = x_0+r*cos(2*pi*t/T);
-y = y_0+r*sin(2*pi*t/T);
-z = z_0;%+0.4*sin(2*pi*t/T);
+% z = 1;
+% r=1;
+% T=10;
+% x = x_0+r*cos(2*pi*t/T);
+% y = y_0+r*sin(2*pi*t/T);
+% z = z_0;%+0.4*sin(2*pi*t/T);
 
 %-------------------------------------------------------------------
-%アステロイド
+%アステロイド,ダイヤ
 % a=1;
 % x=a*cos(2*pi*t/T)^3 ;
 % y=a*sin(2*pi*t/T)^3 ;
 % z=z_0;
 
-%リサージュ
+%リサージュ,八の字
 % A=1;B=1;a=1;b=2;d=0;
 % x=A*sin(a*2*pi*t/T+d);
 % y=B*sin(b*2*pi*t/T);
@@ -42,9 +42,6 @@ z = z_0;%+0.4*sin(2*pi*t/T);
 
 % ref=@(t,x0,y0,z0)[x;y;z;0];%謎x,y,z are function of t.
 
-ref=@(t)[x;y;z;0];%謎x,y,z are function of t.
-
-
-% ref=@(t,x0,y0,z0)[x;y;z;0];%謎x,y,z are function of t.
+ref=@(t)[x;y;z;0];
 end
 

@@ -64,10 +64,10 @@ methods
         %%
 %         dst=-1;
 %         t = param{1};
-        dst = 0;
+%         dst = 1;
         %確率的な外乱
-%         rng("shuffle");
-%                     dst = 1*randn(1);
+        rng("shuffle");
+                    dst = 1*randn(1);
 %                     if t>=10 && t<=10.5
 %                             dst=-3;
 %                     end
