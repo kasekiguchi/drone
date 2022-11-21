@@ -5,7 +5,8 @@
 	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v2'));
 	open(writerObj);
 
-	for count = 1:size(data.pathJ,2)
+	for count = 1:length(0:dt:te)-1
+        %%
 %         count = 50;
         clf(figure(999))
 		fig = figure(999);
@@ -17,7 +18,8 @@
 		% 予測経路のplot
         path_count = size(data.pathJ{count},2);
 		for j = 1:path_count
-			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(data.pathJ{count}(1,j)+0.0001),:));
+% 			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(data.pathJ{count}(1,j)+0.0001),:));
+            plot3(data.path{count}(1,:,j),data.path{count}(2,:,j),data.path{count}(3,:,j),'Color',Color_map(ceil(data.pathJ{count}(1,j)+0.0001),:)); % 追加
 			hold on;
 		end
 % 		x = DATA.X(count);
@@ -36,30 +38,33 @@
 %             Obs_posi = [obs{num,1}(1,1),obs{num,1}(1,2)];
 %             viscircles(Obs_posi,obj.r_obs,'LineWidth',0.1,'Color','black');hold on
 % 		end
-		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
+% 		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
+        plot3(data.bestx(count,:),data.besty(count,:),data.bestz(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);   % 追加
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.2f'),' s'];
-        % circle : -0.27,1.3
-		text(-0.27,5.1,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])    %5.2, 2.5
+		text(-0.27,1.3,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
-        % circle
-        ax.YLim = [-5 5];
-		ax.XLim = [-5 5];
-        % heart
-%         ax.YLim = [-3 1];
-%         ax.XLim = [-1 3];
+% 		ax.YLim = [-2.0 4];
+% 		ax.XLim = [0 10];
+        ax.YLim = [-1.2 1.2];
+		ax.XLim = [-1.2 1.2];
+        ax.ZLim = [0 1.2];  % 追加
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
 		ylabel('$$Y$$[m]','Interpreter', 'Latex','FontSize',20);
+        zlabel('$$Z$$[m]','Interpreter', 'Latex','FontSize',20);    % 追加
 	%     legend({'Reference'},'FontSize',18,'Location','northeast');
 		filename = ['Animation_2_2_',num2str(count),];
 		Xleng = ax.XLim(1,2) - ax.XLim(1,1);
 		Yleng = ax.YLim(1,2) - ax.YLim(1,1);
+        Zleng = ax.ZLim(1,2) - ax.ZLim(1,1); % 追加
 		pbaspect([Xleng,Yleng,1]);
+        pbaspect([Xleng,Zleng,1]);  % 追加
+        pbaspect([Yleng,Zleng,1]);  % 追加
 		ax.OuterPosition = [0.0,0.0,1.15,1.];
 		ax.Position = [0.08,0.14,0.89,0.778];
 	% %     fig.OuterPosition = [-0.056155913978495,0.039753088660446,1.137096774193548,0.995295763873069];
-		fig.Position = [0.17143,0.2074,0.5,0.5102];
+		fig.Position = [0.17143,0.2074,0.5,0.5102]; % 描画可能領域 [left bottom width height]
 	%     saveas(gcf,strcat(Outputdir,'/eps/Animation1/',filename),'epsc');
 	%     savefig(gcf,strcat(Outputdir,'/fig/Animation1/',filename),'compact');
 		saveas(gcf,strcat(Outputdir,'/png/Animation1/',filename),'png');

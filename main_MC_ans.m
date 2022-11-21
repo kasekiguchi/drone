@@ -345,9 +345,9 @@ set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xl
 
 %% 動画生成
 %  ディレクトリ生成
-% mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation1
-% mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation_omega
-% mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata video
+mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation1
+mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation_omega
+mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata video
 Outputdir = 'C:\Users\student\Documents\GitHub\drone\DATAdir\simdata';
 PlotMov       % 2次元プロット
 % PlotMovXYZ  % 3次元プロット

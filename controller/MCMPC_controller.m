@@ -27,6 +27,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.input.Constsigma = param.Constsigma;
             obj.input.Maxsigma = param.Maxsigma;
             obj.input.Minsigma = param.Minsigma;
+%             obj.state.Constraints = param.Constraints;
+            obj.state.ConstraintsY = param.ConstraintsY;
 
             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
 %             obj.input.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
@@ -144,7 +146,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function [removeF] = constraints(obj)
 %             NP = obj.param.particle_num;
             % 状態制約
-            removeFe = (obj.state.state_data(2, 1, :) <= -0.5);
+            removeFe = (obj.state.state_data(2, 1, :) <= obj.state.ConstraintsY);   % y座標制約
             % 棄却するサンプル番号を算出
             removeX = find(removeFe);
 %             Fe_size = size(removeFe_check);
