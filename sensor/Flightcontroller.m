@@ -20,10 +20,10 @@ classdef Flightcontroller < SENSOR_CLASS
             if obj.fState
                 obj.result.state = STATE_CLASS(struct('state_list',param.state_list,"num_list",param.num_list));
             end
-            if sum(contains(self.model.state.list,"q"))==1 && sum(contains(param.state_list,"q"))==1
-                obj.result.state.num_list(contains(param.state_list,"q")) = length(self.model.state.q); % modelと合わせる
-                obj.result.state.type = length(self.model.state.q);
-            end
+%             if sum(contains(self.model.state.list,"q"))==1 && sum(contains(param.state_list,"q"))==1
+%                 obj.result.state.num_list(contains(param.state_list,"q")) = length(self.model.state.q); % modelと合わせる
+%                 obj.result.state.type = length(self.model.state.q);
+%             end
             end
         end
         

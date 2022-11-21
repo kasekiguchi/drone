@@ -3,6 +3,8 @@ close all
 agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,132]),DRONE_PARAM("DIATONE"));
 pause(1);
 agent.plant.connector.sendData(gen_msg([500,500,0,500,0,0,0,0]));% arming
+agent.set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
+
 %%
 % while 1
 %     agent.plant.connector.sendData(gen_msg([500,500,20,500,1000,0,0,0]));% arming
@@ -11,7 +13,7 @@ agent.plant.connector.sendData(gen_msg([500,500,0,500,0,0,0,0]));% arming
 %%
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');
 type receiver
-dt_s = 0.001;%刻み時間
+dt_s = 0.025;%刻み時間
 end_time = 15;%終了時間
 portnumber = 8025;%自ポート番号
 RemoteIPPort = 8024;%ESPr側のポート番号
@@ -20,7 +22,7 @@ ReceiveBufferSize = 1;%バッファサイズ
 %%
 disp("Press Enter");
 dt = 0.75;
-throttle = 20;
+throttle = 10;
 w = waitforbuttonpress;
 disp("start");
 disp("arming");
@@ -62,16 +64,18 @@ try
                     end
                     t = toc(Timer);
                 end
+                agent.sensor.tokyu.result = agent.sensor.tokyu.do;
                 ReceiveDate = udpr.receiver();%通信の取得
                 if isempty(ReceiveDate)==0%受け取ったデータの確認用
                     T(s+1) = toc(Timer_sensor);%dt*i;%時間
                     ReceiveDates = strsplit(strcat(native2unicode(ReceiveDate')),',');%取得したデータの分割
-                    udpr1 = str2double(ReceiveDates(1));%赤外線センサchar→double
-                    udpr2 = str2double(ReceiveDates(2));%超音波センサchar→double
-                    %disp(udpr1,udpr2);%表示
-                    disp("udpr1,udpr2");
+                    udpr1 = str2double(ReceiveDates(1));%センサ char→double
+                    udpr2 = str2double(ReceiveDates(2));%センサsub char→double
+%                     disp(udpr1,udpr2);%表示
                     X1(s+1) = udpr1;%i+1番目にセンサの値を代入↑
                     X2(s+1) = udpr2;%subセンサー
+                    agent.sensor.tokyu.result = agent.sensor.tokyu.do;
+                    X3(s+1,:) = agent.sensor.tokyu.result.ros2.rpm;
                     s=s+1;
                 end
             end
@@ -86,3 +90,13 @@ catch ME
     agent.plant.connector.sender(gen_msg([500,500,0,500,0,0,0,0]));
     rethrow(ME);
 end
+
+%% plot
+figure(2)
+plot(T,X3)%グラフのプロット
+hold on
+plot(T,X2)
+legend('Ultrasonic Sensor','Ultrasonic Sensors sub')
+xlabel('time')
+ylabel('distance')
+hold off
