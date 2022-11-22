@@ -6,12 +6,12 @@ function data = InportFromExpData()
 %   > Data.U : 対象への入力
 %   > Data.Y : 入力後の状態
 %   X, U, Y はデータ数が同じである必要がある
-%   X, Y の状態 [px py pz roll pitch yaw vx vy vz V_roll V_pitch V_yaw] ?順番の確認
+%   X, Y の状態(Eular Angle) [px py pz roll pitch yaw vx vy vz V_roll V_pitch V_yaw] 順番の確認
 
 
 % 実験データ読み込み
 % 読み込むファイル名を指定
-expData_Filename = 'TestData1.mat'
+expData_Filename = 'TestData_Quarternion.mat'
 
 load(expData_Filename);
 clear data % 読み込んだファイル内のdataと同名の変数を初期化
