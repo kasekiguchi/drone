@@ -4,7 +4,7 @@ clear
 %%
 %import
 %選択
-fsingle=1;%figureの数が一つの時１
+fsingle=10;%dataの数が一つの時１
 ff=1;%flightのみは１
 fHLorFT=1;%単体の時,HLは1
 fexp=1;%実験のデータかどうか
@@ -13,7 +13,8 @@ if fsingle==1
     %loggerの名前が変わっているとき
 %     name=logger;
 %     name=logger_FB500_codin45;
-    name=logger_FB_codin0;
+%     name=logger_FTxyz_mass_saddle;
+    name=logger_FB_mass_saddle;
 %         name=logger_FB_saddle;
 %         name=logger_FB_xyz2_saddle;
 %         name=logger_FT_xy_saddle;
@@ -33,7 +34,7 @@ if fsingle==1
     ti0=t0(1:k0);
     if ff==1
         k0f=find(name.Data.phase == 102,1,'first')+1;%0.025sは40Hz
-        k0e=find(name.Data.phase == 102,1,'last');
+        k0e=find(name.Data.phase == 102,1,'last')-0.000;
         %連合の時に使ったrmse
 %         k0f=find(name.Data.phase == 102,1,'first')+240;%0.025sは40Hz
 %         k0e=find(name.Data.phase == 102,1,'last');
@@ -94,9 +95,9 @@ else
 % 比較
 %     name1=logger_HL_c;%HLを書く
 %     name2=logger_FT_c_09;%FTを書く
-    
-    name1=logger_FT_c_09;%HLを書く
-    name2=logger_HL_c;%FTを書く
+
+    name1=logger_FT_xyz_saddle;%FTを書く
+    name2=logger_FB_saddle;%HLを書く
     
     t1 = name1.Data.t';
     t2 = name2.Data.t';
@@ -115,9 +116,9 @@ else
         fspan1=k1e-k1f;
         fspan2=k2e-k2f;
         if  fspan1>=fspan2
-            k1e=k1f+fspan2-8;
+            k1e=k1f+fspan2;
         else
-            k2e=k2f+fspan1-8;
+            k2e=k2f+fspan-0;
         end
 %         m=min([k1e k2e]);
 %         k1e=m;
@@ -147,8 +148,8 @@ else
     est2=zeros(3,n2);
     err1=zeros(3,n1);
     err2=zeros(3,n2);
-    inp1=zeros(4,n1);
-    inp2=zeros(4,n2);
+    inp1=zeros(5,n1);
+    inp2=zeros(5,n2);
     att1=zeros(3,n1);
     att2=zeros(3,n2);
     vel1=zeros(3,n1);
@@ -158,36 +159,47 @@ else
     j=1;
     for i=k1f:1:k1e
         time1(j)=ti1(i)-tt1;
-        ref1(:,j)=name1.Data.agent.reference.result{1,i}.state.p;
-        est1(:,j)=name1.Data.agent.estimator.result{1,i}.state.p;
+        ref1(:,j)=name1.Data.agent.reference.result{1,i}.state.p(1:3);
+        est1(:,j)=name1.Data.agent.estimator.result{1,i}.state.p(1:3);
         err1(:,j)=est1(:,j)-ref1(:,j);%誤差        
         inp1(:,j)=name1.Data.agent.input{1,i};
-        att1(:,j)=name1.Data.agent.estimator.result{1,i}.state.q;
-        vel1(:,j)=name1.Data.agent.estimator.result{1,i}.state.v;
-        w1(:,j)=name1.Data.agent.estimator.result{1,i}.state.w;
+        att1(:,j)=name1.Data.agent.estimator.result{1,i}.state.q(1:3);
+        vel1(:,j)=name1.Data.agent.estimator.result{1,i}.state.v(1:3);
+        w1(:,j)=name1.Data.agent.estimator.result{1,i}.state.w(1:3);
         j=j+1;
     end
     j=1;
-    for i=k2f:k2e
+    for i=k2f:(k2e)
         time2(j)=ti2(i)-tt2;
-        ref2(:,j)=name2.Data.agent.reference.result{1,i}.state.p;
-        est2(:,j)=name2.Data.agent.estimator.result{1,i}.state.p;
+        ref2(:,j)=name2.Data.agent.reference.result{1,i}.state.p(1:3);
+        est2(:,j)=name2.Data.agent.estimator.result{1,i}.state.p(1:3);
         err2(:,j)=est2(:,j)-ref2(:,j);%誤差
         inp2(:,j)=name2.Data.agent.input{1,i};
-        att2(:,j)=name2.Data.agent.estimator.result{1,i}.state.q;
-        vel2(:,j)=name2.Data.agent.estimator.result{1,i}.state.v;
-        w2(:,j)=name2.Data.agent.estimator.result{1,i}.state.w;
+        att2(:,j)=name2.Data.agent.estimator.result{1,i}.state.q(1:3);
+        vel2(:,j)=name2.Data.agent.estimator.result{1,i}.state.v(1:3);
+        w2(:,j)=name2.Data.agent.estimator.result{1,i}.state.w(1:3);
         j=j+1;
     end
 end
-
 %二乗誤差平均
+if fsingle == 1
     RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
     RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
     RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
     RMSE = ["RMSE_x" "RMSE_y" "RMSE_z" ;
                     RMSE_x RMSE_y RMSE_z]
-
+else
+    RMSE_x1=sqrt(immse(ref1(1,:),est1(1,:)));
+    RMSE_y1=sqrt(immse(ref1(2,:),est1(2,:)));
+    RMSE_z1=sqrt(immse(ref1(3,:),est1(3,:)));
+    RMSE1 = ["RMSE_x" "RMSE_y" "RMSE_z" ;
+                    RMSE_x1 RMSE_y1 RMSE_z1]
+    RMSE_x2=sqrt(immse(ref2(1,:),est2(1,:)));
+    RMSE_y2=sqrt(immse(ref2(2,:),est2(2,:)));
+    RMSE_z2=sqrt(immse(ref2(3,:),est2(3,:)));
+    RMSE2 = ["RMSE_x" "RMSE_y" "RMSE_z" ;
+                    RMSE_x2 RMSE_y2 RMSE_z2]
+end
 
 % figure
 FigName=["t-p" "x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma"];
@@ -479,7 +491,7 @@ legend('ref','HL','FT')
     
     f(4)=figure('Name',FigName(4));
     hold on
-    plot(time1,ref1(3,:),'LineWidth',LW);
+%     plot(time1,ref1(3,:),'LineWidth',LW);
     plot(time2,ref2(3,:),'LineWidth',LW);
     plot(time1,est1(3,:),'LineWidth',LW);
     plot(time2,est2(3,:),'LineWidth',LW);
@@ -487,7 +499,7 @@ legend('ref','HL','FT')
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
     ylabel('z[m]')
-    legend('refHL','refFT','HL','FT')
+    legend('refHL','FL','FT')
     hold off
     
     f(5)=figure('Name',FigName(5));
@@ -559,6 +571,24 @@ legend('ref','HL','FT')
     zlabel('z[m]')
     legend('refHL','refFT','HL','FT')
     hold off
+    i=10;
+     i=i+1;
+    f(i)=figure('Name',FigName(i));
+    hold on
+    plot3(ref1(1,:),ref1(2,:),ref1(3,:),'LineWidth',LW);
+    plot3(est1(1,:),est1(2,:),est1(3,:),'LineWidth',LW);
+    plot3(est2(1,:),est2(2,:),est2(3,:),'LineWidth',LW);
+    grid on
+    title(HLorFT)
+    set(gca,'FontSize',fosi)
+    xlabel('x[m]')
+    ylabel('y[m]')
+    zlabel('z[m]')
+    daspect([1,1,1])
+    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    daspect([1,1,1]);
+    campos([-45,-45,60]);
+    hold off 
 end
 
 %% make folder
