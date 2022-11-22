@@ -5,18 +5,27 @@ clc
 clear
 close all
 
+%データ保存先ファイル名
+FileName = 'EstimationResult.mat';
+
+%データ保存用,現在のファイルパスを取得,保存先を指定
+activeFile = matlab.desktop.editor.getActive;
+nowFolder = fileparts(activeFile.Filename);
+targetpath=append(nowFolder,'\',FileName);
+
 %% load data
-% 実験データから必要なものを抜き出す処理
+% 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一位置のデータが対応関係にある)
 % Data.X 入力前の対象の状態
 % Data.U 対象への入力
 % Data.Y 入力後の対象の状態
 
 Data = InportFromExpData();
 
+% クォータニオンのノルムをチェック
+% 閾値を下回った or 上回った場合注意文を提示
 if size(Data.X,1)==13
-    for i=1:Data.N-1
-        attitude_norm(i) = norm(Data.est.q(i,:));
-    end
+    thre = 0.01;
+    attitude_norm = checkQuaternionNorm(Data.est.q',thre);
 end
 
 %% Defining Koopman Operator
@@ -24,7 +33,7 @@ end
 % クープマン作用素を定義
 % F@(X) Xを与える関数ハンドルとして定義
 % F = @(x) x; % 状態そのまま
-F = @quarternionParameter; % クォータニオンを含むパラメータを追加 20221109 現状発散する なんで？
+F = @quaternionParameter; % クォータニオンを含むパラメータを追加 20221109 現状発散する なんで？
 
 %% Koopman linear
 %Xlift,Yliftを計算する
@@ -82,12 +91,14 @@ else
 end
 simResult.state.N = Data.N-1;
 
-save('KoopmanApproarch\Koopman_Linear_by_Data\EstimationResult','est','Data','simResult')
+save(targetpath,'est','Data','simResult')
+disp('Saved to')
+disp(targetpath)
 
 %% Display MSE
 % 工事中
 
-%% Plot by Data with Quarternion13
+%% Plot by simulation
 % P
 figure(1)
 subplot(2,1,1);

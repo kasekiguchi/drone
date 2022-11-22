@@ -1,5 +1,5 @@
-function z = Euler2QuarternionParameter(x)
-%EULER2QUORTERNIONPARAMETER クォータニオンをパラメータとして含む観測量 オイラー角からクォータニオンへ変換
+function z = Euler2QuaternionParameter(x)
+%EULER2QUATERNIONPARAMETER クォータニオンをパラメータとして含む観測量 オイラー角からクォータニオンへ変換
 %   Z = quartanionParameter(X)
 %   X : [位置P; オイラー角Q; 速度V; 角速度W]を持つ12次元の状態量
 %   Z : [X; (クォータニオンを含む項) ]

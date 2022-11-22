@@ -11,7 +11,7 @@ function data = InportFromExpData()
 
 % 実験データ読み込み
 % 読み込むファイル名を指定
-expData_Filename = 'TestData_Quarternion.mat'
+expData_Filename = 'TestData_Quaternion.mat'
 
 load(expData_Filename);
 clear data % 読み込んだファイル内のdataと同名の変数を初期化
@@ -19,6 +19,8 @@ clear data % 読み込んだファイル内のdataと同名の変数を初期化
 data.N = find(logger.Data.t,1,'last');
 
 %% Get data
+% 状態毎に分割して保存
+% XYに結合する際の都合で↓時系列,→状態
 %--------------------time----------------------
 data.t = logger.Data.t(1:data.N);
 %-------------------estimator----------------------
@@ -30,6 +32,8 @@ data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.
 data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N},1:data.N,'UniformOutput',false))';
 
 %% Set Dataset and Input
+% クープマン線形化のためのデータセットに結合
+% ↓状態,→時系列
 for i=1:1:data.N -1
     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
     data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
