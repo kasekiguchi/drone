@@ -58,39 +58,28 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     % データ保存初期化
     data.xr{idx+1} = 0;
-    data.path{idx+1} = 0;   % - 全サンプル全ホライズンの値
-    data.pathJ{idx+1} = 0;  % - 全サンプルの評価値
-    data.sigma(idx+1) = 0;
-    data.bestcost(idx+1) = 0;
+    data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
+    data.pathJ{idx+1} = 0;      % - 全サンプルの評価値
+    data.sigma(idx+1) = 0;      % - 標準偏差 
+    data.bestcost(idx+1) = 0;   % - 評価値
+    data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
 
     dataNum = 11;
     data.state           = zeros(round(te/dt + 1), dataNum);       
-    data.state(idx+1, 1) = idx * dt; % - 現在時刻
-    data.state(idx+1, 2) = initial.p(1);   % - 状態 x
-    data.state(idx+1, 3) = initial.p(2);   % - 状態 y
-    data.state(idx+1, 4) = initial.p(3);   % - 状態 z
+    data.state(idx+1, 1) = idx * dt;        % - 現在時刻
+    data.state(idx+1, 2) = initial.p(1);    % - 状態 x
+    data.state(idx+1, 3) = initial.p(2);    % - 状態 y
+    data.state(idx+1, 4) = initial.p(3);    % - 状態 z
     data.state(idx+1, 5) = agent.input(1);  % - 入力 u1
     data.state(idx+1, 6) = agent.input(2);  % - 入力 u2
     data.state(idx+1, 7) = agent.input(3);  % - 入力 u3
     data.state(idx+1, 8) = agent.input(4);  % - 入力 u4
-    data.state(idx+1, 9) = 0;    % - 目標状態 xr
-    data.state(idx+1, 10) = 0;   % - 目標状態 yr
-    data.state(idx+1, 11) = 0;   % - 目標状態 zr
+    data.state(idx+1, 9) = 0;               % - 目標状態 xr
+    data.state(idx+1, 10) = 0;              % - 目標状態 yr
+    data.state(idx+1, 11) = 0;              % - 目標状態 zr
     data.bestx(idx+1, :) = repelem(initial.p(1), Params.H); % - もっともよい評価の軌道x成分
     data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
     data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
-
-    %     data.state(idx+1, 2) = x(1);     % - 状態 x
-    %     data.state(idx+1, 3) = x(2);     % - 状態 y
-    %     data.state(idx+1, 4) = 0;        % - 入力 ux  
-    %     data.state(idx+1, 5) = 0;        % - 入力 uy
-    %     data.state(idx+1, 6) = 0;        % - ux,uyのノルム
-    %     data.state(idx+1, 7) = 0;        % - 目標状態 xr
-    %     data.state(idx+1, 8) = 0;        % - 目標状態 yr
-    %     data.bestx(idx+1, :) = repelem(x(1), Params.H); % - もっともよい評価の軌道x成分
-    %     data.besty(idx+1, :) = repelem(x(2), Params.H); % - もっともよい評価の軌道y成分
-    %     data.sigmax(idx+1, :) = 0; % - xの標準偏差の値
-    %     data.sigmay(idx+1, :) = 0; % - yの標準偏差の値
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
     %%
@@ -174,6 +163,7 @@ end
         data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
         data.sigma(idx) = agent.controller.result.sigma;
         data.bestcost(idx) = agent.controller.result.bestcost;
+        data.removeF(idx+1) = agent.controller.result.removeF;
 
         data.state(idx+1, 1) = idx * dt; % - 現在時刻
         data.state(idx+1, 2) = agent.estimator.result.state.p(1);   % - 状態 x
@@ -190,9 +180,9 @@ end
         data.besty(idx+1, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
         data.bestz(idx+1, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
 
-
-        removeF = agent.controller.result.removeF;
-        if removeF == 0
+        
+        
+        if data.removeF(idx+1) == 0
             disp('State Constraint Violation!')
         end
         
