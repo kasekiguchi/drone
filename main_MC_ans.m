@@ -333,6 +333,21 @@ plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
 legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
 set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
+%% 2軸グラフ
+figure(9);
+yyaxis left
+logger.plot({1, "input", ""});
+fig9_LW = 0.5;
+% plot(logger.data('t', [], []), data.input(:, 1), "Color", "blue", "LineWidth", fig9_LW, 'LineStyle','-'); hold on;
+% plot(logger.data('t', [], []), data.input(:, 2), "Color", "red", "LineWidth", fig9_LW, 'LineStyle','-')
+% plot(logger.data('t', [], []), data.input(:, 3), "Color", "#FCAF22", "LineWidth", fig9_LW, 'LineStyle','-')
+% plot(logger.data('t', [], []), data.input(:, 4), "Color", "#A757A8", "LineWidth", fig9_LW, 'LineStyle','-'); hold off;
+set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input");
+yyaxis right
+plot(logger.data('t', [], [])', data.bestcost(1:end-1), 'LineWidth', 2, 'LineStyle','--');
+set(gca,'FontSize',15);  grid on; title(""); ylabel("Evaluation [m]"); xlabel("time [s]"); xlim([0 10]);
+legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
+
 %% 動画生成
 %  ディレクトリ生成
 mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation1
