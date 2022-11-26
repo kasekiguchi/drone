@@ -236,7 +236,7 @@ end
                     for h = 1:Params.H-1
 %                         [~,tmpx]=agent.model.solver(@(t,x) agent.model.method(x, u(:, h, m),agent.parameter.get()),[ts ts+0.1],x0);
                         % x[k+1] = Ax[k] + Bu[k]
-                        tmpx = Params.A * previous_state + Params.B * u(:, h, m);
+                        tmpx = Params.A * x0 + Params.B * u(:, h, m);
                         x0 = tmpx;
                         
                         state_data(:, h+1, m) = x0;
@@ -383,21 +383,7 @@ agent(1).animation(logger,"target",1);
 % logger.save();
 
 %% 制御モデル
-function [Ad, Bd, Cd, Dd]  = MassModel(Td)
-        %-- 連続系線形システム
-%         Lx = params.Lx;
-%         Ly = params.Ly;
-%         lx = params.lx;%0.05;
-%         ly = params.ly;%0.05;
-%         xx = params.jx;
-%         xy = params.jy;
-%         xz = params.jz;
-%         gravity = params.gravity;
-%         km1 = params.km1; % ロータ定数
-%         km2 = params.km2; % ロータ定数
-%         km3 = params.km3; % ロータ定数
-%         km4 = params.km4; % ロータ定数
-        
+function [Ad, Bd, Cd, Dd]  = MassModel(Td)      
         %-- DIATONE MODEL PARAM
             Lx = 0.117;
             Ly = 0.0932;

@@ -26,10 +26,13 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.param.modelparam.modelsolver = obj.self.model.solver;
 
             %%
-            obj.input.Initsigma = param.Initsigma;
-            obj.input.Constsigma = param.Constsigma;
-            obj.input.Maxsigma = param.Maxsigma;
-            obj.input.Minsigma = param.Minsigma;
+%             obj.input.Initsigma = param.Initsigma;
+%             obj.input.Constsigma = param.Constsigma;
+%             obj.input.Maxsigma = param.Maxsigma;
+%             obj.input.Minsigma = param.Minsigma;
+%             obj.input.Maxinput = param.Maxinput;
+
+            obj.input = param.input;
 %             obj.state.Constraints = param.Constraints;
             obj.state.ConstraintsY = param.ConstraintsY;
 
@@ -56,7 +59,17 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function result = do(obj,param)
             idx = param{1};
             xr = param{2};
+            SystemM = param{3};
+            obj.param.A = SystemM.A;
+            obj.param.B = SystemM.B;
+            obj.param.C = SystemM.C;
+            obj.param.D = SystemM.D;
             obj.state.ref = xr;
+
+            %%--%%
+            
+%             modelF = modelfun(0)
+
             
             if idx == 1
                 ave1 = 0.269*9.81/4;      % average
@@ -76,7 +89,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 end
                 obj.input.sigma = obj.input.nextsigma;
             end
-            rng ('shuffle');
+%             rng ('shuffle');
             obj.input.u1 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave1;
             obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave2;
             obj.input.u3 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave3;
@@ -85,6 +98,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.input.u2(obj.input.u2<0) = 0;
             obj.input.u3(obj.input.u3<0) = 0;
             obj.input.u4(obj.input.u4<0) = 0;
+            obj.input.u1(obj.input.u1>obj.input.Maxinput) = obj.input.Maxinput; % 上限
+            obj.input.u2(obj.input.u2>obj.input.Maxinput) = obj.input.Maxinput;
+            obj.input.u3(obj.input.u3>obj.input.Maxinput) = obj.input.Maxinput;
+            obj.input.u4(obj.input.u4>obj.input.Maxinput) = obj.input.Maxinput;
             obj.input.u(4, 1:obj.param.H, 1:obj.param.particle_num) = obj.input.u4;   % reshape
             obj.input.u(3, :, :) = obj.input.u3;   
             obj.input.u(2, :, :) = obj.input.u2;
@@ -171,8 +188,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %                 x0 = obj.previous_state;
 %                 obj.state.state_data(:, 1, m) = obj.previous_state;
 %                 for h = 1:obj.param.H-1
-%                     [~,tmpx]=obj.param.modelparam.modelsolver(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
-% %                     [~,tmpx]=obj.param.modelparam.modelsolver(@(t,x) obj.param.modelparam.modelmethod(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
+% %                     [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
+%                     tmpx = obj.param.A .* x0 + obj.param.B * obj.input.u(:, h, m);
 %                     x0 = tmpx(end, :);
 %                     obj.state.state_data(:, h+1, m) = x0;
 %                 end
@@ -215,14 +232,14 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %         end
 
         function [predict_state] = predict(obj)
-            ts = 0;
+            modelF = @roll_pitch_yaw_thrust_force_physical_parameter_model;
+%             ts = 0;
             %-- 予測軌道計算
             for m = 1:obj.input.u_size
                 x0 = obj.previous_state;
                 obj.state.state_data(:, 1, m) = obj.previous_state;
                 for h = 1:obj.param.H-1
-                    [~,tmpx]=obj.param.modelparam.modelsolver(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
-                    x0 = tmpx(end, :);
+                    x0 = x0 + obj.param.dt * modelF(x0, obj.input.u(:, h, m), obj.param.modelparam.modelparam);
                     obj.state.state_data(:, h+1, m) = x0;
                 end
             end
@@ -262,6 +279,12 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef)...
                 + terminalState;
         end
+
+%         function xk = eular(obj)
+%             modelF = @roll_pitch_yaw_thrust_force_physical_parameter_model;
+%             xk = obj.self.estimator.result.state.get() + obj.param.dt.*modelF(obj.self.estimator.result.state.get(), obj.input.u, obj.modelparam.modelparam);
+% 
+%         end
     end
 end
 

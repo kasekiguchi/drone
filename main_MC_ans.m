@@ -83,6 +83,13 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
+
+    %-- 予測モデルのシステム行列
+        [MPC_Ad, MPC_Bd, MPC_Cd, MPC_Dd] = MassModel(Params.dt);
+            Params.model.A = MPC_Ad;
+            Params.model.B = MPC_Bd;
+            Params.model.C = MPC_Cd;
+            Params.model.D = MPC_Dd;
     %%
 
 run("main3_loop_setup.m");
@@ -150,7 +157,7 @@ end
             % reference from HL
 %             xr = Reference(Params, time.t, X);
             % controller
-            param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
+            param(i).controller.mcmpc = {idx, xr, Params.model};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -317,10 +324,10 @@ logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid o
 
 %% 動画生成
 %  ディレクトリ生成
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
-Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
+mkdir D:Documents\University\MCMPC\simdata png/Animation1
+mkdir D:Documents\University\MCMPC\simdata png/Animation_omega
+mkdir D:Documents\University\MCMPC\simdata video
+Outputdir = 'D:Documents\University\MCMPC\simdata';
 PlotMov       % 2次元プロット
 % PlotMovXYZ  % 3次元プロット
 % save()
@@ -331,3 +338,73 @@ agent(1).animation(logger,"target",1);
 
 %%
 % logger.save();
+
+%% 制御モデル
+function [Ad, Bd, Cd, Dd]  = MassModel(Td)      
+    %-- DIATONE MODEL PARAM
+        Lx = 0.117;
+        Ly = 0.0932;
+        lx = 0.117/2;       %0.05;
+        ly = 0.0932/2;      %0.05;
+        xx = 0.02237568;    % jx
+        xy = 0.02985236;    % jy
+%             xx = 100 * 0.02237568;    % jx
+%             xy = 100 * 0.02985236;    % jy
+        xz = 0.0480374;     % jz
+        gravity = 9.81;     % gravity
+        km1 = 0.0301;       % ロータ定数
+        km2 = 0.0301;       % ロータ定数
+        km3 = 0.0301;       % ロータ定数
+        km4 = 0.0301;       % ロータ定数
+        %-- 平衡点：原点
+%             Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+          %-- 平衡点：　1m上空でホバリング [0 0 1 0 0 0 0 0 0 0 0 0 0 hover hover hover hover]
+        Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
+                 0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
+                 0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
+                 0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
+
+        Bc = [    0,        0,        0,        0;
+                  0,        0,        0,        0;
+                  0,        0,        0,        0;
+                  0,        0,        0,        0;
+                  0,        0,        0,        0;
+                  0,        0,        0,        0;
+                  0,        0,        0,        0;
+                  0,        0,        0,        0;
+                  1000/269, 1000/269,   1000/269,   1000/269;
+                  ly/xx,   -ly/xx,     (Ly-ly)/xx,   (Ly-ly)/xx;
+                  lx/(xy),  -(Lx-lx)/xy,lx/xy,      -(Lx-lx)/xy;
+                  km1/xz,   -km2/xz,    -km3/xz,    km4/xz];
+
+        Cc = diag([1 1 1 1 1 1 1 1 1 1 1 1]);
+        Dc = 0;
+        % 可制御性，可観測
+        Uc = [Bc Ac*Bc Ac^2*Bc Ac^3*Bc Ac^4*Bc Ac^5*Bc Ac^6*Bc Ac^7*Bc Ac^8*Bc Ac^9*Bc Ac^10*Bc Ac^11*Bc];
+        Uo = [Cc;Cc*Ac;Cc*Ac^2;Cc*Ac^3;Cc*Ac^4;Cc*Ac^5;Cc*Ac^6;Cc*Ac^7;Cc*Ac^8;Cc*Ac^9;Cc*Ac^10;Cc*Ac^11];
+        sys = ss(Ac, Bc, Cc, Dc);
+
+    %-- 離散系システム
+            dsys = c2d(sys, Td); % - 連続系から離散系への変換
+            [Ad, Bd, Cd, Dd] = ssdata(dsys);
+
+end
