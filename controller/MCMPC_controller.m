@@ -59,11 +59,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function result = do(obj,param)
             idx = param{1};
             xr = param{2};
-            SystemM = param{3};
-            obj.param.A = SystemM.A;
-            obj.param.B = SystemM.B;
-            obj.param.C = SystemM.C;
-            obj.param.D = SystemM.D;
             obj.state.ref = xr;
 
             %%--%%
@@ -180,7 +175,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             removeF = size(removeX, 1); % particle_num -> 全棄却
         end
 
-
+        %%-- 連続ode
 %         function [predict_state] = predict(obj)
 %             ts = 0;
 %             %-- 予測軌道計算
@@ -188,8 +183,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %                 x0 = obj.previous_state;
 %                 obj.state.state_data(:, 1, m) = obj.previous_state;
 %                 for h = 1:obj.param.H-1
-% %                     [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
-%                     tmpx = obj.param.A .* x0 + obj.param.B * obj.input.u(:, h, m);
+%                     [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
+% %                     tmpx = obj.param.A .* x0 + obj.param.B * obj.input.u(:, h, m);
 %                     x0 = tmpx(end, :);
 %                     obj.state.state_data(:, h+1, m) = x0;
 %                 end
@@ -231,9 +226,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %             predict_state = state_data;
 %         end
 
+        %%-- 連続；オイラー近似
         function [predict_state] = predict(obj)
             modelF = @roll_pitch_yaw_thrust_force_physical_parameter_model;
-%             ts = 0;
             %-- 予測軌道計算
             for m = 1:obj.input.u_size
                 x0 = obj.previous_state;
