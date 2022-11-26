@@ -16,7 +16,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 30; % default: 10
+    te = 3; % default: 10
 end
 
 %% generate environment
@@ -86,7 +86,7 @@ else
             % take off
 %             arranged_pos = arranged_position([0, 0], N, 1, 0.01);% [x, y], 機数，1, z
             % landing
-            arranged_pos = arranged_position([1, 0], N, 1, 1);% [x, y], 機数，1, z
+            arranged_pos = arranged_position([0, 0], N, 1, 1);% [x, y], 機数，1, z
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];

@@ -21,6 +21,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.param = param;
             obj.param.subCheck = zeros(obj.param.particle_num, 1);
             obj.param.fRemove = 0;
+            obj.param.modelparam.modelparam = obj.self.parameter.get();
+            obj.param.modelparam.modelmethod = obj.self.model.method;
+            obj.param.modelparam.modelsolver = obj.self.model.solver;
 
             %%
             obj.input.Initsigma = param.Initsigma;
@@ -90,7 +93,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.previous_state = obj.self.estimator.result.state.get();
 
             %-- 状態予測
-            [obj.state.predict_state, obj.param.subCheck] = obj.predict();
+            [obj.state.predict_state] = obj.predict();
             if obj.state.predict_state(3, 1, :) < 0
                 obj.param.fRemove = 1;
             end
@@ -103,10 +106,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
 
             %-- 制約条件
-            [removeF] = obj.constraints();
-%             removeF = 1;
+%             [removeF, removeX] = obj.constraints();
+            removeF = 1; removeX = [];
             
-            if removeF ~= 0
+            if removeF ~= obj.param.particle_num
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
                 %-- resampling
                 %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
@@ -129,9 +132,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 obj.input.nextsigma = obj.input.Constsigma;
             end
             obj.result.removeF = removeF;
-            
+            obj.result.removeX = removeX;
             obj.self.input = obj.result.input;
             obj.result.BestcostID = BestcostID;
+            obj.result.contParam = obj.param;
             obj.result.fRemove = obj.param.fRemove;
             obj.result.path = obj.state.state_data;
             obj.result.sigma = obj.input.nextsigma;
@@ -143,39 +147,91 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.result
         end
 
-        function [removeF] = constraints(obj)
+        function [removeF, removeX] = constraints(obj)
 %             NP = obj.param.particle_num;
             % 状態制約
-            removeFe = (obj.state.state_data(2, 1, :) <= obj.state.ConstraintsY);   % y座標制約
+            removeFe = (obj.state.state_data(1, 1, :) >= obj.state.ConstraintsY);   % y座標制約
             % 棄却するサンプル番号を算出
             removeX = find(removeFe);
 %             Fe_size = size(removeFe_check);
             % サンプル番号の重なりをなくす
 %             removeX = unique(removeFe_check);
             % 制約違反の入力サンプル(入力列)を棄却
-            obj.input.u(:,:,removeX) = NaN;
-            obj.state.state_data(:, :, removeX) = NaN;
+%             obj.input.u(:,:,removeX) = [];
+%             obj.state.state_data(:, :, removeX) = [];
             % 全制約違反による分散リセットを確認するフラグ  
-%             if isnan(obj.input.u(:, :, removeX)); obj.input.u(:, :, removeX) = []; end
-%             if isnan(obj.state.state_data(:, :, removeX)); obj.state.state_data(:, :, removeX) = []; end
-            removeF = obj.param.particle_num - size(removeX, 1); % 0 -> 全棄却
+            removeF = size(removeX, 1); % particle_num -> 全棄却
         end
 
-        function [predict_state, subCheck] = predict(obj)
+
+%         function [predict_state] = predict(obj)
+%             ts = 0;
+%             %-- 予測軌道計算
+%             for m = 1:obj.input.u_size
+%                 x0 = obj.previous_state;
+%                 obj.state.state_data(:, 1, m) = obj.previous_state;
+%                 for h = 1:obj.param.H-1
+%                     [~,tmpx]=obj.param.modelparam.modelsolver(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
+% %                     [~,tmpx]=obj.param.modelparam.modelsolver(@(t,x) obj.param.modelparam.modelmethod(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
+%                     x0 = tmpx(end, :);
+%                     obj.state.state_data(:, h+1, m) = x0;
+%                 end
+%             end
+%             predict_state = obj.state.state_data;
+%         end
+
+
+%         function [predict_state] = predict(obj)
+%             % parfor のための定義
+%             x0 = obj.previous_state;
+%             initx = obj.previous_state;
+%             H = obj.param.H;
+%             modelparam = obj.param.modelparam.modelparam;
+%             roterinput = obj.input.u;
+%             MPCdt = obj.param.dt;
+%             ps = x0;
+%             state_data = zeros(12, obj.param.H, obj.param.particle_num);
+%             
+% 
+%             ts = 0;
+%             %-- 予測軌道計算
+%             for m = 1:obj.input.u_size
+%                 state_data(:, 1, m) = ps;
+%                 parfor h = 1:H-1
+%                     if h == 1
+%                         x0 = initx;
+%                         [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, roterinput(:, h, m),modelparam),[ts ts+MPCdt],x0);
+%                         x0p = tmpx(end, :);
+%                         state_data(:, h+1, m) = x0p;
+%                     else
+%                         x0 = x0p;
+%                         [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, roterinput(:, h, m),modelparam),[ts ts+MPCdt],x0);
+%                         x0p = tmpx(end, :);
+%                         state_data(:, h+1, m) = x0p;
+%                     end
+%                 end
+%             end
+%             predict_state = state_data;
+%         end
+
+        function [predict_state] = predict(obj)
             ts = 0;
             %-- 予測軌道計算
             for m = 1:obj.input.u_size
                 x0 = obj.previous_state;
                 obj.state.state_data(:, 1, m) = obj.previous_state;
                 for h = 1:obj.param.H-1
-                    [~,tmpx]=obj.self.model.solver(@(t,x) obj.self.model.method(x, obj.input.u(:, h, m),obj.self.parameter.get()),[ts ts+obj.param.dt],x0);
+                    [~,tmpx]=obj.param.modelparam.modelsolver(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
                     x0 = tmpx(end, :);
                     obj.state.state_data(:, h+1, m) = x0;
                 end
             end
             predict_state = obj.state.state_data;
-            subCheck = obj.param.subCheck;
         end
+
+
+        %------------------------------------------------------
+        %======================================================
         function [MCeval] = objective(obj, m)   % obj.~とする
             X = obj.state.state_data;       %12 * 10
             U = obj.input.u(:,:,m);         %12 * 10

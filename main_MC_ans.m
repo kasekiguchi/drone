@@ -63,6 +63,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     data.sigma(idx+1) = 0;      % - 標準偏差 
     data.bestcost(idx+1) = 0;   % - 評価値
     data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
+    data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
 
     dataNum = 11;
     data.state           = zeros(round(te/dt + 1), dataNum);       
@@ -157,13 +158,17 @@ end
         end
 
         %-- データ保存
+        if idx == 1
+            data.param = agent.controller.result.contParam;
+        end
         state_data = agent.controller.result.path;
         BestcostID = agent.controller.result.BestcostID;
         data.path{idx} = state_data;
         data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
         data.sigma(idx) = agent.controller.result.sigma;
         data.bestcost(idx) = agent.controller.result.bestcost;
-        data.removeF(idx+1) = agent.controller.result.removeF;
+        data.removeF(idx+1) = agent.controller.result.removeF;   % - 棄却されたサンプル数
+        data.removeX{idx+1} = agent.controller.result.removeX;
 
         data.state(idx+1, 1) = idx * dt; % - 現在時刻
         data.state(idx+1, 2) = agent.estimator.result.state.p(1);   % - 状態 x
@@ -176,18 +181,21 @@ end
         data.state(idx+1, 9)  = xr(1, 1);    % - 目標状態 xr
         data.state(idx+1, 10) = xr(2, 1);   % - 目標状態 yr
         data.state(idx+1, 11) = xr(3, 1);   % - 目標状態 zr
-        data.bestx(idx+1, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
-        data.besty(idx+1, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
-        data.bestz(idx+1, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
 
-        
-        
+        if data.removeF(idx+1) ~= data.param.particle_num
+            data.bestx(idx+1, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
+            data.besty(idx+1, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
+            data.bestz(idx+1, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
+        else
+            data.bestx(idx+1, :) = data.bestx(idx, :); % - もっともよい評価の軌道x成分
+            data.besty(idx+1, :) = data.besty(idx, :); % - もっともよい評価の軌道y成分
+            data.bestz(idx+1, :) = data.bestz(idx, :); % - もっともよい評価の軌道z成分
+        end
+   
         if data.removeF(idx+1) == 0
             disp('State Constraint Violation!')
         end
-        
-%             data.state{idx} = state_data(:, 1, BestcostID);
-%             data.input{idx} = u;
+
         state_monte = agent.estimator.result.state;
         ref_monte = agent.reference.result.state;
 
@@ -219,23 +227,6 @@ end
             logger.logging(time.t, FH, agent, []);
             calculation2 = toc(tStart);
             time.t = time.t + calculation2 - calculation1;
-
-            %% logging
-            %             calculation = toc;
-            %             wait_time = 0.9999 * (sampling - calculation);
-            %
-            %             if wait_time < 0
-            %                 wait_time
-            %                 warning("ACSL : sampling time is too short.");
-            %             end
-            %            time.t = time.t + calculation;
-
-            %            else
-            %                pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
-            % これをやるとpause中が不安定になる．どうしても一定時間にしたいならwhile でsamplingを越えるのを待つなどすればよいかも．
-            % それよりは推定などで，calculationを意識した更新をしてあげた方がよい？
-            %                time.t = time.t + sampling;
-            %            end
         else
             logger.logging(time.t, FH, agent);
 
@@ -249,7 +240,7 @@ end
         fRemove = agent.controller.result.fRemove;
         if fRemove == 1
             warning("Emergency Stop!!!")
-            break
+            break;
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
         totalT = totalT + calT;
@@ -259,38 +250,14 @@ end
         clf
         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
         TvC = 0:Params.dt:te;
-        %% take off
-%         rz = 1; % 目標
-%         rz0 = 0;% スタート
-%         T = 10; % かける時間
-%         a = -2/T^3 * (rz-rz0);
-%         b = 3/T^2 * (rz-rz0);
-%         CRz = a*(TvC).^3+b*(TvC).^2+rz0;
-%         plot(Tv, xr(3, :), '-', 'LineWidth', 2);hold on;
-%         plot(TvC, CRz, '--', 'LineWidth', 1);
-%         plot(time.t, agent.estimator.result.state.p(3), 'h', 'MarkerSize', 20);
-%         hold off;
-%         legend("xr.z", "h.z", "Location", "southeast");
-
         %% circle
-        CRx = cos(TvC/2);
-        CRy = sin(TvC/2);
-%         
-%         TvC = 0:Params.dT:te-0.025;
-%         CRx = X(1, :);
-%         CRy = X(2, :);
-
-        plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
-        plot(Tv, xr(2, :), '-', 'LineWidth', 2);
-
-        plot(TvC, CRx, '--', 'LineWidth', 1);
-        plot(TvC, CRy, '--', 'LineWidth', 1);
+        plot(Tv, xr(1, :), '.', 'LineWidth', 2);hold on;
+        plot(Tv, xr(2, :), '.', 'LineWidth', 2);
         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
         hold off;
         xlabel("Time [s]"); ylabel("Reference [m]");
-        legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
-%         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
+        legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
         xlim([0 te]); ylim([-inf inf+0.1]); 
 
         fprintf("sigma: %f\n", data.sigma(idx))
@@ -324,36 +291,36 @@ logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid o
 logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
 %% Difference of Pos
-figure(7);
-plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+% figure(7);
+% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
 %% 2軸グラフ
-figure(9);
-yyaxis left
-logger.plot({1, "input", ""});
-fig9_LW = 0.5;
-% plot(logger.data('t', [], []), data.input(:, 1), "Color", "blue", "LineWidth", fig9_LW, 'LineStyle','-'); hold on;
-% plot(logger.data('t', [], []), data.input(:, 2), "Color", "red", "LineWidth", fig9_LW, 'LineStyle','-')
-% plot(logger.data('t', [], []), data.input(:, 3), "Color", "#FCAF22", "LineWidth", fig9_LW, 'LineStyle','-')
-% plot(logger.data('t', [], []), data.input(:, 4), "Color", "#A757A8", "LineWidth", fig9_LW, 'LineStyle','-'); hold off;
-set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input");
-yyaxis right
-plot(logger.data('t', [], [])', data.bestcost(1:end-1), 'LineWidth', 2, 'LineStyle','--');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Evaluation [m]"); xlabel("time [s]"); xlim([0 10]);
-legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
+% figure(9);
+% yyaxis left
+% logger.plot({1, "input", ""});
+% fig9_LW = 0.5;
+% % plot(logger.data('t', [], []), data.input(:, 1), "Color", "blue", "LineWidth", fig9_LW, 'LineStyle','-'); hold on;
+% % plot(logger.data('t', [], []), data.input(:, 2), "Color", "red", "LineWidth", fig9_LW, 'LineStyle','-')
+% % plot(logger.data('t', [], []), data.input(:, 3), "Color", "#FCAF22", "LineWidth", fig9_LW, 'LineStyle','-')
+% % plot(logger.data('t', [], []), data.input(:, 4), "Color", "#A757A8", "LineWidth", fig9_LW, 'LineStyle','-'); hold off;
+% set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input");
+% yyaxis right
+% plot(logger.data('t', [], [])', data.bestcost(1:end-1), 'LineWidth', 2, 'LineStyle','--');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Evaluation [m]"); xlabel("time [s]"); xlim([0 10]);
+% legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
 
 %% 動画生成
 %  ディレクトリ生成
-mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation1
-mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata png/Animation_omega
-mkdir C:\Users\student\Documents\GitHub\drone\DATAdir\simdata video
-Outputdir = 'C:\Users\student\Documents\GitHub\drone\DATAdir\simdata';
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
+Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
 PlotMov       % 2次元プロット
 % PlotMovXYZ  % 3次元プロット
 % save()

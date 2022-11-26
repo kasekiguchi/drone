@@ -1,23 +1,38 @@
 
 %アニメーション作成中にグラフ触ると動画生成止まるから注意
     Color_map = (169/255)*ones(1000000,3);
-	Color_map(1:10,:) = jet(10);
+	Color_map(1:200,:) = jet(200);
+%     Color_map(1:1000000, :) = jet(1:1000000);
 	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v2'));
 	open(writerObj);
 
 	for count = 1:size(data.pathJ,2)
 %         count = 50;
-        clf(figure(999))
+        clf(figure(999))    % figureの削除
 		fig = figure(999);
 		ax = gca;
 %         patch([1 5 5 1],[-0.5 -0.5 1 1],'black','Facealpha',0.2);
         hold on
+        
+        T = 0:0.1:100;
+        X = cos(T/2);
+        Y = sin(T/2);
+        plot(X, Y, 'LineStyle', '--', 'LineWidth', 0.2);
+       
+        minI = mink(data.pathJ{count}(1,:), 50);
+        for L = 1:50
+            minIL = find(data.pathJ{count}(1, :) == minI(L)); 
+            data.pathJ{count}(1, minIL) = L; 
+        end
+
 %         plot(data.state(:,10),data.state(:,11),'-','Color',[0,0,0]/255,'LineWidth',4);
         hold on;
 		% 予測経路のplot
         path_count = size(data.pathJ{count},2);
 		for j = 1:path_count
-			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(data.pathJ{count}(1,j)+0.0001),:));
+            
+% 			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(data.pathJ{count}(1,j)+0.0001),:));
+            plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(data.pathJ{count}(1, j)),:));
 			hold on;
 		end
 % 		x = DATA.X(count);
@@ -37,13 +52,16 @@
 %             viscircles(Obs_posi,obj.r_obs,'LineWidth',0.1,'Color','black');hold on
 % 		end
 		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
-		str = ['$$t$$= ',num2str(data.state(count,1),'%.2f'),' s'];
+		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
         % circle : -0.27,1.3
-		text(-0.27,5.1,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])    %5.2, 2.5
+		text(-0.5,3.2,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])    %5.2, 2.5
 		grid on
+        % liner
+%         ax.YLim = [-1.5 1.5];
+%         ax.XLim = [-0.5 3];
         % circle
-        ax.YLim = [-5 5];
-		ax.XLim = [-5 5];
+        ax.YLim = [-1.5 1.5];
+		ax.XLim = [-1.5 1.5];
         % heart
 %         ax.YLim = [-3 1];
 %         ax.XLim = [-1 3];

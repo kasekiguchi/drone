@@ -4,13 +4,13 @@ function Controller = Controller_MCMPC(~)
 
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.particle_num = 5000;
+    Controller_param.particle_num = 200;
     Controller_param.Initsigma = 0.1;
     Controller_param.Constsigma = 2.0;
     Controller_param.Maxsigma = 1.0;
     Controller_param.Minsigma = 0.05;
     Controller_param.ref_input = (0.269 * 9.81 / 4) * ones(4,1);
-    Controller_param.ConstraintsY = -0.5;
+    Controller_param.ConstraintsY = 0.6;
 
     Controller_param.total_size = 16;
     Controller_param.state_size = 12;

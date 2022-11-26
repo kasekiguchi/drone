@@ -209,6 +209,8 @@ end
             end
 %                     ave = 0.269*9.81/4;
 %                     RandN = randn(Params.H, Params.Particle_num);
+
+
             umax = 0.269 * 9.81 / 2;
             u1 = sigma.*randn(Params.H, Params.Particle_num) + ave1;
             u2 = sigma.*randn(Params.H, Params.Particle_num) + ave2;
@@ -220,6 +222,11 @@ end
             u(3, :, :) = u3;   
             u(2, :, :) = u2;
             u(1, :, :) = u1;
+
+            %% vector
+%             u = sigma.*randn(Params.Particle_num * 4, Params.H) + ave1;
+
+
             u_size = size(u, 3);    % Params.Particle_num
         %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
             p_data = zeros(Params.H, Params.Particle_num);
@@ -251,10 +258,6 @@ end
                         break;              % ホライズン途中でも制約外で終了
                     end
                 end
-%                         if state_data(3, 1, m) < 0.0
-%                             subCheck(m) = 1;    % 制約外なら flag = 1
-%                             break;              % ホライズン途中でも制約外で終了
-%                         end
             end
 
         %-- 評価値計算
