@@ -39,7 +39,7 @@ methods
             fExp = []
             items = []
             agent_items = []
-            option.overwrite_target = []
+            option.overwrite_target = ["sensor","input"]
         end
 
         if isstring(target) % save で保存されたデータを呼び出す場合
@@ -71,7 +71,7 @@ methods
                 obj.Data.agent.plant = tmp.plant;
             else % 一つのファイルとして保存した場合
                 tmp = load(target);
-                log = tmp.log;
+                log = tmp.logger;
                 fn = fieldnames(log);
 
                 for i = fn'
@@ -252,7 +252,7 @@ methods
             [~, tidx] = min(abs(obj.Data.t - t)); % 現在時刻に最も近い過去のデータを参照
 
             switch str
-                case "sensor"
+               case "sensor"
                     agent(n).sensor.result = obj.Data.agent(n).sensor.result{tidx};
                     agent(n).sensor.result.state = state_copy(obj.Data.agent(n).sensor.result{tidx}.state);
                 case "estimator"

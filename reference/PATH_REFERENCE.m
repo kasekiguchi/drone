@@ -75,7 +75,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             x = 0;
             y = 0;
 
-            ref = zeros(4,obj.Horizon);%set data size[x ;y ;theta;v]
+            ref = zeros(3,obj.Horizon);%set data size[x ;y ;theta;v]
 
             del = -[a.*c,b.*c]./(a.^2+b.^2); % 垂線の足
 
@@ -194,11 +194,16 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             obj.result.state.set_state("p",ref);%treat as a colmn vector
             obj.result.state.set_state("q",ref(3,1));%treat as a colmn vector
             obj.result.state.set_state("v",ref(4,1));%treat as a colmn vector
-            if vecnorm(obj.result.PreTrack - ref(:,1))>3
+%             if vecnorm(obj.result.PreTrack - ref(:,1))>3
+%                 obj.O;
+%             end
+            if vecnorm(obj.result.PreTrack - ref(1:3,1))>3
                 obj.O;
             end
-            obj.PreTrack = ref(:,1);
-            obj.result.PreTrack = ref(:,1);
+            obj.PreTrack = ref(1:3,1);
+            obj.result.PreTrack = ref(1:3,1);
+%             obj.PreTrack = ref(:,1);
+%             obj.result.PreTrack = ref(:,1);
             if isempty(obj.O)
                 obj.result.O = pe;
             else
@@ -243,8 +248,10 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             end
             p_Area = union(tmpenv(:));
             %plantFinalState
-            pstate = agent.plant.state.p(:,end);
-            pstateq = agent.plant.state.q(:,end);
+%             pstate = agent.plant.state.p(:,end);
+%             pstateq = agent.plant.state.q(:,end);
+            pstate = agent.estimator.result.state.p(:,end);
+            pstateq = agent.estimator.result.state.q(:,end);
             pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
             pstatesquare =  polyshape(pstatesquare');
             pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
@@ -272,14 +279,14 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             clf(FH)
             grid on
             axis equal
-            obj.self.show(["sensor","lrf"],[pstate;pstateq]);
+%             obj.self.show(["sensor","lrf"],[pstate;pstateq]);
             hold on
             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
             %    agent.sensor.LiDAR.show();
             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+%             plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
             plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
             O = agent.reference.result.O;
@@ -293,8 +300,8 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 xlim([xmin-5, xmax+5]);
                 ylim([ymin-5,ymax+5]);
             else
-                xlim([estate(1)-25, estate(1)+25]);
-                ylim([estate(2)-25,estate(2)+25]);
+                xlim([estate(1)-7, estate(1)+7]);
+                ylim([estate(2)-5,estate(2)+5]);
             end
             xlabel("$x$ [m]","Interpreter","latex");
             ylabel("$y$ [m]","Interpreter","latex");

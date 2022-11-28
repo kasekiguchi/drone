@@ -11,7 +11,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 1; % 1: active
+fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 0; % 1: active : for debug function
 run("main1_setting.m");
@@ -39,7 +39,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(21-Aug-2022_06_16_24).mat", ["sensor", "estimator"]);
+  logger = LOGGER("Data/Log(22_Nov_11_6).mat", ["sensor","input"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
@@ -81,9 +81,9 @@ try
       param(i).sensor.lidar = {};
 
       for j = 1:length(agent(i).sensor.name)
+          
         param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
       end
-
       agent(i).do_sensor(param(i).sensor.list);
       if (fOffline); logger.overwrite("sensor", time.t, agent, i); end
     end
@@ -127,9 +127,10 @@ try
     end
 
     if fDebug
-      %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-      %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
-       agent.show(["reference","tbug"],"FH",FH,"param",Env)
+        agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+% %       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+%       %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
+       %agent.show(["reference","tbug"],"FH",FH,"param",Env)
     end
 
     %% update state
@@ -216,10 +217,11 @@ hold off
 
 
 %% animation
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+% VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+% agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);%安西
+agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lrf"]);
 % agent(1).animation(logger,"target",1:N,"Env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
 %%
-%logger.save();
+logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
