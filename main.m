@@ -10,10 +10,10 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
+fExp = 1; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 0; % 1: active : for debug function
+fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
 % for mob1
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
@@ -28,7 +28,7 @@ plot(polyshape(Env.param.Vertices))
 % Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
 initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
-run("main2_agent_setup.m");
+% run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
 % plot(polyshape(Env.param.Vertices),'FaceColor','red','FaceAlpha',0.1);
 %% set logger
@@ -127,10 +127,10 @@ try
     end
 
     if fDebug
-        agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+%         agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 % %       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 %       %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
-       %agent.show(["reference","tbug"],"FH",FH,"param",Env)
+       agent.show(["reference","tbug"],"FH",FH,"param",Env)
     end
 
     %% update state
@@ -198,7 +198,7 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
+logger.plot({1,"p","e"},{1,"q","e"},{1,"input",""});
 % logger.plot({1,"p","er"});
 % legend("x.state", "y.state", "z.state","x.reference", "y.reference", "z.reference");
 % logger.plot({1,"q","e"});

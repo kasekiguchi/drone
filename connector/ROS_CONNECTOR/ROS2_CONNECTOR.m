@@ -38,8 +38,8 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             obj.subName = info.subTopicName;
             obj.subTopicNum = length(obj.subTopic);
             obj.subMsg = info.subMsgName;
-            obj.pubMsg = info.pubMsgName;
             if isfield(info,'pubTopic')
+                obj.pubMsg = info.pubMsgName;
                 obj.pubTopic = info.pubTopic;
                 obj.pubName = info.pubTopicName;
                 obj.pubTopicNum = length(obj.pubTopic);

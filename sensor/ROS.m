@@ -11,6 +11,7 @@ classdef ROS < SENSOR_CLASS
         angle_range
         front
         sensor_point
+        pitch
     end
     
     methods
@@ -38,6 +39,7 @@ classdef ROS < SENSOR_CLASS
                 data.angle(j,1) = data.angle(j-1) + data.angle_increment; 
             end
             obj.angle_range = double(data.angle');
+            obj.pitch = data.angle_increment;
            
             
         end
