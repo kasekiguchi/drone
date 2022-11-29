@@ -156,7 +156,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       hold on
       axis equal
       daspect([1 1 1]);
-      view([-3 1 2]);
+%       view([-3 1 2]);
+      view(2);
       xlabel("x");
       ylabel("y");
       zlabel("z");
@@ -183,7 +184,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       end
       quiver3(p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
       plot3(p(1), p(2), p(3), 'bx');
-      plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 1);
+      plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 3);
       xlim([p(1) - 10, p(1) + 10]);
       ylim([p(2) - 10, p(2) + 10]);
       zlim([p(3) - 10, p(3) + 10]);

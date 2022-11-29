@@ -44,7 +44,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             
             obj.state_initial = [0,0,0]';
 %             obj.goal = [6,0,0]';%2Dgoal
-            obj.goal = [0,15,0]';% global goal position
+            obj.goal = [-2,15,0]';% global goal position
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D
@@ -109,7 +109,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %%
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合
                 reference_length = obj.past.state.p([1,2,3],:) - obj.state.p;
-                if vecnorm(reference_length) < 0.1
+                if vecnorm(reference_length) < 0.1 %一時刻前の目標位置に到達しているか？
                     % edge_ids = 隣との距離の差が大きいところのindex配列（端点）
                     nlength = circshift(obj.length,1); %１つずらした距離データ
                     edge_ids = find(abs(nlength-obj.length) > obj.threshold); %隣との距離の差が大きいところのindex配列（端点）

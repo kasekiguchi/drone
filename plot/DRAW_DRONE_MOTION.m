@@ -40,7 +40,7 @@ classdef DRAW_DRONE_MOTION
             obj.zlim = [0 M(3)+1];
             obj=obj.gen_frame("frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,param.fig_num);
             
-            view(3)
+            view(2)
             grid on
             daspect([1 1 1]);
         end
