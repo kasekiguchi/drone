@@ -35,14 +35,17 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
         function obj = TWOD_TANBUG(self, varargin)
             %obj.state = [0,0,0];
 
-            obj.pitch = self.sensor.lrf.pitch;
+            %obj.pitch = self.sensor.lrf.pitch;
+            tmp = self.sensor.lidar.phi_range;
+            obj.pitch = tmp(2)-tmp(1);
 
             obj.sensor = [0,0];
             
             obj.state_initial = [0,0,0]';
-            obj.goal = [6,0,0]';% global goal position
+            obj.goal = [10,-6,0]';% global goal position
             obj.obstacle = [2,0,0]';% 障害物座標
-            obj.radius = self.sensor.lrf.radius;
+%            obj.radius = self.sensor.lrf.radius;
+             obj.radius = self.sensor.lidar.radius;
             obj.margin = 0.5;
             obj.threshold = obj.margin*2;
             obj.d = 0;
@@ -59,7 +62,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3, 3]));
          
-            obj.path_length = zeros(size(self.sensor.lrf.angle_range));
+%            obj.path_length = zeros(size(self.sensor.lrf.angle_range));
+            obj.path_length = zeros(size(self.sensor.lidar.phi_range));
             as = 0:obj.pitch:2*pi; %センサの分解能(ラジアン)（行列）
             obj.margin = obj.margin;
             %仮想通路の生成
@@ -86,7 +90,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
-            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
+%            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
+             [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
             path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離
             path_length(path_length>goal_length)=goal_length;
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合                
@@ -305,17 +310,24 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %         end
 
 %%
-        function show(obj,env)
+        function fh = show(obj,opt)
+            %"logger",opt.logger,"FH",opt.FH,"t",opt.t,"param",param
             arguments
                 obj
-                env=[]
+                opt.logger = [];
+                opt.FH = 1;
+                opt.t = [];
+                opt.param = [];
             end
+            env = opt.param;
             yaw = obj.state.q(3);
             R = [cos(yaw),-sin(yaw);sin(yaw),cos(yaw)];
             angles= (0:0.01:2*pi)';
             circ = obj.margin*[cos(angles),sin(angles)];
+            fh = figure(opt.FH);
+            hold on
             if isempty(env)
-                obj.self.sensor.lrf.show();
+                %obj.self.sensor.lrf.show();
                 hold on
                 local_rp =R'*obj.result.state.p(1:2)-obj.state.p(1:2);
                 local_tp = obj.local_tp;
