@@ -52,6 +52,8 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
+%                 obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),@exampleHelperROS2PoseCallback,...
+%                     "History","keepall","Reliability","besteffort");
                 obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),...
                     "History","keepall","Reliability","besteffort");
             end
@@ -71,7 +73,11 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                obj.result = receive(obj.subscriber.subtopic(i),2);
+                try
+                    obj.result = receive(obj.subscriber.subtopic(i),0.001);
+                catch
+                    obj.result = [];
+                end
             end
             ret = obj.result;
         end

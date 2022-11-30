@@ -31,8 +31,14 @@ classdef Flightcontroller < SENSOR_CLASS
             % result=sensor.motive.do(motive)
             %   set obj.result.state : State_obj,  p : position, q : quaternion
             %   result : 
-            % 【入力】motive ：NATNET_CONNECOTR object 
+            % 【入力】motive ：NATNET_CONNECOTR object
+            obj.flightdata.time = 0;
+            t = tic;
             data=obj.flightcontroller.getData();
+            obj.flightdata.time = toc(t);
+            if isempty(data)
+                data = obj.self.sensor.telemetry.flightdata.ros2;
+            end
             obj.flightdata.ros2 = data;
             obj.flightdata.ros2.tem = data.data(1:4,1);
             obj.flightdata.ros2.voltage = data.data(5:8,1);
