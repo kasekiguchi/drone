@@ -1,4 +1,5 @@
-dt = 0.5;
+close all
+dt = 0.4;
 agent1 = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,131]),DRONE_PARAM("DIATONE"));
 %%
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');

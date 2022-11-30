@@ -57,8 +57,8 @@ end
 figure(2)
 hold on
 plot(T,X1)%グラフのプロット
-ymax = ylim;
-area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
+%ymax = ylim;
+%area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
 xlabel('time [s]')
 ylabel('current')
@@ -67,8 +67,8 @@ hold off
 figure(3)
 hold on
 plot(T,X2)%グラフのプロット
-ymax = ylim;
-area([Ts Ts+5],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
+%ymax = ylim;
+%area([Ts Ts+5],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
 xlabel('time [s]')
 ylabel('voltage')
@@ -76,14 +76,15 @@ hold off
 
 figure(4)
 hold on
+%area([Ts Ts+5],[8000 8000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 plot(T,X3)%グラフのプロット
-ymax = ylim;
-area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
+% ymax = ylim;
+% area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
 xlabel('time [s]')
 ylabel('morter speed [rpm]')
 hold off
-%%
+%% 平均
 X1A=X1(A,:);
 X2A=X2(A,:);
 X3A=X3(A,:);

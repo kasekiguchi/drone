@@ -44,6 +44,7 @@ for i = 0:10:throttle
             Timer = tic;
 
             while t < dt
+                figure(FH)
                 drawnow        
                 cha = get(FH, 'currentcharacter');
                 if (cha == 'q')
@@ -56,6 +57,7 @@ for i = 0:10:throttle
        end
    end
     while i == throttle
+        figure(FH)
         drawnow        
         cha = get(FH, 'currentcharacter');
         if (cha == 'q')

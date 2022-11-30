@@ -98,12 +98,13 @@ for i = 1:N
         end
         agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
-    agent(i).set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
+%     agent(i).set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
     %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
 %     agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     agent(i).set_property("sensor",Sensor_LiDAR(i));
+    agent(i).set_property("sensor",Sensor_celing(i));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -120,8 +121,10 @@ for i = 1:N
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
+     agent(i).set_property("reference",Reference_ceiling("line_ref",[0,0,1]));%天井
+%      agent(i).set_property("reference", Reference_ceiling_PtoP()); 
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
-     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
+%     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
 %     agent(i).set_property("reference",Reference_Time_Varying("PtoP_ref",[0,0,1]));%PtoP
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 

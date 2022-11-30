@@ -77,6 +77,7 @@ try
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
             param(i).sensor.tokyu = {};
+            param(i).sensor.celing = 2;
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
@@ -100,13 +101,16 @@ try
             end
             param(i).reference.covering = [];
 
-            param(i).reference.point = {FH, [0; 0; 1], time.t,dt};%reference.pointの目標位置を指定できる
+            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,1};%reference.pointの目標位置を指定できる
 
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
             param(i).reference.tbug = {};
             param(i).reference.agreement = {logger, N, time.t};
+            param(i).reference.ceiling = {time,FH};
+            param(i).reference.PtoP = {FH};
+
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
@@ -192,7 +196,7 @@ close all
 clc
 
 % plot 
-logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+%logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 %logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"p","sr"});

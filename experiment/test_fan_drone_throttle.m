@@ -4,6 +4,7 @@ dt = 0.75;
 throttle = 150;
 agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,132]),DRONE_PARAM("DIATONE"));
 agent1 = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,131]),DRONE_PARAM("DIATONE"));
+%%
 pause(1);
 agent.plant.connector.sendData(gen_msg([500,500,0,500,0,0,0,0]));% 0入力
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');
@@ -31,6 +32,8 @@ try
         agent.plant.connector.sender(gen_msg([500,500,i,500,1000,0,0,0]));
         while i == throttle
             agent.plant.connector.sender(gen_msg([500,500,i,500,1000,0,0,0]));
+            drownow
+            figure(FH)
             w = waitforbuttonpress;
             cha = get(FH, 'currentcharacter');
             if (cha == 'q')
