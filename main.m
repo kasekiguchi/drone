@@ -76,6 +76,7 @@ try
             param(i).sensor.direct = {};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
+            param(i).sensor.telemetry = {};
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
