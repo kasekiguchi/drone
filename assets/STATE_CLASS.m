@@ -110,6 +110,8 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                     else
                         if obj.type == 3
                             q=Eul2Quat(obj.q);
+                        elseif obj.type == 1
+                            q = obj.q;%Turtlebot用に追加
                         else
                             value=reshape(obj.q,[3,3])';
                             q = R2q(value);
@@ -132,6 +134,8 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                     else
                         if obj.type == 3
                             q=RodriguesQuaternion(Eul2Quat(obj.q));
+                        elseif obj.type == 1
+                            q = obj.q;%Turtlebot用に追加
                         else
                             q = RodriguesQuaternion(obj.q);
                         end

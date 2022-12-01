@@ -24,10 +24,11 @@ classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
     end
     properties %(GetAccess = ?Motive_SIM)%private) % construct したら変えない値．
         Flag = struct('Noise',     0);                                    % '1' = Additional noise exists
-        local_marker_default     = [ 0.075, -0.075,  0.015;                               % X, Y. Z
-            -0.075, -0.075, -0.015;
-            -0.075,  0.075,  0.015;
-            0.075,  0.075, -0.015];
+%         local_marker_default     = [ 0.075, -0.075,  0.015;                               % X, Y. Z
+%             -0.075, -0.075, -0.015;
+%             -0.075,  0.075,  0.015;
+%             0.075,  0.075, -0.015];
+        local_marker_default     = [0.075, -0.075;-0.075, 0.075];                               % Turtlebot用2×2にしてみた
         sigmaw    = [6.716E-5; 7.058E-5; 7.058E-5];                        % Observationm noise variance
     end
     
