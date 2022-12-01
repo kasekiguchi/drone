@@ -96,9 +96,9 @@ try
                     FH.CurrentCharacter = 't';
                 elseif time.t < 10
                     FH.CurrentCharacter = 'f';%phaseをいじれる
-                elseif time.t < 13
+                elseif time.t < 15
                     FH.CurrentCharacter = 'g';%phaseをいじれる
-                elseif time.t < 16
+                elseif time.t < 23
                     FH.CurrentCharacter = 'h';%phaseをいじれる
                 else
                     FH.CurrentCharacter = 'l';%phaseをいじれる
@@ -107,7 +107,7 @@ try
             param(i).reference.covering = [];
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
-            param(i).reference.point = {FH, [2.3;2.5;2.4], time.t,dt,2.9};%reference.pointの目標位置を指定できる。天井高さを追加{5}
+            param(i).reference.point = {FH, [2.3;2.5;1.6], time.t,dt,2.1};%reference.pointの目標位置を指定できる。天井高さを追加{5}
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
