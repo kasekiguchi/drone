@@ -196,18 +196,18 @@ close all
 clc
 
 % plot 
-%logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 %logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"p","sr"});
-logger.plot({1,"p","s"},{1,"inner_input",""});
+%logger.plot({1,"p","rs"},{1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)
 
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N);
-
+%agent(1).animation(logger,"target",1:N);
+agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[0,0,1.1],"length",[1,1,0.2])));%天井room = [-2 -5;-2 4;7 4;7 -5];
 %%
 %logger.save();

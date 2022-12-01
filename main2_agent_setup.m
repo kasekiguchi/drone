@@ -103,7 +103,7 @@ for i = 1:N
 %     agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-    agent(i).set_property("sensor",Sensor_LiDAR(i));
+%     agent(i).set_property("sensor",Sensor_LiDAR(i));
     agent(i).set_property("sensor",Sensor_celing(i));
     %% set estimator property
     agent(i).estimator = [];
