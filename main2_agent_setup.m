@@ -68,8 +68,10 @@ for i = 1:N
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-        initial_state(i).p = [0;-1.25];%[92;1];%
-        initial_state(i).q = 0;%pi/2-0.05;
+ %       initial_state(i).p = [0;-1.25];%[92;1];%
+ %       initial_state(i).q = 0;%pi/2-0.05;
+        initial_state(i).p = [0;-1.25;0];%[92;1];%
+        initial_state(i).q = [0;0;0];%pi/2-0.05;
         initial_state(i).v = 0;
         agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                 % euler angleのプラントモデル : for sim
     end
@@ -123,10 +125,10 @@ for i = 1:N
   %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
   %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
 %   agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"]));                                                                    % （剛体ベース）EKF
-  agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
+  %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
   %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
   %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
-  %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+  agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
   %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
   %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
   %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する

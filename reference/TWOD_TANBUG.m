@@ -83,13 +83,13 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
             obj.state = obj.self.estimator.result.state; %自己位置
-            yaw = obj.state.q(1);
+            yaw = obj.state.q(3);
 %             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
             R = [cos(yaw),-sin(yaw);sin(yaw),cos(yaw);];
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             obj.l_points = obj.sensor.sensor_points; %座標データ
-            l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
+            l_goal = R'*(obj.goal-obj.state.p(1:2)); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
