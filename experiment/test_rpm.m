@@ -6,7 +6,7 @@ agent.set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');
 type receiver
 dt = 0.01;%刻み時間
-end_time = 100;%終了時間
+end_time = 1000;%終了時間
 frag_Ts = 0;
 %%
 disp("Press Enter");
@@ -56,7 +56,7 @@ end
 % % plot
 figure(2)
 hold on
-plot(T,X1)%グラフのプロット
+plot(T(1:2000),X1(1:2000,1:4))%グラフのプロット
 %ymax = ylim;
 %area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
@@ -66,7 +66,7 @@ hold off
 
 figure(3)
 hold on
-plot(T,X2)%グラフのプロット
+plot(T(1:2000),X2(1:2000,1:4))%グラフのプロット
 %ymax = ylim;
 %area([Ts Ts+5],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
@@ -77,7 +77,7 @@ hold off
 figure(4)
 hold on
 %area([Ts Ts+5],[8000 8000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
-plot(T,X3)%グラフのプロット
+plot(T(1:2000),X3(1:2000,1:4))%グラフのプロット
 % ymax = ylim;
 % area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
