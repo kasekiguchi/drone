@@ -94,9 +94,12 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             obj.l_points = obj.sensor.sensor_points; %座標データ
-            l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
+            l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置        
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
+            l_reference = R'*(obj.past.state.p - obj.state.p); %localでのreference位置
+            reference_length = vecnorm(l_reference);
+            l_reference_angle =atan2(l_reference(2),l_reference(1));
 %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
             path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離            
@@ -107,9 +110,10 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             plot(obj.length.*cos(as),obj.length.*sin(as),"o")
 %             hold off
 %%
+            path_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
+            reference_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
             if find(obj.length < path_length) % ゴールまでの間に障害物がある場合
-                reference_length = obj.past.state.p([1,2,3],:) - obj.state.p;
-                if vecnorm(reference_length) < 0.1 %一時刻前の目標位置に到達しているか？
+                if find(obj.length < reference_length) %referenceまでの間に障害物がある場合                              
                     % edge_ids = 隣との距離の差が大きいところのindex配列（端点）
                     nlength = circshift(obj.length,1); %１つずらした距離データ
                     edge_ids = find(abs(nlength-obj.length) > obj.threshold); %隣との距離の差が大きいところのindex配列（端点）
@@ -151,10 +155,11 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                     obj.result.state.v = R*obj.result.state.v;
                     result = obj.result;   
                 else
-                    obj.result.state.p = obj.past.state.p;
+                    obj.result.state.p = obj.past.state.p; % local座標での位置
                     obj.result.state.v = obj.past.state.v;
-                    result = obj.result;
+                    result = obj.result; 
                 end
+ 
             else % まっすぐゴールに行ける場合
                 obj.result.state.p = l_goal; % local座標での位置
                 obj.result.state.v = [0;0;0]; % local座標での位置
@@ -276,7 +281,27 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 
             
             
-        
+        function path = make_path(~,theta,margin,range,radius,goal_angle,goal)%検出範囲の作成
+            %theta: センサの分解能
+            %margin: ドローンの横幅
+            %range: 角度？
+            %goal_angle: ゴールまでの角度
+            %goal: ゴールまでの距離
+            path = zeros(size(range));
+            tmp =find((radius*sin(theta) >= margin).*(theta <= pi/2));
+            path(tmp) = margin./sin(theta(tmp));
+            path(1:find(path,1)-1) = radius;
+            margin =margin;
+
+            tmp = find((radius*sin(theta) <= -margin).*(theta >= 3*pi/2));
+            path(tmp) = -margin./sin(theta(tmp));
+            path(find(path,1,'last')+1:end) = radius;
+            margin =margin;
+            [~,id] = min(abs(range - goal_angle));
+            path = circshift(path,id-1);
+            path(path>goal) = goal;
+            
+        end
         function d = distance(~,x1,y1,x2,y2) %2点間の距離を算出
             a = [x1,y1];
             b = [x2,y2];
