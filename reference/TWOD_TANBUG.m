@@ -19,6 +19,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
         v_max %速度ベクトルの上限
         dtheta %目標角度とセンサが見ている角度の差
         target_angle 
+        margin_conect
         param
         self
         l_points
@@ -43,12 +44,13 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.sensor = [0,0];
             
             obj.state_initial = [0,0,0]';
-            obj.goal = [6.2,0,0]';%2Dgoal
+            obj.goal = [0,15,0]';%2Dgoal
 %             obj.goal = [0,15,0]';% global goal position
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D
-            obj.margin = 0.5;
+            obj.margin = 0.2;
+            obj.margin_conect = 0.5;
             obj.threshold = obj.margin*4;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
@@ -86,7 +88,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
             obj.state = obj.self.estimator.result.state; %自己位置
-            obj.past.state.p = obj.result.state.p; %一時刻前の目標位置
+            obj.past.state.p = obj.result.state.p(1:3); %一時刻前の目標位置
             obj.past.state.v = obj.result.state.v; %一時刻前の速さ
             yaw = obj.state.q(3);
             as = 0:obj.pitch:2*pi;
@@ -110,67 +112,126 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             plot(obj.length.*cos(as),obj.length.*sin(as),"o")
 %             hold off
 %%
-            path_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
+            path_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成end
             reference_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
-            if find(obj.length < path_length) % ゴールまでの間に障害物がある場合
-                if find(obj.length < reference_length) %referenceまでの間に障害物がある場合                              
-                    % edge_ids = 隣との距離の差が大きいところのindex配列（端点）
-                    nlength = circshift(obj.length,1); %１つずらした距離データ
-                    edge_ids = find(abs(nlength-obj.length) > obj.threshold); %隣との距離の差が大きいところのindex配列（端点）
-                    [~,max_id] = max(abs(nlength-obj.length));
-                    edge_points = obj.l_points(:,edge_ids);%2Dだとエラー吐く
-                    %これより下をいじる必要あり？
-                    tmp = obj.length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列
-                    edge_ids(tmp) = edge_ids(tmp) - 1;%壁が配列なので-1して障害物にする
-                    edge_ids(edge_ids==0) = length(nlength);%0配列は63にする
-    
-    
-                    te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
-    %                 [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
-                    [~,tmp] = min((obj.length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
-                    % TODO : b + c > d + e  <==> b^2 + c^2 > d^2 + e^2 が成り立つ前提：要チェック
-                    tid = edge_ids(tmp);%最短経路の配列
-    %                 tid = edge_ids(max_id);
-    
-                    Length = [obj.length(end),obj.length,obj.length(1)];
-                    edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
-                    if Length(tid+2) > Length(tid) % 左回りで避ける
-                        %tid = obj.width_check(tid,-1);
-                        [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
-               
-                        obj.result.state.p = [tmp1;tmp2;0];
-                        obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
-                    else % 右回り
-                        %tid = obj.width_check(tid,1);
-                        [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
-                        
-                        obj.result.state.p = [tmp1;tmp2;0];
-                        obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
-                    end
-                    obj.tid = tid;
-                    obj.local_tp = edge_p;
-                    % local から global に変換
-                    obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
-        %             obj.result.state.p = [R*obj.result.state.p;0];
-                    obj.result.state.v = R*obj.result.state.v;
-                    result = obj.result;   
-                else
-                    obj.result.state.p = obj.past.state.p; % local座標での位置
-                    obj.result.state.v = obj.past.state.v;
-                    result = obj.result; 
-                end
+
+            if find(reference_length)
+                N = 2;
+            else
+                N = 1;
+            end
+
+            switch N
+                case 1
+                    if find(obj.length < path_length) % ゴールまでの間に障害物がある場合                              
+                        % edge_ids = 隣との距離の差が大きいところのindex配列（端点）
+                        nlength = circshift(obj.length,1); %１つずらした距離データ
+                        edge_ids = find(abs(nlength-obj.length) > obj.threshold); %隣との距離の差が大きいところのindex配列（端点）
+                        [~,max_id] = max(abs(nlength-obj.length));
+                        edge_points = obj.l_points(:,edge_ids);%2Dだとエラー吐く
+                        %これより下をいじる必要あり？
+                        tmp = obj.length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列
+                        edge_ids(tmp) = edge_ids(tmp) - 1;%壁が配列なので-1して障害物にする
+                        edge_ids(edge_ids==0) = length(nlength);%0配列は63にする     
+                        te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
+        %                 [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
+                        [~,tmp] = min((obj.length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
+                        % TODO : b + c > d + e  <==> b^2 + c^2 > d^2 + e^2 が成り立つ前提：要チェック
+                        tid = edge_ids(tmp);%最短経路の配列
+        %                 tid = edge_ids(max_id);
+        
+                        Length = [obj.length(end),obj.length,obj.length(1)];
+                        edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
+                        if Length(tid+2) > Length(tid) % 左回りで避ける
+                            %tid = obj.width_check(tid,-1);
+                            [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);
+                   
+                            obj.result.state.p = [tmp1;tmp2;0];
+                            obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                        else % 右回り
+                            %tid = obj.width_check(tid,1);
+                            [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);
+                            
+                            obj.result.state.p = [tmp1;tmp2;0];
+                            obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                        end
+                        obj.tid = tid;
+                        obj.local_tp = edge_p;
+                        % local から global に変換
+                        obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+            %             obj.result.state.p = [R*obj.result.state.p;0];
+                        obj.result.state.v = R*obj.result.state.v;
+                        result = obj.result;   
  
-            else % まっすぐゴールに行ける場合
-                obj.result.state.p = l_goal; % local座標での位置
-                obj.result.state.v = [0;0;0]; % local座標での位置
-                % local から global に変換
-                obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
-    %             obj.result.state.p = [R*obj.result.state.p;0];
-                obj.result.state.v = R*obj.result.state.v;
-                result = obj.result;   
-            end          
-              
-        end
+                    else % まっすぐゴールに行ける場合
+                        obj.result.state.p = l_goal; % local座標での位置
+                        obj.result.state.v = [0;0;0]; % local座標での位置
+                        % local から global に変換
+                        obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+            %             obj.result.state.p = [R*obj.result.state.p;0];
+                        obj.result.state.v = R*obj.result.state.v;
+                        result = obj.result;   
+                    end     
+                case 2
+                    if find(obj.length < path_length) % ゴールまでの間に障害物がある場合
+                        if find(obj.length < reference_length) %referenceまでの間に障害物がある場合                              
+                            % edge_ids = 隣との距離の差が大きいところのindex配列（端点）
+                            nlength = circshift(obj.length,1); %１つずらした距離データ
+                            edge_ids = find(abs(nlength-obj.length) > obj.threshold); %隣との距離の差が大きいところのindex配列（端点）
+                            [~,max_id] = max(abs(nlength-obj.length));
+                            edge_points = obj.l_points(:,edge_ids);%2Dだとエラー吐く
+                            %これより下をいじる必要あり？
+                            tmp = obj.length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列
+                            edge_ids(tmp) = edge_ids(tmp) - 1;%壁が配列なので-1して障害物にする
+                            edge_ids(edge_ids==0) = length(nlength);%0配列は63にする
+            
+            
+                            te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
+            %                 [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
+                            [~,tmp] = min(abs(obj.length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
+                            % TODO : b + c > d + e  <==> b^2 + c^2 > d^2 + e^2 が成り立つ前提：要チェック
+                            tid = edge_ids(tmp);%最短経路の配列
+            %                 tid = edge_ids(max_id);
+            
+                            Length = [obj.length(end),obj.length,obj.length(1)];
+                            edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
+                            if Length(tid+2) > Length(tid) % 左回りで避ける
+                                %tid = obj.width_check(tid,-1);
+                                [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
+                       
+                                obj.result.state.p = [tmp1;tmp2;0];
+                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                            else % 右回り
+                                %tid = obj.width_check(tid,1);
+                                [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
+                                
+                                obj.result.state.p = [tmp1;tmp2;0];
+                                obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                            end
+                            obj.tid = tid;
+                            obj.local_tp = edge_p;
+                            % local から global に変換
+                            obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+                %             obj.result.state.p = [R*obj.result.state.p;0];
+                            obj.result.state.v = R*obj.result.state.v;
+                            result = obj.result;   
+                        else
+                            obj.result.state.p = obj.past.state.p; % local座標での位置
+                            obj.result.state.v = obj.past.state.v;
+                            result = obj.result; 
+                        end
+     
+                    else % まっすぐゴールに行ける場合
+                        obj.result.state.p = l_goal; % local座標での位置
+                        obj.result.state.v = [0;0;0]; % local座標での位置
+                        % local から global に変換
+                        obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+            %             obj.result.state.p = [R*obj.result.state.p;0];
+                        obj.result.state.v = R*obj.result.state.v;
+                        result = obj.result;   
+                    end          
+            end
+        end   
 % 
 %             % ここからglobal 座標での議論
 %             obj.g_points = ([cos(yaw),-sin(yaw);sin(yaw),cos(yaw)]*obj.l_points')' + obj.state.p(1:2)'; % sensor points on global coord.
@@ -299,9 +360,9 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             margin =margin;
             [~,id] = min(abs(range - goal_angle));
             path = circshift(path,id-1);
-            path(path>goal) = goal;
-            
+            path(path>goal) = goal;        
         end
+        
         function d = distance(~,x1,y1,x2,y2) %2点間の距離を算出
             a = [x1,y1];
             b = [x2,y2];
