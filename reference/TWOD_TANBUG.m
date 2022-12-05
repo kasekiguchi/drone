@@ -133,7 +133,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             obj.result.state.p(3) = atan2(obj.result.state.p(2),obj.result.state.p(1))
             obj.result.state.q = atan2(obj.result.state.p(2),obj.result.state.p(1));
             % local から global に変換
-            obj.result.state.p = [R*obj.result.state.p+obj.state.p];
+            obj.result.state.p = [R*obj.result.state.p+obj.state.p(1:2)];
             
             obj.result.state.v = obj.v_max;
             %             L = obj.distance2(obj.state.p',obj.goal,obj.obstacle);
