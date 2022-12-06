@@ -71,17 +71,6 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %            obj.path_length = zeros(size(self.sensor.lrf.angle_range));
             obj.path_length = zeros(size(self.sensor.lidar.phi_range));%3D
             as = 0:obj.pitch:2*pi; %センサの分解能(ラジアン)（行列）
-            obj.margin = obj.margin;
-            %仮想通路の生成
-            tmp = find((obj.radius*sin(as) >= obj.margin).*(as <= pi/2));% 2～16列目のインデックスを算出
-            obj.path_length(tmp) = obj.margin./sin(as(tmp));
-            obj.path_length(1:find(obj.path_length,1)-1) = obj.radius;
-            
-            tmp = find((obj.radius*sin(as) <= -obj.margin).*(as >= 3*pi/2));%49～63列目のインデックスを算出
-            obj.path_length(tmp) = -obj.margin./sin(as(tmp));
-            obj.path_length(find(obj.path_length,1,'last')+1:end) = obj.radius;
-%             plot(obj.path_length.*cos(as),obj.path_length.*sin(as),"o");
-            obj.margin = obj.margin;
         end
         
         function result = do(obj, t)
@@ -104,15 +93,14 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             l_reference_angle =atan2(l_reference(2),l_reference(1));
 %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
-            path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離            
-            path_length(path_length>goal_length)=goal_length;
+            
 %%
 %             hold on
 %             plot(path_length.*cos(as),path_length.*sin(as),"o")
 %             plot(obj.length.*cos(as),obj.length.*sin(as),"o")
 %             hold off
 %%
-            path_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成end
+            path_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
             reference_length = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
 
             if find(reference_length)
@@ -220,6 +208,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                             obj.result.state.v = obj.past.state.v;
                             result = obj.result; 
                         end
+                           
      
                     else % まっすぐゴールに行ける場合
                         obj.result.state.p = l_goal; % local座標での位置
@@ -232,115 +221,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                     end          
             end
         end   
-% 
-%             % ここからglobal 座標での議論
-%             obj.g_points = ([cos(yaw),-sin(yaw);sin(yaw),cos(yaw)]*obj.l_points')' + obj.state.p(1:2)'; % sensor points on global coord.
-%             goal_angle = atan2((obj.goal(2) - obj.state.p(2)),(obj.goal(1) - obj.state.p(1))); %目標位置の角度
-%             
-%             for k=2:length(obj.sensor.angle)
-%                 obj.dtheta = goal_angle - obj.sensor.angle(k - 1);%目標位置の角度との差の角度
-%                 if abs(obj.dtheta) < 0.1
-%                    L = obj.sensor.length(k - 1);%目標方向の測距距離
-%                    sensor_index = k - 1;%目標位置方向にある障害物点
-%                    break
-%                 end
-%             end
-% %                                    
-% %             anchor_R = sensor_index; %障害物点を右の端点とする
-% %             anchor_L = sensor_index; %障害物点を左の端点とする
-%             if( L < 2.5)%目標位置方向に障害物があるか
-% %                 for k=2:length(obj.sensor.angle)
-% %                 obj.dtheta = obj.angle - obj.sensor.angle(k - 1);
-% %                     if abs(obj.dtheta) < 0.1
-% %                         L = obj.sensor.length(k-1);%目標方向の測距距離
-% %                        sensor_index = k - 1;%目標位置方向にある障害物点
-% %                        break
-% %                     end
-% %                 end
-%                                    
-%                 anchor_R = sensor_index; %障害物点を右の端点とする
-%                 anchor_L = sensor_index; %障害物点を左の端点とする
-%                 %左右の端点の検出
-%                 while(1) %右の端点を検出
-%                     if anchor_R == 1
-%                         anchor_R = 63;
-%                     else
-%                         obj.sensor.P_R = obj.sensor.sensor_points(anchor_R-1,:);
-%                         obj.sensor.P_R = [obj.sensor.P_R';0];%wextend('1','zpd',obj.sensor.P_R, 1,'r');
-%                         obj.sensor.P_index = obj.sensor.sensor_points(anchor_R,:);
-%                         obj.sensor.P_index = [obj.sensor.P_index';0];%wextend('1','zpd',obj.sensor.P_index, 1,'r');
-%                         length_right = norm(obj.sensor.P_index - obj.sensor.P_R); %正面とその右隣りの距離を算出
-%                         %同一の物体として認識
-%                         if length_right < 1
-%                             anchor_R = anchor_R - 1;%右にずらす
-%                         else
-%                             obj.sensor.P_R = obj.sensor.P_index;
-%                             break;
-%                         end
-%                     end
-%                 end
-%             
-%                 while(1) %左の端点を検出
-%                     if anchor_L == 63
-%                         anchor_L = 1;
-%                     else
-%                         obj.sensor.P_index = obj.sensor.sensor_points(anchor_L,:);
-%                         obj.sensor.P_index = [obj.sensor.P_index';0];%wextend('1','zpd',obj.sensor.P_index, 1,'r');
-%                         obj.sensor.P_L = obj.sensor.sensor_points(anchor_L+1,:);
-%                         obj.sensor.P_L = [obj.sensor.P_L';0];%wextend('1','zpd',obj.sensor.P_L, 1,'r');
-%                         length_left = norm(obj.sensor.P_index - obj.sensor.P_L); %正面とその左隣りの距離を算出
-%                         %同一の物体として認識
-%                         if length_left < 1
-%                             anchor_L = anchor_L + 1;%右にずらす
-%                         else
-%                             obj.sensor.P_L = obj.sensor.P_index;
-%                             break;
-%                         end
-%                     end
-%                 end
-%                 
-%                 %移動経路の決定
-%                 length_state_anchor_R = norm(obj.state.p - obj.sensor.P_R); % 現在位置-anchor_R 距離
-%                 length_state_anchor_L = norm(obj.state.p - obj.sensor.P_L); % 現在位置-anchor_L 距離
-%                 length_anchor_goal_R = norm(obj.goal - obj.sensor.P_R); % 目標位置-anchor_R 距離
-%                 length_anchor_goal_L = norm(obj.goal - obj.sensor.P_L); % 目標位置-anchor_L 距離
-%                 route_R = length_state_anchor_R + length_anchor_goal_R; % 現在位置から目標位置までの経路（右）
-%                 route_L = length_state_anchor_L + length_anchor_goal_L; % 現在位置から目標位置までの経路（左）
-%                 
-%                 if route_R < route_L %右のほうが短い
-%                     [obj.waypoint.under(1),obj.waypoint.under(2),obj.waypoint.top(1),obj.waypoint.top(2)] = obj.conection(obj.state.p(1),obj.state.p(2),obj.sensor.P_R(1),obj.sensor.P_R(2),obj.margin);
-%                     obj.target_position(1) = obj.waypoint.under(1);
-%                     obj.target_position(2) = obj.waypoint.under(2); 
-%                     obj.target_angle = atan2(obj.target_position(2),obj.target_position(1));
-%                     obj.sensor.angle = obj.sensor.angle - obj.target_angle;
-%                     x = obj.target_position(1);
-%                     y = obj.target_position(2);
-%                     obj.result.state.v = obj.velocity_vector(obj.state.p,obj.sensor.P_R,obj.target_position)';
-%                     z = 0;
-%                     obj.result.state.p = [x;y;z];% + obj.result.state.v/norm(obj.result.state.v)* 0.1;
-%                     
-%                 else %左の方が短い
-%                     [obj.waypoint.under(1),obj.waypoint.under(2),obj.waypoint.top(1),obj.waypoint.top(2)] = obj.conection(obj.state.p(1),obj.state.p(2),obj.sensor.P_L(1),obj.sensor.P_L(2),obj.margin);
-%                     obj.target_position(1) = obj.waypoint.top(1);
-%                     obj.target_position(2) = obj.waypoint.top(2);  
-%                     obj.target_angle = atan2(obj.target_position(2),obj.target_position(1));
-%                     obj.sensor.angle = obj.sensor.angle - obj.target_angle;
-%                     x = obj.target_position(1);
-%                     y = obj.target_position(2);
-%                     obj.result.state.v = obj.velocity_vector(obj.state.p,obj.sensor.P_L,obj.target_position);
-% %                     obj.result.state.p = obj.result.state.v;
-%                     z = 0;
-%                     obj.result.state.p = [x;y;z];%obj.result.state.v/norm(obj.result.state.v)* 0.1+ [x;y;z];
-%                 end
-%                 
-%             else %前方に障害物がない
-%                 x = obj.goal(1);
-%                 y = obj.goal(2);
-%                 z = 0;
-%                 obj.result.state.p = [x;y;z];
-%             end
-
-            
+        
             
         function path = make_path(~,theta,margin,range,radius,goal_angle,goal)%検出範囲の作成
             %theta: センサの分解能
@@ -349,12 +230,12 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             %goal_angle: ゴールまでの角度
             %goal: ゴールまでの距離
             path = zeros(size(range));
-            tmp =find((radius*sin(theta) >= margin).*(theta <= pi/2));
+            tmp =find((radius*sin(theta) >= margin).*(theta <= pi/2));%2~16列目のインデックスを算出
             path(tmp) = margin./sin(theta(tmp));
             path(1:find(path,1)-1) = radius;
             margin =margin;
 
-            tmp = find((radius*sin(theta) <= -margin).*(theta >= 3*pi/2));
+            tmp = find((radius*sin(theta) <= -margin).*(theta >= 3*pi/2));%49~63列目のインデックスを算出
             path(tmp) = -margin./sin(theta(tmp));
             path(find(path,1,'last')+1:end) = radius;
             margin =margin;
