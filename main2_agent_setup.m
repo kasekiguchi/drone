@@ -32,7 +32,7 @@ else
             clear initial_state
             initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
         else
-            arranged_pos = arranged_position([0, 0], N, 1, 0);
+            arranged_pos = arranged_position([2, 0], N, 1, 1);
             initial_state(i).p = arranged_pos(:, i);
             initial_state(i).q = [1; 0; 0; 0];
             initial_state(i).v = [0; 0; 0];

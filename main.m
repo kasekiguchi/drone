@@ -34,9 +34,9 @@ end
 %f
 run("main2_agent_setup.m");
 % agent.set_model_error("ly",-0.00932);
-% agent.set_model_error("lx",0.0117);
+% agent.set_model_error("lx",0.06);%0.06くらいでFT=FB
 % agent.set_model_error("mass",0.05);
-agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[1,1,0]]);%only sim , add disturbance [x,y,z], [roll, pitch, yaw]
+agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[0,1,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
 %% main loop
 run("main3_loop_setup.m");
 
@@ -84,7 +84,7 @@ try
 
             % reference
             if fExp~=1
-                if time.t<=5
+                if time.t<=0
                     FH.CurrentCharacter = 't';
                 else
                     FH.CurrentCharacter = 'f';
@@ -195,7 +195,8 @@ clc
 % logger.plot({1,"p1:2","pe"},{1,"p","per"},{1,"q","pe"},{1,"v","pe"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
 logger.plot({1,"p","er"},"fig_num",2);
 logger.plot({1,"input",""},"fig_num",3);
-logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
+% logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
+logger.plot({1,"p","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation

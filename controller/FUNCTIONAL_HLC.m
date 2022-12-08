@@ -54,20 +54,20 @@ methods
         xd(17:19) = Rb0' * xd(17:19);
 
         %% calc Z
-        z1 = Z1(x, xd', P);
+        z1 = Z1(x, xd', P);%z
         vf = obj.Vf(z1, F1);
-        z2 = Z2(x, xd', vf, P);
-        z3 = Z3(x, xd', vf, P);
-        z4 = Z4(x, xd', vf, P);
+        z2 = Z2(x, xd', vf, P);%x
+        z3 = Z3(x, xd', vf, P);%y
+        z4 = Z4(x, xd', vf, P);%yaw
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
 
         %%
-%         dst=-1;
+        dst=1;
 %         t = param{1};
 %         dst = 1;
         %確率的な外乱
-        rng("shuffle");
-                    dst = 1*randn(1);
+%         rng("shuffle");
+%                     dst = 1*randn(1);
 %                     if t>=10 && t<=10.5
 %                             dst=-3;
 %                     end

@@ -51,14 +51,14 @@ methods
         F2 = Param.F2;
         F3 = Param.F3;
         F4 = Param.F4;
-        %             kx=[3.16,6.79,40.54,12.27];%ゲイン
-        kx = F2;
-        %             ky=[3.16,6.79,40.54,12.27];%後でparamに格納
-        ky = F3;
+        %             F2=[3.16,6.79,40.54,12.27];%ゲイン
+%         F2 = F2;
+        %             F3=[3.16,6.79,40.54,12.27];%後でparamに格納
+%         F3 = F3;
         %             kz=[2.23,2.28];
         %kz=F1;
         %             kpsi=[1.41,1.35];
-        kpsi = F4;
+%         kpsi = F4;
         %             ax=[0.692,0.75,0.818,0.9];%alpha
         %             ay=[0.692,0.75,0.818,0.9];
         %             az=[0.692,0.75];
@@ -101,42 +101,26 @@ methods
         switch obj.n
             case 1
                 %有限整定
-                %
-                % f=obj.gain1(:,1);
-                %             a=obj.gain1(:,2);
-                gain_xy = 1;
-                ux = -gain_xy * kx(1) * sign(z2(1)) * abs(z2(1))^ax(1) -kx(2) * sign(z2(2)) * abs(z2(2))^ax(2) -kx(3) * sign(z2(3)) * abs(z2(3))^ax(3) -kx(4) * sign(z2(4)) * abs(z2(4))^ax(4); %（17）式
-                uy = -gain_xy * ky(1) * sign(z3(1)) * abs(z3(1))^ay(1) -ky(2) * sign(z3(2)) * abs(z3(2))^ay(2) -ky(3) * sign(z3(3)) * abs(z3(3))^ay(3) -ky(4) * sign(z3(4)) * abs(z3(4))^ay(4); %(19)式
-%                             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2)) -f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%（17）式
-%                             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2)) -f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%(19)式
-% 
-%                             ux=0.6*ux;
-%                             uy=0.6*uy;
-                %
-%                             ux=-1*F2*z2;
-%                             uy=-1*F3*z3;
+                        ux = - F2(1) * sign(z2(1)) * abs(z2(1))^ax(1) -F2(2) * sign(z2(2)) * abs(z2(2))^ax(2) -F2(3) * sign(z2(3)) * abs(z2(3))^ax(3) -F2(4) * sign(z2(4)) * abs(z2(4))^ax(4); %（17）式
+                        uy = -  F3(1) * sign(z3(1)) * abs(z3(1))^ay(1) -F3(2) * sign(z3(2)) * abs(z3(2))^ay(2) -F3(3) * sign(z3(3)) * abs(z3(3))^ay(3) -F3(4) * sign(z3(4)) * abs(z3(4))^ay(4); %(19)式
+
                 %併用
-%                             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2*z2);%（17）式
-%                             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3*z3);%(19)式
-                %外乱ダメ
-                %             ux=ux+8*sin(2*pi*t/0.2);%30以下なら有限整定がいい
-                %             uy=uy+10*cos(2*pi*t/1);
-                %             ux=ux+2;
-                %             if t>=2 && t<=2.1　
-                %                     ux=ux+1/0.025;
-                %             end
-            case 2
+%                         ux= -F2(1)*sign(z2(1))*abs(z2(1))^ax(1) -F2(2)*sign(z2(2))*abs(z2(2))^ax(2) -F2(3)*sign(z2(3))*abs(z2(3))^ax(3) -F2(4)*sign(z2(4))*abs(z2(4))^ax(4) -F2*z2;%（17）式
+%                         uy= -F3(1)*sign(z3(1))*abs(z3(1))^ay(1) -F3(2)*sign(z3(2))*abs(z3(2))^ay(2) -F3(3)*sign(z3(3))*abs(z3(3))^ay(3) -F3(4)*sign(z3(4))*abs(z3(4))^ay(4) -F3*z3;%(19)式
+%                             ux=-F2*z2;
+%                             uy=-F3*z3;
+%             case 2
                 %近似1(sgnを近似)
                 %           a=6;%a>2,alpha=0.9,a=6の時いい感じになる.６月の報告会
-                %             ux=-kx(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(kx(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(kx(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(kx(4)*tanh(a*z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1);%-F2*z2;%（17）式
-                %             uy=-ky(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(ky(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(ky(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(ky(4)*tanh(a*z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1);%-F3*z3;%(19)式
-            case 3
+                %             ux=-F2(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(F2(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(F2(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(F2(4)*tanh(a*z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1);%-F2*z2;%（17）式
+                %             uy=-F3(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(F3(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(F3(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(F3(4)*tanh(a*z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1);%-F3*z3;%(19)式
+%             case 3
                 %近似2(|x|^alphaを近似＋併用)
                 %           a=1.2;%a>1(1だと0の近くでfbと同じになる)
-                %             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2*z2;%F2(1)*z2(1);%（17）式
-                %             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3*z3;%F3(1)*z3(1);%(19)式
-                %             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2(1)*z2(1);%（17）式
-                %             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3(1)*z3(1);%(19)式
+                %             ux=-F2(1)*tanh(a*z2(1))-F2(2)*tanh(a*z2(2))-F2(3)*tanh(a*z2(3))-F2(4)*tanh(a*z2(4))-F2*z2;%F2(1)*z2(1);%（17）式
+                %             uy=-F3(1)*tanh(a*z3(1))-F3(2)*tanh(a*z3(2))-F3(3)*tanh(a*z3(3))-F3(4)*tanh(a*z3(4))-F3*z3;%F3(1)*z3(1);%(19)式
+                %             ux=-F2(1)*tanh(a*z2(1))-F2(2)*tanh(a*z2(2))-F2(3)*tanh(a*z2(3))-F2(4)*tanh(a*z2(4))-F2(1)*z2(1);%（17）式
+                %             uy=-F3(1)*tanh(a*z3(1))-F3(2)*tanh(a*z3(2))-F3(3)*tanh(a*z3(3))-F3(4)*tanh(a*z3(4))-F3(1)*z3(1);%(19)式
             case 4
                 %近似3 tanh1
                 %近似普通誤差0.1x
@@ -151,8 +135,8 @@ methods
                 a = obj.gain1(:, 2);
                 kapr = obj.gain1(:, 3)';
                 gain_xy = 1;
-                %             ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
-                %             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
+%                             ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
+%                             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
                 ux = -gain_xy * f(1) * tanh(a(1) * z2(1)) - f(2) * tanh(a(2) * z2(2)) - f(3) * tanh(a(3) * z2(3)) - f(4) * tanh(a(4) * z2(4)) - kapr * z2; %-F2*z2; %（17）式
                 uy = -gain_xy * f(1) * tanh(a(1) * z3(1)) - f(2) * tanh(a(2) * z3(2)) - f(3) * tanh(a(3) * z3(3)) - f(4) * tanh(a(4) * z3(4)) - kapr * z3; %-F2*z2; %（17）式
                 %              ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-F2*z2;%-F2*z2;%（17）式
@@ -177,7 +161,7 @@ methods
         %=======================================
         %定常外乱：並進方向は0.2m/s^2くらい，回転方向は3rad/s^2(180deg/s^2)
         %=======================================
-                    dst = 4;
+                    dst = 3;
                     %確率の外乱
 %                     rng("shuffle");
 %                     dst = 1*randn(1);

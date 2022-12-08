@@ -71,7 +71,7 @@ syms k c t real;
 udtanh=diff(2*abs(t).^(2/5).*(tanh(t).^2 - 1) - (4.*sign(t).*tanh(t))./(5*abs(t).^(3/5)),t);
 dunew=diff(-k/2.*(tanh(c.*t)+t),t);
 ddunew=diff(dunew);
-%% 7/12入力の微分方程式を解くぜ
+%% 7/12入力の微分方程式を解く
 x0=1;
 tspan=0:0.01:4;
 k=1;

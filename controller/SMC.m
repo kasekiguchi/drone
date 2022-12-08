@@ -55,8 +55,7 @@ classdef SMC < CONTROLLER_CLASS
             
             %% calc Z
             z1 = Z1(x,xd',P);
-%             vf = obj.Vf(z1,F1);
-            vf = obj.Vf(z1);
+            vf = obj.Vf(z1, F1);
             %% smc
             z2 = Z2(x,xd',vf,P);
             z3 = Z3(x,xd',vf,P);
@@ -68,14 +67,14 @@ classdef SMC < CONTROLLER_CLASS
             sigmay=obj.param.S*z3;
 % %%            
 
-            q=10;%circle
-            k=2;
+            q=0.8;%circle
+            k=0.1;
             alp=0.7;%0<alp<1
             %定常到達則
-%             ux=-inv(SB)*(SA*z2+q*sign(sigmax));%sign
-%             uy=-inv(SB)*(SA*z3+q*sign(sigmay));
-            ux=-inv(SB)*(SA*z2+q*tanh(sigmax));%tanh
-            uy=-inv(SB)*(SA*z3+q*tanh(sigmay));
+            ux=-inv(SB)*(SA*z2+q*sign(sigmax));%sign
+            uy=-inv(SB)*(SA*z3+q*sign(sigmay));
+%             ux=-inv(SB)*(SA*z2+q*tanh(sigmax));%tanh
+%             uy=-inv(SB)*(SA*z3+q*tanh(sigmay));
              %比例到達則
 %              ux=-inv(SB)*(SA*z2+q*sign(sigmax)+k*sigmax);%sgn
 %              uy=-inv(SB)*(SA*z3+q*sign(sigmay)+k*sigmay);
@@ -91,7 +90,7 @@ classdef SMC < CONTROLLER_CLASS
             upsi = -F4*z4;
             vs = [ux;uy;upsi];
  %% 外乱(加速度で与える)
-                        dst = -1;
+                        dst = 1;%m/s^2
 %             dst=0.5*sin(2*pi*t/2);%
 %             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);

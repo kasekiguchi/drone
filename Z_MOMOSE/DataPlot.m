@@ -1,20 +1,20 @@
 %%　DataPlot
 %pos = cell2mat(logger.Data.agent.sigma(1,:)'); %cell2matでcell配列を行列に変換，:,1が列全選択
-clear 
-%%
+% clear 
+%% --------------ここのセクションだけを実行
 %import
 %選択
-fsingle=10;%dataの数が一つの時１
-ff=1;%flightのみは１
-fHLorFT=1;%単体の時,HLは1
-fexp=1;%実験のデータかどうか
+fsingle=1;%dataの数が一つの時１
+ff=10;%flightのみは１
+fHLorFT=10;%単体の時,HLは1
+fexp=10;%実験のデータかどうか
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
-%     name=logger;
+    name=logger;
 %     name=logger_FB500_codin45;
-%     name=logger_FTxyz_mass_saddle;
-    name=logger_FB_mass_saddle;
+%     name=logger_FTxyz2_mass_saddle;
+%     name=logger_FB2_mass_saddle;
 %         name=logger_FB_saddle;
 %         name=logger_FB_xyz2_saddle;
 %         name=logger_FT_xy_saddle;
@@ -35,6 +35,10 @@ if fsingle==1
     if ff==1
         k0f=find(name.Data.phase == 102,1,'first')+1;%0.025sは40Hz
         k0e=find(name.Data.phase == 102,1,'last')-0.000;
+%         k0f=961;
+%         k0e=1527;
+%         k0f=1090;
+%         k0e=1655;
         %連合の時に使ったrmse
 %         k0f=find(name.Data.phase == 102,1,'first')+240;%0.025sは40Hz
 %         k0e=find(name.Data.phase == 102,1,'last');
@@ -96,8 +100,8 @@ else
 %     name1=logger_HL_c;%HLを書く
 %     name2=logger_FT_c_09;%FTを書く
 
-    name1=logger_FT_xyz_saddle;%FTを書く
-    name2=logger_FB_saddle;%HLを書く
+    name1=logger_FB2_mass_saddle;%LSを書く
+    name2=logger_FTxyz2_mass_saddle;%FTを書く
     
     t1 = name1.Data.t';
     t2 = name2.Data.t';
@@ -112,27 +116,44 @@ else
         k2e=find(name2.Data.phase == 102,1,'last');
         tt1=ti1(k1f);
         tt2=ti2(k2f);
-        %表示する時間を最小のものに合わせる
         fspan1=k1e-k1f;
         fspan2=k2e-k2f;
         if  fspan1>=fspan2
             k1e=k1f+fspan2;
         else
-            k2e=k2f+fspan-0;
+            k2e=k2f+fspan1-0;
         end
-%         m=min([k1e k2e]);
-%         k1e=m;
-%         k2e=m;
     else
+        k1f=find(name1.Data.phase == 102,1,'first')+1;
+        k2f=find(name2.Data.phase == 102,1,'first')+1;
+        tt1 = 0;
+        tt2 = ti2(k2f) - ti1(k1f) ;
         k1f=1;
         k1e=name1.k;
         k2f=1;
         k2e=name2.k;
-        fspan1=0;
-        fspan2=0;
-        tt1=0;
-        tt2=0;
+        %手動で指定
+%         k1f=961;
+%         k1e=1527;
+%         k2f=1090;
+%         k2e=1655;
+%         tt1 = ti1(k1f) - ti1(1) ;
+%         tt2 = ti2(k2f) - ti2(1) ;
     end
+        %表示する時間を最小のものに合わせる
+%         m=min([k1e k2e]);
+%         k1e=m;
+%         k2e=m;
+%     else
+%         k1f=1;
+%         k1e=name1.k;
+%         k2f=1;
+%         k2e=name2.k;
+%         fspan1=0;
+%         fspan2=0;
+%         tt1=0;
+%         tt2=0;
+%     end
     
     
     lt1=k1e-k1f+0-0;
@@ -169,7 +190,7 @@ else
         j=j+1;
     end
     j=1;
-    for i=k2f:(k2e)
+    for i=k2f:k2e
         time2(j)=ti2(i)-tt2;
         ref2(:,j)=name2.Data.agent.reference.result{1,i}.state.p(1:3);
         est2(:,j)=name2.Data.agent.estimator.result{1,i}.state.p(1:3);
@@ -204,7 +225,7 @@ end
 % figure
 FigName=["t-p" "x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma"];
 fosi=14;%デフォルト9，フォントサイズ変更
-LW = 2;%linewidth
+LW = 1;%linewidth
 if fsingle==1
    
     i=1;
@@ -243,7 +264,7 @@ if fsingle==1
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
     ylabel('x[m]')
-    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
     hold off
     
     i=i+1;
@@ -256,7 +277,7 @@ if fsingle==1
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
     ylabel('y[m]')
-    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
     hold off
     
     i=i+1;
@@ -269,7 +290,7 @@ if fsingle==1
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
     ylabel('z[m]')
-    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
     hold off    
     
     i=i+1;
@@ -292,7 +313,7 @@ if fsingle==1
     title(HLorFT)
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
-    ylabel('input')%単位はN？
+    ylabel('input [N]')%単位はN？
     legend('1','2','3','4')
     hold off    
     
@@ -305,7 +326,7 @@ if fsingle==1
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
     ylabel('attitude [rad]')
-    legend('x','y','z')
+    legend('roll','pitch','yaw')
     hold off    
     
     i=i+1;
@@ -329,7 +350,7 @@ if fsingle==1
     set(gca,'FontSize',fosi)
     xlabel('time[s]')
     ylabel('angular velocity[rad/s]')
-    legend('x','y','z')
+    legend('roll','pitch','yaw')
     hold off     
 
     i=i+1;
@@ -571,6 +592,7 @@ legend('ref','HL','FT')
     zlabel('z[m]')
     legend('refHL','refFT','HL','FT')
     hold off
+    
     i=10;
      i=i+1;
     f(i)=figure('Name',FigName(i));
@@ -579,13 +601,13 @@ legend('ref','HL','FT')
     plot3(est1(1,:),est1(2,:),est1(3,:),'LineWidth',LW);
     plot3(est2(1,:),est2(2,:),est2(3,:),'LineWidth',LW);
     grid on
-    title(HLorFT)
+    
     set(gca,'FontSize',fosi)
     xlabel('x[m]')
     ylabel('y[m]')
     zlabel('z[m]')
     daspect([1,1,1])
-    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimater'))
+    legend('refHL','LS','FT')
     daspect([1,1,1]);
     campos([-45,-45,60]);
     hold off 
