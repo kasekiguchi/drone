@@ -4,15 +4,15 @@
 %% --------------ここのセクションだけを実行
 %import
 %選択
-fsingle=1;%dataの数が一つの時１
-ff=10;%flightのみは１
+fsingle=10;%dataの数が一つの時１
+ff=1;%flightのみは１
 fHLorFT=10;%単体の時,HLは1
 fexp=10;%実験のデータかどうか
 % 単体
 if fsingle==1
     %loggerの名前が変わっているとき
     name=logger;
-%     name=logger_FB500_codin45;
+    name=logger_FTnaname3;
 %     name=logger_FTxyz2_mass_saddle;
 %     name=logger_FB2_mass_saddle;
 %         name=logger_FB_saddle;
@@ -100,9 +100,12 @@ else
 %     name1=logger_HL_c;%HLを書く
 %     name2=logger_FT_c_09;%FTを書く
 
-    name1=logger_FB2_mass_saddle;%LSを書く
-    name2=logger_FTxyz2_mass_saddle;%FTを書く
+%     name1=logger_FB2_mass_saddle;%LSを書く
+%     name2=logger_FTxyz2_mass_saddle;%FTを書く
     
+name1=logger_LSnaname3;%LSを書く
+    name2=logger_FTnaname3;%FTを書く
+
     t1 = name1.Data.t';
     t2 = name2.Data.t';
     k1=name1.k;
@@ -203,24 +206,24 @@ else
     end
 end
 %二乗誤差平均
-if fsingle == 1
-    RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
-    RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
-    RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
-    RMSE = ["RMSE_x" "RMSE_y" "RMSE_z" ;
-                    RMSE_x RMSE_y RMSE_z]
-else
-    RMSE_x1=sqrt(immse(ref1(1,:),est1(1,:)));
-    RMSE_y1=sqrt(immse(ref1(2,:),est1(2,:)));
-    RMSE_z1=sqrt(immse(ref1(3,:),est1(3,:)));
-    RMSE1 = ["RMSE_x" "RMSE_y" "RMSE_z" ;
-                    RMSE_x1 RMSE_y1 RMSE_z1]
-    RMSE_x2=sqrt(immse(ref2(1,:),est2(1,:)));
-    RMSE_y2=sqrt(immse(ref2(2,:),est2(2,:)));
-    RMSE_z2=sqrt(immse(ref2(3,:),est2(3,:)));
-    RMSE2 = ["RMSE_x" "RMSE_y" "RMSE_z" ;
-                    RMSE_x2 RMSE_y2 RMSE_z2]
-end
+% if fsingle == 1
+%     RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
+%     RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
+%     RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
+%     RMSE = ["RMSE_x" "RMSE_y" "RMSE_z" ;
+%                     RMSE_x RMSE_y RMSE_z]
+% else
+%     RMSE_x1=sqrt(immse(ref1(1,:),est1(1,:)));
+%     RMSE_y1=sqrt(immse(ref1(2,:),est1(2,:)));
+%     RMSE_z1=sqrt(immse(ref1(3,:),est1(3,:)));
+%     RMSE1 = ["RMSE_x" "RMSE_y" "RMSE_z" ;
+%                     RMSE_x1 RMSE_y1 RMSE_z1]
+%     RMSE_x2=sqrt(immse(ref2(1,:),est2(1,:)));
+%     RMSE_y2=sqrt(immse(ref2(2,:),est2(2,:)));
+%     RMSE_z2=sqrt(immse(ref2(3,:),est2(3,:)));
+%     RMSE2 = ["RMSE_x" "RMSE_y" "RMSE_z" ;
+%                     RMSE_x2 RMSE_y2 RMSE_z2]
+% end
 
 % figure
 FigName=["t-p" "x-y" "t-x" "t-y" "t-z" "error" "input" "attitude" "velocity" "angular_velocity" "3D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma"];

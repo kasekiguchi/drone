@@ -62,7 +62,7 @@ methods
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
 
         %%
-        dst=1;
+        dst=0;
 %         t = param{1};
 %         dst = 1;
         %確率的な外乱
