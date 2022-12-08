@@ -116,28 +116,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 fprintf("aaaaaa")
             end
 
-            % 正規化した評価値からだと最小値が0となってしまいリサンプリングできない
-            
-
-            % 生き残ってるサンプル
-%             if removeF ~= 0
-                % 生きてるサンプルの抽出
-%                 obj.input.surviveSample = obj.input.Evaluationtra(find(obj.input.Evaluationtra > 0));
-                % 生きてる中から最適入力の取得
-%                 [Bestcost, BestcostID] = min(obj.input.surviveSample);
-%             else
-%                 % 制約を考慮しない入力の取得-> ０が最小になってしまう：改善策；
-%                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-%             end
-
-%             if removeF ~= 0
-%                 fprintf("disp");
-%                 obj.input.u(:, 1, BestcostID)
-% 
-%                 %-- 新たな評価列:死んだ列のみ
-%                 obj.input.Evaluationtra = obj.input.Evaluationtra(removeX);
-%             end
-
             if removeF ~= obj.param.particle_num
                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得

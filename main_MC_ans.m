@@ -294,10 +294,10 @@ Diff = Edata - Rdata;
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
 logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
 %% Difference of Pos
@@ -332,6 +332,12 @@ xlim([0 te])
 set(gca,'FontSize',Fontsize);  grid on; title("");
 xlabel("Time [s]");
 ylabel("Calculation time [s]");
+
+%%
+% figure(12)
+% SF = data.param.particle_num - data.removeF(1:size(logger.data('t',[],[]),1));
+% F = [data.removeF(1:size(logger.data('t',[],[]),1))'; SF'];
+% area(F)
 %% 動画生成
 mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
 mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
