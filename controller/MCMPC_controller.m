@@ -7,6 +7,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         previous_state
         input
         state
+        const
         reference
         model
         result
@@ -24,21 +25,12 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.param.modelparam.modelparam = obj.self.parameter.get();
             obj.param.modelparam.modelmethod = obj.self.model.method;
             obj.param.modelparam.modelsolver = obj.self.model.solver;
-
+            
             %%
-%             obj.input.Initsigma = param.Initsigma;
-%             obj.input.Constsigma = param.Constsigma;
-%             obj.input.Maxsigma = param.Maxsigma;
-%             obj.input.Minsigma = param.Minsigma;
-%             obj.input.Maxinput = param.Maxinput;
-
             obj.input = param.input;
-%             obj.state.Constraints = param.Constraints;
-            obj.state.ConstraintsY = param.ConstraintsY;
+            obj.const = param.const;
 
             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
-%             obj.input.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
-%             obj.input.ref_v = [0; 0; 0.50];
             obj.model = self.model;
             %-- 全予測軌道のパラメータの格納変数を定義 repmat で短縮できるかも
             obj.state.p_data = zeros(obj.param.H, obj.param.particle_num);
@@ -60,12 +52,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             idx = param{1};
             xr = param{2};
             obj.state.ref = xr;
-
-            %%--%%
-            
-%             modelF = modelfun(0)
-
-            
+ 
             if idx == 1
                 ave1 = 0.269*9.81/4;      % average
                 ave2 = ave1;
@@ -93,15 +80,16 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.input.u2(obj.input.u2<0) = 0;
             obj.input.u3(obj.input.u3<0) = 0;
             obj.input.u4(obj.input.u4<0) = 0;
-            obj.input.u1(obj.input.u1>obj.input.Maxinput) = obj.input.Maxinput; % 上限
-            obj.input.u2(obj.input.u2>obj.input.Maxinput) = obj.input.Maxinput;
-            obj.input.u3(obj.input.u3>obj.input.Maxinput) = obj.input.Maxinput;
-            obj.input.u4(obj.input.u4>obj.input.Maxinput) = obj.input.Maxinput;
+%             obj.input.u1(obj.input.u1>obj.input.Maxinput) = obj.input.Maxinput; % 上限
+%             obj.input.u2(obj.input.u2>obj.input.Maxinput) = obj.input.Maxinput;
+%             obj.input.u3(obj.input.u3>obj.input.Maxinput) = obj.input.Maxinput;
+%             obj.input.u4(obj.input.u4>obj.input.Maxinput) = obj.input.Maxinput;
             obj.input.u(4, 1:obj.param.H, 1:obj.param.particle_num) = obj.input.u4;   % reshape
             obj.input.u(3, :, :) = obj.input.u3;   
             obj.input.u(2, :, :) = obj.input.u2;
             obj.input.u(1, :, :) = obj.input.u1;
             obj.input.u_size = size(obj.input.u, 3);    % obj.param.particle_num
+
             obj.previous_state = obj.self.estimator.result.state.get();
 
             %-- 状態予測
@@ -109,19 +97,49 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             if obj.state.predict_state(3, 1, :) < 0
                 obj.param.fRemove = 1;
             end
-            
+
             %-- 評価値計算
             for m = 1:obj.input.u_size
                 obj.input.eval = obj.objective(m);
                 obj.input.Evaluationtra(1,m) = obj.input.eval;
             end
-            [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-
-            %-- 制約条件
-%             [removeF, removeX] = obj.constraints();
-            removeF = 1; removeX = [];
             
+            % 評価値の正規化
+            obj.input.normE = obj.Normalize();
+            
+            %-- 制約条件
+            [removeF, removeX] = obj.constraints();
+%             removeF = 0; removeX = [];
+%             [Bestcost, BestcostID] = min(obj.input.normE);
+
+            if removeF ~= 0
+                fprintf("aaaaaa")
+            end
+
+            % 正規化した評価値からだと最小値が0となってしまいリサンプリングできない
+            
+
+            % 生き残ってるサンプル
+%             if removeF ~= 0
+                % 生きてるサンプルの抽出
+%                 obj.input.surviveSample = obj.input.Evaluationtra(find(obj.input.Evaluationtra > 0));
+                % 生きてる中から最適入力の取得
+%                 [Bestcost, BestcostID] = min(obj.input.surviveSample);
+%             else
+%                 % 制約を考慮しない入力の取得-> ０が最小になってしまう：改善策；
+%                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
+%             end
+
+%             if removeF ~= 0
+%                 fprintf("disp");
+%                 obj.input.u(:, 1, BestcostID)
+% 
+%                 %-- 新たな評価列:死んだ列のみ
+%                 obj.input.Evaluationtra = obj.input.Evaluationtra(removeX);
+%             end
+
             if removeF ~= obj.param.particle_num
+                [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
                 %-- resampling
                 %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
@@ -133,26 +151,24 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                     obj.input.Bestcost_now = Bestcost;
                 end
                 obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
-            else
-%                 obj.result.input = obj.self.input;
-%                 ConstInput1 = obj.input.sigma.*randn() + obj.param.ref_input(1);
-%                 ConstInput2 = obj.input.sigma.*randn() + obj.param.ref_input(2);
-%                 ConstInput3 = obj.input.sigma.*randn() + obj.param.ref_input(3);
-%                 ConstInput4 = obj.input.sigma.*randn() + obj.param.ref_input(4);
-%                 obj.result.input = [ConstInput1; ConstInput2; ConstInput3; ConstInput4];
+            elseif removeF == obj.param.particle_num    % 全棄却
                 obj.result.input = obj.self.input;
                 obj.input.nextsigma = obj.input.Constsigma;
+                Bestcost = 10000;
+                BestcostID = 1;
             end
             obj.result.removeF = removeF;
             obj.result.removeX = removeX;
             obj.self.input = obj.result.input;
             obj.result.BestcostID = BestcostID;
+            obj.result.bestcost = Bestcost;
             obj.result.contParam = obj.param;
             obj.result.fRemove = obj.param.fRemove;
             obj.result.path = obj.state.state_data;
             obj.result.sigma = obj.input.nextsigma;
             obj.result.Evaluationtra = obj.input.Evaluationtra;
-            obj.result.bestcost = Bestcost;
+            obj.result.Evaluationtra_norm = obj.input.normE;
+            
             result = obj.result;  
         end
         function show(obj)
@@ -162,20 +178,34 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function [removeF, removeX] = constraints(obj)
 %             NP = obj.param.particle_num;
             % 状態制約
-            removeFe = (obj.state.state_data(1, 1, :) >= obj.state.ConstraintsY);   % y座標制約
+            removeFe = (obj.state.state_data(1, end, :) <= obj.const.X);
+%             removeFe_check = fix(find(removeFe)/obj.param.H)+1;
             % 棄却するサンプル番号を算出
-            removeX = find(removeFe);
+%             removeX = find(removeFe);
 %             Fe_size = size(removeFe_check);
+            %最後の粒子が制約に引っかかった場合，想定している最大なサンプル番号を超えることがあるのでその部分を修正
+%             if Fe_size(1) ~=0 
+%                 if Fe_size(2) ~=0
+%                     if removeFe_check(end,1) == (obj.param.particle_num + 1)
+%                         removeFe_check(end,1) = obj.param.particle_num;
+%                     end
+%                 end
+%             end
             % サンプル番号の重なりをなくす
 %             removeX = unique(removeFe_check);
+            removeX = find(removeFe);
             % 制約違反の入力サンプル(入力列)を棄却
 %             obj.input.u(:,:,removeX) = [];
 %             obj.state.state_data(:, :, removeX) = [];
+%             obj.input.Evaluationtra(removeX) = [];
+%             obj.input.u(:,:,removeX) = [];
+%             obj.state.state_data(:, :, removeX) = [];
+            obj.input.Evaluationtra(removeX) = 10000;
             % 全制約違反による分散リセットを確認するフラグ  
             removeF = size(removeX, 1); % particle_num -> 全棄却
         end
 
-        %%-- 連続ode
+%         %%-- 連続ode
 %         function [predict_state] = predict(obj)
 %             ts = 0;
 %             %-- 予測軌道計算
@@ -192,49 +222,14 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %             predict_state = obj.state.state_data;
 %         end
 
-
-%         function [predict_state] = predict(obj)
-%             % parfor のための定義
-%             x0 = obj.previous_state;
-%             initx = obj.previous_state;
-%             H = obj.param.H;
-%             modelparam = obj.param.modelparam.modelparam;
-%             roterinput = obj.input.u;
-%             MPCdt = obj.param.dt;
-%             ps = x0;
-%             state_data = zeros(12, obj.param.H, obj.param.particle_num);
-%             
-% 
-%             ts = 0;
-%             %-- 予測軌道計算
-%             for m = 1:obj.input.u_size
-%                 state_data(:, 1, m) = ps;
-%                 parfor h = 1:H-1
-%                     if h == 1
-%                         x0 = initx;
-%                         [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, roterinput(:, h, m),modelparam),[ts ts+MPCdt],x0);
-%                         x0p = tmpx(end, :);
-%                         state_data(:, h+1, m) = x0p;
-%                     else
-%                         x0 = x0p;
-%                         [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, roterinput(:, h, m),modelparam),[ts ts+MPCdt],x0);
-%                         x0p = tmpx(end, :);
-%                         state_data(:, h+1, m) = x0p;
-%                     end
-%                 end
-%             end
-%             predict_state = state_data;
-%         end
-
         %%-- 連続；オイラー近似
         function [predict_state] = predict(obj)
-            modelF = @roll_pitch_yaw_thrust_force_physical_parameter_model;
             %-- 予測軌道計算
             for m = 1:obj.input.u_size
                 x0 = obj.previous_state;
                 obj.state.state_data(:, 1, m) = obj.previous_state;
                 for h = 1:obj.param.H-1
-                    x0 = x0 + obj.param.dt * modelF(x0, obj.input.u(:, h, m), obj.param.modelparam.modelparam);
+                    x0 = x0 + obj.param.dt * obj.param.modelparam.modelmethod(x0, obj.input.u(:, h, m), obj.param.modelparam.modelparam);
                     obj.state.state_data(:, h+1, m) = x0;
                 end
             end
@@ -274,12 +269,26 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef)...
                 + terminalState;
         end
+        
+        function [pw_new] = Normalize(obj)
+            NP = obj.param.particle_num;
+            pw = obj.input.Evaluationtra;
 
-%         function xk = eular(obj)
-%             modelF = @roll_pitch_yaw_thrust_force_physical_parameter_model;
-%             xk = obj.self.estimator.result.state.get() + obj.param.dt.*modelF(obj.self.estimator.result.state.get(), obj.input.u, obj.modelparam.modelparam);
-% 
-%         end
+            % 配列が空かどうかの判別/ pw=評価値
+%             if isempty(pw(pw<=49))
+%                 obj.reset_flag = 1;
+%             end
+            % 評価値は0未満にならず最小値を正規化した際の1と考えた場合，指数関数を
+            % 使って正規化をすることによって上手いことリサンプリングできる．
+            pw = exp(-pw);
+            sumw = sum(pw);
+            if sumw~=0
+                pw = pw/sum(pw);%正規化
+            else
+                pw = zeros(1,NP)+1/NP;
+            end
+            pw_new = pw + 10E-10;
+        end
     end
 end
 

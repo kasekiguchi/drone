@@ -48,14 +48,6 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
     xr0 = zeros(Params.state_size, Params.H);
 
-    % X of HL
-    load('Data/Circle_HL.mat', 'QHL','WHL','PHL','VHL');
-    Params.qHL = QHL';
-    Params.wHL = WHL';
-    Params.pHL = PHL';
-    Params.vHL = VHL';
-    X = [PHL'; QHL'; VHL'; WHL'];
-
     % データ保存初期化
     data.xr{idx+1} = 0;
     data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
@@ -81,6 +73,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     data.bestx(idx+1, :) = repelem(initial.p(1), Params.H); % - もっともよい評価の軌道x成分
     data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
     data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
+
+    calT = 0;
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
@@ -162,50 +156,46 @@ end
         if idx == 1
             data.param = agent.controller.result.contParam;
         end
-        state_data = agent.controller.result.path;
-        BestcostID = agent.controller.result.BestcostID;
-        data.path{idx} = state_data;
-        data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-        data.sigma(idx) = agent.controller.result.sigma;
-        data.bestcost(idx) = agent.controller.result.bestcost;
-        data.removeF(idx+1) = agent.controller.result.removeF;   % - 棄却されたサンプル数
-        data.removeX{idx+1} = agent.controller.result.removeX;
+        state_data =            agent.controller.result.path;
+        BestcostID =            agent.controller.result.BestcostID;
+        data.path{idx} =        state_data;
+        data.pathJ{idx} =       agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+        data.pathJN{idx} =      agent.controller.result.Evaluationtra_norm;
+        data.sigma(idx) =       agent.controller.result.sigma;
+        data.bestcost(idx) =    agent.controller.result.bestcost;
+        data.removeF(idx) =     agent.controller.result.removeF;   % - 棄却されたサンプル数
+        data.removeX{idx} =     agent.controller.result.removeX;
 
-        data.state(idx+1, 1) = idx * dt; % - 現在時刻
-        data.state(idx+1, 2) = agent.estimator.result.state.p(1);   % - 状態 x
-        data.state(idx+1, 3) = agent.estimator.result.state.p(2);   % - 状態 y
-        data.state(idx+1, 4) = agent.estimator.result.state.p(3);   % - 状態 z
-        data.state(idx+1, 5) = agent.input(1);  % - 入力 u1
-        data.state(idx+1, 6) = agent.input(2);  % - 入力 u2
-        data.state(idx+1, 7) = agent.input(3);  % - 入力 u3
-        data.state(idx+1, 8) = agent.input(4);  % - 入力 u4
-        data.state(idx+1, 9)  = xr(1, 1);    % - 目標状態 xr
-        data.state(idx+1, 10) = xr(2, 1);   % - 目標状態 yr
-        data.state(idx+1, 11) = xr(3, 1);   % - 目標状態 zr
+        data.state(idx, 1) = idx * dt; % - 現在時刻
+        data.state(idx, 2) = agent.estimator.result.state.p(1);   % - 状態 x
+        data.state(idx, 3) = agent.estimator.result.state.p(2);   % - 状態 y
+        data.state(idx, 4) = agent.estimator.result.state.p(3);   % - 状態 z
+        data.state(idx, 5) = agent.input(1);  % - 入力 u1
+        data.state(idx, 6) = agent.input(2);  % - 入力 u2
+        data.state(idx, 7) = agent.input(3);  % - 入力 u3
+        data.state(idx, 8) = agent.input(4);  % - 入力 u4
+        data.state(idx, 9)  = xr(1, 1);    % - 目標状態 xr
+        data.state(idx, 10) = xr(2, 1);   % - 目標状態 yr
+        data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
 
-        if data.removeF(idx+1) ~= data.param.particle_num
-            data.bestx(idx+1, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
-            data.besty(idx+1, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
-            data.bestz(idx+1, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
+        data.xr{idx} = xr;
+
+        
+
+        if data.removeF(idx) ~= data.param.particle_num
+            data.bestx(idx, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
+            data.besty(idx, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
+            data.bestz(idx, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
         else
-            data.bestx(idx+1, :) = data.bestx(idx, :); % - もっともよい評価の軌道x成分
-            data.besty(idx+1, :) = data.besty(idx, :); % - もっともよい評価の軌道y成分
-            data.bestz(idx+1, :) = data.bestz(idx, :); % - もっともよい評価の軌道z成分
+            data.bestx(idx, :) = data.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+            data.besty(idx, :) = data.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+            data.bestz(idx, :) = data.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
         end
    
-        if data.removeF(idx+1) == 0
-            disp('State Constraint Violation!')
-        end
+        
 
         state_monte = agent.estimator.result.state;
         ref_monte = agent.reference.result.state;
-
-        fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
-                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
-                xr(1,1), xr(2,1), xr(3,1));
-
         %% update state
         % with FH
         figure(FH)
@@ -234,18 +224,32 @@ end
             if (fOffline)
                 time.t
             else
-                time.t = time.t + dt % for sim
+                time.t = time.t + dt; % for sim
             end
 
         end
         fRemove = agent.controller.result.fRemove;
         if fRemove == 1
-            warning("Emergency Stop!!!")
+            warning("Z<0 Emergency Stop!!!")
             break;
         end
-        calT = toc % 1ステップ（25ms）にかかる計算時間
+        calT = toc; % 1ステップ（25ms）にかかる計算時間
         totalT = totalT + calT;
-        
+        data.calT(idx, :) = calT;
+
+        fprintf("==================================================================\n")
+        fprintf("==================================================================\n")
+        fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
+                xr(1,1), xr(2,1), xr(3,1));
+        fprintf("t: %6.3f \t calT: %f \t sigma: %f", time.t, calT, data.sigma(idx))
+        if data.removeF(idx) ~= data.param.particle_num
+            fprintf('\t State Constraint Violation!')
+        end
+        fprintf("\n");
+
         %% 逐次プロット
         figure(10);
         clf
@@ -261,7 +265,7 @@ end
         legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
         xlim([0 te]); ylim([-inf inf+0.1]); 
 
-        fprintf("sigma: %f\n", data.sigma(idx))
+        
 
         %%
         drawnow 
@@ -284,6 +288,7 @@ close all
 size_best = size(data.bestcost, 2);
 Edata = logger.data(1, "p", "e")';
 Rdata = logger.data(1, "p", "r")';
+Vdata = logger.data(1, "v", "e")';
 Diff = Edata - Rdata;
 
 fprintf("%f秒\n", totalT)
@@ -305,26 +310,38 @@ logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid o
 % figure(9);
 % yyaxis left
 % logger.plot({1, "input", ""});
-% fig9_LW = 0.5;
-% % plot(logger.data('t', [], []), data.input(:, 1), "Color", "blue", "LineWidth", fig9_LW, 'LineStyle','-'); hold on;
-% % plot(logger.data('t', [], []), data.input(:, 2), "Color", "red", "LineWidth", fig9_LW, 'LineStyle','-')
-% % plot(logger.data('t', [], []), data.input(:, 3), "Color", "#FCAF22", "LineWidth", fig9_LW, 'LineStyle','-')
-% % plot(logger.data('t', [], []), data.input(:, 4), "Color", "#A757A8", "LineWidth", fig9_LW, 'LineStyle','-'); hold off;
 % set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input");
 % yyaxis right
 % plot(logger.data('t', [], [])', data.bestcost(1:end-1), 'LineWidth', 2, 'LineStyle','--');
 % set(gca,'FontSize',15);  grid on; title(""); ylabel("Evaluation [m]"); xlabel("time [s]"); xlim([0 10]);
 % legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
 
+%% 
+% logt = logger.data('t',[],[]);
+figure(10)
+plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("remove sample")
+yyaxis right
+plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("sigma");
+xlim([0 te])
+set(gca,'FontSize',Fontsize);  grid on; title("");
+%% calculation time
+logt = logger.data('t',[],[]);
+figure(11)
+plot(logt, data.calT(1:size(logger.data('t',[],[]),1)))
+xlim([0 te])
+set(gca,'FontSize',Fontsize);  grid on; title("");
+xlabel("Time [s]");
+ylabel("Calculation time [s]");
 %% 動画生成
-%  ディレクトリ生成
-% mkdir D:Documents\University\MCMPC\simdata png/Animation1
-% mkdir D:Documents\University\MCMPC\simdata png/Animation_omega
-% mkdir D:Documents\University\MCMPC\simdata video
-% Outputdir = 'D:Documents\University\MCMPC\simdata';
-% PlotMov       % 2次元プロット
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
+Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
+PlotMov_v2       % 2次元プロット
 % PlotMovXYZ  % 3次元プロット
 % save()
+%%
+% save('Data\20221208_circle_const.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
