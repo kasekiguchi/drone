@@ -22,6 +22,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
         pubMsg
 %         pubMsg  % 送信msg
+        flightcontroller%コールバック用
     end
 
     properties(SetAccess=private)
@@ -50,11 +51,12 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             %ROS2のトピック一覧
             ros2 topic list;
             
+            obj.flightcontroller = [];
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
 %                 obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),@exampleHelperROS2PoseCallback,...
 %                     "History","keepall","Reliability","besteffort");
-                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),...
+                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),{@ROS2Callback,obj},...
                     "History","keepall","Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
@@ -73,7 +75,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                try
+                try %%エラーが出たらcatchに移行
                     obj.result = receive(obj.subscriber.subtopic(i),0.001);
                 catch
                     obj.result = [];
@@ -99,6 +101,14 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
                     send(obj.publisher.pubTopic(i), msg);
                 end
             end
+        end
+        function ROS2Callback(obj,message)%コールバック用の謎関数
+            obj.flightcontroller = message.subscriber.subtopic.LatestMessage;
+        end
+        function [ret] = getDataFC(obj)
+            %回転数の測定値を持ってくるための関数
+            obj.result = obj.subscriber.subtopic.LatestMessage;
+            ret = obj.result;
         end
 
         function delete(obj)
