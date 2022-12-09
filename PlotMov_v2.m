@@ -7,7 +7,7 @@ maxbestcost = max(data.bestcost)
     % 寒色：良い評価、暖色：悪い評価
 	Color_map(1:100,:) = jet(100);            % 評価値の上から10個をカラーマップの色付け.
 %     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v5'));
+	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v6'));
 	open(writerObj);
     
     countMax = size(data.pathJ,2);

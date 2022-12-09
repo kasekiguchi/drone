@@ -56,6 +56,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     data.bestcost(idx+1) = 0;   % - 評価値
     data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
     data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
+    data.variable_particle_num(idx+1) = 0;  % - 可変サンプル数
 
     dataNum = 11;
     data.state           = zeros(round(te/dt + 1), dataNum);       
@@ -179,7 +180,7 @@ end
         data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
 
         data.xr{idx} = xr;
-
+%         data.variable_particle_num(idx) = agent.controller.result.variable_N;
         
 
         if data.removeF(idx) ~= data.param.particle_num
@@ -228,15 +229,15 @@ end
             end
 
         end
+        calT = toc; % 1ステップ（25ms）にかかる計算時間
+        totalT = totalT + calT;
+        data.calT(idx, :) = calT;
+
         fRemove = agent.controller.result.fRemove;
         if fRemove == 1
             warning("Z<0 Emergency Stop!!!")
             break;
         end
-        calT = toc; % 1ステップ（25ms）にかかる計算時間
-        totalT = totalT + calT;
-        data.calT(idx, :) = calT;
-
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
         fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
@@ -244,8 +245,8 @@ end
                 state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                 xr(1,1), xr(2,1), xr(3,1));
-        fprintf("t: %6.3f \t calT: %f \t sigma: %f", time.t, calT, data.sigma(idx))
-        if data.removeF(idx) ~= data.param.particle_num
+        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t", time.t, calT, data.sigma(idx))
+        if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
         end
         fprintf("\n");
@@ -264,9 +265,6 @@ end
         xlabel("Time [s]"); ylabel("Reference [m]");
         legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
         xlim([0 te]); ylim([-inf inf+0.1]); 
-
-        
-
         %%
         drawnow 
     end
@@ -333,21 +331,27 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 xlabel("Time [s]");
 ylabel("Calculation time [s]");
 
+%% particle_num
+figure(12)
+plot(logt, data.variable_particle_num(1:size(logt)));
+xlim([0 te])
+xlabel("Time [s]"); ylabel("Number of Sample");
+set(gca,'FontSize',Fontsize);  grid on; title("");
 %%
-% figure(12)
+% figure(13)
 % SF = data.param.particle_num - data.removeF(1:size(logger.data('t',[],[]),1));
 % F = [data.removeF(1:size(logger.data('t',[],[]),1))'; SF'];
 % area(F)
 %% 動画生成
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
-Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
-PlotMov_v2       % 2次元プロット
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
+% Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
+% PlotMov_v2       % 2次元プロット
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20221208_circle_const.mat', '-v7.3')
+% save('Data\20221209_circle_const_variable_sample_10000.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

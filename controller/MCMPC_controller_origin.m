@@ -29,7 +29,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.input = param.input;
             obj.const = param.const;
 
-%             obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
+            obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
             obj.model = self.model;
             %-- 全予測軌道のパラメータの格納変数を定義,　最大のサンプル数で定義
 %             obj.state.p_data = 10000 * ones(obj.param.H, obj.param.particle_num);
@@ -40,6 +40,16 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %             obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
 %             obj.state.w_data = 10000 * ones(obj.param.H, obj.param.particle_num);
 %             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
+
+            obj.state.p_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
+            obj.state.v_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
+            obj.state.q_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
+            obj.state.w_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
+            obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data];  
 
             obj.param.fRemove = 0;
         end
@@ -58,7 +68,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 ave4 = ave1;
                 obj.input.sigma = obj.input.Initsigma;
                 % 追加
-                obj.param.particle_num = obj.param.Mparticle_num;
+%                 obj.param.particle_num = obj.param.Mparticle_num;
             else
                 ave1 = obj.self.input(1);    % リサンプリングとして前の入力を平均値とする
                 ave2 = obj.self.input(2);
@@ -72,36 +82,21 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 end
 
                 % particle_num 追加
-                if obj.param.nextparticle_num > obj.param.Mparticle_num
-                    obj.param.nextparticle_num = obj.param.Mparticle_num;    % 上限:サンプル数
-                elseif obj.param.nextparticle_num < obj.param.MIparticle_num
-                    obj.param.nextparticle_num = obj.param.MIparticle_num;  % 下限
-                end
+%                 if obj.param.nextparticle_num > obj.param.Mparticle_num
+%                     obj.param.nextparticle_num = obj.param.Mparticle_num;    % 上限:サンプル数
+%                 elseif obj.param.nextparticle_num < obj.param.MIparticle_num
+%                     obj.param.nextparticle_num = obj.param.MIparticle_num;  % 下限
+%                 end
 
                 obj.input.sigma = obj.input.nextsigma;
 
                 % 追加
-                obj.param.particle_num = obj.param.nextparticle_num;
+%                 obj.param.particle_num = obj.param.nextparticle_num;
             end
 %             rng ('shuffle');
-            
             % 追加
-            obj.state.p_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
-            obj.state.v_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
-            obj.state.q_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
-            obj.state.w_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
-            obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data]; 
-            
-            % 追加
-            obj.input.Evaluationtra = NaN(1, obj.param.particle_num);
-
-            % 追加
-            obj.input.u = NaN(obj.param.H, obj.param.particle_num);
-            obj.input.u = repmat(reshape(obj.input.u, [1, size(obj.input.u)]), 4, 1);
+%             obj.input.u = NaN(obj.param.H, obj.param.particle_num);
+%             obj.input.u = repmat(reshape(obj.input.u, [1, size(obj.input.u)]), 4, 1);
 
             obj.input.u1 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave1;
             obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave2;
@@ -123,9 +118,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
             obj.previous_state = obj.self.estimator.result.state.get();
 
-%             if obj.param.particle_num ~= obj.param.Mparticle_num
-%                 disp("diff N");
-%             end
             %-- 状態予測
             [obj.state.predict_state] = obj.predict();
             if obj.state.predict_state(3, 1, :) < 0
@@ -146,9 +138,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %             removeF = 0; removeX = [];
 %             [Bestcost, BestcostID] = min(obj.input.normE);
 
-%             if removeF ~= 0
-%                 fprintf("aaaaaa")
-%             end
+            if removeF ~= 0
+                fprintf("aaaaaa")
+            end
 
             if removeF ~= obj.param.particle_num
                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
@@ -165,7 +157,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
 
                 % 追加
-                obj.param.nextparticle_num = ceil(obj.param.particle_num * (obj.input.Bestcost_now/obj.input.Bestcost_pre));
+%                 obj.param.nextparticle_num = ceil(obj.param.particle_num * (obj.input.Bestcost_now/obj.input.Bestcost_pre));
 
             elseif removeF == obj.param.particle_num    % 全棄却
                 obj.result.input = obj.self.input;
@@ -174,7 +166,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 BestcostID = 1;
 
                 % 追加
-                obj.param.nextparticle_num = obj.param.Mparticle_num;
+%                 obj.param.nextparticle_num = obj.param.Mparticle_num;
             end
             obj.result.removeF = removeF;
             obj.result.removeX = removeX;
@@ -185,7 +177,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.result.fRemove = obj.param.fRemove;
             obj.result.path = obj.state.state_data;
             obj.result.sigma = obj.input.nextsigma;
-            obj.result.variable_N = obj.param.nextparticle_num; % 追加
+%             obj.result.variable_N = obj.param.nextparticle_num; % 追加
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.Evaluationtra_norm = obj.input.normE;
             
