@@ -1,14 +1,15 @@
-classdef sensor_ceiling_sim
+classdef sensor_ceiling_sim < SENSOR_CLASS
     %SENSOR_CEILING このクラスの概要をここに記述
     %   天井との距離を測定する赤外線センサ(シミュレーション用)
 
     properties
-        name = "ceiling";
+        name = "celing";
         result
         self
         pitch
         distance
         angle_range
+        KF
     end
 
     methods
@@ -17,6 +18,10 @@ classdef sensor_ceiling_sim
             obj.distance = param.distance;%距離
             obj.pitch = param.pitch;%角度
             obj.angle_range =param.angle_range;%出てくる線と角度範囲
+            obj.KF.x_h = [];%状態推定値初期値
+            obj.KF.P_h = 1;%共分散行列
+            obj.KF.Q = 0.8;%システムノイズの分散
+            obj.KF.R = 1;%観測ノイズの分散
         end
 
         function result = do(obj,param)
@@ -29,13 +34,25 @@ classdef sensor_ceiling_sim
             Ry = [cos(Pitch) 0 sin(Pitch);0 1 0;-sin(Pitch) 0 cos(Pitch)];%y軸周り
             sensor_pos = Rx*Ry*[0 0 0.05]'+pos;%機体よりちょっと高めにセンサー位置を設定
             distance_ceiling = z - sensor_pos(3); %実際の距離
-            result.ceiling_distance = sqrt((distance_ceiling*tan(Roll)/cos(Pitch))^2 + distance_ceiling^2)+random('Normal',0,0.02);%センサの取得した測定距離
-            if result.ceiling_distance > obj.distance
-                error_offset = obj.distance;
-                error_distance = error_offset - 1 + random('Normal',0,0.5);
-                result.ceiling_distance = error_distance;
+            obj.result.ceiling_distance = sqrt((distance_ceiling*tan(Roll)/cos(Pitch))^2 + distance_ceiling^2)+random('Normal',0,0.02);%センサの取得した測定距離
+            %% %KF
+            if isempty(obj.KF.x_h)
+                obj.KF.x_h = obj.result.ceiling_distance;%状態推定値初期値
+            else
+            x_hm = obj.KF.x_h;%事前推定値
+            P_hm = obj.KF.P_h+obj.KF.Q;%事前誤差共分散
+            K = P_hm/(P_hm+obj.KF.R);%カルマンゲイン
+            obj.KF.x_h = x_hm+K*(obj.result.ceiling_distance-x_hm);%事後推定値
+            obj.KF.P_h = (1 - K)*P_hm;%事後誤差共分散
+            obj.result.ceiling_distance = obj.KF.x_h;
             end
-            obj.result = result;
+            result = obj.result;
+        end
+        function show(obj,varargin)
+            if ~isempty(obj.result)
+            else
+                disp("do measure first.");
+            end
         end
     end
 end

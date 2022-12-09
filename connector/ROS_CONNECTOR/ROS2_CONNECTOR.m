@@ -22,6 +22,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
         pubMsg
 %         pubMsg  % 送信msg
+        flightcontroller%東急回転数計測用
     end
 
     properties(SetAccess=private)
@@ -52,7 +53,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
-                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),...
+                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),{@ROS2Callback,obj},...
                     "History","keepall","Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
@@ -60,6 +61,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
                     obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1},obj.pubMsg{i,1});
                 end
             end
+            obj.flightcontroller = [];
         end
 
         function [ret] = getData(obj)
@@ -81,18 +83,18 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             % msg = {msg1, msg2, ...} : order corresponding to pubTopic
             % or 
             % msg = struct('topic_name1',value1,'topic_name2',value2,...)
-            
-            if isstruct(msg)
-                for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic(i), msg);
-                end
-            else
-                for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic(i), msg);
-                end
+
+            for i = 1:obj.pubTopicNum
+                send(obj.publisher.pubTopic(i), msg);
             end
+
+        end
+        function ROS2Callback(obj,message)
+            obj.flightcontroller = message.subscriber.subtopic.LatestMessage.data;
+        end
+        function [ret] = getDataFC(obj)
+            obj.result = obj.subscriber.subtopic.LatestMessage;
+            ret = obj.result;
         end
 
         function delete(obj)

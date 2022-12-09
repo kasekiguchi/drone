@@ -5,6 +5,7 @@ classdef ceiling_reference < REFERENCE_CLASS
         param
         func % 時間関数のハンドル
         self
+        margin
         t=[];
         cha='s';
         dfunc
@@ -20,6 +21,8 @@ classdef ceiling_reference < REFERENCE_CLASS
                 self
                 args
             end
+            obj.self = self;
+            obj.margin = 1.5;
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
             obj.func = gen_func_name(param_for_gen_func);
@@ -31,19 +34,25 @@ classdef ceiling_reference < REFERENCE_CLASS
             else
                 obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
             end
-            syms t real
-            obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
         function result = do(obj, Param)  
            %Param={time,FH}
            obj.cha = get(Param{2}, 'currentcharacter');
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
                 t = Param{1}.t-obj.t; % 目標重心位置（絶対座標）
+                obj.t=Param{1}.t;
            else
                 obj.t=Param{1}.t;
                 t = obj.t;
            end
-           obj.result.state.p = obj.func(t);
+           %% %書き換え部分
+           obj.result.state.p = obj.func(t);%目標位置に向かうポテンシャル
+           obs_potential = 0.1/(2-obj.self.estimator.result.state.p(1))^2;%障害物からのポテンシャル
+           goal_potential = 0.2;
+           %合成
+           obj.result.state.p(1) = -obs_potential + goal_potential + obj.self.estimator.result.state.p(1);%x方向の目標位置
+           %sensorの値から高度を指定
+           obj.result.state.p(3) = obj.self.sensor.result.ceiling_distance + obj.self.estimator.result.state.p(3) - obj.margin;%z方向の目標位置
            result = obj.result;
         end
         function show(obj, logger)

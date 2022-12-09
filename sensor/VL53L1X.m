@@ -1,4 +1,4 @@
-classdef VL53L1X
+classdef VL53L1X < SENSOR_CLASS
     %       self : agent 製作途中
     properties
         name      = "VL";
@@ -25,16 +25,18 @@ classdef VL53L1X
             setup(obj.receiver);
         end
         
-        function result=do(obj,~)
+        function result=do(obj,~) 
             udpr = obj.receiver();
             if isempty(udpr)==0%受け取ったデータの確認用
 %                 ReceiveDate = strcat(native2unicode(udpr'));%取得したデータの分割
 %                 obj.self.sensor.UDP.result = str2double(ReceiveDate);%赤外線センサchar→double
-                ReceiveDate = strsplit(strcat(native2unicode(udpr')),',');%取得したデータの分割
-                obj.length(1,1) = str2double(ReceiveDate(1));%センサ1 char→double
-                obj.length(1,2) = str2double(ReceiveDate(2));%センサ2 char→double
+                ReceiveDate = strcat(native2unicode(udpr'));
+                %ReceiveDate = strsplit(strcat(native2unicode(udpr')),',');%取得したデータの分割
+                obj.result.VL_length = str2double(ReceiveDate);%/1000;%センサ1 char→double
+            else             
+                    obj.result.VL_length = obj.self.sensor.VL.result.VL_length;
             end
-            result = ;%obj.self.sensor.VL.result;
+            result = obj.result;
         end
         function show(obj,varargin)
             if ~isempty(obj.result)

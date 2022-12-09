@@ -5,6 +5,7 @@ agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,132]),DRONE_PARAM("DIATO
 pause(1);
 agent.plant.connector.sendData(gen_msg([500,500,0,500,0,0,0,0]));% arming
 agent.set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
+agent.set_property("sensor",Sensor_vl53l1x(1));
 %% %パラメータ
 dt = 0.75;%throttleの刻み時間
 dt_rpm = 0.01;%rpm取得の刻み時間
@@ -56,6 +57,7 @@ try
             end
             if(cha == 's')
                 T(s+1) = toc(Timer_sensor_rpm);
+                agent.sensor.VL.result = agent.sensor.VL.do;
                 agent.sensor.tokyu.result = agent.sensor.tokyu.do;
                 if isempty(agent.sensor.tokyu.result.ros2.rpm)==1
                     X1(s+1,:) = X1(s,:);
@@ -65,6 +67,11 @@ try
                     X1(s+1,:) = agent.sensor.tokyu.result.ros2.current;
                     X2(s+1,:) = agent.sensor.tokyu.result.ros2.voltage;
                     X3(s+1,:) = agent.sensor.tokyu.result.ros2.rpm;
+                end
+                if isempty(agent.sensor.VL.result.VL_length)==1
+                    X4(s+1,:) = X4(s,:);
+                else
+                    X4(s+1,:) = agent.sensor.VL.result.VL_length;
                 end
                 s=s+1;
             end
@@ -97,6 +104,7 @@ plot(T,X1)%グラフのプロット
 % ymax = ylim;
 % area([Ts Ts_end],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
+legend('Location','best')
 xlabel('time [s]')
 ylabel('current')
 hold off
@@ -107,6 +115,7 @@ plot(T,X2)%グラフのプロット
 % ymax = ylim;
 % area([Ts Ts_end],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
+legend('Location','best')
 xlabel('time [s]')
 ylabel('voltage')
 hold off
@@ -114,10 +123,11 @@ hold off
 figure(4)
 hold on
 plot(T,X3,'LineWidth',1)%グラフのプロット
-plot(T,X3Ave,'LineWidth',1)
+plot(T,X4,'LineWidth',1)%グラフのプロット
+%plot(T,X3Ave,'LineWidth',1)
 % ymax = ylim;
 % area([Ts Ts_end],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
-legend('morter 1','morter 2','morter 3','morter 4','average')
+legend('morter 1','morter 2','morter 3','morter 4','distance ceiling')%,'average')
 legend('Location','best')
 xlabel('time [s]')
 ylabel('morter speed [rpm]')

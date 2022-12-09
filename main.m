@@ -19,16 +19,16 @@ run("main1_setting.m");
 
 % for mob1 Tbug用
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
-wall1 = [2 -1;2 0.5;2.5 0.5;2.5 -1];
-wall2 = [4 0;2 0.5;7 0.5;7 0];
-room = [-2 -5;-2 4;7 4;7 -5];
+wall1 = [2 -1;2 1;2.5 1;2.5 -1];
+%wall2 = [4 0;2 0.5;7 0.5;7 0];
+%room = [-2 -5;-2 4;7 4;7 -5];
 % Env.param.Vertices = [tmp;NaN NaN;0.6*tmp]; %モビング時の障害物
-Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
+%Env.param.Vertices = [wall1;NaN NaN;room]; %Tbug時の障害物
 % Env.param.Vertices = [wall1;NaN NaN;wall2;NaN NaN;room]; %Tbug時の障害物(複数)
 initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
 %agent.set_model_error("ly",0.02);
-plot(polyshape(Env.param.Vertices));
+%plot(polyshape(Env.param.Vertices));
 
 % set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -47,7 +47,7 @@ dstr=[0,0,0];%外乱[x,y,z]
 run("main2_agent_setup.m");
 % agent.set_model_error("ly",0.02);%モデル誤差
 % agent.set_model_error("mass",0.01);%モデル誤差
-agent(1).set_model_error("B",{[zeros(1,6),-dstr,zeros(1,3)]});%only sim
+% agent(1).set_model_error("B",{[zeros(1,6),-dstr,zeros(1,3)]});%only sim
 %% main loop
 run("main3_loop_setup.m");
 disp("enter while loop");
@@ -78,7 +78,7 @@ try
             param(i).sensor.lrf = Env;
             param(i).sensor.tokyu = {};
             param(i).sensor.VL = {};
-            param(i).sensor.celing = 2;
+            param(i).sensor.celing = 3;
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
@@ -102,7 +102,7 @@ try
             end
             param(i).reference.covering = [];
 
-            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,1};%reference.pointの目標位置を指定できる
+            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,3,1.5};%reference.pointの目標位置を指定できる
 
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
@@ -186,7 +186,8 @@ catch ME % for error
     for i = 1:N
         agent(i).do_plant(struct('FH', FH), "emergency");
     end
-
+    clear ROS2_CONNECTOR.subscriber.subtopic(1)
+    clear ROS2_CONNECTOR.subTopic(1)
     warning('ACSL : Emergency stop! Check the connection.');
     rethrow(ME);
 end
@@ -209,6 +210,7 @@ logger.plot({1,"p","sr"});
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 %agent(1).animation(logger,"target",1:N);
-agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[0,0,3.1],"length",[5,5,0.2])));%天井room = [-2 -5;-2 4;7 4;7 -5];
+% agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[0,0,3.1],"length",[5,5,0.2])));%天井room = [-2 -5;-2 4;7 4;7 -5];
+% agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[2,0,1],"length",[0.2,2,2])));%天井room = [-2 -5;-2 4;7 4;7 -5]
 %%
 %logger.save();
