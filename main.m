@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+fExp = 1 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -76,7 +76,6 @@ try
             param(i).sensor.direct = {};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
-            param(i).sensor.tokyu = {};
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
