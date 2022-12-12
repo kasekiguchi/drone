@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -108,7 +108,7 @@ try
             param(i).reference.covering = [];
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
-            param(i).reference.point = {FH, [2.3;2.5;1.6], time.t,dt,2.1};%reference.pointの目標位置を指定できる。天井高さを追加{5}
+            param(i).reference.point = {FH, [1;-3.5;2.4], time.t,dt,3};%reference.pointの目標位置を指定できる。天井高さを追加{5}
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
