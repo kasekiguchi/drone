@@ -20,8 +20,8 @@ classdef sensor_ceiling_sim < SENSOR_CLASS
             obj.angle_range =param.angle_range;%出てくる線と角度範囲
             obj.KF.x_h = [];%状態推定値初期値
             obj.KF.P_h = 1;%共分散行列
-            obj.KF.Q = 0.8;%システムノイズの分散
-            obj.KF.R = 1;%観測ノイズの分散
+            obj.KF.Q = 4;%システムノイズの分散
+            obj.KF.R = 2;%観測ノイズの分散
         end
 
         function result = do(obj,param)
@@ -34,6 +34,9 @@ classdef sensor_ceiling_sim < SENSOR_CLASS
             Ry = [cos(Pitch) 0 sin(Pitch);0 1 0;-sin(Pitch) 0 cos(Pitch)];%y軸周り
             sensor_pos = Rx*Ry*[0 0 0.05]'+pos;%機体よりちょっと高めにセンサー位置を設定
             distance_ceiling = z - sensor_pos(3); %実際の距離
+            if pos(1) > 1 && pos(1) < 1.5
+            distance_ceiling = z - sensor_pos(3)-0.5; %実際の距離
+            end
             obj.result.ceiling_distance = sqrt((distance_ceiling*tan(Roll)/cos(Pitch))^2 + distance_ceiling^2)+random('Normal',0,0.02);%センサの取得した測定距離
             %% %KF
             if isempty(obj.KF.x_h)
@@ -46,6 +49,8 @@ classdef sensor_ceiling_sim < SENSOR_CLASS
             obj.KF.P_h = (1 - K)*P_hm;%事後誤差共分散
             obj.result.ceiling_distance = obj.KF.x_h;
             end
+            %% 実際の天井との距離に変換
+            obj.result.ceiling_distance = obj.result.ceiling_distance*cos(Roll)*cos(Pitch);
             result = obj.result;
         end
         function show(obj,varargin)

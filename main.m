@@ -211,6 +211,6 @@ logger.plot({1,"p","sr"});
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 %agent(1).animation(logger,"target",1:N);
 % agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[0,0,3.1],"length",[5,5,0.2])));%天井room = [-2 -5;-2 4;7 4;7 -5];
-% agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[2,0,1],"length",[0.2,2,2])));%天井room = [-2 -5;-2 4;7 4;7 -5]
+agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[2,0,1],"length",[0.2,2,2])));%壁room = [-2 -5;-2 4;7 4;7 -5]
 %%
 %logger.save();
