@@ -156,9 +156,9 @@ for i = 1:N
   %     erxy=[0 1];%近似する範囲xy
   %     agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
 
-  %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
+%   agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
   agent(i).set_property("controller", Controller_HL(dt));                                                                                     % 階層型線形化
-  %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
+%   agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
   %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 
   %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化

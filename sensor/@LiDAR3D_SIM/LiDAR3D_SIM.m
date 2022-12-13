@@ -126,6 +126,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         fh = figure(opt.FH);
         logger = opt.logger;
         p = logger.Data.agent.plant.result{opt.t}.state.p;
+        r = logger.Data.agent.reference.result{opt.t}.state.p;
         R = logger.Data.agent.plant.result{opt.t}.state.q;
         po = logger.Data.agent.sensor.result{opt.t}.sensor_points;
         if isfield(opt.param, "fField")
@@ -158,7 +159,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       daspect([1 1 1]);
 %       view([-3 1 2]);     
       view(2);
-%       plot(obj.result.state.p(1),obj.result.state.p(2),'bo');%referenceの表示
+%       plot(logger.Data.agent.reference.result{1,:}.state.p(1),logger.Data.agent.reference.result{1,:}.state.p(2),'bo');%referenceの表示
       xlabel("x");
       ylabel("y");
       zlabel("z");
@@ -186,6 +187,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       quiver3(p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
       plot3(p(1), p(2), p(3), 'bx');
       plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 3);
+      plot3(r(1), r(2), r(3),'bo');
       xlim([p(1) - 10, p(1) + 10]);
       ylim([p(2) - 10, p(2) + 10]);
       zlim([p(3) - 10, p(3) + 10]);
