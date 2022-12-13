@@ -85,6 +85,7 @@ classdef FUNCTIONAL_HLC_SERVO < CONTROLLER_CLASS
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
             obj.self.input = obj.result.input;
+%             obj.result.z= [obj.z(1),0,0];
             obj.result.z= obj.z;
             result = obj.result;
         end

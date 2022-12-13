@@ -46,9 +46,13 @@ classdef FUNCTIONAL_JIREI_SERVO < CONTROLLER_CLASS
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
 
-            if t > 5
-                obj.z = obj.z + xd(1:3)-x(5:7); %z+目標値ー今の状態 （積分項）
+            if strcmp(cha,'f')
+                obj.z = obj.z + xd(1:3)-x(5:7);
             end
+
+%             if t > 5
+%                 obj.z = obj.z + xd(1:3)-x(5:7); %z+目標値ー今の状態 （積分項）
+%             end
 
             %% calc Z 階層型線形化
             z1 = Z1(x,xd',P);

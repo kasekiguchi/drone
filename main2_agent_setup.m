@@ -64,7 +64,7 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
-     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
+     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[1,0,1]));%line
 %     agent(i).set_property("reference",Reference_Time_Varying("PtoP_ref",[0,0,1]));%PtoP
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{15,[0;0;1],[1,1,0.5]})); % 時変な目標状態
@@ -77,10 +77,10 @@ for i = 1:N
     %% set controller property
     agent(i).controller = [];
 %     agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-%     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL(dt));  %入力を簡単にいじれる                              % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));
-    agent(i).set_property("controller", controller_jirei_servo(dt));% 階層型線形化
+%     agent(i).set_property("controller", controller_jirei_servo(dt));% 階層型線形化
      %HLControlSetting = Controller_HL(dt);
       HLParam = agent(i).controller.hlc.param;%HLControlSetting.param;
 
