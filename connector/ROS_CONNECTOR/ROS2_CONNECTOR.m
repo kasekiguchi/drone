@@ -53,8 +53,10 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
-                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),{@ROS2Callback,obj},...
-                    "History","keepall","Reliability","besteffort");
+%                 obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),{@ROS2Callback,obj},...
+%                     "History","keepall","Reliability","besteffort");%callback用
+                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),...
+                    "History","keepall","Reliability","besteffort");%通常の通信用
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum 

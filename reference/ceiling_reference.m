@@ -47,13 +47,11 @@ classdef ceiling_reference < REFERENCE_CLASS
            end
            %% %書き換え部分
            goal_potential = obj.func(t);%目標位置に向かうポテンシャル 
-           obs_potential = -obj.func(t)/(3-obj.self.estimator.result.state.p(1))^2;%障害物からのポテンシャル
-           obj.result.state.p = obs_potential + goal_potential;
-           %合成
-           obj.result.state.p(1) = obj.self.estimator.result.state.p(1) + obj.result.state.p(1);
+           obs_potential = -obj.func(t)/(Param{3}-obj.self.estimator.result.state.p(1))^2;%障害物からのポテンシャル
+           obj.result.state.p = obs_potential + goal_potential;%potentialの合成
+           obj.result.state.p(1) = obj.self.estimator.result.state.p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
            %% %sensorの値から高度を指定
-           ceiling_distance = obj.self.sensor.result.ceiling_distance;
-           obj.result.state.p(3) = obj.self.sensor.result.ceiling_distance + obj.self.estimator.result.state.p(3) - obj.margin;%z方向の目標位置
+           obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + obj.self.estimator.result.state.p(3) - obj.margin;%z方向の目標位置
            result = obj.result;
         end
         function show(obj, logger)

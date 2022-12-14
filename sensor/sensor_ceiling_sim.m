@@ -20,8 +20,8 @@ classdef sensor_ceiling_sim < SENSOR_CLASS
             obj.angle_range =param.angle_range;%出てくる線と角度範囲
             obj.KF.x_h = [];%状態推定値初期値
             obj.KF.P_h = 1;%共分散行列
-            obj.KF.Q = 4;%システムノイズの分散
-            obj.KF.R = 2;%観測ノイズの分散
+            obj.KF.Q = 1;%システムノイズの分散
+            obj.KF.R = 4;%観測ノイズの分散
         end
 
         function result = do(obj,param)
@@ -33,24 +33,28 @@ classdef sensor_ceiling_sim < SENSOR_CLASS
             Rx = [1 0 0;0 cos(Roll) -sin(Roll);0 sin(Roll) cos(Roll)];% x軸周りボディ座標から見るため転置
             Ry = [cos(Pitch) 0 sin(Pitch);0 1 0;-sin(Pitch) 0 cos(Pitch)];%y軸周り
             sensor_pos = Rx*Ry*[0 0 0.05]'+pos;%機体よりちょっと高めにセンサー位置を設定
-            distance_ceiling = z - sensor_pos(3); %実際の距離
-            if pos(1) > 1 && pos(1) < 1.5
-            distance_ceiling = z - sensor_pos(3)-0.5; %実際の距離
-            end
-            obj.result.ceiling_distance = sqrt((distance_ceiling*tan(Roll)/cos(Pitch))^2 + distance_ceiling^2)+random('Normal',0,0.02);%センサの取得した測定距離
-            %% %KF
-            if isempty(obj.KF.x_h)
-                obj.KF.x_h = obj.result.ceiling_distance;%状態推定値初期値
+            if pos(1) > 1 && pos(1) < 1.5   % 1 < x < 1.5の時天井に窪み
+                distance_ceiling = z - sensor_pos(3)-0.5; %‐0.5m低くする
             else
-            x_hm = obj.KF.x_h;%事前推定値
-            P_hm = obj.KF.P_h+obj.KF.Q;%事前誤差共分散
-            K = P_hm/(P_hm+obj.KF.R);%カルマンゲイン
-            obj.KF.x_h = x_hm+K*(obj.result.ceiling_distance-x_hm);%事後推定値
-            obj.KF.P_h = (1 - K)*P_hm;%事後誤差共分散
-            obj.result.ceiling_distance = obj.KF.x_h;
+                distance_ceiling = z - sensor_pos(3); %実際の距離
             end
-            %% 実際の天井との距離に変換
-            obj.result.ceiling_distance = obj.result.ceiling_distance*cos(Roll)*cos(Pitch);
+            sensor_distance = sqrt((distance_ceiling*tan(Roll)/cos(Pitch))^2 + distance_ceiling^2)+random('Normal',0,0.02);%センサの取得した測定距離
+            %% カルマンフィルタ
+            if isempty(obj.KF.x_h)
+                obj.KF.x_h = sensor_distance;%状態推定値初期値
+            else
+                if abs(sensor_distance-obj.KF.x_h) > 0.1
+                    obj.result.ceiling_distance = obj.KF.x_h;
+                else
+                    x_hm = obj.KF.x_h;%事前推定値
+                    P_hm = obj.KF.P_h+obj.KF.Q;%事前誤差共分散
+                    K = P_hm/(P_hm+obj.KF.R);%カルマンゲイン
+                    obj.KF.x_h = x_hm+K*(sensor_distance-x_hm);%事後推定値
+                    obj.KF.P_h = (1 - K)*P_hm;%事後誤差共分散
+                end
+            end
+            %% 天井との距離に変換
+            obj.result.ceiling_distance = obj.KF.x_h*cos(Roll)*cos(Pitch);
             result = obj.result;
         end
         function show(obj,varargin)
