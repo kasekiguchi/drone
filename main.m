@@ -98,7 +98,7 @@ try
                 elseif time.t < 10
                     FH.CurrentCharacter = 'f';%phaseをいじれる
                 elseif time.t < 15
-                    FH.CurrentCharacter = 'g';%phaseをいじれる
+                    FH.CurrentCharacter = 'f';%phaseをいじれる
                 elseif time.t < 23
                     FH.CurrentCharacter = 'h';%phaseをいじれる
                 else
@@ -108,7 +108,8 @@ try
             param(i).reference.covering = [];
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
-            param(i).reference.point = {FH, [1;-3.5;2.4], time.t,dt,3};%reference.pointの目標位置を指定できる。天井高さを追加{5}
+            param(i).reference.point = {FH, [1;0;0], time.t,dt};%reference.pointの目標位置を指定できる。
+            param(i).reference.CeilingPoint = {FH, [1;-3.5;2.4], time.t,dt,3};%天井接地用。張り付き前座標{2}、天井高さ{5}を追加
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};

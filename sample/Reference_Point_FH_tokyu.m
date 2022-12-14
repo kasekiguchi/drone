@@ -5,7 +5,7 @@ function Reference = Reference_Point_FH_tokyu(~)
 % 組み合わせることでf を押したときにこれより前に設定したリファレンスになる
 clear Reference
 Reference.type=["POINT_REFERENCE_FH_tokyu"];
-Reference.name=["point"];
+Reference.name=["CeilingPoint"];
 Reference.param=[];
 end
 

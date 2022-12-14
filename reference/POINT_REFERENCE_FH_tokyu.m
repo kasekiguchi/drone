@@ -6,6 +6,7 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
         self
         base_time
         base_state
+        t
     end
     
     methods
@@ -13,10 +14,11 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
             % 参照
             obj.self = self;
             obj.result.state = STATE_CLASS(struct('state_list',["p","v"],'num_list', [3]));
+            obj.t = [];
         end
         function  result= do(obj,Param,result)
             % 【Input】result = {Xd(optional)}
-            %  Param = FH,xd,time.t
+            %  Param = FH,xd,time.t,dt,ceiling_distance
             %  Xd (optional) : 他のreference objで生成された目標値
             if isempty( obj.base_state )
                 obj.base_state =obj.self.estimator.result.state.p;
@@ -27,7 +29,8 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h'  && cha ~= 'g')
+            %if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h'  && cha ~= 'g' && cha ~= 'j')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -48,18 +51,18 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 end
                 obj.flag='t';
                 
-            elseif strcmp(cha,'f') % flight phase
-                obj.flag='f';
-                if nargin==3 % 他のreference objでの参照値がある場合
-                    Param{2} = result.state;
-                end
-                if strcmp(class(Param{2}),"STATE_CLASS")
-                    state_copy(Param{2},obj.result.state);
-                else
-                    Param{2}(1) = Param{2}(1)/2;
-                    Param{2}(2) = Param{2}(2)/2;
-                    obj.result.state.p = Param{2};
-                end
+%             elseif strcmp(cha,'f') % flight phase
+%                 obj.flag='f';
+%                 if nargin==3 % 他のreference objでの参照値がある場合
+%                     Param{2} = result.state;
+%                 end
+%                 if strcmp(class(Param{2}),"STATE_CLASS")
+%                     state_copy(Param{2},obj.result.state);
+%                 else
+%                     Param{2}(1) = Param{2}(1)/2;
+%                     Param{2}(2) = Param{2}(2)/2;
+%                     obj.result.state.p = Param{2};
+%                 end
             elseif strcmp(cha,'h') % flight phase
                 if strcmp(obj.flag,'h')
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),4,Param{3}-obj.base_time);
@@ -71,15 +74,33 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
                 obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
                 obj.flag='h';
-            elseif strcmp(cha,'g') % flight phase
-                obj.flag='g';
-                if nargin==3 % 他のreference objでの参照値がある場合
-                    Param{2} = result.state;
-                end
-                if strcmp(class(Param{2}),"STATE_CLASS")
-                    state_copy(Param{2},obj.result.state);
+%             elseif strcmp(cha,'g') % flight phase
+%                 obj.flag='g';
+%                 if nargin==3 % 他のreference objでの参照値がある場合
+%                     Param{2} = result.state;
+%                 end
+%                 if strcmp(class(Param{2}),"STATE_CLASS")
+%                     state_copy(Param{2},obj.result.state);
+%                 else
+%                     obj.result.state.p = Param{2};
+%                 end
+            elseif strcmp(cha,'f') % flight phase (時間関数)
+                obj.flag='f';
+                if ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{3}-obj.t; 
                 else
-                    obj.result.state.p = Param{2};
+                    obj.t=Param{3};
+                    t = 0;
+                end
+                if norm(Param{2}-obj.self.reference.result.state.p(1:3)) > 0.1
+                    v = 0.7;
+                    yaw = atan(Param{2}(2)/Param{2}(1));
+                    x = v*cos(yaw)*t;
+                    y = v*sin(yaw)*t;
+                    z = Param{2}(3);
+                    obj.result.state.p = [x;y;z];
+                else
+                    obj.result.state.p = obj.self.reference.result.state.p;
                 end
             else
                 obj.result.state.p = obj.base_state;
