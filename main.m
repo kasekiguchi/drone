@@ -98,18 +98,18 @@ try
                 elseif time.t < 10
                     FH.CurrentCharacter = 'f';%phaseをいじれる
                 elseif time.t < 15
-                    FH.CurrentCharacter = 'f';%phaseをいじれる
-                elseif time.t < 23
                     FH.CurrentCharacter = 'h';%phaseをいじれる
+                elseif time.t < 23
+                    FH.CurrentCharacter = 'j';%phaseをいじれる
                 else
-                    FH.CurrentCharacter = 'l';%phaseをいじれる
+                    FH.CurrentCharacter = 'u';%phaseをいじれる
                 end
             end
             param(i).reference.covering = [];
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
             param(i).reference.point = {FH, [1;0;0], time.t,dt};%reference.pointの目標位置を指定できる。
-            param(i).reference.CeilingPoint = {FH, [1;-3.5;2.4], time.t,dt,3};%天井接地用。張り付き前座標{2}、天井高さ{5}を追加
+            param(i).reference.CeilingPoint = {FH, [1.5;2.8;2.4], time.t,dt,2.9};%天井接地用。張り付き前座標{2}、天井高さ{5}を追加
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -202,9 +202,9 @@ clc
 
 % plot 
 %logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
-logger.plot({1,"p","sr"},{1,"inner_input",""});
+%logger.plot({1,"p","sr"},{1,"inner_input",""});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
-%logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
+logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)
 
