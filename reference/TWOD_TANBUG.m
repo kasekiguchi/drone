@@ -90,7 +90,10 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             l_reference_angle =atan2(l_reference(2),l_reference(1));
 %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
-            
+           [~,reference_id]=min(abs(obj.self.sensor.lidar.phi_range - l_reference_angle));% reference に一番近い角度であるレーザーインデックス(3D)
+           route_range = obj.route_determin_range(reference_id,obj.length);
+           route_range_l_points=obj.l_points(:,route_range);
+           route_range_length=obj.length(route_range);
 %%
 %             hold on
 %             plot(path_goal.*cos(as),path_goal.*sin(as),"o")
@@ -101,7 +104,6 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             path_goal = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
             path_reference = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
 
-            
 %             figure(8)
 %             hold on
 %             plot(path_goal.*cos(as),path_goal.*sin(as),"ro")
@@ -111,7 +113,9 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             clf
 
             if find(path_reference)
-                N = 2;
+                if find(obj.past.state.p(:,1) > 0)
+                    N = 2;
+                end
             else
                 N = 1;
             end
@@ -119,7 +123,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             switch N
                 case 1
                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合                              
-                        tid = obj.ancher_detection(obj.length,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,obj.sensor.sensor_points);
+                        tid = obj.ancher_detection(obj.length,obj.threshold,obj.l_points,obj.pitch,id,obj.goal);
                         Length = [obj.length(end),obj.length,obj.length(1)];
                         edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
 %                         edge_p = obj.sensor.sensor_points(:,tid);
@@ -155,7 +159,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 case 2
                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
                         if find(obj.length < path_reference) %referenceまでの間に障害物がある場合                              
-                            tid = obj.ancher_detection(obj.length,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,obj.sensor.sensor_points);
+                            tid = obj.ancher_detection(route_range_length,obj.threshold,route_range_l_points,obj.pitch,id,obj.goal);
                             Length = [obj.length(end),obj.length,obj.length(1)];
 %                             edge_p = obj.sensor.sensor_points(:,tid);
                             edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
@@ -197,8 +201,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                             reference_state = obj.past.state.p - obj.state.p;
                             reference_state = vecnorm(reference_state);
 
-                            if reference_state < 1.0
-                                tid = obj.ancher_detection(obj.length,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,obj.sensor.sensor_points);
+                            if reference_state < 1
+                                tid = obj.ancher_detection(route_range_length,obj.threshold,route_range_l_points,obj.pitch,id,obj.goal);
                                 Length = [obj.length(end),obj.length,obj.length(1)];
     %                             edge_p = obj.sensor.sensor_points(:,tid);
                                 edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
@@ -265,7 +269,18 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             path(path>goal) = goal;        
         end
 
-        function tid = ancher_detection(~,length,threshold,l_points,pitch,id,goal,sensor_points) %端点を検出する
+        function route = route_determin_range(~,reference_id,length)
+            tmp = (round(reference_id-numel(length)*0.25):round(reference_id+numel(length)*0.25));
+            if find(tmp > numel(length))
+               tmp(tmp >numel(length)) = tmp(tmp>numel(length)) - numel(length);
+            end
+            if find(tmp < 1)
+               tmp(tmp<1) = tmp(tmp<1) + numel(length);
+            end
+            route = tmp;      
+        end
+
+        function tid = ancher_detection(~,length,threshold,l_points,pitch,id,goal) %端点を検出する
             nlength = circshift(length,1); %１つずらした距離データ
             edge_ids = find(abs(nlength-length) > threshold); %隣との距離の差が大きいところのindex配列（端点）
             edge_points = l_points(:,edge_ids);%2Dだとエラー吐く
@@ -276,11 +291,12 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             te_angle = pitch*abs(edge_ids - id); % angle between target-edge
 %             [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
 %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
-            reference_goal = goal - sensor_points(:,edge_ids);
+            reference_goal = goal - l_points(:,edge_ids);
             reference_goal = vecnorm(reference_goal);
             [~,tmp] = min(length(edge_ids)+reference_goal);
             tid = edge_ids(tmp);%最短経路の配列
         end
+
 
         function d = distance(~,x1,y1,x2,y2) %2点間の距離を算出
             a = [x1,y1];
