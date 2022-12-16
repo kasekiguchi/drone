@@ -30,13 +30,13 @@ classdef Flightcontroller < SENSOR_CLASS
             % 【入力】motive ：NATNET_CONNECOTR object 
             data=obj.flightcontroller.getData();
 %             data=obj.flightcontroller.getDataFC();
-            obj.flightdata.ros2 = data;
-            obj.flightdata.ros2.tem = data.data(1:4,1);
-            obj.flightdata.ros2.voltage = data.data(5:8,1);
-            obj.flightdata.ros2.current = data.data(9:12,1);
-            obj.flightdata.ros2.rpm = data.data(13:16,1);
-%             obj.flightdata.ros2.layout = data.layout;
-%             obj.flightdata.ros2.MessageType = data.MessageType;
+            obj.flightdata.ros_t = data;
+            obj.flightdata.ros_t.tem = data.data(1:4,1);
+            obj.flightdata.ros_t.voltage = data.data(5:8,1);
+            obj.flightdata.ros_t.current = data.data(9:12,1);
+            obj.flightdata.ros_t.rpm = data.data(13:16,1);
+%             obj.flightdata.ros_t.layout = data.layout;
+%             obj.flightdata.ros_t.MessageType = data.MessageType;
             result= obj.flightdata;
         end
         function show(obj,varargin)
