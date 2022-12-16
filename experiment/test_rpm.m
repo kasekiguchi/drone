@@ -2,8 +2,8 @@ clear all
 close all
 agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,132]),DRONE_PARAM("DIATONE"));
 pause(1);
-%agent.set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
-agent.set_property("sensor",Sensor_vl53l1x(1));
+agent.set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
+% agent.set_property("sensor",Sensor_vl53l1x(1));
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');
 type receiver
 dt = 0.01;%刻み時間
@@ -37,23 +37,23 @@ try
         end
         T(s+1) = toc(Timer_sensor);%時間
 
-        agent.sensor.VL.result = agent.sensor.VL.do;
-%         agent.sensor.tokyu.result = agent.sensor.tokyu.do;
-%         
-%         if isempty(agent.sensor.tokyu.result.ros2.rpm)==1
-%             X1(s+1,:) = X1(s,:);
-%             X2(s+1,:) = X2(s,:);
-%             X3(s+1,:) = X3(s,:);
-%         else
-%             X1(s+1,:) = agent.sensor.tokyu.result.ros2.current;
-%             X2(s+1,:) = agent.sensor.tokyu.result.ros2.voltage;
-%             X3(s+1,:) = agent.sensor.tokyu.result.ros2.rpm;
-%         end
-        if isempty(agent.sensor.VL.result.VL_length)==1
-            X4(s+1,:) = X4(s,:);
+%         agent.sensor.VL.result = agent.sensor.VL.do;
+        agent.sensor.tokyu.result = agent.sensor.tokyu.do;
+        
+        if isempty(agent.sensor.tokyu.result.ros2.rpm)==1
+            X1(s+1,:) = X1(s,:);
+            X2(s+1,:) = X2(s,:);
+            X3(s+1,:) = X3(s,:);
         else
-            X4(s+1,:) = agent.sensor.VL.result.VL_length;
+            X1(s+1,:) = agent.sensor.tokyu.result.ros2.current;
+            X2(s+1,:) = agent.sensor.tokyu.result.ros2.voltage;
+            X3(s+1,:) = agent.sensor.tokyu.result.ros2.rpm;
         end
+%         if isempty(agent.sensor.VL.result.VL_length)==1
+%             X4(s+1,:) = X4(s,:);
+%         else
+%             X4(s+1,:) = agent.sensor.VL.result.VL_length;
+%         end
         %disp(X3(s+1,:));
         s=s+1;
     end
@@ -101,7 +101,7 @@ hold off
 figure(5)
 hold on
 plot(T,X3,'LineWidth',1)%グラフのプロット
-plot(T,X4,'LineWidth',1)%グラフのプロット
+% plot(T,X4,'LineWidth',1)%グラフのプロット
 %plot(T,X3Ave,'LineWidth',1)
 % ymax = ylim;
 % area([Ts Ts_end],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);

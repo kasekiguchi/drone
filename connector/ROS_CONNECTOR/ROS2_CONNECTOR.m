@@ -91,13 +91,13 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             end
 
         end
-        function ROS2Callback(obj,message)
-            obj.flightcontroller = message.subscriber.subtopic.LatestMessage.data;
-        end
-        function [ret] = getDataFC(obj)
-            obj.result = obj.subscriber.subtopic.LatestMessage;
-            ret = obj.result;
-        end
+%         function ROS2Callback(obj,message)
+%             obj.flightcontroller = message.subscriber.subtopic.LatestMessage.data;
+%         end
+%         function [ret] = getDataFC(obj)
+%             obj.result = obj.subscriber.subtopic.LatestMessage;
+%             ret = obj.result;
+%         end
 
         function delete(obj)
             clear obj.node
