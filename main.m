@@ -57,7 +57,6 @@ try
     %% sensor
     %    tic
     tStart = tic;
-
     if (fOffline)
       logger.overwrite("plant", time.t, agent, i);
       FH.CurrentCharacter = char(logger.Data.phase(offline_time));
