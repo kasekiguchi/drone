@@ -65,40 +65,54 @@ end
 % % plot
 figure(2)
 hold on
-plot(T,X1)%グラフのプロット
+plot(T,X1/100,'LineWidth',1)%グラフのプロット
 %plot(T(1:2000),X1(1:2000,1:4))%グラフのプロット(範囲指定)
 %ymax = ylim;
 %area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
 xlabel('time [s]')
-ylabel('current')
+ylabel('current [A]')
 hold off
 
 figure(3)
 hold on
-plot(T,X2)%グラフのプロット
+plot(T,X2/100,'LineWidth',1)%グラフのプロット
 %plot(T(1:2000),X2(1:2000,1:4))%グラフのプロット
 %ymax = ylim;
 %area([Ts Ts+5],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
 xlabel('time [s]')
-ylabel('voltage')
+ylabel('voltage [V]')
 hold off
 
 figure(4)
 hold on
 %area([Ts Ts+5],[8000 8000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 %plot(T(1:2000),X3(1:2000,1:4))%グラフのプロット
-plot(T,X3)
+plot(T,X3,'LineWidth',1)
 % ymax = ylim;
 % area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
+legend('Location','best')
 xlabel('time [s]')
 ylabel('morter speed [rpm]')
 hold off
 
-
 figure(5)
+hold on
+plot(T,X2.*X1/10000,'LineWidth',1)%グラフのプロット
+%plot(T(1:2000),X2(1:2000,1:4))%グラフのプロット
+%ymax = ylim;
+%area([Ts Ts+5],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
+legend('morter 1','morter 2','morter 3','morter 4')
+legend('Location','best')
+xlabel('time [s]')
+ylabel('power [W]')
+hold off
+
+%%
+
+figure(6)
 hold on
 plot(T,X3,'LineWidth',1)%グラフのプロット
 % plot(T,X4,'LineWidth',1)%グラフのプロット
