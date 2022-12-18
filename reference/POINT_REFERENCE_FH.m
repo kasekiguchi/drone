@@ -27,7 +27,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h' && cha ~= 'm')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -54,13 +54,21 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 if nargin==3 % 他のreference objでの参照値がある場合
                     Param{2} = result.state;
                 end
-                if strcmp(class(Param{2}),"STATE_CLASS")
+                if strcmp(class(Param{2}),"STATE_CLASS")    % timevaryingの呼び出し？
                     state_copy(Param{2},obj.result.state);
                     %                    obj.result.state = state_copy(Param{2}); % 目標重心位置（絶対座標）
                 else
                     obj.result.state.xd = Param{2};
                     obj.result.state.p = obj.result.state.xd;
                 end
+            elseif strcmp(cha,'m') % flight phase
+                if strcmp(obj.flag,'m')
+                    obj.result.state.xd=gen_ref_for_landing(obj.result.state.p);
+                else% 初めてlanding に入ったとき
+                    obj.result.state.xd=gen_ref_for_landing(obj.self.reference.result.state.p);
+                end
+                obj.result.state.p = obj.result.state.xd; % このようにすることでf の後でも反映される
+                obj.flag='m';
             elseif strcmp(cha,'h')
                 obj.flag='h';
                 obj.result.state.xd = [0; 0; 1];

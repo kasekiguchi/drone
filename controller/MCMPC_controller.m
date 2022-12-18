@@ -56,6 +56,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 ave2 = ave1;
                 ave3 = ave1;
                 ave4 = ave1;
+%                 ave1 = 0; ave2 = 0; ave3 = 0; ave4 = 0;
                 obj.input.sigma = obj.input.Initsigma;
                 % 追加
                 obj.param.particle_num = obj.param.Mparticle_num;
@@ -123,9 +124,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
             obj.previous_state = obj.self.estimator.result.state.get();
 
-%             if obj.param.particle_num ~= obj.param.Mparticle_num
-%                 disp("diff N");
-%             end
             %-- 状態予測
             [obj.state.predict_state] = obj.predict();
             if obj.state.predict_state(3, 1, :) < 0
@@ -140,20 +138,14 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             
             % 評価値の正規化
             obj.input.normE = obj.Normalize();
-            
+
             %-- 制約条件
             [removeF, removeX] = obj.constraints();
 %             removeF = 0; removeX = [];
-%             [Bestcost, BestcostID] = min(obj.input.normE);
-
-%             if removeF ~= 0
-%                 fprintf("aaaaaa")
-%             end
 
             if removeF ~= obj.param.particle_num
                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
-                %-- resampling
                 %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
                 if idx == 1 || idx == 2 % - 最初は全時刻の評価値がないから現時刻/現時刻にしてる
                     obj.input.Bestcost_pre = Bestcost;
@@ -170,7 +162,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             elseif removeF == obj.param.particle_num    % 全棄却
                 obj.result.input = obj.self.input;
                 obj.input.nextsigma = obj.input.Constsigma;
-                Bestcost = 10000;
+                Bestcost = obj.param.ConstEval;
                 BestcostID = 1;
 
                 % 追加
@@ -184,8 +176,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.result.contParam = obj.param;
             obj.result.fRemove = obj.param.fRemove;
             obj.result.path = obj.state.state_data;
-            obj.result.sigma = obj.input.nextsigma;
-            obj.result.variable_N = obj.param.nextparticle_num; % 追加
+            obj.result.sigma = obj.input.sigma;
+            obj.result.variable_N = obj.param.particle_num; % 追加
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.Evaluationtra_norm = obj.input.normE;
             
@@ -196,51 +188,16 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         end
 
         function [removeF, removeX] = constraints(obj)
-%             NP = obj.param.particle_num;
             % 状態制約
+%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X);
-%             removeFe_check = fix(find(removeFe)/obj.param.H)+1;
-            % 棄却するサンプル番号を算出
-%             removeX = find(removeFe);
-%             Fe_size = size(removeFe_check);
-            %最後の粒子が制約に引っかかった場合，想定している最大なサンプル番号を超えることがあるのでその部分を修正
-%             if Fe_size(1) ~=0 
-%                 if Fe_size(2) ~=0
-%                     if removeFe_check(end,1) == (obj.param.particle_num + 1)
-%                         removeFe_check(end,1) = obj.param.particle_num;
-%                     end
-%                 end
-%             end
-            % サンプル番号の重なりをなくす
-%             removeX = unique(removeFe_check);
+%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
             removeX = find(removeFe);
             % 制約違反の入力サンプル(入力列)を棄却
-%             obj.input.u(:,:,removeX) = [];
-%             obj.state.state_data(:, :, removeX) = [];
-%             obj.input.Evaluationtra(removeX) = [];
-%             obj.input.u(:,:,removeX) = [];
-%             obj.state.state_data(:, :, removeX) = [];
             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
             % 全制約違反による分散リセットを確認するフラグ  
             removeF = size(removeX, 1); % particle_num -> 全棄却
         end
-
-%         %%-- 連続ode
-%         function [predict_state] = predict(obj)
-%             ts = 0;
-%             %-- 予測軌道計算
-%             for m = 1:obj.input.u_size
-%                 x0 = obj.previous_state;
-%                 obj.state.state_data(:, 1, m) = obj.previous_state;
-%                 for h = 1:obj.param.H-1
-%                     [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
-% %                     tmpx = obj.param.A .* x0 + obj.param.B * obj.input.u(:, h, m);
-%                     x0 = tmpx(end, :);
-%                     obj.state.state_data(:, h+1, m) = x0;
-%                 end
-%             end
-%             predict_state = obj.state.state_data;
-%         end
 
         %%-- 連続；オイラー近似
         function [predict_state] = predict(obj)
@@ -255,7 +212,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             end
             predict_state = obj.state.state_data;
         end
-
 
         %------------------------------------------------------
         %======================================================
@@ -282,9 +238,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
 
             %-- 状態の終端コストを計算 状態だけの終端コスト
-            terminalState = tildeXp(:, end)' * obj.param.P * tildeXp(:, end)...
-                +tildeXv(:, end)'   * obj.param.V   * tildeXv(:, end)...
-                +tildeXqw(:, end)'  * obj.param.QW  * tildeXqw(:, end);
+            terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
+                +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
+                +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef)...
                 + terminalState;

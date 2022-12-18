@@ -76,7 +76,7 @@ for i = 1:N
     agent(i).controller = [];
     %-- sample 通さずに実行
 %     agent(i).set_property("controller",struct("type","MCMPC_controller","name","mcmpc","param",{agent(i)}));
-    agent(i).set_property("controller",Controller_MCMPC(dt)); % sampleを通す方
+    agent(i).set_property("controller", Controller_MCMPC(dt)); % sampleを通す方
     %% 必要か？実験で確認 : TODO
     param(i).sensor.list = cell(1, length(agent(i).sensor.name));
     param(i).reference.list = cell(1, length(agent(i).reference.name));

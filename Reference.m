@@ -51,10 +51,17 @@ function xr = Reference(params, T, Agent)
         xr(1:3, h+1) = Ref(1:3);
         xr(7:9, h+1) = Ref(5:7);
         % 抑制項
-        xr(4:6, h+1) =   [0; 0; 0];
+        xr(4:6, h+1) =   [0; 0; 0]; % 姿勢角
         xr(10:12, h+1) = [0; 0; 0];
 
         xr(13:16, h+1) = params.ur;
+
+        % 姿勢角の目標値
+        % x軸方向の姿勢角のみ変化
+
+%         if T > 10
+%             xr(3, h+1) = 0.005;
+%         end
     end
 end
 

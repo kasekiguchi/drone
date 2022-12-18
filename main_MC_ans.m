@@ -143,9 +143,6 @@ end
 
             % timevarygin -> generated reference
             xr = Reference(Params, time.t, agent);
-            % reference from HL
-%             xr = Reference(Params, time.t, X);
-            % controller
             param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -175,12 +172,12 @@ end
         data.state(idx, 6) = agent.input(2);  % - 入力 u2
         data.state(idx, 7) = agent.input(3);  % - 入力 u3
         data.state(idx, 8) = agent.input(4);  % - 入力 u4
-        data.state(idx, 9)  = xr(1, 1);    % - 目標状態 xr
-        data.state(idx, 10) = xr(2, 1);   % - 目標状態 yr
-        data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
+%         data.state(idx, 9)  = xr(1, 1);    % - 目標状態 xr
+%         data.state(idx, 10) = xr(2, 1);   % - 目標状態 yr
+%         data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
 
         data.xr{idx} = xr;
-%         data.variable_particle_num(idx) = agent.controller.result.variable_N;
+        data.variable_particle_num(idx) = agent.controller.result.variable_N;
         
 
         if data.removeF(idx) ~= data.param.particle_num
@@ -188,13 +185,16 @@ end
             data.besty(idx, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
             data.bestz(idx, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
         else
-            data.bestx(idx, :) = data.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
-            data.besty(idx, :) = data.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
-            data.bestz(idx, :) = data.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+            if idx == 1
+                data.bestx(idx, :) = data.bestx(idx, :); % - 制約外は前の評価値を引き継ぐ
+                data.besty(idx, :) = data.besty(idx, :); % - 制約外は前の評価値を引き継ぐ
+                data.bestz(idx, :) = data.bestz(idx, :); % - 制約外は前の評価値を引き継ぐ
+            else
+                data.bestx(idx, :) = data.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                data.besty(idx, :) = data.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                data.bestz(idx, :) = data.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+            end
         end
-   
-        
-
         state_monte = agent.estimator.result.state;
         ref_monte = agent.reference.result.state;
         %% update state
@@ -245,26 +245,26 @@ end
                 state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                 xr(1,1), xr(2,1), xr(3,1));
-        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t", time.t, calT, data.sigma(idx))
+        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t particle_num: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx))
         if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
         end
         fprintf("\n");
 
         %% 逐次プロット
-        figure(10);
-        clf
-        Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-        TvC = 0:Params.dt:te;
-        %% circle
-        plot(Tv, xr(1, :), '.', 'LineWidth', 2);hold on;
-        plot(Tv, xr(2, :), '.', 'LineWidth', 2);
-        plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-        plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-        hold off;
-        xlabel("Time [s]"); ylabel("Reference [m]");
-        legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
-        xlim([0 te]); ylim([-inf inf+0.1]); 
+%         figure(10);
+%         clf
+%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
+%         TvC = 0:Params.dt:te;
+%         %% circle
+%         plot(Tv, xr(1, :), '.', 'LineWidth', 2);hold on;
+%         plot(Tv, xr(2, :), '.', 'LineWidth', 2);
+%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
+%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
+%         hold off;
+%         xlabel("Time [s]"); ylabel("Reference [m]");
+%         legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
+%         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
         drawnow 
     end
@@ -285,24 +285,29 @@ close all
 
 size_best = size(data.bestcost, 2);
 Edata = logger.data(1, "p", "e")';
-Rdata = logger.data(1, "p", "r")';
+% Rdata = logger.data(1, "p", "r")';
+Rdata = zeros(3, size_best-1);
+for R = 1:size_best-1
+    Rdata(:, R) = data.xr{R}(1:3, 1);
+end
 Vdata = logger.data(1, "v", "e")';
 Diff = Edata - Rdata;
+logt = logger.data('t',[],[]);
 
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
-logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+logger.plot({1,"q", "p"},   "fig_num",3); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
 %% Difference of Pos
-% figure(7);
-% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
-% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+figure(7);
+plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
 %% 2軸グラフ
 % figure(9);
@@ -314,6 +319,21 @@ logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid o
 % set(gca,'FontSize',15);  grid on; title(""); ylabel("Evaluation [m]"); xlabel("time [s]"); xlim([0 10]);
 % legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
 
+%%
+figure(8)
+plot(logger.data('t',[],[]), logger.data(1,'p','e'), 'LineWidth', 2);
+hold on
+plot(logger.data('t',[],[]), Rdata, 'LineWidth', 2)
+hold off
+% xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+
+yyaxis right
+plot(logt, data.variable_particle_num(1:size(logt)), 'LineWidth', 1.5);
+xlabel("Time [s]"); ylabel("Number of Samples"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference","N");
+
+xlim([0 te]); ylim([0 inf])
+set(gca,'FontSize',Fontsize);  grid on; title(""); 
+
 %% 
 % logt = logger.data('t',[],[]);
 figure(10)
@@ -323,7 +343,7 @@ plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylab
 xlim([0 te])
 set(gca,'FontSize',Fontsize);  grid on; title("");
 %% calculation time
-logt = logger.data('t',[],[]);
+
 figure(11)
 plot(logt, data.calT(1:size(logger.data('t',[],[]),1)))
 xlim([0 te])
@@ -333,7 +353,7 @@ ylabel("Calculation time [s]");
 
 %% particle_num
 figure(12)
-plot(logt, data.variable_particle_num(1:size(logt)));
+plot(logt, data.variable_particle_num(1:size(logt)), 'LineWidth', 1.5);
 xlim([0 te])
 xlabel("Time [s]"); ylabel("Number of Sample");
 set(gca,'FontSize',Fontsize);  grid on; title("");
@@ -351,7 +371,7 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20221209_circle_const_variable_sample_10000.mat', '-v7.3')
+save('Data\20221218_circle_const_Pf10000_landing.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
