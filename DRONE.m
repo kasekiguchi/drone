@@ -1,22 +1,26 @@
 classdef DRONE < ABSTRACT_SYSTEM
-    % Drone class
-    properties %(Access = private)
-        fig
-    end
-    methods
-        function obj = DRONE(args,param)
-            arguments
-                args
-                param
-            end
-            obj=obj@ABSTRACT_SYSTEM(args,param);
-            if contains(args.type,"EXP")
-                obj.plant = DRONE_EXP_MODEL(args);
-            end
-            obj.parameter = param;
+% Drone class
+properties %(Access = private)
+    fig
+end
+
+methods
+
+    function obj = DRONE(args, param)
+
+        arguments
+            args
+            param
+        end
+
+        obj = obj@ABSTRACT_SYSTEM(args, param);
+
+        if contains(args.type, "EXP")
+            obj.plant = DRONE_EXP_MODEL(args);
         end
     end
-    methods
+end
+methods
         function animation(obj,logger,param)
             % obj.animation(logger,param)
             % logger : LOGGER class instance
@@ -36,7 +40,9 @@ classdef DRONE < ABSTRACT_SYSTEM
                 param.mp4 = 0;
             end
             p = obj.parameter;
-            DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
+            mov = DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"target",param.target,"rotor_r",p.rotor_r,"fig_num",param.fig_num,"mp4",param.mp4,"gif",param.gif,"Motive_ref",param.Motive_ref,"animation",false);
+            mov.animation(logger,"opt_plot",param.opt_plot,"frame_size",[p.Lx,p.Ly],"self",obj,"realtime",true,"rotor_r",p.rotor_r,"target",param.target,"fig_num",param.fig_num,"gif",param.gif,"Motive_ref",param.Motive_ref);
         end
-    end
+end
+
 end

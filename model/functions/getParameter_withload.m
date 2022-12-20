@@ -1,7 +1,7 @@
-function Param = getParameter_withload(varargin)
+function param = getParameter_withload(varargin)
 % class化したほうが良い．
-mass = 0.2655;
-Length = 0.075;% モーター間の距離：正方形を仮定している
+mass = 0.2355;
+length = 0.075;% モーター間の距離：正方形を仮定している
 jx = 0.002237568;
 jy = 0.002985236;
 jz = 0.00480374;
@@ -14,21 +14,18 @@ k1 = 0.000008048;          % 推力定数
 k2 = 0.000008048;          % 推力定数
 k3 = 0.000008048;          % 推力定数
 k4 = 0.000008048;          % 推力定数
-loadmass = 0.0556;            % 牽引物体の重さ
-L = 0.44;                   % 紐の長さ
-ex = 0.01;                  % 紐の取り付け位置
-ey = 0.004;                  % 紐の取り付け位置
-ez = 0.07;                  % 紐の取り付け位置
+loadmass = 0.1;            % 牽引物体の重さ
+L = 0.5;                   % 紐の長さ
 % T = k*w^2  
 % T : thrust , w : angular velocity of rotor
 % M = km * T = km* k * w^2
 % M : zb moment  ：そのため普通の意味でのロータ定数とは違う
-Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4 ,loadmass, L, ex, ey, ez];
+param= [mass, length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4 ,loadmass, L];
 if size(varargin) >= 1
     if strcmp(varargin{1},'Plant')% for Plant parameter
-        Param= [mass, Length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, loadmass, L, ex, ey, ez];
+        param= [mass, length, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, loadmass, L];
     end
-
+end
 % if size(varargin) >= 1
 %     if contains(varargin,'m')
 %         mass = varargin.m;

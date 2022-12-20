@@ -67,4 +67,3 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
         end
     end
 end
-
