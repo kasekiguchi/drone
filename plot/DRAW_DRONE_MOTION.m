@@ -27,6 +27,7 @@ classdef DRAW_DRONE_MOTION
                 param.rotor_r
                 param.target = 1;
                 param.fig_num = 1;
+                param.mp4 = 0;
             end
             data = logger.data(param.target,"p","e");
             tM = max(data);
@@ -104,6 +105,9 @@ classdef DRAW_DRONE_MOTION
             end
             obj.frame = t;
             obj.thrust = tt;
+%            if param.animation
+%                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
+%            end
         end
         function draw(obj,target,p,q,u)
             % obj.draw(p,q,u)
@@ -160,6 +164,7 @@ classdef DRAW_DRONE_MOTION
                 param.gif = 0;
                 param.Motive_ref = 0;
                 param.fig_num = 1;
+                param.mp4 = 0;
                 param.frame_size = [];
                 param.opt_plot = [];
             end
@@ -195,6 +200,17 @@ classdef DRAW_DRONE_MOTION
                 sizen = 256;
                 delaytime = 0;
                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
+            end
+
+            if param.mp4
+                sizen = 256;
+                delaytime = 0;
+                filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').mp4'),':','_'),' ','_');
+                v = VideoWriter(filename,"MPEG-4");
+                if param.mp4
+                    open(v);
+                    writeAnimation(v);
+                end
             end
 
             t = logger.data("t");
@@ -235,6 +251,13 @@ classdef DRAW_DRONE_MOTION
                         imwrite(imind,cm,filename,'gif','WriteMode','append','DelayTime',delaytime);
                     end
                 end
+                if param.mp4
+                    framev = getframe(obj.fig);
+                    writeVideo(v,framev);
+                end
+            end
+            if param.mp4
+                close(v);
             end
         end
     end
