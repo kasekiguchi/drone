@@ -1,30 +1,17 @@
-classdef NULL_PARAM < matlab.mixin.SetGetExactNames
+classdef NULL_PARAM < PARAMETER_CLASS
     % 物理パラメータのないモデル用
 
     properties
-        parameter % 制御モデル用パラメータ
-        parameter_name % 物理パラメータの名前
-        model_error % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ
     end
 
     methods
-        function obj = NULL_PARAM(~,~)
-        end
-    end
-    methods
-        function v = get(obj,p,plant)
+        function obj = NULL_PARAM(name,type,param)
             arguments
-                obj
-                p = "all";
-                plant = "model"
+                name
+                type = "row";            
+                param.additional = []; % プロパティに無いパラメータを追加する場合
             end
-            if strcmp(plant,"plant") % 制御対象の真値 : 制御モデル(parameter) + モデル誤差(model_error)
-                v = [];
-            else % 制御モデルで想定している値
-                v = [];
-            end
-        end
-        function set_model_error(obj,~,~)
+            obj = obj@PARAMETER_CLASS(name,type,param);
         end
     end
 end

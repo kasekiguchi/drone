@@ -5,6 +5,6 @@ end
     %% sensor class demo : constructor
     % sensor property をSensor classのインスタンス配列として定義
     Sensor.name=["direct"];
-    Sensor.type=["DirectSensor"];
+    Sensor.type=["DIRECT_SENSOR"];
     Sensor.param=noise;
 end
