@@ -177,7 +177,11 @@ end
 %         data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
 
         data.xr{idx} = xr;
-        data.variable_particle_num(idx) = agent.controller.result.variable_N;
+%         data.variable_particle_num(idx) = agent.controller.result.variable_N;
+%         data.survive{idx} = agent.controller.result.survive;
+%         COG = agent.controller.result.COG;
+%         data.cog.g{idx} = COG.g;
+%         data.cog.gc{idx} = COG.gc;
         
 
         if data.removeF(idx) ~= data.param.particle_num
@@ -245,9 +249,11 @@ end
                 state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                 xr(1,1), xr(2,1), xr(3,1));
-        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t particle_num: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx))
+        fprintf("t: %6.3f \t calT: %f \t sigma: %f", time.t, calT, data.sigma(idx))
         if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
+%             data.removeX{idx}
+%             data.sur{idx}
         end
         fprintf("\n");
 
@@ -265,6 +271,48 @@ end
 %         xlabel("Time [s]"); ylabel("Reference [m]");
 %         legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
 %         xlim([0 te]); ylim([-inf inf+0.1]); 
+%         figure(20)
+%         clf
+%         if data.removeF(idx) == data.variable_particle_num(idx)
+%             % 制約外の集合
+%             xDc = reshape(data.path{idx}(1, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
+%             yDc = reshape(data.path{idx}(2, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
+%             plot(xDc, yDc, '.', 'MarkerSize', 5);
+%             % 制約外の重心
+%             plot(data.cog.gc{idx}(1), data.cog.gc{idx}(2), '+', 'MarkerSize', 5);
+%             % 現在位置
+%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
+%             xlim([-inf inf]); ylim([-inf inf]);
+%             hold off;
+%         elseif data.removeF(idx) == 0
+%             % 制約内の集合
+%             xD = reshape(data.path{idx}(1, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
+%             yD = reshape(data.path{idx}(2, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
+%             plot(xD, yD, '.', 'MarkerSize', 5); hold on;
+%             % 制約内の重心
+%             plot(data.cog.g{idx}(1), data.cog.g{idx}(2), '+', 'MarkerSize', 5);
+%             % 現在位置
+%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
+%             xlim([-inf inf]); ylim([-inf inf]);
+%             hold off;
+%         else
+%             % 制約内の集合
+%             xD = reshape(data.path{idx}(1, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
+%             yD = reshape(data.path{idx}(2, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
+%             plot(xD, yD, '.', 'MarkerSize', 5); hold on;
+%             % 制約内の重心
+%             plot(data.cog.g{idx}(1), data.cog.g{idx}(2), '+', 'MarkerSize', 5);
+%             % 制約外の集合
+%             xDc = reshape(data.path{idx}(1, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
+%             yDc = reshape(data.path{idx}(2, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
+%             plot(xDc, yDc, '.', 'MarkerSize', 5);
+%             % 制約外の重心
+%             plot(data.cog.gc{idx}(1), data.cog.gc{idx}(2), '+', 'MarkerSize', 5);
+%             % 現在位置
+%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
+%             xlim([-inf inf]); ylim([-inf inf]);
+%             hold off;
+%         end
         %%
         drawnow 
     end
@@ -296,14 +344,25 @@ logt = logger.data('t',[],[]);
 
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
-% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+set(0, 'defaultAxesFontSize',15);
+set(0,'defaultTextFontsize',15);
+set(0,'defaultLineLineWidth',2);
+set(0,'defaultLineMarkerSize',10);
+% set(0,'defaultLineMarkerFaceColor',[1 1 1]);
+% set(0,'defaultFigurecolor',[1 1 1]);
+% set(groot,'defaultAxesTickLabelInterpreter', 'latex');
+% set(groot,'defaulttextinterpreter', 'latex');
+% set(groot,'defaultLegendInterpreter','latex');
+
+logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "p"},   "fig_num",3); set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
 %% Difference of Pos
+close(figure(7))
 figure(7);
 plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
 legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
@@ -320,12 +379,15 @@ set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xl
 % legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
 
 %%
+plot(logt, data.removeX)
+%%
+close(figure(8))
 figure(8)
 plot(logger.data('t',[],[]), logger.data(1,'p','e'), 'LineWidth', 2);
 hold on
 plot(logger.data('t',[],[]), Rdata, 'LineWidth', 2)
 hold off
-% xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+xlabel("Time [s]"); ylabel("Position [m]"); %legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 
 yyaxis right
 plot(logt, data.variable_particle_num(1:size(logt)), 'LineWidth', 1.5);
@@ -343,9 +405,10 @@ plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylab
 xlim([0 te])
 set(gca,'FontSize',Fontsize);  grid on; title("");
 %% calculation time
-
 figure(11)
-plot(logt, data.calT(1:size(logger.data('t',[],[]),1)))
+plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
+% plot(logt, totalT/400*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
+
 xlim([0 te])
 set(gca,'FontSize',Fontsize);  grid on; title("");
 xlabel("Time [s]");
@@ -371,7 +434,7 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-save('Data\20221218_circle_const_Pf10000_landing.mat', '-v7.3')
+% save('Data\20221219_circle_calc.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
