@@ -44,7 +44,8 @@ ny_app = 100; % 見かけ上のy辺
   pi = 1;
   gi = 0.8;
 %  [E,E2,W] = make_grid_graph(nx,ny,@(x,y) gi*max(cx,nx-cx)^(pi)*gi*max(cy,ny-cy)^(pi)*(0.3+0.2*rand(size(x)))+(-abs(x-cx).^(pi)+gi*max(cx,nx-cx)^(pi)).*(-abs(y-cy).^(pi)+gi*max(cy,ny-cy)^(pi)),0.04);
- [E,E2,W] = make_grid_graph(nx,ny,0.01,0.04);
+ [E,E2,W] = make_grid_graph(nx,ny,0.01,0.04,3);
+ % 
  %[i,j,v]=find(E);
 %G=digraph(i,j,v); % グラフ構造は自明なので描画するメリットはなさそう．
 %figure()
@@ -151,13 +152,14 @@ for k = 1:ken
 %         map.I(tbh15) =1 ;
 %     end
 end
+map.draw_state(nx,ny,W);
 %% graphs
-% map.draw_state(nx,ny,map.loggerk(logger,10));  %loggerk内の数字は何ステップ目の状態化を表す
+% map.draw_state(nx,ny,map.loggerk(logger,200));  %loggerk内の数字は何ステップ目の状態化を表す
 % nx=100, ny=100 でマップ上に表示
-% map.draw_state(nx,ny,W)   %建物重みマップの表示
+% c   %建物重みマップの表示
 %% animations
-map.draw_movie(logger,nx,ny,0);
-% map.draw_movie(logger,nx,ny,1,"2022Feb23_Natural_Log44");    %natural_expansion 
+% map.draw_movie(logger,nx,ny,0);
+map.draw_movie(logger,nx,ny,1,"2022Dec21_Natural_Log2");    %natural_expansion 
 %map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
 %M=map.draw_movie(logger,nx,ny,2);
 %map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
@@ -252,7 +254,7 @@ map.save('Logger_Feb23_WAPR_Direct_unum15_vi5_h0.1_Log1.mat',Logger);
 % M = map.draw_movie(Logger(1),nx,ny,1);    %動画を出力
 % M=map.draw_movie(Logger(1),nx,ny,1,"2022Feb22_WAPR_Direct_unum15_kn30_vi5_h0.1_Log64");  %名前を付けて動画を出力
 %% %%% 違法増築3 Logデータの読み込み
-Logger=map.load('Logger_Feb22_WAPR_Direct_unum15_vi5_h0.1_Log40.mat');
+Logger=map.load('Logger_Feb22_WAPR_Direct_unum15_vi5_h0.1_Log64.mat');
 %% plot 2
 kre = K-1;
 % kre = 200;    %Kの値は手動入力
@@ -315,8 +317,8 @@ switch fFPosition
         init_fx=50;
         init_fy=10;
     case 7
-        init_fx=52;
-        init_fy=52;
+        init_fx=41;
+        init_fy=11;
 end
 init_I = sparse(N,1);
 % r=randi(20,numel(init_fx),numel(init_fy))-10;
