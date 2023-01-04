@@ -32,7 +32,7 @@ else
             clear initial_state
             initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
         else
-            arranged_pos = arranged_position([2, 0], N, 1, 1);
+            arranged_pos = arranged_position([0,0], N, 1, 0);
             initial_state(i).p = arranged_pos(:, i);
             initial_state(i).q = [1; 0; 0; 0];
             initial_state(i).v = [0; 0; 0];
@@ -106,7 +106,7 @@ for i = 1:N
     end
 
     %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
-    %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
+%     agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_LiDAR(i));
@@ -121,7 +121,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_EKF(agent(i), ["p", "q"],"B",diag([dt^2,dt^2,0,0,0,dt]))); %
     %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
     %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
-    %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+%     agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
     %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
@@ -143,20 +143,21 @@ for i = 1:N
     %% set controller property
     agent(i).controller = [];
     
-            fzapr = 10;%z方向に適用するか:1 else:~1
-            fzsingle = 1;%tanhが一つか:1 tanh2:~1
-            fxyapr = 10;%%%xy近似するか:1 else:~1
-            fxysingle = 1;%%% tanh1:1 or tanh2 :~1
-            %ftは誤差が大きいとxyのみに適用でも発散するので想定する誤差に合わせてalphaを調整する必要がある
-            alp = 0.9;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
-            erz=[0 1];%近似する範囲z
-            erxy=[0 1];%近似する範囲xy
-%             agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
+            fApproxZ = 1;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
+            fTanh1Z = 1;%tanhが一つか:1 tanh2:~1
+            fApproxXY = 10;%%%xy近似するか:1 else:~1
+            fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
+            %FTは誤差が大きいとxyのみに適用でも発散するので想定する誤差に合わせてalphaを調整する必要がある
+            alpha = 0.8;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            approxRangeZ=[0 1];%近似する範囲z
+            approxRangeXY=[0 1];%近似する範囲xy
+%             agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
 
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 %          agent(i).set_property("controller", Controller_SMC(dt)); 
+%     agent(i).set_property("controller", Controller_APPRO_C(dt,agent.model.param,alpha));    
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器

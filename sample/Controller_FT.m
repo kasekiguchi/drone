@@ -31,8 +31,8 @@ for a = anum - 1:-1:1
     alpha(a) = (alpha(a + 2) * alpha(a + 1)) / (2 * alpha(a + 2) - alpha(a + 1));
 end
 Controller_param.alpha = alpha(anum);
-Controller_param.ax = alpha;
-Controller_param.ay = alpha;
+Controller_param.ax = alpha(1:4,1);
+Controller_param.ay = alpha(1:4,1);
 Controller_param.az = alpha(1:2, 1);
 Controller_param.apsi = alpha(1:2, 1);
 %% 有限整定の近似微分　一層

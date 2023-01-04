@@ -45,12 +45,12 @@ methods
         x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
         xd = ref.state.get();
 
-        Param = obj.param;
-        P = Param.P;
-        F1 = Param.F1;
-        F2 = Param.F2;
-        F3 = Param.F3;
-        F4 = Param.F4;
+%         Param = obj.param;
+        P = obj.param.P;
+        F1 = obj.param.F1;
+        F2 = obj.param.F2;
+        F3 = obj.param.F3;
+        F4 = obj.param.F4;
         %             F2=[3.16,6.79,40.54,12.27];%ゲイン
 %         F2 = F2;
         %             F3=[3.16,6.79,40.54,12.27];%後でparamに格納
@@ -63,10 +63,10 @@ methods
         %             ay=[0.692,0.75,0.818,0.9];
         %             az=[0.692,0.75];
         %             apsi=[0.692,0.75];
-        ax = Param.ax;
-        ay = Param.ay;
-        az = Param.az;
-        apsi = Param.apsi;
+        ax = obj.param.ax;
+        ay = obj.param.ay;
+        az = obj.param.az;
+        apsi = obj.param.apsi;
 
         xd = [xd; zeros(20 - size(xd, 1), 1)]; % 足りない分は０で埋める．
 
@@ -93,21 +93,25 @@ methods
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向
         z4 = Z4(x, xd', vf, P); %yaw
-        %vs = obj.Vs(z2,z3,z4,F2,F3,F4);%%%%%%%%%%%%%%%%%%%
-
+        %vs = obj.Vs(z2,z3,z4,F2,F3,F4);
+%         z2(3) = z2(3)-1*randn(1);
+%         z2(4) = z2(4)-1*randn(1);
         %% x,y,psiの入力
         % 1:有限整定 4:tanh1 5:tanh2 （2,3は使わない）
         % gain_xy=2;%1m/s^2なら2くらいがいい
         switch obj.n
             case 1
                 %有限整定
-                        ux = - F2(1) * sign(z2(1)) * abs(z2(1))^ax(1) -F2(2) * sign(z2(2)) * abs(z2(2))^ax(2) -F2(3) * sign(z2(3)) * abs(z2(3))^ax(3) -F2(4) * sign(z2(4)) * abs(z2(4))^ax(4); %（17）式
-                        uy = -  F3(1) * sign(z3(1)) * abs(z3(1))^ay(1) -F3(2) * sign(z3(2)) * abs(z3(2))^ay(2) -F3(3) * sign(z3(3)) * abs(z3(3))^ay(3) -F3(4) * sign(z3(4)) * abs(z3(4))^ay(4); %(19)式
-
+%                         ux = - F2(1) * sign(z2(1)) * abs(z2(1))^ax(1) -F2(2) * sign(z2(2)) * abs(z2(2))^ax(2) -F2(3) * sign(z2(3)) * abs(z2(3))^ax(3) -F2(4) * sign(z2(4)) * abs(z2(4))^ax(4); %（17）式
+%                         uy = -  F3(1) * sign(z3(1)) * abs(z3(1))^ay(1) -F3(2) * sign(z3(2)) * abs(z3(2))^ay(2) -F3(3) * sign(z3(3)) * abs(z3(3))^ay(3) -F3(4) * sign(z3(4)) * abs(z3(4))^ay(4); %(19)式
+                        ux=-F2*(sign(z2).*abs(z2).^ax(1:4));
+                        uy=-F3*(sign(z3).*abs(z3).^ay(1:4));
+%仮想入力に外乱を入れる
+%                         ux = ux +1*randn(1);
                 %併用
 %                         ux= -F2(1)*sign(z2(1))*abs(z2(1))^ax(1) -F2(2)*sign(z2(2))*abs(z2(2))^ax(2) -F2(3)*sign(z2(3))*abs(z2(3))^ax(3) -F2(4)*sign(z2(4))*abs(z2(4))^ax(4) -F2*z2;%（17）式
 %                         uy= -F3(1)*sign(z3(1))*abs(z3(1))^ay(1) -F3(2)*sign(z3(2))*abs(z3(2))^ay(2) -F3(3)*sign(z3(3))*abs(z3(3))^ay(3) -F3(4)*sign(z3(4))*abs(z3(4))^ay(4) -F3*z3;%(19)式
-%                             ux=-F2*z2;
+%                             ux=-F2*z2;%+1*randn(1);
 %                             uy=-F3*z3;
 %             case 2
                 %近似1(sgnを近似)
@@ -161,10 +165,11 @@ methods
         %=======================================
         %定常外乱：並進方向は0.2m/s^2くらい，回転方向は3rad/s^2(180deg/s^2)
         %=======================================
-                    dst = 0;
+                    dst = 1;
                     %確率の外乱
 %                     rng("shuffle");
-%                     dst = 1*randn(1);
+                    a = 1;%外乱の大きさの上限
+                    dst = 2*a*rand-a;
         %             if t>=1
         %                 dst=0;
         %             end
@@ -189,7 +194,6 @@ methods
         vs = [ux, uy, upsi];
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs', P);
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4); dst];
-        %             ob j.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
         obj.self.input = obj.result.input;
         %サブシステムの入力
         obj.result.uHL = [vf(1); ux; uy; upsi];

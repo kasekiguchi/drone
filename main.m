@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experient data
 fDebug = 0;
@@ -33,10 +33,21 @@ end
 
 %f
 run("main2_agent_setup.m");
-% agent.set_model_error("ly",-0.00932);
-% agent.set_model_error("lx",0.06);%0.06くらいでFT=FB
-% agent.set_model_error("mass",0.05);
-% agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[0,0,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
+% agent.set_model_error("ly",0);
+% agent.set_model_error("lx",0.1);%0.06くらいでFT=FB
+% agent.set_model_error("mass",-0.1);
+% agent.set_model_error("jx",0.02);%0.02237568;
+% agent.set_model_error("jy",0.06);%0.02985236;
+% agent.set_model_error("jz",1);%0.0480374;
+% agent.set_model_error("km2",1);%0.0301
+% agent.set_model_error("km2",1);%0.0301
+% agent.set_model_error("km3",1);%0.0301
+% agent.set_model_error("km4",1);%0.0301
+% agent.set_model_error("k1",0.0);%0.000008
+% agent.set_model_error("k2",0.05);%0.000008
+% agent.set_model_error("k3",0.05);%0.000008
+% agent.set_model_error("k4",0.05);%0.000008
+agent(i).set_model_error("B",[zeros(1,6),[0,0,1],[5,-5,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
 %% main loop
 run("main3_loop_setup.m");
 
@@ -83,8 +94,9 @@ try
             if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
             % reference
+%             FH.CurrentCharacter = 'f';
             if fExp~=1
-                if time.t<=0
+                if time.t<=5
                     FH.CurrentCharacter = 't';
                 else
                     FH.CurrentCharacter = 'f';
@@ -105,7 +117,7 @@ try
 
             agent(i).do_reference(param(i).reference.list);
             if (fOffline); logger.overwrite("reference", time.t, agent, i); end
-
+            
             % controller
             param(i).controller.hlc = {time.t};
             param(i).controller.ftc = {time.t};
@@ -194,9 +206,11 @@ clc
 % logger.plot({1,"p1:2","pe"},{1,"p","per"},{1,"q","pe"},{1,"v","pe"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
 logger.plot({1,"p","er"},"fig_num",2);
 logger.plot({1,"input",""},"fig_num",3);
-logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
+% logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
+logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,3]);
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,3]);
 % agent(1).reference.timeVarying.show(logger)
+
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
@@ -206,22 +220,22 @@ agent(1).animation(logger, "target", 1:N);
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
 %% make folder&save
-fsave=1;
+fsave=10;
 if fsave==1
     %変更しない
-    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-%     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='data';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
-    subfolder='exp';%sim or exp or sample
-%     subfolder='sim';%sim or exp or sample
+%     subfolder='exp';%sim or exp or sample
+    subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='FT_wind_T';%実験,シミュレーション名
+    ExpSimName='HLsubsystem';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
-contents='LSnaname3';%実験,シミュレーション内容
+contents='LSprodstx';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
