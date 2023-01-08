@@ -187,7 +187,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       quiver3(p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
       plot3(p(1), p(2), p(3), 'bx');
       plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 3);
-      plot3(r(1), r(2), r(3),'bo');
+%       plot3(r(1), r(2), r(3),'bo');
       xlim([p(1) - 10, p(1) + 10]);
       ylim([p(2) - 10, p(2) + 10]);
       zlim([p(3) - 10, p(3) + 10]);

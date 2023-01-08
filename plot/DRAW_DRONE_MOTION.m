@@ -208,7 +208,7 @@ classdef DRAW_DRONE_MOTION
                 if param.Motive_ref
                     addpoints(f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
                 else
-                    plot3(r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
+                    plot3(r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');%黒い軌道作っているところ
                 end
                 if ~isempty(param.opt_plot)
                     param.self.show(param.opt_plot,"logger",logger,"FH",gcf,"t",i);

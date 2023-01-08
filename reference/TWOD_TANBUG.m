@@ -38,6 +38,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             %obj.state = [0,0,0];
 
 %            obj.pitch = self.sensor.lrf.pitch;
+q = self.model.state.q;
             tmp = self.sensor.lidar.phi_range;%3D
             obj.pitch = tmp(2)-tmp(1);%3D
             obj.sensor = [0,0];          
@@ -47,7 +48,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D
-            obj.margin = 0.4;
+            obj.margin = 0.5;
             obj.margin_conect = 0.5;
             obj.threshold = 1.5;
             obj.d = 0;
@@ -60,10 +61,11 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                        
             obj.self=self;
             obj.e_z = [0,0,1]';
-            obj.v_max = 0.35;
+            obj.v_max = 0.3;
             obj.target_angle = 0;
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
-            obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3, 3]));
+%             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
+            obj.result.state = STATE_CLASS(struct('state_list', ["p","q","v"], 'num_list', [3,4,3]));
             obj.result.state.p = [0;0;0];
 %            obj.path_goal = zeros(size(self.sensor.lrf.angle_range));
             obj.path_goal = zeros(size(self.sensor.lidar.phi_range));%3D
@@ -75,7 +77,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             %   詳細説明をここに記述
             obj.state = obj.self.estimator.result.state; %自己位置
             obj.past.state.p = obj.result.state.p(1:3); %一時刻前の目標位置
-            obj.past.state.v = obj.result.state.v; %一時刻前の速さ
+            obj.past.state.v = obj.result.state.v; %一時刻前の速さ 
+            obj.past.state.q = obj.result.state.q; %一時刻前の姿勢角
             yaw = obj.state.q(3);
             as = 0:obj.pitch:2*pi;
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
@@ -137,17 +140,19 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %                         edge_p = obj.sensor.sensor_points(:,tid);
                         if Length(tid+2) > Length(tid) % 左回りで避ける
                             %tid = obj.width_check(tid,-1);
-                            [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);
+                            [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
                             obj.result.state.p = [tmp1;tmp2;0];
                             obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
                         else % 右回り
                             %tid = obj.width_check(tid,1);
-                            [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);
+                            [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
                             obj.result.state.p = [tmp1;tmp2;0];
-                            obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                            obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                         end
                         obj.tid = tid;
                         obj.local_tp = edge_p;
+                        yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
+                        obj.result.state.q(3) = yaw;
                         % local から global に変換
                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
             %             obj.result.state.p = [R*obj.result.state.p;0];
@@ -156,7 +161,9 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
  
                     else % まっすぐゴールに行ける場合
                         obj.result.state.p = l_goal; % local座標での位置
-                        obj.result.state.v = [0;0;0]; % local座標での位置
+                        obj.result.state.v = obj.state_initial; % local座標での位置
+                        yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
+                        obj.result.state.q(3) = yaw;
                         % local から global に変換
                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
             %             obj.result.state.p = [R*obj.result.state.p;0];
@@ -164,30 +171,34 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                         result = obj.result;   
                     end     
 
+                %2時刻目以降
                 case 2
+%                     obj.past.state.q(3) = obj.result.state.q(3);
                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
                         if find(obj.length < path_reference) %referenceまでの間に障害物がある場合                              
                             tid = obj.ancher_detection(obj.length,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
                             Length = [obj.length(end),obj.length,obj.length(1)];
 %                             edge_p = obj.sensor.sensor_points(:,tid);
-                            edge_p = Length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
+                            edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
                             if Length(tid+2) > Length(tid) % 左回りで避ける
                                 %tid = obj.width_check(tid,-1);
-                                [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);  
+                                [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);  
 %                                 [~,~,tmp1,tmp2] = obj.conection(obj.state.p(1),obj.state.p(2),edge_p(1),edge_p(2),obj.margin_conect);  
                                 obj.result.state.p = [tmp1;tmp2;0];
-                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                obj.result.state.v = obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                             else % 右回り
                                 %tid = obj.width_check(tid,1);
-                                [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);
+                                [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
 %                                 [tmp1,tmp2,~,~] = obj.conection(obj.state.p(1),obj.state.p(2),edge_p(1),edge_p(2),obj.margin_conect); 
                                 obj.result.state.p = [tmp1;tmp2;0];
-                                obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                             end
                             obj.tid = tid;
                             obj.local_tp = edge_p;
 
                             % local から global に変換
+                            yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
+                            obj.result.state.q(3) = yaw;
                             obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
                 %             obj.result.state.p = [R*obj.result.state.p;0];
                             obj.result.state.v = R*obj.result.state.v;
@@ -209,47 +220,52 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                             reference_state = obj.past.state.p - obj.state.p;
                             reference_state = vecnorm(reference_state);
 
-                            if reference_state < 1.0
-%                                 tid = obj.ancher_detection(route_range_length,obj.threshold,route_range_l_points,obj.pitch,id,obj.goal,goal_length);
+                            if reference_state < 1
+%                                 tid = obj.ancher_detection(obj.length,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
                                 nlength = circshift(obj.length,1); %１つずらした距離データ
                                 edge_ids = find(abs(nlength-obj.length) > obj.threshold); %隣との距離の差が大きいところのindex配列（端点）
-                                edge_ids = edge_ids+1;
                                 edge_points = obj.l_points(:,edge_ids);%2Dだとエラー吐く
-                                %これより下をいじる必要あり？
+%                                 %これより下をいじる必要あり？
                                 tmp = obj.length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列
                                 edge_ids(tmp) = edge_ids(tmp) - 1;%壁が配列なので-1して障害物にする
                                 edge_ids(edge_ids==0) = obj.length(end);%0配列は63にする     
-                    %             te_angle = pitch*abs(edge_ids - id); % angle between target-edge
-                    %             [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
-                    %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
-%                                 near = edge_points - obj.state.p;
-%                                 near = vecnorm(near);
-                                reference_goal = obj.goal - edge_points;
+%                     %             te_angle = pitch*abs(edge_ids - id); % angle between target-edge
+%                     %             [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
+%                     %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
+% %                                 near = edge_points - obj.state.p;
+% %                                 near = vecnorm(near);
+                                reference_goal = obj.goal - obj.l_points(:,edge_ids);
                                 reference_goal = vecnorm(reference_goal);
-                                [~,tmp] = min(obj.length(edge_ids)+reference_goal);
+%                                 [~,tmp] = max(obj.length(edge_ids));
+                                [~,tmp] = min(reference_goal);
+%                                 [~,tmp] = mink(obj.length(edge_ids)+reference_goal,2);
+%                                 tmp = max(tmp);
+%                                 [~,tmp] = min(obj.length(edge_ids)+reference_goal);
                                 tid = edge_ids(tmp);%最短経路の配列
 
                                 Length = [obj.length(end),obj.length,obj.length(end)];
     %                             edge_p = obj.sensor.sensor_points(:,tid);
 %                                 edge_p = obj.l_points(:,tid) - obj.state.p;
                                 edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
-                                if Length(tid+2) > obj.length(tid) % 左回りで避ける
+                                if Length(tid+2) > Length(tid) % 左回りで避ける
                                     %tid = obj.width_check(tid,Length-1);
-                                    [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);  
+                                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);  
 %                                     [~,~,tmp1,tmp2] = obj.conection(obj.state.p(1),obj.state.p(2),edge_p(1),edge_p(2),obj.margin_conect);  
                                     obj.result.state.p = [tmp1;tmp2;0];
-                                    obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                    obj.result.state.v = obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                                 else % 右回り
                                     %tid = obj.width_check(tid,1);
-                                    [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin_conect);
+                                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
 %                                     [tmp1,tmp2,~,~] = obj.conection(obj.state.p(1),obj.state.p(2),edge_p(1),edge_p(2),obj.margin_conect); 
                                     obj.result.state.p = [tmp1;tmp2;0];
-                                    obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                    obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                                 end
                                 obj.tid = tid;
                                 obj.local_tp = edge_p;
     
                                 % local から global に変換
+                                yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
+                                obj.result.state.q(3) = yaw;
                                 obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
                     %             obj.result.state.p = [R*obj.result.state.p;0];
                                 obj.result.state.v = R*obj.result.state.v;
@@ -268,6 +284,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %                             clf
 
                             else    
+                                obj.result.state.q(3) = obj.past.state.q(3);
                                 obj.result.state.p = obj.past.state.p; % local座標での位置
                                 obj.result.state.v = obj.past.state.v;
                                 result = obj.result; 
@@ -277,7 +294,9 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
      
                     else % まっすぐゴールに行ける場合
                         obj.result.state.p = l_goal; % local座標での位置
-                        obj.result.state.v = [0;0;0]; % local座標での位置
+                        obj.result.state.v = obj.state_initial; % local座標での位置
+                        yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
+                        obj.result.state.q(3) = yaw;
                         % local から global に変換
                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
             %             obj.result.state.p = [R*obj.result.state.p;0];
