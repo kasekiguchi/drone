@@ -42,7 +42,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.sensor = [0,0];
             
             obj.state_initial = [0,0]';
-            obj.goal = [5,0]';% global goal position
+            obj.goal = [5,0,0]';% global goal position
             obj.obstacle = [2,0]';% 障害物座標
            obj.radius = self.sensor.lrf.radius;
 %              obj.radius = self.sensor.lidar.radius;
@@ -60,8 +60,9 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.v_max = 0.4;
             obj.target_angle = 0;
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
-            obj.result.state = STATE_CLASS(struct('state_list', ["p","q","v"], 'num_list', [3, 1,3]));
-         
+            obj.result.state = STATE_CLASS(struct('state_list', ["p","v","q"], 'num_list', [3,1,3]));
+%             obj.result.state = STATE_CLASS(struct('state_list', ["p","q"], 'num_list', [3,3]));
+
            obj.path_length = zeros(size(self.sensor.lrf.angle_range));
 %             obj.path_length = zeros(size(self.sensor.result.length));
 %             obj.path_length = zeros(size(self.sensor.lidar.phi_range));
@@ -85,11 +86,11 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.state = obj.self.estimator.result.state; %自己位置
             yaw = obj.state.q(3);
 %             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
-            R = [cos(yaw),-sin(yaw);sin(yaw),cos(yaw);];
+            R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             obj.l_points = obj.sensor.sensor_points; %座標データ
-            l_goal = R'*(obj.goal-obj.state.p(1:2)); % local でのゴール位置
+            l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
@@ -116,12 +117,12 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 if Length(tid+2) > Length(tid) % 左回りで避ける
                     %tid = obj.width_check(tid,-1);
                     [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
-                    obj.result.state.p = [tmp1;tmp2];
+                    obj.result.state.p = [tmp1;tmp2;0];
                     obj.result.state.v = obj.v_max;
                 else % 右回り
                     %tid = obj.width_check(tid,1);
                     [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
-                    obj.result.state.p = [tmp1;tmp2];
+                    obj.result.state.p = [tmp1;tmp2;0];
                     obj.result.state.v = obj.v_max;
                 end
             obj.tid = tid;
@@ -131,23 +132,12 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 obj.result.state.v = obj.v_max; % local座標での位置
             end
 %             obj.result.state.p(3) = atan2(obj.result.state.p(2),obj.result.state.p(1))
-            obj.result.state.q = atan2(obj.result.state.p(2),obj.result.state.p(1));
+            obj.result.state.q = [0;0;atan2(obj.result.state.p(2),obj.result.state.p(1))];
             % local から global に変換
-            obj.result.state.p = [R*obj.result.state.p+obj.state.p(1:2)];
+            obj.result.state.p = [R*obj.result.state.p+obj.state.p];
             
             obj.result.state.v = obj.v_max;
-            %             L = obj.distance2(obj.state.p',obj.goal,obj.obstacle);
-%            yaw = obj.angle;           
-%            obj.result.state.v = obj.velocity_vector(obj.state.p,obj.obstacle,obj.target_position)       
-%            obj.result.state.p = [x;y;z];
-%            obj.result.state.p = obj.result.state.v;
-%            obj.result.state.q = obj.angle;
-%            obj.result.state.xd = [x;y;z];
-%            obj.result.state.p = obj.result.state.xd;
-%            obj.result.state.p = obj.result.state.v/norm(obj.result.state.v)* 0.1+ [x:y;z];
-%            obj.result.state.q = [0;0;0];
-%            obj.result.state.q = obj.angle;
-           result = obj.result;     
+            result = obj.result;     
         end
         
         function d = distance(~,x1,y1,x2,y2) %2点間の距離を算出
