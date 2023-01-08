@@ -13,7 +13,7 @@ end
 
 properties (SetAccess = private) % construct したら変えない．
     radius = 20;
-    pitch = 0.1;
+    pitch = 0.01;
     angle_range
     dead_zone = 0.2;
     head_dir = nsidedpoly(3, 'Center', [0, 0], 'SideLength', 0.5);
