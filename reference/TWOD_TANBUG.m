@@ -63,7 +63,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.result.state = STATE_CLASS(struct('state_list', ["p","v","q"], 'num_list', [3,1,3]));
 %             obj.result.state = STATE_CLASS(struct('state_list', ["p","q"], 'num_list', [3,3]));
 
-           obj.path_length = zeros(size(self.sensor.lrf.angle_range));
+            obj.path_length = zeros(size(self.sensor.lrf.angle_range));
 %             obj.path_length = zeros(size(self.sensor.result.length));
 %             obj.path_length = zeros(size(self.sensor.lidar.phi_range));
             as = 0:obj.pitch:2*pi; %センサの分解能(ラジアン)（行列）
@@ -93,7 +93,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
-           [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
+            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
 %              [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
             path_length = circshift(obj.path_length,id-1); % ゴールまでの間の仮想的な通路への距離
             path_length(path_length>goal_length)=goal_length;
