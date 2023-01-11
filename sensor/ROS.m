@@ -38,8 +38,40 @@ classdef ROS < SENSOR_CLASS
                 data.angle(j,1) = data.angle(j-1) + data.angle_increment; 
             end
             obj.angle_range = double(data.angle');
-           
-            
+%             data.ranges = filloutliers(data.ranges,"next");
+%             data.intensities = ficclloutliers(data.intensities,"next");
+            for i = 1:length(data.ranges)
+                if ~isfinite(data.ranges(i,1)) == 1
+                    if i == 1
+                        data.ranges(i,1) = data.ranges(i+1,1);
+                    else
+                        data.ranges(i,1) = data.ranges(i-1,1);
+                    end
+                end
+            end
+            for i = 1:length(data.intensities)
+                if ~isfinite(data.intensities(i,1)) == 1
+                    if i == 1
+                        data.intensities(i,1) = data.intensities(i+1,1);
+                    else
+                        data.intensities(i,1) = data.intensities(i-1,1);
+                    end
+                end
+            end
+%             data.ranges(~isfinite(data.ranges)) = 0;
+%             data.intensities(~isfinite(data.intensities)) = 0;
+%             data.ranges = fillmissing(data.ranges,'previous');
+%             data.intensities = fillmissing(data.intensities,'previous');
+            data.angle = double((data.angle)');
+            data.length = double((data.ranges)');
+            data.intensities = double((data.intensities)');
+            data.radius = double((data.range_max)');
+%             for i = 1:length(data.length)
+%                 if data.length(i,1) > 3.0
+%                     data.length = 0;
+%                     data.intensities(i,1) = 0;
+%                 end
+%             end
         end
         
         function result=do(obj,param)
@@ -48,6 +80,34 @@ classdef ROS < SENSOR_CLASS
             %   result : 
             % 【入力】motive ：NATNET_CONNECOTR object 
             data = obj.ros.getData;
+            for i = 1:length(data.ranges)
+                if ~isfinite(data.ranges(i,1)) == 1
+                    if i == 1
+                        data.ranges(i,1) = data.ranges(i+1,1);
+                    else
+                        data.ranges(i,1) = data.ranges(i-1,1);
+                    end
+                end
+            end
+            for i = 1:length(data.intensities)
+                if ~isfinite(data.intensities(i,1)) == 1
+                    if i == 1
+                        data.intensities(i,1) = data.intensities(i+1,1);
+                    else
+                        data.intensities(i,1) = data.intensities(i-1,1);
+                    end
+                end
+            end
+%             for i = 1:length(data.length)
+%                 if data.length(i,1) > 3.0
+%                     data.length(i,1) = 0;
+%                     data.intensities(i,1) = 0;
+%                 end
+%             end
+
+
+%             data.ranges = filloutliers(data.ranges,"previous");
+%             data.intensities = filloutliers(data.intensities,"previous");
             data.ranges = fillmissing(data.ranges,'previous');
             data.intensities = fillmissing(data.intensities,'previous');
             angle_num  = size(data.ranges);

@@ -5,6 +5,7 @@ properties % (Access=private)
     connector
     phase % q : quit, s : stop, r : run
     conn_type
+    
 end
 
 properties
@@ -16,7 +17,7 @@ methods
     function obj = WHILL_EXP_MODEL(args)
         obj@MODEL_CLASS(args);
         param = args;
-        obj.dt = 0.025; % check
+        obj.dt = 0.2; % check
         %% variable set
         obj.phase = 's';
         obj.conn_type = param.param.conn_type;
@@ -43,10 +44,10 @@ methods
                 %cmdout2 = cmdout(ipp(1) + 8:ipp(1) + 11);
                 %param.ROSHostIP = strcat('192.168.50', '.', string(100 + obj.IP));
                 param.DomainID = obj.IP;
-                param.subTopicName = {'/odom'};
+                param.subTopicName = {'/Robot_1/pose'};
 %                 param.subTopicName = {'/cmd_vel'};
                 param.pubTopicName = {'/cmd_vel'};
-                param.subMsgName = {'nav_msgs/Odometry'};
+                param.subMsgName = {'geometry_msgs/PoseStamped'};
 %                 param.subMsgName = {'geometry_msgs/Twist'};
                 param.pubMsgName = {'geometry_msgs/Twist'};
                 subnum = length(param.subTopicName);
@@ -64,11 +65,18 @@ methods
 %                 odom_sub = ros2subscriber(param.subTopic(1),"/odom");
 %                 receive(odom_sub,2);
                 fprintf("Whill %d is ready\n", obj.IP);
+                state = obj.connector.getData();
+                obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+                obj.result.state.q = [state.pose.orientation.y];
+                obj.state.p = [state.pose.position.z,state.pose.position.x];
+                obj.state.q = [state.pose.orientation.y];
+
         end
 
     end
 
 function do(obj, u, varargin)
+     
 
         if length(varargin) == 1
 
@@ -95,6 +103,11 @@ function do(obj, u, varargin)
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
                     obj.connector.sendData(obj.msg);
+                    state = obj.connector.getData();
+                    obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+                    obj.result.state.q = [state.pose.orientation.y];
+                    obj.state.p = [state.pose.position.z,state.pose.position.x];
+                    obj.state.q = [state.pose.orientation.y];
                     error("ACSL : quit experiment");
                 case 's' % stop
                     obj.msg.linear.x = 0.0;
@@ -103,18 +116,28 @@ function do(obj, u, varargin)
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
+                    state = obj.connector.getData();
+                    obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+                    obj.result.state.q = [state.pose.orientation.y];
+                    obj.state.p = [state.pose.position.z,state.pose.position.x];
+                    obj.state.q = [state.pose.orientation.y];
                 case 'r' % run
 %                      obj.msg.linear.x = 0;
 %                      obj.msg.linear.y = 0.0;
 %                      obj.msg.angular.x = 0.0;
 %                      obj.msg.angular.y = 0.0;
 %                      obj.msg.angular.z = 0;
-                        obj.msg.linear.x = u(1);
-                        obj.msg.linear.y = 0.0;
-                        obj.msg.linear.z = 0.0;
-                        obj.msg.angular.x = 0.0;
-                        obj.msg.angular.y = 0.0;
-                        obj.msg.angular.z = u(2);
+                    obj.msg.linear.x = u(1);
+                    obj.msg.linear.y = 0.0;
+                    obj.msg.linear.z = 0.0;
+                    obj.msg.angular.x = 0.0;
+                    obj.msg.angular.y = 0.0;
+                    obj.msg.angular.z = u(2);
+                    state = obj.connector.getData();
+                    obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+                    obj.result.state.q = [state.pose.orientation.y];
+                    obj.state.p = [state.pose.position.z,state.pose.position.x];
+                    obj.state.q = [state.pose.orientation.y];
             end
 
         else % 緊急時
@@ -125,9 +148,14 @@ function do(obj, u, varargin)
             obj.msg.angular.y = 0.0;
             obj.msg.angular.z = 0.0;
             obj.connector.sendData(obj.msg);
+            state = obj.connector.getData();
+            obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+            obj.result.state.q = [state.pose.orientation.y];
+            obj.state.p = [state.pose.position.z,state.pose.position.x];
+            obj.state.q = [state.pose.orientation.y];
             return;
         end
-
+        
         % send
         obj.connector.sendData(obj.msg);
     end

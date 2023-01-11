@@ -13,7 +13,7 @@ userpath('clear');
 N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
-fOffline = 0; % 1: active : offline verification with saved data
+fOffline = 1; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
 
@@ -25,7 +25,8 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(22_Nov_11_6).mat", ["sensor","input"]);
+  logger = LOGGER("Data/Log(12_5_3_st).mat", ["sensor","input"]);
+%   logger = LOGGER("Data/Log(11_21_1).mat", ["sensor"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
@@ -37,13 +38,13 @@ run("main2_agent_setup.m");
 %% main loop
 run("main3_loop_setup.m");
 
-
 try
 
   while round(time.t, 5) <= te
     %% sensor
     %    tic
     tStart = tic;
+
 
     if (fOffline)
       logger.overwrite("plant", time.t, agent, i);
@@ -78,7 +79,9 @@ try
     %% estimator, reference generator, controller
     for i = 1:N
       % estimator
+      
       agent(i).do_estimator(cell(1, 10));
+      
       if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
       % reference
@@ -89,6 +92,7 @@ try
       param(i).reference.wall = {1};
       param(i).reference.tbug = {};
       param(i).reference.path_ref_mpc = {1};
+      param(i).reference.straight = {};
       param(i).reference.agreement = {logger, N, time.t};
 
       for j = 1:length(agent(i).reference.name)
@@ -114,8 +118,8 @@ try
     end
 
     if fDebug
-        agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-% %       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+        agent.reference.straight.FHPlot(Env,FH,[]);
+%       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 %       agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
     end
 
@@ -166,6 +170,7 @@ try
 
     end
 
+
   end
 
 catch ME % for error
@@ -185,8 +190,8 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-% logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
-logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "input", "e"},{1,"estimator.ukfslam.show",""}, "fig_num", 5, "row_col", [2, 2]);
+% logger.plot({1, "input", ""},"fig_num", 5);
+logger.plot( {1, "p", "e"},{1, "q", "e"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation

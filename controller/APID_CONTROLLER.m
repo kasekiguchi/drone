@@ -9,6 +9,7 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
         Kp
         Ki
         Kd
+        K
         dt
         strans
         rtrans
@@ -21,6 +22,7 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
             obj.Kp=param.Kp;
             obj.Ki=param.Ki;
             obj.Kd=param.Kd;
+            obj.K =param.K;
             obj.dt = param.dt;
             obj.strans = param.strans;
             obj.rtrans = param.rtrans;
@@ -40,25 +42,26 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
                 if isfield(param,'Kd'); obj.Kd=param.Kd; end
                 if isfield(param,'dt'); obj.dt=param.dt; end
             end
+            
+%             if isempty(obj.result)
+%                 v = 0;
+%             else
+%                 v = obj.result.input(1);
+%                 obj.ed = [v-rv;w-rw];
+%             end
             obj.e = [p-rp;q-rq];
-            obj.ed = [v-rv;w-rw];
-            if isempty(obj.result)
-            else
-                obj.ed = [obj.result.input(1) - rv;w-rw];
-            end
+            obj.ed = [obj.K*(p-rp)-rv];
             
            
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
-            if isempty(obj.result)
-                obj.result.input = -Kp*obj.e - Ki*obj.ei;
-            else
-                obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
-            end
+            
+            obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
+%             obj.result.input = [0.1;0];
 
             obj.self.input = obj.result.input;
+%             obj.self.input = [1.0;0];
             u = obj.result;
             obj.ei = obj.ei + obj.e*obj.dt;
-%             v = obj.result.input
         end
         function show(obj)
             obj.result;

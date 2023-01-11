@@ -40,6 +40,7 @@ methods
             items = []
             agent_items = []
             option.overwrite_target = ["sensor","input"]
+%             option.overwrite_target = ["sensor"]
         end
 
         if isstring(target) % save で保存されたデータを呼び出す場合
@@ -149,6 +150,7 @@ methods
             obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
             obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
             obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
+%             obj.Data.agent(n).plant.result{obj.k} = agent(n).plant.result;
 
             if isfield(agent(n).sensor.result, "state")
                 obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
@@ -157,9 +159,14 @@ methods
             obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
             obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
             obj.Data.agent(n).input{obj.k} = agent(n).input;
+%             if obj.fExp
+%                 obj.Data.agent(n).plant.result{obj.k}.state = agent(n).plant.result.state;
+%             end
 
             if obj.fExp
                 obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
+%                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
+%                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.result.state);
             else
                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
             end
@@ -366,8 +373,8 @@ methods
     function data = return_state_prop(obj, variable, data)
         % function for data_org
         for j = 1:length(variable)
-            %data = [data.(variable(j))];
-            data = vertcat(data.(variable(j)));
+            data = [data.(variable(j))];
+%             data = vertcat(data.(variable(j)));
 
             if strcmp(variable(j), 'state')
 
@@ -488,6 +495,7 @@ methods
                     end
 
                     hold on
+                    grid on
 
                     switch length(ps)
                         case 3

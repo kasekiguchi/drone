@@ -36,10 +36,10 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             setenv("ROS_DOMAIN_ID","30");
             obj.subTopic = info.subTopic;
             obj.subName = info.subTopicName;
-            obj.subTopicNum = length(obj.subTopic);
-            obj.subMsg = info.subMsgName;
-            obj.pubMsg = info.pubMsgName;
+            obj.subTopicNum = length(obj.subName);
+            obj.subMsg = info.subMsgName;            
             if isfield(info,'pubTopic')
+                obj.pubMsg = info.pubMsgName;
                 obj.pubTopic = info.pubTopic;
                 obj.pubName = info.pubTopicName;
                 obj.pubTopicNum = length(obj.pubTopic);
@@ -57,7 +57,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum 
-                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1},obj.pubMsg{i,1});
+                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1});
                 end
             end
         end

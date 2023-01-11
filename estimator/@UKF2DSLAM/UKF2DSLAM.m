@@ -37,6 +37,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             obj.NLP = param.NLP;%Number of Line Param
             obj.constant = param.constant;
             %------------------------------------------
+        
         end
 
         function [result]=do(obj,~,~)
@@ -86,12 +87,11 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 if size(obj.EL0(:,1),(1)) < size(sensor.length,(2))
                     S = size(obj.EL0(:,1));
                     sensor.length = sensor.length(:,1:S(1));
-                else 
+                else
                     S =size(sensor.length);
                     obj.EL0 = obj.EL0(1:S(2),:);
                     obj.R = obj.R(1,1)*eye(size(obj.EL0,1));
                 end
-
             end
             % Convert measurements into lines %Line segment approximation%観測値をクラスタリングしてマップパラメータを作り出す           
             LSA_param = PC2LDA(measured.ranges, measured.angles, PreXh, obj.constant);
@@ -145,8 +145,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 cell2mat(arrayfun(@(i) PreXh - sqrt(sn + obj.k) .* CholCov(:,i) , 1:sn , 'UniformOutput' , false))];%sigma point
             weight = [obj.k/(sn + obj.k), 1/( 2*(sn + obj.k) )];
  
-            % シグマポイントに対応し
-            % た出力予測値：各予測位置からのレーザー長さ
+            % シグマポイントに対応した出力予測値：各予測位置からのレーザー長さ
             th = 0;
             EL = obj.EL0;
             for i = 1:size(Kai,2)
@@ -154,8 +153,8 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 if th~=Kai(3,i)
                     th = Kai(3,i);
                     R = [cos(th),-sin(th);sin(th),cos(th)];
-                    EL = obj.EL0*R'; % laser 方向単位ベクトル（絶対座標）in R^(Nx2)
-                end
+                    EL = obj.EL0*R'; %点から壁への法線ベクトルの角 laser 
+                end    
                 d = Kai(obj.n+1:obj.NLP:end,i); % 原点から壁までの距離
                 alpha = Kai(obj.n+2:obj.NLP:end,i); % 原点から壁への法線ベクトルの角度
                 W = DA2L(d,alpha); % wall line R^(mx3)
@@ -242,9 +241,9 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             end
             estate = result.state.p(:,end);
             estatesquare = estate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
-            estatesquare =  polyshape( estatesquare');
-            estatesquare =  rotate(estatesquare,180 * result.state.q(end) / pi, result.state.p(:,end)');
-            plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+%             estatesquare =  polyshape( estatesquare');
+%             estatesquare =  rotate(estatesquare,180 * result.state.q(end) / pi, result.state.p(:,end)');
+%             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
             Ewall = result.map_param;
             Ewallx = reshape([Ewall.x,NaN(size(Ewall.x,1),1)]',3*size(Ewall.x,1),1);
             Ewally = reshape([Ewall.y,NaN(size(Ewall.y,1),1)]',3*size(Ewall.y,1),1);
@@ -256,8 +255,13 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             th = result.state.q;
             plot(l.x,l.y);
             hold on
+            grid on
             plot(p(1),p(2),'ro');
             quiver(p(1),p(2),cos(th),sin(th),'Color','r');
+            xlabel("$x$ [m]","Interpreter","latex");
+            ylabel("$y$ [m]","Interpreter","latex");
+            xlim([-4 12])
+            ylim([-4 12])
             hold off
         end
         function l = point2line(obj,Px,Py)

@@ -34,6 +34,14 @@ Setting.method = "vehicle_velocity_omega_input_model"; % model dynamicsの実体
 Setting.state_list =  ["p","q"];
 Setting.num_list = [2,1];
 %---------------------------%
+%---入力がv1とv2のモデル---%
+% Model.name="vehicle3"; % print name
+% Setting.dim=[3,2,0];
+% Setting.input_channel= ["v1","v2"];
+% Setting.method = "vehicle_velocity_input_model"; % model dynamicsの実体名
+% Setting.state_list =  ["p","q"];
+% Setting.num_list = [2,1];
+%---------------------------%
 Setting.initial = initial;
 Setting.dt = dt;
 Model.param = Setting;

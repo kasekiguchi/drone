@@ -5,8 +5,9 @@ function Sensor=Sensor_ROS(param)
     Sensor.param=param;
     Sensor.param.state_list = ["p"];
     Sensor.param.num_list = [3,3];
-    Sensor.param.subTopic = ros2node("/sensormatlab",param.DomainID);
-    Sensor.param.subTopicName = {'/scan'};
+    Sensor.param.subTopicName = {'/scan2'};
     Sensor.param.subMsgName = {'sensor_msgs/LaserScan'};
+    Sensor.param.subTopic = ros2node("submatlab",param.DomainID);
+    Sensor.param.subTopic = ros2node("submatlab2",param.DomainID);
     Sensor.param.DomainID = param.DomainID; %% check
 end
