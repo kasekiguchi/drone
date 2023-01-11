@@ -18,7 +18,7 @@ run("main1_setting.m");
 % for mob1
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
 wall1 = [2 -1;2 0.5;2.5 0.5;2.5 -1];
-% wall2 = [4 0;4 3;4.5 3;4.5 0];
+wall2 = [4 0;4 3;4.5 3;4.5 0];
 % wall2 = [4 0;2 0.5;7 0.5;7 0];%没
 room = [-2 -5;-2 4;7 4;7 -5];
 room0 = [-2.5 -5.5;-2.5 4.5;7.5 4.5;7.5 -5.5];
@@ -30,7 +30,7 @@ initial.p = [0,0,0]';
 rs = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
 run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
-% plot(polyshape(Env.param.Vertices),'FaceCol複or','red','FaceAlpha',0.1);
+% plot(polyshape(Env.param.Vertices),'FaceColor','red','FaceAlpha',0.1);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
@@ -50,7 +50,7 @@ run("main2_agent_setup.m");
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
-PFH=figure();
+% PFH=figure();
 try
 
   while round(time.t, 5) <= te
@@ -199,18 +199,22 @@ clc
 % logger.plot({1,"p","er"},{1,"q","e"},{1,"p1-p2","er"});
 logger.plot({1,"p","er"});
 legend("x.state", "y.state", "z.state","x.reference", "y.reference", "z.reference");
+ylabel('Position [m]')
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 %%
 logger.plot({1,"p1-p2","er"});
 hold on
 % plot(polyshape(env),'FaceColor','b');
-% % % plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
-% plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
-xlabel('x')
-ylabel('y')
+plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
+plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
+xlabel('x [m]')
+ylabel('y [m]')
 % legend("estimate", "reference", "obstacle");
-% legend("estimate", "reference", "obstacle1","obstacle2");
+title('x-y')
+xlim([0 7])
+ylim([-1.1 3])
+legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 % agent(1).reference.timeVarying.show(logger)
 

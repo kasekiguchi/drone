@@ -578,7 +578,7 @@ methods
                     txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
                 end
 
-                text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
+%                 text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
             end
 
         end

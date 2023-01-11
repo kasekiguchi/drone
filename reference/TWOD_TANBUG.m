@@ -18,7 +18,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
         e_z %z方向のベクトル
         v_max %速度ベクトルの上限
         dtheta %目標角度とセンサが見ている角度の差
-        target_angle 
+        
         margin_conect
         param
         self
@@ -38,12 +38,11 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             %obj.state = [0,0,0];
 
 %            obj.pitch = self.sensor.lrf.pitch;
-q = self.model.state.q;
             tmp = self.sensor.lidar.phi_range;%3D
             obj.pitch = tmp(2)-tmp(1);%3D
             obj.sensor = [0,0];          
             obj.state_initial = [0,0,0]';
-            obj.goal = [0,15,0]';%2Dgoal
+            obj.goal = [2,0,0]';%2Dgoal
 %            obj.goal = [0,15,0]';% global goal position
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
@@ -54,15 +53,13 @@ q = self.model.state.q;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
             obj.waypoint.top = [0,0,0]';
-            obj.target_position = [0,0,0]';
-            obj.forward = [0,0,0]';
             obj.angle = 0;
             obj.result.state.p = [0;0;0];
                        
             obj.self=self;
             obj.e_z = [0,0,1]';
             obj.v_max = 0.3;
-            obj.target_angle = 0;
+            
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
 %             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
             obj.result.state = STATE_CLASS(struct('state_list', ["p","q","v"], 'num_list', [3,4,3]));
@@ -84,6 +81,7 @@ q = self.model.state.q;
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
+            
             obj.l_points = obj.sensor.sensor_points; %座標データ
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置        
             goal_length = vecnorm(l_goal); % ゴールまでの距離
@@ -94,10 +92,10 @@ q = self.model.state.q;
 %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
            [~,reference_id]=min(abs(obj.self.sensor.lidar.phi_range - l_reference_angle));% reference に一番近い角度であるレーザーインデックス(3D)
-           route_range = obj.route_determin_range(reference_id,obj.length);
-           route_range_l_points=obj.l_points(:,route_range);
-           route_range_length=obj.length(route_range);
-           r_as = route_range(1):0.01:route_range(end);
+%            route_range = obj.route_determin_range(reference_id,obj.length);
+%            route_range_l_points=obj.l_points(:,route_range);
+%            route_range_length=obj.length(route_range);
+%            r_as = route_range(1):0.01:route_range(end);
 
 %            figure(46)
 %            hold on
@@ -119,12 +117,12 @@ q = self.model.state.q;
 
 %             figure(8)
 %             hold on
-%             plot(path_goal.*cos(as),path_goal.*sin(as),"ro")
-%             plot(path_reference.*cos(as),path_reference.*sin(as),"bo")
-%             plot(obj.length.*cos(as),obj.length.*sin(as),"yo")
+% %             plot(path_goal.*cos(as),path_goal.*sin(as),"ro")
+% %             plot(path_reference.*cos(as),path_reference.*sin(as),"bo")
+% %             plot3(obj.length.*cos(as),obj.length.*sin(as),as)
 %             hold off     
 %             clf
-
+%
             if find(path_reference)
                 N = 2;
             else
