@@ -7,7 +7,7 @@ clear Reference
 Reference.name=["path_ref_mpc"];
 Reference.type=["PATH_REFERENCE"];
 
-velocity = 0.5;%目標速度
+velocity = 0.1;%目標速度
 Horizon = 5;%MPCのホライゾ
 
 Reference.param={velocity,Horizon,SensorRange,agent.estimator.ukfslam.constant};

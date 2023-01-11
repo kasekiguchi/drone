@@ -194,14 +194,15 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             obj.result.state.set_state("p",ref);%treat as a colmn vector
             obj.result.state.set_state("q",ref(3,1));%treat as a colmn vector
             obj.result.state.set_state("v",ref(4,1));%treat as a colmn vector
-%             if vecnorm(obj.result.PreTrack - ref(:,1))>3
-%                 obj.O;
-%             end
+            
             if vecnorm(obj.result.PreTrack - ref(1:3,1))>3
                 obj.O;
             end
             obj.PreTrack = ref(1:3,1);
             obj.result.PreTrack = ref(1:3,1);
+%             if vecnorm(obj.result.PreTrack - ref(:,1))>3
+%                 obj.O;
+%             end
 %             obj.PreTrack = ref(:,1);
 %             obj.result.PreTrack = ref(:,1);
             if isempty(obj.O)
@@ -250,11 +251,11 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             %plantFinalState
 %             pstate = agent.plant.state.p(:,end);
 %             pstateq = agent.plant.state.q(:,end);
-            pstate = agent.estimator.result.state.p(:,end);
-            pstateq = agent.estimator.result.state.q(:,end);
-            pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
-            pstatesquare =  polyshape(pstatesquare');
-            pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
+%             pstate = agent.estimator.result.state.p(:,end);
+%             pstateq = agent.estimator.result.state.q(:,end);
+%             pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+%             pstatesquare =  polyshape(pstatesquare');
+%             pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
 
             %modelFinalState
             estate = agent.estimator.result.state.p(:,end);
@@ -281,8 +282,8 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             axis equal
 %             obj.self.show(["sensor","lrf"],[pstate;pstateq]);
             hold on
-            plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
-            %    agent.sensor.LiDAR.show();
+%             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+%                agent.sensor.LiDAR.show();
             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);

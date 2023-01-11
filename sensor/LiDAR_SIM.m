@@ -13,7 +13,8 @@ end
 
 properties (SetAccess = private) % construct したら変えない．
     radius = 20;
-    pitch = 0.02512;
+%     pitch = 0.02512;
+    pitch = 0.0087;
 %     pitch = 0.01;
     angle_range
     dead_zone = 0.2;

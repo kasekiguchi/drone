@@ -80,8 +80,7 @@ methods
 %            obj.plant.do(obj.input, [], "emergency");
         else
 
-            if isempty(obj.input_transform)
-                obj.plant.do(obj.input, plant_param);
+            if isempty(obj.input_transform)                obj.plant.do(obj.input, plant_param);
             else
                 obj.inner_input = obj.input;
 

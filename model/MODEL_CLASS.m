@@ -105,6 +105,7 @@ classdef MODEL_CLASS < dynamicprops
             if isfield(opts, 'FH')
 
                 if ~isempty(opts.FH)
+
                     cha = get(opts.FH, 'currentcharacter');
 
                     if (cha == 'q' || cha == 's' || cha == 'a')

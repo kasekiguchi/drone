@@ -68,7 +68,7 @@ for i = 1:N
         %[M,P]=Model_Discrete(dt,initial_state(i),i);
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-        initial_state(i).p = [0;-1.25];%[92;1];%
+        initial_state(i).p = [0;0];%[92;1];%
         initial_state(i).q = 0;%pi/2-0.05;
         initial_state(i).v = 0;
         agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                 % euler angleのプラントモデル : for sim
@@ -107,6 +107,7 @@ for i = 1:N
     end
 
 %     agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
+%     agent(i).set_property("sensor",Sensor_motive(struct('DomainID',30)));
     %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
@@ -137,7 +138,8 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
+%     agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
+    agent(i).set_property("reference",Reference_Straight(agent(i),agent.model.state));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
@@ -152,7 +154,7 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
     %agent(i).set_property("controller", struct("type","TSCF_VEHICLE","name","tscf","param",struct("F1",0.3,"F2",0.2)));
-    %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
+%     agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
 %     agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
