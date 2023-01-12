@@ -43,7 +43,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
             obj.pitch = tmp(2)-tmp(1);%3D
             obj.sensor = [0,0];          
             obj.state_initial = [0,0,0]';
-            obj.goal = [2,0,0]';%2Dgoal
+            obj.goal = [5,0,0]';%2Dgoal
 %            obj.goal = [0,15,0]';% global goal position
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
@@ -63,7 +63,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
             
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
 %             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
-            obj.result.state = STATE_CLASS(struct('state_list', ["p","q","v"], 'num_list', [3,4,3]));
+            obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
             obj.result.state.p = [0;0;0];
 %            obj.path_goal = zeros(size(self.sensor.lrf.angle_range));
             obj.path_goal = zeros(size(self.sensor.lidar.phi_range));%3D
@@ -76,7 +76,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
             obj.state = obj.self.estimator.result.state; %自己位置
             obj.past.state.p = obj.result.state.p(1:3); %一時刻前の目標位置
             obj.past.state.v = obj.result.state.v; %一時刻前の速さ 
-            obj.past.state.q = obj.result.state.q; %一時刻前の姿勢角
+%             obj.past.state.q = obj.result.state.q; %一時刻前の姿勢角
             yaw = obj.state.q(3);
             as = 0:obj.pitch:2*pi;
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
@@ -132,9 +132,12 @@ classdef THRD_TANBUG < REFERENCE_CLASS
 
             switch N
                 case 1
-                    if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合                              
-                        tid = obj.ancher_detection(obj.length,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
-                        Length = [obj.length(end),obj.length,obj.length(1)];
+                    if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
+                        hlength = circshift(obj.length,1); %横に１つずらした距離データ
+                        h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
+                        vlength = circshift(obj.length,[1 0]);%縦に1つずらした距離データ
+                        v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
+                        Length = [obj.length(:,end),obj.length,obj.length(:,1)];
                         edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
 %                         edge_p = obj.sensor.sensor_points(:,tid);
                         if Length(tid+2) > Length(tid) % 左回りで避ける
@@ -162,7 +165,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
                         obj.result.state.p = l_goal; % local座標での位置
                         obj.result.state.v = obj.state_initial; % local座標での位置
                         yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
-                        obj.result.state.q(3) = yaw;
+%                         obj.result.state.q(3) = yaw;
                         % local から global に変換
                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
             %             obj.result.state.p = [R*obj.result.state.p;0];
@@ -197,7 +200,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
 
                             % local から global に変換
                             yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
-                            obj.result.state.q(3) = yaw;
+%                             obj.result.state.q(3) = yaw;
                             obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
                 %             obj.result.state.p = [R*obj.result.state.p;0];
                             obj.result.state.v = R*obj.result.state.v;
@@ -264,7 +267,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
     
                                 % local から global に変換
                                 yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
-                                obj.result.state.q(3) = yaw;
+%                                 obj.result.state.q(3) = yaw;
                                 obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
                     %             obj.result.state.p = [R*obj.result.state.p;0];
                                 obj.result.state.v = R*obj.result.state.v;
@@ -294,8 +297,8 @@ classdef THRD_TANBUG < REFERENCE_CLASS
                     else % まっすぐゴールに行ける場合
                         obj.result.state.p = l_goal; % local座標での位置
                         obj.result.state.v = obj.state_initial; % local座標での位置
-                        yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
-                        obj.result.state.q(3) = yaw;
+%                         yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
+%                         obj.result.state.q(3) = yaw;
                         % local から global に変換
                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
             %             obj.result.state.p = [R*obj.result.state.p;0];
@@ -338,8 +341,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
             route = tmp;      
         end
 
-        function tid = ancher_detection(~,length,threshold,l_points,pitch,id,goal,goal_length) %端点を検出する
-            nlength = circshift(length,1); %１つずらした距離データ
+        function tid = ancher_detection(~,length,nlength,threshold,l_points,pitch,id,goal,goal_length) %端点を検出する
             edge_ids = find(abs(nlength-length) > threshold); %隣との距離の差が大きいところのindex配列（端点）
             edge_points = l_points(:,edge_ids);%2Dだとエラー吐く
             %これより下をいじる必要あり？
