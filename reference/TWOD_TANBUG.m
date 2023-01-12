@@ -41,7 +41,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 
             obj.sensor = [0,0];
             
-            obj.state_initial = [0,0]';
+            obj.state_initial = [0,0,0]';
             obj.goal = [5,0,0]';% global goal position
             obj.obstacle = [2,0]';% 障害物座標
            obj.radius = self.sensor.lrf.radius;
@@ -119,12 +119,12 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                     %tid = obj.width_check(tid,-1);
                     [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
                     obj.result.state.p = [tmp1;tmp2;0];
-                    obj.result.state.v = obj.v_max;
+                    obj.result.state.v = obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                 else % 右回り
                     %tid = obj.width_check(tid,1);
                     [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
                     obj.result.state.p = [tmp1;tmp2;0];
-                    obj.result.state.v = obj.v_max;
+                    obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                 end
             obj.tid = tid;
             obj.local_tp = edge_p;
