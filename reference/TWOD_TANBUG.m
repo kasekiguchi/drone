@@ -114,7 +114,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 tid = edge_ids(tmp);
 
                 Length = [obj.length(end),obj.length,obj.length(1)];
-                edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi)];
+                edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];
                 if Length(tid+2) > Length(tid) % 左回りで避ける
                     %tid = obj.width_check(tid,-1);
                     [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
