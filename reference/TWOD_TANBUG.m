@@ -68,6 +68,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 %             obj.path_length = zeros(size(self.sensor.lidar.phi_range));
             as = 0:obj.pitch:2*pi; %センサの分解能(ラジアン)（行列）
             obj.margin = obj.margin;
+            
             %仮想通路の生成
             tmp = find((obj.radius*sin(as) >= obj.margin).*(as <= pi/2));% 2～16列目のインデックスを算出
             obj.path_length(tmp) = obj.margin./sin(as(tmp));

@@ -70,9 +70,10 @@ for i = 1:N
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
  %       initial_state(i).p = [0;-1.25];%[92;1];%
  %       initial_state(i).q = 0;%pi/2-0.05;
-        initial_state(i).p = [0;0;0];%[92;1];%
-        initial_state(i).q = [0;0;0];%pi/2-0.05;
-        initial_state(i).v = 0;
+%         initial_state(i).p = [0;0;0];%[92;1];%
+%         initial_state(i).q = [0;0;0];%pi/2-0.05;
+%         initial_state(i).v = 0;
+initial_state(i).p =[0;0;0];initial_state(i).q =[0;0;0];initial_state(i).v =[];initial_state(i).w =[];
         agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                 % euler angleのプラントモデル : for sim
     end
 
