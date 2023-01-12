@@ -37,34 +37,86 @@
 % t : reference生成時の現在時刻
 % T : time.t そのステップの現在時刻
 
-function xr = Reference(params, T, Agent)
+% function xr = Reference(params, T, Agent)
+%     % timevaryingをホライズンごとのreferenceに変換する
+%     % params.dt = 0.1;
+%     xr = zeros(params.total_size, params.H);    % initialize
+% 
+%     % 時間関数の取得→時間を代入してリファレンス生成
+%     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
+%     for h = 0:params.H-1
+%         t = T + params.dt * h; % reference生成時の時刻をずらす
+%         Ref = RefTime(t);
+%         % 追従項
+%         xr(1:3, h+1) = Ref(1:3);
+%         xr(7:9, h+1) = Ref(5:7);
+%         % 抑制項
+%         xr(4:6, h+1) =   [0; 0; 0]; % 姿勢角
+%         xr(10:12, h+1) = [0; 0; 0];
+% 
+%         xr(13:16, h+1) = params.ur;
+% 
+%         % 姿勢角の目標値
+%         % x軸方向の姿勢角のみ変化
+% 
+% %         if T > 10
+% %             xr(3, h+1) = 0.005;
+% %         end
+%     end
+% end
+
+%% 現在位置からのリファレンスを生成する
+% zの関数を現在位置から目標値に設定する
+function xr = Reference(params, T, Agent, Gp)
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize
+    Cp = Agent.estimator.result.state.p;
+%     Diffp = Gp - Cp;
 
-    % 時間関数の取得→時間を代入してリファレンス生成
-    RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
+    RT = 10 - T;  % Time
+    
+    r0 = Cp;
+    r = Gp;
+    xa = -2/RT^3 * (r(1)-r0(1));
+    xb = 3/RT^2 * (r(1)-r0(1));
+
+    ya = -2/RT^3 * (r(2)-r0(2));
+    yb = 3/RT^2 * (r(2)-r0(2));
+
+    za = -2/RT^3 * (r(3)-r0(3));
+    zb = 3/RT^2 * (r(3)-r0(3));
+
+    syms rt
+
+    eq = [xa*(rt)^3+xb*(rt)^2+r0(1);
+        ya*(rt)^3+yb*(rt)^2+r0(2);
+        za*(rt)^3+zb*(rt)^2+r0(3)];
+
+%     eq{1} = xa*(rt)^3+xb*(rt)^2+r0(1);
+%     eq{2} = ya*(rt)^3+yb*(rt)^2+r0(2);
+%     eq{3} = za*(rt)^3+zb*(rt)^2+r0(3);
+    veq = diff(eq, rt);
+
     for h = 0:params.H-1
         t = T + params.dt * h; % reference生成時の時刻をずらす
-        Ref = RefTime(t);
+
+        z = za*(t)^3+zb*(t)^2+r0(3);
+        x = xa*(t)^3+xb*(t)^2+r0(1);
+        y = ya*(t)^3+yb*(t)^2+r0(2);
+        
+        v = subs(veq, rt, t);
+
         % 追従項
-        xr(1:3, h+1) = Ref(1:3);
-        xr(7:9, h+1) = Ref(5:7);
+        xr(1:3, h+1) = [x;y;z];
+        xr(7:9, h+1) = v;
         % 抑制項
         xr(4:6, h+1) =   [0; 0; 0]; % 姿勢角
         xr(10:12, h+1) = [0; 0; 0];
 
         xr(13:16, h+1) = params.ur;
-
-        % 姿勢角の目標値
-        % x軸方向の姿勢角のみ変化
-
-%         if T > 10
-%             xr(3, h+1) = 0.005;
-%         end
     end
 end
-
 %% Reference from HL
 % function xr = Reference(params, T, x)
 %     xr = zeros(params.total_size, params.H);    % initialize
