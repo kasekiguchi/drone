@@ -138,8 +138,8 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-%     agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
-    agent(i).set_property("reference",Reference_Straight(agent(i),agent.model.state));
+    agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
+%     agent(i).set_property("reference",Reference_Straight(agent(i),agent.model.state));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
