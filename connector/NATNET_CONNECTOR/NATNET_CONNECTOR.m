@@ -19,6 +19,10 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
 
     methods
         function obj = NATNET_CONNECTOR(info)
+             arguments
+            info.HostIP char
+            info.ClientIP char
+          end
             %-- connection NatNetClient
             disp('Connect to Motive')
             %-- connection takes about 0.3 seconds
