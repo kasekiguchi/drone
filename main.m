@@ -207,14 +207,14 @@ logger.plot({1,"p1-p2","er"});
 hold on
 % plot(polyshape(env),'FaceColor','b');
 plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
-plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
+% plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
 xlabel('x [m]')
 ylabel('y [m]')
 % legend("estimate", "reference", "obstacle");
 title('x-y')
 xlim([0 7])
 ylim([-1.1 3])
-legend("estimate", "reference", "obstacle1","obstacle2");
+% legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 % agent(1).reference.timeVarying.show(logger)
 
