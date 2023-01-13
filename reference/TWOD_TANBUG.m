@@ -108,9 +108,9 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 
 
                 te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
-                reference_goal = obj.goal(1:2)' - obj.l_points(edge_ids,:);
+                reference_goal = l_goal(1:2) - obj.l_points(edge_ids,:)';
                 reference_goal = vecnorm(reference_goal);
-                [~,tmp] = min(obj.length(edge_ids)+reference_goal');
+                [~,tmp] = min(obj.length(edge_ids)+reference_goal);
 %                 [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
 %                 [~,tmp] = min((obj.length(edge_ids)-goal_length*cos(te_angle)));
                 % TODO : b + c > d + e  <==> b^2 + c^2 > d^2 + e^2 が成り立つ前提：要チェック
@@ -122,25 +122,22 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                     %tid = obj.width_check(tid,-1);
                     [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
                     obj.result.state.p = [tmp1;tmp2;0];
-                    obj.result.state.v = obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                 else % 右回り
                     %tid = obj.width_check(tid,1);
                     [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
                     obj.result.state.p = [tmp1;tmp2;0];
-                    obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
                 end
             obj.tid = tid;
             obj.local_tp = edge_p;
             else % まっすぐゴールに行ける場合
-                obj.result.state.p = l_goal; % local座標での位置
-                obj.result.state.v = obj.v_max; % local座標での位置
+                obj.result.state.p = l_goal; % local座標での位置      
             end
 %             obj.result.state.p(3) = atan2(obj.result.state.p(2),obj.result.state.p(1))
             obj.result.state.q = [0;0;atan2(obj.result.state.p(2),obj.result.state.p(1))];
             % local から global に変換
             obj.result.state.p = [R*obj.result.state.p+obj.state.p];
-            
-            obj.result.state.v = obj.v_max;
+            obj.result.state.q = [R*obj.result.state.q+obj.state.q];
+            obj.result.state.v = obj.v_max; % local座標での位置
             result = obj.result;     
         end
         
@@ -209,6 +206,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 opt.t = [];
                 opt.param = [];
             end
+
+%             clf
             env = opt.param;
             yaw = obj.state.q(1);
             R = [cos(yaw),-sin(yaw);sin(yaw),cos(yaw)];
@@ -232,6 +231,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
                 tmp = (R*(obj.self.sensor.result.sensor_points'))';
                 points(1:2:2*size(tmp,1),:)=tmp;
                 points = points + obj.state.p(1:2)';
+%                 points = points + obj.state.q(3);
                 plot(points(:,1),points(:,2),'r-');
                 hold on; 
 %                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
