@@ -40,5 +40,24 @@ classdef BIRD < ABSTRACT_SYSTEM
             p = obj.parameter;
             DRAW_BIRD_MOTION(logger,logger_bird,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"drone",param.drone,"bird",param.bird,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
         end
+
+        function plot_fig(obj,logger,logger_bird)
+            t = logger.Data.t;
+            result = logger.Data.agent(1).reference.result;
+            result = cell2mat(result);
+            for i=1:size(result,2)
+                J(i,:) = result(i).J;
+            end
+            figure(2)
+            xlabel('time {\it t} [s]');
+            ylabel('var');
+            grid on
+            hold on
+            plot(t,J(:,1),'r'); % bird var
+            plot(t,J(:,2),'b'); % drone var
+            plot(t,J(:,3),'g'); % bird-farm distance var
+            hold off
+            legend('bird var','drone var','bird-farm distance','Location','northeast');
+        end
     end
 end

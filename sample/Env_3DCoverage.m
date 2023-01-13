@@ -7,9 +7,9 @@ function env = Env_3DCoverage()
 % max : 任意立方領域の最大値
 %% enviroment class demo
 % env propertyをEnv classのインスタンス配列として定義
-env.d = 0.05;
-env.Vertices = -6*[1,1,1]+ 12*[0,0,0;0,1,0;1,0,0;1,1,0;0,0,1;0,1,1;1,0,1;1,1,1];
-env.min = -2;
-env.max = 2;
+env.d = 0.2;
+env.Vertices = -10*[1,1,1]+ 20*[0,0,0;0,1,0;1,0,0;1,1,0;0,0,1;0,1,1;1,0,1;1,1,1];
+env.min = -7;
+env.max = 7;
 end
 

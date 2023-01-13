@@ -52,7 +52,7 @@ classdef DRAW_BIRD_MOTION
             zlabel(ax,"z [m]");
             obj.fig = figure(param.fig_num);
 
-            view(40,20)
+            view(5,40)
             grid on
             daspect([1 1 1]);
             hold on
@@ -257,24 +257,29 @@ classdef DRAW_BIRD_MOTION
                     end
                     for n = 1:length(param.drone)
                         addpoints(f(n),r(i,1,n),r(i,2,n),r(i,3,n));
+                        % drone pos
                         obj.draw(obj.frame(param.drone(n)),obj.thrust(param.drone(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                        % voronoi face
                         fi(n)=trisurf(agent{n}.reference.result{i}.k{n},agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},1),agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},2),agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},3),'Facecolor','r','Facealpha',0.3,'EdgeColor','none');
                     end
                     for n = 1:length(param.bird)
                         addpoints(f_b(n),r_b(i,1,n),r_b(i,2,n),r_b(i,3,n));
+                        % bird pos
                         obj.draw(obj.frame_bird(param.bird(n)),obj.thrust_bird(param.bird(n),:),p_b(i,:,n),Q_b(i,:,n),u_b(i,:,n));
-                        plot3(farm(1),farm(2),farm(3),'bs','MarkerFaceColor','b');
+                        
                     end
                 else
                     for n = 1:length(param.drone)
-                        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
+                        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'r');
                         obj.draw(obj.frame(param.drone(n)),obj.thrust(param.drone(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
                     end
                     for n = 1:length(param.bird)
-                        plot3(r_b(:,1,n),r_b(:,2,n),r_b(:,3,n),'k');
+                        plot3(p_b(:,1,n),p_b(:,2,n),p_b(:,3,n),'k');
                         obj.draw(obj.frame_bird(param.bird(n)),obj.thrust_bird(param.bird(n),:),p_b(i,:,n),Q_b(i,:,n),u_b(i,:,n));
                     end
                 end
+                % farm pos
+                plot3(farm(1),farm(2),farm(3),'bs','MarkerFaceColor','b');
                 if param.realtime
                     delta = toc(tRealtime);
                     if t(i+1)-t(i) > delta

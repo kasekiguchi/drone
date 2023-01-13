@@ -40,14 +40,11 @@ classdef RANGE_COVERAGE_SIM < SENSOR_CLASS
             sensor_range = {X,Y,Z};
             
             %% 鳥の位置を取得
-            if ~isempty(sensor_bird)
-                for i = 1:Nb
-                    result.bird_pos(:,i) = sensor_bird(i).p;
-                end
-            else
-                for i = 1:N
-                    result.drone_pos(:,i) = sensor(i).p;
-                end
+            for i = 1:Nb
+                result.bird_pos(:,i) = sensor_bird(i).p;
+            end
+            for j = 1:N
+                result.drone_pos(:,j) = sensor(j).p;
             end
             obj.result = result;
         end

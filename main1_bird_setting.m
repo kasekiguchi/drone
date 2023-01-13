@@ -78,7 +78,7 @@ else
             initial_bird_state(i).v = [0; 0; 0];
             initial_bird_state(i).w = [0; 0; 0];
         else
-            arranged_pos = arranged_position([1, 1], Nb, 1, 1);
+            arranged_pos = arranged_position([2, 2], Nb, 1, 3);
             initial_bird_state(i).p = arranged_pos(:, i);
             initial_bird_state(i).q = [1; 0; 0; 0];
             initial_bird_state(i).v = [0; 0; 0];

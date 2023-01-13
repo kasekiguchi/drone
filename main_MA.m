@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 %% general setting
 N = 2; % number of total units
-Nb = 5; % number of birds
+Nb = 6; % number of birds
 fExp = 0 % 実機フラグ
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
@@ -68,7 +68,7 @@ run("main3_loop_setup.m");
         for i = 1:Nb
             % sensor
             if fMotive; param_bird(i).sensor.motive = {}; end
-            param_bird(i).sensor.rpos = {agent};
+            param_bird(i).sensor.rpos_bird = {bird};
             param_bird(i).sensor.imu = {[]};
             param_bird(i).sensor.direct = {};
             param_bird(i).sensor.bounding = {time};
@@ -91,7 +91,7 @@ run("main3_loop_setup.m");
 
             % reference
             param(i).reference.covering = [];
-            param(i).reference.covering_3D = {N,Nb};
+            param(i).reference.covering_3D = {N,Nb,initial_state};
             param(i).reference.birdmove = {time,N,Nb};
             param(i).reference.point = {FH, [2; 1; 1], time.t,dt};
             param(i).reference.timeVarying = {time,FH};
@@ -124,7 +124,7 @@ run("main3_loop_setup.m");
             % reference
             param_bird(i).reference.covering = [];
             param_bird(i).reference.covering_3D = {N,Nb};
-            param_bird(i).reference.birdmove = {time,N,Nb};
+            param_bird(i).reference.birdmove = {time,N,Nb,initial_bird_state};
             param_bird(i).reference.point = {FH, [2; 1; 1], time.t,dt};
             param_bird(i).reference.timeVarying = {time,FH};
             param_bird(i).reference.tvLoad = {time};
@@ -220,12 +220,14 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 % logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""},{2,"p","er"},{2,"q","e"},{2,"input",""},{3,"p","er"},{3,"q","e"},{3,"input",""},"row_col",[3 3]);
+% logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,"input",""},{6,"input",""},"fig_num",2,"row_col",[2 3]);
 % agent(1).reference.timeVarying.show(logger)
+% bird(1).plot_fig(logger,logger_bird);
 
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger,"target",1:N,"Motive_ref",1);
-bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",0);
+bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",0,"mp4",1);
 % agent(1).sensor.bounding.movie(logger);
