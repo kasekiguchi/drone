@@ -57,7 +57,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             
             obj.self=self;
             obj.e_z = [0,0,1]';
-            obj.v_max = 0.4;
+            obj.v_max = 0.5;
             obj.target_angle = 0;
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
             obj.result.state = STATE_CLASS(struct('state_list', ["p","v","q"], 'num_list', [3,1,3]));
