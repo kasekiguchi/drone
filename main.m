@@ -96,14 +96,14 @@ try
             if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
             % reference
-%             FH.CurrentCharacter = 'f';
-            if fExp~=1
-                if time.t<=5
-                    FH.CurrentCharacter = 't';
-                else
-                    FH.CurrentCharacter = 'f';
-                end
-            end
+            FH.CurrentCharacter = 'f';
+%             if fExp~=1
+%                 if time.t<=5
+%                     FH.CurrentCharacter = 't';
+%                 else
+%                     FH.CurrentCharacter = 'f';
+%                 end
+%             end
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [2; 1; 1], time.t, dt};
             param(i).reference.timeVarying = {time, FH};

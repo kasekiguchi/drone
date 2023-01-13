@@ -1,7 +1,6 @@
 %%　DataPlot
 %pos = cell2mat(logger.Data.agent.sigma(1,:)'); %cell2matでcell配列を行列に変換，:,1が列全選択
 close all
-%figureの関数化欲しいfigureだけ持ってくるようにしたい
 %% --------------ここのセクションだけを実行
 %import
 %選択
@@ -9,19 +8,28 @@ fExp=10;%実験のデータかどうか
 fSingle=1;%loggerの数が一つの時１
 fLSorFT=2;%HL:1,FT:2,No:>=3
 fMul =1;%複数まとめるか
-fF=1;%flightのみは１
+fF=10;%flightのみは１
 
+%どの時間の範囲を描画するか指定
+startTime = 5;
+endTime = 20;
+% startTime = 0;
+% endTime = 1E2;
 %========================================================================
 %図を選ぶ[1:"t_p" 2:"x_y" 3:"t_x" 4:"t_y" 5:"t_z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 
 %              11:"three_D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
 %========================================================================
 if fSingle == 1
     name = logger;
+%     name =logger_FT_c_09;
+%     name =logger_HL_c;
     n = 1:19;
     n = [1,9,8,10,7];
 else
-    name1 = logger1;%LS
-    name2 = logger2;%FT
+%     name1 = logger1;%LS
+%     name2 = logger2;%FT
+    name1 = logger_FT_c_09;%LS
+    name2 = logger_HL_c;%FT
 
     n = 2:12;%比較
     c1="Linear state FB";
@@ -29,12 +37,23 @@ else
     comp=[c1,c2];%     comp = struct('c1',' Linear state FB','c2',' Finit time settling');
 end
 
-option.lineWidth = 0.5;%linewidth
+option.lineWidth = 1;%linewidth
 option.fontSize = 18;%デフォルト9，フォントサイズ変更
 option.legendColumns = 1;
 option.aspect = [];
 option.camposition = [];
-% option.fExp = fExp;
+option.fExp = fExp;
+
+%タイトルの名前を付ける
+if fLSorFT==1
+        option.titleName="LS";
+elseif fLSorFT==2 && fSingle ==1
+        option.titleName="FT";
+elseif fSingle~=1 || fLSorFT>2
+        option.titleName=[];
+end
+LSorFT = option.titleName;
+%figごとに追加する場合のもの
 addingContents.aspect = [1,1,1];
 addingContents.camposition = [-45,-45,60];
 
@@ -42,27 +61,20 @@ addingContents.camposition = [-45,-45,60];
 % nM = {[1,9,8,10,7],[13,14,15,16,12]};%複数まとめる
 nM = {[3:5 6 2 11],[9,8,10,7,12],13:16};%複数まとめる
 multiFigure.num =3;%figの数
-multiFigure.title = [" state1", " state2 and input", " subsystem"];%[" state", " subsystem"];
-multiFigure.layout = {[2,3],[2,3],[2,2]};%{[2,3],[2,3]}
+multiFigure.title = [" state1", " state2 and input", " subsystem"];%[" state", " subsystem"];%title name
+multiFigure.layout = {[2,3],[2,3],[2,2]};%{[2,3],[2,3]}%figureの配置場所
 multiFigure.fontSize = 14;
-multiFigure.pba = [1,0.78084714548803,0.78084714548803];
+multiFigure.pba = [1,0.78084714548803,0.78084714548803];%各図の縦横比
 multiFigure.padding = 'tight';
 multiFigure.tileSpacing = 'tight';
 multiFigure.f = fMul;
 
-if fLSorFT==1
-        option.titleName="LS";
-elseif fLSorFT==2
-        option.titleName="FT";
-elseif fSingle~=1 || fLSorFT>2
-        option.titleName=[];
-end
-LSorFT = option.titleName;
+%==================================================================================
 
 % 単体
 if fSingle==1
     %loggerの名前が変わっているとき
-    name=logger;
+%     name=logger;
 %     name = logger_FTzdst10;
 %     name=logger_FTnaname3;
 %     name=logger_FTxyz_mass_saddle;
@@ -73,48 +85,48 @@ if fSingle==1
 %     name=logger_FT_c_09;
 %     name=logger_HL_c;
 %     name=remasui2_0518_FT_hovering_15;
-    %
-%     if fHLorFT==1
-%         HLorFT='LS';
-%     else
-%         HLorFT='FT';
-%     end
-%     if fHLorFT==1
-%         titleName='LS';
-%     else
-%         titleName='FT';
-%     end
     
-    t0 = name.Data.t';
-    k0=name.k;
-    ti0=t0(1:k0);
+    t = name.Data.t';
+    k=name.k;
+    ti=t(1:k);
     if fF==1
-        k0f=find(name.Data.phase == 102,1,'first')+1;%0.025sは40Hz
-        k0e=find(name.Data.phase == 102,1,'last')-0.000;
+        kf=find(name.Data.phase == 102,1,'first') + 1;%0.025sは40Hz
+        ke=find(name.Data.phase == 102,1,'last');
+        startTime = ti(kf) + startTime;
+        endTime = ti(kf) + endTime;
+        ti = ti(1:ke);
+        spanIndex = find(ti <= endTime & ti >= startTime );
+        kf = min(spanIndex);
+        ke = max(spanIndex);
 %         k0f=961;
 %         k0e=1527;
 %         k0f=1090;
 %         k0e=1655;
         %連合の時に使ったrmse
+        
 %         k0f=find(name.Data.phase == 102,1,'first')+240;%0.025sは40Hz
 %         k0e=find(name.Data.phase == 102,1,'last');
 %         k0f=find(name.Data.phase == 102,1,'first')+230;%0.025sは40Hz
 %         k0e=find(name.Data.phase == 102,1,'last')-470;
-        tt0=ti0(k0f);
+        tt=ti(kf);
     else
-        k0f=1;
-        k0e=name.k;
-        tt0=0;
+        spanIndex = find(ti <= endTime & ti >=startTime );
+        kf = min(spanIndex);
+        ke = max(spanIndex);
+        tt = 0;
     end
     
-    lt0=k0e-k0f+1;
-    n0 = lt0;
-    time=zeros(1,n0);
+    lt=ke-kf+1;
+    time=zeros(1,lt);
     tn = length(time);
     ref=zeros(3,tn);
     est=zeros(3,tn);
     err=zeros(3,tn);
-    inp=zeros(5,tn);
+    if fExp==1
+        inp=zeros(4,tn);
+    else
+        inp=zeros(5,tn);
+    end
     att=zeros(3,tn);
     vel=zeros(3,tn);
     w=zeros(3,tn);
@@ -128,8 +140,8 @@ if fSingle==1
     sigmax=zeros(1,tn);
     sigmay=zeros(1,tn);
     j=1;
-    for i=k0f:1:k0e
-        time(j)=ti0(i)-tt0;
+    for i=kf:1:ke
+        time(j)=ti(i)-tt;
         ref(:,j)=name.Data.agent.reference.result{1,i}.state.p(1:3);
         est(:,j)=name.Data.agent.estimator.result{1,i}.state.p(1:3);
         err(:,j)=est(:,j)-ref(:,j);%誤差
@@ -146,7 +158,7 @@ if fSingle==1
         if fExp==1
             ininp(:,j)=name.Data.agent.inner_input{1, i};
         end
-        vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
+%         vf(:,j)=name.Data.agent.controller.result{1, i}.vf';
 %         sigmax(:,j)=name.Data.agent.controller.result{1, i}.sigmax;
 %         sigmay(:,j)=name.Data.agent.controller.result{1, i}.sigmay;
         j=j+1;
@@ -159,8 +171,8 @@ else
 %     name1=logger_HL_c;%HLを書く
 %     name2=logger_FT_c_09;%FTを書く
 
-    name1=logger_LSprodstpit;%LSを書く
-    name2=logger_FTprodstpit;%FTを書く
+%     name1=logger_LSprodstpit;%LSを書く
+%     name2=logger_FTprodstpit;%FTを書く
 %     name1=logger_LSprodstx;%LSを書く
 %     name2=logger_FTprodstx;%FTを書く
     
@@ -178,6 +190,21 @@ else
         k1e=find(name1.Data.phase == 102,1,'last');
         k2f=find(name2.Data.phase == 102,1,'first')+1;
         k2e=find(name2.Data.phase == 102,1,'last');
+
+        startTime1 = ti1(k1f) + startTime;
+        endTime1 = ti1(k1f) + endTime;
+        ti1 = ti1(1:k1e);
+        spanIndex1 = find(ti1 <= endTime1 & ti1 >= startTime1 );
+        k1f = min(spanIndex1);
+        k1e = max(spanIndex1);
+
+        startTime2 = ti2(k2f) + startTime;
+        endTime2 = ti2(k2f) + endTime;
+        ti2 = ti2(1:k2e);
+        spanIndex2 = find(ti2 <= endTime2 & ti2 >= startTime2 );
+        k2f = min(spanIndex2);
+        k2e = max(spanIndex2);
+
         tt1=ti1(k1f);
         tt2=ti2(k2f);
         fspan1=k1e-k1f;
@@ -185,11 +212,19 @@ else
         if  fspan1>=fspan2
             k1e=k1f+fspan2;
         else
-            k2e=k2f+fspan1-0;
+            k2e=k2f+fspan1;
         end
     else
         k1f=find(name1.Data.phase == 102,1,'first')+0;
         k2f=find(name2.Data.phase == 102,1,'first')+0;
+        
+%         startTime = t(k1f) + startTime;
+%         endTime = t(k1f) + endTime;
+%         t1 = t(k1f:k1);
+%         spanIndex = find(t1 <= endTime & t1 >= startTime );
+%         k1f = min(spanIndex);
+%         k1e = max(spanIndex);
+
         tt1 = 0;
         tt2 = ti2(k2f) - ti1(k1f) ;
         k1f=1;
@@ -233,8 +268,13 @@ else
     est2=zeros(3,n2);
     err1=zeros(3,n1);
     err2=zeros(3,n2);
-    inp1=zeros(5,n1);
-    inp2=zeros(5,n2);
+    if fExp
+        inp1=zeros(4,n1);
+        inp2=zeros(4,n2);
+    else
+        inp1=zeros(5,n1);
+        inp2=zeros(5,n2);
+    end
     att1=zeros(3,n1);
     att2=zeros(3,n2);
     vel1=zeros(3,n1);
@@ -251,7 +291,7 @@ else
         att1(:,j)=name1.Data.agent.estimator.result{1,i}.state.q(1:3);
         vel1(:,j)=name1.Data.agent.estimator.result{1,i}.state.v(1:3);
         w1(:,j)=name1.Data.agent.estimator.result{1,i}.state.w(1:3);
-        uHL1(:,j)=name1.Data.agent.controller.result{1, i}.uHL;
+%         uHL1(:,j)=name1.Data.agent.controller.result{1, i}.uHL;
         j=j+1;
     end
     j=1;
@@ -264,7 +304,7 @@ else
         att2(:,j)=name2.Data.agent.estimator.result{1,i}.state.q(1:3);
         vel2(:,j)=name2.Data.agent.estimator.result{1,i}.state.v(1:3);
         w2(:,j)=name2.Data.agent.estimator.result{1,i}.state.w(1:3);
-        uHL2(:,j)=name2.Data.agent.controller.result{1, i}.uHL;
+%         uHL2(:,j)=name2.Data.agent.controller.result{1, i}.uHL;
         j=j+1;
     end
 end
@@ -304,17 +344,21 @@ if fSingle==1
             allData.sigma = {struct('x',{{time}},'y',{{sigmax,sigmay}}), struct('x','time [s]','y','\sigma'), {'\sigma_x','\sigma_y'},add_option([],option,addingContents)};
 else
 %             allData.t_p = {struct('x',{{time}},'y',{{ref,est}}), struct('x','time [s]','y','p [m]'), {'x ref','y ref','z ref','x est','y est','z est'},add_option([],option,addingContents)};
-            allData.x_y = {struct('x',{{ref1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),es2(2,:)}}), struct('x','x [m]','y','y [m]'), {'Reference',c1,c2},add_option(["aspect"],option,addingContents)};
+            allData.x_y = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}}), struct('x','x [m]','y','y [m]'), {'Reference',c1,c2},add_option(["aspect"],option,addingContents)};
             allData.t_x = {struct('x',{{time1,time1,time2}},'y',{{ref1(1,:),est1(1,:),est2(1,:)}}), struct('x','time [s]','y','x [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};
             allData.t_y = {struct('x',{{time1,time1,time2}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}}), struct('x','time [s]','y','y [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};
             allData.t_z = {struct('x',{{time1,time1,time2}},'y',{{ref1(3,:),est1(3,:),est2(3,:)}}), struct('x','time [s]','y','z [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};
-            allData.error = { struct('x',{{time1,time2}},'y',{{err1,err2}}), struct('x','time [s]','y','error [m]'), {'x'+c1,'y'+c1,'z'+c1,'x'+c2,'y'+c2,'z'+c2},add_option([],option,addingContents)};
-            allData.input = { struct('x',{{time1,time2}},'y',{{inp1,inp2}}), struct('x','time [s]','y','input [N]'), {'1'+c1,'2'+c1,'3'+c1,'4'+c1,'dst'+c1,'1'+c2,'2'+c2,'3'+c2,'4'+c2,'dst'+c2,},add_option([],option,addingContents)};
-            allData.attitude = {struct('x',{{time1,time2}},'y',{{att1,att2}}), struct('x','time [s]','y','attitude [rad]'), {'roll'+c1,'pitch'+c1,'yaw'+c1,'roll'+c2,'pitch'+c2,'yaw'+c2},add_option([],option,addingContents)};
-            allData.velocity = {struct('x',{{time1,time2}},'y',{{vel1,vel2}}), struct('x','time [s]','y','velocity[m/s]'), {'x'+c1,'y'+c1,'z'+c1,'x'+c2,'y'+c2,'z'+c2},add_option([],option,addingContents)};
-            allData.angular_velocity = { struct('x',{{time1,time2}},'y',{{w1,w2}}), struct('x','time [s]','y','angular velocity[rad/s]'), {'roll'+c1,'pitch'+c1,'yaw'+c1,'roll'+c2,'pitch'+c2,'yaw'+c2},add_option([],option,addingContents)};
+            allData.error = { struct('x',{{time1,time2}},'y',{{err1,err2}}), struct('x','time [s]','y','error [m]'), {'x '+c1,'y '+c1,'z '+c1,'x '+c2,'y '+c2,'z '+c2},add_option([],option,addingContents)};
+            if fExp
+                allData.input = { struct('x',{{time1,time2}},'y',{{inp1,inp2}}), struct('x','time [s]','y','input [N]'), {'1 '+c1,'2 '+c1,'3 '+c1,'4 '+c1,'1 '+c2,'2 '+c2,'3 '+c2,'4 '+c2},add_option([],option,addingContents)};
+            else
+                allData.input = { struct('x',{{time1,time2}},'y',{{inp1,inp2}}), struct('x','time [s]','y','input [N]'), {'1 '+c1,'2 '+c1,'3 '+c1,'4 '+c1,'dst '+c1,'1 '+c2,'2 '+c2,'3 '+c2,'4 '+c2,'dst '+c2},add_option([],option,addingContents)};
+            end
+            allData.attitude = {struct('x',{{time1,time2}},'y',{{att1,att2}}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
+            allData.velocity = {struct('x',{{time1,time2}},'y',{{vel1,vel2}}), struct('x','time [s]','y','velocity[m/s]'), {'x '+c1,'y '+c1,'z '+c1,'x '+c2,'y '+c2,'z '+c2},add_option([],option,addingContents)};
+            allData.angular_velocity = { struct('x',{{time1,time2}},'y',{{w1,w2}}), struct('x','time [s]','y','angular velocity[rad/s]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
             allData.three_D = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}},'z',{{ref1(3,:),est1(3,:),est2(3,:)}}), struct('x','x [m]','y','y [m]','z','z [m]'), {'ref', 'est'},add_option(["aspect","camposition"],option,addingContents)};
-            allData.uHL = { struct('x',{{time1,time2}},'y',{{uHL1(2,:),uHL2(2,:)}}), struct('x','time [s]','y','inputHL'), {c1,c2},add_option([],option,addingContents)};
+%             allData.uHL = { struct('x',{{time1,time2}},'y',{{uHL1(2,:),uHL2(2,:)}}), struct('x','time [s]','y','inputHL'), {c1,c2},add_option([],option,addingContents)};
 %             allData.z1 = {struct('x',{{time}},'y',{{z1}}), struct('x','time [s]','y','z1'), {'z','dz'},add_option([],option,addingContents)};
 %             allData.z2 = {struct('x',{{time}},'y',{{z2}}), struct('x','time [s]','y','z2'), {'x','dx','ddx','dddx'},add_option([],option,addingContents)};
 %             allData.z3 = {struct('x',{{time}},'y',{{z3}}), struct('x','time [s]','y','z3'), {'y','dy','ddy','dddy'},add_option([],option,addingContents)};
@@ -328,16 +372,16 @@ end
 if multiFigure.f == 1 %multiFigure
     for mfn = 1: multiFigure.num
         f(mfn)=figure(mfn);
-        t = tiledlayout(multiFigure.layout{1,mfn}(1), multiFigure.layout{1,mfn}(2));
-        t.Padding = multiFigure.padding;%'tight'; %'compact';
-        t.TileSpacing = multiFigure.tileSpacing;%tight';%  'compact';
+        tpolt = tiledlayout(multiFigure.layout{1,mfn}(1), multiFigure.layout{1,mfn}(2));
+        tpolt.Padding = multiFigure.padding;%'tight'; %'compact';
+        tpolt.TileSpacing = multiFigure.tileSpacing;%tight';%  'compact';
             
         for fN = 1:length(nM{mfn}) 
                 nexttile
                 plot_data_multi(allData.(figName(nM{mfn}(fN))), multiFigure);
         end
         if ~isempty(LSorFT)
-            title(t,option.titleName+ multiFigure.title(1,mfn));
+            title(tpolt,option.titleName+ multiFigure.title(1,mfn));
             option.titleName = LSorFT;
         end
     end
@@ -346,170 +390,6 @@ else %singleFigure
           plot_data_single(fN, figName(n(fN)), allData.(figName(n(fN))));
      end
 end
-
-
-% 比較
-%     f(1)=figure('Name',FigName(1));
-%     hold on
-% %     plot(ref1(1,:),ref1(2,:),'LineWidth',LW);
-%     plot(ref2(1,:),ref2(2,:),'LineWidth',LW);
-%     plot(est1(1,:),est1(2,:),'LineWidth',LW);
-%     plot(est2(1,:),est2(2,:),'LineWidth',LW);
-%     grid on
-%     daspect([1,1,1])
-%     set(gca,'FontSize',fosi)
-%     xlabel('x[m]')
-%     ylabel('y[m]')
-% %     legend('refHL','refFT','HL','FT')
-%     lgd = legend('Reference','Linear state FB','Finite time settling');
-%     lgd.NumColumns = 2;
-%     hold off
-% 
-%     f(2)=figure('Name',FigName(2));
-%     hold on
-% %     plot(time1,ref1(1,:),'LineWidth',LW);
-%     plot(time2,ref2(1,:),'LineWidth',LW);
-%     plot(time1,est1(1,:),'LineWidth',LW);
-%     plot(time2,est2(1,:),'LineWidth',LW);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('x[m]')
-% %     legend('refHL','refFT','HL','FT')
-%     lgd = legend('Reference','Linear state FB','Finite time settling');
-%     lgd.NumColumns = 2;
-%     hold off
-%     
-%     f(3)=figure('Name',FigName(3));
-%     hold on
-% %     plot(time1,ref1(2,:),'LineWidth',LW);
-%     plot(time2,ref2(2,:),'LineWidth',LW);
-%     plot(time1,est1(2,:),'LineWidth',LW);
-%     plot(time2,est2(2,:),'LineWidth',LW);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('y[m]')
-%     lgd = legend('Reference','Linear state FB','Finite time settling');
-%     lgd.NumColumns = 2;
-% %     legend('refHL','refFT','HL','FT')
-%     hold off
-%     
-%     f(4)=figure('Name',FigName(4));
-%     hold on
-% %     plot(time1,ref1(3,:),'LineWidth',LW);
-%     plot(time2,ref2(3,:),'LineWidth',LW);
-%     plot(time1,est1(3,:),'LineWidth',LW);
-%     plot(time2,est2(3,:),'LineWidth',LW);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('z[m]')
-%     lgd = legend('Reference','Linear state FB','Finite time settlig');
-%     lgd.NumColumns = 2;
-%     hold off
-%     
-%     f(5)=figure('Name',FigName(5));
-%     hold on
-%     plot(time1,err1,'LineWidth',LW);
-%     plot(time2,err2,'LineWidth',LW);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('error[m]')
-%     legend('xHL','yHL','zHL','xFT','yFT','zFT')
-%     hold off
-% 
-%     f(6)=figure('Name',FigName(6));
-%     hold on
-%     plot(time1,inp1);
-%     plot(time2,inp2);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('input')%[?]
-%     legend('1HL','2HL','3HL','4HL','1FT','2FT','3FT','4FT')
-%     hold off
-% 
-%     f(7)=figure('Name',FigName(7));
-%     hold on
-%     plot(time1,att1);
-%     plot(time2,att2);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('attitude')
-%     legend('xHL','yHL','zHL','xFT','yFT','zFT')
-%     hold off
-% 
-%     f(8)=figure('Name',FigName(8));
-%     hold on
-%     plot(time1,vel1);
-%     plot(time2,vel2);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('velocity[m/s]')
-%     legend('xHL','yHL','zHL','xFT','yFT','zFT')
-%     hold off
-% 
-%     f(9)=figure('Name',FigName(9));
-%     hold on
-%     plot(time1,w1);
-%     plot(time2,w2);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('angular velocity[rad/s]')
-%     legend('xHL','yHL','zHL','xFT','yFT','zFT')
-%     hold off
-% 
-%     f(10)=figure('Name',FigName(10));
-%     hold on
-%     plot3(ref1(1,:),ref1(2,:),ref1(3,:),'LineWidth',LW);
-%     plot3(ref2(1,:),ref2(2,:),ref2(3,:),'LineWidth',LW);
-%     plot3(est1(1,:),est1(2,:),est1(3,:),'LineWidth',LW);
-%     plot3(est2(1,:),est2(2,:),est2(3,:),'LineWidth',LW);
-%     grid on
-%     daspect([1,1,1])
-%     set(gca,'FontSize',fosi)
-%     xlabel('x[m]')
-%     ylabel('y[m]')
-%     zlabel('z[m]')
-%     legend('refHL','refFT','HL','FT')
-%     hold off
-%     
-%     i=10;
-%      i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot3(ref1(1,:),ref1(2,:),ref1(3,:),'LineWidth',LW);
-%     plot3(est1(1,:),est1(2,:),est1(3,:),'LineWidth',LW);
-%     plot3(est2(1,:),est2(2,:),est2(3,:),'LineWidth',LW);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('x[m]')
-%     ylabel('y[m]')
-%     zlabel('z[m]')
-%     daspect([1,1,1])
-%     legend('refHL','LS','FT')
-%     daspect([1,1,1]);
-%     campos([-45,-45,60]);
-%     hold off 
-%     
-%     i=i+1;
-%     f(i)=figure('Name',FigName(i));
-%     hold on
-%     plot(time1,uHL1(2,:),'LineWidth',LW);
-%     plot(time2,uHL2(2,:),'LineWidth',LW);
-%     grid on
-%     set(gca,'FontSize',fosi)
-%     xlabel('time[s]')
-%     ylabel('inputHL')
-%     legend('Linear state FB','Finite time settling')
-%     lgd.NumColumns = 2;
-%     hold off
-    
 
 
 %% make folder

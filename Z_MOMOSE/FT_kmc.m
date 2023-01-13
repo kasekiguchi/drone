@@ -314,6 +314,7 @@ t=30;
 dt=0.025;
 time=(0:dt:t);
 ZrLn=zeros(1,length(time));
+ref = ZrLn;
 x1 = ZrLn;
 x2 = ZrLn;
 x3 = ZrLn;
@@ -322,11 +323,18 @@ xl1 = ZrLn;
 xl2 = ZrLn;
 xl3 = ZrLn;
 xl4 = ZrLn;
+xs1 = ZrLn;
+xs2 = ZrLn;
+xs3 = ZrLn;
+xs4 = ZrLn;
 v = ZrLn;
 vl = ZrLn;
+vs = ZrLn;
+vss = ZrLn;
+sigma = ZrLn;
 
 %初期値
-x1(1)= 1.5;
+x1(1)= 1;
 x2(1)= 0;
 x3(1)= 0;
 x4(1)= 0;
@@ -334,12 +342,16 @@ xl1(1)= x1(1);
 xl2(1)= x2(1);
 xl3(1)= x3(1);
 xl4(1)= x4(1);
+xs1(1)= x1(1);
+xs2(1)= x2(1);
+xs3(1)= x3(1);
+xs4(1)= x4(1);
 % X0=[-0.5;-6];
 %ゲイン
 anum = 4; %変数の数
 alpha = zeros(anum + 1, 1);
 alpha(anum + 1) = 1;
-alp=0.9;%論文と同じ0.75
+alp=0.8;%論文と同じ0.75
 alpha(anum) = alp; %alphaの初期値
 for a = anum - 1:-1:1
     alpha(a) = (alpha(a + 2) * alpha(a + 1)) / (2 * alpha(a + 2) - alpha(a + 1));
@@ -349,31 +361,50 @@ end
 A2 = [0 1 0 0;0 0 1 0;0 0 0 1;0 0 0 0];
 B2 =[0;0;0;1];
 [K,~,~] = lqr(A2,B2,diag([100,10,10, 1]),0.01);
+Kf = K;
+% Kf = place(A2,B2,[-4.5,-4,-3,-2.5]);
 dist=0;%外乱の大きさ
-disf=0/dt;%開始時間
-dise=80/dt;%終了時間
+disf=10/dt;%開始時間
+dise=11/dt;%終了時間
+
+%smc
+    Ks = lqr(A2(1:3,1:3),A2(1:3,4),diag([100,1,1]),0.01);
+    %diag([100,1,1]),1)1m/s^2定常到達でたまたま良くなったゲイン
+    %diag([100,1,1]),0.01)1m/s^2比例到達では入力を小さくした方が抑えられることが分かった．
+    S=[Ks 1];
+    SA=S*A2;
+    invSB=inv(S*B2);
+    q=10; k= 10; ka = 20 ; alps = 0.7;
+    %qを下げてもチャタリングする．平滑化でqを下げたときと同じくらい外乱を抑えられてチャタリングを阻止できる
 
 a = 10;%乱数の大きさの範囲 |rand|<=a
 a2 = 2*a;
 for i=1:length(time)
-%     dist = 10*randn(1);
-    dist1= 0;
-    dist2=10;%a+ba*rand;%1*randn(1);
-    dist3=0;%a+ba*rand;
-    dist4=0;%a2*rand - a;
+    dist1= 0;%a2*rand - a;
+    dist2= 0;%a2*rand - a;
+    dist3= 0;%a2*rand - a;
+    dist4= 10;%a2*rand - a;
     
     x = [x1(i);x2(i);x3(i);x4(i)];
     xl = [xl1(i);xl2(i);xl3(i);xl4(i)];
-    v(i) = -K(1)*sign(x(1))*abs(x(1))^alpha(1) -K(2)*sign(x(2))*abs(x(2))^alpha(2)- K(3)*sign(x(3))*abs(x(3))^alpha(3)- K(4)*sign(x(4))*abs(x(4))^alpha(4);
+    xs = [xs1(i);xs2(i);xs3(i);xs4(i)];
+    v(i) = -Kf*(sign(x).*abs(x).^alpha(1:4));
     vl(i) = -K*xl;
-
+    sigma(i) = S*xs;
+%     vs(i) = -invSB*(SA*xs+q*sign(sigma(i)));
+%     vs(i) = -invSB*(SA*xs+q*sign(sigma(i))+k*sigma(i));
+    vs(i) = -invSB*(SA*xs+q*tanh(5*sigma(i))+k*sigma(i));
+%     vs(i) = -invSB*(SA*xs+ka*sign(sigma(i))*abs(sigma(i))^alps);
+vss(i) = -Ks*xs(1:3);
      if disf<i&&i<dise
         [T,X]=ode45(@(t,x) A2*x+B2*v(i)+[dist1;dist2;dist3;dist4],[0 dt],x);
         [Tl,Xl]=ode45(@(t,x) A2*x+B2*vl(i)+[dist1;dist2;dist3;dist4],[0 dt],xl);
+        [Ts,Xs]=ode45(@(t,x) A2*x+B2*vs(i)+[dist1;dist2;dist3;dist4],[0 dt],xs);
             
     else
          [T,X]=ode45(@(t,x) A2*x+B2*v(i),[0 dt],x);
          [Tl,Xl]=ode45(@(t,x) A2*x+B2*vl(i),[0 dt],xl);
+         [Ts,Xs]=ode45(@(t,x) A2*x+B2*vs(i),[0 dt],xs);
       
      end
      if i<length(time)
@@ -385,11 +416,21 @@ for i=1:length(time)
                 xl2(i+1)=Xl(end,2);
                 xl3(i+1)=Xl(end,3);
                 xl4(i+1)=Xl(end,4);
+                xs1(i+1)=Xs(end,1);
+                xs2(i+1)=Xs(end,2);
+                xs3(i+1)=Xs(end,3);
+                xs4(i+1)=Xs(end,4);
      end
 end
 
+s = 5;
+index = find(time <=5,1,"last");
+RMSE_LS = rmse(ref(1, index : end),xl1(1, index : end))
+RMSE_FT = rmse(ref(1, index : end),x1(1, index : end))
+RMSE_SMC = rmse(ref(1, index : end),xs1(1, index : end))
+
 fosi=18;%デフォルト9，フォントサイズ変更
-LW = 2;%linewidth
+LW = 1;%linewidth
 j=1;
 
 % figure(j)
@@ -455,10 +496,64 @@ figure(j)
 hold on
 grid on
 set(gca,'FontSize',fosi)
-plot(time,[xl1;x1],'LineWidth',LW);
+plot(time,[xl1;x1;xs1],'LineWidth',LW);
 % title('LSvsFT')
 xlabel('time[s]')
 ylabel('x_1')
-legend('Linear state FB','Finite time settling');
+legend('Linear state FB','Finite time settling','Sliding mode');
 hold off
 j=j+1;
+
+figure(j)
+hold on
+grid on
+ set(gca,'FontSize',fosi)
+plot(time,[xs1;xs2;xs3;xs4],'LineWidth',LW);
+title('smc');
+xlabel('time[s]')
+ylabel('state')
+legend('xs1','xs2','xs3','xs4')
+hold off
+j=j+1;
+
+figure(j)
+hold on
+grid on
+ set(gca,'FontSize',fosi)
+plot(time,sigma,'LineWidth',LW);
+title('smc');
+xlabel('time[s]')
+ylabel('\sigma')
+% legend('xs1','xs2','xs3','xs4')
+hold off
+j=j+1;
+
+figure(j)
+hold on
+grid on
+ set(gca,'FontSize',fosi)
+plot(time,vs,'LineWidth',LW);
+title('smc');
+xlabel('time[s]')
+ylabel('input')
+% legend('xs1','xs2','xs3','xs4')
+hold off
+j=j+1;
+
+figure(j)
+hold on
+grid on
+ set(gca,'FontSize',fosi)
+plot(time,vss,'LineWidth',LW);
+title('smc');
+xlabel('time[s]')
+ylabel('inputss')
+% legend('xs1','xs2','xs3','xs4')
+hold off
+j=j+1;
+
+function RMSE = rmse(ref,est)
+        RMSE_x=sqrt(immse(ref,est));
+        RMSE = ["RMSE_x" ;
+                        RMSE_x];
+    end

@@ -168,8 +168,8 @@ methods
                     dst = 1;
                     %確率の外乱
 %                     rng("shuffle");
-                    a = 1;%外乱の大きさの上限
-                    dst = 2*a*rand-a;
+%                     a = 1;%外乱の大きさの上限
+%                     dst = 2*a*rand-a;
         %             if t>=1
         %                 dst=0;
         %             end

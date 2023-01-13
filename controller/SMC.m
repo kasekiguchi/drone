@@ -66,7 +66,6 @@ classdef SMC < CONTROLLER_CLASS
             sigmax=obj.param.S*z2;
             sigmay=obj.param.S*z3;
 % %%            
-
             q=20;%circle
             k=10;
             ka=30;
@@ -78,13 +77,13 @@ classdef SMC < CONTROLLER_CLASS
 %             ux=-inv(SB)*(SA*z2+q*tanh(at*sigmax));%tanh
 %             uy=-inv(SB)*(SA*z3+q*tanh(at*sigmay));
              %比例到達則
-%              ux=-inv(SB)*(SA*z2+q*sign(sigmax)+k*sigmax);%sgn
-%              uy=-inv(SB)*(SA*z3+q*sign(sigmay)+k*sigmay);
+             ux=-inv(SB)*(SA*z2+q*sign(sigmax)+k*sigmax);%sgn
+             uy=-inv(SB)*(SA*z3+q*sign(sigmay)+k*sigmay);
 %              ux=-inv(SB)*(SA*z2+q*tanh(sigmax)+k*sigmax);%tanh
 %              uy=-inv(SB)*(SA*z3+q*tanh(sigmay)+k*sigmay);
             %加速率
-            ux = -inv(SB)*(SA*z2+ka*abs(sigmax)^alp*sign(sigmax));%sgn
-            uy = -inv(SB)*(SA*z3+ka*abs(sigmay)^alp*sign(sigmay));
+%             ux = -inv(SB)*(SA*z2+ka*abs(sigmax)^alp*sign(sigmax));%sgn
+%             uy = -inv(SB)*(SA*z3+ka*abs(sigmay)^alp*sign(sigmay));
 %             ux = -inv(SB)*(SA*z2+k*abs(sigmax)^alp*tanh(sigmax));%tanh
 %             uy = -inv(SB)*(SA*z3+k*abs(sigmay)^alp*tanh(sigmay));
             %%
@@ -97,9 +96,9 @@ classdef SMC < CONTROLLER_CLASS
 %             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=2;
-%             if t>=7 && t<=10
-%                     dst=0;
-%             end
+            if t>=4 && t<=5
+                    dst=-1;
+            end
             %% calc actual input
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
             obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];

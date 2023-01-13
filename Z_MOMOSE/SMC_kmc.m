@@ -7,8 +7,8 @@ x2 = zeros(1,length(time));
 sigma = zeros(1,length(time));
 u = zeros(1,length(time));
 %初期値
-x1(1)=-0.5;
-x2(1)=-6;
+x1(1)=1;
+x2(1)=0;
 %ゲイン
 gainq=5;
 gaink=5;
@@ -17,7 +17,7 @@ alp=0.7;
 kk=[10 1];
 %状態方程式
 %ma=-kx-cv-f
-c=1;m=1;k=1;
+c=0;m=1;k=0;
 A=[0 1;-c/m -k/m];
 B=[0;1/m];
 
@@ -25,7 +25,7 @@ B=[0;1/m];
 fb=10;%フィードバック：1、スライディングモード:１以外
 smck=1;
 
-dist=5;%外乱の大きさ
+dist=0;%外乱の大きさ
 disf=4/dt;%開始時間
 dise=6/dt;%終了時間
 %% 極を求めるlqr
@@ -95,10 +95,10 @@ else %スライディングモード
     %入力なし
 %         u(i)=0;
     %定常到達則
-%           u(i)=-inv(SB)*(SA*x+gainq*sign(sigma(i)));%符号関数
+          u(i)=-inv(SB)*(SA*x+gainq*sign(sigma(i)));%符号関数
 %         u(i)=-inv(SB)*(SA*x+gainq*tanh(sigma(i)));%tanh(平滑化)
     %比例到達則
-     u(i)=-inv(SB)*(SA*x+gainq*sign(sigma(i))+gaink*sigma(i));%-kk*x;%符号関数
+%      u(i)=-inv(SB)*(SA*x+gainq*sign(sigma(i))+gaink*sigma(i));%-kk*x;%符号関数
 %      u(i)=-inv(SB)*(SA*x+gainq*tanh(1*sigma(i))+gaink*sigma(i));%tanh(平滑化)
     %加速率  
 %       u(i)=-inv(SB)*(SA*x+gainqa*abs(sigma(i))^(alp)*sign(sigma(i)));%sign 
