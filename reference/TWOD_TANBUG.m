@@ -108,8 +108,11 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 
 
                 te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
+                reference_goal = obj.goal(1:2)' - obj.l_points(edge_ids,:);
+                reference_goal = vecnorm(reference_goal);
+                [~,tmp] = min(obj.length(edge_ids)+reference_goal');
 %                 [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
-                [~,tmp] = min((obj.length(edge_ids)-goal_length*cos(te_angle)));
+%                 [~,tmp] = min((obj.length(edge_ids)-goal_length*cos(te_angle)));
                 % TODO : b + c > d + e  <==> b^2 + c^2 > d^2 + e^2 が成り立つ前提：要チェック
                 tid = edge_ids(tmp);
 
