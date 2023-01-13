@@ -256,14 +256,14 @@ classdef DRAW_BIRD_MOTION
                             delete(fi);
                     end
                     for n = 1:length(param.drone)
-                        addpoints(f(n),r(i,1,n),r(i,2,n),r(i,3,n));
+                        addpoints(f(n),p(i,1,n),p(i,2,n),p(i,3,n));
                         % drone pos
                         obj.draw(obj.frame(param.drone(n)),obj.thrust(param.drone(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
                         % voronoi face
                         fi(n)=trisurf(agent{n}.reference.result{i}.k{n},agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},1),agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},2),agent{n}.reference.result{i}.v(agent{n}.reference.result{i}.c{n},3),'Facecolor','r','Facealpha',0.3,'EdgeColor','none');
                     end
                     for n = 1:length(param.bird)
-                        addpoints(f_b(n),r_b(i,1,n),r_b(i,2,n),r_b(i,3,n));
+                        addpoints(f_b(n),p_b(i,1,n),p_b(i,2,n),p_b(i,3,n));
                         % bird pos
                         obj.draw(obj.frame_bird(param.bird(n)),obj.thrust_bird(param.bird(n),:),p_b(i,:,n),Q_b(i,:,n),u_b(i,:,n));
                         
@@ -274,7 +274,7 @@ classdef DRAW_BIRD_MOTION
                         obj.draw(obj.frame(param.drone(n)),obj.thrust(param.drone(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
                     end
                     for n = 1:length(param.bird)
-                        plot3(p_b(:,1,n),p_b(:,2,n),p_b(:,3,n),'k');
+                        plot3(p_b(:,1,n),p_b(:,2,n),p_b(:,3,n),'r');
                         obj.draw(obj.frame_bird(param.bird(n)),obj.thrust_bird(param.bird(n),:),p_b(i,:,n),Q_b(i,:,n),u_b(i,:,n));
                     end
                 end

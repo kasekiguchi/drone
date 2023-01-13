@@ -220,7 +220,7 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 % logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""},{2,"p","er"},{2,"q","e"},{2,"input",""},{3,"p","er"},{3,"q","e"},{3,"input",""},"row_col",[3 3]);
-% logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,"input",""},{6,"input",""},"fig_num",2,"row_col",[2 3]);
+logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,"input",""},{6,"input",""},"fig_num",2,"row_col",[2 3]);
 % agent(1).reference.timeVarying.show(logger)
 % bird(1).plot_fig(logger,logger_bird);
 
@@ -229,5 +229,5 @@ clc
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger,"target",1:N,"Motive_ref",1);
-bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",0,"mp4",1);
+bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",0,"mp4",0);
 % agent(1).sensor.bounding.movie(logger);

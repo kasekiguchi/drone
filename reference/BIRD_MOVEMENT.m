@@ -46,12 +46,12 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             away_epx = (sensor.drone_pos - state.p)/norm(sensor.drone_pos - state.p); % のドローンから離れる方向のベクトル
             away = -away_epx/norm(sensor.drone_pos - state.p);
             away = sum(away,2); % ドローンから逃げる方向のベクトル
-            field_away = [0;0;-((0 - state.p(3))/norm(0 - state.p(3)))/norm(0 - state.p(3))];
-%             if state.p(3)<0.25
-%                 field_away = [0;0;1];
-%             else
-%                 field_away = [0;0;0];
-%             end
+%             field_away = [0;0;-((0 - state.p(3))/norm(0 - state.p(3)))/norm(0 - state.p(3))];
+            if state.p(3)<0.25
+                field_away = [0;0;1];
+            else
+                field_away = [0;0;0];
+            end
             
             join_gain = 0.3; % 群れの形成
             separate_gain = 0.2; % 接触回避
@@ -71,7 +71,8 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             u = join_gain*join + separate_gain*separate + go_gain*go + away_gain*away + field_away_gain*field_away;
             gain = 0.8;
             obj.result.farm = ref;
-            obj.result.state.p = initial_state(obj.id).p;%state.p + gain*u/norm(u);
+%             obj.result.state.p = initial_state(obj.id).p;
+            obj.result.state.p = state.p + gain*u/norm(u);
             result = obj.result;
         end
 
