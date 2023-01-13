@@ -148,15 +148,15 @@ for i = 1:N
             fApproxXY = 10;%%%xy近似するか:1 else:~1
             fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
             %FTは誤差が大きいとxyのみに適用でも発散するので想定する誤差に合わせてalphaを調整する必要がある
-            alpha = 0.8;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            alpha = 0.9;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
             approxRangeZ=[0 1];%近似する範囲z
             approxRangeXY=[0 1];%近似する範囲xy
 %             agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
 
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
-    agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
+%     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
     %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
-%          agent(i).set_property("controller", Controller_SMC(dt)); 
+         agent(i).set_property("controller", Controller_SMC(dt)); 
 %     agent(i).set_property("controller", Controller_APPRO_C(dt,agent.model.param,alpha));    
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化

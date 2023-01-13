@@ -28,31 +28,6 @@ methods
         x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
         xd = ref.state.get();
         
-            p = model.state.p  ;
-            v = model.state.v  ;
-            q = model.state.q  ;
-            w = model.state.w  ;
-            
-            refp = ref.state.p  ;
-            refv = ref.state.v  ;
-            
-            Xs = [p(1) - refp(1); v(1) - refv(1);q(2);w(2)];
-            Ys = [p(2) - refp(1); v(2) - refv(2);q(1);w(1)];
-            Zs = [p(3) - refp(1); v(3) - refv(3)];
-            Psis = [q(3);w(3)];
-            
-            % Finite time settling controller
-%             ux(i) = -Kx*(sign(Xs).*abs(Xs).^alpha(1:4)); %tau_theta roll
-%             uy(i) = -Ky*(sign(Ys).*abs(Ys).^alpha(1:4)); %tau_phi pitch
-%             uz(i) = -Kz*(sign(Zs).*abs(Zs).^alpha(1:2)); % f throtl
-%             upsi(i) = -Kpsi*(sign(Psis).*abs(Psis).^alpha(1:2));%tau_psi yaw
-
-        % Linear state feedback controller
-%             ux = -Kx*Xs; %tau_theta roll
-%             uy = -Ky*Ys; %tau_phi pitch
-%             uz = -Kz*Zs; % f throtl
-%             upsi = -Kpsi*Psis;%tau_psi yaw
-
         P = obj.param.P;
         F1 = obj.param.F1;
         F2 = obj.param.F2;
@@ -87,13 +62,13 @@ methods
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
 
         %%
-        dst=1;
+        dst=0;
 %         t = param{1};
 %         dst = 1;
         %確率的な外乱
 %         rng("shuffle");
-                    a = 1;%外乱の大きさの上限
-                    dst = 2*a*rand - a;
+%                     a = 1;%外乱の大きさの上限
+%                     dst = 2*a*rand - a;
 %                     if t>=10 && t<=10.5
 %                             dst=-3;
 %                     end

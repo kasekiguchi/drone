@@ -57,18 +57,20 @@ switch sn
     case 1
     A11=diag([1,1],1);
     A12=[0;0;1];
-    K = lqrd(A11,A12,diag([100,10,1]),0.1,dt);
-    [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
+%     K = lqrd(A11,A12,diag([1,1,1]),0.1,dt);
+%     [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
+
+    K = lqr(A11,A12,diag([100,1,1]),1);
     S=[K 1];
 %     sig0=S*[x1(1);x2(1)]
 %     Ts=abs(sig0)/gaink
 %     Tp=1/gaink*log(gaink*abs(sig0)/gaink+1)
 %     Ta=sig0^(1-alp)/((1-alp)*gainqa)
     Controller_param.S=S;
-    Controller_param.SA=S*Ad2;
-    Controller_param.SB=S*Bd2;
-%     Controller_param.SA=S*Ac4;
-%     Controller_param.SB=S*Bc4; 
+%     Controller_param.SA=S*Ad2;
+%     Controller_param.SB=S*Bd2;
+    Controller_param.SA=S*Ac4;
+    Controller_param.SB=S*Bc4; 
     case 2
         A11=diag([1,1],1);%A11-A12*inv(Q22)*Q12'
         A12=[0;0;1];

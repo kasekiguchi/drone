@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+fExp = 1 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experient data
 fDebug = 0;
@@ -33,6 +33,7 @@ end
 
 %f
 run("main2_agent_setup.m");
+if fExp~=1
 % agent.set_model_error("ly",0);
 % agent.set_model_error("lx",0.1);%0.06くらいでFT=FB
 % agent.set_model_error("mass",-0.1);
@@ -47,7 +48,8 @@ run("main2_agent_setup.m");
 % agent.set_model_error("k2",0.05);%0.000008
 % agent.set_model_error("k3",0.05);%0.000008
 % agent.set_model_error("k4",0.05);%0.000008
-agent(i).set_model_error("B",[zeros(1,6),[0,0,1],[5,-5,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
+agent(i).set_model_error("B",[zeros(1,6),[0,1,0],[0,0,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
+end
 %% main loop
 run("main3_loop_setup.m");
 
@@ -215,27 +217,27 @@ logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N);
+% agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
 %% make folder&save
-fsave=10;
+fsave=1;
 if fsave==1
     %変更しない
-%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+%     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='data';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
-%     subfolder='exp';%sim or exp or sample
-    subfolder='sim';%sim or exp or sample
+    subfolder='exp';%sim or exp or sample
+%     subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='HLsubsystem';%実験,シミュレーション名
+    ExpSimName='zirei_SMC';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
-contents='LSprodstx';%実験,シミュレーション内容
+contents='line_SMC_kasoku_ka20alp07';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
