@@ -63,8 +63,8 @@ classdef ROS < SENSOR_CLASS
             data.length = double((data.ranges)');
             data.intensities = double((data.intensities)');
             data.radius = double((data.range_max)');
-            if ~isempty(obj.self.estimator.ukfslam.result.state.q)
-                front = obj.self.estimator.ukfslam.result.state.q;
+            if ~isempty(obj.self.estimator.direct.result.state.q)
+                front = obj.self.estimator.direct.result.state.q(3);
             else
                 front = 0;
             end
@@ -78,19 +78,21 @@ classdef ROS < SENSOR_CLASS
 
             F=fieldnames(data);
             for i = 1: length(F)
-                switch F{i}
-                    case "q"
-                        obj.result.state.set_state('q',data.q);
-                    case "p"
-                        obj.result.state.set_state('p',data.p);
-                    case "v"
-                        obj.result.state.set_state('v',data.v);
-                    case "w"
-                        obj.result.state.set_state('w',data.w);
-                    otherwise
+%                 switch F{i}
+%                     case "q"
+%                         obj.result.state.set_state('q',data.q);
+%                     case "p"
+%                         obj.result.state.set_state('p',data.p);
+%                     case "v"
+%                         obj.result.state.set_state('v',data.v);
+%                     case "w"
+%                         obj.result.state.set_state('w',data.w);
+%                     otherwise
+        
                         obj.result.(F{i}) = data.(F{i});
-                end
+%                 end
             end
+            obj.result.state = obj.self.sensor.motive.result.state;
             result= obj.result;
         end
 %         function show(obj,varargin)

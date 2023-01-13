@@ -43,13 +43,16 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
                 if isfield(param,'dt'); obj.dt=param.dt; end
             end
             obj.e = [p-rp;q-rq];
-            obj.ed = [obj.k*(p-rp)-rv;w-rw];
+%             obj.ed = [obj.k*(p-rp)-rv;w-rw];
+            obj.ed = 0;
 
             
            
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
                 obj.result.input = -Kp*obj.e - Kd*obj.ed;
-
+%             if obj.result.input(1) > 0.5
+                obj.result.input(1) = 0.1;
+%             end
             obj.self.input = obj.result.input;
             u = obj.result;
 %             obj.ei = obj.ei + obj.e*obj.dt;

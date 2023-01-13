@@ -35,7 +35,9 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
         function obj = TWOD_TANBUG(self, varargin)
             %obj.state = [0,0,0];
 
-            obj.pitch = self.sensor.lrf.pitch;
+%             obj.pitch = self.sensor.lrf.pitch;
+               obj.pitch = cast(self.sensor.lrf.pitch,"double");
+
 %             tmp = self.sensor.lidar.phi_range;
 %             obj.pitch = tmp(2)-tmp(1);
 
@@ -46,7 +48,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.obstacle = [2,0]';% 障害物座標
            obj.radius = self.sensor.lrf.radius;
 %              obj.radius = self.sensor.lidar.radius;
-            obj.margin = 0.5;
+            obj.margin = 1.0;
             obj.threshold = obj.margin*2;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
@@ -90,7 +92,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
-            obj.l_points = obj.sensor.sensor_points; %座標データ
+            obj.l_points = obj.sensor.sensor_points'; %座標データ
+            obj.l_points(~isfinite(obj.l_points)) = 40;
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
@@ -108,7 +111,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
 
 
                 te_angle = obj.pitch*abs(edge_ids - id); % angle between target-edge
-                reference_goal = l_goal(1:2) - obj.l_points(edge_ids,:)';
+                reference_goal = l_goal(1:2) - obj.l_points(:,edge_ids);
                 reference_goal = vecnorm(reference_goal);
                 [~,tmp] = min(obj.length(edge_ids)+reference_goal);
 %                 [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id

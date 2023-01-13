@@ -198,7 +198,7 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","e"},{1,"q","e"},{1,"input",""});
+logger.plot({1,"p","ser"},{1,"q","e"},{1,"input",""});
 % logger.plot({1,"p","er"});
 % legend("x.state", "y.state", "z.state","x.reference", "y.reference", "z.reference");
 % logger.plot({1,"q","e"});
