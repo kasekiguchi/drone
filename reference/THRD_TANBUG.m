@@ -83,7 +83,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             obj.l_points = obj.sensor.sensor_points; %座標データ
-            obj.length = reshape(obj.length,16,63); %センサの距離データを並び替え
+            obj.length = reshape(obj.length,16,numel(obj.length)/16); %センサの距離データを並び替え
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置        
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
@@ -353,7 +353,7 @@ classdef THRD_TANBUG < REFERENCE_CLASS
 %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
             reference_goal = goal - l_points(:,edge_ids);
             reference_goal = vecnorm(reference_goal);
-            [~,tmp] = min(length(edge_ids)+reference_goal);
+            [~,tmp] = min(length(edge_ids)+reference_goal');
             tid = edge_ids(tmp);%最短経路の配列
         end
 
