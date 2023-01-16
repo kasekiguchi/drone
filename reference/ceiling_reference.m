@@ -22,7 +22,6 @@ classdef ceiling_reference < REFERENCE_CLASS
                 args
             end
             obj.self = self;
-            obj.margin = 1.5;
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
             obj.func = gen_func_name(param_for_gen_func);
@@ -36,22 +35,26 @@ classdef ceiling_reference < REFERENCE_CLASS
             end
         end
         function result = do(obj, Param)  
-           %Param={time,FH}
+           %Param={time,FH}　目標位置の算出
            obj.cha = get(Param{2}, 'currentcharacter');
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
-                t = Param{1}.t-obj.t; % 目標重心位置（絶対座標）
-                obj.t=Param{1}.t;
-           else
+                t = Param{1}.t-obj.t; % 現在時刻 ‐ 前時刻
+                obj.t=Param{1}.t; %前時刻の保存
+           else %前時刻の保存
                 obj.t=Param{1}.t;
                 t = obj.t;
            end
-           %% %書き換え部分
+           %% %書き換え部分 x座標
            goal_potential = obj.func(t);%目標位置に向かうポテンシャル 
            obs_potential = -obj.func(t)/(Param{3}-obj.self.estimator.result.state.p(1))^2;%障害物からのポテンシャル
            obj.result.state.p = obs_potential + goal_potential;%potentialの合成
            obj.result.state.p(1) = obj.self.estimator.result.state.p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
-           %% %sensorの値から高度を指定
-           obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + obj.self.estimator.result.state.p(3) - obj.margin;%z方向の目標位置
+           %% y座標のポテンシャル設定
+           
+           
+           %% %sensorの値から高度を指定　z座標
+           margin_z = Param{4};
+           obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + obj.self.estimator.result.state.p(3) - margin_z;%z方向の目標位置
            result = obj.result;
         end
         function show(obj, logger)

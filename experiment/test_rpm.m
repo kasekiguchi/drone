@@ -40,14 +40,14 @@ try
 %         agent.sensor.VL.result = agent.sensor.VL.do;
         agent.sensor.tokyu.result = agent.sensor.tokyu.do;
         
-        if isempty(agent.sensor.tokyu.result.ros2.rpm)==1
+        if isempty(agent.sensor.tokyu.result.ros_t.rpm)==1
             X1(s+1,:) = X1(s,:);
             X2(s+1,:) = X2(s,:);
             X3(s+1,:) = X3(s,:);
         else
-            X1(s+1,:) = agent.sensor.tokyu.result.ros2.current;
-            X2(s+1,:) = agent.sensor.tokyu.result.ros2.voltage;
-            X3(s+1,:) = agent.sensor.tokyu.result.ros2.rpm;
+            X1(s+1,:) = agent.sensor.tokyu.result.ros_t.current;
+            X2(s+1,:) = agent.sensor.tokyu.result.ros_t.voltage;
+            X3(s+1,:) = agent.sensor.tokyu.result.ros_t.rpm;
         end
 %         if isempty(agent.sensor.VL.result.VL_length)==1
 %             X4(s+1,:) = X4(s,:);

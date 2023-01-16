@@ -17,6 +17,10 @@ fOffline = 0; % offline verification with experiment data
 
 run("main1_setting.m");
 
+%　事例研用
+reference_ceiling_margin = 1.5;
+celing_high = 3;
+wall_x = 3;
 % for mob1 Tbug用
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
 wall1 = [2 -1;2 1;2.5 1;2.5 -1];
@@ -78,7 +82,7 @@ try
             param(i).sensor.lrf = Env;
             param(i).sensor.tokyu = {};
             param(i).sensor.VL = {};
-            param(i).sensor.celing = 3;
+            param(i).sensor.celing = celing_high;
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
@@ -101,15 +105,15 @@ try
                 end
             end
             param(i).reference.covering = [];
-
-            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,3,1.5};%reference.pointの目標位置を指定できる
+            
+            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,10,reference_ceiling_margin};%reference.pointの目標位置を指定できる（Param{5}目標高度，Param{6}，マージン）
 
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
             param(i).reference.tbug = {};
             param(i).reference.agreement = {logger, N, time.t};
-            param(i).reference.ceiling = {time,FH,3};
+            param(i).reference.ceiling = {time,FH,wall_x,reference_ceiling_margin};%時間,FH,壁の位置
             param(i).reference.PtoP = {FH};
 
             for j = 1:length(agent(i).reference.name)
@@ -201,12 +205,14 @@ clc
 % logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
-% logger.plot({1,"sensor.result.VL_length",""});
-% logger.plot({1,"rpm",""});%ros2←多分名前が悪さをしているので代入してから使う
-% logger.plot({1,"p","er"});
+% logger.plot({1,"p","rs"},{1,"sensor.result.VL_length",""});
+% logger.plot({1,"p","rs"},{1,"rpm",""},{1,"inner_input",""});%ros2←多分名前が悪さをしているので代入してから使う
+% logger.plot({1,"rpm",""},{1,"voltage",""},{1,"current",""})
+logger.plot({1,"p","er"});
 % logger.plot(1,"p1-p2","er");
-logger.plot({1,"p","rs"},{1,"inner_input",""});
+% logger.plot({1,"p","rs"},{1,"inner_input",""});
 %agent(1).reference.timeVarying.show(logger)
+% logger.plot({1,"rpm",""});
 
 
 %% animation
@@ -214,6 +220,6 @@ logger.plot({1,"p","rs"},{1,"inner_input",""});
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 %agent(1).animation(logger,"target",1:N);
 % agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[0,0,3.1],"length",[5,5,0.2])));%天井room = [-2 -5;-2 4;7 4;7 -5];
-% agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[3,0,1],"length",[0.2,2,2])));%壁room = [-2 -5;-2 4;7 4;7 -5]
+ agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[wall_x,0,1],"length",[0.2,2,2])));%壁room = [-2 -5;-2 4;7 4;7 -5]
 %%
 %logger.save();
