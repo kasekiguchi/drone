@@ -67,7 +67,7 @@
 
 %% 現在位置からのリファレンスを生成する
 % zの関数を現在位置から目標値に設定する
-function xr = Reference(params, T, Agent, Gp)
+function xr = Reference(params, T, Agent, Gp, fGp)
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize
@@ -104,8 +104,24 @@ function xr = Reference(params, T, Agent, Gp)
         z = za*(t)^3+zb*(t)^2+r0(3);
         x = xa*(t)^3+xb*(t)^2+r0(1);
         y = ya*(t)^3+yb*(t)^2+r0(2);
-        
+
+%         if x > Gp(1); x = Gp(1);
+%         elseif y > Gp(2); y = Gp(2);
+%         elseif z > Gp(3); z = Gp(3);
+%         end
+
         v = subs(veq, rt, t);
+        % 目標値に到達したら目標値固定＋速度0
+
+        if     Gp(1)*0.99 < Cp(1) && Gp(1)*1.01 > Cp(1); fGp(1) = 1;
+        elseif Gp(2)*0.99 < Cp(2) && Gp(2)*1.01 > Cp(2); fGp(2) = 1;
+        elseif Gp(3)*0.99 < Cp(3) && Gp(3)*1.01 > Cp(3); fGp(3) = 1;
+        end
+
+        if     fGp(1) == 1; x = Gp(1); v(1) = 0;
+        elseif fGp(2) == 1; y = Gp(2); v(2) = 0;
+        elseif fGp(3) == 1; z = Gp(3); v(3) = 0;
+        end
 
         % 追従項
         xr(1:3, h+1) = [x;y;z];

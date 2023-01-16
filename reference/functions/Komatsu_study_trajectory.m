@@ -20,14 +20,18 @@ syms t real
 % y = 0;
 
 %% circle
-x = cos(t/2);
-y = sin(t/2);
+% x = cos(t/2);
+% y = sin(t/2);
+
+%%
+% x = cos(t)+sin(t)^2;
+% y = sin(t)+2*sin(t);
 % z = 1;
 
 %% Liner
-% x = t / 2;
-% y = 0;
-% z = 1.0;
+x = (t/2)^2;
+y = 0;
+z = 1.0;
 
 %% hovering
 % x = 0;
@@ -40,13 +44,13 @@ y = sin(t/2);
 % z = 1.0;
 
 %% landing
-T = 10;  % Time
-rz0 = 1; % start
-rz = 0.05; % target
-
-a = -2/T^3 * (rz-rz0);
-b = 3/T^2 * (rz-rz0);
-z = a*(t)^3+b*(t)^2+rz0;
+% T = 10;  % Time
+% rz0 = 1; % start
+% rz = 0.05; % target
+% 
+% a = -2/T^3 * (rz-rz0);
+% b = 3/T^2 * (rz-rz0);
+% z = a*(t)^3+b*(t)^2+rz0;
 % z = 1.0;
 
 %%
