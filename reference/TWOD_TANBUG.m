@@ -49,7 +49,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
            obj.radius = self.sensor.lrf.radius;
 %              obj.radius = self.sensor.lidar.radius;
             obj.margin = 1.0;
-            obj.threshold = obj.margin*2;
+            obj.threshold = 1.0;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
             obj.waypoint.top = [0,0,0]';
@@ -93,7 +93,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             obj.l_points = obj.sensor.sensor_points'; %座標データ
-            obj.l_points(~isfinite(obj.l_points)) = 40;
+%             obj.l_points(~isfinite(obj.l_points)) = 40;
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度

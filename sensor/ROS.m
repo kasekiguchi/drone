@@ -30,6 +30,17 @@ classdef ROS < SENSOR_CLASS
                 end
             end
             data = obj.ros.getData;
+            for i=1:720
+                if i == 1
+                    if data.ranges(i) == inf
+                        data.ranges(i) = data.ranges(i+1);
+                    end
+                else
+                    if data.ranges(i) == inf
+                        data.ranges(i) = data.ranges(i-1);
+                    end
+                end
+            end
             obj.radius = data.range_max;
             angle_num  = size(data.ranges);
 %             angle_num = data.angle_max/data.angle_increment;
@@ -52,6 +63,17 @@ classdef ROS < SENSOR_CLASS
             data = obj.ros.getData;
             data.ranges = fillmissing(data.ranges,'previous');
             data.intensities = fillmissing(data.intensities,'previous');
+            for i=1:720
+                if i == 1
+                    if data.ranges(i) == inf
+                        data.ranges(i) = data.ranges(i+1);
+                    end
+                else
+                    if data.ranges(i) == inf
+                        data.ranges(i) = data.ranges(i-1);
+                    end
+                end
+            end
             angle_num  = size(data.ranges);
 %             angle_num = data.angle_max/data.angle_increment;
             j = 1;

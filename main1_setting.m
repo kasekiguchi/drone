@@ -11,7 +11,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 20;
+    te = 40;
 end
 
 %% set connector (global instance)
