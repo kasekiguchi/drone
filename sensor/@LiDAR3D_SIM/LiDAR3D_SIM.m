@@ -157,8 +157,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       hold on
       axis equal
       daspect([1 1 1]);
-%       view([-3 1 2]);     
-      view(2);
+      view([-3 1 2]);     
+%       view(2);
 %       plot(logger.Data.agent.reference.result{1,:}.state.p(1),logger.Data.agent.reference.result{1,:}.state.p(2),'bo');%referenceの表示
       xlabel("x");
       ylabel("y");
