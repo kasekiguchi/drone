@@ -198,15 +198,15 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"p","ser"},{1,"q","e"},{1,"input",""});
+logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
 % logger.plot({1,"p","er"});
 % legend("x.state", "y.state", "z.state","x.reference", "y.reference", "z.reference");
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 %%
-% logger.plot({1,"p1-p2","er"});
+logger.plot({1,"p1-p2","er"});
 hold on
-plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
+plot(polyshape([2 2 2.5 2.5],[0.25 -1.25 -1.25 0.25]))%一個目
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
 xlabel('x')
 ylabel('y')
