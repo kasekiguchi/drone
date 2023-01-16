@@ -8,6 +8,7 @@ if fExp
     dt = 0.025; % sampling time
 else
     dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
+%     dt = 0.1;
 end
 
 sampling = dt;
@@ -86,7 +87,7 @@ else
             % take off
 %             arranged_pos = arranged_position([0, 0], N, 1, 0.01);% [x, y], 機数，1, z
             % landing
-            arranged_pos = arranged_position([1, 0], N, 1, 1);% [x, y], 機数，1, z
+            arranged_pos = arranged_position([0, 0], N, 1, 1);% [x, y], 機数，1, z
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];

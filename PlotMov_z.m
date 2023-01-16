@@ -7,7 +7,7 @@ maxbestcost = max(data.bestcost)
     % 寒色：良い評価、暖色：悪い評価
 	Color_map(1:10,:) = jet(10);            % 評価値の上から10個をカラーマップの色付け.
 %     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v10_3d'));
+	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v5'));
 	open(writerObj);
     
     countMax = size(data.pathJ,2);
@@ -18,26 +18,40 @@ maxbestcost = max(data.bestcost)
 		fig = figure(999);
 		ax = gca;
 %         patch([1 5 5 1],[-0.5 -0.5 1 1],'black','Facealpha',0.2);
-%         hold on
+        hold on
 %         plot(data.state(:,10),data.state(:,11),'-','Color',[0,0,0]/255,'LineWidth',4);
             
-%         hold on;
+        hold on;
 		% 予測経路のplot(ホライズン)
         path_count = size(data.pathJ{count},2);
 		for j = 1:path_count
 			plot(data.path{count}(1,:,j),data.path{count}(3,:,j),'Color',Color_map(ceil(pathJN{count}(1,j)*1000+0.0001),:), 'LineWidth',1);
-			hold on; 
-        end 
-        plot(data.xr{count}(1,:),data.xr{count}(3,:), '-.', 'Color', '#008000');
-        plot(data.state(count, 2), data.state(count, 4), '.', 'MarkerSize', 20, 'Color', 'red');
-
-		plot(data.bestx(count,:),data.bestz(count, :),'--','Color',[255,94,25]/255,'LineWidth',2);
+			hold on;
+        end
+        plot(data.state(count, 2), data.state(count, 3), '.', 'MarkerSize', 20, 'Color', 'red');
+% 		x = DATA.X(count);
+%         y = DATA.Y(count);
+%         u = 0.7*cos(DATA.yaw(count));
+%         v = 0.7*sin(DATA.yaw(count)); 
+%         q = quiver(x,y,u,v,'LineWidth',1.75);
+%         q.Color = [255,94,25]/255;
+%         q.Marker = 'o';
+%         q.MaxHeadSize = 2.;
+%         Wheel_posi = [x y];
+%         viscircles(Wheel_posi,obj.r_wheel,'LineWidth',0.1,'Color',[255,94,25]/255);
+%         obs = USER.obstra{count};
+%         for num = 1:obj.ObsNum
+%             plot(obs{num,1}(1,1),obs{num,1}(1,2),'ko','MarkerSize',3,'LineWidth',3);hold on;
+%             Obs_posi = [obs{num,1}(1,1),obs{num,1}(1,2)];
+%             viscircles(Obs_posi,obj.r_obs,'LineWidth',0.1,'Color','black');hold on
+% 		end
+		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
 		text(-0.35,1.35,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
 % 		ax.YLim = [-0.5 2];
 % 		ax.XLim = [-0.5 2];
-        ax.YLim = [0 1.5];
+        ax.YLim = [-1.2 1.2];
 		ax.XLim = [-1.2 1.2];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');

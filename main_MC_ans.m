@@ -27,7 +27,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fV = 0;
     fVcount = 1;
     fWeight = 0; % 重みを変化させる場合 fWeight = 1
-    fFirst = 1; % 一回のみ回す場合
+    fFirst = 0; % 一回のみ回す場合
     fRemove = 0;    % 終了判定
     fLanding = 0;   % 着陸かどうか 目標軌道を変更する
     fLanding_comp = 0;
@@ -35,6 +35,9 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fc = 0;     % 着陸したときだけx，y座標を取得
     totalT = 0;
     idx = 0;
+    pre_pos = 0;
+
+    fG = zeros(3, 1);
 
     %-- 初期設定 controller.mと同期させる
     Params.H = 10;   %Params.H
@@ -93,6 +96,12 @@ try
 if time.t == 9
     time.t;
 end
+
+        % Goal Position
+%         Gp = agent.reference.timeVarying.func(time.t);
+        G = [1; 2; 1];
+        %--------------
+
         % CurrentCharacter Check
 %             fprintf("key input : %c", FH.CurrentCharacter)
         % ----------------------
@@ -123,7 +132,9 @@ end
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
         
-
+%         if time.t > 2
+%             FH.CurrentCharacter = 'm';
+%         end
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator
@@ -142,8 +153,9 @@ end
             agent(i).do_reference(param(i).reference.list);
 
             % timevarygin -> generated reference
-            xr = Reference(Params, time.t, agent);
-            param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
+%             [xr, fFirst, pre_pos] = Reference(Params, time.t, agent, FH, fFirst, pre_pos);
+            [xr] = Reference(Params, time.t, agent, G, fG);
+            param(i).controller.mcmpc = {idx, xr, time.t};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -177,12 +189,11 @@ end
 %         data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
 
         data.xr{idx} = xr;
-%         data.variable_particle_num(idx) = agent.controller.result.variable_N;
-%         data.survive{idx} = agent.controller.result.survive;
-%         COG = agent.controller.result.COG;
-%         data.cog.g{idx} = COG.g;
-%         data.cog.gc{idx} = COG.gc;
-        
+        data.variable_particle_num(idx) = agent.controller.result.variable_N;
+        data.survive{idx} = agent.controller.result.survive;
+        COG = agent.controller.result.COG;
+        data.cog.g{idx} = COG.g;
+        data.cog.gc{idx} = COG.gc;
 
         if data.removeF(idx) ~= data.param.particle_num
             data.bestx(idx, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
@@ -249,7 +260,7 @@ end
                 state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                 xr(1,1), xr(2,1), xr(3,1));
-        fprintf("t: %6.3f \t calT: %f \t sigma: %f", time.t, calT, data.sigma(idx))
+        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx))
         if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
 %             data.removeX{idx}
@@ -331,22 +342,11 @@ end
 %%
 close all
 
-size_best = size(data.bestcost, 2);
-Edata = logger.data(1, "p", "e")';
-% Rdata = logger.data(1, "p", "r")';
-Rdata = zeros(3, size_best-1);
-for R = 1:size_best-1
-    Rdata(:, R) = data.xr{R}(1:3, 1);
-end
-Vdata = logger.data(1, "v", "e")';
-Diff = Edata - Rdata;
-logt = logger.data('t',[],[]);
-
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = te;
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
-set(0,'defaultLineLineWidth',2);
+set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',10);
 % set(0,'defaultLineMarkerFaceColor',[1 1 1]);
 % set(0,'defaultFigurecolor',[1 1 1]);
@@ -354,19 +354,54 @@ set(0,'defaultLineMarkerSize',10);
 % set(groot,'defaulttextinterpreter', 'latex');
 % set(groot,'defaultLegendInterpreter','latex');
 
-logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
+%% graph
+size_best = size(data.bestcost, 2);
+Edata = logger.data(1, "p", "e")';
+% Rdata = logger.data(1, "p", "r")';
+Rdata = zeros(12, size_best-1);
+for R = 1:size_best-1
+    Rdata(:, R) = data.xr{R}(1:12, 1);
+end
+Vdata = logger.data(1, "v", "e")';
+Qdata = logger.data(1, "q", "e")';
+Idata = logger.data(1,"input",[])';
+Diff = Edata - Rdata(1:3, :);
+logt = logger.data('t',[],[]);
+close all
+
+% position
+figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
+xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+grid on; title("Time change of Position"); xlim([0 te]); ylim([-2 inf]);
+% atiitude
+figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
+xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
+grid on; title("Time change of Atiitude"); xlim([0 te]); ylim([-inf inf]);
+% velocity
+figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
+xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
+grid on; title("Time change of Velocity"); xlim([0 te]); ylim([-inf inf]);
+% input
+figure(4); plot(logt, Idata); 
+xlabel("Time [s]"); ylabel("Input");
+grid on; title("Time change of Input"); xlim([0 te]); ylim([-inf inf]);
 %% Difference of Pos
-close(figure(7))
 figure(7);
 plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
 legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
 set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+
+%% Attitude
+plot(logt, Qdata, 'LineWidth', 1.5); hold on;
+plot(logt, Rdata(4:6, :), '--'); hold off;
+xlim([0 te]); ylim([-inf inf])
 
 %% 2軸グラフ
 % figure(9);
@@ -379,22 +414,21 @@ set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xl
 % legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
 
 %%
-plot(logt, data.removeX)
-%%
-close(figure(8))
-figure(8)
-plot(logger.data('t',[],[]), logger.data(1,'p','e'), 'LineWidth', 2);
-hold on
-plot(logger.data('t',[],[]), Rdata, 'LineWidth', 2)
-hold off
-xlabel("Time [s]"); ylabel("Position [m]"); %legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% plot(logt, data.removeX)
+%% Position
+% T = 0.025:0.025:time.t-0.025;
+% Const = 0.5 * sin(T);
+% close(figure(8))
+% figure(8)
+% plot(logger.data('t',[],[]), logger.data(1,'p','e'), 'LineWidth', 2); hold on; plot(logger.data('t',[],[]), Rdata(1:3, :), '--', 'LineWidth', 2); hold off;
+% xlabel("Time [s]"); ylabel("Position [m]"); %legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 
-yyaxis right
-plot(logt, data.variable_particle_num(1:size(logt)), 'LineWidth', 1.5);
-xlabel("Time [s]"); ylabel("Number of Samples"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference","N");
+% yyaxis right
+% plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
+% xlabel("Time [s]"); ylabel("Number of Samples"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference","N");
 
-xlim([0 te]); ylim([0 inf])
-set(gca,'FontSize',Fontsize);  grid on; title(""); 
+% xlim([0 te]); ylim([-inf inf])
+% set(gca,'FontSize',Fontsize);  grid on; title(""); 
 
 %% 
 % logt = logger.data('t',[],[]);
@@ -416,7 +450,7 @@ ylabel("Calculation time [s]");
 
 %% particle_num
 figure(12)
-plot(logt, data.variable_particle_num(1:size(logt)), 'LineWidth', 1.5);
+plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
 xlim([0 te])
 xlabel("Time [s]"); ylabel("Number of Sample");
 set(gca,'FontSize',Fontsize);  grid on; title("");
@@ -426,11 +460,17 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % F = [data.removeF(1:size(logger.data('t',[],[]),1))'; SF'];
 % area(F)
 %% 動画生成
-% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
-% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
-% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
-% Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
-% PlotMov_v2       % 2次元プロット
+% tic
+% pathJ = data.pathJ;
+% for m = 1:size(pathJ, 2)
+%     pathJN{m} = normalize(pathJ{m},'range');
+% end
+% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
+% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
+% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
+% Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
+% % PlotMov_v2       % 2次元プロット
+% toc
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%

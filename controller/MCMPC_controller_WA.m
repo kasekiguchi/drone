@@ -41,6 +41,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function result = do(obj,param)
             idx = param{1};
             xr = param{2};
+            rt = param{3};
             obj.state.ref = xr;
 
 
@@ -322,6 +323,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             tildeXqw = [tildeXq; tildeXw];
             tildeUpre = U - obj.self.input;       % agent.input
             tildeUref = U - obj.state.ref(13:16, :);
+
+            %% 入力の変化率
+%             rate_change = tildeUpre/U;
+
 
             %-- 状態及び入力のステージコストを計算
             stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);

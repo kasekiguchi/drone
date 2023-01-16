@@ -63,9 +63,9 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 end
             elseif strcmp(cha,'m') % flight phase
                 if strcmp(obj.flag,'m')
-                    obj.result.state.xd=gen_ref_for_landing(obj.result.state.p);
+                    obj.result.state.xd=gen_ref_for_monte(obj.result.state.p);
                 else% 初めてlanding に入ったとき
-                    obj.result.state.xd=gen_ref_for_landing(obj.self.reference.result.state.p);
+                    obj.result.state.xd=gen_ref_for_monte(obj.self.reference.result.state.p);
                 end
                 obj.result.state.p = obj.result.state.xd; % このようにすることでf の後でも反映される
                 obj.flag='m';

@@ -46,7 +46,7 @@ function Controller = Controller_MCMPC(dt)
     Controller_param.V = diag([100.0; 100.0; 1.0]);    % 速度
     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.QW = diag([10; 10; 10; 1; 1; 1]);  % 姿勢角、角速度
+    Controller_param.QW = diag([10; 10; 100; 1; 1; 100]);  % 姿勢角、角速度
     
     Controller_param.Pf = 100 * diag([100.0; 100.0; 100.0]);
     Controller_param.Vf = diag([100.0; 100.0; 1.0]);

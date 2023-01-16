@@ -27,7 +27,29 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             %%
             obj.input = param.input;
             obj.const = param.const;
+
+            obj.input.Evaluationtra = zeros(1, obj.param.particle_num);
             obj.model = self.model;
+            %-- 全予測軌道のパラメータの格納変数を定義,　最大のサンプル数で定義
+%             obj.state.p_data = 10000 * ones(obj.param.H, obj.param.particle_num);
+%             obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
+%             obj.state.v_data = 10000 * ones(obj.param.H, obj.param.particle_num);
+%             obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
+%             obj.state.q_data = 10000 * ones(obj.param.H, obj.param.particle_num);
+%             obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
+%             obj.state.w_data = 10000 * ones(obj.param.H, obj.param.particle_num);
+%             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
+
+            obj.state.p_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
+            obj.state.v_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
+            obj.state.q_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
+            obj.state.w_data = NaN(obj.param.H, obj.param.particle_num);
+            obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
+            obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data];  
+
             obj.param.fRemove = 0;
 
             %-- 階層型線形化のゲイン
@@ -98,9 +120,9 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
                 ave2 = ave1;
                 ave3 = ave1;
                 ave4 = ave1;
-                obj.input.sigma = obj.input.Initsigma;  % sigma
+                obj.input.sigma = obj.input.Initsigma;
                 % 追加
-                obj.param.particle_num = obj.param.Mparticle_num;   % N
+%                 obj.param.particle_num = obj.param.Mparticle_num;
             else
                 ave1 = obj.self.input(1);    % リサンプリングとして前の入力を平均値とする
                 ave2 = obj.self.input(2);
@@ -113,18 +135,21 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
                     obj.input.nextsigma = obj.input.Minsigma;  % 下限
                 end
                 % particle_num 追加
-                if obj.param.nextparticle_num > obj.param.Mparticle_num
-                    obj.param.nextparticle_num = obj.param.Mparticle_num;    % 上限:サンプル数
-                elseif obj.param.nextparticle_num < obj.param.MIparticle_num
-                    obj.param.nextparticle_num = obj.param.MIparticle_num;  % 下限
-                end
+%                 if obj.param.nextparticle_num > obj.param.Mparticle_num
+%                     obj.param.nextparticle_num = obj.param.Mparticle_num;    % 上限:サンプル数
+%                 elseif obj.param.nextparticle_num < obj.param.MIparticle_num
+%                     obj.param.nextparticle_num = obj.param.MIparticle_num;  % 下限
+%                 end
+
                 obj.input.sigma = obj.input.nextsigma;
-                obj.param.particle_num = obj.param.nextparticle_num;
+
+                % 追加
+%                 obj.param.particle_num = obj.param.nextparticle_num;
             end
 %             rng ('shuffle');
             % 追加
-            obj.input.u = NaN(obj.param.H, obj.param.particle_num);
-            obj.input.u = repmat(reshape(obj.input.u, [1, size(obj.input.u)]), 4, 1);
+%             obj.input.u = NaN(obj.param.H, obj.param.particle_num);
+%             obj.input.u = repmat(reshape(obj.input.u, [1, size(obj.input.u)]), 4, 1);
 
             obj.input.u1 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave1;
             obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.param.particle_num) + ave2;
@@ -175,8 +200,8 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             obj.input.normE = obj.Normalize();
             
             %-- 制約条件
-%             [removeF, removeX] = obj.constraints();
-            removeF = 0; removeX = []; survive = obj.param.particle_num;
+            [removeF, removeX] = obj.constraints();
+%             removeF = 0; removeX = [];
 %             [Bestcost, BestcostID] = min(obj.input.normE);
 
             if removeF ~= 0
@@ -198,7 +223,7 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
                 obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
 
                 % 追加
-                obj.param.nextparticle_num = ceil(obj.param.particle_num * (obj.input.Bestcost_now/obj.input.Bestcost_pre));
+%                 obj.param.nextparticle_num = ceil(obj.param.particle_num * (obj.input.Bestcost_now/obj.input.Bestcost_pre));
 
             elseif removeF == obj.param.particle_num    % 全棄却
                 obj.result.input = obj.self.input;
@@ -207,11 +232,10 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
                 BestcostID = 1;
 
                 % 追加
-                obj.param.nextparticle_num = obj.param.Mparticle_num;
+%                 obj.param.nextparticle_num = obj.param.Mparticle_num;
             end
             obj.result.removeF = removeF;
             obj.result.removeX = removeX;
-            obj.result.survive = survive;
             obj.self.input = obj.result.input;
             obj.result.BestcostID = BestcostID;
             obj.result.bestcost = Bestcost;
@@ -233,6 +257,20 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
 %             NP = obj.param.particle_num;
             % 状態制約
             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X);
+%             removeFe_check = fix(find(removeFe)/obj.param.H)+1;
+            % 棄却するサンプル番号を算出
+%             removeX = find(removeFe);
+%             Fe_size = size(removeFe_check);
+            %最後の粒子が制約に引っかかった場合，想定している最大なサンプル番号を超えることがあるのでその部分を修正
+%             if Fe_size(1) ~=0 
+%                 if Fe_size(2) ~=0
+%                     if removeFe_check(end,1) == (obj.param.particle_num + 1)
+%                         removeFe_check(end,1) = obj.param.particle_num;
+%                     end
+%                 end
+%             end
+            % サンプル番号の重なりをなくす
+%             removeX = unique(removeFe_check);
             removeX = find(removeFe);
             % 制約違反の入力サンプル(入力列)を棄却
 %             obj.input.u(:,:,removeX) = [];
@@ -243,31 +281,24 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
             % 全制約違反による分散リセットを確認するフラグ  
             removeF = size(removeX, 1); % particle_num -> 全棄却
-            sur = (obj.state.state_data(1, end, :) > obj.const.X);  % 生き残りサンプル
-            survive = find(sur);
-            if removeF == obj.param.particle_num
-                obj.state.COG.g  = NaN;               % 制約内は無視
-                obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-            elseif removeF == 0
-                obj.state.COG.gc = NaN;               % 制約外は無視
-                obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-            else
-                obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-                obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-            end
         end
 
-        function cog = COG(obj, I)
-            if size(I) == 1
-                x = obj.state.state_data(1, end, I);
-                y = obj.state.state_data(2, end, I);
-                cog = [x, y];
-            else
-                x = reshape(obj.state.state_data(1, end, I), [size(I,1), 1]);
-                y = reshape(obj.state.state_data(2, end, I), [size(I,1), 1]);
-                cog = mean([x,y]);
-            end
-        end
+%         %%-- 連続ode
+%         function [predict_state] = predict(obj)
+%             ts = 0;
+%             %-- 予測軌道計算
+%             for m = 1:obj.input.u_size
+%                 x0 = obj.previous_state;
+%                 obj.state.state_data(:, 1, m) = obj.previous_state;
+%                 for h = 1:obj.param.H-1
+%                     [~,tmpx]=ode15s(@(t,x) roll_pitch_yaw_thrust_force_physical_parameter_model(x, obj.input.u(:, h, m),obj.param.modelparam.modelparam),[ts ts+obj.param.dt],x0);
+% %                     tmpx = obj.param.A .* x0 + obj.param.B * obj.input.u(:, h, m);
+%                     x0 = tmpx(end, :);
+%                     obj.state.state_data(:, h+1, m) = x0;
+%                 end
+%             end
+%             predict_state = obj.state.state_data;
+%         end
 
         %%-- 連続；オイラー近似
         function [predict_state] = predict(obj)
@@ -309,9 +340,9 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
 
             %-- 状態の終端コストを計算 状態だけの終端コスト
-            terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
-                +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
-                +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
+            terminalState = tildeXp(:, end)' * obj.param.P * tildeXp(:, end)...
+                +tildeXv(:, end)'   * obj.param.V   * tildeXv(:, end)...
+                +tildeXqw(:, end)'  * obj.param.QW  * tildeXqw(:, end);
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef)...
                 + terminalState;
