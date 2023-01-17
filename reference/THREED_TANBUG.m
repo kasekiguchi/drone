@@ -59,7 +59,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.angle = 0;
             obj.result.state.p = [0;0;0];
 
-            obj.v_layer = 32;
+            obj.v_layer = 32; %3DLiDARの層
                        
             obj.self=self;
             obj.e_z = [0,0,1]';
@@ -231,7 +231,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
         function path = make_path(~,theta,margin,range,radius,goal_angle,goal)%検出範囲の作成
             %theta: センサの分解能
             %margin: ドローンの横幅
-            %range: 角度？
+            %range: 
             %goal_angle: ゴールまでの角度
             %goal: ゴールまでの距離
             path = zeros(size(range));
