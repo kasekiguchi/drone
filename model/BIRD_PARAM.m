@@ -1,5 +1,5 @@
 classdef BIRD_PARAM < matlab.mixin.SetGetExactNames
-    % ドローンの物理パラメータ管理用クラス
+    % 害鳥の物理パラメータ管理用クラス
     % 以下のconfigurationはclass_description.pptxも参照すること．
     % T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
     % 前：ｘ軸，　左：y軸，　上：ｚ軸

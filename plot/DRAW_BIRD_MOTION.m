@@ -244,10 +244,10 @@ classdef DRAW_BIRD_MOTION
             tRealtime = tic;
             if param.Motive_ref
                 for n = 1:length(param.drone)
-                    f(n) = animatedline('Color','r','MaximumNumPoints',15); % ドローンの目標軌道の描画点の制限
+                    f(n) = animatedline('Color','k','MaximumNumPoints',1000000); % ドローンの目標軌道の描画点の制限
                 end
                 for n = 1:length(param.bird)
-                    f_b(n) = animatedline('Color','none','MaximumNumPoints',15); % 鳥の目標軌道の描画点の制限
+                    f_b(n) = animatedline('Color','r','MaximumNumPoints',1000000); % 鳥の目標軌道の描画点の制限
                 end
             end
             for i = 1:length(t)-1
@@ -270,11 +270,11 @@ classdef DRAW_BIRD_MOTION
                     end
                 else
                     for n = 1:length(param.drone)
-                        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'r');
+                        plot3(p(:,1,n),p(:,2,n),p(:,3,n),'k');
                         obj.draw(obj.frame(param.drone(n)),obj.thrust(param.drone(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
                     end
                     for n = 1:length(param.bird)
-                        plot3(p_b(:,1,n),p_b(:,2,n),p_b(:,3,n),'r');
+%                         plot3(p_b(:,1,n),p_b(:,2,n),p_b(:,3,n),'r');
                         obj.draw(obj.frame_bird(param.bird(n)),obj.thrust_bird(param.bird(n),:),p_b(i,:,n),Q_b(i,:,n),u_b(i,:,n));
                     end
                 end

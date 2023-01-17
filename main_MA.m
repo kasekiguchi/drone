@@ -113,6 +113,7 @@ run("main3_loop_setup.m");
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
+            agent(i).input = min(max(agent(i).input,-5),5);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
 
@@ -145,6 +146,7 @@ run("main3_loop_setup.m");
                 param_bird(i).controller.list{j} = param_bird(i).controller.(bird(i).controller.name(j));
             end
             bird(i).do_controller(param_bird(i).controller.list);
+            bird(i).input = min(max(bird(i).input,-3),3);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
 
@@ -219,8 +221,8 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-% logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""},{2,"p","er"},{2,"q","e"},{2,"input",""},{3,"p","er"},{3,"q","e"},{3,"input",""},"row_col",[3 3]);
-logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,"input",""},{6,"input",""},"fig_num",2,"row_col",[2 3]);
+logger.plot({1,"input",""},{2,"input",""},"fig_num",2,"row_col",[1 2]);
+logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,"input",""},{6,"input",""},"fig_num",3,"row_col",[2 3]);
 % agent(1).reference.timeVarying.show(logger)
 % bird(1).plot_fig(logger,logger_bird);
 
@@ -229,5 +231,5 @@ logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger,"target",1:N,"Motive_ref",1);
-bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",0,"mp4",0);
+bird(1).animation(logger,logger_bird,"drone",1:N,"bird",1:Nb,"Motive_ref",1,"mp4",0);
 % agent(1).sensor.bounding.movie(logger);
