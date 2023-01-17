@@ -130,7 +130,7 @@ try
 %         agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 % %       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 %       %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
-%        agent.show(["reference","tbug"],"FH",FH,"param",Env)
+       agent.show(["reference","tbug"],"FH",FH,"t",time.t,"param",Env)
     end
 
     %% update state

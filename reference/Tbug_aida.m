@@ -34,8 +34,9 @@ classdef Tbug_aida < REFERENCE_CLASS
             yaw = obj.state.q(3);
             obj.sensor = obj.self.sensor.result; %センサ情報
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
+            l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             % 障害物検知
-            goalLength = obj.goal-obj.state.p;
+            goalLength = l_goal-obj.state.p;
             r = vecnorm(goalLength); % 目標までの距離
             angle = atan2(goalLength(2),goalLength(1)); % 目標までの角度
 
@@ -60,7 +61,7 @@ classdef Tbug_aida < REFERENCE_CLASS
                 % 端点検出
                 % 右の端点
                 for i = 1:720
-                    if abs(obj.sensor.length(i)-obj.sensor.length(i+1)) >= 2%閾値変更1
+                    if abs(obj.sensor.length(i)-obj.sensor.length(i+1)) >= 2.5%閾値変更1
                 % 点群間距離が障害物の距離よりも大きい時
                         right_anchor = obj.sensor.length(i+1);
                         right_anchor_point = obj.sensor.sensor_points(i+1,:);
@@ -69,7 +70,7 @@ classdef Tbug_aida < REFERENCE_CLASS
                 end
                 % 左の端点
                 for j = 720:-1:2
-                    if abs(obj.sensor.length(j)-obj.sensor.length(j-1)) >= 2%閾値変更1
+                    if abs(obj.sensor.length(j)-obj.sensor.length(j-1)) >= 3.5%閾値変更1
                 % 点群間距離が障害物の距離よりも大きい時
                         left_anchor = obj.sensor.length(j-1);
                         left_anchor_point = obj.sensor.sensor_points(j-1,:);
@@ -80,11 +81,11 @@ classdef Tbug_aida < REFERENCE_CLASS
                 % 距離比較
                 % 右の距離
                 initial2right = right_anchor_point-obj.state.p(1:2)'; % 右の端点と初期位置の差
-                right2goal = obj.goal(1:2)'-right_anchor_point; % 目標位置と右の端点の差
+                right2goal = l_goal(1:2)'-right_anchor_point; % 目標位置と右の端点の差
                 right_length = vecnorm(initial2right)+vecnorm(right2goal); % 右の目標までの距離
                 % 左の距離
                 initial2left = left_anchor_point-obj.state.p(1:2)'; % 左の端点と初期位置の差
-                left2goal = obj.goal(1:2)'-left_anchor_point; % 目標位置と左の端点の差
+                left2goal = l_goal(1:2)'-left_anchor_point; % 目標位置と左の端点の差
                 left_length = vecnorm(initial2left)+vecnorm(left2goal); % 左の目標までの距離
 
                 if right_length <= left_length
@@ -184,34 +185,44 @@ classdef Tbug_aida < REFERENCE_CLASS
         
 
 %%
-        function show(obj,env)
+        function fh = show(obj,opt)
+            %"logger",opt.logger,"FH",opt.FH,"t",opt.t,"param",param
             arguments
                 obj
-                env=[]
+                opt.logger = [];
+                opt.FH = 1;
+                opt.t = [];
+                opt.param = [];
             end
-            yaw = obj.state.q(3);
+
+%             clf
+            env = opt.param;
+            yaw = obj.state.q(1);
             R = [cos(yaw),-sin(yaw);sin(yaw),cos(yaw)];
             angles= (0:0.01:2*pi)';
-%             circ = obj.margin*[cos(angles),sin(angles)];
+            circ = obj.margin*[cos(angles),sin(angles)];
+            fh = figure(opt.FH);
+            hold on
             if isempty(env)
-                obj.self.sensor.lrf.show();
-%                 hold on
-%                 local_rp =R'*obj.result.state.p(1:2)-obj.state.p(1:2);
-%                 local_tp = obj.local_tp;
-%                 angle= 0:0.1:2*pi;
-%                 wp = obj.waypoint;
-%                 plot(local_rp(1),local_rp(2),'ro');
-%                 plot(local_tp(1)+circ(:,1),local_tp(2)+circ(:,2));
-%                 plot(obj.goal(1)-obj.state.p(1),obj.goal(2)-obj.state.p(2),"ys");
+                %obj.self.sensor.lrf.show();
+                hold on
+                local_rp =R'*obj.result.state.p(1:2)-obj.state.p(1:2);
+                local_tp = obj.local_tp;
+                angle= 0:0.1:2*pi;
+                wp = obj.waypoint;
+                plot(local_rp(1),local_rp(2),'ro');
+                plot(local_tp(1)+circ(:,1),local_tp(2)+circ(:,2));
+                plot(obj.goal(1)-obj.state.p(1),obj.goal(2)-obj.state.p(2),"ys");
             else
                 plot(polyshape(env.param.Vertices),'FaceColor','g');
                 hold on
                 tmp = (R*(obj.self.sensor.result.sensor_points'))';
                 points(1:2:2*size(tmp,1),:)=tmp;
                 points = points + obj.state.p(1:2)';
+%                 points = points + obj.state.q(3);
                 plot(points(:,1),points(:,2),'r-');
                 hold on; 
-                text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
+%                 text(points(1,1),points(1,2),'1','Color','b','FontSize',10);%センサインデックスの1を表示
                 %plot(obj.self.sensor.result.region);
                 %plot(obj.head_dir);
                 plot(obj.state.p(1),obj.state.p(2),'b*');
