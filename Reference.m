@@ -67,7 +67,7 @@
 
 %% 現在位置からのリファレンスを生成する
 % zの関数を現在位置から目標値に設定する
-function xr = Reference(params, T, Agent, Gp, fGp)
+function [xr, fGp] = Reference(params, T, Agent, Gp, fGp)
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize
@@ -104,12 +104,7 @@ function xr = Reference(params, T, Agent, Gp, fGp)
         z = za*(t)^3+zb*(t)^2+r0(3);
         x = xa*(t)^3+xb*(t)^2+r0(1);
         y = ya*(t)^3+yb*(t)^2+r0(2);
-
-%         if x > Gp(1); x = Gp(1);
-%         elseif y > Gp(2); y = Gp(2);
-%         elseif z > Gp(3); z = Gp(3);
-%         end
-
+        
         v = subs(veq, rt, t);
         % 目標値に到達したら目標値固定＋速度0
 
@@ -133,19 +128,6 @@ function xr = Reference(params, T, Agent, Gp, fGp)
         xr(13:16, h+1) = params.ur;
     end
 end
-%% Reference from HL
-% function xr = Reference(params, T, x)
-%     xr = zeros(params.total_size, params.H);    % initialize
-%     if T ~= 0
-%         start = round(T/params.dT);
-%         fin = start + params.H-1;
-%         xr(1:3, 1:params.H) = x(1:3,start:fin);
-%         xr(4:6, 1:params.H) = x(4:6,start:fin);
-%         xr(7:9, 1:params.H) = x(7:9,start:fin);
-%         xr(10:12, 1:params.H) = x(10:12,start:fin);
-%         xr(13:16, 1:params.H) = repmat(params.ur, 1, params.H);
-%     end
-% end
 
 %% 着陸
 % function xr = Reference(params, time)

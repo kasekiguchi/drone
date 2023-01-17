@@ -97,9 +97,7 @@ if time.t == 9
     time.t;
 end
 
-        % Goal Position
-%         Gp = agent.reference.timeVarying.func(time.t);
-        G = [1; 2; 1];
+        
         %--------------
 
         % CurrentCharacter Check
@@ -154,7 +152,10 @@ end
 
             % timevarygin -> generated reference
 %             [xr, fFirst, pre_pos] = Reference(Params, time.t, agent, FH, fFirst, pre_pos);
-            [xr] = Reference(Params, time.t, agent, G, fG);
+            % Goal Position
+            G = [1; 1; 1];
+            [xr, fG] = Reference(Params, time.t, agent, G, fG);
+%             [xr] = Reference(Params, time.t, agent);
             param(i).controller.mcmpc = {idx, xr, time.t};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -261,6 +262,7 @@ end
                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                 xr(1,1), xr(2,1), xr(3,1));
         fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx))
+        fprintf("\t fGp:%d %d %d", fG(1), fG(2), fG(3))
         if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
 %             data.removeX{idx}
@@ -374,24 +376,26 @@ Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 Diff = Edata - Rdata(1:3, :);
 logt = logger.data('t',[],[]);
+% xmax = te;
+xmax = 6.75;
 close all
 
 % position
 figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-grid on; title("Time change of Position"); xlim([0 te]); ylim([-2 inf]);
+grid on; title("Time change of Position"); xlim([0 xmax]); ylim([-inf inf+0.5]);
 % atiitude
 figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-grid on; title("Time change of Atiitude"); xlim([0 te]); ylim([-inf inf]);
+grid on; title("Time change of Atiitude"); xlim([0 xmax]); ylim([-inf inf]);
 % velocity
 figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
-grid on; title("Time change of Velocity"); xlim([0 te]); ylim([-inf inf]);
+grid on; title("Time change of Velocity"); xlim([0 xmax]); ylim([-inf inf]);
 % input
 figure(4); plot(logt, Idata); 
 xlabel("Time [s]"); ylabel("Input");
-grid on; title("Time change of Input"); xlim([0 te]); ylim([-inf inf]);
+grid on; title("Time change of Input"); xlim([0 xmax]); ylim([-inf inf]);
 %% Difference of Pos
 figure(7);
 plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);

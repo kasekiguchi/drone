@@ -10,7 +10,6 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
         const
         reference
         model
-        linearmodel
         result
         self
     end
@@ -21,9 +20,11 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             obj.self = self;
             %---MPCパラメータ設定---%
             obj.param = param;
+%             obj.param.subCheck = zeros(obj.param.particle_num, 1);
             obj.param.modelparam.modelparam = obj.self.parameter.get();
             obj.param.modelparam.modelmethod = obj.self.model.method;
             obj.param.modelparam.modelsolver = obj.self.model.solver;
+            
             %%
             obj.input = param.input;
             obj.const = param.const;
@@ -51,34 +52,6 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data];  
 
             obj.param.fRemove = 0;
-
-            %-- 階層型線形化のゲイン
-            obj.param.P = param.P;
-            obj.param.F1 = param.F1;%z
-            obj.param.F2 = param.F2;%x
-            obj.param.F3 = param.F3;%y
-            obj.param.F4 = param.F4;%yaw
-
-            %% Model Setting
-            %model state : virtual state 2nd layor h2 h3  MPC内状態方程式
-            A23 = diag([1,1,1],1);
-            B23 = [0;0;0;1];
-            C=ones(8,8);
-            D=zeros(8,2);
-            A=blkdiag(A23,A23);
-            B=blkdiag(B23,B23);
-            sys=ss(A,B,C,D);
-            sysd = c2d(sys,obj.param.dt);   % 離散化
-
-            obj.param.input_size = size(sysd.B,2);
-            obj.param.state_size = size(sysd.A,2);
-            obj.param.total_size = obj.param.input_size + obj.param.state_size;
-
-%             obj.param.Pdata=param.Pdata;
-            
-            obj.model = self.model;
-            obj.linearmodel.A = sysd.A; % A行列
-            obj.linearmodel.B = sysd.B; % B行列
         end
         
         %-- main()的な
@@ -87,33 +60,6 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             idx = param{1};
             xr = param{2};
             obj.state.ref = xr;
-
-            %===== HL
-%             modelstate = state_copy(obj.self.estimator.result.state);
-%             modelstate.q=(eul2quat(modelstate.q','XYZ'))';%オイラーからクォータニオンへの変換
-% %             x = modelstate.get; % [q, p, v, w]に並べ替え
-%             x = [modelstate.q;modelstate.p;modelstate.v;modelstate.w];
-%             xd = obj.self.reference.result.state.get();
-%             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める． 座標，速度，加速度のあの配列
-%             
-%             % 階層型線形化
-%             if isfield(obj.param,'dt')  % dtがobj.paramの構造体に含まれるか
-%                 dt = obj.param.dt;
-%                 vf = Vfd(dt,x,xd',obj.param.P,obj.param.F1);
-%             else
-%                 vf = Vf(x,xd',obj.param.P,obj.param.F1);
-%             end
-%             vs = Vs(x,xd',vf,obj.param.P,obj.param.F2,obj.param.F3,obj.param.F4);
-%             v4 = vs(3);
-%             %実状態を仮想状態に変換
-%             h2 = Z2(x,zeros(20,1)',vf,obj.param.P);   %x方向の仮想状態
-%             h3 = Z3(x,zeros(20,1)',vf,obj.param.P);   %y方向
-%             %h2とh3を状態にしたMPC
-%             
-%             %ループの中で変動するパラメータを設定
-%             obj.param.X0 = [h2;h3];
-%             obj.param.Xd = xd;
-%             %===== 階層型線形化
  
             if idx == 1
                 ave1 = 0.269*9.81/4;      % average
@@ -134,6 +80,7 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
                 elseif obj.input.nextsigma < obj.input.Minsigma
                     obj.input.nextsigma = obj.input.Minsigma;  % 下限
                 end
+
                 % particle_num 追加
 %                 if obj.param.nextparticle_num > obj.param.Mparticle_num
 %                     obj.param.nextparticle_num = obj.param.Mparticle_num;    % 上限:サンプル数
@@ -169,25 +116,12 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
             obj.input.u(1, :, :) = obj.input.u1;
             obj.input.u_size = size(obj.input.u, 3);    % obj.param.particle_num
 
-            obj.state.p_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
-            obj.state.v_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
-            obj.state.q_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
-            obj.state.w_data = NaN(obj.param.H, obj.param.particle_num);
-            obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
-            obj.state.state_data = [obj.state.p_data; obj.state.q_data; obj.state.v_data; obj.state.w_data];  
-
-            % 評価列の初期化
-            obj.input.Evaluationtra = NaN(1, obj.param.particle_num);
-
             obj.previous_state = obj.self.estimator.result.state.get();
 
             %-- 状態予測
             [obj.state.predict_state] = obj.predict();
             if obj.state.predict_state(3, 1, :) < 0
-                obj.param.fRemove = 1; 
+                obj.param.fRemove = 1;
             end
 
             %-- 評価値計算
@@ -369,4 +303,3 @@ classdef MCMPC_controller_origin <CONTROLLER_CLASS
         end
     end
 end
-
