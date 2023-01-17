@@ -10,7 +10,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1; % 1: experiment   0: numerical simulation
+fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
@@ -130,7 +130,7 @@ try
 %         agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 % %       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 %       %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
-       agent.show(["reference","tbug"],"FH",FH,"param",Env)
+%        agent.show(["reference","tbug"],"FH",FH,"param",Env)
     end
 
     %% update state
@@ -206,7 +206,8 @@ logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
 %%
 logger.plot({1,"p1-p2","er"});
 hold on
-plot(polyshape([2 2 2.5 2.5],[0.25 -1.25 -1.25 0.25]))%一個目
+plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
+% wall1 = [2 -1;2 0.5;2.5 0.5;2.5 -1];
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
 xlabel('x')
 ylabel('y')

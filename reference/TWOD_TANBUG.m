@@ -49,7 +49,7 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
            obj.radius = self.sensor.lrf.radius;
 %              obj.radius = self.sensor.lidar.radius;
             obj.margin = 1.0;
-            obj.threshold = 1.0;
+            obj.threshold = 2.0;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
             obj.waypoint.top = [0,0,0]';

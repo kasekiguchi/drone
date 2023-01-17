@@ -110,11 +110,11 @@ initial_state(i).p =[0;0;0];initial_state(i).q =[0;0;0];initial_state(i).v =[];i
        agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
-  agent(i).set_property("sensor", Sensor_ROS(struct('DomainID',30)));
+%   agent(i).set_property("sensor", Sensor_ROS(struct('DomainID',30)));
   %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
   %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
   %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-%   agent(i).set_property("sensor",Sensor_LiDAR(i));
+  agent(i).set_property("sensor",Sensor_LiDAR(i));
 %   agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
 %   env = stlread('3F.stl');
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.007:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
@@ -144,7 +144,8 @@ initial_state(i).p =[0;0;0];initial_state(i).q =[0;0;0];initial_state(i).v =[];i
   %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
   %agent(i).set_property("reference",Reference_Wall_observation()); %
   %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
-  agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
+%   agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
+  agent(i).set_property("reference",struct("type","Tbug_aida","name","tbug","param",[]));
   %agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
