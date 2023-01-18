@@ -143,8 +143,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.input.normE = obj.Normalize();
 
             %-- 制約条件
-%             [removeF, removeX, survive] = obj.constraints();
-            removeF = 0; removeX = []; survive = obj.param.particle_num; obj.state.COG.g = 0; obj.state.COG.gc = 0;
+            [removeF, removeX, survive] = obj.constraints();
+%             removeF = 0; removeX = []; survive = obj.param.particle_num; 
+            obj.state.COG.g = 0; obj.state.COG.gc = 0;
             
 
             if removeF ~= obj.param.particle_num
@@ -197,25 +198,29 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         function [removeF, removeX, survive] = constraints(obj)
             % 状態制約
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
-            removeFe = (obj.state.state_data(1, end, :) <= 0.5*sin(obj.param.t));
+%             removeFe = (obj.state.state_data(1, end, :) <= 0.5*sin(obj.param.t));
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
+            removeFe = (obj.state.state_data(6, end, :) >= 0.3 | obj.state.state_data(6, end, :) <= -0.3);
             removeX = find(removeFe);
             % 制約違反の入力サンプル(入力列)を棄却
             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
             % 全制約違反による分散リセットを確認するフラグ  
             removeF = size(removeX, 1); % particle_num -> 全棄却
 %             sur = (obj.state.state_data(1, end, :) > 0.5*sin(obj.param.t));  % 生き残りサンプル
-            survive = find(sur);
-            if removeF == obj.param.particle_num
-                obj.state.COG.g  = NaN;               % 制約内は無視
-                obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-            elseif removeF == 0
-                obj.state.COG.gc = NaN;               % 制約外は無視
-                obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-            else
-                obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-                obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-            end
+%             survive = find(sur);
+            survive = obj.param.particle_num;
+
+            % 重心計算
+%             if removeF == obj.param.particle_num
+%                 obj.state.COG.g  = NaN;               % 制約内は無視
+%                 obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
+%             elseif removeF == 0
+%                 obj.state.COG.gc = NaN;               % 制約外は無視
+%                 obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
+%             else
+%                 obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
+%                 obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
+%             end
         end
 
         function cog = COG(obj, I)

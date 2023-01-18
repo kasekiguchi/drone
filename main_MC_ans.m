@@ -153,9 +153,30 @@ end
             % timevarygin -> generated reference
 %             [xr, fFirst, pre_pos] = Reference(Params, time.t, agent, FH, fFirst, pre_pos);
             % Goal Position
-            G = [1; 1; 1];
-            [xr, fG] = Reference(Params, time.t, agent, G, fG);
-%             [xr] = Reference(Params, time.t, agent);
+            
+%             [xr, fG] = Reference(Params, time.t, agent, G, fG);
+            %% 次の目標値の設定
+            TimeArray = [0, 5, 7, 10];
+            if idx == 1
+                Gp = [1; 0; 1]; 
+                Gq = [0; 0; 0];
+                ToTime = TimeArray(2);
+                Cp = agent.estimator.result.state.p;
+                StartT = 0;
+            elseif idx == TimeArray(2)/0.025
+                ToTime = TimeArray(3) - TimeArray(2);
+                Cp = agent.estimator.result.state.p;
+                Gp = [Cp(1); Cp(2); Cp(3)];
+                Gq = [0; 0; 0];
+                StartT = TimeArray(2);
+            elseif idx == TimeArray(3)/0.025
+                ToTime = te - TimeArray(3);
+                Cp = agent.estimator.result.state.p;
+                Gp = [Cp(1); 1; 1];
+                Gq = [0; 0; 0];
+                StartT = TimeArray(3);
+            end
+            [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
             param(i).controller.mcmpc = {idx, xr, time.t};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -261,7 +282,7 @@ end
                 state_monte.v(1), state_monte.v(2), state_monte.v(3),...
                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                 xr(1,1), xr(2,1), xr(3,1));
-        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx))
+        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d \t remove: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx), data.removeF(idx))
         fprintf("\t fGp:%d %d %d", fG(1), fG(2), fG(3))
         if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
@@ -376,8 +397,7 @@ Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 Diff = Edata - Rdata(1:3, :);
 logt = logger.data('t',[],[]);
-% xmax = te;
-xmax = 6.75;
+xmax = te;
 close all
 
 % position
@@ -401,11 +421,6 @@ figure(7);
 plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
 legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
 set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
-
-%% Attitude
-plot(logt, Qdata, 'LineWidth', 1.5); hold on;
-plot(logt, Rdata(4:6, :), '--'); hold off;
-xlim([0 te]); ylim([-inf inf])
 
 %% 2軸グラフ
 % figure(9);
@@ -478,7 +493,7 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20221219_circle_calc.mat', '-v7.3')
+% save('Data\20230118_P2P_constraints_yaw.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
