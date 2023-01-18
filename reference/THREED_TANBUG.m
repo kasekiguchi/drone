@@ -96,7 +96,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             l_reference_angle =atan2(l_reference(2),l_reference(1)); %referenceまでの角度
 %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
-           [~,reference_id]=min(abs(obj.self.sensor.lidar.phi_range - l_reference_angle));% reference に一番近い角度であるレーザーインデックス(3D)
+%            [~,reference_id]=min(abs(obj.self.sensor.lidar.phi_range - l_reference_angle));% reference に一番近い角度であるレーザーインデックス(3D)
 
             path_goal = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
             path_reference = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
