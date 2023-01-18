@@ -12,6 +12,8 @@ classdef Tbug_aida < REFERENCE_CLASS
         margin % 円の半径
         radius % 測距範囲
         haba % 車体幅
+
+        threshold
     end
 
     methods
@@ -24,6 +26,7 @@ classdef Tbug_aida < REFERENCE_CLASS
             obj.margin = 1;%閾値変更0.5
             obj.haba = 1;%閾値変更0.3
             obj.radius = 20;
+            obj.threshold = 2.0;
 %             DroneMargin = obj.state_initial/2;
         end
         
@@ -32,7 +35,10 @@ classdef Tbug_aida < REFERENCE_CLASS
             %   詳細説明をここに記述
             obj.state = obj.self.estimator.result.state; %自己位置
             yaw = obj.state.q(3);
-            obj.sensor = obj.self.sensor.result; %センサ情報
+            obj.sensor = obj.self.sensor.result; %
+
+            obj.l_points = obj.sensor.sensor_points';
+
             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置
             % 障害物検知
@@ -77,6 +83,30 @@ classdef Tbug_aida < REFERENCE_CLASS
                         break
                     end
                 end
+                
+
+                %改善案
+%                 nlength = circshift(obj.length,1);
+%                 edge_ids = find(abs(nlength-obj.length) > obj.threshold); %近い端点のindex配列
+%                 tmp = obj.length(edge_ids) > nlength(edge_ids);
+%                 edge_ids(tmp) = edge_ids(tmp) - 1;
+% 
+%                 reference_goal = l_goal(1:2) - obj.l_points(:,edge_ids);
+%                 reference_goal = vecnorm(reference_goal);
+%                 [~,tmp] = min(obj.length(edge_ids)+reference_goal);
+%                 tid = edge_ids(tmp);
+%                 Length = [obj.length(end),obj.length,obj.length(1)];
+%                 edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];
+%                 if Length(tid+2) > Length(tid) % 左回りで避ける
+%                     %tid = obj.width_check(tid,-1);
+%                     [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
+%                     obj.result.state.p = [tmp1;tmp2;0];
+%                 else % 右回り
+%                     %tid = obj.width_check(tid,1);
+%                     [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
+%                     obj.result.state.p = [tmp1;tmp2;0];
+%                 end
+
 
                 % 距離比較
                 % 右の距離
