@@ -87,7 +87,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             obj.l_points = obj.sensor.sensor_points; %座標データ
-            obj.length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %センサの距離データを並び替え
+            obj.length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %計算andイメージしやすいようにセンサの距離データを並び替え
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置        
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
@@ -101,27 +101,31 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             path_goal = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
             path_reference = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
 
-            if find(path_reference)
+            if find(path_reference)%1時刻目以降はこっち
                 N = 2;
-            else
+            else%1時刻目はこっち
                 N = 1;
             end
 
             switch N
                 case 1
                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
-                        hlength = circshift(obj.length,[0 1]); %横に１つずらした距離データ
+                        hlength = circshift(obj.length,[0 1]); %右に１つずらした距離データ
                         h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
-                        vlength = circshift(obj.length,[1 0]);%縦に1つずらした距離データ
+                        vlength = circshift(obj.length,[1 0]);%上に1つずらした距離データ
                         v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
 
                         Length = [obj.length(:,end),obj.length,obj.length(:,1)];
                         [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch);
+                        %tid:端点の配列
+                        %edge_p:端点の座標
+                        %route:上下方向か左右方向化を識別するための変数
+                        
 %                         edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
 %                         edge_p = obj.sensor.sensor_points(:,tid);
 
                         
-                        if route == v_tid
+                        if route == v_tid %上下方向の端点の場合
                             if Length(tid+2) > Length(tid) %下を潜り抜ける場合
                                 [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);
                                 obj.result.state.p = [tmp1;edge_p(2);tmp2];
@@ -131,8 +135,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                                 obj.result.state.p = [tmp1;edge_p(2);tmp2];
                                 obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
                             end
-                        else
-                            if Length(tid+obj.layer*2) > Length(tid) % 左回りで避ける
+                        else %左右方向の端点の場合
+                            if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
                                 %tid = obj.width_check(tid,-1);
                                 [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
                                 obj.result.state.p = [tmp1;tmp2;edge_p(3)];
@@ -186,7 +190,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                                     obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
                                 end
                             else
-                                if Length(tid+obj.layer*2) > Length(tid) % 左回りで避ける
+                                if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
                                     %tid = obj.width_check(tid,-1);
                                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
                                     obj.result.state.p = [tmp1;tmp2;edge_p(3)];
@@ -230,8 +234,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             
         function path = make_path(~,theta,margin,range,radius,goal_angle,goal)%検出範囲の作成
             %theta: センサの分解能
-            %margin: ドローンの横幅
-            %range: 
+            %margin: ドローンの横幅（検出範囲の横の長さ）
+            %range: センサのレンジ
             %goal_angle: ゴールまでの角度
             %goal: ゴールまでの距離
             path = zeros(size(range));
@@ -248,17 +252,6 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             path = circshift(path,id-1);
             path(path>goal) = goal;        
         end
-
-%         function route = route_determin_range(~,reference_id,length)
-%             tmp = (round(reference_id-numel(length)*0.25):round(reference_id+numel(length)*0.25));
-%             if find(tmp > numel(length))
-%                tmp(tmp >numel(length)) = tmp(tmp>numel(length)) - numel(length);
-%             end
-%             if find(tmp < 1)
-%                tmp(tmp<1) = tmp(tmp<1) + numel(length);
-%             end
-%             route = tmp;      
-%         end
 
 
         function tid = ancher_detection(~,length,nlength,threshold,l_points,pitch,id,goal,goal_length) %端点を検出する
