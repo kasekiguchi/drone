@@ -129,7 +129,8 @@ methods % Do methods
     function do_sensor(obj, param)
         obj.do_parallel("sensor", param);
     end
-
+    
+    
     function do_estimator(obj, param)
         obj.do_sequential("estimator", param);
     end
