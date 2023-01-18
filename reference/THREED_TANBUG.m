@@ -87,13 +87,13 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             obj.l_points = obj.sensor.sensor_points; %座標データ
-            obj.length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %計算andイメージしやすいようにセンサの距離データを並び替え
+            obj.length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %計算しやすいようにセンサの距離データを並び替え
             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置        
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
-            l_reference = R'*(obj.past.state.p - obj.state.p); %localでのreference位置
-            reference_length = vecnorm(l_reference);
-            l_reference_angle =atan2(l_reference(2),l_reference(1));
+            l_reference = R'*(obj.past.state.p - obj.state.p); %localでの一時刻前のreference位置
+            reference_length = vecnorm(l_reference); %referenceまでの距離
+            l_reference_angle =atan2(l_reference(2),l_reference(1)); %referenceまでの角度
 %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
            [~,reference_id]=min(abs(obj.self.sensor.lidar.phi_range - l_reference_angle));% reference に一番近い角度であるレーザーインデックス(3D)
@@ -111,15 +111,15 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                 case 1
                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
                         hlength = circshift(obj.length,[0 1]); %右に１つずらした距離データ
-                        h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
+                        h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length); %左右方向の端点検出
                         vlength = circshift(obj.length,[1 0]);%上に1つずらした距離データ
-                        v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
+                        v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length); %上下方向の端点検出
 
                         Length = [obj.length(:,end),obj.length,obj.length(:,1)];
-                        [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch);
+                        [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch); %経路とする端点を決定
                         %tid:端点の配列
                         %edge_p:端点の座標
-                        %route:上下方向か左右方向化を識別するための変数
+                        %route:上下方向か左右方向かを識別するための変数
                         
 %                         edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
 %                         edge_p = obj.sensor.sensor_points(:,tid);
@@ -127,25 +127,25 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                         
                         if route == v_tid %上下方向の端点の場合
                             if Length(tid+2) > Length(tid) %下を潜り抜ける場合
-                                [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);
-                                obj.result.state.p = [tmp1;edge_p(2);tmp2];
-                                obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+                                obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+                                obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
                             else %上を通る場合
-                                [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);
-                                obj.result.state.p = [tmp1;edge_p(2);tmp2];
-                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+                                obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
                             end
                         else %左右方向の端点の場合
                             if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
                                 %tid = obj.width_check(tid,-1);
-                                [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
-                                obj.result.state.p = [tmp1;tmp2;edge_p(3)];
-                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+                                obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
                             else % 右回り
                                 %tid = obj.width_check(tid,1);
-                                [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
-                                obj.result.state.p = [tmp1;tmp2;edge_p(3)];
-                                obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
+                                [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+                                obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+                                obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);%ローカル
                             end
                         end
                         
@@ -172,34 +172,34 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
                         if find(obj.length < path_reference) %referenceまでの間に障害物がある場合                              
                             hlength = circshift(obj.length,[0 1]); %横に１つずらした距離データ
-                            h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
+                            h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);%左右方向の端点検出
                             vlength = circshift(obj.length,[1 0]);%縦に1つずらした距離データ
-                            v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);
+                            v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);%上下方向の端点検出
 
                             Length = [obj.length(:,end),obj.length,obj.length(:,1)];
-                            [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch);                 
+                            [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch);%経路とする端点を決定                 
 
                             if route == v_tid
                                 if Length(tid+2) > Length(tid) %下を潜り抜ける場合
-                                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);
-                                    obj.result.state.p = [tmp1;edge_p(2);tmp2];
-                                    obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+                                    obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+                                    obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
                                 else %上を通る場合
-                                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);
-                                    obj.result.state.p = [tmp1;edge_p(2);tmp2];
-                                    obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+                                    obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+                                    obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
                                 end
                             else
                                 if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
                                     %tid = obj.width_check(tid,-1);
-                                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
-                                    obj.result.state.p = [tmp1;tmp2;edge_p(3)];
-                                    obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);
+                                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+                                    obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+                                    obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
                                 else % 右回り
                                     %tid = obj.width_check(tid,1);
-                                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);
-                                    obj.result.state.p = [tmp1;tmp2;edge_p(3)];
-                                    obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);
+                                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+                                    obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+                                    obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);%ローカル
                                 end
                             end
                             obj.tid = tid;
@@ -212,7 +212,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                             result = obj.result;   
                            
                         else %referenceまではいけるので行きます                        
-                            obj.result.state.p = obj.past.state.p; % local座標での位置
+                            obj.result.state.p = obj.past.state.p; 
                             obj.result.state.v = obj.past.state.v;
                             result = obj.result; 
                        end                         
@@ -265,8 +265,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %             [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
 %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
             reference_goal = goal - l_points(:,edge_ids);
-            reference_goal = vecnorm(reference_goal);
-            [~,tmp] = min(length(edge_ids)+reference_goal');
+            reference_goal = vecnorm(reference_goal);%端点の候補→referenceの距離
+            [~,tmp] = min(length(edge_ids)+reference_goal');%自己位置→端点の候補→referenceの距離が小さい配列
             tid = edge_ids(tmp);%最短経路の配列
         end
 
@@ -287,7 +287,6 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             else
                 route = h;
             end
-%             edge_p = length(tid)*[cos((tid-1)*pitch-pi);sin((tid-1)*pitch-pi);1];%端点
         end
 %         
 
