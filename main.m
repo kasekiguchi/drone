@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
+fExp = 1; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
@@ -67,9 +67,9 @@ try
       param(i).sensor.rdensity = {Env};
       param(i).sensor.lrf = {Env.param};
       param(i).sensor.lidar = {};
+      param(i).sensor.Yolo = {};
 
-      for j = 1:length(agent(i).sensor.name)
-          
+      for j = 1:length(agent(i).sensor.name)     
         param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
       end
       agent(i).do_sensor(param(i).sensor.list);
@@ -94,6 +94,7 @@ try
       param(i).reference.path_ref_mpc = {1};
       param(i).reference.straight = {};
       param(i).reference.agreement = {logger, N, time.t};
+      param(i).reference.jirei = {};
 
       for j = 1:length(agent(i).reference.name)
         param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
@@ -118,7 +119,7 @@ try
     end
 
     if fDebug
-        agent.reference.straight.FHPlot(Env,FH,[]);
+%         agent.reference.straight.FHPlot(Env,FH,[]);
 %       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 %       agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
     end
@@ -191,7 +192,8 @@ clc
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
 % logger.plot({1, "input", ""},"fig_num", 5);
-logger.plot( {1, "p", "e"},{1, "q", "e"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
+% logger.plot( {1, "p", "per"},{1, "q", "per"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot( {1, "p", "r"},{1, "q", "r"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation

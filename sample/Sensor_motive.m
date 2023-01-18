@@ -1,12 +1,16 @@
-function Sensor=Sensor_motive(param)
-    Sensor.name=["motive"];
-    Sensor.type=["Motive_ros"];
-    % X, Y. Z
-    Sensor.param=param;
-    Sensor.param.state_list = ["p"];
-    Sensor.param.num_list = [3,3];
-    Sensor.param.subTopic = ros2node("/sensormatlab",param.DomainID);
-    Sensor.param.subTopicName = {'/Robot_1/pose'};
-    Sensor.param.subMsgName = {'geometry_msgs/PoseStamped'};
-    Sensor.param.DomainID = param.DomainID; %% check
+function Sensor = Sensor_Motive(rigid_num,initial_yaw_angle,motive)
+%% sensor class demo : constructor
+% sensor property をSensor classのインスタンス配列として定義
+% rpos : RnagePos_sim
+Sensor.name=["motive"];
+Sensor.type=["MOTIVE"];
+prime_param.Flag = struct('Noise',0,'Occlusion', 0); % '1' : Active, '0' : none
+prime_param.ObjFeature=4;
+prime_param.LocalX     = [ 0.075, -0.075,  0.015;  -0.075, -0.075, -0.015;-0.075,  0.075,  0.015;0.075,  0.075, -0.015]; 
+prime_param.LPF_T=10;
+prime_param.initial_yaw_angle = initial_yaw_angle;
+% X, Y. Z
+prime_param.rigid_num=rigid_num;
+prime_param.motive = motive;
+    Sensor.param=prime_param;
 end
