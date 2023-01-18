@@ -34,6 +34,10 @@ classdef THREED_TANBUG < REFERENCE_CLASS
         tid = 1;
         local_tp = [0;0;0];
         past
+        path0
+        gpath
+        Gpath
+        path_generator 
     end
 
     methods
@@ -45,7 +49,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.pitch = tmp(2)-tmp(1);%3D
             obj.sensor = [0,0];          
             obj.state_initial = [0,0,0]';
-            obj.goal = [5,0,0]';%2Dgoal
+            obj.goal = [10,5,5]';%[5,0,0]';%2Dgoal
 %            obj.goal = [0,15,0]';% global goal position
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
@@ -72,11 +76,65 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %            obj.path_goal = zeros(size(self.sensor.lrf.angle_range));
             obj.path_goal = zeros(size(self.sensor.lidar.phi_range));%3D
             as = 0:obj.pitch:2*pi; %センサの分解能(ラジアン)（行列）
+
+            %radius = ...;
+            radius = self.sensor.lidar.radius;
+            hx= radius;
+            hy = 1;
+            hz= 1;
+            P = [-0.1,hy,hz;-0.1,-hy,hz;-0.1,-hy,-hz;-0.1,hy,-hz;
+                  hx,hy,hz;hx,-hy,hz;hx,-hy,-hz;hx,hy,-hz];
+            T= [1,3,2;1,4,3;1,5,8;1,8,4;1,2,6;1,6,5;2,7,6;2,3,7;3,8,7;3,4,8;5,6,7;5,7,8];
+            T(:,2:3) = T(:,[3,2]);
+            env = triangulation(T,P);
+            tmpstate= STATE_CLASS(struct('state_list',["p","q"],'num_list',[3,3]));
+            tmpstate.set_state("p",[0;0;0],"q",[0;0;0]);
+            tmpparam= struct('env', env, 'theta_range', self.sensor.lidar.theta_range, 'phi_range', self.sensor.lidar.phi_range, 'radius', radius);
+            tmplidar = LiDAR3D_SIM(struct('plant',struct('state',tmpstate)),tmpparam);
+            obj.path0 = tmplidar.do([]);
+            obj.path_generator = tmplidar;
+            obj.gpath = radius*ones(size(obj.path_goal));
         end
         
+         function path = gen_path(obj,p,R,r)           
+           % p, R : 機体位置(3x1)姿勢(3x3)
+           % r : 目標位置(慣性座標系：3x1)
+           rp = R'*(r-p); % ボディ座標系で見たrの位置
+           % rp を極座標表示 r=1, theta, phi
+           Rphi = Rodrigues([0;0;1],atan2(rp(2),rp(1))); % phi に関する回転行列
+           Rtheta= Rodrigues([0;1;0],-atan2(rp(3),vecnorm(rp(1:2))));% thetaに関する回転行列
+           % Rtheta*Rphi*[1;0;0] がrpの向き        
+           obj.path_generator.self.plant.state.set_state("q", Rtheta'*Rphi');
+           path = obj.path_generator.do([]);
+           %obj.path_generator.show("FH",figure());
+         end
         function result = do(obj, t)
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
+            % 
+            p = obj.self.estimator.result.state.p;
+            R = obj.self.estimator.result.state.getq('rotmat');
+%             % 32x63 に整形
+%             obj.reshape();
+%             % G-path 設定
+             obj.Gpath = obj.gen_path(p,R,obj.goal);
+%             % Main algorithm
+%             if (find(Sdata<Gpath,1)) % Gpath内に点群がある場合
+%               if(find(Sdata<gpath,1))% gpath 内に点群がある場合
+%                 obj.g = obj.calc_g();
+%               else% gpath内に点群がない場合
+%                 if (obj.check_reach_to_g()) % 到達した場合
+%                   
+%                 end
+%               end
+%             else % Gpath内に点群がない場合
+%               % G へ向かう
+%               obj.g = obj.G;
+%             end
+%             % 
+%             obj.result.state.p = obj.g;
+
+
             obj.state = obj.self.estimator.result.state; %自己位置
             obj.past.state.p = obj.result.state.p(1:3); %一時刻前の目標位置
             obj.past.state.v = obj.result.state.v; %一時刻前の速さ 

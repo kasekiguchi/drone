@@ -143,7 +143,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                 warning("ACSL : Attitude is not in the state");
                 obj.type = length(value);
             end
-                len = length(value);
+                len = numel(value);
                 if obj.type==len
                     q = value;
                 else
@@ -152,14 +152,14 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                             if len==3
                                 q=Eul2Quat(value);
                             else
-                                value=reshape(value,[3,3])';
+                                value=reshape(value,[3,3]);% '
                                 q = R2q(value);
                             end
                         case 3 % 出力がeuler angle の場合
                             if len==4
                                 q=Quat2Eul(value);
                             else
-                                value=reshape(value,[3,3])';
+                                value=reshape(value,[3,3]);% ' 
                                 q= Quat2Eul(R2q(value));
                             end
                         case 9 % 出力が回転行列の場合

@@ -6,7 +6,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
     name = "lidar";
     result
     self
-    noise
+    noise = 0;
     seed = [] % noise 用
     theta_range
     phi_range
@@ -149,7 +149,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         case 4
           R = rotmat(quaternion(R(:)'), 'frame');
         case 3
-          R = rotmat(quaternion(R(:)', 'euler', 'ZYX', 'frame'), 'point');
+          R = RodriguesQuaternion(Eul2Quat(R(:)'));%rotmat(quaternion(R(:)', 'euler', 'ZYX', 'frame'), 'point'); <- XYZでは？
       end
       ax = fh.CurrentAxes;
       fh.WindowState = 'maximized';
