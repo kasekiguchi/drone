@@ -1,4 +1,4 @@
-function Reference = Reference_Jirei(agent,SensorRange)
+function Reference = Reference_Jirei(agent)
 %% reference class demo
 % reference property をReference classのインスタンス配列として定義
 clear Reference
