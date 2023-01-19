@@ -8,6 +8,7 @@ for i = 1:logger.k
     pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
     rX(i) = logger.Data.agent.reference.result{1,i}.state.p(1,1);
     rY(i) = logger.Data.agent.reference.result{1,i}.state.p(2,1);
+    rq(i) = logger.Data.agent.reference.result{1,i}.state.q;
     input = logger.Data.agent.input{1,i};
     input_v(i) = input(1,1);
     input_w(i) = input(2,1);
@@ -18,7 +19,8 @@ hold on
 grid on
 plot(logger.Data.t(1:logger.k,1),eq);
 plot(logger.Data.t(1:logger.k,1),pq);
-legend('eq','pq');
+plot(logger.Data.t(1:logger.k,1),rq);
+legend('eq','pq','rq');
 xlabel("time [s]");
 ylabel("q");
 hold off
@@ -30,8 +32,8 @@ plot(logger.Data.t(1:logger.k,1),eX);
 plot(logger.Data.t(1:logger.k,1),eY);
 plot(logger.Data.t(1:logger.k,1),pX);
 plot(logger.Data.t(1:logger.k,1),pY);
-% plot(logger.Data.t(1:logger.k,1),rX);
-% plot(logger.Data.t(1:logger.k,1),rY);
+plot(logger.Data.t(1:logger.k,1),rX);
+plot(logger.Data.t(1:logger.k,1),rY);
 legend({'eX','eY','pX','pY','rX','rY'},'Location','northwest');
 xlabel("time [s]");
 ylabel("p [m]");

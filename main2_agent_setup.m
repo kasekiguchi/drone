@@ -126,7 +126,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
     %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
-    %agent(i).set_property("estimator",Estimator_Direct());
+%     agent(i).set_property("estimator",Estimator_Direct());
     %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     agent(i).set_property("estimator",Estimator_UKF2DSLAM_Vehicle(agent(i)));%加速度次元入力モデルのukfslam車両も全方向も可
@@ -143,7 +143,7 @@ for i = 1:N
 %     agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
 %     agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
 %     agent(i).set_property("reference",Reference_Jirei(agent(i),agent.sensor.lrf.radius));
-    agent(i).set_property("reference",Reference_Jirei(agent(i),agent.sensor.lrf.radius));
+    agent(i).set_property("reference",Reference_Jirei(agent(i)));
 %     agent(i).set_property("reference",Reference_Straight(agent(i),agent.model.state));
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通

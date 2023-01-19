@@ -24,7 +24,7 @@ classdef JIREI_REFERENCE < REFERENCE_CLASS
             obj.refv = param{1,1};
             obj.screenX = param{1,2};
             obj.screenY = param{1,3};
-            obj.f = 40e-3;%暫定
+            obj.f = 20e-3;%暫定
             obj.screenXm = 35.64e-3;%暫定
              obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
         end

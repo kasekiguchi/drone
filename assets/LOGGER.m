@@ -165,8 +165,8 @@ methods
 
             if obj.fExp
                 obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
-                obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
-                obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.result.state);
+%                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
+%                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.result.state);
             else
                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
             end
