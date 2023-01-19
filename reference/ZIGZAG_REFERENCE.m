@@ -167,18 +167,24 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
                     rl = (l1-l2)/2;
                 end
                 tmpl = perp(rl,[0;0]); % 機体を通るrl の垂線
+                tmpzl = perp(rl,[pe(1);pe(2)]); % Perpendicular to the straight line between the current location and the center
+                tmpz0 = cr(rl,tmpzl); % The foot of the perpendicular line between the current location and the center line
+                tmpz1 = cr(l1,tmpzl); % The foot of a straight line perpendicular to your current location and the nearest wall
                 if sum(tmpl) == 0
                     rl;
                 end
                 tmp0 = cr(rl,tmpl); % 機体からrlへの垂線の足
                 rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
                 tmpt0 = atan2(-rl(1),rl(2));
+                det = vecnorm(tmpz0);
+                den = vecnorm(tmpz1);
 %                 tmp(:,1) = [tmp0;tmpt0];
 %                 for i = 2:obj.Horizon
 %                     tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
 %                     tmp(:,i) = [tmp0;tmpt0];
 %                 end
 %                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
+                
                 dz = c(idm) / sin(obj.ztheta);
                 xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
                 ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
@@ -186,8 +192,8 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
                 bz = xdz - tmp0(1);
                 cz = xdz * tmp0(2) - tmp0(1) *  ydz;
                 lz = [az,bz,cz];
-                tmpzl = perp(lz,EstData(1:2,1));
-                tmpz0 = cr(lz,tmpzl);
+%                 tmpzl = perp(lz,EstData(1:2,1));
+%                 tmpz0 = cr(lz,tmpzl);
                 Theta = atan2(az,bz);
                 tmp = [tmpz0;Theta];
                 for i = 2:obj.Horizon
