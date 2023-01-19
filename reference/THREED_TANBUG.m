@@ -38,6 +38,11 @@ classdef THREED_TANBUG < REFERENCE_CLASS
         gpath
         Gpath
         path_generator 
+
+        g
+        G
+        v
+        count
     end
 
     methods
@@ -47,10 +52,12 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %            obj.pitch = self.sensor.lrf.pitch;
             tmp = self.sensor.lidar.phi_range;%3D
             obj.pitch = tmp(2)-tmp(1);%3D
-            obj.sensor = [0,0];          
+            obj.sensor = [0,0];        
+
             obj.state_initial = [0,0,0]';
-            obj.goal = [10,5,5]';%[5,0,0]';%2Dgoal
+            obj.goal = [5,0,0]';%[5,0,0]';%2Dgoal
 %            obj.goal = [0,15,0]';% global goal position
+
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D
@@ -68,6 +75,11 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.self=self;
             obj.e_z = [0,0,1]';
             obj.v_max = 0.3;
+
+            obj.g %TangentBugで算出した目標位置
+            obj.G %最終目標位置
+            obj.v 
+            obj.count = 0;
             
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
 %             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
@@ -93,203 +105,59 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             tmplidar = LiDAR3D_SIM(struct('plant',struct('state',tmpstate)),tmpparam);
             obj.path0 = tmplidar.do([]);
             obj.path_generator = tmplidar;
-            obj.gpath = radius*ones(size(obj.path_goal));
+            obj.gpath.length= radius*ones(size(obj.path0.length));
         end
-        
-         function path = gen_path(obj,p,R,r)           
-           % p, R : 機体位置(3x1)姿勢(3x3)
-           % r : 目標位置(慣性座標系：3x1)
-           rp = R'*(r-p); % ボディ座標系で見たrの位置
-           % rp を極座標表示 r=1, theta, phi
-           Rphi = Rodrigues([0;0;1],atan2(rp(2),rp(1))); % phi に関する回転行列
-           Rtheta= Rodrigues([0;1;0],-atan2(rp(3),vecnorm(rp(1:2))));% thetaに関する回転行列
-           % Rtheta*Rphi*[1;0;0] がrpの向き        
-           obj.path_generator.self.plant.state.set_state("q", Rtheta'*Rphi');
-           path = obj.path_generator.do([]);
-           %obj.path_generator.show("FH",figure());
-         end
+  
+%          function gen_path()
+
         function result = do(obj, t)
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
             % 
             p = obj.self.estimator.result.state.p;
+            v = obj.self.estimator.result.state.v;
             R = obj.self.estimator.result.state.getq('rotmat');
-%             % 32x63 に整形
-%             obj.reshape();
-%             % G-path 設定
-             obj.Gpath = obj.gen_path(p,R,obj.goal);
-%             % Main algorithm
-%             if (find(Sdata<Gpath,1)) % Gpath内に点群がある場合
-%               if(find(Sdata<gpath,1))% gpath 内に点群がある場合
-%                 obj.g = obj.calc_g();
-%               else% gpath内に点群がない場合
-%                 if (obj.check_reach_to_g()) % 到達した場合
-%                   
-%                 end
-%               end
-%             else % Gpath内に点群がない場合
-%               % G へ向かう
-%               obj.g = obj.G;
-%             end
-%             % 
-%             obj.result.state.p = obj.g;
-
-
-            obj.state = obj.self.estimator.result.state; %自己位置
-            obj.past.state.p = obj.result.state.p(1:3); %一時刻前の目標位置
-            obj.past.state.v = obj.result.state.v; %一時刻前の速さ 
-%             obj.past.state.q = obj.result.state.q; %一時刻前の姿勢角
-            yaw = obj.state.q(3);
-            as = 0:obj.pitch:2*pi;
-            R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
+            yaw = obj.self.estimator.result.state.q(3);
+            r = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1]; 
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
-            obj.l_points = obj.sensor.sensor_points; %座標データ
-            obj.length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %計算しやすいようにセンサの距離データを並び替え
-            l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置        
+            l_points = obj.sensor.sensor_points; %座標データ
+            l_goal = R'*(obj.goal-p); % local でのゴール位置
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
-            l_reference = R'*(obj.past.state.p - obj.state.p); %localでの一時刻前のreference位置
-            reference_length = vecnorm(l_reference); %referenceまでの距離
-            l_reference_angle =atan2(l_reference(2),l_reference(1)); %referenceまでの角度
-%            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
-           [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
-%            [~,reference_id]=min(abs(obj.self.sensor.lidar.phi_range - l_reference_angle));% reference に一番近い角度であるレーザーインデックス(3D)
+            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
 
-            path_goal = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
-            path_reference = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
-
-            if find(path_reference)%1時刻目以降はこっち
-                N = 2;
-            else%1時刻目はこっち
-                N = 1;
-            end
-
-            switch N
-                case 1
-                    if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
-                        hlength = circshift(obj.length,[0 1]); %右に１つずらした距離データ
-                        h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length); %左右方向の端点検出
-                        vlength = circshift(obj.length,[1 0]);%上に1つずらした距離データ
-                        v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length); %上下方向の端点検出
-
-                        Length = [obj.length(:,end),obj.length,obj.length(:,1)];
-                        [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch); %経路とする端点を決定
-                        %tid:端点の配列
-                        %edge_p:端点の座標
-                        %route:上下方向か左右方向かを識別するための変数
-                        
-%                         edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
-%                         edge_p = obj.sensor.sensor_points(:,tid);
-
-                        
-                        if route == v_tid %上下方向の端点の場合
-                            if Length(tid+2) > Length(tid) %下を潜り抜ける場合
-                                [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
-                                obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
-                                obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
-                            else %上を通る場合
-                                [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
-                                obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
-                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
-                            end
-                        else %左右方向の端点の場合
-                            if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
-                                %tid = obj.width_check(tid,-1);
-                                [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
-                                obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
-                                obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
-                            else % 右回り
-                                %tid = obj.width_check(tid,1);
-                                [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
-                                obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
-                                obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);%ローカル
-                            end
-                        end
-                        
-                        obj.tid = tid;
-                        obj.local_tp = edge_p;
-                        % local から global に変換
-                        obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
-                        obj.result.state.v = R*obj.result.state.v;
-                        result = obj.result;   
- 
-                    else % まっすぐゴールに行ける場合
-                        obj.result.state.p = l_goal; % local座標での位置
-                        obj.result.state.v = obj.state_initial; % local座標での位置
-                        % local から global に変換
-                        obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
-            %             obj.result.state.p = [R*obj.result.state.p;0];
-                        obj.result.state.v = R*obj.result.state.v;
-                        result = obj.result;   
-                    end     
-
-                %2時刻目以降
-                case 2
-%                     obj.past.state.q(3) = obj.result.state.q(3);
-                    if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
-                        if find(obj.length < path_reference) %referenceまでの間に障害物がある場合                              
-                            hlength = circshift(obj.length,[0 1]); %横に１つずらした距離データ
-                            h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);%左右方向の端点検出
-                            vlength = circshift(obj.length,[1 0]);%縦に1つずらした距離データ
-                            v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);%上下方向の端点検出
-
-                            Length = [obj.length(:,end),obj.length,obj.length(:,1)];
-                            [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch);%経路とする端点を決定                 
-
-                            if route == v_tid
-                                if Length(tid+2) > Length(tid) %下を潜り抜ける場合
-                                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
-                                    obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
-                                    obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
-                                else %上を通る場合
-                                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
-                                    obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
-                                    obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
-                                end
-                            else
-                                if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
-                                    %tid = obj.width_check(tid,-1);
-                                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
-                                    obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
-                                    obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
-                                else % 右回り
-                                    %tid = obj.width_check(tid,1);
-                                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
-                                    obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
-                                    obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);%ローカル
-                                end
-                            end
-                            obj.tid = tid;
-                            obj.local_tp = edge_p;
-
-                            % local から global に変換
-                            obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
-                %             obj.result.state.p = [R*obj.result.state.p;0];
-                            obj.result.state.v = R*obj.result.state.v;
-                            result = obj.result;   
-                           
-                        else %referenceまではいけるので行きます                        
-                            obj.result.state.p = obj.past.state.p; 
-                            obj.result.state.v = obj.past.state.v;
-                            result = obj.result; 
-                       end                         
-     
-                    else % まっすぐゴールに行ける場合
-                        obj.result.state.p = l_goal; % local座標での位置
-                        obj.result.state.v = obj.state_initial; % local座標での位置
-%                         yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
-%                         obj.result.state.q(3) = yaw;
-                        % local から global に変換
-                        obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
-            %             obj.result.state.p = [R*obj.result.state.p;0];
-                        obj.result.state.v = R*obj.result.state.v;
-                        result = obj.result;   
-                    end          
-            end
-        end   
-        
             
+
+%             % 32x63 に整形
+            change_length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %計算しやすいようにセンサの距離データを並び替え
+%             % G-path 設定
+            obj.Gpath = obj.gen_path(p,R,obj.goal);%検出範囲の向き変更
+%             % Main algorithm
+            if (find(obj.length < obj.Gpath.length,1)) % Gpath内に点群がある場合
+              if(find(obj.length < obj.gpath.length,1))% gpath 内に点群がある場合
+                [obj.g,obj.v] = obj.T_bug(obj,change_length,l_points,goal_length,id);
+              else% gpath内に点群がない場合
+                obj.count = obj.check_reach_to_g(p,obj.g,obj.count);
+                if (obj.count > 20) % 到達した場合
+                    [obj.g,obj.v] = obj.T_bug(obj,change_length,l_points,goal_length,id);
+                else
+                    obj.g = obj.g;
+                end         
+              end
+              obj.g = r * obj.g + p;
+              obj.v = r * obj.v + v;
+              obj.gpath = obj.gen_path(p,R,obj.g);
+            else % Gpath内に点群がない場合
+              % G へ向かう
+              obj.g = obj.goal; 
+              obj.v = [0 0 0];
+            end
+            obj.result.state.p = obj.g;
+            obj.result.state.v = obj.v;
+            result = obj.result;   
+        end   
+
         function path = make_path(~,theta,margin,range,radius,goal_angle,goal)%検出範囲の作成
             %theta: センサの分解能
             %margin: ドローンの横幅（検出範囲の横の長さ）
@@ -347,7 +215,67 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             end
         end
 %         
+        function path = gen_path(obj,p,R,r) %検出範囲の向きを変える     
+           % p, R : 機体位置(3x1)姿勢(3x3)
+           % r : 目標位置(慣性座標系：3x1)グローバル系？
+           rp = R'*(r-p); % ボディ座標系で見たrの位置
+           % rp を極座標表示 r=1, theta, phi
+           Rphi = Rodrigues([0;0;1],atan2(rp(2),rp(1))); % phi に関する回転行列
+           Rtheta= Rodrigues([0;1;0],-atan2(rp(3),vecnorm(rp(1:2))));% thetaに関する回転行列
+           % Rtheta*Rphi*[1;0;0] がrpの向き        
+           obj.path_generator.self.plant.state.set_state("q", Rtheta'*Rphi');
+           path = obj.path_generator.do([]);
+%            obj.path_generator.show("FH",figure());
+         end
 
+         function [g,v] = T_bug(~,obj,length,l_points,goal_length,id)
+            %length:センサの距離データ
+            %l_points:センサの座標データ
+            %goal_length:goalと自己位置の距離
+            %id:l_goal_angleに一番近いセンサのインデックス
+            hlength = circshift(length,[0 1]); %右に１つずらした距離データ
+            h_tid = obj.ancher_detection(length,hlength,obj.threshold,l_points,obj.pitch,id,obj.goal,goal_length); %左右方向の端点検出
+            vlength = circshift(length,[1 0]);%上に1つずらした距離データ
+            v_tid = obj.ancher_detection(length,vlength,obj.threshold,l_points,obj.pitch,id,obj.goal,goal_length); %上下方向の端点検出
+            
+            Length = [length(:,end),length,length(:,1)];
+            [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,l_points,length,obj.pitch); %経路とする端点を決定
+
+            if route == v_tid %上下方向の端点の場合
+                if Length(tid+2) > Length(tid) %下を潜り抜ける場合
+                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+                    g = [tmp1;edge_p(2);tmp2];%ローカル
+                    v = -obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                else %上を通る場合
+                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+                    g = [tmp1;edge_p(2);tmp2];%ローカル
+                    v = obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                end
+            else %左右方向の端点の場合
+                if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
+                    %tid = obj.width_check(tid,-1);
+                    [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+                    g = [tmp1;tmp2;edge_p(3)];%ローカル
+                    v = obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                else % 右回り
+                    %tid = obj.width_check(tid,1);
+                    [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+                    g = [tmp1;tmp2;edge_p(3)];%ローカル
+                    v = -obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                end
+            end
+         end
+
+         function count = check_reach_to_g(~,p,g,count)
+            r = 0.3;
+            p_glength = p - g;
+            p_glength = vecnorm(p_glength);
+            if r > p_glength
+                count = count+1;
+            else
+                count = 0;
+            end
+         end
         
         function [A_x,A_y,B_x,B_y] = conection(obj,x,y,X,Y,r) %接点の算出
             % x,y:初期位置
@@ -378,6 +306,163 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             v = t*o;
             
         end
+
+%             obj.state = obj.self.estimator.result.state; %自己位置
+%             obj.past.state.p = obj.result.state.p(1:3); %一時刻前の目標位置
+%             obj.past.state.v = obj.result.state.v; %一時刻前の速さ 
+% %             obj.past.state.q = obj.result.state.q; %一時刻前の姿勢角
+%             yaw = obj.state.q(3);
+%             as = 0:obj.pitch:2*pi;
+%             R = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1];
+%             obj.sensor = obj.self.sensor.result; %センサ情報
+%             obj.length = obj.sensor.length; % 距離データ
+%             obj.l_points = obj.sensor.sensor_points; %座標データ
+%             obj.length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %計算しやすいようにセンサの距離データを並び替え
+%             l_goal = R'*(obj.goal-obj.state.p); % local でのゴール位置        
+%             goal_length = vecnorm(l_goal); % ゴールまでの距離
+%             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
+%             l_reference = R'*(obj.past.state.p - obj.state.p); %localでの一時刻前のreference位置
+%             reference_length = vecnorm(l_reference); %referenceまでの距離
+%             l_reference_angle =atan2(l_reference(2),l_reference(1)); %referenceまでの角度
+% %            [~,id]=min(abs(obj.sensor.angle - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス
+%            [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
+% %            [~,reference_id]=min(abs(obj.self.sensor.lidar.phi_range - l_reference_angle));% reference に一番近い角度であるレーザーインデックス(3D)
+% 
+%             path_goal = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_goal_angle,goal_length);%ゴールとの間に経路生成
+%             path_reference = obj.make_path(as,obj.margin,obj.self.sensor.lidar.phi_range,obj.radius,l_reference_angle,reference_length);%referenceとの間に経路生成
+
+%             if find(path_reference)%1時刻目以降はこっち
+%                 N = 2;
+%             else%1時刻目はこっち
+%                 N = 1;
+%             end
+% 
+%             switch N
+%                 case 1
+%                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
+%                         hlength = circshift(obj.length,[0 1]); %右に１つずらした距離データ
+%                         h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length); %左右方向の端点検出
+%                         vlength = circshift(obj.length,[1 0]);%上に1つずらした距離データ
+%                         v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length); %上下方向の端点検出
+% 
+%                         Length = [obj.length(:,end),obj.length,obj.length(:,1)];
+%                         [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch); %経路とする端点を決定
+%                         %tid:端点の配列
+%                         %edge_p:端点の座標
+%                         %route:上下方向か左右方向かを識別するための変数
+%                         
+% %                         edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];%端点
+% %                         edge_p = obj.sensor.sensor_points(:,tid);
+% 
+%                         
+%                         if route == v_tid %上下方向の端点の場合
+%                             if Length(tid+2) > Length(tid) %下を潜り抜ける場合
+%                                 [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+%                                 obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+%                                 obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
+%                             else %上を通る場合
+%                                 [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+%                                 obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+%                                 obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
+%                             end
+%                         else %左右方向の端点の場合
+%                             if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
+%                                 %tid = obj.width_check(tid,-1);
+%                                 [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+%                                 obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+%                                 obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
+%                             else % 右回り
+%                                 %tid = obj.width_check(tid,1);
+%                                 [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+%                                 obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+%                                 obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);%ローカル
+%                             end
+%                         end
+%                         
+%                         obj.tid = tid;
+%                         obj.local_tp = edge_p;
+%                         % local から global に変換
+%                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+%                         obj.result.state.v = R*obj.result.state.v;
+%                         result = obj.result;   
+%  
+%                     else % まっすぐゴールに行ける場合
+%                         obj.result.state.p = l_goal; % local座標での位置
+%                         obj.result.state.v = obj.state_initial; % local座標での位置
+%                         % local から global に変換
+%                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+%             %             obj.result.state.p = [R*obj.result.state.p;0];
+%                         obj.result.state.v = R*obj.result.state.v;
+%                         result = obj.result;   
+%                     end     
+% 
+%                 %2時刻目以降
+%                 case 2
+% %                     obj.past.state.q(3) = obj.result.state.q(3);
+%                     if find(obj.length < path_goal) % ゴールまでの間に障害物がある場合
+%                         if find(obj.length < path_reference) %referenceまでの間に障害物がある場合                              
+%                             hlength = circshift(obj.length,[0 1]); %横に１つずらした距離データ
+%                             h_tid = obj.ancher_detection(obj.length,hlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);%左右方向の端点検出
+%                             vlength = circshift(obj.length,[1 0]);%縦に1つずらした距離データ
+%                             v_tid = obj.ancher_detection(obj.length,vlength,obj.threshold,obj.l_points,obj.pitch,id,obj.goal,goal_length);%上下方向の端点検出
+% 
+%                             Length = [obj.length(:,end),obj.length,obj.length(:,1)];
+%                             [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,obj.l_points,obj.length,obj.pitch);%経路とする端点を決定                 
+% 
+%                             if route == v_tid
+%                                 if Length(tid+2) > Length(tid) %下を潜り抜ける場合
+%                                     [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+%                                     obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+%                                     obj.result.state.v = -obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
+%                                 else %上を通る場合
+%                                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
+%                                     obj.result.state.p = [tmp1;edge_p(2);tmp2];%ローカル
+%                                     obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
+%                                 end
+%                             else
+%                                 if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
+%                                     %tid = obj.width_check(tid,-1);
+%                                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+%                                     obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+%                                     obj.result.state.v = obj.velocity_vector([0;0;0],edge_p,obj.result.state.p);%ローカル
+%                                 else % 右回り
+%                                     %tid = obj.width_check(tid,1);
+%                                     [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
+%                                     obj.result.state.p = [tmp1;tmp2;edge_p(3)];%ローカル
+%                                     obj.result.state.v = -obj.velocity_vector(obj.state_initial,edge_p,obj.result.state.p);%ローカル
+%                                 end
+%                             end
+%                             obj.tid = tid;
+%                             obj.local_tp = edge_p;
+% 
+%                             % local から global に変換
+%                             obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+%                 %             obj.result.state.p = [R*obj.result.state.p;0];
+%                             obj.result.state.v = R*obj.result.state.v;
+%                             result = obj.result;   
+%                            
+%                         else %referenceまではいけるので行きます                        
+%                             obj.result.state.p = obj.past.state.p; 
+%                             obj.result.state.v = obj.past.state.v;
+%                             result = obj.result; 
+%                        end                         
+%      
+%                     else % まっすぐゴールに行ける場合
+%                         obj.result.state.p = l_goal; % local座標での位置
+%                         obj.result.state.v = obj.state_initial; % local座標での位置
+% %                         yaw = atan2(obj.result.state.p(2),obj.result.state.p(1));
+% %                         obj.result.state.q(3) = yaw;
+%                         % local から global に変換
+%                         obj.result.state.p = [R*obj.result.state.p+obj.state.p;0];
+%             %             obj.result.state.p = [R*obj.result.state.p;0];
+%                         obj.result.state.v = R*obj.result.state.v;
+%                         result = obj.result;   
+%                     end          
+%             end
+        
+        
+            
+        
 %         function id = width_check(obj,tid,sign)
 %             obj.tid
 %         end
