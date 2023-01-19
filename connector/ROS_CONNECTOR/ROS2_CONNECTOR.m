@@ -71,7 +71,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                obj.result = receive(obj.subscriber.subtopic(i),10);
+                obj.result = receive(obj.subscriber.subtopic(i),2);
             end
             ret = obj.result;
         end

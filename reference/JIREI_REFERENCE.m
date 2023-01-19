@@ -40,14 +40,8 @@ classdef JIREI_REFERENCE < REFERENCE_CLASS
             Xcs = ( Xcp - obj.screenX/2 )*(obj.screenXm/obj.screenX);
             theta = atan(Xcs/obj.f);
             
-%             obj.result = [];
-%             obj.result.state.set_state("xd",ref);%treat as a colmn vector
-%             obj.result.state.set_state("p",pe);%treat as a colmn vector
-%             obj.result.state.set_state("q",theta);%treat as a colmn vector
-%             obj.result.state.set_state("v",obj.refv);%treat as a colmn vector
-            
             obj.result.state.p = [pe(1);pe(2)];
-            obj.result.state.q = theta;
+            obj.result.state.q = -theta;
             obj.self.reference.result.state = obj.result.state;
             obj.result.state.v = obj.refv;
             
