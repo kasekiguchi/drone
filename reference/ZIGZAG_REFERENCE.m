@@ -184,14 +184,18 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
 %                     tmp(:,i) = [tmp0;tmpt0];
 %                 end
 %                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
-                
+                if den <= 0.3 && tmpzl(2) < 0
+                    trackcase = 0;
+                elseif den <= 0.3 && tmpzl(2) > 0
+                    trackcase = 1;
+                end
                 dz = c(idm) / sin(obj.ztheta);
                 xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
                 ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
                 az = -(ydz - tmp0(2));
                 bz = xdz - tmp0(1);
                 cz = xdz * tmp0(2) - tmp0(1) *  ydz;
-                lz = [az,bz,cz];
+                lz = [az,bz,cz]/vecnorm([az,bz]);
 %                 tmpzl = perp(lz,EstData(1:2,1));
 %                 tmpz0 = cr(lz,tmpzl);
                 Theta = atan2(az,bz);

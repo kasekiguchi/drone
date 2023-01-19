@@ -150,7 +150,7 @@ methods
             obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
             obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
             obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
-%             obj.Data.agent(n).plant.result{obj.k} = agent(n).plant.result;
+            obj.Data.agent(n).plant.result{obj.k} = agent(n).plant.result;
 
             if isfield(agent(n).sensor.result, "state")
                 obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
@@ -160,13 +160,13 @@ methods
             obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
             obj.Data.agent(n).input{obj.k} = agent(n).input;
 %             if obj.fExp
-%                 obj.Data.agent(n).plant.result{obj.k}.state = agent(n).plant.result.state;
+                obj.Data.agent(n).plant.result{obj.k}.state = agent(n).plant.result.state;
 %             end
 
             if obj.fExp
                 obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
-%                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
-%                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.result.state);
+                obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
+                obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.result.state);
             else
                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
             end
