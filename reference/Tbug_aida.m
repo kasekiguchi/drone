@@ -13,6 +13,7 @@ classdef Tbug_aida < REFERENCE_CLASS
         radius % 測距範囲
         haba % 車体幅
 
+        l_points
         threshold
     end
 
@@ -27,6 +28,7 @@ classdef Tbug_aida < REFERENCE_CLASS
             obj.haba = 1;%閾値変更0.3
             obj.radius = 20;
             obj.threshold = 2.0;
+            obj.l_points
 %             DroneMargin = obj.state_initial/2;
         end
         
@@ -66,65 +68,65 @@ classdef Tbug_aida < REFERENCE_CLASS
 
                 % 端点検出
                 % 右の端点
-                for i = 1:720
-                    if abs(obj.sensor.length(i)-obj.sensor.length(i+1)) >= 2.5%閾値変更1
-                % 点群間距離が障害物の距離よりも大きい時
-                        right_anchor = obj.sensor.length(i+1);
-                        right_anchor_point = obj.sensor.sensor_points(i+1,:);
-                        break
-                    end
-                end
-                % 左の端点
-                for j = 720:-1:2
-                    if abs(obj.sensor.length(j)-obj.sensor.length(j-1)) >= 3.5%閾値変更1
-                % 点群間距離が障害物の距離よりも大きい時
-                        left_anchor = obj.sensor.length(j-1);
-                        left_anchor_point = obj.sensor.sensor_points(j-1,:);
-                        break
-                    end
-                end
+%                 for i = 1:720
+%                     if abs(obj.sensor.length(i)-obj.sensor.length(i+1)) >= 2.5%閾値変更1
+%                 % 点群間距離が障害物の距離よりも大きい時
+%                         right_anchor = obj.sensor.length(i+1);
+%                         right_anchor_point = obj.sensor.sensor_points(i+1,:);
+%                         break
+%                     end
+%                 end
+%                 % 左の端点
+%                 for j = 720:-1:2
+%                     if abs(obj.sensor.length(j)-obj.sensor.length(j-1)) >= 3.5%閾値変更1
+%                 % 点群間距離が障害物の距離よりも大きい時
+%                         left_anchor = obj.sensor.length(j-1);
+%                         left_anchor_point = obj.sensor.sensor_points(j-1,:);
+%                         break
+%                     end
+%                 end
                 
 
                 %改善案
-%                 nlength = circshift(obj.length,1);
-%                 edge_ids = find(abs(nlength-obj.length) > obj.threshold); %近い端点のindex配列
-%                 tmp = obj.length(edge_ids) > nlength(edge_ids);
-%                 edge_ids(tmp) = edge_ids(tmp) - 1;
-% 
-%                 reference_goal = l_goal(1:2) - obj.l_points(:,edge_ids);
-%                 reference_goal = vecnorm(reference_goal);
-%                 [~,tmp] = min(obj.length(edge_ids)+reference_goal);
-%                 tid = edge_ids(tmp);
-%                 Length = [obj.length(end),obj.length,obj.length(1)];
-%                 edge_p = obj.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];
-%                 if Length(tid+2) > Length(tid) % 左回りで避ける
-%                     %tid = obj.width_check(tid,-1);
-%                     [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
-%                     obj.result.state.p = [tmp1;tmp2;0];
-%                 else % 右回り
-%                     %tid = obj.width_check(tid,1);
-%                     [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
-%                     obj.result.state.p = [tmp1;tmp2;0];
-%                 end
+                nlength = circshift(obj.sensor.length,1);
+                edge_ids = find(abs(nlength-obj.sensor.length) > obj.threshold); %近い端点のindex配列
+                tmp = obj.sensor.length(edge_ids) > nlength(edge_ids);
+                edge_ids(tmp) = edge_ids(tmp) - 1;
+
+                reference_goal = l_goal(1:2) - obj.l_points(:,edge_ids);
+                reference_goal = vecnorm(reference_goal);
+                [~,tmp] = min(obj.sensor.length(edge_ids)+reference_goal);
+                tid = edge_ids(tmp);
+                Length = [obj.sensor.length(end),obj.sensor.length,obj.sensor.length(1)];
+                edge_p = obj.sensor.length(tid)*[cos((tid-1)*obj.pitch-pi);sin((tid-1)*obj.pitch-pi);0];
+                if Length(tid+2) > Length(tid) % 左回りで避ける
+                    %tid = obj.width_check(tid,-1);
+                    [~,~,tmp1,tmp2] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
+                    obj.result.state.p = [tmp1;tmp2;0];
+                else % 右回り
+                    %tid = obj.width_check(tid,1);
+                    [tmp1,tmp2,~,~] = obj.conection(0,0,edge_p(1),edge_p(2),obj.margin);
+                    obj.result.state.p = [tmp1;tmp2;0];
+                end
 
 
                 % 距離比較
                 % 右の距離
-                initial2right = right_anchor_point-obj.state.p(1:2)'; % 右の端点と初期位置の差
-                right2goal = l_goal(1:2)'-right_anchor_point; % 目標位置と右の端点の差
-                right_length = vecnorm(initial2right)+vecnorm(right2goal); % 右の目標までの距離
-                % 左の距離
-                initial2left = left_anchor_point-obj.state.p(1:2)'; % 左の端点と初期位置の差
-                left2goal = l_goal(1:2)'-left_anchor_point; % 目標位置と左の端点の差
-                left_length = vecnorm(initial2left)+vecnorm(left2goal); % 左の目標までの距離
-
-                if right_length <= left_length
-                    [A_x,A_y,~,~] = obj.conection(0,0,right_anchor_point(1),right_anchor_point(2),obj.margin);
-                    obj.result.state.p = [A_x,A_y,0]'; % local座標での位置
-                else
-                    [~,~,B_x,B_y] = obj.conection(0,0,left_anchor_point(1),left_anchor_point(2),obj.margin);
-                    obj.result.state.p = [B_x,B_y,0]'; % local座標での位置
-                end
+%                 initial2right = right_anchor_point-obj.state.p(1:2)'; % 右の端点と初期位置の差
+%                 right2goal = l_goal(1:2)'-right_anchor_point; % 目標位置と右の端点の差
+%                 right_length = vecnorm(initial2right)+vecnorm(right2goal); % 右の目標までの距離
+%                 % 左の距離
+%                 initial2left = left_anchor_point-obj.state.p(1:2)'; % 左の端点と初期位置の差
+%                 left2goal = l_goal(1:2)'-left_anchor_point; % 目標位置と左の端点の差
+%                 left_length = vecnorm(initial2left)+vecnorm(left2goal); % 左の目標までの距離
+% 
+%                 if right_length <= left_length
+%                     [A_x,A_y,~,~] = obj.conection(0,0,right_anchor_point(1),right_anchor_point(2),obj.margin);
+%                     obj.result.state.p = [A_x,A_y,0]'; % local座標での位置
+%                 else
+%                     [~,~,B_x,B_y] = obj.conection(0,0,left_anchor_point(1),left_anchor_point(2),obj.margin);
+%                     obj.result.state.p = [B_x,B_y,0]'; % local座標での位置
+%                 end
 
             % local座標での位置
             obj.result.state.q = [0;0;atan2(obj.result.state.p(2),obj.result.state.p(1))];
