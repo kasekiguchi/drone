@@ -117,8 +117,6 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             p = obj.self.estimator.result.state.p;
             v = obj.self.estimator.result.state.v;
             R = obj.self.estimator.result.state.getq('rotmat');
-            yaw = obj.self.estimator.result.state.q(3);
-            r = [cos(yaw),-sin(yaw),0;sin(yaw),cos(yaw),0;0,0,1]; 
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             l_points = obj.sensor.sensor_points; %座標データ
@@ -126,8 +124,6 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             goal_length = vecnorm(l_goal); % ゴールまでの距離
             l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
             [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
-
-            
 
 %             % 32x63 に整形
             change_length = reshape(obj.length,obj.v_layer,numel(obj.length)/obj.v_layer); %計算しやすいようにセンサの距離データを並び替え
@@ -145,8 +141,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                     obj.g = obj.g;
                 end         
               end
-              obj.g = r * obj.g + p;
-              obj.v = r * obj.v + v;
+              obj.g = R * obj.g + p;
+              obj.v = v;
               obj.gpath = obj.gen_path(p,R,obj.g);
             else % Gpath内に点群がない場合
               % G へ向かう
