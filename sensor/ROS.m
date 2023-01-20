@@ -30,6 +30,15 @@ classdef ROS < SENSOR_CLASS
                 end
             end
             data = obj.ros.getData;
+            data.ranges = cast(data.ranges,"double");
+            data.angle_increment = cast(data.angle_increment,"double");
+            data.angle_max = cast(data.angle_max,"double");
+            data.angle_min = cast(data.angle_min,"double");
+            data.range_max = cast(data.range_max,"double");
+            data.range_min = cast(data.range_min,"double");
+            data.scan_time = cast(data.scan_time,"double");
+            data.time_increment = cast(data.time_increment,"double");
+            data.intensities = cast(data.intensities,"double");
             for i=1:720
                 if i == 1
                     if data.ranges(i) == inf
@@ -61,6 +70,15 @@ classdef ROS < SENSOR_CLASS
             %   result : 
             % 【入力】motive ：NATNET_CONNECOTR object 
             data = obj.ros.getData;
+            data.ranges = cast(data.ranges,"double");
+            data.angle_increment = cast(data.angle_increment,"double");
+            data.angle_max = cast(data.angle_max,"double");
+            data.angle_min = cast(data.angle_min,"double");
+            data.range_max = cast(data.range_max,"double");
+            data.range_min = cast(data.range_min,"double");
+            data.scan_time = cast(data.scan_time,"double");
+            data.time_increment = cast(data.time_increment,"double");
+            data.intensities = cast(data.intensities,"double");
             data.ranges = fillmissing(data.ranges,'previous');
             data.intensities = fillmissing(data.intensities,'previous');
             for i=1:720

@@ -128,17 +128,18 @@ classdef Tbug_aida < REFERENCE_CLASS
 %                     obj.result.state.p = [B_x,B_y,0]'; % local座標での位置
 %                 end
 
-            % local座標での位置
-            obj.result.state.q = [0;0;atan2(obj.result.state.p(2),obj.result.state.p(1))];
-            obj.result.state.p = [R*obj.result.state.p+obj.state.p];
-            obj.result.state.v = 0.5;
-            obj.result.state.q = [R*obj.result.state.q+obj.state.q];
-            result = obj.result;
+                % local座標での位置
+                obj.result.state.q = [0;0;atan2(obj.result.state.p(2),obj.result.state.p(1))];
+                obj.result.state.p = [R*obj.result.state.p+obj.state.p];
+                obj.result.state.v = 0.5;
+                obj.result.state.q = [R*obj.result.state.q+obj.state.q];
+                result = obj.result;
 
             else
+                obj.result.state.p = l_goal;
                 obj.result.state.q = [0;0;atan2(obj.result.state.p(2), ...
                 obj.result.state.p(1))];
-                obj.result.state.p = obj.goal; % local座標での位置
+                obj.result.state.p = [R*obj.result.state.p+obj.state.p];
                 obj.result.state.v = 0.5;
                 obj.result.state.q = [R*obj.result.state.q+obj.state.q];
 
