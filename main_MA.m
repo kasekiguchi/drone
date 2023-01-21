@@ -13,6 +13,7 @@ Nb = 6; % number of birds
 fExp = 0 % 実機フラグ
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
+fDebug = 1; % 1: active : for debug function
 
 run("main1_bird_setting.m");
 run("main1_setting.m");
@@ -224,7 +225,7 @@ clc
 logger.plot({1,"q","e"},{2,"q","e"},"fig_num",2,"row_col",[1 2]);
 logger_bird.plot({1,"q","e"},{2,"q","e"},{3,"q","e"},{4,"q","e"},{5,"q","e"},{6,"q","e"},"fig_num",3,"row_col",[2 3]);
 % agent(1).reference.timeVarying.show(logger)
-% bird(1).plot_fig(logger,logger_bird);
+% bird(1).plot_evaluation(logger);
 
 
 %% animation

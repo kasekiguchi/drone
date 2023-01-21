@@ -41,7 +41,7 @@ classdef BIRD < ABSTRACT_SYSTEM
             DRAW_BIRD_MOTION(logger,logger_bird,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"drone",param.drone,"bird",param.bird,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
         end
 
-        function plot_fig(obj,logger,logger_bird)
+        function plot_evaluation(obj,logger)
             t = logger.Data.t;
             result = logger.Data.agent(1).reference.result;
             result = cell2mat(result);
