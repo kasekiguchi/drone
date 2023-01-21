@@ -43,6 +43,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
         G
         v
         count
+        l_goal
     end
 
     methods
@@ -80,6 +81,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.G %最終目標位置
             obj.v 
             obj.count = 0;
+            obj.l_goal
             
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
 %             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
@@ -92,8 +94,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %radius = ...;
             radius = self.sensor.lidar.radius;
             hx= radius;
-            hy = 1;
-            hz= 1;
+            hy = 0.5;
+            hz= 0.5;
             P = [-0.1,hy,hz;-0.1,-hy,hz;-0.1,-hy,-hz;-0.1,hy,-hz;
                   hx,hy,hz;hx,-hy,hz;hx,-hy,-hz;hx,hy,-hz];
             T= [1,3,2;1,4,3;1,5,8;1,8,4;1,2,6;1,6,5;2,7,6;2,3,7;3,8,7;3,4,8;5,6,7;5,7,8];
@@ -120,9 +122,9 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.sensor = obj.self.sensor.result; %センサ情報
             obj.length = obj.sensor.length; % 距離データ
             l_points = obj.sensor.sensor_points; %座標データ
-            l_goal = R'*(obj.goal-p); % local でのゴール位置
-            goal_length = vecnorm(l_goal); % ゴールまでの距離
-            l_goal_angle = atan2(l_goal(2),l_goal(1)); %ゴールまでの角度
+            obj.l_goal = R'*(obj.goal-p); % local でのゴール位置
+            goal_length = vecnorm(obj.l_goal); % ゴールまでの距離
+            l_goal_angle = atan2(obj.l_goal(2),obj.l_goal(1)); %ゴールまでの角度
             [~,id]=min(abs(obj.self.sensor.lidar.phi_range - l_goal_angle)); % goal に一番近い角度であるレーザーインデックス(3D)
 
 %             % 32x63 に整形
@@ -131,18 +133,16 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.Gpath = obj.gen_path(p,R,obj.goal);%検出範囲の向き変更
 %             % Main algorithm
             if (find(obj.length < obj.Gpath.length,1)) % Gpath内に点群がある場合
-              if(find(obj.length < obj.gpath.length,1))% gpath 内に点群がある場合
+              if(find(obj.length < obj.gpath.length,1)) % gpath 内に点群がある場合
                 [obj.g,obj.v] = obj.T_bug(obj,change_length,l_points,goal_length,id);
               else% gpath内に点群がない場合
                 obj.count = obj.check_reach_to_g(p,obj.g,obj.count);
                 if (obj.count > 20) % 到達した場合
                     [obj.g,obj.v] = obj.T_bug(obj,change_length,l_points,goal_length,id);
-                else
-                    obj.g = obj.g;
                 end         
               end
               obj.g = R * obj.g + p;
-              obj.v = v;
+              obj.v = obj.v;
               obj.gpath = obj.gen_path(p,R,obj.g);
             else % Gpath内に点群がない場合
               % G へ向かう
@@ -178,7 +178,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 
         function tid = ancher_detection(~,length,nlength,threshold,l_points,pitch,id,goal,goal_length) %端点を検出する
             edge_ids = find(abs(nlength-length) > threshold); %隣との距離の差が大きいところのindex配列（端点）
-            edge_points = l_points(:,edge_ids);%2Dだとエラー吐く
+            edge_points = l_points(:,edge_ids);
             %これより下をいじる必要あり？
             tmp = length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列
             edge_ids(tmp) = edge_ids(tmp) - 1;%壁が配列なので-1して障害物にする
@@ -230,12 +230,12 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %goal_length:goalと自己位置の距離
             %id:l_goal_angleに一番近いセンサのインデックス
             hlength = circshift(length,[0 1]); %右に１つずらした距離データ
-            h_tid = obj.ancher_detection(length,hlength,obj.threshold,l_points,obj.pitch,id,obj.goal,goal_length); %左右方向の端点検出
+            h_tid = obj.ancher_detection(length,hlength,obj.threshold,l_points,obj.pitch,id,obj.l_goal,goal_length); %左右方向の端点検出
             vlength = circshift(length,[1 0]);%上に1つずらした距離データ
-            v_tid = obj.ancher_detection(length,vlength,obj.threshold,l_points,obj.pitch,id,obj.goal,goal_length); %上下方向の端点検出
+            v_tid = obj.ancher_detection(length,vlength,obj.threshold,l_points,obj.pitch,id,obj.l_goal,goal_length); %上下方向の端点検出
             
             Length = [length(:,end),length,length(:,1)];
-            [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.goal,l_points,length,obj.pitch); %経路とする端点を決定
+            [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.l_goal,l_points,length,obj.pitch); %経路とする端点を決定
 
             if route == v_tid %上下方向の端点の場合
                 if Length(tid+2) > Length(tid) %下を潜り抜ける場合
@@ -299,8 +299,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             N = P_r - T;
             t = cross(N,obj.e_z);
             o = (obj.v_max/obj.margin_conect);
-            v = t*o;
-            
+            v = t*o;          
         end
 
 %             obj.state = obj.self.estimator.result.state; %自己位置
