@@ -27,7 +27,7 @@ for i = 1:Nb
     %% model
     % set control model
 %     bird(i).set_model(Model_Bird(dt,initial_bird_state(i),i)) % 鳥のモデル（離散時間モデル）
-    bird(i).set_model(Model_Bird_EulerAngle(dt,initial_bird_state(i),i)) % 鳥のモデル（オイラー角モデル）
+    bird(i).set_model(Model_Bird_EulerAngle(dt,initial_bird_state(i),i),BIRD_PARAM("TCUbird")) % 鳥のモデル（オイラー角モデル）
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
