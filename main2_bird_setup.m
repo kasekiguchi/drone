@@ -14,21 +14,26 @@ for i = 1:Nb
         bird(i).input = [0; 0; 0; 0];
     else
         %agent(i) = DRONE(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
-        bird(i) = BIRD(Model_Bird(dt,initial_bird_state(i), i),BIRD_PARAM("TCUbird"));                % euler angleのプラントモデル : for sim
+%         bird(i) = BIRD(Model_Bird(dt,initial_bird_state(i), i),BIRD_PARAM("TCUbird"));                % euler angleのプラントモデル : for sim
+        bird(i) = BIRD(Model_Bird_EulerAngle(dt,initial_bird_state(i), i),BIRD_PARAM("TCUbird"));                % euler angleのプラントモデル : for sim
         %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
         %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
-        %[M,P]=Model_Discrete(dt,initial_state(i),i);
+%         [M,P]=Model_Discrete(dt,initial_state(i),i);
+%         bird(i) = BIRD(Model_Bird(dt,initial_state(i),i),POINT_MASS_PARAM("TCUbird"));
+
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
     end
 
     %% model
     % set control model
-    bird(i).set_model(Model_Bird(dt,initial_bird_state(i),i)) % 鳥のモデル（離散時間モデル）
+%     bird(i).set_model(Model_Bird(dt,initial_bird_state(i),i)) % 鳥のモデル（離散時間モデル）
+    bird(i).set_model(Model_Bird_EulerAngle(dt,initial_bird_state(i),i)) % 鳥のモデル（オイラー角モデル）
     %agent(i).set_model(Model_Quat13(dt,initial_state(i),i)); % オイラーパラメータ（unit quaternion）モデル
     %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
     %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
-    %agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+%     agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
+%     bird(i).set_model(Model_Bird(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
     %agent(i).set_model(Model_Three_Vehicle(dt,initial_state(i),i)); % for exp % 機体番号（ESPrのIP）
     close all
     %% set input_transform property

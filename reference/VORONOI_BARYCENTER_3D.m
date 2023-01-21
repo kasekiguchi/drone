@@ -116,8 +116,8 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             C = V(3,1)*X + V(3,2)*Y + V(3,3)*Z;
 
             % 描画用変数
-            obj.result.state.p = initial_state(obj.id).p;
-%             obj.result.state.p = state.p + 0.9*(xd - state.p)/norm(xd - state.p);
+%             obj.result.state.p = initial_state(obj.id).p;
+            obj.result.state.p = state.p + 0.9*(xd - state.p)/norm(xd - state.p);
             obj.result.qx = x;
             obj.result.qy = y;
             obj.result.qz = z;

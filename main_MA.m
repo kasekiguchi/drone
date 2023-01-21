@@ -221,8 +221,8 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"input",""},{2,"input",""},"fig_num",2,"row_col",[1 2]);
-logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,"input",""},{6,"input",""},"fig_num",3,"row_col",[2 3]);
+logger.plot({1,"q","e"},{2,"q","e"},"fig_num",2,"row_col",[1 2]);
+logger_bird.plot({1,"q","e"},{2,"q","e"},{3,"q","e"},{4,"q","e"},{5,"q","e"},{6,"q","e"},"fig_num",3,"row_col",[2 3]);
 % agent(1).reference.timeVarying.show(logger)
 % bird(1).plot_fig(logger,logger_bird);
 

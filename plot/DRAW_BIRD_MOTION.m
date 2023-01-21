@@ -79,7 +79,7 @@ classdef DRAW_BIRD_MOTION
             for n = param.drone
                 for i = 4:-1:1
                     h(n,i) = surface(ax,xr+rp(i,1),yr+rp(i,2),zr+rp(i,3),'FaceColor',c(i)); % rotor 描画
-                    T(n,i) = quiver3(ax,rp(i,1),rp(i,2),rp(i,3),0,0,1,'FaceColor',c(i)); % 推力ベクトル描画
+                    T(n,i) = quiver3(ax,rp(i,1),rp(i,2),rp(i,3),1,1,1,'FaceColor',c(i)); % 推力ベクトル描画
                     tt(n,i) = hgtransform('Parent',ax); set(T(n,i),'Parent',tt(n,i)); % 推力を慣性座標と紐づけ
                 end
                 h(n,5) = surface(ax,[F1(1,:);F1(4,:);NaN(1,size(F1,2));F2(1,:);F2(4,:)], ...
