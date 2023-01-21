@@ -6,7 +6,7 @@ arguments
   id
 end
 Model.type="THREE_STATE_VEHICLE_MODEL"; % class name
-Model.name="three_vehicle"; % print name
+Model.name="vehicle"; % print name
 Model.id = id;
 Setting.dt = dt;
 Setting.method = "three_state_vehicle_model"; % model dynamicsの実体名

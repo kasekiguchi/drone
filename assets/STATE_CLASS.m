@@ -160,6 +160,8 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
                             else
                                 q= R2v(RodriguesQuaternion(Eul2Quat(value)));
                             end
+                        otherwise
+                            q = value;
                     end
                 end
             

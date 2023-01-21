@@ -13,6 +13,8 @@ function model_full_name = get_model_name(sn)
         case "R 18"
             model_full_name = "rotation_matrix_thrust_force_physical_parameter_model";
         case "Load"
+            model_full_name = "with_load_model";
+        case "Load_Euler"
             model_full_name = "euler_with_load_model";
         case "Bird"
             model_full_name = "bird_model";
