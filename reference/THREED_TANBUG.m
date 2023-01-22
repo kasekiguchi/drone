@@ -16,6 +16,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
         forward %ドローンが向かう座標
         d %現在位置から目標位置までの距離
         angle %ドローンの姿勢角
+        e_y %y方向のベクトル
         e_z %z方向のベクトル
         v_max %速度ベクトルの上限
         dtheta %目標角度とセンサが見ている角度の差
@@ -63,7 +64,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D
             obj.margin = 0.5;
-            obj.margin_conect = 0.8;
+            obj.margin_conect = 0.4;
             obj.threshold = 1.5;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
@@ -74,6 +75,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.v_layer = 32; %3DLiDARの層
                        
             obj.self=self;
+            obj.e_y = [0,1,0]';
             obj.e_z = [0,0,1]';
             obj.v_max = 0.3;
 
@@ -86,6 +88,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %             obj.result.state = STATE_CLASS(struct('state_list', ["xd","p","q"], 'num_list', [20, 3, 3]));     
 %             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
             obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
+%             obj.result.state = STATE_CLASS(struct('state_list', ["p"], 'num_list', [3]));
             obj.result.state.p = [0;0;0];
 %            obj.path_goal = zeros(size(self.sensor.lrf.angle_range));
             obj.path_goal = zeros(size(self.sensor.lidar.phi_range));%3D
@@ -94,8 +97,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %radius = ...;
             radius = self.sensor.lidar.radius;
             hx= radius;
-            hy = 0.4;
-            hz= 0.4;
+            hy = 0.25;
+            hz= 0.25;
             P = [-0.1,hy,hz;-0.1,-hy,hz;-0.1,-hy,-hz;-0.1,hy,-hz;
                   hx,hy,hz;hx,-hy,hz;hx,-hy,-hz;hx,hy,-hz];
             T= [1,3,2;1,4,3;1,5,8;1,8,4;1,2,6;1,6,5;2,7,6;2,3,7;3,8,7;3,4,8;5,6,7;5,7,8];
@@ -147,7 +150,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             else % Gpath内に点群がない場合
               % G へ向かう
               obj.g = obj.goal; 
-              obj.v = [0 0 0];
+              obj.v = [0;0;0];
+              %%%%%%%%%%%%%%%%
             end
             obj.result.state.p = obj.g;
             obj.result.state.v = obj.v;
@@ -182,7 +186,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %これより下をいじる必要あり？
             tmp = length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列  /壁→障害物
             edge_ids(tmp) = edge_ids(tmp) - th;%壁が配列なので-32or-1して障害物にする
-            edge_ids(edge_ids==0) = zero_change;%0配列は63or32にする  %%%%%%%%%%%   
+            edge_ids(edge_ids==0) = numel(length);%0配列は63or32にする%%%%%%%%%%%%
+            edge_ids(edge_ids<0) = edge_ids(edge_ids<0)+numel(length);%%%%%%%%%%
 %             te_angle = pitch*abs(edge_ids - id); % angle between target-edge
 %             [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
 %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
@@ -244,23 +249,23 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                 if Length(tid+2) > Length(tid) %下を潜り抜ける場合
                     [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
                     g = [tmp1;edge_p(2);tmp2];%ローカル
-                    v = -obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                    v = obj.velocity_vector(obj.state_initial,edge_p,g,obj.e_y);%ローカル
                 else %上を通る場合
                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
                     g = [tmp1;edge_p(2);tmp2];%ローカル
-                    v = obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                    v = -obj.velocity_vector(obj.state_initial,edge_p,g,obj.e_y);%ローカル
                 end
             else %左右方向の端点の場合
                 if Length(tid+obj.v_layer*2) > Length(tid) % 左回りで避ける
                     %tid = obj.width_check(tid,-1);
                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
                     g = [tmp1;tmp2;edge_p(3)];%ローカル
-                    v = obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                    v = obj.velocity_vector(obj.state_initial,edge_p,g,obj.e_z);%ローカル
                 else % 右回り
                     %tid = obj.width_check(tid,1);
                     [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(2),edge_p(1),edge_p(2),obj.margin_conect);%x-yで端点を中心とする接点作成
                     g = [tmp1;tmp2;edge_p(3)];%ローカル
-                    v = -obj.velocity_vector(obj.state_initial,edge_p,g);%ローカル
+                    v = -obj.velocity_vector(obj.state_initial,edge_p,g,obj.e_z);%ローカル
                 end
             end
          end
@@ -293,14 +298,14 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %             contact = [A_x,A_y,B_x,B_y];            
         end
         
-        function v = velocity_vector(obj,x,y,P)
+        function v = velocity_vector(obj,x,y,P,e)
             % x:ドローンの現在位置
             % y:障害物点の座標
             % P:疑似目標位置
             T = y - x;
             P_r = P - x;
             N = P_r - T;
-            t = cross(N,obj.e_z);
+            t = cross(N,e);
             o = (obj.v_max/obj.margin_conect);
             v = t*o;          
         end
