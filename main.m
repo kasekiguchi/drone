@@ -203,7 +203,7 @@ ylabel('Position [m]')
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 %%
-logger.plot({1,"p1-p2","er"});
+logger.plot({1,"p1-p2-p3","e"});
 hold on
 % plot(polyshape(env),'FaceColor','b');
 plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
@@ -224,7 +224,7 @@ hold off
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 hold on
 agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"])
-logger.plot({1,"p1-p2","e","#D95319"});
+logger.plot({1,"p1-p2-p3","e","#D95319"});
 % plot(polyshape(env),'FaceColor','b');
 % % % plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目

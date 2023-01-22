@@ -151,7 +151,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
               % G へ向かう
               obj.g = obj.goal; 
               obj.v = [0;0;0];
-              %%%%%%%%%%%%%%%%
+              obj.gpath = obj.gen_path(p,R,obj.g);
             end
             obj.result.state.p = obj.g;
             obj.result.state.v = obj.v;
@@ -188,12 +188,12 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             edge_ids(tmp) = edge_ids(tmp) - th;%壁が配列なので-32or-1して障害物にする
             edge_ids(edge_ids==0) = numel(length);%0配列は63or32にする%%%%%%%%%%%%
             edge_ids(edge_ids<0) = edge_ids(edge_ids<0)+numel(length);%%%%%%%%%%
-%             te_angle = pitch*abs(edge_ids - id); % angle between target-edge
-%             [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
+            te_angle = pitch*abs(edge_ids - id); % angle between target-edge
+            [~,tmp] = min(length(edge_ids).*(length(edge_ids)-goal_length*cos(te_angle))); % target id
 %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
-            reference_goal = goal - l_points(:,edge_ids);
-            reference_goal = vecnorm(reference_goal);%端点の候補→referenceの距離
-            [~,tmp] = min(length(edge_ids)+reference_goal');%自己位置→端点の候補→referenceの距離が小さい配列
+%             reference_goal = goal - l_points(:,edge_ids);
+%             reference_goal = vecnorm(reference_goal);%端点の候補→referenceの距離
+%             [~,tmp] = min(length(edge_ids)+reference_goal');%自己位置→端点の候補→referenceの距離が小さい配列
             tid = edge_ids(tmp);%最短経路の配列
         end
 
