@@ -63,7 +63,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D
             obj.margin = 0.5;
-            obj.margin_conect = 0.5;
+            obj.margin_conect = 0.8;
             obj.threshold = 1.5;
             obj.d = 0;
             obj.waypoint.under = [0,0,0]';
@@ -94,8 +94,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %radius = ...;
             radius = self.sensor.lidar.radius;
             hx= radius;
-            hy = 0.5;
-            hz= 0.5;
+            hy = 0.4;
+            hz= 0.4;
             P = [-0.1,hy,hz;-0.1,-hy,hz;-0.1,-hy,-hz;-0.1,hy,-hz;
                   hx,hy,hz;hx,-hy,hz;hx,-hy,-hz;hx,hy,-hz];
             T= [1,3,2;1,4,3;1,5,8;1,8,4;1,2,6;1,6,5;2,7,6;2,3,7;3,8,7;3,4,8;5,6,7;5,7,8];
@@ -154,35 +154,35 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             result = obj.result;   
         end   
 
-        function path = make_path(~,theta,margin,range,radius,goal_angle,goal)%検出範囲の作成
-            %theta: センサの分解能
-            %margin: ドローンの横幅（検出範囲の横の長さ）
-            %range: センサのレンジ
-            %goal_angle: ゴールまでの角度
-            %goal: ゴールまでの距離
-            path = zeros(size(range));
-            tmp =find((radius*sin(theta) >= margin).*(theta <= pi/2));%2~16列目のインデックスを算出
-            path(tmp) = margin./sin(theta(tmp));
-            path(1:find(path,1)-1) = radius;
-            margin =margin;
+%         function path = make_path(~,theta,margin,range,radius,goal_angle,goal)%検出範囲の作成
+%             %theta: センサの分解能
+%             %margin: ドローンの横幅（検出範囲の横の長さ）
+%             %range: センサのレンジ
+%             %goal_angle: ゴールまでの角度
+%             %goal: ゴールまでの距離
+%             path = zeros(size(range));
+%             tmp =find((radius*sin(theta) >= margin).*(theta <= pi/2));%2~16列目のインデックスを算出
+%             path(tmp) = margin./sin(theta(tmp));
+%             path(1:find(path,1)-1) = radius;
+%             margin =margin;
+% 
+%             tmp = find((radius*sin(theta) <= -margin).*(theta >= 3*pi/2));%49~63列目のインデックスを算出
+%             path(tmp) = -margin./sin(theta(tmp));
+%             path(find(path,1,'last')+1:end) = radius;
+%             margin =margin;
+%             [~,id] = min(abs(range - goal_angle));
+%             path = circshift(path,id-1);
+%             path(path>goal) = goal;        
+%         end
 
-            tmp = find((radius*sin(theta) <= -margin).*(theta >= 3*pi/2));%49~63列目のインデックスを算出
-            path(tmp) = -margin./sin(theta(tmp));
-            path(find(path,1,'last')+1:end) = radius;
-            margin =margin;
-            [~,id] = min(abs(range - goal_angle));
-            path = circshift(path,id-1);
-            path(path>goal) = goal;        
-        end
 
-
-        function tid = ancher_detection(~,length,nlength,threshold,l_points,pitch,id,goal,goal_length) %端点を検出する
+        function tid = ancher_detection(~,length,nlength,threshold,l_points,pitch,id,goal,goal_length,th,zero_change) %端点を検出する
             edge_ids = find(abs(nlength-length) > threshold); %隣との距離の差が大きいところのindex配列（端点）
             edge_points = l_points(:,edge_ids);
             %これより下をいじる必要あり？
-            tmp = length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列
-            edge_ids(tmp) = edge_ids(tmp) - 1;%壁が配列なので-1して障害物にする
-            edge_ids(edge_ids==0) = length(end);%0配列は63にする     
+            tmp = length(edge_ids) > nlength(edge_ids);%障害物→壁の場合の配列  /壁→障害物
+            edge_ids(tmp) = edge_ids(tmp) - th;%壁が配列なので-32or-1して障害物にする
+            edge_ids(edge_ids==0) = zero_change;%0配列は63or32にする  %%%%%%%%%%%   
 %             te_angle = pitch*abs(edge_ids - id); % angle between target-edge
 %             [~,tmp] = min(obj.length(edge_ids).*(obj.length(edge_ids)-goal_length*cos(te_angle))); % target id
 %             [~,tmp] = min((length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
@@ -229,10 +229,13 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %l_points:センサの座標データ
             %goal_length:goalと自己位置の距離
             %id:l_goal_angleに一番近いセンサのインデックス
+            h_th = obj.v_layer;
+            v_th = 1;
+            [v,h] = size(length);
             hlength = circshift(length,[0 1]); %右に１つずらした距離データ
-            h_tid = obj.ancher_detection(length,hlength,obj.threshold,l_points,obj.pitch,id,obj.l_goal,goal_length); %左右方向の端点検出
+            h_tid = obj.ancher_detection(length,hlength,obj.threshold,l_points,obj.pitch,id,obj.l_goal,goal_length,h_th,h); %左右方向の端点検出
             vlength = circshift(length,[1 0]);%上に1つずらした距離データ
-            v_tid = obj.ancher_detection(length,vlength,obj.threshold,l_points,obj.pitch,id,obj.l_goal,goal_length); %上下方向の端点検出
+            v_tid = obj.ancher_detection(length,vlength,obj.threshold,l_points,obj.pitch,id,obj.l_goal,goal_length,v_th,v); %上下方向の端点検出
             
             Length = [length(:,end),length,length(:,1)];
             [tid,edge_p,route] = ancher_determine(obj,v_tid,h_tid,obj.l_goal,l_points,length,obj.pitch); %経路とする端点を決定

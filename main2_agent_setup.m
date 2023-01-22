@@ -113,7 +113,7 @@ for i = 1:N
 %   agent(i).set_property("sensor",Sensor_LiDAR(i));%matlabで作成したシンプル環境用
 %   agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
 %   env = stlread('3F.stl');
-  env = stlread('3d_Simple.stl');
+  env = stlread('3d_Simple_wall.stl');
   model.Vertices = env.Points;
   model.Faces    = env.ConnectivityList;
   figure(2), clf
