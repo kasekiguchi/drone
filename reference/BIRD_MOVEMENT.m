@@ -17,7 +17,7 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             end
             obj.self = self;
             obj.param = param;
-            obj.result.state = STATE_CLASS(struct('state_list',"p",'num_list',3));
+            obj.result.state = STATE_CLASS(struct('state_list',["p","q"],'num_list',[3,3]));
             obj.id = self.sensor.motive.rigid_num;
             obj.farm = [0;0;0];
         end
@@ -59,6 +59,8 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             away_gain = 0.3; % ドローンから離れる
             field_away_gain = 0.4; % 地面からの反力
 
+            
+
             % 目標値
 %             if obj.id == 1
 %                 obj.result.state.p = [cos(time.t);sin(time.t);abs(sin(time.t))];
@@ -71,8 +73,16 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             u = join_gain*join + separate_gain*separate + go_gain*go + away_gain*away + field_away_gain*field_away;
             gain = 0.8;
             obj.result.farm = ref;
+
+            % 目標座標
 %             obj.result.state.p = initial_state(obj.id).p;
             obj.result.state.p = state.p + gain*u/norm(u);
+
+            % 目標姿勢角
+            Roll = state.q(1); % ロール角（ひねり）
+            Pitch = state.q(2) - 0.1*subspace([ref(1);ref(3)] - [state.p(1);state.p(3)],[obj.result.state.p(1);obj.result.state.p(3)] - [state.p(1);state.p(3)]); % ピッチ角（上下）
+            Yaw = state.q(3) - 0.1*subspace(ref(1:2) - state.p(1:2),obj.result.state.p(1:2) - state.p(1:2)); % ヨー角（左右）
+            obj.result.state.q = [Roll;Pitch;Yaw];
             result = obj.result;
         end
 

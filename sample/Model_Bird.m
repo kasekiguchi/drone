@@ -7,8 +7,9 @@ arguments
   id
 end
 Setting.dt = dt;
-type="DISCRETE_MODEL"; % class name
-name="discrete"; % print name
+Model.type="DISCRETE_MODEL"; % class name
+Model.name="discrete"; % print name
+Model.id = id; % bird id
 Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
 Setting.param.A = [zeros(3)];
 Setting.param.B =eye(3);% x.p = u; 次の時刻にu の位置に行くモデル
@@ -17,5 +18,5 @@ Setting.initial = initial;%struct('p',[0;0;0]);
 Setting.state_list = ["p"];
 Setting.num_list = [3];
 Setting.input_channel = ["p"];
-Model = {"type",type,"name",name,"param",Setting,"id",id};
+Model.param = Setting;
 end
