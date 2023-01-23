@@ -405,24 +405,24 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 if ~fhold
                     hold off
                 end
-                if fcolor
-                    txt = {''};
-                    if length([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]) == 2
-                        Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')])); % take off phase
-                        %                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
-                        txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
-                    end
-                    if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
-                        Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
-                        txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
-                    end
-                    if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
-                        Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
-                        txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
-                    end
-
-                    text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
-                end
+%                 if fcolor
+%                     txt = {''};
+%                     if length([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]) == 2
+%                         Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')])); % take off phase
+%                         %                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
+%                         txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+%                     end
+%                     if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
+%                         Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
+%                         txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
+%                     end
+%                     if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
+%                         Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
+%                         txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+%                     end
+% 
+%                     text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
+%                 end
             end
         end
         function [name, vrange] = full_var_name(obj, var, att)

@@ -11,6 +11,9 @@ classdef sensor_ceiling_sim < SENSOR_CLASS
         angle_range
         KF
         z_d
+        A
+        b
+        c
     end
 
     methods

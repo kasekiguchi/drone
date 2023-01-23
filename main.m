@@ -113,7 +113,7 @@ try
             param(i).reference.wall = {1};
             param(i).reference.tbug = {};
             param(i).reference.agreement = {logger, N, time.t};
-            param(i).reference.ceiling = {time,FH,wall_x,reference_ceiling_margin};%時間,FH,壁の位置
+            param(i).reference.ceiling = {time,FH,wall_x,reference_ceiling_margin,[3;0]};%時間,FH,壁の位置，マージン，目標位置
             param(i).reference.PtoP = {FH};
 
             for j = 1:length(agent(i).reference.name)
@@ -205,21 +205,21 @@ clc
 % logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
-% logger.plot({1,"p","rs"},{1,"sensor.result.VL_length",""});
+% logger.plot({1,"p","er"},{1,"sensor.result.distance.VL",""});
 % logger.plot({1,"p","rs"},{1,"rpm",""},{1,"inner_input",""});%ros2←多分名前が悪さをしているので代入してから使う
 % logger.plot({1,"rpm",""},{1,"voltage",""},{1,"current",""})
-logger.plot({1,"p","er"});
-% logger.plot(1,"p1-p2","er");
-% logger.plot({1,"p","rs"},{1,"inner_input",""});
+% logger.plot({1,"p","er"});
+% logger.plot({1,"p1-p2-p3","er"});
+% logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
+logger.plot({1,"p","rs"},{1,"inner_input",""});
 %agent(1).reference.timeVarying.show(logger)
 % logger.plot({1,"rpm",""});
-
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 %agent(1).animation(logger,"target",1:N);
 % agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[0,0,3.1],"length",[5,5,0.2])));%天井room = [-2 -5;-2 4;7 4;7 -5];
- agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[wall_x,0,1],"length",[0.2,2,2])));%壁room = [-2 -5;-2 4;7 4;7 -5]
+%  agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[wall_x,0,1],"length",[0.2,2,2])));%壁room = [-2 -5;-2 4;7 4;7 -5]
 %%
 %logger.save();

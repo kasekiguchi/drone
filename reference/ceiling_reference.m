@@ -44,17 +44,35 @@ classdef ceiling_reference < REFERENCE_CLASS
                 obj.t=Param{1}.t;
                 t = obj.t;
            end
-           %% %書き換え部分 x座標
+           %% 自己位置
+           p = obj.self.estimator.result.state.p;%自己位置
+           yaw = 0;%目標位置への角度
+           y_marjin = 1.5;
+           %% x座標
            goal_potential = obj.func(t);%目標位置に向かうポテンシャル 
-           obs_potential = -obj.func(t)/(Param{3}-obj.self.estimator.result.state.p(1))^2;%障害物からのポテンシャル
-           obj.result.state.p = obs_potential + goal_potential;%potentialの合成
-           obj.result.state.p(1) = obj.self.estimator.result.state.p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
-           %% y座標のポテンシャル設定
+           obs_potential_x = -obj.func(t)/(Param{3}-p(1))^2;%*((y_marjin-p(2))/y_marjin);%障害物からのポテンシャル
+           %obs_potential_x = -obj.func(t)/(obj.self.sensor.VL.result.distance(2))^2;%*((y_marjin-p(2))/y_marjin);%障害物からのポテンシャル(実験用)
+           obj.result.state.p = obs_potential_x + goal_potential;%potentialの合成
+           obj.result.state.p(1) = p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
            
-           
+           %% y座標
+%             obs_potential_y = -obj.func(t)/(-obj.self.estimator.result.state.p(2))^2;%障害物からのポテンシャル
+%             obj.result.state.p(6) = goal_potential(6);
+%             obj.result.state.p(2) = p(2) +goal_potential(2);%obj.result.state.p(2);%現在位置にpotentialを付与
            %% %sensorの値から高度を指定　z座標
            margin_z = Param{4};
-           obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + obj.self.estimator.result.state.p(3) - margin_z;%z方向の目標位置
+           obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + p(3) - margin_z;%z方向の目標位置
+%            obj.result.state.p(3) = obj.self.sensor.VL.result.distance(1) + p(3) - margin_z;%z方向の目標位置(実験用)
+           %% 目標位置にたどり着いたか
+           if obj.cha =='f'
+               if norm(Param{5}(1)-obj.self.reference.result.state.p(1)) < 0.1%目標位置にたどり着いたか
+                   obj.result.state.p(1) = p(1);%Param{5}(1);%その場停滞
+                   obj.result.state.p(5) = 0;
+               end
+%                if norm(Param{5}(2)-obj.self.reference.result.state.p(2)) < 0.1%目標位置にたどり着いたか
+%                    obj.result.state.p(2) = Param{5}(2);%その場停滞
+%                end
+           end
            result = obj.result;
         end
         function show(obj, logger)
