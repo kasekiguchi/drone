@@ -106,14 +106,14 @@ try
             end
             param(i).reference.covering = [];
             
-            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,10,reference_ceiling_margin};%reference.pointの目標位置を指定できる（Param{5}目標高度，Param{6}，マージン）
+            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,2,reference_ceiling_margin,fExp};%reference.pointの目標位置を指定できる（Param{5}目標高度，Param{6}，マージン）
 
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
             param(i).reference.tbug = {};
             param(i).reference.agreement = {logger, N, time.t};
-            param(i).reference.ceiling = {time,FH,wall_x,reference_ceiling_margin,[3;0]};%時間,FH,壁の位置，マージン，目標位置
+            param(i).reference.ceiling = {time,FH,wall_x,reference_ceiling_margin,[3;0],fExp};%時間,FH,壁の位置，マージン，目標位置
             param(i).reference.PtoP = {FH};
 
             for j = 1:length(agent(i).reference.name)
@@ -210,8 +210,8 @@ clc
 % logger.plot({1,"rpm",""},{1,"voltage",""},{1,"current",""})
 % logger.plot({1,"p","er"});
 % logger.plot({1,"p1-p2-p3","er"});
-% logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
-logger.plot({1,"p","rs"},{1,"inner_input",""});
+logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
+% logger.plot({1,"p","rs"},{1,"inner_input",""});
 %agent(1).reference.timeVarying.show(logger)
 % logger.plot({1,"rpm",""});
 

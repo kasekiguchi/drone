@@ -105,7 +105,7 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_LiDAR(i));
     agent(i).set_property("sensor",Sensor_celing(i));
-%     agent(i).set_property("sensor",Sensor_vl53l1x(i));
+    agent(i).set_property("sensor",Sensor_vl53l1x(i));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -138,7 +138,7 @@ for i = 1:N
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
     agent(i).set_property("reference", Reference_Point_celing());  
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
-    %agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
+%     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
     n=3;

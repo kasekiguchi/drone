@@ -64,10 +64,10 @@ classdef VL53L1X < SENSOR_CLASS
                 obj.result= obj.self.sensor.VL.result;
             end
             %% 実際の天井との距離に変換
-            obj.result.distance.VL = (obj.KF.x_h(1))*cos(Roll)*cos(Pitch)/100;
+            obj.result.distance.VL = (obj.KF.x_h(1))*cos(Roll)*cos(Pitch)/1000;
             obj.result.distance.teraranger = (obj.KF.x_h(2))*cos(Roll)*cos(Yaw)/1000;
             obj.result.switch = 0;
-            if obj.result.distance.VL < 60
+            if obj.result.distance.VL < 0.05
                 obj.result.switch = 1;
             end
             result = obj.result;

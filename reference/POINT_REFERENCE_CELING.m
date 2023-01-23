@@ -39,8 +39,14 @@ classdef POINT_REFERENCE_CELING < REFERENCE_CLASS
                 end
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
-                if obj.self.sensor.result.ceiling_distance - Param{6} < Param{5} - obj.self.estimator.result.state.p(3)%%ココ追加
-                    Param{5} = obj.self.sensor.result.ceiling_distance + obj.self.estimator.result.state.p(3) -Param{6}; 
+                if Param{7}==1
+                    if obj.self.sensor.VL.result.distance.VL - Param{6} < Param{5} - obj.self.estimator.result.state.p(3)%%ココ追加
+                        Param{5} = obj.self.sensor.VL.result.distance.VL + obj.self.estimator.result.state.p(3) -Param{6};
+                    end
+                else
+                    if obj.self.sensor.result.ceiling_distance - Param{6} < Param{5} - obj.self.estimator.result.state.p(3)%%ココ追加
+                        Param{5} = obj.self.sensor.result.ceiling_distance + obj.self.estimator.result.state.p(3) -Param{6};
+                    end
                 end
                 if strcmp(obj.flag,'t')
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),5,Param{3}-obj.base_time);
