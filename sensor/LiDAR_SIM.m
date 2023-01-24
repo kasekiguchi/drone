@@ -107,12 +107,19 @@ methods
         obj.result = result;
     end
 
-    function show(obj, pq,q)
+    function fh= show(obj, opt)
         arguments
             obj
-            pq
-            q = 0;
+            opt.logger = [];
+            opt.FH = 1;
+            opt.t = [];
+            opt.param = [];
+%            pq
+%            q = 0;
         end
+        %fh = figure(opt.FH);
+        fh = opt.FH;
+        pq = opt.param;
         p = pq(1:2);
         if length(pq) >2
             q = pq(end);

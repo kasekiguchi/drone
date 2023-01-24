@@ -77,21 +77,16 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
 
             ref = zeros(4,obj.Horizon);%set data size[x ;y ;theta;v]
 
-            del = -[a.*c,b.*c]./(a.^2+b.^2); % 垂線の足
+            del = -[a.*c,b.*c]./sqrt(a.^2+b.^2); % 垂線の足
 
             ds = [Xs,Ys]; % wall 始点
             de = [Xe,Ye]; % wall 終点
             ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
             wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
-            d = vecnorm(del,2,2); % 壁面までの距離
+            d = vecnorm(del(wid,:),2,2); % wid の壁面までの距離
             %[ip,d,Xs,Ys,Xe,Ye]
-            [~,idm]=min(d(wid)); % 一番近い壁面
-            [~,idm2]=min(del(wid(idm),:)*del(wid,:)');
-            if idm ==idm2
-                error("ACSL : something wrong");
-            end
-            ids=[idm,idm2];
-            ids=wid(ids);
+            [~,idx]=mink(d,2); % 近い２つの壁面
+            ids=wid(idx); % 対象とする２つの壁面
             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]/vecnorm([a(ids(1)),b(ids(1))]);
             l2 = [a(ids(2)),b(ids(2)),c(ids(2))]/vecnorm([a(ids(2)),b(ids(2))]);
             if l1*l2'<0
@@ -268,11 +263,10 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             fWall = agent.reference.result.focusedLine;
 
             figure(FH)
-
             clf(FH)
             grid on
-            axis equal
-            obj.self.show(["sensor","lrf"],[pstate;pstateq]);
+            %axis equal
+            obj.self.show(["sensor","lrf"],"FH",FH,"param",[pstate;pstateq]);
             hold on
             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
             %    agent.sensor.LiDAR.show();
