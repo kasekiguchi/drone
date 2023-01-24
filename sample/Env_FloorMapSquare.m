@@ -53,6 +53,7 @@ Pwalls = union(Poutwall);
 % pwallpoly = polyshape(pwall);
 % Pwalls = union(Poutwall,pwallpoly);
 
+
 %%
 % pout = [-3.5,-1.25;6,-1.25;6,8.75;-3.5,8.75];
 % Poutpoly = polyshape(pout);
@@ -72,6 +73,25 @@ Pwalls = union(Poutwall);
 % pwall = [-1.5,1.25;24,1.25;24,26.75;-1.5,26.75];
 % pwallpoly = polyshape(pwall);
 % Pwalls = union(Poutwall,pwallpoly);
+%%
+pout = [-5,-5;95,-5;95,95;-5,95];
+Poutpoly = polyshape(pout);
+pin = [-6,-6;96,-6;96,96;-6,96];
+Pinpoly = polyshape(pin);
+Poutwall = subtract(Pinpoly,Poutpoly);
+pwall = [0,0;90,0;90,90;0,90];
+pwallpoly = polyshape(pwall);
+Pwalls = union(Poutwall,pwallpoly);
+%%
+pout = [-2,-2;10,-2;10,5;-2,5];
+Poutpoly = polyshape(pout);
+pin = [-2.5,-2.5;10.5,-2.5;10.5,5.5;-2.5,5.5];
+Pinpoly = polyshape(pin);
+Poutwall = subtract(Pinpoly,Poutpoly);
+pwall = [0,0;8,0;8,4;0,4];
+pwallpoly = polyshape(pwall);
+Pwalls = union(Poutwall,pwallpoly);
+
 
 env_param.param.Vertices(:,:,1) = Pwalls.Vertices;
 end

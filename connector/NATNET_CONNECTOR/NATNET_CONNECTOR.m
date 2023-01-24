@@ -3,7 +3,6 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
     %  param : HostIP, ClientIP
     properties
         result
-        rigid_list
     end
     properties (NonCopyable = true, SetAccess = private )
         init_time  % first getData time
