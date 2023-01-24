@@ -26,7 +26,7 @@ classdef YOLO < SENSOR_CLASS
                     obj.result.state.type = length(self.model.state.q);
                 end
             end
-            data = obj.yolo.getData;
+            data = obj.yolo.getData; 
             data.data =  cast(data.data,"double");
             obj.Uxy = [data.data(1);data.data(2)];
             obj.Dxy = [data.data(3);data.data(4)];

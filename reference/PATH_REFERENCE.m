@@ -100,7 +100,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             % Current time reference position calced at previous time
             rp = R'*(obj.result.PreTrack(1:2) - pe);
 
-            if abs(prod(a(ids))+prod(b(ids)))<1e-1 % ほぼ直交している場合（傾きの積が-1の式より）
+            if abs(prod(a(ids))+prod(b(ids)))<3e-1 % ほぼ直交している場合（傾きの積が-1の式より）
                 % TODO : 入りと出で同じ幅の通路を前提としてしまっている．
                 % 初期値が垂直二等分線上の場合その場で回転するだけのリファレンスになる．
                 if isempty(obj.O)
@@ -301,8 +301,8 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 xlim([xmin-10, xmax+10]);
                 ylim([ymin-10,ymax+10]);
             else
-                xlim([estate(1)-5, estate(1)+5]);
-                ylim([estate(2)-5,estate(2)+5]);
+                xlim([estate(1)-5, estate(1)+9]);
+                ylim([estate(2)-5,estate(2)+9]);
             end
             xlabel("$x$ [m]","Interpreter","latex");
             ylabel("$y$ [m]","Interpreter","latex");

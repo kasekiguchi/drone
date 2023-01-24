@@ -67,9 +67,9 @@ methods
                 fprintf("Whill %d is ready\n", obj.IP);
                 state = obj.connector.getData();
                 obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                obj.result.state.q = [state.pose.orientation.y];
+                obj.result.state.q = [-state.pose.orientation.y];
                 obj.state.p = [state.pose.position.z,state.pose.position.x];
-                obj.state.q = [state.pose.orientation.y];
+                obj.state.q = [-state.pose.orientation.y];
 
         end
 
