@@ -7,7 +7,8 @@ C = obj.constant;
 if isempty(map)
     parameter = s;
 else
-    I = extract_in_range_wall_index(map,obj.constant.SensorRange,p(1:2));
+  % map の中でセンサーレンジ内のmap内の壁面インデックスを抽出
+  I = extract_in_range_wall_index(map,obj.constant.SensorRange,p(1:2));
     
     for i = 1:size(s.x,1)
         % Select matching line : all をとることで始点と終点両方が満たしているもののみ取り出す．
