@@ -10,8 +10,8 @@ userpath('clear');
 % warning('off', 'all');
 
 %% general setting
-N = 3; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+N = 1; % number of agents
+fExp = 1 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -106,7 +106,7 @@ try
             end
             param(i).reference.covering = [];
             
-            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,2,reference_ceiling_margin,fExp};%reference.pointの目標位置を指定できる（Param{5}目標高度，Param{6}，マージン）
+            param(i).reference.point = {FH, [0; 0; 1], time.t,dt,1,reference_ceiling_margin,fExp};%reference.pointの目標位置を指定できる（Param{5}目標高度，Param{6}，マージン）
 
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
@@ -205,12 +205,13 @@ clc
 % logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
-% logger.plot({1,"p","er"},{1,"sensor.result.distance.VL",""});
+% logger.plot({1,"p","er"},{1,"sensor.result.distance.teraranger",""});
 % logger.plot({1,"p","rs"},{1,"rpm",""},{1,"inner_input",""});%ros2←多分名前が悪さをしているので代入してから使う
 % logger.plot({1,"rpm",""},{1,"voltage",""},{1,"current",""})
-logger.plot({1,"p","er"},{1,"p1-p2-p3","er"});
+% logger.plot({1,"p","er"},{1,"p1-p2-p3","er"});
 % logger.plot({1,"p1-p2-p3","er"});
 % logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
+logger.plot({1,"p","re"},{1,"v","e"});
 % logger.plot({1,"p","rs"},{1,"inner_input",""});
 %agent(1).reference.timeVarying.show(logger)
 % logger.plot({1,"rpm",""});

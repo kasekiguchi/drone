@@ -10,6 +10,8 @@ function arranged_pos = arranged_position(base_pos,N,gap,z)
     ypos=gap*ypos;
     arranged_pos=base_pos-[gap gap]+[reshape(xpos,[N-rempos,1]),reshape(ypos,[N-rempos,1]);(1:rempos)'*[gap,0]+[0 gap]*(ceil(cpos/2)+1)];
     arranged_pos= [arranged_pos';z*ones(1,size(arranged_pos,1))];
+    if N==3
     arranged_pos= [0 3 3;0 1 -2;0 0 0];
+    end
 end
 

@@ -36,7 +36,7 @@ classdef VL53L1X < SENSOR_CLASS
         
         function result=do(obj,~) 
             %% パラメータ
-            Plant = obj.self.plant;%Plantはドローンの状態
+            Plant = obj.self.sensor.motive.result;%Plantはドローンの状態
             Roll = Plant.state.q(1);%ロール角
             Pitch = Plant.state.q(2);%ピッチ角
             Yaw = Plant.state.q(3);%ピッチ角

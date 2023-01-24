@@ -70,7 +70,7 @@ classdef ceiling_reference < REFERENCE_CLASS
                 obj.result.state.p(1) = p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
                 %% y座標
                 if Param{6}==1
-                    obs_potential_y = 1*0.5*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
+                    obs_potential_y = 3*0.5*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
                 else
                     obs_potential_y = 3*0.5*sin(sita)/(dicetance_wall);%障害物からのポテンシャル
                 end
@@ -80,7 +80,7 @@ classdef ceiling_reference < REFERENCE_CLASS
                 %% %sensorの値から高度を指定　z座標
                 margin_z = Param{4};
                 if Param{6}==1
-                    obj.result.state.p(3) = obj.self.sensor.VL.result.distance.VL + p(3) - margin_z;
+                    obj.result.state.p(3) = 1;%obj.self.sensor.VL.result.distance.VL + p(3) - margin_z;
                 else
                     obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + p(3) - margin_z;%z方向の目標位置
                 end
