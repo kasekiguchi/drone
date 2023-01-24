@@ -3,9 +3,11 @@ for i = 1:logger.k
     eX(i) = logger.Data.agent.estimator.result{1,i}.state.p(1,1);
     eY(i) = logger.Data.agent.estimator.result{1,i}.state.p(2,1);
     eq(i) = logger.Data.agent.estimator.result{1,i}.state.q;
-    pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
-    pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
-    pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
+    if fExp
+        pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
+        pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
+        pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
+    end
     rX(i) = logger.Data.agent.reference.result{1,i}.state.p(1,1);
     rY(i) = logger.Data.agent.reference.result{1,i}.state.p(2,1);
     rq(i) = logger.Data.agent.reference.result{1,i}.state.q;
@@ -18,7 +20,9 @@ figure(6);
 hold on
 grid on
 plot(logger.Data.t(1:logger.k,1),eq);
-plot(logger.Data.t(1:logger.k,1),pq);
+if fExp
+    plot(logger.Data.t(1:logger.k,1),pq);
+end
 plot(logger.Data.t(1:logger.k,1),rq);
 legend('eq','pq','rq');
 xlabel("time [s]");
@@ -30,8 +34,10 @@ hold on
 grid on
 plot(logger.Data.t(1:logger.k,1),eX);
 plot(logger.Data.t(1:logger.k,1),eY);
+if fExp
 plot(logger.Data.t(1:logger.k,1),pX);
 plot(logger.Data.t(1:logger.k,1),pY);
+end
 plot(logger.Data.t(1:logger.k,1),rX);
 plot(logger.Data.t(1:logger.k,1),rY);
 legend({'eX','eY','pX','pY','rX','rY'},'Location','northwest');
@@ -39,6 +45,7 @@ xlabel("time [s]");
 ylabel("p [m]");
 hold off
 
+if fExp
 figure(8)
 hold on 
 grid on
@@ -82,3 +89,4 @@ label = reordercats(label,{'x','y','q'});
 bar(label,RMSE)
 ylabel("RMSE");
 hold off
+end
