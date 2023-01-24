@@ -12,7 +12,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 1; % 1: active
+fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
@@ -113,8 +113,8 @@ try
     end
 
     if fDebug
-      %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-      agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
+      agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+      %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
     end
 
     %% update state

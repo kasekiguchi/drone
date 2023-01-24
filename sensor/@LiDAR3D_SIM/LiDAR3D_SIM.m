@@ -114,7 +114,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         obj
         opt.fField = true;
         opt.fLocal = true; % ボディ座標から見たセンサー情報
-        opt.FH = [];
+        opt.FH = 1;
         opt.logger = [];
         opt.t = 1;
         opt.p = obj.self.plant.state.p;
