@@ -1,5 +1,5 @@
-function data = InportFromExpData()
-%INPORTFFROMEXPDATA ドローンの実験データから入出力を抜き出す関数
+function data = InportFromExpData(expData_Filename)
+%INPORTFROMEXPDATA ドローンの実験データから入出力を抜き出す関数
 %   expData_Filename : 実験データの保存場所
 %   Data     : 出力変数をまとめる構造体
 %   > Data.X : 入力前の状態
@@ -11,7 +11,7 @@ function data = InportFromExpData()
 
 % 実験データ読み込み
 % 読み込むファイル名を指定
-expData_Filename = 'TestData_Quaternion.mat'
+% expData_Filename = 'TestData1.mat'
 
 load(expData_Filename);
 clear data % 読み込んだファイル内のdataと同名の変数を初期化

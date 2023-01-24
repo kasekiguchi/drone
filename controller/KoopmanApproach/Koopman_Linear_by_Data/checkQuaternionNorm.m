@@ -6,8 +6,8 @@ function attitude_norm = checkQuaternionNorm(Q,thre)
 for i=1:size(Q,2)
     attitude_norm(i) = norm(Q(:,i));
 end
-over_threshold=attitude_norm(attitude_norm>1+thre);
-lower_threshold=attitude_norm(attitude_norm<1-thre);
+over_threshold = attitude_norm(attitude_norm > 1+thre);
+lower_threshold = attitude_norm(attitude_norm < 1-thre);
 if find(over_threshold)
     disp('Caution! Quaternions over the norm 1 are included.')
     disp('Press any key to continue the simulation.')
