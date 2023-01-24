@@ -47,34 +47,37 @@ classdef ceiling_reference < REFERENCE_CLASS
                     obj.t=Param{1}.t;
                     t = obj.t;
                 end
-                 %% 自己位置
+                 %% パラメータ
                 p = obj.self.estimator.result.state.p;%自己位置
                 sensor_state = obj.self.sensor.motive.result.rigid;
                 a = [sensor_state(2).p(1);sensor_state(2).p(2)];%端点aの座標
                 b = [sensor_state(3).p(1);sensor_state(3).p(2)];%端点bの座標
                 M = (a+b)/2;
                 sita = atan(-(p(2)-M(2))/(p(1)-M(1)));
+                margin_y = 1;
                 %% x座標
                 goal_potential = obj.func(t);%目標位置に向かうポテンシャル
                 if Param{6}==1
                     obs_potential_x = -obj.func(t)/(obj.self.sensor.VL.result.distance.teraranger)^2;%障害物からのポテンシャル(実験用)
                 else
                     if p(2)<a(2)&&p(2)>b(2)&&p(1)<M(1)
-                        dicetance_wall = Param{3}-p(1);
+                        dicetance_wall = M(1)-p(1);
                     else
-                        dicetance_wall = 5;
+                        dicetance_wall = M(1)-p(1)+3;
                     end
                         obs_potential_x = -obj.func(t)/(dicetance_wall)^2;%障害物からのポテンシャル
                 end
                 obj.result.state.p = obs_potential_x + goal_potential;%potentialの合成
                 obj.result.state.p(1) = p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
                 %% y座標
+                w_y = 3;
+                w_y = 0.3;
                 if Param{6}==1
-                    obs_potential_y = 3*0.5*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
+                    obs_potential_y = w_y*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
                 else
-                    obs_potential_y = 3*0.5*sin(sita)/(dicetance_wall);%障害物からのポテンシャル
+                    obs_potential_y = w_y*w_y*sin(sita)/(dicetance_wall);%障害物からのポテンシャル
                 end
-                goal_potential_y = -0.5*(p(2)-M(2))/sqrt((M(2)+a(2)-b(2))^2);
+                goal_potential_y = -w_y*p(2)/abs(-M(2)+(a(2)-b(2))/2+margin_y);
                 obj.result.state.p(6) = goal_potential_y+obs_potential_y;%y方向速度
                 obj.result.state.p(2) = p(2) + t*obj.result.state.p(6);%y目標座標
                 %% %sensorの値から高度を指定　z座標
