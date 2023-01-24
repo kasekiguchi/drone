@@ -122,7 +122,8 @@ function do(obj, u, varargin)
                     obj.state.p = [state.pose.position.z,state.pose.position.x];
                     obj.state.q = [state.pose.orientation.y];
                 case 'r' % run
-                     obj.msg.linear.x = 0.025;
+%                      obj.msg.linear.x = 0.025;
+                     obj.msg.linear.x = u(1);
                      obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
                     obj.msg.angular.x = 0.0;

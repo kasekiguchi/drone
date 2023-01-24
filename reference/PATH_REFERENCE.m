@@ -298,10 +298,10 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 xmax = max(95,max(Ewallx));
                 ymin = min(-5,min(Ewally));
                 ymax = max(95,max(Ewally));
-                xlim([xmin-5, xmax+5]);
-                ylim([ymin-5,ymax+5]);
+                xlim([xmin-10, xmax+10]);
+                ylim([ymin-10,ymax+10]);
             else
-                xlim([estate(1)-7, estate(1)+7]);
+                xlim([estate(1)-5, estate(1)+5]);
                 ylim([estate(2)-5,estate(2)+5]);
             end
             xlabel("$x$ [m]","Interpreter","latex");

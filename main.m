@@ -25,7 +25,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(12_5_3_st).mat", ["sensor","input"]);
+  logger = LOGGER("Data/Log(1_23_13).mat", ["sensor","input"]);
 %   logger = LOGGER("Data/Log(11_21_1).mat", ["sensor"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
@@ -120,7 +120,7 @@ try
 
     if fDebug
 %         agent.reference.straight.FHPlot(Env,FH,[]);
-%       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+      agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
 %       agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
     end
 
