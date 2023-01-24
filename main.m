@@ -11,9 +11,9 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1; % 1: experiment   0: numerical simulation
+fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
-fOffline = 0; % 1: active : offline verification with saved data
+fOffline = 1; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
 
@@ -25,7 +25,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(1_23_13).mat", ["sensor","input"]);
+  logger = LOGGER("Data/Log(1_24_3).mat", ["sensor","input"]);
 %   logger = LOGGER("Data/Log(11_21_1).mat", ["sensor"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);

@@ -108,13 +108,13 @@ for i = 1:N
        agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
-    agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
+%     agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
 %     agent(i).set_property("sensor",Sensor_motive(struct('DomainID',30)));
 %     agent(i).set_property("sensor",Sensor_Yolo(struct('DomainID',30)));
     %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-%     agent(i).set_property("sensor",Sensor_LiDAR(i));
+    agent(i).set_property("sensor",Sensor_LiDAR(i));
     %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
     %% set estimator property
     agent(i).estimator = [];
