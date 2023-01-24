@@ -121,7 +121,7 @@ function do(obj, u, varargin)
                     obj.result.state.q = [state.pose.orientation.y];
                     obj.state.p = [state.pose.position.z,state.pose.position.x];
                     obj.state.q = [state.pose.orientation.y];
-                case 'r' % run
+                case 'f' % run
 %                      obj.msg.linear.x = 0.025;
                      obj.msg.linear.x = u(1);
                      obj.msg.linear.y = 0.0;
