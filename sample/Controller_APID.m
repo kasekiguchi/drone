@@ -1,15 +1,15 @@
 function Controller= Controller_APID(dt)
 % Adaptive PIDコントローラ設計用
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
-% Controller_param.Kp = [0,0,0;2,2,3]*0.1;
-% Controller_param.Ki = [0 0 0;0 0 0];
-% Controller_param.Kd = [2;0.1]*0.5;
-% Controller_param.K  = [1,1]*0.1;
+Controller_param.Kp = [0,0,0;2,2,3]*0.1;
+Controller_param.Ki = [0 0 0;0 0 0];
+Controller_param.Kd = [2;0.1]*0.5;
+Controller_param.K  = [1,1]*0.1;
 %--------%
-Controller_param.Kp = [0,0,0;2,2,2]*0.5;
-Controller_param.Ki = [0 0 0;0 0 0.05];
-Controller_param.Kd = [2;1]*0.5;
-Controller_param.K  = [1,1]*0.5;
+% Controller_param.Kp = [0,0,0;2,2,2]*0.5;
+% Controller_param.Ki = [0 0 0;0 0 0.05];
+% Controller_param.Kd = [2;1]*0.5;
+% Controller_param.K  = [1,1]*0.5;
 %--------%
 Controller_param.dt = dt;
 Controller_param.strans = str2func("strans_2111");

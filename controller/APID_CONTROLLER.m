@@ -50,7 +50,7 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
 %                 obj.ed = [v-rv;w-rw];
 %             end
             obj.e = [p-rp;q-rq];
-            obj.ed = [obj.K*(p-rp)-rv];
+            obj.ed = [obj.K*(p-rp)-rv;w-rw];
             
            
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);

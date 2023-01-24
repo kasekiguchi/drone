@@ -274,7 +274,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             clf(FH)
             grid on
             %axis equal
-            obj.self.show(["sensor","lrf"],"FH",FH,"param",[pstate;pstateq]);
+            obj.self.show(["sensor","lrf"],"FH",FH,"param",[estate;estateq]);
             hold on
 %             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %                agent.sensor.LiDAR.show();
