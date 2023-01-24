@@ -51,7 +51,7 @@ for i = 1:N
   %% generate Drone instance
   % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
   if fExp
-    agent(i) = DRONE(Model_Drone_Exp(dt, initial_state(i), "udp", [50, 132]), DRONE_PARAM("DIATONE"));                                          % for exp % 機体番号（ESPrのIP）
+%     agent(i) = DRONE(Model_Drone_Exp(dt, initial_state(i), "udp", [50, 132]), DRONE_PARAM("DIATONE"));                                          % for exp % 機体番号（ESPrのIP）
     %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
     %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
     %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
@@ -60,7 +60,7 @@ for i = 1:N
         initial_state(i).v = 0;
         agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",30),VEHICLE_PARAM("VEHICLE3")); % for exp % 機体番号（ESPrのIP）
         agent(i).input = [0;0];
-    agent(i).input = [0; 0; 0; 0];
+%     agent(i).input = [0; 0; 0; 0];
   else
     %agent(i) = DRONE(Model_Quat13(dt, initial_state(i), i), DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
     %agent(i) = DRONE(Model_EulerAngle(dt, initial_state(i), i), DRONE_PARAM("DIATONE", "additional", struct("B", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))); % euler angleのプラントモデル : for sim
@@ -69,7 +69,7 @@ for i = 1:N
     %[M,P]=Model_Discrete(dt,initial_state(i),i);
     %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
     %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-             initial_state(i).p = [1;-1];%[92;1];%
+             initial_state(i).p = [0;-1];%[92;1];%
              initial_state(i).q = 0;%pi/2-0.05;
              initial_state(i).v = 0;
     agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
@@ -86,10 +86,10 @@ for i = 1:N
   agent(i).set_model(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([1,1]),"D",0.1)));
   close all
   %% set input_transform property
-  if fExp                                                                             % isa(agent(i).plant,"Lizard_exp")
-    agent(i).input_transform = [];
-    agent(i).set_property("input_transform", InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-  end
+%   if fExp                                                                             % isa(agent(i).plant,"Lizard_exp")
+%     agent(i).input_transform = [];
+%     agent(i).set_property("input_transform", InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+%   end
 
   %agent.plant.espr.sendData(Pw(1,1:16));
   % for quat-model plant with discrete control model
@@ -142,7 +142,7 @@ for i = 1:N
   %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
   %agent(i).set_property("reference",Reference_Wall_observation()); %
   %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
-  agent(i).set_property("reference",Reference_Jirei(agent(i)));
+%   agent(i).set_property("reference",Reference_Jirei(agent(i)));
   %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
   agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
