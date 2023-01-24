@@ -195,7 +195,7 @@ end
 close all
 clc
 % plot
-%logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
+%logger.plot({1,"p","er"},{1,"controller.result.z",""},{1,"input",""});
 % logger.plot({1,"p","er"},{1,"q","e"},{1,"p1-p2","er"});
 logger.plot({1,"p","er"});
 legend("x.state", "y.state", "z.state","x.reference", "y.reference", "z.reference");
@@ -203,17 +203,40 @@ ylabel('Position [m]')
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 %%
-logger.plot({1,"p1-p2-p3","e"});
+logger.plot({1,"p1-p2-p3","re"});
 hold on
+F_size = 12;
 % plot(polyshape(env),'FaceColor','b');
-plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
+% plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
-xlabel('x [m]')
-ylabel('y [m]')
-% legend("estimate", "reference", "obstacle");
-title('x-y')
-xlim([0 7])
-ylim([-1.1 3])
+% x=2;
+% y=0.5;
+x=2;
+y=4.5;
+z=2.5;
+%simple
+X1=[x, x+1.5, x+1.5, x, x; x, x+1.5, x+1.5, x, x;x, x, x, x, x; x+1.5, x+1.5, x+1.5, x+1.5, x+1.5];
+Y1=[-y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y];
+Z1=[-z, -z, -z, -z, -z; 3-z, 3-z, 3-z, 3-z, 3-z; -z,3-z,3-z,-z,-z; -z,3-z,3-z,-z,-z];
+%%enviroment
+X1=[x, x+1.5, x+1.5, x, x; x, x+1.5, x+1.5, x, x;x, x, x, x, x; x+1.5, x+1.5, x+1.5, x+1.5, x+1.5];
+Y1=[-y, -y, y-2, y-2, -y; -y, -y, y-2, y-2, -y; -y, -y, y-2, y-2, -y; -y, -y, y-2, y-2, -y];
+Z1=[z, -z, -z, -z, -z; 3-z, 3-z, 3-z, 3-z, 3-z; -z,3-z,3-z,-z,-z; -z,3-z,3-z,-z,-z];
+s=mesh(X1,Y1,Z1);
+s.EdgeColor = 'k';
+s.FaceColor = [0.4940 0.1840 0.5560];
+s.FaceAlpha = 0.1;
+X1=[x, x+1.5, x+1.5, x, x; x, x+1.5, x+1.5, x, x;x, x, x, x, x; x+1.5, x+1.5, x+1.5, x+1.5, x+1.5];
+Y1=[y, y+2, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y];
+Z1=[0, 0, 0, 0, 0; 3-z, 3-z, 3-z, 3-z, 3-z; 0,3-z,3-z,0,0; 0,3-z,3-z,0,0];
+xlim([-1 , 6]);
+ylim([-4.5 ,4.5]);
+zlim([-2.5 , 2]);
+xlabel('x [m]','Fontsize',F_size)
+ylabel('y [m]','Fontsize',F_size)
+zlabel('z [m]','Fontsize',F_size)
+legend("reference", "estimate", "obstacle");
+title('phase plot:x-y-z')
 % legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 % agent(1).reference.timeVarying.show(logger)
@@ -234,6 +257,6 @@ legend("estimate", "reference", "obstacle");
 % legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 % agent(1).animation(logger,"target",1:N,"Env",OBJECT3D("cube",struct("cog",[2.25,-0.25,0.5],"length",[0.5,1.5,1])));
-%%
+% %
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

@@ -481,7 +481,19 @@ methods
 
                     % plot
                     if length(ps) == 3
-                        plot3(tmpx, tmpy, tmpz);
+%                         plot3(tmpx, tmpy, tmpz);
+                        %referenceは点でプロット
+                        if att == 'r' 
+                           sz=70;
+                           d=0.025;
+                           si2=1;
+                            ref_plot=scatter3(tmpx(si2:d:end), tmpy(si2:d:end), tmpz(si2:d:end),[sz],t(1:d:end-si2+1,1),'filled','LineWidth',0.1);
+                            ref_plot.MarkerEdgeColor = 'b';
+                            c = colorbar;
+                            c.Label.String = 'Time [s]';
+                        else
+                            plot3(tmpx, tmpy, tmpz);
+                        end
                     else
                         plot(tmpx, tmpy(:, :, 1)); % tmpy(1:size(tmpx,1),:,1)
                         xlim([min(tmpx), max(tmpx)]);
@@ -567,11 +579,11 @@ methods
                     %                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
                     txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
                 end
-
-                if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
-                    Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
-                    txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
-                end
+%flight phaseを青にするところ
+%                 if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
+%                     Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
+%                     txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
+%                 end
 
                 if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
                     Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase

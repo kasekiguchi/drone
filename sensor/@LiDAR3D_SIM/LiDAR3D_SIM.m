@@ -160,7 +160,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
 %       view([1 1 1]);   
 %       view([2 2]); 
       view(2);
-%       plot(logger.Data.agent.reference.result{1,:}.state.p(1),logger.Data.agent.reference.result{1,:}.state.p(2),'bo');%referenceの表示
+%       view(-10,30); 
+      
       xlabel("x");
       ylabel("y");
       zlabel("z");
@@ -177,7 +178,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         if opt.fField
           bld.Faces = obj.cn;
           bld.Vertices = obj.ps;
-          bld.FaceAlpha = 0.5; % remove the transparency
+          bld.FaceAlpha = 0.1; % remove the transparency
           bld.FaceColor = 'b'; %
           bld.LineStyle = '-'; % 'none'; % remove the lines
           patch(bld);
@@ -188,7 +189,9 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       quiver3(p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
       plot3(p(1), p(2), p(3), 'bx');
       plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 3);
-%       plot3(r(1), r(2), r(3),'bo');
+%       plot3(r(1), r(2), r(3),'ro');%referenceの表示
+%       scatter3(r(1),r(2),r(3),70,'filled','LineWidth',0.1);%目標軌跡
+      ref_plot.MarkerEdgeColor = 'b';
       xlim([p(1) - 10, p(1) + 10]);
       ylim([p(2) - 10, p(2) + 10]);
       zlim([p(3) - 10, p(3) + 10]);
