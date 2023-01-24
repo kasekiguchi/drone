@@ -45,7 +45,7 @@ xlabel("time [s]");
 ylabel("p [m]");
 hold off
 
-if fExp
+
 figure(8)
 hold on 
 grid on
@@ -56,6 +56,7 @@ xlabel("time [s]");
 ylabel("input")
 hold off
 
+if fExp
 figure(9)
 hold on
 grid on
