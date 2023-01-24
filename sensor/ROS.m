@@ -98,12 +98,12 @@ classdef ROS < SENSOR_CLASS
                     end
                 end
             end
-%             for i = 1:length(data.length)
-%                 if data.length(i,1) > 3.0
-%                     data.length(i,1) = 0;
+            for i = 1:length(data.ranges)
+                if data.ranges(i,1) >= 6.0
+                    data.ranges(i,1) = 0;
 %                     data.intensities(i,1) = 0;
-%                 end
-%             end
+                end
+            end
 
 
 %             data.ranges = filloutliers(data.ranges,"previous");
