@@ -44,7 +44,7 @@ classdef sensor_ceiling_sim < SENSOR_CLASS
             else
                 distance_ceiling = z - sensor_pos(3); %実際の距離
             end
-            sensor_distance = sqrt((distance_ceiling*tan(Roll)/cos(Pitch))^2 + distance_ceiling^2);%+random('Normal',0,0.02);%センサの取得した測定距離に変換
+            sensor_distance = sqrt((distance_ceiling*tan(Roll)/cos(Pitch))^2 + distance_ceiling^2)+random('Normal',0,0.02);%センサの取得した測定距離に変換
             %% カルマンフィルタ
             if isempty(obj.KF.x_h)
                 obj.KF.x_h = sensor_distance;%状態推定値初期値

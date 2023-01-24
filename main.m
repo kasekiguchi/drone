@@ -20,7 +20,7 @@ run("main1_setting.m");
 %　事例研用
 reference_ceiling_margin = 1.5;
 celing_high = 3;
-wall_x = 3;
+wall_x = 2.5;
 % for mob1 Tbug用
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
 wall1 = [2 -1;2 1;2.5 1;2.5 -1];
@@ -205,10 +205,10 @@ clc
 % logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
-% logger.plot({1,"p","er"},{1,"sensor.result.distance.VL",""});
+% loggeplot({1,"p","er"},{1,"sensor.result.distance.VL",""});
 % logger.plot({1,"p","rs"},{1,"rpm",""},{1,"inner_input",""});%ros2←多分名前が悪さをしているので代入してから使う
 % logger.plot({1,"rpm",""},{1,"voltage",""},{1,"current",""})
-logger.plot({1,"p","er"},{1,"p1-p2-p3","er"});
+logger.plot({1,"p","er"},{1,"v","e"});
 % logger.plot({1,"p1-p2-p3","er"});
 % logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
 % logger.plot({1,"p","rs"},{1,"inner_input",""});
@@ -220,6 +220,6 @@ logger.plot({1,"p","er"},{1,"p1-p2-p3","er"});
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 %agent(1).animation(logger,"target",1:N);
 % agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[0,0,3.1],"length",[5,5,0.2])));%天井room = [-2 -5;-2 4;7 4;7 -5];
-%  agent(1).animation(logger,"target",1:N,"env",OBJECT3D("cube",struct("cog",[wall_x,0,1],"length",[0.2,2,2])));%壁room = [-2 -5;-2 4;7 4;7 -5]
+agent(1).animation(logger,"target",1,"env",OBJECT3D("cube",struct("cog",[wall_x+0.1,(arranged_pos(2,2)+arranged_pos(2,3))/2,1],"length",[0.2,abs(arranged_pos(2,2)-arranged_pos(2,3)),2])));%壁room = [-2 -5;-2 4;7 4;7 -5]
 %%
 %logger.save();
