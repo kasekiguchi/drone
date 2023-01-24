@@ -168,7 +168,7 @@ methods
 %                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
 %                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.result.state);
             else
-                obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
+%                 obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
             end
 
         end
