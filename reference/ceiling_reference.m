@@ -9,6 +9,7 @@ classdef ceiling_reference < REFERENCE_CLASS
         t=[];
         cha='s';
         dfunc
+        id
     end
 
     methods
@@ -25,6 +26,7 @@ classdef ceiling_reference < REFERENCE_CLASS
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
             obj.func = gen_func_name(param_for_gen_func);
+            obj.id = self.sensor.motive.rigid_num;
             if length(args) > 2
                 if strcmp(args{3}, "HL")
                     obj.func = gen_ref_for_HL(obj.func);
@@ -35,49 +37,66 @@ classdef ceiling_reference < REFERENCE_CLASS
             end
         end
         function result = do(obj, Param)  
-           %Param={time,FH}　目標位置の算出
-           obj.cha = get(Param{2}, 'currentcharacter');
-           if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
-                t = Param{1}.t-obj.t; % 現在時刻 ‐ 前時刻
-                obj.t=Param{1}.t; %前時刻の保存
-           else %前時刻の保存
-                obj.t=Param{1}.t;
-                t = obj.t;
-           end
-           %% 自己位置
-           p = obj.self.estimator.result.state.p;%自己位置
-%            yaw = 0;%目標位置への角度
-%            y_marjin = 1.5;
-           %% x座標
-           goal_potential = obj.func(t);%目標位置に向かうポテンシャル 
-           if Param{6}==1
-               obs_potential_x = -obj.func(t)/(obj.self.sensor.VL.result.distance.teraranger)^2;%*((y_marjin-p(2))/y_marjin);%障害物からのポテンシャル(実験用)
-           else
-               obs_potential_x = -obj.func(t)/(Param{3}-p(1))^2;%*((y_marjin-p(2))/y_marjin);%障害物からのポテンシャル
-           end
-           obj.result.state.p = obs_potential_x + goal_potential;%potentialの合成
-           obj.result.state.p(1) = p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
-           %% y座標
-%             obs_potential_y = -obj.func(t)/(-obj.self.estimator.result.state.p(2))^2;%障害物からのポテンシャル
-%             obj.result.state.p(6) = goal_potential(6);
-%             obj.result.state.p(2) = p(2) +goal_potential(2);%obj.result.state.p(2);%現在位置にpotentialを付与
-           %% %sensorの値から高度を指定　z座標
-           margin_z = Param{4};
-           if Param{6}==1
-               obj.result.state.p(3) = obj.self.sensor.VL.result.distance.VL + p(3) - margin_z;
-           else
-               obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + p(3) - margin_z;%z方向の目標位置
-           end
-           %% 目標位置にたどり着いたか
-           if obj.cha =='f'
-               if norm(Param{5}(1)-obj.self.reference.result.state.p(1)) < 0.1%目標位置にたどり着いたか
-                   obj.result.state.p(1) = p(1);%Param{5}(1);%その場停滞
-                   obj.result.state.p(5) = 0;
-               end
-%                if norm(Param{5}(2)-obj.self.reference.result.state.p(2)) < 0.1%目標位置にたどり着いたか
-%                    obj.result.state.p(2) = Param{5}(2);%その場停滞
-%                end
-           end
+            %Param={time,FH}　目標位置の算出
+            if obj.id==1
+                obj.cha = get(Param{2}, 'currentcharacter');
+                if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{1}.t-obj.t; % 現在時刻 ‐ 前時刻
+                    obj.t=Param{1}.t; %前時刻の保存
+                else %前時刻の保存
+                    obj.t=Param{1}.t;
+                    t = obj.t;
+                end
+                 %% 自己位置
+                p = obj.self.estimator.result.state.p;%自己位置
+                sensor_state = obj.self.sensor.motive.result.rigid;
+                a = [sensor_state(2).p(1);sensor_state(2).p(2)];%端点aの座標
+                b = [sensor_state(3).p(1);sensor_state(3).p(2)];%端点bの座標
+                M = (a+b)/2;
+                sita = atan(-(p(2)-M(2))/(p(1)-M(1)));
+                %% x座標
+                goal_potential = obj.func(t);%目標位置に向かうポテンシャル
+                if Param{6}==1
+                    obs_potential_x = -obj.func(t)/(obj.self.sensor.VL.result.distance.teraranger)^2;%障害物からのポテンシャル(実験用)
+                else
+                    if p(2)<a(2)&&p(2)>b(2)&&p(1)<M(1)
+                        dicetance_wall = Param{3}-p(1);
+                    else
+                        dicetance_wall = 5;
+                    end
+                        obs_potential_x = -obj.func(t)/(dicetance_wall)^2;%障害物からのポテンシャル
+                end
+                obj.result.state.p = obs_potential_x + goal_potential;%potentialの合成
+                obj.result.state.p(1) = p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
+                %% y座標
+                if Param{6}==1
+                    obs_potential_y = 1*0.5*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
+                else
+                    obs_potential_y = 3*0.5*sin(sita)/(dicetance_wall);%障害物からのポテンシャル
+                end
+                goal_potential_y = -0.5*(p(2)-M(2))/sqrt((M(2)+a(2)-b(2))^2);
+                obj.result.state.p(6) = goal_potential_y+obs_potential_y;%y方向速度
+                obj.result.state.p(2) = p(2) + t*obj.result.state.p(6);%y目標座標
+                %% %sensorの値から高度を指定　z座標
+                margin_z = Param{4};
+                if Param{6}==1
+                    obj.result.state.p(3) = obj.self.sensor.VL.result.distance.VL + p(3) - margin_z;
+                else
+                    obj.result.state.p(3) = obj.self.sensor.celing.result.ceiling_distance + p(3) - margin_z;%z方向の目標位置
+                end
+                %% 目標位置にたどり着いたか
+%                 if obj.cha =='f'
+%                     if norm(Param{5}(1)-obj.self.reference.result.state.p(1)) < 0.1%目標位置にたどり着いたか
+%                         obj.result.state.p(1) = p(1);%Param{5}(1);%その場停滞
+%                         obj.result.state.p(5) = 0;
+%                     end
+%                     if norm(Param{5}(2)-obj.self.reference.result.state.p(2)) < 0.1%目標位置にたどり着いたか
+%                        obj.result.state.p(2) = Param{5}(2);%その場停滞
+%                     end
+%                 end
+            else
+                obj.result.state.p = obj.self.estimator.result.state.p;
+            end
            result = obj.result;
         end
         function show(obj, logger)
