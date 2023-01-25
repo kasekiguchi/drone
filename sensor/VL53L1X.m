@@ -50,7 +50,7 @@ classdef VL53L1X < SENSOR_CLASS
                 if isempty(obj.KF.x_h)
                     obj.KF.x_h = sensor_distance';%状態推定値初期値
                 else
-                    if abs(sensor_distance(1)-obj.KF.x_h(1)) > 100 %測定値の変化率
+                    if abs(sensor_distance(1)-obj.KF.x_h(1)) > 1000 %測定値の変化率
                         obj.z_d = sensor_distance(1)-obj.KF.x_h(1);
                         sensor_distance(1)=sensor_distance(1)-obj.z_d;
                     end
