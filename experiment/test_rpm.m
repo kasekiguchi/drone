@@ -100,7 +100,8 @@ hold off
 
 figure(5)
 hold on
-plot(T,X2.*X1/10000,'LineWidth',1)%グラフのプロット
+% plot(T,(X2.*X1)/10000,'LineWidth',1)%グラフのプロット
+plot(T,X2.*X1/10000,'LineWidth',1)
 %plot(T(1:2000),X2(1:2000,1:4))%グラフのプロット
 %ymax = ylim;
 %area([Ts Ts+5],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);

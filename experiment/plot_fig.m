@@ -84,8 +84,8 @@ hold off
 clear T
 T = logger.Data.t(1:logger.k);
 figure(6)
-% name_class = ["ceiling";"reference";"estimate";"throttle"];
-name_class = ["ceiling";"sensor";"throttle"];
+name_class = ["ceiling";"reference";"sensor";"throttle"];
+%name_class = ["ceiling";"sensor";"throttle"];
 hold on
 plot([0 53],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
 Y=[];
@@ -94,7 +94,7 @@ for plot_i = 1:logger.k%グラフのプロット
     Y(plot_i,2) = logger.Data.agent.sensor.result{1, plot_i}.state.p(3);
     Y(plot_i,3) = logger.Data.agent.inner_input{1, plot_i}(3);
 end
-% plot(T(1:logger.k),Y(:,1),'LineWidth',4,'Color',[0.39,0.83,0.07])
+plot(T(1:logger.k),Y(:,1),'LineWidth',4,'Color',[0.39,0.83,0.07])
 plot(T(1:logger.k),Y(:,2),'LineWidth',2.5,'Color',[0.85,0.33,0.10])
 ylim([0 3])
 xlabel('time [s]')

@@ -70,16 +70,23 @@ classdef ceiling_reference < REFERENCE_CLASS
                 obj.result.state.p = obs_potential_x + goal_potential;%potentialの合成
                 obj.result.state.p(1) = p(1) + obj.result.state.p(1);%現在位置にpotentialを付与
                 %% y座標
-                w_y = 3;
-                w_y = 0.3;
-                if Param{6}==1
-                    obs_potential_y = w_y*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
-                else
-                    obs_potential_y = w_y*w_y*sin(sita)/(dicetance_wall);%障害物からのポテンシャル
-                end
-                goal_potential_y = -w_y*p(2)/abs(-M(2)+(a(2)-b(2))/2+margin_y);
+%                 w_y = 3;%重み
+%                 v_y = 0.3;%デフォルトの速度
+%                 if Param{6}==1
+%                     obs_potential_y = w_y*v_y*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
+%                 else
+%                     obs_potential_y = w_y*v_y*sin(sita)/(dicetance_wall);%障害物からのポテンシャル
+%                 end
+%                 goal_potential_y = -v_y*p(2)/abs(-M(2)+(a(2)-b(2))/2+margin_y);
+%                 obj.result.state.p(6) = goal_potential_y+obs_potential_y;%y方向速度
+%                 obj.result.state.p(2) = p(2) + t*obj.result.state.p(6);%y目標座標
+                %%         y方向の設定
+                w_y = 3;%障害物の重み
+                weight_y = 0.7;%目標位置の重み
+                obs_potential_y = w_y*0.5*sin(sita)/(distance_wall);%障害物からのポテンシャル
+                goal_potential_y = -weight_y*0.5*p(2)/abs(a(2)-b(2));
                 obj.result.state.p(6) = goal_potential_y+obs_potential_y;%y方向速度
-                obj.result.state.p(2) = p(2) + t*obj.result.state.p(6);%y目標座標
+                obj.result.state.p(2) = p(2) + t*obj.result.state.p(6);%目標座標
                 %% %sensorの値から高度を指定　z座標
                 margin_z = Param{4};
                 if Param{6}==1

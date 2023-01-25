@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -205,13 +205,12 @@ clc
 % logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
-% loggeplot({1,"p","er"},{1,"sensor.result.distance.VL",""});
+logger.plot({1,"p","er"},{1,"sensor.result.distance.teraranger",""});
 % logger.plot({1,"p","rs"},{1,"rpm",""},{1,"inner_input",""});%ros2←多分名前が悪さをしているので代入してから使う
 % logger.plot({1,"rpm",""},{1,"voltage",""},{1,"current",""})
-logger.plot({1,"p","er"},{1,"v","e"});
+% logger.plot({1,"p","er"},{1,"v","e"});
 % logger.plot({1,"p1-p2-p3","er"});
-% logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
-logger.plot({1,"p","re"},{1,"v","e"});
+logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
 % logger.plot({1,"p","rs"},{1,"inner_input",""});
 %agent(1).reference.timeVarying.show(logger)
 % logger.plot({1,"rpm",""});
