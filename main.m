@@ -11,9 +11,9 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1; % 1: experiment   0: numerical simulation
+fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
-fOffline = 0; % 1: active : offline verification with saved data
+fOffline = 1; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
 
