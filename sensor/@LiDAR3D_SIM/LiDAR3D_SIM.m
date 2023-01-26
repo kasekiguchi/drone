@@ -157,11 +157,11 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       hold on
       axis equal
       daspect([1 1 1]);
-%       view([1 1 1]);   
+      view([-1 -1 1]);   
 %       view([2 2]); 
-      view(2);
+%       view(2);
 %       view(-10,30); 
-      
+%       
       xlabel("x");
       ylabel("y");
       zlabel("z");
@@ -188,8 +188,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       end
       quiver3(p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
       plot3(p(1), p(2), p(3), 'bx');
-      plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 3);
-%       plot3(r(1), r(2), r(3),'ro');%referenceの表示
+%       plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 3);
+      plot3(r(1), r(2), r(3),'ro');%referenceの表示
 %       scatter3(r(1),r(2),r(3),70,'filled','LineWidth',0.1);%目標軌跡
       ref_plot.MarkerEdgeColor = 'b';
       xlim([p(1) - 10, p(1) + 10]);

@@ -57,7 +57,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.sensor = [0,0];        
 
             obj.state_initial = [0,0,0]';
-            obj.goal = [5,-3,0]';%[5,0,0]';%2Dgoal
+            obj.goal = [5,3,0]';%[5,0,0]';%2Dgoal
 %            obj.goal = [0,15,0]';% global goal position
 
             obj.obstacle = [0,0,0]';% 障害物座標
@@ -97,8 +97,9 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %radius = ...;
             radius = self.sensor.lidar.radius;
             hx= radius;
-            hy = 0.25;
-            hz= 0.25;
+            hy = 0.15;%3D_enviroment_hv3(v)
+            hz= 0.15;%3D_enviroment_hv3(v)
+3
             P = [-0.1,hy,hz;-0.1,-hy,hz;-0.1,-hy,-hz;-0.1,hy,-hz;
                   hx,hy,hz;hx,-hy,hz;hx,-hy,-hz;hx,hy,-hz];
             T= [1,3,2;1,4,3;1,5,8;1,8,4;1,2,6;1,6,5;2,7,6;2,3,7;3,8,7;3,4,8;5,6,7;5,7,8];
@@ -142,18 +143,18 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                 obj.count = obj.check_reach_to_g(p,obj.g,obj.count);
                 if (obj.count > 20) % 到達した場合
                     [obj.g,obj.v] = obj.T_bug(obj,change_length,l_points,goal_length,id);
-                end         
+                end 
+                obj.g = obj.g;
               end
-              obj.g = R * obj.g + p;
               obj.v = obj.v;
               obj.gpath = obj.gen_path(p,R,obj.g);
             else % Gpath内に点群がない場合
               % G へ向かう
-              obj.g = obj.goal; 
+              obj.g = obj.l_goal; 
               obj.v = [0;0;0];
               obj.gpath = obj.gen_path(p,R,obj.g);
-            end
-            obj.result.state.p = obj.g;
+            end     
+            obj.result.state.p =  R * obj.g + p;
             obj.result.state.v = obj.v;
             result = obj.result;   
         end   
