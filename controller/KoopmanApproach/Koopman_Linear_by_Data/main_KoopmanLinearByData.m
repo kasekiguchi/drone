@@ -21,24 +21,41 @@ targetpath=append(nowFolder,'\',FileName);
 % Data.Y 入力後の対象の状態
 
 % 使用するデータセットの数を指定
-% 23/01/18現在 1 or 2 のみ対応
-Data.HowmanyDataset = 2;
+% 23/01/26 run_mainManyTime.m で得たデータを合成
+loading_filename = 'simtest';
+Data.HowmanyDataset = 100;
 
-switch Data.HowmanyDataset
-    case 1
-        Dataset1 = InportFromExpData('TestData2.mat');
-
-        Data.X = [Dataset1.X];
-        Data.U = [Dataset1.U];
-        Data.Y = [Dataset1.Y];
-    case 2
-        Dataset1 = InportFromExpData('TestData1.mat');
-        Dataset2 = InportFromExpData('TestData2.mat');
-
-        Data.X = [Dataset1.X, Dataset2.X];
-        Data.U = [Dataset1.U, Dataset2.U];
-        Data.Y = [Dataset1.Y, Dataset2.Y];
+for i= 1: Data.HowmanyDataset
+    Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
+    if i==1
+        Data.X = [Dataset.X];
+        Data.U = [Dataset.U];
+        Data.Y = [Dataset.Y];        
+    else
+        Data.X = [Data.X, Dataset.X];
+        Data.U = [Data.U, Dataset.U];
+        Data.Y = [Data.Y, Dataset.Y];
+    end
 end
+
+% 23/01/18現在 1 or 2 のみ対応
+% Data.HowmanyDataset = 2;
+% 
+% switch Data.HowmanyDataset
+%     case 1
+%         Dataset1 = InportFromExpData('TestData2.mat');
+% 
+%         Data.X = [Dataset1.X];
+%         Data.U = [Dataset1.U];
+%         Data.Y = [Dataset1.Y];
+%     case 2
+%         Dataset1 = InportFromExpData('TestData1.mat');
+%         Dataset2 = InportFromExpData('TestData2.mat');
+% 
+%         Data.X = [Dataset1.X, Dataset2.X];
+%         Data.U = [Dataset1.U, Dataset2.U];
+%         Data.Y = [Dataset1.Y, Dataset2.Y];
+% end
 % Data = InportFromOUIBSimulationData();
 
 % クォータニオンのノルムをチェック
@@ -55,9 +72,9 @@ end
 % DroneSimulation
 % F = @(x) x; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含むパラメータを追加 22/11/22 観測量にクォータニオンを含めるとうまく推定できない？
-F = @eulerAngleParameter;
+% F = @eulerAngleParameter;
 % F = @eulerAngleParameter_withinConst;
-% F = @eulerAngleParameter_InputAndConst;
+F = @eulerAngleParameter_InputAndConst;
 
 
 % OUIBS system
@@ -106,10 +123,14 @@ disp(targetpath)
 % 工事中
 
 %% Plot by simulation
+stepN = 31;
+dt = simResult.reference.T(2)-simResult.reference.T(1);
+tlength = 0:dt:dt*(stepN-1);
+
 % P
 figure(1)
 subplot(2,1,2);
-p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.p(1:simResult.state.N,:)','LineWidth',2);
+p2 = plot(tlength,simResult.reference.est.p(1:stepN,:)','LineWidth',2);
 hold on
 grid on
 xlabel('time [sec]','FontSize',12);
@@ -119,7 +140,7 @@ set(gca,'FontSize',14);
 originYlim = gcf().CurrentAxes.YLim;
 hold off
 subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.p,'LineWidth',2);
+p1 = plot(tlength , simResult.state.p(:,1:1:stepN),'LineWidth',2);
 ylim(originYlim)
 hold on
 grid on
@@ -132,7 +153,7 @@ hold off
 % Q
 figure(2)
 subplot(2,1,2);
-p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.q(1:simResult.state.N,:)','LineWidth',2);
+p2 = plot(tlength , simResult.reference.est.q(1:1:stepN,:)','LineWidth',2);
 hold on
 grid on
 originYlim = gcf().CurrentAxes.YLim;
@@ -142,7 +163,7 @@ legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
 set(gca,'FontSize',14);
 hold off
 subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.q,'LineWidth',2);
+p1 = plot(tlength , simResult.state.q(:,1:1:stepN),'LineWidth',2);
 hold on
 grid on
 ylim(originYlim)
@@ -154,7 +175,7 @@ hold off
 % V
 figure(3)
 subplot(2,1,2);
-p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.v(1:simResult.state.N,:)','LineWidth',2);
+p2 = plot(tlength , simResult.reference.est.v(1:1:stepN,:)','LineWidth',2);
 hold on
 grid on
 originYlim = gcf().CurrentAxes.YLim;
@@ -164,7 +185,7 @@ legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
 set(gca,'FontSize',14);
 hold off
 subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.v,'LineWidth',2);
+p1 = plot(tlength , simResult.state.v(:,1:1:stepN),'LineWidth',2);
 hold on
 grid on
 ylim(originYlim)
@@ -177,7 +198,7 @@ hold off
 % W
 figure(4)
 subplot(2,1,2);
-p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.w(1:simResult.state.N,:)','LineWidth',2);
+p2 = plot(tlength , simResult.reference.est.w(1:1:stepN,:)','LineWidth',2);
 hold on
 grid on
 originYlim = gcf().CurrentAxes.YLim;
@@ -187,7 +208,7 @@ legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
 set(gca,'FontSize',14);
 hold off
 subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.w,'LineWidth',2);
+p1 = plot(tlength , simResult.state.w(:,1:1:stepN),'LineWidth',2);
 hold on
 grid on
 ylim(originYlim)
