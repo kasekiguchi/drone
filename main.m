@@ -216,6 +216,22 @@ legend("estimate", "reference", "obstacle");
 hold off
 % agent(1).reference.timeVarying.show(logger)
 
+%%
+E = logger.data(1, "p","e");
+R = logger.data(1, "p","r");
+T = logger.data(0,'t',[]);
+
+% figure(1);
+% plot(T, E); hold on;
+% plot(T, R); hold off;
+
+figure(2);
+plot(T, E(:, 1:2), 'LineWidth', 1.5); hold on;
+plot(T, R(:, 1:2), 'LineWidth', 1.5); hold off;
+xlabel("Time [s]"); ylabel("Position [m]");
+% set(gca,'FontSize', 2);
+legend("x.est", "y.est", "x.ref", "y.ref");
+
 
 %% animation
 % VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
