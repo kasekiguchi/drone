@@ -480,8 +480,23 @@ methods
                     end
 
                     % plot
-                    if length(ps) == 3
-                        plot3(tmpx, tmpy, tmpz);
+                    if length(ps) == 2
+                        % plot
+%                         plot3(tmpx, tmpy, tmpz);
+                        %referenceは点でプロット
+                        if att == 'r' 
+                           sz=70;
+                           d=5;
+                           si2=1;
+                           ref_plot=scatter(tmpx(si2:d:end), tmpy(si2:d:end),[sz],t(1:d:end-si2+1,1),'filled','LineWidth',0.1);
+                           ref_plot.MarkerEdgeColor = 'b';
+                           c = colorbar;
+                           
+                           c.Label.String = 'Time [s]';
+                        else
+                            plot(tmpx, tmpy(:, :, 1));
+                        end
+%                         plot(tmpx, tmpy(:, :, 1));
                     else
                         plot(tmpx, tmpy(:, :, 1)); % tmpy(1:size(tmpx,1),:,1)
                         xlim([min(tmpx), max(tmpx)]);

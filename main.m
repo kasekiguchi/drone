@@ -204,6 +204,7 @@ logger.plot({1,"p","er"},{1,"q","e"},{1,"input",""});
 % logger.plot({1,"q","e"});
 % logger.plot({1,"p","er"},{1,"inner_input",""});
 %%
+%referenceのplot変更
 logger.plot({1,"p1-p2","er"});
 hold on
 plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
@@ -217,6 +218,7 @@ hold off
 % agent(1).reference.timeVarying.show(logger)
 
 %%
+%z座標削除
 E = logger.data(1, "p","e");
 R = logger.data(1, "p","r");
 T = logger.data(0,'t',[]);
