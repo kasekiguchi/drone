@@ -1,46 +1,46 @@
 %% p_plot
 for i = 1:logger.k
-    eX(i) = logger.Data.agent.estimator.result{1,i}.state.p(1,1);
-    eY(i) = logger.Data.agent.estimator.result{1,i}.state.p(2,1);
-    eq(i) = logger.Data.agent.estimator.result{1,i}.state.q;
+    resultplot.eX(i) = logger.Data.agent.estimator.result{1,i}.state.p(1,1);
+    resultplot.eY(i) = logger.Data.agent.estimator.result{1,i}.state.p(2,1);
+    resultplot.eq(i) = logger.Data.agent.estimator.result{1,i}.state.q;
     if fExp
-        pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
-        pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
-        pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
+        resultplot.pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
+        resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
+        resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
     end
-    rX(i) = logger.Data.agent.reference.result{1,i}.state.p(1,1);
-    rY(i) = logger.Data.agent.reference.result{1,i}.state.p(2,1);
-    rq(i) = logger.Data.agent.reference.result{1,i}.state.q;
-    input = logger.Data.agent.input{1,i};
-    input_v(i) = input(1,1);
-    input_w(i) = input(2,1);
+    resultplot.rX(i) = logger.Data.agent.reference.result{1,i}.state.p(1,1);
+    resultplot.rY(i) = logger.Data.agent.reference.result{1,i}.state.p(2,1);
+    resultplot.rq(i) = logger.Data.agent.reference.result{1,i}.state.q;
+    resultplot.input = logger.Data.agent.input{1,i};
+    resultplot.input_v(i) = resultplot.input(1,1);
+    resultplot.input_w(i) = resultplot.input(2,1);
 end
 
 figure(6);
 hold on
 grid on
-plot(logger.Data.t(1:logger.k,1),eq);
+plot(logger.Data.t(1:logger.k,1),resultplot.eq)
+plot(logger.Data.t(1:logger.k,1),resultplot.rq)
 if fExp
-    plot(logger.Data.t(1:logger.k,1),pq);
+    plot(logger.Data.t(1:logger.k,1),resultplot.pq)
 end
-plot(logger.Data.t(1:logger.k,1),rq);
-legend('eq','pq','rq');
+legend('eq','rq','pq','Location','northwest');
 xlabel("time [s]");
-ylabel("q");
+ylabel("q[rad]");
 hold off
 
 figure(7)
 hold on
 grid on
-plot(logger.Data.t(1:logger.k,1),eX);
-plot(logger.Data.t(1:logger.k,1),eY);
+plot(logger.Data.t(1:logger.k,1),resultplot.eX)
+plot(logger.Data.t(1:logger.k,1),resultplot.eY)
+plot(logger.Data.t(1:logger.k,1),resultplot.rX)
+plot(logger.Data.t(1:logger.k,1),resultplot.rY)
 if fExp
-plot(logger.Data.t(1:logger.k,1),pX);
-plot(logger.Data.t(1:logger.k,1),pY);
+    plot(logger.Data.t(1:logger.k,1),resultplot.pX)
+    plot(logger.Data.t(1:logger.k,1),resultplot.pY)
 end
-plot(logger.Data.t(1:logger.k,1),rX);
-plot(logger.Data.t(1:logger.k,1),rY);
-legend({'eX','eY','pX','pY','rX','rY'},'Location','northwest');
+legend({'eX','eY','rX','rY','pX','pY'},'Location','northwest');
 xlabel("time [s]");
 ylabel("p [m]");
 hold off
@@ -49,8 +49,8 @@ hold off
 figure(8)
 hold on 
 grid on
-plot(logger.Data.t(1:logger.k,1),input_v);
-plot(logger.Data.t(1:logger.k,1),input_w);
+plot(logger.Data.t(1:logger.k,1),resultplot.input_v)
+plot(logger.Data.t(1:logger.k,1),resultplot.input_w)
 legend('v','w');
 xlabel("time [s]");
 ylabel("input")
@@ -60,34 +60,48 @@ if fExp
 figure(9)
 hold on
 grid on
-sum_x = 0;
+resultplot.sum_x = 0;
 for i = 1:logger.k
-    sa_X(i) = (pX(1,i) - eX(1,i))*(pX(1,i) - eX(1,i));
-    sum_x = sum_x + sa_X(i);
+    resultplot.sa_X(i) = (resultplot.pX(1,i) - resultplot.eX(1,i))*(resultplot.pX(1,i) - resultplot.eX(1,i));
+    resultplot.sum_x = resultplot.sum_x + resultplot.sa_X(i);
 end
-N_x = (sum_x/logger.k);
-RMSE_X = sqrt(N_x);
+resultplot.N_x = (resultplot.sum_x/logger.k);
+resultplot.RMSE_X = sqrt(resultplot.N_x);
 
-sum_y = 0;
+resultplot.sum_y = 0;
 for i = 1:logger.k
-    sa_Y(i) = (pY(1,i) - eY(1,i))*(pY(1,i) - eY(1,i));
-    sum_y = sum_y + sa_Y(i);
+    resultplot.sa_Y(i) = (resultplot.pY(1,i) - resultplot.eY(1,i))*(resultplot.pY(1,i) - resultplot.eY(1,i));
+    resultplot.sum_y = resultplot.sum_y + resultplot.sa_Y(i);
 end
-N_y = (sum_y/logger.k);
-RMSE_Y = sqrt(N_y);
+resultplot.N_y = (resultplot.sum_y/logger.k);
+resultplot.RMSE_Y = sqrt(resultplot.N_y);
 
-sum_q = 0;
+resultplot.sum_q = 0;
 for i = 1:logger.k
-    sa_q(i) = (pq(1,i) - eq(1,i))*(pq(1,i) - eq(1,i));
-    sum_q = sum_q + sa_q(i);
+    resultplot.sa_q(i) = (resultplot.pq(1,i) - resultplot.eq(1,i))*(resultplot.pq(1,i) - resultplot.eq(1,i));
+    resultplot.sum_q = resultplot.sum_q + resultplot.sa_q(i);
 end
-N_q = (sum_q/logger.k);
-RMSE_q = sqrt(N_q);
+resultplot.N_q = (resultplot.sum_q/logger.k);
+resultplot.RMSE_q = sqrt(resultplot.N_q);
 
-RMSE = [RMSE_X;RMSE_Y;RMSE_q];
+resultplot.RMSE = [resultplot.RMSE_X;resultplot.RMSE_Y;resultplot.RMSE_q];
 label = categorical({'x','y','q'});
 label = reordercats(label,{'x','y','q'});
-bar(label,RMSE)
+bar(label,resultplot.RMSE)
 ylabel("RMSE");
 hold off
 end
+
+figure(10)
+resultplot.estresult = logger.Data.agent.estimator.result{1,logger.k};
+resultplot.Ewall = resultplot.estresult.map_param;
+resultplot.Ewallx = reshape([resultplot.Ewall.x,NaN(size(resultplot.Ewall.x,1),1)]',3*size(resultplot.Ewall.x,1),1);
+resultplot.Ewally = reshape([resultplot.Ewall.y,NaN(size(resultplot.Ewall.y,1),1)]',3*size(resultplot.Ewall.y,1),1);
+hold on
+grid on
+plot(resultplot.Ewallx,resultplot.Ewally,'g-');
+xlabel("$x$ [m]","Interpreter","latex");
+ylabel("$y$ [m]","Interpreter","latex");
+xlim([-4 12])
+ylim([-4 12])
+hold off

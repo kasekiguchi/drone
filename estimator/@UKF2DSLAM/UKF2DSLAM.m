@@ -239,6 +239,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             if isempty(result)
                 result = obj.result;
             end
+            figure(3)
             estate = result.state.p(:,end);
             estatesquare = estate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
 %             estatesquare =  polyshape( estatesquare');
@@ -256,10 +257,11 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             plot(l.x,l.y);
             hold on
             grid on
-            plot(p(1),p(2),'ro');
-            quiver(p(1),p(2),cos(th),sin(th),'Color','r');
+%             plot(p(1),p(2),'ro');
+%             quiver(p(1),p(2),cos(th),sin(th),'Color','r');
             xlabel("$x$ [m]","Interpreter","latex");
             ylabel("$y$ [m]","Interpreter","latex");
+            legend('wall');
             xlim([-4 12])
             ylim([-4 12])
             hold off
