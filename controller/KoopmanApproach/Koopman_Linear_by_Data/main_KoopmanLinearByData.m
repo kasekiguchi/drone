@@ -57,6 +57,7 @@ end
 % F = @quaternionParameter; % クォータニオンを含むパラメータを追加 22/11/22 観測量にクォータニオンを含めるとうまく推定できない？
 F = @eulerAngleParameter;
 % F = @eulerAngleParameter_withinConst;
+% F = @eulerAngleParameter_InputAndConst;
 
 
 % OUIBS system
@@ -107,14 +108,6 @@ disp(targetpath)
 %% Plot by simulation
 % P
 figure(1)
-subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.p,'LineWidth',2);
-hold on
-grid on
-ylabel('Estimated Data','FontSize',12);
-legend('x','y','z','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
 subplot(2,1,2);
 p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.p(1:simResult.state.N,:)','LineWidth',2);
 hold on
@@ -123,67 +116,86 @@ xlabel('time [sec]','FontSize',12);
 ylabel('Original Data','FontSize',12);
 legend('x','y','z','FontSize',18,'Location','bestoutside');
 set(gca,'FontSize',14);
+originYlim = gcf().CurrentAxes.YLim;
+hold off
+subplot(2,1,1);
+p1 = plot(simResult.T , simResult.state.p,'LineWidth',2);
+ylim(originYlim)
+hold on
+grid on
+
+ylabel('Estimated Data','FontSize',12);
+legend('x','y','z','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
 hold off
 
 % Q
 figure(2)
-subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.q,'LineWidth',2);
-hold on
-grid on
-ylabel('Estimated Data','FontSize',12);
-legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
 subplot(2,1,2);
 p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.q(1:simResult.state.N,:)','LineWidth',2);
 hold on
 grid on
+originYlim = gcf().CurrentAxes.YLim;
 xlabel('time [sec]','FontSize',12);
 ylabel('Original Data','FontSize',12);
+legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+subplot(2,1,1);
+p1 = plot(simResult.T , simResult.state.q,'LineWidth',2);
+hold on
+grid on
+ylim(originYlim)
+ylabel('Estimated Data','FontSize',12);
 legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
 set(gca,'FontSize',14);
 hold off
 
 % V
 figure(3)
-subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.v,'LineWidth',2);
-hold on
-grid on
-ylabel('Estimated Data','FontSize',12);
-legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
 subplot(2,1,2);
 p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.v(1:simResult.state.N,:)','LineWidth',2);
 hold on
 grid on
+originYlim = gcf().CurrentAxes.YLim;
 xlabel('time [sec]','FontSize',12);
 ylabel('Original Data','FontSize',12);
 legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
 set(gca,'FontSize',14);
 hold off
+subplot(2,1,1);
+p1 = plot(simResult.T , simResult.state.v,'LineWidth',2);
+hold on
+grid on
+ylim(originYlim)
+ylabel('Estimated Data','FontSize',12);
+legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+
 
 % W
 figure(4)
-subplot(2,1,1);
-p1 = plot(simResult.T , simResult.state.w,'LineWidth',2);
-hold on
-grid on
-ylabel('Estimated Data','FontSize',12);
-legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
 subplot(2,1,2);
 p2 = plot(simResult.reference.T(1:simResult.state.N),simResult.reference.est.w(1:simResult.state.N,:)','LineWidth',2);
 hold on
 grid on
+originYlim = gcf().CurrentAxes.YLim;
 xlabel('time [sec]','FontSize',12);
 ylabel('Original Data','FontSize',12);
 legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
 set(gca,'FontSize',14);
 hold off
+subplot(2,1,1);
+p1 = plot(simResult.T , simResult.state.w,'LineWidth',2);
+hold on
+grid on
+ylim(originYlim)
+ylabel('Estimated Data','FontSize',12);
+legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+
 
 % Z
 figure(5)
