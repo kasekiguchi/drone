@@ -6,6 +6,7 @@ Bc2 = [0;1];
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 Controller_param.F1=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt);                                % 
+% Controller_param.F1 = place(Ac2,Bc2,[-8.2518 + 4.9876i,-8.2518 - 4.9876i]);%近似線形化と同じ極
 Controller_param.F2=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 Controller_param.F3=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 Controller_param.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 

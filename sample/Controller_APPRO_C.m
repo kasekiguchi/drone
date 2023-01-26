@@ -40,7 +40,8 @@ Controller_param.F4 = [1.41 1.35];
 % Controller_param.F3=lqrd(Acy,Bcy,diag([0.5,0.5,0.10,0.10]),[1],dt); % ydiag([100,10,10,1])
 % Controller_param.F4=lqrd(Acp,Bcp,diag([100,10]),[0.1],dt);                       % ヨー角 
  
-Controller_param.F1=lqrd(Acz,Bcz,diag([100,1]),[0.1],dt);                                % 
+% Controller_param.F1=lqrd(Acz,Bcz,diag([100,1]),[0.1],dt);                                % 
+Controller_param.F1 = place(Acz,Bcz,[-4.0293 + 3.4920i,-4.0293 - 3.4920i]);%FTと同じ極
 % Controller_param.F2=lqrd(Acx,Bcx,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd(Acy,Bcy,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 % Controller_param.F4=lqrd(Acp,Bcp,diag([100,10]),[0.1],dt);                       % ヨー角 
@@ -64,6 +65,7 @@ Controller_param.ay = alpha(1:4,1);
 Controller_param.az = alpha(1:2, 1);
 Controller_param.apsi = alpha(1:2, 1);
 
+eig(diag(1, 1) - [0; 1/m] * Controller_param.F1)
 Controller.type="APPRO_C";
 Controller.name="hlc";
 Controller.param=Controller_param;

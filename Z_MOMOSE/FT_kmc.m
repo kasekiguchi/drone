@@ -381,19 +381,20 @@ a = 10;%乱数の大きさの範囲 |rand|<=a
 a2 = 2*a;
 for i=1:length(time)
     dist1= 0;%a2*rand - a;
-    dist2= 0;%a2*rand - a;
+    dist2= 1;%a2*rand - a;
     dist3= 0;%a2*rand - a;
-    dist4= 10;%a2*rand - a;
+    dist4= 0;%a2*rand - a;
     
     x = [x1(i);x2(i);x3(i);x4(i)];
     xl = [xl1(i);xl2(i);xl3(i);xl4(i)];
     xs = [xs1(i);xs2(i);xs3(i);xs4(i)];
     v(i) = -Kf*(sign(x).*abs(x).^alpha(1:4));
     vl(i) = -K*xl;
+
     sigma(i) = S*xs;
 %     vs(i) = -invSB*(SA*xs+q*sign(sigma(i)));
-%     vs(i) = -invSB*(SA*xs+q*sign(sigma(i))+k*sigma(i));
-    vs(i) = -invSB*(SA*xs+q*tanh(5*sigma(i))+k*sigma(i));
+    vs(i) = -invSB*(SA*xs+q*sign(sigma(i))+k*sigma(i));
+%     vs(i) = -invSB*(SA*xs+q*tanh(5*sigma(i))+k*sigma(i));
 %     vs(i) = -invSB*(SA*xs+ka*sign(sigma(i))*abs(sigma(i))^alps);
 vss(i) = -Ks*xs(1:3);
      if disf<i&&i<dise

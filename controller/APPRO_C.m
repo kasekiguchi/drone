@@ -43,6 +43,10 @@ methods
             Zs = [p(3) - refp(3); v(3) - refv(3)];
             Psis = [q(3);w(3)];
 
+% Xs = [p(1) - refp(1); v(1) ;q(2);w(2)];
+%             Ys = [p(2) - refp(2); v(2);q(1);w(1)];
+%             Zs = [p(3) - refp(3); v(3)];
+%             Psis = [q(3);w(3)];
         P = obj.param.P;
         F1 = obj.param.F1;
         F2 = obj.param.F2;
@@ -80,14 +84,17 @@ methods
             uy = -F3*(sign(Ys).*abs(Ys).^ay); %tau_phi pitch
             uz = -F1*(sign(Zs).*abs(Zs).^az); % f throtl
             upsi = -F4*(sign(Psis).*abs(Psis).^apsi);%tau_psi yaw
-
-        % Linear state feedback controller
+% f1 =[6.5935    4.8458   22.1616;
+%     1.5155    4.5020    6.6158];
+%             uz =
+% ub =- f1(1,1)* tanh(f1(2,1) * Zs(1)) - f1(3,1) * z(t);
+%         % Linear state feedback controller
 %             ux = -F2*Xs; %tau_theta roll
 %             uy = -F3*Ys; %tau_phi pitch
 %             uz = -F1*Zs; % f throtl
 %             upsi = -F4*Psis;%tau_psi yaw
         %%
-        dst=0;
+        dst=1;
 %         t = param{1};
 %         dst = 1;
         %確率的な外乱

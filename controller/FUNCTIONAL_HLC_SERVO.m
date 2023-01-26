@@ -48,7 +48,7 @@ classdef FUNCTIONAL_HLC_SERVO < CONTROLLER_CLASS
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
             
-            if t > 5
+            if t > 0
                 obj.z = obj.z + xd(1:3)-x(5:7);
             end
             %% calc Z
@@ -61,9 +61,17 @@ classdef FUNCTIONAL_HLC_SERVO < CONTROLLER_CLASS
 
             %% calc actual input
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);1];
             obj.self.input = obj.result.input;
             obj.result.z= obj.z;
+            %サブシステムの入力
+        obj.result.uHL = [vf(1);vs];
+        %サブシステムの状態
+        obj.result.z1 = z1;
+        obj.result.z2 = z2;
+        obj.result.z3 = z3;
+        obj.result.z4 = z4;
+        obj.result.vf = vf;
             result = obj.result;
         end
         function show(obj)

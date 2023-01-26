@@ -32,18 +32,18 @@
     Bpsi = [zeros(1,1);1/Izz];
 
 % Time
-    t=7;        %symuration time
+    t=20;        %symuration time
     dt=0.01; %sampling time
     time=(0:dt:t);
     tspan = length(time);
     %distrbance time
     disf=0/dt;%start
-    dise=0/dt;%finish
+    dise=10/dt;%finish
 
 % Objective trajectory
     %reference
 %     ref = @(t) [cos(2*pi*t/12)*cos(2*pi*t/0.1), cos(2*pi*t/12)*sin(2*pi*t/0.1), t*0+tanh(t/7)*1+0*sin(2*pi*t/(22))^1];    %x,y,z
-ref = @(t) [0,0,0];    %x,y,z    
+ref = @(t) [7,-5,2];    %x,y,z    
 % r = 0.2;
     % T =15;
     % ref = @(t) [r*cos(2*pi*t/T), r*sin(2*pi*t/T), 1];    %x,y,z
@@ -59,8 +59,8 @@ ref = @(t) [0,0,0];    %x,y,z
     dXidk = dxid; %keep
 
 % Initial state
-    xi1 = 1 - xid(1);    %x
-    xi2 = 0.1 - xid(2);    %y
+    xi1 = 0 - xid(1);    %x
+    xi2 = 0 - xid(2);    %y
     xi3 = 0 - xid(3);    %z
     dxi1 = 0 - dxid(1);
     dxi2 = 0 - dxid(2);
@@ -126,9 +126,10 @@ ref = @(t) [0,0,0];    %x,y,z
     invG = inv([ones(1,4); ly*[-1 1 -1 1]; lx*[-1 -1 1 1];[k1 -k2 -k3 k4]]);
 
 %% Main loop
- for i = 1:tspan-1
+a = 2;%外乱の大きさの上限
+for i = 1:tspan-1
     % distrbance
-         dist1 = 0; dist2 = 0; dist3 = 0; dist4 = 0;%50*rand(1);
+         dist1 = 0; dist2 = 0; dist3 = 0; dist4 = 0;%2*a*rand(1)-a;
          dist21 = 0; dist22 = 1*dist4;
     
     % Subsystem input
@@ -195,34 +196,34 @@ title('\xi 3D');
 hold off
 j=j+1;
 
-% figure(j)
-% hold on
-% grid on
-% plot(time,[Xk(1,:);Yk(1,:);Zk(1,:)])
-% plot(time,Xidk)
-% title('\xi');
-% legend('\xi1','\xi2','\xi3')
-% hold off
-% j=j+1;
-% 
-% figure(j)
-% hold on
-% grid on
-% plot(time,[Xk(2,:);Yk(2,:);Zk(2,:)])
-% plot(time,dXidk)
-% title('d\xi');
-% legend('d\xi1','d\xi2','d\xi3')
-% hold off
-% j=j+1;
-% 
-% figure(j)
-% hold on
-% grid on
-% plot(time,[Yk(3,:);Xk(3,:);Psik(1,:)])
-% title('angle');
-% legend('\theta roll','\phi pitch','\psi yaw')
-% hold off
-% j=j+1;
+figure(j)
+hold on
+grid on
+plot(time,[Xk(1,:);Yk(1,:);Zk(1,:)])
+plot(time,Xidk)
+title('\xi');
+legend('\xi1','\xi2','\xi3')
+hold off
+j=j+1;
+
+figure(j)
+hold on
+grid on
+plot(time,[Xk(2,:);Yk(2,:);Zk(2,:)])
+plot(time,dXidk)
+title('d\xi');
+legend('d\xi1','d\xi2','d\xi3')
+hold off
+j=j+1;
+
+figure(j)
+hold on
+grid on
+plot(time,[Yk(3,:);Xk(3,:);Psik(1,:)])
+title('angle');
+legend('\theta roll','\phi pitch','\psi yaw')
+hold off
+j=j+1;
 
 figure(j)
 hold on
@@ -249,32 +250,32 @@ title('X');
 legend('\xi1','d\xi1','\theta','d\theta')
 hold off
 % 
-% j=j+1;
-% figure(j)
-% hold on
-% grid on
-% plot(time',Yk)
-% legend('\xi2', 'd\xi2', '\phi', 'd\phi')
-% title('Y');
-% hold off
-% 
-% j=j+1;
-% figure(j)
-% hold on
-% grid on
-% plot(time',Zk)
-% legend('\xi3','d\xi3')
-% title('Z');
-% hold off
-% 
-% j=j+1;
-% figure(j)
-% hold on
-% grid on
-% plot(time',Psik)
-% legend('\psi','d\psi')
-% title('\Psi');
-% hold off
+j=j+1;
+figure(j)
+hold on
+grid on
+plot(time',Yk)
+legend('\xi2', 'd\xi2', '\phi', 'd\phi')
+title('Y');
+hold off
+
+j=j+1;
+figure(j)
+hold on
+grid on
+plot(time',Zk)
+legend('\xi3','d\xi3')
+title('Z');
+hold off
+
+j=j+1;
+figure(j)
+hold on
+grid on
+plot(time',Psik)
+legend('\psi','d\psi')
+title('\Psi');
+hold off
 
 j=j+1;
 figure(j)
@@ -309,3 +310,19 @@ hold off
 %         Y = eAy*Y +inty*uy(i);
 %         Z = eAz*Z +intz*uz(i);
 %         Psi = eApsi*Psi +intpsi*upsi(i);
+%%
+B1 = [diag([1E-5,1E-5,1E-5,1E-3,1E-3,1E-3]);...
+                                        diag([1E-1,1E-1,1E-1,1E-1,1E-1,1E-1])]; 
+Q1=diag([1E3,1E3,1E3,1E5,1E5,1E5]);
+V=B1*Q1*B1'
+
+B=[eye(6)*0.01;eye(6)*0.1];
+Q=pinv(B,1e-9)*V*pinv(B',1e-9)
+% Q =1e0* diag([1E-5,1E-5,1E-5,1E5,1E5,1E5]);
+V2=B*Q*B';
+V-V2
+%%
+syms x [6,6]
+f = V - B*x*B' ;
+ [x, fval] = fmincon(f, ones(12));
+% S = solve(eqn,x)

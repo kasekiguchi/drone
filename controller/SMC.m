@@ -70,8 +70,8 @@ classdef SMC < CONTROLLER_CLASS
             k=10;
             ka=30;
             alp=0.7;%0<alp<1
-            at=3;
-            %定常到達則
+            at=1;
+%             定常到達則
 %             ux=-inv(SB)*(SA*z2+q*sign(sigmax));%sign
 %             uy=-inv(SB)*(SA*z3+q*sign(sigmay));
 %             ux=-inv(SB)*(SA*z2+q*tanh(at*sigmax));%tanh
@@ -79,8 +79,8 @@ classdef SMC < CONTROLLER_CLASS
              %比例到達則
              ux=-inv(SB)*(SA*z2+q*sign(sigmax)+k*sigmax);%sgn
              uy=-inv(SB)*(SA*z3+q*sign(sigmay)+k*sigmay);
-%              ux=-inv(SB)*(SA*z2+q*tanh(sigmax)+k*sigmax);%tanh
-%              uy=-inv(SB)*(SA*z3+q*tanh(sigmay)+k*sigmay);
+%              ux=-inv(SB)*(SA*z2+q*tanh(at*sigmax)+k*sigmax);%tanh
+%              uy=-inv(SB)*(SA*z3+q*tanh(at*sigmay)+k*sigmay);
             %加速率
 %             ux = -inv(SB)*(SA*z2+ka*abs(sigmax)^alp*sign(sigmax));%sgn
 %             uy = -inv(SB)*(SA*z3+ka*abs(sigmay)^alp*sign(sigmay));
@@ -96,8 +96,11 @@ classdef SMC < CONTROLLER_CLASS
 %             dst=8*sin(2*pi*t/0.2);%
 %             dst=dst+10*cos(2*pi*t/1);
 %             dst=2;
-            if t>=4 && t<=5
-                    dst=-1;
+             ts = 2 ; te =5.33;
+             T2 = 2*(te - ts);
+            if t>=ts && t<= te
+%                     dst=0.6;
+                    dst=0.4*sin(2*pi*(t-ts)/T2)+0.6;
             end
             %% calc actual input
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);

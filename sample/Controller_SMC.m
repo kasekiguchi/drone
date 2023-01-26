@@ -60,7 +60,8 @@ switch sn
 %     K = lqrd(A11,A12,diag([1,1,1]),0.1,dt);
 %     [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
 
-    K = lqr(A11,A12,diag([100,1,1]),1);
+%     K = lqr(A11,A12,diag([100,1,1]),1);
+    K = lqr(A11,A12,diag([100,1,1]),0.01);
     S=[K 1];
 %     sig0=S*[x1(1);x2(1)]
 %     Ts=abs(sig0)/gaink
