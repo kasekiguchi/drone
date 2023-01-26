@@ -1,6 +1,7 @@
 %% Initialize
 % do initialize first in main.m
-%clc
+clc
+clear
 %tmp = matlab.desktop.editor.getActive;
 %cd(fileparts(tmp.Filename));
 %% Define variables
