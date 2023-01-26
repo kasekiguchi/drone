@@ -68,8 +68,8 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.Length = 0.075;
                 param.loadmass = 0.0556;
                 param.cableL = 0.46;
-                param.ex = 0.0;
-                param.ey = 0.0;
+                param.ex = 0.0735417984963207;
+                param.ey = 0.0628671906594029;
                 param.ez = 0.037;
                 param.model_error = [];
             end

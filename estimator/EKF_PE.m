@@ -81,9 +81,20 @@ classdef EKF_PE < ESTIMATOR_CLASS
             tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% 事後推定
             tmpvalue = obj.projection(tmpvalue);
             obj.result.state.set_state(tmpvalue(1:24,1));
+            obj.result.PEp = obj.result.state.p;
+            obj.result.PEq = obj.result.state.q;
+            obj.result.PEv = obj.result.state.v;
+            obj.result.PEw = obj.result.state.w;
+            obj.result.PEpL = obj.result.state.pL;
+            obj.result.PEvL = obj.result.state.vL;
+            obj.result.PEpT = obj.result.state.pT;
+            obj.result.PEwL = obj.result.state.wL;
             obj.result.G = G;
             if strcmp(obj.self.reference.point.flag,'f')
                 obj.result.e = tmpvalue(25:26,1);
+                obj.result.P = P;
+            elseif strcmp(obj.self.reference.point.flag,'h')
+                obj.result.e = obj.self.parameter.get(["ex","ey"])';
                 obj.result.P = P;
             else
                 obj.result.e = obj.self.parameter.get(["ex","ey"])';
