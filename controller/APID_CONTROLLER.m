@@ -49,6 +49,9 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
 %                 v = obj.result.input(1);
 %                 obj.ed = [v-rv;w-rw];
 %             end
+            q = obj.self.plant.result.state.q;
+            p = [obj.self.plant.result.state.p(1);obj.self.plant.result.state.p(2)];
+
             obj.e = [p-rp;q-rq];
             obj.ed = [obj.K*(p-rp)-rv;w-rw];
             
@@ -56,6 +59,7 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
             
             obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
+            obj.result.input = [0.1;obj.result.input(2)];
 %             obj.result.input = [0.1;0];
 
             obj.self.input = obj.result.input;

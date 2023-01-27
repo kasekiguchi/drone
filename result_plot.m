@@ -19,12 +19,12 @@ end
 figure(6);
 hold on
 grid on
-plot(logger.Data.t(1:logger.k,1),resultplot.eq)
+% plot(logger.Data.t(1:logger.k,1),resultplot.eq)
 plot(logger.Data.t(1:logger.k,1),resultplot.rq)
 if fExp
     plot(logger.Data.t(1:logger.k,1),resultplot.pq)
 end
-legend('eq','rq','pq','Location','northwest');
+legend('rq','pq','Location','northwest');
 xlabel("time [s]");
 ylabel("q[rad]");
 hold off
@@ -104,4 +104,14 @@ xlabel("$x$ [m]","Interpreter","latex");
 ylabel("$y$ [m]","Interpreter","latex");
 xlim([-4 12])
 ylim([-4 12])
+hold off
+
+figure(11)
+hold on
+grid on
+plot(resultplot.pX,resultplot.pY)
+plot(resultplot.rX,resultplot.rY)
+xlabel("$x$ [m]","Interpreter","latex");
+ylabel("$y$ [m]","Interpreter","latex");
+legend({'p','r'},'Location','northwest');
 hold off

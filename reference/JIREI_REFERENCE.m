@@ -32,16 +32,18 @@ classdef JIREI_REFERENCE < REFERENCE_CLASS
         function  result= do(obj,param)
             EstData = obj.self.estimator.result.state.get();
             pe = EstData(1:2);
-            the = EstData(3);
+            the = obj.self.plant.result.state.q;
             R = [cos(the), -sin(the);sin(the), cos(the)];
             
-            sensor = obj.self.sensor.result;
-            Xcp = (sensor.Uxy(1)+sensor.Dxy(1))/2;
-            Xcs = ( Xcp - obj.screenX/2 )*(obj.screenXm/obj.screenX);
-            theta = atan(Xcs/obj.f);
+            sensor = obj.self.sensor.result;%センサ受け取り
+            Xcp = (sensor.Uxy(1)+sensor.Dxy(1))/2;%バウンディングボックスの中心算出
+            Xcs = ( Xcp - obj.screenX/2 )*(obj.screenXm/obj.screenX);%画面中央との差，m変換
+            theta = -atan(Xcs/obj.f);%Θ算出
+            theta_ref = theta + the;%ロボットの角度を追加
+
             
-            obj.result.state.p = [pe(1);pe(2)];
-            obj.result.state.q = -theta;
+            obj.result.state.p = [obj.self.plant.result.state.p(1);obj.self.plant.result.state.p(2)];
+            obj.result.state.q = theta_ref;
             obj.self.reference.result.state = obj.result.state;
             obj.result.state.v = obj.refv;
             
