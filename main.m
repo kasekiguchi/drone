@@ -252,12 +252,13 @@ Y1=[y, y+2, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y
 Z1=[0, 0, 0, 0, 0; 3-z, 3-z, 3-z, 3-z, 3-z; 0,3-z,3-z,0,0; 0,3-z,3-z,0,0];
 xlim([-1 , 6]);
 ylim([-4.5 ,4.5]);
-zlim([-2.5 , 2]);
+zlim([-1 , 3]);
 xlabel('x [m]','Fontsize',F_size)
 ylabel('y [m]','Fontsize',F_size)
 zlabel('z [m]','Fontsize',F_size)
 legend("reference", "estimate", "obstacle");
 title('phase plot:x-y-z')
+% view([2 2])
 % legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 

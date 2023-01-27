@@ -1,3 +1,37 @@
 1/26更新
 Anzai→ドローンのシミュレーション
 Anzai2→Turtlebotのシミュレーション及び実験
+
+model
+Model_EulerAngle
+
+sensor
+TWOD_TANBUG_SIMPLE→Sensor_LiDAR
+TWOD_TANBUG→Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.01:pi, 'noise', 3.0E-2, 'seed', 3))
+THREED_TANBUG→Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12*3:0.0165*3:pi / 12*3), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3))
+
+estimator
+Estimator_EKF(agent(i), ["p", "q"])
+
+reference
+TWOD_TANBUG_SIMPLE→polyshapeで出力した壁と障害物のみのシンプルな環境用
+TWOD_TANBUG→1号館3F用．環境のせいか軌道がきれいでない（改善の余地あり）
+THREE_TANBUG→3次元のTbug．
+
+controller
+Controller_HL→チューニングについてはTHREE_TANBUG実行時を記載．%以降が元の値
+
+Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([5,1]),[0.1],dt);  % diag([100,1])
+Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([40,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([40,20,10,1]),[0.01],dt); % ydiag([100,10,10,1])
+Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt); %ヨー角
+※TWOD_TANBUG_SIMPLE，TWOD_TANBUGではチューニングしておらず元の値
+
+シミュレーション環境
+TWOD_TANBUG_SIMPLE→main文L20～28で作成
+TWOD_TANBUG，THREE_TANBUG→main2のstlreadでstlファイルを出力
+stlファイル→drone/enviroment
+3F→1号館3F
+3d_Simple→壁を乗り越える挙動のための環境．1mは障害物の高さが1m，showは天井無しの観賞用
+3d_enviroment→左右，鉛直どちらも行ける環境のはずだったが鉛直しか行けない．showは天井無しの観賞用
+3d_enviroment_hv→左右，鉛直どちらも行ける環境．showは天井無しの観賞用，obstacleは障害物だけ
