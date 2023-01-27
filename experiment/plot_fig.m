@@ -129,4 +129,110 @@ ylabel('inner input')
 legend(name_class)
 legend('Location','best')
 hold off
-%%
+%% 事例研用(7)
+clear T
+name_class = ["wall";"reference";"estimator";"target orbit"];%名前
+T = logger.Data.t(1:logger.k);%時間
+obs_pos = agent.sensor.motive.result.rigid;%壁の端点
+x_wide = 0.1;%壁の厚さ
+obs_x =(obs_pos(2).p(1)+obs_pos(3).p(1))/2;%壁のx座標
+
+figure(7)
+hold on
+
+% room_edge = polyshape([-2.2,-2.2,7.2,7.2],[-3.2,3.7,3.7,-3.2]);%部屋の外枠の座標設定
+% plot_room_edge = plot(room_edge);%部屋の外枠をプロット
+% hAnnotation = get(plot_room_edge,'Annotation');%凡例の削除
+% hLegendEntry = get(hAnnotation,'LegendInformation');
+% set(hLegendEntry,'IconDisplayStyle','off')
+ 
+% room = polyshape([-2,-2,7,7],[-3,3.5,3.5,-3]);%部屋の座標設定
+% plot_room = plot(room,'FaceColor','w','FaceAlpha',1);%部屋のプロット
+% hAnnotation = get(plot_room,'Annotation');
+% hLegendEntry = get(hAnnotation,'LegendInformation');
+% set(hLegendEntry,'IconDisplayStyle','off')
+
+PX = [obs_x-x_wide,obs_x-x_wide,obs_x+x_wide,obs_x+x_wide];%壁の端点のx座標
+PY = [obs_pos(3).p(2),obs_pos(2).p(2),obs_pos(2).p(2),obs_pos(3).p(2)];%壁の端点のy座標
+obs = polyshape(PX,PY); %壁の角の座標を設定
+plot(obs,'FaceColor',[0.30,0.75,0.93])%壁をプロット
+
+for plot_i = 1:logger.k%変数を格納
+    p_reference(plot_i,:) = logger.Data.agent.reference.result{1, plot_i}.state.p(1:3); 
+    p_sensor(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.state.p(1:3);
+    p_estimator(plot_i,:) = logger.Data.agent.estimator.result{1, plot_i}.state.p(1:3);
+end
+
+f_phase = find(logger.Data.phase == 102, 1);%フライトが始まる番号
+l_phase = find(logger.Data.phase == 108, 1);%ランディングが始まる番号
+
+%%フライトフェーズで色を変えるプロット↓
+% plot(p_estimator(1:f_phase,1),p_estimator(1:f_phase,2),'LineWidth',2)%estimatorをプロット(フライト前)
+% plot(p_reference(f_phase:plot_i,1),p_reference(f_phase:plot_i,2),'LineWidth',3,'Color',[0.39,0.83,0.07])%referenceをプロット(フライト後)
+% plot(p_estimator(f_phase:plot_i,1),p_estimator(f_phase:plot_i,2),'LineWidth',2,'Color',[0.85,0.33,0.10])%estimatorをプロット(フライト後)
+%普通の奴↓
+plot(p_reference(:,1),p_reference(:,2),'LineWidth',3,'Color',[0.39,0.83,0.07])%referenceをプロット
+plot(p_estimator(:,1),p_estimator(:,2),'LineWidth',2,'Color',[0.85,0.33,0.10])%estimatorをプロット
+plot([0 7],[0 0],"marker",">","LineStyle","--",'LineWidth',1,'Color',[0.15,0.15,0.15])%目標の軌道をプロット
+
+xlim([-2 7])%グラフの範囲の設定
+ylim([-3 3.5])
+xlabel('x [m]')
+ylabel('y [m]')
+legend(name_class)%凡例の表示
+ax = gca;
+ax.FontSize = 12;
+hold off
+
+%事例研用 3次元プロット (8)
+figure(8)
+hold on
+
+%線のプロット↓
+plot3(p_estimator(1:f_phase,1),p_estimator(1:f_phase,2),p_estimator(1:f_phase,3),'LineWidth',1.5,'Color',[0.39,0.83,0.07])%テイクオフ
+plot3(p_estimator(f_phase:l_phase,1),p_estimator(f_phase:l_phase,2),p_estimator(f_phase:l_phase,3),'LineWidth',1.5,'Color',[0.30,0.75,0.93])%フライト
+plot3(p_estimator(l_phase:plot_i,1),p_estimator(l_phase:plot_i,2),p_estimator(l_phase:plot_i,3),'LineWidth',1.5,'Color',[0.85,0.33,0.10])%ランディング
+% plot3(p_estimator(:,1),p_estimator(:,2),p_estimator(:,3),'LineWidth',1,'Color',[0.85,0.33,0.10])
+plot3([0 7],[0 0],[1 1],"LineStyle","--","marker",">")
+
+%図形の定義とプロット↓
+wall_3D=OBJECT3D("cube",struct("cog",[obs_x,(obs_pos(2).p(2)+obs_pos(3).p(2))/2,obs_pos(3).p(3)/2],"length",[0.2,abs(obs_pos(2).p(2)-obs_pos(3).p(2)),obs_pos(3).p(2)]));
+room_3D=OBJECT3D("cube",struct("cog",[2.5,0.25,1.5],"length",[9,6.5,3]));
+
+fill3(wall_3D.X,wall_3D.Y,wall_3D.Z,wall_3D.C,'FaceAlpha',0.5);
+plot_room_3D = fill3(room_3D.X,room_3D.Y,room_3D.Z,room_3D.C,'FaceAlpha',0);
+
+xlabel('x [m]')
+ylabel('y [m]')
+zlabel('z [m]')
+
+name_class = ["takeoff";"flight";"landing";"target orbit";"wall"];%名前
+legend(name_class)
+ax = gca;
+ax.FontSize = 12;
+
+hold off
+
+%事例研用　物体との距離(9)
+figure(9)
+hold on
+for plot_i = 1:logger.k%変数を格納
+    if obs_pos(2).p(2)>logger.Data.agent.estimator.result{1, plot_i}.state.p(2)&&logger.Data.agent.estimator.result{1, plot_i}.state.p(2)<obs_pos(3).p(2)
+        distance_wall(plot_i,1) = norm(obs_x-logger.Data.agent.estimator.result{1, plot_i}.state.p(1));
+    else
+        distance_a(1) = norm(obs_pos(2).p(1:2)-logger.Data.agent.estimator.result{1, plot_i}.state.p(1:2));
+        distance_a(2) = norm(obs_pos(3).p(1:2)-logger.Data.agent.estimator.result{1, plot_i}.state.p(1:2));
+        distance_wall(plot_i,1) = min(distance_a);
+    end
+    distance_sensor(plot_i,1) = logger.Data.agent.sensor.result{1, plot_i}.distance.teraranger;
+end
+plot(T,distance_wall,'LineWidth',1)
+plot(T,distance_sensor,'LineWidth',1)
+xlabel('time [s]')
+ylabel('distance [m]')
+name_class = ["distance wall";"teraranger"];%名前
+legend(name_class)
+ax = gca;
+ax.FontSize = 12;
+
+hold off

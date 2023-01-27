@@ -122,7 +122,7 @@ for i = 1:N
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
-     agent(i).set_property("reference",Reference_ceiling("line_ref",[0,0,1]));%天井
+%      agent(i).set_property("reference",Reference_ceiling("line_ref",[0,0,1]));%天井
 %      agent(i).set_property("reference", Reference_ceiling_PtoP()); 
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
 %     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line
