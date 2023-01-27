@@ -1,0 +1,24 @@
+1/27更新
+TurtlebotでTbugを行うためのブランチ
+
+model
+実験時：agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",30),VEHICLE_PARAM("VEHICLE3"));
+シミュレーション時：agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1))); 
+
+sensor
+実験時：Sensor_ROS
+シミュレーション時：Sensor_LiDAR
+
+estimator
+Estimator_Direct→Primeの値を真値としてそのまま利用
+
+reference
+TWOD_TANBUG
+
+controller
+Controller_APID
+
+Data
+障害物の左側を避ける実験
+1_16anzai_0.25.mat→障害物がやや右側（論文記載データ）
+1_16anzai_0.5.mat→やや右側でない配置
