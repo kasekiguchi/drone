@@ -6,7 +6,7 @@ close all
 %選択
 fExp=10;%実験のデータかどうか
 fLogN=1;%loggerの数が一つの時１ 2つの時:2, other:3
-fLSorFT=3;%LS:1,FT:2,No:>=3
+fLSorFT=1;%LS:1,FT:2,No:>=3
 fMul =1;%複数まとめるか
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
@@ -97,8 +97,8 @@ else
 end
 
 % multiFigure
-% nM = {[1,9,8,10,7],[13,14,15,16,12]};%複数まとめる
-nM = {[3:5 6 2 11],[9,8,10,7,12,18],13:16,20:23};%複数まとめる
+nM = {[1,9,8,10,7],[13,14,15,16,12]};%複数まとめる
+% nM = {[3:5 6 2 11],[9,8,10,7,12,18],13:16,20:23};%複数まとめる
 multiFigure.num = length(nM);%figの数
 multiFigure.title = [" state1", " state2 and input", " subsystem",""];%[" state", " subsystem"];%title name
 multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}%figureの配置場所
@@ -203,10 +203,10 @@ if fLogN==1
         time(j)=ti(i)-tt;
         ref(:,j)=name.Data.agent.reference.result{1,i}.state.p(1:3);
         est(:,j)=name.Data.agent.estimator.result{1,i}.state.p(1:3);
-        pltp(:,j) = name.Data.agent.plant.result{1,i}.state.p(1:3);
-        pltv(:,j) = name.Data.agent.plant.result{1,i}.state.v(1:3);
-        pltq(:,j) = name.Data.agent.plant.result{1,i}.state.q(1:3);
-        pltw(:,j) = name.Data.agent.plant.result{1,i}.state.w(1:3);
+%         pltp(:,j) = name.Data.agent.plant.result{1,i}.state.p(1:3);
+%         pltv(:,j) = name.Data.agent.plant.result{1,i}.state.v(1:3);
+%         pltq(:,j) = name.Data.agent.plant.result{1,i}.state.q(1:3);
+%         pltw(:,j) = name.Data.agent.plant.result{1,i}.state.w(1:3);
         err(:,j)=est(:,j)-ref(:,j);%誤差
         inp(:,j)=name.Data.agent.input{1,i};
         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
@@ -455,21 +455,21 @@ else
 end
 
 %二乗誤差平均
-if fLogN ==1
-     RMSE = rmse(ref,est)
-%      fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
+% if fLogN ==1
+%      RMSE = rmse(ref,est)
+% %      fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
+% %         RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
+% %         fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
+% elseif  fLogN == 2
+%     RMSE_LS = rmse(ref1,est1)
+%     RMSE_FT = rmse(ref2,est2)
+% else
+%     for i =1:logNum
+%         fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
 %         RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
 %         fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
-elseif  fLogN == 2
-    RMSE_LS = rmse(ref1,est1)
-    RMSE_FT = rmse(ref2,est2)
-else
-    for i =1:logNum
-        fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
-        RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
-        fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
-    end
-end
+%     end
+% end
 
 % figure
 %図を選ぶ場合[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
@@ -497,10 +497,11 @@ if fLogN==1
             allData.vf = {struct('x',{{time}},'y',{{vf}}), struct('x','time [s]','y','vf'), {'zu','dzu','ddzu','dddzu'},add_option([],option,addingContents)};
             allData.sigma = {struct('x',{{time}},'y',{{sigmax,sigmay}}), struct('x','time [s]','y','$\sigma$'), {'$\sigma_x$','$\sigma_y$'},add_option([],option,addingContents)};
 %             allData.plant = {struct('x',{{time}},'y',{{plt}}), struct('x','time [s]','y','plant [m]'), {'Plant x','Plant y','Plant z'},add_option([],option,addingContents)};
-            allData.pp = {struct('x',{{time}},'y',{{est,pltp}}), struct('x','time [s]','y','p[m]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
-            allData.pv = {struct('x',{{time}},'y',{{vel,pltv}}), struct('x','time [s]','y','v[m/s]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
-            allData.pq = {struct('x',{{time}},'y',{{att,pltq}}), struct('x','time [s]','y','q[rad]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
-            allData.pw = {struct('x',{{time}},'y',{{w,pltw}}), struct('x','time [s]','y','w[rad/s]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
+%             allData.pp = {struct('x',{{time}},'y',{{est,pltp}}), struct('x','time [s]','y','p[m]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
+%             allData.pv = {struct('x',{{time}},'y',{{vel,pltv}}), struct('x','time [s]','y','v[m/s]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
+%             allData.pq = {struct('x',{{time}},'y',{{att,pltq}}), struct('x','time [s]','y','q[rad]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
+%             allData.pw = {struct('x',{{time}},'y',{{w,pltw}}), struct('x','time [s]','y','w[rad/s]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
+% allData.attitude = {struct('x',{{time}},'y',{[att,w]}), struct('x','time [s]','y','attitude [rad]'), {'roll ','pitch ','yaw ','roll ','pitch ','yaw '},add_option([],option,addingContents)};
 elseif fLogN == 2
 %             allData.t_p = {struct('x',{{time}},'y',{{ref,est}}), struct('x','time [s]','y','p [m]'), {'x ref','y ref','z ref','x est','y est','z est'},add_option([],option,addingContents)};
 % allData.x_y = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}}), struct('x','$x$ [m]','y','$y$ [m]'), {'Reference',c1,c2},add_option(["aspect"],option,addingContents)};
@@ -526,6 +527,7 @@ elseif fLogN == 2
 %             allData.inner_input = {struct('x',{{time}},'y',{{ininp}}), struct('x','time [s]','y','inner input'), {},add_option([],option,addingContents)};
 %             allData.vf = {struct('x',{{time}},'y',{{vf}}), struct('x','time [s]','y','vf'), {'zu','dzu','ddzu','dddzu'},add_option([],option,addingContents)};
 %             allData.sigma = {struct('x',{{time}},'y',{{sigmax,sigmay}}), struct('x','time [s]','y','\sigma'), {'\sigma_x','\sigma_y'},add_option([],option,addingContents)};
+% allData.attitude = {struct('x',{time},'y',{[att,w]}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
 else
                 refx = ref{1}(1,:);
                 refy = ref{1}(2,:);
@@ -546,6 +548,7 @@ else
                 allData.input = { struct('x',{time},'y',{inp}), struct('x','time [s]','y','input [N]'), {'1 '+c1,'2 '+c1,'3 '+c1,'4 '+c1,'dst '+c1,'1 '+c2,'2 '+c2,'3 '+c2,'4 '+c2,'dst '+c2},add_option([],option,addingContents)};
             end
             allData.attitude = {struct('x',{time},'y',{att}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
+%             allData.attitude = {struct('x',{time},'y',{[att,w]}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
             allData.velocity = {struct('x',{time},'y',{vel}), struct('x','time [s]','y','velocity[m/s]'), {'x '+c1,'y '+c1,'z '+c1,'x '+c2,'y '+c2,'z '+c2},add_option([],option,addingContents)};
             allData.angular_velocity = { struct('x',{time},'y',{w}), struct('x','time [s]','y','angular velocity[rad/s]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
             allData.three_D = {struct('x',{[refx,estx]},'y',{[refy,esty]},'z',{[refz,estz]}), struct('x','$x$ [m]','y','$y$ [m]','z','$z$ [m]'), {'ref', 'est'},add_option(["aspect","camposition"],option,addingContents)};
