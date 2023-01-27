@@ -109,7 +109,8 @@ try
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
             param(i).reference.point = {FH, [1;0;0], time.t,dt};%reference.pointの目標位置を指定できる。
-            param(i).reference.CeilingPoint = {FH, [1.5;2.8;2.4], time.t,dt,2.9};%天井接地用。張り付き前座標{2}、天井高さ{5}を追加
+%             param(i).reference.CeilingPoint = {FH, [1.5;2.8;2.4], time.t,dt,2.9};%天井接地用。張り付き前座標{2}、天井高さ{5}を追加
+            param(i).reference.CeilingPoint = {FH, [1;0;1], time.t,dt,2.9};%コスト検証用
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
