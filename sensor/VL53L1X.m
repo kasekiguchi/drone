@@ -13,7 +13,7 @@ classdef VL53L1X < SENSOR_CLASS
         KF
         z_d
     end
-    
+
     methods
         function obj = VL53L1X(self,param)
             obj.self = self;
@@ -46,16 +46,16 @@ classdef VL53L1X < SENSOR_CLASS
                 ReceiveDate = strsplit(strcat(native2unicode(udpr')),',');
                 sensor_distance(1) = str2double(ReceiveDate(1))/1000;%センサ1 char→double
                 sensor_distance(2) = str2double(ReceiveDate(2))/1000;%センサ1 char→double
-                obj.result.distance.esprV = sensor_distance(1);
-                obj.result.distance.esprT = sensor_distance(2);
+%                 obj.result.distance.esprV = sensor_distance(1);
+%                 obj.result.distance.esprT = sensor_distance(2);
                 %% KF
                 if isempty(obj.KF.x_h)
                     obj.KF.x_h = sensor_distance';%状態推定値初期値
                 else
-%                     if abs(sensor_distance(1)-obj.KF.x_h(1)) > 1000 %測定値の変化率
-%                         obj.z_d = sensor_distance(1)-obj.KF.x_h(1);
-%                         sensor_distance(1)=sensor_distance(1)-obj.z_d;
-%                     end
+                    if abs(sensor_distance(1)-obj.KF.x_h(1)) > 1000 %測定値の変化率
+                        obj.z_d = sensor_distance(1)-obj.KF.x_h(1);
+                        sensor_distance(1)=sensor_distance(1)-obj.z_d;
+                    end
                     x_hm = obj.KF.A*obj.KF.x_h;%事前推定値
                     P_hm = obj.KF.A*obj.KF.P_h*obj.KF.A'+obj.KF.Q*obj.KF.b*obj.KF.b';%事前誤差共分散
                     K = P_hm*obj.KF.c/(obj.KF.c'*P_hm*obj.KF.c+obj.KF.R);%カルマンゲイン
@@ -69,7 +69,7 @@ classdef VL53L1X < SENSOR_CLASS
                 if obj.result.distance.VL < 0.05
                     obj.result.switch = 1;
                 end
-            else             
+            else
                 obj.result= obj.self.sensor.VL.result;
             end
             result = obj.result;

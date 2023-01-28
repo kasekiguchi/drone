@@ -104,8 +104,8 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_LiDAR(i));
-%     agent(i).set_property("sensor",Sensor_celing(i));
-    agent(i).set_property("sensor",Sensor_vl53l1x(i));
+    agent(i).set_property("sensor",Sensor_celing(i));
+%     agent(i).set_property("sensor",Sensor_vl53l1x(i));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -122,7 +122,7 @@ for i = 1:N
     %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
     %% set reference property
     agent(i).reference = [];
-%      agent(i).set_property("reference",Reference_ceiling("line_ref",[0,0,1]));%天井
+     agent(i).set_property("reference",Reference_ceiling("line_ref",[0,0,1]));%天井
 %      agent(i).set_property("reference", Reference_ceiling_PtoP()); 
 %     agent(i).set_property("reference",Reference_Time_Varying("sin_ref",[0,0,1]));%sin単振動
 %     agent(i).set_property("reference",Reference_Time_Varying("line_ref",[0,0,1]));%line

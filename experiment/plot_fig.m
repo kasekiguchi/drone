@@ -180,11 +180,12 @@ ylim([-3 3.5])
 xlabel('x [m]')
 ylabel('y [m]')
 legend(name_class)%凡例の表示
+legend('Location','best')
 ax = gca;
 ax.FontSize = 12;
 hold off
 
-%事例研用 3次元プロット (8)
+%% 事例研用 3次元プロット (8)
 figure(8)
 hold on
 
@@ -195,43 +196,86 @@ plot3(p_estimator(l_phase:plot_i,1),p_estimator(l_phase:plot_i,2),p_estimator(l_
 % plot3(p_estimator(:,1),p_estimator(:,2),p_estimator(:,3),'LineWidth',1,'Color',[0.85,0.33,0.10])
 plot3([0 7],[0 0],[1 1],"LineStyle","--","marker",">")
 
-%図形の定義とプロット↓
+%図形の定義↓
 wall_3D=OBJECT3D("cube",struct("cog",[obs_x,(obs_pos(2).p(2)+obs_pos(3).p(2))/2,obs_pos(3).p(3)/2],"length",[0.2,abs(obs_pos(2).p(2)-obs_pos(3).p(2)),obs_pos(3).p(2)]));
 room_3D=OBJECT3D("cube",struct("cog",[2.5,0.25,1.5],"length",[9,6.5,3]));
-
+%図形のプロット
 fill3(wall_3D.X,wall_3D.Y,wall_3D.Z,wall_3D.C,'FaceAlpha',0.5);
 plot_room_3D = fill3(room_3D.X,room_3D.Y,room_3D.Z,room_3D.C,'FaceAlpha',0);
-
+%ラベルの設定↓
 xlabel('x [m]')
 ylabel('y [m]')
 zlabel('z [m]')
 
 name_class = ["takeoff";"flight";"landing";"target orbit";"wall"];%名前
 legend(name_class)
+legend('Location','best')
 ax = gca;
-ax.FontSize = 12;
+ax.FontSize = 12;%フォントの設定
 
 hold off
 
-%事例研用　物体との距離(9)
+%% 事例研用　物体との距離(9)
 figure(9)
 hold on
 for plot_i = 1:logger.k%変数を格納
     if obs_pos(2).p(2)>logger.Data.agent.estimator.result{1, plot_i}.state.p(2)&&logger.Data.agent.estimator.result{1, plot_i}.state.p(2)<obs_pos(3).p(2)
-        distance_wall(plot_i,1) = norm(obs_x-logger.Data.agent.estimator.result{1, plot_i}.state.p(1));
+        distance_wall(plot_i,1) = norm(obs_x-logger.Data.agent.estimator.result{1, plot_i}.state.p(1));%壁との垂直の距離
     else
-        distance_a(1) = norm(obs_pos(2).p(1:2)-logger.Data.agent.estimator.result{1, plot_i}.state.p(1:2));
-        distance_a(2) = norm(obs_pos(3).p(1:2)-logger.Data.agent.estimator.result{1, plot_i}.state.p(1:2));
-        distance_wall(plot_i,1) = min(distance_a);
+        distance_a(1) = norm(obs_pos(2).p(1:2)-logger.Data.agent.estimator.result{1, plot_i}.state.p(1:2));%端点aとの距離
+        distance_a(2) = norm(obs_pos(3).p(1:2)-logger.Data.agent.estimator.result{1, plot_i}.state.p(1:2));%端点bとの距離
+        distance_wall(plot_i,1) = min(distance_a);%a or b　近いほうを選出
     end
-    distance_sensor(plot_i,1) = logger.Data.agent.sensor.result{1, plot_i}.distance.teraranger;
+    distance_sensor(plot_i,1) = logger.Data.agent.sensor.result{1, plot_i}.distance.teraranger;%テラレンジャーの距離
 end
+
 plot(T,distance_wall,'LineWidth',1)
 plot(T,distance_sensor,'LineWidth',1)
+
 xlabel('time [s]')
 ylabel('distance [m]')
 name_class = ["distance wall";"teraranger"];%名前
 legend(name_class)
+legend('Location','best')
+ax = gca;
+ax.FontSize = 12;
+hold off
+
+%% 事例研　速度x,y,z(10)
+figure(10)
+hold on
+for plot_i = 1:logger.k%変数を格納
+    velocity(plot_i,:) = logger.Data.agent.estimator.result{1, plot_i}.state.v;%速度を代入
+end
+
+plot(T,velocity,'LineWidth',1)%速度のプロット
+
+%グラフの書式設定↓
+xlabel('time [s]')
+ylabel('velocity [m/s]')
+name_class = ["Vx";"Vy";"Vz"];%名前
+legend(name_class)
+legend('Location','best')
+ax = gca;
+ax.FontSize = 12;
+hold off
+
+%% 速度とセンサの距離のグラフ
+hold on
+%左軸に速度のプロット
+figure(11)
+plot(T,velocity(:,1:2),'LineWidth',1)%速度のプロット
+xlabel('time [s]')
+ylabel('velocity [m/s]')
+
+
+%右軸にセンサの測定値をプロット
+yyaxis right
+plot(T,distance_sensor,'LineWidth',1)
+ylabel('distance [m]')
+name_class = ["Vx";"Vy";"Vz";"teraranger"];%名前
+legend(name_class)
+legend('Location','best')
 ax = gca;
 ax.FontSize = 12;
 

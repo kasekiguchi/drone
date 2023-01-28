@@ -63,7 +63,7 @@ classdef ceiling_reference < REFERENCE_CLASS
                     if p(2)<a(2)&&p(2)>b(2)&&p(1)<M(1)
                         distance_wall = M(1)-p(1);
                     else
-                        distance_wall = M(1)-p(1)+3;
+                        distance_wall = M(1)-p(1)+4.5;
                     end
                         obs_potential_x = -obj.func(t)/(distance_wall)^2;%障害物からのポテンシャル
                 end
