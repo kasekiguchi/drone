@@ -64,7 +64,7 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
 %                     Param{2}(2) = Param{2}(2)/2;
 %                     obj.result.state.p = Param{2};
 %                 end
-            elseif strcmp(cha,'h') % flight phase
+            elseif strcmp(cha,'h') % 天井張り付き
                 if strcmp(obj.flag,'h')
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),4,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
@@ -104,7 +104,7 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 else
                     obj.result.state.p = obj.self.reference.result.state.p;
                 end
-            elseif strcmp(cha,'j') % flight phase (時間関数)
+            elseif strcmp(cha,'j') % yaw角回転(右？) (時間関数)
                 if obj.flag~='j'
                     obj.t=[];
                 end
@@ -126,7 +126,7 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 else
                 obj.result.state.p = obj.self.reference.result.state.p;
                 end
-            elseif strcmp(cha,'u') % flight phase (時間関数)
+            elseif strcmp(cha,'u') % yaw角回転(左？) (時間関数)
                 if obj.flag~='u'
                     obj.t=[];
                 end

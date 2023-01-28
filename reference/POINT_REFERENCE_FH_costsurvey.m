@@ -1,4 +1,4 @@
-classdef POINT_REFERENCE_FH < REFERENCE_CLASS
+classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
     properties
         param
         flight_phase = 's';
@@ -9,7 +9,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
     end
     
     methods
-        function obj = POINT_REFERENCE_FH(self,varargin)
+        function obj = POINT_REFERENCE_FH_costsurvey(self,varargin)
             % 参照
             obj.self = self;
             obj.result.state = STATE_CLASS(struct('state_list',["p","v"],'num_list', [3]));
@@ -27,7 +27,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't'  && cha ~= 'h' && cha ~= 'm')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
