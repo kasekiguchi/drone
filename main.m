@@ -7,6 +7,10 @@ cd(fileparts(activeFile.Filename));
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; %clear all;
 clc;
+
+% 20230129 磯部 main.m内で初期値をランダムに変化させるフラグ
+flag_initrandam = 1
+
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
@@ -43,10 +47,31 @@ end
             motive.getData(agent, mparam);
         end
 
-        % 20230126
+        % 20230129
         % 初期状態を変更
-        agent(1).input = rand(4,1)*0.1;
-        
+        if flag_initrandam
+            initialState.input = rand(4,1)*0.1; % 0 ~ 0.1
+            initialState.p = rand(3,1)*0.02-0.01; % 1 cm 程度の誤差イメージ
+            initialState.q = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg 程度のイメージ
+            initialState.v = rand(3,1)*0.02-0.01; % 1 cm/s 程度の誤差イメージ
+            initialState.w = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg/s 程度のイメージ
+    
+            agent(1).model.state.p = initialState.p;
+            agent(1).model.state.q = initialState.q;
+            agent(1).model.state.v = initialState.v;
+            agent(1).model.state.w = initialState.w;
+            agent(1).plant.state.p = initialState.p;
+            agent(1).plant.state.q = initialState.q;
+            agent(1).plant.state.v = initialState.v;
+            agent(1).plant.state.w = initialState.w;
+            agent(1).estimator.result.state.p = initialState.p;
+            agent(1).estimator.result.state.q = initialState.q;
+            agent(1).estimator.result.state.v = initialState.v;
+            agent(1).estimator.result.state.w = initialState.w;
+    
+            agent(1).input = initialState.input;
+        end
+
         for i = 1:N
             % sensor
             if fMotive; param(i).sensor.motive = {}; end

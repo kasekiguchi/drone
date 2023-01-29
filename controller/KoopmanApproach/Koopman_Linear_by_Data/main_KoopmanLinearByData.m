@@ -70,11 +70,11 @@ end
 % クープマン作用素を定義
 % F@(X) Xを与える関数ハンドルとして定義
 % DroneSimulation
-% F = @(x) x; % 状態そのまま
+F = @(x) x; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含むパラメータを追加 22/11/22 観測量にクォータニオンを含めるとうまく推定できない？
 % F = @eulerAngleParameter;
 % F = @eulerAngleParameter_withinConst;
-F = @eulerAngleParameter_InputAndConst;
+% F = @eulerAngleParameter_InputAndConst;
 
 
 % OUIBS system
