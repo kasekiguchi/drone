@@ -23,7 +23,7 @@ targetpath=append(nowFolder,'\',FileName);
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 loading_filename = 'simtest';
-Data.HowmanyDataset = 100;
+Data.HowmanyDataset = 1000;
 
 for i= 1: Data.HowmanyDataset
     Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));

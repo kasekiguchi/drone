@@ -1,6 +1,10 @@
 %% initialize
 close all
 
+stepN = 31;
+dt = simResult.reference.T(2)-simResult.reference.T(1);
+tlength = 0:dt:dt*(stepN-1);
+
 %% Font size setting
 Fsize.label = 18;
 Fsize.lgd = 18;
@@ -8,10 +12,10 @@ Fsize.luler = 18;
 
 %% P
 figure(1)
-p1 = plot(simResult.T , simResult.state.p,'LineWidth',2);
+p1 = plot(tlength , simResult.state.p(:,1:stepN),'LineWidth',2);
 hold on
 grid on
-p2 = plot(Data.T(1:simResult.state.N),Data.est.p(1:simResult.state.N,:)','--','LineWidth',1);
+p2 = plot(tlength,simResult.reference.est.p(1:stepN,:)','--','LineWidth',1);
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Position','FontSize',Fsize.label);
@@ -22,10 +26,10 @@ hold off
 
 %% Q
 figure(2)
-p1 = plot(simResult.T , simResult.state.q,'LineWidth',2);
+p1 = plot(tlength , simResult.state.q(:,1:stepN),'LineWidth',2);
 hold on
 grid on
-p2 = plot(Data.T(1:simResult.state.N),Data.est.q(1:simResult.state.N,:)','--','LineWidth',1);
+p2 = plot(tlength,simResult.reference.est.q(1:stepN,:)','--','LineWidth',1);
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Attitude','FontSize',Fsize.label);
@@ -39,10 +43,10 @@ hold off
 
 %% V
 figure(3)
-p1 = plot(simResult.T , simResult.state.v,'LineWidth',2);
+p1 = plot(tlength , simResult.state.v(:,1:stepN),'LineWidth',2);
 hold on
 grid on
-p2 = plot(Data.T(1:simResult.state.N),Data.est.v(1:simResult.state.N,:)','--','LineWidth',1);
+p2 = plot(tlength,simResult.reference.est.v(1:stepN,:)','--','LineWidth',1);
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Velosity','FontSize',Fsize.label);
@@ -52,10 +56,10 @@ hold off
 
 %% W
 figure(4)
-p1 = plot(simResult.T , simResult.state.w,'LineWidth',2);
+p1 = plot(tlength , simResult.state.w(:,1:stepN),'LineWidth',2);
 hold on
 grid on
-p2 = plot(Data.T(1:simResult.state.N),Data.est.w(1:simResult.state.N,:)','--','LineWidth',1);
+p2 = plot(tlength,simResult.reference.est.w(1:stepN,:)','--','LineWidth',1);
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Angular Velosity','FontSize',Fsize.label);

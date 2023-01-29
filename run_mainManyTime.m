@@ -6,7 +6,7 @@ clear;clc;
 
 %% 初期設定
 % 実行する回数を指定
-HowManyRun = 10^2;
+HowManyRun = 10^3;
 
 % rand シード値
 seed = double('T');
@@ -32,7 +32,7 @@ agent = struct; logger = struct;
 
 %% mainを複数回実行
 for runCount = 1:HowManyRun
-    clearvars -except appendLogger HowManyRun targetpath FileName Foldername seed runCount nowFolder% 変数 A 以外の変数を削除  
+    clearvars -except appendLogger HowManyRun targetpath FileName Foldername seed runCount nowFolder % 変数 A 以外の変数を削除  
     
     run('main.m')
 

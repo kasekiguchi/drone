@@ -56,7 +56,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
-            cha = get(FH, 'currentcharacter');
+%             cha = get(FH, 'currentcharacter');
+cha = 'f';
             obj.Data.phase(obj.k) = cha;
             % TODO : activate warning
             %            if isempty(items{1}) | length(items) ~= length(obj.items)

@@ -5,7 +5,8 @@ activeFile = matlab.desktop.editor.getActive;
 cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
-close all hidden; clear all; clc;
+close all hidden; %clear all;
+clc;
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
@@ -42,6 +43,10 @@ end
             motive.getData(agent, mparam);
         end
 
+        % 20230126
+        % 初期状態を変更
+        agent(1).input = rand(4,1)*0.1;
+        
         for i = 1:N
             % sensor
             if fMotive; param(i).sensor.motive = {}; end
@@ -152,11 +157,12 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","er"});
+% logger.plot({1,"p","re"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1:N);
+% agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
+
