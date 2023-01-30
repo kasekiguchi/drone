@@ -488,7 +488,7 @@ methods
                            sz=70;
                            d=5;
                            si2=1;
-                           ref_plot=scatter(tmpx(si2:d:end), tmpy(si2:d:end),[sz],t(1:d:end-si2+1,1),'filled','LineWidth',0.1);
+                           ref_plot=scatter(tmpx(si2:d:end), tmpy(si2:d:end),[sz],t(1:d:end-si2+1,1),'filled','LineWidth',0.5);
                            ref_plot.MarkerEdgeColor = 'b';
                            c = colorbar;
                            
