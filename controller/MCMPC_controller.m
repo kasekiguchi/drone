@@ -143,8 +143,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.input.normE = obj.Normalize();
 
             %-- 制約条件
-            [removeF, removeX, survive] = obj.constraints();
-%             removeF = 0; removeX = []; survive = obj.param.particle_num; 
+%             [removeF, removeX, survive] = obj.constraints();
+            removeF = 0; removeX = []; survive = obj.param.particle_num; 
             obj.state.COG.g = 0; obj.state.COG.gc = 0;
             
 

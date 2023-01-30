@@ -29,7 +29,7 @@ syms t real
 % z = 1;
 
 %% Liner
-x = t/10;
+x = t;
 y = 0;
 z = 1.0;
 

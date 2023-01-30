@@ -69,7 +69,7 @@
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
-		ylabel('$$Y$$[m]','Interpreter', 'Latex','FontSize',20);
+		ylabel('$$YZ$$[m]','Interpreter', 'Latex','FontSize',20);
 	%     legend({'Reference'},'FontSize',18,'Location','northeast');
 		filename = ['Animation_2_2_',num2str(count),];
 		Xleng = ax.XLim(1,2) - ax.XLim(1,1);

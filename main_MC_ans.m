@@ -156,32 +156,56 @@ end
             
 %             [xr, fG] = Reference(Params, time.t, agent, G, fG);
             %% 次の目標値の設定
-            TimeArray = [0, 5, 7, 10];
+            TimeArray = [0, 3, 4, 10];
             if idx == 1
-                Gp = [1; 0; 1]; 
+                Gp = initial.p;
                 Gq = [0; 0; 0];
-                ToTime = TimeArray(2);
-                Cp = agent.estimator.result.state.p;
+                ToTime = TimeArray(2) - TimeArray(1);
+                Cp = initial.p;
                 StartT = 0;
-            elseif idx == TimeArray(2)/0.025
+            elseif idx == TimeArray(2)
+%                 Gp = initial.p;
+                Gq = [0.5; 0; 0];
                 ToTime = TimeArray(3) - TimeArray(2);
                 Cp = agent.estimator.result.state.p;
-                Gp = [Cp(1); Cp(2); Cp(3)];
-                Gq = [0; 0; 0];
                 StartT = TimeArray(2);
-            elseif idx == TimeArray(3)/0.025
-                ToTime = te - TimeArray(3);
-                Cp = agent.estimator.result.state.p;
-                Gp = [Cp(1); 1; 1];
+            elseif idx == TimeArray(3)
                 Gq = [0; 0; 0];
+                ToTime = TimeArray(4) - TimeArray(3);
+                Cp = agent.estimator.result.state.p;
                 StartT = TimeArray(3);
             end
+
+
+%             if idx == 1
+%                 Gp = [0; 0; 0.1]; 
+%                 Gq = [0; 0; 0];
+%                 ToTime = TimeArray(2);
+%                 Cp = agent.estimator.result.state.p;
+%                 StartT = 0;
+%             elseif idx == TimeArray(2)/0.025
+%                 ToTime = TimeArray(3) - TimeArray(2);
+%                 Cp = agent.estimator.result.state.p;
+%                 Gp = [Cp(1); Cp(2); 0.05];
+%                 Gq = [0.2; 0; 0];
+%                 StartT = TimeArray(2);
+%             elseif idx == TimeArray(3)/0.025
+%                 ToTime = te - TimeArray(3);
+%                 Cp = agent.estimator.result.state.p;
+%                 Gp = [0; 0; 0];
+%                 Gq = [0.2; 0; 0];
+%                 StartT = TimeArray(3);
+%             end
             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
             param(i).controller.mcmpc = {idx, xr, time.t};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
+
+            if idx > TimeArray(3) / 0.025
+                agent.input = [0; 0; 0; 0];
+            end
         end
 
         %-- データ保存
@@ -283,7 +307,6 @@ end
                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                 xr(1,1), xr(2,1), xr(3,1));
         fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d \t remove: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx), data.removeF(idx))
-        fprintf("\t fGp:%d %d %d", fG(1), fG(2), fG(3))
         if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
 %             data.removeX{idx}
@@ -422,34 +445,7 @@ plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
 legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
 set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
-%% 2軸グラフ
-% figure(9);
-% yyaxis left
-% logger.plot({1, "input", ""});
-% set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input");
-% yyaxis right
-% plot(logger.data('t', [], [])', data.bestcost(1:end-1), 'LineWidth', 2, 'LineStyle','--');
-% set(gca,'FontSize',15);  grid on; title(""); ylabel("Evaluation [m]"); xlabel("time [s]"); xlim([0 10]);
-% legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
-
-%%
-% plot(logt, data.removeX)
-%% Position
-% T = 0.025:0.025:time.t-0.025;
-% Const = 0.5 * sin(T);
-% close(figure(8))
-% figure(8)
-% plot(logger.data('t',[],[]), logger.data(1,'p','e'), 'LineWidth', 2); hold on; plot(logger.data('t',[],[]), Rdata(1:3, :), '--', 'LineWidth', 2); hold off;
-% xlabel("Time [s]"); ylabel("Position [m]"); %legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-
-% yyaxis right
-% plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
-% xlabel("Time [s]"); ylabel("Number of Samples"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference","N");
-
-% xlim([0 te]); ylim([-inf inf])
-% set(gca,'FontSize',Fontsize);  grid on; title(""); 
-
-%% 
+%% Remove sample and Sigma
 % logt = logger.data('t',[],[]);
 figure(10)
 plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("remove sample")
@@ -479,21 +475,28 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % F = [data.removeF(1:size(logger.data('t',[],[]),1))'; SF'];
 % area(F)
 %% 動画生成
-% tic
-% pathJ = data.pathJ;
-% for m = 1:size(pathJ, 2)
-%     pathJN{m} = normalize(pathJ{m},'range');
-% end
+tic
+pathJ = data.pathJ;
+for m = 1:size(pathJ, 2)
+    pathJN{m} = normalize(pathJ{m},'range');
+end
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
+mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
+Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
+PlotMov_z
+
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
 % Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
-% % PlotMov_v2       % 2次元プロット
-% toc
+% PlotMov_v2       % 2次元プロット
+toc
+
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20230118_P2P_constraints_yaw.mat', '-v7.3')
+% save('Data\20230118_P2P_roll_reference01.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
