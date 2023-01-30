@@ -22,6 +22,7 @@ targetpath=append(nowFolder,'\',FileName);
 
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
+disp('now loading data set')
 loading_filename = 'simtest';
 Data.HowmanyDataset = 1000;
 
@@ -36,7 +37,9 @@ for i= 1: Data.HowmanyDataset
         Data.U = [Data.U, Dataset.U];
         Data.Y = [Data.Y, Dataset.Y];
     end
+    disp(num2str(i))
 end
+disp('loaded')
 
 % 23/01/18現在 1 or 2 のみ対応
 % Data.HowmanyDataset = 2;
@@ -85,6 +88,7 @@ F = @(x) x; % 状態そのまま
 
 %% Koopman linear
 % 12/12 関数化
+disp('now estimating')
 [est.Ahat,est.Bhat, est.Chat] = KoopmanLinear(Data.X,Data.U,Data.Y,F);
 
 disp('Estimated')
@@ -97,7 +101,7 @@ simResult.U = simResult.reference.U;
 simResult.T = simResult.reference.T;
 for i = 1:1:simResult.reference.N-2
     simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
-    simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i);
+    simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
 end
 % SimulationByEstimatedModel
 
