@@ -10,7 +10,7 @@ userpath('clear');
 % warning('off', 'all');
 
 %% general setting
-N = 3; % number of agents
+N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
@@ -20,7 +20,7 @@ run("main1_setting.m");
 %　事例研用
 reference_ceiling_margin = 1.5;
 celing_high = 3;
-wall_x = 2.5;
+wall_x = 3;
 % for mob1 Tbug用
 % tmp = [0 0;0 10;10 10;10 0]-[5 5];
 wall1 = [2 -1;2 1;2.5 1;2.5 -1];
@@ -101,7 +101,7 @@ try
                 if time.t<=5
                     FH.CurrentCharacter = 't';
                 else
-                    FH.CurrentCharacter = 'f';%phaseをいじれる
+                    FH.CurrentCharacter = 't';%phaseをいじれる
                 end
             end
             param(i).reference.covering = [];
@@ -208,13 +208,13 @@ clc
 % logger.plot({1,"p","er"},{1,"sensor.result.distance.teraranger",""});
 % logger.plot({1,"p","rs"},{1,"rpm",""},{1,"inner_input",""});%ros2←多分名前が悪さをしているので代入してから使う
 % logger.plot({1,"rpm",""},{1,"voltage",""},{1,"current",""})
-logger.plot({1,"p","er"},{1,"v","e"});
+% logger.plot({1,"p","er"},{1,"v","e"});
 % logger.plot({1,"p1-p2-p3","er"});
 % logger.plot({1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""});
 % logger.plot({1,"sensor.result.distance.esprV",""},{1,"sensor.result.distance.VL",""},{1,"sensor.result.switch",""},{1,"sensor.result.distance.esprT",""},{1,"sensor.result.distance.teraranger",""});
 % logger.plot({1,"p","rs"},{1,"inner_input",""});
 %agent(1).reference.timeVarying.show(logger)
-% logger.plot({1,"rpm",""});
+logger.plot({1,"rpm",""});
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

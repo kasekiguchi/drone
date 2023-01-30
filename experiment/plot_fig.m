@@ -185,7 +185,7 @@ ax = gca;
 ax.FontSize = 12;
 hold off
 
-%% 事例研用 3次元プロット (8)
+% 事例研用 3次元プロット (8)
 figure(8)
 hold on
 
@@ -215,7 +215,7 @@ ax.FontSize = 12;%フォントの設定
 
 hold off
 
-%% 事例研用　物体との距離(9)
+% 事例研用　物体との距離(9)
 figure(9)
 hold on
 for plot_i = 1:logger.k%変数を格納
@@ -241,7 +241,7 @@ ax = gca;
 ax.FontSize = 12;
 hold off
 
-%% 事例研　速度x,y,z(10)
+% 事例研　速度x,y,z(10)
 figure(10)
 hold on
 for plot_i = 1:logger.k%変数を格納
@@ -260,7 +260,7 @@ ax = gca;
 ax.FontSize = 12;
 hold off
 
-%% 速度とセンサの距離のグラフ
+% 速度とセンサの距離のグラフ(11)
 hold on
 %左軸に速度のプロット
 figure(11)
@@ -279,4 +279,75 @@ legend('Location','best')
 ax = gca;
 ax.FontSize = 12;
 
+hold off
+
+ 三次元　ポテンシャル場(12)(13)
+%clear all
+
+d=0.25;%刻み幅[m]
+x = -2:d:7;%実際の環境のx座標幅
+y = -3:d:3.5;%実際の環境のy座標幅
+
+for dx = -4.5:d:4.5%刻み幅[m]ごとのpotential高さを計算
+    j=1;
+    for dy = -3:d:3.5
+        if dy>-1.2&&dy<0.8&&dx<0%壁面前
+            P_x = -0.5*dx;%xの引力P_x
+            P_xm = -0.5/dx;%xの斥力P_x
+            P_y = 0.25*(dy+0.2)^2;%yの引力P_x
+            P_ym = -sqrt(dx^2+(dy+0.2)^2)+2;%yの斥力P_x
+        else%壁面から外れた場合(上と式は同じ)
+            P_x = -0.5*dx;
+            P_xm = 0.5/(4.5-dx);
+            P_y = 0.25*(dy+0.2)^2;
+            P_ym = -sqrt(dx^2+(dy+0.2)^2)+2;
+        end
+        %potentialの格納
+        Px(j,i)= P_x+P_xm;  %x軸のpotential = xの引力P_x + xの斥力P_xm
+        Py(j,i)= P_y+P_ym;  %y軸のpotential = yの引力P_x + yの斥力P_xm
+        P(j,i)= P_ym+P_xm+P_y+P_x; %全部合わせたのpotential
+        Pm(j,i)= P_xm+P_ym; %斥力のみ合わせたのpotential
+        Pxm(j,i)=P_xm; %x斥力のみのpotential
+        Pym(j,i)=P_ym; %y斥力のみのpotential
+        j=j+1;
+    end
+    i=i+1;
+end
+
+
+potential_name=[Px;Py;P;Pm;Pxm;Pym];%potentialを一つの配列に格納
+title_name= ["x potential";"y potential";"all potential";"obs potential";"x obs potential";"y obs potential"];%図のタイトル
+
+figure(12)%タイトル参照
+for sub_i= 1:6%6つで1つのfigureに出力
+    subplot(2,3,sub_i);
+    mesh(x,y,potential_name(1+27*(sub_i-1):27*sub_i,1:37))
+    xlabel('x [m]')
+    ylabel('y [m]')
+    zlabel('potential')
+    title(title_name(sub_i))
+end
+
+
+figure(13)%yのpotentialとxの斥力potentialを描画した三次元graph
+
+hold on
+mesh(x,y,Pxm,"FaceAlpha",0.05,"FaceColor","r","EdgeColor","r")%xの斥力potentialのみ描画
+%mesh(x,y,Px,"FaceAlpha",0.05,"FaceColor","r","EdgeColor","r")%xのpotentialの描画(これ付けたい場合は上をコメントアウト)
+mesh(x,y,Py,"FaceAlpha",0.05,"FaceColor","b","EdgeColor","b")%yのpotentialの描画
+
+plot3(p_estimator(:,1),p_estimator(:,2),p_estimator(:,3),'LineWidth',1.5,'Color',[0.1,0.1,0.1])%軌道の描画
+
+wall_3D=OBJECT3D("cube",struct("cog",[2.5,-0.2,0.6],"length",[0.2,2,1.2]));%障害物の定義
+room_3D=OBJECT3D("cube",struct("cog",[2.5,0.25,1.5],"length",[9,6.5,3]));%実験環境の空間の定義
+fill3(wall_3D.X,wall_3D.Y,wall_3D.Z,wall_3D.C,'FaceAlpha',1);%障害物の描画
+plot_room_3D = fill3(room_3D.X,room_3D.Y,room_3D.Z,room_3D.C,'FaceAlpha',0);%空間の描画
+
+
+xlabel('x [m]')
+ylabel('y [m]')
+zlabel('potential')
+name_class = ["x potential";"y potential"];%凡例
+% name_class = ["x potential";"y potential";"orbit"];
+legend(name_class)
 hold off

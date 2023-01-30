@@ -86,6 +86,7 @@ classdef ceiling_reference < REFERENCE_CLASS
                 if Param{6}==1
                     obs_potential_y = w_y*0.3*sin(sita)/(obj.self.sensor.VL.result.distance.teraranger);%障害物からのポテンシャル
                 else
+%                     obs_potential_y = 0.5*(-M(2)+p(2))/((-M(2)+p(2))^2+(-M(1)+p(1))^2);%障害物からのポテンシャル
                     obs_potential_y = w_y*0.3*sin(sita)/(distance_wall);%障害物からのポテンシャル
                 end
                 goal_potential_y = -weight_y*0.3*p(2)/abs(-M(2)+(a(2)-b(2))/2+margin_y);
@@ -93,11 +94,12 @@ classdef ceiling_reference < REFERENCE_CLASS
                 obj.result.state.p(2) = p(2) + t*obj.result.state.p(6);%目標座標
                 %% %sensorの値から高度を指定　z座標
                 margin_z = Param{4};
-                if Param{6}==1
-                    obj.result.state.p(3) = 1;%obj.self.sensor.VL.result.distance.VL + p(3) - margin_z;
-                else
-                    obj.result.state.p(3) = 1;%obj.self.sensor.celing.result.ceiling_distance + p(3) - margin_z;%z方向の目標位置
-                end
+                obj.result.state.p(3) = 1;
+%                 if Param{6}==1
+%                     obj.result.state.p(3) = 1;%obj.self.sensor.VL.result.distance.VL + p(3) - margin_z;
+%                 else
+%                     obj.result.state.p(3) = 1;%obj.self.sensor.celing.result.ceiling_distance + p(3) - margin_z;%z方向の目標位置
+%                 end
                 %% 目標位置にたどり着いたか
 %                 if obj.cha =='f'
 %                     if norm(Param{5}(1)-obj.self.reference.result.state.p(1)) < 0.1%目標位置にたどり着いたか
