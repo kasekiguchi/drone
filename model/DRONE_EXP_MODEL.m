@@ -50,7 +50,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                 obj.flight_phase=cha;
                 switch cha
                     case 'q'  % quit
-                        obj.connector.sendData(gen_msg(obj.stop_msg));
+                        obj.connector.sendData(gen_msg([500 500 0 500 0 1000 0 0]));
                         error("ACSL : quit experiment");
                     case 's' % stop pro
 %                        uroll   = 500;     upitch  = 500;     uthr    =  0;     uyaw    = 500;

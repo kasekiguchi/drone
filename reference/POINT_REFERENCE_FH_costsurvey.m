@@ -6,11 +6,13 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
         self
         base_time
         base_state
+        t
     end
     
     methods
         function obj = POINT_REFERENCE_FH_costsurvey(self,varargin)
             % 参照
+            obj.t = [];
             obj.self = self;
             obj.result.state = STATE_CLASS(struct('state_list',["p","v"],'num_list', [3]));
         end
@@ -27,7 +29,7 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't'  && cha ~= 'h' && cha ~= 'm')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't'  && cha ~= 'h' && cha ~= 'm' && cha ~= 'u' && cha ~= 'z' && cha ~= 'r')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -60,45 +62,123 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
 %                 else
 %                     obj.result.state.p = Param{2};
 %                 end
-            elseif strcmp(cha,'f') % flight phase
-                if strcmp(obj.flag,'f')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),4,Param{3}-obj.base_time);
-                else % 初めてtake off に入ったとき
-                    obj.base_time=Param{3};
-                    obj.base_state=obj.self.estimator.result.state.p;
-                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,Param{5}-obj.base_state(3),4,0);
+           elseif strcmp(cha,'f') % flight phase (時間関数)  前移動
+               if obj.flag~='f'
+                    obj.t=[];
                 end
-                obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
-                obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
-                obj.result.state.p(4)=obj.self.estimator.result.state.q(3);
                 obj.flag='f';
-            
+                if ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{3}-obj.t; 
+                else
+                    obj.t=Param{3};
+                    t = 0;
+                end
+                if norm(Param{2}-obj.self.reference.result.state.p(1:3)) > 0.1
+                    v = 0.25;
+                    yaw = atan(Param{2}(2)/Param{2}(1));
+                    x = v*t;
+                    y = 0;
+                    z = Param{2}(3);
+                    obj.result.state.p = [x;y;z];
+                else
+                    obj.result.state.p = obj.self.reference.result.state.p;
+                    t = 0;
+                end
+
+            elseif strcmp(cha,'m') % flight phase (時間関数)  右移動
+                if obj.flag~='m'
+                    obj.t=[];
+                end
+                obj.flag='m';
+                if ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{3}-obj.t; 
+                else
+                    obj.t=Param{3};
+                    t = 0;
+                end
+                if norm(Param{2}-obj.self.reference.result.state.p(1:3)) > 0.1
+                    v = 0.25;
+                    yaw = atan(Param{2}(2)/Param{2}(1));
+                    x = 0;
+                    y = -v*t;
+                    z = Param{2}(3);
+                    obj.result.state.p = [x;y;z];
+                else
+                    obj.result.state.p = obj.self.reference.result.state.p;
+                    t = 0;
+                end
+
+            elseif strcmp(cha,'u') % flight phase (時間関数)  上移動
+                obj.flag='u';
+                if ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{3}-obj.t; 
+                else
+                    obj.t=Param{3};
+                    t = 0;
+                end
+                if norm(Param{2}-obj.self.reference.result.state.p(1:3)) > 0.1
+                    v = 0.25;
+                    yaw = atan(Param{2}(2)/Param{2}(1));
+                    x = 0;
+                    y = 0;
+                    z = Param{2}(3)+v*t;
+                    obj.result.state.p = [x;y;z];
+                else
+                    obj.result.state.p = obj.self.reference.result.state.p;
+                    t = 0;
+                end
+
+
             elseif strcmp(cha,'r') %原点に戻る
-                if strcmp(obj.flag,'r')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),4,Param{3}-obj.base_time);
-                else % 初めてtake off に入ったとき
-                    obj.base_time=Param{3};
-                    obj.base_state=obj.self.estimator.result.state.p;
-                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,Param{5}-obj.base_state(3),4,0);
+                if obj.flag~='r'
+                    obj.t=[];
+                end
+                
+                obj.flag='r';
+                if ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{3}-obj.t; 
+                else
+                    obj.t=Param{3};
+                    t = 0;
+                end
+                if norm([-0.1;0;1]-obj.self.reference.result.state.p(1:3)) > 0.1
+                    v = 0.25;
+                    yaw = atan(obj.self.estimator.result.state.p(2)/obj.self.estimator.result.state.p(1));
+                    x = -v*cos(yaw)*t+obj.self.estimator.result.state.p(1);
+                    y = v*sin(yaw)*t+obj.self.estimator.result.state.p(2);
+                    y = 0;
+                    z = Param{2}(3);
+                    obj.result.state.p = [x;y;z];
+                else
+                    obj.result.state.p = obj.self.reference.result.state.p;
+                    t = 0;
+                end
+            
+             elseif strcmp(cha,'z') % flight phase (時間関数)  上移動戻る
+                if obj.flag~='z'
+                    obj.t=[];
+                end
+                obj.flag='z';
+                if ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{3}-obj.t; 
+                else
+                    obj.t=Param{3};
+                    t = 0;
+                end
+                if norm([0;0;0.9]-obj.self.reference.result.state.p(1:3)) > 0.1
+                    v = 0.25;
+                    yaw = atan(Param{2}(2)/Param{2}(1));
+                    x = 0;
+                    y = 0;
+                    z = Param{2}(3)-v*t;
+                    obj.result.state.p = [x;y;z];
+                else
+                    obj.result.state.p = obj.self.reference.result.state.p;
+                    z =0;
                 end
 
-            elseif strcmp(cha,'h') %右に1m移動
-                if strcmp(obj.flag,'h')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),4,Param{3}-obj.base_time);
-                else % 初めてtake off に入ったとき
-                    obj.base_time=Param{3};
-                    obj.base_state=obj.self.estimator.result.state.p;
-                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,Param{5}-obj.base_state(3),4,0);
-                end
 
-            elseif strcmp(cha,'m') %前に1m移動
-                if strcmp(obj.flag,'m')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),4,Param{3}-obj.base_time);
-                else % 初めてtake off に入ったとき
-                    obj.base_time=Param{3};
-                    obj.base_state=obj.self.estimator.result.state.p;
-                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,Param{5}-obj.base_state(3),4,0);
-                end
+            
 
             else
                 obj.result.state.p = obj.base_state;
