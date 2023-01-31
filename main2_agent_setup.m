@@ -69,7 +69,7 @@ for i = 1:N
     %[M,P]=Model_Discrete(dt,initial_state(i),i);
     %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
     %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
-             initial_state(i).p = [0;-1.5];%[92;1];%
+             initial_state(i).p = [0;0];%[92;1];%
              initial_state(i).q = 0;%pi/2-0.05;
              initial_state(i).v = 0;
     agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
@@ -144,7 +144,7 @@ for i = 1:N
   %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
 %   agent(i).set_property("reference",Reference_Jirei(agent(i)));
   %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-  agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
+%   agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
   agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
