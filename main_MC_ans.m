@@ -158,23 +158,23 @@ end
             %% 次の目標値の設定
             TimeArray = [0, 5, 10, 15];
             if idx == 1
-                Gp = [0.5; 0; 1];
+                Gp = [0; 0; 1];
                 Gq = [0; 0; 0];
                 ToTime = TimeArray(3) - TimeArray(1);
                 Cp = initial.p;
                 StartT = 0;
-%             elseif idx == TimeArray(2)/dt
-%                 Gp = [0.5; 0.5; 1];
-%                 Gq = [0; 0; 0];
-%                 ToTime = TimeArray(3) - TimeArray(2);
-%                 Cp = agent.estimator.result.state.p;
-%                 StartT = TimeArray(2);
-%             elseif idx == TimeArray(3)/dt
-%                 Gp = [0; 0.5; 1];
-%                 Gq = [0.1; 0; 0];
-%                 ToTime = TimeArray(4) - TimeArray(3);
-%                 Cp = agent.estimator.result.state.p;
-%                 StartT = TimeArray(3);
+            elseif idx == TimeArray(2)/dt
+                Gp = [0; 0; 1];
+                Gq = [0; 0; 0];
+                ToTime = TimeArray(3) - TimeArray(2);
+                Cp = agent.estimator.result.state.p;
+                StartT = TimeArray(2);
+            elseif idx == TimeArray(3)/dt
+                Gp = [0; 0; 1];
+                Gq = [0.1; 0; 0];
+                ToTime = TimeArray(4) - TimeArray(3);
+                Cp = agent.estimator.result.state.p;
+                StartT = TimeArray(3);
             end
 
 
@@ -374,7 +374,7 @@ grid on; title("Time change of Position"); xlim([0 xmax]); ylim([-inf inf+0.5]);
 % atiitude
 figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-grid on; title("Time change of Atiitude"); xlim([0 xmax]); ylim([-inf inf]);
+grid on; title("Time change of Atiitude"); xlim([0 xmax]); ylim([-1 1]);
 % velocity
 figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
@@ -440,7 +440,7 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20230118_P2P_roll_reference01.mat', '-v7.3')
+save('Data\20230131_attitude_0.1_02.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
