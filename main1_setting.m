@@ -1,4 +1,3 @@
-
 if fExp
     dt = 0.025; % sampling time
 else
