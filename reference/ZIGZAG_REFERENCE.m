@@ -15,6 +15,7 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
         r  % 回転半径
         th = [];
         constant
+        trackcase
     end
 
     methods
@@ -27,8 +28,6 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
             obj.self = self;
             param = varargin{1};
             obj.refv = param{1,1};
-            %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
-            %obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
             obj.PreTrack = obj.self.model.state.get();%位置,姿勢,速さ
             obj.result.PreTrack = obj.PreTrack;
             obj.Horizon = param{1,2};
@@ -38,6 +37,7 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
             obj.constant = param{1,4};
             obj.ztheta = param{1,5};
+            obj.trackcase = 1;
         end
 
         function  result= do(obj,param)
@@ -167,7 +167,7 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
                     rl = (l1-l2)/2;
                 end
                 tmpl = perp(rl,[0;0]); % 機体を通るrl の垂線
-                tmpzl = perp(rl,[pe(1);pe(2)]); % Perpendicular to the straight line between the current location and the center
+                tmpzl = perp(rl,[pe(1);pe(2)]); % 現在地と中心を結ぶ直線に垂直
                 tmpz0 = cr(rl,tmpzl); % The foot of the perpendicular line between the current location and the center line
                 tmpz1 = cr(l1,tmpzl); % The foot of a straight line perpendicular to your current location and the nearest wall
                 if sum(tmpl) == 0
@@ -184,26 +184,59 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
 %                     tmp(:,i) = [tmp0;tmpt0];
 %                 end
 %                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
-                if den <= 0.3 && tmpzl(2) < 0
-                    trackcase = 0;
-                elseif den <= 0.3 && tmpzl(2) > 0
-                    trackcase = 1;
+                if (den <= 0.3 && tmpz1(2) - pe(2) > 0) || (den <= 0.3 && tmpz1(1) - pe(1) < 0)
+                    obj.trackcase = 0;
+                elseif (den <= 0.3 && tmpz1(2) - pe(2) < 0) || (den <= 0.3 && tmpz1(1) - pe(1) > 0)
+                    obj.trackcase = 1;
                 end
-                dz = c(idm) / sin(obj.ztheta);
-                xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
-                ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
-                az = -(ydz - tmp0(2));
-                bz = xdz - tmp0(1);
-                cz = xdz * tmp0(2) - tmp0(1) *  ydz;
-                lz = [az,bz,cz]/vecnorm([az,bz]);
-%                 tmpzl = perp(lz,EstData(1:2,1));
-%                 tmpz0 = cr(lz,tmpzl);
-                Theta = atan2(az,bz);
-                tmp = [tmpz0;Theta];
-                for i = 2:obj.Horizon
-                    tmpz0 = tmpz0+obj.step*obj.dt*obj.refv*[lz(2);-lz(1)]/vecnorm(lz(1:2));
-                    tmp(:,i) = [tmpz0;Theta];
+                switch obj.trackcase
+                    case 0
+                        if obj.ztheta < 0
+                            obj.ztheta = -obj.ztheta;
+                        end
+                        dz = c(idm) / sin(obj.ztheta);
+                        xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
+                        ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
+                        az = -(ydz - tmp0(2));
+                        bz = xdz - tmp0(1);
+                        cz = xdz * tmp0(2) - tmp0(1) *  ydz;
+                        lz = [az,bz,cz]/vecnorm([az,bz]);
+                        tmpzl2 = perp(lz,[pe(1);pe(2)]);
+                        tmpz2 = cr(lz,tmpl);
+        %                 tmpzl = perp(lz,EstData(1:2,1));
+        %                 tmpz0 = cr(lz,tmpzl);
+                        Theta = atan2(az,bz);
+                        tmp = [tmpz2;Theta];
+                    case 1
+                        if obj.ztheta > 0
+                            obj.ztheta = -obj.ztheta;
+                        end
+                        dz = c(idm) / sin(obj.ztheta);
+                        xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
+                        ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
+                        az = (ydz - tmp0(2));
+                        bz = xdz - tmp0(1);
+                        cz = xdz * tmp0(2) - tmp0(1) *  ydz;
+                        lz = [az,bz,cz]/vecnorm([az,bz]);
+                        tmpzl2 = perp(lz,[pe(1);pe(2)]);
+                        tmpz2 = cr(lz,tmpl);
+        %                 tmpzl = perp(lz,EstData(1:2,1));
+        %                 tmpz0 = cr(lz,tmpzl);
+                        Theta = atan2(az,bz);
+                        tmp = [tmpz2;Theta];
+                
                 end
+%                 dz = c(idm) / sin(obj.ztheta);
+%                 xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
+%                 ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
+%                 az = -(ydz - tmp0(2));
+%                 bz = xdz - tmp0(1);
+%                 cz = xdz * tmp0(2) - tmp0(1) *  ydz;
+%                 lz = [az,bz,cz]/vecnorm([az,bz]);
+% %                 tmpzl = perp(lz,EstData(1:2,1));
+% %                 tmpz0 = cr(lz,tmpzl);
+%                 Theta = atan2(az,bz);
+%                 tmp = [tmpz0;Theta];
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
             end
 
@@ -318,6 +351,7 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
 %             plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
             plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
+%             plot(fWall(:,1),'g-','LineWidth',2);
             O = agent.reference.result.O;
             plot(O(1),O(2),'r*');
             quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
