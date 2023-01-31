@@ -67,9 +67,9 @@ methods
                 fprintf("Whill %d is ready\n", obj.IP);
                 state = obj.connector.getData();
                 obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                obj.result.state.q = [-state.pose.orientation.y];
+                obj.result.state.q = [state.pose.orientation.y];
                 obj.state.p = [state.pose.position.z,state.pose.position.x];
-                obj.state.q = [-state.pose.orientation.y];
+                obj.state.q = [state.pose.orientation.y];
 
         end
 
@@ -105,9 +105,9 @@ function do(obj, u, varargin)
                     obj.connector.sendData(obj.msg);
                     state = obj.connector.getData();
                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.result.state.q = [-state.pose.orientation.y];
+                    obj.result.state.q = [state.pose.orientation.y];
                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.state.q = [-state.pose.orientation.y];
+                    obj.state.q = [state.pose.orientation.y];
                     error("ACSL : quit experiment");
                 case 's' % stop
                     obj.msg.linear.x = 0.0;
@@ -118,9 +118,9 @@ function do(obj, u, varargin)
                     obj.msg.angular.z = 0.0;
                     state = obj.connector.getData();
                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.result.state.q = [-state.pose.orientation.y];
+                    obj.result.state.q = [state.pose.orientation.y];
                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.state.q = [-state.pose.orientation.y];
+                    obj.state.q = [state.pose.orientation.y];
                 case 'f' % run
 %                      obj.msg.linear.x = 0.025;
                      obj.msg.linear.x = u(1);
@@ -131,9 +131,9 @@ function do(obj, u, varargin)
                     obj.msg.angular.z = u(2);
                     state = obj.connector.getData();
                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.result.state.q = [-state.pose.orientation.y];
+                    obj.result.state.q = [state.pose.orientation.y];
                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.state.q = [-state.pose.orientation.y];
+                    obj.state.q = [state.pose.orientation.y];
             end
 
         else % 緊急時
@@ -146,9 +146,9 @@ function do(obj, u, varargin)
             obj.connector.sendData(obj.msg);
             state = obj.connector.getData();
             obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-            obj.result.state.q = [-state.pose.orientation.y];
+            obj.result.state.q = [state.pose.orientation.y];
             obj.state.p = [state.pose.position.z,state.pose.position.x];
-            obj.state.q = [-state.pose.orientation.y];
+            obj.state.q = [state.pose.orientation.y];
             return;
         end
         
