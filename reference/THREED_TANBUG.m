@@ -57,7 +57,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.sensor = [0,0];        
 
             obj.state_initial = [0,0,0]';
-            obj.goal = [5,3,0]';%[5,0,0]';%2Dgoal
+            obj.goal = [5,-4.5,0]';%[5,0,0]';%2Dgoal
 %            obj.goal = [0,15,0]';% global goal position
 
             obj.obstacle = [0,0,0]';% 障害物座標

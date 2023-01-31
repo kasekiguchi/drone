@@ -12,7 +12,7 @@ if fExp
     te = 10000;
 else
 %     te = 5.5;%simple用
-    te = 5.0;%enviroment用
+    te = 4.0;%enviroment用
 end
 
 %% set connector (global instance)
