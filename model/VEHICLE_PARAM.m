@@ -18,7 +18,7 @@ classdef VEHICLE_PARAM < PARAMETER_CLASS
                 name %
                 type = "row"; % row : 列ベクトル or struct : 構造体
                 param.mass = 0.269;
-                param.Lx = 0.01; %角速度の偏差
+                param.Lx = -0.005; %角速度の偏差
                 param.Ly = 0.0932;
                 param.lx = 0.117/2;%0.05;
                 param.ly = 0.0932/2;%0.05;
