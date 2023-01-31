@@ -98,6 +98,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             if abs(prod(a(ids))+prod(b(ids)))<3e-1 % ほぼ直交している場合（傾きの積が-1の式より）
                 % TODO : 入りと出で同じ幅の通路を前提としてしまっている．
                 % 初期値が垂直二等分線上の場合その場で回転するだけのリファレンスになる．
+                obj.self.model.param.Lx  = 0;
                 if isempty(obj.O)
                     e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
                     e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
@@ -152,6 +153,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))]; %　相対座標
             else % ほぼ平行な場合
+                obj.self.model.param.Lx  = -0.005;
                 obj.O = []; th = [];
                 if l1(3)*l2(3)<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                     % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる

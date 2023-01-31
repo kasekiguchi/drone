@@ -160,7 +160,7 @@ methods
             obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
             obj.Data.agent(n).input{obj.k} = agent(n).input;
 %             if obj.fExp
-%                 obj.Data.agent(n).plant.result{obj.k}.state = agent(n).plant.result.state;
+                obj.Data.agent(n).plant.result{obj.k}.state = agent(n).plant.result.state;
 %             end
 
             if obj.fExp
