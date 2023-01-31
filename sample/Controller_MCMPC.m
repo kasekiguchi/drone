@@ -6,7 +6,7 @@ function Controller = Controller_MCMPC(~)
     Controller_param.H = 10;
     Controller_param.Mparticle_num = 10000;
     Controller_param.particle_num = Controller_param.Mparticle_num;
-    Controller_param.MIparticle_num = 10000;
+    Controller_param.MIparticle_num = 1000;
     Controller_param.input.Initsigma = 1.0;
     Controller_param.input.Constsigma = 2.0;
     Controller_param.input.Maxsigma = 2.0;
@@ -46,14 +46,25 @@ function Controller = Controller_MCMPC(~)
 
     %% 円旋回
     Controller_param.P = diag([100.0; 100.0; 1000.0]);    % 座標   1000 1000 100
-    Controller_param.V = diag([100.0; 100.0; 1.0]);    % 速度
+    Controller_param.V = diag([100.0; 100.0; 100.0]);    % 速度
     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.QW = diag([10000; 10000; 10000; 1; 1; 100]);  % 姿勢角、角速度
+    Controller_param.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
     
-    Controller_param.Pf = 100 * diag([100.0; 100.0; 100.0]);
-    Controller_param.Vf = diag([100.0; 100.0; 1.0]);
+    Controller_param.Pf = 100 * diag([10000.0; 10000.0; 10000.0]);
+    Controller_param.Vf = diag([100.0; 100.0; 100.0]);
     Controller_param.QWf = diag([100; 100; 100; 1; 1; 1]);
+
+    %% 姿勢角
+%     Controller_param.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
+%     Controller_param.V = diag([100.0; 100.0; 1.0]);    % 速度
+%     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+%     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+%     Controller_param.QW = diag([100000; 100000; 100000; 100; 100; 1]);  % 姿勢角、角速度
+%     
+%     Controller_param.Pf = 100 * diag([100.0; 100.0; 100.0]);
+%     Controller_param.Vf = diag([100.0; 100.0; 1.0]);
+%     Controller_param.QWf = diag([100; 100; 100; 1; 1; 1]);
 
     %%
 %     Controller_param.P = diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100

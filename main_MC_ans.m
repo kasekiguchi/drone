@@ -156,24 +156,25 @@ end
             
 %             [xr, fG] = Reference(Params, time.t, agent, G, fG);
             %% 次の目標値の設定
-            TimeArray = [0, 3, 4, 10];
+            TimeArray = [0, 5, 10, 15];
             if idx == 1
-                Gp = initial.p;
+                Gp = [0.5; 0; 1];
                 Gq = [0; 0; 0];
-                ToTime = TimeArray(2) - TimeArray(1);
+                ToTime = TimeArray(3) - TimeArray(1);
                 Cp = initial.p;
                 StartT = 0;
-            elseif idx == TimeArray(2)
-%                 Gp = initial.p;
-                Gq = [0.5; 0; 0];
-                ToTime = TimeArray(3) - TimeArray(2);
-                Cp = agent.estimator.result.state.p;
-                StartT = TimeArray(2);
-            elseif idx == TimeArray(3)
-                Gq = [0; 0; 0];
-                ToTime = TimeArray(4) - TimeArray(3);
-                Cp = agent.estimator.result.state.p;
-                StartT = TimeArray(3);
+%             elseif idx == TimeArray(2)/dt
+%                 Gp = [0.5; 0.5; 1];
+%                 Gq = [0; 0; 0];
+%                 ToTime = TimeArray(3) - TimeArray(2);
+%                 Cp = agent.estimator.result.state.p;
+%                 StartT = TimeArray(2);
+%             elseif idx == TimeArray(3)/dt
+%                 Gp = [0; 0.5; 1];
+%                 Gq = [0.1; 0; 0];
+%                 ToTime = TimeArray(4) - TimeArray(3);
+%                 Cp = agent.estimator.result.state.p;
+%                 StartT = TimeArray(3);
             end
 
 
@@ -203,18 +204,18 @@ end
             end
             agent(i).do_controller(param(i).controller.list);
 
-            if idx > TimeArray(3) / 0.025
-                agent.input = [0; 0; 0; 0];
-            end
+%             if idx > TimeArray(3) / 0.025
+%                 agent.input = [0; 0; 0; 0];
+%             end
         end
 
         %-- データ保存
         if idx == 1
             data.param = agent.controller.result.contParam;
         end
-        state_data =            agent.controller.result.path;
+%         state_data =            agent.controller.result.path;
         BestcostID =            agent.controller.result.BestcostID;
-        data.path{idx} =        state_data;
+        data.path{idx} =        agent.controller.result.path;
         data.pathJ{idx} =       agent.controller.result.Evaluationtra; % - 全サンプルの評価値
         data.pathJN{idx} =      agent.controller.result.Evaluationtra_norm;
         data.sigma(idx) =       agent.controller.result.sigma;
@@ -222,17 +223,17 @@ end
         data.removeF(idx) =     agent.controller.result.removeF;   % - 棄却されたサンプル数
         data.removeX{idx} =     agent.controller.result.removeX;
 
-        data.state(idx, 1) = idx * dt; % - 現在時刻
-        data.state(idx, 2) = agent.estimator.result.state.p(1);   % - 状態 x
-        data.state(idx, 3) = agent.estimator.result.state.p(2);   % - 状態 y
-        data.state(idx, 4) = agent.estimator.result.state.p(3);   % - 状態 z
-        data.state(idx, 5) = agent.input(1);  % - 入力 u1
-        data.state(idx, 6) = agent.input(2);  % - 入力 u2
-        data.state(idx, 7) = agent.input(3);  % - 入力 u3
-        data.state(idx, 8) = agent.input(4);  % - 入力 u4
-%         data.state(idx, 9)  = xr(1, 1);    % - 目標状態 xr
-%         data.state(idx, 10) = xr(2, 1);   % - 目標状態 yr
-%         data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
+        data.state(idx, 1) =    idx * dt; % - 現在時刻
+        data.state(idx, 2) =    agent.estimator.result.state.p(1);   % - 状態 x
+        data.state(idx, 3) =    agent.estimator.result.state.p(2);   % - 状態 y
+        data.state(idx, 4) =    agent.estimator.result.state.p(3);   % - 状態 z
+        data.state(idx, 5) =    agent.input(1);  % - 入力 u1
+        data.state(idx, 6) =    agent.input(2);  % - 入力 u2
+        data.state(idx, 7) =    agent.input(3);  % - 入力 u3
+        data.state(idx, 8) =    agent.input(4);  % - 入力 u4
+%         data.state(idx, 9)  =   xr(1, 1);    % - 目標状態 xr
+%         data.state(idx, 10) =   xr(2, 1);   % - 目標状態 yr
+%         data.state(idx, 11) =   xr(3, 1);   % - 目標状態 zr
 
         data.xr{idx} = xr;
         data.variable_particle_num(idx) = agent.controller.result.variable_N;
@@ -242,9 +243,9 @@ end
         data.cog.gc{idx} = COG.gc;
 
         if data.removeF(idx) ~= data.param.particle_num
-            data.bestx(idx, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
-            data.besty(idx, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
-            data.bestz(idx, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
+            data.bestx(idx, :) = data.path{idx}(1, :, BestcostID); % - もっともよい評価の軌道x成分
+            data.besty(idx, :) = data.path{idx}(2, :, BestcostID); % - もっともよい評価の軌道y成分
+            data.bestz(idx, :) = data.path{idx}(3, :, BestcostID); % - もっともよい評価の軌道z成分
         else
             if idx == 1
                 data.bestx(idx, :) = data.bestx(idx, :); % - 制約外は前の評価値を引き継ぐ
@@ -313,63 +314,6 @@ end
 %             data.sur{idx}
         end
         fprintf("\n");
-
-        %% 逐次プロット
-%         figure(10);
-%         clf
-%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-%         TvC = 0:Params.dt:te;
-%         %% circle
-%         plot(Tv, xr(1, :), '.', 'LineWidth', 2);hold on;
-%         plot(Tv, xr(2, :), '.', 'LineWidth', 2);
-%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-%         hold off;
-%         xlabel("Time [s]"); ylabel("Reference [m]");
-%         legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
-%         xlim([0 te]); ylim([-inf inf+0.1]); 
-%         figure(20)
-%         clf
-%         if data.removeF(idx) == data.variable_particle_num(idx)
-%             % 制約外の集合
-%             xDc = reshape(data.path{idx}(1, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             yDc = reshape(data.path{idx}(2, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             plot(xDc, yDc, '.', 'MarkerSize', 5);
-%             % 制約外の重心
-%             plot(data.cog.gc{idx}(1), data.cog.gc{idx}(2), '+', 'MarkerSize', 5);
-%             % 現在位置
-%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
-%             xlim([-inf inf]); ylim([-inf inf]);
-%             hold off;
-%         elseif data.removeF(idx) == 0
-%             % 制約内の集合
-%             xD = reshape(data.path{idx}(1, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             yD = reshape(data.path{idx}(2, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             plot(xD, yD, '.', 'MarkerSize', 5); hold on;
-%             % 制約内の重心
-%             plot(data.cog.g{idx}(1), data.cog.g{idx}(2), '+', 'MarkerSize', 5);
-%             % 現在位置
-%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
-%             xlim([-inf inf]); ylim([-inf inf]);
-%             hold off;
-%         else
-%             % 制約内の集合
-%             xD = reshape(data.path{idx}(1, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             yD = reshape(data.path{idx}(2, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             plot(xD, yD, '.', 'MarkerSize', 5); hold on;
-%             % 制約内の重心
-%             plot(data.cog.g{idx}(1), data.cog.g{idx}(2), '+', 'MarkerSize', 5);
-%             % 制約外の集合
-%             xDc = reshape(data.path{idx}(1, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             yDc = reshape(data.path{idx}(2, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             plot(xDc, yDc, '.', 'MarkerSize', 5);
-%             % 制約外の重心
-%             plot(data.cog.gc{idx}(1), data.cog.gc{idx}(2), '+', 'MarkerSize', 5);
-%             % 現在位置
-%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
-%             xlim([-inf inf]); ylim([-inf inf]);
-%             hold off;
-%         end
         %%
         drawnow 
     end
@@ -475,23 +419,23 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % F = [data.removeF(1:size(logger.data('t',[],[]),1))'; SF'];
 % area(F)
 %% 動画生成
-tic
-pathJ = data.pathJ;
-for m = 1:size(pathJ, 2)
-    pathJN{m} = normalize(pathJ{m},'range');
-end
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
-mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
-Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
-PlotMov_z
+% tic
+% pathJ = data.pathJ;
+% for m = 1:size(pathJ, 2)
+%     pathJN{m} = normalize(pathJ{m},'range');
+% end
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
+% Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
+% PlotMov_z
 
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
 % Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
 % PlotMov_v2       % 2次元プロット
-toc
+% toc
 
 % PlotMovXYZ  % 3次元プロット
 % save()

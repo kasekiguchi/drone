@@ -173,6 +173,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 % 追加
                 obj.param.nextparticle_num = obj.param.Mparticle_num;
             end
+
+%             if Bestcost > obj.param.ConstEval; Bestcost = obj.param.ConstEval;  end
+           
             obj.result.removeF = removeF;
             obj.result.removeX = removeX;
             obj.result.survive = survive;
