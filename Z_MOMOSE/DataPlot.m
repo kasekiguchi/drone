@@ -503,6 +503,7 @@ if fLogN==1
 %             allData.pv = {struct('x',{{time}},'y',{{vel,pltv}}), struct('x','time [s]','y','v[m/s]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
 %             allData.pq = {struct('x',{{time}},'y',{{att,pltq}}), struct('x','time [s]','y','q[rad]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
 %             allData.pw = {struct('x',{{time}},'y',{{w,pltw}}), struct('x','time [s]','y','w[rad/s]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
+% allData.attitude = {struct('x',{{time}},'y',{[att,w]}), struct('x','time [s]','y','attitude [rad]'), {'roll ','pitch ','yaw ','roll ','pitch ','yaw '},add_option([],option,addingContents)};
 elseif fLogN == 2
 %             allData.t_p = {struct('x',{{time}},'y',{{ref,est}}), struct('x','time [s]','y','p [m]'), {'x ref','y ref','z ref','x est','y est','z est'},add_option([],option,addingContents)};
 % allData.x_y = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}}), struct('x','$x$ [m]','y','$y$ [m]'), {'Reference',c1,c2},add_option(["aspect"],option,addingContents)};
@@ -528,6 +529,7 @@ elseif fLogN == 2
 %             allData.inner_input = {struct('x',{{time}},'y',{{ininp}}), struct('x','time [s]','y','inner input'), {},add_option([],option,addingContents)};
 %             allData.vf = {struct('x',{{time}},'y',{{vf}}), struct('x','time [s]','y','vf'), {'zu','dzu','ddzu','dddzu'},add_option([],option,addingContents)};
 %             allData.sigma = {struct('x',{{time}},'y',{{sigmax,sigmay}}), struct('x','time [s]','y','\sigma'), {'\sigma_x','\sigma_y'},add_option([],option,addingContents)};
+% allData.attitude = {struct('x',{time},'y',{[att,w]}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
 else
                 refx = ref{1}(1,:);
                 refy = ref{1}(2,:);
@@ -548,6 +550,7 @@ else
                 allData.input = { struct('x',{time},'y',{inp}), struct('x','time [s]','y','input [N]'), {'1 '+c1,'2 '+c1,'3 '+c1,'4 '+c1,'dst '+c1,'1 '+c2,'2 '+c2,'3 '+c2,'4 '+c2,'dst '+c2},add_option([],option,addingContents)};
             end
             allData.attitude = {struct('x',{time},'y',{att}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
+%             allData.attitude = {struct('x',{time},'y',{[att,w]}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
             allData.velocity = {struct('x',{time},'y',{vel}), struct('x','time [s]','y','velocity[m/s]'), {'x '+c1,'y '+c1,'z '+c1,'x '+c2,'y '+c2,'z '+c2},add_option([],option,addingContents)};
             allData.angular_velocity = { struct('x',{time},'y',{w}), struct('x','time [s]','y','angular velocity[rad/s]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
             allData.three_D = {struct('x',{[refx,estx]},'y',{[refy,esty]},'z',{[refz,estz]}), struct('x','$x$ [m]','y','$y$ [m]','z','$z$ [m]'), {'ref', 'est'},add_option(["aspect","camposition"],option,addingContents)};
