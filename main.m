@@ -96,11 +96,11 @@ try
                 if time.t<=8
                     FH.CurrentCharacter = 't';
                 elseif time.t < 15
-                    FH.CurrentCharacter = 'f';%phaseをいじれる
+                    FH.CurrentCharacter = 'u';%phaseをいじれる
                 elseif time.t < 20
-                    FH.CurrentCharacter = 'l';%phaseをいじれる
-%                 elseif time.t < 23
-%                     FH.CurrentCharacter = 'm';%phaseをいじれる
+                    FH.CurrentCharacter = 'z';%phaseをいじれる
+                elseif time.t < 23
+                    FH.CurrentCharacter = 'u';%phaseをいじれる
 %                 else
 %                     FH.CurrentCharacter = 'h';%phaseをいじれる
                 end
