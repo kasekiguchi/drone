@@ -36,7 +36,7 @@ run("main2_agent_setup.m");
 if fExp~=1
     for i = 1:N
 % agent.set_model_error("lx",0.08);%0.0585 %0.06くらいでFT=FB 
-agent.set_model_error("ly",0.01);%0.0466
+% agent.set_model_error("ly",0.01);%0.0466
 % agent.set_model_error("mass",-0.1);%0.269
 % agent(i).set_model_error("jx",-0.02);%0.02237568;
 % agent.set_model_error("jy",-0.01);%0.02985236;
@@ -49,8 +49,7 @@ agent.set_model_error("ly",0.01);%0.0466
 % agent.set_model_error("k2",0.05);%0.000008
 % agent.set_model_error("k3",0.05);%0.000008
 % agent.set_model_error("k4",0.05);%0.000008
-% agent(i).set_m
-% odel_error("B",[zeros(1,6),[1,0,0],[0,1,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
+agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[1,1,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
     end
 end
 %% main loop

@@ -6,8 +6,8 @@ close all
 %選択
 fExp=10;%実験のデータかどうか
 fLogN=1;%loggerの数が一つの時１ 2つの時:2, other:3
-fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =1;%複数まとめるか
+fLSorFT=1;%LS:1,FT:2,No:>=3
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 
@@ -21,7 +21,7 @@ endTime = 1E2;
 %              11:"three_D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma" 20:"plant"]
 %========================================================================
 if fLogN == 1
-    name = logger;
+    name = logger_ls;
 %     name = logger_FB_codin0;
 %     name =logger_FT_c_09;
 %     name =logger_HL_c;
@@ -43,12 +43,12 @@ if fLogN == 1
 % name = logger_ls_jz_n003;
 
 %chuse figure
-%     n = 1:19;
-    n = [1,5,8,10,7, 12:16,20:23];
+    n = 1:18;
+%     n = [1,5,8,10,7, 12:16,20:23];
 %     n=20:23;
 elseif fLogN==2
-    name1 = logger;%LS
-    name2 = logger2;%FT
+    name1 = logger_ls_saddle;%LS
+    name2 = logger_ft_saddle;%FT
 % name1 = logger_lsjx002;%LS
 %     name2 = logger_ftjx002;%FT
 %     name1 = logger_ls_jx_n001;%LS
@@ -81,11 +81,13 @@ elseif fLogN==2
     comp=[c1,c2];%     comp = struct('c1',' Linear state FB','c2',' Finit time settling');
 else
     loggers = {
-        logger_ft_lx_001,...
-        logger_ls_lx_001,...
+%         logger_ft_lx_001,...
+%         logger_ls_lx_001,...
 %         logger_ft_ly_001,...
 %         logger_ls_ly_001,...
-%         logger
+        logger_ls_saddle
+        logger_ft_saddle
+        logger_ls
         };
     c1="lxFinit time settling";
     c2="lxLinear state FB";
@@ -98,7 +100,7 @@ end
 
 % multiFigure
 % nM = {[1,9,8,10,7],[13,14,15,16,12]};%複数まとめる
-nM = {[3:5 6 2 11],[9,8,10,7,12,18],13:16,20:23};%複数まとめる
+nM = {[3:5 6 2 11],[9,8,10,7,12,18],13:16,[1,8,9,10]};%複数まとめる
 multiFigure.num = length(nM);%figの数
 multiFigure.title = [" state1", " state2 and input", " subsystem",""];%[" state", " subsystem"];%title name
 multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}%figureの配置場所
@@ -203,10 +205,10 @@ if fLogN==1
         time(j)=ti(i)-tt;
         ref(:,j)=name.Data.agent.reference.result{1,i}.state.p(1:3);
         est(:,j)=name.Data.agent.estimator.result{1,i}.state.p(1:3);
-        pltp(:,j) = name.Data.agent.plant.result{1,i}.state.p(1:3);
-        pltv(:,j) = name.Data.agent.plant.result{1,i}.state.v(1:3);
-        pltq(:,j) = name.Data.agent.plant.result{1,i}.state.q(1:3);
-        pltw(:,j) = name.Data.agent.plant.result{1,i}.state.w(1:3);
+%         pltp(:,j) = name.Data.agent.plant.result{1,i}.state.p(1:3);
+%         pltv(:,j) = name.Data.agent.plant.result{1,i}.state.v(1:3);
+%         pltq(:,j) = name.Data.agent.plant.result{1,i}.state.q(1:3);
+%         pltw(:,j) = name.Data.agent.plant.result{1,i}.state.w(1:3);
         err(:,j)=est(:,j)-ref(:,j);%誤差
         inp(:,j)=name.Data.agent.input{1,i};
         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
@@ -374,7 +376,7 @@ elseif fLogN == 2
     end
     %figureは何個でもいい========================================================
 else
-
+%%%%%%%%%%%%%%%%%%%%これに行こう===============================
     if fF==1
         logNum = length(loggers);
         for i = 1:logNum
@@ -399,7 +401,7 @@ else
         for i = 1:logNum
             ke(i) = kf(i) + minSpan;
         end
-    else
+    else 
         logNum = length(loggers);
        for i = 1:logNum
             t{i} = loggers{i}.Data.t';
@@ -465,7 +467,7 @@ elseif  fLogN == 2
     RMSE_FT = rmse(ref2,est2)
 else
     for i =1:logNum
-        fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
+        fprintf('#%s \n RMSE_x    RMSE_y   RMSE_z \n',c{i});
         RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
         fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
     end
@@ -497,14 +499,14 @@ if fLogN==1
             allData.vf = {struct('x',{{time}},'y',{{vf}}), struct('x','time [s]','y','vf'), {'zu','dzu','ddzu','dddzu'},add_option([],option,addingContents)};
             allData.sigma = {struct('x',{{time}},'y',{{sigmax,sigmay}}), struct('x','time [s]','y','$\sigma$'), {'$\sigma_x$','$\sigma_y$'},add_option([],option,addingContents)};
 %             allData.plant = {struct('x',{{time}},'y',{{plt}}), struct('x','time [s]','y','plant [m]'), {'Plant x','Plant y','Plant z'},add_option([],option,addingContents)};
-            allData.pp = {struct('x',{{time}},'y',{{est,pltp}}), struct('x','time [s]','y','p[m]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
-            allData.pv = {struct('x',{{time}},'y',{{vel,pltv}}), struct('x','time [s]','y','v[m/s]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
-            allData.pq = {struct('x',{{time}},'y',{{att,pltq}}), struct('x','time [s]','y','q[rad]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
-            allData.pw = {struct('x',{{time}},'y',{{w,pltw}}), struct('x','time [s]','y','w[rad/s]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
+%             allData.pp = {struct('x',{{time}},'y',{{est,pltp}}), struct('x','time [s]','y','p[m]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
+%             allData.pv = {struct('x',{{time}},'y',{{vel,pltv}}), struct('x','time [s]','y','v[m/s]'), {'x est','y est','z est','x plant','y plant','z plant'},add_option([],option,addingContents)};
+%             allData.pq = {struct('x',{{time}},'y',{{att,pltq}}), struct('x','time [s]','y','q[rad]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
+%             allData.pw = {struct('x',{{time}},'y',{{w,pltw}}), struct('x','time [s]','y','w[rad/s]'), {'roll est','pitch est','yaw est','roll plant','pitch plant','yaw plant'},add_option([],option,addingContents)};
 elseif fLogN == 2
 %             allData.t_p = {struct('x',{{time}},'y',{{ref,est}}), struct('x','time [s]','y','p [m]'), {'x ref','y ref','z ref','x est','y est','z est'},add_option([],option,addingContents)};
 % allData.x_y = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}}), struct('x','$x$ [m]','y','$y$ [m]'), {'Reference',c1,c2},add_option(["aspect"],option,addingContents)};
-            allData.x_y = {struct('x',{{est1(1,:),est2(1,:)}},'y',{{est1(2,:),est2(2,:)}}), struct('x','$x$ [m]','y','$y$ [m]'), {c1,c2},add_option(["aspect"],option,addingContents)};
+            allData.x_y = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}}), struct('x','$x$ [m]','y','$y$ [m]'), {'Reference',c1,c2},add_option(["aspect"],option,addingContents)};
             allData.t_x = {struct('x',{{time1,time1,time2}},'y',{{ref1(1,:),est1(1,:),est2(1,:)}}), struct('x','time [s]','y','$x$ [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};
             allData.t_y = {struct('x',{{time1,time1,time2}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}}), struct('x','time [s]','y','$y$ [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};
             allData.t_z = {struct('x',{{time1,time1,time2}},'y',{{ref1(3,:),est1(3,:),est2(3,:)}}), struct('x','time [s]','y','$z$ [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};
@@ -559,7 +561,7 @@ else
 end
 
 %plot
-if multiFigure.f == 1 %multiFigure
+if multiFigure.f == 1 && fspider ~=1%multiFigure
     for mfn = 1: multiFigure.num
         f(mfn)=figure(mfn);
         tpolt = tiledlayout(multiFigure.layout{1,mfn}(1), multiFigure.layout{1,mfn}(2));
@@ -584,33 +586,9 @@ elseif fspider ==1
     %x,dx,ddx,dddx,rmse
     %ang(roll pitch yaw),angver(roll pitch yaw)
     %inp:x,dx,ddx,dddxに加えられたとき
-    figName = ["subsystem_x","angle_angleVel","angle_vel","err_RMSE","est","velocity","est_ver","subsystem_y","uHL"];%%
-    P1=[];P2=[];P3=[];P4=[];P5=[];P6=[];P7=[];P8=[];P9=[];%%
-     for i = 1:logNum
-%         D1 = [z2{i}(1,end),z2{i}(2,end),z2{i}(3,end),z2{i}(4;,end),RMSE(i,1:3)];
-        D1 = [z2{i}(1,end),z2{i}(2,end),z2{i}(3,end),z2{i}(4,end)];
-        D2 = [att{i}(1:3,end)',w{i}(1:3,end)'];
-        D3 = w{i}(1:3,end)';
-        D4 = [err{i}(1:3,end)',RMSE(i,1:3)];
-        D5 = est{i}(1:3,end)';
-        D6 = vel{i}(1:3,end)';
-        D7 = [est{i}(1:3,end)',vel{i}(1:3,end)'];%%
-        D8 = [z3{i}(1,end),z3{i}(2,end),z3{i}(3,end),z3{i}(4,end)];
-        D9 = uHL{i}(1:4,end)';
-        P1 = [P1; D1];
-        P2 = [P2; D2];
-        P3 = [P3; D3];
-        P4 = [P4; D4];
-        P5 = [P5; D5];
-        P6 = [P6; D6];
-        P7 = [P7; D7];
-        P8 = [P8; D8];
-        P9 = [P9; D9];
-     end
-     P = {P1,P2,P3,P4,P5,P6,P7,P8,P9};%%
-     ALmax = [max(max(P1,[],2)),max(max(P2,[],2)),max(max(P3,[],2)),max(max(P4,[],2)),max(max(P5,[],2)),max(max(P6,[],2)),max(max(P7 ,[],2)),max(max(P8 ,[],2)),max(max(P9 ,[],2))];%%
-     ALmin = [min(min(P1,[],2)),min(min(P2,[],2)),min(min(P3,[],2)),min(min(P4,[],2)),min(min(P5,[],2)),min(min(P6,[],2)),min(min(P7,[],2)),min(min(P8,[],2)),min(min(P9,[],2))];%%
-     AL={{'$x$', '$dx$', '$ddx$', '$dddx$'},...
+    figName = ["subsystem_x","angle_angleVel","angle_vel","err_RMSE","est","velocity","est_ver","subsystem_y","uHL","input"];%%
+    %legend
+    AL={{'$x$', '$dx$', '$ddx$', '$dddx$'},...
          {'$q_{roll}$ [rad]', '$q_{pitch}$ [rad]', '$q_{yaw}$ [rad]','$w_{roll}$ [rad/s]', '$w_{pitch}$ [rad/s]', '$w_{yaw}$ [rad/s]'},...
          {'$w_{roll}$ [rad/s]', '$w_{pitch}$ [rad/s]', '$w_{yaw}$ [rad/s]'},...
          {'$error_x$ [m]','$error_y$ [m]','$error_z$ [m]','$x$ RMSE [m]','$y$ RMSE [m]','$z$ RMSE [m]'},...
@@ -618,28 +596,77 @@ elseif fspider ==1
          {'$v_x$ [m/s]','$v_y$ [m/s]','$v_z$ [m/s]'}, ...
          {'$x$ [m]','$y$ [m]','$z$ [m]','$v_x$ [m/s]','$v_y$ [m/s]','$v_z$ [m/s]'},...
          {'$y$', '$dy$', '$ddy$', '$dddy$'},...
-         {'$z$', '$x$', '$y$', '$yaw$'}};%%
-     legend_str = c;
+         {'$z$', '$x$', '$y$', '$yaw$'},...
+         {'rotor$1$ [N]', 'rotor$2$ [N]', 'rotor$3$ [N]', 'rotor$4$ [N]'}};
+    legend_str = c;
+    lengthFN=length(figName);
+    P =cell(1,lengthFN);
+    D = cell(1,lengthFN);
+     for i = 1:logNum
+        D{1} = [z2{i}(1,end),z2{i}(2,end),z2{i}(3,end),z2{i}(4,end)];
+        D{2} = [att{i}(1:3,end)',w{i}(1:3,end)'];
+        D{3} = w{i}(1:3,end)';
+        D{4} = [err{i}(1:3,end)',RMSE(i,1:3)];
+        D{5} = est{i}(1:3,end)';
+        D{6} = vel{i}(1:3,end)';
+        D{7} = [est{i}(1:3,end)',vel{i}(1:3,end)'];
+        D{8} = [z3{i}(1,end),z3{i}(2,end),z3{i}(3,end),z3{i}(4,end)];
+        D{9} = uHL{i}(1:4,end)';
+        D{10} = inp{i}(1:4,end)';
+         for nFN = 1:lengthFN
+            P{nFN} = abs([P{nFN}; D{nFN}]);
+         end
+     end
+        nFN = 1;
+        for nFN = 1:lengthFN
+           ALmax(nFN) = max(max(P{nFN},[],2));
+%            ALmin(nFN) = min(min(P{nFN},[],2));
+           ALmin(nFN) = 0;
+        end
 
-     for fN = 1:length(P)
+     for fN = 1:lengthFN
             lAL = length(AL{fN});
             f(fN)  = figure('Name',figName(fN));
-            spider_plot(P{fN},...
-            'AxesLabels', AL{fN},...
-            'AxesInterval', 4,...
-            'AxesDisplay', 'one',...
-            'AxesLimits', [ALmin(fN)*ones(1,lAL); ALmax(fN)*ones(1,lAL)],...
-            'AxesInterpreter','latex',...
-            'FillOption', 'on',...
-            'FillTransparency',0.1, ...
-            'LineWidth', 2,...
-            'AxesFontSize', 14,...
-            'LabelFontSize', 18,...
-            'BackgroundColor','white',...
-            'AxesLabelsEdge', 'none');
+            axes_precision = 2;
+            if ALmax(fN)>0.1
+                spider_plot(P{fN},...
+                    'AxesLabels', AL{fN},...
+                    'AxesInterval', 3,...
+                    'AxesDisplay', 'one',...
+                    'AxesLimits', [ALmin(fN)*ones(1,lAL); ALmax(fN)*ones(1,lAL)],...
+                    'AxesInterpreter','latex',...
+                    'AxesPrecision', axes_precision,...
+                    'FillOption', 'on',...
+                    'FillTransparency',0.1, ...
+                    'LineWidth', 2,...
+                    'AxesFontSize', 20,...
+                    'LabelFontSize', 20,...
+                    'AxesLabelsOffset', 0.24,...
+                    'BackgroundColor','white',...
+                    'AxesLabelsEdge', 'none',...
+                    'MaxUnderEn1',0);
+            else
+                 spider_plot(P{fN},...
+                    'AxesLabels', AL{fN},...
+                    'AxesInterval', 3,...
+                    'AxesDisplay', 'one',...
+                    'AxesLimits', [ALmin(fN)*ones(1,lAL); ALmax(fN)*ones(1,lAL)],...
+                    'AxesInterpreter','latex',...
+                    'AxesPrecision', 1,...
+                    'FillOption', 'on',...
+                    'FillTransparency',0.1, ...
+                    'LineWidth', 2,...
+                    'AxesFontSize', 20,...
+                    'LabelFontSize', 20,...
+                    'AxesLabelsOffset', 0.24,...
+                    'BackgroundColor','white',...
+                    'AxesLabelsEdge', 'none',...
+                    'MaxUnderEn1',1);
+            end
 %             'AxesDisplay', 'data'
 %             legend_str = {'D1', 'D2','D3'};
-            legend(legend_str,'Interpreter','latex');
+            legend(legend_str,'Interpreter','latex','Location','northeast');
+%             legend(legend_str,'Interpreter','latex','Position',[0.2 0.6 0.1 0.2]);
             set(gca,'FontSize',18)
      end
 end
@@ -814,9 +841,9 @@ function plot_data_single(~, ~, branchData)
                 for i = 1:plotNum 
                     plot3(data.x{1,i}, data.y{1,i}, data.z{1,i}, 'LineWidth', option.lineWidth)
                 end
-                xlabel(label.x)
-                ylabel(label.y)
-                zlabel(label.z)
+                xlabel(label.x,'Interpreter','latex')
+                ylabel(label.y,'Interpreter','latex')
+                zlabel(label.z,'Interpreter','latex')
                 legend(legendLabels,'NumColumns',option.legendColumns,'Interpreter','latex')
                 daspect(option.aspect)
                 campos(option.camposition)

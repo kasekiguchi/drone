@@ -32,7 +32,7 @@ else
             clear initial_state
             initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
         else
-            arranged_pos = arranged_position([1, 0], N, 0, 0);
+            arranged_pos = arranged_position([0.1, 100], N, 0, 0);
             initial_state(i).p = arranged_pos(:, i);
             initial_state(i).q = [1; 0; 0; 0];
             initial_state(i).v = [0; 0; 0];
@@ -143,7 +143,7 @@ for i = 1:N
     %% set controller property
     agent(i).controller = [];
     
-            fApproxZ = 1;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
+            fApproxZ = 10;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
             fTanh1Z = 1;%tanhが一つか:1 tanh2:~1
             fApproxXY = 10;%%%xy近似するか:1 else:~1
             fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
@@ -151,9 +151,9 @@ for i = 1:N
             alpha = 0.9;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
             approxRangeZ=[0 0.1];%近似する範囲z
             approxRangeXY=[0 1];%近似する範囲xy
-%             agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
+            agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
-    agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
+%     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 %          agent(i).set_property("controller", Conttroller_SMC(dt)); 
 %     agent(i).set_property("controller", Controller_APPRO_C(dt,agent.model.param,alpha));    

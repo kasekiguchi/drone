@@ -18,6 +18,12 @@ Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydia
 % Controller_param.F3(1)=Controller_param.F3(1)*1.5; 
 Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 
+%approと一緒
+Controller_param.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
+Controller_param.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+Controller_param.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+Controller_param.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
+
 syms sz1 [2 1] real
 syms sF1 [1 2] real
 [Ad1, Bd1, ~, ~] = ssdata(c2d(ss(Ac2, Bc2, [1, 0], [0]), dt));
@@ -242,8 +248,10 @@ Controller_param.gain1 = gain_ser1;
 Controller_param.gain2 = gain_ser2;
 %%
 Controller_param.dt = dt;
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller_param.F2)
 eig(diag(1, 1) - [0; 1] * Controller_param.F1)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller_param.F2)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller_param.F3)
+eig(diag(1, 1) - [0; 1] * Controller_param.F4)
 Controller.type = "FTC";
 % Controller.name="ftc";
 Controller.name = "hlc";
