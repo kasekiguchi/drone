@@ -79,6 +79,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
 
     calT = 0;
+    phase = 0;
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
@@ -156,25 +157,31 @@ end
             
 %             [xr, fG] = Reference(Params, time.t, agent, G, fG);
             %% 次の目標値の設定
-            TimeArray = [0, 5, 10, 15];
+            TimeArray = [0, 5, 10, 6, 8, 10];
             if idx == 1
                 Gp = [0; 0; 1];
                 Gq = [0; 0; 0];
-                ToTime = TimeArray(3) - TimeArray(1);
+                ToTime = TimeArray(2) - TimeArray(1);
                 Cp = initial.p;
                 StartT = 0;
             elseif idx == TimeArray(2)/dt
+                Cp = Gp;
                 Gp = [0; 0; 1];
-                Gq = [0; 0; 0];
+                Gq = [0.3; 0; 0];
                 ToTime = TimeArray(3) - TimeArray(2);
-                Cp = agent.estimator.result.state.p;
                 StartT = TimeArray(2);
-            elseif idx == TimeArray(3)/dt
-                Gp = [0; 0; 1];
-                Gq = [0.1; 0; 0];
-                ToTime = TimeArray(4) - TimeArray(3);
-                Cp = agent.estimator.result.state.p;
-                StartT = TimeArray(3);
+                phase = 4;
+%             elseif idx == TimeArray(3)/dt
+%                 Gp = [0; 0; 0.5];
+%                 Gq = [0; 0; 0];
+%                 ToTime = TimeArray(4) - TimeArray(3);
+%                 Cp = agent.estimator.result.state.p;
+%                 StartT = TimeArray(3);
+%             elseif idx == TimeArray(4)/dt
+%                 Gp = [0; 0; 1];
+%                 ToTime = TimeArray(4) - TimeArray(3);
+%                 Cp = agent.estimator.result.state.p;
+%                 StartT = TimeArray(3);
             end
 
 
@@ -198,7 +205,7 @@ end
 %                 StartT = TimeArray(3);
 %             end
             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
-            param(i).controller.mcmpc = {idx, xr, time.t};    % 入力算出 / controller.name = hlc
+            param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -374,7 +381,7 @@ grid on; title("Time change of Position"); xlim([0 xmax]); ylim([-inf inf+0.5]);
 % atiitude
 figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-grid on; title("Time change of Atiitude"); xlim([0 xmax]); ylim([-1 1]);
+grid on; title("Time change of Atiitude"); xlim([0 xmax]); ylim([-inf inf]);
 % velocity
 figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
@@ -440,7 +447,7 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-save('Data\20230131_attitude_0.1_02.mat', '-v7.3')
+% save('Data\20230131_attitude_0.1_03.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

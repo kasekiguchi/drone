@@ -50,8 +50,13 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             idx = param{1};
             xr = param{2};
             rt = param{3};
+            phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
+
+            if phase == 4
+                obj.param.QW = diag([100000; 100000; 100000; 100; 100; 1]);
+            end
  
             if idx == 1
                 ave1 = 0.269*9.81/4;      % average
@@ -195,6 +200,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         end
         function show(obj)
             obj.result
+%             view([2]);
         end
 
         %-- 制約とその重心計算 --%
