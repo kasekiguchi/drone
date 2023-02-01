@@ -108,6 +108,7 @@ for i = 1:N
     end
 
   agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
+%   agent(i).set_property("sensor",Sensor_Motive_ROS(struct('DomainID',30)));
   %agent(i).set_property("sensor",Sensor_Yolo(struct('DomainID',30)));
   %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
   %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
