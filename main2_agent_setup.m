@@ -132,6 +132,7 @@ plot3(0,0,0,'ro','LineWidth',5);
 plot3(5,3,0,'bx','LineWidth',5);
 legend("wall","initial potision","goal position")
 % plot(env);
+%%
 % hold off
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12*3:0.0165*3:pi / 12*3), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
