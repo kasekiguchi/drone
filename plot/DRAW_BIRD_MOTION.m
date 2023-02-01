@@ -94,18 +94,25 @@ classdef DRAW_BIRD_MOTION
                 t1(n) = hgtransform('Parent',ax); set(h(n,:),'Parent',t1(n)); % ドローンを慣性座標と紐づけ
             end
             for n = param.bird
-                for i = 4:-1:1
-                    h_b(n,i) = surface(ax,xr+r*rp(i,1),yr+r*rp(i,2),zr+rp(i,3),'FaceColor','r'); % rotor 描画
-                    T_b(n,i) = quiver3(ax,rp(i,1),rp(i,2),rp(i,3),0,0,0,'FaceColor',c(i)); % 推力ベクトル描画
-                    tt_b(n,i) = hgtransform('Parent',ax); set(T_b(n,i),'Parent',tt_b(n,i)); % 推力を慣性座標と紐づけ
-                end
-
-                t2(n) = hgtransform('Parent',ax); set(h_b(n,:),'Parent',t2(n)); % ドローンを慣性座標と紐づけ
+%                 for i = 4:-1:1
+                    h_b(n,1) = surface(ax,xb,yb,zb,'FaceColor','k'); % ボディ楕円体
+%                     h_b(n,2) = trisurf([5 1 2;5 2 3; 5 3 4; 5 4 1], ...
+%                                         [0.2;0.2;0.2;0.2;3*2.5*L(1)/8], ...
+%                                         0.8*L(2)*[1;-1;-1;1;0]/6, ...
+%                                         0.05*[1;1;-1;-1;0],'FaceColor','k'); % rotor 描画
+%                     T_b(n,i) = quiver3(ax,rp(i,1),rp(i,2),rp(i,3),0,0,0,'FaceColor',c(i)); % 推力ベクトル描画
+%                     tt_b(n,i) = hgtransform('Parent',ax); set(T_b(n,i),'Parent',tt_b(n,i)); % 推力を慣性座標と紐づけ
+%                 end
+%                 h(n,1) = trisurf([5 1 2;5 2 3; 5 3 4; 5 4 1], ...
+%                     [0.02;0.02;0.02;0.02;4*1.2*L(1)/8], ...
+%                     0.8*L(2)*[1;-1;-1;1;0]/6, ...
+%                     0.01*[1;1;-1;-1;0],'FaceColor',c(5)); % 前を表す四角錐
+                t2(n) = hgtransform('Parent',ax); set(h_b(n,:),'Parent',t2(n)); % 鳥を慣性座標と紐づけ
             end
             obj.frame = t1;
             obj.frame_bird = t2;
             obj.thrust = tt;
-            obj.thrust_bird = tt_b;
+%             obj.thrust_bird = tt_b;
             if param.animation
                 obj.animation(logger,logger_bird,"realtime",true,"drone",param.drone,"bird",param.bird,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
             end
@@ -113,7 +120,7 @@ classdef DRAW_BIRD_MOTION
 
         function draw(obj,frame,thrust,p,q,u)
             % obj.draw(p,q,u)
-            % p : 一ベクトル
+            % p : 位置ベクトル
             % q = [x,y,z,th] : 回転軸[x,y,z]にth回転
             % u (optional): 入力
             arguments
@@ -147,6 +154,28 @@ classdef DRAW_BIRD_MOTION
             set(frame,'Matrix',Txyz*R);
             drawnow
         end
+
+        function draw_bird(obj,frame,p,u)
+            % obj.draw(p,q,u)
+            % p : 位置ベクトル
+            % q = [x,y,z,th] : 回転軸[x,y,z]にth回転
+            % u (optional): 入力
+            arguments
+                obj
+                frame
+                p
+                u = [1;1;1;1];
+            end
+
+            % Translational matrix
+            Txyz = makehgtform('translate',p);
+
+            % Concatenate the transforms and
+            % set the transform Matrix property
+            set(frame,'Matrix',Txyz);
+            drawnow
+        end
+
         function animation(obj,logger,logger_bird,param)
             % obj.animation(logger,param)
             % logger : LOGGER class instance
@@ -180,12 +209,10 @@ classdef DRAW_BIRD_MOTION
             u = reshape(u,size(u,1),4,length(param.drone));
             r = reshape(r,size(r,1),3,length(param.drone));
             p_b = logger_bird.data(param.bird,"p","p");
-            q_b = logger_bird.data(param.bird,"q","p");
             u_b = logger_bird.data(param.bird,"input");
             r_b = logger_bird.data(param.bird,"p","r");
             p_b = reshape(p_b,size(p_b,1),3,length(param.bird));
-            q_b = reshape(q_b,size(q_b,1),size(q_b,2)/length(param.bird),length(param.bird));
-            u_b = reshape(u_b,size(u_b,1),4,length(param.bird));
+            u_b = reshape(u_b,size(u_b,1),3,length(param.bird));
             r_b = reshape(r_b,size(r_b,1),3,length(param.bird));
             farm = logger_bird.Data.agent(1).reference.result{1}.farm;
             for n = 1:length(param.drone)
@@ -203,22 +230,6 @@ classdef DRAW_BIRD_MOTION
                 Q(tmp==0,:,n) = 0;
                 Q(tmp==0,1,n) = 1;
                 Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
-            end
-            for m = 1:length(param.bird)
-                switch size(q_b(:,:,m),2)
-                    case 3
-                        Q2 = quaternion(q_b(:,:,m),'euler','XYZ','frame');
-                    case 4
-                        Q2 = quaternion(q_b(:,:,m));
-                    case 9
-                        Q2 = quaternion(q_b(:,:,m),'rotmat','frame');
-                end
-                Q2 = rotvec(Q2);
-                tmp = vecnorm(Q2,2,2);
-                Q_b(:,:,m) = zeros(size(Q2,1),4);
-                Q_b(tmp==0,:,m) = 0;
-                Q_b(tmp==0,1,m) = 1;
-                Q_b(tmp~=0,:,m) = [Q2(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
             end
 
             if param.gif
@@ -265,7 +276,7 @@ classdef DRAW_BIRD_MOTION
                     for n = 1:length(param.bird)
                         addpoints(f_b(n),p_b(i,1,n),p_b(i,2,n),p_b(i,3,n));
                         % bird pos
-                        obj.draw(obj.frame_bird(param.bird(n)),obj.thrust_bird(param.bird(n),:),p_b(i,:,n),Q_b(i,:,n),u_b(i,:,n));
+                        obj.draw_bird(obj.frame_bird(param.bird(n)),p_b(i,:,n),u_b(i,:,n));
                         
                     end
                 else

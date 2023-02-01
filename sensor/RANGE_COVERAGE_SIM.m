@@ -26,12 +26,12 @@ classdef RANGE_COVERAGE_SIM < SENSOR_CLASS
             % result.state : State_obj,  p : position
             % 【入力】varargin = {{Env}}      agent : センサーを積んでいる機体obj,    Env：観測対象のEnv_obj
             state = obj.self.plant.state; % 真値
-            sensor = obj.self.sensor.motive.result.rigid; % センサで取ったドローンの位置
-            sensor_bird = obj.bird(1).sensor.motive.motive.result.rigid; % センサで取った鳥の全部の位置
-
-            id = obj.self.sensor.motive.rigid_num;
-            N = Param{1};
-            Nb = Param{2};
+            sensor = obj.self.sensor.rpos.result.neighbor; % センサで取ったドローンの位置
+            Nb = Param{1};
+            for i = 1:Nb
+                sensor_bird(:,i) = obj.bird(i).plant.state.p; % センサで取った鳥の全部の位置
+            end
+%             id = obj.self.id;
 
             %% センシング領域を定義
             obj.r = 0.5:0.1:2;
@@ -40,12 +40,8 @@ classdef RANGE_COVERAGE_SIM < SENSOR_CLASS
             sensor_range = {X,Y,Z};
             
             %% 鳥の位置を取得
-            for i = 1:Nb
-                result.bird_pos(:,i) = sensor_bird(i).p;
-            end
-            for j = 1:N
-                result.drone_pos(:,j) = sensor(j).p;
-            end
+            result.bird_pos = sensor_bird;
+            result.drone_pos = sensor;
             obj.result = result;
         end
 

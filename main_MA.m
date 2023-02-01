@@ -43,9 +43,6 @@ run("main3_loop_setup.m");
         if fMotive
             %motive.getData({agent,["pL"]},mparam);
             motive.getData(agent, mparam);
-            if Nb ~= 0
-                motive_bird.getData(bird, bparam);
-            end
         end
 
         for i = 1:N
@@ -55,7 +52,7 @@ run("main3_loop_setup.m");
             param(i).sensor.imu = {[]};
             param(i).sensor.direct = {};
             param(i).sensor.bounding = {time};
-            param(i).sensor.rcoverage_3D = {N,Nb};
+            param(i).sensor.rcoverage_3D = {Nb};
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
             for j = 1:length(agent(i).sensor.name)
@@ -73,7 +70,7 @@ run("main3_loop_setup.m");
             param_bird(i).sensor.imu = {[]};
             param_bird(i).sensor.direct = {};
             param_bird(i).sensor.bounding = {time};
-            param_bird(i).sensor.rcoverage_bird_3D = {N,Nb};
+            param_bird(i).sensor.rcoverage_bird_3D = {N};
             param_bird(i).sensor.rdensity = {Env};
             param_bird(i).sensor.lrf = Env;
             for j = 1:length(bird(i).sensor.name)
@@ -143,11 +140,12 @@ run("main3_loop_setup.m");
             param_bird(i).controller.hlc = {time.t};
             param_bird(i).controller.pd = {};
             param_bird(i).controller.tscf = {time.t};
+            param_bird(i).controller.direct = {};
             for j = 1:length(bird(i).controller.name)
                 param_bird(i).controller.list{j} = param_bird(i).controller.(bird(i).controller.name(j));
             end
             bird(i).do_controller(param_bird(i).controller.list);
-            bird(i).input = min(max(bird(i).input,-3),3);
+%             bird(i).input = min(max(bird(i).input,-0.3),0.3);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
         end
 
@@ -170,7 +168,7 @@ run("main3_loop_setup.m");
             model_bird_param.FH = FH;
             bird(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
 
-                      bird(i).input = bird(i).input - [0.1;0.01;0;0]; % 定常外乱
+%                       bird(i).input = bird(i).input - [0.1;0.01;0]; % 定常外乱
             model_bird_param.param = bird(i).plant.param;
             bird(i).do_plant(model_param);
         end
@@ -221,9 +219,13 @@ run("main3_loop_setup.m");
 close all
 clc
 % plot
-%logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-logger.plot({1,"q","e"},{2,"q","e"},"fig_num",2,"row_col",[1 2]);
-logger_bird.plot({1,"q","e"},{2,"q","e"},{3,"q","e"},{4,"q","e"},{5,"q","e"},{6,"q","e"},"fig_num",3,"row_col",[2 3]);
+% logger.plot({1,"sensor.result.bird_pos",""});
+% logger.plot({1,"q","e"},{2,"q","e"},"fig_num",2,"row_col",[1 2]);
+% logger_bird.plot({1,"q","e"},{2,"q","e"},{3,"q","e"},{4,"q","e"},{5,"q","e"},{6,"q","e"},"fig_num",3,"row_col",[2 3]);
+% logger.plot({1,"input","e"},{2,"q","e"},"fig_num",2,"row_col",[1 2]);
+% logger_bird.plot({1,"input",""},{2,"input",""},{3,"input",""},{4,"input",""},{5,"input",""},{6,"input",""},"fig_num",3,"row_col",[2 3]);
+% logger_bird.plot({1,"p","p"},{2,"p","p"},{3,"p","p"},{4,"p","p"},{5,"p","p"},{6,"p","p"},"fig_num",3,"row_col",[2 3]);
+% logger_bird.plot({1,"v","e"},{2,"v","e"},{3,"v","e"},{4,"v","e"},{5,"v","e"},{6,"v","e"},"fig_num",3,"row_col",[2 3]);
 % agent(1).reference.timeVarying.show(logger)
 % bird(1).plot_evaluation(logger);
 

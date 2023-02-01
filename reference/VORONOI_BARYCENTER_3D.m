@@ -18,7 +18,7 @@ classdef VORONOI_BARYCENTER_3D < REFERENCE_CLASS
             obj.self = self;
             obj.param = param;
             obj.result.state = STATE_CLASS(struct('state_list',"p",'num_list',3));
-            obj.id = self.sensor.motive.rigid_num;
+            obj.id = self.id;
         end
         
         function result = do(obj,Param)

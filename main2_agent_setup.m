@@ -21,6 +21,7 @@ for i = 1:N
         %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
         %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
     end
+    agent(i).id = i;
 
     %% model
     % set control model

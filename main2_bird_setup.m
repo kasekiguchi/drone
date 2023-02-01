@@ -26,18 +26,20 @@ for i = 1:Nb
     end
     %% set sensors property
     bird(i).sensor = [];
-    if fMotive
-        if ~exist('initial_bird_yaw_angles')
-            initial_bird_yaw_angles = zeros(1, Nb);
-        end
-        bird(i).set_property("sensor", Sensor_Motive(bird_ids(i), initial_bird_yaw_angles(i), motive_bird)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
-    end
+%     if fMotive
+%         if ~exist('initial_bird_yaw_angles')
+%             initial_bird_yaw_angles = zeros(1, Nb);
+%         end
+%         bird(i).set_property("sensor", Sensor_Motive(bird_ids(i), initial_bird_yaw_angles(i), motive_bird)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
+%     end
 
     bird(i).set_property("sensor",Sensor_RangePos_Bird(i,'r',1.5)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+    bird(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
 %     bird(i).set_property("sensor",Sensor_Map_3D(agent,'d',10)); % 測定距離d（第二引数宇）内の重要度を計測 : sim のみ
     %% set estimator property
     bird(i).estimator = [];
-    bird(i).set_property("estimator",Estimator_EKF(bird(i), ["p", "q"])); % （剛体ベース）EKF
+    bird(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+%     bird(i).set_property("estimator",Estimator_EKF(bird(i), ["p", "q"])); % （剛体ベース）EKF
     %% set reference property
     bird(i).reference = [];
     bird(i).set_property("reference",Reference_Bird(Nb)); % 鳥の群れの動き
@@ -45,7 +47,8 @@ for i = 1:Nb
     bird(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     bird(i).controller = [];
-    bird(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+%     bird(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
+    bird(i).set_property("controller", Controller_BIRD());                                % 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
     %% 必要か？実験で確認 : TODO
     param(i).sensor.list = cell(1, length(bird(i).sensor.name));
     param(i).reference.list = cell(1, length(bird(i).reference.name));
