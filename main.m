@@ -203,14 +203,14 @@ clc
 
 % plot 
 % logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
-logger.plot({1,"p","sr"})%,{1,"sensor.result.VL_length",""});
+logger.plot({1,"p","sr"},{1,"sensor.result.VL_length",""});
 %logger.plot({1,"p","sr"},{1,"inner_input",""});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"sensor.result.ros_t.rpm",""})
 % % logger.plot({1,"inner_input",""});
 % agent(1).reference.timeVarying.show(logger)
-
+% logger.plot({1,"rpm",""})
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
