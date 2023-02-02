@@ -117,8 +117,8 @@ for i = 1:N
   model.Vertices = env.Points;
   model.Faces    = env.ConnectivityList;
   figure(2), clf
-  patch(model, 'FaceColor', [0.8 0.8 1.0])
-  alpha(0.5)
+%   patch(model, 'FaceColor', [0.8 0.8 1.0])
+%   alpha(0.5)
   view([2 2])
   xlabel('x [m]')
   ylabel('y [m]')
@@ -128,12 +128,14 @@ for i = 1:N
   zlim([-12 ,11])
 %   lightangle(-45,70)
 hold on
-plot3(0,0,0,'ro','LineWidth',5);
-plot3(5,3,0,'bx','LineWidth',5);
-legend("wall","initial potision","goal position")
+plot3(0,0,0,'ro','LineWidth',3);
+plot3(5,3,0,'bx','LineWidth',3);
+trisurf(env,'EdgeColor',[0 0 0],'EdgeAlpha',0.1,'FaceAlpha',0.05,'FaceColor',[0 0 0]);
+legend("initial potision","goal position","wall")
 % plot(env);
+hold off
 %%
-% hold off
+
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12*3:0.0165*3:pi / 12*3), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.01:pi, 'noise', 3.0E-2, 'seed', 3)); % 2D lidar1

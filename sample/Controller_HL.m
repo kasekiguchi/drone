@@ -8,11 +8,13 @@ Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([5,1]),[0.1],dt);                 
 %3D_Simple(v)
 % Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([30,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([40,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
-
+%3D_Simple_reverce(v)
+Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([35,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([40,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 
 %3D_enviroment_hv3(v)
-Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([37,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([40,20,10,1]),[0.01],dt); % ydiag([100,10,10,1])
+% Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([37,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+% Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([40,20,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 
 % Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])

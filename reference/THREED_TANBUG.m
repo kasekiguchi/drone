@@ -57,7 +57,7 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             obj.sensor = [0,0];        
 
             obj.state_initial = [0,0,0]';
-            obj.goal = [5,3,0]';%[5,0,0]';%2Dgoal
+            obj.goal = [5,0,0]';%[5,0,0]';%2Dgoal
 %            obj.goal = [0,15,0]';% global goal position
 
             obj.obstacle = [0,0,0]';% 障害物座標
@@ -97,11 +97,13 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %radius = ...;
             radius = self.sensor.lidar.radius;
             hx= radius;
-            hy = 0.15;%3D_enviroment_hv3(v)
-            hz= 0.15;%3D_enviroment_hv3(v)
+%             hy = 0.15;%3D_enviroment_hv3(v)
+%             hz= 0.15;%3D_enviroment_hv3(v)
 
 %             hy = 0.15;%3D_Simple(v)
 %             hz= 0.15;%3D_Simple(v)
+            hy = 0.2;%3D_Simple_reverce(v)
+            hz= 0.2;%3D_Simple_reverce(v)
             P = [-0.05,hy,hz;-0.05,-hy,hz;-0.05,-hy,-hz;-0.05,hy,-hz;
                   hx,hy,hz;hx,-hy,hz;hx,-hy,-hz;hx,hy,-hz];
             T= [1,3,2;1,4,3;1,5,8;1,8,4;1,2,6;1,6,5;2,7,6;2,3,7;3,8,7;3,4,8;5,6,7;5,7,8];
