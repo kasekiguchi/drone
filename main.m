@@ -96,13 +96,13 @@ try
                 if time.t<=8
                     FH.CurrentCharacter = 't';
                 elseif time.t < 15
-                    FH.CurrentCharacter = 'u';%phaseをいじれる
-%                 elseif time.t < 20
-%                     FH.CurrentCharacter = 'z';%phaseをいじれる
-%                 elseif time.t < 23
-%                     FH.CurrentCharacter = 'u';%phaseをいじれる
-% %                 else
-% %                     FH.CurrentCharacter = 'h';%phaseをいじれる
+                    FH.CurrentCharacter = 'm';%phaseをいじれる
+                elseif time.t < 20
+                    FH.CurrentCharacter = 'r';%phaseをいじれる
+                elseif time.t < 23
+                    FH.CurrentCharacter = 'm';%phaseをいじれる
+                else
+                    FH.CurrentCharacter = 'r';%phaseをいじれる
                 end
             end
             param(i).reference.covering = [];
@@ -110,7 +110,7 @@ try
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
             param(i).reference.point = {FH, [1;0;1], time.t,dt};%reference.pointの目標位置を指定できる。
             param(i).reference.CeilingPoint = {FH, [1.5;2.8;2.4], time.t,dt,2.9};%天井接地用。張り付き前座標{2}、天井高さ{5}を追加
-            param(i).reference.costsurvey = {FH, [1;0;1], time.t,dt,2.9};%コスト検証用
+            param(i).reference.costsurvey = {FH, [0;-1;1], time.t,dt,2.9};%コスト検証用
             param(i).reference.timeVarying = {time,FH};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -202,9 +202,9 @@ close all
 clc
 
 % plot 
-% logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
-logger.plot({1,"sensor.result.switch",""},{1,"sensor.result.distance",""});
-%logger.plot({1,"p","sr"},{1,"inner_input",""});
+logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+% logger.plot({1,"sensor.result.switch",""},{1,"sensor.result.distance",""});
+% logger.plot({1,"v","er"},{1,"inner_input",""});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"sensor.result.ros_t.rpm",""})
