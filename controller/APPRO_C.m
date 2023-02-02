@@ -27,27 +27,8 @@ methods
         % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
-        x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
-        xd = ref.state.get();
-        %状態を取得
-            p = model.state.p  ;
-            v = model.state.v  ;
-            q = model.state.q  ;
-            w = model.state.w  ;
-        %refernceを取得
-            refp = ref.state.p  ;
-            refv = ref.state.v  ;
-        % サブシステムの状態            
-            Xs = [p(1) - refp(1); v(1) - refv(1);q(2);w(2)];
-            Ys = [p(2) - refp(2); v(2) - refv(2);q(1);w(1)];
-            Zs = [p(3) - refp(3); v(3) - refv(3)];
-            Psis = [q(3);w(3)];
-
-% Xs = [p(1) - refp(1); v(1) ;q(2);w(2)];
-%             Ys = [p(2) - refp(2); v(2);q(1);w(1)];
-%             Zs = [p(3) - refp(3); v(3)];
-%             Psis = [q(3);w(3)];
-        P = obj.param.P;
+        xd = ref.state.get();%referenceとその微分[x,y,z,yaw]の順番
+        
         F1 = obj.param.F1;
         F2 = obj.param.F2;
         F3 = obj.param.F3;
@@ -60,29 +41,34 @@ methods
         
         xd = [xd; zeros(20 - size(xd, 1), 1)]; % 足りない分は０で埋める．
 
+        %状態 ドローンの状態 - refernce
+            p = model.state.p - xd(1:3)  ;%位置
+            v = model.state.v - xd(5:7)  ;%速度
+            q = model.state.q - [0;0;xd(4)] ;%角度
+            w = model.state.w - [0;0;xd(8)] ;%角速度
+        % サブシステムの状態            
+            Xs = [p(1); v(1);q(2);w(2)];
+            Ys = [p(2) ; v(2);q(1);w(1)];
+            Zs = [p(3) ; v(3)];
+            Psis = [q(3) ;w(3)];
+
         % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
         % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
-        Rb0 = RodriguesQuaternion(Eul2Quat([0; 0; xd(4)]));
-        x = [R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.p; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
-        xd(1:3) = Rb0' * xd(1:3);
-        xd(4) = 0;
-        xd(5:7) = Rb0' * xd(5:7);
-        xd(9:11) = Rb0' * xd(9:11);
-        xd(13:15) = Rb0' * xd(13:15);
-        xd(17:19) = Rb0' * xd(17:19);
+%         Rb0 = RodriguesQuaternion(Eul2Quat([0; 0; xd(4)]));
+%         x = [R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.p; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
+%         xd(1:3) = Rb0' * xd(1:3);
+%         xd(4) = 0;
+%         xd(5:7) = Rb0' * xd(5:7);
+%         xd(9:11) = Rb0' * xd(9:11);
+%         xd(13:15) = Rb0' * xd(13:15);
+%         xd(17:19) = Rb0' * xd(17:19);
 
-        %% calc Z
-%         z1 = Z1(x, xd', P);%z
-%         vf = obj.Vf(z1, F1);
-%         z2 = Z2(x, xd', vf, P);%x
-%         z3 = Z3(x, xd', vf, P);%y
-%         z4 = Z4(x, xd', vf, P);%yaw
-%         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
+        %% cariculate controller
 
-                    % Finite time settling controller
+         % Finite time settling controller
+            uz = -F1*(sign(Zs).*abs(Zs).^az); % f throtl
             ux = -F2*(sign(Xs).*abs(Xs).^ax); %tau_theta roll
             uy = -F3*(sign(Ys).*abs(Ys).^ay); %tau_phi pitch
-            uz = -F1*(sign(Zs).*abs(Zs).^az); % f throtl
             upsi = -F4*(sign(Psis).*abs(Psis).^apsi);%tau_psi yaw
 % f1 =[6.5935    4.8458   22.1616;
 %     1.5155    4.5020    6.6158];
@@ -93,14 +79,14 @@ methods
 %             uy = -F3*Ys; %tau_phi pitch
 %             uz = -F1*Zs; % f throtl
 %             upsi = -F4*Psis;%tau_psi yaw
-        %%
+        %% setting disturbance
         dst=0;
 %         t = param{1};
 %         dst = 1;
 %--------------------------------------------------
 %確率的な外乱
 a = 1;%外乱の大きさの上限
-dst = 2*a*rand-a;
+% dst = 2*a*rand-a;
 %--------------------------------------------------        
 %                     if t>=10 && t<=10.5
 %                             dst=-3;
@@ -120,7 +106,7 @@ dst = 2*a*rand-a;
         obj.self.input = obj.result.input;
         
 %          %サブシステムの入力
-%         obj.result.uHL = [vf(1);vs];
+        obj.result.uHL = [uz; ux; uy; upsi];
 %         %サブシステムの状態
 %         obj.result.z1 = z1;
 %         obj.result.z2 = z2;

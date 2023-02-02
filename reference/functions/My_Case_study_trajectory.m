@@ -15,7 +15,7 @@ z_0 = X0(3);
 x = x_0;
 y = y_0;
 z = z_0;
-
+% 
 r=1;
 T=10;
 x = x_0+r*cos(2*pi*t/T);
@@ -41,7 +41,6 @@ z = z_0;%+0.4*sin(2*pi*t/T);
 % y=1.5*sin((a*2*pi*t/T)/b)*sin(2*pi*t/T);
 % z=z_0;
 
-% ref=@(t,x0,y0,z0)[x;y;z;0];%謎x,y,z are function of t.
 
 ref=@(t)[x;y;z;0];
 end

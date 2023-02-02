@@ -18,11 +18,11 @@ Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydia
 % Controller_param.F3(1)=Controller_param.F3(1)*1.5; 
 Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 
-%approと一緒
-Controller_param.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
-Controller_param.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-Controller_param.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-Controller_param.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
+%approと一緒の極
+% Controller_param.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
+% Controller_param.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+% Controller_param.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+% Controller_param.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
 
 syms sz1 [2 1] real
 syms sF1 [1 2] real
@@ -72,59 +72,59 @@ if fzapr == 1
             f1(i, :) = x;
         end
 %sigmoidを使う,こっちの方が計算は早い感じ
-            for i = 1:2
-                fza(i) = 1 / (1 + exp(-f1(i, 2) * 2 * sz1(i)));
-                tanha(i) = 2 * fza(i) - 1;
-                dtanha(i) = 4 * f1(i, end - 1) * fza(i) * (1 - fza(i));
-                ddtanha(i) = 8 * f1(i, end - 1)^2 * fza(i) * (1 - fza(i)) * (1 - 2 * fza(i));
-                dddtanha(i) = 16 * f1(i, end - 1)^3 * fza(i) * (1 - fza(i)) * (1 - 6 * fza(i) + 6 * fza(i)^2);
-
-            end
-
-            for i = 1:2
-                u = u -f1(i, 1) * tanha(i) -f1(i, 3) * sz1(i);
-            end
-
-            dz = Ad1 * sz1 + Bd1 * u;
-
-            for i = 1:2
-                du = du -f1(i, 1) * dtanha(i) * dz(i) -f1(i, 3) * dz(i);
-            end
-
-            ddz = Ad1 * dz + Bd1 * du;
-
-            for i = 1:2
-                ddu = ddu -f1(i, 1) * ddtanha(i) * (dz(i))^2 -f1(i, 1) * dtanha(i) * ddz(i) -f1(i, 3) * ddz(i);
-            end
-
-            dddz = Ad1 * ddz + Bd1 * ddu;
-
-            for i = 1:2
-                dddu = dddu -f1(i, 1) * dddtanha(i) * (dz(i))^3 -3 * f1(i, 1) * ddtanha(i) * dz(i) * ddz(i) -f1(i, 1) * dtanha(i) * dddz(i) -f1(i, 3) * dddz(i);
-            end
-
-%diffを用いた===========================================
-%             ub =- zF1(1) * tanh(zF1(2) * z(t)) - zF1(3) * z(t);
-%             dub = diff(ub, t);
-%             ddub = diff(dub, t);
-%             dddub = diff(ddub, t);
-%            
+%             for i = 1:2
+%                 fza(i) = 1 / (1 + exp(-f1(i, 2) * 2 * sz1(i)));
+%                 tanha(i) = 2 * fza(i) - 1;
+%                 dtanha(i) = 4 * f1(i, end - 1) * fza(i) * (1 - fza(i));
+%                 ddtanha(i) = 8 * f1(i, end - 1)^2 * fza(i) * (1 - fza(i)) * (1 - 2 * fza(i));
+%                 dddtanha(i) = 16 * f1(i, end - 1)^3 * fza(i) * (1 - fza(i)) * (1 - 6 * fza(i) + 6 * fza(i)^2);
+% 
+%             end
 % 
 %             for i = 1:2
-%                 u = u + subs(ub, [zF1 z], [f1(i, :) sz1(i)]);
+%                 u = u -f1(i, 1) * tanha(i) -f1(i, 3) * sz1(i);
 %             end
-%                        dz = Ad1*sz1 + Bd1*u;
+% 
+%             dz = Ad1 * sz1 + Bd1 * u;
+% 
 %             for i = 1:2
-%                 du = du + subs(dub, [zF1 diff(z, t) z], [f1(i, :) dz(i) sz1(i)]);
+%                 du = du -f1(i, 1) * dtanha(i) * dz(i) -f1(i, 3) * dz(i);
 %             end
-%                        ddz = Ad1*dz + Bd1*du;
+% 
+%             ddz = Ad1 * dz + Bd1 * du;
+% 
 %             for i = 1:2
-%                 ddu = ddu + subs(ddub, [zF1 diff(z, t, t)  diff(z, t) z], [f1(i, :) ddz(i)  dz(i) sz1(i)]);
+%                 ddu = ddu -f1(i, 1) * ddtanha(i) * (dz(i))^2 -f1(i, 1) * dtanha(i) * ddz(i) -f1(i, 3) * ddz(i);
 %             end
-%                        dddz = Ad1*ddz + Bd1*ddu;
+% 
+%             dddz = Ad1 * ddz + Bd1 * ddu;
+% 
 %             for i = 1:2
-%                 dddu = dddu + subs(dddub, [zF1 diff(z, t, t, t) diff(z, t, t)  diff(z, t) z], [f1(i, :) dddz(i) ddz(i)  dz(i) sz1(i)]);
+%                 dddu = dddu -f1(i, 1) * dddtanha(i) * (dz(i))^3 -3 * f1(i, 1) * ddtanha(i) * dz(i) * ddz(i) -f1(i, 1) * dtanha(i) * dddz(i) -f1(i, 3) * dddz(i);
 %             end
+
+%diffを用いた===========================================
+            ub =- zF1(1) * tanh(zF1(2) * z(t)) - zF1(3) * z(t);
+            dub = diff(ub, t);
+            ddub = diff(dub, t);
+            dddub = diff(ddub, t);
+           
+
+            for i = 1:2
+                u = u + subs(ub, [zF1 z], [f1(i, :) sz1(i)]);
+            end
+                       dz = Ad1*sz1 + Bd1*u;
+            for i = 1:2
+                du = du + subs(dub, [zF1 diff(z, t) z], [f1(i, :) dz(i) sz1(i)]);
+            end
+                       ddz = Ad1*dz + Bd1*du;
+            for i = 1:2
+                ddu = ddu + subs(ddub, [zF1 diff(z, t, t)  diff(z, t) z], [f1(i, :) ddz(i)  dz(i) sz1(i)]);
+            end
+                       dddz = Ad1*ddz + Bd1*ddu;
+            for i = 1:2
+                dddu = dddu + subs(dddub, [zF1 diff(z, t, t, t) diff(z, t, t)  diff(z, t) z], [f1(i, :) dddz(i) ddz(i)  dz(i) sz1(i)]);
+            end
 
         Controller_param.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
     else

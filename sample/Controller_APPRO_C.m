@@ -30,9 +30,9 @@ Bcy = [0;0;0;1/jx];
 % Controller_param.F2  = place(Acx,Bcx,1E-1*[-10,-1.2,-100,-150]);
 %     Controller_param.F3  = place(Acy,Bcy,1E-1*[-10,-1.2,-100,-150]);
 
+Controller_param.F1 = [2.23 2.28];
 Controller_param.F2 = 0.1*[3.16 6.79 40.54 12.27];
 Controller_param.F3 = 0.1*[-3.16 -6.79 40.54 12.27];
-Controller_param.F1 = [2.23 2.28];
 Controller_param.F4 = [1.41 1.35];
 
 % Controller_param.F1=lqrd(Acz,Bcz,diag([100,1]),[0.1],dt);                                % 
