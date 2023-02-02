@@ -122,7 +122,7 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
                 obj.result.state.p(3)=obj.self.estimator.result.state.p(3);
                 obj.result.state.p(4)=pi()/2;
-                obj.result.q=pi()/2;
+%                 obj.result.q=pi()/2;
                 else
                 obj.result.state.p = obj.self.reference.result.state.p;
                 end

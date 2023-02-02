@@ -104,8 +104,8 @@ for i = 1:N
     %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
     %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 %     agent(i).set_property("sensor",Sensor_LiDAR(i));
-    agent(i).set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
-    agent(i).set_property("sensor",Sensor_vl53l1x(i));
+%     agent(i).set_property("sensor",Sensor_tokyu(struct('DomainID',30)));
+    agent(i).set_property("sensor",Sensor_ESPr(i));
     %% set estimator property
     agent(i).estimator = [];
     %agent(i).set_property("estimator",Estimator_LPF(agent(i))); % lowpass filter
@@ -134,8 +134,8 @@ for i = 1:N
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-%     agent(i).set_property("reference", Reference_Point_FH_COST());%東急の天井接地軌道※これをつける場合は下のReference_Point_FHをoffにする
-    agent(i).set_property("reference", Reference_Point_FH_tokyu());%東急の天井接地軌道※これをつける場合は下のReference_Point_FHをoffにする
+    agent(i).set_property("reference", Reference_Point_FH_COST());%東急の天井接地軌道※これをつける場合は下のReference_Point_FHをoffにする
+%     agent(i).set_property("reference", Reference_Point_FH_tokyu());%東急の天井接地軌道※これをつける場合は下のReference_Point_FHをoffにする
     % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
 %      agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property

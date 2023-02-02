@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -77,7 +77,7 @@ try
             param(i).sensor.rdensity = {Env};
             param(i).sensor.lrf = Env;
             param(i).sensor.telemetry = {};
-            param(i).sensor.VL = {};
+            param(i).sensor.espr = {};
             for j = 1:length(agent(i).sensor.name)
                 param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
             end
@@ -97,12 +97,12 @@ try
                     FH.CurrentCharacter = 't';
                 elseif time.t < 15
                     FH.CurrentCharacter = 'u';%phaseをいじれる
-                elseif time.t < 20
-                    FH.CurrentCharacter = 'z';%phaseをいじれる
-                elseif time.t < 23
-                    FH.CurrentCharacter = 'u';%phaseをいじれる
-%                 else
-%                     FH.CurrentCharacter = 'h';%phaseをいじれる
+%                 elseif time.t < 20
+%                     FH.CurrentCharacter = 'z';%phaseをいじれる
+%                 elseif time.t < 23
+%                     FH.CurrentCharacter = 'u';%phaseをいじれる
+% %                 else
+% %                     FH.CurrentCharacter = 'h';%phaseをいじれる
                 end
             end
             param(i).reference.covering = [];
@@ -203,7 +203,7 @@ clc
 
 % plot 
 % logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
-logger.plot({1,"p","sr"},{1,"sensor.result.VL_length",""});
+logger.plot({1,"sensor.result.switch",""},{1,"sensor.result.distance",""});
 %logger.plot({1,"p","sr"},{1,"inner_input",""});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
@@ -215,7 +215,7 @@ logger.plot({1,"p","sr"},{1,"sensor.result.VL_length",""});
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger,"target",1:N);
+% agent(1).animation(logger,"target",1:N);
 
 %%
 %logger.save();

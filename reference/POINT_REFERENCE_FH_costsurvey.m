@@ -165,9 +165,9 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
             elseif strcmp(cha,'z') % flight phase (時間関数)  上移動戻る
                 if norm([0;0;9]-obj.self.reference.result.state.p(1:3)) > 0.1
                 if strcmp(obj.flag,'z')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.5);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.5,1);
                 else% 初めてlanding に入ったとき
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.5);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.5,1);
                 end
                 else
                     obj.result.state.p = obj.self.reference.result.state.p;
