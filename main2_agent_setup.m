@@ -113,7 +113,7 @@ for i = 1:N
 %   agent(i).set_property("sensor",Sensor_LiDAR(i));%matlabで作成したシンプル環境用
 %   agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
 %   env = stlread('3F.stl');
-  env = stlread('3d_enviroment_hv.stl');
+  env = stlread('3d_enviroment_hv_show.stl');
   model.Vertices = env.Points;
   model.Faces    = env.ConnectivityList;
   figure(2), clf
@@ -128,10 +128,12 @@ for i = 1:N
   zlim([-12 ,11])
 %   lightangle(-45,70)
 hold on
-plot3(0,0,0,'ro','LineWidth',3);
-plot3(5,3,0,'bx','LineWidth',3);
 trisurf(env,'EdgeColor',[0 0 0],'EdgeAlpha',0.1,'FaceAlpha',0.05,'FaceColor',[0 0 0]);
-legend("initial potision","goal position","wall")
+plot3(0,0,0,'ro','LineWidth',1);
+plot3(5,3,0,'bx','LineWidth',1);
+legend("wall","initial potision","goal position")
+view([2 2])
+% view([-2 -2 2])
 % plot(env);
 hold off
 %%

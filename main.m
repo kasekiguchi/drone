@@ -258,7 +258,7 @@ ylabel('y [m]','Fontsize',F_size)
 zlabel('z [m]','Fontsize',F_size)
 legend("reference", "estimate", "obstacle");
 title('phase plot:x-y-z')
-% view([2 2])
+view([2 2])
 % legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 

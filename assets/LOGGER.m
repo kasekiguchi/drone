@@ -490,6 +490,7 @@ methods
                             ref_plot=scatter3(tmpx(si2:d:end), tmpy(si2:d:end), tmpz(si2:d:end),[sz],t(1:d:end-si2+1,1),'filled','LineWidth',0.1);
                             ref_plot.MarkerEdgeColor = 'b';
                             c = colorbar('Ticks',[0,1,2,3,4,5]);
+%                             colorbar('southoutside')
                             clim([0 5])
                             c.Label.String = 'Time [s]';
                         else
