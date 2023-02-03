@@ -64,12 +64,13 @@ for i = 1:N
   else
     %agent(i) = DRONE(Model_Quat13(dt, initial_state(i), i), DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
     %agent(i) = DRONE(Model_EulerAngle(dt, initial_state(i), i), DRONE_PARAM("DIATONE", "additional", struct("B", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))); % euler angleのプラントモデル : for sim
-    %agent(i) = DRONE(Model_Suspended_Load(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
+    %agent(i) = DRONE(f(dt,'plant',initial_state(i),i)); % 牽引物込みのプラントモデル : for sim
     %agent(i) = DRONE(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % 離散時間質点モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定
-    %[M,P]=Model_Discrete(dt,initial_state(i),i);
+    %[M,P]=Model_Discrete(dt,initfial_state(i),i);
     %agent(i) = DRONE(M,P); % 離散時間質点モデル : PD controller などを想定
     %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
              initial_state(i).p = [1;-1];%[92;1];%
+%              initial_state(i).p = [0;0];%offline
              initial_state(i).q = 0;%pi/2-0.05;
              initial_state(i).v = 0;
     agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
@@ -107,13 +108,13 @@ for i = 1:N
        agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
-  agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
+%   agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
 %   agent(i).set_property("sensor",Sensor_Motive_ROS(struct('DomainID',30)));
   %agent(i).set_property("sensor",Sensor_Yolo(struct('DomainID',30)));
   %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
   %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
   %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
-%   agent(i).set_property("sensor",Sensor_LiDAR(i));
+  agent(i).set_property("sensor",Sensor_LiDAR(i));
   %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
   %env = stlread('3F.stl');
   %agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.007:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
@@ -145,8 +146,8 @@ for i = 1:N
   %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
 %   agent(i).set_property("reference",Reference_Jirei(agent(i)));
   %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-%   agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
-  agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
+  agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
+%   agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
   %% set controller property

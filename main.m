@@ -11,10 +11,10 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1; % 1: experiment   0: numerical simulation
+fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 0; % 1: active : for debug function
+fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
 
 % set logger
@@ -25,8 +25,8 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(1_31_1).mat", ["sensor","input"]);
-%   logger = LOGGER("Data/Log(11_21_1).mat", ["sensor"]);
+  logger = LOGGER("Data/Log(2_1_1).mat", ["sensor","input"]);
+%   logger = LOGGER("Data/Log(2_1_1).mat", ["sensor"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 end
@@ -188,11 +188,11 @@ end
 close all
 clc
 % plot
-%logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
+    %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
 % logger.plot({1, "input", ""},"fig_num", 5);
 % logger.plot( {1, "p", "per"},{1, "q", "per"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
-logger.plot( {1, "p", "er"},{1, "q", "er"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot( {1, "p", "e"},{1, "p", "r"},{1, "q", "er"}, {1, "input", "e"}, "fig_num", 5, "row_col", [2, 2]);
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
