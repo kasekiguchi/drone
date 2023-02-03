@@ -1,4 +1,5 @@
 %% p_plot
+close all
 for i = 1:logger.k
     resultplot.eX(i) = logger.Data.agent.estimator.result{1,i}.state.p(1,1);
     resultplot.eY(i) = logger.Data.agent.estimator.result{1,i}.state.p(2,1);
