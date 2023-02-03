@@ -62,16 +62,17 @@ classdef ROS < SENSOR_CLASS
 %             data.intensities(~isfinite(data.intensities)) = 0;
 %             data.ranges = fillmissing(data.ranges,'previous');
 %             data.intensities = fillmissing(data.intensities,'previous');
+%             
+            for i = 1:length(data.ranges)
+                if data.ranges(i,1) >= 3.0
+                    data.ranges(i,1) = 0;
+                    data.intensities(i,1) = 0;
+                end
+            end
             data.angle = double((data.angle)');
             data.length = double((data.ranges)');
             data.intensities = double((data.intensities)');
             data.radius = double((data.range_max)');
-%             for i = 1:length(data.length)
-%                 if data.length(i,1) > 3.0
-%                     data.length = 0;
-%                     data.intensities(i,1) = 0;
-%                 end
-%             end
         end
         
         function result=do(obj,param)
@@ -98,12 +99,12 @@ classdef ROS < SENSOR_CLASS
                     end
                 end
             end
-%             for i = 1:length(data.ranges)
-%                 if data.ranges(i,1) >= 6.0
-%                     data.ranges(i,1) = 0;
+            for i = 1:length(data.ranges)
+                if data.ranges(i,1) >= 3.0
+                    data.ranges(i,1) = 0;
 %                     data.intensities(i,1) = 0;
-%                 end
-%             end
+                end
+            end
 
 
 %             data.ranges = filloutliers(data.ranges,"previous");

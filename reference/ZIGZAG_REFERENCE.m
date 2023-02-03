@@ -99,72 +99,72 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
             % Current time reference position calced at previous time
             rp = R'*(obj.result.PreTrack(1:2) - pe);
 
-            if abs(prod(a(ids))+prod(b(ids)))<1e-1 % ほぼ直交している場合（傾きの積が-1の式より）
-                % TODO : 入りと出で同じ幅の通路を前提としてしまっている．
-                % 初期値が垂直二等分線上の場合その場で回転するだけのリファレンスになる．
-                if isempty(obj.O)
-                    e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
-                    e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
-                    p = cr(l1,l2);
-                    tmp=[e1;e2]-p';
-                    if sum(vecnorm(tmp,2,2) < 0.5) % lineの近い方の距離が近い => 直交して交わる
-                        if l1(3)*l2(3) < 0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
-                            % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
-                            l3 = (l1+l2)/2;
-                        else
-                            l3 = (l1-l2)/2;
-                        end
-                        l4 = perp(l1,rp);
-                        obj.O = cr(l4,l3);% 回転中心：相対座標
-                        obj.r = vecnorm(obj.O-rp);
-                    else % 遠い => 交わらない線分：推定が失敗してくると生じる
-                        [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
-                        [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
-                        de1 = vecnorm(e1(id1,:)'-rp);
-                        de2 = vecnorm(e2(id2,:)'-rp);
-                        if de1 < de2
-                            obj.O = (e1(id1,:) + [x y])';
-                            obj.r = de1;
-                        else
-                            obj.O = (e2(id2,:) + [x y])';
-                            obj.r = de2;
-                        end
-                    end
-                    tmp = cross([0;0;1],[-obj.O;0]);% 相対座標系における機体の進むべき向き
-                    % tmp(1)が正：Oが機体の左にあり反時計回りに回転
-                    % tmp(2)が負：Oが機体の右にあり時計回りに回転
-                    obj.th = sign(tmp(1))*obj.step*obj.dt*obj.refv/obj.r;
-                    obj.O = R*obj.O + pe; % 絶対座標位置
-                end
-                th = obj.th;
-                O = R'*(obj.O-pe);%ボディから見た回転中心位置ベクトルの位置に変換
-                r = obj.r;
-                Rmat = [cos(th),-sin(th);sin(th),cos(th)];
-                tmp0 = -O;
-                tmp0 = tmp0/vecnorm(tmp0);% 回転中心から機体の位置方向の単位ベクトル
-                tmp = cross([0;0;1],[tmp0;0]);% 機体の進むべき向き
-                tmpt0 = atan2(tmp(2),tmp(1));% 現在時刻の目標姿勢角
-                if sign(tmp(1))<0
-                    tmpt0 = tmpt0+pi;
-                end
-                tmp0 = r*tmp0; % Oから見た現在時刻の目標位置
-                tmp(:,1) = [tmp0 + O;tmpt0];
-                for i = 2:obj.Horizon
-                    tmp0 = Rmat*tmp0;
-                    tmpt0 = tmpt0 + th;
-                    tmp(:,i) = [tmp0+O;tmpt0];
-                end
-                ref = [tmp;obj.refv*ones(1,size(tmp,2))]; %　相対座標
-                if obj.trackcase == 0|| obj.trackcase == 1
-                    obj.trackcase = 2;
-                elseif obj.trackcase == 2|| obj.trackcase == 3
-                    obj.trackcase = 0;
-                end
-                if obj.count1 == 1
-                    obj.count = 1;
-                end
-
-            else % ほぼ平行な場合
+%             if abs(prod(a(ids))+prod(b(ids)))<1e-1 % ほぼ直交している場合（傾きの積が-1の式より）
+%                 % TODO : 入りと出で同じ幅の通路を前提としてしまっている．
+%                 % 初期値が垂直二等分線上の場合その場で回転するだけのリファレンスになる．
+%                 if isempty(obj.O)
+%                     e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
+%                     e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
+%                     p = cr(l1,l2);
+%                     tmp=[e1;e2]-p';
+%                     if sum(vecnorm(tmp,2,2) < 0.5) % lineの近い方の距離が近い => 直交して交わる
+%                         if l1(3)*l2(3) < 0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
+%                             % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
+%                             l3 = (l1+l2)/2;
+%                         else
+%                             l3 = (l1-l2)/2;
+%                         end
+%                         l4 = perp(l1,rp);
+%                         obj.O = cr(l4,l3);% 回転中心：相対座標
+%                         obj.r = vecnorm(obj.O-rp);
+%                     else % 遠い => 交わらない線分：推定が失敗してくると生じる
+%                         [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
+%                         [~,id2]=min(vecnorm(e2-e1(id1,:),2,2));
+%                         de1 = vecnorm(e1(id1,:)'-rp);
+%                         de2 = vecnorm(e2(id2,:)'-rp);
+%                         if de1 < de2
+%                             obj.O = (e1(id1,:) + [x y])';
+%                             obj.r = de1;
+%                         else
+%                             obj.O = (e2(id2,:) + [x y])';
+%                             obj.r = de2;
+%                         end
+%                     end
+%                     tmp = cross([0;0;1],[-obj.O;0]);% 相対座標系における機体の進むべき向き
+%                     % tmp(1)が正：Oが機体の左にあり反時計回りに回転
+%                     % tmp(2)が負：Oが機体の右にあり時計回りに回転
+%                     obj.th = sign(tmp(1))*obj.step*obj.dt*obj.refv/obj.r;
+%                     obj.O = R*obj.O + pe; % 絶対座標位置
+%                 end
+%                 th = obj.th;
+%                 O = R'*(obj.O-pe);%ボディから見た回転中心位置ベクトルの位置に変換
+%                 r = obj.r;
+%                 Rmat = [cos(th),-sin(th);sin(th),cos(th)];
+%                 tmp0 = -O;
+%                 tmp0 = tmp0/vecnorm(tmp0);% 回転中心から機体の位置方向の単位ベクトル
+%                 tmp = cross([0;0;1],[tmp0;0]);% 機体の進むべき向き
+%                 tmpt0 = atan2(tmp(2),tmp(1));% 現在時刻の目標姿勢角
+%                 if sign(tmp(1))<0
+%                     tmpt0 = tmpt0+pi;
+%                 end
+%                 tmp0 = r*tmp0; % Oから見た現在時刻の目標位置
+%                 tmp(:,1) = [tmp0 + O;tmpt0];
+%                 for i = 2:obj.Horizon
+%                     tmp0 = Rmat*tmp0;
+%                     tmpt0 = tmpt0 + th;
+%                     tmp(:,i) = [tmp0+O;tmpt0];
+%                 end
+%                 ref = [tmp;obj.refv*ones(1,size(tmp,2))]; %　相対座標
+% %                 if obj.trackcase == 0|| obj.trackcase == 1
+% %                     obj.trackcase = 2;
+% %                 elseif obj.trackcase == 2|| obj.trackcase == 3
+% %                     obj.trackcase = 0;
+% %                 end
+% %                 if obj.count1 == 1
+% %                     obj.count = 1;
+% %                 end
+% 
+%             else % ほぼ平行な場合
 %                 obj.self.model.param.Lx  = -0.008;
                 obj.O = []; th = [];
                 if l1(3)*l2(3)<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
@@ -182,17 +182,17 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
                 tmpt0 = atan2(-rl(1),rl(2));
                 tmpdl = perp(l1,[0,0]);
                 ld = cr(l1,tmpdl);
-                if obj.count == 1
-                    if abs(l1(1)) < abs(l1(2)) 
-                        obj.trackcase = 2;
-                    elseif abs(l1(1)) > abs(l1(2))
-                        obj.trackcase = 0;
-                    end
-                end
-                if abs(l1(3)) <= 0.9 && ld(2) >= 0
-                    obj.trackcase = 1
-                elseif abs(l1(3)) >= 0.9 && ld(2) <= 0
-                    obj.trackcase = 0
+%                 if obj.count == 1
+%                     if abs(l1(1)) < abs(l1(2)) 
+%                         obj.trackcase = 2;
+%                     elseif abs(l1(1)) > abs(l1(2))
+%                         obj.trackcase = 0;
+%                     end
+%                 end
+                if abs(l1(3)) <= 0.6 && ld(2) >= 0
+                    obj.trackcase = 1;
+                elseif abs(l1(3)) <= 0.6 && ld(2) <= 0
+                    obj.trackcase = 0;
 %                 elseif abs(l1(3)) >= 0.9 && ld(1) >= 0
 %                     obj.trackcase = 3
 %                 elseif abs(l1(3)) >= 0.9 && ld(1) <= 0
@@ -300,7 +300,7 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
 %                     tmp(:,i) = [tmp0;tmpt0];
 %                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
-            end
+%             end
 
         % ここから絶対座標に戻す．
 
@@ -322,9 +322,9 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
             if vecnorm(obj.result.PreTrack - ref(1:3,1))>3
                 obj.O;
             end
-            if count0 == 1
-                obj.count1 = 0;
-            end
+%             if count0 == 1
+%                 obj.count1 = 0;
+%             end
             obj.PreTrack = ref(1:3,1);
             obj.result.PreTrack = ref(1:3,1);
 %             if vecnorm(obj.result.PreTrack - ref(:,1))>3
@@ -411,13 +411,13 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
             hold on
 %             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %                agent.sensor.LiDAR.show();
-            plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+%             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
 %             plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
             plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
-%             plot(fWall(:,1),'g-','LineWidth',2);
+            plot(fWall(:,1),'g-','LineWidth',2);
             O = agent.reference.result.O;
             plot(O(1),O(2),'r*');
             quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));

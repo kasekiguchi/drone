@@ -9,6 +9,6 @@ Reference.type=["ZIGZAG_REFERENCE"];
 
 velocity = 0.1;%目標速度
 Horizon = 5;%MPCのホライゾ
-ztheta = 0.25;
+ztheta = 0.4;
 
 Reference.param={velocity,Horizon,SensorRange,agent.estimator.ukfslam.constant,ztheta};
