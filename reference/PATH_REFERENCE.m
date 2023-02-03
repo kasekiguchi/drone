@@ -153,7 +153,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))]; %　相対座標
             else % ほぼ平行な場合
-                obj.self.model.param.Lx  = -0.005;
+                obj.self.model.param.Lx  = -0.008;
                 obj.O = []; th = [];
                 if l1(3)*l2(3)<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                     % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
@@ -169,10 +169,10 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
                 rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
                 tmpt0 = atan2(-rl(1),rl(2));
                 tmp(:,1) = [tmp0;tmpt0];
-                for i = 2:obj.Horizon
-                    tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
-                    tmp(:,i) = [tmp0;tmpt0];
-                end
+%                 for i = 2:obj.Horizon
+%                     tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
+%                     tmp(:,i) = [tmp0;tmpt0];
+%                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
             end
 
@@ -276,7 +276,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
             clf(FH)
             grid on
             %axis equal
-%             obj.self.show(["sensor","lrf"],"FH",FH,"param",[estate;estateq]);
+            obj.self.show(["sensor","lrf"],"FH",FH,"param",[estate;estateq]);
             hold on
 %             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
 %                agent.sensor.LiDAR.show();
