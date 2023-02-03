@@ -91,6 +91,9 @@ bar(label,resultplot.RMSE)
 ylabel("RMSE");
 hold off
 end
+resultplot.max.x = max(resultplot.sa_X); 
+resultplot.max.y = max(resultplot.sa_Y);
+resultplot.max.q = max(resultplot.sa_q);
 
 figure(10)
 resultplot.estresult = logger.Data.agent.estimator.result{1,logger.k};

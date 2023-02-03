@@ -155,7 +155,8 @@ methods % Do methods
 
         end
 
-        obj.model.do(obj.input, param);
+
+obj.model.do(obj.input, param);
     end
 
 end

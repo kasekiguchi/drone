@@ -16,6 +16,7 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
         th = [];
         constant
         trackcase
+        count
     end
 
     methods
@@ -37,7 +38,8 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
             obj.constant = param{1,4};
             obj.ztheta = param{1,5};
-            obj.trackcase = 1;
+            obj.trackcase = 0;
+            obj.count = 0;
         end
 
         function  result= do(obj,param)
@@ -79,21 +81,16 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
 
             ref = zeros(3,obj.Horizon);%set data size[x ;y ;theta]
 
-            del = -[a.*c,b.*c]./(a.^2+b.^2); % 垂線の足
+            del = -[a.*c,b.*c]./sqrt(a.^2+b.^2); % 垂線の足
 
             ds = [Xs,Ys]; % wall 始点
             de = [Xe,Ye]; % wall 終点
             ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
             wid = find(ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
-            d = vecnorm(del,2,2); % 壁面までの距離
+            d = vecnorm(del(wid,:),2,2); % wid の壁面までの距離
             %[ip,d,Xs,Ys,Xe,Ye]
-            [~,idm]=min(d(wid)); % 一番近い壁面
-            [~,idm2]=min(del(wid(idm),:)*del(wid,:)'); % 
-            if idm ==idm2
-                error("ACSL : something wrong");
-            end
-            ids=[idm,idm2];
-            ids=wid(ids);
+            [~,idx]=mink(d,2); % 近い２つの壁面
+            ids=wid(idx); % 対象とする２つの壁面
             l1 = [a(ids(1)),b(ids(1)),c(ids(1))]/vecnorm([a(ids(1)),b(ids(1))]); %一番近い壁面のパラメータ
             l2 = [a(ids(2)),b(ids(2)),c(ids(2))]/vecnorm([a(ids(2)),b(ids(2))]);
             if l1*l2'<0
@@ -158,7 +155,17 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
                     tmp(:,i) = [tmp0+O;tmpt0];
                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))]; %　相対座標
+                if obj.trackcase == 0|| obj.trackcase == 1
+                    obj.trackcase = 2;
+                elseif obj.trackcase == 2|| obj.trackcase == 3
+                    obj.trackcase = 0;
+                end
+                if obj.count1 == 1
+                    obj.count = 1;
+                end
+
             else % ほぼ平行な場合
+%                 obj.self.model.param.Lx  = -0.008;
                 obj.O = []; th = [];
                 if l1(3)*l2(3)<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                     % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
@@ -167,80 +174,136 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
                     rl = (l1-l2)/2;
                 end
                 tmpl = perp(rl,[0;0]); % 機体を通るrl の垂線
-                tmpzl = perp(rl,[pe(1);pe(2)]); % 現在地と中心を結ぶ直線に垂直
-                tmpz0 = cr(rl,tmpzl); % The foot of the perpendicular line between the current location and the center line
-                tmpz1 = cr(l1,tmpzl); % The foot of a straight line perpendicular to your current location and the nearest wall
                 if sum(tmpl) == 0
                     rl;
                 end
                 tmp0 = cr(rl,tmpl); % 機体からrlへの垂線の足
-                rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
+                rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるよう
                 tmpt0 = atan2(-rl(1),rl(2));
-                det = vecnorm(tmpz0);
-                den = vecnorm(tmpz1);
-%                 tmp(:,1) = [tmp0;tmpt0];
-%                 for i = 2:obj.Horizon
-%                     tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
-%                     tmp(:,i) = [tmp0;tmpt0];
-%                 end
-%                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
-                if (den <= 0.3 && tmpz1(2) - pe(2) > 0) || (den <= 0.3 && tmpz1(1) - pe(1) < 0)
-                    obj.trackcase = 0;
-                elseif (den <= 0.3 && tmpz1(2) - pe(2) < 0) || (den <= 0.3 && tmpz1(1) - pe(1) > 0)
-                    obj.trackcase = 1;
+                tmpdl = perp(l1,[0,0]);
+                ld = cr(l1,tmpdl);
+                if obj.count == 1
+                    if abs(l1(1)) < abs(l1(2)) 
+                        obj.trackcase = 2;
+                    elseif abs(l1(1)) > abs(l1(2))
+                        obj.trackcase = 0;
+                    end
                 end
+                if abs(l1(3)) <= 0.9 && ld(2) >= 0
+                    obj.trackcase = 1
+                elseif abs(l1(3)) >= 0.9 && ld(2) <= 0
+                    obj.trackcase = 0
+%                 elseif abs(l1(3)) >= 0.9 && ld(1) >= 0
+%                     obj.trackcase = 3
+%                 elseif abs(l1(3)) >= 0.9 && ld(1) <= 0
+%                     obj.trackcase = 2
+                end
+%                 dxz = tmp0(2)*sin(tmpt0);
+%                 dyz = dxz*tan(obj.ztheta);
+%                 tmp1 = [dxz;dyz]; 
+%                 tmpt1 = atan2(dxz,dyz);
+%                 if obj.ztheta < 0
+%                     obj.ztheta = -obj.ztheta;
+%                 end
                 switch obj.trackcase
                     case 0
-                        if obj.ztheta < 0
-                            obj.ztheta = -obj.ztheta;
-                        end
-                        dz = c(idm) / sin(obj.ztheta);
-                        xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
-                        ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
-                        az = -(ydz - tmp0(2));
-                        bz = xdz - tmp0(1);
-                        cz = xdz * tmp0(2) - tmp0(1) *  ydz;
-                        lz = [az,bz,cz]/vecnorm([az,bz]);
-                        tmpzl2 = perp(lz,[pe(1);pe(2)]);
-                        tmpz2 = cr(lz,tmpl);
-        %                 tmpzl = perp(lz,EstData(1:2,1));
-        %                 tmpz0 = cr(lz,tmpzl);
-                        Theta = atan2(az,bz);
-                        tmp = [tmpz2;Theta];
+                    %-case0-%
+                    if obj.ztheta < 0
+                        obj.ztheta = -obj.ztheta;
+                    end
+
+                    dy1 = l1(3);
+                    dy2 = l2(3);
+                    dx1 = dy1/tan(obj.ztheta);
+                    dx2 = dy2/tan(obj.ztheta);
+                    tmpz1 = [dx1,dy1];
+                    tmpz2 = [dx2,dy2];
+                    al = tmpz2(2) - tmpz1(2);
+                    bl = -(tmpz2(1) - tmpz1(1));
+                    cl = tmpz2(1)*tmpz1(2) - tmpz1(1)*tmpz2(2);
+                    zl = [al,bl,cl]+[0,0,-al*tmp0(1)-tmp0(2)];
+                    zl = [al,bl,cl]/vecnorm([al,bl,cl]);
+                    zl = zl*sign([zl(2),-zl(1)]*[1;0]);
+                    tmpzl = perp(zl,[0;0]);
+                    tmpz0 = cr(zl,tmpzl);
+                    ltheta = atan2(-zl(1),zl(2));
+                    tmp = [tmpz0;ltheta-the];
+                    %--%
                     case 1
                         if obj.ztheta > 0
                             obj.ztheta = -obj.ztheta;
                         end
-                        dz = c(idm) / sin(obj.ztheta);
-                        xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
-                        ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
-                        az = (ydz - tmp0(2));
-                        bz = xdz - tmp0(1);
-                        cz = xdz * tmp0(2) - tmp0(1) *  ydz;
-                        lz = [az,bz,cz]/vecnorm([az,bz]);
-                        tmpzl2 = perp(lz,[pe(1);pe(2)]);
-                        tmpz2 = cr(lz,tmpl);
-        %                 tmpzl = perp(lz,EstData(1:2,1));
-        %                 tmpz0 = cr(lz,tmpzl);
-                        Theta = atan2(az,bz);
-                        tmp = [tmpz2;Theta];
-                
+            
+                        dy1 = l1(3);
+                        dy2 = l2(3);
+                        dx1 = dy1/tan(obj.ztheta);
+                        dx2 = dy2/tan(obj.ztheta);
+                        tmpz1 = [dx1,dy1];
+                        tmpz2 = [dx2,dy2];
+                        al = tmpz2(2) - tmpz1(2);
+                        bl = -(tmpz2(1) - tmpz1(1));
+                        cl = tmpz2(1)*tmpz1(2) - tmpz1(1)*tmpz2(2);
+                        zl = [al,bl,cl]+[0,0,-al*tmp0(1)-tmp0(2)];
+                        zl = [al,bl,cl]/vecnorm([al,bl,cl]);
+                        zl = zl*sign([zl(2),-zl(1)]*[1;0]);
+                        tmpzl = perp(zl,[0;0]);
+                        tmpz0 = cr(zl,tmpzl);
+                        ltheta = atan2(-zl(1),zl(2));
+                        tmp = [tmpz0;ltheta-the];
+                    case 2
+                        if obj.ztheta < 0
+                            obj.ztheta = -obj.ztheta;
+                        end
+    
+                        dy1 = l1(3);
+                        dy2 = l2(3);
+                        dx1 = dy1/tan(obj.ztheta);
+                        dx2 = dy2/tan(obj.ztheta);
+                        tmpz1 = [dx1,dy1];
+                        tmpz2 = [dx2,dy2];
+                        al = tmpz2(2) - tmpz1(2);
+                        bl = -(tmpz2(1) - tmpz1(1));
+                        cl = tmpz2(1)*tmpz1(2) - tmpz1(1)*tmpz2(2);
+                        zl = [al,bl,cl]+[0,0,-al*tmp0(1)-tmp0(2)];
+                        zl = [al,bl,cl]/vecnorm([al,bl,cl]);
+                        zl = zl*sign([zl(2),-zl(1)]*[1;0]);
+                        tmpzl = perp(zl,[0;0]);
+                        tmpz0 = cr(zl,tmpzl);
+                        ltheta = atan2(-zl(1),zl(2));
+                        tmp = [tmpz0;ltheta-the+pi/2];
+                        case 3
+                        if obj.ztheta > 0
+                            obj.ztheta = -obj.ztheta;
+                        end
+    
+                        dy1 = l1(3);
+                        dy2 = l2(3);
+                        dx1 = dy1/tan(obj.ztheta);
+                        dx2 = dy2/tan(obj.ztheta);
+                        tmpz1 = [dx1,dy1];
+                        tmpz2 = [dx2,dy2];
+                        al = tmpz2(2) - tmpz1(2);
+                        bl = -(tmpz2(1) - tmpz1(1));
+                        cl = tmpz2(1)*tmpz1(2) - tmpz1(1)*tmpz2(2);
+                        zl = [al,bl,cl]+[0,0,-al*tmp0(1)-tmp0(2)];
+                        zl = [al,bl,cl]/vecnorm([al,bl,cl]);
+                        zl = zl*sign([zl(2),-zl(1)]*[1;0]);
+                        tmpzl = perp(zl,[0;0]);
+                        tmpz0 = cr(zl,tmpzl);
+                        ltheta = atan2(-zl(1),zl(2));
+                        tmp = [tmpz0;ltheta-the+pi/2];
+                        
                 end
-%                 dz = c(idm) / sin(obj.ztheta);
-%                 xdz = tmp0(1) + dz * cos(obj.ztheta+tmpt0);
-%                 ydz = tmp0(2) + dz * sin(obj.ztheta+tmpt0);
-%                 az = -(ydz - tmp0(2));
-%                 bz = xdz - tmp0(1);
-%                 cz = xdz * tmp0(2) - tmp0(1) *  ydz;
-%                 lz = [az,bz,cz]/vecnorm([az,bz]);
-% %                 tmpzl = perp(lz,EstData(1:2,1));
-% %                 tmpz0 = cr(lz,tmpzl);
-%                 Theta = atan2(az,bz);
-%                 tmp = [tmpz0;Theta];
+                
+%                 for i = 2:obj.Horizon
+%                     tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
+%                     tmp(:,i) = [tmp0;tmpt0];
+%                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
             end
 
-            % ここから絶対座標に戻す．
+        % ここから絶対座標に戻す．
+
             ref(1:2,:) = R*ref(1:2,:) + pe;
             ref(3,:) = ref(3,:) + the;
 
@@ -258,6 +321,9 @@ classdef ZIGZAG_REFERENCE < REFERENCE_CLASS
             
             if vecnorm(obj.result.PreTrack - ref(1:3,1))>3
                 obj.O;
+            end
+            if count0 == 1
+                obj.count1 = 0;
             end
             obj.PreTrack = ref(1:3,1);
             obj.result.PreTrack = ref(1:3,1);
