@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0 % 1：実機　それ以外：シミュレーション
+fExp = 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experient data
 fDebug = 0;
@@ -35,10 +35,10 @@ end
 run("main2_agent_setup.m");
 if fExp~=1
     for i = 1:N
-        rat = 0.5;
-% agent.set_model_error("lx",0.0585*rat);%0.0585 %0.06くらいでFT=FB 
+%         rat = -0.2;
+% % agent.set_model_error("lx",0.0585*rat);%0.0585 %0.06くらいでFT=FB 
 % agent.set_model_error("ly",0.0466*rat);%0.0466
-% agent.set_model_error("mass",0.269*ratio);%0.269
+% agent.set_model_error("mass",0.08);%0.269
 % agent(i).set_model_error("jx", 0.02237568*rat);%0.02237568;
 % agent.set_model_error("jy", 0.02985236*rat);%0.02985236;
 % agent.set_model_error("jz",-0.03);%0.0480374;
@@ -99,7 +99,7 @@ try
             if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
             % reference
-            FH.CurrentCharacter = 'f';
+%             FH.CurrentCharacter = 'f';
 %             if fExp~=1
 %                 if time.t<=5
 %                     FH.CurrentCharacter = 't';
@@ -211,8 +211,8 @@ clc
 % logger.plot({1,"p1:2","pe"},{1,"p","per"},{1,"q","pe"},{1,"v","pe"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
 % logger.plot({1,"p","per"},"fig_num",2);
 % logger.plot({1,"input",""},"fig_num",3);
-% logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
-logger.plot({1,"p","erp"},{1,"v","ep"},{1,"q","ep"},{1,"w","ep"},{1,"input",""},"fig_num",4,"row_col",[2,3]);
+logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
+% logger.plot({1,"p","erp"},{1,"v","ep"},{1,"q","ep"},{1,"w","ep"},{1,"input",""},"fig_num",4,"row_col",[2,3]);
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","se"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,3]);
 % agent(1).reference.timeVarying.show(logger)
 
@@ -225,23 +225,23 @@ logger.plot({1,"p","erp"},{1,"v","ep"},{1,"q","ep"},{1,"w","ep"},{1,"input",""},
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
 %% make folder&save
-fsave=10;
+fsave=1;
 if fsave==1
     %変更しない
-%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+%     ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='data';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
-%     subfolder='exp';%sim or exp or sample
-    subfolder='sim';%sim or exp or sample
+    subfolder='exp';%sim or exp or sample
+%     subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='model_error';%実験,シミュレーション名
+    ExpSimName='model_errorexp';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
 % contents='ft_jy_002';%実験,シミュレーション内容
-contents='LS_jxy150';%実験,シミュレーション内容
+contents='LS_c6';%実験,シミュレーション内容
 % contents='FT_jxy150';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath

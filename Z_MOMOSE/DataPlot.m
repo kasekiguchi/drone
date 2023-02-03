@@ -5,10 +5,10 @@ close all
 %import
 %選択
 fExp=10;%実験のデータかどうか
-fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
+fLogN=2;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
-fspider=1;%レーダーチャート1
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 
 %どの時間の範囲を描画するか指定
@@ -47,8 +47,8 @@ if fLogN == 1
 %     n = [1,5,8,10,7, 12:16,20:23];
 %     n=20:23;
 elseif fLogN==2
-    name1 = logger_LS_non;%LS
-    name2 = logger_FT_non;%FT
+    name1 = logger_LS_c6;%LS
+    name2 = logger_FT_c6;%FT
 % name1 = logger_lsjx002;%LS
 %     name2 = logger_ftjx002;%FT
 %     name1 = logger_ls_jx_n001;%LS
@@ -517,30 +517,30 @@ else
 end
 
 %二乗誤差平均
-if fLogN ==1
-     RMSE = rmse(ref,est)
-%      fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
-%         RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
-%         fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
-elseif  fLogN == 2
-    RMSE_LS = rmse(ref1,est1)
-    RMSE_FT = rmse(ref2,est2)
-else
-    if isempty(c)
-        c = string(1:logNum);
-    end
-    RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
-    RMSE = zeros(logNum,12);
-        for i =1:logNum
-            refs = zeros(3,k(i)-1);%kはtimeの長さ
-            RMSE(i,1:12) = [rmse(ref{1,i},est{1,i}),rmse(refs,vel{1,i}),rmse(refs,att{1,i}),rmse(refs,w{1,i})];
-            RMSElog(i+1,1:13) = [c(i),RMSE(i,1:12)];
-            fprintf('#%s RMSE\n',c(i));
-            fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
-            fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
-           
-        end
-end
+% if fLogN ==1
+%      RMSE = rmse(ref,est)
+% %      fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
+% %         RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
+% %         fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
+% elseif  fLogN == 2
+%     RMSE_LS = rmse(ref1,est1)
+%     RMSE_FT = rmse(ref2,est2)
+% else
+%     if isempty(c)
+%         c = string(1:logNum);
+%     end
+%     RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
+%     RMSE = zeros(logNum,12);
+%         for i =1:logNum
+%             refs = zeros(3,k(i)-1);%kはtimeの長さ
+%             RMSE(i,1:12) = [rmse(ref{1,i},est{1,i}),rmse(refs,vel{1,i}),rmse(refs,att{1,i}),rmse(refs,w{1,i})];
+%             RMSElog(i+1,1:13) = [c(i),RMSE(i,1:12)];
+%             fprintf('#%s RMSE\n',c(i));
+%             fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
+%             fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
+%            
+%         end
+% end
 
 % figure
 %図:[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
