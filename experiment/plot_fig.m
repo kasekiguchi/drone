@@ -57,7 +57,7 @@ for name_i = 1:length(name_class)
 end
 %回転数の二乗
 sum = 0;
-for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 114, 1, 'last')
+for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 108, 1)-1
  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
 end    
 %% 電力(5)
