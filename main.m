@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1 % 1：実機　それ以外：シミュレーション
+fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experiment data
 
@@ -96,13 +96,13 @@ try
                 if time.t<=8
                     FH.CurrentCharacter = 't';
                 elseif time.t < 15
-                    FH.CurrentCharacter = 'm';%phaseをいじれる
+                    FH.CurrentCharacter = 'f';%phaseをいじれる
                 elseif time.t < 20
-                    FH.CurrentCharacter = 'r';%phaseをいじれる
+                    FH.CurrentCharacter = 'h';%phaseをいじれる
                 elseif time.t < 23
-                    FH.CurrentCharacter = 'm';%phaseをいじれる
+                    FH.CurrentCharacter = 'y';%phaseをいじれる
                 else
-                    FH.CurrentCharacter = 'r';%phaseをいじれる
+                    FH.CurrentCharacter = 'y';%phaseをいじれる
                 end
             end
             param(i).reference.covering = [];
@@ -202,7 +202,7 @@ close all
 clc
 
 % plot 
-logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+% logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
 % logger.plot({1,"sensor.result.switch",""},{1,"sensor.result.distance",""});
 % logger.plot({1,"v","er"},{1,"inner_input",""});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);

@@ -30,8 +30,8 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            %if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h'  && cha ~= 'g' && cha ~= 'j')
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h'  && cha ~= 'u' && cha ~= 'j')
+            %if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h' && cha ~= 'u' && cha ~= 'j')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h' && cha ~= 'y')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -41,6 +41,9 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 else% 初めてlanding に入ったとき
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing(obj.self.reference.result.state.p,Param{4});
                 end
+                obj.result.state.p(1) = obj.self.estimator.result.state.p(1);
+                obj.result.state.p(2) = obj.self.estimator.result.state.p(2);
+                obj.result.state.p(4) = obj.self.estimator.result.state.q(3);
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
@@ -104,48 +107,58 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 else
                     obj.result.state.p = obj.self.reference.result.state.p;
                 end
-            elseif strcmp(cha,'j') % yaw角回転(右？) (時間関数)
-                if obj.flag~='j'
-                    obj.t=[];
+%             elseif strcmp(cha,'j') % yaw角回転(右？) (時間関数)
+%                 if obj.flag~='j'
+%                     obj.t=[];
+%                 end
+%                 obj.flag='j';
+%                 if ~isempty(obj.t)    %flightからreferenceの時間を開始
+%                     t = Param{3}-obj.t;
+%                 else
+%                     obj.t=Param{3};
+%                     t = 0;
+%                 end
+% %                 yaw = 0.5*pi()*t;
+%                 yaw = 0;
+%                 if yaw <= 2*pi()
+%                 obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
+%                 obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
+%                 obj.result.state.p(3)=obj.self.estimator.result.state.p(3);
+%                 obj.result.state.p(4)=pi()/2;
+% %                 obj.result.q=pi()/2;
+%                 else
+%                 obj.result.state.p = obj.self.reference.result.state.p;
+%                 end
+%             elseif strcmp(cha,'u') % yaw角回転(左？) (時間関数)
+%                 if obj.flag~='u'
+%                     obj.t=[];
+%                 end
+%                 obj.flag='u';
+%                 if ~isempty(obj.t)    %flightからreferenceの時間を開始
+%                     t = Param{3}-obj.t;
+%                 else
+%                     obj.t=Param{3};
+%                     t = 0;
+%                 end
+%                 yaw = -0.5*pi()*t;
+%                 if yaw >= -2*pi()
+%                     obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
+%                     obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
+%                     obj.result.state.p(3)=obj.self.estimator.result.state.p(3);
+%                     obj.result.state.p(4)=yaw;
+%                 else
+%                     obj.result.state.p = obj.self.reference.result.state.p;
+%                 end
+            elseif strcmp(cha,'y') % landing phase
+                if strcmp(obj.flag,'y')
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,2.8);
+                else% 初めてlanding に入ったとき
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.04,2.8);
                 end
-                obj.flag='j';
-                if ~isempty(obj.t)    %flightからreferenceの時間を開始
-                    t = Param{3}-obj.t;
-                else
-                    obj.t=Param{3};
-                    t = 0;
-                end
-%                 yaw = 0.5*pi()*t;
-                yaw = 0;
-                if yaw <= 2*pi()
-                obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
-                obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
-                obj.result.state.p(3)=obj.self.estimator.result.state.p(3);
-                obj.result.state.p(4)=pi()/2;
-%                 obj.result.q=pi()/2;
-                else
-                obj.result.state.p = obj.self.reference.result.state.p;
-                end
-            elseif strcmp(cha,'u') % yaw角回転(左？) (時間関数)
-                if obj.flag~='u'
-                    obj.t=[];
-                end
-                obj.flag='u';
-                if ~isempty(obj.t)    %flightからreferenceの時間を開始
-                    t = Param{3}-obj.t;
-                else
-                    obj.t=Param{3};
-                    t = 0;
-                end
-                yaw = -0.5*pi()*t;
-                if yaw >= -2*pi()
-                    obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
-                    obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
-                    obj.result.state.p(3)=obj.self.estimator.result.state.p(3);
-                    obj.result.state.p(4)=yaw;
-                else
-                    obj.result.state.p = obj.self.reference.result.state.p;
-                end
+                obj.result.state.p(1) = obj.self.estimator.result.state.p(1);
+                obj.result.state.p(2) = obj.self.estimator.result.state.p(2);
+                obj.result.state.p(4) = obj.self.estimator.result.state.q(3);
+                obj.flag='n';
             else
                 obj.result.state.p = obj.base_state;
             end
