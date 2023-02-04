@@ -57,7 +57,13 @@ for name_i = 1:length(name_class)
 end
 %回転数の二乗
 sum = 0;
-for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 108, 1)-1
+% for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 108, 1)-1
+%  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
+% end    
+% for plot_i = find(logger.Data.phase == 109, 1):1:find(logger.Data.phase == 114, 1)-1
+%  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
+% end    
+for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1
  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
 end    
 %% 電力(5)
@@ -66,7 +72,7 @@ clear T
 T = logger.Data.t(1:logger.k);
 hold on
 for plot_i = 1:logger.k%グラフのプロット
-    Y(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.ros2.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros2.current;
+    Y(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros_t.current;
 end
 plot(T(1:logger.k),Y/100,'LineWidth',1)
 % txt = {''};
@@ -82,9 +88,9 @@ plot(T(1:logger.k),Y/100,'LineWidth',1)
 %     Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
 %     txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
 % end
-if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
-    Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
-end
+% if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
+%     Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
+% end
 legend('morter 1','morter 2','morter 3','morter 4')
 xlabel('time [s]')
 ylabel('power [W]')
