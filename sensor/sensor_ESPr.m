@@ -46,7 +46,7 @@ classdef sensor_ESPr < SENSOR_CLASS
                 end
                 obj.result.distance = sensor_distance;
                 obj.result.switch = 0;
-                if obj.result.distance(1) < 65
+                if obj.result.distance(3) < 55
                     obj.result.switch = 1;
                 end
             else
