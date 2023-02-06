@@ -154,8 +154,8 @@ for i = 1:N
   %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
 %   agent(i).set_property("reference",Reference_Jirei(agent(i)));
   %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-  agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
-%   agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
+%   agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
+  agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
 %   agent(i).set_property("reference",Reference_PathCenter_Plant(agent(i),agent.sensor.lrf.radius));
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
