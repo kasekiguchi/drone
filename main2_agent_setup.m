@@ -111,8 +111,13 @@ for i = 1:N
        agent(i).set_property("sensor", Sensor_Motive(rigid_ids(i), initial_yaw_angles(i), motive)); % motive情報 : sim exp 共通 % 引数はmotive上の剛体番号ではない点に注意
     end
 
-  agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
-%   agent(i).set_property("sensor",Sensor_Motive_ROS(struct('DomainID',30)));
+  
+  if fExp
+      agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
+      agent(i).set_property("sensor",Sensor_Motive_ROS(struct('DomainID',30)));
+  else
+      agent(i).set_property("sensor",Sensor_LiDAR(i));
+  end
   %agent(i).set_property("sensor",Sensor_Yolo(struct('DomainID',30)));
   %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
   %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
@@ -151,6 +156,7 @@ for i = 1:N
   %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
   agent(i).set_property("reference",Reference_Zigzag(agent(i),agent.sensor.lrf.radius));
 %   agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
+%   agent(i).set_property("reference",Reference_PathCenter_Plant(agent(i),agent.sensor.lrf.radius));
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
   %% set controller property

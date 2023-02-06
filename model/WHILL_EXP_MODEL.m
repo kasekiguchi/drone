@@ -44,11 +44,11 @@ methods
                 %cmdout2 = cmdout(ipp(1) + 8:ipp(1) + 11);
                 %param.ROSHostIP = strcat('192.168.50', '.', string(100 + obj.IP));
                 param.DomainID = obj.IP;
-                param.subTopicName = {'/Robot_1/pose'};
-%                 param.subTopicName = {'/odom'};
+%                 param.subTopicName = {'/Robot_1/pose'};
+                param.subTopicName = {'/odom'};
                 param.pubTopicName = {'/cmd_vel'};
-                param.subMsgName = {'geometry_msgs/PoseStamped'};
-%                 param.subMsgName = {'nav_msgs/Odometry'};
+%                 param.subMsgName = {'geometry_msgs/PoseStamped'};
+                param.subMsgName = {'nav_msgs/Odometry'};
                 param.pubMsgName = {'geometry_msgs/Twist'};
                 subnum = length(param.subTopicName);
                 pubnum = length(param.pubTopicName);
@@ -65,13 +65,13 @@ methods
 %                 odom_sub = ros2subscriber(param.subTopic(1),"/odom");
 %                 receive(odom_sub,2);
                 fprintf("Whill %d is ready\n", obj.IP);
-                state = obj.connector.getData();
-                obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                obj.result.state.eq = quat2eul(obj.result.state.qq);
-                obj.state.p = [state.pose.position.z,state.pose.position.x];
-                obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                obj.state.eq = quat2eul(obj.state.qq);
+%                 state = obj.connector.getData();
+%                 obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+%                 obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                 obj.result.state.eq = quat2eul(obj.result.state.qq);
+%                 obj.state.p = [state.pose.position.z,state.pose.position.x];
+%                 obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                 obj.state.eq = quat2eul(obj.state.qq);
         end
 
     end
@@ -104,13 +104,13 @@ function do(obj, u, varargin)
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
                     obj.connector.sendData(obj.msg);
-                    state = obj.connector.getData();
-                    obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                    obj.result.state.eq = quat2eul(obj.result.state.qq);
-                    obj.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                    obj.state.eq = quat2eul(obj.state.qq);
+%                     state = obj.connector.getData();
+%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
+%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
+%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                     obj.state.eq = quat2eul(obj.state.qq);
                     error("ACSL : quit experiment");
                 case 's' % stop
                     obj.msg.linear.x = 0.0;
@@ -119,13 +119,13 @@ function do(obj, u, varargin)
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
-                    state = obj.connector.getData();
-                    obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                    obj.result.state.eq = quat2eul(obj.result.state.qq);
-                    obj.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                    obj.state.eq = quat2eul(obj.state.qq);
+%                     state = obj.connector.getData();
+%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
+%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
+%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                     obj.state.eq = quat2eul(obj.state.qq);
                 case 'f' % run
 %                      obj.msg.linear.x = 0.025;
                      obj.msg.linear.x = u(1);
@@ -134,13 +134,13 @@ function do(obj, u, varargin)
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = u(2);
-                    state = obj.connector.getData();
-                    obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                    obj.result.state.eq = quat2eul(obj.result.state.qq);
-                    obj.state.p = [state.pose.position.z,state.pose.position.x];
-                    obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-                    obj.state.eq = quat2eul(obj.state.qq);
+%                     state = obj.connector.getData();
+%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
+%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
+%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%                     obj.state.eq = quat2eul(obj.state.qq);
             end
 
         else % 緊急時
@@ -151,13 +151,13 @@ function do(obj, u, varargin)
             obj.msg.angular.y = 0.0;
             obj.msg.angular.z = 0.0;
             obj.connector.sendData(obj.msg);
-            state = obj.connector.getData();
-            obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-            obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-            obj.result.state.eq = quat2eul(obj.result.state.qq);
-            obj.state.p = [state.pose.position.z,state.pose.position.x];
-            obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-            obj.state.eq = quat2eul(obj.state.qq);
+%             state = obj.connector.getData();
+%             obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+%             obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%             obj.result.state.eq = quat2eul(obj.result.state.qq);
+%             obj.state.p = [state.pose.position.z,state.pose.position.x];
+%             obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+%             obj.state.eq = quat2eul(obj.state.qq);
             return;
         end
         

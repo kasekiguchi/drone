@@ -25,7 +25,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
               ];
 
 if (fOffline)
-  logger = LOGGER("Data/Log(zigu_5).mat", ["sensor","input"]);
+  logger = LOGGER("Data/Log(2_6_1_1).mat", ["sensor","input"]);
 %   logger = LOGGER("Data/Log(2_1_1).mat", ["sensor"]);
 else
   logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
@@ -68,6 +68,7 @@ try
       param(i).sensor.lrf = {Env.param};
       param(i).sensor.lidar = {};
       param(i).sensor.Yolo = {};
+      param(i).sensor.motive = {};
 
       for j = 1:length(agent(i).sensor.name)     
         param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));

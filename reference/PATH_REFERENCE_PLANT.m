@@ -1,4 +1,4 @@
-classdef PATH_REFERENCE < REFERENCE_CLASS
+classdef PATH_REFERENCE_PLANT < REFERENCE_CLASS
     % 通路の中心を通るリファレンスを生成するクラス
     % 曲がり角では外側の二本の壁面の中線と曲がり角に進入時の位置から近い壁面に下した垂線の交点を中心とした回転をする．
     properties
@@ -17,7 +17,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
     end
 
     methods
-        function obj = PATH_REFERENCE(self,varargin)
+        function obj = PATH_REFERENCE_PALNT(self,varargin)
             % 【Input】 map_param ,
             %  目標点の行列を受け取る．それに対応した目標速度を受け取る．
             %　目標点と速度に応じて参照軌道を作成，estimatorの値から収束判定をする．
@@ -40,8 +40,6 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
 
         function  result= do(obj,param)
             EstData = obj.self.estimator.result.state.get();
-%             q = quat2eul([obj.self.sensor.result.motive.orientation.w,obj.self.sensor.result.motive.orientation.x,obj.self.sensor.result.motive.orientation.y,obj.self.sensor.result.motive.orientation.z]);
-%             EstData = [obj.self.sensor.result.motive.position.z,obj.self.sensor.result.motive.position.z,q(1,2)];
             pe = EstData(1:2);
             the = EstData(3);
             R = [cos(the), -sin(the);sin(the), cos(the)];
