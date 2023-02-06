@@ -113,33 +113,34 @@ for i = 1:N
 %   agent(i).set_property("sensor",Sensor_LiDAR(i));%matlabで作成したシンプル環境用
 %   agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
 %   env = stlread('3F.stl');
-  env = stlread('3d_enviroment_hv_show.stl');
+  env = stlread('3d_enviroment_hv.stl');
   model.Vertices = env.Points;
   model.Faces    = env.ConnectivityList;
   figure(2), clf
 %   patch(model, 'FaceColor', [0.8 0.8 1.0])
 %   alpha(0.5)
-  view([2 2])
+%   view([2 2])
+  view([-1 -1 1]);
   xlabel('x [m]')
   ylabel('y [m]')
   zlabel('z [m]')
-  xlim([-2.5,8.5])
+  xlim([-3,8])
   ylim([-5.5 , 5.5]);
-  zlim([-12 ,11])
+  zlim([-5 ,5])
 %   lightangle(-45,70)
 hold on
-trisurf(env,'EdgeColor',[0 0 0],'EdgeAlpha',0.1,'FaceAlpha',0.05,'FaceColor',[0 0 0]);
+trisurf(env,'EdgeColor',[0 0 0],'EdgeAlpha',0.1,'FaceAlpha',0.05,'FaceColor',[0 0 1]);
 plot3(0,0,0,'ro','LineWidth',1);
 plot3(5,3,0,'bx','LineWidth',1);
 legend("wall","initial potision","goal position")
-view([2 2])
+view(2)
 % view([-2 -2 2])
 % plot(env);
 hold off
 %%
 
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
-  agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12*3:0.0165*3:pi / 12*3), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
+  agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12*3:0.0165*3:pi / 12*3), 'phi_range', -pi:0.07:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.01:pi, 'noise', 3.0E-2, 'seed', 3)); % 2D lidar1
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-15*pi/360:0.05:15*pi/360), 'phi_range', -15*pi/360:0.05:15*pi/360, 'noise', 3.0E-2, 'seed', 3)); % Teraranger 64px
   %% set estimator property

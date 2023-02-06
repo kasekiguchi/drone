@@ -157,8 +157,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       hold on
       axis equal
       daspect([1 1 1]);
-      view([-1 -1 1]);   
-%       view([2 2]); 
+%       view([-1 -1 1]);   
+      view([-2 2]); 
 %       view(2);
 %       view(-10,30); 
 %       
@@ -178,9 +178,12 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         if opt.fField
           bld.Faces = obj.cn;
           bld.Vertices = obj.ps;
-          bld.FaceAlpha = 0.1; % remove the transparency
+          bld.FaceAlpha = 0.05; % remove the transparency
           bld.FaceColor = 'b'; %
           bld.LineStyle = '-'; % 'none'; % remove the lines
+          bld.EdgeAlpha = 0.1;
+          bld.EdgeColor = [0 0 0];
+%           trisurf(bld,'EdgeColor',[0 0 0],'EdgeAlpha',0.1,'FaceAlpha',0.05,'FaceColor',[0 0 1]);
           patch(bld);
         end
         %campos(p +10*[-1;-0.2;0.2]);
@@ -192,9 +195,9 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       plot3(r(1), r(2), r(3),'ro');%referenceの表示
 %       scatter3(r(1),r(2),r(3),70,'filled','LineWidth',0.1);%目標軌跡
       ref_plot.MarkerEdgeColor = 'b';
-      xlim([p(1) - 10, p(1) + 10]);
-      ylim([p(2) - 10, p(2) + 10]);
-      zlim([p(3) - 10, p(3) + 10]);
+      xlim([p(1) - 3, p(1) + 8]);
+      ylim([p(2) - 5, p(2) + 5]);
+      zlim([p(3) - 5, p(3) + 5]);
     end
     function Qpi = inverse_matrices(obj, p, ids)
       % Qpi : inv(Q-p) = [r1;r2;r3] に対して 各行が [r1,r2,r3] となっている．

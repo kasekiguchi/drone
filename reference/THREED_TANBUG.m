@@ -97,11 +97,11 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             %radius = ...;
             radius = self.sensor.lidar.radius;
             hx= radius;
-            hy = 0.15;%3D_enviroment_hv3(v)
-            hz= 0.15;%3D_enviroment_hv3(v)
+%             hy = 0.15;%3D_enviroment_hv3(v)
+%             hz= 0.15;%3D_enviroment_hv3(v)
 
-%             hy = 0.15;%3D_Simple(v)
-%             hz= 0.15;%3D_Simple(v)
+            hy = 0.15;%3D_Simple(v)
+            hz= 0.15;%3D_Simple(v)
 %             hy = 0.2;%3D_Simple_reverce(v)
 %             hz= 0.2;%3D_Simple_reverce(v)
             P = [-0.05,hy,hz;-0.05,-hy,hz;-0.05,-hy,-hz;-0.05,hy,-hz;
@@ -151,14 +151,13 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                 obj.g = obj.g;
               end
               obj.v = obj.v;
-              obj.gpath = obj.gen_path(p,R,obj.g);
             else % Gpath内に点群がない場合
               % G へ向かう
               obj.g = obj.l_goal; 
-              obj.v = [0;0;0];
-              obj.gpath = obj.gen_path(p,R,obj.g);
+              obj.v = [0;0;0];             
             end     
             obj.result.state.p =  R * obj.g + p;
+            obj.gpath = obj.gen_path(p,R,obj.result.state.p);
             obj.result.state.v = obj.v;
             result = obj.result;   
         end   
@@ -257,14 +256,14 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                     anchor_ids = find(abs(edge_p(2) - l_points(2,edge_ids))<obj.margin/2,1);
                     anchor_ids = edge_ids(anchor_ids);
                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
-%                     if isempty(anchor_ids)
-%                         g = [tmp1;edge_p(2);tmp2];%ローカル
-%                         g = [edge_p(1);edge_p(2);edge_p(3)+obj.margin];
-%                     elseif edge_p(2) > l_points(2,anchor_ids)
-%                         g = [tmp1;l_points(2,anchor_ids)+obj.margin_conect;edge_p(3)-obj.margin_conect];
-%                     else
-%                         g = [tmp1;l_points(2,anchor_ids)-obj.margin_conect;edge_p(3)-obj.margin_conect];
-%                     end
+                    if isempty(anchor_ids)
+                        g = [tmp1;edge_p(2);tmp2];%ローカル
+                        g = [edge_p(1);edge_p(2);edge_p(3)+obj.margin];
+                    elseif edge_p(2) > l_points(2,anchor_ids)
+                        g = [tmp1;l_points(2,anchor_ids)+obj.margin_conect;edge_p(3)-obj.margin_conect];
+                    else
+                        g = [tmp1;l_points(2,anchor_ids)-obj.margin_conect;edge_p(3)-obj.margin_conect];
+                    end
 
                     [tmp1,tmp2,~,~] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
                     g = [tmp1;edge_p(2);tmp2];%ローカル
@@ -274,14 +273,14 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                     anchor_ids = find(abs(edge_p(2) - l_points(2,edge_ids))<obj.margin/2,1);
                     anchor_ids = edge_ids(anchor_ids);
                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
-%                     if isempty(anchor_ids)
-%                         g = [tmp1;edge_p(2);tmp2];%ローカル
-% %                         g = [edge_p(1);edge_p(2);edge_p(3)+obj.margin];
-%                     elseif edge_p(2) > l_points(2,anchor_ids)
-%                         g = [tmp1;l_points(2,anchor_ids)+obj.margin_conect;edge_p(3)+obj.margin_conect];
-%                     else
-%                         g = [tmp1;l_points(2,anchor_ids)-obj.margin_conect;edge_p(3)+obj.margin_conect];
-%                     end
+                    if isempty(anchor_ids)
+                        g = [tmp1;edge_p(2);tmp2];%ローカル
+%                         g = [edge_p(1);edge_p(2);edge_p(3)+obj.margin];
+                    elseif edge_p(2) > l_points(2,anchor_ids)
+                        g = [tmp1;l_points(2,anchor_ids)+obj.margin_conect;edge_p(3)+obj.margin_conect];
+                    else
+                        g = [tmp1;l_points(2,anchor_ids)-obj.margin_conect;edge_p(3)+obj.margin_conect];
+                    end
 %                     
 
                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
