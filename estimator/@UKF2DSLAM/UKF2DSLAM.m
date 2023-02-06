@@ -80,12 +80,12 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             %---センサ情報の処理-------------------------------------------------------------%
             % SLAM algorithm
             sensor = obj.self.sensor.result;%scan data
-%             for i = 1:length(sensor.length)
-%                 if sensor.length(1,i) >= 2.5
-%                     sensor.length(1,i) = 0;
-% %                     data.intensities(i,1) = 0;
-%                 end
-%             end
+            for i = 1:length(sensor.length)
+                if sensor.length(1,i) >= 3.0
+                    sensor.length(1,i) = 0;
+%                     data.intensities(i,1) = 0;
+                end
+            end
             measured.ranges = sensor.length;
             measured.angles = sensor.angle + PreXh(3); %laser angles.姿勢角を基準とする．絶対角
             measured.angles(sensor.length==0) = 0;
