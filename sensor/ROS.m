@@ -64,7 +64,7 @@ classdef ROS < SENSOR_CLASS
 %             data.intensities = fillmissing(data.intensities,'previous');
 %             
             for i = 1:length(data.ranges)
-                if data.ranges(i,1) >= 2.0
+                if data.ranges(i,1) >= 3.0
                     data.ranges(i,1) = 0;
                     data.intensities(i,1) = 0;
                 end
