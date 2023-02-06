@@ -36,8 +36,8 @@ classdef APID_CONTROLLER <CONTROLLER_CLASS
             % param (optional) :
 %             plant.state.p = [obj.self.sensor.result.motive.position.z;obj.self.sensor.result.motive.position.x];
 %             plant.state.q = obj.self.sensor.result.motive.euler(1,2);
-            [p,q,v,w]=obj.strans(obj.self.plant.result.state);
-%             [p,q,v,w]=obj.strans(obj.self.estimator.result.state);       % （グローバル座標）推定状態 (state object)
+%             [p,q,v,w]=obj.strans(obj.self.plant.result.state);
+            [p,q,v,w]=obj.strans(obj.self.estimator.result.state);       % （グローバル座標）推定状態 (state object)
             [rp,rq,rv,rw]=obj.rtrans(obj.self.reference.result.state);   % （ボディ座標）目標状態 (state object)
             if ~isempty(param)
                 if isfield(param,'Kp'); obj.Kp=param.Kp; end
