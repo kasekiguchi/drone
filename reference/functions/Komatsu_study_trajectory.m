@@ -22,6 +22,7 @@ syms t real
 %% circle
 % x = cos(t/2);
 % y = sin(t/2);
+% z = 1.1;
 
 %%
 % x = cos(t)+sin(t)^2;
@@ -29,9 +30,9 @@ syms t real
 % z = 1;
 
 %% Liner
-x = t;
-y = 0;
-z = 1.0;
+% x = t;
+% y = 0;
+% z = 1.0;
 
 %% hovering
 % x = 0;
@@ -44,14 +45,34 @@ z = 1.0;
 % z = 1.0;
 
 %% landing
-% T = 10;  % Time
+% T = 13;  % Time
 % rz0 = 1; % start
 % rz = 0.05; % target
+% StartT = -3;
 % 
 % a = -2/T^3 * (rz-rz0);
 % b = 3/T^2 * (rz-rz0);
-% z = a*(t)^3+b*(t)^2+rz0;
-% z = 1.0;
+% z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
+% % z = 1.0;
+% x = 6/100 * t -3/10;
+% y = 0;
+
+%% syamen
+% zt = 0.6; % 減衰係数？
+% z = exp(-t/zt)+0.1;
+% % x = 6/100 * t -3/10;
+% x = -2477/10000 * exp(-t/0.4) + 2477/10000;
+% y = 0;
+
+%% landing liner
+% x = 6/100*t - 2.7;
+% y = 0;
+% z = -10/3*t + 10;
+
+x = 0;
+y = 0;
+% z = 0.5;
+z = 2 * (t-1)^2 + 0.05;
 
 %%
 ref=@(t)[x;y;z;0];  % xyz yaw

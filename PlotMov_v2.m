@@ -51,8 +51,8 @@ maxbestcost = max(data.bestcost)
 		grid on
 % 		ax.YLim = [-0.5 2];
 % 		ax.XLim = [-0.5 2];
-        ax.YLim = [-1.2 1.2];
-		ax.XLim = [-1.2 1.2];
+        ax.YLim = [-2 2];
+		ax.XLim = [-0 4];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);

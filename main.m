@@ -76,6 +76,14 @@ end
             end
             agent(i).do_reference(param(i).reference.list);
 
+%             if time.t > 2
+%                 agent.reference.result.state.p = [0;0;1];
+%                 agent.reference.result.state.xd(1:3) = [0;0;1];
+%                 agent.reference.result.state.xd(4:6) = [0;0;0];
+%             end
+
+%             agent(i).reference.result.state.q = [0;0;200];
+
             % controller 
             param(i).controller.hlc = {time.t, HLParam};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
@@ -87,6 +95,15 @@ end
 %             fInput = fInput + 1;
 %             agent.input = [0.269*9.81/4-0.01; 0.269*9.81/4+0.01; 0.269*9.81/4+0.01; 0.269*9.81/4-0.01];
         end  
+
+        if abs(agent.estimator.result.state.v(3)) < 0.035
+            flag = 1;
+        end
+
+        if flag == 1
+             agent.input = [0;0;0;0];
+        end
+
         
         state_monte = agent.estimator.result.state;
         ref_monte = agent.reference.result.state;
@@ -168,10 +185,10 @@ clc
 Fontsize = 15;  timeMax = te;
 logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
-logger.plot({1,"p1-p2-p3", "er"}, "fig_num", 6);
+logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
+% logger.plot({1,"p1-p2-p3", "er"}, "fig_num", 6);
 % agent(1).reference.timeVarying.show(logger)
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
@@ -181,4 +198,7 @@ agent(1).animation(logger,"target",1);
 % QHL = logger.data(1,"q","p");
 % WHL = logger.data(1,"w","p");
 % PHL = logger.data(1,"p","e");
-% VHL = logger.data(1,"v","e");
+VHL = logger.data(1,"v","e")';
+IHL = logger.data(1,"input",[])';
+save("Data/HL_input", "IHL");
+save("Data/HL_V", "VHL");
