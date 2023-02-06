@@ -40,6 +40,8 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
 
         function  result= do(obj,param)
             EstData = obj.self.estimator.result.state.get();
+%             q = quat2eul([obj.self.sensor.result.motive.orientation.w,obj.self.sensor.result.motive.orientation.x,obj.self.sensor.result.motive.orientation.y,obj.self.sensor.result.motive.orientation.z]);
+%             EstData = [obj.self.sensor.result.motive.position.z,obj.self.sensor.result.motive.position.z,q(1,2)];
             pe = EstData(1:2);
             the = EstData(3);
             R = [cos(the), -sin(the);sin(the), cos(the)];

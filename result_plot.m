@@ -6,8 +6,8 @@ for i = 1:logger.k
     resultplot.eq(i) = logger.Data.agent.estimator.result{1,i}.state.q;
     if fExp
         resultplot.pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
-        resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
-        resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.eq(1,2);
+        resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(2,1);
+        resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
     end
     resultplot.rX(i) = logger.Data.agent.reference.result{1,i}.state.p(1,1);
     resultplot.rY(i) = logger.Data.agent.reference.result{1,i}.state.p(2,1);

@@ -1,7 +1,7 @@
 classdef Motive_ros < SENSOR_CLASS
     %       self : agent
     properties
-        name      = "YOLO";
+        name      = "MOTIVE";
         motive_ros
         result
         state
@@ -31,7 +31,12 @@ classdef Motive_ros < SENSOR_CLASS
             obj.position= data.pose.position;
             obj.orientation  = data.pose.orientation;
             obj.euler = quat2eul([obj.orientation.w,obj.orientation.x,obj.orientation.y,obj.orientation.z]);
-            
+            obj.self.plant.state=STATE_CLASS(struct('state_list',["p","q"],'num_list',[2,1]));
+            obj.self.plant.state.p = [obj.position.z;obj.position.x];
+            obj.self.plant.state.q = [obj.euler(1,2)];
+            obj.self.plant.result.state=STATE_CLASS(struct('state_list',["p","q"],'num_list',[2,1]));
+            obj.self.plant.result.state.p = [obj.position.z;obj.position.x];
+            obj.self.plant.result.state.q = [obj.euler(1,2)];
         end
         
         function result=do(obj,param)
@@ -39,10 +44,17 @@ classdef Motive_ros < SENSOR_CLASS
             %   set obj.result.state : State_obj,  p : position, q : quaternion
             %   result : 
             % 【入力】motive ：NATNET_CONNECOTR object 
-            data = obj.motive_ros.getData;
-            data.orientation  = data.pose.orientation;
-            data.Dxy = [data.data(3);data.data(4)];
-            data.euler = quat2eul([obj.orientation.w,obj.orientation.x,obj.orientation.y,obj.orientation.z]);
+            sensor = obj.motive_ros.getData;
+            sensor.position= sensor.pose.position;
+            sensor.orientation  = sensor.pose.orientation;
+            sensor.euler = quat2eul([sensor.orientation.w,sensor.orientation.x,sensor.orientation.y,sensor.orientation.z]);
+            obj.self.plant.state=STATE_CLASS(struct('state_list',["p","q"],'num_list',[2,1]));
+            obj.self.plant.state.p = [sensor.position.z;sensor.position.x];
+            obj.self.plant.state.q = [sensor.euler(1,2)];
+            obj.self.plant.result.state=STATE_CLASS(struct('state_list',["p","q"],'num_list',[2,1]));
+            obj.self.plant.result.state.p = [sensor.position.z;sensor.position.x];
+            obj.self.plant.result.state.q = [sensor.euler(1,2)];
+            data.motive = sensor;
 
             F=fieldnames(data);
             for i = 1: length(F)

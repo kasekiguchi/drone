@@ -1,5 +1,5 @@
-function Sensor=Sensor_ROS(param)
-    Sensor.name=["lrf"];
+function Sensor=Sensor_Motive_ROS(param)
+    Sensor.name=["motive"];
     Sensor.type=["Motive_ros"];
     %50系統でROS経由での受け渡し
     % X, Y. Z
