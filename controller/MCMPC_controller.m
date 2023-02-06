@@ -42,6 +42,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
 
             obj.param.fRemove = 0;
+            obj.input.AllRemove = 0;
         end
         
         %-- main()的な
@@ -50,8 +51,13 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             idx = param{1};
             xr = param{2};
             rt = param{3};
+            phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
+% 
+%             if phase == 1
+%                 obj.param.QW = diag([1000; 1000; 100; 1; 1; 1]);
+%             end
  
             if idx == 1
                 ave1 = 0.269*9.81/4;      % average
@@ -82,9 +88,15 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 end
 
                 obj.input.sigma = obj.input.nextsigma;
-
-                % 追加
                 obj.param.particle_num = obj.param.nextparticle_num;
+
+                if obj.input.AllRemove == 1
+                    ave1 = 0.269*9.81/4;
+                    ave2 = ave1;
+                    ave3 = ave1;
+                    ave4 = ave1;
+                    obj.input.AllRemove = 0;
+                end
             end
 %             rng ('shuffle');
             
@@ -143,8 +155,11 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.input.normE = obj.Normalize();
 
             %-- 制約条件
-%             [removeF, removeX, survive] = obj.constraints();
-            removeF = 0; removeX = []; survive = obj.param.particle_num; obj.state.COG.g = 0; obj.state.COG.gc = 0;
+            removeF = 0; removeX = []; survive = obj.param.particle_num; 
+            if obj.self.estimator.result.state.p(3) < 0.3
+                [removeF, removeX, survive] = obj.constraints();
+            end
+            obj.state.COG.g = 0; obj.state.COG.gc = 0;
             
 
             if removeF ~= obj.param.particle_num
@@ -158,20 +173,36 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                     obj.input.Bestcost_pre = obj.input.Bestcost_now;
                     obj.input.Bestcost_now = Bestcost;
                 end
-                obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
+                
+                % 棄却数がサンプル数の半分以上なら入力増やす
+                if removeF > obj.param.particle_num /2
+                    obj.input.nextsigma = obj.input.Constsigma;
+                    obj.input.nextparticle_num = obj.param.Mparticle_num;
+                else
+                    obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
+                    % 追加
+                    obj.param.nextparticle_num = ceil(obj.param.particle_num * (obj.input.Bestcost_now/obj.input.Bestcost_pre));
+                end
 
-                % 追加
-                obj.param.nextparticle_num = ceil(obj.param.particle_num * (obj.input.Bestcost_now/obj.input.Bestcost_pre));
+                
+%                 if obj.param.nextparticle_num < obj.param.particle_num * 2
+%                     obj.param.nextparticle_num = obj.param.particle_num * 2;
+%                 end
+                
 
             elseif removeF == obj.param.particle_num    % 全棄却
                 obj.result.input = obj.self.input;
                 obj.input.nextsigma = obj.input.Constsigma;
                 Bestcost = obj.param.ConstEval;
                 BestcostID = 1;
+                obj.input.AllRemove = 1;
 
                 % 追加
                 obj.param.nextparticle_num = obj.param.Mparticle_num;
             end
+
+%             if Bestcost > obj.param.ConstEval; Bestcost = obj.param.ConstEval;  end
+           
             obj.result.removeF = removeF;
             obj.result.removeX = removeX;
             obj.result.survive = survive;
@@ -191,31 +222,54 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         end
         function show(obj)
             obj.result
+%             view([2]);
         end
 
         %-- 制約とその重心計算 --%
         function [removeF, removeX, survive] = constraints(obj)
             % 状態制約
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
-            removeFe = (obj.state.state_data(1, end, :) <= 0.5*sin(obj.param.t));
+%             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
+            
+            % 姿勢角
+            removeFe = (obj.state.state_data(5, end, :) >= 0.3975 | obj.state.state_data(5, end, :) <= 0.1975);
+            
+            % ドローンの四隅の座標
+            % drone = 四隅の座標 Particle_num * 2
+%             drone = obj.state.state_data(1,end,:);
+%             drone_1 = drone+obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));
+%             drone_2 = drone-obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));         
+%             drone_3 = drone_2;
+%             drone_4 = drone_1;
+%             d4edge = [drone_1, drone_2];
+
+            % 高度
+%             zx = 10;
+%             zz = 3;
+%             removeFe = (any(repmat(obj.state.state_data(3, end, :), 1, 2) <= zz/zx * d4edge(1,:, :)+0.1));
+            
+            
             removeX = find(removeFe);
             % 制約違反の入力サンプル(入力列)を棄却
             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
             % 全制約違反による分散リセットを確認するフラグ  
             removeF = size(removeX, 1); % particle_num -> 全棄却
 %             sur = (obj.state.state_data(1, end, :) > 0.5*sin(obj.param.t));  % 生き残りサンプル
-            survive = find(sur);
-            if removeF == obj.param.particle_num
-                obj.state.COG.g  = NaN;               % 制約内は無視
-                obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-            elseif removeF == 0
-                obj.state.COG.gc = NaN;               % 制約外は無視
-                obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-            else
-                obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-                obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-            end
+%             survive = find(sur);
+            survive = obj.param.particle_num;
+
+            % 重心計算
+%             if removeF == obj.param.particle_num
+%                 obj.state.COG.g  = NaN;               % 制約内は無視
+%                 obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
+%             elseif removeF == 0
+%                 obj.state.COG.gc = NaN;               % 制約外は無視
+%                 obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
+%             else
+%                 obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
+%                 obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
+%             end
         end
 
         function cog = COG(obj, I)

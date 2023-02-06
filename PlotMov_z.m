@@ -7,7 +7,7 @@ maxbestcost = max(data.bestcost)
     % 寒色：良い評価、暖色：悪い評価
 	Color_map(1:10,:) = jet(10);            % 評価値の上から10個をカラーマップの色付け.
 %     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v5'));
+	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_z_v1'));
 	open(writerObj);
     
     countMax = size(data.pathJ,2);
@@ -28,7 +28,7 @@ maxbestcost = max(data.bestcost)
 			plot(data.path{count}(1,:,j),data.path{count}(3,:,j),'Color',Color_map(ceil(pathJN{count}(1,j)*1000+0.0001),:), 'LineWidth',1);
 			hold on;
         end
-        plot(data.state(count, 2), data.state(count, 3), '.', 'MarkerSize', 20, 'Color', 'red');
+        plot(data.state(count, 2), data.state(count, 4), '.', 'MarkerSize', 20, 'Color', 'red');
 % 		x = DATA.X(count);
 %         y = DATA.Y(count);
 %         u = 0.7*cos(DATA.yaw(count));
@@ -45,18 +45,18 @@ maxbestcost = max(data.bestcost)
 %             Obs_posi = [obs{num,1}(1,1),obs{num,1}(1,2)];
 %             viscircles(Obs_posi,obj.r_obs,'LineWidth',0.1,'Color','black');hold on
 % 		end
-		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
+		plot(data.bestx(count,:),data.bestz(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
 		text(-0.35,1.35,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
 % 		ax.YLim = [-0.5 2];
 % 		ax.XLim = [-0.5 2];
-        ax.YLim = [-1.2 1.2];
-		ax.XLim = [-1.2 1.2];
+        ax.YLim = [-0.2 1.5];
+		ax.XLim = [-0 4];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
-		ylabel('$$Y$$[m]','Interpreter', 'Latex','FontSize',20);
+		ylabel('$$Z$$[m]','Interpreter', 'Latex','FontSize',20);
 	%     legend({'Reference'},'FontSize',18,'Location','northeast');
 		filename = ['Animation_2_2_',num2str(count),];
 		Xleng = ax.XLim(1,2) - ax.XLim(1,1);

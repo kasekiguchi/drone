@@ -33,6 +33,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fLanding_comp = 0;
     fCount_landing = 0;
     fc = 0;     % 着陸したときだけx，y座標を取得
+    flag = [0;0];
     totalT = 0;
     idx = 0;
     pre_pos = 0;
@@ -40,8 +41,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fG = zeros(3, 1);
 
     %-- 初期設定 controller.mと同期させる
-    Params.H = 10;   %Params.H
-    Params.dt = 0.1;  %Params.dt
+    Params.H = agent.controller.mcmpc.param.H;   %Params.H
+    Params.dt = agent.controller.mcmpc.param.dt;  %Params.dt
     Params.dT = dt;
     %-- 配列サイズの定義
     Params.state_size = 12;
@@ -78,7 +79,13 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
     data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
 
+    xr = zeros(16, Params.H);
+
     calT = 0;
+    phase = 0;
+
+    load("Data/HL_input");
+    load("Data/HL_V");
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
@@ -153,23 +160,111 @@ end
             % timevarygin -> generated reference
 %             [xr, fFirst, pre_pos] = Reference(Params, time.t, agent, FH, fFirst, pre_pos);
             % Goal Position
-            G = [1; 1; 1];
-            [xr, fG] = Reference(Params, time.t, agent, G, fG);
-%             [xr] = Reference(Params, time.t, agent);
-            param(i).controller.mcmpc = {idx, xr, time.t};    % 入力算出 / controller.name = hlc
+            
+%             [xr, fG] = Reference(Params, time.t, agent, G, fG);
+            %% 次の目標値の設定
+%             TimeArray = [0, 7, 9, 12, 15];
+%             if idx == 1
+%                 Gp = [0; 0; 0.15];
+%                 Gq = [0; 0; 0];
+%                 ToTime = TimeArray(2) - TimeArray(1);
+%                 Cp = initial.p;
+%                 StartT = 0;
+%             elseif idx == TimeArray(2)/dt
+%                 Cp = Gp;
+%                 Gp = [0.1; 0; 0.15];
+%                 Gq = [0; 0; 0];
+%                 ToTime = TimeArray(3) - TimeArray(2);
+%                 StartT = TimeArray(2);
+%             elseif idx == TimeArray(3)/dt
+%                 Cp = Gp;
+%                 Gp = [0.1; 0; 0.0];
+%                 Gq = [0; 0; 0];
+%                 ToTime = TimeArray(4) - TimeArray(3);
+%                 StartT = TimeArray(3);
+%                 phase = 4;
+%             elseif idx == TimeArray(4)/dt
+%                 Cp = Gp;
+%                 Gp = [0; 0; 1];
+%                 ToTime = TimeArray(5) - TimeArray(4);
+%                 
+%                 StartT = TimeArray(3);
+%             end
+
+            % 斜面の垂直方向の速度を目標に与える．
+            % -> そういう関数
+            % -> 初期速度必要
+            % ある程度速度が落ちたら入力切る．
+%             if idx == 1
+%                 Cp = initial.p;
+%                 Gp = [0; 0; 0];
+%                 Gq = [0; 0.2915; 0];
+%                 ToTime = 10aaad
+
+%             if idx == 1
+%                 Cp = agent.estimator.result.state.p;
+%                 Gp = initial.p;
+%                 Gq = [0; 0; 0];
+%                 ToTime = 2;
+%                 StartT = 0;
+%                 phase = 1;
+%             elseif idx == 5/dt
+%                 Cp = agent.estimator.result.state.p;
+%                 Gp = [0; 0; 0];
+%                 Gq = [0; 0.2915; 0];
+%                 ToTime = te;
+%                 StartT = time.t;
+%                 phase = 2;
+%             end
+%             Gq = [0;0;0];
+            
+            if idx >= 400
+                params.ur = IHL(:, end);
+                Rv = VHL(:, end);
+            else
+                params.ur = IHL(:, idx);
+                Rv = VHL(:, idx);
+            end
+
+            if abs(xr(9, 1)) < 0.05 && idx > 1
+                flag(1) = 1;
+            elseif agent.estimator.result.state.q(2) > 1.975 && ...
+                    agent.estimator.result.state.q(2) < 3.975 && ...
+                    agent.estimator.result.state.p(3) < 0.3
+                flag(2) = 1;
+            end
+
+            if flag(1) == 1 % 地面に近づいたら
+                Gp = [0;0;0.1];
+                phase = 1;
+            elseif flag(1) == 0 % それまで
+                Gp = [0;0;0];
+            end
+
+%             phase = 0;
+%             Gp = [0;0;0.1];
+            Gq = [0; 0; 0];
+%             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
+            xr = Reference(Params, time.t, agent, Gq, Gp, phase, Rv);
+            param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
             agent(i).do_controller(param(i).controller.list);
+
+            
+            if flag(2) == 1
+                agent.input = [0; 0; 0; 0];
+            end
         end
 
         %-- データ保存
         if idx == 1
             data.param = agent.controller.result.contParam;
         end
-        state_data =            agent.controller.result.path;
+%         state_data =            agent.controller.result.path;
         BestcostID =            agent.controller.result.BestcostID;
-        data.path{idx} =        state_data;
+        data.path{idx} =        agent.controller.result.path;
         data.pathJ{idx} =       agent.controller.result.Evaluationtra; % - 全サンプルの評価値
         data.pathJN{idx} =      agent.controller.result.Evaluationtra_norm;
         data.sigma(idx) =       agent.controller.result.sigma;
@@ -177,29 +272,29 @@ end
         data.removeF(idx) =     agent.controller.result.removeF;   % - 棄却されたサンプル数
         data.removeX{idx} =     agent.controller.result.removeX;
 
-        data.state(idx, 1) = idx * dt; % - 現在時刻
-        data.state(idx, 2) = agent.estimator.result.state.p(1);   % - 状態 x
-        data.state(idx, 3) = agent.estimator.result.state.p(2);   % - 状態 y
-        data.state(idx, 4) = agent.estimator.result.state.p(3);   % - 状態 z
-        data.state(idx, 5) = agent.input(1);  % - 入力 u1
-        data.state(idx, 6) = agent.input(2);  % - 入力 u2
-        data.state(idx, 7) = agent.input(3);  % - 入力 u3
-        data.state(idx, 8) = agent.input(4);  % - 入力 u4
-%         data.state(idx, 9)  = xr(1, 1);    % - 目標状態 xr
-%         data.state(idx, 10) = xr(2, 1);   % - 目標状態 yr
-%         data.state(idx, 11) = xr(3, 1);   % - 目標状態 zr
+        data.state(idx, 1) =    idx * dt; % - 現在時刻
+        data.state(idx, 2) =    agent.estimator.result.state.p(1);   % - 状態 x
+        data.state(idx, 3) =    agent.estimator.result.state.p(2);   % - 状態 y
+        data.state(idx, 4) =    agent.estimator.result.state.p(3);   % - 状態 z
+        data.state(idx, 5) =    agent.input(1);  % - 入力 u1
+        data.state(idx, 6) =    agent.input(2);  % - 入力 u2
+        data.state(idx, 7) =    agent.input(3);  % - 入力 u3
+        data.state(idx, 8) =    agent.input(4);  % - 入力 u4
+%         data.state(idx, 9)  =   xr(1, 1);    % - 目標状態 xr
+%         data.state(idx, 10) =   xr(2, 1);   % - 目標状態 yr
+%         data.state(idx, 11) =   xr(3, 1);   % - 目標状態 zr
 
         data.xr{idx} = xr;
         data.variable_particle_num(idx) = agent.controller.result.variable_N;
         data.survive{idx} = agent.controller.result.survive;
-        COG = agent.controller.result.COG;
-        data.cog.g{idx} = COG.g;
-        data.cog.gc{idx} = COG.gc;
+%         COG = agent.controller.result.COG;
+%         data.cog.g{idx} = COG.g;
+%         data.cog.gc{idx} = COG.gc;
 
         if data.removeF(idx) ~= data.param.particle_num
-            data.bestx(idx, :) = state_data(1, :, BestcostID); % - もっともよい評価の軌道x成分
-            data.besty(idx, :) = state_data(2, :, BestcostID); % - もっともよい評価の軌道y成分
-            data.bestz(idx, :) = state_data(3, :, BestcostID); % - もっともよい評価の軌道z成分
+            data.bestx(idx, :) = data.path{idx}(1, :, BestcostID); % - もっともよい評価の軌道x成分
+            data.besty(idx, :) = data.path{idx}(2, :, BestcostID); % - もっともよい評価の軌道y成分
+            data.bestz(idx, :) = data.path{idx}(3, :, BestcostID); % - もっともよい評価の軌道z成分
         else
             if idx == 1
                 data.bestx(idx, :) = data.bestx(idx, :); % - 制約外は前の評価値を引き継ぐ
@@ -256,76 +351,21 @@ end
         end
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
-        fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
+        fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                 state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
-                xr(1,1), xr(2,1), xr(3,1));
-        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx))
-        fprintf("\t fGp:%d %d %d", fG(1), fG(2), fG(3))
+                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi);
+        fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+                xr(1,1), xr(2,1), xr(3,1),...
+                xr(7,1), xr(8,1), xr(9,1),...
+                xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)
+        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d \t remove: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx), data.removeF(idx))
         if data.removeF(idx) ~= 0
             fprintf('\t State Constraint Violation!')
 %             data.removeX{idx}
 %             data.sur{idx}
         end
         fprintf("\n");
-
-        %% 逐次プロット
-%         figure(10);
-%         clf
-%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-%         TvC = 0:Params.dt:te;
-%         %% circle
-%         plot(Tv, xr(1, :), '.', 'LineWidth', 2);hold on;
-%         plot(Tv, xr(2, :), '.', 'LineWidth', 2);
-%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-%         hold off;
-%         xlabel("Time [s]"); ylabel("Reference [m]");
-%         legend("xr.x", "xr.y", "est.x", "est.y", "Location", "southeast");
-%         xlim([0 te]); ylim([-inf inf+0.1]); 
-%         figure(20)
-%         clf
-%         if data.removeF(idx) == data.variable_particle_num(idx)
-%             % 制約外の集合
-%             xDc = reshape(data.path{idx}(1, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             yDc = reshape(data.path{idx}(2, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             plot(xDc, yDc, '.', 'MarkerSize', 5);
-%             % 制約外の重心
-%             plot(data.cog.gc{idx}(1), data.cog.gc{idx}(2), '+', 'MarkerSize', 5);
-%             % 現在位置
-%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
-%             xlim([-inf inf]); ylim([-inf inf]);
-%             hold off;
-%         elseif data.removeF(idx) == 0
-%             % 制約内の集合
-%             xD = reshape(data.path{idx}(1, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             yD = reshape(data.path{idx}(2, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             plot(xD, yD, '.', 'MarkerSize', 5); hold on;
-%             % 制約内の重心
-%             plot(data.cog.g{idx}(1), data.cog.g{idx}(2), '+', 'MarkerSize', 5);
-%             % 現在位置
-%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
-%             xlim([-inf inf]); ylim([-inf inf]);
-%             hold off;
-%         else
-%             % 制約内の集合
-%             xD = reshape(data.path{idx}(1, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             yD = reshape(data.path{idx}(2, end, data.survive{idx}), [size(data.survive{idx},1), 1]);
-%             plot(xD, yD, '.', 'MarkerSize', 5); hold on;
-%             % 制約内の重心
-%             plot(data.cog.g{idx}(1), data.cog.g{idx}(2), '+', 'MarkerSize', 5);
-%             % 制約外の集合
-%             xDc = reshape(data.path{idx}(1, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             yDc = reshape(data.path{idx}(2, end, data.removeX{idx}), [size(data.removeX{idx},1), 1]);
-%             plot(xDc, yDc, '.', 'MarkerSize', 5);
-%             % 制約外の重心
-%             plot(data.cog.gc{idx}(1), data.cog.gc{idx}(2), '+', 'MarkerSize', 5);
-%             % 現在位置
-%             plot(agent.estimator.result.state.p(1), agent.estimator.result.state.p(2), '*', 'MarkerSize', 5, 'Color', 'red');
-%             xlim([-inf inf]); ylim([-inf inf]);
-%             hold off;
-%         end
         %%
         drawnow 
     end
@@ -349,7 +389,7 @@ Fontsize = 15;  timeMax = te;
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
-set(0,'defaultLineMarkerSize',10);
+set(0,'defaultLineMarkerSize',15);
 % set(0,'defaultLineMarkerFaceColor',[1 1 1]);
 % set(0,'defaultFigurecolor',[1 1 1]);
 % set(groot,'defaultAxesTickLabelInterpreter', 'latex');
@@ -363,7 +403,6 @@ set(0,'defaultLineMarkerSize',10);
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
-%% graph
 size_best = size(data.bestcost, 2);
 Edata = logger.data(1, "p", "e")';
 % Rdata = logger.data(1, "p", "r")';
@@ -376,15 +415,25 @@ Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 Diff = Edata - Rdata(1:3, :);
 logt = logger.data('t',[],[]);
-% xmax = te;
-xmax = 6.75;
+xmax = 1.25;
 close all
 
+% x-y
+% figure(5); plot(Edata(1,:), Edata(2,:)); xlabel("X [m]"); ylabel("Y [m]");
+
+% x-z
+Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
+figure(6); plot(Edata(1,1:xmax/dt), Edata(3,1:xmax/dt)); hold on;
+plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
+plot(initial.p(1), initial.p(3), 'h');
+plot(Et, Er)
+plot(Et, Ez); hold off;
+xlabel("X [m]"); ylabel("Z [m]"); 
 % position
 figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-grid on; title("Time change of Position"); xlim([0 xmax]); ylim([-inf inf+0.5]);
-% atiitude
+grid on; title("Time change of Position"); xlim([0 xmax]); ylim([-inf inf]);
+% atiitude 0.2915 rad = 16.69 deg
 figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
 grid on; title("Time change of Atiitude"); xlim([0 xmax]); ylim([-inf inf]);
@@ -396,68 +445,41 @@ grid on; title("Time change of Velocity"); xlim([0 xmax]); ylim([-inf inf]);
 figure(4); plot(logt, Idata); 
 xlabel("Time [s]"); ylabel("Input");
 grid on; title("Time change of Input"); xlim([0 xmax]); ylim([-inf inf]);
+
+% figure(20)
+% IHL = load("Data/HL_input");
+% plot(logt(1:end), IHL(1, :))
 %% Difference of Pos
-figure(7);
-plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+% figure(7);
+% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
-%% Attitude
-plot(logt, Qdata, 'LineWidth', 1.5); hold on;
-plot(logt, Rdata(4:6, :), '--'); hold off;
-xlim([0 te]); ylim([-inf inf])
-
-%% 2軸グラフ
-% figure(9);
-% yyaxis left
-% logger.plot({1, "input", ""});
-% set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input");
-% yyaxis right
-% plot(logger.data('t', [], [])', data.bestcost(1:end-1), 'LineWidth', 2, 'LineStyle','--');
-% set(gca,'FontSize',15);  grid on; title(""); ylabel("Evaluation [m]"); xlabel("time [s]"); xlim([0 10]);
-% legend("roter1", "roter2", "roter3", "roter4", "$$J$$", 'Interpreter', 'latex', 'Location', 'northeast')
-
-%%
-% plot(logt, data.removeX)
-%% Position
-% T = 0.025:0.025:time.t-0.025;
-% Const = 0.5 * sin(T);
-% close(figure(8))
-% figure(8)
-% plot(logger.data('t',[],[]), logger.data(1,'p','e'), 'LineWidth', 2); hold on; plot(logger.data('t',[],[]), Rdata(1:3, :), '--', 'LineWidth', 2); hold off;
-% xlabel("Time [s]"); ylabel("Position [m]"); %legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-
-% yyaxis right
-% plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
-% xlabel("Time [s]"); ylabel("Number of Samples"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference","N");
-
-% xlim([0 te]); ylim([-inf inf])
-% set(gca,'FontSize',Fontsize);  grid on; title(""); 
-
-%% 
-% logt = logger.data('t',[],[]);
+%% Remove sample and Sigma
+logt = logger.data('t',[],[]);
 figure(10)
-plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("remove sample")
+plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("remove sample");
 yyaxis right
-plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("sigma");
+plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("sigma")
 xlim([0 te])
 set(gca,'FontSize',Fontsize);  grid on; title("");
 %% calculation time
-figure(11)
-plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
+% figure(11)
+% plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
 % plot(logt, totalT/400*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
 
-xlim([0 te])
-set(gca,'FontSize',Fontsize);  grid on; title("");
-xlabel("Time [s]");
-ylabel("Calculation time [s]");
+% xlim([0 te])
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% xlabel("Time [s]");
+% ylabel("Calculation time [s]");
 
 %% particle_num
-figure(12)
-plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
-xlim([0 te])
-xlabel("Time [s]"); ylabel("Number of Sample");
-set(gca,'FontSize',Fontsize);  grid on; title("");
+% figure(12)
+% plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
+% xlim([0 te])
+% xlabel("Time [s]"); ylabel("Number of Sample");
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% ylim([0 data.param.Mparticle_num])
 %%
 % figure(13)
 % SF = data.param.particle_num - data.removeF(1:size(logger.data('t',[],[]),1));
@@ -469,16 +491,23 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % for m = 1:size(pathJ, 2)
 %     pathJN{m} = normalize(pathJ{m},'range');
 % end
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
+% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
+% Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
+% PlotMov_z
+
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
 % mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
 % Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
-% % PlotMov_v2       % 2次元プロット
+% PlotMov_v2       % 2次元プロット
 % toc
+
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20221219_circle_calc.mat', '-v7.3')
+% save('Data\20230206_landing_q_osii.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
