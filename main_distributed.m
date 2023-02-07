@@ -148,6 +148,6 @@ clc
 %logger.plot({1,"p1-p2-p3","es"},'fig_num',2);
 %logger.plot({1,"p","e"})
 %plot(logger.data("t","",""),sum(logger.data(1,"input",""),2))
-logger.plot({1, "p", "er"},{1, "q", "e"},{1, "input", "e"}, 'fig_num', 3)
+logger.plot({1, "p1:2", "sr"}, 'fig_num', 2)
 %%
 %logger.save();

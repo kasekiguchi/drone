@@ -1,179 +1,220 @@
 classdef FTC < CONTROLLER_CLASS
-    % ƒNƒAƒbƒhƒRƒvƒ^[—pŠK‘wŒ^üŒ`‰»‚ðŽg‚Á‚½“ü—ÍŽZo
-    properties
-        self
-        result
-        param
-        Q
-        parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
-        Vf
-        Vs
-        VfFT
-        gain1
-        gain2
-    end
-    
-    methods
-        function obj = FTC(self,param)
-            obj.self = self;
-            obj.param = param;
-            obj.param.P = self.parameter.get(obj.parameter_name);            
-            obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
-            obj.Vf = param.Vf; % ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹
-            obj.Vs = param.Vs; % ŠK‘w‚Q‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹ 
-            obj.VfFT = param.VfFT;% ŠK‘w‚P‚Ì“ü—Í‚ð¶¬‚·‚éŠÖ”ƒnƒ“ƒhƒ‹FT—p
-            obj.gain1 = param.gain1;%tanh1
-            obj.gain2 = param.gain2;%tanh2
-        end
-        
-        function result = do(obj,param,~)
-            % param (optional) : \‘¢‘ÌF•¨—ƒpƒ‰ƒ[ƒ^PCƒQƒCƒ“F1-F4 
-            t = param{1};
-            model = obj.self.estimator.result;
-            ref = obj.self.reference.result; 
-            x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]‚É•À‚×‘Ö‚¦
-            xd = ref.state.get();
-             
-            Param= obj.param;
-            P = Param.P;
-            F1 = Param.F1;
-            F2 = Param.F2;
-            F3 = Param.F3;
-            F4 = Param.F4;
-%             kx=[3.16,6.79,40.54,12.27];%ƒQƒCƒ“
-            kx=F2;
-%             ky=[3.16,6.79,40.54,12.27];%Œã‚Åparam‚ÉŠi”[
-            ky=F3;
-%             kz=[2.23,2.28];
-            %kz=F1;
-%             kpsi=[1.41,1.35];
-            kpsi=F4;
-%             ax=[0.692,0.75,0.818,0.9];%alpha
-%             ay=[0.692,0.75,0.818,0.9];
-%             az=[0.692,0.75];
-%             apsi=[0.692,0.75];
-            ax = Param.ax;
-            ay = Param.ay;
-            az = Param.az;
-            apsi = Param.apsi;
-            
-            xd=[xd;zeros(20-size(xd,1),1)];% ‘«‚è‚È‚¢•ª‚Í‚O‚Å–„‚ß‚éD
-
-            Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-            x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]‚É•À‚×‘Ö‚¦
-            xd(1:3)=Rb0'*xd(1:3);
-            xd(4) = 0;
-            xd(5:7)=Rb0'*xd(5:7);
-            xd(9:11)=Rb0'*xd(9:11);
-            xd(13:15)=Rb0'*xd(13:15);
-            xd(17:19)=Rb0'*xd(17:19);
-
-            
-%% calc Z
-            z1 = Z1(x,xd',P);
-          %z•ûŒü:FB
-%             vf = obj.Vf(z1,F1);%%%%%%%%%%%%%%%%%%%
-          %z•ûŒü:FT
-%             vf = obj.VfFT(F1,z1);%%%%%%%%%%%%%%%%%%xy
-            vf = obj.VfFT(z1);%%%%%%%%%%%%%%%%%%xyz
-            %x,y,psi‚Ìó‘Ô•Ï”‚Ì’l
-            z2=Z2(x,xd',vf,P);%x•ûŒü
-            z3=Z3(x,xd',vf,P);%y•ûŒü
-            z4=Z4(x,xd',vf,P);%yaw
-            %vs = obj.Vs(z2,z3,z4,F2,F3,F4);%%%%%%%%%%%%%%%%%%%
-            
-%% x,y,psi‚Ì“ü—Í
-n =1;% 1:—LŒÀ®’è 4:tanh1 5:tanh2
-switch n
-        case 1
-%—LŒÀ®’è
-% 
-            ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4));%i17jŽ®
-            uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4));%(19)Ž®       
-%             ux=1*ux;
-%             uy=1*uy;
-%             
-%             ux=-1*F2*z2;
-%             uy=-1*F3*z3;
-            %•¹—p
-%             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1));%i17jŽ®
-%             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1));%(19)Ž®  
-            %ŠO—ƒ_ƒ
-%             ux=ux+8*sin(2*pi*t/0.2);%30ˆÈ‰º‚È‚ç—LŒÀ®’è‚ª‚¢‚¢
-%             uy=uy+10*cos(2*pi*t/1);
-%             ux=ux+2;
-%             if t>=2 && t<=2.1@
-%                     ux=ux+1/0.025;
-%             end
-        case 2
-%‹ßŽ—1(sgn‚ð‹ßŽ—)
-          %           a=6;%a>2,alpha=0.9,a=6‚ÌŽž‚¢‚¢Š´‚¶‚É‚È‚é.‚UŒŽ‚Ì•ñ‰ï
-%             ux=-kx(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(kx(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(kx(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(kx(4)*tanh(a*z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1);%-F2*z2;%i17jŽ®
-%             uy=-ky(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(ky(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(ky(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(ky(4)*tanh(a*z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1);%-F3*z3;%(19)Ž®          
-        case 3
-%‹ßŽ—2(|x|^alpha‚ð‹ßŽ—{•¹—p)
-%           a=1.2;%a>1(1‚¾‚Æ0‚Ì‹ß‚­‚Åfb‚Æ“¯‚¶‚É‚È‚é)
-%             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2*z2;%F2(1)*z2(1);%i17jŽ®
-%             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3*z3;%F3(1)*z3(1);%(19)Ž®          
-%             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2(1)*z2(1);%i17jŽ®
-%             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3(1)*z3(1);%(19)Ž®   
-        case 4
-%‹ßŽ—3 tanh1
-          %‹ßŽ—•’ÊŒë·0.1x
-%             g = [0.105, 0.08, 0.055, 0.028];
-%             a = [20, 18, 16, 15];
-%             f= F2.*g;%F3.*g‚à“¯‚¶’l
-          %‹ßŽ—Fb‚Æ‚Ì“ü—ÍŒë·‚ªˆê”Ô‘å‚«‚­‚È‚é‚Æ‚±‚ë[0.3, 0.3160, 0.3320, 0.3490]‚Å‚Ì‹ßŽ—x
-    %         g = [0.135, 0.105, 0.075, 0.035];
-    %         a = [9.5, 9, 9.5, 9.5];
-          %Å¬‰»‚Å‹‚ß‚é
-            f=obj.gain1(:,1);
-            a=obj.gain1(:,2);
-
-            ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%i17jŽ®
-            uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%i17jŽ®
-            %-F3*z3;%(19)Ž®
-        case 5
-% ‹ßŽ—4tanh2
-            f1=obj.gain2(:,1);
-            a1=obj.gain2(:,2);
-            f2=obj.gain2(:,3);
-            a2=obj.gain2(:,4);
-            ux= -f1(1)*tanh(a1(1)*z2(1))-f2(1)*tanh(a2(1)*z2(1)) -f1(2)*tanh(a1(2)*z2(2))-f2(2)*tanh(a2(2)*z2(2)) -f1(3)*tanh(a1(3)*z2(3))-f2(3)*tanh(a2(3)*z2(3)) -f1(4)*tanh(a1(4)*z2(4))-f2(4)*tanh(a2(4)*z2(4))-F2*z2;%-F2*z2;%i17jŽ®
-            uy= -f1(1)*tanh(a1(1)*z3(1))-f2(1)*tanh(a2(1)*z3(1)) -f1(2)*tanh(a1(2)*z3(2))-f2(2)*tanh(a2(2)*z3(2)) -f1(3)*tanh(a1(3)*z3(3))-f2(3)*tanh(a2(3)*z3(3)) -f1(4)*tanh(a1(4)*z3(4))-f2(4)*tanh(a2(4)*z3(4))-F3*z3;%-F3*z3;%i17jŽ®
-end
-%upsi:HL or FT
-            upsi=-F4*z4;%HL
-%             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%¡‰ñ‚Í‚±‚ê‚Å()%FT
-%
-%% ŠO—(‰Á‘¬“x‚Å—^‚¦‚é)
-            dst = 0.8;
-%             dst_y = 0;
-%             dst_z=0;
-%             dst=0.5*sin(2*pi*t/0.5);%
-%             dst=dst+10*cos(2*pi*t/1);
-%             dst=2;
-%             if t>=5 && t<=5.025
-%                     dst=1/0.025;
-%             end
-%%            
-            vs =[ux,uy,upsi];
-            tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4);dst];
-%             ob j.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
-            obj.self.input = obj.result.input;
-            %ƒTƒuƒVƒXƒeƒ€‚Ì“ü—Í
-            obj.result.uHL = [vf(1);ux;uy;upsi];
-            %ƒTƒuƒVƒXƒeƒ€‚Ìó‘Ô
-            obj.result.z1 = z1;
-            obj.result.z2 = z2;
-            obj.result.z3 = z3;
-            obj.result.z4 = z4;
-            result = obj.result;
-        end
-        function show(obj)
-            obj.result
-        end
-    end
+% ã‚¯ã‚¢ãƒƒãƒ‰ã‚³ãƒ—ã‚¿ãƒ¼ç”¨éšŽå±¤åž‹ç·šå½¢åŒ–ã‚’ä½¿ã£ãŸå…¥åŠ›ç®—å‡º
+properties
+    self
+    result
+    param
+    Q
+    parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
+    Vf
+    Vs
+    VfFT
+    gain1
+    gain2
+    fzFT
+    fzapr
+    n
 end
 
+methods
+
+    function obj = FTC(self, param)
+        obj.self = self;
+        obj.param = param;
+        obj.param.P = self.parameter.get(obj.parameter_name);
+        obj.Q = STATE_CLASS(struct('state_list', ["q"], 'num_list', [4]));
+        obj.Vf = param.Vf; % éšŽå±¤ï¼‘ã®å…¥åŠ›ã‚’ç”Ÿæˆã™ã‚‹é–¢æ•°ãƒãƒ³ãƒ‰ãƒ«
+        obj.Vs = param.Vs; % éšŽå±¤ï¼’ã®å…¥åŠ›ã‚’ç”Ÿæˆã™ã‚‹é–¢æ•°ãƒãƒ³ãƒ‰ãƒ«
+        %             obj.VfFT = param.VfFT;% éšŽå±¤ï¼‘ã®å…¥åŠ›ã‚’ç”Ÿæˆã™ã‚‹é–¢æ•°ãƒãƒ³ãƒ‰ãƒ«FTç”¨
+        obj.gain1 = param.gain1; %tanh1
+        obj.gain2 = param.gain2; %tanh2
+        obj.fzapr = param.fzapr;
+
+        if param.fxyapr == 1
+            obj.n = 4;
+        else
+            obj.n = 1;
+        end
+
+    end
+
+    function result = do(obj, param, ~)
+        % param (optional) : æ§‹é€ ä½“ï¼šç‰©ç†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿Pï¼Œã‚²ã‚¤ãƒ³F1-F4
+        t = param{1};
+        model = obj.self.estimator.result;
+        ref = obj.self.reference.result;
+        x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]ã«ä¸¦ã¹æ›¿ãˆ
+        xd = ref.state.get();
+
+        Param = obj.param;
+        P = Param.P;
+        F1 = Param.F1;
+        F2 = Param.F2;
+        F3 = Param.F3;
+        F4 = Param.F4;
+        %             kx=[3.16,6.79,40.54,12.27];%ã‚²ã‚¤ãƒ³
+        kx = F2;
+        %             ky=[3.16,6.79,40.54,12.27];%å¾Œã§paramã«æ ¼ç´
+        ky = F3;
+        %             kz=[2.23,2.28];
+        %kz=F1;
+        %             kpsi=[1.41,1.35];
+        kpsi = F4;
+        %             ax=[0.692,0.75,0.818,0.9];%alpha
+        %             ay=[0.692,0.75,0.818,0.9];
+        %             az=[0.692,0.75];
+        %             apsi=[0.692,0.75];
+        ax = Param.ax;
+        ay = Param.ay;
+        az = Param.az;
+        apsi = Param.apsi;
+
+        xd = [xd; zeros(20 - size(xd, 1), 1)]; % è¶³ã‚Šãªã„åˆ†ã¯ï¼ã§åŸ‹ã‚ã‚‹ï¼Ž
+
+        Rb0 = RodriguesQuaternion(Eul2Quat([0; 0; xd(4)]));
+        x = [R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.p; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]ã«ä¸¦ã¹æ›¿ãˆ
+        xd(1:3) = Rb0' * xd(1:3);
+        xd(4) = 0;
+        xd(5:7) = Rb0' * xd(5:7);
+        xd(9:11) = Rb0' * xd(9:11);
+        xd(13:15) = Rb0' * xd(13:15);
+        xd(17:19) = Rb0' * xd(17:19);
+
+        %% calc Z
+        z1 = Z1(x, xd', P);
+
+        if obj.fzapr ~= 1
+            %zæ–¹å‘:FB
+            vf = obj.Vf(z1, F1); % % % % % % % % % % % % % % % % % % %xy
+        else
+            %zæ–¹å‘:FT
+            vf = obj.Vf(z1); % % % % % % % % % % % % % % % % % %xyz
+        end
+
+        %x,y,psiã®çŠ¶æ…‹å¤‰æ•°ã®å€¤
+        z2 = Z2(x, xd', vf, P); %xæ–¹å‘
+        z3 = Z3(x, xd', vf, P); %yæ–¹å‘
+        z4 = Z4(x, xd', vf, P); %yaw
+        %vs = obj.Vs(z2,z3,z4,F2,F3,F4);%%%%%%%%%%%%%%%%%%%
+
+        %% x,y,psiã®å…¥åŠ›
+        % 1:æœ‰é™æ•´å®š 4:tanh1 5:tanh2 ï¼ˆ2,3ã¯ä½¿ã‚ãªã„ï¼‰
+        % gain_xy=2;%1m/s^2ãªã‚‰2ãã‚‰ã„ãŒã„ã„
+        switch obj.n
+            case 1
+                %æœ‰é™æ•´å®š
+                %
+                % f=obj.gain1(:,1);
+                %             a=obj.gain1(:,2);
+                gain_xy = 1;
+                ux = -gain_xy * kx(1) * sign(z2(1)) * abs(z2(1))^ax(1) -kx(2) * sign(z2(2)) * abs(z2(2))^ax(2) -kx(3) * sign(z2(3)) * abs(z2(3))^ax(3) -kx(4) * sign(z2(4)) * abs(z2(4))^ax(4); %ï¼ˆ17ï¼‰å¼
+                uy = -gain_xy * ky(1) * sign(z3(1)) * abs(z3(1))^ay(1) -ky(2) * sign(z3(2)) * abs(z3(2))^ay(2) -ky(3) * sign(z3(3)) * abs(z3(3))^ay(3) -ky(4) * sign(z3(4)) * abs(z3(4))^ay(4); %(19)å¼
+                %             ux=-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2)) -f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2(3:4)*z2(3:4);%ï¼ˆ17ï¼‰å¼
+                %             uy=-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2)) -f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3(3:4)*z3(3:4);%(19)å¼
+
+                %             ux=1*ux;
+                %             uy=1*uy;
+                %
+                %             ux=-1*F2*z2;
+                %             uy=-1*F3*z3;
+                %ä½µç”¨
+                %             ux=1*(-kx(1)*sign(z2(1))*abs(z2(1))^ax(1)-(kx(2)*sign(z2(2))*abs(z2(2))^ax(2))-(kx(3)*sign(z2(3))*abs(z2(3))^ax(3))-(kx(4)*sign(z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1));%ï¼ˆ17ï¼‰å¼
+                %             uy=1*(-ky(1)*sign(z3(1))*abs(z3(1))^ay(1)-(ky(2)*sign(z3(2))*abs(z3(2))^ay(2))-(ky(3)*sign(z3(3))*abs(z3(3))^ay(3))-(ky(4)*sign(z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1));%(19)å¼
+                %å¤–ä¹±ãƒ€ãƒ¡
+                %             ux=ux+8*sin(2*pi*t/0.2);%30ä»¥ä¸‹ãªã‚‰æœ‰é™æ•´å®šãŒã„ã„
+                %             uy=uy+10*cos(2*pi*t/1);
+                %             ux=ux+2;
+                %             if t>=2 && t<=2.1ã€€
+                %                     ux=ux+1/0.025;
+                %             end
+            case 2
+                %è¿‘ä¼¼1(sgnã‚’è¿‘ä¼¼)
+                %           a=6;%a>2,alpha=0.9,a=6ã®æ™‚ã„ã„æ„Ÿã˜ã«ãªã‚‹.ï¼–æœˆã®å ±å‘Šä¼š
+                %             ux=-kx(1)*tanh(a*z2(1))*abs(z2(1))^ax(1)-(kx(2)*tanh(a*z2(2))*abs(z2(2))^ax(2))-(kx(3)*tanh(a*z2(3))*abs(z2(3))^ax(3))-(kx(4)*tanh(a*z2(4))*abs(z2(4))^ax(4))-F2(1)*z2(1);%-F2*z2;%ï¼ˆ17ï¼‰å¼
+                %             uy=-ky(1)*tanh(a*z3(1))*abs(z3(1))^ay(1)-(ky(2)*tanh(a*z3(2))*abs(z3(2))^ay(2))-(ky(3)*tanh(a*z3(3))*abs(z3(3))^ay(3))-(ky(4)*tanh(a*z3(4))*abs(z3(4))^ay(4))-F3(1)*z3(1);%-F3*z3;%(19)å¼
+            case 3
+                %è¿‘ä¼¼2(|x|^alphaã‚’è¿‘ä¼¼ï¼‹ä½µç”¨)
+                %           a=1.2;%a>1(1ã ã¨0ã®è¿‘ãã§fbã¨åŒã˜ã«ãªã‚‹)
+                %             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2*z2;%F2(1)*z2(1);%ï¼ˆ17ï¼‰å¼
+                %             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3*z3;%F3(1)*z3(1);%(19)å¼
+                %             ux=-kx(1)*tanh(a*z2(1))-kx(2)*tanh(a*z2(2))-kx(3)*tanh(a*z2(3))-kx(4)*tanh(a*z2(4))-F2(1)*z2(1);%ï¼ˆ17ï¼‰å¼
+                %             uy=-ky(1)*tanh(a*z3(1))-ky(2)*tanh(a*z3(2))-ky(3)*tanh(a*z3(3))-ky(4)*tanh(a*z3(4))-F3(1)*z3(1);%(19)å¼
+            case 4
+                %è¿‘ä¼¼3 tanh1
+                %è¿‘ä¼¼æ™®é€šèª¤å·®0.1x
+                %             g = [0.105, 0.08, 0.055, 0.028];
+                %             a = [20, 18, 16, 15];
+                %             f= F2.*g;%F3.*gã‚‚åŒã˜å€¤
+                %è¿‘ä¼¼Fbã¨ã®å…¥åŠ›èª¤å·®ãŒä¸€ç•ªå¤§ãããªã‚‹ã¨ã“ã‚[0.3, 0.3160, 0.3320, 0.3490]ã§ã®è¿‘ä¼¼x
+                %         g = [0.135, 0.105, 0.075, 0.035];
+                %         a = [9.5, 9, 9.5, 9.5];
+                %æœ€å°åŒ–ã§æ±‚ã‚ã‚‹
+                f = obj.gain1(:, 1);
+                a = obj.gain1(:, 2);
+                kapr = obj.gain1(:, 3)';
+                gain_xy = 1;
+                %             ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%ï¼ˆ17ï¼‰å¼
+                %             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%ï¼ˆ17ï¼‰å¼
+                ux = -gain_xy * f(1) * tanh(a(1) * z2(1)) - f(2) * tanh(a(2) * z2(2)) - f(3) * tanh(a(3) * z2(3)) - f(4) * tanh(a(4) * z2(4)) - kapr * z2; %-F2*z2; %ï¼ˆ17ï¼‰å¼
+                uy = -gain_xy * f(1) * tanh(a(1) * z3(1)) - f(2) * tanh(a(2) * z3(2)) - f(3) * tanh(a(3) * z3(3)) - f(4) * tanh(a(4) * z3(4)) - kapr * z3; %-F2*z2; %ï¼ˆ17ï¼‰å¼
+                %              ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-F2*z2;%-F2*z2;%ï¼ˆ17ï¼‰å¼
+                %             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-F3*z3;%-F2*z2;%ï¼ˆ17ï¼‰å¼
+
+                %-F3*z3;%(19)å¼
+            case 5
+                % è¿‘ä¼¼4tanh2
+                f1 = obj.gain2(:, 1);
+                a1 = obj.gain2(:, 2);
+                f2 = obj.gain2(:, 3);
+                a2 = obj.gain2(:, 4);
+                ux = -f1(1) * tanh(a1(1) * z2(1)) - f2(1) * tanh(a2(1) * z2(1)) -f1(2) * tanh(a1(2) * z2(2)) - f2(2) * tanh(a2(2) * z2(2)) -f1(3) * tanh(a1(3) * z2(3)) - f2(3) * tanh(a2(3) * z2(3)) -f1(4) * tanh(a1(4) * z2(4)) - f2(4) * tanh(a2(4) * z2(4)) - F2 * z2; %-F2*z2; %ï¼ˆ17ï¼‰å¼
+                uy = -f1(1) * tanh(a1(1) * z3(1)) - f2(1) * tanh(a2(1) * z3(1)) -f1(2) * tanh(a1(2) * z3(2)) - f2(2) * tanh(a2(2) * z3(2)) -f1(3) * tanh(a1(3) * z3(3)) - f2(3) * tanh(a2(3) * z3(3)) -f1(4) * tanh(a1(4) * z3(4)) - f2(4) * tanh(a2(4) * z3(4)) - F3 * z3; %-F3*z3; %ï¼ˆ17ï¼‰å¼
+        end
+
+        %upsi:HL or FT
+        upsi = -F4 * z4; %HL
+        %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%ä»Šå›žã¯ã“ã‚Œã§()%FT
+        %
+        %% å¤–ä¹±(åŠ é€Ÿåº¦ã§ä¸Žãˆã‚‹)
+        %             dst = -1;
+        %             if t>=1
+        %                 dst=0;
+        %             end
+        %             dst_y = 0;
+        %             dst_z=0;
+        %             dst=0.5*sin(2*pi*t/0.5);%
+        %             dst=dst+10*cos(2*pi*t/1);
+        dst = -5;
+        %             if t>=5 && t<=5.1
+        %                     dst=-2;
+        %             end
+        %ç‰¹å®šã®ä½ç½®ã§å¤–ä¹±ã‚’ä¸Žãˆã‚‹
+        %             dst=0;xxx0=0.5;TT=0.5;%TTå¤–ä¹±ã‚’ä¸Žãˆã‚‹åŒºé–“
+        %             xxx=model.state.p(1)-xxx0;
+        %             if xxx>=0 && xxx<=TT
+        %                     dst=-sin(2*pi*xxx/(TT*2));
+        %             end
+        %%
+        vs = [ux, uy, upsi];
+        tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs', P);
+        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4); dst];
+        %             ob j.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+        obj.self.input = obj.result.input;
+        %ã‚µãƒ–ã‚·ã‚¹ãƒ†ãƒ ã®å…¥åŠ›
+        obj.result.uHL = [vf(1); ux; uy; upsi];
+        %ã‚µãƒ–ã‚·ã‚¹ãƒ†ãƒ ã®çŠ¶æ…‹
+        obj.result.z1 = z1;
+        obj.result.z2 = z2;
+        obj.result.z3 = z3;
+        obj.result.z4 = z4;
+        obj.result.vf = vf;
+        result = obj.result;
+    end
+
+    function show(obj)
+        obj.result
+    end
+
+end
+
+end

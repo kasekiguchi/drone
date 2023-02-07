@@ -21,12 +21,13 @@ if fExp && ~fMotive
 end
 
 disp('Press Enter key to start.');
-FH = figure('position', [0 0 eps eps], 'menubar', 'none');
-% 
-if fExp
-    w = waitforbuttonpress;%キーボード入力はいるまで停止
+if ~fDebug | fExp
+    FH = figure('position', [0 0 eps eps], 'menubar', 'none');
+else
+    FH = figure();
 end
-%     w = waitforbuttonpress;%キーボード入力はいるまで停止
+
+w = waitforbuttonpress;
 
 if (fOffline)
     logger.overwrite("model", time.t, agent, i);

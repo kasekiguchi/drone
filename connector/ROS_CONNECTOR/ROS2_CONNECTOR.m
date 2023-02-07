@@ -20,9 +20,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         pubTopicNum
         pubTopic
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
-        pubMsg
 %         pubMsg  % 送信msg
-        flightcontroller%コールバック用
     end
 
     properties(SetAccess=private)
@@ -34,12 +32,10 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         function obj = ROS2_CONNECTOR(info)
             disp('Preparing connection to robot operating system...');
             %-- Configulations for ROS
-            setenv("ROS_DOMAIN_ID","30");
             obj.subTopic = info.subTopic;
             obj.subName = info.subTopicName;
             obj.subTopicNum = length(obj.subTopic);
             obj.subMsg = info.subMsgName;
-%             obj.pubMsg = info.pubMsgName;
             if isfield(info,'pubTopic')
                 obj.pubTopic = info.pubTopic;
                 obj.pubName = info.pubTopicName;
@@ -51,17 +47,14 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             %ROS2のトピック一覧
             ros2 topic list;
             
-            obj.flightcontroller = [];
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
-%                 obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),@exampleHelperROS2PoseCallback,...
-%                     "History","keepall","Reliability","besteffort");
-                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),{@ROS2Callback,obj},...
+                obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
                     "History","keepall","Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum 
-                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1},obj.pubMsg{i,1});
+                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{1,i});
                 end
             end
         end
@@ -75,11 +68,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                try %%エラーが出たらcatchに移行
-                    obj.result = receive(obj.subscriber.subtopic(i),0.001);
-                catch
-                    obj.result = [];
-                end
+                obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
             end
             ret = obj.result;
         end
@@ -92,23 +81,13 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             
             if isstruct(msg)
                 for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic(i), msg);
+                    send(obj.publisher.(obj.pubName(i)), msg.(obj.pubName(i)));
                 end
             else
                 for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic(i), msg);
+                    send(obj.publisher.(obj.pubName(i)), msg{i});
                 end
             end
-        end
-        function ROS2Callback(obj,message)%コールバック用の謎関数
-            obj.flightcontroller = message.subscriber.subtopic.LatestMessage;
-        end
-        function [ret] = getDataFC(obj)
-            %回転数の測定値を持ってくるための関数
-            obj.result = obj.subscriber.subtopic.LatestMessage;
-            ret = obj.result;
         end
 
         function delete(obj)
