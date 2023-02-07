@@ -20,7 +20,7 @@ for name_i = 1:length(name_class)
     end
 %     figure(2)
 %     subplot(1,3,name_i);
-    plot(T(1:logger.k),Y/100,'LineWidth',1)
+    plot(T(1:logger.k),Y,'LineWidth',1)
 %     txt = {''};
 %     if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
 %         Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
@@ -66,6 +66,15 @@ sum = 0;
 for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1
  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
 end    
+
+%%回転数rmseを算出by安西
+sum = 0
+for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 108, 1)-1
+ tmp(1,plot_i) = logger.Data.agent.sensor.result{1,1300}.ros_t.rpm - logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm;
+ tid (1,plot_i)= tmp(1,plot_i)^2;
+ sum = tid + sum;
+end    
+%%
 %% 電力(5)
 figure(5)
 clear T
@@ -366,3 +375,5 @@ name_class = ["x potential";"y potential"];%凡例
 % name_class = ["x potential";"y potential";"orbit"];
 legend(name_class)
 hold off
+
+
