@@ -37,7 +37,7 @@
 % t : reference生成時の現在時刻
 % T : time.t そのステップの現在時刻
 
-function xr = Reference(params, T, Agent, Gq, Gp, phase, Rv)
+function xr = Reference(params, T, Agent, Gq, Gp, phase)
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize
@@ -56,13 +56,10 @@ function xr = Reference(params, T, Agent, Gq, Gp, phase, Rv)
 
         xr(13:16, h+1) = params.ur;
 
-        if phase == 1
-            xr(1:3, h+1) = Gp;
-            xr(7:9, h+1) = [0;0;0];
-%         elseif phase == 2
-%             xr(1:3, h+1) = Gp{2};
+%         if phase == 1
+%             xr(1:3, h+1) = Gp;
 %             xr(7:9, h+1) = [0;0;0];
-        end
+%         end
 
 %         if T > 0.975
 %             xr(1:3, h+1) = Gp;

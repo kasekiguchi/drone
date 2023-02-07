@@ -163,89 +163,20 @@ end
             
 %             [xr, fG] = Reference(Params, time.t, agent, G, fG);
             %% 次の目標値の設定
-%             TimeArray = [0, 7, 9, 12, 15];
-%             if idx == 1
-%                 Gp = [0; 0; 0.15];
-%                 Gq = [0; 0; 0];
-%                 ToTime = TimeArray(2) - TimeArray(1);
-%                 Cp = initial.p;
-%                 StartT = 0;
-%             elseif idx == TimeArray(2)/dt
-%                 Cp = Gp;
-%                 Gp = [0.1; 0; 0.15];
-%                 Gq = [0; 0; 0];
-%                 ToTime = TimeArray(3) - TimeArray(2);
-%                 StartT = TimeArray(2);
-%             elseif idx == TimeArray(3)/dt
-%                 Cp = Gp;
-%                 Gp = [0.1; 0; 0.0];
-%                 Gq = [0; 0; 0];
-%                 ToTime = TimeArray(4) - TimeArray(3);
-%                 StartT = TimeArray(3);
-%                 phase = 4;
-%             elseif idx == TimeArray(4)/dt
-%                 Cp = Gp;
-%                 Gp = [0; 0; 1];
-%                 ToTime = TimeArray(5) - TimeArray(4);
-%                 
-%                 StartT = TimeArray(3);
-%             end
 
             % 斜面の垂直方向の速度を目標に与える．
             % -> そういう関数
             % -> 初期速度必要
             % ある程度速度が落ちたら入力切る．
-%             if idx == 1
-%                 Cp = initial.p;
-%                 Gp = [0; 0; 0];
-%                 Gq = [0; 0.2915; 0];
-%                 ToTime = 10aaad
 
-%             if idx == 1
-%                 Cp = agent.estimator.result.state.p;
-%                 Gp = initial.p;
-%                 Gq = [0; 0; 0];
-%                 ToTime = 2;
-%                 StartT = 0;
-%                 phase = 1;
-%             elseif idx == 5/dt
-%                 Cp = agent.estimator.result.state.p;
-%                 Gp = [0; 0; 0];
-%                 Gq = [0; 0.2915; 0];
-%                 ToTime = te;
-%                 StartT = time.t;
-%                 phase = 2;
-%             end
-%             Gq = [0;0;0];
-            
-            if idx >= 400
-                params.ur = IHL(:, end);
-                Rv = VHL(:, end);
-            else
-                params.ur = IHL(:, idx);
-                Rv = VHL(:, idx);
-            end
 
-            if abs(xr(9, 1)) < 0.05 && idx > 1
-                flag(1) = 1;
-            elseif agent.estimator.result.state.q(2) > 1.975 && ...
-                    agent.estimator.result.state.q(2) < 3.975 && ...
-                    agent.estimator.result.state.p(3) < 0.3
-                flag(2) = 1;
-            end
 
-            if flag(1) == 1 % 地面に近づいたら
-                Gp = [0;0;0.1];
-                phase = 1;
-            elseif flag(1) == 0 % それまで
-                Gp = [0;0;0];
-            end
 
 %             phase = 0;
-%             Gp = [0;0;0.1];
+            Gp = [0;0;0.1];
             Gq = [0; 0; 0];
 %             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
-            xr = Reference(Params, time.t, agent, Gq, Gp, phase, Rv);
+            xr = Reference(Params, time.t, agent, Gq, Gp, phase);
             param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -253,7 +184,7 @@ end
             agent(i).do_controller(param(i).controller.list);
 
             
-            if flag(2) == 1
+            if flag(1) == 1
                 agent.input = [0; 0; 0; 0];
             end
         end
@@ -415,7 +346,7 @@ Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 Diff = Edata - Rdata(1:3, :);
 logt = logger.data('t',[],[]);
-xmax = 1.25;
+xmax = te;
 close all
 
 % x-y
@@ -423,7 +354,7 @@ close all
 
 % x-z
 Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
-figure(6); plot(Edata(1,1:xmax/dt), Edata(3,1:xmax/dt)); hold on;
+figure(6); plot(Edata(1,:), Edata(3,:)); hold on;
 plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
 plot(initial.p(1), initial.p(3), 'h');
 plot(Et, Er)
@@ -507,11 +438,11 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20230206_landing_q_osii.mat', '-v7.3')
+% save('Data\20230207_landing_kanariyoi_v2.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
-
+agent(1).animation(logger,"target",1); 
+u
 %%
 % logger.save();

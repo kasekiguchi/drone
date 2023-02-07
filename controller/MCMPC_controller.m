@@ -177,7 +177,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 % 棄却数がサンプル数の半分以上なら入力増やす
                 if removeF > obj.param.particle_num /2
                     obj.input.nextsigma = obj.input.Constsigma;
-                    obj.input.nextparticle_num = obj.param.Mparticle_num;
+                    obj.param.nextparticle_num = obj.param.Mparticle_num;
                 else
                     obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
                     % 追加
