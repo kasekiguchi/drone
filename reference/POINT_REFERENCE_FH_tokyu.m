@@ -85,9 +85,11 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                     end
                     obj.flag='h';
                 end
-                obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
-                obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
-                obj.result.state.p(4)=obj.self.estimator.result.state.q(3);
+%                 obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
+%                 obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
+                obj.result.state.p(1)=Param{2}(1);
+                obj.result.state.p(2)=Param{2}(2);
+%                 obj.result.state.p(4)=obj.self.estimator.result.state.q(3);
 %                 obj.result.state.p(1)=Param{2}(1);%ホバリング用
 %                 obj.result.state.p(2)=Param{2}(2);
             elseif strcmp(cha,'f') % flight phase (時間関数)
@@ -152,13 +154,15 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
 %                 end
             elseif strcmp(cha,'y') % landing phase
                 if strcmp(obj.flag,'y')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,2.7);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,1.3);
                 else% 初めてlanding に入ったとき
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.04,2.7);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.04,1.3);
                 end
-                obj.result.state.p(1) = obj.self.estimator.result.state.p(1);
-                obj.result.state.p(2) = obj.self.estimator.result.state.p(2);
-                obj.result.state.p(4) = obj.self.estimator.result.state.q(3);
+                obj.result.state.p(1)=Param{2}(1);
+                obj.result.state.p(2)=Param{2}(2);
+%                 obj.result.state.p(1) = obj.self.estimator.result.state.p(1);
+%                 obj.result.state.p(2) = obj.self.estimator.result.state.p(2);
+%                 obj.result.state.p(4) = obj.self.estimator.result.state.q(3);
                 obj.flag='y';
             else
                 obj.result.state.p = obj.base_state;
