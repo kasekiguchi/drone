@@ -202,9 +202,9 @@ close all
 clc
 
 % plot 
-% logger.plot({1,"p","er"},{1, "q", "e"},{1, "input", "e"});
+logger.plot({1,"p","er"},{1, "q", "e"},{1, "inner_input", ""});
 % logger.plot({1,"sensor.result.switch",""},{1,"sensor.result.distance",""});
-logger.plot({1,"p","sr"},{1,"sensor.result.switch",""},{1,"sensor.result.distance",""},{1,"inner_input",""});
+% logger.plot({1,"p","sr"},{1,"sensor.result.switch",""},{1,"sensor.result.distance",""},{1,"inner_input",""});
 % logger.plot({1,"p","er"},{1, "q", "es"},"time",[4 10], "fig_num",2,"row_col",[2 1]);
 % logger.plot({1,"p","er"},{1,"p1-p2","er"},{1, "q", "e"},{1, "input", "e"},{1,"inner_input",""});
 % logger.plot({1,"sensor.result.ros_t.rpm",""})
