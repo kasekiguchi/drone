@@ -21,19 +21,19 @@ for name_i = 1:length(name_class)
 %     figure(2)
 %     subplot(1,3,name_i);
     plot(T(1:logger.k),Y,'LineWidth',1)
-%     txt = {''};
-%     if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
-%         Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
-%         txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
-%     end
+    txt = {''};
+    if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
+        Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
+        txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+    end
 %     if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
 %         Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
 %         txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
 %     end
-%     if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
-%         Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-%         txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
-%     end
+    if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
+        Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+        txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+    end
 
 %     if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
 %         Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
@@ -68,12 +68,14 @@ for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 
 end    
 
 %%回転数rmseを算出by安西
-sum = 0
-for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 108, 1)-1
- tmp(1,plot_i) = logger.Data.agent.sensor.result{1,1300}.ros_t.rpm - logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm;
- tid (1,plot_i)= tmp(1,plot_i)^2;
+sum = 0;
+for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1
+ tmp = logger.Data.agent.sensor.result{1,1300}.ros_t.rpm - logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm;
+ tid = tmp.^2;
  sum = tid + sum;
 end    
+average = sum/numel(logger.Data.phase(find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1));
+RMSE = sqrt(average)
 %%
 %% 電力(5)
 figure(5)
