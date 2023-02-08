@@ -215,7 +215,7 @@ logger.plot({1,"p","er"},{1,"input",""});
 %%
 logger.plot({1,"p1-p2-p3","re"});
 hold on
-F_size = 12;
+F_size = 15;
 % plot(polyshape(env),'FaceColor','b');
 % plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
@@ -234,12 +234,12 @@ z2=10;
 % Y1=[-y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y];
 % Z1=[-z, -z, -z, -z, -z; 3-z, 3-z, 3-z, 3-z, 3-z; -z,3-z,3-z,-z,-z; -z,3-z,3-z,-z,-z];
 %%enviroment
-X1=[x, x+1.5, x+1.5, x, x; x, x+1.5, x+1.5, x, x;x, x, x, x, x; x+1.5, x+1.5, x+1.5, x+1.5, x+1.5];
-Y1=[-y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y];
-Z1=[-z, -z, -z, -z, -z; 3-z, 3-z, 3-z, 3-z, 3-z; -z,3-z,3-z,-z,-z; -z,3-z,3-z,-z,-z];
+% X1=[x, x+1.5, x+1.5, x, x; x, x+1.5, x+1.5, x, x;x, x, x, x, x; x+1.5, x+1.5, x+1.5, x+1.5, x+1.5];
+% Y1=[-y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y];
+% Z1=[-z, -z, -z, -z, -z; 3-z, 3-z, 3-z, 3-z, 3-z; -z,3-z,3-z,-z,-z; -z,3-z,3-z,-z,-z];
 
 X1=[x-0.5, x+0.5, x+0.5, x-0.5, x-0.5; x-0.5, x+0.5, x+0.5, x-0.5, x-0.5;x-0.5, x-0.5, x-0.5, x-0.5, x-0.5; x+0.5, x+0.5, x+0.5, x+0.5, x+0.5];
-Y1=[y2, y2, y, y, y2; y2, y2, y, y, y2; y2, y2, y, y, y2; y2, y2, y, y, y2];
+Y1=[y2, y2, y4, y4, y2; y2, y2, y4, y4, y2; y2, y2, y4, y4, y2; y2, y2, y4, y4, y2];
 Z1=[z, z, z, z, z; z+0.5, z+0.5, z+0.5, z+0.5, z+0.5; z,z+0.5,z+0.5,z,z+0.5; z,z+0.5,z+0.5,z,z+0.5];
 
 X2=[x-0.5, x+0.5, x+0.5, x-0.5, x-0.5; x-0.5, x+0.5, x+0.5, x-0.5, x-0.5;x-0.5, x-0.5, x-0.5, x-0.5, x-0.5; x+0.5, x+0.5, x+0.5, x+0.5, x+0.5];
@@ -249,9 +249,15 @@ Z2=[z+0.5, z+0.5, z+0.5, z+0.5, z+0.5;z2,z2,z2,z2,z2;z+0.5,z2,z2,z+0.5,z+0.5;+0.
 X3=[x-0.5, x+0.5, x+0.5, x-0.5, x-0.5; x-0.5, x+0.5, x+0.5, x-0.5, x-0.5;x-0.5, x-0.5, x-0.5, x-0.5, x-0.5; x+0.5, x+0.5, x+0.5, x+0.5, x+0.5];
 Y3=[-y4,-y4,-y,-y,-y4;-y4,-y4,-y,-y,-y4;-y4,-y4,-y,-y,-y4;-y4,-y4,-y,-y,-y4];
 Z3=[z, z z, z, z; z2, z2, z2, z2, z2; z,z2,z2,z,z2; z,z2,z2,z,z2];
+
+X4=[x-0.5, x+0.5, x+0.5, x-0.5, x-0.5; x-0.5, x+0.5, x+0.5, x-0.5, x-0.5;x-0.5, x-0.5, x-0.5, x-0.5, x-0.5; x+0.5, x+0.5, x+0.5, x+0.5, x+0.5];
+Y4=[-y4, -y4, y4, y4, -y4; -y4, -y4, y4, y4, -y4; -y4, -y4, y4, y4, -y4; -y4, -y4, y4, y4, -y4];
+Z4=[-2, -2, -2, -2, -2; z, z, z, z, z; -2,z,z,-2,-2; -2,z,z,-2,-2];
+%reverce
 % X1=[x, x+1.5, x+1.5, x, x; x, x+1.5, x+1.5, x, x;x, x, x, x, x; x+1.5, x+1.5, x+1.5, x+1.5, x+1.5];
-% Y1=[y, y+2, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y];
-% Z1=[0, 0, 0, 0, 0; 3-z, 3-z, 3-z, 3-z, 3-z; 0,3-z,3-z,0,0; 0,3-z,3-z,0,0];
+% Y1=[-y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y; -y, -y, y, y, -y];
+% Z1=[-0.5, -0.5, -0.5, -0.5, -0.5; 3-z, 3-z, 3-z, 3-z, 3-z; -0.5,3-z,3-z,-0.5,-0.5; -0.5,3-z,3-z,-0.5,-0.5];
+
 s=mesh(X1,Y1,Z1);
 s.EdgeColor = 'k';
 s.FaceColor = [0.4940 0.1840 0.5560];
@@ -264,6 +270,10 @@ u=mesh(X3,Y3,Z3);
 u.EdgeColor = 'k';
 u.FaceColor = [0.4940 0.1840 0.5560];
 u.FaceAlpha = 0.1;
+v=mesh(X4,Y4,Z4);
+v.EdgeColor = 'k';
+v.FaceColor = [0.4940 0.1840 0.5560];
+v.FaceAlpha = 0.1;
 % X1=[x, x+1.5, x+1.5, x, x; x, x+1.5, x+1.5, x, x;x, x, x, x, x; x+1.5, x+1.5, x+1.5, x+1.5, x+1.5];
 % Y1=[y, y+2, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y; y, y, y+2, y+2, y];
 % Z1=[0, 0, 0, 0, 0; 3-z, 3-z, 3-z, 3-z, 3-z; 0,3-z,3-z,0,0; 0,3-z,3-z,0,0];
@@ -275,7 +285,7 @@ ylabel('y [m]','Fontsize',F_size)
 zlabel('z [m]','Fontsize',F_size)
 legend("reference", "estimate", "obstacle");
 title('phase plot:x-y-z')
-view(2)
+view([2 2])
 % legend("estimate", "reference", "obstacle1","obstacle2");
 hold off
 

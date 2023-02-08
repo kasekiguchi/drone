@@ -100,10 +100,10 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %             hy = 0.15;%3D_enviroment_hv3(v)
 %             hz= 0.15;%3D_enviroment_hv3(v)
 
-            hy = 0.15;%3D_Simple(v)
-            hz= 0.15;%3D_Simple(v)
-%             hy = 0.2;%3D_Simple_reverce(v)
-%             hz= 0.2;%3D_Simple_reverce(v)
+%             hy = 0.15;%3D_Simple(v)
+%             hz= 0.15;%3D_Simple(v)
+            hy = 0.2;%3D_Simple_reverce(v)
+            hz= 0.2;%3D_Simple_reverce(v)
             P = [-0.05,hy,hz;-0.05,-hy,hz;-0.05,-hy,-hz;-0.05,hy,-hz;
                   hx,hy,hz;hx,-hy,hz;hx,-hy,-hz;hx,hy,-hz];
             T= [1,3,2;1,4,3;1,5,8;1,8,4;1,2,6;1,6,5;2,7,6;2,3,7;3,8,7;3,4,8;5,6,7;5,7,8];
@@ -150,14 +150,18 @@ classdef THREED_TANBUG < REFERENCE_CLASS
                     [obj.g,obj.v] = obj.T_bug(obj,change_length,l_points,goal_length,id,R,p);
                     obj.result.state.p =  R * obj.g + p;
                 end 
+%                 obj.g = obj.g;
                obj.result.state.p = obj.result.state.p;
               end
               obj.v = obj.v;
+%               obj.gpath = obj.gen_path(p,R,obj.result.state.p);
             else % Gpath内に点群がない場合
               % G へ向かう
-              obj.result.state.p = obj.l_goal; 
-              obj.v = [0;0;0];        
+              obj.result.state.p = obj.goal; 
+              obj.v = [0;0;0];      
+%               obj.gpath = obj.gen_path(p,R,obj.result.state.p);
             end     
+%             obj.result.state.p =  R * obj.g + p;
             obj.gpath = obj.gen_path(p,R,obj.result.state.p);
             obj.result.state.v = obj.v;
             result = obj.result;   
@@ -194,8 +198,8 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             edge_ids(edge_ids==0) = numel(length);%0配列は63or32にする%%%%%%%%%%%%
             edge_ids(edge_ids<0) = edge_ids(edge_ids<0)+numel(length);%%%%%%%%%%
             te_angle = pitch*abs(edge_ids - id); % angle between target-edge
-%             [~,tmp] = min(length(edge_ids).*(length(edge_ids)-goal_length*cos(te_angle))); % target id
-            [~,tmp] = min(abs(length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
+            [~,tmp] = min(length(edge_ids).*(length(edge_ids)-goal_length*cos(te_angle))); % target id
+%             [~,tmp] = min(abs(length(edge_ids)-goal_length*cos(te_angle)));%最終目標までの距離が短い方の配列番号を決定
 %             reference_goal = goal - l_points(:,edge_ids);
 %             reference_goal = vecnorm(reference_goal);%端点の候補→referenceの距離
 %             [~,tmp] = min(length(edge_ids)+reference_goal');%自己位置→端点の候補→referenceの距離が小さい配列
@@ -209,17 +213,17 @@ classdef THREED_TANBUG < REFERENCE_CLASS
             % l_points:LiDARの座標データ
             % length:LiDARの距離データ
             edge_ids = [v,h];
-            te_angle = pitch*abs(edge_ids - id);
-            [~,tmp] = min(abs(length(edge_ids)-goal_length*cos(te_angle)));
+%             te_angle = pitch*abs(edge_ids - id);
+%             [~,tmp] = min(abs(length(edge_ids)-goal_length*cos(te_angle)));
 
-%             reference_goal = goal - l_points(:,edge_ids);
-%             reference_goal = vecnorm(reference_goal);
-%             [~,tmp] = min(length([v,h])+reference_goal);
+            reference_goal = goal - l_points(:,edge_ids);
+            reference_goal = vecnorm(reference_goal);
+            [~,tmp] = min(length([v,h])+reference_goal);
             tid = edge_ids(tmp);%最短経路の配列
 %             edge_p = length(tid)*[cos((tid-1)*pitch-pi);sin((tid-1)*pitch-pi);tan((tid-1)*pitch-pi)];
 %             edge_p = length(tid)*[cos((tid)*pitch-pi);sin((tid)*pitch-pi);tan((tid)*pitch-pi)];
             edge_p = l_points(:,tid);%最短経路の端点座標
-            edge_p = R'*(edge_p-p);
+%             edge_p = R'*(edge_p-p);
             if tmp == 1%左右の移動か上下の移動かを決めるための変数
                 route = v;
             else
@@ -258,9 +262,9 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 
             if route == v_tid %上下方向の端点の場合
                 if Length(tid+2) > Length(tid) %下を潜り抜ける場合
-%                     anchor_ids = R'*(l_points(2,edge_ids)-p);
-%                     anchor_ids = find(abs(edge_p(2) - anchor_ids)<obj.margin/2,1);
+%                     local_points = R'*(l_points-p);
                     anchor_ids = find(abs(edge_p(2) - l_points(2,edge_ids))<obj.margin/2,1);
+%                     anchor_ids = find(abs(edge_p(2) - local_points(2,edge_ids))<obj.margin/2,1);
                     anchor_ids = edge_ids(anchor_ids);
                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
                     if isempty(anchor_ids)
@@ -276,9 +280,9 @@ classdef THREED_TANBUG < REFERENCE_CLASS
 %                     g = [tmp1;edge_p(2);tmp2];%ローカル
                     v = obj.velocity_vector(obj.state_initial,edge_p,g,obj.e_y);%ローカル
                 else %上を通る場合
-                    % anchor_ids = R'*(l_points(2,edge_ids)-p);
-%                     anchor_ids = find(abs(edge_p(2) - anchor_ids)<obj.margin/2,1);
+%                     local_points = R'*(l_points-p);
                     anchor_ids = find(abs(edge_p(2) - l_points(2,edge_ids))<obj.margin/2,1);
+%                     anchor_ids = find(abs(edge_p(2) - local_points(2,edge_ids))<obj.margin/2,1);
                     anchor_ids = edge_ids(anchor_ids);
                     [~,~,tmp1,tmp2] = obj.conection(obj.state_initial(1),obj.state_initial(3),edge_p(1),edge_p(3),obj.margin_conect);%x-zで端点を中心とする接点作成
                     if isempty(anchor_ids)

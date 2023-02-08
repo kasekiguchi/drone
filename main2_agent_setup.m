@@ -113,7 +113,7 @@ for i = 1:N
 %   agent(i).set_property("sensor",Sensor_LiDAR(i));%matlabで作成したシンプル環境用
 %   agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
 %   env = stlread('3F.stl');
-  env = stlread('3d_enviroment_reverce.stl');
+  env = stlread('3d_enviroment_hv_show.stl');
   model.Vertices = env.Points;
   model.Faces    = env.ConnectivityList;
   figure(2), clf
@@ -121,9 +121,10 @@ for i = 1:N
 %   alpha(0.5)
 %   view([2 2])
   view([-1 -1 1]);
-  xlabel('x [m]')
-  ylabel('y [m]')
-  zlabel('z [m]')
+  F_size = 15;
+  xlabel('x [m]','Fontsize',F_size)
+  ylabel('y [m]','Fontsize',F_size)
+  zlabel('z [m]','Fontsize',F_size) 
   xlim([-3,8])
   ylim([-5.5 , 5.5]);
   zlim([-5 ,5])

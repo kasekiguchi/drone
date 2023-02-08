@@ -12,9 +12,9 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te =0.95;%enviroment用
+%     te =0.95;%enviroment用
 %     te = 5;%simple用
-%     te = 3.5;%reverce用
+    te = 4.5;%reverce用
 %     te = 1.8;
 end
 
