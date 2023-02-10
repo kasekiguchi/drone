@@ -169,12 +169,17 @@ end
             % -> 初期速度必要
             % ある程度速度が落ちたら入力切る．
 
-
-
-
-%             phase = 0;
             Gp = [0;0;0.1];
-            Gq = [0; 0; 0];
+%             if agent.estimator.result.state.p(3) < 0.3
+%                 Gq = [0; 0.2915; 0];
+%             else
+                Gq = [0; 0; 0];
+%             end
+
+            if abs(agent.estimator.result.state.v(3)) < 0.03
+                flag(1) = 1;
+            end
+
 %             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
             xr = Reference(Params, time.t, agent, Gq, Gp, phase);
             param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
@@ -276,10 +281,15 @@ end
         data.calT(idx, :) = calT;
 
         fRemove = agent.controller.result.fRemove;
-        if fRemove == 1
-            warning("Z<0 Emergency Stop!!!")
-            break;
+
+        if agent.estimator.result.state.p(3) < (3/10 * agent.estimator.result.state.p(1)+0.1)
+            fRemove = 1;
         end
+%         終了条件に傾きを導入
+%         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
+%         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
+%         drone_1Y = agent.estimator.result.state.p(3)+
+%         if 
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
         fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
@@ -290,13 +300,14 @@ end
                 xr(1,1), xr(2,1), xr(3,1),...
                 xr(7,1), xr(8,1), xr(9,1),...
                 xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)
-        fprintf("t: %6.3f \t calT: %f \t sigma: %f \t paritcle_num: %d \t remove: %d", time.t, calT, data.sigma(idx), data.variable_particle_num(idx), data.removeF(idx))
-        if data.removeF(idx) ~= 0
-            fprintf('\t State Constraint Violation!')
-%             data.removeX{idx}
-%             data.sur{idx}
-        end
+        fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t remove: %d \t input: %f %f %f %f", ...
+            time.t, calT, data.variable_particle_num(idx), data.removeF(idx), agent.input(1), agent.input(2), agent.input(3), agent.input(4))
         fprintf("\n");
+
+        if fRemove == 1
+            warning("Z<0 Emergency Stop!!!")
+            break;
+        end
         %%
         drawnow 
     end
@@ -346,7 +357,7 @@ Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 Diff = Edata - Rdata(1:3, :);
 logt = logger.data('t',[],[]);
-xmax = te;
+xmax = 1.45;
 close all
 
 % x-y
@@ -357,26 +368,29 @@ Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
 figure(6); plot(Edata(1,:), Edata(3,:)); hold on;
 plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
 plot(initial.p(1), initial.p(3), 'h');
-plot(Et, Er)
+% plot(Et, Er)
 plot(Et, Ez); hold off;
 xlabel("X [m]"); ylabel("Z [m]"); 
 % position
 figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-grid on; title("Time change of Position"); xlim([0 xmax]); ylim([-inf inf]);
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% title("Time change of Position"); 
 % atiitude 0.2915 rad = 16.69 deg
 figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-grid on; title("Time change of Atiitude"); xlim([0 xmax]); ylim([-inf inf]);
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% title("Time change of Atiitude");
 % velocity
 figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
-grid on; title("Time change of Velocity"); xlim([0 xmax]); ylim([-inf inf]);
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% title("Time change of Velocity"); 
 % input
 figure(4); plot(logt, Idata); 
-xlabel("Time [s]"); ylabel("Input");
-grid on; title("Time change of Input"); xlim([0 xmax]); ylim([-inf inf]);
-
+xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% title("Time change of Input");
 % figure(20)
 % IHL = load("Data/HL_input");
 % plot(logt(1:end), IHL(1, :))
@@ -438,11 +452,10 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20230207_landing_kanariyoi_v2.mat', '-v7.3')
+% save('Data\20230209_landing.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1); 
-u
 %%
 % logger.save();

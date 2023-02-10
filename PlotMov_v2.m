@@ -7,8 +7,9 @@ maxbestcost = max(data.bestcost)
     % 寒色：良い評価、暖色：悪い評価
 	Color_map(1:10,:) = jet(10);            % 評価値の上から10個をカラーマップの色付け.
 %     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v5'));
+	writerObj=VideoWriter(strcat(Outputdir,'/video/20230208_v1'));
 	open(writerObj);
+    tt = 0:0.1:15;
     
     countMax = size(data.pathJ,2);
 	for count = 1:countMax
@@ -46,13 +47,16 @@ maxbestcost = max(data.bestcost)
 %             viscircles(Obs_posi,obj.r_obs,'LineWidth',0.1,'Color','black');hold on
 % 		end
 		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
+        plot(cos(tt/2), sin(tt/2), 'LineWidth', 1, 'color', 'green');
+        pgon = polyshape([-1.2 -1.2 -0.5 -0.5],[1.2 -1.2 -1.2 1.2]); plot(pgon);
+
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
 		text(-0.35,1.35,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
 % 		ax.YLim = [-0.5 2];
 % 		ax.XLim = [-0.5 2];
-        ax.YLim = [-2 2];
-		ax.XLim = [-0 4];
+        ax.YLim = [-1.2 1.2];
+		ax.XLim = [-1.2 1.2];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);

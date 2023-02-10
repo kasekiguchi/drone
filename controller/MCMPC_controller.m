@@ -178,6 +178,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 if removeF > obj.param.particle_num /2
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Mparticle_num;
+                    obj.input.AllRemove = 1;
                 else
                     obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
                     % 追加
@@ -259,7 +260,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %             survive = find(sur);
             survive = obj.param.particle_num;
 
-            % 重心計算
+            %% ソフト制約
+            % 棄却はしないが評価値を大きくする
+
+            %% 重心計算
 %             if removeF == obj.param.particle_num
 %                 obj.state.COG.g  = NaN;               % 制約内は無視
 %                 obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
@@ -295,6 +299,19 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                     obj.state.state_data(:, h+1, m) = x0;
                 end
             end
+
+
+            %ベクトル化：  input[4*obj.param.particle_num, obj.param.H]
+            % 無名関数@ cellには入れられた気がする
+%             model_equ = {obj.param.particle_num, 1};
+%             for mk = 1:obj.param.particle_num
+%                 model_equ{mk, 1} = obj.param.modelparam.modelmethod;
+%             end
+%             x0 = repmat(obj.previous_state, obj.param.particle_num, 1);
+%             obj.state.state_data(:, 1) = repmat(obj.previous_state, obj.param.particle_num, 1);
+%             for h = 1:obj.param.H-1
+%                 x0 = x0 + obj.param.dt * model_equ{:, 1}(); cell配列の式に値を代入する方法
+%             end
             predict_state = obj.state.state_data;
         end
 
