@@ -1,7 +1,7 @@
 function Sensor=Sensor_Motive_ROS(param)
     Sensor.name=["motive"];
     Sensor.type=["Motive_ros"];
-    %50系統でROS経由での受け渡し
+    %50系統ROS経由での受け渡し
     % X, Y. Z
     Sensor.param=param;
     Sensor.param.state_list = ["p"];

@@ -6,7 +6,7 @@ function Estimator = Estimator_EKF(agent,output,opts)
     % すべての機体で同一設定
     arguments
         agent
-        output = ["p","q"]
+        output = ["p","q","v"]
         opts.B = []
         opts.P = []
         opts.Q = []
