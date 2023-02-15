@@ -223,6 +223,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
 
+            fisher = fisher()
             % return values setting
             obj.result.state.set_state(Xh(1:obj.n));
             obj.result.estate = Xh;
@@ -280,6 +281,30 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             y = [Py,NaN(size(Py,1),1)];
             l.x = reshape(x',numel(x),1);
             l.y = reshape(y',numel(y),1);
+        end
+
+        function evFim = fisher(param,)
+            t1 = param.phi;
+            t2 = param.alpha;
+            [~,tth]=min(abs(t1-t2),[],2);
+            
+            H = (param.dis(:) - X(1,1).*cos(param.alpha(:)) - X(2,1).*sin(param.alpha(:)))./cos(param.phi(tth)' - param.alpha(:) + X(3,1));%observation
+        %     RangeLogic = H<SensorRange;
+            RangeLogic = (tanh(RangeGain*(SensorRange - H))+1)/2;%センサレンジの考慮 zeta
+            Fim = RangeLogic(1) * FIM_ObserbSubAOmegaRungeKutta(X(1,1), X(2,1), X(3,1), X(4,1),U(2,1),U(1,1),param.dt, param.dis(1), param.alpha(1), param.phi(1));
+            obFim = RangeLogic(1) * FIM_Observe(X(1,1), X(2,1), X(3,1), param.dis(1), param.alpha(1), param.phi(1));
+            for i = 2:length(param.dis)
+                Fim = Fim + RangeLogic(i) * FIM_ObserbSubAOmegaRungeKutta(X(1,1), X(2,1), X(3,1), X(4,1),U(2,1),U(1,1),param.dt, param.dis(i), param.alpha(i), param.phi(i));
+                obFim = obFim + RangeLogic(i) * FIM_Observe(X(1,1), X(2,1), X(3,1), param.dis(i), param.alpha(i), param.phi(i));
+            end
+        %     Fim = (1/(2*NoiseR+diag([1,1])))*Fim;
+            Fim = (Fim+1e-2*eye(2))/(2*NoiseR);%観測値差分のFisher情報行列計算
+            %obFim = (1/(NoiseR))*([obFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);%観測値のFisher情報行列
+            obFim = (1/(NoiseR))*(obFim + 1e-2*eye(3));%観測値のFisher情報行列
+            InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));%逆行列の計算
+        %     InvFim = inv(Fim);
+            InvobFim = inv(obFim);
+            evFim(1,1) = trace(InvobFim)*trace(InvFim);%評価値計算
         end
     end
 end

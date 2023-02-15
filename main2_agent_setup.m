@@ -56,10 +56,14 @@ for i = 1:N
     %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
     %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
     initial_state(i).p = [0;0];%[92;1];%
-        initial_state(i).q = 0;%pi/2-0.05;
-        initial_state(i).v = 0;
+    initial_state(i).q = 0;%pi/2-0.05;
+    initial_state(i).v = 0;
+    if fMotive
+        agent(i) = WHILL(Model_Whill_Exp_Motive(dt,initial_state(i),"ros",30),VEHICLE_PARAM("VEHICLE3")); % for exp % 機体番号（ESPrのIP）
+    else
         agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",30),VEHICLE_PARAM("VEHICLE3")); % for exp % 機体番号（ESPrのIP）
-        agent(i).input = [0;0];
+    end
+    agent(i).input = [0;0];
 %     agent(i).input = [0; 0; 0; 0];
   else
     %agent(i) = DRONE(Model_Quat13(dt, initial_state(i), i), DRONE_PARAM("DIATONE")); % unit quaternionのプラントモデル : for sim
@@ -71,9 +75,10 @@ for i = 1:N
     %agent(i) = WHILL(Model_Three_Vehicle(dt,initial_state(i),i),NULL_PARAM()); % for exp % 機体番号（ESPrのIP）
     if fOffline
         initial_state(i).p = [0;0];
+    else
+        initial_state(i).p = [1;-1];%[92;1];%
     end
-     initial_state(i).p = [1;-1];%[92;1];%
-    %              initial_state(i).p = [0;0];%offline
+%      initial_state(i).p = [0;0];%offline
      initial_state(i).q = 0;%pi/2-0.05;
      initial_state(i).v = 0;
     agent(i) = WHILL(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE3","struct","additional",struct("K",diag([0.9,1]),"D",0.1)));                % euler angleのプラントモデル : for sim
@@ -134,8 +139,9 @@ for i = 1:N
   %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
   %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
   %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-  %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"]));                                                                    % （剛体ベース）EKF
-  %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
+%   agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p","q","v"]));  
+  %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"])); % （剛体ベース）EKF
+%   agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q","v"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
   %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
   %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
   %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
@@ -171,7 +177,7 @@ for i = 1:N
   %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
   %agent(i).set_property("controller", struct("type", "TSCF_VEHICLE", "name", "tscf", "param", struct("F1", [1.0000 1.7321] * 3/4, "F2", [0.1000 0.4583]))); %)));
   %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
-  %agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
+%   agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
   %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
   %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
   %agent(i).set_property("controller", Controller_PID(dt)); % not work for drone
