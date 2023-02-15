@@ -58,13 +58,10 @@ syms t real
 % y = 0;
 
 %% syamen
-zt = 0.5; % 減衰係数？
-z = 2*exp(-t/zt)+0.3;
-% x = 6/100 * t -3/10;
-% x = -2477/10000 * exp(-t/0.4); %+ 2477/10000;x
-x = -exp(-t/zt);
-% z = 2*exp(-(x)/zz)+0.05;
-y = 0;
+% zt = 0.5; % 減衰係数？
+% z = 2*exp(-t/zt)+0.3;
+% x = -exp(-t/zt);
+% y = 0;
 
 %% landing liner
 % x = 6/100*t - 2.7;
@@ -76,6 +73,18 @@ y = 0;
 % z = 0.5;
 % z = (t-1)^2 + 0.05;
 
+a = 0.81;
+b = 0.14;
+c = 1.0;
+n = 5;
+xmax = sqrt(-log(2*exp(-a^2)-1)/b^2);
+r0 = 0.1*xmax;
+T = 10*pi;
+r = r0 + sqrt(-log(2*exp(-a^2) - exp(-b^2*xmax^2*sin((2*pi*t/T-pi/2)*n/2)^2)))/c;
+x = r*sin(2*pi*t/T);
+y = r*cos(2*pi*t/T);
+
+z = 1;
 %%
 ref=@(t)[x;y;z;0];  % xyz yaw
 end
