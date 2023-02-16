@@ -55,7 +55,7 @@ classdef EKF < ESTIMATOR_CLASS
 %             if isempty(obj.y.list)
 %                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
 %             end
-            state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
+%             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             p = model.param;
             if ~isempty(param)
                 F=fieldnames(param);
@@ -70,14 +70,23 @@ classdef EKF < ESTIMATOR_CLASS
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
             C = obj.JacobianH(x,p);
 
-            if norm(obj.y.q(3)-model.state.q(3)) > pi
-                if obj.y.q(3) > 0
+%             if norm(obj.y.q(3)-model.state.q(3)) > pi
+%                 if obj.y.q(3) > 0
+%                     model.state.set_state("q",model.state.q+[0;0;2*pi]);
+%                 else
+%                     model.state.set_state("q",model.state.q-[0;0;2*pi]);
+%                 end
+%                 xh_pre = model.state.get();
+%             end
+            if norm(obj.y.q-model.state.q) > pi
+                if obj.y.q > 0
                     model.state.set_state("q",model.state.q+[0;0;2*pi]);
                 else
                     model.state.set_state("q",model.state.q-[0;0;2*pi]);
                 end
                 xh_pre = model.state.get();
             end
+
 
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % 事前誤差共分散行列
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % カルマンゲイン更新
