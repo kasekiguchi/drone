@@ -32,7 +32,7 @@ else
             clear initial_state
             initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
         else
-            arranged_pos = arranged_position([1, 1], N, 0, 1);
+            arranged_pos = arranged_position([0, 0], N, 0, 0);
             initial_state(i).p = arranged_pos(:, i);
             initial_state(i).q = [1; 0; 0; 0];
             initial_state(i).v = [0; 0; 0];
@@ -129,10 +129,11 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
     agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[0;0;1]));
+%     agent(i).set_property("reference",Reference_Time_Varying("Komatsu_study_trajectory",[0;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{8,[0;0;1.2],[1,1,0.4]})); % 時変な目標状態
-%     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+%     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
@@ -146,9 +147,9 @@ for i = 1:N
             fApproxZ = 10;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
             fTanh1Z = 1;%tanhが一つか:1 tanh2:~1
             fApproxXY = 10;%%%xy近似するか:1 else:~1
-            fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
+            fTanh1XY = 10;%%% tanh1:1 or tanh2 :~1
             %FTは誤差が大きいとxyのみに適用でも発散するので想定する誤差に合わせてalphaを調整する必要がある
-            alpha = 0.85;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            alpha = 0.9;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
             approxRangeZ=[0 0.2];%近似する範囲z
             approxRangeXY=[0 1];%近似する範囲xy
 %             agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
