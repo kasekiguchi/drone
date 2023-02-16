@@ -34,6 +34,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             obj.k = param.k;
             obj.dt = model.dt; % tic time
             obj.result.P = param.P;%covariance
+            obj.result.u = [];
             obj.NLP = param.NLP;%Number of Line Param
             obj.constant = param.constant;
             %------------------------------------------
@@ -223,10 +224,11 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
 
-            fisher = fisher();
+%             obj.result.Fisher = fisher(line_param,obj,sensor,u);
             % return values setting
             obj.result.state.set_state(Xh(1:obj.n));
             obj.result.estate = Xh;
+            obj.result.u = u;
             %obj.result.G = G;
             obj.result.map_param = obj.map_param;
             obj.result.AssociationInfo = obj.UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), obj.map_param, measured.ranges,measured.angles);
@@ -283,7 +285,20 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             l.y = reshape(y',numel(y),1);
         end
 
-        function evFim = fisher(param)
+        function evFim = fisher(param,obj,sensor,u)
+            param.phi = sensor.angle;
+            param.dis = param.d;
+            RangeGain = 10;
+            SensorRange = obj.constant.SensorRange;
+            NoiseR = 1e-2;
+            X = [obj.result.estate;u(1,1)];
+            if isempty(obj.result.u)
+                a = 0;
+            else
+                a = (u(1,1)-obj.result.u(1,1))/obj.dt;
+            end
+            U = [a;u(2,1)];
+            param.dt = obj.dt;
             t1 = param.phi;
             t2 = param.alpha;
             [~,tth]=min(abs(t1-t2),[],2);
@@ -291,7 +306,8 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             H = (param.dis(:) - X(1,1).*cos(param.alpha(:)) - X(2,1).*sin(param.alpha(:)))./cos(param.phi(tth)' - param.alpha(:) + X(3,1));%observation
         %     RangeLogic = H<SensorRange;
             RangeLogic = (tanh(RangeGain*(SensorRange - H))+1)/2;%センサレンジの考慮 zeta
-            Fim = RangeLogic(1) * FIM_ObserbSubAOmegaRungeKutta(X(1,1), X(2,1), X(3,1), X(4,1),U(2,1),U(1,1),param.dt, param.dis(1), param.alpha(1), param.phi(1));
+%             FIM_ObserbSubAOmegaRungeKutta_a = FIM_ObserbSubAOmegaRungeKutta(X(1,1), X(2,1), X(3,1), X(4,1),U(2,1),U(1,1),param.dt, param.dis(1), param.alpha(1), param.phi(1));
+            Fim = RangeLogic(1) * obj.FIM_ObserbSubAOmegaRungeKutta(X(1,1), X(2,1), X(3,1), X(4,1),U(2,1),U(1,1),param.dt, param.dis(1), param.alpha(1), param.phi(1));
             obFim = RangeLogic(1) * FIM_Observe(X(1,1), X(2,1), X(3,1), param.dis(1), param.alpha(1), param.phi(1));
             for i = 2:length(param.dis)
                 Fim = Fim + RangeLogic(i) * FIM_ObserbSubAOmegaRungeKutta(X(1,1), X(2,1), X(3,1), X(4,1),U(2,1),U(1,1),param.dt, param.dis(i), param.alpha(i), param.phi(i));
@@ -306,6 +322,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             InvobFim = inv(obFim);
             evFim(1,1) = trace(InvobFim)*trace(InvFim);%評価値計算
         end
+
         function APP = FIM_ObserbSubAOmegaRungeKutta(x,y,theta,v,omega,a,t,d1,alpha1,phi1)
             %FIM_OBSERBSUBAOMEGARUNGEKUTTA
             %    APP = FIM_OBSERBSUBAOMEGARUNGEKUTTA(X,Y,THETA,V,OMEGA,A,T,D1,ALPHA1,PHI1)
@@ -370,6 +387,60 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             t56 = t53+t55;
             t57 = t28.*t51.*t56;
             APP = [t29.*t51.^2,t57;t57,t56.^2];
+        end
+        function eval = GetobjectiveFimEval(obj,x)
+            % モデル予測制御の評価値を計算するプログラム
+            params = obj.param;
+            NoiseR = obj.NoiseR;
+            SensorRange = obj.SensorRange;
+            RangeGain= obj.RangeGain;
+            %-- MPCで用いる予測状態 Xと予測入力 Uを設定
+            X = x(1:params.state_size, :);
+            U = x(params.state_size+1:params.state_size+params.input_size, :);
+            % S = x(params.total_size+1:end,:);
+            %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
+            tildeX = X - params.Xr;
+            %     tildeU = U - params.Ur;
+            tildeU = U;
+            %
+            evFim = zeros(1,params.H);
+            evObFim = zeros(1,params.H);
+            for j = 1:params.H
+                t1 = params.phi;
+                t2 = params.alpha;
+                [~,tth]=min(abs(t1-t2),[],2);
+                
+                H = (params.dis(:) - X(1,j).*cos(params.alpha(:)) - X(2,j).*sin(params.alpha(:)))./cos(params.phi(tth)' - params.alpha(:) + X(3,j));%observation 
+            %     RangeLogic = H<SensorRange;
+                RangeLogic = (tanh(RangeGain*(SensorRange - H))+1)/2;
+            %     Fim = RangeLogic(1) * FIM_ObserbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
+                Fim = RangeLogic(1) * obj.FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j),X(4,j),U(2,j),U(1,j),params.dt, params.dis(1), params.alpha(1), params.phi(1));
+                ObFim = RangeLogic(1) * obj.FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(1), params.alpha(1), params.phi(1));
+                for i = 2:length(params.dis)
+                    Fim = Fim + RangeLogic(i) * obj.FIM_ObserbSubAOmegaRungeKutta(X(1,j), X(2,j), X(3,j),X(4,j),U(2,j),U(1,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
+            %         Fim = Fim + RangeLogic(i) * FIM_Ob    serbSub(X(1,j), X(2,j), X(3,j), X(4,j),U(2,j),params.dt, params.dis(i), params.alpha(i), params.phi(i));
+                    ObFim = ObFim + RangeLogic(i) * obj.FIM_Observe(X(1,j), X(2,j), X(3,j), params.dis(i), params.alpha(i), params.phi(i));
+                end
+                Fim = (1/(2*NoiseR))*(Fim+1e-2*eye(2));
+                ObFim = (1/(NoiseR))*(ObFim + 1e-2*eye(3));%[ObFim + [1e-2,1e-2,1e-2;1e-2,1e-2,1e-2;1e-2,1e-2,1e-2]]);
+                InvFim = [Fim(2,2) -Fim(1,2); -Fim(2,1), Fim(1,1)]/(det(Fim));
+                InvObFim = inv(ObFim);
+            %     evFim(1,j) = max(eig(InvFim));
+            evFim(1,j) = trace(InvObFim)*trace(InvFim);
+            %evObFim(1,j) = trace(InvObFim);
+            end
+            %-- 状態及び入力のステージコストを計算
+            stageState = arrayfun(@(L) tildeX(:, L)' * params.Q * tildeX(:, L), 1:params.H);
+            stageInput = arrayfun(@(L) tildeU(:, L)' * params.R * tildeU(:, L), 1:params.H);
+            % stageSlack = arrayfun(@(L) S(:, L)' * params.WoS * S(:,L), 1:params.H);
+            eval.stageevFim = evFim* params.T *evFim';
+            %-- 状態の終端コストを計算
+            eval.terminalState = tildeX(:, end)' * params.Qf * tildeX(:, end);
+            %-- 評価値計算
+            eval.StageState = sum(stageState);
+            eval.StageInput = sum(stageInput);
+            % eval.StageSlack = sum(stageSlack);
+            eval.stageeObFim = 1;%evObFim* params.T * evObFim';
         end
     end
 end
