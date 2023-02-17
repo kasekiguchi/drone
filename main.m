@@ -6,6 +6,7 @@ cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
+
 userpath('clear');
 
 %% general setting
@@ -210,11 +211,11 @@ hold on
 plot(polyshape([2 2 2.5 2.5],[0.5 -1 -1 0.5]))%一個目
 % wall1 = [2 -1;2 0.5;2.5 0.5;2.5 -1];
 % plot(polyshape([4 4 4.5 4.5],[3 0 0 3]))%二個目
-xlabel('x')
-ylabel('y')
+xlabel('x [m]')
+ylabel('y [m]')
 legend("estimate", "reference", "obstacle");
 % legend("estimate", "reference", "obstacle1","obstacle2");
-hold off
+hold off 
 % agent(1).reference.timeVarying.show(logger)
 
 %%

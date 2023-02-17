@@ -531,11 +531,11 @@ methods
                         case "input"
                             title(strcat("Input u of agent", string(n)));
                         otherwise
-                            title(ps(2));
+                            
                     end
 
                     if ps(1) ~= "t"
-                        title(strcat("phase plot : ", string(param)));
+%                         title(strcat("phase plot : ", string(param)));
 
                         switch att
                             case "s"
