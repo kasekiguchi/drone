@@ -127,20 +127,12 @@ function do(obj, u, varargin)
 %                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
 %                     obj.state.eq = quat2eul(obj.state.qq);
                 case 'f' % run
-%                      obj.msg.linear.x = 0.025;
-                     obj.msg.linear.x = u(1);
-                     obj.msg.linear.y = 0.0;
+                    obj.msg.linear.x = u(1);
+                    obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = u(2);
-%                     state = obj.connector.getData();
-%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
-%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.state.eq = quat2eul(obj.state.qq);
             end
 
         else % 緊急時

@@ -119,7 +119,7 @@ for i = 1:N
   
   if fExp
       agent(i).set_property("sensor",Sensor_ROS(struct('DomainID',30)));
-      agent(i).set_property("sensor",Sensor_Motive_ROS(struct('DomainID',30)));
+%       agent(i).set_property("sensor",Sensor_Motive_ROS(struct('DomainID',30)));
   else
       agent(i).set_property("sensor",Sensor_LiDAR(i));
   end
@@ -141,7 +141,7 @@ for i = 1:N
   %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
 %   agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p","q","v"]));  
   %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"])); % （剛体ベース）EKF
-  agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, dt]),"Q",diag([1E3,1E3,1E5]))); % for vehicle model
+%   agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, dt]),"Q",diag([1E3,1E3,1E5]))); % for vehicle model
   %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
   %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
   %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ

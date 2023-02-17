@@ -5,12 +5,16 @@ for i = 1:logger.k
     resultplot.eY(i) = logger.Data.agent.estimator.result{1,i}.state.p(2,1);
     resultplot.eq(i) = logger.Data.agent.estimator.result{1,i}.state.q;
     if fExp
-        resultplot.pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
-%         resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(2,1);
-%         resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
-        %2_6izenDat
-        resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
-        resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.eq(1,2);
+%         resultplot.pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
+% %         resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(2,1);
+% %         resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
+%         %2_6izenDat
+%         resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
+%         resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.eq(1,2);
+%fmotive
+    resultplot.pX(i) = logger.Data.agent.sensor.result{1, i}.rigid.p(1,1);
+    resultplot.pY(i) = logger.Data.agent.sensor.result{1, i}.rigid.p(2,1);
+    resultplot.pq(i) = quat2eul(logger.Data.agent.sensor.result{1, i}.rigid.q);
     end
     resultplot.rX(i) = logger.Data.agent.reference.result{1,i}.state.p(1,1);
     resultplot.rY(i) = logger.Data.agent.reference.result{1,i}.state.p(2,1);
