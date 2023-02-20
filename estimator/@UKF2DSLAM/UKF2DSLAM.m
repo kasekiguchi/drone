@@ -34,7 +34,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             obj.k = param.k;
             obj.dt = model.dt; % tic time
             obj.result.P = param.P;%covariance
-            obj.result.u = [];
+%             obj.result.u = [];
             obj.NLP = param.NLP;%Number of Line Param
             obj.constant = param.constant;
             %------------------------------------------
@@ -81,12 +81,12 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             %---センサ情報の処理-------------------------------------------------------------%
             % SLAM algorithm
             sensor = obj.self.sensor.result;%scan data
-            for i = 1:length(sensor.length)
-                if sensor.length(1,i) >= 3.0
-                    sensor.length(1,i) = 0;
-%                     data.intensities(i,1) = 0;
-                end
-            end
+%             for i = 1:length(sensor.length)
+%                 if sensor.length(1,i) >= 3.0
+%                     sensor.length(1,i) = 0;
+% %                     data.intensities(i,1) = 0;
+%                 end
+%             end
             measured.ranges = sensor.length;
             measured.angles = sensor.angle + PreXh(3); %laser angles.姿勢角を基準とする．絶対角
             measured.angles(sensor.length==0) = 0;
@@ -224,11 +224,11 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
                 obj.result.P = obj.result.P(exist_flag, exist_flag);
             end
 
-            obj.result.Fisher = fisher(line_param,obj,sensor,u);
+%             obj.result.Fisher = fisher(line_param,obj,sensor,u);
             % return values setting
             obj.result.state.set_state(Xh(1:obj.n));
             obj.result.estate = Xh;
-            obj.result.u = u;
+%             obj.result.u = u;
             %obj.result.G = G;
             obj.result.map_param = obj.map_param;
             obj.result.AssociationInfo = obj.UKFMapAssociation(Xh(1:obj.n),Xh(obj.n+1:end), obj.map_param, measured.ranges,measured.angles);

@@ -150,7 +150,7 @@ methods
             obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
             obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
             obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
-            obj.Data.agent(n).plant.result{obj.k} = agent(n).plant.result;
+%             obj.Data.agent(n).plant.result{obj.k} = agent(n).plant.result;
 
             if isfield(agent(n).sensor.result, "state")
                 obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
