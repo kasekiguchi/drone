@@ -11,8 +11,8 @@ end
 %% 電圧，電流，回転数(234)
 clear Y
 T = logger.Data.t(1:logger.k);
-name_class = ["current";"voltage";"rpm"];
-name_legend = ["current [A]";"voltage [V]";"morter speed [rpm]"];
+name_class = ["voltage";"current";"rpm"];
+name_legend = ["voltage [V]";"current [A]";"morter speed [rpm]"];
 for name_i = 1:length(name_class)
     figure(name_i+1)
     hold on
@@ -22,7 +22,7 @@ for name_i = 1:length(name_class)
 %     figure(2)
 %     subplot(1,3,name_i);
     plot(T(1:logger.k),Y,'LineWidth',1)
-%     txt = {''};
+    txt = {''};
 %     if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
 %         Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
 %         txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
@@ -33,7 +33,7 @@ for name_i = 1:length(name_class)
 %     end
 %     if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
 %         Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-%         txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+%         txt = {txt{:}, '{\color[rgb]{1.0,0.7,1.0}■} :Landing phase'};
 %     end
 
 %     if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
@@ -49,17 +49,21 @@ for name_i = 1:length(name_class)
 %             Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL > 65, 1, 'last')]), 'y'); % landing phase
 %         end
 %     end
-% if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
-%     Square_coloring(logger.Data.t([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
+    txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
+end
+% 
+% for plot_i = 1:logger.k%天井センサスイッチ用
+%     sensor_switch(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.switch;
+% end
+% if length([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
 % end
 
-for plot_i = 1:logger.k%天井センサスイッチ用
-    sensor_switch(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.switch;
-end
-if length([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]) == 2
-    Square_coloring(logger.Data.t([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-end
-
+    XLim = get(gca, 'XLim');
+    YLim = get(gca, 'YLim');
+    text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
     legend('morter 1','morter 2','morter 3','morter 4')
     xlabel('time [s]')
     ylabel(name_legend(name_i))
@@ -72,7 +76,7 @@ end
 sum = 0;
 for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 108, 1)-1
  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
-end    
+end
 %% 電力(5)
 figure(5)
 clear T Y
@@ -91,34 +95,49 @@ txt = {''};
 %     Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
 %     txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
 % end
-if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2
-    Square_coloring(logger.Data.t([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-    txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
-end
+% if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+% end
 % if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
 %     Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
 % end
+if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
+    txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
+end
+XLim = get(gca, 'XLim');
+YLim = get(gca, 'YLim');
+text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+
+
 legend('morter 1','morter 2','morter 3','morter 4')
 xlabel('time [s]')
 ylabel('power [W]')
+ax = gca;
+ax.FontSize = 15;
 hold off
 %% z throttle　sr(6)
-clear T Y
+clear T Y VL
 T = logger.Data.t(1:logger.k);
 figure(6)
-name_class = ["ceiling";"reference";"sensor";"throttle"];
-%name_class = ["ceiling";"sensor";"throttle"];
+name_class = ["ceiling";"reference";"sensor";"VL53L1X";"throttle"];
+%name_class = ["ceiling";"sensor";"throttle";"VL53L1X"];
 hold on
-plot([0 60],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
+plot([0 350],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
 Y=[];
 for plot_i = 1:logger.k%グラフのプロット
     Y(plot_i,1) = logger.Data.agent.reference.result{1, plot_i}.state.p(3); 
     Y(plot_i,2) = logger.Data.agent.sensor.result{1, plot_i}.state.p(3);
     Y(plot_i,3) = logger.Data.agent.inner_input{1, plot_i}(3);
+    VL(plot_i) = logger.Data.agent.sensor.result{1, plot_i}.distance(1);
 end
 plot(T(1:logger.k),Y(:,1),'LineWidth',4,'Color',[0.39,0.83,0.07])
 plot(T(1:logger.k),Y(:,2),'LineWidth',2.5,'Color',[0.85,0.33,0.10])
-ylim([0 3])
+plot(T(1:logger.k),VL/1000,'LineWidth',2,'Color',[0.93,0.69,0.13])
+% plot([0 60],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
+xlim([0 60])
+ylim([0 3.1])
 xlabel('time [s]')
 ylabel('z [m]')
 clear txt
@@ -130,27 +149,35 @@ txt = {''};
 % if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
 %     Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
 %     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Flight phase'};
-% end
+% % end
 % if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
-%     Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
-%     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Landing phase'};
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{1.0,0.7,1.0}■} :Landing phase'};
+% end
+% if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
+% end
+% 
+% if length([find(Y(:,2) >= 2.95, 1), find(Y(:,2) >= 2.95, 1, 'last')]) == 2%天井接地状態用
+%     Square_coloring(logger.Data.t([find(Y(:,2) >= 2.95, 1), find(Y(:,2) >= 2.95, 1, 'last')]), [0.30,0.75,0.93]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.30,0.75,0.93}■} :On ceiling phase'};
 % end
 
-if length([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]) == 2%推力ダウン
-    Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
-    txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Landing phase'};
-end
+% if length([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]) == 2%推力ダウン
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Landing phase'};
+% end
 
 % for plot_i = 1:logger.k%天井センサスイッチ用
 %     sensor_VL(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.distance(1);
 %     sensor_VL_e(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.distance(3);
 % end
-% if length([find(sensor_VL_e <= 55, 1), find(sensor_VL_e <= 55, 1, 'last')]) == 2
-%     Square_coloring(logger.Data.t([find(sensor_VL_e <= 55, 1), find(sensor_VL_e <= 55, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+% if length([find(VL <= 55, 1), find(VL <= 55, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(VL <= 55, 1), find(VL <= 55, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :On ceiling phase'};
 % end
 
-XLim = get(gca, 'XLim');
-YLim = get(gca, 'YLim');
 % 
 % if length([find(Y(:,2) > 2.93, 1), find(Y(:,2) > 2.93, 1, 'last')]) == 2%12月実験用
 %     margin = 0.002*(YLim(2)-YLim(1));
@@ -159,9 +186,13 @@ YLim = get(gca, 'YLim');
 %     txt = {txt{:}, '{\color[rgb]{1.00,0.70,1.00}■} : on ceiling phase'};
 % end
 % text(XLim(2),YLim(2), txt)
+XLim = get(gca, 'XLim');
+YLim = get(gca, 'YLim');
+% text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
 yyaxis right
 plot(T(1:logger.k),Y(:,3),'LineWidth',1.5,'Color',[0.00,0.45,0.74])
 ylabel('inner input')
+ylim([0 700])
 legend(name_class)
 legend('Location','best')
 ax = gca;
@@ -410,3 +441,85 @@ legend('Location','best')
 ax = gca;
 ax.FontSize = 15;
 hold off
+%% 電力，回転数，throttle，平均
+clear T
+T=[200 250];
+Y=0;
+W=0;
+throttle=0;
+length_t = find(logger.Data.t >= T(2) ,1) - find(logger.Data.t >= T(1), 1);
+for plot_i = find(logger.Data.t >= T(1), 1):find(logger.Data.t >= T(2) ,1)
+    Y = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm + Y;
+    W = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros_t.current + W;
+    throttle = logger.Data.agent.inner_input{1, plot_i}(3)+throttle;
+end
+rpm_average = Y/length_t
+W_average = W/length_t/10000
+throttle_average = throttle/length_t
+mean(rpm_average)
+mean(W_average)
+%% (15)電力合計
+figure(15)
+clear T Y
+T = logger.Data.t(1:logger.k);
+hold on
+for plot_i = 1:logger.k%グラフのプロット
+    Y(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros_t.current;
+end
+% Y_all=mean(Y,2);
+Y_all=sum(Y,2);
+% plot(T(1:logger.k),Y/10000,'LineWidth',1)
+plot(T(1:logger.k),Y_all/10000,'LineWidth',1)
+txt = {''};
+if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
+    txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+end
+if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
+    txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
+end
+if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+    txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+end
+% if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2  %VL
+%     Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
+% end
+% if length([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]) == 2%推力ダウン
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Landing phase'};
+% end
+% legend('morter 1','morter 2','morter 3','morter 4')
+xlabel('time [s]')
+ylabel('power [W]')
+ax = gca;
+ax.FontSize = 15;
+hold off
+%% figure(16)(17)
+clear T Y
+figure(16)
+T = logger.Data.t(1:logger.k);
+lamda = 0.99;
+Y(1,:) = logger.Data.agent.sensor.result{1, 1}.ros_t.voltage;
+for plot_i = 2:logger.k%グラフのプロット
+    Y(plot_i,:) = lamda*Y(plot_i-1,:) + (1-lamda)*logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.';
+end
+Y_ave = mean(Y,2)/100;
+plot(T,Y)
+clear Y
+figure(17)
+for plot_i = 1:logger.k%グラフのプロット
+    Y(plot_i,1) = logger.Data.agent.reference.result{1, plot_i}.state.p(3); 
+    Y(plot_i,2) = logger.Data.agent.sensor.result{1, plot_i}.state.p(3);
+end
+hold on
+k = find(Y(:,1) == 1.5, 1):find(T < 300, 1, 'last');
+% k = find(Y_ave > 19, 1):find(Y_ave > 19, 1, 'last');
+% plot(T(k),Y(k,1),'LineWidth',4,'Color',[0.39,0.83,0.07])
+% plot(T(k),Y(k,2),'LineWidth',2.5,'Color',[0.85,0.33,0.10])
+plot(Y_ave(k),Y(k,1)-Y(k,2),'*')%,'LineWidth',2,'Color',[0.93,0.69,0.13])
+polyfit(Y_ave,Y(:,1)-Y(:,2),1)
+lsline
+hold off
+

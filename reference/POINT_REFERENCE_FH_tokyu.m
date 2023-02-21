@@ -152,7 +152,7 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
 %                 else
 %                     obj.result.state.p = obj.self.reference.result.state.p;
 %                 end
-            elseif strcmp(cha,'y') % landing phase
+            elseif strcmp(cha,'y') % landing phase%注意機体流れる→landing_speedは普通のlandingには使わない方が良
                 if strcmp(obj.flag,'y')
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,1.3);
                 else% 初めてlanding に入ったとき
