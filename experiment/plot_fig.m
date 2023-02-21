@@ -49,10 +49,10 @@ for name_i = 1:length(name_class)
 %             Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL > 65, 1, 'last')]), 'y'); % landing phase
 %         end
 %     end
-if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
-    Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
-    txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
-end
+% if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
+% end
 % 
 % for plot_i = 1:logger.k%天井センサスイッチ用
 %     sensor_switch(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.switch;
@@ -63,7 +63,7 @@ end
 
     XLim = get(gca, 'XLim');
     YLim = get(gca, 'YLim');
-    text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+%     text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
     legend('morter 1','morter 2','morter 3','morter 4')
     xlabel('time [s]')
     ylabel(name_legend(name_i))
@@ -102,13 +102,13 @@ txt = {''};
 % if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
 %     Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
 % end
-if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
-    Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
-    txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
-end
-XLim = get(gca, 'XLim');
-YLim = get(gca, 'YLim');
-text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+% if length([find(logger.Data.phase == 104, 1), find(logger.Data.phase == 104, 1, 'last')]) == 2%推力down用
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
+% end
+% XLim = get(gca, 'XLim');
+% YLim = get(gca, 'YLim');
+% text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
 
 
 legend('morter 1','morter 2','morter 3','morter 4')
@@ -506,20 +506,22 @@ for plot_i = 2:logger.k%グラフのプロット
     Y(plot_i,:) = lamda*Y(plot_i-1,:) + (1-lamda)*logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.';
 end
 Y_ave = mean(Y,2)/100;
-plot(T,Y)
+plot(T,Y_ave)
 clear Y
 figure(17)
 for plot_i = 1:logger.k%グラフのプロット
     Y(plot_i,1) = logger.Data.agent.reference.result{1, plot_i}.state.p(3); 
     Y(plot_i,2) = logger.Data.agent.sensor.result{1, plot_i}.state.p(3);
+    V(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage_average.';
 end
 hold on
 k = find(Y(:,1) == 1.5, 1):find(T < 300, 1, 'last');
 % k = find(Y_ave > 19, 1):find(Y_ave > 19, 1, 'last');
 % plot(T(k),Y(k,1),'LineWidth',4,'Color',[0.39,0.83,0.07])
 % plot(T(k),Y(k,2),'LineWidth',2.5,'Color',[0.85,0.33,0.10])
-plot(Y_ave(k),Y(k,1)-Y(k,2),'*')%,'LineWidth',2,'Color',[0.93,0.69,0.13])
-polyfit(Y_ave,Y(:,1)-Y(:,2),1)
-lsline
+plot(T(k),Y(k,3),'LineWidth',2.5,'Color',[0.85,0.33,0.10])
+% plot(Y_ave(k),Y(k,1)-Y(k,2),'*')%,'LineWidth',2,'Color',[0.93,0.69,0.13])
+% polyfit(Y_ave,Y(:,1)-Y(:,2),1)
+% lsline
 hold off
 

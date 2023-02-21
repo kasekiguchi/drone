@@ -67,12 +67,14 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
 %                     Param{2}(2) = Param{2}(2)/2;
 %                     obj.result.state.p = Param{2};
 %                 end
-            elseif strcmp(cha,'h') % 天井張り付き
+            elseif strcmp(cha,'h')||strcmp(cha,'y') % 天井張り付き
                 if obj.self.sensor.result.switch == 1%センサの値から推力down
+                    %reference高さの算出
+                    z_ref = 2.7+obj.self.sensor.result.ros_t.voltage_average*(-0.1018)+2.4301;
                      if strcmp(obj.flag,'y')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,2.7);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,z_ref);
                     else% 初めてlanding に入ったとき
-                        [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.04,2.7);
+                        [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.04,z_ref);
                      end
                      obj.flag='y';
                 else
@@ -85,11 +87,11 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                     end
                     obj.flag='h';
                 end
-%                 obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
-%                 obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
-                obj.result.state.p(1)=Param{2}(1);
-                obj.result.state.p(2)=Param{2}(2);
-%                 obj.result.state.p(4)=obj.self.estimator.result.state.q(3);
+                obj.result.state.p(1)=obj.self.estimator.result.state.p(1);
+                obj.result.state.p(2)=obj.self.estimator.result.state.p(2);
+%                 obj.result.state.p(1)=Param{2}(1);
+%                 obj.result.state.p(2)=Param{2}(2);
+                obj.result.state.p(4)=obj.self.estimator.result.state.q(3);
 %                 obj.result.state.p(1)=Param{2}(1);%ホバリング用
 %                 obj.result.state.p(2)=Param{2}(2);
             elseif strcmp(cha,'f') % flight phase (時間関数)
