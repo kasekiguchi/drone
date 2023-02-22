@@ -66,9 +66,9 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                 if norm(Param{2}-obj.self.reference.result.state.p(1:3)) > 0.01
                     
                     yaw = atan(Param{2}(2)/Param{2}(1));
-                    x = obj.self.estimator.result.state.p(1);
-                    y = obj.self.estimator.result.state.p(2);
-                    z = obj.self.estimator.result.state.p(3);
+                    x = 0;
+                    y = 0;
+                    z = 1;
                     obj.result.state.p = [x;y;z];
                 else
                     obj.result.state.p = obj.self.reference.result.state.p;
@@ -178,10 +178,10 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                 if norm([0;0;1]-obj.self.reference.result.state.p(1:3)) > 0.01
                     v = 0.25;
                     yaw = atan(obj.self.estimator.result.state.p(2)/obj.self.estimator.result.state.p(1));
-                    x = -v*cos(yaw)*t+obj.self.estimator.result.state.p(1);
-%                     x = 0;
-%                     y = abs(v*sin(yaw))*t+obj.self.estimator.result.state.p(2);
-                    y = 0;
+%                     x = -v*cos(yaw)*t+obj.self.estimator.result.state.p(1);
+                    x = 0;
+                    y = abs(v*sin(yaw))*t+obj.self.estimator.result.state.p(2);
+%                     y = 0;
                     z = Param{2}(3);
                     obj.result.state.p = [x;y;z];
                 else
