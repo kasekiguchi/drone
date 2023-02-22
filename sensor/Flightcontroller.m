@@ -8,6 +8,8 @@ classdef Flightcontroller < SENSOR_CLASS
         self
         fState % subscribeにstate情報を含むか
         flightdata
+        lamda
+        flag
     end
     
     methods
@@ -25,6 +27,8 @@ classdef Flightcontroller < SENSOR_CLASS
 %                 obj.result.state.type = length(self.model.state.q);
 %             end
             end
+            obj.lamda = 0.99;
+            obj.flag = [];
         end
         
         function result=do(obj,~)
@@ -45,6 +49,11 @@ classdef Flightcontroller < SENSOR_CLASS
             obj.flightdata.ros_t.voltage = data.data(5:8,1);
             obj.flightdata.ros_t.current = data.data(9:12,1);
             obj.flightdata.ros_t.rpm = data.data(13:16,1);
+            obj.flightdata.ros_t.voltage_average = mean(obj.flightdata.ros_t.voltage)/100;
+            if ~isempty(obj.flag) 
+                obj.flightdata.ros_t.voltage_average = mean(obj.lamda*obj.self.sensor.result.ros_t.voltage_average + (1-obj.lamda)*obj.flightdata.ros_t.voltage_average);
+            end
+            obj.flag = 1;
 %             obj.flightdata.ros_t.layout = data.layout;
 %             obj.flightdata.ros_t.MessageType = data.MessageType;
 %             F=fieldnames(data);

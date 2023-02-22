@@ -40,7 +40,7 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
 
             cha = get(FH, 'currentcharacter');
 
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't'&& cha ~= 'n'&& cha ~= 'd')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't'&& cha ~= 'n'&& cha ~= 'y' && cha ~= 'h')
                 cha = obj.flight_phase;
             end
 
@@ -75,28 +75,13 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
                 % uthr =uthr + u_throttle_offset ;%sign(uthr)*min(abs(uthr),100)+ u_throttle_offset;
                 obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
-            elseif cha == 'n'
+            elseif cha == 'n' || cha == 'y' || cha == 'h'
                 throttle_offset = obj.param.th_offset;
                 T_thr = sum(input);
                 uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset);
                 uroll =obj.param.roll_offset;
                 upitch = obj.param.pitch_offset;
                 uyaw =obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
-                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
-            elseif cha == 'd'
-                throttle_offset = obj.param.th_offset;
-                wh = obj.self.estimator.result.state.w;
-                whn = obj.self.model.state.w;% １時刻先の事前予測
-                T_thr = sum(input); % T_thr = input(1);
-                uroll = obj.param.gain(1) * (whn(1) - wh(1));
-                upitch = obj.param.gain(2) * (whn(2) - wh(2));
-                uthr = 350; % hovering からの偏差をゲイン倍する
-                % ホバリング時から変分にゲイン倍する
-                uyaw = obj.param.gain(3) * (whn(3) - wh(3));
-                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset; 
-                upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
-                uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
-                % uthr =uthr + u_throttle_offset ;%sign(uthr)*min(abs(uthr),100)+ u_throttle_offset;
                 obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
             else
                 obj.result = [obj.param.roll_offset, obj.param.pitch_offset, 0, obj.param.yaw_offset, 1000, 0, 0, 0];

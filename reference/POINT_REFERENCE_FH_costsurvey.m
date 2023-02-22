@@ -29,7 +29,7 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't'  && cha ~= 'h' && cha ~= 'm' && cha ~= 'u' && cha ~= 'z' && cha ~= 'r')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't'  && cha ~= 'h' && cha ~= 'm' && cha ~= 'u' && cha ~= 'z' && cha ~= 'r' && cha ~= 'o')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -107,7 +107,6 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                     obj.result.state.p = obj.self.reference.result.state.p;
                     t = 0;
                 end
-
             elseif strcmp(cha,'u') % flight phase (時間関数)  上移動
                 if strcmp(obj.flag,'u')   %takeoff関数を用いて1m上昇(2m地点)
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,2-obj.base_state(3),4,Param{3}-obj.base_time);
@@ -135,6 +134,10 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
 %                     obj.result.state.p = obj.self.reference.result.state.p;
 %                     t = 0;
 %                 end
+            elseif strcmp(cha,'o') % landing phase
+                obj.result.state.p = [0;0;1];
+                obj.result.state.p(4)=obj.self.estimator.result.state.q(3)+0.5;
+                obj.flag='o';
 
 
             elseif strcmp(cha,'r') %原点に戻る
@@ -152,10 +155,10 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                 if norm([0;0;1]-obj.self.reference.result.state.p(1:3)) > 0.01
                     v = 0.25;
                     yaw = atan(obj.self.estimator.result.state.p(2)/obj.self.estimator.result.state.p(1));
-%                     x = -v*cos(yaw)*t+obj.self.estimator.result.state.p(1);
-                    x = 0;
-                    y = abs(v*sin(yaw))*t+obj.self.estimator.result.state.p(2);
-%                     y = 0;
+                    x = -v*cos(yaw)*t+obj.self.estimator.result.state.p(1);
+%                     x = 0;
+%                     y = abs(v*sin(yaw))*t+obj.self.estimator.result.state.p(2);
+                    y = 0;
                     z = Param{2}(3);
                     obj.result.state.p = [x;y;z];
                 else
