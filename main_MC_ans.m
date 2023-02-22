@@ -84,8 +84,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     calT = 0;
     phase = 0;
 
-    load("Data/HL_input");
-    load("Data/HL_V");
+    %load("Data/HL_input");
+    %load("Data/HL_V");
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
@@ -204,7 +204,7 @@ end
         data.path{idx} =        agent.controller.result.path;
         data.pathJ{idx} =       agent.controller.result.Evaluationtra; % - 全サンプルの評価値
         data.pathJN{idx} =      agent.controller.result.Evaluationtra_norm;
-        data.sigma(idx) =       agent.controller.result.sigma;
+        data.sigma(idx) =       agent.controller.result.sigma(1);
         data.bestcost(idx) =    agent.controller.result.bestcost;
         data.removeF(idx) =     agent.controller.result.removeF;   % - 棄却されたサンプル数
         data.removeX{idx} =     agent.controller.result.removeX;
@@ -291,7 +291,7 @@ end
 %         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_1Y = agent.estimator.result.state.p(3)+
-%         if 
+%         if f
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
         fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
