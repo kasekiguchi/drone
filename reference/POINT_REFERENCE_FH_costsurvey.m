@@ -29,7 +29,7 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't'  && cha ~= 'h' && cha ~= 'm' && cha ~= 'u' && cha ~= 'z' && cha ~= 'r' && cha ~= 'o')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't'  && cha ~= 'h' && cha ~= 'u' && cha ~= 'z' && cha ~= 'r' && cha ~= 'o' && cha ~= 'x' && cha ~= 'y' && cha ~= 'd')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -52,6 +52,29 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                 end
                 obj.flag='t';
 
+            elseif strcmp(cha,'f') % flight phase (時間関数)  その場にいる
+               if obj.flag~='f'
+                    obj.t=[];
+                end
+                obj.flag='f';
+                if ~isempty(obj.t)    %flightからreferenceの時間を開始
+                    t = Param{3}-obj.t; 
+                else
+                    obj.t=Param{3};
+                    t = 0;
+                end
+                if norm(Param{2}-obj.self.reference.result.state.p(1:3)) > 0.01
+                    
+                    yaw = atan(Param{2}(2)/Param{2}(1));
+                    x = obj.self.estimator.result.state.p(1);
+                    y = obj.self.estimator.result.state.p(2);
+                    z = obj.self.estimator.result.state.p(3);
+                    obj.result.state.p = [x;y;z];
+                else
+                    obj.result.state.p = obj.self.reference.result.state.p;
+                    t = 0;
+                end
+
 %             elseif strcmp(cha,'f') % flight phase
 %                 obj.flag='f';
 %                 if nargin==3 % 他のreference objでの参照値がある場合
@@ -62,11 +85,11 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
 %                 else
 %                     obj.result.state.p = Param{2};
 %                 end
-           elseif strcmp(cha,'f') % flight phase (時間関数)  前移動
-               if obj.flag~='f'
+           elseif strcmp(cha,'x') % flight phase (時間関数)  前移動
+               if obj.flag~='x'
                     obj.t=[];
                 end
-                obj.flag='f';
+                obj.flag='x';
                 if ~isempty(obj.t)    %flightからreferenceの時間を開始
                     t = Param{3}-obj.t; 
                 else
@@ -85,11 +108,11 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                     t = 0;
                 end
 
-            elseif strcmp(cha,'m') % flight phase (時間関数)  右移動
-                if obj.flag~='m'
+            elseif strcmp(cha,'y') % flight phase (時間関数)  右移動
+                if obj.flag~='y'
                     obj.t=[];
                 end
-                obj.flag='m';
+                obj.flag='y';
                 if ~isempty(obj.t)    %flightからreferenceの時間を開始
                     t = Param{3}-obj.t; 
                 else
@@ -107,15 +130,15 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                     obj.result.state.p = obj.self.reference.result.state.p;
                     t = 0;
                 end
-            elseif strcmp(cha,'u') % flight phase (時間関数)  上移動
-                if strcmp(obj.flag,'u')   %takeoff関数を用いて1m上昇(2m地点)
+            elseif strcmp(cha,'z') % flight phase (時間関数)  上移動
+                if strcmp(obj.flag,'z')   %takeoff関数を用いて1m上昇(2m地点)
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,2-obj.base_state(3),4,Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
                     [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,2-obj.base_state(3),4,0);
                 end
-                obj.flag='u';
+                obj.flag='z';
 %                 obj.flag='u';
 %                 if ~isempty(obj.t)    %flightからreferenceの時間を開始
 %                     t = Param{3}-obj.t; 
@@ -166,9 +189,9 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                     t = 0;
                 end
             
-            elseif strcmp(cha,'z') % flight phase (時間関数)  上移動戻る
+            elseif strcmp(cha,'d') % flight phase (時間関数)  上移動戻る
                 if norm([0;0;9]-obj.self.reference.result.state.p(1:3)) > 0.1
-                if strcmp(obj.flag,'z')
+                if strcmp(obj.flag,'d')
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.25,1);
                 else% 初めてlanding に入ったとき
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.25,1);
@@ -177,10 +200,10 @@ classdef POINT_REFERENCE_FH_costsurvey < REFERENCE_CLASS
                     obj.result.state.p = obj.self.reference.result.state.p;
                 end                    
 
-                if obj.flag~='z'
+                if obj.flag~='d'
                     obj.t=[];
                 end
-                obj.flag='z';
+                obj.flag='d';
 
 %                 if ~isempty(obj.t)    %flightからreferenceの時間を開始
 %                     t = Param{3}-obj.t; 
