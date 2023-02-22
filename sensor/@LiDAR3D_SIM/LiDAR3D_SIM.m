@@ -193,6 +193,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       plot3(p(1), p(2), p(3), 'bx');
 %       plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 3);
       plot3(r(1), r(2), r(3),'ro');%referenceの表示
+%       plot3(obj.self.reference.tbug.edge_p(1),obj.self.reference.tbug.edge_p(2),obj.self.reference.tbug.edge_p(3),'go')
 %       scatter3(r(1),r(2),r(3),70,'filled','LineWidth',0.1);%目標軌跡
       ref_plot.MarkerEdgeColor = 'b';
       xlim([p(1) - 3, p(1) + 8]);
