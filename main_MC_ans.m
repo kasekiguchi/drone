@@ -169,16 +169,17 @@ end
             % -> 初期速度必要
             % ある程度速度が落ちたら入力切る．
 
-            Gp = [0;0;0.1];
-%             if agent.estimator.result.state.p(3) < 0.3
-%                 Gq = [0; 0.2915; 0];
-%             else
+            Gp = initial.p;
+            if agent.estimator.result.state.p(3) < 0.3
+                Gq = [0; 0.2915; 0];
+            else
                 Gq = [0; 0; 0];
-%             end
-
-            if abs(agent.estimator.result.state.v(3)) < 0.03
-                flag(1) = 1;
             end
+
+            %% 斜面着陸　入力切断条件
+%             if abs(agent.estimator.result.state.v(3)) < 0.03
+%                 flag(1) = 1;
+%             end
 
 %             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
             xr = Reference(Params, time.t, agent, Gq, Gp, phase);
@@ -282,9 +283,10 @@ end
 
         fRemove = agent.controller.result.fRemove;
 
-        if agent.estimator.result.state.p(3) < (3/10 * agent.estimator.result.state.p(1)+0.1)
-            fRemove = 1;
-        end
+        %% 斜面着陸　終了条件
+%         if agent.estimator.result.state.p(3) < (3/10 * agent.estimator.result.state.p(1)+0.1)
+%             fRemove = 1;
+%         end
 %         終了条件に傾きを導入
 %         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
@@ -332,18 +334,6 @@ set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
-% set(0,'defaultLineMarkerFaceColor',[1 1 1]);
-% set(0,'defaultFigurecolor',[1 1 1]);
-% set(groot,'defaultAxesTickLabelInterpreter', 'latex');
-% set(groot,'defaulttextinterpreter', 'latex');
-% set(groot,'defaultLegendInterpreter','latex');
-
-% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-% logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
-% logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "fig_num",1,"row_col",[2,3]);
 
 size_best = size(data.bestcost, 2);
 Edata = logger.data(1, "p", "e")';
@@ -357,7 +347,7 @@ Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 Diff = Edata - Rdata(1:3, :);
 logt = logger.data('t',[],[]);
-xmax = 1.45;
+xmax = te;
 close all
 
 % x-y
@@ -434,7 +424,7 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % tic
 % pathJ = data.pathJ;
 % for m = 1:size(pathJ, 2)
-%     pathJN{m} = normalize(pathJ{m},'range');
+%     pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]);
 % end
 % mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
 % mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
@@ -452,7 +442,7 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20230209_landing.mat', '-v7.3')
+% save('Data\20230222_landing.mat', '-v7.3')
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

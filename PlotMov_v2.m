@@ -3,17 +3,20 @@
 maxbestcost = max(data.bestcost)
 % now = datetime('now');
 % datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
-    Color_map = (169/255)*ones(1000000,3);  % 灰色のカラーマップの作成
-    % 寒色：良い評価、暖色：悪い評価
-	Color_map(1:10,:) = jet(10);            % 評価値の上から10個をカラーマップの色付け.
+    
+    %%
 %     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/20230208_v1'));
+	writerObj=VideoWriter(strcat(Outputdir,'/video/20230211_circle_v1'));
 	open(writerObj);
     tt = 0:0.1:15;
     
+    
     countMax = size(data.pathJ,2);
 	for count = 1:countMax
-        %%
+        Color_map = (169/255)*ones(data.variable_particle_num(count),3);  % 灰色のカラーマップの作成
+        % 寒色：良い評価、暖色：悪い評価
+	    Color_map(1:data.variable_particle_num(count),:) = jet(data.variable_particle_num(count));            % 評価値の上から10個をカラーマップの色付け.
+        
 %         count = 50;
         clf(figure(999))
 		fig = figure(999);
@@ -26,7 +29,7 @@ maxbestcost = max(data.bestcost)
 		% 予測経路のplot(ホライズン)
         path_count = size(data.pathJ{count},2);
 		for j = 1:path_count
-			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(pathJN{count}(1,j)*1000+0.0001),:), 'LineWidth',1);
+			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(pathJN{count}(1,j)),:), 'LineWidth',1);
 			hold on;
         end
         plot(data.state(count, 2), data.state(count, 3), '.', 'MarkerSize', 20, 'Color', 'red');

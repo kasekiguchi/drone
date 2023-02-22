@@ -51,41 +51,20 @@ function xr = Reference(params, T, Agent, Gq, Gp, phase)
         xr(1:3, h+1) = Ref(1:3);
         xr(7:9, h+1) = Ref(5:7);
         % 抑制項
-        xr(4:6, h+1) =   Gq; % 姿勢角
-        xr(10:12, h+1) = [0; 0; 0];
+        xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+        xr(10:12, h+1) = [0;0;0];
 
         xr(13:16, h+1) = params.ur;
 
-%         if phase == 1
-%             xr(1:3, h+1) = Gp;
-%             xr(7:9, h+1) = [0;0;0];
-%         end
+        %% 斜面
+        if T < 3
+            xr(1:3, h+1) = Gp;
+            xr(7:9, h+1) = [0;0;0];
+        end
 
-%         if T > 0.975
-%             xr(1:3, h+1) = Gp;
-%         end
-
-%         if phase == 1
-%             % 追従項
-%             xr(1:3, h+1) = Gp;
-%             xr(7:9, h+1) = [0;0;0];
-%             % 抑制項
-%             xr(4:6, h+1) =   Gq; % 姿勢角
-%             xr(10:12, h+1) = [0; 0; 0];
-%         elseif Agent.estimator.result.state.p(3) == 0.5
-%             z = exp(-(t-T)/zt)+0.01;
-%             xr(1:3, h+1) = [Agent.estimator.result.state.p(1);...
-%                             Agent.estimator.result.state.p(2); 0.01];
-%             xr(4:6, h+1) = [0;0;0];
-%             xr(7:9, h+1) = [0;0;0];    
-%         end
-
-        % 姿勢角の目標値
-        % x軸方向の姿勢角のみ変化
-
-%         if T > 10
-%             xr(3, h+1) = 0.005;
-%         end
+        if h == params.H-1
+            xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
+        end
     end
 end
 

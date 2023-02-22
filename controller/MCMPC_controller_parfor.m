@@ -1,4 +1,4 @@
-classdef MCMPC_controller <CONTROLLER_CLASS
+classdef MCMPC_controller_parfor <CONTROLLER_CLASS
     % MCMPC_CONTROLLER MCMPCのコントローラー
     
     properties
@@ -15,7 +15,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
     end
     
     methods
-        function obj = MCMPC_controller(self, param)
+        function obj = MCMPC_controller_parfor(self, param)
             %-- 変数定義
             obj.self = self;
             %---MPCパラメータ設定---%
@@ -290,40 +290,45 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
         %%-- 連続；オイラー近似
         function [predict_state] = predict(obj)
-            modelf = obj.param.modelparam.modelmethod;
-            modelp = obj.param.modelparam.modelparam;
-            u = obj.input.u;
             %-- 予測軌道計算
-            for m = 1:obj.input.u_size
-                x0 = obj.previous_state;
-                obj.state.state_data(:, 1, m) = obj.previous_state;
+%             for m = 1:obj.input.u_size
+%                 x0 = obj.previous_state;
+%                 obj.state.state_data(:, 1, m) = obj.previous_state;
 %                 for h = 1:obj.param.H-1
 %                     x0 = x0 + obj.param.dt * obj.param.modelparam.modelmethod(x0, obj.input.u(:, h, m), obj.param.modelparam.modelparam);
 %                     obj.state.state_data(:, h+1, m) = x0;
 %                 end
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 1, m), modelp); obj.state.state_data(:, 2, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 2, m), modelp); obj.state.state_data(:, 3, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 3, m), modelp); obj.state.state_data(:, 4, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 4, m), modelp); obj.state.state_data(:, 5, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 5, m), modelp); obj.state.state_data(:, 6, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 6, m), modelp); obj.state.state_data(:, 7, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 7, m), modelp); obj.state.state_data(:, 8, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 8, m), modelp); obj.state.state_data(:, 9, m) = x0;
-                x0 = x0 + obj.param.dt * modelf(x0, u(:, 9, m), modelp); obj.state.state_data(:, 10, m) = x0;
+%             end
+            
+            %% parfor
+            dt = obj.param.dt;
+            modelf = obj.param.modelparam.modelmethod;
+            modelp = obj.param.modelparam.modelparam;
+            ini = obj.previous_state;
+            H = obj.param.H;
+            u = obj.input.u;
+%             predict = zeros(12, 9, 1);
+            predict_s = zeros(12, obj.param.H, obj.param.particle_num);
+            obj.state.state_data = zeros(12, obj.param.H, obj.param.particle_num);
+            u_size = obj.input.u_size;
+
+            for m = 1:u_size
+                predict = zeros(12, 9, 1);
+                x0 = ini;
+                x0 = x0 + dt * modelf(x0, u(:, 1, m), modelp); predict(:, 2, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 2, m), modelp); predict(:, 3, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 3, m), modelp); predict(:, 4, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 4, m), modelp); predict(:, 5, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 5, m), modelp); predict(:, 6, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 6, m), modelp); predict(:, 7, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 7, m), modelp); predict(:, 8, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 8, m), modelp); predict(:, 9, m) = x0;
+                x0 = x0 + dt * modelf(x0, u(:, 9, m), modelp); predict(:, 10, m) = x0;
+                predict_s(:, :, m) = predict;
             end
+            obj.state.state_data = predict_s;
 
-
-            %ベクトル化：  input[4*obj.param.particle_num, obj.param.H]
-            % 無名関数@ cellには入れられた気がする
-%             model_equ = {obj.param.particle_num, 1};
-%             for mk = 1:obj.param.particle_num
-%                 model_equ{mk, 1} = obj.param.modelparam.modelmethod;
-%             end
-%             x0 = repmat(obj.previous_state, obj.param.particle_num, 1);
-%             obj.state.state_data(:, 1) = repmat(obj.previous_state, obj.param.particle_num, 1);
-%             for h = 1:obj.param.H-1
-%                 x0 = x0 + obj.param.dt * model_equ{:, 1}(); cell配列の式に値を代入する方法
-%             end
+            %%
             predict_state = obj.state.state_data;
         end
 
@@ -349,12 +354,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
             %% 人口ポテンシャル場法
             % x-y
-%             apfLower = (X(1,end,m)-obj.param.obsX)^2 + (X(2,end,m)-obj.param.obsY)^2;   % 終端ホライズン
-
-            obsX = repmat(obj.param.obsX, 1, obj.param.H);
-            obsY = repmat(obj.param.obsY, 1, obj.param.H);
-            Qapf = repmat(obj.param.Qapf, 1, obj.param.H);
-            apfLower = (X(1,:,m)-obsX).^2 + (X(2,:,m)-obsY).^2;
+%             obsX = repmat(obj.param.obsX, 1, obj.param.H);
+%             obsY = repmat(obj.param.obsY, 1, obj.param.H);
+%             Qapf = repmat(obj.param.Qapf, 1, obj.param.H);
+            apfLower = (X(1,end,m)-obj.param.obsX)^2 + (X(2,end,m)-obj.param.obsY)^2;
 
 
             %-- 状態及び入力のステージコストを計算
@@ -363,16 +366,15 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
             stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
-            APF = sum(Qapf/apfLower);
 
             %-- 状態の終端コストを計算 状態だけの終端コスト
             terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
                 +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
                 +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
-%             APF = obj.param.Qapf/apfLower;
+            terminalAPF = obj.param.Qapf/apfLower;
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef)...
-                + terminalState + APF;
+                + terminalState + terminalAPF;
         end
         
         function [pw_new] = Normalize(obj)
