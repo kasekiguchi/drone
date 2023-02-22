@@ -12,7 +12,7 @@ syms t real
 % T = 10;
 % rz0 = 0;
 % rz = 1; %rz = 1;
-%
+% 
 % a = -2/T^3 * (rz-rz0);
 % b = 3/T^2 * (rz-rz0);
 % z = a*(t)^3+b*(t)^2+rz0;
@@ -30,9 +30,9 @@ syms t real
 % z = 1;
 
 %% Liner
-% x = t;
-% y = 0;
-% z = 1.0;
+x = t;
+y = 0;
+z = 1.0;
 
 %% hovering
 % x = 0;
@@ -49,7 +49,7 @@ syms t real
 % rz0 = 1; % start
 % rz = 0.05; % target
 % StartT = -3;
-%
+% 
 % a = -2/T^3 * (rz-rz0);
 % b = 3/T^2 * (rz-rz0);
 % z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
@@ -58,16 +58,10 @@ syms t real
 % y = 0;
 
 %% syamen
-phaseT = 3;
-zt = 0.5; % 減衰係数？
-z = 2*exp(-(t-phaseT)/zt);
-x = -exp(-(t-phaseT)/zt);
-y = 0;
-
-%% slope P2P
-% x = -0.2;
+% zt = 0.5; % 減衰係数？
+% z = 2*exp(-t/zt)+0.05;
+% x = -exp(-t/zt);
 % y = 0;
-% z = 0.1;
 
 %% landing liner
 % x = 6/100*t - 2.7;
@@ -79,18 +73,7 @@ y = 0;
 % z = 0.5;
 % z = (t-1)^2 + 0.05;
 
-%% Star
-% a = 0.81;
-% b = 0.14;
-% c = 1.0;
-% n = 5;
-% xmax = sqrt(-log(2*exp(-a^2)-1)/b^2);
-% r0 = 0.1*xmax;
-% T = 10*pi;
-% r = r0 + sqrt(-log(2*exp(-a^2) - exp(-b^2*xmax^2*sin((2*pi*t/T-pi/2)*n/2)^2)))/c;
-% x = 0.7*r*sin(2*pi*t/T);
-% y = 0.7*r*cos(2*pi*t/T);
-% z = 1;
 %%
 ref=@(t)[x;y;z;0];  % xyz yaw
 end
+
