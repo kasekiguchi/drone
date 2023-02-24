@@ -142,7 +142,7 @@ figure(6)
 name_class = ["ceiling";"reference";"sensor";"VL53L1X";"throttle"];
 %name_class = ["ceiling";"sensor";"throttle";"VL53L1X"];
 hold on
-plot([0 350],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
+% plot([0 350],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
 Y=[];
 for plot_i = 1:logger.k%グラフのプロット
     Y(plot_i,1) = logger.Data.agent.reference.result{1, plot_i}.state.p(3); 
@@ -154,7 +154,7 @@ plot(T(1:logger.k),Y(:,1),'LineWidth',4,'Color',[0.39,0.83,0.07])
 plot(T(1:logger.k),Y(:,2),'LineWidth',2.5,'Color',[0.85,0.33,0.10])
 plot(T(1:logger.k),VL/1000,'LineWidth',2,'Color',[0.93,0.69,0.13])
 % plot([0 60],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
-xlim([0 60])
+% xlim([0 60])
 ylim([0 3.1])
 xlabel('time [s]')
 ylabel('z [m]')

@@ -40,7 +40,7 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
 
             cha = get(FH, 'currentcharacter');
 
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')%&& cha ~= 'n'&& cha ~= 'y' && cha ~= 'h')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't'&& cha ~= 'n' && cha ~= 'h')%&& cha ~= 'y')
                 cha = obj.flight_phase;
             end
 
@@ -75,7 +75,7 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
                 % uthr =uthr + u_throttle_offset ;%sign(uthr)*min(abs(uthr),100)+ u_throttle_offset;
                 obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
-            elseif cha == 'n' %|| cha == 'y' || cha == 'h'
+            elseif cha == 'n' || cha == 'h'%|| cha == 'y'
                 throttle_offset = obj.param.th_offset;
                 T_thr = sum(input);
                 uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset);
