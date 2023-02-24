@@ -393,10 +393,10 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 %% Remove sample and Sigma
 logt = logger.data('t',[],[]);
 figure(10)
-plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("remove sample");
+plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("sigma");
 yyaxis right
-plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("sigma")
-xlim([0 te])
+plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("rejected")
+xlim([0 te]); ylim([0 10000]);
 set(gca,'FontSize',Fontsize);  grid on; title("");
 %% calculation time
 % figure(11)

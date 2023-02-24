@@ -1,4 +1,4 @@
-classdef MCMPC_controller <CONTROLLER_CLASS
+classdef MCMPC_controller_org <CONTROLLER_CLASS
     % MCMPC_CONTROLLER MCMPCのコントローラー
     
     properties
@@ -19,7 +19,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
     end
     
     methods
-        function obj = MCMPC_controller(self, param)
+        function obj = MCMPC_controller_org(self, param)
             %-- 変数定義
             obj.self = self;
             %---MPCパラメータ設定---%
@@ -50,12 +50,14 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.modelf = obj.param.modelparam.modelmethod;
             obj.modelp = obj.param.modelparam.modelparam;
 
+%             obj.input.sigma = obj.input.Initsigma(1);
+
         end
         
         %-- main()的な
         % u fFirst
         function result = do(obj,param)
-          profile on
+%           profile on
             idx = param{1};
             xr = param{2};
             rt = param{3};
@@ -73,9 +75,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 ave3 = ave1;
                 ave4 = ave1;
 %                 ave1 = 0; ave2 = 0; ave3 = 0; ave4 = 0;
-                obj.input.sigma = obj.input.Initsigma;
+                obj.input.sigma = obj.input.Initsigma(1);
                 % 追加
-                obj.param.particle_num = obj.param.Mparticle_num;
+                obj.param.particle_num = obj.param.Maxparticle_num;
             else
                 ave1 = obj.self.input(1);    % リサンプリングとして前の入力を平均値とする
                 ave2 = obj.self.input(2);
@@ -89,10 +91,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 end
 
                 % particle_num 追加
-                if obj.param.nextparticle_num > obj.param.Mparticle_num
-                    obj.param.nextparticle_num = obj.param.Mparticle_num;    % 上限:サンプル数
-                elseif obj.param.nextparticle_num < obj.param.MIparticle_num
-                    obj.param.nextparticle_num = obj.param.MIparticle_num;  % 下限
+                if obj.param.nextparticle_num > obj.param.Maxparticle_num
+                    obj.param.nextparticle_num = obj.param.Maxparticle_num;    % 上限:サンプル数
+                elseif obj.param.nextparticle_num < obj.param.Minparticle_num
+                    obj.param.nextparticle_num = obj.param.Minparticle_num;  % 下限
                 end
 
                 obj.input.sigma = obj.input.nextsigma;
@@ -185,7 +187,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 % 棄却数がサンプル数の半分以上なら入力増やす
                 if removeF > obj.param.particle_num /2
                     obj.input.nextsigma = obj.input.Constsigma;
-                    obj.param.nextparticle_num = obj.param.Mparticle_num;
+                    obj.param.nextparticle_num = obj.param.Maxparticle_num;
                     obj.input.AllRemove = 1;
                 else
                     obj.input.nextsigma = obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre);
@@ -207,7 +209,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 obj.input.AllRemove = 1;
 
                 % 追加
-                obj.param.nextparticle_num = obj.param.Mparticle_num;
+                obj.param.nextparticle_num = obj.param.Maxparticle_num;
             end
 
 %             if Bestcost > obj.param.ConstEval; Bestcost = obj.param.ConstEval;  end
@@ -228,7 +230,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.result.Evaluationtra_norm = obj.input.normE;
             
             result = obj.result;  
-            profile viewer
+%             profile viewer
         end
         function show(obj)
             obj.result
@@ -308,15 +310,15 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %                     x0 = x0 + obj.param.dt * obj.param.modelparam.modelmethod(x0, obj.input.u(:, h, m), obj.param.modelparam.modelparam);
 %                     obj.state.state_data(:, h+1, m) = x0;
 %                 end
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 1, m), obj.modelp); obj.state.state_data(:, 2, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 2, m), obj.modelp); obj.state.state_data(:, 3, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 3, m), obj.modelp); obj.state.state_data(:, 4, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 4, m), obj.modelp); obj.state.state_data(:, 5, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 5, m), obj.modelp); obj.state.state_data(:, 6, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 6, m), obj.modelp); obj.state.state_data(:, 7, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 7, m), obj.modelp); obj.state.state_data(:, 8, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 8, m), obj.modelp); obj.state.state_data(:, 9, m) = x0;
-x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 9, m), obj.modelp); obj.state.state_data(:, 10, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 1, m), obj.modelp); obj.state.state_data(:, 2, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 2, m), obj.modelp); obj.state.state_data(:, 3, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 3, m), obj.modelp); obj.state.state_data(:, 4, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 4, m), obj.modelp); obj.state.state_data(:, 5, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 5, m), obj.modelp); obj.state.state_data(:, 6, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 6, m), obj.modelp); obj.state.state_data(:, 7, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 7, m), obj.modelp); obj.state.state_data(:, 8, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 8, m), obj.modelp); obj.state.state_data(:, 9, m) = x0;
+                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 9, m), obj.modelp); obj.state.state_data(:, 10, m) = x0;
             end
 
 
@@ -358,33 +360,27 @@ x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 9, m), obj.modelp); obj.state.state
             % x-y
 %             apfLower = (X(1,end,m)-obj.param.obsX)^2 + (X(2,end,m)-obj.param.obsY)^2;   % 終端ホライズン
 
-            obsX = repmat(obj.param.obsX, 1, obj.param.H);
-            obsY = repmat(obj.param.obsY, 1, obj.param.H);
-            Qapf = repmat(obj.param.Qapf, 1, obj.param.H);
-            apfLower = (X(1,:,m)-obsX).^2 + (X(2,:,m)-obsY).^2;
-
 
             %-- 状態及び入力のステージコストを計算
-%             stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
-%             stageStateV = arrayfun(@(L) tildeXv(:, L)' * obj.param.V * tildeXv(:, L), 1:obj.param.H-1);
-%             stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
-%             stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
-%             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
-stageStateP = sum(tildeXp' * obj.param.P   .* tildeXp',2);
-stageStateV = sum(tildeXv' * obj.param.V   .* tildeXv',2);
-stageStateQW = sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
-stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
-APF = sum(Qapf/apfLower);
+            stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
+            stageStateV = arrayfun(@(L) tildeXv(:, L)' * obj.param.V * tildeXv(:, L), 1:obj.param.H-1);
+            stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
+            stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
+            stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
+%             stageStateP =    sum(tildeXp' * obj.param.P   .* tildeXp',2);
+%             stageStateV =    sum(tildeXv' * obj.param.V   .* tildeXv',2);
+%             stageStateQW =   sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
+%             stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
+%             stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
 
             %-- 状態の終端コストを計算 状態だけの終端コスト
             terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
                 +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
                 +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
-%             APF = obj.param.Qapf/apfLower;
+
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
-                + terminalState + APF;
+                + terminalState;
         end
         
         function [pw_new] = Normalize(obj)

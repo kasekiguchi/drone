@@ -57,14 +57,14 @@ function xr = Reference(params, T, Agent, Gq, Gp, phase)
         xr(13:16, h+1) = params.ur;
 
         %% 斜面
-        if T < 3
-            xr(1:3, h+1) = Gp;
-            xr(7:9, h+1) = [0;0;0];
-        end
-
-        if h == params.H-1
-            xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
-        end
+%         if T < 3
+%             xr(1:3, h+1) = Gp;
+%             xr(7:9, h+1) = [0;0;0];
+%         end
+% 
+%         if h == params.H-1
+%             xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
+%         end
     end
 end
 

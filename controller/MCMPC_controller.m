@@ -40,7 +40,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       %%
       obj.input = param.input;
       obj.const = param.const;
-      obj.result.v = obj.input.u;
+      obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
 
       %             obj.input.Evaluationtra = zeros(1, obj.N);
       obj.model = self.model;
@@ -55,38 +55,37 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       %             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
 
       obj.param.fRemove = 0;
-      obj.input.AllRemove = 0;
-      obj.modelf = obj.param.modelparam.modelmethod;
-      obj.modelp = obj.param.modelparam.modelparam;
+      obj.input.AllRemove = 0; % 全棄却フラグ
 
-      obj.input.nextsigma = param.input.Initsigma;
+      obj.input.nextsigma = param.input.Initsigma;  % 初期化
       % 追加
-      obj.param.nextparticle_num = param.Maxparticle_num;
-      obj.input.Bestcost_now = 1e6;% 十分大きい値にする
-      obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],self.model.dt);    
+      obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
+      obj.input.Bestcost_now = 1e5;% 十分大きい値にする  初期周期での比較用
+
+      %% HL
+      obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,self.model.dt);    
       obj.N = param.particle_num;
       n = 12; % 状態数
       obj.state.state_data = zeros(n,obj.param.H, obj.N);
       obj.input.Evaluationtra = zeros(1, obj.N);
-      obj.Weight = repmat(blkdiag(obj.param.P,obj.param.V,obj.param.QW),1,1,obj.N);
-      obj.WeightF = repmat(blkdiag(obj.param.Pf,obj.param.Vf,obj.param.QWf),1,1,obj.N);
-      obj.WeightR = repmat(obj.param.R,1,1,obj.N);
-      obj.WeightRp = repmat(obj.param.RP,1,1,obj.N);
+      % 重みの配列サイズ変換
+      obj.Weight = repmat(blkdiag(obj.param.P,obj.param.V,obj.param.QW),1,1,obj.N); % ステージコスト
+      obj.WeightF = repmat(blkdiag(obj.param.Pf,obj.param.Vf,obj.param.QWf),1,1,obj.N); % ターミナルコスト
+      obj.WeightR = repmat(obj.param.R,1,1,obj.N);  % 目標入力
+      obj.WeightRp = repmat(obj.param.RP,1,1,obj.N); % 前ステップとの入力
+      % HL. A, B行列定義
       A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
       B = blkdiag([0;1],[0;0;0;1],[0;0;0;1],[0;1]);
-      sysd = c2d(ss(A,B,eye(12),0),obj.model.dt);
-      obj.A = repmat(sysd.A,1,1,obj.N);
+      sysd = c2d(ss(A,B,eye(12),0),obj.model.dt); % 離散化
+      obj.A = repmat(sysd.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
       obj.B = repmat(sysd.B,1,1,obj.N);
     end
 
     %-- main()的な
-    % u fFirst
     function result = do(obj,param)
       %profile on
-      idx = param{1};
       xr = param{2};
       rt = param{3};
-      phase = param{4};
       obj.state.ref = xr;
       obj.param.t = rt;
 
@@ -97,42 +96,36 @@ classdef MCMPC_controller <CONTROLLER_CLASS
           xd = ref.state.xd; % 20次元の目標値に対応するよう
         end
       end
-      model = obj.self.estimator.result;
-      xn = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-      P = obj.param.modelparam.modelparam ;
-      vfn = Vf(xn,xd',P,obj.F1);%v1
+      model_HL = obj.self.estimator.result;
+      xn = [model_HL.state.getq('compact');model_HL.state.p;model_HL.state.v;model_HL.state.w]; % [q, p, v, w]に並べ替え
+      P = obj.param.modelparam.modelparam;
+      vfn = Vf(xn,xd',P,obj.F1); %v1
       z1n = Z1(xn,xd',P);
       z2n = Z2(xn,xd',vfn,P);
       z3n = Z3(xn,xd',vfn,P);
       z4n = Z4(xn,xd',vfn,P);
       obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
       
-
-      %
-      %             if phase == 1
-      %                 obj.param.QW = diag([1000; 1000; 100; 1; 1; 1]);
-      %             end
-
       ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-      ave2 = obj.input.u(2);
+      ave2 = obj.input.u(2);    % 初期値はparamで定義
       ave3 = obj.input.u(3);
       ave4 = obj.input.u(4);
-
-
-      obj.input.sigma = obj.input.nextsigma;
+      % 標準偏差，サンプル数の更新
+      obj.input.sigma = obj.input.nextsigma;    
       obj.N = obj.param.nextparticle_num;
 
       % 全棄却時のケア
       if obj.input.AllRemove == 1
-        ave1 = 0.269*9.81;
+        ave1 = 0;
         ave2 = 0;
         ave3 = 0;
         ave4 = 0;
+%         obj.result.v = obj.input.u;
         obj.input.AllRemove = 0;
       end
-      %             rng ('shuffle');
       
-      obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1);
+      % 入力生成
+      obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
       obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
       obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3;
       obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
@@ -166,14 +159,17 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
         vf = obj.input.u(1, 1, BestcostID);     % 最適な入力の取得
         vs = obj.input.u(2:4, 1, BestcostID);     % 最適な入力の取得
-            tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
-            obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)];
-            obj.self.input = obj.result.input;  % 入力算出
+        tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
+        obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
+        obj.self.input = obj.result.input;  % agent.inputへの代入
 
-            %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
+        obj.result.v = [vf; vs];
+
+        %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
+        %   評価が良くなったら標準偏差を狭めるようにしている
         
-          obj.input.Bestcost_pre = obj.input.Bestcost_now;
-          obj.input.Bestcost_now = Bestcost;
+        obj.input.Bestcost_pre = obj.input.Bestcost_now;
+        obj.input.Bestcost_now = Bestcost;
 
         % 棄却数がサンプル数の半分以上なら入力増やす
         if removeF > obj.N /2
@@ -186,13 +182,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
           obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now/obj.input.Bestcost_pre))));
         end
 
-        %                 if obj.param.nextparticle_num < obj.N * 2
-        %                     obj.param.nextparticle_num = obj.N * 2;
-        %                 end
-
-
       elseif removeF == obj.N    % 全棄却
-        obj.result.v = obj.input.u;
+        %agent.input = そのまま
         obj.input.nextsigma = obj.input.Constsigma;
         Bestcost = obj.param.ConstEval;
         BestcostID = 1;
@@ -202,13 +193,13 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         obj.param.nextparticle_num = obj.param.Maxparticle_num;
       end
 
-      %             if Bestcost > obj.param.ConstEval; Bestcost = obj.param.ConstEval;  end
+      obj.input.u = obj.input.v;
 
       obj.result.removeF = removeF;
       obj.result.removeX = removeX;
       obj.result.survive = survive;
       obj.result.COG = obj.state.COG;
-      obj.input.u = obj.result.v;
+      
       obj.result.BestcostID = BestcostID;
       obj.result.bestcost = Bestcost;
       obj.result.contParam = obj.param;
@@ -224,7 +215,6 @@ classdef MCMPC_controller <CONTROLLER_CLASS
     end
     function show(obj)
       obj.result
-      %             view([2]);
     end
 
     %-- 制約とその重心計算 --%
@@ -296,60 +286,26 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       for i = 1:obj.param.H-1
         obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),u(:,i,1:obj.N));
       end
-      %-- 予測軌道計算
-%       for m = 1:obj.N
-%         x0 = obj.current_state;
-%         obj.state.state_data(:, 1, m) = obj.current_state;
-%         %                 for h = 1:obj.param.H-1
-%         %                     x0 = x0 + obj.param.dt * obj.param.modelparam.modelmethod(x0, obj.input.u(:, h, m), obj.param.modelparam.modelparam);
-%         %                     obj.state.state_data(:, h+1, m) = x0;
-%         %                 end
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 1, m), obj.modelp); obj.state.state_data(:, 2, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 2, m), obj.modelp); obj.state.state_data(:, 3, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 3, m), obj.modelp); obj.state.state_data(:, 4, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 4, m), obj.modelp); obj.state.state_data(:, 5, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 5, m), obj.modelp); obj.state.state_data(:, 6, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 6, m), obj.modelp); obj.state.state_data(:, 7, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 7, m), obj.modelp); obj.state.state_data(:, 8, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 8, m), obj.modelp); obj.state.state_data(:, 9, m) = x0;
-%         x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 9, m), obj.modelp); obj.state.state_data(:, 10, m) = x0;
-%       end
-
-
-      %ベクトル化：  input[4*obj.N, obj.param.H]
-      % 無名関数@ cellには入れられた気がする
-      %             model_equ = {obj.N, 1};
-      %             for mk = 1:obj.N
-      %                 model_equ{mk, 1} = obj.param.modelparam.modelmethod;
-      %             end
-      %             x0 = repmat(obj.current_state, obj.N, 1);
-      %             obj.state.state_data(:, 1) = repmat(obj.current_state, obj.N, 1);
-      %             for h = 1:obj.param.H-1
-      %                 x0 = x0 + obj.param.dt * model_equ{:, 1}(); cell配列の式に値を代入する方法
-      %             end
       predict_state = obj.state.state_data;
     end
 
     %------------------------------------------------------
     %======================================================
     function [MCeval] = objective(obj)   % obj.~とする
-      X = obj.state.state_data(:,:,1:obj.N);       %12 * 10 * N
-      U = obj.input.u(:,:,1:obj.N);         %12 * 10 * N
-      Z = X;% - obj.state.ref(1:12,:);
+      X = obj.state.state_data(:,:,1:obj.N);       % 12 * 10 * N
+      U = obj.input.u(:,:,1:obj.N);                % 12 * 10 * N
+%       Z = X;% - obj.state.ref(1:12,:);
+      Z = X - repmat(obj.current_state, 1, 10, obj.N);
 
-      tildeUpre = U - obj.result.v;       % agent.input
-      tildeUref = U - obj.param.ref_input;
-
-      %% 入力の変化率
-      %             rate_change = tildeUpre/U;
-
+      tildeUpre = U - obj.input.v;         % agent.input
+      tildeUref = U - obj.param.ref_input;  %
 
       %-- 状態及び入力のステージコストを計算
-      %             stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
-      %             stageStateV = arrayfun(@(L) tildeXv(:, L)' * obj.param.V * tildeXv(:, L), 1:obj.param.H-1);
-      %             stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
-      %             stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
-      %             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
+      %   stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
+      %   stageStateV = arrayfun(@(L) tildeXv(:, L)' * obj.param.V * tildeXv(:, L), 1:obj.param.H-1);
+      %   stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
+      %   stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
+      %   stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
       stageStateZ = sum(Z.*pagemtimes(obj.Weight(:,:,obj.N),Z),[1,2]);%
       stageInputPre  = sum(tildeUpre.*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
       stageInputRef  = sum(tildeUref.*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);

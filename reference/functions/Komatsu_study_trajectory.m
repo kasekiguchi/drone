@@ -30,9 +30,9 @@ syms t real
 % z = 1;
 
 %% Liner
-% x = t;
-% y = 0;
-% z = 1.0;
+x = 0;
+y = 0;
+z = 1.0;
 
 %% hovering
 % x = 0;
@@ -58,11 +58,11 @@ syms t real
 % y = 0;
 
 %% syamen
-phaseT = 3;
-zt = 0.5; % 減衰係数？
-z = 2*exp(-(t-phaseT)/zt);
-x = -exp(-(t-phaseT)/zt);
-y = 0;
+% phaseT = 3;
+% zt = 0.5; % 減衰係数？
+% z = 2*exp(-(t-phaseT)/zt);
+% x = -exp(-(t-phaseT)/zt);
+% y = 0;
 
 %% slope P2P
 % x = -0.2;
