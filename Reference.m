@@ -38,6 +38,8 @@
 % T : time.t そのステップの現在時刻
 
 function xr = Reference(params, T, Agent, Gq, Gp, phase)
+    % パラメータ取得
+    
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize

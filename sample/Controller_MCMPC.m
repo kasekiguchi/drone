@@ -4,9 +4,9 @@ function Controller = Controller_MCMPC(~)
 
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 10000;
+    Controller_param.Maxparticle_num = 100000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 1000;
+    Controller_param.Minparticle_num = 10000;
     Controller_param.input.Initsigma = 0.02*[1,1,1,1];
     Controller_param.input.Constsigma = 5.0;
     Controller_param.input.Maxsigma = 2.0;
@@ -50,25 +50,39 @@ function Controller = Controller_MCMPC(~)
 %     Controller_param.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     %% 円旋回
-    Controller_param.P = diag([100.0; 100.0; 10000.0]);    % 座標   1000 1000 100
-    Controller_param.V = diag([100.0; 100.0; 100.0]);    % 速度
-    Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
-
-    Controller_param.Qapf = 0;
-    
-    Controller_param.Pf = diag([10000.0; 10000.0; 100.0]);
-    Controller_param.Vf = diag([100.0; 100.0; 1.0]);
-    Controller_param.QWf = diag([100; 100; 100; 1; 1; 1]);
+%     Controller_param.P = diag([100.0; 100.0; 10000.0]);    % 座標   1000 1000 100
+%     Controller_param.V = diag([100.0; 100.0; 100.0]);    % 速度
+%     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+%     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+%     Controller_param.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+% 
+%     Controller_param.Qapf = 0;
+%     
+%     Controller_param.Pf = diag([10000.0; 10000.0; 100.0]);
+%     Controller_param.Vf = diag([100.0; 100.0; 1.0]);
+%     Controller_param.QWf = diag([100; 100; 100; 1; 1; 1]);
 
     %% sekiguchi
-    Controller_param.P = diag([10000;100]);    % 座標   1000 1000 100
-    Controller_param.V = diag([1,1,1,1,1,1,1,1])*100;    % 速度
-    Controller_param.QW = diag([1000 1]);  % 姿勢角、角速度
-    Controller_param.Pf = diag([10000;100]);    % 座標   1000 1000 100
-    Controller_param.Vf = diag([1,1,1,1,1,1,1,1])*100;    % 速度
-    Controller_param.QWf = diag([1000 1]);  % 姿勢角、角速度
+    % z, x, y, yaw : 誤差、誤差の変化量、微分、微分、、、 
+%     Controller_param.P = diag([10000;100]);   
+%     Controller_param.V = diag([1,1,1,1,1,1,1,1])*100;   
+%     Controller_param.QW = diag([1000 1]); 
+%     Controller_param.Pf = diag([10000;100]);   
+%     Controller_param.Vf = diag([1,1,1,1,1,1,1,1])*100;   
+%     Controller_param.QWf = diag([1000 1]);  
+
+    Controller_param.Z = diag([10000; 10000]);
+    Controller_param.X = diag([1,1,1,1]);
+    Controller_param.Y = diag([1,1,1,1]);
+    Controller_param.PHI = diag([1; 1]);
+
+    Controller_param.Zf = diag([1; 1]);
+    Controller_param.Xf = diag([1,1,1,1]);
+    Controller_param.Yf = diag([1,1,1,1]);
+    Controller_param.PHIf = diag([1; 1]);
+
+    Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]);
+    Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]); 
 
     %% 姿勢角
 %     Controller_param.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100

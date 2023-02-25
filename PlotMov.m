@@ -1,41 +1,38 @@
 
 %アニメーション作成中にグラフ触ると動画生成止まるから注意
-    Color_map = (169/255)*ones(1000000,3);
-	Color_map(1:data.param.particle_num/2,:) = jet(data.param.particle_num/2);
-%     Color_map(1:1000000, :) = jet(1:1000000);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/animation_v2'));
+maxbestcost = max(data.bestcost)
+% now = datetime('now');
+% datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
+    
+    %%
+%     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
+	writerObj=VideoWriter(strcat(Outputdir,'/video/20230211_circle_v1'));
 	open(writerObj);
-
-	for count = 1:size(data.pathJ,2)/3
+    tt = 0:0.1:15;
+    
+    
+    countMax = size(data.pathJ,2);
+	for count = 1:countMax
+        Color_map = (169/255)*ones(data.variable_particle_num(count),3);  % 灰色のカラーマップの作成
+        % 寒色：良い評価、暖色：悪い評価
+	    Color_map(1:data.variable_particle_num(count),:) = jet(data.variable_particle_num(count));            % 評価値の上から10個をカラーマップの色付け.
+        
 %         count = 50;
-        clf(figure(999))    % figureの削除
+        clf(figure(999))
 		fig = figure(999);
 		ax = gca;
 %         patch([1 5 5 1],[-0.5 -0.5 1 1],'black','Facealpha',0.2);
         hold on
-        
-        T = 0:0.1:100;
-        X = cos(T/2);
-        Y = sin(T/2);
-        plot(X, Y, 'LineStyle', '--', 'LineWidth', 0.2);
-       
-        %%-- 評価値上位 L 個に色付け
-%         minI = mink(data.pathJ{count}(1,:), data.param.particle_num/2);
-%         for L = 1:data.param.particle_num/2
-%             minIL = find(data.pathJ{count}(1, :) == minI(L)); 
-%             data.pathJ{count}(1, minIL) = L; 
-%         end
-
 %         plot(data.state(:,10),data.state(:,11),'-','Color',[0,0,0]/255,'LineWidth',4);
+            
         hold on;
-		% 予測経路のplot
+		% 予測経路のplot(ホライズン)
         path_count = size(data.pathJ{count},2);
 		for j = 1:path_count
-            
-			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(data.pathJ{count}(1,j)+0.0001),:));
-%             plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(data.pathJ{count}(1, j)),:));
+			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(pathJN{count}(1,j)),:), 'LineWidth',1);
 			hold on;
-		end
+        end
+        plot(data.state(count, 2), data.state(count, 3), '.', 'MarkerSize', 20, 'Color', 'red');
 % 		x = DATA.X(count);
 %         y = DATA.Y(count);
 %         u = 0.7*cos(DATA.yaw(count));
@@ -53,23 +50,20 @@
 %             viscircles(Obs_posi,obj.r_obs,'LineWidth',0.1,'Color','black');hold on
 % 		end
 		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
+        plot(cos(tt/2), sin(tt/2), 'LineWidth', 1, 'color', 'green');
+        pgon = polyshape([-1.2 -1.2 -0.5 -0.5],[1.2 -1.2 -1.2 1.2]); plot(pgon);
+
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
-        % circle : -0.27,1.3
-		text(-0.5,1.7,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])    %5.2, 2.5
+		text(-0.35,1.35,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
-        % liner
-%         ax.YLim = [-1.5 1.5];
-%         ax.XLim = [-0.5 3];
-        % circle
-        ax.YLim = [-1.5 1.5];
-		ax.XLim = [-1.5 1.5];
-        % heart
-%         ax.YLim = [-3 1];
-%         ax.XLim = [-1 3];
+% 		ax.YLim = [-0.5 2];
+% 		ax.XLim = [-0.5 2];
+        ax.YLim = [-1.2 1.2];
+		ax.XLim = [-1.2 1.2];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
-		ylabel('$$YZ$$[m]','Interpreter', 'Latex','FontSize',20);
+		ylabel('$$Y$$[m]','Interpreter', 'Latex','FontSize',20);
 	%     legend({'Reference'},'FontSize',18,'Location','northeast');
 		filename = ['Animation_2_2_',num2str(count),];
 		Xleng = ax.XLim(1,2) - ax.XLim(1,1);

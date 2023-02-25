@@ -130,6 +130,10 @@ try
       agent(i).do_plant(model_param);
     end
 
+    %%
+    data.input_v{round(time.t/dt + 1)} = agent.controller.result.input_v;
+
+
     % for exp
     if fExp
       %% logging
@@ -178,6 +182,11 @@ end
 
 %profile viewer
 %%
+logt = logger.data('t',[],[]);
+for R = 1:te/dt
+    InputV(:, R) = data.input_v{R};
+end
+
 close all
 clc
 set(0, 'defaultAxesFontSize',15);
@@ -189,13 +198,20 @@ set(0,'defaultLineMarkerSize',15);
 %logger.plot({1, "q1", "e"});
 % logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
 logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_num", 5, "row_col", [2, 2]);
-
+% 仮想入力
+figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
+xlabel("Time [s]"); ylabel("input.V");
+grid on; xlim([0 te]); ylim([-inf inf]);
+saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
+%%
+InputV(:, te/dt+1) = InputV(:, te/dt);
+save("Data/InputV_HL.mat", "InputV");
 %% Save figure
 % d = char(yyyymmddHHMMSS(datetime));
-d = datestr(now, "yyyy-mm-dd_HH:MM:SS");
-dsave = append(d, ".png");
+% d = datestr(now, "yyyy-mm-dd_HH:MM:SS");
+% dsave = append(d, ".png");
 %%
-saveas(gcf, "../save_figure/HL/dsave");
+% saveas(gcf, "../save_figure/HL/dsave");
 
 % agent(1).reference.timeVarying.show(logger)
 

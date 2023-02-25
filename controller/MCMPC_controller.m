@@ -60,7 +60,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       obj.input.nextsigma = param.input.Initsigma;  % 初期化
       % 追加
       obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
-      obj.input.Bestcost_now = 1e5;% 十分大きい値にする  初期周期での比較用
+      obj.input.Bestcost_now = [1e1, 1e-5, 1e-5, 1e-5, 1e-5];% 十分大きい値にする  初期周期での比較用
 
       %% HL
       obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,self.model.dt);    
@@ -69,11 +69,14 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       obj.state.state_data = zeros(n,obj.param.H, obj.N);
       obj.input.Evaluationtra = zeros(1, obj.N);
       % 重みの配列サイズ変換
-      obj.Weight = repmat(blkdiag(obj.param.P,obj.param.V,obj.param.QW),1,1,obj.N); % ステージコスト
-      obj.WeightF = repmat(blkdiag(obj.param.Pf,obj.param.Vf,obj.param.QWf),1,1,obj.N); % ターミナルコスト
+      obj.Weight = repmat(blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI), 1, 1, obj.N);
+      obj.WeightF = repmat(blkdiag(obj.param.Zf, obj.param.Xf, obj.param.Yf, obj.param.PHIf), 1, 1, obj.N);
+%       obj.Weight = repmat(blkdiag(obj.param.P,obj.param.V,obj.param.QW),1,1,obj.N); % ステージコスト
+%       obj.WeightF = repmat(blkdiag(obj.param.Pf,obj.param.Vf,obj.param.QWf),1,1,obj.N); % ターミナルコスト
       obj.WeightR = repmat(obj.param.R,1,1,obj.N);  % 目標入力
       obj.WeightRp = repmat(obj.param.RP,1,1,obj.N); % 前ステップとの入力
       % HL. A, B行列定義
+      % z, x, y, yawの順番
       A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
       B = blkdiag([0;1],[0;0;0;1],[0;0;0;1],[0;1]);
       sysd = c2d(ss(A,B,eye(12),0),obj.model.dt); % 離散化
@@ -84,8 +87,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
     %-- main()的な
     function result = do(obj,param)
       %profile on
+      idx = param{1};
       xr = param{2};
       rt = param{3};
+      obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
 
@@ -136,13 +141,13 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
       %-- 状態予測
-      [obj.state.predict_state] = obj.predict();
-      if obj.state.predict_state(1, 1, :) < 0
+      [obj.state.state_data] = obj.predict();
+      if obj.state.state_data(1, 1, :) < 0
         obj.param.fRemove = 1;
       end
 
       %-- 評価値計算
-      obj.input.Evaluationtra =  obj.objective();
+      obj.input.Evaluationtra =  obj.objective(idx);
 
       % 評価値の正規化
       obj.input.normE = obj.Normalize();
@@ -157,13 +162,14 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
       if removeF ~= obj.N
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-        vf = obj.input.u(1, 1, BestcostID);     % 最適な入力の取得
-        vs = obj.input.u(2:4, 1, BestcostID);     % 最適な入力の取得
+        vf = obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
+        vs = obj.input.u(2:4, 1, BestcostID(1));     % 最適な入力の取得
         tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
         obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.self.input = obj.result.input;  % agent.inputへの代入
 
         obj.result.v = [vf; vs];
+        obj.input.v = obj.result.v;
 
         %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
         %   評価が良くなったら標準偏差を狭めるようにしている
@@ -177,9 +183,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
           obj.param.nextparticle_num = obj.param.Maxparticle_num;
           obj.input.AllRemove = 1;
         else
-          obj.input.nextsigma = min( obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre)));
+          obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma * (obj.input.Bestcost_now(2:5)/obj.input.Bestcost_pre(2:5))));
           % 追加
-          obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now/obj.input.Bestcost_pre))));
+          obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
         end
 
       elseif removeF == obj.N    % 全棄却
@@ -199,7 +205,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       obj.result.removeX = removeX;
       obj.result.survive = survive;
       obj.result.COG = obj.state.COG;
-      
+      obj.result.input_v = obj.input.v;
       obj.result.BestcostID = BestcostID;
       obj.result.bestcost = Bestcost;
       obj.result.contParam = obj.param;
@@ -223,48 +229,15 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
       %             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
       %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
-
-      % 姿勢角
-      removeFe = (obj.state.state_data(5, end, :) >= 0.3975 | obj.state.state_data(5, end, :) <= 0.1975);
-
-      % ドローンの四隅の座標
-      % drone = 四隅の座標 Particle_num * 2
-      %             drone = obj.state.state_data(1,end,:);
-      %             drone_1 = drone+obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));
-      %             drone_2 = drone-obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));
-      %             drone_3 = drone_2;
-      %             drone_4 = drone_1;
-      %             d4edge = [drone_1, drone_2];
-
-      % 高度
-      %             zx = 10;
-      %             zz = 3;
-      %             removeFe = (any(repmat(obj.state.state_data(3, end, :), 1, 2) <= zz/zx * d4edge(1,:, :)+0.1));
-
-
       removeX = find(removeFe);
       % 制約違反の入力サンプル(入力列)を棄却
       obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
       % 全制約違反による分散リセットを確認するフラグ
       removeF = size(removeX, 1); % particle_num -> 全棄却
-      %             sur = (obj.state.state_data(1, end, :) > 0.5*sin(obj.param.t));  % 生き残りサンプル
-      %             survive = find(sur);
       survive = obj.N;
 
       %% ソフト制約
       % 棄却はしないが評価値を大きくする
-
-      %% 重心計算
-      %             if removeF == obj.N
-      %                 obj.state.COG.g  = NaN;               % 制約内は無視
-      %                 obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-      %             elseif removeF == 0
-      %                 obj.state.COG.gc = NaN;               % 制約外は無視
-      %                 obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-      %             else
-      %                 obj.state.COG.g  = obj.COG(survive);  % 制約内の重心
-      %                 obj.state.COG.gc = obj.COG(removeX);  % 制約外の重心
-      %             end
     end
 
     function cog = COG(obj, I)
@@ -291,14 +264,15 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
     %------------------------------------------------------
     %======================================================
-    function [MCeval] = objective(obj)   % obj.~とする
+    function [MCeval] = objective(obj, idx)   % obj.~とする
       X = obj.state.state_data(:,:,1:obj.N);       % 12 * 10 * N
       U = obj.input.u(:,:,1:obj.N);                % 12 * 10 * N
-%       Z = X;% - obj.state.ref(1:12,:);
-      Z = X - repmat(obj.current_state, 1, 10, obj.N);
+      Z = X;% - obj.state.ref(1:12,:);
+%       Z = X - repmat(obj.current_state, 1, 10, obj.N);
 
       tildeUpre = U - obj.input.v;         % agent.input
       tildeUref = U - obj.param.ref_input;  %
+%       tildeUref = U - obj.input.InputV(:, idx);
 
       %-- 状態及び入力のステージコストを計算
       %   stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
@@ -317,12 +291,24 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %         +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
       %             APF = obj.param.Qapf/apfLower;
       %-- 評価値計算
-      MCeval = stageStateZ + stageInputPre + stageInputRef + terminalState;
+      MCEval{1} = stageStateZ + stageInputPre + stageInputRef + terminalState;
+      MCEval{2} = sum(Z(1:2,:,:)   .* pagemtimes(obj.Weight(1:2,1:2,obj.N),       Z(1:2,:,:)),[1,2]);
+      MCEval{3} = sum(Z(3:6,:,:)   .* pagemtimes(obj.Weight(3:6,3:6,obj.N),       Z(3:6,:,:)),[1,2]);
+      MCEval{4} = sum(Z(7:10,:,:)  .* pagemtimes(obj.Weight(7:10,7:10,obj.N),    Z(7:10,:,:)),[1,2]);
+      MCEval{5} = sum(Z(11:12,:,:) .* pagemtimes(obj.Weight(11:12,11:12,obj.N), Z(11:12,:,:)),[1,2]);
+
+      %-- 評価値をreshapeして縦ベクトルに変換
+      MCeval(:,1) = reshape(MCEval{1}, obj.N, 1);
+      MCeval(:,2) = reshape(MCEval{2}, obj.N, 1);
+      MCeval(:,3) = reshape(MCEval{3}, obj.N, 1);
+      MCeval(:,4) = reshape(MCEval{4}, obj.N, 1);
+      MCeval(:,5) = reshape(MCEval{5}, obj.N, 1);
+      
     end
 
     function [pw_new] = Normalize(obj)
       NP = obj.N;
-      pw = obj.input.Evaluationtra;
+      pw = obj.input.Evaluationtra(1);
 
       % 配列が空かどうかの判別/ pw=評価値
       %             if isempty(pw(pw<=49))

@@ -30,14 +30,14 @@ syms t real
 % z = 1;
 
 %% Liner
-x = 0;
-y = 0;
-z = 1.0;
+% x = t;
+% y = 2*t;
+% z = 1.0;
 
 %% hovering
-% x = 0;
-% y = 0;
-% z = 1;
+x = 0;
+y = 0;
+z = 1;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
