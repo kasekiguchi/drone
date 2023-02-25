@@ -25,15 +25,15 @@ for name_i = 1:length(name_class)
     txt = {''};
     if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
         Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
-        txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+        txt = {txt{:}, '{\color[rgb]{1.00,1.00,0.00}■} :Take off phase'};
     end
-%     if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
-%         Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
-%         txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
-%     end
+    if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
+        Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
+        txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Flight phase'};
+    end
     if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
         Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-        txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+        txt = {txt{:}, '{\color[rgb]{1.0,0.7,1.0}■} :Landing phase'};
     end
 
 %     if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
@@ -63,7 +63,7 @@ for name_i = 1:length(name_class)
 
     XLim = get(gca, 'XLim');
     YLim = get(gca, 'YLim');
-%     text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+    text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt);
     legend('morter 1','morter 2','morter 3','morter 4')
     xlabel('time [s]')
     ylabel(name_legend(name_i))
@@ -105,18 +105,18 @@ for plot_i = 1:logger.k%グラフのプロット
 end
 plot(T(1:logger.k),Y/10000,'LineWidth',1)
 txt = {''};
-% if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
-%     Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
-%     txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
-% end
-% if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
-%     Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
-%     txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
-% end
-% if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
-%     Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-%     txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
-% end
+if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
+    txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+end
+if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
+    txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
+end
+if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
+    Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+    txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+end
 % if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
 %     Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
 % end
@@ -124,9 +124,9 @@ txt = {''};
 %     Square_coloring(logger.Data.t([find(logger.Data.phase == 121, 1), find(logger.Data.phase == 121, 1, 'last')]), [0.65,0.65,0.65]); % landing phase
 %     txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
 % end
-% XLim = get(gca, 'XLim');
-% YLim = get(gca, 'YLim');
-% text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+XLim = get(gca, 'XLim');
+YLim = get(gca, 'YLim');
+text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt);
 
 
 legend('morter 1','morter 2','morter 3','morter 4')
@@ -135,6 +135,8 @@ ylabel('power [W]')
 ax = gca;
 ax.FontSize = 15;
 hold off
+
+%
 %% z throttle　sr(6)
 clear T Y VL
 T = logger.Data.t(1:logger.k);
