@@ -54,16 +54,16 @@ for name_i = 1:length(name_class)
 %     txt = {txt{:}, '{\color[rgb]{0.65,0.65,0.65}■} :down phase'};
 % end
 % 
-for plot_i = 1:logger.k%天井センサスイッチ用
-    sensor_switch(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.switch;
-end
-if length([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]) == 2
-    Square_coloring(logger.Data.t([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
-    txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :down phase'};
-end
-
-    XLim = get(gca, 'XLim');
-    YLim = get(gca, 'YLim');
+% for plot_i = 1:logger.k%天井センサスイッチ用
+%     sensor_switch(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.switch;
+% end
+% if length([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :down phase'};
+% end
+% 
+%     XLim = get(gca, 'XLim');
+%     YLim = get(gca, 'YLim');
 %     text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
     legend('morter 1','morter 2','morter 3','morter 4')
     xlabel('time [s]')
@@ -137,7 +137,7 @@ txt = {''};
 
 XLim = get(gca, 'XLim');
 YLim = get(gca, 'YLim');
-text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+% text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
 
 
 legend('morter 1','morter 2','morter 3','morter 4')
@@ -156,10 +156,10 @@ hold on
 plot([0 350],[3 3],"LineStyle","--",'LineWidth',1.5,'Color',[0.15,0.15,0.15])
 Y=[];
 for plot_i = 1:logger.k%グラフのプロット
-    Y(plot_i,1) = logger.Data.agent.reference.result{1, plot_i}.state.p(2); 
+    Y(plot_i,1) = logger.Data.agent.reference.result{1, plot_i}.state.p(3); 
     Y(plot_i,2) = logger.Data.agent.sensor.result{1, plot_i}.state.p(3);
-    Y(plot_i,3) = logger.Data.agent.sensor.result{1, plot_i}.state.q(3);
-%     Y(plot_i,3) = logger.Data.agent.inner_input{1, plot_i}(3);
+%     Y(plot_i,3) = logger.Data.agent.sensor.result{1, plot_i}.state.q(3);
+    Y(plot_i,3) = logger.Data.agent.inner_input{1, plot_i}(3);
 %     VL(plot_i) = logger.Data.agent.sensor.result{1, plot_i}.distance(1);
 end
 plot(T(1:logger.k),Y(:,1),'LineWidth',4,'Color',[0.39,0.83,0.07])
@@ -208,13 +208,13 @@ txt = {''};
 %     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :On ceiling phase'};
 % end
 
-for plot_i = 1:logger.k%天井センサスイッチ用
-    sensor_switch(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.switch;
-end
-if length([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]) == 2
-    Square_coloring(logger.Data.t([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
-    txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :down phase'};
-end
+% for plot_i = 1:logger.k%天井センサスイッチ用
+%     sensor_switch(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.switch;
+% end
+% if length([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :down phase'};
+% end
 
 % 
 % if length([find(Y(:,2) > 2.93, 1), find(Y(:,2) > 2.93, 1, 'last')]) == 2%12月実験用
@@ -226,7 +226,7 @@ end
 % text(XLim(2),YLim(2), txt)
 XLim = get(gca, 'XLim');
 YLim = get(gca, 'YLim');
-text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+% text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
 yyaxis right
 plot(T(1:logger.k),Y(:,3),'LineWidth',1.5,'Color',[0.00,0.45,0.74])
 ylabel('inner input')
