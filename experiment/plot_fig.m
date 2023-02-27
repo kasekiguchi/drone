@@ -21,7 +21,11 @@ for name_i = 1:length(name_class)
     end
 %     figure(2)
 %     subplot(1,3,name_i);
-    plot(T(1:logger.k),Y,'LineWidth',1)
+%     plot(T(1:logger.k),Y,'LineWidth',1)
+
+    Y_ave = mean(Y,2);
+    plot(T(1:logger.k),Y_ave/100,'LineWidth',1)
+
     txt = {''};
 %     if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
 %         Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
@@ -94,7 +98,7 @@ for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 
 end    
 average = sum/numel(logger.Data.phase(find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1));
 RMSE = sqrt(average)
-%%
+
 %% 電力(5)
 figure(5)
 clear T Y
@@ -102,9 +106,12 @@ T = logger.Data.t(1:logger.k);
 hold on
 for plot_i = 1:logger.k%グラフのプロット
     Y(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros_t.current;
-    Y(plot_i,:) = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros_t.current;
 end
-plot(T(1:logger.k),Y/10000,'LineWidth',1)
+% plot(T(1:logger.k),Y/10000,'LineWidth',1)
+
+Y_ave = mean(Y,2);
+plot(T(1:logger.k),Y_ave/10000,'LineWidth',1)
+
 txt = {''};
 % if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
 %     Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
@@ -481,7 +488,7 @@ ax.FontSize = 15;
 hold off
 %% 電力，回転数，throttle，平均
 clear T
-T=[200 250];
+T=[35 45];
 Y=0;
 W=0;
 throttle=0;
