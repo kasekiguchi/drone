@@ -84,14 +84,22 @@ for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 
  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
 end    
 
+%x:120 y:121 z:122
 %%回転数rmseを算出by安西
 sum = 0;
-for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1
- tmp = logger.Data.agent.sensor.result{1,1300}.ros_t.rpm - logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm;
+for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 120, 1)-1
+    tid = logger.Data.agent.sensor.result{1,plot_i}.ros_t.rpm;
+    sum = sum +tid;
+end
+f_average = sum/numel(logger.Data.phase(find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 120, 1)-1));
+
+sum = 0;
+for plot_i = find(logger.Data.phase == 120, 1):1:find(logger.Data.phase == 108, 1)-1
+ tmp = f_average - logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm;
  tid = tmp.^2;
  sum = tid + sum;
 end    
-average = sum/numel(logger.Data.phase(find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1));
+average = sum/numel(logger.Data.phase(find(logger.Data.phase == 120, 1):1:find(logger.Data.phase == 108, 1)-1));
 RMSE = sqrt(average)
 %%
 %% 電力(5)
@@ -136,7 +144,16 @@ ax = gca;
 ax.FontSize = 15;
 hold off
 
-%
+sum = 0;
+%電力を飛行時間で割る
+for plot_i = find(logger.Data.phase == 121, 1):1:find(logger.Data.phase == 108, 1)-1
+    tmp = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros_t.current;
+    tmp = tmp/10000;
+    sum = tmp + sum;
+end
+t = logger.Data.t(find(logger.Data.phase == 108, 1)-1) - logger.Data.t(find(logger.Data.phase == 121, 1));
+w = sum/numel(logger.Data.phase(find(logger.Data.phase == 121, 1):1:find(logger.Data.phase == 108, 1)-1))
+% p = sum/t;%飛行時間当たりの消費電力
 %% z throttle　sr(6)
 clear T Y VL
 T = logger.Data.t(1:logger.k);
