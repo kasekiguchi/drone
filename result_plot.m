@@ -5,20 +5,20 @@ for i = 1:logger.k
     resultplot.eX(i) = logger.Data.agent.estimator.result{1,i}.state.p(1,1);
     resultplot.eY(i) = logger.Data.agent.estimator.result{1,i}.state.p(2,1);
     resultplot.eq(i) = logger.Data.agent.estimator.result{1,i}.state.q;
-    if fMotive
-%         resultplot.pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
-% %         resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(2,1);
-% %         resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
+%     if fMotive
+        resultplot.pX(i) = logger.Data.agent.plant.result{1,i}.state.p(1,1);
+        resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(2,1);
+        resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.q;
 %         %2_6izenDat
 %         resultplot.pY(i) = logger.Data.agent.plant.result{1,i}.state.p(1,2);
 %         resultplot.pq(i) = logger.Data.agent.plant.result{1,i}.state.eq(1,2);
 %fmotive
-    resultplot.pX(i) = -logger.Data.agent.sensor.result{1, i}.rigid.p(2,1);
-    resultplot.pY(i) = logger.Data.agent.sensor.result{1, i}.rigid.p(1,1);
-    resultplot.qurtanion = [logger.Data.agent.sensor.result{1, i}.rigid.q(1,1),logger.Data.agent.sensor.result{1, i}.rigid.q(2,1),logger.Data.agent.sensor.result{1, i}.rigid.q(3,1),logger.Data.agent.sensor.result{1, i}.rigid.q(4,1)];
-    resultplot.peq = quat2eul(resultplot.qurtanion);
-    resultplot.pq(i) = resultplot.peq(1,1);
-    end
+%     resultplot.pX(i) = -logger.Data.agent.sensor.result{1, i}.rigid.p(2,1);
+%     resultplot.pY(i) = logger.Data.agent.sensor.result{1, i}.rigid.p(1,1);
+%     resultplot.qurtanion = [logger.Data.agent.sensor.result{1, i}.rigid.q(1,1),logger.Data.agent.sensor.result{1, i}.rigid.q(2,1),logger.Data.agent.sensor.result{1, i}.rigid.q(3,1),logger.Data.agent.sensor.result{1, i}.rigid.q(4,1)];
+%     resultplot.peq = quat2eul(resultplot.qurtanion);
+%     resultplot.pq(i) = resultplot.peq(1,1);
+%     end
     resultplot.rX(i) = logger.Data.agent.reference.result{1,i}.state.p(1,1);
     resultplot.rY(i) = logger.Data.agent.reference.result{1,i}.state.p(2,1);
     resultplot.rq(i) = logger.Data.agent.reference.result{1,i}.state.q;
@@ -33,9 +33,9 @@ hold on
 grid on
 plot(logger.Data.t(1:logger.k,1),resultplot.eq)
 plot(logger.Data.t(1:logger.k,1),resultplot.rq)
-if fMotive
+% if fMotive
     plot(logger.Data.t(1:logger.k,1),resultplot.pq)
-end
+% end
 legend('eq','rq','pq','Location','northwest');
 xlabel("time [s]");
 ylabel("q[rad]");
@@ -48,10 +48,10 @@ plot(logger.Data.t(1:logger.k,1),resultplot.eX)
 plot(logger.Data.t(1:logger.k,1),resultplot.eY)
 plot(logger.Data.t(1:logger.k,1),resultplot.rX)
 plot(logger.Data.t(1:logger.k,1),resultplot.rY)
-if fMotive
+% if fMotive
     plot(logger.Data.t(1:logger.k,1),resultplot.pX)
     plot(logger.Data.t(1:logger.k,1),resultplot.pY)
-end
+% end
 legend({'eX','eY','rX','rY','pX','pY'},'Location','northwest');
 xlabel("time [s]");
 ylabel("p [m]");
@@ -77,7 +77,7 @@ hold off
 % ylabel("Fisher")
 % hold off
 
-if fMotive
+% if fMotive
 figure(9)
 hold on
 grid on
@@ -115,7 +115,7 @@ hold off
 resultplot.max.x = max(resultplot.sa_X); 
 resultplot.max.y = max(resultplot.sa_Y);
 resultplot.max.q = max(resultplot.sa_q);
-end
+% end
 figure(10)
 resultplot.estresult = logger.Data.agent.estimator.result{1,logger.k};
 resultplot.Ewall = resultplot.estresult.map_param;
