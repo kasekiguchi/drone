@@ -271,8 +271,8 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
             xlabel("$x$ [m]","Interpreter","latex");
             ylabel("$y$ [m]","Interpreter","latex");
             legend('wall');
-            xlim([-4 12])
-            ylim([-4 12])
+            xlim([-4 8])
+            ylim([-4 8])
             hold off
         end
         function l = point2line(obj,Px,Py)
