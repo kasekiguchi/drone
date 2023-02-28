@@ -156,7 +156,7 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
 %                 end
             elseif strcmp(cha,'n') % landing phase%注意機体流れる→landing_speedは普通のlandingには使わない方が良
                     %reference高さの算出
-                    z_ref = 2.3;%2.7+obj.self.sensor.result.ros_t.voltage_average*(-0.1018)+2.4301;
+                    z_ref = 2.4;%2.7+obj.self.sensor.result.ros_t.voltage_average*(-0.1018)+2.4301;
                 if strcmp(obj.flag,'n')
                     [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,z_ref);
                 else% 初めてlanding に入ったとき
