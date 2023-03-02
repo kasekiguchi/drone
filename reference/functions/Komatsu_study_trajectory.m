@@ -31,7 +31,7 @@ syms t real
 
 %% Liner
 % x = t;
-% y = 2*t;
+% y = 0;
 % z = 1.0;
 
 %% hovering

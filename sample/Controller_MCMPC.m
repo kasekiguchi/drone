@@ -1,22 +1,19 @@
 function Controller = Controller_MCMPC(~)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
-
-    Controller_param.dt = 0.1; % MPCステップ幅
+    Controller_param.dt = 0.025; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 100000;
+    Controller_param.Maxparticle_num = 10000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 10000;
+    Controller_param.Minparticle_num = 1000;
     Controller_param.input.Initsigma = 0.02*[1,1,1,1];
     Controller_param.input.Constsigma = 5.0;
     Controller_param.input.Maxsigma = 2.0;
     Controller_param.input.Minsigma = 0.01;
     Controller_param.input.Maxinput = 1.5;
-    %Controller_param.input.u = 0.269 * 9.81 / 4;
-    Controller_param.input.u = [0;0;0;0]; %  sekiguchi 
+
     Controller_param.ConstEval = 100000;
-    %Controller_param.ref_input = (0.269 * 9.81 / 4) * ones(4,1);
-    Controller_param.ref_input = [0;0;0;0];
+    
     Controller_param.const.X = -0.5;
     Controller_param.const.Y = -0.5;
 
@@ -27,21 +24,6 @@ function Controller = Controller_MCMPC(~)
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
 
-    %% HLParam
-%     Controller_param.model.param=getParameter();
-    % Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z 
-    % Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,10,10,1]),[1],dt); % x
-    % Controller_param.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,10,10,1]),[1],dt); % y
-    % Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ヨー角 
-
-
-    % 使うほう
-%     Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.5,dt);                                % z 
-%     Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),0.01,dt); % xdiag([100,10,10,1])
-%     Controller_param.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),0.01,dt); % ydiag([100,10,10,1])
-%     Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([10,1]),0.1,dt);                       % ヨー角 
-%     Controller_param.dt = dt;
-
     %% 離陸
 %     Controller_param.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
 %     Controller_param.V = diag([1.0; 1.0; 1.0]);    % 速度
@@ -50,39 +32,19 @@ function Controller = Controller_MCMPC(~)
 %     Controller_param.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     %% 円旋回
-%     Controller_param.P = diag([100.0; 100.0; 10000.0]);    % 座標   1000 1000 100
-%     Controller_param.V = diag([100.0; 100.0; 100.0]);    % 速度
-%     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-%     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-%     Controller_param.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
-% 
-%     Controller_param.Qapf = 0;
-%     
-%     Controller_param.Pf = diag([10000.0; 10000.0; 100.0]);
-%     Controller_param.Vf = diag([100.0; 100.0; 1.0]);
-%     Controller_param.QWf = diag([100; 100; 100; 1; 1; 1]);
+    Controller_param.P = diag([100.0; 100.0; 10000.0]);    % 座標   1000 1000 100
+    Controller_param.V = diag([100.0; 100.0; 100.0]);    % 速度
+    Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+    Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    %% sekiguchi
-    % z, x, y, yaw : 誤差、誤差の変化量、微分、微分、、、 
-%     Controller_param.P = diag([10000;100]);   
-%     Controller_param.V = diag([1,1,1,1,1,1,1,1])*100;   
-%     Controller_param.QW = diag([1000 1]); 
-%     Controller_param.Pf = diag([10000;100]);   
-%     Controller_param.Vf = diag([1,1,1,1,1,1,1,1])*100;   
-%     Controller_param.QWf = diag([1000 1]);  
-
-    Controller_param.Z = diag([10000; 10000]);
-    Controller_param.X = diag([1,1,1,1]);
-    Controller_param.Y = diag([1,1,1,1]);
-    Controller_param.PHI = diag([1; 1]);
-
-    Controller_param.Zf = diag([1; 1]);
-    Controller_param.Xf = diag([1,1,1,1]);
-    Controller_param.Yf = diag([1,1,1,1]);
-    Controller_param.PHIf = diag([1; 1]);
-
-    Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]);
-    Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]); 
+    Controller_param.Qapf = 0;
+    
+    Controller_param.Pf = diag([10000.0; 10000.0; 100.0]);
+    Controller_param.Vf = diag([100.0; 100.0; 1.0]);
+    Controller_param.QWf = diag([100; 100; 100; 1; 1; 1]);
+    Controller_param.input.u = 0.269*9.81/4 * [1;1;1;1];  % old version
+    Controller_param.ref_input = 0.269*9.81/4 * [1;1;1;1];
 
     %% 姿勢角
 %     Controller_param.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
@@ -106,7 +68,7 @@ function Controller = Controller_MCMPC(~)
 
 
     Controller.name = "mcmpc";
-    Controller.type = "MCMPC_controller";
+    Controller.type = "MCMPC_controller_org";
     Controller.param = Controller_param;
 
 end

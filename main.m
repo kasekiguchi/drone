@@ -218,7 +218,7 @@ save("Data/InputV_HL.mat", "InputV");
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N);
+% agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

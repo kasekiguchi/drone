@@ -1,4 +1,4 @@
-classdef MCMPC_controller <CONTROLLER_CLASS
+classdef HLMCMPC_controller <CONTROLLER_CLASS
   % MCMPC_CONTROLLER MCMPCのコントローラー
 
   properties
@@ -27,7 +27,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
   end
 
   methods
-    function obj = MCMPC_controller(self, param)
+    function obj = HLMCMPC_controller(self, param)
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
@@ -41,29 +41,15 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       obj.input = param.input;
       obj.const = param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-
-      %             obj.input.Evaluationtra = zeros(1, obj.N);
       obj.model = self.model;
-      %-- 全予測軌道のパラメータの格納変数を定義,　最大のサンプル数で定義
-      %             obj.state.p_data = 10000 * ones(obj.param.H, obj.N);
-      %             obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
-      %             obj.state.v_data = 10000 * ones(obj.param.H, obj.N);
-      %             obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
-      %             obj.state.q_data = 10000 * ones(obj.param.H, obj.N);
-      %             obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
-      %             obj.state.w_data = 10000 * ones(obj.param.H, obj.N);
-      %             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
-
       obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
-
       obj.input.nextsigma = param.input.Initsigma;  % 初期化
-      % 追加
       obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
       obj.input.Bestcost_now = [1e1, 1e-5, 1e-5, 1e-5, 1e-5];% 十分大きい値にする  初期周期での比較用
 
       %% HL
-      obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,self.model.dt);    
+      obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,param.dt);    
       obj.N = param.particle_num;
       n = 12; % 状態数
       obj.state.state_data = zeros(n,obj.param.H, obj.N);
@@ -79,7 +65,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       % z, x, y, yawの順番
       A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
       B = blkdiag([0;1],[0;0;0;1],[0;0;0;1],[0;1]);
-      sysd = c2d(ss(A,B,eye(12),0),obj.model.dt); % 離散化
+      sysd = c2d(ss(A,B,eye(12),0),param.dt); % 離散化
       obj.A = repmat(sysd.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
       obj.B = repmat(sysd.B,1,1,obj.N);
     end
@@ -130,7 +116,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       end
       
       % 入力生成
-      obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
+      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1; % 負入力の阻止
       obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
       obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3;
       obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
@@ -142,7 +128,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
       %-- 状態予測
       [obj.state.state_data] = obj.predict();
-      if obj.state.state_data(1, 1, :) < 0
+      if obj.state.state_data(1,1,:) + xd(3) < 0
+        obj.param.fRemove = 1;
+      elseif obj.state.state_data(1,1,:) + xd(3) > 10
         obj.param.fRemove = 1;
       end
 
@@ -162,11 +150,15 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
       if removeF ~= obj.N
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-        vf = obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
+        vf = 0*obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
         vs = obj.input.u(2:4, 1, BestcostID(1));     % 最適な入力の取得
         tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
         obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.self.input = obj.result.input;  % agent.inputへの代入
+
+        if tmp(1) < 0 || tmp(2) < 0
+            warning("xy < 0\n");
+        end
 
         obj.result.v = [vf; vs];
         obj.input.v = obj.result.v;
@@ -183,7 +175,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
           obj.param.nextparticle_num = obj.param.Maxparticle_num;
           obj.input.AllRemove = 1;
         else
-          obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma * (obj.input.Bestcost_now(2:5)/obj.input.Bestcost_pre(2:5))));
+          obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
           % 追加
           obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
         end
@@ -280,9 +272,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
       %   stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
       %   stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
       %   stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
-      stageStateZ = sum(Z.*pagemtimes(obj.Weight(:,:,obj.N),Z),[1,2]);%
-      stageInputPre  = sum(tildeUpre.*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-      stageInputRef  = sum(tildeUref.*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
+      stageStateZ = sum(Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,1:end-1,:)),[1,2]);%
+      stageInputPre  = sum(tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre(:,1:end-1,:)),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
+      stageInputRef  = sum(tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref(:,1:end-1,:)),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
       
       %-- 状態の終端コストを計算 状態だけの終端コスト
       terminalState = sum(Z(:,end,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,end,:)),[1,2]);
