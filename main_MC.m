@@ -352,8 +352,8 @@ Rdata = zeros(12, size(logt, 1));
 IV = zeros(4, size(logt, 1));
 for R = 1:size(logt, 1)
     Rdata(:, R) = data.xr{R}(1:12, 1);
-%     IV(:, R) = data.input_v{R};
-%     Bestcost(:, R) = data.bestcost{R};
+    if ~isempty(data.input_v); IV(:, R) = data.input_v{R}; end
+    Bestcost(:, R) = data.bestcost{R};
 end
 Diff = Edata - Rdata(1:3, :);
 xmax = te;
@@ -392,8 +392,7 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Input");
 %%
 % 仮想入力
-if isempty(data.input_v)
-else
+if ~isempty(data.input_v)
 figure(5); plot(logt, IV); legend("input1", "input2", "input3", "input4");
 xlabel("Time [s]"); ylabel("input.V");
 grid on; xlim([0 xmax]); ylim([-inf inf]);

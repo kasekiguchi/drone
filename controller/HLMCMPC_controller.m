@@ -101,8 +101,13 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       ave2 = obj.input.u(2);    % 初期値はparamで定義
       ave3 = obj.input.u(3);
       ave4 = obj.input.u(4);
+
+      ave1 = 0;
+%       ave2 = 0;
+%       ave3 = 0;
+      ave4 = 0;
       % 標準偏差，サンプル数の更新
-      obj.input.sigma = obj.input.nextsigma;    
+      obj.input.sigma = obj.input.nextsigma;   
       obj.N = obj.param.nextparticle_num;
 
       % 全棄却時のケア
@@ -150,15 +155,11 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       if removeF ~= obj.N
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-        vf = 0*obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
+        vf = obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
         vs = obj.input.u(2:4, 1, BestcostID(1));     % 最適な入力の取得
         tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
         obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.self.input = obj.result.input;  % agent.inputへの代入
-
-        if tmp(1) < 0 || tmp(2) < 0
-            warning("xy < 0\n");
-        end
 
         obj.result.v = [vf; vs];
         obj.input.v = obj.result.v;
