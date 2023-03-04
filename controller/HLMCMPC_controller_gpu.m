@@ -1,4 +1,4 @@
-classdef HLMCMPC_controller <CONTROLLER_CLASS
+classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
   % MCMPC_CONTROLLER MCMPCのコントローラー
 
   properties
@@ -27,7 +27,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
   end
 
   methods
-    function obj = HLMCMPC_controller(self, param)
+    function obj = HLMCMPC_controller_gpu(self, param)
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
@@ -66,8 +66,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
       B = blkdiag([0;1],[0;0;0;1],[0;0;0;1],[0;1]);
       sysd = c2d(ss(A,B,eye(12),0),param.dt); % 離散化
-      obj.A = repmat(sysd.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
-      obj.B = repmat(sysd.B,1,1,obj.N);
+      obj.A = gpuArray(repmat(sysd.A,1,1,obj.N)); % サンプル分同時に計算のためobj.N分のA行列を用意
+      obj.B = gpuArray(repmat(sysd.B,1,1,obj.N));
     end
 
     %-- main()的な
@@ -113,10 +113,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       ave3 = obj.input.u(3);
       ave4 = obj.input.u(4);
 
-%       ave1 = 0;
+      ave1 = 0;
 %       ave2 = 0;
 %       ave3 = 0;
-%       ave4 = 0;
+      ave4 = 0;
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;   
       obj.N = obj.param.nextparticle_num;
@@ -144,10 +144,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %-- 状態予測
       [obj.state.state_data] = obj.predict();
-      %% 墜落 or 飛びすぎたら終了
       if obj.state.state_data(1,1,:) + xd(3) < 0
         obj.param.fRemove = 1;
-      elseif obj.state.state_data(1,1,:) + xd(3) > 5
+      elseif obj.state.state_data(1,1,:) + xd(3) > 10
         obj.param.fRemove = 1;
       end
 
@@ -206,7 +205,6 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       obj.input.u = obj.input.v;
 
-      % 座標として軌跡を保存するため　x = state + xd
       state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)];
 
       obj.result.removeF = removeF;
@@ -262,8 +260,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
     %%-- 連続；オイラー近似
     function [predict_state] = predict(obj)
-      u = obj.input.u;
-      obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);
+      u = gpuArray(obj.input.u);
+      obj.state.state_data(:,1,1:obj.N) = gpuArray(repmat(obj.current_state,1,1,obj.N));
       for i = 1:obj.param.H-1
         obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),u(:,i,1:obj.N));
       end

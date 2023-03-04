@@ -3,13 +3,13 @@ function Controller = Controller_HLMCMPC(~)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.025; % MPCステップ幅
     Controller_param.H = 15;
-    Controller_param.Maxparticle_num = 5000;
+    Controller_param.Maxparticle_num = 50000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 500;
+    Controller_param.Minparticle_num = 50000;
     Controller_param.input.Initsigma = 0.02*[1,1,1,1];
     Controller_param.input.Constsigma = 5.0;
-    Controller_param.input.Maxsigma = 0.5;
-    Controller_param.input.Minsigma = 0.01;
+    Controller_param.input.Maxsigma = 2.0;
+    Controller_param.input.Minsigma = 1.0;
     Controller_param.input.Maxinput = 1.5;
 
     Controller_param.ConstEval = 100000;
@@ -34,7 +34,7 @@ function Controller = Controller_HLMCMPC(~)
 %     Controller_param.QWf = diag([1000 1]);  
 
     %% sekiguchi-komatsu new
-    Controller_param.Z = 1e1*diag([100; 1]);
+    Controller_param.Z = 1e2*diag([100; 1]);
     Controller_param.X = 1e4*diag([100,1,1,1]);
     Controller_param.Y = 1e4*diag([100,1,1,1]);
     Controller_param.PHI = diag([1; 1]);

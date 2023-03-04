@@ -396,7 +396,7 @@ if ~isempty(data.input_v)
 figure(5); plot(logt, IV); legend("input1", "input2", "input3", "input4");
 xlabel("Time [s]"); ylabel("input.V");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
-saveas(5, "../../Komatsu/MCMPC/InputV", "png");
+% saveas(5, "../../Komatsu/MCMPC/InputV", "png");
 end
 
 % figure(20)
@@ -441,20 +441,21 @@ ylim([0 data.param.Maxparticle_num])
 % area(F)
 %% 動画生成
 % tic
-% pathJ = data.pathJ;
-% for m = 1:size(pathJ, 2)
-%     pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]);
-% end
+pathJ = data.pathJ;
+for m = 1:size(pathJ, 2)
+    pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]);
+end
 % mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
 % mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
 % mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
 % Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
 % PlotMov_xz
 
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
-% Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
+%% Home PC adress
+mkdir ../../MCMPC/simdata png/Animation1
+mkdir ../../MCMPC/simdata png/Animation_omega
+mkdir ../../MCMPC/simdata video
+Outputdir = '../../MCMPC/simdata';
 % PlotMov       % 2次元プロット
 % toc
 

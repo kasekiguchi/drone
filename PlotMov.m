@@ -1,12 +1,12 @@
 
 %アニメーション作成中にグラフ触ると動画生成止まるから注意
-maxbestcost = max(data.bestcost)
+% maxbestcost = max(data.bestcost)
 % now = datetime('now');
 % datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
     
     %%
 %     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/20230211_circle_v1'));
+	writerObj=VideoWriter(strcat(Outputdir,'/video/v1'));
 	open(writerObj);
     tt = 0:0.1:15;
     
@@ -27,9 +27,9 @@ maxbestcost = max(data.bestcost)
             
         hold on;
 		% 予測経路のplot(ホライズン)
-        path_count = size(data.pathJ{count},2);
-		for j = 1:path_count
-			plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(pathJN{count}(1,j)),:), 'LineWidth',1);
+%         path_count = size(data.pathJ{count},2);
+		for j = 1:size(data.pathJ{count},1)
+			plot(data.path{count}(3,:,j),data.path{count}(7,:,j),'Color',Color_map(ceil(pathJN{count}(j, 1)),:), 'LineWidth',1);
 			hold on;
         end
         plot(data.state(count, 2), data.state(count, 3), '.', 'MarkerSize', 20, 'Color', 'red');
@@ -50,16 +50,16 @@ maxbestcost = max(data.bestcost)
 %             viscircles(Obs_posi,obj.r_obs,'LineWidth',0.1,'Color','black');hold on
 % 		end
 		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
-        plot(cos(tt/2), sin(tt/2), 'LineWidth', 1, 'color', 'green');
-        pgon = polyshape([-1.2 -1.2 -0.5 -0.5],[1.2 -1.2 -1.2 1.2]); plot(pgon);
+%         plot(cos(tt/2), sin(tt/2), 'LineWidth', 1, 'color', 'green');
+%         pgon = polyshape([-1.2 -1.2 -0.5 -0.5],[1.2 -1.2 -1.2 1.2]); plot(pgon);
 
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
-		text(-0.35,1.35,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
+		text(-0.1,12,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
 % 		ax.YLim = [-0.5 2];
 % 		ax.XLim = [-0.5 2];
-        ax.YLim = [-1.2 1.2];
-		ax.XLim = [-1.2 1.2];
+        ax.YLim = [-0.2 2];
+		ax.XLim = [-0.2 12];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);

@@ -20,9 +20,9 @@ syms t real
 % y = 0;
 
 %% circle
-x = cos(t/2);
-y = sin(t/2);
-z = 1.0;
+% x = cos(t/2);
+% y = sin(t/2);
+% z = 1.0;
 
 %%
 % x = cos(t)+sin(t)^2;
@@ -30,14 +30,14 @@ z = 1.0;
 % z = 1;
 
 %% Liner
-% x = t;
-% y = 0;
+% x = 0;
+% y = t;
 % z = 1.0;
 
 %% hovering
-% x = 0;
-% y = 0;
-% z = 1;
+x = 0;
+y = 0;
+z = 1;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
