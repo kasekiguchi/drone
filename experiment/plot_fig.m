@@ -26,18 +26,18 @@ for name_i = 1:length(name_class)
 %     plot(T(1:logger.k),Y_ave/100,'LineWidth',1)
 % xlim([0 60])
     txt = {''};
-    if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
-        Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
-        txt = {txt{:}, '{\color[rgb]{1.00,1.00,0.00}■} :Take off phase'};
-    end
-    if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
-        Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
-        txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Flight phase'};
-    end
-    if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
-        Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-        txt = {txt{:}, '{\color[rgb]{1.0,0.7,1.0}■} :Landing phase'};
-    end
+%     if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
+%         Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
+%         txt = {txt{:}, '{\color[rgb]{1.00,1.00,0.00}■} :Take off phase'};
+%     end
+%     if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
+%         Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
+%         txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :Flight phase'};
+%     end
+%     if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
+%         Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
+%         txt = {txt{:}, '{\color[rgb]{1.0,0.7,1.0}■} :Landing phase'};
+%     end
 
 %     if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
 %         Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
