@@ -14,6 +14,8 @@ properties
     fzFT
     fzapr
     n
+    pdst 
+    fRandn =0;%確率seedを指定．同じ確率の値でできる
 end
 
 methods
@@ -102,18 +104,15 @@ methods
         switch obj.n
             case 1
                 %有限整定
-%                         ux = - F2(1) * sign(z2(1)) * abs(z2(1))^ax(1) -F2(2) * sign(z2(2)) * abs(z2(2))^ax(2) -F2(3) * sign(z2(3)) * abs(z2(3))^ax(3) -F2(4) * sign(z2(4)) * abs(z2(4))^ax(4); %（17）式
-%                         uy = -  F3(1) * sign(z3(1)) * abs(z3(1))^ay(1) -F3(2) * sign(z3(2)) * abs(z3(2))^ay(2) -F3(3) * sign(z3(3)) * abs(z3(3))^ay(3) -F3(4) * sign(z3(4)) * abs(z3(4))^ay(4); %(19)式
 %                         vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%zは近似なし
                         ux=-F2*(sign(z2).*abs(z2).^ax(1:4));
                         uy=-F3*(sign(z3).*abs(z3).^ay(1:4));
-%仮想入力に外乱を入れる
-%                         ux = ux +1*randn(1);
-                %併用
-%                         ux= -F2(1)*sign(z2(1))*abs(z2(1))^ax(1) -F2(2)*sign(z2(2))*abs(z2(2))^ax(2) -F2(3)*sign(z2(3))*abs(z2(3))^ax(3) -F2(4)*sign(z2(4))*abs(z2(4))^ax(4) -F2*z2;%（17）式
-%                         uy= -F3(1)*sign(z3(1))*abs(z3(1))^ay(1) -F3(2)*sign(z3(2))*abs(z3(2))^ay(2) -F3(3)*sign(z3(3))*abs(z3(3))^ay(3) -F3(4)*sign(z3(4))*abs(z3(4))^ay(4) -F3*z3;%(19)式
-%                             ux=-F2*z2;%+1*randn(1);
-%                             uy=-F3*z3;
+
+%                         uxl=-F2*z2;
+%                         uyl=-F3*z3;
+% 
+%                         ux = max(ux,uxl);
+%                         uy = max(uy,uyl);
 %             case 2
                 %近似1(sgnを近似)
                 %           a=6;%a>2,alpha=0.9,a=6の時いい感じになる.６月の報告会
@@ -140,14 +139,9 @@ methods
                 a = obj.gain1(:, 2);
                 kapr = obj.gain1(:, 3)';
                 gain_xy = 1;
-%                             ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-f(3)*tanh(a(3)*z2(3))-f(4)*tanh(a(4)*z2(4))-F2*z2;%-F2*z2;%（17）式
-%                             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-f(3)*tanh(a(3)*z3(3))-f(4)*tanh(a(4)*z3(4))-F3*z3;%-F2*z2;%（17）式
-                ux = -gain_xy * f(1) * tanh(a(1) * z2(1)) - f(2) * tanh(a(2) * z2(2)) - f(3) * tanh(a(3) * z2(3)) - f(4) * tanh(a(4) * z2(4)) - kapr * z2; %-F2*z2; %（17）式
+           ux = -gain_xy * f(1) * tanh(a(1) * z2(1)) - f(2) * tanh(a(2) * z2(2)) - f(3) * tanh(a(3) * z2(3)) - f(4) * tanh(a(4) * z2(4)) - kapr * z2; %-F2*z2; %（17）式
                 uy = -gain_xy * f(1) * tanh(a(1) * z3(1)) - f(2) * tanh(a(2) * z3(2)) - f(3) * tanh(a(3) * z3(3)) - f(4) * tanh(a(4) * z3(4)) - kapr * z3; %-F2*z2; %（17）式
-                %              ux=-f(1)*tanh(a(1)*z2(1))-f(2)*tanh(a(2)*z2(2))-F2*z2;%-F2*z2;%（17）式
-                %             uy=-f(1)*tanh(a(1)*z3(1))-f(2)*tanh(a(2)*z3(2))-F3*z3;%-F2*z2;%（17）式
-
-                %-F3*z3;%(19)式
+             
             case 5
                 % 近似4tanh2
                 f1 = obj.gain2(:, 1);
@@ -160,26 +154,33 @@ methods
 
         %upsi:HL or FT
         upsi = -F4 * z4; %HL
+%         upsi=-F4*(sign(z4).*abs(z4).^apsi(1:2));
         %             upsi=-kpsi(1)*sign(z4(1))*abs(z4(1))^apsi(1)-kpsi(2)*sign(z4(1))*abs(z4(1))^apsi(2);%F4*Z4;%今回はこれで()%FT
         %
         %% 外乱(加速度で与える)
         %=======================================
         %定常外乱：並進方向は0.2m/s^2くらい，回転方向は3rad/s^2(180deg/s^2)
         %=======================================
-                    dst = 0;
+                    dst = 1;
+        %-----------------------------------------------------------------
                     %確率の外乱
 %                     rng("shuffle");
-                    a = 1;%外乱の大きさの上限
+%                     a = 1;%外乱の大きさの上限
 %                     dst = 2*a*rand-a;
-        %             if t>=1
-        %                 dst=0;
-        %             end
-        %             dst_y = 0;
-        %             dst_z=0;
-%                 t = param{1};
-%                     dst=-1*sin(2*pi*t/1);%
-        %             dst=dst+10*cos(2*pi*t/1);
-        %一時的な外乱
+%
+                    %平均b、標準偏差aのガウスノイズ
+%                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
+%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
+%                           a = 1;%標準偏差
+%                           b = 0;%平均
+%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
+%                           obj.pdst = a.*randn(c,1) + b;%ループ数分の値の乱数を作成
+%                           obj.fRandn = 1;
+%                     end
+%                     dst = obj.pdst(obj.fRandn);
+%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
+        %-----------------------------------------------------------------
+                    %一時的な外乱
 %         t = param{1};
 %         dst = 0;
 %                     if t>=2 && t<=5.33

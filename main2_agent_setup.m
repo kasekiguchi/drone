@@ -32,7 +32,7 @@ else
             clear initial_state
             initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
         else
-            arranged_pos = arranged_position([1, 1], N, 0, 1);
+            arranged_pos = arranged_position([0, 0], N, 0, 0);
             initial_state(i).p = arranged_pos(:, i);
             initial_state(i).q = [1; 0; 0; 0];
             initial_state(i).v = [0; 0; 0];
@@ -128,7 +128,7 @@ for i = 1:N
     %agent(i).set_property("estimator",Estimator_UKF2DSLAM_Vehicle(agent(i)));%加速度次元入力モデルのukfslam車両も全方向も可
     %% set reference property
     agent(i).reference = [];
-    agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[0;0;0]));
+    agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[-2;1.5;1]));
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{8,[0;0;1.2],[1,1,0.4]})); % 時変な目標状態
@@ -156,7 +156,7 @@ for i = 1:N
 %     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 %          agent(i).set_property("controller", Conttroller_SMC(dt)); 
-%     agent(i).set_property("controller", Controller_APPRO_C(dt,agent.model.param,alpha));    
+%     agent(i).set_property("controller", Controller_AFT(dt,agent.model.param,alpha));    
 
     %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器

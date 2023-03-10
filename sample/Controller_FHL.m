@@ -12,6 +12,11 @@ Controller_param.F3=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10
 Controller_param.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
 % Controller_param.F2(1)=Controller_param.F2(1)*1.5;
 % Controller_param.F3(1)=Controller_param.F3(1)*1.5; 
+%approと一緒の極
+% Controller_param.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
+% Controller_param.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+% Controller_param.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+% Controller_param.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
 
 syms sz1 [2 1] real
 syms sF1 [1 2] real

@@ -8,7 +8,7 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear ; clc;
 userpath('clear');
 % warning('off', 'all');
-
+ 
 %% general setting
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
@@ -35,22 +35,22 @@ end
 run("main2_agent_setup.m");
 if fExp~=1
     for i = 1:N
-        rat = 0.5;
-% agent.set_model_error("lx",0.0585*rat);%0.0585 %0.06くらいでFT=FB 
-% agent.set_model_error("ly",0.0466*rat);%0.0466
-% agent.set_model_error("mass",0.269*ratio);%0.269
-% agent(i).set_model_error("jx", 0.02237568*rat);%0.02237568;
-% agent.set_model_error("jy", 0.02985236*rat);%0.02985236;
-% agent.set_model_error("jz",-0.03);%0.0480374;
-% agent.set_model_error("km1",1);%0.0301
-% agent.set_model_error("km2",1);%0.0301
-% agent.set_model_error("km3",-0.025);%0.0301
-% agent.set_model_error("km4",-0.025);%0.0301
+        ratio = 0.15;
+% agent.set_model_error("lx",0.0585*ratio);%0.0585 %0.06くらいでFT=FB 
+% agent.set_model_error("ly",0.0466*ratio);%0.0466
+% agent.set_model_error("mass",-0.269*ratio);%0.269
+% agent(i).set_model_error("jx", 0.02237568*ratio);%0.02237568;
+% agent.set_model_error("jy", 0.02985236*ratio);%0.02985236;
+% agent.set_model_error("jz",0.0480374*ratio);%0.0480374;
+% agent.set_model_error("km1",0.0301*ratio);%0.0301
+% agent.set_model_error("km2",0.0301*ratio);%0.0301
+% agent.set_model_error("km3",0.0301*ratio);%0.0301
+% agent.set_model_error("km4",0.0301*ratio);%0.0301
 % agent.set_model_error("k1",-100000000);%0.000008
 % agent.set_model_error("k2",0.05);%0.000008
 % agent.set_model_error("k3",0.05);%0.000008
 % agent.set_model_error("k4",0.05);%0.000008
-% agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[1,1,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
+% agent(i).set_model_error("B",[zeros(1,6),[0,0,1],[1,0,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
     end
 end
 %% main loop
@@ -101,7 +101,7 @@ try
             % reference
             FH.CurrentCharacter = 'f';
 %             if fExp~=1
-%                 if time.t<=5
+%                 if time.t<=0
 %                     FH.CurrentCharacter = 't';
 %                 else
 %                     FH.CurrentCharacter = 'f';
@@ -124,8 +124,8 @@ try
             if (fOffline); logger.overwrite("reference", time.t, agent, i); end
             
             % controller
-            param(i).controller.hlc = {time.t};
-            param(i).controller.ftc = {time.t};
+            param(i).controller.hlc = {time.t,te};
+            param(i).controller.ftc = {time.t,te};
             param(i).controller.pid = {};
             param(i).controller.tscf = {time.t};
             param(i).controller.mpc = {};
@@ -219,11 +219,13 @@ logger.plot({1,"p","erp"},{1,"v","ep"},{1,"q","ep"},{1,"w","ep"},{1,"input",""},
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+%agent(1).estimator.pf.animation(logger,"target",1,"FH"
+% ,figure(),"state_char","p");
 % agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
+
 %% make folder&save
 fsave=10;
 if fsave==1
@@ -238,10 +240,10 @@ if fsave==1
     subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='model_error';%実験,シミュレーション名
+    ExpSimName='prob_comp';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
 % contents='ft_jy_002';%実験,シミュレーション内容
-contents='LS_jxy150';%実験,シミュレーション内容
+contents='FT2';%実験,シミュレーション内容
 % contents='FT_jxy150';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
