@@ -22,7 +22,8 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
             end
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
-            obj.func = gen_func_name(param_for_gen_func);
+%             obj.func = gen_func_name(param_for_gen_func{:});
+obj.func = gen_func_name(param_for_gen_func);
             if length(args) > 2
                 if strcmp(args{3}, "HL")
                     obj.func = gen_ref_for_HL(obj.func);

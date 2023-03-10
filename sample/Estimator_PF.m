@@ -6,8 +6,8 @@ function Estimator = Estimator_PF(agent,output_char,opts)
         agent
         output_char = ["p","q"];
         opts.P = [];
-        opts.sd = 1; % system noise 
-        opts.sample = 2000;
+        opts.sd = 0.4; % system noise 
+        opts.sample = 10000;
         opts.R = diag([0.1*ones(1,3), 0.01*ones(1,3)]); % sensor noise
     end
     Estimator.name="pf";

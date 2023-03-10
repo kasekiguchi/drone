@@ -40,8 +40,10 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 type = "row";
                 param.mass = 0.269;
                 param.Lx = 0.117;
+%                 param.Ly = 0.117;
                 param.Ly = 0.0932;
                 param.lx = 0.117/2;%0.05;
+%                 param.ly = 0.117/2;%0.05;
                 param.ly = 0.0932/2;%0.05;
                 param.jx = 0.02237568;
                 param.jy = 0.02985236;

@@ -13,16 +13,34 @@ syms sz1 [2 1] real
 syms sF1 [1 2] real
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,[1,0],[0]),dt));
 Controller_param.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
-
-    A11=diag(1);
-    A12=[0;0;1];
-    K = lqrd(A11,A12,diag([100,10,10]),0.01,dt);
-    [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
+syms zs1(t) zs2(t)
+szs=[zs1(t);zs2(t)];
+    A11=0;
+    A12=1;
+    K = lqrd(A11,A12,1,0.01,dt);
+%     [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
     S=[K 1];
-    Controller_param.S=S;
-    Controller_param.SA=S*Ac4;
-    Controller_param.SB=S*Bc4; 
-
+    SA=S*Ac2;
+    SB=S*Bc2; 
+%     sigmaz=S(1)*zs1(t)+S(2)*zs2(t);
+%     sigmaz=S*szs;
+%     q=10;k=10;
+%     ub=-inv(SB)*(SA*szs+q*tanh(sigmaz)+k*sigmaz);
+%     dub=diff(ub,t);
+%     ddub=diff(dub,t);
+%     dddub=diff(ddub,t);
+%     
+%     u=subs(ub,szs,sz1);
+%     dsz1=Ac2*sz1+Bc2*u;
+%     
+%     du=subs(dub,[szs,diff(szs,t)],[sz1,dsz1]);
+%     ddsz1=Ac2*dsz1+Bc2*du;
+%     
+%     ddu=subs(ddub,[szs,diff(szs,t),diff(szs,t,2)],[sz1,dsz1,ddsz1]);
+%     dddsz1=Ac2*ddsz1+Bc2*ddu;
+%     
+%     dddu=subs(dddub,[szs,diff(szs,t),diff(szs,t,2),diff(szs,t,3)],[sz1,dsz1,ddsz1,dddsz1]);
+%     Controller_param.Vf = matlabFunction([u,du,ddu,dddu],"Vars",{sz1});
 
 syms sz2 [4 1] real
 syms sF2 [1 4] real
@@ -39,8 +57,11 @@ switch sn
     case 1
     A11=diag([1,1],1);
     A12=[0;0;1];
-    K = lqrd(A11,A12,diag([100,10,10]),0.01,dt);
-    [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
+%     K = lqrd(A11,A12,diag([1,1,1]),0.1,dt);
+%     [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
+
+%     K = lqr(A11,A12,diag([100,1,1]),1);
+    K = lqr(A11,A12,diag([100,1,1]),0.01);
     S=[K 1];
 %     sig0=S*[x1(1);x2(1)]
 %     Ts=abs(sig0)/gaink
@@ -59,9 +80,10 @@ switch sn
         Q12=0;%Q12=Q21
         [~,P,~] = lqrd(A11,A12,Q11,Q22,dt);%正準系のFBgain
         S=[A12'*P+Q12',Q22];
+        [Ad2,Bd2,~,~] = ssdata(c2d(ss(Ac4,Bc4,[1,0,0,0],[0]),dt));
         Controller_param.S=S;
-    %     Controller_param.SA=S*Ad2;
-    %     Controller_param.SB=S*Bd2;
+%         Controller_param.SA=S*Ad2;
+%         Controller_param.SB=S*Bd2;
         Controller_param.SA=S*Ac4;
         Controller_param.SB=S*Bc4; 
 end

@@ -20,6 +20,8 @@ function Model = Model_EulerAngle_With_Disturbance(dt, initial, id)
     Setting.initial = initial;                 % struct('p', [0; 0; 0], 'q', [0; 0; 0], 'v', [0; 0; 0], 'w', [0; 0; 0]);
     Setting.num_list = [3, 3, 3, 3];
     Setting.dt = dt;
+%     Setting.noise.value = 0.1;%入力にノイズを入れることができる
+%     Setting.noise.seed = [];
     Model.param = Setting;
     Model.parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","rotor_r","B"];
 

@@ -5,15 +5,15 @@ activeFile = matlab.desktop.editor.getActive;
 cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
-close all hidden; clear all; clc;
+close all hidden; clear ; clc;
 userpath('clear');
 % warning('off', 'all');
-
+ 
 %% general setting
 N = 1; % number of agents
 fExp = 0 % 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
-fOffline = 0; % offline verification with experiment data
+fOffline = 0; % offline verification with experient data
 fDebug = 0;
 
 run("main1_setting.m");
@@ -33,9 +33,26 @@ end
 
 %f
 run("main2_agent_setup.m");
-%agent.set_model_error("ly",0.02);
-% agent.set_model_error("mass",0.1);
-agent(i).set_model_error("B",[zeros(1,6),[0,0,0],zeros(1,3)]);%only sim
+if fExp~=1
+    for i = 1:N
+        ratio = 0.15;
+% agent.set_model_error("lx",0.0585*ratio);%0.0585 %0.06くらいでFT=FB 
+% agent.set_model_error("ly",0.0466*ratio);%0.0466
+% agent.set_model_error("mass",-0.269*ratio);%0.269
+% agent(i).set_model_error("jx", 0.02237568*ratio);%0.02237568;
+% agent.set_model_error("jy", 0.02985236*ratio);%0.02985236;
+% agent.set_model_error("jz",0.0480374*ratio);%0.0480374;
+% agent.set_model_error("km1",0.0301*ratio);%0.0301
+% agent.set_model_error("km2",0.0301*ratio);%0.0301
+% agent.set_model_error("km3",0.0301*ratio);%0.0301
+% agent.set_model_error("km4",0.0301*ratio);%0.0301
+% agent.set_model_error("k1",-100000000);%0.000008
+% agent.set_model_error("k2",0.05);%0.000008
+% agent.set_model_error("k3",0.05);%0.000008
+% agent.set_model_error("k4",0.05);%0.000008
+% agent(i).set_model_error("B",[zeros(1,6),[0,0,1],[1,0,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
+    end
+end
 %% main loop
 run("main3_loop_setup.m");
 
@@ -82,13 +99,14 @@ try
             if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
             % reference
-            if fExp~=1
-                if time.t<=5
-                    FH.CurrentCharacter = 't';
-                else
-                    FH.CurrentCharacter = 'f';
-                end
-            end
+            FH.CurrentCharacter = 'f';
+%             if fExp~=1
+%                 if time.t<=0
+%                     FH.CurrentCharacter = 't';
+%                 else
+%                     FH.CurrentCharacter = 'f';
+%                 end
+%             end
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [2; 1; 1], time.t, dt};
             param(i).reference.timeVarying = {time, FH};
@@ -104,10 +122,10 @@ try
 
             agent(i).do_reference(param(i).reference.list);
             if (fOffline); logger.overwrite("reference", time.t, agent, i); end
-
+            
             % controller
-            param(i).controller.hlc = {time.t};
-            param(i).controller.ftc = {time.t};
+            param(i).controller.hlc = {time.t,te};
+            param(i).controller.ftc = {time.t,te};
             param(i).controller.pid = {};
             param(i).controller.tscf = {time.t};
             param(i).controller.mpc = {};
@@ -190,15 +208,66 @@ close all
 clc
 % plot
 % logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-%logger.plot({1, "q1", "e"});
-% logger.plot({1,"p1:2","per"},{1,"p","per"},{1,"q","per"},{1,"v","per"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
-logger.plot({1,"p1:2","per"},{1,"p","per"},{1,"v","per"},{1,"input",""},"fig_num",1,"row_col",[2,3]);
+% logger.plot({1,"p1:2","pe"},{1,"p","per"},{1,"q","pe"},{1,"v","pe"},{1,"input",""},"fig_num",5,"row_col",[2,3]);
+% logger.plot({1,"p","per"},"fig_num",2);
+% logger.plot({1,"input",""},"fig_num",3);
+% logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,4]);
+logger.plot({1,"p","erp"},{1,"v","ep"},{1,"q","ep"},{1,"w","ep"},{1,"input",""},"fig_num",4,"row_col",[2,3]);
+% logger.plot({1,"p","er"},{1,"v","e"},{1,"q","se"},{1,"w","e"},{1,"input",""},"fig_num",4,"row_col",[2,3]);
 % agent(1).reference.timeVarying.show(logger)
+
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N);
+%agent(1).estimator.pf.animation(logger,"target",1,"FH"
+% ,figure(),"state_char","p");
+% agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
+
+%% make folder&save
+fsave=10;
+if fsave==1
+    %変更しない
+%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    DataFig='data';%データか図か
+    date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
+    date2=string(datetime('now','Format','yyyy_MMdd'));%日付
+%変更==============================================================================
+%     subfolder='exp';%sim or exp or sample
+    subfolder='sim';%sim or exp or sample
+%     subfolder='sample';%sim or exp or sample
+    
+    ExpSimName='prob_comp';%実験,シミュレーション名
+%     contents='appox_error01';%実験,シミュレーション内容
+% contents='ft_jy_002';%実験,シミュレーション内容
+contents='FT2';%実験,シミュレーション内容
+% contents='FT_jxy150';%実験,シミュレーション内容
+%======================================================================================
+    FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
+    FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
+    %フォルダができてないとき
+    
+        mkdir(FolderNamed);
+        mkdir(FolderNamef);
+        addpath(genpath(ExportFolder));
+    
+    % save logger and agent
+        logger_contents=strcat('logger_',contents);
+        SaveTitle=strcat(date,'_',logger_contents);    
+        eval([logger_contents '= logger;']);%loggerの名前をlogger_contentsに変更
+        save(fullfile(FolderNamed, SaveTitle),logger_contents);
+      
+        agent_contents=strcat('agent_',contents);
+        SaveTitle2=strcat(date,'_',agent_contents);
+        eval([agent_contents '=agent;']);%agentの名前をagent_contentsに変更
+        save(fullfile(FolderNamed, SaveTitle2),agent_contents);
+
+    %savefig
+%     SaveTitle=strcat(date,'_',ExpSimName);
+%         saveas(1, fullfile(FolderName, SaveTitle ),'jpg');
+    %     saveas(1, fullfile(FolderName, SaveTitle ),'fig');
+    %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
+end

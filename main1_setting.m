@@ -1,9 +1,8 @@
-
 if fExp
-    dt = 0.025; % sampling time
+    dt = 0.0250; % sampling time
 else
-    %dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
     dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
+%     dt = 0.0250; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
 end
 
 sampling = dt;
@@ -12,7 +11,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 15;
+    te = 10;
 end
 
 %% set connector (global instance)
@@ -23,7 +22,7 @@ if fMotive
         %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.6')
         %% set connector (global instance)
         rigid_ids = [1];
-        motive = Connector_Natnet('ClientIP', '192.168.1.9'); % Motive 7 : hara
+        motive = Connector_Natnet('ClientIP', '192.168.1.8'); % Motive 7 : hara
         COMs = "COM21";
         %[COMs,rigid_ids,motive,initial_state_yaw_angles] = build_MASystem_with_motive('192.168.1.6'); % set ClientIP
         N = length(COMs);
@@ -34,4 +33,3 @@ if fMotive
         %motive = Connector_Natnet_sim(2*N,dt,0); % for suspended load
     end
 end
-

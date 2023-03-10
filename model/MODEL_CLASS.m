@@ -131,7 +131,7 @@ classdef MODEL_CLASS < dynamicprops
                     rng('shuffle');
                 end
 
-                u = u + obj.noise.value .* randn(size(u));
+                u = u + obj.noise.value .* randn(size(u));%ノイズ
             end
 
             % 状態更新

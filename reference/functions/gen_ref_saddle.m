@@ -1,16 +1,24 @@
-function ref = gen_ref_saddle(varargin)
-% T ：周期
-% origin : サドルの中心
-% scale : 各軸の振幅
-if length(varargin) == 1
-    param=varargin{1};
-elseif length(varargin)==4
-    param=varargin;
-end
+function ref = gen_ref_saddle(param)
+% if length(varargin) == 1
+%     param=varargin{1};
+% elseif length(varargin)==4
+%     param=varargin;
+% end
+% arguments
+%     param.freq = 10% 周期
+%     param.orig = [0 0 1]% サドルの中心
+%     param.size = [1 1 0] % 各軸の振幅
+%     param.phase = -pi % 位相
+% end
+
+% T = param.freq;
+% origin = param.orig;
+% scale = param.size;
+% phase = param.phase;
 T = param{1};
 origin = param{2};
 scale = param{3};
-%flag = param{4};
+phase = -pi;
 syms t real
 syms lx ly real
 lx = scale(1); % 4
@@ -24,9 +32,9 @@ w = 2*pi/T; % T秒で一周
 % xd2 = @(t) ly*sin(w*t-pi)+ly_offset;% y
 % xd3 = @(t) lz*sin(2*w*t-pi/2)+lz_offset;% z
 % xd4 = @(t) 0;%
-ref=@(t) [lx*cos(w*t-pi)+lx_offset; % x
-ly*sin(w*t-pi)+ly_offset; % y
-lz*sin(2*w*t-pi/2)+lz_offset; % z
+ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
+ly*sin(w*t + phase)+ly_offset; % y
+lz*sin(2*w*t + phase/2)+lz_offset; % z
 0];%
 
 % 圧倒的に遅いので以下のような書き方はしないこと

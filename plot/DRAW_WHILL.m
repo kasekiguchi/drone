@@ -76,7 +76,11 @@ classdef DRAW_WHILL
             Ly = W - ww;
             [X,Y,Z]=ellipsoid(Lx/2,0,0.5,Ly/2,Ly/2,0.05);
             seat(3) = surface(ax,X,Y,Z,'FaceColor','#AAAAAA','EdgeColor','#555555');
-            
+%             [x,y,z] = meshgrid([-1:0.01:1]);
+%             V = exp(real(-x.^(1.8) -y.^(1.8) -(8*z).^2));
+%             tmp = isosurface(x,y,z,V,0.9);
+%             seat(3) = patch(ax,'Faces', tmp.faces, 'Vertices', tmp.vertices+[Lx/2,0,0.5], 'FaceColor', '#555555');
+
             % back
             Lx = 0.1;
             Ly = W - ww;
@@ -159,6 +163,9 @@ classdef DRAW_WHILL
             tRealtime = tic;
             for i = 1:length(t)-1
                 obj.draw(p(i,:),q(i))
+                if mod(t(i),0.1)<0.001
+                    title("Time : " + t(i));
+                end
                 if param.realtime
                     delta = toc(tRealtime);
                     if t(i+1)-t(i) > delta
