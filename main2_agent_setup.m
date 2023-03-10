@@ -142,16 +142,7 @@ for i = 1:N
     agent(i).set_property("reference", Reference_Point_FH());                              % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
     %% set controller property
     agent(i).controller = [];
-    
-            fApproxZ = 1;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
-            fTanh1Z = 1;%tanhが一つか:1 tanh2:~1
-            fApproxXY = 10;%%%xy近似するか:1 else:~1
-            fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
-            %FTは誤差が大きいとxyのみに適用でも発散するので想定する誤差に合わせてalphaを調整する必要がある
-            alpha = 0.9;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
-            approxRangeZ=[0 1];%近似する範囲z
-            approxRangeXY=[0 1];%近似する範囲xy
-            agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
+            agent(i).set_property("controller",Controller_FT(dt));
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化

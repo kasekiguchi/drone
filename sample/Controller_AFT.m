@@ -23,22 +23,10 @@ Bcx = [0;0;0;1/jy];
 Acy = diag([1,-g,1],1);
 Bcy = [0;0;0;1/jx];
 
-% [Adx,Bdx,~,~] = ssdata(c2d(ss(Acx,Bcx,[1,0,0,0],[0]),dt));
-% [Ady,Bdy,~,~] = ssdata(c2d(ss(Acy,Bcy,[1,0,0,0],[0]),dt));
-% Controller_param.F2  = place(Adx,Bdx,1E-3*[-1,-1.2,-10,-1.5]);
-%     Controller_param.F3  = place(Ady,Bdy,[-1,-1.2,-10,-1.5]);
-% Controller_param.F2  = place(Acx,Bcx,1E-1*[-10,-1.2,-100,-150]);
-%     Controller_param.F3  = place(Acy,Bcy,1E-1*[-10,-1.2,-100,-150]);
-
 Controller_param.F1 = [2.23 2.28];
 Controller_param.F2 = 0.1*[3.16 6.79 40.54 12.27];
 Controller_param.F3 = 0.1*[-3.16 -6.79 40.54 12.27];
 Controller_param.F4 = [1.41 1.35];
-
-% Controller_param.F1=lqrd(Acz,Bcz,diag([100,1]),[0.1],dt);                                % 
-% Controller_param.F2=lqrd(Acx,Bcx,diag([0.5,5,0.10,0.10]),[1],dt); % xdiag([100,10,10,1])
-% Controller_param.F3=lqrd(Acy,Bcy,diag([0.5,0.5,0.10,0.10]),[1],dt); % ydiag([100,10,10,1])
-% Controller_param.F4=lqrd(Acp,Bcp,diag([100,10]),[0.1],dt);                       % ヨー角 
  
 % Controller_param.F1=lqrd(Acz,Bcz,diag([100,1]),[0.1],dt);                                % 
 % Controller_param.F2=lqrd(Acx,Bcx,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])

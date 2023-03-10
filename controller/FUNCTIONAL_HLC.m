@@ -63,45 +63,32 @@ methods
         z4 = Z4(x, xd', vf, P);%yaw
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
 
-        %%
-        dst=0;
-        t = param{1};
-%         dst = 1;
-        %確率的な外乱
-%         rng("shuffle");
+        %% 外乱(加速度で与える)
+        dst = 1;
+        %-----------------------------------------------------------------
+                    %確率の外乱
+%                     rng("shuffle");
 %                     a = 1;%外乱の大きさの上限
-%                     dst = 2*a*rand - a;
+%                     dst = 2*a*rand-a;
+%
                     %平均b、標準偏差aのガウスノイズ
-                    if~obj.fRandn %最初のループでシミュレーションで使う分の乱数を作成
-                          rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-                          a = 1;%標準偏差
-                          b = 0;%平均
-                          c = param{2}/obj.self.plant.dt +1 ;%スープ数を計算
-                          obj.pdst = a.*randn(c,1) + b;%ループ数分の値の乱数を作成
-                          obj.fRandn = 1;
-                    end
-                    dst = obj.pdst(obj.fRandn);
-                    obj.fRandn = obj.fRandn+1;%乱数の値を更新
-%                     if t>=10 && t<=10.5
-%                             dst=-3;
+%                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
+%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
+%                           a = 1;%標準偏差
+%                           b = 0;%平均
+%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
+%                           obj.pdst = a.*randn(c,1) + b;%ループ数分の値の乱数を作成
+%                           obj.fRandn = 1;
 %                     end
-%              ts = 2 ; te =5.33;
-%              T2 = 2*(te - ts);
-%             if t>=ts && t<= te
-% %                     dst=0.6;
-%                     dst=0.4*sin(2*pi*(t-ts)/T2)+0.6;
-%             end
-
-% dst=-1*sin(2*pi*t/1);
- %特定の位置で外乱を与える
-%                     dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
-%                     xxx=model.state.p(1)-xxx0;
-%                     if xxx>=0 && xxx<=TT
-%                             dst=-5*sin(2*pi*xxx/(TT*2));
+%                     dst = obj.pdst(obj.fRandn);
+%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
+        %-----------------------------------------------------------------
+                    %一時的な外乱
+%         t = param{1};
+%         dst = 0;
+%                     if t>=2 && t<=5.33
+%                             dst= 0.6;
 %                     end
-%             if t>=4 && t<=5.33
-%                     dst=0.6;
-%             end
         %% calc actual input
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4);dst];
