@@ -27,7 +27,7 @@ for name_i = 1:length(name_class)
     txt = {''};
 %     if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
 %         Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
-%         txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+%         txt = {txt{:}, '{\color[rgb]{1.00,1.00,0.00}■} :Take off phase'};
 %     end
     if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
         Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.0,1.0,1.0]); % flight phase
@@ -35,7 +35,7 @@ for name_i = 1:length(name_class)
     end
 %     if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
 %         Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
-%         txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+%         txt = {txt{:}, '{\color[rgb]{1.0,0.7,1.0}■} :Landing phase'};
 %     end
 
 %     if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
@@ -66,7 +66,7 @@ end
 % 
     XLim = get(gca, 'XLim');
     YLim = get(gca, 'YLim');
-    text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+    text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt);
     legend('morter 1','morter 2','morter 3','morter 4')
     xlabel('time [s]')
     ylabel(name_legend(name_i))
@@ -87,14 +87,22 @@ for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 
  sum = logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm.^2+sum;
 end    
 
+%x:120 y:121 z:122
 %%回転数rmseを算出by安西
 sum = 0;
-for plot_i = find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1
- tmp = logger.Data.agent.sensor.result{1,1300}.ros_t.rpm - logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm;
+for plot_i = find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 120, 1)-1
+    tid = logger.Data.agent.sensor.result{1,plot_i}.ros_t.rpm;
+    sum = sum +tid;
+end
+f_average = sum/numel(logger.Data.phase(find(logger.Data.phase == 102, 1):1:find(logger.Data.phase == 120, 1)-1));
+
+sum = 0;
+for plot_i = find(logger.Data.phase == 120, 1):1:find(logger.Data.phase == 108, 1)-1
+ tmp = f_average - logger.Data.agent.sensor.result{1, plot_i}.ros_t.rpm;
  tid = tmp.^2;
  sum = tid + sum;
 end    
-average = sum/numel(logger.Data.phase(find(logger.Data.phase == 117, 1):1:find(logger.Data.phase == 122, 1)-1));
+average = sum/numel(logger.Data.phase(find(logger.Data.phase == 120, 1):1:find(logger.Data.phase == 108, 1)-1));
 RMSE = sqrt(average)
 
 %% 電力(5)
@@ -111,6 +119,7 @@ end
 % plot(T(1:logger.k),Y/10000,'LineWidth',1)
 
 txt = {''};
+
 % if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2%フェーズのプロット
 %     Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]),[1.00,1.00,0.00]); % take off phase
 %     txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
@@ -123,6 +132,7 @@ end
 %     Square_coloring(logger.Data.t([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0,0.7,1.0]); % landing phase
 %     txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
 % end
+
 % if length([find(VL > 60, 1), find(VL < 60, 1, 'last')]) == 2%12月実験用
 %     Square_coloring(logger.Data.t([find(VL < 60, 1), find(VL < 60, 1, 'last')]), 'g'); % landing phase
 % end
@@ -138,11 +148,9 @@ end
 %     Square_coloring(logger.Data.t([find(sensor_switch == 1, 1), find(sensor_switch == 1, 1, 'last')]), [0.0,1.0,1.0]); % landing phase
 %     txt = {txt{:}, '{\color[rgb]{0.0,1.0,1.0}■} :down phase'};
 % end
-
-
 XLim = get(gca, 'XLim');
 YLim = get(gca, 'YLim');
-text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt(2));
+text(XLim(2) - (XLim(2) - XLim(1)) * 0.25, YLim(2) + (YLim(2) - YLim(1)) * -0.1, txt);
 
 
 legend('morter 1','morter 2','morter 3','morter 4')
@@ -151,6 +159,17 @@ ylabel('power [W]')
 ax = gca;
 ax.FontSize = 15;
 hold off
+
+sum = 0;
+%電力を飛行時間で割る
+for plot_i = find(logger.Data.phase == 121, 1):1:find(logger.Data.phase == 108, 1)-1
+    tmp = logger.Data.agent.sensor.result{1, plot_i}.ros_t.voltage.*logger.Data.agent.sensor.result{1, plot_i}.ros_t.current;
+    tmp = tmp/10000;
+    sum = tmp + sum;
+end
+t = logger.Data.t(find(logger.Data.phase == 108, 1)-1) - logger.Data.t(find(logger.Data.phase == 121, 1));
+w = sum/numel(logger.Data.phase(find(logger.Data.phase == 121, 1):1:find(logger.Data.phase == 108, 1)-1))
+% p = sum/t;%飛行時間当たりの消費電力
 %% z throttle　sr(6)
 clear T Y VL
 T = logger.Data.t(1:logger.k);
