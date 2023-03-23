@@ -47,11 +47,11 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
                 obj.flag='l';
             elseif strcmp(cha,'t') % take off phase
                 if strcmp(obj.flag,'t')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{2}(3)-obj.base_state(3),8,Param{3}-obj.base_time);
+                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{2}(3)-obj.base_state(3),Param{6},Param{3}-obj.base_time);
                 else % 初めてtake off に入ったとき
                     obj.base_time=Param{3};
                     obj.base_state=obj.self.estimator.result.state.p;
-                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,Param{2}(3)-obj.base_state(3),8,0);
+                    [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,Param{2}(3)-obj.base_state(3),Param{6},0);
                 end
                 obj.flag='t';
                 
@@ -155,14 +155,25 @@ classdef POINT_REFERENCE_FH_tokyu < REFERENCE_CLASS
 %                     obj.result.state.p = obj.self.reference.result.state.p;
 %                 end
             elseif strcmp(cha,'n') % landing phase%注意機体流れる→landing_speedは普通のlandingには使わない方が良
-                    %reference高さの算出
-                    z_ref = 2.4;%2.7+obj.self.sensor.result.ros_t.voltage_average*(-0.1018)+2.4301;
-                if strcmp(obj.flag,'n')
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,z_ref);
-                else% 初めてlanding に入ったとき
-                    [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.04,z_ref);
+                %reference高さの算出
+                if obj.self.sensor.result.switch == 1%センサの値から推力down
+                    z_ref = 2.7+obj.self.sensor.result.ros_t.voltage_average*(-0.1018)+2.4301;
+                    if strcmp(obj.flag,'n')
+                        [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.result.state.p,Param{4},0.04,z_ref);
+                    else% 初めてlanding に入ったとき
+                        [obj.result.state.p,obj.result.state.v]=gen_ref_for_landing_speed(obj.self.reference.result.state.p,Param{4},0.04,z_ref);
+                    end
+                else
+                    if strcmp(obj.flag,'y')
+                        [obj.result.state.p,obj.result.state.v]=gen_ref_for_take_off(obj.result.state.p,obj.base_state,Param{5}-obj.base_state(3),4,Param{3}-obj.base_time);
+                    else % 初めてtake off に入ったとき
+                        obj.base_time=Param{3};
+                        obj.base_state=obj.self.estimator.result.state.p;
+                        [obj.result.state.p,obj.result.state.v] = gen_ref_for_take_off(obj.base_state,obj.base_state,Param{5}-obj.base_state(3),4,0);
+                    end
+                    obj.flag='y';
                 end
-%                 obj.result.state.p(1)=Param{2}(1);
+                %                 obj.result.state.p(1)=Param{2}(1);
 %                 obj.result.state.p(2)=Param{2}(2);
                 obj.result.state.p(1) = obj.self.estimator.result.state.p(1);
                 obj.result.state.p(2) = obj.self.estimator.result.state.p(2);
