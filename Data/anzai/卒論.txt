@@ -10,7 +10,7 @@ sensor
 シミュレーション時：Sensor_LiDAR
 
 estimator
-Estimator_Direct→Primeの値を真値としてそのまま利用
+Estimator_Direct→自己位置はPrimeの値を真値としてそのまま利用
 
 reference
 TWOD_TANBUG
@@ -22,3 +22,4 @@ Data
 障害物の左側を避ける実験
 1_16anzai_0.25.mat→障害物がやや右側（論文記載データ）
 1_16anzai_0.5.mat→やや右側でない配置
+
