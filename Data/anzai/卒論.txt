@@ -16,7 +16,11 @@ Estimator_EKF(agent(i), ["p", "q"])
 reference
 TWOD_TANBUG_SIMPLE→polyshapeで出力した壁と障害物のみのシンプルな環境用
 TWOD_TANBUG→1号館3F用．環境のせいか軌道がきれいでない（改善の余地あり）
-THREE_TANBUG→3次元のTbug．
+THREE_TANBUG→3次元のTbug．発表会で使用したプログラムでは鉛直方向のrengeを考慮できていなかったため鉛直方向のrengeを考慮しようとした結果動かなくなった．．．ので発表会や報告書で使用したプログラムを下記に記載
+
+THREE_TANBUG_old_simple→発表会で使用した3d_Simpleに対応しているreference
+THREE_TANBUG_old_rev→報告書で使用した3d_envirment_reverceに対応しているreference
+THREE_TANBUG_old_env→発表会で使用した3d_envirment_hvに対応しているreference
 
 controller
 Controller_HL→チューニングについてはTHREE_TANBUG実行時を記載．%以降が元の値
@@ -35,3 +39,24 @@ stlファイル→drone/enviroment
 3d_Simple→壁を乗り越える挙動のための環境．1mは障害物の高さが1m，showは天井無しの観賞用
 3d_enviroment→左右，鉛直どちらも行ける環境のはずだったが鉛直しか行けない．showは天井無しの観賞用
 3d_enviroment_hv→左右，鉛直どちらも行ける環境．showは天井無しの観賞用，obstacleは障害物だけ
+3d_enviroment_reverce→Simpleの環境を上下逆さまにし，障害物を潜り抜ける用の環境
+
+
+速さについて
+referenceでは速さを算出しているが，実際のドローンの速さは算出している値でないため，referenceで算出している値がどこかで上書きされている（controllerかestimatorの部分だと思われる）のでreferenceでの速さの値は意味がない（referenceで出力する値をpとvにしているため算出しないとerrorを吐くので一応算出している）
+
+今後の課題
+・実機実装をするにあたって重量や計算速度の関係でドローンに搭載できる3次元lidarが存在しない（L515が搭載できる大きさではあるがデータ量が多く点群情報を取得するのに3秒ほどかかる）
+・TangentBugはPtoPの移動のため目標位置によっては入力（ドローンの推力）が大きくなったりマイナスになるがある．
+→controllerで制約を設ければ解消できると思われる（小松，百瀬あたりがcontrollerに詳しいので聞いてみるといいかも）
+・ゴールにたどり着くところで目標位置がチャタリングのような現象が起こる
+→LPFを設ければ解消できるかも
+x = x/T + (1-1/T)u
+左辺x:コントローラに渡す目標位置
+右辺x：一時刻前の目標位置
+u:T-bugで算出した値
+T:パラメータ（大きいとu,小さいとxが優先される)
+・実験室のマットの四隅にマーカーを取り付けて障害物として認識させて回避する実験（Lidarがないのでprimeで代用するT-bugの実験）
+→時間の関係で未検証（中村，横田が事例研究で似たような実験をやっていたので聞いてみるといいかも）
+・シミュレーション動画を3次元的に見せる
+→matlabの機能でシミュレーションを3人称視点（ドローンの後ろから？）で見れるらしい．

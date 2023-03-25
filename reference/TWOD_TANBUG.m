@@ -42,8 +42,8 @@ classdef TWOD_TANBUG < REFERENCE_CLASS
             obj.pitch = tmp(2)-tmp(1);%3D
             obj.sensor = [0,0];          
             obj.state_initial = [0,0,0]';
-            obj.goal = [5,0,0]';%2Dgoal
-%            obj.goal = [0,15,0]';% global goal position
+%             obj.goal = [5,0,0]';%2Dgoal
+           obj.goal = [0,15,0]';% global goal position
             obj.obstacle = [0,0,0]';% 障害物座標
 %            obj.radius = self.sensor.lrf.radius;
             obj.radius = self.sensor.lidar.radius;%3D

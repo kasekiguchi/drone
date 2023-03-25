@@ -112,37 +112,39 @@ for i = 1:N
   %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
 %   agent(i).set_property("sensor",Sensor_LiDAR(i));%matlabで作成したシンプル環境用
 %   agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
-%   env = stlread('3F.stl');
-  env = stlread('3d_enviroment_hv.stl');
-  model.Vertices = env.Points;
-  model.Faces    = env.ConnectivityList;
-  figure(2), clf
-%   patch(model, 'FaceColor', [0.8 0.8 1.0])
-%   alpha(0.5)
-%   view([2 2])
-  view([-1 -1 1]);
-  F_size = 15;
-  xlabel('x [m]','Fontsize',F_size)
-  ylabel('y [m]','Fontsize',F_size)
-  zlabel('z [m]','Fontsize',F_size) 
-  xlim([-3,8])
-  ylim([-5.5 , 5.5]);
-  zlim([-5 ,5])
-%   lightangle(-45,70)
-hold on
-trisurf(env,'EdgeColor',[0 0 0],'EdgeAlpha',0.1,'FaceAlpha',0.05,'FaceColor',[0 0 1]);
-plot3(0,0,0,'ro','LineWidth',1);
-plot3(5,3,0,'bx','LineWidth',1);
-legend("wall","initial potision","goal position")
-view([2 2])
-% view([-2 -2 2])
-% plot(env);
-hold off
+  env = stlread('3F.stl');
+
+%STLファイルを出力＆plotするところ
+%   env = stlread('3d_enviroment_reverce.stl');
+%   model.Vertices = env.Points;
+%   model.Faces    = env.ConnectivityList;
+%   figure(2), clf
+% %   patch(model, 'FaceColor', [0.8 0.8 1.0])
+% %   alpha(0.5)
+% %   view([2 2])
+%   view([-1 -1 1]);
+%   F_size = 15;
+%   xlabel('x [m]','Fontsize',F_size)
+%   ylabel('y [m]','Fontsize',F_size)
+%   zlabel('z [m]','Fontsize',F_size) 
+%   xlim([-3,8])
+%   ylim([-5.5 , 5.5]);
+%   zlim([-5 ,5])
+% %   lightangle(-45,70)
+% hold on
+% trisurf(env,'EdgeColor',[0 0 0],'EdgeAlpha',0.1,'FaceAlpha',0.05,'FaceColor',[0 0 1]);
+% plot3(0,0,0,'ro','LineWidth',1);
+% plot3(5,3,0,'bx','LineWidth',1);
+% legend("wall","initial potision","goal position")
+% view([2 2])
+% % view([-2 -2 2])
+% % plot(env);
+% hold off
 %%
 
-%   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
-  agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12*3:0.0165*3:pi / 12*3), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
-%   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.01:pi, 'noise', 3.0E-2, 'seed', 3)); % 2D lidar1
+%   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.0078:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
+%   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12*3:0.0165*3:pi / 12*3), 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % 
+  agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.01:pi, 'noise', 3.0E-2, 'seed', 3)); % 2D lidar1
 %   agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-15*pi/360:0.05:15*pi/360), 'phi_range', -15*pi/360:0.05:15*pi/360, 'noise', 3.0E-2, 'seed', 3)); % Teraranger 64px
   %% set estimator property
   agent(i).estimator = [];
@@ -168,12 +170,12 @@ hold off
   %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
   %agent(i).set_property("reference",Reference_Wall_observation()); %
   %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
-%   agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
+  agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % 
 %   agent(i).set_property("reference",struct("type","TWOD_TANBUG_SIMPLE","name","tbug","param",[]));%matlabで作成したシンプル環境用
-%     agent(i).set_property("reference",struct("type","THREED_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-    agent(i).set_property("reference",struct("type","THREED_TANBUG_old","name","tbug","param",[])); % ハート形[x;y;z]永久
+%     agent(i).set_property("reference",struct("type","THREED_TANBUG","name","tbug","param",[])); % 
+%     agent(i).set_property("reference",struct("type","THREED_TANBUG_old_simple","name","tbug","param",[]));
   %agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
-  % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
+%   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
   %% set controller property
   agent(i).controller = [];
