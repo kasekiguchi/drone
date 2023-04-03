@@ -16,10 +16,10 @@ end
 [numU, ~] = size(U);
 
 % %ABをまとめて計算する 参考資料記載のやりかた
-% M = Ylift * pinv([Xlift; U]);
-% A = M(1 : numX, 1 : numX);
-% B = M(1 : numX, numX + 1:numX + numU);
-% C = X*pinv(Xlift);
+M = Ylift * pinv([Xlift; U]);
+A = M(1 : numX, 1 : numX);
+B = M(1 : numX, numX + 1:numX + numU);
+C = X*pinv(Xlift);
 
 % A,Bをまとめて計算するデータ数が多い場合のやりかた
 G = [Xlift ; U]*[Xlift ; U]';
