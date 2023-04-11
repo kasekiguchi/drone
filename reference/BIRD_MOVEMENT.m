@@ -75,14 +75,7 @@ classdef BIRD_MOVEMENT < REFERENCE_CLASS
             obj.result.farm = ref;
 
             % 目標座標
-%             obj.result.state.p = initial_state(obj.id).p;
-            obj.result.state.p = ref;
-
-            % 目標姿勢角
-            Roll = -(state.p - obj.result.state.p); % ロール角（ひねり）
-            Pitch = - 0.1*subspace([ref(1);ref(3)] - [state.p(1);state.p(3)],[obj.result.state.p(1);obj.result.state.p(3)] - [state.p(1);state.p(3)]); % ピッチ角（上下）
-            Yaw = - 0.1*subspace(ref(1:2) - state.p(1:2),obj.result.state.p(1:2) - state.p(1:2)); % ヨー角（左右）
-%             obj.result.state.q = [Roll;Pitch;Yaw];
+            obj.result.state.p = ref;    
             result = obj.result;
         end
 

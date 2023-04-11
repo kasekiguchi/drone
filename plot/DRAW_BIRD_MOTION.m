@@ -199,7 +199,8 @@ classdef DRAW_BIRD_MOTION
             for n = 1:length(param.drone)
                 agent{n} = logger.Data.agent(n);
             end
-            fi = [];
+            fi = []; % ボロノイ境界
+            fb = []; % 鳥
             p = logger.data(param.drone,"p","p");
             q = logger.data(param.drone,"q","p");
             u = logger.data(param.drone,"input");
@@ -211,9 +212,11 @@ classdef DRAW_BIRD_MOTION
             p_b = logger_bird.data(param.bird,"p","p");
             u_b = logger_bird.data(param.bird,"input");
             r_b = logger_bird.data(param.bird,"p","r");
+            v_b = logger_bird.data(param.bird,"v","p");
             p_b = reshape(p_b,size(p_b,1),3,length(param.bird));
             u_b = reshape(u_b,size(u_b,1),3,length(param.bird));
             r_b = reshape(r_b,size(r_b,1),3,length(param.bird));
+            v_b = reshape(v_b,size(v_b,1),3,length(param.bird));
             farm = logger_bird.Data.agent(1).reference.result{1}.farm;
             for n = 1:length(param.drone)
                 switch size(q(:,:,n),2)
@@ -266,6 +269,10 @@ classdef DRAW_BIRD_MOTION
                     if ~isempty(fi)
                             delete(fi);
                     end
+                    if ~isempty(fb)
+                            pause(0.2);
+                            delete(fb);
+                    end
                     for n = 1:length(param.drone)
                         addpoints(f(n),p(i,1,n),p(i,2,n),p(i,3,n));
                         % drone pos
@@ -276,8 +283,8 @@ classdef DRAW_BIRD_MOTION
                     for n = 1:length(param.bird)
                         addpoints(f_b(n),p_b(i,1,n),p_b(i,2,n),p_b(i,3,n));
                         % bird pos
-                        obj.draw_bird(obj.frame_bird(param.bird(n)),p_b(i,:,n),u_b(i,:,n));
-                        
+%                         obj.draw_bird(obj.frame_bird(param.bird(n)),p_b(i,:,n),u_b(i,:,n)) % 質点描画（位置のみ，向きはわかりにくい）
+                        fb(n) = coneplot(p_b(i,1,n),p_b(i,2,n),p_b(i,3,n),v_b(i,1,n)/norm(v_b(i,1,n)),v_b(i,2,n)/norm(v_b(i,2,n)),v_b(i,3,n)/norm(v_b(i,3,n)),0.1,'nointerp'); % 速度ベクトル方向にコーンの先端が向く
                     end
                 else
                     for n = 1:length(param.drone)

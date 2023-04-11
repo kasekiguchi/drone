@@ -45,9 +45,15 @@ classdef BIRD_CONTROLLER < CONTROLLER_CLASS
             away_gain = 1.2; % ドローンから離れる
             field_away_gain = 1.0; % 地面からの反力
 
+            % 目標姿勢角
+            Roll = state.v(1);
+            Pitch = state.v(2);
+            Yaw = state.v(3);
+
             
             % 入力
             obj.result.input = join_gain*join + separate_gain*separate + go_gain*go + away_gain*away + field_away_gain*field_away;
+%             obj.result.input = [0;0;0];
             obj.self.input = obj.result.input;
             u=obj.result;
         end
