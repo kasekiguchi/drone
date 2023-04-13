@@ -22,7 +22,7 @@ loading_filename = 'EstimationResult_quaternion12state_bilinear.mat';
 HowmanySimulationRunning = 1;
 
 % 確認するステップ数
-stepN = 20;
+stepN = 100;
 
 % 乱数シード
 % seed = double('T');

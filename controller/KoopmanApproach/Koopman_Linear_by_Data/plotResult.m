@@ -9,8 +9,8 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 loadfilename{1} = 'EstimationResult_12state.mat'
-loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
-loadfilename{3} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
+% loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
+loadfilename{2} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
 % loadfilename{1} = 'rndInitSim_bilinear_1.mat'
 % loadfilename{2} = 'rndInitSim_bilinear_plusConst_1.mat'
@@ -26,7 +26,7 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 
 %% plot range
 %何ステップまで表示するか
-stepN = 21;
+stepN = 61;
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 % flg.ylimHoldがtrueのときのplot y範囲
@@ -37,7 +37,7 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 if flg.xlimHold == 1
-    xlimHold = [0, 0.5];
+    xlimHold = [0, 2];
 end
 
 %% Font size
