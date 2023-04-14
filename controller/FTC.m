@@ -53,18 +53,7 @@ methods
         F2 = obj.param.F2;
         F3 = obj.param.F3;
         F4 = obj.param.F4;
-        %             F2=[3.16,6.79,40.54,12.27];%ゲイン
-%         F2 = F2;
-        %             F3=[3.16,6.79,40.54,12.27];%後でparamに格納
-%         F3 = F3;
-        %             kz=[2.23,2.28];
-        %kz=F1;
-        %             kpsi=[1.41,1.35];
-%         kpsi = F4;
-        %             ax=[0.692,0.75,0.818,0.9];%alpha
-        %             ay=[0.692,0.75,0.818,0.9];
-        %             az=[0.692,0.75];
-        %             apsi=[0.692,0.75];
+       
         ax = obj.param.ax;
         ay = obj.param.ay;
         az = obj.param.az;
@@ -104,7 +93,7 @@ methods
         switch obj.n
             case 1
                 %有限整定
-%                         vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%zは近似なし
+                        vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
                         ux=-F2*(sign(z2).*abs(z2).^ax(1:4));
                         uy=-F3*(sign(z3).*abs(z3).^ay(1:4));
 
@@ -161,7 +150,7 @@ methods
         %=======================================
         %定常外乱：並進方向は0.2m/s^2くらい，回転方向は3rad/s^2(180deg/s^2)
         %=======================================
-                    dst = 1;
+                    dst = [zeros(6,1)];%[x,y,z,roll,pitch,yaw](加速次元)
         %-----------------------------------------------------------------
                     %確率の外乱
 %                     rng("shuffle");
@@ -169,16 +158,18 @@ methods
 %                     dst = 2*a*rand-a;
 %
                     %平均b、標準偏差aのガウスノイズ
-%                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
-%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-%                           a = 1;%標準偏差
-%                           b = 0;%平均
-%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
-%                           obj.pdst = a.*randn(c,1) + b;%ループ数分の値の乱数を作成
-%                           obj.fRandn = 1;
-%                     end
-%                     dst = obj.pdst(obj.fRandn);
-%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
+                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
+                          rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
+                          a = 1;%標準偏差
+                          b = 0;%平均
+                          c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
+                          obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
+                          obj.fRandn = 1;
+                    end
+                    dst(4) = obj.pdst(obj.fRandn,1);
+                    dst(5) = obj.pdst(obj.fRandn,2);
+                    dst(3) = obj.pdst(obj.fRandn,3);
+                    obj.fRandn = obj.fRandn+1;%乱数の値を更新
         %-----------------------------------------------------------------
                     %一時的な外乱
 %         t = param{1};

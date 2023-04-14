@@ -5,7 +5,7 @@ close all
 %import
 %選択
 fExp=10;%実験のデータかどうか
-fLogN=1;%loggerの数が一つの時１ 2つの時:2, other:3
+fLogN=2;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
 fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
@@ -14,7 +14,7 @@ fF=1;%flightのみは１
 %どの時間の範囲を描画するか指定
 % startTime = 5;
 % endTime = 20;
-startTime = 0;
+startTime = 5;
 endTime = 1E2;
 %========================================================================
 %図を選ぶ[1:"t_p" 2:"x_y" 3:"t_x" 4:"t_y" 5:"t_z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 
@@ -51,12 +51,15 @@ if fLogN == 1
     n = [1,5,8,10,7, 12:16,20:23];
 %     n=20:23;
 elseif fLogN==2
-%     name1 = logger_LS_non;%LS
-%     name2 = logger_FT_non;%FT
+    name1 = logger_proba_LS;%LS
+    name2 = logger_proba_FT;%FT
+%     name1 = logger_saddle2_LS;%LS
+%     name2 = logger_saddle2_FT;%FT
+
 %     name1 = logger_LS_jxy50;
 % name2=logger_FT_jxy50;
-name1=logger_LS_massn40;
-name2=logger_LS_mass40;
+% name1=logger_LS_massn40;
+% name2=logger_LS_mass40;
 
 %simration of approximation
 % name1 = logger_app_circl_1_alp09;
@@ -96,12 +99,12 @@ name2=logger_LS_mass40;
 
 %chuse figure
     n = 2:12;%比較
-    n = 2:10;
+%     n = 2:10;
 %     n = [2:5 19];
-%     c1="Linear state FB";
-% c2="Finit time settling";
-    c1="LS 60\%";
-    c2="LS 140\%";
+    c1="Linear state FB";
+c2="Finit time settling";
+    c1="LS";
+    c2="FT";
     comp=[c1,c2];%     comp = struct('c1',' Linear state FB','c2',' Finit time settling');
 else
     loggers = {
@@ -441,13 +444,13 @@ elseif fLogN == 2
     est2=zeros(3,n2);
     err1=zeros(3,n1);
     err2=zeros(3,n2);
-    if fExp ==1
+    % if fExp ==1
         inp1=zeros(4,n1);
         inp2=zeros(4,n2);
-    else
-        inp1=zeros(5,n1);
-        inp2=zeros(5,n2);
-    end
+    % else
+    %     inp1=zeros(4,n1);
+    %     inp2=zeros(4,n2);
+    % end
     att1=zeros(3,n1);
     att2=zeros(3,n2);
     vel1=zeros(3,n1);
@@ -460,7 +463,7 @@ elseif fLogN == 2
         ref1(:,j)=name1.Data.agent.reference.result{1,i}.state.p(1:3);
         est1(:,j)=name1.Data.agent.estimator.result{1,i}.state.p(1:3);
         err1(:,j)=est1(:,j)-ref1(:,j);%誤差        
-        inp1(:,j)=name1.Data.agent.input{1,i};
+        inp1(:,j)=name1.Data.agent.input{1,i}(1:4);
         att1(:,j)=name1.Data.agent.estimator.result{1,i}.state.q(1:3);
         vel1(:,j)=name1.Data.agent.estimator.result{1,i}.state.v(1:3);
         w1(:,j)=name1.Data.agent.estimator.result{1,i}.state.w(1:3);
@@ -473,7 +476,7 @@ elseif fLogN == 2
         ref2(:,j)=name2.Data.agent.reference.result{1,i}.state.p(1:3);
         est2(:,j)=name2.Data.agent.estimator.result{1,i}.state.p(1:3);
         err2(:,j)=est2(:,j)-ref2(:,j);%誤差
-        inp2(:,j)=name2.Data.agent.input{1,i};
+        inp2(:,j)=name2.Data.agent.input{1,i}(1:4);
         att2(:,j)=name2.Data.agent.estimator.result{1,i}.state.q(1:3);
         vel2(:,j)=name2.Data.agent.estimator.result{1,i}.state.v(1:3);
         w2(:,j)=name2.Data.agent.estimator.result{1,i}.state.w(1:3);
@@ -641,7 +644,7 @@ elseif fLogN == 2
             allData.attitude = {struct('x',{{time1,time2}},'y',{{att1,att2}}), struct('x','time [s]','y','attitude [rad]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
             allData.velocity = {struct('x',{{time1,time2}},'y',{{vel1,vel2}}), struct('x','time [s]','y','velocity[m/s]'), {'x '+c1,'y '+c1,'z '+c1,'x '+c2,'y '+c2,'z '+c2},add_option([],option,addingContents)};
             allData.angular_velocity = { struct('x',{{time1,time2}},'y',{{w1,w2}}), struct('x','time [s]','y','angular velocity[rad/s]'), {'roll '+c1,'pitch '+c1,'yaw '+c1,'roll '+c2,'pitch '+c2,'yaw '+c2},add_option([],option,addingContents)};
-            allData.three_D = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}},'z',{{ref1(3,:),est1(3,:),est2(3,:)}}), struct('x','$x$ [m]','y','$y$ [m]','z','$z$ [m]'), {'ref', 'est'},add_option(["aspect","camposition"],option,addingContents)};
+            allData.three_D = {struct('x',{{ref1(1,:),est1(1,:),est2(1,:)}},'y',{{ref1(2,:),est1(2,:),est2(2,:)}},'z',{{ref1(3,:),est1(3,:),est2(3,:)}}), struct('x','$x$ [m]','y','$y$ [m]','z','$z$ [m]'), {'ref',c1, c2},add_option(["aspect","camposition"],option,addingContents)};
 %             allData.uHL = { struct('x',{{time1,time2}},'y',{{uHL1(2,:),uHL2(2,:)}}), struct('x','time [s]','y','inputHL'), {c1,c2},add_option([],option,addingContents)};
 %             allData.z1 = {struct('x',{{time}},'y',{{z1}}), struct('x','time [s]','y','z1'), {'z','dz'},add_option([],option,addingContents)};
 %             allData.z2 = {struct('x',{{time}},'y',{{z2}}), struct('x','time [s]','y','z2'), {'x','dx','ddx','dddx'},add_option([],option,addingContents)};
@@ -660,6 +663,7 @@ else
                 esty{i} = est{i}(2,:);
                 estz{i} = est{i}(3,:);
             end
+            allData.t_p = {struct('x',{[time{1},time]},'y',{{ref,est}}), struct('x','time [s]','y','position [m]'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ estimator','$y$ estimator','$z$ estimator'},add_option([],option,addingContents)};
             allData.x_y = {struct('x',{[refx,estx]},'y',{[refy,esty]}), struct('x','$x$ [m]','y','$y$ [m]'), {'Reference',c1,c2},add_option(["aspect"],option,addingContents)};
             allData.t_x = {struct('x',{[time{1},time]},'y',{[refx,estx]}), struct('x','time [s]','y','$x$ [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};
             allData.t_y = {struct('x',{[time{1},time]},'y',{[refy,esty]}), struct('x','time [s]','y','$y$ [m]'), {'Reference',c1,c2},add_option([],option,addingContents)};

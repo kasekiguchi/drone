@@ -1,11 +1,11 @@
 function Controller = Controller_FT(dt, fApproxZ, fTanh1Z, fApproxXY, fTanh1XY, alp, approxRangeZ, approxRangeXY)
 %% flag and approximate range
-fApproxZ = 10;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
+fApproxZ = 1;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
             fTanh1Z = 1;%tanhが一つか:1 tanh2:~1
             fApproxXY = 10;%%%xy近似するか:1 else:~1
             fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
             %FTは誤差が大きいとxyのみに適用でも発散するので想定する誤差に合わせてalphaを調整する必要がある
-            alp = 0.9;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            alp = 0.85;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
             approxRangeZ=[0 1];%近似する範囲z
             approxRangeXY=[0 1];%近似する範囲xy
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
@@ -13,11 +13,11 @@ Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
 Bc4 = [0; 0; 0;1];
-Controller_param.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt); 
+Controller_param.F1 = lqrd(Ac2, Bc2, diag([1000, 1]), [0.1], dt); 
 % Controller_param.F1 = place(Ac2,Bc2,[-8.2518 + 4.9876i,-8.2518 - 4.9876i]);%近似線形化と同じ極
 % 有限整定用
-Controller_param.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller_param.F2 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller_param.F3 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
 %併用
 % Bcm = [0; 0; 0; 2];
 % Controller_param.F2 = lqrd(Ac4, Bcm, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
@@ -66,7 +66,7 @@ if fApproxZ == 1
     syms dddtanha [1 2] real
 
     syms z(t) ub
-%     syms zF1 [1 3]
+    syms zF1 [1 3]
     syms zF1 [1 4]%------------------------------------
 
     if fTanh1Z == 1
@@ -74,17 +74,39 @@ if fApproxZ == 1
         fvals12z = zeros(2, 1);
         f1 = zeros(2, 3);
 
-        xz0 = [80, 1E-5];%------------------------------------
+        xz0 = [50, 0.01];%------------------------------------
         f1 =zeros(2,4);%------------------------------------
+        b=[5,3];
+        %alhpa=0.8 rang=0.05:[4.5,2.5]/rang=0.01:[6,4.8]
+        %alpha=0.85rng=0.01[5,3]
         k = Controller_param.F1;
         %         erz=0.4; %近似する範囲を指定
         for i = 1:2
-            fun = @(x)(integral(@(e) abs(-k(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + x(3) * e), approxRangeZ(1), approxRangeZ(2)));
-            fun=@(x)(integral(@(e) abs( -k(i).*abs(e).^alpha(i) + k(i).*tanh(x(1).*e).*sqrt(e.^2 + x(2)).^alpha(i)),0.4,1));%------------------------------------
-            [x, fval] = fminsearch(fun, xz0);
+%             fun = @(x)(integral(@(e) abs(-k(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + x(3) * e), approxRangeZ(1), approxRangeZ(2)));
+% % fun = @(x)(integral(@(e) abs(-k(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + k(i) * e), approxRangeZ(1), approxRangeZ(2)));%比例固定
+%              [p, fval] = fminsearch(fun, xz0);
+
+             %tanh absolute-----------------
+             %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
+             rng = 0.01;
+            fun=@(x)(integral(@(w) abs( -k(i).*abs(w).^alpha(i) + k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alpha(i)), rng,rng+1) +integral(@(w) abs( k(i).*w-k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alpha(i)), 0,rng));
+            c =@(x)0;
+            ceq = @(x) 1 - x(1).*x(2).^(alpha(i)./2)+b(i);
+            nonlinfcn = @(x)deal(c(x),ceq(x));
+            
+            options = optimoptions("fmincon",...
+                "Algorithm","interior-point",...
+                "EnableFeasibilityMode",true,...
+                "SubproblemAlgorithm","cg");
+            % [p,fval] = fmincon(fun,x0,[],[],[],[],[0,1E-4*0],[inf,1]) 
+            [p,fval] = fmincon(fun,xz0,[],[],[],[],[0,0],[inf,inf],nonlinfcn,options) 
+             % ----------------------------
+
+            
             fvals12z(i) = 2 * fval;
-%             f1(i, :) = x;
-            f1(i, :) = [k(i),x,alpha(i)];%------------------------------------
+%             f1(i, :) = p;
+%             f1(i, :) = [x,k(i)];%比例固定
+            f1(i, :) = [k(i),p,alpha(i)];%------------------------------------
         end
 %sigmoidを使う,こっちの方が計算は早い感じ
 %             for i = 1:2

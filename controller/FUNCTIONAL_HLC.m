@@ -64,7 +64,7 @@ methods
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
 
         %%
-        dst=0;
+        dst = [zeros(6,1)];%[x,y,z,roll,pitch,yaw](加速次元)
         t = param{1};
 %         dst = 1;
         %確率的な外乱
@@ -72,16 +72,19 @@ methods
 %                     a = 1;%外乱の大きさの上限
 %                     dst = 2*a*rand - a;
                     %平均b、標準偏差aのガウスノイズ
-                    if~obj.fRandn %最初のループでシミュレーションで使う分の乱数を作成
-                          rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-                          a = 1;%標準偏差
-                          b = 0;%平均
-                          c = param{2}/obj.self.plant.dt +1 ;%スープ数を計算
-                          obj.pdst = a.*randn(c,1) + b;%ループ数分の値の乱数を作成
-                          obj.fRandn = 1;
-                    end
-                    dst = obj.pdst(obj.fRandn);
-                    obj.fRandn = obj.fRandn+1;%乱数の値を更新
+%                      if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
+%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
+%                           a = 1;%標準偏差
+%                           b = 0;%平均
+%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
+%                           obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
+%                           obj.fRandn = 1;
+%                     end
+%                     dst(4) = obj.pdst(obj.fRandn,1);
+%                     dst(5) = obj.pdst(obj.fRandn,2);
+%                     dst(3) = obj.pdst(obj.fRandn,3);
+%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
+
 %                     if t>=10 && t<=10.5
 %                             dst=-3;
 %                     end
