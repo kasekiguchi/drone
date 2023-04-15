@@ -56,7 +56,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
         %-- main()的な
         % u fFirst
         function result = do(obj,param)
-          profile on
+%           profile on
             idx = param{1};
             xr = param{2};
             rt = param{3};
@@ -168,7 +168,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.result.Evaluationtra_norm = obj.input.normE;
             
             result = obj.result;  
-            profile viewer
+%             profile viewer
         end
         function show(obj)
             obj.result
@@ -178,28 +178,19 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
         %-- 制約とその重心計算 --%
         function [removeF, removeX, survive] = constraints(obj)
             % 状態制約
+
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
 %             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
             
             % 姿勢角
-            removeFe = (obj.state.state_data(5, end, :) >= 0.3975 | obj.state.state_data(5, end, :) <= 0.1975);
-            
-            % ドローンの四隅の座標
-            % drone = 四隅の座標 Particle_num * 2
-%             drone = obj.state.state_data(1,end,:);
-%             drone_1 = drone+obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));
-%             drone_2 = drone-obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));         
-%             drone_3 = drone_2;
-%             drone_4 = drone_1;
-%             d4edge = [drone_1, drone_2];
+%             removeFe = (obj.state.state_data(5, end, :) >= 0.3975 | obj.state.state_data(5, end, :) <= 0.1975);
 
             % 高度
 %             zx = 10;
 %             zz = 3;
 %             removeFe = (any(repmat(obj.state.state_data(3, end, :), 1, 2) <= zz/zx * d4edge(1,:, :)+0.1));
-            
-            
+ 
             removeX = find(removeFe);
             % 制約違反の入力サンプル(入力列)を棄却
             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
@@ -244,33 +235,20 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             for m = 1:obj.N
                 x0 = obj.previous_state;
                 obj.state.state_data(:, 1, m) = obj.previous_state;
-%                 for h = 1:obj.param.H-1
-%                     x0 = x0 + obj.param.dt * obj.param.modelparam.modelmethod(x0, obj.input.u(:, h, m), obj.param.modelparam.modelparam);
-%                     obj.state.state_data(:, h+1, m) = x0;
-%                 end
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 1, m), obj.modelp); obj.state.state_data(:, 2, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 2, m), obj.modelp); obj.state.state_data(:, 3, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 3, m), obj.modelp); obj.state.state_data(:, 4, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 4, m), obj.modelp); obj.state.state_data(:, 5, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 5, m), obj.modelp); obj.state.state_data(:, 6, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 6, m), obj.modelp); obj.state.state_data(:, 7, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 7, m), obj.modelp); obj.state.state_data(:, 8, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 8, m), obj.modelp); obj.state.state_data(:, 9, m) = x0;
-                x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 9, m), obj.modelp); obj.state.state_data(:, 10, m) = x0;
+                for h = 1:obj.param.H-1
+                    x0 = x0 + obj.param.dt * obj.param.modelparam.modelmethod(x0, u(:, h, m), obj.param.modelparam.modelparam);
+                    obj.state.state_data(:, h+1, m) = x0;
+                end
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 1, m), obj.modelp); obj.state.state_data(:, 2, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 2, m), obj.modelp); obj.state.state_data(:, 3, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 3, m), obj.modelp); obj.state.state_data(:, 4, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 4, m), obj.modelp); obj.state.state_data(:, 5, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 5, m), obj.modelp); obj.state.state_data(:, 6, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 6, m), obj.modelp); obj.state.state_data(:, 7, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 7, m), obj.modelp); obj.state.state_data(:, 8, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 8, m), obj.modelp); obj.state.state_data(:, 9, m) = x0;
+%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 9, m), obj.modelp); obj.state.state_data(:, 10, m) = x0;
             end
-
-
-            %ベクトル化：  input[4*obj.N, obj.param.H]
-            % 無名関数@ cellには入れられた気がする
-%             model_equ = {obj.N, 1};
-%             for mk = 1:obj.N
-%                 model_equ{mk, 1} = obj.param.modelparam.modelmethod;
-%             end
-%             x0 = repmat(obj.previous_state, obj.N, 1);
-%             obj.state.state_data(:, 1) = repmat(obj.previous_state, obj.N, 1);
-%             for h = 1:obj.param.H-1
-%                 x0 = x0 + obj.param.dt * model_equ{:, 1}(); cell配列の式に値を代入する方法
-%             end
             predict_state = obj.state.state_data;
         end
 
@@ -297,6 +275,9 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             %% 人口ポテンシャル場法
             % x-y
 %             apfLower = (X(1,end,m)-obj.param.obsX)^2 + (X(2,end,m)-obj.param.obsY)^2;   % 終端ホライズン
+            
+            %% 制約違反ソフト制約
+            constraints = 0;
 
 
             %-- 状態及び入力のステージコストを計算
@@ -318,7 +299,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
-                + terminalState;
+                + terminalState + constraints;
         end
         
         function [pw_new] = Normalize(obj)

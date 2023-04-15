@@ -39,15 +39,15 @@ classdef DRAW_DRONE_MOTION
             zlabel(ax,"z [m]");
             obj.fig = ax;
 
-%             view(360, 0)
-            view(3)
+            view(360, 0)
+%             view(3)
             grid on
             daspect([1 1 1]);
             hold on
-%             xx = -5:5;
-%             yy = zeros(1, size(xx, 2));
-%             zz = 3/10 * xx+0.1;
-%             plot3(xx, yy, zz);
+            xx = -5:5;
+            yy = zeros(1, size(xx, 2));
+            zz = 3/10 * xx+0.1;
+            plot3(xx, yy, zz);
             
 
             % rotor setup
