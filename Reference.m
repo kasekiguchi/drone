@@ -59,7 +59,7 @@ function xr = Reference(params, T, Agent, Gq, Gp, phase)
         xr(13:16, h+1) = params.ur;
 
         %% 斜面
-        if T < 3
+        if T < phase
             xr(1:3, h+1) = Gp;  % 座標
             xr(7:9, h+1) = [0;0;0]; % 速度
         end

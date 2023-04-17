@@ -6,7 +6,7 @@ function Controller = Controller_MCMPC(~)
     Controller_param.Maxparticle_num = 10000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = 1000;
-    Controller_param.input.Initsigma = 0.02*[1,1,1,1];
+    Controller_param.input.Initsigma = 0.01;
     Controller_param.input.Constsigma = 5.0;
     Controller_param.input.Maxsigma = 2.0;
     Controller_param.input.Minsigma = 0.01;
@@ -33,12 +33,13 @@ function Controller = Controller_MCMPC(~)
 
     %% 円旋回
     Controller_param.P = diag([10000.0; 10000.0; 10000.0]);    % 座標   1000 1000 100
-    Controller_param.V = diag([10000.0; 10000.0; 100.0]);    % 速度
+    Controller_param.V = diag([100.0; 100.0; 10000.0]);    % 速度
     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
     Controller_param.Qapf = 0;
+    Controller_param.C = 100;
     
     Controller_param.Pf = diag([100.0; 100.0; 10000.0]);
     Controller_param.Vf = diag([100.0; 100.0; 1.0]);

@@ -84,10 +84,10 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 obj.input.AllRemove = 0;
             end
 
-            obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
-            obj.input.u2 = max(0,obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2);
-            obj.input.u3 = max(0,obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3);
-            obj.input.u4 = max(0,obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4);
+            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
+            obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
+            obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
+            obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
             obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
             obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;   
             obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
@@ -112,13 +112,14 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.input.normE = obj.Normalize();
 
             %-- 制約条件
-            removeF = 0; removeX = []; survive = obj.N; 
+%             removeF = 0; removeX = []; survive = obj.N; 
+            [removeF, removeX, survive] = obj.constraints();
 %             if obj.self.estimator.result.state.p(3) < 0.3
 %                 [removeF, removeX, survive] = obj.constraints();
 %             end
             obj.state.COG.g = 0; obj.state.COG.gc = 0;
             
-
+            
             if removeF ~= obj.N
                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
@@ -131,7 +132,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 if removeF > obj.N /2
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
-                    obj.input.AllRemove = 1;
+%                     obj.input.AllRemove = 1;
                 else
                     obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre)));
                     % 追加
@@ -181,27 +182,48 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
 %             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
-%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
-            
-            % 姿勢角
-%             removeFe = (obj.state.state_data(5, end, :) >= 0.3975 | obj.state.state_data(5, end, :) <= 0.1975);
+%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);    
 
             % 高度
 %             zx = 10;
 %             zz = 3;
 %             removeFe = (any(repmat(obj.state.state_data(3, end, :), 1, 2) <= zz/zx * d4edge(1,:, :)+0.1));
- 
-            removeX = find(removeFe);
-            % 制約違反の入力サンプル(入力列)を棄却
-            obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
-            % 全制約違反による分散リセットを確認するフラグ  
-            removeF = size(removeX, 1); % particle_num -> 全棄却
+            
 %             sur = (obj.state.state_data(1, end, :) > 0.5*sin(obj.param.t));  % 生き残りサンプル
 %             survive = find(sur);
-            survive = obj.N;
+
+              % 使ってたところ
+%             removeFe = NaN;
+%             removeX = find(removeFe);
+%             % 制約違反の入力サンプル(入力列)を棄却
+%             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
+%             % 全制約違反による分散リセットを確認するフラグ  
+%             removeF = size(removeX, 1); % particle_num -> 全棄却
+%             survive = obj.N;
+            removeF = 0; removeX = []; survive = obj.N;
 
             %% ソフト制約
             % 棄却はしないが評価値を大きくする
+            % 姿勢角
+            if obj.self.estimator.result.state.p(3) < 0.2   
+                constIL = find(obj.state.state_data(5, end, 1:obj.N) <= 0.1975);
+                constIR = find(obj.state.state_data(5, end, 1:obj.N) >= 0.3975);
+                constL = @(x) obj.param.C*(x-0.1975).^2;
+                constR = @(x) obj.param.C*(x-0.3975).^2;
+                CL = reshape(constL(obj.state.state_data(5, end, constIL)), [1, length(constIL)]); % 0.1975 rad.未満の計算
+                CR = reshape(constR(obj.state.state_data(5, end, constIR)), [1, length(constIR)]);
+                obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
+                obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
+            end
+
+            % yaw角
+            constIYaw = find(abs(obj.state.state_data(6, end, 1:obj.N)) > 0.5);
+            CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
+            obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
+
+            % 斜面
+            constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
+            obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
 
             %% 重心計算
 %             if removeF == obj.N

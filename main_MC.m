@@ -74,7 +74,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     xr = zeros(16, Params.H);
 
     calT = 0;
-    phase = 0;
+    phase = 2;
 
     %load("Data/HL_input");
     %load("Data/HL_V");
@@ -273,7 +273,11 @@ end
 %         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_1Y = agent.estimator.result.state.p(3)+
-%         if f
+        slope = @(x) 3/10*x;
+        if agent.estimator.result.state.p(3)-(3/10 * agent.estimator.result.state.p(1)) < 0.05
+            fRemove = 2;
+        end
+
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
         fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
@@ -284,14 +288,17 @@ end
                 xr(1,1), xr(2,1), xr(3,1),...
                 xr(7,1), xr(8,1), xr(9,1),...
                 xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)
-        fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t remove: %d \t sigma: %f %f %f %f\n", ...
-            time.t, calT, data.variable_particle_num(idx), data.removeF(idx),data.sigma{idx}(1), data.sigma{idx}(2), data.sigma{idx}(3), data.sigma{idx}(4))
+        fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t remove: %d \t sigma: %f \n", ...
+            time.t, calT, data.variable_particle_num(idx), data.removeF(idx),data.sigma{idx})
         fprintf("input: %f %f %f %f \t input_v: %f %f %f %f", ...
             agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v{idx}(1),data.input_v{idx}(2),data.input_v{idx}(3),data.input_v{idx}(4));
         fprintf("\n");
 
         if fRemove == 1
             warning("Z<0 Emergency Stop!!!")
+            break;
+        elseif fRemove == 2
+            warning("Landing complete")
             break;
         end
         %%
@@ -393,6 +400,18 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
 % end
 
+figure(21)
+V1 = Rdata(9, 1:end-1);
+V2 = Rdata(9, 2:end);
+A1 = Edata(3, 1:end-1);
+A2 = Edata(3, 2:end);
+for i = 1:length(V1)
+    accR(i) = (V2(i)-V1(i))/0.025;
+    accE(i) = (A2(i)-A1(i))/0.025;
+end
+plot(logt(1:end-1,1), accR, "--"); hold on
+plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-3 2]);
+
 % figure(20)
 % IHL = load("Data/HL_input");
 % plot(logt(1:end), IHL(1, :))
@@ -403,7 +422,7 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
 %% Remove sample and Sigma
-logt = logger.data('t',[],[]);
+% logt = logger.data('t',[],[]);
 % figure(10)
 % plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("sigma");
 % plot(logger.data('t',[],[]), Bestcost(1,1:size(logt,1))); ylabel("Bestcost");
@@ -412,22 +431,22 @@ logt = logger.data('t',[],[]);
 % xlim([0 te]); ylim([0 10000]);
 % set(gca,'FontSize',Fontsize);  grid on; title("");
 %% calculation time
-figure(11)
-plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
-plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
-
-xlim([0 te])
-set(gca,'FontSize',Fontsize);  grid on; title("");
-xlabel("Time [s]");
-ylabel("Calculation time [s]");
+% figure(11)
+% plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
+% plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
+% 
+% xlim([0 te])
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% xlabel("Time [s]");
+% ylabel("Calculation time [s]");
 
 %% particle_num
-figure(12)
-plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
-xlim([0 te])
-xlabel("Time [s]"); ylabel("Number of Sample");
-set(gca,'FontSize',Fontsize);  grid on; title("");
-ylim([0 data.param.Maxparticle_num])
+% figure(12)
+% plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
+% xlim([0 te])
+% xlabel("Time [s]"); ylabel("Number of Sample");
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% ylim([0 data.param.Maxparticle_num])
 %%
 % figure(13)
 % SF = data.param.particle_num - data.removeF(1:size(logger.data('t',[],[]),1));
@@ -456,9 +475,10 @@ ylim([0 data.param.Maxparticle_num])
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20230407_landing.mat', '-v7.3')
+% save('../../Komatsu/Data/20230417v1.mat', '-v7.3')
 
 %% animation
+
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1); 
 %%

@@ -63,9 +63,9 @@ syms t real
 % y = 0;
 
 %% syamen
-phaseT = 3;
+phaseT = 2;
 zt = 0.5; % 減衰係数？
-z = 2*exp(-(t-phaseT)/zt)+0.1;
+z = 2*exp(-(t-phaseT)/zt)-0.15;
 x = -exp(-(t-phaseT)/zt);
 y = 0;
 %% slope P2P
