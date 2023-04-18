@@ -9,6 +9,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     state
     const
     reference
+    fRemove
     model
     result
     self
@@ -42,7 +43,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.const = param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
       obj.model = self.model;
-      obj.param.fRemove = 0;
+      obj.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = param.input.Initsigma;  % 初期化
       obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
@@ -68,18 +69,25 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       sysd = c2d(ss(A,B,eye(12),0),param.dt); % 離散化
       obj.A = repmat(sysd.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
       obj.B = repmat(sysd.B,1,1,obj.N);
+
+      obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
+      obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
+      obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
+
+%       obj.param.te = 10;
     end
 
     %-- main()的な
     function result = do(obj,param)
       %profile on
-      idx = param{1};
       xr = param{2};
       rt = param{3};
-      obj.input.InputV = param{5};
+%       obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
+      idx = rt/obj.self.model.dt+1;
 
+      %% HL 
       ref = obj.self.reference.result;
       xd = ref.state.get();
       if isprop(ref.state,'xd')
@@ -111,7 +119,6 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         ave2 = 0;
         ave3 = 0;
         ave4 = 0;
-%         obj.result.v = obj.input.u;
         obj.input.AllRemove = 0;
       end
       
@@ -128,24 +135,26 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %-- 状態予測
       [obj.state.state_data] = obj.predict();
-      if obj.state.state_data(1,1,:) + xd(3) < 0
-        obj.param.fRemove = 1;
+      if obj.state.state_data(1,1,:) + xd(3) < 0.99
+        obj.fRemove = 1;
+        return;
       elseif obj.state.state_data(1,1,:) + xd(3) > 10
-        obj.param.fRemove = 1;
+        obj.fRemove = 1;
+        return;
       end
 
       %-- 評価値計算
-      obj.input.Evaluationtra =  obj.objective(idx);
+      obj.input.Evaluationtra =  obj.objective();
 
       % 評価値の正規化
       obj.input.normE = obj.Normalize();
 
       %-- 制約条件
-      removeF = 0; removeX = []; survive = obj.N;
+      removeF = 0; removeX = []; %survive = obj.N;
       %             if obj.self.estimator.result.state.p(3) < 0.3
       %                 [removeF, removeX, survive] = obj.constraints();
       %             end
-      obj.state.COG.g = 0; obj.state.COG.gc = 0;
+%       obj.state.COG.g = 0; obj.state.COG.gc = 0;
 
 
       if removeF ~= obj.N
@@ -193,20 +202,30 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       obj.input.u = obj.input.v;
 
-      obj.result.removeF = removeF;
-      obj.result.removeX = removeX;
-      obj.result.survive = survive;
-      obj.result.COG = obj.state.COG;
-      obj.result.input_v = obj.input.v;
-      obj.result.BestcostID = BestcostID;
-      obj.result.bestcost = Bestcost;
-      obj.result.contParam = obj.param;
-      obj.result.fRemove = obj.param.fRemove;
-      obj.result.path = obj.state.state_data;
-      obj.result.sigma = obj.input.sigma;
-      obj.result.variable_N = obj.N; % 追加
-      obj.result.Evaluationtra = obj.input.Evaluationtra;
-      obj.result.Evaluationtra_norm = obj.input.normE;
+      obj.result.removeF(idx) = removeF;
+      obj.result.removeX{idx} = removeX;
+%       obj.result.survive = survive;
+%       obj.result.COG = obj.state.COG;
+      obj.result.input_v{idx} = obj.input.v;
+      obj.result.BestcostID{idx} = BestcostID;
+      obj.result.bestcost{idx} = Bestcost;
+%       obj.result.contParam = obj.param;
+      obj.result.obj.fRemove = obj.fRemove;     % controller内で完結させたい
+      obj.result.path{idx} = obj.state.state_data;
+      obj.result.sigma{idx} = obj.input.sigma;
+      obj.result.variable_N(idx) = obj.N; % 追加
+      obj.result.Evaluationtra{idx} = obj.input.Evaluationtra;
+      obj.result.Evaluationtra_norm{idx} = obj.input.normE;
+
+      if removeF ~= obj.N
+          obj.result.bestx(idx, :) = obj.result.path{idx}(1, :, BestcostID(1)); % - もっともよい評価の軌道x成分
+          obj.result.besty(idx, :) = obj.result.path{idx}(2, :, BestcostID(1)); % - もっともよい評価の軌道y成分
+          obj.result.bestz(idx, :) = obj.result.path{idx}(3, :, BestcostID(1)); % - もっともよい評価の軌道z成分
+      else
+          obj.result.bestx(idx, :) = obj.result.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+          obj.result.besty(idx, :) = obj.result.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+          obj.result.bestz(idx, :) = obj.result.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+      end
 
       result = obj.result;
       %profile viewer
@@ -256,32 +275,22 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
     %------------------------------------------------------
     %======================================================
-    function [MCeval] = objective(obj, idx)   % obj.~とする
+    function [MCeval] = objective(obj)   % obj.~とする
       X = obj.state.state_data(:,:,1:obj.N);       % 12 * 10 * N
       U = obj.input.u(:,:,1:obj.N);                % 12 * 10 * N
       Z = X;% - obj.state.ref(1:12,:);
-%       Z = X - repmat(obj.current_state, 1, 10, obj.N);
 
       tildeUpre = U - obj.input.v;         % agent.input
       tildeUref = U - obj.param.ref_input;  %
-%       tildeUref = U - obj.input.InputV(:, idx);
 
       %-- 状態及び入力のステージコストを計算
-      %   stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
-      %   stageStateV = arrayfun(@(L) tildeXv(:, L)' * obj.param.V * tildeXv(:, L), 1:obj.param.H-1);
-      %   stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
-      %   stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
-      %   stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
       stageStateZ = sum(Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,1:end-1,:)),[1,2]);%
       stageInputPre  = sum(tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre(:,1:end-1,:)),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
       stageInputRef  = sum(tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref(:,1:end-1,:)),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
       
       %-- 状態の終端コストを計算 状態だけの終端コスト
       terminalState = sum(Z(:,end,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,end,:)),[1,2]);
-%       tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
-%         +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
-%         +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
-      %             APF = obj.param.Qapf/apfLower;
+
       %-- 評価値計算
       MCEval{1} = stageStateZ + stageInputPre + stageInputRef + terminalState;
       MCEval{2} = sum(Z(1:2,:,:)   .* pagemtimes(obj.Weight(1:2,1:2,obj.N),       Z(1:2,:,:)),[1,2]);
