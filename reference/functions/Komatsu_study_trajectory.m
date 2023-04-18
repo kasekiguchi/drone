@@ -22,7 +22,7 @@ syms t real
 %% circle
 % x = cos(t/2);
 % y = sin(t/2);
-% z = 1.1;
+% z = 1.0;
 
 %%
 % x = cos(t)+sin(t)^2;
@@ -30,14 +30,19 @@ syms t real
 % z = 1;
 
 %% Liner
-% x = t;
-% y = 0;
+% x = 0;
+% y = t;
 % z = 1.0;
 
+%% Vertical vibration
+% x = 0;
+% y = 0;
+% z = 1/2 * sin(2*t)+1;
+
 %% hovering
-x = 0;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
@@ -58,12 +63,11 @@ z = 1;
 % y = 0;
 
 %% syamen
-% phaseT = 3;
-% zt = 0.5; % 減衰係数？
-% z = 2*exp(-(t-phaseT)/zt);
-% x = -exp(-(t-phaseT)/zt);
-% y = 0;
-
+phaseT = 2;
+zt = 0.5; % 減衰係数？
+z = 2*exp(-(t-phaseT)/zt)-0.15;
+x = -exp(-(t-phaseT)/zt);
+y = 0;
 %% slope P2P
 % x = -0.2;
 % y = 0;
@@ -76,7 +80,7 @@ z = 1;
 
 % x = 6/10*t;
 % y = 0;
-% z = 0.5;
+% % z = 0.5;
 % z = (t-1)^2 + 0.05;
 
 %% Star

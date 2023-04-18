@@ -204,8 +204,8 @@ xlabel("Time [s]"); ylabel("input.V");
 grid on; xlim([0 te]); ylim([-inf inf]);
 saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
 %%
-InputV(:, te/dt+1) = InputV(:, te/dt);
-save("Data/InputV_HL.mat", "InputV");
+% InputV(:, te/dt+1) = InputV(:, te/dt);
+% save("Data/InputV_HL.mat", "InputV");
 %% Save figure
 % d = char(yyyymmddHHMMSS(datetime));
 % d = datestr(now, "yyyy-mm-dd_HH:MM:SS");

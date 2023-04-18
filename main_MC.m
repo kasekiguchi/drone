@@ -42,8 +42,9 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fG = zeros(3, 1);
 
     %-- 初期設定 controller.mと同期させる
-    Params.H = agent.controller.mcmpc.param.H;   %Params.H
-    Params.dt = agent.controller.mcmpc.param.dt;  %Params.dt
+    data.param = agent.controller.mcmpc;
+    Params.H = data.param.param.H;   %Params.H
+    Params.dt = data.param.param.dt;  %Params.dt
     Params.dT = dt;
     %-- 配列サイズの定義
     Params.state_size = 12;
@@ -66,16 +67,6 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     dataNum = 11;
     data.state           = zeros(round(te/dt + 1), dataNum);       
     data.state(idx+1, 1) = idx * dt;        % - 現在時刻
-    data.state(idx+1, 2) = initial.p(1);    % - 状態 x
-    data.state(idx+1, 3) = initial.p(2);    % - 状態 y
-    data.state(idx+1, 4) = initial.p(3);    % - 状態 z
-    data.state(idx+1, 5) = agent.input(1);  % - 入力 u1
-    data.state(idx+1, 6) = agent.input(2);  % - 入力 u2
-    data.state(idx+1, 7) = agent.input(3);  % - 入力 u3
-    data.state(idx+1, 8) = agent.input(4);  % - 入力 u4
-    data.state(idx+1, 9) = 0;               % - 目標状態 xr
-    data.state(idx+1, 10) = 0;              % - 目標状態 yr
-    data.state(idx+1, 11) = 0;              % - 目標状態 zr
     data.bestx(idx+1, :) = repelem(initial.p(1), Params.H); % - もっともよい評価の軌道x成分
     data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
     data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
@@ -83,7 +74,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     xr = zeros(16, Params.H);
 
     calT = 0;
-    phase = 0;
+    phase = 2;
 
     %load("Data/HL_input");
     %load("Data/HL_V");
@@ -212,18 +203,6 @@ end
         data.removeX{idx} =     agent.controller.result.removeX;
         data.input_v{idx} =     agent.controller.result.input_v;
 
-        data.state(idx, 1) =    idx * dt; % - 現在時刻
-        data.state(idx, 2) =    agent.estimator.result.state.p(1);   % - 状態 x
-        data.state(idx, 3) =    agent.estimator.result.state.p(2);   % - 状態 y
-        data.state(idx, 4) =    agent.estimator.result.state.p(3);   % - 状態 z
-        data.state(idx, 5) =    agent.input(1);  % - 入力 u1
-        data.state(idx, 6) =    agent.input(2);  % - 入力 u2
-        data.state(idx, 7) =    agent.input(3);  % - 入力 u3
-        data.state(idx, 8) =    agent.input(4);  % - 入力 u4
-%         data.state(idx, 9)  =   xr(1, 1);    % - 目標状態 xr
-%         data.state(idx, 10) =   xr(2, 1);   % - 目標状態 yr
-%         data.state(idx, 11) =   xr(3, 1);   % - 目標状態 zr
-
         data.xr{idx} = xr;
         data.variable_particle_num(idx) = agent.controller.result.variable_N;
         data.survive{idx} = agent.controller.result.survive;
@@ -294,7 +273,11 @@ end
 %         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_1Y = agent.estimator.result.state.p(3)+
-%         if f
+        slope = @(x) 3/10*x;
+        if agent.estimator.result.state.p(3)-(3/10 * agent.estimator.result.state.p(1)) < 0.05
+            fRemove = 2;
+        end
+
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
         fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
@@ -305,14 +288,17 @@ end
                 xr(1,1), xr(2,1), xr(3,1),...
                 xr(7,1), xr(8,1), xr(9,1),...
                 xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)
-        fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t remove: %d \t sigma: %f %f %f %f\n", ...
-            time.t, calT, data.variable_particle_num(idx), data.removeF(idx),data.sigma{idx}(1), data.sigma{idx}(2), data.sigma{idx}(3), data.sigma{idx}(4))
+        fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t remove: %d \t sigma: %f \n", ...
+            time.t, calT, data.variable_particle_num(idx), data.removeF(idx),data.sigma{idx})
         fprintf("input: %f %f %f %f \t input_v: %f %f %f %f", ...
             agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v{idx}(1),data.input_v{idx}(2),data.input_v{idx}(3),data.input_v{idx}(4));
         fprintf("\n");
 
         if fRemove == 1
             warning("Z<0 Emergency Stop!!!")
+            break;
+        elseif fRemove == 2
+            warning("Landing complete")
             break;
         end
         %%
@@ -352,8 +338,8 @@ Rdata = zeros(12, size(logt, 1));
 IV = zeros(4, size(logt, 1));
 for R = 1:size(logt, 1)
     Rdata(:, R) = data.xr{R}(1:12, 1);
-%     IV(:, R) = data.input_v{R};
-%     Bestcost(:, R) = data.bestcost{R};
+    if ~isempty(data.input_v); IV(:, R) = data.input_v{R}; end
+    Bestcost(:, R) = data.bestcost{R};
 end
 Diff = Edata - Rdata(1:3, :);
 xmax = te;
@@ -366,7 +352,7 @@ close all
 Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
 figure(6); plot(Edata(1,:), Edata(3,:)); hold on;
 plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
-plot(initial.p(1), initial.p(3), 'h');
+plot(Edata(1,1), Edata(3,1), 'h');
 % plot(Et, Er)
 plot(Et, Ez); hold off;
 xlabel("X [m]"); ylabel("Z [m]"); 
@@ -391,14 +377,40 @@ xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Input");
 %%
+% figure(5); 
+% ref_t = agent.reference.timeVarying.func;
+% ref_time = 0:0.025:te;
+% for i = 1:te/dt
+%     ref_t_value(i,:) = ref_t(ref_time(i));
+% end
+% plot(logt, ref_t_value(:,11));
+% xlim([0 te]); ylim([-inf inf]); xlabel("Time [s]"); ylabel("Acc.Z [m/s^2]");
+%%
+% syms t_plot real
+% z = 1/2 * sin(2*t_plot)+1;
+% ddz = diff(z, t_plot, 2);
+% plot(logt, subs(ddz, t_plot, logt));
+% xlim([0 te]); ylim([-inf inf]);
+%%
 % 仮想入力
-if isempty(data.input_v)
-else
-figure(5); plot(logt, IV); legend("input1", "input2", "input3", "input4");
-xlabel("Time [s]"); ylabel("input.V");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
-saveas(5, "../../Komatsu/MCMPC/InputV", "png");
+% if ~isempty(data.input_v)
+% figure(7); plot(logt, IV); legend("input1", "input2", "input3", "input4");
+% xlabel("Time [s]"); ylabel("input.V");
+% grid on; xlim([0 xmax]); ylim([-inf inf]);
+% % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
+% end
+
+figure(21)
+V1 = Rdata(9, 1:end-1);
+V2 = Rdata(9, 2:end);
+A1 = Edata(3, 1:end-1);
+A2 = Edata(3, 2:end);
+for i = 1:length(V1)
+    accR(i) = (V2(i)-V1(i))/0.025;
+    accE(i) = (A2(i)-A1(i))/0.025;
 end
+plot(logt(1:end-1,1), accR, "--"); hold on
+plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-3 2]);
 
 % figure(20)
 % IHL = load("Data/HL_input");
@@ -410,31 +422,31 @@ end
 % set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
 %% Remove sample and Sigma
-logt = logger.data('t',[],[]);
-figure(10)
+% logt = logger.data('t',[],[]);
+% figure(10)
 % plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("sigma");
 % plot(logger.data('t',[],[]), Bestcost(1,1:size(logt,1))); ylabel("Bestcost");
-yyaxis right
-plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("rejected")
-xlim([0 te]); ylim([0 10000]);
-set(gca,'FontSize',Fontsize);  grid on; title("");
+% yyaxis right
+% plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("rejected")
+% xlim([0 te]); ylim([0 10000]);
+% set(gca,'FontSize',Fontsize);  grid on; title("");
 %% calculation time
-figure(11)
-plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
-plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
-
-xlim([0 te])
-set(gca,'FontSize',Fontsize);  grid on; title("");
-xlabel("Time [s]");
-ylabel("Calculation time [s]");
+% figure(11)
+% plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
+% plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
+% 
+% xlim([0 te])
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% xlabel("Time [s]");
+% ylabel("Calculation time [s]");
 
 %% particle_num
-figure(12)
-plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
-xlim([0 te])
-xlabel("Time [s]"); ylabel("Number of Sample");
-set(gca,'FontSize',Fontsize);  grid on; title("");
-ylim([0 data.param.Maxparticle_num])
+% figure(12)
+% plot(logt, data.variable_particle_num(1:size(logt,1)), 'LineWidth', 1.5);
+% xlim([0 te])
+% xlabel("Time [s]"); ylabel("Number of Sample");
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% ylim([0 data.param.Maxparticle_num])
 %%
 % figure(13)
 % SF = data.param.particle_num - data.removeF(1:size(logger.data('t',[],[]),1));
@@ -452,19 +464,21 @@ ylim([0 data.param.Maxparticle_num])
 % Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
 % PlotMov_xz
 
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
-% Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
+%% Home PC adress
+% mkdir ../../MCMPC/simdata png/Animation1
+% mkdir ../../MCMPC/simdata png/Animation_omega
+% mkdir ../../MCMPC/simdata video
+% Outputdir = '../../MCMPC/simdata';
 % PlotMov       % 2次元プロット
 % toc
 
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('Data\20230222_landing.mat', '-v7.3')
+% save('../../Komatsu/Data/20230417v1.mat', '-v7.3')
 
 %% animation
+
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 agent(1).animation(logger,"target",1); 
 %%
