@@ -300,6 +300,9 @@ end
         elseif fRemove == 2
             warning("Landing complete")
             break;
+        elseif fRemove == 3
+            warning("all remove")
+            break;
         end
         %%
         drawnow 
@@ -475,7 +478,7 @@ plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-3 2]);
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('../../Komatsu/Data/20230417v1.mat', '-v7.3')
+% save('C:/Users/student/"OneDrive - 東京都市大学 Tokyo City University (1)"/研究室_2023/Data/20230420v1.mat', '-v7.3')
 
 %% animation
 

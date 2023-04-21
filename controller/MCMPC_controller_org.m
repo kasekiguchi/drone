@@ -206,12 +206,14 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % 棄却はしないが評価値を大きくする
             % 姿勢角
             if obj.self.estimator.result.state.p(3) < 0.2   
+%                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
+                A = 100;
+                Zdis = (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975);
+                gradZ = -A * Zdis .^ (1/10);
                 constIL = find(obj.state.state_data(5, end, 1:obj.N) <= 0.1975);
                 constIR = find(obj.state.state_data(5, end, 1:obj.N) >= 0.3975);
-                constL = @(x) obj.param.C*(x-0.1975).^2;
-                constR = @(x) obj.param.C*(x-0.3975).^2;
-                CL = reshape(constL(obj.state.state_data(5, end, constIL)), [1, length(constIL)]); % 0.1975 rad.未満の計算
-                CR = reshape(constR(obj.state.state_data(5, end, constIR)), [1, length(constIR)]);
+                CL = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIL)-0.1975).^2, [1, length(constIL)]); % 0.1975 rad.未満の計算
+                CR = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
                 obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
                 obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
             end
@@ -221,9 +223,13 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
             obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
 
-            % 斜面
+            % 斜面に墜落したかどうか　実質棄却
             constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
             obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
+
+            if length(constISlope) == obj.N % 全墜落なら終了
+                obj.param.fRemove = 3;
+            end
 
             %% 重心計算
 %             if removeF == obj.N

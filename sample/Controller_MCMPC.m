@@ -40,6 +40,8 @@ function Controller = Controller_MCMPC(~)
 
     Controller_param.Qapf = 0;
     Controller_param.C = 100;
+    Controller_param.CA = 10;
+    
     
     Controller_param.Pf = diag([100.0; 100.0; 10000.0]);
     Controller_param.Vf = diag([100.0; 100.0; 1.0]);
