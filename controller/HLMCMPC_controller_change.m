@@ -33,9 +33,9 @@ classdef HLMCMPC_controller_change <CONTROLLER_CLASS
       %---MPCパラメータ設定---%
       obj.param = param;
       %             obj.param.subCheck = zeros(obj.N, 1);
-      obj.param.modelparam.modelparam = obj.self.parameter.get();
-      obj.param.modelparam.modelmethod = obj.self.model.method;
-      obj.param.modelparam.modelsolver = obj.self.model.solver;
+%       obj.param.modelparam.modelparam = obj.self.parameter.get();
+%       obj.param.modelparam.modelmethod = obj.self.model.method;
+%       obj.param.modelparam.modelsolver = obj.self.model.solver;
 
       %%
       obj.input = param.input;
@@ -68,7 +68,6 @@ classdef HLMCMPC_controller_change <CONTROLLER_CLASS
       sysd = c2d(ss(A,B,eye(12),0),param.dt); % 離散化
       obj.A = repmat(sysd.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
       obj.B = repmat(sysd.B,1,1,obj.N);
-      obj.input.U = zeros(4,1);
     end
 
     %-- main()的な
@@ -80,6 +79,8 @@ classdef HLMCMPC_controller_change <CONTROLLER_CLASS
       obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
+      obj.input.U = 10 * ones(4,1);
+      indwhile = 0;
 
       ref = obj.self.reference.result;
       xd = ref.state.get();
@@ -101,7 +102,7 @@ classdef HLMCMPC_controller_change <CONTROLLER_CLASS
       xd(13:15)=Rb0'*xd(13:15);
       xd(17:19)=Rb0'*xd(17:19);
       %%
-      P = obj.param.modelparam.modelparam;
+      P = obj.self.parameter.get();
       vfn = Vf(xn,xd',P,obj.F1); %v1
       z1n = Z1(xn,xd',P);
       z2n = Z2(xn,xd',vfn,P);
@@ -109,104 +110,108 @@ classdef HLMCMPC_controller_change <CONTROLLER_CLASS
       z4n = Z4(xn,xd',vfn,P);
       obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
       
-      while(any(abs(obj.input.U) > ones(4,1) * 1.5))
-      ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-      ave2 = obj.input.u(2);    % 初期値はparamで定義
-      ave3 = obj.input.u(3);
-      ave4 = obj.input.u(4);
-
-%       ave1 = 0;
-%       ave2 = 0;
-%       ave3 = 0;
-%       ave4 = 0;
-      % 標準偏差，サンプル数の更新
-      obj.input.sigma = obj.input.nextsigma;   
-      obj.N = obj.param.nextparticle_num;
-
-      % 全棄却時のケア
-      if obj.input.AllRemove == 1
-        ave1 = 0;
-        ave2 = 0;
-        ave3 = 0;
-        ave4 = 0;
-%         obj.result.v = obj.input.u;
-        obj.input.AllRemove = 0;
-      end
-      
-      % 入力生成
-      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1; % 負入力の阻止
-      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
-      obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3;
-      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
-      
-      obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
-      obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
-      obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
-      obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
-
-      %-- 状態予測
-      [obj.state.state_data] = obj.predict();
-      %% 墜落 or 飛びすぎたら終了
-      if obj.state.state_data(1,1,:) + xd(3) < 0
-        obj.param.fRemove = 1;
-      elseif obj.state.state_data(1,1,:) + xd(3) > 5
-        obj.param.fRemove = 1;
-      end
-
-      %-- 評価値計算
-      obj.input.Evaluationtra =  obj.objective(idx);
-
-      % 評価値の正規化
-      obj.input.normE = obj.Normalize();
-
-      %-- 制約条件
-      removeF = 0; removeX = []; survive = obj.N;
-      %             if obj.self.estimator.result.state.p(3) < 0.3
-      %                 [removeF, removeX, survive] = obj.constraints();
-      %             end
-      obj.state.COG.g = 0; obj.state.COG.gc = 0;
-
-
-      if removeF ~= obj.N
-        [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
-        vf = obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
-        vs = obj.input.u(2:4, 1, BestcostID(1));     % 最適な入力の取得
-        tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
-        obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
-        obj.self.input = obj.result.input;  % agent.inputへの代入
-
-        obj.result.v = [vf; vs];
-        obj.input.v = obj.result.v;
-
-        %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
-        %   評価が良くなったら標準偏差を狭めるようにしている
-        
-        obj.input.Bestcost_pre = obj.input.Bestcost_now;
-        obj.input.Bestcost_now = Bestcost;
-
-        % 棄却数がサンプル数の半分以上なら入力増やす
-        if removeF > obj.N /2
-          obj.input.nextsigma = obj.input.Constsigma;
-          obj.param.nextparticle_num = obj.param.Maxparticle_num;
-          obj.input.AllRemove = 1;
-        else
-          obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
-          % 追加
-          obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
-        end
-
-      elseif removeF == obj.N    % 全棄却
-        %agent.input = そのまま
-        obj.input.nextsigma = obj.input.Constsigma;
-        Bestcost = obj.param.ConstEval;
-        BestcostID = 1;
-        obj.input.AllRemove = 1;
-
-        % 追加
-        obj.param.nextparticle_num = obj.param.Maxparticle_num;
-      end
-      obj.input.U = obj.result.input;
+      % 入力が大きすぎる場合は再計算
+      while(any(abs(obj.input.U) > ones(4,1) * 2.0) || indwhile < 5)
+          indwhile = indwhile + 1;
+          ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+          ave2 = obj.input.u(2);    % 初期値はparamで定義
+          ave3 = obj.input.u(3);
+          ave4 = obj.input.u(4);
+    
+    %       ave1 = 0;
+    %       ave2 = 0;
+    %       ave3 = 0;
+    %       ave4 = 0;
+          % 標準偏差，サンプル数の更新
+          obj.input.sigma = obj.input.nextsigma;   
+          obj.N = obj.param.nextparticle_num;
+    
+          % 全棄却時のケア
+          if obj.input.AllRemove == 1
+            ave1 = 0;
+            ave2 = 0;
+            ave3 = 0;
+            ave4 = 0;
+    %         obj.result.v = obj.input.u;
+            obj.input.AllRemove = 0;
+          end
+          
+          % 入力生成
+          obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1; % 負入力の阻止
+          obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
+          obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3;
+          obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
+          
+          obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
+          obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
+          obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
+          obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
+    
+          %-- 状態予測
+          [obj.state.state_data] = obj.predict();
+          %% 墜落 or 飛びすぎたら終了
+          if obj.state.state_data(1,1,:) + xd(3) < 0
+            obj.param.fRemove = 1;
+          elseif obj.state.state_data(1,1,:) + xd(3) > 5
+            obj.param.fRemove = 1;
+          end
+    
+          %-- 評価値計算
+          obj.input.Evaluationtra =  obj.objective(idx);
+    
+          % 評価値の正規化
+          obj.input.normE = obj.Normalize();
+    
+          %-- 制約条件
+          obj.state.COG.g = 0; obj.state.COG.gc = 0;
+          removeF = 0; removeX = []; survive = obj.N;
+    
+    
+          if removeF ~= obj.N
+            [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
+            vf = obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
+            vs = obj.input.u(2:4, 1, BestcostID(1));     % 最適な入力の取得
+            tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
+            obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
+            obj.self.input = obj.result.input;  % agent.inputへの代入
+    
+            obj.result.v = [vf; vs];
+            obj.input.v = obj.result.v;
+    
+            %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
+            %   評価が良くなったら標準偏差を狭めるようにしている
+            
+            obj.input.Bestcost_pre = obj.input.Bestcost_now;
+            obj.input.Bestcost_now = Bestcost;
+    
+            % 棄却数がサンプル数の半分以上なら入力増やす
+            if removeF > obj.N /2
+              obj.input.nextsigma = obj.input.Constsigma;
+              obj.param.nextparticle_num = obj.param.Maxparticle_num;
+              obj.input.AllRemove = 1;
+            else
+              obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
+              % 追加
+              obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
+            end
+    
+          elseif removeF == obj.N    % 全棄却
+            %agent.input = そのまま
+            obj.input.nextsigma = obj.input.Constsigma;
+            Bestcost = obj.param.ConstEval;
+            BestcostID = 1;
+            obj.input.AllRemove = 1;
+    
+            % 追加
+            obj.param.nextparticle_num = obj.param.Maxparticle_num;
+          end
+          obj.input.U = obj.result.input;
       end % while
+
+      % obj.result.input : 実入力
+      % obj.input.U : 実入力
+      % obj.input.u : 仮想入力
+      % obj.input.v : 仮想入力
 
       obj.input.u = obj.input.v;
 
@@ -240,17 +245,18 @@ classdef HLMCMPC_controller_change <CONTROLLER_CLASS
     end
 
     %-- 制約とその重心計算 --%
-    function [removeF, removeX, survive] = constraints(obj)
+    function [removeF] = constraints(obj)
       % 状態制約
       %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
       %             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
       %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
-      removeX = find(removeFe);
+%       removeX = find(removeFe);
       % 制約違反の入力サンプル(入力列)を棄却
-      obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
+%       obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
       % 全制約違反による分散リセットを確認するフラグ
-      removeF = size(removeX, 1); % particle_num -> 全棄却
-      survive = obj.N;
+%       removeF = size(removeX, 1); % particle_num -> 全棄却
+%       survive = obj.N;
+        removeF = 0;
 
       %% ソフト制約
       % 棄却はしないが評価値を大きくする

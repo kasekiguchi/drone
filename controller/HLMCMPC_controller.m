@@ -43,7 +43,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.const = param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
       obj.model = self.model;
-      obj.fRemove = 0;
+      obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = param.input.Initsigma;  % 初期化
       obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
@@ -165,11 +165,11 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.input.normE = obj.Normalize();
 
       %-- 制約条件
-      removeF = 0; removeX = []; %survive = obj.N;
+      removeF = 0; removeX = []; survive = obj.N;
       %             if obj.self.estimator.result.state.p(3) < 0.3
       %                 [removeF, removeX, survive] = obj.constraints();
       %             end
-%       obj.state.COG.g = 0; obj.state.COG.gc = 0;
+      obj.state.COG.g = 0; obj.state.COG.gc = 0;
 
 
       if removeF ~= obj.N
