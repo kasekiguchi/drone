@@ -10,17 +10,17 @@
 #include <math.h>
 
 uint8_t i;
-unsigned int droneNumber = 132; //機体番号を入力
+unsigned int droneNumber = 251; //機体番号を入力　No.1 [251] No.2 [252]
 
 /////////////////// WiFi関係 ////////////////////
 // ESPrのIPアドレスの設定
 //const char *ssid = "ACSLexperimentWiFi";
 //const char *password = "wifi-acsl-mse";
-const char *ssid = "ACSL-Drone-Hotspot";
-const char *password = "1qaz2wsx";
-IPAddress myIP(192, 168, 50, droneNumber);  // 機体により下番号変更
+const char *ssid = "ACSLWiFi-Y";
+const char *password = "acsl-wifi-0104";
+IPAddress myIP(192, 168, 100, droneNumber);  // 機体により下番号変更
 
-IPAddress gateway(192, 168, 50, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
+IPAddress gateway(192, 168, 100, 1);// PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
 const int my_udp_port = 8000;        //開放する自ポート
 IPAddress subnet(255, 255, 255, 0);
 
