@@ -95,28 +95,28 @@ try
             if fExp ~=1 %シミュレーションのみ
                 if time.t<=10
                     FH.CurrentCharacter = 't';
-                elseif time.t < 15
+                else%if time.t < 15
                     FH.CurrentCharacter = 'f';%phaseをいじれる
-                elseif time.t < 20
-                    FH.CurrentCharacter = 'h';%phaseをいじれる
-                elseif time.t < 25
-                    FH.CurrentCharacter = 'd';%phaseをいじれる
-                elseif time.t < 30
-                    FH.CurrentCharacter = 'z';%phaseをいじれる
-                elseif time.t < 35
-                    FH.CurrentCharacter = 'd';
-                elseif time.t < 40
-                    FH.CurrentCharacter = 'z';
-                elseif time.t < 45
-                    FH.CurrentCharacter = 'd';
-                else 
-                    FH.CurrentCharacter = 'z';
+%                 elseif time.t < 20
+%                     FH.CurrentCharacter = 'h';%phaseをいじれる
+%                 elseif time.t < 25
+%                     FH.CurrentCharacter = 'd';%phaseをいじれる
+%                 elseif time.t < 30
+%                     FH.CurrentCharacter = 'z';%phaseをいじれる
+%                 elseif time.t < 35
+%                     FH.CurrentCharacter = 'd';
+%                 elseif time.t < 40
+%                     FH.CurrentCharacter = 'z';
+%                 elseif time.t < 45
+%                     FH.CurrentCharacter = 'd';
+%                 else 
+%                     FH.CurrentCharacter = 'z';
                 end
             end
             param(i).reference.covering = [];
 
             %param(i).reference.point = {FH, [agent.estimator.result.state.p(1:2);1], time.t,dt};%reference.pointの目標位置を指定できる
-            param(i).reference.point = {FH, [0;0;1], time.t,dt};%reference.pointの目標位置を指定できる。
+            param(i).reference.point = {FH, [1;0;1], time.t,dt};%reference.pointの目標位置を指定できる。
             param(i).reference.CeilingPoint = {FH, [1.5;2.8;2.4], time.t,dt,2.9,8};%天井接地用。張り付き前座標{2}、天井高さ{5},takeOff時間{6}を追加
             param(i).reference.costsurvey = {FH, [0;-1;1], time.t,dt,2.9};%コスト検証用
             param(i).reference.timeVarying = {time,FH};

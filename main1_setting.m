@@ -21,7 +21,7 @@ if fMotive
         %[COMs,rigid_ids,motive] = build_MASystem_with_motive('192.168.1.6')
         %% set connector (global instance)
         rigid_ids = [1];
-        motive = Connector_Natnet('ClientIP', '192.168.1.8'); % Motive 7 : hara
+        motive = Connector_Natnet('ClientIP', '192.168.100.142'); % Motive 7 : hara
         COMs = "COM21";
         %[COMs,rigid_ids,motive,initial_state_yaw_angles] = build_MASystem_with_motive('192.168.1.6'); % set ClientIP
         N = length(COMs);
