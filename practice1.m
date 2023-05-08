@@ -12,8 +12,10 @@ syms J0 [3,3] real; syms J1 [3,3] real; syms J2 [3,3] real; syms J3 [3,3] real; 
 syms l1 real; syms l2 real; syms l3 real; syms l4 real; %スカラー
 syms q1 [3,1] real; syms q2 [3,1] real; syms q3 [3,1] real; syms q4 [3,1] real
 
-%syms q1hat [3,3] real; syms q2hat [3,3] real; syms q3hat [3,3] real; syms q4hat [3,3] real; 
+%syms q1hat [3,3] real; syms q2hat [3,3] real; syms q3hat [3,3] real; syms q4hat [3,3] real;
+syms ol0 [3,1] real;
 syms ol1 [3,1] real;syms ol2 [3,1] real;syms ol3 [3,1] real;syms ol4 [3,1] real;
+syms os1 [3,1] real;syms os2 [3,1] real;syms os3 [3,1] real;syms os4 [3,1] real;
 syms u1p [3,1] real; syms u2p [3,1] real; syms u3p [3,1] real; syms u4p [3,1] real; 
 syms u1v [3,1] real; syms u2v [3,1] real; syms u3v [3,1] real; syms u4v [3,1] real; 
 %yms ro1hat [3,3] real; syms ro2hat [3,3] real; syms ro3hat [3,3] real; syms ro4hat [3,3] real;
@@ -47,6 +49,12 @@ ro4hat = [0, -ro4(3,1), ro4(2,1);
         ro4(3,1), 0, -ro4(1,1);
         -ro4(2,1), ro4(1,1), 0];
 
+%%
+olhat0 = [0, -ol0(3,1), ol0(2,1);
+        ol0(3,1), 0, -ol0(1,1);
+        -ol0(2,1), ol0(1,1), 0];
+
+
 mq = m0*eye(3) + m1*(q1*q1') + m2*(q2*q2') + m3*(q3*q3') + m4*(q4*q4');
 
 
@@ -66,15 +74,14 @@ dos4 = q4hat*(ddx0_2-ge3-R0*ro4hat*dol0+R0*oh02*ro4)/l4 - q3hat*u4p/(m4*l4);
 AA = mq\(m1*(q1*q1')*R0*ro1hat +m2*(q2*q2')*R0*ro2hat +m3*(q3*q3')*R0*ro3hat +m4*(q4*q4')*R0*ro4hat);
 BB = J0 - m1*ro1hat*R0'*(q1*q1')*R0*ro1hat - m2*ro2hat*R0'*(q2*q2')*R0*ro2hat - m3*ro3hat*R0'*(q3*q3')*R0*ro3hat - m4*ro4hat*R0'*q4*q4'*R0*ro4hat;
 CC = m1*ro1hat*R0'*(q1*q1') +m2*ro2hat*R0'*(q2*q2') +m3*ro3hat*R0'*(q3*q3') +m4*ro4hat*R0'*(q4*q4');
-% P1_new = mq\(1);
-% P2_new=0;
+P1_new = mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*R0*olhat0^2*ro1)+(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*R0*olhat0^2*ro2)+(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*R0*olhat0^2*ro3)+(u4p-m4*l4*norm(os4)^2*q4-m1*(q4*q4')*R0*olhat0^2*ro4)+ge3);
+P2_new= ((m1*ro1hat*R0*(q1*q1'))+(m2*ro2hat*R0*(q2*q2'))+(m3*ro3hat*R0*(q3*q3'))+(m4*ro4hat*R0*(q4*q4')))*ge3+ro1hat*R0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*R0*olhat0^2*ro1)+ro2hat*R0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*R0*olhat0^2*ro2)+ro3hat*R0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*R0*olhat0^2*ro3)+ro4hat*R0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*R0*olhat0^2*ro4); 
 % S = subs(dos1,[A,B,C],[AA,BB,CC]);
-ddx0_new = subs(ddx0_2,[A,B,C],[AA,BB,CC]);
-dol0_new = subs(dol0,[A,B,C],[AA,BB,CC]);
+ddx0_new = subs(ddx0_2,[A,B,C,P1],[AA,BB,CC,P1_new]);
+dol0_new = subs(dol0,[A,B,C,P2],[AA,BB,CC,P2_new]);
 dos1_new = subs(dos1,[A,B,C],[AA,BB,CC]);
 dos2_new = subs(dos2,[A,B,C],[AA,BB,CC]);
 dos3_new = subs(dos3,[A,B,C],[AA,BB,CC]);
-
 dos4_new = subs(dos4,[A,B,C],[AA,BB,CC]);
 dol1 = J1\(M1-cross(ol1,J1*ol1));
 dol2 = J2\(M2-cross(ol2,J2*ol2));
