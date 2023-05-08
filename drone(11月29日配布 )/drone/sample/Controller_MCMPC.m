@@ -1,0 +1,35 @@
+function Controller = Controller_MCMPC(~)
+%UNTITLED この関数の概要をここに記述
+%   詳細説明をここに記述
+
+    Controller_param.dt = 0.1; % MPCステップ幅
+    Controller_param.H = 10;
+    Controller_param.particle_num = 200; %サンプル数
+    Controller_param.Initsigma = 0.1;
+    Controller_param.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
+    Controller_param.model = load('C:\Users\kiyam\Documents\卒業研究\drone\drone-isobe2022\drone-isobe2022\controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state.mat','est');
+    %loadで別の場所からの値を引っ張ってくる「''」でパスを書けば別のファイルからデータを引っ張ってこれる
+
+    %% 離陸(以前のやつ)
+%     obj.param.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
+%     obj.param.V = diag([1.0; 1.0; 1.0]);    % 速度
+%     obj.param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+%     obj.param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+%     obj.param.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
+
+    %% 円旋回
+    Controller_param.P = diag([200.0; 200.0; 500.0]);    % 座標   1000 1000 100
+    Controller_param.V = diag([100.0; 100.0; 100.0]);    % 速度
+    Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+    Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.Q = diag([1; 1; 1]);  % 姿勢角
+    Controller_param.W = diag([100; 100; 100]);  % 角速度
+
+    Controller_param.Pf = diag([100.0; 100.0; 100.0]);
+
+
+    Controller.name = "mcmpc";
+    Controller.type = "MCMPC_controller";
+    Controller.param = Controller_param;
+
+end

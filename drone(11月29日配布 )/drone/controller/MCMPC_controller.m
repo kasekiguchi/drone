@@ -1,0 +1,168 @@
+classdef MCMPC_controller <CONTROLLER_CLASS
+    % MCMPC_CONTROLLER MCMPCのコントローラー
+    
+    properties%(新しい変数を追加する場合はここに書く)
+        %-- 変数の構造体を宣言 --%
+        options 
+        param % パラメータ
+        previous_state  % 前状態
+        input   % 入力
+        state   % 状態
+        reference   % 目標軌道
+        model   % モデル
+        result  % mainに値戻す
+        self    % classの通例
+        A
+        B
+    end
+    
+    methods
+        function obj = MCMPC_controller(self, param)
+            %---- 変数定義 ----%
+            obj.self = self; 
+            %--MPCパラメータ設定--%
+            %~ SampleのController_MCMPCからパラメータの受け取り
+            obj.param = param;
+            obj.param.subCheck = zeros(obj.param.particle_num, 1);
+            obj.param.fRemove = 0;
+            obj.input.Initsigma = param.Initsigma;  % 初期標準偏差
+            obj.input.ref_input = param.ref_input;  % 目標入力 (reference_input) 
+            obj.input.Evaluationtra = zeros(1, obj.param.particle_num); % 評価値配列の初期化
+            obj.model = self.model; % agent.model -> obj.model
+            %-- 全予測軌道のパラメータの格納変数を定義 --%
+            %-- ドローンの状態を格納するための配列を作成
+            obj.state.p_data = zeros(obj.param.H, obj.param.particle_num);
+            obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
+            obj.state.q_data = zeros(obj.param.H, obj.param.particle_num);
+            obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
+            obj.state.v_data = zeros(obj.param.H, obj.param.particle_num);
+            obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
+            obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
+            obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
+            obj.A = obj.param.model.est.Ahat;
+            obj.B = obj.param.model.est.Bhat;
+
+
+            % p , q, v, w
+                %~ ホライズン×サンプル数の配列初期化
+                %~ 状態数×ホライズン×サンプル数に次元変換
+            obj.state.state_data = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data];  
+        end
+        
+        %-- main()的な
+        % u fFirst
+        function result = do(obj,param)
+            idx = param{1}; % mainから値の受け取り
+            xr = param{2};
+            obj.state.ref = xr; % 構造体に代入
+
+            %-- 正規分布の標準偏差，平均の設定
+%                 obj.input.sigma = 0.1;
+%                 obj.input.average = 0.269*9.81/4;     
+
+            if idx == 1
+                obj.input.sigma = 0.1;
+                obj.input.average = 0.269*9.81/4;     
+            else
+                obj.input.sigma = obj.input.sigma * (obj.input.bestcost_now / obj.input.bestcost_befor);
+                obj.input.average = obj.input.u1(:,1,obj.input.I);
+                if obj.input.sigma >= 2
+                    obj.input.sigma = 2;
+                elseif obj.input.sigma <= 0.005
+                    obj.input.sigma = 0.005;
+                end
+            end
+            obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num) + obj.input.average;
+               
+            %-- 入力列の生成
+            % 正規分布に従う．設定した標準偏差と平均に基づく
+            % 負の入力の阻止
+            % 入力列の次元変換
+            obj.input.u1(find(obj.input.u1 < 0)) = 0;
+
+            %-- 現在状態の取得
+            obj.previous_state.x0 = obj.self.estimator.result.state.get(); %12 * 1
+
+            %-- 状態予測
+            obj.state.predict_state = obj.predict(); %関数呼び出し
+            % プラスα　：　墜落したらプログラムを終了させる
+
+            %-- 評価値計算
+            for i = 1:obj.param.particle_num
+                obj.state.objective(i) = obj.objective(i);
+            end
+            % 最小値を取得
+            [bestcost,obj.input.I] = min(obj.state.objective);
+
+            % 最適な入力をagentに代入
+            obj.self.input = obj.input.u1(:,1,obj.input.I);
+            %-- リサンプリング
+            if idx == 1
+                obj.input.bestcost_befor = bestcost;
+                obj.input.bestcost_now = bestcost;
+            else
+                obj.input.bestcost_befor =  obj.input.bestcost_now;
+                obj.input.bestcost_now = bestcost;
+            end
+               
+            %-- (必要があれば)変数の保存(mainへ値を返す) 
+            obj.result.bestcost = bestcost;
+            obj.result.sigma = obj.input.sigma;
+            obj.result.contParam = obj.param;
+            result = obj.result;
+            
+        end
+
+        % 今回は関係ないので無視
+        function show(obj)
+            obj.result
+        end
+
+        %-- 状態予測関数
+        function [predict_state] = predict(obj)
+            ts = 0; % 一応初期化, odeで用いる
+            % 予測軌道計算
+            for i = 1:obj.param.particle_num %サンプル数
+            obj.state.y0 = obj.previous_state.x0;
+            obj.state.state_data(:,1,i) = obj.state.y0;
+                for j = 1:obj.param.H - 1 %ホライズン数
+                    obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
+%                     obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i);
+                    obj.state.state_data(:,j+1,i) = obj.state.y0; 
+                end
+            end
+            predict_state = obj.state.state_data;
+        end
+
+        %-- 評価関数
+        function [MCeval] = objective(obj, i)   %m=サンプル
+            X = obj.state.state_data;       %12 * 10
+            U = obj.input.u1(:,:,i);         %4  * 10
+
+            %-- 予測状態と目標状態の誤差計算
+            tildep = obj.state.ref(1:3,:) - X(1:3,:,i);
+            tildeq = obj.state.ref(4:6,:) - X(4:6,:,i);
+            tildev = obj.state.ref(7:9,:) - X(7:9,:,i);
+            tildew = obj.state.ref(10:12,:) - X(10:12,:,i);
+            %-- 予測入力と目標入力の誤差計算
+            tildeu = obj.state.ref(13:16,:) - U;
+            %-- 状態及び入力のステージコストを計算
+            stagestateP = arrayfun(@(L) tildep(:,L)' * obj.param.P * tildep(:,L), 1:obj.param.H - 1);
+            stagestateQ = arrayfun(@(L) tildeq(:,L)' * obj.param.Q * tildeq(:,L), 1:obj.param.H - 1);
+            stagestateV = arrayfun(@(L) tildev(:,L)' * obj.param.V * tildev(:,L), 1:obj.param.H - 1);
+            stagestateW = arrayfun(@(L) tildew(:,L)' * obj.param.W * tildew(:,L), 1:obj.param.H - 1);
+            stagestateU = arrayfun(@(L) tildeu(:,L)' * obj.param.R * tildeu(:,L), 1:obj.param.H - 1);
+            %-- 状態の終端コストを計算(重みは分離可能，controllerに追加する)
+            terminalstatep = tildep(:,end)' * obj.param.Pf * tildep(:,end);
+            terminalstateq = tildeq(:,end)' * obj.param.Q * tildeq(:,end);
+            terminalstatev = tildev(:,end)' * obj.param.V * tildev(:,end);
+            terminalstatew = tildew(:,end)' * obj.param.W * tildew(:,end);
+            terminalstateu = tildeu(:,end)' * obj.param.R * tildeu(:,end);
+            %-- 評価値計算
+            MCeval = sum(stagestateP + stagestateQ + stagestateV + stagestateW + stagestateU ...
+                 ) + terminalstatep + terminalstateq + terminalstatev + terminalstatew + terminalstateu;
+
+            
+        end
+    end
+end
