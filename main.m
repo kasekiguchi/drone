@@ -11,10 +11,10 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 0; % 1: active
+fExp = 0; % 1: 実機   0: シミュレーション
+fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 1; % 1: active : for debug function
+fDebug = 0; % 1: active : for debug function
 run("main1_setting.m");
 
 % set logger
@@ -33,7 +33,7 @@ end
 %
 run("main2_agent_setup.m");
 
-%agent.set_model_error("ly",0.02);
+%agent.set_model_error("ly",0.02);%モデル誤差
 %% main loop
 run("main3_loop_setup.m");
 
