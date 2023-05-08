@@ -4,25 +4,27 @@ clc
 %dos1,2,3,4のqiがqihatに変更
 %ro追加 omegahat^2(oh02)を変更
 syms ddx0 [3 1] real ; syms dol0 [3 1] real;
-syms dos1 [3 1] real; syms dos2 [3 1] real; syms dos3 [3 1] real; syms dos4 [3 1] real;
-syms dol1 [3 1] real; syms dol2 [3 1] real; syms dol3 [3 1] real; syms dol4 [3 1] real;
 syms A [3,3] real; syms B [3,3] real; syms C [3,3] real
 syms P1 [3,1] real; syms P2 [3,1] real
 syms J0 [3,3] real; syms J1 [3,3] real; syms J2 [3,3] real; syms J3 [3,3] real; syms J4 [3,3] real; 
 syms l1 real; syms l2 real; syms l3 real; syms l4 real; %スカラー
 syms q1 [3,1] real; syms q2 [3,1] real; syms q3 [3,1] real; syms q4 [3,1] real
 
-%syms q1hat [3,3] real; syms q2hat [3,3] real; syms q3hat [3,3] real; syms q4hat [3,3] real;
+
 syms ol0 [3,1] real;
 syms ol1 [3,1] real;syms ol2 [3,1] real;syms ol3 [3,1] real;syms ol4 [3,1] real;
 syms os1 [3,1] real;syms os2 [3,1] real;syms os3 [3,1] real;syms os4 [3,1] real;
-syms u1p [3,1] real; syms u2p [3,1] real; syms u3p [3,1] real; syms u4p [3,1] real; 
-syms u1v [3,1] real; syms u2v [3,1] real; syms u3v [3,1] real; syms u4v [3,1] real; 
-%yms ro1hat [3,3] real; syms ro2hat [3,3] real; syms ro3hat [3,3] real; syms ro4hat [3,3] real;
+syms u [3,1] real;
+u1p = (q1*q1')*u; u2p = (q2*q2')*u; u3p = (q3*q3')*u; u4p = (q4*q4')*u;
+u1v = (eye(3)-(q1*q1'))*u; u2v = (eye(3)-(q2*q2'))*u; u3v = (eye(3)-(q3*q3'))*u; u4v = (eye(3)-(q4*q4'))*u;
+
+
 syms R0 [3,3] real; syms ro1 [3,1] real; syms ro2 [3,1] real; syms ro3 [3,1] real; syms ro4 [3,1] real;
 syms ge3 [3,1] real; syms oh02 [3,3] real
 syms m0 real;syms m1 real;syms m2 real;syms m3 real;syms m4 real
 syms M1 real;syms M2 real;syms M3 real;syms M4 real
+
+
 q1hat = [0, -q1(3,1), q1(2,1);
         q1(3,1), 0, -q1(1,1);
         -q1(2,1), q1(1,1), 0];
@@ -49,7 +51,6 @@ ro4hat = [0, -ro4(3,1), ro4(2,1);
         ro4(3,1), 0, -ro4(1,1);
         -ro4(2,1), ro4(1,1), 0];
 
-%%
 olhat0 = [0, -ol0(3,1), ol0(2,1);
         ol0(3,1), 0, -ol0(1,1);
         -ol0(2,1), ol0(1,1), 0];
@@ -87,3 +88,9 @@ dol1 = J1\(M1-cross(ol1,J1*ol1));
 dol2 = J2\(M2-cross(ol2,J2*ol2));
 dol3 = J3\(M3-cross(ol3,J3*ol3));
 dol4 = J4\(M4-cross(ol4,J4*ol4));
+
+%%
+% subs(ddx0_new,dol0,[0,0,0])
+
+
+
