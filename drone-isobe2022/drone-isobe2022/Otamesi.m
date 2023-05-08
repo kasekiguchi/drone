@@ -1,1 +1,1 @@
-disp('Hello')
+A = load('D:\workspace\GitHub\drone\drone-isobe2022\drone-isobe2022\Data\simData_KoopmanApproach_2023_4_28\simtest_36.mat')

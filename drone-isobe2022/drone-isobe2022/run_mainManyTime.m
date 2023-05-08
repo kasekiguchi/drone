@@ -6,7 +6,7 @@ clear;clc;
 
 %% 初期設定
 % 実行する回数を指定
-HowManyRun = 10000;
+HowManyRun = 5000;
 
 % rand シード値
 seed = double('T');
