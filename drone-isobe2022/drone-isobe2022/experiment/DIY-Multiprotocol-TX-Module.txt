@@ -1,0 +1,65 @@
+diff --git a/Multiprotocol/Multiprotocol.ino b/Multiprotocol/Multiprotocol.ino
+index 01b088e..bc7022a 100644
+--- a/Multiprotocol/Multiprotocol.ino
++++ b/Multiprotocol/Multiprotocol.ino
+@@ -492,13 +492,13 @@ void setup()
+ 			((PROTO_DIAL3_ipr & _BV(PROTO_DIAL3_pin)) ? 0 : 4) +
+ 			((PROTO_DIAL4_ipr & _BV(PROTO_DIAL4_pin)) ? 0 : 8);
+ 	#endif
+-	//mode_select=1;
++	mode_select=8; // sekiguchi  force proto 8
+     debugln("Protocol selection switch reads as %d", mode_select);
+ 
+ 	#ifdef ENABLE_PPM
+ 		uint8_t bank=bank_switch();
+ 	#endif
+-
++  //bank = 0; // sekiguchi
+ 	// Set default channels' value
+ 	for(uint8_t i=0;i<NUM_CHN;i++)
+ 		Channel_data[i]=1024;
+diff --git a/Multiprotocol/_Config.h b/Multiprotocol/_Config.h
+index ef48fe3..0ca9ae1 100644
+--- a/Multiprotocol/_Config.h
++++ b/Multiprotocol/_Config.h
+@@ -74,10 +74,10 @@
+ //4-in-1 modules have the A7105, CYRF6936, CC2500 and NRF24L01 RF chips installed
+ //5-in-1 modules have all RF chips installed
+ //!!!If a RF chip is present it MUST be marked as installed!!! or weird things will happen you have been warned.
+-#define A7105_INSTALLED
+-#define CYRF6936_INSTALLED
++//#define A7105_INSTALLED
++//#define CYRF6936_INSTALLED
+ #define CC2500_INSTALLED
+-#define NRF24L01_INSTALLED
++//#define NRF24L01_INSTALLED
+ //#define SX1276_INSTALLED		// only supported on STM32 modules
+ 
+ //Uncomment (remove //) if you have an internal 5-in-1 Multi module.
+@@ -352,13 +352,13 @@
+ //It is important for the module to know the endpoints of your radio.
+ //Below are some standard transmitters already preconfigured.
+ //Uncomment only the one which matches your transmitter.
+-#define TX_ER9X			//ER9X/ERSKY9X/OpenTX	( 988<->2012 microseconds)
++//#define TX_ER9X			//ER9X/ERSKY9X/OpenTX	( 988<->2012 microseconds)
+ //#define TX_DEVO7		//DEVO					(1120<->1920 microseconds)
+ //#define TX_SPEKTRUM	//Spektrum				(1100<->1900 microseconds)
+ //#define TX_HISKY		//HISKY					(1120<->1920 microseconds)
+ //#define TX_MPX		//Multiplex MC2020		(1250<->1950 microseconds)
+ //#define TX_WALKERA	//Walkera PL0811-01H	(1000<->1800 microseconds)
+-//#define TX_CUSTOM		//Custom
++#define TX_CUSTOM		//Custom
+ 
+ // The lines below are used to set the end points in microseconds if you have selected TX_CUSTOM.
+ // A few things to consider:
+@@ -367,8 +367,8 @@
+ //  - Centered stick value is usually 1500. It should match the middle between MIN and MAX, ie Center=(MAX+MIN)/2. If your TX is not centered you can adjust the value MIN or MAX.
+ //  - 100% is referred as the value when the TX is set to default with no trims
+ #if defined(TX_CUSTOM)
+-	#define PPM_MAX_100	1900	//	100%
+-	#define PPM_MIN_100	1100	//	100%
++	#define PPM_MAX_100	2000	//	100%  org : 1900
++	#define PPM_MIN_100	1000	//	100%  org : 1100
+ #endif
+ 
+ /** Number of PPM Channels **/
