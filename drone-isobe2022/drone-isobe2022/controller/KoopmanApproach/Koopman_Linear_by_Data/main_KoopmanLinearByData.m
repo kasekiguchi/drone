@@ -8,7 +8,7 @@ close all
 flg.bilinear = 0;
 
 %データ保存先ファイル名
-FileName = 'EstimationResult_12state_8000data.mat'; %保存先のファイル名も逐次変更する
+FileName = 'EstimationResult_12state_1000data.mat'; %保存先のファイル名も逐次変更する
 
 % 読み込むデータファイル名
 % loading_filename = 'sim_rndP_12state';
@@ -42,7 +42,7 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 8000; %使用するデータの量に応じて逐次変更
+Data.HowmanyDataset = 1000; %使用するデータの量に応じて逐次変更
 
 for i= 1: Data.HowmanyDataset
     Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
