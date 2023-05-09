@@ -50,7 +50,7 @@ end
         % 20230129
         % 初期状態を変更
         if flag_initrandam
-            initialState.input = randi([0,1],4,1); %randi([下限,上限],行数,列数)
+            initialState.input = randi([0,1],4,1)*0.1; %randi([下限,上限],行数,列数)
             initialState.p = randi([-1,1],3,1);
             initialState.q = randi([-1,1],3,1)*0.175;
             initialState.q(3,1) = 0;

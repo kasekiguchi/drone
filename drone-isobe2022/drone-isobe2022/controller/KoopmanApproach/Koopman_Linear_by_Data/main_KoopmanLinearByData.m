@@ -8,7 +8,7 @@ close all
 flg.bilinear = 0;
 
 %データ保存先ファイル名
-FileName = 'EstimationResult_12state_100data2.mat'; %保存先のファイル名も逐次変更する
+FileName = 'EstimationResult_12state_1000data2_5_9.mat'; %保存先のファイル名も逐次変更する
 
 % 読み込むデータファイル名
 % loading_filename = 'sim_rndP_12state';
@@ -42,7 +42,7 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 100; %使用するデータの量に応じて逐次変更
+Data.HowmanyDataset = 1000; %使用するデータの量に応じて逐次変更
 
 for i= 1: Data.HowmanyDataset
     Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
@@ -143,103 +143,103 @@ disp(targetpath)
 % 工事中 多分ずっと
 
 %% Plot by simulation(グラフを出力するところ)
-% stepN = 31;
-% dt = simResult.reference.T(2)-simResult.reference.T(1);
-% tlength = simResult.reference.T(1:stepN);
-% 
-% % P
-% figure(1)
-% subplot(2,1,2);
-% p2 = plot(tlength,simResult.reference.est.p(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('x','y','z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% originYlim = gcf().CurrentAxes.YLim;
-% originXlim = gcf().CurrentAxes.XLim;
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.p(:,1:stepN),'LineWidth',2);
-% xlim(originXlim)
-% ylim(originYlim)
-% hold on
-% grid on
-% 
-% ylabel('Estimated Data','FontSize',12);
-% legend('x','y','z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% 
-% % Q
-% figure(2)
-% subplot(2,1,2);
-% p2 = plot(tlength ,simResult.reference.est.q(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% originYlim = gcf().CurrentAxes.YLim;
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.q(:,1:stepN),'LineWidth',2);
-% hold on
-% grid on
-% ylim(originYlim)
-% ylabel('Estimated Data','FontSize',12);
-% legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% 
-% % V
-% figure(3)
-% subplot(2,1,2);
-% p2 = plot(tlength ,simResult.reference.est.v(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% originYlim = gcf().CurrentAxes.YLim;
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.v(:,1:stepN),'LineWidth',2);
-% hold on
-% grid on
-% ylim(originYlim)
-% ylabel('Estimated Data','FontSize',12);
-% legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% 
-% 
-% % W
-% figure(4)
-% subplot(2,1,2);
-% p2 = plot(tlength ,simResult.reference.est.w(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% originYlim = gcf().CurrentAxes.YLim;
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.w(:,1:stepN),'LineWidth',2);
-% hold on
-% grid on
-% ylim(originYlim)
-% ylabel('Estimated Data','FontSize',12);
-% legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
+stepN = 31;
+dt = simResult.reference.T(2)-simResult.reference.T(1);
+tlength = simResult.reference.T(1:stepN);
 
-% 
+% P
+figure(1)
+subplot(2,1,2);
+p2 = plot(tlength,simResult.reference.est.p(1:stepN,:)','LineWidth',2);
+hold on
+grid on
+xlabel('time [sec]','FontSize',12);
+ylabel('Original Data','FontSize',12);
+legend('x','y','z','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+originYlim = gcf().CurrentAxes.YLim;
+originXlim = gcf().CurrentAxes.XLim;
+hold off
+subplot(2,1,1);
+p1 = plot(tlength,simResult.state.p(:,1:stepN),'LineWidth',2);
+xlim(originXlim)
+ylim(originYlim)
+hold on
+grid on
+
+ylabel('Estimated Data','FontSize',12);
+legend('x','y','z','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+
+% Q
+figure(2)
+subplot(2,1,2);
+p2 = plot(tlength ,simResult.reference.est.q(1:stepN,:)','LineWidth',2);
+hold on
+grid on
+originYlim = gcf().CurrentAxes.YLim;
+xlabel('time [sec]','FontSize',12);
+ylabel('Original Data','FontSize',12);
+legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+subplot(2,1,1);
+p1 = plot(tlength,simResult.state.q(:,1:stepN),'LineWidth',2);
+hold on
+grid on
+ylim(originYlim)
+ylabel('Estimated Data','FontSize',12);
+legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+
+% V
+figure(3)
+subplot(2,1,2);
+p2 = plot(tlength ,simResult.reference.est.v(1:stepN,:)','LineWidth',2);
+hold on
+grid on
+originYlim = gcf().CurrentAxes.YLim;
+xlabel('time [sec]','FontSize',12);
+ylabel('Original Data','FontSize',12);
+legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+subplot(2,1,1);
+p1 = plot(tlength,simResult.state.v(:,1:stepN),'LineWidth',2);
+hold on
+grid on
+ylim(originYlim)
+ylabel('Estimated Data','FontSize',12);
+legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+
+
+% W
+figure(4)
+subplot(2,1,2);
+p2 = plot(tlength ,simResult.reference.est.w(1:stepN,:)','LineWidth',2);
+hold on
+grid on
+originYlim = gcf().CurrentAxes.YLim;
+xlabel('time [sec]','FontSize',12);
+ylabel('Original Data','FontSize',12);
+legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+subplot(2,1,1);
+p1 = plot(tlength,simResult.state.w(:,1:stepN),'LineWidth',2);
+hold on
+grid on
+ylim(originYlim)
+ylabel('Estimated Data','FontSize',12);
+legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
+set(gca,'FontSize',14);
+hold off
+
+
 % % Z
 % figure(5)
 % plot(simResult.T,simResult.Z);

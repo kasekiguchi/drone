@@ -16,7 +16,7 @@ seed = double('T');
 rng(seed);
 
 % データ保存先フォルダ名
-Foldername = 'Data\simData_KoopmanApproach_2023_4_28'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
+Foldername = 'Data\simData_KoopmanApproach_2023_5_9'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル名
 % "ファイル名"_[番号].mat で保存される
 FileName = 'simtest';
