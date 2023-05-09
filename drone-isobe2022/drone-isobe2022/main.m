@@ -50,9 +50,10 @@ end
         % 20230129
         % 初期状態を変更
         if flag_initrandam
+            %以下の初期状態の設定は磯部先輩の最新の論文のモノ
             initialState.input = randi([0,100],4,1)*0.001; %randi([下限,上限],行数,列数)
             initialState.p = randi([-1000,1000],3,1)*0.001;
-            initialState.p(3,1) = randi([-3000,3000],3,1)*0.001;
+            initialState.p(3,1) = randi([-3000,3000])*0.001;
             initialState.q = randi([-1750,1750],3,1)*0.001;
 %             initialState.q(3,1) = 0;
             initialState.v = randi([-10,10],3,1)*0.001;
