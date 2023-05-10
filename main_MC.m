@@ -76,8 +76,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     calT = 0;
     phase = 2;
 
-    %load("Data/HL_input");
-    %load("Data/HL_V");
+%     load("Data/HL_input");
+%     load("Data/HL_V");
     load("Data/InputV_HL.mat", "InputV");
 
     fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
@@ -273,10 +273,20 @@ end
 %         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_1Y = agent.estimator.result.state.p(3)+
-        slope = @(x) 3/10*x;
-        if agent.estimator.result.state.p(3)-(3/10 * agent.estimator.result.state.p(1)) < 0.05
+
+        %% 斜面に対する高度が0.1m以下かつ速度が0.1m/s以下なら終了
+        altitudeSlope = (agent.estimator.result.state.p(3) - 3/10 * agent.estimator.result.state.p(1)) * cos(0.2975); % 斜面に対する高度
+        vSlope = agent.estimator.result.state.v(3);
+        if altitudeSlope < 0.1 && abs(vSlope) < 0.1 && abs(agent.estimator.result.state.q(2)) < 0.3975 && abs(agent.estimator.result.state.q(2)) > 0.1975
             fRemove = 2;
+        elseif fRemove == 2
+            agent.input = zeros(4,1);
         end
+        
+%         slope = @(x) 3/10*x;
+%         if agent.estimator.result.state.p(3)-(3/10 * agent.estimator.result.state.p(1)) < 0.05
+%             fRemove = 2;
+%         end
 
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
@@ -288,8 +298,8 @@ end
                 xr(1,1), xr(2,1), xr(3,1),...
                 xr(7,1), xr(8,1), xr(9,1),...
                 xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)
-        fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t remove: %d \t sigma: %f \n", ...
-            time.t, calT, data.variable_particle_num(idx), data.removeF(idx),data.sigma{idx})
+        fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t slopeZ: %d \t sigma: %f \n", ...
+            time.t, calT, data.variable_particle_num(idx), 3/10*agent.estimator.result.state.p(1),data.sigma{idx})
         fprintf("input: %f %f %f %f \t input_v: %f %f %f %f", ...
             agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v{idx}(1),data.input_v{idx}(2),data.input_v{idx}(3),data.input_v{idx}(4));
         fprintf("\n");
@@ -345,7 +355,7 @@ for R = 1:size(logt, 1)
     Bestcost(:, R) = data.bestcost{R};
 end
 Diff = Edata - Rdata(1:3, :);
-xmax = te;
+xmax = time.t;
 close all
 
 % x-y
@@ -353,11 +363,12 @@ close all
 
 % x-z
 Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
-figure(6); plot(Edata(1,:), Edata(3,:)); hold on;
-plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
-plot(Edata(1,1), Edata(3,1), 'h');
+figure(6); plot(Edata(1,1:round(xmax/dt)-1), Edata(3,1:round(xmax/dt-1))); hold on; % 軌跡
+plot(Rdata(1,1:round(xmax/dt)-1), Rdata(3, 1:round(xmax/dt)-1));
+% plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
+plot(Edata(1,1), Edata(3,1), 'h');  % initial
 % plot(Et, Er)
-plot(Et, Ez); hold off;
+plot(Et, Ez); hold off; % 斜面
 xlabel("X [m]"); ylabel("Z [m]"); 
 % position
 figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
@@ -404,16 +415,28 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % end
 
 figure(21)
-V1 = Rdata(9, 1:end-1);
-V2 = Rdata(9, 2:end);
-A1 = Edata(3, 1:end-1);
-A2 = Edata(3, 2:end);
+% V1 = Rdata(9, 1:end-1);
+% V2 = Rdata(9, 2:end);
+% A1 = Edata(3, 1:end-1);
+% A2 = Edata(3, 2:end);
+% for i = 1:length(V1)
+%     accR(i) = (V2(i)-V1(i))/0.025;
+%     accE(i) = (A2(i)-A1(i))/0.025;
+% end
+% plot(logt(1:end-1,1), accR, "--"); hold on
+% plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
+
+E = round(time.t/dt)-1;
+V1 = Rdata(9, 1:E-1);
+V2 = Rdata(9, 2:E);
+A1 = Edata(3, 1:E-1);
+A2 = Edata(3, 2:E);
 for i = 1:length(V1)
     accR(i) = (V2(i)-V1(i))/0.025;
     accE(i) = (A2(i)-A1(i))/0.025;
 end
-plot(logt(1:end-1,1), accR, "--"); hold on
-plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-3 2]);
+plot(logt(1:E-1,1), accR, "--"); hold on
+plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
 
 % figure(20)
 % IHL = load("Data/HL_input");
@@ -478,8 +501,8 @@ plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-3 2]);
 % PlotMovXYZ  % 3次元プロット
 % save()
 %%
-% save('C:/Users/student/"OneDrive - 東京都市大学 Tokyo City University (1)"/研究室_2023/Data/20230420v1.mat', '-v7.3')
-
+% save('C:\Users\student\"OneDrive - 東京都市大学 Tokyo City University (1)"\研究室_2023\Data\20230427v1.mat', '-v7.3')
+% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230430v2.mat", '-v7.3')
 %% animation
 
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

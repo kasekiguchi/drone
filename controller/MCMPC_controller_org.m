@@ -205,31 +205,41 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             %% ソフト制約
             % 棄却はしないが評価値を大きくする
             % 姿勢角
-            if obj.self.estimator.result.state.p(3) < 0.2   
+%             if obj.self.estimator.result.state.p(3) < 0.3  
 %                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
-                A = 100;
+%                 A = 100;
                 Zdis = (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975);
-                gradZ = -A * Zdis .^ (1/10);
+%                 gradZ = -obj.param.CA * (Zdis .^ (2)) + obj.param.CA;
+                Zlim = 2;
+                gradZ = -obj.param.CA * (1-cos((Zdis/Zlim).*pi))/Zlim + obj.param.CA;
                 constIL = find(obj.state.state_data(5, end, 1:obj.N) <= 0.1975);
                 constIR = find(obj.state.state_data(5, end, 1:obj.N) >= 0.3975);
                 CL = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIL)-0.1975).^2, [1, length(constIL)]); % 0.1975 rad.未満の計算
                 CR = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
                 obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
                 obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
+%             end
+
+            if (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975) < 0.12
+                 %% 速度制約
+                constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
+                CV = reshape(obj.param.CV * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
+                obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
             end
+
+            %% 斜面に墜落したかどうか　実質棄却
+            constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
+            obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
+%             if length(constISlope) == obj.N % 全墜落なら終了
+%                 obj.param.fRemove = 3;
+%             end
 
             % yaw角
             constIYaw = find(abs(obj.state.state_data(6, end, 1:obj.N)) > 0.5);
             CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
             obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
 
-            % 斜面に墜落したかどうか　実質棄却
-            constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
-            obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
-
-            if length(constISlope) == obj.N % 全墜落なら終了
-                obj.param.fRemove = 3;
-            end
+            
 
             %% 重心計算
 %             if removeF == obj.N

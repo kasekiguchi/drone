@@ -19,6 +19,11 @@ syms t real
 % x = 0;
 % y = 0;
 
+%% 
+% x = 0;
+% y = 0;
+% z = 1/2 * sin(t/2);
+
 %% circle
 % x = cos(t/2);
 % y = sin(t/2);
@@ -62,10 +67,10 @@ syms t real
 % x = 6/100 * t -3/10;
 % y = 0;
 
-%% syamen
+%% syamen これ！！
 phaseT = 2;
-zt = 0.5; % 減衰係数？
-z = 2*exp(-(t-phaseT)/zt)-0.25;
+zt = 4.1; % 減衰係数？
+z = exp(-(t-phaseT)/zt)-0.1;
 x = -exp(-(t-phaseT)/zt);
 y = 0;
 %% slope P2P
