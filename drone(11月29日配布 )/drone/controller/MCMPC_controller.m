@@ -10,7 +10,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         state   % 状態
         reference   % 目標軌道
         model   % モデル
-        result  % mainに値戻す
+        result  % mainに値戻す(agentへの保存)
         self    % classの通例
         A
         B
@@ -33,26 +33,27 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             %-- ドローンの状態を格納するための配列を作成
             obj.state.p_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.p_data = repmat(reshape(obj.state.p_data, [1, size(obj.state.p_data)]), 3, 1);
+            %(reshape(obj.state.p_data,[1,size(obj.state.p_data)],3,1)は[1,size(obj.state.p_data)]で1行とobj.state.p_dataの元の行列の行を列，列を高さに変換(3次元に変換している)
             obj.state.q_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
             obj.state.v_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
             obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
-            obj.A = obj.param.model.est.Ahat;
-            obj.B = obj.param.model.est.Bhat;
+%             obj.A = obj.param.model.est.Ahat;
+%             obj.B = obj.param.model.est.Bhat;
 
 
             % p , q, v, w
                 %~ ホライズン×サンプル数の配列初期化
                 %~ 状態数×ホライズン×サンプル数に次元変換
             obj.state.state_data = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data];  
-        end
+        end%(ここまでは一回目のみ読み込まれる)
         
         %-- main()的な
         % u fFirst
         function result = do(obj,param)
-            idx = param{1}; % mainから値の受け取り
+            idx = param{1}; % mainから値の受け取り プログラムの周回数
             xr = param{2};
             obj.state.ref = xr; % 構造体に代入
 
@@ -60,10 +61,10 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 %                 obj.input.sigma = 0.1;
 %                 obj.input.average = 0.269*9.81/4;     
 
-            if idx == 1
+            if idx == 1 %プログラムの1周目では標準偏差，平均値を設定
                 obj.input.sigma = 0.1;
                 obj.input.average = 0.269*9.81/4;     
-            else
+            else %2周目以降はリサンプリングで標準偏差と平均値を計算
                 obj.input.sigma = obj.input.sigma * (obj.input.bestcost_now / obj.input.bestcost_befor);
                 obj.input.average = obj.input.u1(:,1,obj.input.I);
                 if obj.input.sigma >= 2
@@ -72,7 +73,9 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                     obj.input.sigma = 0.005;
                 end
             end
+
             obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num) + obj.input.average;
+             %(新しい入力の生成，σ×[入力数×ホライズン数×サンプル数]+平均値)
                
             %-- 入力列の生成
             % 正規分布に従う．設定した標準偏差と平均に基づく
@@ -82,20 +85,26 @@ classdef MCMPC_controller <CONTROLLER_CLASS
 
             %-- 現在状態の取得
             obj.previous_state.x0 = obj.self.estimator.result.state.get(); %12 * 1
+            %(上の式の右辺はagent(どこからでもアクセスできる)から引っ張ってきている)
+            % obj.self:agentにアクセス
+            % estimator → result → state:agentの中のestimatorの中のresultの中のstateにアクセス，get()で中身をすべてobj.previous_state.x0に代入
 
-            %-- 状態予測
+            %-- 予測軌道算出
             obj.state.predict_state = obj.predict(); %関数呼び出し
             % プラスα　：　墜落したらプログラムを終了させる
 
-            %-- 評価値計算
-            for i = 1:obj.param.particle_num
-                obj.state.objective(i) = obj.objective(i);
+            %-- 予測軌道に対する評価値計算
+            for i = 1:obj.param.particle_num %1～サンプル数(obj.param.particle_num)分の評価値を計算
+                obj.state.objective(i) = obj.objective(i); %評価値計算用関数の呼び出し
             end
+
             % 最小値を取得
             [bestcost,obj.input.I] = min(obj.state.objective);
+            %min()で計算した評価値の中から最小な値を探し出し，obj.input.Iに最小値が入っている場所の配列番号を入力
 
             % 最適な入力をagentに代入
             obj.self.input = obj.input.u1(:,1,obj.input.I);
+
             %-- リサンプリング
             if idx == 1
                 obj.input.bestcost_befor = bestcost;
@@ -110,6 +119,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.result.sigma = obj.input.sigma;
             obj.result.contParam = obj.param;
             result = obj.result;
+            %(result = とすることで値がagentに保存される,agent内のデータはどこからでもアクセスできる)
+            %ただし，シミュレーションを回すごとにagent内の内容は書き換えられる
             
         end
 
@@ -119,25 +130,25 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         end
 
         %-- 状態予測関数
-        function [predict_state] = predict(obj)
+        function [predict_state] = predict(obj) %function 戻り値 = 関数名(入力値)
             ts = 0; % 一応初期化, odeで用いる
             % 予測軌道計算
             for i = 1:obj.param.particle_num %サンプル数
-            obj.state.y0 = obj.previous_state.x0;
-            obj.state.state_data(:,1,i) = obj.state.y0;
-                for j = 1:obj.param.H - 1 %ホライズン数
+            obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
+            obj.state.state_data(:,1,i) = obj.state.y0; %y0を初期値に設定
+                for j = 1:obj.param.H - 1 %ホライズン数分繰り返し
                     obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
 %                     obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i);
-                    obj.state.state_data(:,j+1,i) = obj.state.y0; 
+                    obj.state.state_data(:,j+1,i) = obj.state.y0; %j+1の理由：初期位置を除くから
                 end
             end
-            predict_state = obj.state.state_data;
+            predict_state = obj.state.state_data; %戻り値predict_stateに予測した値を代入
         end
 
         %-- 評価関数
         function [MCeval] = objective(obj, i)   %m=サンプル
-            X = obj.state.state_data;       %12 * 10
-            U = obj.input.u1(:,:,i);         %4  * 10
+            X = obj.state.state_data;       %12 * 10 = 12状態×10ホライズン
+            U = obj.input.u1(:,:,i);         %4  * 10 = 4入力(プロペラの数)×10ホライズン
 
             %-- 予測状態と目標状態の誤差計算
             tildep = obj.state.ref(1:3,:) - X(1:3,:,i);

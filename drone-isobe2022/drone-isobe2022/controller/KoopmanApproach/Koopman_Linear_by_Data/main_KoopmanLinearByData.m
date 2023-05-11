@@ -42,11 +42,11 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 500; %使用するデータの量に応じて逐次変更
+Data.HowmanyDataset = 5; %使用するデータの量に応じて逐次変更
 
 for i= 1: Data.HowmanyDataset
     Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
-    if i==1
+    if i==1 %どうしてここ分けているの？
         Data.X = [Dataset.X];
         Data.U = [Dataset.U];
         Data.Y = [Dataset.Y];        
@@ -77,7 +77,7 @@ end
 % 12/12 関数化
 disp('now estimating')
 if flg.bilinear == 1 %双線形であるかどうかの切り替え(上が双線形)
-    [est.Ahat, est.Bhat, est.Ehat, est.Chat] = KoopmanLinear_biLinear(Data.X,Data.U,Data.Y,F);
+    [est.Ahat, est.Bhat, est.Ehat, est.Chat] = KoopmanLinear_biLinear(Data.X,Data.U,Data.Y,F); %koopmanLinear_biLinear:A,B,Cを求めるclass
 else
     [est.Ahat, est.Bhat, est.Chat] = KoopmanLinear(Data.X,Data.U,Data.Y,F);
 end
@@ -122,12 +122,12 @@ else
     end
 end
 %% Save Estimation Result (結果を保存するところ)
-if size(Data.X,1)==13
+if size(Data.X,1)==13 %クォータニオンモデル
     simResult.state.p = simResult.Xhat(1:3,:);
     simResult.state.q = simResult.Xhat(4:7,:);
     simResult.state.v = simResult.Xhat(8:10,:);
     simResult.state.w = simResult.Xhat(11:13,:);
-else
+else %オイラーモデル
     simResult.state.p = simResult.Xhat(1:3,:);
     simResult.state.q = simResult.Xhat(4:6,:);
     simResult.state.v = simResult.Xhat(7:9,:);
@@ -135,7 +135,7 @@ else
 end
 simResult.state.N = simResult.reference.N-1;
 simResult.observable = F;
-save(targetpath,'est','Data','simResult')
+save(targetpath,'est','Data','simResult') %est,Data,simResultの保存
 disp('Saved to')
 disp(targetpath)
 

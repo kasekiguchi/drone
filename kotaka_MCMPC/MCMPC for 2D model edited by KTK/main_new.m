@@ -16,7 +16,7 @@
     mkdir(Outputdir,'video');
 
 %% Setup
-    %-- パラメータ
+    %-- 初期パラメータの設定
         dt = 0.05;          % - 離散時間幅（チューニング必要かも）
         Te = 2;	            % - シミュレーション時間
         x0 = [0.0; 0.0];    % - 初期状態
@@ -115,7 +115,7 @@ while idx * dt < Te + dt
         y = Cd * x;
 
 	%-- 目標軌道生成
-        xr = Reference(idx * dt, Params);
+        xr = Reference(idx * dt, Params); %Reference:classファイル
         
     %-- MPCでパラメータを配列に格納
         Params.Ur = ur;
@@ -148,7 +148,7 @@ while idx * dt < Te + dt
         end
     
     %-- 分散によるノイズを格納，入力の広がりを決定
-        nx = normrnd(zeros(Params.H,Particle_num), sigmax);
+        nx = normrnd(zeros(Params.H,Particle_num), sigmax); %normrnd:正規分布から乱数を生成
         ny = normrnd(zeros(Params.H,Particle_num), sigmay);
 
     %-- 各方向の入力列を格納

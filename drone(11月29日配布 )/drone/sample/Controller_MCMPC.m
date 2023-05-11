@@ -3,11 +3,11 @@ function Controller = Controller_MCMPC(~)
 %   詳細説明をここに記述
 
     Controller_param.dt = 0.1; % MPCステップ幅
-    Controller_param.H = 10;
+    Controller_param.H = 10; %ホライズン数
     Controller_param.particle_num = 200; %サンプル数
     Controller_param.Initsigma = 0.1;
     Controller_param.ref_input = [0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4 0.269 * 9.81 / 4]';
-    Controller_param.model = load('C:\Users\kiyam\Documents\卒業研究\drone\drone-isobe2022\drone-isobe2022\controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state.mat','est');
+%     Controller_param.model = load('C:\Users\kiyam\Documents\卒業研究\drone\drone-isobe2022\drone-isobe2022\controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state.mat','est');
     %loadで別の場所からの値を引っ張ってくる「''」でパスを書けば別のファイルからデータを引っ張ってこれる
 
     %% 離陸(以前のやつ)

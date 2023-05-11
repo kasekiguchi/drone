@@ -60,7 +60,7 @@ try
         tic
         idx = idx + 1;
         %% sensor
-        %    tic
+        %    tic:現在の時刻を記録
         tStart = tic;
 if time.t == 9
     time.t;
@@ -81,7 +81,7 @@ end
         end
 
         for i = 1:N
-            % sensor
+            % センサに関する設定
             if fMotive; param(i).sensor.motive = {}; end
             param(i).sensor.rpos = {agent};
             param(i).sensor.imu = {[]};

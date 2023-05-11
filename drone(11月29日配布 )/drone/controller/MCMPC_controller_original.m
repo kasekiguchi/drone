@@ -53,7 +53,7 @@ classdef MCMPC_controller_original <CONTROLLER_CLASS
             %-- 正規分布の標準偏差，平均の設定
             if idx == 1
                 obj.input.sigma = 0.1;
-                ibj.input.average = 0.269*9.81/4;
+                obj.input.average = 0.269*9.81/4;
             else
                 obj.input.sigma = obj.input.sigma * (obj.input.bestcost_now / obj.input.bestcost_befor);
                 obj.input.average = obj.input.u1(:,1,obj.input.I);
