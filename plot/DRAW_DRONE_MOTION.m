@@ -9,6 +9,10 @@ classdef DRAW_DRONE_MOTION
         frame
         thrust
         fig
+        xlim
+        ylim
+        zlim
+        L
     end
 
     methods
@@ -17,14 +21,13 @@ classdef DRAW_DRONE_MOTION
             % logger : LOGGER class instance
             % param.frame_size : drone size [Lx,Ly]
             % param.rotor_r : rotor radius r
-            % param.plot_ref : reference plot true or not
             arguments
                 logger
                 param.frame_size
                 param.rotor_r
-                param.plot_ref = true;
-                param.animation = false;
                 param.target = 1;
+                param.fig_num = 1;
+                param.mp4 = 0;
             end
             data = logger.data(param.target,"p","e");
             tM = max(data);
@@ -32,23 +35,38 @@ classdef DRAW_DRONE_MOTION
             M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
             m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
             L = param.frame_size;
-            figure();   disp("Press Enter key to start video");   %pause();
-            ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
-            xlabel(ax,"x [m]");
-            ylabel(ax,"y [m]");
-            zlabel(ax,"z [m]");
-            obj.fig = ax;
-
-%             view(360, 0)
+            obj.L = L;
+            obj.xlim = [m(1)-L(1) M(1)+L(1)];
+            obj.ylim = [m(2)-L(2) M(2)+L(2)];
+            obj.zlim = [0 M(3)+1];
+            obj=obj.gen_frame("frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,param.fig_num);
+            
             view(3)
             grid on
             daspect([1 1 1]);
-            hold on
-            xx = -5:5;
-            yy = zeros(1, size(xx, 2));
-            zz = 3/10 * xx+0.1;
-            plot3(xx, yy, zz);
+        end
+        function obj=gen_frame(obj,param)
+            arguments
+                obj
+                param.frame_size
+                param.rotor_r
+                param.target = 1;
+                param.fig_num = 1;
+            end
+            if class(param.fig_num)=="matlab.ui.Figure"
+                obj.fig = param.fig_num;
+                ax = obj.fig.CurrentAxes;
+            else
+                obj.fig = figure(param.fig_num);
+                ax = axes('XLim',obj.xlim,'YLim',obj.ylim,'ZLim',obj.zlim);
+            end
             
+            xlabel(ax,"x [m]");
+            ylabel(ax,"y [m]");
+            zlabel(ax,"z [m]");
+            hold on
+
+            L = obj.L;
 
             % rotor setup
             r = param.rotor_r;
@@ -87,45 +105,47 @@ classdef DRAW_DRONE_MOTION
             end
             obj.frame = t;
             obj.thrust = tt;
-            if param.animation
-                obj.animation(logger,"realtime",true,"target",param.target);
-            end
+%            if param.animation
+%                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
+%            end
         end
-
-        function draw(obj,frame,thrust,p,q,u)
+        function draw(obj,target,p,q,u)
             % obj.draw(p,q,u)
             % p : 一ベクトル
             % q = [x,y,z,th] : 回転軸[x,y,z]にth回転
             % u (optional): 入力
             arguments
                 obj
-                frame
-                thrust
+                target
                 p
                 q
                 u = [1;1;1;1];
             end
 
-            % Rotation matrix
-            R = makehgtform('axisrotate',q(1:3),q(4));
-            % Translational matrix
-            Txyz = makehgtform('translate',p);
-            % Scaling matrix
-            for i = 1:4
-                if u(i) > 0
-                    S = makehgtform('scale',[1,1,u(i)]);
-                elseif u(i) < 0
-                    S1 = makehgtform('xrotate',pi);
-                    S = makehgtform('scale',[1,1,-u(i)])*S1;
-                else
-                    S = eye(4);
-                    S(3,3) = 1e-5;
+            for n = target
+                frame = obj.frame(n);
+                thrust = obj.thrust(n,:);
+                % Rotation matrix
+                R = makehgtform('axisrotate',q(1,1:3,n),q(1,4,n));
+                % Translational matrix
+                Txyz = makehgtform('translate',p(1,:,n));
+                % Scaling matrix
+                for i = 1:4
+                    if u(1,i,n) > 0
+                        S = makehgtform('scale',[1,1,u(1,i,n)]);
+                    elseif u(i) < 0
+                        S1 = makehgtform('xrotate',pi);
+                        S = makehgtform('scale',[1,1,-u(1,i,n)])*S1;
+                    else
+                        S = eye(4);
+                        S(3,3) = 1e-5;
+                    end
+                    set(thrust(i),'Matrix',Txyz*R*S);
                 end
-                set(thrust(i),'Matrix',Txyz*R*S);
+                % Concatenate the transforms and
+                % set the transform Matrix property
+                set(frame,'Matrix',Txyz*R);
             end
-            % Concatenate the transforms and
-            % set the transform Matrix property
-            set(frame,'Matrix',Txyz*R);
             drawnow
         end
         function animation(obj,logger,param)
@@ -133,21 +153,31 @@ classdef DRAW_DRONE_MOTION
             % logger : LOGGER class instance
             % param.realtime (optional) : t-or-f : logger.data('t')を使うか
             % param.target = 1:4 描画するドローンのインデックス
+            % "rotor_r",p.rotor_r;
             arguments
                 obj
                 logger
+                param.rotor_r
+                param.self
                 param.realtime = false;
                 param.target = 1;
                 param.gif = 0;
+                param.Motive_ref = 0;
+                param.fig_num = 1;
+                param.mp4 = 0;
+                param.frame_size = [];
+                param.opt_plot = [];
             end
 
-            p = logger.data(param.target,"p","e");
-            q = logger.data(param.target,"q","e");
+            %p = logger.data(param.target,"p","e");
+            %q = logger.data(param.target,"q","e");
+            p = logger.data(param.target,"p","p");
+            q = logger.data(param.target,"q","p");
             u = logger.data(param.target,"input");
             r = logger.data(param.target,"p","r");
             p = reshape(p,size(p,1),3,length(param.target));
             q = reshape(q,size(q,1),size(q,2)/length(param.target),length(param.target));
-            u = reshape(u,size(u,1),4,length(param.target));
+            u = reshape(u,size(u,1),size(u,2),length(param.target));
             r = reshape(r,size(r,1),3,length(param.target));
             for n = 1:length(param.target)
                 switch size(q(:,:,n),2)
@@ -172,13 +202,37 @@ classdef DRAW_DRONE_MOTION
                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
             end
 
+            if param.mp4
+                sizen = 256;
+                delaytime = 0;
+                filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').mp4'),':','_'),' ','_');
+                v = VideoWriter(filename,"MPEG-4");
+                if param.mp4
+                    open(v);
+                    writeAnimation(v);
+                end
+            end
+
             t = logger.data("t");
             tRealtime = tic;
-            for i = 1:length(t)-1
+            if param.Motive_ref
                 for n = 1:length(param.target)
-                    plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
-                    obj.draw(obj.frame(param.target(n)),obj.thrust(param.target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+                    f(n) = animatedline('Color','r','MaximumNumPoints',15); % 目標軌道の描画点の制限
                 end
+            end
+            for i = 1:length(t)-1
+                if param.Motive_ref
+                    addpoints(f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
+                else
+                    plot3(r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
+                end
+                if ~isempty(param.opt_plot)
+                    param.self.show(param.opt_plot,"logger",logger,"FH",gcf,"t",i);
+                end
+                if ~isvalid(obj.frame)
+                    obj=obj.gen_frame("frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,gcf);
+                end
+                obj.draw(param.target,p(i,:,param.target),Q(i,:,param.target),u(i,:,param.target));
                 if param.realtime
                     delta = toc(tRealtime);
                     if t(i+1)-t(i) > delta
@@ -197,6 +251,13 @@ classdef DRAW_DRONE_MOTION
                         imwrite(imind,cm,filename,'gif','WriteMode','append','DelayTime',delaytime);
                     end
                 end
+                if param.mp4
+                    framev = getframe(obj.fig);
+                    writeVideo(v,framev);
+                end
+            end
+            if param.mp4
+                close(v);
             end
         end
     end
