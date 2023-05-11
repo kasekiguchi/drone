@@ -65,6 +65,8 @@ try
       param(i).sensor.rdensity = {Env};
       param(i).sensor.lrf = {Env.param};
       param(i).sensor.lidar = {};
+      param(i).sensor.T265 = {};
+      param(i).sensor.flightcontroller = {};
 
       for j = 1:length(agent(i).sensor.name)
         param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
@@ -82,7 +84,7 @@ try
 
       % reference
       param(i).reference.covering = [];
-      param(i).reference.point = {FH, [2; 0; 1], time.t, dt};
+      param(i).reference.point = {FH, [1; 0; 1], time.t, dt};
       param(i).reference.timeVarying = {time, FH};
       param(i).reference.tvLoad = {time};
       param(i).reference.wall = {1};
@@ -183,14 +185,14 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
-
+% logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot({1,"sensor.result.posion",""},{1,"p","s"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N);
+% agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

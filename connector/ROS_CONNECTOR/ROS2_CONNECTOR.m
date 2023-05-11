@@ -21,6 +21,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         pubTopic
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
 %         pubMsg  % 送信msg
+
     end
 
     properties(SetAccess=private)
@@ -45,7 +46,8 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             obj.DomainID = info.DomainID;
 
             %ROS2のトピック一覧
-            ros2 topic list;
+%             ros2 topic list;
+            ros2("topic","list","-t","DomainID",obj.DomainID)
             
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
@@ -68,7 +70,8 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
             for i = 1:obj.subTopicNum
-                obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
+%                 obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
+                obj.result = receive(obj.subscriber.subTopic(i),10);
             end
             ret = obj.result;
         end
