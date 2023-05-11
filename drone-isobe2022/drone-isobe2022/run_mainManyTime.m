@@ -6,7 +6,7 @@ clear;clc;
 
 %% 初期設定
 % 実行する回数を指定
-HowManyRun = 5000;
+HowManyRun = 1000;
 
 % rand シード値
 seed = double('T');
@@ -16,7 +16,7 @@ seed = double('T');
 rng(seed);
 
 % データ保存先フォルダ名
-Foldername = 'Data\simData_KoopmanApproach_2023_5_9'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
+Foldername = 'Data\simData_KoopmanApproach_2023_5_9_newdata'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル名
 % "ファイル名"_[番号].mat で保存される
 FileName = 'simtest';
