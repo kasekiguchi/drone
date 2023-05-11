@@ -37,7 +37,7 @@
 % t : reference生成時の現在時刻
 % T : time.t そのステップの現在時刻
 
-function xr = Reference(params, T, Agent, Gq, Gp, phase)
+function [xr] = Reference(params, T, Agent, Gq, Gp, phase)
     % パラメータ取得
     
     % timevaryingをホライズンごとのreferenceに変換する
@@ -48,21 +48,19 @@ function xr = Reference(params, T, Agent, Gq, Gp, phase)
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     for h = 0:params.H-1
         t = T + params.dt * h; % reference生成時の時刻をずらす
-        Ref = RefTime(t);
-        % 追従項
+        Ref = RefTime(t); % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
         xr(1:3, h+1) = Ref(1:3);
         xr(7:9, h+1) = Ref(5:7);
-        % 抑制項
         xr(4:6, h+1) =   [0;0;0]; % 姿勢角
         xr(10:12, h+1) = [0;0;0];
 
         xr(13:16, h+1) = params.ur;
 
         %% 斜面
-        if T < phase
-            xr(1:3, h+1) = Gp;  % 座標
-            xr(7:9, h+1) = [0;0;0]; % 速度
-        end
+%         if T < phase
+%             xr(1:3, h+1) = Gp;  % 座標
+%             xr(7:9, h+1) = [0;0;0]; % 速度
+%         end
 % 
 %         if h == params.H-1
 %             xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値

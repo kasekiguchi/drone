@@ -39,8 +39,8 @@ classdef DRAW_DRONE_MOTION
             zlabel(ax,"z [m]");
             obj.fig = ax;
 
-            view(360, 0)
-%             view(3)
+%             view(360, 0)
+            view(3)
             grid on
             daspect([1 1 1]);
             hold on

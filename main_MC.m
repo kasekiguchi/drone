@@ -72,6 +72,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
 
     xr = zeros(16, Params.H);
+    Acc_old = 0;
 
     calT = 0;
     phase = 2;
@@ -173,9 +174,12 @@ end
 %             if abs(agent.estimator.result.state.v(3)) < 0.03
 %                 flag(1) = 1;
 %             end
-
+                    % 加速度で増減見る
+%                             AA_old = ACC;
+%                             AA = Ref(11);
+%                             if AA_old/AA_old * AA/AA == -1
 %             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
-            xr = Reference(Params, time.t, agent, Gq, Gp, phase);
+            [xr] = Reference(Params, time.t, agent, Gq, Gp, phase);
             param(i).controller.mcmpc = {idx, xr, time.t, phase, InputV};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -277,7 +281,7 @@ end
         %% 斜面に対する高度が0.1m以下かつ速度が0.1m/s以下なら終了
         altitudeSlope = (agent.estimator.result.state.p(3) - 3/10 * agent.estimator.result.state.p(1)) * cos(0.2975); % 斜面に対する高度
         vSlope = agent.estimator.result.state.v(3);
-        if altitudeSlope < 0.1 && abs(vSlope) < 0.1 && abs(agent.estimator.result.state.q(2)) < 0.3975 && abs(agent.estimator.result.state.q(2)) > 0.1975
+        if altitudeSlope < 0.2 && abs(vSlope) < 0.1 && abs(agent.estimator.result.state.q(2)) < 0.3975 && abs(agent.estimator.result.state.q(2)) > 0.1975
             fRemove = 2;
         elseif fRemove == 2
             agent.input = zeros(4,1);
@@ -307,9 +311,9 @@ end
         if fRemove == 1
             warning("Z<0 Emergency Stop!!!")
             break;
-        elseif fRemove == 2
-            warning("Landing complete")
-            break;
+        % elseif fRemove == 2
+        %     warning("Landing complete")
+        %     break;
         elseif fRemove == 3
             warning("all remove")
             break;
@@ -368,7 +372,8 @@ plot(Rdata(1,1:round(xmax/dt)-1), Rdata(3, 1:round(xmax/dt)-1));
 % plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
 plot(Edata(1,1), Edata(3,1), 'h');  % initial
 % plot(Et, Er)
-plot(Et, Ez); hold off; % 斜面
+% plot(Et, Ez); 
+hold off; % 斜面
 xlabel("X [m]"); ylabel("Z [m]"); 
 % position
 figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
@@ -502,7 +507,7 @@ plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xl
 % save()
 %%
 % save('C:\Users\student\"OneDrive - 東京都市大学 Tokyo City University (1)"\研究室_2023\Data\20230427v1.mat', '-v7.3')
-% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230430v2.mat", '-v7.3')
+% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230511v2.mat", '-v7.3')
 %% animation
 
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

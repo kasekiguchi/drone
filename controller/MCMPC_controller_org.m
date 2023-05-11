@@ -17,6 +17,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
       modelf
       modelp
       N % 現時刻のパーティクル数
+      flag
     end
     
     methods
@@ -25,11 +26,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.self = self;
             %---MPCパラメータ設定---%
             obj.param = param;
-%             obj.param.subCheck = zeros(obj.N, 1);
-            obj.param.modelparam.modelparam = obj.self.parameter.get();
-            obj.param.modelparam.modelmethod = obj.self.model.method;
-            obj.param.modelparam.modelsolver = obj.self.model.solver;
-            
+            obj.modelp = obj.self.parameter.get();
+            obj.modelf = obj.self.model.method; 
             %%
             obj.input = param.input;
             obj.const = param.const;
@@ -37,20 +35,14 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % 追加
             obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
             obj.input.Bestcost_now = 1e2;% 十分大きい値にする  初期周期での比較用
-
-            %             obj.input.Evaluationtra = zeros(1, obj.N);
             obj.model = self.model;
-            
             obj.param.fRemove = 0;
             obj.input.AllRemove = 0;
-            obj.modelf = obj.param.modelparam.modelmethod;
-            obj.modelp = obj.param.modelparam.modelparam;
-
             obj.N = param.particle_num;
             n = 12; % 状態数
             obj.state.state_data = zeros(n,obj.param.H, obj.N);
             obj.input.Evaluationtra = zeros(1, obj.N);
-
+            obj.flag.vz = 0;
         end
         
         %-- main()的な
@@ -63,9 +55,18 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
+
+            %% vz の符号判定 ⇒ 平均を０付近に変える
+%             vz = xr(9,:)<0; % 速度目標値　負：０，正：１
+%             [~, indvmin] = min(vz);
+%             [~, indvmax] = max(vz);
 % 
-%             if phase == 1
-%                 obj.param.QW = diag([1000; 1000; 100; 1; 1; 1]);
+%             if obj.model.estimator.result.state.v(3) > 0
+%                 vz = xr(9,:)<0;
+%                 [~, indvmin] = min(vz);
+%             elseif obj.model.estimator.result.state.v(3) < 0
+%                 vz = xr(9,:)>0;
+%                 [~, indvmax] = max(vz);
 %             end
 
             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
@@ -204,8 +205,9 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
             %% ソフト制約
             % 棄却はしないが評価値を大きくする
+            %% 斜面
             % 姿勢角
-%             if obj.self.estimator.result.state.p(3) < 0.3  
+            if obj.self.estimator.result.state.p(3) < 0.01  
 %                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
 %                 A = 100;
                 Zdis = (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975);
@@ -218,8 +220,9 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 CR = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
                 obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
                 obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
-%             end
+            end
 
+            %% 斜面
             if (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975) < 0.12
                  %% 速度制約
                 constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
@@ -274,7 +277,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 x0 = obj.previous_state;
                 obj.state.state_data(:, 1, m) = obj.previous_state;
                 for h = 1:obj.param.H-1
-                    x0 = x0 + obj.param.dt * obj.param.modelparam.modelmethod(x0, u(:, h, m), obj.param.modelparam.modelparam);
+                    x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, h, m), obj.modelp);
                     obj.state.state_data(:, h+1, m) = x0;
                 end
 %                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 1, m), obj.modelp); obj.state.state_data(:, 2, m) = x0;
