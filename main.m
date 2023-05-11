@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: 実機   0: シミュレーション
+fExp = 1; % 1: 実機   0: シミュレーション
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 0; % 1: active : for debug function
@@ -184,7 +184,7 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-%logger.plot({1, "q1", "e"});
+% logger.plot({1, "inner_input", ""});
 % logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
 logger.plot({1,"sensor.result.posion",""},{1,"p","s"});
 % agent(1).reference.timeVarying.show(logger)
