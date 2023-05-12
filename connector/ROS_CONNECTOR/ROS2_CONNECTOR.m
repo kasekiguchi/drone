@@ -55,8 +55,10 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             for i = 1:obj.subTopicNum
 %                 obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
 %                     "History","keepall","Reliability","besteffort");
-                 obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},{@ROS2Callback,obj},...
-                    "History","keepall","Reliability","besteffort"); %　変更
+%                  obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},{@ROS2Callback,obj},...
+%                     "History","keepall","Reliability","besteffort"); %　変更
+                  obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName(1,i),obj.subMsg(1,i),{@ROS2Callback,obj},...
+                    "History","keepall","Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum 
@@ -80,7 +82,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             for i = 1:obj.subTopicNum
 %                 obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
 %                 obj.result = receive(obj.subscriber.subTopic(i),10);
-                obj.result = obj.subscriber.subTopic.LatestMessage; % 変更
+                obj.result = obj.subscriber.subtopic.LatestMessage; % 変更
             end
             ret = obj.result;
         end
