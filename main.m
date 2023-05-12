@@ -11,10 +11,10 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 0; % 1: active
+fExp = 1; % 1: 実機   0: シミュレーション
+fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 1; % 1: active : for debug function
+fDebug = 0; % 1: active : for debug function
 run("main1_setting.m");
 
 % set logger
@@ -33,7 +33,7 @@ end
 %
 run("main2_agent_setup.m");
 
-%agent.set_model_error("ly",0.02);
+%agent.set_model_error("ly",0.02);%モデル誤差
 %% main loop
 run("main3_loop_setup.m");
 
@@ -65,6 +65,8 @@ try
       param(i).sensor.rdensity = {Env};
       param(i).sensor.lrf = {Env.param};
       param(i).sensor.lidar = {};
+      param(i).sensor.T265 = {};
+      param(i).sensor.flightcontroller = {};
 
       for j = 1:length(agent(i).sensor.name)
         param(i).sensor.list{j} = param(i).sensor.(agent(i).sensor.name(j));
@@ -82,7 +84,7 @@ try
 
       % reference
       param(i).reference.covering = [];
-      param(i).reference.point = {FH, [2; 0; 1], time.t, dt};
+      param(i).reference.point = {FH, [1; 0; 1], time.t, dt};
       param(i).reference.timeVarying = {time, FH};
       param(i).reference.tvLoad = {time};
       param(i).reference.wall = {1};
@@ -182,15 +184,15 @@ close all
 clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
-%logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
-
+% logger.plot({1, "inner_input", ""});
+% logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot({1,"sensor.result.posion",""},{1,"p","s"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+% agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
