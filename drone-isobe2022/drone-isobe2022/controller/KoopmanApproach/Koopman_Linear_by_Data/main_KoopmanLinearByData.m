@@ -8,7 +8,7 @@ close all
 flg.bilinear = 0;
 
 %データ保存先ファイル名
-FileName = 'EstimationResult_12state_5_12_newdata.mat'; %保存先のファイル名も逐次変更する
+FileName = 'EstimationResult_12state_newdata2_100data_5_12.mat'; %保存先のファイル名も逐次変更する
 
 % 読み込むデータファイル名
 % loading_filename = 'sim_rndP_12state';
@@ -24,11 +24,11 @@ targetpath=append(nowFolder,'\',FileName);
 % クープマン作用素を定義
 % F@(X) Xを与える関数ハンドルとして定義
 % DroneSimulation
-% F = @(x) [x;1]; % 状態そのまま
+F = @(x) [x;1]; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量
 % F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
 % F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
-F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(しっかり回る)
+% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(しっかり回る)
 % F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(しっかり回る)
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
@@ -42,12 +42,12 @@ F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 1; %使用するデータの量に応じて逐次変更
+Data.HowmanyDataset = 100; %使用するデータの量に応じて逐次変更
 
 for i= 1: Data.HowmanyDataset
-    Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
+    Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat')); %行列の形に直してる
     if i==1
-        Data.X = [Dataset.X];
+        Data.X = [Dataset.X]; %Data.X内の行は上から位置(x,y,z),姿勢角(ロール、ピッチ、ヨー)...
         Data.U = [Dataset.U];
         Data.Y = [Dataset.Y];        
     else
@@ -143,103 +143,103 @@ disp(targetpath)
 % 工事中 多分ずっと
 
 %% Plot by simulation(グラフを出力するところ)
-stepN = 31;
-dt = simResult.reference.T(2)-simResult.reference.T(1);
-tlength = simResult.reference.T(1:stepN);
-
-% P
-figure(1)
-subplot(2,1,2);
-p2 = plot(tlength,simResult.reference.est.p(1:stepN,:)','LineWidth',2);
-hold on
-grid on
-xlabel('time [sec]','FontSize',12);
-ylabel('Original Data','FontSize',12);
-legend('x','y','z','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-originYlim = gcf().CurrentAxes.YLim;
-originXlim = gcf().CurrentAxes.XLim;
-hold off
-subplot(2,1,1);
-p1 = plot(tlength,simResult.state.p(:,1:stepN),'LineWidth',2);
-xlim(originXlim)
-ylim(originYlim)
-hold on
-grid on
-
-ylabel('Estimated Data','FontSize',12);
-legend('x','y','z','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
-
-% Q
-figure(2)
-subplot(2,1,2);
-p2 = plot(tlength ,simResult.reference.est.q(1:stepN,:)','LineWidth',2);
-hold on
-grid on
-originYlim = gcf().CurrentAxes.YLim;
-xlabel('time [sec]','FontSize',12);
-ylabel('Original Data','FontSize',12);
-legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
-subplot(2,1,1);
-p1 = plot(tlength,simResult.state.q(:,1:stepN),'LineWidth',2);
-hold on
-grid on
-ylim(originYlim)
-ylabel('Estimated Data','FontSize',12);
-legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
-
-% V
-figure(3)
-subplot(2,1,2);
-p2 = plot(tlength ,simResult.reference.est.v(1:stepN,:)','LineWidth',2);
-hold on
-grid on
-originYlim = gcf().CurrentAxes.YLim;
-xlabel('time [sec]','FontSize',12);
-ylabel('Original Data','FontSize',12);
-legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
-subplot(2,1,1);
-p1 = plot(tlength,simResult.state.v(:,1:stepN),'LineWidth',2);
-hold on
-grid on
-ylim(originYlim)
-ylabel('Estimated Data','FontSize',12);
-legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
-
-
-% W
-figure(4)
-subplot(2,1,2);
-p2 = plot(tlength ,simResult.reference.est.w(1:stepN,:)','LineWidth',2);
-hold on
-grid on
-originYlim = gcf().CurrentAxes.YLim;
-xlabel('time [sec]','FontSize',12);
-ylabel('Original Data','FontSize',12);
-legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
-subplot(2,1,1);
-p1 = plot(tlength,simResult.state.w(:,1:stepN),'LineWidth',2);
-hold on
-grid on
-ylim(originYlim)
-ylabel('Estimated Data','FontSize',12);
-legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
-set(gca,'FontSize',14);
-hold off
-
-
-% % Z
-% figure(5)
-% plot(simResult.T,simResult.Z);
+% stepN = 31;
+% dt = simResult.reference.T(2)-simResult.reference.T(1);
+% tlength = simResult.reference.T(1:stepN);
+% 
+% % P
+% figure(1)
+% subplot(2,1,2);
+% p2 = plot(tlength,simResult.reference.est.p(1:stepN,:)','LineWidth',2);
+% hold on
+% grid on
+% xlabel('time [sec]','FontSize',12);
+% ylabel('Original Data','FontSize',12);
+% legend('x','y','z','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% originYlim = gcf().CurrentAxes.YLim;
+% originXlim = gcf().CurrentAxes.XLim;
+% hold off
+% subplot(2,1,1);
+% p1 = plot(tlength,simResult.state.p(:,1:stepN),'LineWidth',2);
+% xlim(originXlim)
+% ylim(originYlim)
+% hold on
+% grid on
+% 
+% ylabel('Estimated Data','FontSize',12);
+% legend('x','y','z','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% hold off
+% 
+% % Q
+% figure(2)
+% subplot(2,1,2);
+% p2 = plot(tlength ,simResult.reference.est.q(1:stepN,:)','LineWidth',2);
+% hold on
+% grid on
+% originYlim = gcf().CurrentAxes.YLim;
+% xlabel('time [sec]','FontSize',12);
+% ylabel('Original Data','FontSize',12);
+% legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% hold off
+% subplot(2,1,1);
+% p1 = plot(tlength,simResult.state.q(:,1:stepN),'LineWidth',2);
+% hold on
+% grid on
+% ylim(originYlim)
+% ylabel('Estimated Data','FontSize',12);
+% legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% hold off
+% 
+% % V
+% figure(3)
+% subplot(2,1,2);
+% p2 = plot(tlength ,simResult.reference.est.v(1:stepN,:)','LineWidth',2);
+% hold on
+% grid on
+% originYlim = gcf().CurrentAxes.YLim;
+% xlabel('time [sec]','FontSize',12);
+% ylabel('Original Data','FontSize',12);
+% legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% hold off
+% subplot(2,1,1);
+% p1 = plot(tlength,simResult.state.v(:,1:stepN),'LineWidth',2);
+% hold on
+% grid on
+% ylim(originYlim)
+% ylabel('Estimated Data','FontSize',12);
+% legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% hold off
+% 
+% 
+% % W
+% figure(4)
+% subplot(2,1,2);
+% p2 = plot(tlength ,simResult.reference.est.w(1:stepN,:)','LineWidth',2);
+% hold on
+% grid on
+% originYlim = gcf().CurrentAxes.YLim;
+% xlabel('time [sec]','FontSize',12);
+% ylabel('Original Data','FontSize',12);
+% legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% hold off
+% subplot(2,1,1);
+% p1 = plot(tlength,simResult.state.w(:,1:stepN),'LineWidth',2);
+% hold on
+% grid on
+% ylim(originYlim)
+% ylabel('Estimated Data','FontSize',12);
+% legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
+% set(gca,'FontSize',14);
+% hold off
+% 
+% 
+% % % Z
+% % figure(5)
+% % plot(simResult.T,simResult.Z);
