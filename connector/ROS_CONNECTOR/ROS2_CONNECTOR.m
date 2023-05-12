@@ -21,7 +21,8 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
         pubTopic
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
 %         pubMsg  % 送信msg
-
+%         callback
+        pose
     end
 
     properties(SetAccess=private)
@@ -44,6 +45,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             end
             %-- Setting the environment variables to connect to ROS
             obj.DomainID = info.DomainID;
+            obj.pose = [];
 
             %ROS2のトピック一覧
 %             ros2 topic list;
@@ -63,6 +65,10 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             end
         end
 
+%         function ROS2Callback(obj,message)
+%             obj.pose = message.subscriber.subtopic.LatestMessage;
+%         end
+        
         function [ret] = getData(obj)
             %
             %   詳細説明をここに記述
@@ -74,9 +80,13 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
             for i = 1:obj.subTopicNum
 %                 obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
 %                 obj.result = receive(obj.subscriber.subTopic(i),10);
-                obj.result = obj.subscriber.subTopic(i); % 変更
+                obj.result = obj.subscriber.subTopic.LatestMessage; % 変更
             end
             ret = obj.result;
+        end
+
+        function ROS2Callback(obj,message)
+            obj.pose = message.subscriber.subtopic.LatestMessage;
         end
 
         function sendData(obj,msg)
