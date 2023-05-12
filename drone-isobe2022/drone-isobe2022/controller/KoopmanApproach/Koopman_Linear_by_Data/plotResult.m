@@ -8,7 +8,7 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
-loadfilename{1} = 'EstimationResult_12state_100data_5_9_newdata.mat' %mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = 'EstimationResult_12state_100data_5_9_newdata_eulerAngleParameter.mat' %mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
 % loadfilename{3} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
