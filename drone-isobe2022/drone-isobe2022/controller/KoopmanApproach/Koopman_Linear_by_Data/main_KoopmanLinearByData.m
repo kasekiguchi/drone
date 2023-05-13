@@ -8,7 +8,7 @@ close all
 flg.bilinear = 0;
 
 %データ保存先ファイル名
-FileName = 'EstimationResult_12state_newdata2_100data_5_12.mat'; %保存先のファイル名も逐次変更する
+FileName = 'EstimationResult_12state_newdata3_100data_5_13.mat'; %保存先のファイル名も逐次変更する
 
 % 読み込むデータファイル名
 % loading_filename = 'sim_rndP_12state';
