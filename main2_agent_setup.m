@@ -113,14 +113,14 @@ for i = 1:N
   %agent(i).set_property("sensor",Sensor_LiDAR(i));
   %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
   % env = stlread('3F.stl');
-  a = 1;
-  b = 2;
-  c = 3;
-  Points = [4 0 0]+[-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c]; 
-  Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
-  env = triangulation(Tri,Points);
+  % a = 1;
+  % b = 2;
+  % c = 3;
+  % Points = [4 0 0]+[-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c]; 
+  % Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
+  % env = triangulation(Tri,Points);
   %agent(i).set_property("sensor", Sensor_LigDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-pi / 12:0.034:pi / 12), 'phi_range', -pi:0.007:pi, 'noise', 3.0E-2, 'seed', 3)); % VLP-16
-  agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % 2D lidar
+  % agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % 2D lidar
   %agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2, 'phi_range', 0, 'noise', 0.0E-2, 'seed', 3)); % 2D lidar
   %agent(i).set_property("sensor", Sensor_LiDAR3D(i, 'env', env, 'theta_range', pi / 2 + (-15*pi/360:0.05:15*pi/360), 'phi_range', -15*pi/360:0.05:15*pi/360, 'noise', 3.0E-2, 'seed', 3)); % Teraranger 64px
   %% set estimator property
