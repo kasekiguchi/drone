@@ -68,6 +68,10 @@ try
                     rpm(s+1,:) = agent.sensor.tokyu.result.ros2.rpm;
                     power(s+1,:) = current(s+1,:)*voltage(s+1,:);
                 end
+                if(power(s+1,:)>880)
+                    close(1)
+                    error("over power");
+                end
 %                 if isempty(agent.sensor.VL.result.VL_length)==1
 %                     X4(s+1,:) = X4(s,:);
 %                 else
