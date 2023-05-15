@@ -5,6 +5,7 @@ clc
 
 %dos1,2,3,4のqiがqihatに変更
 %ro追加 omegahat^2(oh02)を変更
+syms v [3 1] real;
 syms ddx0 [3 1] real ; syms dol0 [3 1] real;
 syms A [3,3] real; syms B [3,3] real; syms C [3,3] real
 syms P1 [3,1] real; syms P2 [3,1] real
@@ -139,7 +140,7 @@ AA = mq\(m1*(q1*q1')*R0*ro1hat +m2*(q2*q2')*R0*ro2hat +m3*(q3*q3')*R0*ro3hat +m4
 BB = J0 - m1*ro1hat*R0'*(q1*q1')*R0*ro1hat - m2*ro2hat*R0'*(q2*q2')*R0*ro2hat - m3*ro3hat*R0'*(q3*q3')*R0*ro3hat - m4*ro4hat*R0'*(q4*q4')*R0*ro4hat;
 CC = m1*ro1hat*R0'*(q1*q1') +m2*ro2hat*R0'*(q2*q2') +m3*ro3hat*R0'*(q3*q3') +m4*ro4hat*R0'*(q4*q4');
 P1_new = mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*R0*ol0hat^2*ro1)+(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*R0*ol0hat^2*ro2)+(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*R0*ol0hat^2*ro3)+(u4p-m4*l4*norm(os4)^2*q4-m1*(q4*q4')*R0*ol0hat^2*ro4))+ge3;
-P2_new= ((m1*ro1hat*R0*(q1*q1'))+(m2*ro2hat*R0*(q2*q2'))+(m3*ro3hat*R0*(q3*q3'))+(m4*ro4hat*R0*(q4*q4')))*ge3+ro1hat*R0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*R0*ol0hat^2*ro1)+ro2hat*R0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*R0*ol0hat^2*ro2)+ro3hat*R0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*R0*ol0hat^2*ro3)+ro4hat*R0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*R0*ol0hat^2*ro4); 
+P2_new= ((m1*ro1hat*R0*(q1*q1'))+(m2*ro2hat*R0*(q2*q2'))+(m3*ro3hat*R0*(q3*q3'))+(m4*ro4hat*R0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*R0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*R0*ol0hat^2*ro1)+ro2hat*R0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*R0*ol0hat^2*ro2)+ro3hat*R0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*R0*ol0hat^2*ro3)+ro4hat*R0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*R0*ol0hat^2*ro4); 
 % S = subs(dos1,[A,B,C],[AA,BB,CC]);
 ddx0_new = subs(ddx0_2,[A,B,C,P1],[AA,BB,CC,P1_new]);
 dol0_new = subs(dol0,[A,B,C,P2],[AA,BB,CC,P2_new]);
@@ -166,19 +167,30 @@ dR4 = R4*ol4hat;
 
 %%
 % Usage: dx=f+g*u
-x = [q1,q2,q3,q4,R0,R1,R2,R3,R4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4]
-f = [dq1,dq2,dq3,dq4,dR0,dR1,dR2,dR3,dR4,ddx0_new,dol0_new,dol1_new,dol2_new,dol3_new,dol4_new,dol1,dol2,dol3,dol4]
-u = [u1,u2,u3,u4,M1,M2,M3,M4]
+x = [q1,q2,q3,q4,R0,R1,R2,R3,R4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4];
+f = [dq1,dq2,dq3,dq4,dR0,dR1,dR2,dR3,dR4,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dol1,dol2,dol3,dol4];
+u = [u1,u2,u3,u4,M1,M2,M3,M4];
+
+% subs(f,u,[0,0,0,0,0,0,0,0])
 %%
 % subs(ddx0_new,dol0,[0,0,0])
 data = [q1,q2,q3,q4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4,u1,u2,u3,u4,R0]
 q_dataset=[[0;0;1],[0;0;1],[0;0;1],[0;0;1]];
-ol0_dataset=[0;0;0];
+ol0_dataset=[0;1;0];
 ol_dataset=[[0;0;0],[0;0;0],[0;0;0],[0;0;0]];
 os_dataset=[[0;0;0],[0;0;0],[0;0;0],[0;0;0]];
-u_dataset = [[0;0;-1],[0;0;-1],[0;0;-1],[0;0;-1]];
+u_dataset = [[1;1;-1],[1;1;-1],[1;1;-1],[1;1;-1]];
+
+alfa=pi/180*90;
+beta=pi/180*0;
+gunma=pi/180*60;
+R0_matrix = [cos(alfa)*cos(beta)*cos(gunma)-sin(alfa)*sin(gunma),-cos(alfa)*cos(beta)*sin(gunma)-sin(alfa)*cos(gunma),cos(alfa)*sin(beta);
+            sin(alfa)*cos(beta)*cos(gunma)-cos(alfa)*sin(gunma),-sin(alfa)*cos(beta)*sin(gunma)-cos(alfa)*sin(gunma),sin(alfa)*sin(gunma);
+            -sin(beta)*cos(gunma),sin(beta)*sin(gunma),cos(beta)]
+
 R0_dataset=[0,0,0;0,0,0;0,0,0];
-dataset = [q_dataset,ol0_dataset,ol_dataset,os_dataset,u_dataset,R0_dataset]
+
+dataset = [q_dataset,ol0_dataset,ol_dataset,os_dataset,u_dataset,R0_matrix];
 
 %%
-matlabFunction(ddx0_new,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+% matlabFunction(f,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
