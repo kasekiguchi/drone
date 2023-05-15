@@ -174,10 +174,14 @@ u = [u1,u2,u3,u4,M1,M2,M3,M4];
 %%
 f_data = [ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new];
 u_data = [u1;u2;u3;u4];
-fx = subs(f_data,u_data,[0;0;0;0;0;0;0;0;0;0;0;0]);
+fx = subs(f_data,u_data,zeros(size(u_data)));
+gx = subs(subs(f_data,[u2;u3;u4],zeros(size([u2;u3;u4]))),u1,ones(3,1))-fx,subs(subs(f_data,[u1,u3,u4],zeros([u1;u3;u4])),u2,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u4],zeros([u1,u2,u4])),u3,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u3],zeros([u1,u2,u3])),u4,ones(3,1))-fx;
+% subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl
+f_data - (fx + gx*u_data)
+
 %%
 % subs(ddx0_new,dol0,[0,0,0])
-data = [q1,q2,q3,q4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4,u1,u2,u3,u4,R0]
+data = [q1,q2,q3,q4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4,u1,u2,u3,u4,R0];
 q_dataset=[[0;0;1],[0;0;1],[0;0;1],[0;0;1]];
 ol0_dataset=[0;1;0];
 ol_dataset=[[0;0;0],[0;0;0],[0;0;0],[0;0;0]];
