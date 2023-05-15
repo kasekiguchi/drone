@@ -8,7 +8,7 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
-loadfilename{1} = 'EstimationResult_12state_newdata3_100data_5_13.mat' %mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = ['EstimationResult_12state_newdata3_100data_5_15.mat'] %mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
 % loadfilename{3} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
@@ -307,44 +307,44 @@ if flg.calcFile1RMSE
 end
 
 %% RSE 各ステップにおける誤差二乗のプロット
-if flg.calcFile1RMSE
-    figure(5)
-    p1 = plot(0:stepN-1,RMSE.P.eachStep','.','MarkerSize',15);
-    set(gca,'FontSize',Fsize.luler);
-    xlim([0, stepN-1])
-    ylim([0, RMSE.Posylim])
-    grid on
-    xlabel('Step','FontSize',Fsize.label);
-    ylabel('Position RSE','FontSize',Fsize.label);
-    lgd = legend('$(\hat{x}-x_d)^2$','$(\hat{y}-y_d)^2$','$(\hat{z}-z_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    
-    figure(6)
-    p1 = plot(0:stepN-1,RMSE.Q.eachStep','.','MarkerSize',15);
-    set(gca,'FontSize',Fsize.luler);
-    xlim([0, stepN-1])
-    ylim([0, RMSE.Atiylim])
-    grid on
-    xlabel('Step','FontSize',Fsize.label);
-    ylabel('Atitiude RSE','FontSize',Fsize.label);
-    lgd = legend('$(\hat{\phi}-\phi_d)^2$','$(\hat{\theta}-\theta_d)^2$','$(\hat{\psi}-\psi_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    
-    figure(7)
-    p1 = plot(0:stepN-1,RMSE.V.eachStep','.','MarkerSize',15);
-    set(gca,'FontSize',Fsize.luler);
-    xlim([0, stepN-1])
-    ylim([0, RMSE.Posylim])
-    grid on
-    xlabel('Step','FontSize',Fsize.label);
-    ylabel('Velocity RSE','FontSize',Fsize.label);
-    lgd = legend('$(\hat{v_x}-v_{xd})^2$','$(\hat{v_y}-v_{yd})^2$','$(\hat{v_z}-v_{zd})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    
-    figure(8)
-    p1 = plot(0:stepN-1,RMSE.W.eachStep','.','MarkerSize',15);
-    set(gca,'FontSize',Fsize.luler);
-    xlim([0, stepN-1])
-    ylim([0, RMSE.Atiylim])
-    grid on
-    xlabel('Step','FontSize',Fsize.label);
-    ylabel('Angular Velocity RSE','FontSize',Fsize.label);
-    lgd = legend('($\hat{\omega}_\theta-\omega_{\theta d})^2$','$(\hat{\omega}_\phi-\omega_{\phi d})^2$','$(\hat{\omega}_\psi-\omega_{\psi d})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-end
+% if flg.calcFile1RMSE
+%     figure(5)
+%     p1 = plot(0:stepN-1,RMSE.P.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Posylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Position RSE','FontSize',Fsize.label);
+%     lgd = legend('$(\hat{x}-x_d)^2$','$(\hat{y}-y_d)^2$','$(\hat{z}-z_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% 
+%     figure(6)
+%     p1 = plot(0:stepN-1,RMSE.Q.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Atiylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Atitiude RSE','FontSize',Fsize.label);
+%     lgd = legend('$(\hat{\phi}-\phi_d)^2$','$(\hat{\theta}-\theta_d)^2$','$(\hat{\psi}-\psi_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% 
+%     figure(7)
+%     p1 = plot(0:stepN-1,RMSE.V.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Posylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Velocity RSE','FontSize',Fsize.label);
+%     lgd = legend('$(\hat{v_x}-v_{xd})^2$','$(\hat{v_y}-v_{yd})^2$','$(\hat{v_z}-v_{zd})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% 
+%     figure(8)
+%     p1 = plot(0:stepN-1,RMSE.W.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Atiylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Angular Velocity RSE','FontSize',Fsize.label);
+%     lgd = legend('($\hat{\omega}_\theta-\omega_{\theta d})^2$','$(\hat{\omega}_\phi-\omega_{\phi d})^2$','$(\hat{\omega}_\psi-\omega_{\psi d})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% end
