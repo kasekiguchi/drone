@@ -41,13 +41,13 @@ try
         agent.sensor.tokyu.result = agent.sensor.tokyu.do;
         
         if isempty(agent.sensor.tokyu.result.ros_t.rpm)==1
-            X1(s+1,:) = X1(s,:);
-            X2(s+1,:) = X2(s,:);
-            X3(s+1,:) = X3(s,:);
+            current(s+1,:) = current(s,:);
+            voltage(s+1,:) = voltage(s,:);
+            rpm(s+1,:) = rpm(s,:);
         else
-            X1(s+1,:) = agent.sensor.tokyu.result.ros_t.current;
-            X2(s+1,:) = agent.sensor.tokyu.result.ros_t.voltage;
-            X3(s+1,:) = agent.sensor.tokyu.result.ros_t.rpm;
+            current(s+1,:) = agent.sensor.tokyu.result.ros_t.current;
+            voltage(s+1,:) = agent.sensor.tokyu.result.ros_t.voltage;
+            rpm(s+1,:) = agent.sensor.tokyu.result.ros_t.rpm;
         end
 %         if isempty(agent.sensor.VL.result.VL_length)==1
 %             X4(s+1,:) = X4(s,:);
@@ -65,7 +65,7 @@ end
 % % plot
 figure(2)
 hold on
-plot(T,X1/100,'LineWidth',1)%グラフのプロット
+plot(T,current/100,'LineWidth',1)%グラフのプロット
 %plot(T(1:2000),X1(1:2000,1:4))%グラフのプロット(範囲指定)
 %ymax = ylim;
 %area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
@@ -89,7 +89,7 @@ figure(4)
 hold on
 %area([Ts Ts+5],[8000 8000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 %plot(T(1:2000),X3(1:2000,1:4))%グラフのプロット
-plot(T,X3,'LineWidth',1)
+plot(T,rpm,'LineWidth',1)
 % ymax = ylim;
 % area([Ts Ts+5],[ymax(2) ymax(2)],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
 legend('morter 1','morter 2','morter 3','morter 4')
@@ -101,7 +101,7 @@ hold off
 figure(5)
 hold on
 % plot(T,(X2.*X1)/10000,'LineWidth',1)%グラフのプロット
-plot(T,X2.*X1/10000,'LineWidth',1)
+plot(T,X2.*current/10000,'LineWidth',1)
 %plot(T(1:2000),X2(1:2000,1:4))%グラフのプロット
 %ymax = ylim;
 %area([Ts Ts+5],[3000 3000],FaceColor = "red",LineStyle = "none",Facealpha = 0.1);
@@ -115,7 +115,7 @@ hold off
 
 figure(6)
 hold on
-plot(T,X3,'LineWidth',1)%グラフのプロット
+plot(T,rpm,'LineWidth',1)%グラフのプロット
 % plot(T,X4,'LineWidth',1)%グラフのプロット
 %plot(T,X3Ave,'LineWidth',1)
 % ymax = ylim;
@@ -126,9 +126,9 @@ xlabel('time [s]')
 ylabel('morter speed [rpm]')
 hold off
 %% 平均
-X1A=X1(A,:);
+X1A=current(A,:);
 X2A=X2(A,:);
-X3A=X3(A,:);
+X3A=rpm(A,:);
 TA=T(:,A);
 mean(X1A)
 mean(X2A)
