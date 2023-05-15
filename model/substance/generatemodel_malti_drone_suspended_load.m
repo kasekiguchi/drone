@@ -166,7 +166,7 @@ dR4 = R4*ol4hat;
 x = [q1,q2,q3,q4,R0,R1,R2,R3,R4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4];
 f = [v0,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dq1,dq2,dq3,dq4,dR0,dR1,dR2,dR3,dR4,dol1,dol2,dol3,dol4];
 u = [u1,u2,u3,u4,M1,M2,M3,M4];
-% matlabFunction(f,'file','malti_drone_suspended_load_FL','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
+matlabFunction(f,'file','malti_drone_suspended_load_FL','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 % subs(f,u,[0,0,0,0,0,0,0,0])
 %%
 % subs(ddx0_new,dol0,[0,0,0])
