@@ -4,7 +4,7 @@ close all
 agent = DRONE(Model_Drone_Exp(0.025,[0;0;0], "udp", [50,132]),DRONE_PARAM("DIATONE"));%ドローンの定義
 pause(1);
 agent.plant.connector.sendData(gen_msg([500,500,0,500,0,0,0,0]));% arming
-agent.set_property("sensor",Sensor_tokyu(struct('DomainID',30)));%センサー定義
+agent.set_property("sensor",Sensor_tokyu(struct('DomainID',40)));%センサー定義
 % agent.set_property("sensor",Sensor_vl53l1x(1));
 %% %パラメータ
 dt = 0.75;%throttleの上昇の刻み時間
