@@ -12,7 +12,7 @@ userpath('clear');
 %% general setting
 N = 1; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 0; % 1: active
+fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
@@ -112,9 +112,18 @@ try
       if (fOffline); logger.overwrite("input", time.t, agent, i); end
     end
 
+    for i = 1:N                       % 状態更新
+      model_param.param = agent(i).model.param;
+      model_param.FH = FH;
+      agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
+
+      model_param.param = agent(i).plant.param;
+      agent(i).do_plant(model_param);
+    end
     if fDebug
-      agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
-      %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true));%false));
+      %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
+      %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true,'fFiled',1));%false));
+      agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", false));
     end
 
     %% update state
@@ -163,7 +172,6 @@ try
       end
 
     end
-
   end
 
 catch ME % for error

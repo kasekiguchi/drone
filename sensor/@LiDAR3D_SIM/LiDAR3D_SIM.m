@@ -110,6 +110,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
     end
 
     function fh = show(obj, opt)
+        % 環境の描画の仕方
+        % agent.sensor.lidar.show('FH',1,'logger',logger,'param',struct('fField',1))
       arguments
         obj
         opt.fField = true;
