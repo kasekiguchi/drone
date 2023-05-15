@@ -133,7 +133,7 @@ dob  = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*tau;
 dq   = L'*ob/2;
 x=[p;q;dp;ob;pl;dpl;pT;ol];
 f=[dp;dq;ddp;dob;dpl;ddpl;dpT;dol];
-matlabFunction(f,'file','with_load_model_for_HL','vars',{x T cell2sym(physicalParam)},'outputs',{'dx'});
+matlabFunction(f,'file','with_load_model_for_HL','vars',{x 0 cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Local functions
 function m = Mtake(mat,m,n)
