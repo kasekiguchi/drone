@@ -19,7 +19,7 @@ FileName = 'rndInitSim_bilinear';
 loading_filename = 'EstimationResult_quaternion12state_bilinear.mat';
 
 % シミュレーション実行回数
-HowmanySimulationRunning = 4;
+HowmanySimulationRunning = 1;
 
 % 確認するステップ数
 stepN = 20;
@@ -50,8 +50,8 @@ for i = 1:HowmanySimulationRunning
     simResult = rmfield(simResult, {'Z','Xhat','U', 'T'});
     % 初期状態として抜き出す時間インデックスをランダムに決める
 
-    simResult.initTindex = randi(size(simResult.reference.T,2),1);
-    % simResult.initTindex = 3.5/0.025+1;
+%     simResult.initTindex = randi(size(simResult.reference.T,2),1);
+    simResult.initTindex = 3.5/0.025+1;
 
     % 決めた時間インデックスiでの状態X[i]と観測量Fから観測量空間上の初期状態Z[1] = F(x[i])を求める
     simResult.Z(:,1) = F(simResult.reference.X(:,simResult.initTindex));
