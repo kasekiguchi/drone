@@ -43,7 +43,7 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 10; %使用するデータの量に応じて逐次変更
+Data.HowmanyDataset = 100; %使用するデータの量に応じて逐次変更
 
 for i= 1: Data.HowmanyDataset
     Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat')); %行列の形に直してる
