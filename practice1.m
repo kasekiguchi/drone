@@ -19,13 +19,19 @@ syms M1 [3,1] real;syms M2 [3,1] real;syms M3 [3,1] real;syms M4 [3,1] real %3*1
 syms R0 [3,3] real; %ペイロードを軸にした回転行列
 syms R1 [3,3] real; syms R2 [3,3] real; syms R3 [3,3] real; syms R4 [3,3] real; %機体回転行列
 syms f1 real; syms f2 real; syms f3 real; syms f4 real; %機体推力
-syms qt0 [4,1] real; syms qt1 [4,1] real; syms qt2 [4,1] real; syms qt3 [4,1] real; syms qt4 [4,1] real; %クォータニオン
+syms qt0 [4,1] real; syms qt1 [4,1] real; syms qt2 [4,1] real; syms qt3 [4,1] real; syms qt4 [4,1] real; %クォータニオン(姿勢)
 
 [Rb0,L0] = RodriguesQuaternion(qt0);   % Rotation matrix
 [Rb1,L1] = RodriguesQuaternion(qt1);   % Rotation matrix
 [Rb2,L2] = RodriguesQuaternion(qt2);   % Rotation matrix
 [Rb3,L3] = RodriguesQuaternion(qt3);   % Rotation matrix
 [Rb4,L4] = RodriguesQuaternion(qt4);   % Rotation matrix
+
+dqt0 = L0'*ol0/2; %ペイロードの姿勢
+dqt1 = L1'*ol1/2;
+dqt2 = L2'*ol2/2;
+dqt3 = L3'*ol3/2;
+dqt4 = L4'*ol4/2; %ドローンの姿勢
 
 ro1 = [0.05; 0.05; 0.05];
 ro2 = [-0.05; 0.05; 0.05];
@@ -135,16 +141,16 @@ mq = m0*eye(3) + m1*(q1*q1') + m2*(q2*q2') + m3*(q3*q3') + m4*(q4*q4');
 ddx0 = A*dol0 + P1;
 dol0 = simplifyFraction (B\(-C*ddx0 + P2));
 ddx0_2 = simplifyFraction (A*dol0 + P1);
-dos1 = q1hat*(ddx0_2-ge3-R0*ro1hat*dol0+R0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
-dos2 = q2hat*(ddx0_2-ge3-R0*ro2hat*dol0+R0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
-dos3 = q3hat*(ddx0_2-ge3-R0*ro3hat*dol0+R0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
-dos4 = q4hat*(ddx0_2-ge3-R0*ro4hat*dol0+R0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
+dos1 = q1hat*(ddx0_2-ge3-Rb0*ro1hat*dol0+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
+dos2 = q2hat*(ddx0_2-ge3-Rb0*ro2hat*dol0+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
+dos3 = q3hat*(ddx0_2-ge3-Rb0*ro3hat*dol0+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
+dos4 = q4hat*(ddx0_2-ge3-Rb0*ro4hat*dol0+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
 
-AA = mq\(m1*(q1*q1')*R0*ro1hat +m2*(q2*q2')*R0*ro2hat +m3*(q3*q3')*R0*ro3hat +m4*(q4*q4')*R0*ro4hat);
-BB = J0 - m1*ro1hat*R0'*(q1*q1')*R0*ro1hat - m2*ro2hat*R0'*(q2*q2')*R0*ro2hat - m3*ro3hat*R0'*(q3*q3')*R0*ro3hat - m4*ro4hat*R0'*(q4*q4')*R0*ro4hat;
-CC = m1*ro1hat*R0'*(q1*q1') +m2*ro2hat*R0'*(q2*q2') +m3*ro3hat*R0'*(q3*q3') +m4*ro4hat*R0'*(q4*q4');
-P1_new = mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*R0*ol0hat^2*ro1)+(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*R0*ol0hat^2*ro2)+(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*R0*ol0hat^2*ro3)+(u4p-m4*l4*norm(os4)^2*q4-m1*(q4*q4')*R0*ol0hat^2*ro4))+ge3;
-P2_new= ((m1*ro1hat*R0*(q1*q1'))+(m2*ro2hat*R0*(q2*q2'))+(m3*ro3hat*R0*(q3*q3'))+(m4*ro4hat*R0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*R0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*R0*ol0hat^2*ro1)+ro2hat*R0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*R0*ol0hat^2*ro2)+ro3hat*R0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*R0*ol0hat^2*ro3)+ro4hat*R0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*R0*ol0hat^2*ro4); 
+AA = mq\(m1*(q1*q1')*Rb0*ro1hat +m2*(q2*q2')*Rb0*ro2hat +m3*(q3*q3')*Rb0*ro3hat +m4*(q4*q4')*Rb0*ro4hat);
+BB = J0 - m1*ro1hat*Rb0'*(q1*q1')*Rb0*ro1hat - m2*ro2hat*Rb0'*(q2*q2')*Rb0*ro2hat - m3*ro3hat*Rb0'*(q3*q3')*Rb0*ro3hat - m4*ro4hat*Rb0'*(q4*q4')*Rb0*ro4hat;
+CC = m1*ro1hat*Rb0'*(q1*q1') +m2*ro2hat*Rb0'*(q2*q2') +m3*ro3hat*Rb0'*(q3*q3') +m4*ro4hat*Rb0'*(q4*q4');
+P1_new = mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+(u4p-m4*l4*norm(os4)^2*q4-m1*(q4*q4')*Rb0*ol0hat^2*ro4))+ge3;
+P2_new= ((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q3'))+(m4*ro4hat*Rb0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*Rb0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+ro2hat*Rb0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+ro3hat*Rb0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+ro4hat*Rb0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*Rb0*ol0hat^2*ro4); 
 % S = subs(dos1,[A,B,C],[AA,BB,CC]);
 ddx0_new = subs(ddx0_2,[A,B,C,P1],[AA,BB,CC,P1_new]);
 dol0_new = subs(dol0,[A,B,C,P2],[AA,BB,CC,P2_new]);
@@ -170,8 +176,8 @@ dR4 = R4*ol4hat;
 
 %%
 % Usage: dx=f+g*u
-x = [q1,q2,q3,q4,R0,R1,R2,R3,R4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4];
-f = [v0,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dq1,dq2,dq3,dq4,dR0,dR1,dR2,dR3,dR4,dol1,dol2,dol3,dol4];
+x = [q1,q2,q3,q4,qt0,qt1,qt2,qt3,qt4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4];
+f = [v0,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dq1,dq2,dq3,dq4,dqt0,dqt1,dqt2,dqt3,dqt4,dol1,dol2,dol3,dol4];
 u = [u1,u2,u3,u4,M1,M2,M3,M4];
 
 
