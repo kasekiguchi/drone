@@ -170,9 +170,9 @@ end
             initialState.input = rand(4,1)*0.5; 
             initialState.p = rand(3,1)*3-1; % rand(3,1)*0.02で生成範囲を0~0.02に変更、後ろのマイナスで-0.01~0.01にしてる(イメージ:0-0.01 ~ 0.02-0.01)
             % initialState.p(3,1) = rand*6-3;
-            initialState.q = (rand(3,1)*10-5)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
+            initialState.q = (rand(3,1)*12-5)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
             %値の範囲を-+に調整してる
-            initialState.v = rand(3,1)*0.4-0.1; % 1 cm/s 程度の誤差イメージ
+            initialState.v = rand(3,1)*0.2-0.1; % 1 cm/s 程度の誤差イメージ
             % initialState.w = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg/s 程度のイメージ
             initialState.w = [0;0;0];
             
