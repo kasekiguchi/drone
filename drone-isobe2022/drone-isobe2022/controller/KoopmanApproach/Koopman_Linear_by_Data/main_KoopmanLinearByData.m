@@ -8,8 +8,9 @@ close all
 flg.bilinear = 0;
 
 %データ保存先ファイル名
-FileName = 'EstimationResult_12state_newdata3_100data_5_15_isobeparameter.mat'; %保存先のファイル名も逐次変更する
-% FileName = 'otamesi.mat';
+% FileName = 'EstimationResult_12state_newdata2_100data_5_16_maxsize.mat'; %保存先のファイル名も逐次変更する
+% FileName = 'EstimationResult_12state_eulerAngleParameter_InputAndConst_newdata2_100data_5_16_maxsize.mat'; %eulerAngleParameter_InputAndConst
+FileName = 'otamesi.mat'; %お試し用
 
 % 読み込むデータファイル名
 % loading_filename = 'sim_rndP_12state';
@@ -25,11 +26,11 @@ targetpath=append(nowFolder,'\',FileName);
 % クープマン作用素を定義
 % F@(X) Xを与える関数ハンドルとして定義
 % DroneSimulation
-F = @(x) [x;1]; % 状態そのまま
+% F = @(x) [x;1]; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量
 % F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
 % F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
-% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(しっかり回る)
+F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(しっかり回る)
 % F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(しっかり回る)
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;

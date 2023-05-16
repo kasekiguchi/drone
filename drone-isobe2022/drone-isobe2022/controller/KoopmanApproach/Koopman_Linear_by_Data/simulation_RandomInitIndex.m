@@ -13,10 +13,11 @@ FolderName = 'RandomInitialIndexTest';
 
 %データ保存先ファイル名
 % 'FileName'_'シミュレーション番号'.mat
-FileName = 'rndInitSim_bilinear';
+% FileName = 'rndInitSim_bilinear';
+FileName = 'EstimationResult_12state_newdata2_100data_5_16_maxsize';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_quaternion12state_bilinear.mat';
+loading_filename = 'EstimationResult_12state_newdata2_100data_5_16_maxsize.mat';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 4;
