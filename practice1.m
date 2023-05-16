@@ -19,6 +19,13 @@ syms M1 [3,1] real;syms M2 [3,1] real;syms M3 [3,1] real;syms M4 [3,1] real %3*1
 syms R0 [3,3] real; %ペイロードを軸にした回転行列
 syms R1 [3,3] real; syms R2 [3,3] real; syms R3 [3,3] real; syms R4 [3,3] real; %機体回転行列
 syms f1 real; syms f2 real; syms f3 real; syms f4 real; %機体推力
+syms qt0 [4,1] real; syms qt1 [4,1] real; syms qt2 [4,1] real; syms qt3 [4,1] real; syms qt4 [4,1] real; %クォータニオン
+
+[Rb0,L0] = RodriguesQuaternion(qt0);   % Rotation matrix
+[Rb1,L1] = RodriguesQuaternion(qt1);   % Rotation matrix
+[Rb2,L2] = RodriguesQuaternion(qt2);   % Rotation matrix
+[Rb3,L3] = RodriguesQuaternion(qt3);   % Rotation matrix
+[Rb4,L4] = RodriguesQuaternion(qt4);   % Rotation matrix
 
 ro1 = [0.05; 0.05; 0.05];
 ro2 = [-0.05; 0.05; 0.05];
@@ -172,12 +179,15 @@ u = [u1,u2,u3,u4,M1,M2,M3,M4];
 % subs(f,u,[0,0,0,0,0,0,0,0])
 
 %%
-f_data = [ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new];
+f_data = [ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new];
 u_data = [u1;u2;u3;u4];
 fx = subs(f_data,u_data,zeros(size(u_data)));
-gx = subs(subs(f_data,[u2;u3;u4],zeros(size([u2;u3;u4]))),u1,ones(3,1))-fx,subs(subs(f_data,[u1,u3,u4],zeros([u1;u3;u4])),u2,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u4],zeros([u1,u2,u4])),u3,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u3],zeros([u1,u2,u3])),u4,ones(3,1))-fx;
+% gx = subs(subs(f_data,[u2;u3;u4],zeros(size([u2;u3;u4]))),u1,ones(3,1))-fx,subs(subs(f_data,[u1,u3,u4],zeros([u1;u3;u4])),u2,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u4],zeros([u1,u2,u4])),u3,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u3],zeros([u1,u2,u3])),u4,ones(3,1))-fx;
+gx = [subs(f_data,u_data,[1;zeros(11,1)])-f_data,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-f_data,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-f_data,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-f_data,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-f_data,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-f_data,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-f_data,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-f_data,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-f_data,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-f_data,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-f_data,subs(f_data,u_data,[zeros(11,1);1])-f_data];
 % subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl
-f_data - (fx + gx*u_data)
+% f_data - (fx + gx*u_data)
+%%
+kakunin = simplify(f_data - (fx + gx*u_data));
 
 %%
 % subs(ddx0_new,dol0,[0,0,0])
