@@ -1,7 +1,7 @@
 % Drone 班用共通プログラム update sekiguchi
 %-- 連続時間モデル　リサンプリングつき これを基に変更
 opengl software
-%% Initialize settings
+%% Initialize settings(ファイルの読み込み)
 % set path
 activeFile = matlab.desktop.editor.getActive;
 cd(fileparts(activeFile.Filename));
@@ -13,7 +13,7 @@ userpath('clear');
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
-%% set logger
+%% set logger(デフォルトで取らないデータを追加で取る際に使用)
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
 LogData = [     % agentのメンバー関係以外のデータ
         ];
@@ -21,7 +21,7 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
             ];
 
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
-%% main loop
+%% main loop(シミュレーションや実機の計算，グラフの描写，アニメーション)
     fInput = 0;
     fV = 0;
     fVcount = 1;
@@ -57,8 +57,8 @@ run("main3_loop_setup.m");
 
 try
     while round(time.t, 5) <= te
-        tic
-        idx = idx + 1;
+        tic %経過時間を測定
+        idx = idx + 1; %プログラムの周回数
         %% sensor
         %    tic:現在の時刻を記録
         tStart = tic;
@@ -75,7 +75,7 @@ end
             offline_time = offline_time + 1;
         end
 
-        if fMotive
+        if fMotive %(motiveを使用する場合)
             %motive.getData({agent,["pL"]},mparam);
             motive.getData(agent, mparam);
         end
@@ -99,7 +99,7 @@ end
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator
-            agent(i).do_estimator(cell(1, 10));
+            agent(i).do_estimator(cell(1, 10)); %estimator関数を回す
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
 
             param(i).reference.covering = [];
@@ -111,7 +111,7 @@ end
             for j = 1:length(agent(i).reference.name)
                 param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
             end
-            agent(i).do_reference(param(i).reference.list);
+            agent(i).do_reference(param(i).reference.list); %reference関数を回す
 
             % timevarygin -> generated reference
             xr = Reference(Params, time.t, agent);
@@ -124,7 +124,7 @@ end
             end
             agent(i).do_controller(param(i).controller.list);
         end
-
+%% 
         %-- データ保存
             data.xr{idx} = xr;
             data.sigma(idx) = agent.controller.result.sigma;
@@ -132,7 +132,8 @@ end
             if idx == 1
                 data.param = agent.controller.result.contParam;
             end
-% 
+
+%% 
 %             data.pathJ{idx} = agent.controller.result.Evaluationtra; % - 全サンプルの評価値
 %             data.sigma(idx) = agent.controller.result.sigma;
 %             data.bestcost(idx) = agent.controller.result.bestcost;
@@ -149,7 +150,7 @@ end
                     state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                     xr(1,1), xr(2,1), xr(3,1));
 
-        %% update state
+        %% update state(状態の更新)
         % with FH
         figure(FH)
         drawnow
@@ -159,6 +160,7 @@ end
             model_param.FH = FH;
             agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
             % ここでモデルの計算
+
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
@@ -194,12 +196,12 @@ end
             if (fOffline)
                 time.t
             else
-                time.t = time.t + dt % for sim
+                time.t = time.t + dt % for sim 時間の更新
             end
 
         end
 %         fRemove = agent.controller.result.fRemove;
-        if fRemove == 1
+        if fRemove == 1 %緊急停止用
             warning("Emergency Stop!!!")
             break
         end

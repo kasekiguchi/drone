@@ -19,7 +19,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
     methods
         function obj = MCMPC_controller(self, param)
             %---- 変数定義 ----%
-            obj.self = self; 
+            obj.self = self; %selfでagentに接続できる
             %--MPCパラメータ設定--%
             %~ SampleのController_MCMPCからパラメータの受け取り
             obj.param = param;
@@ -67,7 +67,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             else %2周目以降はリサンプリングで標準偏差と平均値を計算
                 obj.input.sigma = obj.input.sigma * (obj.input.bestcost_now / obj.input.bestcost_befor);
                 obj.input.average = obj.input.u1(:,1,obj.input.I);
-                if obj.input.sigma >= 2
+                if obj.input.sigma >= 2 %sigmaの最大最小の設定
                     obj.input.sigma = 2;
                 elseif obj.input.sigma <= 0.005
                     obj.input.sigma = 0.005;
@@ -75,11 +75,11 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             end
 
             obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num) + obj.input.average;
-             %(新しい入力の生成，σ×[入力数×ホライズン数×サンプル数]+平均値)
+             %(新しい入力の生成，σ×[入力数×ホライズン数×サンプル数]+平均値),randn:標準世紀分布から取り出された乱数スカラーを返す
                
             %-- 入力列の生成
             % 正規分布に従う．設定した標準偏差と平均に基づく
-            % 負の入力の阻止
+            % 負の入力の阻止(find()<0の部分)
             % 入力列の次元変換
             obj.input.u1(find(obj.input.u1 < 0)) = 0;
 
@@ -137,15 +137,16 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
             obj.state.state_data(:,1,i) = obj.state.y0; %y0を初期値に設定
                 for j = 1:obj.param.H - 1 %ホライズン数分繰り返し
+                    %モデルの計算
                     obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
-%                     obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i);
+%                     obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i); %クープマン
                     obj.state.state_data(:,j+1,i) = obj.state.y0; %j+1の理由：初期位置を除くから
                 end
             end
             predict_state = obj.state.state_data; %戻り値predict_stateに予測した値を代入
         end
 
-        %-- 評価関数
+        %-- 評価関数の計算
         function [MCeval] = objective(obj, i)   %m=サンプル
             X = obj.state.state_data;       %12 * 10 = 12状態×10ホライズン
             U = obj.input.u1(:,:,i);         %4  * 10 = 4入力(プロペラの数)×10ホライズン

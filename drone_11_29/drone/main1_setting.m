@@ -1,11 +1,11 @@
-%% general setting
-N = 1; % number of agents
+%% general setting(シミュレーションなどを行う際の各値を設定)
+N = 1; % number of agents(制御する機体の数)
 fExp = 0 % 1：実機　それ以外：シミュレーション
-fMotive = 1; % Motiveを使うかどうか
-fOffline = 0; % offline verification with experiment data
+fMotive = 1; % Motive(機体の位置などを計測する機械)を使うかどうか(1：使用する)
+fOffline = 0; % offline verification with experiment data(オフラインで制御するか)
 
 if fExp
-    dt = 0.025; % sampling time
+    dt = 0.025; % sampling time＝制御周期
 else
     dt = 0.025; % sampling time (plantとmodelが違う場合0.025くらいの方が確実)
 %     dt = 0.02;
@@ -14,13 +14,14 @@ end
 sampling = dt;
 ts = 0;
 
+%te：シミュレーション時間
 if fExp
-    te = 10000;
+    te = 10000; %こちらは実機
 else
-    te = 10; % default: 10
+    te = 10; % default: 10 シミュレーション用時間
 end
 
-%% generate environment
+%% generate environment(シミュレーション環境の構築)
 Env = DensityMap_sim(Env_2DCoverage); % 重要度マップ設定
 %% set connector (global instance)
 if fMotive

@@ -127,7 +127,7 @@ while idx * dt < Te + dt
 %-- モンテカルロモデル予測制御
     %-- MPCのホライズン間の分散
         if Count_sigma == 0 || Count_sigma ==1
-            sigmax = repmat(InitSigma_x + Csigma * (sigma_cnt - 1), Particle_num, 1)'; % - 初期時刻
+            sigmax = repmat(InitSigma_x + Csigma * (sigma_cnt - 1), Particle_num, 1)'; % - 初期時刻 repmat:配列のコピーの繰り返し
             sigmay = repmat(InitSigma_y + Csigma * (sigma_cnt - 1), Particle_num, 1)';
         else
             sigmax = repmat(sigmanext_x + Csigma * (sigma_cnt - 1), Particle_num, 1)'; % - 初期時刻以降
@@ -247,7 +247,7 @@ while idx * dt < Te + dt
         if remove_flag ~= 0
             [uOpt, ~] = clustering(Params, Evaluationtra, u1, state_data);
         end
-        
+        %% 
     %-- 最小評価値の入力をリサンプリング，格納,次時刻の分散決定
         if remove_flag ~= 0
             [Params, L_norm] = Normalize(Params, Evaluationtra);
@@ -265,12 +265,12 @@ while idx * dt < Te + dt
         unow = uOpt.u(1).u(:, 1);
 
         %-- プラントモデル内で制約を超える入力を補正
-            unormnow = norm(unow(:, 1));
+            unormnow = norm(unow(:, 1)); % norm:ベクトルと行列のユークリッドノルム
             if unormnow > Params.umax
                 unow(:, 1) = (Params.umax/unormnow) * unow(:, 1);   
             end
 
-        %-- 次時刻の分散の決定
+        %-- 次時刻の分散の決定(リサンプリング)
         %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，評価が良くなったら標準偏差を狭めるようにしている
             if Count_sigma == 0 || sigma_reset_flag == 1 % - 最初は全時刻の評価値がないから現時刻/現時刻にしてる
                 Bestcost_pre = Bestcost;
@@ -280,12 +280,13 @@ while idx * dt < Te + dt
                 Bestcost_pre = Bestcost_now;
                 Bestcost_now = Bestcost;
             end
+            %標準偏差の変更
             sigmanext_x = sigmax(1,1) * (Bestcost_now/Bestcost_pre);
             sigmanext_y = sigmay(1,1) * (Bestcost_now/Bestcost_pre);
 %             sigmanext_x = sigmax(1,1);
 %             sigmanext_y = sigmay(1,1);
     end
-
+%% 
     %-- データ保存
         data.path{idx+1}  = state_data;    % - 全サンプル全ホライズンの値
         data.pathJ{idx+1} = Evaluationtra; % - 全サンプルの評価値
