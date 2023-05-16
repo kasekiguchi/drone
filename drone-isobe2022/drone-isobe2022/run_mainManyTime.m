@@ -20,8 +20,8 @@ rng(seed);
 mkdir Data\otamesi; %データ生成お試しフォルダ
 Foldername = 'Data\otamesi';
 
-% mkdir Data\simData_KoopmanApproach_2023_5_16_newdata2_maxsize; %新規ファイルの作成(以下のファイル名と一致させるように)
-% Foldername = 'Data\simData_KoopmanApproach_2023_5_16_newdata2_maxsize'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
+% mkdir Data\simData_KoopmanApproach_2023_5_15_newdata2_isobeparameter; %新規ファイルの作成(以下のファイル名と一致させるように)
+% Foldername = 'Data\simData_KoopmanApproach_2023_5_15_newdata2_isobeparameter'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル名
 % "ファイル名"_[番号].mat で保存される
 FileName = 'simtest';

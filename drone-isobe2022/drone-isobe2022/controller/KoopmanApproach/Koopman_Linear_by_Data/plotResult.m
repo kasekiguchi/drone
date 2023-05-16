@@ -8,11 +8,7 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
-% loadfilename{1} = ['EstimationResult_12state_newdata2_100data_5_16_maxsize.mat'] %mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{1} = ['EstimationResult_12state_eulerAngleParameter_InputAndConst_newdata2_100data_5_16_maxsize.mat'] %eulerAngleParameter_InputAndConst
-% loadfilename{1} = ['EstimationResult_12state_newdata2_100data_5_16_maxsize_1.mat'] %時間が乱数
-loadfilename{1} = 'otamesi.mat'; %お試し用
-
+loadfilename{1} = ['EstimationResult_12state_newdata3_100data_5_15.mat'] %mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
 % loadfilename{3} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
@@ -44,7 +40,6 @@ end
 if flg.xlimHold == 1
     % xlimHold = [0, 0.5];
     xlimHold = [0,1];
-    % xlimHold = [0,50];s
 end
 
 %% Font size
