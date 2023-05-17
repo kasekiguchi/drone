@@ -10,7 +10,6 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
-% mkdir ../../students/komatsu/simdata/20230515/
 % run("main.m"); % 目標入力生成
 % close all hidden; clear all; clc;
 % userpath('clear');
@@ -43,7 +42,8 @@ Params.state_size = 12;
 Params.input_size = 4;
 Params.total_size = 16;
 % Reference.mを使えるようにする
-Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
+% Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
+Params.ur = data.param.param.ref_input;
 xr0 = zeros(Params.state_size, Params.H);
 
 % データ保存初期化
@@ -337,6 +337,7 @@ end
 
 %% animation
 % agent(1).animation(logger,"target",1); 
+%%
 close all
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  xmax = time.t;
@@ -365,7 +366,7 @@ close all
 
 % x-y
 % figure(5); plot(Edata(1,:), Edata(2,:)); xlabel("X [m]"); ylabel("Y [m]");
-m = 3; n = 2;
+m = 2; n = 2;
 % x-z
 % Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
 % figure(6); plot(Edata(1,1:round(xmax/dt)-1), Edata(3,1:round(xmax/dt-1))); hold on; % 軌跡
@@ -377,6 +378,11 @@ m = 3; n = 2;
 % hold off; % 斜面
 % xlabel("X [m]"); ylabel("Z [m]"); 
 % position
+now = datetime('now');
+datename = datestr(now, 'HHMMSS');
+figure(1)
+Title = strcat('Ymoving_N1000_a0_weightYbig_', datename);
+sgtitle(Title);
 subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
@@ -393,11 +399,15 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Velocity"); 
 % input
 subplot(m,n,4); 
-plot(logt, Idata); 
-% plot(logt, Idata, "--", "LineWidth", 1); 
-xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
+% plot(logt, Idata); 
+% % plot(logt, Idata, "--", "LineWidth", 1); 
+% xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
+% grid on; xlim([0 xmax]); ylim([-inf inf]);
+% % title("Time change of Input");
+plot(logt, IV); legend("Z", "X", "Y", "YAW");
+xlabel("Time [s]"); ylabel("input.V");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
-% title("Time change of Input");
+
 set(gcf, "WindowState", "maximized");
 %%
 % figure(5); 
@@ -489,7 +499,7 @@ set(gcf, "WindowState", "maximized");
 % area(F)
 %% figure保存
 % foldername = datestr(datetime('now'), 'YYYYmmdd');
-% now = datetime('now'); datename = datestr(now, 'HHMMSS');
+% now = datetime('now'); datename = datestr(datetime('now'), 'HHMMSS');
 % Outputdir = '../../students/komatsu/simdata/20230515/';
 % saveas(1,strcat(Outputdir,datename, "_position"),'fig');
 % saveas(2,strcat(Outputdir,datename, "_attitude"),'fig');
@@ -518,8 +528,13 @@ set(gcf, "WindowState", "maximized");
 % PlotMovXYZ  % 3次元プロット
 % save()
 %% 学校PC adress
+Outputdir = '../../students/komatsu/simdata/20230517/';
 % save('C:\Users\student\"OneDrive - 東京都市大学 Tokyo City University (1)"\研究室_2023\Data\20230427v1.mat', '-v7.3')
 % save("C:/Users/student/Documents/students/komatsu/MCMPC/20230515v1.mat", '-v7.3')
-% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230515v3_H30dt25msN1000.mat","agent","data","initial","logger","Params","totalT", "time", "-v7.3");
+mkdir ../../students/komatsu/simdata/20230517/
+Savefilename = Title;
+Savefigurename = strcat(Savefilename, '_position');
+% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/20230517/', Savefilename, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3");
+saveas(1, strcat(Outputdir, Savefigurename), "png");
 %%
 % logger.save();

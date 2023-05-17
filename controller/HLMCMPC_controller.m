@@ -139,10 +139,14 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       end
 
       % 入力生成
-      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1; % 負入力の阻止
-      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
+      % obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1; % 負入力の阻止
+      % obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
       obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3;
-      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
+      % obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
+
+      obj.input.u1 = zeros(obj.param.H, obj.N);
+      obj.input.u2 = zeros(obj.param.H, obj.N);
+      obj.input.u4 = zeros(obj.param.H, obj.N);
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
