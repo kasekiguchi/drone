@@ -1,6 +1,6 @@
 
 %アニメーション作成中にグラフ触ると動画生成止まるから注意
-maxbestcost = max(data.bestcost)
+% maxbestcost = max(data.bestcost)
 % now = datetime('now');
 % datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
     Color_map = (169/255)*ones(1000000,3);  % 灰色のカラーマップの作成

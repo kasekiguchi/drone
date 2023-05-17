@@ -56,10 +56,10 @@
 		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
 		text(-0.1,12,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
-% 		ax.YLim = [-0.5 2];
-% 		ax.XLim = [-0.5 2];
-        ax.YLim = [-0.2 2];
-		ax.XLim = [-0.2 12];
+		ax.YLim = [-0.5 2];
+		ax.XLim = [-2 2];
+        % ax.YLim = [-0.2 2];
+		% ax.XLim = [-0.2 12];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
