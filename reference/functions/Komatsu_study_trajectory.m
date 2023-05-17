@@ -35,14 +35,16 @@ syms t real
 % z = 1;
 
 %% Liner
-x = 0;
-y = t;
-z = 1.0;
+% x = 0;
+% y = t;
+% z = 1.0;
 
 %% Vertical vibration
-% x = 0;
-% y = 0;
-% z = 1/2 * sin(2*t)+1;
+x = 0;
+y = 0;
+z = 1/2 * sin(2*t)+1;
+% z = 1/2 * sin(2*t)+1 + 1/10 * cos(t);
+% z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
 %% hovering
 % x = 0;

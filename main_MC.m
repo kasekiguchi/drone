@@ -10,6 +10,10 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
+% mkdir ../../students/komatsu/simdata/20230515/
+% run("main.m"); % 目標入力生成
+% close all hidden; clear all; clc;
+% userpath('clear');
 
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
@@ -24,64 +28,53 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %% main loop
-    fInput = 0;
-    fV = 0;
-    fVcount = 1;
-    fWeight = 0; % 重みを変化させる場合 fWeight = 1
-    fFirst = 0; % 一回のみ回す場合
-    fRemove = 0;    % 終了判定
-    fLanding = 0;   % 着陸かどうか 目標軌道を変更する
-    fLanding_comp = 0;
-    fCount_landing = 0;
-    fc = 0;     % 着陸したときだけx，y座標を取得
-    flag = [0;0];
-    totalT = 0;
-    idx = 0;
-    pre_pos = 0;
+flag = [0;0];
+totalT = 0;
+idx = 0;
+pre_pos = 0;
+fG = zeros(3, 1);
+%-- 初期設定 controller.mと同期させる
+data.param = agent.controller.mcmpc;
+Params.H = data.param.param.H;   %Params.H
+Params.dt = data.param.param.dt;  %Params.dt
+Params.dT = dt;
+%-- 配列サイズの定義
+Params.state_size = 12;
+Params.input_size = 4;
+Params.total_size = 16;
+% Reference.mを使えるようにする
+Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
+xr0 = zeros(Params.state_size, Params.H);
 
-    fG = zeros(3, 1);
+% データ保存初期化
+data.xr{idx+1} = 0;
+data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
+data.pathJ{idx+1} = 0;      % - 全サンプルの評価値
+data.sigma{idx+1} = 0;      % - 標準偏差 
+data.bestcost{idx+1} = 0;   % - 評価値
+data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
+data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
+data.variable_particle_num(idx+1) = 0;  % - 可変サンプル数
 
-    %-- 初期設定 controller.mと同期させる
-    data.param = agent.controller.mcmpc;
-    Params.H = data.param.param.H;   %Params.H
-    Params.dt = data.param.param.dt;  %Params.dt
-    Params.dT = dt;
-    %-- 配列サイズの定義
-    Params.state_size = 12;
-    Params.input_size = 4;
-    Params.total_size = 16;
-    % Reference.mを使えるようにする
-    Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
-    xr0 = zeros(Params.state_size, Params.H);
+dataNum = 11;
+data.state           = zeros(round(te/dt + 1), dataNum);       
+data.state(idx+1, 1) = idx * dt;        % - 現在時刻
+data.bestx(idx+1, :) = repelem(initial.p(1), Params.H); % - もっともよい評価の軌道x成分
+data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
+data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
 
-    % データ保存初期化
-    data.xr{idx+1} = 0;
-    data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
-    data.pathJ{idx+1} = 0;      % - 全サンプルの評価値
-    data.sigma{idx+1} = 0;      % - 標準偏差 
-    data.bestcost{idx+1} = 0;   % - 評価値
-    data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
-    data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
-    data.variable_particle_num(idx+1) = 0;  % - 可変サンプル数
+xr = zeros(16, Params.H);
+Acc_old = 0;
 
-    dataNum = 11;
-    data.state           = zeros(round(te/dt + 1), dataNum);       
-    data.state(idx+1, 1) = idx * dt;        % - 現在時刻
-    data.bestx(idx+1, :) = repelem(initial.p(1), Params.H); % - もっともよい評価の軌道x成分
-    data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
-    data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
-
-    xr = zeros(16, Params.H);
-    Acc_old = 0;
-
-    calT = 0;
-    phase = 2;
+calT = 0;
+phase = 2;
 
 %     load("Data/HL_input");
 %     load("Data/HL_V");
-    load("Data/InputV_HL.mat", "InputV");
+load("Data/Input_HL.mat", "Idata");
+Params.ur_array = Idata;
 
-    fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
+fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
     %%
 
@@ -139,7 +132,8 @@ end
             % estimator
             agent(i).do_estimator(cell(1, 10));
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
-
+            
+            FH.CurrentCharacter = 'f';
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [1;1;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -179,8 +173,14 @@ end
 %                             AA = Ref(11);
 %                             if AA_old/AA_old * AA/AA == -1
 %             [xr] = Reference(Params, time.t, agent, Gp, Gq, Cp, ToTime, StartT);
-            [xr] = Reference(Params, time.t, agent, Gq, Gp, phase);
-            param(i).controller.mcmpc = {idx, xr, time.t, phase, InputV};    % 入力算出 / controller.name = hlc
+            Time.t = time.t; 
+            if time.t < te 
+                Time.ind = time.t/dt; 
+            else 
+                Time.ind = Time.ind; 
+            end
+            [xr] = Reference(Params, Time, agent, Gq, Gp, phase);
+            param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -334,10 +334,12 @@ end
 
 %profile viewer
 %%
-close all
 
+%% animation
+% agent(1).animation(logger,"target",1); 
+close all
 fprintf("%f秒\n", totalT)
-Fontsize = 15;  timeMax = te;
+Fontsize = 15;  xmax = time.t;
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
@@ -359,42 +361,44 @@ for R = 1:size(logt, 1)
     Bestcost(:, R) = data.bestcost{R};
 end
 Diff = Edata - Rdata(1:3, :);
-xmax = time.t;
 close all
 
 % x-y
 % figure(5); plot(Edata(1,:), Edata(2,:)); xlabel("X [m]"); ylabel("Y [m]");
-
+m = 3; n = 2;
 % x-z
-Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
-figure(6); plot(Edata(1,1:round(xmax/dt)-1), Edata(3,1:round(xmax/dt-1))); hold on; % 軌跡
-plot(Rdata(1,1:round(xmax/dt)-1), Rdata(3, 1:round(xmax/dt)-1));
-% plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
-plot(Edata(1,1), Edata(3,1), 'h');  % initial
+% Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
+% figure(6); plot(Edata(1,1:round(xmax/dt)-1), Edata(3,1:round(xmax/dt-1))); hold on; % 軌跡
+% plot(Rdata(1,1:round(xmax/dt)-1), Rdata(3, 1:round(xmax/dt)-1));
+% % plot(0, 0.15, '*'); plot(0.1, 0.15, '.'); plot(0.1, 0.1, '.');
+% plot(Edata(1,1), Edata(3,1), 'h');  % initial
 % plot(Et, Er)
 % plot(Et, Ez); 
-hold off; % 斜面
-xlabel("X [m]"); ylabel("Z [m]"); 
+% hold off; % 斜面
+% xlabel("X [m]"); ylabel("Z [m]"); 
 % position
-figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
+subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Position"); 
 % atiitude 0.2915 rad = 16.69 deg
-figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
+subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Atiitude");
 % velocity
-figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
+subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Velocity"); 
 % input
-figure(4); plot(logt, Idata); 
+subplot(m,n,4); 
+plot(logt, Idata); 
+% plot(logt, Idata, "--", "LineWidth", 1); 
 xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Input");
+set(gcf, "WindowState", "maximized");
 %%
 % figure(5); 
 % ref_t = agent.reference.timeVarying.func;
@@ -419,7 +423,7 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
 % end
 
-figure(21)
+% figure(21)
 % V1 = Rdata(9, 1:end-1);
 % V2 = Rdata(9, 2:end);
 % A1 = Edata(3, 1:end-1);
@@ -431,17 +435,17 @@ figure(21)
 % plot(logt(1:end-1,1), accR, "--"); hold on
 % plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
 
-E = round(time.t/dt)-1;
-V1 = Rdata(9, 1:E-1);
-V2 = Rdata(9, 2:E);
-A1 = Edata(3, 1:E-1);
-A2 = Edata(3, 2:E);
-for i = 1:length(V1)
-    accR(i) = (V2(i)-V1(i))/0.025;
-    accE(i) = (A2(i)-A1(i))/0.025;
-end
-plot(logt(1:E-1,1), accR, "--"); hold on
-plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
+% E = round(time.t/dt)-1;
+% V1 = Rdata(9, 1:E-1);
+% V2 = Rdata(9, 2:E);
+% A1 = Edata(3, 1:E-1);
+% A2 = Edata(3, 2:E);
+% for i = 1:length(V1)
+%     accR(i) = (V2(i)-V1(i))/0.025;
+%     accE(i) = (A2(i)-A1(i))/0.025;
+% end
+% plot(logt(1:E-1,1), accR, "--"); hold on
+% plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
 
 % figure(20)
 % IHL = load("Data/HL_input");
@@ -483,16 +487,24 @@ plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xl
 % SF = data.param.particle_num - data.removeF(1:size(logger.data('t',[],[]),1));
 % F = [data.removeF(1:size(logger.data('t',[],[]),1))'; SF'];
 % area(F)
+%% figure保存
+% foldername = datestr(datetime('now'), 'YYYYmmdd');
+% now = datetime('now'); datename = datestr(now, 'HHMMSS');
+% Outputdir = '../../students/komatsu/simdata/20230515/';
+% saveas(1,strcat(Outputdir,datename, "_position"),'fig');
+% saveas(2,strcat(Outputdir,datename, "_attitude"),'fig');
+% saveas(3,strcat(Outputdir,datename, "_velocity"),'fig');
+% saveas(4,strcat(Outputdir,datename, "_input"),'fig');
 %% 動画生成
 % tic
 % pathJ = data.pathJ;
 % for m = 1:size(pathJ, 2)
 %     pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]);
 % end
-% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation1
-% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata png/Animation_omega
-% mkdir C:\Users\student\Documents\Komatsu\MCMPC\simdata video
-% Outputdir = 'C:\Users\student\Documents\Komatsu\MCMPC\simdata';
+% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
+% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
+% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
+% Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
 % PlotMov_xz
 
 %% Home PC adress
@@ -505,12 +517,9 @@ plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xl
 
 % PlotMovXYZ  % 3次元プロット
 % save()
-%%
+%% 学校PC adress
 % save('C:\Users\student\"OneDrive - 東京都市大学 Tokyo City University (1)"\研究室_2023\Data\20230427v1.mat', '-v7.3')
-% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230511v2.mat", '-v7.3')
-%% animation
-
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1); 
+% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230515v1.mat", '-v7.3')
+% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230515v3_H30dt25msN1000.mat","agent","data","initial","logger","Params","totalT", "time", "-v7.3");
 %%
 % logger.save();

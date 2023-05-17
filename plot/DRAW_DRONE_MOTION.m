@@ -199,7 +199,8 @@ classdef DRAW_DRONE_MOTION
             if param.gif
                 sizen = 256;
                 delaytime = 0;
-                filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
+%                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
+                filename = strrep(strrep(strcat('../../students/komatsu/simdata/20230511/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
             end
 
             if param.mp4

@@ -17,6 +17,7 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
       modelf
       modelp
       N % 現時刻のパーティクル数
+      flag
     end
     
     methods
@@ -25,10 +26,8 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
             obj.self = self;
             %---MPCパラメータ設定---%
             obj.param = param;
-%             obj.param.subCheck = zeros(obj.N, 1);
             obj.modelp = obj.self.parameter.get();
-            obj.modelf = obj.self.model.method;
-            
+            obj.modelf = obj.self.model.method; 
             %%
             obj.input = param.input;
             obj.const = param.const;
@@ -36,39 +35,67 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
             % 追加
             obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
             obj.input.Bestcost_now = 1e2;% 十分大きい値にする  初期周期での比較用
-
-            %             obj.input.Evaluationtra = zeros(1, obj.N);
             obj.model = self.model;
-            
             obj.param.fRemove = 0;
             obj.input.AllRemove = 0;
-
             obj.N = param.particle_num;
             n = 12; % 状態数
             obj.state.state_data = zeros(n,obj.param.H, obj.N);
             obj.input.Evaluationtra = zeros(1, obj.N);
-
+            obj.flag.vz = 0;
         end
         
         %-- main()的な
         % u fFirst
         function result = do(obj,param)
 %           profile on
-            idx = param{1};
+            % idx = param{1};
             xr = param{2};
             rt = param{3};
-            phase = param{4};
+            % phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
-% 
-%             if phase == 1
-%                 obj.param.QW = diag([1000; 1000; 100; 1; 1; 1]);
-%             end
 
-            ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-            ave2 = obj.input.u(2);    % 初期値はparamで定義
-            ave3 = obj.input.u(3);
-            ave4 = obj.input.u(4);
+            %% vz の符号判定 ⇒ 平均を０付近に変える
+            % vz = xr(9,:)<0; % 速度目標値　負：０，正：１
+            % [~, indvmin] = min(vz);
+            % [~, indvmax] = max(vz);
+
+            if obj.self.estimator.result.state.v(3) >= 0
+                vz = xr(9,:)<0;
+                [~, indvmin] = min(vz);
+                indvmax = 0;
+            elseif obj.self.estimator.result.state.v(3) < 0
+                vz = xr(9,:)>0;
+                [~, indvmax] = max(vz);
+                indvmin = 0;
+            end
+
+            %% xr(9,:)の符号判定
+            % D = zeros(1,obj.param.H-1);
+            % changei = cell(1,2);
+            % xr0or1 = xr(9,:) > 0;   % 正なら1、負なら0
+            % for xri = 1:obj.param.H-1
+            %     D(1,xri) = xr0or1(xri+1) - xr0or1(xri);
+            %     if D(1,xri) == -1; change(xri) = -1;   % 負に変わった
+            %     elseif D(1,xri) == 1; change(xri) = 1; % 正に変わった
+            %     else change(xri) = NaN;
+            %     end
+            % end
+            % changei{1,1} = find(change == 1);   % 正に変わったインデント
+            % changei{1,2} = find(change == -1);  % 負に変わったインデント
+            %% 3以上の符号変化に対応
+
+%             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+%             ave2 = obj.input.u(2);    % 初期値はparamで定義
+%             ave3 = obj.input.u(3);
+%             ave4 = obj.input.u(4);
+            
+            ave1 = 0.269*9.81/4;    % ホバリング入力を平均
+            ave2 = 0.269*9.81/4;    % 初期値はparamで定義
+            ave3 = 0.269*9.81/4;
+            ave4 = 0.269*9.81/4;
+            
             % 標準偏差，サンプル数の更新
             obj.input.sigma = obj.input.nextsigma;
             obj.N = obj.param.nextparticle_num;         
@@ -81,10 +108,34 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
                 obj.input.AllRemove = 0;
             end
 
-            obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
-            obj.input.u2 = max(0,obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2);
-            obj.input.u3 = max(0,obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3);
-            obj.input.u4 = max(0,obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4);
+            if indvmin ~= 0 
+                % 目標速度の符号が反転するまでは通常の平均、マイナスになったらその先の平均を０にする．
+                obj.input.u1 = max(0, obj.input.sigma.*randn(indvmin, obj.N) + ave1); obj.input.uu1 = max(0, obj.input.sigma.*randn(obj.param.H-indvmin, obj.N));
+                obj.input.u2 = max(0, obj.input.sigma.*randn(indvmin, obj.N) + ave1); obj.input.uu2 = max(0, obj.input.sigma.*randn(obj.param.H-indvmin, obj.N));
+                obj.input.u3 = max(0, obj.input.sigma.*randn(indvmin, obj.N) + ave1); obj.input.uu3 = max(0, obj.input.sigma.*randn(obj.param.H-indvmin, obj.N));
+                obj.input.u4 = max(0, obj.input.sigma.*randn(indvmin, obj.N) + ave1); obj.input.uu4 = max(0, obj.input.sigma.*randn(obj.param.H-indvmin, obj.N));
+                obj.input.u1 = vertcat(obj.input.u1, obj.input.uu1);
+                obj.input.u2 = vertcat(obj.input.u2, obj.input.uu2);
+                obj.input.u3 = vertcat(obj.input.u3, obj.input.uu3);
+                obj.input.u4 = vertcat(obj.input.u4, obj.input.uu4);
+            elseif indvmax ~= 0
+                obj.input.u1 = max(0, obj.input.sigma.*randn(indvmax, obj.N) + ave1); obj.input.uu1 = max(0, obj.input.sigma.*randn(obj.param.H-indvmax, obj.N) + 0.269*9.81/4);
+                obj.input.u2 = max(0, obj.input.sigma.*randn(indvmax, obj.N) + ave1); obj.input.uu2 = max(0, obj.input.sigma.*randn(obj.param.H-indvmax, obj.N) + 0.269*9.81/4);
+                obj.input.u3 = max(0, obj.input.sigma.*randn(indvmax, obj.N) + ave1); obj.input.uu3 = max(0, obj.input.sigma.*randn(obj.param.H-indvmax, obj.N) + 0.269*9.81/4);
+                obj.input.u4 = max(0, obj.input.sigma.*randn(indvmax, obj.N) + ave1); obj.input.uu4 = max(0, obj.input.sigma.*randn(obj.param.H-indvmax, obj.N) + 0.269*9.81/4);
+                obj.input.u1 = vertcat(obj.input.u1, obj.input.uu1);
+                obj.input.u2 = vertcat(obj.input.u2, obj.input.uu2);
+                obj.input.u3 = vertcat(obj.input.u3, obj.input.uu3);
+                obj.input.u4 = vertcat(obj.input.u4, obj.input.uu4);
+            else
+                obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
+                obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
+                obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
+                obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
+            end
+%             obj.input.u2 = obj.input.u1;    % すべて同じ入力、　確認用
+%             obj.input.u3 = obj.input.u1;
+%             obj.input.u4 = obj.input.u1;
             obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
             obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;   
             obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
@@ -109,13 +160,14 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
             obj.input.normE = obj.Normalize();
 
             %-- 制約条件
-            removeF = 0; removeX = []; survive = obj.N; 
+%             removeF = 0; removeX = []; survive = obj.N; 
+            [removeF, removeX, survive] = obj.constraints();
 %             if obj.self.estimator.result.state.p(3) < 0.3
 %                 [removeF, removeX, survive] = obj.constraints();
 %             end
             obj.state.COG.g = 0; obj.state.COG.gc = 0;
             
-
+            
             if removeF ~= obj.N
                 [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
                 obj.result.input = obj.input.u(:, 1, BestcostID);     % 最適な入力の取得
@@ -128,7 +180,7 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
                 if removeF > obj.N /2
                     obj.input.nextsigma = obj.input.Constsigma;
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
-                    obj.input.AllRemove = 1;
+%                     obj.input.AllRemove = 1;
                 else
                     obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre)));
                     % 追加
@@ -175,39 +227,69 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
         %-- 制約とその重心計算 --%
         function [removeF, removeX, survive] = constraints(obj)
             % 状態制約
+
 %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
 %             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
-%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
-            
-            % 姿勢角
-            removeFe = (obj.state.state_data(5, end, :) >= 0.3975 | obj.state.state_data(5, end, :) <= 0.1975);
-            
-            % ドローンの四隅の座標
-            % drone = 四隅の座標 Particle_num * 2
-%             drone = obj.state.state_data(1,end,:);
-%             drone_1 = drone+obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));
-%             drone_2 = drone-obj.self.parameter.lx*cos(obj.state.state_data(9, end, :));         
-%             drone_3 = drone_2;
-%             drone_4 = drone_1;
-%             d4edge = [drone_1, drone_2];
+%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);    
 
             % 高度
 %             zx = 10;
 %             zz = 3;
 %             removeFe = (any(repmat(obj.state.state_data(3, end, :), 1, 2) <= zz/zx * d4edge(1,:, :)+0.1));
             
-            
-            removeX = find(removeFe);
-            % 制約違反の入力サンプル(入力列)を棄却
-            obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
-            % 全制約違反による分散リセットを確認するフラグ  
-            removeF = size(removeX, 1); % particle_num -> 全棄却
 %             sur = (obj.state.state_data(1, end, :) > 0.5*sin(obj.param.t));  % 生き残りサンプル
 %             survive = find(sur);
-            survive = obj.N;
+
+              % 使ってたところ
+%             removeFe = NaN;
+%             removeX = find(removeFe);
+%             % 制約違反の入力サンプル(入力列)を棄却
+%             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
+%             % 全制約違反による分散リセットを確認するフラグ  
+%             removeF = size(removeX, 1); % particle_num -> 全棄却
+%             survive = obj.N;
+            removeF = 0; removeX = []; survive = obj.N;
 
             %% ソフト制約
             % 棄却はしないが評価値を大きくする
+            %% 斜面
+            % 姿勢角
+            if obj.self.estimator.result.state.p(3) < 0.01  
+%                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
+%                 A = 100;
+                Zdis = (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975);
+%                 gradZ = -obj.param.CA * (Zdis .^ (2)) + obj.param.CA;
+                Zlim = 2;
+                gradZ = -obj.param.CA * (1-cos((Zdis/Zlim).*pi))/Zlim + obj.param.CA;
+                constIL = find(obj.state.state_data(5, end, 1:obj.N) <= 0.1975);
+                constIR = find(obj.state.state_data(5, end, 1:obj.N) >= 0.3975);
+                CL = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIL)-0.1975).^2, [1, length(constIL)]); % 0.1975 rad.未満の計算
+                CR = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
+                obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
+                obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
+            end
+
+            %% 斜面
+            if (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975) < 0.12
+                 %% 速度制約
+                constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
+                CV = reshape(obj.param.CV * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
+                obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
+            end
+
+            %% 斜面に墜落したかどうか　実質棄却
+            constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
+            obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
+%             if length(constISlope) == obj.N % 全墜落なら終了
+%                 obj.param.fRemove = 3;
+%             end
+
+            % yaw角
+            constIYaw = find(abs(obj.state.state_data(6, end, 1:obj.N)) > 0.5);
+            CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
+            obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
+
+            
 
             %% 重心計算
 %             if removeF == obj.N
@@ -246,19 +328,6 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
                     obj.state.state_data(:, h+1, m) = x0;
                 end
             end
-
-
-            %ベクトル化：  input[4*obj.N, obj.param.H]
-            % 無名関数@ cellには入れられた気がする
-%             model_equ = {obj.N, 1};
-%             for mk = 1:obj.N
-%                 model_equ{mk, 1} = obj.modelf;
-%             end
-%             x0 = repmat(obj.previous_state, obj.N, 1);
-%             obj.state.state_data(:, 1) = repmat(obj.previous_state, obj.N, 1);
-%             for h = 1:obj.param.H-1
-%                 x0 = x0 + obj.param.dt * model_equ{:, 1}(); cell配列の式に値を代入する方法
-%             end
             predict_state = obj.state.state_data;
         end
 
@@ -267,6 +336,8 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
         function [MCeval] = objective(obj, m)   % obj.~とする
             X = obj.state.state_data;       %12 * 10
             U = obj.input.u(:,:,m);         %12 * 10
+            % k = linspace(1, 0.5, obj.param.H)';        %ホライズンごとに係数下げる
+            k = ones(1,obj.param.H)';
 
             %% xr
             tildeXp = X(1:3,:,m) - obj.state.ref(1:3, :);  % 位置   agent.refenrece.result.state.p
@@ -285,6 +356,9 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
             %% 人口ポテンシャル場法
             % x-y
 %             apfLower = (X(1,end,m)-obj.param.obsX)^2 + (X(2,end,m)-obj.param.obsY)^2;   % 終端ホライズン
+            
+            %% 制約違反ソフト制約
+            constraints = 0;
 
 
             %-- 状態及び入力のステージコストを計算
@@ -293,11 +367,11 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
 %             stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
 %             stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
 %             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
-            stageStateP =    sum(tildeXp' * obj.param.P   .* tildeXp',2);
-            stageStateV =    sum(tildeXv' * obj.param.V   .* tildeXv',2);
-            stageStateQW =   sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
-            stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-            stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
+            stageStateP =    k(1,1:end-1).*sum(tildeXp(:, 1:end-1)' * obj.param.P   .* tildeXp(:, 1:end-1)',2);
+            stageStateV =    k(1,1:end-1).*sum(tildeXv(:, 1:end-1)' * obj.param.V   .* tildeXv(:, 1:end-1)',2);
+            stageStateQW =   k(1,1:end-1).*sum(tildeXqw(:, 1:end-1)' * obj.param.QW .* tildeXqw(:, 1:end-1)',2);
+            stageInputPre  = k(1,1:end-1).*sum(tildeUpre(:, 1:end-1)' * obj.param.RP.* tildeUpre(:, 1:end-1)',2);
+            stageInputRef  = k(1,1:end-1).*sum(tildeUref(:, 1:end-1)' * obj.param.R .* tildeUref(:, 1:end-1)',2);
 
             %-- 状態の終端コストを計算 状態だけの終端コスト
             terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
@@ -306,7 +380,7 @@ classdef MCMPC_controller_par <CONTROLLER_CLASS
 
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
-                + terminalState;
+                + terminalState + constraints;
         end
         
         function [pw_new] = Normalize(obj)

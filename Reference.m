@@ -43,18 +43,19 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase)
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize
-
+    
     % 時間関数の取得→時間を代入してリファレンス生成
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     for h = 0:params.H-1
-        t = T + params.dt * h; % reference生成時の時刻をずらす
+        t = T.t + params.dt * h; % reference生成時の時刻をずらす
         Ref = RefTime(t); % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
         xr(1:3, h+1) = Ref(1:3);
         xr(7:9, h+1) = Ref(5:7);
         xr(4:6, h+1) =   [0;0;0]; % 姿勢角
         xr(10:12, h+1) = [0;0;0];
 
-        xr(13:16, h+1) = params.ur;
+        % xr(13:16, h+1) = params.ur; % 0.6597
+        xr(13:16, h+1) = params.ur_array(:, round(T.ind)+1); % HLの入力を目標入力
 
         %% 斜面
 %         if T < phase

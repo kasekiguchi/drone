@@ -49,30 +49,23 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
         % u fFirst
         function result = do(obj,param)
 %           profile on
-            idx = param{1};
+            % idx = param{1};
             xr = param{2};
             rt = param{3};
-            phase = param{4};
+            % phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
 
-            %% vz の符号判定 ⇒ 平均を０付近に変える
-%             vz = xr(9,:)<0; % 速度目標値　負：０，正：１
-%             [~, indvmin] = min(vz);
-%             [~, indvmax] = max(vz);
-% 
-%             if obj.model.estimator.result.state.v(3) > 0
-%                 vz = xr(9,:)<0;
-%                 [~, indvmin] = min(vz);
-%             elseif obj.model.estimator.result.state.v(3) < 0
-%                 vz = xr(9,:)>0;
-%                 [~, indvmax] = max(vz);
-%             end
-
-            ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-            ave2 = obj.input.u(2);    % 初期値はparamで定義
-            ave3 = obj.input.u(3);
-            ave4 = obj.input.u(4);
+%             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+%             ave2 = obj.input.u(2);    % 初期値はparamで定義
+%             ave3 = obj.input.u(3);
+%             ave4 = obj.input.u(4);
+            
+            ave1 = 0.269*9.81/4;    % ホバリング入力を平均
+            ave2 = 0.269*9.81/4;    % 初期値はparamで定義
+            ave3 = 0.269*9.81/4;
+            ave4 = 0.269*9.81/4;
+            
             % 標準偏差，サンプル数の更新
             obj.input.sigma = obj.input.nextsigma;
             obj.N = obj.param.nextparticle_num;         
@@ -89,6 +82,9 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
             obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
             obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
+%             obj.input.u2 = obj.input.u1;    % すべて同じ入力、　確認用
+%             obj.input.u3 = obj.input.u1;
+%             obj.input.u4 = obj.input.u1;
             obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
             obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;   
             obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
@@ -277,18 +273,11 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 x0 = obj.previous_state;
                 obj.state.state_data(:, 1, m) = obj.previous_state;
                 for h = 1:obj.param.H-1
-                    x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, h, m), obj.modelp);
+                    % x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, h, m), obj.modelp);
+                    [~,tmpx]=ode15s(@(t,x) obj.modelf(x, u(:, h, m),obj.modelp),[0 obj.param.dt], x0);
+                    x0 = tmpx(end, :);
                     obj.state.state_data(:, h+1, m) = x0;
                 end
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 1, m), obj.modelp); obj.state.state_data(:, 2, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 2, m), obj.modelp); obj.state.state_data(:, 3, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 3, m), obj.modelp); obj.state.state_data(:, 4, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 4, m), obj.modelp); obj.state.state_data(:, 5, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 5, m), obj.modelp); obj.state.state_data(:, 6, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 6, m), obj.modelp); obj.state.state_data(:, 7, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 7, m), obj.modelp); obj.state.state_data(:, 8, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 8, m), obj.modelp); obj.state.state_data(:, 9, m) = x0;
-%                 x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, 9, m), obj.modelp); obj.state.state_data(:, 10, m) = x0;
             end
             predict_state = obj.state.state_data;
         end

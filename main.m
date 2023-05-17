@@ -81,6 +81,7 @@ try
       if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
       % reference
+      FH.CurrentCharacter = 'f';
       param(i).reference.covering = [];
       param(i).reference.point = {FH, [2; 0; 1], time.t, dt};
       param(i).reference.timeVarying = {time, FH};
@@ -202,10 +203,12 @@ logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_
 figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
 xlabel("Time [s]"); ylabel("input.V");
 grid on; xlim([0 te]); ylim([-inf inf]);
-saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
+% saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
 %%
 % InputV(:, te/dt+1) = InputV(:, te/dt);
-% save("Data/InputV_HL.mat", "InputV");
+% save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
+Idata = logger.data(1,"input",[])';
+save("Data/Input_HL.mat", "Idata"); % 実入力の保存
 %% Save figure
 % d = char(yyyymmddHHMMSS(datetime));
 % d = datestr(now, "yyyy-mm-dd_HH:MM:SS");
