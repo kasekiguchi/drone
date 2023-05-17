@@ -116,15 +116,15 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       z4n = Z4(xn,xd',vfn,P);
       obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
-      ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-      ave2 = obj.input.u(2);    % 初期値はparamで定義
-      ave3 = obj.input.u(3);
-      ave4 = obj.input.u(4);
+      % ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+      % ave2 = obj.input.u(2);    % 初期値はparamで定義
+      % ave3 = obj.input.u(3);
+      % ave4 = obj.input.u(4);
 
-%       ave1 = 0;
-%       ave2 = 0;
-%       ave3 = 0;
-%       ave4 = 0;
+      ave1 = 0;
+      ave2 = 0;
+      ave3 = 0;
+      ave4 = 0;
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;
@@ -139,10 +139,14 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       end
 
       % 入力生成
-      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1; % 負入力の阻止
-      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
+      % obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1; % 負入力の阻止
+      % obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave2;
       obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave3;
-      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
+      % obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave4;
+
+      obj.input.u1 = zeros(obj.param.H, obj.N);
+      obj.input.u2 = zeros(obj.param.H, obj.N);
+      obj.input.u4 = zeros(obj.param.H, obj.N);
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;

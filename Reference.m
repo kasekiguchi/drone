@@ -54,8 +54,8 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase)
         xr(4:6, h+1) =   [0;0;0]; % 姿勢角
         xr(10:12, h+1) = [0;0;0];
 
-        % xr(13:16, h+1) = params.ur; % 0.6597
-        xr(13:16, h+1) = params.ur_array(:, round(T.ind)+1); % HLの入力を目標入力
+        xr(13:16, h+1) = params.ur; % MC -> 0.6597,   HL -> 0
+        % xr(13:16, h+1) = params.ur_array(:, round(T.ind)+1); % HLの入力を目標入力
 
         %% 斜面
 %         if T < phase
