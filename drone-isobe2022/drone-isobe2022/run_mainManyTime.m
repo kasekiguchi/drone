@@ -6,7 +6,7 @@ clear;clc;
 
 %% 初期設定
 % 実行する回数を指定
-HowManyRun = 100;
+HowManyRun = 10;
 
 % rand シード値
 seed = double('T');
@@ -16,9 +16,9 @@ seed = double('T');
 rng(seed);
 
 % データ保存先フォルダ名
-
-mkdir Data\simData_KoopmanApproach_2023_5_17_maxrange_otamesi; %新規ファイルの作成(以下のファイル名と一致させるように)
-Foldername = 'Data\simData_KoopmanApproach_2023_5_17_maxrange_otamesi'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
+% rmdir Data\simData_KoopmanApproach_2023_5_17_isoberange s;%フォルダの削除 フォルダ名を変更せずに回す場合はコメントオフを外す 
+mkdir Data\simData_KoopmanApproach_2023_5_16_maxrange; %新規フォルダの作成(以下のフォルダ名と一致させるように)
+Foldername = 'Data\simData_KoopmanApproach_2023_5_16_maxrange'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル
 % "ファイル名"_[番号].mat で保存される
 FileName = 'simtest';
