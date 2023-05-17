@@ -17,8 +17,8 @@ rng(seed);
 
 % データ保存先フォルダ名
 
-mkdir Data\simData_KoopmanApproach_2023_5_17_maxrange_wnot0; %新規ファイルの作成(以下のファイル名と一致させるように)
-Foldername = 'Data\simData_KoopmanApproach_2023_5_17_maxrange_wnot0'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
+mkdir Data\simData_KoopmanApproach_2023_5_17_maxrange_otamesi; %新規ファイルの作成(以下のファイル名と一致させるように)
+Foldername = 'Data\simData_KoopmanApproach_2023_5_17_maxrange_otamesi'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル
 % "ファイル名"_[番号].mat で保存される
 FileName = 'simtest';

@@ -8,7 +8,7 @@ close all
 flg.bilinear = 0;
 
 %データ保存先ファイル名
-FileName = 'EstimationResult_12state_100data_5_17_maxrange_wnot0.mat'; %保存先のファイル名も逐次変更する
+FileName = 'EstimationResult_12state_100data_5_17_maxrange_wnot0_eulerAngleParameter_InputAndConst.mat'; %保存先のファイル名も逐次変更する
 % FileName = 'otamesi.mat';
 
 % 読み込むデータファイル名

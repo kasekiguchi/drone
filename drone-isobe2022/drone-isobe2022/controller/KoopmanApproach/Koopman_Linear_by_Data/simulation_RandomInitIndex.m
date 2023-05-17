@@ -13,10 +13,10 @@ FolderName = 'RandomInitialIndexTest';
 
 %データ保存先ファイル名
 % 'FileName'_'シミュレーション番号'.mat
-FileName = 'EstimationResult_12state_100data_5_17_maxrange_quaternions';
+FileName = 'EstimationResult_12state_100data_5_17_maxrange_wnot0_eulerAngleParameter_InputAndConst';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_12state_100data_5_17_maxrange_eulerAngleParameter_InputAndConst.mat';
+loading_filename = 'EstimationResult_12state_100data_5_17_maxrange_wnot0_eulerAngleParameter_InputAndConst.mat';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 4;
