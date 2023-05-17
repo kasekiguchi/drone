@@ -76,7 +76,7 @@ classdef HLMCMPC_controller_change <CONTROLLER_CLASS
       idx = param{1};
       xr = param{2};
       rt = param{3};
-      obj.input.InputV = param{5};
+%       obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
       obj.input.U = 10 * ones(4,1);

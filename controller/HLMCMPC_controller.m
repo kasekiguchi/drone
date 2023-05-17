@@ -116,10 +116,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       z4n = Z4(xn,xd',vfn,P);
       obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
-      % ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-      % ave2 = obj.input.u(2);    % 初期値はparamで定義
-      % ave3 = obj.input.u(3);
-      % ave4 = obj.input.u(4);
+%       ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+%       ave2 = obj.input.u(2);    % 初期値はparamで定義
+%       ave3 = obj.input.u(3);
+%       ave4 = obj.input.u(4);
 
       ave1 = 0;
       ave2 = 0;
