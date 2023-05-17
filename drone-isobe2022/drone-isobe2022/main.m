@@ -167,7 +167,7 @@ end
             % % initialState.w = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg/s 程度のイメージ
             % initialState.w = [0;0;0];
 
-            initialState.input = rand(4,1)*0.5; 
+            initialState.input = rand(4,1)*0.6; 
             initialState.p = rand(3,1)*3-1; % rand(3,1)*0.02で生成範囲を0~0.02に変更、後ろのマイナスで-0.01~0.01にしてる(イメージ:0-0.01 ~ 0.02-0.01)
             % initialState.p(3,1) = rand*6-3;
             initialState.q = (rand(3,1)*40-20)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
