@@ -173,8 +173,8 @@ end
             initialState.q = (rand(3,1)*40-20)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
             %値の範囲を-+に調整してる
             initialState.v = rand(3,1)*0.2-0.1; % 1 cm/s 程度の誤差イメージ
-            % initialState.w = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg/s 程度のイメージ
-            initialState.w = [0;0;0];
+            initialState.w = (rand(3,1)*40-20)*0.0175; % -5 ~ +5 deg/s 程度のイメージ
+            % initialState.w = [0;0;0];
             
             agent(1).model.state.p = initialState.p;
             agent(1).model.state.q = initialState.q;
