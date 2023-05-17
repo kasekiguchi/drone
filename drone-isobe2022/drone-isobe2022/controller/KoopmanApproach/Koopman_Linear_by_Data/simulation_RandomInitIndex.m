@@ -13,10 +13,10 @@ FolderName = 'RandomInitialIndexTest';
 
 %データ保存先ファイル名
 % 'FileName'_'シミュレーション番号'.mat
-FileName = 'EstimationResult_12state_100data_5_16_maxrange';
+FileName = 'EstimationResult_12state_100data_5_17_maxrange_quaternions';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_12state_100data_5_16_maxrange.mat';
+loading_filename = 'EstimationResult_12state_100data_5_17_maxrange_eulerAngleParameter_InputAndConst.mat';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 4;
@@ -51,7 +51,7 @@ for i = 1:HowmanySimulationRunning
     % 初期状態として抜き出す時間インデックスをランダムに決める
 
     simResult.initTindex = randi(size(simResult.reference.T,2),1);
-    % simResult.initTindex = 3.5/0.025+1;
+    % simResult.initTindex = 3.5/0.025+1; %生成する時間固定の場合
 
     % 決めた時間インデックスiでの状態X[i]と観測量Fから観測量空間上の初期状態Z[1] = F(x[i])を求める
     simResult.Z(:,1) = F(simResult.reference.X(:,simResult.initTindex));
