@@ -120,8 +120,8 @@ U = [u1;u2;u3;u4];
 Fl= subs(f,U,[0;0;0;0]);
 Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
 simplify(f - (Fl+Gl*U))
-matlabFunction(Fl,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
-matlabFunction(Gl,'file','GL','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
+% matlabFunction(Fl,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+% matlabFunction(Gl,'file','GL','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 % matlabFunction(f,'file','with_load_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 %%
 dol  = cross(-pT,(T1+T2+T3+T4)*Rb0*e3)/(m*Length);
@@ -133,7 +133,7 @@ dob  = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*tau;
 dq   = L'*ob/2;
 x=[p;q;dp;ob;pl;dpl;pT;ol];
 f=[dp;dq;ddp;dob;dpl;ddpl;dpT;dol];
-matlabFunction(f,'file','with_load_model_for_HL','vars',{x 0 cell2sym(physicalParam)},'outputs',{'dx'});
+% matlabFunction(f,'file','with_load_model_for_HL','vars',{x 0 cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Local functions
 function m = Mtake(mat,m,n)

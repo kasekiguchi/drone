@@ -190,12 +190,18 @@ u = [u1,u2,u3,u4,M1,M2,M3,M4];
 f_data = [ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new];
 u_data = [u1;u2;u3;u4];
 fx = subs(f_data,u_data,zeros(size(u_data)));
-% gx = subs(subs(f_data,[u2;u3;u4],zeros(size([u2;u3;u4]))),u1,ones(3,1))-fx,subs(subs(f_data,[u1,u3,u4],zeros([u1;u3;u4])),u2,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u4],zeros([u1,u2,u4])),u3,ones(3,1))-fx,subs(subs(f_data,[u1,u2,u3],zeros([u1,u2,u3])),u4,ones(3,1))-fx;
-gx = [subs(f_data,u_data,[1;zeros(11,1)])-f_data,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-f_data,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-f_data,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-f_data,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-f_data,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-f_data,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-f_data,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-f_data,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-f_data,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-f_data,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-f_data,subs(f_data,u_data,[zeros(11,1);1])-f_data];
+gx = [subs(f_data,u_data,[1;zeros(11,1)])-fx,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(f_data,u_data,[zeros(11,1);1])-fx];
 % subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl
 % f_data - (fx + gx*u_data)
 %%
-kakunin = simplify(f_data - (fx + gx*u_data));
+% f_data2 = ddx0_new;
+% fx2 = subs(f_data2,u_data,zeros(size(u_data)));
+% gx2 = [subs(f_data2,u_data,[1;zeros(11,1)])-fx2,subs(f_data2,u_data,[zeros(1,1);1;zeros(10,1)])-fx2,subs(f_data2,u_data,[zeros(2,1);1;zeros(9,1)])-fx2,subs(f_data2,u_data,[zeros(3,1);1;zeros(8,1)])-fx2,subs(f_data2,u_data,[zeros(4,1);1;zeros(7,1)])-fx2,subs(f_data2,u_data,[zeros(5,1);1;zeros(6,1)])-fx2,subs(f_data2,u_data,[zeros(6,1);1;zeros(5,1)])-fx2,subs(f_data2,u_data,[zeros(7,1);1;zeros(4,1)])-fx2,subs(f_data2,u_data,[zeros(8,1);1;zeros(3,1)])-fx2,subs(f_data2,u_data,[zeros(9,1);1;zeros(2,1)])-fx2,subs(f_data2,u_data,[zeros(10,1);1;zeros(1,1)])-fx2,subs(f_data2,u_data,[zeros(11,1);1])-fx2];
+
+%%
+% kakunin2 = f_data2 - (fx2 + gx2*u_data);
+%%
+% kakunin = simplify(f_data - (fx + gx*u_data));
 
 %%
 % subs(ddx0_new,dol0,[0,0,0])
