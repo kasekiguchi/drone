@@ -139,22 +139,35 @@ mq = m0*eye(3) + m1*(q1*q1') + m2*(q2*q2') + m3*(q3*q3') + m4*(q4*q4');
 % enq2 = B*dol0 == -C*ddx0 + P2;
 
 % ddx0 = A*dol0 + P1;
-ddx0 = (A*C+B)\(B*P1 + A*P2);
-dol0_2 = simplify(B\(-C*ddx0 + P2));
-ddx0_2 = simplify(A*dol0_2 + P1);
-dos1 = q1hat*(ddx0_2-ge3-Rb0*ro1hat*dol0_2+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
-dos2 = q2hat*(ddx0_2-ge3-Rb0*ro2hat*dol0_2+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
-dos3 = q3hat*(ddx0_2-ge3-Rb0*ro3hat*dol0_2+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
-dos4 = q4hat*(ddx0_2-ge3-Rb0*ro4hat*dol0_2+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
+%%
+A0=[1,1,1;1,1,1;1,1,1];
+B0=[1,1,1;1,1,1;1,1,1];
+C0=[1,1,1;1,1,1;1,1,1];
+P10=[1;2;2];
+P20=[1;2;1];
+
+%%
+ddx0 = simplifyFraction((A*C+B)\(B*P1 + A*P2));
+dol0 = simplifyFraction((A*C+B)\(-C*P1+P2));
+% dol0_2 = simplify(B\(-C*ddx0 + P2));
+% ddx0_2 = simplifyFraction(A*dol0 + P1);
+dos1 = q1hat*(ddx0-ge3-Rb0*ro1hat*dol0+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
+dos2 = q2hat*(ddx0-ge3-Rb0*ro2hat*dol0+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
+dos3 = q3hat*(ddx0-ge3-Rb0*ro3hat*dol0+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
+dos4 = q4hat*(ddx0-ge3-Rb0*ro4hat*dol0+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
+
+GGGG=1
 
 AA = mq\(m1*(q1*q1')*Rb0*ro1hat +m2*(q2*q2')*Rb0*ro2hat +m3*(q3*q3')*Rb0*ro3hat +m4*(q4*q4')*Rb0*ro4hat);
 BB = J0 - m1*ro1hat*Rb0'*(q1*q1')*Rb0*ro1hat - m2*ro2hat*Rb0'*(q2*q2')*Rb0*ro2hat - m3*ro3hat*Rb0'*(q3*q3')*Rb0*ro3hat - m4*ro4hat*Rb0'*(q4*q4')*Rb0*ro4hat;
 CC = m1*ro1hat*Rb0'*(q1*q1') +m2*ro2hat*Rb0'*(q2*q2') +m3*ro3hat*Rb0'*(q3*q3') +m4*ro4hat*Rb0'*(q4*q4');
 P1_new = mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+(u4p-m4*l4*norm(os4)^2*q4-m1*(q4*q4')*Rb0*ol0hat^2*ro4))+ge3;
-P2_new= ((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q3'))+(m4*ro4hat*Rb0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*Rb0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+ro2hat*Rb0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+ro3hat*Rb0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+ro4hat*Rb0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*Rb0*ol0hat^2*ro4); 
+P2_new = ((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q3'))+(m4*ro4hat*Rb0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*Rb0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+ro2hat*Rb0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+ro3hat*Rb0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+ro4hat*Rb0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*Rb0*ol0hat^2*ro4); 
 % S = subs(dos1,[A,B,C],[AA,BB,CC]);
-ddx0_new = subs(ddx0_2,[A,B,C,P1],[AA,BB,CC,P1_new]);
-dol0_new = subs(dol0_2,[A,B,C,P2],[AA,BB,CC,P2_new]);
+
+GGGG2=1
+ddx0_new = subs(ddx0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
+dol0_new = subs(dol0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
 dos1_new = subs(dos1,[A,B,C],[AA,BB,CC]);
 dos2_new = subs(dos2,[A,B,C],[AA,BB,CC]);
 dos3_new = subs(dos3,[A,B,C],[AA,BB,CC]);
@@ -188,12 +201,14 @@ u = [u1,u2,u3,u4,M1,M2,M3,M4];
 % subs(f,u,[0,0,0,0,0,0,0,0])
 
 %%
-% f_data = [ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new];
-% u_data = [u1;u2;u3;u4];
+f_data = [ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new];
+u_data = [u1;u2;u3;u4];
 % fx = subs(f_data,u_data,zeros(size(u_data)));
+fx = subs(ddx0_new,u_data,zeros(size(u_data)));
 % gx = [subs(f_data,u_data,[1;zeros(11,1)])-fx,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(f_data,u_data,[zeros(11,1);1])-fx];
-% subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl
-% f_data - (fx + gx*u_data)
+gx = [subs(ddx0_new,u_data,[1;zeros(11,1)])-fx,subs(ddx0_new,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(ddx0_new,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(ddx0_new,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(ddx0_new,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(ddx0_new,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(ddx0_new,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(ddx0_new,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(ddx0_new,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(ddx0_new,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(ddx0_new,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(ddx0_new,u_data,[zeros(11,1);1])-fx];
+subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl
+f_data - (fx + gx*u_data)
 %%
 % f_data2 = ddx0_new;
 % fx2 = subs(f_data2,u_data,zeros(size(u_data)));
@@ -208,11 +223,17 @@ u = [u1,u2,u3,u4,M1,M2,M3,M4];
 % subs(ddx0_new,dol0,[0,0,0])
 % subs(ddx0_new,data,dataset)
 data = [q1;q2;q3;q4;ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;u1;u2;u3;u4;qt0];
-q_dataset=[[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)]];
-ol0_dataset=[0;0;3.14];
+% q_dataset=[[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)]];
+q_dataset=[[0;0;1];[0;0;1];[0;0;1];[0;0;1]];
+ol0_dataset=[0;0;0];
 ol_dataset=[[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
 os_dataset=[[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
 u_dataset = [[0;0;-3];[0;0;-3];[0;0;-3];[0;0;-3]];
+
+% P1dataset=subs(P1_new,data,dataset);
+% P2dataset=subs(P2_new,data,dataset);
+
+% data2 = [q1;q2;q3;q4;ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;u1;u2;u3;u4;qt0;P1;P2];
 
 alfa=pi/180*90;
 beta=pi/180*0;
@@ -224,6 +245,8 @@ R0_matrix = [cos(alfa)*cos(beta)*cos(gunma)-sin(alfa)*sin(gunma),-cos(alfa)*cos(
 qt0_dataset=[0;1/2;0;0];
 
 dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
+% dataset2 = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset;P1dataset;P2dataset];
 
+% ddx0_new2 = subs(ddx0_new,[P1,P2],[P1_new,P2_new]);
 %%
 % matlabFunction(f,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
