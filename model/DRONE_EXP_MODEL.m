@@ -20,7 +20,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             obj.flight_phase        = 's';
             switch param.conn_type
                 case "udp"
-                    obj.arming_msg = [1100 1100 0 1100 1000 0 0 0];
+                    obj.arming_msg = [500 500 0 500 1000 0 0 0];
                     obj.ESPr_num = param.num;
                     [~,cmdout] = system("ipconfig");
                     ipp=regexp(cmdout,"192.168.");
