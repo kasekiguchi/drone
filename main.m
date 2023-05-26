@@ -109,11 +109,11 @@ end
         if fExp
             %% logging
             calculation1 = toc(tStart);
-            time.t = time.t + calculation1;
+            time.t = time.t + calculation1
             logger.logging(time.t, FH, agent, []);
             calculation2 = toc(tStart);
             time.t = time.t + calculation2 - calculation1;
-
+            
             %% logging
             %             calculation = toc;
             %             wait_time = 0.9999 * (sampling - calculation);
