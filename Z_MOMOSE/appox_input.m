@@ -90,14 +90,18 @@ syms k1 k w p1 p2 a
 % f=w - sign(p1*w)*sqrt(w^2 + p2)==0;%*sqrt(w^2 + p2)==0;
 % ans_f=solve(f,w)
 k=1;
-f=k*w -k*tanh(18*w)*sqrt(w^2 + 0.001)^0.8;
+% f=k*w -k*tanh(18*w)*sqrt(w^2 + 0.001)^0.8;Ua LS
+% f=k*w -k*sign(w)*abs(w)^0.8;%FT LS
+f1=-abs(k*w) +abs(k*sign(w)*abs(w)^0.8);%FT LS
+f=k*w -k*sign(w)*abs(w)^0.8;%FT LS
 % f=k1*w - k*tanh(p1*w)*sqrt(w^2 + p2)^a;
 df =diff(f,w);
-dfs=subs(df,w,0);
-f=-k*abs(w) +k*tanh(18*abs(w))*sqrt(w^2 + 0.001)^0.8;
-fplot(f,[-1.5,1.5],'LineWidth', 2.5)
+% dfs=subs(df,w,0);
+% f=-k*abs(w) +k*tanh(18*abs(w))*sqrt(w^2 + 0.001)^0.8;
+fplot(f1,[-1.5,1.5],'LineWidth', 2.5)
 hold on
 fplot(df,[-1.5,1.5],'LineWidth', 2.5)
+
 % fplot(0,[-1.1,1])
 % fplot( -k*tanh(10*w)*sqrt(w^2 + 0.0001)^0.8,[-1.1,1])
 % fplot( -k*sign(w)*abs(w)^0.8,[-1.1,1])
@@ -105,7 +109,7 @@ fplot(df,[-1.5,1.5],'LineWidth', 2.5)
 legend("$h_i(x_i)$","$\dot{h_i}(x_i)$",'Interpreter','latex');
 fosi=20;%defolt 9
 set(gca,'FontSize',fosi)
-xlabel("$h_i(x_i)$",'FontSize',fosi,'Interpreter','latex');
+xlabel("$x_i$",'FontSize',fosi,'Interpreter','latex');
 ylabel("${h_i}(x_i)$or$\dot{h_i}(x_i)$",'FontSize',fosi,'Interpreter','latex');
 grid on
 hold off

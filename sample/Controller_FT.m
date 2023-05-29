@@ -14,6 +14,9 @@ Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
 Bc4 = [0; 0; 0;1];
 Controller_param.F1 = lqrd(Ac2, Bc2, diag([1000, 1]), [0.1], dt); 
+if fexpand
+    Controller_param.F1 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt);
+end
 % Controller_param.F1 = place(Ac2,Bc2,[-8.2518 + 4.9876i,-8.2518 - 4.9876i]);%近似線形化と同じ極
 % 有限整定用
 Controller_param.F2 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])

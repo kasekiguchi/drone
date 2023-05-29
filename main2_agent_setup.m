@@ -151,9 +151,9 @@ for i = 1:N
             alpha = 0.85;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
             approxRangeZ=[0 1];%近似する範囲z
             approxRangeXY=[0 1];%近似する範囲xy
-            agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
+            % agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
-%     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
+    agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 %          agent(i).set_property("controller", Conttroller_SMC(dt)); 
 %     agent(i).set_property("controller", Controller_AFT(dt,agent.model.param,alpha));    
