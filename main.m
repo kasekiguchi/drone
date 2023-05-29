@@ -212,7 +212,7 @@ logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_
 % figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
 % xlabel("Time [s]"); ylabel("input.V");
 % grid on; xlim([0 te]); ylim([-inf inf]);
-saveas(gcf, 'HL_slope-landing-ref', "png");
+% saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
 %%
 % InputV(:, te/dt+1) = InputV(:, te/dt);
 % save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
