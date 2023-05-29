@@ -56,15 +56,15 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.state.ref = xr;
             obj.param.t = rt;
 
-%             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-%             ave2 = obj.input.u(2);    % 初期値はparamで定義
-%             ave3 = obj.input.u(3);
-%             ave4 = obj.input.u(4);
+            ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+            ave2 = obj.input.u(2);    % 初期値はparamで定義
+            ave3 = obj.input.u(3);
+            ave4 = obj.input.u(4);
             
-            ave1 = 0.269*9.81/4;    % ホバリング入力を平均
-            ave2 = 0.269*9.81/4;    % 初期値はparamで定義
-            ave3 = 0.269*9.81/4;
-            ave4 = 0.269*9.81/4;
+            % ave1 = 0.269*9.81/4;    % ホバリング入力を平均
+            % ave2 = 0.269*9.81/4;    % 初期値はparamで定義
+            % ave3 = 0.269*9.81/4;
+            % ave4 = 0.269*9.81/4;
             
             % 標準偏差，サンプル数の更新
             obj.input.sigma = obj.input.nextsigma;
@@ -203,7 +203,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % 棄却はしないが評価値を大きくする
             %% 斜面
             % 姿勢角
-            if obj.self.estimator.result.state.p(3) < 0.01  
+            if obj.self.estimator.result.state.p(3) < 0.3 
 %                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
 %                 A = 100;
                 Zdis = (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975);
@@ -273,9 +273,9 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 x0 = obj.previous_state;
                 obj.state.state_data(:, 1, m) = obj.previous_state;
                 for h = 1:obj.param.H-1
-                    % x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, h, m), obj.modelp);
-                    [~,tmpx]=ode15s(@(t,x) obj.modelf(x, u(:, h, m),obj.modelp),[0 obj.param.dt], x0);
-                    x0 = tmpx(end, :);
+                    x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, h, m), obj.modelp); % オイラー近似
+                    % [~,tmpx]=ode15s(@(t,x) obj.modelf(x, u(:, h, m),obj.modelp),[0 obj.param.dt], x0); % 非線形モデル
+                    % x0 = tmpx(end, :);
                     obj.state.state_data(:, h+1, m) = x0;
                 end
             end

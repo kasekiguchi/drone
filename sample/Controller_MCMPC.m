@@ -33,15 +33,15 @@ function Controller = Controller_MCMPC(~)
 
     %% 円旋回
     Controller_param.P = diag([1000.0; 1000.0; 10000.0]);    % 座標   1000 1000 10000
-    Controller_param.V = diag([100.0; 100.0; 10000.0]);    % 速度
+    Controller_param.V = diag([1000.0; 1000.0; 100.0]);    % 速度
     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Controller_param.QW = diag([1000; 1000; 100; 1; 1; 1]);  % 姿勢角、角速度
 
     Controller_param.Qapf = 0;
-    Controller_param.C = 10;
-    Controller_param.CA = 10;
-    Controller_param.CV = 10;
+    Controller_param.C = 1;  % 姿勢角の係数
+    Controller_param.CA = 100; % 高度による係数
+    Controller_param.CV = 10; % 速度の係数
     
     
     Controller_param.Pf = 10000 * diag([1.0; 1.0; 1.0]);

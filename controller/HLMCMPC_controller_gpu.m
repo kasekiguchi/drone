@@ -52,7 +52,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,param.dt);    
       obj.N = param.particle_num;
       n = 12; % 状態数
-      obj.state.state_data = zeros(n,obj.param.H, obj.N);
+      obj.state.state_data = gpuArray(zeros(n,obj.param.H, obj.N));
       obj.input.Evaluationtra = zeros(1, obj.N);
       % 重みの配列サイズ変換
       obj.Weight = repmat(blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI), 1, 1, obj.N);
@@ -76,7 +76,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       idx = param{1};
       xr = param{2};
       rt = param{3};
-      obj.input.InputV = param{5};
+      % obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
 
@@ -108,14 +108,14 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       z4n = Z4(xn,xd',vfn,P);
       obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
       
-      ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-      ave2 = obj.input.u(2);    % 初期値はparamで定義
-      ave3 = obj.input.u(3);
-      ave4 = obj.input.u(4);
+      % ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+      % ave2 = obj.input.u(2);    % 初期値はparamで定義
+      % ave3 = obj.input.u(3);
+      % ave4 = obj.input.u(4);
 
       ave1 = 0;
-%       ave2 = 0;
-%       ave3 = 0;
+      ave2 = 0;
+      ave3 = 0;
       ave4 = 0;
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;   
@@ -143,7 +143,15 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
       %-- 状態予測
-      [obj.state.state_data] = obj.predict();
+      % [obj.state.state_data] = obj.predict();
+      u = gpuArray(obj.input.u);
+      pN = obj.N;
+      H = obj.param.H;
+      pcurrent_state = gpuArray(obj.current_state);
+      state_data = obj.state.state_data;
+      pA = obj.A;
+      pB = obj.B;
+      [obj.state.state_data] = predict(u,pN,H,pcurrent_state,state_data,pA,pB);
       if obj.state.state_data(1,1,:) + xd(3) < 0
         obj.param.fRemove = 1;
       elseif obj.state.state_data(1,1,:) + xd(3) > 10
@@ -151,7 +159,14 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       end
 
       %-- 評価値計算
-      obj.input.Evaluationtra =  obj.objective(idx);
+      % obj.input.Evaluationtra =  obj.objective(idx);
+      X = obj.state.state_data(:,:,1:obj.N);       % 12 * 10 * N
+      U = obj.input.u(:,:,1:obj.N);                % 4  * 10 * N
+      xrobject = obj.reference.xr;
+      inputv = obj.input.v;
+      refinput = obj.param.ref_input;
+      oWeight = obj.Weight; oWeightR = obj.WeightR; oWeightRp = obj.WeightRp;
+      obj.input.Evaluationtra = objective(X, U, pN, xrobject, inputv, refinput, oWeight, oWeightR, oWeightRp);
 
       % 評価値の正規化
       obj.input.normE = obj.Normalize();

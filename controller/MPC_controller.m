@@ -14,13 +14,13 @@ classdef MPC_controller <CONTROLLER_CLASS
     end
     
     methods
-        function obj = MPC_controller(self,param)
+        function obj = MPC_controller(self,~)
             obj.self = self;
             %options_setting
             obj.options = optimoptions('fmincon');
             obj.options.UseParallel            = false;
             obj.options.Algorithm			   = 'sqp';
-            % obj.options.Display                = 'none';
+            obj.options.Display                = 'none';
             obj.options.Diagnostics            = 'off';
             obj.options.MaxFunctionEvaluations = 1.e+12;%関数評価の最大回数
             obj.options.MaxIterations		   = Inf;%反復の最大許容回数
@@ -43,6 +43,8 @@ classdef MPC_controller <CONTROLLER_CLASS
             obj.previous_input = zeros(obj.param.input_size,obj.param.Num);
 
             obj.model = self.model;
+
+            
         end
         
         function u = do(obj,param,~)

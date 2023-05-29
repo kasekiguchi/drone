@@ -83,7 +83,7 @@ for i = 1:N
     %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器
     % agent(i).set_property("controller",Controller_HL_MEC(dt);% 階層型線形化＋MEC
     %agent(i).set_property("controller",Controller_HL_ATMEC(dt));%階層型線形化+AT-MEC
-    %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i
+    % agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
 
 %     agent(i).set_property("controller",Controller_MCMPC(dt)); % sampleを通す方
     %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする

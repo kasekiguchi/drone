@@ -8,6 +8,10 @@ syms t real
 % zg = X(3);
 % T = X(4);   % 目標到達までの時間 T=10
 
+% x = 1;
+% y = 0;
+% z = 1;
+
 %% takeoff
 % T = 10;
 % rz0 = 0;
@@ -35,9 +39,9 @@ syms t real
 % z = 1;
 
 %% Liner
-x = 0;
-y = t;
-z = 1.0;
+% x = 0;
+% y = t;
+% z = 1.0;
 
 %% Vertical vibration
 % x = 0;
@@ -70,11 +74,11 @@ z = 1.0;
 % y = 0;
 
 %% syamen これ！！
-% phaseT = 2;
-% zt = 0.5; % 減衰係数？
-% z = 2*exp(-(t-phaseT)/zt)-0.1;
-% x = -exp(-(t-phaseT)/zt);
-% y = 0;
+phaseT = 2;
+zt = 0.5; % 減衰係数？
+z = 2*exp(-(t-phaseT)/zt)-0.1;
+x = -exp(-(t-phaseT)/zt);
+y = 0;
 %% slope P2P
 % x = -0.2;
 % y = 0;

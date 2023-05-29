@@ -1,14 +1,14 @@
 function Controller = Controller_HLMCMPC(~)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
-    Controller_param.dt = 0.025; % MPCステップ幅
-    Controller_param.H = 15;
-    Controller_param.Maxparticle_num = 100000;
+    Controller_param.dt = 0.1; % MPCステップ幅
+    Controller_param.H = 20;
+    Controller_param.Maxparticle_num = 1000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 100000;
-    Controller_param.input.Initsigma = 0.02*[1,1,1,1];
+    Controller_param.Minparticle_num = 1000;
+    Controller_param.input.Initsigma = 1*[1,1,1,1];
     Controller_param.input.Constsigma = 5.0;
-    Controller_param.input.Maxsigma = [0.001,0.1,0.1,0.1];
+    Controller_param.input.Maxsigma = [0.001,0.1,0.1,0.01];
     Controller_param.input.Minsigma = 0.001 * [1,1,1,1];
     Controller_param.input.Maxinput = 1.5;
 
@@ -35,8 +35,8 @@ function Controller = Controller_HLMCMPC(~)
 
     %% sekiguchi-komatsu new
     Controller_param.Z = 1e2*diag([100; 1]);
-    Controller_param.X = 1e4*diag([100,1,1,1]);
-    Controller_param.Y = 1e4*diag([100,100,1,1]);
+    Controller_param.X = 1e4*diag([100,10,1,1]);
+    Controller_param.Y = 1e4*diag([100,10,1,1]);
     Controller_param.PHI = diag([1; 1]);
 
     Controller_param.Zf = diag([1; 1]);
@@ -45,7 +45,7 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.PHIf = diag([1; 1]);
 
     Controller_param.R = diag([1.0; 1*[1.0; 1.0; 1.0]]);
-    Controller_param.RP = diag([1.0; 1*[1.0; 1.0; 1.0]]); 
+    Controller_param.RP = 1e2 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
     
     Controller_param.input.u = [0;0;0;0]; %  sekiguchi 
     Controller_param.ref_input = [0;0;0;0];

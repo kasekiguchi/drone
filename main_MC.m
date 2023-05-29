@@ -66,6 +66,7 @@ data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい�
 xr = zeros(16, Params.H);
 Acc_old = 0;
 
+fh = @(tt)[3*tt, 2*tt^2, tt-2];
 calT = 0;
 phase = 2;
 
@@ -314,7 +315,7 @@ end
         % elseif fRemove == 2
         %     warning("Landing complete")
         %     break;
-        elseif fRemove == 3
+        elseif fRemove == 3 % 多分ない⇒制約なし
             warning("all remove")
             break;
         end
@@ -335,9 +336,9 @@ end
 %profile viewer
 %%
 
-%% animation
-% agent(1).animation(logger,"target",1); 
+
 %%
+SigmaData = zeros(4, te/dt);
 close all
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  xmax = time.t;
@@ -359,6 +360,7 @@ IV = zeros(4, size(logt, 1));
 for R = 1:size(logt, 1)
     Rdata(:, R) = data.xr{R}(1:12, 1);
     if ~isempty(data.input_v); IV(:, R) = data.input_v{R}; end
+    if length(data.sigma{1}) == 4; SigmaData(:, R) = data.sigma{R}; end
     Bestcost(:, R) = data.bestcost{R};
 end
 Diff = Edata - Rdata(1:3, :);
@@ -366,7 +368,7 @@ close all
 
 % x-y
 % figure(5); plot(Edata(1,:), Edata(2,:)); xlabel("X [m]"); ylabel("Y [m]");
-m = 2; n = 2;
+m = 3; n = 2;
 % x-z
 % Et = -0.5:0.1:0.5; Ez = 3/10 * Et; Er = -10/3 * Et;
 % figure(6); plot(Edata(1,1:round(xmax/dt)-1), Edata(3,1:round(xmax/dt-1))); hold on; % 軌跡
@@ -378,10 +380,9 @@ m = 2; n = 2;
 % hold off; % 斜面
 % xlabel("X [m]"); ylabel("Z [m]"); 
 % position
-now = datetime('now');
-datename = datestr(now, 'HHMMSS');
+% 1:リファレンス, 
 figure(1)
-Title = strcat('Ymoving_N1000_a0_weightYbig_', datename);
+Title = strcat('Ymoving', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 sgtitle(Title);
 subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
@@ -390,7 +391,7 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % atiitude 0.2915 rad = 16.69 deg
 subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
+grid on; xlim([0 xmax]); ylim([-0.5 0.5]);
 % title("Time change of Atiitude");
 % velocity
 subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
@@ -398,17 +399,31 @@ xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref",
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % title("Time change of Velocity"); 
 % input
-subplot(m,n,4); 
+subplot(m,n,6); 
 % plot(logt, Idata); 
-% % plot(logt, Idata, "--", "LineWidth", 1); 
-% xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
-% grid on; xlim([0 xmax]); ylim([-inf inf]);
+plot(logt, Idata, "--", "LineWidth", 1); 
+xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
+grid on; xlim([0 xmax]); ylim([-inf inf]);
 % % title("Time change of Input");
+subplot(m,n,5); % 仮想入力
 plot(logt, IV); legend("Z", "X", "Y", "YAW");
 xlabel("Time [s]"); ylabel("input.V");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
+% calculation time
+subplot(m, n, 4);
+plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
+plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
+
+xlim([0 te])
+set(gca,'FontSize',Fontsize);  grid on; title("");
+xlabel("Time [s]");
+ylabel("Calculation time [s]");
 
 set(gcf, "WindowState", "maximized");
+movegui(gcf,'east'); 
+
+%%
+agent(1).animation(logger,"target",1); 
 %%
 % figure(5); 
 % ref_t = agent.reference.timeVarying.func;
@@ -469,21 +484,13 @@ set(gcf, "WindowState", "maximized");
 %% Remove sample and Sigma
 % logt = logger.data('t',[],[]);
 % figure(10)
-% plot(logger.data('t',[],[]), data.sigma(1:size(logger.data('t',[],[]),1))); ylabel("sigma");
-% plot(logger.data('t',[],[]), Bestcost(1,1:size(logt,1))); ylabel("Bestcost");
-% yyaxis right
-% plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("rejected")
-% xlim([0 te]); ylim([0 10000]);
+% plot(logger.data('t',[],[]), SigmaData(:,1:size(logger.data('t',[],[]),1))); ylabel("sigma");
+% % plot(logger.data('t',[],[]), Bestcost(1,1:size(logt,1))); ylabel("Bestcost");
+% % yyaxis right
+% % plot(logger.data('t',[],[]), data.removeF(1:size(logger.data('t',[],[]),1))); ylabel("rejected")
+% xlim([0 xmax]); ylim([0 max(agent.controller.mcmpc.param.input.Maxsigma)]);
+% legend("Z", "X", "Y", "YAW")
 % set(gca,'FontSize',Fontsize);  grid on; title("");
-%% calculation time
-% figure(11)
-% plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
-% plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
-% 
-% xlim([0 te])
-% set(gca,'FontSize',Fontsize);  grid on; title("");
-% xlabel("Time [s]");
-% ylabel("Calculation time [s]");
 
 %% particle_num
 % figure(12)
@@ -511,30 +518,33 @@ set(gcf, "WindowState", "maximized");
 % for m = 1:size(pathJ, 2)
 %     pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]);
 % end
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation1
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata png/Animation_omega
-% mkdir C:\Users\student\Documents\students\komatsu\MCMPC\simdata video
-% Outputdir = 'C:\Users\student\Documents\students\komatsu\MCMPC\simdata';
-% PlotMov_xz
-
+% rmdir ('C:/Users/student/Documents/students/komatsu/simdata/20230524/Animation/','s'); % 直前のシミュレーションより短くする場合
+% mkdir C:/Users/student/Documents/students/komatsu/simdata/20230524/Animation/;
+% Outputdir_mov = 'C:/Users/student/Documents/students/komatsu/simdata/20230524/Animation/';
+% PlotMov
+% toc
 %% Home PC adress
-% mkdir ../../MCMPC/simdata png/Animation1
-% mkdir ../../MCMPC/simdata png/Animation_omega
-% mkdir ../../MCMPC/simdata video
-% Outputdir = '../../MCMPC/simdata';
+% mkdir ../../students/komatsu/simdata/20230522/ png/Animation1
+% mkdir ../../students/komatsu/simdata/20230522/ png/Animation_omega
+% mkdir ../../students/komatsu/simdata/20230522/ video
+% Outputdir = '../../students/komatsu/simdata/20230522';
 % PlotMov       % 2次元プロット
 % toc
 
 % PlotMovXYZ  % 3次元プロット
 % save()
 %% 学校PC adress
-Outputdir = '../../students/komatsu/simdata/20230517/';
+Outputdir = '../../students/komatsu/simdata/20230529/';
 % save('C:\Users\student\"OneDrive - 東京都市大学 Tokyo City University (1)"\研究室_2023\Data\20230427v1.mat', '-v7.3')
 % save("C:/Users/student/Documents/students/komatsu/MCMPC/20230515v1.mat", '-v7.3')
-mkdir ../../students/komatsu/simdata/20230517/
+mkdir ../../students/komatsu/simdata/20230529/ % ここは毎日更新する
 Savefilename = Title;
-Savefigurename = strcat(Savefilename, '_position');
-% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/20230517/', Savefilename, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3");
-saveas(1, strcat(Outputdir, Savefigurename), "png");
+% Savefigurename = strcat(Savefilename, '_position');
+% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',datestr(datetime('now'), 'yyyymmdd'), '/', Savefilename, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3");
+% saveas(1, strcat(Outputdir, Savefilename), "png");
+
+%% animation
+% pause();
+
 %%
 % logger.save();

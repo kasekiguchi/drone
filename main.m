@@ -81,7 +81,11 @@ try
       if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
       % reference
-      FH.CurrentCharacter = 'f';
+      if time.t < 2
+          FH.CurrentCharacter = 'h';
+      else
+        FH.CurrentCharacter = 'f';
+      end
       param(i).reference.covering = [];
       param(i).reference.point = {FH, [2; 0; 1], time.t, dt};
       param(i).reference.timeVarying = {time, FH};
@@ -94,10 +98,15 @@ try
       for j = 1:length(agent(i).reference.name)
         param(i).reference.list{j} = param(i).reference.(agent(i).reference.name(j));
       end
+      % if time.t < 2
+      %   agent.reference.result.state.xd(1:12) = [initial.p;0; initial.v;0; 0;0;0;0];
+      %   agent.reference.result.state.xd(13:end) = zeros(16, 1);
+      % end
 
       agent(i).do_reference(param(i).reference.list);
       if (fOffline); logger.overwrite("reference", time.t, agent, i); end
 
+      
       % controller
       param(i).controller.hlc = {time.t};
       param(i).controller.ftc = {time.t};
@@ -132,7 +141,7 @@ try
     end
 
     %%
-    data.input_v{round(time.t/dt + 1)} = agent.controller.result.input_v;
+%     data.input_v{round(time.t/dt + 1)} = agent.controller.result.input_v;
 
 
     % for exp
@@ -184,9 +193,9 @@ end
 %profile viewer
 %%
 logt = logger.data('t',[],[]);
-for R = 1:te/dt
-    InputV(:, R) = data.input_v{R};
-end
+% for R = 1:te/dt
+%     InputV(:, R) = data.input_v{R};
+% end
 
 close all
 clc
@@ -200,15 +209,15 @@ set(0,'defaultLineMarkerSize',15);
 % logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
 logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_num", 5, "row_col", [2, 2]);
 % 仮想入力
-figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
-xlabel("Time [s]"); ylabel("input.V");
-grid on; xlim([0 te]); ylim([-inf inf]);
-% saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
+% figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
+% xlabel("Time [s]"); ylabel("input.V");
+% grid on; xlim([0 te]); ylim([-inf inf]);
+saveas(gcf, 'HL_slope-landing-ref', "png");
 %%
 % InputV(:, te/dt+1) = InputV(:, te/dt);
 % save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
-Idata = logger.data(1,"input",[])';
-save("Data/Input_HL.mat", "Idata"); % 実入力の保存
+% Idata = logger.data(1,"input",[])';
+% save("Data/Input_HL.mat", "Idata"); % 実入力の保存
 %% Save figure
 % d = char(yyyymmddHHMMSS(datetime));
 % d = datestr(now, "yyyy-mm-dd_HH:MM:SS");
@@ -221,7 +230,7 @@ save("Data/Input_HL.mat", "Idata"); % 実入力の保存
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-% agent(1).animation(logger, "target", 1:N);
+agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

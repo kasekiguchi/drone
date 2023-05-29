@@ -45,12 +45,26 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase)
     xr = zeros(params.total_size, params.H);    % initialize
     
     % 時間関数の取得→時間を代入してリファレンス生成
-    RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
+    % RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     for h = 0:params.H-1
         t = T.t + params.dt * h; % reference生成時の時刻をずらす
-        Ref = RefTime(t); % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
-        xr(1:3, h+1) = Ref(1:3);
-        xr(7:9, h+1) = Ref(5:7);
+        % Ref = RefTime(t); % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
+        % それぞれの関数 % z方向目標値
+        if t<=phase
+            tz = 2;
+            tx = -1;
+            tvz = 0;
+            tvx = 0;
+        elseif phase<t && t<phase+0.3
+            tz = -5 * (t-phase).^2 + 2; tvz = 20-10*t;
+            tx = 5 * (t-phase).^2 - 1;  tvx = 10*t-20;
+        elseif phase+0.3 <= t
+            tz = 2 * exp(-(t-phase-0.14)/0.5)+0.1; tvz = -4*exp((107/25)-2*t);
+            tx = -exp(-(t-phase)/0.5);             tvx = 2*exp(4-2*t);
+        end
+
+        xr(1:3, h+1) = [tx;  0; tz];
+        xr(7:9, h+1) = [tvx; 0; tvz];
         xr(4:6, h+1) =   [0;0;0]; % 姿勢角
         xr(10:12, h+1) = [0;0;0];
 
@@ -58,16 +72,29 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase)
         % xr(13:16, h+1) = params.ur_array(:, round(T.ind)+1); % HLの入力を目標入力
 
         %% 斜面
-%         if T < phase
-%             xr(1:3, h+1) = Gp;  % 座標
-%             xr(7:9, h+1) = [0;0;0]; % 速度
-%         end
+        if T.t < 2
+            xr(1:3, h+1) = Gp;  % 座標
+            xr(7:9, h+1) = [0;0;0]; % 速度
+        end
 % 
 %         if h == params.H-1
 %             xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
 %         end
     end
 end
+
+% function funcRef = Reft(t)
+%     % 加速度が重力加速度を超えないようなリファレンスの作成
+%     phase = 2;
+%     % それぞれの関数
+%     if t<=phase
+%         funcRef = 2;
+%     elseif phase<t && t<phase+0.3
+%         funcRef = -5 * (t-phase).^2 + 2;
+%     elseif phase+0.3 <= t
+%         funcRef = 2 * exp(-(t-phase-0.14)/0.5)+0.1;
+%     end
+% end
 
 %% P2P すべてのホライズンに目標値を割り当て
 % function xr = Reference(params, ~, ~, Gp)

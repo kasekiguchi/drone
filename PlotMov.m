@@ -1,18 +1,16 @@
 
 %アニメーション作成中にグラフ触ると動画生成止まるから注意
-% maxbestcost = max(data.bestcost)
 % now = datetime('now');
 % datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
-    
-    %%
-%     Color_map(1:data.param.particle_num/2, :) = jet(data.param.particle_num/2);
-	writerObj=VideoWriter(strcat(Outputdir,'/video/v1'));
-	open(writerObj);
-    tt = 0:0.1:15;
+% 
+% 	writerObj=VideoWriter(strcat(Outputdir,'/video/v1_HL_z_',datename), 'MPEG-4');
+% 	open(writerObj);
+%     tt = 0:0.1:15;
     
     
     countMax = size(data.pathJ,2);
-	for count = 1:countMax
+	for count = 1:countMax -1 
+        
         Color_map = (169/255)*ones(data.variable_particle_num(count),3);  % 灰色のカラーマップの作成
         % 寒色：良い評価、暖色：悪い評価
 	    Color_map(1:data.variable_particle_num(count),:) = jet(data.variable_particle_num(count));            % 評価値の上から10個をカラーマップの色付け.
@@ -29,10 +27,12 @@
 		% 予測経路のplot(ホライズン)
 %         path_count = size(data.pathJ{count},2);
 		for j = 1:size(data.pathJ{count},1)
-			plot(data.path{count}(3,:,j),data.path{count}(7,:,j),'Color',Color_map(ceil(pathJN{count}(j, 1)),:), 'LineWidth',1);
+			% plot(data.path{count}(3,:,j),data.path{count}(7,:,j),'Color',Color_map(ceil(pathJN{count}(j, 1)),:), 'LineWidth',1); % HL
+            plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(pathJN{count}(j, 1)),:), 'LineWidth',1); % MC
 			hold on;
         end
-        plot(data.state(count, 2), data.state(count, 3), '.', 'MarkerSize', 20, 'Color', 'red');
+        plot(Edata(1,count), Edata(2,count), '.', 'MarkerSize', 20, 'Color', 'red');    % 現在位置
+        plot(Rdata(1,count), Rdata(2,count), 'h', 'MarkerSize', 15, 'Color', 'blue');   % 目標位置 Rdata = xr
 % 		x = DATA.X(count);
 %         y = DATA.Y(count);
 %         u = 0.7*cos(DATA.yaw(count));
@@ -53,11 +53,11 @@
 %         plot(cos(tt/2), sin(tt/2), 'LineWidth', 1, 'color', 'green');
 %         pgon = polyshape([-1.2 -1.2 -0.5 -0.5],[1.2 -1.2 -1.2 1.2]); plot(pgon);
 
-		str = ['$$t$$= ',num2str(data.state(count,1),'%.3f'),' s'];
-		text(-0.1,12,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
+		str = ['$$t$$= ',num2str(logt(count,1),'%.3f'),' s'];
+		text(5,5,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
-		ax.YLim = [-0.5 2];
-		ax.XLim = [-2 2];
+		ax.YLim = [-5 5];
+		ax.XLim = [-5 5];
         % ax.YLim = [-0.2 2];
 		% ax.XLim = [-0.2 12];
 		fig.Units = 'normalized';
@@ -65,7 +65,7 @@
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
 		ylabel('$$Y$$[m]','Interpreter', 'Latex','FontSize',20);
 	%     legend({'Reference'},'FontSize',18,'Location','northeast');
-		filename = ['Animation_2_2_',num2str(count),];
+		filename = ['Animation_',num2str(count)];
 		Xleng = ax.XLim(1,2) - ax.XLim(1,1);
 		Yleng = ax.YLim(1,2) - ax.YLim(1,1);
 		pbaspect([Xleng,Yleng,1]);
@@ -75,17 +75,22 @@
 		fig.Position = [0.17143,0.2074,0.5,0.5102];
 	%     saveas(gcf,strcat(Outputdir,'/eps/Animation1/',filename),'epsc');
 	%     savefig(gcf,strcat(Outputdir,'/fig/Animation1/',filename),'compact');
-		saveas(gcf,strcat(Outputdir,'/png/Animation1/',filename),'png');
+     
+		% saveas(gcf,strcat(Outputdir,'/png/Animation1/',filename),'png');
+        I=getframe(gcf);
+        imwrite(I.cdata,strcat(Outputdir_mov,filename,'.png'))
+        
         %%
-		refreshdata(gcf);
-		%-- get frames as images --%
-		frame = getframe(gcf);
-        im{count} = frame2im(frame);
-		%- Add frame to video object -%
-		writeVideo(writerObj, frame);
-		drawnow limitrate;
+		% refreshdata(gcf);
+		% %-- get frames as images --%
+		% frame = getframe(gcf);
+        % im{count} = frame2im(frame);
+		% %- Add frame to video object -%
+		% writeVideo(writerObj, frame);
+		% drawnow limitrate;
         hold off
+       
     end
-    
-    close(writerObj);
-    close;
+    % 
+    % close(writerObj);
+    % close;
