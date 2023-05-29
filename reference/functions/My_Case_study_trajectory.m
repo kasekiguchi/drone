@@ -15,6 +15,7 @@ z_0 = X0(3);
 x = x_0;
 y = y_0;
 z = z_0;
+
 % 
 % r=1;
 % T=10;
@@ -47,7 +48,6 @@ z = z_0;
 % y = (r*cos(2*pi*t/T)+1)*sin(2*2*pi*t/T);
 % z = z_0+r*sin(2*pi*t/T);
 
-% ======================
 % 
 R1=1;
 N1=1;
@@ -62,7 +62,10 @@ s=0.2;
 x=0.5*(2*sin(s*t+cos(a*s*t)));
 y=0.5*(2*cos(s*t+sin(a*s*t)));
 
-
+% r =cos(2*pi*t/3); T = 43;a =2;
+% x = (r*cos(pi*t/T)+a)*cos(2*pi*t/T);
+% y = (r*cos(pi*t/T)+a)*sin(2*pi*t/T);
+% z = r*sin(pi*t/T);
 
 ref=@(t)[x;y;z;0];
 end

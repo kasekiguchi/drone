@@ -33,7 +33,7 @@
 
 % Time
     t=20;        %symuration time
-    dt=0.01; %sampling time
+    dt=0.02; %sampling time
     time=(0:dt:t);
     tspan = length(time);
     %distrbance time
@@ -42,12 +42,17 @@
 
 % Objective trajectory
     %reference
+%     syms t real
 %     ref = @(t) [cos(2*pi*t/12)*cos(2*pi*t/0.1), cos(2*pi*t/12)*sin(2*pi*t/0.1), t*0+tanh(t/7)*1+0*sin(2*pi*t/(22))^1];    %x,y,z
-ref = @(t) [7,-5,2];    %x,y,z    
+% ref = @(t) [7,-5,2];    %x,y,z    
 % r = 0.2;
     % T =15;
     % ref = @(t) [r*cos(2*pi*t/T), r*sin(2*pi*t/T), 1];    %x,y,z
 
+    r =cos(2*pi*t/1); T = 20;
+    ref =@(t)[ (r*cos(pi*t/T)+2)*cos(2*pi*t/T);...
+                        (r*cos(pi*t/T)+2)*sin(2*pi*t/T);...
+                        r*sin(pi*t/T)];
     %diff reference
     syms t real
     dref = matlabFunction(diff(ref,t),"Vars",t);
@@ -134,16 +139,16 @@ for i = 1:tspan-1
     
     % Subsystem input
         % Finite time settling controller
-            ux(i) = -Kx*(sign(Xs).*abs(Xs).^alpha(1:4)); %tau_theta roll
-            uy(i) = -Ky*(sign(Ys).*abs(Ys).^alpha(1:4)); %tau_phi pitch
-            uz(i) = -Kz*(sign(Zs).*abs(Zs).^alpha(1:2)); % f throtl
-            upsi(i) = -Kpsi*(sign(Psis).*abs(Psis).^alpha(1:2));%tau_psi yaw
+%             ux(i) = -Kx*(sign(Xs).*abs(Xs).^alpha(1:4)); %tau_theta roll
+%             uy(i) = -Ky*(sign(Ys).*abs(Ys).^alpha(1:4)); %tau_phi pitch
+%             uz(i) = -Kz*(sign(Zs).*abs(Zs).^alpha(1:2)); % f throtl
+%             upsi(i) = -Kpsi*(sign(Psis).*abs(Psis).^alpha(1:2));%tau_psi yaw
 
         % Linear state feedback controller
-%             ux(i) = -Kx*Xs; %tau_theta roll
-%             uy(i) = -Ky*Ys; %tau_phi pitch
-%             uz(i) = -Kz*Zs; % f throtl
-%             upsi(i) = -Kpsi*Psis;%tau_psi yaw
+            ux(i) = -Kx*Xs; %tau_theta roll
+            uy(i) = -Ky*Ys; %tau_phi pitch
+            uz(i) = -Kz*Zs; % f throtl
+            upsi(i) = -Kpsi*Psis;%tau_psi yaw
     
     % Thrust input
         U(:,i) =  invG*[uz(i) + m*g; uy(i); ux(i); upsi(i)];
@@ -310,19 +315,16 @@ hold off
 %         Y = eAy*Y +inty*uy(i);
 %         Z = eAz*Z +intz*uz(i);
 %         Psi = eApsi*Psi +intpsi*upsi(i);
-%%
-B1 = [diag([1E-5,1E-5,1E-5,1E-3,1E-3,1E-3]);...
-                                        diag([1E-1,1E-1,1E-1,1E-1,1E-1,1E-1])]; 
-Q1=diag([1E3,1E3,1E3,1E5,1E5,1E5]);
-V=B1*Q1*B1'
 
-B=[eye(6)*0.01;eye(6)*0.1];
-Q=pinv(B,1e-9)*V*pinv(B',1e-9)
-% Q =1e0* diag([1E-5,1E-5,1E-5,1E5,1E5,1E5]);
-V2=B*Q*B';
-V-V2
 %%
-syms x [6,6]
-f = V - B*x*B' ;
- [x, fval] = fmincon(f, ones(12));
-% S = solve(eqn,x)
+rng(1,'twister');
+a = 1;
+b = 0;
+c=1;
+x=-4*a+b:0.1:4*a+b;
+f=exp(-(x-b).^2./(2*a^2))./sqrt(2*pi);
+y = a.*randn(c,1) + b;
+
+stats = [mean(y) std(y) var(y)]
+plot(1:c,y)
+% plot(x,f)

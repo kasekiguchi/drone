@@ -1,4 +1,4 @@
-classdef APPRO_C < CONTROLLER_CLASS
+classdef AFTC < CONTROLLER_CLASS
 % クアッドコプター用階層型線形化を使った入力算出
 properties
     self
@@ -9,11 +9,13 @@ properties
     Vf
     Vs
     Uthrust
+    pdst 
+    fRandn =0;%確率seedを指定．同じ確率の値でできる
 end
 
 methods
 %
-    function obj = APPRO_C(self, param)
+function obj = AFTC(self, param)
         obj.self = self;
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
@@ -78,15 +80,25 @@ methods
 %             ux = -F2*Xs; %tau_theta roll
 %             uy = -F3*Ys; %tau_phi pitch
 %             uz = -F1*Zs; % f throtl
-%             upsi = -F4*Psis;%tau_psi yaw
+            upsi = -F4*Psis;%tau_psi yaw
         %% setting disturbance
-        dst=0;
+        dst=1;
 %         t = param{1};
 %         dst = 1;
 %--------------------------------------------------
 %確率的な外乱
-a = 1;%外乱の大きさの上限
+% a = 1;%外乱の大きさの上限
 % dst = 2*a*rand-a;
+%                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
+%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
+%                           a = 1;%標準偏差
+%                           b = 0;%平均
+%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算
+%                           obj.pdst = a.*randn(c,1) + b;%ループ数分の値の乱数を作成
+%                           obj.fRandn = 1;
+%                     end
+%                     dst = obj.pdst(obj.fRandn);
+%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
 %--------------------------------------------------        
 %                     if t>=10 && t<=10.5
 %                             dst=-3;

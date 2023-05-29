@@ -1,4 +1,4 @@
-function Controller= Controller_APPRO_C(dt,param,alp)
+function Controller= Controller_AFT(dt,param,alp)
 % 近似線形化コントローラの設定
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 m = param(1);
@@ -41,10 +41,14 @@ Controller_param.F4 = [1.41 1.35];
 % Controller_param.F4=lqrd(Acp,Bcp,diag([100,10]),[0.1],dt);                       % ヨー角 
  
 % Controller_param.F1=lqrd(Acz,Bcz,diag([100,1]),[0.1],dt);                                % 
-% % Controller_param.F1 = place(Acz,Bcz,[-4.0293 + 3.4920i,-4.0293 - 3.4920i]);%FTと同じ極
 % Controller_param.F2=lqrd(Acx,Bcx,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % Controller_param.F3=lqrd(Acy,Bcy,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 % Controller_param.F4=lqrd(Acp,Bcp,diag([100,10]),[0.1],dt);                       % ヨー角 
+% 
+% Controller_param.F1 = place(Acz,Bcz,[-4.0293 + 3.4920i,-4.0293 - 3.4920i]);%FTと同じ極
+% Controller_param.F2 = place(Acx,Bcx,[-7.3469, -3.5435, -1.2645 + 1.2608i,-1.2645 - 1.2608i]);%FTと同じ極
+% Controller_param.F3 = place(Acy,Bcy,[-7.3469, -3.5435, -1.2645 + 1.2608i,-1.2645 - 1.2608i]);%FTと同じ極
+% Controller_param.F4 = place(Acp,Bcp,[-3.4561,-7.8378]);%FTと同じ極
 
 syms uz ux uy upsi real
 invG = inv([ones(1,4); ly*[-1 -1 1 1]; lx*[1 -1 1 -1];[k1 -k2 -k3 k4]]);
@@ -69,7 +73,7 @@ eig(diag(1, 1) - [0; 1/m] * Controller_param.F1)
 eig(diag([1, g, 1], 1) - [0; 0; 0; 1/jy] * Controller_param.F2)
 eig(diag([1, -g, 1], 1) - [0; 0; 0; 1/jx] * Controller_param.F3)
 eig(diag(1, 1) - [0; 1/jz] * Controller_param.F4)
-Controller.type="APPRO_C";
+Controller.type="AFTC";
 Controller.name="hlc";
 Controller.param=Controller_param;
 end

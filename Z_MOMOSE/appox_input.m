@@ -2,98 +2,131 @@
 %最小のalpに対して入力の変化が耐えられるようにするこれができれば初期値のalpの値を小さくできるかも
 %ddxとdddxの項は近似しなくてもいいかも
 %最適化でパラメータ調整するといいかも．そうすればtanhをいくつか組み合わせる方法でもパラメータ調整簡単そう
-%% 手動
-
-clear 
-% e= -1:0.001:1;
-% e = -0.35:0.001:0.35;
-e= -0.1:0.001:0.1;
-alp = [0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000];%初期値0.9有限整定のべき乗
-k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
-
-g = [1 1 1 1];%元のゲインの倍率調整
-a = [1 1 1 1];%曲がり具合のきつさ
-%近似普通誤差0.1x
-g = [0.105, 0.08, 0.055, 0.028];
-a = [20, 18, 16, 15];
-kg01= k.*g;
-%近似Fbとの入力誤差が一番大きくなるところ[0.3, 0.3160, 0.3320, 0.3490]での近似x
-g = [0.135, 0.105, 0.075, 0.035];
-a = [9.5, 9, 9.5, 9.5];
-kg= k.*g;
-%近似強めより近くで近似
-% g(1) = 0.1;
-% a(1)=40;
-titlex=["x","dx","ddx","dddx"];
-for i = 1:4
-    ufb(i,:)= -k(i)*e;
-    u(i,:)= -k(i)*sign(e).*abs(e).^alp(i);
-    
-    utanh(i,:)=-k(i)*g(i)*tanh(a(i)*e)-k(i)*e;
-% n=10;
-%     up(i,:) = polyfit(e,u(i,:),n);
-%     up2(i,:) = polyval(up(i,:),e2);
-
-sigma(i,:) =abs( u(i,:)-ufb(i,:));
-smax = max(sigma(i,:))
-imax = find(sigma(i,:)==smax);
-e(1,imax)
-
-sigma2(i,:) = -utanh(i,:)+u(i,:);
-smax2 = max(sigma2(i,:))
-imax2 = find(sigma2(i,:)==smax2);
-e(1,imax2)
-    figure(3*i-2)  
-        plot(e,u(i,:),e,utanh(i,:),e,ufb(i,:))
-        legend("FT","tanh","FB")
-        grid on
-        title(titlex(i))
-    
-%     figure(3*i-1)
-%         plot(e,sigma(i,:),e(1,imax),sigma(i,imax),'*')
-%         grid on
-
-    figure(3*i)
-        plot(e,sigma2(i,:))%,e(1,imax2))%sigma2(i,imax2),'*')
-        grid on
-        title(titlex(i)+"元の入力との差")
+h = get(gca,'Children'); % 軸オブジェクトの子オブジェクトを取得(複数の場合はベクトル)
+% 青色ラインのハンドルを一番上に設定
+for i=1:3
+    nh1(i)=h(i);
 end
-%% forループ tanh一つ
-alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
-k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
-
-x=@(f1,a1)(integral(@(e)( abs(-k(1)*abs(e).^alp(1)+f1*tanh(a1*e)+k(1)*e)),0,0.1));
-
-dt=0.5;
-old=x(0,0);
-for i=0:dt:20
-    for j=0:dt:40
-        new=x(i,j);
-        if(old>new)
-            old=new;
-            ff1=i;
-            aa1=j;
-        end
-    end
+for i=4:10
+    nh2(i-3)=h(i);
+end
+newh = [nh2,nh1]'; % h(ind)：青色ラインのハンドル、h(~ind)：それ以外のハンドル
+set(gca,'children',newh) % Childrenプロパティ値の再設定(順番の入れ替え)
+%% sign,absoluteを近似
+clear
+anum=4;%変数の数
+alp=zeros(anum+1,1);
+alp(anum+1)=1;
+alp(anum)=0.85;%alphaの初期値
+for a=anum-1:-1:1
+    alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
 
-clear e utanh u sigma
-% e= -0.5:0.001:0.5;      
-e= -0.1:0.001:0.1;
-utanh(1,:)=-ff1*tanh(aa1*e)-k(1)*e;
-u(1,:)=-k(1)*sign(e).*abs(e).^alp(1);
-sigma=utanh-u;
-plot(e,utanh,e,u,e,sigma)
+Ac4 = diag([1,1,1],1);
+Bc4 = [0;0;0;1];
+Ac2 = diag([1],1);
+Bc2 = [0;1];
+dt=0.025;
+k=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+k=lqrd(Ac2,Bc2,diag([1000,1]),[0.1],dt); % xdiag([100,10,10,1])
+% k=5;
+
+x0=[50,0.01];
+rng=0.01;
+i=2;
+fun=@(x)(integral(@(w) abs( -k(i).*abs(w).^alp(i) + k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), rng,rng+1) +integral(@(w) abs( k(i).*w-k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0,rng));
+% fun=@(x)(integral(@(w) abs( k(i).*abs(w).^alp(i) - k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0.1,1));
+% fun=@(x)(integral(@(w) abs( k(i).*w-k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0,0.5));
+% fun=@(x)1 - x(1).*x(2).^(alp(i)./2);
+c =@(x)0;% [k(i).*sign(rng).*abs(rng).^alp(i) - k(i).*tanh(x(1).*rng).*sqrt(rng.^2 + x(2)).^alp(i);1 - x(1).*x(2).^(alp(i)./2)];
+% ceq = @(x) [1 - x(1).*x(2).^(alp(i)./2)+ 0;
+%                     -k(i).*abs(rng).^alp(i) + k(i).*tanh(x(1).*rng).*sqrt(rng.^2 + x(2)).^alp(i) + 1];
+% ceq = @(x) -k(i).*abs(rng).^alp(i) + k(i).*tanh(x(1).*rng).*sqrt(rng.^2 + x(2)).^alp(i) + 0.1;
+ceq = @(x) 1 - x(1).*x(2).^(alp(i)./2)+ 1;
+%alhpa=0.8 rang=0.05:[4.5,2.5]/rang=0.01:[6,4.8]
+%alpha=0.85rng=0.01[5,3]
+nonlinfcn = @(x)deal(c(x),ceq(x));
+
+options = optimoptions("fmincon",...
+    "Algorithm","interior-point",...
+    "EnableFeasibilityMode",true,...
+    "SubproblemAlgorithm","cg");
+% [p,fval] = fmincon(fun,x0,[],[],[],[],[0,1E-4*0],[inf,1]) 
+[p,fval] = fmincon(fun,x0,[],[],[],[],[0,0],[inf,inf],nonlinfcn,options) 
+% [p,fval] = fminsearch(fun,x0) 
+
+2*fval
+1 - p(1).*p(2).^(alp(i)./2)
+
+syms w
+du = diff(k(i).*tanh(p(1).*w).*sqrt(w.^2 + p(2)).^alp(i),w,1);
+
+e = -1:0.01:1;
+% p=[20,1E-3];
+usgn = -k(i).*tanh(p(1)*e).*abs(e).^alp(i);
+usgnabs = -k(i).*tanh(p(1).*e).*sqrt(e.^2 + p(2)).^alp(i);
+du = subs(du,w,e);
+u = -k(i).*sign(e).*abs(e).^alp(i);
+uk= -k(i).*e;
+
+% plot(e,usgn);
+hold on
 grid on
-legend('utanh','u','誤差')
-s=2*(x(ff1,aa1))
+plot(e,usgnabs, 'LineWidth', 2.5);
+% plot(e,du);
+plot(e,u, 'LineWidth', 2.5);
+plot(e,uk, 'LineWidth', 2.5);
+% legend("app","app2","du","ft","ls");
+legend("Approximation","Finite time settling","Linear state FB");
+fosi=20;%defolt 9
+set(gca,'FontSize',fosi)
+xlabel('x','FontSize',fosi);
+ylabel('input','FontSize',fosi);
+hold off
+
+%%
+syms k1 k w p1 p2 a 
+% f=k*w - k*tanh(p1*w)*sqrt(w^2 + p2)^a==0;
+% f=w - sign(p1*w)*sqrt(w^2 + p2)==0;%*sqrt(w^2 + p2)==0;
+% ans_f=solve(f,w)
+k=1;
+% f=k*w -k*tanh(18*w)*sqrt(w^2 + 0.001)^0.8;Ua LS
+% f=k*w -k*sign(w)*abs(w)^0.8;%FT LS
+f1=-abs(k*w) +abs(k*sign(w)*abs(w)^0.8);%FT LS
+f=k*w -k*sign(w)*abs(w)^0.8;%FT LS
+% f=k1*w - k*tanh(p1*w)*sqrt(w^2 + p2)^a;
+df =diff(f,w);
+% dfs=subs(df,w,0);
+% f=-k*abs(w) +k*tanh(18*abs(w))*sqrt(w^2 + 0.001)^0.8;
+fplot(f1,[-1.5,1.5],'LineWidth', 2.5)
+hold on
+fplot(df,[-1.5,1.5],'LineWidth', 2.5)
+
+% fplot(0,[-1.1,1])
+% fplot( -k*tanh(10*w)*sqrt(w^2 + 0.0001)^0.8,[-1.1,1])
+% fplot( -k*sign(w)*abs(w)^0.8,[-1.1,1])
+% fplot( -k*w,[-1.1,1])
+legend("$h_i(x_i)$","$\dot{h_i}(x_i)$",'Interpreter','latex');
+fosi=20;%defolt 9
+set(gca,'FontSize',fosi)
+xlabel("$x_i$",'FontSize',fosi,'Interpreter','latex');
+ylabel("${h_i}(x_i)$or$\dot{h_i}(x_i)$",'FontSize',fosi,'Interpreter','latex');
+grid on
+hold off
+%%
+e=-1:0.001:1;
+plot(e,sqrt(e.^2 + 5e-3));
+hold on
+plot(e,abs(e));
+% legend("app","ft","ls");
+hold off
 %% fminserch tanh一つ
 clear e utanh u ufb sigma
 titlex=["x","dx","ddx","dddx"];
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.9;%alphaの初期値
+alp(anum)=0.8;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -105,13 +138,13 @@ k=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 %k(3:4)=[80 40];
 kft=k;
 kft(1)=1*kft(1);
-% kgain=0.8;
+kgain=1;
 % x0=[2,2];
 x0=[2,2,2];
 fvals12=zeros(4,1);
 gain_ser1=["","f1","a1","k"];
 % gain_ser1=["","f1","a1","k1"];
-er=[0 0.05]; %近似する範囲を指定
+er=[0 0.9]; %近似する範囲を指定
 ee=er;
 for i=1:4
 %     if i~=5
@@ -119,8 +152,8 @@ for i=1:4
 %     else
 %             er=ee;
 %     end
-% fun=@(x)(integral(@(e) abs( -kft(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + kgain*k(i)*e ) ,er(1), er(2)));
-fun=@(x)(integral(@(e) abs( -kft(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,er(1), er(2)));
+fun=@(x)(integral(@(e) abs( -kft(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + kgain*k(i)*e ) ,er(1), er(2)));
+% fun=@(x)(integral(@(e) abs( -kft(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*e ) ,er(1), er(2)));
 
 [x,fval] = fminsearch(fun,x0) ;
 fvals12(i) = 2*fval
@@ -129,8 +162,8 @@ gain_ser1(i+1,:)=[titlex(i),x];
 e= -1:0.001:1;      
 % e= -5:0.001:5;
 ufb(i,:)= -k(i)*e;
-% utanh(i,:)= - x(1)*tanh(x(2)*e) - kgain*k(i)*e;%%
-utanh(i,:)= - x(1)*tanh(x(2)*e) -x(3)*e;%%
+utanh(i,:)= - x(1)*tanh(x(2)*e) - kgain*k(i)*e;%%
+% utanh(i,:)= - x(1)*tanh(x(2)*e) -x(3)*e;%%
 u(i,:)=-kft(i)*sign(e).*abs(e).^alp(i);
 sigma(i,:)=utanh(i,:)-u(i,:);
 fig=figure(i);
@@ -497,156 +530,8 @@ xlabel('error','FontSize',fosi);
 ylabel('input','FontSize',fosi);
 
 end
-%% 
-syms z(t) ub A F K
-syms sz  real
-syms dsz  real
-syms ddsz real
-syms dddsz real
-ub=-F*tanh(A*z(t)) -K*z(t)
-dub = diff(ub,t)
-ddub = diff(dub,t)
-dddub = diff(ddub,t)
 
-u = subs(ub,z,sz)
-%z(t) diff(z(t), t)
-du = subs(dub,[z(t) diff(z(t), t)],[sz dsz])
-%z(t) diff(z(t), t) diff(z(t), t, t)
-ddu = subs(ddub,[z(t) diff(z, t) diff(z(t), t, t)],[sz dsz ddsz])
-%z(t) diff(z(t), t) diff(z(t), t, t) diff(z(t), t, t, t)
-dddu = subs(dddub,[z(t) diff(z(t), t) diff(z(t), t, t) diff(z(t), t, t, t)],[sz dsz ddsz dddsz])
-%% smc
-dt=0.025;
-Ac4 = diag([1,1,1],1);
-Bc4 = [0;0;0;1];
-A11=diag([1,1],1);
-    A12=[0;0;1];
-    K = lqrd(A11,A12,diag([1,1,1]),1,dt);
-    S=[K 1];
-    SA=S*Ac4;
-    SB=S*Bc4; 
-    q=10;
-    e=-1:0.01:1;
-    s=length(e);
-    u=zeros(1,s);
-    for i=1:s
-%         u(i)=-inv(SB)*(SA*e(i)+q*tanh(S*e(i)));
-        u(i)=sign(e(i));
-    end
-    plot(e,u,'LineWidth',2);
 
-grid on
-% taitl('符号関数')
-% title(titlex(i));
-
-fosi=14;%defolt 9
-set(gca,'FontSize',fosi)
-xlabel('x','FontSize',fosi);
-ylabel('y','FontSize',fosi);
-%%
-% %元の入力と近似の入力の差を取り二乗しそれを積分する
-% alp = double([0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000]);%初期値0.9有限整定のべき乗
-% k = double([82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445]);%FBゲイン
-% 
-% syms f1 f2 a1 a2 %alp k
-% syms e positive
-% utanh = -f1*tanh(a1*e)-f2*tanh(a2*e)-k(1)*e;
-% u = -k(1)*sign(e)*(e)^alp(1);
-% sigma(f1, f2, a1, a2, e) = (u - utanh)^2;
-% % e= -0.1:0.001:0.1;
-% 
-% % sigma = subs(sigma,[alps,ks],[alp(1),k(1)]);
-% insigma = int(sigma,e,[0 1]);
-% % double(insiguma);
-% finsigma = insigma == 0;
-% % sol = solve(finsigma,)
-%%
-% alp = double([0.692307692307692;0.750000000000000;0.818181818181818;0.900000000000000]);%初期値0.9有限整定のべき乗
-% k = double([82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445]);%FBゲイン
-% alp = double([0.6923;0.75;0.8181;0.9]);%初期値0.9有限整定のべき乗
-% k = double([82.37,132.1,64.79,13.94]);%FBゲイン
-% 
-% syms k real%alp k
-% syms f1 f2 a1 a2 e alp positive
-% sgmd1=1/(1+exp(-a1*e));%f(2x)の時のシグモイド関数
-% sgmd2=1/(1+exp(-a2*e));%f(2x)の時のシグモイド関数
-% tanh1 = 2*sgmd1-1;%tanhをシグモイドで表す
-% tanh2 = 2*sgmd2-1;%tanhをシグモイドで表す
-% 
-% utanh = -f1*tanh1-f2*tanh2-k(1)*e;
-% % utanh = -f1*tanh(a1*e)-f2*tanh(a2*e)-k(1)*e;
-% u = -k(1)*sign(e)*(e)^alp(1);
-% % sigma = (u - utanh)^2;
-% sigma = abs(u - utanh);
-% isigma = int(sigma,e);
-% % u2=(-k(1)*sign(e)*(e)^alp(1))^2;
-% % uutanh=-2*u*utanh;
-% % utanh2=utanh^2;
-% % intu2=double
-% % sigma = subs(sigma,[],[alp(1),k(1)]);
-% 
-% inx1_2 = int((e*k)^2,e,0,1);
-% % intuutanh =
-% 
-% insigma = int(sigma,e,[0 1]);
-% 
-% prob = optimproblem('ObjectiveSense','min');
-% x = optimvar('x',4);
-% % insig = subs(insigma,[f1, f2, a1, a2],x);
-% % insig = int((x(5)*k(1) + x(1)*tanh(x(2)*x(5)) + x(3)*tanh(x(4)*x(5)) - x(5)^alp(1)*k(1))^2, x(5), 0, 1);
-% insig = subs(isigma,e,1);
-% cons1 = insig >= 0;
-% cons2 = insig <= 2;
-% prob.Constraints.cons1 = cons1;
-% prob.Constraints.cons2 = cons2;
-% show(prob)
-% sol = solve(prob);
-%%
-% alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
-% k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
-% % alp = [0.6923;0.75;0.8181;0.9];%初期値0.9有限整定のべき乗
-% % k = [82.37,132.1,64.79,13.94];%FBゲイン
-% syms f1 f2 a1 a2 e  positive
-% x0=[1,1,1,1];
-% utanh = -f1*tanh(a1*e)-f2*tanh(a2*e)-k(1)*e;
-% u = -k(1)*sign(e)*(e)^alp(1);
-% sigma = abs(u - utanh);
-% isigma = int(sigma,e); 
-% f=subs(isigma,e,1)-subs(isigma,e,0);
-% clear f1 f2 a1 a2
-% % fun=@(f1, f2, a1, a2)(f1*sign(f1*tanh(a1)) + f2*tanh(a2))*log(cosh(a1)))/a1 - (25345249*sign(f1*tanh(a1) + f2*tanh(a2)))/3384600 + (f2*sign(f1*tanh(a1) + f2*tanh(a2))*log(cosh(a2)))/a2;
-% % x = fminunc(fun,x0);
-%%
-% syms a b c d e
-% k = [82.3694335484227,132.127723488091,64.7874537390378,13.9398476471445];%FBゲイン
-% alp = [0.692307692307692;0.75;0.818181818181818;0.9];%初期値0.9有限整定のべき乗
-% 
-% sigma = int(abs( -k(1)*abs(e).^alp(1) + a*tanh(b*e) + c*tanh(d*e) + k(1)*e ) ,e,0, 0.1);
-% sigma = integral(@(e) abs( -k(i)*abs(e).^alp(i) + x(1)*tanh(x(2)*e) + x(3)*tanh(x(4)*e) + k(i)*e ) ,0, er);
-%% 時間かかりすぎ
-% alp = [0.6923;0.75;0.8181;0.9];%初期値0.9有限整定のべき乗
-% k = [82.37,132.1,64.79,13.94];%FBゲイン
-% 
-% x=@(f1,a1,f2,a2)(integral(@(e) abs( -k(1)*abs(e).^alp(1) + f1*tanh(a1*e) + f2*tanh(a2*e) + k(1)*e ) ,0, 0.1));
-% 
-% dt=1;
-% old=x(0,0,0,0);
-% for i=0:dt:20%f1
-%     for j=0:dt:40%a1
-%         for k=0:dt:20%f2
-%             for l=0:dt:40%a2
-%                 new=x(i,j,k,l);
-%                 if(old>new)
-%                     old=new;
-%                     ff1=i;
-%                     aa1=j;
-%                     ff2=k;
-%                     aa2=l;
-%                 end
-%             end
-%         end
-%     end
-% end
 %%
 % clear e utanh u sigma
 % % e= -0.5:0.001:0.5;      
