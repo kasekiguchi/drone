@@ -176,11 +176,11 @@ dR4 = R4*ol4hat;
 
 %%
 % Usage: dx=f+g*u
-x = [q1,q2,q3,q4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4];
-Quat = [qt0,qt1,qt2,qt3,qt4];
-f = [v0,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dq1,dq2,dq3,dq4,dol1,dol2,dol3,dol4];
-dQuat = [dqt0,dqt1,dqt2,dqt3,dqt4];
-u = [u1,u2,u3,u4,M1,M2,M3,M4];
+x = [ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;q1;q2;q3;q4]; %lomega,somega,link
+Quat = [qt0;qt1;qt2;qt3;qt4];
+f = [v0;ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new;dq1;dq2;dq3;dq4;dol1;dol2;dol3;dol4];
+dQuat = [dqt0;dqt1;dqt2;dqt3;dqt4];
+u = [u1;u2;u3;u4;M1;M2;M3;M4];
 
 
 % matlabFunction(f,'file','malti_drone_suspended_load_FL','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
