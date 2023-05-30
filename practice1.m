@@ -165,11 +165,19 @@ P1_new = mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+(u2p-m2*l2*
 P2_new = ((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q3'))+(m4*ro4hat*Rb0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*Rb0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+ro2hat*Rb0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+ro3hat*Rb0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+ro4hat*Rb0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*Rb0*ol0hat^2*ro4); 
 % S = subs(dos1,[A,B,C],[AA,BB,CC]);
 
+
+
+
+
+
 GGGG2=1
 ddx0_new = subs(ddx0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
+% ddx0_new2 = simplifyFraction(((mq\(m1*(q1*q1')*Rb0*ro1hat +m2*(q2*q2')*Rb0*ro2hat +m3*(q3*q3')*Rb0*ro3hat +m4*(q4*q4')*Rb0*ro4hat))*(m1*ro1hat*Rb0'*(q1*q1') +m2*ro2hat*Rb0'*(q2*q2') +m3*ro3hat*Rb0'*(q3*q3') +m4*ro4hat*Rb0'*(q4*q4'))+(J0 - m1*ro1hat*Rb0'*(q1*q1')*Rb0*ro1hat - m2*ro2hat*Rb0'*(q2*q2')*Rb0*ro2hat - m3*ro3hat*Rb0'*(q3*q3')*Rb0*ro3hat - m4*ro4hat*Rb0'*(q4*q4')*Rb0*ro4hat))\((J0 - m1*ro1hat*Rb0'*(q1*q1')*Rb0*ro1hat - m2*ro2hat*Rb0'*(q2*q2')*Rb0*ro2hat - m3*ro3hat*Rb0'*(q3*q3')*Rb0*ro3hat - m4*ro4hat*Rb0'*(q4*q4')*Rb0*ro4hat)*(mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+(u4p-m4*l4*norm(os4)^2*q4-m1*(q4*q4')*Rb0*ol0hat^2*ro4))+ge3) + (mq\(m1*(q1*q1')*Rb0*ro1hat +m2*(q2*q2')*Rb0*ro2hat +m3*(q3*q3')*Rb0*ro3hat +m4*(q4*q4')*Rb0*ro4hat))*(((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q3'))+(m4*ro4hat*Rb0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*Rb0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+ro2hat*Rb0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+ro3hat*Rb0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+ro4hat*Rb0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*Rb0*ol0hat^2*ro4))));
 dol0_new = subs(dol0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
+GGGG3=1
 dos1_new = subs(dos1,[A,B,C],[AA,BB,CC]);
 dos2_new = subs(dos2,[A,B,C],[AA,BB,CC]);
+GGGG4=1
 dos3_new = subs(dos3,[A,B,C],[AA,BB,CC]);
 dos4_new = subs(dos4,[A,B,C],[AA,BB,CC]);
 dol1 = J1\(M1-cross(ol1,J1*ol1));
@@ -201,14 +209,22 @@ u = [u1,u2,u3,u4,M1,M2,M3,M4];
 % subs(f,u,[0,0,0,0,0,0,0,0])
 
 %%
-f_data = [ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new];
+f_data = [dos1_new];
+% u_data = [M1;M2;M3;M4];
 u_data = [u1;u2;u3;u4];
-% fx = subs(f_data,u_data,zeros(size(u_data)));
-fx = subs(ddx0_new,u_data,zeros(size(u_data)));
-% gx = [subs(f_data,u_data,[1;zeros(11,1)])-fx,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(f_data,u_data,[zeros(11,1);1])-fx];
-gx = [subs(ddx0_new,u_data,[1;zeros(11,1)])-fx,subs(ddx0_new,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(ddx0_new,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(ddx0_new,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(ddx0_new,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(ddx0_new,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(ddx0_new,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(ddx0_new,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(ddx0_new,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(ddx0_new,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(ddx0_new,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(ddx0_new,u_data,[zeros(11,1);1])-fx];
-subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl
-f_data - (fx + gx*u_data)
+fx = subs(f_data,u_data,zeros(size(u_data)));
+gx = [subs(f_data,u_data,[1;zeros(11,1)])-fx,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(f_data,u_data,[zeros(11,1);1])-fx];
+% simplifyFraction(f_data - (fx + gx*u_data));
+
+% f_data = [ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new];
+% u_data = [u1;u2;u3;u4];
+% % fx = subs(f_data,u_data,zeros(size(u_data)));
+% fx = subs(ddx0_new,u_data,zeros(size(u_data)));
+% AAAAA=1
+% % gx = [subs(f_data,u_data,[1;zeros(11,1)])-fx,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(f_data,u_data,[zeros(11,1);1])-fx];
+% gx = [subs(ddx0_new,u_data,[1;zeros(11,1)])-fx,subs(ddx0_new,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(ddx0_new,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(ddx0_new,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(ddx0_new,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(ddx0_new,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(ddx0_new,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(ddx0_new,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(ddx0_new,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(ddx0_new,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(ddx0_new,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(ddx0_new,u_data,[zeros(11,1);1])-fx];
+% % subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl
+% % simplifyFraction(f_data - (fx + gx*u_data));
 %%
 % f_data2 = ddx0_new;
 % fx2 = subs(f_data2,u_data,zeros(size(u_data)));
