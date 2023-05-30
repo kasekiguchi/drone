@@ -369,3 +369,37 @@ dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
 % ddx0_new2 = subs(ddx0_new,[P1,P2],[P1_new,P2_new]);
 %%
 % matlabFunction(f,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+
+%%
+% [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
+% reshape([fi;Mi],4*N,1);
+x0data = [0;0;0];
+r0data = [0;0;0;0];
+dx0data = [0;0;0];
+o0data = [0;0;0];
+q1 = [0,0,1]'; q2 = [0,0,1]'; q3 = [0,0,1]'; q4 = [0,0,1]';
+qidata = [q1;q2;q3;q4];
+w1 = [0,0,0]'; w2 = [0,0,0]'; w3 = [0,0,0]'; w4 = [0,0,0]';
+widata = [w1;w2;w3;w4];
+r1 = [0,0,0,0]'; r2 = [0,0,0,0]'; r3 = [0,0,0,0]'; r4 = [0,0,0,0]';
+ridata = [r1;r2;r3;r4];
+o1 = [0,0,0]'; o2 = [0,0,0]'; o3 = [0,0,0]'; o4 = [0,0,0]'; 
+oidata = [o1;o2;o3;o4];
+xdata=[x0data;r0data;dx0data;o0data;qidata;widata;ridata;oidata];
+
+fidata = [1,1,1,1]';
+M1 = [0,0,0]'; M2 = [0,0,0]'; M3 = [0,0,0]'; M4 = [0,0,0]';
+Midata = [M1;M2;M3;M4];
+udata =[fidata;Midata];
+
+% [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)]
+gdata = 9.81;
+m0data = 1;
+j0data = [1,1,1];
+rho1data = [1,1,1]; rho2data = [1,-1,1]; rho3data = [-1,-1,1]; rho4data = [0,1,1];
+rhodata = [rho1data,rho2data,rho3data,rho4data];
+lidata = [1,1,1,1];
+midata = [0.5,0.5,0.5,0.5];
+j1data = [1,1,1]; j2data = [1,1,1]; j3data = [1,1,1]; j4data = [1,1,1];
+jidata = [j1data,j2data,j3data,j4data];
+P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
