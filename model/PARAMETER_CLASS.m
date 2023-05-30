@@ -1,5 +1,5 @@
 classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprops
-    % 車両モデルのパラメータ管理用クラス
+    % Model parameter class
 
     properties
         parameter % 制御モデル用パラメータ : 値ベクトル
