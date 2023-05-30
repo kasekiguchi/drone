@@ -1,20 +1,138 @@
 clear
 clc
+% 以下の論文に基づくモデル化
+% Geometric Control of Multiple Quadrotor UAVs Transporting a Cable-Suspended Rigid Body
+% https://ieeexplore.ieee.org/document/7040353
+% 軸の取り方に注意
+% e3 = [0;0;1]; % 鉛直下向き
+
+%% symbol定義
+N = 4; % エージェント数
+% 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
+syms x0 [3 1] real % 位置
+syms dx0 [3 1] real
+syms ddx0 [3 1] real
+syms r0 [4 1] real % 姿勢角（オイラーパラメータ）
+syms o0 [3 1] real % 角速度
+syms do0 [3 1] real
+syms qi [N 3] real % リンクのドローンから見た方向ベクトル：論文中qi
+qi = qi';
+syms wi [N 3] real % リンクの角速度
+wi = wi';
+syms dwi [N 3] real
+dwi = dwi';
+
+% ドローンに関する変数定義 %%%%%%%%%%%%%%%%%%
+syms ri [N 4] real % 姿勢角（オイラーパラメータ）
+ri = ri';
+syms oi [N 3] real % 角速度
+oi = oi';
+syms fi [1 N] real % 推力入力
+syms Mi [N 3] real % モーメント入力
+Mi = Mi';
+%% 牽引物の物理パラメータ %%%%%%%%%%%%%%%%%%%
+syms g real % 重力加速度
+syms m0 real % 質量
+syms j0 [3 1] real % 慣性モーメント
+syms rho [N 3] real % 牽引物座標系でのリンク接続位置：第i列がi番目のドローンとの接続位置
+rho = rho';
+syms li [1 N] real % リンク長
+% ドローンの物理パラメータ %%%%%%%%%%%%%%%%%%%
+syms mi [1 N] real % 質量
+syms ji [N 3] real % 慣性モーメント
+ji = ji';
+physicalParam = [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)];
+%%
+[R0,L0] = RodriguesQuaternion(r0); % 牽引物回転行列
+tmp = mat2cell(ri,4,ones(1,N));
+[Ri,Li] = arrayfun(@(q) RodriguesQuaternion(q{:}),tmp,'UniformOutput',false); % ドローン姿勢回転行列
+O0 = Skew(o0); % 牽引物の角速度行列（歪対象行列）
+tmp = mat2cell(oi,3,ones(1,N));
+Oi = arrayfun(@(o) Skew(o{:}),tmp,'UniformOutput',false); % ドローン角速度行列
+J0 = diag(j0); % 牽引物の慣性行列
+tmp = mat2cell(ji,3,ones(1,N));
+Ji = arrayfun(@(j) diag(j{:}),tmp,'UniformOutput',false); % ドローン慣性行列
+e3 = [0;0;1]; % 鉛直下向き
+Rho = arrayfun(@(i) Skew(rho(:,i)),1:N,'UniformOutput',false); % rho の歪対称化
+Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称化
+%% 状態：
+% 牽引物: 位置，姿勢角，速度，角速度， : 13
+% リンク: 角度，角速度 : N x 6
+% ドローン:姿勢角，角速度
+x = [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
+u = reshape([fi;Mi],4*N,1);
+%% 
+% (1)
+tmp = arrayfun(@(i) Skew(wi(:,i))*qi(:,i),1:N,'UniformOutput',false);
+dqi = vertcat(tmp{:});
+% (2)
+dr0 = L0'*o0/2;
+tmp = arrayfun(@(i) Li{i}'*oi(:,i)/2,1:N,'UniformOutput',false);
+dri = vertcat(tmp{:});
+%%
+Mq = m0*eye(3) + qi*diag(mi)*qi';
+ui = arrayfun(@(i) -fi(i)*Ri{i}*e3,1:N,'UniformOutput',false);
+ul = arrayfun(@(i) qi(:,i)*qi(:,i)'*ui{i},1:N,'UniformOutput',false); % (10)
+up = arrayfun(@(i) (eye(3) - qi(:,i)*qi(:,i)')*ui{i},1:N,'UniformOutput',false); % (11)
+%% (6) 
+mqiqiR0 = arrayfun(@(i) mi(i)*qi(:,i)*qi(:,i)'*R0,1:N,'UniformOutput',false);
+tmp = arrayfun(@(i) mqiqiR0{i}*Rho{i},1:N,'UniformOutput',false);
+mqiqiR0rhoidO0 = [tmp{:}]*repmat(do0,N,1);
+tmp = arrayfun(@(i) mqiqiR0{i}*O0^2*rho(:,i),1:N,'UniformOutput',false);
+mqiqiR0O02rho = [tmp{:}]*ones(N,1);
+rhs6 = ([ul{:}])*ones(N,1)-qi*(mi.*li.*sum(wi.^2,1))'-mqiqiR0O02rho;
+eq6 = Mq*(ddx0 - g*e3) - mqiqiR0rhoidO0 -rhs6;
+%% (7)
+lhs71 = J0*do0;
+tmp = arrayfun(@(i) mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)'*R0*Rho{i},1:N,'UniformOutput',false);
+lhs72 = [tmp{:}]*repmat(do0,N,1);
+tmp = arrayfun(@(i) mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)',1:N,'UniformOutput',false);
+lhs73 = [tmp{:}]*repmat((ddx0-g*e3),N,1);
+lhs74 = O0*J0*o0;
+tmp = arrayfun(@(i) Rho{i}*R0',1:N,'UniformOutput',false);
+rhs71 = [tmp{:}]*vertcat(ul{:});
+tmp = arrayfun(@(i) Rho{i}*R0'*mi(i)*li(i)*sum(wi(:,i).^2),1:N,'UniformOutput',false);
+rhs72 = [tmp{:}]*reshape(qi,[3*N,1]);
+tmp = arrayfun(@(i) Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*R0*O0^2,1:N,'UniformOutput',false);
+rhs73 = [tmp{:}]*reshape(rho,[3*N,1]);
+rhs7 = rhs71 - rhs72 - rhs73;
+eq7 = lhs71 - lhs72 + lhs73 + lhs74 - (rhs7);
+%% solve (6), (7) derive ddx0, do0
+% eq6 = A6*[ddx0;do0] + B6
+B6 = subs(eq6,[ddx0;do0],[0;0;0;0;0;0]);
+tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq6-B6,'UniformOutput',false);
+A6 = vertcat(tmp{:});
+% eq7 = A7*[ddx0;do0] + B7
+B7 = subs(eq7,[ddx0;do0],[0;0;0;0;0;0]);
+tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq7-B7,'UniformOutput',false);
+A7 = vertcat(tmp{:});
+Addx0do0 = [A6;A7];
+matlabFunction(Addx0do0,"File","Addx0do0_"+string(N),"Vars",{x u physicalParam},'outputs',{'A'})
+syms iA [6 6] 
+matlabFunction(-iA*[B6;B7],"File","ddx0do0_"+string(N),"Vars",{x u physicalParam iA},'outputs',{'dX'});
+%% (8)
+syms ddX [6 1]  % ddX = [ddx0;do0]
+rhs81 = ddX(1:3)-g*e3; % 3x1
+tmp = arrayfun(@(i) R0*Rho{i}*ddX(4:6),1:N,'UniformOutput',false);
+rhs82 = tmp;
+rhs83 = arrayfun(@(i) R0*O0^2*rho(:,i),1:N,'UniformOutput',false);
+rhs8 =  arrayfun(@(i) li(i)\Qi{i}*(rhs81-rhs82{i}+rhs83{i})-(mi(i)*li(i))\Qi{i}*up{i},1:N,'UniformOutput',false);
+%% (9)
+tmp = arrayfun(@(i) Ji{i}\(-Oi{i}*Ji{i}*oi(:,i)+Mi(:,i)),1:N,'UniformOutput',false);
+doi = vertcat(tmp{:});
+
+%% 
+
+%dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
+matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
 
 
 
-%dos1,2,3,4のqiがqihatに変更
-%ro追加 omegahat^2(oh02)を変更
-syms v0 [3 1] real;
-syms ddx0 [3 1] real ; syms dol0 [3 1] real;
-syms A [3,3] real; syms B [3,3] real; syms C [3,3] real
-syms P1 [3,1] real; syms P2 [3,1] real
-
+%%
 syms q1 [3,1] real; syms q2 [3,1] real; syms q3 [3,1] real; syms q4 [3,1] real %リンクの方向ベクトル
 syms ol0 [3,1] real; %ペイロードの角速度
 syms ol1 [3,1] real;syms ol2 [3,1] real;syms ol3 [3,1] real;syms ol4 [3,1] real; %機体の角速度
 syms os1 [3,1] real;syms os2 [3,1] real;syms os3 [3,1] real;syms os4 [3,1] real; %リンクの角速度
-
 syms M1 [3,1] real;syms M2 [3,1] real;syms M3 [3,1] real;syms M4 [3,1] real %3*1 モーメント入力
 syms R0 [3,3] real; %ペイロードを軸にした回転行列
 syms R1 [3,3] real; syms R2 [3,3] real; syms R3 [3,3] real; syms R4 [3,3] real; %機体回転行列
@@ -148,13 +266,13 @@ P20=[1;2;1];
 
 %%
 ddx0 = simplifyFraction((A*C+B)\(B*P1 + A*P2));
-dol0 = simplifyFraction((A*C+B)\(-C*P1+P2));
+o0 = simplifyFraction((A*C+B)\(-C*P1+P2));
 % dol0_2 = simplify(B\(-C*ddx0 + P2));
 % ddx0_2 = simplifyFraction(A*dol0 + P1);
-dos1 = q1hat*(ddx0-ge3-Rb0*ro1hat*dol0+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
-dos2 = q2hat*(ddx0-ge3-Rb0*ro2hat*dol0+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
-dos3 = q3hat*(ddx0-ge3-Rb0*ro3hat*dol0+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
-dos4 = q4hat*(ddx0-ge3-Rb0*ro4hat*dol0+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
+dos1 = q1hat*(ddx0-ge3-Rb0*ro1hat*o0+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
+dos2 = q2hat*(ddx0-ge3-Rb0*ro2hat*o0+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
+dos3 = q3hat*(ddx0-ge3-Rb0*ro3hat*o0+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
+dos4 = q4hat*(ddx0-ge3-Rb0*ro4hat*o0+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
 
 GGGG=1
 
@@ -167,7 +285,7 @@ P2_new = ((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q
 
 GGGG2=1
 ddx0_new = subs(ddx0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
-dol0_new = subs(dol0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
+dol0_new = subs(o0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
 dos1_new = subs(dos1,[A,B,C],[AA,BB,CC]);
 dos2_new = subs(dos2,[A,B,C],[AA,BB,CC]);
 dos3_new = subs(dos3,[A,B,C],[AA,BB,CC]);
@@ -190,11 +308,11 @@ dR4 = R4*ol4hat;
 
 %%
 % Usage: dx=f+g*u
-x = [ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;q1;q2;q3;q4]; %lomega,somega,link
-Quat = [qt0;qt1;qt2;qt3;qt4];
-f = [v0;ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new;dq1;dq2;dq3;dq4;dol1;dol2;dol3;dol4];
-dQuat = [dqt0;dqt1;dqt2;dqt3;dqt4];
-u = [u1;u2;u3;u4;M1;M2;M3;M4];
+x = [q1,q2,q3,q4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4];
+Quat = [qt0,qt1,qt2,qt3,qt4];
+f = [v0,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dq1,dq2,dq3,dq4,dol1,dol2,dol3,dol4];
+dQuat = [dqt0,dqt1,dqt2,dqt3,dqt4];
+u = [u1,u2,u3,u4,M1,M2,M3,M4];
 
 
 % matlabFunction(f,'file','malti_drone_suspended_load_FL','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
