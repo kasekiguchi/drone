@@ -362,6 +362,7 @@ R0_matrix = [cos(alfa)*cos(beta)*cos(gunma)-sin(alfa)*sin(gunma),-cos(alfa)*cos(
 
 qt0_dataset=[0;1/2;0;0];
 
+
 dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
 % dataset2 = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset;P1dataset;P2dataset];
 
