@@ -12,7 +12,8 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         % 1：実機　それ以外：シミュレーション
+fExp = 1
+% 1：実機　それ以外：シミュレーション
 fMotive = 1 % Motiveを使うかどうか
 fOffline = 0; % offline verification with experient data
 fDebug = 0;
@@ -53,7 +54,7 @@ if fExp~=1
 % agent.set_model_error("k3",0.05);%0.000008
 % agent.set_model_error("k4",0.05);%0.000008
 
-agent(i).set_model_error("B",[zeros(1,6),[1,0,0],[0,0,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
+agent(i).set_model_error("B",[zeros(1,6),[0,0,0],[0,0,0]]);%only sim , add disturbance [x,y,z]m/s^2, [roll, pitch, yaw]rad/s^2
 
     end
 end
@@ -242,12 +243,12 @@ if fsave==1
 %変更==============================================================================
     subfolder='exp';%sim or exp or sample
 %     subfolder='sim';%sim or exp or sample
-    subfolder='sample';%sim or exp or sample
+%     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='ifacFin';%実験,シミュレーション名
+    ExpSimName='kiyama';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
 % contents='ft_jy_002';%実験,シミュレーション内容
-contents='saddle2_LS';%実験,シミュレーション内容
+contents='cricle_LS';%実験,シミュレーション内容
 % contents='FT_jxy150';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath

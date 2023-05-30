@@ -17,7 +17,7 @@ clear
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.85;%alphaの初期値
+alp(anum)=0.88;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -28,11 +28,11 @@ Ac2 = diag([1],1);
 Bc2 = [0;1];
 dt=0.025;
 k=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-k=lqrd(Ac2,Bc2,diag([1000,1]),[0.1],dt); % xdiag([100,10,10,1])
+k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
 % k=5;
 
 x0=[50,0.01];
-rng=0.01;
+rng=0.02;
 i=2;
 fun=@(x)(integral(@(w) abs( -k(i).*abs(w).^alp(i) + k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), rng,rng+1) +integral(@(w) abs( k(i).*w-k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0,rng));
 % fun=@(x)(integral(@(w) abs( k(i).*abs(w).^alp(i) - k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0.1,1));
@@ -42,7 +42,7 @@ c =@(x)0;% [k(i).*sign(rng).*abs(rng).^alp(i) - k(i).*tanh(x(1).*rng).*sqrt(rng.
 % ceq = @(x) [1 - x(1).*x(2).^(alp(i)./2)+ 0;
 %                     -k(i).*abs(rng).^alp(i) + k(i).*tanh(x(1).*rng).*sqrt(rng.^2 + x(2)).^alp(i) + 1];
 % ceq = @(x) -k(i).*abs(rng).^alp(i) + k(i).*tanh(x(1).*rng).*sqrt(rng.^2 + x(2)).^alp(i) + 0.1;
-ceq = @(x) 1 - x(1).*x(2).^(alp(i)./2)+ 1;
+ceq = @(x) 1 - x(1).*x(2).^(alp(i)./2)+ 1.5;
 %alhpa=0.8 rang=0.05:[4.5,2.5]/rang=0.01:[6,4.8]
 %alpha=0.85rng=0.01[5,3]
 nonlinfcn = @(x)deal(c(x),ceq(x));
@@ -61,7 +61,7 @@ options = optimoptions("fmincon",...
 syms w
 du = diff(k(i).*tanh(p(1).*w).*sqrt(w.^2 + p(2)).^alp(i),w,1);
 
-e = -1:0.01:1;
+e = -1:0.001:1;
 % p=[20,1E-3];
 usgn = -k(i).*tanh(p(1)*e).*abs(e).^alp(i);
 usgnabs = -k(i).*tanh(p(1).*e).*sqrt(e.^2 + p(2)).^alp(i);

@@ -32,7 +32,7 @@ else
             clear initial_state
             initial_state(i) = state_copy(logger.Data.agent(i).plant.result{1}.state);
         else
-            arranged_pos = arranged_position([0, 0], N, 0, 0);
+            arranged_pos = arranged_position([-1, 0], N, 0, 0);
             initial_state(i).p = arranged_pos(:, i);
             initial_state(i).q = [1; 0; 0; 0];
             initial_state(i).v = [0; 0; 0];
@@ -51,7 +51,7 @@ for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[50,132]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
+        agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i),"udp",[100,251]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
@@ -129,13 +129,14 @@ for i = 1:N
     %% set reference property
     agent(i).reference = [];
 
-    agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[0;0;1]));
+%     agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[0;0;1]));
 %     agent(i).set_property("reference",Reference_Time_Varying("Komatsu_study_trajectory",[0;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
-%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{8,[0;0;1.2],[1,1,0.4]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{10,[0;0;1],[1,1,0.3]})); % 時変な目標状態
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[0;0;1])); % ハート形[x;y;z]永久
-    %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+    %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1]));
+    %% ハート形[x;y;z]永久 
     %agent(i).set_property("reference",Reference_Wall_observation()); %
     %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
     %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
@@ -153,7 +154,8 @@ for i = 1:N
             alpha = 0.85;%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
             approxRangeZ=[0 1];%近似する範囲z
             approxRangeXY=[0 1];%近似する範囲xy
-            % agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
+%             agent(i).set_property("controller",Controller_FT(dt,fApproxZ ,fTanh1Z,fApproxXY,fTanh1XY,alpha,approxRangeZ,approxRangeXY));
+% agent(i).set_property("controller",Controller_FT(dt));
 %     agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化
     agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
 %     agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
