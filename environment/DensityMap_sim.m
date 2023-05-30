@@ -34,6 +34,7 @@ classdef DensityMap_sim% < ENV_CLASS
         grid_col % grid の列数 : min:d:max
         grid_n % grid 数 row x col
         density_sigma
+        param % dummy
     end
     methods
         function obj = DensityMap_sim(param)

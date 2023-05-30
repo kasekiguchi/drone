@@ -10,9 +10,9 @@ userpath('clear');
 % warning('off', 'all');
 
 %% general setting
-N = 1; % number of agents
+N = 3; % number of agents
 fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 1; % 1: active
+fMotive = 0; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 1; % 1: active : for debug function
 run("main1_setting.m");
@@ -103,6 +103,7 @@ try
       param(i).controller.pid = {};
       param(i).controller.tscf = {dt, time.t};
       param(i).controller.mpc = {};
+      param(i).controller.direct = {};
 
       for j = 1:length(agent(i).controller.name)
         param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -123,7 +124,8 @@ try
     if fDebug
       %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
       %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true,'fFiled',1));%false));
-      agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", false));
+%      agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", false));
+      %agent.show(["reference","covering"],"param",Env);
     end
 
     %% update state
@@ -172,6 +174,9 @@ try
       end
 
     end
+    if fDebug
+        FH = VORONOI_BARYCENTER.show_k(logger, N, Env,"FH",FH);
+    end
   end
 
 catch ME % for error
@@ -191,14 +196,16 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
+%logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
+logger.plot({1, "p", "pr"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
 
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+%agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
+%agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

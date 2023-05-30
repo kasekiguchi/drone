@@ -10,9 +10,8 @@ methods
 
         arguments
             args
-            param
+            param = []
         end
-
         obj = obj@ABSTRACT_SYSTEM(args, param);
 
         if contains(args.type, "EXP")

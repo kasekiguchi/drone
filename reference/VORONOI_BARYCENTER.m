@@ -15,7 +15,7 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
             end            
             obj.self = self;
             obj.param = param;
-            obj.result.state = STATE_CLASS(struct('state_list', ["p"], 'num_list', [3]));
+            obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
             obj.fShow = param.fShow;
         end
         function result = do(obj, ~)
@@ -86,48 +86,56 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
             obj.result.region = region.Vertices + state.p(1:2)';
             obj.result.state.p = (result + state.p); % .*[1;1;0]; % 重心位置（絶対座標）
             obj.result.state.p(3) = 1;               % リファレンス高さは１ｍ
+            obj.result.state.v = [0;0;0];               % リファレンス速度は０
             result = obj.result;
             if obj.fShow
                 obj.show();
             end
         end
-        function show(obj, Env)
+        function show(obj,opt)
             arguments
                 obj
-                Env = polyshape(obj.result.region);
+                opt.logger = [];
+                opt.FH = 1;
+                opt.t = 0;
+                opt.param = polyshape(obj.result.region);
             end
-            clf(figure(2));
+            clf(figure(opt.FH));
             set( gca, 'FontSize', 26); % 文字の大きさ設定
-            draw_voronoi({polyshape(obj.result.region)},[obj.result.state.p';obj.self.estimator.result.state.p'],Env.Vertices);
+            draw_voronoi({polyshape(obj.result.region)},[obj.result.state.p';obj.self.estimator.result.state.p'],opt.param.Vertices);
         end
     end
     methods (Static)
-        function show_k(logger, N, Env, span,k)
+        function FH = show_k(logger, N, Env, opt)
             arguments
                 logger
                 N
                 Env
-                span = 1:N
-                k = 1
+                opt.span = 1:N
+                opt.k = logger.k
+                opt.FH = figure
             end
-            rpdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "r"), span, 'UniformOutput', false));
-            epdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "e"), span, 'UniformOutput', false));
-            spdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "s"), span, 'UniformOutput', false));
+            rpdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "r"), opt.span, 'UniformOutput', false));
+            epdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "e"), opt.span, 'UniformOutput', false));
+            spdata = cell2mat(arrayfun(@(i) logger.data(i, "p", "s"), opt.span, 'UniformOutput', false));
+            clf(opt.FH);
             draw_voronoi( ...
-                arrayfun(@(i) logger.Data.agent(i).reference.result{k}.region, span, 'UniformOutput', false) ...
-                , [spdata(k, :); rpdata(k, :); epdata(k, :)] ...
+                arrayfun(@(i) logger.Data.agent(i).reference.result{opt.k}.region, opt.span, 'UniformOutput', false) ...
+                , [spdata(opt.k, :); rpdata(opt.k, :); epdata(opt.k, :)] ...
                 , Env.Vertices);
+            FH = opt.FH;
         end
         
-        function draw_movie(logger, N, Env, span)
+        function draw_movie(logger, N, Env, span,FH)
             arguments
                 logger
                 N
                 Env
                 span = 1:N
+                FH = figure
             end
             % Voronoi 被覆の様子
-            make_animation(1:10:logger.k - 1,@(k) VORONOI_BARYCENTER.show_k(logger, N, Env, span,k), @() Env.show);
+            make_animation(1:10:logger.k - 1,@(k) VORONOI_BARYCENTER.show_k(logger, N, Env, "span",span,"k",k,"FH",FH), @() Env.show,FH);
 
             % エージェントが保存している環境地図
             %make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(Env.xq,Env.yq,logger.Data.agent(i).estimator.result{k}.grid_density),span,'UniformOutput',false), @() Env.show_setting());
