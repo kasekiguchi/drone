@@ -14,9 +14,11 @@ function data = InportFromExpData(expData_Filename)
 % expData_Filename = 'TestData1.mat'
 
 load(expData_Filename);
+% load('D:\workspace\GitHub\drone\drone-isobe2022\drone-isobe2022\Data\simData_KoopmanApproach_2023_5_30_experiment\simtest_1.mat');
 clear data % 読み込んだファイル内のdataと同名の変数を初期化
 %データの個数をチェック
 data.N = find(logger.Data.t,1,'last');
+% data.N = 2461;
 
 %% Get data
 % 状態毎に分割して保存

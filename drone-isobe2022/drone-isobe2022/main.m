@@ -47,50 +47,7 @@ end
             motive.getData(agent, mparam);
         end
 
-        % % 20230129
-        % % 初期状態を変更
-        % if flag_initrandam==1
-        %     % initialState.input = randi([0,100],4,1)*0.001; %randi([下限,上限],行数,列数)
-        %     % initialState.p = randi([-1000,1000],3,1)*0.001; %例 980*0.001=0.980となり-1~1
-        %     % initialState.p(3,1) = randi([-3000,3000])*0.001; %pzの範囲は-3~3
-        %     % initialState.q = randi([-1750,1750],3,1)*0.001;
-        %     % initialState.q(3,1) = 0;
-        %     % initialState.v = randi([-10,10],3,1)*0.001;
-        %     % initialState.w = [0;0;0];
-        % 
-        %     initialState.input = randi([0,1],4,1)*0.1; %randi([下限,上限],行数,列数)
-        %     initialState.p = randi([-1,1],3,1); %例 980*0.001=0.980となり-1~1
-        %     initialState.p(3,1) = randi([-3,3]); %pzの範囲は-3~3
-        %     initialState.q = randi([-1,1],3,1)*0.175;
-        %     initialState.q(3,1) = 0;
-        %     initialState.v = randi([-1,1],3,1)*0.01;
-        %     initialState.w = [0;0;0];
-        %     %以下のような書き方をしないと、生成される値がランダムにならない
-        %     initialState.input = rand(4,1)*0.1; % 0 ~ 0.1
-        %     initialState.p = rand(3,1)*0.02-0.01; % プラスマイナス1 cm 程度の誤差イメージ 
-        %     initialState.q = (rand(3,1)*10-5)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
-        %     %値の範囲を-+に調整してる
-        %     initialState.v = rand(3,1)*0.02-0.01; % 1 cm/s 程度の誤差イメージ
-        %     initialState.w = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg/s 程度のイメージ
-        % 
-        % 
-        %     agent(1).model.state.p = initialState.p;
-        %     agent(1).model.state.q = initialState.q;
-        %     agent(1).model.state.v = initialState.v;
-        %     agent(1).model.state.w = initialState.w;
-        %     agent(1).plant.state.p = initialState.p;
-        %     agent(1).plant.state.q = initialState.q;
-        %     agent(1).plant.state.v = initialState.v;
-        %     agent(1).plant.state.w = initialState.w;
-        %     agent(1).estimator.result.state.p = initialState.p;
-        %     agent(1).estimator.result.state.q = initialState.q;
-        %     agent(1).estimator.result.state.v = initialState.v;
-        %     agent(1).estimator.result.state.w = initialState.w;
-        % 
-        %     agent(1).input = initialState.input;
-        %     flag_initrandam=0;
-        % end
-
+     
         for i = 1:N
             % sensor
             if fMotive; param(i).sensor.motive = {}; end
