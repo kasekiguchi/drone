@@ -5,16 +5,16 @@ clc
 clear
 close all
 % フラグ管理
-flg.bilinear = 0;
+flg.bilinear = 1;
 
-%データ保存先ファイル名
-FileName = 'EstimationResult_12state_100data_5_31_.mat'; %保存先のファイル名も逐次変更する
-% FileName = 'otamesi.mat';
+%データ保存先ファイル名(逐次変更する)
+FileName = 'EstimationResult_12state_5_31_Input2.mat';
 
-% 読み込むデータファイル名
+% 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる)
 % loading_filename = 'sim_rndP_12state';
-loading_filename = 'simtest'; %run_mainManyTimeの中のFileNameに変更すればそのファイルを読み込んでくれる
-% loading_filename = 'sim_rndP4;
+% loading_filename = 'sim_rndP4';
+% loading_filename = '2023_0529_1804_logger_cricle_LS.mat';
+loading_filename = '5_31_1';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -25,12 +25,12 @@ targetpath=append(nowFolder,'\',FileName);
 % クープマン作用素を定義
 % F@(X) Xを与える関数ハンドルとして定義
 % DroneSimulation
-F = @(x) [x;1]; % 状態そのまま
+% F = @(x) [x;1]; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量
 % F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
 % F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
-% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(しっかり回る)
-% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(しっかり回る)
+F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(動作確認済み)
+% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み)
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
 
@@ -43,12 +43,16 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 1; %使用するデータの量に応じて逐次変更
+Data.HowmanyDataset = 100;
 
 for i= 1: Data.HowmanyDataset
-    Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat')); %行列の形に直してる
+    if contains(loading_filename,'.mat')
+        Dataset = ImportFromExpData(loading_filename);
+    else
+        Dataset = ImportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
+    end
     if i==1
-        Data.X = [Dataset.X]; %Data.X内の行は上から位置(x,y,z),姿勢角(ロール、ピッチ、ヨー)...
+        Data.X = [Dataset.X];
         Data.U = [Dataset.U];
         Data.Y = [Dataset.Y];        
     else
@@ -56,16 +60,16 @@ for i= 1: Data.HowmanyDataset
         Data.U = [Data.U, Dataset.U];
         Data.Y = [Data.Y, Dataset.Y];
     end
-    disp(num2str(i))
+    disp(append('loading data number: ',num2str(i),', now data:',num2str(Dataset.N),', all data: ',num2str(size(Data.X,2))))
 end
 disp('loaded')
 
-% クォータニオンのノルムをチェック
+% クォータニオンのノルムをチェック(クォータニオンのノルムは1にならなければいけないという制約がある)
 % 閾値を下回った or 上回った場合注意文を提示
-% attitude_norm 各時間におけるクォータニオンのノルム (クォータニオンのノルムは1にならなければいけないという制約がある)
+% attitude_norm 各時間におけるクォータニオンのノルム
 if size(Data.X,1)==13
     thre = 0.01;
-    attitude_norm = checkQuaternionNorm(Dataset.est.q',thre); 
+    attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
 % OUIBS system
@@ -75,9 +79,9 @@ end
 % F = @(x) [x(2);sin(x(1));cos(x(1));x(2)*cos(x(1));x(2)*sin(x(1))];
 
 %% Koopman linear
-% 12/12 関数化
+% 12/12 関数化(双線形であるかどかの切り替え，上が双線形)
 disp('now estimating')
-if flg.bilinear == 1 %双線形であるかどうかの切り替え(上が双線形)
+if flg.bilinear == 1
     [est.Ahat, est.Bhat, est.Ehat, est.Chat] = KoopmanLinear_biLinear(Data.X,Data.U,Data.Y,F);
 else
     [est.Ahat, est.Bhat, est.Chat] = KoopmanLinear(Data.X,Data.U,Data.Y,F);
@@ -85,10 +89,9 @@ end
 est.observable = F;
 disp('Estimated')
 
-%% Simulation by Estimated model (作ったモデルでシミュレーション)
-%分からないから先輩に聞こう！
+%% Simulation by Estimated model(作ったモデルでシミュレーション)
 %中間発表の推定精度検証シミュレーション
-simResult.reference = InportFromExpData('TestData3.mat');
+simResult.reference = ImportFromExpData('TestData3.mat');
 if flg.bilinear == 1
 %     simResult.Z(:,1) = F(simResult.reference.X(:,1));
 %     simResult.Xhat(:,1) = simResult.reference.X(:,1);
@@ -113,7 +116,7 @@ if flg.bilinear == 1
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
     end
 else
-    simResult.Z(:,1) = F(simResult.reference.X(:,1)); 
+    simResult.Z(:,1) = F(simResult.reference.X(:,1));
     simResult.Xhat(:,1) = simResult.reference.X(:,1);
     simResult.U = simResult.reference.U;
     simResult.T = simResult.reference.T;
@@ -122,7 +125,7 @@ else
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
     end
 end
-%% Save Estimation Result (結果を保存するところ)
+%% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
     simResult.state.p = simResult.Xhat(1:3,:);
     simResult.state.q = simResult.Xhat(4:7,:);
@@ -135,7 +138,7 @@ else
     simResult.state.w = simResult.Xhat(10:12,:);
 end
 simResult.state.N = simResult.reference.N-1;
-simResult.observable = F;
+
 save(targetpath,'est','Data','simResult')
 disp('Saved to')
 disp(targetpath)
@@ -143,7 +146,7 @@ disp(targetpath)
 %% Display MSE
 % 工事中 多分ずっと
 
-%% Plot by simulation(グラフを出力するところ)
+%% Plot by simulation(グラフ出力)
 % stepN = 31;
 % dt = simResult.reference.T(2)-simResult.reference.T(1);
 % tlength = simResult.reference.T(1:stepN);
@@ -240,7 +243,7 @@ disp(targetpath)
 % set(gca,'FontSize',14);
 % hold off
 % 
-% 
+% % 
 % % % Z
 % % figure(5)
 % % plot(simResult.T,simResult.Z);

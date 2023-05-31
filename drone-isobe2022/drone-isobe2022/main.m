@@ -106,32 +106,32 @@ end
             % initialState.v = randi([-10,10],3,1)*0.001;
             % initialState.w = [0;0;0];
 
-            initialState.input = randi([0,1],4,1)*0.1; %randi([下限,上限],行数,列数)
-            initialState.p = randi([-1,1],3,1); %例 980*0.001=0.980となり-1~1
-            % initialState.p(3,1) = randi([-3,3]); %pzの範囲は-3~3
-            initialState.q = randi([-1,1],3,1)*0.175;
-            initialState.q(3,1) = 0;
-            initialState.v = randi([-1,1],3,1)*0.01;
-            initialState.w = [0;0;0];
+%             initialState.input = randi([0,1],4,1)*0.1; %randi([下限,上限],行数,列数)
+%             initialState.p = randi([-1,1],3,1); %例 980*0.001=0.980となり-1~1
+%             % initialState.p(3,1) = randi([-3,3]); %pzの範囲は-3~3
+%             initialState.q = randi([-1,1],3,1)*0.175;
+%             initialState.q(3,1) = 0;
+%             initialState.v = randi([-1,1],3,1)*0.01;
+%             initialState.w = [0;0;0];
 
             %以下のような書き方をしないと、生成される値がランダムにならない
-            % initialState.input = rand(4,1)*0.1; % 0 ~ 0.1
-            % initialState.p = rand(3,1)*2-1; % プラスマイナス1 cm 程度の誤差イメージ
-            % initialState.p(3,1) = rand*4-1;
-            % initialState.q = (rand(3,1)*10-5)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
-            % %値の範囲を-+に調整してる
-            % initialState.v = rand(3,1)*0.02-0.01; % 1 cm/s 程度の誤差イメージ
-            % % initialState.w = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg/s 程度のイメージ
-            % initialState.w = [0;0;0];
+%             initialState.input = rand(4,1)*0.1; % 0 ~ 0.1
+%             initialState.p = rand(3,1)*2-1; % プラスマイナス1 cm 程度の誤差イメージ
+%             initialState.p(3,1) = rand*4-1;
+%             initialState.q = (rand(3,1)*10-5)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
+%             %値の範囲を-+に調整してる
+%             initialState.v = rand(3,1)*0.02-0.01; % 1 cm/s 程度の誤差イメージ
+%             % initialState.w = rand(3,1)*0.175-0.0175*5; % -5 ~ +5 deg/s 程度のイメージ
+%             initialState.w = [0;0;0];
 
-            % initialState.input = rand(4,1)*0.5; 
-            % initialState.p = rand(3,1)*2-1; % rand(3,1)*0.02で生成範囲を0~0.02に変更、後ろのマイナスで-0.01~0.01にしてる(イメージ:0-0.01 ~ 0.02-0.01)
-            % % initialState.p(3,1) = rand*6-3;
-            % initialState.q = (rand(3,1)*40-20)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
-            % %値の範囲を-+に調整してる
-            % initialState.v = rand(3,1)*0.2-0.1; % 1 cm/s 程度の誤差イメージ
-            % % initialState.w = (rand(3,1)*40-20)*0.0175; % -5 ~ +5 deg/s 程度のイメージ
-            % initialState.w = [0;0;0];
+            initialState.input = rand(4,1)*0.9; 
+            initialState.p = rand(3,1)*2-1; % rand(3,1)*0.02で生成範囲を0~0.02に変更、後ろのマイナスで-0.01~0.01にしてる(イメージ:0-0.01 ~ 0.02-0.01)
+            % initialState.p(3,1) = rand*6-3;
+            initialState.q = (rand(3,1)*40-20)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
+            %値の範囲を-+に調整してる
+            initialState.v = rand(3,1)*0.2-0.1; % 1 cm/s 程度の誤差イメージ
+            % initialState.w = (rand(3,1)*40-20)*0.0175; % -5 ~ +5 deg/s 程度のイメージ
+            initialState.w = [0;0;0];
 
             % initialState.input = rand(4,1); 
             % initialState.p = rand(3,1); % rand(3,1)*0.02で生成範囲を0~0.02に変更、後ろのマイナスで-0.01~0.01にしてる(イメージ:0-0.01 ~ 0.02-0.01)
