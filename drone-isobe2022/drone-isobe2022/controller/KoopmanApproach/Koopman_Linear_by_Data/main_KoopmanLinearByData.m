@@ -5,10 +5,10 @@ clc
 clear
 close all
 % フラグ管理
-flg.bilinear = 1;
+flg.bilinear = 0; %1:双線形モデルへの切り替え
 
 %データ保存先ファイル名(逐次変更する)
-FileName = 'EstimationResult_12state_5_31_Input2.mat';
+FileName = 'EstimationResult_12state_5_31_normal3.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる)
 % loading_filename = 'sim_rndP_12state';
@@ -25,11 +25,11 @@ targetpath=append(nowFolder,'\',FileName);
 % クープマン作用素を定義
 % F@(X) Xを与える関数ハンドルとして定義
 % DroneSimulation
-% F = @(x) [x;1]; % 状態そのまま
+F = @(x) [x;1]; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量
 % F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
 % F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
-F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(動作確認済み)
+% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(動作確認済み)
 % F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み)
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
