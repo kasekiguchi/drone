@@ -1,8 +1,6 @@
 clear
 clc
 
-
-
 %dos1,2,3,4のqiがqihatに変更
 %ro追加 omegahat^2(oh02)を変更
 syms v0 [3 1] real;

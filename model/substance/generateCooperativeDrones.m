@@ -387,7 +387,7 @@ o1 = [0,0,0]'; o2 = [0,0,0]'; o3 = [0,0,0]'; o4 = [0,0,0]';
 oidata = [o1;o2;o3;o4];
 xdata=[x0data;r0data;dx0data;o0data;qidata;widata;ridata;oidata];
 
-fidata = [1,1,1,1]';
+fidata = [10,10,10,10]';
 M1 = [0,0,0]'; M2 = [0,0,0]'; M3 = [0,0,0]'; M4 = [0,0,0]';
 Midata = [M1;M2;M3;M4];
 udata =[fidata;Midata];
@@ -396,10 +396,17 @@ udata =[fidata;Midata];
 gdata = 9.81;
 m0data = 1;
 j0data = [1,1,1];
-rho1data = [1,1,1]; rho2data = [1,-1,1]; rho3data = [-1,-1,1]; rho4data = [0,1,1];
+rho1data = [1,1,1]; rho2data = [1,-1,1]; rho3data = [-1,-1,1]; rho4data = [-1,1,1];
 rhodata = [rho1data,rho2data,rho3data,rho4data];
-lidata = [1,1,1,1];
+lidata = [0.5,0.5,0.5,0.5];
 midata = [0.5,0.5,0.5,0.5];
 j1data = [1,1,1]; j2data = [1,1,1]; j3data = [1,1,1]; j4data = [1,1,1];
 jidata = [j1data,j2data,j3data,j4data];
 P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
+
+%%
+%             3       7        10       13     25      37      53      65    
+%dX = [dx0 3*1;dr0 4*1;ddx0 3*1;do0 3*1;dqi 3*N;dwi 3*N;dri 4*N;doi 3*N]
+iAdata =inv(Addx0do0_4(xdata,udata,P));
+ddx0do0_4(xdata,udata,P,iAdata);
+dxdata = tmp_cable_suspended_rigid_body_with_4_drones(xdata,udata,P,ddxdata)
