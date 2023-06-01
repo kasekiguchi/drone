@@ -13,10 +13,10 @@ FolderName = 'RandomInitialIndexTest';
 
 %データ保存先ファイル名
 % 'FileName'_'シミュレーション番号'.mat
-FileName = 'EstimationResult_12state_6_1';
+FileName = 'EstimationResult_12state_6_1_Input_byLiner';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_12state_6_1_normal.mat';
+loading_filename = 'EstimationResult_12state_6_1_Input_byLiner.mat';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 4;
@@ -101,7 +101,18 @@ for i = 1:HowmanySimulationRunning
     close all
     if flg.plotresult_eachTime
         plotSimulationResult(simResult, stepN)
-        pause(2)
+%         pause(2);
+        
+        pause;
+
+%         fig = uiufigure;
+%         btn = uibutton(fig);
+%         btn.Text = 'Continue';
+%         btn.ButtonPushedFcn = 'uiresume(fig)';
+%         
+%         disp('This text prints immediately');
+%         uiwait(fig)
+%         disp('This text prints after you click Continue');
     end
     % 結果を保存
     fileName = append(targetpath,'_',num2str(i),'.mat');
@@ -217,14 +228,5 @@ function output = plotSimulationResult(simResult,stepN)
     hold off
 
     movegui(fw,'southeast')
-    
-    fig = uiufigure;
-    btn = uibutton(fig);
-    btn.Text = 'Continue';
-    btn.ButtonPushedFcn = 'uiresume(fig)';
-
-    disp('This text prints immediately');
-    uiwait(fig)
-    disp('This text prints after you click Continue');
-
-end
+     
+ end
