@@ -7,6 +7,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 %%
+clc
 SimBaseMode = ["","SimHL","SimVoronoi2D"];
 ExpBaseMode = ["","ExpHL","ExpVoronoi2D"];
 gui = SimExp;
