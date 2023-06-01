@@ -6,12 +6,6 @@ time.t = ts;
 % time, motive, FH　や定数　などグローバル情報
 % agent 自体はagentの各プロパティ内でselfとしてhandleを保持しているのでdo methodに引数として渡す必要は無い．
 
-% % for simulation
-% mparam.occlusion.cond=["time.t >=1.5 && time.t<1.6","agent(1).model.state.p(1) > 2"];
-% mparam.occlusion.target={[1],[1]};
-% mparam.marker_num = 20;
-mparam = [];    % without occulusion
-
 %profile on
 disp("while ============================")
 close all;
