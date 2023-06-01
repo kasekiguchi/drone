@@ -5,12 +5,13 @@
 % agent.reference = ["Reference_Time_Varying"];
 % agent.controller = ["Controller_HL"];
 fExp = 0; % 1: experiment   0: numerical simulation
-fMotive = 0; % 1: active
-fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 1; % 1: active : for debug function
+flag.fMotive = 0; % 1: active
+flag.fOffline = 0; % 1: active : offline verification with saved data
+flag.fDebug = 1; % 1: active : for debug function
 ts = 0;
-dt = 0.025; % sampling time
+dt = 0.025;
 te = 5;
+time = TIME(ts,dt,te);
 motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), fExp, [],[]);
 
@@ -28,5 +29,3 @@ agent.set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5
 agent.set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
 agent.set_property("controller", Controller_HL(dt));                                                                                     % 階層型線形化
 
-time = TIME();
-time.t = ts;

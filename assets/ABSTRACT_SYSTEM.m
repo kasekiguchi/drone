@@ -61,12 +61,13 @@ end
 
 methods
 
-    function do_plant(obj, plant_param, emergency)
+    function do_plant(obj, plant_param, emergency,dummy)
 
         arguments
             obj
             plant_param = [];
             emergency = [];
+            dummy = [];
         end
         if ~isempty(plant_param)
             switch class(plant_param)
@@ -127,23 +128,23 @@ end
 
 methods % Do methods
 
-    function do_sensor(obj, param)
-        obj.do_parallel("sensor", param);
+  function do_sensor(obj,param1,param2,param3,param4)
+        obj.do_parallel("sensor", param1,param2,param3,param4);
     end
 
-    function do_estimator(obj, param)
-        obj.do_sequential("estimator", param);
+    function do_estimator(obj, param1,param2,param3,param4)
+        obj.do_sequential("estimator", param1,param2,param3,param4);
     end
 
-    function do_reference(obj, param)
-        obj.do_sequential("reference", param);
+    function do_reference(obj, param1,param2,param3,param4)
+        obj.do_sequential("reference", param1,param2,param3,param4);
     end
 
-    function do_controller(obj, param)
-        obj.do_parallel("controller", param);
+    function do_controller(obj, param1,param2,param3,param4)
+        obj.do_parallel("controller", param1,param2,param3,param4);
     end
 
-    function do_model(obj, param)
+    function do_model(obj, param1,param2,param3,param4)
         % 推定値でmodelの状態を上書きした上でmodelのdo method を実行
         if obj.model.state.list == obj.estimator.result.state.list % TODO　１回目の時に右辺が定義されていないのでは？
             obj.model.state.set_state(obj.estimator.result.state.get());
@@ -155,7 +156,7 @@ methods % Do methods
 
         end
 
-        obj.model.do(obj.input, param);
+        obj.model.do(obj.input,param1,param2,param3,param4);
     end
 
 end
@@ -175,7 +176,7 @@ methods % set, do property
         obj.(prop).result = [];
     end
 
-    function do_parallel(obj, prop, param)
+    function do_parallel(obj, prop, param1,param2,param3,param4)
         % prop : property name
         % param : parameter to do a property
         result = obj.(prop).(obj.(prop).name(1)).do(param{1});
@@ -215,7 +216,7 @@ methods % set, do property
         obj.(prop).result = result;
     end
 
-    function do_sequential(obj, prop, param)
+    function do_sequential(obj, prop, param1,param2,param3,param4)
         % prop : property name
         % param : parameter to do a property
         % 複数同じpropertyを設定した場合recursiveに参照値を求める．
