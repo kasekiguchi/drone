@@ -110,8 +110,8 @@ for i = 1:N
 
   %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
   agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
-  agent(i).set_property("sensor",Sensor_RangePos(i,'r',100)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
-  agent(i).set_property("sensor",Sensor_RangeD('r',100)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
+  agent(i).set_property("sensor",Sensor_RangePos(i,'r',2)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
+  agent(i).set_property("sensor",Sensor_RangeD('r',1)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
   %agent(i).set_property("sensor",Sensor_LiDAR(i));
   %agent(i).set_property("sensor",Sensor_LiDAR(i,'noise',1.0E-2 ,'seed',3));
   % env = stlread('3F.stl');
@@ -142,7 +142,7 @@ for i = 1:N
   %agent(i).set_property("estimator",Estimator_UKF2DSLAM_Vehicle(agent(i)));%加速度次元入力モデルのukfslam車両も全方向も可
   %% set reference property
   agent(i).reference = [];
-  agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
+  agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0)); % Voronoi重心
   %agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]})); % 時変な目標状態
   %agent(i).set_property("reference", Reference_Time_Varying("gen_ref_saddle", {"freq", 20, "orig", [0; 10; 0], "size", [10, 10, 0], "phase", -pi / 2})); % 時変な目標状態
   %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
