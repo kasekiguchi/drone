@@ -8,13 +8,14 @@ close all
 flg.bilinear = 0; %1:双線形モデルへの切り替え
 
 %データ保存先ファイル名(逐次変更する)
-FileName = 'EstimationResult_12state_5_31_normal3.mat';
+delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_1_normal.mat; %同じファイル名を使うときはコメントイン
+FileName = 'EstimationResult_12state_6_1_normal.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる)
 % loading_filename = 'sim_rndP_12state';
 % loading_filename = 'sim_rndP4';
 % loading_filename = '2023_0529_1804_logger_cricle_LS.mat';
-loading_filename = '5_31_1';
+loading_filename = '6_1';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
