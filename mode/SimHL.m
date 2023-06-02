@@ -7,12 +7,12 @@
 fExp = 0; % 1: experiment   0: numerical simulation
 flag.fMotive = 0; % 1: active
 flag.fOffline = 0; % 1: active : offline verification with saved data
-fDebug = 1; % 1: active : for debug function
 ts = 0;
 dt = 0.025;
 te = 5;
 time = TIME(ts,dt,te);
-debug_func = @(app) app.logger.plot({1, "p", "er"},"FH",app.UIAxes,"xrange",[ts,te]);
+fDebug = 1; % 1: active : for debug function
+debug_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), fExp, [],[]);
 initial_state.p = arranged_position([0, 0], 1, 1, 0);
@@ -29,3 +29,8 @@ agent.set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5
 %agent.set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
 agent.set_property("controller", Controller_HL(dt));                                                                                     % 階層型線形化
 
+function dfunc(app)
+app.logger.plot({1, "p", "er"},"FH",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "q", "er"},"FH",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "input", ""},"FH",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+end

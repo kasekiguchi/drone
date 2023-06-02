@@ -467,11 +467,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       end
 
       for fi = 1:length(list) % fi : 図番号
-        % if length(list) == 1
-        %   spfi = fh;
-        % else
-        %   spfi = subplot(frow, fcol, fi,ax);
-        % end
+         if length(list) == 1
+           spfi = ax;
+         else
+           spfi = subplot(frow, fcol, fi);
+         end
         plegend = [];
         N = list{fi}{1}; % indices of variable drones. example : [1 2]
         param = list{fi}{2}; % p,q,v,w, etc
@@ -509,7 +509,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
               end
             end
 
-            hold on
+            hold(ax, "on");
 
             switch length(ps)
               case 3
@@ -557,7 +557,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                   plegend = [plegend, att];
               end
 
-              daspect([1 1 1]);
+              daspect(ax,[1 1 1]);
             else
 
               if isempty(vrange)
@@ -569,38 +569,38 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
               plegend = [plegend, append(vrange, att)];
             end
 
-            ylabel(ps(2));
+            ylabel(ax, ps(2));
             if length(ps) == 3; zlabel(ps(3)); end
           end
 
         end
 
-        lgd = legend(plegend);
+        lgd = legend(ax,plegend);
 
         if ~fhold
-          hold off
+          hold(ax,"off");
         end
 
         if fcolor
           txt = {''};
 
           if length([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]) == 2
-            Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')])); % take off phase
+            Square_coloring(obj.Data.t([find(obj.Data.phase == 116, 1), find(obj.Data.phase == 116, 1, 'last')]),[],[],[],ax); % take off phase
             %                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
             txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
           end
 
           if length([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]) == 2
-            Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
+            Square_coloring(obj.Data.t([find(obj.Data.phase == 102, 1), find(obj.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],ax); % flight phase
             txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
           end
 
           if length([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]) == 2
-            Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
+            Square_coloring(obj.Data.t([find(obj.Data.phase == 108, 1), find(obj.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],ax); % landing phase
             txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
           end
 
-         % text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
+          text(ax,spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
         end
 
       end
