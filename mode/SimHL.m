@@ -1,13 +1,10 @@
-flag.fMotive = 0; % 1: active
-flag.fOffline = 0; % 1: active : offline verification with saved data
 ts = 0;
 dt = 0.025;
 te = 5;
 time = TIME(ts,dt,te);
-fDebug = 1; % 1: active : for debug function
 debug_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
-logger = LOGGER(1, size(ts:dt:te, 2), fExp, [],[]);
+logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 initial_state.p = arranged_position([0, 0], 1, 1, 0);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
