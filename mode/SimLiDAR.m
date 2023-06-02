@@ -6,13 +6,13 @@ debug_func = @(app) dfunc(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
 
-% env = stlread('3F.stl');
-  a = 1;
-  b = 2;
-  c = 3;
-  Points = [4 0 0]+[-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c]; 
-  Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
-  env = triangulation(Tri,Points);
+env = stlread('3F.stl');
+  % a = 1;
+  % b = 2;
+  % c = 3;
+  % Points = [4 0 0]+[-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c]; 
+  % Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
+  % env = triangulation(Tri,Points);
 
 initial_state.p = arranged_position([0, 0], 1, 1, 0);
 initial_state.q = [1; 0; 0; 0];
@@ -28,5 +28,7 @@ agent.set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5
 agent.set_property("controller", Controller_HL(dt));                                                                                     % 階層型線形化
 
 function dfunc(app)
-app.logger.plot({1, "p", "er"},"FH",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+%app.agent.animation(app.logger, "target", 1, "opt_plot", ["sensor", "lidar"]);
+%agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true,'fFiled',1));%false));
+app.agent.show(["sensor", "lidar"], "ax", app.UIAxes, "param", struct("fLocal", false));
 end

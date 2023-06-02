@@ -37,9 +37,10 @@ methods
                 param.Motive_ref = 0;
                 param.fig_num = 1;
                 param.mp4 = 0;
+                param.opt_plot = [];
             end
             p = obj.parameter;
-            mov = DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"target",param.target,"rotor_r",p.rotor_r,"fig_num",param.fig_num,"mp4",param.mp4,"gif",param.gif,"Motive_ref",param.Motive_ref,"animation",false);
+            mov = DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"target",param.target,"rotor_r",p.rotor_r,"fig_num",param.fig_num,"mp4",param.mp4);
             mov.animation(logger,"opt_plot",param.opt_plot,"frame_size",[p.Lx,p.Ly],"self",obj,"realtime",true,"rotor_r",p.rotor_r,"target",param.target,"fig_num",param.fig_num,"gif",param.gif,"Motive_ref",param.Motive_ref);
         end
 end

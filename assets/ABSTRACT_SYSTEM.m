@@ -243,13 +243,14 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.model.param = obj.parameter.get();
         end
 
-        function fh=show(obj,str,opt)
+        function ax=show(obj,str,opt)
             % requires each target class' show method accept
             % "logger","FH","t","param" option inputs
             arguments
                 obj
                 str
                 opt.FH = 1;
+                opt.ax = [];
                 opt.logger = [];
                 opt.t = [];
                 opt.param = [];
@@ -264,7 +265,11 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                 for i = str(j,:)
                     tmp = tmp.(i);
                 end
-                fh = tmp.show("logger",opt.logger,"FH",opt.FH,"t",opt.t,"param",param);
+                if isempty(opt.ax)
+                  ax = tmp.show("logger",opt.logger,"FH",opt.FH,"t",opt.t,"param",param);
+                else
+                  ax = tmp.show("logger",opt.logger,"ax",opt.ax,"t",opt.t,"param",param);
+                end
             end
         end
     end
