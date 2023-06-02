@@ -374,14 +374,15 @@ dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
 % [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
 % reshape([fi;Mi],4*N,1);
 x0data = [0;0;0];
-r0data = [0;0;0;0];
+r0data = [1;0;0;0];
 dx0data = [0;0;0];
 o0data = [0;0;0];
 q1 = [0,0,1]'; q2 = [0,0,1]'; q3 = [0,0,1]'; q4 = [0,0,1]';
 qidata = [q1;q2;q3;q4];
 w1 = [0,0,0]'; w2 = [0,0,0]'; w3 = [0,0,0]'; w4 = [0,0,0]';
 widata = [w1;w2;w3;w4];
-r1 = [0,0,0,0]'; r2 = [0,0,0,0]'; r3 = [0,0,0,0]'; r4 = [0,0,0,0]';
+r1 = [1,0,0,0]'; r2 = [1,0,0,0]'; r3 = [1,0,0,0]'; r4 = [1,0,0,0]';
+% r1 = [1,1,1,1]'; r2 = [0,0,0,0]'; r3 = [0,0,0,0]'; r4 = [0,0,0,0]';
 ridata = [r1;r2;r3;r4];
 o1 = [0,0,0]'; o2 = [0,0,0]'; o3 = [0,0,0]'; o4 = [0,0,0]'; 
 oidata = [o1;o2;o3;o4];
@@ -395,7 +396,7 @@ udata =[fidata;Midata];
 % [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)]
 gdata = 9.81;
 m0data = 1;
-j0data = [1,1,1];
+j0data = [0.01,0.011,0.011];
 rho1data = [1,1,1]; rho2data = [1,-1,1]; rho3data = [-1,-1,1]; rho4data = [-1,1,1];
 rhodata = [rho1data,rho2data,rho3data,rho4data];
 lidata = [0.5,0.5,0.5,0.5];
@@ -405,8 +406,15 @@ jidata = [j1data,j2data,j3data,j4data];
 P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
 
 %%
+x0 = [zeros(3,1);[1;0;0;0];zeros(6,1);repmat([0;0;1],4,1);zeros(12,1);repmat([1;0;0;0],4,1);repmat([0;0;0],4,1)];
+u0 = zeros(4*4,1);
+P = [9.81, 1, [0.01, 0.01, 0.01], [0.2,0.1,-0.1, -0.2,0.1,-0.1, -0.2,-0.1,-0.1, 0.2,-0.1,-0.1], [1 1 1 1], [1 1 1 1],0.005*ones(1,12)]
+
+%%
 %             3       7        10       13     25      37      53      65    
 %dX = [dx0 3*1;dr0 4*1;ddx0 3*1;do0 3*1;dqi 3*N;dwi 3*N;dri 4*N;doi 3*N]
-iAdata =inv(Addx0do0_4(xdata,udata,P));
-ddx0do0_4(xdata,udata,P,iAdata);
-dxdata = tmp_cable_suspended_rigid_body_with_4_drones(xdata,udata,P,ddxdata)
+% iAdata =inv(Addx0do0_4(xdata,udata,P));
+% ddx0do0_4(xdata,udata,P,iAdata);
+% dxdata = reshape(tmp_cable_suspended_rigid_body_with_4_drones(xdata,udata,P,ddxdata),[13,5])
+dxdata = reshape(cable_suspended_rigid_body_with_4_drones(x0,udata,P),[13,5])
+
