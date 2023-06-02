@@ -57,16 +57,16 @@ classdef EKF < ESTIMATOR_CLASS
 %             end
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             p = model.param;
-            if ~isempty(param)
-                F=fieldnames(param);
-                for i = 1: length(F)
-                    if strcmp(F{i},"P")
-                        obj.result.(F{i}) = param.(F{i}); %
-                    else
-                        obj.(F{i}) = param.(F{i}); %
-                    end
-                end
-            end
+            % if ~isempty(param)
+            %     F=fieldnames(param);
+            %     for i = 1: length(F)
+            %         if strcmp(F{i},"P")
+            %             obj.result.(F{i}) = param.(F{i}); %
+            %         else
+            %             obj.(F{i}) = param.(F{i}); %
+            %         end
+            %     end
+            % end
             A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
             C = obj.JacobianH(x,p);
 

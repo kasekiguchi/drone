@@ -36,11 +36,11 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
         end
         function result = do(obj, Param)  
            %Param={time,FH}
-           obj.cha = get(Param{2}, 'currentcharacter');
+           obj.cha = Param{1}{2};
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
-                t = Param{1}.t-obj.t; % 目標重心位置（絶対座標）
+                t = Param{1}{1}.t-obj.t; % 目標重心位置（絶対座標）
            else
-                obj.t=Param{1}.t;
+                obj.t=Param{1}{1}.t;
                 t = obj.t;
            end
            %obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）

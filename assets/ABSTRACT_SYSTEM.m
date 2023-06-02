@@ -128,23 +128,23 @@ end
 
 methods % Do methods
 
-  function do_sensor(obj,param1,param2,param3,param4)
-        obj.do_parallel("sensor", param1,param2,param3,param4);
+    function do_sensor(obj,varargin)
+        obj.do_parallel("sensor",varargin);
     end
 
-    function do_estimator(obj, param1,param2,param3,param4)
-        obj.do_sequential("estimator", param1,param2,param3,param4);
+    function do_estimator(obj,varargin)
+        obj.do_sequential("estimator",varargin);
     end
 
-    function do_reference(obj, param1,param2,param3,param4)
-        obj.do_sequential("reference", param1,param2,param3,param4);
+    function do_reference(obj,varargin)
+        obj.do_sequential("reference",varargin);
     end
 
-    function do_controller(obj, param1,param2,param3,param4)
-        obj.do_parallel("controller", param1,param2,param3,param4);
+    function do_controller(obj,varargin)
+        obj.do_parallel("controller",varargin);
     end
 
-    function do_model(obj, param1,param2,param3,param4)
+    function do_model(obj,varargin)
         % 推定値でmodelの状態を上書きした上でmodelのdo method を実行
         if obj.model.state.list == obj.estimator.result.state.list % TODO　１回目の時に右辺が定義されていないのでは？
             obj.model.state.set_state(obj.estimator.result.state.get());
@@ -156,7 +156,7 @@ methods % Do methods
 
         end
 
-        obj.model.do(obj.input,param1,param2,param3,param4);
+        obj.model.do(obj.input,varargin);
     end
 
 end
@@ -176,13 +176,13 @@ methods % set, do property
         obj.(prop).result = [];
     end
 
-    function do_parallel(obj, prop, param1,param2,param3,param4)
+    function do_parallel(obj, prop,varargin)
         % prop : property name
         % param : parameter to do a property
-        result = obj.(prop).(obj.(prop).name(1)).do(param{1});
+        result = obj.(prop).(obj.(prop).name(1)).do(varargin);
 
         for i = 2:length(obj.(prop).name) % (prop).resultに結果をまとめるため
-            tmp = obj.(prop).(obj.(prop).name(i)).do(param{i}); % = result
+            tmp = obj.(prop).(obj.(prop).name(i)).do(varargin); % = result
             F = fieldnames(tmp);
 
             for j = 1:length(F)
@@ -216,17 +216,17 @@ methods % set, do property
         obj.(prop).result = result;
     end
 
-    function do_sequential(obj, prop, param1,param2,param3,param4)
+    function do_sequential(obj, prop,varargin)
         % prop : property name
         % param : parameter to do a property
         % 複数同じpropertyを設定した場合recursiveに参照値を求める．
         % result = prop.prop1.do(param{1})
         % result = prop.prop2.do(param{2},result)
         % result = prop.prop3.do(param{3},result) ...
-        result = obj.(prop).(obj.(prop).name(1)).do(param{1});
+        result = obj.(prop).(obj.(prop).name(1)).do(varargin);
 
         for i = 2:length(obj.(prop).name) % prop.resultに結果をまとめるため
-            tmp = obj.(prop).(obj.(prop).name(i)).do(param{i}, result);
+            tmp = obj.(prop).(obj.(prop).name(i)).do(varargin, result);
             F = fieldnames(tmp);
 
             for j = 1:length(F)
