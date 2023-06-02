@@ -109,7 +109,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       obj.result = result;
     end
 
-    function fh = show(obj, opt)
+    function ax = show(obj, opt)
         % 環境の描画の仕方
         % agent.sensor.lidar.show('FH',1,'logger',logger,'param',struct('fField',1))
       arguments
@@ -117,6 +117,7 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         opt.fField = true;
         opt.fLocal = true; % ボディ座標から見たセンサー情報
         opt.FH = 1;
+        opt.ax = [];
         opt.logger = [];
         opt.t = 1;
         opt.p = obj.self.plant.state.p;
@@ -124,8 +125,14 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         opt.po = obj.result.sensor_points;
         opt.param = [];
       end
-      if ~isempty(opt.logger)
+      if isempty(opt.ax)
         fh = figure(opt.FH);
+        ax = fh.CurrentAxes;
+        fh.WindowState = 'maximized';
+      else
+        ax = opt.ax;
+      end
+      if ~isempty(opt.logger)
         logger = opt.logger;
         p = logger.Data.agent.plant.result{opt.t}.state.p;
         R = logger.Data.agent.plant.result{opt.t}.state.q;
@@ -138,7 +145,6 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         p = opt.p;
         R = opt.R;
         po = opt.po;
-        fh = figure(opt.FH);
       end
       if ~isempty(opt.param)
         fn = fieldnames(opt.param);
@@ -152,17 +158,15 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         case 3
           R = rotmat(quaternion(R(:)', 'euler', 'ZYX', 'frame'), 'point');
       end
-      ax = fh.CurrentAxes;
-      fh.WindowState = 'maximized';
-      clf(fh);
-      hold on
-      axis equal
-      daspect([1 1 1]);
-      view([-3 1 2]);
-      xlabel("x");
-      ylabel("y");
-      zlabel("z");
-      axis vis3d
+      cla(ax);
+      hold(ax,"on");
+      axis(ax,"equal");
+      daspect(ax,[1 1 1]);
+      view(ax,[-3 1 2]);
+      xlabel(ax,"x");
+      ylabel(ax,"y");
+      zlabel(ax,"z");
+      axis(ax,"vis3d");
       if opt.fLocal % ボディ座標系
         p = [0; 0; 0];
         po = R' * po - p(:);
@@ -178,17 +182,17 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
           bld.FaceAlpha = 0.5; % remove the transparency
           bld.FaceColor = 'b'; %
           bld.LineStyle = '-'; % 'none'; % remove the lines
-          patch(bld);
+          patch(ax,bld);
         end
         %campos(p +10*[-1;-0.2;0.2]);
         %camtarget(p);
       end
-      quiver3(p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
-      plot3(p(1), p(2), p(3), 'bx');
-      plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 1);
-      xlim([p(1) - 10, p(1) + 10]);
-      ylim([p(2) - 10, p(2) + 10]);
-      zlim([p(3) - 10, p(3) + 10]);
+      quiver3(ax,p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
+      plot3(ax,p(1), p(2), p(3), 'bx');
+      plot3(ax,po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 1);
+      xlim(ax,[p(1) - 10, p(1) + 10]);
+      ylim(ax,[p(2) - 10, p(2) + 10]);
+      zlim(ax,[p(3) - 10, p(3) + 10]);
     end
     function Qpi = inverse_matrices(obj, p, ids)
       % Qpi : inv(Q-p) = [r1;r2;r3] に対して 各行が [r1,r2,r3] となっている．
