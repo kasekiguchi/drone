@@ -17,7 +17,7 @@ clear
 anum=4;%変数の数
 alp=zeros(anum+1,1);
 alp(anum+1)=1;
-alp(anum)=0.88;%alphaの初期値
+alp(anum)=0.86;%alphaの初期値
 for a=anum-1:-1:1
     alp(a)=(alp(a+2)*alp(a+1))/(2*alp(a+2)-alp(a+1));
 end
@@ -33,7 +33,7 @@ k=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt); % xdiag([100,10,10,1])
 
 x0=[50,0.01];
 rng=0.02;
-i=2;
+i=1;
 fun=@(x)(integral(@(w) abs( -k(i).*abs(w).^alp(i) + k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), rng,rng+1) +integral(@(w) abs( k(i).*w-k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0,rng));
 % fun=@(x)(integral(@(w) abs( k(i).*abs(w).^alp(i) - k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0.1,1));
 % fun=@(x)(integral(@(w) abs( k(i).*w-k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alp(i)), 0,0.5));

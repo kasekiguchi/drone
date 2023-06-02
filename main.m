@@ -245,10 +245,10 @@ if fsave==1
 %     subfolder='sim';%sim or exp or sample
 %     subfolder='sample';%sim or exp or sample
     
-    ExpSimName='kiyama';%実験,シミュレーション名
+    ExpSimName='ifacslide';%実験,シミュレーション名
 %     contents='appox_error01';%実験,シミュレーション内容
 % contents='ft_jy_002';%実験,シミュレーション内容
-contents='cricle_LS';%実験,シミュレーション内容
+contents='modelerror_FT5';%実験,シミュレーション内容
 % contents='FT_jxy150';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath

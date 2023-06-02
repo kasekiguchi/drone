@@ -52,8 +52,8 @@ if fLogN == 1
 %     n=20:23;
 elseif fLogN==2
 
-    name1 = logger_proba_LS;%LS
-    name2 = logger_proba_FT;%FT
+    name1 = logger_modelerror_LS2;%LS
+    name2 = logger_modelerror_ft;%FT
 %     name1 = logger_saddle2_LS;%LS
 %     name2 = logger_saddle2_FT;%FT
 
@@ -567,30 +567,30 @@ else
 end
 
 %二乗誤差平均
-% if fLogN ==1
-%      RMSE = rmse(ref,est)
-% %      fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
-% %         RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
-% %         fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
-% elseif  fLogN == 2
-%     RMSE_LS = rmse(ref1,est1)
-%     RMSE_FT = rmse(ref2,est2)
-% else
-%     if isempty(c)
-%         c = string(1:logNum);
-%     end
-%     RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
-%     RMSE = zeros(logNum,12);
-%         for i =1:logNum
-%             refs = zeros(3,k(i)-1);%kはtimeの長さ
-%             RMSE(i,1:12) = [rmse(ref{1,i},est{1,i}),rmse(refs,vel{1,i}),rmse(refs,att{1,i}),rmse(refs,w{1,i})];
-%             RMSElog(i+1,1:13) = [c(i),RMSE(i,1:12)];
-%             fprintf('#%s RMSE\n',c(i));
-%             fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
-%             fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
-%            
-%         end
-% end
+if fLogN ==1
+     RMSE = rmse(ref,est)
+%      fprintf('#%d RMSE_x    RMSE_y   RMSE_z \n',i);
+%         RMSE(i,1:3) = rmse(ref{1,i},est{1,i});
+%         fprintf('       %.4f    %.4f    %.4f \n',RMSE(i,1:3))
+elseif  fLogN == 2
+    RMSE_LS = rmse(ref1,est1)
+    RMSE_FT = rmse(ref2,est2)
+else
+    if isempty(c)
+        c = string(1:logNum);
+    end
+    RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
+    RMSE = zeros(logNum,12);
+        for i =1:logNum
+            refs = zeros(3,k(i)-1);%kはtimeの長さ
+            RMSE(i,1:12) = [rmse(ref{1,i},est{1,i}),rmse(refs,vel{1,i}),rmse(refs,att{1,i}),rmse(refs,w{1,i})];
+            RMSElog(i+1,1:13) = [c(i),RMSE(i,1:12)];
+            fprintf('#%s RMSE\n',c(i));
+            fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
+            fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
+           
+        end
+end
 
 % figure
 %図:[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
@@ -934,9 +934,12 @@ legend(legend_str);
     end
 
     function RMSE = rmse(ref,est)
-        RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
-        RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
-        RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
+%         RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
+%         RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
+%         RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
+RMSE_x=sqrt(sum(((ref(1,:)-est(1,:)).^2)));
+        RMSE_y=sqrt(sum(((ref(2,:)-est(2,:)).^2)));
+        RMSE_z=sqrt(sum(((ref(3,:)-est(3,:)).^2)));
         RMSE = [RMSE_x RMSE_y RMSE_z];
     end
 
