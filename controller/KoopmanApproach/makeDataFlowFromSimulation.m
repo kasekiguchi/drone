@@ -6,7 +6,7 @@ function output = makeDataFlowFromSimulation(varargin)
 %                 X = varargin(2)(varagin(1))
 %                 入力する関数ハンドルXの出力が追加したい値を含む縦ベクトルであること
 %   output: 出力されるデータフロー行列 ↓系列, →時系列
-%   入力にvararginを使っているのはデータフローに観測量を追加するしないで分けるのがいやだったから
+%   入力にvararginを使っているのはデータフローに観測量を追加するかしないかで分けたくないから
 %% ファイル名の読み込み
 % 拡張子をチェックして含まれていない(フォルダを指定)している場合はフラグをON
 data_Filename = varargin{1};

@@ -12,7 +12,8 @@ FileName = 'EstimationResult_12state.mat';
 
 % 読み込むデータファイル名
 % loading_filename = 'sim_rndP_12state';
-loading_filename = 'sim_rndP4';
+% loading_filename = 'sim_rndP4';
+loading_filename = '2023_0529_1804_logger_cricle_LS.mat';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -44,7 +45,11 @@ disp('now loading data set')
 Data.HowmanyDataset = 100;
 
 for i= 1: Data.HowmanyDataset
-    Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
+    if endsWith(loading_filename,'.mat')
+        Dataset = ImportFromExpData(loading_filename);
+    else
+        Dataset = ImportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
+    end
     if i==1
         Data.X = [Dataset.X];
         Data.U = [Dataset.U];
@@ -54,7 +59,7 @@ for i= 1: Data.HowmanyDataset
         Data.U = [Data.U, Dataset.U];
         Data.Y = [Data.Y, Dataset.Y];
     end
-    disp(num2str(i))
+    disp(append('loading data number: ',num2str(i),', now data:',num2str(Dataset.N),', all data: ',num2str(size(Data.X,2))))
 end
 disp('loaded')
 
@@ -84,7 +89,7 @@ est.observable = F;
 disp('Estimated')
 
 %% Simulation by Estimated model
-simResult.reference = InportFromExpData('TestData3.mat');
+simResult.reference = ImportFromExpData('TestData3.mat');
 if flg.bilinear == 1
 %     simResult.Z(:,1) = F(simResult.reference.X(:,1));
 %     simResult.Xhat(:,1) = simResult.reference.X(:,1);

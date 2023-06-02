@@ -13,8 +13,10 @@ function data = ImportFromExpData(expData_Filename)
 % 読み込むファイル名を指定
 % expData_Filename = 'TestData1.mat'
 
-load(expData_Filename);
+logger = load(expData_Filename);
+logger = logger.(string(fieldnames(logger)));
 clear data % 読み込んだファイル内のdataと同名の変数を初期化
+
 %データの個数をチェック
 data.N = find(logger.Data.t,1,'last');
 

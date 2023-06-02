@@ -11,15 +11,17 @@ clear all; close all;
 %% データ読み込み
 % San Diego Blackout data Samplingtime = 35 sec
 % dataFlowP = readmatrix('sd.dat.txt'); 
-
+% 
 % % UCTE Grid-Wide Disturbance data Sampling time = 30 sec
 % dataFlowP = readmatrix('ucte.dat.txt'); 
 % dataFlowP = dataFlowP(1:end,1:end-1); % 幻の9列目が読み込まれたため,とりあえず最後の1列を消去
 
 % シミュレーションデータからデータフローを作成するテスト
 F = @quaternions;
-dataFlowP = makeDataFlowFromSimulation('Data/simData_Koopman_rndP2O4',F);
+% dataFlowP = makeDataFlowFromSimulation('Data/simData_Koopman_rndP2O4',F);
 % dataFlowP = makeDataFlowFromSimulation('sim_rndP4_1.mat');
+% save('Data/simData_Koopman_rndP2O4/sim_rnd_P4_appendAll4KMD.mat','dataFlowP')
+load('Data/simData_Koopman_rndP2O4/sim_rnd_P4_appendAll4KMD.mat')
 
 % 元データは縦列が時系列なので横向きになるように転置
 dataFlowP = dataFlowP';
@@ -75,40 +77,36 @@ P = matrix.V*matrix.T;
 % end
 r = dataFlowP(:,matrixSize.N)-dataFlowP(:,1:matrixSize.N-1)*matrix.c;
 
-%% モード分解
+%%
 P(:,matrixSize.N-1) = P(:,matrixSize.N-1) + r;
 % for j = 1:matrixSize.N-1
 %     P(:,matrixSize.N-1) = P(:,matrixSize.N-1)+matrix.lambda(j)^(matrixSize.N-1)*matrix.V(:,j);
 % end
 
 % %% 論文の(D)
-% % 共役複素数を探す
-% lambda_dash = matrix.lambda*transpose(matrix.lambda);
-% [row,col]=ind2sub([40,40],find(abs(imag(lambda_dash))<0.001));
-% % ISO = row<col;
-% ISO = find(row<col);
-% L1 = matrix.lambda(row(ISO(end-1)));
-% L2 = matrix.lambda(col(ISO(end-1)));
-% V1 = matrix.V(:,row(ISO(end-1)));
-% V2 = matrix.V(:,col(ISO(end-1)));
-% 
-% % P_Unstable = L1.*V1+L2.*V2;
-% for k  = 1:matrixSize.N
-%     P_Unstable(:,k) = L1.^k.*V1 + L2.^k.*V2;
-% end
+% 共役複素数を探す
+% todo lambda_dashが対象行列になってない?
+lambda_dash = matrix.lambda*transpose(matrix.lambda);
+[row,col]=ind2sub(size(lambda_dash),find(abs(imag(lambda_dash))<0.001));
+%% ISO = row<col;
+ISO = find(row<col);
+L1 = matrix.lambda(row(ISO(end-1)));
+L2 = matrix.lambda(col(ISO(end-1)));
+V1 = matrix.V(:,row(ISO(end-1)));
+V2 = matrix.V(:,col(ISO(end-1)));
+
+% P_Unstable = L1.*V1+L2.*V2;
+for k  = 1:matrixSize.N
+    P_Unstable(:,k) = L1.^k.*V1 + L2.^k.*V2;
+end
 
 %% 結果をplot
-fnum = 0;
+fnum = 1;
 % %% データフロー
-% figure(fnum)
-fnum = fnum+1;
-% plot(dataFlowP','Marker','.')
-% grid on
-
-%% クープマンモード
 figure(fnum)
 fnum = fnum+1;
-plot(matrix.V)
+plot(dataFlowP','Marker','.')
+grid on
 
 
 %% 複素平面
@@ -132,6 +130,7 @@ axis square
 grid on
 viscircles([0,0],1)
 % % モード分解
-% figure(3)
-% plot(real(P_Unstable)','Marker','.')
-% grid on
+figure(fnum)
+fnum = fnum+1;
+plot(real(P_Unstable)','Marker','.')
+grid on

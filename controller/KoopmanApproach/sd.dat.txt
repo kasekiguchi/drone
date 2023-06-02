@@ -1,0 +1,18 @@
+# San Diego Blackout data used in
+#
+# Y. Susuki and I. Mezic, 
+# Nonlinear Koopman modes and power system stability assessment without models, 
+# IEEE Transactions on Power Systems, vol.29, no.2, pp.899-907, March (2014).
+#
+# Sampling period = 35 sec
+# Path 44, IV-El Centro, Miguel-IV, El Centro-Pilot Knob, Pilot Knob-Knob, Pilot Knob-Yucca, J Hinds-Mirage, J Hinds-Eagle Mt.
+
+   2.8520e+03   1.7038e+02   7.7319e+01  -5.1071e+01  -1.9156e+02   1.0541e+02   2.4095e+02   1.0270e+02
+   2.8420e+03   1.6964e+02   7.6612e+01  -5.0398e+01  -1.9131e+02   1.0566e+02   2.4085e+02   1.0296e+02
+   2.8388e+03   1.7695e+02   8.0415e+01  -5.1570e+01  -1.9219e+02   1.0487e+02   2.3970e+02   1.0411e+02
+   2.8374e+03   1.8293e+02   8.8407e+01  -5.4141e+01  -1.9446e+02   1.0423e+02   2.3876e+02   1.0502e+02
+   2.8908e+03   1.6727e+02   1.2200e+02  -6.7749e+01  -2.7515e+02   1.6096e+02   2.4801e+02   9.5947e+01
+   2.9621e+03   1.1391e+02   1.7706e+02  -9.8993e+01  -2.5927e+02   8.0786e+01   2.6289e+02   8.0918e+01
+   3.0139e+03   7.2974e+01   2.2526e+02  -1.3570e+02  -2.3352e+02   4.6930e-02   2.7211e+02   7.1516e+01
+   3.0265e+03   1.1242e+02   2.4302e+02  -1.6946e+02  -2.1806e+02   4.6519e-02   2.7125e+02   7.1828e+01
+   3.3671e+03  -3.1068e-01   4.7987e+02   4.9435e-01  -6.0394e-01  -1.4782e-01   2.8270e+02  -6.4168e+01
