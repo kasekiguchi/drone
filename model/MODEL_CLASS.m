@@ -96,43 +96,27 @@ classdef MODEL_CLASS < dynamicprops
 
         end
 
-        function [] = do(obj, u, opts)
-            arguments
-                obj
-                u
-                opts = []
-            end
-            if isfield(opts, 'FH')
-
-                if ~isempty(opts.FH)
-                    cha = get(opts.FH, 'currentcharacter');
-
-                    if (cha == 'q' || cha == 's' || cha == 'a')
-                        return
-                    end
-
-                end
-
+        function [] = do(obj, u, varargin)
+            cha = varargin{1}{2};
+            if (cha == 'q' || cha == 's' || cha == 'a')
+                return
             end
 
-            if isfield(opts, 'param')
-                obj.param = opts.param;
-            end
+            % if isfield(opts, 'param')
+            %     obj.param = opts.param;
+            % end
+            obj.dt = varargin{1}{1}.dt;
 
-            if isfield(opts, 'dt')
-                obj.dt = opts.dt;
-            end
-
-            if ~isempty(obj.noise)
-
-                if ~isempty(obj.noise.seed)
-                    rng(obj.noise.seed * obj.param.t);
-                else
-                    rng('shuffle');
-                end
-
-                u = u + obj.noise.value .* randn(size(u));
-            end
+            % if ~isempty(obj.noise)
+            %
+            %     if ~isempty(obj.noise.seed)
+            %         rng(obj.noise.seed * obj.param.t);
+            %     else
+            %         rng('shuffle');
+            %     end
+            %
+            %     u = u + obj.noise.value .* randn(size(u));
+            %            end
 
             % 状態更新
             if contains(obj.time_scale, 'discrete')

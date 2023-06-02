@@ -106,23 +106,21 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
     end
 
-    function logging(obj, t, FH, agent, items)
+    function logging(obj, time, cha, agent, items)
       % logging(t,FH)
       % t : current time
       % FH : figure handle for keyboard input
       arguments
         obj
-        t
-        FH
+        time
+        cha
         agent
       end
-
       arguments (Repeating)
         items
       end
 
-      cha = get(FH, 'currentcharacter');
-
+      t = time.t;
       if isempty(cha)
         %                error("ACSL : FH is empty");
         cha = obj.Data.phase(obj.k);
@@ -439,6 +437,10 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         option.row_col (1, 2) {mustBeNumeric} = [ceil(length(list) / min(length(list), 3)) min(length(list), 3)]
         option.color {mustBeNumeric} = 1
         option.hold {mustBeNumeric} = 0
+        option.FH = [];
+        option.xrange = [];
+        option.yrange = [];
+        option.zrange = [];
       end
 
       ranget = option.time; % time range
@@ -449,9 +451,12 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       fhold = option.hold; % on/off flag for holding (only active to last subfigure)
 
       t = obj.data(0, "t", [], "ranget", ranget); % time data
-      fh = figure(fig_num);
-      fh.WindowState = 'maximized';
-
+      if isempty(option.FH)
+        ax = figure(fig_num);
+        ax.WindowState = 'maximized';
+      else
+        ax = option.FH;
+      end
       switch frow
         case 1
           yoffset = 0.05;
@@ -462,7 +467,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       end
 
       for fi = 1:length(list) % fi : 図番号
-        spfi = subplot(frow, fcol, fi);
+        % if length(list) == 1
+        %   spfi = fh;
+        % else
+        %   spfi = subplot(frow, fcol, fi,ax);
+        % end
         plegend = [];
         N = list{fi}{1}; % indices of variable drones. example : [1 2]
         param = list{fi}{2}; % p,q,v,w, etc
@@ -490,10 +499,14 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
             % plot
             if length(ps) == 3
-              plot3(tmpx, tmpy, tmpz);
+              plot3(ax,tmpx, tmpy, tmpz);
             else
-              plot(tmpx, tmpy(:, :, 1)); % tmpy(1:size(tmpx,1),:,1)
-              xlim([min(tmpx), max(tmpx)]);
+              plot(ax,tmpx, tmpy(:, :, 1)); % tmpy(1:size(tmpx,1),:,1)
+              if option.xrange
+                xlim(ax,[min(tmpx), max(tmpx)]);
+              else
+                xlim(ax,option.xrange);
+              end
             end
 
             hold on
@@ -506,30 +519,30 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             % set title label legend
             if length(ps) == 1
               ps = ["t", ps];
-              xlabel("Time [s]");
+              xlabel(ax,"Time [s]");
             else
-              xlabel(ps(1));
+              xlabel(ax,ps(1));
             end
 
             switch ps(2)
               case "p"
-                title(strcat("Position p of agent", string(n)));
+                title(ax,strcat("Position p of agent", string(n)));
               case "q"
-                title(strcat("Attitude q of agent", string(n)));
+                title(ax,strcat("Attitude q of agent", string(n)));
               case "v"
-                title(strcat("Velocity v of agent", string(n)));
+                title(ax,strcat("Velocity v of agent", string(n)));
               case "w"
-                title(strcat("Angular velocity w of agent", string(n)));
+                title(ax,strcat("Angular velocity w of agent", string(n)));
               case "z"
-                title(strcat("Position error integration of agent", string(n)));
+                title(ax,strcat("Position error integration of agent", string(n)));
               case "input"
-                title(strcat("Input u of agent", string(n)));
+                title(ax,strcat("Input u of agent", string(n)));
               otherwise
-                title(ps(2));
+                title(ax,ps(2));
             end
 
             if ps(1) ~= "t"
-              title(strcat("phase plot : ", string(param)));
+              title(ax,strcat("phase plot : ", string(param)));
 
               switch att
                 case "s"
@@ -587,7 +600,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
           end
 
-          text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
+         % text(spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
         end
 
       end
