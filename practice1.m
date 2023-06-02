@@ -36,19 +36,19 @@ ro2 = [-0.05; 0.05; 0.05];
 ro3 = [-0.05; -0.05; 0.05];
 ro4 = [0.05; -0.05; 0.05]; %ペイロードの重心とリングが接地している点までの長さ
 
-m0 = 0.1;
-m1 = 0.2;
-m2 = 0.2;
-m3 = 0.2;
-m4 = 0.2;
+m0 = 1;
+m1 = 2;
+m2 = 2;
+m3 = 2;
+m4 = 2;
 
 ge3 = [0;0;9.81]; 
 
 % syms J0 [3,3] real; syms J1 [3,3] real; syms J2 [3,3] real; syms J3 [3,3] real; syms J4 [3,3] real; 
-jx = 0.002237568;
-jy = 0.002985236;
-jz = 0.00480374;
-J0=diag([1.6667e-04,1.6667e-04,1.6667e-04]);
+jx = 0.005;
+jy = 0.005;
+jz = 0.005;
+J0=diag([0.01, 0.01, 0.01]);
 J1=diag([jx,jy,jz]);
 J2=diag([jx,jy,jz]);
 J3=diag([jx,jy,jz]);
@@ -202,16 +202,18 @@ f = [v0;ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new;dq1;dq2;dq3;dq4;do
 dQuat = [dqt0;dqt1;dqt2;dqt3;dqt4];
 u = [u1;u2;u3;u4;M1;M2;M3;M4];
 
+f = [v0,dqt0,ddx0_new,dol0_new,dq1,dq2,dq3,dq4,dos1_new,dos2_new,dos3_new,dos4_new,dqt1,dqt2,dqt3,dqt4,dol1,dol2,dol3,dol4];
+u = [u1,u2,u3,u4,M1,M2,M3,M4];
 
 % matlabFunction(f,'file','malti_drone_suspended_load_FL','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 % subs(f,u,[0,0,0,0,0,0,0,0])
 
 %%
-f_data = [dos1_new];
-% u_data = [M1;M2;M3;M4];
-u_data = [u1;u2;u3;u4];
-fx = subs(f_data,u_data,zeros(size(u_data)));
-gx = [subs(f_data,u_data,[1;zeros(11,1)])-fx,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(f_data,u_data,[zeros(11,1);1])-fx];
+% f_data = [dos1_new];
+% % u_data = [M1;M2;M3;M4];
+% u_data = [u1;u2;u3;u4];
+% fx = subs(f_data,u_data,zeros(size(u_data)));
+% gx = [subs(f_data,u_data,[1;zeros(11,1)])-fx,subs(f_data,u_data,[zeros(1,1);1;zeros(10,1)])-fx,subs(f_data,u_data,[zeros(2,1);1;zeros(9,1)])-fx,subs(f_data,u_data,[zeros(3,1);1;zeros(8,1)])-fx,subs(f_data,u_data,[zeros(4,1);1;zeros(7,1)])-fx,subs(f_data,u_data,[zeros(5,1);1;zeros(6,1)])-fx,subs(f_data,u_data,[zeros(6,1);1;zeros(5,1)])-fx,subs(f_data,u_data,[zeros(7,1);1;zeros(4,1)])-fx,subs(f_data,u_data,[zeros(8,1);1;zeros(3,1)])-fx,subs(f_data,u_data,[zeros(9,1);1;zeros(2,1)])-fx,subs(f_data,u_data,[zeros(10,1);1;zeros(1,1)])-fx,subs(f_data,u_data,[zeros(11,1);1])-fx];
 % simplifyFraction(f_data - (fx + gx*u_data));
 
 % f_data = [ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new];
@@ -242,7 +244,7 @@ q_dataset=[[0;0;1];[0;0;1];[0;0;1];[0;0;1]];
 ol0_dataset=[0;0;0];
 ol_dataset=[[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
 os_dataset=[[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
-u_dataset = [[0;0;-3];[0;0;-3];[0;0;-3];[0;0;-3]];
+u_dataset = [[0;0;-1];[0;0;-1];[0;0;-1];[0;0;-1]];
 
 % P1dataset=subs(P1_new,data,dataset);
 % P2dataset=subs(P2_new,data,dataset);
@@ -256,7 +258,7 @@ R0_matrix = [cos(alfa)*cos(beta)*cos(gunma)-sin(alfa)*sin(gunma),-cos(alfa)*cos(
             sin(alfa)*cos(beta)*cos(gunma)-cos(alfa)*sin(gunma),-sin(alfa)*cos(beta)*sin(gunma)-cos(alfa)*sin(gunma),sin(alfa)*sin(gunma);
             -sin(beta)*cos(gunma),sin(beta)*sin(gunma),cos(beta)];
 
-qt0_dataset=[0;1/2;0;0];
+qt0_dataset=[1;0;0;0];
 
 dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
 % dataset2 = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset;P1dataset;P2dataset];
