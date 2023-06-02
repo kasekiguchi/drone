@@ -11,7 +11,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
+fExp = 1; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 0; % 1: active : for debug function
@@ -191,7 +191,7 @@ clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},{1,"p1-p2","pr"},{1,"p1-p2-p3","pr"}, "fig_num", 5, "row_col", [2, 3]);
+logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"},{1, "inner_input", ""}, "fig_num", 5, "row_col", [2, 4]);
 % logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
 
 % agent(1).reference.timeVarying.show(logger)
@@ -204,7 +204,7 @@ logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},{1,"p
 %%
 if fExp
     save('experiment_6_2.mat',"logger");
-    logger.save();
+%     logger.save();
     movefile experiment_6_2.mat Datafolder;
 else
     save('simulation_6_2.mat',"logger");
