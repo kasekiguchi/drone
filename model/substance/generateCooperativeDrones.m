@@ -310,8 +310,9 @@ dR4 = R4*ol4hat;
 % Usage: dx=f+g*u
 x = [q1,q2,q3,q4,ol0,ol1,ol2,ol3,ol4,os1,os2,os3,os4];
 Quat = [qt0,qt1,qt2,qt3,qt4];
-f = [v0,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dq1,dq2,dq3,dq4,dol1,dol2,dol3,dol4];
+% f = [v0,ddx0_new,dol0_new,dos1_new,dos2_new,dos3_new,dos4_new,dq1,dq2,dq3,dq4,dol1,dol2,dol3,dol4];
 dQuat = [dqt0,dqt1,dqt2,dqt3,dqt4];
+f = [v0,dqt0,ddx0_new,dol0_new,dq1,dq2,dq3,dq4,dos1_new,dos2_new,dos3_new,dos4_new,dqt1,dqt2,dqt3,dqt4dol1,dol2,dol3,dol4];
 u = [u1,u2,u3,u4,M1,M2,M3,M4];
 
 
@@ -388,7 +389,7 @@ o1 = [0,0,0]'; o2 = [0,0,0]'; o3 = [0,0,0]'; o4 = [0,0,0]';
 oidata = [o1;o2;o3;o4];
 xdata=[x0data;r0data;dx0data;o0data;qidata;widata;ridata;oidata];
 
-fidata = [10,10,10,10]';
+fidata = [1,1,1,1]';
 M1 = [0,0,0]'; M2 = [0,0,0]'; M3 = [0,0,0]'; M4 = [0,0,0]';
 Midata = [M1;M2;M3;M4];
 udata =[fidata;Midata];
@@ -396,25 +397,26 @@ udata =[fidata;Midata];
 % [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)]
 gdata = 9.81;
 m0data = 1;
-j0data = [0.01,0.011,0.011];
+j0data = [0.01,0.01,0.01];
 rho1data = [1,1,1]; rho2data = [1,-1,1]; rho3data = [-1,-1,1]; rho4data = [-1,1,1];
 rhodata = [rho1data,rho2data,rho3data,rho4data];
 lidata = [0.5,0.5,0.5,0.5];
 midata = [0.5,0.5,0.5,0.5];
-j1data = [1,1,1]; j2data = [1,1,1]; j3data = [1,1,1]; j4data = [1,1,1];
+j1data = [0.005,0.005,0.005]; j2data = [0.005,0.005,0.005]; j3data = [0.005,0.005,0.005]; j4data = [0.005,0.005,0.005];
 jidata = [j1data,j2data,j3data,j4data];
-P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
+% P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
 
 %%
 x0 = [zeros(3,1);[1;0;0;0];zeros(6,1);repmat([0;0;1],4,1);zeros(12,1);repmat([1;0;0;0],4,1);repmat([0;0;0],4,1)];
 u0 = zeros(4*4,1);
-P = [9.81, 1, [0.01, 0.01, 0.01], [0.2,0.1,-0.1, -0.2,0.1,-0.1, -0.2,-0.1,-0.1, 0.2,-0.1,-0.1], [1 1 1 1], [1 1 1 1],0.005*ones(1,12)]
-
+u0 = [fidata;Midata]
+P = [9.81, 1, [0.01, 0.01, 0.01], [0.2,0.1,-0.1, -0.2,0.1,-0.1, -0.2,-0.1,-0.1, 0.2,-0.1,-0.1], [1 1 1 1], [1 1 1 1],0.005*ones(1,12)];
+% P = [9.81, 1, [0.01, 0.01, 0.01], [0.2,0.1,-0.1, -0.2,0.1,-0.1, -0.2,-0.1,-0.1, 0.2,-0.1,-0.1], [1 1 1 1], [1 1 1 1],0.005*ones(1,12)]
 %%
 %             3       7        10       13     25      37      53      65    
 %dX = [dx0 3*1;dr0 4*1;ddx0 3*1;do0 3*1;dqi 3*N;dwi 3*N;dri 4*N;doi 3*N]
 % iAdata =inv(Addx0do0_4(xdata,udata,P));
 % ddx0do0_4(xdata,udata,P,iAdata);
 % dxdata = reshape(tmp_cable_suspended_rigid_body_with_4_drones(xdata,udata,P,ddxdata),[13,5])
-dxdata = reshape(cable_suspended_rigid_body_with_4_drones(x0,udata,P),[13,5])
+dxdata = reshape(cable_suspended_rigid_body_with_4_drones(x0,udata,P),[5,13])'
 
