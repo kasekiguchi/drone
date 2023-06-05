@@ -109,22 +109,22 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       obj.result = result;
     end
 
-    function ax = show(obj, opt)
+    function ax = show(obj, varargin)%opt)
         % 環境の描画の仕方
         % agent.sensor.lidar.show('FH',1,'logger',logger,'param',struct('fField',1))
-      arguments
-        obj
-        opt.fField = true;
-        opt.fLocal = true; % ボディ座標から見たセンサー情報
-        opt.FH = 1;
-        opt.ax = [];
-        opt.logger = [];
-        opt.t = 1;
-        opt.p = obj.self.plant.state.p;
-        opt.R = obj.self.plant.state.q;
-        opt.po = obj.result.sensor_points;
-        opt.param = [];
-      end
+      % arguments
+      %   opt.fField = true;
+      %   opt.fLocal = true; % ボディ座標から見たセンサー情報
+      %   opt.FH = 1;
+      %   opt.ax = [];
+      %   opt.logger = [];
+      %   opt.t = 1;
+      %   opt.p = obj.self.plant.state.p;
+      %   opt.R = obj.self.plant.state.q;
+      %   opt.po = obj.result.sensor_points;
+      %   opt.param = [];
+      % end
+      opt = struct(varargin{:});
       if isempty(opt.ax)
         fh = figure(opt.FH);
         ax = fh.CurrentAxes;
@@ -134,9 +134,9 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       end
       if ~isempty(opt.logger)
         logger = opt.logger;
-        p = logger.Data.agent.plant.result{opt.t}.state.p;
-        R = logger.Data.agent.plant.result{opt.t}.state.q;
-        po = logger.Data.agent.sensor.result{opt.t}.sensor_points;
+        p = logger.Data.agent.plant.result{opt.k}.state.p;
+        R = logger.Data.agent.plant.result{opt.k}.state.q;
+        po = logger.Data.agent.sensor.result{opt.k}.sensor_points;
         if isfield(opt.param, "fField")
           opt.fField = opt.param.fField;
         end

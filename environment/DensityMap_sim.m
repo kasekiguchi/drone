@@ -56,21 +56,22 @@ classdef DensityMap_sim% < ENV_CLASS
             %s=surf(1:obj.grid_row,1:obj.grid_col,obj.grid_density);
             %s.VerticesColor = 'none';
             %pcolor(obj.xq,obj.yq,obj.grid_density);
-            contourf(obj.xq,obj.yq,obj.grid_density);
+            ax = varargin{1};
+            contourf(ax,obj.xq,obj.yq,obj.grid_density);
             %            surf(obj.xq,obj.yq,obj.grid_density);
-            obj.show_setting();
+            obj.show_setting(ax);
         end
-        function [] = show_setting(obj)
-            daspect([1 1 1])
-            xlabel('x [m]');
-            ylabel('y [m]');
-            xlim([obj.map_min(1) obj.map_max(1)]);
-            ylim([obj.map_min(2) obj.map_max(2)]);
-            view(0, 90);
+        function [] = show_setting(obj,ax)
+            daspect(ax,[1 1 1])
+            xlabel(ax,'x [m]');
+            ylabel(ax,'y [m]');
+            xlim(ax,[obj.map_min(1) obj.map_max(1)]);
+            ylim(ax,[obj.map_min(2) obj.map_max(2)]);
+            view(ax,0, 90);
             cmap=[[1 1 1];parula];
-            colormap(cmap)
-            colorbar
-            grid on;
+            colormap(ax,cmap)
+            colorbar(ax)
+            grid(ax,"on");
         end
     end
 end

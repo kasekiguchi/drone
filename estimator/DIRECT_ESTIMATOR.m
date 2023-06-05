@@ -11,7 +11,7 @@ classdef DIRECT_ESTIMATOR < ESTIMATOR_CLASS
             obj.self = self;
             obj.result.state=state_copy(self.model.state);
         end
-        function result=do(obj,~,~)
+        function result=do(obj,varargin)
             % Copy field values corresponding to the field of obj.result.state (=model.state) only.
             % 【Input】
             % 【Output】void

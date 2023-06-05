@@ -31,7 +31,8 @@ classdef RANGE_POS_SIM < SENSOR_CLASS
             %   result.state : State_obj,  p : position
             % 【入力】Target ：観測対象のModel_objのリスト
             if ~isempty(varargin)
-                Target=varargin{1}{1};
+                %Target=varargin{1}{3}.Data.agent;
+                Target=varargin{1}{5};
 %                obj.target=Target;
             else
                 Target=obj.target;

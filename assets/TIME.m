@@ -5,6 +5,7 @@ properties
     ts
     te
     dt
+    k = 1;
 end
 methods
   function obj = TIME(ts,dt,te)
