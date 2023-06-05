@@ -45,7 +45,7 @@ classdef EKF < ESTIMATOR_CLASS
             obj.result.P = param.P;
         end
         
-        function [result]=do(obj,param)
+        function [result]=do(obj,varargin)
             %   param : optional
             model=obj.self.model;
             sensor = obj.self.sensor.result;
@@ -56,7 +56,7 @@ classdef EKF < ESTIMATOR_CLASS
 %                 obj.y.list=sensor.state.list; % num_listは代入してはいけない．
 %             end
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
-            p = model.param;
+            p = obj.self.parameter.get();
             % if ~isempty(param)
             %     F=fieldnames(param);
             %     for i = 1: length(F)

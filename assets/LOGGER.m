@@ -154,7 +154,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
         obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
         obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
-        obj.Data.agent(n).input{obj.k} = agent(n).input;
+        obj.Data.agent(n).input{obj.k} = agent(n).controller.result.input;
 
         if obj.fExp
           obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;

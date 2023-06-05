@@ -26,6 +26,7 @@ classdef MODEL_CLASS < dynamicprops
         input_channel % ["v", "w"]
         noise
         fig
+        self
     end
 
     properties %(Access=private)
@@ -34,12 +35,13 @@ classdef MODEL_CLASS < dynamicprops
 
     methods
 
-        function obj = MODEL_CLASS(args) % constructor
+      function obj = MODEL_CLASS(self,args) % constructor
 
             arguments
-                args
+              self
+              args
             end
-
+            obj.self = self;
             if isempty(regexp(args.type, "EXP", 'once'))
                 param = args.param;
                 name = args.name;
@@ -96,17 +98,19 @@ classdef MODEL_CLASS < dynamicprops
 
         end
 
-        function [] = do(obj, u, varargin)
-            cha = varargin{1}{2};
+        function [] = do(obj, varargin)
+            cha = varargin{2};
             if (cha == 'q' || cha == 's' || cha == 'a')
                 return
             end
-
+            u = obj.self.input;%varargin{5}.controller.result.input;
+            if isempty(obj.param)
+              obj.param = obj.self.parameter.get();%varargin{5}.parameter.get();
+            end
             % if isfield(opts, 'param')
             %     obj.param = opts.param;
             % end
-            obj.dt = varargin{1}{1}.dt;
-
+            obj.dt = varargin{1}.dt;
             % if ~isempty(obj.noise)
             %
             %     if ~isempty(obj.noise.seed)

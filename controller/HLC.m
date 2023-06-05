@@ -16,7 +16,7 @@ classdef HLC < CONTROLLER_CLASS
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
         end
         
-        function result=do(obj,~,~)
+        function result=do(obj,varargin)
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
