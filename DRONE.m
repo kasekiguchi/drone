@@ -1,7 +1,15 @@
-classdef DRONE < ABSTRACT_SYSTEM
+classdef DRONE < handle
 % Drone class
 properties %(Access = private)
     fig
+    plant
+    model
+    parameter
+    sensor
+    estimator
+    reference
+    controller
+    input
 end
 
 methods
@@ -9,10 +17,10 @@ methods
     function obj = DRONE(args, param)
 
         arguments
-            args
+            args = struct("type","sim");
             param = []
         end
-        obj = obj@ABSTRACT_SYSTEM(args, param);
+        %obj = obj@ABSTRACT_SYSTEM(args, param);
 
         if contains(args.type, "EXP")
             obj.plant = DRONE_EXP_MODEL(args);

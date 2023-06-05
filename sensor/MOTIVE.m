@@ -38,7 +38,7 @@ methods
 
     end
 
-    function result = do(obj, ~)
+    function result = do(obj, varargin)
         % result=sensor.motive.do(motive)
         %   set obj.result.state : State_obj,  p : position, q : quaternion
         %   result :

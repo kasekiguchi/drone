@@ -34,13 +34,13 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
             syms t real
             obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
-        function result = do(obj, Param)  
+        function result = do(obj, varargin)  
            %Param={time,FH}
-           obj.cha = Param{1}{2};
+           obj.cha = varargin{2};
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
-                t = Param{1}{1}.t-obj.t; % 目標重心位置（絶対座標）
+                t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
            else
-                obj.t=Param{1}{1}.t;
+                obj.t=varargin{1}.t;
                 t = obj.t;
            end
            %obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
