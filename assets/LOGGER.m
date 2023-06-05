@@ -125,44 +125,53 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         %                error("ACSL : FH is empty");
         cha = obj.Data.phase(obj.k);
       end
+      % if t == 0 %初期値
+      %   obj.k = 1;
+      %   obj.Data.t(obj.k) = t;
+      %   obj.Data.phase(obj.k) = cha;
+      %   for n = obj.target
+      %     obj.Data.agent(n).estimator.result{1}.state = state_copy(agent(n).estimator.result.state);
+      %     obj.Data.agent(n).plant.result{1}.state = state_copy(agent(n).plant.state);
+      %   end
+      % else
+        obj.k = obj.k + 1;
+        obj.Data.t(obj.k) = t;
+        obj.Data.phase(obj.k) = cha;
 
-      obj.k = obj.k + 1;
-      obj.Data.t(obj.k) = t;
-      obj.Data.phase(obj.k) = cha;
-
-      for i = 1:length(obj.items)
-        obj.Data.(obj.items(i)){obj.k} = items{i};
-        % 注：サイズの固定されている数値データだけ保存可能
-      end
-
-      for n = obj.target
-
-        for i = 1:length(obj.agent_items) % sensor,estimator,reference以外のみ
-          str = strsplit(obj.agent_items(i), '.');
-          tmp = agent(n);
-          obj.Data.agent(n).(str{1}){obj.k} = tmp.(str{1});
+        for i = 1:length(obj.items)
+          obj.Data.(obj.items(i)){obj.k} = items{i};
+          % 注：サイズの固定されている数値データだけ保存可能
         end
 
-        obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
-        obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
-        obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
-        obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
+        for n = obj.target
 
-        if isfield(agent(n).sensor.result, "state")
-          obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
+          for i = 1:length(obj.agent_items) % sensor,estimator,reference以外のみ
+            str = strsplit(obj.agent_items(i), '.');
+            tmp = agent(n);
+            obj.Data.agent(n).(str{1}){obj.k} = tmp.(str{1});
+          end
+
+          obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
+          obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
+          obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
+          obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
+
+          if isfield(agent(n).sensor.result, "state")
+            obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
+          end
+
+          obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
+          obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
+          obj.Data.agent(n).input{obj.k} = agent(n).controller.result.input;
+
+          if obj.fExp
+            obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
+          else
+            obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
+          end
+
         end
-
-        obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
-        obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
-        obj.Data.agent(n).input{obj.k} = agent(n).controller.result.input;
-
-        if obj.fExp
-          obj.Data.agent(n).inner_input{obj.k} = agent(n).inner_input;
-        else
-          obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
-        end
-
-      end
+      %end
 
     end
 
@@ -467,11 +476,11 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       end
 
       for fi = 1:length(list) % fi : 図番号
-         if length(list) == 1
-           spfi = ax;
-         else
-           spfi = subplot(frow, fcol, fi);
-         end
+        if length(list) == 1
+          spfi = ax;
+        else
+          spfi = subplot(frow, fcol, fi);
+        end
         plegend = [];
         N = list{fi}{1}; % indices of variable drones. example : [1 2]
         param = list{fi}{2}; % p,q,v,w, etc

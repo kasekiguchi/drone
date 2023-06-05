@@ -38,20 +38,6 @@ varargin{5}.sensor.result = result;
 end
 
 function dfunc(app)
-%app.agent.animation(app.logger, "target", 1, "opt_plot", ["sensor", "lidar"]);
-%agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true,'fFiled',1));%false));
-app.agent.show(["sensor", "lidar"], "ax", app.UIAxes, "param", struct("fLocal", false));
-end
-function r1 = merge_result(r1,r2)
-F = fieldnames(r2);
-
-                for j = 1:length(F)
-
-                    if strcmp(F{j}, 'state')
-                        r1.(F{j}) = state_copy(r2.(F{j}));
-                    else
-                        r1.(F{j}) = r2.(F{j});
-                    end
-
-                end
+app.agent.animation(app.logger,"ax", app.UIAxes,"self",app.agent, "target", 1, "opt_plot", ["sensor", "lidar"], "param",struct("fLocal", false,"fField",true));
+%app.agent.show(["sensor", "lidar"], "ax", app.UIAxes,"k",app.time.k,"logger",app.logger, "param",struct("fLocal", false,"fField",true));
 end

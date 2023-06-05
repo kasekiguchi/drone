@@ -30,13 +30,14 @@ classdef PID_CONTROLLER <CONTROLLER_CLASS
             %obj.ei = zeros(size(var,1),1);
         end
         
-        function u = do(obj,param,~)
+        function u = do(obj,varargin)
             % u = do(obj,param,~)
             % param (optional) : 
             %[p,q,v,w]=obj.strans(obj.self.estimator.result.state.get(obj.target));       % （グローバル座標）推定状態 (state object)
             %[rp,rq,rv,rw]=obj.rtrans(obj.self.reference.result.state.get(obj.target));   % （ボディ座標）目標状態 (state object) 
             %var=obj.strans(obj.self.estimator.result.state.get(obj.target));       % （グローバル座標）推定状態 (state object)
             %rvar=obj.rtrans(obj.self.reference.result.state.get(obj.target));   % （ボディ座標）目標状態 (state object) 
+            param = [];%struct(varargin{:});
             if ~isempty(param)
                 if isfield(param,'Kp'); obj.Kp=param.Kp; end
                 if isfield(param,'Ki'); obj.Ki=param.Ki; end

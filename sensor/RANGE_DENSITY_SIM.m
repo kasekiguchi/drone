@@ -22,7 +22,7 @@ classdef RANGE_DENSITY_SIM < SENSOR_CLASS
             % result=rdensity.do(varargin) : obj.r 内のdensity mapを返す．
             %   result.state : State_obj,  p : position
             % 【入力】varargin = {{Env}}      agent : センサーを積んでいる機体obj,    Env：観測対象のEnv_obj
-            Env=varargin{1}{1};
+            Env=varargin{1}{4};
             state=obj.self.plant.state; % 真値
             env = polyshape(Env.Vertices);
 

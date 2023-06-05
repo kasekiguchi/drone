@@ -10,7 +10,7 @@ classdef DirectController <CONTROLLER_CLASS
             obj.self= self;
         end
         
-        function u = do(obj,param,~)
+        function u = do(obj,varargin)
           % param = {state, xd}
             state=obj.self.model.state;
             xd=obj.self.reference.result.state;
