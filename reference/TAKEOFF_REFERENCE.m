@@ -13,7 +13,7 @@ classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
     function obj = TAKEOFF_REFERENCE(self,varargin)
       % generate takeoff reference w.r.t. position and velocity
       obj.self = self;
-      obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,4,4]));
+      obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
     end
     function  result= do(obj,varargin)
       % [Input] time,cha,logger,env
@@ -23,8 +23,9 @@ classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
         obj.result.state.xd = [obj.base_state;zeros(17,1)];
       end
       obj.result.state.xd = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
-      obj.result.state.p = obj.result.state.xd(1:4,1);
-      obj.result.state.v = obj.result.state.xd(5:8,1);
+      obj.result.state.p = obj.result.state.xd(1:3,1);
+      obj.result.state.v = obj.result.state.xd(5:7,1);
+            obj.result.name = "takeoff";
       result = obj.result;
 
     end

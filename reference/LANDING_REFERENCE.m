@@ -10,7 +10,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
     function obj = LANDING_REFERENCE(self,varargin)
       % generate landing reference w.r.t. position
       obj.self = self;
-      obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[3,3,3]));
+      obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
       obj.dt = varargin{1};
     end
     function  result= do(obj,varargin)
@@ -21,6 +21,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
       obj.result.state.xd = obj.gen_ref_for_landing(obj.self.estimator.result.state.p);
       obj.result.state.p = obj.result.state.xd;
       obj.result.state.v = [0;0;0];
+      obj.result.name = "landing";
       result = obj.result;
 
     end
