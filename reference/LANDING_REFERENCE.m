@@ -2,7 +2,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
   properties
     param
     self
-    vd = 0.2;
+    vd = 0.5;
     dt
   end
 
@@ -40,7 +40,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
       dz = obj.vd * obj.dt; % ref vel * sampling
       %% Set Xd
       Xd = obj.result.state.xd(1:3);
-      if Xd(3) > 0 || p(3) - Xd(3) <0.5 % stop descending if xd(3) is far from p(3)
+      if Xd(3) > 0 || p(3) - Xd(3) <0.2 % stop descending if xd(3) is far from p(3)
           Xd(3,1)   = Xd(3,1) - dz; % descending with constant rate
       end
 

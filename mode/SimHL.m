@@ -1,6 +1,6 @@
 ts = 0;
 dt = 0.025;
-te = 5;
+te = 25;
 time = TIME(ts,dt,te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -22,7 +22,7 @@ agent.controller = HLC(agent,Controller_HL(dt).param);
 run("ExpBase");
 
 function dfunc(app)
-app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "q", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "input", ""},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.t]);
+app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.t]);
+app.logger.plot({1, "input", ""},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.t]);
 end

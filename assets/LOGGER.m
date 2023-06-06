@@ -42,7 +42,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         option.overwrite_target = []
       end
 
-      if isstring(target) % save で保存されたデータを呼び出す場合
+      if isstring(target) || ischar(target) % save で保存されたデータを呼び出す場合
 
         if contains(target, "Data.mat") | ~contains(target, ".mat") % separate で保存された場合
 
@@ -234,6 +234,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         plant = obj.Data.agent.plant;
         save(dirname + "/plant.mat", "plant");
       else
+        filename = tmpname;
         list = "Data/" + filename + ".mat";
         log.Data = obj.Data;
         fn = fieldnames(obj);
@@ -246,7 +247,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
         end
 
-        save(filename, 'log');
+        save(list, 'log');
       end
 
     end
@@ -492,8 +493,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         for n = N
 
           for a = 1:strlength(attribute)
-            ps = split(param, '-'); % 「-」区切りで分割
-            att = extract(attribute, a);
+            ps = split(param, '-'); % separate by '-', each in {p q v w}
+            att = extract(attribute, a); % attribute {s e r p}
 
             switch length(ps)
               case 1 % 時間応答（時間を省略）
@@ -509,14 +510,22 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
 
             % plot
+            switch att % set line type
+              case 'r'
+                lt = '--'; % dashed
+              case 's'
+                lt = ':'; % dotted
+              otherwise
+                lt = '-'; % line
+            end
             if length(ps) == 3
-              plot3(ax,tmpx, tmpy, tmpz);
+              plot3(ax,tmpx, tmpy, tmpz,LineStyle=lt);
             else
-              plot(ax,tmpx, tmpy(:, :, 1)); % tmpy(1:size(tmpx,1),:,1)
+              plot(ax,tmpx, tmpy(:, :, 1),LineStyle=lt); % tmpy(1:size(tmpx,1),:,1)
               if option.xrange
-                xlim(ax,[min(tmpx), max(tmpx)]);
-              else
                 xlim(ax,option.xrange);
+              else
+                xlim(ax,[min(tmpx), max(tmpx)]);
               end
             end
 
