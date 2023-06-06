@@ -10,6 +10,7 @@ classdef DRONE < handle
     reference
     controller
     input
+    input_transform
     id = 1
   end
 
@@ -21,8 +22,7 @@ classdef DRONE < handle
         args = struct("type","sim");
         param = []
       end
-      %obj = obj@ABSTRACT_SYSTEM(args, param);
-
+      obj.input_transform.do = @(varargin) [];
       if contains(args.type, "EXP")
         obj.plant = DRONE_EXP_MODEL(args);
       end
