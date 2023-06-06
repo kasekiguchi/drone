@@ -18,11 +18,11 @@ classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
     function  result= do(obj,varargin)
       % [Input] time,cha,logger,env
       if isempty( obj.base_state ) % first take
-        obj.base_time=varargin{1}{1}.t;
+        obj.base_time=varargin{1}.t;
         obj.base_state = obj.self.estimator.result.state.p;
-        [obj.result.state.xd] = obj.gen_ref_for_take_off(0);
+        obj.result.state.xd = [obj.base_state;zeros(17,1)];
       end
-      [obj.result.state.xd] = obj.gen_ref_for_take_off(varargin{1}{1}.t-obj.base_time);
+      obj.result.state.xd = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:4,1);
       obj.result.state.v = obj.result.state.xd(5:8,1);
       result = obj.result;

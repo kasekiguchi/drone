@@ -19,9 +19,10 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive).param);
 agent.estimator = EKF(agent, Estimator_EKF(agent, ["p", "q"]).param);
 agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}).param);
 agent.controller = HLC(agent,Controller_HL(dt).param);
+run("ExpBase");
 
 function dfunc(app)
-app.logger.plot({1, "p", "er"},"FH",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "q", "er"},"FH",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "input", ""},"FH",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "q", "er"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "input", ""},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 end

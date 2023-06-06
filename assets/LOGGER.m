@@ -447,6 +447,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         option.color {mustBeNumeric} = 1
         option.hold {mustBeNumeric} = 0
         option.FH = [];
+        option.ax = [];
         option.xrange = [];
         option.yrange = [];
         option.zrange = [];
@@ -460,11 +461,12 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       fhold = option.hold; % on/off flag for holding (only active to last subfigure)
 
       t = obj.data(0, "t", [], "ranget", ranget); % time data
-      if isempty(option.FH)
-        ax = figure(fig_num);
-        ax.WindowState = 'maximized';
+      if isempty(option.ax)
+        fh = figure(fig_num);
+        %fh.WindowState = 'maximized';
+        ax = gca;
       else
-        ax = option.FH;
+        ax = option.ax;
       end
       switch frow
         case 1

@@ -3,6 +3,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
     param
     self
     vd = 0.2;
+    dt
   end
 
   methods
@@ -10,7 +11,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
       % generate landing reference w.r.t. position
       obj.self = self;
       obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[3,3,3]));
-      obj.dt = varargin{1}{1}.dt;
+      obj.dt = varargin{1};
     end
     function  result= do(obj,varargin)
       % [Input] time,cha,logger,env
@@ -38,7 +39,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
       dz = obj.vd * obj.dt; % ref vel * sampling
       %% Set Xd
       Xd = obj.result.state.xd(1:3);
-      if Xd(3) > 0 || p(3) - obj.Xd(3) <0.5 % stop descending if xd(3) is far from p(3)
+      if Xd(3) > 0 || p(3) - Xd(3) <0.5 % stop descending if xd(3) is far from p(3)
           Xd(3,1)   = Xd(3,1) - dz; % descending with constant rate
       end
 
