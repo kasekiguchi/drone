@@ -2,7 +2,8 @@ ts = 0;
 dt = 0.025;
 te = 10;
 time = TIME(ts,dt,te);
-debug_func = @(app) dfunc(app);
+in_prog_func = @(app) in_prog(app);
+post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
 
@@ -37,7 +38,9 @@ result = merge_result(result,sensor.motive.do(varargin));
 varargin{5}.sensor.result = result;
 end
 
-function dfunc(app)
+function in_prog(app)
+app.agent.show(["sensor", "lidar"], "ax", app.UIAxes,"k",app.time.k,"logger",app.logger, "param",struct("fLocal", false,"fField",true));
+end
+function post(app)
 app.agent.animation(app.logger,"ax", app.UIAxes,"self",app.agent, "target", 1, "opt_plot", ["sensor", "lidar"], "param",struct("fLocal", false,"fField",true));
-%app.agent.show(["sensor", "lidar"], "ax", app.UIAxes,"k",app.time.k,"logger",app.logger, "param",struct("fLocal", false,"fField",true));
 end
