@@ -31,10 +31,16 @@ dqt2 = L2'*ol2/2;
 dqt3 = L3'*ol3/2;
 dqt4 = L4'*ol4/2; %ドローンの姿勢
 
-ro1 = [0.05; 0.05; 0.05];
-ro2 = [-0.05; 0.05; 0.05];
-ro3 = [-0.05; -0.05; 0.05];
-ro4 = [0.05; -0.05; 0.05]; %ペイロードの重心とリングが接地している点までの長さ
+% ro1 = [0.05; 0.05; 0.05];
+% ro2 = [-0.05; 0.05; 0.05];
+% ro3 = [-0.05; -0.05; 0.05];
+% ro4 = [0.05; -0.05; 0.05]; %ペイロードの重心とリングが接地している点までの長さ
+
+ro1 = [1; 1; 1];
+ro2 = [-1; 1; 1];
+ro3 = [-1; -1; 1];
+ro4 = [1; -1; 1]; %ペイロードの重心とリングが接地している点までの長さ
+
 
 m0 = 1;
 m1 = 2;
@@ -149,11 +155,12 @@ ddx0 = simplifyFraction((A*C+B)\(B*P1 + A*P2));
 dol0 = simplifyFraction((A*C+B)\(-C*P1+P2));
 % dol0_2 = simplify(B\(-C*ddx0 + P2));
 % ddx0_2 = simplifyFraction(A*dol0 + P1);
-dos1 = q1hat*(ddx0-ge3-Rb0*ro1hat*dol0+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
-dos2 = q2hat*(ddx0-ge3-Rb0*ro2hat*dol0+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
-dos3 = q3hat*(ddx0-ge3-Rb0*ro3hat*dol0+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
-dos4 = q4hat*(ddx0-ge3-Rb0*ro4hat*dol0+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
+% dos1 = q1hat*(ddx0-ge3-Rb0*ro1hat*dol0+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
+% dos2 = q2hat*(ddx0-ge3-Rb0*ro2hat*dol0+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
+% dos3 = q3hat*(ddx0-ge3-Rb0*ro3hat*dol0+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
+% dos4 = q4hat*(ddx0-ge3-Rb0*ro4hat*dol0+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
 
+%%
 GGGG=1
 
 AA = mq\(m1*(q1*q1')*Rb0*ro1hat +m2*(q2*q2')*Rb0*ro2hat +m3*(q3*q3')*Rb0*ro3hat +m4*(q4*q4')*Rb0*ro4hat);
@@ -164,7 +171,7 @@ P2_new = ((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q
 % S = subs(dos1,[A,B,C],[AA,BB,CC]);
 
 
-
+%%
 
 
 
@@ -172,12 +179,18 @@ GGGG2=1
 ddx0_new = subs(ddx0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
 % ddx0_new2 = simplifyFraction(((mq\(m1*(q1*q1')*Rb0*ro1hat +m2*(q2*q2')*Rb0*ro2hat +m3*(q3*q3')*Rb0*ro3hat +m4*(q4*q4')*Rb0*ro4hat))*(m1*ro1hat*Rb0'*(q1*q1') +m2*ro2hat*Rb0'*(q2*q2') +m3*ro3hat*Rb0'*(q3*q3') +m4*ro4hat*Rb0'*(q4*q4'))+(J0 - m1*ro1hat*Rb0'*(q1*q1')*Rb0*ro1hat - m2*ro2hat*Rb0'*(q2*q2')*Rb0*ro2hat - m3*ro3hat*Rb0'*(q3*q3')*Rb0*ro3hat - m4*ro4hat*Rb0'*(q4*q4')*Rb0*ro4hat))\((J0 - m1*ro1hat*Rb0'*(q1*q1')*Rb0*ro1hat - m2*ro2hat*Rb0'*(q2*q2')*Rb0*ro2hat - m3*ro3hat*Rb0'*(q3*q3')*Rb0*ro3hat - m4*ro4hat*Rb0'*(q4*q4')*Rb0*ro4hat)*(mq\((u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+(u4p-m4*l4*norm(os4)^2*q4-m1*(q4*q4')*Rb0*ol0hat^2*ro4))+ge3) + (mq\(m1*(q1*q1')*Rb0*ro1hat +m2*(q2*q2')*Rb0*ro2hat +m3*(q3*q3')*Rb0*ro3hat +m4*(q4*q4')*Rb0*ro4hat))*(((m1*ro1hat*Rb0*(q1*q1'))+(m2*ro2hat*Rb0*(q2*q2'))+(m3*ro3hat*Rb0*(q3*q3'))+(m4*ro4hat*Rb0*(q4*q4')))*ge3-ol0hat*J0*ol0+ro1hat*Rb0'*(u1p-m1*l1*norm(os1)^2*q1-m1*(q1*q1')*Rb0*ol0hat^2*ro1)+ro2hat*Rb0'*(u2p-m2*l2*norm(os2)^2*q2-m2*(q2*q2')*Rb0*ol0hat^2*ro2)+ro3hat*Rb0'*(u3p-m3*l3*norm(os3)^2*q3-m3*(q3*q3')*Rb0*ol0hat^2*ro3)+ro4hat*Rb0'*(u4p-m4*l4*norm(os4)^2*q4-m4*(q4*q4')*Rb0*ol0hat^2*ro4))));
 dol0_new = subs(dol0,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
+
+dos1 = q1hat*(ddx0_new-ge3-Rb0*ro1hat*dol0_new+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1);
+dos2 = q2hat*(ddx0_new-ge3-Rb0*ro2hat*dol0_new+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2);
+dos3 = q3hat*(ddx0_new-ge3-Rb0*ro3hat*dol0_new+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3);
+dos4 = q4hat*(ddx0_new-ge3-Rb0*ro4hat*dol0_new+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4);
+
 GGGG3=1
-dos1_new = subs(dos1,[A,B,C],[AA,BB,CC]);
-dos2_new = subs(dos2,[A,B,C],[AA,BB,CC]);
+dos1_new = subs(dos1,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
+dos2_new = subs(dos2,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
 GGGG4=1
-dos3_new = subs(dos3,[A,B,C],[AA,BB,CC]);
-dos4_new = subs(dos4,[A,B,C],[AA,BB,CC]);
+dos3_new = subs(dos3,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
+dos4_new = subs(dos4,[A,B,C,P1,P2],[AA,BB,CC,P1_new,P2_new]);
 dol1 = J1\(M1-cross(ol1,J1*ol1));
 dol2 = J2\(M2-cross(ol2,J2*ol2));
 dol3 = J3\(M3-cross(ol3,J3*ol3));
@@ -196,14 +209,14 @@ dR4 = R4*ol4hat;
 
 %%
 % Usage: dx=f+g*u
-x = [ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;q1;q2;q3;q4]; %lomega,somega,link
-Quat = [qt0;qt1;qt2;qt3;qt4];
-f = [v0;ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new;dq1;dq2;dq3;dq4;dol1;dol2;dol3;dol4];
-dQuat = [dqt0;dqt1;dqt2;dqt3;dqt4];
-u = [u1;u2;u3;u4;M1;M2;M3;M4];
-
-f = [v0,dqt0,ddx0_new,dol0_new,dq1,dq2,dq3,dq4,dos1_new,dos2_new,dos3_new,dos4_new,dqt1,dqt2,dqt3,dqt4,dol1,dol2,dol3,dol4];
-u = [u1,u2,u3,u4,M1,M2,M3,M4];
+% x = [ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;q1;q2;q3;q4]; %lomega,somega,link
+% Quat = [qt0;qt1;qt2;qt3;qt4];
+% f = [v0;ddx0_new;dol0_new;dos1_new;dos2_new;dos3_new;dos4_new;dq1;dq2;dq3;dq4;dol1;dol2;dol3;dol4];
+% dQuat = [dqt0;dqt1;dqt2;dqt3;dqt4];
+% u = [u1;u2;u3;u4;M1;M2;M3;M4];
+% 
+% f = [v0,dqt0,ddx0_new,dol0_new,dq1,dq2,dq3,dq4,dos1_new,dos2_new,dos3_new,dos4_new,dqt1,dqt2,dqt3,dqt4,dol1,dol2,dol3,dol4];
+% u = [u1,u2,u3,u4,M1,M2,M3,M4];
 
 % matlabFunction(f,'file','malti_drone_suspended_load_FL','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 % subs(f,u,[0,0,0,0,0,0,0,0])
@@ -240,11 +253,13 @@ u = [u1,u2,u3,u4,M1,M2,M3,M4];
 % subs(ddx0_new,data,dataset)
 data = [q1;q2;q3;q4;ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;u1;u2;u3;u4;qt0];
 % q_dataset=[[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)]];
-q_dataset=[[0;0;1];[0;0;1];[0;0;1];[0;0;1]];
+q_dataset=[[0;1/sqrt(2);1/sqrt(2)];[0;1/sqrt(2);1/sqrt(2)];[0;1/sqrt(2);1/sqrt(2)];[0;1/sqrt(2);1/sqrt(2)]];
+% q_dataset=[[0;0;1];[0;0;1];[0;0;1];[0;0;1]];
+
 ol0_dataset=[0;0;0];
 ol_dataset=[[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
 os_dataset=[[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
-u_dataset = [[0;0;-1];[0;0;-1];[0;0;-1];[0;0;-1]];
+u_dataset = [[0;0;-1];[0;0;-1];[0;0;-5];[0;0;-1]];
 
 % P1dataset=subs(P1_new,data,dataset);
 % P2dataset=subs(P2_new,data,dataset);
@@ -266,3 +281,29 @@ dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
 % ddx0_new2 = subs(ddx0_new,[P1,P2],[P1_new,P2_new]);
 %%
 % matlabFunction(f,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+% [subs(ddx0_new,data,dataset);
+% subs(dol0_new,data,dataset);
+% subs(dos1_new,data,dataset);
+% subs(dos2_new,data,dataset);
+% subs(dos3_new,data,dataset);
+% subs(dos4_new,data,dataset)]
+
+AA2 = subs(AA,data,dataset);
+BB2 = subs(BB,data,dataset);
+CC2 = subs(CC,data,dataset);
+P1_new2 = subs(P1_new,data,dataset);
+P2_new2 = subs(P2_new,data,dataset);
+
+ddx0_out = simplifyFraction((AA2*CC2+BB2)\(BB2*P1_new2 + AA2*P2_new2));
+dol0_out = simplifyFraction((AA2*CC2+BB2)\(-CC2*P1_new2+P2_new2));
+dos1_out = subs((q1hat*(ddx0_out-ge3-Rb0*ro1hat*dol0_out+Rb0*ol0hat^2*ro1)/l1 - q1hat*u1p/(m1*l1)),data,dataset);
+dos2_out = subs((q2hat*(ddx0_out-ge3-Rb0*ro2hat*dol0_out+Rb0*ol0hat^2*ro2)/l2 - q2hat*u2p/(m2*l2)),data,dataset);
+dos3_out = subs((q3hat*(ddx0_out-ge3-Rb0*ro3hat*dol0_out+Rb0*ol0hat^2*ro3)/l3 - q3hat*u3p/(m3*l3)),data,dataset);
+dos4_out = subs((q4hat*(ddx0_out-ge3-Rb0*ro4hat*dol0_out+Rb0*ol0hat^2*ro4)/l4 - q3hat*u4p/(m4*l4)),data,dataset);
+
+ddx0_out2 = ddx0_out'
+dol0_out2 = dol0_out'
+dos1_out2 = dos1_out'
+dos2_out2 = dos2_out'
+dos3_out2 = dos3_out'
+dos4_out2 = dos4_out'
