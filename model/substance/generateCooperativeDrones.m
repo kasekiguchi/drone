@@ -389,39 +389,53 @@ x0data = [0;0;0];
 r0data = [1;0;0;0];
 dx0data = [0;0;0];
 o0data = [0;0;0];
-q1 = [0,0,1]'; q2 = [0,0,1]'; q3 = [0,0,1]'; q4 = [0,0,1]';
-qidata = [q1;q2;q3;q4];
+% q1 = [0,1/sqrt(2),1/sqrt(2)]'; q2 = [0,1/sqrt(2),1/sqrt(2)]'; q3 = [0,1/sqrt(2),1/sqrt(2)]'; q4 = [0,1/sqrt(2),1/sqrt(2)]';
+q1 = [0,1,1]'; q2 = [0,1,1]'; q3 = [0,0,1]'; q4 = [0,0,1]';
+qidata=[q1/vecnorm(q1);q2/vecnorm(q2);q3/vecnorm(q3);q4/vecnorm(q4)];
+
+% qidata = [q1;q2;q3;q4];
 w1 = [0,0,0]'; w2 = [0,0,0]'; w3 = [0,0,0]'; w4 = [0,0,0]';
 widata = [w1;w2;w3;w4];
+% r1 = [0.8776,0.4794,0,0]'; r2 = [1,0,0,0]'; r3 = [1,0,0,0]'; r4 = [0.8776,0.4794,0,0]';
 r1 = [1,0,0,0]'; r2 = [1,0,0,0]'; r3 = [1,0,0,0]'; r4 = [1,0,0,0]';
-% r1 = [1,1,1,1]'; r2 = [0,0,0,0]'; r3 = [0,0,0,0]'; r4 = [0,0,0,0]';
 ridata = [r1;r2;r3;r4];
 o1 = [0,0,0]'; o2 = [0,0,0]'; o3 = [0,0,0]'; o4 = [0,0,0]'; 
 oidata = [o1;o2;o3;o4];
 xdata=[x0data;r0data;dx0data;o0data;qidata;widata;ridata;oidata];
 
-fidata = [3,3,3,3]';
-M1 = [0,0,0]'; M2 = [0,0,0]'; M3 = [0,0,0]'; M4 = [0,0,0]';
-Midata = [M1;M2;M3;M4];
-udata =[fidata;Midata];
+fidata = [1,1,1,1];
+M1 = [0,0,0]; M2 = [0,0,0]; M3 = [0,0,0]; M4 = [0,0,0];
+% Midata = [M1;M2;M3;M4];
+% udata =[fidata;Midata]';
+udata =[fidata(1,1),M1,fidata(1,2),M2,fidata(1,3),M3,fidata(1,4),M4]';
 
 % [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)]
 gdata = 9.81;
 m0data = 1;
-j0data = [0.01,0.01,0.01];
-rho1data = [1,1,1]; rho2data = [1,-1,1]; rho3data = [-1,-1,1]; rho4data = [-1,1,1];
+j0data = [0.1,0.1,0.1];
+rho1data = [1,1,-1]; rho2data = [1,-1,-1]; rho3data = [-1,-1,-1]; rho4data = [-1,1,-1];
 rhodata = [rho1data,rho2data,rho3data,rho4data];
 lidata = [0.5,0.5,0.5,0.5];
-midata = [0.5,0.5,0.5,0.5];
+midata = [2,2,2,2];
 j1data = [0.005,0.005,0.005]; j2data = [0.005,0.005,0.005]; j3data = [0.005,0.005,0.005]; j4data = [0.005,0.005,0.005];
 jidata = [j1data,j2data,j3data,j4data];
-% P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
+P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
 
 %%
-x0 = [zeros(3,1);[1;0;0;0];zeros(6,1);repmat([0;0;1],4,1);zeros(12,1);repmat([1;0;0;0],4,1);repmat([0;0;0],4,1)];
-u0 = zeros(4*4,1);
-u0 = [fidata;Midata]
-P = [9.81, 0.1, [0.01, 0.01, 0.01], [0.2,0.1,-0.1, -0.2,0.1,-0.1, -0.2,-0.1,-0.1, 0.2,-0.1,-0.1], [1 1 1 1], [1 1 1 1],0.005*ones(1,12)];
+% x = [p0 Q0 v0 O0 qi wi Qi Oi]
+% [x01, x02, x03, r01, r02, r03, r04, dx01, dx02, dx03, o01, o02, o03, qi1_1, qi1_2, qi1_3, qi2_1, qi2_2, qi2_3, qi3_1, qi3_2, qi3_3, qi4_1, qi4_2, qi4_3, wi1_1, wi1_2, wi1_3, wi2_1, wi2_2, wi2_3, wi3_1, wi3_2, wi3_3, wi4_1, wi4_2, wi4_3, ri1_1, ri1_2, ri1_3, ri1_4, ri2_1, ri2_2, ri2_3, ri2_4, ri3_1, ri3_2, ri3_3, ri3_4, ri4_1, ri4_2, ri4_3, ri4_4, oi1_1, oi1_2, oi1_3, oi2_1, oi2_2, oi2_3, oi3_1, oi3_2, oi3_3, oi4_1, oi4_2, oi4_3]
+% u = [f1 M1 f2 M2 .. f4 M4]
+% [fi1, Mi1_1, Mi1_2, Mi1_3, fi2, Mi2_1, Mi2_2, Mi2_3, fi3, Mi3_1, Mi3_2, Mi3_3, fi4, Mi4_1, Mi4_2, Mi4_3]
+% P = [g m0 j0 rho li mi ji]
+% [g, m0, j01, j02, j03, rho1_1, rho1_2, rho1_3, rho2_1, rho2_2, rho2_3, rho3_1, rho3_2, rho3_3, rho4_1, rho4_2, rho4_3, li1, li2, li3, li4, mi1, mi2, mi3, mi4, ji1_1, ji1_2, ji1_3, ji2_1, ji2_2, ji2_3, ji3_1, ji3_2, ji3_3, ji4_1, ji4_2, ji4_3]
+
+% [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
+% x0 = [zeros(3,1);[1;0;0;0];zeros(6,1);repmat([0;0;1],4,1);zeros(12,1);repmat([1;0;0;0],4,1);repmat([0;0;0],4,1)];
+% x0 = [zeros(3,1);[1;0;0;0];zeros(3,1);zeros(3,1);repmat([0;0;1],4,1);zeros(12,1);repmat([1;0;0;0],4,1);repmat([0;0;0],4,1)];
+
+% u0 = zeros(4*4,1);
+% u0 = [fidata;Midata]
+% P = [9.81, 0.1, [0.01, 0.01, 0.01], [1,1,1, 1,-1,1, -1,-1,1, -1,1,1], [0.5 0.5 0.5 0.5], [0.2 0.2 0.2 0.2],0.005*ones(1,12)];
 % P = [9.81, 1, [0.01, 0.01, 0.01], [0.2,0.1,-0.1, -0.2,0.1,-0.1, -0.2,-0.1,-0.1, 0.2,-0.1,-0.1], [1 1 1 1], [1 1 1 1],0.005*ones(1,12)]
 %%
 %             3       7        10       13     25      37      53      65    
@@ -429,5 +443,5 @@ P = [9.81, 0.1, [0.01, 0.01, 0.01], [0.2,0.1,-0.1, -0.2,0.1,-0.1, -0.2,-0.1,-0.1
 % iAdata =inv(Addx0do0_4(xdata,udata,P));
 % ddx0do0_4(xdata,udata,P,iAdata);
 % dxdata = reshape(tmp_cable_suspended_rigid_body_with_4_drones(xdata,udata,P,ddxdata),[13,5])
-dxdata = reshape(cable_suspended_rigid_body_with_4_drones(x0,udata,P),[5,13])'
+dxdata = reshape(cable_suspended_rigid_body_with_4_drones(xdata,udata,P),[5,13])'
 
