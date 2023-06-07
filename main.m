@@ -186,9 +186,15 @@ clc
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 % logger.plot({1, "inner_input", ""});
 % logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
-logger.plot({1,"sensor.result.posion",""},{1,"p","sr"});
-% logger.plot({1,"p","sr"});
+% logger.plot({1,"sensor.result.posion",""},{1,"p","sr"}); % Primeの位置とT265
+% logger.plot({1,"sensor.result.posion",""}); % T265の位置
+logger.plot({1,"p","sr"}); % Primeの位置とreference
 % agent(1).reference.timeVarying.show(logger)
+% legend("T265.x","T265.y","T265.z",'FontSize',24);
+% legend("Prime.x","Prime.y","Prime.z","reference.x","reference.y","reference.z",'FontSize',20);
+legend("estimator.x","estimator.y","estimator.z","reference.x","reference.y","reference.z",'FontSize',20);
+xlabel('Time [s]','FontSize',24);
+ylabel('Position [m]','FontSize',24);
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
