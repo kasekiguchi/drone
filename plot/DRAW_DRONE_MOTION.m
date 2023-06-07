@@ -13,6 +13,8 @@ classdef DRAW_DRONE_MOTION
     ylim
     zlim
     L
+    frame_size = [0.1170, 0.0932];
+    rotor_r= 0.0392;
   end
 
   methods
@@ -30,17 +32,28 @@ classdef DRAW_DRONE_MOTION
       %     param.mp4 = 0;
       % end
       param = struct(varargin{:});
-      ax = param.ax;
+
       data = logger.data(param.target,"p","e");
       tM = max(data);
       tm = min(data);
       M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
       m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
-      L = param.frame_size;
+      if isfield(param,'frame_size')
+        L = param.frame_size;
+      else
+        L = obj.frame_size;
+      end
       obj.L = L;
       obj.xlim = [m(1)-L(1) M(1)+L(1)];
       obj.ylim = [m(2)-L(2) M(2)+L(2)];
       obj.zlim = [0 M(3)+1];
+      if isfield(param,'ax')
+        ax = param.ax;
+      else
+        figure();
+        ax = axes('XLim',obj.xlim,'YLim',obj.ylim,'ZLim',obj.zlim);
+        varargin = {varargin{:},'ax',ax};
+      end
       obj=obj.gen_frame(varargin{:});%"frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,param.fig_num);
 
       view(ax,3)
@@ -63,13 +76,7 @@ classdef DRAW_DRONE_MOTION
       %     obj.fig = figure(param.fig_num);
       %     ax = axes('XLim',obj.xlim,'YLim',obj.ylim,'ZLim',obj.zlim);
       % end
-      if isfield(param,'ax')
-        ax = param.ax;
-      else
-        figure();
-        ax = axes('XLim',obj.xlim,'YLim',obj.ylim,'ZLim',obj.zlim);
-      end
-      obj.ax = ax;
+      obj.ax = param.ax;
 
       xlabel(ax,"x [m]");
       ylabel(ax,"y [m]");
@@ -79,7 +86,11 @@ classdef DRAW_DRONE_MOTION
       L = obj.L;
 
       % rotor setup
-      r = param.rotor_r;
+      if isfield(param,'rotor_r')
+        r = param.rotor_r;
+      else
+        r = obj.rotor_r;
+      end
       [xr,yr,zr] = cylinder(ax,[0 r]); % rotor
       zr = 0.001*zr;
 
@@ -241,7 +252,7 @@ classdef DRAW_DRONE_MOTION
           param.self.show(param.opt_plot,"logger",logger,"k",i,varargin{:});
         end
         if ~isvalid(obj.frame)
-          obj=obj.gen_frame("frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"ax" ,ax);
+          obj=obj.gen_frame("target",param.target,"ax" ,ax);
         end
         obj.draw(param.target,p(i,:,param.target),Q(i,:,param.target),u(i,:,param.target));
         if isfield(param,'realtime')
