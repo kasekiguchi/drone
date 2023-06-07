@@ -103,7 +103,7 @@ classdef MODEL_CLASS < dynamicprops
       if (cha == 'q' || cha == 's' || cha == 'a')
         return
       end
-      u = obj.self.input;%varargin{5}.controller.result.input;
+      u = obj.self.controller.result.input;
       if isempty(obj.param)
         obj.param = obj.self.parameter.get();%varargin{5}.parameter.get();
       end

@@ -16,11 +16,9 @@ classdef DRONE < handle
 
   methods
 
-    function obj = DRONE(args, param)
-
+    function obj = DRONE(args)
       arguments
         args = struct("type","sim");
-        param = []
       end
       obj.input_transform.do = @(varargin) [];
       if contains(args.type, "EXP")
@@ -38,19 +36,8 @@ classdef DRONE < handle
       % param.Motive_ref = 0 or 1 動画内の目標軌道をMotiveみたいに徐々に消える形にするか選択（1でMotiveモード）
       % param.fig_num = 1 gif出力するfigure番号の選択（デフォルトはfigure１）
       % param.mp4 = 0 or 1 mp4形式として出力するか選択（1で出力＆Dataフォルダに保存）
-      % arguments
-      %   obj
-      %   logger
-      %   param.target = 1;
-      %   param.gif = 0;
-      %   param.Motive_ref = 0;
-      %   param.fig_num = 1;
-      %   param.mp4 = 0;
-      %   param.opt_plot = [];
-      % end     
-      p = obj.parameter;
-      mov = DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,varargin{:});%"frame_size",[p.Lx,p.Ly],"target",param.target,"rotor_r",p.rotor_r,"fig_num",param.fig_num,"mp4",param.mp4);
-      mov.animation(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,varargin{:});%"opt_plot",param.opt_plot,"frame_size",[p.Lx,p.Ly],"self",obj,"realtime",true,"rotor_r",p.rotor_r,"target",param.target,"fig_num",param.fig_num,"gif",param.gif,"Motive_ref",param.Motive_ref);
+      mov = DRAW_DRONE_MOTION(logger,varargin{:});%"target",param.target,"fig_num",param.fig_num,"mp4",param.mp4);
+      mov.animation(logger,varargin{:});%"realtime",true,"target",param.target,"fig_num",param.fig_num,"gif",param.gif,"Motive_ref",param.Motive_ref);
     end
     function ax=show(obj,str,varargin)
       % str : list of target class
