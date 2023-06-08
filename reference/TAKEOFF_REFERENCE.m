@@ -5,7 +5,7 @@ classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
     base_time
     base_state
     ts
-    te = 10;
+    te = 3;
     zd = 1; % goal altitude
   end
 
@@ -13,18 +13,18 @@ classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
     function obj = TAKEOFF_REFERENCE(self,varargin)
       % generate takeoff reference w.r.t. position and velocity
       obj.self = self;
-      obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,4,4]));
+      obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
     end
     function  result= do(obj,varargin)
       % [Input] time,cha,logger,env
       if isempty( obj.base_state ) % first take
-        obj.base_time=varargin{1}{1}.t;
+        obj.base_time=varargin{1}.t;
         obj.base_state = obj.self.estimator.result.state.p;
-        [obj.result.state.xd] = obj.gen_ref_for_take_off(0);
+        obj.result.state.xd = [obj.base_state;zeros(17,1)];
       end
-      [obj.result.state.xd] = obj.gen_ref_for_take_off(varargin{1}{1}.t-obj.base_time);
-      obj.result.state.p = obj.result.state.xd(1:4,1);
-      obj.result.state.v = obj.result.state.xd(5:8,1);
+      obj.result.state.xd = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
+      obj.result.state.p = obj.result.state.xd(1:3,1);
+      obj.result.state.v = obj.result.state.xd(5:7,1);
       result = obj.result;
 
     end
@@ -61,8 +61,7 @@ classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
         d3tra = 0;
         d4tra = 0;
       end
-
-      Xd(1:4,1) = obj.result.state.xd(1:4);
+      Xd(1:3,1) = obj.base_state(1:3);
       Xd(3,1) = tra + Xd(3,1);
       Xd(7,1) = dtra;
       Xd(11,1) = ddtra;
