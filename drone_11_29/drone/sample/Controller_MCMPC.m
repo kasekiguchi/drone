@@ -31,8 +31,8 @@ function Controller = Controller_MCMPC(~)
 
 
     Controller.name = "mcmpc";
-%     Controller.type = "MCMPC_controller";
-    Controller.type = "HLMPC_controller_ToKiyama"; %コントローラでHLMPCの方を使う
+    Controller.type = "MCMPC_controller";
+%     Controller.type = "HLMPC_controller_ToKiyama"; %コントローラでHLMPCの方を使う
     Controller.param = Controller_param;
 
 end
