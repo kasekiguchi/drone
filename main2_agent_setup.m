@@ -53,7 +53,7 @@ for i = 1:N
   %% generate Drone instance
   % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
   if fExp
-    agent(i) = DRONE(Model_Drone_Exp(dt, initial_state(i), "udp", [50, 132]), DRONE_PARAM("DIATONE"));                                          % for exp % 機体番号（ESPrのIP）
+    agent(i) = DRONE(Model_Drone_Exp(dt, initial_state(i), "udp", [100, 252]), DRONE_PARAM("DIATONE"));                                          % for exp % 機体番号（ESPrのIP）
     %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
     %agent(i) = DRONE(Model_Drone_Exp(dt,initial_state(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
     %agent(i) = WHILL(Model_Whill_Exp(dt,initial_state(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
@@ -129,7 +129,7 @@ for i = 1:N
   %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
   %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
   %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-  agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"]));                                                                    % （剛体ベース）EKF
+  agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"]));  % （剛体ベース）EKF
   %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
   %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
   %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
@@ -141,14 +141,14 @@ for i = 1:N
   %% set reference property
   agent(i).reference = [];
   %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
-  agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]})); % 時変な目標状態
-  %agent(i).set_property("reference", Reference_Time_Varying("gen_ref_saddle", {"freq", 20, "orig", [0; 10; 0], "size", [10, 10, 0], "phase", -pi / 2})); % 時変な目標状態
-  %agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
+%   agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]})); % 時変な目標状態
+%   agent(i).set_property("reference", Reference_Time_Varying("gen_ref_saddle", {"freq", 20, "orig", [0; 10; 0], "size", [10, 10, 0], "phase", -pi / 2})); % 時変な目標状態
+  agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",{[1;0;1]})); % ハート形[x;y;z]永久 {}:セルで送る
   %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
   %agent(i).set_property("reference",Reference_Wall_observation()); %
   %agent(i).set_property("reference",Reference_Agreement(N)); % Voronoi重心
   %agent(i).set_property("reference",struct("type","TWOD_TANBUG","name","tbug","param",[])); % ハート形[x;y;z]永久
-  %agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
+%   agent(i).set_property("reference",Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
   % 以下は常に有効にしておくこと "t" : take off, "f" : flight , "l" : landing
   agent(i).set_property("reference", Reference_Point_FH());                                                                                   % 目標状態を指定 ：上で別のreferenceを設定しているとそちらでxdが上書きされる  : sim, exp 共通
   %% set controller property
@@ -164,9 +164,9 @@ for i = 1:N
   %     agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
 
   %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-  agent(i).set_property("controller", Controller_HL(dt));                                                                                     % 階層型線形化
-  %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
-  %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
+  agent(i).set_property("controller", Controller_HL(dt));              % 階層型線形化
+%   agent(i).set_property("controller", Controller_FHL(dt));            % 階層型線形化
+  %agent(i).set_property("controller", Controller_FHL_Servo(dt));      % 階層型線形化
 
   %agent(i).set_property("controller",Controller_HL_Suspended_Load(dt)); % 階層型線形化
   %agent(i).set_property("controller",Controller_MEC()); % 実入力へのモデル誤差補償器

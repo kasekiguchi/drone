@@ -28,7 +28,7 @@ ly*sin(w*t + phase)+ly_offset; % y
 lz*sin(2*w*t + phase/2)+lz_offset; % z
 0];%
 
-% 圧倒的に遅いので以下のような書き方はしないこと
+%圧倒的に遅いので以下のような書き方はしないこと
 % xdf =@(t) [xd1(t),xd2(t),xd3(t),xd4(t)];
 % dxdf =@(tt) subs(diff(xdf(t),t),t,tt);
 % ddxdf =@(tt) subs( diff(dxdf(t),t),t,tt);
