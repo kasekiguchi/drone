@@ -13,10 +13,10 @@ FolderName = 'RandomInitialIndexTest';
 
 %データ保存先ファイル名
 % 'FileName'_'シミュレーション番号'.mat
-FileName = 'EstimationResult_12state_6_1_Input_byLiner';
+FileName = 'EstimationResult_12state_6_6_normal_experiment.mat';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_12state_6_1_Input_byLiner.mat';
+loading_filename = 'EstimationResult_12state_6_6_normal_experiment.mat';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 4;

@@ -15,7 +15,7 @@ FileName = 'EstimationResult_12state_6_6_normal_experiment.mat';
 % loading_filename = 'sim_rndP_12state';
 % loading_filename = 'sim_rndP4';
 % loading_filename = '2023_0529_1804_logger_cricle_LS.mat';
-loading_filename = '6_2_experiment';
+loading_filename = '6_08_experiment';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -44,7 +44,7 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 2; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 4; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')

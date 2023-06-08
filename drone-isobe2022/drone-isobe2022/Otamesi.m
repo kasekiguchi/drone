@@ -11,4 +11,4 @@ close all hidden;
 % p = rand(3,1)*6-3 % rand(3,1)*0.02で生成範囲を0~0.02に変更、後ろのマイナスで-0.01~0.01にしてる(イメージ:0-0.01 ~ 0.02-0.01)
 % p(3,1) = rand*8-4
 % [n,p] = size('6_2_experiment_1.mat');
-logger.plot({1, "p", "es"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"}, "fig_num", 5, "row_col", [2, 3]);
+logger_modelerror_ft.plot({1, "p", "es"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"}, "fig_num", 5, "row_col", [2, 3]);
