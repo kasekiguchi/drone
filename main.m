@@ -183,10 +183,11 @@ catch ME % for error
   warning('ACSL : Emergency stop! Check the connection.');
   rethrow(ME);
 end
+%% 実験が終了するごとに回す必要あり
 
 if fExp == 1
-    save('experiment_6_8_1.mat',"logger");
-    movefile experiment_6_8_1.mat Datafolder;
+    save('experiment_6_8_4.mat',"logger");
+    movefile experiment_6_8_4.mat Datafolder;
 else
     save('simulation_6_8.mat',"logger");
     movefile simulation_6_8.mat Datafolder;
@@ -206,8 +207,8 @@ logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
-%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+% VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+% agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
 
 %%
