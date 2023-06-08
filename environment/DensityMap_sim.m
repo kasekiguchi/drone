@@ -1,4 +1,4 @@
-classdef DensityMap_sim% < ENV_CLASS
+classdef DensityMap_sim< ENV_CLASS 
     % 環境設定
     % 用語
     % map ：実スケールのマップ
@@ -57,7 +57,9 @@ classdef DensityMap_sim% < ENV_CLASS
             %s.VerticesColor = 'none';
             %pcolor(obj.xq,obj.yq,obj.grid_density);
             ax = varargin{1};
-            contourf(ax,obj.xq,obj.yq,obj.grid_density);
+            % grid_density = varargin{2};
+            grid_density = obj.grid_density;
+            contourf(ax,obj.xq,obj.yq,grid_density);
             %            surf(obj.xq,obj.yq,obj.grid_density);
             obj.show_setting(ax);
         end

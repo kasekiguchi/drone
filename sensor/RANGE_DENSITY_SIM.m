@@ -7,15 +7,19 @@ classdef RANGE_DENSITY_SIM < SENSOR_CLASS
         result
         target % 観測対象の環境
         self % センサーを積んでいる機体のhandle object
+        grid_density 
     end
     properties (SetAccess = private) % construct したら変えない値．
         r = 10;
+        
     end
 
     methods
         function obj = RANGE_DENSITY_SIM(self,Env)
             obj.self=self;
             if isfield(Env,'r'); obj.r= Env.r;end
+            Env.env.grid_density= ones(size(Env.env.grid_density))*100;
+            
         end
 
         function result = do(obj,varargin)
@@ -25,6 +29,40 @@ classdef RANGE_DENSITY_SIM < SENSOR_CLASS
             Env=varargin{1}{4};
             state=obj.self.plant.state; % 真値
             env = polyshape(Env.Vertices);
+            %%  Yamak追加
+            if size(obj.self.reference.result.state.p) == [3 1]
+                e2r_vector = obj.self.reference.result.state.p-state.p;
+            else
+                e2r_vector = [1;0;0];
+            end
+            e2r_ang = atan2(e2r_vector(2),e2r_vector(1))-pi;
+            tmp = e2r_ang-0.25*pi:0.1:e2r_ang+0.25*pi; % カメラ画角 
+            camera_range = polyshape([state.p(1) state.p(1)+1*cos(tmp)],[state.p(2) state.p(2)+1*sin(tmp)]); % カメラ検出距離
+            camera_region=intersect(camera_range, env);
+            camera_region.Vertices=camera_region.Vertices-state.p(1:2)';
+
+            pxy=state.p(1:2)'-Env.map_min; % 領域左下から見たエージェント座標
+            pmap_min = max(min(pxy+camera_region.Vertices,[],1),[0,0]); % エージェントを中心としたセンサーレンジの直方包左下座標
+            pmap_max = min(max(pxy+camera_region.Vertices,[],1),Env.map_max-Env.map_min); % 右上座標
+            rpmap_min = pmap_min-pxy; % 相対座標
+            rpmap_max = pmap_max-pxy; %  相対座標f
+            [xq,yq]=meshgrid(rpmap_min(1):Env.d:rpmap_max(1),rpmap_min(2):Env.d:rpmap_max(2));% 相対座標
+            xq=xq';      yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
+
+            % 対象領域の重要度マップを取り出す
+            min_grid_cell=floor(pmap_min/Env.d);
+            min_grid_cell(min_grid_cell==0)=1; % これが無いと0からになってしまう
+            max_grid_cell=min_grid_cell+size(xq)-[1 1]; % region_phi と inのサイズを合わせるため
+
+            region_phi=Env.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2));% 相対的な重要度行列
+            in = inpolygon(xq,yq,camera_region.Vertices(:,1),camera_region.Vertices(:,2)); % （相対座標）測距領域判別
+
+            Env.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2))= region_phi - 20*(in); %減少
+            Env.grid_density = Env.grid_density + 0.01; %回復
+            Env.grid_density = max(Env.grid_density,0);
+            Env.grid_density = min(Env.grid_density,100);
+            %% 
+            % Env.grid_density=obj.grid_density;
 
             %% センシング領域を定義
             tmp = 0:0.1:2*pi;
@@ -39,7 +77,7 @@ classdef RANGE_DENSITY_SIM < SENSOR_CLASS
             pmap_min=max(pxy+[-obj.r,-obj.r],[0,0]); % エージェントを中心としたセンサーレンジの直方包左下座標
             pmap_max=min(pxy+[obj.r,obj.r],Env.map_max-Env.map_min); % 右上座標
             rpmap_min=pmap_min-pxy; % 相対座標
-            rpmap_max=pmap_max-pxy; %  相対座標
+            rpmap_max=pmap_max-pxy; %  相対座標f
             [xq,yq]=meshgrid(rpmap_min(1):Env.d:rpmap_max(1),rpmap_min(2):Env.d:rpmap_max(2));% 相対座標
             xq=xq';      yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
 

@@ -12,5 +12,5 @@ SimBaseMode = ["SimVoronoi","SimLiDAR","SimHL","SimVoronoi2D"];
 ExpBaseMode = ["","ExpHL","ExpVoronoi2D"];
 fExp = 0;
 fDebug = 1; % 1: active : for debug function
-PInterval = 1; % sec : poling interval for emergency stop
+PInterval = 10; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);
