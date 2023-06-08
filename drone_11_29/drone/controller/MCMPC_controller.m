@@ -12,9 +12,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
         model   % モデル
         result  % mainに値戻す(agentへの保存)
         self    % classの通例
-        A       %係数行列(クープマン)
-        B       %出力ベクトル(クープマン)
-        f       %観測量(クープマン)
+        A
+        B
     end
     
     methods
@@ -41,9 +40,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
             obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
-%             obj.A = obj.param.model.est.Ahat;  %係数行列A,複素数空間上での値
-%             obj.B = obj.param.model.est.Bhat;  %入力ベクトルB,複素数空間上での値
-            %obj.f 観測量
+%             obj.A = obj.param.model.est.Ahat;
+%             obj.B = obj.param.model.est.Bhat;
 
 
             % p , q, v, w
@@ -141,7 +139,7 @@ classdef MCMPC_controller <CONTROLLER_CLASS
                 for j = 1:obj.param.H - 1 %ホライズン数分繰り返し
                     %モデルの計算
                     obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
-%                     obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i); %クープマンモデル,複素数空間上での値
+%                     obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i); %クープマン
                     obj.state.state_data(:,j+1,i) = obj.state.y0; %j+1の理由：初期位置を除くから
                 end
             end

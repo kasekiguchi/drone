@@ -184,22 +184,14 @@ catch ME % for error
   rethrow(ME);
 end
 
-if fExp == 1
-    save('experiment_6_2.mat',"logger");
-    movefile experiment_6_2.mat Datafolder;
-else
-    save('simulation_6_72.mat',"logger");
-    movefile simulation_6_72.mat Datafolder;
-end
 %profile viewer
 %%
 close all
-clc %コマンドウィンドウからすべてんおテキストをクリアして，画面を空にする
+clc
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-% logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"},{1, "inner_input", ""}, "fig_num", 5, "row_col", [2, 4]);
-logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"}, "fig_num", 5, "row_col", [2, 3]);
+logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"},{1, "inner_input", ""}, "fig_num", 5, "row_col", [2, 4]);
 % logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
 
 % agent(1).reference.timeVarying.show(logger)
@@ -209,13 +201,14 @@ logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
 
-%% 毎回別で回さないと記録されない
-% if fExp == 1
-%     save('experiment_6_2.mat',"logger");
-%     movefile experiment_6_2.mat Datafolder;
-% else
-%     save('simulation_6_7.mat',"logger");
-%     movefile simulation_6_7.mat Datafolder;
-% end
+%%
+if fExp
+    save('experiment_6_2.mat',"logger");
+%     logger.save();
+    movefile experiment_6_2.mat Datafolder;
+else
+    save('simulation_6_2.mat',"logger");
+    movefile simulation_6_2.mat Datafolder;
+end
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
