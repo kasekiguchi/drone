@@ -54,3 +54,22 @@ legend('Location','best')
 ax = gca;
 ax.FontSize = 12;
 hold off
+
+%% 
+figure(7)
+hold on
+
+for plot_i = 1:ep
+    z = ep(3);
+end
+
+plot(t,ep,'LineWidth',1)
+
+xlabel('Time [s]','FontSize',16);
+ylabel('Position [m]','FontSize',16);
+name_class = ["x","y","z"];%名前
+legend(name_class)
+legend('Location','best')
+ax = gca;
+ax.FontSize = 12;
+hold off
