@@ -88,5 +88,14 @@ z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
      (cos(Q2)*cos(Q1))/const.m
      ];
 
+% %磯部先輩最新バージョン?(あっているか不明)
+% z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;1;
+%      w1*w2;w2*w3;w3*w1;w2*cos(Q1);w3*sin(Q1);
+%      (w1*cos(Q2))/cos(Q1);(w2*sin(Q1))/cos(Q1);
+%      (w3*cos(Q1))/cos(Q1);
+%      (w2*sin(Q1)*sin(Q2))/cos(Q1);
+%      (w3*cos(Q1)*sin(Q2))/cos(Q1);
+%      ];
+
 end
 

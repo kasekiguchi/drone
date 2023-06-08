@@ -8,12 +8,12 @@ close all
 flg.bilinear = 0;
 
 %データ保存先ファイル名
-FileName = 'EstimationResult_12state_500data.mat'; %保存先のファイル名も逐次変更する
+FileName = 'EstimationResult_12state_6_8.mat'; %保存先のファイル名も逐次変更する
 
 % 読み込むデータファイル名
 % loading_filename = 'sim_rndP_12state';
-loading_filename = 'simtest'; %run_mainManyTimeの中のFileNameに変更すればそのファイルを読み込んでくれる
-% loading_filename = 'sim_rndP4;
+% loading_filename = 'simtest'; %run_mainManyTimeの中のFileNameに変更すればそのファイルを読み込んでくれる
+loading_filename = 'sim_rndP4';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -24,11 +24,13 @@ targetpath=append(nowFolder,'\',FileName);
 % クープマン作用素を定義
 % F@(X) Xを与える関数ハンドルとして定義
 % DroneSimulation
-F = @(x) [x;1]; % 状態そのまま
+
+%観測量の設定
+% F = @(x) [x;1]; % 状態そのまま+定数項
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量
 % F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
 % F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
-% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(しっかり回る)
+F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(しっかり回る)
 % F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(しっかり回る)
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
@@ -46,7 +48,7 @@ Data.HowmanyDataset = 5; %使用するデータの量に応じて逐次変更
 
 for i= 1: Data.HowmanyDataset
     Dataset = InportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
-    if i==1 %どうしてここ分けているの？
+    if i==1 %クープマン線形化のために，データの合成を行う
         Data.X = [Dataset.X];
         Data.U = [Dataset.U];
         Data.Y = [Dataset.Y];        

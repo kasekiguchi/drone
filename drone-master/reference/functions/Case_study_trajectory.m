@@ -28,9 +28,13 @@ syms t real
 
 % 円旋回
 % s = 8;
-x = sin(2*pi*t/10);
-y = cos(2*pi*t/10);
-z = 1;
+% x = sin(2*pi*t/10);
+% y = cos(2*pi*t/10);
+% z = 1;
+
+x = 0.5*sin(2*pi*t/10);
+y = 0;
+z = 0.5*cos(2*pi*t/10);
 
 %八の字
 % x = sin(2*t/8);
