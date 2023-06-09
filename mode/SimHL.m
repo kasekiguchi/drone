@@ -17,9 +17,9 @@ agent.parameter = DRONE_PARAM("DIATONE");
 agent.model = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive).param);
 agent.estimator = EKF(agent, Estimator_EKF(agent, ["p", "q"]).param);
-agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}).param);
+%agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}).param);
+agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]}).param);
 agent.controller = HLC(agent,Controller_HL(dt).param);
-run("ExpBase");
 
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.t]);

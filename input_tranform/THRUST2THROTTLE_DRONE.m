@@ -24,22 +24,22 @@ methods
         obj.param.yaw_offset = self.plant.arming_msg(4);
         obj.param.P = self.parameter.get();
         obj.flight_phase = 's';
-        P = self.model.param;
+        P = self.parameter.get;
         obj.hover_thrust_force = P(1) * P(9);
         obj.state = state_copy(self.model.state);
     end
 
-    function u = do(obj, input, varargin)
+    function u = do(obj, varargin)
         %% 実験用入力生成  uroll, upitch, uthr, uyaw
         % 【Input】varargin : struct with field FH
-        if ~isfield(varargin{1}, 'FH')
-            error("ACSL : require figure window");
-        else
-            FH = varargin{1}.FH; % figure handle
-        end
+        % if ~isfield(varargin{1}, 'FH')
+        %     error("ACSL : require figure window");
+        % else
+        %     FH = varargin{1}.FH; % figure handle
+        % end
 
-        cha = get(FH, 'currentcharacter');
-
+        cha = varargin{2};
+        input = varargin{5}(varargin{6}).controller.result.input;
         if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')
             cha = obj.flight_phase;
         end
