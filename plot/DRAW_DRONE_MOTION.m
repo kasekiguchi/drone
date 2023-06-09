@@ -77,8 +77,8 @@ classdef DRAW_DRONE_MOTION
       %     ax = axes('XLim',obj.xlim,'YLim',obj.ylim,'ZLim',obj.zlim);
       % end
       obj.ax = param.ax;
-
-      xlabel(ax,"x [m]");
+      ax = obj.ax;
+      xlabel(obj.ax,"x [m]");
       ylabel(ax,"y [m]");
       zlabel(ax,"z [m]");
       hold(ax,"on");
