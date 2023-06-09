@@ -17,8 +17,8 @@ rng(seed);
 
 % データ保存先フォルダ名
 % rmdir Data\simData_KoopmanApproach_2023_6_1_data200 s;%フォルダの削除 フォルダ名を変更せずに回す場合はコメントイン 
-mkdir Data\simData_KoopmanApproach_2023_6_6_experiment; %新規フォルダの作成(以下のフォルダ名と一致させるように)
-Foldername = 'Data\simData_KoopmanApproach_2023_6_6_experiment'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
+mkdir Data\simData_KoopmanApproach_2023_6_9_experiment_alldata; %新規フォルダの作成(以下のフォルダ名と一致させるように)
+Foldername = 'Data\simData_KoopmanApproach_2023_6_6_experiment_circle'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル
 % "ファイル名"_[番号].mat で保存される
 FileName = '6_1_isobe'; %線形化で読み込むファイルはこれで判別してる
