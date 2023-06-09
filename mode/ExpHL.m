@@ -6,7 +6,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
-motive = Connector_Natnet('ClientIP', '192.168.1.9'); % connect to Motive
+motive = Connector_Natnet('ClientIP', '192.168.100.120'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
@@ -16,7 +16,7 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-agent.plant = MODEL_CLASS(agent,Model_Drone_Exp(dt, initial_state, "udp", [50, 132]));
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [100, 252f]));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.model = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone().param); % 推力からスロットルに変換
