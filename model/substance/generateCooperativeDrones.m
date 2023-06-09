@@ -372,7 +372,7 @@ R0_matrix = [cos(alfa)*cos(beta)*cos(gunma)-sin(alfa)*sin(gunma),-cos(alfa)*cos(
             sin(alfa)*cos(beta)*cos(gunma)-cos(alfa)*sin(gunma),-sin(alfa)*cos(beta)*sin(gunma)-cos(alfa)*sin(gunma),sin(alfa)*sin(gunma);
             -sin(beta)*cos(gunma),sin(beta)*sin(gunma),cos(beta)];
 
-qt0_dataset=[0;1/2;0;0];
+qt0_dataset=[1;0;0;0];
 
 
 dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
@@ -387,10 +387,9 @@ dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
 % reshape([fi;Mi],4*N,1);
 x0data = [0;0;0];
 r0data = [1;0;0;0];
-dx0data = [0;0;0];
 o0data = [0;0;0];
 % q1 = [0,1/sqrt(2),1/sqrt(2)]'; q2 = [0,1/sqrt(2),1/sqrt(2)]'; q3 = [0,1/sqrt(2),1/sqrt(2)]'; q4 = [0,1/sqrt(2),1/sqrt(2)]';
-q1 = [0,1,1]'; q2 = [0,1,1]'; q3 = [0,0,1]'; q4 = [0,0,1]';
+q1 = [0,-1,1]'; q2 = [0,-1,1]'; q3 = [0,-1,1]'; q4 = [0,-1,1]';
 qidata=[q1/vecnorm(q1);q2/vecnorm(q2);q3/vecnorm(q3);q4/vecnorm(q4)];
 
 % qidata = [q1;q2;q3;q4];
@@ -405,8 +404,6 @@ xdata=[x0data;r0data;dx0data;o0data;qidata;widata;ridata;oidata];
 
 fidata = [1,1,1,1];
 M1 = [0,0,0]; M2 = [0,0,0]; M3 = [0,0,0]; M4 = [0,0,0];
-% Midata = [M1;M2;M3;M4];
-% udata =[fidata;Midata]';
 udata =[fidata(1,1),M1,fidata(1,2),M2,fidata(1,3),M3,fidata(1,4),M4]';
 
 % [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)]
@@ -445,3 +442,6 @@ P = [gdata,m0data,j0data,rhodata,lidata,midata,jidata];
 % dxdata = reshape(tmp_cable_suspended_rigid_body_with_4_drones(xdata,udata,P,ddxdata),[13,5])
 dxdata = reshape(cable_suspended_rigid_body_with_4_drones(xdata,udata,P),[5,13])'
 
+%%
+eul = [pi/4 0 0];
+qZYX = eul2quat(eul)
