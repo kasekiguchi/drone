@@ -1,9 +1,10 @@
-classdef LANDING_REFERENCE < REFERENCE_CLASS
+classdef LANDING_REFERENCE < handle
   properties
     param
     self
     vd = 0.5;
     dt
+    result
   end
 
   methods

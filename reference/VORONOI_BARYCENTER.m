@@ -1,10 +1,11 @@
-classdef VORONOI_BARYCENTER < REFERENCE_CLASS
+classdef VORONOI_BARYCENTER < handle
   % ボロノイ重心を算出するクラス
   %   詳細説明をここに記述
   properties
     param
     self
     fShow
+    result
   end
 
   methods

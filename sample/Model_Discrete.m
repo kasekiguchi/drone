@@ -6,8 +6,6 @@ arguments
   id
   type
 end
-Model.type="DISCRETE_MODEL"; % class name
-Model.name="discrete_"+type; % print name
 Model.id = id;
 Setting.dt = dt;
 Setting.method = get_model_name("Discrete"); % model dynamicsの実体名

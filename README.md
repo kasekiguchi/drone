@@ -1,3 +1,12 @@
+# Change log
+To merge your program into this common project, follow 
+* obj.self.input => obj.self.controller.result.input
+* obj.input => obj.controller.result.input
+
+# 基本ルール
+estimator.result.state ：現在時刻の状態
+controller.result.input : 入力
+
 # 共通プログラムを用いた開発の手順
 
 * github上にアカウントを作り，関口先生にアカウントを連絡する．

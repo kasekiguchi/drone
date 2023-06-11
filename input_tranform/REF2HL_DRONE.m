@@ -1,4 +1,4 @@
-classdef REF2HL_DRONE < INPUT_TRANSFORM_CLASS
+classdef REF2HL_DRONE < handle
     % 目標位置から階層型線形化入力を算出するクラス
     %   未検討
     

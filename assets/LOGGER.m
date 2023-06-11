@@ -482,7 +482,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         if length(list) == 1
           spfi = ax;
         else
-          spfi = subplot(frow, fcol, fi);
+          ax = subplot(frow, fcol, fi);
         end
         plegend = [];
         N = list{fi}{1}; % indices of variable drones. example : [1 2]
@@ -620,7 +620,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
           end
 
-          text(ax,spfi.XLim(2) - (spfi.XLim(2) - spfi.XLim(1)) * 0.25, spfi.YLim(2) + (spfi.YLim(2) - spfi.YLim(1)) * yoffset, txt);
+          text(ax,ax.XLim(2) - (ax.XLim(2) - ax.XLim(1)) * 0.25, ax.YLim(2) + (ax.YLim(2) - ax.YLim(1)) * yoffset, txt);
         end
 
       end

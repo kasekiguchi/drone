@@ -1,4 +1,4 @@
-classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
+classdef THRUST2THROTTLE_DRONE < handle
 % Calculate throttle level from desired thrust forces to send via transmitter
 % Do 1 step simulation wrt the model to derive a desired angular velocity wd and thrust force Fd.
 % To follow wd and Fd minor feedback is designed as a P control.
