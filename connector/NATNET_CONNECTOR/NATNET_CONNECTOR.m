@@ -1,4 +1,4 @@
-classdef NATNET_CONNECTOR < CONNECTOR_CLASS
+classdef NATNET_CONNECTOR < handle
     % motive = NATNET_CONNECTOR(param)
     %  param : HostIP, ClientIP
     properties

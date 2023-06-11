@@ -1,4 +1,4 @@
-classdef PARTICLE_FILTER < ESTIMATOR_CLASS
+classdef PARTICLE_FILTER < handle
     % Particle filter
     properties
         m % number of input
@@ -16,12 +16,14 @@ classdef PARTICLE_FILTER < ESTIMATOR_CLASS
         self
         FH
         dt 
+        model
     end
 
     methods
         function obj = PARTICLE_FILTER(self,param)
             obj.self= self;
-            model = self.model;
+            model = param.model;
+            obj.model = model;
             obj.m = model.dim(2);
             obj.self.input = zeros(obj.m,1);
             obj.result.state= state_copy(model.state);

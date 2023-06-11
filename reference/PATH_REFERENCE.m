@@ -1,4 +1,4 @@
-classdef PATH_REFERENCE < REFERENCE_CLASS
+classdef PATH_REFERENCE < handle
     % 通路の中心を通るリファレンスを生成するクラス
     % 曲がり角では外側の二本の壁面の中線と曲がり角に進入時の位置から近い壁面に下した垂線の交点を中心とした回転をする．
     properties
@@ -14,6 +14,7 @@ classdef PATH_REFERENCE < REFERENCE_CLASS
         r  % 回転半径
         th = [];
         constant
+        result
     end
 
     methods

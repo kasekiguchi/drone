@@ -1,4 +1,4 @@
-classdef MODEL_CLASS < dynamicprops
+classdef MODEL_CLASS < dynamicprops & handle
   % general model class
   % obj = MODEL_CLASS(name,param)
   %      name : 名前（obsolete）

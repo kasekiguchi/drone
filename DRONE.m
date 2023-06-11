@@ -3,13 +3,11 @@ classdef DRONE < handle
   properties %(Access = private)
     fig
     plant
-    model
     parameter
     sensor
     estimator
     reference
     controller
-    input
     input_transform
     id = 1
   end

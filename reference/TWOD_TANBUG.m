@@ -1,9 +1,10 @@
-classdef TWOD_TANBUG < REFERENCE_CLASS
+classdef TWOD_TANBUG < handle
     % 時間関数としてのリファレンスを生成するクラス
     % obj = TWOD_TANBUG_REFERENCE()
     properties
         param
         self
+        result
     end
 
     methods

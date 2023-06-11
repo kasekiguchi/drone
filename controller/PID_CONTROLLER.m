@@ -1,4 +1,4 @@
-classdef PID_CONTROLLER <CONTROLLER_CLASS    
+classdef PID_CONTROLLER < handle
     properties
            self
            result

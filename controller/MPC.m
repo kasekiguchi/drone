@@ -1,4 +1,4 @@
-classdef MPC <CONTROLLER_CLASS
+classdef MPC < handle
     % linear Model Predictive Control
     
     properties

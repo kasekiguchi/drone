@@ -1,4 +1,4 @@
-classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
+classdef TIME_VARYING_REFERENCE < handle
     % 時間関数としてのリファレンスを生成するクラス
     % obj = TIME_VARYING_REFERENCE()
     properties
@@ -8,6 +8,7 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
         t=[];
         cha='s';
         dfunc
+        result
     end
 
     methods
@@ -20,6 +21,7 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
                 self
                 args
             end
+            obj.self = self;
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
             obj.func = gen_func_name(param_for_gen_func{:});
@@ -31,6 +33,10 @@ classdef TIME_VARYING_REFERENCE < REFERENCE_CLASS
             else
                 obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
             end
+            obj.result.state.set_state("xd",obj.func(0));
+            obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+            obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+            obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
             syms t real
             obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
