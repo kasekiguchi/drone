@@ -6,6 +6,8 @@ arguments
   id
   type
 end
+Model.type = type;
+Model.name = "discrete";
 Model.id = id;
 Setting.dt = dt;
 Setting.method = get_model_name("Discrete"); % model dynamicsの実体名
