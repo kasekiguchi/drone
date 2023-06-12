@@ -527,6 +527,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
               else
                 xlim(ax,[min(tmpx), max(tmpx)]);
               end
+              ylim(ax,[min(tmpy,[],'all'), max(tmpy,[],'all')]);
             end
 
             hold(ax, "on");

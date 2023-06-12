@@ -37,17 +37,20 @@ classdef HLC < handle
       xd(9:11)=Rb0'*xd(9:11);
       xd(13:15)=Rb0'*xd(13:15);
       xd(17:19)=Rb0'*xd(17:19);
-      if isfield(obj.param,'dt')
+      %if isfield(obj.param,'dt')
+      if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
+        dt = varargin{1}.dt;
+      else
         dt = obj.param.dt;
+        % vf = Vf(x,xd',P,F1);
+        % vs = Vs(x,xd',vf,P,F2,F3,F4);
+      end
         vf = Vfd(dt,x,xd',P,F1);
         vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
-      else
-        vf = Vf(x,xd',P,F1);
-      vs = Vs(x,xd',vf,P,F2,F3,F4);
-      end
-      disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
+      %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-      obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
+      % max,min are applied for the safty
+      obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
       result = obj.result;
     end
   end
