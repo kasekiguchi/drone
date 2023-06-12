@@ -14,14 +14,14 @@ fF=1;%flightのみは１
 %どの時間の範囲を描画するか指定
 % startTime = 5;
 % endTime = 20;
-startTime = 5;
+startTime = 0;
 endTime = 1E2;
 %========================================================================
 %図を選ぶ[1:"t_p" 2:"x_y" 3:"t_x" 4:"t_y" 5:"t_z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 
 %              11:"three_D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma" 20:"plant"]
 %========================================================================
 if fLogN == 1
-    name = logger;
+    name = logger_modelerror_LS2;
 %     name = logger_FT_lxy10;
 % name = logger_FB2_mass_saddle;
 %     name = logger_FTxyz2_mass_saddle;
@@ -51,8 +51,8 @@ if fLogN == 1
     n = [1,5,8,10,7, 12:16,20:23];
 %     n=20:23;
 elseif fLogN==2
-    name1 = logger_proba_LS;%LS
-    name2 = logger_proba_FT;%FT
+    name1 = logger_app_c2;%LS
+    name2 = logger_HL_c2;%FT
 %     name1 = logger_saddle2_LS;%LS
 %     name2 = logger_saddle2_FT;%FT
 
@@ -319,7 +319,7 @@ if fLogN==1
 %         pltq(:,j) = name.Data.agent.plant.result{1,i}.state.q(1:3);
 %         pltw(:,j) = name.Data.agent.plant.result{1,i}.state.w(1:3);
         err(:,j)=est(:,j)-ref(:,j);%誤差
-        inp(:,j)=name.Data.agent.input{1,i};
+        inp(:,j)=name.Data.agent.input{1,i}(1:4);
         att(:,j)=name.Data.agent.estimator.result{1,i}.state.q(1:3);
         vel(:,j)=name.Data.agent.estimator.result{1,i}.state.v(1:3);
         w(:,j)=name.Data.agent.estimator.result{1,i}.state.w(1:3);

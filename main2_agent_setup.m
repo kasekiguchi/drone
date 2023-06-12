@@ -131,7 +131,7 @@ for i = 1:N
 %     agent(i).set_property("reference",Reference_Time_Varying("My_Case_study_trajectory",[-2;1.5;1]));
     %agent(i).set_property("reference",Reference_2DCoverage(agent(i),Env,'void',0.1)); % Voronoi重心
 %     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{5,[0;0;1],[2,2,0.5]})); % 時変な目標状態
-%     agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{8,[0;0;1.2],[1,1,0.8]})); % 時変な目標状態
+    agent(i).set_property("reference",Reference_Time_Varying("gen_ref_saddle",{8,[0;0;1.2],[1,1,0.8]})); % 時変な目標状態
 %     agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Time_Varying_Suspended_Load("Case_study_trajectory",[1;0;1])); % ハート形[x;y;z]永久
     %agent(i).set_property("reference",Reference_Wall_observation()); %

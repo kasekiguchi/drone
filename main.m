@@ -100,13 +100,13 @@ try
 
             % reference
 %             FH.CurrentCharacter = 'f';
-            if fExp~=1
-                if time.t<=5
-                    FH.CurrentCharacter = 't';
-                else
-                    FH.CurrentCharacter = 'f';
-                end
-            end
+            % if fExp~=1
+            %     if time.t<=5
+            %         FH.CurrentCharacter = 't';
+            %     else
+            %         FH.CurrentCharacter = 'f';
+            %     end
+            % end
             param(i).reference.covering = [];
             param(i).reference.point = {FH, [0; 0; 0], time.t, dt};
             param(i).reference.timeVarying = {time, FH};

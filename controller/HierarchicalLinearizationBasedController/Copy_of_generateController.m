@@ -1,5 +1,5 @@
 %% Define the nonlinear physical model of a quadrotor
-syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 vz dvz real
+syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 T dT vz dvz real
 syms u u1 u2 u3 u4 uz T1 T2 T3 T4 Tzreal
 syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 %% Controller design
@@ -13,11 +13,11 @@ dp	= [ dp1; dp2; dp3];             % Velocity
 ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
 q	= [  q0;  q1;  q2;  q3];        % Quaternion
 ob	= [  o1;  o2;  o3];             % Angular velocity
-ex
-x = [q;p;dp;ob];
+
+x = [q;p;dp;ob;T;dT];
 physicalParam = [m, Lx, Ly, lx, ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
-f = F(x,physicalParam);
-g = G(x,physicalParam);
+f = [F(x,physicalParam);dT;0];
+g = [G(x,physicalParam);zeros(2,4)];
 %g= [g1 g2 g3 g4];
 %% 1st layer
 clc
@@ -58,7 +58,8 @@ f1 = subs(FG,[u2,u3,u4],[0,0,0]);
 % f1 = subs(FG,[v2,v3,v4],[0,0,0]);
 
 %%
-% % Define virtual output: h2, h3, h4
+% % Define virtual output: h1 h2, h3, h4
+h1 = p3 - xd(3);
 h2 = p1 - xd(1);
 h3 = p2 - xd(2);
 [~,~,yaw] = Quat2Eul(q);
@@ -66,13 +67,16 @@ h4 = yaw - xd(4);
 %h4 = 2*(q0*q3 + q1*q2) - xd(4); % これでは姿勢は変わらない
 %% **************************************** % %
 clc
-dh2 = LieD(h2,f1,x)+diff(h2,t);
-dh3 = LieD(h3,f1,x)+diff(h3,t);
-dh4 = LieD(h4,f1,x)+diff(h4,t);
-ddh2 = LieD(dh2,f1,x)+diff(dh2,t);
-ddh3 = LieD(dh3,f1,x)+diff(dh3,t);
-dddh2 = LieD(ddh2,f1,x)+diff(ddh2,t);
-dddh3 = LieD(ddh3,f1,x)+diff(ddh3,t);
+dh1 = LieD(h1,f,x)+diff(h1,t);
+dh2 = LieD(h2,f,x)+diff(h2,t);
+dh3 = LieD(h3,f,x)+diff(h3,t);
+dh4 = LieD(h4,f,x)+diff(h4,t);
+ddh1 = LieD(dh1,f,x)+diff(dh1,t);
+ddh2 = LieD(dh2,f,x)+diff(dh2,t);
+ddh3 = LieD(dh3,f,x)+diff(dh3,t);
+dddh1 = LieD(ddh1,f,x)+diff(ddh1,t);
+dddh2 = LieD(ddh2,f,x)+diff(ddh2,t);
+dddh3 = LieD(ddh3,f,x)+diff(ddh3,t);
 % % For check
 % 	[LieD(h2,g1,x),LieD(h3,g1,x)]
 % 	simplify([LieD(dh2,g1,x),LieD(dh3,g1,x)])
@@ -82,8 +86,8 @@ dddh3 = LieD(ddh3,f1,x)+diff(ddh3,t);
 % 	simplify([LieD(ddh2,g1,x),LieD(ddh3,g1,x)])
 %% 
 % % Derive 2nd layer controller
-alpha2 = [LieD(dddh2,f1,x)+diff(dddh2,t); LieD(dddh3,f1,x)+diff(dddh3,t); LieD(dh4,f1,x)+diff(dh4,t)];
-beta2 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
+alpha2 = [LieD(dddh1,f,x)+diff(dddh1,t);LieD(dddh2,f,x)+diff(dddh2,t); LieD(dddh3,f,x)+diff(dddh3,t); LieD(dh4,f,x)+diff(dh4,t)];
+beta2 = [LieD(dddh1,g,x);LieD(dddh2,g,x); LieD(dddh3,g,x); LieD(dh4,g,x)];
 % Qxy = diag([1.0, 1.0, 0.1, 0.01]);	% Weight of state
 % Rxy = 1.0;                          % Weight of input
 % Nxy = 0;
@@ -96,10 +100,10 @@ beta2 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
 %     v2 = [-F4*[h2;dh2;ddh2;dddh2]; -Fxy*[h3;dh3;ddh3;dddh3]; -Fr*[h4;dh4]];
 %     U2 = inv(beta2)*(-alpha2+v2);   % v2 を事前に設計しておく時はこっち
 % else
-    syms v2(t) v3(t) v4(t)
-    U2 = inv(beta2)*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
+    syms v1(t) v2(t) v3(t) v4(t)
+    U2 = inv(beta2)*(-alpha2+[v1(t);v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
     %U2 = beta2/(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
+    U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v1(t);v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
 %end
 %% Initialize xd as an unspecified function of t
 % % If regenerate Uf, Us or Xd functions, evaluate this section.
@@ -118,7 +122,7 @@ beta2 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
 %% Make functions of z
 % % If either model, virtual output or parameters is changed, then evaluate this section.
     disp("Start: make functions of virtual states.");
-    matlabFunction(subs([h1;dh1], [xdRef], [XD]),'file','Z1.m','vars',{x cell2sym(XD) physicalParam},'outputs',{'cZ1'});
+    matlabFunction(subs([h1;dh1;ddh1;dddh1], [xdRef], [XD]),'file','Z1.m','vars',{x cell2sym(XD) physicalParam},'outputs',{'cZ1'});
     matlabFunction(subs([h2;dh2;ddh2;dddh2], [xdRef vInput1], [XD V1v]),'file','Z2.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ2'});
     matlabFunction(subs([h3;dh3;ddh3;dddh3], [xdRef vInput1], [XD V1v]),'file','Z3.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ3'});
     matlabFunction(subs([h4;dh4], [xdRef vInput1], [XD V1v]),'file','Z4.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'cZ4'});
