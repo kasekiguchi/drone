@@ -52,7 +52,6 @@ classdef PID_CONTROLLER < handle
             obj.ed = v - vr;
             
             obj.result.input = -obj.Kp*obj.e - obj.Kd*obj.ed; % - obj.Ki*obj.ei 
-            obj.self.input = obj.result.input;
             u = obj.result;
             %obj.ei = obj.ei + obj.e*obj.dt;
         end 
