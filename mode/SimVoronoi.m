@@ -51,5 +51,5 @@ function post(app) % post procedure
 app.logger.plot({1, "p", "pr"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({2, "p", "pr"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({3, "p", "pr"},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
-VORONOI_BARYCENTER.draw_movie(app.logger, app.env,1:app.N,app.UIAxes);
+%VORONOI_BARYCENTER.draw_movie(app.logger, app.env,1:app.N,app.UIAxes);
 end
