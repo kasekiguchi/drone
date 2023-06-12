@@ -17,6 +17,7 @@ classdef EKF < handle
         y
         self
         model
+        timer= [];
     end
     
     methods
@@ -25,7 +26,7 @@ classdef EKF < handle
             obj.model = param.model;
             ELfile=strcat("Jacobian_",obj.model.name);
             if ~exist(ELfile,"file")
-                obj.JacobianF=ExtendedLinearization(ELfile,model);
+                obj.JacobianF=ExtendedLinearization(ELfile,obj.model);
             else
                 obj.JacobianF=str2func(ELfile);
             end
@@ -47,6 +48,14 @@ classdef EKF < handle
         end
         
         function [result]=do(obj,varargin)
+          if ~isempty(obj.timer)
+            dt = toc(obj.timer);
+            if dt > obj.dt
+              dt = obj.dt;
+            end
+          else
+            dt = obj.dt;
+          end
             sensor = obj.self.sensor.result;
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             x = obj.result.state.get(); % estimated state at previous step
@@ -62,7 +71,7 @@ classdef EKF < handle
             xh_pre = obj.model.state.get(); % 
 
             p = obj.self.parameter.get();
-            A = eye(obj.n)+obj.JacobianF(x,p)*obj.dt; % Euler approximation
+            A = eye(obj.n)+obj.JacobianF(x,p)*dt; % Euler approximation
             C = obj.JacobianH(x,p);
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % Predicted covariance
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % Kalman gain
@@ -74,6 +83,7 @@ classdef EKF < handle
             obj.result.G = G;
             obj.result.P = P;
             result=obj.result;
+            obj.timer = tic;
         end
     end
 end

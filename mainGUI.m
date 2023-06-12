@@ -9,7 +9,7 @@ userpath('clear');
 %%
 clc
 SimBaseMode = ["SimHL","SimVoronoi","SimLiDAR"];
-ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL"];
+ExpBaseMode = ["SimHL","ExpTestMotiveConnection","ExpHL"];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.1; % sec : poling interval for emergency stop

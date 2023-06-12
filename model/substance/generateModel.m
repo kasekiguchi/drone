@@ -108,8 +108,8 @@ matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_torque_physical
 %matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_force_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Calculate Jacobian matrix
-jacobianA = jacobian(f+g*[u1;u2;u3;u4],xp);
-matlabFunction(jacobianA,'file','JacobiA.m','vars',{xp u cell2sym(physicalParam)},'outputs',{'a'});
+% jacobianA = jacobian(fp+gp*[u1;u2;u3;u4],xp);
+% matlabFunction(jacobianA,'file','JacobiA.m','vars',{xp u cell2sym(physicalParam)},'outputs',{'a'});
 
 %% Local functions
 function m = Mtake(mat,m,n)
