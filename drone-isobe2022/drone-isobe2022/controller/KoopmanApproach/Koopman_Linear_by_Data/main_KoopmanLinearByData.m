@@ -9,15 +9,15 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_9_normal_experiment_vertical.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_6_9_Input_experiment_alldata.mat';
+FileName = 'EstimationResult_12state_6_12_Input_experiment_alldata.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる)
 % loading_filename = 'sim_rndP_12state';
 % loading_filename = 'sim_rndP4';
 % loading_filename = '2023_0529_1804_logger_cricle_LS.mat';
 % loading_filename = 'experiment_circle_6_8';
-loading_filename = 'experiment_vertical_6_8';
-% loading_filename = '6_8_experiment';
+% loading_filename = 'experiment_vertical_6_8';
+loading_filename = '6_8_experiment';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -32,8 +32,8 @@ targetpath=append(nowFolder,'\',FileName);
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量
 % F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
 % F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
-F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量(動作確認済み)アップデート中
-% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み)
+% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量
+F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み) こちらが最新の観測量
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
 
@@ -46,7 +46,7 @@ F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 2; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 10; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -94,11 +94,23 @@ disp('Estimated')
 
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
 %中間発表の推定精度検証シミュレーション
-simResult.reference = ImportFromExpData('TestData3.mat');
+% simResult.reference = ImportFromExpData('TestData3.mat');
+simResult.reference = ImportFromExpData('6_8_experiment_11.mat');
+
+% 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
+takeoff_idx = find(simResult.reference.T,1,'first');
+simResult.reference.X = simResult.reference.X(:,takeoff_idx:end);
+simResult.reference.Y = simResult.reference.Y(:,takeoff_idx:end);
+simResult.reference.U = simResult.reference.U(:,takeoff_idx:end);
+simResult.reference.T = simResult.reference.T(takeoff_idx:end);
+simResult.reference.T = simResult.reference.T - simResult.reference.T(1);
+simResult.reference.N = simResult.reference.N - takeoff_idx;
 if flg.bilinear == 1 %双線形モデル
     simResult.Z(:,1) = F(simResult.reference.X(:,1));
     simResult.Xhat(:,1) = simResult.reference.X(:,1);
     simResult.U = simResult.reference.U(:,1:end);
+    
+
     simResult.T = simResult.reference.T(1:end);
   
     for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
@@ -110,7 +122,7 @@ else
     simResult.Xhat(:,1) = simResult.reference.X(:,1);
     simResult.U = simResult.reference.U;
     simResult.T = simResult.reference.T;
-    
+
     for i = 1:1:simResult.reference.N-2
         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);

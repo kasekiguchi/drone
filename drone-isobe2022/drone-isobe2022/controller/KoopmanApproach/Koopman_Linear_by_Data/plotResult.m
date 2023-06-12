@@ -5,10 +5,10 @@ close all
 %% flag
 flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求める
 flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 1; % 指定した値にxlimを固定
+flg.xlimHold = 0; % 指定した値にxlimを固定
 
 %% select file to load
-loadfilename{1} = ['EstimationResult_12state_6_9_Input_experiment_alldata.mat'] %mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = ['EstimationResult_12state_6_12_Input_experiment_alldata.mat'] %mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
 % loadfilename{3} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
@@ -27,7 +27,8 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 %% plot range
 %何ステップまで表示するか
 %ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
-stepN = 31; %検証用シミュレーションのステップ数がどれだけあるかを確認
+% stepN = 501;
+% stepN = 51; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 % flg.ylimHoldがtrueのときのplot y範囲
@@ -38,8 +39,8 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 if flg.xlimHold == 1
-    % xlimHold = [0, 0.5];
-    xlimHold = [0,0.5];
+    xlimHold = [0, 0.5];
+    % xlimHold = [0,20];
 end
 
 %% Font size
