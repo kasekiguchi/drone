@@ -25,8 +25,25 @@ data.uN = find(logger.Data.agent.input{1},1,'last');
 %% Get data
 % 状態毎に分割して保存
 % XYに結合する際の都合で↓時系列,→状態
+if logger.fExp==1
 %--------------------time----------------------
+data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))'; 
+data.startIndex = find(data.est.p(:,3)>0.4,1,'first');
+data.phase = logger.Data.phase;
+data.endIndex = find(data.phase==108,1,'first');
+data.N = data.endIndex - data.startIndex + 1;
 data.t = logger.Data.t(1:data.N);
+%-------------------estimator----------------------
+% data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))';
+data.est.q = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.q,1:data.N,'UniformOutput',false))';
+data.est.v = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.v,1:data.N,'UniformOutput',false))';
+data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,1:data.N,'UniformOutput',false))';
+%-----------------------input----------------------
+data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),1:data.N,'UniformOutput',false))';
+else
+    data.startIndex=1;
+%--------------------time----------------------
+    data.t = logger.Data.t(1:data.N);
 %-------------------estimator----------------------
 data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))';
 data.est.q = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.q,1:data.N,'UniformOutput',false))';
@@ -34,11 +51,11 @@ data.est.v = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.
 data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,1:data.N,'UniformOutput',false))';
 %-----------------------input----------------------
 data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),1:data.N,'UniformOutput',false))';
-
+end
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合
 % ↓状態,→時系列
-for i=1:1:data.N -1
+for i=data.startIndex:1:data.N -1
     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
     data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
     data.U(:,i) = [data.input(i,:)'];
