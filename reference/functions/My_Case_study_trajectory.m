@@ -15,9 +15,10 @@ z_0 = X0(3);
 x = x_0;
 y = y_0;
 z = z_0;
-% 円
+
+% 
 % r=1;
-% T=8;
+% T=10;
 % x = x_0+r*cos(2*pi*t/T);
 % y = y_0+r*sin(2*pi*t/T);
 % z = z_0;%+0.4*sin(2*pi*t/T);
@@ -42,6 +43,25 @@ z = z_0;
 % z=z_0;
 
 %メビウスの帯
+% T = 12;r=0.5;
+% x = (r*cos(2*pi*t/T)+1)*cos(2*2*pi*t/T);
+% y = (r*cos(2*pi*t/T)+1)*sin(2*2*pi*t/T);
+% z = z_0+r*sin(2*pi*t/T);
+
+% 
+R1=1;
+N1=1;
+R2=1;
+N2=-2;
+S=0.5;
+x=R1*sin(N1*S*t)+R2*sin(N2*S*t);
+y=R1*cos(N1*S*t)+R2*cos(N2*S*t);
+
+a=5;
+s=0.2;
+x=0.5*(2*sin(s*t+cos(a*s*t)));
+y=0.5*(2*cos(s*t+sin(a*s*t)));
+
 % r =cos(2*pi*t/3); T = 43;a =2;
 % x = (r*cos(pi*t/T)+a)*cos(2*pi*t/T);
 % y = (r*cos(pi*t/T)+a)*sin(2*pi*t/T);

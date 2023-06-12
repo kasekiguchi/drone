@@ -1,6 +1,6 @@
 %%　DataPlot
 %pos = cell2mat(logger.Data.agent.sigma(1,:)'); %cell2matでcell配列を行列に変換，:,1が列全選択
-
+close all
 %%
 %=======================================================================
 %ふぃぐは１つ
@@ -20,7 +20,7 @@ fHLorFT=10;%単体の時,HLは1
 HLorFT='';
 % 単体
     %loggerの名前が変わっているとき
-    name=logger;
+    name=logger_no_servo;
 %     name=logger_FB_lqr_dst1;
 %     name=remasui2_0518_FT_hovering_15;
         
@@ -89,7 +89,7 @@ FigName= ["t-p" "t-x" "t-y" "t-z" "velocity" "attitude" "angular_velocity" "inpu
     set(gca,'FontSize',fosi)
     xlabel('x [m]','FontSize',fosi)
     ylabel('y [m]','FontSize',fosi)
-    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'estimator'))
+    legend(strcat(HLorFT,'reference'),strcat(HLorFT,'drone'))
     daspect([1,1,1]);
     hold off
     
@@ -112,7 +112,7 @@ FigName= ["t-p" "t-x" "t-y" "t-z" "velocity" "attitude" "angular_velocity" "inpu
     set(gca,'FontSize',fosi)
     xlabel('time [s]','FontSize',fosi)
     ylabel('input [N]','FontSize',fosi)%単位はN？
-    legend('プロペラ1','プロペラ2','プロペラ3','プロペラ4')
+    legend('rotor1','rotor2','rotor3','rotor4')
     hold off
 
     f(6)=figure('Name',FigName(6));
@@ -161,8 +161,8 @@ FigName= ["t-p" "t-x" "t-y" "t-z" "velocity" "attitude" "angular_velocity" "inpu
 
 %% make folder
 %変更しない
-%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-        ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+%         ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
@@ -170,11 +170,11 @@ FigName= ["t-p" "t-x" "t-y" "t-z" "velocity" "attitude" "angular_velocity" "inpu
     %名前\日付_名前_
 %変更
 % subfolder='sim';%sim or exp
-% subfolder='exp';%sim or exp
-subfolder='result_exp';%班
-ExpSimName='全体実験';%実験名,シミュレーション名
+subfolder='sample';%sim or exp
+% subfolder='result_exp';%班
+ExpSimName='ECU';%実験名,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
-contents='例';%B3の名前
+contents='no_servo';%B3の名前
 %     FolderName=fullfile(ExportFolder,subfolder,strcat(date,'_',ExpSimName),'data');%保存先のpath
 %     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
 %     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
@@ -195,6 +195,7 @@ indent = [1,5,6,7,8,9,10];%保存したいものを書く
 for i=1:length(indent) 
     j=indent(i);
     SaveTitle(j)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(j));
-    saveas(f(j), fullfile(FolderNamef, SaveTitle(j) ),'fig');
+%     saveas(f(j), fullfile(FolderNamef, SaveTitle(j) ),'fig');
+    saveas(f(j), fullfile(FolderNamef, SaveTitle(j) ),'png');
 end
 

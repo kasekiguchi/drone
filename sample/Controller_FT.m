@@ -1,6 +1,7 @@
-function Controller = Controller_FT(dt, fApproxZ, fTanh1Z, fApproxXY, fTanh1XY, alp, approxRangeZ, approxRangeXY)
+% function Controller = Controller_FT(dt, fApproxZ, fTanh1Z, fApproxXY, fTanh1XY, alp, approxRangeZ, approxRangeXY)
+function Controller = Controller_FT(dt)
 %% flag and approximate range
-fApproxZ = 1;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
+            fApproxZ = 1;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
             fTanh1Z = 1;%tanhが一つか:1 tanh2:~1
             fApproxXY = 10;%%%xy近似するか:1 else:~1
             fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
@@ -13,14 +14,16 @@ Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
 Bc4 = [0; 0; 0;1];
-Controller_param.F1 = lqrd(Ac2, Bc2, diag([1000, 1]), [0.1], dt); 
-if fexpand
-    Controller_param.F1 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt);
-end
+Controller_param.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt);
+% Controller_param.F1 = lqrd(Ac2, Bc2, diag([1000, 1]), [0.1], dt);
+% if fexpand
+%     Controller_param.F1 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt);
+% end
+
 % Controller_param.F1 = place(Ac2,Bc2,[-8.2518 + 4.9876i,-8.2518 - 4.9876i]);%近似線形化と同じ極
 % 有限整定用
-Controller_param.F2 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller_param.F3 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller_param.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
 %併用
 % Bcm = [0; 0; 0; 2];
 % Controller_param.F2 = lqrd(Ac4, Bcm, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
@@ -79,7 +82,8 @@ if fApproxZ == 1
 
         xz0 = [50, 0.01];%------------------------------------
         f1 =zeros(2,4);%------------------------------------
-        b=[5,3];
+%         b=[5,3];
+        b=[1.6,1.5];
         %alhpa=0.8 rang=0.05:[4.5,2.5]/rang=0.01:[6,4.8]
         %alpha=0.85rng=0.01[5,3]
         k = Controller_param.F1;
@@ -91,7 +95,7 @@ if fApproxZ == 1
 
              %tanh absolute-----------------
              %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
-             rng = 0.01;
+             rng = 0.02;
             fun=@(x)(integral(@(w) abs( -k(i).*abs(w).^alpha(i) + k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alpha(i)), rng,rng+1) +integral(@(w) abs( k(i).*w-k(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^alpha(i)), 0,rng));
             c =@(x)0;
             ceq = @(x) 1 - x(1).*x(2).^(alpha(i)./2)+b(i);

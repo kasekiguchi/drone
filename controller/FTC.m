@@ -73,13 +73,13 @@ methods
         %% calc Z
         z1 = Z1(x, xd', P);
 
-        if obj.fzapr ~= 1
+%         if obj.fzapr ~= 1
             %z方向:FB
-            vf = obj.Vf(z1, F1); % % % % % % % % % % % % % % % % % % %xy
-        else
+%             vf = obj.Vf(z1, F1); % % % % % % % % % % % % % % % % % % %xy
+%         else
             %z方向:FT
             vf = obj.Vf(z1); % % % % % % % % % % % % % % % % % %xyz
-        end
+%         end
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向
@@ -93,7 +93,7 @@ methods
         switch obj.n
             case 1
                 %有限整定
-                        vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
+%                         vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
                         ux=-F2*(sign(z2).*abs(z2).^ax(1:4));
                         uy=-F3*(sign(z3).*abs(z3).^ay(1:4));
 
@@ -158,18 +158,18 @@ methods
 %                     dst = 2*a*rand-a;
 %
                     %平均b、標準偏差aのガウスノイズ
-                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
-                          rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-                          a = 1;%標準偏差
-                          b = 0;%平均
-                          c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
-                          obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
-                          obj.fRandn = 1;
-                    end
-                    dst(4) = obj.pdst(obj.fRandn,1);
-                    dst(5) = obj.pdst(obj.fRandn,2);
-                    dst(3) = obj.pdst(obj.fRandn,3);
-                    obj.fRandn = obj.fRandn+1;%乱数の値を更新
+%                      if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
+%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
+%                           a = 1;%標準偏差
+%                           b = 0;%平均
+%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
+%                           obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
+%                           obj.fRandn = 1;
+%                     end
+%                     dst(4) = obj.pdst(obj.fRandn,1);
+%                     dst(5) = obj.pdst(obj.fRandn,2);
+%                     dst(3) = obj.pdst(obj.fRandn,3);
+%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
         %-----------------------------------------------------------------
                     %一時的な外乱
 %         t = param{1};

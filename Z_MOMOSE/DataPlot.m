@@ -51,8 +51,10 @@ if fLogN == 1
     n = [1,5,8,10,7, 12:16,20:23];
 %     n=20:23;
 elseif fLogN==2
+
     name1 = logger_app_c2;%LS
     name2 = logger_HL_c2;%FT
+
 %     name1 = logger_saddle2_LS;%LS
 %     name2 = logger_saddle2_FT;%FT
 
@@ -933,9 +935,12 @@ legend(legend_str);
     end
 
     function RMSE = rmse(ref,est)
-        RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
-        RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
-        RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
+%         RMSE_x=sqrt(immse(ref(1,:),est(1,:)));
+%         RMSE_y=sqrt(immse(ref(2,:),est(2,:)));
+%         RMSE_z=sqrt(immse(ref(3,:),est(3,:)));
+RMSE_x=sqrt(sum(((ref(1,:)-est(1,:)).^2)));
+        RMSE_y=sqrt(sum(((ref(2,:)-est(2,:)).^2)));
+        RMSE_z=sqrt(sum(((ref(3,:)-est(3,:)).^2)));
         RMSE = [RMSE_x RMSE_y RMSE_z];
     end
 
