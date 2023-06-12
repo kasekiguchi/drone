@@ -89,13 +89,13 @@ z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
      ];
 
 %磯部先輩最新バージョン?(あってない Rezがない)
-% z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;1;
-%      W1*W2;W2*W3;W3*W1;W2*cos(Q1);W3*sin(Q1);
-%      (W1*cos(Q2))/cos(Q1);(W2*sin(Q1))/cos(Q1);
-%      (W3*cos(Q1))/cos(Q1);
-%      (W2*sin(Q1)*sin(Q2))/cos(Q1); 
-%      (W3*cos(Q1)*sin(Q2))/cos(Q1);
-%      ];
+z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;1;
+     W1*W2;W2*W3;W3*W1;W2*cos(Q1);W3*sin(Q1);
+     (W1*cos(Q2))/cos(Q1);(W2*sin(Q1))/cos(Q1);
+     (W3*cos(Q1))/cos(Q1);
+     (W2*sin(Q1)*sin(Q2))/cos(Q1); 
+     (W3*cos(Q1)*sin(Q2))/cos(Q1);
+     ];
 
 end
 

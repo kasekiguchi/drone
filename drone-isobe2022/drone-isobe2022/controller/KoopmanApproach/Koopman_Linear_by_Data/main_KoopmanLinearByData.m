@@ -95,26 +95,13 @@ disp('Estimated')
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
 %中間発表の推定精度検証シミュレーション
 simResult.reference = ImportFromExpData('TestData3.mat');
-if flg.bilinear == 1
-%     simResult.Z(:,1) = F(simResult.reference.X(:,1));
-%     simResult.Xhat(:,1) = simResult.reference.X(:,1);
-%     simResult.U = simResult.reference.U;
-%     simResult.T = simResult.reference.T;
+if flg.bilinear == 1 %双線形モデル
     simResult.Z(:,1) = F(simResult.reference.X(:,1));
     simResult.Xhat(:,1) = simResult.reference.X(:,1);
     simResult.U = simResult.reference.U(:,1:end);
     simResult.T = simResult.reference.T(1:end);
-    % dZ = A*Z + (B + E*R*ez*[1,1,1,1])*u
-%     for i = 1:1:simResult.reference.N-2
-    for i = 1:1:simResult.reference.N-2
-%         roll  = simResult.Z(4,i);
-%         pitch = simResult.Z(5,i);
-%         yaw   = simResult.Z(6,i);
-        % R*ez
-%         R13 = ( 2.*(cos(pitch/2).*cos(roll/2).*cos(yaw/2) + sin(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(roll/2).*cos(yaw/2).*sin(pitch/2) + cos(pitch/2).*sin(roll/2).*sin(yaw/2)) + 2.*(cos(pitch/2).*cos(roll/2).*sin(yaw/2) - cos(yaw/2).*sin(pitch/2).*sin(roll/2)).*(cos(pitch/2).*cos(yaw/2).*sin(roll/2) - cos(roll/2).*sin(pitch/2).*sin(yaw/2)))./m;
-%         R23 = (-2.*(cos(pitch/2).*cos(roll/2).*cos(yaw/2) + sin(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(pitch/2).*cos(yaw/2).*sin(roll/2) - cos(roll/2).*sin(pitch/2).*sin(yaw/2)) - 2.*(cos(roll/2).*cos(yaw/2).*sin(pitch/2) + cos(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(pitch/2).*cos(roll/2).*sin(yaw/2) - cos(yaw/2).*sin(pitch/2).*sin(roll/2)))./m;
-%         R33 =  (cos(pitch).*cos(roll))/m;
-        %simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + [zeros(6,4);est.Ehat(7:8,:)*simResult.Z(13:14,i)*[1,1,1,1];zeros(7,4)] )* simResult.U(:,i);
+  
+    for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
     end
@@ -123,11 +110,48 @@ else
     simResult.Xhat(:,1) = simResult.reference.X(:,1);
     simResult.U = simResult.reference.U;
     simResult.T = simResult.reference.T;
+    
     for i = 1:1:simResult.reference.N-2
         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
     end
 end
+
+% simResult.reference = ImportFromExpData('TestData3.mat');
+% if flg.bilinear == 1
+% %     simResult.Z(:,1) = F(simResult.reference.X(:,1));
+% %     simResult.Xhat(:,1) = simResult.reference.X(:,1);
+% %     simResult.U = simResult.reference.U;
+% %     simResult.T = simResult.reference.T;
+%     simResult.Z(:,1) = F(simResult.reference.X(:,1));
+%     simResult.Xhat(:,1) = simResult.reference.X(:,1);
+%     simResult.U = simResult.reference.U(:,1:end);
+%     simResult.T = simResult.reference.T(1:end);
+%     % dZ = A*Z + (B + E*R*ez*[1,1,1,1])*u
+% %     for i = 1:1:simResult.reference.N-2
+%     for i = 1:1:simResult.reference.N-2
+% %         roll  = simResult.Z(4,i);
+% %         pitch = simResult.Z(5,i);
+% %         yaw   = simResult.Z(6,i);
+%         % R*ez
+% %         R13 = ( 2.*(cos(pitch/2).*cos(roll/2).*cos(yaw/2) + sin(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(roll/2).*cos(yaw/2).*sin(pitch/2) + cos(pitch/2).*sin(roll/2).*sin(yaw/2)) + 2.*(cos(pitch/2).*cos(roll/2).*sin(yaw/2) - cos(yaw/2).*sin(pitch/2).*sin(roll/2)).*(cos(pitch/2).*cos(yaw/2).*sin(roll/2) - cos(roll/2).*sin(pitch/2).*sin(yaw/2)))./m;
+% %         R23 = (-2.*(cos(pitch/2).*cos(roll/2).*cos(yaw/2) + sin(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(pitch/2).*cos(yaw/2).*sin(roll/2) - cos(roll/2).*sin(pitch/2).*sin(yaw/2)) - 2.*(cos(roll/2).*cos(yaw/2).*sin(pitch/2) + cos(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(pitch/2).*cos(roll/2).*sin(yaw/2) - cos(yaw/2).*sin(pitch/2).*sin(roll/2)))./m;
+% %         R33 =  (cos(pitch).*cos(roll))/m;
+%         %simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + [zeros(6,4);est.Ehat(7:8,:)*simResult.Z(13:14,i)*[1,1,1,1];zeros(7,4)] )* simResult.U(:,i);
+%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
+%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
+%     end
+% else
+%     simResult.Z(:,1) = F(simResult.reference.X(:,1));
+%     simResult.Xhat(:,1) = simResult.reference.X(:,1);
+%     simResult.U = simResult.reference.U;
+%     simResult.T = simResult.reference.T;
+%     for i = 1:1:simResult.reference.N-2
+%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
+%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
+%     end
+% end
+
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
     simResult.state.p = simResult.Xhat(1:3,:);
