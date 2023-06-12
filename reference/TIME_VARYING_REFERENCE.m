@@ -28,7 +28,7 @@ classdef TIME_VARYING_REFERENCE < handle
             if length(args) > 2
                 if strcmp(args{3}, "HL")
                     obj.func = gen_ref_for_HL(obj.func);
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));                    
                 end
             else
                 obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
@@ -37,8 +37,8 @@ classdef TIME_VARYING_REFERENCE < handle
             obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
             obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
             obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-            syms t real
-            obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
+            %syms t real
+            %obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
         function result = do(obj, varargin)  
            %Param={time,FH}
@@ -48,11 +48,14 @@ classdef TIME_VARYING_REFERENCE < handle
            else
                 obj.t=varargin{1}.t;
                 t = obj.t;
+           end           
+           obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           obj.result.state.p = obj.result.state.xd(1:3);
+           if length(obj.result.state.xd)>=4
+            obj.result.state.v = obj.result.state.xd(5:7);
+           else
+            obj.result.state.v = [0;0;0];
            end
-           %obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-           %obj.result.state.p = obj.result.state.xd(1:3);
-           obj.result.state.p = obj.func(t);
-           obj.result.state.v = obj.dfunc(t);
            obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            result = obj.result;
         end

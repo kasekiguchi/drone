@@ -18,7 +18,8 @@ classdef HLC < handle
     function result = do(obj,varargin)
       model = obj.self.estimator.result;
       ref = obj.self.reference.result;
-      xd = ref.state.get();
+      xd = ref.state.xd;
+      xd0 =xd;
       P = obj.param.P;
       F1 = obj.param.F1;
       F2 = obj.param.F2;
@@ -39,11 +40,12 @@ classdef HLC < handle
       if isfield(obj.param,'dt')
         dt = obj.param.dt;
         vf = Vfd(dt,x,xd',P,F1);
+        vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
       else
         vf = Vf(x,xd',P,F1);
-      end
-      vf = Vf(x,xd',P,F1);
       vs = Vs(x,xd',vf,P,F2,F3,F4);
+      end
+      disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
       obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
       result = obj.result;
