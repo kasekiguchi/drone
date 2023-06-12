@@ -43,6 +43,7 @@ classdef EKF < handle
             obj.dt = obj.model.dt; % 刻み
             obj.B = param.B;
             obj.result.P = param.P;
+            obj.result.G = zeros(obj.n,size(obj.R,2));
         end
         
         function [result]=do(obj,varargin)
