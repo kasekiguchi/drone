@@ -26,7 +26,7 @@ methods
         obj.flight_phase = 's';
         P = self.parameter.get;
         obj.hover_thrust_force = P(1) * P(9);
-        obj.state = state_copy(self.model.state);
+        obj.state = state_copy(self.estimator.result.state);
     end
 
     function u = do(obj, varargin)
@@ -57,8 +57,8 @@ methods
             %                 statetmp = obj.self.model.state.get() + obj.self.model.dt * obj.self.model.method(obj.self.model.state.get(), obj.self.input, P); % euler approximation
             %                 obj.state.set_state(statetmp);
             %                 whn = obj.state.w; %statetmp(end-2:end);
-
-            whn = obj.self.model.state.w; % １時刻先の事前予測
+obj.self.estimator.model.do(varargin{:});
+            whn = obj.self.estimator.model.state.w; % １時刻先の事前予測
             T_thr = sum(input); % T_thr = input(1);
 
             % TODO : 以下であるべきでは？　要チェック
