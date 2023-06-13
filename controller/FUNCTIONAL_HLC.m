@@ -1,4 +1,4 @@
-classdef FUNCTIONAL_HLC < CONTROLLER_CLASS
+classdef FUNCTIONAL_HLC < handle
 % クアッドコプター用階層型線形化を使った入力算出
 properties
     self

@@ -1,4 +1,4 @@
-classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
+classdef TAKEOFF_REFERENCE < handle
   properties
     param
     self
@@ -7,6 +7,7 @@ classdef TAKEOFF_REFERENCE < REFERENCE_CLASS
     ts
     te = 3;
     zd = 1; % goal altitude
+    result
   end
 
   methods

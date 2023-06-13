@@ -13,9 +13,9 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
 
 
   methods
-    function obj = DRONE_EXP_MODEL(args)
-      obj@MODEL_CLASS(args);
-      param=args.param;
+    function obj = DRONE_EXP_MODEL(varargin)
+      obj@MODEL_CLASS(varargin{:});      
+      param=varargin{2}.param;
       obj.dt = 0.025;
       %% variable set
       obj.flight_phase        = 's';
@@ -37,7 +37,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
       end
     end
     function do(obj,varargin)
-      u = varargin{5}.controller.result.input;
+      u = gen_msg(varargin{5}.controller.result.input');
       cha = varargin{2};
       obj.flight_phase=cha;
       switch cha

@@ -1,4 +1,4 @@
-classdef ROS < SENSOR_CLASS
+classdef ROS < handle
     %       self : agent
     properties
         name      = "ROS";

@@ -1,4 +1,4 @@
-classdef WALL_REFERENCE < REFERENCE_CLASS
+classdef WALL_REFERENCE < handle
     % 既知である環境に対し，目標位置(x,y)，目標姿勢角(yaw)を生成するクラス
     % obj = WALL_REFERENCE()
     properties % objの中に何が欲しいか決める所
@@ -13,6 +13,7 @@ classdef WALL_REFERENCE < REFERENCE_CLASS
         area2
         fShow
         vrtx_len_limit
+        result
     end
     methods % リファレンスクラス
         function obj = WALL_REFERENCE(self,pparam) % doへの橋渡し，中身を計算したりして決める．1次的な部分

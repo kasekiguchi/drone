@@ -33,10 +33,7 @@ JH1 = ZH1'*QH2*ZH1 + V1'*RH2*V1;
 JH2 = ZH2'*QH4*ZH2 + V2'*RH4*V2;
 JH3 = ZH3'*QH4*ZH3 + V3'*RH4*V3;
 JH4 = ZH4'*QH2*ZH4 + V4'*RH2*V4;
-Controller_param.J = matlabFunction(JH1 + JH2 + JH3 + JH4,'vars',{z01,z02,z03,z04,V1,V2,V3,V4}); % 評価関数
-Controller_param.S = 200; % サンプル数
-Controller_param.dt = dt;
-Controller.type = "MCMPC_CONTROLLER";
-Controller.name = "mcmpc";
-Controller.param = Controller_param;
+Controller.J = matlabFunction(JH1 + JH2 + JH3 + JH4,'vars',{z01,z02,z03,z04,V1,V2,V3,V4}); % 評価関数
+Controller.S = 200; % サンプル数
+Controller.dt = dt;
 end

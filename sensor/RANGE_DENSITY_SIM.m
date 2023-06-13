@@ -1,4 +1,4 @@
-classdef RANGE_DENSITY_SIM < SENSOR_CLASS
+classdef RANGE_DENSITY_SIM < handle
     % RangeDensityのsimulation用クラス：登録されたエージェントのうち半径内のエージェントの位置を返す
     %   rdensity = RANGE_DENSITY_SIM(Env)
     %   (optional) Env.r : 半径

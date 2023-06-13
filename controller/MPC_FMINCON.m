@@ -1,4 +1,4 @@
-classdef MPC <CONTROLLER_CLASS
+classdef MPC_fmincon < handle
     % linear Model Predictive Control
     
     properties
@@ -15,7 +15,7 @@ classdef MPC <CONTROLLER_CLASS
     end
     
     methods
-        function obj = MPC(self,param)
+        function obj = MPC_fmincon(self,param)
             obj.self = self;
             obj.options = optimoptions('fmincon');
             obj.options.UseParallel            = false;

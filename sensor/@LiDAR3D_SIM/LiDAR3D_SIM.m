@@ -1,4 +1,4 @@
-classdef LiDAR3D_SIM < SENSOR_CLASS
+classdef LiDAR3D_SIM < handle
   %   3次元LiDAR（全方位センサー）のsimulation用クラス
   %   lidar = LiDAR3D_SIM(param)
   %   (optional) radius = 1 default 40 m

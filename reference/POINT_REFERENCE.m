@@ -1,7 +1,8 @@
-classdef POINT_REFERENCE < REFERENCE_CLASS
+classdef POINT_REFERENCE < handle
     properties
         param
         self
+        result
     end
     
     methods
