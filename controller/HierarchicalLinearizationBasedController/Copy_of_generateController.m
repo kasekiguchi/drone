@@ -1,6 +1,6 @@
 %% Define the nonlinear physical model of a quadrotor
 syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 T dT vz dvz real
-syms u u1 u2 u3 u4 uz T1 T2 T3 T4 Tzreal
+syms u u1 u2 u3 u4 v1 T1 T2 T3 T4 Tzreal
 syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 %% Controller design
 clc
@@ -17,7 +17,9 @@ ob	= [  o1;  o2;  o3];             % Angular velocity
 x = [q;p;dp;ob;T;dT];
 physicalParam = [m, Lx, Ly, lx, ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
 f = [F(x,physicalParam);dT;0];
-g = [G(x,physicalParam);zeros(2,4)];
+g = [G(x,physicalParam);zeros(1,4);0,zeros(1,3)];
+% f = [F(x,physicalParam);0;0];
+% g = [G(x,physicalParam);zeros(2,4)];
 %g= [g1 g2 g3 g4];
 %% 1st layer
 clc
@@ -48,7 +50,7 @@ He = [1/(beta1(1)+e1),-beta1(2)/(beta1(1)+e1),-beta1(3)/(beta1(1)+e1),-beta1(4)/
  %v1 = -Fz * [h1;dh1]; % v1を事前に決めておく時はこっち
 %% 2nd layer
 syms v2 v3 v4
-FG = simplify(f+g*H*[-alpha1+vz;u2;u3;u4]);	% v1を後で設計する時はこっち
+FG = simplify(f+g*H*[-alpha1+T ;u2;u3;u4]);	% v1を後で設計する時はこっち
 g1 = simplify(MyCoeff(FG,[u2;u3;u4]));
 f1 = subs(FG,[u2,u3,u4],[0,0,0]);
 %simplify(FG-(f1+g1*[v2;v3;v4]))   % For check
@@ -67,16 +69,18 @@ h4 = yaw - xd(4);
 %h4 = 2*(q0*q3 + q1*q2) - xd(4); % これでは姿勢は変わらない
 %% **************************************** % %
 clc
-dh1 = LieD(h1,f,x)+diff(h1,t);
-dh2 = LieD(h2,f,x)+diff(h2,t);
-dh3 = LieD(h3,f,x)+diff(h3,t);
-dh4 = LieD(h4,f,x)+diff(h4,t);
-ddh1 = LieD(dh1,f,x)+diff(dh1,t);
-ddh2 = LieD(dh2,f,x)+diff(dh2,t);
-ddh3 = LieD(dh3,f,x)+diff(dh3,t);
-dddh1 = LieD(ddh1,f,x)+diff(ddh1,t);
-dddh2 = LieD(ddh2,f,x)+diff(ddh2,t);
-dddh3 = LieD(ddh3,f,x)+diff(ddh3,t);
+dh1 = LieD(h1,f1,x)+diff(h1,t);
+dh2 = LieD(h2,f1,x)+diff(h2,t);
+dh3 = LieD(h3,f1,x)+diff(h3,t);
+dh4 = LieD(h4,f1,x)+diff(h4,t);
+% ddh1 =  LieD(dh1,f1,x)+diff(dh1,t);
+ddh1 =  T;
+ddh2 = LieD(dh2,f1,x)+diff(dh2,t);
+ddh3 = LieD(dh3,f1,x)+diff(dh3,t);
+% dddh1 =  LieD(dh1,f1,x)+diff(dh1,t);
+dddh1 =  dT;
+dddh2 = LieD(ddh2,f1,x)+diff(ddh2,t);
+dddh3 = LieD(ddh3,f1,x)+diff(ddh3,t);
 % % For check
 % 	[LieD(h2,g1,x),LieD(h3,g1,x)]
 % 	simplify([LieD(dh2,g1,x),LieD(dh3,g1,x)])
@@ -86,8 +90,9 @@ dddh3 = LieD(ddh3,f,x)+diff(ddh3,t);
 % 	simplify([LieD(ddh2,g1,x),LieD(ddh3,g1,x)])
 %% 
 % % Derive 2nd layer controller
-alpha2 = [LieD(dddh1,f,x)+diff(dddh1,t);LieD(dddh2,f,x)+diff(dddh2,t); LieD(dddh3,f,x)+diff(dddh3,t); LieD(dh4,f,x)+diff(dh4,t)];
-beta2 = [LieD(dddh1,g,x);LieD(dddh2,g,x); LieD(dddh3,g,x); LieD(dh4,g,x)];
+alpha2 = [0;LieD(dddh2,f1,x)+diff(dddh2,t); LieD(dddh3,f1,x)+diff(dddh3,t); LieD(dh4,f1,x)+diff(dh4,t)];
+% beta22 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
+beta2 = [1 0 0 0;0 LieD(dddh2,g1,x);0  LieD(dddh3,g1,x);0  LieD(dh4,g1,x)];
 % Qxy = diag([1.0, 1.0, 0.1, 0.01]);	% Weight of state
 % Rxy = 1.0;                          % Weight of input
 % Nxy = 0;
