@@ -6,7 +6,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-motive = Connector_Natnet('ClientIP', '192.168.100.90'); % connect to Motive
+motive = Connector_Natnet('ClientIP', '192.168.100.99'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
@@ -22,8 +22,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,initial_state,MODEL_CLASS(ag
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
-%agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
 agent.controller = HLC(agent,Controller_HL(dt));
 
