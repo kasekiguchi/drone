@@ -5,8 +5,8 @@ arguments
   id = 0
 end
 Model.id = id;
-type="Suspended_Cooperative_Load_Model"; % model name
-name="Cooperative_Load"; % print name
+Model.type="Suspended_Cooperative_Load_Model"; % model name
+Model.name="Cooperative_Load"; % print name
 Setting.dim=[65,16,8];
 Setting.input_channel = ["f","M"];
 Setting.method = get_model_name("Cooperative_Load"); % model dynamicsの実体名
