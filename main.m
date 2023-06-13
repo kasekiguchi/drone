@@ -12,7 +12,7 @@ userpath('clear');
 
 %% general setting
 N = 1; % number of agents
-fExp = 0; % 1: experiment   0: numerical simulation
+fExp = 1; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 0; % 1: active : for debug function
@@ -82,7 +82,6 @@ try
       if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
       % reference
-%       agent(i).set_property("reference",Reference_Time_Varying("Case_study_trajectory",{[1;0;1]}));
       param(i).reference.covering = [];
       param(i).reference.point = {FH, [2; 0; 1], time.t, dt};
       param(i).reference.timeVarying = {time, FH};
@@ -188,8 +187,8 @@ end
 %% 実験が終了するごとに回す必要あり
 
 if fExp == 1
-    save('experiment_6_8_4.mat',"logger");
-    movefile experiment_6_8_4.mat Datafolder;
+    save('experiment_6_13_circle_2.mat',"logger");
+    movefile experiment_6_13_circle_2.mat Datafolder;
 else
     save('simulation_6_13.mat',"logger");
     movefile simulation_6_13.mat Datafolder;
@@ -203,8 +202,8 @@ clc
 %logger.plot({1, "q1", "e"});
 
 %頭文字の部分は読み込んだデータのワークスペース名と一致させる
-% logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"},{1, "inner_input", ""}, "fig_num", 5, "row_col", [2, 4]);
-logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1,"p1-p2","e"},{1,"p1-p2-p3","e"}, "fig_num", 5, "row_col", [2, 3]);
+logger.plot({1, "p", "re"}, {1, "q", "es"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"},{1, "inner_input", ""}, "fig_num", 5, "row_col", [2, 4]);
+% logger.plot({1, "p", "e"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""}, {1,"p1-p2","e"},{1,"p1-p2-p3","e"}, "fig_num", 5, "row_col", [2, 3]);
 
 % agent(1).reference.timeVarying.show(logger)
 

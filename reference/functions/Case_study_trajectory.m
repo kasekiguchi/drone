@@ -39,14 +39,14 @@ syms t real
 % z = z_0;
 
 %z方向も回転する軌道
-x = sin(2*pi*t/15);
-y = cos(2*pi*t/15);
-z = sin(3*pi*t/15);
+% x = sin(2*pi*t/15);
+% y = cos(2*pi*t/15);
+% z = sin(3*pi*t/15);
 
 % 円旋回
-% x = sin(2*pi*t/10);
-% y = cos(2*pi*t/10);
-% z = 1;
+x = sin(2*pi*t/10);
+y = cos(2*pi*t/10);
+z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/10);
