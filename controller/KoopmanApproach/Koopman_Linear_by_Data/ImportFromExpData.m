@@ -19,6 +19,7 @@ clear data % 読み込んだファイル内のdataと同名の変数を初期化
 
 %データの個数をチェック
 data.N = find(logger.Data.t,1,'last');
+data.UN = find(logger.Data.agent.input{1},1,'last');
 
 %% Get data
 % 状態毎に分割して保存
@@ -31,7 +32,7 @@ data.est.q = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.
 data.est.v = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.v,1:data.N,'UniformOutput',false))';
 data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,1:data.N,'UniformOutput',false))';
 %-----------------------input----------------------
-data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N},1:data.N,'UniformOutput',false))';
+data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.UN),1:data.N,'UniformOutput',false))';
 
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合

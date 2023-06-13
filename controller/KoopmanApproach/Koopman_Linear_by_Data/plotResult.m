@@ -8,9 +8,9 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
-loadfilename{1} = 'EstimationResult_12state.mat'
+% loadfilename{1} = 'EstimationResult_12state.mat'
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
-loadfilename{2} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
+% loadfilename{2} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
 % loadfilename{1} = 'rndInitSim_bilinear_1.mat'
 % loadfilename{2} = 'rndInitSim_bilinear_plusConst_1.mat'
@@ -21,6 +21,8 @@ loadfilename{2} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
 % loadfilename{2} = 'EstimationResult_12state.mat'
 % loadfilename{2} = 'EstimationResult_rndP2O4_InputAndConst.mat';
+
+loadfilename{1} = 'EstimationResult_realExp_0608.mat'
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
@@ -37,7 +39,7 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 if flg.xlimHold == 1
-    xlimHold = [0, 2];
+    xlimHold = [0, 0.1];
 end
 
 %% Font size
@@ -95,7 +97,7 @@ file{3}.lgdname.w = {'$\hat{\omega}_{1,{\rm case3}}$','$\hat{\omega}_{2,{\rm cas
 
 columnomber = size(file,2)+1;
 
-% マーカーに特別なものをつける時はここで指定，ない時は':o'になります
+%% マーカーに特別なものをつける時はここで指定，ない時は':o'になります
 file{2}.markerSty = ':s';
 file{3}.markerSty = ':*';
 
