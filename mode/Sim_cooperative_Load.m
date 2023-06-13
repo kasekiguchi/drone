@@ -32,6 +32,7 @@ agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,Model_
 agent.sensor = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
 % agent.estimator = EKF(agent, Estimator_EKF(agent, ["p", "q"]).param);
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}).param);
+agent.reference = POINT_REFERENCE(agent,[1,1,1]);
 agent.controller = HLC(agent,Controller_HL(dt).param);
 run("ExpBase");
 
