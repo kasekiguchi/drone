@@ -1,4 +1,4 @@
-classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
+classdef NATNET_CONNECTOR_SIM < handle
     % MotiveのSimulation用クラス：登録されたエージェントの位置と姿勢がわかる
     % motive = NATNET_CONNECTOR_SIM(param)
     % param :（要確認：バージョン変化で変わっているかも）

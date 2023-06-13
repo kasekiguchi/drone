@@ -1,15 +1,17 @@
-classdef DIRECT_ESTIMATOR < ESTIMATOR_CLASS
+classdef DIRECT_ESTIMATOR < handle
     % Directory generate the estimated state from the sensor output.
     % obj = DIRECT_ESTIMATOR(agent,~)
     properties
         % state
         result
         self
+        model
     end
     methods
-        function obj = DIRECT_ESTIMATOR(self,~)
+        function obj = DIRECT_ESTIMATOR(self,param)
             obj.self = self;
-            obj.result.state=state_copy(self.model.state);
+            obj.model = param.model;
+            obj.result.state=state_copy(obj.model.state); % STATE_CLASSとしてコピー
         end
         function result=do(obj,varargin)
             % Copy field values corresponding to the field of obj.result.state (=model.state) only.

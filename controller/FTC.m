@@ -1,4 +1,4 @@
-classdef FTC < CONTROLLER_CLASS
+classdef FTC < handle
 % クアッドコプター用階層型線形化を使った入力算出
 properties
     self

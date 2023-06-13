@@ -1,4 +1,4 @@
-classdef APID_CONTROLLER <CONTROLLER_CLASS
+classdef APID_CONTROLLER < handle
     % Adaptive PID controller
     properties
         self

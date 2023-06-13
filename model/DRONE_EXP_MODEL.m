@@ -37,7 +37,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
       end
     end
     function do(obj,varargin)
-      u = varargin{5}.controller.result.input;
+      u = gen_msg(varargin{5}.controller.result.input');
       cha = varargin{2};
       obj.flight_phase=cha;
       switch cha

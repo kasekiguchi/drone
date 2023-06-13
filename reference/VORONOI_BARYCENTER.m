@@ -1,14 +1,18 @@
-classdef VORONOI_BARYCENTER < REFERENCE_CLASS
-  % ボロノイ重心を算出するクラス
-  %   詳細説明をここに記述
+classdef VORONOI_BARYCENTER < handle
+  % reference class for voronoi-based coverage control
   properties
     param
     self
     fShow
+    result
   end
 
   methods
     function obj = VORONOI_BARYCENTER(self, param)
+      % agent.reference = VORONOI_BARYCENTER(agent,param);
+      % agent : autonomous agent which has properties of sensor, reference,
+      % estimator, controller, so on.
+      % This class requires 
       arguments
         self
         param
@@ -19,21 +23,25 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
       obj.fShow = param.fShow;
     end
     function result = do(obj, varargin)
-      %  param = range, pos_range, d, void,
-      % 【Output】 result = 目標値（グローバル位置）
-      %% 共通設定１：単純ボロノイセル確定
+      % [Input] varargin = {time, cha, logger, env, agents, index}
+      % time : TIME class instance
+      % cha : keyboard input character
+      % logger : LOGGER class instance
+      % env : environment
+      % agents : array of agents
+      % index : self = agents(index)
+      % [Output] result = reference position w.r.t. global coordinate.
+      %% Common setting 1 : Simple Voronoi cell
       sensor = obj.self.sensor.result;
       state = obj.self.estimator.result.state;
-      %            r = obj.param.r; % 重要度を測距できるレンジ
-      R = obj.param.R;       % 通信レンジ
-      %           d= obj.param.d; % グリッド間隔
-      void = obj.param.void; % VOID幅
+      R = obj.param.R;       % communication range
+      void = obj.param.void; % VOID width
       if isfield(sensor, 'neighbor')
-        neighbor = sensor.neighbor; % 通信領域内のエージェント位置 絶対座標
+        neighbor = sensor.neighbor; % neighbor's global position within the communication range
       elseif isfield(sensor, 'rigid')
         neighbor = [sensor.rigid(1:size(sensor.rigid, 2) ~= obj.self.id).p];
       end
-      % ここから相対座標
+      % from here local coordinate
       if ~isempty(neighbor)                                                                                         % 通信範囲にエージェントが存在するかの判別
         neighbor_rpos = neighbor - state.p;                                                                       % 通信領域内のエージェントの相対位置
         %        if size(neighbor_rpos,2)>=1 % 隣接エージェントの位置点重み更新
@@ -132,15 +140,21 @@ classdef VORONOI_BARYCENTER < REFERENCE_CLASS
         , Env.Vertices,[],ax);
     end
 
-    function draw_movie(logger, Env, span,ax)
+    function draw_movie(logger, Env, span,ax,filename)
       arguments
         logger
         Env
         span
         ax
+        filename= [];
+      end
+      if isempty(filename)
+        output = 0;
+      else
+        output = 1;
       end
       % Voronoi 被覆の様子
-      make_animation(1:10:logger.k - 1,@(k) VORONOI_BARYCENTER.show_k(logger, Env, "span",span,"k",k,"ax",ax), @(ax) Env.show(ax),0,[],ax);
+      make_animation(1:10:logger.k - 1,@(k) VORONOI_BARYCENTER.show_k(logger, Env, "span",span,"k",k,"ax",ax), @(ax) Env.show(ax),output,filename,ax);
 
       % エージェントが保存している環境地図
       %make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(Env.xq,Env.yq,logger.Data.agent(i).estimator.result{k}.grid_density),span,'UniformOutput',false), @() Env.show_setting());

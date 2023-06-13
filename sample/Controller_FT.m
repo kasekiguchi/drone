@@ -4,17 +4,17 @@ Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
 Bc4 = [0; 0; 0; 1];
-Controller_param.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt); %
-% Controller_param.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-% Controller_param.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+Controller.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt); %
+% Controller.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+% Controller.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 % 有限整定用
-Controller_param.F2 = lqrd(Ac4, Bc4, diag([2000, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller_param.F3 = lqrd(Ac4, Bc4, diag([2000, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
-Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
+Controller.F2 = lqrd(Ac4, Bc4, diag([2000, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller.F3 = lqrd(Ac4, Bc4, diag([2000, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 syms sz1 [2 1] real
 syms sF1 [1 2] real
 [Ad1, Bd1, ~, ~] = ssdata(c2d(ss(Ac2, Bc2, [1, 0], [0]), dt));
-Controller_param.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
+Controller.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
 %% 入力のalphaを計算
 
 anum = 4; %変数の数
@@ -26,20 +26,20 @@ for a = anum - 1:-1:1
     alpha(a) = (alpha(a + 2) * alpha(a + 1)) / (2 * alpha(a + 2) - alpha(a + 1));
 end
 
-Controller_param.alpha = alpha(anum);
-Controller_param.ax = alpha;
-Controller_param.ay = alpha;
-% Controller_param.az=alpha(anum-1:anum,1);
-% Controller_param.apsi=alpha(anum-1:anum,1);
+Controller.alpha = alpha(anum);
+Controller.ax = alpha;
+Controller.ay = alpha;
+% Controller.az=alpha(anum-1:anum,1);
+% Controller.apsi=alpha(anum-1:anum,1);
 %masui
-Controller_param.az = alpha(1:2, 1);
-Controller_param.apsi = alpha(1:2, 1);
+Controller.az = alpha(1:2, 1);
+Controller.apsi = alpha(1:2, 1);
 %% 有限整定の近似微分　一層
 syms k [1 2] real
 %
 % fzFT = 10;%z方向に適用するか
 % fsingle = 1;%%%%%%%%%%%%%%%%%%%%
-Controller_param.fzapr = fzapr;
+Controller.fzapr = fzapr;
 
 if fzapr == 1
     u = 0; du = 0; ddu = 0; dddu = 0;
@@ -56,7 +56,7 @@ if fzapr == 1
         xz0 = [2, 2, 2];
         fvals12z = zeros(2, 1);
         f1 = zeros(2, 3);
-        k = Controller_param.F1;
+        k = Controller.F1;
         %         erz=0.4; %近似する範囲を指定
         for i = 1:2
             fun = @(x)(integral(@(e) abs(-k(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + x(3) * e), erz(1), erz(2)));
@@ -132,12 +132,12 @@ if fzapr == 1
 
         end
 
-        Controller_param.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
+        Controller.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
     else
         xz0 = [7, 10, 2, 100];
         fvals22z = zeros(4, 1);
         f2 = zeros(2, 4);
-        k = Controller_param.F1;
+        k = Controller.F1;
         er = 1; %近似する範囲を指定 0.8 以上でないと近似精度高すぎで止まる．入力負になる
 
         for i = 1:2
@@ -172,7 +172,7 @@ if fzapr == 1
 
         end
 
-        Controller_param.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
+        Controller.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
     end
 
 end
@@ -184,27 +184,27 @@ syms sz3 [4 1] real
 syms sF3 [1 4] real
 syms sz4 [2 1] real
 syms sF4 [1 2] real
-Controller_param.Vs = matlabFunction([-sF2 * sz2; -sF3 * sz3; -sF4 * sz4], "Vars", {sz2, sz3, sz4, sF2, sF3, sF4});
+Controller.Vs = matlabFunction([-sF2 * sz2; -sF3 * sz3; -sF4 * sz4], "Vars", {sz2, sz3, sz4, sF2, sF3, sF4});
 
 %% 再現実験
-% Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z
-% Controller_param.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-% Controller_param.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
-% Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);
+% Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z
+% Controller.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+% Controller.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
+% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);
 % % 極配置
 % Eig=[-3.2,-2,-2.5,-2.1];
-% Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z
-% % Controller_param.F2=place(diag([1,1,1],1),[0;0;0;1],Eig);
-% % Controller_param.F3=place(diag([1,1,1],1),[0;0;0;1],Eig);
-% Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ヨー角
+% Controller.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z
+% % Controller.F2=place(diag([1,1,1],1),[0;0;0;1],Eig);
+% % Controller.F3=place(diag([1,1,1],1),[0;0;0;1],Eig);
+% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ヨー角
 
 %% 近似のパラメータ
 % fxyapr=1;%%%近似するか
 % faprxm1=1;%%% tanh1 or tanh2
 
-kf2 = Controller_param.F3;
+kf2 = Controller.F3;
 % kf2(1)=3*kf2(1);
-Controller_param.fxyapr = fxyapr;
+Controller.fxyapr = fxyapr;
 gain_ser1 = zeros(4, 3);
 gain_ser2 = zeros(4, 5);
 
@@ -251,16 +251,10 @@ if fxyapr == 1
 
 end
 
-Controller_param.gain1 = gain_ser1;
-Controller_param.gain2 = gain_ser2;
-%%
-Controller_param.dt = dt;
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller_param.F2)
-Controller.type = "FTC";
-% Controller.name="ftc";
-Controller.name = "hlc";
-Controller.param = Controller_param;
+Controller.gain1 = gain_ser1;
+Controller.gain2 = gain_ser2;
 
-%assignin('base',"Controller_param",Controller_param);
+Controller.dt = dt;
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
 
 end

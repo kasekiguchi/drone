@@ -1,4 +1,4 @@
-classdef MPC <CONTROLLER_CLASS
+classdef MPC < handle
     % linear Model Predictive Control
     
     properties
@@ -97,6 +97,8 @@ classdef MPC <CONTROLLER_CLASS
             %     %-- 予測入力間での変化量が変化量制約以下となることを設定
             %     cineq(:, 2*params.H+1: 3*params.H) = [cell2mat(arrayfun(@(L) -params.S - (U(:, L) - U(:, L-1)) , 2:params.H, 'UniformOutput', false)),  zeros(2,1)];
             %     cineq(:, 3*params.H+1: 4*params.H) = [cell2mat(arrayfun(@(L) (U(:, L) - U(:, L-1)) - params.S  , 2:params.H, 'UniformOutput', false)),  zeros(2,1)];
+        end
+        function trans_qp(A,B)
         end
     end
 end
