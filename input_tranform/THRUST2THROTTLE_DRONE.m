@@ -59,7 +59,8 @@ methods
             %                 whn = obj.state.w; %statetmp(end-2:end);
 obj.self.estimator.model.do(varargin{:});
             whn = obj.self.estimator.model.state.w; % １時刻先の事前予測
-            T_thr = sum(input); % T_thr = input(1);
+            %T_thr = sum(input); % 
+            T_thr = input(1);
 
             % TODO : 以下であるべきでは？　要チェック
             %wh = obj.self.estimator.result.state.w; % 現在の角速度推定値

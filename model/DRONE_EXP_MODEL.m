@@ -37,7 +37,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
       end
     end
     function do(obj,varargin)
-      u = gen_msg(varargin{5}.controller.result.input');
+      %%u = gen_msg(varargin{5}.inner_input.result');
+      u = varargin{5}.input_transform.result;
       cha = varargin{2};
       obj.flight_phase=cha;
       switch cha
@@ -57,7 +58,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
         case 'l' % landing
           msg(1,1:8) = u;
         case 't' % take off
-          msg(1,1:8) = u;
+          msg(1,1:8) = u
       end
       obj.connector.sendData(gen_msg(msg));
       obj.msg=msg;
