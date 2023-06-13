@@ -24,7 +24,7 @@ disp('Press Enter key to start.');
 if ~fDebug | fExp
     FH = figure('position', [0 0 eps eps], 'menubar', 'none');
 else
-    FH = figure();
+    FH = figure('WindowState','maximized');
 end
 
 w = waitforbuttonpress;

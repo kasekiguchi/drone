@@ -276,7 +276,7 @@ methods % set, do property
         arguments
             obj
             str
-            opt.FH = [];
+            opt.FH = 1;
             opt.logger = [];
             opt.t = [];
             opt.param = [];

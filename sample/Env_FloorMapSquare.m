@@ -41,6 +41,15 @@ Poutwall = subtract(Pinpoly,Poutpoly);
 pwall = [0,0;90,0;90,90;0,90];
 pwallpoly = polyshape(pwall);
 Pwalls = union(Poutwall,pwallpoly);
+%%
+pout = [-2,-2;10,-2;10,5;-2,5];
+Poutpoly = polyshape(pout);
+pin = [-2.5,-2.5;10.5,-2.5;10.5,5.5;-2.5,5.5];
+Pinpoly = polyshape(pin);
+Poutwall = subtract(Pinpoly,Poutpoly);
+pwall = [0,0;8,0;8,4;0,4];
+pwallpoly = polyshape(pwall);
+Pwalls = union(Poutwall,pwallpoly);
 
 env_param.param.Vertices(:,:,1) = Pwalls.Vertices;
 end

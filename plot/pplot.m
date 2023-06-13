@@ -3,7 +3,7 @@ function [ p ] = pplot(x,y,z)
 % 京大丸太先生作
 
 if nargin==2
-    z=0;
+    z=0*x;
 end
 
 x=reshape(x,[],1);
