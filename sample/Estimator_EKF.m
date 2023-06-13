@@ -14,7 +14,7 @@ function Estimator = Estimator_EKF(agent,dt,initial_state,output,opts)
         opts.Q = []
         opts.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
     end
-    Estimator.model = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
+    Estimator.model = MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1));
     %dt = Estimator.model.dt;
     n = Estimator.model.dim(1);% 状態数
     % 出力方程式の拡張線形化行列(JacobianH)の生成
