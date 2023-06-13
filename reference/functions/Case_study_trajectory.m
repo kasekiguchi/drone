@@ -38,10 +38,15 @@ syms t real
 % y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
 % z = z_0;
 
+%z方向も回転する軌道
+x = sin(2*pi*t/15);
+y = cos(2*pi*t/15);
+z = sin(3*pi*t/15);
+
 % 円旋回
-x = sin(2*pi*t/6);
-y = cos(2*pi*t/6);
-z = 1;
+% x = sin(2*pi*t/10);
+% y = cos(2*pi*t/10);
+% z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/10);

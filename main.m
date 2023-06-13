@@ -1,4 +1,5 @@
 %% Drone 班用共通プログラム
+opengl software
 %% Initialize settings
 % set path
 activeFile = matlab.desktop.editor.getActive;
@@ -211,7 +212,8 @@ logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1,"
 % VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 % agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 % agent(1).animation(logger, "target", 1:N, "opt_plot", ["sensor", "lidar"]);
-agent(1).animation(logger,"target",1:N);
+% agent(1).animation(logger, "target", 1:N,"gif",1);
+
 %%
 % if fExp
 %     save('experiment_6_2.mat',"logger");
