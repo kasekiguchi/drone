@@ -5,11 +5,11 @@ arguments
   id = 0
 end
 Model.id = id;
-type="Suspended_Load_Model"; % model name
+type="Suspended_Cooperative_Load_Model"; % model name
 name="Cooperative_Load"; % print name
 Setting.dim=[65,16,8];
 Setting.input_channel = ["f","M"];
-Setting.method = get_model_name("Load"); % model dynamicsの実体名
+Setting.method = get_model_name("Cooperative_Load"); % model dynamicsの実体名
 Setting.state_list =  ["dx0","dr0","ddx0","do0","dqi","dwi","dri","doi"];
 Setting.initial = initial; 
 Setting.num_list = [3,4,3,3,12,12,16,12];
