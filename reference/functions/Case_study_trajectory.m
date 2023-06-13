@@ -7,6 +7,18 @@ syms t real
 % y_0 = X0(2);
 % z_0 = X0(3);
 
+% T = t
+% 
+% if T < 50
+%     x = sin(2*pi*t/8)
+%     y = cos(2*pi*t/8);
+%     z = 1;
+% else
+%     x = sin(2*pi*t/8);
+%     y = 1;
+%     z = cos(2*pi*t/8);
+% end
+
 % %% takeoff
 % T = 10;
 % rz0 = 0;
@@ -27,16 +39,16 @@ syms t real
 % z = z_0;
 
 % 円旋回
-% s = 8;
-% x = sin(2*pi*t/6);
-% y = cos(2*pi*t/6);
-% z = 1;
+x = sin(2*pi*t/6);
+y = cos(2*pi*t/6);
+z = 1;
 
 %縦円旋回
-x = 0.5*sin(2*pi*t/10);
-y = 0;
-z = 0.5*cos(2*pi*t/10)+1; %1:オフセットを入れる必要あり
-yaw = 2*pi*t/5;
+% x = 0.5*sin(2*pi*t/10);
+% y = 0;
+% z = 0.5*cos(2*pi*t/10)+1; %1:オフセットを入れる必要あり
+% yaw = 2*pi*t/5;
+
 %八の字
 % x = sin(2*t/8);
 % y = sin(t/8);
@@ -77,6 +89,7 @@ yaw = 2*pi*t/5;
 % b = 3/T^2 * (rz-rz0);
 % z = a*(t)^3+b*(t)^2+rz0;
 
-ref=@(t)[x;y;z;yaw];
+% ref=@(t)[x;y;z;yaw];
+ref=@(t)[x;y;z;0];
 end
 
