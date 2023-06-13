@@ -187,8 +187,8 @@ end
 %% 実験が終了するごとに回す必要あり
 
 if fExp == 1
-    save('experiment_6_13_circle_2.mat',"logger");
-    movefile experiment_6_13_circle_2.mat Datafolder;
+    save('experiment_6_13_circle_11.mat',"logger");
+    movefile experiment_6_13_circle_11.mat Datafolder;
 else
     save('simulation_6_13.mat',"logger");
     movefile simulation_6_13.mat Datafolder;

@@ -27,7 +27,7 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 FH = Param{1};% figure handle
             end
             cha = get(FH, 'currentcharacter');
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h')
                 cha   = obj.flight_phase;
             end
             obj.flight_phase=cha;
@@ -57,6 +57,15 @@ classdef POINT_REFERENCE_FH < REFERENCE_CLASS
                 else
                     obj.result.state.p = Param{2};
                 end
+            elseif strcmp(cha,'h') % take off phase
+            if strcmp(obj.flag,'h')
+                [obj.result.state.p,obj.result.state.v]=gen_ref_for_hovering([0,0,1]);
+            else % 初めてtake off に入ったとき
+                obj.base_time=Param{3};
+                obj.base_state=obj.self.estimator.result.state.p;
+                [obj.result.state.p,obj.result.state.v] = gen_ref_for_hovering([0,0,1]);
+            end
+            obj.flag='h';
             else
                 obj.result.state.p = obj.base_state;
             end
