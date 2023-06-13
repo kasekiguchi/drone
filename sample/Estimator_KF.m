@@ -10,24 +10,21 @@ function Estimator = Estimator_KF(agent,output,var)
         var.Q = 1E-3;
         var.R = 1E-2;
     end
-    Estimator.name="kf";
-    Estimator.type="KF";
     dt = agent.model.dt;
     tmp=arrayfun(@(i) strcmp(agent.model.state.list,output(i)),1:length(output),'UniformOutput',false);
     col = agent.model.state.num_list;
     output_num =  cell2mat(arrayfun(@(i) col(tmp{i}),1:length(tmp),"UniformOutput",false));
     n = agent.model.dim(1);% 状態数
     m = agent.model.dim(2);% 入力数
-    KF_param.Q = var.Q.*eye(m);
-    KF_param.R = var.R.*eye(sum(output_num));
+    Estimator.Q = var.Q.*eye(m);
+    Estimator.R = var.R.*eye(sum(output_num));
     %%
-    KF_param.P = eye(n); % 初期共分散行列
-    KF_param.A = agent.parameter.A;
-    KF_param.B = agent.parameter.B;
-    KF_param.C = agent.parameter.C;
+    Estimator.P = eye(n); % 初期共分散行列
+    Estimator.A = agent.parameter.A;
+    Estimator.B = agent.parameter.B;
+    Estimator.C = agent.parameter.C;
     
-    KF_param.list=output;
-    Estimator.param=KF_param;
+    Estimator.list=output;
 end
 
 function mat = zeroone(row,col,idx)

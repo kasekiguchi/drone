@@ -1,9 +1,10 @@
-classdef LANDING_REFERENCE < REFERENCE_CLASS
+classdef LANDING_REFERENCE < handle
   properties
     param
     self
     vd = 0.5;
     dt
+    result
   end
 
   methods
@@ -21,9 +22,7 @@ classdef LANDING_REFERENCE < REFERENCE_CLASS
       obj.result.state.xd = obj.gen_ref_for_landing(obj.self.estimator.result.state.p);
       obj.result.state.p = obj.result.state.xd;
       obj.result.state.v = [0;0;0];
-      obj.result.name = "landing";
       result = obj.result;
-
     end
     function show(obj,param)
 

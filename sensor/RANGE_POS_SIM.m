@@ -1,4 +1,4 @@
-classdef RANGE_POS_SIM < SENSOR_CLASS
+classdef RANGE_POS_SIM < handle
     % RangePosのsimulation用クラス：登録されたエージェントのうち半径内のエージェントの位置を返す
     %   rpos = RANGE_POS_SIM(param)
     %   (optional) param.r : 半径

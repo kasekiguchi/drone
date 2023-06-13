@@ -1,5 +1,4 @@
-classdef MAP_UPDATE < ESTIMATOR_CLASS
-% for VORONOI_VARYCENTER reference class
+classdef MAP_UPDATE < handle
 properties
     result
     env
@@ -14,16 +13,9 @@ methods
         obj.env.grid_density(:, :) = 0;
     end
 
-    function [result] = do(obj, ~, varargin)
-        % param
-        % varargin : 他の推定器で推定した状態
+    function [result] = do(obj,varargin)
         sensor = obj.self.sensor.result;
-
-        if ~isempty(varargin)
-            state = varargin{1}.state;
-        else
-            state = sensor.state;
-        end
+        state = obj.self.estimator.result.state; % require the state estimated by another estimator
 
         pos = [find((obj.env.xq(:, 1) > (state.p(1) - obj.env.d / 2)), 1), ...
                 find((obj.env.yq(1, :) > (state.p(2) - obj.env.d / 2)), 1)]; % globalのgrid 上のエージェントの位置

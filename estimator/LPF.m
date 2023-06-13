@@ -1,4 +1,4 @@
-classdef LPF < ESTIMATOR_CLASS
+classdef LPF < handle
     % 仕様が定まっていないのでとても中途半端
     %   現状　後退差分近似で微分値を求められる
     properties
@@ -10,6 +10,7 @@ classdef LPF < ESTIMATOR_CLASS
         result
         dt   
         self
+        model
     end
     
     methods
@@ -17,14 +18,16 @@ classdef LPF < ESTIMATOR_CLASS
             %UNTITLED このクラスのインスタンスを作成
             %   詳細説明をここに記述
             obj.self = self;
-            obj.dt=obj.self.model.dt;
+            obj.model = param.model;
+
+            obj.dt=obj.model.dt;
             obj.T = param.LPF_T;
             if isfield(param,'list')
                 obj.list = param.list;
                 obj.num_list = param.num_list;
             else
-                obj.list = obj.self.model.state.list;
-                obj.num_list = obj.self.model.state.num_list;
+                obj.list = obj.model.state.list;
+                obj.num_list = obj.model.state.num_list;
             end
             obj.result.state=STATE_CLASS(struct('state_list',obj.list,'num_list',obj.num_list)); % STATE_CLASSとしてコピー（値はいれない）
         end

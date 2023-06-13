@@ -1,4 +1,4 @@
-classdef LSM9DS1 < SENSOR_CLASS
+classdef LSM9DS1 < handle
     % ９軸IMUセンサー(LSM9DS1)用クラス
     % Suppose the sensor mounted on espr implemented ESPr_UDP.ino.
     %  sensor.imu = LSM9DS1(self, ~)
