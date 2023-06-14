@@ -9,7 +9,7 @@ close all hidden; %clear all; %毎回clearする必要あり
 clc;
 
 % 20230129 磯部 main.m内で初期値をランダムに変化させるフラグ
-flag_initrandam = 1
+flag_initrandam = 1;
 
 userpath('clear');
 % warning('off', 'all');

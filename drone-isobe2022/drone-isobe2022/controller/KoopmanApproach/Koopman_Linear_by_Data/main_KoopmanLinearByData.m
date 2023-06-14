@@ -12,12 +12,6 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 FileName = 'EstimationResult_12state_6_13_experiment.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる)
-% loading_filename = 'sim_rndP_12state';
-% loading_filename = 'sim_rndP4';
-% loading_filename = '2023_0529_1804_logger_cricle_LS.mat';
-% loading_filename = 'experiment_circle_6_8';
-% loading_filename = 'experiment_vertical_6_8';
-% loading_filename = '6_8_experiment';
 loading_filename = 'experiment_6_13_circle';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
@@ -76,12 +70,6 @@ if size(Data.X,1)==13
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
-% OUIBS system
-% F = @(x) x;
-% F = @(x) [x(2);sin(x(1));cos(x(1))];
-% F = @(x) [x(1);x(2);sin(x(1));cos(x(1));x(2)*cos(x(1));x(2)*sin(x(1))];
-% F = @(x) [x(2);sin(x(1));cos(x(1));x(2)*cos(x(1));x(2)*sin(x(1))];
-
 %% Koopman linear
 % 12/12 関数化(双線形であるかどかの切り替え，上が双線形)
 disp('now estimating')
@@ -106,51 +94,31 @@ simResult.reference.U = simResult.reference.U(:,takeoff_idx:end);
 simResult.reference.T = simResult.reference.T(takeoff_idx:end);
 simResult.reference.T = simResult.reference.T - simResult.reference.T(1);
 simResult.reference.N = simResult.reference.N - takeoff_idx;
-if flg.bilinear == 1 %双線形モデル
-    simResult.Z(:,1) = F(simResult.reference.X(:,1));
-    simResult.Xhat(:,1) = simResult.reference.X(:,1);
-    simResult.U = simResult.reference.U(:,1:end);
-    
 
-    simResult.T = simResult.reference.T(1:end);
-  
+simResult.Z(:,1) = F(simResult.reference.X(:,1));
+simResult.Xhat(:,1) = simResult.reference.X(:,1);
+simResult.U = simResult.reference.U(:,1:end);
+simResult.T = simResult.reference.T(1:end);
+
+if flg.bilinear == 1 %双線形モデル
     for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
     end
 else
-    simResult.Z(:,1) = F(simResult.reference.X(:,1));
-    simResult.Xhat(:,1) = simResult.reference.X(:,1);
-    simResult.U = simResult.reference.U;
-    simResult.T = simResult.reference.T;
-
     for i = 1:1:simResult.reference.N-2
         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
     end
 end
 
-% simResult.reference = ImportFromExpData('TestData3.mat');
-% if flg.bilinear == 1
-% %     simResult.Z(:,1) = F(simResult.reference.X(:,1));
-% %     simResult.Xhat(:,1) = simResult.reference.X(:,1);
-% %     simResult.U = simResult.reference.U;
-% %     simResult.T = simResult.reference.T;
+% if flg.bilinear == 1 %双線形モデル
 %     simResult.Z(:,1) = F(simResult.reference.X(:,1));
 %     simResult.Xhat(:,1) = simResult.reference.X(:,1);
 %     simResult.U = simResult.reference.U(:,1:end);
 %     simResult.T = simResult.reference.T(1:end);
-%     % dZ = A*Z + (B + E*R*ez*[1,1,1,1])*u
-% %     for i = 1:1:simResult.reference.N-2
-%     for i = 1:1:simResult.reference.N-2
-% %         roll  = simResult.Z(4,i);
-% %         pitch = simResult.Z(5,i);
-% %         yaw   = simResult.Z(6,i);
-%         % R*ez
-% %         R13 = ( 2.*(cos(pitch/2).*cos(roll/2).*cos(yaw/2) + sin(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(roll/2).*cos(yaw/2).*sin(pitch/2) + cos(pitch/2).*sin(roll/2).*sin(yaw/2)) + 2.*(cos(pitch/2).*cos(roll/2).*sin(yaw/2) - cos(yaw/2).*sin(pitch/2).*sin(roll/2)).*(cos(pitch/2).*cos(yaw/2).*sin(roll/2) - cos(roll/2).*sin(pitch/2).*sin(yaw/2)))./m;
-% %         R23 = (-2.*(cos(pitch/2).*cos(roll/2).*cos(yaw/2) + sin(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(pitch/2).*cos(yaw/2).*sin(roll/2) - cos(roll/2).*sin(pitch/2).*sin(yaw/2)) - 2.*(cos(roll/2).*cos(yaw/2).*sin(pitch/2) + cos(pitch/2).*sin(roll/2).*sin(yaw/2)).*(cos(pitch/2).*cos(roll/2).*sin(yaw/2) - cos(yaw/2).*sin(pitch/2).*sin(roll/2)))./m;
-% %         R33 =  (cos(pitch).*cos(roll))/m;
-%         %simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + [zeros(6,4);est.Ehat(7:8,:)*simResult.Z(13:14,i)*[1,1,1,1];zeros(7,4)] )* simResult.U(:,i);
+%   
+%     for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
 %         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
 %         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
 %     end
@@ -159,6 +127,7 @@ end
 %     simResult.Xhat(:,1) = simResult.reference.X(:,1);
 %     simResult.U = simResult.reference.U;
 %     simResult.T = simResult.reference.T;
+% 
 %     for i = 1:1:simResult.reference.N-2
 %         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
 %         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
@@ -183,107 +152,6 @@ save(targetpath,'est','Data','simResult')
 disp('Saved to')
 disp(targetpath)
 
-%% Display MSE
-% 工事中 多分ずっと
-
-%% Plot by simulation(グラフ出力)
-% stepN = 31;
-% dt = simResult.reference.T(2)-simResult.reference.T(1);
-% tlength = simResult.reference.T(1:stepN);
-% 
-% % P
-% figure(1)
-% subplot(2,1,2);
-% p2 = plot(tlength,simResult.reference.est.p(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('x','y','z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% originYlim = gcf().CurrentAxes.YLim;
-% originXlim = gcf().CurrentAxes.XLim;
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.p(:,1:stepN),'LineWidth',2);
-% xlim(originXlim)
-% ylim(originYlim)
-% hold on
-% grid on
-% 
-% ylabel('Estimated Data','FontSize',12);
-% legend('x','y','z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% 
-% % Q
-% figure(2)
-% subplot(2,1,2);
-% p2 = plot(tlength ,simResult.reference.est.q(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% originYlim = gcf().CurrentAxes.YLim;
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.q(:,1:stepN),'LineWidth',2);
-% hold on
-% grid on
-% ylim(originYlim)
-% ylabel('Estimated Data','FontSize',12);
-% legend('q0','q1','q2','q3','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% 
-% % V
-% figure(3)
-% subplot(2,1,2);
-% p2 = plot(tlength ,simResult.reference.est.v(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% originYlim = gcf().CurrentAxes.YLim;
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.v(:,1:stepN),'LineWidth',2);
-% hold on
-% grid on
-% ylim(originYlim)
-% ylabel('Estimated Data','FontSize',12);
-% legend('v_x','v_y','v_z','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% 
-% 
-% % W
-% figure(4)
-% subplot(2,1,2);
-% p2 = plot(tlength ,simResult.reference.est.w(1:stepN,:)','LineWidth',2);
-% hold on
-% grid on
-% originYlim = gcf().CurrentAxes.YLim;
-% xlabel('time [sec]','FontSize',12);
-% ylabel('Original Data','FontSize',12);
-% legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% subplot(2,1,1);
-% p1 = plot(tlength,simResult.state.w(:,1:stepN),'LineWidth',2);
-% hold on
-% grid on
-% ylim(originYlim)
-% ylabel('Estimated Data','FontSize',12);
-% legend('w_{roll}','w_{pitch}','w_{yaw}','FontSize',18,'Location','bestoutside');
-% set(gca,'FontSize',14);
-% hold off
-% 
-% % 
-% % % Z
-% % figure(5)
-% % plot(simResult.T,simResult.Z);
+%% プロット
+logger.loadfilename = 'EstimationResult_12state_6_13_experiment.mat';
+plotResult(logger.loadfilename)

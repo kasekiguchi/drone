@@ -1,3 +1,4 @@
+function plotResult(loadfilename)
 %% initialize
 clear all
 close all
@@ -8,19 +9,10 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 0; % 指定した値にxlimを固定
 
 %% select file to load
-loadfilename{1} = ['EstimationResult_12state_6_13_experiment.mat'] %mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = loadfilename;
+% loadfilename{1} = ['EstimationResult_12state_6_13_experiment.mat'] %mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
 % loadfilename{3} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
-
-% loadfilename{1} = 'rndInitSim_bilinear_1.mat'
-% loadfilename{2} = 'rndInitSim_bilinear_plusConst_1.mat'
-
-% loadfilename{1} = '2secInitSim_12state_1.mat'
-% loadfilename{1} = '2secInitSim_InputAndConst_1.mat'
-% loadfilename{1} = '2secInitSim_quaternions_1.mat'
-
-% loadfilename{2} = 'EstimationResult_12state.mat'
-% loadfilename{2} = 'EstimationResult_rndP2O4_InputAndConst.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
@@ -307,6 +299,7 @@ if flg.calcFile1RMSE
     disp(RMSE.W)
 end
 
+end
 %% RSE 各ステップにおける誤差二乗のプロット
 % if flg.calcFile1RMSE
 %     figure(5)
