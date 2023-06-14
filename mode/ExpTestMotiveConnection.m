@@ -6,7 +6,7 @@ in_prog_func = @(app) [];
 post_func = @(app) [];
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
-motive = Connector_Natnet('ClientIP', '192.168.100.99'); % connect to Motive
+motive = Connector_Natnet('192.168.100.131'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
@@ -15,19 +15,7 @@ initial_state.q = sstate.q;
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 do_calculation = @(app) label2(app);
-% agent = DRONE;
-% agent.plant = struct("do",@(varragin) []);
-% agent.parameter = [];
-% agent.model = struct("do",@(varragin) []);
-% agent.input_transform = struct("do",@(varragin) []);
-% 
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive).param);
-% agent.estimator = struct("do",@(varragin) []);
-% agent.reference = struct("do",@(varragin) []);
-% agent.controller = struct("do",@(varragin) []);
 
-% takeoff_ref = struct("do",@(varragin) []);
-% landing_ref = struct("do",@(varragin) []);
 function label2(app)
 ModelDescription = app.motive.NatnetClient.getModelDescription;
 rigid_num = ModelDescription.RigidBodyCount;
