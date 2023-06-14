@@ -1,4 +1,4 @@
-function plotResult(loadfilename)
+function plotResult
 %% initialize
 clear all
 close all
@@ -9,8 +9,11 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 0; % 指定した値にxlimを固定
 
 %% select file to load
-loadfilename{1} = loadfilename;
-% loadfilename{1} = ['EstimationResult_12state_6_13_experiment.mat'] %mainで書き込んだファイルの名前に逐次変更する
+% filename = agent.id.filename;
+% a = append(filename,'.mat');
+% loadfilename{1} = append(agent.id.filename,'.mat');
+
+loadfilename{1} = ['EstimationResult_12state_6_14_saddleandcircle_basechange.mat'] %mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
 % loadfilename{3} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
 
@@ -32,7 +35,7 @@ if flg.ylimHold == 1
 end
 if flg.xlimHold == 1
     xlimHold = [0, 0.5];
-%     xlimHold = [0,10];
+    % xlimHold = [0,10];
 end
 
 %% Font size
