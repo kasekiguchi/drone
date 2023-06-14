@@ -32,6 +32,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.input = param.input;
             obj.const = param.const;
             obj.input.nextsigma = param.input.Initsigma;  % 初期化
+            obj.param.H = param.H + 1;
             % 追加
             obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
             obj.input.Bestcost_now = 1e2;% 十分大きい値にする  初期周期での比較用
@@ -99,11 +100,25 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             end
 
             %-- 評価値計算
+            obj.param.fin = 0;
+            eachCost = zeros(obj.N, 3);
+            tic
             for m = 1:obj.N
-                obj.input.eval(1,m) = obj.objective(m);
-%                 obj.input.Evaluationtra(1,m) = obj.input.eval;
+                [obj.input.eval(1,m), eachCost(m, :)] = obj.objective(m);
+                % [Evaluationtra(1,m), eachCost] = objective(obj, m);
             end
-            obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N);
+            toc
+            obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); % サンプル数が小さくなった時に最小値を見失わないように
+            % obj.input.eachcost = eachCost(1, 1:obj.N);
+
+            % 評価値の上位50個の取り出し
+            % obj.param.fin = 1;
+            % [~, obj.input.bestNID] = mink(obj.input.Evaluationtra, 50);
+            % % 姿勢角終端コストを変更させるため再計算
+            % for m = obj.input.bestNID
+            %     [eval, eachCost(m, :)] = obj.objective(m);
+            %     obj.input.Evaluationtra(1,m) = eval;
+            % end
             
             % 評価値の正規化
             obj.input.normE = obj.Normalize();
@@ -164,6 +179,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.result.variable_N = obj.N; % 追加
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.Evaluationtra_norm = obj.input.normE;
+            obj.result.eachcost = eachCost(BestcostID, :);
             
             result = obj.result;  
 %             profile viewer
@@ -212,8 +228,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 gradZ = -obj.param.CA * (1-cos((Zdis/Zlim).*pi))/Zlim + obj.param.CA;
                 constIL = find(obj.state.state_data(5, end, 1:obj.N) <= 0.1975);
                 constIR = find(obj.state.state_data(5, end, 1:obj.N) >= 0.3975);
-                CL = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIL)-0.1975).^2, [1, length(constIL)]); % 0.1975 rad.未満の計算
-                CR = reshape(obj.param.C *gradZ* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
+                CL = reshape(obj.param.Ca *gradZ* (obj.state.state_data(5, end, constIL)-0.1975).^2, [1, length(constIL)]); % 0.1975 rad.未満の計算
+                CR = reshape(obj.param.Ca *gradZ* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
                 obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
                 obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
             end
@@ -237,6 +253,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             constIYaw = find(abs(obj.state.state_data(6, end, 1:obj.N)) > 0.5);
             CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
             obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
+
+            % 良い評価のサンプルは終端コストのみ大きくする
 
             
 
@@ -284,7 +302,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
         %------------------------------------------------------
         %======================================================
-        function [MCeval] = objective(obj, m)   % obj.~とする
+        function [MCeval, EachCost] = objective(obj, m)   % obj.~とする
             X = obj.state.state_data;       %12 * 10
             U = obj.input.u(:,:,m);         %12 * 10
 
@@ -299,13 +317,11 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             tildeUpre = U - obj.self.input;       % agent.input
             tildeUref = U - obj.state.ref(13:16, :);
 
-            %% 入力の変化率
-%             rate_change = tildeUpre/U;
-
-            %% 人口ポテンシャル場法
-            % x-y
-%             apfLower = (X(1,end,m)-obj.param.obsX)^2 + (X(2,end,m)-obj.param.obsY)^2;   % 終端ホライズン
-            
+            %% ホライズンの先に係数下げる
+            kJ = linspace(1, 0.2, obj.param.H);
+            tildeXp = tildeXp .* kJ; tildeXqw = tildeXqw .* kJ;
+            tildeXv = tildeXv .* kJ; 
+            tildeUpre = tildeUpre .* kJ; tildeUref = tildeUref .* kJ;
             %% 制約違反ソフト制約
             constraints = 0;
 
@@ -323,13 +339,20 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
 
             %-- 状態の終端コストを計算 状態だけの終端コスト
-            terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
-                +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
-                +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
+            if obj.param.fin == 0
+                terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
+                    +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
+                    +tildeXqw(:, end)'  * obj.param.QW  * tildeXqw(:, end);
+            else
+                terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
+                    +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
+                    +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
+            end
 
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
                 + terminalState + constraints;
+            EachCost = [sum(stageStateP), sum(stageStateV), sum(stageStateQW)];
         end
         
         function [pw_new] = Normalize(obj)

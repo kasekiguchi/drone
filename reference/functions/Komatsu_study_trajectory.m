@@ -23,6 +23,10 @@ syms t real
 % x = 0;
 % y = 0;
 
+%%
+x = 0 * t;
+y = 0 * t;
+z = 0 * t;
 %% 
 % x = 0;
 % y = 0;
@@ -74,11 +78,12 @@ syms t real
 % y = 0;
 
 %% syamen これ！！
-phaseT = 2;
-zt = 0.5; % 減衰係数？
-z = 2*exp(-(t-phaseT)/zt)-0.1;
-x = -exp(-(t-phaseT)/zt);
-y = 0;
+% phaseT = 2;
+% zt = 0.5; % 減衰係数 小さくすれば傾き増加
+% xt = 0.3; % x方向速度増大
+% z = 2*exp(-(t-phaseT)/zt)-0.1;
+% x = -exp(-(t-phaseT)/xt);
+% y = 0;
 %% slope P2P
 % x = -0.2;
 % y = 0;
