@@ -32,7 +32,7 @@ classdef VORONOI_BARYCENTER < handle
       % index : self = agents(index)
       % [Output] result = reference position w.r.t. global coordinate.
       %% Common setting 1 : Simple Voronoi cell
-      sensor = obj.self.sensor.result;
+      sensor = obj.self.sensor.result.density_front;
       state = obj.self.estimator.result.state;
       R = obj.param.R;       % communication range
       void = obj.param.void; % VOID width
@@ -42,22 +42,23 @@ classdef VORONOI_BARYCENTER < handle
         neighbor = [sensor.rigid(1:size(sensor.rigid, 2) ~= obj.self.id).p];
       end
       % from here local coordinate
-      if ~isempty(neighbor)                                                                                         % 通信範囲にエージェントが存在するかの判別
-        neighbor_rpos = neighbor - state.p;                                                                       % 通信領域内のエージェントの相対位置
-        %        if size(neighbor_rpos,2)>=1 % 隣接エージェントの位置点重み更新
-        % 以下は計算負荷を下げられるが重み付きvoronoiをやるとセル形状が崩れる
-        %     tri=delaunay([0,neighbor_rpos(1,:)],[0,neighbor_rpos(2,:)]); % 自機体(0,0)を加えたドロネー三角形分割
-        %     tmpid=tri(logical(sum(tri==1,2)),:); % 1 つまり自機体を含む三角形だけを取り出す．
-        %     tmpid=unique(tmpid(tmpid~=1))-1; % tmpid = 隣接エージェントのインデックス （neighbor_rpos内のインデックス番号）
-        %     neighbor_rpos=neighbor_rpos(:,tmpid); % 隣接エージェントの相対位置
-        %     neighbor.pos=neighbor.pos(:,tmpid); % 隣接エージェントの位置
-        %     neighbor.weight=sensor_obj.output.neighbor.weight(tmpid); % neighbor weight
-        %     neighbor.mass=sensor_obj.output.neighbor.mass(tmpid); % neighbor mass
-        Vn = voronoi_region([[0; 0; 0], (neighbor_rpos)], [R, R; -R, R; -R, -R; R, -R], 1:size(neighbor, 2) + 1); % neighborsとのみボロノイ分割（相対座標）
-      else                                                                                                          % 通信範囲にエージェントがいない場合
-        Vn = voronoi_region([0; 0; 0], [R, R; -R, R; -R, -R; R, -R], 1);
-      end
-      V = intersect(sensor.region, Vn{1}); % range_regionセンサの結果との共通部分（相対座標）
+      % if ~isempty(neighbor)                                                                                         % 通信範囲にエージェントが存在するかの判別
+      %   neighbor_rpos = neighbor - state.p;                                                                       % 通信領域内のエージェントの相対位置
+      %   %        if size(neighbor_rpos,2)>=1 % 隣接エージェントの位置点重み更新
+      %   % 以下は計算負荷を下げられるが重み付きvoronoiをやるとセル形状が崩れる
+      %   %     tri=delaunay([0,neighbor_rpos(1,:)],[0,neighbor_rpos(2,:)]); % 自機体(0,0)を加えたドロネー三角形分割
+      %   %     tmpid=tri(logical(sum(tri==1,2)),:); % 1 つまり自機体を含む三角形だけを取り出す．
+      %   %     tmpid=unique(tmpid(tmpid~=1))-1; % tmpid = 隣接エージェントのインデックス （neighbor_rpos内のインデックス番号）
+      %   %     neighbor_rpos=neighbor_rpos(:,tmpid); % 隣接エージェントの相対位置
+      %   %     neighbor.pos=neighbor.pos(:,tmpid); % 隣接エージェントの位置
+      %   %     neighbor.weight=sensor_obj.output.neighbor.weight(tmpid); % neighbor weight
+      %   %     neighbor.mass=sensor_obj.output.neighbor.mass(tmpid); % neighbor mass
+      %   Vn = voronoi_region([[0; 0; 0], (neighbor_rpos)], [R, R; -R, R; -R, -R; R, -R], 1:size(neighbor, 2) + 1); % neighborsとのみボロノイ分割（相対座標）
+      % else                                                                                                          % 通信範囲にエージェントがいない場合
+      %   Vn = voronoi_region([0; 0; 0], [R, R; -R, R; -R, -R; R, -R], 1);
+      % end
+      % V = intersect(sensor.region, Vn{1}); % range_regionセンサの結果との共通部分（相対座標）
+      V = sensor.region;
       region = polybuffer(V, -void);       % 自領域のVOIDマージンを取ったpolyshape
       %%
 

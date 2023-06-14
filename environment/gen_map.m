@@ -19,7 +19,7 @@ yv=Vertex(:,2); % 領域 頂点y座標
 in= inpolygon(xq,yq,xv,yv); % map 座標が領域に含まれるかの判別  ：領域内1 領域外0
 %% 重要度
 if isempty(q) % q = []  => 一様分布
-    grid_density= ones(size(xq));
+    grid_density= ones(size(xq))*100;
 else
 normal_k = sigma/d; % 重み用正規分布のexp内の係数  0.04
 normal_mat = exp(-normal_k*((reshape(xq,[row*col,1])-q(:,1)').^2+(reshape(yq,[row*col,1])-q(:,2)').^2)); % 各重要度（列）の各グリッド（行）への影響（値）
