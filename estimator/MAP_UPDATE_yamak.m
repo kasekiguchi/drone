@@ -42,7 +42,7 @@ methods
 
         Env.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2))= region_phi - 20*(in); %減少
         % Env.grid_density = Env.grid_density + 0.01; %回復
-        Env.grid_density = max(Env.grid_density,10);
+        Env.grid_density = max(Env.grid_density,1);
         Env.grid_density = min(Env.grid_density,100);
 
         obj.result = obj.env;

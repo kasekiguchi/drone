@@ -32,62 +32,33 @@ classdef VORONOI_BARYCENTER < handle
       % index : self = agents(index)
       % [Output] result = reference position w.r.t. global coordinate.
       %% Common setting 1 : Simple Voronoi cell
-      sensor = obj.self.sensor.result.density_front;
+      sensor = obj.self.sensor.result;
       state = obj.self.estimator.result.state;
       R = obj.param.R;       % communication range
       void = obj.param.void; % VOID width
-      if isfield(sensor, 'neighbor')
-        neighbor = sensor.neighbor; % neighbor's global position within the communication range
-      elseif isfield(sensor, 'rigid')
-        neighbor = [sensor.rigid(1:size(sensor.rigid, 2) ~= obj.self.id).p];
-      end
-      % from here local coordinate
-      % if ~isempty(neighbor)                                                                                         % 通信範囲にエージェントが存在するかの判別
-      %   neighbor_rpos = neighbor - state.p;                                                                       % 通信領域内のエージェントの相対位置
-      %   %        if size(neighbor_rpos,2)>=1 % 隣接エージェントの位置点重み更新
-      %   % 以下は計算負荷を下げられるが重み付きvoronoiをやるとセル形状が崩れる
-      %   %     tri=delaunay([0,neighbor_rpos(1,:)],[0,neighbor_rpos(2,:)]); % 自機体(0,0)を加えたドロネー三角形分割
-      %   %     tmpid=tri(logical(sum(tri==1,2)),:); % 1 つまり自機体を含む三角形だけを取り出す．
-      %   %     tmpid=unique(tmpid(tmpid~=1))-1; % tmpid = 隣接エージェントのインデックス （neighbor_rpos内のインデックス番号）
-      %   %     neighbor_rpos=neighbor_rpos(:,tmpid); % 隣接エージェントの相対位置
-      %   %     neighbor.pos=neighbor.pos(:,tmpid); % 隣接エージェントの位置
-      %   %     neighbor.weight=sensor_obj.output.neighbor.weight(tmpid); % neighbor weight
-      %   %     neighbor.mass=sensor_obj.output.neighbor.mass(tmpid); % neighbor mass
-      %   Vn = voronoi_region([[0; 0; 0], (neighbor_rpos)], [R, R; -R, R; -R, -R; R, -R], 1:size(neighbor, 2) + 1); % neighborsとのみボロノイ分割（相対座標）
-      % else                                                                                                          % 通信範囲にエージェントがいない場合
-      %   Vn = voronoi_region([0; 0; 0], [R, R; -R, R; -R, -R; R, -R], 1);
-      % end
-      % V = intersect(sensor.region, Vn{1}); % range_regionセンサの結果との共通部分（相対座標）
-      V = sensor.region;
-      region = polybuffer(V, -void);       % 自領域のVOIDマージンを取ったpolyshape
-      %%
+      
+      %% LiDAR 部分のボロノイ領域算出
+      LiDAR_V = poly_volonoi(state,sensor.neighbor,sensor.region,void,R);
+      [LiDAR_cent, LiDAR_mass] = map_centre_of_gravity(sensor.xq , sensor.yq , sensor.grid_density,LiDAR_V);
+      LiDAR_mass = 1;
+      %% camera 部分のボロノイ領域算出
+      dens_c = sensor.density_camera;
+      camera_V = poly_volonoi(state, sensor.neighbor, dens_c.region,void,R);
+      [camera_cent, camera_mass] = map_centre_of_gravity(dens_c.xq, dens_c.yq , dens_c.grid_density, camera_V);
+      camera_mass = 1;
+      %% front 部分のボロノイ領域算出
+      dens_f = sensor.density_front;
+      front_V = poly_volonoi(state, sensor.neighbor, dens_f.region,void,R);
+      [front_cent, front_mass] = map_centre_of_gravity(dens_f.xq, dens_f.yq , dens_f.grid_density, front_V);
+      front_mass = 0;
 
-      result = [0; 0; 0];                  % 相対位置
-      obj.param.region = region;
+      result = (LiDAR_cent*LiDAR_mass + camera_cent*camera_mass + front_cent*front_mass)/(LiDAR_mass + camera_mass + front_mass);
+      %%  描画用変数
       region_phi = [];
       yq = [];
       xq = [];
-      if area(region) <= 0
-        %% 領域の面積０
-        % ここにくる多くの場合はbugか？（voidを取るとありえる）なら動かない（ref = state）
-        warning("ACSL : The voronoi region is empty.")
-      elseif ~inpolygon(0, 0, region.Vertices(:, 1), region.Vertices(:, 2))
-        % 領域が自機体を含まない（voidを取るとありえる）なら動かない（ref = state）
-        % ここにくる多くの場合がbugか？
-        warning("ACSL : The agent is out of the voronoi region.")
-      else
-        %% 共通設定２：単純ボロノイセルの重み確定
-        xq = sensor.xq;
-        yq = sensor.yq;
-        region_phi = sensor.grid_density;
-        in = inpolygon(xq, yq, region.Vertices(:, 1), region.Vertices(:, 2)); % （相対座標）測距領域判別
-        region_phi = region_phi .* in;                                        % region_phi(i,j) : grid (i,j) の位置での重要度：測距領域外は０
-        mass = sum(region_phi, 'all');                                        % 領域の質量
-        cogx = sum(region_phi .* xq, 'all') / mass;                           % 一次モーメント/質量
-        cogy = sum(region_phi .* yq, 'all') / mass;                           % 一次モーメント/質量
-        result = [cogx; cogy; 0];                                             % 相対位置
-      end
-      % 描画用変数
+      region = LiDAR_V;
+
       obj.result.region_phi = region_phi;
       obj.result.xq = xq;
       obj.result.yq = yq;
@@ -141,6 +112,8 @@ classdef VORONOI_BARYCENTER < handle
         , Env.Vertices,[],ax);
     end
 
+        
+
     function draw_movie(logger, Env, span,ax,filename)
       arguments
         logger
@@ -161,4 +134,39 @@ classdef VORONOI_BARYCENTER < handle
       %make_animation(1:10:logger.k-1,@(k) arrayfun(@(i) contourf(Env.xq,Env.yq,logger.Data.agent(i).estimator.result{k}.grid_density),span,'UniformOutput',false), @() Env.show_setting());
     end
   end
+end
+
+%% Add Yamak 
+function V = poly_volonoi(state,neighbor,region,void,R)
+    %   ボロノイ領域を算出する関数
+    % state 現在座標
+    % neighbor 隣接Agent座標
+    % region 観測領域polyshape
+    % void 領域
+    % R 観測半径
+    neighbor_rpos = neighbor - state.p;   % 通信領域内のエージェントの相対位置
+    Vn = voronoi_region([[0; 0; 0], (neighbor_rpos)],...
+        [R, R; -R, R; -R, -R; R, -R],...
+        1:size(neighbor, 2) + 1); % neighborsとのみボロノイ分割（相対座標）
+    V = intersect(region, Vn{1});
+    V = polybuffer(V, -void);
+    if area(V) <= 0
+        % 領域の面積０だった場合の例外処理
+        % ここにくる多くの場合はbugか？（voidを取るとありえる）なら動かない（ref = state）
+        warning("ACSL : The voronoi region is empty.")
+    elseif ~inpolygon(0, 0, V.Vertices(:, 1), V.Vertices(:, 2))
+        % 領域が自機体を含まない（voidを取るとありえる）なら動かない（ref = state）
+        % ここにくる多くの場合がbugか？
+        % 凸領域でなければあり得る？
+        warning("ACSL : The agent is out of the voronoi region.")
+    end
+end
+function [centroid , mass] = map_centre_of_gravity(xq , yq , grid_density, region)
+    % ボロノイ重心を求めるプログラム
+    in = inpolygon(xq, yq, region.Vertices(:, 1), region.Vertices(:, 2)); % 重みグリッドがポリゴンに含まれているかを判別
+    region_phi = grid_density .* in;                                        % region_phi(i,j) : grid (i,j) の位置での重要度：測距領域外は０
+    mass = sum(region_phi, 'all');                                        % 領域の質量
+    cogx = sum(region_phi .* xq, 'all') / mass;                           % 一次モーメント/質量
+    cogy = sum(region_phi .* yq, 'all') / mass;                           % 一次モーメント/質量
+    centroid = [cogx; cogy; 0];     
 end

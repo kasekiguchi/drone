@@ -34,7 +34,7 @@ classdef RANGE_DENSITY_FRONT < handle
             else
                 e2r_vector = [1;0;0];
             end
-            field_of_view = 0.75*pi; % 画角
+            field_of_view =pi/2; % 画角
             radius_of_view = obj.r ;
 
             e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
