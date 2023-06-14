@@ -36,7 +36,7 @@ function Estimator = Estimator_EKF(agent,dt,initial_state,model,output,opts)
         Estimator.P = opts.P;
     end
     if isempty(opts.Q)
-        Estimator.Q = eye(6);%diag([1E3,1E3,1E3,1E5,1E5,1E5]);%eye(6)*1E3;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
+        Estimator.Q = diag([1E3,1E3,1E3,1E5,1E5,1E5]);%eye(6)*1E3;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
     else
         Estimator.Q = opts.Q;
     end
