@@ -9,6 +9,7 @@ DATAdir = cd(fileparts(activeFile.Filename));
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
+
 % warning('off', 'all');
 % run("main.m"); % 目標入力生成
 % close all hidden; clear all; clc;
@@ -72,8 +73,8 @@ phase = 2;
 
 %     load("Data/HL_input");
 %     load("Data/HL_V");
-load("Data/Input_HL.mat", "Idata");
-Params.ur_array = Idata;
+% load("Data/Input_HL.mat", "Idata");
+% Params.ur_array = Idata;
 
 fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
@@ -381,7 +382,7 @@ m = 3; n = 2;
 % xlabel("X [m]"); ylabel("Z [m]"); 
 % position
 % 1:リファレンス, 
-figure(1)
+figure(10)
 Title = strcat('Ymoving', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 sgtitle(Title);
 subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
@@ -419,11 +420,12 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 xlabel("Time [s]");
 ylabel("Calculation time [s]");
 
-set(gcf, "WindowState", "maximized");
-movegui(gcf,'east'); 
+set(gcf, "Position", [0 0 960 1000])
+% set(gcf, "WindowState", "maximized");
+% movegui(gcf,'east'); 
 
 %%
-agent(1).animation(logger,"target",1); 
+% agent(1).animation(logger,"target",1); 
 %%
 % figure(5); 
 % ref_t = agent.reference.timeVarying.func;

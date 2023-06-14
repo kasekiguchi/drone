@@ -51,9 +51,9 @@ syms t real
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
 %% hovering
-% x = 0;
-% y = 0;
-% z = 1;
+x = 0;
+y = 0;
+z = 1;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
@@ -74,11 +74,11 @@ syms t real
 % y = 0;
 
 %% syamen これ！！
-phaseT = 2;
-zt = 0.5; % 減衰係数？
-z = 2*exp(-(t-phaseT)/zt)-0.1;
-x = -exp(-(t-phaseT)/zt);
-y = 0;
+% phaseT = 2;
+% zt = 0.5; % 減衰係数？
+% z = 2*exp(-(t-phaseT)/zt)-0.1;
+% x = -exp(-(t-phaseT)/zt);
+% y = 0;
 %% slope P2P
 % x = -0.2;
 % y = 0;

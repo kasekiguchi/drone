@@ -1,11 +1,11 @@
 function Controller = Controller_HLMCMPC(~)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
-    Controller_param.dt = 0.1; % MPCステップ幅
-    Controller_param.H = 20;
-    Controller_param.Maxparticle_num = 1000;
+    Controller_param.dt = 0.025; % MPCステップ幅
+    Controller_param.H = 25;
+    Controller_param.Maxparticle_num = 10000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 1000;
+    Controller_param.Minparticle_num = 10000;
     Controller_param.input.Initsigma = 1*[1,1,1,1];
     Controller_param.input.Constsigma = 5.0;
     Controller_param.input.Maxsigma = [0.001,0.1,0.1,0.01];
