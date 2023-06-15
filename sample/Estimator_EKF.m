@@ -1,4 +1,4 @@
-function Estimator = Estimator_EKF(agent,dt,initial_state,model,output,opts)
+function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     % output ：出力のリスト　例 ["p","q"]
     % var : 各出力に対するセンサーの観測ノイズs
     %% estimator class demo
@@ -7,7 +7,6 @@ function Estimator = Estimator_EKF(agent,dt,initial_state,model,output,opts)
     arguments
         agent
         dt
-        initial_state
         model
         output = ["p","q"]
         opts.B = []
