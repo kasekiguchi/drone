@@ -4,7 +4,7 @@
 %tmp = matlab.desktop.editor.getActive;
 %cd(fileparts(tmp.Filename));
 %% Define variables
-syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
+syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 Tr dTr real
 syms u u1 u2 u3 u4 T1 T2 T3 T4 real
 syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 syms R real
@@ -57,10 +57,11 @@ dobg = simplify(inv(Ib)*T2T)
 dobg = simplify([zeros(3,1),inv(Ib)])
 %% SS equation
 % % Usage: dx=f+g*u
-x = [q;p;dp;ob]            % 13 states
+x = [q;p;dp;ob;Tr;dTr]            % 13 states
 u = [u1;u2;u3;u4] % thrust, torques
-f = [dq;dp;ddpf;dobf;dE3;0]
-g = [zeros(4,4);zeros(3,4);ddpG;dobg;zeros(1,4);1,zeros(1,3)]
+g0 = [zeros(4,4);zeros(3,4);ddpG;dobg]
+f = [dq;dp;ddpf;dobf;dTr;0]+[g0(:,1);zeros(2,1)]*Tr
+g = [zeros(size(g0,1),1),g0(:,2:end);zeros(1,4);1,zeros(1,3)]
  %% Linearization
 % xe=[[1,0,0,0]';zeros(9,1)];
 % Ac=simplify(subs(subs(pdiff(f,x),x,xe)+simplify(subs(g(:,1)*(1/m),x,xe)),pParam,physicalParamV));
@@ -69,13 +70,13 @@ g = [zeros(4,4);zeros(3,4);ddpG;dobg;zeros(1,4);1,zeros(1,3)]
 % rank([Bc,Ac*Bc,Ac*Ac*Bc])
 %% Make function of the quadrotor model : if model is modified, then evaluate this section.
 clc
-matlabFunction(f,'file','F.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
-matlabFunction(g,'file','G.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
+matlabFunction(f,'file','Fep.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+matlabFunction(g,'file','Gep.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 %%
 %nonlinearModel = subs(f+g*[u1;u2;u3;u4], physicalParam, physicalParamV);
 %matlabFunction(nonlinearModel,'file','euler_parameter_thrust_force_model','vars',{x u},'outputs',{'dx'});
 %matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_force_physical_parameter_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
-matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_torque_physical_parameter_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
+matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_torque_physical_parameter_expand_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% euler angle model : roll-pitch-yaw(XYZ) euler angle 
 syms roll pitch yaw droll dpitch dyaw real

@@ -17,8 +17,8 @@ x = [q;p;dp;ob;T1;dT1];
 physicalParam = [m, Lx, Ly, lx, ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
 g = G(x,physicalParam);
 % fep= [F(x,physicalParam) + [zeros(9:4);gravity+E3;zeros(3,4)] + g(:,1)*E3;dE3;0];
-fep= [F(x,physicalParam) + g(:,1)*T1;dT1;0];
-gep = [zeros(size(g,1),1), g(:,2:4); zeros(1,4);1, zeros(1,3)];
+fep= Fep(x,physicalParam) ;
+gep = Gep(x,physicalParam) ;
 % dxep = fep + gep*[ddT;u2;u3;u4];
 %g= [g1 g2 g3 g4];
 %% 1st layer
@@ -80,12 +80,12 @@ dddh1 = LieD(ddh1,fep,x)+diff(ddh1,t);
 dddh2 = LieD(ddh2,fep,x)+diff(ddh2,t);
 dddh3 = LieD(ddh3,fep,x)+diff(ddh3,t);
 % % For check
-% 	[LieD(h2,g1,x),LieD(h3,g1,x)]
-% 	simplify([LieD(dh2,g1,x),LieD(dh3,g1,x)])
-% 	simplify([LieD(ddh2,g1,x),LieD(ddh3,g1,x)])
-% 	[LieD(h2,g1,x),LieD(h3,g1,x),LieD(h4,g1,x)]
-% 	simplify([LieD(dh2,g1,x),LieD(dh3,g1,x)])
-% 	simplify([LieD(ddh2,g1,x),LieD(ddh3,g1,x)])
+	[LieD(h1,gep,x),LieD(h2,gep,x),LieD(h3,gep,x)]
+	simplify([LieD(dh1,gep,x),LieD(dh2,gep,x),LieD(dh3,gep,x)])
+	simplify([LieD(ddh1,gep,x),LieD(ddh2,gep,x),LieD(ddh3,gep,x)])
+	[LieD(h1,gep,x),LieD(h2,gep,x),LieD(h3,gep,x),LieD(h4,gep,x)]
+	simplify([LieD(dh1,gep,x),LieD(dh2,gep,x),LieD(dh3,gep,x)])
+	simplify([LieD(ddh1,gep,x),LieD(ddh2,gep,x),LieD(ddh3,gep,x)])
 %% 
 % % Derive 2nd layer controller
 alpha2 = [LieD(dddh1,fep,x)+diff(dddh1,t);LieD(dddh2,fep,x)+diff(dddh2,t); LieD(dddh3,fep,x)+diff(dddh3,t); LieD(dh4,fep,x)+diff(dh4,t)];
