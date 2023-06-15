@@ -18,14 +18,12 @@ switch type
     Setting.dim = [6,3,3];
     Setting.state_list = ["p","v"];
     Setting.num_list = [3,3];
-    Setting.input_channel = ["v"];
     %% 質点モデル
   case "PVQ" % point-mass (force,angular-vel)-input model
     dsys = c2d(ss([zeros(3) eye(3) zeros(3);zeros(6,9)],[zeros(3,6);eye(3) zeros(3);zeros(3) eye(3)],eye(9),zeros(9,6)),dt);
     Setting.dim = [9,6,2];
     Setting.state_list = ["p","v","q"];
     Setting.num_list = [3,3,3];
-    Setting.input_channel = ["v","q"];
   case "P" % next position = input model
     dsys.A = [zeros(3)];
     dsys.B = eye(3); % x.p = u; 次の時刻にu の位置に行くモデル
@@ -33,7 +31,6 @@ switch type
     Setting.dim = [3, 3, 0];
     Setting.state_list = ["p"];
     Setting.num_list = [3];
-    Setting.input_channel = ["p"];
 end
 %% 共通設定
 Setting.param.A = dsys.A;
