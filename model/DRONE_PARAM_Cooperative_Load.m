@@ -55,13 +55,13 @@ classdef DRONE_PARAM_Cooperative_Load < PARAMETER_CLASS
     end
 
     methods
-        function obj = DRONE_PARAM(name,type,param)
+        function obj = DRONE_PARAM_Cooperative_Load(name,type,param)
             arguments
                 % P = [g m0 j0 rho li mi ji]
                 name % DIATONE
                 type = "row";
                 param.g = 9.81;
-                param.m0 = m0;
+                param.m0 = 1;
                 param.j01 = 0.005
                 param.j02 = 0.005
                 param.j03 = 0.005                
