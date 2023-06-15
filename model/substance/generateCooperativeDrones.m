@@ -387,7 +387,7 @@ dataset = [q_dataset;ol0_dataset;ol_dataset;os_dataset;u_dataset;qt0_dataset];
 % reshape([fi;Mi],4*N,1);
 x0data = [0;0;0];
 r0data = [1;0;0;0];
-dx0data = [0;0;0];
+dx0data = [1;0;0];
 o0data = [0;0;0];
 % q1 = [0,1/sqrt(2),1/sqrt(2)]'; q2 = [0,1/sqrt(2),1/sqrt(2)]'; q3 = [0,1/sqrt(2),1/sqrt(2)]'; q4 = [0,1/sqrt(2),1/sqrt(2)]';
 q1 = [0,-1,1]'; q2 = [0,-1,1]'; q3 = [0,-1,1]'; q4 = [0,-1,1]';
