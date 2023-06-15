@@ -8,7 +8,6 @@ properties
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vf
     Vs
-     fzFT
     fzapr
 end
 
@@ -19,31 +18,21 @@ methods
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
         obj.Q = STATE_CLASS(struct('state_list', ["q"], 'num_list', [4]));
+        obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.Vf = obj.param.Vf; % 階層１の入力を生成する関数ハンドル
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
         obj.fzapr = param.fzapr;
 
     end
 
-    function result = do(obj, param, ~)
-        % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
-        t = param{1};
+    function result = do(obj,varargin)
+        % param (optional) : 構造体：物理パラメータP，ゲインF1-F4       
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
         x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
         xd = ref.state.get();
 
-        
         P = obj.param.P;
-        F1 = obj.param.F1;
-        F2 = obj.param.F2;
-        F3 = obj.param.F3;
-        F4 = obj.param.F4;
-       
-        ax = obj.param.ax;
-        ay = obj.param.ay;
-        az = obj.param.az;
-        apsi = obj.param.apsi;
 
         xd = [xd; zeros(20 - size(xd, 1), 1)]; % 足りない分は０で埋める．
 
@@ -55,28 +44,22 @@ methods
         xd(9:11) = Rb0' * xd(9:11);
         xd(13:15) = Rb0' * xd(13:15);
         xd(17:19) = Rb0' * xd(17:19);
-            %z方向:LSFB
-%             vf = obj.Vf(z1, F1); % % % % % % % % % % % % % % % % % % %xy
-%vs = obj.Vs(z2,z3,z4,F2,F3,F4);
-            %z方向:FT
-            vf = obj.Vf(z1); % % % % % % % % % % % % % % % % % %xyz
-
+        if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
+                dt = varargin{1}.dt;
+        else
+                 dt = obj.param.dt;
+        end
+        %z方向:FT
+        z1 = Z1(x, xd', P);%z
+        vf = obj.Vf(z1); 
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向
         z4 = Z4(x, xd', vf, P); %yaw
-
-       
-        
-    %有限整定
+        vs = obj.Vs(z2,z3,z4);
+        %検証用
 %      vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
-        ux=-F2*(sign(z2).*abs(z2).^ax(1:4));
-        uy=-F3*(sign(z3).*abs(z3).^ay(1:4));
-
-        %upsi:HL or FT
-        upsi = -F4 * z4; %HL
-%         upsi=-F4*(sign(z4).*abs(z4).^apsi(1:2));
-        %
+        % vs(3) = -F4 * z4; %yaw:LS
         %% 外乱(加速度で与える)
         
         %=======================================
@@ -85,6 +68,7 @@ methods
                     dst = [zeros(6,1)];%[x,y,z,roll,pitch,yaw](加速次元)
         %-----------------------------------------------------------------
                     %確率の外乱
+                    % t = param{1};
 %                     rng("shuffle");
 %                     a = 1;%外乱の大きさの上限
 %                     dst = 2*a*rand-a;
@@ -117,18 +101,19 @@ methods
 %                             dst=-5*sin(2*pi*xxx/(TT*2));
 %                     end
         %%
-        vs = [ux, uy, upsi];
-        tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs', P);
-        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4); dst];
-        obj.self.input = obj.result.input;
+        tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
+        % obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4); dst];
+        % obj.self.input = obj.result.input;
         %サブシステムの入力
-        obj.result.uHL = [vf(1); ux; uy; upsi];
+        obj.result.uHL = [vf(1); vs];
         %サブシステムの状態
         obj.result.z1 = z1;
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
         obj.result.vf = vf;
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+        % obj.result.input =[max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)));dst];%外乱用
         result = obj.result;
     end
 
