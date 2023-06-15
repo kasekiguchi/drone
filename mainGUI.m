@@ -1,19 +1,19 @@
 %% Initialize settings
 % set path
-cd(fileparts(mfilename('fullpath')));
-if isfile('./mainGUI.m') == 0
-    tmp = matlab.desktop.editor.getActive; 
-    cd(fileparts(tmp.Filename));
+if isfile('./mainGUI.m')
+  tmp = matlab.desktop.editor.getActive; 
+  cd(fileparts(tmp.Filename));
+else
+  cd(fileparts(mfilename('fullpath')));
 end
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 close all hidden; clear all; clc;
-userpath('clear');
 %%
 clc
 SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR"];
 ExpBaseMode = ["ExpTestMotiveConnection","ExpHL"];
-fExp = 1;
+fExp = 0;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);
