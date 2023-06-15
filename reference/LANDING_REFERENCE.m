@@ -7,6 +7,7 @@ classdef LANDING_REFERENCE < handle
     result
     base_state
     base_time
+    te = 3
   end
 
   methods
@@ -44,9 +45,9 @@ classdef LANDING_REFERENCE < handle
       %% Variable set
       Xd  = zeros( 20, 1);
       %% Set Xd
-      if t<=te
+      if t<=obj.te
         Zd = curve_interpolation_9order(t,obj.te,obj.base_state(3),0,0,0);
-      elseif t> te
+      elseif t> obj.te
         Zd = zeros(1,5);
       end
       Xd(1:3,1) = obj.base_state(1:3);

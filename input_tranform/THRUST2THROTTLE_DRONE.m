@@ -52,9 +52,14 @@ methods
 
             uroll = obj.param.gain(1) * (whn(1) - wh(1));
             upitch = obj.param.gain(2) * (whn(2) - wh(2));
-            
+            % if cha == 'f'
+            %     gain=70
+            % end
+            gain = obj.param.gain(4)
             % apply gain to (thrust - hovering_thrust)
-            uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
+            % uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
+            uthr = max(0, gain * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
+
             uyaw = obj.param.gain(3) * (whn(3) - wh(3));
             uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
             upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
