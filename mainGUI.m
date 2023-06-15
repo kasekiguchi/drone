@@ -1,6 +1,6 @@
 %% Initialize settings
 % set path
-if isfile('./mainGUI.m')
+if ~isfile('./mainGUI.m')
   tmp = matlab.desktop.editor.getActive; 
   cd(fileparts(tmp.Filename));
 else
@@ -12,8 +12,8 @@ close all hidden; clear all; clc;
 %%
 clc
 SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR"];
-ExpBaseMode = ["ExpTestMotiveConnection","ExpHL"];
-fExp = 0;
+ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL"];
+fExp = 1;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);
