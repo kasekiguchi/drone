@@ -95,7 +95,11 @@ classdef RANGE_DENSITY_SIM < handle
             result.map_min=rpmap_min;
             %% 出力として整形
             result.region=region;
-
+            result.env.grid_density = Env.grid_density;
+            result.env.xq = Env.xq;
+            result.env.yq = Env.yq;
+            result.env.map_min = Env.map_min;
+            result.env.map_max = Env.map_max;
             obj.result = result;
         end
         function show(obj,varargin)

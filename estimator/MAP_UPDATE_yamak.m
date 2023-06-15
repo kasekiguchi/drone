@@ -40,7 +40,7 @@ methods
         region_phi=Env.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2));% 相対的な重要度行列
         in = inpolygon(xq,yq,sensor.region.Vertices(:,1),sensor.region.Vertices(:,2)); % （相対座標）測距領域判別
 
-        Env.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2))= region_phi - 20*(in); %減少
+        Env.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2))= region_phi - 100*(in); %減少
         % Env.grid_density = Env.grid_density + 0.01; %回復
         Env.grid_density = max(Env.grid_density,1);
         Env.grid_density = min(Env.grid_density,100);

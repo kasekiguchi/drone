@@ -20,7 +20,7 @@ env.Vertices=[-2 -2.5;5.5 -2.5;5.5 3;-2 3];
 in = inpolygon(env.q(:,1),env.q(:,2),env.Vertices(:,1),env.Vertices(:,2));
 
 % 一様分布
-env.d = 0.05;
+env.d = 0.1;
 env.q = [];
 env.Vertices=[-2 -2.5;5.5 -2.5;5.5 3;-2 3]; 
 

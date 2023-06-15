@@ -34,7 +34,7 @@ classdef RANGE_DENSITY_FRONT < handle
             else
                 e2r_vector = [1;0;0];
             end
-            field_of_view =pi/2; % 画角
+            field_of_view =pi*0.4; % 画角
             radius_of_view = obj.r ;
 
             e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
@@ -79,7 +79,7 @@ classdef RANGE_DENSITY_FRONT < handle
         end
         function show(obj,varargin)
             if ~isempty(obj.result)
-                contourf(obj.result.xq,obj.result.yq,obj.result.grid_density);
+                contour(obj.result.xq,obj.result.yq,obj.result.grid_density);
                 %            surf(obj.result.xq,obj.result.yq,obj.result.grid_density);
                 obj.draw_setting();
             else

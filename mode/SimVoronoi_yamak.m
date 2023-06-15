@@ -1,6 +1,6 @@
 ts = 0; % initial time
 dt = 0.1; % sampling period
-te = 100; % terminal time
+te = 60; % terminal time
 time = TIME(ts,dt,te); % time class instance
 in_prog_func = @(app) in_prog(app); % in progress procedure
 post_func = @(app) post(app); % post procedure
@@ -30,7 +30,7 @@ for i = 1:N
   agent(i).sensor.direct = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise 
   agent(i).sensor.rpos = RANGE_POS_SIM(agent(i),Sensor_RangePos(i,'r',10)); % range sensor to capture neighbor's position : r : sensor radius
   agent(i).sensor.rdensity = RANGE_DENSITY_SIM(agent(i),Sensor_RangeD('r',10)); % range sensor to capture field importance : r : sensor radius
-  agent(i).sensor.rdensity_f = RANGE_DENSITY_FRONT(agent(i),Sensor_RangeD('r',0.5)); % range sensor to capture field importance : r : sensor radius
+  agent(i).sensor.rdensity_f = RANGE_DENSITY_FRONT(agent(i),Sensor_RangeD('r',1)); % range sensor to capture field importance : r : sensor radius
   agent(i).sensor.rdensity_c = RANGE_DENSITY_CAMERA(agent(i),Sensor_RangeD('r',1)); % range sensor to capture field importance : r : sensor radius 
   agent(i).sensor.do = @sensor_do; % synthesis of sensors
   agent(i).estimator.est = DIRECT_ESTIMATOR(agent(i),struct("model",MODEL_CLASS(agent(i),M))); % estimator.result.state = sensor.result.state
