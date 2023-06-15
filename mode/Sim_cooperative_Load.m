@@ -26,7 +26,7 @@ initial_state.Oi = [0;0;0;0;0;0;0;0;0;0;0;0];
 
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1));
-agent.parameter = DRONE_PARAM("DIATONE");
+agent.parameter = DRONE_PARAM_Cooperative_Load("DIATONE");
 % agent.model =
 agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1)))); % estimator.result.state = sensor.result.state
 agent.sensor = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
