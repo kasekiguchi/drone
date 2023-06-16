@@ -21,6 +21,7 @@ methods
         % obj.Vft = param.Vepft; % 階層１の入力を生成する関数ハンドル
         obj.Vep = param.Vep; % 仮想入力を生成する関数ハンドル
         obj.result.input = zeros(self.estimator.model.dim(2),1);
+        obj.result.u = zeros(self.estimator.model.dim(2),1);
     end
 
     function result = do(obj, ~, ~)
@@ -75,7 +76,8 @@ methods
         obj.result.z3 = z3;
         obj.result.z4 = z4;
         obj.result.vf = vf;
-        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+        obj.result.u = tmp;
+        obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];        
         result = obj.result;
     end
 
