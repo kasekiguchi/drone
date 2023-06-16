@@ -9,7 +9,7 @@ flg.bilinear = 1; %1:双線形モデルへの切り替え
 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_9_normal_experiment_vertical.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_6_15_test.mat';  %plotResultの方も変更するように
+FileName = 'EstimationResult_12state_6_16_test.mat';  %plotResultの方も変更するように
 
 % agent.id.filename = 'EstimationResult_12state_6_13_test';
 % FileName = append(agent.id.filename,'.mat');
@@ -120,28 +120,6 @@ else
     end
 end
 
-% if flg.bilinear == 1 %双線形モデル
-%     simResult.Z(:,1) = F(simResult.reference.X(:,1));
-%     simResult.Xhat(:,1) = simResult.reference.X(:,1);
-%     simResult.U = simResult.reference.U(:,1:end);
-%     simResult.T = simResult.reference.T(1:end);
-%   
-%     for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
-%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
-%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
-%     end
-% else
-%     simResult.Z(:,1) = F(simResult.reference.X(:,1));
-%     simResult.Xhat(:,1) = simResult.reference.X(:,1);
-%     simResult.U = simResult.reference.U;
-%     simResult.T = simResult.reference.T;
-% 
-%     for i = 1:1:simResult.reference.N-2
-%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
-%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
-%     end
-% end
-
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
     simResult.state.p = simResult.Xhat(1:3,:);
@@ -163,4 +141,5 @@ disp(targetpath)
 %% プロット
 % logger.loadfilename = 'EstimationResult_12state_6_13_experiment.mat';
 % agent.id.filename = FileName;
-plotResult
+% plotResult
+agent(1).animation(logger,"target",1:N);

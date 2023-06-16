@@ -230,7 +230,7 @@ clc
 logger_modelerror_LS.plot({1, "p", "e"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""}, {1,"p1-p2", "e"}, {1,"p1-p2-p3", "e"}, "fig_num", 5, "row_col", [2, 3]);
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-% agent(1).animation(logger,"target",1:N);
+agent(1).animation(logger,"target",1:N,"gif",1);
 %%
 %logger.save();
 
