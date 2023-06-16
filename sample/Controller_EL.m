@@ -1,4 +1,4 @@
-function Controller= Controller_EL(dt)
+function Controller= Controller_EL(dt,fFT)
 % 階層型線形化コントローラの設定
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 Ac4 = diag([1,1,1],1);
@@ -7,36 +7,53 @@ Controller.F1=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt);
 Controller.F2=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 Controller.F3=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
+eF1=Controller.F1;
+eF2=Controller.F2;
+eF3=Controller.F3;
+eF4=Controller.F4;
+%% finite-time settling controlのalphaを計算
+
+% 入力のalphaを計算
+alp = [0.85,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+anum = 4; %最大の変数の個数
+alpha = zeros(anum + 1, 4);
+alpha(anum + 1,:) = 1*ones(1,anum);
+alpha(anum,:) = alp; %alphaの初期値
+for a = anum - 1:-1:1
+    alpha(a,:) = (alpha(a + 2,:) .* alpha(a + 1,:)) ./ (2 .* alpha(a + 2,:) - alpha(a + 1,:));
+end
+Controller.alpha = alpha(anum);
+Controller.az = alpha(1:2,1);
+Controller.ax = alpha(1:4,2);
+Controller.ay = alpha(1:4,3);
+Controller.apsi = alpha(1:2, 4);
+%各サブシステムでalpを変える場合」
+% Controller.az = alpha(3:4, 1);
+% Controller.ax = alpha(1:4,2);
+% Controller.ay = alpha(1:4,3);
+% Controller.apsi = alpha(3:4, 4);
+az =Controller.az ;
+ax =Controller.ax ;
+ay =Controller.ay;
+apsi =Controller.apsi;
 
 syms ez1 [4 1] real
 syms ez2 [4 1] real
 syms ez3 [4 1] real
 syms ez4 [2 1] real
-eF1=Controller.F1;
-eF2=Controller.F2;
-eF3=Controller.F3;
-eF4=Controller.F4;
-Controller.Vepls = matlabFunction([-eF1*ez1,-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
-Controller.dt = dt;
-
-%% finite-time settling controlのalphaを計算
-
-anum = 4; %変数の数
-alpha = zeros(anum + 1, 1);
-alpha(anum + 1) = 1;
-alpha(anum) = alp; %alphaの初期値
-
-for a = anum - 1:-1:1
-    alpha(a) = (alpha(a + 2) * alpha(a + 1)) / (2 * alpha(a + 2) - alpha(a + 1));
+if fFT ==1
+    %FT
+    Controller.Vep = matlabFunction([-eF1 * (sign(ez1).*abs(ez1).^az); -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1,ez2, ez3, ez4});
+else
+    %LS
+    Controller.Vep = matlabFunction([-eF1*ez1,-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
 end
-
-Controller.alpha = alpha(anum);
-Controller.ax = alpha;
-Controller.ay = alpha;
-Controller.az = alpha;
-Controller.apsi = alpha(1:2, 1);
-
-Controller.Vepft = matlabFunction([-eF1*ez1,-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
+Controller.dt = dt;
+Controller.type = "ELC";
+eig(diag(1, 1) - [0; 1] * Controller.F1)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F3)
+eig(diag(1, 1) - [0; 1] * Controller.F4)
 %% 線形システムにMCMPCコントローラを適用する場合
 % H : horizon
 % A2 = [0 1;0 0]; B2 = [0;1];
