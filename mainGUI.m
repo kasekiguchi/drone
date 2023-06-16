@@ -1,9 +1,10 @@
 %% Initialize settings
 % set path
-cd(fileparts(mfilename('fullpath')));
-if isfile('./mainGUI.m') == 0
-    tmp = matlab.desktop.editor.getActive; 
-    cd(fileparts(tmp.Filename));
+if ~isfile('./mainGUI.m')
+  tmp = matlab.desktop.editor.getActive; 
+  cd(fileparts(tmp.Filename));
+else
+  cd(fileparts(mfilename('fullpath')));
 end
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
