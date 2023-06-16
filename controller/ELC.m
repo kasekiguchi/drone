@@ -6,8 +6,8 @@ properties
     param
     Q
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
-    % Vf
-    Vls
+    % Vft
+    Vep
 end
 
 methods
@@ -17,8 +17,10 @@ methods
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
         obj.Q = STATE_CLASS(struct('state_list', ["q"], 'num_list', [4]));
-        obj.Vls = param.Vepls; % 階層２の入力を生成する関数ハンドル
-        obj.Vft = param.Vepft; % 階層１の入力を生成する関数ハンドル
+        % obj.Vls = param.Vepls; % 階層２の入力を生成する関数ハンドル
+        % obj.Vft = param.Vepft; % 階層１の入力を生成する関数ハンドル
+        obj.Vep = param.Vep; % 仮想入力を生成する関数ハンドル
+        obj.result.input = zeros(self.estimator.model.dim(2),1);
     end
 
     function result = do(obj, ~, ~)
@@ -56,24 +58,24 @@ methods
 
         %% calc Z
         z1 = Zep1(x, xd', P);
-        % vf = obj.Vf(z1, F1);
-        z2 = Zep2(x, xd', vf, P);
-        z3 = Zep3(x, xd', vf, P);
-        z4 = Zep4(x, xd', vf, P);
+        z2 = Zep2(x, xd', P);
+        z3 = Zep3(x, xd', P);
+        z4 = Zep4(x, xd', P);
         
-        %liner state feedback controller
-        vep = obj.Vls(z1, z2, z3, z4);
-       obj.Vft
-        %finite-time settling controller
-        v1 = 0;
-        v2 = 0;
-        v3 = 0;
-        v4 = 0;
+        %subsystem controller
+        vep = obj.Vep(z1, z2, z3, z4);
 
         %% calc actual input
         tmp = Uep(x, xd', vep, P);
-        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)];
-        obj.self.input = obj.result.input;
+         %サブシステムの入力
+        obj.result.uHL =vep;
+        %サブシステムの状態
+        obj.result.z1 = z1;
+        obj.result.z2 = z2;
+        obj.result.z3 = z3;
+        obj.result.z4 = z4;
+        obj.result.vf = vf;
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         result = obj.result;
     end
 

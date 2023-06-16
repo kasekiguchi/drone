@@ -15,11 +15,12 @@ initial_state.Trs = [0; 0];
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,initial_state,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,initial_state,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
-agent.controller = HLC(agent,Controller_HL(dt));
+fFT=1;%1:FT, other:LS
+agent.controller = ELC(agent,Controller_EL(dt,fFT));
 run("ExpBase");
 function dfunc(app)
 app.logger.plot({1, "p", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

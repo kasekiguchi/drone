@@ -14,20 +14,20 @@ Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
 Bc4 = [0; 0; 0;1];
-Controller_param.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt);
-Controller_param.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller_param.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
-Controller_param.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
+Controller.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt);
+Controller.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 
 %approと一緒の極
-% Controller_param.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
-% Controller_param.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-% Controller_param.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-% Controller_param.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
-vF1 = Controller_param.F1;
-vF2 = Controller_param.F2;
-vF3 = Controller_param.F3;
-vF4 = Controller_param.F4;
+% Controller.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
+% Controller.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+% Controller.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
+% Controller.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
+vF1 = Controller.F1;
+vF2 = Controller.F2;
+vF3 = Controller.F3;
+vF4 = Controller.F4;
 %% 入力のalphaを計算
 
 anum = 4; %最大の変数の個数
@@ -37,28 +37,28 @@ alpha(anum,:) = alp; %alphaの初期値
 for a = anum - 1:-1:1
     alpha(a,:) = (alpha(a + 2,:) .* alpha(a + 1,:)) ./ (2 .* alpha(a + 2,:) - alpha(a + 1,:));
 end
-Controller_param.alpha = alpha(anum);
-Controller_param.az = alpha(1:2,1);
-Controller_param.ax = alpha(1:4,2);
-Controller_param.ay = alpha(1:4,3);
-Controller_param.apsi = alpha(1:2, 4);
+Controller.alpha = alpha(anum);
+Controller.az = alpha(1:2,1);
+Controller.ax = alpha(1:4,2);
+Controller.ay = alpha(1:4,3);
+Controller.apsi = alpha(1:2, 4);
 %各サブシステムでalpを変える場合」
-% Controller_param.az = alpha(3:4, 1);
-% Controller_param.ax = alpha(1:4,2);
-% Controller_param.ay = alpha(1:4,3);
-% Controller_param.apsi = alpha(3:4, 4);
-az =Controller_param.az ;
-ax =Controller_param.ax ;
-ay =Controller_param.ay;
-apsi =Controller_param.apsi;
+% Controller.az = alpha(3:4, 1);
+% Controller.ax = alpha(1:4,2);
+% Controller.ay = alpha(1:4,3);
+% Controller.apsi = alpha(3:4, 4);
+az =Controller.az ;
+ax =Controller.ax ;
+ay =Controller.ay;
+apsi =Controller.apsi;
 %%
 syms sz1 [2 1] real
 syms sF1 [1 2] real
 [Ad1, Bd1, ~, ~] = ssdata(c2d(ss(Ac2, Bc2, [1, 0], [0]), dt));
-Controller_param.fzapr = fApproxZ;
+Controller.fzapr = fApproxZ;
 if fApproxZ~= 1
     %一層
-    Controller_param.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
+    Controller.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
 else
 % 有限整定の近似微分　一層   
     syms z(t)
@@ -112,26 +112,24 @@ else
                 dddu = dddu + subs(dddub, [zF1 diff(z, t, 3) diff(z, t, 2)  diff(z, t) z], [f1(i, :) dddz(i) ddz(i)  dz(i) sz1(i)]);
             end
 
-        Controller_param.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
+        Controller.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
 end
 
 %% 二層
 syms sz2 [4 1] real
 syms sz3 [4 1] real
 syms sz4 [2 1] real
-Controller_param.Vs = matlabFunction([-vF2 * (sign(sz2).*abs(sz2).^ax); -vF3 * (sign(sz3).*abs(sz3).^ay); -vF4 * (sign(sz4).*abs(sz4).^apsi)], "Vars", {sz2, sz3, sz4});
+Controller.Vs = matlabFunction([-vF2 * (sign(sz2).*abs(sz2).^ax); -vF3 * (sign(sz3).*abs(sz3).^ay); -vF4 * (sign(sz4).*abs(sz4).^apsi)], "Vars", {sz2, sz3, sz4});
 
 %%
-Controller_param.dt = dt;
-eig(diag(1, 1) - [0; 1] * Controller_param.F1)
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller_param.F2)
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller_param.F3)
-eig(diag(1, 1) - [0; 1] * Controller_param.F4)
-Controller = Controller_param;
+Controller.dt = dt;
+eig(diag(1, 1) - [0; 1] * Controller.F1)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F3)
+eig(diag(1, 1) - [0; 1] * Controller.F4)
 Controller.type = "FTC";
-Controller.name="ftc";
 % Controller.name = "hlc";
 
-%assignin('base',"Controller_param",Controller_param);
+%assignin('base',"Controller",Controller);
 
 end
