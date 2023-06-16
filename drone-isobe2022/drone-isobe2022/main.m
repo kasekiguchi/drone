@@ -117,7 +117,7 @@ end
             %以下のような書き方をしないと、生成される値がランダムにならない
             initialState.input = rand(4,1); % 0 ~ 0.1
             initialState.p = rand(3,1)*2-1; % プラスマイナス1 cm 程度の誤差イメージ
-            initialState.p(3,1) = rand*6-3;
+%             initialState.p(3,1) = rand*6-3;
             initialState.q = (rand(3,1)*10-5)*0.0175; % -5 ~ +5 deg 程度のイメージ 0.175をかけることでdegに変換してる。
             %値の範囲を-+に調整してる
             initialState.v = rand(3,1)*0.02-0.01; % 1 cm/s 程度の誤差イメージ
@@ -227,10 +227,10 @@ clc
 % logger.plot({1,"p","e"},{1,"v","e"});
 % agent(1).reference.timeVarying.show(logger)
 % figure
-logger_modelerror_LS.plot({1, "p", "e"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""}, {1,"p1-p2", "e"}, {1,"p1-p2-p3", "e"}, "fig_num", 5, "row_col", [2, 3]);
+% logger_modelerror_LS.plot({1, "p", "e"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""}, {1,"p1-p2", "e"}, {1,"p1-p2-p3", "e"}, "fig_num", 5, "row_col", [2, 3]);
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1:N,"gif",1);
+agent(1).animation(logger,"target",1:N);
 %%
 %logger.save();
 

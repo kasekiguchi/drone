@@ -5,8 +5,16 @@ clc
 clear
 close all
 % フラグ管理
-flg.bilinear = 1; %1:双線形モデルへの切り替え
-
+flg.bilinear = 0; %1:双線形モデルへの切り替え
+%% 
+% run("main1_setting.m");
+% LogData = [     % agentのメンバー関係以外のデータ
+%         ];
+% LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
+%             ];
+% 
+% logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
+%% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_9_normal_experiment_vertical.mat; %同じファイル名を使うときはコメントイン
 FileName = 'EstimationResult_12state_6_16_test.mat';  %plotResultの方も変更するように
@@ -37,8 +45,8 @@ targetpath=append(nowFolder,'\',FileName);
 
 
 %<使用している観測量>
-% F = @(x) [x;1]; % 状態そのまま
-F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み)   <こちらが最新の観測量>
+F = @(x) [x;1]; % 状態そのまま
+% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み)   <こちらが最新の観測量>
 
 % load data
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
@@ -49,7 +57,7 @@ F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角�
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 2; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 17; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -119,7 +127,7 @@ else
         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
     end
 end
-
+% logger.logging(simResult.T,0,simResult.Xhat);  %追加
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
     simResult.state.p = simResult.Xhat(1:3,:);
@@ -137,9 +145,23 @@ simResult.state.N = simResult.reference.N-1;
 save(targetpath,'est','Data','simResult')
 disp('Saved to')
 disp(targetpath)
+%% 
+% x = simResult.Xhat(1,1283:end);
+% y = simResult.Xhat(2,1283:end);
+% z = simResult.Xhat(3,1283:end);
+% 
+% figure;
+% plot3(x,y,z,'b.-');
+% xlabel('X');
+% ylabel('Y');
+% zlabel('Z');
+% title('3D Plot');
+% 
+% grid on;
+
 
 %% プロット
 % logger.loadfilename = 'EstimationResult_12state_6_13_experiment.mat';
 % agent.id.filename = FileName;
-% plotResult
-agent(1).animation(logger,"target",1:N);
+plotResult
+% agent(1).animation(logger,"target",1:N);

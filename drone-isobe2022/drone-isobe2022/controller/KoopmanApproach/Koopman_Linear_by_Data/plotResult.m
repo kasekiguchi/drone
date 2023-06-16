@@ -13,9 +13,9 @@ flg.xlimHold = 0; % 指定した値にxlimを固定
 % a = append(filename,'.mat');
 % loadfilename{1} = append(agent.id.filename,'.mat');
 
-loadfilename{1} = 'EstimationResult_12state_6_13_experiment_circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-loadfilename{2} = 'EstimationResult_12state_6_13_Input.mat';
-loadfilename{3} = 'EstimationResult_12state_6_13_Input_ByLinear.mat';
+loadfilename{1} = 'EstimationResult_12state_6_16_test.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{2} = 'EstimationResult_12state_6_13_Input.mat';
+% loadfilename{3} = 'EstimationResult_12state_6_13_Input_ByLinear.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
@@ -23,7 +23,7 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 %何ステップまで表示するか
 %ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
 % stepN = 501;
-stepN = 101; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
+stepN = 31; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 % flg.ylimHoldがtrueのときのplot y範囲
@@ -35,7 +35,7 @@ if flg.ylimHold == 1
 end
 if flg.xlimHold == 1
 %     xlimHold = [0, 0.5];
-    xlimHold = [0,10];
+    xlimHold = [0,50];
 end
 
 %% Font size
@@ -100,10 +100,13 @@ file{3}.markerSty = ':*';
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
 tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1
 
-
+newcolors = [0 0.4470 0.7410
+             0.8500 0.3250 0.0980
+             0.4660 0.6740 0.1880];
 %% P
 figure(1)
 % Referenceをplot
+% colororder(newcolors)
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',2);
 % Referenceの凡例をtmpに保存
 lgdtmp = {'$x_d$','$y_d$','$z_d$'};
@@ -112,6 +115,14 @@ grid on
 % 入力されたファイル数分ループ
 for i = 1:HowmanyFile
     % i番目のファイルをplot
+%     if i == 1
+%         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),'LineWidth',2,'LineStyle','--');
+%     elseif i == 2
+%         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),'LineWidth',2,'LineStyle',':');
+%     elseif i == 3
+%         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),'LineWidth',2,'LineStyle','-.');
+%     end
+%       plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),'LineWidth',2);
     plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),file{i}.markerSty,'MarkerSize',6,'LineWidth',2);
     % file{i}に凡例が保存されている場合実行
     if isfield(file{i},'lgdname')
@@ -157,6 +168,7 @@ end
 
 %% Q
 figure(2)
+colororder(newcolors)
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.q(tlength,:)','LineWidth',2);
 if size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 3
     lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
@@ -208,6 +220,7 @@ end
 
 %% V
 figure(3)
+colororder(newcolors)
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.v(tlength,:)','LineWidth',2);
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 hold on
@@ -255,6 +268,7 @@ end
 
 %% W
 figure(4)
+colororder(newcolors)
 % lgd = ('$\omega_{\phi d}$','$\omega_{\theta d}$','$\omega_{\psi d}$','$\hat{\omega}_\phi$','$\hat{\omega}_\theta$','$\hat{\omega}_\psi$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.w(tlength,:)','LineWidth',2);
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
@@ -302,7 +316,24 @@ if flg.calcFile1RMSE
     disp(RMSE.W)
 end
 
+%% 3次元グラフの作成
+% for i = 1:stepN
+% x(1,1:stepN) = file{i}.simResult.reference.est.p(1,1:stepN);
+% y(1,1:stepN) = file{i}.simResult.reference.est.p(2,1:stepN);
+% z(1,1:stepN)  = file{i}.simResult.reference.est.p(3,1:stepN);
+% end
+% 
+% figure;
+% plot3(x,y,z,'b.-');
+% xlabel('X');
+% ylabel('Y');
+% zlabel('Z');
+% title('3D Plot');
+% 
+% grid on;
+% view(45,30);
 end
+
 %% RSE 各ステップにおける誤差二乗のプロット
 % if flg.calcFile1RMSE
 %     figure(5)

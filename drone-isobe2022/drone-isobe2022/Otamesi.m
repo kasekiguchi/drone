@@ -14,4 +14,26 @@ close all hidden;
 % file{1, 1}.Data.X.plot({1, "p", "es"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""},{1,"p1-p2","e"},{1,"p1-p2-p3","e"}, "fig_num", 5, "row_col", [2, 3]);
 % rmfield(agent.id,"test")
 % rmfield(agent.id,"i")
-agent.id.filename  = 1;
+% agent.id.filename  = 1;
+%% 3次元グラフの作成
+% for i = 1:stepN
+% x(1,1:stepN) = file{i}.simResult.reference.est.p(1,1:stepN);
+% y(1,1:stepN) = file{i}.simResult.reference.est.p(2,1:stepN);
+% z(1,1:stepN)  = file{i}.simResult.reference.est.p(3,1:stepN);
+% end
+
+% figure;
+% plot3(x,y,z,'b.-');
+% xlabel('X');
+% ylabel('Y');
+% zlabel('Z');
+% title('3D Plot');
+% 
+% 
+% grid on;
+% view(45,30);
+%% 
+array = [0, 0, 0, 5, 0, 7];  % 例として配列を定義
+
+nonZeroIndex = find(array ~= 0, 1)
+
