@@ -12,7 +12,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 %%
 clc
-SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","SimFT"];
+SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","SimFT","SimEHL"];
 ExpBaseMode = ["ExpTestMotiveConnection","ExpHL","ExpFT"];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function

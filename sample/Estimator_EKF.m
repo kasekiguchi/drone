@@ -57,8 +57,8 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     end
 
     if strcmp(Estimator.model.name,"EULER_ANGLE_Expand_MODEL")
-        Estimator.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
-        Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]);
+        Estimator.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8,eye(2)); % システムノイズ（Modelクラス由来）
+        Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],dt^2*eye(2));
     end
     Estimator.list=output;
 end

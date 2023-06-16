@@ -6,7 +6,7 @@ Bc4 = [0;0;0;1];
 Controller.F1=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt);
 Controller.F2=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 Controller.F3=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
-Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
+Controller.F4=lqrd([0,1;0,0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
 eF1=Controller.F1;
 eF2=Controller.F2;
 eF3=Controller.F3;
@@ -23,7 +23,7 @@ for a = anum - 1:-1:1
     alpha(a,:) = (alpha(a + 2,:) .* alpha(a + 1,:)) ./ (2 .* alpha(a + 2,:) - alpha(a + 1,:));
 end
 Controller.alpha = alpha(anum);
-Controller.az = alpha(1:2,1);
+Controller.az = alpha(1:4,1);
 Controller.ax = alpha(1:4,2);
 Controller.ay = alpha(1:4,3);
 Controller.apsi = alpha(1:2, 4);
@@ -50,7 +50,7 @@ else
 end
 Controller.dt = dt;
 Controller.type = "ELC";
-eig(diag(1, 1) - [0; 1] * Controller.F1)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F1)
 eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
 eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F3)
 eig(diag(1, 1) - [0; 1] * Controller.F4)
@@ -100,7 +100,7 @@ end
 function v = MCMPC_Vs(z2, z3, z4, S, M, Q)
 % S : sample number
 v2 =  Q.V2.*randn(1,S);
-v3 = Q.V3.*randn(1.S);
+v3 = Q.V3.*randn(1,S);
 v4 = Q.V4.*randn(1,S);
 Z2=M.A4*z2 + M.B4*v2;
 Z3=M.A4*z3 + M.B4*v3;
