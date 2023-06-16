@@ -101,12 +101,20 @@ ddpG = [ERb0*[0;0;1/m],zeros(3)];
 % ddpg=ddpG*T
 %% SS equation
 % % Usage: dx=f+g*u
-xp = [p;er;dp;ob];            % 13 states
-fp = [dp;der;ddpf;dobf];
-%fp = [dp;ob;ddpf;dobf];
-gp = [zeros(3,4);zeros(3,4);ddpG;dobg];
-u = [u1;u2;u3;u4];
-matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_torque_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
+% xp = [p;er;dp;ob];            % 12 states
+% fp = [dp;der;ddpf;dobf];
+% %fp = [dp;ob;ddpf;dobf];
+% gp = [zeros(3,4);zeros(3,4);ddpG;dobg];
+% u = [u1;u2;u3;u4];
+
+xp = [p;er;dp;ob;Tr;dTr]            % 12 states
+u = [u1;u2;u3;u4] % thrust, torques
+g0 = [zeros(3,4);zeros(3,4);ddpG;dobg]
+fp = [dp;der;ddpf;dobf;dTr;0]+[g0(:,1);zeros(2,1)]*Tr
+gp = [zeros(size(g0,1),1),g0(:,2:end);zeros(1,4);1,zeros(1,3)]
+dX=fp+gp*[u1;u2;u3;u4]
+%%
+matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_torque_physical_parameter_expand_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
 %matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_force_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Calculate Jacobian matrix

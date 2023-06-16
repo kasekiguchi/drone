@@ -24,7 +24,7 @@ methods
         obj.result.u = zeros(self.estimator.model.dim(2),1);
     end
 
-    function result = do(obj, ~, ~)
+    function result = do(obj ,varargin)
         % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
@@ -49,7 +49,7 @@ methods
         % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
         % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
         Rb0 = RodriguesQuaternion(Eul2Quat([0; 0; xd(4)]));
-        x = [R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.p; Rb0' * model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
+        x = [R2q(Rb0' * model.state.getq("rotmat")); Rb0' * model.state.p; Rb0' * model.state.v; model.state.w;model.state.Trs]; % [q, p, v, w]に並べ替え
         xd(1:3) = Rb0' * xd(1:3);
         xd(4) = 0;
         xd(5:7) = Rb0' * xd(5:7);
@@ -75,7 +75,6 @@ methods
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
-        obj.result.vf = vf;
         obj.result.u = tmp;
         obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];        
         result = obj.result;
