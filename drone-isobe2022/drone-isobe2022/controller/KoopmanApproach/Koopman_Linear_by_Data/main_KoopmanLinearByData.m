@@ -163,4 +163,4 @@ disp(targetpath)
 %% プロット
 % logger.loadfilename = 'EstimationResult_12state_6_13_experiment.mat';
 % agent.id.filename = FileName;
-% plotResult
+plotResult
