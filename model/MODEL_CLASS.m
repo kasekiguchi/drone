@@ -7,7 +7,6 @@ classdef MODEL_CLASS < dynamicprops & handle
   %            "num_list" : [3,3]
   %            "initial" (optional)     : struct('p',[0;0;0],'v',[0;0;0])
   %            "dim"         : n, m, p :  number of state, input, and physical parameters
-  %            "input_channel" : ['v']
   properties
     result
     name % model dynamicsの名前
@@ -23,7 +22,6 @@ classdef MODEL_CLASS < dynamicprops & handle
     % state.num_list % 例 [3,4,3,3]
     param % parameters
     dim % n, m, p :  number of state, input, and physical parameters
-    input_channel % ["v", "w"]
     noise
     fig
     self
@@ -53,8 +51,7 @@ classdef MODEL_CLASS < dynamicprops & handle
 
         obj.name = name;
         obj.dim = param.dim;
-        obj.input_channel = param.input_channel;
-
+  
         if isstring(param.method)
           obj.method = str2func(param.method);
         else

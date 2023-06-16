@@ -8,6 +8,7 @@ syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
 syms u u1 u2 u3 u4 T1 T2 T3 T4 real
 syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 syms R real
+%paramの例
 param.mass = 0.2;
 param.length = 0.1;% モーター間の距離：正方形を仮定している
 param.Lx = 0.1; % x軸方向のモーター間距離
