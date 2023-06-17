@@ -8,7 +8,7 @@ classdef GEOMETRIC_CONTROLLER < handle
   end
 
   methods
-    function obj = GEOMETRIC_CONTROLLER(self)
+    function obj = GEOMETRIC_CONTROLLER(self,param)
       obj.self = self;
       obj.param.P = self.parameter.get(obj.parameter_name);
       obj.result.input = zeros(self.estimator.model.dim(2),1);
@@ -18,7 +18,6 @@ classdef GEOMETRIC_CONTROLLER < handle
       model = obj.self.estimator.result;
       ref = obj.self.reference.result;
       xd = ref.state.xd;
-      xd0 =xd;
       P = obj.param.P;
       F1 = obj.param.F1;
       F2 = obj.param.F2;
