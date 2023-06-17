@@ -1,9 +1,10 @@
-function motive = Connector_Natnet(natnet_param)
+function motive = Connector_Natnet(HostIP)
 % create NATNET_CONNECTOR instance as motive
 arguments
-  natnet_param.ClientIP char = '192.168.100.120' % 9 : 関口デスクトップ
-  natnet_param.HostIP char = '192.168.100.131'
+  HostIP % motive server IP
 end
-
- motive=NATNET_CONNECTOR("HostIP",natnet_param.HostIP,"ClientIP",natnet_param.ClientIP);
+[~,hostname] = system('hostname');
+hostname = string(strtrim(hostname));
+ClientIP = resolvehost(hostname,"address"); % client ip
+motive=NATNET_CONNECTOR("HostIP",HostIP,"ClientIP",ClientIP);
 end
