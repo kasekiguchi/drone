@@ -1,4 +1,4 @@
-function Estimator = Estimator_EKF(agent,dt,initial_state,output,opts)
+function Estimator = Estimator_EKF(agent,dt,initial_state,model,output,opts)
     % output ：出力のリスト　例 ["p","q"]
     % var : 各出力に対するセンサーの観測ノイズs
     %% estimator class demo
@@ -8,13 +8,14 @@ function Estimator = Estimator_EKF(agent,dt,initial_state,output,opts)
         agent
         dt
         initial_state
+        model
         output = ["p","q"]
         opts.B = []
         opts.P = []
         opts.Q = []
         opts.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
     end
-    Estimator.model = MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1));
+    Estimator.model = model;
     %dt = Estimator.model.dt;
     n = Estimator.model.dim(1);% 状態数
     % 出力方程式の拡張線形化行列(JacobianH)の生成
@@ -35,7 +36,7 @@ function Estimator = Estimator_EKF(agent,dt,initial_state,output,opts)
         Estimator.P = opts.P;
     end
     if isempty(opts.Q)
-        Estimator.Q = eye(6);%diag([1E3,1E3,1E3,1E5,1E5,1E5]);%eye(6)*1E3;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
+        Estimator.Q = diag([1E3,1E3,1E3,1E5,1E5,1E5]);%eye(6)*1E3;%*7.058E-5;%diag(ones(n,1))*1e-7;%eye(6)*7.058E-5;%.*[50;50;50;1E04;1E04;1E04];%1.0e-1; % システムノイズ（Modelクラス由来）
     else
         Estimator.Q = opts.Q;
     end
