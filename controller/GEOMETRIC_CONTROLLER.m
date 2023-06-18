@@ -17,13 +17,13 @@ classdef GEOMETRIC_CONTROLLER < handle
     function result = do(obj,varargin)
       model = obj.self.estimator.result;
       ref = obj.self.reference.result;
-      xd = ref.state.xd;
+      xd = ref.state.p;
       P = obj.param.P;
-      F1 = obj.param.F1;
-      F2 = obj.param.F2;
-      F3 = obj.param.F3;
-      F4 = obj.param.F4;
-      xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
+%       F1 = obj.param.F1;
+%       F2 = obj.param.F2;
+%       F3 = obj.param.F3;
+%       F4 = obj.param.F4;
+%       xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
 
       % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
