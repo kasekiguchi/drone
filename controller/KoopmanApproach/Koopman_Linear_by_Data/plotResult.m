@@ -3,11 +3,15 @@ clear all
 close all
 
 %% flag
-flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求める
-flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 1; % 指定した値にxlimを固定
+flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求めるか
+flg.ylimHold = 0; % 指定した値にylimを固定するか
+flg.xlimHold = 1; % 指定した値にxlimを固定するか
+flg.figureSave = 0; % figure を外部出力するか
 
 %% select file to load
+loadfilename{1} = 'savetest.mat'
+loadfilename{2} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
+
 % loadfilename{1} = 'EstimationResult_12state.mat'
 % loadfilename{2} = 'EstimationResult_NonlinearElementsInF.mat'
 % loadfilename{2} = 'EstimationResult_quaternion12state_bilinear_plusConst.mat'
@@ -21,10 +25,17 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 % loadfilename{2} = 'EstimationResult_12state.mat'
 % loadfilename{2} = 'EstimationResult_rndP2O4_InputAndConst.mat';
-
-loadfilename{1} = 'EstimationResult_realExp_0608.mat'
+% 
+% loadfilename{1} = 'EstimationResult_realExp_0608.mat'
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
+
+%% save file name
+% figureの出力先を指定
+savepath.p = 'C:/Users/isobe/OneDrive/ドキュメント/2022lab/報告会・発表会/23_6月報告会/simP.jpg';
+savepath.q = 'C:/Users/isobe/OneDrive/ドキュメント/2022lab/報告会・発表会/23_6月報告会/simQ.jpg';
+savepath.v = 'C:/Users/isobe/OneDrive/ドキュメント/2022lab/報告会・発表会/23_6月報告会/simV.jpg';
+savepath.w = 'C:/Users/isobe/OneDrive/ドキュメント/2022lab/報告会・発表会/23_6月報告会/simW.jpg';
 
 %% plot range
 %何ステップまで表示するか
@@ -39,7 +50,7 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 if flg.xlimHold == 1
-    xlimHold = [0, 0.1];
+    xlimHold = [0, 0.5];
 end
 
 %% Font size
@@ -75,27 +86,32 @@ end
 %%
 % 凡例に特別な名前をつける時はここで指定, ない時は勝手に番号をふります
 
-% file{1}.lgdname.p = {'$\hat{x}$','$\hat{y}$','$\hat{z}$'};
-% file{1}.lgdname.q = {'$\hat{\phi}$','$\hat{\theta}$','$\hat{\psi}$'};
-% file{1}.lgdname.v = {'$\hat{v_x}$','$\hat{v_y}$','$\hat{v_z}$'};
-% file{1}.lgdname.w = {'$\hat{\omega_1}$','$\hat{\omega_2}$','$\hat{\omega_3}$'};
+file{1}.lgdname.p = {'$\hat{x}_{\rm new}$','$\hat{y}_{\rm new}$','$\hat{z}_{\rm new}$'};
+file{1}.lgdname.q = {'$\hat{\phi}_{\rm new}$','$\hat{\theta}_{\rm new}$','$\hat{\psi}_{\rm new}$'};
+file{1}.lgdname.v = {'$\hat{v_x}_{\rm new}$','$\hat{v_y}_{\rm new}$','$\hat{v_z}_{\rm new}$'};
+file{1}.lgdname.w = {'$\hat{\omega_1}_{\rm new}$','$\hat{\omega_2}_{\rm new}$','$\hat{\omega_3}_{\rm new}$'};
+file{2}.lgdname.p = {'$\hat{x}_{\rm old}$','$\hat{y}_{\rm old}$','$\hat{z}_{\rm old}$'};
+file{2}.lgdname.q = {'$\hat{\phi}_{\rm old}$','$\hat{\theta}_{\rm old}$','$\hat{\psi}_{\rm old}$'};
+file{2}.lgdname.v = {'$\hat{v_x}_{\rm old}$','$\hat{v_y}_{\rm old}$','$\hat{v_z}_{\rm old}$'};
+file{2}.lgdname.w = {'$\hat{\omega_1}_{\rm old}$','$\hat{\omega_2}_{\rm old}$','$\hat{\omega_3}_{\rm old}$'};
 
 % file{1}.lgdname.q = {'$q_0$','$q_1$','$q_2$','$q_3$'};
 
-file{1}.lgdname.p = {'$\hat{x}_{\rm case1}$','$\hat{y}_{\rm case1}$','$\hat{z}_{\rm case1}$'};
-file{1}.lgdname.q = {'$\hat{\phi}_{\rm case1}$','$\hat{\theta}_{\rm case1}$','$\hat{\psi}_{\rm case1}$'};
-file{1}.lgdname.v = {'$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{z,{\rm case1}}$'};
-file{1}.lgdname.w = {'$\hat{\omega}_{1,{\rm case1}}$','$\hat{\omega}_{2,{\rm case1}}$','$\hat{\omega}_{3,{\rm case1}}$'};
-file{2}.lgdname.p = {'$\hat{x}_{\rm case2}$','$\hat{y}_{\rm case2}$','$\hat{z}_{\rm case2}$'};
-file{2}.lgdname.q = {'$\hat{\phi}_{\rm case2}$','$\hat{\theta}_{\rm case2}$','$\hat{\psi}_{\rm case2}$'};
-file{2}.lgdname.v = {'$\hat{v}_{x,{\rm case2}}$','$\hat{v}_{y,{\rm case2}}$','$\hat{v}_{z,{\rm case2}}$'};
-file{2}.lgdname.w = {'$\hat{\omega}_{1,{\rm case2}}$','$\hat{\omega}_{2,{\rm case2}}$','$\hat{\omega}_{3,{\rm case2}}$'};
-file{3}.lgdname.p = {'$\hat{x}_{\rm case3}$','$\hat{y}_{\rm case3}$','$\hat{z}_{\rm case3}$'};
-file{3}.lgdname.q = {'$\hat{\phi}_{\rm case3}$','$\hat{\theta}_{\rm case3}$','$\hat{\psi}_{\rm case3}$'};
-file{3}.lgdname.v = {'$\hat{v}_{x,{\rm case3}}$','$\hat{v}_{y,{\rm case3}}$','$\hat{v}_{z,{\rm case3}}$'};
-file{3}.lgdname.w = {'$\hat{\omega}_{1,{\rm case3}}$','$\hat{\omega}_{2,{\rm case3}}$','$\hat{\omega}_{3,{\rm case3}}$'};
+% file{1}.lgdname.p = {'$\hat{x}_{\rm case1}$','$\hat{y}_{\rm case1}$','$\hat{z}_{\rm case1}$'};
+% file{1}.lgdname.q = {'$\hat{\phi}_{\rm case1}$','$\hat{\theta}_{\rm case1}$','$\hat{\psi}_{\rm case1}$'};
+% file{1}.lgdname.v = {'$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{z,{\rm case1}}$'};
+% file{1}.lgdname.w = {'$\hat{\omega}_{1,{\rm case1}}$','$\hat{\omega}_{2,{\rm case1}}$','$\hat{\omega}_{3,{\rm case1}}$'};
+% file{2}.lgdname.p = {'$\hat{x}_{\rm case2}$','$\hat{y}_{\rm case2}$','$\hat{z}_{\rm case2}$'};
+% file{2}.lgdname.q = {'$\hat{\phi}_{\rm case2}$','$\hat{\theta}_{\rm case2}$','$\hat{\psi}_{\rm case2}$'};
+% file{2}.lgdname.v = {'$\hat{v}_{x,{\rm case2}}$','$\hat{v}_{y,{\rm case2}}$','$\hat{v}_{z,{\rm case2}}$'};
+% file{2}.lgdname.w = {'$\hat{\omega}_{1,{\rm case2}}$','$\hat{\omega}_{2,{\rm case2}}$','$\hat{\omega}_{3,{\rm case2}}$'};
+% file{3}.lgdname.p = {'$\hat{x}_{\rm case3}$','$\hat{y}_{\rm case3}$','$\hat{z}_{\rm case3}$'};
+% file{3}.lgdname.q = {'$\hat{\phi}_{\rm case3}$','$\hat{\theta}_{\rm case3}$','$\hat{\psi}_{\rm case3}$'};
+% file{3}.lgdname.v = {'$\hat{v}_{x,{\rm case3}}$','$\hat{v}_{y,{\rm case3}}$','$\hat{v}_{z,{\rm case3}}$'};
+% file{3}.lgdname.w = {'$\hat{\omega}_{1,{\rm case3}}$','$\hat{\omega}_{2,{\rm case3}}$','$\hat{\omega}_{3,{\rm case3}}$'};
 
 columnomber = size(file,2)+1;
+lgdpos = 'northoutside';
 
 %% マーカーに特別なものをつける時はここで指定，ない時は':o'になります
 file{2}.markerSty = ':s';
@@ -141,12 +157,13 @@ if flg.ylimHold == 1
     end
 end
 % tmpに保存された凡例を表示
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location',lgdpos);
 lgd.NumColumns = columnomber;
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Position','FontSize',Fsize.label);
 hold off
+
 % flg. calcFile1RMSE==trueならば rmseを算出
 if flg.calcFile1RMSE
     RMSE.P.eachStep = (file{1}.simResult.state.p(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)').^2;
@@ -157,6 +174,10 @@ if flg.calcFile1RMSE
     RMSE.P.z = haven(3,:);
     disp('RMSE.P =')
     disp(RMSE.P)
+end
+
+if flg.figureSave == 1
+    exportgraphics(gca,savepath.p)
 end
 
 %% Q
@@ -191,7 +212,7 @@ if flg.ylimHold == 1
         ylim(ylimHold.q);
     end
 end
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location',lgdpos);
 lgd.NumColumns = columnomber;
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
@@ -208,6 +229,10 @@ if flg.calcFile1RMSE
     RMSE.Q.z = haven(3,:);
     disp('RMSE.Q =')
     disp(RMSE.Q)
+end
+
+if flg.figureSave == 1
+    exportgraphics(gca,savepath.q)
 end
 
 %% V
@@ -238,7 +263,7 @@ if flg.ylimHold == 1
         ylim(ylimHold.v);
     end
 end
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location',lgdpos);
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Velocity','FontSize',Fsize.label);
@@ -255,6 +280,10 @@ if flg.calcFile1RMSE
     RMSE.V.z = haven(3,:);
     disp('RMSE.V =')
     disp(RMSE.V)
+end
+
+if flg.figureSave == 1
+    exportgraphics(gca,savepath.v)
 end
 
 %% W
@@ -289,7 +318,7 @@ end
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Angular Velocity','FontSize',Fsize.label);
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location',lgdpos);
 lgd.NumColumns = columnomber;
 
 hold off
@@ -304,6 +333,10 @@ if flg.calcFile1RMSE
     RMSE.W.z = haven(3,:);
     disp('RMSE.W =')
     disp(RMSE.W)
+end
+
+if flg.figureSave == 1
+    exportgraphics(gca,savepath.w)
 end
 
 %% RSE 各ステップにおける誤差二乗のプロット
