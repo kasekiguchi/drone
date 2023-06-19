@@ -17,13 +17,13 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_9_normal_experiment_vertical.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_6_19_saddleandcircle_range=change.mat';  %plotResultの方も変更するように
+FileName = 'EstimationResult_12state_6_19_test_circle.mat';  %plotResultの方も変更するように
 
 % agent.id.filename = 'EstimationResult_12state_6_13_test';
 % FileName = append(agent.id.filename,'.mat');
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
-loading_filename = 'experiment_6_14_saddleandcircle2';  
+loading_filename = 'experiment_6_13_circle';  
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -57,7 +57,7 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 17; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 10; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -100,7 +100,9 @@ disp('Estimated')
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
 %中間発表の推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
-simResult.reference = ImportFromExpData('experiment_6_13_circle_11.mat');
+% simResult.reference = ImportFromExpData('experiment_6_13_circle_11.mat');
+simResult.reference = ImportFromExpData('6_8_experiment_momose_1.mat');
+
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
 takeoff_idx = find(simResult.reference.T,1,'first');
