@@ -9,11 +9,14 @@ DATAdir = cd(fileparts(activeFile.Filename));
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
-% warning('off', 'all');
-% run("main.m"); % 目標入力生成
-% close all hidden; clear all; clc;
-% userpath('clear');
-fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 0:TimeVarying
+
+fRef = 1; %% 斜面着陸かどうか 1:斜面 2:逆時間 0:TimeVarying
+% if fRef == 0
+%     warning('off', 'all');
+%     run("main.m"); % 目標入力生成
+%     close all hidden; clear all; clc;
+%     userpath('clear');
+% end
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
@@ -32,6 +35,8 @@ flag = [0;0];
 totalT = 0;
 idx = 0;
 pre_pos = 0;
+fRemove = 0;
+fFinish = 0;
 fG = zeros(3, 1);
 %-- 初期設定 controller.mと同期させる
 data.param = agent.controller.mcmpc;
@@ -74,8 +79,9 @@ Time.te = te;
 
 %     load("Data/HL_input");
 %     load("Data/HL_V");
-load("Data/Input_HL.mat", "Idata");
-Params.ur_array = Idata;
+
+% load("Data/Input_HL.mat", "Idata");
+% Params.ur_array = Idata;
 
 fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
@@ -160,12 +166,12 @@ end
             % -> 初期速度必要
             % ある程度速度が落ちたら入力切る．
 
-            Gp = initial.p;
-            if agent.estimator.result.state.p(3) < 0.3
-                Gq = [0; 0.2915; 0];
-            else
-                Gq = [0; 0; 0];
-            end
+%             Gp = initial.p;
+%             if agent.estimator.result.state.p(3) < 0.3
+%                 Gq = [0; 0.2915; 0];
+%             else
+%                 Gq = [0; 0; 0];
+%             end
 
             %% 斜面着陸　入力切断条件
 %             if abs(agent.estimator.result.state.v(3)) < 0.03
@@ -182,18 +188,30 @@ end
             else 
                 Time.ind = Time.ind; 
             end
-            [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef);    % 1:斜面 0:それ以外(TimeVarying)
-            param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
+            Gp = initial.p;         % 初期値
+            Gq = [0; 0.2915; 0];    % 目標姿勢角
+            [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef);     % 1:斜面 0:それ以外(TimeVarying)
+            param(i).controller.mcmpc = {idx, xr, time.t, phase};           % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
-            agent(i).do_controller(param(i).controller.list);
 
-            if time.t < 0.4
+            if fRef==1 && 2.5 < time.t && time.t < 2.6
                 agent.input = [0;0;0;0];
+            elseif fRemove == 2
+                agent.input = [0;0;0;0];    % 入力切っているときはコントローラー計算しない
+            else
+                agent(i).do_controller(param(i).controller.list);
             end
-
             
+
+            %% 自由落下:入力切る
+            if fRef == 0 && time.t < 0.4
+                agent.input = [0;0;0;0];
+%             elseif fRef == 1 && 2.5 < time.t && time.t < 2.6
+%                 agent.input = [0;0;0;0];
+            end
+   
             if flag(1) == 1
                 agent.input = [0; 0; 0; 0];
             end
@@ -275,12 +293,14 @@ end
         totalT = totalT + calT;
         data.calT(idx, :) = calT;
 
-        fRemove = agent.controller.result.fRemove;
-
+%         fRemove = agent.controller.result.fRemove;
+        % flag
+        % 1:終了
+        % 2:入力切るタイミング
         %% 斜面着陸　終了条件
-%         if agent.estimator.result.state.p(3) < (3/10 * agent.estimator.result.state.p(1)+0.1)
-%             fRemove = 1;
-%         end
+        if agent.estimator.result.state.p(3) < (3/10 * agent.estimator.result.state.p(1)+0.1)
+            fRemove = 1;
+        end
 %         終了条件に傾きを導入
 %         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
@@ -289,11 +309,11 @@ end
         %% 斜面に対する高度が0.2m以下かつ速度が0.1m/s以下，0.1975rad - Q - 0.3975rad以内なら終了
         altitudeSlope = (agent.estimator.result.state.p(3) - 3/10 * agent.estimator.result.state.p(1)) * cos(0.2975); % 斜面に対する高度
         vSlope = agent.estimator.result.state.v(3);
-        if altitudeSlope < 0.5 && abs(vSlope) < 0.1 %&& abs(agent.estimator.result.state.q(2)) < 0.3975 && abs(agent.estimator.result.state.q(2)) > 0.1975
+        if altitudeSlope < 0.5 && abs(vSlope) < 0.1 && abs(agent.estimator.result.state.q(2)) < 0.3975 && abs(agent.estimator.result.state.q(2)) > 0.1975
             fRemove = 2;
-        elseif fRemove == 2
-            agent.input = zeros(4,1);
+            fFinish = 1;
         end
+        
 
         fprintf("==================================================================\n")
         fprintf("==================================================================\n")
@@ -312,11 +332,14 @@ end
         fprintf("\n");
 
         if fRemove == 1   % 1:本物 10:墜落で終了させない
+            if fFinish == 1
+                disp('Congraturation')
+            end
             warning("Z<0 Emergency Stop!!!")
             break;
-        % elseif fRemove == 2
-        %     warning("Landing complete")
-        %     break;
+%         elseif fRemove == 2
+%             warning("Landing complete")
+%             break;
         elseif fRemove == 3 % 多分ない⇒制約なし
             warning("all remove")
             break;
@@ -404,7 +427,7 @@ Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-'
 % % input
 % subplot(m,n,6); 
 % % plot(logt, Idata); 
-% plot(logt, Idata, "--", "LineWidth", 1); 
+plot(logt, Idata, "--", "LineWidth", 1); 
 % xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
 % grid on; xlim([0 xmax]); ylim([-inf inf]);
 % % % title("Time change of Input");
@@ -488,30 +511,39 @@ set(gcf, "Position", [0 0 960 1000])
 % % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
 % end
 
-%% 加速度
-figure(21)
-V1 = Rdata(9, 1:end-1);
-V2 = Rdata(9, 2:end);
-A1 = Edata(3, 1:end-1);
-A2 = Edata(3, 2:end);
-for i = 1:length(V1)
-    accR(i) = (V2(i)-V1(i))/0.025;
-    accE(i) = (A2(i)-A1(i))/0.025;
+%% Ubuntu
+data_now = datestr(datetime('now'), 'yyyymmdd');
+Title = strcat('LandingFreeFall_Good_+01', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
+if exist(Outputdir) ~= 7
+    mkdir ../../students/komatsu/simdata/20230617/
 end
-plot(logt(1:end-1,1), accR, "--"); hold on
-plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
+% save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 
-E = round(time.t/dt)-1;
-V1 = Rdata(9, 1:E-1);
-V2 = Rdata(9, 2:E);
-A1 = Edata(3, 1:E-1);
-A2 = Edata(3, 2:E);
-for i = 1:length(V1)
-    accR(i) = (V2(i)-V1(i))/0.025;
-    accE(i) = (A2(i)-A1(i))/0.025;
-end
-plot(logt(1:E-1,1), accR, "--"); hold on
-plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
+%% 加速度
+% figure(21)
+% V1 = Rdata(9, 1:end-1);
+% V2 = Rdata(9, 2:end);
+% A1 = Edata(3, 1:end-1);
+% A2 = Edata(3, 2:end);
+% for i = 1:length(V1)
+%     accR(i) = (V2(i)-V1(i))/0.025;
+%     accE(i) = (A2(i)-A1(i))/0.025;
+% end
+% plot(logt(1:end-1,1), accR, "--"); hold on
+% plot(logt(1:end-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
+% 
+% E = round(time.t/dt)-1;
+% V1 = Rdata(9, 1:E-1);
+% V2 = Rdata(9, 2:E);
+% A1 = Edata(3, 1:E-1);
+% A2 = Edata(3, 2:E);
+% for i = 1:length(V1)
+%     accR(i) = (V2(i)-V1(i))/0.025;
+%     accE(i) = (A2(i)-A1(i))/0.025;
+% end
+% plot(logt(1:E-1,1), accR, "--"); hold on
+% plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xlim([0 time.t])
 
 %%
 % figure(20)
@@ -575,16 +607,17 @@ plot(logt(1:E-1,1), accE); hold off; title("Accelaration"); ylim([-inf inf]); xl
 
 % PlotMovXYZ  % 3次元プロット
 % save()
+
+
 %% 学校PC adress
 Outputdir = '../../students/komatsu/simdata/20230614/';
 % save('C:\Users\student\"OneDrive - 東京都市大学 Tokyo City University (1)"\研究室_2023\Data\20230427v1.mat', '-v7.3')
 % save("C:/Users/student/Documents/students/komatsu/MCMPC/20230515v1.mat", '-v7.3')
-mkdir ../../students/komatsu/simdata/20230614/ % ここは毎日更新する
-Savefilename = Title;
+% mkdir ../../students/komatsu/simdata/20230614/ % ここは毎日更新する
+% Savefilename = Title;
 % Savefigurename = strcat(Savefilename, '_position');
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',datestr(datetime('now'), 'yyyymmdd'), '/', Savefilename, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3");
 % saveas(1, strcat(Outputdir, Savefilename), "png");
-
 %% animation
 % pause();
 

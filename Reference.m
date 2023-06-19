@@ -46,7 +46,7 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     for h = 0:params.H-1
         t = T.t + params.dt * h; % reference生成の時刻をずらす
-        % それぞれの関数 % z方向目標値時
+        % それぞれの関数 % z方向目標値時.mat", "Idata");
         if refFlag == 1
             if t<=phase
                 tz = 2;
@@ -58,7 +58,7 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
                 tx = 5 * (t-phase).^2 - 1;  tvx = 10*t-20;
             elseif phase+0.3 <= t
                 tz = 2 * exp(-(t-phase-0.14)/0.5)+0.1; tvz = -4*exp((107/25)-2*t);
-                tx = -exp(-(t-phase)/0.5);             tvx = 2*exp(4-2*t);
+                tx = -exp(-(t-phase)/0.3);             tvx = 2*exp(4-2*t);  % 0.2 : good
             end
             xr(1:3, h+1) = [tx;  0; tz];
             xr(7:9, h+1) = [tvx; 0; tvz];
@@ -69,8 +69,10 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
             if T.t < 2
                 xr(1:3, h+1) = Gp;  % 座標
                 xr(7:9, h+1) = [0;0;0]; % 速度
-            elseif h == params.H-1
-                xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
+            elseif h > 5
+                xr(4:6, h+1) = Gq;
+%             elseif h == params.H-1
+%                 xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
             end
         elseif refFlag == 2  % 逆時間
             % t = abs(t-T.te);
