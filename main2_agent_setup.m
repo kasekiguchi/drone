@@ -74,10 +74,10 @@ for i = 1:N
 
   %% model
   % set control model
-  agent(i).set_model(Model_EulerAngle(dt, initial_state(i), i), DRONE_PARAM("DIATONE", "additional", struct("B", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))); % オイラー角モデル
+  % agent(i).set_model(Model_EulerAngle(dt, initial_state(i), i), DRONE_PARAM("DIATONE", "additional", struct("B", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))); % オイラー角モデル
   %agent(i).set_model(Model_Quat13(dt,initial_state(i),i),DRONE_PARAM("DIATONE")); % オイラーパラメータ（unit quaternion）モデル
   %agent(i).set_model(Model_Suspended_Load(dt,'model',initial_state(i),i)); %牽引物込みモデル
-  %agent(i).set_model(Model_Discrete0(dt,initial_state(i),i)) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
+  agent(i).set_model(Model_Discrete0(dt,initial_state(i),i),DRONE_PARAM("DIATONE")) % 離散時間モデル（次時刻位置＝入力） : Direct controller（入力＝目標位置） を想定 : plantが４入力モデルの時はInputTransform_REFtoHL_droneを有効にする
   %agent(i).set_model(Model_Discrete(dt,initial_state(i),i)) % 離散時間質点モデル : plantが４入力モデルの時はInputTransform_toHL_droneを有効にする
   %agent(i).set_model(Model_Three_Vehicle(dt,initial_state(i),i)); % for exp % 機体番号（ESPrのIP）
   %agent(i).set_model(Model_Vehicle45(dt,initial_state(i),i),VEHICLE_PARAM("VEHICLE4","struct","additional",struct("K",diag([1,1]),"D",0.1)));
@@ -107,7 +107,7 @@ for i = 1:N
   end
 
   %agent(i).set_property("sensor", Sensor_ROS(struct('ROSHostIP', '192.168.50.21')));
-  %agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
+  agent(i).set_property("sensor",Sensor_Direct(0.0)); % 状態真値(plant.state)　：simのみ % 入力はノイズの大きさ
   %agent(i).set_property("sensor",Sensor_RangePos(i,'r',3)); % 半径r (第二引数) 内の他エージェントの位置を計測 : sim のみ
   %agent(i).set_property("sensor",Sensor_RangeD('r',3)); %  半径r (第二引数) 内の重要度を計測 : sim のみ
   %agent(i).set_property("sensor",Sensor_LiDAR(i));
@@ -129,11 +129,11 @@ for i = 1:N
   %agent(i).set_property("estimator",Estimator_AD()); % 後退差分近似で速度，角速度を推定　シミュレーションこっち
   %agent(i).set_property("estimator",Estimator_feature_based_EKF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースEKF
   %agent(i).set_property("estimator",Estimator_PDAF(agent(i),["p","q"],[1e-5,1e-8])); % 特徴点ベースPDAF
-  agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"]));                                                                    % （剛体ベース）EKF
+  % agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"]));                                                                    % （剛体ベース）EKF
   %agent(i).set_property("estimator", Estimator_EKF(agent(i), ["p", "q"], "B", diag([dt^2, dt^2, 0, 0, 0, dt]))); % for vehicle model
   %agent(i).set_property("estimator",Estimator_KF(agent(i), ["p","v","q"], "Q",1e-5,"R",1e-3)); % （質点）EKF
   %agent(i).set_property("estimator",Estimator_PF(agent(i), ["p", "q"])); % （剛体ベース）EKF
-  %agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
+  agent(i).set_property("estimator",Estimator_Direct()); % Directセンサーと組み合わせて真値を利用する　：sim のみ
   %agent(i).set_property("estimator",Estimator_Suspended_Load([i,i+N])); %
   %agent(i).set_property("estimator",Estimator_EKF(agent(i),["p","q","pL","pT"],[1e-5,1e-5,1e-5,1e-7])); % （剛体ベース）EKF
   %agent(i).set_property("estimator",struct('type',"MAP_UPDATE",'name','map','param',Env)); % map 更新用 重要度などのmapを時間更新する
@@ -164,7 +164,7 @@ for i = 1:N
   %     agent(i).set_property("controller",Controller_FT(dt,fzapr,fzsingle,fxyapr,fxysingle,alp,erz,erxy));
 
   %agent(i).set_property("controller",Controller_FT(dt)); % 有限時間整定制御
-  agent(i).set_property("controller", Controller_HL(dt));                                                                                     % 階層型線形化
+  % agent(i).set_property("controller", Controller_HL(dt));                                                                                     % 階層型線形化
   %agent(i).set_property("controller", Controller_FHL(dt));                                % 階層型線形化
   %agent(i).set_property("controller", Controller_FHL_Servo(dt));                                % 階層型線形化
 
@@ -175,7 +175,7 @@ for i = 1:N
   %agent(i).set_property("controller", struct("type", "TSCF_VEHICLE", "name", "tscf", "param", struct("F1", [1.0000 1.7321] * 3/4, "F2", [0.1000 0.4583]))); %)));
   %agent(i).set_property("controller",struct("type","MPC_controller","name","mpc","param",{agent(i)}));
   %agent(i).set_property("controller",Controller_TrackingMPC(dt));%MPCコントローラ
-  %agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
+  agent(i).set_property("controller",struct("type","DirectController","name","direct","param",[]));% 次時刻に入力の位置に移動するモデル用：目標位置を直接入力とする
   %agent(i).set_property("controller",struct("type","PDController","name","pd","param",struct("P",-0.9178*diag([1,1,3]),"D",-1.6364*diag([1,1,3]),"Q",-1)));
   %agent(i).set_property("controller", Controller_PID(dt)); % not work for drone
   %agent(i).set_property("controller", Controller_PID_based(dt)); % not work for drone

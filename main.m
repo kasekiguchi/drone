@@ -103,6 +103,7 @@ try
       param(i).controller.pid = {};
       param(i).controller.tscf = {dt, time.t};
       param(i).controller.mpc = {};
+      param(i).controller.direct = {};
 
       for j = 1:length(agent(i).controller.name)
         param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
