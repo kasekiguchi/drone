@@ -1,7 +1,8 @@
-function KoopmanLinearByData(flg,F,loading_filename,targetpath)
+function [est, simResult] = KoopmanLinearByData(flg,F,loading_filename,targetpath)
 % flg : flag struct 
 %   .bilinear : 1 :on
-%   .F        : Observables
+%   .fileSave : 1 :on
+% F   : Observables
 % loading filename : 
 % targetpath : save file name
 
@@ -88,8 +89,10 @@ else
     simResult.state.w = simResult.Xhat(10:12,:);
 end
 simResult.state.N = simResult.reference.N-1;
-
-save(targetpath,'est','Data','simResult')
-disp('Saved to')
-disp(targetpath)
+if flg.fileSave == 1
+    save(targetpath,'est','Data','simResult')
+    disp('Saved to')
+    disp(targetpath)
+else
+    disp('FLAG is OFF! To not save result in File.')
 end
