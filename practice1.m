@@ -249,10 +249,10 @@ P = [m0,m1,m2,m3,m4]';
 data = [q1;q2;q3;q4;ol0;ol1;ol2;ol3;ol4;os1;os2;os3;os4;f1;f2;f3;f4;M1;M2;M3;M4;qt0;qt1;qt2;qt3;qt4;P];
 % q_dataset=[[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)];[1/(3)^(1/2);1/(3)^(1/2);1/(3)^(1/2)]];
 % q_dataset=[[0;1/sqrt(2);1/sqrt(2)];[0;1/sqrt(2);1/sqrt(2)];[0;1/sqrt(2);1/sqrt(2)];[0;1/sqrt(2);1/sqrt(2
-q_dataset1=[0;-1;1];
-q_dataset2=[0;-1;1];
-q_dataset3=[0;-1;1];
-q_dataset4=[0;-1;1];
+q_dataset1=[0;0;1];
+q_dataset2=[0;0;1];
+q_dataset3=[0;0;1];
+q_dataset4=[0;0;1];
 q_dataset=[q_dataset1/vecnorm(q_dataset1);q_dataset2/vecnorm(q_dataset2);q_dataset3/vecnorm(q_dataset3);q_dataset4/vecnorm(q_dataset4)];
 
 ol0_dataset=[0;0;0];
@@ -263,10 +263,10 @@ f_dataset=[1;1;1;1];
 M_dataset = [[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
 
 qt0_dataset=[1;0;0;0];
-qt1_dataset=[1;0;0;0];
-qt2_dataset=[1;0;0;0];
-qt3_dataset=[1;0;0;0];
-qt4_dataset=[1;0;0;0];
+qt1_dataset=[0.9239;0;0.3827;0];
+qt2_dataset=[0.9239;0;0.3827;0];
+qt3_dataset=[0.9239;0;0.3827;0];
+qt4_dataset=[0.9239;0;0.3827;0];
 
 m0_dataset = 1;
 m1_dataset = 2;
