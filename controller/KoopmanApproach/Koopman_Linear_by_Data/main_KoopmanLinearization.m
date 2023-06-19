@@ -24,19 +24,39 @@ F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角�
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
 
-% load file name
+% load filename
 % 読み込むフォルダ or matファイルを選択
 loadFile = 'Data/simData_Koopman_rndP2O4';
 % loadFile = 'Data/simData_Koopman_rndP2O4/sim_rndP4_1.mat';
+
+% reference filename
+% referenceFile = 'Data/simData_Koopman_rndP2O4/sim_rndP4_1.mat';
+referenceFile = 'TestData2.mat';
 % save file name
 saveFile = 'controller/KoopmanApproach/Koopman_Linear_by_Data/savetest.mat';
 
+%% Load file and append data
+Data = loadData(loadFile,referenceFile);
+
 %% Run Koopman Linear By Data
-output = {};
-[output{1}.est, output{1}.simResult] = KoopmanLinearByData(flg,F,loadFile,saveFile);
+est = KoopmanLinearByData(flg,F,Data);
+
+%% Simulation with Estimated Dynamics
+simResult = simulationWithEstimatedDynamics(flg,F,est, referenceFile);
+
+%% Save Data
+if flg.fileSave == 1
+    save(saveFile,'est','Data','simResult')
+    disp('Saved to')
+    disp(fileSave)
+else
+    disp('FLAG is OFF! To not save result in File.')
+end
 
 %% Plot Simulation Result
 pltflg = struct('calcFile1RMSE',0,'ylimHold',0,'xlimHold',1,'figureSave',0);
+output={};
+output{1} = struct('est',est,'Data',Data,'simResult',simResult);
 plot_KLResult(output,pltflg)
 
 
