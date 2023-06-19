@@ -1,14 +1,15 @@
 %% Initialize settings
 % set path
-if ~isfile('./mainGUI.m')
+cf = pwd;
+if contains(mfilename('fullpath'),"mainGUI")
+  cd(fileparts(mfilename('fullpath')));
+else
   tmp = matlab.desktop.editor.getActive; 
   cd(fileparts(tmp.Filename));
-else
-  cd(fileparts(mfilename('fullpath')));
 end
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-close all hidden; clear all; clc;
+cd(cf); close all hidden; clear all; userpath('clear');
 %%
 clc
 SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR"];
