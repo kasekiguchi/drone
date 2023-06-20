@@ -62,7 +62,6 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 obj.param.QW(2,2) = 1*1e4;
             end
             
-
             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
             ave2 = obj.input.u(2);    % 初期値はparamで定義
             ave3 = obj.input.u(3);
@@ -252,7 +251,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
             obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
 %             if length(constISlope) == obj.N % 全墜落なら終了
-%                 obj.param.fRemove = 1;
+%                 obj.param.fRemove = 3;
 %             end
 
             % yaw角

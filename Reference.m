@@ -13,7 +13,7 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     for h = 0:params.H-1
         t = T.t + params.dt * h; % reference生成の時刻をずらす
-        % それぞれの関数 % z方向目標値時.mat", "Idata");
+        % それぞれの関数 % z方向目標値時
         if refFlag == 1
             if t<=phase
                 tz = 2;
@@ -26,6 +26,7 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
             elseif phase+0.3 <= t
                 tz = 2 * exp(-(t-phase-0.14)/0.5)+0.1; tvz = -4*exp((107/25)-2*t);
                 tx = -exp(-(t-phase)/0.28);             tvx = 2*exp(4-2*t);  % 0.2 : good
+
             end
             xr(1:3, h+1) = [tx;  0; tz];
             xr(7:9, h+1) = [tvx; 0; tvz];

@@ -3,9 +3,9 @@ function Controller = Controller_MCMPC(~)
 %   詳細説明をここに記述
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 10000;
+    Controller_param.Maxparticle_num = 5000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 5000;
+    Controller_param.Minparticle_num = 1000;
     Controller_param.input.Initsigma = 0.01;
     Controller_param.input.Constsigma = 5.0;
     Controller_param.input.Maxsigma = 2.0;
@@ -33,11 +33,11 @@ function Controller = Controller_MCMPC(~)
 
     %% 円旋回
     %SICE 重み
-    Controller_param.P = diag([10000.0; 10000.0; 1000.0]);    % 座標   1000 1000 10000
-    Controller_param.V = diag([1000.0; 1000.0; 1000.0]);    % 速度
+    Controller_param.P = diag([50000.0; 1000.0; 1000.0]);    % 座標   1000 1000 10000
+    Controller_param.V = diag([50000.0; 1000.0; 1000.0]);    % 速度
     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.QW = diag([1; 1; 2000; 1; 1; 1]);  % 姿勢角、角速度
+    Controller_param.QW = diag([1; 1; 1500; 1; 1; 1]);  % 姿勢角、角速度
 
     Controller_param.Qapf = 0;
     Controller_param.C = 1000;  % yaw姿勢角の係数
