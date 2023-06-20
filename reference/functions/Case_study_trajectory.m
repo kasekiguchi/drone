@@ -51,14 +51,14 @@ syms t real
 % y = 0.5*cos(2*pi*t/T);
 % z = 0.5*sin(3*pi*t/T)+1;
 
-x = 0.5*sin(3*pi*t/T);
-y = 0.5*cos(3*pi*t/T);
-z = 0.5*sin(3*pi*t/T)+1;
+% x = 0.5*sin(3*pi*t/T);
+% y = 0.5*cos(3*pi*t/T);
+% z = 0.5*sin(3*pi*t/T)+1;
 
 % 円旋回
-% x = sin(2*pi*t/T);
-% y = cos(2*pi*t/T);
-% z = 1;
+x = sin(2*pi*t/T);
+y = cos(2*pi*t/T);
+z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/T);
