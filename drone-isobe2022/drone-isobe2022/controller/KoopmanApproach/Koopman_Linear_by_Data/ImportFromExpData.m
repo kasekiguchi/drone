@@ -20,7 +20,10 @@ clear data % 読み込んだファイル内のdataと同名の変数を初期化
 %データの個数をチェック
 data.N = find(logger.Data.t,1,'last');
 % data.N = 2000;
-data.uN = find(logger.Data.agent.input{1},1,'last');
+% data.uN = find(logger.Data.agent.input{1},1,'last');
+% data.uN = size(logger.Data.agent.input{1},1); %GUIのデータはこっちじゃないとダメ？
+data.uN = 4; %入力の個数
+% data.uN(:,4) = size(logger.Data.agent.input{1},1); %GUIのデータはこっちじゃないとダメ？
 
 %% Get data
 % 状態毎に分割して保存
