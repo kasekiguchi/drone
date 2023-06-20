@@ -13,7 +13,7 @@ userpath('clear');
 % run("main.m"); % 目標入力生成
 % close all hidden; clear all; clc;
 % userpath('clear');
-fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 0:TimeVarying
+fRef = 1; %% 斜面着陸かどうか 1:斜面 2:逆時間 0:TimeVarying
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
@@ -33,6 +33,8 @@ totalT = 0;
 idx = 0;
 pre_pos = 0;
 fG = zeros(3, 1);
+fRemove = 0;
+fFinish = 0;
 %-- 初期設定 controller.mと同期させる
 data.param = agent.controller.mcmpc;
 Params.H = data.param.param.H;   %Params.H
@@ -161,12 +163,13 @@ end
             % -> 初期速度必要
             % ある程度速度が落ちたら入力切る．
 
-            Gp = initial.p;
-            if agent.estimator.result.state.p(3) < 0.3
-                Gq = [0; 0.2915; 0];
-            else
-                Gq = [0; 0; 0];
-            end
+%             Gp = initial.p;
+%             if agent.estimator.result.state.p(3) < 0.3
+%                 Gq = [0; 0.2915; 0];
+%             else
+%                 Gq = [0; 0; 0];
+%             end
+
 
             %% 斜面着陸　入力切断条件
 %             if abs(agent.estimator.result.state.v(3)) < 0.03
@@ -183,6 +186,8 @@ end
             else 
                 Time.ind = Time.ind; 
             end
+            Gp = initial.p;
+            Gq = [0; 0.2975; 0];
             [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef);    % 1:斜面 0:それ以外(TimeVarying)
             param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
@@ -190,11 +195,22 @@ end
             end
             agent(i).do_controller(param(i).controller.list);
 
-            if time.t < 0.4
+%             if time.t < 0.4
+            if fRef==1 && 2.5 < time.t && time.t < 2.6
                 agent.input = [0;0;0;0];
+            elseif fRemove == 2
+                agent.input = [0;0;0;0];    % 入力切っているときはコントローラー計算しない
+            else
+                agent(i).do_controller(param(i).controller.list);
             end
 
-            
+            %% 自由落下:入力切る
+            if fRef == 0 && time.t < 0.4
+                agent.input = [0;0;0;0];
+%             elseif fRef == 1 && 2.5 < time.t && time.t < 2.6
+%                 agent.input = [0;0;0;0];
+            end
+
             if flag(1) == 1
                 agent.input = [0; 0; 0; 0];
             end
@@ -214,7 +230,7 @@ end
         data.removeF(idx) =     agent.controller.result.removeF;   % - 棄却されたサンプル数
         data.removeX{idx} =     agent.controller.result.removeX;
         data.input_v{idx} =     agent.controller.result.input_v;
-        data.eachcost{idx} =    agent.controller.result.eachcost;
+%         data.eachcost{idx} =    agent.controller.result.eachcost;
 
         data.xr{idx} = xr;
         data.variable_particle_num(idx) = agent.controller.result.variable_N;
@@ -276,12 +292,14 @@ end
         totalT = totalT + calT;
         data.calT(idx, :) = calT;
 
-        fRemove = agent.controller.result.fRemove;
+%         fRemove = agent.controller.result.fRemove;
+        % flag:: 1:終了, 2:入力切るタイミング
 
         %% 斜面着陸　終了条件
-%         if agent.estimator.result.state.p(3) < (3/10 * agent.estimator.result.state.p(1)+0.1)
-%             fRemove = 1;
-%         end
+        % 斜面に対して0.2m未満だったら終わり
+        if agent.estimator.result.state.p(3) < (3/10 * agent.estimator.result.state.p(1)+0.2)
+            fRemove = 1;
+        end
 %         終了条件に傾きを導入
 %         drone_1X = agent.estimator.result.state.p(1)+agent.parameter.lx*cos(agent.estimator.result.state.q(3));
 %         drone_2X = agent.estimator.result.state.p(1)-agent.parameter.lx*cos(agent.estimator.result.state.q(3));
@@ -293,8 +311,9 @@ end
 
         if altitudeSlope < 0.5 && abs(vSlope) < 0.05 && abs(agent.estimator.result.state.q(2)) > 0.1975 %&& abs(agent.estimator.result.state.q(2)) < 0.3975 
             fRemove = 2;
-        elseif fRemove == 2
-            agent.input = zeros(4,1);
+            fFinish = 1;
+%         elseif fRemove == 2
+%             agent.input = zeros(4,1);
         end
 
         fprintf("==================================================================\n")
@@ -314,11 +333,14 @@ end
         fprintf("\n");
 
         if fRemove == 1   % 1:本物 10:墜落で終了させない
+            if fFinish == 1
+                disp('Conguraturation')
+            end
             warning("Z<0 Emergency Stop!!!")
             break;
-        % elseif fRemove == 2
-        %     warning("Landing complete")
-        %     break;
+%         elseif fRemove == 2
+%             warning("Landing complete")
+%             break;
         elseif fRemove == 3 % 多分ない⇒制約なし
             warning("all remove")
             break;
@@ -388,44 +410,44 @@ m = 3; n = 2;
 
 % figure(1)
 Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
-% sgtitle(Title);
-% subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
-% xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-% grid on; xlim([0 xmax]); ylim([-inf inf]);
-% % title("Time change of Position"); 
-% % atiitude 0.2915 rad = 16.69 deg
-% subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
-% xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-% grid on; xlim([0 xmax]); ylim([-0.5 0.5]);
-% % title("Time change of Atiitude");
-% % velocity
-% subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
-% xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
-% grid on; xlim([0 xmax]); ylim([-inf inf]);
-% % title("Time change of Velocity"); 
-% % input
-% subplot(m,n,6); 
-% % plot(logt, Idata); 
-% plot(logt, Idata, "--", "LineWidth", 1); 
-% xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
-% grid on; xlim([0 xmax]); ylim([-inf inf]);
-% % % title("Time change of Input");
-% subplot(m,n,5); % 仮想入力
-% plot(logt, IV); legend("Z", "X", "Y", "YAW");
-% xlabel("Time [s]"); ylabel("input.V");
-% grid on; xlim([0 xmax]); ylim([-inf inf]);
-% % calculation time
-% subplot(m, n, 4);
-% plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
-% plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
-% 
-% xlim([0 te])
-% set(gca,'FontSize',Fontsize);  grid on; title("");
-% xlabel("Time [s]");
-% ylabel("Calculation time [s]");
-% 
-% % set(gcf, "WindowState", "maximized");
-% set(gcf, "Position", [960 0 960 1000])
+sgtitle(Title);
+subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
+xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% title("Time change of Position"); 
+% atiitude 0.2915 rad = 16.69 deg
+subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
+xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
+grid on; xlim([0 xmax]); ylim([-0.5 0.5]);
+% title("Time change of Atiitude");
+% velocity
+subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
+xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% title("Time change of Velocity"); 
+% input
+subplot(m,n,6); 
+% plot(logt, Idata); 
+plot(logt, Idata, "--", "LineWidth", 1); 
+xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% % title("Time change of Input");
+subplot(m,n,5); % 仮想入力
+plot(logt, IV); legend("Z", "X", "Y", "YAW");
+xlabel("Time [s]"); ylabel("input.V");
+grid on; xlim([0 xmax]); ylim([-inf inf]);
+% calculation time
+subplot(m, n, 4);
+plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
+plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
+
+xlim([0 te])
+set(gca,'FontSize',Fontsize);  grid on; title("");
+xlabel("Time [s]");
+ylabel("Calculation time [s]");
+
+% set(gcf, "WindowState", "maximized");
+set(gcf, "Position", [960 0 960 1000])
 
 %%
 agent(1).animation(logger,"target",1); 

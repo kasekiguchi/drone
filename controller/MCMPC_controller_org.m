@@ -109,7 +109,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             eachCost = zeros(obj.N, 3);
             tic
             for m = 1:obj.N
-                [obj.input.eval(1,m), eachCost(m, :)] = obj.objective(m);
+                [obj.input.eval(1,m), eachCost(m, :)] = objective(obj,m);
                 % [Evaluationtra(1,m), eachCost] = objective(obj, m);
             end
             toc
@@ -251,7 +251,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
             obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
 %             if length(constISlope) == obj.N % 全墜落なら終了
-%                 obj.param.fRemove = 3;
+%                 obj.param.fRemove = 1;
 %             end
 
             % yaw角
