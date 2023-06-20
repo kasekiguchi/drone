@@ -492,10 +492,10 @@ set(gcf, "Position", [0 0 960 1000])
 
 %% Ubuntu
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat('LandingFreeFall_VeryGood', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat('LandingFreeFall_Good_+01', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230619/
+    mkdir ../../students/komatsu/simdata/20230617/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 
