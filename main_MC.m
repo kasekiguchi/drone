@@ -309,7 +309,7 @@ end
         %% 斜面に対する高度が0.2m以下かつ速度が0.1m/s以下，0.1975rad - Q - 0.3975rad以内なら終了
         altitudeSlope = (agent.estimator.result.state.p(3) - 3/10 * agent.estimator.result.state.p(1)) * cos(0.2975); % 斜面に対する高度
         vSlope = agent.estimator.result.state.v(3);
-        if altitudeSlope < 0.5 && abs(vSlope) < 0.1 && abs(agent.estimator.result.state.q(2)) < 0.3975 && abs(agent.estimator.result.state.q(2)) > 0.1975
+        if altitudeSlope < 0.5 && abs(vSlope) < 0.05 && abs(agent.estimator.result.state.q(2)) > 0.1975 %&& abs(agent.estimator.result.state.q(2)) < 0.3975 
             fRemove = 2;
             fFinish = 1;
         end
@@ -513,10 +513,10 @@ set(gcf, "Position", [0 0 960 1000])
 
 %% Ubuntu
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat('LandingFreeFall_Good_+01', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat('LandingFreeFall_VeryGood', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230617/
+    mkdir ../../students/komatsu/simdata/20230619/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 

@@ -58,8 +58,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.param.t = rt;
 
             if obj.param.t > 2.6
-                obj.param.QW(1,1) = 10000;
-                obj.param.QW(2,2) = 10000;
+                obj.param.QW(1,1) = 1000;
+                obj.param.QW(2,2) = 1*1e4;
             end
             
 

@@ -51,6 +51,7 @@ classdef DRAW_DRONE_MOTION
             yy = zeros(1, size(xx, 2));
             zz = 3/10 * xx+0.1;
             plot3(xx, yy, zz);
+            pause();
             
         end
         function obj=gen_frame(obj,param)
