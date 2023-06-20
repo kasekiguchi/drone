@@ -97,8 +97,9 @@ beta2 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
 % else
     syms v2(t) v3(t) v4(t)
     U2 = inv(beta2)*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
+    Uover0= subs(U2,[p,dp],zeros(size([p,dp])));
     %U2 = beta2/(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
+    % U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
 %end
 %% Initialize xd as an unspecified function of t
 % % If regenerate Uf, Us or Xd functions, evaluate this section.

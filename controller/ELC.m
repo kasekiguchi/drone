@@ -6,8 +6,8 @@ properties
     param
     Q
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
-    % Vft
     Vep
+    finitial
 end
 
 methods
@@ -22,15 +22,15 @@ methods
         obj.Vep = param.Vep; % 仮想入力を生成する関数ハンドル
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.result.u = zeros(self.estimator.model.dim(2),1);
+        obj.finitial=1;
     end
 
     function result = do(obj ,varargin)
         % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
-        x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w;model.state.Trs]; % [q, p, v, w]に並べ替え
-        xd = ref.state.get();
-
+        xd = ref.state.xd;
+        xd0 =xd;
         P = obj.param.P;
         % F1 = obj.param.F1;
         % F2 = obj.param.F2;
@@ -68,6 +68,10 @@ methods
 
         %% calc actual input
         tmp = Uep(x, xd', vep, P);
+        if obj.finitial
+            tmp(2:4) =zeros(3,1);
+            obj.finitial=0;
+        end
          %サブシステムの入力
         obj.result.uHL =vep;
         %サブシステムの状態

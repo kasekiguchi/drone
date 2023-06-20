@@ -14,7 +14,7 @@ eF4=Controller.F4;
 %% finite-time settling controlのalphaを計算
 
 % 入力のalphaを計算
-alp = [0.85,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+alp = [0.9,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
 anum = 4; %最大の変数の個数
 alpha = zeros(anum + 1, 4);
 alpha(anum + 1,:) = 1*ones(1,anum);
@@ -46,7 +46,7 @@ if fFT ==1
     Controller.Vep = matlabFunction([-eF1 * (sign(ez1).*abs(ez1).^az); -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1,ez2, ez3, ez4});
 else
     %LS
-    Controller.Vep = matlabFunction([-eF1*ez1,-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
+    Controller.Vep = matlabFunction([-eF1*ez1;-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
 end
 Controller.dt = dt;
 Controller.type = "ELC";
