@@ -207,7 +207,7 @@ set(0,'defaultLineMarkerSize',15);
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
 % logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
-logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_num", 5, "row_col", [2, 2]);
+% logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_num", 5, "row_col", [2, 2]);
 % 仮想入力
 % figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
 % xlabel("Time [s]"); ylabel("input.V");
@@ -215,7 +215,7 @@ logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_
 % saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
 %%
 % InputV(:, te/dt+1) = InputV(:, te/dt);
-% save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
+save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
 % Idata = logger.data(1,"input",[])';
 % save("Data/Input_HL.mat", "Idata"); % 実入力の保存
 %% Save figure
@@ -230,7 +230,7 @@ logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-agent(1).animation(logger, "target", 1:N);
+% agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);
