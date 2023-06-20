@@ -16,51 +16,12 @@ ob	= [  o1;  o2;  o3];             % Angular velocity
 x = [q;p;dp;ob;T1;dT1];
 physicalParam = [m, Lx, Ly, lx, ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4];
 g = G(x,physicalParam);
-% fep= [F(x,physicalParam) + [zeros(9:4);gravity+E3;zeros(3,4)] + g(:,1)*E3;dE3;0];
 fep= Fep(x,physicalParam) ;
 gep = Gep(x,physicalParam) ;
 % dxep = fep + gep*[ddT;u2;u3;u4];
 %g= [g1 g2 g3 g4];
-%% 1st layer
-% clc
-% % Define virtual output: h1
-% h1 = p3 - xd(3);
-% q	= [  q0;  q1;  q2;  q3];        % Quaternion
-% % % **************************************** % %
-% % LieD(h1,g,x) % For check 
-% dh1 = LieD(h1,f,x)+diff(h1,t);
-% alpha1 = LieD(dh1,f,x)+diff(dh1,t);
-% beta1 = simplify(LieD(dh1,g,x));
-% H = [1/beta1(1),-beta1(2)/beta1(1),-beta1(3)/beta1(1),-beta1(4)/beta1(1); zeros(3,1),eye(3)];
-syms e1 e2 real
-% He = [1/(beta1(1)+e1),-beta1(2)/(beta1(1)+e1),-beta1(3)/(beta1(1)+e1),-beta1(4)/(beta1(1)+e1); zeros(3,1),eye(3)];
-% H = pinv(beta1);
-% nH = null(H');
-
-
-% syms v1(t) dv1(t) ddv1(t) dddv1(t) ddddv1(t)
-% dv1(t) = diff(v1(t),t);
-% ddv1(t) = diff(v1(t),t,2);
-% dddv1(t) = diff(v1(t),t,3);
-% ddddv1(t) = diff(v1(t),t,4);
-% Qz = diag([1.0,1.0]);               % Weight of state
-% Rz = 0.1;                           % Weight of input
-% Nz = 0;
-% Fz = lqr([0,1;0,0], [0;1], Qz, Rz, Nz);
- %v1 = -Fz * [h1;dh1]; % v1を事前に決めておく時はこっち
-%% 2nd layer
-% syms v2 v3 v4
-% FG = simplify(f+g*H*[-alpha1+v1(t);u2;u3;u4]);	% v1を後で設計する時はこっち
-% g1 = simplify(MyCoeff(FG,[u2;u3;u4]));
-% f1 = subs(FG,[u2,u3,u4],[0,0,0]);
-%simplify(FG-(f1+g1*[v2;v3;v4]))   % For check
-
-% FG = simplify(f+g*(H*(-alpha1+v1(t))+nH*[v2;v3;v4]));	% v1を後で設計する時はこっち
-% g1 = simplify(MyCoeff(FG,[v2;v3;v4]));
-% f1 = subs(FG,[v2,v3,v4],[0,0,0]);
-
 %%
-% % Define virtual output: h1 h2, h3, h4
+% Define virtual output: h1 h2, h3, h4
 h1 = p3 - xd(3);
 h2 = p1 - xd(1);
 h3 = p2 - xd(2);
@@ -87,30 +48,13 @@ dddh3 = LieD(ddh3,fep,x)+diff(ddh3,t);
 	simplify([LieD(dh1,gep,x),LieD(dh2,gep,x),LieD(dh3,gep,x)])
 	simplify([LieD(ddh1,gep,x),LieD(ddh2,gep,x),LieD(ddh3,gep,x)])
 %% 
-% % Derive 2nd layer controller
-alpha2 = [LieD(dddh1,fep,x)+diff(dddh1,t);LieD(dddh2,fep,x)+diff(dddh2,t); LieD(dddh3,fep,x)+diff(dddh3,t); LieD(dh4,fep,x)+diff(dh4,t)];
-beta2 = [LieD(dddh1,gep,x);LieD(dddh2,gep,x); LieD(dddh3,gep,x); LieD(dh4,gep,x)];
-% Qxy = diag([1.0, 1.0, 0.1, 0.01]);	% Weight of state
-% Rxy = 1.0;                          % Weight of input
-% Nxy = 0;
-% Fxy = lqr([0,1,0,0;0,0,1,0;0,0,0,1;0,0,0,0], [0;0;0;1], Qxy, Rxy, Nxy);
-% Qr = diag([1.0, 1.0]);              % Weight of state
-% Rr = 1;                             % Weight of input
-% Nr = 0;
-% Fr = lqr([0,1;0,0], [0;1], Qr, Rr, Nr);
-% if flag.predefinedReference
-%     v2 = [-F4*[h2;dh2;ddh2;dddh2]; -Fxy*[h3;dh3;ddh3;dddh3]; -Fr*[h4;dh4]];
-%     U2 = inv(beta2)*(-alpha2+v2);   % v2 を事前に設計しておく時はこっち
-% else
-    % syms v2(t) v3(t) v4(t)
-    % U2 = inv(beta2)*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    % %U2 = beta2/(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    % U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    syms v1(t) v2(t) v3(t) v4(t)
-    Uep = inv(beta2)*(-alpha2+[v1(t);v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    %U2 = beta2/(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    % Uepe = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v1(t);v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-%end
+% % Derive controller
+alpha = [LieD(dddh1,fep,x)+diff(dddh1,t);LieD(dddh2,fep,x)+diff(dddh2,t); LieD(dddh3,fep,x)+diff(dddh3,t); LieD(dh4,fep,x)+diff(dh4,t)];
+beta = [LieD(dddh1,gep,x);LieD(dddh2,gep,x); LieD(dddh3,gep,x); LieD(dh4,gep,x)];
+syms v1 v2 v3 v4
+Uep = inv(beta)*(-alpha+[v1;v2;v3;v4]);  % v2を後で設計する時はこっち
+V1234 = alpha+beta*Uep;
+% Uepe = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v1(t);v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
 %% Initialize xd as an unspecified function of t
 % % If regenerate Uf, Us or Xd functions, evaluate this section.
     xd = [xd1(t),xd2(t),xd3(t),xd4(t)];
@@ -146,16 +90,16 @@ clc
     F4 = [f41 f42];
     % A1=diag([1,1,1],1)-[zeros(3,1);1]*F1; % closed loop : continuous
     % matlabFunction(subs([-F1*[h1;dh1],-F1*A1*[h1;dh1],-F1*A1*A1*[h1;dh1],-F1*A1*A1*A1*[h1;dh1]], [xdRef], [XDf]),'file','Vf.m','vars',{x cell2sym(XD) physicalParam F1},'outputs',{'V1'});
-    matlabFunction(subs([-F1*[h1;dh1;ddh1;dddh1],-F2*[h2;dh2;ddh2;dddh2],-F3*[h3;dh3;ddh3;dddh3],-F4*[h4;dh4]], xdRef, XDf),'file','Vep.m','vars',{x cell2sym(XD) physicalParam F1 F2 F3 F4},'outputs',{'cVep'});
+    % matlabFunction(subs([-F1*[h1;dh1;ddh1;dddh1],-F2*[h2;dh2;ddh2;dddh2],-F3*[h3;dh3;ddh3;dddh3],-F4*[h4;dh4]], xdRef, XDf),'file','Vep.m','vars',{x cell2sym(XD) physicalParam F1 F2 F3 F4},'outputs',{'cVep'});
     %%
     
     % A1 = expm([0,1;0,0]*dt)-int(expm([0,1;0,0]*(dt-k))*[0;1],k,[0,dt])*F1; % closed loop discrete
     % matlabFunction(subs([-F1*[h1;dh1],-F1*A1*[h1;dh1],-F1*A1*A1*[h1;dh1],-F1*A1*A1*A1*[h1;dh1]], [xdRef], [XDf]),'file','Vfd.m','vars',{dt x cell2sym(XD) physicalParam F1},'outputs',{'V1'});
-    A1 = expm(diag([1,1,1],1)*dt)-int(expm(diag([1,1,1],1)*(dt-k))*[0;0;0;1],k,[0,dt])*F1; % closed loop discrete
-    A2 = expm(diag([1,1,1],1)*dt)-int(expm(diag([1,1,1],1)*(dt-k))*[0;0;0;1],k,[0,dt])*F2; % closed loop discrete
-    A3 = expm(diag([1,1,1],1)*dt)-int(expm(diag([1,1,1],1)*(dt-k))*[0;0;0;1],k,[0,dt])*F3; % closed loop discrete
-    A4 = expm([0 1;0 0]*dt)-int(expm([0 1;0 0]*(dt-k))*[0;1],k,[0,dt])*F4; % closed loop discrete
-    matlabFunction(subs([-F1*[h1;dh1;ddh1;dddh1],-F2*[h2;dh2;ddh2;dddh2],-F3*[h3;dh3;ddh3;dddh3],-F4*[h4;dh4]], xdRef, XDf),'file','Vepd.m','vars',{dt x cell2sym(XD) physicalParam F1 F2 F3 F4},'outputs',{'cVep'});
+    % A1 = expm(diag([1,1,1],1)*dt)-int(expm(diag([1,1,1],1)*(dt-k))*[0;0;0;1],k,[0,dt])*F1; % closed loop discrete
+    % A2 = expm(diag([1,1,1],1)*dt)-int(expm(diag([1,1,1],1)*(dt-k))*[0;0;0;1],k,[0,dt])*F2; % closed loop discrete
+    % A3 = expm(diag([1,1,1],1)*dt)-int(expm(diag([1,1,1],1)*(dt-k))*[0;0;0;1],k,[0,dt])*F3; % closed loop discrete
+    % A4 = expm([0 1;0 0]*dt)-int(expm([0 1;0 0]*(dt-k))*[0;1],k,[0,dt])*F4; % closed loop discrete
+    % matlabFunction(subs([-F1*[h1;dh1;ddh1;dddh1],-F2*[h2;dh2;ddh2;dddh2],-F3*[h3;dh3;ddh3;dddh3],-F4*[h4;dh4]], xdRef, XDf),'file','Vepd.m','vars',{dt x cell2sym(XD) physicalParam F1 F2 F3 F4},'outputs',{'cVep'});
     
     % % For check
 %     Vf(0,x0,Xd(0))
@@ -164,7 +108,7 @@ clc
 % % If either model, virtual output or parameters is changed, then evaluate this section. It'll take few minutes.
 % % Usage: u = Uf(...) + Us(...)
     % matlabFunction(subs(H(:,1)*(-alpha1+v1(t)), [xdRef vInput1], [XDf V1vf]),'file','Uf.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'U1'});
-    matlabFunction(subs(Uep, [xdRef v1(t) v2(t) v3(t) v4(t)], [XDf [V1 V2 V3 V4]]),'file','Uep.m','vars',{x cell2sym(XD) [V1;V2;V3;V4] physicalParam},'outputs',{'Uep'});
+    matlabFunction(subs(Uep, [xdRef v1(t) v2(t) v3(t) v4(t)], [XDf V1 V2 V3 V4]),'file','Uep.m','vars',{x cell2sym(XD) [V1;V2;V3;V4] physicalParam},'outputs',{'Uep'});
     %matlabFunction(subs(He(:,1)*(-alpha1+v1(t)), [xdRef vInput1], [XDf V1vf]),'file','Ufe.m','vars',{t x cell2sym(XD) cell2sym(V1v) [physicalParam,e1,e2]},'outputs',{'cU1'});
     %matlabFunction(subs(He(:,2:4)*U2e, [xdRef vInput1 v2(t) v3(t) v4(t)], [XDf V1vf [V2 V3 V4]]),'file','Use.m','vars',{t x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] [physicalParam,e1,e2]},'outputs',{'cU2'});
 % % For check

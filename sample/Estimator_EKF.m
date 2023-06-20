@@ -57,7 +57,7 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     end
 
     if strcmp(Estimator.model.name,"Expand")
-        Estimator.Q = blkdiag(eye(3)*1E-3, eye(3)*1E-3,eye(2)); % システムノイズ（Modelクラス由来）
+        Estimator.Q = blkdiag(eye(3)*1E-3, eye(3)*1E-3,eye(2)*1E-3); % システムノイズ（Modelクラス由来）
         Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],dt^2*eye(2));
     end
     Estimator.list=output;
