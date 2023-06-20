@@ -47,9 +47,13 @@ syms t real
 % z = z_0;
 
 %z方向も回転する軌道
-% x = sin(2*pi*t/T);
-% y = cos(2*pi*t/T);
-% z = sin(3*pi*t/T);
+% x = 0.5*sin(2*pi*t/T);
+% y = 0.5*cos(2*pi*t/T);
+% z = 0.5*sin(3*pi*t/T)+1;
+
+x = 0.5*sin(3*pi*t/T);
+y = 0.5*cos(3*pi*t/T);
+z = 0.5*sin(3*pi*t/T)+1;
 
 % 円旋回
 % x = sin(2*pi*t/T);
@@ -57,9 +61,9 @@ syms t real
 % z = 1;
 
 %縦円旋回
-x = 0.5*sin(2*pi*t/T);
-y = 0;
-z = 0.5*cos(2*pi*t/T)+1; %1:オフセットを入れる必要あり
+% x = 0.5*sin(2*pi*t/T);
+% y = 0;
+% z = 0.5*cos(2*pi*t/T)+1; %1:オフセットを入れる必要あり
 % yaw = 2*pi*t/5;
 
 %八の字
