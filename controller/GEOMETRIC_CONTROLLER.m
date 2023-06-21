@@ -10,21 +10,24 @@ classdef GEOMETRIC_CONTROLLER < handle
   methods
     function obj = GEOMETRIC_CONTROLLER(self,param)
       obj.self = self;
+      obj.param = param;
       obj.param.P = self.parameter.get(obj.parameter_name);
       obj.result.input = zeros(self.estimator.model.dim(2),1);
     end
 
     function result = do(obj,varargin)
-      rho1 = [rho1_1;rho1_2;rho1_3];
-      rho2 = [rho2_1;rho2_2;rho2_3];
-      rho3 = [rho3_1;rho3_2;rho3_3];
-      rho4 = [rho4_1;rho4_2;rho4_3];
+      m0 = obj.param.P(2);
+      g  = obj.param.P(1);
+      rho1 = obj.param.P(6:8)';
+      rho2 = obj.param.P(9:11)';
+      rho3 = obj.param.P(12:14)';
+      rho4 = obj.param.P(15:17)';
       rho_hat = [Skew(rho1),Skew(rho2),Skew(rho3),Skew(rho4)];
       P_mat = [eye(3),eye(3),eye(3),eye(3);rho_hat]; 
 
-      e3 = [0;0;1]
+      e3 = [0;0;1];
       J0 = diag([obj.param.P(3),obj.param.P(4),obj.param.P(5)]);
-      model = obj.self.estimator.result;
+      model = obj.self.estimator.result.state;
       ref = obj.self.reference.result;
       pd = ref.state.p;
       Qd = ref.state.Q;
@@ -51,39 +54,14 @@ classdef GEOMETRIC_CONTROLLER < handle
 %       ev0 = model.v - vd;
       eO0 = model.O - Rb0'*Rbd*Od;
       
-      Fd = param.P(2)*(-kx0*ex0 - kdx0*edx0 + ddxd - param.(1)*e3);
+      Fd = m0*(-kx0*ex0 - kdx0*edx0 + ddxd - g*e3);
       R0Fd = Rb0'*Fd;
       Md = -kR0*eR0 - kO0*eO0 + Skew(Rb0'*Rbd*Od)*J0*Rb0'*Rbd*Od + J0*Rb0'*Rbd*dOd;
       con_mat = [R0Fd;Md];
 
       img_mu = diag(Rb0,Rb0,Rb0,Rb0)*P_mat'\(P_mat*P_mat')*con_mat;
       
-
-
-
-
-%       Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-%       x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-%       xd(1:3)=Rb0'*xd(1:3);
-%       xd(4) = 0;
-%       xd(5:7)=Rb0'*xd(5:7);
-%       xd(9:11)=Rb0'*xd(9:11);
-%       xd(13:15)=Rb0'*xd(13:15);
-%       xd(17:19)=Rb0'*xd(17:19);
-      %if isfield(obj.param,'dt')
-      if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-        dt = varargin{1}.dt;
-      else
-        dt = obj.param.dt;
-        % vf = Vf(x,xd',P,F1);
-        % vs = Vs(x,xd',vf,P,F2,F3,F4);
-      end
-        vf = Vfd(dt,x,xd',P,F1);
-        vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
-      %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
-      tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
       % max,min are applied for the safty
-      obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
       result = obj.result;
     end
   end
