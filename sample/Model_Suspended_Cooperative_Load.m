@@ -12,6 +12,7 @@ Setting.dim=[65,16,42];
 Setting.method = get_model_name("Cooperative_Load"); % model dynamicsの実体名
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 Setting.state_list =  ["p","Q","v","O","qi","wi","Qi","Oi"];
+Setting.qlist = ["Q","Qi"];
 Setting.initial = initial;
 Setting.num_list = [3,4,3,3,12,12,16,12];
 % Setting.type="compact"; % unit quaternionr
