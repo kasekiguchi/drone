@@ -18,6 +18,8 @@ classdef POINT_REFERENCE_COOPERATIVE_LOAD < handle
             obj.result.state.Q = [0;0;0;0];
             obj.result.state.v = [0;0;0];
             obj.result.state.O = [0;0;0];
+            obj.result.state.ddx = [0;0;0];
+
             %一旦ペイロードのみのreferenceを作成
             result=obj.result;
         end

@@ -26,30 +26,31 @@ classdef GEOMETRIC_CONTROLLER < handle
 
       Rb0 = RodriguesQuaternion(model.Q);
       Rbd = RodriguesQuaternion(Qd);
-%       F1 = obj.param.F1;
-%       F2 = obj.param.F2;
-%       F3 = obj.param.F3;
-%       F4 = obj.param.F4;
+      kx0 = obj.param.F1; %Controller_Cooperative_Load(dt)から係数を持ってくる
+      kdx0 = obj.param.F2;
+      kR02 = obj.param.F3;
+      kO0 = obj.param.F4; 
 %       xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
 
       % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
       ex0 = model.p - pd;
-      eQ0 = 1/2*(Rbd'*Rb0 - Rb0'*Rbd);
+      edx0 = model.v - vd;
+      eQ0 = 1/2*vee(Rbd'*Rb0 - Rb0'*Rbd);
 %       ev0 = model.v - vd;
-      eO0 = model.O - Od;
+      eO0 = model.O - Rb0'*Rbd*Od;
+      
+      Fd = param.P(2)*(-kx0*ex0 - kdx0*edx0 + )
 
 
-
-
-      Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-      x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-      xd(1:3)=Rb0'*xd(1:3);
-      xd(4) = 0;
-      xd(5:7)=Rb0'*xd(5:7);
-      xd(9:11)=Rb0'*xd(9:11);
-      xd(13:15)=Rb0'*xd(13:15);
-      xd(17:19)=Rb0'*xd(17:19);
+%       Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
+%       x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
+%       xd(1:3)=Rb0'*xd(1:3);
+%       xd(4) = 0;
+%       xd(5:7)=Rb0'*xd(5:7);
+%       xd(9:11)=Rb0'*xd(9:11);
+%       xd(13:15)=Rb0'*xd(13:15);
+%       xd(17:19)=Rb0'*xd(17:19);
       %if isfield(obj.param,'dt')
       if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
         dt = varargin{1}.dt;
