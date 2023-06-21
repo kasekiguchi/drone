@@ -7,14 +7,6 @@ close all
 % フラグ管理
 flg.bilinear = 0; %1:双線形モデルへの切り替え
 %% 
-% run("main1_setting.m");
-% LogData = [     % agentのメンバー関係以外のデータ
-%         ];
-% LogAgentData = [% 下のLOGGER コンストラクタで設定している対象agentに共通するdefault以外のデータ
-%             ];
-% 
-% logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
-%% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_9_normal_experiment_vertical.mat; %同じファイル名を使うときはコメントイン
 % FileName = 'EstimationResult_12state_6_19_test_circle.mat';  %plotResultの方も変更するように
@@ -25,7 +17,7 @@ FileName = '6_20_test.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'circle1_Log(15-Jun-2023_16_22_24).mat';  
-loading_filename = 'experiment_6_14_saddleandcircle2';
+loading_filename = 'experiment_6_13_circle';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -59,7 +51,7 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 17; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 10; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -91,11 +83,18 @@ end
 %% Koopman linear
 % 12/12 関数化(双線形であるかどかの切り替え，上が双線形)
 disp('now estimating')
+% if flg.bilinear == 1
+%     [est.Ahat, est.Bhat, est.Ehat, est.Chat] = KoopmanLinear_biLinear(Data.X,Data.U,Data.Y,F);
+% else
+%     [est.Ahat, est.Bhat, est.Chat] = KoopmanLinear(Data.X,Data.U,Data.Y,F);
+% end
+
 if flg.bilinear == 1
-    [est.Ahat, est.Bhat, est.Ehat, est.Chat] = KoopmanLinear_biLinear(Data.X,Data.U,Data.Y,F);
+    est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    [est.Ahat, est.Bhat, est.Chat] = KoopmanLinear(Data.X,Data.U,Data.Y,F);
+    est = KL(Data.X,Data.U,Data.Y,F);
 end
+
 est.observable = F;
 disp('Estimated')
 
@@ -120,17 +119,30 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-if flg.bilinear == 1 %双線形モデル
-    for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
-        simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
-        simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
+%厳密な計算方法
+if flg.bilinear == 1
+    for i = 1:1:simResult.refrence.N-2
+        simResult.Z(:,i+1) = est.ABE' * [sinResult.Z(:,i);simResult.U(:,i);reshape(kron(simResult.Z(:,i),simResult.U(:,i)),[],1)];
     end
 else
     for i = 1:1:simResult.reference.N-2
-        simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
-        simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
+        simResult.Z(:,i+1) = est.A * simResult.Z(:,i) + est.B * simResult.U(:,i);
     end
 end
+simResult.Xhat = est.C * simResult.Z;
+
+%旧プログラム
+% if flg.bilinear == 1 %双線形モデル
+%     for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
+%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
+%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
+%     end
+% else
+%     for i = 1:1:simResult.reference.N-2
+%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
+%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
+%     end
+% end
 % logger.logging(simResult.T,0,simResult.Xhat);  %追加
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
@@ -149,23 +161,7 @@ simResult.state.N = simResult.reference.N-1;
 save(targetpath,'est','Data','simResult')
 disp('Saved to')
 disp(targetpath)
-%% 
-% x = simResult.Xhat(1,1283:end);
-% y = simResult.Xhat(2,1283:end);
-% z = simResult.Xhat(3,1283:end);
-% 
-% figure;
-% plot3(x,y,z,'b.-');
-% xlabel('X');
-% ylabel('Y');
-% zlabel('Z');
-% title('3D Plot');
-% 
-% grid on;
-
 
 %% プロット
-% logger.loadfilename = 'EstimationResult_12state_6_13_experiment.mat';
-% agent.id.filename = FileName;
 plotResult
-% agent(1).animation(logger,"target",1:N);
+% 
