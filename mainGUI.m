@@ -13,8 +13,10 @@ cd(cf); close all hidden; clear all; userpath('clear');
 %%
 clc
 
-SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","Sim"];
-ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL"];
+SimBaseMode = ["Sim_cooperative_Load","SimHL","SimVoronoi","SimLiDAR"];
+% SimBaseMode = ["SimHL","SimVoronoi","SimLiDAR"];
+ExpBaseMode = ["ExpTestMotiveConnection","ExpHL"];
+
 fExp = 0;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop

@@ -9,6 +9,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
         %                   3 : euler : euler angle
         %                   9 : rotmat : rotation matrix
         %state % structure named "state" with member variables of list. state.x/ state.v
+        qlist % attitude variable
     end
     methods
         function obj=STATE_CLASS(varargin)
