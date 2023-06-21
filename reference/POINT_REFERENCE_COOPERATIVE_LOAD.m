@@ -9,7 +9,7 @@ classdef POINT_REFERENCE_COOPERATIVE_LOAD < handle
         function obj = POINT_REFERENCE_COOPERATIVE_LOAD(self,varargin)
             % 参照
             obj.self = self;
-            obj.result.state = STATE_CLASS(struct('state_list',["p","Q","v","O"],'num_list',[3,4,3,3]));
+            obj.result.state = STATE_CLASS(struct('state_list',["p","Q","v","O","ddx","dO"],'num_list',[3,4,3,3,3,3]));
         end
         function  result= do(obj,varargin)
             % 【Input】result = {Xd(optional)}
@@ -19,6 +19,8 @@ classdef POINT_REFERENCE_COOPERATIVE_LOAD < handle
             obj.result.state.v = [0;0;0];
             obj.result.state.O = [0;0;0];
             obj.result.state.ddx = [0;0;0];
+            obj.result.state.dO = [0;0;0];
+
 
             %一旦ペイロードのみのreferenceを作成
             result=obj.result;
