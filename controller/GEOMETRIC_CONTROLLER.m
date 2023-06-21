@@ -17,8 +17,15 @@ classdef GEOMETRIC_CONTROLLER < handle
     function result = do(obj,varargin)
       model = obj.self.estimator.result;
       ref = obj.self.reference.result;
-      xd = ref.state.p;
+      pd = ref.state.p;
+      Qd = ref.state.Q;
+      vd = ref.state.v;
+      Od = ref.state.O;
       P = obj.param.P;
+      xd=0;
+
+      Rb0 = RodriguesQuaternion(model.Q);
+      Rbd = RodriguesQuaternion(Qd);
 %       F1 = obj.param.F1;
 %       F2 = obj.param.F2;
 %       F3 = obj.param.F3;
@@ -27,6 +34,14 @@ classdef GEOMETRIC_CONTROLLER < handle
 
       % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
+      ex0 = model.p - pd;
+      eQ0 = 1/2*(Rbd'*Rb0 - Rb0'*Rbd);
+%       ev0 = model.v - vd;
+      eO0 = model.O - Od;
+
+
+
+
       Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
       x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
       xd(1:3)=Rb0'*xd(1:3);
