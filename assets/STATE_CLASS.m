@@ -165,7 +165,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
         obj.type = length(value);
       end
       len = length(value);
-      if obj.type==len
+      if mod(len,obj.type)==0
         q = value;
       else
         switch obj.type
