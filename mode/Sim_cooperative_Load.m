@@ -14,12 +14,12 @@ logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 % initial_state.w = [0; 0; 0];
 % Setting.state_list =  ["dx0","dr0","ddx0","do0","dqi","dwi","dri","doi"];
 initial_state.p = [0;0;0];
-initial_state.Q = [0;0;0;0];
+initial_state.Q = [1;0;0;0];
 initial_state.v = [0;0;0];
 initial_state.O = [0;0;0];
-initial_state.qi = [0;0;0;0;0;0;0;0;0;0;0;0];
+initial_state.qi = [0;0;1;0;0;1;0;0;1;0;0;1];
 initial_state.wi = [0;0;0;0;0;0;0;0;0;0;0;0];
-initial_state.Qi = [0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];
+initial_state.Qi = [1;0;0;0;1;0;0;0;1;0;0;0;1;0;0;0];
 initial_state.Oi = [0;0;0;0;0;0;0;0;0;0;0;0];
 
 
@@ -33,7 +33,7 @@ agent.sensor = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : se
 % agent.estimator = EKF(agent, Estimator_EKF(agent, ["p", "q"]).param);
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}).param);
 agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
-agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
+%agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 run("ExpBase");
 
 function dfunc(app)
