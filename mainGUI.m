@@ -12,7 +12,7 @@ close all hidden; clear all; clc;
 %%
 clc
 
-SimBaseMode = ["SimHL","SimVoronoi","SimLiDAR","Sim_cooperative_Load"];
+SimBaseMode = ["Sim_cooperative_Load","SimHL","SimVoronoi","SimLiDAR"];
 % SimBaseMode = ["SimHL","SimVoronoi","SimLiDAR"];
 ExpBaseMode = ["ExpTestMotiveConnection","ExpHL"];
 fExp = 0;
