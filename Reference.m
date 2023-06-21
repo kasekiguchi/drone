@@ -25,7 +25,7 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
                 tz = -5 * (t-phase).^2 + 2; tvz = 20-10*t;
                 tx = 5 * (t-phase).^2 - 1;  tvx = 10*t-20;
             elseif phase+0.3 <= t
-                tz = 2 * exp(-(t-phase-0.14)/0.5)+0.1; tvz = -4*exp((107/25)-2*t);
+                tz = 2 * exp(-(t-phase-0.14)/0.55)+0.2; tvz = -4*exp((107/25)-2*t); % zeta=0.5, offset=0.1
                 tx = -exp(-(t-phase)/0.28);             tvx = 2*exp(4-2*t);  % 0.2 : good
 
             end
@@ -38,10 +38,10 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
             if T.t < 2
                 xr(1:3, h+1) = Gp;  % 座標
                 xr(7:9, h+1) = [0;0;0]; % 速度
-%             elseif h > 5
-%                 xr(4:6, h+1) = Gq;
-            elseif h == params.H-1
-                xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
+            elseif h > 5
+                xr(4:6, h+1) = Gq;
+%             elseif h == params.H-1
+%                 xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
             end
         elseif refFlag == 2  % 逆時間
             % t = abs(t-T.te);

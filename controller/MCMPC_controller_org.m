@@ -59,7 +59,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
             if obj.param.t > 2.6
                 obj.param.QW(1,1) = 10000;
-                obj.param.QW(2,2) = 10000;
+                obj.param.QW(2,2) = 20000;
             end
             
             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
@@ -107,12 +107,12 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             %-- 評価値計算
             obj.param.fin = 0;
             eachCost = zeros(obj.N, 3);
-            tic
+%             tic
             for m = 1:obj.N
                 [obj.input.eval(1,m), eachCost(m, :)] = objective(obj,m);
                 % [Evaluationtra(1,m), eachCost] = objective(obj, m);
             end
-            toc
+%             toc
             obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); % サンプル数が小さくなった時に最小値を見失わないように
             % obj.input.eachcost = eachCost(1, 1:obj.N);
 
@@ -240,11 +240,16 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             end
 
             %% 斜面
-            if (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975) < 0.12
-                 %% 速度制約
+            if (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))+0.1) * cos(0.2975) < 0.12
+                %% 速度制約
+                % z-direction velocity
                 constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
                 CV = reshape(obj.param.CV * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
                 obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
+                % x-direction velocity
+                constVx = find(abs(obj.state.state_data(7, end, 1:obj.N)) > 0.05);
+                CVx = reshape(obj.param.CV * (obj.state.state_data(7, end, constV)).^2, [1, length(constVx)]);
+                obj.input.Evaluationtra(constVx) = obj.input.Evaluationtra(constVx) + CVx;
             end
 
             %% 斜面に墜落したかどうか　実質棄却
