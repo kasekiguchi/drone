@@ -25,7 +25,7 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 %何ステップまで表示するか
 %ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
 % stepN = 501;
-stepN = 31; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
+stepN = 201; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 % flg.ylimHoldがtrueのときのplot y範囲
@@ -36,8 +36,8 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 if flg.xlimHold == 1
-    xlimHold = [0, 0.5];
-    % xlimHold = [0,50];
+%     xlimHold = [0, 0.5];
+    xlimHold = [0,30];
 end
 
 %% Font size
