@@ -15,6 +15,7 @@ fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 0; % 1: active : for debug function
+fRef = 0;
 run("main1_setting.m");
 
 % set logger
@@ -31,11 +32,25 @@ else
 end
 
 %
-run("main2_agent_setup.m");
+run("main2_agent_setup_sqp.m");
 
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
+idx = 0;
+%% Fmincon
+%-- fmincon 設定
+options = optimoptions('fmincon');
+%     options = optimoptions(options,'Diagnostics','off');
+%     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
+options = optimoptions(options,'MaxIterations',         1.e+9);     % 最大反復回数
+options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
+
+%-- fmincon設定
+options.Algorithm = 'sqp';  % 逐次二次計画法
+options.Display = 'none';   % 計算結果の表示
+problem.solver = 'fmincon'; % solver
+problem.options = options;  %
 
 try
 
@@ -43,6 +58,7 @@ try
     %% sensor
     %    tic
     tStart = tic;
+    idx = idx + 1;
 
     if (fOffline)
       logger.overwrite("plant", time.t, agent, i);
@@ -81,7 +97,7 @@ try
       if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
       % reference
-      if time.t < 2
+      if time.t > 12
           FH.CurrentCharacter = 'h';
       else
         FH.CurrentCharacter = 'f';
@@ -108,11 +124,13 @@ try
 
       
       % controller
+      phase = 2;
       param(i).controller.hlc = {time.t};
       param(i).controller.ftc = {time.t};
       param(i).controller.pid = {};
       param(i).controller.tscf = {dt, time.t};
       param(i).controller.mpc = {};
+      param(i).controller.mcmpc = {idx, time.t, phase, problem};
 
       for j = 1:length(agent(i).controller.name)
         param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -150,23 +168,6 @@ try
       logger.logging(time.t, FH, agent, []);
       calculation1 = toc(tStart);
       time.t = time.t + calculation1;
-
-      %% logging
-      %             calculation = toc;
-      %             wait_time = 0.9999 * (sampling - calculation);
-      %
-      %             if wait_time < 0
-      %                 wait_time
-      %                 warning("ACSL : sampling time is too short.");
-      %             end
-      %            time.t = time.t + calculation;
-
-      %            else
-      %                pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
-      % これをやるとpause中が不安定になる．どうしても一定時間にしたいならwhile でsamplingを越えるのを待つなどすればよいかも．
-      % それよりは推定などで，calculationを意識した更新をしてあげた方がよい？
-      %                time.t = time.t + sampling;
-      %            end
     else
       logger.logging(time.t, FH, agent, []);
 
@@ -206,7 +207,7 @@ set(0,'defaultLineMarkerSize',15);
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-% logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
+logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
 % logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_num", 5, "row_col", [2, 2]);
 % 仮想入力
 % figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
@@ -215,7 +216,7 @@ set(0,'defaultLineMarkerSize',15);
 % saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
 %%
 % InputV(:, te/dt+1) = InputV(:, te/dt);
-save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
+% save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
 % Idata = logger.data(1,"input",[])';
 % save("Data/Input_HL.mat", "Idata"); % 実入力の保存
 %% Save figure

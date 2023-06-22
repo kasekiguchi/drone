@@ -1,8 +1,8 @@
 function Controller = Controller_HLMCMPC(~)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
-    Controller_param.dt = 0.025; % MPCステップ幅
-    Controller_param.H = 25;
+    Controller_param.dt = 0.1; % MPCステップ幅
+    Controller_param.H = 10;
     Controller_param.Maxparticle_num = 10000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = 10000;
@@ -51,7 +51,8 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.ref_input = [0;0;0;0];
 
     Controller.name = "mcmpc";
-    Controller.type = "HLMCMPC_controller";
+    % Controller.type = "HLMCMPC_controller";
+    Controller.type = "HLMPC_controller";
     Controller.param = Controller_param;
 
 end
