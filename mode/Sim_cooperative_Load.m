@@ -8,11 +8,6 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
-% initial_state.p = arranged_position([0, 0], 1, 1, 0);
-% initial_state.q = [1; 0; 0; 0];
-% initial_state.v = [0; 0; 0];
-% initial_state.w = [0; 0; 0];
-% Setting.state_list =  ["dx0","dr0","ddx0","do0","dqi","dwi","dri","doi"];
 initial_state.p = [0;0;0];
 initial_state.Q = [1;0;0;0];
 initial_state.v = [0;0;0];
