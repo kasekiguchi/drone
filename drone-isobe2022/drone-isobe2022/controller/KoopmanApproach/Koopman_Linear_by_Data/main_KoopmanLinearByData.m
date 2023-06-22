@@ -25,7 +25,7 @@ FileName = '6_20_test.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'circle1_Log(15-Jun-2023_16_22_24).mat';  
-loading_filename = 'experiment_6_14_saddleandcircle2';
+loading_filename = 'experiment_6_20_circle';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -102,7 +102,7 @@ disp('Estimated')
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
 %中間発表の推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
-simResult.reference = ImportFromExpData('experiment_6_13_circle_11.mat');
+simResult.reference = ImportFromExpData('experiment_6_20_circle_estimaterdata');
 % simResult.reference = ImportFromExpData('6_8_experiment_momose_1.mat');
 
 
