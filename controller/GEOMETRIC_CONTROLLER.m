@@ -17,7 +17,15 @@ classdef GEOMETRIC_CONTROLLER < handle
 
     function result = do(obj,varargin)
       m0 = obj.param.P(2);
-      g  = obj.param.P(1);
+      m1= obj.param.P(22);
+      m2= obj.param.P(23);
+      m3= obj.param.P(24);
+      m4= obj.param.P(25);
+      g = obj.param.P(1);
+      l1 = obj.param.P(18);
+      l2 = obj.param.P(19);
+      l3 = obj.param.P(20);
+      l4 = obj.param.P(21);
       rho1 = obj.param.P(6:8)';
       rho2 = obj.param.P(9:11)';
       rho3 = obj.param.P(12:14)';
@@ -35,22 +43,36 @@ classdef GEOMETRIC_CONTROLLER < handle
       Od = ref.state.O;
       ddxd = ref.state.ddx;
       dOd = ref.state.dO; %ペイロード角加速度
+      dqid = ref.state.dqi;
+      dwid = ref.state.dwi;
+
+      dqi1 = Skew(model.wi(1:3))*model.qi(1:3);
+      dqi2 = Skew(model.wi(4:6))*model.qi(4:6);
+      dqi3 = Skew(model.wi(7:9))*model.qi(7:9);
+      dqi4 = Skew(model.wi(10:12))*model.qi(10:12); %応急処置
+
       P = obj.param.P;
-      xd=0;
+%       xd=0;
 
       Rb0 = RodriguesQuaternion(model.Q);
+      Rb1 = RodriguesQuaternion(model.Qi(1:4));
+      Rb2 = RodriguesQuaternion(model.Qi(5:8));
+      Rb3 = RodriguesQuaternion(model.Qi(9:12));
+      Rb4 = RodriguesQuaternion(model.Qi(13:16));
       Rbd = RodriguesQuaternion(Qd);
       kx0 = obj.param.F1; %Controller_Cooperative_Load(dt)から係数を持ってくる
       kdx0 = obj.param.F2;
       kR0 = obj.param.F3;
       kO0 = obj.param.F4; 
+      kq = obj.param.F5; 
+      kw = obj.param.F6; 
 %       xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
 
       % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
       ex0 = model.p - pd;
       edx0 = model.v - vd;
-      eQ0 = 1/2*Vee(Rbd'*Rb0 - Rb0'*Rbd);
+      eR0 = 1/2*Vee(Rbd'*Rb0 - Rb0'*Rbd);
 %       ev0 = model.v - vd;
       eO0 = model.O - Rb0'*Rbd*Od;
       
@@ -59,8 +81,74 @@ classdef GEOMETRIC_CONTROLLER < handle
       Md = -kR0*eR0 - kO0*eO0 + Skew(Rb0'*Rbd*Od)*J0*Rb0'*Rbd*Od + J0*Rb0'*Rbd*dOd;
       con_mat = [R0Fd;Md];
 
-      img_mu = diag(Rb0,Rb0,Rb0,Rb0)*P_mat'\(P_mat*P_mat')*con_mat;
-      
+
+      img_mu = blkdiag(Rb0,Rb0,Rb0,Rb0)*P_mat'*inv(P_mat*P_mat')*con_mat;
+      mu1 = model.qi(1:3)*model.qi(1:3)'*img_mu(1:3);
+      mu2 = model.qi(4:6)*model.qi(4:6)'*img_mu(4:6);
+      mu3 = model.qi(7:9)*model.qi(7:9)'*img_mu(7:9);
+      mu4 = model.qi(10:12)*model.qi(10:12)'*img_mu(10:12);
+
+      mu_sum = mu1+mu2+mu3+mu4;
+      temp1 = (Skew(rho1)*Rb0'*mu1 +Skew(rho2)*Rb0'*mu2 +Skew(rho3)*Rb0'*mu3 +Skew(rho4)*Rb0'*mu4);
+      a1 = mu_sum/m1 + Rb0*Skew(model.O)^2*rho1 + Rb0*Skew(rho1)*inv(J0)*(Skew(model.O)*J0*model.O - temp1);
+      a2 = mu_sum/m2 + Rb0*Skew(model.O)^2*rho2 + Rb0*Skew(rho2)*inv(J0)*(Skew(model.O)*J0*model.O - temp1);
+      a3 = mu_sum/m3 + Rb0*Skew(model.O)^2*rho3 + Rb0*Skew(rho3)*inv(J0)*(Skew(model.O)*J0*model.O - temp1);
+      a4 = mu_sum/m4 + Rb0*Skew(model.O)^2*rho4 + Rb0*Skew(rho4)*inv(J0)*(Skew(model.O)*J0*model.O - temp1);
+
+      up1 = mu1 +m1*l1*norm(model.wi(1:3)) + m1*model.qi(1:3)*model.qi(1:3)'*a1;
+      up2 = mu2 +m2*l2*norm(model.wi(4:6)) + m1*model.qi(4:6)*model.qi(4:6)'*a2;
+      up3 = mu3 +m3*l3*norm(model.wi(7:9)) + m1*model.qi(7:9)*model.qi(7:9)'*a3;
+      up4 = mu4 +m4*l4*norm(model.wi(10:12)) + m1*model.qi(10:12)*model.qi(10:12)'*a4;
+
+      qid1=-img_mu(1:3)/norm(img_mu(1:3));
+      qid2=-img_mu(4:6)/norm(img_mu(4:6));
+      qid3=-img_mu(7:9)/norm(img_mu(7:9));
+      qid4=-img_mu(10:12)/norm(img_mu(10:12));
+
+      wid1 = cross(qid1,dqid(1:3));
+      wid2 = cross(qid2,dqid(4:6));
+      wid3 = cross(qid3,dqid(7:9));
+      wid4 = cross(qid4,dqid(10:12));
+
+      eqi1 = cross(qid1,model.qi(1:3));
+      eqi2 = cross(qid2,model.qi(4:6));
+      eqi3 = cross(qid3,model.qi(7:9));
+      eqi4 = cross(qid4,model.qi(10:12));
+
+      ewi1 = model.wi(1:3) + Skew(model.qi(1:3))^2*wid1;
+      ewi2 = model.wi(4:6) + Skew(model.qi(4:6))^2*wid1;
+      ewi3 = model.wi(7:9) + Skew(model.qi(7:9))^2*wid1;
+      ewi4 = model.wi(10:12) + Skew(model.qi(10:12))^2*wid1;
+
+      uv1 = m1*l1*Skew(model.qi(1:3))*(-kq*eqi1 -kw*ewi1 -(model.qi(1:3)'*wid1)*dqi1 -Skew(model.qi(1:3))^2*dwid(1:3)) -m1*Skew(model.qi(1:3))^2*a1;
+      uv2 = m2*l2*Skew(model.qi(4:6))*(-kq*eqi2 -kw*ewi2 -(model.qi(4:6)'*wid2)*dqi2 -Skew(model.qi(4:6))^2*dwid(4:6)) -m2*Skew(model.qi(4:6))^2*a2;
+      uv3 = m3*l3*Skew(model.qi(7:9))*(-kq*eqi3 -kw*ewi3 -(model.qi(7:9)'*wid3)*dqi3 -Skew(model.qi(7:9))^2*dwid(7:9)) -m3*Skew(model.qi(7:9))^2*a3;
+      uv4 = m4*l4*Skew(model.qi(10:12))*(-kq*eqi4 -kw*ewi4 -(model.qi(10:12)'*wid4)*dqi4 -Skew(model.qi(10:12))^2*dwid(10:12)) -m4*Skew(model.qi(10:12))^2*a4;
+
+      u1 = up1 +uv1;
+      u2 = up2 +uv2;
+      u3 = up3 +uv3;
+      u4 = up4 +uv4;
+
+      b3i1 = - u1/norm(u1);
+      b3i2 = - u1/norm(u2);
+      b3i3 = - u1/norm(u3);
+      b3i4 = - u1/norm(u4);
+
+      f1 = -u1'*Rb1*e3;
+      f2 = -u2'*Rb2*e3;
+      f3 = -u3'*Rb3*e3;
+      f4 = -u4'*Rb4*e3;
+
+      M1=1;
+      M2=1;
+      M3=1;
+      M4=1;
+
+      obj.result.input = [f1(3);M1;f2(3);M2;f3(3);M3;f4(3);M4]';
+
+
+
       % max,min are applied for the safty
       result = obj.result;
     end
