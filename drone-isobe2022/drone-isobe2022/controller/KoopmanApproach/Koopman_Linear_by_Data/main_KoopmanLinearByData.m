@@ -9,8 +9,8 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 
 %% 
 %データ保存先ファイル名(逐次変更する)
-delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_20_circle_test.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_6_20_circle_test.mat';  %plotResultの方も変更するように
+% delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_20_circle__test.mat; %同じファイル名を使うときはコメントイン
+FileName = 'EstimationResult_12state_6_20_circle__test.mat';  %plotResultの方も変更するように
 % FileName = '6_20_test.mat';
 
 % agent.id.filename = 'EstimationResult_12state_6_13_test';
@@ -18,7 +18,7 @@ FileName = 'EstimationResult_12state_6_20_circle_test.mat';  %plotResultの方�
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'circle1_Log(15-Jun-2023_16_22_24).mat';  
-loading_filename = 'experiment_6_13_circle';
+loading_filename = 'experiment_6_20_circle';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -100,8 +100,8 @@ disp('Estimated')
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
 %中間発表の推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
-% simResult.reference = ImportFromExpData('experiment_6_20_circle_estimaterdata');
-simResult.reference = ImportFromExpData('experiment_6_13_circle_11.mat');
+simResult.reference = ImportFromExpData('experiment_6_20_circle_estimaterdata');
+% simResult.reference = ImportFromExpData('experiment_6_13_circle_11.mat');
 
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消

@@ -51,6 +51,7 @@ columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
 %位置p
+box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
 plot(data.t,data.x,'LineWidth',1);
@@ -60,9 +61,10 @@ hold on
 grid on
 plot(data.t,data.y,'LineWidth',1);
 plot(data.t,data.z,'LineWidth',1);
-plot(data.t,data.xr,'LineWidth',1,'LineStyle','--');
-plot(data.t,data.yr,'LineWidth',1,'LineStyle','--');
-plot(data.t,data.zr,'LineWidth',1,'LineStyle','--');
+plot(data.t,data.xr,'LineWidth',1,'LineStyle','-');
+plot(data.t,data.yr,'LineWidth',1,'LineStyle','-');
+plot(data.t,data.zr,'LineWidth',1,'LineStyle','-');
+% lgdtmp = {'$x_r$','$y_r$','$z_r$'};
 lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
 lgd.NumColumns = columnomber;
