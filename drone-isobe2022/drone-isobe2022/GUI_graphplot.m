@@ -1,7 +1,13 @@
-%%GUIデータ用グラフプロット
+%% GUIデータ用グラフプロット
 opengl software
+% パスの設定
+activeFile = matlab.desktop.editor.getActive;
+cd(fileparts(activeFile.Filename));
+[~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden;
 clear all;
+clc;
 %% データのインポート
 load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
 disp('load finished')
@@ -31,17 +37,21 @@ end
 
 
 %% 各グラフで出力
-serect = 0 %0:各グラフで出力,1:いっぺんに出力
-if serect ==0
+num = input('出力するグラフ形態を選択してください(0:各グラフで出力,1:いっぺんに出力)：','s'); %0:各グラフで出力,1:いっぺんに出力
+selection = str2double(num); %文字列を数値に変換
+if selection == 0
 close all
-clc
 
 newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
              0.4660 0.6740 0.1880];
 
-colororder(newcolors)
+columnomber = 3; %凡例の並べ方調整
+Fsize.lgd = 16; %凡例の大きさ調整
+
 %位置p
+figure(1)
+colororder(newcolors)
 plot(data.t,data.x,'LineWidth',1);
 xlabel('Time [s]');
 ylabel('p');
@@ -52,11 +62,14 @@ plot(data.t,data.z,'LineWidth',1);
 plot(data.t,data.xr,'LineWidth',1,'LineStyle','--');
 plot(data.t,data.yr,'LineWidth',1,'LineStyle','--');
 plot(data.t,data.zr,'LineWidth',1,'LineStyle','--');
+lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
+lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 hold off
 
 %姿勢角q
-figure
+figure(2)
 colororder(newcolors)
 plot(data.t,data.qx,'LineWidth',1);
 xlabel('Time [s]');
@@ -65,11 +78,13 @@ hold on
 grid on
 plot(data.t,data.qy,'LineWidth',1);
 plot(data.t,data.qz,'LineWidth',1);
+lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
 hold off
 
 %速度v
-figure
+figure(3)
 colororder(newcolors)
 plot(data.t,data.vx,'LineWidth',1);
 xlabel('Time [s]');
@@ -78,11 +93,13 @@ hold on
 grid on
 plot(data.t,data.vy,'LineWidth',1);
 plot(data.t,data.vz,'LineWidth',1);
+lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
 hold off
 
 %角速度w
-figure
+figure(4)
 colororder(newcolors)
 plot(data.t,data.wx,'LineWidth',1);
 xlabel('Time [s]');
@@ -91,6 +108,8 @@ hold on
 grid on
 plot(data.t,data.wy,'LineWidth',1);
 plot(data.t,data.wz,'LineWidth',1);
+lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
 hold off
 
@@ -108,6 +127,8 @@ newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
              0.4660 0.6740 0.1880];
 colororder(newcolors)
+columnomber = 3; %凡例の並べ方調整
+Fsize.lgd = 14; %凡例の大きさ調整
 
 num = 3;
 % xlim([data.t(1) data.t(end)])
@@ -123,6 +144,9 @@ p4 = plot(data.t, data.xr);
 p5 = plot(data.t, data.yr);
 p6 = plot(data.t, data.zr);
 xlim([data.t(1) data.t(end)])
+lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
+lgd.NumColumns = columnomber;
 hold off
 title('Position p of agent1');
 % 姿勢角
@@ -135,6 +159,8 @@ grid on
 p8 = plot(data.t, data.qy);
 p9 = plot(data.t, data.qz);
 xlim([data.t(1) data.t(end)])
+lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 hold off
 title('Attitude q of agent1');
 % 速度
@@ -147,6 +173,8 @@ grid on
 p11 = plot(data.t, data.vy);
 p12 = plot(data.t, data.vz);
 xlim([data.t(1) data.t(end)])
+lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 hold off
 title('Velocity v of agent1');
 % 角速度
@@ -159,6 +187,8 @@ grid on
 p14 = plot(data.t, data.wy);
 p15 = plot(data.t, data.wz);
 xlim([data.t(1) data.t(end)])
+lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 hold off
 title('Angular velocity w of agent1');
 
@@ -172,7 +202,6 @@ plot3(data.x,data.y,data.z);
 xlabel('x');
 ylabel('y');
 zlabel('z');
-
 
 set([p4,p5,p6],'LineStyle','--','LineWidth',1);
 set([p1,p2,p3,p7,p8,p9,p10,p11,p12,p13,p14,p15],'LineWidth',1);
