@@ -31,6 +31,17 @@ agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
 agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 run("ExpBase");
 
+%%
+time.t = time.t + time.dt;
+agent(1).sensor.do(time,'f');
+agent(1).estimator.do(time,'f');
+agent(1).reference.do(time,'f');
+agent(1).controller.result.input = zeros(16,1);
+agent(1).plant.do(time,'f');
+logger.logging(time,'f',agent);
+tmp = logger.data(1,"plant.result.state.Qi","p");
+
+
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.t]);
 app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.t]);
