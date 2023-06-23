@@ -3,7 +3,7 @@ function Controller= Controller_EL(dt,fFT)
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
-Controller.F1=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt);
+Controller.F1=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt);
 Controller.F2=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 Controller.F3=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 Controller.F4=lqrd([0,1;0,0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
@@ -14,7 +14,7 @@ eF4=Controller.F4;
 %% finite-time settling controlのalphaを計算
 
 % 入力のalphaを計算
-alp = [0.9,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+alp = [0.8,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
 anum = 4; %最大の変数の個数
 alpha = zeros(anum + 1, 4);
 alpha(anum + 1,:) = 1*ones(1,anum);

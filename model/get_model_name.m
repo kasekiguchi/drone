@@ -13,7 +13,7 @@ function model_full_name = get_model_name(sn)
         case "RPY 12"
             model_full_name = "roll_pitch_yaw_thrust_torque_physical_parameter_model";
         case "RPY_dst"
-            model_full_name = "euler_parameter_thrust_force_physical_parameter_model_with_dst";
+            model_full_name = "roll_pitch_yaw_thrust_force_physical_parameter_model_with_dst";
         case "R 18"
             model_full_name = "rotation_matrix_thrust_force_physical_parameter_model";
         case "Load"

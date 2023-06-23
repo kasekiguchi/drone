@@ -12,7 +12,7 @@ end
 Model.id = id;
 Model.type = "Euler_Angle_Expand_Model";                 % model name
 Model.name = "Expand";                            % print name
-Setting.dim = [14, 4, 17];
+Setting.dim = [14, 4+6, 17];
 Setting.method = get_model_name("RPY 14"); % model dynamicsの実体名
 Setting.state_list = ["p", "q", "v", "w","Trs"];
 Setting.initial = initial;                 % struct('p', [0; 0; 0], 'q', [0; 0; 0], 'v', [0; 0; 0], 'w', [0; 0; 0]);
