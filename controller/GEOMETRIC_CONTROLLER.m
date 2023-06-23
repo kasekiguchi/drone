@@ -33,6 +33,8 @@ classdef GEOMETRIC_CONTROLLER < handle
       rho_hat = [Skew(rho1),Skew(rho2),Skew(rho3),Skew(rho4)];
       P_mat = [eye(3),eye(3),eye(3),eye(3);rho_hat]; 
 
+      t = varargin{1,1}.t;
+
       e3 = [0;0;1];
       J0 = diag([obj.param.P(3),obj.param.P(4),obj.param.P(5)]);
       J1 = diag([obj.param.P(26),obj.param.P(27),obj.param.P(28)]);
@@ -141,20 +143,33 @@ classdef GEOMETRIC_CONTROLLER < handle
       b3i3 = - u1/norm(u3);
       b3i4 = - u1/norm(u4);
 
-      b1i1 = [vd,vd,0];
-      b1i2 = [vd,vd,0];
-      b1i3 = [vd,vd,0];
-      b1i4 = [vd,vd,0];
+      temp = [t+1;t+1;0];
+      b1i1 = temp/vecnorm(temp);
+      temp = [t+1;t+1;0];
+      b1i2 = temp/vecnorm(temp);
+      temp = [t+1;t+1;0];
+      b1i3 = temp/vecnorm(temp);
+      temp = [t+1;t+1;0];
+      b1i4 = temp/vecnorm(temp);
+
+      temp = [1;1;0];
+      db1i1 = temp/vecnorm(temp);
+      temp = [1;1;0];
+      db1i2 = temp/vecnorm(temp);
+      temp = [1;1;0];
+      db1i3 = temp/vecnorm(temp);
+      temp = [1;1;0];
+      db1i4 = temp/vecnorm(temp);
 
       Ric1 = [-Skew(b3i1)^2*b1i1/norm(Skew(b3i1)^2*b1i1), Skew(b3i1)*b1i1/norm(Skew(b3i1)*b1i1), b1i1];
       Ric2 = [-Skew(b3i2)^2*b1i2/norm(Skew(b3i2)^2*b1i2), Skew(b3i2)*b1i2/norm(Skew(b3i2)*b1i2), b1i2];
       Ric3 = [-Skew(b3i3)^2*b1i3/norm(Skew(b3i3)^2*b1i3), Skew(b3i3)*b1i3/norm(Skew(b3i3)*b1i3), b1i3];
       Ric4 = [-Skew(b3i4)^2*b1i4/norm(Skew(b3i4)^2*b1i4), Skew(b3i4)*b1i4/norm(Skew(b3i4)*b1i4), b1i4];
 
-      dRic1 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
-      dRic2 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
-      dRic3 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
-      dRic4 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
+      dRic1 = [db1i1, db1i1, zeros(3,1)];
+      dRic2 = [db1i2, db1i2, zeros(3,1)];
+      dRic3 = [db1i3, db1i3, zeros(3,1)];
+      dRic4 = [db1i4, db1i4, zeros(3,1)];
 
       Oic1 =Vee(Ric1'*dRic1);
       Oic2 =Vee(Ric2'*dRic2);
@@ -183,7 +198,7 @@ classdef GEOMETRIC_CONTROLLER < handle
       M3=- kr/epsilon^2*eRi3 - kO/epsilon*eOi3 + cross(model.Oi(7:9),J1*model.Oi(7:9));
       M4=- kr/epsilon^2*eRi4 - kO/epsilon*eOi4 + cross(model.Oi(10:12),J1*model.Oi(10:12));
 
-      obj.result.input = [f1(3);M1;f2(3);M2;f3(3);M3;f4(3);M4]';
+      obj.result.input = [f1;M1;f2;M2;f3;M3;f4;M4];
 
 
 
