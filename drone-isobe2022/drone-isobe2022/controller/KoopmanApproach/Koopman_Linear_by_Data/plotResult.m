@@ -13,9 +13,7 @@ flg.xlimHold = 0; % 指定した値にxlimを固定
 % a = append(filename,'.mat');
 % loadfilename{1} = append(agent.id.filename,'.mat');
 
-loadfilename{1} = '6_20_test.mat';
-
-% loadfilename{1} = 'EstimationResult_12state_6_19_test_circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = 'EstimationResult_12state_6_20_circle_test.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_6_19_test.mat';
 % loadfilename{3} = 'EstimationResult_12state_6_19_circle_InputandConst_ByLinear_range=change.mat';
 
@@ -25,7 +23,7 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 %何ステップまで表示するか
 %ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
 % stepN = 501;
-stepN = 231; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
+stepN = 31; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 % flg.ylimHoldがtrueのときのplot y範囲

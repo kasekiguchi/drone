@@ -39,6 +39,7 @@ end
 %% 各グラフで出力
 num = input('出力するグラフ形態を選択してください(0:各グラフで出力,1:いっぺんに出力)：','s'); %0:各グラフで出力,1:いっぺんに出力
 selection = str2double(num); %文字列を数値に変換
+
 if selection == 0
 close all
 
@@ -67,6 +68,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','south
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 hold off
+title('Position p of agent1');
 
 %姿勢角q
 figure(2)
@@ -82,6 +84,7 @@ lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
 hold off
+title('Attitude q of agent1');
 
 %速度v
 figure(3)
@@ -97,6 +100,7 @@ lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
 hold off
+title('Velocity v of agent1');
 
 %角速度w
 figure(4)
@@ -112,12 +116,30 @@ lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
 hold off
+title('Angular velocity w of agent1');
 
-figure
+figure(5)
 plot(data.x,data.y);
 
-figure
+figure(6)
 plot3(data.x,data.y,data.z);
+
+%入力
+figure(7)
+plot(data.t,data.u1,'LineWidth',1);
+xlabel('Time [s]');
+ylabel('u');
+hold on
+grid on
+plot(data.t,data.u2,'LineWidth',1);
+plot(data.t,data.u3,'LineWidth',1);
+plot(data.t,data.u4,'LineWidth',1);
+lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd.NumColumns = columnomber;
+xlim([data.t(1) data.t(end)])
+hold off
+title('Input u of agent1');
 
 else
 %% いっぺんに出力
@@ -128,7 +150,7 @@ newcolors = [0 0.4470 0.7410
              0.4660 0.6740 0.1880];
 colororder(newcolors)
 columnomber = 3; %凡例の並べ方調整
-Fsize.lgd = 14; %凡例の大きさ調整
+Fsize.lgd = 12; %凡例の大きさ調整
 
 num = 3;
 % xlim([data.t(1) data.t(end)])
@@ -193,9 +215,23 @@ hold off
 title('Angular velocity w of agent1');
 
 subplot(2,num,5);
-plot(data.x,data.y);
-xlabel('x');
-ylabel('y');
+% plot(data.x,data.y);
+% xlabel('x');
+% ylabel('y');
+plot(data.t,data.u1,'LineWidth',1);
+xlabel('Time [s]');
+ylabel('u');
+hold on
+grid on
+plot(data.t,data.u2,'LineWidth',1);
+plot(data.t,data.u3,'LineWidth',1);
+plot(data.t,data.u4,'LineWidth',1);
+lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd.NumColumns = columnomber;
+xlim([data.t(1) data.t(end)])
+hold off
+title('Input u of agent1');
 
 subplot(2,num,6);
 plot3(data.x,data.y,data.z);
