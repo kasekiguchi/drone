@@ -17,6 +17,8 @@ classdef DRAW_COOPERATIVE_DRONES
     rotor_r= 0.0392;
     load
     target
+    rho
+    li
   end
 
   methods
@@ -34,8 +36,12 @@ classdef DRAW_COOPERATIVE_DRONES
       %     param.mp4 = 0;
       % end
       param = struct(varargin{:});
-  obj.target = param.target;
-      data = logger.data(param.target,"p","e");
+      obj.target = param.target;
+      rhostr=param.self.parameter.parameter_name(contains(param.self.parameter.parameter_name,"rho"))';
+      obj.rho = param.self.parameter.get(rhostr);
+      listr=param.self.parameter.parameter_name(contains(param.self.parameter.parameter_name,"li"))';
+      obj.li = param.self.parameter.get(listr);
+      data = logger.data(1,"p","e");
       tM = max(data);
       tm = min(data);
       M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
@@ -57,7 +63,7 @@ classdef DRAW_COOPERATIVE_DRONES
         varargin = {varargin{:},'ax',ax};
       end
       obj=obj.gen_frame(varargin{:});
-      obj=obj.gen_load(varargin{:},'cube',[1,2,1]);
+      obj=obj.gen_load(varargin{:},'cube',[sum(abs(obj.rho(1:3:end)))/2,sum(abs(obj.rho(2:3:end)))/2,sum(abs(obj.rho(3:3:end)))/2]);
 
       view(ax,3)
       grid(ax,'on')
@@ -137,16 +143,16 @@ classdef DRAW_COOPERATIVE_DRONES
       param = struct(varargin{:});
       ax = obj.ax;
 
-      a = param.cube(1);
-      b = param.cube(2);
-      c = param.cube(3);
+      a = param.cube(1)/2;
+      b = param.cube(2)/2;
+      c = param.cube(3)/2;
       Points = [-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c];
       Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
       h = trisurf(triangulation(Tri,Points));
       ttt = hgtransform('Parent',ax); set(h,'Parent',ttt); % 推力を慣性座標と紐づけ
       obj.load = ttt;
     end
-    function draw(obj,target,p,q,u)
+    function draw(obj,target,p0,q0,p,q,u,rho)
       % obj.draw(p,q,u)
       % p : 一ベクトル
       % q = [x,y,z,th] : 回転軸[x,y,z]にth回転
@@ -154,9 +160,12 @@ classdef DRAW_COOPERATIVE_DRONES
       arguments
         obj
         target
+        p0
+        q0
         p
-        q
-        u = [1;1;1;1];
+        q       
+        u
+        rho
       end
 
       for n = target
@@ -182,6 +191,12 @@ classdef DRAW_COOPERATIVE_DRONES
         % Concatenate the transforms and
         % set the transform Matrix property
         set(frame,'Matrix',Txyz*R);
+        
+        R0 = makehgtform('axisrotate',q0(1,1:3),q0(1,4));
+        % Translational matrix
+        Txyz0 = makehgtform('translate',p0);
+        set(obj.load,'Matrix',Txyz0*R0);
+      plot3([rho(1,1,n);p(1,1,n)],[rho(1,2,n);p(1,2,n)],[rho(1,3,n);p(1,3,n)]);
       end
       drawnow
     end
@@ -207,22 +222,21 @@ classdef DRAW_COOPERATIVE_DRONES
       % end
       param = struct(varargin{:});
       ax = obj.ax;
-      %p = logger.data(param.target,"p","e");
-      %q = logger.data(param.target,"q","e");
-      p = logger.data(param.target,"p","p");
-      u = logger.data(param.target,"input");
-      r = logger.data(param.target,"p","r");
-      p = reshape(p,size(p,1),3,length(param.target));
-      u = reshape(u,size(u,1),size(u,2),length(param.target));
-      r = reshape(r,size(r,1),3,length(param.target));
-      Q = obj.gen_Q(logger);
+      p = obj.data_format(logger,1,"p","p");
+      q = obj.data_format(logger,1,"plant.result.state.Q","p");
+      Q = obj.gen_Q(1,q);
+      u = obj.data_format(logger,obj.target,"input","");% N x 4m
+      r = obj.data_format(logger,1,"p","r");
+      qi = obj.data_format(logger,obj.target,"plant.result.state.qi","p");
+      Qit = obj.data_format(logger,obj.target,"plant.result.state.Qi","p");
+      Qi = obj.gen_Q(obj.target,Qit);
+      [pi,rho] = obj.gen_pi(p,Q,qi);
 
       if isfield(param, "gif")
         sizen = 256;
         delaytime = 0;
         filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
       end
-
       if isfield(param,'mp4')
         sizen = 256;
         delaytime = 0;
@@ -245,24 +259,18 @@ classdef DRAW_COOPERATIVE_DRONES
         if isfield(param,'Motive_ref')
           addpoints(ax,f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
         else
-          plot3(ax,r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
+          %plot3(ax,r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
+          plot3(ax,r(:,1),r(:,2),r(:,3),'k');
         end
-        if ~isempty(param.opt_plot)
+        if isfield(param,"opt_plot")
           param.self.show(param.opt_plot,"logger",logger,"k",i,varargin{:});
         end
         if ~isvalid(obj.frame)
           obj=obj.gen_frame("target",param.target,"ax" ,ax);
         end
-        obj.draw(param.target,p(i,:,param.target),Q(i,:,param.target),u(i,:,param.target));
-        if isfield(param,'realtime')
-          delta = toc(tRealtime);
-          if t(i+1)-t(i) > delta
-            pause(t(i+1)-t(i) - delta);
-          end
-          tRealtime = tic;
-        else
-          pause(0.01);
-        end
+        obj.draw(param.target,p(i,:),Q(i,:),pi(i,:,param.target),Qi(i,:,param.target),u(i,:,param.target),rho(i,:,param.target));
+
+        pause(0.01);
         if isfield(param,'gif')
           im = frame2im(getframe(obj.ax));
           [imind,cm] = rgb2ind(im,sizen);
@@ -281,11 +289,20 @@ classdef DRAW_COOPERATIVE_DRONES
         close(v);
       end
     end
-    function Q = gen_Q(obj,logger)
-      % Q = 3rd array : (time, q , target)
-      q = logger.data(obj.target,"q","p");
-      q = reshape(q,size(q,1),size(q,2)/length(param.target),length(obj.target));
-       for n = 1:length(obj.target)
+    function [pi,rho] = gen_pi(obj,p,Q,qi)
+      % pi(k,:,i) = [xi yi zi] at time k
+      Qrho = cell2mat(arrayfun(@(rho) quat_times_vec(Q',rho{1})',mat2cell(reshape(obj.rho,3,[]),3,ones(1,length(obj.target))),'UniformOutput',false));
+      q = repmat(p,1,length(obj.target))+Qrho;
+      rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target));
+      pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));      
+    end
+    function D = data_format(obj,logger,target,var,att)
+      % D = 3dim array : (time, var , target)
+      q = logger.data(1,var,att);
+      D = reshape(q,size(q,1),size(q,2)/length(target),length(target));      
+    end
+    function Q = gen_Q(obj,target,q)
+       for n = 1:length(target)
         switch size(q(:,:,n),2)
           case 3
             Q1 = quaternion(q(:,:,n),'euler','XYZ','frame');
@@ -300,13 +317,6 @@ classdef DRAW_COOPERATIVE_DRONES
         Q(tmp==0,:,n) = 0;
         Q(tmp==0,1,n) = 1;
         Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
-      end
-    end
-    function q = convert_q(obj,Q)
-      n = length(Q)/length(obj.target);
-      q = obj.Q(1:n);
-      for i = 2:length(obj.target)
-         q(:,:,i) = Q((i-1)*n+1:i*n);
       end
     end
   end
