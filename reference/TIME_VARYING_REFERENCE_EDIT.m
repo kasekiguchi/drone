@@ -57,7 +57,8 @@ classdef TIME_VARYING_REFERENCE_EDIT < handle
             obj.result.state.v = [0;0;0];
            end
            % obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
-           obj.result.state.q = [0.25*sin(t/2);0.2*cos(t);0.5*sin(t)];
+           w = 2*pi/10;
+           obj.result.state.q = [0.3*sin(w*t);0.4*cos(w*t-pi);0.5*sin(w*t)];
            result = obj.result;
         end
         function show(obj, logger)

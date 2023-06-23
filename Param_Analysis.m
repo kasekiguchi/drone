@@ -17,29 +17,19 @@ illustration= 1; %1で図示，0で非表示
 
 %% Log Dataの読み取りと格納
 
-load('t50');
-len = length(log.Data.agent.sensor.result);
-robot_p  = zeros(size(log.Data.agent.sensor.result{1,1}.state.p,1),len);
-robot_pt  = zeros(size(log.Data.agent.plant.result{1,1}.state.p,1),len);
-robot_vt  = zeros(size(log.Data.agent.plant.result{1,1}.state.v,1),len);
-robot_q  = zeros(size(log.Data.agent.sensor.result{1,1}.state.q,1),len);
-robot_qt  = zeros(size(log.Data.agent.plant.result{1,1}.state.q,1),len);
-sensor_data = zeros(size(log.Data.agent.sensor.result{1,1}.length,1),len);
-ref_p = zeros(size(log.Data.agent.reference.result{1, 1}.state.p,1),len);
-ref_q = zeros(size(log.Data.agent.reference.result{1, 1}.state.q,1),len);
-for i=1:len
-robot_p(:,i) = log.Data.agent.sensor.result{1,i}.state.p;
-robot_pt(:,i) = log.Data.agent.plant.result{1,i}.state.p;
-robot_q(:,i) = log.Data.agent.sensor.result{1,i}.state.q;
-robot_qt(:,i) = log.Data.agent.plant.result{1,i}.state.q;
-sensor_data(:,i) = log.Data.agent.sensor.result{1,i}.length;
-ref_p(:,i) = log.Data.agent.reference.result{1,i}.state.p;
-ref_q(:,i) = log.Data.agent.reference.result{1,i}.state.q;
-end
+log = LOGGER('./Data/Log(23-Jun-2023_17_59_52).mat');
+robot_p  = log.data(1,"p","s")';
+robot_pt  = log.data(1,"p","p")';
+robot_vt  = log.data(1,"v","p")';
+robot_q  = log.data(1,"q","s")';
+robot_qt  = log.data(1,"q","p")';
+sensor_data = log.data(1,"length","s")';
+ref_p = log.data(1,"p","r")';
+ref_q = log.data(1,"q","r")';
 
 %% 解析(回帰分析)
 [A,X,Av,Xv] = param_analysis(robot_pt,robot_qt,sensor_data,NaN);
-% [A,X,Av,Xv] = param_analysis(robot_pt(:,1000:2500),robot_qt(:,1000:2500),sensor_data(:,1000:2500),NaN);
+% [A,X,Av,Xv] = param_analysis(robot_pth(:,1000:2500),robot_qt(:,1000:2500),sensor_data(:,1000:2500),NaN);
 S = svd(A);% 特異値の計算
 %% パラメータの計算
 offset_esta = [X(4)/X(1);X(5)/X(1);X(6)/X(1);];
@@ -47,10 +37,10 @@ offset_estb = [X(7)/X(2);X(8)/X(2);X(9)/X(2);];
 offset_estc = [X(10)/X(3);X(11)/X(3);X(12)/X(3);];
 offset_est = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:6);X(7:9);X(10:12)];
 % offset_estS = pinv([XS(1)*eye(3);XS(2)*eye(3);XS(3)*eye(3)])*[XS(4:6);XS(7:9);XS(10:12)];
-R_sens_est1a = [X(13)/X(1),X(14)/X(1),X(15)/X(1)];
-R_sens_est1b = [X(16)/X(2),X(17)/X(2),X(18)/X(2)];
-R_sens_est1c = [X(19)/X(3),X(20)/X(3),X(21)/X(3)];
-R_sens_est1 = [R_sens_est1a;R_sens_est1b;R_sens_est1c];
+R_sens_est1a = [X(13)/X(1),X(14)/X(1),X(15)/X(1)]';
+R_sens_est1b = [X(16)/X(2),X(17)/X(2),X(18)/X(2)]';
+R_sens_est1c = [X(19)/X(3),X(20)/X(3),X(21)/X(3)]';
+R_sens_est1 = [R_sens_est1a,R_sens_est1b,R_sens_est1c];
 %% 図示
 if illustration == 1
     fig1=figure(1);
@@ -59,7 +49,7 @@ if illustration == 1
     hold on;
     plot(robot_p(2,:),'LineWidth', 2);
     plot(robot_p(3,:),'LineWidth', 2);
-    legend('x,y,z');
+    legend('\it{px}','\it{py}','\it{pz}','FontSize', 18);
     hold off;
     xlabel('step');
     ylabel('[m]');
@@ -70,7 +60,7 @@ if illustration == 1
     hold on;
     plot(robot_q(2,:),'LineWidth', 2);
     plot(robot_q(3,:),'LineWidth', 2);
-    legend('w_x,w_y,w_z');
+    legend('\it{w}_{\it{\phi}}','\it{w}_{\it{\theta}}','\it{w}_{\it{\psi}}','FontSize', 18);
     hold off;
     xlabel('step');
     ylabel('angle');
@@ -81,7 +71,7 @@ if illustration == 1
     hold on;
     plot(robot_vt(2,:),'LineWidth', 2);
     plot(robot_vt(3,:),'LineWidth', 2);
-    legend('v_x,v_y,v_z');
+    legend('\it{v}_{\it{\phi}}','\it{v}_{\it{\theta}}','\it{v}_{\it{\psi}}','FontSize', 18);
     fig4=figure(4);
     fig4.Color = 'white';
     plot(sensor_data);
