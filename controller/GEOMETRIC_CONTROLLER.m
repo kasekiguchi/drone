@@ -35,6 +35,10 @@ classdef GEOMETRIC_CONTROLLER < handle
 
       e3 = [0;0;1];
       J0 = diag([obj.param.P(3),obj.param.P(4),obj.param.P(5)]);
+      J1 = diag([obj.param.P(26),obj.param.P(27),obj.param.P(28)]);
+      J2 = diag([obj.param.P(29),obj.param.P(30),obj.param.P(31)]);
+      J3 = diag([obj.param.P(32),obj.param.P(33),obj.param.P(34)]);
+      J4 = diag([obj.param.P(35),obj.param.P(36),obj.param.P(37)]);
       model = obj.self.estimator.result.state;
       ref = obj.self.reference.result;
       pd = ref.state.p;
@@ -66,6 +70,8 @@ classdef GEOMETRIC_CONTROLLER < handle
       kO0 = obj.param.F4; 
       kq = obj.param.F5; 
       kw = obj.param.F6; 
+      kr = obj.param.F7; 
+      kO = obj.param.F8; 
 %       xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
 
       % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
@@ -135,15 +141,47 @@ classdef GEOMETRIC_CONTROLLER < handle
       b3i3 = - u1/norm(u3);
       b3i4 = - u1/norm(u4);
 
+      b1i1 = [vd,vd,0];
+      b1i2 = [vd,vd,0];
+      b1i3 = [vd,vd,0];
+      b1i4 = [vd,vd,0];
+
+      Ric1 = [-Skew(b3i1)^2*b1i1/norm(Skew(b3i1)^2*b1i1), Skew(b3i1)*b1i1/norm(Skew(b3i1)*b1i1), b1i1];
+      Ric2 = [-Skew(b3i2)^2*b1i2/norm(Skew(b3i2)^2*b1i2), Skew(b3i2)*b1i2/norm(Skew(b3i2)*b1i2), b1i2];
+      Ric3 = [-Skew(b3i3)^2*b1i3/norm(Skew(b3i3)^2*b1i3), Skew(b3i3)*b1i3/norm(Skew(b3i3)*b1i3), b1i3];
+      Ric4 = [-Skew(b3i4)^2*b1i4/norm(Skew(b3i4)^2*b1i4), Skew(b3i4)*b1i4/norm(Skew(b3i4)*b1i4), b1i4];
+
+      dRic1 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
+      dRic2 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
+      dRic3 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
+      dRic4 = [ddxd/norm(ddxd), ddxd/norm(ddxd), 0];
+
+      Oic1 =Vee(Ric1'*dRic1);
+      Oic2 =Vee(Ric2'*dRic2);
+      Oic3 =Vee(Ric3'*dRic3);
+      Oic4 =Vee(Ric4'*dRic4);
+
+      eRi1 = 1/2*Vee(Ric1'*Rb1-Rb1'*Ric1);
+      eRi2 = 1/2*Vee(Ric2'*Rb2-Rb2'*Ric2);
+      eRi3 = 1/2*Vee(Ric3'*Rb3-Rb3'*Ric3);
+      eRi4 = 1/2*Vee(Ric4'*Rb4-Rb4'*Ric4);
+
+      eOi1 = model.Oi(1:3)-Rb1'*Rb1*Oic1;
+      eOi2 = model.Oi(4:6)-Rb2'*Rb2*Oic2;
+      eOi3 = model.Oi(7:9)-Rb3'*Rb3*Oic3;
+      eOi4 = model.Oi(10:12)-Rb4'*Rb4*Oic4;
+
       f1 = -u1'*Rb1*e3;
       f2 = -u2'*Rb2*e3;
       f3 = -u3'*Rb3*e3;
       f4 = -u4'*Rb4*e3;
 
-      M1=1;
-      M2=1;
-      M3=1;
-      M4=1;
+      epsilon = 1;
+
+      M1=- kr/epsilon^2*eRi1 - kO/epsilon*eOi1 + cross(model.Oi(1:3),J1*model.Oi(1:3));
+      M2=- kr/epsilon^2*eRi2 - kO/epsilon*eOi2 + cross(model.Oi(4:6),J1*model.Oi(4:6));
+      M3=- kr/epsilon^2*eRi3 - kO/epsilon*eOi3 + cross(model.Oi(7:9),J1*model.Oi(7:9));
+      M4=- kr/epsilon^2*eRi4 - kO/epsilon*eOi4 + cross(model.Oi(10:12),J1*model.Oi(10:12));
 
       obj.result.input = [f1(3);M1;f2(3);M2;f3(3);M3;f4(3);M4]';
 

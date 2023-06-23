@@ -12,6 +12,8 @@ Controller.F3=1; % ydiag([100,10,10,1])
 Controller.F4=1;
 Controller.F5=1;
 Controller.F6=1;% ヨー角 
+Controller.F7=1;
+Controller.F8=1;
 
 
 % % dt = 0.2 くらいの時用
