@@ -146,6 +146,7 @@ classdef SIR_model < handle
                 colorbar;
             end
             view(2)
+            % マップ範囲を決めている
             xlabel('\sl x','FontSize',25);
             ylabel('\sl y','FontSize',25);
             xlim([1,101]);  %nx+1
@@ -174,9 +175,9 @@ classdef SIR_model < handle
                 filename = "";
             end
             if filename==""
-                F=make_animation(find(logger.k),@(k,~) SIR_model.draw_state(nx,ny,SIR_model.loggerk(logger,k)),@()[],output);
+                F=make_animation(find(logger.k),1,@(k,~) SIR_model.draw_state(nx,ny,SIR_model.loggerk(logger,k)),@()[],output);
             else
-                F=make_animation(find(logger.k),@(k,~) SIR_model.draw_state(nx,ny,SIR_model.loggerk(logger,k)),@()[],output,filename);
+                F=make_animation(find(logger.k),1,@(k,~) SIR_model.draw_state(nx,ny,SIR_model.loggerk(logger,k)),@()[],output,filename);
             end
         end
         function W=loggerk(logger,k)

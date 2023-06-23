@@ -31,21 +31,29 @@ nx = 130; % x axis grid number
 ny = 130; % y axis grid number
 N = nx*ny; % total grid number
 Il = 30; % length of I
+maxv = 0.04;    % 確率の上限，シミュレーションの進行に関係するパラメータであり、適当な値を入力
+maptrue = 300;   % マップ直径m
+meas = maptrue/100; % 縮尺換算用の関数
+map_extra = nx * ny - nx_app * ny_app ;     %見えない部分の総セル数
 nx_app = 100; % 見かけ上のx辺
 ny_app = 100; % 見かけ上のy辺
+wind = 9;  %風向 [1つ前:15]
+wind2 = 0;  %風速x[m/s] 無風は0.01とかに
+% 0:南 1:南南西 2:南西 3:西南西 4:西 5:西北西 6:北西 7:北北西 
+% 8:北 9:北北東 10:北東 11:東北東 12:東 13:東南東 14:南東 15:南南東
+mapd = 8;  % map difference マップ差異（風向の対応関係がマップごとに異なるため、その補正項）
+build = 1;  %1で重み分類（秋山）、0で分類無し
+
 %% environment definition
-%[E,W] = make_grid_graph(nx,ny,@(x,y)0.1*ones(size(x))); % flat weight
-%[E,W] = make_grid_graph(nx,ny,@(x,y)0.01*[1:size(x,2)]'.^2.*ones(size(x)),1); % flat weight
-%[E,W] = make_grid_graph(nx,ny,@(x,y)rand(size(x)),0.07); % random weight
- cx = 80;cy = 80; % biased weight
- % sum(W9,2)で割るときは0.3程度，割らないときは0.04程度が適正? 0.3でも良さそう
-%  pi = 2;
-%  gi = 1.3;
-  pi = 1;
-  gi = 0.8;
-%  [E,E2,W] = make_grid_graph(nx,ny,@(x,y) gi*max(cx,nx-cx)^(pi)*gi*max(cy,ny-cy)^(pi)*(0.3+0.2*rand(size(x)))+(-abs(x-cx).^(pi)+gi*max(cx,nx-cx)^(pi)).*(-abs(y-cy).^(pi)+gi*max(cy,ny-cy)^(pi)),0.04);
- [E,E2,W] = make_grid_graph(nx,ny,0.01,0.04,3);
- % 
+%  [E,E2,W] = make_grid_graph(nx,ny,meas,wind,wind2,mapd,maxv);
+ [E,E2,W] = make_grid_graph2(nx,ny,meas,wind,wind2,mapd,build,maxv);
+ % make_grid_graphで糸魚川，make_grid_graph2で世田谷
+
+ % Wの生成に数時間かかるため、make_grid_graphからWのみ独立
+ [W] = make_grid_graph3(nx,ny,meas,build,maxv);
+%%
+ [E,E2] = make_fire_graph(nx,ny,meas,W,wind,wind2,mapd,maxv);
+
  %[i,j,v]=find(E);
 %G=digraph(i,j,v); % グラフ構造は自明なので描画するメリットはなさそう．
 %figure()
@@ -58,15 +66,16 @@ end
 %%
    L = speye(size(E)) - E/eigs(E,1);
     [V,Eig,Flag]=eigs(L',1,'smallestabs','Tolerance',1e-20); % V : alt page rank
+   L = sparse(L);
     %[V2,Eig2,Flag2]=eigs(E'/eigs(E,1),1,'largestreal','Tolerance',1e-20);
     %map.draw_state(nx,ny,reshape(V,[nx,ny]));% V2だとAPRが負になることがある．Vの方が数値的に安定そう．符号自由度についてはVの方が悪そうなのになぜだろう？
 %% 消火しない場合の燃え広がり方 (h = 0)
 % 200ステップで端に行かない程度の重みがAstar でやる場合適切
 % Directでやる場合はもっと早い燃え広がりでも対応可能
-ken = 200; % シミュレーションステップ ke_natural
-fFPosition = 7; % flag fire position
+ken = 400; % シミュレーションステップ ke_natural
+fFPosition = 13; % flag fire position
+% 7:GIS糸魚川, 13:世田谷500m北東下, 14:世田谷300m北東下
 h = 0; % extinction probability
-map_extra = nx * ny - nx_app * ny_app ;     %見えない部分の総セル数
 W_vec = reshape(W,N,1);
 map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);
 %%
@@ -158,8 +167,8 @@ map.draw_state(nx,ny,W);
 % nx=100, ny=100 でマップ上に表示
 % c   %建物重みマップの表示
 %% animations
-% map.draw_movie(logger,nx,ny,0);
-map.draw_movie(logger,nx,ny,1,"2022Dec21_Natural_Log2");    %natural_expansion 
+map.draw_movie(logger,nx,ny,0);
+% map.draw_movie(logger,nx,ny,1,"20230602_世田谷_2multiW_200_fP北中下_風向北北東2");    %natural_expansion 
 %map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
 %M=map.draw_movie(logger,nx,ny,2);
 %map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
@@ -190,19 +199,21 @@ xlim([0 ken]);
 ylim([0 nx_app * ny_app]);
 hold off
 %% Monte-Carlo simulation
-unum = 15; % 消火点の数（10機のUAV）
-ke = 200; % シミュレーションステップ
-kn = 1;% number of Monte-Carlo simulation
+% 90min =~ 30step
+unum = 0; % 消火点の数（10機のUAV）
+ke = 100; % シミュレーションステップ
+kn = 100;% number of Monte-Carlo simulation
 % 手法選択
-fMethod = "WAPR"; % Weighted Alt Page Rank
+% fMethod = "WAPR"; % Weighted Alt Page Rank
 % fMethod = "APR"; % Alt Page Rank
-% fMethod = "Weight"; % 重み行列
+fMethod = "Weight"; % 重み行列
 % fDynamics = "Astar"; % 消火方法：A star or Direct
 fDynamics = "Direct"; % 消火方法：A star or Direct
 vi = 5; % 消火の必要がない部分を飛ばす距離
 %map.draw_state(nx,ny,map.loggerk(logger,ke));
-fFPosition = 6;
-h = 0.1; % extinction probability
+fFPosition = 12;
+h = 0.1 * (3/meas); % extinction probability
+W_vec = reshape(W,N,1);
 clear Logger
 
 if fMethod=="WAPR"
@@ -234,8 +245,8 @@ else
     disp("Method Error");
 end
 w2 = 1/((XM-Xm)/max(nx,ny))
-V_mat = reshape(V,[nx,ny]);     %重みAPRグラフ表示のための正方行列化
-map.draw_state(nx,ny,V_mat);    %重みAPRのグラフ表示
+% V_mat = reshape(V,[nx,ny]);     %重みAPRグラフ表示のための正方行列化
+% map.draw_state(nx,ny,V_mat);    %重みAPRのグラフ表示
 % map.draw_state(nx,ny,reshape(V,[nx,ny]))
 %% MC simulation 時間かかる
 for k = 1:kn
@@ -245,44 +256,65 @@ for k = 1:kn
     K(k);
 end
 %% %%% 違法増築1 Logデータの保存
-map.save('Logger_Feb23_WAPR_Direct_unum15_vi5_h0.1_Log1.mat',Logger);
+map.save('230608_Log100[100s]_FP12北東中(66,86)_W_Direct_5st_h0_世田谷300改W.mat',Logger);
 % map.save('K_Feb22_WAPR_Direct_unum15_vi5_h0.1_Log2.mat',K);
 %% %%% 違法増築2 動画の生成と保存
+% figure('Position', [0 -500 1100 1000]);
 % Logger2=map.load('Logger_APR_Astar_100_30_09_004_10_5.mat');
 % K2 = map.load('K_APR_Astar_100_30_09_004_10_5.mat');
-% md = map.draw_state(nx,ny,map.loggerk(Logger,10));    %nステップ目を画像出力
-% M = map.draw_movie(Logger(1),nx,ny,1);    %動画を出力
-% M=map.draw_movie(Logger(1),nx,ny,1,"2022Feb22_WAPR_Direct_unum15_kn30_vi5_h0.1_Log64");  %名前を付けて動画を出力
+md = map.draw_state(nx,ny,map.loggerk(Logger(3),100));    %nステップ目を画像出力
+% M = map.draw_movie(Logger(40),nx,ny,0);    %動画を出力
+% M=map.draw_movie(Logger(34),nx,ny,1,"W_Direct_unum5sta_h0.1_Log34");  %名前を付けて動画を出力
 %% %%% 違法増築3 Logデータの読み込み
-Logger=map.load('Logger_Feb22_WAPR_Direct_unum15_vi5_h0.1_Log64.mat');
-%% plot 2
-kre = K-1;
-% kre = 200;    %Kの値は手動入力
-tmpS2 = 0;
-tmpI2 = 0;
-tmpR2 = 0;
-tmp2=[];
-I2.I = logical (Logger.I)
-for i = 1:kre
-    tmpS2(i)=sum(Logger.S(:,i))-map_extra; %logger(i)内にあるRの200s時(ke)の値の合計
-    tmpI2(i)=sum(I2.I(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
-    tmpR2(i)=sum(Logger.R(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
+Logger=map.load('230508_Log100[300s]_無風_W_Direct_5st_h0.1_糸魚川M.mat');
+%% plot 2　いろいろな統計データの出力項
+% 消失セル数の算出
+clear xi
+for xi = 1:kn
+    kre = size(Logger(xi).I);
+    kre = kre(1,2);  %シミュレーションの最終ステップ数
+    tmpS2 = 0;
+    tmpI2 = 0;
+    tmpR2 = 0;
+    tmp2=[];
+    I2.I = logical (Logger(xi).I);
+    for i = 1:kre
+        tmpS2(i)=sum(Logger(xi).S(:,i))-map_extra; %logger(i)内にあるRの200s時(ke)の値の合計
+        tmpI2(i)=sum(I2.I(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
+        tmpR2(i)=sum(Logger(xi).R(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
+    end
+    final_step(xi,1) = kre;
+    damage_all(xi,1) = tmpR2(kre)+tmpI2(kre);
 end
-damage_cell = tmpR2(kre)+tmpI2(kre)
-%%
+%% plot3
+% 特定のLOGのS,I,R遷移を出力
+xi =   34   %Logの番号
+kre2 = size(Logger(xi).I); kre2 = kre2(1,2);  %シミュレーションの最終ステップ数
+tmpS3 = 0;
+tmpI3 = 0;
+tmpR3 = 0;
+I2.I = logical (Logger(xi).I);
+for i = 1:kre2
+    tmpS3(i)=sum(Logger(xi).S(:,i))-map_extra; %logger(i)内にあるRの200s時(ke)の値の合計
+    tmpI3(i)=sum(I2.I(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
+    tmpR3(i)=sum(Logger(xi).R(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
+end
+damage_cell = tmpR3(kre2)+tmpI3(kre2)
+
 figure(2)
-plot(1:kre,tmpS2,'-g','LineWidth',2);
+plot(1:kre2,tmpS3,'-g','LineWidth',2);  %Iだけならコメントアウト
 hold on 
-plot(1:kre,tmpI2,'-b','LineWidth',2);
-plot(1:kre,tmpR2,'-r','LineWidth',2);
-legend('S','I','R');
+plot(1:kre2,tmpI3,'-b','LineWidth',2);
+plot(1:kre2,tmpR3,'-r','LineWidth',2);  %Iだけならコメントアウト
+legend('S','I','R');  %Iだけならコメントアウト
+% legend('I');        %Iだけならコメント解除
 xlabel('\sl Time step k','FontSize',20);
 ylabel('\sl Number','FontSize',20);
 set(gca,'FontSize',10);
 ax = gca;
 ax.Box = 'on';
-xlim([0 ke]);
-ylim([0 nx_app * ny_app]);
+xlim([0 kre2]);
+ylim([0 nx_app * ny_app * 1.0]);
 hold off
 
 disp('Plot ended')
@@ -315,10 +347,45 @@ switch fFPosition
         init_fy=floor(1):floor(1)+2;
     case 6
         init_fx=50;
-        init_fy=10;
+        init_fy=11;
     case 7
         init_fx=41;
         init_fy=11;
+    case 8
+        init_fx=28;
+        init_fy=8;
+    case 9
+        % 世田谷500m南西
+        init_fx=17;
+        init_fy=3;
+    case 10
+        % 世田谷500m南東
+        init_fx=71;
+        init_fy=2;
+    case 11
+        % 世田谷500m北東
+        init_fx=91;
+        init_fy=92;
+    case 12
+        % 世田谷500m北東中
+        init_fx=66;
+        init_fy=86;
+    case 13
+        % 世田谷500m北東下
+        init_fx=62;
+        init_fy=66;
+    case 14
+        % 世田谷300m北東下
+        init_fx=35;
+        init_fy=42;
+    case 15
+        % 世田谷300m北東
+        init_fx=85;
+        init_fy=85;
+    case 16
+        % 世田谷300m北東中
+        init_fx=42;
+        init_fy=77;
 end
 init_I = sparse(N,1);
 % r=randi(20,numel(init_fx),numel(init_fy))-10;
@@ -438,6 +505,16 @@ while (k <= ke) && sum(find(map.I))
     logger.R(:,k) = map.R(:);
     logger.U(:,k) = map.U(:);
     k = k+1;
+
+%     if k == 20
+%         unum = unum + 10;
+%     elseif  k == 40
+%         unum = unum + 10;
+%     elseif  k == 60
+%         unum = unum + 10;
+%     elseif  k == 120
+%         unum = unum + 5;
+%     end
 end
 end
 %% performance
