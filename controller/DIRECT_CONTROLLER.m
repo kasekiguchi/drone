@@ -24,7 +24,7 @@ classdef DIRECT_CONTROLLER < handle
                 end
             end
             obj.result.input = Ref.get();
-            obj.self.input = obj.result.input;
+            % obj.self.input = obj.result.input;
             u=obj.result;
         end
         function show(obj)

@@ -31,6 +31,15 @@ switch type
     Setting.dim = [3, 3, 0];
     Setting.state_list = ["p"];
     Setting.num_list = [3];
+case "PVQ0" % point-mass (force,angular-vel)-input model
+    dsys.A = zeros(9);
+    dsys.B = [eye(3)*dt,zeros(3,6);
+              zeros(6,3),eye(6)];
+    dsys.C = eye(9);
+    dsys.D = zeros(9);
+    Setting.dim = [9,6,2];
+    Setting.state_list = ["p","v","q"];
+    Setting.num_list = [3,3,3];
 end
 %% 共通設定
 Setting.param.A = dsys.A;
