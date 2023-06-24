@@ -74,15 +74,15 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
         function update_parameter(obj)
             for i = 1:length(obj.parameter_name)
                 if isprop(obj,obj.parameter_name(i))
-                    if strcmp(obj.type,"row")
+                    % if strcmp(obj.type,"row")
                         val = obj.(obj.parameter_name(i));
-                        if size(val,2) > 1
+                        if size(val,1) > 1
                             val = reshape(val,[1,numel(val)]);
                         end
                         obj.parameter=[obj.parameter, val];
-                    else
-                        obj.parameter.(obj.parameter_name(i)) = obj.(obj.parameter_name(i));
-                    end
+                    % else
+                    %     obj.parameter.(obj.parameter_name(i)) = obj.(obj.parameter_name(i));
+                    % end
                 else % propertyに無いパラメータ
                     error("ACSL : this is not a parameter.");
                 end

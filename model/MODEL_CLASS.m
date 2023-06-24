@@ -102,7 +102,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       end
       u = obj.self.controller.result.input;
       if isempty(obj.param)
-        obj.param = obj.self.parameter.get();%varargin{5}.parameter.get();
+        obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
       % if isfield(opts, 'param')
       %     obj.param = opts.param;

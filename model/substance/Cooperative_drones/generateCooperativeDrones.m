@@ -60,6 +60,7 @@ Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称�
 % リンク: 角度，角速度 : N x 6
 % ドローン:姿勢角，角速度
 x = [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
+ % 13 + 13 * N states
 u = reshape([fi;Mi],4*N,1);
 %% 
 % (1)
@@ -107,6 +108,7 @@ B7 = subs(eq7,[ddx0;do0],[0;0;0;0;0;0]);
 tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq7-B7,'UniformOutput',false);
 A7 = vertcat(tmp{:});
 Addx0do0 = [A6;A7];
+%%
 matlabFunction(Addx0do0,"File","Addx0do0_"+string(N),"Vars",{x u physicalParam},'outputs',{'A'})
 syms iA [6 6] 
 matlabFunction(-iA*[B6;B7],"File","ddx0do0_"+string(N),"Vars",{x u physicalParam iA},'outputs',{'dX'});
@@ -125,6 +127,54 @@ doi = vertcat(tmp{:});
 
 %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
 matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
+%% z up version : euler parameter
+syms X [13*(N+1) 1] real
+R = diag([1 -1 -1]);
+rp = [1 -1 -1]; rq = [1 1 -1 -1];
+Rzup = [rp, rq, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rq, 1,N), repmat(rp, 1,N)]';
+rX = Rzup.*X;
+%matlabFunction(subs(Addx0do0,x,rX),"File","zup_Addx0do0_"+string(N),"Vars",{X u physicalParam},'outputs',{'A'})
+%syms iA [6 6] 
+%matlabFunction(subs(-iA*[B6;B7],x,rX),"File","zup_ddx0do0_"+string(N),"Vars",{X u physicalParam iA},'outputs',{'dX'});
+matlabFunction(subs(Rzup.*[dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],x,rX),"File","zup_tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{X u physicalParam ddX},'outputs',{'dX'});
+%% euler angle model : roll-pitch-yaw(ZYX) euler angle 
+syms eu0 [3 1] real
+syms eui [3 N] real
+syms deu0 [3 1] real
+syms deui [3 N] real
+Eq0 = simplify(Eul2Quat(eu0));
+Eqi = simplify(Eul2Quat(eui));
+der0 = dEulerdt(eu0,o0);
+deri = dEulerdt(eui,oi);
+%%
+xeu = [x0;eu0;dx0;o0;reshape([qi,wi],6*N,1);reshape(eui,3*N,1);reshape(oi,3*N,1)];
+% 12 + 12*N states
+fgueu = subs([dx0;der0;ddX;dqi;vertcat(rhs8{:});reshape(deri,3*N,1);doi],[r0,ri],[Eq0,Eqi]);
+
+%% z up version : euler angle
+syms X [12*(N+1) 1] real
+R = diag([1 -1 -1]);
+rp = [1 -1 -1];
+rXeu = [rp, rp, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rp, 1,N), repmat(rp, 1,N)]'.*X;
+matlabFunction(subs(simplify(subs(Addx0do0,[r0,ri],[Eq0,Eqi])),xeu,rXeu),"File","zup_eul_Addx0do0_"+string(N),"Vars",{X u physicalParam},'outputs',{'A'})
+%%
+syms iA [6 6] 
+matlabFunction(subs(subs(-iA*[B6;B7],[r0,ri],[Eq0,Eqi]),xeu,rXeu),"File","zup_eul_ddx0do0_"+string(N),"Vars",{X u physicalParam iA},'outputs',{'dX'});
+%%
+matlabFunction(subs(fgueu,xeu,rXeu),"File","zup_eul_tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{X u physicalParam ddX},'outputs',{'dX'});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -446,3 +496,5 @@ dxdata = reshape(cable_suspended_rigid_body_with_4_drones(xdata,udata,P),[5,13])
 %%
 eul = [pi/4 0 0];
 qZYX = eul2quat(eul)
+
+%%

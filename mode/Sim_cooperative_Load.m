@@ -9,19 +9,21 @@ logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 initial_state.p = [0;0;0];
-initial_state.Q = [1;0;0;0];
+%initial_state.Q = [1;0;0;0];
+initial_state.Q = [0;0;0];
 initial_state.v = [0;0;0];
 initial_state.O = [0;0;0];
-initial_state.qi = [0;0;1;0;0;1;0;0;1;0;0;1];
+initial_state.qi = -1*[0;0;1;0;0;1;0;0;1;0;0;1];
 initial_state.wi = [0;0;0;0;0;0;0;0;0;0;0;0];
-initial_state.Qi = [1;0;0;0;1;0;0;0;1;0;0;0;1;0;0;0];
+%initial_state.Qi = [1;0;0;0;1;0;0;0;1;0;0;0;1;0;0;0];
+initial_state.Qi = [0;0;0;0;0;0;0;0;0;0;0;0];
 initial_state.Oi = [0;0;0;0;0;0;0;0;0;0;0;0];
 
 
 
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1));
-agent.parameter = DRONE_PARAM_Cooperative_Load("DIATONE");
+agent.parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE");
 % agent.model =
 agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1)))); % estimator.result.state = sensor.result.state
 agent.sensor = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
@@ -32,6 +34,8 @@ agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 run("ExpBase");
 
 %%
+clc
+for i = 1:100
 agent(1).sensor.do(time,'f');
 agent(1).estimator.do(time,'f');
 agent(1).reference.do(time,'f');
@@ -40,6 +44,8 @@ agent(1).plant.do(time,'f');
 logger.logging(time,'f',agent);
 tmp = logger.data(1,"plant.result.state.Qi","");
 time.t = time.t + time.dt;
+end
+%%
 mov = DRAW_COOPERATIVE_DRONES(logger, "self",agent,"target", 1:4);
 mov.animation(logger,'target',1:4)
 function dfunc(app)
