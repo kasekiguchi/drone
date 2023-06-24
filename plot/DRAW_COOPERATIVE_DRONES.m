@@ -13,8 +13,9 @@ classdef DRAW_COOPERATIVE_DRONES
     ylim
     zlim
     L
-    frame_size = [0.1170, 0.0932];
-    rotor_r= 0.0392;
+    frame_size = [0.33, 0.3];
+    system_size = [1.5 1.5 1];
+    rotor_r= 0.1;
     load
     target
     rho
@@ -37,13 +38,15 @@ classdef DRAW_COOPERATIVE_DRONES
       % end
       param = struct(varargin{:});
       obj.target = param.target;
-      rhostr=param.self.parameter.parameter_name(contains(param.self.parameter.parameter_name,"rho"))';
-      obj.rho = param.self.parameter.get(rhostr);
+      %rhostr=param.self.parameter.parameter_name(contains(param.self.parameter.parameter_name,"rho"))';
+      %obj.rho = param.self.parameter.get(rhostr);
+      obj.rho = param.self.parameter.rho;
       listr=param.self.parameter.parameter_name(contains(param.self.parameter.parameter_name,"li"))';
-      obj.li = param.self.parameter.get(listr);
+      %obj.li = param.self.parameter.get(listr);
+      obj.li = param.self.parameter.li;
       data = logger.data(1,"p","e");
-      tM = max(data);
-      tm = min(data);
+      tM = max(data,1);
+      tm = min(data,1);
       M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
       m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
       if isfield(param,'frame_size')
@@ -52,9 +55,10 @@ classdef DRAW_COOPERATIVE_DRONES
         L = obj.frame_size;
       end
       obj.L = L;
-      obj.xlim = [m(1)-L(1) M(1)+L(1)];
-      obj.ylim = [m(2)-L(2) M(2)+L(2)];
-      obj.zlim = [0 M(3)+1];
+      S = obj.system_size;
+      obj.xlim = [m(1)-S(1) M(1)+S(1)];
+      obj.ylim = [m(2)-S(2) M(2)+S(2)];
+      obj.zlim = [-S(3) M(3)+S(3)+1];
       if isfield(param,'ax')
         ax = param.ax;
       else
@@ -316,7 +320,9 @@ classdef DRAW_COOPERATIVE_DRONES
         Q(:,:,n) = zeros(size(Q1,1),4);
         Q(tmp==0,:,n) = 0;
         Q(tmp==0,1,n) = 1;
-        Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
+        if sum(tmp~=0)
+          Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
+        end
       end
     end
   end
