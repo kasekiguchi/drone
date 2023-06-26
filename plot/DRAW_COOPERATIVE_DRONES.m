@@ -20,29 +20,15 @@ classdef DRAW_COOPERATIVE_DRONES
     target
     rho
     li
+    N
   end
 
   methods
     function obj = DRAW_COOPERATIVE_DRONES(logger,varargin)
-      % 【usage】 obj = DRAW_DRONE_MOTION(logger,param)
-      % logger : LOGGER class instance
-      % param.frame_size : drone size [Lx,Ly]
-      % param.rotor_r : rotor radius r
-      % arguments
-      %     logger
-      %     param.frame_size
-      %     param.rotor_r
-      %     param.target = 1;
-      %     param.fig_num = 1;
-      %     param.mp4 = 0;
-      % end
       param = struct(varargin{:});
       obj.target = param.target;
-      %rhostr=param.self.parameter.parameter_name(contains(param.self.parameter.parameter_name,"rho"))';
-      %obj.rho = param.self.parameter.get(rhostr);
+      obj.N = length(param.target);
       obj.rho = param.self.parameter.rho;
-      listr=param.self.parameter.parameter_name(contains(param.self.parameter.parameter_name,"li"))';
-      %obj.li = param.self.parameter.get(listr);
       obj.li = param.self.parameter.li;
       data = logger.data(1,"p","e");
       tM = max(data,1);
@@ -146,13 +132,16 @@ classdef DRAW_COOPERATIVE_DRONES
     function obj=gen_load(obj,varargin)
       param = struct(varargin{:});
       ax = obj.ax;
-
-      a = param.cube(1)/2;
-      b = param.cube(2)/2;
-      c = param.cube(3)/2;
-      Points = [-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c];
-      Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
-      h = trisurf(triangulation(Tri,Points));
+      [x,y,z] = cylinder(ax,1,obj.N);
+      z = z*param.cube(3)-param.cube(3)/2;
+      h(1) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,:),x(2,:)],[y(1,:),y(2,:)],[z(1,:),z(2,:)],'FaceColor',"cyan");
+      h(2) = surf(x,y,z);
+      % a = param.cube(1)/2;
+      % b = param.cube(2)/2;
+      % c = param.cube(3)/2;
+      % Points = [-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c];
+      % Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
+      % h = trisurf(triangulation(Tri,Points));
       ttt = hgtransform('Parent',ax); set(h,'Parent',ttt); % 推力を慣性座標と紐づけ
       obj.load = ttt;
     end
@@ -180,18 +169,18 @@ classdef DRAW_COOPERATIVE_DRONES
         % Translational matrix
         Txyz = makehgtform('translate',p(1,:,n));
         % Scaling matrix
-        for i = 1:4
-          if u(1,i,n) > 0
-            S = makehgtform('scale',[1,1,u(1,i,n)]);
-          elseif u(i) < 0
-            S1 = makehgtform('xrotate',pi);
-            S = makehgtform('scale',[1,1,-u(1,i,n)])*S1;
-          else
-            S = eye(4);
-            S(3,3) = 1e-5;
-          end
-          set(thrust(i),'Matrix',Txyz*R*S);
-        end
+         for i = 1:4
+        %   if u(1,i,n) > 0
+        %     S = makehgtform('scale',[1,1,u(1,i,n)]);
+        %   elseif u(i) < 0
+        %     S1 = makehgtform('xrotate',pi);
+        %     S = makehgtform('scale',[1,1,-u(1,i,n)])*S1;
+        %   else
+        %     S = eye(4);
+        %     S(3,3) = 1e-5;
+        %   end
+           set(thrust(i),'Matrix',Txyz*R);
+         end
         % Concatenate the transforms and
         % set the transform Matrix property
         set(frame,'Matrix',Txyz*R);
