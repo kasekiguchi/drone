@@ -13,6 +13,7 @@ if strcmp(type,"eul")
   Setting.dim=[12*(N+1),4*N,5 + 8*N];
   Setting.method = get_model_name("Cooperative_Load_eul",N); % model dynamicsの実体名
   Setting.num_list = [3,3,3,3,3*N,3*N,3*N,3*N];
+  Setting.projection = @(x) [x(1:12);x(13:15)/vecnorm(x(13:15));x(16:end)];
 else
   Setting.dim=[13*(N+1),4*N,42];
   Setting.method = get_model_name("Cooperative_Load",N); % model dynamicsの実体名
