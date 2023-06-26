@@ -11,12 +11,12 @@ Model.type="Suspended_Cooperative_Load_Model"; % model name
 Model.name="Cooperative_Load"; % print name
 % Setting.input_channel = ["f","M"];
 if strcmp(type,"eul")
-  Setting.dim=[12*(N+1),4*N,42];
-  Setting.method = get_model_name("Cooperative_Load_eul"); % model dynamicsの実体名
+  Setting.dim=[12*(N+1),4*N,5 + 8*N];
+  Setting.method = get_model_name("Cooperative_Load_eul",N); % model dynamicsの実体名
   Setting.num_list = [3,3,3,3,3*N,3*N,3*N,3*N];
 else
   Setting.dim=[13*(N+1),4*N,42];
-  Setting.method = get_model_name("Cooperative_Load"); % model dynamicsの実体名
+  Setting.method = get_model_name("Cooperative_Load",N); % model dynamicsの実体名
   Setting.num_list = [3,4,3,3,3*N,3*N,4*N,3*N];
 end
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
