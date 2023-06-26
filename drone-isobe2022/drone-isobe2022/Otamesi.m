@@ -1,15 +1,18 @@
 opengl software
 close all hidden;
+clear all;
+clc;
 
+load("experiment_6_20_circle_estimaterdata.mat")
+
+for i = 1:find(log.Data.phase==108,1,'first')-find(log.Data.t>18,1,'first')+1
+    data.t(1,i) = log.Data.t(i+find(log.Data.t>18,1,'first'),1);                                      %時間t
+    data.x(1,i) = log.Data.agent.estimator.result{i+find(log.Data.t>18,1,'first')}.state.p(1,1);      %位置x
+    data.y(1,i) = log.Data.agent.estimator.result{i+find(log.Data.t>18,1,'first')}.state.p(2,1);      %位置y
+    data.z(1,i) = log.Data.agent.estimator.result{i+find(log.Data.t>18,1,'first')}.state.p(3,1);
+end
+%% 
+
+plot3(data.x,data.y,data.z);
 grid on
-figure(1)
-plot(data.t,data.u1)
-
-figure(2)
-plot(data.t,data.u2)
-
-figure(3)
-plot(data.t,data.u3)
-
-figure(4)
-plot(data.t,data.u4)
+zlim([0.5 1.3])

@@ -10,10 +10,11 @@ clear all;
 clc;
 %% データのインポート
 load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-% load("experiment_6_20_circle_4.mat")
+% load("circle_6_26_sim_Log(26-Jun-2023_22_10_30).mat")
 disp('load finished')
 
-for i = 1:find(log.Data.t,1,'last')
+% for i = 1:find(log.Data.t,1,'last')
+for i = find(log.Data.t>18,1,'first'):2300
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
     data.x(1,i) = log.Data.agent.estimator.result{i}.state.p(1,1);      %位置x
     data.y(1,i) = log.Data.agent.estimator.result{i}.state.p(2,1);      %位置y
@@ -55,23 +56,24 @@ Fsize.lgd = 16; %凡例の大きさ調整
 box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
-plot(data.t,data.x,'LineWidth',1);
+% plot(data.t,data.x,'LineWidth',1);
 xlabel('Time [s]');
 ylabel('p');
 hold on
 grid on
-plot(data.t,data.y,'LineWidth',1);
-plot(data.t,data.z,'LineWidth',1);
+% plot(data.t,data.y,'LineWidth',1);
+% plot(data.t,data.z,'LineWidth',1);
 plot(data.t,data.xr,'LineWidth',1,'LineStyle','-');
 plot(data.t,data.yr,'LineWidth',1,'LineStyle','-');
 plot(data.t,data.zr,'LineWidth',1,'LineStyle','-');
-% lgdtmp = {'$x_r$','$y_r$','$z_r$'};
-lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+lgdtmp = {'$x_r$','$y_r$','$z_r$'};
+% lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
+ax = gca;
 hold off
-title('Position p of agent1');
+title('Position p of agent1','FontSize',12);
 
 %姿勢角q
 figure(2)
@@ -86,8 +88,9 @@ plot(data.t,data.qz,'LineWidth',1);
 lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
+ax(2) = gca;
 hold off
-title('Attitude q of agent1');
+title('Attitude q of agent1','FontSize',12);
 
 %速度v
 figure(3)
@@ -102,8 +105,9 @@ plot(data.t,data.vz,'LineWidth',1);
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
+ax(3) = gca;
 hold off
-title('Velocity v of agent1');
+title('Velocity v of agent1','FontSize',12);
 
 %角速度w
 figure(4)
@@ -118,14 +122,19 @@ plot(data.t,data.wz,'LineWidth',1);
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 xlim([data.t(1) data.t(end)])
+ax(4) = gca;
 hold off
-title('Angular velocity w of agent1');
+title('Angular velocity w of agent1','FontSize',12);
 
 figure(5)
 plot(data.x,data.y);
+grid on
+ax(5) = gca;
 
 figure(6)
 plot3(data.x,data.y,data.z);
+grid on
+ax(6) = gca;
 
 %入力
 figure(7)
@@ -141,8 +150,12 @@ lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
+ax(7) = gca;
 hold off
-title('Input u of agent1');
+title('Input u of agent1','FontSize',12);
+
+fontSize = 12; %軸の文字の大きさの設定
+set(ax,'FontSize',fontSize); 
 
 else
 %% いっぺんに出力
