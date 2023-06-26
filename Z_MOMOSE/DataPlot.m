@@ -59,8 +59,8 @@ endTime = 1E2;
 % logger_LS_km1_1500,...
 % logger_FT_09,...
 % logger_FT_085
-% log
-gui.logger  
+log
+% gui.logger  
         };
     c=[
 %         "lxFinit time settling",...
@@ -116,8 +116,9 @@ gui.logger
 %              11:"three_D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma" 
 %               20:"pp" 21:"pv" 22:"pq" 23:"pw" 24:"Trs"];
 %========================================================================
-     n=[1:16,18 20:24];
+     % n=[1:16,18 20:24];
      % n = [2:11];
+     n=1;
 %========================================================================
 % multiFigure
 % nM = {[1,9,8,10,7],[13,14,15,16,12]};%複数まとめる
@@ -318,7 +319,7 @@ for i = 1:logNum
 end
 Rc = ['Reference',c];
 Rc = mat2cell(Rc,1,ones(1,length(Rc)));
-allData.t_p = {struct('x',{[time{1},time]},'y',{[ref,est]}), struct('x','time [s]','y','position [m]'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ estimator','$y$ estimator','$z$ estimator'},add_option([],option,addingContents)};
+allData.t_p = {struct('x',{[time{1},time]},'y',{[ref,est]}), struct('x','time [s]','y','position [m]'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
 allData.x_y = {struct('x',{[refx,estx]},'y',{[refy,esty]}), struct('x','$x$ [m]','y','$y$ [m]'),Rc,add_option(["aspect"],option,addingContents)};
 allData.t_x = {struct('x',{[time{1},time]},'y',{[refx,estx]}), struct('x','time [s]','y','$x$ [m]'),Rc,add_option([],option,addingContents)};
 allData.t_y = {struct('x',{[time{1},time]},'y',{[refy,esty]}), struct('x','time [s]','y','$y$ [m]'),Rc,add_option([],option,addingContents)};

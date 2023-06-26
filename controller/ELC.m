@@ -93,9 +93,9 @@ methods
                           obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
                           obj.fRandn = 1;
                     end
-                    % dst(3) = obj.pdst(obj.fRandn,1);
-                    % dst(4) = obj.pdst(obj.fRandn,2);
-                    % dst(5) = obj.pdst(obj.fRandn,3);
+                    dst(3) = obj.pdst(obj.fRandn,1);
+                    dst(4) = obj.pdst(obj.fRandn,2);
+                    dst(5) = obj.pdst(obj.fRandn,3);
                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
          %サブシステムの入力
         obj.result.uHL =vep;

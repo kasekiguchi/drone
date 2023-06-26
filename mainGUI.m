@@ -1,4 +1,4 @@
-%% Initialize settings
+ %% Initialize settings
 % set path
 if ~isfile('./mainGUI.m')
   tmp = matlab.desktop.editor.getActive; 
