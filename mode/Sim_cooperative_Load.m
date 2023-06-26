@@ -34,12 +34,12 @@ run("ExpBase");
 
 %%
 clc
-for i = 1:40
+for i = 1:30
 agent(1).sensor.do(time,'f');
 agent(1).estimator.do(time,'f');
 agent(1).reference.do(time,'f');
 % agent(1).controller.result.input = zeros(4*N,1);
-fidata = [25,25,325,325];
+fidata = [20,20,20,20];
 M1 = [0,0,0]; M2 = [0,0,0]; M3 = [0,0,0]; M4 = [0,0,0];
 udata =[fidata(1,1),M1,fidata(1,2),M2,fidata(1,3),M3,fidata(1,4),M4]';
 agent(1).controller.result.input = udata;
