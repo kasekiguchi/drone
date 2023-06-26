@@ -100,19 +100,19 @@ rhs73 = [tmp{:}]*reshape(rho,[3*N,1]);
 rhs7 = rhs71 - rhs72 - rhs73;
 eq7 = lhs71 - lhs72 + lhs73 + lhs74 - (rhs7);
 %% solve (6), (7) derive ddx0, do0
-% eq6 = A6*[ddx0;do0] + B6
+% eq6 = A6*[ddx0;do0] + B6 == 0
 B6 = subs(eq6,[ddx0;do0],[0;0;0;0;0;0]);
 tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq6-B6,'UniformOutput',false);
 A6 = vertcat(tmp{:});
-% eq7 = A7*[ddx0;do0] + B7
+% eq7 = A7*[ddx0;do0] + B7 == 0
 B7 = subs(eq7,[ddx0;do0],[0;0;0;0;0;0]);
 tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq7-B7,'UniformOutput',false);
 A7 = vertcat(tmp{:});
 Addx0do0 = [A6;A7];
 %%
-% matlabFunction(Addx0do0,"File","Addx0do0_"+string(N),"Vars",{x u physicalParam},'outputs',{'A'})
+% matlabFunction(Addx0do0,"File","Addx0do0_"+N,"Vars",{x u physicalParam},'outputs',{'A'})
 % syms iA [6 6] 
-% matlabFunction(-iA*[B6;B7],"File","ddx0do0_"+string(N),"Vars",{x u physicalParam iA},'outputs',{'dX'});
+% matlabFunction(-iA*[B6;B7],"File","ddx0do0_"+N,"Vars",{x u physicalParam iA},'outputs',{'dX'});
 %% (8)
 syms ddX [6 1]  % ddX = [ddx0;do0]
 rhs81 = ddX(1:3)-g*e3; % 3x1
@@ -127,17 +127,17 @@ doi = vertcat(tmp{:});
 %% 
 
 % %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
-%matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
+%matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
 %% z up version : euler parameter
 syms X [13*(N+1) 1] real
 R = diag([1 -1 -1]);
 rp = [1 -1 -1]; rq = [1 1 -1 -1];
 Rzup = [rp, rq, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rq, 1,N), repmat(rp, 1,N)]';
 rX = Rzup.*X;
-%matlabFunction(subs(Addx0do0,x,rX),"File","zup_Addx0do0_"+string(N),"Vars",{X u physicalParam},'outputs',{'A'})
+%matlabFunction(subs(Addx0do0,x,rX),"File","zup_Addx0do0_"+N,"Vars",{X u physicalParam},'outputs',{'A'})
 %syms iA [6 6] 
-%matlabFunction(subs(-iA*[B6;B7],x,rX),"File","zup_ddx0do0_"+string(N),"Vars",{X u physicalParam iA},'outputs',{'dX'});
-%matlabFunction(subs(Rzup.*[dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],x,rX),"File","zup_tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{X u physicalParam ddX},'outputs',{'dX'});
+%matlabFunction(subs(-iA*[B6;B7],x,rX),"File","zup_ddx0do0_"+N,"Vars",{X u physicalParam iA},'outputs',{'dX'});
+%matlabFunction(subs(Rzup.*[dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],x,rX),"File","zup_tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{X u physicalParam ddX},'outputs',{'dX'});
 %% euler angle model : roll-pitch-yaw(ZYX) euler angle 
 syms eu0 [3 1] real
 syms eui [3 N] real
@@ -158,13 +158,13 @@ R = diag([1 -1 -1]);
 rp = [1 -1 -1];
 rXeu = [rp, rp, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rp, 1,N), repmat(rp, 1,N)]'.*X;
 %%
-matlabFunction(subs(subs(Addx0do0,[r0,ri],[Eq0,Eqi]),xeu,rXeu),"File",dir + "zup_eul_Addx0do0_"+string(N),"Vars",{X u physicalParam},'outputs',{'A'});
+matlabFunction(subs(subs(Addx0do0,[r0,ri],[Eq0,Eqi]),xeu,rXeu),"File",dir + "zup_eul_Addx0do0_"+N,"Vars",{X u physicalParam},'outputs',{'A'});
 %%
 syms iA [6 6] 
-matlabFunction(subs(subs(-iA*[B6;B7],[r0,ri],[Eq0,Eqi]),xeu,rXeu),"File",dir+"zup_eul_ddx0do0_"+string(N),"Vars",{X u physicalParam iA},'outputs',{'dX'});
+matlabFunction(subs(subs(-iA*[B6;B7],[r0,ri],[Eq0,Eqi]),xeu,rXeu),"File",dir+"zup_eul_ddx0do0_"+N,"Vars",{X u physicalParam iA},'outputs',{'dX'});
 %%
-matlabFunction(subs(fgueu,xeu,rXeu),"File",dir + "zup_eul_tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{X u physicalParam ddX},'outputs',{'dX'});
-%%
+matlabFunction(subs(fgueu,xeu,rXeu),"File",dir + "zup_eul_tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{X u physicalParam ddX},'outputs',{'dX'});
+%% gen zup_eul_cable_suspended_rigid_body_with_N_drones
 fname = "zup_eul_cable_suspended_rigid_body_with_" + N + "_drones";
 str = "function dX = "+fname+"(x,u,P)\n"+...
 "ddX = zup_eul_ddx0do0_"+N+"(x,u,P,inv(zup_eul_Addx0do0_"+N+"(x,u,P)));\n" + ...
@@ -176,17 +176,28 @@ fprintf(fileID,str);
 fclose(fileID);
 %%
 A = jacobian(fgueu,xeu);
-%%
-A = simplify(A);
-%%
+matlabFunction(subs(A,[xeu;u],[rXeu;0*u]),"File",dir + "zup_eul_jacobian_"+string(N),"Vars",{X physicalParam ddX},'outputs',{'dAs'});
 
+%%
 A21= jacobian(subs([B6;B7],[r0,ri],[Eq0,Eqi]),xeu);
-%%
 Aeu = simplify(subs(Addx0do0,[r0,ri],[Eq0,Eqi]));
+dAeu = arrayfun(@(x) subs(diff(Aeu,x,1),xeu,rXeu),xeu','UniformOutput',false);
+dAddX = cellmatfun(@(A) A*ddX,dAeu,"mat");
+matlabFunction(subs(dAddX-A21,[xeu;u],[rXeu;0*u]),"File",dir + "zup_eul_dAddx0do0_"+N,"Vars",{X physicalParam,ddX},'outputs',{'dAs'},...
+  'Comments',[" Equation (6),(7) "," A*ddX + B ==0"," ddX = -A^-1*B"," d(ddX)/dx = -d(A^-1)/dx*B - A^-1*dB/dx = -A^-1(dA/dx*A^-1*B+dB/dx) = A^-1(dA/dx*ddX - dB/dx)",...
+  " dB/dx =: A21,  dA/dx =: dAddX ", " This function calc (dA/dx*ddX - dB/dx) = dAddX - A21"]);
 %%
-dAeu = cell2mat(arrayfun(@(x) subs(diff(Aeu,x,1),xeu,rXeu),xeu','UniformOutput',false));
-%%
-matlabFunction(dAeu,"File",dir + "zup_eul_dAddx0do0_"+string(N),"Vars",{X physicalParam},'outputs',{'dAs'});
+fname = "Jacobian_zup_eul_cable_suspended_rigid_body_with_" + N + "_drones";
+str = "function Aapp = "+fname+"(x,P)\n"+...
+"iA = inv(zup_eul_Addx0do0_"+N+"(x,zeros("+4*N+",1),P));\n"+...
+"ddX = zup_eul_ddx0do0_"+N+"(x,zeros("+4*N+",1),P,iA);\n" + ...
+"Aapp = zup_eul_jacobian_"+N+"(x,P,ddX);\n"+...
+"Aapp(7:12,:)= iA*zup_eul_dAddx0do0_"+N+"(x,P,ddX);\nend\n";
+fileID = fopen("estimator/ExtendedLinearization/" + fname+".m",'w');
+fprintf(fileID,str);
+fclose(fileID);
+
+
 
 
 
