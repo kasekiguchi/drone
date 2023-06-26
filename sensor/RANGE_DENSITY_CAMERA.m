@@ -34,11 +34,11 @@ classdef RANGE_DENSITY_CAMERA < handle
             else
                 e2r_vector = [1;0;0];
             end
-            field_of_view = 0.25; % 画角
+            field_of_view = pi*0.25; % 画角
             radius_of_view = obj.r ;
 
-            e2r_ang = atan2(e2r_vector(2),e2r_vector(1))+pi;
-            tmp = e2r_ang-0.25*pi:0.1:e2r_ang+field_of_view*pi; % カメラ画角 
+            e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
+            tmp = e2r_ang-field_of_view:0.1:e2r_ang+field_of_view; % カメラ画角 
 
             camera_range = polyshape([state.p(1) state.p(1)+radius_of_view*cos(tmp)],[state.p(2) state.p(2)+radius_of_view*sin(tmp)]); % カメラ検出距離
             camera_region=intersect(camera_range, env);

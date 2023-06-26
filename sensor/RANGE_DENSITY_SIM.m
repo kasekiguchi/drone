@@ -70,6 +70,13 @@ classdef RANGE_DENSITY_SIM < handle
 
             %% 領域と環境のintersectionが測距領域
             region=intersect(sensor_range, env); % 測距領域
+            region_candidate = regions(region);
+            for i = 1:length(region_candidate)
+                if isinterior(region_candidate(i),state.p(1),state.p(2))
+                    region = region_candidate(i);
+                    break
+                end
+            end
             region.Vertices=region.Vertices-state.p(1:2)'; % 相対的な測距領域
 
             %% 重み分布
@@ -95,11 +102,6 @@ classdef RANGE_DENSITY_SIM < handle
             result.map_min=rpmap_min;
             %% 出力として整形
             result.region=region;
-            result.env.grid_density = Env.grid_density;
-            result.env.xq = Env.xq;
-            result.env.yq = Env.yq;
-            result.env.map_min = Env.map_min;
-            result.env.map_max = Env.map_max;
             obj.result = result;
         end
         function show(obj,varargin)
