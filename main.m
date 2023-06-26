@@ -151,7 +151,7 @@ try
     if fDebug
       %agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
       %agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", true,'fFiled',1));%false));
-      agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", false));
+      % agent.show(["sensor", "lidar"], "FH", FH, "param", struct("fLocal", false));
     end
 
     %% update state
@@ -229,7 +229,7 @@ logger.plot({1,"p1-p2","er"},{1,"p1:2","er"},{1,"p","er"},{1,"v","e"},{1,"q","e"
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-%agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
+% agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
 
 agent(1).animation(logger, "target", 1:N);
 %%

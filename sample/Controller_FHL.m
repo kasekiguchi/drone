@@ -81,17 +81,17 @@ Controller.type="FUNCTIONAL_HLC";
 Controller.name="hlc";
 Controller.param=Controller_param;
 end
-function v = MCMPC_Vs(z2, z3, z4, S, M, Q)
-% S : sample number
-v2 =  Q.V2.*randn(1,S);
-v3 = Q.V3.*randn(1.S);
-v4 = Q.V4.*randn(1,S);
-Z2=M.A4*z2 + M.B4*v2;
-Z3=M.A4*z3 + M.B4*v3;
-Z4=M.A2*z4 + M.B2*v4;
-% 実入力で評価できるようにしても面白い
-[~,i2]=min(sum([(Z2'*Q.Q2).*Z2',Q.R2*v2'.*v2'],[],2));
-[~,i3]=min(sum([(Z3'*Q.Q3).*Z3',Q.R3*v3'.*v3'],[],2));
-[~,i4]=min(sum([(Z4'*Q.Q4).*Z4',Q.R4*v4'.*v4'],[],2));
-v = [v2(i2);v3(i3);v4(i4)];% とりあえず最小評価の入力を算出
-end
+% function v = MCMPC_Vs(z2, z3, z4, S, M, Q)
+% % S : sample number
+% v2 =  Q.V2.*randn(1,S);
+% v3 = Q.V3.*randn(1.S);
+% v4 = Q.V4.*randn(1,S);
+% Z2=M.A4*z2 + M.B4*v2;
+% Z3=M.A4*z3 + M.B4*v3;
+% Z4=M.A2*z4 + M.B2*v4;
+% % 実入力で評価できるようにしても面白い
+% [~,i2]=min(sum([(Z2'*Q.Q2).*Z2',Q.R2*v2'.*v2'],[],2));
+% [~,i3]=min(sum([(Z3'*Q.Q3).*Z3',Q.R3*v3'.*v3'],[],2));
+% [~,i4]=min(sum([(Z4'*Q.Q4).*Z4',Q.R4*v4'.*v4'],[],2));
+% v = [v2(i2);v3(i3);v4(i4)];% とりあえず最小評価の入力を算出
+% end
