@@ -7,7 +7,7 @@ post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
-N = 6;
+N = 4;
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 initial_state.p = [0;0;0];
 %initial_state.Q = [1;0;0;0];
@@ -34,11 +34,15 @@ run("ExpBase");
 
 %%
 clc
-for i = 1:100
+for i = 1:40
 agent(1).sensor.do(time,'f');
 agent(1).estimator.do(time,'f');
 agent(1).reference.do(time,'f');
-agent(1).controller.result.input = zeros(4*N,1);
+% agent(1).controller.result.input = zeros(4*N,1);
+fidata = [25,25,325,325];
+M1 = [0,0,0]; M2 = [0,0,0]; M3 = [0,0,0]; M4 = [0,0,0];
+udata =[fidata(1,1),M1,fidata(1,2),M2,fidata(1,3),M3,fidata(1,4),M4]';
+agent(1).controller.result.input = udata;
 agent(1).plant.do(time,'f');
 logger.logging(time,'f',agent);
 tmp = logger.data(1,"plant.result.state.Qi","");
