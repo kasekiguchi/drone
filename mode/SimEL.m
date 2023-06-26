@@ -13,14 +13,15 @@ initial_state.w = [0; 0; 0];
 initial_state.Trs = [9.81; 0];%divison by zero やちゃんと計算されないので初期値は[0.1; 0.1]にする．
 
 agent = DRONE;
-% agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
-agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));
+agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
+% agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+%target tragectory
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.0]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",1,"orig",[0;0;1],"size",[0,0,0]},"HL"});
-fFT=0;%1:FT, other:LS
+fFT=1;%1:FT, other:LS
 agent.controller = ELC(agent,Controller_EL(dt,fFT));
 run("ExpBase");
 function dfunc(app)

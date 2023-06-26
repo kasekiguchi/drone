@@ -9,6 +9,8 @@ properties
     Vf
     Vs
     fzapr
+    fRandn
+    pdst
 end
 
 methods
@@ -22,7 +24,7 @@ methods
         obj.Vf = obj.param.Vf; % 階層１の入力を生成する関数ハンドル
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
         obj.fzapr = param.fzapr;
-
+        obj.fRandn =0;
     end
 
     function result = do(obj,varargin)
@@ -44,11 +46,7 @@ methods
         xd(9:11) = Rb0' * xd(9:11);
         xd(13:15) = Rb0' * xd(13:15);
         xd(17:19) = Rb0' * xd(17:19);
-        if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-                dt = varargin{1}.dt;
-        else
-                 dt = obj.param.dt;
-        end
+        
         %z方向:FT
         z1 = Z1(x, xd', P);%z
         vf = obj.Vf(z1); 
@@ -74,18 +72,18 @@ methods
 %                     dst = 2*a*rand-a;
 %
                     %平均b、標準偏差aのガウスノイズ
-%                      if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
-%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-%                           a = 1;%標準偏差
-%                           b = 0;%平均
-%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
-%                           obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
-%                           obj.fRandn = 1;
-%                     end
-%                     dst(4) = obj.pdst(obj.fRandn,1);
-%                     dst(5) = obj.pdst(obj.fRandn,2);
-%                     dst(3) = obj.pdst(obj.fRandn,3);
-%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
+                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
+                          rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
+                          a = 1;%標準偏差
+                          b = 0;%平均
+                          c = varargin{1, 1}.te/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
+                          obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
+                          obj.fRandn = 1;
+                    end
+                    dst(4) = obj.pdst(obj.fRandn,1);
+                    dst(5) = obj.pdst(obj.fRandn,2);
+                    dst(3) = obj.pdst(obj.fRandn,3);
+                    obj.fRandn = obj.fRandn+1;%乱数の値を更新
         %-----------------------------------------------------------------
                     %一時的な外乱
 %         t = param{1};
@@ -112,8 +110,8 @@ methods
         obj.result.z3 = z3;
         obj.result.z4 = z4;
         obj.result.vf = vf;
-        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-        % obj.result.input =[max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)));dst];%外乱用
+        % obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+        obj.result.input =[max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)));dst];%外乱用
         result = obj.result;
     end
 
