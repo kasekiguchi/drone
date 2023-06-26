@@ -21,22 +21,28 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
     end
 
     methods
-        function obj = DRONE_PARAM_COOPERATIVE_LOAD(name,type,param)
+        function obj = DRONE_PARAM_COOPERATIVE_LOAD(name,N,type,param)
             arguments
                 % P = [g m0 j0 rho li mi ji]
                 name % DIATONE
+                N = 4;
                 type = "struct";
+                % parameters : 5 + 8*N
                 param.g = 9.81;
-                param.N = 4;
                 param.m0 = 1;
                 param.J0 = [0.005;0.005;0.005];
-                param.rho = [[1 1 1/2],[1 -1 1/2],[-1 -1 1/2],[-1 1 1/2]]';
-                param.li = 0.5*[1;1;1;1];
-                param.mi = [1 1 1 1]';
-                param.Ji = 0.005*[[1 1 1],[1 1 1],[1 1 1],[1 1 1]];
+                param.rho = [];
+                param.li = 0.5*ones(N,1);
+                param.mi = ones(N,1)';
+                param.Ji = 0.005*repmat([1 1 1]',1,N);
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
+            if isempty(param.rho)
+              R = Rodrigues([0;0;1],2*pi/N);
+              param.rho = [0;0;1/2]+[[1;0;0],cell2mat(cellmatfun(@(A,B) A*B, FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),[1;0;0]))];
+            end
             obj = obj@PARAMETER_CLASS(name,type,param);
+            obj.N = N;
         end
     end
 
