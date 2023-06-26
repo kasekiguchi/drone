@@ -8,7 +8,7 @@ clc
 dir = "model/substance/Cooperative_drones/";
 
 %% symbol定義
-N = 4; % エージェント数
+N = 6; % エージェント数
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
 syms x0 [3 1] real % 位置
 syms dx0 [3 1] real
