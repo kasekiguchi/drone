@@ -17,7 +17,8 @@ initial_state.qi = -1*repmat([0;0;1],N,1);
 initial_state.wi = repmat([0;0;0],N,1);
 initial_state.Oi = repmat([0;0;0],N,1);
 
-qtype = "eul"; % "eul" : euler angle, "" : euler parameter
+% qtype = "eul"; % "eul" : euler angle, "" : euler parameter
+qtype = ""; % "eul" : euler angle, "" : euler parameter
 if strcmp(qtype,"eul")
 initial_state.Q = [0;0;0];
 initial_state.Qi = repmat([0;0;0],N,1);
@@ -35,7 +36,8 @@ agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,Model_
 agent.sensor = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
 agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
-agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
+% agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
+agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
 run("ExpBase");
 
 %%
@@ -46,8 +48,8 @@ for i = 1:220
 agent(1).sensor.do(time,'f');
 agent(1).estimator.do(time,'f');
 agent(1).reference.do(time,'f');
-agent(1).controller.result.input = repmat([1 + 0.3*cos(time.t*2*pi/3);0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
-
+% agent(1).controller.result.input = repmat([1 + 0.3*cos(time.t*2*pi/3);0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
+agent(1).controller.do(time,'f');
 agent(1).plant.do(time,'f');
 logger.logging(time,'f',agent);
 time.t = time.t + time.dt;
