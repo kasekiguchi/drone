@@ -68,7 +68,7 @@ classdef MODEL_CLASS < dynamicprops & handle
 
         for j = 1:length(F)
 
-          if ~strcmp(F{j}, 'initial') && ~strcmp(F{j}, 'state_list') && ~strcmp(F{j}, 'num_list') && ~strcmp(F{j}, 'method') && ~strcmp(F{j}, 'time_scale')
+          if ~strcmp(F{j}, 'qlist') && ~strcmp(F{j}, 'initial') && ~strcmp(F{j}, 'state_list') && ~strcmp(F{j}, 'num_list') && ~strcmp(F{j}, 'method') && ~strcmp(F{j}, 'time_scale')
 
             if strcmp(F{j}, 'solver')
               obj.solver = str2func(param.solver);
@@ -102,7 +102,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       end
       u = obj.self.controller.result.input;
       if isempty(obj.param)
-        obj.param = obj.self.parameter.get();%varargin{5}.parameter.get();
+        obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
       % if isfield(opts, 'param')
       %     obj.param = opts.param;

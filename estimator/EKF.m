@@ -61,12 +61,13 @@ classdef EKF < handle
             x = obj.result.state.get(); % estimated state at previous step
             % Pre-estimation
             obj.model.do(varargin{:});
-            if norm(obj.y.q(3)-obj.model.state.q(3)) > pi
-                if obj.y.q(3) > 0
-                    obj.model.state.set_state("q",obj.model.state.q+[0;0;2*pi]);
-                else
-                    obj.model.state.set_state("q",obj.model.state.q-[0;0;2*pi]);
-                end
+            % 
+            for i = obj.y.qlist
+            yq = obj.y.get(i);
+            mq = obj.model.state.get(i);
+            ids = abs(yq(3:3:end)-mq(3:3:end)) > pi;
+            mq(3:3:end) = mq(3:3:end) + sign(ids.*mq(3:3:end))*2*pi;
+            obj.model.state.set_state(i,mq);
             end
             xh_pre = obj.model.state.get(); % 
 
