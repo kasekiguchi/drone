@@ -348,7 +348,7 @@ end
 %     ylim([0, RMSE.Posylim])
 %     grid on
 %     xlabel('Step','FontSize',Fsize.label);
-%     ylabel('Position RSE','FontSize',Fsize.label);
+%     ylabel('Position RSME','FontSize',Fsize.label);
 %     lgd = legend('$(\hat{x}-x_d)^2$','$(\hat{y}-y_d)^2$','$(\hat{z}-z_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 % 
 %     figure(6)
@@ -372,7 +372,7 @@ end
 %     lgd = legend('$(\hat{v_x}-v_{xd})^2$','$(\hat{v_y}-v_{yd})^2$','$(\hat{v_z}-v_{zd})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 % 
 %     figure(8)
-%     p1 = plot(0:stepN-1,RMSE.W.eachStep','.','MarkerSize',15);
+%     p1 = plot(0:stepN-1,RMSE.W.eachStep','-','MarkerSize',15);
 %     set(gca,'FontSize',Fsize.luler);
 %     xlim([0, stepN-1])
 %     ylim([0, RMSE.Atiylim])
