@@ -318,17 +318,18 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% それぞれのホライズンのリファレンスとの誤差を求める
       Z = Xd - Xh;
       % Z = X;
+      k = linspace(1,0.1, obj.param.H-1);
 
       tildeUpre = U - obj.input.v;          % agent.input 　前時刻入力との誤差
       tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-      stageStateZ = sum(Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,1:end-1,:)),[1,2]);%
-      stageInputPre  = sum(tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre(:,1:end-1,:)),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-      stageInputRef  = sum(tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref(:,1:end-1,:)),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
+      stageStateZ = sum(k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,1:end-1,:)),[1,2]);%
+      stageInputPre  = sum(k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre(:,1:end-1,:)),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
+      stageInputRef  = sum(k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref(:,1:end-1,:)),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
 
       %-- 状態の終端コストを計算 状態だけの終端コスト
-      terminalState = sum(Z(:,end,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,end,:)),[1,2]);
+      terminalState = sum(k .* Z(:,end,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,end,:)),[1,2]);
 
       %-- 評価値計算
       MCEval{1} = stageStateZ + stageInputPre + stageInputRef + terminalState;  % 全体の評価値

@@ -3,9 +3,9 @@ function Controller = Controller_HLMCMPC(~)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 10000;
+    Controller_param.Maxparticle_num = 5000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 10000;
+    Controller_param.Minparticle_num = 5000;
     Controller_param.input.Initsigma = 1*[1,1,1,1];
     Controller_param.input.Constsigma = 5.0;
     Controller_param.input.Maxsigma = [0.001,0.1,0.1,0.01];

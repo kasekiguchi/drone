@@ -24,9 +24,9 @@ syms t real
 % y = 0;
 
 %%
-x = 0 * t;
-y = 0 * t;
-z = 0 * t;
+% x = 0 * t;
+% y = 0 * t;
+% z = 0 * t;
 %% 
 % x = 0;
 % y = 0;
@@ -43,9 +43,9 @@ z = 0 * t;
 % z = 1;
 
 %% Liner
-% x = 0;
-% y = t;
-% z = 1.0;
+x = 0;
+y = t^2/50;
+z = 1.0;
 
 %% Vertical vibration
 % x = 0;
@@ -55,9 +55,9 @@ z = 0 * t;
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
 %% hovering
-x = 0;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
