@@ -92,3 +92,22 @@ legend('Location','best')
 ax = gca;
 ax.FontSize = 12;
 hold off
+
+%%
+figure(9)
+hold on
+
+for plot_i = 1:double(battery)
+    z = battery(4);
+end
+
+plot(t,battery,'LineWidth',1)
+
+xlabel('Time [s]','FontSize',16);
+ylabel('Battery [cV]','FontSize',16);
+name_class = ["moter1","moter2","moter3","moter4"];%名前
+legend(name_class)
+legend('Location','best')
+ax = gca;
+ax.FontSize = 12;
+hold off
