@@ -27,7 +27,8 @@ methods
         obj.self = self;
         obj.motive = args.motive;
         obj.rigid_num = args.rigid_num;
-        obj.initq = quaternion(Eul2Quat([args.initial_yaw_angle 0 0])');
+        %obj.initq = quaternion(Eul2Quat([args.initial_yaw_angle;0;0])');
+        obj.initq = quaternion(Eul2Quat([0;0;args.initial_yaw_angle])');
 
         obj.result.state = STATE_CLASS(struct('state_list', ["p", "q"], "num_list", [3, 4]));
 
