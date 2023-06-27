@@ -78,7 +78,7 @@ matlabFunction(g,'file','G.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxg
 %matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_force_physical_parameter_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_torque_physical_parameter_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 
-%% euler angle model : roll-pitch-yaw(XYZ) euler angle 
+%% euler angle model : roll-pitch-yaw(ZYX) euler angle 
 syms roll pitch yaw droll dpitch dyaw real
 % q0 = cos(roll)*cos(pitch)*cos(yaw) + sin(roll)*sin(pitch)*sin(yaw);
 % q1 = sin(roll)*cos(pitch)*cos(yaw) - cos(roll)*sin(pitch)*sin(yaw);
@@ -101,7 +101,7 @@ ddpG = [ERb0*[0;0;1/m],zeros(3)];
 % ddpg=ddpG*T
 %% SS equation
 % % Usage: dx=f+g*u
-xp = [p;er;dp;ob];            % 13 states
+xp = [p;er;dp;ob];            % 12 states
 fp = [dp;der;ddpf;dobf];
 %fp = [dp;ob;ddpf;dobf];
 gp = [zeros(3,4);zeros(3,4);ddpG;dobg];

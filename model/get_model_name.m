@@ -1,4 +1,8 @@
-function model_full_name = get_model_name(sn)
+function model_full_name = get_model_name(sn,N)
+arguments
+  sn
+  N = 4;
+end
     switch sn
         case "Discrete"
             model_full_name = "discrete_linear_model";
@@ -22,5 +26,9 @@ function model_full_name = get_model_name(sn)
             model_full_name = "euler_with_load_model";
 %         "euler","euler_angle_model",12;
 %         "rodrigues","rodrigues_parameter_model",12;
+        case "Cooperative_Load"
+            model_full_name = "zup_cable_suspended_rigid_body_with_" + N + "_drones";
+      case "Cooperative_Load_eul"
+            model_full_name = "zup_eul_cable_suspended_rigid_body_with_" + N + "_drones";
     end
 end
