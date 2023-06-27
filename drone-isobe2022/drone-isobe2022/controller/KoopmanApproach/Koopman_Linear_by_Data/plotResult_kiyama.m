@@ -187,8 +187,8 @@ hold off
 % end
 %% 
 
-xt = file{WhichRef}.simResult.reference.est.p(tlength,1)';
-xr = file{2}.simResult.state.p(3,1:stepN);
+xt = file{WhichRef}.simResult.reference.est.v(tlength,1)';
+xr = file{1}.simResult.state.v(1,1:stepN);
 rmse = sqrt(mean(xr-xt).^2);
 disp(['RMSE:' num2str(rmse)])
 
