@@ -85,7 +85,7 @@ end
 plot(t,battery,'LineWidth',1)
 
 xlabel('Time [s]','FontSize',16);
-ylabel('Battery [cV]','FontSize',16);
+ylabel('Voltage [cV]','FontSize',16);
 name_class = ["moter1","moter2","moter3","moter4"];%名前
 legend(name_class)
 legend('Location','best')
@@ -104,7 +104,7 @@ end
 plot(t,battery,'LineWidth',1)
 
 xlabel('Time [s]','FontSize',16);
-ylabel('Battery [cV]','FontSize',16);
+ylabel('Battery [V]','FontSize',16);
 name_class = ["moter1","moter2","moter3","moter4"];%名前
 legend(name_class)
 legend('Location','best')
