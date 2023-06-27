@@ -1,5 +1,6 @@
 classdef ELC < handle
 % クアッドコプター用階層型線形化を使った入力算出
+% DynamicExtendedLinearizationBasedController に対応
 properties
     self
     result
