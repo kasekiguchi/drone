@@ -8,7 +8,7 @@ post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
-N = 4;
+N = 3;
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 initial_state.p = [0;0;10];
 initial_state.v = [0;0;0];
