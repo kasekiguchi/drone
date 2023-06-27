@@ -13,8 +13,7 @@ load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイ
 % load("circle_6_26_sim_Log(26-Jun-2023_22_10_30).mat")
 disp('load finished')
 
-% for i = 1:find(log.Data.t,1,'last')
-for i = find(log.Data.t>18,1,'first'):2300
+for i = 1:find(log.Data.t,1,'last')
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
     data.x(1,i) = log.Data.agent.estimator.result{i}.state.p(1,1);      %位置x
     data.y(1,i) = log.Data.agent.estimator.result{i}.state.p(2,1);      %位置y

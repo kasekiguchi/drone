@@ -96,7 +96,7 @@ file{3}.lgdname.w = {'$\hat{\omega}_{1,{\rm case3}}$','$\hat{\omega}_{2,{\rm cas
 columnomber = size(file,2)+1;
 
 % マーカーに特別なものをつける時はここで指定，ない時は':o'になります
-file{2}.markerSty = ':square';
+file{2}.markerSty = ':diamond';
 file{3}.markerSty = ':x';
 
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
@@ -109,7 +109,7 @@ newcolors = [0 0.4470 0.7410
 figure(1)
 % Referenceをplot
 colororder(newcolors)
-plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',2);
+plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',1);
 % Referenceの凡例をtmpに保存
 lgdtmp = {'$x_d$','$y_d$','$z_d$'};
 hold on
@@ -171,7 +171,7 @@ end
 %% Q
 figure(2)
 colororder(newcolors)
-plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.q(tlength,:)','LineWidth',2);
+plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.q(tlength,:)','LineWidth',1);
 if size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 3
     lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 elseif size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 4
@@ -230,7 +230,7 @@ end
 %% V
 figure(3)
 colororder(newcolors)
-plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.v(tlength,:)','LineWidth',2);
+plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.v(tlength,:)','LineWidth',1);
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 hold on
 grid on
@@ -286,7 +286,7 @@ end
 figure(4)
 colororder(newcolors)
 % lgd = ('$\omega_{\phi d}$','$\omega_{\theta d}$','$\omega_{\psi d}$','$\hat{\omega}_\phi$','$\hat{\omega}_\theta$','$\hat{\omega}_\psi$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.w(tlength,:)','LineWidth',2);
+plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.w(tlength,:)','LineWidth',1);
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 hold on
 grid on

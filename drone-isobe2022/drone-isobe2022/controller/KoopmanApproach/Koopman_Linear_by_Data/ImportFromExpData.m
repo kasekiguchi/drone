@@ -34,8 +34,8 @@ if logger.fExp==1
 %     data.startIndex = find(data.est.p(:,3)>0.4,1,'first'); %0.4m以上になった部分からデータの取得開始
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
-    data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
-    % data.startIndex = find(data.t > 18,1,'first'); %完全に目標軌道になった部分のデータのみを使用
+%     data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
+    data.startIndex = find(data.t > 18,1,'first'); %完全に目標軌道になった部分のデータのみを使用
 %     data.phase = logger.Data.phase;
     data.endIndex = find(data.phase==108,1,'first'); %ランディングする前にデータの取得をやめる
     data.N = data.endIndex - data.startIndex + 1;
@@ -63,7 +63,7 @@ end
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合
 % ↓状態,→時系列
-for i=1:data.N -1
+for i=1:data.N-1
     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
     data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
     data.U(:,i) = [data.input(i,:)'];
