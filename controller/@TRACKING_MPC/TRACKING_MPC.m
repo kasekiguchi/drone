@@ -1,4 +1,4 @@
-classdef TRACKING_MPC <CONTROLLER_CLASS
+classdef TRACKING_MPC < handle
     %MPC_CONTROLLER MPCのコントローラー
     %   fminiconで車両モデルに対するMPC
     %   目標点を追従する
@@ -48,7 +48,7 @@ classdef TRACKING_MPC <CONTROLLER_CLASS
             obj.model = self.model;
         end
         
-        function result = do(obj,param,~)
+        function result = do(obj,varargin)
             tic
             %---ロボットの状態をとる---%
             RobotState = [obj.self.estimator.result.state.p(1) , obj.self.estimator.result.state.p(2) , obj.self.estimator.result.state.q];

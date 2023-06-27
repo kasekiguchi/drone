@@ -1,4 +1,4 @@
-classdef CONSENSUS_AGREEMENT < REFERENCE_CLASS
+classdef CONSENSUS_AGREEMENT < handle
     % 合意重心を指定して隊列を形成するクラス
     % 指定すれば各時刻における合意重心の算出も可能
     
@@ -7,6 +7,7 @@ classdef CONSENSUS_AGREEMENT < REFERENCE_CLASS
         self
         offset
         id
+        result
     end
     
     methods

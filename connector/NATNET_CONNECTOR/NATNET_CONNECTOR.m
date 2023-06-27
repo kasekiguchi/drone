@@ -1,4 +1,4 @@
-classdef NATNET_CONNECTOR < CONNECTOR_CLASS
+classdef NATNET_CONNECTOR < handle
     % motive = NATNET_CONNECTOR(param)
     %  param : HostIP, ClientIP
     properties
@@ -32,12 +32,15 @@ classdef NATNET_CONNECTOR < CONNECTOR_CLASS
             obj.NatnetClient.ConnectionType = 'Multicast';
             obj.NatnetClient.connect;
             if obj.NatnetClient.IsConnected == 0
-                error( 'Please check whether it is connected to the net. Is the IP address correctly specified?' )
+                error( 'ACSL : Please check whether it is connected to the net. Is the IP address correctly specified?' )
             end            
             ModelDescription = obj.NatnetClient.getModelDescription;
             % get frame from motive
             Frame = obj.NatnetClient.getFrame;
             obj.result.rigid_num = ModelDescription.RigidBodyCount;
+            if obj.result.rigid_num == 0
+              error('ACSL : No rigid body is measured.')
+            end
             omnum = 0;
             obj.on_marker = cell(1,obj.result.rigid_num);
             obj.result.rigid(obj.result.rigid_num) = struct('p',[],'q',[]);
