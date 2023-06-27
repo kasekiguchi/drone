@@ -1,6 +1,6 @@
 function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     % output ：出力のリスト　例 ["p","q"]
-    % var : 各出力に対するセンサーの観測ノイズs
+    % var : 各出力に対するセンサーの観測ノイズ
     %% estimator class demo
     % estimator property をEstimator classのインスタンス配列として定義
     % すべての機体で同一設定
@@ -15,6 +15,7 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         opts.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
     end
     Estimator.model = model;
+    p = length(model.state.get(output)); % number of output
     %dt = Estimator.model.dt;
     n = Estimator.model.dim(1);% 状態数
     % 出力方程式の拡張線形化行列(JacobianH)の生成
@@ -59,6 +60,13 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     if strcmp(Estimator.model.name,"Expand")
         Estimator.Q = blkdiag(eye(3)*1E-3, eye(3)*1E-3,eye(2)*1E-3); % システムノイズ（Modelクラス由来）
         Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],dt^2*eye(2));
+    end
+    if contains(Estimator.model.name,"cable_suspended_rigid_body")
+      N = length(Estimator.model.state.Oi)/3;
+        Estimator.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3*N)*1E-3,eye(3*N)*1E-8); % システムノイズ（Modelクラス由来）
+        Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(6*N);dt*eye(6*N)]);
+        %Estimator.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3), 1e-8*ones(1,3*N), 1e-8*ones(1,3*N)]);
+        Estimator.R = 1e-5*eye(p);
     end
     Estimator.list=output;
 end
