@@ -8,7 +8,7 @@ clc
 dir = "model/substance/Cooperative_drones/";
 
 %% symbol定義
-N = 6; % エージェント数
+N = 5; % エージェント数
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
 syms x0 [3 1] real % 位置
 syms dx0 [3 1] real
@@ -127,7 +127,7 @@ doi = vertcat(tmp{:});
 %% 
 
 % %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
-%matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
+matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
 %% z up version : euler parameter
 syms X [13*(N+1) 1] real
 R = diag([1 -1 -1]);
