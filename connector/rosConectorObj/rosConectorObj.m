@@ -1,4 +1,4 @@
-classdef rosConectorObj < CONNECTOR_CLASS
+classdef rosConectorObj < handle
 	properties(NonCopyable = true, SetAccess = private)
 		data
 		Data

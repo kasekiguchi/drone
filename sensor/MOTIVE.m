@@ -1,4 +1,4 @@
-classdef MOTIVE < SENSOR_CLASS
+classdef MOTIVE < handle
 % Motive用クラス：登録されたエージェントの位置と姿勢がわかる
 %  sensor.motive = MOTIVE(self, ~)
 %       self : agent
@@ -31,14 +31,14 @@ methods
 
         obj.result.state = STATE_CLASS(struct('state_list', ["p", "q"], "num_list", [3, 4]));
 
-        if sum(contains(self.model.state.list, "q")) == 1
-            obj.result.state.num_list = [3, length(self.model.state.q)]; % modelと合わせる
-            obj.result.state.type = length(self.model.state.q);
+        if sum(contains(self.estimator.result.state.list, "q")) == 1
+            obj.result.state.num_list = [3, length(self.estimator.result.state.q)]; % modelと合わせる
+            obj.result.state.type = length(self.estimator.result.state.q);
         end
 
     end
 
-    function result = do(obj, ~)
+    function result = do(obj, varargin)
         % result=sensor.motive.do(motive)
         %   set obj.result.state : State_obj,  p : position, q : quaternion
         %   result :

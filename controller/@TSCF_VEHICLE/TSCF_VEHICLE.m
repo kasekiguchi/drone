@@ -1,4 +1,4 @@
-classdef TSCF_VEHICLE < CONTROLLER_CLASS
+classdef TSCF_VEHICLE < handle
 % 車両の時間軸状態制御形での制御
 properties
     self

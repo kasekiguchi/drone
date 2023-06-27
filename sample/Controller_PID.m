@@ -1,21 +1,25 @@
 function Controller = Controller_PID(dt)
 % PIDコントローラ設計用
-Controller_param.dt = dt;
-% Controller_param.Kp = [0,0,0;1,1,1];
-% Controller_param.Ki = [0 0 0;0 0 0];
-% Controller_param.Kd = [1;1];
-% Controller_param.strans = str2func("strans_2110");
-% Controller_param.rtrans = str2func("strans_2110");
-F = lqr([0, 1; 0 0], [0; 1], diag([1, 1]), 1);
-Controller_param.Kp = F(1) * eye(4);
-Controller_param.Ki = zeros(4);
-Controller_param.Kd = F(2) * eye(4);
-Controller_param.strans = str2func("strans_4");
-Controller_param.rtrans = str2func("strans_4");
-Controller_param.utrans = str2func("utrans_throttle2thrust");
-Controller.type = "PID_CONTROLLER";
-Controller.name = "pid";
-Controller.param = Controller_param;
+Controller.dt = dt;
+% Controller.Kp = [0,0,0;1,1,1];
+% Controller.Ki = [0 0 0;0 0 0];
+% Controller.Kd = [1;1];
+% Controller.strans = str2func("strans_2110");
+% Controller.rtrans = str2func("strans_2110");
+F = lqr([0, 1; 0 0], [0; 1], diag([100, 1]), 0.01);
+% Controller.Kp = F(1) * eye(4);
+Controller.Ki = zeros(4);
+% Controller.Kd = F(2) * eye(4);
+% Controller.strans = str2func("strans_4");
+% Controller.rtrans = str2func("strans_4");
+% Controller.utrans = str2func("utrans_throttle2thrust");
+Controller.Kp = F(1) * eye(3);
+Controller.Kd = F(2) * eye(3);
+Controller.strans = @(x) x;%str2func("strans_4");
+Controller.rtrans = @(x) x;%str2func("strans_4");
+Controller.utrans = @(x) x;%str2func("utrans_throttle2thrust");
+Controller.ptarget = ["p"];
+Controller.vtarget = ["v"];
 end
 
 function [p, q, v, w] = strans_2110(state)
