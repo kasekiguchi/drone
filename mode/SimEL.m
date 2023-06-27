@@ -10,7 +10,7 @@ initial_state.p = arranged_position([0, 0], 1, 1, 0);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
-initial_state.Trs = [9.81; 0];%divison by zero やちゃんと計算されないので初期値は[0.1; 0.1]にする．
+initial_state.Trs = [0.5*9.81; 0];%重力加速度を打ち消すため最初はTr=9.81
 
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
