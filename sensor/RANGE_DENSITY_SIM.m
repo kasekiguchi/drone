@@ -7,19 +7,20 @@ classdef RANGE_DENSITY_SIM < handle
         result
         target % 観測対象の環境
         self % センサーを積んでいる機体のhandle object
-        grid_density 
+
+    angle_range
     end
     properties (SetAccess = private) % construct したら変えない値．
         r = 10;
-        
     end
 
     methods
         function obj = RANGE_DENSITY_SIM(self,Env)
             obj.self=self;
             if isfield(Env,'r'); obj.r= Env.r;end
-            % Env.env.grid_density= ones(size(Env.env.grid_density))*100;
-            
+
+                    obj.angle_range = -pi:0.01:pi;
+
         end
 
         function result = do(obj,varargin)
@@ -29,27 +30,43 @@ classdef RANGE_DENSITY_SIM < handle
             Env=varargin{1}{4};
             state=obj.self.plant.state; % 真値
             env = polyshape(Env.Vertices);
+
             %% センシング領域を定義
             tmp = 0:0.1:2*pi;
             sensor_range=polyshape(state.p(1)+obj.r*sin(tmp),state.p(2)+obj.r*cos(tmp)); % エージェントの位置を中心とした円
 
             %% 領域と環境のintersectionが測距領域
             region=intersect(sensor_range, env); % 測距領域
-            region_candidate = regions(region);
-            for i = 1:length(region_candidate)
-                if isinterior(region_candidate(i),state.p(1),state.p(2))
-                    region = region_candidate(i);
-                    break
-                end
+
+            pos = obj.self.plant.state.p; % 実状態
+
+            circ = [obj.r * cos(obj.angle_range); obj.r * sin(obj.angle_range)]'+ pos(1:2)';
+
+            result.angle = zeros(1, length(obj.angle_range));
+
+            for i = 1:length(circ)
+              in = intersect(region, [circ(i, :); pos(1:2)']);
+              [~,ii]=mink(vecnorm(in-pos(1:2)',2,2),2);
+              if ~isempty(in)
+                in = in(ii(2),:);
+                in = setdiff(in(~isnan(in(:, 1)), :), [0 0], 'rows'); % レーザーと領域の交点
+                [~, mini] = min(vecnorm(in')');
+                result.sensor_points(i, :) = in(mini, :);
+                result.angle(i) = obj.angle_range(i);
+              else
+                result.sensor_points(i, :) = [0 0];
+              end
+
             end
-            region.Vertices=region.Vertices-state.p(1:2)'; % 相対的な測距領域
+
+            region.Vertices = result.sensor_points - pos(1:2)';% 相対的な測距領域
 
             %% 重み分布
             pxy=state.p(1:2)'-Env.map_min; % 領域左下から見たエージェント座標
             pmap_min=max(pxy+[-obj.r,-obj.r],[0,0]); % エージェントを中心としたセンサーレンジの直方包左下座標
             pmap_max=min(pxy+[obj.r,obj.r],Env.map_max-Env.map_min); % 右上座標
             rpmap_min=pmap_min-pxy; % 相対座標
-            rpmap_max=pmap_max-pxy; %  相対座標f
+            rpmap_max=pmap_max-pxy; %  相対座標
             [xq,yq]=meshgrid(rpmap_min(1):Env.d:rpmap_max(1),rpmap_min(2):Env.d:rpmap_max(2));% 相対座標
             xq=xq';      yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
 
@@ -67,6 +84,7 @@ classdef RANGE_DENSITY_SIM < handle
             result.map_min=rpmap_min;
             %% 出力として整形
             result.region=region;
+
             obj.result = result;
         end
         function show(obj,varargin)
