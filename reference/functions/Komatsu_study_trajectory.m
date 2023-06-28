@@ -43,9 +43,9 @@ syms t real
 % z = 1;
 
 %% Liner
-x = 0;
-y = t^2/50;
-z = 1.0;
+% x = 0;
+% y = t;
+% z = 1.0;
 
 %% Vertical vibration
 % x = 0;
@@ -65,17 +65,17 @@ z = 1.0;
 % z = 1.0;
 
 %% landing
-% T = 13;  % Time
-% rz0 = 1; % start
-% rz = 0.05; % target
-% StartT = -3;
-%
-% a = -2/T^3 * (rz-rz0);
-% b = 3/T^2 * (rz-rz0);
-% z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
-% % z = 1.0;
-% x = 6/100 * t -3/10;
-% y = 0;
+T = 13;  % Time
+rz0 = 1; % start
+rz = 0.05; % target
+StartT = -3;
+
+a = -2/T^3 * (rz-rz0);
+b = 3/T^2 * (rz-rz0);
+z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
+% z = 1.0;
+x = 6/100 * t -3/10;
+y = 0;
 
 %% syamen これ！！
 % phaseT = 2;

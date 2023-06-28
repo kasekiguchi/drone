@@ -51,6 +51,7 @@ options.Algorithm = 'sqp';  % 逐次二次計画法
 options.Display = 'none';   % 計算結果の表示
 problem.solver = 'fmincon'; % solver
 problem.options = options;  %
+totalT = 0;
 
 try
 
@@ -58,6 +59,7 @@ try
     %% sensor
     %    tic
     tStart = tic;
+    calT = tic;
     idx = idx + 1;
 
     if (fOffline)
@@ -130,7 +132,7 @@ try
       param(i).controller.pid = {};
       param(i).controller.tscf = {dt, time.t};
       param(i).controller.mpc = {};
-      param(i).controller.mcmpc = {idx, time.t, phase, problem};
+      param(i).controller.hlmpc = {idx, time.t, phase, problem};
 
       for j = 1:length(agent(i).controller.name)
         param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -161,6 +163,9 @@ try
     %%
 %     data.input_v{round(time.t/dt + 1)} = agent.controller.result.input_v;
 
+    CALT = toc(calT);
+%     disp(CALT);
+    totalT = totalT + CALT;
 
     % for exp
     if fExp
@@ -174,10 +179,16 @@ try
       if (fOffline)
         time.t
       else
-        time.t = time.t + dt % for sim
+        time.t = time.t + dt; % for sim
       end
+%       disp(time.t);
 
     end
+
+    %% information
+    fprintf("t:%f \t dt:%f\n", time.t, CALT);
+    fprintf("%f \t %f \t ", agent.estimator.result.state.p', agent.reference.result.state.p');
+    fprintf("\n");
 
   end
 
@@ -214,6 +225,14 @@ logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, 
 % xlabel("Time [s]"); ylabel("input.V");
 % grid on; xlim([0 te]); ylim([-inf inf]);
 % saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
+%% Ubuntu
+data_now = datestr(datetime('now'), 'yyyymmdd');
+Title = strcat('Circle_good','-','HLMPC', '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
+if exist(Outputdir) ~= 7
+    mkdir ../../students/komatsu/simdata/20230627/
+end
+% save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","logger", "-v7.3")
 %%
 % InputV(:, te/dt+1) = InputV(:, te/dt);
 % save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
@@ -231,7 +250,7 @@ logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-% agent(1).animation(logger, "target", 1:N);
+agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

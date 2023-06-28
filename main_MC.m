@@ -453,7 +453,7 @@ ylabel("Calculation time [s]");
 set(gcf, "Position", [960 0 960 1000])
 
 %%
-% agent(1).animation(logger,"target",1); 
+agent(1).animation(logger,"target",1); 
 %% 各評価値
 % clf(20)
 % Peval = zeros(1, size(logt, 1)); Veval = zeros(1, size(logt, 1)); Qeval = zeros(1, size(logt, 1));
@@ -520,12 +520,12 @@ set(gcf, "Position", [960 0 960 1000])
 
 %% Ubuntu
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat('LandingFreeFall_input_0', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat('a', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230621/
+    mkdir ../../students/komatsu/simdata/20230627/
 end
-% save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
+save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 
 %% 加速度
 % figure(21)
