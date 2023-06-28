@@ -6,14 +6,14 @@ function Controller= Controller_Cooperative_Load(dt)
 % Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 % Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
 
-Controller.F1=1;                                % z 
-Controller.F2=1; % xdiag([100,10,10,1])
-Controller.F3=1; % ydiag([100,10,10,1])
-Controller.F4=1;
-Controller.F5=1;
-Controller.F6=1;% ヨー角 
-Controller.F7=1;
-Controller.F8=1;
+Controller.F1=0.5;                                % z 
+Controller.F2=0.7; % xdiag([100,10,10,1])
+Controller.F3=0.5; % ydiag([100,10,10,1])
+Controller.F4=0.8;
+Controller.F5=0.3;
+Controller.F6=0.45;% ヨー角 
+Controller.F7=0.5;
+Controller.F8=0.7;
 
 
 % % dt = 0.2 くらいの時用
