@@ -33,7 +33,7 @@ switch type
     Setting.num_list = [3];
 case "PVQ0" % point-mass (force,angular-vel)-input model
     dsys.A = zeros(9);
-    dsys.B = [eye(3)*dt,zeros(3,6);
+    dsys.B = [eye(3),zeros(3,6);
               zeros(6,3),eye(6)];
     dsys.C = eye(9);
     dsys.D = zeros(9);

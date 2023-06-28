@@ -22,7 +22,7 @@ w = 2*pi/T; % T秒で一周
 
 ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
 ly*sin(w*t + phase)+ly_offset; % y
-lz*sin(2*w*t + phase/2)+lz_offset; % z
+lz*sin(1.5*w*t + phase/2)+lz_offset; % z
 ];%
 ddx = diff(ref,t,2);
 fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));

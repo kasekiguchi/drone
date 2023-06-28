@@ -17,30 +17,62 @@ illustration= 1; %1で図示，0で非表示
 
 %% Log Dataの読み取りと格納
 
-log = LOGGER('./Data/Log(23-Jun-2023_17_59_52).mat');
+log = LOGGER('./Data/100_2noise_Log(27-Jun-2023_16_37_16).mat');
 robot_p  = log.data(1,"p","s")';
 robot_pt  = log.data(1,"p","p")';
 robot_vt  = log.data(1,"v","p")';
 robot_q  = log.data(1,"q","s")';
 robot_qt  = log.data(1,"q","p")';
-sensor_data = log.data(1,"length","s")';
+sensor_data = (log.data(1,"length","s"))';
 ref_p = log.data(1,"p","r")';
 ref_q = log.data(1,"q","r")';
 
+%% 不要データの除去
+nanIndices = isnan(sensor_data);
+ds = find(nanIndices==1);
+sensor_data(:,ds) = [];
+robot_p(:,ds) = [];
+robot_pt(:,ds) = [];
+robot_q (:,ds) = [];
+robot_qt(:,ds) = [];
+
 %% 解析(回帰分析)
-[A,X,Av,Xv] = param_analysis(robot_pt,robot_qt,sensor_data,NaN);
-% [A,X,Av,Xv] = param_analysis(robot_pth(:,1000:2500),robot_qt(:,1000:2500),sensor_data(:,1000:2500),NaN);
+[A,X,Av,Xv] = param_analysis(robot_pt,robot_qt,sensor_data(1,:),NaN);
+% [A2,X2,Av2,Xv2] = param_analysis(robot_pt,robot_qt,sensor_data(2,:),RodriguesQuaternion(Eul2Quat([0,0,pi/180]')));
+% maxt = size(robot_p,2);
+% [A2,X2,Av2,Xv2] = param_analysis(robot_pt(:,1000:maxt),robot_qt(:,1000:maxt),sensor_data(:,1000:maxt),NaN);
+% [A4,X4,Av,Xv] = param_analysis(robot_pt(:,2:maxt),robot_qt(:,2:maxt),sensor_data(:,2:maxt),NaN);
 S = svd(A);% 特異値の計算
 %% パラメータの計算
 offset_esta = [X(4)/X(1);X(5)/X(1);X(6)/X(1);];
 offset_estb = [X(7)/X(2);X(8)/X(2);X(9)/X(2);];
 offset_estc = [X(10)/X(3);X(11)/X(3);X(12)/X(3);];
-offset_est = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:6);X(7:9);X(10:12)];
+offset_est = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:12)];
 % offset_estS = pinv([XS(1)*eye(3);XS(2)*eye(3);XS(3)*eye(3)])*[XS(4:6);XS(7:9);XS(10:12)];
 R_sens_est1a = [X(13)/X(1),X(14)/X(1),X(15)/X(1)]';
 R_sens_est1b = [X(16)/X(2),X(17)/X(2),X(18)/X(2)]';
 R_sens_est1c = [X(19)/X(3),X(20)/X(3),X(21)/X(3)]';
 R_sens_est1 = [R_sens_est1a,R_sens_est1b,R_sens_est1c];
+% offset_esta2 = [X2(4)/X2(1);X2(5)/X2(1);X2(6)/X2(1);];
+% offset_estb2 = [X2(7)/X2(2);X2(8)/X2(2);X2(9)/X2(2);];
+% offset_estc2 = [X2(10)/X2(3);X2(11)/X2(3);X2(12)/X2(3);];
+% offset_est2 = pinv([X2(1)*eye(3);X2(2)*eye(3);X2(3)*eye(3)])*[X2(4:12)];
+% % offset_estS = pinv([XS(1)*eye(3);XS(2)*eye(3);XS(3)*eye(3)])*[XS(4:6);XS(7:9);XS(10:12)];
+% R_sens_est1a2 = [X2(13)/X2(1),X2(14)/X2(1),X2(15)/X2(1)]';
+% R_sens_est1b2 = [X2(16)/X2(2),X2(17)/X2(2),X2(18)/X2(2)]';
+% R_sens_est1c2 = [X2(19)/X2(3),X2(20)/X2(3),X2(21)/X2(3)]';
+% R_sens_est12 = [R_sens_est1a2,R_sens_est1b2,R_sens_est1c2];
+% 
+% 
+% offset_esta4 = [X4(4)/X4(1);X4(5)/X4(1);X4(6)/X4(1);];
+% offset_estb4 = [X4(7)/X4(2);X4(8)/X4(2);X4(9)/X4(2);];
+% offset_estc4 = [X4(10)/X4(3);X4(11)/X4(3);X4(12)/X4(3);];
+% offset_est4= pinv([X4(1)*eye(3);X4(2)*eye(3);X4(3)*eye(3)])*[X4(4:12)];
+% % offset_estS = pinv([XS(1)*eye(3);XS(2)*eye(3);XS(3)*eye(3)])*[XS(4:6);XS(7:9);XS(10:12)];
+% R_sens_est1a4 = [X4(13)/X4(1),X4(14)/X4(1),X4(15)/X4(1)]';
+% R_sens_est1b4 = [X4(16)/X4(2),X4(17)/X4(2),X4(18)/X4(2)]';
+% R_sens_est1c4 = [X4(19)/X4(3),X4(20)/X4(3),X4(21)/X4(3)]';
+% R_sens_est14 = [R_sens_est1a4,R_sens_est1b4,R_sens_est1c4];
 %% 図示
 if illustration == 1
     fig1=figure(1);
@@ -74,7 +106,10 @@ if illustration == 1
     legend('\it{v}_{\it{\phi}}','\it{v}_{\it{\theta}}','\it{v}_{\it{\psi}}','FontSize', 18);
     fig4=figure(4);
     fig4.Color = 'white';
-    plot(sensor_data);
+    plot(sensor_data(1,:));
+    hold on;
+    plot(sensor_data(2,:));
+    plot(sensor_data(3,:));
     xlabel('step','FontSize', 14);
     ylabel('Distance of the lidar [m]','FontSize', 14);
     grid on;
@@ -130,7 +165,6 @@ function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,R_num)
     var = [a,b,c,var]/d;
     var(ds)=[];
     A = zeros(size(robot_p,2),size(Cf,2));
-    B = zeros(size(robot_p,2),1);
     for i =1:size(robot_p,2)
             pb=robot_p(:,i);
             q = robot_q(:,i);
@@ -138,7 +172,6 @@ function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,R_num)
             R = RodriguesQuaternion(Eul2Quat(q));
             Cfc = subs(Cf,{p1, p2, p3, Rb1_1, Rb1_2, Rb1_3, Rb2_1, Rb2_2, Rb2_3, Rb3_1, Rb3_2, Rb3_3, y},{pb(1),pb(2),pb(3),R(1,1),R(1,2),R(1,3),R(2,1),R(2,2),R(2,3),R(3,1),R(3,2),R(3,3),r});
             A(i,:) = Cfc;
-            B(i,:) = -1;
     end
-    X = pinv(A)*B;
+    X = pinv(A)*(-1*ones(size(A,1),1));
 end
