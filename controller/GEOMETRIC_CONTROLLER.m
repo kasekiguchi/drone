@@ -193,14 +193,18 @@ classdef GEOMETRIC_CONTROLLER < handle
       f3 = -u3'*Rb3*e3;
       f4 = -u4'*Rb4*e3;
 
-      epsilon = 1;
+      epsilon = 3;
 
       M1=- kr/epsilon^2*eRi1 - kO/epsilon*eOi1 + cross(model.Oi(1:3),J1*model.Oi(1:3));
       M2=- kr/epsilon^2*eRi2 - kO/epsilon*eOi2 + cross(model.Oi(4:6),J1*model.Oi(4:6));
       M3=- kr/epsilon^2*eRi3 - kO/epsilon*eOi3 + cross(model.Oi(7:9),J1*model.Oi(7:9));
       M4=- kr/epsilon^2*eRi4 - kO/epsilon*eOi4 + cross(model.Oi(10:12),J1*model.Oi(10:12));
 
-      obj.result.input = [f1;M1;f2;M2;f3;M3;f4;M4];
+      M1 = M1.*[-1,-1,0]';
+      M2 = M2.*[-1,-1,0]';
+      M3 = M3.*[-1,-1,0]';
+      M4 = M4.*[-1,-1,0]';
+      obj.result.input = [-f1;M1;-f2;M2;-f3;M3;-f4;M4];
 
 
 

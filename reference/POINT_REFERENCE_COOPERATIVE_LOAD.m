@@ -14,13 +14,13 @@ classdef POINT_REFERENCE_COOPERATIVE_LOAD < handle
         function  result= do(obj,varargin)
             % 【Input】result = {Xd(optional)}
 %             obj.result.state.p = varargin{end};
-            obj.result.state.p = [1;0;1];
+            obj.result.state.p = [0.1;0;1.5];
             obj.result.state.Q = [0;0;0;0];
             obj.result.state.v = [0;0;0];
             obj.result.state.O = [0;0;0];
             obj.result.state.ddx = [0;0;0];
             obj.result.state.dO = [0;0;0];
-            obj.result.state.qi = [0;0;0;0;0;0;0;0;0;0;0;0];
+            obj.result.state.qi = [0;0;1;0;0;1;0;0;1;0;0;1];
             obj.result.state.dqi = [0;0;0;0;0;0;0;0;0;0;0;0];
             obj.result.state.dwi = [0;0;0;0;0;0;0;0;0;0;0;0];
 
