@@ -58,47 +58,6 @@ methods
         %検証用
 %      vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
         % vs(3) = -F4 * z4; %yaw:LS
-        %% 外乱(加速度で与える)
-        
-        %=======================================
-        %定常外乱：並進方向は0.2m/s^2くらい，回転方向は3rad/s^2(180deg/s^2)
-        %=======================================
-                    dst = [zeros(6,1)];%[x,y,z,roll,pitch,yaw](加速次元)
-        %-----------------------------------------------------------------
-                    %確率の外乱
-                    % t = param{1};
-%                     rng("shuffle");
-%                     a = 1;%外乱の大きさの上限
-%                     dst = 2*a*rand-a;
-%
-                    %平均b、標準偏差aのガウスノイズ
-                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
-                          rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-                          a = 1;%標準偏差
-                          b = 0;%平均
-                          c = varargin{1, 1}.te/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
-                          obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
-                          obj.fRandn = 1;
-                    end
-                    dst(4) = obj.pdst(obj.fRandn,1);
-                    dst(5) = obj.pdst(obj.fRandn,2);
-                    dst(3) = obj.pdst(obj.fRandn,3);
-                    obj.fRandn = obj.fRandn+1;%乱数の値を更新
-        %-----------------------------------------------------------------
-                    %一時的な外乱
-%         t = param{1};
-%         dst = 0;
-%                     if t>=2 && t<=5.33
-%                             dst= 0.6;
-%                     end
-        %特定の位置で外乱を与える
-     
-%                     dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
-%                     xxx=model.state.p(1)-xxx0;
-%                     if xxx>=0 && xxx<=TT
-%                             dst=-5*sin(2*pi*xxx/(TT*2));
-%                     end
-        %%
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
         % obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4); dst];
         % obj.self.input = obj.result.input;
