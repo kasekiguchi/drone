@@ -77,14 +77,14 @@ classdef GEOMETRIC_CONTROLLER < handle
 %       kr = obj.param.F7; 
 %       kO = obj.param.F8; 
 
-      kx0 = 0.7; %Controller_Cooperative_Load(dt)から係数を持ってくる
-      kdx0 = 1;
-      kR0 = 0.7;
-      kO0 = 1; 
-      kq = 0.7; 
-      kw = 1; 
-      kr = 0.7; 
-      kO = 1; 
+      kx0 = 1; %Controller_Cooperative_Load(dt)から係数を持ってくる
+      kdx0 = 1.5;
+      kR0 = 1;
+      kO0 = 1.5; 
+      kq = 1; 
+      kw = 1.5; 
+      kr = 1; 
+      kO = 1.5; 
 
       ex0 = model.p - pd;
       edx0 = model.v - vd;
