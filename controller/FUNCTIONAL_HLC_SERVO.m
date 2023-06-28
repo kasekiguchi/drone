@@ -4,7 +4,6 @@ classdef FUNCTIONAL_HLC_SERVO < handle
         self
         result
         param
-        Q
         parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
         Vf
         Vs
@@ -16,17 +15,16 @@ classdef FUNCTIONAL_HLC_SERVO < handle
             obj.self = self;
             obj.param = param;
             obj.param.P = self.parameter.get(obj.parameter_name);
-            obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
+            obj.result.input = zeros(self.estimator.model.dim(2),1);
             obj.Vf = param.Vf; % 階層１の入力を生成する関数ハンドル
             obj.Vs = param.Vs; % 階層２の入力を生成する関数ハンドル 
             obj.z = [0;0;0];
         end
         
-        function result=do(obj,param,~)
+        function result = do(obj,varargin)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
-            x = [model.state.getq('compact');model.state.p;model.state.v;model.state.w]; % [q, p, v, w, z]に並べ替え
             xd = ref.state.get();
 
             P = obj.param.P;
@@ -34,7 +32,7 @@ classdef FUNCTIONAL_HLC_SERVO < handle
             F2 = obj.param.F2;
             F3 = obj.param.F3;
             F4 = obj.param.F4;
-            t = param{1};
+            t = varargin{1}.t;
             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
             
             % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
@@ -61,8 +59,17 @@ classdef FUNCTIONAL_HLC_SERVO < handle
 
             %% calc actual input
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs,P);
-            obj.result.input = [tmp(1);tmp(2);tmp(3);tmp(4)];
-            obj.self.input = obj.result.input;
+            %input of subsystems
+            obj.result.uHL = [vf(1); vs];
+            %differential virtual input first layer
+            obj.result.vf = vf;
+            %state of subsystems
+            obj.result.z1 = z1;
+            obj.result.z2 = z2;
+            obj.result.z3 = z3;
+            obj.result.z4 = z4;
+          % max,min are applied for the safty
+            obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             obj.result.z= obj.z;
             result = obj.result;
         end

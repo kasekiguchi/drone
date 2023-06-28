@@ -4,12 +4,9 @@ properties
     self
     result
     param
-    Q
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vf
     Vs
-    pdst 
-    fRandn =0;%確率seedを指定．同じ確率の値でできる
 end
 
 methods
@@ -18,19 +15,15 @@ methods
         obj.self = self;
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
-        obj.Q = STATE_CLASS(struct('state_list', ["q"], 'num_list', [4]));
-        obj.Vf = param.param.Vf; % 階層１の入力を生成する関数ハンドル
-        obj.Vs = param.param.Vs; % 階層２の入力を生成する関数ハンドル
+        obj.result.input = zeros(self.estimator.model.dim(2),1);
+        obj.Vf = obj.param.Vf; % 階層１の入力を生成する関数ハンドル
+        obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
     end
 
-    function result = do(obj, param, ~)
-        % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
+    function result = do(obj,varargin)
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
-        x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
-        xd = ref.state.get();
-
-        
+        xd = ref.state.xd;
         P = obj.param.P;
         F1 = obj.param.F1;
         F2 = obj.param.F2;
@@ -55,61 +48,18 @@ methods
         z4 = Z4(x, xd', vf, P);%yaw
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
 
-        %%
-        dst = [zeros(6,1)];%[x,y,z,roll,pitch,yaw](加速次元)
-        t = param{1};
-%         dst = 1;
-        %確率的な外乱
-%         rng("shuffle");
-%                     a = 1;%外乱の大きさの上限
-%                     dst = 2*a*rand - a;
-                    %平均b、標準偏差aのガウスノイズ
-%                      if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
-%                           rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-%                           a = 1;%標準偏差
-%                           b = 0;%平均
-%                           c = param{2}/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
-%                           obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
-%                           obj.fRandn = 1;
-%                     end
-%                     dst(4) = obj.pdst(obj.fRandn,1);
-%                     dst(5) = obj.pdst(obj.fRandn,2);
-%                     dst(3) = obj.pdst(obj.fRandn,3);
-%                     obj.fRandn = obj.fRandn+1;%乱数の値を更新
-
-%                     if t>=10 && t<=10.5
-%                             dst=-3;
-%                     end
-%              ts = 2 ; te =5.33;
-%              T2 = 2*(te - ts);
-%             if t>=ts && t<= te
-% %                     dst=0.6;
-%                     dst=0.4*sin(2*pi*(t-ts)/T2)+0.6;
-%             end
-
-% dst=-1*sin(2*pi*t/1);
- %特定の位置で外乱を与える
-%                     dst=0;xxx0=0.5;TT=0.5;%TT外乱を与える区間
-%                     xxx=model.state.p(1)-xxx0;
-%                     if xxx>=0 && xxx<=TT
-%                             dst=-5*sin(2*pi*xxx/(TT*2));
-%                     end
-%             if t>=4 && t<=5.33
-%                     dst=0.6;
-%             end
         %% calc actual input
-        tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
-        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4);dst];
-        obj.self.input = obj.result.input;
-%         obj.result.state.set_state('p', data.rigid(id).p);
-         %サブシステムの入力
-        obj.result.uHL = [vf(1);vs];
-        %サブシステムの状態
+       tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
+        %%input of subsystems
+        obj.result.uHL = [vf(1); vs];
+        %differential virtual input first layer
+        obj.result.vf = vf;
+        %state of subsystems
         obj.result.z1 = z1;
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
-        obj.result.vf = vf;
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         result = obj.result;
     end
 

@@ -5,12 +5,8 @@ properties
     self
     result
     param
-    Q
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vep
-    finitial
-    fRandn
-    pdst
 end
 
 methods
@@ -19,14 +15,9 @@ methods
         obj.self = self;
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
-        obj.Q = STATE_CLASS(struct('state_list', ["q"], 'num_list', [4]));
-        % obj.Vls = param.Vepls; % 階層２の入力を生成する関数ハンドル
-        % obj.Vft = param.Vepft; % 階層１の入力を生成する関数ハンドル
         obj.Vep = param.Vep; % 仮想入力を生成する関数ハンドル
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.result.u = zeros(self.estimator.model.dim(2),1);
-        obj.finitial=1;
-        obj.fRandn =0;
     end
 
     function result = do(obj ,varargin)
@@ -72,14 +63,15 @@ methods
 
         %% calc actual input
         tmp = Uep(x, xd', vep, P);
-         %サブシステムの入力
+        obj.result.u = tmp;
+        %input of subsystems
         obj.result.uHL =vep;
-        %サブシステムの状態
+        %state of subsystems
         obj.result.z1 = z1;
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
-        obj.result.u = tmp;
+        % max,min are applied for the safty
         obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
         result = obj.result;
     end
