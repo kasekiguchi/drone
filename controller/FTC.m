@@ -4,13 +4,9 @@ properties
     self
     result
     param
-    Q
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vf
     Vs
-    fzapr
-    fRandn
-    pdst
 end
 
 methods
@@ -19,20 +15,15 @@ methods
         obj.self = self;
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
-        obj.Q = STATE_CLASS(struct('state_list', ["q"], 'num_list', [4]));
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.Vf = obj.param.Vf; % 階層１の入力を生成する関数ハンドル
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
-        obj.fzapr = param.fzapr;
-        obj.fRandn =0;
     end
 
     function result = do(obj,varargin)
-        % param (optional) : 構造体：物理パラメータP，ゲインF1-F4       
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
-        x = [model.state.getq('compact'); model.state.p; model.state.v; model.state.w]; % [q, p, v, w]に並べ替え
-        xd = ref.state.get();
+        xd = ref.state.xd;
 
         P = obj.param.P;
 
@@ -59,18 +50,17 @@ methods
 %      vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
         % vs(3) = -F4 * z4; %yaw:LS
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
-        % obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4); dst];
-        % obj.self.input = obj.result.input;
-        %サブシステムの入力
+        %input of subsystems
         obj.result.uHL = [vf(1); vs];
-        %サブシステムの状態
+        %differential virtual input first layer
+        obj.result.vf = vf;
+        %state of subsystems
         obj.result.z1 = z1;
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
-        obj.result.vf = vf;
-        % obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-        obj.result.input =[max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)));dst];%外乱用
+      % max,min are applied for the safty
+        obj.result.input =[max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%外乱用
         result = obj.result;
     end
 
