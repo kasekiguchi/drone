@@ -1,6 +1,6 @@
 ts = 0;
 dt = 0.02;
-te = 50;
+te = 100;
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
@@ -10,7 +10,7 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
 %env = stlread('3F.stl');
   a = 1;
   b = 10;
-  c = 10;
+  c = 20;
   Points = [10 0 0]+[-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c]; 
   Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
   env = triangulation(Tri,Points);
@@ -22,11 +22,12 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
 
 
 findPlaneEquation(env);
+%%
 initial_state.p = arranged_position([0, 0], 1, 1, 0);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
-
+%%
 % default
 % agent = DRONE;
 % agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
@@ -47,7 +48,7 @@ agent.parameter = P; % set model parameter
 agent.controller = DIRECT_CONTROLLER(agent,dt); 
 agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,M))); % estimator.result.state = sensor.result.state
 agent.sensor.direct = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
-agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'R0', Rodrigues([0,1,0],0),'p0',[0.1;0;0],'theta_range', pi/2, 'phi_range', 0, 'noise', 0, 'seed', 0)); % 2D lidar
+agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'R0', Rodrigues([0,1,0],pi/6),'p0',[0.1;0;0],'theta_range', pi/2, 'phi_range', 0, 'noise',0, 'seed', 0)); % 2D lidar
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.do = @sensor_do; % synthesis of sensors
 agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[2.5,2.5,1]}});

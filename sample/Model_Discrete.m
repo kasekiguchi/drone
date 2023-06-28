@@ -37,7 +37,7 @@ case "PVQ0" % point-mass (force,angular-vel)-input model
               zeros(6,3),eye(6)];
     dsys.C = eye(9);
     dsys.D = zeros(9);
-    Setting.dim = [9,6,2];
+    Setting.dim = [9,9,2];
     Setting.state_list = ["p","v","q"];
     Setting.num_list = [3,3,3];
 end

@@ -1,5 +1,7 @@
 %% Initialize settings
 % set path
+clc
+close all hidden; clear all; userpath('clear');
 cf = pwd;
 if contains(mfilename('fullpath'),"mainGUI")
   cd(fileparts(mfilename('fullpath')));
