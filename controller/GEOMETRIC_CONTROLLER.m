@@ -18,12 +18,12 @@ classdef GEOMETRIC_CONTROLLER < handle
     end
 
     function result = do(obj,varargin)
+      g = obj.param.P(1);
       m0 = obj.param.P(2);
       m1= obj.param.P(22);
       m2= obj.param.P(23);
       m3= obj.param.P(24);
       m4= obj.param.P(25);
-      g = obj.param.P(1);
       l1 = obj.param.P(18);
       l2 = obj.param.P(19);
       l3 = obj.param.P(20);
