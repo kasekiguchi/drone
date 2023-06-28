@@ -15,13 +15,13 @@ agent.parameter = DRONE_PARAM("DIATONE");
     initial_state.w = [0; 0; 0];
     % mg = agent.parameter.mass*agent.parameter.gravity;
     initial_state.Trs = [agent.parameter.mass*agent.parameter.gravity; 0];%重力を打ち消すため最初はTr=m*g
-% agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
-agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
-agent.input_transform = THRUST_DST_DRONE(agent,InputTransform_Dst_drone(time)); % 外乱付与
+agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
+% agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
+% agent.input_transform = THRUST_DST_DRONE(agent,InputTransform_Dst_drone(time)); % 外乱付与
 agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.0]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",1,"orig",[0;0;1],"size",[0,0,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",1,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
 fFT=1;%1:FT, other:LS
 agent.controller = ELC(agent,Controller_EL(dt,fFT));
