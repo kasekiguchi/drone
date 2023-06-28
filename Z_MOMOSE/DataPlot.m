@@ -8,7 +8,7 @@ fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
 fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
+fF=10;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 5;
@@ -117,7 +117,7 @@ log
 %               20:"pp" 21:"pv" 22:"pq" 23:"pw" 24:"Trs"];
 %========================================================================
      % n=[1:16,18 20:24];
-     n = [2:11];
+     n = [2:11,24];
      % n=1;
 %========================================================================
 % multiFigure
@@ -190,7 +190,7 @@ addingContents.camposition = [-45,-45,60];
             spanIndex{i} = find(ti{i} <= eTime(i) & ti{i} >= sTime(i) );
             kf(i) = min(spanIndex{i});
             ke(i) = max(spanIndex{i});
-            tt(i)=1;
+            tt(i)=0;
         end
     end
         for i = 1:logNum
