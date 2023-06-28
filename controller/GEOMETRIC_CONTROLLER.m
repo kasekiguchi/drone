@@ -68,22 +68,28 @@ classdef GEOMETRIC_CONTROLLER < handle
       Rb3 = RodriguesQuaternion(model.Qi(9:12));
       Rb4 = RodriguesQuaternion(model.Qi(13:16));
       Rbd = RodriguesQuaternion(Qd);
-      kx0 = obj.param.F1; %Controller_Cooperative_Load(dt)から係数を持ってくる
-      kdx0 = obj.param.F2;
-      kR0 = obj.param.F3;
-      kO0 = obj.param.F4; 
-      kq = obj.param.F5; 
-      kw = obj.param.F6; 
-      kr = obj.param.F7; 
-      kO = obj.param.F8; 
-%       xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
+%       kx0 = obj.param.F1; %Controller_Cooperative_Load(dt)から係数を持ってくる
+%       kdx0 = obj.param.F2;
+%       kR0 = obj.param.F3;
+%       kO0 = obj.param.F4; 
+%       kq = obj.param.F5; 
+%       kw = obj.param.F6; 
+%       kr = obj.param.F7; 
+%       kO = obj.param.F8; 
 
-      % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
-      % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
+      kx0 = 0.7; %Controller_Cooperative_Load(dt)から係数を持ってくる
+      kdx0 = 1;
+      kR0 = 0.7;
+      kO0 = 1; 
+      kq = 0.7; 
+      kw = 1; 
+      kr = 0.7; 
+      kO = 1; 
+
       ex0 = model.p - pd;
       edx0 = model.v - vd;
       eR0 = 1/2*Vee(Rbd'*Rb0 - Rb0'*Rbd);
-%       ev0 = model.v - vd;
+
       eO0 = model.O - Rb0'*Rbd*Od;
       
       Fd = m0*(-kx0*ex0 - kdx0*edx0 + ddxd - g*e3);
