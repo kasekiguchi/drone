@@ -55,7 +55,7 @@ ax = gca;
 ax.FontSize = 12;
 hold off
 
-%% 
+%% 自己位置
 figure(7)
 hold on
 
@@ -74,7 +74,7 @@ ax = gca;
 ax.FontSize = 12;
 hold off
 
-%%
+%% バッテリー電圧
 figure(8)
 hold on
 
@@ -93,7 +93,7 @@ ax = gca;
 ax.FontSize = 12;
 hold off
 
-%%
+%% 温度
 figure(9)
 hold on
 
