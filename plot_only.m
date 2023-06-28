@@ -82,7 +82,7 @@ for plot_i = 1:double(battery)
     z = battery(4);
 end
 
-plot(t,battery,'LineWidth',1)
+plot(t,double(battery)/100,'LineWidth',1)
 
 xlabel('Time [s]','FontSize',16);
 ylabel('Voltage [cV]','FontSize',16);
