@@ -59,8 +59,8 @@ endTime = 1E2;
 % logger_LS_km1_1500,...
 % logger_FT_09,...
 % logger_FT_085
-% log
-gui.logger  
+log
+% gui.logger  
         };
     c=[
 %         "lxFinit time settling",...

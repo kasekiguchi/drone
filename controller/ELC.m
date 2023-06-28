@@ -72,32 +72,6 @@ methods
 
         %% calc actual input
         tmp = Uep(x, xd', vep, P);
-        % if obj.finitial
-        %     tmp(2:4) =zeros(3,1);
-        %     obj.finitial=0;
-        % end
-        %%
-        dst = [zeros(6,1)];%[x,y,z,roll,pitch,yaw](加速次元)
-        %-----------------------------------------------------------------
-                    %確率の外乱
-                    % t = param{1};
-                    % rng("shuffle");
-                    % a = 1;%外乱の大きさの上限
-                    % dst = 2*a*rand-a;
-
-                    % 平均b、標準偏差aのガウスノイズ
-                     if ~obj.fRandn%最初のループでシミュレーションで使う分の乱数を作成
-                          rng(42,"twister");%シミュレーション条件を同じにするために乱数の初期値を決めることができる
-                          a = 1;%標準偏差
-                          b = 0;%平均
-                          c = varargin{1, 1}.te/obj.self.plant.dt +1 ;%ループ数を計算param{2}はシミュレーション時間
-                          obj.pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
-                          obj.fRandn = 1;
-                    end
-                    dst(3) = obj.pdst(obj.fRandn,1);
-                    dst(4) = obj.pdst(obj.fRandn,2);
-                    dst(5) = obj.pdst(obj.fRandn,3);
-                    obj.fRandn = obj.fRandn+1;%乱数の値を更新
          %サブシステムの入力
         obj.result.uHL =vep;
         %サブシステムの状態
@@ -105,9 +79,8 @@ methods
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
-        obj.result.u = [tmp;dst];
-        % obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];        
-        obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)));dst];        
+        obj.result.u = tmp;
+        obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
         result = obj.result;
     end
 
