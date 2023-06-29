@@ -185,51 +185,87 @@ classdef GEOMETRIC_CONTROLLER < handle
       % Ric2 = [-Skew(b3i2)^2*b1i2/norm(Skew(b3i2)^2*b1i2), Skew(b3i2)*b1i2/norm(Skew(b3i2)*b1i2), b3i2];
       % Ric3 = [-Skew(b3i3)^2*b1i3/norm(Skew(b3i3)^2*b1i3), Skew(b3i3)*b1i3/norm(Skew(b3i3)*b1i3), b3i3];
       % Ric4 = [-Skew(b3i4)^2*b1i4/norm(Skew(b3i4)^2*b1i4), Skew(b3i4)*b1i4/norm(Skew(b3i4)*b1i4), b3i4];
-if vecnorm(vd(1:2)) == 0
-  vdt = [1;0;0];
-  dvdt = [0;0;0];
-  ddvdt = [0;0;0];
-else
-  vdt = vd;
-  dvdt = dvd;
-  ddvdt = ddvd;
-end
+      if vecnorm(vd(1:2)) == 0
+        vdt = [1;0;0];
+        dvdt = [0;0;0];
+        ddvdt = [0;0;0];
+      else
+        vdt = vd;
+        dvdt = dvd;
+        ddvdt = ddvd;
+      end
+    b2i1 = cross(b3i1, vdt);
+    si1 = vecnorm(b2i1);
+    ci1 = b3i1' * vdt;
+    si12 = si1^2;
+    b2i1 = b2i1 / si1;
+    b1i1 = cross(b2i1, b3i1);
+    
+    db3i1 = [0; 0; 0];
+    b3db1i1 = cross(b3i1, dvdt);
+    db2i1 = b3db1i1 / si1 - ci1 * b2i1 / si1;
+    db1i1 = -cross(b3i1, db2i1);
+        
+    ddb3i1 = [0; 0; 0];
+    ddb2i1 = cross(b3i1,ddvdt)/si1 - ci1*b3db1i1/si12 + b2i1/si12 - ci1*db2i1/si1;
+    ddb1i1 = -cross(b3i1,ddb2i1);
 
-      b2i1 = cross(b3i1,vdt);
-      s1 = vecnorm(b2i1);
-      b2i1 = b2i1/s1;
-      b1i1 = cross(b2i1,b3i1);
+    Ric1 = [b1i1,b2i1,b3i1];
 
-      b2i2 = cross(b3i2,vdt);
-      s2 = vecnorm(b2i2);
-      b2i2 = b2i2/s2;
-      b1i2 = cross(b2i2,b3i2);
+    b2i2 = cross(b3i2, vdt);
+    si2 = vecnorm(b2i2);
+    ci2 = b3i2' * vdt;
+    si22 = si2^2;
+    b2i2 = b2i2 / si2;
+    b1i2 = cross(b2i2, b3i2);
+    
+    db3i2 = [0; 0; 0];
+    b3db1i2 = cross(b3i2, dvdt);
+    db2i2 = b3db1i2 / si2 - ci2 * b2i2 / si2;
+    db1i2 = -cross(b3i2, db2i2);
+        
+    ddb3i2 = [0; 0; 0];
+    ddb2i2 = cross(b3i2,ddvdt)/si2 - ci2*b3db1i2/si22 + b2i2/si22 - ci2*db2i2/si2;
+    ddb1i2 = -cross(b3i2,ddb2i2);
 
-      b2i3 = cross(b3i3,vdt);
-      s3 = vecnorm(b2i3);
-      b2i3 = b2i3/s3;
-      b1i3 = cross(b2i3,b3i3);
+    Ric2 = [b1i2,b2i2,b3i2];
 
-      b2i4 = cross(b3i4,vdt);
-      s4 = vecnorm(b2i4);
-      b2i4 = b2i4/s4;
-      b1i4 = cross(b2i4,b3i4);
+        b2i3 = cross(b3i3, vdt);
+    si3 = vecnorm(b2i3);
+    ci3 = b3i3' * vdt;
+    si32 = si3^2;
+    b2i3 = b2i3 / si3;
+    b1i3 = cross(b2i3, b3i3);
+    
+    db3i3 = [0; 0; 0];
+    b3db1i3 = cross(b3i3, dvdt);
+    db2i3 = b3db1i3 / si3 - ci3 * b2i3 / si3;
+    db1i3 = -cross(b3i3, db2i3);
+        
+    ddb3i3 = [0; 0; 0];
+    ddb2i3 = cross(b3i3,ddvdt)/si3 - ci3*b3db1i3/si32 + b2i3/si32 - ci3*db2i3/si3;
+    ddb1i3 = -cross(b3i3,ddb2i3);
 
-db3i1 = [0;0;0];
-db2i1 = cross(b3i1,dvdt)/s1 - (b3i1'*vdt)*b2i1/s1;
-db1i1 = -cross(b3i1,db2i1);
+    Ric3 = [b1i3,b2i3,b3i3];
 
-db3i2 = [0;0;0];
-db2i2 = cross(b3i2,dvdt)/s2 - (b3i2'*vdt)*b2i2/s2;
-db1i2 = -cross(b3i2,db2i2);
+        b2i4 = cross(b3i4, vdt);
+    si4 = vecnorm(b2i4);
+    ci4 = b3i4' * vdt;
+    si42 = si4^2;
+    b2i4 = b2i4 / si4;
+    b1i4 = cross(b2i4, b3i4);
+    
+    db3i4 = [0; 0; 0];
+    b3db1i4 = cross(b3i4, dvdt);
+    db2i4 = b3db1i4 / si4 - ci4 * b2i4 / si4;
+    db1i4 = -cross(b3i4, db2i4);
+        
+    ddb3i4 = [0; 0; 0];
+    ddb2i4 = cross(b3i4,ddvdt)/si4 - ci4*b3db1i4/si42 + b2i4/si42 - ci4*db2i4/si4;
+    ddb1i4 = -cross(b3i4,ddb2i4);
 
-db3i3 = [0;0;0];
-db2i3 = cross(b3i3,dvdt)/s3 - (b3i3'*vdt)*b2i3/s3;
-db1i3 = -cross(b3i3,db2i3);
+    Ric4 = [b1i4,b2i4,b3i4];
 
-db3i4 = [0;0;0];
-db2i4 = cross(b3i4,dvdt)/s4 - (b3i4'*vdt)*b2i4/s4;
-db1i4 = -cross(b3i4,db2i4);
 
 
       dRic1 = [db1i1, db2i1, db3i1];
@@ -237,26 +273,28 @@ db1i4 = -cross(b3i4,db2i4);
       dRic3 = [db1i3, db2i3, db3i3];
       dRic4 = [db1i4, db2i4, db3i4];
 
-    ddRic1 = [ddb1i1, ddb2i1, ddb3i1];
-    ddRic2 = [ddb1i2, ddb2i2, ddb3i2];
-    ddRic3 = [ddb1i3, ddb2i3, ddb3i3];
-    ddRic4 = [ddb1i4, ddb2i4, ddb3i4];
 
-    hOic1 = Ric1' * dRic1;
-    hOic2 = Ric2' * dRic2;
-    hOic3 = Ric3' * dRic3;
-    hOic4 = Ric4' * dRic4;
 
-    Oic1 = Vee(dOic1);
-Oic2 = Vee(dOic2);
-Oic3 = Vee(dOic3);
-Oic4 = Vee(dOic4);
+      ddRic1 = [ddb1i1, ddb2i1, ddb3i1];
+      ddRic2 = [ddb1i2, ddb2i2, ddb3i2];
+      ddRic3 = [ddb1i3, ddb2i3, ddb3i3];
+      ddRic4 = [ddb1i4, ddb2i4, ddb3i4];
 
-    dOic1 = Vee(Ric1' * ddRic1 - hOic1);
-    dOic2 = Vee(Ric2' * ddRic2 - hOic2);
-    dOic3 = Vee(Ric3' * ddRic3 - hOic3);
-    dOic4 = Vee(Ric4' * ddRic4 - hOic4);
-    
+      hOic1 = Ric1' * dRic1;
+      hOic2 = Ric2' * dRic2;
+      hOic3 = Ric3' * dRic3;
+      hOic4 = Ric4' * dRic4;
+
+      Oic1 = Vee(hOic1);
+      Oic2 = Vee(hOic2);
+      Oic3 = Vee(hOic3);
+      Oic4 = Vee(hOic4);
+
+      dOic1 = Vee(Ric1' * ddRic1 - hOic1*hOic1);
+      dOic2 = Vee(Ric2' * ddRic2 - hOic2*hOic2);
+      dOic3 = Vee(Ric3' * ddRic3 - hOic3*hOic3);
+      dOic4 = Vee(Ric4' * ddRic4 - hOic4*hOic4);
+
       eRi1 = 1/2*Vee(Ric1'*Rb1-Rb1'*Ric1);
       eRi2 = 1/2*Vee(Ric2'*Rb2-Rb2'*Ric2);
       eRi3 = 1/2*Vee(Ric3'*Rb3-Rb3'*Ric3);
@@ -274,15 +312,15 @@ Oic4 = Vee(dOic4);
 
       epsilon = 1;
 
-      M1=- kr/epsilon^2*eRi1 - kO/epsilon*eOi1 + cross(model.Oi(1:3),J1*model.Oi(1:3)) - J1*(Skew(model.Oi(1:3))*Rb1'*Ric1*Oic1);
-      M2=- kr/epsilon^2*eRi2 - kO/epsilon*eOi2 + cross(model.Oi(4:6),J1*model.Oi(4:6)) - J2*(Skew(model.Oi(4:6))*Rb2'*Ric2*Oic2);
-      M3=- kr/epsilon^2*eRi3 - kO/epsilon*eOi3 + cross(model.Oi(7:9),J1*model.Oi(7:9)) - J3*(Skew(model.Oi(7:9))*Rb3'*Ric3*Oic3);
-      M4=- kr/epsilon^2*eRi4 - kO/epsilon*eOi4 + cross(model.Oi(10:12),J1*model.Oi(10:12)) - J4*(Skew(model.Oi(10:12))*Rb4'*Ric4*Oic4);
+      M1=- kr/epsilon^2*eRi1 - kO/epsilon*eOi1 + cross(model.Oi(1:3),J1*model.Oi(1:3)) - J1*(Skew(model.Oi(1:3))*Rb1'*Ric1*Oic1 - Rb1'*Ric1*dOic1);
+      M2=- kr/epsilon^2*eRi2 - kO/epsilon*eOi2 + cross(model.Oi(4:6),J1*model.Oi(4:6)) - J2*(Skew(model.Oi(4:6))*Rb2'*Ric2*Oic2 - Rb2'*Ric2*dOic2);
+      M3=- kr/epsilon^2*eRi3 - kO/epsilon*eOi3 + cross(model.Oi(7:9),J1*model.Oi(7:9)) - J3*(Skew(model.Oi(7:9))*Rb3'*Ric3*Oic3 - Rb3'*Ric3*dOic3);
+      M4=- kr/epsilon^2*eRi4 - kO/epsilon*eOi4 + cross(model.Oi(10:12),J1*model.Oi(10:12)) - J4*(Skew(model.Oi(10:12))*Rb4'*Ric4*Oic4 - Rb4'*Ric4*dOic4);
 
-      M1 = M1.*[-1,-1,0]';
-      M2 = M2.*[-1,-1,0]';
-      M3 = M3.*[-1,-1,0]';
-      M4 = M4.*[-1,-1,0]';
+      % M1 = M1.*[-1,-1,0]';
+      % M2 = M2.*[-1,-1,0]';
+      % M3 = M3.*[-1,-1,0]';
+      % M4 = M4.*[-1,-1,0]';
       obj.result.input = [-f1;M1;-f2;M2;-f3;M3;-f4;M4];
 
 
