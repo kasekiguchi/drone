@@ -12,9 +12,11 @@ classdef POINT_REFERENCE_COOPERATIVE_LOAD < handle
             obj.result.state = STATE_CLASS(struct('state_list',["p","Q","v","O","ddx","dO","qi","dqi","dwi"],'num_list',[3,4,3,3,3,3,12,12,12]));
         end
         function  result= do(obj,varargin)
+            t = varargin{1,1}.t;
             % 【Input】result = {Xd(optional)}
 %             obj.result.state.p = varargin{end};
-            obj.result.state.p = [0.1;0;1.5];
+%             obj.result.state.p = [0.1;0;1.5];
+            obj.result.state.p = [cos(pi*t);sin(pi*t);1];
             obj.result.state.Q = [0;0;0;0];
             obj.result.state.v = [0;0;0];
             obj.result.state.O = [0;0;0];
