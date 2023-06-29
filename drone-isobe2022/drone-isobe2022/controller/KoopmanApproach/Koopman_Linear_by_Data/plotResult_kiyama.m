@@ -25,7 +25,7 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 %何ステップまで表示するか
 %ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
 % stepN = 501;
-stepN = 51; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
+stepN = 31; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 % flg.ylimHoldがtrueのときのplot y範囲
@@ -36,8 +36,8 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 if flg.xlimHold == 1
-    % xlimHold = [0, 0.5];
-    xlimHold = [0,0.8];
+    xlimHold = [0, 0.5];
+%     xlimHold = [0,0.8];
 end
 
 %% Font size
@@ -74,6 +74,13 @@ end
 %%
 % 凡例に特別な名前をつける時はここで指定, ない時は勝手に番号をふります
 
+% file{1}.lgdname.p = {'$\hat{x}$','$\hat{y}$','$\hat{z}$'};
+% file{1}.lgdname.q = {'$\hat{\phi}$','$\hat{\theta}$','$\hat{\psi}$'};
+% file{1}.lgdname.v = {'$\hat{v_x}$','$\hat{v_y}$','$\hat{v_z}$'};
+% file{1}.lgdname.w = {'$\hat{\omega_1}$','$\hat{\omega_2}$','$\hat{\omega_3}$'};
+
+% file{1}.lgdname.q = {'$q_0$','$q_1$','$q_2$','$q_3$'};
+
 file{1}.lgdname.p = {'$\hat{x}_{\rm case1}$','$\hat{y}_{\rm case1}$','$\hat{z}_{\rm case1}$'};
 file{1}.lgdname.q = {'$\hat{\phi}_{\rm case1}$','$\hat{\theta}_{\rm case1}$','$\hat{\psi}_{\rm case1}$'};
 file{1}.lgdname.v = {'$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{z,{\rm case1}}$'};
@@ -89,6 +96,10 @@ file{3}.lgdname.w = {'$\hat{\omega}_{1,{\rm case3}}$','$\hat{\omega}_{2,{\rm cas
 
 columnomber = size(file,2)+1;
 
+% マーカーに特別なものをつける時はここで指定，ない時は':o'になります
+% file{2}.markerSty = ':diamond';
+% file{3}.markerSty = ':x';
+
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
 tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1;
 
@@ -99,11 +110,12 @@ newcolors = [0 0.4470 0.7410
 newcolors = [0 0.4470 0.7410
              0.9900 0 0
              0.3660 0.6740 0.1880];
-
+% flg.ylimHold = 1;
+% ylimHold.p = [0.98 1.01];
 figure(1)
 % Referenceをplot
 colororder(newcolors)
-plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,2)','LineWidth',2);
+plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,3)','LineWidth',2);
 % Referenceの凡例をtmpに保存
 % lgdtmp = {'$x_d$','$y_d$','$z_d$'};
 lgdtmp = {'$z_d$','$\hat{z}_{\rm case1}$','$\hat{z}_{\rm case2}$'};
@@ -113,9 +125,9 @@ grid on
 for i = 1:HowmanyFile
     % i番目のファイルをplot
     if i == 1
-        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(2,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
+        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(3,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
     elseif i == 2
-        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(2,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':');
+        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(3,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':');
     elseif i == 3
         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(3,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
     end
@@ -151,6 +163,113 @@ set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Position z','FontSize',Fsize.label);
 hold off
+% flg. calcFile1RMSE==trueならば rmseを算出
+% if flg.calcFile1RMSE
+%     RMSE.P1.eachStep = (file{1}.simResult.state.p(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)').^2;
+%     RMSE.P1.all  = rms(file{1}.simResult.state.p(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)','all');
+%     haven = rms(file{1}.simResult.state.p(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)',2);
+%     RMSE.P1.x = haven(1,:);
+%     RMSE.P1.y = haven(2,:);
+%     RMSE.P1.z = haven(3,:);
+%     % RMSE.P = [RMSE.P.x RMSE.P.y RMSE.P.z];
+%     disp('RMSE.P1 =')
+%     disp(RMSE.P1)
+% 
+%      RMSE.P2.eachStep = (file{2}.simResult.state.p(:,1:stepN)-file{2}.simResult.reference.est.p(1:stepN,:)').^2;
+%     RMSE.P2.all  = rms(file{2}.simResult.state.p(:,1:stepN)-file{2}.simResult.reference.est.p(1:stepN,:)','all');
+%     haven = rms(file{2}.simResult.state.p(:,1:stepN)-file{2}.simResult.reference.est.p(1:stepN,:)',2);
+%     RMSE.P2.x = haven(1,:);
+%     RMSE.P2.y = haven(2,:);
+%     RMSE.P2.z = haven(3,:);
+%     % RMSE.P = [RMSE.P.x RMSE.P.y RMSE.P.z];
+%     disp('RMSE.P2 =')
+%     disp(RMSE.P2)
+% end
+%% 
+clc
+%位置のRMSE
+xt = file{WhichRef}.simResult.reference.est.p(tlength,1)';
+yt = file{WhichRef}.simResult.reference.est.p(tlength,2)';
+zt = file{WhichRef}.simResult.reference.est.p(tlength,3)';
+xr1 = file{1}.simResult.state.p(1,1:stepN);
+xr2 = file{2}.simResult.state.p(1,1:stepN);
+yr1 = file{1}.simResult.state.p(2,1:stepN);
+yr2 = file{2}.simResult.state.p(2,1:stepN);
+zr1 = file{1}.simResult.state.p(3,1:stepN);
+zr2 = file{2}.simResult.state.p(3,1:stepN);
+
+x_case1 = sqrt((sum(xr1-xt).^2)/size(xt,2));
+x_case2 = sqrt((sum(xr2-xt).^2)/size(xt,2));
+y_case1 = sqrt((sum(yr1-yt).^2)/size(xt,2));
+y_case2 = sqrt((sum(yr2-yt).^2)/size(xt,2));
+z_case1 = sqrt((sum(zr1-zt).^2)/size(xt,2));
+z_case2 = sqrt((sum(zr2-zt).^2)/size(xt,2));
+
+disp(['x_case1: ' num2str(x_case1) ' x_case2: ' num2str(x_case2) ' y_case1: ' num2str(y_case1) ...
+    ' y_case2: ' num2str(y_case2) ' z_case1: ' num2str(z_case1) ' z_case2: ' num2str(z_case2)])
+
+%姿勢角のRMSE
+phi_t = file{WhichRef}.simResult.reference.est.q(tlength,1)';
+sita_t = file{WhichRef}.simResult.reference.est.q(tlength,2)';
+psi_t = file{WhichRef}.simResult.reference.est.q(tlength,3)';
+phi_r1 = file{1}.simResult.state.q(1,1:stepN);
+phi_r2 = file{2}.simResult.state.q(1,1:stepN);
+sita_r1 = file{1}.simResult.state.q(2,1:stepN);
+sita_r2 = file{2}.simResult.state.q(2,1:stepN);
+psi_r1 = file{1}.simResult.state.q(3,1:stepN);
+psi_r2 = file{2}.simResult.state.q(3,1:stepN);
+
+phi_case1 = sqrt((sum(phi_r1-phi_t).^2)/size(xt,2));
+phi_case2 = sqrt((sum(phi_r2-phi_t).^2)/size(xt,2));
+sita_case1 = sqrt((sum(sita_r1-sita_t).^2)/size(xt,2));
+sita_case2 = sqrt((sum(sita_r2-sita_t).^2)/size(xt,2));
+psi_case1 = sqrt((sum(psi_r1-psi_t).^2)/size(xt,2));
+psi_case2 = sqrt((sum(psi_r2-psi_t).^2)/size(xt,2));
+
+disp(['phi_case1: ' num2str(phi_case1) ' phi_case2: ' num2str(phi_case2) ' sita_case1: ' num2str(sita_case1) ...
+    ' sita_case2: ' num2str(sita_case2) ' psi_case1: ' num2str(psi_case1) ' psi_case2: ' num2str(psi_case2)])
+
+%速度のRMSE
+vxt = file{WhichRef}.simResult.reference.est.v(tlength,1)';
+vyt = file{WhichRef}.simResult.reference.est.v(tlength,2)';
+vzt = file{WhichRef}.simResult.reference.est.v(tlength,3)';
+vxr1 = file{1}.simResult.state.v(1,1:stepN);
+vxr2 = file{2}.simResult.state.v(1,1:stepN);
+vyr1 = file{1}.simResult.state.v(2,1:stepN);
+vyr2 = file{2}.simResult.state.v(2,1:stepN);
+vzr1 = file{1}.simResult.state.v(3,1:stepN);
+vzr2 = file{2}.simResult.state.v(3,1:stepN);
+
+vx_case1 = sqrt((sum(vxr1-vxt).^2)/size(xt,2));
+vx_case2 = sqrt((sum(vxr2-vxt).^2)/size(xt,2));
+vy_case1 = sqrt((sum(vyr1-vyt).^2)/size(xt,2));
+vy_case2 = sqrt((sum(vyr2-vyt).^2)/size(xt,2));
+vz_case1 = sqrt((sum(vzr1-vzt).^2)/size(xt,2));
+vz_case2 = sqrt((sum(vzr2-vzt).^2)/size(xt,2));
+
+disp(['vx_case1: ' num2str(vx_case1) ' vx_case2: ' num2str(vx_case2) ' vy_case1: ' num2str(vy_case1) ...
+    ' vy_case2: ' num2str(vy_case2) ' vz_case1: ' num2str(vz_case1) ' vz_case2: ' num2str(vz_case2)])
+
+%角速度のRMSE
+wphi_t = file{WhichRef}.simResult.reference.est.w(tlength,1)';
+wsita_t = file{WhichRef}.simResult.reference.est.w(tlength,2)';
+wpsi_t = file{WhichRef}.simResult.reference.est.w(tlength,3)';
+wphi_r1 = file{1}.simResult.state.w(1,1:stepN);
+wphi_r2 = file{2}.simResult.state.w(1,1:stepN);
+wsita_r1 = file{1}.simResult.state.w(2,1:stepN);
+wsita_r2 = file{2}.simResult.state.w(2,1:stepN);
+wpsi_r1 = file{1}.simResult.state.w(3,1:stepN);
+wpsi_r2 = file{2}.simResult.state.w(3,1:stepN);
+
+wphi_case1 = sqrt((sum(wphi_r1-wphi_t).^2)/size(xt,2));
+wphi_case2 = sqrt((sum(wphi_r2-wphi_t).^2)/size(xt,2));
+wsita_case1 = sqrt((sum(wsita_r1-wsita_t).^2)/size(xt,2));
+wsita_case2 = sqrt((sum(wsita_r2-wsita_t).^2)/size(xt,2));
+wpsi_case1 = sqrt((sum(wpsi_r1-wpsi_t).^2)/size(xt,2));
+wpsi_case2 = sqrt((sum(wpsi_r2-wpsi_t).^2)/size(xt,2));
+
+disp(['wphi_case1: ' num2str(wphi_case1) ' wphi_case2: ' num2str(wphi_case2) ' wsita_case1: ' num2str(wsita_case1) ...
+    ' wsita_case2: ' num2str(wsita_case2) ' wpsi_case1: ' num2str(wpsi_case1) ' wpsi_case2: ' num2str(wpsi_case2)])
 
 %% Q
 figure(2)
@@ -182,20 +301,20 @@ for i = 1:HowmanyFile
         end
     end
 end
-if flg.xlimHold == 1
-    if ~isfield(xlimHold,'q')
-        xlim(xlimHold);
-    else
-        xlim(xlimHold.p);
-    end
-end
-if flg.ylimHold == 1
-    if ~isfield(ylimHold,'q')
-        ylim(ylimHold);
-    else
-        ylim(ylimHold.q);
-    end
-end
+% if flg.xlimHold == 1
+%     if ~isfield(xlimHold,'q')
+%         xlim(xlimHold);
+%     else
+%         xlim(xlimHold.p);
+%     end
+% end
+% if flg.ylimHold == 1
+%     if ~isfield(ylimHold,'q')
+%         ylim(ylimHold);
+%     else
+%         ylim(ylimHold.q);
+%     end
+% end
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 set(gca,'FontSize',Fsize.luler);
@@ -203,6 +322,26 @@ xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Attitude \psi','FontSize',Fsize.label);
 
 hold off
+% rmseの算出
+if flg.calcFile1RMSE
+    RMSE.Q1.eachStep = (file{1}.simResult.state.q(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)').^2;
+    RMSE.Q1.all  = rms(file{1}.simResult.state.q(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)','all');
+    haven = rms(file{1}.simResult.state.q(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)',2);
+    RMSE.Q1.x = haven(1,:);
+    RMSE.Q1.y = haven(2,:);
+    RMSE.Q1.z = haven(3,:);
+    disp('RMSE.Q1 =')
+    disp(RMSE.Q1)
+
+    RMSE.Q2.eachStep = (file{2}.simResult.state.q(:,1:stepN)-file{2}.simResult.reference.est.p(1:stepN,:)').^2;
+    RMSE.Q2.all  = rms(file{2}.simResult.state.q(:,1:stepN)-file{2}.simResult.reference.est.p(1:stepN,:)','all');
+    haven = rms(file{2}.simResult.state.q(:,1:stepN)-file{2}.simResult.reference.est.p(1:stepN,:)',2);
+    RMSE.Q2.x = haven(1,:);
+    RMSE.Q2.y = haven(2,:);
+    RMSE.Q2.z = haven(3,:);
+    disp('RMSE.Q2 =')
+    disp(RMSE.Q2)
+end
 
 %% V
 figure(3)
@@ -210,15 +349,15 @@ newcolors = [0 0.4470 0.7410
              0.9900 0 0
              0.3660 0.6740 0.1880];
 colororder(newcolors)
-plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.v(tlength,2)','LineWidth',1);
-lgdtmp = {'$v_{yd}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{y,{\rm case2}}$'};
+plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.v(tlength,3)','LineWidth',1);
+lgdtmp = {'$v_{zd}$','$\hat{v}_{z,{\rm case1}}$','$\hat{v}_{z,{\rm case2}}$'};
 hold on
 grid on
 for i = 1:HowmanyFile
     if i == 1
-        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(2,1:stepN),file{i}.markerSty,'MarkerSize',7,'LineWidth',2,'LineStyle','--');
+        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(3,1:stepN),file{i}.markerSty,'MarkerSize',7,'LineWidth',2,'LineStyle','--');
     elseif i == 2
-        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(2,1:stepN),file{i}.markerSty,'MarkerSize',7,'LineWidth',3,'LineStyle',':');
+        plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(3,1:stepN),file{i}.markerSty,'MarkerSize',7,'LineWidth',3,'LineStyle',':');
     elseif i == 3
         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(2,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
     end
@@ -246,10 +385,30 @@ end
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
-ylabel('Velocity v_y','FontSize',Fsize.label);
+ylabel('Velocity v_z','FontSize',Fsize.label);
 lgd.NumColumns = columnomber;
 
 hold off
+% rmseの算出
+if flg.calcFile1RMSE
+    RMSE.V1.eachStep = (file{1}.simResult.state.v(:,1:stepN)-file{1}.simResult.reference.est.v(1:stepN,:)').^2;
+    RMSE.V1.all  = rms(file{1}.simResult.state.v(:,1:stepN)-file{1}.simResult.reference.est.v(1:stepN,:)','all');
+    haven = rms(file{1}.simResult.state.v(:,1:stepN)-file{1}.simResult.reference.est.v(1:stepN,:)',2);
+    RMSE.V1.x = haven(1,:);
+    RMSE.V1.y = haven(2,:);
+    RMSE.V1.z = haven(3,:);
+    disp('RMSE.V1 =')
+    disp(RMSE.V1)
+
+    RMSE.V2.eachStep = (file{2}.simResult.state.v(:,1:stepN)-file{2}.simResult.reference.est.v(1:stepN,:)').^2;
+    RMSE.V2.all  = rms(file{2}.simResult.state.v(:,1:stepN)-file{2}.simResult.reference.est.v(1:stepN,:)','all');
+    haven = rms(file{2}.simResult.state.v(:,1:stepN)-file{2}.simResult.reference.est.v(1:stepN,:)',2);
+    RMSE.V2.x = haven(1,:);
+    RMSE.V2.y = haven(2,:);
+    RMSE.V2.z = haven(3,:);
+    disp('RMSE.V2 =')
+    disp(RMSE.V2)
+end
 
 %% W
 figure(4)
@@ -298,3 +457,67 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best'
 lgd.NumColumns = columnomber;
 
 hold off
+
+% rmseの算出
+if flg.calcFile1RMSE
+    RMSE.W1.eachStep = (file{1}.simResult.state.w(:,1:stepN)-file{1}.simResult.reference.est.w(1:stepN,:)').^2;
+    RMSE.W1.all  = rms(file{1}.simResult.state.w(:,1:stepN)-file{1}.simResult.reference.est.w(1:stepN,:)','all');
+    haven = rms(file{1}.simResult.state.w(:,1:stepN)-file{1}.simResult.reference.est.w(1:stepN,:)',2);
+    RMSE.W1.x = haven(1,:);
+    RMSE.W1.y = haven(2,:);
+    RMSE.W1.z = haven(3,:);
+    disp('RMSE.W1 =')
+    disp(RMSE.W1)
+
+     RMSE.W2.eachStep = (file{2}.simResult.state.w(:,1:stepN)-file{2}.simResult.reference.est.w(1:stepN,:)').^2;
+    RMSE.W2.all  = rms(file{2}.simResult.state.w(:,1:stepN)-file{2}.simResult.reference.est.w(1:stepN,:)','all');
+    haven = rms(file{2}.simResult.state.w(:,1:stepN)-file{2}.simResult.reference.est.w(1:stepN,:)',2);
+    RMSE.W2.x = haven(1,:);
+    RMSE.W2.y = haven(2,:);
+    RMSE.W2.z = haven(3,:);
+    disp('RMSE.W2 =')
+    disp(RMSE.W2)
+end
+
+%% RSE 各ステップにおける誤差二乗のプロット
+% if flg.calcFile1RMSE
+%     figure(5)
+%     p1 = plot(0:stepN-1,RMSE.P.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Posylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Position RSE','FontSize',Fsize.label);
+%     lgd = legend('$(\hat{x}-x_d)^2$','$(\hat{y}-y_d)^2$','$(\hat{z}-z_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% 
+%     figure(6)
+%     p1 = plot(0:stepN-1,RMSE.Q.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Atiylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Atitiude RSE','FontSize',Fsize.label);
+%     lgd = legend('$(\hat{\phi}-\phi_d)^2$','$(\hat{\theta}-\theta_d)^2$','$(\hat{\psi}-\psi_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% 
+%     figure(7)
+%     p1 = plot(0:stepN-1,RMSE.V.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Posylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Velocity RSE','FontSize',Fsize.label);
+%     lgd = legend('$(\hat{v_x}-v_{xd})^2$','$(\hat{v_y}-v_{yd})^2$','$(\hat{v_z}-v_{zd})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% 
+%     figure(8)
+%     p1 = plot(0:stepN-1,RMSE.W.eachStep','.','MarkerSize',15);
+%     set(gca,'FontSize',Fsize.luler);
+%     xlim([0, stepN-1])
+%     ylim([0, RMSE.Atiylim])
+%     grid on
+%     xlabel('Step','FontSize',Fsize.label);
+%     ylabel('Angular Velocity RSE','FontSize',Fsize.label);
+%     lgd = legend('($\hat{\omega}_\theta-\omega_{\theta d})^2$','$(\hat{\omega}_\phi-\omega_{\phi d})^2$','$(\hat{\omega}_\psi-\omega_{\psi d})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+% end

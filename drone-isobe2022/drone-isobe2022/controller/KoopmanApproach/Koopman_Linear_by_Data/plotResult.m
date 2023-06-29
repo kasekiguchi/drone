@@ -3,7 +3,7 @@ clear all
 close all
 
 %% flag
-flg.calcFile1RMSE = 0; % file{1}に読み込んだデータのRMSEを求める
+flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求める
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
@@ -25,7 +25,7 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 %何ステップまで表示するか
 %ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
 % stepN = 501;
-stepN = 61; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
+stepN = 31; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 % flg.ylimHoldがtrueのときのplot y範囲
@@ -36,8 +36,8 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 if flg.xlimHold == 1
-    % xlimHold = [0, 0.5];
-    xlimHold = [0,0.8];
+    xlimHold = [0, 0.5];
+%     xlimHold = [0,0.8];
 end
 
 %% Font size
