@@ -11,7 +11,7 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
 % FileName = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat';  %plotResultの方も変更するように
-FileName = 'test1.mat';
+FileName = 'test2_circle_flight.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = '5_31_simulation';  
