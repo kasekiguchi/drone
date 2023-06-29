@@ -81,14 +81,14 @@ classdef GEOMETRIC_CONTROLLER < handle
 %       kO = obj.param.F8; 
 
 
-      kx0 = 1.5; %Controller_Cooperative_Load(dt)から係数を持ってくる
-      kdx0 = 1;
-      kR0 = 1.5;
-      kO0 = 1; 
-      kq = 1.5; 
-      kw = 1; 
-      kr = 1.5; 
-      kO = 1; 
+      kx0 = 1; %Controller_Cooperative_Load(dt)から係数を持ってくる
+      kdx0 = 1.2;
+      kR0 = 1;
+      kO0 = 1.2; 
+      kq = 1; 
+      kw = 1.2; 
+      kr = 1; 
+      kO = 1.2; 
 
 
       ex0 = model.p - pd;
@@ -172,16 +172,16 @@ classdef GEOMETRIC_CONTROLLER < handle
       
 
 %       temp = [1;1;0];
-      temp = [sin(pi*t);cos(pi*t);0];
+      temp = [-sin(pi*t);cos(pi*t);0];
       db1i1 = temp/vecnorm(temp);
 %       temp = [1;1;0];
-      temp = [sin(pi*t);cos(pi*t);0];
+      temp = [-sin(pi*t);cos(pi*t);0];
       db1i2 = temp/vecnorm(temp);
 %       temp = [1;1;0];
-      temp = [sin(pi*t);cos(pi*t);0];
+      temp = [-sin(pi*t);cos(pi*t);0];
       db1i3 = temp/vecnorm(temp);
 %       temp = [1;1;0];
-      temp = [sin(pi*t);cos(pi*t);0];
+      temp = [-sin(pi*t);cos(pi*t);0];
       db1i4 = temp/vecnorm(temp);
 
       Ric1 = [-Skew(b3i1)^2*b1i1/norm(Skew(b3i1)^2*b1i1), Skew(b3i1)*b1i1/norm(Skew(b3i1)*b1i1), b1i1];
@@ -216,7 +216,7 @@ classdef GEOMETRIC_CONTROLLER < handle
 
       epsilon = 1;
 
-      M1=- kr/epsilon^2*eRi1 - kO/epsilon*eOi1 + cross(model.Oi(1:3),J1*model.Oi(1:3)) - J1*(Skew(model.Oi(1:3))*Rb1'*Ric1*Oic1);%一旦dOicを無視
+      M1=- kr/epsilon^2*eRi1 - kO/epsilon*eOi1 + cross(model.Oi(1:3),J1*model.Oi(1:3)) - J1*(Skew(model.Oi(1:3))*Rb1'*Ric1*Oic1);
       M2=- kr/epsilon^2*eRi2 - kO/epsilon*eOi2 + cross(model.Oi(4:6),J1*model.Oi(4:6)) - J2*(Skew(model.Oi(4:6))*Rb2'*Ric2*Oic2);
       M3=- kr/epsilon^2*eRi3 - kO/epsilon*eOi3 + cross(model.Oi(7:9),J1*model.Oi(7:9)) - J3*(Skew(model.Oi(7:9))*Rb3'*Ric3*Oic3);
       M4=- kr/epsilon^2*eRi4 - kO/epsilon*eOi4 + cross(model.Oi(10:12),J1*model.Oi(10:12)) - J4*(Skew(model.Oi(10:12))*Rb4'*Ric4*Oic4);
