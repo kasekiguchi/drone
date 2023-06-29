@@ -184,6 +184,7 @@ xlim([data.t(1) data.t(end)])
 lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
 lgd.NumColumns = columnomber;
+ax = gca;
 hold off
 title('Position p of agent1');
 % 姿勢角
@@ -198,6 +199,7 @@ p9 = plot(data.t, data.qz);
 xlim([data.t(1) data.t(end)])
 lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+ax(2) = gca;
 hold off
 title('Attitude q of agent1');
 % 速度
@@ -212,6 +214,7 @@ p12 = plot(data.t, data.vz);
 xlim([data.t(1) data.t(end)])
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+ax(3) = gca;
 hold off
 title('Velocity v of agent1');
 % 角速度
@@ -226,6 +229,7 @@ p15 = plot(data.t, data.wz);
 xlim([data.t(1) data.t(end)])
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+ax(4) = gca;
 hold off
 title('Angular velocity w of agent1');
 
@@ -245,6 +249,7 @@ lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
+ax(5) = gca;
 hold off
 title('Input u of agent1');
 
@@ -259,4 +264,7 @@ zlabel('z');
 
 set([p4,p5,p6],'LineStyle','--','LineWidth',1);
 set([p1,p2,p3,p7,p8,p9,p10,p11,p12,p13,p14,p15],'LineWidth',1);
+
+fontSize = 16; %軸の文字の大きさの設定
+set(ax,'FontSize',fontSize); 
 end
