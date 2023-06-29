@@ -152,53 +152,111 @@ classdef GEOMETRIC_CONTROLLER < handle
       u4 = up4 +uv4;
 
       b3i1 = - u1/norm(u1);
-      b3i2 = - u1/norm(u2);
-      b3i3 = - u1/norm(u3);
-      b3i4 = - u1/norm(u4);
+      b3i2 = - u2/norm(u2);
+      b3i3 = - u3/norm(u3);
+      b3i4 = - u4/norm(u4);
 
 %       temp = [t+1;t+1;0];
-      temp = [cos(pi*t);sin(pi*t);0];
-      b1i1 = temp/vecnorm(temp);
-%       temp = [t+1;t+1;0];
-      temp = [cos(pi*t);sin(pi*t);0];
-      b1i2 = temp/vecnorm(temp);
-%       temp = [t+1;t+1;0];
-      temp = [cos(pi*t);sin(pi*t);0];
-      b1i3 = temp/vecnorm(temp);
-%       temp = [t+1;t+1;0];
-      temp = [cos(pi*t);sin(pi*t);0];
-      b1i4 = temp/vecnorm(temp);
-
-      
-
+      %ref.gen_func(t)
+%       %temp = [cos(pi*t);sin(pi*t);0];
+%       b1i1 = temp/vecnorm(temp);
+% %       temp = [t+1;t+1;0];
+%       %temp = [cos(pi*t);sin(pi*t);0];
+%       b1i2 = temp/vecnorm(temp);
+% %       temp = [t+1;t+1;0];
+%       %temp = [cos(pi*t);sin(pi*t);0];
+%       b1i3 = temp/vecnorm(temp);
+% %       temp = [t+1;t+1;0];
+%       %temp = [cos(pi*t);sin(pi*t);0];
+%       b1i4 = temp/vecnorm(temp);
 %       temp = [1;1;0];
-      temp = [-sin(pi*t);cos(pi*t);0];
-      db1i1 = temp/vecnorm(temp);
-%       temp = [1;1;0];
-      temp = [-sin(pi*t);cos(pi*t);0];
-      db1i2 = temp/vecnorm(temp);
-%       temp = [1;1;0];
-      temp = [-sin(pi*t);cos(pi*t);0];
-      db1i3 = temp/vecnorm(temp);
-%       temp = [1;1;0];
-      temp = [-sin(pi*t);cos(pi*t);0];
-      db1i4 = temp/vecnorm(temp);
+%       temp = [-sin(pi*t);cos(pi*t);0];
+%       db1i1 = temp/vecnorm(temp);
+% %       temp = [1;1;0];
+%       temp = [-sin(pi*t);cos(pi*t);0];
+%       db1i2 = temp/vecnorm(temp);
+% %       temp = [1;1;0];
+%       temp = [-sin(pi*t);cos(pi*t);0];
+%       db1i3 = temp/vecnorm(temp);
+% %       temp = [1;1;0];
+%       temp = [-sin(pi*t);cos(pi*t);0];
+%       db1i4 = temp/vecnorm(temp);
+      % Ric1 = [-Skew(b3i1)^2*b1i1/norm(Skew(b3i1)^2*b1i1), Skew(b3i1)*b1i1/norm(Skew(b3i1)*b1i1), b3i1];
+      % Ric2 = [-Skew(b3i2)^2*b1i2/norm(Skew(b3i2)^2*b1i2), Skew(b3i2)*b1i2/norm(Skew(b3i2)*b1i2), b3i2];
+      % Ric3 = [-Skew(b3i3)^2*b1i3/norm(Skew(b3i3)^2*b1i3), Skew(b3i3)*b1i3/norm(Skew(b3i3)*b1i3), b3i3];
+      % Ric4 = [-Skew(b3i4)^2*b1i4/norm(Skew(b3i4)^2*b1i4), Skew(b3i4)*b1i4/norm(Skew(b3i4)*b1i4), b3i4];
+if vecnorm(vd(1:2)) == 0
+  vdt = [1;0;0];
+  dvdt = [0;0;0];
+  ddvdt = [0;0;0];
+else
+  vdt = vd;
+  dvdt = dvd;
+  ddvdt = ddvd;
+end
 
-      Ric1 = [-Skew(b3i1)^2*b1i1/norm(Skew(b3i1)^2*b1i1), Skew(b3i1)*b1i1/norm(Skew(b3i1)*b1i1), b1i1];
-      Ric2 = [-Skew(b3i2)^2*b1i2/norm(Skew(b3i2)^2*b1i2), Skew(b3i2)*b1i2/norm(Skew(b3i2)*b1i2), b1i2];
-      Ric3 = [-Skew(b3i3)^2*b1i3/norm(Skew(b3i3)^2*b1i3), Skew(b3i3)*b1i3/norm(Skew(b3i3)*b1i3), b1i3];
-      Ric4 = [-Skew(b3i4)^2*b1i4/norm(Skew(b3i4)^2*b1i4), Skew(b3i4)*b1i4/norm(Skew(b3i4)*b1i4), b1i4];
+      b2i1 = cross(b3i1,vdt);
+      s1 = vecnorm(b2i1);
+      b2i1 = b2i1/s1;
+      b1i1 = cross(b2i1,b3i1);
 
-      dRic1 = [db1i1, db1i1, zeros(3,1)];
-      dRic2 = [db1i2, db1i2, zeros(3,1)];
-      dRic3 = [db1i3, db1i3, zeros(3,1)];
-      dRic4 = [db1i4, db1i4, zeros(3,1)];
+      b2i2 = cross(b3i2,vdt);
+      s2 = vecnorm(b2i2);
+      b2i2 = b2i2/s2;
+      b1i2 = cross(b2i2,b3i2);
 
-      Oic1 =Vee(Ric1'*dRic1);
-      Oic2 =Vee(Ric2'*dRic2);
-      Oic3 =Vee(Ric3'*dRic3);
-      Oic4 =Vee(Ric4'*dRic4);
+      b2i3 = cross(b3i3,vdt);
+      s3 = vecnorm(b2i3);
+      b2i3 = b2i3/s3;
+      b1i3 = cross(b2i3,b3i3);
 
+      b2i4 = cross(b3i4,vdt);
+      s4 = vecnorm(b2i4);
+      b2i4 = b2i4/s4;
+      b1i4 = cross(b2i4,b3i4);
+
+db3i1 = [0;0;0];
+db2i1 = cross(b3i1,dvdt)/s1 - (b3i1'*vdt)*b2i1/s1;
+db1i1 = -cross(b3i1,db2i1);
+
+db3i2 = [0;0;0];
+db2i2 = cross(b3i2,dvdt)/s2 - (b3i2'*vdt)*b2i2/s2;
+db1i2 = -cross(b3i2,db2i2);
+
+db3i3 = [0;0;0];
+db2i3 = cross(b3i3,dvdt)/s3 - (b3i3'*vdt)*b2i3/s3;
+db1i3 = -cross(b3i3,db2i3);
+
+db3i4 = [0;0;0];
+db2i4 = cross(b3i4,dvdt)/s4 - (b3i4'*vdt)*b2i4/s4;
+db1i4 = -cross(b3i4,db2i4);
+
+
+      dRic1 = [db1i1, db2i1, db3i1];
+      dRic2 = [db1i2, db2i2, db3i2];
+      dRic3 = [db1i3, db2i3, db3i3];
+      dRic4 = [db1i4, db2i4, db3i4];
+
+    ddRic1 = [ddb1i1, ddb2i1, ddb3i1];
+    ddRic2 = [ddb1i2, ddb2i2, ddb3i2];
+    ddRic3 = [ddb1i3, ddb2i3, ddb3i3];
+    ddRic4 = [ddb1i4, ddb2i4, ddb3i4];
+
+    hOic1 = Ric1' * dRic1;
+    hOic2 = Ric2' * dRic2;
+    hOic3 = Ric3' * dRic3;
+    hOic4 = Ric4' * dRic4;
+
+    Oic1 = Vee(dOic1);
+Oic2 = Vee(dOic2);
+Oic3 = Vee(dOic3);
+Oic4 = Vee(dOic4);
+
+    dOic1 = Vee(Ric1' * ddRic1 - hOic1);
+    dOic2 = Vee(Ric2' * ddRic2 - hOic2);
+    dOic3 = Vee(Ric3' * ddRic3 - hOic3);
+    dOic4 = Vee(Ric4' * ddRic4 - hOic4);
+    
       eRi1 = 1/2*Vee(Ric1'*Rb1-Rb1'*Ric1);
       eRi2 = 1/2*Vee(Ric2'*Rb2-Rb2'*Ric2);
       eRi3 = 1/2*Vee(Ric3'*Rb3-Rb3'*Ric3);

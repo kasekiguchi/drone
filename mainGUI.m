@@ -1,5 +1,6 @@
 %% Initialize settings
 % set path
+clear all
 cf = pwd;
 if contains(mfilename('fullpath'),"mainGUI")
   cd(fileparts(mfilename('fullpath')));

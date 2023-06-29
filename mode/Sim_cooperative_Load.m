@@ -50,6 +50,7 @@ agent(1).estimator.do(time,'f');
 agent(1).reference.do(time,'f');
 % agent(1).controller.result.input = repmat([1 + 0.3*cos(time.t*2*pi/3);0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
 agent(1).controller.do(time,'f');
+agent(1).controller.result.input'
 agent(1).plant.do(time,'f');
 logger.logging(time,'f',agent);
 time.t = time.t + time.dt;
