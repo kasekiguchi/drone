@@ -15,7 +15,7 @@ syms dx0 [3 1] real
 syms ddx0 [3 1] real
 syms r0 [4 1] real % 姿勢角（オイラーパラメータ）
 syms o0 [3 1] real % 角速度
-syms do0 [3 1] real
+%syms do0 [3 1] real
 syms qi [N 3] real % リンクのドローンから見た方向ベクトル：論文中qi
 qi = qi';
 syms wi [N 3] real % リンクの角速度
@@ -28,9 +28,6 @@ syms ri [N 4] real % 姿勢角（オイラーパラメータ）
 ri = ri';
 syms oi [N 3] real % 角速度
 oi = oi';
-syms fi [1 N] real % 推力入力
-syms Mi [N 3] real % モーメント入力
-Mi = Mi';
 %% 牽引物の物理パラメータ %%%%%%%%%%%%%%%%%%%
 syms g real % 重力加速度
 syms m0 real % 質量
@@ -69,17 +66,22 @@ syms dddx0d [3 1] real
 syms r0d [4 1] real % 姿勢角（オイラーパラメータ）
 syms o0d [3 1] real % 角速度
 syms do0d [3 1] real 
+R0d = RodriguesQuaternion(r0d); % 牽引物回転行列
 %% (20)-(22)
 ex0 = x0 - x0d;
 dex0 = dx0 -dx0d;
-R0dTR0 = quat_times_vec(r0d.*[1;-1;-1;-1],R0);
+R0dTR0 = R0d'*R0;
 R0TR0d = R0dTR0';
 eR0 = Vee(R0dTR0 - R0TR0d)/2;
 eo0 = o0 - R0dTR0'*o0d;
+%%
+syms kqi kwi real
+syms kx0 kdx0 kr0 ko0 real
+syms kri koi e real
+gains = [kx0 kr0 kdx0 ko0 kqi kwi kri koi e]';
 %% (23),(24)
-syms kx0 kdx0 kR0 ko0 real
 Fd = m0*(-kx0*ex0- kdx0*dex0 + ddx0d - g*e3);
-Md = -kR0*eR0 - ko0*eo0 + Skew(R0TR0d*o0d)*J0*R0TR0d*o0d + J0*R0TR0d*do0d;
+Md = -kr0*eR0 - ko0*eo0 + Skew(R0TR0d*o0d)*J0*R0TR0d*o0d + J0*R0TR0d*do0d;
 P =[repmat(eye(3),1,N); horzcat(Rho{:})];
 syms Pdagger [3*N 6] real % = P'*inv(P*P')
 muid = reshape(kron(eye(N),R0)*Pdagger*[R0'*Fd;Md],3,N); % 3xN
@@ -87,21 +89,37 @@ mui = sum(muid.*qi,1).*qi;% 3xN
 qid = -muid./sqrt(sum(muid.*muid,1)); % 3xN
 %%
 %dwi = cross(qi,ai)./li - cross(qi,uip1)./(mi.*li);
-wid = cross(qid,dqid);
-q2i = % =Skew(qi)^2
-eqi = cross(qid,qi);
-ewi = wi + cellmatfun(@(Qi,i,wi) Qi^2*wi,Qi,"mat",wid);
-
+e = -R0d'*qid;
+dqid = -R0d*Skew(o0d)*e; % 3xN
+wid = cross(qid,dqid); % 3xN
+ddqid = R0d*(Skew(do0d) + Skew(o0d)^2)*e;
+dwid = cross(qid,ddqid);
+eqi = cross(qid,qi); % 3xN
+ewi = wi + cellmatfun(@(Qi,i) Qi^2*wid(:,i),Qi,"mat");
 %% ui
-%ai = sum(mui)/m0 + R0*O0^2*rho + R0*Rho*J0\(O0*J0*o0-Rho*R0'*mui) % (19)
-ai = ddx0 - g*e3 + R0*O0^2*rho - R0'*Rho*do0; % (15)
-uip1 = mui + mi.*li.*lwi2.*qi + mi.*sum(ai.*qi,1).*qi;% ui parallel
-uip2 = mi.*li.*qi.*(-kq.*eqi -kw.*ewi -sum(qi.*wid,1).*dqi - q2i.*dwd) - mi.*q2i.*ai; % ui perp
-ui = uip1 + uip2;
-
+%ai = ddx0 - g*e3 + R0*O0^2*rho - R0'*cellmatfun(@(R,i) R*do0,Rho,"mat"); % (15) 3xN
+R0Rho = cellmatfun(@(Rho,i) R0*Rho,Rho,"struct");
+RhoR0Tmu = cellmatfun(@(R0Rho,i) -R0Rho'*mui(:,i),R0Rho,"mat");
+ai3 = cellmatfun(@(M,i) M*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)),R0Rho,"mat");% 3xN
 %%
-%clc
-%syms ui [3 N] real
+ai = sum(mui,2)/m0 + R0*O0^2*rho + ai3; % (19) 3xN
+uip1 = mui + mi.*li.*sum(wi.*wi,1).*qi + mi.*sum(ai.*qi,1).*qi;% ui parallel 3xN
+uip2 = mi.*li.*qi.*(-kqi.*eqi -kwi.*ewi -sum(qi.*wid,1).*cross(wi,qi) - cellmatfun(@(Qi,i) Qi^2*dwid(:,i),Qi,"mat")) - mi.*cellmatfun(@(Qi,i) Qi^2*ai(:,i),Qi,"mat"); % ui perp
+ui = uip1 + uip2; % 3xN
+%%
+syms Gains [size(gains)] real
+syms X [13*(N+1) 1] real
+syms Xd [3*4+4+6 1] real
+rp = [1 -1 -1]; rq = [1 1 -1 -1];
+Rzup = [rp, rq, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rq, 1,N), repmat(rp, 1,N)]';
+rX = Rzup.*X;
+rXd = [rp rp rp rp rq rp rp]'.*Xd;
+%%
+matlabFunction(subs(ui,[x;x0d;dx0d;ddx0d;dddx0d;r0d;o0d;do0d;gains],[rX;rXd;Gains]),"file",dir + "ui_CSLC_"+N+".m","vars",{X Xd physicalParam Gains Pdagger})
+%%
+clc
+clear ui
+syms ui [3 N] real
 b3 = -ui./sqrt(sum(ui.*ui,1));% 3xN
 b1 = dx0d + 0.1*quat_times_vec(ri,[1;0;0]); % Caution : problem if dx0d = - 10*xi.
 b1 = b1./sqrt(sum(b1.*b1,1));
@@ -135,11 +153,8 @@ eri = mtake(matrix_transpose_3x3to9x1(RiTRic)-RiTRic,[6,7,2])/2;% 3xN
 RiTRicoicd = matrix_prod_3x3to9x1(RiTRic,[oic;doic;zeros(size(oic))]);% 1:3 = RiTRic*oic, 4:6 = RiTRic*doic
 eoi = oi - RiTRicoicd(1:3,:);% 3xN
 %%
-syms kr ko e real
 fi = -sum(ui.*quat_times_vec(ri,e3),1);
-Mi = - kr.*eri/(e^2) - ko.*eoi/2 + cross(oi,ji.*oi) - ji.*(cross(oi,RiTRicoicd(1:3,:))-RiTRicoicd(4:6,:));% 3xN
+Mi = - kri.*eri/(e^2) - koi.*eoi/2 + cross(oi,ji.*oi) - ji.*(cross(oi,RiTRicoicd(1:3,:))-RiTRicoicd(4:6,:));% 3xN
 
 %%
-syms X [13*(N+1) 1] real
-syms Xd [3*4+4+6 1] real
-matlabFunction(subs(reshape([fi;Mi],[],1),[x;x0d;dx0d;ddx0d;dddx0d;r0d;o0d;do0d],[X;Xd]),"file",dir+"Uvec_CSLC_"+N+".m","Vars",{X,Xd,physicalParam,[kr;ko;e]});
+matlabFunction(subs(reshape([fi;Mi],[],1),[x;x0d;dx0d;ddx0d;dddx0d;r0d;o0d;do0d;gains],[rX;rXd;Gains]),"file",dir+"Uvec_CSLC_"+N+".m","Vars",{X,Xd,physicalParam,Gains,ui});

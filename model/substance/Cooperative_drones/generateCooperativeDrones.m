@@ -130,7 +130,6 @@ doi = vertcat(tmp{:});
 matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
 %% z up version : euler parameter
 syms X [13*(N+1) 1] real
-R = diag([1 -1 -1]);
 rp = [1 -1 -1]; rq = [1 1 -1 -1];
 Rzup = [rp, rq, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rq, 1,N), repmat(rp, 1,N)]';
 rX = Rzup.*X;
