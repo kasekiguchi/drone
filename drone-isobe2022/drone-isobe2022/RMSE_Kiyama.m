@@ -1,3 +1,5 @@
+%% RMSE(二乗平均平方根誤差)を求めるプログラム
+
 close all hidden;
 clear all;
 clc;
@@ -7,18 +9,12 @@ loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle
 loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
-stepN = 49;
+stepN = 49; %グラフプロットと一致させるように!
 
 HowmanyFile = size(loadfilename,2);
 for i = 1:HowmanyFile
     file{i} = load(loadfilename{i});
     file{i}.name = loadfilename{i};
-    % file{i}.markerSty = ':o';
-    file{i}.markerSty = '';
-    file{i}.lgdname.p = {append('$data',num2str(i),'_x$'),append('$data',num2str(i),'_y$'),append('$data',num2str(i),'_z$')};
-    file{i}.lgdname.q = {append('$data',num2str(i),'_{roll}$'),append('$data',num2str(i),'_{pitch}$'),append('$data',num2str(i),'_{yaw}$')};
-    file{i}.lgdname.v = {append('$data',num2str(i),'_{vx}$'),append('$data',num2str(i),'_{vy}$'),append('$data',num2str(i),'_{vz}$')};
-    file{i}.lgdname.w = {append('$data',num2str(i),'_{w1}$'),append('$data',num2str(i),'_{w2}$'),append('$data',num2str(i),'_{w3}$')};
     
     if isfield(file{i}.simResult,'initTindex')
     

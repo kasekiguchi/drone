@@ -8,9 +8,6 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
-% filename = agent.id.filename;
-% a = append(filename,'.mat');
-% loadfilename{1} = append(agent.id.filename,'.mat');
 
 % loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
@@ -24,10 +21,33 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 %% plot range
 %何ステップまで表示するか
 %ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
-% stepN = 501;
-stepN = 301; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
+% stepN = 121; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
+
+stepnum = 1; %ステップ数，xの範囲を設定
+if stepnum == 0
+    stepN = 31;
+    if flg.xlimHold == 1
+        xlimHold = [0,0.5];
+    end
+elseif stepnum == 1
+    stepN = 61;
+    if flg.xlimHold == 1
+        xlimHold = [0,1];
+    end
+elseif stepnum == 2
+    stepN = 91;
+    if flg.xlimHold == 1
+        xlimHold = [0,1.5];
+    end
+else
+    stepN = 121;
+    if flg.xlimHold == 1
+        xlimHold = [0,2];
+    end
+end
+
 % flg.ylimHoldがtrueのときのplot y範囲
 if flg.ylimHold == 1
     ylimHold.p = [-1.5, 1.5];
@@ -35,10 +55,10 @@ if flg.ylimHold == 1
     ylimHold.v = [-3, 4];
     ylimHold.w = [-1.5, 2];
 end
-if flg.xlimHold == 1
-%     xlimHold = [0, 0.5];
-    xlimHold = [0,3];
-end
+% if flg.xlimHold == 1
+% %     xlimHold = [0, 0.5];
+%     xlimHold = [0,2];
+% end
 
 %% Font size
 Fsize.label = 18;
@@ -100,7 +120,7 @@ file{2}.markerSty = ':square';
 file{3}.markerSty = ':x';
 
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
-tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1
+tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1;
 
 newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
@@ -124,8 +144,6 @@ for i = 1:HowmanyFile
     elseif i == 3
         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
     end
-%       plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),'LineWidth',2);
-%     plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(:,1:stepN),file{i}.markerSty,'MarkerSize',6,'LineWidth',2);
     % file{i}に凡例が保存されている場合実行
     if isfield(file{i},'lgdname')
         if isfield(file{i}.lgdname,'p')
@@ -187,7 +205,6 @@ for i = 1:HowmanyFile
     elseif i == 3
         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(:,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
     end
-%     plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(:,1:stepN),file{i}.markerSty,'MarkerSize',6,'LineWidth',2);
     if isfield(file{i},'lgdname')
         if isfield(file{i}.lgdname,'q')
             lgdtmp = [lgdtmp,file{i}.lgdname.q];
@@ -242,7 +259,6 @@ for i = 1:HowmanyFile
     elseif i == 3
         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(:,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
     end
-%     plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(:,1:stepN),file{i}.markerSty,'MarkerSize',6,'LineWidth',2);
     if isfield(file{i},'lgdname')
         if isfield(file{i}.lgdname,'v')
             lgdtmp = [lgdtmp,file{i}.lgdname.v];
@@ -298,7 +314,6 @@ for i = 1:HowmanyFile
     elseif i == 3
         plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(:,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
     end
-%     plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(:,1:stepN),file{i}.markerSty,'MarkerSize',6,'LineWidth',2);
     if isfield(file{i},'lgdname')
         if isfield(file{i}.lgdname,'w')
             lgdtmp = [lgdtmp,file{i}.lgdname.w];
