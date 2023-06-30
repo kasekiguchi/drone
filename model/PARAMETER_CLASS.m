@@ -4,6 +4,7 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
     properties
         parameter % 制御モデル用パラメータ : 値ベクトル
         parameter_name % 物理パラメータの名前
+        parameter_raw
         type
     end
 
@@ -25,6 +26,7 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
                 for i = 1:length(fn)
                     obj.(fn{i}) = param.(fn{i});
                 end
+                obj.parameter_raw = param;
             end
             if ~isempty(param.additional) % propertyに無いパラメータを設定する場合
                 fn = fieldnames(param.additional);
@@ -45,7 +47,11 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
                 type = obj.type;
             end
             if strcmp(p,"all")
+              if strcmp(type, "row")
                 v = obj.parameter;
+              else
+                v = obj.parameter_raw;
+              end
             else
                 for i = 1:length(p)
                     if strcmp(type,"row")

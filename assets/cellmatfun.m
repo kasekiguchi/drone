@@ -1,5 +1,5 @@
 function B = cellmatfun(fn, C, type, varargin)
-% B = {fn(C{1},varargin),fn(C{1},varargin), ...}
+% B = {fn(C{1},varargin),fn(C{2},varargin), ...}
 arguments
   fn
   C
