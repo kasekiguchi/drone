@@ -191,10 +191,11 @@ classdef GEOMETRIC_CONTROLLER < handle
         dvdt = [0;0;0];
         ddvdt = [0;0;0];
       else
-        vdt = vd;
+        vdt = vd/vecnorm(vd);
         dvdt = dvd;
         ddvdt = ddvd;
       end
+      
     b2i1 = cross(b3i1, vdt);
     si1 = vecnorm(b2i1);
     ci1 = b3i1' * vdt;
