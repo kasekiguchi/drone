@@ -1,4 +1,4 @@
-function Controller= Controller_Cooperative_Load(dt)
+function Controller= Controller_Cooperative_Load(dt,N)
 % PIDコントローラの設定
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 % Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
@@ -27,6 +27,7 @@ Controller.F8=0.7;
 % Controller.F2=place(diag([1,1,1],1),[0;0;0;1],Eig);
 % Controller.F3=place(diag([1,1,1],1),[0;0;0;1],Eig);
 
+Controller.method = "CooperativeSuspendedLoadController_"+N;
 % 設定確認
 Controller.dt = dt;
 % eig(diag([1,1,1],1)-[0;0;0;1]*Controller.F2)
