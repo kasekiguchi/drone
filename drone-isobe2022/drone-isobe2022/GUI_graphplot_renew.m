@@ -42,13 +42,14 @@ Fsize.lgd = 16; %凡例の大きさ調整
 box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
-plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','--');
+plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('p');
 hold on
 grid on
-plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
-lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
+% plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
+% lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
+lgdtmp = {'$x_e$','$y_e$','$z_e$'};
 % lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
 lgd.NumColumns = columnomber;
