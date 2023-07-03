@@ -295,23 +295,25 @@ classdef DRAW_COOPERATIVE_DRONES
       D = reshape(q,size(q,1),size(q,2)/length(target),length(target));      
     end
     function Q = gen_Q(obj,target,q)
+        Q = zeros(size(q,1),4,length(target));
        for n = 1:length(target)
         switch size(q(:,:,n),2)
           case 3
-            Q1 = quaternion(q(:,:,n),'euler','XYZ','frame');
+            Q1 = quaternion(Eul2Quat(q(:,:,n)')');%quaternion(q(:,:,n),'euler','XYZ','frame');
           case 4
             Q1 = quaternion(q(:,:,n));
           case 9
             Q1 = quaternion(q(:,:,n),'rotmat','frame');
-        end
-        Q1 = rotvec(Q1);
-        tmp = vecnorm(Q1,2,2);
-        Q(:,:,n) = zeros(size(Q1,1),4);
-        Q(tmp==0,:,n) = 0;
-        Q(tmp==0,1,n) = 1;
-        if sum(tmp~=0)
-          Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
-        end
+        end         
+        Q(:,:,n) = compact(Q1);
+        % Q1 = rotvec(Q1);
+        % tmp = vecnorm(Q1,2,2);
+        % Q(:,:,n) = zeros(size(Q1,1),4);
+        % Q(tmp==0,:,n) = 0;
+        % Q(tmp==0,1,n) = 1;
+        % if sum(tmp~=0)
+        %   Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
+        % end
       end
     end
   end

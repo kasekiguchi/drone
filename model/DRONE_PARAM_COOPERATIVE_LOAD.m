@@ -37,10 +37,15 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 param.Ji = 0.005*repmat([1 1 1]',1,N);
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
+            if contains(type,"zup")
+              rho0 = [0;0;1/2];
+            else
+              rho0 = [0;0;-1/2];
+            end
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);
-              %param.rho = [0;0;1/2]+[[1;0;0],cell2mat(cellmatfun(@(A,B) A*B, FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),[1;0;0]))];
-              param.rho = [0;0;1/2]+[[1;0;0],double(cellmatfun(@(A,~) A*[1;0;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
+              %param.rho = rho0+[[1;0;0],cell2mat(cellmatfun(@(A,B) A*B, FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),[1;0;0]))];
+              param.rho = rho0+[[1;0;0],double(cellmatfun(@(A,~) A*[1;0;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
             obj.N = N;

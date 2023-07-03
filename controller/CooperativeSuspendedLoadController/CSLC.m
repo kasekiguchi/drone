@@ -17,10 +17,10 @@ classdef CSLC < handle
       obj.self = self;
       obj.P = self.parameter.get("all","row");
       obj.result.input = zeros(self.estimator.model.dim(2),1);
-      P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho));
+      P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho.*[1;-1;-1]));% アルゴリズムはzdownなので
       obj.Pdagger = pinv(P);
       obj.N = size(P,2)/3;
-      obj.gains = [1,1,1.7321,1.7321,1,1.7321,1,1.7321,0.1]'; % kx0, kr0,kdx0, ko0, kqi, kwi, kri, koi, e
+      obj.gains = [1,1/10,1.7321,1.7321/10,1/10,1.7321/10,1/10,1.7321/10,10]'; % kx0, kr0,kdx0, ko0, kqi, kwi, kri, koi, e
       obj.gen_input = str2func(param.method);
       if self.estimator.model.state.type ==3
         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
