@@ -25,8 +25,8 @@ end
 %         "euler","euler_angle_model",12;
 %         "rodrigues","rodrigues_parameter_model",12;
         case "Cooperative_Load"
-            model_full_name = "zup_cable_suspended_rigid_body_with_" + N + "_drones";
+            model_full_name = "cable_suspended_rigid_body_with_" + N + "_drones";
       case "Cooperative_Load_eul"
-            model_full_name = "zup_eul_cable_suspended_rigid_body_with_" + N + "_drones";
+            model_full_name = "eul_cable_suspended_rigid_body_with_" + N + "_drones";
     end
 end
