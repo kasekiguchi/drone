@@ -20,7 +20,8 @@ classdef CSLC < handle
       P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho.*[1;-1;-1]));% アルゴリズムはzdownなので
       obj.Pdagger = pinv(P);
       obj.N = size(P,2)/3;
-      obj.gains = [1,1/10,1.7321,0.4583,0.1,0.4583,0.1,0.4583,0.1]; % kx0, kr0,kdx0, ko0, kqi, kwi, kri, koi, e
+      obj.gains = [1*[1 1 1], 1,1.7321*[1 1 1],1.1,0.1,0.4583,0.1,0.4583,1]; % kx0, kr0,kdx0, ko0, kqi, kwi, kri, koi, e
+      %obj.gains = [1,1,1.7321,1.7321,1,1.7321,1,1.7321,0.5]; % kx0, kr0,kdx0, ko0, kqi, kwi, kri, koi, e
       obj.gen_input = str2func(param.method);
       if self.estimator.model.state.type ==3
         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
@@ -36,13 +37,13 @@ classdef CSLC < handle
       qi = reshape(model.qi,3,obj.N);
       Ri = obj.toR(model.Qi);
       R0 = obj.toR(model.Q);
-      R0d = obj.toR([0;0;0;0]);
 
       %xd = ref.xd;
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
       % Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
       % % x = [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
       % xd = [x0d;dx0d;ddx0d;dddx0d;r0d;o0d;do0d]
+      R0d = obj.toR([1;0;0;0]);
       xd = [[0;0;0];[0;0;0];[0;0;0];[0;0;0];[0;0;0];[0;0;0]];
       % xd(1:3)=Rb0'*xd(1:3);
       % xd(4) = 0;
