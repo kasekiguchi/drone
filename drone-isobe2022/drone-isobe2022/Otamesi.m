@@ -2,143 +2,65 @@
 clear all
 close all
 
-%% flag
-flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求める
-flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 1; % 指定した値にxlimを固定
+% % データの準備
+% x = 1:10;
+% y = rand(1, 10);
+% 
+% % グラフの描画
+% plot(x, y)
+% hold on
+% 
+% % 縦線を引く時刻
+% targetTime = 5;
+% 
+% % 縦線を描画
+% line([targetTime targetTime], ylim, 'Color', 'red', 'LineStyle', '--')
+% 
+% % グラフの装飾
+% xlabel('時刻')
+% ylabel('値')
+% title('時刻に縦線を引くグラフ')
+% legend('データ', '縦線')
+% hold off
 
-%% select file to load
-% filename = agent.id.filename;
-% a = append(filename,'.mat');
-% loadfilename{1} = append(agent.id.filename,'.mat');
 
-loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
-% loadfilename{3} = 'EstimationResult_12state_6_20_circle__test_InputandConst_ByLinear.mat';
+%% データのインポート
+% load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
+load("experiment_6_20_circle_2.mat")
+disp('load finished')
 
-% loadfilename{1} = 'test1.mat';
-% loadfilename{2} = 'test2.mat';
-
-WhichRef = 1; % どのファイルをリファレンスに使うか
-
-%% plot range
-%何ステップまで表示するか
-%ステップ数とxlinHoldの幅を変えればグラフの長さを変えられる
-% stepN = 501;
-stepN = 51; %検証用シミュレーションのステップ数がどれだけあるかを確認,これを変えると出力時間が伸びる
-RMSE.Posylim = 0.1^2;
-RMSE.Atiylim = 0.0175^2;
-% flg.ylimHoldがtrueのときのplot y範囲
-if flg.ylimHold == 1
-    ylimHold.p = [-1.5, 1.5];
-    ylimHold.q = [-0.2, 0.8];
-    ylimHold.v = [-3, 4];
-    ylimHold.w = [-1.5, 2];
-end
-if flg.xlimHold == 1
-    % xlimHold = [0, 0.5];
-    xlimHold = [0,0.8];
+for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 108,1,'first')
+    data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                     
+    data.u1(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);
 end
 
-%% Font size
-Fsize.label = 18;
-Fsize.lgd = 18;
-Fsize.luler = 18;
-
-%% load
-HowmanyFile = size(loadfilename,2);
-for i = 1:HowmanyFile
-    file{i} = load(loadfilename{i});
-    file{i}.name = loadfilename{i};
-    % file{i}.markerSty = ':o';
-    file{i}.markerSty = '';
-    file{i}.lgdname.p = {append('$data',num2str(i),'_x$'),append('$data',num2str(i),'_y$'),append('$data',num2str(i),'_z$')};
-    file{i}.lgdname.q = {append('$data',num2str(i),'_{roll}$'),append('$data',num2str(i),'_{pitch}$'),append('$data',num2str(i),'_{yaw}$')};
-    file{i}.lgdname.v = {append('$data',num2str(i),'_{vx}$'),append('$data',num2str(i),'_{vy}$'),append('$data',num2str(i),'_{vz}$')};
-    file{i}.lgdname.w = {append('$data',num2str(i),'_{w1}$'),append('$data',num2str(i),'_{w2}$'),append('$data',num2str(i),'_{w3}$')};
-    
-    if isfield(file{i}.simResult,'initTindex')
-    
-    else
-        file{i}.simResult.initTindex = 1;
-    end
-
-    if i == 1
-        indexcheck = file{i}.simResult.initTindex
-    elseif indexcheck ~= file{i}.simResult.initTindex
-            disp('Caution!! 読み込んだファイルの初期状態が異なっています!!')
-            dammy = input('Enterで無視して続行します');
-    end
+for i = find(log.Data.t > 18,1,'first'):find(log.Data.phase == 108,1,'first')
+    data.t1(1,i-find(log.Data.t > 18,1,'first')+1) = log.Data.t(i,1);         
+    data.p(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.u2(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.input{i}(:,1);
 end
 
-%%
-% 凡例に特別な名前をつける時はここで指定, ない時は勝手に番号をふります
+%入力
+figure(1)
+plot(data.t,data.u1(:,:),'LineWidth',1);
+hold on
+targetTime = 18;
+line([targetTime targetTime],ylim, 'Color', 'red', 'LineStyle', '--');
+xlabel('Time [s]');
+ylabel('u');
+grid on
+% lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 
-% file{1}.lgdname.p = {'$\hat{x}_{\rm case1}$','$\hat{y}_{\rm case1}$','$\hat{z}_{\rm case1}$'};
-% file{1}.lgdname.q = {'$\hat{\phi}_{\rm case1}$','$\hat{\theta}_{\rm case1}$','$\hat{\psi}_{\rm case1}$'};
-% file{1}.lgdname.v = {'$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{z,{\rm case1}}$'};
+%入力
+figure(2)
+plot(data.t1,data.u2(:,:),'LineWidth',1);
+xlabel('Time [s]');
+ylabel('u');
+grid on
+% lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 
-columnomber = size(file,2)+1;
-
-dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
-tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1;
-
-% newcolors = [0 0.4470 0.7410
-%              1.9500 0.4250 0.1980
-%              0.4660 0.6740 0.1880];
-%% w
-newcolors = [0 0.4470 0.7410
-             0.9900 0 0
-             0.3660 0.6740 0.1880];
-
-for graph_num = 1:3 
-    figure(graph_num)
-    colororder(newcolors)
-    plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.w(tlength,graph_num)','LineWidth',2);
-    hold on
-    grid on
-    for i = 1:HowmanyFile
-        if graph_num == 1
-            plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',1,'LineStyle','-.');
-            lgdtmp = {'$\omega_{1 d}$','$\hat{\omega}_{1,{\rm case1}}$','$\hat{\omega}_{1,{\rm case2}}$'};
-            lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-            lgd.NumColumns = columnomber;
-            set(gca,'FontSize',Fsize.luler);
-            xlabel('time [sec]','FontSize',Fsize.label);
-            ylabel('Angular Velocity $\omega_{1 d}$ [rad/s]','FontSize',Fsize.label,'Interpreter','latex');
-        elseif graph_num == 2
-            plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':');
-            lgdtmp = {'$\omega_{2 d}$','$\hat{\omega}_{2,{\rm case1}}$','$\hat{\omega}_{2,{\rm case2}}$'};
-            lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-            lgd.NumColumns = columnomber;
-            set(gca,'FontSize',Fsize.luler);
-            xlabel('time [sec]','FontSize',Fsize.label);
-            ylabel('Angular Velocity $\omega_{2 d}$ [rad/s]','FontSize',Fsize.label,'Interpreter','latex');
-        elseif graph_num == 3
-            plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
-            lgdtmp = {'$\omega_{3 d}$','$\hat{\omega}_{3,{\rm case1}}$','$\hat{\omega}_{3,{\rm case2}}$'};
-            lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-            lgd.NumColumns = columnomber;
-            set(gca,'FontSize',Fsize.luler);
-            xlabel('time [sec]','FontSize',Fsize.label,'Interpreter','latex');
-            ylabel('Angular Velocity $\omega_{3 d}$ [rad/s]','FontSize',Fsize.label,'Interpreter','latex');
-        end
-        % xlim, ylimの設定
-        if flg.xlimHold == 1
-            if ~isfield(xlimHold,'q')
-                xlim(xlimHold);
-            else
-                xlim(xlimHold.q);
-            end
-        end
-        if flg.ylimHold == 1
-            if ~isfield(ylimHold,'q')
-                ylim(ylimHold);
-            else
-                ylim(ylimHold.q);
-            end
-        end
-    end
-    hold off
-end
-
+figure(3)
+plot(data.p(1,:),data.p(2,:));
+grid on

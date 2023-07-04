@@ -11,11 +11,11 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
 % FileName = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat';  %plotResultの方も変更するように
-FileName = 'test2_circle_flight.mat';
+FileName = 'test1.mat';
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
-% loading_filename = '5_31_simulation';  
-loading_filename = 'experiment_6_20_circle';  %matは含まないように注意！
+loading_filename = 'test';  
+% loading_filename = 'experiment_6_20_circle';  %matは含まないように注意！
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -49,7 +49,7 @@ F = @(x) [x;1]; % 状態そのまま
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 10; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 9; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')

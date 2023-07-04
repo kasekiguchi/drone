@@ -9,11 +9,11 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 
-loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 % loadfilename{3} = 'EstimationResult_12state_6_20_circle__test_InputandConst_ByLinear.mat';
 
-% loadfilename{1} = 'test1.mat';
+loadfilename{1} = 'test1.mat';
 % loadfilename{2} = 'test2.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
@@ -96,7 +96,7 @@ newcolors = [0 0.4470 0.7410
              0.9900 0 0
              0.3660 0.6740 0.1880];
 
-for graph_num = 1:3 
+for graph_num = 1:3 %1 = x,2 = y,3 = z
     figure(graph_num)
     colororder(newcolors)
     plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,graph_num)','LineWidth',2);
