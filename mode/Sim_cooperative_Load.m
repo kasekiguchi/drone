@@ -10,7 +10,7 @@ logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
 N = 3;
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
-qtype = "zup_eul"; % "eul" : euler angle, "" : euler parameter
+qtype = ""; % "eul" : euler angle, "" : euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 initial_state.p = [0;0;1];
 initial_state.v = [0;0;0];
@@ -56,8 +56,8 @@ for i = 1:200
 agent(1).sensor.do(time,'f');
 agent(1).estimator.do(time,'f');
 agent(1).reference.do(time,'f');
-% agent(1).controller.result.input = repmat([1 + 0.3*cos(time.t*2*pi/3);0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
- agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
+ agent(1).controller.result.input = repmat([1 + 0.0*cos(time.t*2*pi/3);0;0.1*sin(time.t*(pi/3));0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
+ %agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
 %agent(1).controller.do(time,'f');
 agent(1).controller.result.input';
 agent(1).plant.do(time,'f');
@@ -69,7 +69,7 @@ close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self",agent,"target", 1:N);
 mov.animation(logger,'target',1:N)
 %%
-logger.plot({1,"p","p"},{1,"p","e"},{1, "v", "p"},{1, "v", "e"},{1, "plant.result.state.Qi","p"})
+logger.plot({1,"plant.result.state.qi","p"},{1,"p","e"},{1, "v", "p"},{1, "v", "e"},{1, "plant.result.state.Qi","p"})
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.t]);
 app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.t]);

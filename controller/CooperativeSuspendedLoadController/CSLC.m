@@ -20,7 +20,7 @@ classdef CSLC < handle
       P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho.*[1;-1;-1]));% アルゴリズムはzdownなので
       obj.Pdagger = pinv(P);
       obj.N = size(P,2)/3;
-      obj.gains = [1,1/10,1.7321,1.7321/10,1/10,1.7321/10,1/10,1.7321/10,10]'; % kx0, kr0,kdx0, ko0, kqi, kwi, kri, koi, e
+      obj.gains = [1,1/10,1.7321,1.7321/10,1/10,1.7321/10,1/10,1.7321/10,10]; % kx0, kr0,kdx0, ko0, kqi, kwi, kri, koi, e
       obj.gen_input = str2func(param.method);
       if self.estimator.model.state.type ==3
         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
@@ -32,11 +32,11 @@ classdef CSLC < handle
     function result = do(obj,varargin)
       model = obj.self.estimator.result.state;
       ref = obj.self.reference.result.state;
-      x = model.get(["p"  "v"    "O"    "qi"    "wi"    "Oi"]);
+      x = model.get(["p"  "Q" "v"    "O"    "qi"    "wi"  "Qi"  "Oi"]);
       qi = reshape(model.qi,3,obj.N);
       Ri = obj.toR(model.Qi);
       R0 = obj.toR(model.Q);
-      R0d = obj.toR([0;0;0]);
+      R0d = obj.toR([0;0;0;0]);
 
       %xd = ref.xd;
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．

@@ -47,8 +47,7 @@ ji = ji';
 physicalParam = [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)];
 %%
 [~,L0] = RodriguesQuaternion(r0); % 牽引物回転行列
-tmp = mat2cell(ri,4,ones(1,N));
-[~,Li] = RodriguesQuaternion(ri);%arrayfun(@(q) RodriguesQuaternion(q{:}),tmp,'UniformOutput',false); % ドローン姿勢回転行列
+[~,Li] = RodriguesQuaternion(ri);
 O0 = Skew(o0); % 牽引物の角速度行列（歪対象行列）
 tmp = mat2cell(oi,3,ones(1,N));
 Oi = arrayfun(@(o) Skew(o{:}),tmp,'UniformOutput',false); % ドローン角速度行列
@@ -67,8 +66,7 @@ x = [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
 u = reshape([fi;Mi],4*N,1);
 %% 
 % (1)
-tmp = arrayfun(@(i) Skew(wi(:,i))*qi(:,i),1:N,'UniformOutput',false);
-dqi = vertcat(tmp{:});
+dqi = reshape(cross(wi,qi),[],1);
 % (2)
 dr0 = L0'*o0/2;
 tmp = arrayfun(@(i) Li(:,:,i)'*oi(:,i)/2,1:N,'UniformOutput',false);
@@ -81,47 +79,67 @@ up = arrayfun(@(i) (eye(3) - qi(:,i)*qi(:,i)')*ui{i},1:N,'UniformOutput',false);
 %% (6) 
 mqiqiR0 = arrayfun(@(i) mi(i)*qi(:,i)*qi(:,i)'*R0,1:N,'UniformOutput',false);
 tmp = arrayfun(@(i) mqiqiR0{i}*Rho{i},1:N,'UniformOutput',false);
+LHS62 = zeros(3);
+for i = 1:N 
+  LHS62 = LHS62 + tmp{i};
+end
 mqiqiR0rhoidO0 = [tmp{:}]*repmat(do0,N,1);
 tmp = arrayfun(@(i) mqiqiR0{i}*O0^2*rho(:,i),1:N,'UniformOutput',false);
 mqiqiR0O02rho = [tmp{:}]*ones(N,1);
-rhs6 = ([ul{:}])*ones(N,1)-qi*(mi.*li.*sum(wi.^2,1))'-mqiqiR0O02rho;
+rhs6 = sum([ul{:}],2)-qi*(mi.*li.*sum(wi.^2,1))'-mqiqiR0O02rho;
 eq6 = Mq*(ddx0 - g*e3) - mqiqiR0rhoidO0 -rhs6;
+A6 = [Mq,-LHS62];
+B6 = Mq*(-g*e3) - rhs6;
+% eq6 = A6*[ddx0;do0] + B6 == 0
+% B6 = subs(eq6,[ddx0;do0],[0;0;0;0;0;0]);
+% tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq6-B6,'UniformOutput',false);
+% A6 = vertcat(tmp{:});
 %% (7)
+clc
+
 lhs71 = J0*do0;
 tmp = arrayfun(@(i) mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)'*R0*Rho{i},1:N,'UniformOutput',false);
-lhs72 = [tmp{:}]*repmat(do0,N,1);
+lhs72 = tmp;
 tmp = arrayfun(@(i) mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)',1:N,'UniformOutput',false);
-lhs73 = [tmp{:}]*repmat((ddx0-g*e3),N,1);
+LHS71 = J0;
+LHS73 = zeros(3);
+for i = 1:N 
+  LHS71 = LHS71 + lhs72{i};
+  LHS73 = LHS73 + tmp{i};
+end
+lhs72 = LHS71*do0;
+lhs73 = LHS73*(ddx0-g*e3);
+%%
 lhs74 = O0*J0*o0;
 tmp = arrayfun(@(i) Rho{i}*R0',1:N,'UniformOutput',false);
 rhs71 = [tmp{:}]*vertcat(ul{:});
 tmp = arrayfun(@(i) Rho{i}*R0'*mi(i)*li(i)*sum(wi(:,i).^2),1:N,'UniformOutput',false);
-rhs72 = [tmp{:}]*reshape(qi,[3*N,1]);
+rhs72 = [tmp{:}]*reshape(qi,[],1);
 tmp = arrayfun(@(i) Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*R0*O0^2,1:N,'UniformOutput',false);
-rhs73 = [tmp{:}]*reshape(rho,[3*N,1]);
+rhs73 = [tmp{:}]*reshape(rho,[],1);
 rhs7 = rhs71 - rhs72 - rhs73;
 eq7 = lhs71 - lhs72 + lhs73 + lhs74 - (rhs7);
-%% solve (6), (7) derive ddx0, do0
-% eq6 = A6*[ddx0;do0] + B6 == 0
-B6 = subs(eq6,[ddx0;do0],[0;0;0;0;0;0]);
-tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq6-B6,'UniformOutput',false);
-A6 = vertcat(tmp{:});
-% eq7 = A7*[ddx0;do0] + B7 == 0
-B7 = subs(eq7,[ddx0;do0],[0;0;0;0;0;0]);
-tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq7-B7,'UniformOutput',false);
-A7 = vertcat(tmp{:});
-Addx0do0 = [A6;A7];
+% eq7 = A7*do0 + B7 == 0
+B7 = LHS73*(-g*e3) + lhs74 -rhs7;
+A7 = [LHS73,LHS71];
 %%
-matlabFunction(Addx0do0,"File",dir+"Addx0do0_"+N,"Vars",{x R0 u physicalParam},'outputs',{'A'})
-syms iA [6 6] 
-matlabFunction(-iA*[B6;B7],"File",dir+"ddx0do0_"+N,"Vars",{x R0 Ri u physicalParam iA},'outputs',{'dX'})
+% B7 = subs(eq7,[ddx0;do0],[0;0;0;0;0;0]);
+% tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq7-B7,'UniformOutput',false);
+% A7 = vertcat(tmp{:});
+% simplify(AA7-A7)
+%%
+syms iA [6 6] real
+matlabFunction([A6;A7],"File",dir+"Addx0do0_"+N,"Vars",{x R0 u physicalParam},'outputs',{'A'})
+matlabFunction(iA*([-B6;-B7]),"File",dir+"ddx0do0_"+N,"Vars",{x R0 Ri u physicalParam iA},'outputs',{'dX'})
 %% (8)
-syms ddX [6 1]  % ddX = [ddx0;do0]
-rhs81 = ddX(1:3)-g*e3; % 3x1
-tmp = arrayfun(@(i) R0*Rho{i}*ddX(4:6),1:N,'UniformOutput',false);
-rhs82 = tmp;
-rhs83 = arrayfun(@(i) R0*O0^2*rho(:,i),1:N,'UniformOutput',false);
-rhs8 =  arrayfun(@(i) li(i)\Qi{i}*(rhs81-rhs82{i}+rhs83{i})-(mi(i)*li(i))\Qi{i}*up{i},1:N,'UniformOutput',false);
+clc
+syms ddX0 [6 1] real
+rhs81 = ddX0(1:3)-g*e3; % 3x1
+tmp = arrayfun(@(i) R0*Rho{i}*ddX0(4:6),1:N,'UniformOutput',false);
+rhs82 = [tmp{:}];
+tmp = arrayfun(@(i) R0*O0^2*rho(:,i),1:N,'UniformOutput',false);
+rhs83 = [tmp{:}];
+rhs8 =  arrayfun(@(i) li(i)\Qi{i}*(rhs81-rhs82(:,i)+rhs83(:,i))-(mi(i)*li(i))\Qi{i}*up{i},1:N,'UniformOutput',false);
 %% (9)
 tmp = arrayfun(@(i) Ji{i}\(-Oi{i}*Ji{i}*oi(:,i)+Mi(:,i)),1:N,'UniformOutput',false);
 doi = vertcat(tmp{:});
@@ -129,7 +147,7 @@ doi = vertcat(tmp{:});
 %% 
 
 % %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
-matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File",dir+"tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX},'outputs',{'dX'});
+matlabFunction([dx0;dr0;ddX0;dqi;vertcat(rhs8{:});dri;doi],"File",dir+"tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX0},'outputs',{'dX'});
 %% gen cable_suspended_rigid_body_with_N_drones
 fname = "cable_suspended_rigid_body_with_" + N + "_drones";
 str = "function dX = "+fname+"(x,u,P)\n"+...
@@ -161,6 +179,24 @@ str = "function dx = "+fname+"(x,u,P)\n"+...
 fileID = fopen(dir + fname+".m",'w');
 fprintf(fileID,str);
 fclose(fileID);
+%% zup model
+fname = "zup_cable_suspended_rigid_body_with_" + N + "_drones";
+str = "function dx = "+fname+"(x,u,P)\n"+...
+"r0 = [1;1;-1;-1].*x(4:7);\n ri = [1;1;-1;-1].*reshape(x("+(13+6*N+1)+":"+(13+10*N)+"),4,[]);\n"+...
+"R0 = RodriguesQuaternion(r0);\n"+...
+"Ri = RodriguesQuaternion(ri);\n"+...
+"rp = [1 -1 -1]'; rq = [1;1;-1;-1];\nRzup = [rp; rq; rp; rp; repmat(rp, 2*"+N+",1); repmat(rq, "+N+",1); repmat(rp, "+N+",1)];\n"+...
+"X = Rzup.*x;\n"+...
+"ddX = ddx0do0_"+N+"(X,R0,Ri,u,P,inv(Addx0do0_"+N+"(X,R0,u,P)));\n" + ...
+"dX = tmp_cable_suspended_rigid_body_with_"+N+"_drones(X,R0,Ri,u,P,ddX);\n" + ...
+"dx = Rzup.*dX;\nend\n"+...
+  "%%%% 状態：\n%% 牽引物: 位置，姿勢角，速度，角速度，\n%% リンク: 角度，角速度\n"+...
+"%% ドローン:姿勢角，角速度\n%% x = [p0 Q0 v0 O0 qi wi Qi Oi]\n";
+fileID = fopen(dir + fname+".m",'w');
+fprintf(fileID,str);
+fclose(fileID);
+
+
 %% zup euler angle model
 fname = "zup_eul_cable_suspended_rigid_body_with_" + N + "_drones";
 str = "function dx = "+fname+"(x,u,P)\n"+...
