@@ -18,6 +18,7 @@ else
   Setting.dim=[13*(N+1),4*N,42];
   Setting.method = get_model_name("Cooperative_Load",N); % model dynamicsの実体名
   Setting.num_list = [3,4,3,3,3*N,3*N,4*N,3*N];
+  Setting.projection = @(x) [x(1:13);x(14:16)/vecnorm(x(14:16));x(17:19)/vecnorm(x(17:19));x(20:22)/vecnorm(x(20:22));x(23:end)];
 end
 if contains(type,"zup")
   Setting.method = "zup_"+Setting.method;
