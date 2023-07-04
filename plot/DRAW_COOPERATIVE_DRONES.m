@@ -217,7 +217,7 @@ classdef DRAW_COOPERATIVE_DRONES
       ax = obj.ax;
       p = obj.data_format(logger,1,"p","p");
       q = obj.data_format(logger,1,"plant.result.state.Q","p");
-      Q = obj.gen_Q(1,q);
+      [~,Q] = obj.gen_Q(1,q);
       u = obj.data_format(logger,obj.target,"input","");% N x 4m
       r = obj.data_format(logger,1,"p","r");
       qi = obj.data_format(logger,obj.target,"plant.result.state.qi","p");
@@ -284,9 +284,9 @@ classdef DRAW_COOPERATIVE_DRONES
     end
     function [pi,rho] = gen_pi(obj,p,Q,qi)
       % pi(k,:,i) = [xi yi zi] at time k
-      Qrho = cell2mat(arrayfun(@(rho) quat_times_vec(Q',rho{1})',mat2cell(reshape(obj.rho,3,[]),3,ones(1,length(obj.target))),'UniformOutput',false));
+      Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
       q = repmat(p,1,length(obj.target))+Qrho;
-      rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target));
+      rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point
       pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));      
     end
     function D = data_format(obj,logger,target,var,att)
@@ -294,7 +294,7 @@ classdef DRAW_COOPERATIVE_DRONES
       q = logger.data(1,var,att);
       D = reshape(q,size(q,1),size(q,2)/length(target),length(target));      
     end
-    function Q = gen_Q(obj,target,q)
+    function [Q,Q1] = gen_Q(obj,target,q)
         Q = zeros(size(q,1),4,length(target));
        for n = 1:length(target)
         switch size(q(:,:,n),2)
@@ -305,15 +305,13 @@ classdef DRAW_COOPERATIVE_DRONES
           case 9
             Q1 = quaternion(q(:,:,n),'rotmat','frame');
         end         
-        Q(:,:,n) = compact(Q1);
-        % Q1 = rotvec(Q1);
-        % tmp = vecnorm(Q1,2,2);
-        % Q(:,:,n) = zeros(size(Q1,1),4);
-        % Q(tmp==0,:,n) = 0;
-        % Q(tmp==0,1,n) = 1;
-        % if sum(tmp~=0)
-        %   Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
-        % end
+        Q2 = rotvec(Q1);
+        Q1 = compact(Q1);
+        tmp = vecnorm(Q2,2,2);
+        Q(:,:,n) = zeros(size(Q2,1),4);
+        Q(tmp==0,:,n) = 0;
+        Q(tmp==0,1,n) = 1;
+        Q(tmp~=0,:,n) = [Q2(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
       end
     end
   end

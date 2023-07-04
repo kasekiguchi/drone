@@ -16,32 +16,25 @@ syms ddx0 [3 1] real
 syms r0 [4 1] real % 姿勢角（オイラーパラメータ）
 syms o0 [3 1] real % 角速度
 syms do0 [3 1] real
-syms qi [N 3] real % リンクのドローンから見た方向ベクトル：論文中qi
-qi = qi';
-syms wi [N 3] real % リンクの角速度
-wi = wi';
+syms qi [3 N] real % リンクのドローンから見た方向ベクトル：論文中qi
+syms wi [3 N] real % リンクの角速度
 syms R0 [3 3] real
 syms Ri [3 3 N] real
 
 % ドローンに関する変数定義 %%%%%%%%%%%%%%%%%%
-syms ri [N 4] real % 姿勢角（オイラーパラメータ）
-ri = ri';
-syms oi [N 3] real % 角速度
-oi = oi';
+syms ri [4 N] real % 姿勢角（オイラーパラメータ）
+syms oi [3 N] real % 角速度
 syms fi [1 N] real % 推力入力
-syms Mi [N 3] real % モーメント入力
-Mi = Mi';
+syms Mi [3 N] real % モーメント入力
 %% 牽引物の物理パラメータ %%%%%%%%%%%%%%%%%%%
 syms g real % 重力加速度
 syms m0 real % 質量
 syms j0 [3 1] real % 慣性モーメント
-syms rho [N 3] real % 牽引物座標系でのリンク接続位置：第i列がi番目のドローンとの接続位置
-rho = rho';
+syms rho [3 N] real % 牽引物座標系でのリンク接続位置：第i列がi番目のドローンとの接続位置
 syms li [1 N] real % リンク長
 % ドローンの物理パラメータ %%%%%%%%%%%%%%%%%%%
 syms mi [1 N] real % 質量
-syms ji [N 3] real % 慣性モーメント
-ji = ji';
+syms ji [3 N] real % 慣性モーメント
 physicalParam = [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)];
 %%
 [~,L0] = RodriguesQuaternion(r0); % 牽引物回転行列
@@ -67,9 +60,9 @@ for i = 1:N
 dqi(:,i) = cross(wi(:,i),qi(:,i));
 % (2)
 dri(:,i) = Li(:,:,i)'*oi(:,i)/2;
-ui(:,i) = -fi(i)*Ri(:,:,i)*e3;
-ul(:,i) = qi(:,i)*qi(:,i)'*ui(:,i);
-up(:,i) = (eye(3) - qi(:,i)*qi(:,i)')*ui(:,i); % (11)
+ui(:,i) = fi(i)*Ri(:,:,i)*e3;
+%ul(:,i) = qi(:,i)*qi(:,i)'*ui(:,i);
+%up(:,i) = (eye(3) - qi(:,i)*qi(:,i)')*ui(:,i); % (11)
 end
 %%
 clc
@@ -100,15 +93,21 @@ dri = reshape(dri,[],1);
 syms iA [6 6] real
 matlabFunction(A,"File",dir+"Addx0do0_"+N,"Vars",{x R0 u physicalParam},'outputs',{'A'})
 matlabFunction(iA*B,"File",dir+"ddx0do0_"+N,"Vars",{x R0 Ri u physicalParam iA},'outputs',{'dX'})
+%%
+syms ddqi [3 1] real
+syms a [3 1] real
+syms b [3 1] real
+syms c [3 1] real
+syms d [3 1] real
 %% (8) (9)
 for i = 1:N
-  dwi(:,i) = -wi(:,i)'*wi(:,i)*qi(:,i) + Qi{i}^2*(ui(:,i)-mi(i)*ai(:,i))/(mi(i)*li(i));
+  dwi(:,i) = -Skew(qi(:,i))*(qi(:,i)'*Skew(wi(:,i))^2*qi(:,i))*qi(:,i) + Skew(qi(:,i))*Qi{i}^2*(ui(:,i)-mi(i)*ai(:,i))/(mi(i)*li(i));% dwi = Skew(qi)*ddqi
   doi(:,i) = Ji{i}\(-Oi{i}*Ji{i}*oi(:,i)+Mi(:,i));
 end
 
 %% 
 % %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
-matlabFunction([dx0;dr0;ddX0dO0(1:6);dqi;reshape(dwi,[],1);dri;reshape(doi,[],1)],"File",dir+"tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX0dO0},'outputs',{'dX'})
+matlabFunction([dx0;dr0;ddX0dO0;dqi;reshape(dwi,[],1);dri;reshape(doi,[],1)],"File",dir+"tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX0dO0},'outputs',{'dX'})
 %% gen cable_suspended_rigid_body_with_N_drones
 fname = "zup_cable_suspended_rigid_body_with_" + N + "_drones";
 str = "function dX = "+fname+"(x,u,P)\n"+...
