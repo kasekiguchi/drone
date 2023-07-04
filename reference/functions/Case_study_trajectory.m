@@ -2,7 +2,7 @@ function ref = Case_study_trajectory(param)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 arguments
-    param.freq = 10
+    param.freq = 14
     param.orig = [0 0 1]
     param.size = [1 1 0]
     param.phase = -pi
