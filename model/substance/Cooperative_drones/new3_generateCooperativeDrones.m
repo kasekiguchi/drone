@@ -73,19 +73,20 @@ eq22 = zeros(3);
 eq23 = zeros(3);
 eq32 = zeros(3);
 eq33 = zeros(3);
+G = g*e3;
 for i = 1:N
   uil(:,i) = qi(:,i)*qi(:,i)'*ui(:,i);
   uip(:,i) = (eye(3) - qi(:,i)*qi(:,i)')*ui(:,i);
-  ai(:,i) = ddX0 + g*e3 - R0*Rho{i}*dO0+ R0*O0^2*rho(:,i);
-  eq21(:,i) = uil(:,i) - mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*qi(:,i)*qi(:,i)'*(g*e3+R0*O0^2*rho(:,1));
+  ai(:,i) = ddX0 + G - R0*Rho{i}*dO0+ R0*O0^2*rho(:,i);
+  eq21(:,i) = uil(:,i) - mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*qi(:,i)*qi(:,i)'*(G+R0*O0^2*rho(:,1));
   eq22 = eq22 + mi(i)*qi(:,i)*qi(:,i)';
   eq23 = eq23 + mi(i)*qi(:,i)*qi(:,i)'*(-R0*Rho{i});
-  eq31(:,i) = Rho{i}*R0'*uil(:,i) - Rho{i}*R0'*mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*(g*e3+R0*O0^2*rho(:,1)) ;
+  eq31(:,i) = Rho{i}*R0'*uil(:,i) - Rho{i}*R0'*mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*(G+R0*O0^2*rho(:,1)) ;
   eq32 = eq32 + Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)';
   eq33 = eq33 + Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*(-R0*Rho{i}); 
 end
 A = [m0*eye(3) + eq22, eq23; eq32,J0 + eq33];
-B = [ -m0*g*e3 + sum(eq21,2);- O0*J0*o0 + sum(eq31,2)];
+B = [ -m0*G + sum(eq21,2);- O0*J0*o0 + sum(eq31,2)];
 %%
 dqi = reshape(dqi,[],1);
 dri = reshape(dri,[],1);
