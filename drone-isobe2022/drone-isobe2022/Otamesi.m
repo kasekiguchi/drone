@@ -1,51 +1,28 @@
-function Data = loadData(loading_filename,reference_filepath)
-%LOADDATA  実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
-% Data.X 入力前の対象の状態
-% Data.U 対象への入力
-% Data.Y 入力後の対象の状態
-if isfolder(reference_filepath)
-    reference_filename = dir(fullfile(reference_filepath)).name;
-else
-    reference_filename = reference_filepath;
+close all hidden;
+clear all;
+clc;
+
+%% 特定の範囲のグラフ出力
+
+%landingのインデックスから220だけ増加させることでだいたい円軌道に収束後となる
+% load("experiment_6_20_circle_estimaterdata.mat")
+load("experiment_6_20_circle_1.mat")
+disp('load finished')
+
+for i = find(log.Data.phase == 102,1,'first')+220:find(log.Data.phase == 108,1,'first')
+    data.t(1,i-find(log.Data.phase == 102,1,'first')+1-220) = log.Data.t(i,1);                                     
+    data.p1(:,i-find(log.Data.phase==102,1,'first')+1-220) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
 end
 
-disp('now loading data set')
-if endsWith(loading_filename,'.mat')
-    Dataset = ImportFromExpData(loading_filename);
-    Data.X = [Dataset.X];
-    Data.U = [Dataset.U];
-    Data.Y = [Dataset.Y];  
-    disp(append('loaded filename: ', loading_filename));
-    disp(append('data count in this file:',num2str(Dataset.N),', total data count: ',num2str(size(Data.X,2))))
-else
-    fileList = dir(fullfile(loading_filename, '*.mat'));
-    % フォルダの中にシミュレーションで基準にしたいファイルがあった場合は除外して読み込む
-    if ~isempty(dir(fullfile(loading_filename,reference_filename)))
-        fileList(contains({fileList.name},reference_filename)) = [];
-    end
-    for i = 1 : numel(fileList)
-        Dataset = ImportFromExpData(fullfile(loading_filename,fileList(i).name));
-        if i == 1
-            Data.X = [Dataset.X];
-            Data.U = [Dataset.U];
-            Data.Y = [Dataset.Y];        
-        else
-            Data.X = [Data.X, Dataset.X];
-            Data.U = [Data.U, Dataset.U];
-            Data.Y = [Data.Y, Dataset.Y];
-        end
-        disp(append('loaded filename: ', fileList(i).name));
-        disp(append('data count in this file:',num2str(Dataset.N),', total data count: ',num2str(size(Data.X,2))))
-    end
+for i = find(log.Data.t > 18,1,'first'):find(log.Data.phase == 108,1,'first')
+    data.t1(1,i-find(log.Data.t > 18,1,'first')+1) = log.Data.t(i,1);         
+    data.p2(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
 end
-disp('loading finish')
 
-% クォータニオンのノルムをチェック
-% 閾値を下回った or 上回った場合注意文を提示
-% attitude_norm 各時間におけるクォータニオンのノルム
-if size(Data.X,1)==13
-    thre = 0.01;
-    attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
-    disp(['quaternion norm = ' ,num2str(attitude_norm)])
-end
-end
+figure(1)
+plot(data.p1(1,:),data.p1(2,:));
+grid on
+
+figure(2)
+plot(data.p2(1,:),data.p2(2,:));
+grid on
