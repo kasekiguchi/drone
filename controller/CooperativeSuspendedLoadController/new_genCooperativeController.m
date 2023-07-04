@@ -42,11 +42,9 @@ physicalParam = [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)];
 %tmp = mat2cell(ri,4,ones(1,N));
 %[Ri,Li] = arrayfun(@(q) RodriguesQuaternion(q{:}),tmp,'UniformOutput',false); % ドローン姿勢回転行列
 O0 = Skew(o0); % 牽引物の角速度行列（歪対象行列）
-tmp = mat2cell(oi,3,ones(1,N));
-Oi = arrayfun(@(o) Skew(o{:}),tmp,'UniformOutput',false); % ドローン角速度行列
+Oi = arrayfun(@(i) Skew(oi(:,i)),1:N,'UniformOutput',false); % ドローン角速度行列
 J0 = diag(j0); % 牽引物の慣性行列
-tmp = mat2cell(ji,3,ones(1,N));
-Ji = arrayfun(@(j) diag(j{:}),tmp,'UniformOutput',false); % ドローン慣性行列
+Ji = arrayfun(@(i) diag(ji(:,i)),1:N,'UniformOutput',false); % ドローン慣性行列
 e3 = [0;0;1]; %
 Rho = arrayfun(@(i) Skew(rho(:,i)),1:N,'UniformOutput',false); % rho の歪対称化
 Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称化
@@ -80,24 +78,22 @@ gains = [kx0 kr0 kdx0 ko0 kqi kwi kri koi epsilon];
 %% (20)-(22)
 ex0 = x0 - x0d;
 dex0 = dx0 -dx0d;
-R0dTR0 = R0d'*R0;
-R0TR0d = R0dTR0';
-eR0 = Vee(R0dTR0 - R0TR0d)/2;
-eo0 = o0 - R0dTR0'*o0d;
+eR0 = Vee(R0d'*R0 - R0'*R0d)/2;
+eo0 = o0 - R0'*R0d*o0d;
 %% (23),(24)
 clc
 Fd0 = m0*(-kx0*ex0- kdx0*dex0 + ddx0d - g*e3);
-Md0 = -kr0*eR0 - ko0*eo0 + Skew(R0TR0d*o0d)*J0*R0TR0d*o0d + J0*R0TR0d*do0d;
+Md0 = -kr0*eR0 - ko0*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
 matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{x,Xd,R0,R0d,physicalParam,gains},...
   "Comments","[R0'*Fd;Md] for (26)")
 %%
 R0dqid = -R0d'*qid;
-dqid = -R0d*Skew(o0d)*R0dqid; % 3xN
+dqid = (-R0d*Skew(o0d)*R0dqid); % 3xN
 wid = cross(qid,dqid); % 3xN
-ddqid = R0d*(Skew(do0d) + Skew(o0d)^2)*R0dqid;
+ddqid = (R0d*(Skew(do0d) + Skew(o0d)^2)*R0dqid);
 dwid = cross(qid,ddqid);
 eqi = cross(qid,qi); % 3xN
-ewi = wi + cellmatfun(@(Qi,i) Qi^2*wid(:,i),Qi,"mat");
+ewi = wi + cellmatfun(@(Q,i) Q^2*wid(:,i),Qi,"mat");
 %% ui
 %ai = ddx0 - g*e3 + R0*O0^2*rho - R0'*cellmatfun(@(R,i) R*do0,Rho,"mat"); % (15) 3xN
 R0Rho = cellmatfun(@(Rho,i) R0*Rho,Rho,"struct");
