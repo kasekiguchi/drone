@@ -1,66 +1,51 @@
-%% initialize
-clear all
-close all
-
-% % データの準備
-% x = 1:10;
-% y = rand(1, 10);
-% 
-% % グラフの描画
-% plot(x, y)
-% hold on
-% 
-% % 縦線を引く時刻
-% targetTime = 5;
-% 
-% % 縦線を描画
-% line([targetTime targetTime], ylim, 'Color', 'red', 'LineStyle', '--')
-% 
-% % グラフの装飾
-% xlabel('時刻')
-% ylabel('値')
-% title('時刻に縦線を引くグラフ')
-% legend('データ', '縦線')
-% hold off
-
-
-%% データのインポート
-% load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("experiment_6_20_circle_2.mat")
-disp('load finished')
-
-for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 108,1,'first')
-    data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                     
-    data.u1(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);
+function Data = loadData(loading_filename,reference_filepath)
+%LOADDATA  実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
+% Data.X 入力前の対象の状態
+% Data.U 対象への入力
+% Data.Y 入力後の対象の状態
+if isfolder(reference_filepath)
+    reference_filename = dir(fullfile(reference_filepath)).name;
+else
+    reference_filename = reference_filepath;
 end
 
-for i = find(log.Data.t > 18,1,'first'):find(log.Data.phase == 108,1,'first')
-    data.t1(1,i-find(log.Data.t > 18,1,'first')+1) = log.Data.t(i,1);         
-    data.p(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.u2(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.input{i}(:,1);
+disp('now loading data set')
+if endsWith(loading_filename,'.mat')
+    Dataset = ImportFromExpData(loading_filename);
+    Data.X = [Dataset.X];
+    Data.U = [Dataset.U];
+    Data.Y = [Dataset.Y];  
+    disp(append('loaded filename: ', loading_filename));
+    disp(append('data count in this file:',num2str(Dataset.N),', total data count: ',num2str(size(Data.X,2))))
+else
+    fileList = dir(fullfile(loading_filename, '*.mat'));
+    % フォルダの中にシミュレーションで基準にしたいファイルがあった場合は除外して読み込む
+    if ~isempty(dir(fullfile(loading_filename,reference_filename)))
+        fileList(contains({fileList.name},reference_filename)) = [];
+    end
+    for i = 1 : numel(fileList)
+        Dataset = ImportFromExpData(fullfile(loading_filename,fileList(i).name));
+        if i == 1
+            Data.X = [Dataset.X];
+            Data.U = [Dataset.U];
+            Data.Y = [Dataset.Y];        
+        else
+            Data.X = [Data.X, Dataset.X];
+            Data.U = [Data.U, Dataset.U];
+            Data.Y = [Data.Y, Dataset.Y];
+        end
+        disp(append('loaded filename: ', fileList(i).name));
+        disp(append('data count in this file:',num2str(Dataset.N),', total data count: ',num2str(size(Data.X,2))))
+    end
 end
+disp('loading finish')
 
-%入力
-figure(1)
-plot(data.t,data.u1(:,:),'LineWidth',1);
-hold on
-targetTime = 18;
-line([targetTime targetTime],ylim, 'Color', 'red', 'LineStyle', '--');
-xlabel('Time [s]');
-ylabel('u');
-grid on
-% lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-
-%入力
-figure(2)
-plot(data.t1,data.u2(:,:),'LineWidth',1);
-xlabel('Time [s]');
-ylabel('u');
-grid on
-% lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-
-figure(3)
-plot(data.p(1,:),data.p(2,:));
-grid on
+% クォータニオンのノルムをチェック
+% 閾値を下回った or 上回った場合注意文を提示
+% attitude_norm 各時間におけるクォータニオンのノルム
+if size(Data.X,1)==13
+    thre = 0.01;
+    attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
+    disp(['quaternion norm = ' ,num2str(attitude_norm)])
+end
+end

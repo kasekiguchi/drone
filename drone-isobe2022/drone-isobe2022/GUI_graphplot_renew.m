@@ -24,6 +24,19 @@ for i = 1:find(log.Data.t,1,'last')
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
 
+%% 特定の範囲のグラフ出力
+
+% for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 108,1,'first')
+%     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                     
+%     data.u1(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);
+% end
+% 
+% for i = find(log.Data.t > 18,1,'first'):find(log.Data.phase == 108,1,'first')
+%     data.t1(1,i-find(log.Data.t > 18,1,'first')+1) = log.Data.t(i,1);         
+%     data.p(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.u2(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.input{i}(:,1);
+% end
+
 %% 各グラフで出力
 num = input('出力するグラフ形態を選択してください (各グラフで出力 : 0 / いっぺんに出力 : 1)：','s'); %0:各グラフで出力,1:いっぺんに出力
 selection = str2double(num); %文字列を数値に変換

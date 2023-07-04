@@ -86,11 +86,7 @@ if flg.bilinear == 1
 else
     est = KL(Data.X,Data.U,Data.Y,F);
 end
-% if flg.bilinear == 1
-%     [est.Ahat, est.Bhat, est.Ehat, est.Chat] = KoopmanLinear_biLinear(Data.X,Data.U,Data.Y,F);
-% else
-%     [est.Ahat, est.Bhat, est.Chat] = KoopmanLinear(Data.X,Data.U,Data.Y,F);
-% end
+
 est.observable = F;
 disp('Estimated')
 
@@ -125,19 +121,6 @@ else
     end
 end
 simResult.Xhat = est.C * simResult.Z;
-
-% if flg.bilinear == 1 %双線形モデル
-%     for i = 1:1:simResult.reference.N-2 %クープマンモデルでの計算
-%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + (est.Bhat + est.Ehat*simResult.Z(13:15,i)*[1,1,1,1] )* simResult.U(:,i);
-%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
-%     end
-% else
-%     for i = 1:1:simResult.reference.N-2
-%         simResult.Z(:,i+1) = est.Ahat * simResult.Z(:,i) + est.Bhat * simResult.U(:,i);
-%         simResult.Xhat(:,i+1) = est.Chat * simResult.Z(:,i+1);
-%     end
-% end
-% logger.logging(simResult.T,0,simResult.Xhat);  %追加
 
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13

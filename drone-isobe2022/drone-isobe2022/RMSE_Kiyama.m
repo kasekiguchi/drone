@@ -4,7 +4,7 @@ close all hidden;
 clear all;
 clc;
 %% 
-
+% loadfilename{1} = 'test1.mat';
 loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
@@ -32,12 +32,13 @@ end
 
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
 tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1;
+length = size(file{WhichRef}.simResult.reference.est.p(tlength,1)',2);
 
 %% RMSE計算
 clc
 %位置のRMSE
 xt = file{WhichRef}.simResult.reference.est.p(tlength,1)';
-yt = file{2}.simResult.reference.est.p(tlength,2)';
+yt = file{WhichRef}.simResult.reference.est.p(tlength,2)';
 zt = file{WhichRef}.simResult.reference.est.p(tlength,3)';
 xr1 = file{1}.simResult.state.p(1,1:stepN);
 xr2 = file{2}.simResult.state.p(1,1:stepN);
