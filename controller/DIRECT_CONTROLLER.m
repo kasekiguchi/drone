@@ -23,8 +23,8 @@ classdef DIRECT_CONTROLLER < handle
                     end
                 end
             end
-             obj.result.input = Ref.get() + [0.01*randn(1,3)';0;0;0;1e-4*randn(1,3)'];
-            %obj.result.input = Ref.get();
+            obj.result.input = Ref.get() + [0.05*randn(1,3)';0;0;0;1e-3*randn(1,3)'];
+            % obj.result.input = Ref.get();
             % obj.self.input = obj.result.input;
             u=obj.result;
         end
