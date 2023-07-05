@@ -41,7 +41,8 @@ agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,Model_
 
 agent.sensor = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
+% agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
+agent.reference = TIME_VARYING_REFERENCE_Cooporative(agent,Reference_Time_Varying_Cooprative_Load("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
 %agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 agent.controller = CSLC(agent,Controller_Cooperative_Load(dt,N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
