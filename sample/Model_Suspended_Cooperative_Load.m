@@ -13,12 +13,13 @@ if contains(type,"eul")
   Setting.dim=[12*(N+1),4*N,5 + 8*N];
   Setting.method = get_model_name("Cooperative_Load_eul",N); % model dynamicsの実体名
   Setting.num_list = [3,3,3,3,3*N,3*N,3*N,3*N];
-  Setting.projection = @(x) [x(1:12);x(13:15)/vecnorm(x(13:15));x(16:end)];
+  %Setting.projection = @(x) [x(1:12);x(13:15)/vecnorm(x(13:15));x(16:end)];
 else
   Setting.dim=[13*(N+1),4*N,42];
   Setting.method = get_model_name("Cooperative_Load",N); % model dynamicsの実体名
   Setting.num_list = [3,4,3,3,3*N,3*N,4*N,3*N];
-  Setting.projection = @(x) [x(1:13);x(14:16)/vecnorm(x(14:16));x(17:19)/vecnorm(x(17:19));x(20:22)/vecnorm(x(20:22));x(23:end)];
+  %Setting.projection = @(x) [x(1:3);x(4:7)/vecnorm(x(4:7));x(8:13);x(14:16)/vecnorm(x(14:16));x(17:19)/vecnorm(x(17:19));x(20:22)/vecnorm(x(20:22));x(23:25)/vecnorm(x(23:25));x(26:37);x(38:41)/vecnorm(x(38:41));x(42:45)/vecnorm(x(42:45));x(46:49)/vecnorm(x(46:49));x(50:53)/vecnorm(x(50:53));x(54:end)];
+  Setting.projection = @(x) [x(1:3);x(4:7)/vecnorm(x(4:7));x(8:13);x(14:16)/vecnorm(x(14:16));x(17:19)/vecnorm(x(17:19));x(20:22)/vecnorm(x(20:22));x(23:31);x(32:35)/vecnorm(x(32:35));x(36:39)/vecnorm(x(36:39));x(40:43)/vecnorm(x(40:43));x(44:end)];
 end
 if contains(type,"zup")
   Setting.method = "zup_"+Setting.method;

@@ -29,12 +29,12 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 type = "struct";
                 % parameters : 5 + 8*N
                 param.g = 9.81;
-                param.m0 = 1;
-                param.J0 = [0.005;0.005;0.005];
+                param.m0 = 1.5;
+                param.J0 = 100*[0.005;0.005;0.005];
                 param.rho = [];
-                param.li = 0.5*ones(N,1);
-                param.mi = ones(N,1)';
-                param.Ji = 0.005*repmat([1 1 1]',1,N);
+                param.li = 1*ones(N,1);
+                param.mi = 0.755*ones(N,1)';
+                param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
             if contains(type,"zup")
