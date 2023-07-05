@@ -22,8 +22,8 @@ classdef TIME_VARYING_REFERENCE_Cooporative < handle
                 args
             end
             obj.self = self;
-            gen_func_name = str2func(args{1});
-            param_for_gen_func = args{2};
+            gen_func_name = str2func(args.name);
+            param_for_gen_func = args.param;
             obj.func = gen_func_name(param_for_gen_func{:});
             if length(args) > 2
                 if strcmp(args{3}, "HL")
