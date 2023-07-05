@@ -10,11 +10,11 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 %% select file to load
 
 % loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
+% loadfilename{2} = 'EstimationResult_12state_7_5_circle=flight_estimation=circle_T=7.mat';
 % loadfilename{3} = 'EstimationResult_12state_6_20_circle__test_InputandConst_ByLinear.mat';
 
-loadfilename{1} = 'test1_circle_only.mat';
-loadfilename{2} = 'test2_circle_flight.mat';
+loadfilename{1} = 'test1.mat';
+loadfilename{2} = 'test2.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
@@ -25,16 +25,16 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 1; %ステップ数，xの範囲を設定
+stepnum = 0; %ステップ数，xの範囲を設定
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1
         xlimHold = [0,0.5];
     end
 elseif stepnum == 1
-    stepN = 61;
+    stepN = 55;
     if flg.xlimHold == 1
-        xlimHold = [0,1];
+        xlimHold = [0,0.8];
     end
 elseif stepnum == 2
     stepN = 91;
