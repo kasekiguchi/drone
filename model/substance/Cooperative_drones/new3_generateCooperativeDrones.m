@@ -6,7 +6,7 @@ clc
 % 軸の取り方に注意
 % e3 = [0;0;1]; % 鉛直下向き
 dir = "model/substance/Cooperative_drones/";
-N = 3; % エージェント数
+N = 4; % エージェント数
 
 %% symbol定義
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
@@ -81,31 +81,27 @@ for i = 1:N
   eq21(:,i) = uil(:,i) - mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*qi(:,i)*qi(:,i)'*(G+R0*O0^2*rho(:,1));
   eq22 = eq22 + mi(i)*qi(:,i)*qi(:,i)';
   eq23 = eq23 + mi(i)*qi(:,i)*qi(:,i)'*(-R0*Rho{i});
-  eq31(:,i) = Rho{i}*R0'*uil(:,i) - Rho{i}*R0'*mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*(G+R0*O0^2*rho(:,1)) ;
+  eq31(:,i) = Rho{i}*R0'*eq21(:,i);
   eq32 = eq32 + Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)';
   eq33 = eq33 + Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*(-R0*Rho{i}); 
 end
 A = [m0*eye(3) + eq22, eq23; eq32,J0 + eq33];
 B = [ -m0*G + sum(eq21,2);- O0*J0*o0 + sum(eq31,2)];
-%%
-dqi = reshape(dqi,[],1);
-dri = reshape(dri,[],1);
 %% A* [ddx0;do0] = B
 syms iA [6 6] real
 matlabFunction(A,"File",dir+"Addx0do0_"+N,"Vars",{x R0 u physicalParam},'outputs',{'A'})
 matlabFunction(iA*B,"File",dir+"ddx0do0_"+N,"Vars",{x R0 Ri u physicalParam iA},'outputs',{'dX'})
-%%
-syms ddqi [3 1] real
-syms a [3 1] real
-syms b [3 1] real
-syms c [3 1] real
-syms d [3 1] real
 %% (8) (9)
 for i = 1:N
-  dwi(:,i) = -Skew(qi(:,i))*(qi(:,i)'*Skew(wi(:,i))^2*qi(:,i))*qi(:,i) + Skew(qi(:,i))*Qi{i}^2*(ui(:,i)-mi(i)*ai(:,i))/(mi(i)*li(i));% dwi = Skew(qi)*ddqi
+  tmp_ddqi = (qi(:,i)'*Skew(wi(:,i))^2*qi(:,i))*qi(:,i) + Qi{i}^2*(ui(:,i)-mi(i)*ai(:,i))/(mi(i)*li(i)); % ddqi in (4)
+  dwi(:,i) = Qi{i}*tmp_ddqi;% dwi = Skew(qi)*ddqi
+  %dwi(:,i) = Skew(qi(:,i))*((ddX0 + G -R0*Rho{i}*dO0+R0*O0^2*rho(:,1))/li(i) - uip(:,i)/(mi(i)*li(i))); % G の符号
+  %dwi(:,i) = Qi{i}*ai(:,i)/li(i) - Qi{i}*uip(:,i)/(mi(i)*li(i));
   doi(:,i) = Ji{i}\(-Oi{i}*Ji{i}*oi(:,i)+Mi(:,i));
 end
-
+%%
+dqi = reshape(dqi,[],1);
+dri = reshape(dri,[],1);
 %% 
 % %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
 matlabFunction([dx0;dr0;ddX0dO0;dqi;reshape(dwi,[],1);dri;reshape(doi,[],1)],"File",dir+"tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX0dO0},'outputs',{'dX'})
