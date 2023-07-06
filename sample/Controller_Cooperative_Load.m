@@ -1,31 +1,10 @@
 function Controller= Controller_Cooperative_Load(dt,N)
-% PIDコントローラの設定
-%% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
-% Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-% Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-% Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
-% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
 
-Controller.F1=0.5;                                % z 
-Controller.F2=0.7; % xdiag([100,10,10,1])
-Controller.F3=0.5; % ydiag([100,10,10,1])
-Controller.F4=0.8;
-Controller.F5=0.3;
-Controller.F6=0.45;% ヨー角 
-Controller.F7=0.5;
-Controller.F8=0.7;
-
-
-% % dt = 0.2 くらいの時用
-% Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-% Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([1,1,1,1]),[1],dt); % xdiag([100,10,10,1])
-% Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([1,1,1,1]),[1],dt); % ydiag([100,10,10,1])
-% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
-
-
-% 極配置
-% Controller.F2=place(diag([1,1,1],1),[0;0;0;1],Eig);
-% Controller.F3=place(diag([1,1,1],1),[0;0;0;1],Eig);
+g1p = lqrd([0,1;0,0],[0;1],diag([5 1]),0.01,dt); % 1 10 1
+g1r = lqrd([0,1;0,0],[0;1],diag([1000 1]),0.01,dt); % 1 10 1 : 100 1 0.01
+g2 = lqrd([0,1;0,0],[0;1],diag([1 0.1]),1,dt); % 1 1 0.001 : 1 1 1
+g3 = lqrd([0,1;0,0],[0;1],diag([1 0.001]),1,dt);%  1 1 50 : 1 10 0.05
+Controller.gains = [g1p(1)*[1 1 1],g1r(1),g1p(2)*[1 1 1],g1r(2),g2,g3,0.1];
 
 Controller.method = "CooperativeSuspendedLoadController_"+N;
 % 設定確認
