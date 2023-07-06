@@ -91,7 +91,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 %       obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
-      idx = rt/obj.self.model.dt+1;
+      idx = round(rt/obj.self.model.dt+1);
+
+      InputV = param{5};
 
       %% HL 5/18 削除------------------------------------------------------------------------------------------------------------------------
       ref = obj.self.reference.result;
@@ -126,10 +128,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 %       ave3 = obj.input.u(3);
 %       ave4 = obj.input.u(4);
 
-      ave1 = 0;
-      ave2 = 0;
-      ave3 = 0;
-      ave4 = 0;
+      ave1 = InputV(1,idx);
+      ave2 = InputV(2,idx);
+      ave3 = InputV(3,idx);
+      ave4 = InputV(4,idx);
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;

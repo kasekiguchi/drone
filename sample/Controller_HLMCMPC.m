@@ -51,8 +51,7 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.ref_input = [0;0;0;0];
 
     Controller.name = "mcmpc";
-    % Controller.type = "HLMCMPC_controller";
-    Controller.type = "HLMPC_controller";
+    Controller.type = "HLMCMPC_controller";
     Controller.param = Controller_param;
 
 end

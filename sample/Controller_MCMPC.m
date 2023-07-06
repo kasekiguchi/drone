@@ -43,7 +43,7 @@ function Controller = Controller_MCMPC(~)
     Controller_param.C = 1000;  % yaw姿勢角の係数
     Controller_param.CA = 10; % 高度による係数
     Controller_param.Ca = 10; % pitch
-    Controller_param.CV = 100000; % 速度の係数
+    Controller_param.CV = 1000000; % 速度の係数
     
     
     Controller_param.Pf = diag([1000.0; 1000.0; 1000.0]);

@@ -41,7 +41,7 @@ classdef HLMPC_controller <CONTROLLER_CLASS
 
             %%
             obj.input = param.input;
-            obj.const = param.const;
+            % obj.const = param.const;
             obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
             obj.param.H = param.H + 1;
             obj.model = self.model;
@@ -68,11 +68,12 @@ classdef HLMPC_controller <CONTROLLER_CLASS
 
         %-- main()的な
         function result = do(obj,param)
-%             profile on
+            % profile on
             % OB = obj;
             % xr = param{2};
             rt = param{2};
             problem = param{4};
+            xr = param{5};
             %       obj.input.InputV = param{5};
             % obj.state.ref = xr;
             obj.param.t = rt;
@@ -87,6 +88,9 @@ classdef HLMPC_controller <CONTROLLER_CLASS
                 end
             end
             %
+            %% Reference function
+            % xd = [xr(1:3)'; 0; xr(7:9)'; 0];
+
             xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
             model_HL = obj.self.estimator.result;
             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
@@ -127,11 +131,26 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             %                 previous_state(Params.state_size+1:Params.total_size, 1:Params.H) = repmat(x0, 1, Params.H);
 
             % MPC設定(problem)
-            
+
+            obj_HL.input = obj.input.u;
+            obj_HL.reference = obj.reference.xr;
+            objHLrefinput = obj.param.ref_input;
+            obj_HL.Weight = obj.Weight;
+            obj_HL.WeightRp = obj.WeightRp;
+            obj_HL.WeightR = obj.WeightR;
+
+            objHL_const.H = obj.param.H;
+            objHL_const.A = obj.A;
+            objHL_const.B = obj.B;
+            objHL_const.current_state = obj.current_state;
+            obj.reference.state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)]; % 実状態における目標値
 
             problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
-            problem.objective = @(x) obj.objective(x);            % 評価関数
-            problem.nonlcon   = @(x) obj.constraints(x);          % 制約条件
+            % problem.objective = @(x) objective_HL_mex(obj_HL, x, objHLrefinput);            % 評価関数
+            % problem.nonlcon   = @(x) constraints_HL_mex(objHL_const, x);          % 制約条件
+
+            problem.objective = @(x) obj.objective(x); 
+            problem.nonlcon   = @(x) obj.constraints(x);
             [var, ~, ~] = fmincon(problem);
             % 制御入力の決定
 %             previous_state = var;   % 初期値の書き換え
@@ -150,10 +169,11 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             obj.input.u = obj.result.input;
 
             % 座標として軌跡を保存するため　x = xd + state
-            % state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)];
-
+            
+            
+            obj.result.inputv = [vf; vs];
             result = obj.result;
-%             profile viewer
+            % profile viewer
         end
         function show(obj)
             obj.result
@@ -165,6 +185,8 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             c  = zeros(12, obj.param.H);
             ceq_ode = zeros(12, obj.param.H);
 
+            xReal = obj.reference.xr - x(1:12,:);
+
             %-- MPCで用いる予測状態 Xと予測入力 Uを設定
             X = x(1:12, :);          % 12 * Params.H
             U = x(13:16, :);   % 4 * Params.H
@@ -175,15 +197,13 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             for L = 2:obj.param.H
                 xx = X(:, L-1);
                 xu = U(:, L-1);
-%                 xp = obj.current_state; % 初期値
-                %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],params.X0);
-                %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-                % [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
                 tmp = obj.A * xx + obj.B * xu;
                 ceq_ode(:, L) = X(:, L) - tmp;   % tmpx : 縦ベクトル？
             end
             ceq = [X(:, 1) - obj.current_state, ceq_ode];
-%             c = x(13:16, :);
+            %% c(x) <= 0
+            % c(1) = xReal(3, :); % x <= 0
+            % c(2) = xReal(11, :)-0.1;% yawの抑制
         end
 
         %------------------------------------------------------

@@ -82,16 +82,16 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
             elseif phase<t && t<phase+0.3
                 tz = -5 * (t-phase).^2 + 2;             tvz = 20-10*t;
             elseif phase+0.3 <= t
-                tz = 2 * exp(-(t-phase-0.14)/0.55)+0.2; tvz = -4*exp((107/25)-2*t); % zeta=0.5, offset=0.1
+                tz = 2 * exp(-(t-phase-0.09)/0.55)+0.2; tvz = -(40*exp(19/5 - (20*t)/11))/11;%tvz = -4*exp((107/25)-2*t); % zeta=0.5, offset=0.1
             end
 
             if t<=phasex
                 tx = -1;
                 tvx = 0;
             elseif phasex<t && t<phasex+0.3
-                tx = 5 * (t-phasex).^2 - 1;  tvx = 10*t-20;
+                tx = 5 * (t-phasex).^2 - 1;  tvx = 10*t-25;
             elseif phasex+0.3 <= t
-                tx = -exp(-(t-phasex)/0.28); tvx = 2*exp(4-2*t);  % 0.2 : good
+                tx = -exp(-(t-phasex)/0.5); tvx = 2*exp(5 - 2*t); %tvx = 2*exp(4-2*t);  % 0.2 : good
             end
             xr(1:3, h+1) = [tx;  0; tz];
             xr(7:9, h+1) = [tvx; 0; tvz];

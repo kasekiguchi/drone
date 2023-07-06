@@ -15,7 +15,7 @@ fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 0; % 1: active : for debug function
-fRef = 0;
+fRef = 10;
 run("main1_setting.m");
 
 % set logger
@@ -37,6 +37,18 @@ run("main2_agent_setup_sqp.m");
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
+data.param = agent.controller.hlmpc;
+Params.H = data.param.param.H;   %Params.H
+Params.dt = data.param.param.dt;  %Params.dt
+Params.dT = dt;
+%-- 配列サイズの定義
+Params.state_size = 12;
+Params.input_size = 4;
+Params.total_size = 16;
+Params.ur = zeros(4,1);
+
+gradient = 1/10;
+
 idx = 0;
 %% Fmincon
 %-- fmincon 設定
@@ -124,6 +136,14 @@ try
       agent(i).do_reference(param(i).reference.list);
       if (fOffline); logger.overwrite("reference", time.t, agent, i); end
 
+      %
+      Time.t = time.t;
+      Gq = [0; atan(gradient); 0];
+      Gp = initial.p;
+      phase = 2;
+      
+      % [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef);
+      xr = 0;
       
       % controller
       phase = 2;
@@ -132,7 +152,8 @@ try
       param(i).controller.pid = {};
       param(i).controller.tscf = {dt, time.t};
       param(i).controller.mpc = {};
-      param(i).controller.hlmpc = {idx, time.t, phase, problem};
+      param(i).controller.hlmpc = {idx, time.t, phase, problem, xr};
+      % param(i).controller.mcmpc = {idx, time.t, phase, problem, xr};
 
       for j = 1:length(agent(i).controller.name)
         param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -141,6 +162,7 @@ try
       agent(i).do_controller(param(i).controller.list);
       if (fOffline); logger.overwrite("input", time.t, agent, i); end
     end
+
 
     if fDebug
       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
@@ -187,9 +209,12 @@ try
 
     %% information
     fprintf("t:%f \t dt:%f\n", time.t, CALT);
-    fprintf("%f \t %f \t ", agent.estimator.result.state.p', agent.reference.result.state.p');
+    fprintf("%f\t ref:%f\t ", agent.estimator.result.state.p', agent.reference.result.state.p');
     fprintf("\n");
 
+    % get data
+    data.inputv{:,idx} = agent.controller.result.inputv;
+    % data.xr{:, idx} = xr(:, 1);
   end
 
 catch ME % for error
@@ -218,13 +243,19 @@ set(0,'defaultLineMarkerSize',15);
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
-% logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_num", 5, "row_col", [2, 2]);
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
 % 仮想入力
-% figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
+inputvcell = cell2mat(data.inputv)';
+figure(10); plot(logt, inputvcell(1:end-1, :)); legend("input1", "input2", "input3", "input4");
 % xlabel("Time [s]"); ylabel("input.V");
 % grid on; xlim([0 te]); ylim([-inf inf]);
 % saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
+
+% xr
+% Rdata = cell2mat(data.xr);
+% Edata = logger.data(1, "p", "e")';
+% logt = logger.data('t',[],[]);
+% figure(2); plot(logt, Rdata(1:3, 1:end-1)); hold on; plot(logt, Edata); hold off;
 %% Ubuntu
 data_now = datestr(datetime('now'), 'yyyymmdd');
 Title = strcat('Circle_good','-','HLMPC', '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));

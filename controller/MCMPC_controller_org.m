@@ -56,6 +56,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
+            obj.reference.grad = param{6};
 
             if obj.param.t > 2.6
                 obj.param.QW(1,1) = 10000;
@@ -227,7 +228,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             if obj.self.estimator.result.state.p(3) < 0.3 
 %                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
 %                 A = 100;
-                Zdis = (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))) * cos(0.2975);
+                Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2975);
 %                 gradZ = -obj.param.CA * (Zdis .^ (2)) + obj.param.CA;
                 Zlim = 2;
                 gradZ = -obj.param.CA * (1-cos((Zdis/Zlim).*pi))/Zlim + obj.param.CA;
@@ -240,7 +241,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             end
 
             %% 斜面
-            if (obj.self.estimator.result.state.p(3) - (3/10*obj.self.estimator.result.state.p(1))+0.1) * cos(0.2975) < 0.12
+            if (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))+0.1) * cos(0.2975) < 0.12
                 %% 速度制約
                 % z-direction velocity
                 constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
@@ -253,7 +254,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             end
 
             %% 斜面に墜落したかどうか　実質棄却
-            constISlope = find(3/10 * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
+            constISlope = find(obj.reference.grad * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
             obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
 %             if length(constISlope) == obj.N % 全墜落なら終了
 %                 obj.param.fRemove = 1;
