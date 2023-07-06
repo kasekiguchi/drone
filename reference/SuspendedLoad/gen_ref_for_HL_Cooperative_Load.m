@@ -15,7 +15,7 @@ dddxd =diff(ddxd,t);
 
 o0d = [0;0;0];
 do0d = [0;0;0];
-r0d = [0;0;0;0];
+r0d = [1;0;0;0];
 
 
 %Xd.state=double(subs([xd,dxd,ddxd,dddxd,ddddxd],t,tt));
