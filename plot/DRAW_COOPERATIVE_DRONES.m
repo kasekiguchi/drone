@@ -21,6 +21,7 @@ classdef DRAW_COOPERATIVE_DRONES
     rho
     li
     N
+    line
   end
 
   methods
@@ -54,27 +55,21 @@ classdef DRAW_COOPERATIVE_DRONES
       end
       obj=obj.gen_frame(varargin{:});
       obj=obj.gen_load(varargin{:},'cube',[sum(abs(obj.rho(1:3:end)))/2,sum(abs(obj.rho(2:3:end)))/2,sum(abs(obj.rho(3:3:end)))/2]);
-
+      
+       p0 = data(1,:);
+      q = obj.data_format(logger,1,"plant.result.state.Q","p");
+      [~,Q0] = obj.gen_Q(1,q(1,:));
+      qi = obj.data_format(logger,obj.target,"plant.result.state.qi","p");
+      [p,rho] = obj.gen_pi(p0,Q0,qi(1,:,:));
+      rp=[rho;p];
+      tt=vertcat(rp(:,:));
+      obj.line=plot3(tt(:,1:3:end),tt(:,2:3:end),tt(:,3:3:end));
       view(ax,3)
       grid(ax,'on')
       daspect(ax,[1 1 1]);
     end
-    function obj=gen_frame(obj,varargin)%param)
-      % arguments
-      %     obj
-      %     param.frame_size
-      %     param.rotor_r
-      %     param.target = 1;
-      %     param.fig_num = 1;
-      % end
+    function obj=gen_frame(obj,varargin)
       param = struct(varargin{:});
-      % if class(param.fig_num)=="matlab.ui.Figure"
-      %     obj.fig = param.fig_num;
-      %     ax = obj.fig.CurrentAxes;
-      % else
-      %     obj.fig = figure(param.fig_num);
-      %     ax = axes('XLim',obj.xlim,'YLim',obj.ylim,'ZLim',obj.zlim);
-      % end
       obj.ax = param.ax;
       ax = obj.ax;
       xlabel(obj.ax,"x [m]");
@@ -116,18 +111,11 @@ classdef DRAW_COOPERATIVE_DRONES
           [F1(2,:);F1(5,:);NaN(1,size(F1,2));F2(2,:);F2(5,:)], ...
           [F1(3,:);F1(6,:);NaN(1,size(F1,2));F2(3,:);F2(6,:)],'FaceColor',c(5)); % アーム部
         h(n,6) = surface(ax,xb,yb,zb,'FaceColor',c(5)); % ボディ楕円体
-        % h(n,7) = trisurf([5 1 2;5 2 3; 5 3 4; 5 4 1], ...
-        %   [0.02;0.02;0.02;0.02;4*1.2*L(1)/8], ...
-        %   0.8*L(2)*[1;-1;-1;1;0]/6, ...
-        %   0.01*[1;1;-1;-1;0],'FaceColor',c(5)); % 前を表す四角錐
 
         t(n) = hgtransform('Parent',ax); set(h(n,:),'Parent',t(n)); % ドローンを慣性座標と紐づけ
       end
       obj.frame = t;
       obj.thrust = tt;
-      %            if param.animation
-      %                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
-      %            end
     end
     function obj=gen_load(obj,varargin)
       param = struct(varargin{:});
@@ -136,20 +124,13 @@ classdef DRAW_COOPERATIVE_DRONES
       z = z*param.cube(3)-param.cube(3)/2;
       h(1) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,:),x(2,:)],[y(1,:),y(2,:)],[z(1,:),z(2,:)],'FaceColor',"cyan");
       h(2) = surf(x,y,z);
-      % a = param.cube(1)/2;
-      % b = param.cube(2)/2;
-      % c = param.cube(3)/2;
-      % Points = [-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c];
-      % Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
-      % h = trisurf(triangulation(Tri,Points));
       ttt = hgtransform('Parent',ax); set(h,'Parent',ttt); % 推力を慣性座標と紐づけ
       obj.load = ttt;
     end
-    function draw(obj,target,p0,q0,p,q,u,rho)
+    function draw(obj,target,p0,q0,p,q,rho)
       % obj.draw(p,q,u)
       % p : 一ベクトル
       % q = [x,y,z,th] : 回転軸[x,y,z]にth回転
-      % u (optional): 入力
       arguments
         obj
         target
@@ -157,8 +138,7 @@ classdef DRAW_COOPERATIVE_DRONES
         q0
         p
         q       
-        u
-        rho
+        rho        
       end
 
       for n = target
@@ -170,26 +150,17 @@ classdef DRAW_COOPERATIVE_DRONES
         Txyz = makehgtform('translate',p(1,:,n));
         % Scaling matrix
          for i = 1:4
-        %   if u(1,i,n) > 0
-        %     S = makehgtform('scale',[1,1,u(1,i,n)]);
-        %   elseif u(i) < 0
-        %     S1 = makehgtform('xrotate',pi);
-        %     S = makehgtform('scale',[1,1,-u(1,i,n)])*S1;
-        %   else
-        %     S = eye(4);
-        %     S(3,3) = 1e-5;
-        %   end
            set(thrust(i),'Matrix',Txyz*R);
          end
-        % Concatenate the transforms and
-        % set the transform Matrix property
         set(frame,'Matrix',Txyz*R);
         
         R0 = makehgtform('axisrotate',q0(1,1:3),q0(1,4));
         % Translational matrix
         Txyz0 = makehgtform('translate',p0);
         set(obj.load,'Matrix',Txyz0*R0);
-      plot3([rho(1,1,n);p(1,1,n)],[rho(1,2,n);p(1,2,n)],[rho(1,3,n);p(1,3,n)]);
+        obj.line(n).XData = [p(1,1,n) rho(1,1,n)];
+        obj.line(n).YData = [p(1,2,n) rho(1,2,n)];
+        obj.line(n).ZData = [p(1,3,n) rho(1,3,n)];
       end
       drawnow
     end
@@ -261,7 +232,7 @@ classdef DRAW_COOPERATIVE_DRONES
         if ~isvalid(obj.frame)
           obj=obj.gen_frame("target",param.target,"ax" ,ax);
         end
-        obj.draw(param.target,p(i,:),Q(i,:),pi(i,:,param.target),Qi(i,:,param.target),u(i,:,param.target),rho(i,:,param.target));
+        obj.draw(param.target,p(i,:),Q(i,:),pi(i,:,param.target),Qi(i,:,param.target),rho(i,:,param.target));
 
         pause(0.01);
         if isfield(param,'gif')
