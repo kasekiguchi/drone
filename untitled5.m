@@ -8,7 +8,7 @@
     syms a b c d real
     syms R_num [3 3] real
     A = [a b c];
-    X = p +quat_times_vec(qb,psb) + y*quat_times_vec(qb,Rs*eye(3)*[1;0;0]);
+    X = p +quat_times_vec(qb,psb) + y*quat_times_vec(qb,Rs*R_num*[1;0;0]);
     %%
     eq = [A d]*[X;1];
     var=[a.*psb',b.*psb',c.*psb',reshape(a*Rs,1,numel(Rs)),reshape(b*Rs,1,numel(Rs)),reshape(c*Rs,1,numel(Rs))];
