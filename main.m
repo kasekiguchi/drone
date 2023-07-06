@@ -187,7 +187,7 @@ clc
 % logger.plot({1, "inner_input", ""});
 % logger.plot({1, "p", "pr"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, "fig_num", 5, "row_col", [2, 2]);
 % logger.plot({1,"sensor.result.posion",""},{1,"p","sr"});
-% logger.plot({1,"p","sr"});
+logger.plot({1,"p","sr"});
 % logger.plot({1,"sensor.result.rostwo.voltage"});
 % agent(1).reference.timeVarying.show(logger)
 

@@ -9,11 +9,11 @@ figure(6)
 hold on
 
 for plot_i = 1:logger.k%変数を格納
-    distance_sensor = logger.Data.agent.sensor.result{1,plot_i}.state.p(3) - logger.Data.agent.sensor.result{1,plot_i}.posion(3);
-    sensor_T265(plot_i,1) = logger.Data.agent.sensor.result{1,plot_i}.posion(1);
-    sensor_T265(plot_i,2) = logger.Data.agent.sensor.result{1,plot_i}.posion(2);
-%     sensor_T265(plot_i,3) = logger.Data.agent.sensor.result{1,plot_i}.posion(3) + distance_sensor; %T265とprimeの差を印加
-    sensor_T265(plot_i,3) = logger.Data.agent.sensor.result{1,plot_i}.posion(3) + 0.2; %T265とマーカーの位置ずれ13cm
+%     distance_sensor = logger.Data.agent.sensor.result{1,plot_i}.state.p(3) - logger.Data.agent.sensor.result{1,plot_i}.posion(3);
+%     sensor_T265(plot_i,1) = logger.Data.agent.sensor.result{1,plot_i}.posion(1);
+%     sensor_T265(plot_i,2) = logger.Data.agent.sensor.result{1,plot_i}.posion(2);
+% %     sensor_T265(plot_i,3) = logger.Data.agent.sensor.result{1,plot_i}.posion(3) + distance_sensor; %T265とprimeの差を印加
+%     sensor_T265(plot_i,3) = logger.Data.agent.sensor.result{1,plot_i}.posion(3) + 0.2; %T265とマーカーの位置ずれ13cm
     prime_sensor(plot_i,1:3) = logger.Data.agent.sensor.result{1,plot_i}.state.p;
 %     if obs_pos(2).p(2)>logger.Data.agent.estimator.result{1, plot_i}.state.p(2)&&logger.Data.agent.estimator.result{1, plot_i}.state.p(2)<obs_pos(3).p(2)
 %         distance_wall(plot_i,1) = norm(obs_x-logger.Data.agent.estimator.result{1, plot_i}.state.p(1));%壁との垂直の距離
@@ -25,30 +25,31 @@ for plot_i = 1:logger.k%変数を格納
 %     distance_sensor(plot_i,1) = logger.Data.agent.sensor.result{1, plot_i}.distance.teraranger;%テラレンジャーの距離
 end
 
-plot(T,sensor_T265,'LineWidth',1)
+% plot(T,sensor_T265,'LineWidth',1)
 plot(T,prime_sensor,'LineWidth',1)
 
-txt = {''};
-
-if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2
-    Square_coloring(logger.Data.t([find(logger.Data.phase == 97, 1), find(logger.Data.phase == 116, 1, 'last')])); % take off phase
-    %                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
-    txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
-end
-
-if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
-    Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
-    txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
-end
-
-if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
-    Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
-    txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
-end
+% txt = {''};
+% 
+% if length([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 116, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 97, 1), find(logger.Data.phase == 116, 1, 'last')])); % take off phase
+%     %                        txt = {txt{:},'{\color{yellow}■} :Take off phase'};
+%     txt = {txt{:}, '{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'};
+% end
+% 
+% if length([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 102, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 116, 1), find(logger.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0]); % flight phase
+%     txt = {txt{:}, '{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'};
+% end
+% 
+% if length([find(logger.Data.phase == 108, 1), find(logger.Data.phase == 108, 1, 'last')]) == 2
+%     Square_coloring(logger.Data.t([find(logger.Data.phase == 102, 1), find(logger.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0]); % landing phase
+%     txt = {txt{:}, '{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'};
+% end
 
 xlabel('Time [s]','FontSize',16);
 ylabel('Position [m]','FontSize',16);
-name_class = ["t265.x";"t265.y";"t265.z";"prime.x";"prime.y";"prime.z"];%名前
+% name_class = ["t265.x";"t265.y";"t265.z";"prime.x";"prime.y";"prime.z"];%名前
+name_class = ["prime.x";"prime.y";"prime.z"];%名前
 legend(name_class)
 legend('Location','best')
 ax = gca;
@@ -85,7 +86,7 @@ end
 plot(t,double(battery)/100,'LineWidth',1)
 
 xlabel('Time [s]','FontSize',16);
-ylabel('Voltage [cV]','FontSize',16);
+ylabel('Voltage [V]','FontSize',16);
 name_class = ["moter1","moter2","moter3","moter4"];%名前
 legend(name_class)
 legend('Location','best')
@@ -96,16 +97,19 @@ hold off
 %% 温度
 figure(9)
 hold on
-
-for plot_i = 1:double(battery)
-    z = battery(4);
+T = logger.Data.t(1:logger.k);
+for plot_i = 1:logger.k%変数を格納
+    templeture(plot_i,1) = logger.Data.agent.sensor.result{1,plot_i}.rostwo.tem(1) ;
+    templeture(plot_i,2) = logger.Data.agent.sensor.result{1,plot_i}.rostwo.tem(2) ;
+    templeture(plot_i,3) = logger.Data.agent.sensor.result{1,plot_i}.rostwo.tem(3) ;
+    templeture(plot_i,4) = logger.Data.agent.sensor.result{1,plot_i}.rostwo.tem(4) ;
 end
 
-plot(t,battery,'LineWidth',1)
+plot(T,templeture,'LineWidth',1)
 
 xlabel('Time [s]','FontSize',16);
-ylabel('Battery [V]','FontSize',16);
-name_class = ["moter1","moter2","moter3","moter4"];%名前
+ylabel('Tmpleture [℃]','FontSize',16);
+name_class = ["moter1","moter2","moter3","morter4"];%名前
 legend(name_class)
 legend('Location','best')
 ax = gca;
