@@ -1,4 +1,4 @@
-classdef TIME_VARYING_REFERENCE_Cooporative < handle
+classdef TIME_VARYING_REFERENCE_COOPERATIVE < handle
     % 時間関数としてのリファレンスを生成するクラス
     % obj = TIME_VARYING_REFERENCE()
     properties
@@ -12,7 +12,7 @@ classdef TIME_VARYING_REFERENCE_Cooporative < handle
     end
 
     methods
-        function obj = TIME_VARYING_REFERENCE_Cooporative(self, args)
+        function obj = TIME_VARYING_REFERENCE_COOPERATIVE(self, args)
             % 【Input】ref_gen, param, "HL"
             % ref_gen : reference function generator
             % param : parameter to generate the reference function
@@ -22,21 +22,34 @@ classdef TIME_VARYING_REFERENCE_Cooporative < handle
                 args
             end
             obj.self = self;
-            gen_func_name = str2func(args.name);
-            param_for_gen_func = args.param;
+            gen_func_name = str2func(args{1});
+            param_for_gen_func = args{2};
             obj.func = gen_func_name(param_for_gen_func{:});
             if length(args) > 2
                 if strcmp(args{3}, "HL")
                     obj.func = gen_ref_for_HL(obj.func);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));                    
                 end
+                if strcmp(args{3}, "Cooperative")
+                    obj.func = gen_ref_for_HL_Cooperative_Load(obj.func);
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [22, 3, 3, 3,3]));                    
+                end
             else
                 obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
             end
-            obj.result.state.set_state("xd",obj.func(0));
-            obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-            obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-            obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+            
+            if strcmp(args{3}, "Cooperative")
+                obj.result.state.set_state("xd",obj.func(0));
+                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
+                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
+            else
+                obj.result.state.set_state("xd",obj.func(0));
+                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+            end
             %syms t real
             %obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
