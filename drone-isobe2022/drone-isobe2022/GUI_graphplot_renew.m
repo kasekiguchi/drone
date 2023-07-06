@@ -10,8 +10,8 @@ clear all;
 clc;
 
 %% データのインポート
-% load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("simulation_7_5_saddle.mat")
+load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
+% load("simulation_7_5_saddle.mat")
 disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
@@ -58,6 +58,8 @@ colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('p');
+% xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
+% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','red','LineWidth',2)
 hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
@@ -146,7 +148,8 @@ newcolors = [0 0.4470 0.7410
 colororder(newcolors)
 columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 12; %凡例の大きさ調整
-
+size = figure;
+size.WindowState = 'maximized'; %表示するグラフを最大化
 num = 3;
 
 subplot(2, num, 1);
@@ -230,6 +233,7 @@ else
 end
 
 fontSize = 16; %軸の文字の大きさの設定
-set(ax,'FontSize',fontSize); 
-set(gcf,"Position",get(0,'Screensize'))
+set(ax,'FontSize',fontSize);
+% size = 'maximized';
+% set(gcf,"Position",get(0,'Screensize')
 end
