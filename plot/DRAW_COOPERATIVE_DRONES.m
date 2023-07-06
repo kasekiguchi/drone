@@ -217,13 +217,13 @@ classdef DRAW_COOPERATIVE_DRONES
       ax = obj.ax;
       p = obj.data_format(logger,1,"p","p");
       q = obj.data_format(logger,1,"plant.result.state.Q","p");
-      [~,Q] = obj.gen_Q(1,q);
+      [Q,Q0] = obj.gen_Q(1,q);
       u = obj.data_format(logger,obj.target,"input","");% N x 4m
       r = obj.data_format(logger,1,"p","r");
       qi = obj.data_format(logger,obj.target,"plant.result.state.qi","p");
       Qit = obj.data_format(logger,obj.target,"plant.result.state.Qi","p");
       Qi = obj.gen_Q(obj.target,Qit);
-      [pi,rho] = obj.gen_pi(p,Q,qi);
+      [pi,rho] = obj.gen_pi(p,Q0,qi);
 
       if isfield(param, "gif")
         sizen = 256;
@@ -295,6 +295,8 @@ classdef DRAW_COOPERATIVE_DRONES
       D = reshape(q,size(q,1),size(q,2)/length(target),length(target));      
     end
     function [Q,Q1] = gen_Q(obj,target,q)
+      % Q : for hgtransform : unit euler angle + its norm
+      % Qi : quaternion form
         Q = zeros(size(q,1),4,length(target));
        for n = 1:length(target)
         switch size(q(:,:,n),2)
