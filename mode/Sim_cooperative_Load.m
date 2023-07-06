@@ -12,7 +12,7 @@ N = 3;
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
 qtype = "zup"; % "eul" : euler angle, "" : euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
-initial_state.p = [-2;-2;1];
+initial_state.p = [0;0;1];
 initial_state.v = [0;0;0];
 initial_state.O = [0;0;0];
 initial_state.wi = repmat([0;0;0],N,1);
@@ -43,7 +43,7 @@ agent.sensor = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : se
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
 % agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
 % agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,Reference_Time_Varying_Cooperative_Load("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",3,"orig",[0;0;1],"size",[1,1,1]},"Cooperative"});
+agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",3,"orig",[0;0;2],"size",[1,1,1]},"Cooperative"});
 %agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 agent.controller = CSLC(agent,Controller_Cooperative_Load(dt,N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
@@ -71,7 +71,7 @@ close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self",agent,"target", 1:N);
 mov.animation(logger,'target',1:N)
 %%
-logger.plot({1,"plant.result.state.qi","p"},{1,"p","e"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
+logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.t]);
