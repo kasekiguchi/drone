@@ -9,7 +9,7 @@ clc
 %%
 dir = "controller/CooperativeSuspendedLoadController/";
 %% symbol定義
-N = 3; % エージェント数
+N = 4; % エージェント数
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
 syms x0 [3 1] real % 位置
 syms dx0 [3 1] real
@@ -85,6 +85,14 @@ Md0 = -kr0*eR0 - ko0*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
 matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{x,Xd,R0,R0d,physicalParam,gains},...
   "Comments","[R0'*Fd;Md] for (26)")
 %%
+% -qid = R0d*e  ... (1)
+% e : constant unit vector that points the drone's position
+% time derivative of (1) 
+% -dqid = R0d*Skew(o0d)*e, 
+% where de/dt = 0 since e is constant vector.
+% dqid = R0d*Skew(o0d)*R0d'*qid
+% Similarly 
+% -ddqid = R0d*Skew(o0d)^2*e + R0d*Skew(do0d)*e
 dqid = R0d*Skew(o0d)*(R0d'*qid); % 3xN
 wid = cross(qid,dqid); % 3xN
 ddqid = R0d*(Skew(do0d) + Skew(o0d)^2)*R0d'*qid;

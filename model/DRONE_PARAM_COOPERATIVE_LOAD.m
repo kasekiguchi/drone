@@ -30,7 +30,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % parameters : 5 + 8*N
                 param.g = 9.81;
                 param.m0 = 1.5;
-                param.J0 = 100*[0.005;0.005;0.005];
+                param.J0 = [0.15;0.15;0.25];
                 param.rho = [];
                 param.li = 1*ones(N,1);
                 param.mi = 0.755*ones(N,1)';
@@ -44,7 +44,6 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             end
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);
-              %param.rho = rho0+[[1;0;0],cell2mat(cellmatfun(@(A,B) A*B, FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),[1;0;0]))];
               param.rho = rho0+[[1;0;0],double(cellmatfun(@(A,~) A*[1;0;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
