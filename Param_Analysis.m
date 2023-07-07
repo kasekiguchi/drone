@@ -9,8 +9,8 @@ else
   tmp = matlab.desktop.editor.getActive; 
   cd(fileparts(tmp.Filename));
 end
-% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 % cd(cf); close all hidden; clear all; userpath('clear');
 
 %% フラグ設定
@@ -18,7 +18,7 @@ illustration= 1; %1で図示，0で非表示
 
 %% Log Dataの読み取りと格納
 log = LOGGER('./Data/2wall100data_Log(05-Jul-2023_16_25_28).mat');
-% log = LOGGER('./Data/nomove_Log(06-Jul-2023_17_13_34).mat');
+% log = LOGGER('./Data/onlyxyz_Log.mat');
 %% ログ
 tspan = [0 ,100];
 % tspan = [0 99];
@@ -54,10 +54,10 @@ A(:,ds) = [];
 % A3(:,ds) = [];
 % A4(:,ds) = [];
 % A5(:,ds) = [];
-% At(:,ds) = [];
-% A2t(:,ds) = [];
-% Xt(:,ds) = [];
-% X2t(:,ds) = [];
+At(:,ds) = [];
+A2t(:,ds) = [];
+Xt(:,ds) = [];
+X2t(:,ds) = [];
 X12 = pinv([A;A2])*(-1*ones(size([A;A2],1),1));
 % XM = pinv([A;A2;A3;A4;A5])*(-1*ones(size([A;A2;A3;A4;A5],1),1));
 % X0 = pinv([A;A0])*(-1*ones(size([A;A0],1),1));
@@ -65,25 +65,41 @@ X12 = pinv([A;A2])*(-1*ones(size([A;A2],1),1));
 S = svd(A)';% 特異値の計算
 %% 逐次最小
 P_stack = zeros(size(A,2),size(A,2),size(A,1));
+P_stack2 = zeros(size(A,2),size(A,2),size(A,1));
 Ps=eye(size(A,2));
 Xs = zeros(size(A,2),1);
 for j=1:1:length(A)
-
     if j ==1
         [Xn,Pn] = param_analysis_eq(A(j,:)',Xs,Ps);
+        [Xn2,Pn2] = param_analysis_eq(A2(j,:)',Xs,Ps);
+        % [Xn,Pn12] = param_analysis_eq(A(j,:)'+A2(j,:)',Xs,Ps);
         P_stack(:,:,j) = Pn;
+        P_stack2(:,:,j) = Pn2;
     else
         [Xn,Pn] = param_analysis_eq(A(j,:)',Xn,Pn );
+        [Xn2,Pn2] = param_analysis_eq(A2(j,:)',Xn2,Pn2);
+        % [Xn,Pn12] = param_analysis_eq(A(j,:)'+A2(j,:)',Xn,Pn12);
         P_stack(:,:,j) = Pn;
+        P_stack2(:,:,j) = Pn2;
     end
 end
 
+%% 分散の保存
+variance = zeros(size(P_stack,2),size(P_stack,3));
+for j=1:size(P_stack,3)
+    variance(:,j) = diag(P_stack(:,:,j));
+end
 %% パラメータの計算
 offset_est = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(4:12)];
 Rsx = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(13:15);X12(19:21);X12(25:27)];
 Rsy = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(16:18);X12(22:24);X12(28:30)];
 Rsz = cross(Rsx/vecnorm(Rsx),Rsy/vecnorm(Rsy));
 Rs = [Rsx,Rsy,Rsz];
+offset_est_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
+Rsx_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
+Rsy_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(16:18);Xn(22:24);Xn(28:30)];
+Rsz_eq = cross(Rsx/vecnorm(Rsx_eq),Rsy/vecnorm(Rsy_eq));
+Rs_eq = [Rsx_eq,Rsy_eq,Rsz_eq];
 % R1y = R1x + [0;1;0];
 % R1y = R1y/vecnorm(R1y);
 % R1z = cross(R1x,R1y);
@@ -101,14 +117,14 @@ pb = robot_pt;
 qt = Eul2Quat(robot_qt);
 y = sensor_data;
 %% 交点比較
-sp = pb + quat_times_vec(qt,ps) + y.*quat_times_vec(qt,R1x);
-figure(8);
-plot(sp')
-hold on
-ss=log.data(1,"sensor.result.sensor_points","s");
-ss = reshape(ss,3,[]);
-%tt=log.data(1,"t",[]);
-plot(ss');
+% sp = pb + quat_times_vec(qt,ps) + y.*quat_times_vec(qt,R1x);
+% figure(8);
+% plot(sp')
+% hold on
+% ss=log.data(1,"sensor.result.sensor_points","s");
+% ss = reshape(ss,3,[]);
+% %tt=log.data(1,"t",[]);
+% plot(ss');
 %% 図示
 if illustration == 1
     fig1=figure(1);
@@ -145,8 +161,8 @@ if illustration == 1
     plot(sensor_data(1,:));
     hold on;
     plot(sensor_data(2,:));
-    plot(sensor_data(8,:));
-    plot(sensor_data(9,:));
+    % plot(sensor_data(8,:));
+    % plot(sensor_data(9,:));
     xlabel('step','FontSize', 14);
     ylabel('Distance of the lidar [m]','FontSize', 14);
     grid on;
@@ -171,6 +187,50 @@ if illustration == 1
     hold off;
     xlabel('step');
     ylabel('ref q');
+    grid on;
+    fig7=figure(7);
+    fig7.Color = 'white';
+    for i=1:3
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    hold off;
+    xlabel('step');
+    ylabel('variance of wall param');
+    legend('a/d','b/d','c/d');
+    grid on;
+    fig8=figure(8);
+    fig8.Color = 'white';
+    for i=4:6
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    hold off;
+    xlabel('step');
+    ylabel('variance of offset*wallparam');
+    legend('P1*a/d','P2*a/d','P3*a/d');
+    grid on;
+    fig9=figure(9);
+    fig9.Color = 'white';
+    for i=13:15
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    hold off;
+    xlabel('step');
+    ylabel('variance of offset*wallparam');
+    legend('R11*a/d','R21*a/d','R31*a/d');
+    grid on;
+    fig10=figure(10);
+    fig10.Color = 'white';
+    for i=16:18
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    hold off;
+    xlabel('step');
+    ylabel('variance of offset*wallparam');
+    legend('R12*a/d','R22*a/d','R32*a/d');
     grid on;
 end
 
