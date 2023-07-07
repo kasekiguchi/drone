@@ -2,7 +2,7 @@ close all hidden;
 clear all;
 clc;
 
-load("experiment_6_20_circle_estimaterdata.mat")
+load("experiment_6_20_circle_7.mat")
 disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
@@ -20,7 +20,7 @@ newcolors = [0 0.4470 0.7410
              0.4660 0.6740 0.1880];
 
 columnomber = 3; %凡例の並べ方調整
-Fsize.lgd = 16; %凡例の大きさ調整
+Fsize.lgd = 14; %凡例の大きさ調整
 
 %位置p
 box on %グラフの枠線が出ないときに使用
@@ -29,12 +29,12 @@ hold on
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); %グラフの背面を塗る
-% Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]));
+Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
 xlabel('Time [s]');
 ylabel('p');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
 % hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
@@ -52,12 +52,13 @@ title('Position p of agent1','FontSize',12);
 figure(2)
 colororder(newcolors)
 plot(data.t,data.q(:,:),'LineWidth',1);
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); %グラフの背面を塗る
+Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]);
+Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
 xlabel('Time [s]');
 ylabel('q');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
 grid on
 lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
@@ -69,12 +70,13 @@ title('Attitude q of agent1','FontSize',12);
 figure(3)
 colororder(newcolors)
 plot(data.t,data.v(:,:),'LineWidth',1);
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); %グラフの背面を塗る
+Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); 
+Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
 xlabel('Time [s]');
 ylabel('v');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
 grid on
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
@@ -86,12 +88,13 @@ title('Velocity v of agent1','FontSize',12);
 figure(4)
 colororder(newcolors)
 plot(data.t,data.w(:,:),'LineWidth',1);
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); %グラフの背面を塗る
+Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); 
+Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
 xlabel('Time [s]');
 ylabel('w');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
 grid on
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
@@ -112,12 +115,13 @@ ax(6) = gca;
 %入力
 figure(7)
 plot(data.t,data.u(:,:),'LineWidth',1);
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); %グラフの背面を塗る
+Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); 
+Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
 xlabel('Time [s]');
 ylabel('u');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
 grid on
 lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');

@@ -2,7 +2,7 @@ close all hidden;
 clear all;
 clc;
 
-load("experiment_6_20_circle_estimaterdata.mat")
+load("experiment_6_20_circle_1.mat")
 
 for i = find(log.Data.phase==102,1,'first'):find(log.Data.t,1,'last')
     data.t(1,i-find(log.Data.phase==102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
