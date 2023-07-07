@@ -10,7 +10,7 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-% FileName = 'EstimationResult_12state_7_5_circle=flight_estimation=circle_T=7.mat';  %plotResultの方も変更するように
+% FileName = 'EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat';  %plotResultの方も変更するように
 FileName = 'test2.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
@@ -23,18 +23,6 @@ nowFolder = fileparts(activeFile.Filename);
 targetpath=append(nowFolder,'\',FileName);
 
 %% Defining Koopman Operator
-% クープマン作用素を定義
-% F@(X) Xを与える関数ハンドルとして定義
-% DroneSimulation
-% F = @(x) [x;1]; % 状態そのまま
-% F = @quaternionParameter; % クォータニオンを含む13状態の観測量
-% F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
-% F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
-% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量
-% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み) <こちらが最新の観測量>
-% F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
-% F = @eulerAngleParameter_withoutP;
-
 
 %<使用している観測量>
 % F = @(x) [x;1]; % 状態そのまま
@@ -93,8 +81,8 @@ disp('Estimated')
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
 %中間発表の推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
-% simResult.reference = ImportFromExpData2('experiment_6_20_circle_estimaterdata');
-simResult.reference = ImportFromExpData2('simulation_7_5_saddle.mat');
+simResult.reference = ImportFromExpData2('experiment_6_20_circle_estimaterdata');
+% simResult.reference = ImportFromExpData2('simulation_7_5_saddle.mat');
 
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
@@ -143,3 +131,13 @@ disp(targetpath)
 %% プロット
 
 % plotResult
+%% 
+% F = @(x) [x;1]; % 状態そのまま
+% F = @quaternionParameter; % クォータニオンを含む13状態の観測量
+% F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量
+% F = @eulerAngleParameter_withinConst; % eulerAngleParameter+慣性行列を含む部分(dvdt)を含む観測量
+% F = @eulerAngleParameter_InputAndConst; % eulerAngleParameter_withinConst+入力にかかる係数行列の項を含む観測量
+% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み) <こちらが最新の観測量>
+% F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
+% F = @eulerAngleParameter_withoutP;
+

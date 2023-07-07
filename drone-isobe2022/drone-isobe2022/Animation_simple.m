@@ -2,11 +2,12 @@ close all hidden;
 clear all;
 clc;
 
-load("experiment_6_20_circle_1.mat")
+load("experiment_6_20_circle_estimaterdata.mat")
+disp('load finished')
 
-for i = find(log.Data.phase==102,1,'first'):find(log.Data.t,1,'last')
-    data.t(1,i-find(log.Data.phase==102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i-find(log.Data.phase==102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+for i = find(log.Data.phase == 116,1,'first')+20:find(log.Data.phase == 108,1,'first')
+    data.t1(1,i-(find(log.Data.phase == 116,1,'first')+20)+1) = log.Data.t(i,1);         
+    data.p(:,i-(find(log.Data.phase == 116,1,'first')+20)+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
 end
 
 a1 = animatedline('Color',[0 .7 .7]);
@@ -26,6 +27,7 @@ for k = 1:size(data.p,2)
 
     % update screen
     drawnow limitrate
-    view(40,10)
+    view(40,30)
     pause(T);
 end
+

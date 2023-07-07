@@ -3,12 +3,12 @@ close all hidden;
 clear all;
 clc;
 %% 読み込み
-% loadfilename{1} = 'test1.mat';
-loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{2} = 'EstimationResult_12state_7_5_circle=flight_estimation=circle_T=7.mat';
-
-% loadfilename{2} = 'tst5.mat';
 % loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat';
+% loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{3} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=circle.mat';
+
+loadfilename{1} = 'test1.mat';
+loadfilename{2} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat';
 % loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
