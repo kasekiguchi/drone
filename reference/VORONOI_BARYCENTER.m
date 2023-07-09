@@ -45,6 +45,9 @@ classdef VORONOI_BARYCENTER < handle
       dens_c = sensor.density_camera;
       camera_V = poly_volonoi(state, sensor.neighbor, dens_c.region,void,R);
       [camera_cent, camera_mass] = map_centre_of_gravity(dens_c.xq, dens_c.yq , dens_c.grid_density, camera_V);
+      if sum(isnan(camera_cent))>0
+        camera_cent = state.p;
+      end
       camera_mass = 1;
       %% front 部分のボロノイ領域算出
       dens_f = sensor.density_front;

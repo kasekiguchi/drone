@@ -7,6 +7,8 @@ classdef RANGE_DENSITY_CAMERA < handle
         result
         target % 観測対象の環境
         self % センサーを積んでいる機体のhandle object
+
+        angle_range
     end
     properties (SetAccess = private) % construct したら変えない値．
         r = 10;
@@ -18,7 +20,7 @@ classdef RANGE_DENSITY_CAMERA < handle
             obj.self=self;
             if isfield(Env,'r'); obj.r= Env.r;end
             % Env.env.grid_density= ones(size(Env.env.grid_density))*100;
-            
+            obj.angle_range = -pi:0.01:pi;
         end
 
         function result = do(obj,varargin)
@@ -34,21 +36,52 @@ classdef RANGE_DENSITY_CAMERA < handle
             else
                 e2r_vector = [1;0;0];
             end
-            field_of_view = pi*0.25; % 画角
+            field_of_view = pi*0.3; % 画角
+            % field_of_view = pi*0.5; % 画角
+            % field_of_view = pi; % 画角
             radius_of_view = obj.r ;
-
+    
             e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
-            tmp = e2r_ang-field_of_view:0.1:e2r_ang+field_of_view; % カメラ画角 
-
-            camera_range = polyshape([state.p(1) state.p(1)+radius_of_view*cos(tmp)],[state.p(2) state.p(2)+radius_of_view*sin(tmp)]); % カメラ検出距離
+            tmp = e2r_ang-field_of_view:0.01:e2r_ang+field_of_view; % カメラ画角 
+            obj.angle_range = tmp; % LiDARの照射角
+            camera_range = polyshape([0 radius_of_view*cos(tmp)],[0 radius_of_view*sin(tmp)]); % カメラ検出距離
+            camera_range.Vertices = camera_range.Vertices + state.p(1:2)';
             camera_region=intersect(camera_range, env);
-            camera_region.Vertices=camera_region.Vertices-state.p(1:2)';
+
+            %%
+           
+            pos = obj.self.plant.state.p; % 実状態
+
+            circ = [obj.r * cos(obj.angle_range); obj.r * sin(obj.angle_range)]'+ pos(1:2)';
+
+            result.density_camera.angle = zeros(1, length(obj.angle_range));
+
+            for i = 1:length(circ)
+              in = intersect(camera_region, [circ(i, :); pos(1:2)']);% PolyshapeからLiDARの光線を切りだし．壁の状態により複数のPolyshapeは出力
+              [~,ii]=mink(vecnorm(in-pos(1:2)',2,2),2);% ベクトルのL2ノルムを算出しそのうち小さい2つのインデックスを出力
+              if ~isempty(in)
+                in = in(ii(2),:); % 出力した2つの内2つ目を取得し上書き
+                in = setdiff(in(~isnan(in(:, 1)), :), [0 0], 'rows');  % これが必要な理由が分からない
+                [~, mini] = min(vecnorm(in')'); % インデックスを出力する．
+                result.density_camera.sensor_points(i, :) = in(mini, :);% ここがおかしい？
+                result.density_camera.angle(i) = obj.angle_range(i);
+              else
+                result.density_camera.sensor_points(i, :) = pos(1:2)';
+              end
+
+            end
+            result.density_camera.sensor_points(i+1, :) = pos(1:2)';
+            %%
+
+            
+
+            camera_region.Vertices=result.density_camera.sensor_points - pos(1:2)';% 相対的な測距領域
 
             pxy=state.p(1:2)'-Env.map_min; % 領域左下から見たエージェント座標
-            pmap_min = max(min(pxy+camera_region.Vertices,[],1),[0,0]); % エージェントを中心としたセンサーレンジの直方包左下座標
-            pmap_max = min(max(pxy+camera_region.Vertices,[],1),Env.map_max-Env.map_min); % 右上座標
+            pmap_min = max(pxy+[-obj.r,-obj.r],[0,0]); % エージェントを中心としたセンサーレンジの直方包左下座標
+            pmap_max = min(pxy+[obj.r,obj.r],Env.map_max-Env.map_min); % 右上座標
             rpmap_min = pmap_min-pxy; % 相対座標
-            rpmap_max = pmap_max-pxy; %  相対座標f
+            rpmap_max = pmap_max-pxy; %  相対座標
             [xq,yq]=meshgrid(rpmap_min(1):Env.d:rpmap_max(1),rpmap_min(2):Env.d:rpmap_max(2));% 相対座標
             xq=xq';      yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
 
@@ -63,8 +96,10 @@ classdef RANGE_DENSITY_CAMERA < handle
 
            
             %% 領域と環境のintersectionが測距領域
-            region=intersect(camera_range, env); % 測距領域
-            region.Vertices=region.Vertices-state.p(1:2)'; % 相対的な測距領域
+            region=camera_region; % 測距領域
+            % region.Vertices=region.Vertices-state.p(1:2)'; % 相対的な測距領域
+
+
 
            
             %% 結果の格納
