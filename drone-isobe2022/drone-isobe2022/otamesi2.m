@@ -36,14 +36,14 @@ box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
-% Square_coloring(data.t([find(log.Data.phase == 116,1,'first')+85,find(log.Data.phase==102,1,'first') + 220]),[1.0 0.9 1.0]);
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase==102,1,'first') + 220]),[0.9 1.0 1.0]);
-Square_coloring(data.t([find(log.Data.phase==102,1,'first') + 220,find(log.Data.phase==108,1,'first')]));
+Square_coloring(data.t([find(log.Data.phase == 108,1,'first'),find(log.Data.phase==108,1,'first')+15]),[1.0 0.9 1.0]);
+% Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase==102,1,'first') + 220]),[0.9 1.0 1.0]);
+% Square_coloring(data.t([find(log.Data.phase==102,1,'first') + 220,find(log.Data.phase==108,1,'first')]));
 xlabel('Time [s]');
 ylabel('p');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(log.Data.phase==102,1,'first') + 220),'LineStyle','--','Color','black','LineWidth',1)
 xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 108,1,'first')+15),'LineStyle','--','Color','black','LineWidth',1)
+% xline(data.t(1,find(log.Data.phase == 108,1,'last')-5),'LineStyle','--','Color','black','LineWidth',2)
 hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
@@ -57,7 +57,7 @@ ax = gca;
 hold off
 title('Position p of agent1','FontSize',12);
 
-fontSize = 12; %軸の文字の大きさの設定
+fontSize = 16; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
 
 % plot3(data.p(1,:),data.p(2,:),data.p(3,:));

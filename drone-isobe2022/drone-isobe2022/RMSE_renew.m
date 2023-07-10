@@ -8,7 +8,7 @@ clc;
 % loadfilename{3} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=circle.mat';
 
 loadfilename{1} = 'test1.mat';
-loadfilename{2} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat';
+% loadfilename{2} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat';
 % loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか

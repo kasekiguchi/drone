@@ -1,0 +1,8 @@
+phase
+
+115 : stop
+ 97 : arming
+116 : take off
+102 : flight
+108 : landing
+
