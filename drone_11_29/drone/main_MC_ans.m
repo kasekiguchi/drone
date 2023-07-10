@@ -34,6 +34,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fc = 0;     % 着陸したときだけx，y座標を取得
     totalT = 0;
     idx = 0;
+    a = 0;
 
     %-- 初期設定 controller.mと同期させる
     Params.H = 10;   %Params.H
@@ -119,6 +120,7 @@ end
 %             xr = Reference(Params, time.t, X);
             % controller
             param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
+            a = a + 1
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end

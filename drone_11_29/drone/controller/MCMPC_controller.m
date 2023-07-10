@@ -1,4 +1,4 @@
-classdef MCMPC_controller <CONTROLLER_CLASS
+classdef MCMPC_controller < CONTROLLER_CLASS
     % MCMPC_CONTROLLER MCMPCのコントローラー
     
     properties%(新しい変数を追加する場合はここに書く)
@@ -136,8 +136,8 @@ classdef MCMPC_controller <CONTROLLER_CLASS
             ts = 0; % 一応初期化, odeで用いる
             % 予測軌道計算
             for i = 1:obj.param.particle_num %サンプル数
-            obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
-            obj.state.state_data(:,1,i) = obj.state.y0; %y0を初期値に設定
+                obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
+                obj.state.state_data(:,1,i) = obj.state.y0; %y0を初期値に設定
                 for j = 1:obj.param.H - 1 %ホライズン数分繰り返し
                     %モデルの計算
                     obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
