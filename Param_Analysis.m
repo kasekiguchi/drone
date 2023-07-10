@@ -17,7 +17,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 illustration= 1; %1で図示，0で非表示
 
 %% Log Dataの読み取りと格納
-log = LOGGER('./Data/2wall100data_Log(05-Jul-2023_16_25_28).mat');
+log = LOGGER('./Data/2wall_1015_Log(10-Jul-2023_14_31_32).mat');
 % log = LOGGER('./Data/onlyxyz_Log.mat');
 %% ログ
 tspan = [0 ,100];
@@ -40,47 +40,54 @@ robot_pt(:,ds) = [];
 robot_q (:,ds) = [];
 robot_qt(:,ds) = [];
 
+
 %% 解析(回帰分析)
 [A,X,At,Xt] = param_analysis(robot_pt(:,1:end-1),robot_qt(:,1:end-1),sensor_data(1,2:end),eye(3));
-[A2,X2,A2t,X2t] = param_analysis(robot_pt(:,1:end-1),robot_qt(:,1:end-1),sensor_data(2,2:end),RodriguesQuaternion(Eul2Quat([0,0,pi/20]')));
+num = 2;
+[A2,X2,A2t,X2t] = param_analysis(robot_pt(:,1:end-1),robot_qt(:,1:end-1),sensor_data(num,2:end),RodriguesQuaternion(Eul2Quat([0,0,(num-1)*pi/20]')));
 % [A3,X3,A3t,X3t] = param_analysis(robot_pt(:,1:end-1),robot_qt(:,1:end-1),sensor_data(3,2:end),RodriguesQuaternion(Eul2Quat([0,0,2*pi/20]')));
 % [A4,X4,A4t,X4t] = param_analysis(robot_pt(:,1:end-1),robot_qt(:,1:end-1),sensor_data(8,2:end),RodriguesQuaternion(Eul2Quat([0,0,7*pi/20]')));
 % [A5,X5,A5t,X5t] = param_analysis(robot_pt(:,1:end-1),robot_qt(:,1:end-1),sensor_data(9,2:end),RodriguesQuaternion(Eul2Quat([0,0,8*pi/20]')));
 % [A0,X02,At0,Xt0] = param_analysis(robot_pt(:,1:end-1),robot_qt(:,1:end-1),sensor_data(1,2:end),RodriguesQuaternion(Eul2Quat([0,0,pi/180]')));
 %% 不要ぱらの除去
-ds = find(A2(1,:)==0);
-A2(:,ds) = [];
-A(:,ds) = [];
-% A3(:,ds) = [];
-% A4(:,ds) = [];
-% A5(:,ds) = [];
-At(:,ds) = [];
-A2t(:,ds) = [];
-Xt(:,ds) = [];
-X2t(:,ds) = [];
-X12 = pinv([A;A2])*(-1*ones(size([A;A2],1),1));
+% ds = find(A2(1,:)==0);
+% A2(:,ds) = [];
+% A(:,ds) = [];
+% % A3(:,ds) = [];
+% % A4(:,ds) = [];
+% % A5(:,ds) = [];
+% At(:,ds) = [];
+% A2t(:,ds) = [];
+% Xt(:,ds) = [];
+% X2t(:,ds) = [];
+% X12 = pinv([A;A2])*(-1*ones(size([A;A2],1),1));
 % XM = pinv([A;A2;A3;A4;A5])*(-1*ones(size([A;A2;A3;A4;A5],1),1));
 % X0 = pinv([A;A0])*(-1*ones(size([A;A0],1),1));
 %固有値計算
 S = svd(A)';% 特異値の計算
+A12 = [A,A2];
+% A12 = [A,A2(:,16:18),A2(:,22:24),A2(:,28:30)];
+X12 = pinv(A12)*(-1*ones(size(A12,1),1));
+X12t = [Xt,X2t];
 %% 逐次最小
 P_stack = zeros(size(A,2),size(A,2),size(A,1));
-P_stack2 = zeros(size(A,2),size(A,2),size(A,1));
-Ps=eye(size(A,2));
-Xs = zeros(size(A,2),1);
-for j=1:1:length(A)
+P_stack2 = zeros(size(A2,2),size(A2,2),size(A2,1));
+P_stack12 = zeros(size(A12,2),size(A12,2),size(A12,1));
+for j=1:1:length(A12)
     if j ==1
-        [Xn,Pn] = param_analysis_eq(A(j,:)',Xs,Ps);
-        [Xn2,Pn2] = param_analysis_eq(A2(j,:)',Xs,Ps);
-        % [Xn,Pn12] = param_analysis_eq(A(j,:)'+A2(j,:)',Xs,Ps);
+        [Xn,Pn] = param_analysis_eq(A(j,:)',zeros(size(A,2),1),eye(size(A,2)));
+        [Xn2,Pn2] = param_analysis_eq(A2(j,:)',zeros(size(A2,2),1),eye(size(A2,2)));
+        [Xn12,Pn12] = param_analysis_eq(A12(j,:)',zeros(size(A12,2),1),eye(size(A12,2)));
         P_stack(:,:,j) = Pn;
         P_stack2(:,:,j) = Pn2;
+        P_stack12(:,:,j) = Pn12;
     else
         [Xn,Pn] = param_analysis_eq(A(j,:)',Xn,Pn );
         [Xn2,Pn2] = param_analysis_eq(A2(j,:)',Xn2,Pn2);
-        % [Xn,Pn12] = param_analysis_eq(A(j,:)'+A2(j,:)',Xn,Pn12);
+        [Xn12,Pn12] = param_analysis_eq(A12(j,:)',Xn12,Pn12);
         P_stack(:,:,j) = Pn;
         P_stack2(:,:,j) = Pn2;
+        P_stack12(:,:,j) = Pn12;
     end
 end
 
@@ -91,14 +98,14 @@ for j=1:size(P_stack,3)
 end
 %% パラメータの計算
 offset_est = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(4:12)];
-Rsx = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(13:15);X12(19:21);X12(25:27)];
-Rsy = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(16:18);X12(22:24);X12(28:30)];
+Rsx = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(13:21)];
+Rsy = pinv([X12(1)*eye(3);X12(2)*eye(3);X12(3)*eye(3)])*[X12(22:30)];
 Rsz = cross(Rsx/vecnorm(Rsx),Rsy/vecnorm(Rsy));
 Rs = [Rsx,Rsy,Rsz];
-offset_est_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
-Rsx_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
-Rsy_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(16:18);Xn(22:24);Xn(28:30)];
-Rsz_eq = cross(Rsx/vecnorm(Rsx_eq),Rsy/vecnorm(Rsy_eq));
+offset_est_eq = pinv([Xn12(1)*eye(3);Xn12(2)*eye(3);Xn12(3)*eye(3)])*[Xn12(4:12)];
+Rsx_eq = pinv([Xn12(1)*eye(3);Xn12(2)*eye(3);Xn12(3)*eye(3)])*[Xn12(13:21)];
+Rsy_eq = pinv([Xn12(1)*eye(3);Xn12(2)*eye(3);Xn12(3)*eye(3)])*[Xn12(22:30)];
+Rsz_eq = cross(Rsx_eq/vecnorm(Rsx_eq),Rsy_eq/vecnorm(Rsy_eq));
 Rs_eq = [Rsx_eq,Rsy_eq,Rsz_eq];
 % R1y = R1x + [0;1;0];
 % R1y = R1y/vecnorm(R1y);
@@ -112,10 +119,10 @@ Rs_eq = [Rsx_eq,Rsy_eq,Rsz_eq];
 % abcd = [ad bd cd];
 % vecnorm(abcd);
 % -abcd/vecnorm(abcd);
-ps = offset_est;
-pb = robot_pt;
-qt = Eul2Quat(robot_qt);
-y = sensor_data;
+% ps = offset_est;
+% pb = robot_pt;
+% qt = Eul2Quat(robot_qt);
+% y = sensor_data;
 %% 交点比較
 % sp = pb + quat_times_vec(qt,ps) + y.*quat_times_vec(qt,R1x);
 % figure(8);
@@ -253,14 +260,15 @@ function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,R_num)
      Cf(j) = subs(simplify(eq-subs(expand(eq),var(j),0)),var(j),1);
    end
    Cf = [p1,p2,p3,Cf];
-   % ds=find(Cf==0);    
-   % Cf(ds)=[];
+   ds=find(Cf==0);    
+   Cf(ds)=[];
    var = [a,b,c,var]/d;
-   % var(ds)=[];
+   var(ds)=[];
    qt = Eul2Quat(robot_q);
    qt = qt./vecnorm(qt,2);
    A = Cfa(robot_p,qt,sensor_data,R_num)';
-   % ds = find(A(1,:)==0);
-   % A(:,ds) = [];
+   ds = find(A(1,:)==0);
+   A(:,ds) = [];
    X = pinv(A)*(-1*ones(size(A,1),1));
 end
+

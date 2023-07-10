@@ -8,8 +8,8 @@ syms y real
 syms Rs [3 3] real
 syms psb [3 1] real
 syms a b c d real
-Rt=rot3(0,0,0);
-
+% Rt=rot3(0,0,0);
+syms Rt [3 3] real
 A = [a b c];
 X = p +Rb*psb + y*Rb*Rs*Rt*[1;0;0];
 %%

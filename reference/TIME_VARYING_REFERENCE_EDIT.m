@@ -51,6 +51,7 @@ classdef TIME_VARYING_REFERENCE_EDIT < handle
            end           
            obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
+           % obj.result.state.p = [0;0;0];
            if length(obj.result.state.xd)>4
             obj.result.state.v = obj.result.state.xd(5:7);
            else
@@ -59,6 +60,7 @@ classdef TIME_VARYING_REFERENCE_EDIT < handle
            % obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            w = 2*pi/20;
            obj.result.state.q = [0.35*sin(0.5*w*t);0.3*sin(0.75*w*t);0.4*sin(w*t)];
+           % obj.result.state.q = [0;0;0];
            % obj.result.state.q = [0;0;0.4*sin(0.4*w*t)];
            result = obj.result;
         end
