@@ -73,7 +73,7 @@ for i = 1:1000
 end
 
 %%
-logger.plot({1, "p", "p"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"})
+logger.plot({1, "p", "pr"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"})
 %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
