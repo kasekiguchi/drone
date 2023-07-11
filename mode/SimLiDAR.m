@@ -1,6 +1,6 @@
 ts = 0;
 dt = 0.01;
-te = 200;
+te = 100;
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
@@ -17,7 +17,7 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
   a2 = 30;
   b2 = 1;
   c2 = 20;
-  Points2 = [0 15 0]+[-a2 -b2 -c2;a2 -b2 -c2;a2 b2 -c2; -a2 b2 -c2;-a2 -b2 c2;a -b2 c2;a2 b2 c2; -a2 b2 c2]; 
+  Points2 = [0 30 0]+[-a2 -b2 -c2;a2 -b2 -c2;a2 b2 -c2; -a2 b2 -c2;-a2 -b2 c2;a -b2 c2;a2 b2 c2; -a2 b2 c2]; 
   Tri2  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
   env2 = triangulation(Tri2,Points2);
 % 
@@ -26,9 +26,10 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
 % 
 % env = triangulation(Tri, Points);
 %% 
-combinedPoints = [env.Points; env2.Points];
-combinedTri = [env.ConnectivityList; env2.ConnectivityList + size(env.Points, 1)];
-combinedEnv = triangulation(combinedTri, combinedPoints);
+% combinedPoints = [env.Points; env2.Points];
+% combinedTri = [env.ConnectivityList; env2.ConnectivityList + size(env.Points, 1)];
+% combinedEnv = triangulation(combinedTri, combinedPoints);
+combinedEnv = env;
 %%
 findPlaneEquation(env);
 %%
@@ -62,7 +63,7 @@ agent.sensor.direct = DIRECT_SENSOR(agent,0.0); % sensor to capture plant positi
 agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0.5,0.5,1],pi/12),'p0',[0.1;0.05;0.05],'theta_range', pi/2, 'phi_range', 0:pi/20:pi/2, 'noise',0.0025, 'seed', 0)); % 2D lidar
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.do = @sensor_do; % synthesis of sensors
-agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[2,2.5,1]}});
+agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[3,3.5,2]}});
 % agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0,0,0]}});
 function result = sensor_do(varargin)
 sensor = varargin{5}.sensor;
