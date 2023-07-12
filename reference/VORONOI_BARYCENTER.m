@@ -40,7 +40,7 @@ classdef VORONOI_BARYCENTER < handle
       %% LiDAR 部分のボロノイ領域算出
       LiDAR_V = poly_volonoi(state,sensor.neighbor,sensor.region,void,R);
       [LiDAR_cent, LiDAR_mass] = map_centre_of_gravity(sensor.xq , sensor.yq , sensor.grid_density,LiDAR_V);
-      LiDAR_mass = 1;
+      LiDAR_mass = 0;
       %% camera 部分のボロノイ領域算出
       dens_c = sensor.density_camera;
       camera_V = poly_volonoi(state, sensor.neighbor, dens_c.region,void,R);
