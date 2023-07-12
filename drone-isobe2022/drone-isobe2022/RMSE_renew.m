@@ -3,11 +3,11 @@ close all hidden;
 clear all;
 clc;
 %% 読み込み
-loadfilename{1} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=landing.mat';
-loadfilename{2} = 'EstimationResult_12state_7_10_circle=takeoff-landing_estimation=landing.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{3} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=circle.mat';
+loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat';
+% loadfilename{2} = 'EstimationResult_12state_7_12_circle=circle_estimation=circle_datanum=20.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
-% loadfilename{1} = 'test1.mat';
+loadfilename{2} = 'test1.mat';
 % loadfilename{2} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat';
 % loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
@@ -26,7 +26,7 @@ for i = 1:HowmanyFile
     end
 
     if i == 1
-        indexcheck = file{i}.simResult.initTindex
+        indexcheck = file{i}.simResult.initTindex;
     elseif indexcheck ~= file{i}.simResult.initTindex
             disp('Caution!! 読み込んだファイルの初期状態が異なっています!!')
             dammy = input('Enterで無視して続行します');

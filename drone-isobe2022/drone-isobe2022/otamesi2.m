@@ -2,7 +2,7 @@ close all hidden;
 clear all;
 clc;
 
-load("experiment_6_20_circle_estimaterdata.mat")
+load("experiment_7_11_circle_radius=0.7.mat")
 disp('load finished')
 
 % for i = find(log.Data.phase == 116,1,'first')+85:find(log.Data.phase == 108,1,'first')
@@ -11,7 +11,7 @@ disp('load finished')
 %     data.u2(:,i-(find(log.Data.phase == 116,1,'first')+85)+1) = log.Data.agent.input{i}(:,1);
 % end
 
-for i = 1:find(log.Data.t,1,'last')
+for i = 1:find(log.Data.phase==102,1,'last')-400
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
     data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p               
 end
@@ -36,14 +36,15 @@ box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
-Square_coloring(data.t([find(log.Data.phase == 108,1,'first'),find(log.Data.phase==108,1,'first')+15]),[1.0 0.9 1.0]);
+Square_coloring(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase==102,1,'first')+230]),[1.0 0.9 1.0]);
 % Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase==102,1,'first') + 220]),[0.9 1.0 1.0]);
 % Square_coloring(data.t([find(log.Data.phase==102,1,'first') + 220,find(log.Data.phase==108,1,'first')]));
 xlabel('Time [s]');
 ylabel('p');
-xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(log.Data.phase == 108,1,'first')+15),'LineStyle','--','Color','black','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'last')-5),'LineStyle','--','Color','black','LineWidth',2)
+% xline(data.t(1,find(log.Data.phase == 116,1,'first')+85),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+230),'LineStyle','--','Color','black','LineWidth',1)
+% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
 hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');

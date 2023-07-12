@@ -1,8 +1,8 @@
 %%ファイル名を一括で変えるプログラム(2周連続で回す時はloading_filenameを変更するように！)
-% folderPath = 'D:\workspace\GitHub\drone\drone-isobe2022\drone-isobe2022\Data\test'; %フォルダの指定
-folderPath = 'C:\Users\kiyam\Documents\卒業研究\GitHub2\drone\drone-isobe2022\drone-isobe2022\Data\test'; %フォルダの指定(自分のPC)
+folderPath = 'D:\workspace\GitHub\drone\drone-isobe2022\drone-isobe2022\Data\simData_KoopmanApproach_2023_7_12_experiment_circle'; %フォルダの指定
+% folderPath = 'C:\Users\kiyam\Documents\卒業研究\GitHub2\drone\drone-isobe2022\drone-isobe2022\Data\simData_KoopmanApproach_2023_7_12_experiment_circle'; %フォルダの指定(自分のPC)
 fileList = dir(fullfile(folderPath,'*.mat')); %対象のファイルを取得
-loading_filename = 'test'; %変更後のファイル名の指定
+loading_filename = 'experiment_7_12'; %変更後のファイル名の指定
 for i = 1:length(fileList)
     oldFileName = fullfile(folderPath,fileList(i).name);
     newFileName = fullfile(folderPath,[append(loading_filename,'_',num2str(i),'.mat')]);

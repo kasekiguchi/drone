@@ -34,12 +34,12 @@ if logger.fExp==1
     % data.startIndex = find(data.est.p(:,3)>0.4,1,'first'); %0.4m以上になった部分からデータの取得開始
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
-    data.startIndex = find(data.phase == 108,1,'first');
+    % data.startIndex = find(data.phase == 108,1,'first');
     % data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
-    % data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
+    data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
     % data.startIndex = find(data.t > 18,1,'first');
 %     data.phase = logger.Data.phase;
-    data.endIndex = find(data.phase==108,1,'last'); %ランディングする前にデータの取得をやめる
+    data.endIndex = find(data.phase==108,1,'first'); %ランディングする前にデータの取得をやめる
     % data.endIndex = find(data.phase==116,1,'last'); 
     data.N = data.endIndex - data.startIndex + 1;
     data.t = logger.Data.t(data.startIndex:data.endIndex);
