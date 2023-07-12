@@ -13,8 +13,8 @@ userpath('clear');
 % run("main.m"); % 目標入力生成
 % close all hidden; clear all; clc;
 % userpath('clear');
-fRef = 1; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
-fHL = 0;
+fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
+fHL = 1; % HL はトルク入力の変換の部分作らないと動かない
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);

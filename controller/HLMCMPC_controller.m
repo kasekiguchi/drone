@@ -206,7 +206,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vf = obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
         vs = obj.input.u(2:4, 1, BestcostID(1));     % 最適な入力の取得
         tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
-        obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
+        % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))]; % トルク入力への変換
         obj.self.input = obj.result.input;  % agent.inputへの代入
 
         obj.result.v = [vf; vs];
