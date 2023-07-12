@@ -72,10 +72,10 @@ Acc_old = 0;
 
 fh = @(tt)[3*tt, 2*tt^2, tt-2];
 calT = 0;
-phase = 2;
+phase = 1; % 着陸開始時間
 Time.te = te;
 
-gradient = 2/10;
+gradient = 3/10;
 
 %     load("Data/HL_input");
 %     load("Data/HL_V");
@@ -86,6 +86,24 @@ InputVdata = load("Data/inputV_HLMPC.mat");
 InputVdata = cell2mat(InputVdata.data.inputv);
 
 fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
+
+%% reference 
+teref = 2; % かける時間
+z0 = 2; % z初期値
+ze = 0; % z収束値
+v0 = 0; % 初期速度
+ve = -0.5; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか
+t = 0:0.025:3;
+Params.refZ = curve_interpolation_9order(t',teref,z0,v0,ze,ve);
+x0 = -1; % -1
+xe = 0;
+ve = 0;
+% teref = 1.5;
+delay = 0;
+Params.refX = curve_interpolation_9order(t'-delay,teref,x0,v0,xe,ve);
+% y0 = 0;
+% ye = 0;
+% Params.refY = curve_interpolation_9order(t',teref,y0,v0,ye,ve);
 
     %%
 
@@ -202,8 +220,9 @@ end
             agent(i).do_controller(param(i).controller.list);
 
 %             if time.t < 0.4
-            if fRef==1 && 2.5 < time.t && time.t < 2.575
+            if fRef==0 && 2.5 < time.t && time.t < 2.575  %fRef==1
                 agent.input = [0;0;0;0];
+                % agent(i).do_controller(param(i).controller.list);
             elseif fRemove == 2
                 agent.input = [0;0;0;0];    % 入力切っているときはコントローラー計算しない
             else
@@ -211,11 +230,11 @@ end
             end
 
             %% 自由落下:入力切る
-            if fRef == 0 && time.t < 0.4 && fHL == 0
-                agent.input = [0;0;0;0];
-%             elseif fRef == 1 && 2.5 < time.t && time.t < 2.6
+%             if fRef == 0 && time.t < 0.4 && fHL == 0
 %                 agent.input = [0;0;0;0];
-            end
+% %             elseif fRef == 1 && 2.5 < time.t && time.t < 2.6
+% %                 agent.input = [0;0;0;0];
+%             end
 
             if flag(1) == 1
                 agent.input = [0; 0; 0; 0];
@@ -315,7 +334,7 @@ end
         altitudeSlope = (agent.estimator.result.state.p(3) - (gradient * (agent.estimator.result.state.p(1) + 0.1))) * cos(atan(gradient)); % 斜面に対する高度, 
         vSlope = agent.estimator.result.state.v(3);
 
-        if altitudeSlope < 0.2 && abs(vSlope) < 0.05 && abs(agent.estimator.result.state.q(2)) > atan(gradient)/2 %&& abs(agent.estimator.result.state.q(2)) < 0.3975 
+        if altitudeSlope < 0.25 && abs(agent.estimator.result.state.v(3)) < 0.05 && abs(agent.estimator.result.state.q(2)) > 0.1 %&& abs(agent.estimator.result.state.q(2)) < 0.3975 
             fRemove = 2;
             fFinish = 1;
             data.FinishState = [agent.estimator.result.state.p; agent.estimator.result.state.q(2); altitudeSlope; vSlope];
@@ -335,8 +354,8 @@ end
                 xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)                             % r:reference 目標状態
 %         fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t slopeZ: %f \t sigma: %f \n", ...
 %             time.t, calT, data.variable_particle_num(idx), altitudeSlope,data.sigma{idx})
-        fprintf("input: %f %f %f %f \t input_v: %f %f %f %f", ...
-            agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v{idx}(1),data.input_v{idx}(2),data.input_v{idx}(3),data.input_v{idx}(4));
+        fprintf("t: %f \t input: %f %f %f %f \t input_v: %f %f %f %f", ...
+            time.t, agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v{idx}(1),data.input_v{idx}(2),data.input_v{idx}(3),data.input_v{idx}(4));
         fprintf("\n");
 
         if fRemove == 1   % 1:本物 10:墜落で終了させない
@@ -376,7 +395,7 @@ end
 SigmaData = zeros(4, te/dt);
 close all
 fprintf("%f秒\n", totalT)
-Fontsize = 15;  xmax = time.t;
+Fontsize = 15;  xmax = 4;
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
@@ -457,11 +476,7 @@ ylabel("Calculation time [s]");
 
 % set(gcf, "WindowState", "maximized");
 set(gcf, "Position", [960 0 960 1000])
-
-%%
-agent(1).animation(logger,"target",1); 
-%% 各評価値
-% clf(20)
+% 
 % Peval = zeros(1, size(logt, 1)); Veval = zeros(1, size(logt, 1)); Qeval = zeros(1, size(logt, 1));
 % for R = 1:size(logt, 1)
 %     Peval(:, R) = data.eachcost{R}(1, 1);
@@ -485,7 +500,7 @@ agent(1).animation(logger,"target",1);
 % plot(logt, Qeval); ylim([-inf inf])
 % yyaxis right
 % plot(logt, Qdata, 'Color', 'magenta'); hold on; plot(logt, Rdata(4:6, :), '--');  hold off; ylabel("ref atti")
-% title('angular vel eval'); xlim([0.25 xmax]); ylim([-inf inf])
+% title('angular eval'); xlim([0.25 xmax]); ylim([-inf inf])
 % legend("QWeval","Eroll","Epitch","Eyaw","Rroll","Rpitch","Ryaw")
 % subplot(2,2,4);
 % plot(logt, Idata); ylabel("ref input")
@@ -500,13 +515,18 @@ agent(1).animation(logger,"target",1);
 % % text(0.1,0.5,strQ,'FontSize',15,'Interpreter', 'Latex')
 % % text(0.1,0.3,strW,'FontSize',15,'Interpreter', 'Latex')
 % set(gcf, "Position", [1000 0 960 1000])
+%% 
+% close all;
+agent(1).animation(logger,"target",1); 
+%% 各評価値
+
 %%
 % figure(5); 
 % ref_t = agent.reference.timeVarying.func;
 % ref_time = 0:0.025:te;
 % for i = 1:te/dt
 %     ref_t_value(i,:) = ref_t(ref_time(i));
-% end
+% endf
 % plot(logt, ref_t_value(:,11));
 % xlim([0 te]); ylim([-inf inf]); xlabel("Time [s]"); ylabel("Acc.Z [m/s^2]");
 %%
@@ -526,10 +546,10 @@ agent(1).animation(logger,"target",1);
 
 %% save data
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat('SlopeLanding_5deg', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat('SlopeLanding-VeryGood', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230705/
+    mkdir ../../students/komatsu/simdata/20230711/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")

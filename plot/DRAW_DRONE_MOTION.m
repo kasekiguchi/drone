@@ -49,9 +49,9 @@ classdef DRAW_DRONE_MOTION
             hold on
             xx = -5:5;
             yy = zeros(1, size(xx, 2));
-            zz = 1/10 * (xx)+0.1;
+            zz = 3/10 * (xx)+0.1;
             plot3(xx, yy, zz);
-            
+            % pause();
         end
         function obj=gen_frame(obj,param)
             arguments

@@ -68,7 +68,7 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
     % パラメータ取得
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
-    phasex = phase + 0.5;
+    % phasex = phase + 0.5;
     xr = zeros(params.total_size, params.H);    % initialize
     % 時間関数の取得→時間を代入してリファレンス生成
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
@@ -76,37 +76,39 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
         t = T.t + params.dt * h; % reference生成の時刻をずらす
         % それぞれの関数 % z方向目標値時
         if refFlag == 1
-            if t<=phase
-                tz = 2;
-                tvz = 0;
-            elseif phase<t && t<phase+0.3
-                tz = -5 * (t-phase).^2 + 2;             tvz = 20-10*t;
-            elseif phase+0.3 <= t
-                tz = 2 * exp(-(t-phase-0.09)/0.55)+0.2; tvz = -(40*exp(19/5 - (20*t)/11))/11;%tvz = -4*exp((107/25)-2*t); % zeta=0.5, offset=0.1
+            ind = round((t-phase)/0.025) + 1; 
+            if t < phase % zとxの開始時間を変える
+                tz = 2; tvz = 0;
+            elseif t > 4
+                tz = params.refZ(end,1); tvz = params.refZ(end,2);
+            else % 斜面開始
+                tz = params.refZ(ind,1); % 9次補完のリファレンスから値だけ持ってくる
+                tvz = params.refZ(ind,2);
             end
 
-            if t<=phasex
-                tx = -1;
-                tvx = 0;
-            elseif phasex<t && t<phasex+0.3
-                tx = 5 * (t-phasex).^2 - 1;  tvx = 10*t-25;
-            elseif phasex+0.3 <= t
-                tx = -exp(-(t-phasex)/0.5); tvx = 2*exp(5 - 2*t); %tvx = 2*exp(4-2*t);  % 0.2 : good
+            if t < phase
+                tx = -1; tvx = 0; 
+            elseif t > 4
+                tx = params.refX(end,1); tvx = params.refX(end,2);
+            else
+                tx = params.refX(ind,1); tvx = params.refX(ind,2); 
             end
-            xr(1:3, h+1) = [tx;  0; tz];
-            xr(7:9, h+1) = [tvx; 0; tvz];
-            xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+
+            if t < 2.6
+                pitch = 0;
+            else    
+                pitch = 0;
+                if h == 10
+                    tz = 0.25; tvz = 0;
+                    pitch = -0.2915;
+                end
+            end
+            xr(1:3, h+1) = [tx;  0.0; tz];
+            xr(7:9, h+1) = [tvx; 0.0; tvz];
+            xr(4:6, h+1) =   [0;pitch;0]; % 姿勢角
             xr(10:12, h+1) = [0;0;0];
             xr(13:16, h+1) = params.ur; % MC -> 0.6597,   HL -> 0
             %% 斜面
-            if T.t < 2
-                xr(1:3, h+1) = Gp;  % 座標
-                xr(7:9, h+1) = [0;0;0]; % 速度
-            elseif h > 5
-                xr(4:6, h+1) = Gq;
-%             elseif h == params.H-1
-%                 xr(4:6, h) = Gq;% 終端ホライズンのみ姿勢角目標値
-            end
         elseif refFlag == 2  % 逆時間
             % t = abs(t-T.te);
             t = abs(t-3);

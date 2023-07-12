@@ -58,10 +58,10 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.param.t = rt;
             obj.reference.grad = param{6};
 
-            if obj.param.t > 2.6
-                obj.param.QW(1,1) = 10000;
-                obj.param.QW(2,2) = 20000;
-            end
+            % if obj.param.t > 2.6
+            %     obj.param.QW(1,1) = 10000;
+            %     obj.param.QW(2,2) = 20000;
+            % end
             
             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
             ave2 = obj.input.u(2);    % 初期値はparamで定義
@@ -78,20 +78,21 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.N = obj.param.nextparticle_num;         
 
             if obj.input.AllRemove == 1
-                ave1 = 0.269*9.81/4;
+                ave1 = 0.269*9.81;
                 ave2 = ave1;
                 ave3 = ave1;
                 ave4 = ave1;
                 obj.input.AllRemove = 0;
             end
 
-            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
-            obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
-            obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
-            obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
-%             obj.input.u2 = obj.input.u1;    % すべて同じ入力、　確認用
-%             obj.input.u3 = obj.input.u1;
-%             obj.input.u4 = obj.input.u1;
+            % obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
+            % obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
+            % obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
+            % obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
+            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1);
+            obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.N);    % すべて同じ入力、　確認用
+            obj.input.u3 = obj.input.sigma.*randn(obj.param.H, obj.N);
+            obj.input.u4 = obj.input.sigma.*randn(obj.param.H, obj.N);
             obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
             obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;   
             obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
@@ -152,7 +153,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                     obj.param.nextparticle_num = obj.param.Maxparticle_num;
 %                     obj.input.AllRemove = 1;
                 else
-                    obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma * (obj.input.Bestcost_now/obj.input.Bestcost_pre)));
+                    obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now./obj.input.Bestcost_pre)));
                     % 追加
                     obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now/obj.input.Bestcost_pre))));
                 end
@@ -225,10 +226,11 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % 棄却はしないが評価値を大きくする
             %% 斜面
             % 姿勢角
-            if obj.self.estimator.result.state.p(3) < 0.3 
+            % if obj.self.estimator.result.state.p(3) < 0.3 
+            if obj.param.t > obj.param.soft
 %                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
 %                 A = 100;
-                Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2975);
+                Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2915);
 %                 gradZ = -obj.param.CA * (Zdis .^ (2)) + obj.param.CA;
                 Zlim = 2;
                 gradZ = -obj.param.CA * (1-cos((Zdis/Zlim).*pi))/Zlim + obj.param.CA;
@@ -238,32 +240,40 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 CR = reshape(obj.param.Ca *gradZ* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
                 obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
                 obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
+
+                % yaw角
+                constIYaw = find(abs(obj.state.state_data(6, end, 1:obj.N)) > 0.5);
+                if ~isempty(constIYaw)
+                    CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
+                    obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
+                end
             end
 
             %% 斜面
-            if (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))+0.1) * cos(0.2975) < 0.12
+            if (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))+0.1) * cos(0.2915) < 0.15
                 %% 速度制約
                 % z-direction velocity
                 constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
-                CV = reshape(obj.param.CV * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
-                obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
+                if length(constV) > 1
+                    CV = reshape(obj.param.CV * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
+                    obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
+                end
                 % x-direction velocity
                 constVx = find(abs(obj.state.state_data(7, end, 1:obj.N)) > 0.05);
-                CVx = reshape(obj.param.CV * (obj.state.state_data(7, end, constV)).^2, [1, length(constVx)]);
-                obj.input.Evaluationtra(constVx) = obj.input.Evaluationtra(constVx) + CVx;
+                if length(constVx) > 1
+                    CVx = reshape(obj.param.CV * (obj.state.state_data(7, end, constV)).^2, [1, length(constVx)]);
+                    obj.input.Evaluationtra(constVx) = obj.input.Evaluationtra(constVx) + CVx;
+                end
             end
 
             %% 斜面に墜落したかどうか　実質棄却
-            constISlope = find(obj.reference.grad * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
-            obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
+            % constISlope = find(obj.reference.grad * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
+            % obj.input.Evaluationtra(constISlope) = obj.input.Evaluationtra(constISlope) + obj.param.ConstEval;
 %             if length(constISlope) == obj.N % 全墜落なら終了
 %                 obj.param.fRemove = 1;
 %             end
 
-            % yaw角
-            constIYaw = find(abs(obj.state.state_data(6, end, 1:obj.N)) > 0.5);
-            CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
-            obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
+            
 
             % 良い評価のサンプルは終端コストのみ大きくする
 
@@ -330,31 +340,36 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
             %% ホライズンの先に係数下げる
             kJ = linspace(1, 0.2, obj.param.H);
-            tildeXp = tildeXp .* kJ; tildeXqw = tildeXqw .* kJ;
-            tildeXv = tildeXv .* kJ; 
-            tildeUpre = tildeUpre .* kJ; tildeUref = tildeUref .* kJ;
+            
             %% 制約違反ソフト制約
             constraints = 0;
-
-
             %-- 状態及び入力のステージコストを計算
 %             stageStateP = arrayfun(@(L) tildeXp(:, L)' * obj.param.P * tildeXp(:, L), 1:obj.param.H-1);
 %             stageStateV = arrayfun(@(L) tildeXv(:, L)' * obj.param.V * tildeXv(:, L), 1:obj.param.H-1);
 %             stageStateQW = arrayfun(@(L) tildeXqw(:, L)' * obj.param.QW * tildeXqw(:, L), 1:obj.param.H-1);
 %             stageInputPre  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP * tildeUpre(:, L), 1:obj.param.H-1);
 %             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
-            stageStateP =    sum(tildeXp' * obj.param.P   .* tildeXp',2);
-            stageStateV =    sum(tildeXv' * obj.param.V   .* tildeXv',2);
-            stageStateQW =   sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
-            stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-            stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
 
-            %-- 状態の終端コストを計算 状態だけの終端コスト
-            if obj.param.fin == 0
-                terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
-                    +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
-                    +tildeXqw(:, end)'  * obj.param.QW  * tildeXqw(:, end);
+            %% 斜面姿勢角入れるまではステージコストと終端コストは一緒
+            if obj.param.t < obj.param.soft
+                tildeXp = tildeXp .* kJ; tildeXqw = tildeXqw .* kJ;
+                tildeXv = tildeXv .* kJ; 
+                tildeUpre = tildeUpre .* kJ; tildeUref = tildeUref .* kJ;
+                stageStateP =    sum(tildeXp' * obj.param.P   .* tildeXp',2);
+                stageStateV =    sum(tildeXv' * obj.param.V   .* tildeXv',2);
+                stageStateQW =   sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
+                stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
+                stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
+                terminalState = 0;
             else
+                tildeXp = tildeXp(:,end-1) .* kJ; tildeXqw = tildeXqw(:,end-1) .* kJ;
+                tildeXv = tildeXv(:,end-1) .* kJ; 
+                tildeUpre = tildeUpre(:,end-1) .* kJ; tildeUref = tildeUref(:,end-1) .* kJ;
+                stageStateP =    sum(tildeXp(:,end-1)' * obj.param.P   .* tildeXp(:,end-1)',2);
+                stageStateV =    sum(tildeXv(:,end-1)' * obj.param.V   .* tildeXv(:,end-1)',2);
+                stageStateQW =   sum(tildeXqw(:,end-1)' * obj.param.QW .* tildeXqw(:,end-1)',2);
+                stageInputPre  = sum(tildeUpre(:,end-1)' * obj.param.RP.* tildeUpre(:,end-1)',2);
+                stageInputRef  = sum(tildeUref(:,end-1)' * obj.param.R .* tildeUref(:,end-1)',2);
                 terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
                     +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
                     +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
