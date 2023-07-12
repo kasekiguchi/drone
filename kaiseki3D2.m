@@ -15,11 +15,11 @@ X = p +Rb*psb + y*Rb*[Rs1,Rs23]*Rn*[1;0;0];
 
 %%
 eq =[A d]*[X;1];
-var=[a.*psb',b.*psb',c.*psb',reshape(a*Rs23,1,numel(Rs23)),reshape(b*Rs23,1,numel(Rs23)),reshape(c*Rs23,1,numel(Rs23))];
+var=[reshape(a*Rs23,1,numel(Rs23)),reshape(b*Rs23,1,numel(Rs23)),reshape(c*Rs23,1,numel(Rs23))];
 for i = 1:length(var)
 Cf(i) = subs(simplify(eq-subs(expand(eq),var(i),0)),var(i),1);
 end
-Cf = [(Rn1_1*y*Rb*Rs1)'+[p1,p2,p3],Cf];
+Cf = [(Rb*psb)'+(Rn1_1*y*Rb*Rs1)'+[p1,p2,p3],Cf];
 % Cf = [p1,p2,p3,Cf];
 ds=find(Cf==0)
 Cf(ds)=[];

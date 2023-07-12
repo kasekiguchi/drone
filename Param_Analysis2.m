@@ -45,33 +45,58 @@ robot_qt(:,ds) = [];
 %% 解析(回帰分析)
 end1=10000;
 num = 3;%2本目センサのいっぽん目からの本数
-[A,X,At,Xt] = param_analysis(robot_pt(:,1:end1-1),robot_qt(:,1:end1-1),sensor_data(1,2:end1),sensor_data(num,2:end1),RodriguesQuaternion(Eul2Quat([0,0,(num-1)*pi/20]')));
+[A,X,At,Xt] = param_analysis(robot_pt(:,1:end1-1),robot_qt(:,1:end1-1),sensor_data(1,2:end1),eye(3));
 
-%固有値計算
+%% 1本目でのパラ推定，固有値計算
+offset = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:12)];
+Rsx = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*X(13:21);
 S = svd(A)';% 特異値の計算
-%% 逐次最小
+
+%% 1本目の情報使って2本目の計算
+num = 2;
+[A2,X2,A2t,X2t] = param_analysis1known(robot_pt(:,1:end1-1),robot_qt(:,1:end1-1),sensor_data(num,2:end1),RodriguesQuaternion(Eul2Quat([0,0,(num-1)*pi/20]')),offset,Rsx);
+%% 2本目でのパラ推定，固有値計算
+Rsy = pinv([X2(1)*eye(3);X2(2)*eye(3);X2(3)*eye(3)])*X2(4:12);
+Rsz = cross(Rsx/vecnorm(Rsx),Rsy/vecnorm(Rsy));
+Rs = [Rsx,Rsy,Rsz];
+%% 逐次最小(2ほんの情報それぞれで)＆逐次パラメータ計算
+
 P_stack = zeros(size(A,2),size(A,2),size(A,1));
+P_stack2 = zeros(size(A2,2),size(A2,2),size(A2,1));
+
 for j=1:1:length(A)
     if j ==1
         [Xn,Pn] = param_analysis_eq(A(j,:)',zeros(size(A,2),1),eye(size(A,2)));
         P_stack(:,:,j) = Pn;
+        offset_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
+        Rsx_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*Xn(13:21);
+        [X2n,P2n] = param_analysis_eq(A2(j,:)',zeros(size(A2,2),1),eye(size(A2,2)));
+        P_stack2(:,:,j) = P2n;
+        Rsy_eq = pinv([X2n(1)*eye(3);X2n(2)*eye(3);X2n(3)*eye(3)])*X2n(4:12);
+        Rsz_eq = cross(Rsx_eq/vecnorm(Rsx_eq),Rsy_eq/vecnorm(Rsy_eq));
+        Rs_eq = [Rsx_eq,Rsy_eq,Rsz_eq];
     else
-        [Xn,Pn] = param_analysis_eq(A(j,:)',Xn,Pn );
+        [Xn,Pn] = param_analysis_eq(A(j,:)',Xn,Pn);
         P_stack(:,:,j) = Pn;
+        offset_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
+        Rsx_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*Xn(13:21);
+        [X2n,P2n] = param_analysis_eq(A2(j,:)',X2n,P2n);
+        P_stack2(:,:,j) = P2n;
+        Rsy_eq = pinv([X2n(1)*eye(3);X2n(2)*eye(3);X2n(3)*eye(3)])*X2n(4:12);
+        Rsz_eq = cross(Rsx_eq/vecnorm(Rsx_eq),Rsy_eq/vecnorm(Rsy_eq));
+        Rs_eq = [Rsx_eq,Rsy_eq,Rsz_eq];
     end
 end
 
 %% 分散の保存
-variance = zeros(size(P_stack,2),size(P_stack,3));
+variance1 = zeros(size(P_stack,2),size(P_stack,3));
 for j=1:size(P_stack,3)
-    variance(:,j) = diag(P_stack(:,:,j));
+    variance1(:,j) = diag(P_stack(:,:,j));
 end
-%% パラメータの計算
-offset_est = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
-Rsx = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
-Rsy = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(16:18);Xn(22:24);Xn(28:30)];
-Rsz = cross(Rsx/vecnorm(Rsx),Rsy/vecnorm(Rsy));
-Rs = [Rsx,Rsy,Rsz];
+variance2 = zeros(size(P_stack2(4:end,4:end,:),2),size(P_stack2,3));
+for j=1:size(P_stack2,3)
+    variance2(:,j) = diag(P_stack2(4:end,4:end,j));
+end
 %% 図示
 if illustration == 1
     fig1=figure(1);
@@ -131,7 +156,7 @@ if illustration == 1
     hold on;
     plot(ref_q(2,:),'LineWidth', 2);
     plot(ref_q(3,:),'LineWidth', 2);
-    legend('x,y,z');
+    legend('x','y','z');
     hold off;
     xlabel('step');
     ylabel('ref q');
@@ -139,7 +164,7 @@ if illustration == 1
     fig7=figure(7);
     fig7.Color = 'white';
     for i=1:3
-        plot(variance(i,:),'LineWidth', 2);
+        plot(variance1(i,:),'LineWidth', 2);
         hold on;
     end
     ylim([0 1]);
@@ -150,48 +175,47 @@ if illustration == 1
     grid on;
     fig8=figure(8);
     fig8.Color = 'white';
-    for i=4:6
-        plot(variance(i,:),'LineWidth', 2);
+    for i=4:12
+        plot(variance1(i,:),'LineWidth', 2);
         hold on;
     end
     hold off;
     ylim([0 1]);
     xlabel('step');
     ylabel('variance of offset*wallparam');
-    legend('P1*a/d','P2*a/d','P3*a/d');
+    legend('P1*a/d','P2*a/d','P3*a/d','P1*b/d','P2*b/d','P3*b/d','P1*c/d','P2*c/d','P3*c/d');
     grid on;
     fig9=figure(9);
     fig9.Color = 'white';
-    for i=13:15
-        plot(variance(i,:),'LineWidth', 2);
+    for i=13:21
+        plot(variance1(i,:),'LineWidth', 2);
         hold on;
     end
     ylim([0 1]);
     hold off;
     xlabel('step');
     ylabel('variance of offset*wallparam');
-    legend('R11*a/d','R21*a/d','R31*a/d');
+    legend('R11*a/d','R21*a/d','R31*a/d','R11*b/d','R21*b/d','R31*b/d','R11*c/d','R21*c/d','R31*c/d');
     grid on;
     fig10=figure(10);
     fig10.Color = 'white';
-    for i=16:18
-        plot(variance(i,:),'LineWidth', 2);
+    for i=1:9
+        plot(variance2(i,:),'LineWidth', 2);
         hold on;
     end
     hold off;
     ylim([0 1]);
     xlabel('step');
     ylabel('variance of offset*wallparam');
-    legend('R12*a/d','R22*a/d','R32*a/d');
+    legend('R12*a/d','R22*a/d','R32*a/d','R12*b/d','R22*b/d','R32*b/d','R12*c/d','R22*c/d','R32*c/d');
     grid on;
 end
 
 %% 関数たち
-function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,sensor_data2,R_num)
+function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,R_num)
     syms p [3 1] real
     syms Rb [3 3] real
     syms y real 
-    syms y2 real 
     syms Rs [3 3] real
     syms Rn [3 3] real
     syms psb [3 1] real
@@ -199,16 +223,12 @@ function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,sensor_data
     
     A = [a b c];
     X = p +Rb*psb + y*Rb*Rs*[1;0;0];
-    X2 = p +Rb*psb + y2*Rb*Rs*Rn*[1;0;0];
-    
-    %%
-    eq =[A d]*[X;1]+[A d]*[X2;1];
-    clear Cf
+    eq =[A d]*[X;1];
     var=[a.*psb',b.*psb',c.*psb',reshape(a*Rs,1,numel(Rs)),reshape(b*Rs,1,numel(Rs)),reshape(c*Rs,1,numel(Rs))];
     for i = 1:length(var)
-    Cf(i) = subs(simplify(eq-subs(expand(eq),var(i),0)),var(i),1);
+        Cf(i) = subs(simplify(eq-subs(expand(eq),var(i),0)),var(i),1);
     end
-    Cf = [2*p1,2*p2,2*p3,Cf];
+    Cf = [p1,p2,p3,Cf];
     ds=find(Cf==0);
     Cf(ds)=[];
     var = [a,b,c,var]/d;
@@ -216,11 +236,43 @@ function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,sensor_data
     simplify(eq/d - Cf*var' ) 
     qt = Eul2Quat(robot_q);
     qt = qt./vecnorm(qt,2);
-    A = Cf2_sens(robot_p,qt,sensor_data,sensor_data2,R_num)';
+    A = Cfa(robot_p,qt,sensor_data,R_num)';
+    ds = find(A(1,:)==0);
+    A(:,ds) = [];
+    X = pinv(A)*(-1*ones(size(A,1),1));
+end
+function [A,X,Cf,var] = param_analysis1known(robot_p, robot_q, sensor_data,R_num,Psb,R1)
+    syms p [3 1] real
+    syms Rb [3 3] real
+    syms y real 
+    syms Rs1 [3 1] real
+    syms Rs23 [3 2] real
+    syms Rn [3 3] real
+    syms psb [3 1] real
+    syms a b c d real
+    
+    A = [a b c];
+    X = p +Rb*psb + y*Rb*[Rs1,Rs23]*Rn*[1;0;0];
+    
+    %%
+    eq =[A d]*[X;1];
+    var=[reshape(a*Rs23,1,numel(Rs23)),reshape(b*Rs23,1,numel(Rs23)),reshape(c*Rs23,1,numel(Rs23))];
+    for i = 1:length(var)
+    Cf(i) = subs(simplify(eq-subs(expand(eq),var(i),0)),var(i),1);
+    end
+    Cf = [(Rb*psb)'+(Rn1_1*y*Rb*Rs1)'+[p1,p2,p3],Cf];
+    % Cf = [p1,p2,p3,Cf];
+    ds=find(Cf==0)
+    Cf(ds)=[];
+    var = [a,b,c,var]/d;
+    var(ds)=[];
+    simplify(eq/d - Cf*var' ) 
+    qt = Eul2Quat(robot_q);
+    qt = qt./vecnorm(qt,2);
+    A = Cf1known(robot_p,qt,sensor_data,R_num,Psb,R1)';
     ds = find(A(1,:)==0);
     A(:,ds) = [];
     Cf(ds)=[];
     var(ds)=[];
-    X = pinv(A)*(-2*ones(size(A,1),1));
+    X = pinv(A)*(-1*ones(size(A,1),1));
 end
-
