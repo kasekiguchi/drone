@@ -13,12 +13,18 @@ N = 3;
 qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
-%initial_state.p = [-2;-2;1];
-initial_state.p = [1; 4.8; 1.5];
+
+initial_state.p = [0; 0; 1];
 initial_state.v = [0; 0; 0];
-initial_state.O = [0; 0; -1.0996];
+initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
 initial_state.Oi = repmat([0; 0; 0], N, 1);
+
+% initial_state.p = [1; 4.8; 1.5];
+% initial_state.v = [0; 0; 0];
+% initial_state.O = [0; 0; -1.0996];
+% initial_state.wi = repmat([0; 0; 0], N, 1);
+% initial_state.Oi = repmat([0; 0; 0], N, 1);
 
 if contains(qtype, "zup")
     initial_state.qi = -1 * repmat([0; 0; 1], N, 1);
@@ -73,7 +79,7 @@ for i = 1:1000
 end
 
 %%
-logger.plot({1, "p", "pr"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"})
+logger.plot({1, "p", "p"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"})
 %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
