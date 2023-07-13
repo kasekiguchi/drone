@@ -1,39 +1,83 @@
-function Controller = Controller_MCMPC(dt,H)
-% 線形システムにMCMPCコントローラを適用する場合
-% H : horizon
-A2 = [0 1;0 0]; B2 = [0;1];
-[Ad,Bd] = c2d(A2,B2,dt);
-[AN2,BN2] = calc_horizon_for_linear_system(Ad,Bd,H);
-A4 = [zeros(3,1),eye(3);zeros(1,4)]; B4 = [0;0;0;1];
-[Ad,Bd] = c2d(A4,B4,dt);
-[AN4,BN4] = calc_horizon_for_linear_system(Ad,Bd,H);
-Q2 = eye(2);
-Q4 = eye(4);
-R2 = 1;
-R4 = 1;
-QH2 = kron(eye(H),Q2);
-QH4 = kron(eye(H),Q4);
-RH2 = kron(eye(H),R2);
-RH4 = kron(eye(H),R4);
-% 以下サブシステムごとに評価関数を計算
-syms V1 [H 1] real
-syms V2 [H 1] real
-syms V3 [H 1] real
-syms V4 [H 1] real
-syms z01 [2 1] real
-syms z02 [4 1] real
-syms z03 [4 1] real
-syms z04 [2 1] real
+function Controller = Controller_MCMPC(~)
+%UNTITLED この関数の概要をここに記述
+%   詳細説明をここに記述
+    Controller_param.dt = 0.1; % MPCステップ幅
+    Controller_param.H = 10;
+    Controller_param.Maxparticle_num = 10000;
+    Controller_param.particle_num = Controller_param.Maxparticle_num;
+    Controller_param.Minparticle_num = 5000;
+    Controller_param.input.Initsigma = 0.01;
+    Controller_param.input.Constsigma = 5.0;
+    Controller_param.input.Maxsigma = 1.0;
+    Controller_param.input.Minsigma = 0.01;
+    Controller_param.input.Maxinput = 1.5;
 
-ZH1 = AN2*z01+BN2*V1;
-ZH2 = AN4*z02+BN4*V2;
-ZH3 = AN4*z03+BN4*V3;
-ZH4 = AN2*z04+BN2*V4;
-JH1 = ZH1'*QH2*ZH1 + V1'*RH2*V1;
-JH2 = ZH2'*QH4*ZH2 + V2'*RH4*V2;
-JH3 = ZH3'*QH4*ZH3 + V3'*RH4*V3;
-JH4 = ZH4'*QH2*ZH4 + V4'*RH2*V4;
-Controller.J = matlabFunction(JH1 + JH2 + JH3 + JH4,'vars',{z01,z02,z03,z04,V1,V2,V3,V4}); % 評価関数
-Controller.S = 200; % サンプル数
-Controller.dt = dt;
+    Controller_param.soft = 2.5;
+
+    Controller_param.ConstEval = 100000;
+    
+    Controller_param.const.X = -0.5;
+    Controller_param.const.Y = -0.5;
+
+    Controller_param.obsX = 3;
+    Controller_param.obsY = 0;
+
+    Controller_param.total_size = 16;
+    Controller_param.state_size = 12;
+    Controller_param.input_size = 4;
+
+    %% 離陸
+%     Controller_param.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
+%     Controller_param.V = diag([1.0; 1.0; 1.0]);    % 速度
+%     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+%     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+%     Controller_param.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
+
+    %% 円旋回
+    %SICE 重み
+    Controller_param.P = diag([100.0; 100.0; 1000.0]);    % 座標   1000 1000 10000
+    Controller_param.V = 100 * diag([100.0; 100.0; 1000.0]);    % 速度
+    Controller_param.R = 0.1*diag([1.0; 10000.0; 10000.0; 10000.0]); % 入力
+    Controller_param.RP = 0 * diag([1.0,; 1000.0; 1000.0; 1000.0]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.QW = diag([1000; 1; 2000; 1; 1; 1]);  % 姿勢角、角速度
+
+    Controller_param.Qapf = 0;
+    Controller_param.C = 0*1000;  % yaw姿勢角の係数
+    Controller_param.CA = 0*10; % 高度による係数
+    Controller_param.Ca = 0*10; % pitch
+    Controller_param.CV = 0*10000; % 速度の係数
+    
+    
+    Controller_param.Pf = diag([1e4; 1e4; 1e3]); % 6
+    Controller_param.Vf = diag([1e2; 1e2; 1e3]); % 6
+    Controller_param.QWf = diag([1e20; 1e20; 1; 1; 1; 1]); % 7,8
+    % Controller_param.QWf = Controller_param.QW;
+    Controller_param.input.u = 0.269*9.81 * [1;0;0;0];  % old version
+    Controller_param.ref_input = 0.269*9.81 * [1;0;0;0];
+
+    %% 姿勢角
+%     Controller_param.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
+%     Controller_param.V = diag([100.0; 100.0; 1.0]);    % 速度
+%     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+%     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+%     Controller_param.QW = diag([100000; 100000; 100000; 100; 100; 1]);  % 姿勢角、角速度
+%     
+%     Controller_param.Pf = 100 * diag([100.0; 100.0; 100.0]);
+%     Controller_param.Vf = diag([100.0; 100.0; 1.0]);
+%     Controller_param.QWf = diag([100; 100; 100; 1; 1; 1]);
+
+    %%
+%     Controller_param.P = diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
+%     Controller_param.V = diag([100.0; 100.0; 1.0]);    % 速度
+%     Controller_param.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+%     Controller_param.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+%     Controller_param.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+
+
+
+
+    Controller.name = "mcmpc";
+    Controller.type = "MCMPC_controller_org";
+    Controller.param = Controller_param;
+
 end
