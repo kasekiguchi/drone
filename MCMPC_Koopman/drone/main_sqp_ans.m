@@ -23,15 +23,15 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
     Params.dt = 0.25;
-    idx = 0;
+    idx = 0; %プログラムの周回数
     totalT = 0;
 
-%Koopman
-%     load('C:\Users\kiyam\Documents\卒業研究\GitHub2\drone\MCMPC_Koopman\drone\EstimationResult_12state_6_26_circle.mat','est');
-%     Params.A = est.A;
-%     Params.B = est.B;
-%     Params.C = est.C;
-%     Params.f = @(x) [x;1];
+% %Koopman
+%     load('C:\Users\student\Documents\GitHub\drone\MCMPC_Koopman\drone\EstimationResult_12state_6_26_circle.mat','est');
+%     A = est.A;
+%     B = est.B;
+%     C = est.C;
+%     f = @(x) [x;1];
     %% 重みの設定
     
 %     Params.Weight.P =  diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
@@ -86,6 +86,15 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     problem.options = options;  % 
 
     x = agent.estimator.result.state.get();
+
+    %Koopman
+    load('C:\Users\student\Documents\GitHub\drone\MCMPC_Koopman\drone\EstimationResult_12state_6_26_circle.mat','est');
+    A = est.A;
+    B = est.B;
+    C = est.C;
+    f = @(x) [x;1];
+
+    xc = f(x); %複素空間へ値を写像
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
 
     xr = zeros(Params.state_size+Params.input_size, Params.H);
@@ -100,6 +109,7 @@ try
     while round(time.t, 5) <= te
         tic
         idx = idx + 1;
+%         profile on;
         %% sensor
         %    tic
         tStart = tic;
@@ -155,11 +165,13 @@ end
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
     %-- newton and sqp MPC controller
         x = agent.estimator.result.state.get(); % これ追加10/14　よくなった気がする
+        xc = f(x); %複素空間へ値を写像
         %-- MPCパラメータを構造体に格納
             Params.ts = 0;
             Params.xr = xr;
 %             Params.ur = ur;
             Params.X0= x;   % 現在状態の記録
+            
         %-- 状態の表示
             state_monte = agent.model.state;
             ref_monte = agent.reference.result.state;
@@ -183,12 +195,14 @@ end
 %                 previous_state(Params.state_size+1:Params.total_size, 1:Params.H) = repmat(x0, 1, Params.H);
             
             % MPC設定(problem)
-            problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
-            problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
+            problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
+%             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
+            problem.objective = @(x) Objective(xc, x,  Params, agent);            % 評価関数
+%             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
-            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem);
+            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             % 制御入力の決定
-            previous_state = var   % 初期値の書き換え
+            previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
             fprintf("\tfval : %f\n", fval)
         %TODO: 1列目のvarが一切変動しない問題に対処
             if var(Params.state_size+1:Params.total_size, end) > 1.0
@@ -201,11 +215,12 @@ end
                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
 
-            agent.input = var(Params.state_size+1:Params.total_size, 1);    % 2なら飛んだ
+            agent.input = var(Params.state_size+1:Params.total_size, 1);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
     
         end   
         %-- データ保存
-            data.bestcost = fval;
+            data.bestcost = fval; %もっともよい評価値を保存
+
 %             data.bestcost(idx) = output.bestfeasible.fval; 
 %             data.pathJ{idx} = output.bestfeasible.fval; % - 全サンプルの評価値
 %             data.sigma(idx) = sigma;
@@ -217,17 +232,17 @@ end
         figure(FH)
         drawnow
 
-        for i = 1:N                         % 状態更新
+        for i = 1:N  % 状態更新
             model_param.param = agent(i).model.param;
             model_param.FH = FH;
-            agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算
+            agent(i).do_model(model_param); % 算出した入力と推定した状態を元に状態の1ステップ予測を計算 model_param：DRONE_PARAMで設定した値
             % ここでモデルの計算
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
 
         % for exp
-        if fExp
+        if fExp %実機
             %% logging
             calculation1 = toc(tStart);
             time.t = time.t + calculation1;
@@ -235,17 +250,17 @@ end
             calculation2 = toc(tStart);
             time.t = time.t + calculation2 - calculation1;
         else
-            logger.logging(time.t, FH, agent);
+            logger.logging(time.t, FH, agent); %値の記録
 
             if (fOffline)
                 time.t
             else
-                time.t = time.t + dt % for sim
+                time.t = time.t + dt % for sim 時刻の更新
             end
 
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
-        totalT = totalT + calT;
+        totalT = totalT + calT; %すべての計算を終えるまでにかかった時間
         
         %% 逐次プロット
 %         figure(10);
@@ -270,6 +285,7 @@ end
 %         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
         drawnow 
+%        profile viewer;
     end
 
 catch ME % for error
@@ -283,7 +299,7 @@ catch ME % for error
 end
 
 %profile viewer
-%%
+%%グラフの描画
 close all
 
 size_best = size(data.bestcost, 2);
@@ -315,14 +331,14 @@ logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, 
 %%
 % logger.save();
 
-function [eval] = Objective(x, params, Agent) % x : p q v w input
+function [eval] = Objective(xc, x, params, Agent) % x : p q v w input
 %-- 評価計算をする関数
 %-- 現在の状態および入力
 %     x = repmat(x, 1, params.H);
-    Xp = x(1:3, :);
-    Xq = x(4:6, :);
-    Xv = x(7:9, :);  
-    Xw = x(10:12, :);
+    Xp = xc(1:3, :);
+    Xq = xc(4:6, :);
+    Xv = xc(7:9, :);  
+    Xw = xc(10:12, :);
     U = x(13:16, :);
     
 %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
@@ -358,6 +374,7 @@ function [c, ceq] = Constraints(x, params, Agent, ~)
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
     X = x(1:params.state_size, :);          % 12 * Params.H 
+    Xc = f(X);
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
 
 %- ダイナミクス拘束
@@ -370,8 +387,9 @@ function [c, ceq] = Constraints(x, params, Agent, ~)
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],params.X0);
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
 %         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-        tmpx = xp + params.dt * Agent.model.method(xx, xu, Agent.parameter.get());
-        ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？
+%         tmpx = xp + params.dt * Agent.model.method(xx, xu, Agent.parameter.get()); %非線形モデル
+        tmpx = Params.A * Xc + Params.B * U;
+        ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
 %     c(:, 1) = [];
