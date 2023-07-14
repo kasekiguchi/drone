@@ -45,13 +45,13 @@ z = 1;
 % y = 2*(1 - cos(t));
 % z = 1;
 %% landing
-T = 10;  % Time
-rz0 = 0.01; % start
-rz = 1; % target
-
-a = -2/T^3 * (rz-rz0);
-b = 3/T^2 * (rz-rz0);
-z = a*(t)^3+b*(t)^2+rz0;
+% T = 10;  % Time
+% rz0 = 0.01; % start
+% rz = 1; % target
+% 
+% a = -2/T^3 * (rz-rz0);
+% b = 3/T^2 * (rz-rz0);
+% z = a*(t)^3+b*(t)^2+rz0;
 
 %%
 ref=@(t)[x;y;z;0];  % xyz yaw

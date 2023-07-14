@@ -21,10 +21,17 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- MPC関連 変数定義 
-    Params.H = 3;  % 10
+    Params.H = 10;  % 10
     Params.dt = 0.25;
     idx = 0;
     totalT = 0;
+
+%Koopman
+%     load('C:\Users\kiyam\Documents\卒業研究\GitHub2\drone\MCMPC_Koopman\drone\EstimationResult_12state_6_26_circle.mat','est');
+%     Params.A = est.A;
+%     Params.B = est.B;
+%     Params.C = est.C;
+%     Params.f = @(x) [x;1];
     
 %-- 重み
 %     Params.Weight.P =  diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
@@ -240,26 +247,26 @@ end
         totalT = totalT + calT;
         
         %% 逐次プロット
-        figure(10);
-        clf
-        Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-        TvC = 0:Params.dt:te;
-        %% circle
-        CRx = cos(TvC/2);
-        CRy = sin(TvC/2);
-
-        plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
-        plot(Tv, xr(2, :), '-', 'LineWidth', 2);
-
-        plot(TvC, CRx, '--', 'LineWidth', 1);
-        plot(TvC, CRy, '--', 'LineWidth', 1);
-        plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-        plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-        hold off;
-        xlabel("Time [s]"); ylabel("Reference [m]");
-        legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
-%         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
-        xlim([0 te]); ylim([-inf inf+0.1]); 
+%         figure(10);
+%         clf
+%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
+%         TvC = 0:Params.dt:te;
+%         %% circle
+%         CRx = cos(TvC/2);
+%         CRy = sin(TvC/2);
+% 
+%         plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
+%         plot(Tv, xr(2, :), '-', 'LineWidth', 2);
+% 
+%         plot(TvC, CRx, '--', 'LineWidth', 1);
+%         plot(TvC, CRy, '--', 'LineWidth', 1);
+%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
+%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
+%         hold off;
+%         xlabel("Time [s]"); ylabel("Reference [m]");
+%         legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
+% %         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
+%         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
         drawnow 
     end
@@ -295,14 +302,14 @@ set(0, 'defaultTextFontSize', Fontsize);
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, "p1-p2-p3", "er"}, "time", [0, timeMax], "fig_num",1,"row_col",[2,3]);
 
 %% Difference of Pos
-figure(7);
-plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+% figure(7);
+% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();

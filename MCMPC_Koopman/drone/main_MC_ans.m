@@ -34,7 +34,6 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     fc = 0;     % 着陸したときだけx，y座標を取得
     totalT = 0;
     idx = 0;
-    a = 0;
 
     %-- 初期設定 controller.mと同期させる
     Params.H = 10;   %Params.H
@@ -120,7 +119,6 @@ end
 %             xr = Reference(Params, time.t, X);
             % controller
             param(i).controller.mcmpc = {idx, xr};    % 入力算出 / controller.name = hlc
-            a = a + 1
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -297,7 +295,7 @@ Vdata = logger.data(1, "v", "e")';
 Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 logt = logger.data('t',[],[]);
-Diff = Edata - Rdata(1:3, :);
+% Diff = Edata - Rdata(1:3, :);
 xmax = te;
 close all
 
@@ -308,7 +306,7 @@ grid on; xlim([0 xmax]); ylim([-inf inf+0.5]);
 % atiitude
 figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-grid on; xlim([0 xmax]); ylim([-1 1]);
+grid on; xlim([0 xmax]); ylim([-inf inf]);
 % velocity
 figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
@@ -317,7 +315,7 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 figure(4); plot(logt, Idata); 
 xlabel("Time [s]"); ylabel("Input"); legend("u1", "u2", "u3", "u4");
 % grid on; xlim([0 xmax]); ylim([-inf inf]);
-grid on; xlim([0 xmax]); ylim([0 2]);
+grid on; xlim([0 xmax]); ylim([-inf inf]);
 
 % % position
 % figure(1); plot(logt, Edata, 'LineWidth', 2); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
@@ -336,14 +334,14 @@ grid on; xlim([0 xmax]); ylim([0 2]);
 % xlabel("Time [s]"); ylabel("Input");
 % grid on; title("Time change of Input"); xlim([0 xmax]); ylim([-inf inf]);
 %% Difference of Pos
-figure(7);
-plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Position [m]"); xlabel("time [s]"); xlim([0 10])
+% figure(7);
+% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Position [m]"); xlabel("time [s]"); xlim([0 10])
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"target",1);
 
 %%
 % logger.save();

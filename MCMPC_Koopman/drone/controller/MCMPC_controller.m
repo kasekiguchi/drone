@@ -42,17 +42,17 @@ classdef MCMPC_controller < CONTROLLER_CLASS
             obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
             obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
-            % obj.state.constant = ones(obj.param.H,obj.param.particle_num);
-            % obj.state.constant = repmat(reshape(obj.state.constant, [1, size(obj.state.constant)]),1, 1);
-            % obj.A = obj.param.model.est.A; %係数行列A, 複素数空間上での値
-            % obj.B = obj.param.model.est.B; %入力ベクトルB, 複素数空間上での値
-            % obj.C = obj.param.model.est.C; %出力ベクトル
-            % obj.f = @(x) [x;1];%観測量
+            obj.state.constant = ones(obj.param.H,obj.param.particle_num);
+            obj.state.constant = repmat(reshape(obj.state.constant, [1, size(obj.state.constant)]),1, 1);
+            obj.A = obj.param.model.est.A; %係数行列A, 複素数空間上での値
+            obj.B = obj.param.model.est.B; %入力ベクトルB, 複素数空間上での値
+            obj.C = obj.param.model.est.C; %出力ベクトル
+            obj.f = @(x) [x;1];%観測量
 
             % p , q, v, w
                 %~ ホライズン×サンプル数の配列初期化
                 %~ 状態数×ホライズン×サンプル数に次元変換
-            % obj.state.state_data_koopman = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data;obj.state.constant];
+            obj.state.state_data_koopman = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data;obj.state.constant];
             obj.state.state_data = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data];
         end%(ここまでは一回目のみ読み込まれる)
         
@@ -91,7 +91,7 @@ classdef MCMPC_controller < CONTROLLER_CLASS
 
             %-- 現在状態の取得
             obj.previous_state.x0 = obj.self.estimator.result.state.get(); %12 * 1
-            % obj.previous_state.x0C = obj.f(obj.previous_state.x0); %現在状態を複素数の集合へ写像
+            obj.previous_state.x0C = obj.f(obj.previous_state.x0); %現在状態を複素数の集合へ写像
             %(上の式の右辺はagent(どこからでもアクセスできる)から引っ張ってきている)
             % obj.self:agentにアクセス
             % estimator → result → state:agentの中のestimatorの中のresultの中のstateにアクセス，get()で中身をすべてobj.previous_state.x0に代入
@@ -141,18 +141,18 @@ classdef MCMPC_controller < CONTROLLER_CLASS
             ts = 0; % 一応初期化, odeで用いる
             % 予測軌道計算
             for i = 1:obj.param.particle_num %サンプル数
-                obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
-                % obj.state.y0 = obj.previous_state.x0C;
-                % obj.state.state_data_koopman(:,1,i) = obj.state.y0; %y0を初期値に設定
-                obj.state.state_data(:,1,i) = obj.state.y0; %y0を初期値に設定
+%                 obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
+                obj.state.y0 = obj.previous_state.x0C;
+                obj.state.state_data_koopman(:,1,i) = obj.state.y0; %y0を初期値に設定
+%                 obj.state.state_data(:,1,i) = obj.state.y0; %y0を初期値に設定
                 for j = 1:obj.param.H - 1 %ホライズン数分繰り返し
                     %モデルの計算
-                    obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
-                    % obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i); %クープマンモデル，複素数空間上での値
-                    % obj.state.state_data_koopman(:,j+1,i) = obj.state.y0; %j+1の理由：初期位置を除くから
-                    % obj.state.xhat = obj.C*obj.state.y0; %複素空間から実空間へ値を戻す
-                    % obj.state.state_data (:,j+1,i) = obj.state.xhat;
-                    obj.state.state_data (:,j+1,i) = obj.state.y0;
+%                     obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
+                    obj.state.y0 = obj.A*obj.state.y0 + obj.B*obj.input.u1(:,j,i); %クープマンモデル，複素数空間上での値
+                    obj.state.state_data_koopman(:,j+1,i) = obj.state.y0; %j+1の理由：初期位置を除くから
+                    obj.state.xhat = obj.C*obj.state.y0; %複素空間から実空間へ値を戻す
+                    obj.state.state_data (:,j+1,i) = obj.state.xhat;
+%                     obj.state.state_data (:,j+1,i) = obj.state.y0;
                 end
             end
             predict_state = obj.state.state_data; %戻り値predict_stateに予測した値を代入
