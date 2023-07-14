@@ -26,18 +26,23 @@ classdef DENSITY_MAP < ENV_CLASS
         d % grid間距離
         map_min % polygonを内包する長方形閉包の最小値座標
         map_max % polygonを内包する長方形閉包の最大値座標
-        xq % x 方向の各gridに対応した実座標： n x 1
-        yq % y 方向の各gridに対応した実座標： n x 1
+        xp % x 方向の各gridに対応した実座標： n x 1
+        yp % y 方向の各gridに対応した実座標： n x 1
+        xq % グリッドマップのインデックスに対応した x 実座標： n x m グリッドサイズ
+        yq % グリッドマップのインデックスに対応した y 実座標： n x m グリッドサイズ
         phi % phi(i) : (xq(i), yq(i)) の位置での重要度の値．n x 1  : = reshape(grid_density,[n 1]);
         grid_density % 各grid 点でのdensity 値 grid_density(i,j) : 実座標のd (i, j) の位置にあるセルの重要度
         grid_row % grid の行数 : min:d:max
         grid_col % grid の列数 : min:d:max
         grid_n % grid 数 row x col
+        grid_in % gridがpolyshape内か判別するためのlogical行列 n x m グリッドサイズ
         density_sigma
         param % dummy
     end
     methods
         function obj = DENSITY_MAP(param)
+            % TODO yamak_com 環境マップとしてポリシェイプの変数を持つべき
+            % TODO yamak_com グリッドがポリシェイプ内か判別するフラグを持つbool行列を持つべき
             obj.d = param.d;
             obj.q = param.q;
             obj.Vertices= param.Vertices;    
@@ -46,12 +51,14 @@ classdef DENSITY_MAP < ENV_CLASS
             else
                 obj.density_sigma=0.04;
             end
-            [obj.grid_density,obj.map_max,obj.map_min,obj.xq,obj.yq]=gen_map(param.Vertices,param.d,param.q,obj.density_sigma);
+            [obj.grid_density, obj.map_max, obj.map_min, obj.xp, obj.yp, obj.xq, obj.yq, obj.grid_in] = gen_map(param.Vertices,param.d,param.q,obj.density_sigma);
             obj.discrete=1;
-            obj.grid_row=length(obj.map_min(1):obj.d:obj.map_max(1));
-            obj.grid_col=length(obj.map_min(2):obj.d:obj.map_max(2));
-            obj.grid_n = obj.grid_row*obj.grid_col;%length(obj.row)*length(obj.col);
+            obj.grid_row=length(obj.xp); 
+            obj.grid_col=length(obj.yp); 
+            obj.grid_n = length(obj.xq);
         end
+
+
         function [] = show(obj,varargin)
             %s=surf(1:obj.grid_row,1:obj.grid_col,obj.grid_density);
             %s.VerticesColor = 'none';
