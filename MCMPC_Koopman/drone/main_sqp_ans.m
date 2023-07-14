@@ -32,8 +32,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.B = est.B;
 %     Params.C = est.C;
 %     Params.f = @(x) [x;1];
+    %% 重みの設定
     
-%-- 重み
 %     Params.Weight.P =  diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
 %     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
 %     Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
@@ -42,19 +42,20 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.RP = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
 %     Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
 
-    %% 離陸
+% 離陸
 %     Params.Weight.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
 %     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
 %     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
 %     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
-    %% 円旋回(重みの設定)
+    % 円旋回(重みの設定)
     Params.Weight.P = diag([10.0; 10.0; 1000.0]);    % 座標   1000 1000 100
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
     Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
+    %% 
     
 %-- data
     data.bestcost(idx+1) = 0;           % - もっともよい評価値
@@ -64,8 +65,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     data.input{idx+1} = 0;
 
 %-- 配列サイズ
-    Params.state_size = 12;
-    Params.input_size = 4;
+    Params.state_size = 12; %12状態
+    Params.input_size = 4;  %4つの入力
     Params.total_size = Params.state_size + Params.input_size;
 
 %-- 目標値等
