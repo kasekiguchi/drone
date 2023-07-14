@@ -29,11 +29,13 @@ classdef RANGE_DENSITY_SIM < handle
             % 【入力】varargin = {{Env}}      agent : センサーを積んでいる機体obj,    Env：観測対象のEnv_obj
             Env=varargin{1}{4};
             state=obj.self.plant.state; % 真値
-            env = polyshape(Env.Vertices);
+            env = polyshape(Env.Vertices); % TODO コンスタントなのでENVファイルの中でやるべき
+
 
             %% センシング領域を定義
-            tmp = 0:0.1:2*pi;
-            sensor_range=polyshape(state.p(1)+obj.r*sin(tmp),state.p(2)+obj.r*cos(tmp)); % エージェントの位置を中心とした円
+            ray_direction = 0:0.1:2*pi; % TODO コンストラクタで実行すべき
+            sensor_range=polyshape(state.p(1)+obj.r*sin(ray_direction),state.p(2)+obj.r*cos(ray_direction)); % エージェントの位置を中心とした円
+            % TODO 
 
             %% 領域と環境のintersectionが測距領域
             region=intersect(sensor_range, env); % 測距領域
