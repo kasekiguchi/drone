@@ -22,11 +22,11 @@ classdef RANGE_DENSITY_FRONT < handle
             if isfield(Env,'r'); obj.r = Env.r; end
             if isfield(Env,'d'); obj.d = Env.d; end
             if isfield(Env,'direction_range') 
-                obj.ray_direction = Env.direction_range(0):obj.d:Env.direction_range(1);
-                obj.sensor_poly = polyshape([0 obj.r*sin(obj.ray_direction)], [0 obj.r*cos(obj.ray_direction)]);
+                obj.ray_direction = Env.direction_range(1):obj.d:Env.direction_range(2);
+                obj.sensor_poly = polyshape([0 obj.r*cos(obj.ray_direction)], [0 obj.r*sin(obj.ray_direction)]);
             else
                 obj.ray_direction = -pi:obj.d:pi; 
-                obj.sensor_poly = polyshape(obj.r*sin(obj.ray_direction), obj.r*cos(obj.ray_direction));
+                obj.sensor_poly = polyshape(obj.r*cos(obj.ray_direction), obj.r*sin(obj.ray_direction));
             end
         end
 
@@ -46,7 +46,7 @@ classdef RANGE_DENSITY_FRONT < handle
             end
 
             e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
-            sensor_range = rotate(obj.sensor_poly,e2r_ang) ;
+            sensor_range = rotate(obj.sensor_poly,e2r_ang*180/pi) ;
             sensor_range = translate(sensor_range , pos(1:2)'); % エージェントの位置を中心とした円
 
             %% 領域と環境のintersectionが測距領域
