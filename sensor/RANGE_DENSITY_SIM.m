@@ -13,14 +13,21 @@ classdef RANGE_DENSITY_SIM < handle
     end
     properties (SetAccess = private) % construct したら変えない値．
         r = 10;
+        d = 0.01;
     end
 
     methods
         function obj = RANGE_DENSITY_SIM(self,Env)
             obj.self=self;
-            if isfield(Env,'r'); obj.r= Env.r;end
-            obj.ray_direction = -pi:0.01:pi;
-            obj.sensor_poly = polyshape(obj.r*sin(obj.ray_direction), obj.r*cos(obj.ray_direction));
+            if isfield(Env,'r'); obj.r = Env.r; end
+            if isfield(Env,'d'); obj.d = Env.d; end
+            if isfield(Env,'direction_range') 
+                obj.ray_direction = Env.direction_range(0):obj.d:Env.direction_range(1);
+                obj.sensor_poly = polyshape([0 obj.r*sin(obj.ray_direction)], [0 obj.r*cos(obj.ray_direction)]);
+            else
+                obj.ray_direction = -pi:obj.d:pi; 
+                obj.sensor_poly = polyshape(obj.r*sin(obj.ray_direction), obj.r*cos(obj.ray_direction));
+            end
         end
 
         function result = do(obj,varargin)
@@ -33,7 +40,15 @@ classdef RANGE_DENSITY_SIM < handle
 
 
             %% センシング領域を定義
-            sensor_range=translate(obj.sensor_poly , pos(1:2)'); % エージェントの位置を中心とした円
+            if size(obj.self.reference.result.state.p) == [3 1]
+                e2r_vector = obj.self.reference.result.state.p - pos;
+            else
+                e2r_vector = [1;0;0];
+            end
+
+            e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
+            sensor_range = rotate(obj.sensor_poly,e2r_ang) ;
+            sensor_range = translate(sensor_range , pos(1:2)'); % エージェントの位置を中心とした円
 
             %% 領域と環境のintersectionが測距領域
             region=intersect(sensor_range, env); % LiDARのサークルとENVを比較し切り出す

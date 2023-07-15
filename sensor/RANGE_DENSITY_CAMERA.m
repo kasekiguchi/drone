@@ -10,7 +10,6 @@ classdef RANGE_DENSITY_CAMERA < handle
 
         ray_direction % LiDAR点群の照射方向 
         sensor_poly
-        d
     end
     properties (SetAccess = private) % construct したら変えない値．
         r = 10;
@@ -21,7 +20,7 @@ classdef RANGE_DENSITY_CAMERA < handle
         function obj = RANGE_DENSITY_CAMERA(self,Env)
             obj.self=self;
             if isfield(Env,'r'); obj.r = Env.r; end
-            if isfield(Env,'d'); obj.d = Env.d; else; obj.d = 0.01 ;end
+            if isfield(Env,'d'); obj.d = Env.d; end
             if isfield(Env,'direction_range') 
                 obj.ray_direction = Env.direction_range(0):obj.d:Env.direction_range(1);
                 obj.sensor_poly = polyshape([0 obj.r*sin(obj.ray_direction)], [0 obj.r*cos(obj.ray_direction)]);
@@ -40,7 +39,15 @@ classdef RANGE_DENSITY_CAMERA < handle
             env = Env.poly;
 
             %% センシング領域を定義
-            sensor_range=translate(obj.sensor_poly , pos(1:2)'); % エージェントの位置を中心とした円
+            if size(obj.self.reference.result.state.p) == [3 1]
+                e2r_vector = obj.self.reference.result.state.p - pos;
+            else
+                e2r_vector = [1;0;0];
+            end
+
+            e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
+            sensor_range = rotate(obj.sensor_poly,e2r_ang) ;
+            sensor_range = translate(sensor_range , pos(1:2)'); % エージェントの位置を中心とした円
 
             %% 領域と環境のintersectionが測距領域
             region=intersect(sensor_range, env); % LiDARのサークルとENVを比較し切り出す
