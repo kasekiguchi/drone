@@ -39,24 +39,23 @@ classdef RANGE_DENSITY_SIM < handle
             region=intersect(sensor_range, env); % LiDARのサークルとENVを比較し切り出す
             circ = sensor_range.Vertices; % sensor_rangeの頂点
 
-            result.angle =  obj.ray_direction;% NOTE 不要では？
-            result.sensor_points = circ; % 配列の初期化
+            sensor_points = circ; % 配列の初期化
             for i = 1:length(circ)
                 [in,~] = intersect(region, [pos(1:2)';circ(i, :) ]);
                 if isempty(in)
                     % LiDARで測れる距離にいない
-                    result.sensor_points(i,:) = pos(1:2)';% 測距距離が0とみなしAgent座標をLiDAR点群とする．
+                    sensor_points(i,:) = pos(1:2)';% 測距距離が0とみなしAgent座標をLiDAR点群とする．
                 else
                     [~,ii]= mink(vecnorm(in-pos(1:2)',2,2),2);
-                    result.sensor_points(i,:) = in(ii(2),:);
+                    sensor_points(i,:) = in(ii(2),:);
                 end
             end
             
-            region = polyshape( result.sensor_points(:,1),result.sensor_points(:,2));
+            region = polyshape( sensor_points(:,1),sensor_points(:,2));
 
             %% 重み分布
-            pmap_min = min(result.sensor_points,[],1);
-            pmap_max = max(result.sensor_points,[],1);
+            pmap_min = min(sensor_points,[],1);
+            pmap_max = max(sensor_points,[],1);
             
             map_x_index = find(all([pmap_min(1) <= Env.xp ; Env.xp <= pmap_max(1) ],1)) ;
             map_y_index = find(all([pmap_min(2) <= Env.yp ; Env.yp <= pmap_max(2) ],1)) ;
@@ -67,6 +66,9 @@ classdef RANGE_DENSITY_SIM < handle
             region_phi = Env.grid_density(map_x_index,map_y_index);
             in = reshape(isinterior(region,xq(:),yq(:)),size(xq));
             
+            % RESULTの処理
+            result.angle =  obj.ray_direction;
+            result.sensor_points = sensor_points;
             result.grid_density = region_phi.*in;
             result.xq=xq-pos(1);
             result.yq=yq-pos(2);
