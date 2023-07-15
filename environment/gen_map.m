@@ -1,4 +1,4 @@
-function [grid_density,map_max,map_min,xp,yp,xq,yq,in] = gen_map(Vertex,d,q,sigma)
+function [grid_density,map_max,map_min,xp,yp,xq,yq,in,poly] = gen_map(Vertex,d,q,sigma)
 % Vertex : 対象領域
 % d : グリッド幅
 % q : 重要度の位置 [xi yi] を縦に並べる
@@ -18,6 +18,7 @@ function [grid_density,map_max,map_min,xp,yp,xq,yq,in] = gen_map(Vertex,d,q,sigm
     [row,col]=size(xq);
     xv=Vertex(:,1); % 領域 頂点x座標
     yv=Vertex(:,2); % 領域 頂点y座標
+    poly = polyshape(xv,yv);
     in= inpolygon(xq,yq,xv,yv); % map 座標が領域に含まれるかの判別  ：領域内1 領域外0
     %% 重要度
     if isempty(q) % q = []  => 一様分布

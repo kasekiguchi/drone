@@ -36,6 +36,7 @@ classdef DENSITY_MAP < ENV_CLASS
         grid_col % grid の列数 : min:d:max
         grid_n % grid 数 row x col
         grid_in % gridがpolyshape内か判別するためのlogical行列 n x m グリッドサイズ
+        poly % ENV環境のPolyshape
         density_sigma
         param % dummy
     end
@@ -51,7 +52,7 @@ classdef DENSITY_MAP < ENV_CLASS
             else
                 obj.density_sigma=0.04;
             end
-            [obj.grid_density, obj.map_max, obj.map_min, obj.xp, obj.yp, obj.xq, obj.yq, obj.grid_in] = gen_map(param.Vertices,param.d,param.q,obj.density_sigma);
+            [obj.grid_density, obj.map_max, obj.map_min, obj.xp, obj.yp, obj.xq, obj.yq, obj.grid_in, obj.poly] = gen_map(param.Vertices,param.d,param.q,obj.density_sigma);
             obj.discrete=1;
             obj.grid_row=length(obj.xp); 
             obj.grid_col=length(obj.yp); 
