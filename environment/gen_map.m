@@ -8,8 +8,8 @@ function [grid_density,map_max,map_min,xp,yp,xq,yq,in,poly] = gen_map(Vertex,d,q
 % グラフ表示するときに工夫する
     map_max=max(Vertex); % 領域を囲う長方形の右上座標
     map_min=min(Vertex); % 領域を囲う長方形の左下座標
-    xp = map_min(1):d:map_max(1);
-    yp = map_min(2):d:map_max(2);
+    xp = map_min(1)+d/2:d:map_max(1)-d/2;
+    yp = map_min(2)+d/2:d:map_max(2)-d/2;
     [xq,yq]=meshgrid(xp,yp); %
     % 領域が (-1,-1) から(2,1)の場合
     % xq = [-1,0,1,2;-1,0,1,2;-1,0,1,2],  yq = [-1,-1,-1,-1;0,0,0,0;1,1,1,1];
