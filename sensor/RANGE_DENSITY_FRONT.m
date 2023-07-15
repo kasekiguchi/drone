@@ -78,12 +78,19 @@ classdef RANGE_DENSITY_FRONT < handle
             xq=xq'; yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
 
             region_phi = Env.grid_density(map_x_index,map_y_index);
-            in = reshape(isinterior(region,xq(:),yq(:)),size(xq));
+            if ~isempty(xq(:)); in = reshape(isinterior(region,xq(:),yq(:)),size(xq));end
             
             %% RESULTの処理
             result.density_front.sensor_points = sensor_points;
             result.density_front.angle         = obj.ray_direction;
-            result.density_front.grid_density  = region_phi.*in;
+            if isempty(in) 
+                result.density_front.grid_density = [];
+            else
+                result.density_front.grid_density  = region_phi.*in;
+            end
+            result.density_front.in            = in;
+            result.density_front.map_xi        = map_x_index;
+            result.density_front.map_yi        = map_y_index;
             result.density_front.xq            = xq-pos(1);
             result.density_front.yq            = yq-pos(2);
             result.density_front.map_min       = pmap_min-pos(1:2)';

@@ -40,6 +40,9 @@ classdef VORONOI_BARYCENTER < handle
       %% LiDAR 部分のボロノイ領域算出
       LiDAR_V = poly_volonoi(state,sensor.neighbor,sensor.region,void,R);
       [LiDAR_cent, LiDAR_mass] = map_centre_of_gravity(sensor.xq , sensor.yq , sensor.grid_density,LiDAR_V);
+      if sum(isnan(LiDAR_cent))>0
+        LiDAR_cent = state.p;
+      end
       LiDAR_mass = 0;
       %% camera 部分のボロノイ領域算出
       dens_c = sensor.density_camera;
@@ -53,8 +56,11 @@ classdef VORONOI_BARYCENTER < handle
       dens_f = sensor.density_front;
       front_V = poly_volonoi(state, sensor.neighbor, dens_f.region,void,R);
       [front_cent, front_mass] = map_centre_of_gravity(dens_f.xq, dens_f.yq , dens_f.grid_density, front_V);
-      front_mass = 0;
-
+      if sum(isnan(front_cent))>0
+        front_cent = state.p;
+      end
+      front_mass = 1;
+      
       result = (LiDAR_cent*LiDAR_mass + camera_cent*camera_mass + front_cent*front_mass)/(LiDAR_mass + camera_mass + front_mass);
       %%  描画用変数
       region_phi = [];

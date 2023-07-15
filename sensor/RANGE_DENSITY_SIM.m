@@ -79,17 +79,24 @@ classdef RANGE_DENSITY_SIM < handle
             xq=xq'; yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
 
             region_phi = Env.grid_density(map_x_index,map_y_index);
-            in = reshape(isinterior(region,xq(:),yq(:)),size(xq));
+            if ~isempty(xq(:)); in = reshape(isinterior(region,xq(:),yq(:)),size(xq));end
             
             % RESULTの処理
-            result.angle =  obj.ray_direction;
+            result.angle         =  obj.ray_direction;
             result.sensor_points = sensor_points;
-            result.grid_density = region_phi.*in;
-            result.xq=xq-pos(1);
-            result.yq=yq-pos(2);
-            result.map_min=pmap_min-pos(1:2)';
-            result.map_max=pmap_max-pos(1:2)';
-            result.region = translate(region,-pos(1:2)');
+            if isempty(in) 
+                result.grid_density = [];
+            else
+                result.grid_density  = region_phi.*in;
+            end
+            result.in            = in;
+            result.map_xi        = map_x_index;
+            result.map_yi        = map_y_index;
+            result.xq            = xq-pos(1);
+            result.yq            = yq-pos(2);
+            result.map_min       = pmap_min-pos(1:2)';
+            result.map_max       = pmap_max-pos(1:2)';
+            result.region        = translate(region,-pos(1:2)');
             obj.result = result;
         end
         function show(obj,varargin)
