@@ -5,7 +5,7 @@ function dst =InputTransform_Dst_drone(varargin)
            dt=varargin{1, 1}.dt;
            index = te/dt+1;
            dst =zeros(index ,6); %[x y z roll pitch roll] 加速度，角加速度
-           ndst = "tmp";
+           ndst = "p";
            switch ndst
                case "p"
                  % 平均b、標準偏差aのガウスノイズ
