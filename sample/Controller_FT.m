@@ -1,14 +1,12 @@
 % function Controller = Controller_FT(dt, fApproxZ, fTanh1Z, fApproxXY, fTanh1XY, alp, approxRangeZ, approxRangeXY)
-function Controller = Controller_FT(dt)
+function Controller = Controller_FT(dt,fz)
 %% flag and approximate range
-            fApproxZ = 1;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
-            % fTanh1Z = 1;%tanhが一つか:1 tanh2:~1
-            % fApproxXY = 10;%%%xy近似するか:1 else:~1
-            % fTanh1XY = 1;%%% tanh1:1 or tanh2 :~1
-            %FTは誤差が大きいとxyのみに適用でも発散するので想定する誤差に合わせてalphaを調整する必要がある
+            fApproxZ = fz;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
             alp = [0.85,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
-            % approxRangeZ=[0 1];%近似する範囲z
-            % approxRangeXY=[0 1];%近似する範囲xy
+            x0 = [50, 0.01];
+            r=0.02;%緩和区間
+            ar = [1, 1];%近似に使う区間
+            br=[1.6,1.5];%制約の大きさ最小は0
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
@@ -42,7 +40,7 @@ Controller.az = alpha(1:2,1);
 Controller.ax = alpha(1:4,2);
 Controller.ay = alpha(1:4,3);
 Controller.apsi = alpha(1:2, 4);
-%各サブシステムでalpを変える場合」
+%各サブシステムでalpを変える場合
 % Controller.az = alpha(3:4, 1);
 % Controller.ax = alpha(1:4,2);
 % Controller.ay = alpha(1:4,3);
@@ -53,42 +51,30 @@ ay =Controller.ay;
 apsi =Controller.apsi;
 %%
 syms sz1 [2 1] real
-syms sF1 [1 2] real
 [Ad1, Bd1, ~, ~] = ssdata(c2d(ss(Ac2, Bc2, [1, 0], [0]), dt));
 Controller.fzapr = fApproxZ;
 if fApproxZ~= 1
     %一層
-    Controller.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
+    Controller.Vf = matlabFunction([-vF1 * sz1, -vF1 * (Ad1 - Bd1 * vF1) * sz1, -vF1 * (Ad1 - Bd1 * vF1)^2 * sz1, -vF1 * (Ad1 - Bd1 * vF1)^3 * sz1], "Vars", {sz1});
 else
 % 有限整定の近似微分　一層   
     syms z(t)
     syms zF1 [1 4]
-        xz0 = [50, 0.01];
         f1 =zeros(2,4);
-%         b=[5,3];
-        b=[1.6,1.5];
-        %alhpa=0.8 rang=0.05:[4.5,2.5]/rang=0.01:[6,4.8]
-        %alpha=0.85rng=0.01[5,3]
-        %         erz=0.4; %近似する範囲を指定
         for i = 1:2
              %tanh absolute
              %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
-             rng = 0.02;
-            fun=@(x)(integral(@(w) abs( -vF1(i).*abs(w).^az(i) + vF1(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^az(i)), rng,rng+1) +integral(@(w) abs( vF1(i).*w-vF1(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^az(i)), 0,rng));
+            fun=@(x)(integral(@(w) abs( -vF1(i).*abs(w).^az(i) + vF1(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^az(i)), r ,r+ar(i)) +integral(@(w) abs( vF1(i).*w-vF1(i).*tanh(x(1).*w).*sqrt(w.^2 + x(2)).^az(i)), 0, r));
             c =@(x)0;
-            ceq = @(x) 1 - x(1).*x(2).^(az(i)./2)+b(i);
+            ceq = @(x) 1 - x(1).*x(2).^(az(i)./2)+br(i);
             nonlinfcn = @(x)deal(c(x),ceq(x));
             
-            % options = optimoptions("fmincon",...
-            %     "Algorithm","sqp",...
-            %     "EnableFeasibilityMode",true,...
-            %     "SubproblemAlgorithm","cg");
             options = optimoptions("fmincon",...
                 "Algorithm","interior-point",...
                 "EnableFeasibilityMode",true,...
                 "SubproblemAlgorithm","cg");
-            % [p,fval] = fmincon(fun,x0,[],[],[],[],[0,1E-4*0],[inf,1]) 
-            [p,fval] = fmincon(fun,xz0,[],[],[],[],[0,0],[inf,inf],nonlinfcn,options) 
+            
+            [p,fval] = fmincon(fun,x0,[],[],[],[],[0,0],[inf,inf],nonlinfcn,options) 
             fvals12z(i) = 2 * fval%誤差の大きさの確認
             f1(i, :) = [vF1(i),p,az(i)];
         end
