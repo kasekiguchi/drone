@@ -1,4 +1,4 @@
-function [Xn,Pn] = param_analysis_eq(A,X,P)
-    Pn = P - (P*A*(A')*P)/(1+ A'*P*A);
-    Xn = X + Pn * A * (-1*ones(size(A,2),1) - A' *X);
+function [Xn,Pn] = param_analysis_eq(A,X,B,P)
+    Pn = P - (P*A*(eye(size(A,2))+ A'*P*A)*(A')*P);
+    Xn = X + Pn * A * (B - A' *X);
 end
