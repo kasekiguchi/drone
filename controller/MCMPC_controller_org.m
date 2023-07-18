@@ -43,6 +43,7 @@ classdef MCMPC_controller_org < handle
             obj.state.state_data = zeros(n,obj.param.H, obj.N);
             obj.input.Evaluationtra = zeros(1, obj.N);
             obj.flag.vz = 0;
+            obj.result.input = zeros(self.estimator.model.dim(2),1);
         end
         
         %-- main()的な
@@ -53,16 +54,21 @@ classdef MCMPC_controller_org < handle
             % xr = param{2};
             % rt = param{3};
             % phase = param{4};
+            obj.param.t = varargin{1,1}.t;
 
-            ref_p = obj.self.reference.result.state.p;
-            ref_q = [0;0;0];
-            ref_v = obj.self.reference.result.state.xd(5:7);
-            ref_w = [0;0;0];
-            ref_input = obj.param.ref_input;
-            ref_MC = [ref_p; ref_q; ref_v; ref_w; ref_input];
-            xr = repmat(ref_MC, 1, obj.param.H);
+            %% horizonごとではないリファレンス
+%             ref_p = obj.self.reference.result.state.p;
+%             ref_q = [0;0;0];
+%             ref_v = obj.self.reference.result.state.xd(5:7);
+%             ref_w = [0;0;0];
+%             ref_input = obj.param.ref_input;
+%             ref_MC = [ref_p; ref_q; ref_v; ref_w; ref_input];
+%             xr = repmat(ref_MC, 1, obj.param.H);
+            %%
+            xr = obj.Reference();
+            
+            %%
             obj.state.ref = xr;
-            obj.param.t = rt;
             obj.reference.grad = 3/10;
 
             % if obj.param.t > 2.6
@@ -129,8 +135,8 @@ classdef MCMPC_controller_org < handle
             obj.input.normE = obj.Normalize();
 
             %-- 制約条件
-%             removeF = 0; removeX = []; survive = obj.N; 
-            [removeF, removeX, survive] = obj.constraints();
+            removeF = 0; removeX = []; survive = obj.N; 
+%             [removeF, removeX, survive] = obj.constraints();
 %             if obj.self.estimator.result.state.p(3) < 0.3
 %                 [removeF, removeX, survive] = obj.constraints();
 %             end
@@ -157,7 +163,7 @@ classdef MCMPC_controller_org < handle
                 end
 
             elseif removeF == obj.N    % 全棄却
-                obj.result.input = obj.self.input;
+                obj.result.input = obj.input.u;
                 obj.input.nextsigma = obj.input.Constsigma;
                 Bestcost = obj.param.ConstEval;
                 BestcostID = 1;
@@ -174,7 +180,7 @@ classdef MCMPC_controller_org < handle
             obj.result.removeX = removeX;
             obj.result.survive = survive;
             obj.result.COG = obj.state.COG;
-            obj.self.input = obj.result.input;
+%             obj.self.input = obj.result.input;
             obj.result.BestcostID = BestcostID;
             obj.result.bestcost = Bestcost;
             obj.result.contParam = obj.param;
@@ -197,8 +203,11 @@ classdef MCMPC_controller_org < handle
         %-- 制約とその重心計算 --%
         function [removeF, removeX, survive] = constraints(obj)
             % 状態制約
-            removeF = 0; removeX = []; survive = obj.N;
-
+            removeX = find(obj.state.predict_state(1, 1, 1:obj.N) < -0.5);
+%             removeX = find(removeFe);
+            obj.input.Evaluationtra(1,removeX) = obj.param.ConstEval;
+            removeF = size(removeX, 1);
+            removeX = []; survive = obj.N;
         end
 
         function cog = COG(obj, I)
@@ -244,7 +253,8 @@ classdef MCMPC_controller_org < handle
 
             %%
             tildeXqw = [tildeXq; tildeXw];
-            tildeUpre = U - obj.self.input;       % agent.input
+%             tildeUpre = U - obj.self.input;       % agent.input
+            tildeUpre = U - obj.input.u;
             tildeUref = U - obj.state.ref(13:16, :);
 
             %% ホライズンの先に係数下げる
@@ -255,12 +265,14 @@ classdef MCMPC_controller_org < handle
             tildeXp = tildeXp .* kJ; tildeXqw = tildeXqw .* kJ;
             tildeXv = tildeXv .* kJ; 
             tildeUpre = tildeUpre .* kJ; tildeUref = tildeUref .* kJ;
-            stageStateP =    sum(tildeXp' * obj.param.P   .* tildeXp',2);
-            stageStateV =    sum(tildeXv' * obj.param.V   .* tildeXv',2);
-            stageStateQW =   sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
-            stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-            stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
-            terminalState = 0;
+            stageStateP =    sum(tildeXp(:,end-1)' * obj.param.P   .* tildeXp(:,end-1)',2);
+            stageStateV =    sum(tildeXv(:,end-1)' * obj.param.V   .* tildeXv(:,end-1)',2);
+            stageStateQW =   sum(tildeXqw(:,end-1)' * obj.param.QW .* tildeXqw(:,end-1)',2);
+            stageInputPre  = sum(tildeUpre(:,end-1)' * obj.param.RP.* tildeUpre(:,end-1)',2);
+            stageInputRef  = sum(tildeUref(:,end-1)' * obj.param.R .* tildeUref(:,end-1)',2);
+            terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
+                +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
+                +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
 
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
@@ -286,6 +298,24 @@ classdef MCMPC_controller_org < handle
                 pw = zeros(1,NP)+1/NP;
             end
             pw_new = pw;
+        end
+
+        function [xr] = Reference(obj, ~)
+            % パラメータ取得
+            % timevaryingをホライズンごとのreferenceに変換する
+            % params.dt = 0.1;
+            xr = zeros(16, obj.param.H);    % initialize
+            % 時間関数の取得→時間を代入してリファレンス生成
+            RefTime = obj.self.reference.func;    % 時間関数の取得
+            for h = 0:obj.param.H-1
+                t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
+                ref = RefTime(t);
+                xr(1:3, h+1) = ref(1:3);
+                xr(7:9, h+1) = ref(5:7);
+                xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                xr(10:12, h+1) = [0;0;0];
+                xr(13:16, h+1) = 0.269*9.81/4 * [1;1;1;1]; % MC -> 0.6597,   HL -> 0
+            end
         end
     end
 end

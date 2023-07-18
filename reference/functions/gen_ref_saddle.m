@@ -34,4 +34,9 @@ fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 % dddxdf =@(tt)  subs(diff(ddxdf(t),t),t,tt);
 % ddddxdf =@(tt)  subs(diff(dddxdf(t),t),t,tt);
 % tXd=@(t) double([xdf(t),dxdf(t),ddxdf(t),dddxdf(t),ddddxdf(t)]);
+
+x=cos(t/2);
+y=sin(t/2);
+z=1;
+ref=@(t)[x;y;z;0];
 end
