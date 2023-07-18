@@ -22,7 +22,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
-    Params.dt = 0.025;
+%     Params.dt = 0.25; %MPCステップ幅
+    Params.dt = 0.1; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
 
@@ -44,8 +45,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([10.0; 10.0; 100.0]);    % 座標   1000 10
-    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
+    Params.Weight.P = diag([300.0; 300.0; 4000.0]);    % 座標   1000 10
+    Params.Weight.V = diag([300.0; 300.0; 300.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
     Params.Weight.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
@@ -86,8 +87,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
-%     f = @(x) [x;1];
-%     Params.f = {f};
+% %     f = @(x) [x;1];
+% %     Params.f = {f};
 
 %     xc = f(x); %複素空間へ値を写像
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
@@ -190,18 +191,16 @@ end
             
             % MPC設定(problem)
             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
-%             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
-            problem.objective = @(x) Objective(x,  Params, agent);            % 評価関数
-%             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
+            problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             % 制御入力の決定
             previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
             fprintf("\tfval : %f\n", fval)
-        %TODO: 1列目のvarが一切変動しない問題に対処
-%             if var(Params.state_size+1:Params.total_size, end) > 1.0
-%                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
-%             end
+%         TODO: 1列目のvarが一切変動しない問題に対処
+            if var(Params.state_size+1:Params.total_size, end) > 1.0
+                var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
+            end
             
             fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
@@ -375,7 +374,7 @@ function [c, ceq] = Constraints(x, params, Agent, ~)
     one = ones(1,params.H);
     Xc = vertcat(X,one);
 %     Xc = [X(1:params.state_size, 1);1];     % 13 * 1(観測量に通したつもり)
-%     Xc = repmat(Xc,1,params.H);
+    Xc = repmat(Xc,1,params.H);
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
 
 %- ダイナミクス拘束
