@@ -5,6 +5,7 @@ classdef VORONOI_BARYCENTER < handle
     self
     fShow
     result
+    override_f
   end
 
   methods
@@ -21,6 +22,7 @@ classdef VORONOI_BARYCENTER < handle
       obj.param = param;
       obj.result.state = STATE_CLASS(struct('state_list', ["p","v"], 'num_list', [3,3]));
       obj.fShow = param.fShow;
+      obj.override_f = false;
     end
     function result = do(obj, varargin)
       % [Input] varargin = {time, cha, logger, env, agents, index}
@@ -61,14 +63,28 @@ classdef VORONOI_BARYCENTER < handle
       end
       front_mass = 1;
       
-      
-      %% 壁面との衝突を防止する
-      result = (LiDAR_cent*LiDAR_mass + camera_cent*camera_mass + front_cent*front_mass)/(LiDAR_mass + camera_mass + front_mass);
-      [in,~] = intersect(polybuffer(env.poly,-env.d/2), [state.p(1:2)';result(1:2)'+ state.p(1:2)' ]);% 絶対座標
-      [~,ii]= mink(vecnorm(in-state.p(1:2)',2,2),2);
-      result= in(ii(2),:)';
 
-      route = a_star(state.p(1:2)',result(1:2)',env);
+      result = (LiDAR_cent*LiDAR_mass + camera_cent*camera_mass + front_cent*front_mass)/(LiDAR_mass + camera_mass + front_mass);
+      %% 目標値がエリア外に生成されるのを防ぐ処理
+      [in,~] = intersect(polybuffer(env.poly,-env.d*sqrt(2)/2), [state.p(1:2)';result(1:2)'+ state.p(1:2)' ]);% 絶対座標
+      if ~isempty(in)
+          [~,ii]= mink(vecnorm(in-state.p(1:2)',2,2),2);
+          result= in(ii(2),:)';
+      else
+          result = state.p(1:2)';
+      end
+      
+
+      %% 目標値の例外的な処理(ボロノイベースではなくす条件)
+      if max(sensor.grid_density,[],"all") < 0.2;obj.override_f = true;end
+      if obj.override_f
+        [~,I] = max(env.grid_density,[],'all');
+        result = [ env.xq(I);env.yq(I);0 ];
+        if vecnorm(result(1:2)-state.p(1:2) )<0.2; obj.override_f = false;end
+      end
+      
+
+      route = a_star(state.p(1:2)',result(1:2)',env); % A-star処理
       %%  描画用変数
       region_phi = [];
       yq = [];
@@ -193,9 +209,13 @@ function route = a_star(start,goal,env)
     d = env.d;
     xp = env.xp;
     yp = env.yp;
+    xq = env.xq;
+    yq = env.yq;
     grid_size = [length(xp) length(yp)]; 
-    grid = env.grid_in;
+    % poly = polybuffer(env.poly , -d*sqrt(2)/2) ;
+    % grid = reshape(isinterior(poly,xq(:),yq(:)),size(xq));
     poly = env.poly;
+    grid = env.grid_in;
     move = [1 0; 1 1; 0 1; -1 1; -1 0; -1 -1; 0 -1; 1 -1];
     move_cost = [1 sqrt(2) 1 sqrt(2) 1 sqrt(2) 1 sqrt(2) ]*d;
     % move = [1 0;  0 1;  -1 0; 0 -1];
@@ -297,6 +317,7 @@ function route = a_star(start,goal,env)
     grid_route = [ xp(cand_grid(1)) yp(cand_grid(2))];
     route = grid_route;
     env_buffer = polybuffer(poly , -d*sqrt(2)/2);
+    % env_buffer = poly;
     while true
     
         grid_route = cat(1,[ xp(node_grid(index,1)) yp(node_grid(index,2))] , grid_route);
@@ -322,20 +343,21 @@ function route = a_star(start,goal,env)
     %% Ploter
     % close all
     % figure()
-    % cla;
-    % hold on
-    % plot(env.poly)
-    % daspect([1 1 1])
-    % scatter( xp(node_grid(node_status==0,1)) , yp(node_grid(node_status==0,2)) , "r.")
-    % % scatter( xp(node_grid(node_status==-1,1)) , yp(node_grid(node_status==-1,2)) , "black.")
-    % scatter( xp(node_grid(node_status==1,1)) , yp(node_grid(node_status==1,2)) , "r.")
-    % scatter(start(1),start(2),'b*')
-    % scatter(goal(1),goal(2),'r*')
-    % 
-    % plot(grid_route(:,1),grid_route(:,2),'g',LineWidth=1)
-    % plot(route(:,1),route(:,2),'bo-',LineWidth=2)
-    % % et = toc(st);
-    % % attempt
-    % % cand_real_cost
-    % hold off
+    cla;
+    hold on
+    plot(env.poly)
+    daspect([1 1 1])
+    scatter( xp(node_grid(node_status==0,1)) , yp(node_grid(node_status==0,2)) , "r.")
+    % scatter( xp(node_grid(node_status==-1,1)) , yp(node_grid(node_status==-1,2)) , "black.")
+    scatter( xp(node_grid(node_status==1,1)) , yp(node_grid(node_status==1,2)) , "r.")
+    scatter(start(1),start(2),'b*')
+    scatter(goal(1),goal(2),'r*')
+
+    plot(grid_route(:,1),grid_route(:,2),'g',LineWidth=1)
+    plot(route(:,1),route(:,2),'bo-',LineWidth=2)
+    % et = toc(st);
+    % attempt
+    % cand_real_cost
+    hold off
+    drawnow
 end

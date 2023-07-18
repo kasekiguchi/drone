@@ -10,7 +10,8 @@ N = 3; % number of agent
 logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); % logger class instance for logging
 env = DENSITY_MAP(Env_2DCoverage); % Weighted 2D grid map
 arranged_pos = arranged_position([0, 0], N, 1, 0); % initial position
-
+warning('off','MATLAB:polyshape:repairedBySimplify')
+warnStruct = warning('The "polyshape:repairedBySimplify" warning has been disabled.');
 for i = 1:N
   agent(i) = DRONE; % set drone agent
   agent(i).id = i; % set index
