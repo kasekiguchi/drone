@@ -6,15 +6,9 @@ Bc2 = [0;1];
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 Controller.F1=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt);                                % 
-% Controller.F1 = place(Ac2,Bc2,[-8.2518 + 4.9876i,-8.2518 - 4.9876i]);%近似線形化と同じ極
 Controller.F2=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 Controller.F3=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
-%approと一緒の極
-% Controller.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
-% Controller.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-% Controller.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-% Controller.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
 
 syms sz1 [2 1] real
 syms sF1 [1 2] real
@@ -28,15 +22,15 @@ syms sF3 [1 4] real
 syms sz4 [2 1] real
 syms sF4 [1 2] real
 Controller.Vs = matlabFunction([-sF2*sz2;-sF3*sz3;-sF4*sz4],"Vars",{sz2,sz3,sz4,sF2,sF3,sF4});
-% Controller.dt = dt;
+Controller.dt = dt;
 
 %% 線形システムにMCMPCコントローラを適用する場合
 % H : horizon
-%A2 = [0 1;0 0]; B2 = [0;1];
-%[Ad,Bd] = c2d(A2,B2,dt);
-%[AN2,BN2] = calc_horizon_for_linear_system(Ad,Bd,H);
-%A4 = [zeros(3,1),eye(3);zeros(1,4)]; B4 = [0;0;0;1];
-%[Ad,Bd] = c2d(A4,B4,dt);
+% A2 = [0 1;0 0]; B2 = [0;1];
+% [Ad,Bd] = c2d(A2,B2,dt);
+% [AN2,BN2] = calc_horizon_for_linear_system(Ad,Bd,H);
+% A4 = [zeros(3,1),eye(3);zeros(1,4)]; B4 = [0;0;0;1];
+% [Ad,Bd] = c2d(A4,B4,dt);
 % [AN4,BN4] = calc_horizon_for_linear_system(Ad,Bd,H);
 % Q2 = eye(2);
 % Q4 = eye(4);
