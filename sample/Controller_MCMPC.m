@@ -12,7 +12,8 @@ function Controller = Controller_MCMPC(~)
     Controller_param.input.Minsigma = 0.01;
     Controller_param.input.Maxinput = 1.5;
 
-    Controller_param.soft = 2.5;
+    Controller_param.soft_time = 2.5;
+    Controller_param.soft_z = 1.0;
 
     Controller_param.ConstEval = 100000;
     

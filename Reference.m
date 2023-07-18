@@ -94,7 +94,8 @@ function [xr] = Reference(params, T, Agent, Gq, Gp, phase, refFlag)
                 tx = params.refX(ind,1); tvx = params.refX(ind,2); 
             end
 
-            if t < 2.6
+            % if t < params.soft_time
+            if Agent.estimator.result.state.p(3) > params.soft_z
                 pitch = 0;
             else    
                 pitch = 0;

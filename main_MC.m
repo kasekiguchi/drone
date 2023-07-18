@@ -13,8 +13,8 @@ userpath('clear');
 % run("main.m"); % 目標入力生成
 % close all hidden; clear all; clc;
 % userpath('clear');
-fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
-fHL = 1; % HL はトルク入力の変換の部分作らないと動かない
+fRef = 1; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
+fHL = 0; % HL はトルク入力の変換の部分作らないと動かない
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
@@ -45,6 +45,8 @@ Params.dT = dt;
 Params.state_size = 12;
 Params.input_size = 4;
 Params.total_size = 16;
+Params.soft_time = data.param.param.soft_time;
+Params.soft_z = data.param.param.soft_z;
 % Reference.mを使えるようにする
 % Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
 Params.ur = data.param.param.ref_input;

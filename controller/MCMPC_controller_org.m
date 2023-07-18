@@ -199,35 +199,12 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
         %-- 制約とその重心計算 --%
         function [removeF, removeX, survive] = constraints(obj)
             % 状態制約
-
-%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
-%             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
-%             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);    
-
-            % 高度
-%             zx = 10;
-%             zz = 3;
-%             removeFe = (any(repmat(obj.state.state_data(3, end, :), 1, 2) <= zz/zx * d4edge(1,:, :)+0.1));
-            
-%             sur = (obj.state.state_data(1, end, :) > 0.5*sin(obj.param.t));  % 生き残りサンプル
-%             survive = find(sur);
-
-              % 使ってたところ
-%             removeFe = NaN;
-%             removeX = find(removeFe);
-%             % 制約違反の入力サンプル(入力列)を棄却
-%             obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
-%             % 全制約違反による分散リセットを確認するフラグ  
-%             removeF = size(removeX, 1); % particle_num -> 全棄却
-%             survive = obj.N;
             removeF = 0; removeX = []; survive = obj.N;
-
-            %% ソフト制約
-            % 棄却はしないが評価値を大きくする
             %% 斜面
             % 姿勢角
             % if obj.self.estimator.result.state.p(3) < 0.3 
-            if obj.param.t > obj.param.soft
+            % if obj.param.t > obj.param.soft_time % 時間で制約
+            if obj.self.estimator.result.state.p(3) < obj.param.soft_z % 高度で制約
 %                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
 %                 A = 100;
                 Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2915);
@@ -351,17 +328,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 %             stageInputRef  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R  * tildeUref(:, L), 1:obj.param.H-1);
 
             %% 斜面姿勢角入れるまではステージコストと終端コストは一緒
-            if obj.param.t < obj.param.soft
-                tildeXp = tildeXp .* kJ; tildeXqw = tildeXqw .* kJ;
-                tildeXv = tildeXv .* kJ; 
-                tildeUpre = tildeUpre .* kJ; tildeUref = tildeUref .* kJ;
-                stageStateP =    sum(tildeXp' * obj.param.P   .* tildeXp',2);
-                stageStateV =    sum(tildeXv' * obj.param.V   .* tildeXv',2);
-                stageStateQW =   sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
-                stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-                stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
-                terminalState = 0;
-            else
+            % if obj.param.t < obj.param.soft_time
+            if obj.self.estimator.result.state.p(3) < obj.param.soft_z
                 tildeXp = tildeXp(:,end-1) .* kJ; tildeXqw = tildeXqw(:,end-1) .* kJ;
                 tildeXv = tildeXv(:,end-1) .* kJ; 
                 tildeUpre = tildeUpre(:,end-1) .* kJ; tildeUref = tildeUref(:,end-1) .* kJ;
@@ -373,6 +341,16 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
                     +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
                     +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
+            else
+                tildeXp = tildeXp .* kJ; tildeXqw = tildeXqw .* kJ;
+                tildeXv = tildeXv .* kJ; 
+                tildeUpre = tildeUpre .* kJ; tildeUref = tildeUref .* kJ;
+                stageStateP =    sum(tildeXp' * obj.param.P   .* tildeXp',2);
+                stageStateV =    sum(tildeXv' * obj.param.V   .* tildeXv',2);
+                stageStateQW =   sum(tildeXqw' * obj.param.QW .* tildeXqw',2);
+                stageInputPre  = sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
+                stageInputRef  = sum(tildeUref' * obj.param.R .* tildeUref',2);
+                terminalState = 0;
             end
 
             %-- 評価値計算
