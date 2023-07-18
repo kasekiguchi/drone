@@ -18,12 +18,10 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 illustration= 1; %1で図示，0で非表示
 
 %% Log Dataの読み取りと格納
-log = LOGGER('./Data/2wall_1015_Log(10-Jul-2023_14_31_32).mat');
+log = LOGGER('./Data/onlyxyyaw.mat');
+% log = LOGGER('./Data/lidar1deg.mat');
 % log = LOGGER('./Data/nomove_little_Log(14-Jul-2023_00_53_31).mat');
 
-%% パラメータ真値
-offset_true = [0.1;0.05;0.05];
-Rs_true = Rodrigues([0.5,0.5,1],pi/12);
 %% ログ
 tspan = [0 ,100];
 % tspan = [0 99];
@@ -46,93 +44,88 @@ robot_pt(:,ds) = [];
 robot_q (:,ds) = [];
 robot_qt(:,ds) = [];
 
-
+%% パラメータ真値
+offset_true = [0.1;0.05;0.05];
+Rs_true = Rodrigues([0.5,0.5,1],pi/12);
+w=[1,0,0,9];
+X_true  = -1*[w(1)/w(4);w(2)/w(4);w(3)/w(4);
+           offset_true(1)*w(1)/w(4);offset_true(2)*w(1)/w(4);offset_true(3)*w(1)/w(4);offset_true(1)*w(2)/w(4);offset_true(2)*w(2)/w(4);offset_true(3)*w(2)/w(4);offset_true(1)*w(3)/w(4);offset_true(2)*w(3)/w(4);offset_true(3)*w(3)/w(4);
+           Rs_true(1,1)*w(1)/w(4);Rs_true(2,1)*w(1)/w(4);Rs_true(3,1)*w(1)/w(4);Rs_true(1,2)*w(1)/w(4);Rs_true(2,2)*w(1)/w(4);Rs_true(3,2)*w(1)/w(4);
+           Rs_true(1,1)*w(2)/w(4);Rs_true(2,1)*w(2)/w(4);Rs_true(3,1)*w(2)/w(4);Rs_true(1,2)*w(2)/w(4);Rs_true(2,2)*w(2)/w(4);Rs_true(3,2)*w(2)/w(4);
+           Rs_true(1,1)*w(3)/w(4);Rs_true(2,1)*w(3)/w(4);Rs_true(3,1)*w(3)/w(4);Rs_true(1,2)*w(3)/w(4);Rs_true(2,2)*w(3)/w(4);Rs_true(3,2)*w(3)/w(4);];
+Y_true = [offset_true;reshape(Rs_true,[9,1])];
 %% 解析(回帰分析)
-end1=10000;
-num = 3;%2本目センサのいっぽん目からの本数
-% [A,X,At,Xt] = param_analysis(robot_pt(:,1:end1-1),robot_qt(:,1:end1-1),sensor_data(1,2:end1),eye(3));
-% [A,X,At,Xt] = param_analysis2(robot_pt(:,1:end1-1),robot_qt(:,1:end1-1),sensor_data(1,2:end1),sensor_data(2,2:end1),Rodrigues([0,0,1],pi/20));
-
+last=10000;
+num = 10;%2本目センサのいっぽん目からの本数
+ang = 180;
 %% 一括でパラ推定
-[A,X,At,Xt] = param_analysis2(robot_pt(:,1),robot_qt(:,1),sensor_data(1,1),sensor_data(2,1),Rodrigues([0,0,1],pi/20));
+[~,~,At,Xt] = param_analysis2(robot_pt(:,1),robot_qt(:,1),sensor_data(1,2),sensor_data(num,2),Rodrigues([0,0,1],(num-1)*pi/ang));
 A_stack=[];
-for i=1:length(robot_pt)
-    qt = Eul2Quat(robot_qt(:,i));
+for i=2:1:last
+    qt = Eul2Quat(robot_qt(:,i-1));
     qt = qt./vecnorm(qt,2);
-    A = Cf2_sens(robot_pt(:,i),qt,sensor_data(1,i),sensor_data(2,i),Rodrigues([0,0,1],pi/20));
+    A = Cf2_sens(robot_pt(:,i-1),qt,sensor_data(1,i),sensor_data(num,i),Rodrigues([0,0,1],(num-1)*pi/ang));
     ds = find(A(2,:)==0);
     A(:,ds)=[];
     A_stack=[A_stack;A];
 end
+
 %% 疑似逆
 X = pinv(A_stack)*(-1*ones(size(A_stack,1),1));
 offset = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:12)];
 Rsx = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(13:15);X(19:21);X(25:27)];
+Rsy = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(16:18);X(22:24);X(28:30)];
+Rsz = cross(Rsx/vecnorm(Rsx),Rsy/vecnorm(Rsy));
+Rs = [Rsx,Rsy,Rsz];
 %% 一括でパラ推定逐次
-[A,X,At,Xt] = param_analysis2(robot_pt(:,1),robot_qt(:,1),sensor_data(1,1),sensor_data(2,1),Rodrigues([0,0,1],pi/20));
-P_stack = zeros(size(A,2),size(A,2),length(robot_pt));
-[Xn,Pn] = param_analysis_eq(A',zeros(size(A,2),1),-1*ones(size(A,1),1),eye(size(A,2)));
-P_stack(:,:,1) = Pn;
-for j=2:1:size(P_stack,3)  
-    qt = Eul2Quat(robot_qt(:,j));
-    qt = qt./vecnorm(qt,2);
-    A = Cf2_sens(robot_pt(:,j),qt,sensor_data(1,j),sensor_data(2,j),Rodrigues([0,0,1],pi/20));
-    ds = find(A(2,:)==0);
-    A(:,ds)=[];
-    [Xn,Pn] = param_analysis_eq(A',Xn,-1*ones(size(A,1),1),Pn);
-    P_stack(:,:,j) = Pn;
+P_stack = zeros(size(A,2),size(A,2),last-1);%%Pnスタックする変数
+JP = zeros(1,last-1); %J=Σ||p^-p||
+JX = zeros(1,last-1); %J=Σ||X^-X||
+JY = zeros(1,last-1); %J=Σ||Y^-Y||
+for j=2:1:last
+    if j == 2
+        qt = Eul2Quat(robot_qt(:,j-1));
+        qt = qt./vecnorm(qt,2);
+        A = Cf2_sens(robot_pt(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        A(:,ds)=[];
+        [Xn,Pn] = param_analysis_eq(A',zeros(size(A,2),1),-1*ones(size(A,1),1),eye(size(A,2)));
+        P_stack(:,:,j-1) = Pn;
+        offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
+        Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
+        Rsyn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(16:18);Xn(22:24);Xn(28:30)];
+        Rszn = cross(Rsxn/vecnorm(Rsxn),Rsyn/vecnorm(Rsyn));
+        Rsn = [Rsxn,Rsyn,Rszn];
+        % 評価
+        JP(1,j-1) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
+        JX(:,j-1) = norm(Xn-X_true);
+        Yn = [offsetn;reshape(Rsn,[9,1])];
+        JY(:,j-1) = norm(Yn-Y_true);
+    else
+        qt = Eul2Quat(robot_qt(:,j-1));
+        qt = qt./vecnorm(qt,2);
+        A = Cf2_sens(robot_pt(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        ds = find(A(2,:)==0);
+        A(:,ds)=[];
+        [Xn,Pn] = param_analysis_eq(A',Xn,-1*ones(size(A,1),1),Pn);
+        P_stack(:,:,j-1) = Pn;
+        offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
+        Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
+        Rsyn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(16:18);Xn(22:24);Xn(28:30)];
+        Rszn = cross(Rsxn/vecnorm(Rsxn),Rsyn/vecnorm(Rsyn));
+        Rsn = [Rsxn,Rsyn,Rszn];
+        % 評価
+        JP(:,j-1) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
+        JX(:,j-1) = norm(Xn-X_true);
+        Yn = [offsetn;reshape(Rsn,[9,1])];
+        JY(:,j-1) = norm(Yn-Y_true);
+    end
 end
 
-%% 1本目でのパラ推定，固有値計算
-% offset = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:12)];
-% Rsx = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*X(13:21);
-% S = svd(A)';% 特異値の計算
-
-%% 1本目の情報使って2本目の計算
-% num = 2;
-% [A2,X2,A2t,X2t] = param_analysis1known(robot_pt(:,1:end1-1),robot_qt(:,1:end1-1),sensor_data(num,2:end1),RodriguesQuaternion(Eul2Quat([0,0,(num-1)*pi/20]')),offset,Rsx);
-%% 2本目でのパラ推定，固有値計算
-% Rsy = pinv([X2(1)*eye(3);X2(2)*eye(3);X2(3)*eye(3)])*X2(4:12);
-% Rsz = cross(Rsx/vecnorm(Rsx),Rsy/vecnorm(Rsy));
-% Rs = [Rsx,Rsy,Rsz];
-%% 逐次最小(2ほんの情報それぞれで)＆逐次パラメータ計算
-
-% P_stack = zeros(size(A,2),size(A,2),size(A,1));
-% P_stack2 = zeros(size(A2,2),size(A2,2),size(A2,1));
-% 
-% for j=1:1:length(A)
-%     if j ==1
-%         [Xn,Pn] = param_analysis_eq(A(j,:)',zeros(size(A,2),1),eye(size(A,2)));
-%         P_stack(:,:,j) = Pn;
-%         offset_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
-%         Rsx_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*Xn(13:21);
-%         [X2n,P2n] = param_analysis_eq(A2(j,:)',zeros(size(A2,2),1),eye(size(A2,2)));
-%         P_stack2(:,:,j) = P2n;
-%         Rsy_eq = pinv([X2n(1)*eye(3);X2n(2)*eye(3);X2n(3)*eye(3)])*X2n(4:12);
-%         Rsz_eq = cross(Rsx_eq/vecnorm(Rsx_eq),Rsy_eq/vecnorm(Rsy_eq));
-%         Rs_eq = [Rsx_eq,Rsy_eq,Rsz_eq];
-%     else
-%         [Xn,Pn] = param_analysis_eq(A(j,:)',Xn,Pn);
-%         P_stack(:,:,j) = Pn;
-%         offset_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
-%         Rsx_eq = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*Xn(13:21);
-%         [X2n,P2n] = param_analysis_eq(A2(j,:)',X2n,P2n);
-%         P_stack2(:,:,j) = P2n;
-%         Rsy_eq = pinv([X2n(1)*eye(3);X2n(2)*eye(3);X2n(3)*eye(3)])*X2n(4:12);
-%         Rsz_eq = cross(Rsx_eq/vecnorm(Rsx_eq),Rsy_eq/vecnorm(Rsy_eq));
-%         Rs_eq = [Rsx_eq,Rsy_eq,Rsz_eq];
-%     end
-% end
-
-%% 分散の保存
-% variance1 = zeros(size(P_stack,2),size(P_stack,3));
-% for j=1:size(P_stack,3)
-%     variance1(:,j) = diag(P_stack(:,:,j));
-% end
-% variance2 = zeros(size(P_stack2(4:end,4:end,:),2),size(P_stack2,3));
-% for j=1:size(P_stack2,3)
-%     variance2(:,j) = diag(P_stack2(4:end,4:end,j));
-% end
+%% 逐次計算時の共分散行列Pnの対角成分(分散)保存
+variance = zeros(size(P_stack,2),size(P_stack,3));
+for j=1:size(P_stack,3)
+    variance(:,j) = diag(P_stack(:,:,j));
+end
 %% 図示
 if illustration == 1
     fig1=figure(1);
@@ -168,7 +161,7 @@ if illustration == 1
     fig4.Color = 'white';
     plot(sensor_data(1,:));
     hold on;
-    plot(sensor_data(2,:));
+    plot(sensor_data(num,:));
     % plot(sensor_data(8,:));
     % plot(sensor_data(9,:));
     xlabel('step','FontSize', 14);
@@ -200,7 +193,7 @@ if illustration == 1
     fig7=figure(7);
     fig7.Color = 'white';
     for i=1:3
-        plot(variance1(i,:),'LineWidth', 2);
+        plot(variance(i,:),'LineWidth', 2);
         hold on;
     end
     ylim([0 1]);
@@ -212,7 +205,7 @@ if illustration == 1
     fig8=figure(8);
     fig8.Color = 'white';
     for i=4:12
-        plot(variance1(i,:),'LineWidth', 2);
+        plot(variance(i,:),'LineWidth', 2);
         hold on;
     end
     hold off;
@@ -223,8 +216,16 @@ if illustration == 1
     grid on;
     fig9=figure(9);
     fig9.Color = 'white';
-    for i=13:21
-        plot(variance1(i,:),'LineWidth', 2);
+    for i=13:15
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    for i=19:21
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    for i=25:27
+        plot(variance(i,:),'LineWidth', 2);
         hold on;
     end
     ylim([0 1]);
@@ -235,8 +236,16 @@ if illustration == 1
     grid on;
     fig10=figure(10);
     fig10.Color = 'white';
-    for i=1:9
-        plot(variance2(i,:),'LineWidth', 2);
+    for i=16:18
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    for i=22:24
+        plot(variance(i,:),'LineWidth', 2);
+        hold on;
+    end
+    for i=28:30
+        plot(variance(i,:),'LineWidth', 2);
         hold on;
     end
     hold off;
@@ -245,73 +254,25 @@ if illustration == 1
     ylabel('variance of offset*wallparam');
     legend('R12*a/d','R22*a/d','R32*a/d','R12*b/d','R22*b/d','R32*b/d','R12*c/d','R22*c/d','R32*c/d');
     grid on;
+    fig11=figure(11);
+    fig11.Color = 'white';
+    plot(JP,'LineWidth', 2);
+    hold on;
+    plot(JX,'LineWidth', 2);
+    plot(JY,'LineWidth', 2);
+    hold off;
+    xlabel('step');
+    ylabel('evaluation value');
+    legend('JP','JX','JY');
+    grid on;
 end
+% %%
+% figure(20);
+% trisurf(env);
+% xlabel('x');
+% ylabel('y');
+% zlabel('z');
 
-%% 関数たち
-function [A,X,Cf,var] = param_analysis(robot_p, robot_q, sensor_data,R_num)
-    syms p [3 1] real
-    syms Rb [3 3] real
-    syms y real 
-    syms Rs [3 3] real
-    syms Rn [3 3] real
-    syms psb [3 1] real
-    syms a b c d real
-    
-    A = [a b c];
-    X = p +Rb*psb + y*Rb*Rs*[1;0;0];
-    eq =[A d]*[X;1];
-    var=[a.*psb',b.*psb',c.*psb',reshape(a*Rs,1,numel(Rs)),reshape(b*Rs,1,numel(Rs)),reshape(c*Rs,1,numel(Rs))];
-    for i = 1:length(var)
-        Cf(i) = subs(simplify(eq-subs(expand(eq),var(i),0)),var(i),1);
-    end
-    Cf = [p1,p2,p3,Cf];
-    ds=find(Cf==0);
-    Cf(ds)=[];
-    var = [a,b,c,var]/d;
-    var(ds)=[];
-    simplify(eq/d - Cf*var' ) 
-    qt = Eul2Quat(robot_q);
-    qt = qt./vecnorm(qt,2);
-    A = Cfa(robot_p,qt,sensor_data,R_num)';
-    ds = find(A(1,:)==0);
-    A(:,ds) = [];
-    X = pinv(A)*(-1*ones(size(A,1),1));
-end
-function [A,X,Cf,var] = param_analysis1known(robot_p, robot_q, sensor_data,R_num,Psb,R1)
-    syms p [3 1] real
-    syms Rb [3 3] real
-    syms y real 
-    syms Rs1 [3 1] real
-    syms Rs23 [3 2] real
-    syms Rn [3 3] real
-    syms psb [3 1] real
-    syms a b c d real
-    
-    A = [a b c];
-    X = p +Rb*psb + y*Rb*[Rs1,Rs23]*Rn*[1;0;0];
-    
-    %%
-    eq =[A d]*[X;1];
-    var=[reshape(a*Rs23,1,numel(Rs23)),reshape(b*Rs23,1,numel(Rs23)),reshape(c*Rs23,1,numel(Rs23))];
-    for i = 1:length(var)
-    Cf(i) = subs(simplify(eq-subs(expand(eq),var(i),0)),var(i),1);
-    end
-    Cf = [(Rb*psb)'+(Rn1_1*y*Rb*Rs1)'+[p1,p2,p3],Cf];
-    % Cf = [p1,p2,p3,Cf];
-    ds=find(Cf==0)
-    Cf(ds)=[];
-    var = [a,b,c,var]/d;
-    var(ds)=[];
-    simplify(eq/d - Cf*var' ) 
-    qt = Eul2Quat(robot_q);
-    qt = qt./vecnorm(qt,2);
-    A = Cf1known(robot_p,qt,sensor_data,R_num,Psb,R1)';
-    ds = find(A(1,:)==0);
-    A(:,ds) = [];
-    Cf(ds)=[];
-    var(ds)=[];
-    X = pinv(A)*(-1*ones(size(A,1),1));
-end
 function [A,X,Cf,var] = param_analysis2(robot_p, robot_q, sensor_data,sensor_data2,R_num)
     syms p [3 1] real
     syms Rb [3 3] real

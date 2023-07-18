@@ -64,6 +64,15 @@ for i=1:length(robot_pt)
     A(:,ds)=[];
     A_stack=[A_stack;A];
 end
+A_stack=[];
+for i=1:length(robot_pt)
+    qt = Eul2Quat(robot_qt(:,i));
+    qt = qt./vecnorm(qt,2);
+    A = Cf2_sens(robot_pt(:,i),qt,sensor_data(1,i),sensor_data(2,i),Rodrigues([0,0,1],pi/20));
+    ds = find(A(2,:)==0);
+    A(:,ds)=[];
+    A_stack=[A_stack;A];
+end
 %% 疑似逆とパラ計算
 X = pinv(A_stack)*(-1*ones(size(A_stack,1),1));
 offset = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:12)];
