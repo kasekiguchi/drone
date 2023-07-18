@@ -25,9 +25,13 @@ syms t real
 % y = sin(t/2);
 % z = 1;
 
-x = cos(t);
-y = sin(t);
+x = 1;
+y = 0;
 z = 1;
+
+% x = cos(t);
+% y = sin(t);
+% z = 1;
 
 % x = 0;
 % y = 0;

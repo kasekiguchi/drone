@@ -233,7 +233,42 @@ catch ME % for error
 end
 
 %profile viewer
+%% 
 
+%profile viewer
+%%グラフの描画
+close all
+opengl software
+
+% size_best = size(data.bestcost, 2);
+% Edata = logger.data(1, "p", "e")';
+% Rdata = logger.data(1, "p", "r")';
+% Diff = Edata - Rdata;
+
+fprintf("%f秒\n", totalT)
+Fontsize = 15;  timeMax = 10;
+set(0, 'defaultAxesFontSize', Fontsize);
+set(0, 'defaultTextFontSize', Fontsize);
+% logger.plot({1,"p","e"})
+% hold on
+% logger.plot({1,"p","r"})
+logger.plot({1,"p", "er"},  "fig_num",1); % set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+% logger.plot({1,"p","e"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "time", [0, timeMax], "fig_num",1,"row_col",[2,3]);
+
+%% Difference of Pos
+% figure(7);
+% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+
+%% animation
+%VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
+agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();
 
