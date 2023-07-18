@@ -17,11 +17,6 @@ Controller.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100
 Controller.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
 Controller.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 
-%approと一緒の極
-% Controller.F1 = place(Ac2,Bc2,[-1.1283, -7.3476]);%appと同じgain
-% Controller.F2 = place(Ac4,Bc4,[-37.6509 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-% Controller.F3 = place(Ac4,Bc4,[-51.4247 ,-1.3739 + 1.4255i,-1.3739 - 1.4255i,-0.7037]);%appと同じgain
-% Controller.F4 = place(Ac2,Bc2,[-1.0864,-27.0167]);%appと同じgain
 vF1 = Controller.F1;
 vF2 = Controller.F2;
 vF3 = Controller.F3;
