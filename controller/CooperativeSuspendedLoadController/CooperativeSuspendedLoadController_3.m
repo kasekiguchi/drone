@@ -15,7 +15,7 @@ mui = sum(muid.*qi,1).*qi; % 3xN
 qid = -muid./vecnorm(muid,2,1); % 3xN
 ui = CSLC_3_ui(x,xd,R0,R0d,P,K,Pdagger,mui,qid);
 b3 = ui./vecnorm(ui,2,1); % 3xN
-b1 = xd(4:6) + 0.1*cell2mat(arrayfun(@(i) Ri(:,:,i)*[1;0;0],1:3,'UniformOutput',false)); % Caution : problem if dx0d = - 10*xi.
+b1 = xd(4:6) + 1*cell2mat(arrayfun(@(i) Ri(:,:,i)*[1;0;0],1:3,'UniformOutput',false)); % Caution : problem if dx0d = - 10*xi.
 b1 = b1./vecnorm(b1,2,1);
 b2 = cross(b3, b1); % 3xN
 si = vecnorm(b2,2,1);

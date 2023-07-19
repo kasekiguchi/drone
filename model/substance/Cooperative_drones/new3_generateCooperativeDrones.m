@@ -6,7 +6,7 @@ clc
 % 軸の取り方に注意
 % e3 = [0;0;1]; % 鉛直下向き
 dir = "model/substance/Cooperative_drones/";
-N = 4; % エージェント数
+N = 5; % エージェント数
 
 %% symbol定義
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
@@ -102,9 +102,11 @@ end
 %%
 dqi = reshape(dqi,[],1);
 dri = reshape(dri,[],1);
+dwi = reshape(dwi,[],1);
+doi = reshape(doi,[],1);
 %% 
 % %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
-matlabFunction([dx0;dr0;ddX0dO0;dqi;reshape(dwi,[],1);dri;reshape(doi,[],1)],"File",dir+"tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX0dO0},'outputs',{'dX'})
+matlabFunction([dx0;dr0;ddX0dO0;dqi;dwi;dri;doi],"File",dir+"tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX0dO0},'outputs',{'dX'})
 %% gen cable_suspended_rigid_body_with_N_drones
 fname = "zup_cable_suspended_rigid_body_with_" + N + "_drones";
 str = "function dX = "+fname+"(x,u,P)\n"+...
