@@ -1,21 +1,26 @@
 classdef ELC < handle
-% クアッドコプター用階層型線形化を使った入力算出
-% DynamicExtendedLinearizationBasedController に対応
 properties
     self
     result
     param
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
-    Vep
+    Vep%線形化したシステムの仮想入力を生成する関数
 end
 
 methods
-
     function obj = ELC(self, param)
+        % クアッドコプターの動的拡大システムの線形化を使った入力算出
+% DynamicExtendedLinearizationBasedController に対応
+        %クワッドコプタを動的拡大したシステムを線形化したシステムの仮想入力を計算し，線形化前の動的拡大システムの入力を求める
+%Zep1~Zep4は動的拡大システムの状態から線形化後の状態に変換する関数である
+%Trs=[T(クワッドコプタの合計推力), dT(合計推力の微分)]である
+%z1~z4は線形化後のz,x,y,yawサブシステムの状態である
+%Vepはサブシステムの状態を用いて仮想入力を求める関数である
+%Uepで仮想入力を動的拡大システムの入力に変更する
         obj.self = self;
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
-        obj.Vep = param.Vep; % 仮想入力を生成する関数ハンドル
+        obj.Vep = param.Vep; % 動的拡大したシステムを線形化したシステムの仮想入力を生成する関数
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.result.u = zeros(self.estimator.model.dim(2),1);
     end
@@ -27,18 +32,6 @@ methods
         xd = ref.state.xd;
         xd0 =xd;
         P = obj.param.P;
-        % F1 = obj.param.F1;
-        % F2 = obj.param.F2;
-        % F3 = obj.param.F3;
-        % F4 = obj.param.F4;
-
-        %     xd=Xd.p;
-        %     if isfield(Xd,'v')
-        %         xd=[xd;Xd.v];
-        %         if isfield(Xd,'dv')
-        %             xd=[xd;Xd.dv];
-        %         end
-        %     end
         xd = [xd; zeros(20 - size(xd, 1), 1)]; % 足りない分は０で埋める．
 
         % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和

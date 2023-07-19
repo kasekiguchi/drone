@@ -1,5 +1,7 @@
 %% Initialize
 % do initialize first in main.m
+%クワッドコプタの動的拡大システムの導出
+%拡大する状態はTr(クワッドコプタの合計推力), dTr(合計推力の微分)である
 %clc
 %tmp = matlab.desktop.editor.getActive;
 %cd(fileparts(tmp.Filename));

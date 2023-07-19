@@ -6,7 +6,8 @@ function Controller = Controller_FT(dt,fz)
             x0 = [50, 0.01];
             r=0.02;%緩和区間
             ar = [1, 1];%近似に使う区間
-            br=[1.6,1.5];%制約の大きさ最小は0
+            br=[1.8,1.6];%制約の大きさ最小は0
+            %確認用のファイルと対応図ける
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
@@ -56,6 +57,7 @@ else
     syms z(t)
     syms zF1 [1 4]
         f1 =zeros(2,4);
+        zname = ["z","dz"];
         for i = 1:2
              %tanh absolute
              %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
@@ -63,7 +65,6 @@ else
             c =@(x)0;
             ceq = @(x) 1 - x(1).*x(2).^(az(i)./2)+br(i);
             nonlinfcn = @(x)deal(c(x),ceq(x));
-            
             options = optimoptions("fmincon",...
                 "Algorithm","interior-point",...
                 "EnableFeasibilityMode",true,...
@@ -71,7 +72,26 @@ else
             
             [p,fval] = fmincon(fun,x0,[],[],[],[],[0,0],[inf,inf],nonlinfcn,options) 
             fvals12z(i) = 2 * fval%誤差の大きさの確認
-            f1(i, :) = [vF1(i),p,az(i)];
+            f1(i, :) = [vF1(i), p, az(i)];%パラメータを配列に保存
+
+            %figureで緩和区間を確認
+                e = -0.1 : 0.001 : 0.1;
+                usgnabs = -vF1(i).*tanh(p(1).*e).*sqrt(e.^2 + p(2)).^az(i);
+                u = -vF1(i).*sign(e).*abs(e).^az(i);
+                uk= -vF1(i).*e;
+                figure(i)
+                plot(e,usgnabs, 'LineWidth', 2.5);
+                hold on
+                grid on
+                plot(e,u, 'LineWidth', 2.5);
+                plot(e,uk, 'LineWidth', 2.5);
+                legend("Approximation","Finite time settling","Linear state FB");
+                fosi=20;%defolt 9
+                set(gca,'FontSize',fosi)
+                xlabel(zname(i),'FontSize',fosi);
+                ylabel('input','FontSize',fosi);
+                hold off
+
         end
         %matlabfunctionにしてもいいかも matlabFunction([u, du, ddu, dddu], "Vars", {sz1,vF1(i),p,alpha(i)});
         u = 0; du = 0; ddu = 0; dddu = 0;

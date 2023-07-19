@@ -5,8 +5,8 @@ properties
     result
     param
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
-    Vf
-    Vs
+    Vf % 階層１の入力を生成する関数ハンドル
+    Vs % 階層２の入力を生成する関数ハンドル
 end
 
 methods
