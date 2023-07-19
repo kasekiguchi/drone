@@ -156,7 +156,9 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","ser"},{1,"v","e"},{1,"q","se"},{1,"w","e"},{1,"state.pL","er"},{1,"state.vL","e"},{1,"state.pT","e"},{1,"state.wL","e"},{1,"input",""});
+% logger.plot({1,"p","ser"},{1,"v","e"},{1,"q","se"},{1,"w","e"},{1,"state.pL","er"},{1,"state.vL","e"},{1,"state.pT","e"},{1,"state.wL","e"},{1,"input",""});
+logger.plot({1,"inner_input",""});
+logger.plot({1,"p","ser"});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
