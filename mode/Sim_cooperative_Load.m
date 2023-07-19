@@ -83,7 +83,7 @@ logger.plot({1, "p", "p"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.s
 %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif", true)
+mov.animation(logger, 'target', 1:N, "gif",false)
 %%
 logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
