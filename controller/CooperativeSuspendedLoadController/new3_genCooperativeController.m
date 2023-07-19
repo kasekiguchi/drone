@@ -9,7 +9,7 @@ clc
 %%
 dir = "controller/CooperativeSuspendedLoadController/";
 %% symbol定義
-N = 4; % エージェント数
+N = 3; % エージェント数
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
 syms x0 [3 1] real % 位置
 syms dx0 [3 1] real
@@ -94,9 +94,9 @@ matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{x,Xd,R0,R
 % Similarly 
 % -ddqid = R0d*Skew(o0d)^2*e + R0d*Skew(do0d)*e
 dqid = R0d*Skew(o0d)*(R0d'*qid); % 3xN
-wid = cross(qid,dqid); % 3xN
+wid = 0*cross(qid,dqid); % 3xN
 ddqid = R0d*(Skew(do0d) + Skew(o0d)^2)*R0d'*qid;
-dwid = cross(qid,ddqid);
+dwid = 0*cross(qid,ddqid);
 eqi = cross(qid,qi); % 3xN
 ewi = wi + cellmatfun(@(Qi,i) Qi^2*wid(:,i),Qi,"mat");
 %% ui
@@ -139,8 +139,9 @@ for i = 1:N
 %   doic(:,i) = Vee(Ric(:,:,i)'*ddRic(:,:,i)-(Ric(:,:,i)'*dRic(:,:,i))^2);
   doic(:,i) = zeros(size(Vee(Ric(:,:,i)'*ddRic(:,:,i)-(Ric(:,:,i)'*dRic(:,:,i))^2)));
   eri(:,i) = Vee(Ric(:,:,i)'*Ri(:,:,i)-Ri(:,:,i)'*Ric(:,:,i))/2;
-%   eoi(:,i) = oi(:,i) - Ri(:,:,i)'*Ric(:,:,i)*oic(:,i);
-  eoi(:,i) = oi(:,i);
+
+  eoi(:,i) = oi(:,i);% - Ri(:,:,i)'*Ric(:,:,i)*oic(:,i);
+
   fi(:,i) = ui(:,i)'*Ri(:,:,i)*e3;
   Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi{i}*Ji{i}*oi(:,i);% - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric(:,:,i)*oic(:,i)-Ri(:,:,i)'*Ric(:,:,i)*doic(:,i));% 3xN
 end
