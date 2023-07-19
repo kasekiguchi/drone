@@ -14,7 +14,7 @@ qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
 
-initial_state.p = [0; 0; 1];
+initial_state.p = [0; 4.2; 2];
 initial_state.v = [0; 0; 0];
 initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
