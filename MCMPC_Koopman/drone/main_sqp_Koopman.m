@@ -45,11 +45,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([100.0; 100.0; 4000.0]);    % 座標   1000 10
+    Params.Weight.P = diag([1000.0; 1000.0; 4000.0]);    % 座標   1000 10
     Params.Weight.V = diag([100.0; 100.0; 100.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([5000; 5000; 5000; 1; 1; 1]);  % 姿勢角、角速度
     %% 
     
 %-- data
@@ -83,12 +83,13 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     x = agent.estimator.result.state.get();
 
     %Koopman
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est');
+%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est');
+    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est');
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
-% %     f = @(x) [x;1];
-% %     Params.f = {f};
+    Params.f = {@quaternions};
+    
 
 %     xc = f(x); %複素空間へ値を写像
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
@@ -371,10 +372,10 @@ function [c, ceq] = Constraints(x, params, Agent, ~)
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
     X = x(1:params.state_size, :);          % 12 * Params.H 
-    one = ones(1,params.H);
-    Xc = vertcat(X,one);
-%     Xc = [X(1:params.state_size, 1);1];     % 13 * 1(観測量に通したつもり)
-    Xc = repmat(Xc,1,params.H);
+%     one = ones(1,params.H);
+%     Xc = vertcat(X,one);
+    F = params.f;
+    Xc = F(X);
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
 
 %- ダイナミクス拘束
