@@ -21,8 +21,8 @@ syms t real
 
 
 % %% circle
-x = cos(t/10);
-y = sin(t/10);
+x = sin(2*pi*t/10);
+y = cos(2*pi*t/10);
 z = 1;
 
 % x = 1;

@@ -23,7 +23,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.1; %MPCステップ幅
+    Params.dt = 0.08; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
 
@@ -45,10 +45,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1000.0; 1000.0; 4000.0]);    % 座標   1000 10
-    Params.Weight.V = diag([100.0; 100.0; 100.0]);    % 速度
-    Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+    Params.Weight.P = diag([1000.0; 1000.0; 5000.0]);    % 座標   1000 10
+    Params.Weight.V = diag([10.0; 10.0; 10.0]);    % 速度
+    Params.Weight.R = diag([5.0,; 5.0; 5.0; 5.0]); % 入力
+    Params.Weight.RP = diag([100.0,; 100.0; 100.0; 100.0]);  % 1ステップ前の入力との差    0*(無効化)
     Params.Weight.QW = diag([5000; 5000; 5000; 1; 1; 1]);  % 姿勢角、角速度
     %% 
     
@@ -72,7 +72,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     options = optimoptions(options,'Diagnostics','off');
 %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
     options = optimoptions(options,'MaxIterations',      1.e+9);     % 最大反復回数
-    options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
+%     options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
+    options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
     
     %-- fmincon設定
     options.Algorithm = 'sqp';  % 逐次二次計画法
@@ -83,15 +84,15 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     x = agent.estimator.result.state.get();
 
     %Koopman
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est');
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est');
+%     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
+    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
-    Params.f = {@quaternions};
+%     Params.f = {@quaternions}; %状態+非線型項
+    Params.f = {@(x) [x;1]}; %状態のみ
     
-
-%     xc = f(x); %複素空間へ値を写像
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
 
     xr = zeros(Params.state_size+Params.input_size, Params.H);
@@ -195,6 +196,7 @@ end
             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
+            data.exitflag(idx) = exitflag;
             % 制御入力の決定
             previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
             fprintf("\tfval : %f\n", fval)
@@ -297,10 +299,10 @@ end
 close all
 opengl software
 
-size_best = size(data.bestcost, 2);
-Edata = logger.data(1, "p", "e")';
-Rdata = logger.data(1, "p", "r")';
-Diff = Edata - Rdata;
+% size_best = size(data.bestcost, 2);
+% Edata = logger.data(1, "p", "e")';
+% Rdata = logger.data(1, "p", "r")';
+% Diff = Edata - Rdata;
 
 fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = 10;
@@ -309,18 +311,20 @@ set(0, 'defaultTextFontSize', Fontsize);
 % logger.plot({1,"p","e"})
 % hold on
 % logger.plot({1,"p","r"})
-logger.plot({1,"p", "er"},  "fig_num",1); % set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+plot(data.exitflag)
+ylim([0,2])
+% logger.plot({1,"p", "er"},  "fig_num",1); % set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+% logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 % logger.plot({1,"p","e"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "time", [0, timeMax], "fig_num",1,"row_col",[2,3]);
 
 %% Difference of Pos
-figure(7);
-plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
-legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
-set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
+% figure(7);
+% plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);
+% legend("$$x_\mathrm{diff}$$", "$$y_\mathrm{diff}$$", "$$z_\mathrm{diff}$$", 'Interpreter', 'latex', 'Location', 'southeast');
+% set(gca,'FontSize',15);  grid on; title(""); ylabel("Difference of Pos [m]"); xlabel("time [s]"); xlim([0 10])
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
@@ -371,27 +375,19 @@ function [c, ceq] = Constraints(x, params, Agent, ~)
     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-    X = x(1:params.state_size, :);          % 12 * Params.H 
-%     one = ones(1,params.H);
-%     Xc = vertcat(X,one);
-    F = params.f;
-    Xc = F(X);
+    for i = 1:params.H
+        X(:,i) = x(1:params.state_size, i);          % 12 * Params.H 
+        F = params.f{1};
+        Xc(:,i) = F(X(:,i));
+    end
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
 
 %- ダイナミクス拘束
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
 %-- 連続の式をダイナミクス拘束に使う
-    for L = 2:params.H
-%         xx = X(:, L-1);
-%         xu = U(:, L-1);
-%         xp = params.X0;
-%         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],params.X0);
-%         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-%         [~,tmpx]=Agent.model.solver(@(t,X) Agent.model.method(xx, xu, Agent.parameter.get()), [0 0+params.dt],xp);
-%         tmpx = xp + params.dt * Agent.model.method(xx, xu, Agent.parameter.get()); %非線形モデル
-
+    for L = 2:params.H  
         tmpx = params.A * Xc(:,L-1) + params.B * U(:,L-1); %クープマンモデル
-        tmpx = params.C * tmpx;
+        tmpx = params.C * tmpx; %実空間の値に変換
         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
