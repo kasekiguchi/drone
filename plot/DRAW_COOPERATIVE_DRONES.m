@@ -284,7 +284,9 @@ classdef DRAW_COOPERATIVE_DRONES
         Q(:,:,n) = zeros(size(Q2,1),4);
         Q(tmp==0,:,n) = 0;
         Q(tmp==0,1,n) = 1;
+        if sum(tmp~=0) ~=0
         Q(tmp~=0,:,n) = [Q2(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
+        end
       end
     end
   end

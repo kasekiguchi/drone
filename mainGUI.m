@@ -10,7 +10,8 @@ else
 end
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-cd(cf); close all hidden; clear all; userpath('clear');
+%cd(cf); 
+close all hidden; clear all; userpath('clear');
 %%
 clc
 
