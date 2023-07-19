@@ -48,6 +48,10 @@ if logger.fExp==1
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
+    for i = 1:size(data.input,1)
+        data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
+    end
+%     plot(logger.Data.t(data.startIndex:data.endIndex),data.input)
 else
     data.startIndex = 1;
     data.endIndex = data.N;
@@ -70,6 +74,6 @@ for i=1:data.N-1
     data.U(:,i) = [data.input(i,:)'];
     data.T(:,i) = [data.t(i,:)];
 end
-
+t=1;
 end
 
