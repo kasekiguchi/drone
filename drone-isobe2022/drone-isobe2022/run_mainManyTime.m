@@ -6,7 +6,7 @@ clear;clc;
 
 %% 初期設定
 % 実行する回数を指定
-HowManyRun = 100;
+HowManyRun = 1;
 
 % rand シード値
 seed = double('T');
@@ -16,12 +16,12 @@ seed = double('T');
 rng(seed);
 
 % データ保存先フォルダ名
-% rmdir Data\simData_KoopmanApproach_2023_6_1_data200 s;%フォルダの削除 フォルダ名を変更せずに回す場合はコメントイン 
-mkdir Data\simData_KoopmanApproach_2023_7_12_experiment_circle; %新規フォルダの作成(以下のフォルダ名と一致させるように)
-Foldername = 'Data\simData_KoopmanApproach_2023_6_6_experiment_circle'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
+% rmdir Data\simData_KoopmanApproach_2023_7_20_circle s;%フォルダの削除 フォルダ名を変更せずに回す場合はコメントイン 
+% mkdir Data\simData_KoopmanApproach_2023_7_20_circle; %新規フォルダの作成(以下のフォルダ名と一致させるように)
+Foldername = 'Data\simData_KoopmanApproach_2023_7_20_circle'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル
 % "ファイル名"_[番号].mat で保存される
-FileName = '6_1_isobe'; %線形化で読み込むファイルはこれで判別してる
+FileName = 'sim_7_20_circle_estimaterdata'; %線形化で読み込むファイルはこれで判別してる
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
