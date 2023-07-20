@@ -194,11 +194,13 @@ end
             % MPC設定(problem)
             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
-            problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
+            problem.nonlcon   = @(x) Constraints(idx,x, Params, agent, time);    % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             data.exitflag(idx) = exitflag;
             % 制御入力の決定
             previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
+            num3(idx) = {x};
+            num(idx) = {var};
             fprintf("\tfval : %f\n", fval)
 %         TODO: 1列目のvarが一切変動しない問題に対処
             if var(Params.state_size+1:Params.total_size, end) > 1.0
@@ -369,12 +371,13 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     eval = sum(stageState) + terminalState;
 end
 
-function [c, ceq] = Constraints(x, params, Agent, ~)
+function [c, ceq] = Constraints(idx,x, params, Agent, ~)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, params.H);
     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
+    num2(idx) = {x};
     for i = 1:params.H
         X(:,i) = x(1:params.state_size, i);          % 12 * Params.H 
         F = params.f{1};
