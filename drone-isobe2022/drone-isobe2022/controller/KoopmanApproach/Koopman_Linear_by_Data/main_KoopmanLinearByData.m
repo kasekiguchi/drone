@@ -5,13 +5,13 @@ clc
 clear
 close all
 % フラグ管理
-flg.bilinear = 0; %1:双線形モデルへの切り替え
+flg.bilinear = 1; %1:双線形モデルへの切り替え
 
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_7_20_simulation_circle_InputandConst.mat';  %plotResultの方も変更するように
-% FileName = 'test1.mat'; %お試し用
+% FileName = 'EstimationResult_12state_7_20_simulation_circle_InputandConst.mat';  %plotResultの方も変更するように
+FileName = 'test1.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'test';  
@@ -82,7 +82,7 @@ disp('Estimated')
 %中間発表の推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
 % simResult.reference = ImportFromExpData2('experiment_6_20_circle_estimaterdata');
-simResult.reference = ImportFromExpData2('sim_7_20_circle_estimaterdata');
+simResult.reference = ImportFromExpData2('sim_7_20_circle_estimatordata');
 % simResult.reference = ImportFromExpData2('experiment_7_11_circle_radius=0.7');
 
 

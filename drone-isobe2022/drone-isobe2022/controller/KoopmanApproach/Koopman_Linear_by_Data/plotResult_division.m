@@ -9,11 +9,11 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 
-loadfilename{1} = 'EstimationResult_12state_7_20_simulation_circle_InputandConst.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{2} = 'EstimationResult_12state_7_12_circle=circle_estimation=circle_datanum=20.mat';
+loadfilename{1} = 'EstimationResult_12state_7_20_simulation_circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{2} = 'EstimationResult_12state_7_20_simulation_circle_InputandConst.mat';
 % loadfilename{2} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
-% loadfilename{1} = 'test1.mat';
+% loadfilename{3} = 'test1.mat';
 % loadfilename{2} = 'test1.mat';
 % loadfilename{2} = 'test3.mat';
 % loadfilename{3} = 'test3.mat';
