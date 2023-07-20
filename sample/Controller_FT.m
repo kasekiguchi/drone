@@ -2,7 +2,7 @@
 function Controller = Controller_FT(dt,fz)
 %% flag and approximate range
             fApproxZ = fz;%z方向に適用するか:1 else:~1 Approximate Zdirection subsystem
-            alp = [0.85,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            alp = [0.9,0.9,0.9,0.9];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
             x0 = [50, 0.01];
             r=0.02;%緩和区間
             ar = [1, 1];%近似に使う区間
