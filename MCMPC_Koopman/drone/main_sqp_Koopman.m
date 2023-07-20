@@ -45,11 +45,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([3000.0; 1000.0; 7000.0]);    % 座標   1000 10
+    Params.Weight.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 10
     Params.Weight.V = diag([100.0; 100.0; 100.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([100.0,; 100.0; 100.0; 100.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2000; 2000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
     %% 
     
 %-- data
@@ -87,8 +87,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est')
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est')
+%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
+    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
@@ -177,10 +177,15 @@ end
             
         %-- 初期値の設定
             if idx == 1
-                initial_u1 = 0.5884 * 9.81 / 4;   % 初期値
-                initial_u2 = initial_u1;
-                initial_u3 = initial_u1;
-                initial_u4 = initial_u1;
+%                 initial_u1 = 0.5884 * 9.81 / 4;   % 初期値
+%                 initial_u2 = initial_u1;
+%                 initial_u3 = initial_u1;
+%                 initial_u4 = initial_u1;
+
+                initial_u1 = 1.80;   % 初期値
+                initial_u2 = 0.84;
+                initial_u3 = 2.06;
+                initial_u4 = 1.07;
             else
                 initial_u1 = agent.input(1);
                 initial_u2 = agent.input(2);
@@ -196,13 +201,13 @@ end
             % MPC設定(problem)
             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
-            problem.nonlcon   = @(x) Constraints(idx,x, Params, agent, time);    % 制約条件
+            problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             data.exitflag(idx) = exitflag;
             % 制御入力の決定
             previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
-            num3(idx) = {x};
-            num(idx) = {var};
+%             num3(idx) = {x};
+%             num(idx) = {var};
             fprintf("\tfval : %f\n", fval)
 %         TODO: 1列目のvarが一切変動しない問題に対処
             if var(Params.state_size+1:Params.total_size, end) > 1.0
@@ -214,7 +219,7 @@ end
                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
 
-            agent.input = var(Params.state_size+1:Params.total_size, 1);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
+            agent.input = var(Params.state_size+1:Params.total_size, 2);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
     
         end   
         %-- データ保存
@@ -373,13 +378,13 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     eval = sum(stageState) + terminalState;
 end
 
-function [c, ceq] = Constraints(idx,x, params, Agent, ~)
+function [c, ceq] = Constraints(x, params, Agent, ~)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, params.H);
     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-    num2(idx) = {x};
+%     num2(idx) = {x};
     for i = 1:params.H
         X(:,i) = x(1:params.state_size, i);          % 12 * Params.H 
         F = params.f{1};
@@ -396,6 +401,7 @@ function [c, ceq] = Constraints(idx,x, params, Agent, ~)
         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
+    c = -x(13:16,:);
 %     c(:, 1) = [];
 %     c = X(1,:) - 2;
 end

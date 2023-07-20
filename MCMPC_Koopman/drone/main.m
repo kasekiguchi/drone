@@ -9,7 +9,7 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
-run("main2_agent_setup.m");
+run("main2_agent_setup_sqp.m");
 %agent.set_model_error("ly",0.02);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
