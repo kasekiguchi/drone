@@ -19,7 +19,7 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0.7,0.7,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0.7,0.7,0.5]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
