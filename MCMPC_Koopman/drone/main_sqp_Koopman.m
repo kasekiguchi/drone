@@ -45,11 +45,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 10
-    Params.Weight.V = diag([100.0; 100.0; 100.0]);    % 速度
+    Params.Weight.P = diag([1.0; 1.0; 1.0]);    % 座標   1000 10
+    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Params.Weight.RP = diag([100.0,; 100.0; 100.0; 100.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
+    Params.Weight.QW = diag([10000; 10000; 1000; 1; 1; 1]);  % 姿勢角、角速度
     %% 
     
 %-- data
@@ -177,15 +177,15 @@ end
             
         %-- 初期値の設定
             if idx == 1
-%                 initial_u1 = 0.5884 * 9.81 / 4;   % 初期値
-%                 initial_u2 = initial_u1;
-%                 initial_u3 = initial_u1;
-%                 initial_u4 = initial_u1;
+                initial_u1 = 0.5884 * 9.81 / 4;   % 初期値
+                initial_u2 = initial_u1;
+                initial_u3 = initial_u1;
+                initial_u4 = initial_u1;
 
-                initial_u1 = 1.80;   % 初期値
-                initial_u2 = 0.84;
-                initial_u3 = 2.06;
-                initial_u4 = 1.07;
+%                 initial_u1 = 1.80;   % 初期値
+%                 initial_u2 = 0.84;
+%                 initial_u3 = 2.06;
+%                 initial_u4 = 1.07;
             else
                 initial_u1 = agent.input(1);
                 initial_u2 = agent.input(2);
@@ -378,9 +378,10 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     eval = sum(stageState) + terminalState;
 end
 
-function [c, ceq] = Constraints(x, params, Agent, ~)
+function [c , ceq] = Constraints(x, params, Agent, ~)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, params.H);
+%     c2  = zeros(params.state_size, params.H);
     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
@@ -401,7 +402,11 @@ function [c, ceq] = Constraints(x, params, Agent, ~)
         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
-    c = -x(13:16,:);
+
+%     c1 = 1.0 - x(13:16,:);
+      c = [1.44 - x(15:16,:), x(13:14,:) - 1.45];
+%     c1 = -x(13:16,:);
+%     c2 = x(13:16,:) - 1.5;
 %     c(:, 1) = [];
 %     c = X(1,:) - 2;
 end

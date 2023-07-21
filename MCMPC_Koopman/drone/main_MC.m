@@ -44,7 +44,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.input_size = 4;
     Params.total_size = 16;
     % Reference.mを使えるようにする
-    Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
+%     Params.ur = 0.5884 * 9.81 / 4 * ones(Params.input_size, 1);
+    Params.ur = 1.443 * ones(Params.input_size,1);
     xr0 = zeros(Params.state_size, Params.H);
 
    
@@ -59,6 +60,7 @@ try
     while round(time.t, 5) <= te
         tic %経過時間を測定
         idx = idx + 1; %プログラムの周回数
+%         profile on
         %% sensor
         %    tic:現在の時刻を記録
         tStart = tic;
@@ -252,6 +254,7 @@ end
 
         %%
         drawnow 
+%         profile viewer
     end
 
 catch ME % for error
@@ -341,7 +344,7 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-% agent(1).animation(logger,"target",1);
+agent(1).animation(logger,"target",1);
 
 %%
 % logger.save();
