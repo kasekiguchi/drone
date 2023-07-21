@@ -21,8 +21,9 @@ agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-fFT=1;%z directional controller flag 1:FT, other:LS
-agent.controller = FTC(agent,Controller_FT(dt,fFT));
+fApprox_FTxy=1;%approximate x,y directional FTC input : 1,non : the other
+fConfirmFig =1;%近似入力のfigureを確認するか
+agent.controller = FTC(agent,Controller_FT(dt,fApprox_FTxy,fConfirmFig));
 run("ExpBase");
 function dfunc(app)
 app.logger.plot({1, "p", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
