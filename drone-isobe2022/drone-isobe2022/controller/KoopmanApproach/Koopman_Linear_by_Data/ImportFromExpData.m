@@ -51,7 +51,7 @@ if logger.fExp==1
     for i = 1:size(data.input,1)
         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
     end
-%     plot(logger.Data.t(data.startIndex:data.endIndex),data.input)
+    plot(logger.Data.t(data.startIndex:data.endIndex),data.input)
 else
     data.startIndex = 1;
     data.endIndex = data.N;
