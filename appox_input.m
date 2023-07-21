@@ -33,17 +33,17 @@ options = optimoptions("fmincon",...
     "EnableFeasibilityMode",true,...
     "SubproblemAlgorithm","cg");
 
-[p,fval] = fmincon(fun,x0,[],[],[],[],[0,0],[inf,inf],nonlinfcn,options) 
-
-2*fval%近似したFTCとFTCとの誤差
-const = 1 - p(1).*p(2).^(alp(i)./2)%算出したパラメータが制約を満たしているのか確認
-
-syms w
-du = diff(k(i).*tanh(p(1).*w).*sqrt(w.^2 + p(2)).^alp(i),w,1);
+[p(i,:),fval] = fmincon(fun,x0,[],[],[],[],[0,0],[inf,inf],nonlinfcn,options) 
+fval2(i)=2*fval%近似したFTCとFTCとの誤差
+const = 1 - p(i,1).*p(i,2).^(alp(i)./2)%算出したパラメータが制約を満たしているのか確認
+end
 
 e = -1:0.001:1;
-usgn = -k(i).*tanh(p(1)*e).*abs(e).^alp(i);
-usgnabs = -k(i).*tanh(p(1).*e).*sqrt(e.^2 + p(2)).^alp(i);
+for i=1:2
+syms w
+du = diff(k(i).*tanh(p(i,1).*w).*sqrt(w.^2 + p(i,2)).^alp(i),w,1);
+usgn = -k(i).*tanh(p(i,1)*e).*abs(e).^alp(i);
+usgnabs = -k(i).*tanh(p(i,1).*e).*sqrt(e.^2 + p(i,2)).^alp(i);
 du = subs(du,w,e);
 u = -k(i).*sign(e).*abs(e).^alp(i);
 uk= -k(i).*e;
@@ -61,3 +61,37 @@ xlabel('x','FontSize',fosi);
 ylabel('input','FontSize',fosi);
 hold off
 end
+%%
+filename="appox_FTC_param.mat";
+save(filename,"r","a","b","k","p","fval2");
+whos("-file",filename);
+%%
+ syms zF [2 4]
+ syms z(t)
+ syms sz1 [2 1] real
+            %matlabfunctionにしてもいいかも matlabFunction([u, du, ddu, dddu], "Vars", {sz1,vF1(i),p,alpha(i)});
+            u = 0; du = 0; ddu = 0; dddu = 0;
+            for i=1:2
+            ub(i) = -zF(i,1).*tanh(zF(i,2).*z(t)).*sqrt(z(t).^2 + zF(i,3)).^zF(i,4);
+            dub(i) = diff(ub(i), t);
+            ddub(i) = diff(dub(i), t);
+            dddub(i) = diff(ddub(i), t);
+            end
+
+            for i = 1:2
+                u = u + subs(ub(i), z, sz1(i));
+            end
+                       dz = Ad1*sz1 + Bd1*u;
+            for i = 1:2
+                du = du + subs(dub(i), [diff(z, t) z], [dz(i) sz1(i)]);
+            end
+                       ddz = Ad1*dz + Bd1*du;
+            for i = 1:2
+                ddu = ddu + subs(ddub(i), [diff(z, t, 2)  diff(z, t) z], [ddz(i)  dz(i) sz1(i)]);
+            end
+                       dddz = Ad1*ddz + Bd1*ddu;
+            for i = 1:2
+                dddu = dddu + subs(dddub(i), [diff(z, t, 3) diff(z, t, 2)  diff(z, t) z], [dddz(i) ddz(i)  dz(i) sz1(i)]);
+            end
+  
+        matlabFunction([u, du, ddu, dddu],'file','Vzft.m', "Vars", {zF, sz1},'outputs',{'Vftc'});
