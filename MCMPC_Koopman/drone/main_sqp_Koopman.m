@@ -23,7 +23,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.08; %MPCステップ幅
+    Params.dt = 0.07; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
 
@@ -49,7 +49,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([8000; 6000; 1000; 1; 1; 1]);  % 姿勢角、角速度
     %% 
     
 %-- data
@@ -85,15 +85,15 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
+%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
-    Params.f = {@quaternions}; %状態+非線型項
-%     Params.f = {@(x) [x;1]}; %状態のみ
+%     Params.f = {@quaternions}; %状態+非線型項
+    Params.f = {@(x) [x;1]}; %状態のみ
     
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
 
@@ -201,7 +201,7 @@ end
             % MPC設定(problem)
             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
-            problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
+            problem.nonlcon   = @(x) Constraints(idx, x, Params, agent, time);    % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             data.exitflag(idx) = exitflag;
             % 制御入力の決定
@@ -378,7 +378,7 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     eval = sum(stageState) + terminalState;
 end
 
-function [c , ceq] = Constraints(x, params, Agent, ~)
+function [c , ceq] = Constraints(idx, x, params, Agent, ~)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, params.H);
 %     c2  = zeros(params.state_size, params.H);
@@ -405,9 +405,15 @@ function [c , ceq] = Constraints(x, params, Agent, ~)
 
 %     c1 = 1.0 - x(13:16,:);
 %       c = [1.442 - x(13:14,:),x(13:14,:) - 1.447, x(15:16,:) - 1.447, 1.442 - x(15:16,:)];
-      c = [x(13:14,:) - 1.5,1.43 - x(13:14,:), x(15:16,:) - 1.447, 1.444 - x(15:16,:)];
-%     c1 = -x(13:16,:);
-%     c2 = x(13:16,:) - 1.5;
+%       c = [x(13:14,:) - 1.48,1.44 - x(13:14,:), x(15:16,:) - 1.48, 1.444 - x(15:16,:)];
+    if idx < 7
+        c = [x(13:16,:) - 3, 1.9 - x(13:16,:)];
+    elseif idx >= 7 && idx < 30
+        c = [x(13:16,:) - 1.9, 0.8 - x(13:16,:)];
+    else
+        c = [x(13:14,:) - 1.6,1.3 - x(13:14,:), x(15:16,:) - 1.6, 1.3 - x(15:16,:)];
+    end
+%     c = [x(13:16,:) - 1.9, 1.1 - x(13:16,:)];
 %     c(:, 1) = [];
 %     c = X(1,:) - 2;
 end
