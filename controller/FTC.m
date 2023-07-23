@@ -6,7 +6,7 @@ properties
     param
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vs % 階層２の入力を生成する関数ハンドル
-    gpa %zサブシステムのゲイン，近似パラメータ，alpha
+    approx_z %zサブシステムのゲイン，近似パラメータ，alpha
 end
 
 methods
@@ -17,7 +17,7 @@ methods
         obj.param.P = self.parameter.get(obj.parameter_name);
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
-        obj.gpa = [obj.param.F1',obj.param.approx_z,obj.param.az]; %zサブシステムのゲイン，近似パラメータ，alpha
+        obj.approx_z = obj.param.approx_z; %zサブシステムのゲイン，近似パラメータ，alpha
     end
 
     function result = do(obj,varargin)
@@ -46,7 +46,7 @@ methods
             dt = obj.param.dt;
         end
         % vf = Vfd(dt,x,xd',P,obj.param.F1);%線形入力
-        vf = Vzft(obj.gpa,z1);%近似FTC
+        vf = Vzft(obj.approx_z,z1);%近似FTC
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向
@@ -76,7 +76,39 @@ methods
 end
 
 methods(Static)
-    function ps=approx_FTC_param(a,b,r,k,alp,x0,txt)
+    % function p = paramSetting(txt,values, fConfirmFig)
+        function p = paramSetting(txt,r, a, b, k, alp,x0, fConfirmFig)
+        filename="appox_FTC_param_"+txt+".mat";
+        val = "params_"+txt;
+        fconst=0;
+        fexist=exist(filename,'file');%近似のパラメータが保存されているのか
+        if fexist
+            valuesb= load(filename,val).(val);
+            p = valuesb.p;
+            % old= struct("r", valuesb.r,"a", valuesb.a,"b", valuesb.b,"k", valuesb.k,"alp", valuesb.alp, "x0", valuesb.x0);
+            old= [valuesb.r, valuesb.a, valuesb.b, valuesb.k, valuesb.alp, valuesb.x0];
+            % fconst = isequaln(old,values);%現在の制約条件とalphaの値とloadしたものが同じか
+            fconst = isequal(old,[r, a, b, k, alp, x0]);%現在の制約条件とalphaの値とloadしたものが同じか
+        end
+        if fexist==0 || ~fconst %保存されていないまたはloadしたものと違う場合
+            new = FTC.approx_FTC_param(txt, r, a, b, k, alp,x0);%新しいパラメータを計算
+            p=new.p;
+            eval([char(val) '= new;']);%保存する名前を付ける
+            save(filename,val);%パラメータを保存 : [パラメータ，ゲイン，FTCとの誤差，近似する区間，制約の大きさ，緩和区間，alpha]
+            whos("-file",filename);
+        elseif fConfirmFig ==1
+            FTC.confirmParam(txt, valuesb.k, valuesb.p, valuesb.alp);%近似した入力を確認, パラメータが新しく作成される場合は実行されない
+        end
+    end
+    
+    % function [ps, p]=approx_FTC_param(txt,values)
+    function [ps, p]=approx_FTC_param(txt,r, a, b, k, alp,x0)
+        % r=values.r;
+        % a=values.a;
+        % b=values.b;
+        % k=values.k;
+        % alp=values.alp;
+        % x0=values.x0;
         % 有限整定の近似微分　一層   
             if length(k)==2
                 j=2;%z,yaw方向サブシステムの緩和
@@ -107,7 +139,7 @@ methods(Static)
                     usgnabs = -k(i).*tanh(p(i,1).*e).*sqrt(e.^2 + p(i,2)).^alp(i);
                     u = -k(i).*sign(e).*abs(e).^alp(i);
                     uk= -k(i).*e;
-                    % figure(i)
+                    
                     subplot(row,2,i);
                     plot(e,usgnabs, 'LineWidth', 2.5);
                     hold on
@@ -121,13 +153,14 @@ methods(Static)
                     ylabel('input','FontSize',fosi);
                     hold off
             end
-            ps = struct("p",p,"k",k,"fval2",fval2,"a",a,"b",b,"r",r,"alp",alp);%構造体に格納
-            fprintf("Is this paramaters of "+txt+" OK ? \nIf It's OK, push something. \nIf It's NO, push ""ctrl + C \"". \n");
+            ps = struct("p",p,"fval2",fval2,"r",r,"a",a,"b",b,"k",k,"alp",alp,"x0",x0);%構造体に格納:[パラメータ，ゲイン，FTCとの誤差，近似する区間，制約の大きさ，緩和区間，alpha]
+            p = ps.p;
+            fprintf("Is this paramaters of "+txt+" OK ? \nIf It's OK, push the Enter key. \nIf It's NO, push ""ctrl + C \"".");
             input("");
             close all
     end
 
-    function confirmParam(k,p,alp,txt)
+    function confirmParam(txt, k,p,alp)
         % 有限整定の近似微分　一層   
             if length(k)==2
                 j=2;%z,yaw方向サブシステムの緩和
@@ -144,7 +177,7 @@ methods(Static)
                     usgnabs = -k(i).*tanh(p(i,1).*e).*sqrt(e.^2 + p(i,2)).^alp(i);
                     u = -k(i).*sign(e).*abs(e).^alp(i);
                     uk= -k(i).*e;
-                    % figure(i)
+                    
                     subplot(row,2,i);
                     plot(e,usgnabs, 'LineWidth', 2.5);
                     hold on
@@ -158,7 +191,7 @@ methods(Static)
                     ylabel('input','FontSize',fosi);
                     hold off
             end
-            fprintf("If you confirmed paramaters of "+txt+", push something. \n");
+            fprintf("If you confirmed paramaters of "+txt+", push the Enter key.");
             input("");
             close all
     end

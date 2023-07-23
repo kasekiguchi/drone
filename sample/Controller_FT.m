@@ -2,18 +2,18 @@ function Controller = Controller_FT(dt,fxy,fcf)
 %% flag and approximate range
             fApproxXY =fxy;%xy方向を近似する: 1 else:~1 
             fConfirmFig = fcf;%近似入力のfigureを確認するか
-            alp = [0.8,0.8,0.8,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            alp = [0.8,0.8,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
 
             %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
             %zを近似する
-            x0 = [50, 0.01];
+            x0 = [50, 0.01];%最小化の初期値
             r=0.02;%緩和区間
             ar = [1, 1];%近似に使う区間
             br=[1.8,1.6];%制約の大きさ, 最小は0
-            
+
             %xyを近似する場合
             %x方向
-            x0xy = [50, 0.01];
+            x0xy = [50, 0.01];%最小化の初期値
             rx=0.02;%緩和区間
             arx = [1,1,1,1];%近似に使う区間
             brx=[1.8, 1.6, 0.5 ,0.2];%制約の大きさ, 最小は0
@@ -35,8 +35,7 @@ vF1 = Controller.F1;
 vF2 = Controller.F2;
 vF3 = Controller.F3;
 vF4 = Controller.F4;
-%% 入力のalphaを計算
-
+%% FTCの同次性のパラメータalphaを計算
 anum = 4; %最大の変数の個数
 alpha = zeros(anum + 1, 4);
 alpha(anum + 1,:) = 1*ones(1,anum);
@@ -60,52 +59,16 @@ ay =Controller.ay;
 apsi =Controller.apsi;
 %%
 %z方向FTCの近似
-fconstz=0;
-fexist_z=exist('appox_FTC_param_z.mat','file');%近似のパラメータが保存されているのか
-if fexist_z
-    load('appox_FTC_param_z.mat','params_z');
-    fconstz = ~isequal([params_z.r, params_z.a, params_z.b,params_z.alp'],[r,ar,br,az']);%現在の制約条件とalphaの値とloadしたものが同じか
-end
-if fexist_z==0 || fconstz %保存されていないまたはloadしたものと違う場合
-    params_z = FTC.approx_FTC_param(ar,br,r,vF1,az,x0,"z");%新しいパラメータを計算
-    filename="appox_FTC_param_z.mat";
-    save(filename,"params_z");%パラメータを保存
-    whos("-file",filename);
-elseif fConfirmFig ==1
-    FTC.confirmParam(vF1,params_z.p,az,"z");%近似した入力を確認, パラメータが新しく作成される場合は実行されない
-end
+% pz=FTC.paramSetting("z", struct("r", r,"a", ar,"b", br,"k", vF1,"alp", az', "x0", x0), fConfirmFig);
+pz=FTC.paramSetting("z",r, ar, br, vF1, az',  x0, fConfirmFig);
 %xy方向FTCの近似
 if fApproxXY
     %x方向
-    fconstx=0;
-    fexist_x=exist('appox_FTC_param_x.mat','file');%近似のパラメータが保存されているのか
-    if fexist_x
-    load('appox_FTC_param_x.mat','params_x');
-    fconstx = ~isequal([params_x.r, params_x.a, params_x.b, params_x.alp'],[rx,arx,brx,ax']);%現在の制約条件とalphaの値とloadしたものが同じか
-    end
-    if fexist_x==0 || fconstx
-        params_x = FTC.approx_FTC_param(arx,brx,rx,vF2,ax,x0xy,"x");%新しいパラメータを計算
-        filename="appox_FTC_param_x.mat";
-        save(filename,"params_x");%パラメータを保存
-        whos("-file",filename);
-    elseif fConfirmFig ==1
-        FTC.confirmParam(vF2,params_x.p,ax,"x");%近似した入力を確認 パラメータが新しく作成される場合は実行されない
-    end
+    % px=FTC.paramSetting("x", struct("r", rx,"a", arx,"b", brx,"k", vF2,"alp", ax', "x0", x0xy), fConfirmFig);
+    px=FTC.paramSetting("x",rx, arx, brx, vF2, ax',  x0xy, fConfirmFig);
     %y方向
-    fconsty=0;
-    fexist_y=exist('appox_FTC_param_y.mat','file');%近似のパラメータが保存されているのか
-    if fexist_y
-    load('appox_FTC_param_y.mat','params_y');
-    fconsty = ~isequal([params_y.r, params_y.a, params_y.b, params_y.alp'],[ry,ary,bry,ay']);%現在の制約条件とalphaの値とloadしたものが同じか
-    end
-    if fexist_y==0 || fconsty
-        params_y = FTC.approx_FTC_param(ary,bry,ry,vF3,ay,x0xy,"y");%新しいパラメータを計算
-        filename="appox_FTC_param_y.mat";
-        save(filename,"params_y");%パラメータを保存
-        whos("-file",filename);
-    elseif fConfirmFig ==1
-        FTC.confirmParam(vF3,params_y.p,ay,"y");%近似した入力を確認 パラメータが新しく作成される場合は実行されない
-    end
+    % py=FTC.paramSetting("y", struct("r", ry,"a", ary,"b", bry,"k", vF3,"alp", ay', "x0", x0xy), fConfirmFig);
+    py=FTC.paramSetting("y",ry, ary, bry, vF3, ay',  x0xy, fConfirmFig);
 end
 %% 二層
 syms sz2 [4 1] real
@@ -113,13 +76,13 @@ syms sz3 [4 1] real
 syms sz4 [2 1] real
 if fApproxXY 
     %xy方向を近似
-    Controller.Vs = matlabFunction([-vF2 * (tanh(params_x.p(:,1).*sz2).*sqrt(params_x.p(:,2)+sz2.^2).^ax); -vF3 * (tanh(params_y.p(:,1).*sz3).*sqrt(params_y.p(:,2)+sz3.^2).^ay); -vF4 * (sign(sz4).*abs(sz4).^apsi)], "Vars", {sz2, sz3, sz4});
+    Controller.Vs = matlabFunction([-vF2 * (tanh(px(:,1).*sz2).*sqrt(px(:,2)+sz2.^2).^ax); -vF3 * (tanh(py(:,1).*sz3).*sqrt(py(:,2)+sz3.^2).^ay); -vF4 * (sign(sz4).*abs(sz4).^apsi)], "Vars", {sz2, sz3, sz4});
 else
     %近似しない
     Controller.Vs = matlabFunction([-vF2 * (sign(sz2).*abs(sz2).^ax); -vF3 * (sign(sz3).*abs(sz3).^ay); -vF4 * (sign(sz4).*abs(sz4).^apsi)], "Vars", {sz2, sz3, sz4});
 end
 %%
-Controller.approx_z = params_z.p;%近似パラメータ
+Controller.approx_z = [Controller.F1', pz, az];%近似パラメータ
 Controller.dt = dt;
 eig(diag(1, 1) - [0; 1] * Controller.F1)
 eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
