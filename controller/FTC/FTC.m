@@ -76,39 +76,28 @@ methods
 end
 
 methods(Static)
-    % function p = paramSetting(txt,values, fConfirmFig)
-        function p = paramSetting(txt,r, a, b, k, alp,x0, fConfirmFig)
-        filename="appox_FTC_param_"+txt+".mat";
-        val = "params_"+txt;
-        fconst=0;
-        fexist=exist(filename,'file');%近似のパラメータが保存されているのか
-        if fexist
+    %近似パラメータのload，作成，描画を行うmethod
+     function p = paramSetting(txt,r, a, b, k, alp,x0, fNewParam, fConfirmFig)
+        filename="appox_FTC_param_"+txt+".mat";%loadするファイル名
+        val = "params_"+txt;%loadまたはsaveする配列
+        fExist=exist(filename,'file');%近似のパラメータが保存されているのか
+        if fExist
             valuesb= load(filename,val).(val);
-            p = valuesb.p;
-            % old= struct("r", valuesb.r,"a", valuesb.a,"b", valuesb.b,"k", valuesb.k,"alp", valuesb.alp, "x0", valuesb.x0);
-            old= [valuesb.r, valuesb.a, valuesb.b, valuesb.k, valuesb.alp, valuesb.x0];
-            % fconst = isequaln(old,values);%現在の制約条件とalphaの値とloadしたものが同じか
-            fconst = isequal(old,[r, a, b, k, alp, x0]);%現在の制約条件とalphaの値とloadしたものが同じか
+            p = valuesb.p; %近似のパラメータを代入
         end
-        if fexist==0 || ~fconst %保存されていないまたはloadしたものと違う場合
-            new = FTC.approx_FTC_param(txt, r, a, b, k, alp,x0);%新しいパラメータを計算
-            p=new.p;
+        if ~fExist || fNewParam %保存されていないまたは新しく更新する場合
+            new = FTC.approx_FTC_param(txt, r, a, b, k, alp, x0);%新しいパラメータを計算
+            p=new.p;%近似のパラメータを代入
             eval([char(val) '= new;']);%保存する名前を付ける
-            save(filename,val);%パラメータを保存 : [パラメータ，ゲイン，FTCとの誤差，近似する区間，制約の大きさ，緩和区間，alpha]
-            whos("-file",filename);
+            savePath = fullfile(pwd,"controller/FTC",filename);%保存するパスを設定
+            save(savePath,val);%パラメータを保存 : [パラメータ，FTCとの誤差，近似する区間，制約の大きさ，緩和区間，ゲイン，yyyyyalpha]
+            % whos("-file",filename);
         elseif fConfirmFig ==1
             FTC.confirmParam(txt, valuesb.k, valuesb.p, valuesb.alp);%近似した入力を確認, パラメータが新しく作成される場合は実行されない
         end
-    end
-    
-    % function [ps, p]=approx_FTC_param(txt,values)
-    function [ps, p]=approx_FTC_param(txt,r, a, b, k, alp,x0)
-        % r=values.r;
-        % a=values.a;
-        % b=values.b;
-        % k=values.k;
-        % alp=values.alp;
-        % x0=values.x0;
+     end
+    %近似パラメータを求めるmethod
+    function [ps, p]=approx_FTC_param(txt, r, a, b, k, alp, x0)
         % 有限整定の近似微分　一層   
             if length(k)==2
                 j=2;%z,yaw方向サブシステムの緩和
@@ -140,7 +129,7 @@ methods(Static)
                     u = -k(i).*sign(e).*abs(e).^alp(i);
                     uk= -k(i).*e;
                     
-                    subplot(row,2,i);
+                    subplot(row,2,i);%1枚ずつ表示する場合はfigure(i)に変更する
                     plot(e,usgnabs, 'LineWidth', 2.5);
                     hold on
                     grid on
@@ -159,7 +148,7 @@ methods(Static)
             input("");
             close all
     end
-
+    %描画するmethod
     function confirmParam(txt, k,p,alp)
         % 有限整定の近似微分　一層   
             if length(k)==2
@@ -178,7 +167,7 @@ methods(Static)
                     u = -k(i).*sign(e).*abs(e).^alp(i);
                     uk= -k(i).*e;
                     
-                    subplot(row,2,i);
+                    subplot(row,2,i);%1枚ずつ表示する場合はfigure(i)に変更する
                     plot(e,usgnabs, 'LineWidth', 2.5);
                     hold on
                     grid on

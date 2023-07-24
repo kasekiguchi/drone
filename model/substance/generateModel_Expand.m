@@ -31,7 +31,9 @@ ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
 q	= [  q0;  q1;  q2;  q3];        % Quaternion
 ob	= [  o1;  o2;  o3];             % Angular velocity
 [Rb0,L] = RodriguesQuaternion(q);   % Rotation matrix
-T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
+T = [T1;T2;T3;T4];                     % Input
+% Thrust torque: T1 : 合計推力，T2：roll トルク，T3：pitch トルク，T4：yaw トルク
+% Thrust force ：正がzb 向き
 % 前：ｘ軸，　左：y軸，　上：ｚ軸
 % motor configuration 
 % T1 : 右後，T2：右前，T3：左後，T4：左前（x-y平面の象限順）
@@ -64,28 +66,15 @@ u = [u1;u2;u3;u4] % thrust, torques
 g0 = [zeros(4,4);zeros(3,4);ddpG;dobg]
 f = [dq;dp;ddpf;dobf;dTr;0]+[g0(:,1);zeros(2,1)]*Tr
 g = [zeros(size(g0,1),1),g0(:,2:end);zeros(1,4);1,zeros(1,3)]
- %% Linearization
-% xe=[[1,0,0,0]';zeros(9,1)];
-% Ac=simplify(subs(subs(pdiff(f,x),x,xe)+simplify(subs(g(:,1)*(1/m),x,xe)),pParam,physicalParamV));
-% Bc=simplify(subs(subs(g,x,xe),pParam,physicalParamV));
-% rank(ctrb(Ac,Bc))
-% rank([Bc,Ac*Bc,Ac*Ac*Bc])
 %% Make function of the quadrotor model : if model is modified, then evaluate this section.
 clc
 matlabFunction(f,'file','Fep.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
 matlabFunction(g,'file','Gep.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 %%
-%nonlinearModel = subs(f+g*[u1;u2;u3;u4], physicalParam, physicalParamV);
-%matlabFunction(nonlinearModel,'file','euler_parameter_thrust_force_model','vars',{x u},'outputs',{'dx'});
-%matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_force_physical_parameter_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_torque_physical_parameter_expand_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% euler angle model : roll-pitch-yaw(XYZ) euler angle 
 syms roll pitch yaw droll dpitch dyaw real
-% q0 = cos(roll)*cos(pitch)*cos(yaw) + sin(roll)*sin(pitch)*sin(yaw);
-% q1 = sin(roll)*cos(pitch)*cos(yaw) - cos(roll)*sin(pitch)*sin(yaw);
-% q2 = cos(roll)*sin(pitch)*cos(yaw) + sin(roll)*cos(pitch)*sin(yaw);
-% q3 = cos(roll)*cos(pitch)*sin(yaw) - sin(roll)*sin(pitch)*cos(yaw);
 Eq0 = cos(roll/2)*cos(pitch/2)*cos(yaw/2) + sin(roll/2)*sin(pitch/2)*sin(yaw/2);
 Eq1 = sin(roll/2)*cos(pitch/2)*cos(yaw/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2);
 Eq2 = cos(roll/2)*sin(pitch/2)*cos(yaw/2) + sin(roll/2)*cos(pitch/2)*sin(yaw/2);
@@ -102,22 +91,15 @@ ddpG = [ERb0*[0;0;1/m],zeros(3)];
 
 % ddpg=ddpG*T
 %% SS equation
-% % Usage: dx=f+g*u
-% xp = [p;er;dp;ob];            % 12 states
-% fp = [dp;der;ddpf;dobf];
-% %fp = [dp;ob;ddpf;dobf];
-% gp = [zeros(3,4);zeros(3,4);ddpG;dobg];
-% u = [u1;u2;u3;u4];
-
-xp = [p;er;dp;ob;Tr;dTr]            % 12 states
-u = [u1;u2;u3;u4] % thrust, torques
-g0 = [zeros(3,4);zeros(3,4);ddpG;dobg]
-fp = [dp;der;ddpf;dobf;dTr;0]+[g0(:,1);zeros(2,1)]*Tr
-gp = [zeros(size(g0,1),1),g0(:,2:end);zeros(1,4);1,zeros(1,3)]
-dX=fp+gp*[u1;u2;u3;u4]
+% % Usage: dx=fp+gp*u
+xp = [p;er;dp;ob;Tr;dTr];            % 14 states
+u = [u1;u2;u3;u4]; % thrust, torques
+g0 = [zeros(3,4);zeros(3,4);ddpG;dobg];
+fp = [dp;der;ddpf;dobf;dTr;0]+[g0(:,1);zeros(2,1)]*Tr;
+gp = [zeros(size(g0,1),1),g0(:,2:end);zeros(1,4);1,zeros(1,3)];
+dX=fp+gp*[u1;u2;u3;u4];
 %%
 matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_torque_physical_parameter_expand_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
-%matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_force_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Calculate Jacobian matrix
 % jacobianA = jacobian(fp+gp*[u1;u2;u3;u4],xp);
