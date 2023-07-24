@@ -6,7 +6,7 @@ clear;clc;
 
 %% 初期設定
 % 実行する回数を指定
-HowManyRun = 1;
+HowManyRun = 10;
 
 % rand シード値
 seed = double('T');
@@ -21,7 +21,7 @@ rng(seed);
 Foldername = 'Data\simData_KoopmanApproach_2023_7_20_circle'; %ここの名前を変えないとフォルダがどんどん上書きされてしまう
 % データ保存先ファイル
 % "ファイル名"_[番号].mat で保存される
-FileName = 'sim_7_20_circle_estimaterdata'; %線形化で読み込むファイルはこれで判別してる
+FileName = 'sim_7_24_circle'; %線形化で読み込むファイルはこれで判別してる
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;

@@ -27,7 +27,7 @@ syms t real
 
 x = sin(2*pi*t/10);
 y = cos(2*pi*t/10);
-z = 1;
+z = 1.5;
 
 % x = 0;
 % y = 0;

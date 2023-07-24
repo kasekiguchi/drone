@@ -13,10 +13,10 @@ FolderName = 'RandomInitialIndexTest';
 
 %データ保存先ファイル名
 % 'FileName'_'シミュレーション番号'.mat
-FileName = 'EstimationResult_12state_6_6_normal_experiment.mat';
+FileName = 'test.mat';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_12state_6_6_normal_experiment.mat';
+loading_filename = 'EstimationResult_12state_6_26_circle=circle_estimation=circle';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 4;
@@ -66,7 +66,7 @@ for i = 1:HowmanySimulationRunning
     % シミュレーションループ
     if flg.bilinear ==1
         for j = 1:simResult.reference.N-2 - simResult.initTindex
-            simResult.Z(:,j+1) = est.Ahat * simResult.Z(:,j) + (est.Bhat + est.Ehat*simResult.Z(13:15,j)*[1,1,1,1] )* simResult.U(:,j);
+            simResult.Z(:,j+1) = est.A * simResult.Z(:,j) + (est.Bhat + est.Ehat*simResult.Z(13:15,j)*[1,1,1,1] )* simResult.U(:,j);
             simResult.Xhat(:,j+1) = est.Chat * simResult.Z(:,j+1);
         end
         if size(Data.X,1)==13
@@ -82,8 +82,8 @@ for i = 1:HowmanySimulationRunning
         end
     else
         for j = 1:simResult.reference.N-2 - simResult.initTindex
-            simResult.Z(:,j+1) = est.Ahat * simResult.Z(:,j) + est.Bhat * simResult.U(:,j);
-            simResult.Xhat(:,j+1) = est.Chat * simResult.Z(:,j+1);
+            simResult.Z(:,j+1) = est.A * simResult.Z(:,j) + est.B * simResult.U(:,j);
+            simResult.Xhat(:,j+1) = est.C * simResult.Z(:,j+1);
         end
         if size(Data.X,1)==13
              simResult.state.p = simResult.Xhat(1:3,:);
