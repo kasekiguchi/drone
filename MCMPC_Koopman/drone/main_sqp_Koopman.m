@@ -65,7 +65,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.total_size = Params.state_size + Params.input_size;
 
 %-- 目標値等
-    Params.ur = 0.269*9.81/4 * ones(4, 1);
+    Params.ur = 0.5884*9.81/4 * ones(4, 1);
 
 %-- fmincon 設定
     options = optimoptions('fmincon');
@@ -86,6 +86,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
@@ -381,7 +382,6 @@ end
 function [c , ceq] = Constraints(idx, x, params, Agent, ~)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, params.H);
-%     c2  = zeros(params.state_size, params.H);
     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
@@ -392,27 +392,29 @@ function [c , ceq] = Constraints(idx, x, params, Agent, ~)
         Xc(:,i) = F(X(:,i));
     end
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
-
+%     At = params.A(1:12,1:12);
+%     Bt = params.B(1:12,:);
 %- ダイナミクス拘束
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
 %-- 連続の式をダイナミクス拘束に使う
     for L = 2:params.H  
         tmpx = params.A * Xc(:,L-1) + params.B * U(:,L-1); %クープマンモデル
+%         tmpx = At * X(:,L-1) + Bt * U(:,L-1); %クープマンモデル
         tmpx = params.C * tmpx; %実空間の値に変換
         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
 
-%     c1 = 1.0 - x(13:16,:);
+    c = [-x(13:16,:),x(13:16,:) - 3];
 %       c = [1.442 - x(13:14,:),x(13:14,:) - 1.447, x(15:16,:) - 1.447, 1.442 - x(15:16,:)];
-%       c = [x(13:14,:) - 1.48,1.44 - x(13:14,:), x(15:16,:) - 1.48, 1.444 - x(15:16,:)];
-    if idx < 7
-        c = [x(13:16,:) - 3, 1.9 - x(13:16,:)];
-    elseif idx >= 7 && idx < 30
-        c = [x(13:16,:) - 1.9, 0.8 - x(13:16,:)];
-    else
-        c = [x(13:14,:) - 1.6,1.3 - x(13:14,:), x(15:16,:) - 1.6, 1.3 - x(15:16,:)];
-    end
+%       c = [x(13:14,:) - 1.46,1.44 - x(13:14,:), x(15:16,:) - 1.46, 1.444 - x(15:16,:)];
+%     if idx < 7
+%         c = [x(13:16,:) - 3, 1.9 - x(13:16,:)];
+%     elseif idx >= 7 && idx < 30
+%         c = [x(13:16,:) - 1.9, 0.8 - x(13:16,:)];
+%     else
+%         c = [x(13:14,:) - 1.6,1.3 - x(13:14,:), x(15:16,:) - 1.6, 1.3 - x(15:16,:)];
+%     end
 %     c = [x(13:16,:) - 1.9, 1.1 - x(13:16,:)];
 %     c(:, 1) = [];
 %     c = X(1,:) - 2;
