@@ -20,7 +20,7 @@ syms t real
 % y = 0;
 
 
-% %% circle
+%% circle
 % x = sin(2*pi*t/10);
 % y = cos(2*pi*t/10);
 % z = 1;

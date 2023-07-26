@@ -18,7 +18,7 @@ ts = 0;
 if fExp
     te = 10000; %こちらは実機
 else
-    te = 20; % default: 10 シミュレーション用時間
+    te = 30; % default: 10 シミュレーション用時間
 end
 
 %% generate environment(シミュレーション環境の構築)
@@ -88,7 +88,7 @@ else
             % take off
 %             arranged_pos = arranged_position([0, 0], N, 1, 0.01);% [x, y], 機数，1, z
             % landing
-            arranged_pos = arranged_position([0.2, 0.2], N, 1, 1);% [x, y], 機数，1, z 初期値
+            arranged_pos = arranged_position([0, 0], N, 1, 0.8);% [x, y], 機数，1, z 初期値
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];

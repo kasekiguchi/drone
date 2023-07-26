@@ -28,11 +28,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     
 %-- 重み
     %% 円旋回(重みの設定)
-    Params.Weight.P = diag([10.0; 10.0; 1000.0]);    % 座標   1000 1000 100
+    Params.Weight.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([100; 100; 100; 100; 100; 100]);  % 姿勢角、角速度
     
 %-- data
     data.bestcost(idx+1) = 0;           % - もっともよい評価値
@@ -43,7 +43,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.total_size = Params.state_size + Params.input_size;
 
 %-- 目標値等
-    Params.ur = 0.269*9.81/4 * ones(4, 1);
+    Params.ur = 0.5884*9.81/4 * ones(4, 1);
 
 %-- fmincon 設定
     options = optimoptions('fmincon');
@@ -137,7 +137,7 @@ end
             
         %-- 初期値の設定
             if idx == 1
-                initial_u1 = 0.269 * 9.81 / 4;   % 初期値
+                initial_u1 = 0.5884 * 9.81 / 4;   % 初期値
                 initial_u2 = initial_u1;
                 initial_u3 = initial_u1;
                 initial_u4 = initial_u1;
