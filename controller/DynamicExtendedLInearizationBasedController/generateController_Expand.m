@@ -19,7 +19,9 @@ g = G(x,physicalParam);
 fep= Fep(x,physicalParam) ;
 gep = Gep(x,physicalParam) ;
 % dxep = fep + gep*[ddT;u2;u3;u4];
-%% Define virtual output: h1 h2, h3, h4
+%g= [g1 g2 g3 g4];
+%%
+% Define virtual output: h1 h2, h3, h4
 h1 = p3 - xd(3);
 h2 = p1 - xd(1);
 h3 = p2 - xd(2);
