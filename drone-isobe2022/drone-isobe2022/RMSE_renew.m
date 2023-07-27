@@ -3,7 +3,7 @@ close all hidden;
 clear all;
 clc;
 %% 読み込み
-loadfilename{1} = 'EstimationResult_12state_7_20_simulation_circle.mat';
+loadfilename{1} = 'EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat';
 % loadfilename{2} = 'EstimationResult_12state_7_12_circle=circle_estimation=circle_datanum=20.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
