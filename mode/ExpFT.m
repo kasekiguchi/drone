@@ -21,11 +21,11 @@ agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
-%agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
-fFT=1;%z directional controller flag 1:FT, other:LS
-agent.controller = FTC(agent,Controller_FT(dt,fFT));
-
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
+fApprox_FTxy = 0;%approximate x,y directional FTC input : 1
+fNewParam = 0;%新しく更新する場合 : 1
+fConfirmFig =0;%近似入力のfigureを確認する場合 : 1
+agent.controller = FTC(agent,Controller_FT(dt, fApprox_FTxy, fNewParam, fConfirmFig));
 run("ExpBase");
 
 function post(app)

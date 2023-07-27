@@ -97,7 +97,6 @@ beta2 = [LieD(dddh2,g1,x); LieD(dddh3,g1,x); LieD(dh4,g1,x)];
 % else
     syms v2(t) v3(t) v4(t)
     U2 = inv(beta2)*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
-    Uover0= subs(U2,[p,dp],zeros(size([p,dp])));
     %U2 = beta2/(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
     % U2e = (adjoint(beta2)/(det(beta2)+e2))*(-alpha2+[v2(t);v3(t);v4(t)]);  % v2を後で設計する時はこっち
 %end
@@ -170,25 +169,6 @@ clc
 % matlabFunction(beta1,'file','beta1.m','vars',{t x physicalParam},'outputs',{'beta1'});
 
 %% Local functions
-function tmp = DeleteCommentLine(fname)
-% % DeleteCommentLine : Remove comments and blank lines in functions
-% % % Load file
-	fp = fopen(strcat(fname,'.m'),'r');
-	str = textscan(fp,'%s','delimiter','\n');
-	str = str{1};
-	fclose(fp);
-	tmp = length(str);
-% % % Check comment line and blank line
-	str = str(~strncmp(str,'%',1));
-	str = str(~strncmp(str,'',1));
-	tmp2 = length(str);
-% % % Update file
-	if (tmp~=tmp2) && (tmp2 ~= 0)
-		fp = fopen(strcat(fname,'.m'),'w');
-		cellfun(@(a) fprintf(fp,'%s\n',a),str,'UniformOutput',false);
-		fclose(fp);
-	end
-end
 function pd = pdiff(flist, vars)
 % % flistをvarsで微分したもののシンボリック配列を返す？
     flist = flist(:);
@@ -233,34 +213,4 @@ function [eul,th,psi] = Quat2Eul(q,varargin)
         case 3
 		eul = phi;
 	end
-end
-function R=Rodrigues(u,th)
-    u = u(:);
-    u = u/norm(u);
-    R=u*u'+cos(th)*(eye(3)-u*u')+sin(th)*Skew(u);
-end
-function Om = Skew(o)
-% % Skew : Skew symmetric matrix
-    o  = o(:);
-    o1 = o(1);
-    o2 = o(2);
-    o3 = o(3);
-    Om = [  0,-o3, o2;
-		   o3,  0,-o1;
-		  -o2, o1,  0];
-end
-function R = RodriguesQuaternion(q)
-% % RodriguesQuaternion : R is the rotation matrix
-    q  = q(:);
-    q0 = q(1);
-    q1 = q(2);
-    q2 = q(3);
-    q3 = q(4);
-	E = [-q1, q0,-q3, q2;
-		 -q2, q3, q0,-q1;
-		 -q3,-q2, q1, q0];
-	L = [-q1, q0, q3,-q2;
-		 -q2,-q3, q0, q1;
-		 -q3, q2,-q1, q0];
-	R = E*L';
 end
