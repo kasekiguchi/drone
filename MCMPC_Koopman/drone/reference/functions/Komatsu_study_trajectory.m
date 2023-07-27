@@ -21,13 +21,13 @@ syms t real
 
 
 %% circle
-% x = sin(2*pi*t/10);
-% y = cos(2*pi*t/10);
-% z = 1;
-
-x = 0;
-y = 0;
+x = sin(2*pi*t/20);
+y = cos(2*pi*t/20);
 z = 1;
+
+% x = 0;
+% y = 0;
+% z = 1;
 
 % x = cos(t);
 % y = sin(t);
