@@ -23,7 +23,7 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
-agent.controller = HLC(agent,Controller_HL(dt));
+agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
 
 run("ExpBase");
 
