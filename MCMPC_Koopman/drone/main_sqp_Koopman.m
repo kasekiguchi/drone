@@ -23,7 +23,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.07; %MPCステップ幅
+    Params.dt = 0.08; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
 
@@ -45,11 +45,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([10.0; 20.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([25.0; 30.0; 10.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0,; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([40000; 60000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2500; 2500; 1500; 1; 1; 1]);  % 姿勢角、角速度
     %% 
     
 %-- data
@@ -409,8 +409,8 @@ function [c , ceq] = Constraints(idx, x, params, Agent, ~)
 %     c = [-x(13:16,:),x(13:16,:) - 3];
 %       c = [1.442 - x(13:14,:),x(13:14,:) - 1.447, x(15:16,:) - 1.447, 1.442 - x(15:16,:)];
 %       c = [x(13:14,:) - 1.46,1.44 - x(13:14,:), x(15:16,:) - 1.46, 1.444 - x(15:16,:)];
-    if idx < 10
-        c = [x(13:16,:) - 2.5, 1.7 - x(13:16,:)];
+    if idx < 15
+        c = [x(13:16,:) - 2.5, 1.45 - x(13:16,:)];
     else
         c = [-x(13:16,:),x(13:16,:) - 2.5];
     end

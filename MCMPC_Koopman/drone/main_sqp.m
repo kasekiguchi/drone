@@ -22,7 +22,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
-    Params.dt = 0.25;
+    Params.dt = 0.1;
     idx = 0;
     totalT = 0;
     
@@ -32,7 +32,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([100; 100; 100; 100; 100; 100]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([1000; 1000; 100; 1; 1; 1]);  % 姿勢角、角速度
     
 %-- data
     data.bestcost(idx+1) = 0;           % - もっともよい評価値
