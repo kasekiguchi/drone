@@ -2,7 +2,7 @@ close all hidden;
 clear all;
 clc;
 
-load("experiment_7_11_circle_radius=0.7.mat")
+load("experiment_6_20_circle_estimaterdata.mat")
 disp('load finished')
 
 % for i = find(log.Data.phase == 116,1,'first')+85:find(log.Data.phase == 108,1,'first')
@@ -11,7 +11,7 @@ disp('load finished')
 %     data.u2(:,i-(find(log.Data.phase == 116,1,'first')+85)+1) = log.Data.agent.input{i}(:,1);
 % end
 
-for i = 1:find(log.Data.phase==102,1,'last')-400
+for i = 1:find(log.Data.t,1,'last')
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
     data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p               
 end
@@ -36,15 +36,15 @@ box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase==102,1,'first')+230]),[1.0 0.9 1.0]);
+Square_coloring(data.t([find(log.Data.phase == 116,1,'first')+85,find(log.Data.phase==108,1,'first')]));
 % Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase==102,1,'first') + 220]),[0.9 1.0 1.0]);
 % Square_coloring(data.t([find(log.Data.phase==102,1,'first') + 220,find(log.Data.phase==108,1,'first')]));
 xlabel('Time [s]');
 ylabel('p');
-% xline(data.t(1,find(log.Data.phase == 116,1,'first')+85),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','black','LineWidth',1)
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+230),'LineStyle','--','Color','black','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
+xline(data.t(1,find(log.Data.phase == 116,1,'first')+85),'LineStyle','--','Color','black','LineWidth',2)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',2)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','black','LineWidth',2)
+xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',2)
 hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
@@ -61,13 +61,7 @@ title('Position p of agent1','FontSize',12);
 fontSize = 16; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
 
-% plot3(data.p(1,:),data.p(2,:),data.p(3,:));
-% zlim([0 1.2])
-% grid on
-% xlabel('x');
-% ylabel('y');
-% zlabel('z');
-% ax = gca;
+
 % 
 % fontSize = 14; %軸の文字の大きさの設定
 % set(ax,'FontSize',fontSize);
