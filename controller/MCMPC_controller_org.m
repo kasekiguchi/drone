@@ -63,10 +63,21 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             %     obj.param.QW(2,2) = 20000;
             % end
             
+            %% 斜面に対する高度
+            obj.state.Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2915);
+            % 高度可変の重み
+            % obj.param.Zsoft = -obj.param.softZ * (1-cos((Zdis/2.2).*pi))/2 + obj.param.softZ; % 高度中くらいで重みききすぎ
+            % obj.param.Zsoft = obj.param.softZ * exp(-obj.param.zeta * obj.state.Zdis); % 指数的減少
+            obj.param.Zsoft = 0;
+            %% change weight
+            % obj.param.Pfsoft = obj.param.Zsoft * obj.param.Pf;
+            % obj.param.Vfsoft = obj.param.Zsoft * obj.param.Vf;
+            % obj.param.QWfsoft = obj.param.Zsoft * obj.param.QWf;
+            
             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-            ave2 = obj.input.u(2);    % 初期値はparamで定義
-            ave3 = obj.input.u(3);
-            ave4 = obj.input.u(4);
+            % ave2 = obj.input.u(2);    % 初期値はparamで定義
+            % ave3 = obj.input.u(3);
+            % ave4 = obj.input.u(4);
             
             % ave1 = 0.269*9.81/4;    % ホバリング入力を平均
             % ave2 = 0.269*9.81/4;    % 初期値はparamで定義
@@ -79,9 +90,9 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
             if obj.input.AllRemove == 1
                 ave1 = 0.269*9.81;
-                ave2 = ave1;
-                ave3 = ave1;
-                ave4 = ave1;
+                % ave2 = ave1;
+                % ave3 = ave1;
+                % ave4 = ave1;
                 obj.input.AllRemove = 0;
             end
 
@@ -108,7 +119,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
             %-- 評価値計算
             obj.param.fin = 0;
-            eachCost = zeros(obj.N, 3);
+            eachCost = zeros(obj.N, 4);
 %             tic
             for m = 1:obj.N
                 [obj.input.eval(1,m), eachCost(m, :)] = objective(obj,m);
@@ -187,6 +198,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.Evaluationtra_norm = obj.input.normE;
             obj.result.eachcost = eachCost(BestcostID, :);
+            obj.result.Zsoft = obj.param.Zsoft;
+            obj.result.Zdis = obj.state.Zdis;
             
             result = obj.result;  
 %             profile viewer
@@ -204,13 +217,11 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % 姿勢角
             % if obj.self.estimator.result.state.p(3) < 0.3 
             % if obj.param.t > obj.param.soft_time % 時間で制約
-            if obj.self.estimator.result.state.p(3) < obj.param.soft_z % 高度で制約
-%                 A = obj.self.estimator.result.state.p(3) .^(1/10) * -obj.param.CA;
-%                 A = 100;
-                Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2915);
+%             Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2915);
+            if obj.state.Zdis < obj.param.soft_z % 高度で制約
 %                 gradZ = -obj.param.CA * (Zdis .^ (2)) + obj.param.CA;
                 Zlim = 2;
-                gradZ = -obj.param.CA * (1-cos((Zdis/Zlim).*pi))/Zlim + obj.param.CA;
+                gradZ = -obj.param.CA * (1-cos((obj.state.Zdis/Zlim).*pi))/Zlim + obj.param.CA;
                 constIL = find(obj.state.state_data(5, end, 1:obj.N) <= 0.1975);
                 constIR = find(obj.state.state_data(5, end, 1:obj.N) >= 0.3975);
                 CL = reshape(obj.param.Ca *gradZ* (obj.state.state_data(5, end, constIL)-0.1975).^2, [1, length(constIL)]); % 0.1975 rad.未満の計算
@@ -224,24 +235,49 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                     CY = reshape(obj.param.C * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
                     obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
                 end
-            end
 
-            %% 斜面
-            if (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))+0.1) * cos(0.2915) < 0.15
-                %% 速度制約
-                % z-direction velocity
                 constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
                 if length(constV) > 1
                     CV = reshape(obj.param.CV * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
                     obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
                 end
-                % x-direction velocity
-                constVx = find(abs(obj.state.state_data(7, end, 1:obj.N)) > 0.05);
-                if length(constVx) > 1
-                    CVx = reshape(obj.param.CV * (obj.state.state_data(7, end, constV)).^2, [1, length(constVx)]);
-                    obj.input.Evaluationtra(constVx) = obj.input.Evaluationtra(constVx) + CVx;
-                end
             end
+
+            %% 高度可変の重み
+            % 姿勢角 Zsoft 高度可変重み　終端コストと共有
+            % constIL = find(obj.state.state_data(5, end, 1:obj.N) <= 0.1975);
+            % constIR = find(obj.state.state_data(5, end, 1:obj.N) >= 0.3975);
+            % CL = reshape(obj.param.Ca *obj.param.Zsoft* (obj.state.state_data(5, end, constIL)-0.1975).^2, [1, length(constIL)]); % 0.1975 rad.未満の計算
+            % CR = reshape(obj.param.Ca *obj.param.Zsoft* (obj.state.state_data(5, end, constIR)-0.3975).^2, [1, length(constIR)]);
+            % obj.input.Evaluationtra(constIL) = obj.input.Evaluationtra(constIL) + CL;
+            % obj.input.Evaluationtra(constIR) = obj.input.Evaluationtra(constIR) + CR;
+            % 
+            % % yaw角
+            % constIYaw = find(abs(obj.state.state_data(6, end, 1:obj.N)) > 0.5);
+            % CY = reshape(obj.param.C * obj.param.Zsoft * abs(obj.state.state_data(6, end, constIYaw)).^2, [1, length(constIYaw)]);
+            % obj.input.Evaluationtra(constIYaw) = obj.input.Evaluationtra(constIYaw) + CY; 
+            % 
+            % % 速度v
+            % constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
+            % CV = reshape(obj.param.CV * obj.param.Zsoft * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
+            % obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
+
+            %% 斜面
+            % if (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))+0.1) * cos(0.2915) < 0.15
+            %     %% 速度制約
+            %     % z-direction velocity
+            %     constV = find(abs(obj.state.state_data(9, end, 1:obj.N)) > 0.1);
+            %     if length(constV) > 1
+            %         CV = reshape(obj.param.CV * (obj.state.state_data(9, end, constV)).^2, [1, length(constV)]);
+            %         obj.input.Evaluationtra(constV) = obj.input.Evaluationtra(constV) + CV;
+            %     end
+            %     % x-direction velocity
+            %     % constVx = find(abs(obj.state.state_data(7, end, 1:obj.N)) > 0.05);
+            %     % if length(constVx) > 1
+            %     %     CVx = reshape(obj.param.CV * (obj.state.state_data(7, end, constV)).^2, [1, length(constVx)]);
+            %     %     obj.input.Evaluationtra(constVx) = obj.input.Evaluationtra(constVx) + CVx;
+            %     % end
+            % end
 
             %% 斜面に墜落したかどうか　実質棄却
             % constISlope = find(obj.reference.grad * obj.state.state_data(1, end, 1:obj.N) > obj.state.state_data(3, end, 1:obj.N));
@@ -249,12 +285,6 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 %             if length(constISlope) == obj.N % 全墜落なら終了
 %                 obj.param.fRemove = 1;
 %             end
-
-            
-
-            % 良い評価のサンプルは終端コストのみ大きくする
-
-            
 
             %% 重心計算
 %             if removeF == obj.N
@@ -353,10 +383,25 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
                 terminalState = 0;
             end
 
+
+            %% 高度可変重み
+            % tildeXp = tildeXp(:,end-1) .* kJ; tildeXqw = tildeXqw(:,end-1) .* kJ;
+            % tildeXv = tildeXv(:,end-1) .* kJ; 
+            % tildeUpre = tildeUpre(:,end-1) .* kJ; tildeUref = tildeUref(:,end-1) .* kJ;
+            % stageStateP =    sum(tildeXp(:,end-1)' * obj.param.P   .* tildeXp(:,end-1)',2);
+            % stageStateV =    sum(tildeXv(:,end-1)' * obj.param.V   .* tildeXv(:,end-1)',2);
+            % stageStateQW =   sum(tildeXqw(:,end-1)' * obj.param.QW .* tildeXqw(:,end-1)',2);
+            % stageInputPre  = sum(tildeUpre(:,end-1)' * obj.param.RP.* tildeUpre(:,end-1)',2);
+            % stageInputRef  = sum(tildeUref(:,end-1)' * obj.param.R .* tildeUref(:,end-1)',2);
+            % terminalState = tildeXp(:, end)' * obj.param.Pfsoft * tildeXp(:, end)...
+            %     +tildeXv(:, end)'   * obj.param.Vfsoft   * tildeXv(:, end)...
+            %     +tildeXqw(:, end)'  * obj.param.QWfsoft  * tildeXqw(:, end);
+
+
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
                 + terminalState + constraints;
-            EachCost = [sum(stageStateP), sum(stageStateV), sum(stageStateQW)];
+            EachCost = [sum(stageStateP), sum(stageStateV), sum(stageStateQW), terminalState];
         end
         
         function [pw_new] = Normalize(obj)

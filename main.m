@@ -209,7 +209,7 @@ try
 
     %% information
     fprintf("t:%f \t dt:%f\n", time.t, CALT);
-    fprintf("%f\t ref:%f\t ", agent.estimator.result.state.p', agent.reference.result.state.p');
+    fprintf("%f\t %f\t ", agent.estimator.result.state.p', agent.reference.result.state.p');
     fprintf("\n");
 
     % get data

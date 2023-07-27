@@ -56,8 +56,8 @@ xr0 = zeros(Params.state_size, Params.H);
 data.xr{idx+1} = 0;
 data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
 data.pathJ{idx+1} = 0;      % - 全サンプルの評価値
-data.sigma{idx+1} = 0;      % - 標準偏差 
-data.bestcost{idx+1} = 0;   % - 評価値
+data.sigma(:,idx+1) = 0;      % - 標準偏差 
+data.bestcost(:,idx+1) = 0;   % - 評価値
 data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
 data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
 data.variable_particle_num(idx+1) = 0;  % - 可変サンプル数
@@ -92,9 +92,9 @@ fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 %% reference 
 teref = 2; % かける時間
 z0 = 2; % z初期値
-ze = 0; % z収束値
+ze = -0.2; % z収束値
 v0 = 0; % 初期速度
-ve = -0.5; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか
+ve = -0.5; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか -0.5
 t = 0:0.025:3;
 Params.refZ = curve_interpolation_9order(t',teref,z0,v0,ze,ve);
 x0 = -1; % -1
@@ -106,7 +106,7 @@ Params.refX = curve_interpolation_9order(t'-delay,teref,x0,v0,xe,ve);
 % y0 = 0;
 % ye = 0;
 % Params.refY = curve_interpolation_9order(t',teref,y0,v0,ye,ve);
-
+data.Zdis(1) = 0;
     %%
 
 run("main3_loop_setup.m");
@@ -213,7 +213,7 @@ end
             end
             Gp = initial.p;
             Gq = [0; 0.2975; 0];
-            [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef);    % 1:斜面 0:それ以外(TimeVarying)
+            [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef, data.Zdis);    % 1:斜面 0:それ以外(TimeVarying)
             param(i).controller.mcmpc = {idx, xr, time.t, phase, InputVdata, gradient};    % 入力算出 / controller.name = hlc
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -248,16 +248,18 @@ end
             data.param = agent.controller.result.contParam;
         end
 %         state_data =            agent.controller.result.path;
-        BestcostID =            agent.controller.result.BestcostID;
-        data.path{idx} =        agent.controller.result.path;
-        data.pathJ{idx} =       agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-        data.pathJN{idx} =      agent.controller.result.Evaluationtra_norm;
-        data.sigma{idx} =       agent.controller.result.sigma;
-        data.bestcost{idx} =    agent.controller.result.bestcost;
-        data.removeF(idx) =     agent.controller.result.removeF;   % - 棄却されたサンプル数
+        BestcostID =              agent.controller.result.BestcostID;
+        data.path{idx} =          agent.controller.result.path;
+        data.pathJ{idx} =         agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+        data.pathJN{idx} =        agent.controller.result.Evaluationtra_norm;
+        data.sigma(:,idx) =       agent.controller.result.sigma;
+        data.bestcost(:,idx)=     agent.controller.result.bestcost;
+        data.removeF(idx) =       agent.controller.result.removeF;   % - 棄却されたサンプル数
         data.removeX{idx} =     agent.controller.result.removeX;
-        data.input_v{idx} =     agent.controller.result.input_v;
-        if fHL == 0;    data.eachcost{idx} =    agent.controller.result.eachcost; end
+        data.input_v(:,idx) =     agent.controller.result.input_v;
+        data.Zdis(idx) =          agent.controller.result.Zdis;
+        data.Zsoft(idx) =         agent.controller.result.Zsoft;
+        if fHL == 0;    data.eachcost(:, idx) =    agent.controller.result.eachcost; end
 
         data.xr{idx} = xr;
         data.variable_particle_num(idx) = agent.controller.result.variable_N;
@@ -357,7 +359,7 @@ end
 %         fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t slopeZ: %f \t sigma: %f \n", ...
 %             time.t, calT, data.variable_particle_num(idx), altitudeSlope,data.sigma{idx})
         fprintf("t: %f \t input: %f %f %f %f \t input_v: %f %f %f %f", ...
-            time.t, agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v{idx}(1),data.input_v{idx}(2),data.input_v{idx}(3),data.input_v{idx}(4));
+            time.t, agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v(1, idx),data.input_v(2, idx),data.input_v(3, idx),data.input_v(4, idx));
         fprintf("\n");
 
         if fRemove == 1   % 1:本物 10:墜落で終了させない
@@ -414,10 +416,7 @@ logt = logger.data('t',[],[]);
 Rdata = zeros(12, size(logt, 1));
 IV = zeros(4, size(logt, 1));
 for R = 1:size(logt, 1)
-    Rdata(:, R) = data.xr{R}(1:12, 1);
-    if ~isempty(data.input_v); IV(:, R) = data.input_v{R}; end
-    if length(data.sigma{1}) == 4; SigmaData(:, R) = data.sigma{R}; end
-    Bestcost(:, R) = data.bestcost{R};
+    Rdata(:, R) = data.xr{R}(1:12, 1); % cell2matにはできない　ホライズンがあるからcellオンリー
 end
 Diff = Edata - Rdata(1:3, :);
 close all
@@ -438,88 +437,89 @@ m = 3; n = 2;
 % position
 % 1:リファレンス, 
 
-figure(1)
-Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
-sgtitle(Title);
-subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
-xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
-% title("Time change of Position"); 
-% atiitude 0.2915 rad = 16.69 deg
-subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
-xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
-grid on; xlim([0 xmax]); ylim([-0.5 0.5]);
-% title("Time change of Atiitude");
-% velocity
-subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
-xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
-% title("Time change of Velocity"); 
-% input
-subplot(m,n,6); 
-% plot(logt, Idata); 
-plot(logt, Idata, "--", "LineWidth", 1); 
-xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
-% % title("Time change of Input");
-subplot(m,n,5); % 仮想入力
-plot(logt, IV); legend("Z", "X", "Y", "YAW");
-xlabel("Time [s]"); ylabel("input.V");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
-% calculation time
-subplot(m, n, 4);
-plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
-plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
-
-xlim([0 te])
-set(gca,'FontSize',Fontsize);  grid on; title("");
-xlabel("Time [s]");
-ylabel("Calculation time [s]");
-
-% set(gcf, "WindowState", "maximized");
-set(gcf, "Position", [960 0 960 1000])
+% figure(1)
+% Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+% sgtitle(Title);
+% subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
+% xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% grid on; xlim([0 xmax]); ylim([-inf inf]);
+% % title("Time change of Position"); 
+% % atiitude 0.2915 rad = 16.69 deg
+% subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
+% xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
+% grid on; xlim([0 xmax]); ylim([-0.5 0.5]);
+% % title("Time change of Atiitude");
+% % velocity
+% subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
+% xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
+% grid on; xlim([0 xmax]); ylim([-inf inf]);
+% % title("Time change of Velocity"); 
+% % input
+% subplot(m,n,6); 
+% % plot(logt, Idata); 
+% plot(logt, Idata, "--", "LineWidth", 1); 
+% xlabel("Time [s]"); ylabel("Input"); legend("input1", "input2", "input3", "input4");
+% grid on; xlim([0 xmax]); ylim([-inf inf]);
+% % % title("Time change of Input");
+% subplot(m,n,5); % 仮想入力
+% plot(logt, IV); legend("Z", "X", "Y", "YAW");
+% xlabel("Time [s]"); ylabel("input.V");
+% grid on; xlim([0 xmax]); ylim([-inf inf]);
+% % calculation time
+% subplot(m, n, 4);
+% plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
+% plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
 % 
-% Peval = zeros(1, size(logt, 1)); Veval = zeros(1, size(logt, 1)); Qeval = zeros(1, size(logt, 1));
-% for R = 1:size(logt, 1)
-%     Peval(:, R) = data.eachcost{R}(1, 1);
-%     Veval(:, R) = data.eachcost{R}(1, 2);
-%     Qeval(:, R) = data.eachcost{R}(1, 3);
-% end
-% figure(20);
-% subplot(2,2,1)
-% plot(logt, Peval); 
+% xlim([0 te])
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% xlabel("Time [s]");
+% ylabel("Calculation time [s]");
+% 
+% set(gcf, "WindowState", "maximized");
+% set(gcf, "Position", [960 0 960 1000])
+
+
+figure(20);
+subplot(2,2,1)
+plot(logt, data.eachcost(1,1:end-1)); %hold on; plot(logt, data.eachcost(4,end-1)); hold off;
+yyaxis right
+plot(logt, Edata, 'Color', 'green'); hold on; plot(logt, Rdata(1:3, :), '--');  hold off; ylabel("ref pos")
+title('position eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
+legend("Peval","Ex","Ey","Ez","Rx","Ry","Rz")
+subplot(2,2,3)
+plot(logt, data.eachcost(2,1:end-1)); %hold on; plot(logt, data.eachcost(4,end-1)); hold off;
+yyaxis right
+plot(logt, Vdata, 'Color', 'green'); hold on; plot(logt, Rdata(7:9, :), '--');  hold off; ylabel("ref vel")
+title('velocity eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
+legend("Veval","Ex","Ey","Ez","Rx","Ry","Rz", 'Location', 'northwest')
+subplot(2,2,2)
+plot(logt, data.eachcost(3,1:end-1)); %hold on; plot(logt, data.eachcost(4,end-1)); hold off; ylim([-inf inf])
+yyaxis right
+plot(logt, Qdata, 'Color', 'magenta'); hold on; plot(logt, Rdata(4:6, :), '--');  hold off; ylabel("ref atti")
+title('angular eval'); xlim([0.25 xmax]); ylim([-inf inf])
+legend("QWeval","Eroll","Epitch","Eyaw","Rroll","Rpitch","Ryaw")
+subplot(2,2,4);
+plot(logt, data.eachcost(:, 1:end-1));
 % yyaxis right
-% plot(logt, Edata, 'Color', 'green'); hold on; plot(logt, Rdata(1:3, :), '--');  hold off; ylabel("ref pos")
-% title('position eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
-% legend("Peval","Ex","Ey","Ez","Rx","Ry","Rz")
-% subplot(2,2,3)
-% plot(logt, Veval);
-% yyaxis right
-% plot(logt, Vdata, 'Color', 'green'); hold on; plot(logt, Rdata(7:9, :), '--');  hold off; ylabel("ref vel")
-% title('velocity eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
-% legend("Veval","Ex","Ey","Ez","Rx","Ry","Rz", 'Location', 'northwest')
-% subplot(2,2,2)
-% plot(logt, Qeval); ylim([-inf inf])
-% yyaxis right
-% plot(logt, Qdata, 'Color', 'magenta'); hold on; plot(logt, Rdata(4:6, :), '--');  hold off; ylabel("ref atti")
-% title('angular eval'); xlim([0.25 xmax]); ylim([-inf inf])
-% legend("QWeval","Eroll","Epitch","Eyaw","Rroll","Rpitch","Ryaw")
-% subplot(2,2,4);
+% plot(logt, data.Zsoft(1:end-1));
+legend("Peval", "Veval", "Qeval", "Terminal");
+% legend("Zweight");
+
 % plot(logt, Idata); ylabel("ref input")
 % title('velocity eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
 % legend("input1", "input2", "input3", "input4")
-% % strP = ['$$P$$= ','[',num2str(data.param.P(1,1),'%d'), ' ',num2str(data.param.P(2,2),'%d'), ' ',num2str(data.param.P(3,3),'%d'),']'];
-% % strV = ['$$V$$= ','[',num2str(data.param.V(1,1),'%d'), ' ',num2str(data.param.V(2,2),'%d'), ' ',num2str(data.param.V(3,3),'%d'),']'];
-% % strQ = ['$$Q$$= ','[',num2str(data.param.QW(1,1),'%d'), ' ',num2str(data.param.QW(2,2),'%d'), ' ',num2str(data.param.QW(3,3),'%d'),']'];
-% % strW = ['$$W$$= ','[',num2str(data.param.QW(4,4),'%d'), ' ',num2str(data.param.QW(5,5),'%d'), ' ',num2str(data.param.QW(6,6),'%d'),']'];
-% % text(0.1,0.9,strP,'FontSize',15,'Interpreter', 'Latex')
-% % text(0.1,0.7,strV,'FontSize',15,'Interpreter', 'Latex')
-% % text(0.1,0.5,strQ,'FontSize',15,'Interpreter', 'Latex')
-% % text(0.1,0.3,strW,'FontSize',15,'Interpreter', 'Latex')
-% set(gcf, "Position", [1000 0 960 1000])
+% strP = ['$$P$$= ','[',num2str(data.param.P(1,1),'%d'), ' ',num2str(data.param.P(2,2),'%d'), ' ',num2str(data.param.P(3,3),'%d'),']'];
+% strV = ['$$V$$= ','[',num2str(data.param.V(1,1),'%d'), ' ',num2str(data.param.V(2,2),'%d'), ' ',num2str(data.param.V(3,3),'%d'),']'];
+% strQ = ['$$Q$$= ','[',num2str(data.param.QW(1,1),'%d'), ' ',num2str(data.param.QW(2,2),'%d'), ' ',num2str(data.param.QW(3,3),'%d'),']'];
+% strW = ['$$W$$= ','[',num2str(data.param.QW(4,4),'%d'), ' ',num2str(data.param.QW(5,5),'%d'), ' ',num2str(data.param.QW(6,6),'%d'),']'];
+% text(0.1,0.9,strP,'FontSize',15,'Interpreter', 'Latex')
+% text(0.1,0.7,strV,'FontSize',15,'Interpreter', 'Latex')
+% text(0.1,0.5,strQ,'FontSize',15,'Interpreter', 'Latex')
+% text(0.1,0.3,strW,'FontSize',15,'Interpreter', 'Latex')
+set(gcf, "Position", [1000 0 960 1000])
 %% 
 % close all;
-agent(1).animation(logger,"target",1); 
+% agent(1).animation(logger,"target",1); 
 %% 各評価値
 
 %%
@@ -548,10 +548,10 @@ agent(1).animation(logger,"target",1);
 
 %% save data
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat('SlopeLanding-VeryGood', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat(['SlopeLanding-v-mosukosi', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230711/
+    mkdir ../../students/komatsu/simdata/20230727/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")

@@ -152,8 +152,9 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             problem.objective = @(x) obj.objective(x); 
             problem.nonlcon   = @(x) obj.constraints(x);
             [var, ~, ~] = fmincon(problem);
+            % var
             % 制御入力の決定
-%             previous_state = var;   % 初期値の書き換え
+            previous_state = var;   % 初期値の書き換え
 
             %TODO: 1列目のvarが一切変動しない問題に対処
             % if var(Params.state_size+1:Params.total_size, end) > 1.0

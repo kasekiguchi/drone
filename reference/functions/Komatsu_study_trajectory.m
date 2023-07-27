@@ -48,7 +48,7 @@ syms t real
 x = t;
 y = 0;
 z = 1.0;
-yaw = 0.1;
+yaw = 1;
 
 %% Vertical vibration
 % x = 0;
