@@ -1,4 +1,4 @@
-%% Initialize settings
+ %% Initialize settings
 % set path
 cf = pwd;
 if contains(mfilename('fullpath'),"mainGUI")
@@ -9,11 +9,12 @@ else
 end
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-cd(cf); close all hidden; clear all; userpath('clear');
+close all hidden; clear ; clc;
+userpath('clear');
 %%
 clc
-SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR"];
-ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL"];
+SimBaseMode = ["SimVoronoi","SimHL","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL"];
+ExpBaseMode = ["ExpTestMotiveConnection","ExpHL","ExpFHL","ExpFHL_Servo","ExpFT","ExpEL"];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
