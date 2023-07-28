@@ -3,7 +3,7 @@ function Controller = Controller_MCMPC(~)
 %   詳細説明をここに記述
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 20000;
+    Controller_param.Maxparticle_num = 10000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = 5000;
     Controller_param.input.Initsigma = 0.01;
@@ -33,8 +33,8 @@ function Controller = Controller_MCMPC(~)
 
     %% 円旋回
     %SICE 重み
-    Controller_param.P = diag([1e2; 1e2; 1e3]);    % 座標   1000 1000 10000
-    Controller_param.V = 100 * diag([1e1; 1e1; 1e2]);    % 速度
+    Controller_param.P = diag([1e7; 1e7; 1e3]);    % 座標   1000 1000 10000
+    Controller_param.V = 100 * diag([1e2; 1e2; 1e5]);    % 速度
     Controller_param.R = 0.1*diag([1.0; 1e4; 1e4; 1e4]); % 入力
     Controller_param.RP = 0 * diag([1.0,; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.QW = diag([1e3; 1; 2000; 1; 1; 1]);  % 姿勢角、角速度
@@ -53,7 +53,7 @@ function Controller = Controller_MCMPC(~)
     Controller_param.soft_z = 0.4;
     
     Controller_param.Pf = diag([1e1; 1e1; 1e6]); % 6
-    Controller_param.Vf = diag([1e1; 1e1; 1e8]); % 6
+    Controller_param.Vf = diag([1e1; 1e1; 1e10]); % 6
     Controller_param.QWf = diag([1e2; 1e2; 1; 1; 1; 1]); % 7,8
     % Controller_param.QWf = Controller_param.QW;
     Controller_param.input.u = 0.269*9.81 * [1;0;0;0];  % old version

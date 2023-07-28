@@ -338,7 +338,7 @@ end
         altitudeSlope = (agent.estimator.result.state.p(3) - (gradient * (agent.estimator.result.state.p(1) + 0.1))) * cos(atan(gradient)); % 斜面に対する高度, 
         vSlope = agent.estimator.result.state.v(3);
 
-        if altitudeSlope < 0.25 && abs(agent.estimator.result.state.v(3)) < 0.05 && abs(agent.estimator.result.state.q(2)) > 0.1 %&& abs(agent.estimator.result.state.q(2)) < 0.3975 
+        if altitudeSlope < 0.25 && abs(agent.estimator.result.state.v(3)) < 0.05 && agent.estimator.result.state.q(2) < -0.1 %&& abs(agent.estimator.result.state.q(2)) < 0.3975 
             fRemove = 2;
             fFinish = 1;
             data.FinishState = [agent.estimator.result.state.p; agent.estimator.result.state.q(2); altitudeSlope; vSlope];
@@ -477,33 +477,37 @@ m = 3; n = 2;
 % 
 % set(gcf, "WindowState", "maximized");
 % set(gcf, "Position", [960 0 960 1000])
-
+Zpos = Edata(3,:) - (3/10 .* Edata(1,:) + 0.1) ;
 
 figure(20);
-subplot(2,2,1)
-plot(logt, data.eachcost(1,1:end-1)); %hold on; plot(logt, data.eachcost(4,end-1)); hold off;
+subplot(3,2,1)
+plot(logt, data.eachcost(1,1:end-1)); grid on;%hold on; plot(logt, data.eachcost(4,end-1)); hold off; 
 yyaxis right
-plot(logt, Edata, 'Color', 'green'); hold on; plot(logt, Rdata(1:3, :), '--');  hold off; ylabel("ref pos")
+plot(logt, Edata, 'Color', 'green'); hold on; plot(logt, Rdata(1:3, :), '--');  hold off; ylabel("ref pos"); 
 title('position eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
 legend("Peval","Ex","Ey","Ez","Rx","Ry","Rz")
-subplot(2,2,3)
+subplot(3,2,3)
 plot(logt, data.eachcost(2,1:end-1)); %hold on; plot(logt, data.eachcost(4,end-1)); hold off;
 yyaxis right
-plot(logt, Vdata, 'Color', 'green'); hold on; plot(logt, Rdata(7:9, :), '--');  hold off; ylabel("ref vel")
+plot(logt, Vdata, 'Color', 'green'); hold on; plot(logt, Rdata(7:9, :), '--');  hold off; ylabel("ref vel"); grid on;
 title('velocity eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
 legend("Veval","Ex","Ey","Ez","Rx","Ry","Rz", 'Location', 'northwest')
-subplot(2,2,2)
-plot(logt, data.eachcost(3,1:end-1)); %hold on; plot(logt, data.eachcost(4,end-1)); hold off; ylim([-inf inf])
+subplot(3,2,2)
+plot(logt, data.eachcost(3,1:end-1)); grid on;%hold on; plot(logt, data.eachcost(4,end-1)); hold off; ylim([-inf inf])
 yyaxis right
-plot(logt, Qdata, 'Color', 'magenta'); hold on; plot(logt, Rdata(4:6, :), '--');  hold off; ylabel("ref atti")
+plot(logt, Qdata, 'Color', 'magenta'); hold on; plot(logt, Rdata(4:6, :), '--');  hold off; ylabel("ref atti"); grid on;
 title('angular eval'); xlim([0.25 xmax]); ylim([-inf inf])
 legend("QWeval","Eroll","Epitch","Eyaw","Rroll","Rpitch","Ryaw")
-subplot(2,2,4);
-plot(logt, data.eachcost(:, 1:end-1));
+subplot(3,2,4);
+plot(logt, data.eachcost(:, 1:end-1)); grid on;
 % yyaxis right
 % plot(logt, data.Zsoft(1:end-1));
 legend("Peval", "Veval", "Qeval", "Terminal");
 % legend("Zweight");
+subplot(3,2,5);
+plot(logt, Zpos); grid on; xlabel("Time [s]"); ylabel("slope alt"); xlim([0 xmax])
+%% 斜面に対する高度
+
 
 % plot(logt, Idata); ylabel("ref input")
 % title('velocity eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
@@ -548,10 +552,10 @@ set(gcf, "Position", [1000 0 960 1000])
 
 %% save data
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat(['SlopeLanding-v-mosukosi', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat(['SlopeLanding-girigiri-made-kanpeki', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230727/
+    mkdir ../../students/komatsu/simdata/20230728/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")

@@ -133,7 +133,7 @@
 % end
 
 %% SICE 斜面 
-function [xr] = Reference(params, T, ~, ~, ~, phase, ~, Zdis)
+function [xr] = Reference(params, T, Agent, ~, ~, phase, ~, Zdis)
     % パラメータ取得
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
@@ -175,8 +175,10 @@ function [xr] = Reference(params, T, ~, ~, ~, phase, ~, Zdis)
         else    
             pitch = 0;
             if h == 10
-                tz = 0.25; tvz = 0.05;
                 pitch = -0.2915;
+                % 斜面に対する高度の目標値
+                tz = (3/10 * Agent.estimator.result.state.p(1) + 0.1) + 0.15; % 斜面に対して0.1m上を目標値
+                tvz = 0.05;
             end
         end
         xr(1:3, h+1) = [tx;  0.0; tz];
