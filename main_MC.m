@@ -506,7 +506,6 @@ legend("Peval", "Veval", "Qeval", "Terminal");
 % legend("Zweight");
 subplot(3,2,5);
 plot(logt, Zpos); grid on; xlabel("Time [s]"); ylabel("slope alt"); xlim([0 xmax])
-%% 斜面に対する高度
 
 
 % plot(logt, Idata); ylabel("ref input")
@@ -559,6 +558,8 @@ if exist(Outputdir) ~= 7
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
+%%
+% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, "-forVIDEO", ".mat"), "logger", "-v7.3");
 %% 加速度
 % figure(21)
 % V1 = Rdata(9, 1:end-1);
