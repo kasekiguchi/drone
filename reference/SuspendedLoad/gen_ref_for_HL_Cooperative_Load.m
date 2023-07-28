@@ -13,24 +13,28 @@ dxd =diff(xd,t);
 ddxd =diff(dxd,t);
 dddxd =diff(ddxd,t);
 
-r0x = [dxd(1),dxd(2),0]'/norm(dxd);
-r0z = [0;0;1];
-r0y = Skew(r0z)*r0x;
-R0d = [r0x,r0y,r0z];
-dR0d = diff(R0d,t);
-o0d = simplify(Vee(R0d'*dR0d));
-do0d = simplify(diff(o0d,t));
-% R0d2quat = R2q(R0d);
-w_q = simplify(sqrt(R0d(1,1)+R0d(2,2)+R0d(3,3)+1)/2);
-xp_q = simplify(sqrt(R0d(1,1)-R0d(2,2)-R0d(3,3)+1)/2);
-yp_q = simplify(sqrt(-R0d(1,1)+R0d(2,2)-R0d(3,3)+1)/2);
-zp_q = simplify(sqrt(-R0d(1,1)-R0d(2,2)+R0d(3,3)+1)/2);
+% r0x = [dxd(1),dxd(2),0]'/norm(dxd);
+% r0z = [0;0;1];
+% r0y = Skew(r0z)*r0x;
+% R0d = [r0x,r0y,r0z];
+R0d = [1,0,0;0,1,0;0,0,1];
+% dR0d = diff(R0d,t);
+dR0d = [0,0,0;0,0,0;0,0,0];
+% o0d = simplify(Vee(R0d'*dR0d));
+% do0d = simplify(diff(o0d,t));
+o0d = Vee(R0d'*dR0d);
+do0d = diff(o0d,t);
+R0d2quat = R2q(R0d);
+% w_q = simplify(sqrt(R0d(1,1)+R0d(2,2)+R0d(3,3)+1)/2);
+% xp_q = simplify(sqrt(R0d(1,1)-R0d(2,2)-R0d(3,3)+1)/2);
+% yp_q = simplify(sqrt(-R0d(1,1)+R0d(2,2)-R0d(3,3)+1)/2);
+% zp_q = simplify(sqrt(-R0d(1,1)-R0d(2,2)+R0d(3,3)+1)/2);
 
-[Ele,Id]=max([w_q,xp_q,yp_q,zp_q]); % max element
-Ele = 4*Ele;
+% [Ele,Id]=max([w_q,xp_q,yp_q,zp_q]); % max element
+% Ele = 4*Ele;
 
-qd = [w_q;(R0d(3,2)-R0d(2,3))/Ele;(R0d(1,3)-R0d(3,1))/Ele;(R0d(2,1)-R0d(1,2))/Ele];
-
+% qd = [w_q;(R0d(3,2)-R0d(2,3))/Ele;(R0d(1,3)-R0d(3,1))/Ele;(R0d(2,1)-R0d(1,2))/Ele];
+qd = R0d2quat;
 % o0d = [0;0;0];
 % do0d = [0;0;0];
 % r0d = [1;0;0;0];
