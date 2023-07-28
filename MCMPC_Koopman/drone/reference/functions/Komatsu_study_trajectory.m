@@ -21,13 +21,13 @@ syms t real
 
 
 %% circle
-x = sin(2*pi*t/20);
-y = cos(2*pi*t/20);
-z = 1;
-
-% x = 0;
-% y = 0;
+% x = sin(2*pi*t/30);
+% y = cos(2*pi*t/30);
 % z = 1;
+
+x = 0;
+y = 0;
+z = 1;
 
 % x = cos(t);
 % y = sin(t);
@@ -48,7 +48,7 @@ z = 1;
 % x = t - sin(t);
 % y = 2*(1 - cos(t));
 % z = 1;
-%% landing
+% landing
 % T = 10;  % Time
 % rz0 = 0.01; % start
 % rz = 1; % target
