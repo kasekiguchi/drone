@@ -31,7 +31,7 @@ data.uN = 4; %入力の個数
 if logger.fExp==1
 %--------------------time----------------------
     data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))'; 
-    % data.startIndex = find(data.est.p(:,3)>0.4,1,'first'); %0.4m以上になった部分からデータの取得開始
+%     data.startIndex = find(data.est.p(:,3)>0.4,1,'first'); %0.4m以上になった部分からデータの取得開始
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
     % data.startIndex = find(data.phase == 108,1,'first');
