@@ -1,6 +1,5 @@
-% RUNi = 0;
 while(1)
-%     RUNi = RUNi + 1
+%     RUNi = RUNi + 1;
     main_MC
     if fFinish == 1
         fFinish
@@ -8,4 +7,3 @@ while(1)
     end
 %     pause();
 end
-

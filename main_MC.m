@@ -84,17 +84,17 @@ gradient = 3/10;
 
 % load("Data/Input_HL.mat", "Idata");
 % Params.ur_array = Idata;
-InputVdata = load("Data/inputV_HLMPC.mat");
-InputVdata = cell2mat(InputVdata.data.inputv);
-
+% InputVdata = load("Data/inputV_HLMPC.mat");
+% InputVdata = cell2mat(InputVdata.data.inputv);
+InputVdata = 0;
 fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
 %% reference 
 teref = 2; % かける時間
 z0 = 2; % z初期値
-ze = -0.2; % z収束値
+ze = 0.1; % z収束値
 v0 = 0; % 初期速度
-ve = -0.5; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか -0.5
+ve = 0; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか -0.5
 t = 0:0.025:3;
 Params.refZ = curve_interpolation_9order(t',teref,z0,v0,ze,ve);
 x0 = -1; % -1
@@ -507,7 +507,7 @@ legend("Peval", "Veval", "Qeval", "Terminal");
 subplot(3,2,5);
 plot(logt, Zpos); grid on; xlabel("Time [s]"); ylabel("slope alt"); xlim([0 xmax])
 
-
+set(gcf, "WindowState", "maximized");
 % plot(logt, Idata); ylabel("ref input")
 % title('velocity eval'); xlim([0.25 xmax]); ylim([-inf, inf]);
 % legend("input1", "input2", "input3", "input4")
@@ -519,10 +519,10 @@ plot(logt, Zpos); grid on; xlabel("Time [s]"); ylabel("slope alt"); xlim([0 xmax
 % text(0.1,0.7,strV,'FontSize',15,'Interpreter', 'Latex')
 % text(0.1,0.5,strQ,'FontSize',15,'Interpreter', 'Latex')
 % text(0.1,0.3,strW,'FontSize',15,'Interpreter', 'Latex')
-set(gcf, "Position", [1000 0 960 1000])
+% set(gcf, "Position", [1000 0 960 1000])
 %% 
-% close all;
-% agent(1).animation(logger,"target",1); 
+close all;
+agent(1).animation(logger,"target",1); 
 %% 各評価値
 
 %%
@@ -551,10 +551,10 @@ set(gcf, "Position", [1000 0 960 1000])
 
 %% save data
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat(['SlopeLanding-girigiri-made-kanpeki', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat(['SlopeLanding-kekkou-yoi', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230728/
+    mkdir ../../students/komatsu/simdata/20230729/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
