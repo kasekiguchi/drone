@@ -17,7 +17,7 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
   a2 = 30;
   b2 = 1;
   c2 = 20;
-  Points2 = [0 30 0]+[-a2 -b2 -c2;a2 -b2 -c2;a2 b2 -c2; -a2 b2 -c2;-a2 -b2 c2;a -b2 c2;a2 b2 c2; -a2 b2 c2]; 
+  Points2 = [0 5 0]+[-a2 -b2 -c2;a2 -b2 -c2;a2 b2 -c2; -a2 b2 -c2;-a2 -b2 c2;a -b2 c2;a2 b2 c2; -a2 b2 c2]; 
   Tri2  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
   env2 = triangulation(Tri2,Points2);
 % 
@@ -26,8 +26,8 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
 % 
 % env = triangulation(Tri, Points);
 %% 
-% combinedPoints = [env.Points; env2.Points];
-% combinedTri = [env.ConnectivityList; env2.ConnectivityList + size(env.Points, 1)];
+combinedPoints = [env.Points; env2.Points];
+combinedTri = [env.ConnectivityList; env2.ConnectivityList + size(env.Points, 1)];
 % combinedEnv = triangulation(combinedTri, combinedPoints);
 combinedEnv = env;
 %%
@@ -37,34 +37,46 @@ initial_state.p = arranged_position([0, 0], 1, 1, 0);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
+% パラメータ推定時オン
+% initial_state.ps = [1,1,1];
+% initial_state.qs = [1; 0; 0; 0];
+% initial_state.l = [1; 1; 1; 1];
 %%
 % default
-% agent = DRONE;
+agent = DRONE;
 % agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
-% agent.parameter = DRONE_PARAM("DIATONE");
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
+agent.parameter = DRONE_PARAM("DIATONE");
+% % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-% %agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.1:pi, 'noise', 3.0E-2, 'seed', 3)); % 2D lidar
-% agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'R0', Rodrigues([0,1,0],pi/6),'p0',[1;0;1],'theta_range', pi/2, 'phi_range', 0, 'noise', 0, 'seed', 0)); % 2D lidar
-% agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.sensor.do = @sensor_do;
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}});
-% agent.controller = HLC(agent,Controller_HL(dt));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_params(dt, initial_state, 1)),[@(x,p) JacobH_param(x,p)]));
+agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/12),'p0',[0.1;0.05;0],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.0001, 'seed', 0)); % 2D lidar
+agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.sensor.do = @sensor_do;
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.3,0.4,0.25,0.3]}});
+agent.controller = HLC(agent,Controller_HL(dt));
+
 
 % edited nozaki
-agent = DRONE;
-[M,P]=Model_Discrete(dt,initial_state,1,"PVQ0");
-agent.plant = MODEL_CLASS(agent,M); % control target model
-agent.parameter = P; % set model parameter
-agent.controller = DIRECT_CONTROLLER(agent,dt); 
-agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,M))); % estimator.result.state = sensor.result.state
-agent.sensor.direct = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
-% agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'R0', Rodrigues([0,1,0],pi/6),'p0',[0.1;0;0],'theta_range', pi/2, 'phi_range', 0, 'noise',0.005, 'seed', 0)); % 2D lidar
-% agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'R0', Rodrigues([0,1,0],pi/6),'p0',[0.1;0;0],'theta_range', pi/2, 'phi_range', 0:pi/180:2*pi/180, 'noise',0.005, 'seed', 0)); % 2D lidar
-agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0.5,0.5,1],pi/12),'p0',[0.1;0.05;0.05],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.0025, 'seed', 0)); % 2D lidar
-agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.sensor.do = @sensor_do; % synthesis of sensors
-agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[3,3.5,0]}});
-% agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;0],"size",[0,0,0]}});
+% agent = DRONE;
+% [M,P]=Model_Discrete(dt,initial_state,1,"PVQ0");
+% agent.plant = MODEL_CLASS(agent,M); % control target model
+% agent.parameter = P; % set model parameter
+% agent.controller = DIRECT_CONTROLLER(agent,dt); 
+% % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,M),["p","q"],"B",[eye(3),zeros(3,3);zeros(3,6);zeros(3,3),eye(3)]));
+% % agent.controller = HLC(agent,Controller_HL(dt));
+% agent.estimator = DIRECT_ESTIMATOR(agent,struct("model",MODEL_CLASS(agent,M))); % estimator.result.state = sensor.result.state
+% % agent.estimator = DIRECT_ESTIMATOR_N(agent,struct("model",MODEL_CLASS(agent,M))); % estimator.result.state = sensor.result.state
+% agent.sensor.direct = DIRECT_SENSOR(agent,0.0); % sensor to capture plant position : second arg is noise 
+% % agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'R0', Rodrigues([0,1,0],pi/6),'p0',[0.1;0;0],'theta_range', pi/2, 'phi_range', 0, 'noise',0.005, 'seed', 0)); % 2D lidar
+% % agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'R0', Rodrigues([0,0,1],pi/20),'p0',[0.1;0.05;0],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.01, 'seed', 0)); % 2D lidar
+% agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/20),'p0',[0.1;0.05;0],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.0001, 'seed', 0)); % 2D lidar
+% agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
+% agent.sensor.do = @sensor_do; % synthesis of sensors
+% % agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[3,3.5,2]}});
+% agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0.5,0.5,0.2]}});
+% % agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;0],"size",[0,0,0]}});
+
 function result = sensor_do(varargin)
 sensor = varargin{5}.sensor;
 result = sensor.lidar.do(varargin);

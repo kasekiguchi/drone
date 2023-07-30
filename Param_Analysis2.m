@@ -16,37 +16,64 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-
-%% Log Dataの読み取りと格納
-log = LOGGER('./Data/onlyxyyaw.mat');
-% log = LOGGER('./Data/lidar1deg.mat');
+noiseflag = 0;
+% Log Dataの読み取りと格納
+% log2 = LOGGER('./Data/data030402503.mat');
+% log2 = LOGGER('./Data/miidmove_Log(24-Jul-2023_13_38_35).mat');
+log = LOGGER('./Data/Log(27-Jul-2023_14_15_50).mat');
 % log = LOGGER('./Data/nomove_little_Log(14-Jul-2023_00_53_31).mat');
 
 %% ログ
 tspan = [0 ,100];
 % tspan = [0 99];
-robot_p  = log.data(1,"p","s")';
-robot_pt  = log.data(1,"p","p")';
-robot_vt  = log.data(1,"v","p")';
-robot_q  = log.data(1,"q","s")';
-robot_qt  = log.data(1,"q","p")';
+robot_p  = log.data(1,"p","p")';
+robot_pe  = log.data(1,"p","e")';
+robot_q  = log.data(1,"q","p")';
+robot_qe  = log.data(1,"q","e")';
 sensor_data = (log.data(1,"length","s"))';
 ref_p = log.data(1,"p","r")';
 ref_q = log.data(1,"q","r")';
+% 
+% %
+% robot_p2  = log2.data(1,"p","p")';
+% robot_pe2  = log2.data(1,"p","e")';
+% robot_q2  = log2.data(1,"q","p")';
+% robot_qe2  = log2.data(1,"q","e")';
+% sensor_data2 = (log2.data(1,"length","s"))';
+% ref_p2 = log2.data(1,"p","r")';
+% ref_q2 = log2.data(1,"q","r")';
+% % 
+% robot_p  = [robot_p,robot_p2(:,5:end)];
+% robot_pe  = [robot_pe,robot_pe2(:,5:end)];
+% robot_q  = [robot_q,robot_q2(:,5:end)];
+% robot_qe  = [robot_qe,robot_qe2(:,5:end)];
+% sensor_data = [sensor_data,sensor_data2(:,5:end)]; 
+% ref_p = [ref_p,ref_p2(:,5:end)];
+% ref_q = [ref_q,ref_q2(:,5:end)];
 
+%% ノイズ付加
+if noiseflag==1
+    robot_pe = robot_pe + (0.01*randn(size(robot_pe)));
+    robot_qe = robot_qe + (0.001*randn(size(robot_qe)));
+    sensor_data = sensor_data+ (0.002*randn(size(sensor_data)));
+end
 %% 不要データの除去
 nanIndices = isnan(sensor_data(1,:));
 ds = find(nanIndices==1);
 sensor_data(:,ds) = [];
-
 robot_p(:,ds) = [];
-robot_pt(:,ds) = [];
+robot_pe(:,ds) = [];
 robot_q (:,ds) = [];
-robot_qt(:,ds) = [];
-
+robot_qe(:,ds) = [];
+ds0= find(robot_pe(1,:)==0);
+sensor_data(:,ds) = [];
+robot_p(:,ds0) = [];
+robot_pe(:,ds0) = [];
+robot_q (:,ds0) = [];
+robot_qe(:,ds0) = [];
 %% パラメータ真値
-offset_true = [0.1;0.05;0.05];
-Rs_true = Rodrigues([0.5,0.5,1],pi/12);
+offset_true = [0.1;0.05;0.0];
+Rs_true = Rodrigues([0,0,1],pi/12);
 w=[1,0,0,9];
 X_true  = -1*[w(1)/w(4);w(2)/w(4);w(3)/w(4);
            offset_true(1)*w(1)/w(4);offset_true(2)*w(1)/w(4);offset_true(3)*w(1)/w(4);offset_true(1)*w(2)/w(4);offset_true(2)*w(2)/w(4);offset_true(3)*w(2)/w(4);offset_true(1)*w(3)/w(4);offset_true(2)*w(3)/w(4);offset_true(3)*w(3)/w(4);
@@ -55,16 +82,19 @@ X_true  = -1*[w(1)/w(4);w(2)/w(4);w(3)/w(4);
            Rs_true(1,1)*w(3)/w(4);Rs_true(2,1)*w(3)/w(4);Rs_true(3,1)*w(3)/w(4);Rs_true(1,2)*w(3)/w(4);Rs_true(2,2)*w(3)/w(4);Rs_true(3,2)*w(3)/w(4);];
 Y_true = [offset_true;reshape(Rs_true,[9,1])];
 %% 解析(回帰分析)
-last=10000;
-num = 10;%2本目センサのいっぽん目からの本数
+last=length(robot_pe);
+num = 3;%2本目センサのいっぽん目からの本数
 ang = 180;
 %% 一括でパラ推定
-[~,~,At,Xt] = param_analysis2(robot_pt(:,1),robot_qt(:,1),sensor_data(1,2),sensor_data(num,2),Rodrigues([0,0,1],(num-1)*pi/ang));
+[~,~,At,Xt] = param_analysis2(robot_pe(:,2),robot_qe(:,2),sensor_data(1,3),sensor_data(num,3),Rodrigues([0,0,1],(num-1)*pi/ang));
 A_stack=[];
-for i=2:1:last
-    qt = Eul2Quat(robot_qt(:,i-1));
+for i=3:1:last
+    qt = Eul2Quat(robot_qe(:,i));%正規
     qt = qt./vecnorm(qt,2);
-    A = Cf2_sens(robot_pt(:,i-1),qt,sensor_data(1,i),sensor_data(num,i),Rodrigues([0,0,1],(num-1)*pi/ang));
+    A = Cf2_sens(robot_pe(:,i),qt,sensor_data(1,i),sensor_data(num,i),Rodrigues([0,0,1],(num-1)*pi/ang));
+    % qt = Eul2Quat(robot_qe(:,i));
+    % qt = qt./vecnorm(qt,2);
+    % A = Cf2_sens(robot_pe(:,i),qt,sensor_data(1,i),sensor_data(num,i),Rodrigues([0,0,1],(num-1)*pi/ang));
     ds = find(A(2,:)==0);
     A(:,ds)=[];
     A_stack=[A_stack;A];
@@ -74,26 +104,35 @@ end
 X = pinv(A_stack)*(-1*ones(size(A_stack,1),1));
 offset = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(4:12)];
 Rsx = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(13:15);X(19:21);X(25:27)];
+Rsx = Rsx/vecnorm(Rsx);
 Rsy = pinv([X(1)*eye(3);X(2)*eye(3);X(3)*eye(3)])*[X(16:18);X(22:24);X(28:30)];
-Rsz = cross(Rsx/vecnorm(Rsx),Rsy/vecnorm(Rsy));
+Rsy = Rsy/vecnorm(Rsy);
+Rsz = cross(Rsx,Rsy);
 Rs = [Rsx,Rsy,Rsz];
 %% 一括でパラ推定逐次
 P_stack = zeros(size(A,2),size(A,2),last-1);%%Pnスタックする変数
 JP = zeros(1,last-1); %J=Σ||p^-p||
 JX = zeros(1,last-1); %J=Σ||X^-X||
 JY = zeros(1,last-1); %J=Σ||Y^-Y||
-for j=2:1:last
-    if j == 2
-        qt = Eul2Quat(robot_qt(:,j-1));
+alpha = 100000;
+for j=3:last
+    if j == 3
+        qt = Eul2Quat(robot_qe(:,j));
         qt = qt./vecnorm(qt,2);
-        A = Cf2_sens(robot_pt(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        % qt = Eul2Quat(robot_qe(:,j));
+        % qt = qt./vecnorm(qt,2);
+        % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         A(:,ds)=[];
-        [Xn,Pn] = param_analysis_eq(A',zeros(size(A,2),1),-1*ones(size(A,1),1),eye(size(A,2)));
+        [Xn,Pn] = param_analysis_eq(A',zeros(size(A,2),1),-1*ones(size(A,1),1),alpha*eye(size(A,2)),0.9999);
         P_stack(:,:,j-1) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
+        Rsxn = Rsxn/vecnorm(Rsxn);
         Rsyn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(16:18);Xn(22:24);Xn(28:30)];
-        Rszn = cross(Rsxn/vecnorm(Rsxn),Rsyn/vecnorm(Rsyn));
+        Rsyn = Rsyn/vecnorm(Rsyn);
+        % Rszn = cross(Rsxn/vecnorm(Rsxn),Rsyn/vecnorm(Rsyn));
+        Rszn = cross(Rsxn,Rsyn);
         Rsn = [Rsxn,Rsyn,Rszn];
         % 評価
         JP(1,j-1) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
@@ -101,17 +140,23 @@ for j=2:1:last
         Yn = [offsetn;reshape(Rsn,[9,1])];
         JY(:,j-1) = norm(Yn-Y_true);
     else
-        qt = Eul2Quat(robot_qt(:,j-1));
+        qt = Eul2Quat(robot_qe(:,j));
         qt = qt./vecnorm(qt,2);
-        A = Cf2_sens(robot_pt(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        % qt = Eul2Quat(robot_qe(:,j));
+        % qt = qt./vecnorm(qt,2);
+        % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         ds = find(A(2,:)==0);
         A(:,ds)=[];
-        [Xn,Pn] = param_analysis_eq(A',Xn,-1*ones(size(A,1),1),Pn);
+        [Xn,Pn] = param_analysis_eq(A',Xn,-1*ones(size(A,1),1),Pn,0.9999);
         P_stack(:,:,j-1) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
+        Rsxn = Rsxn/vecnorm(Rsxn);
         Rsyn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(16:18);Xn(22:24);Xn(28:30)];
-        Rszn = cross(Rsxn/vecnorm(Rsxn),Rsyn/vecnorm(Rsyn));
+        Rsyn = Rsyn/vecnorm(Rsyn);
+        Rszn = cross(Rsxn,Rsyn);
+        % Rszn = cross(Rsxn/vecnorm(Rsxn),Rsyn/vecnorm(Rsyn));
         Rsn = [Rsxn,Rsyn,Rszn];
         % 評価
         JP(:,j-1) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
@@ -126,6 +171,21 @@ variance = zeros(size(P_stack,2),size(P_stack,3));
 for j=1:size(P_stack,3)
     variance(:,j) = diag(P_stack(:,:,j));
 end
+%% 交点比較
+for i=1:length(robot_pe)
+    sp(:,i) = robot_pe(:,i) + eul2rotm(robot_qe(:,i)','XYZ')*offsetn + sensor_data(1,i)*eul2rotm(robot_qe(:,i)','XYZ')*Rsn*[1;0;0];
+end
+figure(12);
+plot(sp(1,:));
+hold on;
+plot(sp(2,:));
+plot(sp(3,:));
+legend('x','y','z');
+% ss=log.data(1,"sensor.result.sensor_points","s");
+% ss = reshape(ss,3,[]);
+% plot(ss);
+% legend('x','y','z','xt','yt','zt');
+hold off ;
 %% 図示
 if illustration == 1
     fig1=figure(1);
@@ -134,7 +194,10 @@ if illustration == 1
     hold on;
     plot(robot_p(2,:),'LineWidth', 2);
     plot(robot_p(3,:),'LineWidth', 2);
-    legend('\it{px}','\it{py}','\it{pz}','FontSize', 18);
+    plot(robot_pe(1,:),'LineWidth', 2);
+    plot(robot_pe(2,:),'LineWidth', 2);
+    plot(robot_pe(3,:),'LineWidth', 2);
+    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 18);
     hold off;
     xlabel('step');
     ylabel('[m]');
@@ -145,18 +208,14 @@ if illustration == 1
     hold on;
     plot(robot_q(2,:),'LineWidth', 2);
     plot(robot_q(3,:),'LineWidth', 2);
-    legend('\it{w}_{\it{\phi}}','\it{w}_{\it{\theta}}','\it{w}_{\it{\psi}}','FontSize', 18);
+    plot(robot_qe(1,:),'LineWidth', 2);
+    plot(robot_qe(2,:),'LineWidth', 2);
+    plot(robot_qe(3,:),'LineWidth', 2);
+    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 18);
     hold off;
     xlabel('step');
     ylabel('angle');
     grid on;
-    fig3=figure(3);
-    fig3.Color = 'white';
-    plot(robot_vt(1,:),'LineWidth', 2);
-    hold on;
-    plot(robot_vt(2,:),'LineWidth', 2);
-    plot(robot_vt(3,:),'LineWidth', 2);
-    legend('\it{v}_{\it{\phi}}','\it{v}_{\it{\theta}}','\it{v}_{\it{\psi}}','FontSize', 18);
     fig4=figure(4);
     fig4.Color = 'white';
     plot(sensor_data(1,:));
@@ -196,7 +255,7 @@ if illustration == 1
         plot(variance(i,:),'LineWidth', 2);
         hold on;
     end
-    ylim([0 1]);
+    ylim([0 alpha]);
     hold off;
     xlabel('step');
     ylabel('variance of wall param');
@@ -209,7 +268,7 @@ if illustration == 1
         hold on;
     end
     hold off;
-    ylim([0 1]);
+    ylim([0 alpha]);
     xlabel('step');
     ylabel('variance of offset*wallparam');
     legend('P1*a/d','P2*a/d','P3*a/d','P1*b/d','P2*b/d','P3*b/d','P1*c/d','P2*c/d','P3*c/d');
@@ -228,7 +287,7 @@ if illustration == 1
         plot(variance(i,:),'LineWidth', 2);
         hold on;
     end
-    ylim([0 1]);
+    ylim([0 alpha]);
     hold off;
     xlabel('step');
     ylabel('variance of offset*wallparam');
@@ -249,7 +308,7 @@ if illustration == 1
         hold on;
     end
     hold off;
-    ylim([0 1]);
+    ylim([0 alpha]);
     xlabel('step');
     ylabel('variance of offset*wallparam');
     legend('R12*a/d','R22*a/d','R32*a/d','R12*b/d','R22*b/d','R32*b/d','R12*c/d','R22*c/d','R32*c/d');

@@ -10,8 +10,8 @@ syms psb [2 1] real
 syms a b c  real
 
 A = [a b];
-X = p +Rb*psb + y*Rb*Rs*[1;0];
-X2 = p +Rb*psb + y2*Rb*Rs*Rn*[1;0];
+X = Rb*p +Rb*psb + y*Rb*Rs*[1;0];
+X2 = Rb*p +Rb*psb + y2*Rb*Rs*Rn*[1;0];
 %%
 eq =[A c]*[X;1];
 eq2 =[A c]*[X2;1];
@@ -28,4 +28,4 @@ var = [a,b,var]/c;
 simplify([eq/c;eq2/c] - [Cf;Cf2]*var' ) 
 Cf12 = [Cf;Cf2];
 %% 
-matlabFunction(Cf12,"file","Cf2D","vars",{p Rb y y2 Rn});
+% matlabFunction(Cf12,"file","Cf2D","vars",{p Rb y y2 Rn});

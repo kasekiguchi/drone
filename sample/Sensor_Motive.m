@@ -2,7 +2,7 @@ function Sensor = Sensor_Motive(rigid_num,initial_yaw_angle,motive)
 %% sensor class demo : constructor
 % sensor property をSensor classのインスタンス配列として定義
 % rpos : RnagePos_sim
-Sensor.Flag = struct('Noise',0,'Occlusion', 0); % '1' : Active, '0' : none
+Sensor.Flag = struct('Noise',1,'Occlusion', 0); % '1' : Active, '0' : none
 Sensor.ObjFeature=4;
 Sensor.LocalX     = [ 0.075, -0.075,  0.015;  -0.075, -0.075, -0.015;-0.075,  0.075,  0.015;0.075,  0.075, -0.015];
 Sensor.LPF_T=10;

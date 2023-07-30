@@ -1,6 +1,6 @@
 function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     % output ：出力のリスト　例 ["p","q"]
-    % var : 各出力に対するセンサーの観測ノイズs
+    % var : 各出力に対するセンサーの観測ノイズ
     %% estimator class demo
     % estimator property をEstimator classのインスタンス配列として定義
     % すべての機体で同一設定
@@ -15,19 +15,29 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         opts.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
     end
     Estimator.model = model;
-    %dt = Estimator.model.dt;
+    % p = length(model.state.get(output)); % number of output
+    % %dt = Estimator.model.dt;
     n = Estimator.model.dim(1);% 状態数
     % 出力方程式の拡張線形化行列(JacobianH)の生成
     % output で登録された出力
     if class(output)=="function_handle"
         Estimator.JacobianH = output;
     else
+        p = length(model.state.get(output)); % number of output
+        %dt = Estimator.model.dt;
         tmp=arrayfun(@(i) strcmp(Estimator.model.state.list,output(i)),1:length(output),'UniformOutput',false);
         syms dummy1 dummy2
         col = Estimator.model.state.num_list;
         Estimator.JacobianH= matlabFunction(cell2mat(arrayfun(@(k) cell2mat(arrayfun(@(i,j) zeroone( col*tmp{k}',i,j),col,tmp{k},"UniformOutput",false)),1:length(output),"UniformOutput",false)'),"Vars",[dummy1,dummy2]);
     end
+    %通常シミュレーション時
+    Estimator.output_func = @(self,param) self.sensor.result.state.get(param);%y = [p;q]にセンサ値追加する形で
+    Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
     
+    %パラメータ推定時（lidarセンサ出力追加）
+    % Estimator.output_func = @(self,param) [self.sensor.result.state.get(param) ;self.sensor.lidar.result.length'];%y = [p;q]にセンサ値追加する形で
+    % Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
+
     % P, Q, R, B生成
     if isempty(opts.P) % 初期共分散行列
         Estimator.P = eye(n);
@@ -54,6 +64,19 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     if strcmp(Estimator.model.name,"Suspended_Load_Model")
         Estimator.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
         Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]);
+    end
+
+    if strcmp(Estimator.model.name,"Expand")
+        % Estimator.Q = blkdiag(eye(3)*1E-3, eye(3)*1E-3,eye(2)*1E-3); % システムノイズ（Modelクラス由来）
+        Estimator.Q = blkdiag(eye(3)*1E-3, eye(3)*1E-3,eye(2)*1E-3); % システムノイズ（Modelクラス由来）
+        Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],dt^2*eye(2));
+    end
+    if contains(Estimator.model.name,"cable_suspended_rigid_body")
+      N = length(Estimator.model.state.Oi)/3;
+        Estimator.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3*N)*1E-3,eye(3*N)*1E-8); % システムノイズ（Modelクラス由来）
+        Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(6*N);dt*eye(6*N)]);
+        %Estimator.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3), 1e-8*ones(1,3*N), 1e-8*ones(1,3*N)]);
+        Estimator.R = 1e-5*eye(p);
     end
     Estimator.list=output;
 end
