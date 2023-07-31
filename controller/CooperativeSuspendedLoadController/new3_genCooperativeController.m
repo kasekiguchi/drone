@@ -94,9 +94,9 @@ matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{x,Xd,R0,R
 % Similarly 
 % -ddqid = R0d*Skew(o0d)^2*e + R0d*Skew(do0d)*e
 dqid = R0d*Skew(o0d)*(R0d'*qid); % 3xN
-wid = 0*cross(qid,dqid); % 3xN
+wid = cross(qid,dqid); % 3xN
 ddqid = R0d*(Skew(do0d) + Skew(o0d)^2)*R0d'*qid;
-dwid = 0*cross(qid,ddqid);
+dwid = cross(qid,ddqid);
 eqi = cross(qid,qi); % 3xN
 ewi = wi + cellmatfun(@(Qi,i) Qi^2*wid(:,i),Qi,"mat");
 %% ui
@@ -134,16 +134,16 @@ for i = 1:N
   Ric(:,:,i) = [b1(:,i),b2(:,i),b3(:,i)];
   dRic(:,:,i) = [db1(:,i),db2(:,i),db3(:,i)];
   ddRic(:,:,i) = [ddb1(:,i),ddb2(:,i),ddb3(:,i)];
-%   oic(:,i) = Vee(Ric(:,:,i)'*dRic(:,:,i));
-  oic(:,i) = zeros(size(Vee(Ric(:,:,i)'*dRic(:,:,i))));
-%   doic(:,i) = Vee(Ric(:,:,i)'*ddRic(:,:,i)-(Ric(:,:,i)'*dRic(:,:,i))^2);
-  doic(:,i) = zeros(size(Vee(Ric(:,:,i)'*ddRic(:,:,i)-(Ric(:,:,i)'*dRic(:,:,i))^2)));
+  oic(:,i) = Vee(Ric(:,:,i)'*dRic(:,:,i));
+%   oic(:,i) = zeros(size(Vee(Ric(:,:,i)'*dRic(:,:,i))));
+  doic(:,i) = Vee(Ric(:,:,i)'*ddRic(:,:,i)-(Ric(:,:,i)'*dRic(:,:,i))^2);
+%   doic(:,i) = zeros(size(Vee(Ric(:,:,i)'*ddRic(:,:,i)-(Ric(:,:,i)'*dRic(:,:,i))^2)));
   eri(:,i) = Vee(Ric(:,:,i)'*Ri(:,:,i)-Ri(:,:,i)'*Ric(:,:,i))/2;
 
-  eoi(:,i) = oi(:,i);% - Ri(:,:,i)'*Ric(:,:,i)*oic(:,i);
+  eoi(:,i) = oi(:,i) - Ri(:,:,i)'*Ric(:,:,i)*oic(:,i);
 
   fi(:,i) = ui(:,i)'*Ri(:,:,i)*e3;
-  Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi{i}*Ji{i}*oi(:,i);% - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric(:,:,i)*oic(:,i)-Ri(:,:,i)'*Ric(:,:,i)*doic(:,i));% 3xN
+  Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi{i}*Ji{i}*oi(:,i) - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric(:,:,i)*oic(:,i)-Ri(:,:,i)'*Ric(:,:,i)*doic(:,i));% 3xN
 end
 matlabFunction(reshape([fi;Mi],[],1),"file",dir+"CSLC_"+N+"_Uvec.m","Vars",{x,Xd,physicalParam,gains,ui,R0,Ri,R0d,qid,b1,b2,b3,si,ci})
 %%
