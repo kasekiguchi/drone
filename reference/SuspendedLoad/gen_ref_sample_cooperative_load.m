@@ -40,7 +40,7 @@ w = 0.2; % T秒で一周
 % dx = diff(ref,t,1);
 
 % ref=@(t)[1.2*sin(2*w*pi*t);4.2*cos(w*pi*t);2];
-ref=@(t)[1;0;2];
+ref=@(t)[0.1;0;2];
 
 % fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 
