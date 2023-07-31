@@ -9,9 +9,9 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 
-loadfilename{1} = 'EstimationResult_12state_7_12_circle=circle_estimation=circle_datanum=20.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-loadfilename{2} = 'EstimationResult_12state_7_12_circle=flight_estimation=circle_datanum=20.mat';
-loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
+loadfilename{1} = 'EstimationResult_12state_7_19_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{2} = 'EstimationResult_12state_7_12_circle=flight_estimation=circle_datanum=20.mat';
+% loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
 % loadfilename{1} = 'test1.mat';
 % loadfilename{1} = 'test2.mat';
@@ -173,7 +173,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best'
 lgd.NumColumns = columnomber;
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
-ylabel('Position','FontSize',Fsize.label);
+ylabel('Position [m]','FontSize',Fsize.label);
 hold off
 % flg. calcFile1RMSE==trueならば rmseを算出
 if flg.calcFile1RMSE
@@ -230,7 +230,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best'
 lgd.NumColumns = columnomber;
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
-ylabel('Attitude','FontSize',Fsize.label);
+ylabel('Attitude [rad]','FontSize',Fsize.label);
 
 hold off
 % rmseの算出
@@ -283,7 +283,7 @@ end
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
-ylabel('Velocity','FontSize',Fsize.label);
+ylabel('Velocity [[m/s]','FontSize',Fsize.label);
 lgd.NumColumns = columnomber;
 
 hold off
@@ -337,7 +337,7 @@ if flg.ylimHold == 1
 end
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
-ylabel('Angular Velocity','FontSize',Fsize.label);
+ylabel('Angular Velocity [rad/s]','FontSize',Fsize.label);
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 
