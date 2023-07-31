@@ -41,7 +41,6 @@ function xr = Reference(params, T, Agent)
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize
-
     % 時間関数の取得→時間を代入してリファレンス生成
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     for h = 0:params.H-1

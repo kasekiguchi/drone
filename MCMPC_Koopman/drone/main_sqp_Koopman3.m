@@ -26,6 +26,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.dt = 0.07; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
+    Params.flag = 0;
 
     %% 重みの設定
     
@@ -45,14 +46,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([5.0; 10.0; 5.0]);    % 座標   1000 10
+    Params.Weight.P = diag([10.0; 10.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([4000; 5000; 1500; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([6000; 5000; 1500; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([10; 15; 10]);
-    Params.Weight.QWf = diag([6500; 8500; 1500; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([15; 10; 5]);
+    Params.Weight.QWf = diag([9000; 8000; 1500; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -155,9 +156,20 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値       
         %-- 目標軌道生成
-            xr = Reference(Params, time.t, agent);
+             xr = Reference2(Params, time.t, agent); %PtoP
             param(i).reference.covering = [];
-            param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
+%             param(i).reference.point = {FH, [1;-1;1], time.t};
+            if agent.estimator.result.state.p(2) < -1
+                Params.flag = 1;
+            elseif agent.estimator.result.state.p(2) > 1
+                Params.flag = 0;
+            end
+            if Params.flag == 1
+                param(i).reference.point = {FH, [1;1;1;], time.t};
+            else
+                param(i).reference.point = {FH, [1;-1;1], time.t};
+            end
+%             param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -331,7 +343,7 @@ set(0, 'defaultTextFontSize', Fontsize);
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
-logger.plot({1,"p","e"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
+% logger.plot({1,"p","e"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % figure
 % plot(data.exitflag)
 %% Difference of Pos
@@ -409,6 +421,7 @@ function [c , ceq] = Constraints(idx, x, params, Agent, ~)
     end
     ceq = [X(:, 1) - params.X0, ceq_ode];
 
+%     c = [x(7:9) - 0.6, -0.6 - x(7:9)];
     c = [-x(13:16,:),x(13:16,:) - 2.5];
 %       c = [1.442 - x(13:14,:),x(13:14,:) - 1.447, x(15:16,:) - 1.447, 1.442 - x(15:16,:)];
 %       c = [x(13:14,:) - 1.46,1.44 - x(13:14,:), x(15:16,:) - 1.46, 1.444 - x(15:16,:)];
