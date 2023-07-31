@@ -16,17 +16,18 @@ syms t real
 % T = 10;
 % rz0 = 0;
 % rz = 1; %rz = 1;
-%
+% 
 % a = -2/T^3 * (rz-rz0);
 % b = 3/T^2 * (rz-rz0);
 % z = a*(t)^3+b*(t)^2+rz0;
 % x = 0;
 % y = 0;
+% yaw = 0;
 
 %%
-x = 0 * t;
-y = 0 * t;
-z = 0 * t;
+% x = 0 * t;
+% y = 0 * t;
+% z = 0 * t;
 %% 
 % x = 0;
 % y = 0;
@@ -36,6 +37,7 @@ z = 0 * t;
 % x = cos(t/2);
 % y = sin(t/2);
 % z = 1.0;
+% yaw = 0;
 
 %%
 % x = cos(t)+sin(t)^2;
@@ -43,9 +45,10 @@ z = 0 * t;
 % z = 1;
 
 %% Liner
-% x = 0;
-% y = t;
-% z = 1.0;
+x = t;
+y = 0;
+z = 1.0;
+yaw = 1;
 
 %% Vertical vibration
 % x = 0;
@@ -55,9 +58,10 @@ z = 0 * t;
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
 %% hovering
-x = 0;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
+% yaw = 0;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
@@ -69,7 +73,7 @@ z = 1;
 % rz0 = 1; % start
 % rz = 0.05; % target
 % StartT = -3;
-%
+% 
 % a = -2/T^3 * (rz-rz0);
 % b = 3/T^2 * (rz-rz0);
 % z = a*(t-StartT)^3+b*(t-StartT)^2+rz0;
@@ -112,5 +116,5 @@ z = 1;
 % y = 0.7*r*cos(2*pi*t/T);
 % z = 1;
 %%
-ref=@(t)[x;y;z;0];  % xyz yaw
+ref=@(t)[x;y;z;yaw];  % xyz yaw
 end

@@ -91,7 +91,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 %       obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
-      idx = rt/obj.self.model.dt+1;
+      idx = round(rt/obj.self.model.dt+1);
+
+      InputV = param{5};
 
       %% HL 5/18 削除------------------------------------------------------------------------------------------------------------------------
       ref = obj.self.reference.result;
@@ -126,10 +128,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 %       ave3 = obj.input.u(3);
 %       ave4 = obj.input.u(4);
 
-      ave1 = 0;
-      ave2 = 0;
-      ave3 = 0;
-      ave4 = 0;
+      ave1 = InputV(1,idx);
+      ave2 = InputV(2,idx);
+      ave3 = InputV(3,idx);
+      ave4 = InputV(4,idx);
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;
@@ -204,7 +206,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vf = obj.input.u(1, 1, BestcostID(1));     % 最適な入力の取得
         vs = obj.input.u(2:4, 1, BestcostID(1));     % 最適な入力の取得
         tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);
-        obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
+        % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))]; % トルク入力への変換
         obj.self.input = obj.result.input;  % agent.inputへの代入
 
         obj.result.v = [vf; vs];
@@ -318,17 +321,18 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% それぞれのホライズンのリファレンスとの誤差を求める
       Z = Xd - Xh;
       % Z = X;
+      k = linspace(1,0.1, obj.param.H-1);
 
       tildeUpre = U - obj.input.v;          % agent.input 　前時刻入力との誤差
       tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-      stageStateZ = sum(Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,1:end-1,:)),[1,2]);%
-      stageInputPre  = sum(tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre(:,1:end-1,:)),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
-      stageInputRef  = sum(tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref(:,1:end-1,:)),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
+      stageStateZ = sum(k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,1:end-1,:)),[1,2]);%
+      stageInputPre  = sum(k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre(:,1:end-1,:)),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
+      stageInputRef  = sum(k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref(:,1:end-1,:)),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
 
       %-- 状態の終端コストを計算 状態だけの終端コスト
-      terminalState = sum(Z(:,end,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,end,:)),[1,2]);
+      terminalState = sum(k .* Z(:,end,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,end,:)),[1,2]);
 
       %-- 評価値計算
       MCEval{1} = stageStateZ + stageInputPre + stageInputRef + terminalState;  % 全体の評価値

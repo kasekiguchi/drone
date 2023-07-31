@@ -15,6 +15,7 @@ fExp = 0; % 1: experiment   0: numerical simulation
 fMotive = 1; % 1: active
 fOffline = 0; % 1: active : offline verification with saved data
 fDebug = 0; % 1: active : for debug function
+fRef = 10;
 run("main1_setting.m");
 
 % set logger
@@ -31,11 +32,38 @@ else
 end
 
 %
-run("main2_agent_setup.m");
+run("main2_agent_setup_sqp.m");
 
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
+data.param = agent.controller.hlmpc;
+Params.H = data.param.param.H;   %Params.H
+Params.dt = data.param.param.dt;  %Params.dt
+Params.dT = dt;
+%-- 配列サイズの定義
+Params.state_size = 12;
+Params.input_size = 4;
+Params.total_size = 16;
+Params.ur = zeros(4,1);
+
+gradient = 1/10;
+
+idx = 0;
+%% Fmincon
+%-- fmincon 設定
+options = optimoptions('fmincon');
+%     options = optimoptions(options,'Diagnostics','off');
+%     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
+options = optimoptions(options,'MaxIterations',         1.e+9);     % 最大反復回数
+options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
+
+%-- fmincon設定
+options.Algorithm = 'sqp';  % 逐次二次計画法
+options.Display = 'none';   % 計算結果の表示
+problem.solver = 'fmincon'; % solver
+problem.options = options;  %
+totalT = 0;
 
 try
 
@@ -43,6 +71,8 @@ try
     %% sensor
     %    tic
     tStart = tic;
+    calT = tic;
+    idx = idx + 1;
 
     if (fOffline)
       logger.overwrite("plant", time.t, agent, i);
@@ -81,7 +111,7 @@ try
       if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
       % reference
-      if time.t < 2
+      if time.t > 12
           FH.CurrentCharacter = 'h';
       else
         FH.CurrentCharacter = 'f';
@@ -106,13 +136,24 @@ try
       agent(i).do_reference(param(i).reference.list);
       if (fOffline); logger.overwrite("reference", time.t, agent, i); end
 
+      %
+      Time.t = time.t;
+      Gq = [0; atan(gradient); 0];
+      Gp = initial.p;
+      phase = 2;
+      
+      % [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef);
+      xr = 0;
       
       % controller
+      phase = 2;
       param(i).controller.hlc = {time.t};
       param(i).controller.ftc = {time.t};
       param(i).controller.pid = {};
       param(i).controller.tscf = {dt, time.t};
       param(i).controller.mpc = {};
+      param(i).controller.hlmpc = {idx, time.t, phase, problem, xr};
+      % param(i).controller.mcmpc = {idx, time.t, phase, problem, xr};
 
       for j = 1:length(agent(i).controller.name)
         param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -121,6 +162,7 @@ try
       agent(i).do_controller(param(i).controller.list);
       if (fOffline); logger.overwrite("input", time.t, agent, i); end
     end
+
 
     if fDebug
       agent.reference.path_ref_mpc.FHPlot(Env,FH,[]);
@@ -143,6 +185,9 @@ try
     %%
 %     data.input_v{round(time.t/dt + 1)} = agent.controller.result.input_v;
 
+    CALT = toc(calT);
+%     disp(CALT);
+    totalT = totalT + CALT;
 
     % for exp
     if fExp
@@ -150,34 +195,26 @@ try
       logger.logging(time.t, FH, agent, []);
       calculation1 = toc(tStart);
       time.t = time.t + calculation1;
-
-      %% logging
-      %             calculation = toc;
-      %             wait_time = 0.9999 * (sampling - calculation);
-      %
-      %             if wait_time < 0
-      %                 wait_time
-      %                 warning("ACSL : sampling time is too short.");
-      %             end
-      %            time.t = time.t + calculation;
-
-      %            else
-      %                pause(wait_time);  %　センサー情報取得から制御入力印加までを早く保ちつつ，周期をできるだけ一定に保つため
-      % これをやるとpause中が不安定になる．どうしても一定時間にしたいならwhile でsamplingを越えるのを待つなどすればよいかも．
-      % それよりは推定などで，calculationを意識した更新をしてあげた方がよい？
-      %                time.t = time.t + sampling;
-      %            end
     else
       logger.logging(time.t, FH, agent, []);
 
       if (fOffline)
         time.t
       else
-        time.t = time.t + dt % for sim
+        time.t = time.t + dt; % for sim
       end
+%       disp(time.t);
 
     end
 
+    %% information
+    fprintf("t:%f \t dt:%f\n", time.t, CALT);
+    fprintf("%f\t %f\t ", agent.estimator.result.state.p', agent.reference.result.state.p');
+    fprintf("\n");
+
+    % get data
+    data.inputv{:,idx} = agent.controller.result.inputv;
+    % data.xr{:, idx} = xr(:, 1);
   end
 
 catch ME % for error
@@ -206,16 +243,30 @@ set(0,'defaultLineMarkerSize',15);
 % plot
 %logger.plot({1,"p","per"},{1,"controller.result.z",""},{1,"input",""});
 %logger.plot({1, "q1", "e"});
-% logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
-% logger.plot({1, "p", "er"}, {1, "q", "p"}, {1, "v", "p"}, {1, "input", ""},"fig_num", 5, "row_col", [2, 2]);
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "e"}, {1, "input", ""}, {1, "p1-p2", "er"}, "fig_num", 5, "row_col", [2, 3]);
 % 仮想入力
-% figure(10); plot(logt, InputV); legend("input1", "input2", "input3", "input4");
+inputvcell = cell2mat(data.inputv)';
+figure(10); plot(logt, inputvcell(1:end-1, :)); legend("input1", "input2", "input3", "input4");
 % xlabel("Time [s]"); ylabel("input.V");
 % grid on; xlim([0 te]); ylim([-inf inf]);
 % saveas(10, "../../Komatsu/MCMPC/InputV_HL", "png");
+
+% xr
+% Rdata = cell2mat(data.xr);
+% Edata = logger.data(1, "p", "e")';
+% logt = logger.data('t',[],[]);
+% figure(2); plot(logt, Rdata(1:3, 1:end-1)); hold on; plot(logt, Edata); hold off;
+%% Ubuntu
+data_now = datestr(datetime('now'), 'yyyymmdd');
+Title = strcat('Circle_good','-','HLMPC', '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
+if exist(Outputdir) ~= 7
+    mkdir ../../students/komatsu/simdata/20230627/
+end
+% save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","logger", "-v7.3")
 %%
 % InputV(:, te/dt+1) = InputV(:, te/dt);
-save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
+% save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
 % Idata = logger.data(1,"input",[])';
 % save("Data/Input_HL.mat", "Idata"); % 実入力の保存
 %% Save figure
@@ -230,7 +281,7 @@ save("Data/InputV_HL.mat", "InputV");   %仮想入力の保存
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
 %agent(1).estimator.pf.animation(logger,"target",1,"FH",figure(),"state_char","p");
-% agent(1).animation(logger, "target", 1:N);
+agent(1).animation(logger, "target", 1:N);
 %%
 %logger.save();
 %logger.save("AROB2022_Prop400s2","separate",true);

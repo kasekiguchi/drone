@@ -76,13 +76,9 @@ for i = 1:N
     agent(i).controller = [];
     %-- sample 通さずに実行
 %     agent(i).set_property("controller",struct("type","MCMPC_controller","name","mcmpc","param",{agent(i)}));
-    if fHL == 1
-        agent(i).set_property("controller", Controller_HLMCMPC(dt));
-    else
-        agent(i).set_property("controller", Controller_MCMPC(dt)); 
-    end
-    
-    % agent(i).set_property("controller", Controller_HLMPC(dt));
+    % agent(i).set_property("controller", Controller_MCMPC(dt)); 
+    % agent(i).set_property("controller", Controller_HLMCMPC(dt));
+    agent(i).set_property("controller", Controller_HLMPC(dt));
     
     % 
     % agent(i).set_property("controller", Controller_HL(dt));                                % 階層型線形化

@@ -17,7 +17,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 10; % default: 10
+    te = 5; % default: 10
 end
 
 %% generate environment
@@ -90,7 +90,7 @@ else
             if fRef == 1
                 arranged_pos = arranged_position([-1, 0], N, 1, 2);% [x, y], 機数，1, z
             else
-                arranged_pos = arranged_position([0, 0], N, 1, 2);
+                arranged_pos = arranged_position([0, 0], N, 1, 1);
             end
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
