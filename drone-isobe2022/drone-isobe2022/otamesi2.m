@@ -36,15 +36,15 @@ box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
-Square_coloring(data.t([find(log.Data.phase == 116,1,'first')+85,find(log.Data.phase==108,1,'first')]));
+% Square_coloring(data.t([find(log.Data.phase == 116,1,'first')+85,find(log.Data.phase==108,1,'first')]));
 % Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase==102,1,'first') + 220]),[0.9 1.0 1.0]);
-% Square_coloring(data.t([find(log.Data.phase==102,1,'first') + 220,find(log.Data.phase==108,1,'first')]));
+Square_coloring(data.t([find(log.Data.phase==102,1,'first') + 220,find(log.Data.phase==102,1,'first')+260]),[1.0 0.9 1.0]);
 xlabel('Time [s]');
 ylabel('p');
-xline(data.t(1,find(log.Data.phase == 116,1,'first')+85),'LineStyle','--','Color','black','LineWidth',2)
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','black','LineWidth',2)
 xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','black','LineWidth',2)
-xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',2)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+260),'LineStyle','--','Color','black','LineWidth',2)
+% xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','black','LineWidth',2)
+% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',2)
 hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
