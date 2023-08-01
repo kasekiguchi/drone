@@ -15,13 +15,13 @@
 %     for h = 0:params.H-1
 %         t = T + params.dt * h; % reference生成時の時刻をずらす
 %         Ref = RefTime(t);
-%         if T <= 10
+%         if Agent.estimator.result.state.p(3) < 1
 %             % 追従項
 %             xr(1:3, h+1) = Ref(1:3);
 %             xr(7:9, h+1) = Ref(5:7);
 %         else
 %             % 追従項
-%             xr(1:3, h+1) = [0;0;0.001];
+%             xr(1:3, h+1) = [0;0;1];
 %             xr(7:9, h+1) = [0;0;0];
 %         end
 %         % 抑制項
