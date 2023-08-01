@@ -14,7 +14,7 @@ qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
 
-initial_state.p = [0; 4.2; 2];
+initial_state.p = [-1; 0; 2];
 initial_state.v = [0; 0; 0];
 initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
@@ -63,7 +63,7 @@ run("ExpBase");
 %
 clc
 
-for i = 1:1000
+for i = 1:5000
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');

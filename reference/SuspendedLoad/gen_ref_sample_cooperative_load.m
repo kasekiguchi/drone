@@ -26,7 +26,7 @@ ly = scale(2); %3.5;
 ly_offset = origin(2);% 3.5;
 lz = scale(3);% 1;
 lz_offset=origin(3);% 1;
-w = 0.2; % T秒で一周
+w = 0.05; % T秒で一周
 % w = 1*pi/T; % T秒で一周
 
 % ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
@@ -39,8 +39,8 @@ w = 0.2; % T秒で一周
 % lz_offset]; % z
 % dx = diff(ref,t,1);
 
-ref=@(t)[1.2*sin(2*w*pi*t);4.2*cos(w*pi*t);2];
-
+% ref=@(t)[1.2*sin(2*w*pi*t);4.2*cos(w*pi*t);2];
+ref=@(t)[0.5;0;2];
 % fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 
 % r0x = [(4*2^(1/2)*w*cos(2*pi*t*w))/(abs(w)*(16*cos(4*t*w*pi) - 49*cos(2*t*w*pi) + 65)^(1/2)) -(7*2^(1/2)*w*sin(pi*t*w))/(abs(w)*(16*cos(4*t*w*pi) - 49*cos(2*t*w*pi) + 65)^(1/2)) 0]';
