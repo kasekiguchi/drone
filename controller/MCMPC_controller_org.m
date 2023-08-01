@@ -85,8 +85,12 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % ave4 = 0.269*9.81/4;
             
             % 標準偏差，サンプル数の更新
-            obj.input.sigma = obj.input.nextsigma;
-            obj.N = obj.param.nextparticle_num;         
+            obj.input.sigma = obj.input.nextsigma; % 4*1
+            obj.N = obj.param.nextparticle_num;      
+
+            % roll, yaw 入力なし
+            obj.input.sigma(2) = 0;
+            obj.input.sigma(4) = 0;
 
             if obj.input.AllRemove == 1
                 ave1 = 0.269*9.81;
@@ -100,10 +104,10 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
             % obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
             % obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
-            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1);
-            obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.N);    % すべて同じ入力、　確認用
-            obj.input.u3 = obj.input.sigma.*randn(obj.param.H, obj.N);
-            obj.input.u4 = obj.input.sigma.*randn(obj.param.H, obj.N);
+            obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1);
+            obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N);    % すべて同じ入力、　確認用
+            obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N);
+            obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N);
             obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
             obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;   
             obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;

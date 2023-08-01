@@ -1,8 +1,10 @@
-while(1)
-%     RUNi = RUNi + 1;
+for RUNi = 1:5
+    RUNi
     main_MC
     if fFinish == 1
-        fFinish
+        fprintf("RUN FILE FINISH");
+        Title
+        % fFinish
         break;
     end
 %     pause();

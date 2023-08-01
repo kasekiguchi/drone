@@ -56,7 +56,7 @@ xr0 = zeros(Params.state_size, Params.H);
 data.xr{idx+1} = 0;
 data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
 data.pathJ{idx+1} = 0;      % - 全サンプルの評価値
-data.sigma(:,idx+1) = 0;      % - 標準偏差 
+data.sigma(:,idx+1) = zeros(4,1);      % - 標準偏差 
 data.bestcost(:,idx+1) = 0;   % - 評価値
 data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
 data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
@@ -551,14 +551,14 @@ agent(1).animation(logger,"target",1);
 
 %% save data
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat(['SlopeLanding-kekkou-yoi', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat(['SlopeLanding-posWeight-sigma-each', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230729/
+    mkdir ../../students/komatsu/simdata/20230731/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
-%%
+% Video Only
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, "-forVIDEO", ".mat"), "logger", "-v7.3");
 %% 加速度
 % figure(21)
