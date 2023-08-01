@@ -46,13 +46,13 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([10.0; 10.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([15.0; 5.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([6000; 5000; 1500; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([6500; 5500; 1500; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([15; 10; 5]);
+    Params.Weight.Pf = diag([15; 5; 5]);
     Params.Weight.QWf = diag([9000; 8000; 1500; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
@@ -354,7 +354,8 @@ set(0, 'defaultTextFontSize', Fontsize);
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-% agent(1).animation(logger,"target",1);
+agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"mp4",1);
 % agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();

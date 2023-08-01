@@ -46,14 +46,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([20.0; 10.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([15.0; 10.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([5000; 4500; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([6500; 5500; 1500; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([10; 15; 1]);
-    Params.Weight.QWf = diag([7500; 8500; 1500; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([15; 10; 5]);
+    Params.Weight.QWf = diag([9000; 8000; 1500; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -156,21 +156,21 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値       
         %-- 目標軌道生成
-%             xr = Reference(Params, time.t, agent); %TimeVarying
-            xr = Reference2(Params, time.t, agent); %PtoP
+            xr = Reference(Params, time.t, agent); %TimeVarying
+%             xr = Reference2(Params, time.t, agent); %PtoP
             param(i).reference.covering = [];
 %             param(i).reference.point = {FH, [1;-1;1], time.t};
-            if agent.estimator.result.state.p(2) < -1
-                Params.flag = 1;
-            elseif agent.estimator.result.state.p(2) > 1
-                Params.flag = 0;
-            end
-            if Params.flag == 1
-                param(i).reference.point = {FH, [1;1;1;], time.t};
-            else
-                param(i).reference.point = {FH, [1;-1;1], time.t};
-            end
-%             param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
+%             if agent.estimator.result.state.p(2) < -1
+%                 Params.flag = 1;
+%             elseif agent.estimator.result.state.p(2) > 1
+%                 Params.flag = 0;
+%             end
+%             if Params.flag == 1
+%                 param(i).reference.point = {FH, [1;1;1;], time.t};
+%             else
+%                 param(i).reference.point = {FH, [1;-1;1], time.t};
+%             end
+            param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
             param(i).reference.wall = {1};
@@ -355,7 +355,7 @@ set(0, 'defaultTextFontSize', Fontsize);
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-% agent(1).animation(logger,"target",1);
+agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();

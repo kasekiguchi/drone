@@ -27,6 +27,7 @@ classdef DRONE < ABSTRACT_SYSTEM
                 obj
                 logger
                 param.target = 1;
+%                 param.mp4 = 1;
             end
             p = obj.parameter;
 %             DRAW_DRONE_MOTION(logger,"frame_size",[p.Lx,p.Ly],"rotor_r",p.rotor_r,"animation",true,"target",param.target);

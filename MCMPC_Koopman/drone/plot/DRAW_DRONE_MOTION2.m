@@ -25,14 +25,16 @@ classdef DRAW_DRONE_MOTION2
                 param.plot_ref = true;
                 param.animation = false;
                 param.target = 1;
+%                 param.mp4 = 1;
             end
+%             data = logger.data(param.mp4,"p","e");
             data = logger.data(param.target,"p","e");
             tM = max(data);
             tm = min(data);
             M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
             m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
             L = param.frame_size;
-            for K = 7:10
+            for K = 8
                 figure(K)
                 if K == 7
                     ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
@@ -85,6 +87,7 @@ classdef DRAW_DRONE_MOTION2
                     disp("Press Enter key to start video 1");   pause();
                     if param.animation
                         obj.animation(logger,"realtime",true,"target",param.target);
+%                         obj.animation(logger,"realtime",true,"mp4",param.target);
                     end
                 elseif K == 8
                     ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
@@ -137,6 +140,7 @@ classdef DRAW_DRONE_MOTION2
                     disp("Press Enter key to start video 2");   pause();
                     if param.animation
                         obj.animation(logger,"realtime",true,"target",param.target);
+%                         obj.animation(logger,"realtime",true,"mp4",param.target);
                     end
                 elseif K == 9
                     ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
@@ -189,6 +193,7 @@ classdef DRAW_DRONE_MOTION2
                     disp("Press Enter key to start video 3");   pause();
                     if param.animation
                         obj.animation(logger,"realtime",true,"target",param.target);
+%                         obj.animation(logger,"realtime",true,"mp4",param.target);
                     end
                 else
                     ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
@@ -241,6 +246,7 @@ classdef DRAW_DRONE_MOTION2
                     disp("Press Enter key to start video 4");   pause();
                     if param.animation
                         obj.animation(logger,"realtime",true,"target",param.target);
+%                         obj.animation(logger,"realtime",true,"mp4",param.target);
                     end
                 end
             end 
@@ -330,6 +336,17 @@ classdef DRAW_DRONE_MOTION2
                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').gif'),':','_'),' ','_');
             end
 
+%             if param.mp4
+%                 sizen = 256;
+%                 delaytime = 0;
+%                 filename = strrep(strrep(strcat('Data/Movie(',datestr(datetime('now')),').mp4'),':','_'),' ','_');
+%                 v = VideoWriter(filename,"MPEG-4");
+%                 if param.mp4
+%                     open(v);
+%                     writeAnimation(v);
+%                 end
+%             end
+
             t = logger.data("t");
             tRealtime = tic;
             for i = 1:length(t)-1
@@ -355,7 +372,14 @@ classdef DRAW_DRONE_MOTION2
                         imwrite(imind,cm,filename,'gif','WriteMode','append','DelayTime',delaytime);
                     end
                 end
+%                 if param.mp4
+%                     framev = getframe(obj.fig);
+%                     writeVideo(v,framev);
+%                 end
             end
+%             if param.mp4
+%                 close(v);
+%             end
         end
     end
 end
