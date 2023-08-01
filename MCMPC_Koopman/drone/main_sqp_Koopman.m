@@ -27,7 +27,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0; %PtoP
-    Params.PtoP = 1; %1：PtoP制御
+    Params.PtoP = 0; %1：PtoP制御
 
     %% 重みの設定
     
@@ -47,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1.0; 10.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([1.0; 1.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([3000; 4000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([4300;3500; 800; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([10; 15; 10]);
-    Params.Weight.QWf = diag([6000; 8000; 1500; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([1; 1; 1]);
+    Params.Weight.QWf = diag([5800; 5500; 1000; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -90,8 +90,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
+%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
