@@ -9,15 +9,15 @@ syms t real
 % T = X(4);   % 目標到達までの時間 T=10
 
 %% takeoff
-% T = 10;
-% rz0 = 0;
-% rz = 1; %rz = 1;
-% 
-% a = -2/T^3 * (rz-rz0);
-% b = 3/T^2 * (rz-rz0);
-% z = a*(t)^3+b*(t)^2+rz0;
-% x = t-10;
-% y = 0;
+T = 10;
+rz0 = 0;
+rz = 1; %rz = 1;
+
+a = -2/T^3 * (rz-rz0);
+b = 3/T^2 * (rz-rz0);
+z = a*(t)^3+b*(t)^2+rz0;
+x = 0;
+y = 0;
 
 
 %% circle
@@ -25,9 +25,9 @@ syms t real
 % y = cos(2*pi*t/30);
 % z = 1;
 
-x = 0;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
 
 % x = cos(t);
 % y = sin(t);
