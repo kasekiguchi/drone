@@ -20,7 +20,7 @@ noiseflag = 0;
 % Log Dataの読み取りと格納
 % log2 = LOGGER('./Data/data030402503.mat');
 % log2 = LOGGER('./Data/miidmove_Log(24-Jul-2023_13_38_35).mat');
-log = LOGGER('./Data/Log(27-Jul-2023_14_15_50).mat');
+log = LOGGER('./Data/error1kaidake_Log(01-Aug-2023_19_13_37).mat');
 % log = LOGGER('./Data/nomove_little_Log(14-Jul-2023_00_53_31).mat');
 
 %% ログ
@@ -33,6 +33,18 @@ robot_qe  = log.data(1,"q","e")';
 sensor_data = (log.data(1,"length","s"))';
 ref_p = log.data(1,"p","r")';
 ref_q = log.data(1,"q","r")';
+
+len = length(log.Data.agent.sensor.result);
+ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
+qs  = zeros(size(log.Data.agent.estimator.result{1,1}.state.qs,1),len);
+l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
+
+for i=1:len
+    ps(:,i) = log.Data.agent.estimator.result{1,i}.state.ps;
+    qs(:,i) = log.Data.agent.estimator.result{1,i}.state.qs;
+    l(:,i) = log.Data.agent.estimator.result{1,i}.state.l;
+end
+
 % 
 % %
 % robot_p2  = log2.data(1,"p","p")';

@@ -10,7 +10,8 @@ arguments
     id             % 個体識別番号
 end
 Model.id = id;
-Model.type = "EULER_ANGLE_PARAM_MODEL";                 % model name
+% Model.type = "EULER_ANGLE_PARAMS_MODEL"; 
+Model.type = "EULER_ANGLE_MODEL";  % model name
 Model.name = "euler_params";                              % print name
 Setting.dim = [22, 4, 17];
 % Setting.method = get_model_name("RPY 12"); % model dynamicsの実体名 ←ここが名前でファンクション呼んでるが直接[既存のfunc;0]にする．

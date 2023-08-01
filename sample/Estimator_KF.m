@@ -36,4 +36,3 @@ function mat = zeroone(row,col,idx)
         error("ACSL : invalid size");
     end
 end
-

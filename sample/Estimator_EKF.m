@@ -31,12 +31,14 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         Estimator.JacobianH= matlabFunction(cell2mat(arrayfun(@(k) cell2mat(arrayfun(@(i,j) zeroone( col*tmp{k}',i,j),col,tmp{k},"UniformOutput",false)),1:length(output),"UniformOutput",false)'),"Vars",[dummy1,dummy2]);
     end
     %通常シミュレーション時
-    Estimator.output_func = @(self,param) self.sensor.result.state.get(param);%y = [p;q]にセンサ値追加する形で
-    Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
+    % Estimator.output_func = @(self,param) self.sensor.result.state.get(param);%y = [p;q]にセンサ値追加する形で
+    % Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
     
     %パラメータ推定時（lidarセンサ出力追加）
-    % Estimator.output_func = @(self,param) [self.sensor.result.state.get(param) ;self.sensor.lidar.result.length'];%y = [p;q]にセンサ値追加する形で
-    % Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
+    Estimator.output_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1:2)'];
+    % % % ;self.sensor.lidar.result.length(1)
+    % % %y = [p;q]にセンサ値追加する形で
+    Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
 
     % P, Q, R, B生成
     if isempty(opts.P) % 初期共分散行列
