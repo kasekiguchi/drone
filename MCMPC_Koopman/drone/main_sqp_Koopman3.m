@@ -27,6 +27,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0;
+    Params.PtoP = 0; %1：PtoP制御
 
     %% 重みの設定
     
@@ -46,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([15.0; 5.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([5.0; 1.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([6500; 5500; 1500; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2500;2000;1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([15; 5; 5]);
-    Params.Weight.QWf = diag([9000; 8000; 1500; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([10; 1; 1]);
+    Params.Weight.QWf = diag([5000; 3000; 1200; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -89,8 +90,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
-      load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
+    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+%       load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
@@ -157,19 +158,23 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値       
         %-- 目標軌道生成
-             xr = Reference2(Params, time.t, agent); %PtoP
-            param(i).reference.covering = [];
-%             param(i).reference.point = {FH, [1;-1;1], time.t};
-            if agent.estimator.result.state.p(2) < -1
-                Params.flag = 1;
-            elseif agent.estimator.result.state.p(2) > 1
-                Params.flag = 0;
-            end
-            if Params.flag == 1
-                param(i).reference.point = {FH, [1;1;1;], time.t};
+            if Params.PtoP == 1
+                xr = Reference2(Params, time.t, agent); %PtoP
+                if agent.estimator.result.state.p(2) < -1
+                    Params.flag = 1;
+                elseif agent.estimator.result.state.p(2) > 1
+                    Params.flag = 0;
+                end
+                if Params.flag == 1
+                    param(i).reference.point = {FH, [1;1;1;], time.t};
+                else
+                    param(i).reference.point = {FH, [1;-1;1], time.t};
+                end
             else
-                param(i).reference.point = {FH, [1;-1;1], time.t};
+                xr = Reference(Params, time.t, agent); %TimeVarying
+                param(i).reference.point = {FH, [0;2;1], time.t};  % 目標値[x, y, z]
             end
+            param(i).reference.covering = [];
 %             param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
@@ -347,7 +352,7 @@ set(0, 'defaultTextFontSize', Fontsize);
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
-% logger.plot({1,"p","e"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
+logger.plot({1,"p","e"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % figure
 % plot(data.exitflag)
 %% Difference of Pos
@@ -358,7 +363,7 @@ set(0, 'defaultTextFontSize', Fontsize);
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"mp4",1);
 % agent(1).animation(logger,"gif", 1);
 %%

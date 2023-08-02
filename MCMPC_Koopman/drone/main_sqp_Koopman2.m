@@ -27,6 +27,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0;
+    Params.PtoP = 0; %1：PtoP制御
 
     %% 重みの設定
     
@@ -46,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 10
+    Params.Weight.P = diag([5.0; 3.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([100; 100; 100; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([3000; 3000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([100; 100; 100]);
-    Params.Weight.QWf = diag([100; 100; 100; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([5; 3; 1]);
+    Params.Weight.QWf = diag([3500; 3500; 1500; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -89,8 +90,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
-      load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
+    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+%       load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
@@ -157,9 +158,8 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値       
         %-- 目標軌道生成
-             xr = Reference2(Params, time.t, agent); %PtoP
-            param(i).reference.covering = [];
-%             param(i).reference.point = {FH, [1;-1;1], time.t};
+            if Params.PtoP == 1
+            xr = Reference2(Params, time.t, agent); %PtoP
             if agent.estimator.result.state.p(2) < -1
                 Params.flag = 1;
             elseif agent.estimator.result.state.p(2) > 1
@@ -170,6 +170,11 @@ end
             else
                 param(i).reference.point = {FH, [1;-1;1], time.t};
             end
+            else
+                xr = Reference(Params, time.t, agent); %TimeVarying
+                param(i).reference.point = {FH, [0;2;1], time.t};  % 目標値[x, y, z]
+            end
+            param(i).reference.covering = [];
 %             param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
             param(i).reference.tvLoad = {time};
@@ -181,7 +186,7 @@ end
             agent(i).do_reference(param(i).reference.list);
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
     %-- newton and sqp MPC controller
-        x = agent.estimator.result.state.get(); % これ追加10/14　よくなった気がする
+            x = agent.estimator.result.state.get(); % これ追加10/14　よくなった気がする
         %-- MPCパラメータを構造体に格納
             Params.ts = 0;
             Params.xr = xr;
