@@ -34,7 +34,7 @@ classdef DRAW_DRONE_MOTION2
             M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
             m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
             L = param.frame_size;
-            for K = 8
+            for K = 7:10
                 figure(K)
                 if K == 7
                     ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);

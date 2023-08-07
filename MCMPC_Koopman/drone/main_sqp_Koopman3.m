@@ -47,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1.0; 5.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([7.0; 7.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2000;2500;1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2000;2000;1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([1; 10; 1]);
-    Params.Weight.QWf = diag([3000; 4000; 1200; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([8; 8; 1]);
+    Params.Weight.QWf = diag([3000; 3000; 1000; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -77,8 +77,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     options = optimoptions(options,'Diagnostics','off');
 %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
     options = optimoptions(options,'MaxIterations',      1.e+9);     % 最大反復回数
-%     options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
-    options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
+    options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
+%     options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
     
     %-- fmincon設定
     options.Algorithm = 'sqp';  % 逐次二次計画法
@@ -351,8 +351,8 @@ set(0, 'defaultTextFontSize', Fontsize);
 % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
-logger.plot({1,"p","e"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
+% % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+% logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
 % figure
 % plot(data.exitflag)
 %% Difference of Pos

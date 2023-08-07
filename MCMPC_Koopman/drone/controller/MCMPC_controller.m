@@ -53,7 +53,9 @@ classdef MCMPC_controller < CONTROLLER_CLASS
             % p , q, v, w
                 %~ ホライズン×サンプル数の配列初期化
                 %~ 状態数×ホライズン×サンプル数に次元変換
-            obj.state.state_data_koopman = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data;obj.state.constant];
+            obj.state.state_data_koopman = zeros(obj.param.H, obj.param.particle_num);
+            obj.state.state_data_koopman = repmat(reshape(obj.state.state_data_koopman, [1, size(obj.state.state_data_koopman)]), size(obj.A, 1), 1);
+%             obj.state.state_data_koopman2 = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data;obj.state.constant];
             obj.state.state_data = [obj.state.p_data;obj.state.q_data;obj.state.v_data;obj.state.w_data];
         end%(ここまでは一回目のみ読み込まれる)
         
@@ -65,49 +67,23 @@ classdef MCMPC_controller < CONTROLLER_CLASS
             obj.state.ref = xr; % 構造体に代入
 
             %-- 正規分布の標準偏差，平均の設定
-%             if idx < 8 
-%                 obj.input.sigma = 0.01;
-% %                 obj.input.average = 2;
-%                 obj.input.average(1) = 1.4;
-%                 obj.input.average(2) = 1.55;
-%                 obj.input.average(3) = 1.4;
-%                 obj.input.average(4) = 1.55;
-%             elseif idx >= 8 && idx < 20 
-%                 obj.input.sigma = 0.01;
-%                 obj.input.average = 1.5;
-%             else
-%                 obj.input.sigma = 0.001;
-%                 obj.input.average = 1.44;
-%             end
-%                 obj.input.sigma = 0.000001;
-%                 obj.input.average = 1.443;     
-
             if idx == 1 %プログラムの1周目では標準偏差，平均値を設定
-                obj.input.sigma = 0.0001;
-%                 obj.input.average = 0.5884*9.81/4;
-                obj.input.average = 1.443;
+                obj.input.sigma = 0.1;
+                obj.input.average = 0.5884*9.81/4;
             else %2周目以降はリサンプリングで標準偏差と平均値を計算
                 obj.input.sigma = obj.input.sigma * (obj.input.bestcost_now / obj.input.bestcost_befor);
                 obj.input.average = obj.input.u1(:,1,obj.input.I);
                 if obj.input.sigma >= 2 %sigmaの最大最小の設定
                     obj.input.sigma = 2;
-                elseif obj.input.sigma <= 0.0000001
-                    obj.input.sigma = 0.0000001;
+                elseif obj.input.sigma <= 0.001
+                    obj.input.sigma = 0.001;
                 end
             end
-            obj.input.sigma
-            obj.input.average
-%             if idx < 8
-%                 obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num);
-%                 for i = 1:4
-%                     obj.input.u1(i,:,:) = obj.input.u1(i,:,:) + obj.input.average(i);
-%                 end
-%             else
-%                 obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num) + obj.input.average;
-%             end
+
             obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num) + obj.input.average;
              %(新しい入力の生成，σ×[入力数×ホライズン数×サンプル数]+平均値),randn:標準世紀分布から取り出された乱数スカラーを返す
-               
+            input2 = obj.input.u1(:,:,1);
+            plot(input2)
             %-- 入力列の生成
             % 正規分布に従う．設定した標準偏差と平均に基づく
             % 負の入力の阻止(find()<0の部分)
@@ -169,15 +145,12 @@ classdef MCMPC_controller < CONTROLLER_CLASS
 %                 obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
                 obj.state.z = obj.previous_state.x0C;
                 obj.state.state_data_koopman(:,1,i) = obj.state.z; %y0を初期値に設定
-%                 obj.state.state_data(:,1,i) = obj.state.y0; %y0を初期値に設定
                 for j = 1:obj.param.H - 1 %ホライズン数分繰り返し
                     %モデルの計算
-%                     obj.state.y0 = obj.state.y0 + obj.param.dt * obj.self.model.method(obj.state.y0,obj.input.u1(:,j,i),obj.self.model.param);
                     obj.state.z = obj.A*obj.state.z + obj.B*obj.input.u1(:,j,i); %クープマンモデル，複素数空間上での値
                     obj.state.state_data_koopman(:,j+1,i) = obj.state.z; %j+1の理由：初期位置を除くから
                     obj.state.xhat = obj.C*obj.state.z; %複素空間から実空間へ値を戻す
-                    obj.state.state_data (:,j+1,i) = obj.state.xhat;
-%                     obj.state.state_data (:,j+1,i) = obj.state.y0;
+                    obj.state.state_data(:,j+1,i) = obj.state.xhat;
                 end
             end
             predict_state = obj.state.state_data; %戻り値predict_stateに予測した値を代入
@@ -203,7 +176,7 @@ classdef MCMPC_controller < CONTROLLER_CLASS
             stagestateU = arrayfun(@(L) tildeu(:,L)' * obj.param.R * tildeu(:,L), 1:obj.param.H - 1);
             %-- 状態の終端コストを計算(重みは分離可能，controllerに追加する)
             terminalstatep = tildep(:,end)' * obj.param.Pf * tildep(:,end);
-            terminalstateq = tildeq(:,end)' * obj.param.Q * tildeq(:,end);
+            terminalstateq = tildeq(:,end)' * obj.param.Qf * tildeq(:,end);
             terminalstatev = tildev(:,end)' * obj.param.V * tildev(:,end);
             terminalstatew = tildew(:,end)' * obj.param.W * tildew(:,end);
             terminalstateu = tildeu(:,end)' * obj.param.R * tildeu(:,end);

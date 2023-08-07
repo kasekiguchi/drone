@@ -10,18 +10,18 @@ clear all;
 clc;
 
 %% データのインポート
-load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
+% load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
 % load("simulation_7_5_saddle.mat")
 disp('load finished')
 
-for i = 1:find(log.Data.t,1,'last')
-    data.t(1,i) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
+for i = 1:find(logger.Data.t,1,'last')
+    data.t(1,i) = logger.Data.t(i,1);                                      %時間t
+    data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
 end
 
 %% 特定の範囲のグラフ出力
@@ -62,10 +62,10 @@ ylabel('p');
 % xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','red','LineWidth',2)
 hold on
 grid on
-% plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
+plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
-lgdtmp = {'$x_e$','$y_e$','$z_e$'};
-% lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+% lgdtmp = {'$x_e$','$y_e$','$z_e$'};
+lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
@@ -120,6 +120,7 @@ ax(5) = gca;
 figure(6)
 plot3(data.p(1,:),data.p(2,:),data.p(3,:));
 grid on
+zlim([0 max(data.p(3,:))])
 ax(6) = gca;
 
 %入力

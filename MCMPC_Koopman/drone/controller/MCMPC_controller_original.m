@@ -34,7 +34,11 @@ classdef MCMPC_controller_original <CONTROLLER_CLASS
             %(reshape(obj.state.p_data,[1,size(obj.state.p_data)],3,1)は[1,size(obj.state.p_data)]で1行と
             %obj.state.p_dataの元の行列の行を列，列を高さに変換(3次元に変換している)
             obj.state.q_data = zeros(obj.param.H,obj.param.particle_num);
-
+            obj.state.q_data = repmat(reshape(obj.state.q_data, [1, size(obj.state.q_data)]), 3, 1);
+            obj.state.v_data = zeros(obj.param.H, obj.param.particle_num);
+            obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
+            obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
+            obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
 
             % p , q, v, w
                 %~ ホライズン×サンプル数の配列初期化
@@ -78,6 +82,7 @@ classdef MCMPC_controller_original <CONTROLLER_CLASS
             %-- 予測軌道算出
             obj.state.predict_state = obj.predict();
             % プラスα　：　墜落したらプログラムを終了させる
+            
 
             %-- 予測軌道に対する評価値計算;
             for i = 1:obj.param.particle_num %サンプル数分の評価値計算
@@ -91,9 +96,18 @@ classdef MCMPC_controller_original <CONTROLLER_CLASS
             obj.self.input = obj.input.u1(:,1,obj.input.I);
 
             %-- リサンプリング
-            
+            if idx == 1
+                obj.input.bestcost_befor = bestcost;
+                obj.input.bestcost_now = bestcost;
+            else
+                obj.input.bestcost_befor =  obj.input.bestcost_now;
+                obj.input.bestcost_now = bestcost;
+            end
             %-- (必要があれば)変数の保存(mainへ値を返す) 
-            obj.result = obj.input.u1;
+            obj.result.bestcost = bestcost;
+            obj.result.sigma = obj.input.sigma;
+            obj.result.contParam = obj.param;
+%             obj.result = obj.input.u1;
             result = obj.result; %(result = とすることで値がagentに保存される,agent内のデータはどこからでもアクセスできる)
             %ただし，シミュレーションを回すごとに内容は書き換えられる
         end
@@ -126,11 +140,25 @@ classdef MCMPC_controller_original <CONTROLLER_CLASS
             %-- 予測状態と目標状態の誤差計算
             tildep = obj.state.ref(1:3,:) - X(1:3,:,i);
             tildeq = obj.state.ref(4:6,:) - X(4:6,:,i);
-
+            tildev = obj.state.ref(7:9,:) - X(7:9,:,i);
+            tildew = obj.state.ref(10:12,:) - X(10:12,:,i);
             %-- 予測入力と目標入力の誤差計算
+            tildeu = obj.state.ref(13:16,:) - U;
             %-- 状態及び入力のステージコストを計算
-            %-- 状態の終端コストを計算
+            stagestateP = arrayfun(@(L) tildep(:,L)' * obj.param.P * tildep(:,L), 1:obj.param.H - 1);
+            stagestateQ = arrayfun(@(L) tildeq(:,L)' * obj.param.Q * tildeq(:,L), 1:obj.param.H - 1);
+            stagestateV = arrayfun(@(L) tildev(:,L)' * obj.param.V * tildev(:,L), 1:obj.param.H - 1);
+            stagestateW = arrayfun(@(L) tildew(:,L)' * obj.param.W * tildew(:,L), 1:obj.param.H - 1);
+            stagestateU = arrayfun(@(L) tildeu(:,L)' * obj.param.R * tildeu(:,L), 1:obj.param.H - 1);
+            %-- 状態の終端コストを計算(重みは分離可能，controllerに追加する)
+            terminalstatep = tildep(:,end)' * obj.param.Pf * tildep(:,end);
+            terminalstateq = tildeq(:,end)' * obj.param.Q * tildeq(:,end);
+            terminalstatev = tildev(:,end)' * obj.param.V * tildev(:,end);
+            terminalstatew = tildew(:,end)' * obj.param.W * tildew(:,end);
+            terminalstateu = tildeu(:,end)' * obj.param.R * tildeu(:,end);
             %-- 評価値計算
+            MCeval = sum(stagestateP + stagestateQ + stagestateV + stagestateW + stagestateU ...
+                 ) + terminalstatep + terminalstateq + terminalstatev + terminalstatew + terminalstateu;
         end
     end
 end

@@ -37,15 +37,15 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     %-- 初期設定 controller.mと同期させる
     Params.H = 10;   %Params.H
-    Params.dt = 0.1;  %Params.dt
+    Params.dt = 0.07;  %Params.dt
     Params.dT = dt;
     %-- 配列サイズの定義
     Params.state_size = 12;
     Params.input_size = 4;
     Params.total_size = 16;
     % Reference.mを使えるようにする
-%     Params.ur = 0.5884 * 9.81 / 4 * ones(Params.input_size, 1);
-    Params.ur = 1.443 * ones(Params.input_size,1);
+    Params.ur = 0.5884 * 9.81 / 4 * ones(Params.input_size, 1);
+%     Params.ur = 1.443 * ones(Params.input_size,1);
     xr0 = zeros(Params.state_size, Params.H);
 
    
@@ -147,11 +147,22 @@ end
             ref_monte = agent.reference.result.state;
 
             %値をディスプレイに表示
-            fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
+%             fprintf("pos: %f %f %f \t vel: %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
+%                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+%                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+%                     state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
+%                     xr(1,1), xr(2,1), xr(3,1));
+
+            fprintf("pos: %f %f %f \t u: %f %f %f %f \t q: %f %f %f \t ref: %f %f %f \n",...
                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                    state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                    agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                     state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi,...
                     xr(1,1), xr(2,1), xr(3,1));
+
+%             fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
+%                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+%                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
+%                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
 
         %% update state(状態の更新)
         % with FH
@@ -166,6 +177,9 @@ end
 
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
+            if agent.estimator.result.state.p(3) < 0
+                error('墜落しました')
+            end
         end
 
         % for exp
@@ -289,7 +303,7 @@ logger.plot({1,"p","er"},{1,"v","e"},{1,"q","p"},{1,"w","p"},{1,"input",""},{1, 
 set(0, 'defaultLineLineWidth', 1.5);
 size_best = size(data.bestcost, 2);
 Edata = logger.data(1, "p", "e")';
-% Rdata = logger.data(1, "p", "r")';
+Rdata = logger.data(1, "p", "r")';
 Rdata = zeros(12, size_best-1);
 for R = 1:size_best-1
     Rdata(:, R) = data.xr{R}(1:12, 1);
@@ -303,15 +317,15 @@ xmax = te;
 close all
 
 % position
-figure(1); plot(logt, Edata, 'LineWidth', 2); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
+figure(1); plot(logt, Edata, 'LineWidth', 2); hold on; plot(logt, Rdata(1:3, end-1), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
 grid on; xlim([0 xmax]); ylim([-inf inf+0.5]);
 % atiitude
-figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
+figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, end-1), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % velocity
-figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
+figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, end-1), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % input
