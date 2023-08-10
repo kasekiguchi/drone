@@ -43,10 +43,10 @@ z = z_0;
 % z=z_0;
 
 %メビウスの帯
-T = 12;r=0.5;
-x = (r*cos(2*pi*t/T)+1)*cos(2*2*pi*t/T);
-y = (r*cos(2*pi*t/T)+1)*sin(2*2*pi*t/T);
-z = z_0+r*sin(2*pi*t/T);
+% T = 12;r=0.5;
+% x = (r*cos(2*pi*t/T)+1)*cos(2*2*pi*t/T);
+% y = (r*cos(2*pi*t/T)+1)*sin(2*2*pi*t/T);
+% z = z_0+r*sin(2*pi*t/T);
 
 % 
 % R1=1;
