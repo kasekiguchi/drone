@@ -51,10 +51,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([1900; 1900; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2000; 2000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
     Params.Weight.Pf = diag([10; 10; 1]);
-    Params.Weight.QWf = diag([2700; 2700; 1000; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.QWf = diag([3000; 3000; 1000; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
