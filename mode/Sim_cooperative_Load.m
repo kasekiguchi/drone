@@ -1,6 +1,6 @@
 clc
 ts = 0;
-dt = 0.01;
+dt = 0.1;
 te = 25;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -8,13 +8,13 @@ post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [], []);
 
-N = 3;
+N = 4;
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
 qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
 
-initial_state.p = [0; 0; 2];
+initial_state.p = [0; 0; 1];
 initial_state.v = [0; 0; 0];
 initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
@@ -34,8 +34,8 @@ end
 
 if contains(qtype, "eul")
     initial_state.Q = [0; 0; 0];
-    initial_state.Qi = repmat([0; pi / 180; 0], N, 1);
-    %initial_state.Qi = repmat([0;0;0],N,1);
+    %initial_state.Qi = repmat([0; pi / 180; 0], N, 1);
+    initial_state.Qi = repmat([0;0;0],N,1);
 else
     initial_state.Q = [1; 0; 0; 0];
     initial_state.Q = initial_state.Q / vecnorm(initial_state.Q);
@@ -54,7 +54,7 @@ agent.sensor = DIRECT_SENSOR(agent, 0.0); % sensor to capture plant position : s
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
 % agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
 % agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,Reference_Time_Varying_Cooperative_Load("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",3,"orig",[0;0;2],"size",[1,1,1]},"Cooperative"});
+agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",40,"orig",[0;0;1],"size",[1,1,0]},"Cooperative"});
 %agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 agent.controller = CSLC(agent, Controller_Cooperative_Load(dt, N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
@@ -62,15 +62,14 @@ run("ExpBase");
 
 %
 clc
-
-for i = 1:4000
+for i = 1:200
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
-    %agent(1).controller.result.input = repmat([1 + 0.1*cos(time.t*2*pi/3);0;0.0001*sin(time.t*(pi)*5);0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
-    %agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
-    agent(1).controller.do(time, 'f');
+    %agent(1).controller.do(time, 'f');
+    %agent(1).controller.result.input = repmat([1.01 + 0.0*cos(time.t*2*pi/3);0.001*[sin(time.t*(pi)/1);0*cos(time.t*(pi)/1);0]],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
+    agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
     %agent(1).controller.result.input = agent(1).controller.result.input.*repmat([-1;1;-1;-1],N,1);
     agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
@@ -79,7 +78,7 @@ for i = 1:4000
 end
 
 %%
-logger.plot({1, "p", "p"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"})
+logger.plot({1,"p","pr"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"},{1, "input", "p"})
 %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);

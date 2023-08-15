@@ -38,9 +38,9 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
             if contains(type,"zup")
-              rho0 = [0;0;1/2];
+              rho0 = [0;0;1/4];
             else
-              rho0 = [0;0;-1/2];
+              rho0 = [0;0;-1/4];
             end
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);
