@@ -37,9 +37,10 @@ classdef CSLC < handle
       qi = reshape(model.qi,3,obj.N);
       Ri = obj.toR(model.Qi);
       R0 = obj.toR(model.Q);
-      xd = ref.xd;
+      xd = 0*ref.xd;
       %R0d = RodriguesQuaternion([xd(19);xd(20);xd(21);xd(22)]);
       R0d = reshape(xd(end-8:end),3,3);
+      R0d = eye(3);
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
       obj.result.input = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger);
       result = obj.result;
