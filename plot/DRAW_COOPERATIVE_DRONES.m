@@ -32,10 +32,10 @@ classdef DRAW_COOPERATIVE_DRONES
       obj.rho = param.self.parameter.rho;
       obj.li = param.self.parameter.li;
       data = logger.data(1,"p","e");
-      tM = max(data,1);
-      tm = min(data,1);
-      M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
-      m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
+      tM = data;%max(data,1);
+      tm = data;%min(data,1);
+      M = [max(tM(:,1)),max(tM(:,2)),max(tM(:,3))];
+      m = [min(tm(:,1)),min(tm(:,2)),min(tm(:,3))];
       if isfield(param,'frame_size')
         L = param.frame_size;
       else
@@ -45,7 +45,7 @@ classdef DRAW_COOPERATIVE_DRONES
       S = obj.system_size;
       obj.xlim = [m(1)-S(1) M(1)+S(1)];
       obj.ylim = [m(2)-S(2) M(2)+S(2)];
-      obj.zlim = [-S(3) M(3)+S(3)+1];
+      obj.zlim = [m(3)-S(3) M(3)+S(3)+1];
       if isfield(param,'ax')
         ax = param.ax;
       else
@@ -54,7 +54,7 @@ classdef DRAW_COOPERATIVE_DRONES
         varargin = {varargin{:},'ax',ax};
       end
       obj=obj.gen_frame(varargin{:});
-      obj=obj.gen_load(varargin{:},'cube',[sum(abs(obj.rho(1:3:end)))/2,sum(abs(obj.rho(2:3:end)))/2,sum(abs(obj.rho(3:3:end)))/2]);
+      obj=obj.gen_load(varargin{:},'cube',[sum(abs(obj.rho(1,:)))/2,sum(abs(obj.rho(2,:)))/2,sum(abs(obj.rho(3,:)))/2]);
       
        p0 = data(1,:);
       q = obj.data_format(logger,1,"plant.result.state.Q","p");
@@ -256,8 +256,8 @@ classdef DRAW_COOPERATIVE_DRONES
     function [pi,rho] = gen_pi(obj,p,Q,qi)
       % pi(k,:,i) = [xi yi zi] at time k
       Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
-      q = repmat(p,1,length(obj.target))+Qrho;
-      rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point
+      q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
+      rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
       pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));      
     end
     function D = data_format(obj,logger,target,var,att)
