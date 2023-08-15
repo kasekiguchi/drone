@@ -8,13 +8,13 @@ post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [], []);
 
-N = 4;
+N = 6;
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
 qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
 
-initial_state.p = [0; 0; 1];
+initial_state.p = [-1; 1; -2];
 initial_state.v = [0; 0; 0];
 initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
@@ -67,9 +67,9 @@ for i = 1:200
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
-    %agent(1).controller.do(time, 'f');
+    agent(1).controller.do(time, 'f');
     %agent(1).controller.result.input = repmat([1.01 + 0.0*cos(time.t*2*pi/3);0.001*[sin(time.t*(pi)/1);0*cos(time.t*(pi)/1);0]],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
-    agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
+    %agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
     %agent(1).controller.result.input = agent(1).controller.result.input.*repmat([-1;1;-1;-1],N,1);
     agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
