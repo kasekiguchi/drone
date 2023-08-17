@@ -14,7 +14,7 @@ qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
 
-initial_state.p = [-1; 0; 2];
+initial_state.p = [0; 0; 2];
 initial_state.v = [0; 0; 0];
 initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
@@ -28,6 +28,8 @@ initial_state.Oi = repmat([0; 0; 0], N, 1);
 
 if contains(qtype, "zup")
     initial_state.qi = -1 * repmat([0; 0; 1], N, 1);
+%     initial_state.qi = -1 * [[cos(pi/3); sin(pi/3); 1]/vecnorm([cos(pi/3); sin(pi/3); 1]);[cos(pi); sin(pi); 1]/vecnorm([cos(pi); sin(pi); 1]);[cos(5*pi/3); sin(5*pi/3); 1]/vecnorm([cos(5*pi/3); sin(5*pi/3); 1]);];
+    initial_state.qi = -1 * [[0; 0; 1];[0; 0; 1];[0; 0; 0.7]];
 else
     initial_state.qi = 1 * repmat([0; 0; 1], N, 1);
 end
@@ -63,7 +65,7 @@ run("ExpBase");
 %
 clc
 
-for i = 1:5000
+for i = 1:1000
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -82,13 +84,13 @@ end
 logger.plot({1, "p", "p"}, {1, "plant.result.state.Q", "p"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"})
 %%
 close all
-% mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",false)
+mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
+mov.animation(logger, 'target', 1:N, "gif",false)
 %%
 logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 
 %% ログからのplot
-ps1 = logger.data(1,"p","p");
+ps1 = logger.data(1,"input","p");
 
 %%
 function dfunc(app)
