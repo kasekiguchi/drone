@@ -123,7 +123,8 @@ classdef DRAW_COOPERATIVE_DRONES
       [x,y,z] = cylinder(ax,1,obj.N);
       z = z*param.cube(3)-param.cube(3)/2;
       h(1) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,:),x(2,:)],[y(1,:),y(2,:)],[z(1,:),z(2,:)],'FaceColor',"cyan");
-      h(2) = surf(x,y,z);
+      h(2) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,1),x(1,2:end)/5,x(2,1),x(2,2:end)/5],[y(1,1),y(1,2:end)/5,y(2,1),y(2,2:end)/5],[z(1,:)+0.001,z(2,:)],'FaceColor',"red");
+      h(3) = surf(x,y,z);
       ttt = hgtransform('Parent',ax); set(h,'Parent',ttt); % 推力を慣性座標と紐づけ
       obj.load = ttt;
     end
@@ -219,7 +220,12 @@ classdef DRAW_COOPERATIVE_DRONES
           f(n) = animatedline(ax,'Color','r','MaximumNumPoints',15); % 目標軌道の描画点の制限
         end
       end
-      for i = 1:length(t)-1
+      if isfield(param,'ntimes')
+        skip = param.ntimes;
+      else
+        skip = 1;
+      end      
+      for i = 1:skip:length(t)-1
         if isfield(param,'Motive_ref')
           addpoints(ax,f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
         else
@@ -233,6 +239,15 @@ classdef DRAW_COOPERATIVE_DRONES
           obj=obj.gen_frame("target",param.target,"ax" ,ax);
         end
         obj.draw(param.target,p(i,:),Q(i,:),pi(i,:,param.target),Qi(i,:,param.target),rho(i,:,param.target));
+        title(ax,"time : " + t(i));
+        if isfield(param,'lims')
+          obj.xlim = param.lims(1,:);
+          obj.ylim = param.lims(2,:);
+          obj.zlim = param.lims(3,:);
+          obj.ax.XLim = obj.xlim;
+          obj.ax.YLim = obj.ylim;
+          obj.ax.ZLim = obj.zlim;
+        end
 
         pause(0.01);
         if isfield(param,'gif')
@@ -249,6 +264,7 @@ classdef DRAW_COOPERATIVE_DRONES
           writeVideo(v,framev);
         end
       end
+      title(ax,"Finish !!");
       if isfield(param,'mp4')
         close(v);
       end

@@ -19,7 +19,6 @@ syms R0 [3 3] real
 syms o0 [3 1] real % 角速度
 syms qi [3 N] real % リンクのドローンから見た方向ベクトル：論文中qi
 syms wi [3 N] real % リンクの角速度
-%syms dwi [3 N] real
 
 % ドローンに関する変数定義 %%%%%%%%%%%%%%%%%%
 syms ri [4 N] real % 姿勢角（オイラーパラメータ）

@@ -6,7 +6,7 @@ clc
 % 軸の取り方に注意
 % e3 = [0;0;1]; % 鉛直下向き zup : 鉛直上向き
 dir = "model/substance/Cooperative_drones/";
-N = 3; % エージェント数
+N = 6; % エージェント数
 
 %% symbol定義
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
@@ -81,8 +81,7 @@ rhs7 = zeros(3,1);
 for i = 1:N
   lhs71 = lhs71 - mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)'*R0*Rho{i};
   lhs72 = lhs72 + mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)';
-  rhs7 = rhs7 + Rho{i}*R0'*(ul{i} - mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*Qi{i}^2*R0*O0^2*rho(:,i)); % 修正版
-  %rhs7 = rhs7 + Rho{i}*R0'*(ul{i} - mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*qi(:,i)*qi(:,i)'*R0*O0^2*rho(:,i)); % 論文通り
+  rhs7 = rhs7 + Rho{i}*R0'*(ul{i} - mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*qi(:,i)*qi(:,i)'*R0*O0^2*rho(:,i)); % 論文通り
 end
 eq7 = lhs72*ddx0 + lhs71*do0 + lhs72*g*e3 + O0*J0*o0 - rhs7;
 
