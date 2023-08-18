@@ -8,13 +8,13 @@ post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [], []);
 
-N = 3;
+N = 4;
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
 qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
 
-initial_state.p = [5; -5; -2];
+initial_state.p = [0; 0; -2];
 initial_state.v = [0; 0; 0];
 initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
@@ -26,8 +26,13 @@ initial_state.Oi = repmat([0; 0; 0], N, 1);
 % initial_state.wi = repmat([0; 0; 0], N, 1);
 % initial_state.Oi = repmat([0; 0; 0], N, 1);
 
+th = 0.1; % rad
+f = (1.5/4+0.755)*9.81/cos(th);
+phi = atan(f*sin(th)/(f*cos(th)-0.755*9.81));
+phi = 0;
 if contains(qtype, "zup")
     initial_state.qi = -1 * repmat([0; 0; 1], N, 1);
+    initial_state.qi = [Rodrigues([1;1;0],phi)*[0; 0; -1];Rodrigues([1;1;0],-phi)*[0; 0; -1];Rodrigues([1;1;0],-phi)*[0; 0; -1];Rodrigues([1;1;0],phi)*[0; 0; -1]];
 else
     initial_state.qi = 1 * repmat([0; 0; 1], N, 1);
 end
@@ -40,6 +45,7 @@ else
     initial_state.Q = [1; 0; 0; 0];
     initial_state.Q = initial_state.Q / vecnorm(initial_state.Q);
     initial_state.Qi = repmat([1; 0; 0; 0], N, 1);
+    %initial_state.Qi = [R2q(Rodrigues([1;1;0],th));R2q(Rodrigues([1;1;0],-th));R2q(Rodrigues([1;1;0],-th));R2q(Rodrigues([1;1;0],th))];
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
@@ -67,11 +73,23 @@ for i = 1:500
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f');
+    %agent(1).controller.do(time, 'f');
     %agent(1).controller.result.input = repmat([1.01 + 0.0*cos(time.t*2*pi/3);0.001*[sin(time.t*(pi)/1);0*cos(time.t*(pi)/1);0]],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
     %agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
     %agent(1).controller.result.input = agent(1).controller.result.input.*repmat([-1;1;-1;-1],N,1);
-    agent(1).controller.result.input(4:4:end) = 0;
+    %agent(1).controller.result.input(4:4:end) = 0;
+agent.plant.state.Qi'
+th=2*acos(agent.plant.state.Qi(1));
+f0 = (agent.parameter.m0/4+agent.parameter.mi(1))*9.81;    
+f = f0/cos(th);
+    if i < 5
+    %agent(1).controller.result.input = [[f;0.1;0.1;0];[f;-0.1;-0.1;0];[f;-0.1;-0.1;0];[f;0.1;0.1;0]];
+    agent(1).controller.result.input = [[f;0;0.1;0];[f0;0;0;0];[f;0;-0.1;0];[f0;0;0;0]];
+    elseif i < 9
+    agent(1).controller.result.input = [[f;0;-0.1;0];[f0;0;0;0];[f;0;0.1;0];[f0;0;0;0]];
+     else
+    agent(1).controller.result.input = [[f;0;0;0];[f0;0;0;0];[f;0;0;0];[f0;0;0;0]];%repmat([1;0;0;0],N,1)*(f);
+    end
     agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
