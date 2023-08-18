@@ -10,6 +10,8 @@ classdef CSLC < handle
     gen_input
     N
     toR
+    dqid
+    ddqid
   end
 
   methods
@@ -28,6 +30,8 @@ classdef CSLC < handle
       else
         obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
       end
+      obj.dqid = 0;
+      obj.ddqid = 0;
     end
 
     function result = do(obj,varargin)
@@ -38,11 +42,10 @@ classdef CSLC < handle
       Ri = obj.toR(model.Qi);
       R0 = obj.toR(model.Q);
       xd = 0*ref.xd;
-      %R0d = RodriguesQuaternion([xd(19);xd(20);xd(21);xd(22)]);
       R0d = reshape(xd(end-8:end),3,3);
       R0d = eye(3);
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
-      obj.result.input = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger);
+      [obj.result.input,obj.dqid,obj.ddqid] = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger,obj.dqid,obj.ddqid);
       result = obj.result;
     end
   end
