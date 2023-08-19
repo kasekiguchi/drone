@@ -16,7 +16,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/Log(10-Aug-2023_17_17_35).mat');
+log = LOGGER('./Data/Log(10-Aug-2023_16_36_15).mat');
 
 %% ログ
 tspan = [0 ,100];

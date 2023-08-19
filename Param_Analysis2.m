@@ -16,11 +16,11 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-noiseflag = 1;
+noiseflag = 0;
 % Log Dataの読み取りと格納
 % log2 = LOGGER('./Data/data030402503.mat');
 % log2 = LOGGER('./Data/miidmove_Log(24-Jul-2023_13_38_35).mat');
-log = LOGGER('./Data/lidar1deg.mat');
+log = LOGGER('./Data/RLS_midterm.mat');
 % log = LOGGER('./Data/nomove_little_Log(14-Jul-2023_00_53_31).mat');
 
 %% ログ
@@ -74,9 +74,13 @@ robot_pe(:,ds0) = [];
 robot_q (:,ds0) = [];
 robot_qe(:,ds0) = [];
 %% パラメータ真値
-offset_true = [0.1;0.05;0.0];
-Rs_true = Rodrigues([0,0,1],pi/12);
-w=[1,0,0,9];
+% offset_true = [0.1;0.05;0.0];
+offset_true = [0.5;0.1;0.5];
+% Rs_true = Rodrigues([0,0,1],pi/12);
+% Rs_true = Rodrigues([1,1,1],pi/20);
+Rs_true = Rodrigues([0,0,1],pi/2);
+% w=[1,0,0,9];
+w=[0,1,0,9];
 X_true  = -1*[w(1)/w(4);w(2)/w(4);w(3)/w(4);
            offset_true(1)*w(1)/w(4);offset_true(2)*w(1)/w(4);offset_true(3)*w(1)/w(4);offset_true(1)*w(2)/w(4);offset_true(2)*w(2)/w(4);offset_true(3)*w(2)/w(4);offset_true(1)*w(3)/w(4);offset_true(2)*w(3)/w(4);offset_true(3)*w(3)/w(4);
            Rs_true(1,1)*w(1)/w(4);Rs_true(2,1)*w(1)/w(4);Rs_true(3,1)*w(1)/w(4);Rs_true(1,2)*w(1)/w(4);Rs_true(2,2)*w(1)/w(4);Rs_true(3,2)*w(1)/w(4);
@@ -112,11 +116,11 @@ Rsy = Rsy/vecnorm(Rsy);
 Rsz = cross(Rsx,Rsy);
 Rs = [Rsx,Rsy,Rsz];
 %% 一括でパラ推定逐次
-P_stack = zeros(size(A,2),size(A,2),last-1);%%Pnスタックする変数
-JP = zeros(1,last-1); %J=Σ||p^-p||
-JX = zeros(1,last-1); %J=Σ||X^-X||
-JY = zeros(1,last-1); %J=Σ||Y^-Y||
 alpha = 100000;
+P_stack = alpha*ones(size(A,2),size(A,2),last);%%Pnスタックする変数
+JP = ones(1,last); %J=Σ||p^-p||
+JX = ones(1,last); %J=Σ||X^-X||
+JY = ones(1,last); %J=Σ||Y^-Y||
 for j=2:last
     if j == 2
         qt = Eul2Quat(robot_qe(:,j-1));
@@ -126,7 +130,7 @@ for j=2:last
         % qt = qt./vecnorm(qt,2);
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         A(:,ds)=[];
-        [Xn,Pn] = param_analysis_eq(A',zeros(size(A,2),1),-1*ones(size(A,1),1),alpha*eye(size(A,2)),0.9999);
+        [Xn,Pn] = param_analysis_eq(A',zeros(size(A,2),1),-1*ones(size(A,1),1),alpha*eye(size(A,2)),1);
         P_stack(:,:,j-1) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
@@ -137,10 +141,10 @@ for j=2:last
         Rszn = cross(Rsxn,Rsyn);
         Rsn = [Rsxn,Rsyn,Rszn];
         % 評価
-        JP(1,j-1) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
-        JX(:,j-1) = norm(Xn-X_true);
+        JP(1,j) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
+        JX(:,j) = norm(Xn-X_true);
         Yn = [offsetn;reshape(Rsn,[9,1])];
-        JY(:,j-1) = norm(Yn-Y_true);
+        JY(:,j) = norm(Yn-Y_true);
     else
         qt = Eul2Quat(robot_qe(:,j-1));
         qt = qt./vecnorm(qt,2);
@@ -150,7 +154,7 @@ for j=2:last
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         ds = find(A(2,:)==0);
         A(:,ds)=[];
-        [Xn,Pn] = param_analysis_eq(A',Xn,-1*ones(size(A,1),1),Pn,0.9999);
+        [Xn,Pn] = param_analysis_eq(A',Xn,-1*ones(size(A,1),1),Pn,1);
         P_stack(:,:,j-1) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
@@ -167,165 +171,213 @@ for j=2:last
         JY(:,j-1) = norm(Yn-Y_true);
     end
 end
-
+P_stack(:,:,last) =Pn;%%Pnスタックする変数
+JP(:,last) =norm(offsetn-offset_true) + norm(Rsn-Rs_true); %J=Σ||p^-p||
+JX(:,last) = norm(Xn-X_true); %J=Σ||X^-X||
+JY(:,last) = norm(Yn-Y_true);
 %% 逐次計算時の共分散行列Pnの対角成分(分散)保存
 variance = zeros(size(P_stack,2),size(P_stack,3));
 for j=1:size(P_stack,3)
     variance(:,j) = diag(P_stack(:,:,j));
 end
+%%
+steps=1:9999;
+time = 0.01*steps;
 %% 交点比較
 for i=1:length(robot_pe)
     sp(:,i) = robot_pe(:,i) + eul2rotm(robot_qe(:,i)','XYZ')*offsetn + sensor_data(1,i)*eul2rotm(robot_qe(:,i)','XYZ')*Rsn*[1;0;0];
 end
-figure(12);
-plot(sp(1,:));
+fig12=figure(12);
+fig12.Color = 'white';
+plot(time,sp(1,:),'LineWidth', 2);
 hold on;
-plot(sp(2,:));
-plot(sp(3,:));
-legend('x','y','z');
-% ss=log.data(1,"sensor.result.sensor_points","s");
-% ss = reshape(ss,3,[]);
-% plot(ss);
-% legend('x','y','z','xt','yt','zt');
+plot(time,sp(2,:),'LineWidth', 2);
+plot(time,sp(3,:),'LineWidth', 2);
+% legend('x','y','z');
+ss=log.data(1,"sensor.result.sensor_points","s");
+ss=zeros(3,last);
+for i2=1:last
+    ss(:,i2)=log.Data.agent.sensor.result{1,i2}.sensor_points(:,1);
+end
+plot(time,ss(1,:),'LineWidth', 2);
+plot(time,ss(2,:),'LineWidth', 2);
+plot(time,ss(3,:),'LineWidth', 2);
+legend('x','y','z','xt','yt','zt','FontSize', 14);
+xlabel('time [s]','FontSize', 12);
+ylabel('Coordinates of intersection [m]','FontSize', 12);
 hold off ;
 %% 図示
 if illustration == 1
     fig1=figure(1);
     fig1.Color = 'white';
-    plot(robot_p(1,:),'LineWidth', 2);
+    plot(time,robot_p(1,:),'LineWidth', 2);
     hold on;
-    plot(robot_p(2,:),'LineWidth', 2);
-    plot(robot_p(3,:),'LineWidth', 2);
-    plot(robot_pe(1,:),'LineWidth', 2);
-    plot(robot_pe(2,:),'LineWidth', 2);
-    plot(robot_pe(3,:),'LineWidth', 2);
-    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 18);
+    plot(time,robot_p(2,:),'LineWidth', 2);
+    plot(time,robot_p(3,:),'LineWidth', 2);
+    plot(time,robot_pe(1,:),'LineWidth', 2);
+    plot(time,robot_pe(2,:),'LineWidth', 2);
+    plot(time,robot_pe(3,:),'LineWidth', 2);
+    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 14);
     hold off;
-    xlabel('step');
-    ylabel('[m]');
+    xlabel('time [s]','FontSize', 12);
+    ylabel('position [m]','FontSize', 12);
     grid on;
     fig2=figure(2);
     fig2.Color = 'white';
-    plot(robot_q(1,:),'LineWidth', 2);
+    plot(time,robot_q(1,:),'LineWidth', 2);
     hold on;
-    plot(robot_q(2,:),'LineWidth', 2);
-    plot(robot_q(3,:),'LineWidth', 2);
-    plot(robot_qe(1,:),'LineWidth', 2);
-    plot(robot_qe(2,:),'LineWidth', 2);
-    plot(robot_qe(3,:),'LineWidth', 2);
-    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 18);
+    plot(time,robot_q(2,:),'LineWidth', 2);
+    plot(time,robot_q(3,:),'LineWidth', 2);
+    plot(time,robot_qe(1,:),'LineWidth', 2);
+    plot(time,robot_qe(2,:),'LineWidth', 2);
+    plot(time,robot_qe(3,:),'LineWidth', 2);
+    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 14);
     hold off;
-    xlabel('step');
-    ylabel('angle');
+    xlabel('time [s]','FontSize', 12);
+    ylabel('angle [rad]','FontSize', 12);
     grid on;
     fig4=figure(4);
     fig4.Color = 'white';
-    plot(sensor_data(1,:));
+    plot(time,sensor_data(1,1:9999));
     hold on;
-    plot(sensor_data(num,:));
+    plot(time,sensor_data(num,1:9999));
     % plot(sensor_data(8,:));
     % plot(sensor_data(9,:));
-    xlabel('step','FontSize', 14);
-    ylabel('Distance of the lidar [m]','FontSize', 14);
-    legend('1st','2nd');
+    xlabel('step','FontSize', 12);
+    ylabel('Distance of the lidar [m]','FontSize', 12);
+    legend('1st','2nd','FontSize', 14);
+    xlim([0, 20]);
     grid on;
     fig5=figure(5);
     fig5.Color = 'white';
-    plot(ref_p(1,:),'LineWidth', 2);
+    plot(time,ref_p(1,1:9999),'LineWidth', 2);
     hold on;
-    plot(ref_p(2,:),'LineWidth', 2);
-    plot(ref_p(3,:),'LineWidth', 2);
-    legend('x,y,z');
+    plot(time,ref_p(2,1:9999),'LineWidth', 2);
+    plot(time,ref_p(3,1:9999),'LineWidth', 2);
+    legend('x,y,z','FontSize', 14);
     hold off;
-    xlabel('step');
-    ylabel('ref p[m]');
+    xlim([0, 20]);
+    xlabel('time [s]','FontSize', 12);
+    ylabel('reference position[m]','FontSize', 12);
     grid on;
     fig6=figure(6);
     fig6.Color = 'white';
-    plot(ref_q(1,:),'LineWidth', 2);
+    plot(time,ref_q(1,1:9999),'LineWidth', 2);
     hold on;
-    plot(ref_q(2,:),'LineWidth', 2);
-    plot(ref_q(3,:),'LineWidth', 2);
-    legend('x','y','z');
+    plot(time,ref_q(2,1:9999),'LineWidth', 2);
+    plot(time,ref_q(3,1:9999),'LineWidth', 2);
+    xlim([0, 20]);
+    legend('\phi','\theta','\psi','FontSize', 14);
     hold off;
-    xlabel('step');
-    ylabel('ref q');
+    xlabel('time [s]','FontSize', 12);
+    ylabel('reference angle [rad]','FontSize', 12);
     grid on;
     fig7=figure(7);
     fig7.Color = 'white';
     for i=1:3
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     ylim([0 alpha]);
     hold off;
-    xlabel('step');
-    ylabel('variance of wall param');
-    legend('a/d','b/d','c/d');
+    xlabel('time [s]','FontSize', 12);
+    ylabel('variance of wall param','FontSize', 12);
+    legend('a/d','b/d','c/d','FontSize', 14);
     grid on;
     fig8=figure(8);
     fig8.Color = 'white';
     for i=4:12
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     hold off;
     ylim([0 alpha]);
-    xlabel('step');
-    ylabel('variance of offset*wallparam');
-    legend('P1*a/d','P2*a/d','P3*a/d','P1*b/d','P2*b/d','P3*b/d','P1*c/d','P2*c/d','P3*c/d');
+    xlabel('time [s]','FontSize', 12);
+    ylabel('variance of offset*wallparam','FontSize', 12);
+    legend('P1*a/d','P2*a/d','P3*a/d','P1*b/d','P2*b/d','P3*b/d','P1*c/d','P2*c/d','P3*c/d','FontSize', 14);
     grid on;
     fig9=figure(9);
     fig9.Color = 'white';
     for i=13:15
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     for i=19:21
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     for i=25:27
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     ylim([0 alpha]);
     hold off;
-    xlabel('step');
-    ylabel('variance of offset*wallparam');
-    legend('R11*a/d','R21*a/d','R31*a/d','R11*b/d','R21*b/d','R31*b/d','R11*c/d','R21*c/d','R31*c/d');
+    xlabel('time [s]','FontSize', 12);
+    ylabel('variance of offset*wallparam','FontSize', 12);
+    legend('R11*a/d','R21*a/d','R31*a/d','R11*b/d','R21*b/d','R31*b/d','R11*c/d','R21*c/d','R31*c/d','FontSize', 14);
     grid on;
     fig10=figure(10);
     fig10.Color = 'white';
     for i=16:18
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     for i=22:24
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     for i=28:30
-        plot(variance(i,:),'LineWidth', 2);
+        plot(time,variance(i,:),'LineWidth', 2);
         hold on;
     end
     hold off;
     ylim([0 alpha]);
-    xlabel('step');
-    ylabel('variance of offset*wallparam');
-    legend('R12*a/d','R22*a/d','R32*a/d','R12*b/d','R22*b/d','R32*b/d','R12*c/d','R22*c/d','R32*c/d');
+    xlabel('time [s]','FontSize', 12);
+    ylabel('variance of offset*wallparam','FontSize', 12);
+    legend('R12*a/d','R22*a/d','R32*a/d','R12*b/d','R22*b/d','R32*b/d','R12*c/d','R22*c/d','R32*c/d','FontSize', 14);
     grid on;
     fig11=figure(11);
     fig11.Color = 'white';
     plot(JP,'LineWidth', 2);
     hold on;
-    plot(JX,'LineWidth', 2);
-    plot(JY,'LineWidth', 2);
+    plot(time,JX,'LineWidth', 2);
+    plot(time,JY,'LineWidth', 2);
     hold off;
-    xlabel('step');
+    xlabel('time [s]');
     ylabel('evaluation value');
-    legend('JP','JX','JY');
+    legend('JP','JX','JY','FontSize', 14);
     grid on;
+   fig13=figure(13);
+    fig13.Color = 'white';
+    plot(time,robot_p(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_p(2,:),'LineWidth', 2);
+    plot(time,robot_p(3,:),'LineWidth', 2);
+    plot(time,robot_pe(1,:),'LineWidth', 2);
+    plot(time,robot_pe(2,:),'LineWidth', 2);
+    plot(time,robot_pe(3,:),'LineWidth', 2);
+    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 14);
+    hold off;
+    xlabel('time [s]','FontSize', 12);
+    ylabel('position[m]','FontSize', 12);
+    xlim([0, 20]);
+    grid on;
+    fig14=figure(14);
+    fig14.Color = 'white';
+    plot(time,robot_q(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_q(2,:),'LineWidth', 2);
+    plot(time,robot_q(3,:),'LineWidth', 2);
+    plot(time,robot_qe(1,:),'LineWidth', 2);
+    plot(time,robot_qe(2,:),'LineWidth', 2);
+    plot(time,robot_qe(3,:),'LineWidth', 2);
+    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 14);
+    hold off;
+    xlabel('time [s]','FontSize', 12);
+    ylabel('angle [rad]','FontSize', 12);
+    xlim([0, 20]);
+    grid on;
+
 end
 % %%
 % figure(20);
@@ -333,7 +385,18 @@ end
 % xlabel('x');
 % ylabel('y');
 % zlabel('z');
-
+%%
+saveas(fig13, fullfile(pass, 'RLS_pos.eps'), 'epsc');
+saveas(fig14, fullfile(pass, 'RLS_ang.eps'), 'epsc');
+saveas(fig4, fullfile(pass, 'RLS_sens.eps'), 'epsc');
+saveas(fig5, fullfile(pass, 'RLS_refp.eps'), 'epsc');
+saveas(fig6, fullfile(pass, 'RLS_refq.eps'), 'epsc');
+saveas(fig7, fullfile(pass, 'RLS_var1.eps'), 'epsc');
+saveas(fig8, fullfile(pass, 'RLS_var2.eps'), 'epsc');
+saveas(fig9, fullfile(pass, 'RLS_var3.eps'), 'epsc');
+saveas(fig10, fullfile(pass, 'RLS_var4.eps'), 'epsc');
+saveas(fig12, fullfile(pass, 'RLS_inst.eps'), 'epsc');
+%%
 function [A,X,Cf,var] = param_analysis2(robot_p, robot_q, sensor_data,sensor_data2,R_num)
     syms p [3 1] real
     syms Rb [3 3] real

@@ -62,7 +62,7 @@ classdef TIME_VARYING_REFERENCE_EDIT < handle
            % obj.result.state.q = ...
            % [0.4*sin(0.5*w*t);0.35*sin(0.75*w*t);pi/2+0.45*sin(w*t)];
            obj.result.state.q = ...
-           [0.1*sin(0.5*w*t);0.15*sin(0.75*w*t);pi/2+0.25*sin(w*t)];
+           [0.006*sin(0.5*w*t);0.006*sin(0.75*w*t);0.1*sin(w*t)];
            % obj.result.state.q = [0;0;0]; 
            % obj.result.state.q = [0;0;0.45*sin(w*t)];
            result = obj.result;
