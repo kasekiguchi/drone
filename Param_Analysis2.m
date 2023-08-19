@@ -16,11 +16,11 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-noiseflag = 0;
+noiseflag = 1;
 % Log Dataの読み取りと格納
 % log2 = LOGGER('./Data/data030402503.mat');
 % log2 = LOGGER('./Data/miidmove_Log(24-Jul-2023_13_38_35).mat');
-log = LOGGER('./Data/error1kaidake_Log(01-Aug-2023_19_13_37).mat');
+log = LOGGER('./Data/lidar1deg.mat');
 % log = LOGGER('./Data/nomove_little_Log(14-Jul-2023_00_53_31).mat');
 
 %% ログ
@@ -34,16 +34,6 @@ sensor_data = (log.data(1,"length","s"))';
 ref_p = log.data(1,"p","r")';
 ref_q = log.data(1,"q","r")';
 
-len = length(log.Data.agent.sensor.result);
-ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
-qs  = zeros(size(log.Data.agent.estimator.result{1,1}.state.qs,1),len);
-l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
-
-for i=1:len
-    ps(:,i) = log.Data.agent.estimator.result{1,i}.state.ps;
-    qs(:,i) = log.Data.agent.estimator.result{1,i}.state.qs;
-    l(:,i) = log.Data.agent.estimator.result{1,i}.state.l;
-end
 
 % 
 % %
@@ -65,8 +55,8 @@ end
 
 %% ノイズ付加
 if noiseflag==1
-    robot_pe = robot_pe + (0.01*randn(size(robot_pe)));
-    robot_qe = robot_qe + (0.001*randn(size(robot_qe)));
+    robot_pe = robot_pe + (0.001*randn(size(robot_pe)));
+    robot_qe = robot_qe + (0.0001*randn(size(robot_qe)));
     sensor_data = sensor_data+ (0.002*randn(size(sensor_data)));
 end
 %% 不要データの除去
@@ -100,10 +90,10 @@ ang = 180;
 %% 一括でパラ推定
 [~,~,At,Xt] = param_analysis2(robot_pe(:,2),robot_qe(:,2),sensor_data(1,3),sensor_data(num,3),Rodrigues([0,0,1],(num-1)*pi/ang));
 A_stack=[];
-for i=3:1:last
-    qt = Eul2Quat(robot_qe(:,i));%正規
+for i=2:1:last
+    qt = Eul2Quat(robot_qe(:,i-1));%正規
     qt = qt./vecnorm(qt,2);
-    A = Cf2_sens(robot_pe(:,i),qt,sensor_data(1,i),sensor_data(num,i),Rodrigues([0,0,1],(num-1)*pi/ang));
+    A = Cf2_sens(robot_pe(:,i-1),qt,sensor_data(1,i),sensor_data(num,i),Rodrigues([0,0,1],(num-1)*pi/ang));
     % qt = Eul2Quat(robot_qe(:,i));
     % qt = qt./vecnorm(qt,2);
     % A = Cf2_sens(robot_pe(:,i),qt,sensor_data(1,i),sensor_data(num,i),Rodrigues([0,0,1],(num-1)*pi/ang));
@@ -127,11 +117,11 @@ JP = zeros(1,last-1); %J=Σ||p^-p||
 JX = zeros(1,last-1); %J=Σ||X^-X||
 JY = zeros(1,last-1); %J=Σ||Y^-Y||
 alpha = 100000;
-for j=3:last
-    if j == 3
-        qt = Eul2Quat(robot_qe(:,j));
+for j=2:last
+    if j == 2
+        qt = Eul2Quat(robot_qe(:,j-1));
         qt = qt./vecnorm(qt,2);
-        A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        A = Cf2_sens(robot_pe(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         % qt = Eul2Quat(robot_qe(:,j));
         % qt = qt./vecnorm(qt,2);
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
@@ -152,9 +142,9 @@ for j=3:last
         Yn = [offsetn;reshape(Rsn,[9,1])];
         JY(:,j-1) = norm(Yn-Y_true);
     else
-        qt = Eul2Quat(robot_qe(:,j));
+        qt = Eul2Quat(robot_qe(:,j-1));
         qt = qt./vecnorm(qt,2);
-        A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        A = Cf2_sens(robot_pe(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         % qt = Eul2Quat(robot_qe(:,j));
         % qt = qt./vecnorm(qt,2);
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));

@@ -80,6 +80,7 @@ classdef EKF < handle
             C = obj.JacobianH(x,p);
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % Predicted covariance
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % Kalman gain
+            % G(:,7:8) = 0;
             P = (eye(obj.n)-G*C)*P_pre;	% Update covariance
             tmpvalue = xh_pre + G*(y-C*xh_pre);	% Update state estimate
             tmpvalue = obj.model.projection(tmpvalue);
