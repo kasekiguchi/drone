@@ -6,7 +6,7 @@ clc
 % 軸の取り方に注意
 % e3 = [0;0;1]; % 鉛直下向き zup : 鉛直上向き
 dir = "model/substance/Cooperative_drones/";
-N = 6; % エージェント数
+N = 4; % エージェント数
 
 %% symbol定義
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
@@ -38,7 +38,7 @@ syms ji [3 N] real % 慣性モーメント
 physicalParam = [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)];
 %%
 [~,L0] = RodriguesQuaternion(r0); % 牽引物回転行列
-[~,Li] = RodriguesQuaternion(ri);%arrayfun(@(q) RodriguesQuaternion(q{:}),tmp,'UniformOutput',false); % ドローン姿勢回転行列
+[~,Li] = RodriguesQuaternion(ri);%
 O0 = Skew(o0); % 牽引物の角速度行列（歪対象行列）
 Oi = arrayfun(@(i) Skew(oi(:,i)),1:N,'UniformOutput',false); % ドローン角速度行列
 J0 = diag(j0); % 牽引物の慣性行列
