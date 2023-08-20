@@ -46,6 +46,7 @@ classdef CSLC < handle
       R0d = eye(3);
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
       [obj.result.input,obj.dqid,obj.ddqid] = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger,obj.dqid,obj.ddqid);
+      %obj.result.input = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger);
       result = obj.result;
     end
   end

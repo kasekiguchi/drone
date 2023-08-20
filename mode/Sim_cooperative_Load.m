@@ -71,19 +71,20 @@ for i = 1:500
     %agent(1).controller.result.input = repmat([1.01 + 0.0*cos(time.t*2*pi/3);0.001*[sin(time.t*(pi)/1);0*cos(time.t*(pi)/1);0]],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
     %agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
     %agent(1).controller.result.input = agent(1).controller.result.input.*repmat([-1;1;-1;-1],N,1);
-    agent(1).controller.result.input(4:4:end) = 0;
+    %agent(1).controller.result.input(4:4:end) = 0;
     agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
     %pause(1)
 end
 
-%%
+
 logger.plot({1,"p","rp"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"},{1, "input", "p"})
 %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",false,"lims",[-10 10;-10 10;-10 10],"ntimes",5);
+mov.animation(logger, 'target', 1:N, "gif",false,"lims",[-10 10;-10 10;-10 10],"ntimes",10);
+
 %%
 logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
