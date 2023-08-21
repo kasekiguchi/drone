@@ -11,12 +11,13 @@ X = x(1:3) +RodriguesQuaternion(Eul2Quat(x(4:6)))*x(13:15) + y*RodriguesQuaterni
 alpha =A *(x(1:3)+RodriguesQuaternion(Eul2Quat(x(4:6)))*x(13:15));
 beta = A*(RodriguesQuaternion(Eul2Quat(x(4:6)))*RodriguesQuaternion(Eul2Quat(x(16:18)))*[1;0;0]);
 beta2 = A*(RodriguesQuaternion(Eul2Quat(x(4:6)))*RodriguesQuaternion(Eul2Quat(x(16:18)))*RodriguesQuaternion(Eul2Quat([0;0;pi/90]))*[1;0;0]);
-y = (d- alpha)/beta;
-y2 = (d- alpha)/beta2;
+%% ax+by+cz+d=0⇔AX=-dじゃね？
+y = (-d- alpha)/beta;
+y2 = (-d- alpha)/beta2;
 h = jacobian(y,x);
 h2 = jacobian(y2,x);
 O = [eye(6),zeros(6,12)];
-H = [O;h];
 %H = [O;h];
-matlabFunction(H,'File','JacobH_param18','vars',{x,[a,b,c,d],param});
+H = [O;h;h2];
+matlabFunction(H,'File','JacobH_param18_2','vars',{x,[a,b,c,d],param});
 
