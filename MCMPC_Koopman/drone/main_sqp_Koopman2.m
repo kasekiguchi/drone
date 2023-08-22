@@ -47,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1.0; 5.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([10.0; 10.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2000; 2000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([3000; 3000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([1; 5; 1]);
-    Params.Weight.QWf = diag([3000; 3000; 1200; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([15; 15; 1]);
+    Params.Weight.QWf = diag([4000; 4000; 1000; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
