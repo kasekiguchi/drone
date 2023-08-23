@@ -56,9 +56,10 @@ Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称�
 
 %dwi = cross(qi,ai)./li - cross(qi,uip1)./(mi.*li);
 for i = 1:N
-dqid(:,i) = 0*(-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微分？
+dqi(:,i) = cross(wi(:,i),qi(:,i));
+dqid(:,i) = (-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微分？
 wid(:,i) = cross(qid(:,i),dqid(:,i)); % 3xN
-ddqid(:,i) = 0*(R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
+ddqid(:,i) = (R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
 dwid(:,i) = cross(qid(:,i),ddqid(:,i));
 eqi(:,i) = cross(qid(:,i),qi(:,i)); % 3xN
 ewi(:,i) = wi(:,i) + Qi{i}^2*wid(:,i);
@@ -69,10 +70,9 @@ for i = 1:N
 %  RhoR0Tmu(:,i) = Rho{i}*R0'*mui(:,i);
 end
 for i = 1:N
-  dqi(:,i) = cross(wi(:,i),qi(:,i));
   ai(:,i) = sum(muid,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
 %  ai(:,i) = sum(mui,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
-  uip1(:,i) = mui(:,i) + mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) + mi(i)*qi(:,i)*qi(:,i)'*ai(:,i);% ui parallel 3xN
+  uip1(:,i) = muid(:,i) + mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) + mi(i)*qi(:,i)*qi(:,i)'*ai(:,i);% ui parallel 3xN
   uip2(:,i) = mi(i)*li(i)*Qi{i}*(-kqi*eqi(:,i) -kwi*ewi(:,i) -(qi(:,i)'*wid(:,i))*dqi(:,i) - Qi{i}^2*dwid(:,i)) - mi(i)*Qi{i}^2*ai(:,i); % ui perp
 end
 ui = uip1 + uip2; % 3xN

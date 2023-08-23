@@ -65,8 +65,8 @@ Ric{i} = [b1(:,i) b2(:,i) b3(:,i)];% 3x3xN
 dRic{i} = [db1(:,i) db2(:,i) db3(:,i)];% 3x3xN
 ddRic{i} = [ddb1(:,i),ddb2(:,i),ddb3(:,i)];% 3x3xN
 oic(:,i) = Vee(Ric{i}'*dRic{i});% 3xN = Vee(hoic)
-doic(:,i) = Vee(Ric{i}'*ddRic{i} - (Ric{i}'*dRic{i})^2);% + (dRic{i}'*dRic{i}));% 3xN
-%doic(:,i) = Vee(Ric{i}'*ddRic{i} + (dRic{i}'*dRic{i}));% 3xN
+%doic(:,i) = Vee(Ric{i}'*ddRic{i} - (Ric{i}'*dRic{i})^2);% + (dRic{i}'*dRic{i}));% 3xN
+doic(:,i) = Vee(Ric{i}'*ddRic{i} + (dRic{i}'*dRic{i}));% 3xN
 end
 for i = 1:N
   eri(:,i) = Vee(Ric{i}'*Ri(:,:,i)-Ri(:,:,i)'*Ric{i})/2;

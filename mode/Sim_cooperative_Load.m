@@ -61,7 +61,7 @@ run("ExpBase");
 
 
 clc
-for i = 1:2000
+for i = 1:200
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -76,6 +76,8 @@ for i = 1:2000
     time.t = time.t + time.dt;
     %pause(1)
 end
+
+
 %%
 logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
 %%
