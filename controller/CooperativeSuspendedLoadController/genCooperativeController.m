@@ -79,7 +79,7 @@ eR0 = Vee(R0d'*R0 - R0'*R0d)/2;
 eo0 = o0 - R0'*R0d*o0d;
 %% (23),(24)
 
-Fd0 = m0*(-kx0*ex0- kdx0*dex0 + ddx0d + g*e3);
+Fd0 = m0*(-kx0'.*ex0- kdx0'.*dex0 + ddx0d + g*e3);
 Md0 = -kr0*eR0 - ko0*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
 matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{X,Xd,R0,R0d,physicalParam,Gains},...
   "Comments","[R0'*Fd;Md] for (26)")
