@@ -61,7 +61,7 @@ dqid(:,i) = (-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微�
 wid(:,i) = cross(qid(:,i),dqid(:,i)); % 3xN
 ddqid(:,i) = 0*(R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
 dwid(:,i) = cross(qid(:,i),ddqid(:,i));
-eqi(:,i) = cross(qi(:,i),qid(:,i)); % 3xN
+eqi(:,i) = cross(qid(:,i),qi(:,i)); % 3xN
 ewi(:,i) = wi(:,i) + Qi{i}^2*wid(:,i);
 end
 %% ui
