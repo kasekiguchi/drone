@@ -24,7 +24,7 @@ m0 = P(2);
 g = P(1);
 ji = reshape(P(end-3*N+1:end),3,[]);
 rho = reshape(P(6:6+3*N-1),3,[]);
-j0 = K(3:5);
+j0 = P(3:5);
 mi = P(end-4*N+1:end-3*N);
 li = P(end-5*N+1:end-4*N);
 
@@ -59,7 +59,7 @@ for i = 1:N
 dqi(:,i) = cross(wi(:,i),qi(:,i));
 dqid(:,i) = (-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微分？
 wid(:,i) = cross(qid(:,i),dqid(:,i)); % 3xN
-ddqid(:,i) = 0*(R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
+ddqid(:,i) = (R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
 dwid(:,i) = cross(qid(:,i),ddqid(:,i));
 eqi(:,i) = cross(qid(:,i),qi(:,i)); % 3xN
 ewi(:,i) = wi(:,i) + Qi{i}^2*wid(:,i);

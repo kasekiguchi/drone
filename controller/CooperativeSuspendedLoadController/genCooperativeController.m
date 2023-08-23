@@ -9,7 +9,7 @@ clc
 %%
 dir = "controller/CooperativeSuspendedLoadController/";
 %% symbol定義
-N = 4; % エージェント数
+N = 6; % エージェント数
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
 syms x0 [3 1] real % 位置
 syms dx0 [3 1] real
@@ -63,13 +63,15 @@ Xd = [x0d;dx0d;ddx0d;dddx0d;o0d;do0d]; % R0d は除いている
 syms Pdagger [3*N 6] real % = P'*inv(P*P')
 syms qid [3 N] real
 syms mui [3 N] real
+syms muid [3 N] real
 syms Fd [3 1] real
 syms Md [3 1] real
 %% gains
 syms kqi kwi real
 syms kx0 [1 3] real
 syms kdx0 [1 3] real
-syms kr0 ko0 real
+syms kr0 [1 3] real
+syms ko0 [1 3] real
 syms kri koi epsilon real
 Gains = [kx0 kr0 kdx0 ko0 kqi kwi kri koi epsilon];
 %% (20)-(22)
@@ -80,17 +82,17 @@ eo0 = o0 - R0'*R0d*o0d;
 %% (23),(24)
 
 Fd0 = m0*(-kx0'.*ex0- kdx0'.*dex0 + ddx0d + g*e3);
-Md0 = -kr0*eR0 - ko0*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
+Md0 = -kr0'.*eR0 - ko0'.*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
 matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{X,Xd,R0,R0d,physicalParam,Gains},...
   "Comments","[R0'*Fd;Md] for (26)")
 %%
 %dwi = cross(qi,ai)./li - cross(qi,uip1)./(mi.*li);
- syms dqid [3 N] real
- syms ddqid [3 N] real
+ %syms dqid [3 N] real
+ %syms ddqid [3 N] real
 for i = 1:N
-%dqid(:,i) = 0*(-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微分？
+dqid(:,i) = (-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微分？
 wid(:,i) = cross(qid(:,i),dqid(:,i)); % 3xN
-%ddqid(:,i) = 0*(R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
+ddqid(:,i) = (R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
 dwid(:,i) = cross(qid(:,i),ddqid(:,i));
 eqi(:,i) = cross(qid(:,i),qi(:,i)); % 3xN
 ewi(:,i) = wi(:,i) + Qi{i}^2*wid(:,i);
@@ -117,7 +119,7 @@ for i = 1:N
   uip2(:,i) = mi(i)*li(i)*Qi{i}*(-kqi*eqi(:,i) -kwi*ewi(:,i) -(qi(:,i)'*wid(:,i))*dqi(:,i) - Qi{i}^2*dwid(:,i)) - mi(i)*Qi{i}^2*ai(:,i); % ui perp
 end
 ui = uip1 + uip2; % 3xN
-matlabFunction(ui, ai(:,i),O0*J0*o0,-sum(RhoR0Tmu,2),"file",dir + "CSLC_"+N+"_ui.m","vars",{X Xd R0 R0d physicalParam Gains qid Pdagger mui muid})
+matlabFunction(ui,"file",dir + "CSLC_"+N+"_ui.m","vars",{X Xd R0 R0d physicalParam Gains qid Pdagger mui muid})
 
 %%
 clc
@@ -167,7 +169,7 @@ str = "function U = "+fname+"(x,qi,R0,Ri,R0d,xd,K,P,Pdagger)\n"+...
 "muid = reshape(kron(eye("+N+"),R0)*Pdagger*R0TFdMd,3,"+N+"); %% 3xN\n"+...
 "mui = sum(muid.*qi,1).*qi; %% 3xN\n"+...
 "qid = -muid./vecnorm(muid,2,1); %% 3xN\n"+...
-"ui = CSLC_"+N+"_ui(x,xd,R0,R0d,P,K,qid,Pdagger,mui);\n"+...
+"ui = CSLC_"+N+"_ui(x,xd,R0,R0d,P,K,qid,Pdagger,mui,muid);\n"+...
 "b3 = ui./vecnorm(ui,2,1); %% 3xN\n"+...
 "b1 = repmat(xd(4:6),1,"+N+");\n"+...
 "if sum(vecnorm(b1,2,1)==0) ~=0\n"+...

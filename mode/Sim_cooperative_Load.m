@@ -8,7 +8,7 @@ post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [], []);
 
-N = 4;
+N = 6;
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
 qtype = "zup"; % "eul":euler angle, "":euler parameter
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]

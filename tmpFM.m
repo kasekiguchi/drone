@@ -24,7 +24,7 @@ m0 = P(2);
 g = P(1);
 ji = reshape(P(end-3*N+1:end),3,[]);
 rho = reshape(P(6:6+3*N-1),3,[]);
-j0 = K(3:5);
+j0 = P(3:5);
 mi = P(end-4*N+1:end-3*N);
 li = P(end-5*N+1:end-4*N);
 
