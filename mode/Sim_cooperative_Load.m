@@ -60,9 +60,9 @@ agent.controller = CSLC(agent, Controller_Cooperative_Load(dt, N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
 run("ExpBase");
 
-%
+
 clc
-for i = 1:500
+for i = 1:502
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -77,13 +77,13 @@ for i = 1:500
     time.t = time.t + time.dt;
     %pause(1)
 end
-
+%%
 
 logger.plot({1,"p","rp"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"},{1, "input", "p"})
 %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",false,"lims",[-10 10;-10 10;-10 10],"ntimes",10);
+mov.animation(logger, 'target', 1:N, "gif",false,"lims",[-10 10;-10 10;-10 10],"ntimes",1);
 
 %%
 logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})

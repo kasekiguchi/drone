@@ -10,8 +10,12 @@ function U = CooperativeSuspendedLoadController_4(x,qi,R0,Ri,R0d,xd,K,P,Pdagger)
  % Pdagger = pinv(P) in (26)
  % U : [f1;M1;f2;M2;...] for zup system
 R0TFdMd = CSLC_4_R0TFdMd(x,xd,R0,R0d,P,K);
+%if sum(R0TFdMd(1:2).*x(1:2)>0)>0
+
 tmp = tmpR0TFdMd4(x,xd,R0,R0d,P,K);
-R0TFdMd'-tmp'
+%end
+%(R0TFdMd - tmp)'
+%R0TFdMd = tmpR0TFdMd4(x,xd,R0,R0d,P,K);
 muid = reshape(kron(eye(4),R0)*Pdagger*R0TFdMd,3,4); % 3xN
 mui = sum(muid.*qi,1).*qi; % 3xN
 qid = -muid./vecnorm(muid,2,1); % 3xN
