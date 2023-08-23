@@ -9,25 +9,30 @@ function U = CooperativeSuspendedLoadController_4(x,qi,R0,Ri,R0d,xd,K,P,Pdagger)
  % P : physical parameter
  % Pdagger = pinv(P) in (26)
  % U : [f1;M1;f2;M2;...] for zup system
-R0TFdMd = CSLC_4_R0TFdMd(x,xd,R0,R0d,P,K);
+%R0TFdMd = CSLC_4_R0TFdMd(x,xd,R0,R0d,P,K);
 %if sum(R0TFdMd(1:2).*x(1:2)>0)>0
 
-tmp = tmpR0TFdMd4(x,xd,R0,R0d,P,K);
+R0TFdMd = tmpR0TFdMd4(x,xd,R0,R0d,P,K);
 %end
 %(R0TFdMd - tmp)'
 %R0TFdMd = tmpR0TFdMd4(x,xd,R0,R0d,P,K);
 muid = reshape(kron(eye(4),R0)*Pdagger*R0TFdMd,3,4); % 3xN
 mui = sum(muid.*qi,1).*qi; % 3xN
 qid = -muid./vecnorm(muid,2,1); % 3xN
-ui = CSLC_4_ui(x,xd,R0,R0d,P,K,Pdagger,mui,qid,0*qid,0*qid);
-tui = tmpui(x,xd,R0,R0d,P,K,Pdagger,mui,qid,0*qid,0*qid);
+%ui = CSLC_4_ui(x,xd,R0,R0d,P,K,qid,Pdagger,mui,muid);
+ui = tmpui(x,xd,R0,R0d,P,K,qid,Pdagger,mui,muid);
 b3 = ui./vecnorm(ui,2,1); % 3xN
-b1 = xd(4:6) + 0.1*cell2mat(arrayfun(@(i) Ri(:,:,i)*[1;0;0],1:4,'UniformOutput',false)); % Caution : problem if dx0d = - 10*xi.
+%b1 = xd(4:6) + 0.1*cell2mat(arrayfun(@(i) Ri(:,:,i)*[1;0;0],1:4,'UniformOutput',false)); % Caution : problem if dx0d = - 10*xi.
+b1 = repmat(xd(4:6),1,4);
+if sum(vecnorm(b1,2,1)==0) ~=0
+  b1(:,vecnorm(b1,2,1)==0) = cell2mat(arrayfun(@(i) Ri(:,:,i)*[1;0;0],vecnorm(b1,2,1)==0,'UniformOutput',false));
+end
 b1 = b1./vecnorm(b1,2,1);
 b2 = cross(b3, b1); % 3xN
 si = vecnorm(b2,2,1);
 ci = sum(b3.* b1,1);
 b2 = b2 ./ si;
 b1 = cross(b2, b3);
-U= CSLC_4_Uvec(x,xd,P,K,ui,R0,Ri,R0d,qid,b1,b2,b3,si,ci);
+%U= CSLC_4_Uvec(x,xd,R0,R0d,P,K,qid,ui,Ri,b1,b2,b3,si,ci);
+U= tmpFM(x,xd,R0,R0d,P,K,qid,ui,Ri,b1,b2,b3,si,ci);
 end

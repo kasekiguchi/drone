@@ -1,4 +1,4 @@
-function ui = tmpui(x,xd,R0,R0d,P,K,Pdagger,mui,qid,dqid,ddqid)
+function ui = tmpui(x,xd,R0,R0d,P,K,qid,Pdagger, mui,muid)
 N = 4;
 %%
 %[x0d;dx0d;ddx0d;dddx0d;o0d;do0d]; % R0d は除いている
@@ -14,8 +14,8 @@ x0 = x(1:3);
 r0 = x(4:7);
 dx0 = x(8:10);
 o0 = x(11:13);
-qi = reshape(x(14:14+3*N-1),3,[]);
-wi = reshape(x(14+3*N:14+6*N-1),3,[]);
+qi = reshape(x(13+1:13+3*N),3,[]);
+wi = reshape(x(13+3*N + 1:13+6*N),3,[]);
 oi = reshape(x(end-3*N+1:end),3,[]);
 
 physicalParam = P;
@@ -31,11 +31,14 @@ li = P(end-5*N+1:end-4*N);
 Gains = K;
 %[kx0 kr0 kdx0 ko0 kqi kwi kri koi epsilon];
 kx0 = K(1:3);
-kr0 = K(4);
-kdx0 = K(5:7);
-ko0 = K(8);
+kr0 = K(4:6);
+kdx0 = K(7:9);
+ko0 = K(10:12);
 kqi = K(end-4);
 kwi = K(end-3);
+kri = K(end-2);
+koi = K(end-1);
+epsilon = K(end);
 
 %%
 O0 = Skew(o0); % 牽引物の角速度行列（歪対象行列）
@@ -53,20 +56,22 @@ Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称�
 
 %dwi = cross(qi,ai)./li - cross(qi,uip1)./(mi.*li);
 for i = 1:N
-%dqid(:,i) = 0*(-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微分？
+dqid(:,i) = 0*(-R0d*Skew(o0d)*(-R0d'*qid(:,i))); % 3xN % 要検討　：近似微分？
 wid(:,i) = cross(qid(:,i),dqid(:,i)); % 3xN
-%ddqid(:,i) = 0*(R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
+ddqid(:,i) = 0*(R0d*(Skew(do0d) + Skew(o0d)^2)*(-R0d'*qid(:,i))); % 要検討　：近似微分？
 dwid(:,i) = cross(qid(:,i),ddqid(:,i));
 eqi(:,i) = cross(qid(:,i),qi(:,i)); % 3xN
 ewi(:,i) = wi(:,i) + Qi{i}^2*wid(:,i);
 end
 %% ui
 for i = 1:N
-  RhoR0Tmu(:,i) = Rho{i}*R0'*mui(:,i);
+  RhoR0Tmu(:,i) = Rho{i}*R0'*muid(:,i);
+%  RhoR0Tmu(:,i) = Rho{i}*R0'*mui(:,i);
 end
 for i = 1:N
   dqi(:,i) = cross(wi(:,i),qi(:,i));
-  ai(:,i) = sum(mui,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
+  ai(:,i) = sum(muid,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
+%  ai(:,i) = sum(mui,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
   uip1(:,i) = mui(:,i) + mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) + mi(i)*qi(:,i)*qi(:,i)'*ai(:,i);% ui parallel 3xN
   uip2(:,i) = mi(i)*li(i)*Qi{i}*(-kqi*eqi(:,i) -kwi*ewi(:,i) -(qi(:,i)'*wid(:,i))*dqi(:,i) - Qi{i}^2*dwid(:,i)) - mi(i)*Qi{i}^2*ai(:,i); % ui perp
 end
