@@ -15,6 +15,7 @@ r0 = x(4:7);
 dx0 = x(8:10);
 o0 = x(11:13);
 qi = reshape(x(14:14+3*N-1),3,[]);
+wi = reshape(x(14+3*N:14+6*N-1),3,[]);
 oi = reshape(x(end-3*N+1:end),3,[]);
 
 physicalParam = P;
@@ -24,6 +25,8 @@ g = P(1);
 ji = reshape(P(end-3*N+1:end),3,[]);
 rho = reshape(P(6:6+3*N-1),3,[]);
 j0 = K(3:5);
+mi = P(end-4*N+1:end-3*N);
+li = P(end-5*N+1:end-4*N);
 
 Gains = K;
 %[kx0 kr0 kdx0 ko0 kqi kwi kri koi epsilon];
@@ -31,6 +34,8 @@ kx0 = K(1:3);
 kr0 = K(4);
 kdx0 = K(5:7);
 ko0 = K(8);
+kqi = K(end-4);
+kwi = K(end-3);
 
 %%
 O0 = Skew(o0); % 牽引物の角速度行列（歪対象行列）
