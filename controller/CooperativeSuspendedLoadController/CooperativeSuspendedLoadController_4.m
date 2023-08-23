@@ -20,6 +20,7 @@ muid = reshape(kron(eye(4),R0)*Pdagger*R0TFdMd,3,4); % 3xN
 mui = sum(muid.*qi,1).*qi; % 3xN
 qid = -muid./vecnorm(muid,2,1); % 3xN
 ui = CSLC_4_ui(x,xd,R0,R0d,P,K,Pdagger,mui,qid,0*qid,0*qid);
+tui = tmpui(x,xd,R0,R0d,P,K,Pdagger,mui,qid,0*qid,0*qid);
 b3 = ui./vecnorm(ui,2,1); % 3xN
 b1 = xd(4:6) + 0.1*cell2mat(arrayfun(@(i) Ri(:,:,i)*[1;0;0],1:4,'UniformOutput',false)); % Caution : problem if dx0d = - 10*xi.
 b1 = b1./vecnorm(b1,2,1);
