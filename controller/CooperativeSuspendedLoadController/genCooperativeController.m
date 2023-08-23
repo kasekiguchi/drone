@@ -96,17 +96,28 @@ eqi(:,i) = cross(qid(:,i),qi(:,i)); % 3xN
 ewi(:,i) = wi(:,i) + Qi{i}^2*wid(:,i);
 end
 %% ui
+% for i = 1:N
+%   RhoR0Tmu(:,i) = Rho{i}*R0'*mui(:,i);
+% end
+% for i = 1:N
+%   dqi(:,i) = cross(wi(:,i),qi(:,i));
+%   ai(:,i) = sum(mui,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
+%   uip1(:,i) = mui(:,i) + mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) + mi(i)*qi(:,i)*qi(:,i)'*ai(:,i);% ui parallel 3xN
+%   uip2(:,i) = mi(i)*li(i)*Qi{i}*(-kqi*eqi(:,i) -kwi*ewi(:,i) -(qi(:,i)'*wid(:,i))*dqi(:,i) - Qi{i}^2*dwid(:,i)) - mi(i)*Qi{i}^2*ai(:,i); % ui perp
+% end
+% ui = uip1 + uip2; % 3xN
+% matlabFunction(ui, ai(:,i),O0*J0*o0,-sum(RhoR0Tmu,2),"file",dir + "CSLC_"+N+"_ui.m","vars",{X Xd R0 R0d physicalParam Gains qid Pdagger mui dqid ddqid})
 for i = 1:N
-  RhoR0Tmu(:,i) = Rho{i}*R0'*mui(:,i);
+  RhoR0Tmu(:,i) = Rho{i}*R0'*muid(:,i);
 end
 for i = 1:N
   dqi(:,i) = cross(wi(:,i),qi(:,i));
-  ai(:,i) = sum(mui,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
-  uip1(:,i) = mui(:,i) + mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) + mi(i)*qi(:,i)*qi(:,i)'*ai(:,i);% ui parallel 3xN
+  ai(:,i) = sum(muid,2)/m0 + R0*O0^2*rho(:,i) + R0*Rho{i}*inv(J0)*(O0*J0*o0-sum(RhoR0Tmu,2)); % (19) 3xN
+  uip1(:,i) = muid(:,i) + mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) + mi(i)*qi(:,i)*qi(:,i)'*ai(:,i);% ui parallel 3xN
   uip2(:,i) = mi(i)*li(i)*Qi{i}*(-kqi*eqi(:,i) -kwi*ewi(:,i) -(qi(:,i)'*wid(:,i))*dqi(:,i) - Qi{i}^2*dwid(:,i)) - mi(i)*Qi{i}^2*ai(:,i); % ui perp
 end
 ui = uip1 + uip2; % 3xN
-matlabFunction(ui, ai(:,i),O0*J0*o0,-sum(RhoR0Tmu,2),"file",dir + "CSLC_"+N+"_ui.m","vars",{X Xd R0 R0d physicalParam Gains Pdagger mui qid dqid ddqid})
+matlabFunction(ui, ai(:,i),O0*J0*o0,-sum(RhoR0Tmu,2),"file",dir + "CSLC_"+N+"_ui.m","vars",{X Xd R0 R0d physicalParam Gains qid Pdagger mui muid})
 
 %%
 clc
@@ -140,9 +151,9 @@ end
 %%
 for i = 1:N
 fi(i) = ui(:,i)'*Ri(:,:,i)*e3;
-Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi(:,i)*Ji{i}*oi(:,i) - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric{i}*oic(:,i)-Ri(:,:,i)*Ric{i}*doic(:,i));% 3xN
+Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi{i}*Ji{i}*oi(:,i) - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric{i}*oic(:,i)-Ri(:,:,i)*Ric{i}*doic(:,i));% 3xN
 end
-matlabFunction(reshape([fi;Mi],[],1),"file",dir+"CSLC_"+N+"_Uvec.m","Vars",{X,Xd,physicalParam,Gains,ui,R0,Ri,R0d,qid,b1,b2,b3,si,ci})
+matlabFunction(reshape([fi;Mi],[],1),"file",dir+"CSLC_"+N+"_Uvec.m","Vars",{X,Xd,R0,R0d,physicalParam,Gains,qid,ui,Ri,b1,b2,b3,si,ci})
 %%
 % X,Xd,R0,R0d,physicalParam,Gains
 fname = "CooperativeSuspendedLoadController_" + N;
@@ -156,7 +167,7 @@ str = "function U = "+fname+"(x,qi,R0,Ri,R0d,xd,K,P,Pdagger)\n"+...
 "muid = reshape(kron(eye("+N+"),R0)*Pdagger*R0TFdMd,3,"+N+"); %% 3xN\n"+...
 "mui = sum(muid.*qi,1).*qi; %% 3xN\n"+...
 "qid = -muid./vecnorm(muid,2,1); %% 3xN\n"+...
-"ui = CSLC_"+N+"_ui(x,xd,R0,R0d,P,K,Pdagger,mui,qid);\n"+...
+"ui = CSLC_"+N+"_ui(x,xd,R0,R0d,P,K,qid,Pdagger,mui);\n"+...
 "b3 = ui./vecnorm(ui,2,1); %% 3xN\n"+...
 "b1 = xd(4:6) + 0.1*cell2mat(arrayfun(@(i) Ri(:,:,i)*[1;0;0],1:"+N+",'UniformOutput',false)); %% Caution : problem if dx0d = - 10*xi.\n"+...
 "b1 = b1./vecnorm(b1,2,1);\n"+...
@@ -165,7 +176,7 @@ str = "function U = "+fname+"(x,qi,R0,Ri,R0d,xd,K,P,Pdagger)\n"+...
 "ci = sum(b3.* b1,1);\n"+...
 "b2 = b2 ./ si;\n"+...
 "b1 = cross(b2, b3);\n"+...
-"U= CSLC_"+N+"_Uvec(x,xd,P,K,ui,R0,Ri,R0d,qid,b1,b2,b3,si,ci);\nend\n";
+"U= CSLC_"+N+"_Uvec(x,xd,R0,R0d,P,K,qid,ui,Ri,b1,b2,b3,si,ci);\nend\n";
 fileID = fopen(dir + fname+".m",'w');
 fprintf(fileID,str)
 fclose(fileID);

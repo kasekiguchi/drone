@@ -1,4 +1,4 @@
-function y = tmpR0TFdMd4(x,xd,R0,R0d,P,K)
+function FM = tmpFM(x,xd,R0,R0d,P,K,qid,ui,Ri,b1,b2,b3,si,ci)
 N = 4;
 %%
 %[x0d;dx0d;ddx0d;dddx0d;o0d;do0d]; % R0d は除いている
@@ -15,6 +15,7 @@ r0 = x(4:7);
 dx0 = x(8:10);
 o0 = x(11:13);
 qi = reshape(x(14:14+3*N-1),3,[]);
+wi = reshape(x(14+3*N:14+6*N-1),3,[]);
 oi = reshape(x(end-3*N+1:end),3,[]);
 
 physicalParam = P;
@@ -24,6 +25,8 @@ g = P(1);
 ji = reshape(P(end-3*N+1:end),3,[]);
 rho = reshape(P(6:6+3*N-1),3,[]);
 j0 = K(3:5);
+mi = P(end-4*N+1:end-3*N);
+li = P(end-5*N+1:end-4*N);
 
 Gains = K;
 %[kx0 kr0 kdx0 ko0 kqi kwi kri koi epsilon];
@@ -50,15 +53,30 @@ Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称�
 % 牽引物: 位置，姿勢角，速度，角速度， : 13
 % リンク: 角度，角速度 : N x 6
 % ドローン:姿勢角，角速度
-
-%% (20)-(22)
-ex0 = x0 - x0d;
-dex0 = dx0 -dx0d;
-eR0 = Vee(R0d'*R0 - R0'*R0d)/2;
-eo0 = o0 - R0'*R0d*o0d;
-%% (23),(24)
-
-Fd0 = m0*(-kx0'.*ex0- kdx0'.*dex0 + ddx0d + g*e3);
-Md0 = -kr0'.*eR0 - ko0'.*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
-y = [R0'*Fd0;Md0];
+db3 = zeros(size(b3));
+for i = 1:N
+b3ddx0d(:,i) = cross(b3(:,i),ddx0d);
+db2(:,i) = (b3ddx0d(:,i)-ci(i)*b2(:,i))/si(i);
+db1(:,i) = -cross(b3(:,i),db2(:,i));
+ddb3(:,i) = db3(:,i);
+ddb2(:,i) = (cross(b3(:,i),dddx0d)+(b2(:,i)-ci(i)*b3ddx0d(:,i))/si(i) - ci(i)*db2(:,i))/si(i);
+ddb1(:,i) = -cross(b3(:,i),ddb2(:,i));
+Ric{i} = [b1(:,i) b2(:,i) b3(:,i)];% 3x3xN
+dRic{i} = [db1(:,i) db2(:,i) db3(:,i)];% 3x3xN
+ddRic{i} = [ddb1(:,i),ddb2(:,i),ddb3(:,i)];% 3x3xN
+oic(:,i) = Vee(Ric{i}'*dRic{i});% 3xN = Vee(hoic)
+doic(:,i) = Vee(Ric{i}'*ddRic{i} - (Ric{i}'*dRic{i})^2);% + (dRic{i}'*dRic{i}));% 3xN
+%doic(:,i) = Vee(Ric{i}'*ddRic{i} + (dRic{i}'*dRic{i}));% 3xN
+end
+for i = 1:N
+  eri(:,i) = Vee(Ric{i}'*Ri(:,:,i)-Ri(:,:,i)'*Ric{i})/2;
+  eoi(:,i) = oi(:,i) - Ri(:,:,i)'*Ric{i}*oic(:,i);% 3xN
+end
+%%
+for i = 1:N
+fi(i) = ui(:,i)'*Ri(:,:,i)*e3;
+Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi{i}*Ji{i}*oi(:,i) - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric{i}*oic(:,i)-Ri(:,:,i)*Ric{i}*doic(:,i));% 3xN
+end
+%[Mi,eoi,oi]
+FM = reshape([fi;Mi],[],1);
 end

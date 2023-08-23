@@ -38,7 +38,6 @@ if contains(qtype, "eul")
     initial_state.Qi = repmat([0;0;0],N,1);
 else
     initial_state.Q = [1; 0; 0; 0];
-    initial_state.Q = initial_state.Q / vecnorm(initial_state.Q);
     initial_state.Qi = repmat([1; 0; 0; 0], N, 1);
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
@@ -54,7 +53,7 @@ agent.sensor = DIRECT_SENSOR(agent, 0.0); % sensor to capture plant position : s
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
 % agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
 % agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,Reference_Time_Varying_Cooperative_Load("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",200,"orig",[2;0;1],"size",0*[1,1,0]},"Cooperative"});
+agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",40,"orig",[2;0.5;1],"size",0*[4,4,0]},"Cooperative"});
 %agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 agent.controller = CSLC(agent, Controller_Cooperative_Load(dt, N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
@@ -62,7 +61,7 @@ run("ExpBase");
 
 
 clc
-for i = 1:502
+for i = 1:2000
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -78,12 +77,11 @@ for i = 1:502
     %pause(1)
 end
 %%
-
-logger.plot({1,"p","rp"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"}, {1, "plant.result.state.Qi", "p"},{1, "input", "p"})
+logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
 %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",false,"lims",[-10 10;-10 10;-10 10],"ntimes",1);
+mov.animation(logger, 'target', 1:N, "gif",false,"lims",[-10 10;-10 10;-10 10]/2,"ntimes",1);
 
 %%
 logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
