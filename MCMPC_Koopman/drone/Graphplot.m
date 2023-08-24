@@ -1,17 +1,9 @@
-%% GUIデータ用グラフプロット
-opengl software
-% パスの設定
-activeFile = matlab.desktop.editor.getActive;
-cd(fileparts(activeFile.Filename));
-[~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
-close all hidden;
-clear all;
-clc;
+function Graphplot
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("Koopman_ホバリング_重み調整済み.mat")
+% load("Koopman_ホバリング_重み調整済み.mat")
+load("simulation.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')
@@ -239,6 +231,7 @@ set(ax,'FontSize',fontSize);
 % set(gcf,"Position",get(0,'Screensize')
 end
 
+end
 %% グラフの背景に色あり
 
 % %位置p
