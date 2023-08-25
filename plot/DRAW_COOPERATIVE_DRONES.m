@@ -187,6 +187,8 @@ classdef DRAW_COOPERATIVE_DRONES
       % end
       param = struct(varargin{:});
       ax = obj.ax;
+      fh = gcf;
+      fh.WindowState = 'maximized';
       p = obj.data_format(logger,1,"p","p");
       q = obj.data_format(logger,1,"plant.result.state.Q","p");
       [Q,Q0] = obj.gen_Q(1,q);
