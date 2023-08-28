@@ -5,6 +5,7 @@ properties
     param
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vep%線形化したシステムの仮想入力を生成する関数
+    z
 end
 
 methods
@@ -21,6 +22,7 @@ methods
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
         obj.Vep = param.Vep; % 動的拡大したシステムを線形化したシステムの仮想入力を生成する関数
+        obj.z=0;
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.result.u = zeros(self.estimator.model.dim(2),1);
     end
@@ -52,7 +54,12 @@ methods
         z4 = Zep4(x, xd', P);
         
         %subsystem controller
-        vep = obj.Vep(z1, z2, z3, z4);
+        % vep = obj.Vep(z1, z2, z3, z4);
+        %servo
+        if varargin{1}.t > 0
+                obj.z = obj.z + xd(3)-x(7);
+        end
+        vep = obj.Vep(z1, z2, z3, z4,obj.z);
 
         %% calc actual input
         tmp = Uep(x, xd', vep, P);

@@ -46,8 +46,9 @@ classdef FUNCTIONAL_HLC_SERVO < handle
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
             
-            if t > 5
+            if t > 0
                 obj.z = obj.z + xd(1:3)-x(5:7);
+                obj.z = obj.z + [zeros(2,1);xd(3)]-[zeros(2,1);x(7)];
             end
             %% calc Z
             z1 = Z1(x,xd',P);

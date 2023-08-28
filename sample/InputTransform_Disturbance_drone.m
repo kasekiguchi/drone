@@ -16,10 +16,11 @@ function dst =InputTransform_Disturbance_drone(varargin)
                       c = index ;%ループ数を計算param{2}はシミュレーション時間
                       pdst = a.*randn(c,3) + b;%ループ数分の値の乱数を作成
                       %z, roll, pitchの加速度, 角加速度に外乱を付与
-                      dst(:,3) = 1*pdst(:,1);
-                      dst(:,4) = 0.1*pdst(:,2);
-                      dst(:,5) = 0.1*pdst(:,3);
-                      dst(:,6) = 0.1*pdst(:,1);%入力用
+                      dst(:,3) = 0.5*ones(c,1);
+                      % dst(:,3) = 1*pdst(:,1);
+                      dst(:,4) = 1*pdst(:,2);
+                      dst(:,5) = 1*pdst(:,3);
+                      % dst(:,6) = 0.1*pdst(:,1);%入力用
 
                case "tmp"
                  %外乱の大きさと付与する時刻を指定
@@ -27,7 +28,7 @@ function dst =InputTransform_Disturbance_drone(varargin)
                          i=1;
                         for t = 0:dt:te
                                 if t>=2 && t<=15
-                                        dst(i ,:)= [0.1,0,0,0,0,0];
+                                        dst(i ,:)= [0,0,1,0,0,0];
                                 end
                                 i = i +1;
                         end

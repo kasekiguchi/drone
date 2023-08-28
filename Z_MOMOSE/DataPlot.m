@@ -5,7 +5,7 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 
@@ -17,12 +17,14 @@ endTime = 1E2;
 
     loggers = {
                 % gui.logger
-                log
+                log1.log
+                log2.log
                 % log_LS_HL_prid,...
                 % log_FT_HL_prid,...
                 % log_FT_EL_prid
         };
     c=[
+        "HL","EL"
            % "LS","FT"
         ];
 %========================================================================
@@ -72,7 +74,7 @@ addingContents.camposition = [-45,-45,60];
 %data setting
 %図:[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
 figName=["t_p" "x_y" "t_x" "t_y" "t_z" "error" "input" "attitude" "velocity" "angular_velocity" "three_D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma" "pp" "pv" "pq" "pw" "Trs"];
-allData = dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime);
+[allData,RMSE] = dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime);
 % allData.figName : (data, label, legendLabels, option)   
 %option : titleName, lineWidth, fontSize, legend, aspect, campositon
 %=====================================================
@@ -214,17 +216,18 @@ end
 %変更========================================================
 % subfolder='sim';%sim or exp
 subfolder='sim';%sim or exp
-ExpSimName='ifacslide';%実験,シミュレーション名
+ExpSimName='SERVOz_FTCxy';%実験,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
-contents='FT_EL_saddle';%実験,シミュレーション内容
+contents='HL_EL';%実験,シミュレーション内容
 %==========================================================
-FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
-FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
+FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
+FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
+FolderNameF=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
 
 %フォルダができてないとき
 
-    mkdir(FolderNamed);
-    mkdir(FolderNamef);
+    mkdir(FolderNameD);
+    mkdir(FolderNameF);
     addpath(genpath(ExportFolder));
 %フォルダをrmる
 %     rmpath(genpath(ExportFolder))
@@ -237,20 +240,31 @@ for i=1:nf
 %     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',figName(n(i)));
     SaveTitle(i)=strcat(contents,'_',figName(n(i)));
 %     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'jpg');
-    saveas(f(n(i)), fullfile(FolderNamef, SaveTitle(i)),'fig');
+    saveas(f(n(i)), fullfile(FolderNameF, SaveTitle(i)),'fig');
 %     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'eps');
 end
+
+%RMSEの保存
+RMSE(1,1)="";
+filenameRMSE=strcat(fullfile(FolderNameR, 'RMSEs'),'.txt');
+fExist=exist(filenameRMSE,'file');
+if fExist
+    writematrix([strings(1,4);"<"+contents+">",strings(1,3);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
+else
+    writematrix(["<"+contents+">",strings(1,3);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
+end
+
 %% single save
 i=6;%figiureの番号
 % n=length(f);
 SaveTitle=strings(1,1);
     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',FigName(i));
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jng');
-    saveas(f(i), fullfile(FolderNamef, SaveTitle(i) ),'fig');
+    saveas(f(i), fullfile(FolderNameF, SaveTitle(i) ),'fig');
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
 
 %% functions
-function allData=dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime)
+function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime)
         if fF==1
             logNum = length(loggers);
             for i = 1:logNum
@@ -481,7 +495,6 @@ function allData=dataSummarize(loggers, c, option, addingContents, fF, startTime
             fprintf('#%s RMSE\n',c(i));
             fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
             fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
-           
         end
     end
 

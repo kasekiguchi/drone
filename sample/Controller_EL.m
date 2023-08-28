@@ -48,6 +48,13 @@ else
     %LS
     Controller.Vep = matlabFunction([-eF1*ez1;-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
 end
+%servo
+syms z
+Cc2 = [1 0 0 0];
+Controller.F1s=lqrd([Ac4,zeros(4,1);-Cc2,0],[Bc4;0],diag([100,10,10,1,0.01]),0.01,dt);
+eF1=Controller.F1s
+Controller.Vep = matlabFunction([-eF1*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
+
 Controller.dt = dt;
 Controller.type = "ELC";
 eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F1)

@@ -8,15 +8,10 @@
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
-    % subfolder='exp';%sim or exp or sample
-    subfolder='sim';%sim or exp or sample
-%     subfolder='sample';%sim or exp or sample
-    
-    ExpSimName='ifacslide';%実験,シミュレーション名
-%     contents='appox_error01';%実験,シミュレーション内容
-% contents='ft_jy_002';%実験,シミュレーション内容
-contents='FT_EL_prid';%実験,シミュレーション内容
-% contents='FT_jxy150';%実験,シミュレーション内容
+    subfolder='sim';%sim or exp
+    ExpSimName='SERVOz_FTCxy';%実験,シミュレーション名
+    % contents='FT_apx_max';%実験,シミュレーション内容
+    contents='EL';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
