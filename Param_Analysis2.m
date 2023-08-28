@@ -17,6 +17,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
 noiseflag = 0;
+storage = 0;
 % Log Dataの読み取りと格納
 % log2 = LOGGER('./Data/data030402503.mat');
 % log2 = LOGGER('./Data/miidmove_Log(24-Jul-2023_13_38_35).mat');
@@ -53,12 +54,6 @@ ref_q = log.data(1,"q","r")';
 % ref_p = [ref_p,ref_p2(:,5:end)];
 % ref_q = [ref_q,ref_q2(:,5:end)];
 
-%% ノイズ付加
-if noiseflag==1
-    robot_pe = robot_pe + (0.001*randn(size(robot_pe)));
-    robot_qe = robot_qe + (0.0001*randn(size(robot_qe)));
-    sensor_data = sensor_data+ (0.002*randn(size(sensor_data)));
-end
 %% 不要データの除去
 nanIndices = isnan(sensor_data(1,:));
 ds = find(nanIndices==1);
@@ -73,6 +68,12 @@ robot_p(:,ds0) = [];
 robot_pe(:,ds0) = [];
 robot_q (:,ds0) = [];
 robot_qe(:,ds0) = [];
+%% ノイズ付加
+if noiseflag==1
+    robot_pe = robot_pe + (0.001*randn(size(robot_pe)));
+    robot_qe = robot_qe + (0.001*randn(size(robot_qe)));
+    % sensor_data = sensor_data+ (0.00002*randn(size(sensor_data)));
+end
 %% パラメータ真値
 % offset_true = [0.1;0.05;0.0];
 offset_true = [0.5;0.1;0.5];
@@ -181,7 +182,7 @@ for j=1:size(P_stack,3)
     variance(:,j) = diag(P_stack(:,:,j));
 end
 %%
-steps=1:9999;
+steps=1:length(robot_pe);
 time = 0.01*steps;
 %% 交点比較
 for i=1:length(robot_pe)
@@ -202,9 +203,9 @@ end
 plot(time,ss(1,:),'LineWidth', 2);
 plot(time,ss(2,:),'LineWidth', 2);
 plot(time,ss(3,:),'LineWidth', 2);
-legend('x','y','z','xt','yt','zt','FontSize', 14);
-xlabel('time [s]','FontSize', 12);
-ylabel('Coordinates of intersection [m]','FontSize', 12);
+legend('x','y','z','x_t','y_t','z_t','FontSize', 18);
+xlabel('time [s]','FontSize', 16);
+ylabel('Coordinates of intersection [m]','FontSize', 16);
 hold off ;
 %% 図示
 if illustration == 1
@@ -217,10 +218,10 @@ if illustration == 1
     plot(time,robot_pe(1,:),'LineWidth', 2);
     plot(time,robot_pe(2,:),'LineWidth', 2);
     plot(time,robot_pe(3,:),'LineWidth', 2);
-    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 14);
+    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 18);
     hold off;
-    xlabel('time [s]','FontSize', 12);
-    ylabel('position [m]','FontSize', 12);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('position [m]','FontSize', 16);
     grid on;
     fig2=figure(2);
     fig2.Color = 'white';
@@ -231,10 +232,10 @@ if illustration == 1
     plot(time,robot_qe(1,:),'LineWidth', 2);
     plot(time,robot_qe(2,:),'LineWidth', 2);
     plot(time,robot_qe(3,:),'LineWidth', 2);
-    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 14);
+    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 18);
     hold off;
-    xlabel('time [s]','FontSize', 12);
-    ylabel('angle [rad]','FontSize', 12);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('angle [rad]','FontSize', 16);
     grid on;
     fig4=figure(4);
     fig4.Color = 'white';
@@ -243,9 +244,9 @@ if illustration == 1
     plot(time,sensor_data(num,1:9999));
     % plot(sensor_data(8,:));
     % plot(sensor_data(9,:));
-    xlabel('step','FontSize', 12);
-    ylabel('Distance of the lidar [m]','FontSize', 12);
-    legend('1st','2nd','FontSize', 14);
+    xlabel('step','FontSize', 16);
+    ylabel('Distance of the lidar [m]','FontSize', 16);
+    legend('1st','2nd','FontSize', 18);
     xlim([0, 20]);
     grid on;
     fig5=figure(5);
@@ -254,11 +255,11 @@ if illustration == 1
     hold on;
     plot(time,ref_p(2,1:9999),'LineWidth', 2);
     plot(time,ref_p(3,1:9999),'LineWidth', 2);
-    legend('x,y,z','FontSize', 14);
+    legend('x','y','z','FontSize', 16);
     hold off;
     xlim([0, 20]);
-    xlabel('time [s]','FontSize', 12);
-    ylabel('reference position[m]','FontSize', 12);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('reference position[m]','FontSize', 16);
     grid on;
     fig6=figure(6);
     fig6.Color = 'white';
@@ -267,10 +268,10 @@ if illustration == 1
     plot(time,ref_q(2,1:9999),'LineWidth', 2);
     plot(time,ref_q(3,1:9999),'LineWidth', 2);
     xlim([0, 20]);
-    legend('\phi','\theta','\psi','FontSize', 14);
+    legend('\phi','\theta','\psi','FontSize', 18);
     hold off;
-    xlabel('time [s]','FontSize', 12);
-    ylabel('reference angle [rad]','FontSize', 12);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('reference angle [rad]','FontSize', 16);
     grid on;
     fig7=figure(7);
     fig7.Color = 'white';
@@ -280,9 +281,9 @@ if illustration == 1
     end
     ylim([0 alpha]);
     hold off;
-    xlabel('time [s]','FontSize', 12);
-    ylabel('variance of wall param','FontSize', 12);
-    legend('a/d','b/d','c/d','FontSize', 14);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('variance of wall param','FontSize', 16);
+    legend('a/d','b/d','c/d','FontSize', 18);
     grid on;
     fig8=figure(8);
     fig8.Color = 'white';
@@ -292,9 +293,12 @@ if illustration == 1
     end
     hold off;
     ylim([0 alpha]);
-    xlabel('time [s]','FontSize', 12);
-    ylabel('variance of offset*wallparam','FontSize', 12);
-    legend('P1*a/d','P2*a/d','P3*a/d','P1*b/d','P2*b/d','P3*b/d','P1*c/d','P2*c/d','P3*c/d','FontSize', 14);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('variance of offset*wallparam','FontSize', 16);
+    legend('PSB1*a/d', 'PSB2*a/d', 'PSB3*a/d', ...
+       'PSB1*b/d', 'PSB2*b/d', 'PSB3*b/d', ...
+       'PSB1*c/d', 'PSB2*c/d', 'PSB3*c/d', ...
+       'FontSize', 18);
     grid on;
     fig9=figure(9);
     fig9.Color = 'white';
@@ -312,9 +316,13 @@ if illustration == 1
     end
     ylim([0 alpha]);
     hold off;
-    xlabel('time [s]','FontSize', 12);
-    ylabel('variance of offset*wallparam','FontSize', 12);
-    legend('R11*a/d','R21*a/d','R31*a/d','R11*b/d','R21*b/d','R31*b/d','R11*c/d','R21*c/d','R31*c/d','FontSize', 14);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('variance of offset*wallparam','FontSize', 16);
+    % legend('R11*a/d','R21*a/d','R31*a/d','R11*b/d','R21*b/d','R31*b/d','R11*c/d','R21*c/d','R31*c/d','FontSize', 18);
+    legend('RS1,1*a/d', 'RS2,1*a/d', 'RS3,1*a/d', ...
+       'RS1,1*b/d', 'RS2,1*b/d', 'RS3,1*b/d', ...
+       'RS1,1*c/d', 'RS2,1*c/d', 'RS3,1*c/d', ...
+       'FontSize', 18);
     grid on;
     fig10=figure(10);
     fig10.Color = 'white';
@@ -332,9 +340,12 @@ if illustration == 1
     end
     hold off;
     ylim([0 alpha]);
-    xlabel('time [s]','FontSize', 12);
-    ylabel('variance of offset*wallparam','FontSize', 12);
-    legend('R12*a/d','R22*a/d','R32*a/d','R12*b/d','R22*b/d','R32*b/d','R12*c/d','R22*c/d','R32*c/d','FontSize', 14);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('variance of offset*wallparam','FontSize', 16);
+    legend('RS1,2*a/d', 'RS2,2*a/d', 'RS3,2*a/d', ...
+       'RS1,2*b/d', 'RS2,2*b/d', 'RS3,2*b/d', ...
+       'RS1,2*c/d', 'RS2,2*c/d', 'RS3,2*c/d', ...
+       'FontSize', 18);
     grid on;
     fig11=figure(11);
     fig11.Color = 'white';
@@ -345,7 +356,7 @@ if illustration == 1
     hold off;
     xlabel('time [s]');
     ylabel('evaluation value');
-    legend('JP','JX','JY','FontSize', 14);
+    legend('JP','JX','JY','FontSize', 18);
     grid on;
    fig13=figure(13);
     fig13.Color = 'white';
@@ -356,10 +367,10 @@ if illustration == 1
     plot(time,robot_pe(1,:),'LineWidth', 2);
     plot(time,robot_pe(2,:),'LineWidth', 2);
     plot(time,robot_pe(3,:),'LineWidth', 2);
-    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 14);
+    legend('\it{px}','\it{py}','\it{pz}','\it{pxe}','\it{pye}','\it{pze}','FontSize', 18);
     hold off;
-    xlabel('time [s]','FontSize', 12);
-    ylabel('position[m]','FontSize', 12);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('position[m]','FontSize', 16);
     xlim([0, 20]);
     grid on;
     fig14=figure(14);
@@ -371,10 +382,10 @@ if illustration == 1
     plot(time,robot_qe(1,:),'LineWidth', 2);
     plot(time,robot_qe(2,:),'LineWidth', 2);
     plot(time,robot_qe(3,:),'LineWidth', 2);
-    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 14);
+    legend('\phi','\theta','\psi','\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 18);
     hold off;
-    xlabel('time [s]','FontSize', 12);
-    ylabel('angle [rad]','FontSize', 12);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('angle [rad]','FontSize', 16);
     xlim([0, 20]);
     grid on;
 
@@ -386,16 +397,47 @@ end
 % ylabel('y');
 % zlabel('z');
 %%
-saveas(fig13, fullfile(pass, 'RLS_pos.eps'), 'epsc');
-saveas(fig14, fullfile(pass, 'RLS_ang.eps'), 'epsc');
-saveas(fig4, fullfile(pass, 'RLS_sens.eps'), 'epsc');
-saveas(fig5, fullfile(pass, 'RLS_refp.eps'), 'epsc');
-saveas(fig6, fullfile(pass, 'RLS_refq.eps'), 'epsc');
-saveas(fig7, fullfile(pass, 'RLS_var1.eps'), 'epsc');
-saveas(fig8, fullfile(pass, 'RLS_var2.eps'), 'epsc');
-saveas(fig9, fullfile(pass, 'RLS_var3.eps'), 'epsc');
-saveas(fig10, fullfile(pass, 'RLS_var4.eps'), 'epsc');
-saveas(fig12, fullfile(pass, 'RLS_inst.eps'), 'epsc');
+if storage==1
+    pass = 'C:\Users\yuika\Desktop\修士\中間発表\latex2e\latex2e\output\fig';
+    saveas(fig13, fullfile(pass, 'RLS_pos.eps'), 'epsc');
+    saveas(fig14, fullfile(pass, 'RLS_ang.eps'), 'epsc');
+    saveas(fig4, fullfile(pass, 'RLS_sens.eps'), 'epsc');
+    saveas(fig5, fullfile(pass, 'RLS_refp.eps'), 'epsc');
+    saveas(fig6, fullfile(pass, 'RLS_refq.eps'), 'epsc');
+    saveas(fig7, fullfile(pass, 'RLS_var1.eps'), 'epsc');
+    saveas(fig8, fullfile(pass, 'RLS_var2.eps'), 'epsc');
+    saveas(fig9, fullfile(pass, 'RLS_var3.eps'), 'epsc');
+    saveas(fig10, fullfile(pass, 'RLS_var4.eps'), 'epsc');
+    saveas(fig12, fullfile(pass, 'RLS_inst.eps'), 'epsc');
+end
+%% Cross
+log = LOGGER('./Data/RLC_badbig.mat');
+robot_pe2  = log.data(1,"p","e")';
+robot_qe2  = log.data(1,"q","e")';
+sensor_data2 = (log.data(1,"length","s"))';
+%% 交点比較
+for i=1:length(robot_pe)
+    sp2(:,i) = robot_pe2(:,i) + eul2rotm(robot_qe2(:,i)','XYZ')*offsetn + sensor_data2(1,i)*eul2rotm(robot_qe2(:,i)','XYZ')*Rsn*[1;0;0];
+end
+fig20=figure(20);
+fig20.Color = 'white';
+plot(time,sp2(1,:),'LineWidth', 2);
+hold on;
+plot(time,sp2(2,:),'LineWidth', 2);
+plot(time,sp2(3,:),'LineWidth', 2);
+% legend('x','y','z');
+ss2=log.data(1,"sensor.result.sensor_points","s");
+ss2=zeros(3,last);
+for i3=1:last
+    ss2(:,i3)=log.Data.agent.sensor.result{1,i3}.sensor_points(:,1);
+end
+plot(time,ss2(1,:),'LineWidth', 2);
+plot(time,ss2(2,:),'LineWidth', 2);
+plot(time,ss2(3,:),'LineWidth', 2);
+legend('x','y','z','x_t','y_t','z_t','FontSize', 18);
+xlabel('time [s]','FontSize', 16);
+ylabel('Coordinates of intersection [m]','FontSize', 16);
+hold off ;
 %%
 function [A,X,Cf,var] = param_analysis2(robot_p, robot_q, sensor_data,sensor_data2,R_num)
     syms p [3 1] real

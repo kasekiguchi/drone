@@ -2,21 +2,21 @@
 % EKFによるパラメータ推定の結果確認
 %% Initialize settings
 % set path
-clear
-cf = pwd;
-if contains(mfilename('fullpath'),"mainGUI")
-  cd(fileparts(mfilename('fullpath')));
-else
-  tmp = matlab.desktop.editor.getActive; 
-  cd(fileparts(tmp.Filename));
-end
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-% cd(cf); close all hidden; clear all; userpath('clear');
+% clear
+% cf = pwd;
+% if contains(mfilename('fullpath'),"mainGUI")
+%   cd(fileparts(mfilename('fullpath')));
+% else
+%   tmp = matlab.desktop.editor.getActive; 
+%   cd(fileparts(tmp.Filename));
+% end
+% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+% % cd(cf); close all hidden; clear all; userpath('clear');
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/Log(10-Aug-2023_16_36_15).mat');
+log = LOGGER('./Data/ttest_Log(28-Aug-2023_14_22_29).mat');
 
 %% ログ
 tspan = [0 ,100];
@@ -30,30 +30,30 @@ ref_p = log.data(1,"p","r")';
 ref_q = log.data(1,"q","r")';
 
 len = length(log.Data.agent.sensor.result);
-ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
-qs  = zeros(size(log.Data.agent.estimator.result{1,1}.state.qs,1),len);
+% ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
+% qs  = zeros(size(log.Data.agent.estimator.result{1,1}.state.qs,1),len);
 % l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
 P  = zeros(size(log.Data.agent.estimator.result{1,1}.P,1),size(log.Data.agent.estimator.result{1,1}.P,2),len);
-for i=1:len
-    ps(:,i) = log.Data.agent.estimator.result{1,i}.state.ps;
-    qs(:,i) = log.Data.agent.estimator.result{1,i}.state.qs;
-    % l(:,i) = log.Data.agent.estimator.result{1,i}.state.l;
-    P(:,:,i)  = log.Data.agent.estimator.result{1,i}.P;
-end
+% for i=1:len
+%     ps(:,i) = log.Data.agent.estimator.result{1,i}.state.ps;
+%     qs(:,i) = log.Data.agent.estimator.result{1,i}.state.qs;
+%     % l(:,i) = log.Data.agent.estimator.result{1,i}.state.l;
+%     P(:,:,i)  = log.Data.agent.estimator.result{1,i}.P;
+% end
 %% 真値
 offset_true = [0.1;0.05;0.0];
 Rs_true = Rodrigues([0,0,1],pi/12);
-w=[1,0,0,9];
+w=[0,1,0,9];
 %% 交点比較
-for i=1:length(robot_pe)
-    sp(:,i) = robot_pe(:,i) + eul2rotm(robot_qe(:,i)','XYZ')*ps(:,end) + sensor_data(1,i)*eul2rotm(robot_qe(:,i)','XYZ')*RodriguesQuaternion(Eul2Quat(qs(:,end)))*[1;0;0];
-end
-figure(12);
-plot(sp(1,:));
-hold on;
-plot(sp(2,:));
-plot(sp(3,:));
-legend('x','y','z');
+% for i=1:length(robot_pe)
+%     sp(:,i) = robot_pe(:,i) + eul2rotm(robot_qe(:,i)','XYZ')*ps(:,end) + sensor_data(1,i)*eul2rotm(robot_qe(:,i)','XYZ')*RodriguesQuaternion(Eul2Quat(qs(:,end)))*[1;0;0];
+% end
+% figure(12);
+% plot(sp(1,:));
+% hold on;
+% plot(sp(2,:));
+% plot(sp(3,:));
+% legend('x','y','z');
 %%
 variance = zeros(size(P,2),size(P,3));
 for j=1:size(P,3)

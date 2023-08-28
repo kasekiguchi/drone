@@ -9,6 +9,7 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         dt
         model
         output = ["p","q"]
+        opts.output_func = [];
         opts.B = []
         opts.P = []
         opts.Q = []
@@ -16,29 +17,46 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     end
     Estimator.model = model;
     % p = length(model.state.get(output)); % number of output
-    % %dt = Estimator.model.dt;
+    %dt = Estimator.model.dt;
     n = Estimator.model.dim(1);% 状態数
     % 出力方程式の拡張線形化行列(JacobianH)の生成
     % output で登録された出力
     if class(output)=="function_handle"
         Estimator.JacobianH = output;
     else
-        p = length(model.state.get(output)); % number of output
-        %dt = Estimator.model.dt;
+        p = length(model.state.get(output));
         tmp=arrayfun(@(i) strcmp(Estimator.model.state.list,output(i)),1:length(output),'UniformOutput',false);
         syms dummy1 dummy2
         col = Estimator.model.state.num_list;
         Estimator.JacobianH= matlabFunction(cell2mat(arrayfun(@(k) cell2mat(arrayfun(@(i,j) zeroone( col*tmp{k}',i,j),col,tmp{k},"UniformOutput",false)),1:length(output),"UniformOutput",false)'),"Vars",[dummy1,dummy2]);
     end
-    %通常シミュレーション時
-    Estimator.output_func = @(self,param) self.sensor.result.state.get(param);%y = [p;q]にセンサ値追加する形で
-    Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
     
-    %パラメータ推定時（lidarセンサ出力追加）
+    % Estimator.sensor_func = @(self,param) self.sensor.result.state.get(param); % function to get sensor value: sometimes some conversion will be done
+    % Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
+    % Estimator.output_func = @(state,param) param*state; % output function
+    % Estimator.output_param = Estimator.JacobianH(0,0); % parameter for output_func
+
+    %のざきついか
+    %通常シミュレーション時
+    % Estimator.output_func = @(self,param) self.sensor.result.state.get(param);%y = [p;q]にセンサ値追加する形で
+    % Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
+
+    % %パラメータ推定時（lidarセンサ出力追加）
     % Estimator.output_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1)];
     % % Estimator.output_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1);self.sensor.lidar.result.length(3)];
     % Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
+    
+    Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1)]; % function to get sensor value: sometimes some conversion will be done
+    Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
 
+    %Estimator.output_param, output_func
+    if isempty(opts.output_func)
+        Estimator.output_func = @(state,param) param*state; % output function
+        Estimator.output_param = Estimator.JacobianH(0,0); % parameter for output_func
+    else
+        Estimator.output_func = opts.output_func; % output function
+        Estimator.output_param = []; % parameter for output_func
+    end
     % P, Q, R, B生成
     if isempty(opts.P) % 初期共分散行列
         Estimator.P = eye(n);

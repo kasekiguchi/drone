@@ -1,6 +1,6 @@
 ts = 0;
 dt = 0.01;
-te = 100;
+te = 10;
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
@@ -14,10 +14,10 @@ motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for no
   Points = [10 0 0]+[-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c]; 
   Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
   env = triangulation(Tri,Points);
-  a2 = 30;
+  a2 = 40;
   b2 = 1;
-  c2 = 30;
-  Points2 = [0 10 0]+[-a2 -b2 -c2;a2 -b2 -c2;a2 b2 -c2; -a2 b2 -c2;-a2 -b2 c2;a -b2 c2;a2 b2 c2; -a2 b2 c2]; 
+  c2 = 40;
+  Points2 = [0 10 0]+[-a2 -b2 -c2;a2 -b2 -c2;a2 b2 -c2; -a2 b2 -c2;-a2 -b2 c2;a2 -b2 c2;a2 b2 c2; -a2 b2 c2]; 
   Tri2  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
   env2 = triangulation(Tri2,Points2);
 % 
@@ -31,32 +31,36 @@ combinedTri = [env.ConnectivityList; env2.ConnectivityList + size(env.Points, 1)
 % combinedEnv = triangulation(combinedTri, combinedPoints);
 combinedEnv = env2;
 %%
-findPlaneEquation(env);
-%%
 initial_state.p = arranged_position([0, 0], 1, 1, 0);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 % パラメータ推定時オン
 % initial_state.l = [1; 1; 1; 1];
-initial_state.ps = [0;0;0];
-initial_state.qs = [1; 1; 1;];
-wall_param = [0,1,0,9];
+% initial_state.ps = [1;1;1];
+% initial_state.qs = [1; 1; 1;];
+
+% 野崎設定
+wall_param = [0,1,0,-9];
+psb = [0.1;0.1;0.1];
+qs = [0;0;pi/2];
 %%
 % default
 agent = DRONE;
 % agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-
-
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+
+% % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12(x,wall_param,psb,qs,p),"R",diag([1e-6*ones(1,3), 1e-8*ones(1,3),1e-6*ones(1,1)])));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_kiti(x,wall_param,psb,qs,p),"output_func",@(x,p) H_12_kiti(x,wall_param,psb,qs,p),"R",diag([1e-6*ones(1,3), 1e-8*ones(1,3),1e-6*ones(1,1)])));
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_test(x,p),"R",diag([1e-6*ones(1,3), 1e-8*ones(1,3),1e-6*ones(1,1)])));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_params(dt, initial_state, 1)),[@(x,p) JacobH_param2(x,p)],"B",[eye(6)*dt^2;eye(6)*dt;zeros(10,6)],"R",diag([1e-6*ones(1,3), 1e-8*ones(1,3),1e-4*ones(1,2)]),"P",diag([ones(1,12),10*ones(1,10)]),"Q",diag([10*ones(1,3),100*ones(1,3)])));
 
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_params2(dt, initial_state, 1)),@(x,p) JacobH_param18(x,wall_param,p),"B",[eye(6)*dt^2;eye(6)*dt;zeros(6,6)],"R",diag([1e-2*ones(1,3), 1e-4*ones(1,3),1e-5*ones(1,1)]),"P",diag([ones(1,12),10000*ones(1,6)])));
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_params2(dt, initial_state, 1)),@(x,p) JacobH_param18(x,wall_param,p),"B",[eye(6)*dt^2;eye(6)*dt;zeros(6,6)],"R",diag([1e-6*ones(1,3), 1e-8*ones(1,3),1e-6*ones(1,1)]),"P",diag([1*ones(1,12),100*ones(1,6)])));
 
-agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/2),'p0',[0.1;0.1;0.1],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.0001, 'seed', 0));
+agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/2),'p0',[0.1;0.1;0.1],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.000001, 'seed', 0));
 % agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],0),'p0',[0;0;0],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.0001, 'seed', 0)); % 2D lidar
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.do = @sensor_do;
@@ -85,6 +89,9 @@ agent.controller = HLC(agent,Controller_HL(dt));
 % % agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[3,3.5,2]}});
 % agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0.2,0.2,0.1]}});
 % % agent.reference = TIME_VARYING_REFERENCE_EDIT(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;0],"size",[0,0,0]}});
+% function sharedpq = initializepq()
+%     sharedpq = 42;
+% end
 
 function result = sensor_do(varargin)
 sensor = varargin{5}.sensor;
