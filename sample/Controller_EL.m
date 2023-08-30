@@ -3,10 +3,12 @@ function Controller= Controller_EL(dt,fFT)
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
+Ac2 = diag(1,1);
+Bc2 = [0;1];
 Controller.F1=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt);
 Controller.F2=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 Controller.F3=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
-Controller.F4=lqrd([0,1;0,0],[0;1],diag([100,10]),[0.1],dt);                       % ヨー角 
+Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
 eF1=Controller.F1;
 eF2=Controller.F2;
 eF3=Controller.F3;
@@ -50,17 +52,21 @@ else
 end
 %servo
 syms z
-Cc2 = [1 0 0 0];
-Controller.F1s=lqrd([Ac4,zeros(4,1);-Cc2,0],[Bc4;0],diag([100,10,10,1,0.01]),0.01,dt);
-eF1=Controller.F1s
-Controller.Vep = matlabFunction([-eF1*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
+% Cc2 = [1 0 0 0];
+% Ac4s=[Ac4,zeros(4,1);-Cc2,0];
+% Bc4s=[Bc4;0];
+% Controller.F1s=lqrd(Ac4s,Bc4s,diag([1000,100,10,10,0.1]),0.01,dt);
+% eF1s=Controller.F1s;
+% Controller.Vep = matlabFunction([-eF1s*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
+% Controller.Vep = matlabFunction([-eF1s *[ez1;z]; -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1, ez2, ez3, ez4, z});
+% eig(Ac4s - Bc4s * eF1s)
 
 Controller.dt = dt;
 Controller.type = "ELC";
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F1)
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F3)
-eig(diag(1, 1) - [0; 1] * Controller.F4)
+eig(Ac4 - Bc4 * eF1)
+eig(Ac4 - Bc4 * eF2)
+eig(Ac4 - Bc4 * eF3)
+eig(Ac2 - Bc2 * eF4)
 %% 線形システムにMCMPCコントローラを適用する場合
 % H : horizon
 % A2 = [0 1;0 0]; B2 = [0;1];

@@ -6,7 +6,7 @@ properties
     param
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vf % 階層1の入力を生成する関数ハンドル
-    z
+    z %z方向にサーボを適用するときの初期値
     Vs % 階層２の入力を生成する関数ハンドル
     approx_z %zサブシステムのゲイン，近似パラメータ，alpha
 end
@@ -19,7 +19,7 @@ methods
         obj.param.P = self.parameter.get(obj.parameter_name);
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.Vf = obj.param.Vf;
-        obj.z=0;
+        obj.z=0; %z方向にサーボを適用するときの初期値
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
         obj.approx_z = obj.param.approx_z; %zサブシステムのゲイン，近似パラメータ，alpha
     end
@@ -51,11 +51,12 @@ methods
         end
         % vf = Vfd(dt,x,xd',P,obj.param.F1);%線形入力
        %  %servo
-        if varargin{1}.t > 0
-                obj.z = obj.z + xd(3)-x(7);
-       end
-        vf = obj.Vf(z1,obj.z);
-        % vf = Vzft(obj.approx_z,z1);%近似FTC
+       %  if varargin{1}.t > 0
+       %          obj.z = obj.z + xd(3)-x(7);
+       % end
+       %  vf = obj.Vf(z1,obj.z);
+       %近似FTC
+        vf = Vzft(obj.approx_z,z1);
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向

@@ -15,7 +15,7 @@ agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
 %外乱を与える==========
 % agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
-% agent.input_transform = THRUST_DST_DRONE(agent,InputTransform_Dst_drone(time)); % 外乱付与
+% agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
 %=====================
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
