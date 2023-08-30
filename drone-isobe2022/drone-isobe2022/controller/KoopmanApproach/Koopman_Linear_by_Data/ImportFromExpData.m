@@ -19,11 +19,8 @@ clear data % 読み込んだファイル内のdataと同名の変数を初期化
 
 %データの個数をチェック
 data.N = find(logger.Data.t,1,'last');
-% data.N = 2000;
-% data.uN = find(logger.Data.agent.input{1},1,'last');
-% data.uN = size(logger.Data.agent.input{1},1); %GUIのデータはこっちじゃないとダメ？
 data.uN = 4; %入力の個数
-% data.uN(:,4) = size(logger.Data.agent.input{1},1); %GUIのデータはこっちじゃないとダメ？
+% data.uN = find(logger.Data.agent.input{1},1,'last');
 
 %% Get data
 % 状態毎に分割して保存
@@ -48,7 +45,7 @@ if logger.fExp==1
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
-    for i = 1:size(data.input,1)
+    for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
     end
     plot(logger.Data.t(data.startIndex:data.endIndex),data.input)

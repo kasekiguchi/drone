@@ -10,12 +10,13 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';  %plotResultの方も変更するように
-% FileName = 'test2.mat'; %お試し用
+% FileName = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'test2.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'test';  
-loading_filename = 'experiment_6_20_circle';  %matは含まないように注意！
+% loading_filename = 'experiment_6_20_circle';  %matは含まないように注意！
+loading_filename = 'sim_7_20_circle';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -25,8 +26,8 @@ targetpath=append(nowFolder,'\',FileName);
 %% Defining Koopman Operator
 
 %<使用している観測量>
-F = @(x) [x;1]; % 状態そのまま
-% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み)   <こちらが最新の観測量>
+F = @(x) [x;1]; % 状態変数+定数項1
+% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
 
 % load data
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
@@ -67,7 +68,7 @@ if size(Data.X,1)==13
 end
 
 %% Koopman linear
-% 12/12 関数化(双線形であるかどかの切り替え，上が双線形)
+% 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
 disp('now estimating')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
@@ -79,11 +80,11 @@ est.observable = F;
 disp('Estimated')
 
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
-%中間発表の推定精度検証シミュレーション
+%推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
-simResult.reference = ImportFromExpData2('experiment_6_20_circle_estimaterdata');
-% simResult.reference = ImportFromExpData2('sim_7_28_circle');
-% simResult.reference = ImportFromExpData2('experiment_7_11_circle_radius=0.7');
+% simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
+simResult.reference = ImportFromExpData_estimation('sim_7_28_circle');
+% simResult.reference = ImportFromExpData_estimation('experiment_7_11_circle_radius=0.7');
 
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
@@ -100,16 +101,16 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-if flg.bilinear == 1     
+if flg.bilinear == 1  %双線形
     for i = 1:1:simResult.reference.N-2
         simResult.Z(:,i+1) = est.ABE'*[simResult.Z(:,i);simResult.U(:,i);reshape(kron(simResult.Z(:,i),simResult.U(:,i)),[],1)];
     end
 else
     for i = 1:1:simResult.reference.N-2
-        simResult.Z(:,i+1) = est.A * simResult.Z(:,i) + est.B * simResult.U(:,i);
+        simResult.Z(:,i+1) = est.A * simResult.Z(:,i) + est.B * simResult.U(:,i); %状態方程式 z[k+1] = Az[k]+BU
     end
 end
-simResult.Xhat = est.C * simResult.Z;
+simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
 
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
@@ -129,10 +130,8 @@ save(targetpath,'est','Data','simResult')
 disp('Saved to')
 disp(targetpath)
 
-%% プロット
+%% 先輩が今まで作られた観測量
 
-% plotResult
-%% 
 % F = @(x) [x;1]; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量
 % F = @eulerAngleParameter; % 姿勢角をオイラー角モデルの状態方程式からdq/dt部分を抜き出した観測量

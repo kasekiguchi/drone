@@ -1,4 +1,4 @@
-function data = ImportFromExpData2(expData_Filename)
+function data = ImportFromExpData_estimation(expData_Filename)
 %INPORTFROMEXPDATA ドローンの実験データから入出力を抜き出す関数
 %   expData_Filename : 実験データの保存場所
 %   Data     : 出力変数をまとめる構造体
@@ -19,16 +19,13 @@ clear data % 読み込んだファイル内のdataと同名の変数を初期化
 
 %データの個数をチェック
 data.N = find(logger.Data.t,1,'last');
-% data.N = 2000;
-% data.uN = find(logger.Data.agent.input{1},1,'last');
-% data.uN = size(logger.Data.agent.input{1},1); %GUIのデータはこっちじゃないとダメ？
 data.uN = 4; %入力の個数
-% data.uN(:,4) = size(logger.Data.agent.input{1},1); %GUIのデータはこっちじゃないとダメ？
+% data.uN = find(logger.Data.agent.input{1},1,'last');
 
 %% Get data
 % 状態毎に分割して保存
 % XYに結合する際の都合で↓時系列,→状態
-if logger.fExp==1
+if logger.fExp==1 %実機データの場合
 %--------------------time----------------------
     data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))'; 
 %     data.startIndex = find(data.est.p(:,3)>0.4,1,'first'); %0.4m以上になった部分からデータの取得開始

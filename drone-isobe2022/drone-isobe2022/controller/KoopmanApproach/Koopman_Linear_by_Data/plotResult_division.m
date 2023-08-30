@@ -9,11 +9,11 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 
-loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_7_7_circle=takeoff_estimation=circle.mat';
-loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
+% loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
-% loadfilename{1} = 'test1.mat';
+loadfilename{1} = 'test2.mat';
 % loadfilename{2} = 'test2.mat';
 % loadfilename{2} = 'test3.mat';
 % loadfilename{3} = 'test3.mat';
@@ -61,7 +61,7 @@ Fsize.label = 18;
 Fsize.lgd = 16;
 Fsize.luler = 18;
 
-%% load
+%% load 凡例などの設定
 HowmanyFile = size(loadfilename,2);
 for i = 1:HowmanyFile
     file{i} = load(loadfilename{i});
@@ -171,7 +171,7 @@ end
 %% Q
 newcolors = [0 0.4470 0.7410
              0.9900 0 0
-             0.3660 0.6740 0.1880];
+             0.3660 0.6740 0.1880]; %出力グラフの色の設定
 
 for graph_num = 1:3 
     figure(graph_num + 3)

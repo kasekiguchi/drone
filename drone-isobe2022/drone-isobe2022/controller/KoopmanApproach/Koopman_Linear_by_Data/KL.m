@@ -12,7 +12,8 @@ for i = 1:size(X,2)%1:Data.num
     Xlift(:,i) = F(X(:,i));
     Ylift(:,i) = F(Y(:,i));
 end
-[numX, ~] = size(Xlift);
+
+[numX, ~] = size(Xlift); %[numX, ~]=size(Xlift): Xliftのサイズ=(A行,B列)のとき，A行の値をnumXに入れ，B列の値は使わない(~:notの意味)
 [numU, ~] = size(U);
 
 % %ABをまとめて計算する 参考資料記載のやりかた
