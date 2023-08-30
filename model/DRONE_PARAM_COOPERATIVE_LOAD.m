@@ -25,11 +25,11 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             arguments
                 % P = [g m0 j0 rho li mi ji]
                 name % DIATONE
-                N = 4;
+                N = 6;
                 type = "struct";
                 % parameters : 5 + 8*N
                 param.g = 9.81;
-                param.m0 = 1.5;
+                param.m0 = 1.45;
                 param.J0 = [0.15;0.15;0.25];
                 param.rho = [];
                 param.li = 1*ones(N,1);
