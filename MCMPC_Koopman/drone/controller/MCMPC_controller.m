@@ -82,8 +82,7 @@ classdef MCMPC_controller < CONTROLLER_CLASS
 
             obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num) + obj.input.average;
              %(新しい入力の生成，σ×[入力数×ホライズン数×サンプル数]+平均値),randn:標準世紀分布から取り出された乱数スカラーを返す
-            input2 = obj.input.u1(:,:,1);
-            plot(input2)
+            
             %-- 入力列の生成
             % 正規分布に従う．設定した標準偏差と平均に基づく
             % 負の入力の阻止(find()<0の部分)
