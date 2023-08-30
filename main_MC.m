@@ -551,10 +551,10 @@ agent(1).animation(logger,"target",1);
 
 %% save data
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat(['SlopeLanding-posWeight-sigma-each', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat(['SlopeLanding-input4-eachSigma-normalWeight', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230731/
+    mkdir ../../students/komatsu/simdata/20230801/
 end
 % save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
@@ -627,16 +627,17 @@ end
 % saveas(3,strcat(Outputdir,datename, "_velocity"),'fig');
 % saveas(4,strcat(Outputdir,datename, "_input"),'fig');
 %% 動画生成
-% tic
-% pathJ = data.pathJ;
-% for m = 1:size(pathJ, 2)
-%     pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]);
-% end
-% rmdir ('C:/Users/student/Documents/students/komatsu/simdata/20230524/Animation/','s'); % 直前のシミュレーションより短くする場合
-% mkdir C:/Users/student/Documents/students/komatsu/simdata/20230524/Animation/;
-% Outputdir_mov = 'C:/Users/student/Documents/students/komatsu/simdata/20230524/Animation/';
-% PlotMov
-% toc
+tic
+pathJ = data.pathJ;
+for m = 1:size(pathJ, 2)
+    pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]); % 0 ~ サンプル数　までで正規化
+end
+% rmdir ('C:/Users/student/Documents/students/komatsu/simdata/20230818/Animation/','s'); % 直前のシミュレーションより短くする場合
+mkdir C:/Users/student/Documents/students/komatsu/simdata/20230820/Animation/video;
+mkdir C:/Users/student/Documents/students/komatsu/simdata/20230820/Animation/png/Animation1/Animation_1/;
+Outputdir = 'C:/Users/student/Documents/students/komatsu/simdata/20230820/Animation/';
+PlotMov
+toc
 %% Home PC adress
 % mkdir ../../students/komatsu/simdata/20230522/ png/Animation1
 % mkdir ../../students/komatsu/simdata/20230522/ png/Animation_omega

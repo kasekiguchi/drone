@@ -20,9 +20,9 @@ Rdata = zeros(12, size(logt, 1));
 IV = zeros(4, size(logt, 1));
 for R = 1:size(logt, 1)
     Rdata(:, R) = data.xr{R}(1:12, 1);
-    if ~isempty(data.input_v); IV(:, R) = data.input_v{R}; end
-    if length(data.sigma{1}) == 4; SigmaData(:, R) = data.sigma{R}; end
-    Bestcost(:, R) = data.bestcost{R};
+%     if ~isempty(data.input_v); IV(:, R) = data.input_v{R}; end
+%     if length(data.sigma{1}) == 4; SigmaData(:, R) = data.sigma{R}; end
+%     Bestcost(:, R) = data.bestcost{R};
 end
 Diff = Edata - Rdata(1:3, :);
 close all
