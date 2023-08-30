@@ -19,13 +19,15 @@ logt = logger.data('t',[],[]);
 Rdata = zeros(12, size(logt, 1));
 IV = zeros(4, size(logt, 1));
 for R = 1:size(logt, 1)
-    Rdata(:, R) = data.xr{R}(1:12, 1);
+    % Rdata(:, R) = data.xr{R}(1:12, 1);
 %     if ~isempty(data.input_v); IV(:, R) = data.input_v{R}; end
 %     if length(data.sigma{1}) == 4; SigmaData(:, R) = data.sigma{R}; end
 %     Bestcost(:, R) = data.bestcost{R};
 end
 Diff = Edata - Rdata(1:3, :);
 close all
+
+Rdata = logger.data(1, "p", "r")';
 
 % x-y
 % figure(5); plot(Edata(1,:), Edata(2,:)); xlabel("X [m]"); ylabel("Y [m]");
@@ -100,8 +102,8 @@ ylabel("Calculation time [s]");
 % set(gcf, "Position", [960 0 960 1000])
 
 %% save
-saveas(1,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_p.epsc");
-saveas(2,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_q.epsc");
-saveas(3,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_v.eps");
-saveas(4,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_input.eps");
-saveas(7,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_ZZ.eps")
+% saveas(1,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_p.epsc");
+% saveas(2,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_q.epsc");
+% saveas(3,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_v.eps");
+% saveas(4,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_input.eps");
+% saveas(7,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_ZZ.eps")

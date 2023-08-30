@@ -629,13 +629,17 @@ end
 %% 動画生成
 tic
 pathJ = data.pathJ;
+
+data.variable_particle_num = size(data.pathJ{1},2) * ones(size(data.pathJ{1},2), 1);
 for m = 1:size(pathJ, 2)
     pathJN{m} = normalize(pathJ{m},'range', [1, data.variable_particle_num(m)]); % 0 ~ サンプル数　までで正規化
+    % pathJN{m} = normalize(pathJ{m},'range', [1, length(size(data.pathJ{1},2))]);
 end
 % rmdir ('C:/Users/student/Documents/students/komatsu/simdata/20230818/Animation/','s'); % 直前のシミュレーションより短くする場合
-mkdir C:/Users/student/Documents/students/komatsu/simdata/20230820/Animation/video;
-mkdir C:/Users/student/Documents/students/komatsu/simdata/20230820/Animation/png/Animation1/Animation_1/;
-Outputdir = 'C:/Users/student/Documents/students/komatsu/simdata/20230820/Animation/';
+mkdir C:/Users/student/Documents/students/komatsu/simdata/20230830/Animation/video;
+mkdir C:/Users/student/Documents/students/komatsu/simdata/20230830/Animation/png/Animation1/Animation_1/;
+Outputdir_mov = 'C:/Users/student/Documents/students/komatsu/simdata/20230830/Animation/';
+Outputdir = 'C:/Users/student/Documents/students/komatsu/simdata/20230830/Animation/';
 PlotMov
 toc
 %% Home PC adress

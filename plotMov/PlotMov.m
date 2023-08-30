@@ -4,10 +4,8 @@ now = datetime('now');
 datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
 
 % 	writerObj=VideoWriter(strcat(Outputdir,'/video/sice23_',datename), 'MPEG-4');
-    
-    %% これ単体なら必要
-    % writerObj=VideoWriter(strcat(Outputdir,'/video/sice23_',datename));
-    % open(writerObj);
+    writerObj=VideoWriter(strcat(Outputdir,'/video/sice23_',datename));
+    open(writerObj);
     tt = 0:0.1:15;
     
     
@@ -35,37 +33,20 @@ datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
         path_count = size(pathJN{count}, 2); % N
         Color_array = zeros(path_count,3);
         Color_ceil = zeros(path_count,1);
+		for j = 1:path_count % サンプルごとにホライズンはまとめて描画
+            %% もとのやつ　create by kotaka and komatsu
+			% plot(data.path{count}(3,:,j),data.path{count}(7,:,j),'Color',Color_map(ceil(pathJN{count}(j, 1)),:), 'LineWidth',1); % HL
+%             plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(pathJN{count}(1, j)),:), 'LineWidth',1); % MC
+%             Color_array(j,:) = Color_map(ceil(pathJN{count}(1, j)),:);
+%             Color_ceil(j,1) = round(ceil{count}(1, j));
+% 			hold on;
 
-        ConstIndex = min(find(Jorder{count}(:,1)==10^5)); % 制約による棄却したサンプルのインデックス
-% 		for j = 1:path_count % サンプルごとにホライズンはまとめて描画 サンプルのループ
-%             %% もとのやつ　create by kotaka and komatsu
-% 			% plot(data.path{count}(3,:,j),data.path{count}(7,:,j),'Color',Color_map(ceil(pathJN{count}(j, 1)),:), 'LineWidth',1); % HL
-% %             plot(data.path{count}(1,:,j),data.path{count}(2,:,j),'Color',Color_map(ceil(pathJN{count}(1, j)),:), 'LineWidth',1); % MC
-% %             Color_array(j,:) = Color_map(ceil(pathJN{count}(1, j)),:);
-% %             Color_ceil(j,1) = round(ceil{count}(1, j));
-% % 			hold on;
-% 
-%             %% 評価の良いサンプルから描画
-%             % Jorder = [J, I];
-%             Jindex = Jorder{count}(j,2); % 評価値の良いほうから評価値と元のインデックスの抜き取り
-%             plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color',Color_map(Jindex,:),'LineWidth',1);
-%             hold on;
-%         end
-
-        %% 制約内までは色付き、　制約外からはすべて灰色で描画
-        % 後に描画したのが上にくるため制約違反から描画
-        for j = ConstIndex:path_count
+            %% 評価の良いサンプルから描画
+            % Jorder = [J, I];
             Jindex = Jorder{count}(j,2); % 評価値の良いほうから評価値と元のインデックスの抜き取り
-            plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color', '#808080', 'LineWidth',1);
+            plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color',Color_map(Jindex,:),'LineWidth',1.5);
             hold on;
         end
-        for j = 1:ConstIndex - 1
-            Jindex = Jorder{count}(j,2); % 評価値の良いほうから評価値と元のインデックスの抜き取り
-            plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color',Color_map(Jindex,:),'LineWidth',1);
-            hold on;
-        end
-        
-
         plot(data.state(count, 2), data.state(count,3), '.', 'MarkerSize', 20, 'Color', 'red');    % 現在位置
 %         plot(Rdata(1,count), Rdata(2,count), 'h', 'MarkerSize', 15, 'Color', 'blue');   % 目標位置 Rdata = xr
 % 		x = DATA.X(count);
@@ -86,7 +67,7 @@ datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
 % 		end
 		plot(data.bestx(count,:),data.besty(count,:),'--','Color',[255,94,25]/255,'LineWidth',2);
         plot(cos(tt/2), sin(tt/2), 'LineWidth', 1, 'color', 'green'); % 目標起動
-        % pgon = polyshape([-1.5 -1.5 -0.5 -0.5],[1.5 -1.5 -1.5 1.5]); plot(pgon, 'FaceColor', "red", "EdgeColor", "red");
+        pgon = polyshape([-1.5 -1.5 -0.5 -0.5],[1.5 -1.5 -1.5 1.5]); plot(pgon, 'FaceColor', "red", "EdgeColor", "red");
         hold off;
 
 		str = ['$$t$$= ',num2str(logt(count,1),'%.3f'),' s'];
@@ -112,24 +93,21 @@ datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
 % 	    saveas(gcf,strcat(Outputdir,'/eps/Animation1/',filename),'epsc');
 % 	    savefig(gcf,strcat(Outputdir,'/fig/Animation1/',filename),'compact');
 %      
-		saveas(gcf,strcat(Outputdir ,filename),'png'); %コメントアウトするとちょっと早くなる
-
-        %% これ単体で書き出すときは必要
-        % I=getframe(gcf);
-        % imwrite(I.cdata,strcat(Outputdir_mov,filename,'.png'))
-        % 
-        % %%
-		% refreshdata(gcf);
-		% %-- get frames as images --%
-		% frame = getframe(gcf);
-        % im{count} = frame2im(frame);
-		% %- Add frame to video object -%
-		% writeVideo(writerObj, frame);
-		% drawnow limitrate;
-        % hold off
+% 		saveas(gcf,strcat(Outputdir,'/png/Animation1/',filename),'png'); コメントアウトするとちょっと早くなる
+        I=getframe(gcf);
+        imwrite(I.cdata,strcat(Outputdir_mov,filename,'.png'))
+        
+        %%
+		refreshdata(gcf);
+		%-- get frames as images --%
+		frame = getframe(gcf);
+        im{count} = frame2im(frame);
+		%- Add frame to video object -%
+		writeVideo(writerObj, frame);
+		drawnow limitrate;
+        hold off
        
     end
     % 
-
-    % close(writerObj);
-    % close;
+    close(writerObj);
+    close;
