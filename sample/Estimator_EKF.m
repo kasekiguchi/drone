@@ -30,24 +30,21 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         col = Estimator.model.state.num_list;
         Estimator.JacobianH= matlabFunction(cell2mat(arrayfun(@(k) cell2mat(arrayfun(@(i,j) zeroone( col*tmp{k}',i,j),col,tmp{k},"UniformOutput",false)),1:length(output),"UniformOutput",false)'),"Vars",[dummy1,dummy2]);
     end
-    
-    % Estimator.sensor_func = @(self,param) self.sensor.result.state.get(param); % function to get sensor value: sometimes some conversion will be done
-    % Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
-    % Estimator.output_func = @(state,param) param*state; % output function
-    % Estimator.output_param = Estimator.JacobianH(0,0); % parameter for output_func
-
-    %のざきついか
-    %通常シミュレーション時
-    % Estimator.output_func = @(self,param) self.sensor.result.state.get(param);%y = [p;q]にセンサ値追加する形で
-    % Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
-
-    % %パラメータ推定時（lidarセンサ出力追加）
-    % Estimator.output_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1)];
-    % % Estimator.output_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1);self.sensor.lidar.result.length(3)];
-    % Estimator.output_param = ["p","q"];%% p,q残してパラメータ追加
-    
-    Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1)]; % function to get sensor value: sometimes some conversion will be done
+    %%通常シミュレーション時
+    sigmap = 0;
+    sigmaq = 0;
+    Estimator.sensor_func = @(self,param) [self.sensor.result.state.get(param)+[sigmap*randn(3,1);sigmaq*randn(3,1)]] ; % function to get sensor value: sometimes some conversion will be done
     Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
+
+    %%パラメータ推定時
+    % sigmap = 0.1;
+    % sigmaq = 0.01;
+    % sigmar = 0;
+    % sigmap = 0;
+    % sigmaq = 0;
+    % sigmar = 0;
+    % Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p') + sigmap*randn(3,1);self.sensor.result.state.getq('3') + sigmaq*randn(3,1);self.sensor.lidar.result.length(1);self.sensor.lidar.result.length(3)]; % function to get sensor value: sometimes some conversion will be done
+    % Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
 
     %Estimator.output_param, output_func
     if isempty(opts.output_func)
