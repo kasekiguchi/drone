@@ -24,7 +24,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,0]},"HL"});
 fApprox_FTxy = 0;%approximate x,y directional FTC input : 1
 fNewParam = 0;%新しく更新する場合 : 1
-fConfirmFig =0;%近似入力のfigureを確認する場合 : 1
+fConfirmFig =1;%近似入力のfigureを確認する場合 : 1
 agent.controller = FTC(agent,Controller_FT(dt, fApprox_FTxy, fNewParam, fConfirmFig));
 run("ExpBase");
 function dfunc(app)

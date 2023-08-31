@@ -70,15 +70,15 @@ if fApprox_FTxy
 end
 
 %servoの時
-Cc2 = [1 0];
-[Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
-Controller.F1s=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([100,1,0.1]),0.1,dt);
-syms z real % Model_EulerAngle_Servoを使う前提
-syms sz1 [2 1] real
-Ad1 = [Ad1,zeros(2,1);-Cc2,1];
-Bd1 = [Bd1;0];
-vF1s = Controller.F1s;
-Controller.Vf = matlabFunction([-vF1s*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^2*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^3*[sz1;z]],"Vars",{sz1,z});
+% Cc2 = [1 0];
+% [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
+% Controller.F1s=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([100,1,0.1]),0.1,dt);
+% syms z real % Model_EulerAngle_Servoを使う前提
+% syms sz1 [2 1] real
+% Ad1 = [Ad1,zeros(2,1);-Cc2,1];
+% Bd1 = [Bd1;0];
+% vF1s = Controller.F1s;
+% Controller.Vf = matlabFunction([-vF1s*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^2*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^3*[sz1;z]],"Vars",{sz1,z});
 
 %% 二層
 syms sz2 [4 1] real
