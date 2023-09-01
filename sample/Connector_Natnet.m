@@ -10,6 +10,7 @@ arguments
 end
 [~,hostname] = system('hostname');
 hostname = string(strtrim(hostname));
-ClientIP = resolvehost(hostname,"address"); % client ip
+% ClientIP = resolvehost(hostname,"address"); % client ip
+ClientIP = '192.168.100.99';
 motive=NATNET_CONNECTOR("HostIP",HostIP,"ClientIP",ClientIP);
 end
