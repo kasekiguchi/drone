@@ -2,9 +2,9 @@ function ref = Case_study_trajectory(param)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 arguments
-    param.freq = 10
-    param.orig = [0 0 1]
-    param.size = [1 1 0]
+    param.freq = 10% 周期
+    param.orig = [0 0 0]
+    param.size = [1 1 0]% 各軸の振幅
     param.phase = -pi
 end
 
@@ -56,8 +56,8 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 % 円旋回
-x = 2*sin(2*pi*t/T);
-y = 2*cos(2*pi*t/T);
+x = sin(2*pi*t/T);
+y = cos(2*pi*t/T);
 z = 1;
 
 %縦円旋回
