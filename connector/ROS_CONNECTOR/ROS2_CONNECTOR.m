@@ -31,7 +31,7 @@ classdef ROS2_CONNECTOR < CONNECTOR_CLASS
     end
 
     methods
-        function obj = ROS2_CONNECTOR(info)
+         function obj = ROS2_CONNECTOR(info)
             disp('Preparing connection to robot operating system...');
             %-- Configulations for ROS
             obj.subTopic = info.subTopic;
