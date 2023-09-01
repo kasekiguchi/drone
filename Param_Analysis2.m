@@ -17,11 +17,11 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
 flag_eps=0;
-flag_png=1;
+flag_png=0;
 % Log Dataの読み取りと格納
 % log2 = LOGGER('./Data/data030402503.mat');
 % log2 = LOGGER('./Data/miidmove_Log(24-Jul-2023_13_38_35).mat');
-log = LOGGER('./Data/RLSmidTrue_Log(31-Aug-2023_02_58_44).mat');
+log = LOGGER('./Data/RLS_result_0904.mat');
 % log = LOGGER('./Data/nomove_little_Log(14-Jul-2023_00_53_31).mat');
 
 %% ログ
@@ -129,7 +129,7 @@ for j=2:last
         % qt = qt./vecnorm(qt,2);
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         A(:,ds)=[];
-        [Xn,Pn] = param_analysis_eq(A',zeros(size(A,2),1),-1*ones(size(A,1),1),alpha*eye(size(A,2)),1);
+        [Xn,Pn] = RLS(A,zeros(size(A,2),1),-1*ones(size(A,1),1),alpha*eye(size(A,2)),1);
         P_stack(:,:,j-1) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
@@ -155,7 +155,7 @@ for j=2:last
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         ds = find(A(2,:)==0);
         A(:,ds)=[];
-        [Xn,Pn] = param_analysis_eq(A',Xn,-1*ones(size(A,1),1),Pn,1);
+        [Xn,Pn] = RLS(A,Xn,-1*ones(size(A,1),1),Pn,1);
         P_stack(:,:,j-1) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];

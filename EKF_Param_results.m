@@ -16,8 +16,8 @@
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/EKF_mid0904_Log(29-Aug-2023_18_45_47).mat');
-flag_png=1;
+log = LOGGER('./Data/Log(01-Sep-2023_14_40_35).mat');
+flag_png=0;
 %% ログ
 tspan = [0 ,100];
 % tspan = [0 99];

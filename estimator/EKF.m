@@ -74,8 +74,8 @@ methods
         C = obj.JacobianH(x,p);
         P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % Predicted covariance
         G = (P_pre*C')/(C*P_pre*C'+obj.R); % Kalman gain
-        P = (eye(obj.n)-G*C)*P_pre;	% Update covariance
-        % P = eye(obj.n);
+        % P = (eye(obj.n)-G*C)*P_pre;	% Update covariance
+        P = 0.1*eye(obj.n);
         tmpvalue = xh_pre + G*(y-yh);	% Update state estimate
         tmpvalue = obj.model.projection(tmpvalue);
         obj.result.state.set_state(tmpvalue);
