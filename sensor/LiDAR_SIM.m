@@ -1,4 +1,4 @@
-classdef LiDAR_SIM < SENSOR_CLASS
+ classdef LiDAR_SIM < handle
 %   単相LiDAR（全方位センサー）のsimulation用クラス
 %   lidar = LiDAR(param)
 %   (optional) radius = 1 default 20 m

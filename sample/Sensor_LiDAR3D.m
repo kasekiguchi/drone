@@ -9,14 +9,16 @@ arguments
     param.seed = 0;
     param.noise = 0.03; % 標準偏差
     param.dead_zone = 0.1;
+    param.p0 = [0;0;0];    
+    param.R0 = eye(3);
 end
-Sensor.name = ["lidar"];
-Sensor.type = ["LiDAR3D_SIM"];
-Sensor.param.env = param.env;
-Sensor.param.radius = param.radius;
-Sensor.param.theta_range = param.theta_range;
-Sensor.param.phi_range = param.phi_range;
-Sensor.param.seed = param.seed;
-Sensor.param.noise = param.noise;
-Sensor.param.id = id;
+Sensor.env = param.env;
+Sensor.radius = param.radius;
+Sensor.theta_range = param.theta_range;
+Sensor.phi_range = param.phi_range;
+Sensor.seed = param.seed;
+Sensor.noise = param.noise;
+Sensor.id = id;
+Sensor.p0 = param.p0;
+Sensor.R0 = param.R0;
 end

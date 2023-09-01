@@ -12,7 +12,7 @@ classdef POINT_MASS_PARAM < PARAMETER_CLASS
         function obj = POINT_MASS_PARAM(name,type,param)
             arguments
                 name
-                type = "row";            
+                type = "struct";            
                 param.additional = []; % プロパティに無いパラメータを追加する場合
                 param.A = [zeros(3) eye(3);zeros(3,6)]; % 次の時刻に入力の位置に行くモデル
                 param.B = [zeros(3);eye(3)];

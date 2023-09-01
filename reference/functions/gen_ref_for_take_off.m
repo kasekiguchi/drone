@@ -1,14 +1,26 @@
 function [Xd,vd] = gen_ref_for_take_off(Xd_old,sp,d,te,t)
 %% Setting
-%離陸の目標速度
-take_off_vz     = 0.2;% m/s
-%%
+% calc reference position and its higher time derivatives
+% reference designed as a 9-degree polynomial function of time
+% [Inputs] 
+% Xd_old : reference calculated at previous time
+% sp : initial offset
+% d : reference altitude
+% te : terminal time to reach d
+% t : current time
+% 
+% [Output]
+% Xd : reference [[p;yd], [p^(1);0], [p^(2);0], [p^(3);0], [p^(4);0]] as column vector 
+%    : Xd in R^20
+%    : yd is a yaw angle reference
+% vd : reference velocity
 
 %% Variable set
 Xd  = zeros( 20, 1);
 %% Set Xd
-Xd( 1, 1)   = Xd_old( 1);% ここで目標位置x
-Xd( 2, 1)   = Xd_old( 2);% ここで目標位置y
+Xd( 1, 1)   = Xd_old( 1);% ref x
+Xd( 2, 1)   = Xd_old( 2);% ref y
+Xd( 4, 1)   = Xd_old( 4);% ref yaw angle
 if t<=te
     tra=(126*d*t^5)/te^5 - (420*d*t^6)/te^6 + (540*d*t^7)/te^7 - (315*d*t^8)/te^8 + (70*d*t^9)/te^9;
     dtra = (630*d*t^4)/te^5 - (2520*d*t^5)/te^6 + (3780*d*t^6)/te^7 - (2520*d*t^7)/te^8 + (630*d*t^8)/te^9;

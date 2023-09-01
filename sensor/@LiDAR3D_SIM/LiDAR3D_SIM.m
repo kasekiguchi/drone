@@ -1,4 +1,4 @@
-classdef LiDAR3D_SIM < SENSOR_CLASS
+classdef LiDAR3D_SIM < handle
   %   3次元LiDAR（全方位センサー）のsimulation用クラス
   %   lidar = LiDAR3D_SIM(param)
   %   (optional) radius = 1 default 40 m
@@ -16,6 +16,8 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
   properties (SetAccess = private)
     radius = 40;     % active distance
     dead_zone = 0.2; % minimum range
+    p0 = [0;0;0];    % sensor origin
+    R0 = eye(3);     % sensor rotation 
     fp               % face points : [x1 y1 z1 x2 y2 z2 x3 y3 z3; ...];
     TR               % triangulation
     cn               % TR.ConnectivityLists
@@ -29,7 +31,11 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
   methods
 
     function obj = LiDAR3D_SIM(self, param)
-      % 【required input】 
+      % https://en.wikipedia.org/wiki/Spherical_coordinate_system
+      % theta : angle from z-axis
+      % phi : angle from x-axis
+      % (theta,phi) = (pi/2, 0) means x-axis
+      % 【required input】
       % param.env : environment : assumes stlread output
       % param.theta_range : laser dir : pi/2 + [-1:0.1:1];
       % param.phi_range : laser dir : -pi:0.1:pi;
@@ -42,16 +48,18 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       if isfield(param, 'radius'); obj.radius = param.radius; end
       if isfield(param, 'noise'); obj.noise = param.noise; end
       if isfield(param, 'seed'); obj.seed = param.seed; end
-        TR = param.env;                                               % env : TR = stlread(STL);
-        cn = TR.ConnectivityList;
-        ps = TR.Points;
-        obj.fp = [ps(cn(:, 1), :), ps(cn(:, 2), :), ps(cn(:, 3), :)]; % face points : [x1 y1 z1 x2 y2 z2 x3 y3 z3; ...];
-        obj.constant = obj.Fp2mat_for_matrix_inverse(obj.fp);
-        obj.TR = TR;
-        obj.cn = obj.TR.ConnectivityList;
-        obj.ps = obj.TR.Points;
-        obj.ic = incenter(TR);                                        % 三角形の内心
-        obj.fn = faceNormal(TR);                                      % 法線ベクトル（外向き）
+      if isfield(param, 'p0'); obj.p0 = param.p0; end
+      if isfield(param, 'R0'); obj.R0 = param.R0; end
+      TR = param.env;                                               % env : TR = stlread(STL);
+      cn = TR.ConnectivityList;
+      ps = TR.Points;
+      obj.fp = [ps(cn(:, 1), :), ps(cn(:, 2), :), ps(cn(:, 3), :)]; % face points : [x1 y1 z1 x2 y2 z2 x3 y3 z3; ...];
+      obj.constant = obj.Fp2mat_for_matrix_inverse(obj.fp);
+      obj.TR = TR;
+      obj.cn = obj.TR.ConnectivityList;
+      obj.ps = obj.TR.Points;
+      obj.ic = incenter(TR);                                        % 三角形の内心
+      obj.fn = faceNormal(TR);                                      % 法線ベクトル（外向き）
       obj.phi_range = param.phi_range;
       obj.theta_range = param.theta_range;
       th = obj.theta_range;
@@ -72,8 +80,9 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       %             else
       %                 env = obj.env;
       %             end
-      p = Plant.state.p;              % 実状態
-      R = Plant.state.getq('rotmat'); % 実状態
+      R = Plant.state.getq('rotmat'); % センサー取り付け機体姿勢
+      p = Plant.state.p + R*obj.p0;   % センサー位置
+      R = R*obj.R0;                   % センサー姿勢
       %% ここは工夫の余地あり．idsを絞れればそれだけ早くなる．
       rp = obj.ic - p';               % 内心への相対位置
       ip1 = sum(rp .* obj.fn, 2) < 0; % 「内積が負の壁」が見える向きの壁面
@@ -109,34 +118,42 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       obj.result = result;
     end
 
-    function fh = show(obj, opt)
-      arguments
-        obj
-        opt.fField = true;
-        opt.fLocal = true; % ボディ座標から見たセンサー情報
-        opt.FH = 1;
-        opt.logger = [];
-        opt.t = 1;
-        opt.p = obj.self.plant.state.p;
-        opt.R = obj.self.plant.state.q;
-        opt.po = obj.result.sensor_points;
-        opt.param = [];
+    function ax = show(obj, varargin)%opt)
+      % 環境の描画の仕方
+      % agent.sensor.lidar.show('FH',1,'logger',logger,'param',struct('fField',1))
+      % arguments
+      %   opt.fField = true;
+      %   opt.fLocal = true; % ボディ座標から見たセンサー情報
+      %   opt.FH = 1;
+      %   opt.ax = [];
+      %   opt.logger = [];
+      %   opt.t = 1;
+      %   opt.p = obj.self.plant.state.p;
+      %   opt.R = obj.self.plant.state.q;
+      %   opt.po = obj.result.sensor_points;
+      %   opt.param = [];
+      % end
+      opt = struct(varargin{:});
+      if isempty(opt.ax)
+        fh = figure(opt.FH);
+        ax = fh.CurrentAxes;
+        fh.WindowState = 'maximized';
+      else
+        ax = opt.ax;
       end
       if ~isempty(opt.logger)
-        fh = figure(opt.FH);
         logger = opt.logger;
-        p = logger.Data.agent.plant.result{opt.t}.state.p;
-        R = logger.Data.agent.plant.result{opt.t}.state.q;
-        po = logger.Data.agent.sensor.result{opt.t}.sensor_points;
+        p = logger.Data.agent.plant.result{opt.k}.state.p;
+        R = logger.Data.agent.plant.result{opt.k}.state.q;
+        po = logger.Data.agent.sensor.result{opt.k}.sensor_points;
         if isfield(opt.param, "fField")
           opt.fField = opt.param.fField;
         end
-        opt.fLocal = false;
+        opt.fLocal = true;
       else
         p = opt.p;
         R = opt.R;
         po = opt.po;
-        fh = figure(opt.FH);
       end
       if ~isempty(opt.param)
         fn = fieldnames(opt.param);
@@ -146,22 +163,20 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
       end
       switch length(R)
         case 4
-          R = rotmat(quaternion(R(:)'), 'frame');
+          R = rotmat(quaternion(R(:)'), 'point');
         case 3
           R = rotmat(quaternion(R(:)', 'euler', 'ZYX', 'frame'), 'point');
       end
-      ax = fh.CurrentAxes;
-      fh.WindowState = 'maximized';
-      clf(fh);
-      hold on
-      axis equal
-      daspect([1 1 1]);
-      view([-3 1 2]);
-      xlabel("x");
-      ylabel("y");
-      zlabel("z");
-      axis vis3d
-      if opt.fLocal % ボディ座標系
+      cla(ax);
+      hold(ax,"on");
+      axis(ax,"equal");
+      daspect(ax,[1 1 1]);
+      %view(ax,[-3 1 2]);
+      xlabel(ax,"x");
+      ylabel(ax,"y");
+      zlabel(ax,"z");
+      axis(ax,"vis3d");
+      if opt.fLocal % ボディ座標系から見た点群
         p = [0; 0; 0];
         po = R' * po - p(:);
         %po = obj.result.Location
@@ -169,24 +184,28 @@ classdef LiDAR3D_SIM < SENSOR_CLASS
         %campos(p-bx);%% - 1 * bx);%+[0;-1;1]);
         %camtarget(p+bx);% + 5*bx);
       else
-        bx = 5 * R * [1; 0; 0];
+        bx = 1 * R * [1; 0; 0];
         if opt.fField
           bld.Faces = obj.cn;
           bld.Vertices = obj.ps;
           bld.FaceAlpha = 0.5; % remove the transparency
           bld.FaceColor = 'b'; %
           bld.LineStyle = '-'; % 'none'; % remove the lines
-          patch(bld);
+          patch(ax,bld);
         end
         %campos(p +10*[-1;-0.2;0.2]);
         %camtarget(p);
       end
-      quiver3(p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
-      plot3(p(1), p(2), p(3), 'bx');
-      plot3(po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 1);
-      xlim([p(1) - 10, p(1) + 10]);
-      ylim([p(2) - 10, p(2) + 10]);
-      zlim([p(3) - 10, p(3) + 10]);
+      campos(ax,p +10*[0;5;0]);
+      camtarget(ax,p);
+      quiver3(ax,p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
+      plot3(ax,p(1), p(2), p(3), 'bx');
+      plot3(ax,po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 1);
+      ps = p + R*obj.p0;
+      quiver3(ax,ps(1), ps(2), ps(3), po(1,:)-ps(1),po(2,:)-ps(2),po(3,:)-ps(3)); % 前
+      xlim(ax,[p(1) - 10, p(1) + 10]);
+      ylim(ax,[p(2) - 10, p(2) + 10]);
+      zlim(ax,[p(3) - 10, p(3) + 10]);
     end
     function Qpi = inverse_matrices(obj, p, ids)
       % Qpi : inv(Q-p) = [r1;r2;r3] に対して 各行が [r1,r2,r3] となっている．
