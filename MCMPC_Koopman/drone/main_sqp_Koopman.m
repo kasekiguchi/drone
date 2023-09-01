@@ -51,10 +51,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([3000;4000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([5000;6000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
     Params.Weight.Pf = diag([1; 10; 1]);
-    Params.Weight.QWf = diag([3000; 8000; 1000; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.QWf = diag([5000; 10000; 1000; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -116,7 +116,7 @@ try
     while round(time.t, 5) <= te
         tic
         idx = idx + 1;
-        profile on;
+%         profile on;
         %% sensor
         %    tic
         tStart = tic;
@@ -314,7 +314,7 @@ end
 %         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
         drawnow 
-       profile viewer;
+%        profile viewer;
     end
 
 catch ME % for error
@@ -356,9 +356,9 @@ set(0, 'defaultTextFontSize', Fontsize);
 % figure
 % plot(data.exitflag)
 
-save('simulation','logger')
-Graphplot
-delete simulation.mat
+% save('simulation','logger')
+% Graphplot
+% delete simulation.mat
 %% Difference of Pos
 % figure(7);
 % plot(logger.data('t', [], [])', Diff, 'LineWidth', 2);

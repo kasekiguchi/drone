@@ -47,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([5.0; 5.0; 5.0]);    % 座標   1000 10
+    Params.Weight.P = diag([1.0; 5.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([4000;4000;1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2500;4000;1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([5; 5; 5]);
-    Params.Weight.QWf = diag([4000; 4000; 1000; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([1; 10; 1]);
+    Params.Weight.QWf = diag([2500; 8000; 1000; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -116,7 +116,7 @@ try
     while round(time.t, 5) <= te
         tic
         idx = idx + 1;
-        profile on;
+%         profile on;
         %% sensor
         %    tic
         tStart = tic;
@@ -319,7 +319,7 @@ end
 %         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
         drawnow 
-       profile viewer;
+%        profile viewer;
     end
 
 catch ME % for error
@@ -402,9 +402,17 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     stageStateV  = arrayfun(@(L) tildeXv(:, L)'   * params.Weight.V         * tildeXv(:, L),   1:params.H-1);
     stageStateQW = arrayfun(@(L) tildeXqw(:, L)'  * params.Weight.QW        * tildeXqw(:, L),  1:params.H-1);
     stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * params.Weight.RP        * tildeUpre(:, L), 1:params.H-1);
+%     stageInputP = zeros();
     stageInputR  = arrayfun(@(L) tildeUref(:, L)' * params.Weight.R         * tildeUref(:, L), 1:params.H-1);
     stageState = stageStateP + stageStateV +  stageStateQW + stageInputP + stageInputR; % ステージコスト
-    
+
+% %-- MEX化? 試行中
+%     stageStateP = Objective(tildeXp(:, params.H-1), params.Weight.P);
+%     stageStateV = Objective(tildeXv(:, params.H-1), params.Weight.V);
+%     stageStateQW = Objective(tildeXqw(:, params.H-1), params.Weight.QW);
+%     stageInputR = Objective(tildeUref(:, params.H-1), params.Weight.R);
+%     stageState = stageStateP + stageStateV +  stageStateQW + stageInputP + stageInputR;
+
 %-- 状態の終端コストを計算
     terminalState =  tildeXp(:, end)'   * params.Weight.Pf   * tildeXp(:, end)...
                     +tildeXv(:, end)'   * params.Weight.V   * tildeXv(:, end)...
