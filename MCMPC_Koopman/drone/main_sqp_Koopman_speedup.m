@@ -394,17 +394,27 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     tildeXv = Xv - params.xr(7:9, :);  % 速度
     tildeXw = Xw - params.xr(10:12,:);
     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-    tildeUpre = U - Agent.input;
+%     tildeUpre = U - Agent.input;
     tildeUref = U - params.xr(13:16,:);
     
 %-- 状態及び入力のステージコストを計算 長くなるから分割
-    stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * params.Weight.P         * tildeXp(:, L),   1:params.H-1);
-    stageStateV  = arrayfun(@(L) tildeXv(:, L)'   * params.Weight.V         * tildeXv(:, L),   1:params.H-1);
-    stageStateQW = arrayfun(@(L) tildeXqw(:, L)'  * params.Weight.QW        * tildeXqw(:, L),  1:params.H-1);
-    stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * params.Weight.RP        * tildeUpre(:, L), 1:params.H-1);
-%     stageInputP = zeros();
-    stageInputR  = arrayfun(@(L) tildeUref(:, L)' * params.Weight.R         * tildeUref(:, L), 1:params.H-1);
+
+    for i = 1:params.H-1
+        stageStateP(1, i) = tildeXp(:, i)'*params.Weight.P*tildeXp(:, i);
+        stageStateV(1, i) = tildeXv(:, i)'*params.Weight.V*tildeXv(:, i);
+        stageStateQW(1, i) = tildeXqw(:, i)'*params.Weight.QW*tildeXqw(:, i);
+        stageInputR(1, i) = tildeUref(:, i)'*params.Weight.R*tildeUref(:, i);
+    end
+    stageInputP = zeros(1, 9);
     stageState = stageStateP + stageStateV +  stageStateQW + stageInputP + stageInputR; % ステージコスト
+
+%こっち遅い
+%     stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * params.Weight.P         * tildeXp(:, L),   1:params.H-1);
+%     stageStateV  = arrayfun(@(L) tildeXv(:, L)'   * params.Weight.V         * tildeXv(:, L),   1:params.H-1);
+%     stageStateQW = arrayfun(@(L) tildeXqw(:, L)'  * params.Weight.QW        * tildeXqw(:, L),  1:params.H-1);
+% %     stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * params.Weight.RP        * tildeUpre(:, L), 1:params.H-1);
+%     stageInputP = zeros(1, 9);
+%     stageInputR  = arrayfun(@(L) tildeUref(:, L)' * params.Weight.R         * tildeUref(:, L), 1:params.H-1);
 
 % %-- MEX化? 試行中
 %     stageStateP = Objective(tildeXp(:, params.H-1), params.Weight.P);
@@ -428,15 +438,10 @@ function [c , ceq] = Constraints(idx, x, params, Agent, ~)
     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-%     num2(idx) = {x};
-    for i = 1:params.H
-        X(:,i) = x(1:params.state_size, i);          % 12 * Params.H 
-        F = params.f{1};
-        Xc(:,i) = F(X(:,i));
-    end
+    X=x(1:params.state_size, 1:params.H);
+    Xc = [X;ones(1,params.H)];
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
-%     At = params.A(1:12,1:12);
-%     Bt = params.B(1:12,:);
+
 %- ダイナミクス拘束
 %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
 %-- 連続の式をダイナミクス拘束に使う
