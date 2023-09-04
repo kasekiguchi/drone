@@ -447,7 +447,6 @@ function [c , ceq] = Constraints(idx, x, params, Agent, ~)
 %-- 連続の式をダイナミクス拘束に使う
     for L = 2:params.H  
         tmpx = params.A * Xc(:,L-1) + params.B * U(:,L-1); %クープマンモデル
-%         tmpx = At * X(:,L-1) + Bt * U(:,L-1); %クープマンモデル
         tmpx = params.C * tmpx; %実空間の値に変換
         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
