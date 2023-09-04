@@ -1,31 +1,20 @@
-function ref = Case_study_trajectory(param)
+function ref = Case_study_trajectory(~)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
-arguments
-    param.freq = 10% 周期
-    param.orig = [0 0 0]
-    param.size = [1 1 0]% 各軸の振幅
-    param.phase = -pi
-end
+% arguments
+%     param.freq = 10% 周期
+%     param.orig = [0 0 0]
+%     param.size = [1 1 0]% 各軸の振幅
+%     param.phase = -pi
+% end
 
-T = param.freq;
+% T = param.freq;
+T = 10;
 
 syms t real
 % x_0 = X0(1);
 % y_0 = X0(2);
 % z_0 = X0(3);
-
-% T = t
-% 
-% if T < 50
-%     x = sin(2*pi*t/8)
-%     y = cos(2*pi*t/8);
-%     z = 1;
-% else
-%     x = sin(2*pi*t/8);
-%     y = 1;
-%     z = cos(2*pi*t/8);
-% end
 
 % %% takeoff
 % T = 10;
