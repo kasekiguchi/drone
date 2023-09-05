@@ -61,7 +61,7 @@ run("ExpBase");
 
 
 clc
-for i = 1:2000
+for i = 1:4000
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -80,20 +80,20 @@ end
 %%
 logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
 %%
-logger.plot({1, "plant.result.state.Qi", "p"})
+logger.plot({1, "p","rp"})
 
 %%
 clc
-aaaa= logger.data(1,"plant.result.state.Q","e");
+aaaa= logger.data(1,"plant.result.state.Q","e");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 t=logger.data(0,'t',[]);
 Euldata=Quat2Eul(aaaa(:,1:4)');
 figure(101)
 plot(t,Euldata)
-legend
+legend("Roll","Pitch","Yaw")
 %%
 %close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-10 10;-10 10;-10 10],"ntimes",10);
+mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-5 10;-7 7;-1 3],"ntimes",2);
 
 %%
 logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
