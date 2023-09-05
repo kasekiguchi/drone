@@ -3,9 +3,9 @@ function ref = Case_study_trajectory(~)
 %   詳細説明をここに記述
 % arguments
 %     param.freq = 10% 周期
-%     param.orig = [0 0 0]
+%     param.orig = [0 0 0]% サドルの中心
 %     param.size = [1 1 0]% 各軸の振幅
-%     param.phase = -pi
+%     param.phase = -pi% 位相
 % end
 
 % T = param.freq;

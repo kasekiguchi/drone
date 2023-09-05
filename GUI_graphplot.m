@@ -12,17 +12,18 @@ clc;
 %% データのインポート
 load("experiment_7_11_circle_radius=0.7_Log(11-Jul-2023_14_30_38).mat") %読み込むデータファイルの設定
 % load("9_4_test.mat")
-disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %推定値
+    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %目標値
     data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
+
+disp('load finished')
 %% グラフ出力
 
 newcolors = [0 0.4470 0.7410
@@ -32,9 +33,9 @@ newcolors = [0 0.4470 0.7410
 columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
-name = 'test';
-folderName = 'test';
-mkdir(folderName)
+name = 'test'; %ファイル名
+folderName = 'test'; %フォルダ名
+mkdir(folderName) %新規フォルダ作成
 
 %位置p
 box on %グラフの枠線が出ないときに使用
