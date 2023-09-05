@@ -381,32 +381,52 @@ set(0, 'defaultTextFontSize', Fontsize);
 function [eval] = Objective(x, params, Agent) % x : p q v w input
 %-- 評価計算をする関数
 %-- 現在の状態および入力
-%     x = repmat(x, 1, params.H);
-    Xp = x(1:3, :);
-    Xq = x(4:6, :);
-    Xv = x(7:9, :);  
-    Xw = x(10:12, :);
-    U = x(13:16, :);
+%     Xp = x(1:3, :);
+%     Xq = x(4:6, :);
+%     Xv = x(7:9, :);  
+%     Xw = x(10:12, :);
+%     U = x(13:16, :);
+%     
+% %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
+%     tildeXp = Xp - params.xr(1:3, :);  % 位置
+%     tildeXq = Xq - params.xr(4:6, :);
+%     tildeXv = Xv - params.xr(7:9, :);  % 速度
+%     tildeXw = Xw - params.xr(10:12,:);
+%     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
+% %     tildeUpre = U - Agent.input;
+%     tildeUref = U - params.xr(13:16,:);
     
-%-- 状態及び入力に対する目標状態や目標入力との誤差を計算
-    tildeXp = Xp - params.xr(1:3, :);  % 位置
-    tildeXq = Xq - params.xr(4:6, :);
-    tildeXv = Xv - params.xr(7:9, :);  % 速度
-    tildeXw = Xw - params.xr(10:12,:);
+    tildeXp = x(1:3, :) - params.xr(1:3, :);  % 位置
+    tildeXq = x(4:6, :) - params.xr(4:6, :);
+    tildeXv = x(7:9, :) - params.xr(7:9, :);  % 速度
+    tildeXw = x(10:12, :) - params.xr(10:12,:);
     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
 %     tildeUpre = U - Agent.input;
-    tildeUref = U - params.xr(13:16,:);
-    
+    tildeUref = x(13:16, :) - params.xr(13:16,:);
+
 %-- 状態及び入力のステージコストを計算 長くなるから分割
 
-    for i = 1:params.H-1
-        stageStateP(1, i) = tildeXp(:, i)'*params.Weight.P*tildeXp(:, i);
-        stageStateV(1, i) = tildeXv(:, i)'*params.Weight.V*tildeXv(:, i);
-        stageStateQW(1, i) = tildeXqw(:, i)'*params.Weight.QW*tildeXqw(:, i);
-        stageInputR(1, i) = tildeUref(:, i)'*params.Weight.R*tildeUref(:, i);
-    end
-    stageInputP = zeros(1, 9);
-    stageState = stageStateP + stageStateV +  stageStateQW + stageInputP + stageInputR; % ステージコスト
+%     for i = 1:params.H-1
+%         stageStateP(1, i) = tildeXp(:, i)'*params.Weight.P*tildeXp(:, i);
+%         stageStateV(1, i) = tildeXv(:, i)'*params.Weight.V*tildeXv(:, i);
+%         stageStateQW(1, i) = tildeXqw(:, i)'*params.Weight.QW*tildeXqw(:, i);
+%         stageInputR(1, i) = tildeUref(:, i)'*params.Weight.R*tildeUref(:, i);
+%     end
+% 
+%     stageInputP = zeros(1, 9);
+%     stageState = stageStateP + stageStateV +  stageStateQW + stageInputP + stageInputR; % ステージコスト
+
+    stageStateP = tildeXp(:, 1:params.H-1)'*params.Weight.P*tildeXp(:, 1:params.H-1);
+    stageStateV = tildeXv(:, 1:params.H-1)'*params.Weight.V*tildeXv(:, 1:params.H-1);
+    stageStateQW = tildeXqw(:, 1:params.H-1)'*params.Weight.QW*tildeXqw(:, 1:params.H-1);
+    stageInputR = tildeUref(:, 1:params.H-1)'*params.Weight.R*tildeUref(:, 1:params.H-1);
+    
+    stageStateP = diag(stageStateP);
+    stageStateV = diag(stageStateV);
+    stageStateQW = diag(stageStateQW);
+    stageInputR = diag(stageInputR);
+    
+    stageState = stageStateP' + stageStateV' + stageStateQW' + stageInputR';
 
 %こっち遅い
 %     stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * params.Weight.P         * tildeXp(:, L),   1:params.H-1);
@@ -439,7 +459,7 @@ function [c , ceq] = Constraints(idx, x, params, Agent, ~)
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
     X=x(1:params.state_size, 1:params.H);
-    Xc = [X;ones(1,params.H)];
+    Xc = [x(1:params.state_size, 1:params.H);ones(1,params.H)];
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
 
 %- ダイナミクス拘束
@@ -449,11 +469,13 @@ function [c , ceq] = Constraints(idx, x, params, Agent, ~)
         tmpx = params.A * Xc(:,L-1) + params.B * U(:,L-1); %クープマンモデル
         tmpx = params.C * tmpx; %実空間の値に変換
         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
+%         ceq_ode(:, L) = x(1:params.state_size, L) - tmpx;
     end
-    ceq = [X(:, 1) - params.X0, ceq_ode];
+%     ce = [X(:, 1) - params.X0, ceq_ode];
+    ceq = [x(1:params.state_size, 1) - params.X0, ceq_ode];
 
 %     c = [x(7:9) - 0.6, -0.6 - x(7:9)];
-    c = [-x(13:16,:),x(13:16,:) - 2.5];
+%     c = [-x(13:16,:),x(13:16,:) - 2.5];
 %       c = [1.442 - x(13:14,:),x(13:14,:) - 1.447, x(15:16,:) - 1.447, 1.442 - x(15:16,:)];
 %       c = [x(13:14,:) - 1.46,1.44 - x(13:14,:), x(15:16,:) - 1.46, 1.444 - x(15:16,:)];
 %     if idx < 15
