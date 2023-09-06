@@ -16,7 +16,7 @@
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/Log(01-Sep-2023_14_40_35).mat');
+log = LOGGER('./Data/time1500_Log(06-Sep-2023_12_02_02).mat');
 flag_png=0;
 %% ログ
 tspan = [0 ,100];
@@ -32,7 +32,7 @@ robot_v  = log.data(1,"v","p")';
 robot_ve  = log.data(1,"v","e")';
 robot_w  = log.data(1,"w","p")';
 robot_we  = log.data(1,"w","e")';
-
+%% 
 last=length(robot_pe);
 len = length(log.Data.agent.sensor.result);
 ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
@@ -48,9 +48,9 @@ end
 steps=1:length(robot_pe);
 time = 0.01*steps;
 %% 真値
-offset_true = [0.1;0.05;0.0];
-Rs_true = Rodrigues([0,0,1],pi/12);
-w=[0,1,0,9];
+offset_true = [0.01;0.01;0.01];
+Rs_true = Rodrigues([0,0,1],pi/2);
+w=[0,1,0,-9];
 % 交点比較
 for i=1:length(robot_pe)
     sp(:,i) = robot_pe(:,i) + eul2rotm(robot_qe(:,i)','XYZ')*ps(:,end) + sensor_data(1,i)*eul2rotm(robot_qe(:,i)','XYZ')*RodriguesQuaternion(Eul2Quat(qs(:,end)))*[1;0;0];
@@ -74,6 +74,20 @@ legend('x','y','z','x_t','y_t','z_t','FontSize', 18);
 xlabel('time [s]','FontSize', 16);
 ylabel('Coordinates of intersection [m]','FontSize', 16);
 hold off ;
+
+ye = zeros(1,size(sensor_data,2));
+for j=1:length(robot_pe)
+    ye(j) = (-w(4)-w(1:3)*(robot_pe(:,j) + eul2rotm(robot_qe(:,j)','XYZ')*ps(:,end)))/(w(1:3)*(eul2rotm(robot_qe(:,j)','XYZ')*RodriguesQuaternion(Eul2Quat(qs(:,end)))*[1;0;0]));
+end
+fig20=figure(20);
+fig20.Color = 'white';
+plot(time,sensor_data(1,:));
+hold on;
+plot(time,ye(1,:));
+xlabel('time [s]','FontSize', 16)
+ylabel('Distance of the lidar [m]','FontSize', 16);
+legend('true','estimate','FontSize', 18);
+grid on;
 %%
 variance = zeros(size(P,2),size(P,3));
 for j=1:size(P,3)
@@ -82,6 +96,31 @@ end
 %% RMSE
 MSE_P=mse(robot_p,robot_pe);
 MSE_Q=mse(robot_q,robot_qe);
+
+% %% 可観測性みる
+% A = log.Data.agent.estimator.result{1,2}.A;
+% C = log.Data.agent.estimator.result{1,2}.C;
+% n = size(A, 1); % 状態ベクトルの次元
+% O = []; % 可観測性行列を初期化
+% % システムの次元を取得する
+% [n, ~] = size(A);
+% 
+% % 可観測性行列 O を計算する
+% O = [];
+% for i = 0:(n-1)
+%     O = [O; C * (A^i)];
+% end
+% 
+% % 可観測性行列 O のランクを計算する
+% rank_O = rank(O);
+% 
+% % システムの次元からランクを引いて不可観測部分空間の次元を計算する
+% unobservable_dimension = n - rank_O;
+% 
+% % 可観測部分空間と不可観測部分空間を計算する
+% observable_subspace = null(O);  % 可観測部分空間
+% % 不可観測部分空間を計算する
+% unobservable_subspace = null(A - observable_subspace' * C');  % 不可観測部分空間
 %% 図示
 if illustration == 1
     fig1=figure(1);
@@ -192,31 +231,33 @@ if illustration == 1
     grid on;
     fig9=figure(9);
     fig9.Color = 'white';
-    plot(time,0.1*ones(size(time)),'LineWidth', 2);
+    plot(time,0.01*ones(size(time)),'LineWidth', 3);
     hold on;
-    plot(time,0.1*ones(size(time)),'LineWidth', 2);
-    plot(time,0.1*ones(size(time)),'LineWidth', 2);
-    plot(time,ps(1,:),'LineWidth', 2);
-    plot(time,ps(2,:),'LineWidth', 2);
-    plot(time,ps(3,:),'LineWidth', 2);
+    plot(time,0.01*ones(size(time)),'LineWidth', 3);
+    plot(time,0.01*ones(size(time)),'LineWidth', 3);
+    plot(time,ps(1,:),'LineWidth', 3);
+    plot(time,ps(2,:),'LineWidth', 3);
+    plot(time,ps(3,:),'LineWidth', 3);
     legend('\it{psb_{x}}','\it{psb_{y}}','\it{psb_{z}}','\it{psb_{ex}}','\it{psb_{ey}}','\it{psb_{ez}}','FontSize', 18);
     hold off;
     xlabel('time [s]','FontSize', 16)
-    ylabel('position \it{p} [m]','FontSize', 16);
+    ylabel('\it{p}_{SB} [m]','FontSize', 16);
     % xlim([0, 20]);
     grid on;
     fig10=figure(10);
     fig10.Color = 'white';
-    plot(time,0*ones(size(time)),'LineWidth', 2);
+    plot(time,0*ones(size(time)),'LineWidth', 3);
         hold on;
-    plot(time,0*ones(size(time)),'LineWidth', 2);
-    plot(time,(pi/2)*ones(size(time)),'LineWidth', 2);
-    plot(time,qs(1,:),'LineWidth', 2);
-    plot(time,qs(2,:),'LineWidth', 2);
-    plot(time,qs(3,:),'LineWidth', 2);
+    plot(time,0*ones(size(time)),'LineWidth', 3);
+    plot(time,(pi/2)*ones(size(time)),'LineWidth', 3);
+    plot(time,qs(1,:),'LineWidth', 3);
+    plot(time,qs(2,:),'LineWidth', 3);
+    plot(time,qs(3,:),'LineWidth', 3);
     % xlim([0, 20]);
     ylim([0 2]);
     legend('qs_{\phi}','qs_{\theta}','qs_{\psi}','qs_{e \phi}','qs_{e \theta}','qs_{e \psi}','FontSize', 18);
+    xlabel('time [s]','FontSize', 16)
+    ylabel('\it{q}_S [rad]','FontSize', 16);
     hold off;
     fig11=figure(11);
     fig11.Color = 'white';

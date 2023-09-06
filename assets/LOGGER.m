@@ -247,7 +247,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
         end
 
-        save(list, 'log');
+        save(list, 'log',"-v7.3");
       end
 
     end

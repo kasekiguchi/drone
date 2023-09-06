@@ -31,15 +31,15 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         Estimator.JacobianH= matlabFunction(cell2mat(arrayfun(@(k) cell2mat(arrayfun(@(i,j) zeroone( col*tmp{k}',i,j),col,tmp{k},"UniformOutput",false)),1:length(output),"UniformOutput",false)'),"Vars",[dummy1,dummy2]);
     end
     %%通常シミュレーション時
-    % sigmap = 0;
-    % sigmaq = 0;
-    % Estimator.sensor_func = @(self,param) [self.sensor.result.state.get(param)+[sigmap*randn(3,1);sigmaq*randn(3,1)]] ; % function to get sensor value: sometimes some conversion will be done
-    % Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
+%     sigmap = 0;
+%     sigmaq = 0;
+%     Estimator.sensor_func = @(self,param) [self.sensor.result.state.get(param)+[sigmap*randn(3,1);sigmaq*randn(3,1)]] ; % function to get sensor value: sometimes some conversion will be done
+%     Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
 
     %%パラメータ推定時
     % sigmap = 0.1;
     % sigmaq = 0.01;
-    % sigmar = 0;
+%     sigmar = 0;
     sigmap = 0;
     sigmaq = 0;
     sigmar = 0;
