@@ -5,26 +5,26 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
+fF=0;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 5;
 % endTime = 20;
-startTime = 5;
+startTime = 0;
 endTime = 1E2;
 
     loggers = {
-                % gui.logger
+                gui.logger
                 % log1.log
                 % log2.log
-                log_LS,...
-                log_FTC,...
+                % log_LS,...
+                % log_FTC,...
                 % log_FT_EL_prid
         };
     c=[
-        "LS","FT"
+        % "LS","FT"
            % "LS","FT"
         ];
 %========================================================================
