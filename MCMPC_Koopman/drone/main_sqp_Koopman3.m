@@ -47,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([10.0; 5.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([1.0; 1.0; 5.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([15000;5000;1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([3000;3000;1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([10; 5; 1]);
-    Params.Weight.QWf = diag([15000; 5000; 1000; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([5; 5; 5]);
+    Params.Weight.QWf = diag([4000; 4000; 1200; 1; 1; 1]); %姿勢角、角速度終端
     %% 
     
 %-- data
@@ -223,7 +223,7 @@ end
             % MPC設定(problem)
             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
-            problem.nonlcon   = @(x) Constraints(idx, x, Params, agent, time);    % 制約条件
+            problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             data.exitflag(idx) = exitflag;
             % 制御入力の決定
@@ -407,7 +407,7 @@ function [eval] = Objective(x, params, Agent) % x : p q v w input
     eval = sum(stageState) + terminalState;
 end
 
-function [c , ceq] = Constraints(idx, x, params, Agent, ~)
+function [c , ceq] = Constraints(x, params, Agent, ~)
 % モデル予測制御の制約条件を計算するプログラム
     c  = zeros(params.state_size, params.H);
     ceq_ode = zeros(params.state_size, params.H);

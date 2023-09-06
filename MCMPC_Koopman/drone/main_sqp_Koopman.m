@@ -47,14 +47,20 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([7.0; 10.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([5.0; 5.0; 5.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([8000;10000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([3500;2500; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([7; 10; 1]);
-    Params.Weight.QWf = diag([8000; 10000; 1000; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([8; 10; 5]);
+    Params.Weight.QWf = diag([4200; 3500; 1000; 1; 1; 1]); %姿勢角、角速度終端
+    %% 
+%     fprintf("%f秒\n", totalT)
+%     Fontsize = 15;  timeMax = 100;
+%     set(0, 'defaultAxesFontSize', Fontsize);
+%     set(0, 'defaultTextFontSize', Fontsize);
+%     logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
     %% 
     
 %-- data
@@ -352,7 +358,7 @@ set(0, 'defaultTextFontSize', Fontsize);
 % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
 % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
 % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
-% logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
+logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % figure
 % plot(data.exitflag)
 
