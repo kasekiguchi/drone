@@ -31,8 +31,8 @@ for i = 1:N
   agent(i).sensor.direct = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise 
   agent(i).sensor.rpos = RANGE_POS_SIM(agent(i),Sensor_RangePos(i,'r',10)); % range sensor to capture neighbor's position : r : sensor radius
   agent(i).sensor.rdensity = RANGE_DENSITY_SIM(agent(i),Sensor_RangeD('r',1.5)); % range sensor to capture field importance : r : sensor radius
-  agent(i).sensor.rdensity_f = RANGE_DENSITY_FRONT(agent(i),Sensor_RangeD('r',1,'direction_range',[-0.6*pi 0.6*pi])); % range sensor to capture field importance : r : sensor radius
-  agent(i).sensor.rdensity_c = RANGE_DENSITY_CAMERA(agent(i),Sensor_RangeD('r',1,'direction_range',[-0.25*pi 0.25*pi])); % range sensor to capture field importance : r : sensor radius 
+  agent(i).sensor.rdensity_f = RANGE_DENSITY_FRONT(agent(i),Sensor_RangeD('r',1,'direction_range',[-0.75*pi 0.75*pi])); % range sensor to capture field importance : r : sensor radius
+  agent(i).sensor.rdensity_c = RANGE_DENSITY_CAMERA(agent(i),Sensor_RangeD('r',1,'direction_range',[-0.25*pi 0.25*pi]+pi)); % range sensor to capture field importance : r : sensor radius 
   agent(i).sensor.do = @sensor_do; % synthesis of sensors
   agent(i).estimator.est = DIRECT_ESTIMATOR(agent(i),struct("model",MODEL_CLASS(agent(i),M))); % estimator.result.state = sensor.result.state
   agent(i).estimator.map_update = MAP_UPDATE_yamak(agent(i),env);

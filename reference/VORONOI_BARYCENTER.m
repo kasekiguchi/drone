@@ -53,7 +53,7 @@ classdef VORONOI_BARYCENTER < handle
       if sum(isnan(camera_cent))>0
         camera_cent = state.p;
       end
-      camera_mass = 1;
+      camera_mass = 0;
       %% front 部分のボロノイ領域算出
       dens_f = sensor.density_front;
       front_V = poly_volonoi(state, sensor.neighbor, dens_f.region,void,R);
@@ -65,7 +65,7 @@ classdef VORONOI_BARYCENTER < handle
       
 
       result = (LiDAR_cent*LiDAR_mass + camera_cent*camera_mass + front_cent*front_mass)/(LiDAR_mass + camera_mass + front_mass);
-      %% 目標値がエリア外に生成されるのを防ぐ処理
+      %% 目標値がエリア外に生成されるのを防ぐ処理 % TODO たまに想定と違う目標値が算出される現在座標が領域外に出ると計算が破綻
       [in,~] = intersect(polybuffer(env.poly,-env.d*sqrt(2)/2), [state.p(1:2)';result(1:2)'+ state.p(1:2)' ]);% 絶対座標
       if ~isempty(in)
           [~,ii]= mink(vecnorm(in-state.p(1:2)',2,2),2);
@@ -76,15 +76,20 @@ classdef VORONOI_BARYCENTER < handle
       
 
       %% 目標値の例外的な処理(ボロノイベースではなくす条件)
-      if max(sensor.grid_density,[],"all") < 0.2;obj.override_f = true;end
+
+      if max(sensor.grid_density,[],"all") < 0.2;obj.override_f = true;end % LiDARで測距できる範囲に重みが無ければ起動する．起動後は条件を満たすまでA*ベースに切り替える
       if obj.override_f
-        [~,I] = max(env.grid_density,[],'all');
+        env_volo = poly_volonoi(state,sensor.neighbor,env.poly,void,R);
+        in = reshape(isinterior(env_volo,env.xq(:),env.yq(:)) , env.grid_row , env.grid_col );
+        [~,I] = max(env.grid_density.*in,[],'all');
         result = [ env.xq(I);env.yq(I);0 ];
         if vecnorm(result(1:2)-state.p(1:2) )<0.2; obj.override_f = false;end
+        route = a_star(state.p(1:2)',result(1:2)',env); % A-star処理
+        result =  route(2,:)';
       end
       
-
-      route = a_star(state.p(1:2)',result(1:2)',env); % A-star処理
+      
+      
       %%  描画用変数
       region_phi = [];
       yq = [];
@@ -97,7 +102,7 @@ classdef VORONOI_BARYCENTER < handle
       % ここまで相対座標
       obj.result.region = region.Vertices + state.p(1:2)';
       % obj.result.state.p = (result + state.p); % .*[1;1;0]; % 重心位置（絶対座標）
-      obj.result.state.p = route(2,:)';
+      obj.result.state.p = result;
       obj.result.state.p(3) = 1;               % リファレンス高さは１ｍ
       obj.result.state.v = [0;0;0];               % リファレンス速度は０
       result = obj.result;
@@ -203,6 +208,26 @@ function [centroid , mass] = map_centre_of_gravity(xq , yq , grid_density, regio
     cogy = sum(region_phi .* yq, 'all') / mass;                           % 一次モーメント/質量
     centroid = [cogx; cogy; 0];     
 end
+
+function dijkstra_volonoi(state,neighbor,env)
+    % 道のり距離でポリシェイプを作成する関数
+    %% Init
+    xp = env.xp ; yp = env.yp;d = env.d ;
+    grid_size = [env.grid_row env.grid_col];
+    move = [1 0; 1 1; 0 1; -1 1; -1 0; -1 -1; 0 -1; 1 -1];
+    move_cost = [1 sqrt(2) 1 sqrt(2) 1 sqrt(2) 1 sqrt(2) ]*d;
+    
+    grid_poly = false(grid_size)
+    grid_cost = ones(grid_size)*length(grid_poly)*d;
+    
+    
+    agent_n = size(neighbor,1)
+    % ▼ Variable that stores the status of each node during traversal
+    node_size = 1;
+    node_grid = -1
+    
+end
+
 
 function route = a_star(start,goal,env)
     %% Setting
@@ -343,21 +368,21 @@ function route = a_star(start,goal,env)
     %% Ploter
     % close all
     % figure()
-    cla;
-    hold on
-    plot(env.poly)
-    daspect([1 1 1])
-    scatter( xp(node_grid(node_status==0,1)) , yp(node_grid(node_status==0,2)) , "r.")
-    % scatter( xp(node_grid(node_status==-1,1)) , yp(node_grid(node_status==-1,2)) , "black.")
-    scatter( xp(node_grid(node_status==1,1)) , yp(node_grid(node_status==1,2)) , "r.")
-    scatter(start(1),start(2),'b*')
-    scatter(goal(1),goal(2),'r*')
-
-    plot(grid_route(:,1),grid_route(:,2),'g',LineWidth=1)
-    plot(route(:,1),route(:,2),'bo-',LineWidth=2)
-    % et = toc(st);
-    % attempt
-    % cand_real_cost
-    hold off
-    drawnow
+    % cla;
+    % hold on
+    % plot(env.poly)
+    % daspect([1 1 1])
+    % scatter( xp(node_grid(node_status==0,1)) , yp(node_grid(node_status==0,2)) , "r.")
+    % % scatter( xp(node_grid(node_status==-1,1)) , yp(node_grid(node_status==-1,2)) , "black.")
+    % scatter( xp(node_grid(node_status==1,1)) , yp(node_grid(node_status==1,2)) , "r.")
+    % scatter(start(1),start(2),'b*')
+    % scatter(goal(1),goal(2),'r*')
+    % 
+    % plot(grid_route(:,1),grid_route(:,2),'g',LineWidth=1)
+    % plot(route(:,1),route(:,2),'bo-',LineWidth=2)
+    % % et = toc(st);
+    % % attempt
+    % % cand_real_cost
+    % hold off
+    % drawnow
 end
