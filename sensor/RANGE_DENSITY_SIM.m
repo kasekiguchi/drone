@@ -7,15 +7,27 @@ classdef RANGE_DENSITY_SIM < handle
         result
         target % 観測対象の環境
         self % センサーを積んでいる機体のhandle object
+
+        ray_direction % LiDAR点群の照射方向 
+        sensor_poly
     end
     properties (SetAccess = private) % construct したら変えない値．
         r = 10;
+        d = 0.01;
     end
 
     methods
         function obj = RANGE_DENSITY_SIM(self,Env)
             obj.self=self;
-            if isfield(Env,'r'); obj.r= Env.r;end
+            if isfield(Env,'r'); obj.r = Env.r; end
+            if isfield(Env,'d'); obj.d = Env.d; end
+            if isfield(Env,'direction_range') 
+                obj.ray_direction = Env.direction_range(1):obj.d:Env.direction_range(2);
+                obj.sensor_poly = polyshape([0 obj.r*cos(obj.ray_direction)], [0 obj.r*sin(obj.ray_direction)]);
+            else
+                obj.ray_direction = -pi:obj.d:pi; 
+                obj.sensor_poly = polyshape(obj.r*cos(obj.ray_direction), obj.r*sin(obj.ray_direction));
+            end
         end
 
         function result = do(obj,varargin)
@@ -23,41 +35,68 @@ classdef RANGE_DENSITY_SIM < handle
             %   result.state : State_obj,  p : position
             % 【入力】varargin = {{Env}}      agent : センサーを積んでいる機体obj,    Env：観測対象のEnv_obj
             Env=varargin{1}{4};
-            state=obj.self.plant.state; % 真値
-            env = polyshape(Env.Vertices);
+            pos=obj.self.plant.state.p; % Agentの現在位置
+            env = Env.poly;
+
 
             %% センシング領域を定義
-            tmp = 0:0.1:2*pi;
-            sensor_range=polyshape(state.p(1)+obj.r*sin(tmp),state.p(2)+obj.r*cos(tmp)); % エージェントの位置を中心とした円
+            if size(obj.self.reference.result.state.p) == [3 1]
+                e2r_vector = obj.self.reference.result.state.p - pos;
+            else
+                e2r_vector = [1;0;0];
+            end
+
+            e2r_ang = atan2(e2r_vector(2),e2r_vector(1));
+            sensor_range = rotate(obj.sensor_poly,e2r_ang*180/pi) ;
+            sensor_range = translate(sensor_range , pos(1:2)'); % エージェントの位置を中心とした円
 
             %% 領域と環境のintersectionが測距領域
-            region=intersect(sensor_range, env); % 測距領域
-            region.Vertices=region.Vertices-state.p(1:2)'; % 相対的な測距領域
+            region=intersect(sensor_range, env); % LiDARのサークルとENVを比較し切り出す
+            circ = sensor_range.Vertices; % sensor_rangeの頂点
+
+            sensor_points = circ; % 配列の初期化
+            for i = 1:length(circ)
+                [in,~] = intersect(region, [pos(1:2)';circ(i, :) ]);
+                if isempty(in)
+                    % LiDARで測れる距離にいない
+                    sensor_points(i,:) = pos(1:2)';% 測距距離が0とみなしAgent座標をLiDAR点群とする．
+                else
+                    [~,ii]= mink(vecnorm(in-pos(1:2)',2,2),2);
+                    sensor_points(i,:) = in(ii(2),:);
+                end
+            end
+            
+            region = polyshape( sensor_points(:,1),sensor_points(:,2));
 
             %% 重み分布
-            pxy=state.p(1:2)'-Env.map_min; % 領域左下から見たエージェント座標
-            pmap_min=max(pxy+[-obj.r,-obj.r],[0,0]); % エージェントを中心としたセンサーレンジの直方包左下座標
-            pmap_max=min(pxy+[obj.r,obj.r],Env.map_max-Env.map_min); % 右上座標
-            rpmap_min=pmap_min-pxy; % 相対座標
-            rpmap_max=pmap_max-pxy; %  相対座標
-            [xq,yq]=meshgrid(rpmap_min(1):Env.d:rpmap_max(1),rpmap_min(2):Env.d:rpmap_max(2));% 相対座標
-            xq=xq';      yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
+            pmap_min = min(sensor_points,[],1);
+            pmap_max = max(sensor_points,[],1);
+            
+            map_x_index = find(all([pmap_min(1) <= Env.xp ; Env.xp <= pmap_max(1) ],1)) ;
+            map_y_index = find(all([pmap_min(2) <= Env.yp ; Env.yp <= pmap_max(2) ],1)) ;
+            xp = Env.xp(map_x_index); yp = Env.yp(map_y_index);
+            [xq,yq]= meshgrid(xp,yp);
+            xq=xq'; yq=yq'; % cell indexは左上からだが，座標系は左下が基準なので座標系に合わせるように転置する．
 
-            % 対象領域の重要度マップを取り出す
-            min_grid_cell=floor(pmap_min/Env.d);
-            min_grid_cell(min_grid_cell==0)=1; % これが無いと0からになってしまう
-            max_grid_cell=min_grid_cell+size(xq)-[1 1]; % region_phi と inのサイズを合わせるため
-            region_phi=Env.grid_density(min_grid_cell(1):max_grid_cell(1),min_grid_cell(2):max_grid_cell(2));% 相対的な重要度行列
-            in = inpolygon(xq,yq,region.Vertices(:,1),region.Vertices(:,2)); % （相対座標）測距領域判別
-
-            result.grid_density = region_phi.*in-0*(~in);  % region_phi(i,j) : grid (i,j) の位置での重要度：測距領域外は0
-            result.xq=xq;
-            result.yq=yq;
-            result.map_max=rpmap_max;
-            result.map_min=rpmap_min;
-            %% 出力として整形
-            result.region=region;
-
+            region_phi = Env.grid_density(map_x_index,map_y_index);
+            if ~isempty(xq(:)); in = reshape(isinterior(region,xq(:),yq(:)),size(xq));end
+            
+            % RESULTの処理
+            result.angle         =  obj.ray_direction;
+            result.sensor_points = sensor_points;
+            if isempty(in) 
+                result.grid_density = [];
+            else
+                result.grid_density  = region_phi.*in;
+            end
+            result.in            = in;
+            result.map_xi        = map_x_index;
+            result.map_yi        = map_y_index;
+            result.xq            = xq-pos(1);
+            result.yq            = yq-pos(2);
+            result.map_min       = pmap_min-pos(1:2)';
+            result.map_max       = pmap_max-pos(1:2)';
+            result.region        = translate(region,-pos(1:2)');
             obj.result = result;
         end
         function show(obj,varargin)

@@ -12,9 +12,9 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 cd(cf); close all hidden; clear all; userpath('clear');
 %%
 clc
-SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR"];
+SimBaseMode = ["SimVoronoi_yamak","SimHL","SimLiDAR"];
 ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL"];
 fExp = 0;
-fDebug = 0; % 1: active : for debug function
-PInterval = 0.6; % sec : poling interval for emergency stop
+fDebug = 1; % 1: active : for debug function
+PInterval = 0.1; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);

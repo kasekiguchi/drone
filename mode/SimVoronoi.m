@@ -28,8 +28,8 @@ for i = 1:N
   agent(i).plant = MODEL_CLASS(agent(i),M); % control target model
   agent(i).parameter = P; % set model parameter
   agent(i).sensor.direct = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise 
-  agent(i).sensor.rpos = RANGE_POS_SIM(agent(i),Sensor_RangePos(i,'r',4)); % range sensor to capture neighbor's position : r : sensor radius
-  agent(i).sensor.rdensity = RANGE_DENSITY_SIM(agent(i),Sensor_RangeD('r',2)); % range sensor to capture field importance : r : sensor radius
+  agent(i).sensor.rpos = RANGE_POS_SIM(agent(i),Sensor_RangePos(i,'r',10)); % range sensor to capture neighbor's position : r : sensor radius
+  agent(i).sensor.rdensity = RANGE_DENSITY_SIM(agent(i),Sensor_RangeD('r',1)); % range sensor to capture field importance : r : sensor radius
   agent(i).sensor.do = @sensor_do; % synthesis of sensors
   agent(i).estimator = DIRECT_ESTIMATOR(agent(i),struct("model",MODEL_CLASS(agent(i),M))); % estimator.result.state = sensor.result.state
   agent(i).reference = VORONOI_BARYCENTER(agent(i),Reference_2DCoverage(agent(i),env,'void',0)); % calculate Voronoi varycenter
