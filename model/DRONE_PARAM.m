@@ -65,6 +65,8 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
                 param.additional = []; % プロパティに無いパラメータを追加する場合
+                param.model_error = [];
+             
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
         end

@@ -25,6 +25,7 @@ classdef MODEL_CLASS < dynamicprops & handle
     noise
     fig
     self
+    fmodelError
   end
 
   properties %(Access=private)
@@ -33,12 +34,14 @@ classdef MODEL_CLASS < dynamicprops & handle
 
   methods
 
-    function obj = MODEL_CLASS(self,args) % constructor
+    function obj = MODEL_CLASS(self,args,fmE) % constructor
 
       arguments
         self
         args
+        fmE=0;
       end
+      obj.fmodelError=fmE;
       obj.self = self;
       if isempty(regexp(args.type, "EXP", 'once'))
         param = args.param;
@@ -102,7 +105,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       end
       u = obj.self.controller.result.input;
       if isempty(obj.param)
-        obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
+        obj.param = obj.self.parameter.get("all","row",obj.fmodelError);%varargin{5}.parameter.get();
       end
       % if isfield(opts, 'param')
       %     obj.param = opts.param;
