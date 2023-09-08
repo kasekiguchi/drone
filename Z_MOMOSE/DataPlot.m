@@ -419,10 +419,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                 end
             else
                 if isfield(loggers{i}.Data.agent.controller.result{1, tindex(i)},'z1') 
-                    for i2=kf(i):1:ke(i)
-                        vf{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.vf;
-                        j=j+1;
-                    end
+                    % for i2=kf(i):1:ke(i)
+                    %     vf{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.vf;
+                    %     j=j+1;
+                    % end
                 end
             end
         end
@@ -492,8 +492,11 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
             RMSE(i,1:12) = [rmse(ref{1,i},est{1,i}),rmse(refs,vel{1,i}),rmse(refs,att{1,i}),rmse(refs,w{1,i})];
             RMSElog(i+1,1:13) = [c(i),RMSE(i,1:12)];
             fprintf('#%s RMSE\n',c(i));
-            fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
-            fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
+            % fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
+            % fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
+            fprintf('  x\t y\t z\t \n');
+            fprintf('  %.4f    %.4f    %.4f \n',RMSElog(i+1,2:4));
+        
         end
     end
 

@@ -5,7 +5,7 @@ properties
     result
     param
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
-    Vf % 階層1の入力を生成する関数ハンドル
+    % Vf % 階層1の入力を生成する関数ハンドル
     z %z方向にサーボを適用するときの初期値
     Vs % 階層２の入力を生成する関数ハンドル
     approx_z %zサブシステムのゲイン，近似パラメータ，alpha
@@ -18,7 +18,7 @@ methods
         obj.param = param;
         obj.param.P = self.parameter.get(obj.parameter_name);
         obj.result.input = zeros(self.estimator.model.dim(2),1);
-        obj.Vf = obj.param.Vf;
+        % obj.Vf = obj.param.Vf;
         obj.z=0; %z方向にサーボを適用するときの初期値
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
         obj.approx_z = obj.param.approx_z; %zサブシステムのゲイン，近似パラメータ，alpha

@@ -9,8 +9,8 @@ classdef TAKEOFF_REFERENCE < handle
     zd = 1; % goal altitude
     result
     th_offset
-    % th_offset0 = 200;
-    th_offset0 = 150;
+    th_offset0 = 160;
+    % th_offset0 = 150;
   end
 
   methods

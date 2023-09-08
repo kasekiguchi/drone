@@ -1,7 +1,8 @@
 %% make folder&save
     %変更しない
+    ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
     % ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     % ExportFolder='C:\Users\81809\OneDrive\ドキュメント\GitHub\drone\Data';
     % ExportFolder='Data';%github内
     DataFig='data';%データか図か
