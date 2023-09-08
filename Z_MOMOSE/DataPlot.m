@@ -5,31 +5,30 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=10;%flightのみは１
+fF=0;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
-% startTime = 5;
-% endTime = 20;
+startTime = 0;
+endTime = 15;
 startTime = 0;
 endTime = 1E2;
 
     loggers = {
                 % gui.logger
-                log1.log
-                log2.log
-                % log_LS_HL_prid,...
-                % log_FT_HL_prid,...
-                % log_FT_EL_prid
+                % logger_modelerror_LS2,
+                % logger_modelerror_ft
+                % log_FT_HL_prid
+                log_sadlle_FTxy
         };
     c=[
-        "HL","EL"
+        % "LS","FTr"
            % "LS","FT"
         ];
 %========================================================================
 %図を選ぶ[1:"t_p" 2:"x_y" 3:"t_x" 4:"t_y" 5:"t_z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 
-%              11:"three_D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma" 
+%              11:"three_D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma" a
 %               20:"pp" 21:"pv" 22:"pq" 23:"pw" 24:"Trs"];
 %========================================================================
      % n=[1:16,18 20:24];

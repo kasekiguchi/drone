@@ -9,9 +9,9 @@
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
     subfolder='sim';%sim or exp
-    ExpSimName='SERVOz_FTCxy';%実験,シミュレーション名
+    ExpSimName='EL_HL';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='EL';%実験,シミュレーション内容
+    contents='HL_FT_gaus';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath

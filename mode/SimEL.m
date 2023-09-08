@@ -9,20 +9,20 @@ logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for 
 
 agent = DRONE;
 agent.parameter = DRONE_PARAM("DIATONE");
-    initial_state.p = arranged_position([0, 0], 1, 1, 0);
+    initial_state.p = arranged_position([1, 1], 1, 1, 0);
     initial_state.q = [1; 0; 0; 0];
     initial_state.v = [0; 0; 0];
     initial_state.w = [0; 0; 0];
     initial_state.Trs = [agent.parameter.mass*agent.parameter.gravity; 0];%重力を打ち消すため最初はTr=m*g
-agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
+% agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
 %外乱を与える==========
-% agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
-% agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
+agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
 %=====================
 agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});
 
 fFT=1;%1:FT, other:LS
 agent.controller = ELC(agent,Controller_EL(dt,fFT));
