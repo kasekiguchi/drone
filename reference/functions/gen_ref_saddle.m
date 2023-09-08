@@ -6,26 +6,26 @@ arguments
     param.phase = -pi % 位相    
 end
 
-T = param.freq;
-origin = param.orig;
-scale = param.size;
-phase = param.phase;
-syms t real
-syms lx ly real
-lx = scale(1); % 4
-lx_offset = origin(1); %4;
-ly = scale(2); %3.5;
-ly_offset = origin(2);% 3.5;
-lz = scale(3);% 1;
-lz_offset=origin(3);% 1;
-w = 2*pi/T; % T秒で一周
-
-ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
-ly*sin(w*t + phase)+ly_offset; % y
-lz*sin(2*w*t + phase/2)+lz_offset; % z
-0];%
-ddx = diff(ref,t,2);
-fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
+% T = param.freq;
+% origin = param.orig;
+% scale = param.size;
+% phase = param.phase;
+% syms t real
+% syms lx ly real
+% lx = scale(1); % 4
+% lx_offset = origin(1); %4;
+% ly = scale(2); %3.5;
+% ly_offset = origin(2);% 3.5;
+% lz = scale(3);% 1;
+% lz_offset=origin(3);% 1;
+% w = 2*pi/T; % T秒で一周
+% 
+% ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
+% ly*sin(w*t + phase)+ly_offset; % y
+% lz*sin(2*w*t + phase/2)+lz_offset; % z
+% 0];%
+% ddx = diff(ref,t,2);
+% fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 
 % 圧倒的に遅いので以下のような書き方はしないこと
 % xdf =@(t) [xd1(t),xd2(t),xd3(t),xd4(t)];
@@ -39,8 +39,8 @@ fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 % y=sin(t/2);
 % z=1;
 
-x = t;
+x = 0;
 y = 0;
-z = 1;
+z = 0.14;
 ref=@(t)[x;y;z;0];
 end
