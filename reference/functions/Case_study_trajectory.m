@@ -45,9 +45,9 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 % 円旋回
-x = sin(2*pi*t/T);
-y = cos(2*pi*t/T);
-z = 1;
+% x = sin(2*pi*t/T);
+% y = cos(2*pi*t/T);
+% z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/T);
@@ -56,9 +56,9 @@ z = 1;
 % yaw = 2*pi*t/5;
 
 %八の字
-% x = sin(2*t/8);
-% y = sin(t/8);
-% z = 1;
+x = sin(2*t/T);
+y = sin(t/T);
+z = 1;
 
 % s = 8;
 % x = t/s;
