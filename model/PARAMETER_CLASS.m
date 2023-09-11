@@ -24,20 +24,20 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
                 fn(fn=="additional") = [];
                 fn(fn=="model_error") = [];
                 obj.parameter_name = string(fn);
-                if isfield(param,"model_error")%モデル誤差のfieldがあるか
-                    for i = 1:length(fn)
-                        obj.(fn{i}) = param.(fn{i});
-                            if ~isfield(param.model_error,(fn{i}))%そのモデル誤差を与えているか
-                                obj.model_error(i)=obj.(fn{i});
-                            else
-                                obj.model_error(i)=obj.(fn{i})+param.model_error.(fn{i});%モデルとの値の差を加える
-                            end
-                    end
-                else
+                % if isfield(param,"model_error")%モデル誤差のfieldがあるか
+                %     for i = 1:length(fn)
+                %         obj.(fn{i}) = param.(fn{i});
+                %             if ~isfield(param.model_error,(fn{i}))%そのモデル誤差を与えているか
+                %                 obj.model_error(i)=obj.(fn{i});
+                %             else
+                %                 obj.model_error(i)=obj.(fn{i})+param.model_error.(fn{i});%モデルとの値の差を加える
+                %             end
+                %     end
+                % else
                     for i = 1:length(fn)
                             obj.(fn{i}) = param.(fn{i});
                     end
-                end
+                % end
             end
             if ~isempty(param.additional) % propertyに無いパラメータを設定する場合
                 fn = fieldnames(param.additional);
@@ -90,6 +90,7 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
             obj.update_parameter();
         end
         function update_parameter(obj)
+            obj.parameter=[];
             for i = 1:length(obj.parameter_name)
                 if isprop(obj,obj.parameter_name(i))
                     % if strcmp(obj.type,"row")
