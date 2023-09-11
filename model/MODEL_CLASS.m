@@ -40,6 +40,9 @@ classdef MODEL_CLASS < dynamicprops & handle
         args
       end
       obj.self = self;
+      if ~isempty(self.parameter)
+         obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
+      end
       if isempty(regexp(args.type, "EXP", 'once'))
         param = args.param;
         name = args.name;
