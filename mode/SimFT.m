@@ -1,6 +1,6 @@
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 25; % terminal time
+te = 14; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -12,13 +12,13 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-fmodel_error=0;
+fmodel_error=1;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1),fmodel_error);
 %外乱を与える==========
 % agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
 % agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
 %=====================
-agent.parameter = DRONE_PARAM("DIATONE","model_error",struct("mass",0.1)); 
+agent.parameter = DRONE_PARAM("DIATONE","model_error",struct("lx",0.05,"mass",0.2,"jy",0.5)); 
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});

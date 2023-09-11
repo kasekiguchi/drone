@@ -30,6 +30,8 @@ classdef MODEL_CLASS < dynamicprops & handle
 
   properties %(Access=private)
     state %=STATE_CLASS(); % 状態の構造体
+    T2T
+    str
   end
 
   methods
@@ -106,6 +108,21 @@ classdef MODEL_CLASS < dynamicprops & handle
       u = obj.self.controller.result.input;
       if isempty(obj.param)
         obj.param = obj.self.parameter.get("all","row",obj.fmodelError);%varargin{5}.parameter.get();
+        if isempty(obj.T2T)
+            p=varargin{1, 5}.parameter;
+            Lx = p.Lx;
+            Ly = p.Ly;
+            lx = p.lx;
+            ly = p.ly;
+            km1 = p.km1;
+            km2 = p.km2;
+            km3 = p.km3;
+            km4 = p.km4;
+            IT = [1 1 1 1;-ly, -ly, (Ly - ly), (Ly - ly); lx, -(Lx-lx), lx, -(Lx-lx); km1, -km2, -km3, km4];
+            IIT = inv(IT);
+            obj.T2T=@(t1,t2,t3,t4) IIT*[t1;t2;t3;t4];%%%%%%%%%%
+            obj.str=contains(func2str(obj.method),'force');%%%%%%%%
+        end
       end
       % if isfield(opts, 'param')
       %     obj.param = opts.param;
@@ -121,7 +138,9 @@ classdef MODEL_CLASS < dynamicprops & handle
       %
       %     u = u + obj.noise.value .* randn(size(u));
       %            end
-
+        if obj.str
+                u=obj.T2T(u(1),u(2),u(3),u(4));
+        end
       % 状態更新
       if contains(obj.time_scale, 'discrete')
         obj.set_state(obj.projection(obj.method(obj.state.get(), u, obj.param)));
