@@ -29,7 +29,7 @@ Controller.az = alpha(1:4,1);
 Controller.ax = alpha(1:4,2);
 Controller.ay = alpha(1:4,3);
 Controller.apsi = alpha(1:2, 4);
-%各サブシステムでalpを変える場合」
+%各サブシステムでalpを変える場合
 % Controller.az = alpha(3:4, 1);
 % Controller.ax = alpha(1:4,2);
 % Controller.ay = alpha(1:4,3);
@@ -55,7 +55,7 @@ syms z
 Cc2 = [1 0 0 0];
 Ac4s=[Ac4,zeros(4,1);-Cc2,0];
 Bc4s=[Bc4;0];
-Controller.F1s=lqrd(Ac4s,Bc4s,diag([1000,100,10,10,0.1]),0.01,dt);
+Controller.F1s=lqrd(Ac4s,Bc4s,diag([1000,10,10,10,0.1]),0.01,dt);
 eF1s=Controller.F1s;
 % Controller.Vep = matlabFunction([-eF1s*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
 Controller.Vep = matlabFunction([-eF1s *[ez1;z]; -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1, ez2, ez3, ez4, z});
