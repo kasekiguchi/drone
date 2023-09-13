@@ -121,11 +121,7 @@ classdef HLMPC_controller <handle
                 initial_u4 = obj.input.u(4);
             end
             u0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
-%             x = obj.self.estimator.result.state.get();
             previous_state = repmat([obj.current_state; u0], 1, obj.param.H);
-            % previous_state の1行目
-
-            %                 previous_state(Params.state_size+1:Params.total_size, 1:Params.H) = repmat(x0, 1, Params.H);
 
             % MPC設定(problem)
             %-- fmincon 設定
@@ -141,17 +137,17 @@ classdef HLMPC_controller <handle
             problem.solver = 'fmincon'; % solver
             problem.options = options;  %
 
-            obj_HL.input = obj.input.u;
-            obj_HL.reference = obj.reference.xr;
-            objHLrefinput = obj.param.ref_input;
-            obj_HL.Weight = obj.Weight;
-            obj_HL.WeightRp = obj.WeightRp;
-            obj_HL.WeightR = obj.WeightR;
-
-            objHL_const.H = obj.param.H;
-            objHL_const.A = obj.A;
-            objHL_const.B = obj.B;
-            objHL_const.current_state = obj.current_state;
+            % obj_HL.input = obj.input.u;
+            % obj_HL.reference = obj.reference.xr;
+            % objHLrefinput = obj.param.ref_input;
+            % obj_HL.Weight = obj.Weight;
+            % obj_HL.WeightRp = obj.WeightRp;
+            % obj_HL.WeightR = obj.WeightR;
+            % 
+            % objHL_const.H = obj.param.H;
+            % objHL_const.A = obj.A;
+            % objHL_const.B = obj.B;
+            % objHL_const.current_state = obj.current_state;
             obj.reference.state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)]; % 実状態における目標値
 
             problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
@@ -161,25 +157,13 @@ classdef HLMPC_controller <handle
             problem.objective = @(x) obj.objective(x); 
             problem.nonlcon   = @(x) obj.constraints(x);
             [var, ~, ~] = fmincon(problem);
-            % 制御入力の決定
-%             previous_state = var;   % 初期値の書き換え
 
-            %TODO: 1列目のvarが一切変動しない問題に対処
-            % if var(Params.state_size+1:Params.total_size, end) > 1.0
-            %     var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
-            % end
-            
-            % obj.input.u = var(13:16, 1);
             vf = var(13, 1);     % 最適な入力の取得
             vs = var(14:16, 1);     % 最適な入力の取得
             tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);  % 入力変換
             obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
-%             obj.self.input = obj.result.input;  % agent.inputへの代入
             obj.input.u = obj.result.input;
-
-            % 座標として軌跡を保存するため　x = xd + state
-            
-            
+     
             obj.result.inputv = [vf; vs];
             result = obj.result;
             % profile viewer
@@ -193,8 +177,6 @@ classdef HLMPC_controller <handle
             % モデル予測制御の制約条件を計算するプログラム
             c  = zeros(12, obj.param.H);
             ceq_ode = zeros(12, obj.param.H);
-
-            xReal = obj.reference.xr(1:12,:) - x(1:12,:);
 
             %-- MPCで用いる予測状態 Xと予測入力 Uを設定
             X = x(1:12, :);          % 12 * Params.H
