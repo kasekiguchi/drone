@@ -9,24 +9,40 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-% size_best = size(data.bestcost, 2);
-Edata = gui.logger.data(1, "p", "e")';
+% % size_best = size(data.bestcost, 2);
+% Edata = gui.logger.data(1, "p", "e")';
+% % Rdata = gui.logger.data(1, "p", "r")';
+% 
+% Vdata = gui.logger.data(1, "v", "e")';
+% Qdata = gui.logger.data(1, "q", "e")';
+% Idata = gui.logger.data(1,"input",[])';
+% logt = gui.logger.data('t',[],[]);
+% Rdata = zeros(12, size(logt, 1));
+% IV = zeros(4, size(logt, 1));
+
+%%
+for i = 1:length(log.Data.t)-1
+    Data(:,i) = log.Data.agent.estimator.result{i}.state.get();
+    RData(:,i) = log.Data.agent.reference.result{i}.state.get();
+end
+logt = log.Data.t;
+logt = logt(1:end-1);
+Edata = Data(1:3,:);
+Qdata = Data(4:6,:);
+Vdata = Data(7:9,:);
+Wdata = Data(10:12,:);
+
+Rdata = RData(1:3,:);
+
+
 % Rdata = gui.logger.data(1, "p", "r")';
-
-Vdata = gui.logger.data(1, "v", "e")';
-Qdata = gui.logger.data(1, "q", "e")';
-Idata = gui.logger.data(1,"input",[])';
-logt = gui.logger.data('t',[],[]);
-Rdata = zeros(12, size(logt, 1));
-IV = zeros(4, size(logt, 1));
-
-
-Rdata = gui.logger.data(1, "p", "r")';
 Rdata = [Rdata; zeros(9, 200)];
 
 Diff = Edata - Rdata(1:3, :);
 cutT = 0;
 close all
+
+
 
 % x-y
 % figure(5); plot(Edata(1,:), Edata(2,:)); xlabel("X [m]"); ylabel("Y [m]");
@@ -121,3 +137,13 @@ xlabel("Time [s]"); ylabel("Calculation time [s]");
 % saveas(3,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_v.eps");
 % saveas(4,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_input.eps");
 % saveas(7,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_ZZ.eps")
+%%
+Et = -1:0.1:1; Ez = 3/10 * Et+ 0.1; Er = -10/5 * Et;
+figure(20)
+plot(Et, Er, Et, Ez); hold on;
+plot(-1, 2, 'h', 'MarkerSize', 20)
+xlim([-1 0.2]); ylim([-0.1 2]);
+grid on;
+xlabel("X [m]"); ylabel("Z [m]");
+daspect([1 1 1]);
+legend("About target trajectory", "Slope", "Initial position")
