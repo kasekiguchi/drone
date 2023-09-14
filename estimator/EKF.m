@@ -74,8 +74,8 @@ methods
         p = obj.self.parameter.get(); 
         A = eye(obj.n)+obj.JacobianF(x,p)*dt; % Euler approximation
         C = obj.JacobianH(x,p);
-%         P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';  
-        P_pre  = A*obj.result.P*A' + diag([0.001*ones(1,6),0.01*ones(1,6),0.01*ones(1,6)]); % Predicted covariance
+        P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';  
+%         P_pre  = A*obj.result.P*A' + diag([0.001*ones(1,6),0.01*ones(1,6),0.01*ones(1,6)]); % Predicted covariance
         G = (P_pre*C')/(C*P_pre*C'+obj.R); % Kalman gain
         P = (eye(obj.n)-G*C)*P_pre;	% Update covariance
 %         P(13:end,13:end) = 0.05*eye(size(P(13:end,13:end)));
@@ -87,6 +87,8 @@ methods
         obj.result.P = P;
         obj.result.A = A;
         obj.result.C = C;
+%         obj.result.F = obj.JacobianF;
+%         obj.result.H = obj.JacobianH;        
       end
         result=obj.result;
         obj.timer = tic;

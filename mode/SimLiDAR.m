@@ -1,13 +1,13 @@
 ts = 0;
 dt = 0.01;
-te = 1500;
+te = 400;
 time = TIME(ts,dt,te);
 % in_prog_func = @(app) in_prog(app);
 % post_func = @(app) post(app);
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
-motive = Connector_Natnet_sim(1, dt, 0);              % 3rd arg is a flag for noise (1 : active )
+motive = Connector_Natnet_sim(1, dt, 1);              % 3rd arg is a flag for noise (1 : active )
 %%
 %env = stlread('3F.stl');
   a = 1;
@@ -39,13 +39,13 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 % パラメータ推定時オン
 % initial_state.l = [1; 1; 1; 1];
-initial_state.ps = [0.05;0.05;0.05];
-initial_state.qs = [0.1; 0.1;0.1];
+initial_state.ps = [1;1;1];
+initial_state.qs = [1; 1;1];
 
 % 野崎設定
 wall_param = [0,1,0,-9];
 psb = [0.01;0.01;0.01];
-qs = [0;0;pi/2];
+qs = [0;0;pi];
 %%
 % default
 agent = DRONE;
@@ -57,11 +57,11 @@ agent.parameter = DRONE_PARAM("DIATONE");
 
 % パラメータ既知
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_kiti(x,wall_param,psb,qs,p),"output_func",@(x,p) H_12_kiti(x,wall_param,psb,qs,p),"R",diag([1e-6*ones(1,3), 1e-7*ones(1,3),1e-3*ones(1,1)])));
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_2(x,wall_param,psb,qs,p),"output_func",@(x,p) H_12_2(x,wall_param,psb,qs,p),"R",diag([1e-0*ones(1,3), 1e-0*ones(1,3),1e-9*ones(1,2)])));
 
 % オフセット類を状態として追加
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18(x,wall_param,p),"output_func",@(x,p) H_18(x,wall_param,p),"B",[eye(6)*dt^2;eye(6)*dt;zeros(6,6)],"P",diag([ones(1,12),10*ones(1,6)]),"R",diag([1e-8*ones(1,3), 1e-8*ones(1,3),1e-6*ones(1,1)]),"Q",diag([10*ones(1,3),100*ones(1,3)])));
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",[eye(6)*dt^2;eye(6)*dt;eye(6)*dt],"P",diag([ones(1,12),1000*ones(1,6)]),"R",diag([1e-8*ones(1,3), 1e-8*ones(1,3),1e-7*ones(1,2)]),"Q",diag([10*ones(1,3),100*ones(1,3)])));
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"P",diag([ones(1,12),1000*ones(1,6)]),"R",diag([1e-8*ones(1,3), 1e-8*ones(1,3),1e-7*ones(1,2)])));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),2000*ones(1,6)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-6*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.001*ones(1,6)])));
 
 
 agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/2),'p0',[0.01;0.01;0.01],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.000001, 'seed', 0));

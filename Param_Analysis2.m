@@ -17,11 +17,11 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
 flag_eps=0;
-flag_png=0;
+flag_png=1;
 % Log Dataの読み取りと格納
 % log2 = LOGGER('./Data/data030402503.mat');
 % log2 = LOGGER('./Data/miidmove_Log(24-Jul-2023_13_38_35).mat');
-log = LOGGER('./Data/Log(04-Sep-2023_17_10_48).mat');
+log = LOGGER('./Data/t1500_Log(11-Sep-2023_13_15_30).mat');
 % log = LOGGER('./Data/nomove_little_Log(14-Jul-2023_00_53_31).mat');
 
 %% ログ
@@ -87,7 +87,7 @@ Y_true = [offset_true;reshape(Rs_true,[9,1])];
 last=length(robot_pe);
 num = 3;%2本目センサのいっぽん目からの本数
 ang = 180;
-%% 一括でパラ推定
+% %% 一括でパラ推定
 [~,~,At,Xt] = param_analysis2(robot_pe(:,2),robot_qe(:,2),sensor_data(1,3),sensor_data(num,3),Rodrigues([0,0,1],(num-1)*pi/ang));
 A_stack=[];
 for i=2:1:last
@@ -118,19 +118,19 @@ JP = ones(1,last); %J=Σ||p^-p||
 JX = ones(1,last); %J=Σ||X^-X||
 JY = ones(1,last); %J=Σ||Y^-Y||
 JY = ones(1,last); %J=Σ||Y^-Y||
-psb = zeros(3,last-1); %J=Σ||Y^-Y||
-qs = zeros(3,last-1);
+psb = zeros(3,last); %J=Σ||Y^-Y||
+qs = zeros(3,last);
 for j=2:last
     if j == 2
-        qt = Eul2Quat(robot_qe(:,j-1));
+        qt = Eul2Quat(robot_qe(:,j));
         qt = qt./vecnorm(qt,2);
-        A = Cf2_sens(robot_pe(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         % qt = Eul2Quat(robot_qe(:,j));
         % qt = qt./vecnorm(qt,2);
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         A(:,ds)=[];
         [Xn,Pn] = RLS(A,zeros(size(A,2),1),-1*ones(size(A,1),1),alpha*eye(size(A,2)),1);
-        P_stack(:,:,j-1) = Pn;
+        P_stack(:,:,j) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
         Rsxn = Rsxn/vecnorm(Rsxn);
@@ -147,16 +147,16 @@ for j=2:last
         psb(:,j)=offsetn;
         qs(:,j)=rotm2eul(Rsn,'XYZ')';
     else
-        qt = Eul2Quat(robot_qe(:,j-1));
+        qt = Eul2Quat(robot_qe(:,j));
         qt = qt./vecnorm(qt,2);
-        A = Cf2_sens(robot_pe(:,j-1),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
+        A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         % qt = Eul2Quat(robot_qe(:,j));
         % qt = qt./vecnorm(qt,2);
         % A = Cf2_sens(robot_pe(:,j),qt,sensor_data(1,j),sensor_data(num,j),Rodrigues([0,0,1],(num-1)*pi/ang));
         ds = find(A(2,:)==0);
         A(:,ds)=[];
         [Xn,Pn] = RLS(A,Xn,-1*ones(size(A,1),1),Pn,1);
-        P_stack(:,:,j-1) = Pn;
+        P_stack(:,:,j) = Pn;
         offsetn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(4:12)];
         Rsxn = pinv([Xn(1)*eye(3);Xn(2)*eye(3);Xn(3)*eye(3)])*[Xn(13:15);Xn(19:21);Xn(25:27)];
         Rsxn = Rsxn/vecnorm(Rsxn);
@@ -166,10 +166,10 @@ for j=2:last
         % Rszn = cross(Rsxn/vecnorm(Rsxn),Rsyn/vecnorm(Rsyn));
         Rsn = [Rsxn,Rsyn,Rszn];
         % 評価
-        JP(:,j-1) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
-        JX(:,j-1) = norm(Xn-X_true);
+        JP(:,j) = norm(offsetn-offset_true) + norm(Rsn-Rs_true);
+        JX(:,j) = norm(Xn-X_true);
         Yn = [offsetn;reshape(Rsn,[9,1])];
-        JY(:,j-1) = norm(Yn-Y_true);
+        JY(:,j) = norm(Yn-Y_true);
         psb(:,j)=offsetn;
         qs(:,j)=rotm2eul(Rsn,'XYZ')';
     end
@@ -430,7 +430,8 @@ end
 % zlabel('z');
 %%
 if flag_eps==1
-    pass = 'C:\Users\yuika\Desktop\修士\中間発表\latex2e\latex2e\output\fig';
+%     pass = 'C:\Users\yuika\Desktop\修士\中間発表\latex2e\latex2e\output\fig';
+    pass = 'C:\Users\student\Desktop\Nozaki\pic';
     saveas(fig13, fullfile(pass, 'RLS_pos.eps'), 'epsc');
     saveas(fig14, fullfile(pass, 'RLS_ang.eps'), 'epsc');
     saveas(fig4, fullfile(pass, 'RLS_sens.eps'), 'epsc');
@@ -443,7 +444,8 @@ if flag_eps==1
     saveas(fig12, fullfile(pass, 'RLS_inst.eps'), 'epsc');
 end
 if flag_png==1
-    pass2 = 'C:\Users\yuika\Desktop\修士\中間発表\ppt';
+%     pass2 = 'C:\Users\yuika\Desktop\修士\中間発表\ppt';
+    pass2 = 'C:\Users\student\Desktop\Nozaki\pic';
     saveas(fig13, fullfile(pass2, 'RLS_pos.png'));
     saveas(fig14, fullfile(pass2, 'RLS_ang.png'));
     saveas(fig4, fullfile(pass2, 'RLS_sens.png'));
