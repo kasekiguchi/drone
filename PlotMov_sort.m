@@ -28,13 +28,6 @@
 % [Jtsort, I] = sort(Jt);
 % Jorder{100} = [Jtsort; I];
 
-% 全時刻
-for i = 1:400
-    Jt = data.pathJ{i};% 1*N
-    pt = data.path{i}; % 12*10*N
-    
-    [Jtsort, I] = sort(Jt);
-    Jorder{i} = [Jtsort', I'];
-end
+
 
 %%

@@ -25,35 +25,43 @@ syms t real
 % yaw = 0;
 
 %%
-% x = 0 * t;
-% y = 0 * t;
-% z = 0 * t;
+% x = 1;
+% y = 0;
+% z = 1;
+% yaw = 0;
 %% 
 % x = 0;
 % y = 0;
 % z = 1/2 * sin(t/2);
 
 %% circle
-% x = cos(t/2);
+% x = cos(t/2)-1;
 % y = sin(t/2);
-% z = 1.0;
+% z = 1;
 % yaw = 0;
 
+%% involute curve
+% x=2*(cos(t)+t*sin(t));
+% y=2*(sin(t)-t*cos(t));
+% z=1;
+% yaw = 0;
 %%
-% x = cos(t)+sin(t)^2;
+% x = cos(t)+sin(t);
 % y = sin(t)+2*sin(t);
 % z = 1;
+% yaw = 0;
 
 %% Liner
 x = t;
 y = 0;
 z = 1.0;
-yaw = 1;
+yaw = 0;
 
 %% Vertical vibration
 % x = 0;
 % y = 0;
 % z = 1/2 * sin(2*t)+1;
+% yaw = 0;
 % z = 1/2 * sin(2*t)+1 + 1/10 * cos(t);
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
@@ -61,7 +69,7 @@ yaw = 1;
 % x = 0;
 % y = 0;
 % z = 1;
-% yaw = 0;
+% yaw = t/10;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
@@ -88,13 +96,15 @@ yaw = 1;
 % z = 2*exp(-(t-phaseT)/zt)-0.1;
 % x = -exp(-(t-phaseT)/xt);
 % y = 0;
+
 %% slope P2P
 % x = -0.2;
 % y = 0;
 % z = 0.1;
+% yaw = 0;
 
 %% landing liner
-% x = 6/100*t - 2.7;
+% x = 0.5;
 % y = 0;
 % z = -10/3*t + 10;
 

@@ -49,7 +49,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
         %-- main()的な
         % u fFirst
         function result = do(obj,param)
-%           profile on
+          profile on
             % idx = param{1};
             xr = param{2};
             rt = param{3};

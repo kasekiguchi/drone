@@ -110,7 +110,9 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
             % -------------------------------------------------------------------------------------------------------------------------------------
             %% Referenceの取得、ホライズンごと
-            obj.reference.xr = ControllerReference(obj); % 12 * obj.param.H 仮想状態 * ホライズン
+            % obj.reference.xr = ControllerReference(obj); % 12 * obj.param.H 仮想状態 * ホライズン
+
+            %% MPC 設定
 
             if idx == 1
                 initial_u1 = 0;   % 初期値
@@ -132,17 +134,17 @@ classdef HLMPC_controller <CONTROLLER_CLASS
 
             % MPC設定(problem)
 
-            obj_HL.input = obj.input.u;
-            obj_HL.reference = obj.reference.xr;
-            objHLrefinput = obj.param.ref_input;
-            obj_HL.Weight = obj.Weight;
-            obj_HL.WeightRp = obj.WeightRp;
-            obj_HL.WeightR = obj.WeightR;
-
-            objHL_const.H = obj.param.H;
-            objHL_const.A = obj.A;
-            objHL_const.B = obj.B;
-            objHL_const.current_state = obj.current_state;
+            % obj_HL.input = obj.input.u;
+            % obj_HL.reference = obj.reference.xr;
+            % objHLrefinput = obj.param.ref_input;
+            % obj_HL.Weight = obj.Weight;
+            % obj_HL.WeightRp = obj.WeightRp;
+            % obj_HL.WeightR = obj.WeightR;
+            % 
+            % objHL_const.H = obj.param.H;
+            % objHL_const.A = obj.A;
+            % objHL_const.B = obj.B;
+            % objHL_const.current_state = obj.current_state;
             obj.reference.state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)]; % 実状態における目標値
 
             problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
@@ -216,10 +218,10 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             Xd = obj.reference.xr;
             %       Z = X;% - obj.state.ref(1:12,:);
             %% ホライズンごとに実際の誤差に変換する（リファレンス(1)の値からの誤差）
-            Xh = X + Xd;
+            % Xh = X + Xd;
             %% それぞれのホライズンのリファレンスとの誤差を求める
-            Z = Xd - Xh;
-            % Z = X;
+            % Z = Xd - Xh;
+            Z = X;
 
             tildeUpre = U - obj.input.u;          % agent.input 　前時刻入力との誤差
             tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差

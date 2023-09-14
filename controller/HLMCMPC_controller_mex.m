@@ -1,4 +1,4 @@
-classdef HLMCMPC_controller <CONTROLLER_CLASS
+classdef HLMCMPC_controller_mex <CONTROLLER_CLASS
   % MCMPC_CONTROLLER MCMPCのコントローラー
 
   properties
@@ -27,8 +27,17 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     B
   end
 
+  properties
+      mex_input
+      mex_state
+      mex_param
+      mex_A
+      mex_B
+      mex_N
+  end
+
   methods
-    function obj = HLMCMPC_controller(self, param)
+    function obj = HLMCMPC_controller_mex(self, param)
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
@@ -85,24 +94,13 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     %-- main()的な
     function result = do(obj,param)
       % profile on
-      OB = obj;
+    
       xr = param{2};
       rt = param{3};
 %       obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
       idx = round(rt/obj.self.model.dt+1);
-
-      InputV = param{5};
-
-      %% HL 5/18 削除------------------------------------------------------------------------------------------------------------------------
-      % ref = obj.self.reference.result;
-      % xd = ref.state.get();
-      % if isprop(ref.state,'xd')
-      %   if ~isempty(ref.state.xd)
-      %     xd = ref.state.xd; % 20次元の目標値に対応するよう
-      %   end
-      % end
 
       %% from main ref
       xd = [xr(1:3,1); 0; xr(7:9,1); 0];
@@ -137,10 +135,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % obj.reference.xr = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)];
 
       % xrを仮想状態目標値に変換 ホライズン分の変換
-      % xyz yaw v_{xyz yaw} a_{xyz yaw}
       obj.reference.xd_imagine = [xr(1:3,:); zeros(1,obj.param.H); xr(7:9,:); zeros(1,obj.param.H);zeros(24, obj.param.H)]; % 実状態を仮想状態に合わせた形で抜き取る
       % xr_imagine = 
-      % yaw入力時にHL用に目標値が切り替わるように　Rb0をかけるようにする
+      % Rb0 = 1;
       xr_imagine(1:3,:)=Rb0'*obj.reference.xd_imagine(1:3,:);
       xr_imagine(4,:) = zeros(1,obj.param.H);
       xr_imagine(5:7,:)=Rb0'*obj.reference.xd_imagine(5:7,:);
@@ -148,80 +145,35 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       xr_imagine(13:15,:)=Rb0'*obj.reference.xd_imagine(13:15,:);
       xr_imagine(17:19,:)=Rb0'*obj.reference.xd_imagine(17:19,:);
       obj.reference.xr_org = [xr_imagine(3,:);xr_imagine(7,:);xr_imagine(1,:);xr_imagine(5,:);xr_imagine(9,:);xr_imagine(13,:);xr_imagine(2,:);xr_imagine(6,:);xr_imagine(10,:);xr_imagine(14,:);xr_imagine(4,:);xr_imagine(8,:)];
-      obj.reference.xr = obj.reference.xr_org(:,1) - obj.reference.xr_org; 
+      obj.reference.xr = obj.reference.xr_org(:,1) - obj.reference.xr_org;
 
-      % main から　reference
-      % z vz x vx ax jx y vy ay jy yaw vyaw
-      % obj.reference.xr = [xr(3,:); xr(9,:); 
-      %                 xr(1,:); xr(7,:); zeros(2,obj.param.H); 
-      %                 xr(2,:); xr(8,:); zeros(2, obj.param.H); 
-      %                 zeros(2,obj.param.H)];
-      
-      % ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-      % ave2 = obj.input.u(2);    % 初期値はparamで定義
-      % ave3 = obj.input.u(3);
-      % ave4 = obj.input.u(4);
-
-      ave(1,1) = 0;
-      ave(2,1) = 0;
-      ave(3,1) = 0;
-      ave(4,1) = 0; % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
-
-      % ave1 = InputV(1,idx);
-      % ave2 = InputV(2,idx);
-      % ave3 = InputV(3,idx);
-      % ave4 = InputV(4,idx);
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;
 
-      % 全棄却時のケア
-      if obj.input.AllRemove == 1
-        % ave1 = 10;
-        % ave2 = 10;
-        % ave3 = 10;
-        % ave4 = 10;
-        if rem(idx,2) == 0
-            ave = 0.1 * [0;1;1;1];
-        else
-            ave = -0.1 *[0;1;1;1];
-        end
-        obj.input.AllRemove = 0;
-      end
+      % OBJ.input = obj.input;
 
-      % obj.input.sigma(4) = 0;
-      % 入力生成 Z; X; Y; YAW
-      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave(1,1); 
-      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave(2,1);
-      obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave(3,1);
-      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave(4,1);
+      %% MEX
+      % OBJ.input.u1 = OBJ.input.sigma(1).*randn(obj.param.H, OBJ.N) + ave(1); 
+      % OBJ.input.u2 = OBJ.input.sigma(2).*randn(obj.param.H, OBJ.N) + ave(2);
+      % OBJ.input.u3 = OBJ.input.sigma(3).*randn(obj.param.H, OBJ.N) + ave(3);
+      % OBJ.input.u4 = OBJ.input.sigma(4).*randn(obj.param.H, OBJ.N) + ave(4);
+      % OBJ.input.u = obj.input.u;
+      OBJ.state.state_data = obj.state.state_data; %OBJ.state.real_data = obj.state.real_data;
+      % OBJ.state.error_data = obj.state.error_data;
+      OBJ.reference.xr_org = obj.reference.xr_org;
+      OBJ.param.H = obj.param.H;
+      OBJ.input.sigma = obj.input.sigma; OBJ.input.v = obj.input.v;
+      OBJ.input.ref_input = obj.param.ref_input;
+      OBJ.current_state = obj.current_state;
+      OBJ.A = obj.A; OBJ.B = obj.B; OBJ.N = obj.N;
+      OBJ.Weight = obj.Weight; OBJ.WeightR = obj.WeightR; OBJ.WeightRp = obj.WeightRp;
 
-      obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
-      obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
-      obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
-      obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
-
-      %-- 状態予測
-      [obj.state.state_data] = obj.predict();
-
-      %% 墜落 or 飛びすぎたら終了
-      if obj.state.state_data(1,1,:) + xd(3) < 0
-        obj.param.fRemove = 1;
-      elseif obj.state.state_data(1,1,:) + xd(3) > 5
-        obj.param.fRemove = 1;
-      end
-
-      %% 実状態変換
-      Xd = repmat(obj.reference.xr_org, 1,1,obj.N);
-      Xreal = Xd + obj.state.state_data; % + or -
-      obj.state.error_data = Xd - Xreal;
-      obj.state.real_data = Xreal;
-
-      %-- 評価値計算 
-      obj.input.Evaluationtra =  obj.objective();
-
-      % 評価値の正規化
-      % obj.input.normE = obj.Normalize();
+      % 入力生成から評価値算出まで
+      contResult = input2eval(OBJ);
+      obj.input.Evaluationtra = contResult.eval;
+      obj.state = contResult.state;
+      obj.input.u = contResult.input.u;
 
       %-- 制約条件
       removeF = 0; removeX = []; survive = obj.N;
@@ -240,6 +192,12 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         % GUI共通プログラムから トルク入力の変換のつもり
         tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); 
 
+        % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); 
+        
+        
+        % yaw入力の削除
+        % tmp(4) = 0;
+
         % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
 
@@ -247,7 +205,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         obj.self.input = obj.result.input;  % agent.inputへの代入
 
         obj.result.v = [vf; vs];
-        obj.input.v = obj.result.v;
+        OBJ.input.v = obj.result.v;
 
         %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
         %   評価が良くなったら標準偏差を狭めるようにしている
@@ -295,7 +253,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.result.sigma = obj.input.sigma;
       obj.result.variable_N = obj.N; % 追加
       obj.result.Evaluationtra = obj.input.Evaluationtra;
-      % obj.result.Evaluationtra_norm = obj.input.normE;
+      obj.result.Evaluationtra_norm = [];
       obj.result.eachcost = [Bestcost, ...
           obj.input.Evaluationtra(BestcostID(1), 1), ...
           obj.input.Evaluationtra(BestcostID(2), 2), ...
@@ -354,20 +312,21 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       end
     end
 
-    %%-- 離散：階層型線形化
-    function [predict_state] = predict(obj)
-      u = obj.input.u;
-      obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
-      for i = 1:obj.param.H-1
-        obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),u(:,i,1:obj.N));
-      end
-      predict_state = obj.state.state_data;
-    end
+    %%-- 連続；オイラー近似
+%     function [predict_state] = predict(obj)
+%       u = obj.input.u;
+%       obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
+% %       obj.state.initial(:,:,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % 12 * obj.param.H * obj.N
+%       for i = 1:obj.param.H-1
+%         obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),u(:,i,1:obj.N));
+%       end
+%       predict_state = obj.state.state_data;
+%     end
 
     %------------------------------------------------------
     %======================================================
     function [MCeval] = objective(obj, ~)   % obj.~とする
-      % X = obj.state.state_data(:,:,1:obj.N);       % 12 * 10 * N
+      X = obj.state.state_data(:,:,1:obj.N);       % 12 * 10 * N
       U = obj.input.u(:,:,1:obj.N);                % 4  * 10 * N
       %% Referenceの取得、ホライズンごと
       % Xd = repmat(obj.reference.xr, 1,1, obj.N); % z vz x vx ax jx ... に目標値を並べ替えただけ
@@ -398,6 +357,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
+      % stageStateZ = sum(k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,obj.N),Z(:,1:end-1,:)),[1,2]);%
+      % stageInputPre  = sum(k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,obj.N),tildeUpre(:,1:end-1,:)),[1,2]);%sum(tildeUpre' * obj.param.RP.* tildeUpre',2);
+      % stageInputRef  = sum(k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,obj.N),tildeUref(:,1:end-1,:)),[1,2]);%sum(tildeUref' * obj.param.R .* tildeUref',2);
       stageStateZ = k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
       stageInputPre  = k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre(:,1:end-1,:));
       stageInputRef  = k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref(:,1:end-1,:));
@@ -420,6 +382,27 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       MCeval(:,5) = reshape(Eval{5}, obj.N, 1);
 
     end
+
+    function xd = ControllerReference(obj)
+    %REFERENCE この関数の概要をここに記述
+    %   詳細説明をここに記述
+        xd = zeros(12, obj.param.H);
+        RefTime = obj.self.reference.timeVarying.func;    % 時間関数の取得
+        for h = 0:obj.param.H-1
+    %         t = obj.param.t + obj.param.dt * h;
+            Ref = RefTime(obj.param.t + obj.param.dt * h);
+            xd(1:2, h+1) = [Ref(3); Ref(7)];
+            xd(3:6, h+1) = [Ref(1); Ref(5); Ref(9); Ref(13)];
+            xd(7:10,h+1) = [Ref(2); Ref(6); Ref(10);Ref(14)];
+            xd(11:12,h+1)= [Ref(4); Ref(8)];
+            %% 単純に　Ref　から対象を抽出する % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
+            % z dz           3 7
+            % x dx ddx dddx  1 5 9 13
+            % y dy ddy dddy  2 6 10 14
+            % yaw dyaw       4 8 
+        end
+    end
+
 
     function [pw_new] = Normalize(obj)
       NP = obj.N;

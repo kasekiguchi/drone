@@ -3,16 +3,16 @@ function Controller = Controller_HLMCMPC(~)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 5000;
+    Controller_param.Maxparticle_num = 5000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 5000;
-    Controller_param.input.Initsigma = 1*[1,1,1,1];
-    Controller_param.input.Constsigma = 5.0;
-    Controller_param.input.Maxsigma = [0.001,0.1,0.1,0.01];
-    Controller_param.input.Minsigma = 0.001 * [1,1,1,1];
+    Controller_param.Minparticle_num = 5000; % 2000でも動く　怪しい
+    Controller_param.input.Initsigma = 1*[2,1,1,1];
+    Controller_param.input.Constsigma = 50 * [0.01, 1,1,1];
+    Controller_param.input.Maxsigma = 10 * [0.01,1,1,1];
+    Controller_param.input.Minsigma = 1 * [0.001,1,1,1];
     Controller_param.input.Maxinput = 1.5;
 
-    Controller_param.ConstEval = 100000;
+    Controller_param.ConstEval = 1e10;
      
     Controller_param.const.X = -0.5;
     Controller_param.const.Y = -0.5;
@@ -35,23 +35,26 @@ function Controller = Controller_HLMCMPC(~)
 
     %% sekiguchi-komatsu new
     Controller_param.Z = 1e2*diag([100; 1]);
-    Controller_param.X = 1e4*diag([100,10,1,1]);
-    Controller_param.Y = 1e4*diag([100,10,1,1]);
+    Controller_param.X = 1e6*diag([100,1000,1,1]);
+    Controller_param.Y = 1e6*diag([100,1000,1,1]);
     Controller_param.PHI = diag([1; 1]);
 
-    Controller_param.Zf = diag([1; 1]);
-    Controller_param.Xf = diag([1,1,1,1]);
-    Controller_param.Yf = diag([10000,10000,1,1]);
+    Controller_param.Zf = diag([1e6; 1]);
+    Controller_param.Xf = diag([1e5,1,1,1]);
+    Controller_param.Yf = diag([1e5,1,1,1]);
     Controller_param.PHIf = diag([1; 1]);
 
-    Controller_param.R = diag([1.0; 1*[1.0; 1.0; 1.0]]);
-    Controller_param.RP = 1e2 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
+    Controller_param.R = 1e10 * diag([1.0; 1*[1.0; 1.0; 1.0]]);
+    Controller_param.RP = 0 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
     
-    Controller_param.input.u = [0;0;0;0]; %  sekiguchi 
-    Controller_param.ref_input = [0;0;0;0];
+    Controller_param.input.u = 0.269 * 9.81 * [0;0;0;0]; %  sekiguchi 
+    Controller_param.ref_input = 0.269 * 9.81 * [0;0;0;0];
+
+    Controller_param.const = 1e6;
 
     Controller.name = "mcmpc";
     Controller.type = "HLMCMPC_controller";
+    % Controller.type = "HLMCMPC_controller_mex";
     Controller.param = Controller_param;
 
 end

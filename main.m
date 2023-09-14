@@ -33,10 +33,13 @@ end
 
 %
 run("main2_agent_setup_sqp.m");
+% run("main2_agent_setup.m");
 
 %agent.set_model_error("ly",0.02);
 %% main loop
 run("main3_loop_setup.m");
+
+%% for HLMPC
 data.param = agent.controller.hlmpc;
 Params.H = data.param.param.H;   %Params.H
 Params.dt = data.param.param.dt;  %Params.dt
@@ -111,11 +114,11 @@ try
       if (fOffline); logger.overwrite("estimator", time.t, agent, i); end
 
       % reference
-      if time.t > 12
-          FH.CurrentCharacter = 'h';
-      else
-        FH.CurrentCharacter = 'f';
-      end
+      % if time.t > 12
+      %     FH.CurrentCharacter = 'h';
+      % else
+      %   FH.CurrentCharacter = 'f';
+      % end
       param(i).reference.covering = [];
       param(i).reference.point = {FH, [2; 0; 1], time.t, dt};
       param(i).reference.timeVarying = {time, FH};
@@ -140,10 +143,10 @@ try
       Time.t = time.t;
       Gq = [0; atan(gradient); 0];
       Gp = initial.p;
-      phase = 2;
+      % phase = 2;
       
-      % [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef);
-      xr = 0;
+      [xr] = Reference(Params, Time, agent);
+      % xr = 0;
       
       % controller
       phase = 2;
@@ -213,7 +216,7 @@ try
     fprintf("\n");
 
     % get data
-    data.inputv{:,idx} = agent.controller.result.inputv;
+    % data.inputv{:,idx} = agent.controller.result.inputv;
     % data.xr{:, idx} = xr(:, 1);
   end
 

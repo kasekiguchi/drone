@@ -36,7 +36,7 @@ datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
         Color_array = zeros(path_count,3);
         Color_ceil = zeros(path_count,1);
 
-        ConstIndex = min(find(Jorder{count}(:,1)==10^5)); % 制約による棄却したサンプルのインデックス
+        
 % 		for j = 1:path_count % サンプルごとにホライズンはまとめて描画 サンプルのループ
 %             %% もとのやつ　create by kotaka and komatsu
 % 			% plot(data.path{count}(3,:,j),data.path{count}(7,:,j),'Color',Color_map(ceil(pathJN{count}(j, 1)),:), 'LineWidth',1); % HL
@@ -52,19 +52,32 @@ datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
 %             hold on;
 %         end
 
+        % ConstIndex = min(find(Jorder{count}(:,1)==10^5)); % 制約による棄却したサンプルのインデックス
         %% 制約内までは色付き、　制約外からはすべて灰色で描画
         % 後に描画したのが上にくるため制約違反から描画
-        for j = ConstIndex:path_count
+        % for j = ConstIndex:path_count
+        %     Jindex = Jorder{count}(j,2); % 評価値の良いほうから評価値と元のインデックスの抜き取り
+        %     plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color', '#808080', 'LineWidth',1);
+        %     hold on;
+        % end
+        % for j = 1:ConstIndex - 1
+        %     Jindex = Jorder{count}(j,2); % 評価値の良いほうから評価値と元のインデックスの抜き取り
+        %     plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color',Color_map(Jindex,:),'LineWidth',1);
+        %     hold on;
+        % end
+
+        ConstIndex = min(find(Jorder{count}(:,1)<10^5)); % 制約違反を回避したサンプルのインデックス
+        %% 悪い方から順に並べたversion sort('descent') 
+        for j = 1:ConstIndex-1
             Jindex = Jorder{count}(j,2); % 評価値の良いほうから評価値と元のインデックスの抜き取り
             plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color', '#808080', 'LineWidth',1);
             hold on;
         end
-        for j = 1:ConstIndex - 1
+        for j = ConstIndex:path_count
             Jindex = Jorder{count}(j,2); % 評価値の良いほうから評価値と元のインデックスの抜き取り
-            plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color',Color_map(Jindex,:),'LineWidth',1);
+            plot(data.path{count}(1,:,Jindex), data.path{count}(2,:,Jindex), 'Color', Color_map(Jindex,:), 'LineWidth',1);
             hold on;
         end
-        
 
         plot(data.state(count, 2), data.state(count,3), '.', 'MarkerSize', 20, 'Color', 'red');    % 現在位置
 %         plot(Rdata(1,count), Rdata(2,count), 'h', 'MarkerSize', 15, 'Color', 'blue');   % 目標位置 Rdata = xr
