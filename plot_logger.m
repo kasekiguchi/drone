@@ -67,8 +67,24 @@ legend('Location','best')
 ax = gca;
 ax.FontSize = 12;
 hold off
-%% 誤差
+%% 入力2
 figure(4)
+hold on
+for plot_i = 1:gui.logger.k
+    inner_input(plot_i,1) = cell2mat(gui.logger.Data.agent.inner_input{1,plot_i});
+    flight_inner_input = cell2mat(gui.logger.Data.agent.inner_input);
+end
+plot(T,flight_inner_input)
+xlabel('Time [s]','FontSize',16)
+ylabel('inner_input [N]','FontSize',16)
+name_class = ["moter1";"moter2";"moter3";"moter4"];
+legend(name_class)
+legend('Location','best')
+ax = gca;
+ax.FontSize = 12;
+hold off
+%% 誤差
+figure(5)
 hold on
 for plot_i = 1:gui.logger.k
     flight_error(plot_i,1) = flight_reference(plot_i,1)- flight_path(plot_i,1);
