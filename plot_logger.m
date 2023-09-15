@@ -1,6 +1,6 @@
 % Figureを作成して保存する
 clear T
-T = log.Data.t(1:log.k);
+T = gui.logger.Data.t(1:gui.logger.k);
 % mkdir('test')
 % for i = 1:10
 %     % Figureを作成
@@ -15,13 +15,13 @@ T = log.Data.t(1:log.k);
 %% 位置状態
 figure(1)
 hold on
-for plot_i = 1:log.k
-    flight_path(plot_i,1) = log.Data.agent.sensor.result{1,plot_i}.state.p(1);
-    flight_path(plot_i,2) = log.Data.agent.sensor.result{1,plot_i}.state.p(2);
-    flight_path(plot_i,3) = log.Data.agent.sensor.result{1,plot_i}.state.p(3);
-    flight_reference(plot_i,1) = log.Data.agent.reference.result{1,plot_i}.state.p(1);
-    flight_reference(plot_i,2) = log.Data.agent.reference.result{1,plot_i}.state.p(2);
-    flight_reference(plot_i,3) = log.Data.agent.reference.result{1,plot_i}.state.p(3);
+for plot_i = 1:gui.logger.k
+    flight_path(plot_i,1) = gui.logger.Data.agent.sensor.result{1,plot_i}.state.p(1);
+    flight_path(plot_i,2) = gui.logger.Data.agent.sensor.result{1,plot_i}.state.p(2);
+    flight_path(plot_i,3) = gui.logger.Data.agent.sensor.result{1,plot_i}.state.p(3);
+    flight_reference(plot_i,1) = gui.logger.Data.agent.reference.result{1,plot_i}.state.p(1);
+    flight_reference(plot_i,2) = gui.logger.Data.agent.reference.result{1,plot_i}.state.p(2);
+    flight_reference(plot_i,3) = gui.logger.Data.agent.reference.result{1,plot_i}.state.p(3);
 end
 plot(T,flight_path,'LineWidth',1)
 plot(T,flight_reference,'LineWidth',1)
@@ -36,11 +36,11 @@ hold off
 %% 軌跡
 figure(2)
 hold on
-for plot_i = 1:log.k
-    fp(plot_i,1) = log.Data.agent.sensor.result{1,plot_i}.state.p(1);
-    fp(plot_i,2) = log.Data.agent.sensor.result{1,plot_i}.state.p(2);
-    fr(plot_i,1) = log.Data.agent.reference.result{1,plot_i}.state.p(1);
-    fr(plot_i,2) = log.Data.agent.reference.result{1,plot_i}.state.p(2);
+for plot_i = 1:gui.logger.k
+    fp(plot_i,1) = gui.logger.Data.agent.sensor.result{1,plot_i}.state.p(1);
+    fp(plot_i,2) = gui.logger.Data.agent.sensor.result{1,plot_i}.state.p(2);
+    fr(plot_i,1) = gui.logger.Data.agent.reference.result{1,plot_i}.state.p(1);
+    fr(plot_i,2) = gui.logger.Data.agent.reference.result{1,plot_i}.state.p(2);
 end
 plot(fp(:,1),fp(:,2))
 plot(fr(:,1),fr(:,2))
@@ -55,8 +55,8 @@ hold off
 %% 入力
 figure(3)
 hold on
-for plot_i = 1:log.k
-    flight_input = cell2mat(log.Data.agent.input);
+for plot_i = 1:gui.logger.k
+    flight_input = cell2mat(gui.logger.Data.agent.input);
 end
 plot(T,flight_input)
 xlabel('Time [s]','FontSize',16)
@@ -70,7 +70,7 @@ hold off
 %% 誤差
 figure(4)
 hold on
-for plot_i = 1:log.k
+for plot_i = 1:gui.logger.k
     flight_error(plot_i,1) = flight_reference(plot_i,1)- flight_path(plot_i,1);
     flight_error(plot_i,2) = flight_reference(plot_i,2)- flight_path(plot_i,2);
     flight_error(plot_i,3) = flight_reference(plot_i,3)- flight_path(plot_i,3);
