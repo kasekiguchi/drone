@@ -190,6 +190,16 @@ classdef DRAW_DRONE_MOTION
       %   param.opt_plot = [];
       % end
       param = struct(varargin{:});
+      param.rotor_r = 0.0392;
+      param.self = logger.Data.agent;
+      param.realtime = false;
+      param.target = 1;
+      param.gif = 0;
+      param.Motive_ref = 0;
+      param.fig_num = 1;
+      param.mp4 = 0;
+      param.frame_size = [];
+      param.opt_plot = [];
       ax = obj.ax;
       %p = logger.data(param.target,"p","e");
       %q = logger.data(param.target,"q","e");

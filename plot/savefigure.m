@@ -66,8 +66,8 @@ xlabel("Time [s]"); ylabel("Calculation time [s]");
 % set(gcf, "WindowState", "maximized");
 % set(gcf, "Position", [960 0 960 1000])
 
-
-agent(1).animation(logger,"target",1); 
+%%
+% gui.agent(1).animation(gui.logger,"target",1); 
 %% save
 % saveas(1,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_p.epsc");
 % saveas(2,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_q.epsc");

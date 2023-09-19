@@ -15,8 +15,12 @@ syms t real
 % y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
 % z = z_0;
 
-x = cos(t/2) -1;
-y = sin(t/2);
+% x = cos(t/2) -1;
+% y = sin(t/2);
+% z = 1;
+
+x = t;
+y = -t;
 z = 1;
 
 ref=@(t)[x;y;z;0];
