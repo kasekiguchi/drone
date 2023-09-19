@@ -14,7 +14,7 @@ userpath('clear');
 % close all hidden; clear all; clc;
 % userpath('clear');
 fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
-fHL = 1; % HL はトルク入力の変換の部分作らないと動かない
+fHL = 0; 
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
@@ -128,15 +128,6 @@ figure(2)
 plot(t, Params.refX(round(t/dt)+1,2), t, Params.refY(round(t/dt)+1,2), t, Params.refZ(round(t/dt)+1,2));
 legend("Vx", "Vy", "Vz")
 
-%% Reference flag
-
-%% Liner model
-%-- 予測モデルのシステム行列
-[MPC_Ad, MPC_Bd, MPC_Cd, MPC_Dd] = MassModel(dt);
-    Params.model.A = MPC_Ad;
-    Params.model.B = MPC_Bd;
-    Params.model.C = MPC_Cd;
-    Params.model.D = MPC_Dd;
     %%
 
 run("main3_loop_setup.m");
@@ -221,7 +212,8 @@ end
             Gp = initial.p;
             Gq = [0; 0.2975; 0];
             [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef, data.Zdis);    % 1:斜面 0:それ以外(TimeVarying)
-            param(i).controller.mcmpc = {idx, xr, time.t, phase, InputVdata, Params.model};    % 入力算出 / controller.name = hlc
+            param(i).controller.mcmpc = {idx, xr, time.t, phase, InputVdata};    % 入力算出 / controller.name = hlc
+% 
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
@@ -232,7 +224,7 @@ end
 
         %-- データ保存
         if idx == 1
-            data.param = agent.controller.result.contParam;
+            data.param = agent.controller.hlmpc;
         end
 %         state_data =            agent.controller.result.path;
         BestcostID =              agent.controller.result.BestcostID;
@@ -252,9 +244,6 @@ end
         data.xr{idx} = xr;
         data.variable_particle_num(idx) = agent.controller.result.variable_N;
         data.survive{idx} = agent.controller.result.survive;
-%         COG = agent.controller.result.COG;
-%         data.cog.g{idx} = COG.g;
-%         data.cog.gc{idx} = COG.gc;
 
         if data.removeF(idx) ~= data.param.particle_num
             data.bestx(idx, :) = data.path{idx}(1, :, BestcostID(1)); % - もっともよい評価の軌道x成分
@@ -480,7 +469,7 @@ set(gcf, "WindowState", "maximized");
 % set(gcf, "Position", [1000 0 960 1000])
 %% 
 close all;
-% agent(1).animation(logger,"target",1); 
+agent(1).animation(logger,"target",1); 
 %% 各評価値
 
 %%
@@ -646,81 +635,3 @@ Outputdir = '../../students/komatsu/simdata/20230614/';
 
 %% figure.m
 savefigure
-%% 制御モデル
-function [Ad, Bd, Cd, Dd]  = MassModel(Td)
-%-- 連続系線形システム
-%         Lx = params.Lx;
-%         Ly = params.Ly;
-%         lx = params.lx;%0.05;
-%         ly = params.ly;%0.05;
-%         xx = params.jx;
-%         xy = params.jy;
-%         xz = params.jz;
-%         gravity = params.gravity;
-%         km1 = params.km1; % ロータ定数
-%         km2 = params.km2; % ロータ定数
-%         km3 = params.km3; % ロータ定数
-%         km4 = params.km4; % ロータ定数
-
-%-- DIATONE MODEL PARAM
-    Lx = 0.117;
-    Ly = 0.0932;
-    lx = 0.117/2;%0.05;
-    ly = 0.0932/2;%0.05;
-    xx = 0.02237568;    % jx
-    xy = 0.02985236;    % jy
-    xz = 0.0480374;     % jz
-    gravity = 9.81;     % gravity
-    km1 = 0.0301; % ロータ定数
-    km2 = 0.0301; % ロータ定数
-    km3 = 0.0301; % ロータ定数
-    km4 = 0.0301; % ロータ定数
-    %-- 平衡点：原点
-    Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,    0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-             0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
-      %-- 平衡点：　1m上空でホバリング [0 0 1 0 0 0 0 0 0 0 0 0 0 hover hover hover hover]
-%             Ac = [   0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     1.,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     1.,    0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     1.;
-%                      0,     0,     0,     0,     gravity,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     -gravity,     0,     0,     0,     0,     0,     0,    0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0;
-%                      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0];
-
-    Bc = [    0,        0,        0,        0;
-              0,        0,        0,        0;
-              0,        0,        0,        0;
-              0,        0,        0,        0;
-              0,        0,        0,        0;
-              0,        0,        0,        0;
-              0,        0,        0,        0;
-              0,        0,        0,        0;
-              1000/269, 1000/269,   1000/269,   1000/269;
-              ly/xx,   -ly/xx,     (Ly-ly)/xx,   (Ly-ly)/xx;
-              lx/(xy),  -(Lx-lx)/xy,lx/xy,      -(Lx-lx)/xy;
-              km1/xz,   -km2/xz,    -km3/xz,    km4/xz];
-
-    Cc = diag([1 1 1 1 1 1 1 1 1 1 1 1]);
-    Dc = 0;
-    sys = ss(Ac, Bc, Cc, Dc);
-
-%-- 離散系システム
-        dsys = c2d(sys, Td); % - 連続系から離散系への変換
-        [Ad, Bd, Cd, Dd] = ssdata(dsys);
-
-end

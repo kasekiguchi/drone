@@ -30,7 +30,6 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.modelf = obj.self.model.method; 
             %%
             obj.input = param.input;
-            obj.const = param.const;
             obj.input.nextsigma = param.input.Initsigma;  % 初期化
             obj.param.H = param.H + 1;
             % 追加
@@ -56,7 +55,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
-            obj.reference.grad = param{6};
+            % obj.reference.grad = param{6};
 
             % if obj.param.t > 2.6
             %     obj.param.QW(1,1) = 10000;
@@ -64,11 +63,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             % end
             
             %% 斜面に対する高度
-            obj.state.Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2915);
-            % 高度可変の重み
-            % obj.param.Zsoft = -obj.param.softZ * (1-cos((Zdis/2.2).*pi))/2 + obj.param.softZ; % 高度中くらいで重みききすぎ
-            % obj.param.Zsoft = obj.param.softZ * exp(-obj.param.zeta * obj.state.Zdis); % 指数的減少
-            obj.param.Zsoft = 0;
+            % obj.state.Zdis = (obj.self.estimator.result.state.p(3) - (obj.reference.grad*obj.self.estimator.result.state.p(1))) * cos(0.2915);
+            % obj.param.Zsoft = 0;
             %% change weight
             % obj.param.Pfsoft = obj.param.Zsoft * obj.param.Pf;
             % obj.param.Vfsoft = obj.param.Zsoft * obj.param.Vf;
@@ -157,8 +153,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.input.normE = obj.Normalize();
 
             %-- 制約条件
-%             removeF = 0; removeX = []; survive = obj.N; 
-            [removeF, removeX, survive] = obj.constraints();
+            removeF = 0; removeX = []; survive = obj.N; 
+            % [removeF, removeX, survive] = obj.constraints();
 %             if obj.self.estimator.result.state.p(3) < 0.3
 %                 [removeF, removeX, survive] = obj.constraints();
 %             end
@@ -213,8 +209,8 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.Evaluationtra_norm = obj.input.normE;
             obj.result.eachcost = eachCost(BestcostID, :);
-            obj.result.Zsoft = obj.param.Zsoft;
-            obj.result.Zdis = obj.state.Zdis;
+            obj.result.Zsoft = 0; %obj.param.Zsoft
+            obj.result.Zdis = 0; %obj.state.Zdis
             
             result = obj.result;  
 %             profile viewer
@@ -374,7 +370,7 @@ classdef MCMPC_controller_org <CONTROLLER_CLASS
 
             %% 斜面姿勢角入れるまではステージコストと終端コストは一緒
             % if obj.param.t < obj.param.soft_time
-            if obj.self.estimator.result.state.p(3) < obj.param.soft_z
+            if obj.self.estimator.result.state.p(3) < 1
                 tildeXp = tildeXp(:,end-1) .* kJ; tildeXqw = tildeXqw(:,end-1) .* kJ;
                 tildeXv = tildeXv(:,end-1) .* kJ; 
                 tildeUpre = tildeUpre(:,end-1) .* kJ; tildeUref = tildeUref(:,end-1) .* kJ;

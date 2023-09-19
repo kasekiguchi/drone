@@ -52,10 +52,10 @@ syms t real
 % yaw = 0;
 
 %% Liner
-x = t;
-y = 0;
-z = 1.0;
-yaw = 0;
+% x = t;
+% y = 0;
+% z = 1.0;
+% yaw = 0;
 
 %% Vertical vibration
 % x = 0;
@@ -66,10 +66,10 @@ yaw = 0;
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
 %% hovering
-% x = 0;
-% y = 0;
-% z = 1;
-% yaw = t/10;
+x = 0;
+y = 0;
+z = 1;
+yaw = 0;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;

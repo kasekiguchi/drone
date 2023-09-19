@@ -71,9 +71,9 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             % profile on
             % OB = obj;
             % xr = param{2};
-            rt = param{2};
-            problem = param{4};
-            xr = param{5};
+            rt = param{1};
+            problem = param{2};
+            xr = param{3};
             %       obj.input.InputV = param{5};
             % obj.state.ref = xr;
             obj.param.t = rt;
@@ -111,6 +111,7 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             % -------------------------------------------------------------------------------------------------------------------------------------
             %% Referenceの取得、ホライズンごと
             % obj.reference.xr = ControllerReference(obj); % 12 * obj.param.H 仮想状態 * ホライズン
+            obj.reference.xr = xr;
 
             %% MPC 設定
 
@@ -128,28 +129,10 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             u0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
 %             x = obj.self.estimator.result.state.get();
             previous_state = repmat([obj.current_state; u0], 1, obj.param.H);
-            % previous_state の1行目
 
-            %                 previous_state(Params.state_size+1:Params.total_size, 1:Params.H) = repmat(x0, 1, Params.H);
-
-            % MPC設定(problem)
-
-            % obj_HL.input = obj.input.u;
-            % obj_HL.reference = obj.reference.xr;
-            % objHLrefinput = obj.param.ref_input;
-            % obj_HL.Weight = obj.Weight;
-            % obj_HL.WeightRp = obj.WeightRp;
-            % obj_HL.WeightR = obj.WeightR;
-            % 
-            % objHL_const.H = obj.param.H;
-            % objHL_const.A = obj.A;
-            % objHL_const.B = obj.B;
-            % objHL_const.current_state = obj.current_state;
             obj.reference.state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)]; % 実状態における目標値
 
             problem.x0		  = previous_state;                 % 状態，入力を初期値とする                                    % 現在状態
-            % problem.objective = @(x) objective_HL_mex(obj_HL, x, objHLrefinput);            % 評価関数
-            % problem.nonlcon   = @(x) constraints_HL_mex(objHL_const, x);          % 制約条件
 
             problem.objective = @(x) obj.objective(x); 
             problem.nonlcon   = @(x) obj.constraints(x);
@@ -188,7 +171,7 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             c  = zeros(12, obj.param.H);
             ceq_ode = zeros(12, obj.param.H);
 
-            xReal = obj.reference.xr - x(1:12,:);
+            % xReal = obj.reference.xr - x(1:12,:);
 
             %-- MPCで用いる予測状態 Xと予測入力 Uを設定
             X = x(1:12, :);          % 12 * Params.H
@@ -215,7 +198,7 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             X = x(1:12, :);       % 12 * 10 * N
             U = x(13:16,:);                % 4  * 10 * N
             %% Referenceの取得、ホライズンごと
-            Xd = obj.reference.xr;
+            % Xd = obj.reference.xr;
             %       Z = X;% - obj.state.ref(1:12,:);
             %% ホライズンごとに実際の誤差に変換する（リファレンス(1)の値からの誤差）
             % Xh = X + Xd;

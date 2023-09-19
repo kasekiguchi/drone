@@ -84,6 +84,7 @@ classdef MCMPC_controller_normal <CONTROLLER_CLASS
             % obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
 
             %% total thrust, roll, pitch, yaw
+            ave1 = obj.self.parameter.mass*9.81; ave2 = 0; ave3 = 0; ave4 = 0;
             obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave1);
             obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N)+ave2;    % すべて同じ入力、　確認用
             obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N)+ave3;

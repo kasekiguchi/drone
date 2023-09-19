@@ -27,8 +27,8 @@ function Controller = Controller_HLMPC(~)
     Controller_param.input.u = [0;0;0;0]; %  sekiguchi 
     Controller_param.ref_input = [0;0;0;0];
 
-    Controller.name = "mcmpc";
-    % Controller.name = "hlmpc";
+    % Controller.name = "mcmpc";
+    Controller.name = "hlmpc";
     Controller.type = "HLMPC_controller";
     Controller.param = Controller_param;
 
