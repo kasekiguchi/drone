@@ -18,6 +18,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,1,1]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,1,1]},"HL"});
+
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
