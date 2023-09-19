@@ -54,6 +54,7 @@ methods
         obj.result.G = zeros(obj.n,size(obj.R,2));
         obj.result.A = zeros(obj.n,size(obj.R,2));
         obj.result.C = zeros(obj.n,size(obj.R,2));
+        obj.result.param = zeros(1,18);
     end
     
     function [result]=do(obj,varargin)
@@ -87,8 +88,7 @@ methods
         obj.result.P = P;
         obj.result.A = A;
         obj.result.C = C;
-%         obj.result.F = obj.JacobianF;
-%         obj.result.H = obj.JacobianH;        
+        obj.result.param = p;
       end
         result=obj.result;
         obj.timer = tic;

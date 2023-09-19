@@ -15,11 +15,11 @@
 
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/farinitialt400_Log(14-Sep-2023_18_09_04).mat');% 初期値ちかいやつ
-% log = LOGGER('./Data/Log(07-Sep-2023_16_40_37).mat');% 初期値ちかいやつ
+% log = LOGGER('./Data/farinitialt400_Log(14-Sep-2023_18_09_04).mat');% 初期値ちかいやつ
+log = LOGGER('./Data/Log(19-Sep-2023_17_22_28).mat');% 初期値ちかいやつ
 
 flag_png=1;
-offsetflag = 1;
+offsetflag = 0;
 %% ログ
 tspan = [0 ,100];
 % tspan = [0 99];
@@ -43,6 +43,7 @@ C  = zeros(size(log.Data.agent.estimator.result{1,2}.C,1),size(log.Data.agent.es
 if offsetflag ==1
 ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
 qs  = zeros(size(log.Data.agent.estimator.result{1,1}.state.qs,1),len);
+param = log.Data.agent.estimator.result{1,2}.param;
 % l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
 for i=1:len
     ps(:,i) = log.Data.agent.estimator.result{1,i}.state.ps;
@@ -121,18 +122,41 @@ MSE_Q
 MSE_V
 MSE_W
 %% 可観測性
-% 可観測性行列 O を計算する
+% 可観測性行列 O を計算する(線形のやつで)
 Ob = [];
 n=18;
-num = 1;
+num = 20;
 for i = 0 : (n-1)
-    Ob = [Ob; C(:,:,num+i) * (A(:,:,num+i)^i)];
+    Ob = [Ob; C(:,:,num-i) * (A(:,:,num-i)^i)];
 end
 Xo_ = null(Ob,"rational");
 rank(Ob)
-O = obsv(A(:,:,2),C(:,:,2));
-rank(O)
-
+Ol = obsv(A(:,:,2),C(:,:,2));
+rank(Ol)
+%% 非線形システムの可観測性
+tmpmethod = str2func(get_model_name("RPY 12"));
+fmethod = @(t,x,p) [tmpmethod(t,x,p); zeros(6,1)];
+wall_param = [0,1,0,-9];
+hmethod = @(x,p) H_18_2(x,wall_param,p);
+x = sym('x',[18,1]);
+u = sym('u',[4,1]);
+syms x [18 1]
+syms u [4 1]
+f=fmethod(x,u,param);
+h = hmethod(x,param);
+syms q [24 1]
+for i=1:3
+    if i == 1
+        Lfh = yh;
+        q(1:8*i) = Lfh;
+    else
+        Lfh = jacobian(Lfh,x)*f;
+        q(1+8*(i-1):8*i)= Lfh;
+        i
+    end
+end
+On = jacobian(q,x);
+matlabFunction(On,'File','On3','vars',{x,u})
 %% 図示
 if illustration == 1
     fig1=figure(1);
