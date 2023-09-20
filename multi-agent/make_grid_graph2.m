@@ -83,7 +83,7 @@ mapdiameter = meas * 100;   %mainのmaptrueと同じ
 % A(130,130)=0.08;
 % W = A;
 
-%% 自動生成マップ (84-202まで)
+%% 自動生成マップ (86-204まで)
 % shaperead Ver マップの読み込み
 % S = shaperead('20160401-建築物の外周線.shp');
 % S = shaperead('building_15216.dbf');

@@ -34,25 +34,64 @@ Il = 30; % length of I
 maxv = 0.04;    % 確率の上限，シミュレーションの進行に関係するパラメータであり、適当な値を入力
 maptrue = 300;   % マップ直径m
 meas = maptrue/100; % 縮尺換算用の関数
-map_extra = nx * ny - nx_app * ny_app ;     %見えない部分の総セル数
 nx_app = 100; % 見かけ上のx辺
 ny_app = 100; % 見かけ上のy辺
-wind = 9;  %風向 [1つ前:15]
-wind2 = 0;  %風速x[m/s] 無風は0.01とかに
-% 0:南 1:南南西 2:南西 3:西南西 4:西 5:西北西 6:北西 7:北北西 
-% 8:北 9:北北東 10:北東 11:東北東 12:東 13:東南東 14:南東 15:南南東
-mapd = 8;  % map difference マップ差異（風向の対応関係がマップごとに異なるため、その補正項）
-build = 1;  %1で重み分類（秋山）、0で分類無し
+map_extra = nx * ny - nx_app * ny_app ;     %見えない部分の総セル数
+mapd = 16;  % map difference マップ差異（風向の対応関係がマップごとに異なるため、その補正項）
+build = 0;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し
 
 %% environment definition
-%  [E,E2,W] = make_grid_graph(nx,ny,meas,wind,wind2,mapd,maxv);
- [E,E2,W] = make_grid_graph2(nx,ny,meas,wind,wind2,mapd,build,maxv);
- % make_grid_graphで糸魚川，make_grid_graph2で世田谷
+% % Wの生成に数時間かかるため、make_grid_graphからWのみ独立
+[W] = make_grid_graph3(nx,ny,meas,build,maxv); % 推定2時間以上
 
- % Wの生成に数時間かかるため、make_grid_graphからWのみ独立
- [W] = make_grid_graph3(nx,ny,meas,build,maxv);
+%% 風向配列生成
+winddata = readtable('data_ito.csv');   % csvの読み込み
+
+ke = 300;   % シミュレーションステップ数
+firstime = 1;   % 1でExcelデータの一番上
+timestage = ke/20;
+csvnorm = 3;    % 使うcsv(気象情報)の何行目に風速や風向の情報が入っているかによって可変
+timebase = firstime + csvnorm;
+
+wbase(1) = {'南微西'};wbase(2) = {'南南西'};wbase(3) = {'南西微南'};wbase(4) = {'南西'};wbase(5) = {'南西微西'};wbase(6) = {'西南西'};wbase(7) = {'西微南'};wbase(8) = {'西'};
+wbase(9) = {'西微北'};wbase(10) = {'西北西'};wbase(11) = {'北西微西'};wbase(12) = {'北西'};wbase(13) = {'北西微北'};wbase(14) = {'北北西'};wbase(15) = {'北微西'};wbase(16) = {'北'};
+wbase(17) = {'北微東'};wbase(18) = {'北北東'};wbase(19) = {'北東微北'};wbase(20) = {'北東'};wbase(21) = {'北東微東'};wbase(22) = {'東北東'};wbase(23) = {'東微北'};wbase(24) = {'東'};
+wbase(25) = {'東微南'};wbase(26) = {'東南東'};wbase(27) = {'南東微東'};wbase(28) = {'南東'};wbase(29) = {'南東微南'};wbase(30) = {'南南東'};wbase(31) = {'南微東'};wbase(32) = {'南'};
+
+for i = 1:timestage
+    wdata = table2cell(winddata(timebase+i,4));
+    wind(2,i) = table2array(winddata(timebase+i,2));    % 風速の設定
+    for j = 1:32
+        wcheck = strcmp(wdata,wbase(j));
+        if wcheck == 1
+            wind(1,i) = rem(j,32);  % 風向の設定
+            break
+        end
+    end
+    clear wdata
+end
+wind(1,:) = wind(1,:) + 1;    % 手動糸魚川の場合は真上が北北西で少し角度がズレているのでここをON
+%% 風情報
+wind1 = 31;  %風向 [1つ前:15]
+wind2 = 9;  %風速x[m/s] 無風は0.01とかに
+E0 = 0;
+Ee = 0;
+[E,ES,EF,E2] = make_fire_graph(nx,ny,meas,W,wind1,wind2,mapd,maxv);
+% % 0:南 2:南南西 4:南西 6:西南西 8:西 10:西北西 12:北西 14:北北西 
+% % 16:北 18:北北東 20:北東 22:東北東 24:東 26:東南東 28:南東 30:南南東
+
+% % 風情報の細分化&リアルタイム参照で使用
+% for i = 1:timestage
+%     clear wind1 wind2 E E2 ES EF Ee
+%     wind1 = wind(1,i)
+%     wind2 = wind(2,i)
+%     [E,ES,EF,E2] = make_fire_graph(nx,ny,meas,W,wind1,wind2,mapd,maxv);
+%     Ee(1,i) = {E};
+%     Ee(2,i) = {EF};
+% %     Ee2(i) = {E2};
+%     E0 = 1;
+% end
 %%
- [E,E2] = make_fire_graph(nx,ny,meas,W,wind,wind2,mapd,maxv);
 
  %[i,j,v]=find(E);
 %G=digraph(i,j,v); % グラフ構造は自明なので描画するメリットはなさそう．
@@ -63,22 +102,29 @@ if find(W<0)
 else
     disp("OK");
 end
-%%
+
+%% 自然延焼
+fFPosition = 6; % flag fire position
+% 7:GIS糸魚川, 13:世田谷500m北東下, 14:世田谷300m北東下
+h = 0; % extinction probability
+W_vec = reshape(W,N,1);
+map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);
+map.draw_state(nx,ny,W);    % model_init実行後でないとマップは生成できない(正確には、その中のmap = SIR_model(N,Il,h)を実行した後でないとパスが無い)
+
+%% 情報保存
+savefile = '230920_糸魚川_E(風一定).mat';
+save(savefile);
+%% 情報読み込み
+loadfile = '230919_糸魚川_E(風一定).mat';
+load(loadfile);
+%% Page-RankやAlt-Page-Rankを用いるのに利用する(つまり単純なWeightでは使わない)
    L = speye(size(E)) - E/eigs(E,1);
     [V,Eig,Flag]=eigs(L',1,'smallestabs','Tolerance',1e-20); % V : alt page rank
    L = sparse(L);
     %[V2,Eig2,Flag2]=eigs(E'/eigs(E,1),1,'largestreal','Tolerance',1e-20);
     %map.draw_state(nx,ny,reshape(V,[nx,ny]));% V2だとAPRが負になることがある．Vの方が数値的に安定そう．符号自由度についてはVの方が悪そうなのになぜだろう？
-%% 消火しない場合の燃え広がり方 (h = 0)
-% 200ステップで端に行かない程度の重みがAstar でやる場合適切
-% Directでやる場合はもっと早い燃え広がりでも対応可能
-ken = 400; % シミュレーションステップ ke_natural
-fFPosition = 13; % flag fire position
-% 7:GIS糸魚川, 13:世田谷500m北東下, 14:世田谷300m北東下
-h = 0; % extinction probability
-W_vec = reshape(W,N,1);
-map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);
-%%
+
+%% 手動入力飛び火(卒論で私用)
 clear logger
 logger.k=zeros(1,ken);
 logger.S(:,1) = map.S(:);
@@ -161,48 +207,13 @@ for k = 1:ken
 %         map.I(tbh15) =1 ;
 %     end
 end
-map.draw_state(nx,ny,W);
-%% graphs
-% map.draw_state(nx,ny,map.loggerk(logger,200));  %loggerk内の数字は何ステップ目の状態化を表す
-% nx=100, ny=100 でマップ上に表示
-% c   %建物重みマップの表示
-%% animations
-map.draw_movie(logger,nx,ny,0);
-% map.draw_movie(logger,nx,ny,1,"20230602_世田谷_2multiW_200_fP北中下_風向北北東2");    %natural_expansion 
-%map.draw_movie(logger,nx,ny,1,"Extinct_alt_page_rank_random");
-%M=map.draw_movie(logger,nx,ny,2);
-%map.draw_movie(logger,nx,ny,1,"Extinct_APR_Astar_BiasRandom");
-%%
-% map.save('Logger_Feb24_Natural_Log1.mat',logger); %logger保存
-%% plot
-tmp1=[];
-logger.I2 = logical (logger.I)
-for i = 1:ken
-    tmpS(i)=sum(logger.S(:,i))-map_extra; %logger(i)内にあるRの200s時(ken)の値の合計
-    tmpI(i)=sum(logger.I2(:,i)); %logger(i)内にあるRの200s時(ken)の値の合計
-    tmpR(i)=sum(logger.R(:,i)); %logger(i)内にあるRの200s時(ken)の値の合計
-end
-damage_cell = tmpR(ken)+tmpI(ken)   %被害セル数
-%%
-figure(1)
-plot(1:ken,tmpS,'-g','LineWidth',2);
-hold on 
-plot(1:ken,tmpI,'-b','LineWidth',2);
-plot(1:ken,tmpR,'-r','LineWidth',2);
-legend('S','I','R');
-xlabel('\sl Time step k','FontSize',20);
-ylabel('\sl Number','FontSize',20);
-set(gca,'FontSize',10);
-ax = gca;
-ax.Box = 'on';
-xlim([0 ken]);
-ylim([0 nx_app * ny_app]);
-hold off
+
 %% Monte-Carlo simulation
 % 90min =~ 30step
-unum = 0; % 消火点の数（10機のUAV）
-ke = 100; % シミュレーションステップ
-kn = 100;% number of Monte-Carlo simulation
+unum = 0; % 初期の消火点の数（10機のUAV）
+addFighter = "ON2";
+ke = 300; % シミュレーションステップ
+kn = 2;% number of Monte-Carlo simulation
 % 手法選択
 % fMethod = "WAPR"; % Weighted Alt Page Rank
 % fMethod = "APR"; % Alt Page Rank
@@ -211,7 +222,7 @@ fMethod = "Weight"; % 重み行列
 fDynamics = "Direct"; % 消火方法：A star or Direct
 vi = 5; % 消火の必要がない部分を飛ばす距離
 %map.draw_state(nx,ny,map.loggerk(logger,ke));
-fFPosition = 12;
+fFPosition = 6;
 h = 0.1 * (3/meas); % extinction probability
 W_vec = reshape(W,N,1);
 clear Logger
@@ -244,7 +255,18 @@ elseif fMethod == "Weight"
 else
     disp("Method Error");
 end
+if addFighter == "OFF"
+    FF = 0;
+elseif addFighter == "ON1"
+    FF = 1;
+elseif addFighter == "ON2"
+    FF = 2;
+else
+    disp("Unum Error");
+end
 w2 = 1/((XM-Xm)/max(nx,ny))
+model_init(N,Il,h,nx,ny,fFPosition,W_vec);
+map.draw_state(nx,ny,W);
 % V_mat = reshape(V,[nx,ny]);     %重みAPRグラフ表示のための正方行列化
 % map.draw_state(nx,ny,V_mat);    %重みAPRのグラフ表示
 % map.draw_state(nx,ny,reshape(V,[nx,ny]))
@@ -252,25 +274,29 @@ w2 = 1/((XM-Xm)/max(nx,ny))
 for k = 1:kn
     k
     map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);% initialize
-    [K(k),Logger(k)] = Astar_SIR(N,ke,nx,ny,map,unum,E,X,Xm,Il,vi,1,w2,fDynamics); % simulation
+    [K(k),Logger(k)] = Astar_SIR(N,ke,nx,ny,map,unum,FF,E0,E,Ee,ES,EF,X,Xm,Il,vi,1,w2,fDynamics); % simulation
     K(k);
 end
 %% %%% 違法増築1 Logデータの保存
-map.save('230608_Log100[100s]_FP12北東中(66,86)_W_Direct_5st_h0_世田谷300改W.mat',Logger);
+map.save('230728_Log100[400s]_手動糸魚川_W_Direct_8st_h0.1_糸魚川300風一定(32).mat',Logger);
 % map.save('K_Feb22_WAPR_Direct_unum15_vi5_h0.1_Log2.mat',K);
 %% %%% 違法増築2 動画の生成と保存
-% figure('Position', [0 -500 1100 1000]);
+% 事前必用準備：plot 2の実行
+i = 34;
+final_step(i)
+figure('Position', [0 -500 1100 1000]);
 % Logger2=map.load('Logger_APR_Astar_100_30_09_004_10_5.mat');
 % K2 = map.load('K_APR_Astar_100_30_09_004_10_5.mat');
-md = map.draw_state(nx,ny,map.loggerk(Logger(3),100));    %nステップ目を画像出力
-% M = map.draw_movie(Logger(40),nx,ny,0);    %動画を出力
-% M=map.draw_movie(Logger(34),nx,ny,1,"W_Direct_unum5sta_h0.1_Log34");  %名前を付けて動画を出力
+md = map.draw_state(nx,ny,map.loggerk(Logger(i),final_step(i)));    %nステップ目を画像出力
+% M = map.draw_movie(Logger(1),nx,ny,0);    %動画を出力
+% M=map.draw_movie(Logger(53),nx,ny,1,"230725_風情報細分化シミュレーション");  %名前を付けて動画を出力
 %% %%% 違法増築3 Logデータの読み込み
-Logger=map.load('230508_Log100[300s]_無風_W_Direct_5st_h0.1_糸魚川M.mat');
+Logger=map.load('230508_Log100[300s]_W_Direct_5st_h0.1_糸魚川M.mat');
 %% plot 2　いろいろな統計データの出力項
 % 消失セル数の算出
 clear xi
-for xi = 1:kn
+damage_ave = 0;
+for xi = 1:100
     kre = size(Logger(xi).I);
     kre = kre(1,2);  %シミュレーションの最終ステップ数
     tmpS2 = 0;
@@ -279,13 +305,20 @@ for xi = 1:kn
     tmp2=[];
     I2.I = logical (Logger(xi).I);
     for i = 1:kre
+%         if kre > 200
+%             kre = 200;
+%         end
         tmpS2(i)=sum(Logger(xi).S(:,i))-map_extra; %logger(i)内にあるRの200s時(ke)の値の合計
         tmpI2(i)=sum(I2.I(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
         tmpR2(i)=sum(Logger(xi).R(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
     end
     final_step(xi,1) = kre;
     damage_all(xi,1) = tmpR2(kre)+tmpI2(kre);
+%     figure('Position', [0 -500 1100 1000]);
+%     md = map.draw_state(nx,ny,map.loggerk(Logger(xi),final_step(xi)));
+    damage_ave = damage_ave + damage_all(xi,1);
 end
+damage_ave = round(damage_ave/kn)
 %% plot3
 % 特定のLOGのS,I,R遷移を出力
 xi =   34   %Logの番号
@@ -318,6 +351,54 @@ ylim([0 nx_app * ny_app * 1.0]);
 hold off
 
 disp('Plot ended')
+%% plot4
+% R遷移の総数
+figure('Position', [0 -500 1100 1000]);
+hold on 
+clear xi kre
+for xi = 1:kn
+    kre = size(Logger(xi).I);
+    kre = kre(1,2);  %シミュレーションの最終ステップ数
+    tmpR4 = 0;
+    tmp2=[];
+    I2.I = logical (Logger(xi).I);
+    for i = 1:kre
+        tmpR4(i)=sum(Logger(xi).R(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
+    end
+    plot(1:kre,tmpR4,'-r','LineWidth',2);
+%     md = map.draw_state(nx,ny,map.loggerk(Logger(xi),final_step(xi)));
+
+end
+Ftime = [10 20 40 60 80 100 120 200];
+Fdame = [33 52 121 628 901 1105 1413 1841];
+% Fpf = polyfit(Ftime,Fdame,4);
+% x2 = 0:.1:200;
+% y2 = polyval(Fpf,x2);
+plot(Ftime,Fdame,'o','MarkerSize',10,'MarkerEdgeColor','b','LineWidth',2);
+xlabel('\sl Time step k','FontSize',20);
+ylabel('\sl Number','FontSize',20);
+set(gca,'FontSize',10);
+ax = gca;
+ax.Box = 'on';
+xlim([0 200]);
+ylim([0 3000]);
+hold off
+
+%% plot5
+% 重み合計
+% 事前必用準備：plot 2の実行
+clear xi kre
+BurnResult = 0;
+for xi = 1:kn
+    for sumW = 1:final_step(xi)-1
+        Logger(xi).R(:,1) = [];
+    end
+    BurnResult =  BurnResult + reshape((Logger(xi).R),[nx,ny]);
+end
+
+figure('Position', [0 -500 1100 1000]);
+map.draw_state(nx,ny,BurnResult)
+
 %% END
 %　ここまでが卒論mainプログラム
 %
@@ -345,7 +426,7 @@ switch fFPosition
     case 5
         init_fx=(floor(nx/2):floor(nx/2)+4)';
         init_fy=floor(1):floor(1)+2;
-    case 6
+    case 6 % 手動糸魚川
         init_fx=50;
         init_fy=11;
     case 7
@@ -354,36 +435,28 @@ switch fFPosition
     case 8
         init_fx=28;
         init_fy=8;
-    case 9
-        % 世田谷500m南西
+    case 9 % 世田谷500m南西
         init_fx=17;
         init_fy=3;
-    case 10
-        % 世田谷500m南東
+    case 10 % 世田谷500m南東
         init_fx=71;
         init_fy=2;
-    case 11
-        % 世田谷500m北東
+    case 11 % 世田谷500m北東
         init_fx=91;
         init_fy=92;
-    case 12
-        % 世田谷500m北東中
+    case 12 % 世田谷500m北東中
         init_fx=66;
         init_fy=86;
-    case 13
-        % 世田谷500m北東下
+    case 13 % 世田谷500m北東下
         init_fx=62;
         init_fy=66;
-    case 14
-        % 世田谷300m北東下
+    case 14 % 世田谷300m北東下
         init_fx=35;
         init_fy=42;
-    case 15
-        % 世田谷300m北東
+    case 15 % 世田谷300m北東
         init_fx=85;
         init_fy=85;
-    case 16
-        % 世田谷300m北東中
+    case 16 % 世田谷300m北東中
         init_fx=42;
         init_fy=77;
 end
@@ -399,7 +472,7 @@ map = SIR_model(N,Il,h);
 map.init(init_I,init_R);
 end
 %% Astar_SIR
-function [k,logger] = Astar_SIR(N,ke,nx,ny,map,unum,E,X,Xm,Il,vi,w1,w2,fDynamics)
+function [k,logger] = Astar_SIR(N,ke,nx,ny,map,unum,FF,E0,E,Ee,ES,EF,X,Xm,Il,vi,w1,w2,fDynamics)
 % simulate
 % [input]
 % N : number of node = nx*ny
@@ -407,6 +480,7 @@ function [k,logger] = Astar_SIR(N,ke,nx,ny,map,unum,E,X,Xm,Il,vi,w1,w2,fDynamics
 % nx, ny : grid size
 % map : SIR_model
 % unum : number of agents
+% FF : 消防隊の消火ノズル状況
 % E : graph edge
 % W : node weight
 % fMethod : "APR" or "Weight"
@@ -422,13 +496,18 @@ logger.I(:,1) = map.I(:);
 logger.R(:,1) = map.R(:);
 logger.U(:,1) = map.U(:);
 logger.P = sparse(N,ke);
-E1 = E>0;   %E>0となる要素のみによるlogical配列
 p = arranged_position([10,10],unum,2,0);
 p = (p(1,:)'-1)*ny + p(2,:)';% init position indices
 pt = zeros(unum,1);
 
 k = 1;
 while (k <= ke) && sum(find(map.I))
+    Eenum = ceil(k/20);
+    if E0 == 0
+        E1 = E>0;
+    else
+        E1 = Ee{Eenum}>0;   %E>0となる要素のみによるlogical配列
+    end
     fi= find(map.I);% 燃えているマップのインデックス
     if fDynamics=="Direct"
         tmpX = X(fi)+(Il-map.I(fi));% 燃えているマップの重要度：X = V, Wどちらでも縦ベクトルになる．
@@ -495,8 +574,53 @@ while (k <= ke) && sum(find(map.I))
         end
     end
     U = sparse(u,1,1,N,1);
-    map.next_step_func(U,E);% map 更新
-    %k % 進捗確認
+
+    if E0 ~= 0
+        if k <= 20 && k > 0
+            map.next_step_func(U,Ee{Eenum});% map 更新
+        elseif k <= 40 && k >= 21
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 60 && k >= 41
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 80 && k >= 61
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 100 && k >= 81
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 120 && k >= 101
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 140 && k >= 121
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 160 && k >= 141
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 180 && k >= 161
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 200 && k >= 181
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 220 && k >= 201
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 240 && k >= 221
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 260 && k >= 241
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 280 && k >= 261
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 300 && k >= 281
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 320 && k >= 301
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 340 && k >= 321
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 360 && k >= 341
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 380 && k >= 361
+            map.next_step_func(U,Ee{Eenum});
+        elseif k <= 400 && k >= 381
+            map.next_step_func(U,Ee{Eenum});
+        end
+    elseif Ee == 0
+%         map.next_step_func(U,E);% map 更新
+        map.next_step_func(U,ES,EF);
+    end
     
     % log
     logger.k(k)=k;
@@ -504,17 +628,38 @@ while (k <= ke) && sum(find(map.I))
     logger.I(:,k) = map.I(:);
     logger.R(:,k) = map.R(:);
     logger.U(:,k) = map.U(:);
+    logger.UF(:,k) = map.v2(:); % 飛び火の発生回数の保存 Logger(i).UFで確認
     k = k+1;
 
-%     if k == 20
-%         unum = unum + 10;
-%     elseif  k == 40
-%         unum = unum + 10;
-%     elseif  k == 60
-%         unum = unum + 10;
-%     elseif  k == 120
-%         unum = unum + 5;
-%     end
+    if FF == 0
+        unum = 0;
+    elseif FF ==1       % 糸魚川火災の詳細Ver
+        if k == 20
+            unum = unum + 10;
+        elseif  k == 40
+            unum = unum + 10;
+        elseif  k == 60
+            unum = unum + 10;
+        elseif  k == 120
+            unum = unum + 5;
+        end
+    elseif FF ==2       % 糸魚川火災の詳細Ver2.0
+        if k == 3
+            unum = unum + 5;
+        elseif k == 10
+            unum = unum + 5;
+        elseif k == 20
+            unum = unum + 10;
+        elseif  k == 30
+            unum = unum + 10;
+        elseif  k == 40
+            unum = unum + 15;
+        elseif  k == 60
+            unum = unum + 15;
+        elseif  k == 120
+            unum = unum + 15;
+        end
+    end
 end
 end
 %% performance
