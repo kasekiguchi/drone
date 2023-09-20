@@ -23,6 +23,10 @@ for i = 1:find(log.Data.t,1,'last')
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
 
+for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
+    data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
+end
+
 disp('load finished')
 %% グラフ出力
 
