@@ -54,12 +54,12 @@ methods
     %線形入力
         % vf = Vfd(dt,x,xd',P,obj.param.F1);
     %servo
-        if varargin{1}.t > 0
-                obj.z = obj.z + xd(3)-x(7);
-       end
-        vf = obj.Vf(z1,obj.z);
+       %  if varargin{1}.t > 0
+       %          obj.z = obj.z + xd(3)-x(7);
+       % end
+       %  vf = obj.Vf(z1,obj.z);
     %近似FTC
-        % vf = Vzft(obj.approx_z,z1);
+        vf = Vzft(obj.approx_z,z1);
         %x,y,psiの状態変数の値
         z2 = Z2(x, xd', vf, P); %x方向
         z3 = Z3(x, xd', vf, P); %y方向

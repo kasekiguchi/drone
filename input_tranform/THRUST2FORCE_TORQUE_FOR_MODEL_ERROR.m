@@ -12,9 +12,10 @@ classdef THRUST2FORCE_TORQUE_FOR_MODEL_ERROR < handle
     
     methods
         function obj = THRUST2FORCE_TORQUE_FOR_MODEL_ERROR(self)
+            %plantのパラメータと推定のパラメータを取得する
             pname = self.parameter.parameter_name;
-            parameter = self.parameter.parameter;%paramater
-            model_error = self.parameter.model_error;%paramater adding model error
+            parameter = self.estimator.model.param;%paramater
+            model_error = self.plant.param;%paramater adding model error
             fname = contains(pname,["Lx","Ly","lx","ly","km1","km2","km3","km4"]);
             for i = 1:length(fname)
                 if fname(i)

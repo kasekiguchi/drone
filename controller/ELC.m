@@ -54,12 +54,12 @@ methods
         z4 = Zep4(x, xd', P);
         
         %subsystem controller
-        % vep = obj.Vep(z1, z2, z3, z4);
+        vep = obj.Vep(z1, z2, z3, z4);
         %servo
-        if varargin{1}.t > 0
-                obj.z = obj.z + xd(3)-x(7);
-        end
-        vep = obj.Vep(z1, z2, z3, z4,obj.z);
+        % if varargin{1}.t > 0
+        %         obj.z = obj.z + xd(3)-x(7);
+        % end
+        % vep = obj.Vep(z1, z2, z3, z4,obj.z);
 
         %% calc actual input
         tmp = Uep(x, xd', vep, P);

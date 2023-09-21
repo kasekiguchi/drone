@@ -108,12 +108,14 @@ classdef MODEL_CLASS < dynamicprops & handle
         return
       end
 
-      % if obj.fmodelError
-      %           u= obj.self.input_transform.result;
-      % else
-      %           u = obj.self.controller.result.input;
-      % end
-      u = obj.self.controller.result.input;
+      if obj.fmodelError && isfield(obj.self,"input_transform")
+                u= obj.self.input_transform.result;
+      else
+                u = obj.self.controller.result.input;
+      end
+
+      % u = obj.self.controller.result.input;
+      % u = obj.self.input_transform.result;
       % if isempty(obj.param)
       %   obj.param = obj.self.parameter.get("all","row",obj.fmodelError);%varargin{5}.parameter.get();
       % end
