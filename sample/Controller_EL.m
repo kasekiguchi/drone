@@ -16,7 +16,7 @@ eF4=Controller.F4;
 %% finite-time settling controlのalphaを計算
 
 % 入力のalphaを計算
-alp = [0.8,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+alp = [0.85,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
 anum = 4; %最大の変数の個数
 alpha = zeros(anum + 1, 4);
 alpha(anum + 1,:) = 1*ones(1,anum);
