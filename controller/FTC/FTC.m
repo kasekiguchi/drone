@@ -54,9 +54,9 @@ methods
     %線形入力
         % vf = Vfd(dt,x,xd',P,obj.param.F1);
     %servo
-        if varargin{1}.t > 0
+        % if varargin{1}.t > 0
                 obj.z = obj.z + xd(3)-x(7);
-       end
+       % end
         vf = obj.Vf(z1,obj.z);
     %近似FTC
         % vf = Vzft(obj.approx_z,z1);

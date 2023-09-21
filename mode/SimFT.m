@@ -13,8 +13,8 @@ initial_state.w = [0; 0; 0];
 
 agent = DRONE;
 % agent.parameter = DRONE_PARAM("DIATONE","row","lx",0,"mass",0.5,"jy",0);
-agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.9);
-% agent.parameter = DRONE_PARAM("DIATONE","row");
+% agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.9);
+agent.parameter = DRONE_PARAM("DIATONE","row");
 fmodel_error=0;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1),fmodel_error);
 %外乱を与える=============
@@ -23,7 +23,7 @@ agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1),fmodel_er
 %モデル誤差用使いません=============
 % agent.input_transform = THRUST2FORCE_TORQUE_FOR_MODEL_ERROR(agent); % modelerror用
 %=====================
-agent.parameter.set("mass",struct("mass",0.5884))
+% agent.parameter.set("mass",struct("mass",0.5884))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
