@@ -55,8 +55,16 @@ hold off
 %% 入力
 figure(3)
 hold on
-for plot_i = 1:gui.logger.k
-    flight_input = cell2mat(gui.logger.Data.agent.input);
+% for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
+%         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
+% end
+for i = 1:gui.logger.k %size(gui.logger.Data.agent.input,1)
+    data.input = cell2mat(gui.logger.Data.agent.input);
+    data.u = T2T(data.input(1,i),data.input(2,i),data.input(3,i),data.input(4,i));
+    flight_input(1,i) = data.u(1,1);
+    flight_input(2,i) = data.u(1,2);
+    flight_input(3,i) = data.u(1,3);
+    flight_input(4,i) = data.u(1,4);
 end
 plot(T,flight_input)
 xlabel('Time [s]','FontSize',16)
@@ -67,22 +75,22 @@ legend('Location','best')
 ax = gca;
 ax.FontSize = 12;
 hold off
-%% 入力2
-figure(4)
-hold on
-for plot_i = 1:gui.logger.k
-    inner_input(plot_i,1) = cell2mat(gui.logger.Data.agent.inner_input{1,plot_i});
-    flight_inner_input = cell2mat(gui.logger.Data.agent.inner_input);
-end
-plot(T,flight_inner_input)
-xlabel('Time [s]','FontSize',16)
-ylabel('inner_input [N]','FontSize',16)
-name_class = ["moter1";"moter2";"moter3";"moter4"];
-legend(name_class)
-legend('Location','best')
-ax = gca;
-ax.FontSize = 12;
-hold off
+%% 入力2 失敗作
+% figure(4)
+% hold on
+% for plot_i = 1:gui.logger.k
+%     inner_input(plot_i,1) = cell2mat(gui.logger.Data.agent.inner_input{1,plot_i});
+%     flight_inner_input = cell2mat(gui.logger.Data.agent.inner_input);
+% end
+% plot(T,flight_inner_input)
+% xlabel('Time [s]','FontSize',16)
+% ylabel('inner_input [N]','FontSize',16)
+% name_class = ["moter1";"moter2";"moter3";"moter4"];
+% legend(name_class)
+% legend('Location','best')
+% ax = gca;
+% ax.FontSize = 12;
+% hold off
 %% 誤差
 figure(5)
 hold on
