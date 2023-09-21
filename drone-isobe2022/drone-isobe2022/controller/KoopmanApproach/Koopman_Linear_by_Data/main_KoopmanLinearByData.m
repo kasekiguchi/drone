@@ -10,13 +10,13 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_9_6_saddle_circle=saddlecircle_estimation=saddle.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
-% FileName = 'test.mat'; %お試し用
+% FileName = 'EstimationResult_12state_9_6_saddle_circle=saddlecircle_estimation=saddle.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'test';  
-% loading_filename = 'experiment_6_20_circle';  %matは含まないように注意！
-loading_filename = 'experiment_9_5_saddle_circle';
+loading_filename = 'experiment_6_20_circle';  %matは含まないように注意！
+% loading_filename = 'experiment_9_5_saddle';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -38,7 +38,7 @@ F = @(x) [x;1]; % 状態変数+定数項1
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 20; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 10; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
