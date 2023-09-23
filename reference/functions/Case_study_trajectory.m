@@ -1,4 +1,4 @@
-function [ref] = Case_study_trajectory(X0)
+function [ref] = Case_study_trajectory(X0, te)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -15,10 +15,26 @@ z_0 = X0(3);
 % y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
 % z = z_0;
 
-x = 0;
+%%
+x = t;
 y = 0;
 z = 1;
 
+%% circle
+% x = cos(t/2) -1;
+% y = sin(t/2);
+% z = 1;
+%%
+% x = 1/(1+exp(-t + te/2));
+% y = 0;
+% z = 1;
+
+%% landing
+% x = 0;
+% y = 0;
+% z = -1/(1+exp(-t + 5)) + 1;
+
+Trajectory = [x,y,z]
 ref=@(t)[x;y;z;0];
 end
 

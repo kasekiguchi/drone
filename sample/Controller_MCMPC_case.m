@@ -21,9 +21,9 @@ function Controller = Controller_MCMPC_case(Agent)
     %% normal
 %     Controller_param.P = diag([1e4; 1e4; 1e3]);    % 座標   1000 1000 10000
     Controller_param.P = diag([1e6; 1e6; 1e4]);    % 座標   1000 1000 10000
-    Controller_param.V = diag([1e2; 1e2; 1e4]);    % 速度
-    Controller_param.R = 0.1*diag([1.0; 1e3; 1e3; 1e3]); % 入力
-    Controller_param.RP = 0 * diag([1.0,; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.V = diag([1e4; 1e4; 1e4]);    % 速度
+    Controller_param.R = 1e6*diag([1.0; 1e3; 1e3; 1e3]); % 入力 0.1
+    Controller_param.RP = 1e3 * diag([1.0,; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.QW = diag([1e1; 1e1; 1e1; 1e1; 1e1; 1e1]);  % 姿勢角、角速度
 
     Controller_param.Pf = diag([1e2; 1e2; 1e4]); % 6
@@ -38,7 +38,7 @@ function Controller = Controller_MCMPC_case(Agent)
     fprintf("MCMPC controller\n")
 
     Controller.name = "mcmpc";
-    Controller.type = "MCMPC_controller";
+    Controller.type = "MCMPC_controller_case";
     Controller.param = Controller_param;
 
 end

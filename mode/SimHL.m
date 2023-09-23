@@ -1,6 +1,6 @@
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 5; % terminal time
+te = 25; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -18,7 +18,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
-agent.reference = MY_POINT_REFERENCE(agent,{"f",[1,1,1], "g",[1,2,1]});
+agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.2;0.2;1.2],"g",[-0.2;0.2;0.8]),2});%縦ベクトルで書く
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
 function dfunc(app)
