@@ -1,3 +1,4 @@
+clc;
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10; % terminal time
@@ -16,8 +17,8 @@ agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory", {[0;0;1]}, "HL"});
-agent.controller = MPC_controller(agent, Controller_MPC(agent));
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory", {[0;0;1], te}, "HL"});
+agent.controller = MPC_controller_case(agent, Controller_MPC_case(agent));
 run("ExpBase");
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
