@@ -52,7 +52,7 @@ function Controller = Controller_HLMCMPC(~)
 
     Controller_param.const = 1e6;
 
-    Controller.name = "mcmpc";
+    Controller.name = "mcmpc"; % HLでもMCだから
     Controller.type = "HLMCMPC_controller";
     % Controller.type = "HLMCMPC_controller_mex";
     Controller.param = Controller_param;

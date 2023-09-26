@@ -78,7 +78,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       
-
+      %%
+      
 %       obj.param.te = 10;
     end
 
@@ -202,7 +203,12 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
       %-- 状態予測
-      [obj.state.state_data] = obj.predict();
+      % [obj.state.state_data] = obj.predict();
+      Objpredict.H = obj.param.H;
+      Objpredict.N = obj.N; Objpredict.A = obj.A; Objpredict.B = obj.B;
+      Objpredict.input = obj.input.u; Objpredict.current_state = obj.current_state;
+      Objpredict.state = obj.state.state_data; 
+      [obj.state.state_data] = predict_mex(Objpredict);
 
       %% 墜落 or 飛びすぎたら終了
       if obj.state.state_data(1,1,:) + xd(3) < 0
@@ -219,6 +225,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %-- 評価値計算 
       obj.input.Evaluationtra =  obj.objective();
+      % obj.input.Evaluationtra = objective(Objobj);  
 
       % 評価値の正規化
       % obj.input.normE = obj.Normalize();
@@ -238,7 +245,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vs(3) = obj.input.u(4, 1, BestcostID(5));
         vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
-        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); 
+        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
 
         % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
@@ -355,14 +362,14 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     end
 
     %%-- 離散：階層型線形化
-    function [predict_state] = predict(obj)
-      u = obj.input.u;
-      obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
-      for i = 1:obj.param.H-1
-        obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),u(:,i,1:obj.N));
-      end
-      predict_state = obj.state.state_data;
-    end
+    % function [predict_state] = predict(obj)
+    %   u = obj.input.u;
+    %   obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
+    %   for i = 1:obj.param.H-1
+    %     obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),u(:,i,1:obj.N));
+    %   end
+    %   predict_state = obj.state.state_data;
+    % end
 
     %------------------------------------------------------
     %======================================================

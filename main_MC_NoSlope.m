@@ -14,7 +14,7 @@ userpath('clear');
 % close all hidden; clear all; clc;
 % userpath('clear');
 fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
-fHL = 0; 
+fHL = 1; 
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
@@ -37,14 +37,10 @@ fG = zeros(3, 1);
 fRemove = 0;
 fFinish = 0;
 %-- 初期設定 controller.mと同期させる
-
-if agent.controller.name == "mcmpc"
-    data.param = agent.controller.mcmpc;
-elseif agent.controller.name == "hlmpc"
-    data.param = agent.controller.hlmpc;
-end
-Params.H = data.param.param.H;   %Params.H
-Params.dt = data.param.param.dt;  %Params.dt
+data.param = agent.controller.(agent.controller.name).param;
+% data.param = agent.controller.(agent.controller.name);
+Params.H = data.param.H;   %Params.H
+Params.dt = data.param.dt;  %Params.dt
 Params.dT = dt;
 %-- 配列サイズの定義
 Params.state_size = 12;
@@ -54,7 +50,7 @@ Params.total_size = 16;
 % Params.soft_z = data.param.param.soft_z;
 % Reference.mを使えるようにする
 % Params.ur = 0.269 * 9.81 / 4 * ones(Params.input_size, 1);
-Params.ur = data.param.param.ref_input;
+Params.ur = data.param.ref_input;
 xr0 = zeros(Params.state_size, Params.H);
 
 % データ保存初期化
@@ -224,7 +220,7 @@ end
 
         %-- データ保存
         if idx == 1
-            data.param = agent.controller.hlmpc;
+            
         end
 %         state_data =            agent.controller.result.path;
         BestcostID =              agent.controller.result.BestcostID;

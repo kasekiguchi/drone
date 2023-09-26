@@ -1,4 +1,4 @@
-function U2 = Us(in1,in2,in3,in4,in5)
+function U2 = Us_GUI(in1,in2,in3,in4,in5)
 %Us
 %    U2 = Us(IN1,IN2,IN3,IN4,IN5)
 

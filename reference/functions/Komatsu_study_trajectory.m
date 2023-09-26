@@ -35,10 +35,10 @@ syms t real
 % z = 1/2 * sin(t/2);
 
 %% circle
-% x = cos(t/2)-1;
-% y = sin(t/2);
-% z = 1;
-% yaw = 0;
+x = cos(t/2)-1;
+y = sin(t/2);
+z = 1;
+yaw = 0;
 
 %% involute curve
 % x=2*(cos(t)+t*sin(t));
@@ -66,10 +66,10 @@ syms t real
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
 %% hovering
-x = 0;
-y = 0;
-z = 1;
-yaw = 0;
+% x = 0;
+% y = 0;
+% z = 1;
+% yaw = 0;
 
 %% star
 % x = 5*cos(2*t/3) + 2*cos(t)-7;
