@@ -76,6 +76,17 @@ classdef MPC_controller_case <handle
             problem.solver = 'fmincon'; % solver
             problem.options = options;  %
 
+            %% mex
+            % Obj.input = obj.input.u; Obj.state = obj.state.ref;
+            % Obj.Q = obj.param.Weight; Obj.Qf = obj.param.Weightf;
+            % Obj.RP = obj.param.RP; Obj.R = obj.param.R;
+
+            %% mex constraints
+            % Objc.H = obj.param.H; Objc.dt = obj.param.dt;
+            % Objc.modelf = obj.modelf; Objc.modelp = obj.modelp;
+            % Objc.current_state = obj.current_state;
+            % Objc.input_max = obj.param.input_max; Objc.input_min = obj.param.input_min; Objc.torque_TH = obj.param.torqe_TH;
+
             problem.x0		  = [obj.previous_state; obj.previous_input];                 % 状態，入力を初期値とする                                    % 現在状態
 
             problem.objective = @(x) obj.objective(x); 
@@ -85,13 +96,12 @@ classdef MPC_controller_case <handle
             %% MPC_controller_case が実行されていない
             %% 他のなにかしらのコントローラを通っている
             %%
-            obj.previous_input = var(13:16,:);
-            % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
+            % obj.previous_input = var(13:16,:);
+            obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
             obj.result.input = var(13:16, 1);
 
             obj.input.u = obj.result.input;
-            % obj.input.v = obj.input.u;
 
             result = obj.result;
             % profile viewer
@@ -113,7 +123,10 @@ classdef MPC_controller_case <handle
 %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             fprintf("\n");
 
-            % [~, tmpx] = ode15s(@(t, x) obj.modelf(obj.current_state, obj.input.u, obj.modelp), [0 0.025], obj.current_state);
+            %% z < 0で終了
+            if obj.self.estimator.result.state < 0
+                warning("Z < 0")
+            end
         end
         function show(obj)
             obj.result
@@ -122,14 +135,12 @@ classdef MPC_controller_case <handle
         %-- 制約とその重心計算 --%
         function [c, ceq] = constraints(obj, x)
             % モデル予測制御の制約条件を計算するプログラム
-            c  = zeros(12, obj.param.H);
             ceq_ode = zeros(12, obj.param.H);
 
             %-- MPCで用いる予測状態 Xと予測入力 Uを設定
             X = x(1:12, :);          % 12 * Params.H
             U = x(13:16, :);   % 4 * Params.H
 
-            % U(16, :) = zeros(1, obj.param.H);
             %- ダイナミクス拘束
             %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
             %-- 連続の式をダイナミクス拘束に使う
@@ -140,16 +151,12 @@ classdef MPC_controller_case <handle
                 tmp = xx + obj.param.dt * obj.modelf(xx, xu, obj.modelp);
                 % tmp = obj.current_state + obj.param.dt * obj.modelf(xx, xu, obj.modelp);
                 ceq_ode(:, L) = X(:, L) - tmp; 
-                % 
-                % [~,tmpx]=ode15s(@(t,X) obj.modelf(xx, xu, obj.modelp), [0 0.025],obj.current_state);
-                % ceq_ode(:, L) = X(:, L) - tmpx(end, :)';
             end
             ceq = [X(:, 1) - obj.current_state, ceq_ode];
-            c = [U(1,:)-10; -U(1,:); -(U(2:4,:)+2); U(2:4,:)-2; -X(3,:)]; % 0<推力<10, -2<torque<2
+            c = [U(1,:)-obj.param.input_max; -U(1,:)+obj.param.input_min; -(U(2:4,:)+obj.param.torque_TH); U(2:4,:)-obj.param.torque_TH; -X(3,:)]; 
+            % 0<推力<10, -2<torque<2, z>0
         end
 
-        %------------------------------------------------------
-        %======================================================
         function [eval] = objective(obj,x)   % obj.~とする
             X = x(1:12,:);
             U = x(13:16,:);
@@ -163,31 +170,6 @@ classdef MPC_controller_case <handle
             terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
 
             eval = stageState + stageInputPre + stageInputRef + terminalState;
-            
-        %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
-            % Xp = x(1:3, :);
-            % Xq = x(4:6, :);
-            % Xv = x(7:9, :);  
-            % Xw = x(10:12, :);
-            % U = x(13:16, :);
-            
-            % tildeXp = Xp - obj.state.ref(1:3, :);  % 位置
-            % tildeXq = Xq - obj.state.ref(4:6, :);
-            % tildeXv = Xv - obj.state.ref(7:9, :);  % 速度
-            % tildeXw = Xw - obj.state.ref(10:12,:);
-            % tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-            % tildeUpre = U - obj.input.v;
-            % tildeUref = U - obj.state.ref(13:16,:);
-
-            % stageStateP =    sum(tildeXp(:,end-1)' * obj.param.P   .* tildeXp(:,end-1)',2);
-            % stageStateV =    sum(tildeXv(:,end-1)' * obj.param.V   .* tildeXv(:,end-1)',2);
-            % stageStateQW =   sum(tildeXqw(:,end-1)' * obj.param.QW .* tildeXqw(:,end-1)',2);
-            % stageInputPre  = sum(tildeUpre(:,end-1)' * obj.param.RP.* tildeUpre(:,end-1)',2);
-            % stageInputRef  = sum(tildeUref(:,end-1)' * obj.param.R .* tildeUref(:,end-1)',2);
-
-            %-- 評価値計算
-            % eval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
-            %     + terminalState;
         end
 
         function [xr] = Reference(obj, T)

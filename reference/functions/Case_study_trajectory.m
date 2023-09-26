@@ -1,4 +1,4 @@
-function [ref] = Case_study_trajectory(X0)
+function [ref] = Case_study_trajectory(X0, te)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -20,9 +20,10 @@ syms t real
 % z = 1;
 
 x = t;
-y = -t;
+y = 0;
 z = 1;
 
+Trajectory = [x, y, z]
 ref=@(t)[x;y;z;0];
 end
 

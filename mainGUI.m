@@ -13,9 +13,12 @@ close all hidden; clear ; clc;
 userpath('clear');
 %%
 clc
-SimBaseMode = ["SimHL","SimVoronoi","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL","SimMCMPC","SimMPC"];
-ExpBaseMode = ["ExpTestMotiveConnection","ExpHL","ExpFHL","ExpFHL_Servo","ExpFT","ExpEL"];
+SimBaseMode = ["SimHL","SimMCMPC","SimMPC"];
+ExpBaseMode = [""];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);
+
+%%
+% save("Data/x_t_sqp_param.mat", 'gui.agent.controller.param');
