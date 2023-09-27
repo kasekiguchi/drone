@@ -11,7 +11,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("Koopman_ホバリング_重み調整済み.mat")
+load("Koopman_ホバリング_x=1_y=1_重み調整よくない.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')
@@ -114,7 +114,14 @@ title('Angular velocity w of agent1','FontSize',12);
 
 figure(5)
 plot(data.p(1,:),data.p(2,:));
+xlabel('Position x [m]');
+ylabel('Position y [m]');
 grid on
+hold on
+plot(data.pr(1,:),data.pr(2,:));
+plot(0,1,'o','MarkerFaceColor','red','Color','red');
+% plot(1,-1,'o','MarkerFaceColor','red','Color','red');
+legend('Estimated trajectory','Trajectory','Initial position')
 ax(5) = gca;
 
 figure(6)
@@ -223,10 +230,16 @@ subplot(2,num,6);
 if choice == 0
     plot(data.p(1,:),data.p(2,:));
     grid on
-    xlabel('x');
-    ylabel('y');
-    xlim([-0.5 0.5])
-    ylim([-0.5 0.5])
+    xlabel('Position x [m]');
+    ylabel('Position y [m]');
+    hold on
+%     plot(data.pr(1,:),data.pr(2,:));
+%     plot(0,1,'o','MarkerFaceColor','red','Color','red');
+%     plot(1,1,'o','MarkerFaceColor','red','Color','red');
+%     plot(1,-1,'o','MarkerFaceColor','red','Color','red');
+%     legend('Estimated trajectory','Target position')
+%     xlim([-0.5 0.5])
+%     ylim([-0.5 0.5])
 else
     plot3(data.p(1,:),data.p(2,:),data.p(3,:));
     grid on
