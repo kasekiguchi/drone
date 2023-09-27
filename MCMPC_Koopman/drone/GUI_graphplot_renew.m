@@ -11,7 +11,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("Koopman_円旋回_radius=1_T=20_改善よい.mat")
+load("Koopman_ホバリング_重み調整済み.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')
@@ -218,13 +218,15 @@ ax(5) = gca;
 title('Input u of agent1');
 
 % 軌道(2次元，3次元)
-choice = 1;
+choice = 0;
 subplot(2,num,6);
 if choice == 0
     plot(data.p(1,:),data.p(2,:));
     grid on
     xlabel('x');
     ylabel('y');
+    xlim([-0.5 0.5])
+    ylim([-0.5 0.5])
 else
     plot3(data.p(1,:),data.p(2,:),data.p(3,:));
     grid on

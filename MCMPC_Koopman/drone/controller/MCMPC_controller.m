@@ -42,8 +42,8 @@ classdef MCMPC_controller < CONTROLLER_CLASS
             obj.state.v_data = repmat(reshape(obj.state.v_data, [1, size(obj.state.v_data)]), 3, 1);
             obj.state.w_data = zeros(obj.param.H, obj.param.particle_num);
             obj.state.w_data = repmat(reshape(obj.state.w_data, [1, size(obj.state.w_data)]), 3, 1);
-            obj.state.constant = ones(obj.param.H,obj.param.particle_num);
-            obj.state.constant = repmat(reshape(obj.state.constant, [1, size(obj.state.constant)]),1, 1);
+%             obj.state.constant = ones(obj.param.H,obj.param.particle_num);
+%             obj.state.constant = repmat(reshape(obj.state.constant, [1, size(obj.state.constant)]),1, 1);
             obj.A = obj.param.model.est.A; %係数行列A, 複素数空間上での値
             obj.B = obj.param.model.est.B; %入力ベクトルB, 複素数空間上での値
             obj.C = obj.param.model.est.C; %出力ベクトル
@@ -68,20 +68,42 @@ classdef MCMPC_controller < CONTROLLER_CLASS
 
             %-- 正規分布の標準偏差，平均の設定
             if idx == 1 %プログラムの1周目では標準偏差，平均値を設定
-                obj.input.sigma = 0.1;
+                obj.input.sigma = 0.01;
                 obj.input.average = 0.5884*9.81/4;
             else %2周目以降はリサンプリングで標準偏差と平均値を計算
                 obj.input.sigma = obj.input.sigma * (obj.input.bestcost_now / obj.input.bestcost_befor);
-                obj.input.average = obj.input.u1(:,1,obj.input.I);
-                if obj.input.sigma >= 2 %sigmaの最大最小の設定
-                    obj.input.sigma = 2;
+%                 obj.input.average = obj.input.u1(:,1,obj.input.I);
+                obj.input.average = (obj.input.u1(1, 1, obj.input.I)+obj.input.u1(2, 1, obj.input.I)+obj.input.u1(3, 1, obj.input.I)+obj.input.u1(4, 1, obj.input.I))/4;
+                if obj.input.sigma >= 0.1 %sigmaの最大最小の設定
+                    obj.input.sigma = 0.1;
                 elseif obj.input.sigma <= 0.001
                     obj.input.sigma = 0.001;
                 end
             end
-
+            fprintf('平均値：%f \n', obj.input.average)
             obj.input.u1 = obj.input.sigma * randn(4, obj.param.H, obj.param.particle_num) + obj.input.average;
              %(新しい入力の生成，σ×[入力数×ホライズン数×サンプル数]+平均値),randn:標準世紀分布から取り出された乱数スカラーを返す
+
+             %生成した入力の確認
+%              if idx > 20
+%                  for i = 1:size(obj.input.average,1)
+%                  u1 = obj.input.u1(i,1,1:obj.param.particle_num);
+%                  u1 = reshape(u1, [1, obj.param.particle_num]);
+% %                  fprintf('%f \t %f',obj.input.sigma, obj.input.average(i, 1));
+%                  x = u1;
+%                  y = normpdf(u1, obj.input.average(i, 1), obj.input.sigma);
+%                  figure(i+1)
+%                  scatter(x, y)
+%                  hold on
+%                  grid on
+%                  x1 = linspace(min(u1), max(u1), 1000);
+%                  y1 = normpdf(x1, obj.input.average(i, 1), obj.input.sigma);
+%                  plot(x1, y1, 'r', 'LineWidth', 2)
+%                  legend('入力', '理論的な正規分布')
+%                  hold off
+%                  pause(5);
+%                  end
+%              end
             
             %-- 入力列の生成
             % 正規分布に従う．設定した標準偏差と平均に基づく
@@ -111,6 +133,7 @@ classdef MCMPC_controller < CONTROLLER_CLASS
 
             % 最適な入力をagentに代入
             obj.self.input = obj.input.u1(:,1,obj.input.I);
+            fprintf('最適な入力：%f \n', obj.self.input)
 
             %-- リサンプリング
             if idx == 1
@@ -144,6 +167,7 @@ classdef MCMPC_controller < CONTROLLER_CLASS
 %                 obj.state.y0 = obj.previous_state.x0; %現在状態x0を状態記憶配列y0に保存
                 obj.state.z = obj.previous_state.x0C;
                 obj.state.state_data_koopman(:,1,i) = obj.state.z; %y0を初期値に設定
+                obj.state.state_data(:,1,i) = obj.previous_state.x0;
                 for j = 1:obj.param.H - 1 %ホライズン数分繰り返し
                     %モデルの計算
                     obj.state.z = obj.A*obj.state.z + obj.B*obj.input.u1(:,j,i); %クープマンモデル，複素数空間上での値

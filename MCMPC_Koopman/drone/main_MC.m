@@ -10,7 +10,7 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
-run("main1_setting.m");
+run("main1_setting_MC.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
 %% set logger(デフォルトで取らないデータを追加で取る際に使用)
@@ -97,7 +97,7 @@ end
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
         
-
+        FH.CurrentCharacter = 'f'; %fを押さずに実行できる
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator

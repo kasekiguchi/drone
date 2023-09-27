@@ -1,43 +1,37 @@
 clc
-clear
-%% MEX
-mex test.c
-tic
-A = [1, 2, 3; 4, 5, 6; 7, 8, 9];
-B = [1, 2, 3; 4, 5, 6; 7, 8, 9];
-result = test(A, B);
-calend = toc;
-disp(result);
-disp(['計算にかかった時間 : ',num2str(calend), '秒']);
+clear 
+close all
 
-%% MATLAB
-tic
-A = [1, 2, 3; 4, 5, 6; 7, 8, 9];
-% A = [1, 2, 3, 4, 5, 6, 7, 8, 9; 1, 2, 3, 4, 5, 6, 7, 8, 9; 1, 2, 3, 4, 5, 6, 7, 8, 9];
-% B = A';
-% B = [1, 2, 3; 4, 5, 6; 7, 8, 9];
+% パラメータの設定
+average = 0.5884*9.81/4; % 平均
+% average = 0;
+sigma = 0.01; % 標準偏差
 H = 10;
-R = diag([1; 1; 1]);
+particle_num = 100;
+% num_samples = 1000; % 生成するデータの数
 
-for i = 1:H-1
-    result2(1,i)  = A(:, i)'*R*A(:, i);
-end
-% result2 = A*B;
-calend2 = toc;
-disp(result2);
-disp(['計算にかかった時間 : ',num2str(calend2), '秒']);
+% 正規分布に従うランダムなデータの生成
+% data = normrnd(average, sigma, 1, particle_num);
+u2 = sigma * randn(4, H, particle_num) + average;
+u1 = u2(1, 1, 1:particle_num);
+u1 = reshape(u1, [1,particle_num]);
+% ヒストグラムの表示
+% histogram(u1, 'Normalization', 'probability');
+% title('正規分布に従うランダムデータのヒストグラム');
 
-%% 
-tic
-A = [1, 2, 3, 4, 5, 6, 7, 8, 9; 1, 2, 3, 4, 5, 6, 7, 8, 9; 1, 2, 3, 4, 5, 6, 7, 8, 9];
-% B = A';
-% B = [1, 2, 3; 4, 5, 6; 7, 8, 9];
-H = 10;
-R = diag([1; 1; 1]);
-
-result3 = arrayfun(@(L) A(:, L)' * R * A(:, L), 1:H-1);
-
-calend3 = toc;
-disp(result3);
-disp(['計算にかかった時間 : ',num2str(calend3), '秒']);
-
+% 理論的な正規分布の確率密度関数をプロット
+% x = linspace(min(u1), max(u1),100);
+x = u1;
+y = normpdf(u1, average, sigma);
+% y = u1;
+% 
+scatter(x,y)
+hold on;
+grid on;
+% scatter(x,y)
+% x1 = linspace(min(data),max(data),100);
+x1 = linspace(min(u1),max(u1),1000);
+y1 = normpdf(x1, average, sigma);
+plot(x1, y1, 'r', 'LineWidth', 2);
+legend('データ', '理論的な正規分布');
+hold off;

@@ -23,7 +23,7 @@ end
 disp('Press Enter key to start.');
 FH = figure('position', [0 0 eps eps], 'menubar', 'none');
 
-w = waitforbuttonpress;
+% w = waitforbuttonpress; %キーボードを押すと開始する
 
 if (fOffline)
     expdata.overwrite("model", time.t, agent, i);
