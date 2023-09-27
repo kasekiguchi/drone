@@ -40,7 +40,7 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.PHI = diag([1; 1]);
 
     Controller_param.Zf = diag([1e6; 1]);
-    Controller_param.Xf = diag([1e5,1,1,1]);
+    Controller_param.Xf = 1e6 * diag([1e5,1e2,1,1]);
     Controller_param.Yf = diag([1e5,1,1,1]);
     Controller_param.PHIf = diag([1; 1]);
 
@@ -51,6 +51,8 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.ref_input = 0.269 * 9.81 * [0;0;0;0];
 
     Controller_param.const = 1e6;
+
+    %%  
 
     Controller.name = "mcmpc"; % HLでもMCだから
     Controller.type = "HLMCMPC_controller";

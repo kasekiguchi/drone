@@ -36,9 +36,11 @@ function Controller = Controller_MCMPC(~)
     Controller_param.ref_input = 0.269*9.81 * [1;0;0;0];
 
     Controller.name = "mcmpc";
-    % Controller.type = "MCMPC_controller_normal";
-    Controller.type = "MCMPC_controller_org";
-    % Controller.type = "MCMPC_controller_Liner";
+    Controller.type = "MCMPC_controller_normal";
+    % Controller.type = "MCMPC_controller_org";
+    %% Controller.type = "MCMPC_controller_Liner";
+
+    % Controller.type = "KPMCMPC_controller";
     Controller.param = Controller_param;
 
 end

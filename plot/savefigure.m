@@ -39,8 +39,9 @@ figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(c
 ylabel("Position [m]")
 yyaxis right
 plot(logt, Eachcost(8,:)); 
+% plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
 xlabel("Time [s]"); ylabel("Eval"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
+grid on; xlim([0 xmax]); ylim([0 5000]);
 % exportgraphics(gcf, "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_p.eps");
 % title("Time change of Position"); 
 % atiitude 0.2915 rad = 16.69 deg
@@ -61,17 +62,6 @@ plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 
 xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northwest");
 grid on; xlim([0 xmax]); ylim([-inf 5.5]);
 ytickformat('%.1f')
-% exportgraphics(gcf, "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_input.eps");
-% % title("Time change of Input");
-% figure(5); % 仮想入力
-% plot(logt, IV); legend("Z", "X", "Y", "YAW");
-% xlabel("Time [s]"); ylabel("input.V");
-% grid on; xlim([0 xmax]); ylim([-inf inf]);
-% % calculation time
-% figure(6);
-% plot(logt, data.calT(1:size(logger.data('t',[],[]),1))); hold on;
-% plot(logt, totalT/(te/dt)*ones(size(logt,1),1), '--', 'LineWidth', 2); hold off;
-% xlim([0 xmax]);
 
 if ~isempty(data.input_v)
     IV = data.input_v(:, 1:end-1);
@@ -92,17 +82,17 @@ end
 % ytickformat('%.1f')
 % exportgraphics(gcf, "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_ZZ.eps");
 %%
+% 
+% set(gca,'FontSize',Fontsize);  grid on; title("");
+% xlabel("Time [s]");
 
-set(gca,'FontSize',Fontsize);  grid on; title("");
-xlabel("Time [s]");
 
-
-figure(6)
-% average
-Average = sum(data.calT(2:end-1,1)) / length(data.calT(2:end-1,1))
-AverageCal = repmat(Average, length(data.calT(1:end-1)),1);  
-plot(logt, data.calT(1:end-1,1), logt, AverageCal);
-xlabel("Time [s]"); ylabel("Calculation time [s]");
+% figure(6)
+% % average
+% Average = sum(data.calT(2:end-1,1)) / length(data.calT(2:end-1,1))
+% AverageCal = repmat(Average, length(data.calT(1:end-1)),1);  
+% plot(logt, data.calT(1:end-1,1), logt, AverageCal);
+% xlabel("Time [s]"); ylabel("Calculation time [s]");
 
 % set(gcf, "WindowState", "maximized");
 % set(gcf, "Position", [960 0 960 1000])

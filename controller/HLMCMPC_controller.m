@@ -163,10 +163,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % ave3 = obj.input.u(3);
       % ave4 = obj.input.u(4);
 
-      ave(1,1) = 0;
-      ave(2,1) = 0;
-      ave(3,1) = 0;
-      ave(4,1) = 0; % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
+      mu(1,1) = 0;
+      mu(2,1) = 0;
+      mu(3,1) = 0;
+      mu(4,1) = 0; % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
 
       % ave1 = InputV(1,idx);
       % ave2 = InputV(2,idx);
@@ -183,19 +183,19 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         % ave3 = 10;
         % ave4 = 10;
         if rem(idx,2) == 0
-            ave = 0.1 * [0;1;1;1];
+            mu = 10 * [0;1;1;1];
         else
-            ave = -0.1 *[0;1;1;1];
+            mu = -10 *[0;1;1;1];
         end
         obj.input.AllRemove = 0;
       end
 
       % obj.input.sigma(4) = 0;
       % 入力生成 Z; X; Y; YAW
-      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave(1,1); 
-      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave(2,1);
-      obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave(3,1);
-      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave(4,1);
+      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1); 
+      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1);
+      obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1);
+      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1);
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
@@ -232,7 +232,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %-- 制約条件
       removeF = 0; removeX = []; survive = obj.N;
-      % [removeF, removeX, survive] = obj.constraints();
+      [removeF, removeX, survive] = obj.constraints();
       obj.state.COG.g = 0; obj.state.COG.gc = 0;
         
       
@@ -242,7 +242,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vf = obj.input.u(1, 1, BestcostID(2));     % 最適な入力の取得
         vs(1) = obj.input.u(2, 1, BestcostID(3));     % 最適な入力の取得
         vs(2) = obj.input.u(3, 1, BestcostID(4));
-        vs(3) = obj.input.u(4, 1, BestcostID(5));
+        vs(3) = obj.input.u(4, 1, BestcostID(5)); % 2,3,4,5 だと個別の評価値に対する入力
         vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
         tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
@@ -335,9 +335,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% 制約 状態＝目標値との誤差
       % HLstate = x_real - ref
       x_real = obj.state.real_data;
-      constX = find(x_real(3,end,:) > 1.5);
+      constX = find(x_real(3,end,:) < -0.5);
       % CX = reshape(obj.param.const * abs(obj.state.state_data(6, end, constX)).^2, [1, length(constX)]);
-      obj.input.Evaluationtra(constX,1) = obj.param.ConstEval; 
+      obj.input.Evaluationtra(constX,1) = NaN;  % 棄却
 
       removeF = size(constX, 1);
       survive = obj.N - removeF;

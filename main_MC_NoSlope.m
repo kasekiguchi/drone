@@ -28,6 +28,14 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %% main loop
+
+%% KP model
+% load('C:\Users\student\Downloads\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat', 'est');
+% KP.A = est.A;
+% KP.B = est.B;
+% KP.C = est.C;
+
+%%
 flag = [0;0];
 
 totalT = 0;
@@ -208,12 +216,17 @@ end
             Gp = initial.p;
             Gq = [0; 0.2975; 0];
             [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef, data.Zdis);    % 1:斜面 0:それ以外(TimeVarying)
+
+            
             param(i).controller.mcmpc = {idx, xr, time.t, phase, InputVdata};    % 入力算出 / controller.name = hlc
+            %% KP
+            % param(i).controller.mcmpc = {idx, xr, time.t, phase, InputVdata, KP};
 % 
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
             end
 
+            
             agent(i).do_controller(param(i).controller.list);
 
         end
@@ -239,7 +252,7 @@ end
 
         data.xr{idx} = xr;
         data.variable_particle_num(idx) = agent.controller.result.variable_N;
-        data.survive{idx} = agent.controller.result.survive;
+        data.survive(idx) = agent.controller.result.survive;
 
         if data.removeF(idx) ~= data.param.particle_num
             data.bestx(idx, :) = data.path{idx}(1, :, BestcostID(1)); % - もっともよい評価の軌道x成分
