@@ -47,20 +47,20 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1.0; 25.0; 10.0]);    % 座標   1000 10
+    Params.Weight.P = diag([1.0; 30.0; 10.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2500;7000;3500; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2700;6800;3500; 1; 1; 1]);  % 姿勢角、角速度
 
     Params.Weight.Pf = diag([45; 50; 20]);
     Params.Weight.QWf = diag([4200; 4000; 4000; 1; 1; 1]); %姿勢角、角速度終端
       %% 
-    fprintf("%f秒\n", totalT)
-    Fontsize = 15;  timeMax = 100;
-    set(0, 'defaultAxesFontSize', Fontsize);
-    set(0, 'defaultTextFontSize', Fontsize);
-    logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
+%     fprintf("%f秒\n", totalT)
+%     Fontsize = 15;  timeMax = 100;
+%     set(0, 'defaultAxesFontSize', Fontsize);
+%     set(0, 'defaultTextFontSize', Fontsize);
+%     logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
     %% 
     
 %-- data
