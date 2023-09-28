@@ -1,10 +1,10 @@
-function [c , ceq] = Constraints(x, params)
+function beq = Constraints2(x, params)
 % モデル予測制御の制約条件を計算するプログラム
-    c  = zeros(params.state_size, params.H);
-    ceq_ode = zeros(params.state_size, params.H);
+%     c  = zeros(params.state_size, params.H);
+%     ceq_ode = zeros(params.state_size, params.H);
 
 %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-    X=x(1:params.state_size, 1:params.H);
+%     X=x(1:params.state_size, 1:params.H);
     Xc = [x(1:params.state_size, 1:params.H);ones(1,params.H)];
     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
 
@@ -15,9 +15,9 @@ function [c , ceq] = Constraints(x, params)
     for L = 2:params.H  
         tmpx = params.A * Xc(:,L-1) + params.B * U(:,L-1); %クープマンモデル
         tmpx = params.C * tmpx; %実空間の値に変換
-        ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
+        beq(:, L) = tmpx;
+%         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
-    ceq = [x(1:params.state_size, 1) - params.X0, ceq_ode];
-    
-%     c = [norm(x(1:params.state_size, 1) , params.X0) - 1, ceq_ode];
+%     ceq = [x(1:params.state_size, 1) - params.X0, ceq_ode];
+%     Aeq = x(1:params.state_size, 1:params.H);
 end
