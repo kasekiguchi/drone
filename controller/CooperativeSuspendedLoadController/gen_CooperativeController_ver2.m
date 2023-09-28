@@ -82,7 +82,7 @@ clc
 Fd0 = m0*(-kx0.*ex0- kdx0.*dex0 + ddx0d + G);
 Md0 = -kr0*eR0 - ko0*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
 matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{x,Xd,R0,R0d,physicalParam,gains},...
-  "Comments","[R0'*Fd;Md] for (26)")
+  "Comments","[R0'*Fd;Md] for (9)")
 %%
 % -qid = R0d*e  ... (1)
 % e : constant unit vector that points the drone's position
@@ -98,7 +98,7 @@ ddqid = R0d*(Skew(do0d) + Skew(o0d)^2)*R0d'*qid;
 dwid = cross(qid,ddqid);
 eqi = cross(qid,qi); % 3xN
 ewi = wi + cellmatfun(@(Qi,i) Qi^2*wid(:,i),Qi,"mat");
-%% ui
+%% ui (14)(15)(16)
 tmp = 0;
 for i = 1:N, tmp = tmp+Rho{i}*R0'*mui(:,i); end
 for i = 1:N
