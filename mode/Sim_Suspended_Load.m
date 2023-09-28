@@ -11,6 +11,10 @@ initial_state.p = arranged_position([0, 0], 1, 1, 0);
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
+initial_state.vL = [0; 0; 0];
+initial_state.pT = [0; 0; -1];
+initial_state.wL = [0; 0; 0];
+
 
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state,1));
