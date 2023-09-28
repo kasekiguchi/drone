@@ -47,6 +47,9 @@ classdef MPC_controller_case <handle
             obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
             
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
+
+            % %% input transform
+            % obj.input.IT = [1 1 1 1;-obj.self.parameter.ly, -obj.self.parameter.ly, (obj.self.parameter.Ly - obj.self.parameter.ly), (obj.self.parameter.Ly - obj.self.parameter.ly); obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx), obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx); obj.self.parameter.km1, -obj.self.parameter.km2, -obj.self.parameter.km3, obj.self.parameter.km4];
         end
 
         %-- main()的な
@@ -56,7 +59,7 @@ classdef MPC_controller_case <handle
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
             obj.param.t = varargin{1}.t;
             rt = obj.param.t;
-            % idx = obj.param.t/obj.param.dt+1;
+            idx = round(rt/varargin{1}.dt+1);
 
             obj.state.ref = obj.Reference(rt);
             obj.current_state = obj.self.estimator.result.state.get();
@@ -82,16 +85,20 @@ classdef MPC_controller_case <handle
             problem.nonlcon   = @(x) obj.constraints(x);
             [var, ~, exitflag, ~, ~, ~, ~] = fmincon(problem);
 
-            %% MPC_controller_case が実行されていない
-            %% 他のなにかしらのコントローラを通っている
             %%
             obj.previous_input = var(13:16,:);
             % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
             % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
-            obj.result.input = var(13:16, 1); % 印加する入力
+            obj.result.input = var(13:16, 1); % 印加する入力 4入力
+            
+            %% トルク入力変換
+            % obj.result.input = obj.input.IT * var(13:16,1);
+
+            %% データ表示用
             obj.input.u = obj.result.input; 
 
+            %% 保存するデータ
             result = obj.result; % controllerの値の保存
             % profile viewer
 
@@ -142,8 +149,13 @@ classdef MPC_controller_case <handle
                 ceq_ode(:, L) = X(:, L) - tmp; 
             end
             ceq = [X(:, 1) - obj.current_state, ceq_ode];
-            c = [U(1,:)-obj.param.input_max; -U(1,:)+obj.param.input_min; -(U(2:4,:)+obj.param.torque_TH); U(2:4,:)-obj.param.torque_TH; -X(3,:)]; 
+            %% torque
+            % c = [U(1,:)-obj.param.input_max; -U(1,:)+obj.param.input_min; -(U(2:4,:)+obj.param.torque_TH); U(2:4,:)-obj.param.torque_TH; -X(3,:)]; 
             % 0<推力<10, -2<torque<2, z>0
+
+            %% 4inputs
+            c = [U(1:4,:)-obj.param.input_max; -U(1:4,:)+obj.param.input_min; -X(3,:)];
+            % ホバリング　±１
         end
 
         function [eval] = objective(obj,x)   % obj.~とする

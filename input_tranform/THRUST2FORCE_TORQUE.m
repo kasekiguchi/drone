@@ -24,7 +24,9 @@ classdef THRUST2FORCE_TORQUE < handle
             obj.dir = param;
         end
         
-        function u = do(obj,input,~)
+        % function u = do(obj,input,~)
+        function u = do(obj, varargin)
+            input = varargin{5}.controller.result.input;
             if obj.dir == 1
                 u = obj.IT*input;
             else

@@ -24,18 +24,24 @@ function Controller = Controller_MPC_case(Agent)
     Controller_param.Vf = diag([1e2; 1e2; 1e3]); % 6
     Controller_param.Qf = diag([1e1; 1e1; 1]); % 7,8
     Controller_param.Wf = diag([1; 1; 1]);
+    
+    %% torqeu
+    % Controller_param.input.u = Agent.parameter.mass*9.81 * [1;0;0;0];  % 総推力トルク
+    % Controller_param.input_max = Agent.parameter.mass*9.81 + 1;
+    % Controller_param.input_min = Agent.parameter.mass*9.81 - 1;
+    % Controller_param.torque_TH = 2;
 
-    Controller_param.input.u = Agent.parameter.mass*9.81 * [1;0;0;0];  % 総推力トルク
-    % Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
+    %% 4inputs
+    Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
+    Controller_param.input_max = Agent.parameter.mass * 9.81 / 4 + 0.2;
+    Controller_param.input_min = Agent.parameter.mass * 9.81 / 4 - 0.2;
+    Controller_param.torque_TH = 0;
+
+    %% 以下は変更なし
+    fprintf("勾配MPC controller\n")
 
     Controller_param.ref_input = Controller_param.input.u;
     Controller_param.input.v = Controller_param.input.u;
-
-    Controller_param.input_max = Agent.parameter.mass*9.81 + 1;
-    Controller_param.input_min = Agent.parameter.mass*9.81 - 1;
-    Controller_param.torque_TH = 2;
-
-    fprintf("勾配MPC controller\n")
 
 %     Controller.name = "mcmpc";
     Controller.name = "mpc";
