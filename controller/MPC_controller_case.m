@@ -76,17 +76,6 @@ classdef MPC_controller_case <handle
             problem.solver = 'fmincon'; % solver
             problem.options = options;  %
 
-            %% mex
-            % Obj.input = obj.input.u; Obj.state = obj.state.ref;
-            % Obj.Q = obj.param.Weight; Obj.Qf = obj.param.Weightf;
-            % Obj.RP = obj.param.RP; Obj.R = obj.param.R;
-
-            %% mex constraints
-            % Objc.H = obj.param.H; Objc.dt = obj.param.dt;
-            % Objc.modelf = obj.modelf; Objc.modelp = obj.modelp;
-            % Objc.current_state = obj.current_state;
-            % Objc.input_max = obj.param.input_max; Objc.input_min = obj.param.input_min; Objc.torque_TH = obj.param.torqe_TH;
-
             problem.x0		  = [obj.previous_state; obj.previous_input];                 % 状態，入力を初期値とする                                    % 現在状態
 
             problem.objective = @(x) obj.objective(x); 
@@ -96,14 +85,14 @@ classdef MPC_controller_case <handle
             %% MPC_controller_case が実行されていない
             %% 他のなにかしらのコントローラを通っている
             %%
-            % obj.previous_input = var(13:16,:);
-            obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
+            obj.previous_input = var(13:16,:);
+            % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
+            % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
-            obj.result.input = var(13:16, 1);
+            obj.result.input = var(13:16, 1); % 印加する入力
+            obj.input.u = obj.result.input; 
 
-            obj.input.u = obj.result.input;
-
-            result = obj.result;
+            result = obj.result; % controllerの値の保存
             % profile viewer
 
             %% 情報表示

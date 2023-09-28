@@ -13,15 +13,15 @@ function Controller = Controller_MPC_case(Agent)
 
     %% normal
 %     Controller_param.P = diag([1e4; 1e4; 1e3]);    % 座標   1000 1000 10000
-    Controller_param.P = 1e4 * diag([1e6; 1e6; 1e4]);    % 座標   1000 1000 10000
-    Controller_param.V = 1e6 * diag([1e2; 1e2; 1e4]);    % 速度
+    Controller_param.P = diag([1e6; 1e6; 1e6]);    % 座標   1000 1000 10000
+    Controller_param.V = diag([1e2; 1e2; 1e4]);    % 速度
     Controller_param.R = 0.1 * diag([1.0; 1e3; 1e3; 1e3]); % 入力
     Controller_param.RP = 0 * diag([1.0; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.Q = diag([1e1; 1e1; 1e1]);  % 姿勢角
     Controller_param.W = diag([1e1; 1e1; 1e1]);  % 角速度
 
-    Controller_param.Pf = 1e4 * diag([1e2; 1e2; 1e4]); % 6
-    Controller_param.Vf = 1e6 * diag([1e2; 1e2; 1e3]); % 6
+    Controller_param.Pf = diag([1e2; 1e2; 1e4]); % 6
+    Controller_param.Vf = diag([1e2; 1e2; 1e3]); % 6
     Controller_param.Qf = diag([1e1; 1e1; 1]); % 7,8
     Controller_param.Wf = diag([1; 1; 1]);
 

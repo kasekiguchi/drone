@@ -15,13 +15,25 @@ syms t real
 % y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
 % z = z_0;
 
+%% circle
 % x = cos(t/2) -1;
 % y = sin(t/2);
 % z = 1;
 
-x = t;
+%% Liner
+% x = t;
+% y = 0;
+% z = 1;
+
+%% landing X0(3):初期高度
+% x = 0;
+% y = 0;
+% z = -1/(1+exp(-t+ te/2))+1;
+
+%% takeoff
+x = 0;
 y = 0;
-z = 1;
+z = 1/(1+exp(-t+te/2));
 
 Trajectory = [x, y, z]
 ref=@(t)[x;y;z;0];

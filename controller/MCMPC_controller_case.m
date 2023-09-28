@@ -36,14 +36,14 @@ classdef MCMPC_controller_case <handle
             % 追加
             obj.param.nextparticle_num = obj.param.Maxparticle_num;   % 初期化
             obj.input.Bestcost_now = 1e2;% 十分大きい値にする  初期周期での比較用
-%             obj.model = self.model;
-            obj.param.fRemove = 0;
-            obj.input.AllRemove = 0;
             obj.N = obj.param.particle_num;
-            n = 12; % 状態数
-            obj.state.state_data = zeros(n,obj.param.H, obj.N);
+            obj.state.state_data = zeros(12,obj.param.H, obj.N);
             obj.input.Evaluationtra = zeros(1, obj.N);
-            obj.flag.vz = 0;
+            %% 重み　統合
+            % obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
+            % obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
+            obj.param.QW = blkdiag(obj.param.Q, obj.param.W);
+            obj.param.QWf = blkdiag(obj.param.Qf, obj.param.Wf);
         end
         
         %-- main()的な
@@ -108,15 +108,13 @@ classdef MCMPC_controller_case <handle
             [obj.state.predict_state] = obj.predict();
 
             %-- 評価値計算
-            obj.param.fin = 0;
-            eachCost = zeros(obj.N, 4);
-
             for m = 1:obj.N
-                [obj.input.eval(1,m), eachCost(m, :)] = obj.objective(m);
+                % [obj.input.eval(1,m)] = obj.objective(m);
+                [obj.input.Evaluationtra(1,m)] = obj.objective(m);
             end
 
             % サンプル数が小さくなった時に最小値を見失わないように
-            obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); 
+            % obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); 
             
             %% 最適な入力の取得
             [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
@@ -135,13 +133,11 @@ classdef MCMPC_controller_case <handle
             % obj.self.input = obj.result.input;
             obj.result.BestcostID = BestcostID;
             obj.result.bestcost = Bestcost;
-            obj.result.contParam = obj.param;
-            obj.result.fRemove = obj.param.fRemove;
             obj.result.path = obj.state.state_data;
             obj.result.sigma = obj.input.sigma;
             obj.result.variable_N = obj.N; % 追加
             obj.result.Evaluationtra = obj.input.Evaluationtra;
-            obj.result.eachcost = eachCost(BestcostID, :);
+            % obj.result.eachcost = eachCost(BestcostID, :);
             
             result = obj.result;  
 %             profile viewer
@@ -168,7 +164,7 @@ classdef MCMPC_controller_case <handle
 
         %------------------------------------------------------
         %======================================================
-        function [MCeval, EachCost] = objective(obj, m)   % obj.~とする
+        function [MCeval] = objective(obj, m)   % obj.~とする
             X = obj.state.state_data;       %12 * 10
             U = obj.input.u(:,:,m);         %12 * 10
 
@@ -195,7 +191,6 @@ classdef MCMPC_controller_case <handle
             %-- 評価値計算
             MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
                 + terminalState;
-            EachCost = [sum(stageStateP), sum(stageStateV), sum(stageStateQW), terminalState];
         end
 
         %% TimeVarying
