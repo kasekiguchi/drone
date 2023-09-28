@@ -5,6 +5,7 @@ te = 10000; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
+motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
 initial_state.p = arranged_position([0, 0], 1, 1, 0);
