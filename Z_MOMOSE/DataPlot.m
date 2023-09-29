@@ -5,7 +5,7 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=0;%flightのみは１
 
@@ -32,6 +32,7 @@ endTime = 1E2;
     c=[
         % "LS","FTr"
            % "HL","EL"
+           "ELft"
         ];
 %========================================================================
 %図を選ぶ[1:"t_p" 2:"x_y" 3:"t_x" 4:"t_y" 5:"t_z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 
@@ -57,9 +58,14 @@ endTime = 1E2;
 % multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
 % multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
 
-nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"]};%比較するとき複数まとめる
+% nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
+% multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
+% multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
+
+nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","three_D","x_y","x_z","y_z"]};%比較するとき複数まとめる
 multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
 multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
+
 
 multiFigure.num = length(nM);%figの数
 multiFigure.fontSize = 14;
@@ -498,6 +504,8 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
         CC = num2cell(c);
         allData.t_p = {struct('x',{[time{1},time]},'y',{[ref,est]}), struct('x','time [s]','y','position [m]'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
         allData.x_y = {struct('x',{[refx,estx]},'y',{[refy,esty]}), struct('x','$x$ [m]','y','$y$ [m]'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.x_z = {struct('x',{[refx,estx]},'y',{[refz,estz]}), struct('x','$x$ [m]','y','$z$ [m]'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.y_z = {struct('x',{[refy,esty]},'y',{[refz,estz]}), struct('x','$x$ [m]','y','$z$ [m]'),Rc,add_option(["aspect"],option,addingContents)};
         allData.t_x = {struct('x',{[time{1},time]},'y',{[refx,estx]}), struct('x','time [s]','y','$x$ [m]'),Rc,add_option([],option,addingContents)};
         allData.t_y = {struct('x',{[time{1},time]},'y',{[refy,esty]}), struct('x','time [s]','y','$y$ [m]'),Rc,add_option([],option,addingContents)};
         allData.t_z = {struct('x',{[time{1},time]},'y',{[refz,estz]}), struct('x','time [s]','y','$z$ [m]'),Rc,add_option([],option,addingContents)};

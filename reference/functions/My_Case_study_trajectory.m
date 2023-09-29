@@ -67,5 +67,5 @@ z = z_0;
 % y = (r*cos(pi*t/T)+a)*sin(2*pi*t/T);
 % z = r*sin(pi*t/T);
 
-ref=@(t)[x;y;z;1];
+ref=@(t)[x;y;z;0];
 end

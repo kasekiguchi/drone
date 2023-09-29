@@ -56,7 +56,8 @@ classdef MY_POINT_REFERENCE < handle
                     obj.t0=varargin{1}.t;%目標地点が更新された時刻
                     %定義された最後の目標地点の場所が終わったら最初の目標地点に戻る
                     if obj.i > obj.length_fns
-                        obj.i=1;
+                        % obj.i=1;
+                        obj.i=obj.length_fns;
                     end
                 end
 
