@@ -16,6 +16,11 @@ syms t real
 % y_0 = X0(2);
 % z_0 = X0(3);
 
+%事例研リファレンス
+
+
+
+
 % %% takeoff
 % T = 10;
 % rz0 = 0;
@@ -45,8 +50,8 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 % 円旋回
-x = sin(2*pi*t/T);
-y = cos(2*pi*t/T);
+x = cos(2*pi*t/T);
+y = sin(2*pi*t/T);
 z = 1;
 
 % x = sin(2*pi*t/T);
