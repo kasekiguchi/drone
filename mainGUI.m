@@ -13,7 +13,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 %%
 clc
-SimBaseMode = ["SimHL","SimMCMPC","SimMPC"];
+SimBaseMode = ["SimHL","SimMCMPC","SimMPC","SimKPMCMPC"];
 ExpBaseMode = [""];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function
