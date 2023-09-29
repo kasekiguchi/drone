@@ -38,9 +38,8 @@ newcolors = [0 0.4470 0.7410
 columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
-% name = 'test'; %ファイル名
+name = 'test'; %ファイル名
 folderName = '2023_1003_全体実験_name'; %フォルダ名
-% folderName = '説明用fig';
 mkdir(folderName) %新規フォルダ作成
 
 %位置p
@@ -63,7 +62,7 @@ ax = gca;
 hold off
 title('Position p of agent1','FontSize',12);
 cd(folderName)
-savefig('Position');
+savefig(strcat('Position_',name));
 
 %姿勢角q
 figure(2)
@@ -77,7 +76,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 xlim([data.t(1) data.t(end)])
 ax(2) = gca;
 title('Attitude q of agent1','FontSize',12);
-savefig('Attitude');
+savefig(strcat('Attitude_',name));
 
 %速度v
 figure(3)
@@ -91,7 +90,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 xlim([data.t(1) data.t(end)])
 ax(3) = gca;
 title('Velocity v of agent1','FontSize',12);
-savefig('Velocity');
+savefig(strcat('Velocity_',name));
 
 %角速度w
 figure(4)
@@ -105,7 +104,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 xlim([data.t(1) data.t(end)])
 ax(4) = gca;
 title('Angular velocity w of agent1','FontSize',12);
-savefig('Angular velocity');
+savefig(strcat('Angular velocity_',name));
 
 figure(5)
 plot(data.p(1,:),data.p(2,:),'LineWidth', 2);
@@ -118,7 +117,7 @@ hold off
 lgdtmp = {'estimator', 'reference'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 ax(5) = gca;
-savefig('x-y')
+savefig(strcat('x-y_',name))
 
 %入力
 figure(6)
@@ -132,7 +131,7 @@ lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax(6) = gca;
 title('Input u of agent1','FontSize',12);
-savefig('Input')
+savefig(strcat('Input_',name))
 
 % %error
 figure(7)
@@ -146,7 +145,7 @@ lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Error of agent1','FontSize',12);
-savefig('Error')
+savefig(strcat('Error_',name))
 
 fontSize = 12; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 

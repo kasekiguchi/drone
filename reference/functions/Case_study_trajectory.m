@@ -17,7 +17,9 @@ syms t real
 % z_0 = X0(3);
 
 %事例研リファレンス
-
+x = sin(2*pi*t/T);
+y = cos(2*pi*t/T);
+z = 1;
 
 
 
@@ -50,9 +52,9 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 % 円旋回
-x = cos(2*pi*t/T);
-y = sin(2*pi*t/T);
-z = 1;
+% x = cos(2*pi*t/T);
+% y = sin(2*pi*t/T);
+% z = 1;
 
 % x = sin(2*pi*t/T);
 % y = sin(3*pi*t/T);
