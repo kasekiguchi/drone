@@ -35,10 +35,10 @@ syms t real
 % z = 1/2 * sin(t/2);
 
 %% circle
-x = cos(t/2)-1;
-y = sin(t/2);
-z = 1;
-yaw = 0;
+% x = cos(t/2)-1;
+% y = sin(t/2);
+% z = 1;
+% yaw = 0;
 
 %% involute curve
 % x=2*(cos(t)+t*sin(t));
@@ -52,10 +52,10 @@ yaw = 0;
 % yaw = 0;
 
 %% Liner
-% x = t;
-% y = 0;
-% z = 1.0;
-% yaw = 0;
+x = t;
+y = 0;
+z = 1.0;
+yaw = 0;
 
 %% Vertical vibration
 % x = 0;

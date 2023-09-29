@@ -2,7 +2,7 @@
 SigmaData = zeros(4, te/dt);
 close all
 fprintf("%f秒\n", totalT)
-Fontsize = 15;  xmax = te;
+Fontsize = 15;  xmax = time.t;
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
@@ -37,11 +37,12 @@ Eachcost = data.eachcost(:,1:end-1);
 % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
 ylabel("Position [m]")
-yyaxis right
-plot(logt, Eachcost(8,:)); 
+legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest");
+% yyaxis right
+% plot(logt, Eachcost(8,:)); 
 % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
-xlabel("Time [s]"); ylabel("Eval"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest");
-grid on; xlim([0 xmax]); ylim([0 5000]);
+% xlabel("Time [s]"); ylabel("Eval"); 
+% grid on; xlim([0 xmax]); ylim([0 5000]);
 % exportgraphics(gcf, "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_p.eps");
 % title("Time change of Position"); 
 % atiitude 0.2915 rad = 16.69 deg

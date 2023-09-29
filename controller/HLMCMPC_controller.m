@@ -86,7 +86,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     %-- main()的な
     function result = do(obj,param)
       % profile on
-      OB = obj;
+      % OB = obj;
       xr = param{2};
       rt = param{3};
 %       obj.input.InputV = param{5};
@@ -94,7 +94,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.param.t = rt;
       idx = round(rt/obj.self.model.dt+1);
 
-      InputV = param{5};
+      % InputV = param{5};
 
       %% HL 5/18 削除------------------------------------------------------------------------------------------------------------------------
       % ref = obj.self.reference.result;
@@ -151,42 +151,24 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.reference.xr_org = [xr_imagine(3,:);xr_imagine(7,:);xr_imagine(1,:);xr_imagine(5,:);xr_imagine(9,:);xr_imagine(13,:);xr_imagine(2,:);xr_imagine(6,:);xr_imagine(10,:);xr_imagine(14,:);xr_imagine(4,:);xr_imagine(8,:)];
       obj.reference.xr = obj.reference.xr_org(:,1) - obj.reference.xr_org; 
 
-      % main から　reference
-      % z vz x vx ax jx y vy ay jy yaw vyaw
-      % obj.reference.xr = [xr(3,:); xr(9,:); 
-      %                 xr(1,:); xr(7,:); zeros(2,obj.param.H); 
-      %                 xr(2,:); xr(8,:); zeros(2, obj.param.H); 
-      %                 zeros(2,obj.param.H)];
-      
-      % ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-      % ave2 = obj.input.u(2);    % 初期値はparamで定義
-      % ave3 = obj.input.u(3);
-      % ave4 = obj.input.u(4);
-
       mu(1,1) = 0;
       mu(2,1) = 0;
       mu(3,1) = 0;
       mu(4,1) = 0; % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
 
-      % ave1 = InputV(1,idx);
-      % ave2 = InputV(2,idx);
-      % ave3 = InputV(3,idx);
-      % ave4 = InputV(4,idx);
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;
 
       % 全棄却時のケア
       if obj.input.AllRemove == 1
-        % ave1 = 10;
-        % ave2 = 10;
-        % ave3 = 10;
-        % ave4 = 10;
-        if rem(idx,2) == 0
-            mu = 10 * [0;1;1;1];
+        if rem(idx,2) == 0 % 時間ごとに±入れ替え
+            mu = obj.input.Constinput * [0;1;1;0];
         else
-            mu = -10 *[0;1;1;1];
+            mu = -obj.input.Constinput *[0;1;1;0];
         end
+        % mu = obj.param.ref_input;
+        % obj.input.sigma = obj.input.Constsigma;
         obj.input.AllRemove = 0;
       end
 
@@ -203,12 +185,12 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
       %-- 状態予測
-      % [obj.state.state_data] = obj.predict();
       Objpredict.H = obj.param.H;
       Objpredict.N = obj.N; Objpredict.A = obj.A; Objpredict.B = obj.B;
       Objpredict.input = obj.input.u; Objpredict.current_state = obj.current_state;
       Objpredict.state = obj.state.state_data; 
-      [obj.state.state_data] = predict_mex(Objpredict);
+      [obj.state.state_data] = predict(Objpredict);
+      % [obj.state.state_data] = predict_mex(Objpredict); % N=5000のみ対応
 
       %% 墜落 or 飛びすぎたら終了
       if obj.state.state_data(1,1,:) + xd(3) < 0
@@ -232,7 +214,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %-- 制約条件
       removeF = 0; removeX = []; survive = obj.N;
-      [removeF, removeX, survive] = obj.constraints();
+      % [removeF, removeX, survive] = obj.constraints();
       obj.state.COG.g = 0; obj.state.COG.gc = 0;
         
       
@@ -243,9 +225,15 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vs(1) = obj.input.u(2, 1, BestcostID(3));     % 最適な入力の取得
         vs(2) = obj.input.u(3, 1, BestcostID(4));
         vs(3) = obj.input.u(4, 1, BestcostID(5)); % 2,3,4,5 だと個別の評価値に対する入力
+
+        % vf = obj.input.u(1, 1, BestcostID(1));     
+        % vs(1) = obj.input.u(2, 1, BestcostID(1));     
+        % vs(2) = obj.input.u(3, 1, BestcostID(1));
+        % vs(3) = obj.input.u(4, 1, BestcostID(1)); 
+
         vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
-        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
+        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
 
         % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
@@ -269,7 +257,6 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
           obj.input.AllRemove = 1;
         else
           obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
-          % 追加
           obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
         end
 
@@ -280,11 +267,12 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         BestcostID = ones(1,5);
         obj.input.AllRemove = 1;
 
-        % 追加
         obj.param.nextparticle_num = obj.param.Maxparticle_num;
+        % previous input
+        obj.result.input = obj.self.input;
       end
 
-      obj.input.u = obj.input.v;
+      obj.input.u = obj.input.v; % 仮想状態の保存
 
       % 座標として軌跡を保存するため　x = xd + state
       state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)];
@@ -335,7 +323,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% 制約 状態＝目標値との誤差
       % HLstate = x_real - ref
       x_real = obj.state.real_data;
-      constX = find(x_real(3,end,:) < -0.5);
+      constX = find(x_real(3,5,:) > 0.5);
       % CX = reshape(obj.param.const * abs(obj.state.state_data(6, end, constX)).^2, [1, length(constX)]);
       obj.input.Evaluationtra(constX,1) = NaN;  % 棄却
 
@@ -405,9 +393,13 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-      stageStateZ = k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
+      stageStateZ =    k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
       stageInputPre  = k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre(:,1:end-1,:));
       stageInputRef  = k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref(:,1:end-1,:));
+
+      %% pagefun
+      % array_fun = @(Q, z) Q*z;
+      % stageStateZ = k .* Z(:,1:end-1,:).*pagefun(array_fun, gpuArray(obj.Weight(:,:,1:obj.N)), gpuArray(Z(:,1:end-1,:)));
 
       %-- 状態の終端コストを計算 状態だけの終端コスト
       terminalState = sum(k .* Z(:,end,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,end,:)),[1,2]);

@@ -56,7 +56,7 @@ classdef KPMCMPC_controller <CONTROLLER_CLASS
             % phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
-            obj.KP = param{6};
+            obj.KP = param{5};
             
             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
             ave2 = obj.input.u(2);    % 初期値はparamで定義
@@ -76,12 +76,6 @@ classdef KPMCMPC_controller <CONTROLLER_CLASS
             % obj.input.sigma(2) = 0;
             % obj.input.sigma(3) = 0;
             obj.input.sigma(4) = 0;
-
-            %% each 4 inputs
-            % obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
-            % obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
-            % obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
-            % obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
 
             %% total thrust, roll, pitch, yaw
             ave1 = obj.self.parameter.mass*9.81; ave2 = 0; ave3 = 0; ave4 = 0;

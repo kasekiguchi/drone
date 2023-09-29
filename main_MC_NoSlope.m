@@ -15,6 +15,7 @@ userpath('clear');
 % userpath('clear');
 fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
 fHL = 1; 
+fKP = 1;
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
@@ -30,10 +31,12 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %% main loop
 
 %% KP model
-% load('C:\Users\student\Downloads\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat', 'est');
-% KP.A = est.A;
-% KP.B = est.B;
-% KP.C = est.C;
+if fKP == 1
+    load('C:\Users\student\Downloads\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat', 'est');
+    KP.A = est.A;
+    KP.B = est.B;
+    KP.C = est.C;
+end
 
 %%
 flag = [0;0];
@@ -218,9 +221,9 @@ end
             [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef, data.Zdis);    % 1:斜面 0:それ以外(TimeVarying)
 
             
-            param(i).controller.mcmpc = {idx, xr, time.t, phase, InputVdata};    % 入力算出 / controller.name = hlc
+            param(i).controller.mcmpc = {idx, xr, time.t, phase, KP};    % 入力算出 / controller.name = hlc
             %% KP
-            % param(i).controller.mcmpc = {idx, xr, time.t, phase, InputVdata, KP};
+            % param(i).controller.mcmpc = {idx, xr, time.t, phase, KP};
 % 
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
