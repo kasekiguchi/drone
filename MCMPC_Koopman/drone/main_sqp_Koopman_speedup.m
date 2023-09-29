@@ -67,7 +67,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     
     %-- fmincon設定
     options.Algorithm = 'sqp';  % 逐次二次計画法
-%     options.Display = 'iter';   % 計算結果の表示
+    options.Display = 'none';   % 計算結果の表示
     problem.solver = 'fmincon'; % solver
     problem.options = options;  % 
 
@@ -228,7 +228,7 @@ end
 
             data.exitflag(idx) = exitflag;
             % 制御入力の決定
-            previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
+            previous_state = var;   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
 %             num3(idx) = {x};
 %             num(idx) = {var};
             fprintf("\tfval : %f\n", fval)
@@ -237,10 +237,10 @@ end
                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
             end
             
-            fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
-                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
-                ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
+%             fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
+%                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+%                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
+%                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
 
             agent.input = var(Params.state_size+1:Params.total_size, 2);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
     

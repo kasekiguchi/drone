@@ -6,12 +6,12 @@ cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden;
-clear all;
+% clear all;
 clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("Koopman_ホバリング_x=1_y=1_重み調整よくない.mat")
+% load("Koopman_ホバリング_x=1_y=1_重み調整よくない.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')
