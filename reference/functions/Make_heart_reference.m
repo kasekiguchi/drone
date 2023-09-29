@@ -4,7 +4,8 @@ function [Make_reference,flag] = Make_heart_reference(i,Make_reference,agent,fla
             if flag == 1
                 Make_reference(i,:) = [0;-1;1.0];
             end
-            error = Make_reference(i,:) - agent(i).state.p';
+%             error = Make_reference(i,:) - agent(i).state.p';
+            error = Make_reference(i,:) - agent(i).estimator.reuslt.state.p';
             if -0.3<=error(1) &&  error(1)<=0.3 && -0.3<=error(2) &&  error(2)<=0.3%目標値の許容範囲 % && -0.3<=error(3) && error(3) <= 0.3 
                     if flag == 2
                         Make_reference(i,:) = [2;1;1.0];%[x;y;z]の値を変化させる
