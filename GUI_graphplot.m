@@ -21,6 +21,7 @@ for i = 1:find(log.Data.t,1,'last')
     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
+    data.error(:,i) = data.pr(:,i) - data.p(:,i);                       %error
 end
 
 for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
@@ -38,19 +39,20 @@ columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
 % name = 'test'; %ファイル名
-folderName = 'test'; %フォルダ名
+folderName = '2023_1003_全体実験_name'; %フォルダ名
+% folderName = '説明用fig';
 mkdir(folderName) %新規フォルダ作成
 
 %位置p
 box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
-plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
+plot(data.t,data.p(:,:),'LineWidth',2,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('p');
 hold on
 grid on
-plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
+plot(data.t,data.pr(:,:),'LineWidth',2,'LineStyle','--');
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
 lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
@@ -66,7 +68,7 @@ savefig('Position');
 %姿勢角q
 figure(2)
 colororder(newcolors)
-plot(data.t,data.q(:,:),'LineWidth',1);
+plot(data.t,data.q(:,:),'LineWidth',2);
 xlabel('Time [s]');
 ylabel('q');
 grid on
@@ -80,7 +82,7 @@ savefig('Attitude');
 %速度v
 figure(3)
 colororder(newcolors)
-plot(data.t,data.v(:,:),'LineWidth',1);
+plot(data.t,data.v(:,:),'LineWidth',2);
 xlabel('Time [s]');
 ylabel('v');
 grid on
@@ -94,7 +96,7 @@ savefig('Velocity');
 %角速度w
 figure(4)
 colororder(newcolors)
-plot(data.t,data.w(:,:),'LineWidth',1);
+plot(data.t,data.w(:,:),'LineWidth',2);
 xlabel('Time [s]');
 ylabel('w');
 grid on
@@ -131,6 +133,20 @@ xlim([data.t(1) data.t(end)])
 ax(6) = gca;
 title('Input u of agent1','FontSize',12);
 savefig('Input')
+
+% %error
+figure(7)
+plot(data.t,data.error(:,:),'LineWidth',1)
+xlabel('Time [s]');
+ylabel('Error');
+grid on
+lgdtmp = {'error.x','error.y','error.z'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd.NumColumns = columnomber;
+xlim([data.t(1) data.t(end)])
+ax(7) = gca;
+title('Error of agent1','FontSize',12);
+savefig('Error')
 
 fontSize = 12; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
