@@ -7,7 +7,7 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 fLSorFT=3;%LS:1,FT:2,No:>=3
 fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=0;%flightのみは１
+fF=1;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
@@ -25,14 +25,16 @@ endTime = 1E2;
                 % log_HL_saddle
                 % log_EL_saddle
                 % log_HL_saddle
+                log_LS15d3
+                log_FT15d3
 
                 % logger_FB_PP11,logger_FT_PP11
-                gui.logger
+                % gui.logger
         };
     c=[
-        % "LS","FTr"
+        "LS","FT"
            % "HL","EL"
-           "ELft"
+           % "ELft"
         ];
 %========================================================================
 %図を選ぶ[1:"t_p" 2:"x_y" 3:"t_x" 4:"t_y" 5:"t_z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 

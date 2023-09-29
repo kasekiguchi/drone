@@ -35,7 +35,7 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % timew=[0,2,5,7,10];%time
 % pointw = [0,4,6,2,0;0,2,-1,4,0;0,3,5,2,0]*0.1;%way points
 % pointw = [0,1,0,-1,0;1,0,-1,0,1;0,3,5,2,0]*0.5;%way points
-agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1'),5,0));
+agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));
 
 fApprox_FTxy = 0;%approximate x,y directional FTC input : 1
 fNewParam = 0;%新しく更新する場合 : 1

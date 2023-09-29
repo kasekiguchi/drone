@@ -47,10 +47,10 @@ end
 
 for i = 1:n-2
     dr3=(i-1)*2;
-    X(add+1+dr3,1+i) = 1;%4関数でさいしょの端点で激しくなるか，最後収束しないかでインデックス1,2をへんこう
-    X(add+2+dr3,end-n:end) = D(i+1,:).*poweT(i,:) ;
-    % X(add+2+dr3,1+i) = 1;%さいしょの端点で激しくなるか，最後収束しないかでインデックス1,2をへんこう
-    % X(add+1+dr3,end-n:end) = D(i+1,:).*poweT(i,:) ;
+    % X(add+1+dr3,1+i) = 1;%4関数でさいしょの端点で激しくなるか，最後収束しないかでインデックス1,2をへんこう
+    % X(add+2+dr3,end-n:end) = D(i+1,:).*poweT(i,:) ;
+    X(add+2+dr3,1+i) = 1;%さいしょの端点で激しくなるか，最後収束しないかでインデックス1,2をへんこう
+    X(add+1+dr3,end-n:end) = D(i+1,:).*poweT(i,:) ;
 end
 
 s=1:(n+1)*Sn;
@@ -91,7 +91,7 @@ ref.dt=dtime;
                 i=1;
                 j=1;
                 delta=0.02;
-                end_time=60;
+                end_time=time(end)+10;
                 % length_time = length(0:delta:end_time);
                 for t_f = 0:delta:end_time
                 
@@ -99,9 +99,9 @@ ref.dt=dtime;
                 
                     if round(t_ref,4) >= dtime(i) 
                        i=i+1;
-                        if i >=length(time) -1
-                            i = length(dtime);
-                            % t_ref = dtime(end)-1;
+                        if i >length(ref.t) 
+                            i = length(ref.t);
+                            t_ref = dtime(end);
                             % t_ref=0;
                             %繰り返し用
                             % obj.i = 1;
@@ -114,6 +114,7 @@ ref.dt=dtime;
                     end
                     % for k = 1:3
                         xyz(:,j) = coefficients.(names{1})(:,:,i)*t_powers.(names{1})(t_ref);
+                        vxyz(:,j) = coefficients.(names{2})(:,:,i)*t_powers.(names{2})(t_ref);
                     % end
                     j=j+1;
                 end
@@ -126,8 +127,17 @@ ref.dt=dtime;
                 hold off
 
                 figure(2)
-                plot(0:delta:end_time,xd)
+                plot(0:delta:end_time,xyz)
                 grid on
+
+                figure(3)
+                plot(0:delta:end_time,vxyz)
+                grid on
+
+                figure(4)
+                v_norm=sum(vxyz.^2).^0.5;
+                plot(0:delta:end_time,v_norm)
+
                 fprintf("If you confirmed trajectory, push the Enter key.");
                 input("");
                 close all
