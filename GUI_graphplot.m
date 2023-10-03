@@ -39,7 +39,7 @@ columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
 name = 'test'; %ファイル名
-folderName = '2023_1003_全体実験_name'; %フォルダ名
+folderName = '2023_1003_全体実験_test'; %フォルダ名
 mkdir(folderName) %新規フォルダ作成
 
 %位置p
