@@ -22,11 +22,13 @@ agent.plant = MODEL_CLASS(agent,Model_Suspended_Load_Fujii(dt, initial_state));%
 agent.parameter = DRONE_PARAM("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load_Fujii(dt, initial_state, 1)), ["p", "q"]));
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.sensor = DIRECT_SENSOR(agent, 0.0);
+agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"Suspended"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
-agent.controller = HLC(agent,Controller_HL(dt));
+agent.controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt));
+% agent.controller = HLC(agent,Controller_HL(dt));
 
 run("ExpBase");
 
@@ -37,10 +39,6 @@ for i = 1:4000
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
     agent(1).controller.do(time, 'f');
-    %agent(1).controller.result.input = repmat([1.01 + 0.0*cos(time.t*2*pi/3);0.001*[sin(time.t*(pi)/1);0*cos(time.t*(pi)/1);0]],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
-    %agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
-    %agent(1).controller.result.input = agent(1).controller.result.input.*repmat([-1;1;-1;-1],N,1);
-    %agent(1).controller.result.input(4:4:end) = 0;
     agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
