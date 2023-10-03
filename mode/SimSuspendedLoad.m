@@ -27,8 +27,9 @@ agent.sensor = DIRECT_SENSOR(agent, 0.0);
 agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"Suspended"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
-agent.controller = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt));
-% agent.controller = HLC(agent,Controller_HL(dt));
+agent.controller.drone = HLC(agent,Controller_HL(dt));
+agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt));
+
 
 run("ExpBase");
 
@@ -38,7 +39,8 @@ for i = 1:4000
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f');
+    agent(1).controller.drone.do(time, 'f');
+    agent(1).controller.load.do(time, 'f');
     agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
