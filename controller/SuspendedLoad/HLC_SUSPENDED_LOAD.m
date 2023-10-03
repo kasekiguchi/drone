@@ -13,8 +13,8 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
-            l = getParameter("Length");
-            km = getParameter("km1");
+            l = getParameter_withload_Fujii("Length");
+            km = getParameter_withload_Fujii("km1");
             obj.IT = [1 1 1 1;sqrt(2)*l*[-1 -1 1 1]/2; sqrt(2)*l*[1 -1 1 -1]/2; km*[1 -1 -1 1]];
         end
         
