@@ -29,6 +29,7 @@ agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"gen_ref_saddle",{
 
 agent.controller.drone = HLC(agent,Controller_HL(dt));
 agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt));
+agent.controller = @controller_do;
 
 
 run("ExpBase");
@@ -45,6 +46,13 @@ for i = 1:4000
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
     %pause(1)
+end
+
+function result = controller_do(varargin)
+controller = varargin{5}.sensor;
+result = controller.drone(varargin);
+result = merge_result(result,controller.load.do(varargin));
+varargin{5}.sensor.result = result;
 end
 
 function post(app)
