@@ -43,7 +43,7 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
     end
 
     methods
-        function obj = DRONE_PARAM_PARAM_SUSPENDED_LOAD(name,param)
+        function obj = DRONE_PARAM_SUSPENDED_LOAD(name,param)
             arguments
                 name % DIATONE
                 param.parameter_name = [];
