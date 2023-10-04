@@ -19,7 +19,7 @@ initial_state.wL = [0; 0; 0];
 
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Load_Fujii(dt, initial_state));%id,dt,type,initial,varargin
-agent.parameter = DRONE_PARAM("DIATONE");
+agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load_Fujii(dt, initial_state, 1)), ["p", "q"]));
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
