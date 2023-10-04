@@ -29,7 +29,7 @@ agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"gen_ref_saddle",{
 
 agent.controller.drone = HLC(agent,Controller_HL(dt));
 agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt));
-agent.controller = HLC_MARGE_SUSPENDEDLOAD(:);
+agent.controller = HLC_MARGE_SUSPENDEDLOAD(agent);
 
 
 run("ExpBase");
