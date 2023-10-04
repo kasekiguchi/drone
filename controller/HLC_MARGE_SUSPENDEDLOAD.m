@@ -7,10 +7,8 @@ classdef HLC_MARGE_SUSPENDEDLOAD < handle
   end
 
   methods
-    function obj = HLC_MARGE_SUSPENDEDLOAD(self,param)
+    function obj = HLC_MARGE_SUSPENDEDLOAD(self)
       obj.self = self;
-      obj.param = param;
-      obj.param.P = self.parameter.get(obj.parameter_name);
       obj.result.input = zeros(self.estimator.model.dim(2),1);
     end
 
