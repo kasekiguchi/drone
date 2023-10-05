@@ -29,7 +29,7 @@ end
 % Model = {"type",type,"name",name,"param",Setting,"id",id};
 Model.id = id;
 Model.type="with_load_model_Fujii"; % model name
-Model.name = "Suspended_Load_Fujii";
+Model.name = "Suspended_Load_Model";
 Model.param = Setting;
 Model.parameter_name =  ["g","m0","J0","rho","li","mi","Ji"];
 end
