@@ -18,7 +18,7 @@ ts = 0;
 if fExp
     te = 10000; %こちらは実機
 else
-    te = 30; % default: 10 シミュレーション用時間
+    te = 100; % default: 10 シミュレーション用時間
 end
 
 %% generate environment(シミュレーション環境の構築)

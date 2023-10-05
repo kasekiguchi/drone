@@ -26,8 +26,9 @@ run("main3_loop_setup.m");
 try
     while round(time.t, 5) <= te
         %% sensor
-        %    tic
+           tic
         tStart = tic;
+%         profile on;
 if time.t == 9
     time.t;
 end
@@ -134,9 +135,10 @@ end
             else
                 time.t = time.t + dt % for sim
             end
+            calT = toc % 1ステップ（25ms）にかかる計算時間
 
         end
-
+%         profile viewer;
     end
 
 catch ME % for error

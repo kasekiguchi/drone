@@ -14,7 +14,7 @@ function [c , ceq] = Constraints(x, params)
 
     for L = 2:params.H  
         tmpx = params.A * Xc(:,L-1) + params.B * U(:,L-1); %クープマンモデル
-        tmpx = params.C * tmpx; %実空間の値に変換
+        tmpx = params.C * tmpx; 
         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
     end
     ceq = [x(1:params.state_size, 1) - params.X0, ceq_ode];
