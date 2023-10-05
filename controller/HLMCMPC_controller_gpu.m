@@ -33,10 +33,6 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       obj.self = self;
       %---MPCパラメータ設定---%
       obj.param = param;
-      %             obj.param.subCheck = zeros(obj.N, 1);
-      obj.param.modelparam.modelparam = obj.self.parameter.get();
-      obj.param.modelparam.modelmethod = obj.self.model.method;
-      obj.param.modelparam.modelsolver = obj.self.model.solver;
       obj.modelf = obj.self.model.method;
       obj.modelp = obj.self.parameter.get();
 
@@ -56,7 +52,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,param.dt);
       obj.N = param.particle_num;
       n = 12; % 状態数
-      obj.state.state_data = zeros(n,obj.param.H, obj.N);
+      obj.state.state_data = gpuArray(zeros(n,obj.param.H, obj.N));
       obj.input.Evaluationtra = zeros(1, obj.N);
       % 重みの配列サイズ変換
       obj.Weight = gpuArray(repmat(blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI), 1, 1, obj.N));
@@ -75,6 +71,8 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       
+      %
+      obj.input.u = gpuArray(obj.input.u);
       %%
       
 %       obj.param.te = 10;
@@ -82,7 +80,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
 
     %-- main()的な
     function result = do(obj,param)
-      % profile on
+      profile on
       % OB = obj;
       xr = param{2};
       rt = param{3};
@@ -90,8 +88,6 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       obj.state.ref = xr;
       obj.param.t = rt;
       idx = round(rt/obj.self.model.dt+1);
-
-      % InputV = param{5};
 
       %% HL 5/18 削除------------------------------------------------------------------------------------------------------------------------
       % ref = obj.self.reference.result;
@@ -122,7 +118,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       z2n = Z2(xn,xd',vfn,P);
       z3n = Z3(xn,xd',vfn,P);
       z4n = Z4(xn,xd',vfn,P);
-      obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)]; 
+      obj.current_state = gpuArray([z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)]); 
       % xd に０ではない値が入っている。
       % ↓
       % obj.current_state=0じゃない。　ホバリング目標値で0,0,1が現在位置だから誤差があるわけではない
@@ -191,10 +187,10 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
 
       % obj.input.sigma(4) = 0;
       % 入力生成 Z; X; Y; YAW
-      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1); 
-      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1);
-      obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1);
-      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1);
+      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N, 'gpuArray') + mu(1,1); 
+      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N, 'gpuArray') + mu(2,1);
+      obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N, 'gpuArray') + mu(3,1);
+      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N, 'gpuArray') + mu(4,1);
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
@@ -253,7 +249,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
         tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
 
         % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
-        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
+        obj.result.input = gather([tmp(1); tmp(2); tmp(3); tmp(4)]); % トルク入力への変換
 
         % obj.result.input = [0.269*9.81; tmp(2); tmp(3); 0];
         obj.self.input = obj.result.input;  % agent.inputへの代入
@@ -316,7 +312,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
           obj.input.Evaluationtra(BestcostID(5), 5)]; % all, z, x, y, yaw, 
 
       result = obj.result;
-      % profile viewer
+      profile viewer
     end
     function show(obj)
       obj.result
@@ -403,16 +399,16 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
 
       %% ホライズンで信頼度を下げる
       % k = linspace(1,0.1, obj.param.H-1);
-      k = gpuArray(ones(1, obj.param.H-1));
+      k = ones(1, obj.param.H-1, 'gpuArray');
 
       %% コスト計算
-      tildeUpre = gpuArray(U - obj.input.v);          % agent.input 　前時刻入力との誤差
-      tildeUref = gpuArray(U - obj.param.ref_input);  % 目標入力との誤差 0　との誤差
+      % tildeUpre = U;          % agent.input 　前時刻入力との誤差
+      % tildeUref = U;  % 目標入力との誤差 0　との誤差
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
       stageStateZ =    k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
-      stageInputPre  = k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre(:,1:end-1,:));
-      stageInputRef  = k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref(:,1:end-1,:));
+      stageInputPre  = k .* U(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,1:obj.N),U(:,1:end-1,:));
+      stageInputRef  = k .* U(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,1:obj.N),U(:,1:end-1,:));
 
       %% pagefun
       % array_fun = @(Q, z) Q*z;
@@ -429,7 +425,7 @@ classdef HLMCMPC_controller_gpu <CONTROLLER_CLASS
       Eval{5} = sum(stageStateZ(11:12,:,:),[1,2]);   % YAW
 
       %-- 評価値をreshapeして縦ベクトルに変換
-      MCeval(:,1) = reshape(Eval{1}, obj.N, 1);
+      % MCeval(:,1) = reshape(Eval{1}, obj.N, 1);
       MCeval(:,2) = reshape(Eval{2}, obj.N, 1);
       MCeval(:,3) = reshape(Eval{3}, obj.N, 1);
       MCeval(:,4) = reshape(Eval{4}, obj.N, 1);

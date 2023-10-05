@@ -185,19 +185,13 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
       %-- 状態予測
-      Objpredict.H = obj.param.H;
-      Objpredict.N = obj.N; Objpredict.A = obj.A; Objpredict.B = obj.B;
-      Objpredict.input = obj.input.u; Objpredict.current_state = obj.current_state;
-      Objpredict.state = obj.state.state_data; 
-      [obj.state.state_data] = predict(Objpredict);
+      % Objpredict.H = obj.param.H;
+      % Objpredict.N = obj.N; Objpredict.A = obj.A; Objpredict.B = obj.B;
+      % Objpredict.input = obj.input.u; Objpredict.current_state = obj.current_state;
+      % Objpredict.state = obj.state.state_data; 
+      % [obj.state.state_data] = predict(Objpredict);
+      [obj.state.state_data] = predict_gpu(obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B);
       % [obj.state.state_data] = predict_mex(Objpredict); % N=5000のみ対応
-
-      %% 墜落 or 飛びすぎたら終了
-      if obj.state.state_data(1,1,:) + xd(3) < 0
-        obj.param.fRemove = 1;
-      elseif obj.state.state_data(1,1,:) + xd(3) > 5
-        obj.param.fRemove = 1;
-      end
 
       %% 実状態変換
       Xd = repmat(obj.reference.xr_org, 1,1,obj.N);
@@ -221,19 +215,20 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       if removeF ~= obj.N
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
         % トルク入力にしたらそれぞれの最適入力をとる必要あり？
-        vf = obj.input.u(1, 1, BestcostID(2));     % 最適な入力の取得
-        vs(1) = obj.input.u(2, 1, BestcostID(3));     % 最適な入力の取得
-        vs(2) = obj.input.u(3, 1, BestcostID(4));
-        vs(3) = obj.input.u(4, 1, BestcostID(5)); % 2,3,4,5 だと個別の評価値に対する入力
+        % vf = obj.input.u(1, 1, BestcostID(2));     % 最適な入力の取得
+        % vs(1) = obj.input.u(2, 1, BestcostID(3));     % 最適な入力の取得
+        % vs(2) = obj.input.u(3, 1, BestcostID(4));
+        % vs(3) = obj.input.u(4, 1, BestcostID(5)); % 2,3,4,5 だと個別の評価値に対する入力
 
-        % vf = obj.input.u(1, 1, BestcostID(1));     
-        % vs(1) = obj.input.u(2, 1, BestcostID(1));     
-        % vs(2) = obj.input.u(3, 1, BestcostID(1));
-        % vs(3) = obj.input.u(4, 1, BestcostID(1)); 
+        vf = obj.input.u(1, 1, BestcostID(1));     
+        vs(1) = obj.input.u(2, 1, BestcostID(1));     
+        vs(2) = obj.input.u(3, 1, BestcostID(1));
+        vs(3) = obj.input.u(4, 1, BestcostID(1)); 
 
         vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
         tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
+        % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
         % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
@@ -326,6 +321,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       constX = find(x_real(3,5,:) > 0.5);
       % CX = reshape(obj.param.const * abs(obj.state.state_data(6, end, constX)).^2, [1, length(constX)]);
       obj.input.Evaluationtra(constX,1) = NaN;  % 棄却
+      % obj.input.u(:,:,constX) = NaN;
 
       removeF = size(constX, 1);
       survive = obj.N - removeF;

@@ -30,14 +30,6 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %% main loop
 
-%% KP model
-if fKP == 1
-    load('C:\Users\student\Downloads\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat', 'est');
-    KP.A = est.A;
-    KP.B = est.B;
-    KP.C = est.C;
-end
-
 %%
 flag = [0;0];
 
@@ -221,9 +213,7 @@ end
             [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef, data.Zdis);    % 1:斜面 0:それ以外(TimeVarying)
 
             
-            param(i).controller.mcmpc = {idx, xr, time.t, phase, KP};    % 入力算出 / controller.name = hlc
-            %% KP
-            % param(i).controller.mcmpc = {idx, xr, time.t, phase, KP};
+            param(i).controller.mcmpc = {idx, xr, time.t, phase};    % 入力算出 / controller.name = hlc
 % 
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
