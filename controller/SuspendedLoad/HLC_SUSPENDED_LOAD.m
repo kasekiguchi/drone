@@ -92,13 +92,17 @@ classdef HLC_SUSPENDED_LOAD < handle
 %             end
 %             vs = Vsp(x,xd',vf,P,F2,F3,F4);
 %             obj.result = Ufp(x,xd',vf,P) + Usp(x,xd',vf,vs',P);
-            cha = obj.self.reference.point.flag;
+%             cha = obj.self.reference.point.flag;
+            cha = obj.self.reference.cha;
             tmpHL = obj.self.controller.hlc.result.input;
-            obj.result.input = obj.IT*tmpHL;
+%             tmpHL = obj.self.marge.drone.result.input;
+%             obj.result.input = obj.IT*tmpHL;
+            obj.result.input = tmpHL;
             if strcmp(cha,'f')
                 obj.result.input = uf +[0;us(2:4)];
             end
-            obj.self.input = obj.result.input;
+%             obj.self.input = obj.result.input;
+            obj.self.controller.result.input = obj.result.input;
             result = obj.result;
         end
         function show(obj)
