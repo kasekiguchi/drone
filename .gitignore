@@ -3,7 +3,7 @@
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
-*.log
+#*.log
 *.lot
 *.fls
 *.out
@@ -639,7 +639,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
+#*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -804,7 +804,7 @@ octave-workspace
 ### https://raw.github.com/github/gitignore/e92f8db7a027af8cc25da2dc0758317e39697684/ROS.gitignore
 
 devel/
-logs/
+#logs/
 build/
 bin/
 lib/
