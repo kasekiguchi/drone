@@ -1,8 +1,8 @@
 
 fMC = 0; % MCかどうか
 fsave = 0; % 保存するかどうか figureを個別に出力しsave_pathに保存
-mkdir C:/Users/student/Documents/students/komatsu/MPC; % 保存するフォルダを作成　コメントアウトして自分で作成してもOK
-save_path = "C:/Users/student/Documents/students/komatsu/MPC"; % 保存するフォルダのパス
+% mkdir C:/Users/student/Documents/students/komatsu/MPC; % 保存するフォルダを作成　コメントアウトして自分で作成してもOK
+% save_path = "C:/Users/student/Documents/students/komatsu/MPC"; % 保存するフォルダのパス
 
 close all
 
@@ -42,6 +42,9 @@ Rdata = [Rdata; zeros(9, len)];
 Diff = Edata - Rdata(1:3, :);
 cutT = 0;
 
+if size(logt,1) ~= size(Edata,2)
+    logt = logt(1:end-1, 1);
+end
 Fontsize = 15;  xmax = te;
 %%
 close all
@@ -118,6 +121,12 @@ else
     saveas(3,strcat(save_path, "/velocity.jpg"));
     saveas(4,strcat(save_path, "/input.jpg"));
 end
+%%
+figure(20)
+plot(Edata(1,:), Edata(2,:), Rdata(1,:), Rdata(2,:)); daspect([1,1,1]);
+legend("Estimator", "Reference");
+xlabel(strcat("$$X$$", " [m]"), "Interpreter","latex");
+ylabel(strcat("$$Y$$", " [m]"), "Interpreter","latex");
 % figure(6)
 % % average
 % Average = sum(data.calT(2:end-1,1)) / length(data.calT(2:end-1,1))
