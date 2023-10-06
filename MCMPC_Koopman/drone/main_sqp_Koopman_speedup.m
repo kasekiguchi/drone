@@ -208,9 +208,9 @@ end
             
             % MPC設定(problem)
             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
-%             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
+            problem.objective = @(x) Objective(x, Params);            % 評価関数
 %             problem.nonlcon   = @(x) Constraints(idx, x, Params, agent, time);    % 制約条件
-            problem.objective = @(x) Objective_mex(x, Params);
+%             problem.objective = @(x) Objective_mex(x, Params);
             problem.nonlcon   = @(x) Constraints_mex(x, Params); %mexファイルを使用する場合は_mexをつける
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
 %             fun = problem.objective;
