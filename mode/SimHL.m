@@ -1,4 +1,4 @@
-ts = 0; % initial time
+s = 0; % initial time
 dt = 0.025; % sampling period
 te = 25; % terminal time
 time = TIME(ts,dt,te); % instance of time class
