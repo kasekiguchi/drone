@@ -26,7 +26,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.dt = 0.07; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
-    Params.flag = 0;
+    Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
     Params.PtoP = 0; %1：PtoP制御
 
     %% 重みの設定
@@ -47,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([5.0; 5.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([1.0; 20.0; 10.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2300; 2300; 1000; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([3000;7500;1500; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([7; 10; 1]);
-    Params.Weight.QWf = diag([2400; 2800; 1200; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([20; 30; 10]);
+    Params.Weight.QWf = diag([3500; 3000; 1500; 1; 1; 1]); %姿勢角、角速度終端
       %% 
 %     fprintf("%f秒\n", totalT)
 %     Fontsize = 15;  timeMax = 100;
@@ -83,12 +83,12 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     options = optimoptions(options,'Diagnostics','off');
 %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
     options = optimoptions(options,'MaxIterations',      1.e+9);     % 最大反復回数
-    options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
+    options = optimoptions(options,'ConstraintTolerance',1.e-3);%制約違反に対する許容誤差
 %     options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
     
     %-- fmincon設定
     options.Algorithm = 'sqp';  % 逐次二次計画法
-%     options.Display = 'iter';   % 計算結果の表示
+    options.Display = 'none';   % 計算結果の表示
     problem.solver = 'fmincon'; % solver
     problem.options = options;  % 
 
@@ -164,22 +164,27 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値       
         %-- 目標軌道生成
-            if Params.PtoP == 1
-                xr = Reference2(Params, time.t, agent); %PtoP
-                if agent.estimator.result.state.p(2) < -1
-                    Params.flag = 1;
-                elseif agent.estimator.result.state.p(2) > 1
-                    Params.flag = 0;
-                end
-                if Params.flag == 1
-                    param(i).reference.point = {FH, [1;1;1;], time.t};
-                else
-                    param(i).reference.point = {FH, [1;-1;1], time.t};
-                end
-            else
-                xr = Reference(Params, time.t, agent); %TimeVarying
-                param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
-            end
+%             if Params.PtoP == 1 %PtoPの場合はコメントイン
+%                 xr = Reference2(Params, time.t, agent); %PtoP
+%                 if agent.estimator.result.state.p(2) < -1
+%                     Params.flag = 1;
+%                 elseif agent.estimator.result.state.p(2) > 1
+%                     Params.flag = 0;
+%                 end
+%                 if Params.flag == 1
+%                     param(i).reference.point = {FH, [1;1;1;], time.t};
+%                 else
+%                     param(i).reference.point = {FH, [1;-1;1], time.t};
+%                 end
+%             else
+%                 xr = Reference(Params, time.t, agent); %TimeVarying
+%                 param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
+%             end
+            
+            %PtoPの場合はコメントオフ
+            xr = Reference(Params, time.t, agent); %TimeVarying
+            param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
+
             param(i).reference.covering = [];
 %             param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -209,11 +214,6 @@ end
                 initial_u2 = initial_u1;
                 initial_u3 = initial_u1;
                 initial_u4 = initial_u1;
-
-%                 initial_u1 = 1.80;   % 初期値
-%                 initial_u2 = 0.84;
-%                 initial_u3 = 2.06;
-%                 initial_u4 = 1.07;
             else
                 initial_u1 = agent.input(1);
                 initial_u2 = agent.input(2);
@@ -221,35 +221,45 @@ end
                 initial_u4 = agent.input(4);
             end
             x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
-            previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
+%             previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
             % previous_state の1行目
 
 %                 previous_state(Params.state_size+1:Params.total_size, 1:Params.H) = repmat(x0, 1, Params.H);
             
-            % MPC設定(problem)
-            problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
-%             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
+            % MPC設定
+            x0 = repmat(x0,1,Params.H);
+            A = [];
+            b = [];
+            Aeq = [];
+            beq = [];
+            lb = [];
+            ub = [];
+            nonlcon = [];
+        
+%             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
+%             problem.objective = @(x) Objective(x, Params);            % 評価関数
 %             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
-            problem.objective = @(x) Objective_mex(x, Params);
-            problem.nonlcon   = @(x) Constraints_mex(x, Params);
-            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
-            data.exitflag(idx) = exitflag;
+%             problem.objective = @(x) Objective_mex(x, Params);
+%             problem.nonlcon   = @(x) Constraints_mex(x, Params);
+            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew_mex(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
+%             data.exitflag(idx) = exitflag;
+
             % 制御入力の決定
             previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
 %             num3(idx) = {x};
 %             num(idx) = {var};
             fprintf("\tfval : %f\n", fval)
 %         TODO: 1列目のvarが一切変動しない問題に対処
-            if var(Params.state_size+1:Params.total_size, end) > 1.0
-                var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
-            end
+%             if var(Params.state_size+1:Params.total_size, end) > 1.0
+%                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
+%             end
             
             fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
 
-            agent.input = var(Params.state_size+1:Params.total_size, 2);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
+            agent.input = var(:, 1);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
     
         end   
         %-- データ保存
@@ -321,7 +331,7 @@ end
 % %         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
 %         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
-        drawnow 
+%         drawnow 
 %        profile viewer;
     end
 
@@ -382,16 +392,47 @@ set(0, 'defaultTextFontSize', Fontsize);
 %%
 % logger.save();
 
-% function [eval] = Objective(x, params, Agent) % x : p q v w input
+% function f = fun(x,params)
+%     f = params.A*x(1:params.state_size, :) + params.B*x(params.state_size+1:end,:);
+%     f = params.C*f;
+% end
+
+% function [eval] = Objective(x, params) % x : p q v w input
 % %-- 評価計算をする関数
 % %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
-%     tildeXp = x(1:3, :) - params.xr(1:3, :);  % 位置
-%     tildeXq = x(4:6, :) - params.xr(4:6, :);
-%     tildeXv = x(7:9, :) - params.xr(7:9, :);  % 速度
-%     tildeXw = x(10:12, :) - params.xr(10:12,:);
+% %元の非線形等式制約を取り込んだ
+%     
+% %     X = zeros(params.state_size+1, params.H-1);
+% %     Xc = [params.X0;1];
+% %     for i = 1:params.H-1
+% %         if i == 1
+% %             X(:,i) = params.A*Xc + params.B*x(:,i);
+% %         else
+% %             X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
+% %         end
+% %     end
+% %     Xn = [params.X0,X(1:params.state_size,:)];
+% 
+%     X = zeros(params.state_size+1, params.H-1);
+%     Xc = [params.X0;1];
+%     X(:,1) = params.A*Xc + params.B*x(:,1);
+%     for i = 2:params.H-1
+% %         if i == 1
+% %             X(:,i) = params.A*Xc + params.B*x(:,i);
+% %         else
+% %             X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
+% %         end
+%         X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
+%     end
+%     Xn = [params.X0,X(1:params.state_size,:)];
+% 
+%     tildeXp = Xn(1:3, :) - params.xr(1:3, :);  % 位置
+%     tildeXq = Xn(4:6, :) - params.xr(4:6, :);
+%     tildeXv = Xn(7:9, :) - params.xr(7:9, :);  % 速度
+%     tildeXw = Xn(10:12, :) - params.xr(10:12,:);
 %     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
 % %     tildeUpre = U - Agent.input;
-%     tildeUref = x(13:16, :) - params.xr(13:16,:);
+%     tildeUref = x(:, :) - params.xr(13:16,:);
 %     
 % %-- 状態及び入力のステージコストを計算 長くなるから分割
 %     stageStateP = tildeXp(:, 1:params.H-1)'*params.Weight.P*tildeXp(:, 1:params.H-1);
