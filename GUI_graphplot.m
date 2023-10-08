@@ -6,11 +6,11 @@ cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden;
-% clear all;
+clear all;
 clc;
 
 %% データのインポート
-% load("experiment_7_11_circle_radius=0.7_Log(11-Jul-2023_14_30_38).mat") %読み込むデータファイルの設定
+load("事例研_すぎやま.mat") %読み込むデータファイルの設定
 % load("9_4_test.mat")
 
 for i = 1:find(log.Data.t,1,'last')
