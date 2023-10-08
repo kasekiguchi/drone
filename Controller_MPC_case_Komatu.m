@@ -1,4 +1,4 @@
-function Controller = Controller_MPC_case(Agent)
+function Controller = Controller_MPC_case_Komatu(Agent)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.25; % MPCステップ幅
@@ -9,7 +9,7 @@ function Controller = Controller_MPC_case(Agent)
     Controller_param.total_size = 16;
 %     Controller_param.total_size = 15;
     Controller_param.state_size = 12;
-    Controller_param.input_size = 3;
+    Controller_param.input_size = 4;
 
     %% normal
 %     Controller_param.P = diag([1e4; 1e4; 1e3]);    % 座標   1000 1000 10000

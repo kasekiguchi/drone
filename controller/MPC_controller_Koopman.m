@@ -1,4 +1,4 @@
-classdef MPC_controller_case_Komatu <handle
+classdef MPC_controller_Koopman <handle
     % MCMPC_CONTROLLER MPCのコントローラー
     % Imai Case study 
     % 勾配MPCコントローラー
@@ -24,27 +24,27 @@ classdef MPC_controller_case_Komatu <handle
     end
 
     methods
-        function obj = MPC_controller_case_Komatu(self, param)
+        function obj = MPC_controller_Koopman(self, param)
             %-- 変数定義
-            obj.self = self;
+            obj.self = self; %agentへの接続
             %---MPCパラメータ設定---%
-            obj.param = param.param;
-            obj.modelf = obj.self.plant.method;
-            obj.modelp = obj.self.parameter.get();
+            obj.param = param.param; %Controller_MPC_Koopmanの値を保存
+            obj.modelf = obj.self.plant.method; %入力の形式
+            obj.modelp = obj.self.parameter.get(); %ドローンのパラメータ
 
             %%
             obj.input = obj.param.input;
             % obj.const = param.const;
             % obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-            obj.param.H = obj.param.H + 1;
+%             obj.param.H = obj.param.H + 1;
             obj.model = self.plant;
-            obj.param.fRemove = 0;
+            
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
 
             %% 重み　統合
-            obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
-            obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
+%             obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
+%             obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
             
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
 
@@ -70,8 +70,8 @@ classdef MPC_controller_case_Komatu <handle
             options = optimoptions('fmincon');
             %     options = optimoptions(options,'Diagnostics','off');
             %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
-            options = optimoptions(options,'MaxIterations',         1.e+12); % 最大反復回数
-            options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
+            options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
+            options = optimoptions(options,'ConstraintTolerance',1.e-3);     % 制約違反に対する許容誤差
             
             %-- fmincon設定
             options.Algorithm = 'sqp';  % 逐次二次計画法
@@ -79,21 +79,23 @@ classdef MPC_controller_case_Komatu <handle
             problem.solver = 'fmincon'; % solver
             problem.options = options;  %
 
-            problem.x0		  = [obj.previous_state; obj.previous_input];                 % 状態，入力を初期値とする                                    % 現在状態
+            x0 = [obj.previous_input];        % 状態，入力を初期値とする              % 現在状態
+            A = [];
+            b = [];
+            Aeq = [];
+            beq = [];
+            lb = [];
+            ub = [];
+            nonlcon = [];
 
-            problem.objective = @(x) Objective(obj,x); 
-            problem.nonlcon   = @(x) obj.constraints(x);
-            [var, ~, exitflag, ~, ~, ~, ~] = fmincon(problem);
+            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(obj,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
 
             %%
-            obj.previous_input = var(13:16,:);
+            obj.previous_input = var;
             % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
             % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
-            obj.result.input = var(13:16, 1); % 印加する入力 4入力
-            
-            %% トルク入力変換
-            % obj.result.input = obj.input.IT * var(13:16,1);
+            obj.result.input = var(:, 1); % 印加する入力 4入力
 
             %% データ表示用
             obj.input.u = obj.result.input; 
@@ -114,8 +116,8 @@ classdef MPC_controller_case_Komatu <handle
                     obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
                     obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
                     obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
-            fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-                rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+            fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
+                rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
 %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             fprintf("\n");
 
@@ -126,36 +128,6 @@ classdef MPC_controller_case_Komatu <handle
         end
         function show(obj)
             obj.result
-        end
-
-        %-- 制約とその重心計算 --%
-        function [c, ceq] = constraints(obj, x)
-            % モデル予測制御の制約条件を計算するプログラム
-            ceq_ode = zeros(12, obj.param.H);
-
-            %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-            X = x(1:12, :);          % 12 * Params.H
-            U = x(13:16, :);   % 4 * Params.H
-
-            %- ダイナミクス拘束
-            %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
-            %-- 連続の式をダイナミクス拘束に使う
-            % tmp = obj.current_state;
-            for L = 2:obj.param.H
-                xx = X(:, L-1);
-                xu = U(:, L-1);
-                tmp = xx + obj.param.dt * obj.modelf(xx, xu, obj.modelp);
-                % tmp = obj.current_state + obj.param.dt * obj.modelf(xx, xu, obj.modelp);
-                ceq_ode(:, L) = X(:, L) - tmp; 
-            end
-            ceq = [X(:, 1) - obj.current_state, ceq_ode];
-            %% torque
-            % c = [U(1,:)-obj.param.input_max; -U(1,:)+obj.param.input_min; -(U(2:4,:)+obj.param.torque_TH); U(2:4,:)-obj.param.torque_TH; -X(3,:)]; 
-            % 0<推力<10, -2<torque<2, z>0
-
-            %% 4inputs
-            c = [U(1:4,:)-obj.param.input_max; -U(1:4,:)+obj.param.input_min; -X(3,:)];
-            % ホバリング　±１
         end
 
 %         function [eval] = objective(obj,x)   % obj.~とする
