@@ -1,4 +1,4 @@
- %% Initialize settings
+%% Initialize settings
 % set path
 cf = pwd;
 if contains(mfilename('fullpath'),"mainGUI")

@@ -1,13 +1,14 @@
-function xr = Reference(H, Ur, Y, dT)
+function xr = Reference(n, H, vr, Y, dT)
 % [Input]
 % H: horizon
-% Ur:input reference
+% vr: velocity reference
 % Y: current output
 % dT: step size for MPC
 % [Output]
 % xr : state reference
-xr = ones(2, H);
-for L = 1:H
-  xr(:, L) = [Y(1) + Ur(1)*(L-1)*dT; 0.];
+xr = zeros(n*H,1);
+xr(1,1) = Y(1) + vr(1)*dT;
+for L = 2:H
+  xr(n*(L-1)+1,1) = xr(n*(L-2)+1,1) + vr(L)*dT;
 end
 end

@@ -12,7 +12,7 @@ Cc = diag([1,1]);
 Dc = 0;
 else
 A = diag(ones(1,n/2-1),1);
-B = [zeros(n/2-1);1];
+B = [zeros(n/2-1,1);1];
 Ac = blkdiag(A,A);
 Bc = blkdiag(B,B);
 Cc = eye(n);

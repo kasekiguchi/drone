@@ -4,10 +4,14 @@ classdef MPC < handle
     H % horizon
     Td % prediction step size
     var % optimization variable's optimized value
+    X
+    U
     gen_beq
     n
     m
     Weight
+    qpproblem
+    gen_f
   end
 
   methods
@@ -25,38 +29,90 @@ classdef MPC < handle
       %obj.Model.Xo = Xo*ones(1, obj.Model.H);       % 障害物の座標をホライゾン分
 
       % set weight
-      obj.Weight.Qf = [1.; 1];      % weight for terminal cost
-      obj.Weight.Qapf = 0.4;               % 人工ポテンシャル場法に対する重み
-      obj.Weight.Q = [1;100];
-      obj.Weight.R = [1;1];
+      Qf = ones(obj.n,1);      % weight for terminal cost
+      Q = repmat([100;100;ones(obj.n/2-2,1);100;ones(obj.n/2-1,1)],obj.H-1,1);
+      R = repmat([1;1],obj.H,1);
+      obj.Weight.QR = [Q;Qf;R];
+      obj.Weight.Qapf = 1;               % weight for obstacle avoidance
+
       Model = model.gen_ss(obj.Td);   % prediction model : discrete-time state space model
 
-      obj.var = [ones(1,obj.H+1).*x0,ones(1,obj.H+1).*u0]; % initialize optimization variables
-
-      AX = eye(obj.n*(obj.H+1))-[zeros(obj.n,obj.n*(obj.H+1));kron(eye(obj.H),Model.A),zeros(obj.n*obj.H,obj.n)];
-      AU = -kron(eye(obj.H+1),Model.B);
+      obj.X = ones(1,obj.H).*x0;
+      obj.U = ones(1,obj.H).*u0; % initialize optimization variables
+      obj.var = [repmat(x0,H,1);repmat(u0,H,1)];
+      AX = eye(obj.n*(obj.H))-[zeros(obj.n,obj.n*(obj.H));kron(eye(obj.H-1),Model.A),zeros(obj.n*(obj.H-1),obj.n)];
+      AU = -kron(eye(obj.H),Model.B);
       obj.problem.Aeq = [AX,AU];
-      obj.gen_beq = @(x0) [Model.A*x0;zeros(obj.n*obj.H,1)];
+      obj.gen_beq = @(x0) [Model.A*x0;zeros(obj.n*(obj.H-1),1)];
+
+      obj.qpproblem.solver = 'quadprog';
+      obj.qpproblem.options = optimoptions('quadprog','Display','none');
+      %options;              % ソルバー
+
+      obj.qpproblem.H = 2*diag(obj.Weight.QR);
+      obj.gen_f = @(xr) -2*obj.Weight.QR.*xr;
+      obj.qpproblem.Aeq = [AX,AU];
+      obj.qpproblem.A = [];
+      obj.qpproblem.B = [];
+      
     end
-    function [var, fval, exitflag, output, lambda, grad, hessian] = do(obj,x,xr,ur)
-      varr = [xr,ur];
-      % set optimization problem
+    function [var,fval,exitflag,output,lambda] = do(obj,varargin)
+      %[var,fval, exitflag, output, lambda, grad, hessian]
+      % (obj,x,varr,xo)    
+      % [Input]
+      % 1 : time
+      % 2 : key board input
+      % 3 : logger
+      % 4 : env
+      % 5 : agent
+      % 6 : id
+      state = varargin{5}.estimator.result.state;
+      x = state.p;
+      varr = varargin{5}.reference.result.state.xd;
+      if isfield(state,"xo")
+        xo = state.xo;
+      end
+      % sqp 
       obj.problem.beq = obj.gen_beq(x);
-      obj.problem.x0		  = [x,obj.var(:,3:obj.H+1),obj.var(:,obj.H+1),obj.var(:,obj.H+2:end)];                         % initial state for optimization
-      % obj.problem.x0		  = [repmat(x,1,obj.H+1),ur*0];%ones(1,obj.H+1).*[x;ur*0];
-      obj.problem.objective = @(x) obj.Objective(x, obj.Weight,varr);              % objective function
+      obj.problem.x0 = [obj.var(obj.n+1:obj.n*obj.H,1);obj.var(obj.n*(obj.H-1)+1:end,1)];
+      %      obj.problem.x0		  = [repmat(x,obj.H,1);zeros(obj.m*obj.H,1)];
+      obj.problem.objective = @(x) obj.Objective(x, obj.Weight,varr,xo);              % objective function
       [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(obj.problem);
+      
+      % qp
+      % obj.qpproblem.beq = obj.gen_beq(x);
+      % obj.qpproblem.f = obj.gen_f(varr);
+      % obj.qpproblem.x0 = [obj.var(obj.n+1:obj.n*obj.H,1);obj.var(obj.n*(obj.H-1)+1:end,1)];
+      % [var,fval,exitflag,output,lambda] = quadprog(obj.qpproblem);
+      
       obj.var = var;
-    end
-    function eval = Objective(obj,x,Weight,xr)
+    end    
+    function eval = Objective(obj,x,Weight,varr,xo)
+      % [Input]
+      % x : [x[k+1];x[k+2];...;x[k+H+1];u[k];u[k+1];...;u[k+H]];
+      % Weight : structure of QR and Qo
+      % varr : reference for x
+      % xo : measured obstacle position
+      % [Output]
+      % eval : objective function's value
+      arguments
+        obj
+        x
+        Weight
+        varr
+        xo = []
+      end
+
       %-- state and input error
-      var = x - xr;
-      %-- calc stage cost
-      stageCost = sum(var(:,1:obj.H).^2.*Weight.Q,"all")+sum(var(:,obj.H+2:end).^2.*Weight.R,"all");
-      %-- calc terminal cost
-      terminalCost = sum(var(1:obj.n,end).^2.*Weight.Qf);
-      %-- calc objective function value
-      eval = stageCost + terminalCost;
+      var = x - varr;
+      %-- obstacle avoidance : artificial potential 
+      dxo = [x(1:obj.n:obj.n*obj.H)';x(1+obj.n/2:obj.n:obj.n*obj.H)'] - xo;
+      if isempty(xo)
+        APF = 0;
+      else
+        APF = sum(Weight.Qapf./sum(dxo.^2));
+      end
+      eval = sum(var.^2.*Weight.QR) + APF;
     end
 
   end

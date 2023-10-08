@@ -9,12 +9,13 @@ classdef LOGGER < handle
  
   methods
     function obj = LOGGER(mpc,x,u,kmax)
-      obj.dataNum = 2*sum(mpc.size) + 2;
+      obj.dataNum = 2*(mpc.n+mpc.m) + 1;
       obj.data.state      = zeros(kmax, obj.dataNum);
-      obj.data.state(1,:) = ([0,x',u',x',u',0]);
+      obj.data.state(1,:) = ([x',u',x',u',0]);
     end
 
-    function log(obj,idx,state,var,fval,exitflag,output,lambda,grad,hessian)
+    function log(obj,idx,t,state,var,fval,exitflag,output,lambda,grad,hessian)
+      obj.data.t(idx) = t;
       obj.data.state(idx,:) = [state,fval];
       % state = [current time, x, u, xr, ur, fval]
       obj.data.exitflag(idx)= exitflag;   % 
