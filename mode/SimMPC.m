@@ -18,7 +18,7 @@ agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory", {[0;0;1], te}, "HL"});
-agent.controller = MPC_controller_case(agent, Controller_MPC_case(agent));
+agent.controller = MPC_controller_case_sub(agent, Controller_MPC_case(agent));
 % agent.input_transform = THRUST2FORCE_TORQUE(agent,1);
 run("ExpBase");
 function dfunc(app)
