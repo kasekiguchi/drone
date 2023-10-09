@@ -8,7 +8,6 @@ classdef DRONE < handle
     estimator
     reference
     controller
-    marge
     input_transform
     id = 1
   end

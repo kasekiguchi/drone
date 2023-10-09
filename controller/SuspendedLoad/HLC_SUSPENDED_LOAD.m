@@ -102,7 +102,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.result.input = uf +[0;us(2:4)];
             end
 %             obj.self.input = obj.result.input;
-            obj.self.controller.result.input = obj.result.input;
+            obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも
             result = obj.result;
         end
         function show(obj)
