@@ -1,4 +1,4 @@
-classdef MPC_controller_Koopman <handle
+classdef MPC_controller_Koopman < handle
     % MCMPC_CONTROLLER MPCのコントローラー
     % Imai Case study 
     % 勾配MPCコントローラー
@@ -36,7 +36,7 @@ classdef MPC_controller_Koopman <handle
             obj.input = obj.param.input;
             % obj.const = param.const;
             % obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-%             obj.param.H = obj.param.H + 1;
+%             obj.param.H = obj.param.H + 1; %なぜ？
             obj.model = self.plant;
             
             %% 入力
@@ -58,11 +58,11 @@ classdef MPC_controller_Koopman <handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
             obj.param.t = varargin{1}.t;
-            rt = obj.param.t;
-            idx = round(rt/varargin{1}.dt+1);
+            rt = obj.param.t; %時間
+            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
 
-            obj.state.ref = obj.Reference(rt);
-            obj.current_state = obj.self.estimator.result.state.get();
+            obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            obj.current_state = obj.self.estimator.result.state.get(); %現在状態
             obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
 
             % MPC設定(problem)
@@ -123,33 +123,18 @@ classdef MPC_controller_Koopman <handle
 
             %% z < 0で終了
             if obj.self.estimator.result.state < 0
-                warning("Z < 0")
+                warning("墜落しました")
             end
         end
         function show(obj)
             obj.result
         end
 
-%         function [eval] = objective(obj,x)   % obj.~とする
-%             X = x(1:12,:);
-%             U = x(13:16,:);
-%             tildeX = X - obj.state.ref(1:12,:);
-%             tildeUpre = U - obj.input.u;
-%             tildeUref = U - obj.state.ref(13:16,:);
-% 
-%             stageState = tildeX(:,end-1)' * obj.param.Weight    * tildeX(:,end-1);
-%             stageInputPre  = tildeUpre(:,end-1)' * obj.param.RP * tildeUpre(:,end-1);
-%             stageInputRef  = tildeUref(:,end-1)' * obj.param.R  * tildeUref(:,end-1);
-%             terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
-% 
-%             eval = stageState + stageInputPre + stageInputRef + terminalState;
-%         end
-
         function [xr] = Reference(obj, T)
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
-            xr = zeros(16, obj.param.H);    % initialize
+            xr = zeros(obj.param.total_size, obj.param.H);    % initialize
             % 時間関数の取得→時間を代入してリファレンス生成
             RefTime = obj.self.reference.func;    % 時間関数の取得
             for h = 0:obj.param.H-1
