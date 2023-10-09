@@ -9,7 +9,7 @@ function ref = Case_study_trajectory(~)
 % end
 
 % T = param.freq;
-T = 4;
+T = 10;
 % r = 1;
 syms t real
 % x_0 = X0(1);
@@ -32,9 +32,9 @@ syms t real
 % z = 1;
 
 % ・もちづき
-x = 0.3*(cos(3*t/T) + cos(t/T));
-y = 0.3*(sin(3*t/T) + sin(t/T));
-z = 1; %ここは変更不可
+% x = 0.3*(cos(3*t/T) + cos(t/T));
+% y = 0.3*(sin(3*t/T) + sin(t/T));
+% z = 1; %ここは変更不可
 
 % ・すずき(完了)
 % x = (cos(pi*t/T))^3;
@@ -136,9 +136,10 @@ z = 1; %ここは変更不可
 % y = cos(2*pi*t/T);
 % z = 1;
 
-% x = sin(2*pi*t/T);
-% y = sin(3*pi*t/T);
-% z = 1;
+%逆円旋回
+x = cos(2*pi*t/T);
+y = sin(2*pi*t/T);
+z = 1;
 
 % x = 1;
 % y = 1;
