@@ -46,16 +46,12 @@ classdef MPC_controller_case_sub <handle
             obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
             obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
             
-            obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
-
-            % %% input transform
-            % obj.input.IT = [1 1 1 1;-obj.self.parameter.ly, -obj.self.parameter.ly, (obj.self.parameter.Ly - obj.self.parameter.ly), (obj.self.parameter.Ly - obj.self.parameter.ly); obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx), obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx); obj.self.parameter.km1, -obj.self.parameter.km2, -obj.self.parameter.km3, obj.self.parameter.km4];
+            obj.previous_input = repmat(obj.input.u, 1, obj.param.H); 
         end
 
         %-- main()的な
         function result = do(obj,varargin)
             tic
-            % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
             obj.param.t = varargin{1}.t;
@@ -64,7 +60,6 @@ classdef MPC_controller_case_sub <handle
 
             obj.state.ref = obj.Reference(rt);
             obj.current_state = obj.self.estimator.result.state.get();
-            % obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
 
             % MPC設定(problem)
             %-- fmincon 設定
@@ -77,10 +72,6 @@ classdef MPC_controller_case_sub <handle
             %-- fmincon設定
             options.Algorithm = 'sqp';  % 逐次二次計画法
             options.Display = 'none';   % 計算結果の表示
-            % problem.solver = 'fmincon'; % solver
-            % problem.options = options;  %
-
-            % problem.x0		  = obj.previous_input;                 % 入力を初期値とする                                    % 現在状態
 
             %% conditions
             fun = @obj.objective;
@@ -89,14 +80,10 @@ classdef MPC_controller_case_sub <handle
             lb = repmat(obj.param.input_min, 4,obj.param.H); % min
             ub = repmat(obj.param.input_max, 4,obj.param.H); % max
             nonlcon = [];
-            % [U(1:4,:)-obj.param.input_max; -U(1:4,:)+obj.param.input_min; -X(3,:)];
-            % problem.objective = @(x) obj.objective(x); 
-            % problem.nonlcon   = @(x) obj.constraints(x);
             [var, ~, exitflag, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
 
             %%
             obj.previous_input = var;
-
             obj.result.input = var(:, 1); % 印加する入力 4入力
 
             %% データ表示用
@@ -104,7 +91,6 @@ classdef MPC_controller_case_sub <handle
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
-            % profile viewer
 
             %% 情報表示
             state_monte = obj.self.estimator.result.state;
@@ -120,7 +106,6 @@ classdef MPC_controller_case_sub <handle
                     obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
-%             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             fprintf("\n");
             toc
 
@@ -133,43 +118,11 @@ classdef MPC_controller_case_sub <handle
             obj.result
         end
 
-        %-- 制約とその重心計算 --%
-        function [c, ceq] = constraints(obj, x)
-            % モデル予測制御の制約条件を計算するプログラム
-            ceq_ode = zeros(12, obj.param.H);
-
-            %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-            X = x(1:12, :);          % 12 * Params.H
-            U = x(13:16, :);   % 4 * Params.H
-
-            %- ダイナミクス拘束
-            %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
-            %-- 連続の式をダイナミクス拘束に使う
-            % tmp = obj.current_state;
-            for L = 2:obj.param.H
-                xx = X(:, L-1);
-                xu = U(:, L-1);
-                tmp = xx + obj.param.dt * obj.modelf(xx, xu, obj.modelp);
-                % tmp = obj.current_state + obj.param.dt * obj.modelf(xx, xu, obj.modelp);
-                ceq_ode(:, L) = X(:, L) - tmp; 
-            end
-            ceq = [X(:, 1) - obj.current_state, ceq_ode];
-            %% torque
-            % c = [U(1,:)-obj.param.input_max; -U(1,:)+obj.param.input_min; -(U(2:4,:)+obj.param.torque_TH); U(2:4,:)-obj.param.torque_TH; -X(3,:)]; 
-            % 0<推力<10, -2<torque<2, z>0
-
-            %% 4inputs
-            c = [U(1:4,:)-obj.param.input_max; -U(1:4,:)+obj.param.input_min; -X(3,:)];
-            % ホバリング　±１
-        end
-
         function [eval] = objective(obj,x)   % obj.~とする
-            % X = x(1:12,:);
             U = x;
             X(:,1) = obj.current_state;
             for L = 2:obj.param.H
                 X(:,L) = X(:,L-1) + obj.param.dt * obj.modelf(X(:,L-1), U(:,L-1), obj.modelp);
-                % tmp = obj.current_state + obj.param.dt * obj.modelf(xx, xu, obj.modelp);
             end
 
             tildeX = X - obj.state.ref(1:12,:);
