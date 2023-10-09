@@ -11,7 +11,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 close all hidden; clear all; clc;
 %%
 clc
-SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","SimMPC"];
+SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","SimMPC","SimMPC_Koopman"];
 ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL"];
 fExp = 1;
 fDebug = 0; % 1: active : for debug function

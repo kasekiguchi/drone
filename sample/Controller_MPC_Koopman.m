@@ -8,7 +8,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
 
     %% Koopman
-    load('C:\Users\kiyam\Documents\卒業研究\GitHub2\drone\Koopman_model\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est');
+    load('C:\Users\student\Documents\GitHub\drone\Koopman_model\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est');
     Controller_param.A = est.A;
     Controller_param.B = est.B;
 
