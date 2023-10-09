@@ -25,13 +25,12 @@ function Controller = Controller_MPC_Koopman(Agent)
 
     %% 4inputs
     Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
-    Controller_param.torque_TH = 0;
+%     Controller_param.torque_TH = 0;
 
     %% 以下は変更なし
     fprintf("勾配MPC controller\n")
 
     Controller_param.ref_input = Controller_param.input.u; %入力の目標値
-    Controller_param.input.v = Controller_param.input.u;
 
     Controller.name = "mpc";
     Controller.type = "MPC_controller_org";

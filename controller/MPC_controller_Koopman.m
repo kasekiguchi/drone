@@ -18,10 +18,6 @@ classdef MPC_controller_Koopman < handle
         result
         self
     end
-    properties
-        modelf
-        modelp
-    end
 
     methods
         function obj = MPC_controller_Koopman(self, param)
@@ -29,8 +25,6 @@ classdef MPC_controller_Koopman < handle
             obj.self = self; %agentへの接続
             %---MPCパラメータ設定---%
             obj.param = param.param; %Controller_MPC_Koopmanの値を保存
-            obj.modelf = obj.self.plant.method; %入力の形式
-            obj.modelp = obj.self.parameter.get(); %ドローンのパラメータ
 
             %%
             obj.input = obj.param.input;
@@ -48,12 +42,11 @@ classdef MPC_controller_Koopman < handle
             
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
 
-            % %% input transform
-            % obj.input.IT = [1 1 1 1;-obj.self.parameter.ly, -obj.self.parameter.ly, (obj.self.parameter.Ly - obj.self.parameter.ly), (obj.self.parameter.Ly - obj.self.parameter.ly); obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx), obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx); obj.self.parameter.km1, -obj.self.parameter.km2, -obj.self.parameter.km3, obj.self.parameter.km4];
         end
 
         %-- main()的な
         function result = do(obj,varargin)
+            tic
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
@@ -63,6 +56,10 @@ classdef MPC_controller_Koopman < handle
 
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
             obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+%             currentstate = obj.current_state;
+            Param = obj.param;
+            Param.current = obj.current_state;
+            Param.ref = obj.state.ref;
             obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
 
             % MPC設定(problem)
@@ -88,7 +85,8 @@ classdef MPC_controller_Koopman < handle
             ub = [];
             nonlcon = [];
 
-            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(obj,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
+%             [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(obj,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
+            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(Param,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem);
 
             %%
             obj.previous_input = var;
@@ -125,6 +123,7 @@ classdef MPC_controller_Koopman < handle
             if obj.self.estimator.result.state < 0
                 warning("墜落しました")
             end
+            calT = toc
         end
         function show(obj)
             obj.result
