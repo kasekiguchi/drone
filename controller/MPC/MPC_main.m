@@ -23,7 +23,8 @@ Xo = [1;0];                             % obstacle position
 
 %% mpc setting
 agent.model = LINEAR_MODEL(@(Td) MassModel2d(n,Td),dt,x); % model class
-agent.controller = MPC(agent.model,x,u,Td,H); % controller class
+%agent.controller = MPC(agent.model,x,u,Td,H); % controller class
+agent.controller = CBFMPC(agent.model,x,u,Td,H); % controller class
 agent.estimator.result.state.p = x;
 agent.estimator.result.state.xo = Xo;%[Xo(1);zeros(n/2-1,1);Xo(2);zeros(n/2-1,1)];
 agent.reference.result.state.xd = [];
@@ -41,11 +42,12 @@ while idx*dt <= Te
   
   %% model predictive control
   agent.estimator.result.state.p = x;
-  agent.reference.result.state.xd = [xr;ur];
+  agent.reference.result.state.xd = xr;%[xr;ur];
   %[var, fval, exitflag, output, lambda, grad, hessian] = agent.controller.do([],[],[],[],agent);
   [var,fval, exitflag, output, lambda] = agent.controller.do([],[],[],[],agent);
   % extract current input
-  u = var(n*H+1:n*H+m);
+  %u = var(n*H+1:n*H+m);
+  u = var(1:m);
 
   % logging
   %logger.log(idx,idx * dt,[x',u',xr(1:n,1)',ur(1:m,1)'],var, fval, exitflag, output, lambda, grad, hessian)
