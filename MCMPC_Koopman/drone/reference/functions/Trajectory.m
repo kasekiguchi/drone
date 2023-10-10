@@ -7,7 +7,7 @@ syms t real
 % yg = X(2);
 % zg = X(3);
 % T = X(4);   % 目標到達までの時間 T=10
-T = 10;
+% T = 10;
 %% takeoff
 % T = 10;
 % rz0 = 0;
@@ -19,6 +19,9 @@ T = 10;
 % x = 0;
 % y = 0;
 
+x = 0;
+y = 0;
+z = 1;
 
 %% circle2
 % x = 2*sin(2*pi*t/T);
@@ -26,9 +29,9 @@ T = 10;
 % z = 1;
 
 % %% circle2
-x = sin(2*pi*t/T);
-y = cos(2*pi*t/T);
-z = 1;
+% x = sin(2*pi*t/T);
+% y = cos(2*pi*t/T);
+% z = 1;
 
 % x = 0;
 % y = 0;
