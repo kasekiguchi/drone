@@ -13,9 +13,6 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
-            l = getParameter_withload_Fujii("Length");
-            km = getParameter_withload_Fujii("km1");
-%             obj.IT = [1 1 1 1;sqrt(2)*l*[-1 -1 1 1]/2; sqrt(2)*l*[1 -1 1 -1]/2; km*[1 -1 -1 1]];
         end
         
         function result=do(obj,param,~)
@@ -83,7 +80,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
             a = v_SuspendedLoad(x,xd',vf,vs',P);
             us = h234*invbeta2*a;
-            obj.result.input = uf +[0;us(2:4)];
+%             obj.result.input = uf +[0;us(2:4)];
 %             if isfield(Param,'dt')
 %                 dt = Param.dt;
 %                 vf = Vfdp(dt,x,xd',P,F1);
@@ -98,11 +95,15 @@ classdef HLC_SUSPENDED_LOAD < handle
 %             tmpHL = obj.self.marge.drone.result.input;
 %             obj.result.input = obj.IT*tmpHL;
             obj.result.input = tmpHL;
+%             force2thrust = THRUST2FORCE_TORQUE(obj.self,obj.param); %推力
             if strcmp(cha,'f')
                 obj.result.input = uf +[0;us(2:4)];
+%                 obj.result.input = force2thrust.do(tmp_input);
             end
 %             obj.self.input = obj.result.input;
+            
             obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも->input_transformで解決？
+
             result = obj.result;
         end
         function show(obj)
