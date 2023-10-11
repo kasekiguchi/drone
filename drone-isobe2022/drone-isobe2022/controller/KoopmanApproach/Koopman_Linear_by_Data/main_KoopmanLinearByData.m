@@ -10,13 +10,13 @@ flg.bilinear = 0; %1:双線形モデルへの切り替え
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-% FileName = 'EstimationResult_12state_9_6_saddle_circle=saddlecircle_estimation=saddle.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+% FileName = 'EstimationResult_12state_10_9_revandorder_circle=reverse_circle_estimation=revcircle.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
-% loading_filename = 'test';  
-loading_filename = 'experiment_6_20_circle';  %matは含まないように注意！
-% loading_filename = 'experiment_9_5_saddle';
+% loading_filename = 'experiment_10_9_revcircle';  
+loading_filename = 'experiment_10_10_reverseandorder_circle';  %matは含まないように注意！
+% loading_filename = 'experiment_6_20_circle';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -26,8 +26,8 @@ targetpath=append(nowFolder,'\',FileName);
 %% Defining Koopman Operator
 
 %<使用している観測量>
-F = @(x) [x;1]; % 状態変数+定数項1
-% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
+% F = @(x) [x;1]; % 状態変数+定数項1
+F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
 
 % load data
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
@@ -38,7 +38,7 @@ F = @(x) [x;1]; % 状態変数+定数項1
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 10; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 20; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -82,8 +82,8 @@ disp('Estimated')
 %% Simulation by Estimated model(作ったモデルでシミュレーション)
 %推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
-% simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
-simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
+simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
+% simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_7_11_circle_radius=0.7');
 
 

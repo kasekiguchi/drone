@@ -33,6 +33,7 @@ if logger.fExp==1
     data.phase = logger.Data.phase;
 %     data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
     data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
+%     data.startIndex = find(data.phase==102,1,'first') + 200; %逆円旋回
 %     data.startIndex = find(data.phase == 102, 1, 'first') + 150; %完全にサドル起動になった部分のデータのみを使用
 %     data.phase = logger.Data.phase;
     % data.endIndex = find(data.phase == 108,1,'last'); %ランディングまで全部
@@ -49,7 +50,7 @@ if logger.fExp==1
     for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
     end
-%     plot(logger.Data.t(data.startIndex:data.endIndex),data.input)
+    plot(logger.Data.t(data.startIndex:data.endIndex),data.input)
 else
     data.startIndex = 1;
     data.endIndex = data.N;

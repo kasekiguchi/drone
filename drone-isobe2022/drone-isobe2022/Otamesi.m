@@ -3,9 +3,10 @@ clear all;
 clc;
 
 %% データのインポート
-load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
+% load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
 % load("experiment_9_5_saddle_estimatordata.mat")
 % load("simulation_7_5_saddle.mat")
+load("")
 disp('load finished')
 
 for i = find(log.Data.phase==102,1,'first')+220:find(log.Data.phase==108,1,'first')
