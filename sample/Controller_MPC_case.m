@@ -1,8 +1,8 @@
 function Controller = Controller_MPC_case(Agent)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
-    Controller_param.dt = 0.25; % MPCステップ幅
-    Controller_param.H = 5;
+    Controller_param.dt = 0.1; % 0.25 MPCステップ幅
+    Controller_param.H = 10; % 5
 
     Controller_param.ConstEval = 100000;
 
@@ -33,19 +33,21 @@ function Controller = Controller_MPC_case(Agent)
 
     %% 4inputs
     Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
-    Controller_param.input_max = Agent.parameter.mass * 9.81 / 4 + 0.2;
-    Controller_param.input_min = Agent.parameter.mass * 9.81 / 4 - 0.2;
+    Controller_param.input_TH = 0.05;
+    Controller_param.input_max = Agent.parameter.mass * 9.81 / 4 + Controller_param.input_TH;
+    Controller_param.input_min = Agent.parameter.mass * 9.81 / 4 - Controller_param.input_TH;
     Controller_param.torque_TH = 0;
 
     %% 以下は変更なし
     fprintf("勾配MPC controller\n")
 
     Controller_param.ref_input = Controller_param.input.u;
-    Controller_param.input.v = Controller_param.input.u;
+    Controller_param.input.v = Controller_param.input.u .* [1;0;0;0];
 
 %     Controller.name = "mcmpc";
     Controller.name = "mpc";
-    Controller.type = "MPC_controller_org";
+    % Controller.type = "MPC_controller_org";
+    Controller.type = "MPC_controller_case_sub";
     Controller.param = Controller_param;
 
 end

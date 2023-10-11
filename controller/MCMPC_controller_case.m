@@ -114,7 +114,7 @@ classdef MCMPC_controller_case <handle
             end
 
             % サンプル数が小さくなった時に最小値を見失わないように
-            % obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); 
+            obj.input.Evaluationtra = obj.input.Evaluationtra(1, 1:obj.N); 
             
             %% 最適な入力の取得
             [Bestcost, BestcostID] = min(obj.input.Evaluationtra);

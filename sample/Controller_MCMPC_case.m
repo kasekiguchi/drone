@@ -5,7 +5,7 @@ function Controller = Controller_MCMPC_case(Agent)
     Controller_param.H = 10;
     Controller_param.Maxparticle_num = 5000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 5000;
+    Controller_param.Minparticle_num = 1000;
     Controller_param.input.Initsigma = 0.01*[1;0.1;0.1;0.1];
     Controller_param.input.Constsigma = 5.0*[1;1;1;1];
     Controller_param.input.Maxsigma = 1.0 * [1.5;1.5;1.5;1.5];
@@ -40,7 +40,7 @@ function Controller = Controller_MCMPC_case(Agent)
     fprintf("MCMPC controller\n")
 
     Controller.name = "mcmpc";
-    Controller.type = "MCMPC_controller";
+    Controller.type = "MCMPC_controller_case";
     Controller.param = Controller_param;
 
 end

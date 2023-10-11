@@ -35,7 +35,7 @@ classdef MPC_controller_case_sub <handle
             %%
             obj.input = obj.param.input;
             % obj.const = param.const;
-            % obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
+            obj.input.v = obj.modelp(1) * 9.81 / 4 * [1;0;0;0];   % 表示用
             obj.param.H = obj.param.H + 1;
             obj.model = self.plant;
             obj.param.fRemove = 0;
@@ -47,6 +47,9 @@ classdef MPC_controller_case_sub <handle
             obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
             
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H); 
+
+            %% input transform
+            obj.input.IT = [1 1 1 1;-obj.self.parameter.ly, -obj.self.parameter.ly, (obj.self.parameter.Ly - obj.self.parameter.ly), (obj.self.parameter.Ly - obj.self.parameter.ly); obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx), obj.self.parameter.lx, -(obj.self.parameter.Lx-obj.self.parameter.lx); obj.self.parameter.km1, -obj.self.parameter.km2, -obj.self.parameter.km3, obj.self.parameter.km4];
         end
 
         %-- main()的な
@@ -84,10 +87,11 @@ classdef MPC_controller_case_sub <handle
 
             %%
             obj.previous_input = var;
-            obj.result.input = var(:, 1); % 印加する入力 4入力
+            obj.result.input = var(:, 1); % 算出された入力
 
             %% データ表示用
             obj.input.u = obj.result.input; 
+            obj.input.v = obj.input.IT * obj.input.u; % トルク変換
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
@@ -105,12 +109,12 @@ classdef MPC_controller_case_sub <handle
                     obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
                     obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-                rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+                rt, obj.input.v(1), obj.input.v(2), obj.input.v(3), obj.input.v(4), exitflag);
             fprintf("\n");
             toc
 
             %% z < 0で終了
-            if obj.self.estimator.result.state < 0
+            if obj.self.estimator.result.state.p(3) < 0
                 warning("Z < 0")
             end
         end
