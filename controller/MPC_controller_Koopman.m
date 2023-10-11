@@ -86,7 +86,7 @@ classdef MPC_controller_Koopman < handle
             nonlcon = [];
 
 %             [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(obj,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
-            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(Param,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem);
+            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective_mex(Param,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem);
 
             %%
             obj.previous_input = var;
