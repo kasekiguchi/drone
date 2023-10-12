@@ -13,6 +13,7 @@ eF1=Controller.F1;
 eF2=Controller.F2;
 eF3=Controller.F3;
 eF4=Controller.F4;
+
 %% finite-time settling controlのalphaを計算
 
 % 入力のalphaを計算
@@ -45,6 +46,13 @@ syms ez3 [4 1] real
 syms ez4 [2 1] real
 if fFT ==1
     %FT
+
+Cc4 = [1 0 0 0];
+Ac5=[Ac4,zeros(4,1);-Cc4,0];
+Bc5=[Bc4;0];
+Controller.F1s=lqrd(Ac5,Bc5,diag([1000,100,10,10,0.01]),0.01,dt);
+eF1=Controller.F1s(1:4);
+
     Controller.Vep = matlabFunction([-eF1 * (sign(ez1).*abs(ez1).^az); -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1,ez2, ez3, ez4});
 else
     %LS
@@ -52,14 +60,18 @@ else
 end
 %servo
 syms z
-Cc2 = [1 0 0 0];
-Ac4s=[Ac4,zeros(4,1);-Cc2,0];
-Bc4s=[Bc4;0];
-Controller.F1s=lqrd(Ac4s,Bc4s,diag([1000,10,10,10,0.1]),0.01,dt);
+Cc4 = [1 0 0 0];
+% [Ad4,Bd4,~,~] = ssdata(c2d(ss(Ac4,Bc4,Cc4,0),dt));
+% Ad
+Ac5=[Ac4,zeros(4,1);-Cc4,0];
+Bc5=[Bc4;0];
+Controller.F1s=lqrd(Ac5,Bc5,diag([1000,10,10,10,0.1]),0.01,dt);
 eF1s=Controller.F1s;
-Controller.Vep = matlabFunction([-eF1s*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
+% Controller.Vep = matlabFunction([-eF1s*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
 % Controller.Vep = matlabFunction([-eF1s *[ez1;z]; -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1, ez2, ez3, ez4, z});
-eig(Ac4s - Bc4s * eF1s)
+% [Ad5,Bd5,~,~] = ssdata(c2d(ss(Ac5,Bc5,[-Cc4,0],0),dt));
+% eig(Ad5 - Bd5 * eF1s)
+eig(Ac5 - Bc5 * eF1s)
 
 Controller.dt = dt;
 Controller.type = "ELC";

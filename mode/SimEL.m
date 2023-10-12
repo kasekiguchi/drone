@@ -17,7 +17,7 @@ agent.parameter = DRONE_PARAM("DIATONE");
 
     % agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.6,"lx",0.18,"ly",0.12);%モデル誤差
     agent.parameter = DRONE_PARAM("DIATONE");
-    % agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1),1);
+    % agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1),0);
 %外乱を与える==========
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
 agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与

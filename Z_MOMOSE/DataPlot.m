@@ -5,9 +5,9 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
+fF=0;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
@@ -25,14 +25,23 @@ endTime = 1E2;
                 % log_HL_saddle
                 % log_EL_saddle
                 % log_HL_saddle
-                log_LS15d3
-                log_FT15d3
+                % log_LS15d3
+                % log_FT15d3
+                % log_EKF_B_0
 
                 % logger_FB_PP11,logger_FT_PP11
+                % log_HLLS_srv_8s2
+                % log_HLFT_srv_8s2
+                % log_HLLS_srv_8s
+                % log_HLaFTC_srv_8s
+
+                % logger_FT_c_09
+
                 % gui.logger
         };
     c=[
-        "LS","FT"
+        % "HLLS"
+        % "HLLS","HLFT"
            % "HL","EL"
            % "ELft"
         ];
@@ -402,7 +411,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                         est{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.p(1:3);
                         err{i}(:,j)=est{i}(:,j)-ref{i}(:,j);%誤差        
                         inp{i}(:,j)=loggers{i}.Data.agent.input{1,i2}(1:4);
-                        ininp{i}(:,j)=loggers{i}.Data.agent.inner_input{1,i2};
+                        % ininp{i}(:,j)=loggers{i}.Data.agent.inner_input{1,i2};
                         att{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.q(1:3);
                         vel{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.v(1:3);
                         w{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.w(1:3);

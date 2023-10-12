@@ -71,9 +71,11 @@ if fApprox_FTxy
 end
 
 %servoの時
+%バッテリーのヘリを考慮したさあーぼのゲインを作る
+%lqrとサーボの部分を置き換え
 Cc2 = [1 0];
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
-Controller.F1s=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([100,1,0.1]),0.1,dt);
+Controller.F1s=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([1000,10,1]),0.1,dt);
 syms z real % Model_EulerAngle_Servoを使う前提
 syms sz1 [2 1] real
 Ad1 = [Ad1,zeros(2,1);-Cc2,1];
@@ -105,6 +107,7 @@ Controller.type = "FTC";
 %assignin('base',"Controller",Controller);
 
 %% FTCのz方向サブシステムの入力の3階微分まで求める関数Vzftを作成
+%刻み時間を変えるときは生成し直す
 % syms zF [2 4]
 %  syms z(t)
 %  syms sz1 [2 1] real
@@ -133,4 +136,47 @@ Controller.type = "FTC";
 %             end
 % 
 %         matlabFunction([u, du, ddu, dddu],'file','Vzft.m', "Vars", {zF, sz1},'outputs',{'Vftc'});
+%% FTCのz方向サブシステム+servoの入力の3階微分まで求める関数Vzftを作成
+%刻み時間を変えるときは生成し直す
+% syms zF [2 4]
+% syms g
+%  syms z(t)
+%  syms sz1 [3 1] real
+%  dt =0.025;
+%  Ac2 = [0, 1; 0, 0];
+% Bc2 = [0; 1];
+%  Cc2 = [1 0];
+% [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
+% Ad1 = [Ad1,zeros(2,1);-Cc2,1];
+% Bd1 = [Bd1;0];
+% 
+%             u = 0; du = 0; ddu = 0; dddu = 0;
+%             for i=1:2
+%             ub(i) = -zF(i,1).*tanh(zF(i,2).*z(t)).*sqrt(z(t).^2 + zF(i,3)).^zF(i,4) ;
+%             dub(i) = diff(ub(i), t);
+%             ddub(i) = diff(dub(i), t);
+%             dddub(i) = diff(ddub(i), t);
+%             end
+% 
+%             for i = 1:2
+%                 u = u + subs(ub(i), z, sz1(i));
+%             end
+%                 u = u-g*sz1(3);
+%                        dz = Ad1*sz1 + Bd1*u;
+%             for i = 1:2
+%                 du = du + subs(dub(i), [diff(z, t) z], [dz(i) sz1(i)]);
+%             end
+%                du = du-g*dz(3);        
+%                        ddz = Ad1*dz + Bd1*du;
+%             for i = 1:2
+%                 ddu = ddu + subs(ddub(i), [diff(z, t, 2)  diff(z, t) z], [ddz(i)  dz(i) sz1(i)]);
+%             end
+%                 ddu = ddu - g*ddz(3);
+%                        dddz = Ad1*ddz + Bd1*ddu;
+%             for i = 1:2
+%                 dddu = dddu + subs(dddub(i), [diff(z, t, 3) diff(z, t, 2)  diff(z, t) z], [dddz(i) ddz(i)  dz(i) sz1(i)]);
+%             end
+%                 dddu = dddu - g*dddz(3);
+% 
+%         matlabFunction([u, du, ddu, dddu],'file','Vzft_srv.m', "Vars", {zF, sz1,g},'outputs',{'Vftc_srv'});
 end

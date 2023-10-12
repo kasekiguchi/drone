@@ -1,7 +1,13 @@
-function ref = way_point_ref(val,n,fconfirm)
+function ref = way_point_ref(val,n,fconfirm,fdrowfig)
 % time=[0,2,5,12];%time
 % point = [0,4,6,2;0,2,-1,4;0,3,5,2];%way points
 % n=5;%多項式次数
+arguments
+    val
+    n
+    fconfirm
+    fdrowfig=1
+end
 time = val(:,1)';
 point = val(:,2:end)';
 dtime = diff(time');%隣の点との差 dw_i = w_i - w_i-1 (dw_1 = 0),  i=1,2,3,...
@@ -82,6 +88,7 @@ ref.coefficients=coefficients;
 ref.t=time(2:end);
 ref.dt=dtime;
 
+
         if fconfirm
             names = fieldnames(ref.coefficients);            
             for i = 1:length(names)
@@ -115,31 +122,70 @@ ref.dt=dtime;
                     % for k = 1:3
                         xyz(:,j) = coefficients.(names{1})(:,:,i)*t_powers.(names{1})(t_ref);
                         vxyz(:,j) = coefficients.(names{2})(:,:,i)*t_powers.(names{2})(t_ref);
+                        axyz(:,j) = coefficients.(names{3})(:,:,i)*t_powers.(names{3})(t_ref);
                     % end
                     j=j+1;
                 end
-                close all
-                figure(1)
-                plot3(xyz(1,:),xyz(2,:),xyz(3,:));
-                hold on
-                plot3(point(1,:),point(2,:),point(3,:),"LineStyle","none","Marker","o")
-                grid on
-                hold off
-
-                figure(2)
-                plot(0:delta:end_time,xyz)
-                grid on
-
-                figure(3)
-                plot(0:delta:end_time,vxyz)
-                grid on
-
-                figure(4)
-                v_norm=sum(vxyz.^2).^0.5;
-                plot(0:delta:end_time,v_norm)
-
-                fprintf("If you confirmed trajectory, push the Enter key.");
-                input("");
-                close all
+    ref.xyz=xyz;
+    ref.vxyz=vxyz;
+    ref.axyz=axyz;
+                if fdrowfig
+                    close all
+                    i=1;
+                    figure(i)
+                    plot3(xyz(1,:),xyz(2,:),xyz(3,:));
+                    hold on
+                    plot3(point(1,:),point(2,:),point(3,:),"LineStyle","none","Marker","o")
+                    grid on
+                    hold off
+                    i=i+1;
+    
+                    figure(i)
+                    plot(0:delta:end_time,xyz)
+                    grid on
+                    i=i+1;
+    
+                    figure(i)
+                    tiledlayout("horizontal")
+                    nexttile
+                    plot(xyz(1,:),xyz(2,:))
+                    daspect([1,1,1])
+                    hold on
+                    plot(point(1,:),point(2,:),'Marker','o','LineStyle','none')
+                    grid on
+                    nexttile
+                    plot(xyz(1,:),xyz(3,:))
+                    daspect([1,1,1])
+                    hold on
+                    plot(point(1,:),point(3,:),'Marker','o','LineStyle','none')
+                    grid on
+                    nexttile
+                    plot(xyz(2,:),xyz(3,:))
+                    daspect([1,1,1])
+                    hold on
+                    plot(point(2,:),point(3,:),'Marker','o','LineStyle','none')
+                    grid on
+                    i=i+1;
+    
+                    figure(i)
+                    plot(0:delta:end_time,vxyz)
+                    hold on
+                    grid on
+                    v_norm=sum(vxyz.^2).^0.5;
+                    plot(0:delta:end_time,v_norm)
+                    i=i+1;
+    
+                    figure(i)
+                    plot(0:delta:end_time,axyz)
+                    hold on
+                    grid on
+                    a_norm=sum(axyz.^2).^0.5;
+                    plot(0:delta:end_time,a_norm)
+                    i=i+1;
+    
+                    fprintf("If you confirmed trajectory, push the Enter key.");
+                    input("");
+                    close all
+                end
         end
 end

@@ -379,8 +379,161 @@ plot(time,point,'o');
 plot(tt,v);
 
 
+%%
+syms x(t) [3 1]
+syms d
+% syms f [1,2]
+dt=0.025;
+A =[0 1 0;0 0 0;-1 0 0];
+B =[0; 1;0];
+f=[-2,-3, 4];
+u = f*x;
+s=diff(x)==A*x+B*u;%+ [0;d;0];
+S = dsolve(s)
+%%
+syms lam S x0 t 
+s1=x0*(1-exp(-lam*t))/lam;
+s2=S;
 
+s1n = subs(s1,[x0,t],[0.01,10]);
+% s1n = subs(s1,t,10);
 
+fplot(s1n,[0,0.5]);
+hold on
+fplot(0.05,[0,0.5]);
+slam = 0.159;
+fplot(0.01*exp(-slam*ts),[0,0.5])
+%%
+syms ts
+% a = int(0.01*exp(-slam*ts),[0,10]);
+a = 0.01*exp(-slam*ts);
+fplot(a,[0,10])
+%%
+Ac2 = [0,1;0,0];
+Bc2=[0;1];
+Cc2=[0 0];
+dt=0.025;
+[Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
+place(Ad1,Bd1,[-0.05,-1])
+%%
+close all
+clear 
+pn =15;%点の数
+n = 5;
+dt = 3;
+t = 0:dt:dt*(pn-1);
+
+i=1;
+f(i)=figure(i);
+f(i).WindowState = 'maximized';
+grid on
+xticks(-1.5:0.1:1.5)
+yticks(-1.5:0.1:1.5)
+xlim([-1.5 1.5])
+ylim([-1.5 1.5])
+xline(0);
+yline(0);
+xlabel('x')
+ylabel('y')
+daspect([1 1 1]);
+hold on
+posi = zeros(pn,3);
+for j = 1:pn
+    [gx,gy] = ginput(1);
+    gx=max(min(gx,1.5),-1.5);
+    gy=max(min(gy,1.5),-1.5);
+    posi(j,1:2) = round([gx,gy],1);
+    plot(posi(j,1),posi(j,2),'Marker','.','MarkerSize',12);
+    str = ['  p',num2str(j),' (',num2str(posi(j,1)),', ',num2str(posi(j,2)),')'];
+    text(posi(j,1),posi(j,2),str)
+end
+i=i+1;
+
+rx=way_point_ref([t',posi],n,1,0);
+
+f(i)=figure(i);
+f(i).WindowState = 'maximized';
+tiledlayout("horizontal")
+nexttile
+plot(rx.xyz(1,:),rx.xyz(2,:))
+xlabel('x')
+ylabel('y')
+daspect([1,1,1])
+pbaspect( [1,0.78084714548803,0.78084714548803]);
+hold on
+plot(posi(:,1),posi(:,2),'Marker','o','LineStyle','none')
+grid on
+nexttile
+plot(rx.xyz(1,:),rx.xyz(3,:))
+xlabel('x')
+ylabel('z')
+daspect([1,1,1])
+pbaspect( [1,0.78084714548803,0.78084714548803]);
+hold on
+plot(posi(:,1),posi(:,3),'Marker','o','LineStyle','none')
+grid on
+nexttile
+plot(rx.xyz(2,:),rx.xyz(3,:))
+xlabel('y')
+ylabel('z')
+daspect([1,1,1])
+pbaspect( [1,0.78084714548803,0.78084714548803]);
+hold on
+plot(posi(:,2),posi(:,3),'Marker','o','LineStyle','none')
+grid on
+i=i+1;
+while 1
+    k = input("If you use 'x-z' codinate, input '1' \nIf you use 'y-z' codinate, input '2' \nFill in : ");
+    if k==1||k==2
+        break
+    end
+end
+f(i)=figure(i);
+f(i).WindowState = 'maximized';
+grid on
+xticks(-1.5:0.1:1.5)
+yticks(-0.1:0.1:2)
+xlim([-1.5 1.5])
+ylim([-0.1 2])
+xline(0);
+yline(0);
+if k==1
+    xlabel('x')
+else
+    xlabel('y')
+end
+ylabel('z')
+daspect([1 1 1]);
+hold on
+plot(posi(:,k),zeros(pn,k),'Marker','.','MarkerSize',12,'LineStyle','none');
+for j = 1:pn
+    str = ['  px',num2str(j),' (',num2str(posi(j,k)),')'];
+    text(posi(j,k),0,str)
+end
+for j = 1:pn
+    [~,gy] = ginput(1);
+    gy=max(min(gy,2),0);
+    posi(j,3) = round(gy,1);
+    plot(posi(j,k),posi(j,3),'Marker','.','MarkerSize',12);
+    str = ['  p',num2str(j),' (',num2str(posi(j,k)),', ',num2str(posi(j,3)),')'];
+    text(posi(j,k),posi(j,3),str)
+end
+fprintf("If you confirmed points, push the Enter key.");
+input("");
+rz=way_point_ref([t',posi],n,1);
+
+% f(i)=figure(i);
+% plot3(rz.xyz(1,:),rz.xyz(2,:),rz.xyz(3,:));
+% hold on
+% plot3(posi(:,1),posi(:,2),posi(:,3),"LineStyle","none","Marker","o")
+% grid on
+% hold off
+% i=i+1;
+% 
+% f(i)=figure(i);
+% plot([0,rz.t],rz.xyz)
+% grid on
+% i=i+1;
 
 
 

@@ -57,7 +57,13 @@ methods
        %  if varargin{1}.t > 0
        %          obj.z = obj.z + xd(3)-x(7);
        % end
-       %  vf = obj.Vf(z1,obj.z);
+        % vf = obj.Vf(z1,obj.z);
+    %近似FTC+servo
+        % Kzz= -2*0.5*0.03/(0.3*10^2);
+        Kzz= -0.588*4/1000;
+        % Kzz=-1;
+        % vf = Vzft_srv(obj.approx_z,[z1;obj.z],Kzz);
+        % vf = Vzft_srv(obj.approx_z,[z1;obj.z],obj.param.F1s(3));
     %近似FTC
         vf = Vzft(obj.approx_z,z1);
         %x,y,psiの状態変数の値
