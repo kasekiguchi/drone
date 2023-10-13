@@ -26,6 +26,18 @@ end
 
 normalization = 1;
 
+%最大値，最小値取得
+for i = 1:3
+    mn.p(i,1) = min(data.p(i,:));
+    mx.p(i,1) = max(data.p(i,:));
+    mn.q(i,1) = min(data.q(i,:));
+    mx.q(i,1) = max(data.q(i,:));
+    mn.v(i,1) = min(data.v(i,:));
+    mx.v(i,1) = max(data.v(i,:));
+    mn.w(i,1) = min(data.w(i,:));
+    mx.w(i,1) = max(data.w(i,:));
+end
+
 %% 特定の範囲のグラフ出力
 
 % for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 108,1,'first')
@@ -42,18 +54,18 @@ normalization = 1;
 %% データの正規化
 if normalization == 1
     for i = 1:3
-    %平均値の算出
-    meanValue.p(i,:) = mean(data.p(i,:));
-    meanValue.q(i,:) = mean(data.q(i,:));
-    meanValue.v(i,:) = mean(data.v(i,:));
-    meanValue.w(i,:) = mean(data.w(i,:));
-    %標準偏差の算出
-    stdValue.p(i,:) = std(data.p(i,:));
-    stdValue.q(i,:) = std(data.q(i,:));
-    stdValue.v(i,:) = std(data.v(i,:));
-    stdValue.w(i,:) = std(data.w(i,:));
+        %平均値の算出
+        meanValue.p(i,:) = mean(data.p(i,:));
+        meanValue.q(i,:) = mean(data.q(i,:));
+        meanValue.v(i,:) = mean(data.v(i,:));
+        meanValue.w(i,:) = mean(data.w(i,:));
+        %標準偏差の算出
+        stdValue.p(i,:) = std(data.p(i,:));
+        stdValue.q(i,:) = std(data.q(i,:));
+        stdValue.v(i,:) = std(data.v(i,:));
+        stdValue.w(i,:) = std(data.w(i,:));
     end
-    
+
     sizeA = size(data.p,1);
     sizeB = size(data.p,2);
     meanValue.p = repmat(meanValue.p,1,sizeB);
