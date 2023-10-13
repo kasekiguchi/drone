@@ -58,14 +58,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.Pf = diag([55; 45; 10]);
 %     Params.Weight.QWf = diag([4800; 3500; 3000; 1; 1; 1]); %姿勢角、角速度終端
 
-    Params.Weight.P = diag([1.0; 25.0; 10.0]);    % 座標   1000 10
+    Params.Weight.P = diag([5.0; 2.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([3000; 7500; 1500; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2000; 2000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([25; 30; 10]);
-    Params.Weight.QWf = diag([3500; 3000; 1500; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([5; 2; 1]);
+    Params.Weight.QWf = diag([2800; 2800; 1200; 1; 1; 1]); %姿勢角、角速度終端
     %% 
 %     fprintf("%f秒\n", totalT)
 %     Fontsize = 15;  timeMax = 100;

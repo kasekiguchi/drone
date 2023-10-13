@@ -6,12 +6,12 @@ cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden;
-% clear all;
+clear all;
 clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-% load("Koopman_ホバリング_x=1_y=1_重み調整よくない.mat")
+load("Koopman_円旋回_radius=1_T=60_8_16.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')
@@ -119,9 +119,13 @@ ylabel('Position y [m]');
 grid on
 hold on
 plot(data.pr(1,:),data.pr(2,:));
-plot(0,1,'o','MarkerFaceColor','red','Color','red');
-% plot(1,-1,'o','MarkerFaceColor','red','Color','red');
-legend('Estimated trajectory','Trajectory','Initial position')
+% plot(1,1,'o','MarkerFaceColor','red','Color','red');
+% plot(1,1,'o','MarkerFaceColor',[0 0 0],'Color',[0 0 0],'Markersize',8);
+% plot(0,0,'o','MarkerFaceColor','red','Color','red','Markersize',8);
+legend('Estimated trajectory','Target trajectory')
+% legend('Estimated trajectory','Initial position','Target position')
+% xlim([-1.5 1.5])
+% ylim([-1 1.5])
 ax(5) = gca;
 
 figure(6)
@@ -143,7 +147,7 @@ xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Input u of agent1','FontSize',12);
 
-fontSize = 12; %軸の文字の大きさの設定
+fontSize = 14; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
 
 else
