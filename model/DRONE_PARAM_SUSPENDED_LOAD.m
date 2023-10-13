@@ -33,9 +33,9 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
         Length
         loadmass
         cableL
-        ex
-        ey
-        ez
+        % ex
+        % ey
+        % ez
         % T = k*w^2
         % T : thrust , w : angular velocity of rotor
         % M = km * T = km* k * w^2
@@ -68,9 +68,9 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 param.Length = 0.075;
                 param.loadmass = 0.0556;
                 param.cableL = 0.46;
-                param.ex = 0.0735417984963207;
-                param.ey = 0.0628671906594029;
-                param.ez = 0.037;
+                % param.ex = 0.0735417984963207;
+                % param.ey = 0.0628671906594029;
+                % param.ez = 0.037;
                 param.model_error = [];
             end
         obj.mass = param.mass;
@@ -94,9 +94,9 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
         obj.Length = param.Length;
         obj.loadmass = param.loadmass;
         obj.cableL = param.cableL;
-        obj.ex = param.ex;
-        obj.ey = param.ey;
-        obj.ez = param.ez;
+        % obj.ex = param.ex;
+        % obj.ey = param.ey;
+        % obj.ez = param.ez;
         if isempty(param.parameter_name)
             obj.parameter_name = string(properties(obj)');
             obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];

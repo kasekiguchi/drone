@@ -26,18 +26,13 @@ classdef HLC_SUSPENDED_LOAD < handle
                 xd = ref.state.get();
             end
             Param= obj.param;
-            P = Param.P;
+            %P = Param.P;
+            P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
+
             F1 = Param.F1;
             F2 = Param.F2;
             F3 = Param.F3;
             F4 = Param.F4;
-            %     xd=Xd.p;
-            %     if isfield(Xd,'v')
-            %         xd=[xd;Xd.v];
-            %         if isfield(Xd,'dv')
-            %             xd=[xd;Xd.dv];
-            %         end
-            %     end
             xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
 
 %             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
@@ -80,27 +75,12 @@ classdef HLC_SUSPENDED_LOAD < handle
             invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
             a = v_SuspendedLoad(x,xd',vf,vs',P);
             us = h234*invbeta2*a;
-%             obj.result.input = uf +[0;us(2:4)];
-%             if isfield(Param,'dt')
-%                 dt = Param.dt;
-%                 vf = Vfdp(dt,x,xd',P,F1);
-%             else
-%                 vf = Vfp(x,xd',P,F1);
-%             end
-%             vs = Vsp(x,xd',vf,P,F2,F3,F4);
-%             obj.result = Ufp(x,xd',vf,P) + Usp(x,xd',vf,vs',P);
-%             cha = obj.self.reference.point.flag;
-            cha = obj.self.reference.cha;
-            tmpHL = obj.self.controller.hlc.result.input;
-%             tmpHL = obj.self.marge.drone.result.input;
-%             obj.result.input = obj.IT*tmpHL;
-            obj.result.input = tmpHL;
-%             force2thrust = THRUST2FORCE_TORQUE(obj.self,obj.param); %推力
-            if strcmp(cha,'f')
+           cha = obj.self.reference.cha;
+           tmpHL = obj.self.controller.hlc.result.input;
+           obj.result.input = tmpHL;
+           if strcmp(cha,'f')
                 obj.result.input = uf +[0;us(2:4)];
-%                 obj.result.input = force2thrust.do(tmp_input);
             end
-%             obj.self.input = obj.result.input;
             
             obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも->input_transformで解決？
 
