@@ -11,7 +11,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("Koopman_円旋回_radius=1_T=60_8_16.mat")
+load("Koopman_円旋回_radius=1_T=60_10_14_重み改良.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')

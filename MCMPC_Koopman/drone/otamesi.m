@@ -11,7 +11,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("Koopman_ホバリング_x=1_y=1_そこそこきれい2.mat")
+load("Koopman_円旋回_radius=1_T=60_10_14_重み改良.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')
@@ -50,6 +50,7 @@ lgdtmp = {'$x_e$','$x_r$','$y_e$','$y_r$','$z_e$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
+ylim([-1.5 2])
 ax = gca;
 hold off
 title('Position p of agent1','FontSize',12);

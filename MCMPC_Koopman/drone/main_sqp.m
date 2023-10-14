@@ -29,10 +29,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- 重み
     %% 円旋回(重みの設定)
     Params.Weight.P = diag([100.0; 100.0; 100.0]);    % 座標   1000 1000 100
-    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
+    Params.Weight.V = diag([100.0; 100.0; 100.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([1000; 1000; 100; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([100; 100; 100; 100; 100; 100]);  % 姿勢角、角速度
     
 %-- data
     data.bestcost(idx+1) = 0;           % - もっともよい評価値
@@ -267,7 +267,7 @@ logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid o
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();
