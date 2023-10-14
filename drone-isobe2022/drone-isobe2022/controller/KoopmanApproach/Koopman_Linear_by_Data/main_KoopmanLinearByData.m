@@ -6,6 +6,7 @@ clear
 close all
 % フラグ管理
 flg.bilinear = 0; %1:双線形モデルへの切り替え
+Normalize = 1;
 
 %% 
 %データ保存先ファイル名(逐次変更する)
@@ -15,9 +16,9 @@ FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'experiment_10_9_revcircle';  
-loading_filename = 'experiment_10_10_reverseandorder_circle';  %matは含まないように注意！
+% loading_filename = 'experiment_10_10_reverseandorder_circle';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
-% loading_filename = 'experiment_10_11_test';
+loading_filename = 'experiment_10_11_test';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -27,8 +28,8 @@ targetpath=append(nowFolder,'\',FileName);
 %% Defining Koopman Operator
 
 %<使用している観測量>
-% F = @(x) [x;1]; % 状態変数+定数項1
-F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
+F = @(x) [x;1]; % 状態変数+定数項1
+% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
 
 % load data
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
@@ -39,7 +40,7 @@ F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角�
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 20; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 30; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -60,132 +61,13 @@ for i= 1: Data.HowmanyDataset
 end
 disp('loaded')
 
-%% 正規化(平均:0,標準偏差:1)
+if Normalize == 1 %正規化
+    Ndata = Normalization(Data);
+    Data.X = Ndata.X;
+    Data.Y = Ndata.Y;
+    Data.U = Ndata.U;
+end
 
-%         %平均値の算出
-%         meanValue.px(1,:) = mean(Data.X(1,:));
-%         meanValue.px(2,:) = mean(Data.X(2,:));
-%         meanValue.px(3,:) = mean(Data.X(3,:));
-%         meanValue.qx(1,:) = mean(Data.X(4,:));
-%         meanValue.qx(2,:) = mean(Data.X(5,:));
-%         meanValue.qx(3,:) = mean(Data.X(6,:));
-%         meanValue.vx(1,:) = mean(Data.X(7,:));
-%         meanValue.vx(2,:) = mean(Data.X(8,:));
-%         meanValue.vx(3,:) = mean(Data.X(9,:));
-%         meanValue.wx(1,:) = mean(Data.X(10,:));
-%         meanValue.wx(2,:) = mean(Data.X(11,:));
-%         meanValue.wx(3,:) = mean(Data.X(12,:));
-% 
-%         meanValue.py(1,:) = mean(Data.Y(1,:));
-%         meanValue.py(2,:) = mean(Data.Y(2,:));
-%         meanValue.py(3,:) = mean(Data.Y(3,:));
-%         meanValue.qy(1,:) = mean(Data.Y(4,:));
-%         meanValue.qy(2,:) = mean(Data.Y(5,:));
-%         meanValue.qy(3,:) = mean(Data.Y(6,:));
-%         meanValue.vy(1,:) = mean(Data.Y(7,:));
-%         meanValue.vy(2,:) = mean(Data.Y(8,:));
-%         meanValue.vy(3,:) = mean(Data.Y(9,:));
-%         meanValue.wy(1,:) = mean(Data.Y(10,:));
-%         meanValue.wy(2,:) = mean(Data.Y(11,:));
-%         meanValue.wy(3,:) = mean(Data.Y(12,:));
-%         %標準偏差の算出
-%         stdValue.px(1,:) = std(Data.X(1,:));
-%         stdValue.px(2,:) = std(Data.X(2,:));
-%         stdValue.px(3,:) = std(Data.X(3,:));
-%         stdValue.qx(1,:) = std(Data.X(1,:));
-%         stdValue.qx(2,:) = std(Data.X(2,:));
-%         stdValue.qx(3,:) = std(Data.X(3,:));
-%         stdValue.vx(1,:) = std(Data.X(1,:));
-%         stdValue.vx(2,:) = std(Data.X(2,:));
-%         stdValue.vx(3,:) = std(Data.X(3,:));
-%         stdValue.wx(1,:) = std(Data.X(1,:));
-%         stdValue.wx(2,:) = std(Data.X(2,:));
-%         stdValue.wx(3,:) = std(Data.X(3,:));
-% 
-%         stdValue.py(1,:) = std(Data.Y(1,:));
-%         stdValue.py(2,:) = std(Data.Y(2,:));
-%         stdValue.py(3,:) = std(Data.Y(3,:));
-%         stdValue.qy(1,:) = std(Data.Y(1,:));
-%         stdValue.qy(2,:) = std(Data.Y(2,:));
-%         stdValue.qy(3,:) = std(Data.Y(3,:));
-%         stdValue.vy(1,:) = std(Data.Y(1,:));
-%         stdValue.vy(2,:) = std(Data.Y(2,:));
-%         stdValue.vy(3,:) = std(Data.Y(3,:));
-%         stdValue.wy(1,:) = std(Data.Y(1,:));
-%         stdValue.wy(2,:) = std(Data.Y(2,:));
-%         stdValue.wy(3,:) = std(Data.Y(3,:));
-% 
-%     sizeA = size(Data.X,2);
-%     meanValue.px = repmat(meanValue.px,1,sizeA);
-%     meanValue.qx = repmat(meanValue.qx,1,sizeA);
-%     meanValue.vx = repmat(meanValue.vx,1,sizeA);
-%     meanValue.wx = repmat(meanValue.wx,1,sizeA);
-% 
-%     sizeB = size(Data.Y,2);
-%     meanValue.py = repmat(meanValue.py,1,sizeB);
-%     meanValue.qy = repmat(meanValue.qy,1,sizeB);
-%     meanValue.vy = repmat(meanValue.vy,1,sizeB);
-%     meanValue.wy = repmat(meanValue.wy,1,sizeB);
-%     
-%     %データの正規化
-%     normalizedData.px(1,:) = (Data.X(1,:) - meanValue.px(1,:));
-%     normalizedData.px(2,:) = (Data.X(2,:) - meanValue.px(2,:));
-%     normalizedData.px(3,:) = (Data.X(3,:) - meanValue.px(3,:));
-%     normalizedData.qx(1,:) = (Data.X(4,:) - meanValue.qx(1,:));
-%     normalizedData.qx(2,:) = (Data.X(5,:) - meanValue.qx(2,:));
-%     normalizedData.qx(3,:) = (Data.X(6,:) - meanValue.qx(3,:));
-%     normalizedData.vx(1,:) = (Data.X(7,:) - meanValue.vx(1,:));
-%     normalizedData.vx(2,:) = (Data.X(8,:) - meanValue.vx(2,:));
-%     normalizedData.vx(3,:) = (Data.X(9,:) - meanValue.vx(3,:));
-%     normalizedData.wx(1,:) = (Data.X(10,:) - meanValue.wx(1,:));
-%     normalizedData.wx(2,:) = (Data.X(11,:) - meanValue.wx(2,:));
-%     normalizedData.wx(3,:) = (Data.X(12,:) - meanValue.wx(3,:));
-% 
-%     normalizedData.py(1,:) = (Data.Y(1,:) - meanValue.py(1,:));
-%     normalizedData.py(2,:) = (Data.Y(2,:) - meanValue.py(2,:));
-%     normalizedData.py(3,:) = (Data.Y(3,:) - meanValue.py(3,:));
-%     normalizedData.qy(1,:) = (Data.Y(4,:) - meanValue.qy(1,:));
-%     normalizedData.qy(2,:) = (Data.Y(5,:) - meanValue.qy(2,:));
-%     normalizedData.qy(3,:) = (Data.Y(6,:) - meanValue.qy(3,:));
-%     normalizedData.vy(1,:) = (Data.Y(7,:) - meanValue.vy(1,:));
-%     normalizedData.vy(2,:) = (Data.Y(8,:) - meanValue.vy(2,:));
-%     normalizedData.vy(3,:) = (Data.Y(9,:) - meanValue.vy(3,:));
-%     normalizedData.wy(1,:) = (Data.Y(10,:) - meanValue.wy(1,:));
-%     normalizedData.wy(2,:) = (Data.Y(11,:) - meanValue.wy(2,:));
-%     normalizedData.wy(3,:) = (Data.Y(12,:) - meanValue.wy(3,:));
-% 
-%     Data.X(1,:) = (1/stdValue.px(1,:))*normalizedData.px(1,:);
-%     Data.X(2,:) = (1/stdValue.px(2,:))*normalizedData.px(2,:);
-%     Data.X(3,:) = (1/stdValue.px(3,:))*normalizedData.px(3,:);
-%     Data.X(4,:) = (1/stdValue.qx(1,:))*normalizedData.qx(1,:);
-%     Data.X(5,:) = (1/stdValue.qx(2,:))*normalizedData.qx(2,:);
-%     Data.X(6,:) = (1/stdValue.qx(3,:))*normalizedData.qx(3,:);
-%     Data.X(7,:) = (1/stdValue.vx(1,:))*normalizedData.vx(1,:);
-%     Data.X(8,:) = (1/stdValue.vx(2,:))*normalizedData.vx(2,:);
-%     Data.X(9,:) = (1/stdValue.vx(3,:))*normalizedData.vx(3,:);
-%     Data.X(10,:) = (1/stdValue.wx(1,:))*normalizedData.wx(1,:);
-%     Data.X(11,:) = (1/stdValue.wx(2,:))*normalizedData.wx(2,:);
-%     Data.X(12,:) = (1/stdValue.wx(3,:))*normalizedData.wx(3,:);
-% 
-%     Data.Y(1,:) = (1/stdValue.py(1,:))*normalizedData.py(1,:);
-%     Data.Y(2,:) = (1/stdValue.py(2,:))*normalizedData.py(2,:);
-%     Data.Y(3,:) = (1/stdValue.py(3,:))*normalizedData.py(3,:);
-%     Data.Y(4,:) = (1/stdValue.qy(1,:))*normalizedData.qy(1,:);
-%     Data.Y(5,:) = (1/stdValue.qy(2,:))*normalizedData.qy(2,:);
-%     Data.Y(6,:) = (1/stdValue.qy(3,:))*normalizedData.qy(3,:);
-%     Data.Y(7,:) = (1/stdValue.vy(1,:))*normalizedData.vy(1,:);
-%     Data.Y(8,:) = (1/stdValue.vy(2,:))*normalizedData.vy(2,:);
-%     Data.Y(9,:) = (1/stdValue.vy(3,:))*normalizedData.vy(3,:);
-%     Data.Y(10,:) = (1/stdValue.wy(1,:))*normalizedData.wy(1,:);
-%     Data.Y(11,:) = (1/stdValue.wy(2,:))*normalizedData.wy(2,:);
-%     Data.Y(12,:) = (1/stdValue.wy(3,:))*normalizedData.wy(3,:);
-
-%     for i = 1:3
-%         data.p(i,:) = (1/stdValue.p(i))*normalizedData.p(i,:);
-%         data.q(i,:) = (1/stdValue.q(i))*normalizedData.p(i,:);
-%         data.v(i,:) = (1/stdValue.v(i))*normalizedData.p(i,:);
-%         data.w(i,:) = (1/stdValue.w(i))*normalizedData.p(i,:);
-%     end
 
 %% クォータニオンのノルムをチェック(クォータニオンのノルムは1にならなければいけないという制約がある)
 % 閾値を下回った or 上回った場合注意文を提示
@@ -229,6 +111,8 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
+% simResult.Z(1:12,1) = (1/Ndata.stdValue.x(:,:))*(simResult.Z(1:12,1)-Ndata.meanValue.x(:,1));
+
 if flg.bilinear == 1  %　flg.bilinear == 1:双線形
     for i = 1:1:simResult.reference.N-2
         simResult.Z(:,i+1) = est.ABE'*[simResult.Z(:,i);simResult.U(:,i);reshape(kron(simResult.Z(:,i),simResult.U(:,i)),[],1)];
@@ -239,6 +123,12 @@ else
     end
 end
 simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
+
+%逆変換
+for i = 1:size(simResult.Xhat,1)
+    simResult.Xhat(i,:) = simResult.Xhat(i,:)*Ndata.stdValue.x(i,:)+Ndata.meanValue.x(i,1:size(simResult.Xhat,2));
+end
+
 
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
