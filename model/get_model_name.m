@@ -18,14 +18,8 @@ end
             model_full_name = "roll_pitch_yaw_thrust_torque_physical_parameter_model";
         case "R 18"
             model_full_name = "rotation_matrix_thrust_force_physical_parameter_model";
-        case "Load"
-            model_full_name = "with_load_model";
         case "Load_HL"
             model_full_name = "with_load_model_euler_for_HL";
-        case "Load_Euler"
-            model_full_name = "euler_with_load_model";
-%         "euler","euler_angle_model",12;
-%         "rodrigues","rodrigues_parameter_model",12;
         case "Cooperative_Load"
             model_full_name = "cable_suspended_rigid_body_with_" + N + "_drones";
       case "Cooperative_Load_eul"
