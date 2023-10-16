@@ -1,4 +1,4 @@
-classdef TIME_VARYING_REFERENCE_COOPERATIVE < handle
+classdef TIME_VARYING_REFERENCE_SUSPENDEDLOAD < handle
     % 時間関数としてのリファレンスを生成するクラス
     % obj = TIME_VARYING_REFERENCE()
     properties
@@ -12,7 +12,7 @@ classdef TIME_VARYING_REFERENCE_COOPERATIVE < handle
     end
 
     methods
-        function obj = TIME_VARYING_REFERENCE_COOPERATIVE(self, args)
+        function obj = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(self, args)
             % 【Input】ref_gen, param, "HL"
             % ref_gen : reference function generator
             % param : parameter to generate the reference function
@@ -26,32 +26,20 @@ classdef TIME_VARYING_REFERENCE_COOPERATIVE < handle
             param_for_gen_func = args{2};
             obj.func = gen_func_name(param_for_gen_func{:});
             if length(args) > 2
-                if strcmp(args{3}, "HL")
+                if strcmp(args{3}, "Suspended")
                     obj.func = gen_ref_for_HL(obj.func);
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));                    
-                end
-                if strcmp(args{3}, "Cooperative")
-                    obj.func = gen_ref_for_HL_Cooperative_Load(obj.func);
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3]));                    
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));                    
                 end
             else
                 obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
             end
             
-            if strcmp(args{3}, "Cooperative")
-                obj.result.state.set_state("xd",obj.func(0));
-                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
-                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-                obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
-            else
+            if strcmp(args{3}, "Suspended")
                 obj.result.state.set_state("xd",obj.func(0));
                 obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
                 obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
                 obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
             end
-            %syms t real
-            %obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
         function result = do(obj, varargin)  
            %Param={time,FH}
@@ -64,12 +52,6 @@ classdef TIME_VARYING_REFERENCE_COOPERATIVE < handle
            end           
            obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
-           % if length(obj.result.state.xd)>4
-           %  obj.result.state.v = obj.result.state.xd(5:7);
-           % else
-           %  obj.result.state.v = [0;0;0];
-           % end
-           % obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            result = obj.result;
         end
         function show(obj, logger)

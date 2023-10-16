@@ -1,4 +1,4 @@
-function U2 = H234_SuspendedLoad(in1,in2,in3,in4,in5)
+function U2 = H234_SuspendedLoad(obj,in1,in2,in3,in4,in5)
 %H234_SUSPENDEDLOAD
 %    U2 = H234_SUSPENDEDLOAD(IN1,IN2,IN3,IN4,IN5)
 

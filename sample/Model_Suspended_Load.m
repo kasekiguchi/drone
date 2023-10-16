@@ -7,6 +7,7 @@ arguments
 end
 Model.id = id;
 Model.name="load"; % print name
+Model.type="Suspended_Load_Model"; % model name
 
 %Setting.projection = @(x)[x(1:18);x(19:21)/norm(x(19:21));x(22:24)-dot(x(19:21)/norm(x(19:21)),x(22:24))*x(19:21)/norm(x(19:21))];
 if strcmp(agent ,"plant")
