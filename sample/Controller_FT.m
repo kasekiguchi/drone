@@ -1,260 +1,123 @@
-function Controller = Controller_FT(dt, fzapr, fzsingle, fxyapr, fxysingle, alp, erz, erxy)
+function Controller = Controller_FT(dt, fApprox_FTxy, fNewParam, fConfirmFig)
+%% flag and approximate range
+            % fApproxXY xy方向を近似する: 1 
+            % fNewParam 新しく更新する場合: 1
+            % fConfirmFig 近似入力のfigureを確認するか: 1
+            alp = [0.85,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+
+            %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
+            %zを近似する
+            x0 = [50, 0.01];%最小化の初期値
+            r=0.02;%緩和区間
+            ar = [1, 1];%近似に使う区間
+            br=[1.8,1.6];%制約の大きさ, 最小は0
+
+            %xyを近似する場合
+            %x方向
+            x0xy = [50, 0.01];%最小化の初期値
+            rx=0.02;%緩和区間
+            arx = [1,1,1,1];%近似に使う区間
+            brx=[1.8, 1.6, 0.5 ,0.2];%制約の大きさ, 最小は0
+            %y方向
+            ry=0.02;%緩和区間
+            ary = [1,1,1,1];%近似に使う区間
+            bry=[1.8, 1.6, 0.5 ,0.2];%制約の大きさ, 最小は0
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
-Bc4 = [0; 0; 0; 1];
-Controller.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt); %
-% Controller.F2=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-% Controller.F3=lqrd(Ac4,Bc4,diag([5000,1000,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-% 有限整定用
-Controller.F2 = lqrd(Ac4, Bc4, diag([2000, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller.F3 = lqrd(Ac4, Bc4, diag([2000, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Bc4 = [0; 0; 0;1];
+Controller.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt);
+Controller.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
 Controller.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
-syms sz1 [2 1] real
-syms sF1 [1 2] real
-[Ad1, Bd1, ~, ~] = ssdata(c2d(ss(Ac2, Bc2, [1, 0], [0]), dt));
-Controller.Vf = matlabFunction([-sF1 * sz1, -sF1 * (Ad1 - Bd1 * sF1) * sz1, -sF1 * (Ad1 - Bd1 * sF1)^2 * sz1, -sF1 * (Ad1 - Bd1 * sF1)^3 * sz1], "Vars", {sz1, sF1});
-%% 入力のalphaを計算
 
-anum = 4; %変数の数
-alpha = zeros(anum + 1, 1);
-alpha(anum + 1) = 1;
-alpha(anum) = alp; %alphaの初期値
-
+vF1 = Controller.F1;
+vF2 = Controller.F2;
+vF3 = Controller.F3;
+vF4 = Controller.F4;
+%% FTCの同次性のパラメータalphaを計算
+anum = 4; %最大の変数の個数
+alpha = zeros(anum + 1, 4);
+alpha(anum + 1,:) = 1*ones(1,anum);
+alpha(anum,:) = alp; %alphaの初期値
 for a = anum - 1:-1:1
-    alpha(a) = (alpha(a + 2) * alpha(a + 1)) / (2 * alpha(a + 2) - alpha(a + 1));
+    alpha(a,:) = (alpha(a + 2,:) .* alpha(a + 1,:)) ./ (2 .* alpha(a + 2,:) - alpha(a + 1,:));
 end
-
 Controller.alpha = alpha(anum);
-Controller.ax = alpha;
-Controller.ay = alpha;
-% Controller.az=alpha(anum-1:anum,1);
-% Controller.apsi=alpha(anum-1:anum,1);
-%masui
-Controller.az = alpha(1:2, 1);
-Controller.apsi = alpha(1:2, 1);
-%% 有限整定の近似微分　一層
-syms k [1 2] real
-%
-% fzFT = 10;%z方向に適用するか
-% fsingle = 1;%%%%%%%%%%%%%%%%%%%%
-Controller.fzapr = fzapr;
-
-if fzapr == 1
-    u = 0; du = 0; ddu = 0; dddu = 0;
-    syms fza [1 2] real
-    syms tanha [1 2] real
-    syms dtanha [1 2] real
-    syms ddtanha [1 2] real
-    syms dddtanha [1 2] real
-
-    syms z(t) ub
-    syms zF1 [1 3]
-
-    if fzsingle == 1
-        xz0 = [2, 2, 2];
-        fvals12z = zeros(2, 1);
-        f1 = zeros(2, 3);
-        k = Controller.F1;
-        %         erz=0.4; %近似する範囲を指定
-        for i = 1:2
-            fun = @(x)(integral(@(e) abs(-k(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + x(3) * e), erz(1), erz(2)));
-            [x, fval] = fminsearch(fun, xz0);
-            fvals12z(i) = 2 * fval;
-            f1(i, :) = x;
-        end
-
-        if 0
-
-            for i = 1:2
-                fza(i) = 1 / (1 + exp(-f1(i, 2) * 2 * sz1(i)));
-                tanha(i) = 2 * fza(i) - 1;
-                dtanha(i) = 4 * f1(i, end - 1) * fza(i) * (1 - fza(i));
-                ddtanha(i) = 8 * f1(i, end - 1)^2 * fza(i) * (1 - fza(i)) * (1 - 2 * fza(i));
-                dddtanha(i) = 16 * f1(i, end - 1)^3 * fza(i) * (1 - fza(i)) * (1 - 6 * fza(i) + 6 * fza(i)^2);
-
-            end
-
-            for i = 1:2
-                u = u -f1(i, 1) * tanha(i) -f1(i, 3) * sz1(i);
-            end
-
-            dz = Ad1 * sz1 + Bd1 * u;
-
-            for i = 1:2
-                du = du -f1(i, 1) * dtanha(i) * dz(i) -f1(i, 3) * dz(i);
-            end
-
-            ddz = Ad1 * dz + Bd1 * du;
-
-            for i = 1:2
-                ddu = ddu -f1(i, 1) * ddtanha(i) * (dz(i))^2 -f1(i, 1) * dtanha(i) * ddz(i) -f1(i, 3) * ddz(i);
-            end
-
-            dddz = Ad1 * ddz + Bd1 * ddu;
-
-            for i = 1:2
-                dddu = dddu -f1(i, 1) * dddtanha(i) * (dz(i))^3 -3 * f1(i, 1) * ddtanha(i) * dz(i) * ddz(i) -f1(i, 1) * dtanha(i) * dddz(i) -f1(i, 3) * dddz(i);
-            end
-
-        else
-            %===========================================diffをつかった
-            ub =- zF1(1) * tanh(zF1(2) * z(t)) - zF1(3) * z(t);
-            dub = diff(ub, t);
-            ddub = diff(dub, t);
-            dddub = diff(ddub, t);
-
-            for i = 1:2
-                u = u + subs(ub, [zF1 z], [f1(i, :) sz1(i)]);
-            end
-
-            %            dz = Ad1*sz1 + Bd1*u;
-            dz = Ac2 * sz1 + Bc2 * u;
-
-            for i = 1:2
-                du = du + subs(dub, [zF1 z diff(z, t)], [f1(i, :) sz1(i) dz(i)]);
-            end
-
-            %            ddz = Ad1*dz + Bd1*du;
-            ddz = Ac2 * dz + Bc2 * du;
-
-            for i = 1:2
-                ddu = ddu + subs(ddub, [zF1 z diff(z, t) diff(z, t, t)], [f1(i, :) sz1(i) dz(i) ddz(i)]);
-            end
-
-            %            dddz = Ad1*ddz + Bd1*ddu;
-            dddz = Ac2 * ddz + Bc2 * ddu;
-
-            for i = 1:2
-                dddu = dddu + subs(dddub, [zF1 z diff(z, t) diff(z, t, t) diff(z, t, t, t)], [f1(i, :) sz1(i) dz(i) ddz(i) dddz(i)]);
-            end
-
-        end
-
-        Controller.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
-    else
-        xz0 = [7, 10, 2, 100];
-        fvals22z = zeros(4, 1);
-        f2 = zeros(2, 4);
-        k = Controller.F1;
-        er = 1; %近似する範囲を指定 0.8 以上でないと近似精度高すぎで止まる．入力負になる
-
-        for i = 1:2
-            fun = @(x)(integral(@(e) abs(-k(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + x(3) * tanh(x(4) * e) + k(i) * e), 0, er));
-            options = optimset('MaxFunEvals', 1e5);
-            [x, fval] = fminsearch(fun, xz0, options);
-            fvals22z(i) = 2 * fval;
-            f2(i, :) = x; % gain_ser2(4*4)["f1", "a1", "f2", "a2"] * [x; dx; ddx; dddx]
-
-        end
-
-        for i = 1:2
-            fza(i) = 1 / (1 + exp(-f2(i, 2) * 2 * sz1(i)));
-            tanha(i) = 2 * fza(i) - 1;
-            dtanha(i) = 4 * f2(i, 2) * fza(i) * (1 - fza(i));
-            ddtanha(i) = 8 * f2(i, 2)^2 * fza(i) * (1 - fza(i)) * (1 - 2 * fza(i));
-            dddtanha(i) = 16 * f2(i, 2)^3 * fza(i) * (1 - fza(i)) * (1 - 6 * fza(i) + 6 * fza(i)^2);
-
-            fzb = 1 / (1 + exp(-f2(i, 4) * 2 * sz1(i)));
-            tanhb = 2 * fzb - 1;
-            dtanhb = 4 * f2(i, 4) * fzb * (1 - fzb);
-            ddtanhb = 8 * f2(i, 4)^2 * fzb * (1 - fzb) * (1 - 2 * fzb);
-            dddtanhb = 16 * f2(i, 4)^3 * fzb * (1 - fzb) * (1 - 6 * fzb + 6 * fzb^2);
-
-            u = u -f2(i, 1) * tanha(i) -f2(i, 3) * tanhb -k(i) * sz1(i);
-            dz = Ad1 * sz1 + Bd1 * u;
-            du = du -f2(i, 1) * dtanha(i) * f2(i, 2) * dz(i) -f2(i, 3) * dtanhb * f2(i, 4) * dz(i) -k(i) * dz(i);
-            ddz = Ad1 * dz + Bd1 * du;
-            ddu = ddu -f2(i, 1) * ddtanha(i) * (f2(i, 2) * dz(i))^2 -f2(i, 3) * ddtanhb * (f2(i, 4) * dz(i))^2 -f2(i, 1) * dtanha(i) * f2(i, 2) * ddz(i) -f2(i, 3) * dtanhb * f2(i, 4) * ddz(i) -k(i) * ddz(i);
-            dddz = Ad1 * ddz + Bd1 * ddu;
-            dddu = dddu -f2(i, 1) * dddtanha(i) * (f2(i, 2) * dz(i))^3 -f2(i, 3) * dddtanhb * (f2(i, 4) * dz(i))^3 -3 * f2(i, 1) * ddtanha(i) * f2(i, 2)^2 * dz(i) * ddz(i) -3 * f2(i, 3) * dtanhb * f2(i, 4)^2 * dz(i) * ddz(i) -f2(i, 1) * dtanha(i) * f2(i, 2) * dddz(i) -f2(i, 3) * dtanhb * f2(i, 4) * dddz(i) - k(i) * dddz(i);
-
-        end
-
-        Controller.Vf = matlabFunction([u, du, ddu, dddu], "Vars", {sz1});
-    end
-
+Controller.az = alpha(1:2,1);
+Controller.ax = alpha(1:4,2);
+Controller.ay = alpha(1:4,3);
+Controller.apsi = alpha(1:2, 4);
+%各サブシステムでalpを変える場合
+% Controller.az = alpha(3:4, 1);
+% Controller.ax = alpha(1:4,2);
+% Controller.ay = alpha(1:4,3);
+% Controller.apsi = alpha(3:4, 4);
+az =Controller.az ;
+ax =Controller.ax ;
+ay =Controller.ay;
+apsi =Controller.apsi;
+%%
+%z方向FTCの近似
+pz=FTC.paramSetting("z", r, ar, br, vF1, az',  x0, fNewParam, fConfirmFig);
+%xy方向FTCの近似
+if fApprox_FTxy
+    %x方向
+    px=FTC.paramSetting("x", rx, arx, brx, vF2, ax',  x0xy, fNewParam, fConfirmFig);
+    %y方向
+    py=FTC.paramSetting("y", ry, ary, bry, vF3, ay',  x0xy, fNewParam, fConfirmFig);
 end
-
 %% 二層
 syms sz2 [4 1] real
-syms sF2 [1 4] real
 syms sz3 [4 1] real
-syms sF3 [1 4] real
 syms sz4 [2 1] real
-syms sF4 [1 2] real
-Controller.Vs = matlabFunction([-sF2 * sz2; -sF3 * sz3; -sF4 * sz4], "Vars", {sz2, sz3, sz4, sF2, sF3, sF4});
-
-%% 再現実験
-% Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z
-% Controller.F2=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-% Controller.F3=lqrd([0 1 0 0;0 0 1 0;0 0 0 1; 0 0 0 0],[0;0;0;1],diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
-% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);
-% % 極配置
-% Eig=[-3.2,-2,-2.5,-2.1];
-% Controller.F1=lqrd([0 1;0 0],[0;1],diag([10,1]),[1],dt);                                % z
-% % Controller.F2=place(diag([1,1,1],1),[0;0;0;1],Eig);
-% % Controller.F3=place(diag([1,1,1],1),[0;0;0;1],Eig);
-% Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,1]),[1],dt);                       % ヨー角
-
-%% 近似のパラメータ
-% fxyapr=1;%%%近似するか
-% faprxm1=1;%%% tanh1 or tanh2
-
-kf2 = Controller.F3;
-% kf2(1)=3*kf2(1);
-Controller.fxyapr = fxyapr;
-gain_ser1 = zeros(4, 3);
-gain_ser2 = zeros(4, 5);
-
-if fxyapr == 1
-
-    if fxysingle == 1
-        %fminserch tanh 1つ
-        x0 = [2, 2, 2];
-        fvals12 = zeros(4, 1);
-        %     er=0.1; %近似する範囲を指定
-        gain_ser1 = zeros(4, 3);
-        ee = erxy;
-
-        for i = 1:4
-            %         if i==5
-            %             erxy=[0.2 0.3];
-            %         else
-            %             erxy=ee;
-            %         end
-            %         fun=@(x)(integral(@(e) abs( -kf2(i)*abs(e).^alpha(i) + x(1)*tanh(x(2)*e) + kf2(i)*e ) ,erxy(1), erxy(2)));
-            fun = @(x)(integral(@(e) abs(-1 * kf2(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + x(3) * e), erxy(1), erxy(2)));
-            options = optimset('MaxFunEvals', 1e5);
-            [x, fval] = fminsearch(fun, x0, options);
-            fvals12(i) = 2 * fval;
-            gain_ser1(i, :) = x; % gain_ser1(4*2)["f1", "a1"] * [x; dx; ddx; dddx]
-        end
-
-    else
-        %fminserch tanh 2つ
-        x0 = [5, 5, 5, 5];
-        fvals22 = zeros(4, 1);
-        %     er=0.4; %近似する範囲を指定
-        gain_ser2 = zeros(4, 4);
-
-        for i = 1:4
-            fun = @(x)(integral(@(e) abs(-kf2(i) * abs(e).^alpha(i) + x(1) * tanh(x(2) * e) + x(3) * tanh(x(4) * e) + kf2(i) * e), erxy(1), erxy(2)));
-            options = optimset('MaxFunEvals', 1e5);
-            [x, fval] = fminsearch(fun, x0, options);
-            fvals22(i) = 2 * fval;
-            gain_ser2(i, :) = x; % gain_ser2(4*4)["f1", "a1", "f2", "a2"] * [x; dx; ddx; dddx]
-        end
-
-    end
-
+if fApprox_FTxy 
+    %xy方向を近似
+    Controller.Vs = matlabFunction([-vF2 * (tanh(px(:,1).*sz2).*sqrt(px(:,2)+sz2.^2).^ax); -vF3 * (tanh(py(:,1).*sz3).*sqrt(py(:,2)+sz3.^2).^ay); -vF4 * (sign(sz4).*abs(sz4).^apsi)], "Vars", {sz2, sz3, sz4});
+else
+    %近似しない
+    Controller.Vs = matlabFunction([-vF2 * (sign(sz2).*abs(sz2).^ax); -vF3 * (sign(sz3).*abs(sz3).^ay); -vF4 * (sign(sz4).*abs(sz4).^apsi)], "Vars", {sz2, sz3, sz4});
 end
-
-Controller.gain1 = gain_ser1;
-Controller.gain2 = gain_ser2;
-
+%%
+Controller.approx_z = [Controller.F1', pz, az];%近似パラメータ
 Controller.dt = dt;
+eig(diag(1, 1) - [0; 1] * Controller.F1)
 eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
+eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F3)
+eig(diag(1, 1) - [0; 1] * Controller.F4)
+Controller.type = "FTC";
+% Controller.name = "hlc";
 
+%assignin('base',"Controller",Controller);
+
+%% FTCのz方向サブシステムの入力の3階微分まで求める関数Vzftを作成
+% syms zF [2 4]
+%  syms z(t)
+%  syms sz1 [2 1] real
+%             u = 0; du = 0; ddu = 0; dddu = 0;
+%             for i=1:2
+%             ub(i) = -zF(i,1).*tanh(zF(i,2).*z(t)).*sqrt(z(t).^2 + zF(i,3)).^zF(i,4);
+%             dub(i) = diff(ub(i), t);
+%             ddub(i) = diff(dub(i), t);
+%             dddub(i) = diff(ddub(i), t);
+%             end
+% 
+%             for i = 1:2
+%                 u = u + subs(ub(i), z, sz1(i));
+%             end
+%                        dz = Ad1*sz1 + Bd1*u;
+%             for i = 1:2
+%                 du = du + subs(dub(i), [diff(z, t) z], [dz(i) sz1(i)]);
+%             end
+%                        ddz = Ad1*dz + Bd1*du;
+%             for i = 1:2
+%                 ddu = ddu + subs(ddub(i), [diff(z, t, 2)  diff(z, t) z], [ddz(i)  dz(i) sz1(i)]);
+%             end
+%                        dddz = Ad1*ddz + Bd1*ddu;
+%             for i = 1:2
+%                 dddu = dddu + subs(dddub(i), [diff(z, t, 3) diff(z, t, 2)  diff(z, t) z], [dddz(i) ddz(i)  dz(i) sz1(i)]);
+%             end
+% 
+%         matlabFunction([u, du, ddu, dddu],'file','Vzft.m', "Vars", {zF, sz1},'outputs',{'Vftc'});
 end

@@ -25,4 +25,7 @@ syms sF3 [1 5] real
 syms sz4 [2 1] real
 syms sF4 [1 2] real
 Controller.Vs = matlabFunction([-sF2*[sz2;x(end-2)];-sF3*[sz3;x(end-1)];-sF4*sz4],"Vars",{sz2,sz3,sz4,sF2,sF3,sF4,x});
+Controller.type="FUNCTIONAL_HLC_SERVO";
+Controller.name="hlc";
+Controller.param=Controller;
 end
