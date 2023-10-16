@@ -18,6 +18,8 @@ end
             model_full_name = "roll_pitch_yaw_thrust_torque_physical_parameter_model";
         case "R 18"
             model_full_name = "rotation_matrix_thrust_force_physical_parameter_model";
+        case "Load"
+            model_full_name = "with_load_model";
         case "Load_HL"
             model_full_name = "with_load_model_euler_for_HL";
         case "Cooperative_Load"
