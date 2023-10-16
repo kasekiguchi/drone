@@ -1,4 +1,4 @@
-function U1 = Uf_SuspendedLoad(in1,in2,in3,in4)
+function U1 = Uf_SuspendedLoad(obj,in1,in2,in3,in4)
 %UF_SUSPENDEDLOAD
 %    U1 = UF_SUSPENDEDLOAD(IN1,IN2,IN3,IN4)
 

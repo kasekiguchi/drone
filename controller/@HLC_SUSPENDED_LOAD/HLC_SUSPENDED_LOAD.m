@@ -64,16 +64,16 @@ classdef HLC_SUSPENDED_LOAD < handle
             end
             if isfield(Param,'dt')
                 dt = Param.dt;
-                vf = Vfd_SuspendedLoad(dt,x,xd',P,F1);
+                vf = obj.Vfd_SuspendedLoad(dt,x,xd',P,F1);
             else
-                vf = Vf_SupendedLoad(x,xd',P,F1);
+                vf = obj.Vf_SupendedLoad(x,xd',P,F1);
             end
-            vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
-            uf = Uf_SuspendedLoad(x,xd',vf,P);
+            vs = obj.Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
             
-            h234 = H234_SuspendedLoad(x,xd',vf,vs',P);
-            invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-            a = v_SuspendedLoad(x,xd',vf,vs',P);
+            h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);
+            invbeta2 = obj.inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
+            a = obj.v_SuspendedLoad(x,xd',vf,vs',P);
             us = h234*invbeta2*a;
            cha = obj.self.reference.cha;
            tmpHL = obj.self.controller.hlc.result.input;

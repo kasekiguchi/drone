@@ -1,4 +1,4 @@
-function cV2 = Vs_SuspendedLoad(in1,in2,in3,in4,in5,in6,in7)
+function cV2 = Vs_SuspendedLoad(obj,in1,in2,in3,in4,in5,in6,in7)
 %VS_SUSPENDEDLOAD
 %    CV2 = VS_SUSPENDEDLOAD(IN1,IN2,IN3,IN4,IN5,IN6,IN7)
 
