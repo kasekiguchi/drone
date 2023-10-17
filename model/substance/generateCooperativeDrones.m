@@ -4,11 +4,10 @@ clc
 % Geometric Control of Multiple Quadrotor UAVs Transporting a Cable-Suspended Rigid Body
 % https://ieeexplore.ieee.org/document/7040353
 % 軸の取り方に注意
-% e3 = [0;0;1]; % 鉛直下向き zup : 鉛直上向き
-dir = "model/substance/Cooperative_drones/";
-N = 4; % エージェント数
+% e3 = [0;0;1]; % 鉛直下向き
 
 %% symbol定義
+N = 3; % エージェント数
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
 syms x0 [3 1] real % 位置
 syms dx0 [3 1] real
@@ -16,34 +15,44 @@ syms ddx0 [3 1] real
 syms r0 [4 1] real % 姿勢角（オイラーパラメータ）
 syms o0 [3 1] real % 角速度
 syms do0 [3 1] real
-syms qi [3 N] real % リンクのドローンから見た方向ベクトル：論文中qi
-syms wi [3 N] real % リンクの角速度
-syms R0 [3 3] real
-syms Ri [3 3 N] real
+syms qi [N 3] real % リンクのドローンから見た方向ベクトル：論文中qi
+qi = qi';
+syms wi [N 3] real % リンクの角速度
+wi = wi';
+syms dwi [N 3] real
+dwi = dwi';
 
 % ドローンに関する変数定義 %%%%%%%%%%%%%%%%%%
-syms ri [4 N] real % 姿勢角（オイラーパラメータ）
-syms oi [3 N] real % 角速度
+syms ri [N 4] real % 姿勢角（オイラーパラメータ）
+ri = ri';
+syms oi [N 3] real % 角速度
+oi = oi';
 syms fi [1 N] real % 推力入力
-syms Mi [3 N] real % モーメント入力
+syms Mi [N 3] real % モーメント入力
+Mi = Mi';
 %% 牽引物の物理パラメータ %%%%%%%%%%%%%%%%%%%
 syms g real % 重力加速度
 syms m0 real % 質量
 syms j0 [3 1] real % 慣性モーメント
-syms rho [3 N] real % 牽引物座標系でのリンク接続位置：第i列がi番目のドローンとの接続位置
+syms rho [N 3] real % 牽引物座標系でのリンク接続位置：第i列がi番目のドローンとの接続位置
+rho = rho';
 syms li [1 N] real % リンク長
 % ドローンの物理パラメータ %%%%%%%%%%%%%%%%%%%
 syms mi [1 N] real % 質量
-syms ji [3 N] real % 慣性モーメント
+syms ji [N 3] real % 慣性モーメント
+ji = ji';
 physicalParam = [g m0 j0' reshape(rho,1, 3*N) li mi reshape(ji,1,3*N)];
 %%
-[~,L0] = RodriguesQuaternion(r0); % 牽引物回転行列
-[~,Li] = RodriguesQuaternion(ri);%
+[R0,L0] = RodriguesQuaternion(r0); % 牽引物回転行列
+tmp = mat2cell(ri,4,ones(1,N));
+[Ri,Li] = arrayfun(@(q) RodriguesQuaternion(q{:}),tmp,'UniformOutput',false); % ドローン姿勢回転行列
 O0 = Skew(o0); % 牽引物の角速度行列（歪対象行列）
-Oi = arrayfun(@(i) Skew(oi(:,i)),1:N,'UniformOutput',false); % ドローン角速度行列
+tmp = mat2cell(oi,3,ones(1,N));
+Oi = arrayfun(@(o) Skew(o{:}),tmp,'UniformOutput',false); % ドローン角速度行列
 J0 = diag(j0); % 牽引物の慣性行列
-Ji = arrayfun(@(i) diag(ji(:,i)),1:N,'UniformOutput',false); % ドローン慣性行列
-e3 = [0;0;1]; %
+tmp = mat2cell(ji,3,ones(1,N));
+Ji = arrayfun(@(j) diag(j{:}),tmp,'UniformOutput',false); % ドローン慣性行列
+e3 = [0;0;1]; % 鉛直下向き
 Rho = arrayfun(@(i) Skew(rho(:,i)),1:N,'UniformOutput',false); % rho の歪対称化
 Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称化
 %% 状態：
@@ -51,184 +60,71 @@ Qi = arrayfun(@(i) Skew(qi(:,i)),1:N,'UniformOutput',false); % qi の歪対称�
 % リンク: 角度，角速度 : N x 6
 % ドローン:姿勢角，角速度
 x = [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
- % 13 + 13 * N states
 u = reshape([fi;Mi],4*N,1);
 %% 
-for i = 1:N
 % (1)
-dqi(:,i) = cross(wi(:,i),qi(:,i));
+tmp = arrayfun(@(i) Skew(wi(:,i))*qi(:,i),1:N,'UniformOutput',false);
+dqi = vertcat(tmp{:});
 % (2)
 dr0 = L0'*o0/2;
-dri(:,i) = Li(:,:,i)'*oi(:,i)/2;
-end
+tmp = arrayfun(@(i) Li{i}'*oi(:,i)/2,1:N,'UniformOutput',false);
+dri = vertcat(tmp{:});
 %%
 Mq = m0*eye(3) + qi*diag(mi)*qi';
-ui = arrayfun(@(i) fi(i)*Ri(:,:,i)*e3,1:N,'UniformOutput',false);
+ui = arrayfun(@(i) -fi(i)*Ri{i}*e3,1:N,'UniformOutput',false);
 ul = arrayfun(@(i) qi(:,i)*qi(:,i)'*ui{i},1:N,'UniformOutput',false); % (10)
 up = arrayfun(@(i) (eye(3) - qi(:,i)*qi(:,i)')*ui{i},1:N,'UniformOutput',false); % (11)
 %% (6) 
-lhs62 = zeros(3);
-rhs6 = zeros(3,1);
-for i = 1:N
-lhs62 = lhs62 + mi(i)*qi(:,i)*qi(:,i)'*R0*Rho{i};
-rhs6 = rhs6 + ul{i} -  mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*qi(:,i)*qi(:,i)'*R0*O0^2*rho(:,i);
-end
-eq6 = Mq*ddx0 -lhs62*do0 + Mq*g*e3 -rhs6;
+mqiqiR0 = arrayfun(@(i) mi(i)*qi(:,i)*qi(:,i)'*R0,1:N,'UniformOutput',false);
+tmp = arrayfun(@(i) mqiqiR0{i}*Rho{i},1:N,'UniformOutput',false);
+mqiqiR0rhoidO0 = [tmp{:}]*repmat(do0,N,1);
+tmp = arrayfun(@(i) mqiqiR0{i}*O0^2*rho(:,i),1:N,'UniformOutput',false);
+mqiqiR0O02rho = [tmp{:}]*ones(N,1);
+rhs6 = ([ul{:}])*ones(N,1)-qi*(mi.*li.*sum(wi.^2,1))'-mqiqiR0O02rho;
+eq6 = Mq*(ddx0 - g*e3) - mqiqiR0rhoidO0 -rhs6;
 %% (7)
-lhs71 = J0;
-lhs72 = zeros(3);
-rhs7 = zeros(3,1);
-for i = 1:N
-  lhs71 = lhs71 - mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)'*R0*Rho{i};
-  lhs72 = lhs72 + mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)';
-  rhs7 = rhs7 + Rho{i}*R0'*(ul{i} - mi(i)*li(i)*(wi(:,i)'*wi(:,i))*qi(:,i) - mi(i)*qi(:,i)*qi(:,i)'*R0*O0^2*rho(:,i)); % 論文通り
-end
-eq7 = lhs72*ddx0 + lhs71*do0 + lhs72*g*e3 + O0*J0*o0 - rhs7;
-
+lhs71 = J0*do0;
+tmp = arrayfun(@(i) mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)'*R0*Rho{i},1:N,'UniformOutput',false);
+lhs72 = [tmp{:}]*repmat(do0,N,1);
+tmp = arrayfun(@(i) mi(i)*Rho{i}*R0'*qi(:,i)*qi(:,i)',1:N,'UniformOutput',false);
+lhs73 = [tmp{:}]*repmat((ddx0-g*e3),N,1);
+lhs74 = O0*J0*o0;
+tmp = arrayfun(@(i) Rho{i}*R0',1:N,'UniformOutput',false);
+rhs71 = [tmp{:}]*vertcat(ul{:});
+tmp = arrayfun(@(i) Rho{i}*R0'*mi(i)*li(i)*sum(wi(:,i).^2),1:N,'UniformOutput',false);
+rhs72 = [tmp{:}]*reshape(qi,[3*N,1]);
+tmp = arrayfun(@(i) Rho{i}*R0'*mi(i)*qi(:,i)*qi(:,i)'*R0*O0^2,1:N,'UniformOutput',false);
+rhs73 = [tmp{:}]*reshape(rho,[3*N,1]);
+rhs7 = rhs71 - rhs72 - rhs73;
+eq7 = lhs71 - lhs72 + lhs73 + lhs74 - (rhs7);
 %% solve (6), (7) derive ddx0, do0
-A67 = [Mq, -lhs62;lhs72,lhs71];
-B67 = [rhs6 - Mq*g*e3; rhs7 - (lhs72*g*e3 + O0*J0*o0)];
-% A67*[ddx0;do0] = B67;
-Addx0do0 = A67;
-%%
-matlabFunction(Addx0do0,"File",dir+"Addx0do0_"+N,"Vars",{x R0 u physicalParam},'outputs',{'A'})
+% eq6 = A6*[ddx0;do0] + B6
+B6 = subs(eq6,[ddx0;do0],[0;0;0;0;0;0]);
+tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq6-B6,'UniformOutput',false);
+A6 = vertcat(tmp{:});
+% eq7 = A7*[ddx0;do0] + B7
+B7 = subs(eq7,[ddx0;do0],[0;0;0;0;0;0]);
+tmp=arrayfun(@(eq) fliplr(coeffs(eq,[ddx0;do0])),eq7-B7,'UniformOutput',false);
+A7 = vertcat(tmp{:});
+Addx0do0 = [A6;A7];
+matlabFunction(Addx0do0,"File","Addx0do0_"+string(N),"Vars",{x u physicalParam},'outputs',{'A'})
 syms iA [6 6] 
-matlabFunction(iA*B67,"File",dir+"ddx0do0_"+N,"Vars",{x R0 Ri u physicalParam iA},'outputs',{'dX'})
+matlabFunction(-iA*[B6;B7],"File","ddx0do0_"+string(N),"Vars",{x u physicalParam iA},'outputs',{'dX'});
 %% (8)
 syms ddX [6 1]  % ddX = [ddx0;do0]
-dwi = [];
-for i = 1:N
-  dwi = [dwi;li(i)\Qi{i}*(ddX(1:3) + g*e3 - R0*Rho{i}*ddX(4:6) + R0*O0^2*rho(:,i)) - (mi(i)*li(i))\Qi{i}*up{i}];
-end
+rhs81 = ddX(1:3)-g*e3; % 3x1
+tmp = arrayfun(@(i) R0*Rho{i}*ddX(4:6),1:N,'UniformOutput',false);
+rhs82 = tmp;
+rhs83 = arrayfun(@(i) R0*O0^2*rho(:,i),1:N,'UniformOutput',false);
+rhs8 =  arrayfun(@(i) li(i)\Qi{i}*(rhs81-rhs82{i}+rhs83{i})-(mi(i)*li(i))\Qi{i}*up{i},1:N,'UniformOutput',false);
 %% (9)
-doi = [];
-for i = 1:N
-  doi = [doi; Ji{i}\(-Oi{i}*Ji{i}*oi(:,i)+Mi(:,i))];
-end
+tmp = arrayfun(@(i) Ji{i}\(-Oi{i}*Ji{i}*oi(:,i)+Mi(:,i)),1:N,'UniformOutput',false);
+doi = vertcat(tmp{:});
+
 %% 
-% x = [x0;r0;dx0;o0;reshape([qi,wi],6*N,1);reshape(ri,4*N,1);reshape(oi,3*N,1)];
+
 %dX = [dx0;dr0;ddx0;do0;dqi;dwi;dri;doi];
-matlabFunction([dx0;dr0;ddX;reshape(dqi,[],1);dwi;reshape(dri,[],1);doi],"File",dir + "tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{x R0 Ri u physicalParam ddX},'outputs',{'dX'})
-%% gen cable_suspended_rigid_body_with_N_drones
-fname = "zup_cable_suspended_rigid_body_with_" + N + "_drones";
-str = "function dX = "+fname+"(x,u,P)\n"+...
-"R0 = RodriguesQuaternion(x(4:7));\n"+...
-"Ri = RodriguesQuaternion(reshape(x("+(13+6*N+1)+":"+(13+6*N+4*N)+"),4,[]));\n"+...
-"ddX = ddx0do0_"+N+"(x,R0,Ri,u,P,inv(Addx0do0_"+N+"(x,R0,u,P)));\n" + ...
-"dX = tmp_cable_suspended_rigid_body_with_"+N+"_drones(x,R0,Ri,u,P,ddX);\nend\n" + ...
-"%%%% 状態：\n%% 牽引物: 位置，姿勢角，速度，角速度，\n%% リンク: 角度，角速度\n" + ...
-"%% ドローン:姿勢角，角速度\n%% x = [p0 Q0 v0 O0 qi wi Qi Oi]\n";
-fileID = fopen(dir + fname+".m",'w');
-fprintf(fileID,str);
-fclose(fileID);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%% z up version : euler parameter
-% syms X [13*(N+1) 1] real
-% rp = [1 -1 -1]; rq = [1 1 -1 -1];
-% Rzup = [rp, rq, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rq, 1,N), repmat(rp, 1,N)]';
-% rX = Rzup.*X;
-%matlabFunction(subs(Addx0do0,x,rX),"File","zup_Addx0do0_"+N,"Vars",{X u physicalParam},'outputs',{'A'})
-%syms iA [6 6] 
-%matlabFunction(subs(-iA*[B6;B7],x,rX),"File","zup_ddx0do0_"+N,"Vars",{X u physicalParam iA},'outputs',{'dX'});
-%matlabFunction(subs(Rzup.*[dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],x,rX),"File","zup_tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{X u physicalParam ddX},'outputs',{'dX'});
-%% euler angle model : roll-pitch-yaw(ZYX) euler angle 
-syms eu0 [3 1] real
-syms eui [3 N] real
-syms deu0 [3 1] real
-syms deui [3 N] real
-Eq0 = simplify(Eul2Quat(eu0));
-Eqi = simplify(Eul2Quat(eui));
-der0 = dEulerdt(eu0,o0);
-deri = dEulerdt(eui,oi);
-%%
-xeu = [x0;eu0;dx0;o0;reshape([qi,wi],6*N,1);reshape(eui,3*N,1);reshape(oi,3*N,1)];
-% 12 + 12*N states
-fgueu = subs([dx0;der0;ddX;dqi;vertcat(rhs8{:});reshape(deri,3*N,1);doi],[r0,ri],[Eq0,Eqi]);
-
-%% z up version : euler angle
-syms X [12*(N+1) 1] real
-R = diag([1 -1 -1]);
-rp = [1 -1 -1];
-rZup = [rp, rp, rp, rp, repmat(rp, 1,N), repmat(rp, 1,N), repmat(rp, 1,N), repmat(rp, 1,N)]';
-rXeu = rZup.*X;
-%%
-matlabFunction(subs(subs(subs(Addx0do0,R0,R0zup),[r0,ri],[Eq0,Eqi]),xeu,rXeu),"File",dir + "zup_eul_Addx0do0_"+N,"Vars",{X R0 u physicalParam},'outputs',{'A'})
-%%
-syms iA [6 6] 
-matlabFunction(subs(subs(subs(subs(-iA*[B6;B7],R0,R0zup),Ri,Rizup),[r0,ri],[Eq0,Eqi]),xeu,rXeu),"File",dir+"zup_eul_ddx0do0_"+N,"Vars",{X R0 Ri u physicalParam iA},'outputs',{'dX'})
-%%
-matlabFunction(subs(subs(subs(rZup.*fgueu,R0,R0zup),Ri,Rizup),xeu,rXeu),"File",dir + "zup_eul_tmp_cable_suspended_rigid_body_with_"+N+"_drones","Vars",{X R0 Ri u physicalParam ddX},'outputs',{'dX'});
-%% gen zup_eul_cable_suspended_rigid_body_with_N_drones
-fname = "zup_eul_cable_suspended_rigid_body_with_" + N + "_drones";
-str = "function dX = "+fname+"(x,u,P)\n"+...
-"R0 = RodriguesQuaternion(Eul2Quat(x(4:6)));\n"+...
-"Ri = RodriguesQuaternion(Eul2Quat(x("+(12+6*N+1)+":"+(12+6*N+3*N)+")));\n"+...
-"ddX = zup_eul_ddx0do0_"+N+"(x,R0,Ri,u,P,inv(zup_eul_Addx0do0_"+N+"(x,R0,u,P)));\n" + ...
-  "dX = zup_eul_tmp_cable_suspended_rigid_body_with_"+N+"_drones(x,R0,Ri,u,P,ddX);\nend\n" + ...
-  "%%%% 状態：\n%% 牽引物: 位置，姿勢角，速度，角速度，\n%% リンク: 角度，角速度\n" + ...
-"%% ドローン:姿勢角，角速度\n%% x = [p0 Q0 v0 O0 qi wi Qi Oi]\n";
-fileID = fopen(dir + fname+".m",'w');
-fprintf(fileID,str);
-fclose(fileID);
-
-
-
-
-
-
-
-
-
-
-
-%%
-A = jacobian(rZup.*fgueu,xeu);
-matlabFunction(subs(A,[xeu;u],[rXeu;0*u]),"File",dir + "zup_eul_jacobian_"+string(N),"Vars",{X physicalParam ddX},'outputs',{'dAs'});
-
-%%
-A21= jacobian(subs([B6;B7],[r0,ri],[Eq0,Eqi]),xeu);
-Aeu = simplify(subs(Addx0do0,[r0,ri],[Eq0,Eqi]));
-dAeu = arrayfun(@(x) subs(diff(Aeu,x,1),xeu,rXeu),xeu','UniformOutput',false);
-dAddX = cellmatfun(@(A,i) A*ddX,dAeu,"mat");
-matlabFunction(subs(dAddX-A21,[xeu;u],[rXeu;0*u]),"File",dir + "zup_eul_dAddx0do0_"+N,"Vars",{X physicalParam,ddX},'outputs',{'dAs'},...
-  'Comments',[" Equation (6),(7) "," A*ddX + B ==0"," ddX = -A^-1*B"," d(ddX)/dx = -d(A^-1)/dx*B - A^-1*dB/dx",...
-  "= -A^-1(dA/dx*A^-1*B+dB/dx) = A^-1(dA/dx*ddX - dB/dx)",...
-  " dB/dx =: A21,  dA/dx =: dAddX ", " This function calc (dA/dx*ddX - dB/dx) = dAddX - A21"]);
-%%
-fname = "Jacobian_zup_eul_cable_suspended_rigid_body_with_" + N + "_drones";
-str = "function Aapp = "+fname+"(x,P)\n"+...
-"iA = inv(zup_eul_Addx0do0_"+N+"(x,zeros("+4*N+",1),P));\n"+...
-"ddX = zup_eul_ddx0do0_"+N+"(x,zeros("+4*N+",1),P,iA);\n" + ...
-"Aapp = zup_eul_jacobian_"+N+"(x,P,ddX);\n"+...
-"Aapp(7:12,:)= [1;-1;-1;1;-1;-1].*iA*zup_eul_dAddx0do0_"+N+"(x,P,ddX);\nend\n";
-fileID = fopen("estimator/ExtendedLinearization/" + fname+".m",'w');
-fprintf(fileID,str);
-fclose(fileID);
-
-
-
-
-
-
-
-
+matlabFunction([dx0;dr0;ddX;dqi;vertcat(rhs8{:});dri;doi],"File","tmp_cable_suspended_rigid_body_with_"+string(N)+"_drones","Vars",{x u physicalParam ddX},'outputs',{'dX'});
 
 
 
@@ -550,5 +446,3 @@ dxdata = reshape(cable_suspended_rigid_body_with_4_drones(xdata,udata,P),[5,13])
 %%
 eul = [pi/4 0 0];
 qZYX = eul2quat(eul)
-
-%%

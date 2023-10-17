@@ -21,6 +21,7 @@ classdef DRAW_COOPERATIVE_DRONES
     rho
     li
     N
+    line
   end
 
   methods
@@ -31,10 +32,10 @@ classdef DRAW_COOPERATIVE_DRONES
       obj.rho = param.self.parameter.rho;
       obj.li = param.self.parameter.li;
       data = logger.data(1,"p","e");
-      tM = max(data,1);
-      tm = min(data,1);
-      M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
-      m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
+      tM = data;%max(data,1);
+      tm = data;%min(data,1);
+      M = [max(tM(:,1)),max(tM(:,2)),max(tM(:,3))];
+      m = [min(tm(:,1)),min(tm(:,2)),min(tm(:,3))];
       if isfield(param,'frame_size')
         L = param.frame_size;
       else
@@ -44,7 +45,7 @@ classdef DRAW_COOPERATIVE_DRONES
       S = obj.system_size;
       obj.xlim = [m(1)-S(1) M(1)+S(1)];
       obj.ylim = [m(2)-S(2) M(2)+S(2)];
-      obj.zlim = [-S(3) M(3)+S(3)+1];
+      obj.zlim = [m(3)-S(3) M(3)+S(3)+1];
       if isfield(param,'ax')
         ax = param.ax;
       else
@@ -53,28 +54,22 @@ classdef DRAW_COOPERATIVE_DRONES
         varargin = {varargin{:},'ax',ax};
       end
       obj=obj.gen_frame(varargin{:});
-      obj=obj.gen_load(varargin{:},'cube',[sum(abs(obj.rho(1:3:end)))/2,sum(abs(obj.rho(2:3:end)))/2,sum(abs(obj.rho(3:3:end)))/2]);
-
+      obj=obj.gen_load(varargin{:},'cube',[sum(abs(obj.rho(1,:)))/2,sum(abs(obj.rho(2,:)))/2,sum(abs(obj.rho(3,:)))/2]);
+      
+       p0 = data(1,:);
+      q = obj.data_format(logger,1,"plant.result.state.Q","p");
+      [~,Q0] = obj.gen_Q(1,q(1,:));
+      qi = obj.data_format(logger,obj.target,"plant.result.state.qi","p");
+      [p,rho] = obj.gen_pi(p0,Q0,qi(1,:,:));
+      rp=[rho;p];
+      tt=vertcat(rp(:,:));
+      obj.line=plot3(tt(:,1:3:end),tt(:,2:3:end),tt(:,3:3:end));
       view(ax,3)
       grid(ax,'on')
       daspect(ax,[1 1 1]);
     end
-    function obj=gen_frame(obj,varargin)%param)
-      % arguments
-      %     obj
-      %     param.frame_size
-      %     param.rotor_r
-      %     param.target = 1;
-      %     param.fig_num = 1;
-      % end
+    function obj=gen_frame(obj,varargin)
       param = struct(varargin{:});
-      % if class(param.fig_num)=="matlab.ui.Figure"
-      %     obj.fig = param.fig_num;
-      %     ax = obj.fig.CurrentAxes;
-      % else
-      %     obj.fig = figure(param.fig_num);
-      %     ax = axes('XLim',obj.xlim,'YLim',obj.ylim,'ZLim',obj.zlim);
-      % end
       obj.ax = param.ax;
       ax = obj.ax;
       xlabel(obj.ax,"x [m]");
@@ -116,18 +111,11 @@ classdef DRAW_COOPERATIVE_DRONES
           [F1(2,:);F1(5,:);NaN(1,size(F1,2));F2(2,:);F2(5,:)], ...
           [F1(3,:);F1(6,:);NaN(1,size(F1,2));F2(3,:);F2(6,:)],'FaceColor',c(5)); % アーム部
         h(n,6) = surface(ax,xb,yb,zb,'FaceColor',c(5)); % ボディ楕円体
-        % h(n,7) = trisurf([5 1 2;5 2 3; 5 3 4; 5 4 1], ...
-        %   [0.02;0.02;0.02;0.02;4*1.2*L(1)/8], ...
-        %   0.8*L(2)*[1;-1;-1;1;0]/6, ...
-        %   0.01*[1;1;-1;-1;0],'FaceColor',c(5)); % 前を表す四角錐
 
         t(n) = hgtransform('Parent',ax); set(h(n,:),'Parent',t(n)); % ドローンを慣性座標と紐づけ
       end
       obj.frame = t;
       obj.thrust = tt;
-      %            if param.animation
-      %                obj.animation(logger,"realtime",true,"target",param.target,"gif",param.gif,"Motive_ref",param.Motive_ref,"fig_num",param.fig_num,"mp4",param.mp4);
-      %            end
     end
     function obj=gen_load(obj,varargin)
       param = struct(varargin{:});
@@ -135,21 +123,15 @@ classdef DRAW_COOPERATIVE_DRONES
       [x,y,z] = cylinder(ax,1,obj.N);
       z = z*param.cube(3)-param.cube(3)/2;
       h(1) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,:),x(2,:)],[y(1,:),y(2,:)],[z(1,:),z(2,:)],'FaceColor',"cyan");
-      h(2) = surf(x,y,z);
-      % a = param.cube(1)/2;
-      % b = param.cube(2)/2;
-      % c = param.cube(3)/2;
-      % Points = [-a -b -c;a -b -c;a b -c; -a b -c;-a -b c;a -b c;a b c; -a b c];
-      % Tri  = [1,4,3;1,3,2;5 6 7;5 7 8;1 5 8;1 8 4;1 2 6;1 6 5; 2 3 7;2 7 6;3 4 8;3 8 7];
-      % h = trisurf(triangulation(Tri,Points));
+      h(2) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,1),x(1,2:end)/5,x(2,1),x(2,2:end)/5],[y(1,1),y(1,2:end)/5,y(2,1),y(2,2:end)/5],[z(1,:)+0.001,z(2,:)],'FaceColor',"red");
+      h(3) = surf(x,y,z);
       ttt = hgtransform('Parent',ax); set(h,'Parent',ttt); % 推力を慣性座標と紐づけ
       obj.load = ttt;
     end
-    function draw(obj,target,p0,q0,p,q,u,rho)
+    function draw(obj,target,p0,q0,p,q,rho)
       % obj.draw(p,q,u)
       % p : 一ベクトル
       % q = [x,y,z,th] : 回転軸[x,y,z]にth回転
-      % u (optional): 入力
       arguments
         obj
         target
@@ -157,8 +139,7 @@ classdef DRAW_COOPERATIVE_DRONES
         q0
         p
         q       
-        u
-        rho
+        rho        
       end
 
       for n = target
@@ -170,26 +151,17 @@ classdef DRAW_COOPERATIVE_DRONES
         Txyz = makehgtform('translate',p(1,:,n));
         % Scaling matrix
          for i = 1:4
-        %   if u(1,i,n) > 0
-        %     S = makehgtform('scale',[1,1,u(1,i,n)]);
-        %   elseif u(i) < 0
-        %     S1 = makehgtform('xrotate',pi);
-        %     S = makehgtform('scale',[1,1,-u(1,i,n)])*S1;
-        %   else
-        %     S = eye(4);
-        %     S(3,3) = 1e-5;
-        %   end
            set(thrust(i),'Matrix',Txyz*R);
          end
-        % Concatenate the transforms and
-        % set the transform Matrix property
         set(frame,'Matrix',Txyz*R);
         
         R0 = makehgtform('axisrotate',q0(1,1:3),q0(1,4));
         % Translational matrix
         Txyz0 = makehgtform('translate',p0);
         set(obj.load,'Matrix',Txyz0*R0);
-      plot3([rho(1,1,n);p(1,1,n)],[rho(1,2,n);p(1,2,n)],[rho(1,3,n);p(1,3,n)]);
+        obj.line(n).XData = [p(1,1,n) rho(1,1,n)];
+        obj.line(n).YData = [p(1,2,n) rho(1,2,n)];
+        obj.line(n).ZData = [p(1,3,n) rho(1,3,n)];
       end
       drawnow
     end
@@ -215,15 +187,17 @@ classdef DRAW_COOPERATIVE_DRONES
       % end
       param = struct(varargin{:});
       ax = obj.ax;
+      fh = gcf;
+      fh.WindowState = 'maximized';
       p = obj.data_format(logger,1,"p","p");
       q = obj.data_format(logger,1,"plant.result.state.Q","p");
-      Q = obj.gen_Q(1,q);
+      [Q,Q0] = obj.gen_Q(1,q);
       u = obj.data_format(logger,obj.target,"input","");% N x 4m
       r = obj.data_format(logger,1,"p","r");
       qi = obj.data_format(logger,obj.target,"plant.result.state.qi","p");
       Qit = obj.data_format(logger,obj.target,"plant.result.state.Qi","p");
       Qi = obj.gen_Q(obj.target,Qit);
-      [pi,rho] = obj.gen_pi(p,Q,qi);
+      [pi,rho] = obj.gen_pi(p,Q0,qi);
 
       if isfield(param, "gif")
         sizen = 256;
@@ -248,7 +222,12 @@ classdef DRAW_COOPERATIVE_DRONES
           f(n) = animatedline(ax,'Color','r','MaximumNumPoints',15); % 目標軌道の描画点の制限
         end
       end
-      for i = 1:length(t)-1
+      if isfield(param,'ntimes')
+        skip = param.ntimes;
+      else
+        skip = 1;
+      end      
+      for i = 1:skip:length(t)-1
         if isfield(param,'Motive_ref')
           addpoints(ax,f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
         else
@@ -261,7 +240,16 @@ classdef DRAW_COOPERATIVE_DRONES
         if ~isvalid(obj.frame)
           obj=obj.gen_frame("target",param.target,"ax" ,ax);
         end
-        obj.draw(param.target,p(i,:),Q(i,:),pi(i,:,param.target),Qi(i,:,param.target),u(i,:,param.target),rho(i,:,param.target));
+        obj.draw(param.target,p(i,:),Q(i,:),pi(i,:,param.target),Qi(i,:,param.target),rho(i,:,param.target));
+        title(ax,"time : " + t(i));
+        if isfield(param,'lims')
+          obj.xlim = param.lims(1,:);
+          obj.ylim = param.lims(2,:);
+          obj.zlim = param.lims(3,:);
+          obj.ax.XLim = obj.xlim;
+          obj.ax.YLim = obj.ylim;
+          obj.ax.ZLim = obj.zlim;
+        end
 
         pause(0.01);
         if isfield(param,'gif')
@@ -278,15 +266,16 @@ classdef DRAW_COOPERATIVE_DRONES
           writeVideo(v,framev);
         end
       end
+      title(ax,"Finish !!");
       if isfield(param,'mp4')
         close(v);
       end
     end
     function [pi,rho] = gen_pi(obj,p,Q,qi)
       % pi(k,:,i) = [xi yi zi] at time k
-      Qrho = cell2mat(arrayfun(@(rho) quat_times_vec(Q',rho{1})',mat2cell(reshape(obj.rho,3,[]),3,ones(1,length(obj.target))),'UniformOutput',false));
-      q = repmat(p,1,length(obj.target))+Qrho;
-      rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target));
+      Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
+      q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
+      rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
       pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));      
     end
     function D = data_format(obj,logger,target,var,att)
@@ -294,23 +283,27 @@ classdef DRAW_COOPERATIVE_DRONES
       q = logger.data(1,var,att);
       D = reshape(q,size(q,1),size(q,2)/length(target),length(target));      
     end
-    function Q = gen_Q(obj,target,q)
+    function [Q,Q1] = gen_Q(obj,target,q)
+      % Q : for hgtransform : unit euler angle + its norm
+      % Qi : quaternion form
+        Q = zeros(size(q,1),4,length(target));
        for n = 1:length(target)
         switch size(q(:,:,n),2)
           case 3
-            Q1 = quaternion(q(:,:,n),'euler','XYZ','frame');
+            Q1 = quaternion(Eul2Quat(q(:,:,n)')');%quaternion(q(:,:,n),'euler','XYZ','frame');
           case 4
             Q1 = quaternion(q(:,:,n));
           case 9
             Q1 = quaternion(q(:,:,n),'rotmat','frame');
-        end
-        Q1 = rotvec(Q1);
-        tmp = vecnorm(Q1,2,2);
-        Q(:,:,n) = zeros(size(Q1,1),4);
+        end         
+        Q2 = rotvec(Q1);
+        Q1 = compact(Q1);
+        tmp = vecnorm(Q2,2,2);
+        Q(:,:,n) = zeros(size(Q2,1),4);
         Q(tmp==0,:,n) = 0;
         Q(tmp==0,1,n) = 1;
-        if sum(tmp~=0)
-          Q(tmp~=0,:,n) = [Q1(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
+        if sum(tmp~=0) ~=0
+        Q(tmp~=0,:,n) = [Q2(tmp~=0,:)./tmp(tmp~=0),tmp(tmp~=0)];
         end
       end
     end
