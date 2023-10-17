@@ -208,7 +208,7 @@
 
 %% TimeVarying
 function [xr] = Reference(params, T, Agent, ~, ~, ~, ~, ~)
-    xr = zeros(params.total_size, params.H);
+    xr = zeros(16, params.H);
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     % TimeVarying
     for h = 0:params.H-1

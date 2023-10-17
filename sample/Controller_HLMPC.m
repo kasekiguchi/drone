@@ -10,6 +10,9 @@ function Controller = Controller_HLMPC(~)
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
 
+    Controller_param.input_min = -1;
+    Controller_param.input_max = 1;
+
     %% sekiguchi-komatsu new
     Controller_param.Z = 1e2*diag([100; 1]);
     Controller_param.X = 1e4*diag([100,10,1,1]);

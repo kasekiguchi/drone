@@ -33,26 +33,18 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.self = self;
       %---MPCパラメータ設定---%
       obj.param = param;
-      %             obj.param.subCheck = zeros(obj.N, 1);
-      obj.param.modelparam.modelparam = obj.self.parameter.get();
-      obj.param.modelparam.modelmethod = obj.self.model.method;
-      obj.param.modelparam.modelsolver = obj.self.model.solver;
       obj.modelf = obj.self.model.method;
       obj.modelp = obj.self.parameter.get();
-
-      %%
-      
+      %%  
       obj.input = param.input;
       obj.const = param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-      obj.param.H = param.H + 1;
       obj.model = self.model;
       obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = param.input.Initsigma;  % 初期化
       obj.param.nextparticle_num = param.Maxparticle_num;   % 初期化
       obj.input.Bestcost_now = [1e1, 1e-5, 1e-5, 1e-5, 1e-5];% 十分大きい値にする  初期周期での比較用
-
       %% HL
       obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,param.dt);
       obj.N = param.particle_num;
@@ -62,8 +54,6 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % 重みの配列サイズ変換
       obj.Weight = repmat(blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI), 1, 1, obj.N);
       obj.WeightF = repmat(blkdiag(obj.param.Zf, obj.param.Xf, obj.param.Yf, obj.param.PHIf), 1, 1, obj.N);
-%       obj.Weight = repmat(blkdiag(obj.param.P,obj.param.V,obj.param.QW),1,1,obj.N); % ステージコスト
-%       obj.WeightF = repmat(blkdiag(obj.param.Pf,obj.param.Vf,obj.param.QWf),1,1,obj.N); % ターミナルコスト
       obj.WeightR = repmat(obj.param.R,1,1,obj.N);  % 目標入力
       obj.WeightRp = repmat(obj.param.RP,1,1,obj.N); % 前ステップとの入力
       % HL. A, B行列定義
@@ -77,10 +67,6 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
-      
-      %%
-      
-%       obj.param.te = 10;
     end
 
     %-- main()的な
@@ -94,21 +80,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.param.t = rt;
       idx = round(rt/obj.self.model.dt+1);
 
-      % InputV = param{5};
-
-      %% HL 5/18 削除------------------------------------------------------------------------------------------------------------------------
-      % ref = obj.self.reference.result;
-      % xd = ref.state.get();
-      % if isprop(ref.state,'xd')
-      %   if ~isempty(ref.state.xd)
-      %     xd = ref.state.xd; % 20次元の目標値に対応するよう
-      %   end
-      % end
-
       %% from main ref
-      xd = [xr(1:3,1); 0; xr(7:9,1); 0];
+      xd = [xr(1:3,1); 0; xr(7:9,1); 0]; % 9次多項式にも対応
       xd = [xd; zeros(24, 1)];
-%
+
       model_HL = obj.self.estimator.result;
       Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
       xn = [R2q(Rb0'*model_HL.state.getq("rotmat"));Rb0'*model_HL.state.p;Rb0'*model_HL.state.v;model_HL.state.w]; % [q, p, v, w]に並べ替え
@@ -118,7 +93,6 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       xd(9:11)=Rb0'*xd(9:11);
       xd(13:15)=Rb0'*xd(13:15);
       xd(17:19)=Rb0'*xd(17:19);
-
       P = obj.modelp;
       vfn = Vf(xn,xd',P,obj.F1); %v1
       z1n = Z1(xn,xd',P);
@@ -126,17 +100,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       z3n = Z3(xn,xd',vfn,P);
       z4n = Z4(xn,xd',vfn,P);
       obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)]; 
-      % xd に０ではない値が入っている。
-      % ↓
-      % obj.current_state=0じゃない。　ホバリング目標値で0,0,1が現在位置だから誤差があるわけではない
-      % ここも問題の一つ
       % -------------------------------------------------------------------------------------------------------------------------------------
       %% Referenceの取得、ホライズンごと
-      % obj.reference.xr = ControllerReference(obj); % 12 * obj.param.H 仮想状態 * ホライズン
-
-      % xd:114-119行目　仮想状態の目標値に変換？　➡　xdを評価関数としての目標値に再利用
-      % obj.reference.xr = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)];
-
       % xrを仮想状態目標値に変換 ホライズン分の変換
       % xyz yaw v_{xyz yaw} a_{xyz yaw}
       obj.reference.xd_imagine = [xr(1:3,:); zeros(1,obj.param.H); xr(7:9,:); zeros(1,obj.param.H);zeros(24, obj.param.H)]; % 実状態を仮想状態に合わせた形で抜き取る
@@ -174,17 +139,31 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       % obj.input.sigma(4) = 0;
       % 入力生成 Z; X; Y; YAW
-      obj.input.u1 = obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1); 
-      obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1);
-      obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1);
-      obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1);
+
+      % 目標値までの距離に対する入力の大きさ
+      input_constraints = @(x) (83.46*x-2.92) / 3;
+
+      %% mu = HL入力関係
+      input_TH = 20; % 最大最小入力
+      % mu(2,1) = input_constraints(xr(1)-obj.self.estimator.result.state.p(1)); % 目標値までの距離に応じた入力の平均
+      % mu(3,1) = input_constraints(xr(2)-obj.self.estimator.result.state.p(2));
+      obj.input.u1 = max(-input_TH, min(input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1))); 
+      obj.input.u2 = max(-input_TH, min(input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1))); 
+      obj.input.u3 = max(-input_TH, min(input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1))); 
+      obj.input.u4 = max(-input_TH, min(input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1))); 
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
       obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
-      %-- 状態予測
+      % max(0,min(10,tmp(1)))
+
+      % 目標値-仮想入力　関係
+      % input = 83.46 * ref - 2.92
+
+
+      %-- 状態予測　mex化　準備
       % Objpredict.H = obj.param.H;
       % Objpredict.N = obj.N; Objpredict.A = obj.A; Objpredict.B = obj.B;
       % Objpredict.input = obj.input.u; Objpredict.current_state = obj.current_state;
@@ -215,33 +194,29 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       if removeF ~= obj.N
         [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
         % トルク入力にしたらそれぞれの最適入力をとる必要あり？
-        % vf = obj.input.u(1, 1, BestcostID(2));     % 最適な入力の取得
-        % vs(1) = obj.input.u(2, 1, BestcostID(3));     % 最適な入力の取得
-        % vs(2) = obj.input.u(3, 1, BestcostID(4));
-        % vs(3) = obj.input.u(4, 1, BestcostID(5)); % 2,3,4,5 だと個別の評価値に対する入力
+        % vf = obj.input.u(1, 1, BestcostID(2));           % 最適な入力の取得
+        % vs(1,1) = obj.input.u(2, 1, BestcostID(3));      % こちらは確実に飛ぶが定常エラー
+        % vs(2,1) = obj.input.u(3, 1, BestcostID(4));
+        % vs(3,1) = obj.input.u(4, 1, BestcostID(5));      % 2,3,4,5 だと個別の評価値に対する入力
 
-        vf = obj.input.u(1, 1, BestcostID(1));     
-        vs(1) = obj.input.u(2, 1, BestcostID(1));     
-        vs(2) = obj.input.u(3, 1, BestcostID(1));
-        vs(3) = obj.input.u(4, 1, BestcostID(1)); 
+        input_ind = BestcostID(1); % 
+        vf      = obj.input.u(1, 1, input_ind);     
+        vs(1,1) = obj.input.u(2, 1, input_ind);     
+        vs(2,1) = obj.input.u(3, 1, input_ind);
+        vs(3,1) = obj.input.u(4, 1, input_ind); 
 
-        vs = vs';
+        % vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
         tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
         % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
-        % obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
-
-        % obj.result.input = [0.269*9.81; tmp(2); tmp(3); 0];
         obj.self.input = obj.result.input;  % agent.inputへの代入
 
-        obj.result.v = [vf; vs];
-        obj.input.v = obj.result.v;
+        obj.input.u = [vf; vs];
 
         %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
         %   評価が良くなったら標準偏差を狭めるようにしている
-
         obj.input.Bestcost_pre = obj.input.Bestcost_now;
         obj.input.Bestcost_now = Bestcost;
 
@@ -267,16 +242,11 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         obj.result.input = obj.self.input;
       end
 
-      obj.input.u = obj.input.v; % 仮想状態の保存
-
-      % 座標として軌跡を保存するため　x = xd + state
-      state_xd = [xd(3);xd(7);xd(1);xd(5);xd(9);xd(13);xd(2);xd(6);xd(10);xd(14);xd(4);xd(8)];
-
       obj.result.removeF = removeF;
       obj.result.removeX = removeX;
       obj.result.survive = survive;
       obj.result.COG = obj.state.COG;
-      obj.result.input_v = obj.input.v;
+      obj.result.input_v = obj.input.u; % input.v
       obj.result.BestcostID = BestcostID;
       obj.result.bestcost = Bestcost;
       obj.result.contParam = obj.param;
@@ -378,7 +348,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % Z = X;
       % for h = 2:obj.param.H-1
       %   Z(:,h,:) = Z(:,h,:) + Xd(1:12,1,:) - Xd(1:12,h,:);
-      % end
+      % endstageStateZ
 
       %% ホライズンで信頼度を下げる
       % k = linspace(1,0.1, obj.param.H-1);

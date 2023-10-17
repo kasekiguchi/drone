@@ -31,45 +31,83 @@ close all
 
 m = 3; n = 2;
 
-Eachcost = data.eachcost(:,1:end-1);
-
-% figure(1)
-% Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
-figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-ylabel("Position [m]")
-legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest");
-% yyaxis right
-% plot(logt, Eachcost(8,:)); 
-% plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
-% xlabel("Time [s]"); ylabel("Eval"); 
-% grid on; xlim([0 xmax]); ylim([0 5000]);
-% exportgraphics(gcf, "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_p.eps");
-% title("Time change of Position"); 
-% atiitude 0.2915 rad = 16.69 deg
-figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
-xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northwest");
-grid on; xlim([0 xmax]); ylim([-0.6 0.6]);
-% exportgraphics(gcf, "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_q.eps");
-% title("Time change of Atiitude");
-% velocity
-figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","southwest");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
-% exportgraphics(gcf, "D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_v.eps");
-% title("Time change of Velocity"); 
-% input
-figure(4); 
-plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northwest");
-grid on; xlim([0 xmax]); ylim([-inf 5.5]);
-ytickformat('%.1f')
-
-if ~isempty(data.input_v)
-    IV = data.input_v(:, 1:end-1);
-    figure(7); plot(logt, IV); legend("input1", "input2", "input3", "input4");
-    xlabel("Time [s]"); ylabel("input.V");
+Eachcost = data.eachcost(:,1:length(logt));
+fsave = 0;
+if fsave == 1
+    % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+    figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
+    ylabel("Position [m]")
+    legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest");
+    % yyaxis right
+    % plot(logt, Eachcost(8,:)); 
+    % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
+    xlabel("Time [s]");  
+    % grid on; xlim([0 xmax]); ylim([0 5000]);
+    % atiitude 0.2915 rad = 16.69 deg
+    figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
+    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northwest");
+    grid on; xlim([0 xmax]); ylim([-0.6 0.6]);
+    % velocity
+    figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
+    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","southwest");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
-% saveas(5, "../../Komatsu/MCMPC/InputV", "png");
+    % input
+    figure(4); 
+    plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
+    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northwest");
+    grid on; xlim([0 xmax]); ylim([-inf 5.5]);
+    ytickformat('%.1f')
+    
+    if ~isempty(data.input_v)
+        IV = data.input_v(:, 1:length(logt));
+        figure(7); plot(logt, IV); legend("input1", "input2", "input3", "input4");
+        xlabel("Time [s]"); ylabel("input.V");
+        grid on; xlim([0 xmax]); ylim([-inf inf]);
+    % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
+    end
+    
+    figure(20);
+    plot(logt, Eachcost(7:10,:)); xlim([0 xmax])
+    legend("Z.cost", "X.cost", "Y.cost", "PHI.cost", "Location", "northwest");
+else
+    % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+    subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
+    ylabel("Position [m]")
+    legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northeast");
+    % yyaxis right
+    % plot(logt, Eachcost(8,:)); 
+    % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
+    xlabel("Time [s]");  
+    % grid on; xlim([0 xmax]); ylim([0 5000]);
+    % atiitude 0.2915 rad = 16.69 deg
+    subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
+    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast");
+    grid on; xlim([0 xmax]); ylim([-0.6 0.6]);
+    % velocity
+    subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
+    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","northeast");
+    grid on; xlim([0 xmax]); ylim([-inf inf]);
+    % input
+    subplot(m,n,4); 
+    plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
+    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northeast");
+    grid on; xlim([0 xmax]); ylim([-inf 5.5]);
+    ytickformat('%.1f')
+    
+    if ~isempty(data.input_v)
+        IV = data.input_v(:, 1:length(logt));
+        subplot(m,n,5); plot(logt, IV); legend("input1", "input2", "input3", "input4","Location","northeast");
+        xlabel("Time [s]"); ylabel("input.V");
+        grid on; xlim([0 xmax]); ylim([-inf inf]);
+    % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
+    end
+    
+    subplot(m,n,6);
+    plot(logt, Eachcost(7:10,:)); xlim([0 xmax])
+    legend("Z.cost", "X.cost", "Y.cost", "PHI.cost", "Location", "northeast");
+    xlabel("Time [s]"); ylabel("Cost");
+
+    set(gcf, "WindowState", "maximized");
 end
 %%
 % zdis = (Edata(3,:) - (3/10 .* Edata(1,:)+0.1)) .* cos(atan(3/10));
@@ -101,7 +139,6 @@ end
 %% Position RMSE
 strRMSE = ["x"; "y"; "z"];
 dataRMSE = rmse(Edata, Rdata(1:3,:), 2)'
-% RMSE = [strRMSE, dataRMSE]
 
 %% Animation video
 % close all;

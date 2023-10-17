@@ -3,15 +3,19 @@ function Controller = Controller_HLMCMPC(~)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 10000; % 100000
+    Controller_param.Maxparticle_num = 100000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
     Controller_param.input.Initsigma = 1*[2,1,1,1];
     Controller_param.input.Constsigma = 50 * [0.01, 1,1,1];
-    Controller_param.input.Maxsigma = 10 * [0.01,1,1,1]; % 10
+    Controller_param.input.Maxsigma = 50 * [0.01,1,1,1]; % 10
     Controller_param.input.Minsigma = 1 * [0.001,1,1,1];
     Controller_param.input.Maxinput = 1.5;
     Controller_param.input.Constinput = 10;
+
+    Controller_param.input.range = 10;
+    % Controller_param.input.Maxsigma = 5 * [0.01,1,1,1]; % 10
+    % Controller_param.input.Minsigma = 0.1 * [0.001,1,1,1];
 
     Controller_param.ConstEval = 1e10;
      
@@ -36,14 +40,21 @@ function Controller = Controller_HLMCMPC(~)
 
     %% sekiguchi-komatsu new
     Controller_param.Z = 1e2*diag([100; 1]);
-    Controller_param.X = 1e6*diag([100,1000,1,1]);
-    Controller_param.Y = 1e6*diag([100,1000,1,1]);
+    Controller_param.X = 1e5*diag([100,1000,1,1]);
+    Controller_param.Y = 1e5*diag([100,1000,1,1]);
     Controller_param.PHI = diag([1; 1]);
 
-    Controller_param.Zf = diag([1e6; 1]);
-    Controller_param.Xf = 1e6 * diag([1e5,1e2,1,1]);
-    Controller_param.Yf = diag([1e5,1,1,1]);
-    Controller_param.PHIf = diag([1; 1]);
+    Controller_param.Zf = Controller_param.Z;
+    Controller_param.Xf = Controller_param.X;
+    Controller_param.Yf = Controller_param.Y;
+    Controller_param.PHIf = Controller_param.PHI;
+
+    % 
+    % 
+    % Controller_param.Zf = diag([1e6; 1]);
+    % Controller_param.Xf = 1e6 * diag([1e5,1e2,1,1]);
+    % Controller_param.Yf = diag([1e5,1,1,1]);
+    % Controller_param.PHIf = diag([1; 1]);
 
     Controller_param.R = 1e10 * diag([1.0; 1*[1.0; 1.0; 1.0]]);
     Controller_param.RP = 0 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
