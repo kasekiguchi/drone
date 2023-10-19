@@ -49,6 +49,15 @@ logger.plot({1,"plant.result.state.pL","pr"})
 % logger.plot({1,"p","pr"})
 hold on
 ylim([-0.2 2.1])
+
+%%
+clc
+aaaa= logger.data(1,"plant.result.state.Q","e");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+t=logger.data(0,'t',[]);
+Euldata=Quat2Eul(aaaa(:,1:4)');
+figure(101)
+plot(t,Euldata)
+legend("Roll","Pitch","Yaw")
 %%
 function result = controller_do(varargin)
 controller = varargin{5}.controller;
