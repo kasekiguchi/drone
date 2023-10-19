@@ -1,4 +1,15 @@
-s = 0; % initial time
+tmp = matlab.desktop.editor.getActive;
+dir = fileparts(tmp.Filename);
+if ~contains(path,dir)
+    cd(erase(dir,'\mode'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+close all hidden; clear ; clc;
+userpath('clear');
+end
+
+%%
+ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 25; % terminal time
 time = TIME(ts,dt,te); % instance of time class
