@@ -21,8 +21,9 @@ agent = DRONE;
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state,1,agent));%id,dt,type,initial,varargin
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
-agent.sensor = DIRECT_SENSOR(agent, 0.0);
-agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;1]},"Suspended"});
+agent.sensor = DIRECT_SE
+NSOR(agent, 0.0);
+agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;2]},"Suspended"});
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
 agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
 agent.controller.do = @controller_do;
@@ -31,7 +32,7 @@ agent.controller.result.input = [(agent.parameter.loadmass+agent.parameter.mass)
 run("ExpBase");
 %%
 clc
-for i = 0%1:time.te
+for i = 1:time.te
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -44,7 +45,10 @@ for i = 0%1:time.te
 end
 
 %%
-%logger.plot({1,"plant.result.state.pL","p"})
+logger.plot({1,"plant.result.state.pL","pr"})
+% logger.plot({1,"p","pr"})
+hold on
+ylim([-0.2 2.1])
 %%
 function result = controller_do(varargin)
 controller = varargin{5}.controller;
