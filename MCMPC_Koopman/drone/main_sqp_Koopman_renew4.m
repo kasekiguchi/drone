@@ -29,6 +29,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
     Params.PtoP = 0; %1：PtoP制御
 
+%     load("attitude_reference.mat");
+%     for i = 1:size(log.Data.agent.estimator.result,2)
+%         Params.attitude(:,i) = log.Data.agent.estimator.result{i}.state.q;
+%     end
     %% 重みの設定
     
 %     Params.Weight.P =  diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
@@ -47,14 +51,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1.0; 20.0; 10.0]);    % 座標   1000 10
+    Params.Weight.P = diag([4.0; 3.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([3000;6500;1500; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([3500;3500;1; 1; 1; 1100]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([20; 20; 10]);
-    Params.Weight.QWf = diag([3300; 3000; 1500; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([6; 4; 2]);
+    Params.Weight.QWf = diag([3800; 3800; 1; 1; 1; 1100]); %姿勢角、角速度終端
       %% 
 %     fprintf("%f秒\n", totalT)
 %     Fontsize = 15;  timeMax = 100;

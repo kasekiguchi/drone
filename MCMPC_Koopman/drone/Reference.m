@@ -59,12 +59,15 @@ function xr = Reference(params, T, Agent)
         
 end
 
+% %姿勢角にリファレンス導入
 % function xr = Reference(params, T, Agent, idx)
 %     % timevaryingをホライズンごとのreferenceに変換する
 %     % params.dt = 0.1;
 %     xr = zeros(params.total_size, params.H);    % initialize
 %     % 時間関数の取得→時間を代入してリファレンス生成
 %     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
+%     Ref_attitude = params.attitude(1:2,idx:idx+9);
+%     
 %     for h = 0:params.H-1
 %         t = T + params.dt * h; % reference生成時の時刻をずらす
 %         Ref = RefTime(t);
@@ -72,19 +75,12 @@ end
 %         xr(1:3, h+1) = Ref(1:3);
 %         xr(7:9, h+1) = Ref(5:7);
 %         % 抑制項
-%         if idx > 30
-%             xr(4:6, h+1) =   [0;0;0];
-%         else
-%             xr(4:5, h+1) =   params.attitude(1:2, h+1);
-%             xr(6, h+1) = 0;
-%         end
+%         xr(4:5, h+1) = Ref_attitude(1:2, h+1);
+%         xr(6, h+1) = 0;
 %         xr(10:12, h+1) = [0; 0; 0];
 %     
 %         xr(13:16, h+1) = params.ur;
 %     end
-%         if idx > 2
-%             params.attitude = params.attitude(:,params.i+1:end);
-%         end
 % end
 %% takeoff -> circle -> landing
 % function xr = Reference(params, T, Agent)

@@ -47,14 +47,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([15.0; 1.0; 6.0]);    % 座標   1000 10
+    Params.Weight.P = diag([4.0; 2.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([4500;1700;1; 1; 1; 1100]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([3400;3400;1; 1; 1; 1100]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([15; 5; 10]);
-    Params.Weight.QWf = diag([7600; 6500; 1300; 1; 1; 1100]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([6; 4; 2]);
+    Params.Weight.QWf = diag([3800; 3800; 1; 1; 1; 1100]); %姿勢角、角速度終端
       %% 
 %     fprintf("%f秒\n", totalT)
 %     Fontsize = 15;  timeMax = 100;
@@ -291,9 +291,9 @@ end
 %             error('入力が正しくありません');
 %         end
 
-%         if agent.estimator.result.state.p(3) < 0
-%             error('墜落しました');
-%         end
+        if agent.estimator.result.state.p(3) < 0
+            error('墜落しました');
+        end
 
         % for exp
         if fExp %実機

@@ -19,9 +19,9 @@ T = 60;
 % x = 0;
 % y = 0;
 
-x = 0;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
 
 %% circle2
 % x = 2*sin(2*pi*t/T);
@@ -29,13 +29,9 @@ z = 1;
 % z = 1;
 
 % %% circle2
-% x = sin(2*pi*t/T);
-% y = cos(2*pi*t/T);
-% z = 1;
-
-% x = 0;
-% y = 0;
-% z = 1;
+x = cos(2*pi*t/T);
+y = sin(2*pi*t/T);
+z = 1;
 
 % x = cos(t);
 % y = sin(t);
