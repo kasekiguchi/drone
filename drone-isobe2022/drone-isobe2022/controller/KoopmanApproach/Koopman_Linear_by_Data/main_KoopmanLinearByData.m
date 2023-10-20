@@ -5,8 +5,8 @@ clc
 clear
 close all
 % フラグ管理
-flg.bilinear = 0; %1:双線形モデルへの切り替え
-Normalize = 1;
+flg.bilinear = 1; %1:双線形モデルへの切り替え
+Normalize = 1; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
@@ -18,7 +18,8 @@ FileName = 'test.mat'; %お試し用
 % loading_filename = 'experiment_10_9_revcircle';  
 % loading_filename = 'experiment_10_10_reverseandorder_circle';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
-loading_filename = 'experiment_10_11_test';
+% loading_filename = 'experiment_10_11_test';
+loading_filename = 'sim_rndP4';
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -40,7 +41,7 @@ F = @(x) [x;1]; % 状態変数+定数項1
 % 使用するデータセットの数を指定
 % 23/01/26 run_mainManyTime.m で得たデータを合成
 disp('now loading data set')
-Data.HowmanyDataset = 30; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 100; %読み込むデータ数に応じて変更
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
@@ -63,11 +64,11 @@ disp('loaded')
 
 if Normalize == 1 %正規化
     Ndata = Normalization(Data);
-    Data.X = Ndata.X;
-    Data.Y = Ndata.Y;
-    Data.U = Ndata.U;
+    Data.X = Ndata.x;
+    Data.Y = Ndata.y;
+    Data.U = Ndata.u;
 end
-
+disp('Normalization is complete')
 
 %% クォータニオンのノルムをチェック(クォータニオンのノルムは1にならなければいけないという制約がある)
 % 閾値を下回った or 上回った場合注意文を提示
@@ -111,7 +112,16 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-% simResult.Z(1:12,1) = (1/Ndata.stdValue.x(:,:))*(simResult.Z(1:12,1)-Ndata.meanValue.x(:,1));
+if Normalize == 1 %推定精度検証用データの正規化
+    Data2.X = simResult.reference.X;
+    Data2.Y = zeros(size(Data2.X,1),size(Data2.X,2));
+    Data2.U = simResult.reference.U;
+    Ndata2 = Normalization(Data2);
+    for i  = 1:12
+    simResult.Z(i,1) = (simResult.Z(i,1)-Ndata2.meanValue.x(i))/Ndata2.stdValue.x(i);
+    end
+    simResult.U(:,:) = Ndata2.u;
+end
 
 if flg.bilinear == 1  %　flg.bilinear == 1:双線形
     for i = 1:1:simResult.reference.N-2
@@ -124,11 +134,11 @@ else
 end
 simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
 
-%逆変換
-for i = 1:size(simResult.Xhat,1)
-    simResult.Xhat(i,:) = simResult.Xhat(i,:)*Ndata.stdValue.x(i,:)+Ndata.meanValue.x(i,1:size(simResult.Xhat,2));
+if Normalize == 1 %逆変換
+    for i = 1:size(simResult.Xhat,1)
+        simResult.Xhat(i,:) = (simResult.Xhat(i,:) * Ndata.stdValue.x(i)) + Ndata.meanValue.x(i);
+    end
 end
-
 
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13

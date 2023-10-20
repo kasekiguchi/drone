@@ -10,7 +10,7 @@ clear all;
 clc;
 
 %% データのインポート
-load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
+load("sim_7_20_circle_estimatordata.mat") %読み込むデータファイルの設定
 % load("simulation_7_5_saddle.mat")
 disp('load finished')
 
@@ -22,20 +22,6 @@ for i = 1:find(log.Data.t,1,'last')
     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
-end
-
-normalization = 1;
-
-%最大値，最小値取得
-for i = 1:3
-    mn.p(i,1) = min(data.p(i,:));
-    mx.p(i,1) = max(data.p(i,:));
-    mn.q(i,1) = min(data.q(i,:));
-    mx.q(i,1) = max(data.q(i,:));
-    mn.v(i,1) = min(data.v(i,:));
-    mx.v(i,1) = max(data.v(i,:));
-    mn.w(i,1) = min(data.w(i,:));
-    mx.w(i,1) = max(data.w(i,:));
 end
 
 %% 特定の範囲のグラフ出力
@@ -50,43 +36,6 @@ end
 %     data.p(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
 %     data.u2(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.input{i}(:,1);
 % end
-
-%% データの正規化
-if normalization == 1
-    for i = 1:3
-        %平均値の算出
-        meanValue.p(i,:) = mean(data.p(i,:));
-        meanValue.q(i,:) = mean(data.q(i,:));
-        meanValue.v(i,:) = mean(data.v(i,:));
-        meanValue.w(i,:) = mean(data.w(i,:));
-        %標準偏差の算出
-        stdValue.p(i,:) = std(data.p(i,:));
-        stdValue.q(i,:) = std(data.q(i,:));
-        stdValue.v(i,:) = std(data.v(i,:));
-        stdValue.w(i,:) = std(data.w(i,:));
-    end
-
-    sizeA = size(data.p,1);
-    sizeB = size(data.p,2);
-    meanValue.p = repmat(meanValue.p,1,sizeB);
-    meanValue.q = repmat(meanValue.q,1,sizeB);
-    meanValue.v = repmat(meanValue.v,1,sizeB);
-    meanValue.w = repmat(meanValue.w,1,sizeB);
-    
-    %データの正規化
-    normalizedData.p = (data.p - meanValue.p);
-    normalizedData.q = (data.q - meanValue.q);
-    normalizedData.v = (data.v - meanValue.v);
-    normalizedData.w = (data.w - meanValue.w);
-    for i = 1:3
-        data.p(i,:) = (1/stdValue.p(i))*normalizedData.p(i,:);
-        data.q(i,:) = (1/stdValue.q(i))*normalizedData.p(i,:);
-        data.v(i,:) = (1/stdValue.v(i))*normalizedData.p(i,:);
-        data.w(i,:) = (1/stdValue.w(i))*normalizedData.p(i,:);
-    end
-    disp('Normalization is complete')
-end
-
 
 %% 各グラフで出力
 num = input('出力するグラフ形態を選択してください (各グラフで出力 : 0 / いっぺんに出力 : 1)：','s'); %0:各グラフで出力,1:いっぺんに出力

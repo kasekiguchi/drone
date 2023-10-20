@@ -8,7 +8,7 @@ for i = 1:size(Data.X,1)
 end
 
 for i = 1:4
-    meanvalue.u(i,:) = mean(Data.U(i,:));
+    meanValue.u(i,:) = mean(Data.U(i,:));
 end
 
 
@@ -22,29 +22,28 @@ for i = 1:4
     stdValue.u(i,:) = std(Data.U(i,:));
 end
 
-
 %列のサイズ調整
-Data_size = size(Data.X,2);
-meanValue.x = repmat(meanValue.x,1,Data_size);
-meanValue.y = repmat(meanValue.y,1,Data_size);
-meanValue.u = repmat(meanvalue.u,1,Data_size);
+% Data_size = size(Data.X,2);
+% meanValue.x = repmat(meanValue.x,1,Data_size);
+% meanValue.y = repmat(meanValue.y,1,Data_size);
+% meanValue.u = repmat(meanvalue.u,1,Data_size);
 % stdValue.u = repmat(stdValue.u,4,1);
 
 %データの正規化
 for i = 1:size(Data.X,1)
-    normalizedData.x(i,:) = Data.X(i,:) - meanValue.x(i,:);
-    normalizedData.y(i,:) = Data.Y(i,:) - meanValue.y(i,:);
-    data.X(i,:) = (1/stdValue.x(i,:))*normalizedData.x(i,:);
-    data.Y(i,:) = (1/stdValue.y(i,:))*normalizedData.y(i,:);
+    data.x(i,:) = (Data.X(i,:) - meanValue.x(i))/stdValue.x(i);
+    data.y(i,:) = (Data.Y(i,:) - meanValue.y(i))/stdValue.y(i);
 end
 
 for i = 1:4
-    data.U(i,:) = (1/stdValue.u(i,:))*(Data.U(i,:)-meanValue.u(i,:));
+    data.u(i,:) = (Data.U(i,:)-meanValue.u(i))/stdValue.u(i);
 end
 
 data.meanValue.x = meanValue.x;
 data.meanValue.y = meanValue.y;
+data.meanValue.u = meanValue.u;
 data.stdValue.x = stdValue.x;
 data.stdValue.y = stdValue.y;
+data.stdValue.u = stdValue.u;
 
 end
