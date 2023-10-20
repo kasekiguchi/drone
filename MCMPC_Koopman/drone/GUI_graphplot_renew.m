@@ -11,17 +11,17 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("attitude_reference.mat")
+load("Koopman_円旋回_radius=1_T=60_10_14_重み改良.mat")
 disp('load finished')
 
-for i = 1:find(log.Data.t,1,'last')
-    data.t(1,i) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
+for i = 1:find(logger.Data.t,1,'last')
+    data.t(1,i) = logger.Data.t(i,1);                                      %時間t
+    data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
 end
 
 %% 特定の範囲のグラフ出力
@@ -119,12 +119,13 @@ ylabel('Position y [m]');
 grid on
 hold on
 plot(data.pr(1,:),data.pr(2,:));
+daspect([1 1 1])
 % plot(1,1,'o','MarkerFaceColor','red','Color','red');
 % plot(1,1,'o','MarkerFaceColor',[0 0 0],'Color',[0 0 0],'Markersize',8);
 % plot(0,0,'o','MarkerFaceColor','red','Color','red','Markersize',8);
 legend('Estimated trajectory','Target trajectory')
 % legend('Estimated trajectory','Initial position','Target position')
-% xlim([-1.5 1.5])
+xlim([-1.5 1.5])
 % ylim([-1 1.5])
 ax(5) = gca;
 
