@@ -17,10 +17,10 @@ function Controller = Controller_MPC_Koopman(Agent)
     Controller_param.weight.V = diag([1; 1; 1]);    % 速度
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([2000; 2000; 1000; 1; 1; 1]);  % 姿勢角，角速度
+    Controller_param.weight.QW = diag([2500; 2500; 1000; 1; 1; 1]);  % 姿勢角，角速度
 
     Controller_param.weight.Pf = diag([5; 10; 1]); % 6
-    Controller_param.weight.QWf = diag([2400; 2400; 1200; 1; 1; 1]); % 7,8
+    Controller_param.weight.QWf = diag([3400; 3400; 1200; 1; 1; 1]); % 7,8
 
     %% 4inputs
     Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力

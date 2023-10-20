@@ -9,7 +9,7 @@ function ref = Case_study_trajectory(~)
 % end
 
 % T = param.freq;
-T = 60;
+T = 30;
 % r = 1;
 syms t real
 % x_0 = X0(1);
