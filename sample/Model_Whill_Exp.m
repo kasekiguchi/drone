@@ -13,7 +13,7 @@ arguments
     id
 end
 
-Model.id = id;
+setting.id = id;
 Model.type = "WHILL_EXP_MODEL"; % model name
 Model.name = "whill"; % print name
 setting.conn_type = conn_type;

@@ -1,4 +1,6 @@
 function env_param = Env_FloorMapSquare()
+env_param.name = 'floor';
+env_param.type = "FLOOR_MAP";
 %% environment class demo
 % env property をEnv classのインスタンス配列として定義
 % pout = [-5,-5;50,-5;50,50;-5,50];
@@ -90,4 +92,6 @@ pwallpoly = polyshape(pwall);
 Pwalls = union(Poutwall, pwallpoly);
 
 env_param.Vertices(:, :, 1) = Pwalls.Vertices;
+env_param.param = env_param;
+
 end

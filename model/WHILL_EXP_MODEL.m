@@ -14,13 +14,13 @@ end
 
 methods
 
-    function obj = WHILL_EXP_MODEL(args)
-        obj@MODEL_CLASS(args);
-        param = args;
-        obj.dt = 0.2; % check
+  function obj = WHILL_EXP_MODEL(varargin)
+        obj@MODEL_CLASS(varargin{:});
+        param = varargin{2}.param;
+%        obj.dt = 0.2; % check
         %% variable set
         obj.phase = 's';
-        obj.conn_type = param.param.conn_type;
+        obj.conn_type = param.conn_type;
 
         switch obj.conn_type
             case "udp"
