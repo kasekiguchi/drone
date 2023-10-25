@@ -1,4 +1,4 @@
-classdef DIRECT_SENSOR < SENSOR_CLASS
+classdef DIRECT_SENSOR < handle
 % simulation用クラス：状態をそのまま返す
 properties
     name = "direct";
@@ -23,7 +23,7 @@ methods
         obj.noise = noise;
     end
 
-    function result = do(obj, ~)
+    function result = do(obj, varargin)
         % 【入力】Target ：観測対象のModel_objのリスト
         tmp = obj.self.plant.state.get();
         obj.result.state.set_state(tmp + obj.noise * randn(size(tmp)));

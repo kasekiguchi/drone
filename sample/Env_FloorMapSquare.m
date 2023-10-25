@@ -1,9 +1,7 @@
 function env_param = Env_FloorMapSquare()
 %% environment class demo
 % env property をEnv classのインスタンス配列として定義
-env_param.name = 'floor';
-env_param.type = "FLOOR_MAP";
-% pout = [-2.5,-2.5;50,-2.5;50,50;-2.5,50];
+% pout = [-5,-5;50,-5;50,50;-5,50];
 % Poutpoly = polyshape(pout);
 % pin = [-6,-6;51,-6;51,51;-6,51];
 % Pinpoly = polyshape(pin);
@@ -23,16 +21,16 @@ env_param.type = "FLOOR_MAP";
 % Pwalls = union(Poutwall,pwallpoly);
 
 %%
-pout = [-5,-5;15,-5;15,15;-5,15];
+pout = [-5, -5; 15, -5; 15, 15; -5, 15];
 Poutpoly = polyshape(pout);
-pin = [-6,-6;16,-6;16,16;-6,16];
+pin = [-6, -6; 16, -6; 16, 16; -6, 16];
 Pinpoly = polyshape(pin);
-Poutwall = subtract(Pinpoly,Poutpoly);
+Poutwall = subtract(Pinpoly, Poutpoly);
 % pwall = [0,0;10,0;10,10;0,10];
 % pwallpoly = polyshape(pwall);
 Pwalls = union(Poutwall);
 
- %%
+%%
 % pout = [-10,-10;60,-10;60,60;-10,60];
 % Poutpoly = polyshape(pout);
 % pin = [-9,-9;29,-9;29,29;-9,29];
@@ -43,7 +41,7 @@ Pwalls = union(Poutwall);
 % Pwalls = union(Poutwall,pwallpoly);
 
 %%
-% 
+%
 % pout = [-5,-5;95,-5;95,95;-5,95];
 % Poutpoly = polyshape(pout);
 % pin = [-6,-6;96,-6;96,96;-6,96];
@@ -52,7 +50,6 @@ Pwalls = union(Poutwall);
 % pwall = [0,0;90,0;90,90;0,90];
 % pwallpoly = polyshape(pwall);
 % Pwalls = union(Poutwall,pwallpoly);
-
 
 %%
 % pout = [-3.5,-1.25;6,-1.25;6,8.75;-3.5,8.75];
@@ -74,24 +71,23 @@ Pwalls = union(Poutwall);
 % pwallpoly = polyshape(pwall);
 % Pwalls = union(Poutwall,pwallpoly);
 %%
-pout = [-5,-5;95,-5;95,95;-5,95];
+pout = [-5, -5; 95, -5; 95, 95; -5, 95];
 Poutpoly = polyshape(pout);
-pin = [-6,-6;96,-6;96,96;-6,96];
+pin = [-6, -6; 96, -6; 96, 96; -6, 96];
 Pinpoly = polyshape(pin);
-Poutwall = subtract(Pinpoly,Poutpoly);
-pwall = [0,0;90,0;90,90;0,90];
+Poutwall = subtract(Pinpoly, Poutpoly);
+pwall = [0, 0; 90, 0; 90, 90; 0, 90];
 pwallpoly = polyshape(pwall);
-Pwalls = union(Poutwall,pwallpoly);
+Pwalls = union(Poutwall, pwallpoly);
 %%
-pout = [-2,-2;10,-2;10,5;-2,5];
+pout = [-2, -2; 10, -2; 10, 5; -2, 5];
 Poutpoly = polyshape(pout);
-pin = [-2.5,-2.5;10.5,-2.5;10.5,5.5;-2.5,5.5];
+pin = [-2.5, -2.5; 10.5, -2.5; 10.5, 5.5; -2.5, 5.5];
 Pinpoly = polyshape(pin);
-Poutwall = subtract(Pinpoly,Poutpoly);
-pwall = [0,0;8,0;8,4;0,4];
+Poutwall = subtract(Pinpoly, Poutpoly);
+pwall = [0, 0; 8, 0; 8, 4; 0, 4];
 pwallpoly = polyshape(pwall);
-Pwalls = union(Poutwall,pwallpoly);
+Pwalls = union(Poutwall, pwallpoly);
 
-
-env_param.param.Vertices(:,:,1) = Pwalls.Vertices;
+env_param.Vertices(:, :, 1) = Pwalls.Vertices;
 end

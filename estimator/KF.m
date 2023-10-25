@@ -1,4 +1,4 @@
-classdef KF < ESTIMATOR_CLASS
+classdef KF < handle
    % Linear Kalman filter
     % obj = KF(model,param)
     %   model : EKFを実装する制御対象の制御モデル
@@ -16,24 +16,25 @@ classdef KF < ESTIMATOR_CLASS
         y
         state % model と同じ状態　cf. result.state は推定値として受け渡すよう？
         self
+        model
     end
     
     methods
         function obj = KF(self,param)
             obj.self= self;
-            obj.self.input = zeros(obj.self.model.dim(2),1);
-            model = self.model;
+            obj.model = param.model;
+            obj.self.input = zeros(obj.model.dim(2),1);
             obj.result.state= state_copy(model.state);
-            obj.y= state_copy(model.state);
+            obj.y= state_copy(obj.model.state);
             if isfield(param,'list')
                 obj.y.list = param.list;
             else
                 obj.y.list = [];
             end
-            obj.n = length(model.state.get());
+            obj.n = length(obj.model.state.get());
             obj.Q = param.Q;% 分散
             obj.R = param.R;% 分散
-            obj.dt = model.dt; % 刻み
+            obj.dt = obj.model.dt; % 刻み
             obj.A = param.A;
             obj.B = param.B;
             obj.C = param.C;
@@ -43,7 +44,7 @@ classdef KF < ESTIMATOR_CLASS
         function [result]=do(obj,param,sensor)
             %   param : optional
             if ~isempty(param) obj.dt = param; end
-            model=obj.self.model;
+            model=obj.model;
             if nargin == 2
                 sensor = obj.self.sensor.result;
             end
