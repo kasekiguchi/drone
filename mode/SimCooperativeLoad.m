@@ -82,9 +82,26 @@ logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "p
 %%
 logger.plot({1, "plant.result.state.Qi", "p"})
 %%
+% clc
+% aaaa= logger.data(1,"p","e");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+% t=logger.data(0,'t',[]);
+% % Euldata=Quat2Eul(aaaa(:,1:4)');
+% figure(101)
+% plot(t,aaaa)
+% legend("Roll","Pitch","Yaw")
+%%
+clc
+aaaa= logger.data(1,"plant.result.state.Qi","e");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+t=logger.data(0,'t',[]);
+% Euldata=Quat2Eul(aaaa(:,1:4)');
+Euldata=Quat2Eul(aaaa(:,1:4)');
+figure(101)
+plot(t,Euldata(3,:))
+legend("Roll","Pitch","Yaw")
+%%
 %close all
-mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-10 10;-10 10;-10 10],"ntimes",10);
+% mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
+% mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-10 10;-10 10;-10 10],"ntimes",10);
 
 %%
 logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})

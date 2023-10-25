@@ -16,7 +16,7 @@ close all hidden; clear all; userpath('clear');
 clc
 
 % SimBaseMode = ["SimCooperativeLoad","SimHL","SimVoronoi","SimLiDAR"];
-SimBaseMode = ["SimHL","SimVoronoi","SimSuspendedLoad","SimLiDAR"];
+SimBaseMode = ["SimHL","SimVoronoi","SimSuspendedLoad","SimLiDAR","SimSplitCooperativeLoad"];
 ExpBaseMode = ["ExpTestMotiveConnection","ExpHL"];
 
 fExp = 0;
