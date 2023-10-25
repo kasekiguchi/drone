@@ -16,11 +16,12 @@ Vdata = logger.data(1, "v", "e")';
 Qdata = logger.data(1, "q", "e")';
 Idata = logger.data(1,"input",[])';
 logt = logger.data('t',[],[]);
-Rdata = zeros(12, size(logt, 1));
+Rdata = logger.data(1, "p", "r")';
+% Rdata = zeros(12, size(logt, 1));
 IV = zeros(4, size(logt, 1));
-for R = 1:size(logt, 1)
-    Rdata(:, R) = data.xr{R}(1:12, 1); % cell2matにはできない　ホライズンがあるからcellオンリー
-end
+% for R = 1:size(logt, 1)
+%     Rdata(:, R) = data.xr{R}(1:12, 1); % cell2matにはできない　ホライズンがあるからcellオンリー
+% end
 % if fHL == 1
 %     Rdata = logger.data(1, "p", "r")';
 %     Rdata = [Rdata; zeros(9, 400)];
@@ -31,7 +32,7 @@ close all
 
 m = 3; n = 2;
 
-Eachcost = data.eachcost(:,1:length(logt));
+% Bestcost = data.bestcost(:,1:length(logt));
 fsave = 0;
 if fsave == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
@@ -79,14 +80,20 @@ else
     % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
     xlabel("Time [s]");  
     % grid on; xlim([0 xmax]); ylim([0 5000]);
-    % atiitude 0.2915 rad = 16.69 deg
-    subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
-    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast");
-    grid on; xlim([0 xmax]); ylim([-0.6 0.6]);
+
+    % subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
+    % xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast");
+    % grid on; xlim([0 xmax]); ylim([-0.6 0.6]);
+
+    subplot(m,n,2); plot(Edata(1,:), Edata(2,:)); hold on; plot(Rdata(1,:), Rdata(2,:), '--'); hold off;
+    daspect([1 1 1]);
+    legend("Estimate", "Reference");
+    xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
+
     % velocity
-    subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","northeast");
-    grid on; xlim([0 xmax]); ylim([-inf inf]);
+    % subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
+    % xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","northeast");
+    % grid on; xlim([0 xmax]); ylim([-inf inf]);
     % input
     subplot(m,n,4); 
     plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
@@ -101,14 +108,23 @@ else
         grid on; xlim([0 xmax]); ylim([-inf inf]);
     % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
     end
-    
-    subplot(m,n,6);
-    plot(logt, Eachcost(7:10,:)); xlim([0 xmax])
-    legend("Z.cost", "X.cost", "Y.cost", "PHI.cost", "Location", "northeast");
-    xlabel("Time [s]"); ylabel("Cost");
+    % 
+    % subplot(m,n,6);
+    % plot(logt, Bestcost); xlim([0 xmax])
+    % legend("Z.cost", "X.cost", "Y.cost", "PHI.cost", "Location", "northeast");
+    % xlabel("Time [s]"); ylabel("Cost");
 
     set(gcf, "WindowState", "maximized");
+
+    %%
+    % savename = 'HLMCMPC-linear-compare-good'
+    % saveas(gcf, strcat('../../png_save/', savename), 'png');
 end
+
+%% 評価値の比較
+% figure(22);
+% plot(logt, Bestcost(1,:), logt, sum(Bestcost(2:5,:), 1)); legend("All", "SUM");
+
 %%
 % zdis = (Edata(3,:) - (3/10 .* Edata(1,:)+0.1)) .* cos(atan(3/10));
 % figure(7);
@@ -139,22 +155,24 @@ end
 %% Position RMSE
 strRMSE = ["x"; "y"; "z"];
 dataRMSE = rmse(Edata, Rdata(1:3,:), 2)'
+data.rmse = dataRMSE;
 
 %% Animation video
 % close all;
 % agent(1).animation(logger,"target",1); 
 
+%% error
+% figure(20)
+% error = Edata(1:3, :) - Rdata(1:3, :);
+% plot(logt, error);
+
 %% save
 data_now = datestr(datetime('now'), 'yyyymmdd');
-Title = strcat(['HLMCMPC-', '-N'], num2str(data.param.Maxparticle_num), '-', data.param.H, 's-', datestr(datetime('now'), 'HHMMSS'));
+Title = strcat(['HLMCMPC-', 'N'], num2str(data.param.Maxparticle_num), '-', data.param.H, 's-', datestr(datetime('now'), 'HHMMSS'));
 Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 if exist(Outputdir) ~= 7
-    mkdir ../../students/komatsu/simdata/20230910/
+    mkdir ../../students/komatsu/simdata/20231019/
 end
 
+% save('C:/Users/student/Documents/students/komatsu/simdata/20231019/HLMCMPC-N-1000-linear-0_2t.mat', "agent", "data","initial","logger","Params","totalT", "time", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
-% saveas(1,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_p.epsc");
-% saveas(2,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_q.epsc");
-% saveas(3,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_v.eps");
-% saveas(4,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_input.eps");
-% saveas(7,"D:\Documents\OneDrive - 東京都市大学 Tokyo City University\研究室_2023\SICE2023_小松祥己\fig\slope_ZZ.eps")

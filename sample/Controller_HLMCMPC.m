@@ -3,13 +3,13 @@ function Controller = Controller_HLMCMPC(~)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 100000; % 100000
+    Controller_param.Maxparticle_num = 1000000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
-    Controller_param.input.Initsigma = 1*[2,1,1,1];
+    Controller_param.input.Initsigma = 1*[0.1,1,1,1];
     Controller_param.input.Constsigma = 50 * [0.01, 1,1,1];
-    Controller_param.input.Maxsigma = 50 * [0.01,1,1,1]; % 10
-    Controller_param.input.Minsigma = 1 * [0.001,1,1,1];
+    Controller_param.input.Maxsigma = 10 * [0.3452,1,1,1]; % 10
+    Controller_param.input.Minsigma = 0.01 * [0.3452,1,1,1];
     Controller_param.input.Maxinput = 1.5;
     Controller_param.input.Constinput = 10;
 
@@ -39,9 +39,9 @@ function Controller = Controller_HLMCMPC(~)
 %     Controller_param.QWf = diag([1000 1]);  
 
     %% sekiguchi-komatsu new
-    Controller_param.Z = 1e2*diag([100; 1]);
-    Controller_param.X = 1e5*diag([100,1000,1,1]);
-    Controller_param.Y = 1e5*diag([100,1000,1,1]);
+    Controller_param.Z = 1e2*diag([100; 1]); %2
+    Controller_param.X = 1e2*diag([100,100,1,1]);%4
+    Controller_param.Y = 1e2*diag([100,100,1,1]);
     Controller_param.PHI = diag([1; 1]);
 
     Controller_param.Zf = Controller_param.Z;
@@ -57,7 +57,7 @@ function Controller = Controller_HLMCMPC(~)
     % Controller_param.PHIf = diag([1; 1]);
 
     Controller_param.R = 1e10 * diag([1.0; 1*[1.0; 1.0; 1.0]]);
-    Controller_param.RP = 0 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
+    Controller_param.RP = 1e2 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
     
     Controller_param.input.u = 0.269 * 9.81 * [0;0;0;0]; %  sekiguchi 
     Controller_param.ref_input = 0.269 * 9.81 * [0;0;0;0];
@@ -67,9 +67,10 @@ function Controller = Controller_HLMCMPC(~)
     %%  
 
     Controller.name = "mcmpc"; % HLでもMCだから
-    Controller.type = "HLMCMPC_controller";
-    % Controller.type = "HLMCMPC_controller_mex";
+    % Controller.type = "HLMCMPC_controller";
+    Controller.type = "HLMCMPC_controller_mex";
     % Controller.type = "HLMCMPC_controller_gpu";
+    % Controller.type = "HLMCMPC_controller_change"; % 複数回入力算出
     Controller.param = Controller_param;
 
 end

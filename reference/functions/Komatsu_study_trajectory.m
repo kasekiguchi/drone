@@ -11,6 +11,13 @@ syms t real
 % x = 1;
 % y = 0;
 % z = 1;
+% yaw = pi/ 2;
+
+%% 
+% x = 2*sin(t/5)+cos(t/5)+1/2*sin(t/10);
+% y = 3*cos(t/5)+2*cos(t/5)+cos(t/10);
+% z = 1;
+% yaw = 0;
 
 %% takeoff
 % T = 10;
@@ -26,25 +33,36 @@ syms t real
 
 %%
 % x = 1;
-% y = 0;
-% z = 1;
+% y = 2;
+% z = 0.5;
 % yaw = 0;
+
 %% 
 % x = 0;
 % y = 0;
 % z = 1/2 * sin(t/2);
 
 %% circle
-x = cos(t/2)-1;
-y = sin(t/2);
-z = 1;
-yaw = 0;
+% x = cos(2*pi*t/30)-1;
+% y = sin(2*pi*t/30);
+% z = 1;
+% yaw = 0;
+
+%% bara
+% A = 8/6;
+% B = 1.5;
+% T = 4;
+% x = B * sin(A*t/T) * cos(t/T);
+% y = B * sin(A*t/T) * sin(t/T);
+% z = 1;
+% yaw = 0;
 
 %% involute curve
-% x=2*(cos(t)+t*sin(t));
-% y=2*(sin(t)-t*cos(t));
+% x=2*(cos(2*pi*t/30)+t*sin(2*pi*t/30));
+% y=2*(sin(2*pi*t/30)-t*cos(2*pi*t/30));
 % z=1;
 % yaw = 0;
+
 %%
 % x = cos(t)+sin(t);
 % y = sin(t)+2*sin(t);
@@ -52,17 +70,17 @@ yaw = 0;
 % yaw = 0;
 
 %% Liner
-% x = t;
-% y = 0;
-% z = 1.0;
-% yaw = 0;
+x = t/5;
+y = 0;
+z = 1.0;
+yaw = 0;
 
 %% Vertical vibration
 % x = 0;
 % y = 0;
-% z = 1/2 * sin(2*t)+1;
+% z = 1/2 * sin(2*pi*t/5)+1;
 % yaw = 0;
-% z = 1/2 * sin(2*t)+1 + 1/10 * cos(t);
+% z = 1/2 * sin(2*t)+1 + 1/5 * cos(t);
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
 %% hovering
@@ -72,10 +90,13 @@ yaw = 0;
 % yaw = 0;
 
 %% star
-% x = 5*cos(2*t/3) + 2*cos(t)-7;
-% y = -5*sin(2*t/3) + 2*sin(t);
+% A = 5; % 5
+% B = 2; % 2
+% T = 3; % 3
+% x = A*cos(2*t/T) + B*cos(t)-7;
+% y = -A*sin(2*t/T) + B*sin(t);
 % z = 1.0;
-
+% yaw = 0;
 %% landing
 % T = 13;  % Time
 % rz0 = 1; % start
