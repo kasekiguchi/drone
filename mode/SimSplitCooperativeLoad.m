@@ -44,7 +44,9 @@ agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, init
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[2;0.5;1],"size",1*[4,4,0]},"Cooperative"});
-agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+% agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
+agent(1).controller.do = @controller_do;
 
 
 for i = 2:N+1
@@ -90,6 +92,26 @@ for j = 1:te
 end
 
 %%
+close all
+aaaa= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+bbbb= logger.data(2,"reference.result.state.p","p");
+cccc= logger.data(2,"plant.result.state.p","p");
+t=logger.data(0,'t',[]);
+figure(101)
+hold on
+% plot(aaaa(:,1),aaaa(:,2))
+plot(bbbb(:,1),bbbb(:,2))
+% plot(cccc(:,1),cccc(:,2))
+xlim([-1.5 1.5])
+ylim([-1.5 1.5])
+xlabel("X [m]")
+ylabel("Y [m]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 13;
+hold off
+
+%%
 % logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
 % %%
 % logger.plot({1, "plant.result.state.Qi", "p"})
@@ -102,10 +124,18 @@ end
 % logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
 function result = controller_do(varargin)
-controller = varargin{5}.controller;
-result = controller.hlc.do(varargin);
-result = merge_result(result,controller.load.do(varargin));
-varargin{5}.controller.result = result;
+agent_num = varargin{6};
+if agent_num==1
+    controller = varargin{5}(1,agent_num).controller;
+    result = controller.cslc.do(varargin{5}(1,agent_num));
+    varargin{5}(1,agent_num).controller.result  = result;
+else
+controller = varargin{5}(1,agent_num).controller;
+result = controller.hlc.do(varargin{5}(1,agent_num));
+result = merge_result(result,controller.load.do(varargin{5}(1,agent_num)));
+varargin{5}(1,agent_num).controller.result = result;
+end
+
 end
 
 function dfunc(app)
