@@ -1,8 +1,13 @@
-function Estimator = Estimator_UKF2DSLAM_Vehicle(agent)
+function Estimator = Estimator_UKF2DSLAM_Vehicle(agent, dt, model, output)
+arguments
+    agent
+    dt
+    model
+    output = ["p", "q"]
+end
 
-%% estimator class
-Estimator.name = "ukfslam";
-Estimator.type = "UKF2DSLAM";
+Estimator.model = model;
+
 %UKF_param.Q = diag([1, 1, 1, 1e-1, 1e-1]);
 %UKF_param.Q = diag([0.001, 0.001, 0.001, 1]);%
 % UKF_param.Q = diag([1e-2, 1e-2, 1e-2, 1e-1]);
@@ -31,5 +36,5 @@ UKF_param.constant.ZeroThreshold = 1e-3; % 1e-3ゼロとみなす閾値
 UKF_param.constant.CluteringThreshold = 0.5; %0.5; % 同じクラスタとみなす最大距離 通路幅/2より大きくすると曲がり角で問題が起こる
 UKF_param.constant.SensorRange = agent.sensor.lrf.radius; % Max scan range
 UKF_param.constant.LineDistance = 1; %1 既存マップ端点からこれ以上離れた線分は別の線分とみなす．
-
+Estimator.param = UKF_param;
 end
