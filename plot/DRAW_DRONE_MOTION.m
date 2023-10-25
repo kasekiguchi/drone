@@ -153,10 +153,10 @@ classdef DRAW_DRONE_MOTION
         % Scaling matrix
         for i = 1:4
           if u(1,i,n) > 0
-            S = makehgtform('scale',[1,1,u(1,i,n)]);
+            S = makehgtform('scale',[1,1,u(1,i,n) / 2]); % /2　追加
           elseif u(i) < 0
             S1 = makehgtform('xrotate',pi);
-            S = makehgtform('scale',[1,1,-u(1,i,n)])*S1;
+            S = makehgtform('scale',[1,1,-u(1,i,n) / 2])*S1; % /2 追加
           else
             S = eye(4);
             S(3,3) = 1e-5;
@@ -193,11 +193,11 @@ classdef DRAW_DRONE_MOTION
       param.rotor_r = 0.0392;
       param.self = logger.Data.agent;
       param.realtime = false;
-      param.target = 1;
-      param.gif = 0;
-      param.Motive_ref = 0;
+      % param.target = 1;
+      param.gif = 1;
+      % param.Motive_ref = 0;
       param.fig_num = 1;
-      param.mp4 = 0;
+      % param.mp4 = 1;
       param.frame_size = [];
       param.opt_plot = [];
       ax = obj.ax;

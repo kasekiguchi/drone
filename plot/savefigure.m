@@ -111,7 +111,7 @@ else
         Trans = [1 1 1 1;-Param.ly, -Param.ly, (Param.Ly - Param.ly), (Param.Ly - Param.ly); Param.lx, -(Param.Lx-Param.lx), Param.lx, -(Param.Lx-Param.lx); Param.km1, -Param.km2, -Param.km3, Param.km4];
         input_torque = Trans * Idata;
         figure(4);
-        plot(logt, input_torque, "LineWidth", 1.5);
+        plot(logt, input_torque, "LineWidth", 1.5);u
         xlabel("Time [s]"); ylabel("Torque input [N, Nm]");
         grid on; xlim([0 xmax]); ylim([-inf inf]);
     end
@@ -127,13 +127,15 @@ plot(Edata(1,:), Edata(2,:), Rdata(1,:), Rdata(2,:)); daspect([1,1,1]);
 legend("Estimator", "Reference");
 xlabel(strcat("$$X$$", " [m]"), "Interpreter","latex");
 ylabel(strcat("$$Y$$", " [m]"), "Interpreter","latex");
-% figure(6)
-% % average
-% Average = sum(data.calT(2:end-1,1)) / length(data.calT(2:end-1,1))
-% AverageCal = repmat(Average, length(data.calT(1:end-1)),1);  
-% plot(logt, data.calT(1:end-1,1), logt, AverageCal);
-% xlabel("Time [s]"); ylabel("Calculation time [s]");
 
-% set(gcf, "WindowState", "maximized");
-% set(gcf, "Position", [960 0 960 1000])
 
+%% animation
+% 動画出力用に入力をトルクに変換
+if fMC ~= 1
+    IT = [1 1 1 1;-gui.agent.parameter.ly, -gui.agent.parameter.ly, (gui.agent.parameter.Ly - gui.agent.parameter.ly), (gui.agent.parameter.Ly - gui.agent.parameter.ly); gui.agent.parameter.lx, -(gui.agent.parameter.Lx-gui.agent.parameter.lx), gui.agent.parameter.lx, -(gui.agent.parameter.Lx-gui.agent.parameter.lx); gui.agent.parameter.km1, -gui.agent.parameter.km2, -gui.agent.parameter.km3, gui.agent.parameter.km4];
+    for i = 1:length(logt)
+        logData.agent.input{1, i} = IT * logData.agent.input{1, i};
+    end
+end
+close all
+gui.agent(1).animation(gui.logger,"target",1); 
