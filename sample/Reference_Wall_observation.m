@@ -1,13 +1,10 @@
 function Reference = Reference_Wall_observation()
 %% reference class demo
 % reference property をReference classのインスタンス配列として定義
-clear Reference
-Reference.type=["WALL_REFERENCE"];
-Reference.name=["wall"];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ↓説明 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % このプログラムでは WALL_REFERENCE.m にregion0という想定環境のpolyshapeを作成．
-% Reference.param に入れ，渡します．
+% Reference に入れ，渡します．
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% ↓環境項 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp("ACSL : First area should be outer frame.");
 region0 = regions(0); %一旦，いろんな形を下の関数に入れて使用する
@@ -101,8 +98,8 @@ region0 = regions(0); %一旦，いろんな形を下の関数に入れて使用する
             xlim([-2 17]);ylim([-2 17]);
         end
     end
-Reference.param.fShow = 1;
-Reference.param.region0 = region0; % region0をWALL_REFERENCEに入れます
+Reference.fShow = 1;
+Reference.region0 = region0; % region0をWALL_REFERENCEに入れます
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end

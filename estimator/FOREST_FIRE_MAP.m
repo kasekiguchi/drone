@@ -1,4 +1,4 @@
-classdef FOREST_FIRE_MAP < ESTIMATOR_CLASS
+classdef FOREST_FIRE_MAP < handle
     % 環境設定
     % 用語
     %

@@ -1,4 +1,4 @@
-classdef ROS2_CONNECTOR < CONNECTOR_CLASS
+classdef ROS2_CONNECTOR < handle
             % 【Input】info : require following fields
             %   subTopic
             %   pubTopic

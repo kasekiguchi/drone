@@ -1,4 +1,4 @@
-classdef UKF2DSLAM < ESTIMATOR_CLASS
+classdef UKF2DSLAM < handle
     % Unscented Kalman filter
     %  State: Robot State,x,y,theta
     %   model :
@@ -16,12 +16,14 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
         Map_Q
         NLP%Number of Line Params
         EL0 % 原点位置でのレーザーの単位円上の位置 R^(Nx2)
+        model
     end
 
     methods
         function obj = UKF2DSLAM(self,param)
             obj.self= self;
-            model = self.model;
+            model = param.model;
+            obj.model = model;
             % --this state use in only UKFSLAM--
             obj.result.estate= model.state.get();%x, y, theta,v
             %------------------------------
@@ -43,7 +45,7 @@ classdef UKF2DSLAM < ESTIMATOR_CLASS
 
         function [result]=do(obj,~,~)
             %model: nolinear model
-            model=obj.self.model;
+            model=obj.model;
             %% sigma points of previous step
             sn = length(obj.result.estate);%前ステップの状態数
             PreXh = obj.result.estate;%previous estimation 事前推定

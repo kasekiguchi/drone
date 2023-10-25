@@ -1,4 +1,4 @@
-classdef SERIAL_CONNECTOR < CONNECTOR_CLASS
+classdef SERIAL_CONNECTOR < handle
 % Serial通信用クラス
 %
 
