@@ -147,3 +147,13 @@ grid on;
 xlabel("X [m]"); ylabel("Z [m]");
 daspect([1 1 1]);
 legend("About target trajectory", "Slope", "Initial position")
+
+%%
+logt = gui.logger.Data.t;
+for i = 1:size(gui.logger.Data.agent.controller.result,2)
+    InputV(:,i) = gui.logger.Data.agent.controller.result{i}.inputv;
+end
+figure(20);
+plot(logt, InputV);
+legend("Z", "X", "Y", "YAW");
+% xlim([0 2]);

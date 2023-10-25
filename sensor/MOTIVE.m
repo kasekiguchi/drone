@@ -48,6 +48,7 @@ methods
 
         if isempty(obj.old_time)
             obj.old_time = data.time;
+%             obj.old_time = varargin{1,1};
         end
 
         id = obj.rigid_num(1);
