@@ -45,21 +45,27 @@ methods
                 %param.ROSHostIP = strcat('192.168.50', '.', string(100 + obj.IP));
                 param.DomainID = obj.IP;
 %                 param.subTopicName = {'/Robot_1/pose'};
-                param.subTopicName = {'/odom'};
-                param.pubTopicName = {'/cmd_vel'};
+                % param.subTopicName = {'/odom'};
+                param.nodename = obj.self.node;
+                param.subTopicName = {'/rover_odo'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub topic name
+                % param.pubTopicName = {'/cmd_vel'};
+                param.pubTopicName = {'/rover_twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub topic name
 %                 param.subMsgName = {'geometry_msgs/PoseStamped'};
-                param.subMsgName = {'nav_msgs/Odometry'};
-                param.pubMsgName = {'geometry_msgs/Twist'};
+                % param.subMsgName = {'nav_msgs/Odometry'};
+                param.subMsgName = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
+                % param.pubMsgName = {'geometry_msgs/Twist'};
+                param.pubMsgName = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub 型
                 subnum = length(param.subTopicName);
                 pubnum = length(param.pubTopicName);
 
-                for i = 1:subnum
-                    param.subTopic(i) = ros2node("/submatlab", obj.IP);
-                end
-
-                for i = 1:pubnum
-                    param.pubTopic(i) = ros2node("/pubmatlab", obj.IP);
-                end
+                % for i = 1:subnum
+                %     param.subTopic(i) = ros2node("/submatlab_rov", obj.IP);
+                % end
+                % 
+                % for i = 1:pubnum
+                %     param.pubTopic(i) = ros2node("/pubmatlab_rov", obj.IP);
+                % end
+                
 
                 obj.connector = ROS2_CONNECTOR(param);
 %                 odom_sub = ros2subscriber(param.subTopic(1),"/odom");

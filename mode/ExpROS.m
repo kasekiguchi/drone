@@ -14,11 +14,18 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = WHILL;
-agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros", 30));
+agent.id = 25;
+agent.node = ros2node("/matnode",agent.id);
+agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros", 25));
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
+% agent.sensor = ROS(agent, Sensor_ROS(struct('DomainID',25)));
+
+agent.sensor = ROS2_LiDAR_PCD(agent, Sensor_LiDAR_ROS2(struct('DomainID',25)));
+% agent.sensor = ROS(agent);
+% agent.sensor = ROS2_LiDAR_PCD(agent);
+
+%agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 agent.estimator = UKF2DSLAM(agent, Estimator_UKF2DSLAM_Vehicle(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
-agent.sensor = ROS(agent, Sensor_ROS(struct('DomainID',30)));
-agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent(i),agent.sensor.lrf.radius));
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));

@@ -10,7 +10,9 @@ properties %(Access = private)
     reference
     controller
     input_transform
-    id = 1
+    % id = 1
+    id
+    node
 end
 
 methods
@@ -25,7 +27,6 @@ methods
           obj.plant = WHILL_EXP_MODEL(args);
         end
     end
-
 end
 
 methods

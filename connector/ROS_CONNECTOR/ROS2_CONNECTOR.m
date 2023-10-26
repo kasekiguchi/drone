@@ -13,7 +13,8 @@ classdef ROS2_CONNECTOR < handle
         publisher
         %- Subscriber topic -%
         subTopicNum
-        subTopic 
+        % subTopic%%%%%%%%%%%%%%%%%%%%%%%%yoshida消
+        nodename%%%%%%%%%%%%%%%%%%%%%%%%%%yoshida増
         subName % 受信msg を格納するresult構造体のフィールド（配列）
         subMsg
         %- Publisher topic -%
@@ -32,32 +33,51 @@ classdef ROS2_CONNECTOR < handle
     methods
         function obj = ROS2_CONNECTOR(info)
             disp('Preparing connection to robot operating system...');
-            %-- Configulations for ROS
-            setenv("ROS_DOMAIN_ID","30");
-            obj.subTopic = info.subTopic;
+            %-- Configulations for ROS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%旧
+            % setenv("ROS_DOMAIN_ID","30");
+            % obj.subTopic = info.subTopic;
+            % obj.subName = info.subTopicName;
+            % obj.subTopicNum = length(obj.subName);
+            % obj.subMsg = info.subMsgName;            
+            % if isfield(info,'pubTopic')
+            %     obj.pubMsg = info.pubMsgName;
+            %     obj.pubTopic = info.pubTopic;
+            %     obj.pubName = info.pubTopicName;
+            %     obj.pubTopicNum = length(obj.pubTopic);
+            % end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%旧
+            %-- Configulations for ROS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%新規
+            obj.nodename = info.nodename;
             obj.subName = info.subTopicName;
             obj.subTopicNum = length(obj.subName);
             obj.subMsg = info.subMsgName;            
             if isfield(info,'pubTopic')
                 obj.pubMsg = info.pubMsgName;
-                obj.pubTopic = info.pubTopic;
                 obj.pubName = info.pubTopicName;
                 obj.pubTopicNum = length(obj.pubTopic);
             end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%新規
+
+
+
             %-- Setting the environment variables to connect to ROS
             obj.DomainID = info.DomainID;
 
             %ROS2のトピック一覧
-            ros2 topic list;
+            % ros2("topic","list","DomainID",obj.DomainID);%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % ros2("topic","list","DomainID",25);%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-            %-- Declaring the node, publishers and subscribers
+            %-- Declaring the topics, publishers and subscribers
             for i = 1:obj.subTopicNum
-                obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
+                % obj.subscriber.subtopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
+                %     "History","keepall","Reliability","besteffort");
+                obj.subscriber.subtopic(i) = ros2subscriber(obj.nodename,obj.subName{1,i},obj.subMsg{1,i},...
                     "History","keepall","Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
                 for i = 1: obj.pubTopicNum 
-                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1});
+                    % obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1});
+                    obj.publisher.pubTopic(i) = ros2publisher(obj.nodename,obj.pubName{i,1});
                 end
             end
         end
