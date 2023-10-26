@@ -22,6 +22,7 @@ for i = 1:find(logger.Data.t,1,'last')
     data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
+    data.error(:,i) = data.pr(:,i) - data.p(:,i);                          %error
 end
 
 %% 特定の範囲のグラフ出力
@@ -147,6 +148,19 @@ lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Input u of agent1','FontSize',12);
+
+% %error
+figure(8)
+plot(data.t,data.error(:,:),'LineWidth',1)
+xlabel('Time [s]');
+ylabel('Error');
+grid on
+lgdtmp = {'error.x','error.y','error.z'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd.NumColumns = columnomber;
+xlim([data.t(1) data.t(end)])
+ax(7) = gca;
+title('Error of agent1','FontSize',12);
 
 fontSize = 14; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 

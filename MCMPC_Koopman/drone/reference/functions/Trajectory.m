@@ -29,8 +29,8 @@ T = 60;
 % z = 1;
 
 % %% circle2
-x = cos(2*pi*t/T);
-y = sin(2*pi*t/T);
+x = sin(2*pi*t/T);
+y = cos(2*pi*t/T);
 z = 1;
 
 % x = cos(t);
