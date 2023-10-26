@@ -7,20 +7,14 @@ properties
     state
     self
     fState % subscribeにstate情報を含むか
-    radius
-    angle_range
-    front
-    sensor_point
 end
 
 methods
 
-    function obj = ROS(self,param)
-        % param = Sensor_ROS(obj);
-        % param.subTopic = self.plant.connector.subTopic;
-        % param.subTopicName = self.plant.connector.subTopicName;
+    function obj = ROS(self)
+        param = Sensor_ROS(obj);
         
-        % obj.ros = ROS2_CONNECTOR(param);
+        obj.ros = ROS2_CONNECTOR(param);
         %  このクラスのインスタンスを作成
         obj.self = self;
 
@@ -38,7 +32,7 @@ methods
 
         end
 
-        % data = obj.ros.getData;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        data = obj.ros.getData;
         obj.radius = data.range_max;
         angle_num = size(data.ranges);
         %             angle_num = data.angle_max/data.angle_increment;

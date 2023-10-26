@@ -29,7 +29,8 @@ switch conn_type
     case "ros"
         setting.param.state_list = ["p"];
         setting.param.num_list = [3, 3];
-        setting.param.subTopic = ['/Robot_1/pose'];
+        % setting.param.subTopic = ['/Robot_1/pose'];
+        % setting.param.subTopic = ['/Robot_1/pose'];%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %         setting.param.subTopic = ["/mavros/local_position/pose"];
         setting.param.subName = ["p"];
         setting.param.DomainID = id;
