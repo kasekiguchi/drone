@@ -96,14 +96,14 @@ end
 %%
 close all
 aaaa= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
-bbbb= logger.data(1,"reference.result.state.p","p");
-cccc= logger.data(1,"plant.result.state.p","p");
+bbbb= logger.data(2,"reference.result.state.p","p");
+cccc= logger.data(2,"plant.result.state.p","p");
 t=logger.data(0,'t',[]);
 figure(101)
 hold on
-% plot(aaaa(:,1),aaaa(:,2))
+plot(aaaa(:,1),aaaa(:,2))
 plot(bbbb(:,1),bbbb(:,2))
-plot(cccc(:,1),cccc(:,2))
+% plot(cccc(:,1),cccc(:,2))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
 xlabel("X [m]")
@@ -126,19 +126,6 @@ hold off
 % logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
 function result = controller_do(varargin)
-% agent_num = varargin{6};
-% if agent_num==1
-%     controller = varargin{5}(1,agent_num).controller;
-%     result = controller.cslc.do(varargin{5}(1,agent_num));
-%     varargin{5}(1,agent_num).controller.result  = result;
-% else
-% controller = varargin{5}(1,agent_num).controller;
-% result = controller.hlc.do(varargin{5}(1,agent_num));
-% result = merge_result(result,controller.load.do(varargin{5}(1,agent_num)));
-% varargin{5}(1,agent_num).controller.result = result;
-% end
-
-
 controller = varargin{5}.controller;
 result = controller.hlc.do(varargin{5});
 result = merge_result(result,controller.load.do(varargin{5}));
