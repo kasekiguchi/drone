@@ -1,4 +1,4 @@
-classdef MPC_controller_Koopman < handle
+classdef MPC_CONTROLLER_KOOPMAN < handle
     % MCMPC_CONTROLLER MPCのコントローラー
     % Imai Case study 
     % 勾配MPCコントローラー
@@ -20,7 +20,7 @@ classdef MPC_controller_Koopman < handle
     end
 
     methods
-        function obj = MPC_controller_Koopman(self, param)
+        function obj = MPC_CONTROLLER_KOOPMAN(self, param)
             %-- 変数定義
             obj.self = self; %agentへの接続
             %---MPCパラメータ設定---%
@@ -57,7 +57,6 @@ classdef MPC_controller_Koopman < handle
 
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
             obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-%             currentstate = obj.current_state;
             Param = obj.param;
             Param.current = obj.current_state;
             Param.ref = obj.state.ref;
@@ -77,7 +76,7 @@ classdef MPC_controller_Koopman < handle
             problem.solver = 'fmincon'; % solver
             problem.options = options;  %
 
-            x0 = [obj.previous_input];        % 状態，入力を初期値とする              % 現在状態
+            x0 = [obj.previous_input];        % 状態，入力を初期値とする        % 現在状態
             A = [];
             b = [];
             Aeq = [];
@@ -85,9 +84,7 @@ classdef MPC_controller_Koopman < handle
             lb = [];
             ub = [];
             nonlcon = [];
-
-%             [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(obj,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
-            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective(Param,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem);
+            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective_mex(Param,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
 
             %%
             obj.previous_input = var;
