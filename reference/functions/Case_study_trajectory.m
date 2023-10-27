@@ -1,18 +1,21 @@
-function ref = Case_study_trajectory(X0)
+function ref = Case_study_trajectory(~)
 
 % T = param.freq;
-% T = 10;
+% T = 20;
 % r = 1;
 syms t real
-x_0 = X0(1);
-y_0 = X0(2);
-z_0 = X0(3);
+% x_0 = X0(1);
+% y_0 = X0(2);
+% z_0 = X0(3);
 
 %% 
-x = x_0;
-y = y_0;
-z = z_0;
-yaw = 2*pi*t/5;
+% x = x_0;
+% y = y_0;
+% z = z_0;
+x = 0;
+y = 0;
+z = 1;
+yaw = -2*pi*t/5;
 
 % %% takeoff
 % T = 10;
