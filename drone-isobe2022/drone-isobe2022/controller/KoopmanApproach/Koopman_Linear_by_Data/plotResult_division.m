@@ -6,17 +6,20 @@ close all
 flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求める
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
+pdf = 0; %1:pdfでグラフを保存
+name = '10_27';
+folderName = '10_27';
 
 %% select file to load
 
-% loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{2} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
-% loadfilename{3} = 'EstimationResult_12state_9_6_saddle=takeoff_estimation=saddle';
+% loadfilename{1} = 'EstimationResult_12state_10_27_data=all_circle=circle_estimation=circle_Inputandconst.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{2} = 'EstimationResult_12state_10_27_data=all_circle=circle_estimation=circle_Inputandconst_Normalize.mat';
+loadfilename{3} = 'EstimationResult_12state_10_12_data=revcirandcirandsaddle_circle=circle_estimation=circle_Inputandconst.mat';
 
-loadfilename{1} = 'test.mat';
-% loadfilename{3} = 'EstimationResult_12state_7_19_circle=circle_estimation=circle.mat';
+loadfilename{2} = 'test.mat';
+loadfilename{1} = 'EstimationResult_12state_7_19_circle=circle_estimation=circle.mat';
 % loadfilename{2} = 'test2.mat';
-% loadfilename{3} = 'EstimationResult_12state_10_9_reverse_circle=reverse_circle_estimation=revcircle.mat';
+% loadfilename{2} = 'EstimationResult_12state_7_19_circle=circle_estimation=circle.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
@@ -166,6 +169,7 @@ for graph_num = 1:3 %1 = x,2 = y,3 = z
         end
     end
     hold off
+    
 end
 
 %% Q
@@ -388,4 +392,33 @@ for graph_num = 1:3
         end
     end
     hold off
+end
+%% pdfで保存
+if pdf == 1
+    mkdir(folderName);
+    movefile(folderName,'drone-isobe2022\Graph')
+    exportgraphics(figure(1),strcat('Position_x_',name,'.pdf'))
+    movefile(strcat('Position_x_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('Position_y_',name,'.pdf'))
+    movefile(strcat('Position_y_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('Position_z_',name,'.pdf'))
+    movefile(strcat('Position_z_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('phi_',name,'.pdf'))
+    movefile(strcat('phi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('theta_',name,'.pdf'))
+    movefile(strcat('theta_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('psi_',name,'.pdf'))
+    movefile(strcat('psi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('velocity_x_',name,'.pdf'))
+    movefile(strcat('velocity_x_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('velocity_y_',name,'.pdf'))
+    movefile(strcat('velocity_y_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('velocity_z_',name,'.pdf'))
+    movefile(strcat('velocity_z_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('omega_phi_',name,'.pdf'))
+    movefile(strcat('omega_phi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('omega_theta_',name,'.pdf'))
+    movefile(strcat('omega_theta_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    exportgraphics(figure(1),strcat('omega_psi_',name,'.pdf'))
+    movefile(strcat('omega_psi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
 end

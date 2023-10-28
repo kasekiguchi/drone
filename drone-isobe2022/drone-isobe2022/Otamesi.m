@@ -3,10 +3,10 @@ clear all;
 clc;
 
 %% データのインポート
-% load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
+load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
 % load("experiment_9_5_saddle_estimatordata.mat")
 % load("simulation_7_5_saddle.mat")
-load("")
+
 disp('load finished')
 
 for i = find(log.Data.phase==102,1,'first')+220:find(log.Data.phase==108,1,'first')
@@ -14,11 +14,20 @@ for i = find(log.Data.phase==102,1,'first')+220:find(log.Data.phase==108,1,'firs
     data.p(:,i-(find(log.Data.phase==102,1,'first')+220)+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p               %入力
 end
 
+name = 'test';
+folderName = 'test';
+mkdir(folderName);
+movefile(folderName,'drone-isobe2022\Graph')
+% Graph = 'Graph';
 figure(1)
 plot3(data.p(1,:),data.p(2,:),data.p(3,:));
 zlim([0 max(data.p(3,:))])
 grid on
+exportgraphics(figure(1),strcat('3D_',name,'.pdf'))
+movefile(strcat('3D_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
 
 figure(2)
 plot(data.p(1,:),data.p(2,:))
 grid on
+exportgraphics(figure(2),strcat('2D_',name,'.pdf'))
+movefile(strcat('2D_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))

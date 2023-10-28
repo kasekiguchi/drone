@@ -32,12 +32,13 @@ if logger.fExp==1 %実機データの場合
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
     % data.startIndex = find(data.phase == 108,1,'first');
-    % data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
+%     data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
     data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
 %     data.startIndex = find(data.phase == 102, 1, 'first') + 200; %逆円旋回
 %     data.startIndex = find(data.phase == 102, 1, 'first') + 150; %完全にサドル起動になった部分のデータのみを使用
     % data.startIndex = find(data.t > 18,1,'first');
 %     data.phase = logger.Data.phase;
+%     data.endIndex = find(data.phase == 102,1,'last');
     data.endIndex = find(data.phase==108,1,'first'); %ランディングする前にデータの取得をやめる
     % data.endIndex = find(data.phase==116,1,'last'); 
     data.N = data.endIndex - data.startIndex + 1;
