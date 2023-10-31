@@ -1,4 +1,5 @@
 clc
+clear
 ts = 0;
 dt = 0.1;
 te = 25;
@@ -53,7 +54,7 @@ agent.sensor = DIRECT_SENSOR(agent, 0.0); % sensor to capture plant position : s
 % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
 % agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
 % agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,Reference_Time_Varying_Cooperative_Load("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[2;0.5;1],"size",1*[4,4,0]},"Cooperative"});
+agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",70,"orig",[2;0.5;1],"size",1*[4,4,0]},"Cooperative"});
 %agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
 agent.controller = CSLC(agent, Controller_Cooperative_Load(dt, N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
@@ -61,7 +62,7 @@ run("ExpBase");
 
 
 clc
-for i = 1:2000
+for i = 1:1000
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');

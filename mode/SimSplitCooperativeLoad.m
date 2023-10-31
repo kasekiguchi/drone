@@ -2,8 +2,8 @@ clc
 clear
 N = 6;
 ts = 0; %機体数
-dt = 0.1;
-te = 500;
+dt = 0.025;
+te = 100;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -86,27 +86,27 @@ for j = 1:te
             agent(i).reference.do(time, 'f');
 %             agent(i).controller.do(time, 'f',0,0,agent,i); 
             agent(i).controller.do(time, 'f',0,0,agent(i),i);
-            agent(i).plant.do(time, 'f');
-            logger.logging(time, 'f', agent);
-            time.t = time.t + time.dt;
+            agent(i).plant.do(time, 'f');            
         end
+        logger.logging(time, 'f', agent);
+        time.t = time.t + time.dt;
     %pause(1)
 end
 
 %%
 close all
-aaaa= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+aaaa= logger.data(3,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 bbbb= logger.data(2,"reference.result.state.p","p");
-cccc= logger.data(2,"plant.result.state.p","p");
+% cccc= logger.data(1,"plant.result.state.p","p");
 t=logger.data(0,'t',[]);
 figure(101)
 hold on
 plot(aaaa(:,1),aaaa(:,2))
-plot(bbbb(:,1),bbbb(:,2))
+% plot(bbbb(:,1),bbbb(:,2))
 % plot(cccc(:,1),cccc(:,2))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
-xlabel("X [m]")
+% xlabel("X [m]")
 ylabel("Y [m]")
 % legend("Payload","UAV")
 ax = gca;
