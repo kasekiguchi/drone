@@ -1,4 +1,4 @@
-classdef UDP_CONNECTOR < handle
+classdef UDP_CONNECTOR < CONNECTOR_CLASS
   % UDP通信用クラス
   %   
   

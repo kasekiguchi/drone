@@ -21,7 +21,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     properties % (Abstract) % General param
         % ここから先のproperty は各名前のクラスのインスタンス : 例 model
         model % MODEL_CLASSのインスタンス（コントローラモデル）
-        sensor % 複数のセンサをpropertyとして持つ
+        sensor % 複数のセンサをpropertyとして持つ、並列で扱われる
         controller % 複数の場合定義された順番に計算される
         estimator % 複数の場合定義された順番に計算される
         reference % 複数の場合定義された順番に計算される
@@ -35,47 +35,47 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
         inner_input
     end
 
-    properties %(Access = {?Logger,?SENSOR_CLASS,?CONNECTOR_CLASS}) % plant, state
-        %(SetAccess = GetAccess={?SENSOR_CLASS}) % SENSOR_CLASSは読み取りのみ
+    properties
         id
         plant % MODEL_CLASSのインスタンス（プラントモデル）
-        %   state % plant or model のstateだけを取り出したもの handleクラスでどちらかのhandleになっている．
     end
 
     %% Plant
     methods
-
-        function obj = ABSTRACT_SYSTEM(args, param)
-
+        function obj = ABSTRACT_SYSTEM(args,param)
             arguments
                 args
-                param % parameter class
+                param
             end
+            obj.parameter = param;
             obj.plant = MODEL_CLASS(args);
-            addprop(obj.plant,"parameter");
-            obj.plant.parameter = param;
-            obj.plant.param = param.get();
+            obj.plant.param = obj.parameter.get("all","plant");
         end
-
     end
 
     methods
 
-        function do_plant(obj, varargin)
-            if isempty(obj.input_transform)
-                obj.plant.do(obj.input, varargin);
-            else
-                obj.inner_input = obj.input;
-
-                for i = 1:length(obj.input_transform.name)
-                    obj.inner_input = obj.input_transform.(obj.input_transform.name(i)).do(obj.inner_input, varargin);
-                end
-
-                obj.plant.do(obj.inner_input, varargin);
+        function do_plant(obj, plant_param, emergency)
+            arguments
+                obj
+                plant_param = [];
+                emergency = [];
             end
 
+            if ~isempty(emergency) % 実験緊急事態
+                obj.plant.do(obj.input, [], "emergency");
+            else
+                if isempty(obj.input_transform)
+                    obj.plant.do(obj.input, plant_param);
+                else
+                    obj.inner_input = obj.input;
+                    for i = 1:length(obj.input_transform.name)
+                        obj.inner_input = obj.input_transform.(obj.input_transform.name(i)).do(obj.inner_input, plant_param);
+                    end
+                    obj.plant.do(obj.inner_input, plant_param);
+                end
+            end
         end
-
     end
 
     %% General
@@ -89,34 +89,36 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     end
 
     methods % Set methods
-
-        function set_model(obj, args, param)
-            obj.model = MODEL_CLASS(args);
-            obj.parameter = param;
-            obj.model.param = obj.parameter.get();
+        function set_estimator(obj, prop, args)
+            obj.set_property(prop,args);
+            % modelの状態でestimatorの状態を生成
+            obj.estimator.result.state = state_copy(obj.model.state);
         end
-
+        function set_model(obj, args)
+          obj.model = MODEL_CLASS(args);
+          obj.model.param = obj.parameter.get();
+        end
     end
 
     methods % Do methods
 
-        function do_sensor(obj,varargin)
-            obj.do_parallel("sensor",varargin);
+        function do_sensor(obj, param)
+            obj.do_parallel("sensor", param);
         end
 
-        function do_estimator(obj,varargin)
-            obj.do_sequential("estimator",varargin);
+        function do_estimator(obj, param)
+            obj.do_sequential("estimator", param);
         end
 
-        function do_reference(obj,varargin)
-            obj.do_sequential("reference",varargin);
+        function do_reference(obj, param)
+            obj.do_sequential("reference", param);
         end
 
-        function do_controller(obj,varargin)
-            obj.do_parallel("controller",varargin);
+        function do_controller(obj, param)
+            obj.do_parallel("controller", param);
         end
 
-        function do_model(obj,varargin)
+        function do_model(obj, param)
             % 推定値でmodelの状態を上書きした上でmodelのdo method を実行
             if obj.model.state.list == obj.estimator.result.state.list % TODO　１回目の時に右辺が定義されていないのでは？
                 obj.model.state.set_state(obj.estimator.result.state.get());
@@ -127,8 +129,8 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
                 end
 
             end
-
-            obj.model.do(obj.input,varargin);
+            % モデルの計算の実行
+            obj.model.do(obj.input, param);
         end
 
     end
@@ -136,6 +138,13 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
     methods % set, do property
 
         function set_property(obj, prop, args)
+
+            arguments
+                obj
+                prop {mustBeInPropList}
+                args {mustBeSpecifiedStructure}
+            end
+
             subclass = str2func(args.type);
             obj.(prop).(args.name) = subclass(obj, args.param);
 
@@ -148,13 +157,13 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.(prop).result = [];
         end
 
-        function do_parallel(obj, prop,varargin)
+        function do_parallel(obj, prop, param)
             % prop : property name
             % param : parameter to do a property
-            result = obj.(prop).(obj.(prop).name(1)).do(varargin);
+            result = obj.(prop).(obj.(prop).name(1)).do(param{1});
 
             for i = 2:length(obj.(prop).name) % (prop).resultに結果をまとめるため
-                tmp = obj.(prop).(obj.(prop).name(i)).do(varargin); % = result
+                tmp = obj.(prop).(obj.(prop).name(i)).do(param{i});
                 F = fieldnames(tmp);
 
                 for j = 1:length(F)
@@ -188,17 +197,17 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.(prop).result = result;
         end
 
-        function do_sequential(obj, prop,varargin)
+        function do_sequential(obj, prop, param)
             % prop : property name
             % param : parameter to do a property
             % 複数同じpropertyを設定した場合recursiveに参照値を求める．
             % result = prop.prop1.do(param{1})
             % result = prop.prop2.do(param{2},result)
             % result = prop.prop3.do(param{3},result) ...
-            result = obj.(prop).(obj.(prop).name(1)).do(varargin);
+            result = obj.(prop).(obj.(prop).name(1)).do(param{1});
 
             for i = 2:length(obj.(prop).name) % prop.resultに結果をまとめるため
-                tmp = obj.(prop).(obj.(prop).name(i)).do(varargin, result);
+                tmp = obj.(prop).(obj.(prop).name(i)).do(param{i}, result);
                 F = fieldnames(tmp);
 
                 for j = 1:length(F)
@@ -216,61 +225,9 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             obj.(prop).result = result;
         end
 
-        function set_model_error(obj, p, v)
-            % update plant parameter
-            % plant = model + error;
-            ps=obj.parameter.get(p,'struct');
-            if isstruct(v)
-                for i = v
-                    ps.(i) = ps.(i) + v.(i);
-                end
-            else
-                ps.(p) = ps.(p) + v;
-            end
-            obj.plant.parameter.set(p,ps);
-            obj.plant.param = obj.plant.parameter.get();
-        end
-
-        function update_model_param(obj, p, v)
-            % update model parameter
-            % this update doesn't affect plant parameter
-            % p : str array : target parameter
-            % v : struct : with updated value
-            % parameter.(p(i)) = v.(p(i))
-            % example
-            % obj.update_model_param(["mass","l"],struct("mass",1,"l",1));
-            obj.parameter.set(p,v);
-            obj.model.param = obj.parameter.get();
-        end
-
-        function ax=show(obj,str,opt)
-            % requires each target class' show method accept
-            % "logger","FH","t","param" option inputs
-            arguments
-                obj
-                str
-                opt.FH = 1;
-                opt.ax = [];
-                opt.logger = [];
-                opt.t = [];
-                opt.param = [];
-            end
-            tmp = obj;
-            for j = 1:size(str,1)
-                if iscell(opt.param)
-                    param = opt.param{j};
-                else
-                    param = opt.param;
-                end
-                for i = str(j,:)
-                    tmp = tmp.(i);
-                end
-                if isempty(opt.ax)
-                  ax = tmp.show("logger",opt.logger,"FH",opt.FH,"t",opt.t,"param",param);
-                else
-                  ax = tmp.show("logger",opt.logger,"ax",opt.ax,"t",opt.t,"param",param);
-                end
-            end
+        function set_model_error(obj,p,v)
+            obj.parameter.set_model_error(p,v);
+            obj.plant.param = obj.parameter.get("all","plant");
         end
     end
 
@@ -278,30 +235,30 @@ end
 
 function mustBePlantStructure(s)
 
-if ~(isfield(s, 'type') && isfield(s, 'param'))
-    eidType = 'mustBePlantStructure:notStructure';
-    msgType = 'ACSL : Input must be a structure with specified fields.';
-    throwAsCaller(MException(eidType, msgType))
-end
+    if ~(isfield(s, 'type') && isfield(s, 'param'))
+        eidType = 'mustBePlantStructure:notStructure';
+        msgType = 'ACSL : Input must be a structure with specified fields.';
+        throwAsCaller(MException(eidType, msgType))
+    end
 
 end
 
 function mustBeSpecifiedStructure(s)
 
-if ~(isfield(s, 'type') && isfield(s, 'name'))
-    eidType = 'mustBeStructure:notStructure';
-    msgType = 'ACSL : Input must be a structure with specified fields.';
-    throwAsCaller(MException(eidType, msgType))
-end
+    if ~(isfield(s, 'type') && isfield(s, 'name'))
+        eidType = 'mustBeStructure:notStructure';
+        msgType = 'ACSL : Input must be a structure with specified fields.';
+        throwAsCaller(MException(eidType, msgType))
+    end
 
 end
 
 function mustBeInPropList(s)
 
-if ~(sum(strcmp(s, {'model', 'sensor', 'estimator', 'controller', 'reference', 'connector', 'input_transform'})))
-    eidType = 'mustBeInPropList:notProp';
-    msgType = 'ACSL : Input must be a property of this class.';
-    throwAsCaller(MException(eidType, msgType))
-end
+    if ~(sum(strcmp(s, {'model', 'sensor', 'estimator', 'controller', 'reference', 'connector', 'input_transform'})))
+        eidType = 'mustBeInPropList:notProp';
+        msgType = 'ACSL : Input must be a property of this class.';
+        throwAsCaller(MException(eidType, msgType))
+    end
 
 end

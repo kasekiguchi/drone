@@ -1,4 +1,4 @@
-classdef MEC < handle
+classdef MEC <CONTROLLER_CLASS
 %別のControllerと併用する実入力へ補償を行うMEC
      properties
          self

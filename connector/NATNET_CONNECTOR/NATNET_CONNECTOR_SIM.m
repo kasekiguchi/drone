@@ -1,7 +1,7 @@
-classdef NATNET_CONNECTOR_SIM < handle
+classdef NATNET_CONNECTOR_SIM < CONNECTOR_CLASS
     % MotiveのSimulation用クラス：登録されたエージェントの位置と姿勢がわかる
     % motive = NATNET_CONNECTOR_SIM(param)
-    % param :（要確認：バージョン変化で変わっているかも）
+    % param :
     %     rigid_num : agnet number
     %     marker_num % number of UnLabeledmarker
     %     on_marker_num % total number of markers on agents
@@ -14,25 +14,12 @@ classdef NATNET_CONNECTOR_SIM < handle
         name      = "Motive";
         result
         interface = @(x) x;
-        occlusion_param = [];        %  設定するとUnLabeledmarkerが定義されオクルージョンを模擬できる
-            %  剛体は固定，剛体上のマーカーはランダムに消える
-            %  obj.occlusion_param : structure with fields
-            %  'cond','target'
-            %  .cond : condition for occlusion
-            %  .target : occlusion target
-            % example : For occlusions at 
-            %  time span [1, 1.2] to rigid-body 1,2 and
-            %  time span [1.5,1.6] to rigid-body 2,
-            %  set 
-            %  .occlusion_param.cond = ["t >= 1.0 && t<1.2","t>=1.5&&t<1.6"]
-            %  .occlusion_param.target = {[1,2],[2]}
     end
     properties (Access = private)
         previous
         t_natnet_start % timer start time
         on_marker
         on_marker_num
-        marker_num =[]; % 　marker_num > on_marker_num: 合計マーカー数
         dt
     end
     properties %(GetAccess = ?Motive_SIM)%private) % construct したら変えない値．
@@ -68,10 +55,18 @@ classdef NATNET_CONNECTOR_SIM < handle
             obj.result.rigid(1:param.rigid_num) = struct();
             obj.on_marker= cell(obj.result.rigid_num);
         end
-        function result = getData(obj,Param1)
+        function result = getData(obj,Param1,Param2)
             %    result = sensor.motive.do(Param)
             % 【Input】
             %  Param1 : agent obj
+            %  Param2 : .marker_num > on_marker_num:
+            %  設定するとUnLabeledmarkerが定義される
+            %             .occlusion :
+            %             設定するとオクルージョンを起こせる．剛体は固定，剛体上のマーカーはランダムに消える
+            %             時刻[1, 1.2]の範囲で剛体1,2
+            %             ，時刻[1.5,1.6]の範囲で剛体2がオクルージョンを起こす例
+            %             .occlusion.cond = ["t >= 1.0 && t<1.2","t>=1.5&&t<1.6]
+            %             .occlusion.target = {[1,2],[2]}
             % 【fields of result】
             % rigid : (struct array) rigid body info
             % marker : all marker position :
@@ -118,11 +113,11 @@ classdef NATNET_CONNECTOR_SIM < handle
                 end
             end
             %% Occulusion
-            if ~isempty(obj.occlusion_param)
-                obj.occlusion();
+            if isfield(Param2,'occlusion')
+                occlusion(obj,Param2.occlusion);
             end
             %% Unlabeledmarker
-            if ~isempty(obj.marker_num)
+            if isfield(Param2,'marker_num')
                 obj.result.marker_num = Param2.marker_num;
             end
             tmp = arrayfun(@(i) obj.on_marker{i}',1:obj.result.rigid_num,'UniformOutput',false);
@@ -163,16 +158,7 @@ classdef NATNET_CONNECTOR_SIM < handle
         end
     end
     methods (Static)
-      function set_occlusion(obj,cond,target)
-        if isempty(cond) % reset
-          obj.occlusion_param = [];
-        else
-          obj.occlusion_param.cond = cond;
-          obj.occlusion_param.target = target;
-        end
-      end
-        function occlusion(obj)
-          param = obj.occlusion_param;
+        function occlusion(obj,param)
             for i = 1:length(param.cond)
                 if evalin('base',param.cond(i))
                     disp(strcat("occlusion is occurring to agent ",string(param.target{i})));
