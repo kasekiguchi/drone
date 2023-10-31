@@ -56,7 +56,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
             obj.k = obj.k + 1;
             obj.Data.t(obj.k) = t;
-            cha = get(FH, 'currentcharacter');
+%             cha = get(FH, 'currentcharacter');
+            cha = 'f';
             obj.Data.phase(obj.k) = cha;
             % TODO : activate warning
             %            if isempty(items{1}) | length(items) ~= length(obj.items)
@@ -209,7 +210,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 data = [data.(variable(j))];
                 if strcmp(variable(j), 'state')
                     for k = 1:length(data)
-                        ndata(k, :) = data(k).(variable(j + 1));
+                        ndata(k, :) = data(k).(variable(j + 1))(1:3);
                     end
                     data = ndata;
                     break % WRN : stateから更に深い構造には対応していない
