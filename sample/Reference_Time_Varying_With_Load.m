@@ -5,4 +5,7 @@ clear Reference
 Reference.type=["TimeVaryingReferenceE"];
 Reference.name=["timeVarying"];
 Reference.param={{f_name,param,"HL"}};
+for i = 1:length(agent)
+    agent(i).set_reference(Reference);
+end
 end

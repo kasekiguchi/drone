@@ -1,7 +1,9 @@
-function Env=Env_ForestFire(agent,map)
+function Env_ForestFire(agent,map)
 %% environment class demo
 clc
 % env property をEnv classのインスタンス配列として定義
+Env.type="FOREST_FIRE_MAP_SIM";
+Env.name="firemap";
 Env.param.name="firemap";
 Env.param.D = 1;
 Env.param.map_min = [-50 -50];%[x_min y_min]

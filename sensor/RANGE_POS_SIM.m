@@ -1,4 +1,4 @@
-classdef RANGE_POS_SIM < handle
+classdef RANGE_POS_SIM < SENSOR_CLASS
     % RangePosのsimulation用クラス：登録されたエージェントのうち半径内のエージェントの位置を返す
     %   rpos = RANGE_POS_SIM(param)
     %   (optional) param.r : 半径
@@ -31,8 +31,7 @@ classdef RANGE_POS_SIM < handle
             %   result.state : State_obj,  p : position
             % 【入力】Target ：観測対象のModel_objのリスト
             if ~isempty(varargin)
-                %Target=varargin{1}{3}.Data.agent;
-                Target=varargin{1}{5};
+                Target=varargin{1}{1};
 %                obj.target=Target;
             else
                 Target=obj.target;

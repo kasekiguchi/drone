@@ -1,4 +1,4 @@
-classdef PDAF < handle
+classdef PDAF < ESTIMATOR_CLASS
     % Probabilistic data association filter based on feature points
     % 【Received information from NATNET】
     %    ・The number of feature points
@@ -25,7 +25,6 @@ classdef PDAF < handle
         Ri
         InvRi
         P
-        model
     end
     methods
         function obj = PDAF(self,param)
@@ -74,8 +73,7 @@ classdef PDAF < handle
             PDfunction = 1 / sqrt((2 * pi())^3* det(Cov)) * exp(-1/2 * (Z - hatZ) / (Cov) * (Z - hatZ)');
             obj.ProbabilityDensityFunction = matlabFunction(PDfunction,'Vars',{Z,hatZ,Cov});            
             %            [obj.H,obj.JacobianH,obj.ProbabilityDensityFunction,obj.param] = DroneParam(param);
-            obj.model = param.model;
-            model = obj.model;
+            model = obj.self.model;
             obj.dt = model.dt;                                        % Sampling time
             ELfile=strcat("Jacobian_",model.name);                    % Extended initialization of model
             if ~exist(ELfile,"file")
@@ -85,8 +83,10 @@ classdef PDAF < handle
             end
             obj.JacobianF = @(x,~) diag(ones(1,6),6);
         end
-        function result = do(obj,varargin)
-            model  = obj.model;                                              % agent.model
+        function result = do(obj,param,~)
+            %【Input】  param : optional
+            %【Output】 obj            
+            model  = obj.self.model;                                              % agent.model
             sensor = obj.self.sensor.result;                                              % agent.sensor.result
             if isempty(obj.local_feature)
                 obj.local_feature = sensor.local_feature;                   % Feature point position of estimated object on robot cordinate

@@ -1,4 +1,4 @@
-classdef ROS < handle
+classdef ROS < SENSOR_CLASS
     %       self : agent
     properties
         name      = "ROS";
@@ -11,7 +11,7 @@ classdef ROS < handle
     
     methods
         function obj = ROS(self,param)
-            obj.ros = ROS2_CONNECTOR(param);
+            obj.ros = ROS_CONNECTOR(param);
             %  このクラスのインスタンスを作成
             obj.self = self;
             if isfield(param,'state_list')

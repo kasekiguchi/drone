@@ -1,4 +1,4 @@
-classdef CONSENSUS_AGREEMENT < handle
+classdef CONSENSUS_AGREEMENT < REFERENCE_CLASS
     % 合意重心を指定して隊列を形成するクラス
     % 指定すれば各時刻における合意重心の算出も可能
     
@@ -7,7 +7,6 @@ classdef CONSENSUS_AGREEMENT < handle
         self
         offset
         id
-        result
     end
     
     methods
@@ -61,8 +60,8 @@ classdef CONSENSUS_AGREEMENT < handle
                 %                         gradPy = gradPy+Wd*(2*state.p(2)-2*P(2,1))/(2*((state.p(1) - P(1,1))^2 + (state.p(2) - P(2,1))^2 + (state.p(3) - P(3,1))^2)^(3/2)) - (Wo*(2*state.p(2) - 2*sensor(2).p(2)))/(2*((state.p(1) - sensor(2).p(1))^2 + (state.p(2) - sensor(2).p(2))^2 + (state.p(3) - sensor(2).p(3))^2)^(3/2));
                 %                     end
                 
-                %obj.result.state.xd = P;%[state.p(1)-gradPx;state.p(2)-gradPy;0.5]; %フォロワー機の目標座標
-                obj.result.state.p = P;%obj.result.state.xd;
+                obj.result.state.xd = P;%[state.p(1)-gradPx;state.p(2)-gradPy;0.5]; %フォロワー機の目標座標
+                obj.result.state.p = obj.result.state.xd;
             end
             
             result = obj.result; %返し値（次の目標位置）

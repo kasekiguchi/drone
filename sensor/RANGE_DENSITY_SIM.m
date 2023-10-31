@@ -1,4 +1,4 @@
-classdef RANGE_DENSITY_SIM < handle
+classdef RANGE_DENSITY_SIM < SENSOR_CLASS
     % RangeDensityのsimulation用クラス：登録されたエージェントのうち半径内のエージェントの位置を返す
     %   rdensity = RANGE_DENSITY_SIM(Env)
     %   (optional) Env.r : 半径
@@ -22,7 +22,7 @@ classdef RANGE_DENSITY_SIM < handle
             % result=rdensity.do(varargin) : obj.r 内のdensity mapを返す．
             %   result.state : State_obj,  p : position
             % 【入力】varargin = {{Env}}      agent : センサーを積んでいる機体obj,    Env：観測対象のEnv_obj
-            Env=varargin{1}{4};
+            Env=varargin{1}{1};
             state=obj.self.plant.state; % 真値
             env = polyshape(Env.Vertices);
 

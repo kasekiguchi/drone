@@ -12,9 +12,8 @@ cd(fileparts(tmp.Filename));
 %% Get corner coordinates
 %STL = 'stl_model.stl';
 %STL = '20210217_5F.stl';
-%STL = '20210217_ASCII_meshlab.stl';
+STL = '20210217_ASCII_meshlab.stl';
 %STL = '20210217_Binary_meshlab.stl';
-STL = '3F.stl';
 [TR,fileformat,attributes,solidID] = stlread(STL);
 Sp0 = TR.Points; % points list
 St0 = TR.ConnectivityList; % triangles list
@@ -40,8 +39,7 @@ for hi = 1:length(hrange) % カットする高さ毎に処理
     [tmp2_eids,~]=ind2sub([length(tmp_eids),2],tmp2_eids); % targetより高い点を含むエッジのインデックス（行番号）
     
     HL_eids=tmp_eids(tmp2_eids);% H-Lを含むedgeのインデックス集合
-    tmp_triid = edgeAttachments(TR,E(HL_eids,:));% H-L edgeを含む三角形インデックス
-    HL_tids=unique(cell2mat(cellfun(@(x) x(1:2), tmp_triid, 'UniformOutput', false)));% H-L edgeを含む三角形インデックス
+    HL_tids=unique(cell2mat(edgeAttachments(TR,E(HL_eids,:))));% H-L edgeを含む三角形インデックス
     
     aa = ordered_cross_points(Sp0,St0(HL_tids,:),h); % h という高さの点群
     % ordered_cross_points : 高さｈと三角形の交点を活かした順番で並べる関数．詳細は関数本体参照

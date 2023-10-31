@@ -1,4 +1,4 @@
-classdef APPROXIMATE_DIFFERENTIATION < handle
+classdef Approximate_Differentiation < ESTIMATOR_CLASS
     
     properties
         previous
@@ -8,16 +8,14 @@ classdef APPROXIMATE_DIFFERENTIATION < handle
         num_list
         return_list
         self
-        model
     end
     
     methods
-        function obj = APPROXIMATE_DIFFERENTIATION(self,param)
+        function obj = Approximate_Differentiation(self,param)
             %UNTITLED このクラスのインスタンスを作成
             %   詳細説明をここに記述
             obj.self = self;
-            obj.model = param.model;
-            model = obj.model;
+            model = self.model;
             obj.result.state=state_copy(model.state); % STATE_CLASSとしてコピー
             obj.previous=state_copy(model.state); % STATE_CLASSとしてコピー
             obj.dt=model.dt;
@@ -25,6 +23,7 @@ classdef APPROXIMATE_DIFFERENTIATION < handle
                 obj.list = param{1}.list(1,:);
                 obj.return_list = param{1}.list(2,:);
             end
+%             obj.result.state=STATE_CLASS(struct('state_list',obj.list,'num_list',obj.num_list)); % STATE_CLASSとしてコピー
         end
         
         function result=do(obj,param,varargin)

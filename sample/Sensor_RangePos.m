@@ -6,6 +6,9 @@ arguments
     id
     param.r = 3
 end
-Sensor.r=param.r; % 隣接エージェントの位置を知るためのレンジ
-Sensor.id=id;
+Sensor.name=["rpos"];
+Sensor.type=["RANGE_POS_SIM"];
+rpos_param.r=param.r; % 隣接エージェントの位置を知るためのレンジ
+    rpos_param.id=id;
+    Sensor.param=rpos_param;
 end

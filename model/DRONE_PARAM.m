@@ -1,6 +1,5 @@
-classdef DRONE_PARAM < PARAMETER_CLASS
+classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
     % ドローンの物理パラメータ管理用クラス
-    % 以下のconfigurationはclass_description.pptxも参照すること．
     % T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
     % 前：ｘ軸，　左：y軸，　上：ｚ軸
     % motor configuration 
@@ -9,6 +8,9 @@ classdef DRONE_PARAM < PARAMETER_CLASS
     % tau = [(Ly - ly)*(T3+T4)-ly*(T1+T2); lx*(T1+T3)-(Lx-lx)*(T2+T4); km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 
     properties
+        parameter % 制御モデル用パラメータ
+        parameter_name % 物理パラメータの名前
+        model_error % モデル誤差 : 制御対象の真値 - 制御モデル用パラメータ
         mass % DIATONE
         Lx 
         Ly 
@@ -34,18 +36,22 @@ classdef DRONE_PARAM < PARAMETER_CLASS
     end
 
     methods
-        function obj = DRONE_PARAM(name,type,param)
+        function obj = DRONE_PARAM(name,param)
             arguments
-                name % DIATONE
-                type = "row";
-                param.mass = 0.5884;
+                name
+%                 param.mass = 0.269;% DIATONE
+%                 param.Lx = 0.117;
+%                 param.Ly = 0.0932;
+%                 param.lx = 0.117/2;%0.05;
+%                 param.ly = 0.0932/2;%0.05;
+                param.mass = 0.5884;% EACHINE
                 param.Lx = 0.16;
                 param.Ly = 0.16;
                 param.lx = 0.16/2;%0.05;
                 param.ly = 0.16/2;%0.05;
-                param.jx = 0.06;
-                param.jy = 0.06;
-                param.jz = 0.06;
+                param.jx = 0.02237568;
+                param.jy = 0.02985236;
+                param.jz = 0.0480374;
                 param.gravity = 9.81;
                 param.km1 = 0.0301; % ロータ定数
                 param.km2 = 0.0301; % ロータ定数
@@ -56,10 +62,68 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 param.k3 = 0.000008;          % 推力定数
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
-                param.additional = []; % プロパティに無いパラメータを追加する場合
+                param.model_error = [];
             end
-            obj = obj@PARAMETER_CLASS(name,type,param);
+        obj.mass = param.mass;
+        obj.Lx = param.Lx;
+        obj.Ly = param.Ly;
+        obj.lx = param.lx;
+        obj.ly = param.ly;
+        obj.jx = param.jx;
+        obj.jy = param.jy;
+        obj.jz = param.jz;
+        obj.gravity = param.gravity;
+        obj.km1 = param.km1;
+        obj.km2 = param.km2;
+        obj.km3 = param.km3;
+        obj.km4 = param.km4;
+        obj.k1 = param.k1;
+        obj.k2 = param.k2;
+        obj.k3 = param.k3;
+        obj.k4 = param.k4;
+        obj.rotor_r = param.rotor_r;
+        obj.parameter_name = string(properties(obj)');
+        obj.parameter_name(strcmp(obj.parameter_name,"parameter")) = [];
+        obj.parameter_name(strcmp(obj.parameter_name,"parameter_name")) = [];
+        obj.parameter_name(strcmp(obj.parameter_name,"model_error")) = [];
+        for i = obj.parameter_name
+                obj.parameter=[obj.parameter,obj.(i)];
+                obj.model_error = [obj.model_error,0];
+        end
+        if ~isempty(param.model_error)
+            obj.model_error = param.model_error;
+        end
+        end        
+    end
+    methods
+        function v = get(obj,p,plant)
+            arguments
+                obj
+                p = "all";
+                plant = "model"
+            end
+            if strcmp(plant,"plant") % 制御対象の真値 : 制御モデル(parameter) + モデル誤差(model_error)
+                if strcmp(p,"all") % 非推奨
+                    v = obj.parameter + obj.model_error;
+                else
+                    for i = length(p):-1:1
+                        v(i) = obj.(p(i)) + obj.model_error(strcmp(obj.parameter_name,p(i)));
+                    end
+                end
+            else % 制御モデルで想定している値
+                if strcmp(p,"all") % 非推奨
+                    v = obj.parameter;
+                else
+                    for i = length(p):-1:1
+                        v(i) = obj.(p(i));
+                    end
+                end
+            end
+        end
+        function set_model_error(obj,p,v)
+            for i = length(p):-1:1
+                obj.model_error(strcmp(obj.parameter_name,p(i))) = v(i);
+            end
         end
     end
-
 end

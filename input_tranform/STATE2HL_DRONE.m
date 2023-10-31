@@ -1,4 +1,4 @@
-classdef STATE2HL_DRONE < handle
+classdef STATE2HL_DRONE < INPUT_TRANSFORM_CLASS
     % 階層型線形化入力を算出するクラス
     % 別のコントローラでone step 分予測したものをリファレンスとしてHL入力を求めるので，移動速度が遅過ぎて使えない．
     

@@ -1,4 +1,4 @@
-classdef FOR_LOAD < handle
+classdef FOR_LOAD < ESTIMATOR_CLASS
       properties
         state
         result
