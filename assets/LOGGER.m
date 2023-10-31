@@ -210,7 +210,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                 data = [data.(variable(j))];
                 if strcmp(variable(j), 'state')
                     for k = 1:length(data)
-                        ndata(k, :) = data(k).(variable(j + 1))(1:3);
+                        ndata(k, :) = data(k).(variable(j + 1));
                     end
                     data = ndata;
                     break % WRN : stateから更に深い構造には対応していない
