@@ -6,22 +6,22 @@ clear
 close all
 % フラグ管理
 flg.bilinear = 0; %1:双線形モデルへの切り替え
-Normalize = 0; %1：正規化
+Normalize = 1; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-% FileName = 'EstimationResult_12state_10_27_data=all_circle=circle_estimation=circle_Inputandconst_Normalize.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+% FileName = 'EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=sad_Inputandconst.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'experiment_10_9_revcircle';  
-% loading_filename = 'experiment_10_10_reverseandorder_circle';  %matは含まないように注意！
+% loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
-loading_filename = 'experiment_10_27';
+loading_filename = 'experiment_10_31';
 % loading_filename = 'sim_rndP4';
 
-Data.HowmanyDataset = 40; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 60; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -98,6 +98,7 @@ disp('Estimated')
 simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
 % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
+% simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
 % simResult.reference = ImportFromExpData_estimation('sim_7_20_circle_estimatordata'); %sim
 
 
@@ -121,7 +122,7 @@ if Normalize == 1 %推定精度検証用データの正規化
     Data2.U = simResult.reference.U;
     Ndata2 = Normalization(Data2);
     for i  = 1:12
-    simResult.Z(i,1) = (simResult.Z(i,1)-Ndata2.meanValue.x(i))/Ndata2.stdValue.x(i);
+        simResult.Z(i,1) = (simResult.Z(i,1)-Ndata2.meanValue.x(i))/Ndata2.stdValue.x(i);
     end
     simResult.U(:,:) = Ndata2.u;
 end
@@ -141,6 +142,7 @@ if Normalize == 1 %逆変換
     for i = 1:size(simResult.Xhat,1)
         simResult.Xhat(i,:) = (simResult.Xhat(i,:) * Ndata.stdValue.x(i)) + Ndata.meanValue.x(i);
     end
+    simResult.Xhat = cat(2,simResult.reference.X(:,1),simResult.Xhat);
 end
 
 %% Save Estimation Result(結果保存場所)
