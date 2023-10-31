@@ -1,27 +1,31 @@
-classdef TIME_VARYING_REFERENCE_SUSPENDEDLOAD < handle
+classdef TIME_VARYING_REFERENCE_SPLIT < handle
     % 時間関数としてのリファレンスを生成するクラス
     % obj = TIME_VARYING_REFERENCE()
     properties
         param
         func % 時間関数のハンドル
         self
+        agent1 % cooprative情報
         t=[];
         cha='s';
+        com % 使用制御モデル->"HL"or"Cooperative"or"Suspended"or"Split"
         dfunc
         result
     end
 
     methods
-        function obj = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(self, args)
+        function obj = TIME_VARYING_REFERENCE_SPLIT(self, args, agent1)
             % 【Input】ref_gen, param, "HL"
             % ref_gen : reference function generator
             % param : parameter to generate the reference function
             % "HL" : flag to decide the reference for HL
             arguments
-                self
+                self   
                 args
+                agent1
             end
-            obj.self = self;
+            obj.self = self;   
+            obj.agent1 = agent1;
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
             obj.func = gen_func_name(param_for_gen_func{:});
@@ -36,6 +40,11 @@ classdef TIME_VARYING_REFERENCE_SUSPENDEDLOAD < handle
                 end
                 if strcmp(args{3}, "Suspended")
                     obj.func = gen_ref_for_HL(obj.func);
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));                    
+                end
+                if strcmp(args{3}, "Split")
+                    obj.com = args{3};
+                    obj.func = obj.agent1.reference.func;
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));                    
                 end
             else
@@ -72,8 +81,13 @@ classdef TIME_VARYING_REFERENCE_SUSPENDEDLOAD < handle
                 obj.t=varargin{1}.t;
                 t = obj.t;
            end
-           obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-           obj.result.state.p = obj.result.state.xd(1:3);
+           if strcmp(obj.com, "Split")
+                   obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+                   obj.result.state.p = obj.result.state.xd(1:3);
+           else
+                   obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+                   obj.result.state.p = obj.result.state.xd(1:3);
+           end
            % if length(obj.result.state.xd)>4
            %  obj.result.state.v = obj.result.state.xd(5:7);
            % else
