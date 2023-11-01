@@ -72,6 +72,7 @@ classdef TIME_VARYING_REFERENCE_COOPERATIVE < handle
            % obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            result = obj.result;
         end
+        
         function show(obj, logger)
             rp = logger.data(1,"p","r");
             plot3(rp(:,1), rp(:,2), rp(:,3));                     % xy平面の軌道を描く

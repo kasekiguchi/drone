@@ -62,7 +62,7 @@ run("ExpBase");
 
 
 clc
-for i = 1:1000
+for i = 1:100
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');

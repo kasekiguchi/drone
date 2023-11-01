@@ -82,8 +82,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 t = obj.t;
            end
            if strcmp(obj.com, "Split")
-                   obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-                   obj.result.state.p = obj.result.state.xd(1:3);
+               loadpoint = obj.state.reference
+               obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+               q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
+               obj.result.state.p = obj.result.state.xd(1:3);
            else
                    obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
                    obj.result.state.p = obj.result.state.xd(1:3);
@@ -96,6 +98,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            % obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            result = obj.result;
         end
+
+        function [pi,rho] = gen_pi(obj,p,Q,qi)
+           % pi(k,:,i) = [xi yi zi] at time k
+           Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
+           q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
+           rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
+           pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));      
+        end
+
         function show(obj, logger)
             rp = logger.data(1,"p","r");
             plot3(rp(:,1), rp(:,2), rp(:,3));                     % xy平面の軌道を描く
