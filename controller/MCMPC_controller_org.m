@@ -32,10 +32,9 @@ classdef MCMPC_controller_org < handle
             obj.const = param.param.const;
             obj.input.nextsigma = param.param.input.Initsigma;  % 初期化
             obj.param.H = param.param.H + 1;
-            % 追加
+
             obj.param.nextparticle_num = param.param.Maxparticle_num;   % 初期化
             obj.input.Bestcost_now = 1e2;% 十分大きい値にする  初期周期での比較用
-            % obj.model = self.plant;
             obj.param.fRemove = 0;
             obj.input.AllRemove = 0;
             obj.N = param.param.particle_num;
@@ -47,13 +46,8 @@ classdef MCMPC_controller_org < handle
         end
         
         %-- main()的な
-        % u fFirst
         function result = do(obj,varargin)
 %           profile on
-            % idx = param{1};
-            % xr = param{2};
-            % rt = param{3};
-            % phase = param{4};
             obj.param.t = varargin{1,1}.t;
 
             %% horizonごとではないリファレンス
@@ -65,44 +59,34 @@ classdef MCMPC_controller_org < handle
 %             ref_MC = [ref_p; ref_q; ref_v; ref_w; ref_input];
 %             xr = repmat(ref_MC, 1, obj.param.H);
             %%
-            xr = obj.Reference();
+            xr = obj.Reference(); % mainでできなくなったのでcnotroller内で計算
             
             %%
-            obj.state.ref = xr;
-            obj.reference.grad = 3/10;
-
-            % if obj.param.t > 2.6
-            %     obj.param.QW(1,1) = 10000;
-            %     obj.param.QW(2,2) = 20000;
-            % end
+            obj.state.ref = xr; % 関数の受け渡し用
             
-            ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-            ave2 = obj.input.u(2);    % 初期値はparamで定義
-            ave3 = obj.input.u(3);
-            ave4 = obj.input.u(4);
+            mu(1) = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
+            mu(2) = obj.input.u(2);    % 初期値はparamで定義
+            mu(3) = obj.input.u(3);
+            mu(4) = obj.input.u(4);
             
-            % ave1 = 0.269*9.81/4;    % ホバリング入力を平均
-            % ave2 = 0.269*9.81/4;    % 初期値はparamで定義
-            % ave3 = 0.269*9.81/4;
-            % ave4 = 0.269*9.81/4;
+            % mu(1) = 0.269*9.81/4;    % ホバリング入力を平均
+            % mu(2) = 0.269*9.81/4;    % 初期値はparamで定義
+            % mu(3) = 0.269*9.81/4;
+            % mu(4) = 0.269*9.81/4;
             
             % 標準偏差，サンプル数の更新
             obj.input.sigma = obj.input.nextsigma;
             obj.N = obj.param.nextparticle_num;         
 
-            if obj.input.AllRemove == 1
-                ave1 = 0.269*9.81;
-                ave2 = ave1;
-                ave3 = ave1;
-                ave4 = ave1;
+            if obj.input.AllRemove == 1 % 全棄却回避用
+                mu(1) = 0.269*9.81;
+                mu(2) = mu(1);
+                mu(3) = mu(1);
+                mu(4) = mu(1);
                 obj.input.AllRemove = 0;
             end
 
-            % obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1); % 負入力の阻止
-            % obj.input.u2 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave2);
-            % obj.input.u3 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave3);
-            % obj.input.u4 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave4);
-            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + ave1);
+            obj.input.u1 = max(0,obj.input.sigma.*randn(obj.param.H, obj.N) + mu(1));
             obj.input.u2 = obj.input.sigma.*randn(obj.param.H, obj.N);    % すべて同じ入力、　確認用
             obj.input.u3 = obj.input.sigma.*randn(obj.param.H, obj.N);
             obj.input.u4 = obj.input.sigma.*randn(obj.param.H, obj.N);
@@ -122,17 +106,13 @@ classdef MCMPC_controller_org < handle
             %-- 評価値計算
             obj.param.fin = 0;
             eachCost = zeros(obj.N, 3);
-%             tic
             for m = 1:obj.N
                 [obj.input.eval(1,m), eachCost(m, :)] = objective(obj,m);
-                % [Evaluationtra(1,m), eachCost] = objective(obj, m);
             end
-%             toc
             obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); % サンプル数が小さくなった時に最小値を見失わないように
-            % obj.input.eachcost = eachCost(1, 1:obj.N);
             
-            % 評価値の正規化
-            obj.input.normE = obj.Normalize();
+            %-- 評価値の正規化
+            obj.input.normE = obj.Normalize(); % ほぼ使わない
 
             %-- 制約条件
             removeF = 0; removeX = []; survive = obj.N; 
@@ -158,7 +138,6 @@ classdef MCMPC_controller_org < handle
 %                     obj.input.AllRemove = 1;
                 else
                     obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now./obj.input.Bestcost_pre)));
-                    % 追加
                     obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now/obj.input.Bestcost_pre))));
                 end
 
@@ -169,25 +148,23 @@ classdef MCMPC_controller_org < handle
                 BestcostID = 1;
                 obj.input.AllRemove = 1;
 
-                % 追加
                 obj.param.nextparticle_num = obj.param.Maxparticle_num;
             end
             obj.input.u = obj.result.input;
 
-%             if Bestcost > obj.param.ConstEval; Bestcost = obj.param.ConstEval;  end
             obj.result.input_v = [0;0;0;0];
             obj.result.removeF = removeF;
             obj.result.removeX = removeX;
             obj.result.survive = survive;
             obj.result.COG = obj.state.COG;
-%             obj.self.input = obj.result.input;
+
             obj.result.BestcostID = BestcostID;
             obj.result.bestcost = Bestcost;
             obj.result.contParam = obj.param;
             obj.result.fRemove = obj.param.fRemove;
             obj.result.path = obj.state.state_data;
             obj.result.sigma = obj.input.sigma;
-            obj.result.variable_N = obj.N; % 追加
+            obj.result.variable_N = obj.N; 
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.Evaluationtra_norm = obj.input.normE;
             obj.result.eachcost = eachCost(BestcostID, :);
@@ -197,7 +174,6 @@ classdef MCMPC_controller_org < handle
         end
         function show(obj)
             obj.result
-%             view([2]);
         end
 
         %-- 制約とその重心計算 --%
