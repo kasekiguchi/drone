@@ -28,12 +28,12 @@ switch conn_type
         setting.port = id;
     case "ros"
         setting.param.state_list = ["p"];
-        setting.param.num_list = [3, 3];
-        % setting.param.subTopic = ['/Robot_1/pose'];
-        % setting.param.subTopic = ['/Robot_1/pose'];%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         setting.param.subTopic = ["/mavros/local_position/pose"];
         setting.param.subName = ["p"];
-        setting.param.DomainID = id;
+        setting.param.DomainID  = id;
+        setting.subTopicName    = {'/rover_odo'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub topic name
+        setting.pubTopicName    = {'/rover_twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub topic name
+        setting.subMsgName      = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
+        setting.pubMsgName      = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub 型
 end
 
 Model.param = setting;

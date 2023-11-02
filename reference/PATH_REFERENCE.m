@@ -29,14 +29,16 @@ classdef PATH_REFERENCE < handle
             obj.refv = param{1,1};
             %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
             %obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
-            obj.PreTrack = obj.self.model.state.get();%位置,姿勢,速さ
+            % obj.PreTrack = obj.self.model.state.get();%位置,姿勢,速さ
+            obj.PreTrack = obj.self.estimator.model.state.get();%位置,姿勢,速さ
             obj.result.PreTrack = obj.PreTrack;
-            obj.Horizon = param{1,2};
+            % obj.Horizon = param{1,2};
             obj.step = 3;
-            obj.SensorRange = param{1,3};
-            obj.dt = obj.self.model.dt;
+            % obj.SensorRange = param{1,3};
+            obj.dt = obj.self.estimator.model.dt;
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
-            obj.constant = param{1,4};
+            % obj.constant = param{1,4};
+            obj.constant = param;
         end
 
         function  result= do(obj,param)

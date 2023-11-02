@@ -1,20 +1,27 @@
-classdef ROS < handle
+classdef ROS2_LiDAR_PCD < handle
 %       self : agent
 properties
-    name = "LiDAR";
     ros
     result
     state
     self
     fState % subscribeにstate情報を含むか
+
+
+    radius
 end
 
 methods
 
-    function obj = ROS(self)
-        param = Sensor_ROS(obj);
-        
-        obj.ros = ROS2_CONNECTOR(param);
+    function obj = ROS2_LiDAR_PCD(self,param)
+        param.nodename = self.node;
+        subTopicName(1) = {'/scan_front'};
+        subTopicName(2) = {'/scan_back'};
+        param.subMsgName      = {'sensor_msgs/LaserScan'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
+        for i = 1:length(subTopicName)
+            param.subTopicName = subTopicName(i);
+            obj.ros{i} = ROS2_CONNECTOR(param);
+        end
         %  このクラスのインスタンスを作成
         obj.self = self;
 
@@ -32,160 +39,77 @@ methods
 
         end
 
-        data = obj.ros.getData;
-        obj.radius = data.range_max;
-        angle_num = size(data.ranges);
-        %             angle_num = data.angle_max/data.angle_increment;
-        j = 1;
-        data.angle(j, 1) = data.angle_min;
-
-        for j = 2:angle_num(1, 1)
-            data.angle(j, 1) = data.angle(j - 1) + data.angle_increment;
-        end
-
-        obj.angle_range = double(data.angle');
-        %             data.ranges = filloutliers(data.ranges,"next");
-        %             data.intensities = ficclloutliers(data.intensities,"next");
-        for i = 1:length(data.ranges)
-
-            if ~isfinite(data.ranges(i, 1)) == 1
-
-                if i == 1
-                    data.ranges(i, 1) = data.ranges(i + 1, 1);
-                else
-                    data.ranges(i, 1) = data.ranges(i - 1, 1);
-                end
-
-            end
-
-        end
-
-        for i = 1:length(data.intensities)
-
-            if ~isfinite(data.intensities(i, 1)) == 1
-
-                if i == 1
-                    data.intensities(i, 1) = data.intensities(i + 1, 1);
-                else
-                    data.intensities(i, 1) = data.intensities(i - 1, 1);
-                end
-
-            end
-
-        end
-
-        %             data.ranges(~isfinite(data.ranges)) = 0;
-        %             data.intensities(~isfinite(data.intensities)) = 0;
-        %             data.ranges = fillmissing(data.ranges,'previous');
-        %             data.intensities = fillmissing(data.intensities,'previous');
-        %
-        %             for i = 1:length(data.ranges)
-        %                 if data.ranges(i,1) >= 3.0
-        %                     data.ranges(i,1) = 0;
-        %                     data.intensities(i,1) = 0;
-        %                 end
-        %             end
-        data.angle = double((data.angle)');
-        data.length = double((data.ranges)');
-        data.intensities = double((data.intensities)');
-        data.radius = double((data.range_max)');
+        % data = obj.ros.getData;
+        % data = obj.ros{1}.getData;
     end
+        
 
     function result = do(obj, param)
         % result=sensor.motive.do(motive)
         %   set obj.result.state : State_obj,  p : position, q : quaternion
         %   result :
         % 【入力】motive ：NATNET_CONNECOTR object
-        data = obj.ros.getData;
-
-        for i = 1:length(data.ranges)
-
-            if ~isfinite(data.ranges(i, 1)) == 1
-
-                if i == 1
-                    data.ranges(i, 1) = data.ranges(i + 1, 1);
-                else
-                    data.ranges(i, 1) = data.ranges(i - 1, 1);
-                end
-
+        
+        while(1)
+            pause(0.001)
+            data{1} = obj.ros{1}.result;
+            data{2} = obj.ros{2}.result;
+            if isempty(data{1})|isempty(data{2})
+                % break
+            else
+                break
             end
-
+        end
+        
+        for i = 1:length(data)
+            data2pcd = rosReadCartesian(data{i});
+            moving_pc(i) = pointCloud([data2pcd zeros(size(data2pcd,1),1)]); % moving:m*3           
         end
 
-        for i = 1:length(data.intensities)
+    %% ローバー自身の点群認識
+        roi = [0.1 0.35 -0.18 0.16 -0.1 0.1];
+        
+        indices_f = findPointsInROI(moving_pc(1),roi);
+        Df = zeros(size(moving_pc(1).Location));
+        
+        indices_b = findPointsInROI(moving_pc(2),roi);
+        Db = zeros(size(moving_pc(2).Location));
+        
+        Df(indices_f,3) = 5;
+        Db(indices_b,3) = 5;
+        ptCloud_tf = pctransform(moving_pc(1),Df);
+        ptCloud_tb = pctransform(moving_pc(2),Db);
+        % %%%%%%%%%ローバー自身の点群除去%%%%%%%%%%%%%%
+        roi = [-10 10 -10 10 -1 1];%入力点群の x、y および z 座標の範囲内で直方体 ROI を定義
+        
+        
+        indices_f = findPointsInROI(ptCloud_tf,roi);%直方体 ROI 内にある点のインデックスを検出
+        moving_pc(1) = select(ptCloud_tf,indices_f);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納    
+        
+        indices_b = findPointsInROI(ptCloud_tb,roi);%直方体 ROI 内にある点のインデックスを検出
+        moving_pc(2) = select(ptCloud_tb,indices_b);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納
+        %% pcd合成
+        rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
+        T = [0.46 0.023 0]; %並進方向(x,y,z)
+        tform = rigidtform3d(rot,T);
+        
+        moving_pc2_m_b = pctransform(moving_pc(2),tform);
+        
+        ptCloudOut = pcmerge(moving_pc(1), moving_pc2_m_b, 0.001);
+        % ptCloudOut = pcmerge(moving_pc.f, moving_pc2_m, 0.001);
+        
+        rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
+        T = [0.17 0 0]; %並進方向(x,y,z)
+        tform = rigidtform3d(rot,T);
+        % moving_pcm = pctransform(ptCloudOut,tform);
 
-            if ~isfinite(data.intensities(i, 1)) == 1
-
-                if i == 1
-                    data.intensities(i, 1) = data.intensities(i + 1, 1);
-                else
-                    data.intensities(i, 1) = data.intensities(i - 1, 1);
-                end
-
-            end
-
-        end
-
-        %             for i = 1:length(data.ranges)
-        %                 if data.ranges(i,1) >= 3.0
-        %                     data.ranges(i,1) = 0;
-        %                     data.intensities(i,1) = 0;
-        %                 end
-        %             end
-
-        %             data.ranges = filloutliers(data.ranges,"previous");
-        %             data.intensities = filloutliers(data.intensities,"previous");
-        data.ranges = fillmissing(data.ranges, 'previous');
-        data.intensities = fillmissing(data.intensities, 'previous');
-        angle_num = size(data.ranges);
-        %             angle_num = data.angle_max/data.angle_increment;
-        j = 1;
-        data.angle(j, 1) = data.angle_min;
-
-        for j = 2:angle_num(1, 1)
-            data.angle(j, 1) = data.angle(j - 1) + data.angle_increment;
-        end
-
-        data.angle = double((data.angle)');
-        data.length = double((data.ranges)');
-        data.intensities = double((data.intensities)');
-        data.radius = double((data.range_max)');
-
-        if ~isempty(obj.self.estimator.ukfslam.result.state.q)
-            front = obj.self.estimator.ukfslam.result.state.q;
-        else
-            front = 0;
-        end
-
-        tmp = data.angle +front;
-        cric = [data.radius * cos(tmp); data.radius * sin(tmp)]';
-
-        for i = 1:size(data.length, 2)
-            a = data.length(i) * sin(tmp(1, i));
-            b = data.length(i) * cos(tmp(1, i));
-            obj.result.sensor_points(i, :) = [b, a];
-        end
-
-        F = fieldnames(data);
-
-        for i = 1:length(F)
-
-            switch F{i}
-                case "q"
-                    obj.result.state.set_state('q', data.q);
-                case "p"
-                    obj.result.state.set_state('p', data.p);
-                case "v"
-                    obj.result.state.set_state('v', data.v);
-                case "w"
-                    obj.result.state.set_state('w', data.w);
-                otherwise
-                    obj.result.(F{i}) = data.(F{i});
-            end
-
-        end
-
+        obj.result = pctransform(ptCloudOut,tform);
+        % obj.result = scanpcplot_rov(moving_pc);
         result = obj.result;
+    end
+    function pcdata = scanpcplot_rov(topics)
+
+        pcdata = moving_pcm;
     end
 
     %         function show(obj,varargin)
@@ -196,11 +120,11 @@ methods
     %         end
     function show(obj, pq, q)
 
-        arguments
-            obj
-            pq
-            q = 0;
-        end
+        % arguments
+        %     % obj
+        %     % pq
+        %     % q = 0;
+        % end
 
         p = pq(1:2);
 

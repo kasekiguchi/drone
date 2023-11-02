@@ -22,8 +22,8 @@ UKF_param.P = eye(n); %初期時刻の共分散行列
 %UKF_param.k = 800;%スケーリングパラメータ
 UKF_param.k = 2; %2スケーリングパラメータ : kappa in [0,3] : 1000
 UKF_param.NLP = 2; %Number of Line Param = [d, alpha]
-UKF_param.SensorRange = agent.sensor.lrf.radius; %センサレンジを呼び出し
-UKF_param.list = agent.model.state.list;
+% UKF_param.SensorRange = agent.sensor.lrf.radius; %センサレンジを呼び出し
+% UKF_param.list = agent.model.state.list;
 
 % the constant value for estimating of the map
 UKF_param.constant = struct; %定数パラメータ設定

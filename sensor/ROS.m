@@ -16,11 +16,10 @@ end
 methods
 
     function obj = ROS(self,param)
-        % param = Sensor_ROS(obj);
-        % param.subTopic = self.plant.connector.subTopic;
-        % param.subTopicName = self.plant.connector.subTopicName;
+        param.subTopic = self.plant.connector.subTopic;
+        param.subTopicName = self.plant.connector.subTopicName;
         
-        % obj.ros = ROS2_CONNECTOR(param);
+        obj.ros = ROS2_CONNECTOR(param);
         %  このクラスのインスタンスを作成
         obj.self = self;
 
@@ -38,7 +37,7 @@ methods
 
         end
 
-        % data = obj.ros.getData;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        data = obj.ros.getData;
         obj.radius = data.range_max;
         angle_num = size(data.ranges);
         %             angle_num = data.angle_max/data.angle_increment;
