@@ -10,6 +10,7 @@ end
 
 properties
     msg
+    data%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
 methods
@@ -38,6 +39,7 @@ methods
                 obj.connector = SERIAL_CONNECTOR(param);
                 fprintf("Whill %d is ready\n", param.port);
             case "ros"
+
                 obj.IP = param.id;
                 %[~, cmdout] = system("ipconfig");
                 %ipp = regexp(cmdout, "192.168.");
@@ -47,29 +49,10 @@ methods
 %                 param.subTopicName = {'/Robot_1/pose'};
                 % param.subTopicName = {'/odom'};
                 param.nodename = obj.self.node;
-                param.subTopicName = {'/rover_odo'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub topic name
-                % param.pubTopicName = {'/cmd_vel'};
-                param.pubTopicName = {'/rover_twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub topic name
-%                 param.subMsgName = {'geometry_msgs/PoseStamped'};
-                % param.subMsgName = {'nav_msgs/Odometry'};
-                param.subMsgName = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
-                % param.pubMsgName = {'geometry_msgs/Twist'};
-                param.pubMsgName = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub 型
                 subnum = length(param.subTopicName);
                 pubnum = length(param.pubTopicName);
 
-                % for i = 1:subnum
-                %     param.subTopic(i) = ros2node("/submatlab_rov", obj.IP);
-                % end
-                % 
-                % for i = 1:pubnum
-                %     param.pubTopic(i) = ros2node("/pubmatlab_rov", obj.IP);
-                % end
-                
-
                 obj.connector = ROS2_CONNECTOR(param);
-%                 odom_sub = ros2subscriber(param.subTopic(1),"/odom");
-%                 receive(odom_sub,2);
                 fprintf("Whill %d is ready\n", obj.IP);
 %                 state = obj.connector.getData();
 %                 obj.result.state.p = [state.pose.position.z,state.pose.position.x];
@@ -79,9 +62,9 @@ methods
 %                 obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
 %                 obj.state.eq = quat2eul(obj.state.qq);
         end
-
-    end
-
+  end
+  
+  
 function do(obj, u, varargin)
      
 

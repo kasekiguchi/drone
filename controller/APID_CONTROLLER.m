@@ -19,6 +19,7 @@ classdef APID_CONTROLLER < handle
     methods
         function obj = APID_CONTROLLER(self,param)
             obj.self = self;
+            param = param.param;
             obj.Kp=param.Kp;
             obj.Ki=param.Ki;
             obj.Kd=param.Kd;
@@ -26,8 +27,8 @@ classdef APID_CONTROLLER < handle
             obj.dt = param.dt;
             obj.strans = param.strans;
             obj.rtrans = param.rtrans;
-            [p,q,~,~]=obj.strans(obj.self.model.state);
-            obj.ei = zeros(size(p,1)+size(q,1),1);
+            % [p,q,~,~]=obj.strans(obj.self.model.state);
+            % obj.ei = zeros(size(p,1)+size(q,1),1);
             obj.adaptive = param.adaptive;
         end
 
