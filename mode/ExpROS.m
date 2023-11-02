@@ -22,9 +22,9 @@ agent.parameter = VEHICLE_PARAM("VEHICLE3");
 agent.sensor = ROS2_LiDAR_PCD(agent, Sensor_LiDAR_ROS2(["ros" agent.id]));
 %agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 % agent.estimator = UKF2DSLAM(agent, Estimator_UKF2DSLAM_Vehicle(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
-agent.estimator = NDT(agent,NDT_rover(agent,dt,initial_state,"fixmap_room_2.pcd"));
+agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)),'floor_map'));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
-agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent));
+% agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent));
 % agent.reference = STRAIGHT(agent,Reference_PathCenter(agent));
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 

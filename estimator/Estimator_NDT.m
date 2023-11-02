@@ -1,5 +1,5 @@
-% function param = NDT_rover(agent, dt, model, output)
-function param = NDT_rover(agent,dt,initial_state,mapname)
+function Estimator = Estimator_NDT(agent, dt, model,mapname)
+% function param = Estimator_NDT(agent,dt,initial_state,mapname)
 % arguments
 %     agent
 %     dt
@@ -9,12 +9,12 @@ function param = NDT_rover(agent,dt,initial_state,mapname)
 arguments
     agent
     dt
-    initial_state
+    model
     mapname
 end
 
-param.model = MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1));
-% param.model = model;
+% param.model = MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1));
+Estimator.model = model;
 
 % %UKF_param.Q = diag([1, 1, 1, 1e-1, 1e-1]);
 % %UKF_param.Q = diag([0.001, 0.001, 0.001, 1]);%
@@ -36,10 +36,11 @@ param.model = MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1));
 
 % the constant value for estimating of the map
 %初期位置set
-initial_state.rot = eul2rotm(initial_state.q','XYZ');%回転行列(roll,pitch,yaw)
-NDT_param.initialtform = rigidtform3d(initial_state.rot,initial_state.p);
-NDT_param.fixedSeg = pcread(mapname);
-param.param = NDT_param;
+initial_state.rot = eul2rotm(model.state.q','XYZ');%回転行列(roll,pitch,yaw)
+NDT_param.initialtform = rigidtform3d(initial_state.rot,model.state.p);
+NDT_param.fixedSeg = load(mapname);
+% NDT_param.fixedSeg = pcread(mapname);
+Estimator.param = NDT_param;
 
 
 % % the constant value for estimating of the map

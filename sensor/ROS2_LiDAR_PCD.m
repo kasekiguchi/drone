@@ -107,10 +107,6 @@ methods
         % obj.result = scanpcplot_rov(moving_pc);
         result = obj.result;
     end
-    function pcdata = scanpcplot_rov(topics)
-
-        pcdata = moving_pcm;
-    end
 
     %         function show(obj,varargin)
     %             if ~isempty(obj.result)
