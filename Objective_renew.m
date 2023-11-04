@@ -3,8 +3,9 @@ function [eval] = Objective_renew(x, params) % x : p q v w input
 %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
 %元の非線形等式制約を取り込んだ
 
-    X = zeros(params.state_size+1, params.H-1);
-    Xc = [params.X0;1];
+    X = zeros(size(params.A,1), params.H-1);
+    Xc = quaternions(params.X0);
+%     Xc = [params.X0;1];
     X(:,1) = params.A*Xc + params.B*x(:,1);
     for i = 2:params.H-1
         X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);

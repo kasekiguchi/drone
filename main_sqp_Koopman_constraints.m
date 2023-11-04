@@ -32,14 +32,14 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     %% 重みの設定
     
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1.0; 10.0; 5.0]);    % 座標   1000 10
+    Params.Weight.P = diag([5.0; 3.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([25; 10; 10; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([2300; 2500; 1200; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([5; 15; 1]);
-    Params.Weight.QWf = diag([35; 20; 10; 5; 5; 10]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([10; 10; 1]);
+    Params.Weight.QWf = diag([3300; 3300; 1200; 1; 1; 1]); %姿勢角、角速度終端
   
     %% 
     
@@ -231,7 +231,7 @@ end
 %             num(idx) = {var};
             fprintf("\tfval : %f\n", fval)
 %         TODO: 1列目のvarが一切変動しない問題に対処
-%             if var(Params.state_size+1:Params.total_size, end) > 1.0
+%             if var(Params.state_size+1:Params.total_size, end) > 1.0  
 %                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
 %             end
             
@@ -367,56 +367,56 @@ logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, 
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-% agent(1).animation(logger,"target",1);
+agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"mp4",1);
 % agent(1).animation(logger,"gif", 1);
 %%
 % logger.save();
 
-function [eval] = Objective_renew(x, params) % x : p q v w input
-%-- 評価計算をする関数
-%-- 状態及び入力に対する目標状態や目標入力との誤差を計算
-%元の非線形等式制約を取り込んだ
-
-    Xc = quaternions(params.X0);
-%     X = zeros(params.state_size+1, params.H-1);
-    X = zeros(size(Xc,1),params.H-1);
-%     Xc = [params.X0;1];
-    X(:,1) = params.A*Xc + params.B*x(:,1);
-    for i = 2:params.H-1
-        X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
-    end
-    Xn = [params.X0,X(1:params.state_size,:)];
-
-    tildeXp = Xn(1:3, :) - params.xr(1:3, :);  % 位置
-    tildeXq = Xn(4:6, :) - params.xr(4:6, :);
-    tildeXv = Xn(7:9, :) - params.xr(7:9, :);  % 速度
-    tildeXw = Xn(10:12, :) - params.xr(10:12,:);
-    tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-%     tildeUpre = U - Agent.input;
-    tildeUref = x(:, :) - params.xr(13:16,:);
-    
-%-- 状態及び入力のステージコストを計算 長くなるから分割
-    stageStateP = tildeXp(:, 1:params.H-1)'*params.Weight.P*tildeXp(:, 1:params.H-1);
-    stageStateV = tildeXv(:, 1:params.H-1)'*params.Weight.V*tildeXv(:, 1:params.H-1);
-    stageStateQW = tildeXqw(:, 1:params.H-1)'*params.Weight.QW*tildeXqw(:, 1:params.H-1);
-    stageInputR = tildeUref(:, 1:params.H-1)'*params.Weight.R*tildeUref(:, 1:params.H-1);
-    
-    stageStateP = diag(stageStateP);
-    stageStateV = diag(stageStateV);
-    stageStateQW = diag(stageStateQW);
-    stageInputR = diag(stageInputR);
-    
-    stageState = stageStateP' + stageStateV' + stageStateQW' + stageInputR'; %ステージコスト
-    
-%-- 状態の終端コストを計算
-    terminalState =  tildeXp(:, end)'   * params.Weight.Pf   * tildeXp(:, end)...
-                    +tildeXv(:, end)'   * params.Weight.V   * tildeXv(:, end)...
-                    +tildeXqw(:, end)'  * params.Weight.QWf  * tildeXqw(:, end);
-
-%-- 評価値計算
-    eval = sum(stageState) + terminalState;
-end
+% function [eval] = Objective_renew(x, params) % x : p q v w input
+% %-- 評価計算をする関数
+% %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
+% %元の非線形等式制約を取り込んだ
+% 
+%     Xc = quaternions(params.X0);
+% %     X = zeros(params.state_size+1, params.H-1);
+%     X = zeros(size(Xc,1),params.H-1);
+% %     Xc = [params.X0;1];
+%     X(:,1) = params.A*Xc + params.B*x(:,1);
+%     for i = 2:params.H-1
+%         X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
+%     end
+%     Xn = [params.X0,X(1:params.state_size,:)];
+% 
+%     tildeXp = Xn(1:3, :) - params.xr(1:3, :);  % 位置
+%     tildeXq = Xn(4:6, :) - params.xr(4:6, :);
+%     tildeXv = Xn(7:9, :) - params.xr(7:9, :);  % 速度
+%     tildeXw = Xn(10:12, :) - params.xr(10:12,:);
+%     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
+% %     tildeUpre = U - Agent.input;
+%     tildeUref = x(:, :) - params.xr(13:16,:);
+%     
+% %-- 状態及び入力のステージコストを計算 長くなるから分割
+%     stageStateP = tildeXp(:, 1:params.H-1)'*params.Weight.P*tildeXp(:, 1:params.H-1);
+%     stageStateV = tildeXv(:, 1:params.H-1)'*params.Weight.V*tildeXv(:, 1:params.H-1);
+%     stageStateQW = tildeXqw(:, 1:params.H-1)'*params.Weight.QW*tildeXqw(:, 1:params.H-1);
+%     stageInputR = tildeUref(:, 1:params.H-1)'*params.Weight.R*tildeUref(:, 1:params.H-1);
+%     
+%     stageStateP = diag(stageStateP);
+%     stageStateV = diag(stageStateV);
+%     stageStateQW = diag(stageStateQW);
+%     stageInputR = diag(stageInputR);
+%     
+%     stageState = stageStateP' + stageStateV' + stageStateQW' + stageInputR'; %ステージコスト
+%     
+% %-- 状態の終端コストを計算
+%     terminalState =  tildeXp(:, end)'   * params.Weight.Pf   * tildeXp(:, end)...
+%                     +tildeXv(:, end)'   * params.Weight.V   * tildeXv(:, end)...
+%                     +tildeXqw(:, end)'  * params.Weight.QWf  * tildeXqw(:, end);
+% 
+% %-- 評価値計算
+%     eval = sum(stageState) + terminalState;
+% end
 
 % function [c , ceq] = Constraints(x, params, Agent, ~)
 % % モデル予測制御の制約条件を計算するプログラム

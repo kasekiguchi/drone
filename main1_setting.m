@@ -88,7 +88,7 @@ else
             % take off
 %             arranged_pos = arranged_position([0, 0], N, 1, 0.01);% [x, y], 機数，1, z
             % landing
-            arranged_pos = arranged_position([0, 1], N, 1, 1);% [x, y], 機数，1, z 初期値
+            arranged_pos = arranged_position([0, 0], N, 1, 1);% [x, y], 機数，1, z 初期値
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];

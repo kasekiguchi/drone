@@ -47,14 +47,24 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([4.0; 2.0; 1.0]);    % 座標   1000 10
-    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-    Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([3400;3400;1; 1; 1; 1100]);  % 姿勢角、角速度
+%     Params.Weight.P = diag([20.0; 10.0; 45.0]);    % 座標   1000 10
+%     Params.Weight.V = diag([10.0; 5.0; 10.0]);    % 速度
+%     Params.Weight.R = diag([10.0,; 10.0; 10.0; 10.0]); % 入力
+%     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
+%     Params.Weight.QW = diag([5500; 4000; 3000; 1; 1; 50]);  % 姿勢角、角速度
+% 
+%     Params.Weight.Pf = diag([40; 30; 65]);
+%     Params.Weight.QWf = diag([7500; 5000; 4000; 1; 1; 50]); %姿勢角、角速度終端
 
-    Params.Weight.Pf = diag([6; 4; 2]);
-    Params.Weight.QWf = diag([3800; 3800; 1; 1; 1; 1100]); %姿勢角、角速度終端
+    Params.Weight.P = diag([10.0; 5.0; 20.0]);    % 座標   1000 10
+    Params.Weight.V = diag([15.0; 5.0; 15.0]);    % 速度
+    Params.Weight.R = diag([20.0,; 20.0; 20.0; 20.0]); % 入力
+    Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
+    Params.Weight.QW = diag([2500;1500; 25000; 1; 1; 150]);  % 姿勢角、角速度
+
+    Params.Weight.Pf = diag([25; 10; 35]);
+    Params.Weight.QWf = diag([3500; 2500; 35000; 1; 1; 200]);
+
       %% 
 %     fprintf("%f秒\n", totalT)
 %     Fontsize = 15;  timeMax = 100;
@@ -83,7 +93,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     options = optimoptions(options,'Diagnostics','off');
 %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
     options = optimoptions(options,'MaxIterations',      1.e+9);     % 最大反復回数
-    options = optimoptions(options,'ConstraintTolerance',1.e-3);%制約違反に対する許容誤差
+    options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
 %     options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
     
     %-- fmincon設定
@@ -102,7 +112,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     load('drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
 %     load('drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
 %     load('drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
-    load('drone\koopman_data\EstimationResult_12state_10_9_reverse_circle=reverse_circle_estimation=revcircle.mat','est') %逆円旋回モデル
+%     load('drone\koopman_data\EstimationResult_12state_10_9_reverse_circle=reverse_circle_estimation=revcircle.mat','est') %逆円旋回モデル
+    load('drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est') %円(順逆)+サドル+P2P(x,y),観測量：状態+非線形項
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
@@ -117,7 +128,6 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params
     
 run("main3_loop_setup.m");
-
 
 try
     while round(time.t, 5) <= te
@@ -242,8 +252,8 @@ end
 %             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
 %             problem.objective = @(x) Objective_mex(x, Params);
 %             problem.nonlcon   = @(x) Constraints_mex(x, Params);
-            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew_mex(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
-%             data.exitflag(idx) = exitflag;
+            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
+            data.exitflag(idx) = exitflag;
 
             % 制御入力の決定
             previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
@@ -285,15 +295,15 @@ end
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
-%         if agent.estimator.result.state.p(3) < 0
-%             error('墜落しました');
-%         elseif find(var(:,:) < 0)
-%             error('入力が正しくありません');
-%         end
-
         if agent.estimator.result.state.p(3) < 0
             error('墜落しました');
+        elseif find(var(:,:) > 5)
+            error('入力が正しくありません');
         end
+
+%         if agent.estimator.result.state.p(3) < 0
+%             error('墜落しました');
+%         end
 
         % for exp
         if fExp %実機
@@ -351,10 +361,8 @@ catch ME % for error
     warning('ACSL : Emergency stop! Check the connection.');
     rethrow(ME);
 end
-%% 
-
+%% グラフの描画
 %profile viewer
-%%グラフの描画
 close all
 opengl software
 
@@ -368,6 +376,7 @@ Fontsize = 15;  timeMax = 100;
 set(0, 'defaultAxesFontSize', Fontsize);
 set(0, 'defaultTextFontSize', Fontsize);
 % logger.plot({1,"p","e"})
+
 % hold on
 % logger.plot({1,"p","r"})
 % plot(data.exitflag)
@@ -379,8 +388,11 @@ set(0, 'defaultTextFontSize', Fontsize);
 % % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
-% figure
-% plot(data.exitflag)
+figure
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag)
+grid on
+xlabel('time t [s]')
+ylabel('exitflag')
 
 % save('simulation','logger')
 % Graphplot
