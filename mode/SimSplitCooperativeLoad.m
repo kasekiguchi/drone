@@ -40,6 +40,11 @@ else
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
+Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
+q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
+rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
+initial_state(1).pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));
+
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
@@ -54,6 +59,8 @@ for i = 2:N+1
     agent(i) = DRONE;
     agent(i).id = i;
     %Drone_Initial_State
+    rho = agent(1).parameter.rho; %loadstate_rho
+    R_load = RodriguesQuaternion(initial_state(1).Q);
     initial_state(i).p = arranged_position([0, 0], 1, 1, 0);
     initial_state(i).q = [0; 0; 0];
     initial_state(i).v = [0; 0; 0];
@@ -61,7 +68,9 @@ for i = 2:N+1
     initial_state(i).vL = [0; 0; 0];
     initial_state(i).pT = [0; 0; -1];
     initial_state(i).wL = [0; 0; 0];
-    initial_state(i).p = [1;0;1.46];
+%     initial_state(i).p = [1;0;1.46];
+    initial_state(i).p = initial_state(1).p+R_load*rho(:,i-1)+;
+    initial_state(i).pL = initial_state(1).p+R_load*rho(:,i-1);
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));

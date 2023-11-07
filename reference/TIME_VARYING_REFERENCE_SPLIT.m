@@ -44,7 +44,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 end
                 if strcmp(args{3}, "Split")
                     obj.com = args{3};
-                    obj.func = obj.agent1.reference.func;
+%                     obj.func = obj.agent1.reference.func;
+                    obj.func = gen_ref_for_HL(obj.func);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));                    
                 end
             else
@@ -82,9 +83,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 t = obj.t;
            end
            if strcmp(obj.com, "Split")
-               loadpoint = obj.state.reference
+               loadref = obj.result.state.xd;
+               id = obj.self.id;
+               rho = obj.agent1.parameter.rho(:,id);
+               R_load = RodriguesQuaternion(obj.agent1.estimator.result.state.Q); %ペイロードの回転行列
+               Qrho = loadref(1:3,1)+R_load*rho;
                obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-               q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
+%                q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
                obj.result.state.p = obj.result.state.xd(1:3);
            else
                    obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
