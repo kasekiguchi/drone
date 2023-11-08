@@ -1,6 +1,6 @@
 ts = 0;
 dt = 0.01;
-te = 30;
+te = 20;
 time = TIME(ts,dt,te);
 % in_prog_func = @(app) in_prog(app);
 % post_func = @(app) post(app);
@@ -77,8 +77,8 @@ agent.parameter = DRONE_PARAM("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1*ones(1,3),100*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0005*ones(1,3),0.001*ones(1,3)])));
 
 %PDAF
-agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1000*ones(1,3),2000*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-5*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0000005*ones(1,3),0.0000001*ones(1,3)])));
-
+agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),10*ones(1,3),200*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0001ones(1,3),0.0005*ones(1,3)])));
+% agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"],"B",eye(12),"R",diag([1e-6*ones(1,3), 1e-6*ones(1,3)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
 
 agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/2),'p0',[0.01;0.01;0.01],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.000001, 'seed', 0));
 % agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],0),'p0',[0;0;0],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.0001, 'seed', 0)); % 2D lidar
@@ -86,9 +86,9 @@ agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.do = @sensor_do;
 
 %AMC ref
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.3]}});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.3]}});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
 

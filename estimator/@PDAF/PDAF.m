@@ -28,6 +28,7 @@ classdef PDAF < handle
     m
     timer= [];
     beta
+    flag
 end
 
 methods
@@ -63,8 +64,9 @@ methods
         obj.L = zeros(length(obj.sensor_length)+1,1);
         obj.m = zeros(length(obj.sensor_length)+1,1);
         obj.beta = zeros(length(obj.sensor_length)+1,1);
+        obj.result.flag = zeros(length(obj.sensor_length)+1,1);
     end
-    
+   
     function [result]=do(obj,varargin)
       if ~isempty(obj.timer)
         dt = toc(obj.timer);
@@ -79,6 +81,9 @@ methods
         x = obj.result.state.get(); % estimated state at previous step
         obj.model.do(varargin{:}); % update state
         xh_pre = obj.model.state.get(); % Pre-estimation
+        if isnan(xh_pre)
+            stopflag =1;
+        end
         yh = obj.output_func(xh_pre,obj.output_param); % output estimation
         y = obj.sensor(obj.self,obj.sensor_param); % sensor output
         p = obj.self.parameter.get(); 
@@ -89,15 +94,16 @@ methods
         nu = y - yh;
         S = C*P_pre*C' + obj.R;
         c = pi^(length(y)/2)/gamma(1+(length(y))/2);
-        Vr = c * obj.threshold^(length(y)/2)*sqrt(S);
+        Vr = c * (obj.threshold^(length(y)/2))*sqrt(det(S));
         obj.m(1) = sqrt(nu'*inv(S)*nu);
         count = 1;
         for j = 1:length(obj.sensor_length)
-            span = [count count+obj.sensor_length(j)-1];
+            span = [count:count+obj.sensor_length(j)-1];
             obj.m(j+1) = sqrt(nu(span)'*inv(S(span,span))*nu(span));
-            count = + obj.sensor_length(j);
+            count = count + obj.sensor_length(j);
         end
         gating_num = min(find(obj.m<obj.threshold));
+        obj.result.flag(gating_num) = 1;
         if  isempty(gating_num)
             tmpvalue = xh_pre;	% Update state estimate
             tmpvalue = obj.model.projection(tmpvalue);
@@ -109,28 +115,35 @@ methods
             obj.result.C = C;
             obj.result.param = p;
         else
-        lambda = length(nu(gating_num))/(c*obj.threshold(1)^(length(y)/2));
+        if gating_num == 1
+            lambda = length(nu)/(c*(obj.threshold^(length(y)/2))*sqrt(det(S)));
+        else
+            lambda = obj.sensor_length(gating_num-1)/(c*(obj.threshold^(length(y)/2))*sqrt(det(S)));
+        end
         obj.L(1) = (obj.PD/lambda)*(exp(-0.5 * nu'*inv(S)*nu))/(sqrt((2*pi)^(length(nu))*det(S)));
         count = 1;
         for j=1:length(obj.sensor_length)
-            span = [count count+obj.sensor_length(j)-1];
+            span = [count:count+obj.sensor_length(j)-1];
             obj.L(j+1) = (obj.PD/lambda)*(exp(-0.5 * nu(span)'*inv(S(span,span))*nu(span)))/(sqrt((2*pi)^(length(nu(span)))*det(S(span,span))));
-            count = + obj.sensor_length(j);
+            count = count + obj.sensor_length(j);
         end
         obj.beta(1) = obj.L(1) / (1 - obj.PD*obj.PG + sum(obj.L(2:end)));
         count = 1;
         inov = zeros(length(nu),1);
         for j=1:length(obj.sensor_length)
-            span = [count count+obj.sensor_length(j)-1];
+            span = [count:count+obj.sensor_length(j)-1];
             obj.beta(j+1) = obj.L(j+1) / (1 - obj.PD*obj.PG + sum(obj.L(2:end)));
             inov(span) = obj.beta(j+1)*nu(span);
-            count = + obj.sensor_length(j);
+            count = count + obj.sensor_length(j);
         end
         % fltering
         G = (P_pre*C')/(C*P_pre*C'+obj.R);% kalmangain
-        P = P_pre + (1-obj.beta(gating_num))*G*S*G';	% Update covariance
+        P = P_pre - (1-obj.beta(gating_num))*G*S*G';	% Update covariance
         tmpvalue = xh_pre + G*inov;	% Update state estimate
         tmpvalue = obj.model.projection(tmpvalue);
+        if isnan(tmpvalue)
+            stopflag =1;
+        end
         obj.result.state.set_state(tmpvalue);
         obj.model.state.set_state(tmpvalue);
         obj.result.G = G;

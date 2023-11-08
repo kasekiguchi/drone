@@ -25,13 +25,17 @@ function Estimator = Estimator_PDAF(agent,dt,model,output,opts)
             syms dummy1 dummy2
             col = Estimator.model.state.num_list;
             Estimator.JacobianH= matlabFunction(cell2mat(arrayfun(@(k) cell2mat(arrayfun(@(i,j) zeroone( col*tmp{k}',i,j),col,tmp{k},"UniformOutput",false)),1:length(output),"UniformOutput",false)'),"Vars",[dummy1,dummy2]);
-    end   
+    end  
+%     Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');]; % function to get sensor value: sometimes some conversion will be done
+%     Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
+%     Estimator.sensor_length = [6];                                
+
     Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1);self.sensor.lidar.result.length(3)]; % function to get sensor value: sometimes some conversion will be done
     Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
     Estimator.sensor_length = [6;2];                                       % Nmber of sensor to fusion
-    Estimator.threshold   =   200000;                                            % threshold (All, Sensor, Sensor1, 2...)
-    Estimator.PD          = 0.9;                                             % Target probability
-    Estimator.PG          = 0.9;                                             % Gate probability
+    Estimator.threshold   =   1000;                                            % threshold (All, Sensor, Sensor1, 2...)
+    Estimator.PD          = 1;                                             % Target probability
+    Estimator.PG          = 1;                                             % Gate probability
     Estimator.R = opts.R;
     if isempty(opts.output_func)
         Estimator.output_func = @(state,param) param*state; % output function

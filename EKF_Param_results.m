@@ -13,18 +13,21 @@
 % cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 % cd(cf); close all hidden; clear all; userpath('clear');
 
+close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/Log(25-Oct-2023_18_05_11).mat');
+log = LOGGER('./Data/Log(08-Nov-2023_15_57_38).mat');
+O_func = @(x,u) On3(x,u);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
-flag_png=0;
-flag_eps=0;
-flag_offset = 1;
-flag_O = 0;
-flag_wall = 0;
+f_png=0;
+f_eps=0;
+f_offset = 1;
+f_O = 0;
+f_wall = 0;
+f_PDAF = 1;
 %% ログ
 tspan = [0 ,100];
-maxt = 60;
+maxt = 20;
 % tspan = [0 99];xlim([0, maxt]);
 robot_p  = log.data(1,"p","p")';
 robot_pe  = log.data(1,"p","e")';
@@ -38,18 +41,23 @@ robot_ve  = log.data(1,"v","e")';
 robot_w  = log.data(1,"w","p")';
 robot_we  = log.data(1,"w","e")';
 %% RMSE
-RMSE_P=sqrt(mse(robot_p(:,((maxt/0.01)-1000):end),robot_pe(:,((maxt/0.01)-1000):end)));
-RMSE_Q=sqrt(mse(robot_q(:,((maxt/0.01)-1000):end),robot_qe(:,((maxt/0.01)-1000):end)));
-RMSE_V=sqrt(mse(robot_v(:,((maxt/0.01)-1000):end),robot_ve(:,((maxt/0.01)-1000):end)));
-RMSE_W=sqrt(mse(robot_w(:,((maxt/0.01)-1000):end),robot_we(:,((maxt/0.01)-1000):end)));
-[RMSE_P;RMSE_Q;RMSE_V;RMSE_W]
+RMSE_P=sqrt(mse(robot_p,robot_pe));
+RMSE_Q=sqrt(mse(robot_q,robot_qe));
+RMSE_V=sqrt(mse(robot_v,robot_ve));
+RMSE_W=sqrt(mse(robot_w,robot_we));
+RMSE_all = [RMSE_P;RMSE_Q;RMSE_V;RMSE_W]
+RMSE_P=sqrt(mse(robot_p(:,((maxt/0.01)-500):end),robot_pe(:,((maxt/0.01)-500):end)));
+RMSE_Q=sqrt(mse(robot_q(:,((maxt/0.01)-500):end),robot_qe(:,((maxt/0.01)-500):end)));
+RMSE_V=sqrt(mse(robot_v(:,((maxt/0.01)-500):end),robot_ve(:,((maxt/0.01)-500):end)));
+RMSE_W=sqrt(mse(robot_w(:,((maxt/0.01)-500):end),robot_we(:,((maxt/0.01)-500):end)));
+RMSE_end = [RMSE_P;RMSE_Q;RMSE_V;RMSE_W]
 %% 
 last=length(robot_pe);
 len = length(log.Data.agent.sensor.result);
 P  = zeros(size(log.Data.agent.estimator.result{1,1}.P,1),size(log.Data.agent.estimator.result{1,1}.P,2),len-1);
 A  = zeros(size(log.Data.agent.estimator.result{1,2}.A,1),size(log.Data.agent.estimator.result{1,2}.A,2),len-1);
 C  = zeros(size(log.Data.agent.estimator.result{1,2}.C,1),size(log.Data.agent.estimator.result{1,2}.C,2),len-1);
-if flag_offset == 1
+if f_offset == 1
 ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
 qs  = zeros(size(log.Data.agent.estimator.result{1,1}.state.qs,1),len);
 % l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
@@ -74,16 +82,22 @@ qs(1,i) = roundpi(qs(1,i)) ;
 qs(2,i) = roundpi(qs(2,i)) ;
 qs(3,i) = roundpi(qs(3,i)) ;
 end
-if flag_wall == 1
+if f_wall == 1
     l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
 for i=1:len
     l(:,i) = log.Data.agent.estimator.result{1,i}.state.l;
 end
 end
+if f_PDAF == 1
+    gating  = zeros(size(log.Data.agent.estimator.result{1,1}.flag,1),len);
+for i=1:len
+    gating(:,i) = log.Data.agent.estimator.result{1,i}.flag;
+end
+end
 steps=1:length(robot_pe);
 time = 0.01*steps;
-meanps = [mean(ps(1,((maxt/0.01)-1000):end)),mean(ps(2,((maxt/0.01)-1000):end)),mean(ps(3,((maxt/0.01)-1000):end))]
-meanqs = [mean(qs(1,((maxt/0.01)-1000):end)),mean(qs(2,((maxt/0.01)-1000):end)),mean(qs(3,((maxt/0.01)-1000):end))]
+meanps = [mean(ps(1,((maxt/0.01)-500):end)),mean(ps(2,((maxt/0.01)-500):end)),mean(ps(3,((maxt/0.01)-500):end))]
+meanqs = [mean(qs(1,((maxt/0.01)-500):end)),mean(qs(2,((maxt/0.01)-500):end)),mean(qs(3,((maxt/0.01)-500):end))]
 %%
  fig9=figure(9);
     fig9.Color = 'white';
@@ -119,7 +133,7 @@ meanqs = [mean(qs(1,((maxt/0.01)-1000):end)),mean(qs(2,((maxt/0.01)-1000):end)),
     ylabel('\it{q}_S [rad]','FontSize', 16);
     hold off;
 %% 真値
-if flag_offset==1
+if f_offset==1
 offset_true = [0.01;0.01;0.01];
 Rs_true = Rodrigues([0,0,1],pi/2);
 w=[0,1,0,-9];
@@ -181,7 +195,7 @@ end
 Ol = obsv(A(:,:,2),C(:,:,2));
 rank(Ol)
 %% 非線形システムの可観測性
-if flag_O == 1
+if f_O == 1
 tmpmethod = str2func(get_model_name("RPY 12"));
 % fmethod = @(t,x,p) [tmpmethod(t,x,p); zeros(6,1)];
 fmethod = @(t,x,p) [tmpmethod(t,x,p); zeros(10,1)];
@@ -207,20 +221,20 @@ for i=1:3
     end
 end
 On = jacobian(q,x);
-matlabFunction(On,'File','On3_1','vars',{x,u})
+matlabFunction(On,'File','O_func','vars',{x,u})
 end
 Rank = zeros(1,len);
 minS = zeros(1,len);
 maxS = zeros(1,len);
 D = zeros(1,len);
-if flag_wall == 1
+if f_wall == 1
     S = zeros(22,len);
     x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1);l(:,1)];
     On = zeros(size(On3_w(x,u(:,1)),1),size(On3_w(x,u(:,1)),2),len);
     for i=1:len
 %     x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
         x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i);l(:,i)];
-        On(:,:,i) = On3_l1(x,u(:,i));
+        On(:,:,i) = O_func(x,u(:,i));
         Rank(i) = rank(On3_w(x,u(:,i)));
         S(:,i) = svd(On(:,:,i));
         minS(i) = min(S(:,i));
@@ -228,16 +242,17 @@ if flag_wall == 1
         D(i) = 1/(maxS(i)/minS(i));
     end
 else
-    U = zeros(21,21,len);
+
+    U = zeros(size(On,1),size(On,1),len);
     V = zeros(18,18,len);
     S = zeros(18,len);
     x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1)];
-    On = zeros(size(On3_l1(x,u(:,1)),1),size(On3_l1(x,u(:,1)),2),len);
+    On = zeros(size(O_func(x,u(:,1)),1),size(O_func(x,u(:,1)),2),len);
     for i=1:len
 %     x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
         x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
-        On(:,:,i) = On3_l1(x,u(:,i));
-        Rank(i) = rank(On3_l1(x,u(:,i)));
+        On(:,:,i) = O_func(x,u(:,i));
+        Rank(i) = rank(O_func(x,u(:,i)),0);
         S(:,i) = svd(On(:,:,i));
         [U(:,:,i),~,V(:,:,i)] = svd(On(:,:,i));
         minS(i) = min(S(:,i));
@@ -349,7 +364,7 @@ if illustration == 1
     xlim([0, maxt]);
     ylim([-1 1]);
     grid on;
-    if flag_offset==1
+    if f_offset==1
     fig9=figure(9);
     fig9.Color = 'white';
     plot(time,ps(1,:),'LineWidth', 3);
@@ -453,7 +468,7 @@ if illustration == 1
     fig1.Color = 'white';
     hold on;
     log.plot({1, "input", ""});
-    if flag_wall == 1
+    if f_wall == 1
         fig30=figure(30);
         fig30.Color = 'white';
         plot(time,l(1,:),'LineWidth', 3);
@@ -477,7 +492,7 @@ if illustration == 1
     xlim([0, maxt]);
 
 end
-if flag_png==1
+if f_png==1
 %     pass2 = 'C:\Users\yuika\Desktop\修士\中間発表\ppt';
     pass2 = 'C:\Users\student\Desktop\Nozaki'; %P:192.168.100.20 PC
     saveas(fig7, fullfile(pass2, 'EKF_pos.png'));
@@ -490,7 +505,7 @@ if flag_png==1
     saveas(fig15, fullfile(pass2, 'minS.png'));
     saveas(fig16, fullfile(pass2, 'Singular_Value.png'));
     saveas(fig17, fullfile(pass2, 'S_15_18.png'));
-    if flag_offset == 1
+    if f_offset == 1
         saveas(fig9, fullfile(pass2, 'EKF_psb.png'));
         saveas(fig10, fullfile(pass2, 'EKF_qs.png'));
         saveas(fig12, fullfile(pass2, 'EKF_inst.png'));
@@ -506,13 +521,13 @@ if flag_png==1
 %     saveas(fig15, fullfile(pass2, 'minS_b.png'));
 %     saveas(fig16, fullfile(pass2, 'Singular_Value_b.png'));
 %     saveas(fig17, fullfile(pass2, 'S_15_18_b.png'));
-%     if flag_offset == 1
+%     if f_offset == 1
 %         saveas(fig9, fullfile(pass2, 'EKF_psb_b.png'));
 %         saveas(fig10, fullfile(pass2, 'EKF_qs_b.png'));
 %         saveas(fig12, fullfile(pass2, 'EKF_inst_b.png'));
 %     end   
 end
-if flag_eps==1
+if f_eps==1
     pass2 = 'C:\Users\student\Desktop\Nozaki'; %P:192.168.100.20 PC
     saveas(fig7, fullfile(pass2, 'EKF_pos.eps'), 'epsc');
     saveas(fig8, fullfile(pass2, 'EKF_ang.eps'), 'epsc');
@@ -525,7 +540,7 @@ if flag_eps==1
     saveas(fig16, fullfile(pass2, 'Singular_Value.eps'), 'epsc');
     saveas(fig17, fullfile(pass2, 'S_15_18.eps'), 'epsc');
     saveas(fig31, fullfile(pass2, 'condN.eps'), 'epsc');
-    if flag_offset == 1
+    if f_offset == 1
         saveas(fig9, fullfile(pass2, 'EKF_psb.eps'), 'epsc');
         saveas(fig10, fullfile(pass2, 'EKF_qs.eps'), 'epsc');
         saveas(fig12, fullfile(pass2, 'EKF_inst.eps'), 'epsc');
@@ -542,7 +557,7 @@ if flag_eps==1
 %     saveas(fig16, fullfile(pass2, 'Singular_Value_b.eps'), 'epsc');
 %     saveas(fig17, fullfile(pass2, 'S_15_18_b.eps'), 'epsc');
 %     saveas(fig31, fullfile(pass2, 'condN_b.eps'), 'epsc');
-%     if flag_offset == 1
+%     if f_offset == 1
 %         saveas(fig9, fullfile(pass2, 'EKF_psb_b.eps'), 'epsc');
 %         saveas(fig10, fullfile(pass2, 'EKF_qs_b.eps'), 'epsc');
 %         saveas(fig12, fullfile(pass2, 'EKF_inst_b.eps'), 'epsc');
