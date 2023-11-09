@@ -5,15 +5,15 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=0;%flightのみは１
+fF=1;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
 % endTime = 14.5;
 startTime = 0;
-endTime = 1E2;
+endTime = 1E3;
 
     loggers = {
                 % log_saddle,...
@@ -36,12 +36,27 @@ endTime = 1E2;
                 % log_HLaFTC_srv_8s
 
                 % logger_FT_c_09
+                % log_FT_HLservo_z,log_FT_servo_z
+                % log_FT_Zservo,log_FT_Zservo_gain_n1
+                % log_FTonly2
+                % log_HL2
+                % log_FT
+                % log_FT_Zservo_gain_n1,...
+                % log_FT2_servo
+                % log_HLFT
+                log_LS15,...
+                log_FT15
+                % log_
+
 
                 % gui.logger
         };
     c=[
+        "LS","FT"
+        % "FTservoZ","FTservoZn1"
         % "HLLS"
-        % "HLLS","HLFT"
+        % "HLFTservo"
+        %,"ELFT","ELLS","ELFT"
            % "HL","EL"
            % "ELft"
         ];
@@ -51,9 +66,11 @@ endTime = 1E2;
 %               20:"pp" 21:"pv" 22:"pq" 23:"pw" 24:"Trs"];
 %========================================================================
      % n=[1:16,18 20:24];
-     n = [1:17,24];
-     n = [1:11];
-     n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input" ,"attitude","velocity","angular_velocity" ,"three_D"];
+     % n = [1:17,24];
+     % n = [1:11];
+     n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     % n=["t_p","input","u","Trs","attitude","velocity","angular_velocity"];
+     % n = "inner_input";
      % n=1;
 %========================================================================
 % multiFigure
@@ -69,13 +86,13 @@ endTime = 1E2;
 % multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
 % multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
 
-% nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
-% multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
-
-nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","three_D","x_y","x_z","y_z"]};%比較するとき複数まとめる
+nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
 multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
 multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
+
+% nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","three_D","x_y","x_z","y_z"]};%比較するとき複数まとめる
+% multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
+% multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
 
 
 multiFigure.num = length(nM);%figの数
@@ -249,8 +266,9 @@ end
 
 %% make folder
 %変更しない
-%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
+    % ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
         ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+        % ExportFolder='Z:\workspace\Work2023\momose';
         % ExportFolder='Data';
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
@@ -258,20 +276,19 @@ end
     
 %変更========================================================
 % subfolder='sim';%sim or exp
-subfolder='exp';%sim or exp
-ExpSimName='SERVOz_FTCxy';%実験,シミュレーション名
+subfolder='sample';%sim or exp
+ExpSimName='ELhover';%実験,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
-contents='HL_EL_saddle_model_error';%実験,シミュレーション内容
+contents='ELFTservo';%実験,シミュレーション内容
 %==========================================================
 FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
 FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
 FolderNameF=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
 
 %フォルダができてないとき
-
+    addpath(genpath(ExportFolder));
     mkdir(FolderNameD);
     mkdir(FolderNameF);
-    addpath(genpath(ExportFolder));
 %フォルダをrmる
 %     rmpath(genpath(ExportFolder))
 %% save 
@@ -322,6 +339,8 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                 ti{i}=t{i}(1:k(i));
                 kf(i)=find(loggers{i}.Data.phase == 102,1,'first')+1;
                 ke(i)=find(loggers{i}.Data.phase == 102,1,'last');
+                % kf(i)=find(loggers{i}.Data.phase == 116,1,'first')+1;
+                % ke(i)=find(loggers{i}.Data.phase == 116,1,'last');
         
                 sTime(i) = ti{i}(kf(i)) + startTime;
                 eTime(i) = ti{i}(kf(i)) + endTime;
@@ -365,6 +384,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
             err{i}=zeros(3,lt(i));
             % if fExp ==1
                 inp{i}=zeros(4,lt(i));
+                u{i}=zeros(4,lt(i));
             % else
             %     inp{i}=zeros(,lt(i));
             % end
@@ -373,7 +393,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
             vel{i}=zeros(3,lt(i));
             w{i}=zeros(3,lt(i));
             uHL{i}=zeros(4,lt(i)); 
-            Trs{i}=zeros(2,lt(i));
+            Trs{i}=zeros(3,lt(i));
             if loggers{i}.fExp
                 tindex(i)=find(loggers{i}.Data.phase == 116,1,'first');
                 if isfield(loggers{i}.Data.agent.controller.result{1, tindex(i)},'z1') 
@@ -411,7 +431,8 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                         est{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.p(1:3);
                         err{i}(:,j)=est{i}(:,j)-ref{i}(:,j);%誤差        
                         inp{i}(:,j)=loggers{i}.Data.agent.input{1,i2}(1:4);
-                        % ininp{i}(:,j)=loggers{i}.Data.agent.inner_input{1,i2};
+                        % u{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.u;
+                        ininp{i}(:,j)=loggers{i}.Data.agent.inner_input{1,i2};
                         att{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.q(1:3);
                         vel{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.v(1:3);
                         w{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.w(1:3);
@@ -454,6 +475,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                     vel{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.v(1:3);
                     w{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.w(1:3);
                     uHL{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.uHL;
+                    u{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.u;
                     z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z1;
                     z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z2;
                     z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z3;
@@ -464,7 +486,8 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
             j=1;
             if isprop(loggers{i}.Data.agent.estimator.result{1, 1}.state,'Trs')
                 for i2=kf(i):1:ke(i)
-                    Trs{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.Trs(1:2);
+                    Trs{i}(1:2,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.Trs(1:2);
+                    Trs{i}(3,j)=loggers{i}.Data.agent.controller.result{1, i2}.u(1);
                     j=j+1;
                 end
             else
@@ -527,6 +550,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
       
          % if fExp ==1
             allData.input = { struct('x',{time},'y',{inp}), struct('x','time [s]','y','input [N]'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
+            allData.u = { struct('x',{time},'y',{u}), struct('x','time [s]','y','input [N]'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
         % else
         %     allData.input = { struct('x',{time},'y',{inp}), struct('x','time [s]','y','input [N]'), LgndCrt(["1 ","2 ","3 ","4","dst"],c),add_option([],option,addingContents)};
         % end
@@ -624,7 +648,7 @@ function plot_data_single(~, ~, branchData)
                     daspect(option.aspect)
                 end
                 title(option.titleName)
-                set(gca,'FontSize',option.fontSize)
+                set(gca,'FontSize',option.fontSize,"TickLabelInterpreter","latex")
                 grid on
                 hold off
 
@@ -641,7 +665,7 @@ function plot_data_single(~, ~, branchData)
                 daspect(option.aspect)
                 campos(option.camposition)
                 title(option.titleName)
-                set(gca,'FontSize',option.fontSize)
+                set(gca,'FontSize',option.fontSize,"TickLabelInterpreter","latex")
                 grid on
                 hold off
         end
@@ -670,7 +694,7 @@ function plot_data_single(~, ~, branchData)
                 if ~isempty(option.aspect)
                     daspect(option.aspect)
                 end
-                set(gca,'FontSize',multi.fontSize)
+                set(gca,'FontSize',multi.fontSize,"TickLabelInterpreter","latex")
                 pbaspect(multi.pba)  
                 grid on
                 hold off
@@ -685,7 +709,7 @@ function plot_data_single(~, ~, branchData)
                 legend(legendLabels,'NumColumns',option.legendColumns,'Interpreter','latex')
                 daspect(option.aspect)
                 campos(option.camposition)
-                set(gca,'FontSize',multi.fontSize)
+                set(gca,'FontSize',multi.fontSize,"TickLabelInterpreter","latex")
                 pbaspect(multi.pba)  
                 grid on
                 hold off

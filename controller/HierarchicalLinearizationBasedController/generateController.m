@@ -1,6 +1,7 @@
 %% Define the nonlinear physical model of a quadrotor
 syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
 syms u u1 u2 u3 u4 T1 T2 T3 T4 real
+% syms u u1 u2 u3 u4 T1 T2 T3 T4 v1 real
 syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 %% Controller design
 clc
@@ -47,7 +48,8 @@ He = [1/(beta1(1)+e1),-beta1(2)/(beta1(1)+e1),-beta1(3)/(beta1(1)+e1),-beta1(4)/
  %v1 = -Fz * [h1;dh1]; % v1を事前に決めておく時はこっち
 %% 2nd layer
 syms v2 v3 v4
-FG = simplify(f+g*H*[-alpha1+v1(t);u2;u3;u4]);	% v1を後で設計する時はこっち
+FG = simplify(f+g*H*[-alpha1+v1(t);u2;u3;u4]);	% v1を後で設計する時はこっ
+% FG = simplify(f+g*H*[-alpha1+v1;u2;u3;u4]);	% v1を後で設計する時はこっち
 g1 = simplify(MyCoeff(FG,[u2;u3;u4]));
 f1 = subs(FG,[u2,u3,u4],[0,0,0]);
 %simplify(FG-(f1+g1*[v2;v3;v4]))   % For check

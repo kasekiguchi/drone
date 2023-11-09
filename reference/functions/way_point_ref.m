@@ -133,10 +133,13 @@ ref.dt=dtime;
                     close all
                     i=1;
                     figure(i)
-                    plot3(xyz(1,:),xyz(2,:),xyz(3,:));
+                    plot3(xyz(1,:),xyz(2,:),xyz(3,:),"LineWidth",2);
                     hold on
-                    plot3(point(1,:),point(2,:),point(3,:),"LineStyle","none","Marker","o")
+                    plot3(point(1,:),point(2,:),point(3,:),"LineStyle","none","Marker","o","LineWidth",2)
                     grid on
+                    xlabel('x [m]','FontSize',18)
+                    ylabel('y [m]','FontSize',18)
+                    zlabel('z [m]','FontSize',18)
                     hold off
                     i=i+1;
     
@@ -146,24 +149,30 @@ ref.dt=dtime;
                     i=i+1;
     
                     figure(i)
-                    tiledlayout("horizontal")
+                    % tiledlayout("horizontal")
                     nexttile
-                    plot(xyz(1,:),xyz(2,:))
+                    plot(xyz(1,:),xyz(2,:),"LineWidth",2)
+                    xlabel('x [m]','FontSize',18)
+                    ylabel('y [m]','FontSize',18)
                     daspect([1,1,1])
                     hold on
-                    plot(point(1,:),point(2,:),'Marker','o','LineStyle','none')
+                    plot(point(1,:),point(2,:),'Marker','o','LineStyle','none',"LineWidth",2)
                     grid on
                     nexttile
-                    plot(xyz(1,:),xyz(3,:))
+                    plot(xyz(1,:),xyz(3,:),"LineWidth",2)
+                    xlabel('x [m]','FontSize',18)
+                    ylabel('z [m]','FontSize',18)
                     daspect([1,1,1])
                     hold on
-                    plot(point(1,:),point(3,:),'Marker','o','LineStyle','none')
+                    plot(point(1,:),point(3,:),'Marker','o','LineStyle','none',"LineWidth",2)
                     grid on
                     nexttile
-                    plot(xyz(2,:),xyz(3,:))
+                    plot(xyz(2,:),xyz(3,:),"LineWidth",2)
                     daspect([1,1,1])
                     hold on
-                    plot(point(2,:),point(3,:),'Marker','o','LineStyle','none')
+                    plot(point(2,:),point(3,:),'Marker','o','LineStyle','none',"LineWidth",2)
+                    xlabel('y [m]','FontSize',18)
+                    ylabel('z [m]','FontSize',18)
                     grid on
                     i=i+1;
     
