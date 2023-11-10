@@ -236,18 +236,12 @@ classdef PATH_REFERENCE < handle
             end
             p_Area = union(tmpenv(:));
             %plantFinalState
-            pstate = agent.plant.state.p(1:2,end);
-            pstateq = agent.plant.state.q(end,end);
-            pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
-            pstatesquare =  polyshape(pstatesquare');
-            pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
+            pstate = agent.plant.state;
+            pstatesquare = vehicle_outline(pstate);
 
             %modelFinalState
-            estate = agent.estimator.result.state.p(1:2,end);
-            estateq = agent.estimator.result.state.q(end,end);
-            estatesquare = estate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
-            estatesquare =  polyshape( estatesquare');
-            estatesquare =  rotate(estatesquare,180 * estateq / pi, estate');
+            estatesquare = vehicle_outline(agent.estimator.result.state);
+
             if isfield(agent.estimator.result,'map_param')
             Ewall = agent.estimator.result.map_param;
             Ewallx = reshape([Ewall.x,NaN(size(Ewall.x,1),1)]',3*size(Ewall.x,1),1);
@@ -258,21 +252,23 @@ classdef PATH_REFERENCE < handle
             end
             %reference state
             RefState = agent.reference.result.state.p(1:3,:);
-            fWall = agent.reference.result.focusedLine;
-
+            iyaw = -agent.reference.result.state.q(end,:);
+            iyaw = 0;
+            fWall = ([cos(iyaw),-sin(iyaw);sin(iyaw),cos(iyaw)]*agent.reference.result.focusedLine')';
+            
             figure(FH)
             clf(FH)
             grid on
             %axis equal
-            obj.self.show(["sensor","lrf"],"FH",FH,"param",[pstate;pstateq]);
+            obj.self.show(["sensor","lrf"],"FH",FH,"param",[pstate.p(1:2,end);pstate.q(end,end)]);
             hold on
             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
-            plot(Ewallx,Ewally,'r-');
-            plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
+            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5); % true environment
+            plot(Ewallx,Ewally,'r-'); % estimated wall
+            plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2); % wall for reference
             O = agent.reference.result.O;
             plot(O(1),O(2),'r*');
             quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
@@ -315,4 +311,11 @@ else
     p(1,1) = (b1*c2 - b2*c1)/d;
     p(2,1) = -(a1*c2 - a2*c1)/d;
 end
+end
+function square = vehicle_outline(state)
+pstate = state.p(1:2,end);
+pstateq = state.q(end,end);
+pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+pstatesquare =  polyshape(pstatesquare');
+square =  rotate(pstatesquare,180 * pstateq / pi, pstate');
 end
