@@ -92,6 +92,6 @@ pwallpoly = polyshape(pwall);
 Pwalls = union(Poutwall, pwallpoly);
 
 env_param.Vertices(:, :, 1) = Pwalls.Vertices;
-env_param.param = env_param;
+%env_param.param = env_param;
 
 end

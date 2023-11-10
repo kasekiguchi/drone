@@ -49,6 +49,17 @@ methods
         vehicle = DRAW_WHILL(data.p);
         vehicle.animation(data)
     end
+    function ax=show(obj,str,varargin)
+      % str : list of target class
+      %  example ["sensor","lidar";"estimator","ekf"]
+      tmp = obj;
+      for j = 1:size(str,1)
+        for i = str(j,:)
+          tmp = tmp.(i);
+        end
+        ax = tmp.show(varargin{:});
+      end
+    end
 
 end
 
