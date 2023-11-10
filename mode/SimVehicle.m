@@ -19,6 +19,7 @@ initial_state.q = [0;0;0];
 agent = WHILL;
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
 agent.plant = MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1));
+%agent.estimator = EKF(agent,Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state, 1)),["p", "q"],"B",1,"Q",[1;1;0;0;0;1]));
 agent.estimator = EKF(agent,Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state, 1)),["p", "q"],"B",1,"Q",[1;1;0;0;0;1]));
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 %agent.sensor.lrf = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.1:pi)); % 2D lidar
@@ -40,10 +41,10 @@ for i = 1:time.te
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
     agent(1).controller.do(time, 'f',0,0,agent,1);
-    agent(1).plant.do(time, 'f');
+    agent.reference.FHPlot(env,FH,0)
     logger.logging(time, 'f', agent);
+    agent(1).plant.do(time, 'f');
     time.t = time.t + time.dt;
-     agent.reference.FHPlot(env,FH,0)
 %    pause(1)
 end
 
