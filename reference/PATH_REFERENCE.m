@@ -252,9 +252,8 @@ classdef PATH_REFERENCE < handle
             end
             %reference state
             RefState = agent.reference.result.state.p(1:3,:);
-            iyaw = -agent.reference.result.state.q(end,:);
-            iyaw = 0;
-            fWall = ([cos(iyaw),-sin(iyaw);sin(iyaw),cos(iyaw)]*agent.reference.result.focusedLine')';
+            iyaw = agent.estimator.result.state.q(end,:);
+            fWall = ([cos(iyaw),-sin(iyaw);sin(iyaw),cos(iyaw)]*(agent.reference.result.focusedLine'-RefState(1:2))+RefState(1:2))';
             
             figure(FH)
             clf(FH)

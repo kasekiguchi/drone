@@ -13,8 +13,8 @@ motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion ca
 fExp = 0;
 logger = LOGGER(1, size(ts:dt:te, 2), fExp, [],[]);
 
-initial_state.p = [0;-1.5;0];
-initial_state.q = [0;0;0];
+initial_state.p = [9;0;0];
+initial_state.q = [0;0;pi/2];
 
 agent = WHILL;
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
