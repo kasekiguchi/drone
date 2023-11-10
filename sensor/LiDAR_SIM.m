@@ -36,14 +36,14 @@ methods
         if isfield(param, 'seed'); obj.seed = param.seed; end
     end
 
-    function result = do(obj, param)
+    function result = do(obj, varargin)
         % result=lidar.do(param)
         %   result.region : センサー領域（センサー位置を原点とした）polyshape
         %   result.length : [1 0]からの角度がangle,
         %   angle_range で規定される方向の距離を並べたベクトル：単相LiDARの出力を模擬
         % 【入力】param = {Env}        Plant ：制御対象， Env：環境真値
         Plant = obj.self.plant;
-        Env = param{1};
+        Env = varargin{1}{4};
         pos = Plant.state.p; % 実状態
 
         if isprop(Plant.state, "q")
