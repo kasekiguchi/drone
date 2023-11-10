@@ -17,7 +17,7 @@ methods
         param.nodename = self.node;
         subTopicName(1) = {'/scan_front'};
         subTopicName(2) = {'/scan_back'};
-        param.subMsgName      = {'sensor_msgs/LaserScan'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
+        param.subMsgName = {'sensor_msgs/LaserScan'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
         for i = 1:length(subTopicName)
             param.subTopicName = subTopicName(i);
             obj.ros{i} = ROS2_CONNECTOR(param);
@@ -52,10 +52,11 @@ methods
         
         while(1)
             pause(0.001)
-            data{1} = obj.ros{1}.result;
-            data{2} = obj.ros{2}.result;
+            data{1} = obj.ros{1}.subtopicdata;
+            data{2} = obj.ros{2}.subtopicdata;
             if isempty(data{1})|isempty(data{2})
                 % break
+                disp("miss")
             else
                 break
             end

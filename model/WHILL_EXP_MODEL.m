@@ -54,29 +54,36 @@ methods
 
                 obj.connector = ROS2_CONNECTOR(param);
                 fprintf("Whill %d is ready\n", obj.IP);
-%                 state = obj.connector.getData();
+                state = obj.connector.result;
 %                 obj.result.state.p = [state.pose.position.z,state.pose.position.x];
 %                 obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
 %                 obj.result.state.eq = quat2eul(obj.result.state.qq);
-%                 obj.state.p = [state.pose.position.z,state.pose.position.x];
-%                 obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                 obj.state.eq = quat2eul(obj.state.qq);
+                % obj.state.p = [state.anguluar.z,state.linear.x];
+                % obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+                % obj.state.eq = quat2eul(obj.state.qq);
         end
   end
   
   
-function do(obj, u, varargin)
-     
+function do(obj,varargin)
+    t = varargin{1,1}.t; 
+    u = obj.self.controller.result.input;%%追記11/8%追追記11/9
+    % if length(u) > 1
+    %     for i = 1:length(u)
+    %         u(i) = subs(u(i),"t",t);
+    %     end
+    %     u=cast(u,"double");
+    % end
+        % if length(varargin) == 1
 
-        if length(varargin) == 1
+            % if ~isfield(varargin{1}, 'FH')
+            %     error("ACSL : require figure window");
+            % else
+            %     FH = varargin{1}.FH; % figure handle
+            % end
 
-            if ~isfield(varargin{1}, 'FH')
-                error("ACSL : require figure window");
-            else
-                FH = varargin{1}.FH; % figure handle
-            end
-
-            cha = get(FH, 'currentcharacter');
+            % cha = get(FH, 'currentcharacter');
+            cha = varargin{2};%%追記11/8
 
             if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
                 cha = obj.phase;
@@ -124,23 +131,23 @@ function do(obj, u, varargin)
                     obj.msg.angular.z = u(2);
             end
 
-        else % 緊急時
-            obj.msg.linear.x = 0.0;
-            obj.msg.linear.y = 0.0;
-            obj.msg.linear.z = 0.0;
-            obj.msg.angular.x = 0.0;
-            obj.msg.angular.y = 0.0;
-            obj.msg.angular.z = 0.0;
-            obj.connector.sendData(obj.msg);
-%             state = obj.connector.getData();
-%             obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%             obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%             obj.result.state.eq = quat2eul(obj.result.state.qq);
-%             obj.state.p = [state.pose.position.z,state.pose.position.x];
-%             obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%             obj.state.eq = quat2eul(obj.state.qq);
-            return;
-        end
+%         else % 緊急時
+%             obj.msg.linear.x = 0.0;
+%             obj.msg.linear.y = 0.0;
+%             obj.msg.linear.z = 0.0;
+%             obj.msg.angular.x = 0.0;
+%             obj.msg.angular.y = 0.0;
+%             obj.msg.angular.z = 0.0;
+%             obj.connector.sendData(obj.msg);
+% %             state = obj.connector.getData();
+% %             obj.result.state.p = [state.pose.position.z,state.pose.position.x];
+% %             obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+% %             obj.result.state.eq = quat2eul(obj.result.state.qq);
+% %             obj.state.p = [state.pose.position.z,state.pose.position.x];
+% %             obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
+% %             obj.state.eq = quat2eul(obj.state.qq);
+%             return;
+%         end
         
         % send
         obj.connector.sendData(obj.msg);

@@ -30,7 +30,7 @@ Model.type="VEHICLE_MODEL"; % class name
 Model.name="vehicle3"; % print name
 Setting.dim=[3,2,0];
 %Setting.input_channel= ["v","w"];
-Setting.method = "vehicle_velocity_omega_input_model"; % model dynamicsの実体名
+Setting.method = "three_state_vehicle_model"; % model dynamicsの実体名
 Setting.state_list =  ["p","q"];
 Setting.num_list = [2,1];
 %---------------------------%

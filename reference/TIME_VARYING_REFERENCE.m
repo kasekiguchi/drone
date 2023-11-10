@@ -36,7 +36,7 @@ classdef TIME_VARYING_REFERENCE < handle
             obj.result.state.set_state("xd",obj.func(0));
             obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
             obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-            obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+            % obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
             %syms t real
             %obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
@@ -49,7 +49,7 @@ classdef TIME_VARYING_REFERENCE < handle
                 obj.t=varargin{1}.t;
                 t = obj.t;
            end           
-           obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           obj.result.state.xd = subs(obj.func(t),t,t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
             obj.result.state.v = obj.result.state.xd(5:7);

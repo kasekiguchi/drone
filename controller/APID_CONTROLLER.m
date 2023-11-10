@@ -27,8 +27,8 @@ classdef APID_CONTROLLER < handle
             obj.dt = param.dt;
             obj.strans = param.strans;
             obj.rtrans = param.rtrans;
-            % [p,q,~,~]=obj.strans(obj.self.model.state);
-            % obj.ei = zeros(size(p,1)+size(q,1),1);
+            [p,q,~,~]=obj.strans(obj.self.estimator.model.state);
+            obj.ei = zeros(size(p,1)+size(q,1),1);
             obj.adaptive = param.adaptive;
         end
 
@@ -56,14 +56,27 @@ classdef APID_CONTROLLER < handle
             obj.e = [p-rp;q-rq];
             obj.ed = [obj.K*(p-rp)-rv;w-rw];
             
-           
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
             
             obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
+            if length(obj.result.input ) > 1
+                for j = 1:length(obj.result.input)
+                    obj.result.input(j) = subs(obj.result.input(j),"t",param.t);
+                end
+                obj.result.input = cast(obj.result.input,"double");
+            end
+
 %             obj.result.input = [0.1;0];
 
-            obj.self.input = obj.result.input;
-            
+
+            obj.self.input_transform.result = obj.result.input;
+
+            % [theta,rho] = cart2pol(x,y)
+            [theta,rho] =cart2pol(obj.result.input(1,1),obj.result.input(2,1));
+
+            obj.result.input = [theta,rho];
+
+
 %             obj.self.input = [1.0;0];
             u = obj.result;
 %             u.input = [0;u.input(2)];

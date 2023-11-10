@@ -3,7 +3,7 @@ function Controller = Controller_APID(dt)
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
 Controller_param.Kp = [0, 0, 0; 2, 2, 3] * 0.1;
 Controller_param.Ki = [0 0 0; 0 0 0];
-Controller_param.Kd = [2; 0.1] * 0.5;
+Controller_param.Kd = [2; 0.1] * 0;
 Controller_param.K = [1, 1] * 0.1;
 Controller_param.dt = dt;
 Controller_param.strans = str2func("strans_2111");
@@ -25,7 +25,10 @@ function [p, q, v, w] = strans_2111(state)
 % q : 1dim（平面上の姿勢）
 % v : 1dim
 % w : 1dim
-p = state.p(1:2, end);
+% p = state.p(1:state.num_list(1));
+p = state.p(1:2);
+% p = state.p(1:2, end);
+% p = state.p;
 % switch length(p)
 %     case 3
 %         p = p(1:2);
