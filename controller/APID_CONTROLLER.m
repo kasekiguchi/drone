@@ -10,9 +10,8 @@ classdef APID_CONTROLLER < handle
         Ki
         Kd
         dt
-        strans
-        rtrans
         adaptive
+        gen_error
     end
 
     methods
@@ -22,23 +21,20 @@ classdef APID_CONTROLLER < handle
             obj.Ki=param.Ki;
             obj.Kd=param.Kd;
             obj.dt = param.dt;
-            obj.strans = param.strans;
-            obj.rtrans = param.rtrans;
-            [p,q,~,~]=obj.strans(obj.self.estimator.model.state);
-            obj.ei = zeros(size(p,1)+size(q,1),1);
             obj.adaptive = param.adaptive;
+            obj.gen_error = param.gen_error;
+            [e,~]=obj.gen_error(obj.self.estimator.model.state,obj.self.reference.result.state);
+            obj.ei = zeros(size(e,1),1);
         end
 
         function u = do(obj,varargin)
-            % u = do(obj,varargin)
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
-            [p,q,v,w]=obj.strans(model.state);       % （グローバル座標）推定状態 (state object)
-            [rp,rq,rv,rw]=obj.rtrans(ref.state);   % （ボディ座標）目標状態 (state object)
-            obj.e = [p-rp;q-rq];
-            obj.ed = [v-rv;w-rw];
+            [e,ed] = obj.gen_error(model.state,ref.state);
+            obj.e = e;
+            obj.ed = ed;
            
-            [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
+            [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,model,ref);
             if isempty(obj.ed)
               obj.ed = 0;
             end
