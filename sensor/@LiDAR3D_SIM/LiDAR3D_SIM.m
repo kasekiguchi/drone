@@ -88,8 +88,6 @@ classdef LiDAR3D_SIM < handle
       ip1 = sum(rp .* obj.fn, 2) < 0; % 「内積が負の壁」が見える向きの壁面
       Pi = obj.inverse_matrices(p, ip1);
       e = R * obj.E;
-      %ip2 = rp*e > 0; % 「内積が正の壁」がレーザー方向にある壁
-      ids = ip1;                      % & ip2;
 
       %% cell array形式 : for よりは早い
       d = cell2mat(arrayfun(@(i) obj.cross_point(e(:, i), Pi), 1:size(e, 2), 'UniformOutput', false));
