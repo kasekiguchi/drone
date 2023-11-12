@@ -15,6 +15,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 close all hidden; clear; clc;
 userpath('clear');
 %%
+% each method's arguments : app.time,app.cha,app.logger,app.env,app.agent,i
 clc
 SimBaseMode = ["SimHL", "SimSuspendedLoad", "SimVoronoi", "SimFHL", "SimFHL_Servo", "SimLiDAR", "SimFT", "SimEL"];
 ExpBaseMode = ["ExpTestMotiveConnection", "ExpHL", "ExpFHL", "ExpFHL_Servo", "ExpFT", "ExpEL"];
