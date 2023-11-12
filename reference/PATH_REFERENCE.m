@@ -28,8 +28,6 @@ classdef PATH_REFERENCE < handle
       obj.self = self;
       param = varargin{1};
       obj.refv = param{1,1};
-      %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
-      %obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
       obj.PreTrack = [obj.self.estimator.model.state.p(1:2);obj.self.estimator.model.state.q(3)];%位置,姿勢,速さ
       obj.result.PreTrack = obj.PreTrack;
       %obj.Horizon = param{1,2};
@@ -52,6 +50,8 @@ classdef PATH_REFERENCE < handle
       sensor = obj.self.sensor.result;
       % 相対座標でのline parameterを算出
       LP = PC2LDA(sensor.length, sensor.angle, [0;0;0],obj.constant);
+      % 以降ではline parameter = (a, b, c) として [a b]の大きさ１、c < 0 を前提とする。
+      % see assets/line_functions/readme.md
       % x, y が全て０のLPを削除 UKFCombiningLinesで使っているフィールドだけ削除
       tmpid=sum([LP.x,LP.y],2)==0;
       LP.x(tmpid,:) = [];
@@ -68,7 +68,7 @@ classdef PATH_REFERENCE < handle
       Xe = LP.x(:,2);
       Ys = LP.y(:,1);
       Ye = LP.y(:,2);
-      lineids = abs(Xe - Xs) + abs(Ye - Ys) > 1; % lineと認識する長さ：1m 以上ないとlineとみなさないようにする．TODO
+      lineids = abs(Xe - Xs) + abs(Ye - Ys) > 1; % lineと認識する長さ：1m 以上ないとlineとみなさないようにする．TODO : チューニングできるようにする
       a = a(lineids);
       b = b(lineids);
       c = c(lineids);
@@ -79,18 +79,14 @@ classdef PATH_REFERENCE < handle
       x = 0;
       y = 0;
 
-      ref = zeros(4,obj.Horizon);%set data size[x ;y ;theta;v]
-
-      del = -[a.*c,b.*c]./sqrt(a.^2+b.^2); % 垂線の足
+      del = -[a.*c,b.*c]; % 垂線の足
 
       ds = [Xs,Ys]; % wall 始点
       de = [Xe,Ye]; % wall 終点
       ip = sum((ds - del).*(de - del),2); % 垂線の足から始点，終点それぞれへのベクトルの内積
-      %widb = (ip < 1e-1); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
       widb = (ip <=0.3); % 垂線の足が壁面内にある壁面インデックス：内積が負になる．（少し緩和している）
-      %d = vecnorm(del(wid,:),2,2); % wid の壁面までの距離
-      d = abs(c(widb));
-      [~,idx]=mink(d,2); % 近い２つの壁面        
+      d = abs(c(widb)); % wid の壁面までの距離
+      [~,idx]=mink(d,2); % 近い２つの壁面
       wid = find(widb);
       ids=wid(idx); % 近い２つの壁面インデックス
       [~,mincid]=mink(abs(c),4);% 近い４つの壁面
@@ -107,36 +103,12 @@ classdef PATH_REFERENCE < handle
         end
       else  % 進行方向との内積が直角に近い左右の壁が存在しない場合
       end
-      l1 = [a(ids(1)),b(ids(1)),c(ids(1))]/vecnorm([a(ids(1)),b(ids(1))]);
-      l2 = [a(ids(2)),b(ids(2)),c(ids(2))]/vecnorm([a(ids(2)),b(ids(2))]);
-
-%       ids20 = intersect(find(~widb),mincid);% 垂線の足が線分に含まれないが近い壁
-%       [~,ids2]=min(abs(a(ids20)));% 内積が小さい＝横にある壁
-%       ids2 = ids20(ids2);
-%       wid2 = find(~widb);
-%       if isempty(wid2)
-%         [~,wid2] = mink(abs(a),2);
-%         ids2 = setxor([ids;wid2],ids);
-%       end
-% %      [~,ids2]=mink(d2,2); % 近い２つの壁面
-%       if l1(1) < -0.9
-%         ids(1) = ids2;
-%         l1 = [a(ids2),b(ids2),c(ids2)];
-%       elseif l2(1) < -0.9
-%         ids(2) = ids2;
-%         l2 = [a(ids2),b(ids2),c(ids2)];
-%       end
-%       if l1*l2'<0
-%         l2 = -l2;
-%       end
+      l1 = [a(ids(1)),b(ids(1)),c(ids(1))];
+      l2 = [a(ids(2)),b(ids(2)),c(ids(2))];
       % Current time reference position calced at previous time
       rp = R'*(obj.result.PreTrack(1:2) - pe);
-%abs(prod(a(ids(1:2)))+prod(b(ids(1:2))))
-%abs(l1(1)*l2(1)+l1(2)*l2(2))
-if abs(l1(1)*l2(1)+l1(2)*l2(2))<1e-1
- %     if abs(prod(a(ids(1:2)))+prod(b(ids(1:2))))<1e-1 % ほぼ直交している場合（傾きの積が-1の式より）
-        % TODO : 入りと出で同じ幅の通路を前提としてしまっている．
-        % 初期値が垂直二等分線上の場合その場で回転するだけのリファレンスになる．
+
+      if abs(l1(1)*l2(1)+l1(2)*l2(2))<1e-1  % ほぼ直交している場合（傾きの積が-1の式より）
         if isempty(obj.O)
           e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
           e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
@@ -151,15 +123,13 @@ if abs(l1(1)*l2(1)+l1(2)*l2(2))<1e-1
             end
             [~,I]=mink(abs(c),3); % 近い３つの壁のインデックスを抽出
             I = setxor([ids;I],ids); % 注目している２本ではない壁が曲がる方向の壁
-            %l4 = [a(I(1)),b(I(1)),c(I(1))]/vecnorm([a(I(1)),b(I(1))]); % 曲がる方向の壁のline parameter
-            l4 = [a(I),b(I),c(I)];
+            l4 = [a(I),b(I),c(I)]; % 曲がる方向の壁のline parameter
             tmpcenter = cr(l4,l3);% 回転中心候補：相対座標
             [~,tmpid] = min(abs(tmpcenter(2,:))); % 相対座標ｙで近い方
             obj.O=tmpcenter(:,tmpid);% 回転中心：相対座標
             if obj.O(1)>0 % 回転中心が前に有るとき（広い通路に出る場合）は回転中心を真横に引き戻す
               obj.O(1) = 0;
             end
-            %obj.r = vecnorm(obj.O-rp); % 回転半径
             obj.r = vecnorm(obj.O); % 回転半径
           else % 遠い => 交わらない線分：推定が失敗してくると生じる
             [~,id1]=min(vecnorm(e1,2,2)); % 近いedgeのインデックス
@@ -212,16 +182,9 @@ if abs(l1(1)*l2(1)+l1(2)*l2(2))<1e-1
         if sum(tmpl) == 0
           rl;
         end
-        tmp01 = cr(rl,tmpl); % 機体からrlへの垂線の足
-        tmp02 = [-rl(3)/rl(1);0]; %  進行方向とrlとの交点
-        if tmp02(1) < 0
-          tmp0 = tmp01;
-        else
-%          tmp01(2) = 0;
-          tmp0 = tmp01;
-        end
-          rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
-          tmpt0 = atan2(-rl(1),rl(2));
+        tmp0 = cr(rl,tmpl); % 機体からrlへの垂線の足
+        rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
+        tmpt0 = atan2(-rl(1),rl(2));
         tmp(:,1) = [min(obj.refv,tmp0(1));tmp0(2);tmpt0];
         for i = 2:obj.Horizon
           tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
@@ -296,15 +259,17 @@ if abs(l1(1)*l2(1)+l1(2)*l2(2))<1e-1
       opts = struct(varargin{:});
       Env = opts.Env;
       FH = opts.FH;
+      if ~isfield(opts,'ax') || isempty(opts.ax)
+        fh = figure(opts.FH);
+       % fh.WindowState = 'maximized';
+      else
+        ax = opts.ax;
+      end
+
       flag = opts.flag;
       agent = obj.self;
       if isa(Env,'triangulation')
-        if ~isprop(FH.Children,'Children')%,'matlab.graphics.primitive.Patch')
-          trimesh(Env);
-        end
-
-        view([0;0;1]);
-        daspect([1 1 1]);
+        trimesh(Env);
       else
         MapIdx = size(Env.param.Vertices,3);
         for ei = 1:MapIdx
@@ -313,11 +278,12 @@ if abs(l1(1)*l2(1)+l1(2)*l2(2))<1e-1
         p_Area = union(tmpenv(:));
         plot(p_Area,'FaceColor','blue','FaceAlpha',0.5); % true environment
       end
-      %plantFinalState
+      ax = gca;
+      view(ax,[0;0;1]);
+      daspect(ax,[1 1 1]);
       pstate = agent.plant.state;
       pstatesquare = vehicle_outline(pstate);
 
-      %modelFinalState
       estatesquare = vehicle_outline(agent.estimator.result.state);
 
       if isfield(agent.estimator.result,'map_param')
@@ -332,38 +298,38 @@ if abs(l1(1)*l2(1)+l1(2)*l2(2))<1e-1
       RefState = obj.result.state.xd;
       fWall = agent.reference.result.focusedLine;
 
-      % figure(FH)
-      % clf(FH)
-      % grid on
-      %axis equal
-      %obj.self.show(["sensor","lrf"],"param",[pstate.p(1:2,end);pstate.q(end,end)],varargin{:});
-      obj.self.show(["sensor","lrf"],varargin{:});
-      view([0 0 1]);
-      hold on
-      plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
-      plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+      inputs_for_show = [{'ax'},{ax},varargin(:)'];
+      obj.self.show(["sensor","lrf"],inputs_for_show{:});
+      view(ax,[0 0 1]);
+      hold(ax,'on')
+      plot(ax,pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+      plot(ax,estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
 
-      plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-      plot(Ewallx,Ewally,'r-'); % estimated wall
-      plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2); % wall for reference
+      plot(ax,RefState(1,:),RefState(2,:),'ro','LineWidth',1);
+      plot(ax,Ewallx,Ewally,'r-'); % estimated wall
+      plot(ax,fWall(:,1),fWall(:,2),'g-','LineWidth',2); % wall for reference
       O = agent.reference.result.O;
-      plot(O(1),O(2),'r*');
-      quiver(RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
+      plot(ax,O(1),O(2),'r*');
+      quiver(ax,RefState(1,:),RefState(2,:),2*cos(RefState(3,:)),2*sin(RefState(3,:)));
       if isstring(flag)
-        xmin = min(-5,min(Ewallx));
-        xmax = max(95,max(Ewallx));
-        ymin = min(-5,min(Ewally));
-        ymax = max(95,max(Ewally));
-        xlim([xmin-5, xmax+5]);
-        ylim([ymin-5,ymax+5]);
+        xmin = min(ax,-5,min(Ewallx));
+        xmax = max(ax,95,max(Ewallx));
+        ymin = min(ax,-5,min(Ewally));
+        ymax = max(ax,95,max(Ewally));
+        xlim(ax,[xmin-5, xmax+5]);
+        ylim(ax,[ymin-5,ymax+5]);
       elseif(flag==1)
-        xlim([estate(1)-25, estate(1)+25]);
-        ylim([estate(2)-25,estate(2)+25]);
+        xlim(ax,[estate(1)-25, estate(1)+25]);
+        ylim(ax,[estate(2)-25,estate(2)+25]);
 
       end
-      xlabel("$x$ [m]","Interpreter","latex");
-      ylabel("$y$ [m]","Interpreter","latex");
-      hold off
+      xlabel(ax,"$x$ [m]","Interpreter","latex");
+      ylabel(ax,"$y$ [m]","Interpreter","latex");
+      text(ax,ax.XLim(1),ax.YLim(2)+0.6,0,"* : rotation center in curve motion");
+      text(ax,ax.XLim(1),ax.YLim(2)+0.2,0,"o : reference point");
+      text(ax,(ax.XLim(1)+ax.XLim(2))/2,ax.YLim(2)+0.6,0,"red points : measured lidar points");
+      text(ax,(ax.XLim(1)+ax.XLim(2))/2,ax.YLim(2)+0.2,0,"green line : forcused line for ref gen");
+      hold(ax,'off')
     end
 
   end
