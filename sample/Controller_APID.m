@@ -1,13 +1,12 @@
 function Controller= Controller_APID(dt)
 % Adaptive PIDコントローラ設計用
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
-Controller.Kp = [0,0,0;-20,2,3];
+Controller.Kp = [0,0,0;1,5,10];
 Controller.Ki = [0 0 0;0 0 0];
 Controller.Kd = [2;0.1];
 Controller.dt = dt;
-Controller.strans = str2func("sitrans_2110");
-Controller.rtrans = str2func("strans_2110");
 Controller.adaptive = str2func("adaptive_gain");
+Controller.gen_error = str2func("gen_e_2110");
 end
 
 function [Kp,Ki,Kd] = adaptive_gain(Kp,Ki,Kd,x,xr)
@@ -84,3 +83,13 @@ end
 v = 0;
 w = [];
 end
+
+function [e,ed] = gen_e_2110(model,ref)
+% 慣性座標目標値を相対座標目標値に変換し相対座標形状でのerror を算出する。
+[p,q,v,w] = sitrans_2110(model);
+[rp,rq,rv,rw]= strans_2110(ref);
+R = [cos(q),-sin(q);sin(q),cos(q)];
+e = [-R'*(rp - p);q-rq];
+ed = [v-rv;w-rw];
+end
+
