@@ -5,25 +5,23 @@ properties % (Access=private)
     connector
     phase % q : quit, s : stop, r : run
     conn_type
-    
 end
 
 properties
     msg
-    data%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
 methods
 
-  function obj = WHILL_EXP_MODEL(varargin)
-        obj@MODEL_CLASS(varargin{:});
-        param = varargin{2}.param;
-%        obj.dt = 0.2; % check
+    function obj = WHILL_EXP_MODEL(args)
+        obj@MODEL_CLASS([], []);
+        param = args;
+        obj.dt = 0.025; % check
         %% variable set
         obj.phase = 's';
         obj.conn_type = param.conn_type;
 
-        switch obj.conn_type
+        switch param.conn_type
             case "udp"
                 obj.IP = param.num;
                 [~, cmdout] = system("ipconfig");
@@ -39,34 +37,36 @@ methods
                 obj.connector = SERIAL_CONNECTOR(param);
                 fprintf("Whill %d is ready\n", param.port);
             case "ros"
-
-                obj.IP = param.id;
+                obj.IP = param.num;
                 %[~, cmdout] = system("ipconfig");
                 %ipp = regexp(cmdout, "192.168.");
                 %cmdout2 = cmdout(ipp(1) + 8:ipp(1) + 11);
                 %param.ROSHostIP = strcat('192.168.50', '.', string(100 + obj.IP));
                 param.DomainID = obj.IP;
-%                 param.subTopicName = {'/Robot_1/pose'};
-                % param.subTopicName = {'/odom'};
-                param.nodename = obj.self.node;
+                param.subTopicName = {'/odom', ...
+                                '/scan'};
+                param.pubTopicName = {'/cmd_vel'};
+                param.subMsgName = {'nav_msgs/Odometry', ...
+                                'sensor_msgs/LaserScan'};
+                param.pubMsgName = {'geometry_msgs/Twist'};
                 subnum = length(param.subTopicName);
                 pubnum = length(param.pubTopicName);
 
+                for i = 1:subnum
+                    param.subTopic(i) = ros2node("/submatlab", obj.IP);
+                end
+
+                for i = 1:pubnum
+                    param.pubTopic(i) = ros2node("/pubmatlab", obj.IP);
+                end
+
                 obj.connector = ROS2_CONNECTOR(param);
                 fprintf("Whill %d is ready\n", obj.IP);
-%                 state = obj.connector.getData();
-%                 obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%                 obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                 obj.result.state.eq = quat2eul(obj.result.state.qq);
-%                 obj.state.p = [state.pose.position.z,state.pose.position.x];
-%                 obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                 obj.state.eq = quat2eul(obj.state.qq);
         end
-  end
-  
-  
-function do(obj, u, varargin)
-     
+
+    end
+
+    function do(obj, u, varargin)
 
         if length(varargin) == 1
 
@@ -78,7 +78,7 @@ function do(obj, u, varargin)
 
             cha = get(FH, 'currentcharacter');
 
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'r')
                 cha = obj.phase;
             end
 
@@ -86,62 +86,16 @@ function do(obj, u, varargin)
 
             switch cha
                 case 'q' % quit
-                    obj.msg.linear.x = 0.0;
-                    obj.msg.linear.y = 0.0;
-                    obj.msg.linear.z = 0.0;
-                    obj.msg.angular.x = 0.0;
-                    obj.msg.angular.y = 0.0;
-                    obj.msg.angular.z = 0.0;
-                    obj.connector.sendData(obj.msg);
-%                     state = obj.connector.getData();
-%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
-%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.state.eq = quat2eul(obj.state.qq);
                     error("ACSL : quit experiment");
                 case 's' % stop
-                    obj.msg.linear.x = 0.0;
-                    obj.msg.linear.y = 0.0;
-                    obj.msg.linear.z = 0.0;
-                    obj.msg.angular.x = 0.0;
-                    obj.msg.angular.y = 0.0;
-                    obj.msg.angular.z = 0.0;
-%                     state = obj.connector.getData();
-%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
-%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.state.eq = quat2eul(obj.state.qq);
-                case 'f' % run
-                    obj.msg.linear.x = u(1);
-                    obj.msg.linear.y = 0.0;
-                    obj.msg.linear.z = 0.0;
-                    obj.msg.angular.x = 0.0;
-                    obj.msg.angular.y = 0.0;
-                    obj.msg.angular.z = u(2);
+                case 'r' % run
+                    obj.msg = u;
             end
 
         else % 緊急時
-            obj.msg.linear.x = 0.0;
-            obj.msg.linear.y = 0.0;
-            obj.msg.linear.z = 0.0;
-            obj.msg.angular.x = 0.0;
-            obj.msg.angular.y = 0.0;
-            obj.msg.angular.z = 0.0;
-            obj.connector.sendData(obj.msg);
-%             state = obj.connector.getData();
-%             obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%             obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%             obj.result.state.eq = quat2eul(obj.result.state.qq);
-%             obj.state.p = [state.pose.position.z,state.pose.position.x];
-%             obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%             obj.state.eq = quat2eul(obj.state.qq);
             return;
         end
-        
+
         % send
         obj.connector.sendData(obj.msg);
     end

@@ -23,8 +23,8 @@ classdef KF < handle
         function obj = KF(self,param)
             obj.self= self;
             obj.model = param.model;
-            % obj.self.input = zeros(obj.model.dim(2),1);
-            obj.result.state= state_copy(obj.model.state);
+            obj.self.input = zeros(obj.model.dim(2),1);
+            obj.result.state= state_copy(model.state);
             obj.y= state_copy(obj.model.state);
             if isfield(param,'list')
                 obj.y.list = param.list;

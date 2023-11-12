@@ -16,7 +16,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
     function obj = DRONE_EXP_MODEL(varargin)
       obj@MODEL_CLASS(varargin{:});      
       param=varargin{2}.param;
-%      obj.dt = 0.025;
+      obj.dt = 0.025;
       %% variable set
       obj.flight_phase        = 's';
       switch param.conn_type

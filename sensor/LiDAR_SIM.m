@@ -131,11 +131,8 @@ classdef LiDAR_SIM < handle
         cla(ax);
         points(1:2:2 * size(obj.result.sensor_points, 1), :) = obj.result.sensor_points;
         R = [cos(q), -sin(q); sin(q), cos(q)];
-        %points = (R'*(points'-p))';
         points = (R * points' + p)';
         pp = plot(ax,[points(:, 1); p(1)], [points(:, 2); p(2)]);
-        %             set(pp,'EdgeAlpha',0.05);
-        %             set(pp,'EdgeColor','g');
         hold on;
         text(ax,points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
         region = polyshape((R * obj.result.region.Vertices' + p)');
