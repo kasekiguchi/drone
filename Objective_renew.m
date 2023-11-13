@@ -4,20 +4,20 @@ function [eval] = Objective_renew(x, params) % x : p q v w input
 %元の非線形等式制約を取り込んだ
 
     X = zeros(size(params.A,1), params.H-1);
-    Xc = quaternions(params.X0);
+    Xc = quaternions(params.X0); % 観測量＋１する関数
 %     Xc = [params.X0;1];
     X(:,1) = params.A*Xc + params.B*x(:,1);
     for i = 2:params.H-1
         X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
     end
-    Xn = [params.X0,X(1:params.state_size,:)];
+    Xn = [params.X0,X(1:12,:)];
 
     tildeXp = Xn(1:3, :) - params.xr(1:3, :);  % 位置
     tildeXq = Xn(4:6, :) - params.xr(4:6, :);
     tildeXv = Xn(7:9, :) - params.xr(7:9, :);  % 速度
     tildeXw = Xn(10:12, :) - params.xr(10:12,:);
     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-    tildeUref = x(:, :) - params.xr(13:16,:);
+    tildeUref = x - params.xr(13:16,:);
     
 %-- 状態及び入力のステージコストを計算 長くなるから分割
     stageStateP = tildeXp(:, 1:params.H-1)'*params.Weight.P*tildeXp(:, 1:params.H-1);

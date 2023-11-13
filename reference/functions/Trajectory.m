@@ -23,6 +23,10 @@ x = 0;
 y = 0;
 z = 1;
 
+% x = t/5;
+% y = 0;
+% z = 1;
+
 %% circle2
 % x = 2*sin(2*pi*t/T);
 % y = 2*cos(2*pi*t/T);

@@ -56,9 +56,9 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.Pf = diag([40; 30; 65]);
 %     Params.Weight.QWf = diag([7500; 5000; 4000; 1; 1; 50]); %姿勢角、角速度終端
 
-    Params.Weight.P = diag([10.0; 5.0; 20.0]);    % 座標   1000 10
+    Params.Weight.P = diag([160.0; 155.0; 20.0]);    % 座標   1000 10
     Params.Weight.V = diag([15.0; 5.0; 15.0]);    % 速度
-    Params.Weight.R = diag([20.0,; 20.0; 20.0; 20.0]); % 入力
+    Params.Weight.R = 1e5 * diag([20.0,; 20.0; 20.0; 20.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
     Params.Weight.QW = diag([2500;1500; 25000; 1; 1; 150]);  % 姿勢角、角速度
 
@@ -87,6 +87,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %-- 目標値等
     Params.ur = 0.5884*9.81/4 * ones(4, 1);
+    % Params.ur = 0.5884*9.81 * [1;0;0;0];
 
 %-- fmincon 設定
     options = optimoptions('fmincon');
@@ -97,10 +98,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
     
     %-- fmincon設定
-    options.Algorithm = 'sqp';  % 逐次二次計画法
+    options.Algorithm = 'interior-point';  % 逐次二次計画法
     options.Display = 'none';   % 計算結果の表示
-    problem.solver = 'fmincon'; % solver
-    problem.options = options;  % 
+    % problem.solver = 'fmincon'; % solver
+    % problem.options = options;  % 
 
     x = agent.estimator.result.state.get();
 
@@ -120,7 +121,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.f = {@quaternions}; %状態+非線型項
 %     Params.f = {@(x) [x;1]}; %状態のみ
     
-    previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
+    previous_state  = repmat(Params.ur, 1, Params.H);
 
     xr = zeros(Params.state_size+Params.input_size, Params.H);
 
@@ -221,24 +222,25 @@ end
             
         %-- 初期値の設定
             if idx == 1
-                initial_u1 = 0.5884 * 9.81 / 4;   % 初期値
-                initial_u2 = initial_u1;
-                initial_u3 = initial_u1;
-                initial_u4 = initial_u1;
-            else
-                initial_u1 = agent.input(1);
-                initial_u2 = agent.input(2);
-                initial_u3 = agent.input(3);
-                initial_u4 = agent.input(4);
-            end
-            x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
-%             previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
-            % previous_state の1行目
+                % initial_u1 = 0.5884 * 9.81 / 4;   % 初期値
+                % initial_u2 = initial_u1;
+                % initial_u3 = initial_u1;
+                % initial_u4 = initial_u1;
 
-%                 previous_state(Params.state_size+1:Params.total_size, 1:Params.H) = repmat(x0, 1, Params.H);
+                initial_input = Params.ur;
+            else
+                % initial_u1 = agent.input(1);
+                % initial_u2 = agent.input(2);
+                % initial_u3 = agent.input(3);
+                % initial_u4 = agent.input(4);
+
+                initial_input = agent.input;
+            end
+            % x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
+            % x0 = repmat(x0,1,Params.H);
             
-            % MPC設定
-            x0 = repmat(x0,1,Params.H);
+            %% MPC設定
+            x0 = previous_state;
             A = [];
             b = [];
             Aeq = [];
@@ -252,20 +254,16 @@ end
 %             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
 %             problem.objective = @(x) Objective_mex(x, Params);
 %             problem.nonlcon   = @(x) Constraints_mex(x, Params);
-            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
+            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,options); %最適化計算
             data.exitflag(idx) = exitflag;
 
             % 制御入力の決定
-            previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
+            previous_state = var;   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
 %             num3(idx) = {x};
 %             num(idx) = {var};
             fprintf("\tfval : %f\n", fval)
-%         TODO: 1列目のvarが一切変動しない問題に対処
-%             if var(Params.state_size+1:Params.total_size, end) > 1.0
-%                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
-%             end
             
-            fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
+            fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d\n",...
                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
@@ -295,6 +293,7 @@ end
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
+
         if agent.estimator.result.state.p(3) < 0
             error('墜落しました');
         elseif find(var(:,:) > 5)
@@ -326,27 +325,6 @@ end
         calT = toc % 1ステップ（25ms）にかかる計算時間
         totalT = totalT + calT; %すべての計算を終えるまでにかかった時間
         
-        %% 逐次プロット
-%         figure(10);
-%         clf
-%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-%         TvC = 0:Params.dt:te;
-%         %% circle
-%         CRx = cos(TvC/2);
-%         CRy = sin(TvC/2);
-% 
-%         plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
-%         plot(Tv, xr(2, :), '-', 'LineWidth', 2);
-% 
-%         plot(TvC, CRx, '--', 'LineWidth', 1);
-%         plot(TvC, CRy, '--', 'LineWidth', 1);
-%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-%         hold off;
-%         xlabel("Time [s]"); ylabel("Reference [m]");
-%         legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
-% %         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
-%         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
 %         drawnow 
 %        profile viewer;
