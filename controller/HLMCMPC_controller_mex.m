@@ -119,12 +119,13 @@ classdef HLMCMPC_controller_mex <CONTROLLER_CLASS
       %% 入力生成開始
       obj.input.nextsigma = obj.input.Initsigma;
       obj.param.nextparticle_num = obj.param.Maxparticle_num;
+      contTT = 0;
       for get_input = 1:10
           tic
-          mu(1,1) = 0;
-          mu(2,1) = 0;
-          mu(3,1) = 0;
-          mu(4,1) = 0; % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
+          % mu(1,1) = 0;
+          % mu(2,1) = 0;
+          % mu(3,1) = 0;
+          % mu(4,1) = 0; % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
     
           mu(:,1) = obj.input.u; % リサンプリング
     
@@ -177,7 +178,7 @@ classdef HLMCMPC_controller_mex <CONTROLLER_CLASS
           if removeF ~= obj.N
             [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
             % トルク入力にしたらそれぞれの最適入力をとる必要あり？
-            
+
             % vf = obj.input.u(1, 1, BestcostID(2));           % 最適な入力の取得
             % vs(1,1) = obj.input.u(2, 1, BestcostID(3));      % こちらは確実に飛ぶが良くない
             % vs(2,1) = obj.input.u(3, 1, BestcostID(4));      % 時間延ばすと収束・高速な軌道だと追いつかない
@@ -235,8 +236,10 @@ classdef HLMCMPC_controller_mex <CONTROLLER_CLASS
               obj.input.best_eval = Bestcost(1,1);
           end
           conT = toc;
-          fprintf("%d, calc time:%f s\n", get_input, conT);
+          contTT = contTT + conT;   
+          % fprintf("%d, calc time:%f s\n", get_input, conT);
       end
+      fprintf("calc time:%f s\n", contTT);
 
       obj.result.removeF = removeF;
       obj.result.removeX = removeX;

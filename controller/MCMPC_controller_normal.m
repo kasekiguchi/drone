@@ -30,7 +30,7 @@ classdef MCMPC_controller_normal <CONTROLLER_CLASS
             obj.modelf = obj.self.model.method; 
             %%
             obj.input = param.input;
-            obj.const = param.const;
+            % obj.const = param.const;
             obj.input.nextsigma = param.input.Initsigma;  % 初期化
             obj.param.H = param.H + 1;
             % 追加
@@ -56,7 +56,7 @@ classdef MCMPC_controller_normal <CONTROLLER_CLASS
             % phase = param{4};
             obj.state.ref = xr;
             obj.param.t = rt;
-            obj.reference.grad = param{6};
+            % obj.reference.grad = param{6};
             
             ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
             ave2 = obj.input.u(2);    % 初期値はparamで定義
@@ -173,7 +173,7 @@ classdef MCMPC_controller_normal <CONTROLLER_CLASS
             obj.result.survive = survive;
             obj.result.COG = obj.state.COG;
             obj.self.input = obj.result.input;
-            obj.result.BestcostID = BestcostID;
+            obj.result.bestcostID = BestcostID;
             obj.result.bestcost = Bestcost;
             obj.result.contParam = obj.param;
             obj.result.fRemove = obj.param.fRemove;

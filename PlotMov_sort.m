@@ -58,12 +58,12 @@ datename = datestr(now, 'yyyymmdd_HHMMSS_FFF');
         hold off;
 
 		str = ['$$t$$= ',num2str(logt(count,1),'%.3f'),' s'];
-		text(-0.5,1.65,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
+		text(0.5,0.8,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		grid on
-		ax.YLim = [-2.5 1.5];
-		ax.XLim = [-2.5 1.5];
-        % ax.YLim = [-0.2 2];
-		% ax.XLim = [-0.2 12];
+		% ax.YLim = [-2.5 1.5];
+		% ax.XLim = [-2.5 1.5];
+        ax.YLim = [-0.2 0.5];
+		ax.XLim = [-0.2 5];
 		fig.Units = 'normalized';
 		set(gca,'FontSize',20,'FontName','Times');
 		xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);

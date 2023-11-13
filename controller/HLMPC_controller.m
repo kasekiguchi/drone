@@ -44,7 +44,7 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             obj.input = param.input;
             % obj.const = param.const;
             obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-            obj.param.H = param.H + 1;
+            % obj.param.H = param.H + 1;
             obj.model = self.model;
             obj.param.fRemove = 0;
 
@@ -128,8 +128,8 @@ classdef HLMPC_controller <CONTROLLER_CLASS
             fun = @obj.objective;
             x0 = obj.previous_input;
             AA = []; b = []; Aeq = []; beq = []; 
-            lb = [zeros(1, obj.param.H); repmat(obj.param.input_min, 3,obj.param.H)]; % min
-            ub = [10 * ones(1, obj.param.H); repmat(obj.param.input_max, 3,obj.param.H)]; % max
+            lb = [zeros(1, obj.param.H); repmat(-obj.param.input_TH, 3,obj.param.H)]; % min
+            ub = [obj.param.Z_max*ones(1, obj.param.H); repmat(obj.param.input_TH, 3,obj.param.H)]; % max
             nonlcon = [];
             [var] = fmincon(fun,x0,AA,b,Aeq,beq,lb,ub,nonlcon,obj.param.options_fmin);
             
@@ -138,7 +138,7 @@ classdef HLMPC_controller <CONTROLLER_CLASS
 
             vf = var(1, 1);     % 最適な入力の取得
             vs = var(2:4, 1);     % 最適な入力の取得
-            tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P);  % 入力変換
+            tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P);  % 入力変換
             obj.result.input = tmp(:);%[tmp(1);tmp(2);tmp(3);tmp(4)]; 実入力変換
             obj.self.input = obj.result.input;  % agent.inputへの代入
             obj.input.u = obj.result.input;

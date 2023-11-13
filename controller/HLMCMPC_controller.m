@@ -67,11 +67,13 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
+
+      [obj.param.expand_A, obj.param.expand_B] = EXPAND_STATE(obj);
     end
 
     %-- main()的な
     function result = do(obj,param)
-      rng(0, "twister");
+      % rng(0, "twister");
       % profile on
       % OB = obj;
       xr = param{2};
@@ -127,9 +129,11 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;
+      input_TH = 50; % 最大最小入力
 
       % 全棄却時のケア
       if obj.input.AllRemove == 1
+        % obj.N = obj.param.constParticle_num;
         % if rem(idx,2) == 0 % 時間ごとに±入れ替え
         %     mu = obj.input.Constinput * [0;1;1;0];
         % else
@@ -137,30 +141,46 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         % end
         mu = obj.param.ref_input;
         obj.input.sigma = obj.input.Constsigma;
+        % input_TH = 100;
         obj.input.AllRemove = 0;
       end
 
       % Z, yawの入力を強制的に小さく
-      obj.input.sigma(1) = 0.00001;
-      obj.input.sigma(4) = 0.00001;
+      % obj.input.sigma(1) = 0.00001;
+      % obj.input.sigma(4) = 0.00001;
       % 入力生成 Z; X; Y; YAW
 
       % 目標値までの距離に対する入力の大きさ
       input_constraints = @(x) (83.46*x-2.92) / 3;
 
       %% mu = HL入力関係
-      input_TH = 50; % 最大最小入力
       % mu(2,1) = input_constraints(xr(1)-obj.self.estimator.result.state.p(1)); % 目標値までの距離に応じた入力の平均
       % mu(3,1) = input_constraints(xr(2)-obj.self.estimator.result.state.p(2));
-      obj.input.u1 = max(-input_TH, min(input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1))); 
-      obj.input.u2 = max(-input_TH, min(input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1))); 
-      obj.input.u3 = max(-input_TH, min(input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1))); 
-      obj.input.u4 = max(-input_TH, min(input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1))); 
+
+      % sigma ちょっとづつ大きく
+      % 
+      % obj.input.sigma = ksigma .* obj.input.sigma; 配列数は考えないとかなあ
+
+      ksigma_max = 0.01 * obj.param.H;
+      ksigma = linspace(1,1 + ksigma_max,obj.param.H);
+      inputSigma = ksigma .* obj.input.sigma';
+      obj.input.u1 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + mu(1,1)));
+      obj.input.u2 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + mu(2,1)));
+      obj.input.u3 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + mu(3,1)));
+      obj.input.u4 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + mu(4,1)));
+
+      % obj.input.u1 = max(-input_TH, min(input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1))); 
+      % obj.input.u2 = max(-input_TH, min(input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1))); 
+      % obj.input.u3 = max(-input_TH, min(input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1))); 
+      % obj.input.u4 = max(-input_TH, min(input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1))); 
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
       obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
+
+      %% ベクトル化　obj.input.u ;vector
+      % obj.input.u = [obj.input.u1; obj.input.u2; obj.input.u3; obj.input.u4];
 
       % max(0,min(10,tmp(1)))
 
@@ -174,8 +194,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % Objpredict.input = obj.input.u; Objpredict.current_state = obj.current_state;
       % Objpredict.state = obj.state.state_data; 
       % [obj.state.state_data] = predict(Objpredict);
-      [obj.state.state_data] = predict_gpu(obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B);
       % [obj.state.state_data] = predict_mex(Objpredict); % N=5000のみ対応
+
+      [obj.state.state_data] = predict_gpu(obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B);
+      % [obj.state.state_data] = obj.predict();
 
       %% 実状態変換
       Xd = repmat(obj.reference.xr_org, 1,1,obj.N);
@@ -203,7 +225,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vs(1,1) = obj.input.u(2, 1, BestcostID(3));      % こちらは確実に飛ぶが良くない
         vs(2,1) = obj.input.u(3, 1, BestcostID(4));      % 時間延ばすと収束・高速な軌道だと追いつかない
         vs(3,1) = obj.input.u(4, 1, BestcostID(5));      % 2,3,4,5 だと個別の評価値に対する入力
-
+        % 
         % input_ind = BestcostID(1); % 
         % vf      = obj.input.u(1, 1, input_ind);     
         % vs(1,1) = obj.input.u(2, 1, input_ind);     
@@ -229,10 +251,10 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         if removeF > obj.N /2
           obj.input.nextsigma = obj.input.Constsigma;
           obj.param.nextparticle_num = obj.param.Maxparticle_num;
-          obj.input.AllRemove = 1;
+          % obj.input.AllRemove = 1;
         else
           obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
-          obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
+          % obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
         end
 
       elseif removeF == obj.N    % 全棄却
@@ -243,9 +265,15 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         obj.input.AllRemove = 1;
 
         obj.param.nextparticle_num = obj.param.Maxparticle_num;
-        % previous input
+        %% previous input
         obj.result.input = obj.self.input;
         obj.input.u = obj.self.input;
+
+        %%
+        % vf = obj.input.u(1,1,1);
+        % vs(:,1) = obj.input.u(2:4,1,1);
+        % obj.result.input  = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P);
+        % obj.input.u = [vf; vs];
       end
 
       obj.result.removeF = removeF;
@@ -277,28 +305,46 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     end
 
     %-- 制約とその重心計算 --%
-    function [removeF, removeX, survive] = constraints(obj)
-      % 状態制約
-      %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(1, end, :) < 0);
-      %             removeFe = (obj.state.state_data(1, end, :) <= -0.5);
-      %             removeFe = (obj.state.state_data(1, end, :) <= obj.const.X | obj.state.state_data(2, end, :) <= obj.const.Y);
-      % removeX = find(removeFe);
-      % 制約違反の入力サンプル(入力列)を棄却
-      % obj.input.Evaluationtra(removeX) = obj.param.ConstEval;   % 制約違反は評価値を大きく設定
-      % 全制約違反による分散リセットを確認するフラグ
-      % removeF = size(removeX, 1); % particle_num -> 全棄却
-      
+    function [removeF, removeX, survive] = constraints(obj)      
       % removeF = 0;
       removeX = 0;
 
       %% 制約 状態＝目標値との誤差
       % HLstate = x_real - ref
       x_real = obj.state.real_data;
-      constX = find(x_real(3,end,:) < -0.5);
-      % CX = reshape(obj.param.const * abs(obj.state.state_data(6, end, constX)).^2, [1, length(constX)]);
-      obj.input.Evaluationtra(constX,1) = NaN;  % 棄却
-      % obj.input.u(:,:,constX) = NaN;
+      % constX = find(x_real(3,5,1:obj.N) > 2); % 1:obj.N 大事
+      % constY = find(x_real(3,5,1:obj.N) > -0.5);
+      constX = find(x_real(3,5,1:obj.N) < -1.5 | x_real(7,5,1:obj.N) > 0.5);
+      % constX = unique(constX);
+      %% 進路上に物体
+      % 四角
+      % InputIdx = obj.param.H;
+      % constAreaY = x_real(7,InputIdx,find(x_real(3,InputIdx,1:obj.N) > 2 & x_real(3,InputIdx,1:obj.N) < 4));
+      % constX = find(constAreaY < 0.2);
 
+      % 円
+      % obsPos = [obj.param.obsX; obj.param.obsY];
+      % % 障害物との距離
+      % Pos = [x_real(3, :, 1:obj.N); x_real(7, :, 1:obj.N)];
+      % DisAbs = abs(obsPos - Pos);
+      % Dis = sqrt(DisAbs(1,1,:).^2 + DisAbs(2,1,:).^2); % 各サンプルと障害物の距離
+      % constX = find(Dis(1,1,:) < 0.2);
+      % % 
+      % if ~isempty(constX)
+      %     fprintf("aa");
+      % end
+
+      %% 評価値で棄却 
+      % obj.input.Evaluationtra(constX, :) = obj.param.ConstEval;
+
+      %% 配列から棄却
+      obj.input.Evaluationtra(constX, :) = nan;
+      obj.input.u(:,:,constX) = nan;
+
+      % obj.input.Evaluationtra(constY, :) = nan;
+      % obj.input.u(:,:,constY) = nan;
+
+      removeX = constX;
       removeF = size(constX, 1);
       survive = obj.N - removeF;
       if removeF ~= 0
@@ -322,14 +368,13 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     % end
 
     %%-- 離散：階層型線形化
-    % function [predict_state] = predict(obj)
-    %   u = obj.input.u;
-    %   obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
-    %   for i = 1:obj.param.H-1
-    %     obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),u(:,i,1:obj.N));
-    %   end
-    %   predict_state = obj.state.state_data;
-    % end
+    % obj.param.expand_A 
+    function [predict_state] = predict(obj)
+      u = obj.input.u_vector;
+      x0 = repmat(obj.current_state,obj.param.H,obj.N);
+      state_data(:,1:obj.N) = pagemtimes(obj.param.expand_A(:,:,1:obj.N),x0) + pagemtimes(obj.param.expand_B(:,:,1:obj.N),u);
+      predict_state = obj.state.state_data;
+    end
 
     %------------------------------------------------------
     %======================================================
@@ -339,28 +384,36 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% 実状態との誤差
       Z = obj.state.error_data;
 
-      %% ホライズンで信頼度を下げる
-      k = linspace(1,0.5, obj.param.H-1);
-      % k = ones(1, obj.param.H-1);
+      %% 制約外の軌道に対して値を付加
+      % x:3, y:7
+      % [~, removeX, ~] = obj.constraints();
+
+      %% ホライズンで重み大きく　終端では1.5倍
+      % k = linspace(1,0.8, obj.param.H); % 終端コストまで重み一緒
+      k = ones(1, obj.param.H);
 
       %% コスト計算
       tildeUpre = U - obj.input.v;          % agent.input 　前時刻入力との誤差
       tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-      stageStateZ =    k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
-      stageInputPre  = k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre(:,1:end-1,:));
-      stageInputRef  = k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref(:,1:end-1,:));
-
-      %% pagefun
-      % array_fun = @(Q, z) Q*z;
-      % stageStateZ = k .* Z(:,1:end-1,:).*pagefun(array_fun, gpuArray(obj.Weight(:,:,1:obj.N)), gpuArray(Z(:,1:end-1,:)));
+      % stageStateZ =    k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
+      % stageInputPre  = k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre(:,1:end-1,:));
+      % stageInputRef  = k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref(:,1:end-1,:));
 
       %-- 状態の終端コストを計算 状態だけの終端コスト
-      terminalState = sum(k .* Z(:,end,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,end,:)), [1,2]);
+      % terminalState = sum(k .* Z(:,end,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,end,:)), [1,2]);
+      stageStateZ =    k .* Z.*pagemtimes(obj.Weight(:,:,1:obj.N),Z);
+      stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre);
+      stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
+
+      %% 軌道ごとに制約を評価
+      % stageStateZ(3, removeX) = stageStateZ(3, removeX) + obj.param.ConstEval;
+      % stageStateZ(7, removeX) = stageStateZ(7, removeX) + obj.param.ConstEval;
+
 
       %-- 評価値計算
-      Eval{1} = sum(sum(stageStateZ,[1,2]) + stageInputPre + stageInputRef + terminalState, [1,2]);  % 全体の評価値
+      Eval{1} = sum(stageStateZ,[1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]);  % 全体の評価値
       Eval{2} = sum(stageStateZ(1:2,:,:),  [1,2]);   % Z
       Eval{3} = sum(stageStateZ(3:6,:,:),  [1,2]);   % X
       Eval{4} = sum(stageStateZ(7:10,:,:), [1,2]);   % Y

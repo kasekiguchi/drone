@@ -8,10 +8,19 @@ syms t real
 % zg = X(3);
 % T = X(4);   % 目標到達までの時間 T=10
 
-% x = 1;
+%% 楕円　斜面着陸
+% T = -2.8;
+% a = 0.1; 
+% b = 1.5;
+% xx = a * cos(t-T);
+% zz = b * sin(t-T)+b+0.2;
+% theta = 0.5;
+% rotmat = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+% xz = rotmat * [xx;zz];
+% x = xz(1);
 % y = 0;
-% z = 1;
-% yaw = pi/ 2;
+% z = xz(2);
+% yaw = 0;
 
 %% 
 % x = 2*sin(t/5)+cos(t/5)+1/2*sin(t/10);
@@ -38,15 +47,21 @@ syms t real
 % yaw = 0;
 
 %% 
-% x = 0;
-% y = 0;
-% z = 1/2 * sin(t/2);
-
-%% circle
 % x = cos(2*pi*t/30)-1;
 % y = sin(2*pi*t/30);
-% z = 1;
+% z = sin(2*pi*t/20)+2;
 % yaw = 0;
+% 
+% x = 0;
+% y = 0;
+% z = sin(2*pi*t/2.5)*0.02+sin(2*pi*t/2.5)*0.01-sin(2*pi*t/25)*0.005 + 2;
+
+%% circle
+T = 40; % 20 でもいける
+x = cos(2*pi*t/T)-1;
+y = sin(2*pi*t/T);
+z = 1;
+yaw = 0;
 
 %% bara
 % A = 8/6;
@@ -70,10 +85,10 @@ syms t real
 % yaw = 0;
 
 %% Liner
-x = t/5;
-y = 0;
-z = 1.0;
-yaw = 0;
+% x = t/2; % constrains: t/1.7
+% y = 0;
+% z = 1.0;
+% yaw = 0;
 
 %% Vertical vibration
 % x = 0;

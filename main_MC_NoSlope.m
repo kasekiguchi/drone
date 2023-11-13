@@ -16,6 +16,10 @@ userpath('clear');
 fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
 fHL = 1; 
 fKP = 1;
+fMovie = 1;
+fSave = 1;
+MovTime = 0;
+
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
@@ -29,24 +33,10 @@ LogAgentData = [% 下のLOGGER コンストラクタで設定している対象a
 logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
 %% main loop
-
-%%
-flag = [0;0];
-
 totalT = 0;
 idx = 0;
-pre_pos = 0;
-fG = zeros(3, 1);
-fRemove = 0;
-fFinish = 0;
 %-- 初期設定 controller.mと同期させる
 data.param = agent.controller.(agent.controller.name).param;
-% data.param = agent.controller.(agent.controller.name);
-Params.H = data.param.H;   %Params.H
-Params.dt = data.param.dt;  %Params.dt
-Params.dT = dt;
-%-- 配列サイズの定義
-Params.ur = data.param.ref_input;
 
 % データ保存初期化
 data.xr{idx+1} = 0;
@@ -64,64 +54,26 @@ data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
 data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
 data.variable_particle_num(idx+1) = 0;  % - 可変サンプル数
 
-dataNum = 11;
-data.state           = zeros(round(te/dt + 1), dataNum);       
-data.state(idx+1, 1) = idx * dt;        % - 現在時刻
-data.bestx(idx+1, :) = repelem(initial.p(1), Params.H); % - もっともよい評価の軌道x成分
-data.besty(idx+1, :) = repelem(initial.p(2), Params.H); % - もっともよい評価の軌道y成分
-data.bestz(idx+1, :) = repelem(initial.p(3), Params.H); % - もっともよい評価の軌道z成分
+data.bestx(idx+1, :) = repelem(initial.p(1), data.param.H); % - もっともよい評価の軌道x成分
+data.besty(idx+1, :) = repelem(initial.p(2), data.param.H); % - もっともよい評価の軌道y成分
+data.bestz(idx+1, :) = repelem(initial.p(3), data.param.H); % - もっともよい評価の軌道z成分
 
-xr = zeros(16, Params.H);
-Acc_old = 0;
+xr = zeros(16, data.param.H);
 
-fh = @(tt)[3*tt, 2*tt^2, tt-2];
-calT = 0;
-phase = 1; % 着陸開始時間
-Time.te = te;
-
-gradient = 3/10;
-
-%     load("Data/HL_input");
-%     load("Data/HL_V");
-
-% load("Data/Input_HL.mat", "Idata");
-% Params.ur_array = Idata;
-% InputVdata = load("Data/inputV_HLMPC.mat");
-% InputVdata = cell2mat(InputVdata.data.inputv);
 InputVdata = 0;
 fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
-%% reference 
-close all;
-teref = te; % かける時間
-z0 = 1; % z初期値
-ze = 1; % z収束値
-v0 = 0; % 初期速度
-ve = 0; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか -0.5
-t = 0:0.025:te;
-Params.refZ = curve_interpolation_9order(t',teref,z0,v0,ze,ve);
-x0 = 0; % -1
-xe = 2;
-v0 = 0;
-ve = 0;
-Params.refX = curve_interpolation_9order(t',teref,x0,v0,xe,ve);
-y0 = 0;
-ye = 0;
-v0 = 0;
-ve = 0;
-Params.refY = curve_interpolation_9order(t',teref,y0,v0,ye,ve);
-data.Zdis(1) = 0;
-%
-figure(1)
-plot(t, Params.refX(round(t/dt)+1,1), t, Params.refY(round(t/dt)+1,1), t, Params.refZ(round(t/dt)+1,1));
-legend("X", "Y", "Z")
-figure(2)
-plot(t, Params.refX(round(t/dt)+1,2), t, Params.refY(round(t/dt)+1,2), t, Params.refZ(round(t/dt)+1,2));
-legend("Vx", "Vy", "Vz")
-
 %%
-now = datetime('now');
-dateprint = datestr(now, 'yyyy / mm / dd HH:MM')
+datestr(datetime('now'), 'yyyy / mm / dd HH:MM')
+
+if fSave == 1
+    % data_now = datestr(datetime('now'), 'yyyymmdd');
+    mkdir(strcat('../../students/komatsu/simdata/', datestr(datetime('now'), 'yyyymmdd'), '/video/'));
+    Outputdir = strcat('C:/Users/student/Documents/students/komatsu/simdata/', datestr(datetime('now'), 'yyyymmdd'));
+    writerObj=VideoWriter(strcat(Outputdir,'/video/',datestr(now, 'HHMMSS_FFF')));
+    open(writerObj);
+end
+calT = 0;
 
 run("main3_loop_setup.m");
 
@@ -190,12 +142,6 @@ end
             end
             agent(i).do_reference(param(i).reference.list);
 
-            % timevarygin -> generated reference
-%             [xr, fFirst, pre_pos] = Reference(Params, time.t, agent, FH, fFirst, pre_pos);
-            % Goal Position
-            
-%             [xr, fG] = Reference(Params, time.t, agent, G, fG);
-
             Time.t = time.t; 
             if time.t < te 
                 Time.ind = time.t/dt; 
@@ -204,8 +150,8 @@ end
             end
             Gp = initial.p;
             Gq = [0; 0.2975; 0];
-            [xr] = Reference(Params, Time, agent, Gq, Gp, phase, fRef, data.Zdis);    % 1:斜面 0:それ以外(TimeVarying)
-            param(i).controller.(agent(i).controller.name) = {idx, xr, time.t, phase};
+            [xr] = Reference(data, Time, agent, Gq, Gp, 0, fRef, 0);    % 1:斜面 0:それ以外(TimeVarying)
+            param(i).controller.(agent(i).controller.name) = {idx, xr, time.t, 0};
 % 
             for j = 1:length(agent(i).controller.name)
                 param(i).controller.list{j} = param(i).controller.(agent(i).controller.name(j));
@@ -214,37 +160,38 @@ end
         end
 
         %%
-        % data.bestcostID(:,idx) =  agent.controller.result.bestcostID;
-        % data.bestcost(:,idx)=     agent.controller.result.bestcost;
-        % data.path{idx} =          agent.controller.result.path;
-        % data.pathJ{idx} =         agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-        % data.sigma(:,idx) =       agent.controller.result.sigma;
-        % data.removeF(idx) =       agent.controller.result.removeF;   % - 棄却されたサンプル数
-        % data.removeX{idx} =       agent.controller.result.removeX;
-        clear data.input_v
+
+        data.bestcostID(:,idx) =  agent.controller.result.bestcostID;
+        data.bestcost(:,idx)=     agent.controller.result.bestcost;
+        data.path{idx} =          agent.controller.result.path;
+        data.pathJ{idx} =         agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+        data.sigma(:,idx) =       agent.controller.result.sigma;
+        data.removeF(idx) =       agent.controller.result.removeF;   % - 棄却されたサンプル数
+        data.removeX{idx} =       agent.controller.result.removeX;
+        % clear data.input_v
         data.input_v(:,idx) =     agent.controller.result.input_v;
-
-        % data.eachcost(:, idx) =    agent.controller.result.eachcost;
-
-        % data.xr{idx} = xr;
-        % data.variable_particle_num(idx) = agent.controller.result.variable_N;
-        % data.survive(idx) = agent.controller.result.survive;
         % 
-        % if data.removeF(idx) ~= data.param.particle_num
-        %     data.bestx(idx, :) = data.path{idx}(3, :, data.bestcostID(3,1)); % - もっともよい評価の軌道x成分
-        %     data.besty(idx, :) = data.path{idx}(7, :, data.bestcostID(4,1)); % - もっともよい評価の軌道y成分
-        %     data.bestz(idx, :) = data.path{idx}(1, :, data.bestcostID(2,1)); % - もっともよい評価の軌道z成分
-        % else
-        %     if idx == 1
-        %         data.bestx(idx, :) = data.bestx(idx, :); % - 制約外は前の評価値を引き継ぐ
-        %         data.besty(idx, :) = data.besty(idx, :); % - 制約外は前の評価値を引き継ぐ
-        %         data.bestz(idx, :) = data.bestz(idx, :); % - 制約外は前の評価値を引き継ぐ
-        %     else
-        %         data.bestx(idx, :) = data.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
-        %         data.besty(idx, :) = data.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
-        %         data.bestz(idx, :) = data.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
-        %     end
-        % end
+        % data.eachcost(:, idx) =    agent.controller.result.eachcost;
+        % 
+        data.xr{idx} = xr;
+        data.variable_particle_num(idx) = agent.controller.result.variable_N;
+        data.survive(idx) = agent.controller.result.survive;
+
+        if data.removeF(idx) ~= data.param.particle_num
+            data.bestx(idx, :) = data.path{idx}(3, :, data.bestcostID(3,1)); % - もっともよい評価の軌道x成分
+            data.besty(idx, :) = data.path{idx}(7, :, data.bestcostID(4,1)); % - もっともよい評価の軌道y成分
+            data.bestz(idx, :) = data.path{idx}(1, :, data.bestcostID(2,1)); % - もっともよい評価の軌道z成分
+        else
+            if idx == 1
+                data.bestx(idx, :) = data.bestx(idx, :); % - 制約外は前の評価値を引き継ぐ
+                data.besty(idx, :) = data.besty(idx, :); % - 制約外は前の評価値を引き継ぐ
+                data.bestz(idx, :) = data.bestz(idx, :); % - 制約外は前の評価値を引き継ぐ
+            else
+                data.bestx(idx, :) = data.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                data.besty(idx, :) = data.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                data.bestz(idx, :) = data.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+            end
+        end
 
         state_monte = agent.estimator.result.state;
         ref_monte = agent.reference.result.state;
@@ -280,40 +227,100 @@ end
             end
 
         end
-        calT = toc; % 1ステップ（25ms）にかかる計算時間
-        totalT = totalT + calT;   % 合計計算時間
-        data.calT(idx, :) = calT; % 計算時間の保存
+        
+        % data.totalT = data.totalT + calT;
 
         fprintf("==================================================================\n");
-        fprintf("t: %f\n", time.t);
+        % fprintf("t: %f\n", time.t);
         fprintf("==================================================================\n");
         
-%         fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
-%                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-%                 state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-%                 state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi); % s:state 現在状態
-%         fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
-%                 xr(1,1), xr(2,1), xr(3,1),...
-%                 xr(7,1), xr(8,1), xr(9,1),...
-%                 xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)                             % r:reference 目標状態
-% %         fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t slopeZ: %f \t sigma: %f \n", ...
-% %             time.t, calT, data.variable_particle_num(idx), altitudeSlope,data.sigma{idx})
-%         fprintf("t: %f calT: %f \t input: %f %f %f %f \t input_v: %f %f %f %f", ...
-%             time.t, calT, agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v(1, idx),data.input_v(2, idx),data.input_v(3, idx),data.input_v(4, idx));
-%         fprintf("\n");
+        fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi); % s:state 現在状態
+        fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+                xr(1,1), xr(2,1), xr(3,1),...
+                xr(7,1), xr(8,1), xr(9,1),...
+                xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)                             % r:reference 目標状態
+%         fprintf("t: %6.3f \t calT: %f \t paritcle_num: %d \t slopeZ: %f \t sigma: %f \n", ...
+%             time.t, calT, data.variable_particle_num(idx), altitudeSlope,data.sigma{idx})
+        fprintf("t: %f calT: %f \t input: %f %f %f %f \t input_v: %f %f %f %f \n", ...
+            time.t, calT, agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v(1, idx),data.input_v(2, idx),data.input_v(3, idx),data.input_v(4, idx));
+        fprintf("J: %f, \t Jconst: %f", data.bestcost(1,idx), data.param.ConstEval);
+        
+        fprintf("\n");
 
-        figure(5);
-        hold on;
-        plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(1), '.', 'MarkerSize', 10, 'Color','blue'); 
-        plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(2), '.', 'MarkerSize', 10, 'Color','red');
-        plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(3), '.', 'MarkerSize', 10, 'Color','#F0E68C');
-        plot(time.t, logger.Data.agent.reference.result{idx}.state.p(1), '.', 'MarkerSize', 10, 'Color','#00FFFF');
-        plot(time.t, logger.Data.agent.reference.result{idx}.state.p(2), '.', 'MarkerSize', 10, 'Color','#FF8C00');
-        plot(time.t, logger.Data.agent.reference.result{idx}.state.p(3), '.', 'MarkerSize', 10, 'Color','#FFFACD');
-        xlim([0 te]);
-        clear logger.Data.agent
+        % figure(5);
+        % hold on;
+        % plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(1), '.', 'MarkerSize', 10, 'Color','blue'); 
+        % plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(2), '.', 'MarkerSize', 10, 'Color','red');
+        % plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(3), '.', 'MarkerSize', 10, 'Color','#F0E68C');
+        % plot(time.t, logger.Data.agent.reference.result{idx}.state.p(1), '.', 'MarkerSize', 10, 'Color','#00FFFF');
+        % plot(time.t, logger.Data.agent.reference.result{idx}.state.p(2), '.', 'MarkerSize', 10, 'Color','#FF8C00');
+        % plot(time.t, logger.Data.agent.reference.result{idx}.state.p(3), '.', 'MarkerSize', 10, 'Color','#FFFACD');
+        % xlim([0 te]);
+        % legend("x.est", "y.est","z.est","x.ref","y.ref","z.ref");
         %%
-        drawnow 
+        
+        %% 毎時刻　軌跡描画
+        if fMovie == 1
+            if time.t > MovTime
+                figure(idx+1)
+                pathJN = normalize(data.pathJ{idx}(:,1),'range', [1, data.param.Maxparticle_num]);
+                Color_map = (169/255)*ones(data.variable_particle_num(idx),3);                         % 灰色のカラーマップの作成
+	            Color_map(1:data.variable_particle_num(idx),:) = jet(data.variable_particle_num(idx)); % 評価値の上からN個をカラーマップの色付け.
+		        fig = gcf;
+		        ax = gca;
+                path_count = size(pathJN, 1); % N
+                Color_array = zeros(path_count,3);
+                Color_ceil = zeros(path_count,1);
+                for j = 1:path_count % サンプルごとにホライズンはまとめて描画 サンプルのループ
+                    %% 棄却
+                    if ~isnan(pathJN(j, 1))
+			            plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color',Color_map(ceil(pathJN(j, 1)),:), 'LineWidth',1); % HL
+                    else
+                        plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color', '#808080', 'LineWidth',1); % 棄却
+                    end
+                    % if data.pathJ{idx}(j, 1) == data.param.ConstEval
+                    %     plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color', '#808080', 'LineWidth',1);
+                    % else
+                    %     plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color',Color_map(ceil(pathJN(j, 1)),:), 'LineWidth',1); % HL
+                    % end
+                    hold on;
+                end
+                plot(state_monte.p(1), state_monte.p(2), '.', 'MarkerSize', 20, 'Color', 'red');    % 現在位置
+		        plot(data.bestx(idx,:),data.besty(idx,:),'--','Color',[255,94,25]/255,'LineWidth',2);
+                % 障害物
+                % radius = 0.2;
+                % pos = [data.param.obsX-radius, data.param.obsY-radius, 2*radius, 2*radius];
+                % rectangle('Position',pos,'Curvature',[1 1]);
+    
+		        str = ['$$t$$= ',num2str(time.t,'%.3f'),' s'];
+		        text(0.5,2,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
+		        grid on
+		        ax.YLim = [-2 2];
+		        ax.XLim = [-3 1];
+                % ax.YLim = [-1 1];
+		        % ax.XLim = [2 te];
+		        fig.Units = 'normalized';
+		        set(gca,'FontSize',20,'FontName','Times');
+		        xlabel('$$X$$[m]','Interpreter', 'Latex','FontSize',20);
+		        ylabel('$$Y$$[m]','Interpreter', 'Latex','FontSize',20);
+		        % filename = ['Animation_',num2str(idx)];
+		        Xleng = ax.XLim(1,2) - ax.XLim(1,1);
+		        Yleng = ax.YLim(1,2) - ax.YLim(1,1);
+		        pbaspect([Xleng,Yleng,1]);
+                if idx ~= 1; close(figure(idx)); end
+                % drawnow
+                if fSave == 1
+                    frame = getframe(figure(idx+1));
+                    writeVideo(writerObj, frame);
+                end
+            end
+        end
+        calT = toc; % 1ステップ（25ms）にかかる計算時間
+        data.calT(idx, :) = calT; % 計算時間の保存
+        totalT = totalT + calT;   % 合計計算時間
     end
 
 catch ME % for error
@@ -326,6 +333,9 @@ catch ME % for error
     rethrow(ME);
 end
 
+if fSave == 1
+    close(writerObj);
+end
 
 %% figure.m
 savefigure
@@ -353,27 +363,24 @@ savefigure
 %% 動画生成
 % tic
 pathJ = data.pathJ;
-
-% data.variable_particle_num = size(data.pathJ{1},2) * ones(size(data.pathJ{1},2), 1);
-for m = 1:size(pathJ, 2)-1
-    pathJN{m} = normalize(pathJ{m}(:,1),'range', [1, data.param.Maxparticle_num]); % 0 ~ サンプル数　までで正規化
-    % pathJN{m} = normalize(pathJ{m},'range', [1, length(size(data.pathJ{1},2))]);
-end
-
-% % 全時刻
-% for i = 1:te/dt
-%     Jt = data.pathJ{i};% 1*N
-%     pt = data.path{i}; % 12*10*N
-% 
-%     [Jtsort, Jindex] = sort(Jt, 'descend');
-%     Jorder{i} = [Jtsort', Jindex'];
+% for m = 1:size(pathJ, 2)-1
+%     pathJN{m} = normalize(pathJ{m}(:,1),'range', [1, data.param.Maxparticle_num]); % 0 ~ サンプル数　までで正規化
+%     % pathJN{m} = normalize(pathJ{m},'range', [1, length(size(data.pathJ{1},2))]);
 % end
-% pathJN = data.pathJ;
-% rmdir ('C:/Users/student/Documents/students/komatsu/simdata/20230818/Animation/','s'); % 直前のシミュレーションより短くする場合
-mkdir C:/Users/student/Documents/students/komatsu/simdata/20231023/Animation/;
-% mkdir C:/Users/student/Documents/students/komatsu/simdata/20230830/Animation/png/Animation1/Animation_1/;
-Outputdir_mov = 'C:/Users/student/Documents/students/komatsu/simdata/20231023/Animation/';
-Outputdir = 'C:/Users/student/Documents/students/komatsu/simdata/20231023/Animation/';
+
+% % % 全時刻
+% % % for i = 1:te/dt
+% % %     Jt = data.pathJ{i};% 1*N
+% % %     pt = data.path{i}; % 12*10*N
+% % % 
+% % %     [Jtsort, Jindex] = sort(Jt, 'descend');
+% % %     Jorder{i} = [Jtsort', Jindex'];
+% % % end
+% % % pathJN = data.pathJ;
+% % % rmdir ('C:/Users/student/Documents/students/komatsu/simdata/20230818/Animation/','s'); % 直前のシミュレーションより短くする場合
+mkdir C:/Users/student/Documents/students/komatsu/simdata/20231108/Animation/;
+Outputdir_mov = 'C:/Users/student/Documents/students/komatsu/simdata/20231108/Animation/';
+Outputdir = 'C:/Users/student/Documents/students/komatsu/simdata/20231108/Animation/';
 % PlotMov_sort
 % toc
 %% Home PC adress

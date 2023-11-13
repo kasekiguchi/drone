@@ -138,7 +138,7 @@
 %     % timevaryingをホライズンごとのreferenceに変換する
 %     % params.dt = 0.1;
 %     % phasex = phase + 0.5;
-%     xr = zeros(params.total_size, params.H);    % initialize
+%     xr = zeros(16, params.H);    % initialize
 %     for h = 0:params.H-1
 %         t = T.t + params.dt * h; % reference生成の時刻をずらす
 %         % それぞれの関数 % z方向目標値時
@@ -192,7 +192,7 @@
 
 %% normal 9th polynomial trajectory
 % function [xr] = Reference(params, T, ~, ~, ~, ~, ~, ~)
-%     xr = zeros(params.total_size, params.H);    % initialize
+%     xr = zeros(16, params.H);    % initialize
 %     for h = 0:params.H-1
 %         t = T.t + params.dt * h; % reference生成の時刻をずらす
 %         % それぞれの関数 % z方向目標値時
@@ -207,17 +207,17 @@
 % end
 
 %% TimeVarying
-function [xr] = Reference(params, T, Agent, ~, ~, ~, ~, ~)
-    xr = zeros(16, params.H);
+function [xr] = Reference(Data, T, Agent, ~, ~, ~, ~, ~)
+    xr = zeros(16, Data.param.H);
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     % TimeVarying
-    for h = 0:params.H-1
-        t = T.t + params.dt * h;
+    for h = 0:Data.param.H-1
+        t = T.t + Data.param.dt * h;
         Ref = RefTime(t); % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
         xr(1:3, h+1) = Ref(1:3);
         xr(7:9, h+1) = Ref(5:7);
         xr(4:6, h+1) =   [0;0;Ref(4)]; % 姿勢角
         xr(10:12, h+1) = [0;0;0];
-        xr(13:16, h+1) = params.ur;
+        xr(13:16, h+1) = Data.param.ref_input;
     end
 end
