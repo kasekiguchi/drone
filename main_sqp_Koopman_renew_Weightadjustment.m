@@ -9,8 +9,8 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
-run("main1_setting.m");
-run("main2_agent_setup_sqp.m");
+run("main1_setting2.m");
+run("main2_agent_setup_sqp2.m");
 %agent.set_model_error("ly",0.02);
 %% set logger
 % デフォルトでsensor, estimator, reference,のresultと inputのログはとる
@@ -23,32 +23,12 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.07; %MPCステップ幅
+    Params.dt = 0.08; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
     Params.PtoP = 0; %1：PtoP制御
     Tuning_again = 0;
-
-    %% 重みの設定
-    % 円旋回(重みの設定)
-%     Params.Weight.P = diag([20.0; 10.0; 45.0]);    % 座標   1000 10
-%     Params.Weight.V = diag([10.0; 5.0; 10.0]);    % 速度
-%     Params.Weight.R = diag([10.0,; 10.0; 10.0; 10.0]); % 入力
-%     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-%     Params.Weight.QW = diag([5500; 4000; 3000; 1; 1; 50]);  % 姿勢角、角速度
-% 
-%     Params.Weight.Pf = diag([40; 30; 65]);
-%     Params.Weight.QWf = diag([7500; 5000; 4000; 1; 1; 50]); %姿勢角、角速度終端
-
-%     Params.Weight.P = diag([10.0; 5.0; 20.0]);    % 座標   1000 10
-%     Params.Weight.V = diag([15.0; 5.0; 15.0]);    % 速度
-%     Params.Weight.R = diag([20.0,; 20.0; 20.0; 20.0]); % 入力
-%     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-%     Params.Weight.QW = diag([2500;1500; 25000; 1; 1; 150]);  % 姿勢角、角速度
-% 
-%     Params.Weight.Pf = diag([25; 10; 35]);
-%     Params.Weight.QWf = diag([3500; 2500; 35000; 1; 1; 200]);
 
     %% 
     
@@ -110,8 +90,8 @@ run("main3_loop_setup.m");
 while true
     if Tuning_again == 1
         clear all
-        run("main1_setting.m");
-        run("main2_agent_setup_sqp.m");
+        run("main1_setting2.m");
+        run("main2_agent_setup_sqp2.m");
         LogData = [];
         LogAgentData = [];
         logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
@@ -143,14 +123,14 @@ while true
         run("main3_loop_setup.m");
     end
     %重みの自動生成
-    Params.Weight.P = diag([randi(40); randi(40); randi(40)]);                            % 座標   
-    Params.Weight.V = diag([randi(30); randi(30); randi(30)]);                            % 速度
+    Params.Weight.P = diag([randi(100); randi(100); randi(100)]);                            % 座標   
+    Params.Weight.V = diag([randi(50); randi(50); randi(50)]);                            % 速度
     Params.Weight.R = diag([randi(30); randi(30); randi(30); randi(30)]);                 % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([randi(5000);randi(5000); randi(40000); 1; 1; randi(200)]);   % 姿勢角、角速度
+    Params.Weight.QW = diag([randi(7000);randi(7000); randi(7000); randi(100); randi(100); randi(200)]);   % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([randi(50); randi(50); randi(50)]);                           % 座標終端
-    Params.Weight.QWf = diag([randi(10000); randi(10000); randi(60000); 1; 1; randi(200)]); % 姿勢角終端
+    Params.Weight.Pf = diag([randi(100); randi(100); randi(100)]);                           % 座標終端
+    Params.Weight.QWf = diag([randi(7000); randi(7000); randi(7000); randi(100); randi(100); randi(200)]); % 姿勢角終端
     try
         while round(time.t, 5) <= te
             tic
@@ -288,11 +268,11 @@ while true
             end   
             %-- データ保存
                 data.bestcost = fval; %もっともよい評価値を保存
-                if data.bestcost > 2000
+                if data.bestcost > 4000
                     Tuning_again = 1;
                     if time.t > te/2
                         time = num2str(time.t);
-                        save(strcat('Weight_data\Weight_',time,'.mat'), 'Params')
+                        save(strcat('Weight_data\Weight_',time,'.mat'), 'Params','logger')
                     end
                     break;
                 end
@@ -348,7 +328,7 @@ while true
         warning('ACSL : Emergency stop! Check the connection.');
         rethrow(ME);
     end
-    if logger.Data.agent.input{size(logger.Data.agent.input,2)}(1,1) >= 1.43 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(1,1) <= 1.45 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(2,1) >= 1.43 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(2,1) <= 1.45 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(3,1) >= 1.43 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(3,1) <= 1.45
+    if logger.Data.agent.input{size(logger.Data.agent.input,2)}(1,1) >= 1.43 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(1,1) <= 1.45 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(2,1) >= 1.43 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(2,1) <= 1.45 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(3,1) >= 1.43 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(3,1) <= 1.45 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(3,1) >= 1.43 && logger.Data.agent.input{size(logger.Data.agent.input,2)}(3,1) <= 1.45 && abs(logger.Data.agent.reference.result{end}.state.p(1) - logger.Data.agent.estimator.result{end}.state.p(1)) < 0.3 && abs(logger.Data.agent.reference.result{end}.state.p(2) - logger.Data.agent.estimator.result{end}.state.p(2)) < 0.3
         disp('条件を満たしたので、重みのチューニングを終了しました')
         Params.Weight.P
         Params.Weight.V
@@ -369,7 +349,7 @@ opengl software
 % Rdata = logger.data(1, "p", "r")';
 % Diff = Edata - Rdata;
 
-fprintf("%f秒\n", totalT)
+% fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = 100;
 set(0, 'defaultAxesFontSize', Fontsize);
 set(0, 'defaultTextFontSize', Fontsize);
@@ -386,11 +366,11 @@ set(0, 'defaultTextFontSize', Fontsize);
 % % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
-figure
-plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag)
-grid on
-xlabel('time t [s]')
-ylabel('exitflag')
+% figure
+% plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag)
+% grid on
+% xlabel('time t [s]')
+% ylabel('exitflag')
 
 % save('simulation','logger')
 % Graphplot

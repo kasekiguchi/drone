@@ -23,11 +23,12 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.07; %MPCステップ幅
+    Params.dt = 0.08; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
     Params.PtoP = 0; %1：PtoP制御
+    Params.T = 0; %1ステップにかかる時間
 
     %% 重みの設定
     
@@ -47,30 +48,19 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-%     Params.Weight.P = diag([20.0; 10.0; 45.0]);    % 座標   1000 10
-%     Params.Weight.V = diag([10.0; 5.0; 10.0]);    % 速度
-%     Params.Weight.R = diag([10.0,; 10.0; 10.0; 10.0]); % 入力
-%     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-%     Params.Weight.QW = diag([5500; 4000; 3000; 1; 1; 50]);  % 姿勢角、角速度
-% 
-%     Params.Weight.Pf = diag([40; 30; 65]);
-%     Params.Weight.QWf = diag([7500; 5000; 4000; 1; 1; 50]); %姿勢角、角速度終端
-
-    Params.Weight.P = diag([10.0; 5.0; 20.0]);    % 座標   1000 10
-    Params.Weight.V = diag([15.0; 5.0; 15.0]);    % 速度
-    Params.Weight.R = diag([20.0,; 20.0; 20.0; 20.0]); % 入力
+    Params.Weight.P = diag([155.0; 160.0; 15.0]);    % 座標   1000 10
+    Params.Weight.V = diag([10.0; 10.0; 40.0]);    % 速度
+    Params.Weight.R = diag([20.0; 20.0; 5.0; 5.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2500;1500; 25000; 1; 1; 150]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([1300; 1400; 1000; 15; 15; 30]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([25; 10; 35]);
-    Params.Weight.QWf = diag([3500; 2500; 35000; 1; 1; 200]);
+    Params.Weight.Pf = diag([1; 1; 1]);
+    Params.Weight.Vf = diag([1; 1; 1]);
+    Params.Weight.QWf = diag([1; 1; 1; 1; 1; 1]); %姿勢角、角速度終端
 
+    
       %% 
-%     fprintf("%f秒\n", totalT)
-%     Fontsize = 15;  timeMax = 100;
-%     set(0, 'defaultAxesFontSize', Fontsize);
-%     set(0, 'defaultTextFontSize', Fontsize);
-%     logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
+% graph(logger)
     %% 
     
 %-- data
@@ -175,27 +165,27 @@ end
             %if (fOffline);exprdata.overwrite("estimator",time.t,agent,i);end
             % reference 目標値       
         %-- 目標軌道生成
-%             if Params.PtoP == 1 %PtoPの場合はコメントイン
-%                 xr = Reference2(Params, time.t, agent); %PtoP
-%                 if agent.estimator.result.state.p(2) < -1
-%                     Params.flag = 1;
-%                 elseif agent.estimator.result.state.p(2) > 1
-%                     Params.flag = 0;
-%                 end
-%                 if Params.flag == 1
-%                     param(i).reference.point = {FH, [1;1;1;], time.t};
-%                 else
-%                     param(i).reference.point = {FH, [1;-1;1], time.t};
-%                 end
-%             else
-%                 xr = Reference(Params, time.t, agent); %TimeVarying
-%                 param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
-%             end
+            if Params.PtoP == 1 %PtoPの場合はコメントイン
+                xr = Reference2(Params, time.t, agent); %PtoP
+                if agent.estimator.result.state.p(2) < -1
+                    Params.flag = 1;
+                elseif agent.estimator.result.state.p(2) > 1
+                    Params.flag = 0;
+                end
+                if Params.flag == 1
+                    param(i).reference.point = {FH, [1;1;1;], time.t};
+                else
+                    param(i).reference.point = {FH, [1;-1;1], time.t};
+                end
+            else
+                xr = Reference(Params, time.t, agent); %TimeVarying
+                param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
+            end
             
             %PtoPの場合はコメントオフ
-            xr = Reference(Params, time.t, agent); %TimeVarying
-            param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
-
+%             xr = Reference(Params, time.t, agent); %TimeVarying
+%             param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
+            
             param(i).reference.covering = [];
 %             param(i).reference.point = {FH, [0;0;1], time.t};  % 目標値[x, y, z]
             param(i).reference.timeVarying = {time};
@@ -247,18 +237,11 @@ end
             ub = [];
             nonlcon = [];
         
-%             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
-%             problem.objective = @(x) Objective(x, Params);            % 評価関数
-%             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
-%             problem.objective = @(x) Objective_mex(x, Params);
-%             problem.nonlcon   = @(x) Constraints_mex(x, Params);
-            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
+            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew2(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
             data.exitflag(idx) = exitflag;
 
             % 制御入力の決定
             previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
-%             num3(idx) = {x};
-%             num(idx) = {var};
             fprintf("\tfval : %f\n", fval)
 %         TODO: 1列目のvarが一切変動しない問題に対処
 %             if var(Params.state_size+1:Params.total_size, end) > 1.0
@@ -274,7 +257,7 @@ end
     
         end   
         %-- データ保存
-            data.bestcost = fval; %もっともよい評価値を保存
+            data.bestcost(idx) = fval; %もっともよい評価値を保存
 
 %             data.bestcost(idx) = output.bestfeasible.fval; 
 %             data.pathJ{idx} = output.bestfeasible.fval; % - 全サンプルの評価値
@@ -295,10 +278,13 @@ end
             model_param.param = agent(i).plant.param;
             agent(i).do_plant(model_param);
         end
+
         if agent.estimator.result.state.p(3) < 0
             error('墜落しました');
         elseif find(var(:,:) > 5)
             error('入力が正しくありません');
+        elseif agent.estimator.result.state.p(3) > 5
+            error('飛行高度が正しくありません')
         end
 
 %         if agent.estimator.result.state.p(3) < 0
@@ -324,29 +310,9 @@ end
 
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
+        Params.T(idx) = calT;
         totalT = totalT + calT; %すべての計算を終えるまでにかかった時間
         
-        %% 逐次プロット
-%         figure(10);
-%         clf
-%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-%         TvC = 0:Params.dt:te;
-%         %% circle
-%         CRx = cos(TvC/2);
-%         CRy = sin(TvC/2);
-% 
-%         plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
-%         plot(Tv, xr(2, :), '-', 'LineWidth', 2);
-% 
-%         plot(TvC, CRx, '--', 'LineWidth', 1);
-%         plot(TvC, CRy, '--', 'LineWidth', 1);
-%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-%         hold off;
-%         xlabel("Time [s]"); ylabel("Reference [m]");
-%         legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
-% %         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
-%         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
 %         drawnow 
 %        profile viewer;
@@ -363,7 +329,7 @@ catch ME % for error
 end
 %% グラフの描画
 %profile viewer
-close all
+close all   
 opengl software
 
 % size_best = size(data.bestcost, 2);
@@ -375,24 +341,31 @@ fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = 100;
 set(0, 'defaultAxesFontSize', Fontsize);
 set(0, 'defaultTextFontSize', Fontsize);
-% logger.plot({1,"p","e"})
 
-% hold on
-% logger.plot({1,"p","r"})
-% plot(data.exitflag)
-% ylim([0,2])
-% logger.plot({1,"p", "er"},  "fig_num",1); % set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-% logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-% % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
-figure
-plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag)
+
+fig = figure(2);
+subplot(2,2,1)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag, 'LineWidth',1.2)
 grid on
 xlabel('time t [s]')
 ylabel('exitflag')
+
+subplot(2,2,2)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),Params.T, 'LineWidth',1.2)
+grid on
+ylim([0 0.3])
+xlabel('time t [s]')
+ylabel('Simulation time [s]')
+
+subplot(2,2,3)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.bestcost, 'LineWidth',1.2)
+grid on
+xlabel('time t [s]')
+ylabel('Best cost')
+
+set(fig, 'Position', [1250, 60, 600, 400])
 
 % save('simulation','logger')
 % Graphplot
@@ -408,6 +381,44 @@ ylabel('exitflag')
 % agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"mp4",1);
 % agent(1).animation(logger,"gif", 1);
+
+%% 
+function graph(logger)
+    close all
+    opengl software
+    
+    % size_best = size(data.bestcost, 2);
+    % Edata = logger.data(1, "p", "e")';
+    % Rdata = logger.data(1, "p", "r")';
+    % Diff = Edata - Rdata;
+    
+%     fprintf("%f秒\n", totalT)
+    Fontsize = 15;  timeMax = 100;
+    set(0, 'defaultAxesFontSize', Fontsize);
+    set(0, 'defaultTextFontSize', Fontsize);
+    % logger.plot({1,"p","e"})
+    
+    % hold on
+    % logger.plot({1,"p","r"})
+    % plot(data.exitflag)
+    % ylim([0,2])
+    % logger.plot({1,"p", "er"},  "fig_num",1); % set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+    % logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+    % logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+    % logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+    % % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+    logger.plot({1,"p","er"},{1, "p1-p2", "e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1,"v","e"}, "fig_num",1,"row_col",[2,3]);
+    % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
+%     figure
+%     plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag)
+%     grid on
+%     xlabel('time t [s]')
+%     ylabel('exitflag')
+    
+    % save('simulation','logger')
+    % Graphplot
+    % delete simulation.mat
+end
 %%
 % logger.save();
 

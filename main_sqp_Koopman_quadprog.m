@@ -28,39 +28,20 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     totalT = 0;
     Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
     Params.PtoP = 0; %1：PtoP制御
+    Params.T = 0; %1ステップにかかった計算時間
 
     %% 重みの設定
     
-%     Params.Weight.P =  diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
-%     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-%     Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
-%     Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
-%     Params.Weight.R = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-%     Params.Weight.RP = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
-%     Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
-
-% 離陸
-%     Params.Weight.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
-%     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-%     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-%     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-%     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
-
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1.0; 1.0; 1.0]);    % 座標   1000 10
-    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-    Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+    Params.Weight.P = diag([1; 1; 1]);    % 座標   1000 10
+    Params.Weight.V = diag([1; 1; 1]);    % 速度
+    Params.Weight.R = diag([1; 1; 1; 1]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([1;1;1; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角、角速度
 
     Params.Weight.Pf = diag([1; 1; 1]);
     Params.Weight.QWf = diag([1; 1; 1; 1; 1; 1]); %姿勢角、角速度終端
-      %% 
-%     fprintf("%f秒\n", totalT)
-%     Fontsize = 15;  timeMax = 100;
-%     set(0, 'defaultAxesFontSize', Fontsize);
-%     set(0, 'defaultTextFontSize', Fontsize);
-%     logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
+  
     %% 
     
 %-- data
@@ -78,37 +59,27 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- 目標値等
     Params.ur = 0.5884*9.81/4 * ones(4, 1);
 
-%-- fmincon 設定
-    options = optimoptions('fmincon');
-%     options = optimoptions(options,'Diagnostics','off');
-%     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
+    %-- quadprog設定
+    options = optimoptions('quadprog');
     options = optimoptions(options,'MaxIterations',      1.e+9);     % 最大反復回数
-    options = optimoptions(options,'ConstraintTolerance',1.e-3);%制約違反に対する許容誤差
-%     options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
-    
-    %-- fmincon設定
-    options.Algorithm = 'sqp';  % 逐次二次計画法
-    options.Display = 'none';   % 計算結果の表示
-    problem.solver = 'fmincon'; % solver
-    problem.options = options;  % 
+    options = optimoptions(options,'ConstraintTolerance',1.e-5);%制約違反に対する許容誤差
+    options.Display = 'none';
+    problem.solver = 'quadprog';
 
     x = agent.estimator.result.state.get();
 
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-    load('EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+%     load('EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
 %       load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
+load('EstimationResult_12state_10_12_data=revcirandcir_circle=circle_estimation=circle_Inputandconst.mat','est') %観測量：状態＋非線形項、データセット：円旋回(各方向)
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
-%     Params.f = {@quaternions}; %状態+非線型項
-%     Params.f = {@(x) [x;1]}; %状態のみ
-    
-    previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
 
     xr = zeros(Params.state_size+Params.input_size, Params.H);
 
@@ -116,7 +87,6 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params
     
 run("main3_loop_setup.m");
-
 
 try
     while round(time.t, 5) <= te
@@ -182,7 +152,7 @@ end
 %             end
             
             %PtoPの場合はコメントオフ
-            xr = Reference(Params, time.t, agent); %TimeVarying
+            xr = Reference(Params, time.t, agent); %TimeVarying 目標値の更新
             param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
 
             param(i).reference.covering = [];
@@ -201,7 +171,6 @@ end
         %-- MPCパラメータを構造体に格納
             Params.ts = 0;
             Params.xr = xr;
-%             Params.ur = ur;
             Params.X0= x;   % 現在状態の記録
             
         %-- 状態の表示
@@ -223,34 +192,26 @@ end
             x0 = [initial_u1; initial_u2; initial_u3; initial_u4];% 初期値＝入力
 %             previous_state = repmat([agent.estimator.result.state.get(); x0], 1, Params.H);
             % previous_state の1行目
-
-%                 previous_state(Params.state_size+1:Params.total_size, 1:Params.H) = repmat(x0, 1, Params.H);
-            
-            % MPC設定
-            x0 = repmat(x0,1,Params.H);
+           
+            %MPC設定(quadprog)
+            [H, f] = Change_equation(Params);
             A = [];
             b = [];
             Aeq = [];
             beq = [];
             lb = [];
             ub = [];
-            nonlcon = [];
-        
-%             problem.x0		  = previous_state;       % 状態，入力を初期値とする      % 現在状態
-%             problem.objective = @(x) Objective(x, Params);            % 評価関数
-%             problem.nonlcon   = @(x) Constraints(x, Params, agent, time);    % 制約条件
-%             problem.objective = @(x) Objective_mex(x, Params);
-%             problem.nonlcon   = @(x) Constraints_mex(x, Params);
-            [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(@(x) Objective_renew(x,Params),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
-%             data.exitflag(idx) = exitflag;
+            x0 = repmat(x0,1,Params.H);
+
+            [var, fval, exitflag, output, lambda] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem);
+            data.exitflag(idx) = exitflag;
 
             % 制御入力の決定
-            previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
-%             num3(idx) = {x};
-%             num(idx) = {var};
+            previous_state = var;   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
+            previous_state = reshape(previous_state,[4,Params.H])
             fprintf("\tfval : %f\n", fval)
 %         TODO: 1列目のvarが一切変動しない問題に対処
-%             if var(Params.state_size+1:Params.total_size, end) > 1.0
+%             if var(Params.state_size+1:Params.total_size, end) > 1.0  
 %                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
 %             end
             
@@ -259,11 +220,11 @@ end
                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
 
-            agent.input = var(:, 1);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
+            agent.input = var(1:4, 1);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
     
         end   
         %-- データ保存
-            data.bestcost = fval; %もっともよい評価値を保存
+            data.bestcost(idx) = fval; %もっともよい評価値を保存
 
 %             data.bestcost(idx) = output.bestfeasible.fval; 
 %             data.pathJ{idx} = output.bestfeasible.fval; % - 全サンプルの評価値
@@ -307,29 +268,9 @@ end
 
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
+        Params.T(idx) = calT; %計算時間の保存
         totalT = totalT + calT; %すべての計算を終えるまでにかかった時間
         
-        %% 逐次プロット
-%         figure(10);
-%         clf
-%         Tv = time.t:Params.dt:time.t+Params.dt*(Params.H-1);
-%         TvC = 0:Params.dt:te;
-%         %% circle
-%         CRx = cos(TvC/2);
-%         CRy = sin(TvC/2);
-% 
-%         plot(Tv, xr(1, :), '-', 'LineWidth', 2);hold on;
-%         plot(Tv, xr(2, :), '-', 'LineWidth', 2);
-% 
-%         plot(TvC, CRx, '--', 'LineWidth', 1);
-%         plot(TvC, CRy, '--', 'LineWidth', 1);
-%         plot(time.t, agent.estimator.result.state.p(1), 'h', 'MarkerSize', 20);
-%         plot(time.t, agent.estimator.result.state.p(2), '*', 'MarkerSize', 20);
-%         hold off;
-%         xlabel("Time [s]"); ylabel("Reference [m]");
-%         legend("xr.x", "xr.y", "h.x", "h.y", "est.x", "est.y", "Location", "southeast");
-% %         legend("xr.x", "xr.y", "xr.z", "est.x", "est.y", "est.z");
-%         xlim([0 te]); ylim([-inf inf+0.1]); 
         %%
 %         drawnow 
 %        profile viewer;
@@ -356,24 +297,32 @@ opengl software
 % Rdata = logger.data(1, "p", "r")';
 % Diff = Edata - Rdata;
 
-fprintf("%f秒\n", totalT)
+% fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = 100;
 set(0, 'defaultAxesFontSize', Fontsize);
 set(0, 'defaultTextFontSize', Fontsize);
-% logger.plot({1,"p","e"})
-% hold on
-% logger.plot({1,"p","r"})
-% plot(data.exitflag)
-% ylim([0,2])
-% logger.plot({1,"p", "er"},  "fig_num",1); % set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-% logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-% % logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Input"); 
+
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
-% figure
-% plot(data.exitflag)
+
+figure(2)
+subplot(2,2,1)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag, 'LineWidth',1.2)
+grid on
+xlabel('time t [s]')
+ylabel('exitflag')
+
+subplot(2,2,2)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),Params.T, 'LineWidth',1.2)
+grid on
+xlabel('time t [s]')
+ylabel('Simulation time [s]')
+
+subplot(2,2,3)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.bestcost, 'LineWidth',1.2)
+grid on
+xlabel('time t [s]')
+ylabel('Best cost')
 
 % save('simulation','logger')
 % Graphplot
@@ -389,103 +338,3 @@ logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, 
 % agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"mp4",1);
 % agent(1).animation(logger,"gif", 1);
-%%
-% logger.save();
-
-% function f = fun(x,params)
-%     f = params.A*x(1:params.state_size, :) + params.B*x(params.state_size+1:end,:);
-%     f = params.C*f;
-% end
-
-% function [eval] = Objective(x, params) % x : p q v w input
-% %-- 評価計算をする関数
-% %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
-% %元の非線形等式制約を取り込んだ
-%     
-% %     X = zeros(params.state_size+1, params.H-1);
-% %     Xc = [params.X0;1];
-% %     for i = 1:params.H-1
-% %         if i == 1
-% %             X(:,i) = params.A*Xc + params.B*x(:,i);
-% %         else
-% %             X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
-% %         end
-% %     end
-% %     Xn = [params.X0,X(1:params.state_size,:)];
-% 
-%     X = zeros(params.state_size+1, params.H-1);
-%     Xc = [params.X0;1];
-%     X(:,1) = params.A*Xc + params.B*x(:,1);
-%     for i = 2:params.H-1
-% %         if i == 1
-% %             X(:,i) = params.A*Xc + params.B*x(:,i);
-% %         else
-% %             X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
-% %         end
-%         X(:,i) = params.A*X(:,i-1) + params.B*x(:,i);
-%     end
-%     Xn = [params.X0,X(1:params.state_size,:)];
-% 
-%     tildeXp = Xn(1:3, :) - params.xr(1:3, :);  % 位置
-%     tildeXq = Xn(4:6, :) - params.xr(4:6, :);
-%     tildeXv = Xn(7:9, :) - params.xr(7:9, :);  % 速度
-%     tildeXw = Xn(10:12, :) - params.xr(10:12,:);
-%     tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-% %     tildeUpre = U - Agent.input;
-%     tildeUref = x(:, :) - params.xr(13:16,:);
-%     
-% %-- 状態及び入力のステージコストを計算 長くなるから分割
-%     stageStateP = tildeXp(:, 1:params.H-1)'*params.Weight.P*tildeXp(:, 1:params.H-1);
-%     stageStateV = tildeXv(:, 1:params.H-1)'*params.Weight.V*tildeXv(:, 1:params.H-1);
-%     stageStateQW = tildeXqw(:, 1:params.H-1)'*params.Weight.QW*tildeXqw(:, 1:params.H-1);
-%     stageInputR = tildeUref(:, 1:params.H-1)'*params.Weight.R*tildeUref(:, 1:params.H-1);
-%     
-%     stageStateP = diag(stageStateP);
-%     stageStateV = diag(stageStateV);
-%     stageStateQW = diag(stageStateQW);
-%     stageInputR = diag(stageInputR);
-%     
-%     stageState = stageStateP' + stageStateV' + stageStateQW' + stageInputR'; %ステージコスト
-%     
-% %-- 状態の終端コストを計算
-%     terminalState =  tildeXp(:, end)'   * params.Weight.Pf   * tildeXp(:, end)...
-%                     +tildeXv(:, end)'   * params.Weight.V   * tildeXv(:, end)...
-%                     +tildeXqw(:, end)'  * params.Weight.QWf  * tildeXqw(:, end);
-% 
-% %-- 評価値計算
-%     eval = sum(stageState) + terminalState;
-% end
-
-% function [c , ceq] = Constraints(x, params, Agent, ~)
-% % モデル予測制御の制約条件を計算するプログラム
-%     c  = zeros(params.state_size, params.H);
-%     ceq_ode = zeros(params.state_size, params.H);
-% 
-% %-- MPCで用いる予測状態 Xと予測入力 Uを設定
-%     X=x(1:params.state_size, 1:params.H);
-%     Xc = [x(1:params.state_size, 1:params.H);ones(1,params.H)];
-%     U = x(params.state_size+1:params.total_size, :);   % 4 * Params.H
-% 
-% %- ダイナミクス拘束
-% %-- 初期状態が現在時刻と一致することと状態方程式に従うことを設定　非線形等式を計算します．
-% %-- 連続の式をダイナミクス拘束に使う
-%     for L = 2:params.H  
-%         tmpx = params.A * Xc(:,L-1) + params.B * U(:,L-1); %クープマンモデル
-%         tmpx = params.C * tmpx; %実空間の値に変換
-%         ceq_ode(:, L) = X(:, L) - tmpx;   % tmpx : 縦ベクトル？ 入力が正しいかを確認
-%     end
-%     ceq = [x(1:params.state_size, 1) - params.X0, ceq_ode];
-% 
-% %     c = [x(7:9) - 0.6, -0.6 - x(7:9)];
-% %     c = [-x(13:16,:),x(13:16,:) - 2.5];
-% %       c = [1.442 - x(13:14,:),x(13:14,:) - 1.447, x(15:16,:) - 1.447, 1.442 - x(15:16,:)];
-% %       c = [x(13:14,:) - 1.46,1.44 - x(13:14,:), x(15:16,:) - 1.46, 1.444 - x(15:16,:)];
-% %     if idx < 15
-% %         c = [x(13:16,:) - 2.5, 1.45 - x(13:16,:)];
-% %     else
-% %         c = [-x(13:16,:),x(13:16,:) - 2.5];
-% %     end
-% %     c = [x(13:16,:) - 1.9, 1.1 - x(13:16,:)];
-% %     c(:, 1) = [];
-% %     c = X(1,:) - 2;
-% end
