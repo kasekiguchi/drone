@@ -8,7 +8,8 @@ function Controller = Controller_MPC_Koopman(Agent)
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
 
     %% Koopman
-    load("EstimationResult_12state_7_19_circle=circle_estimation=circle.mat",'est');
+%     load("EstimationResult_12state_7_19_circle=circle_estimation=circle.mat",'est');
+    load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
     Controller_param.A = est.A;
     Controller_param.B = est.B;
     Controller_param.C = est.C;
