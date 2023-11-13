@@ -1,4 +1,4 @@
-classdef MPC_controller_Koopman_fmincon < handle
+classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
     % MCMPC_CONTROLLER MPCのコントローラー
     % Imai Case study 
     % 勾配MPCコントローラー
@@ -20,7 +20,7 @@ classdef MPC_controller_Koopman_fmincon < handle
     end
 
     methods
-        function obj = MPC_controller_Koopman_fmincon(self, param)
+        function obj = MPC_CONTROLLER_KOOPMAN_quadprog(self, param)
             %-- 変数定義
             obj.self = self; %agentへの接続
             %---MPCパラメータ設定---%
@@ -64,34 +64,33 @@ classdef MPC_controller_Koopman_fmincon < handle
 
             % MPC設定(problem)
             %-- fmincon 設定
-            options = optimoptions('fmincon');
+            options = optimoptions('quadprog');
             %     options = optimoptions(options,'Diagnostics','off');
             %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
             options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
-            options = optimoptions(options,'ConstraintTolerance',1.e-3);     % 制約違反に対する許容誤差
+            options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
             
-            %-- fmincon設定
-            options.Algorithm = 'sqp';  % 逐次二次計画法
+            %-- quadprog設定
             options.Display = 'none';   % 計算結果の表示
-            problem.solver = 'fmincon'; % solver
-            problem.options = options;  %
+            problem.solver = 'quadprog'; % solver
 
-            x0 = [obj.previous_input];        % 状態，入力を初期値とする        % 現在状態
+            [H, f] = Change_equation(Param);
             A = [];
             b = [];
             Aeq = [];
             beq = [];
             lb = [];
             ub = [];
-            nonlcon = [];
-            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(@(x) Objective_mex(Param,x),x0,A,b,Aeq,beq,lb,ub,nonlcon,problem); %最適化計算
+            x0 = [obj.previous_input];
+
+            [var, fval, exitflag, output, lambda] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
 
             %%
             obj.previous_input = var;
             % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
             % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
-            obj.result.input = var(:, 1); % 印加する入力 4入力
+            obj.result.input = var(1:4, 1); % 印加する入力 4入力
 
             %% データ表示用
             obj.input.u = obj.result.input; 
@@ -107,11 +106,11 @@ classdef MPC_controller_Koopman_fmincon < handle
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                    state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi); % s:state 現在状態
+                    state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi);       % s:state 現在状態
             fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
                     obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
                     obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-                    obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
+                    obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)  % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
 %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
