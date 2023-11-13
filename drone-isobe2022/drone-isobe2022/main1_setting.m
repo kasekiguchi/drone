@@ -16,7 +16,7 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 100;
+    te = 10;
 end
 
 %% generate environment
@@ -83,7 +83,7 @@ else
             initial(i).v = [0; 0; 0];
             initial(i).w = [0; 0; 0];
         else
-            arranged_pos = arranged_position([0, 1], N, 1, 1);
+            arranged_pos = arranged_position([0, 0], N, 1, 1);
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];

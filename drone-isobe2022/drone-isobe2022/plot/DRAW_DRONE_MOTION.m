@@ -168,6 +168,7 @@ classdef DRAW_DRONE_MOTION
 
             t = logger.data("t");
             tRealtime = tic;
+            pause;
             for i = 1:length(t)-1
                 for n = 1:length(param.target)
                     plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');

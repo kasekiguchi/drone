@@ -10,29 +10,29 @@ clear all;
 clc;
 
 %% データのインポート
-load("sim_7_20_circle_estimatordata.mat") %読み込むデータファイルの設定
-% load("simulation_7_5_saddle.mat")
+% load("sim_7_20_circle_estimatordata.mat") %読み込むデータファイルの設定
+load("experiment_11_8_P2Pshape_estimator.mat")
 disp('load finished')
 
-% for i = 1:find(log.Data.t,1,'last')
-%     data.t(1,i) = log.Data.t(i,1);                                      %時間t
-%     data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
-% end
-
-for i = 1:find(logger.Data.t,1,'last')
-    data.t(1,i) = logger.Data.t(i,1);                                      %時間t
-    data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
+for i = 1:find(log.Data.t,1,'last')
+    data.t(1,i) = log.Data.t(i,1);                                      %時間t
+    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
+
+% for i = 1:find(logger.Data.t,1,'last')
+%     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
+%     data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+%     data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+%     data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+%     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+%     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
+% end
 
 %% 特定の範囲のグラフ出力
 

@@ -3,13 +3,13 @@ close all hidden;
 clear all;
 clc;
 %% 読み込み
-% loadfilename{1} = 'EstimationResult_12state_10_9_revandorder_circle=reverse_circle_estimation=revcircle.mat';
-% loadfilename{1} = 'EstimationResult_12state_10_9_reverse_circle=reverse_circle_estimation=revcircle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = 'EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat';
+loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{3} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
-loadfilename{1} = 'test.mat';
-loadfilename{2} = 'test2.mat';
-loadfilename{3} = 'test3.mat';
+% loadfilename{1} = 'test.mat';
+% loadfilename{2} = 'test2.mat';
+% loadfilename{3} = 'test3.mat';
 % loadfilename{4} = 'EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか

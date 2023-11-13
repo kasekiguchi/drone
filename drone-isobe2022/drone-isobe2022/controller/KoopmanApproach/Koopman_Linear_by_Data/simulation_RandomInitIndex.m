@@ -2,7 +2,7 @@
 % テストデータのランダムな時刻を初期状態とした検証シミュレーションを複数回実行
 %% initialize
 clc
-clear
+clear all
 close all
 %% flag
 flg.plotresult_eachTime = 1; % 毎回結果をプロットする 出力までが伸びます
@@ -16,15 +16,15 @@ FolderName = 'RandomInitialIndexTest';
 FileName = 'test.mat';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_12state_6_26_circle=circle_estimation=circle';
+loading_filename = 'EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst';
 
 % シミュレーション実行回数
-HowmanySimulationRunning = 4;
+HowmanySimulationRunning = 1;
 
 % 確認するステップ数
 stepN = 20;
 
-% 乱数シード
+% 乱数シード %初期idxの値を固定したい場合はコメントイン
 % seed = double('T');
 seed = double('C');
 % seed = double('U');
@@ -48,8 +48,8 @@ end
 %% シミュレーション実行
 for i = 1:HowmanySimulationRunning
     simResult = rmfield(simResult, {'Z','Xhat','U', 'T'});
-    % 初期状態として抜き出す時間インデックスをランダムに決める
 
+    % 初期状態として抜き出す時間インデックスをランダムに決める
     simResult.initTindex = randi(size(simResult.reference.T,2),1);
     % simResult.initTindex = 3.5/0.025+1; %生成する時間固定の場合
 
@@ -103,7 +103,7 @@ for i = 1:HowmanySimulationRunning
         plotSimulationResult(simResult, stepN)
 %         pause(2);
         
-        pause;
+%         pause;
 
 %         fig = uiufigure;
 %         btn = uibutton(fig);
@@ -129,8 +129,8 @@ end
 function output = plotSimulationResult(simResult,stepN)
     dt = simResult.reference.T(2)-simResult.reference.T(1);
     tlength = simResult.reference.T(simResult.initTindex:simResult.initTindex+stepN);
-
-    % P
+   
+    P
     fp = figure(1);
     subplot(2,1,2);
     p2 = plot(tlength,simResult.reference.est.p(simResult.initTindex:simResult.initTindex+stepN,:)','LineWidth',2);
@@ -156,7 +156,7 @@ function output = plotSimulationResult(simResult,stepN)
     hold off
 
     movegui(fp,'northwest')
-    
+
     % Q
     fq = figure(2);
     subplot(2,1,2);

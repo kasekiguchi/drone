@@ -1,4 +1,4 @@
-function [ref] = Komatsu_study_trajectory(~)
+function [ref] = Komatsu_study_trajectory(X0)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -7,7 +7,11 @@ syms t real
 % yg = X(2);
 % zg = X(3);
 % T = X(4);   % 目標到達までの時間 T=10
-T = 60;
+
+x_0 = X0(1);
+y_0 = X0(2);
+z_0 = X0(3);
+% T = 10;
 %% takeoff
 % T = 10;
 % rz0 = 0;
@@ -25,9 +29,21 @@ T = 60;
 % y = sin(t/2);
 % z = 1;
 
-x = sin(2*pi*t/T);
-y = cos(2*pi*t/T);
-z = 1;
+%バラ曲線　いい感じ
+% a=2;b=1;
+% x=1.5*sin((a*2*pi*t/T)/b)*cos(2*pi*t/T);
+% y=1.5*sin((a*2*pi*t/T)/b)*sin(2*pi*t/T);
+% z=z_0;
+
+%メビウスの帯
+T = 8;r=0.5;
+x = (r*cos(2*pi*t/T)+1)*cos(2*2*pi*t/T);
+y = (r*cos(2*pi*t/T)+1)*sin(2*2*pi*t/T);
+z = z_0+r*sin(2*pi*t/T);
+
+% x = sin(2*pi*t/T);
+% y = cos(2*pi*t/T);
+% z = 1;
 
 % x = 0;
 % y = 0;
