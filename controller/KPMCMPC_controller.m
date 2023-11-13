@@ -5,6 +5,7 @@ classdef KPMCMPC_controller <handle
         options
         param
         previous_state
+        current_state
         input
         state
         const
@@ -40,10 +41,10 @@ classdef KPMCMPC_controller <handle
             obj.state.state_data = zeros(12,obj.param.H, obj.N);
             obj.input.Evaluationtra = zeros(1, obj.N);
             %% 重み　統合
-            % obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
-            % obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
-            obj.param.QW = blkdiag(obj.param.Q, obj.param.W);
-            obj.param.QWf = blkdiag(obj.param.Qf, obj.param.Wf);
+            obj.param.Q = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
+            obj.param.Qf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
+            % obj.param.QW = blkdiag(obj.param.Q, obj.param.W);
+            % obj.param.QWf = blkdiag(obj.param.Qf, obj.param.Wf);
         end
         
         %-- main()的な
@@ -71,32 +72,20 @@ classdef KPMCMPC_controller <handle
                 rt, obj.input.v(1), obj.input.v(2), obj.input.v(3), obj.input.v(4));
             fprintf("\n");
 
-            
-            % 
-            % ave1 = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-            % ave2 = obj.input.u(2);    % 初期値はparamで定義
-            % ave3 = obj.input.u(3);
-            % ave4 = obj.input.u(4);
-
-            %% resampling
-            % ave = obj.input.u;
-
             %% 
             ave = obj.param.ref_input;
-
-            % ave1 = obj.param.ref_input(1);
             
             % 標準偏差，サンプル数の更新
             obj.input.sigma = obj.input.nextsigma; % 4*1
             obj.N = obj.param.nextparticle_num;   
 
-            obj.input.sigma(4) = 0;
+            % obj.input.sigma(4) = 0;
 
             % ave1 = obj.self.parameter.mass*9.81; ave2 = 0; ave3 = 0; ave4 = 0;
             obj.input.u1 = max(0,obj.input.sigma(1).*randn(obj.param.H, obj.N) + ave(1));
-            obj.input.u2 = obj.input.sigma(2).*randn(obj.param.H, obj.N)+ave(2);    % すべて同じ入力、　確認用
-            obj.input.u3 = obj.input.sigma(3).*randn(obj.param.H, obj.N)+ave(3);
-            obj.input.u4 = obj.input.sigma(4).*randn(obj.param.H, obj.N)+ave(4);
+            obj.input.u2 = max(0,obj.input.sigma(2).*randn(obj.param.H, obj.N) + ave(2));    % すべて同じ入力、　確認用
+            obj.input.u3 = max(0,obj.input.sigma(3).*randn(obj.param.H, obj.N) + ave(3));
+            obj.input.u4 = max(0,obj.input.sigma(4).*randn(obj.param.H, obj.N) + ave(4));
             obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
             obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;   
             obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
@@ -117,7 +106,7 @@ classdef KPMCMPC_controller <handle
             % obj.input.Evaluationtra = obj.input.eval(1, 1:obj.N); 
             
             %% 最適な入力の取得
-            [Bestcost, BestcostID] = min(obj.input.Evaluationtra);
+            [Bestcost, BestcostID] = min(obj.input.Evaluationtra(1,1:obj.N));
             obj.result.input = obj.input.u(:, 1, BestcostID);     
             
 
@@ -152,12 +141,13 @@ classdef KPMCMPC_controller <handle
             u = obj.input.u;
             %-- 予測軌道計算
             for m = 1:obj.N
-                x0 = [obj.previous_state; 1];
+                % x0 = [obj.previous_state; 1];
+                x0 = quaternions(obj.previous_state);
                 obj.state.state_data(:, 1, m) = obj.previous_state;
                 for h = 1:obj.param.H-1
                     % x0 = x0 + obj.param.dt * obj.modelf(x0, u(:, h, m), obj.modelp); % オイラー近似
                     x0 = obj.param.A * x0 + obj.param.B * u(:,h,m);
-                    obj.state.state_data(:, h+1, m) = obj.param.C * x0;
+                    obj.state.state_data(:, h+1, m) = x0(1:12);
                 end
             end
             predict_state = obj.state.state_data;
@@ -170,27 +160,17 @@ classdef KPMCMPC_controller <handle
             U = obj.input.u(:,:,m);         %12 * 10
 
             %% xr
-            tildeXp = X(1:3,:,m) - obj.state.ref(1:3, :);  % 位置   agent.refenrece.result.state.p
-            tildeXq = X(4:6,:,m) - obj.state.ref(4:6, :);
-            tildeXv = X(7:9,:,m) - obj.state.ref(7:9, :);  % 速度
-            tildeXw = X(10:12,:,m) - obj.state.ref(10:12, :); 
-
-            %%
-            tildeXqw = [tildeXq; tildeXw];
+            tildeX = X(:,:,m) - obj.state.ref(1:12,:);
             tildeUpre = U - obj.input.v;       % agent.input
             tildeUref = U - obj.state.ref(13:16, :);
 
-            stageStateP =    sum(tildeXp(:,end-1)' * obj.param.P   .* tildeXp(:,end-1)',2);
-            stageStateV =    sum(tildeXv(:,end-1)' * obj.param.V   .* tildeXv(:,end-1)',2);
-            stageStateQW =   sum(tildeXqw(:,end-1)' * obj.param.QW .* tildeXqw(:,end-1)',2);
-            stageInputPre  = sum(tildeUpre(:,end-1)' * obj.param.RP.* tildeUpre(:,end-1)',2);
-            stageInputRef  = sum(tildeUref(:,end-1)' * obj.param.R .* tildeUref(:,end-1)',2);
-            terminalState = tildeXp(:, end)' * obj.param.Pf * tildeXp(:, end)...
-                +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
-                +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
+            stageStateX = sum(tildeX(:,end-1)' * obj.param.Q * tildeX(:,end-1), 2);
+            stageInputPre  = sum(tildeUpre(:,end-1)' * obj.param.RP* tildeUpre(:,end-1),2);
+            stageInputRef  = sum(tildeUref(:,end-1)' * obj.param.R * tildeUref(:,end-1),2);
+            terminalState = tildeX(:,end)' * obj.param.Qf * tildeX(:,end);
 
             %-- 評価値計算
-            MCeval = sum(stageStateP + stageStateV + stageStateQW + stageInputPre + stageInputRef,"all")...
+            MCeval = sum(stageStateX + stageInputPre + stageInputRef,"all")...
                 + terminalState;
         end
 

@@ -16,14 +16,14 @@ syms t real
 % z = z_0;
 
 %% circle
-x = cos(t/2) -1;
-y = sin(t/2);
-z = 1;
+% x = cos(t/2) -1;
+% y = sin(t/2);
+% z = 1;
 
 %% Liner
-% x = t;
-% y = 0;
-% z = 1;
+x = 0;
+y = 0;
+z = 1;
 
 %% landing X0(3):初期高度
 % x = 0;

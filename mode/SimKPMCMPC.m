@@ -1,6 +1,6 @@
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 10; % terminal time
+te = 20; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -11,15 +11,19 @@ initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
-KP = load("C:\Users\student\Downloads\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat", "est");
-
+KP = load('C:\Users\student\Documents\students\komatsu\GitHub_HL\drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est');
+fprintf("Data loaded\n");
+% KP.est.A = est.A
+% Params.A = est.A;
+%     Params.B = est.B;
+%     Params.C = est.C;
 agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1], te},"HL"});
-agent.controller = KPMCMPC_controller(agent, Controller_KPMCMPC(agent, KP.est));
+agent.controller = KPMCMPC_controller(agent, Controller_KPMCMPC(agent, KP));
 run("ExpBase");
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
