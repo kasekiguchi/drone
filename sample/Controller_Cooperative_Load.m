@@ -12,6 +12,7 @@ Controller.gains = [g1p(1)*[1 1],g1z(1),g1r(1)*[1 1],g1rz(1),...
 % gains = [kx0 kr0 kdx0 ko0 kqi kwi kri koi epsilon]';
 
 Controller.method = "CooperativeSuspendedLoadController_"+N;
+Controller.method2 = "Muid_"+N;
 % 設定確認
 Controller.dt = dt;
 % eig(diag([1,1,1],1)-[0;0;0;1]*Controller.F2)

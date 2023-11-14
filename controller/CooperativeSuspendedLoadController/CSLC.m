@@ -4,6 +4,7 @@ classdef CSLC < handle
     self
     result
     P
+    Param
     parameter_name = ["g","m0","J0","rho","li","mi","Ji"];
     gains
     Pdagger
@@ -22,6 +23,7 @@ classdef CSLC < handle
       P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho));
       obj.Pdagger = pinv(P);
       obj.N = size(P,2)/3;
+      obj.Param = param;
       obj.gains = param.gains; %
       %[kx0' kr0 kdx0' ko0 kqi kwi kri koi epsilon]
       obj.gen_input = str2func(param.method);

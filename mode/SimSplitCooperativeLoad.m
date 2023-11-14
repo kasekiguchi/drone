@@ -3,12 +3,12 @@ clear
 N = 6;
 ts = 0; %機体数
 dt = 0.025;
-te = 100;
+te = 1000;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
-logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [], []);
+logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);
 
 
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
@@ -40,16 +40,18 @@ else
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
-Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
-q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
-rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
-initial_state(1).pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));
+% Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
+% q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
+% rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
+% initial_state(1).pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));
+ref_orig = [0;0;0]; %目標軌道原点
 
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
-agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[2;0.5;1],"size",1*[4,4,0]},"Cooperative"});
+% agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.do = @controller_do;
@@ -69,16 +71,14 @@ for i = 2:N+1
     initial_state(i).pT = [0; 0; -1];
     initial_state(i).wL = [0; 0; 0];
 %     initial_state(i).p = [1;0;1.46];
-    initial_state(i).p = initial_state(1).p+R_load*rho(:,i-1)+;
+    initial_state(i).p = initial_state(1).p + R_load*rho(:,i-1) - agent(1).parameter.li(i-1) * initial_state(i).pT;
     initial_state(i).pL = initial_state(1).p+R_load*rho(:,i-1);
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
-    % agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-    % agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
-    % agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,Reference_Time_Varying_Cooperative_Load("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-    agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split"},agent(1));
+    agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[]},"Split",N},agent(1));
+%     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
     agent(i).controller.load = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
     agent(i).controller.do = @controller_do;
@@ -104,14 +104,22 @@ end
 
 %%
 close all
-aaaa= logger.data(3,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
-bbbb= logger.data(2,"reference.result.state.p","p");
-% cccc= logger.data(1,"plant.result.state.p","p");
+DataA= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+Data2= logger.data(2,"reference.result.state.p","p");
+Data3= logger.data(3,"reference.result.state.p","p");
+Data4= logger.data(4,"reference.result.state.p","p");
+Data5= logger.data(5,"reference.result.state.p","p");
+Data6= logger.data(6,"reference.result.state.p","p");
+Data7= logger.data(7,"reference.result.state.p","p");
 t=logger.data(0,'t',[]);
 figure(101)
 hold on
-plot(aaaa(:,1),aaaa(:,2))
-% plot(bbbb(:,1),bbbb(:,2))
+plot(Data2(:,1),Data2(:,2))
+plot(Data3(:,1),Data3(:,2))
+plot(Data4(:,1),Data4(:,2))
+plot(Data5(:,1),Data5(:,2))
+plot(Data6(:,1),Data6(:,2))
+plot(Data7(:,1),Data7(:,2))
 % plot(cccc(:,1),cccc(:,2))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
@@ -121,6 +129,32 @@ ylabel("Y [m]")
 ax = gca;
 ax.FontSize = 13;
 hold off
+
+% figure(102)
+% hold on
+% plot(DataB(:,1),DataB(:,2))
+% % plot(cccc(:,1),cccc(:,2))
+% % xlim([-1.5 1.5])
+% % ylim([-1.5 1.5])
+% % xlabel("X [m]")
+% ylabel("Y [m]")
+% % legend("Payload","UAV")
+% ax = gca;
+% ax.FontSize = 13;
+% hold off
+% 
+% figure(103)
+% hold on
+% plot(DataC(:,1),DataC(:,2))
+% % plot(cccc(:,1),cccc(:,2))
+% % xlim([-1.5 1.5])
+% % ylim([-1.5 1.5])
+% % xlabel("X [m]")
+% ylabel("Y [m]")
+% % legend("Payload","UAV")
+% ax = gca;
+% ax.FontSize = 13;
+% hold off
 
 %%
 % logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
