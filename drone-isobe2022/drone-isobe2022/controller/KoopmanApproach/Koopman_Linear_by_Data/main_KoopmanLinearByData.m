@@ -2,13 +2,14 @@
 % 先に main.m の Initialize settings を実行すること
 % initialize
 % フラグ管理
+clear all
 flg.bilinear = 0; %1:双線形モデルへの切り替え
-Normalize = 0; %1：正規化
+Normalize = 1; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_11_13_data=cirandrevsadP2Pxy_cir=cir_est=P2Pshape.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'EstimationResult_12state_11_13_data=cirandrevsadP2Pxy_cir=cir_est=cir_Norma.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 % FileName = 'test2.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
@@ -28,8 +29,8 @@ targetpath=append(nowFolder,'\',FileName);
 %% Defining Koopman Operator
 
 %<使用している観測量>
-F = @(x) [x;1]; % 状態変数+定数項1
-% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
+% F = @(x) [x;1]; % 状態変数+定数項1
+F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
 
 % load data h 
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
@@ -92,12 +93,12 @@ disp('Estimated')
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('TestData3.mat');
-% simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
+simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
 % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
 % simResult.reference = ImportFromExpData_estimation('sim_7_20_circle_estimatordata'); %sim
-simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
+% simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
 
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
@@ -114,7 +115,18 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-if Normalize == 1 %推定精度検証用データの正規化
+% if Normalize == 1 %推定精度検証用データの正規化(改善前)
+%     Data2.X = simResult.reference.X;
+%     Data2.Y = zeros(size(Data2.X,1),size(Data2.X,2));
+%     Data2.U = simResult.reference.U;
+%     Ndata2 = Normalization(Data2);
+%     for i  = 1:12
+%         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata2.meanValue.x(i))/Ndata2.stdValue.x(i);
+%     end
+%     simResult.U(:,:) = Ndata2.u;
+% end
+
+if Normalize == 1 %推定精度検証用データの正規化(改善後)
     for i  = 1:12
         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata.meanValue.x(i))/Ndata.stdValue.x(i);
     end
