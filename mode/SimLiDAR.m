@@ -1,6 +1,6 @@
 ts = 0;
 dt = 0.01;
-te = 20;
+te = 30;
 time = TIME(ts,dt,te);
 % in_prog_func = @(app) in_prog(app);
 % post_func = @(app) post(app);
@@ -58,6 +58,7 @@ agent.parameter = DRONE_PARAM("DIATONE");
 % パラメータ既知
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_kiti(x,wall_param,psb,qs,p),"output_func",@(x,p) H_12_kiti(x,wall_param,psb,qs,p),"R",diag([1e-6*ones(1,3), 1e-7*ones(1,3),1e-3*ones(1,1)])));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_2(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"output_func",@(x,p) H_12_2(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"B",eye(12),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_1(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"output_func",@(x,p) H_12_1(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"B",eye(12),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,1)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
 
 % オフセット類を状態として追加
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18(x,wall_param,p),"output_func",@(x,p) H_18(x,wall_param,p),"B",[eye(6)*dt^2;eye(6)*dt;zeros(6,6)],"P",diag([ones(1,12),10*ones(1,6)]),"R",diag([1e-8*ones(1,3), 1e-8*ones(1,3),1e-6*ones(1,1)]),"Q",diag([10*ones(1,3),100*ones(1,3)])));
@@ -77,7 +78,7 @@ agent.parameter = DRONE_PARAM("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1*ones(1,3),100*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0005*ones(1,3),0.001*ones(1,3)])));
 
 %PDAF
-agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),10*ones(1,3),200*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0001ones(1,3),0.0005*ones(1,3)])));
+% agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),10*ones(1,3),200*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0001ones(1,3),0.0005*ones(1,3)])));
 % agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"],"B",eye(12),"R",diag([1e-6*ones(1,3), 1e-6*ones(1,3)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
 
 agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/2),'p0',[0.01;0.01;0.01],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.000001, 'seed', 0));
@@ -86,14 +87,14 @@ agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.do = @sensor_do;
 
 %AMC ref
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.3]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.3]}});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
 
 
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1,1,1,0.4]}});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1,1,1,0.4]}});
 
 agent.controller = HLC(agent,Controller_HL(dt));
 

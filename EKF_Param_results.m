@@ -16,18 +16,18 @@
 close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/Log(08-Nov-2023_15_57_38).mat');
-O_func = @(x,u) On3(x,u);
+log = LOGGER('./Data/AMC_1_used.mat');
+O_func = @(x,u) On3_1(x,u);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
-f_png=0;
-f_eps=0;
+f_png=1;
+f_eps=1;
 f_offset = 1;
 f_O = 0;
 f_wall = 0;
-f_PDAF = 1;
+f_PDAF = 0;
 %% ログ
 tspan = [0 ,100];
-maxt = 20;
+maxt = 30;
 % tspan = [0 99];xlim([0, maxt]);
 robot_p  = log.data(1,"p","p")';
 robot_pe  = log.data(1,"p","e")';
@@ -101,13 +101,14 @@ meanqs = [mean(qs(1,((maxt/0.01)-500):end)),mean(qs(2,((maxt/0.01)-500):end)),me
 %%
  fig9=figure(9);
     fig9.Color = 'white';
-    plot(time,ps(1,:),'LineWidth', 3);
-        hold on;
+        plot(time,ps(1,:),'LineWidth', 3);
+    hold on;
     plot(time,ps(2,:),'LineWidth', 3);
     plot(time,ps(3,:),'LineWidth', 3);
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
+   
     lgd=legend('\it{psb_{xe}}','\it{psb_{ye}}','\it{psb_{ze}}','\it{psb_{x}}','\it{psb_{y}}','\it{psb_{z}}','FontSize', 18,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
@@ -126,6 +127,7 @@ meanqs = [mean(qs(1,((maxt/0.01)-500):end)),mean(qs(2,((maxt/0.01)-500):end)),me
     plot(time,0*ones(size(time)),'LineWidth', 3);
     plot(time,(pi/2)*ones(size(time)),'LineWidth', 3);
     xlim([0, maxt]);
+           grid on;
 %     ylim([-1 2]);
     lgd = legend('qs_{\phi e}','qs_{\theta e}','qs_{\psi e}','qs_{\phi}','qs_{\theta}','qs_{\psi}','FontSize', 18,'Location', 'Best');
     lgd.NumColumns = 2;
@@ -242,12 +244,12 @@ if f_wall == 1
         D(i) = 1/(maxS(i)/minS(i));
     end
 else
-
+    x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1)];
+    On = zeros(size(O_func(x,u(:,1)),1),size(O_func(x,u(:,1)),2),len);
     U = zeros(size(On,1),size(On,1),len);
     V = zeros(18,18,len);
     S = zeros(18,len);
-    x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1)];
-    On = zeros(size(O_func(x,u(:,1)),1),size(O_func(x,u(:,1)),2),len);
+   
     for i=1:len
 %     x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
         x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
@@ -494,74 +496,76 @@ if illustration == 1
 end
 if f_png==1
 %     pass2 = 'C:\Users\yuika\Desktop\修士\中間発表\ppt';
-    pass2 = 'C:\Users\student\Desktop\Nozaki'; %P:192.168.100.20 PC
-    saveas(fig7, fullfile(pass2, 'EKF_pos.png'));
-    saveas(fig8, fullfile(pass2, 'EKF_ang.png'));
-    saveas(fig18, fullfile(pass2, 'EKF_posAll.png'));
-    saveas(fig2, fullfile(pass2, 'EKF_angAll.png'));
-    saveas(fig11, fullfile(pass2, 'EKF_v.png'));
-    saveas(fig13, fullfile(pass2, 'EKF_w.png'));
-    saveas(fig14, fullfile(pass2, 'rankO.png'));
-    saveas(fig15, fullfile(pass2, 'minS.png'));
-    saveas(fig16, fullfile(pass2, 'Singular_Value.png'));
-    saveas(fig17, fullfile(pass2, 'S_15_18.png'));
-    if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psb.png'));
-        saveas(fig10, fullfile(pass2, 'EKF_qs.png'));
-        saveas(fig12, fullfile(pass2, 'EKF_inst.png'));
-    end 
-
-%     saveas(fig7, fullfile(pass2, 'EKF_pos_b.png'));
-%     saveas(fig8, fullfile(pass2, 'EKF_ang_b.png'));
-%     saveas(fig18, fullfile(pass2, 'EKF_posAll_b.png'));
-%     saveas(fig2, fullfile(pass2, 'EKF_angAll_b.png'));
-%     saveas(fig11, fullfile(pass2, 'EKF_v_b.png'));
-%     saveas(fig13, fullfile(pass2, 'EKF_w_b.png'));
-%     saveas(fig14, fullfile(pass2, 'rankO_b.png'));
-%     saveas(fig15, fullfile(pass2, 'minS_b.png'));
-%     saveas(fig16, fullfile(pass2, 'Singular_Value_b.png'));
-%     saveas(fig17, fullfile(pass2, 'S_15_18_b.png'));
+%     pass2 = 'C:\Users\student\Desktop\Nozaki\good'; %P:192.168.100.20 PC
+%     saveas(fig7, fullfile(pass2, 'EKF_pos.png'));
+%     saveas(fig8, fullfile(pass2, 'EKF_ang.png'));
+%     saveas(fig18, fullfile(pass2, 'EKF_posAll.png'));
+%     saveas(fig2, fullfile(pass2, 'EKF_angAll.png'));
+%     saveas(fig11, fullfile(pass2, 'EKF_v.png'));
+%     saveas(fig13, fullfile(pass2, 'EKF_w.png'));
+%     saveas(fig14, fullfile(pass2, 'rankO.png'));
+%     saveas(fig15, fullfile(pass2, 'minS.png'));
+%     saveas(fig16, fullfile(pass2, 'Singular_Value.png'));
+%     saveas(fig17, fullfile(pass2, 'S_15_18.png'));
 %     if f_offset == 1
-%         saveas(fig9, fullfile(pass2, 'EKF_psb_b.png'));
-%         saveas(fig10, fullfile(pass2, 'EKF_qs_b.png'));
-%         saveas(fig12, fullfile(pass2, 'EKF_inst_b.png'));
-%     end   
+%         saveas(fig9, fullfile(pass2, 'EKF_psb.png'));
+%         saveas(fig10, fullfile(pass2, 'EKF_qs.png'));
+%         saveas(fig12, fullfile(pass2, 'EKF_inst.png'));
+%     end 
+pass2 = 'C:\Users\student\Desktop\Nozaki\bad'; %P:192.168.100.20 PC
+    saveas(fig7, fullfile(pass2, 'EKF_pos_b.png'));
+    saveas(fig8, fullfile(pass2, 'EKF_ang_b.png'));
+    saveas(fig18, fullfile(pass2, 'EKF_posAll_b.png'));
+    saveas(fig2, fullfile(pass2, 'EKF_angAll_b.png'));
+    saveas(fig11, fullfile(pass2, 'EKF_v_b.png'));
+    saveas(fig13, fullfile(pass2, 'EKF_w_b.png'));
+    saveas(fig14, fullfile(pass2, 'rankO_b.png'));
+    saveas(fig15, fullfile(pass2, 'minS_b.png'));
+    saveas(fig16, fullfile(pass2, 'Singular_Value_b.png'));
+    saveas(fig17, fullfile(pass2, 'S_15_18_b.png'));
+    if f_offset == 1
+        saveas(fig9, fullfile(pass2, 'EKF_psb_b.png'));
+        saveas(fig10, fullfile(pass2, 'EKF_qs_b.png'));
+        saveas(fig12, fullfile(pass2, 'EKF_inst_b.png'));
+    end   
 end
 if f_eps==1
-    pass2 = 'C:\Users\student\Desktop\Nozaki'; %P:192.168.100.20 PC
-    saveas(fig7, fullfile(pass2, 'EKF_pos.eps'), 'epsc');
-    saveas(fig8, fullfile(pass2, 'EKF_ang.eps'), 'epsc');
-    saveas(fig18, fullfile(pass2, 'EKF_posAll.eps'), 'epsc');
-    saveas(fig2, fullfile(pass2, 'EKF_angAll.eps'), 'epsc');
-    saveas(fig11, fullfile(pass2, 'EKF_v.eps'), 'epsc');
-    saveas(fig13, fullfile(pass2, 'EKF_w.eps'), 'epsc');
-    saveas(fig14, fullfile(pass2, 'rankO.eps'), 'epsc');
-    saveas(fig15, fullfile(pass2, 'minS.eps'), 'epsc');
-    saveas(fig16, fullfile(pass2, 'Singular_Value.eps'), 'epsc');
-    saveas(fig17, fullfile(pass2, 'S_15_18.eps'), 'epsc');
-    saveas(fig31, fullfile(pass2, 'condN.eps'), 'epsc');
-    if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psb.eps'), 'epsc');
-        saveas(fig10, fullfile(pass2, 'EKF_qs.eps'), 'epsc');
-        saveas(fig12, fullfile(pass2, 'EKF_inst.eps'), 'epsc');
-    end   
-    
-%     saveas(fig7, fullfile(pass2, 'EKF_pos_b.eps'), 'epsc');
-%     saveas(fig8, fullfile(pass2, 'EKF_ang_b.eps'), 'epsc');
-%     saveas(fig18, fullfile(pass2, 'EKF_posAll_b.eps'), 'epsc');
-%     saveas(fig2, fullfile(pass2, 'EKF_angAll_b.eps'), 'epsc');
-%     saveas(fig11, fullfile(pass2, 'EKF_v_b.eps'), 'epsc');
-%     saveas(fig13, fullfile(pass2, 'EKF_w_b.eps'), 'epsc');
-%     saveas(fig14, fullfile(pass2, 'rankO_b.eps'), 'epsc');
-%     saveas(fig15, fullfile(pass2, 'minS_b.eps'), 'epsc');
-%     saveas(fig16, fullfile(pass2, 'Singular_Value_b.eps'), 'epsc');
-%     saveas(fig17, fullfile(pass2, 'S_15_18_b.eps'), 'epsc');
-%     saveas(fig31, fullfile(pass2, 'condN_b.eps'), 'epsc');
+%     pass2 = 'C:\Users\student\Desktop\Nozaki\good'; %P:192.168.100.20 PC
+%     saveas(fig7, fullfile(pass2, 'EKF_pos.eps'), 'epsc');
+%     saveas(fig8, fullfile(pass2, 'EKF_ang.eps'), 'epsc');
+%     saveas(fig18, fullfile(pass2, 'EKF_posAll.eps'), 'epsc');
+%     saveas(fig2, fullfile(pass2, 'EKF_angAll.eps'), 'epsc');
+%     saveas(fig11, fullfile(pass2, 'EKF_v.eps'), 'epsc');
+%     saveas(fig13, fullfile(pass2, 'EKF_w.eps'), 'epsc');
+%     saveas(fig14, fullfile(pass2, 'rankO.eps'), 'epsc');
+%     saveas(fig15, fullfile(pass2, 'minS.eps'), 'epsc');
+%     saveas(fig16, fullfile(pass2, 'Singular_Value.eps'), 'epsc');
+%     saveas(fig17, fullfile(pass2, 'S_15_18.eps'), 'epsc');
+%     saveas(fig31, fullfile(pass2, 'condN.eps'), 'epsc');
 %     if f_offset == 1
-%         saveas(fig9, fullfile(pass2, 'EKF_psb_b.eps'), 'epsc');
-%         saveas(fig10, fullfile(pass2, 'EKF_qs_b.eps'), 'epsc');
-%         saveas(fig12, fullfile(pass2, 'EKF_inst_b.eps'), 'epsc');
+%         saveas(fig9, fullfile(pass2, 'EKF_psb.eps'), 'epsc');
+%         saveas(fig10, fullfile(pass2, 'EKF_qs.eps'), 'epsc');
+%         saveas(fig12, fullfile(pass2, 'EKF_inst.eps'), 'epsc');
 %     end   
+
+
+    pass2 = 'C:\Users\student\Desktop\Nozaki\bad'; %P:192.168.100.20 PC
+    saveas(fig7, fullfile(pass2, 'EKF_pos_b.eps'), 'epsc');
+    saveas(fig8, fullfile(pass2, 'EKF_ang_b.eps'), 'epsc');
+    saveas(fig18, fullfile(pass2, 'EKF_posAll_b.eps'), 'epsc');
+    saveas(fig2, fullfile(pass2, 'EKF_angAll_b.eps'), 'epsc');
+    saveas(fig11, fullfile(pass2, 'EKF_v_b.eps'), 'epsc');
+    saveas(fig13, fullfile(pass2, 'EKF_w_b.eps'), 'epsc');
+    saveas(fig14, fullfile(pass2, 'rankO_b.eps'), 'epsc');
+    saveas(fig15, fullfile(pass2, 'minS_b.eps'), 'epsc');
+    saveas(fig16, fullfile(pass2, 'Singular_Value_b.eps'), 'epsc');
+    saveas(fig17, fullfile(pass2, 'S_15_18_b.eps'), 'epsc');
+    saveas(fig31, fullfile(pass2, 'condN_b.eps'), 'epsc');
+    if f_offset == 1
+        saveas(fig9, fullfile(pass2, 'EKF_psb_b.eps'), 'epsc');
+        saveas(fig10, fullfile(pass2, 'EKF_qs_b.eps'), 'epsc');
+        saveas(fig12, fullfile(pass2, 'EKF_inst_b.eps'), 'epsc');
+    end   
 end
 
 function rounded_radians = roundpi(radians)

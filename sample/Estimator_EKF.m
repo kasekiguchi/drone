@@ -31,15 +31,15 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         Estimator.JacobianH= matlabFunction(cell2mat(arrayfun(@(k) cell2mat(arrayfun(@(i,j) zeroone( col*tmp{k}',i,j),col,tmp{k},"UniformOutput",false)),1:length(output),"UniformOutput",false)'),"Vars",[dummy1,dummy2]);
     end
     %%通常シミュレーション時
-    Estimator.sensor_func = @(self,param) [self.sensor.result.state.get(param);] ; % function to get sensor value: sometimes some conversion will be done
-    Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
+%     Estimator.sensor_func = @(self,param) [self.sensor.result.state.get(param);] ; % function to get sensor value: sometimes some conversion will be done
+%     Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
 
     %%パラメータ推定時
 %     Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1);self.sensor.lidar.result.length(3)]; % function to get sensor value: sometimes some conversion will be done
 %     Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
 % 
-%     Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1);]; % function to get sensor value: sometimes some conversion will be done
-%     Estimator.sensor_param = ["p","q"];
+    Estimator.sensor_func = @(self,param) [self.sensor.result.state.get('p');self.sensor.result.state.getq('3');self.sensor.lidar.result.length(1);]; % function to get sensor value: sometimes some conversion will be done
+    Estimator.sensor_param = ["p","q"];
     if isempty(opts.output_func)
         Estimator.output_func = @(state,param) param*state; % output function
         Estimator.output_param = Estimator.JacobianH(0,0); % parameter for output_func

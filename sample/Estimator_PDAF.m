@@ -34,8 +34,8 @@ function Estimator = Estimator_PDAF(agent,dt,model,output,opts)
     Estimator.sensor_param = ["p","q"]; % parameter for sensor_func
     Estimator.sensor_length = [6;2];                                       % Nmber of sensor to fusion
     Estimator.threshold   =   1000;                                            % threshold (All, Sensor, Sensor1, 2...)
-    Estimator.PD          = 1;                                             % Target probability
-    Estimator.PG          = 1;                                             % Gate probability
+    Estimator.PD          = 0.95;                                             % Target probability
+    Estimator.PG          = 0.95;                                             % Gate probability
     Estimator.R = opts.R;
     if isempty(opts.output_func)
         Estimator.output_func = @(state,param) param*state; % output function

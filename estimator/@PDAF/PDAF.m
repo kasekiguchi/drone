@@ -127,7 +127,7 @@ methods
             obj.L(j+1) = (obj.PD/lambda)*(exp(-0.5 * nu(span)'*inv(S(span,span))*nu(span)))/(sqrt((2*pi)^(length(nu(span)))*det(S(span,span))));
             count = count + obj.sensor_length(j);
         end
-        obj.beta(1) = obj.L(1) / (1 - obj.PD*obj.PG + sum(obj.L(2:end)));
+        obj.beta(1) = (1-obj.PD*obj.PG) / (1 - obj.PD*obj.PG + sum(obj.L(2:end)));
         count = 1;
         inov = zeros(length(nu),1);
         for j=1:length(obj.sensor_length)
