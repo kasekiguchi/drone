@@ -3,8 +3,10 @@ function [eval] = Objective(Param, u) % x : input
 %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
 %元の非線形等式制約を取り込んだ
 
-    Z = zeros(Param.state_size+1, Param.H-1);
-    z = [Param.current;1];
+%     Z = zeros(Param.state_size+1, Param.H-1);
+%     z = [Param.current;1];
+    z = quaternions(Param.current);
+    Z = zeros(size(z,1),Param.H-1);
     Z(:,1) = Param.A*z + Param.B*u(:,1);
     for i = 2:Param.H-1
         Z(:,i) = Param.A*Z(:,i-1) + Param.B*u(:,i); %z[k+1]=Az[k]+Bu[k],Koopman

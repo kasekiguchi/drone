@@ -83,7 +83,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             ub = [];
             x0 = [obj.previous_input];
 
-            [var, fval, exitflag, output, lambda] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
+            [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
 
             %%
             obj.previous_input = var;
