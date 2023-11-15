@@ -33,13 +33,13 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.self = self;
       %---MPCパラメータ設定---%
       obj.param = param;
-      obj.modelf = obj.self.model.method;
+      % obj.modelf = obj.self.model.method;
       obj.modelp = obj.self.parameter.get();
       %%  
       obj.input = param.input;
       obj.const = param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-      obj.model = self.model;
+      % obj.model = self.model;
       obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = param.input.Initsigma;  % 初期化
@@ -69,12 +69,14 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), param.H, 1); % - 制約外は前の評価値を引き継ぐ
 
       [obj.param.expand_A, obj.param.expand_B] = EXPAND_STATE(obj);
+
+      obj.input.Resampling_mu = zeros(4, obj.param.H, obj.N);
     end
 
     %-- main()的な
     function result = do(obj,param)
       % rng(0, "twister");
-      % profile on
+      profile on
       % OB = obj;
       xr = param{2};
       rt = param{3};
@@ -119,74 +121,46 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.reference.xr_org = [xr_imagine(3,:);xr_imagine(7,:);xr_imagine(1,:);xr_imagine(5,:);xr_imagine(9,:);xr_imagine(13,:);xr_imagine(2,:);xr_imagine(6,:);xr_imagine(10,:);xr_imagine(14,:);xr_imagine(4,:);xr_imagine(8,:)];
       obj.reference.xr = obj.reference.xr_org(:,1) - obj.reference.xr_org; 
 
-      mu(1,1) = 0;
-      mu(2,1) = 0;
-      mu(3,1) = 0;
-      mu(4,1) = 0; % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
-
-      % mu(:,1) = obj.input.u; % リサンプリング
+      % mu = zeros(4, obj.param.H, obj.N); % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
+      mu = obj.input.Resampling_mu; % Importance Sampling / Low Variance Sampling
 
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;
-      input_TH = 50; % 最大最小入力
+      input_TH = obj.param.input.range; % 最大最小入力
 
       % 全棄却時のケア
       if obj.input.AllRemove == 1
-        % obj.N = obj.param.constParticle_num;
-        % if rem(idx,2) == 0 % 時間ごとに±入れ替え
-        %     mu = obj.input.Constinput * [0;1;1;0];
-        % else
-        %     mu = -obj.input.Constinput *[0;1;1;0];
-        % end
         mu = obj.param.ref_input;
         obj.input.sigma = obj.input.Constsigma;
-        % input_TH = 100;
         obj.input.AllRemove = 0;
       end
 
-      % Z, yawの入力を強制的に小さく
-      % obj.input.sigma(1) = 0.00001;
-      % obj.input.sigma(4) = 0.00001;
-      % 入力生成 Z; X; Y; YAW
-
-      % 目標値までの距離に対する入力の大きさ
-      input_constraints = @(x) (83.46*x-2.92) / 3;
-
-      %% mu = HL入力関係
-      % mu(2,1) = input_constraints(xr(1)-obj.self.estimator.result.state.p(1)); % 目標値までの距離に応じた入力の平均
-      % mu(3,1) = input_constraints(xr(2)-obj.self.estimator.result.state.p(2));
-
-      % sigma ちょっとづつ大きく
-      % 
-      % obj.input.sigma = ksigma .* obj.input.sigma; 配列数は考えないとかなあ
-
+      %% ホライズンにかけて分散大きく
       ksigma_max = 0.01 * obj.param.H;
       ksigma = linspace(1,1 + ksigma_max,obj.param.H);
       inputSigma = ksigma .* obj.input.sigma';
-      obj.input.u1 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + mu(1,1)));
-      obj.input.u2 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + mu(2,1)));
-      obj.input.u3 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + mu(3,1)));
-      obj.input.u4 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + mu(4,1)));
+      obj.input.u1 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
+      obj.input.u2 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
+      obj.input.u3 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
+      obj.input.u4 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
 
-      % obj.input.u1 = max(-input_TH, min(input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1))); 
-      % obj.input.u2 = max(-input_TH, min(input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1))); 
-      % obj.input.u3 = max(-input_TH, min(input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1))); 
-      % obj.input.u4 = max(-input_TH, min(input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1))); 
+      %% 正規分布ふつう
+      % obj.input.u1 = max(-input_TH, min(input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1,1))); 
+      % obj.input.u2 = max(-input_TH, min(input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1,1))); 
+      % obj.input.u3 = max(-input_TH, min(input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1,1))); 
+      % obj.input.u4 = max(-input_TH, min(input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1,1))); 
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
       obj.input.u(2, 1:obj.param.H, 1:obj.N) = obj.input.u2;
       obj.input.u(1, 1:obj.param.H, 1:obj.N) = obj.input.u1;
 
-      %% ベクトル化　obj.input.u ;vector
-      % obj.input.u = [obj.input.u1; obj.input.u2; obj.input.u3; obj.input.u4];
+      %% ベクトル化　4*H*N -> 4H * N
+      % obj.input.u_vec = reshape(obj.input.u, [4*obj.param.H, obj.N]);
 
-      % max(0,min(10,tmp(1)))
-
-      % 目標値-仮想入力　関係
+      %% 目標値-仮想入力　関係
       % input = 83.46 * ref - 2.92
-
 
       %-- 状態予測　mex化　準備
       % Objpredict.H = obj.param.H;
@@ -210,7 +184,12 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % obj.input.Evaluationtra = objective(Objobj);  
 
       % 評価値の正規化
-      % obj.input.normE = obj.Normalize();
+      obj.input.EvalNorm = obj.Normalize();
+
+      % 平均のリサンプリング
+
+      % [obj.input.Resampling_mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+      [obj.input.Resampling_mu, ~] = Resampling_IS_mex(obj.N, obj.param.H, obj.input.EvalNorm, obj.input.u); % ImportanceSampling
 
       %-- 制約条件
       removeF = 0; removeX = []; survive = obj.N;
@@ -234,7 +213,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
         % vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
-        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
+        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
         % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
@@ -298,7 +277,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %     obj.input.Evaluationtra(BestcostID(5), 5)]; % all, z, x, y, yaw, 
 
       result = obj.result;
-      % profile viewer
+      profile viewer
     end
     function show(obj)
       obj.result
@@ -314,32 +293,23 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       x_real = obj.state.real_data;
       % constX = find(x_real(3,5,1:obj.N) > 2); % 1:obj.N 大事
       % constY = find(x_real(3,5,1:obj.N) > -0.5);
-      constX = find(x_real(3,5,1:obj.N) < -1.5 | x_real(7,5,1:obj.N) > 0.5);
-      % constX = unique(constX);
+      % constX = find(x_real(3,5,1:obj.N) < -1.5 | x_real(7,5,1:obj.N) > 0.5);
+
+      %% Any horizon
+      constX = find(x_real(3,:,1:obj.N) < -1.5 | x_real(7,:,1:obj.N) > 0.5); % Any horizon
+      constX = unique(constX);
       %% 進路上に物体
       % 四角
       % InputIdx = obj.param.H;
       % constAreaY = x_real(7,InputIdx,find(x_real(3,InputIdx,1:obj.N) > 2 & x_real(3,InputIdx,1:obj.N) < 4));
       % constX = find(constAreaY < 0.2);
 
-      % 円
-      % obsPos = [obj.param.obsX; obj.param.obsY];
-      % % 障害物との距離
-      % Pos = [x_real(3, :, 1:obj.N); x_real(7, :, 1:obj.N)];
-      % DisAbs = abs(obsPos - Pos);
-      % Dis = sqrt(DisAbs(1,1,:).^2 + DisAbs(2,1,:).^2); % 各サンプルと障害物の距離
-      % constX = find(Dis(1,1,:) < 0.2);
-      % % 
-      % if ~isempty(constX)
-      %     fprintf("aa");
-      % end
-
       %% 評価値で棄却 
       % obj.input.Evaluationtra(constX, :) = obj.param.ConstEval;
 
       %% 配列から棄却
-      obj.input.Evaluationtra(constX, :) = nan;
-      obj.input.u(:,:,constX) = nan;
+      % obj.input.Evaluationtra(constX, :) = nan;
+      % obj.input.u(:,:,constX) = nan;
 
       % obj.input.Evaluationtra(constY, :) = nan;
       % obj.input.u(:,:,constY) = nan;
@@ -370,27 +340,31 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     %%-- 離散：階層型線形化
     % obj.param.expand_A 
     function [predict_state] = predict(obj)
-      u = obj.input.u_vector;
-      x0 = repmat(obj.current_state,obj.param.H,obj.N);
-      state_data(:,1:obj.N) = pagemtimes(obj.param.expand_A(:,:,1:obj.N),x0) + pagemtimes(obj.param.expand_B(:,:,1:obj.N),u);
-      predict_state = obj.state.state_data;
+      predict_state = zeros(12*obj.param.H, obj.N);
+      u = obj.input.u_vec;
+      x0 = obj.current_state;
+      for i = 1:obj.N
+          predict_state(:,i) = obj.param.expand_A(:,:,i) * x0 + obj.param.expand_B(:,:,i) * u(:,i);
+      end
+      % predict_state = 12H * 1
+      predict_state = reshape(predict_state, 12, obj.param.H, obj.N); 
+      % TODO: for なし
     end
 
     %------------------------------------------------------
     %======================================================
     function [MCeval] = objective(obj, ~)   % obj.~とする
       U = obj.input.u(:,:,1:obj.N);                % 4  * 10 * N
-
       %% 実状態との誤差
       Z = obj.state.error_data;
 
       %% 制約外の軌道に対して値を付加
       % x:3, y:7
-      % [~, removeX, ~] = obj.constraints();
+      [~, removeX, ~] = obj.constraints();
 
-      %% ホライズンで重み大きく　終端では1.5倍
-      % k = linspace(1,0.8, obj.param.H); % 終端コストまで重み一緒
-      k = ones(1, obj.param.H);
+      %% ホライズンで重み大きく
+      k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
+      % k = ones(1, obj.param.H);
 
       %% コスト計算
       tildeUpre = U - obj.input.v;          % agent.input 　前時刻入力との誤差
@@ -408,9 +382,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
 
       %% 軌道ごとに制約を評価
-      % stageStateZ(3, removeX) = stageStateZ(3, removeX) + obj.param.ConstEval;
-      % stageStateZ(7, removeX) = stageStateZ(7, removeX) + obj.param.ConstEval;
-
+      stageStateZ(3, removeX) = stageStateZ(3, removeX) + obj.param.ConstEval;
+      stageStateZ(7, removeX) = stageStateZ(7, removeX) + obj.param.ConstEval;
 
       %-- 評価値計算
       Eval{1} = sum(stageStateZ,[1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]);  % 全体の評価値
@@ -430,14 +403,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
     function [pw_new] = Normalize(obj)
       NP = obj.N;
-      pw = obj.input.Evaluationtra(1);
+      pw = obj.input.Evaluationtra(:,1); % 全評価値に対してのほうが性能よさそう
 
-      % 配列が空かどうかの判別/ pw=評価値
-      %             if isempty(pw(pw<=49))
-      %                 obj.reset_flag = 1;
-      %             end
-      % 評価値は0未満にならず最小値を正規化した際の1と考えた場合，指数関数を
-      % 使って正規化をすることによって上手いことリサンプリングできる．
       pw = exp(-pw);
       sumw = sum(pw);
       if sumw~=0
@@ -446,6 +413,39 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         pw = zeros(1,NP)+1/NP;
       end
       pw_new = pw;
+    end
+
+    function [resampling_u,pw] = Resampling_LVS(obj)
+        %RESAMPLING この関数の概要をここに記述
+        % アルゴリズムはLow Variance Sampling
+        NP = obj.N;   % サンプル数
+        pw = obj.input.EvalNorm; % 正規化された評価値
+        u1 = reshape(obj.input.u(1,:,:), [], NP); 
+        u2 = reshape(obj.input.u(2,:,:), [], NP); 
+        u3 = reshape(obj.input.u(3,:,:), [], NP); 
+        u4 = reshape(obj.input.u(4,:,:), [], NP); 
+        wcum=cumsum(pw); % 評価値を累積
+        base=cumsum(pw*0+1/NP)-1/NP;%乱数を加える前のbase
+        resampleID=base+rand/NP;%ルーレットを乱数分増やす
+        pu1 = u1;%データ格納用
+        pu2 = u2;
+        pu3 = u3;
+        pu4 = u4;
+        ind=1;%新しいID
+        for ip=1:NP
+            while(resampleID(ip)>wcum(ind))
+                ind=ind+1;
+            end
+            u1(1:end,ip)= [pu1(2:end,ind);pu1(end,ind)];%LVSで選ばれたパーティクルに置き換え
+            u2(1:end,ip)= [pu2(2:end,ind);pu2(end,ind)];
+            u3(1:end,ip)= [pu3(2:end,ind);pu3(end,ind)];
+            u4(1:end,ip)= [pu4(2:end,ind);pu4(end,ind)];
+            pw(ip)=1/NP;%尤度は初期化
+        end
+        resampling_u(4, 1:obj.param.H, 1:obj.N) = u4;
+        resampling_u(3, 1:obj.param.H, 1:obj.N) = u3;
+        resampling_u(2, 1:obj.param.H, 1:obj.N) = u2;
+        resampling_u(1, 1:obj.param.H, 1:obj.N) = u1;
     end
   end
 end

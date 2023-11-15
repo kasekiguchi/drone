@@ -1,11 +1,5 @@
-for RUNi = 1:5
+for RUNi = 1:2
     RUNi
-    main_MC
-    if fFinish == 1
-        fprintf("RUN FILE FINISH");
-        Title
-        % fFinish
-        break;
-    end
-%     pause();
+    main_MC_NoSlope
+    RMSE(RUNi,:) = data.rmse;
 end

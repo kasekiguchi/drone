@@ -14,10 +14,11 @@ userpath('clear');
 % close all hidden; clear all; clc;
 % userpath('clear');
 fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
-fHL = 1; 
-fKP = 1;
-fMovie = 1;
-fSave = 1;
+fHL = 1;
+fMC = 1;
+
+fMovie = 10;
+fSave = 10;
 MovTime = 0;
 
 run("main1_setting.m");
@@ -120,10 +121,7 @@ end
             agent(i).do_sensor(param(i).sensor.list);
             %if (fOffline);    expdata.overwrite("sensor",time.t,agent,i);end
         end
-        
-%         if time.t > 2
-%             FH.CurrentCharacter = 'm';
-%         end
+
         %% estimator, reference generator, controller
         for i = 1:N
             % estimator
@@ -160,38 +158,42 @@ end
         end
 
         %%
+        if fMC == 1
+            data.bestcostID(:,idx) =  agent.controller.result.bestcostID;
+            data.bestcost(:,idx)=     agent.controller.result.bestcost;
+            data.path{idx} =          agent.controller.result.path;
+            data.pathJ{idx} =         agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+            data.sigma(:,idx) =       agent.controller.result.sigma;
+            data.removeF(idx) =       agent.controller.result.removeF;   % - 棄却されたサンプル数
+            data.removeX{idx} =       agent.controller.result.removeX;
+            data.variable_particle_num(idx) = agent.controller.result.variable_N;
+            data.survive(idx) = agent.controller.result.survive;
+            % data.eachcost(:, idx) =    agent.controller.result.eachcost;
 
-        data.bestcostID(:,idx) =  agent.controller.result.bestcostID;
-        data.bestcost(:,idx)=     agent.controller.result.bestcost;
-        data.path{idx} =          agent.controller.result.path;
-        data.pathJ{idx} =         agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-        data.sigma(:,idx) =       agent.controller.result.sigma;
-        data.removeF(idx) =       agent.controller.result.removeF;   % - 棄却されたサンプル数
-        data.removeX{idx} =       agent.controller.result.removeX;
-        % clear data.input_v
-        data.input_v(:,idx) =     agent.controller.result.input_v;
-        % 
-        % data.eachcost(:, idx) =    agent.controller.result.eachcost;
-        % 
-        data.xr{idx} = xr;
-        data.variable_particle_num(idx) = agent.controller.result.variable_N;
-        data.survive(idx) = agent.controller.result.survive;
-
-        if data.removeF(idx) ~= data.param.particle_num
-            data.bestx(idx, :) = data.path{idx}(3, :, data.bestcostID(3,1)); % - もっともよい評価の軌道x成分
-            data.besty(idx, :) = data.path{idx}(7, :, data.bestcostID(4,1)); % - もっともよい評価の軌道y成分
-            data.bestz(idx, :) = data.path{idx}(1, :, data.bestcostID(2,1)); % - もっともよい評価の軌道z成分
-        else
-            if idx == 1
-                data.bestx(idx, :) = data.bestx(idx, :); % - 制約外は前の評価値を引き継ぐ
-                data.besty(idx, :) = data.besty(idx, :); % - 制約外は前の評価値を引き継ぐ
-                data.bestz(idx, :) = data.bestz(idx, :); % - 制約外は前の評価値を引き継ぐ
+            if data.removeF(idx) ~= data.param.particle_num
+                if fHL == 1
+                    data.bestx(idx, :) = data.path{idx}(3, :, data.bestcostID(3,1)); % - もっともよい評価の軌道x成分
+                    data.besty(idx, :) = data.path{idx}(7, :, data.bestcostID(4,1)); % - もっともよい評価の軌道y成分
+                    data.bestz(idx, :) = data.path{idx}(1, :, data.bestcostID(2,1)); % - もっともよい評価の軌道z成分
+                else
+                    data.bestx(idx, :) = data.path{idx}(1, :, data.bestcostID(1,1)); % - もっともよい評価の軌道x成分
+                    data.besty(idx, :) = data.path{idx}(2, :, data.bestcostID(1,1)); % - もっともよい評価の軌道y成分
+                    data.bestz(idx, :) = data.path{idx}(3, :, data.bestcostID(1,1)); % - もっともよい評価の軌道z成分
+                end
             else
-                data.bestx(idx, :) = data.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
-                data.besty(idx, :) = data.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
-                data.bestz(idx, :) = data.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                if idx == 1
+                    data.bestx(idx, :) = data.bestx(idx, :); % - 制約外は前の評価値を引き継ぐ
+                    data.besty(idx, :) = data.besty(idx, :); % - 制約外は前の評価値を引き継ぐ
+                    data.bestz(idx, :) = data.bestz(idx, :); % - 制約外は前の評価値を引き継ぐ
+                else
+                    data.bestx(idx, :) = data.bestx(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                    data.besty(idx, :) = data.besty(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                    data.bestz(idx, :) = data.bestz(idx-1, :); % - 制約外は前の評価値を引き継ぐ
+                end
             end
         end
+        data.input_v(:,idx) =     agent.controller.result.input_v;
+        data.xr{idx} = xr;
 
         state_monte = agent.estimator.result.state;
         ref_monte = agent.reference.result.state;
@@ -246,11 +248,13 @@ end
 %             time.t, calT, data.variable_particle_num(idx), altitudeSlope,data.sigma{idx})
         fprintf("t: %f calT: %f \t input: %f %f %f %f \t input_v: %f %f %f %f \n", ...
             time.t, calT, agent.input(1), agent.input(2), agent.input(3), agent.input(4), data.input_v(1, idx),data.input_v(2, idx),data.input_v(3, idx),data.input_v(4, idx));
-        fprintf("J: %f, \t Jconst: %f", data.bestcost(1,idx), data.param.ConstEval);
+        if fMC == 1
+            fprintf("J: %f, \t Jconst: %f", data.bestcost(1,idx), data.param.ConstEval);
+        end
         
         fprintf("\n");
 
-        % figure(5);
+        % figure(5); 10000...00サンプルの時に描画だけやって確認する用
         % hold on;
         % plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(1), '.', 'MarkerSize', 10, 'Color','blue'); 
         % plot(time.t, logger.Data.agent.estimator.result{idx}.state.p(2), '.', 'MarkerSize', 10, 'Color','red');
@@ -276,16 +280,16 @@ end
                 Color_ceil = zeros(path_count,1);
                 for j = 1:path_count % サンプルごとにホライズンはまとめて描画 サンプルのループ
                     %% 棄却
-                    if ~isnan(pathJN(j, 1))
-			            plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color',Color_map(ceil(pathJN(j, 1)),:), 'LineWidth',1); % HL
-                    else
-                        plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color', '#808080', 'LineWidth',1); % 棄却
-                    end
-                    % if data.pathJ{idx}(j, 1) == data.param.ConstEval
-                    %     plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color', '#808080', 'LineWidth',1);
+                    % if ~isnan(pathJN(j, 1))
+			        %     plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color',Color_map(ceil(pathJN(j, 1)),:), 'LineWidth',1); % HL
                     % else
-                    %     plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color',Color_map(ceil(pathJN(j, 1)),:), 'LineWidth',1); % HL
+                    %     plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color', '#808080', 'LineWidth',1); % 棄却
                     % end
+                    if data.pathJ{idx}(j, 1) >= data.param.ConstEval
+                        plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color', '#808080', 'LineWidth',1);
+                    else
+                        plot(data.path{idx}(3,:,j),data.path{idx}(7,:,j),'Color',Color_map(ceil(pathJN(j, 1)),:), 'LineWidth',1); % HL
+                    end
                     hold on;
                 end
                 plot(state_monte.p(1), state_monte.p(2), '.', 'MarkerSize', 20, 'Color', 'red');    % 現在位置
@@ -340,26 +344,6 @@ end
 %% figure.m
 savefigure
 
-%% save data
-% data_now = datestr(datetime('now'), 'yyyymmdd');
-% Title = strcat(['SlopeLanding-input4-eachSigma-normalWeight', '-N'], num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
-% Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
-% if exist(Outputdir) ~= 7
-%     mkdir ../../students/komatsu/simdata/20230801/
-% end
-% save(strcat('/home/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
-% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")
-% Video Only
-% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, "-forVIDEO", ".mat"), "logger", "-v7.3");
-
-%% figure保存
-% foldername = datestr(datetime('now'), 'YYYYmmdd');
-% now = datetime('now'); datename = datestr(datetime('now'), 'HHMMSS');
-% Outputdir = '../../students/komatsu/simdata/20230515/';
-% saveas(1,strcat(Outputdir,datename, "_position"),'fig');
-% saveas(2,strcat(Outputdir,datename, "_attitude"),'fig');
-% saveas(3,strcat(Outputdir,datename, "_velocity"),'fig');
-% saveas(4,strcat(Outputdir,datename, "_input"),'fig');
 %% 動画生成
 % tic
 pathJ = data.pathJ;
@@ -383,22 +367,3 @@ Outputdir_mov = 'C:/Users/student/Documents/students/komatsu/simdata/20231108/An
 Outputdir = 'C:/Users/student/Documents/students/komatsu/simdata/20231108/Animation/';
 % PlotMov_sort
 % toc
-%% Home PC adress
-% mkdir ../../students/komatsu/simdata/20230522/ png/Animation1
-% mkdir ../../students/komatsu/simdata/20230522/ png/Animation_omega
-% mkdir ../../students/komatsu/simdata/20230522/ video
-% Outputdir = '../../students/komatsu/simdata/20230522';
-% PlotMov       % 2次元プロット
-% toc
-
-% PlotMovXYZ  % 3次元プロット
-% save()
-%% 学校PC adress
-Outputdir = '../../students/komatsu/simdata/20230614/';
-% save('C:\Users\student\"OneDrive - 東京都市大学 Tokyo City University (1)"\研究室_2023\Data\20230427v1.mat', '-v7.3')
-% save("C:/Users/student/Documents/students/komatsu/MCMPC/20230515v1.mat", '-v7.3')
-% mkdir ../../students/komatsu/simdata/20230614/ % ここは毎日更新する
-% Savefilename = Title;
-% Savefigurename = strcat(Savefilename, '_position');
-% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',datestr(datetime('now'), 'yyyymmdd'), '/', Savefilename, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3");
-% saveas(1, strcat(Outputdir, Savefilename), "png");

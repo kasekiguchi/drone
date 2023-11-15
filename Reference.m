@@ -211,6 +211,8 @@ function [xr] = Reference(Data, T, Agent, ~, ~, ~, ~, ~)
     xr = zeros(16, Data.param.H);
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     % TimeVarying
+
+    
     for h = 0:Data.param.H-1
         t = T.t + Data.param.dt * h;
         Ref = RefTime(t); % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
@@ -219,5 +221,11 @@ function [xr] = Reference(Data, T, Agent, ~, ~, ~, ~, ~)
         xr(4:6, h+1) =   [0;0;Ref(4)]; % 姿勢角
         xr(10:12, h+1) = [0;0;0];
         xr(13:16, h+1) = Data.param.ref_input;
+
+        %% 加速度から姿勢角目標値の算出 
+        % acc = Ref(9:11);
+        % roll = atan(-acc(2)/-9.81);
+        % pitch = atan(-acc(1)/-9.81);
+        % xr(4:6, h+1) =   [roll;pitch;Ref(4)]; % 姿勢角
     end
 end

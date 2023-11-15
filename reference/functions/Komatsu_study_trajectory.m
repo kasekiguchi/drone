@@ -41,10 +41,10 @@ syms t real
 % yaw = 0;
 
 %%
-% x = 1;
-% y = 2;
-% z = 0.5;
-% yaw = 0;
+x = 1;
+y = 0;
+z = 1;
+yaw = 0;
 
 %% 
 % x = cos(2*pi*t/30)-1;
@@ -57,11 +57,11 @@ syms t real
 % z = sin(2*pi*t/2.5)*0.02+sin(2*pi*t/2.5)*0.01-sin(2*pi*t/25)*0.005 + 2;
 
 %% circle
-T = 40; % 20 でもいける
-x = cos(2*pi*t/T)-1;
-y = sin(2*pi*t/T);
-z = 1;
-yaw = 0;
+% T = 40; % 20 でもいける
+% x = cos(2*pi*t/T)-1;
+% y = sin(2*pi*t/T);
+% z = 1;
+% yaw = 0;
 
 %% bara
 % A = 8/6;

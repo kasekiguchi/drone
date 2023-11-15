@@ -18,19 +18,16 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
         modelf
         modelp
         F1
-        Weight
-        WeightF
-        WeightR
-        WeightRp
+        Q
+        Qf
+        R
+        Rp
         A
         B
         previous_input
         expandA
         expandB
         expandC
-        Q
-        Qf
-        R
     end
 
     methods
@@ -58,10 +55,10 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
             obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,param.dt);
             n = 12; % 状態数
             % 重みの配列サイズ変換
-            obj.Weight = blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI);
-            obj.WeightF = blkdiag(obj.param.Zf, obj.param.Xf, obj.param.Yf, obj.param.PHIf);
-            obj.WeightR = obj.param.R;  % 目標入力
-            obj.WeightRp = obj.param.RP; % 前ステップとの入力
+            obj.Q = blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI);
+            obj.Qf = blkdiag(obj.param.Zf, obj.param.Xf, obj.param.Yf, obj.param.PHIf);
+            obj.R = obj.param.R;  % 目標入力
+            obj.Rp = obj.param.RP; % 前ステップとの入力
             % HL. A, B行列定義
             % z, x, y, yawの順番
             A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
@@ -78,21 +75,19 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
 %             options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
             
             %-- fmincon設定
-%             options.Algorithm = 'sqp';  % 逐次二次計画法
-%             options.Display = 'none';   % 計算結果の表示
-            options = optimset('Display', 'off');
+            options = optimoptions('quadprog');
+            options = optimoptions(options,'MaxIterations',      1.e+9);     % 最大反復回数
+            options = optimoptions(options,'ConstraintTolerance',1.e-5);%制約違反に対する許容誤差
+            options.Display = 'none';
             obj.param.options_fmin = options;
+            % problem.solver = 'quadprog';
 
             obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
-            %% expand coefficient
-            [obj.expandA, obj.expandB] = ExpandState(obj);
-            obj.expandC = eye(length(obj.expandA));
-
             %% 重み再定義
-            obj.Q = repmat(obj.Weight, obj.param.H, obj.param.H);
-            obj.Qf = repmat(obj.WeightF, obj.param.H, obj.param.H);
-            obj.R = repmat(obj.param.R, obj.param.H, obj.param.H);
+            % obj.Q = repmat(obj.Weight, obj.param.H, obj.param.H);
+            % obj.Qf = repmat(obj.WeightF, obj.param.H, obj.param.H);
+            % obj.R = repmat(obj.param.R, obj.param.H, obj.param.H);
         end
 
         %-- main()的な
@@ -141,21 +136,16 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
             obj.reference.xr = [xr(3,:);xr(7,:);xr(1,:);xr(5,:);xr(9,:);xr(13,:);xr(2,:);xr(6,:);xr(10,:);xr(14,:);xr(4,:);xr(8,:)];
 
             %% MPC 設定
-%             fun = @obj.objective;
-%             x0 = obj.previous_input;
-%             AA = []; b = []; Aeq = []; beq = []; 
-%             lb = [zeros(1, obj.param.H); repmat(obj.param.input_min, 3,obj.param.H)]; % min
-%             ub = [10 * ones(1, obj.param.H); repmat(obj.param.input_max, 3,obj.param.H)]; % max
-%             nonlcon = [];
+            % fun = @obj.objective;
+            x0 = obj.previous_input;
+            AA = []; b = []; Aeq = []; beq = []; 
+            lb = [zeros(1, obj.param.H); repmat(-obj.param.input_TH, 3,obj.param.H)]; % min
+            ub = [10 * ones(1, obj.param.H); repmat(obj.param.input_TH, 3,obj.param.H)]; % max
+            % nonlcon = [];
 
             %% QP : 周るけど評価関数的に目標値入れてない
-%             T = 
-%             H = obj.expandB' * obj.Q * obj.expandB + obj.R;
-%             fb = [obj.current_state' * (obj.expandA' * obj.Q * obj.expandB); T * BB];
-%             [var] = quadprog(H,f,AA,b,Aeq,beq,lb,ub,x0,obj.param.options_fmin);
-
-            %% QP using mpc function. Create by hatenablog
-            var = obj.mpc(obj.reference.xr);
+            [H, f] = obj.ExpandState();
+            [var] = quadprog(H,f,AA,b,Aeq,beq,lb,ub,x0,obj.param.options_fmin);
             
             % var
             obj.previous_input = var(1:4);
@@ -175,106 +165,43 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
             obj.result
         end
 
-        %% model predictive control
-        function uopt = mpc(obj, ref)
-            A_aug = obj.A;
-            B_aug = obj.B;
-            C_aug = eye(length(obj.A));
-            
-            QQ = obj.Weight;
-            S  = obj.WeightF;
-            RR = obj.WeightR;
-            N  = obj.param.H;
-            
-            CQC = C_aug' * QQ * C_aug;
-            CSC = C_aug' * S * C_aug;
-            QC  = QQ * C_aug; 
-            SC  = S * C_aug;
-            
-            Qdb = zeros(length(CQC(:,1))*N  ,length(CQC(1,:))*N);
-            Tdb = zeros(length(QC(:,1))*N   ,length(QC(1,:))*N);
-            Rdb = zeros(length(RR(:,1))*N   ,length(RR(1,:))*N);
-            Cdb = zeros(length(B_aug(:,1))*N,length(B_aug(1,:))*N);
-            Adc = zeros(length(A_aug(:,1))*N,length(A_aug(1,:)));
-            
-            % Filling in the matrices
-            for i = 1:N
-               if i == N
-                   Qdb(1+length(CSC(:,1))*(i-1):length(CSC(:,1))*i,1+length(CSC(1,:))*(i-1):length(CSC(1,:))*i) = CSC;
-                   Tdb(1+length(SC(:,1))*(i-1):length(SC(:,1))*i,1+length(SC(1,:))*(i-1):length(SC(1,:))*i) = SC;           
-               else
-                   Qdb(1+length(CQC(:,1))*(i-1):length(CQC(:,1))*i,1+length(CQC(1,:))*(i-1):length(CQC(1,:))*i) = CQC;
-                   Tdb(1+length(QC(:,1))*(i-1):length(QC(:,1))*i,1+length(QC(1,:))*(i-1):length(QC(1,:))*i) = QC;
-               end
-               
-               Rdb(1+length(RR(:,1))*(i-1):length(RR(:,1))*i,1+length(RR(1,:))*(i-1):length(RR(1,:))*i) = RR;
-               
-               for j = 1:N
-                   if j<=i
-                       Cdb(1+length(B_aug(:,1))*(i-1):length(B_aug(:,1))*i,1+length(B_aug(1,:))*(j-1):length(B_aug(1,:))*j) = A_aug.^(i-j)*B_aug;
-                   end
-               end
-               Adc(1+length(A_aug(:,1))*(i-1):length(A_aug(:,1))*i,1:length(A_aug(1,:))) = A_aug^(i);
+        function [H, f] = ExpandState(obj)
+            Aq = obj.A;
+            Bq = obj.B;
+            Cq = diag(ones(size(obj.A, 1), 1));
+
+            Qq = obj.Q;
+            Qfq = obj.Qf;
+            Rq = obj.R;
+            Hq = obj.param.H;
+
+            X = obj.current_state;% + obj.reference.xr(1:12,1); % 実状態化しないといけない
+            ref = ones(12*obj.param.H ,1);
+            % ref = reshape(obj.reference.xr, 12*obj.param.H, []); % 12*10, 1
+            uref = repmat(obj.param.ref_input, obj.param.H, 1); % 4*10,1
+
+            CQC = Cq' * Qq * Cq;
+            CQfC = Cq' * Qfq * Cq;
+            QC = Qq * Cq;
+            QfC = Qfq * Cq;
+
+            Rm = blkdiag(Rq, Rq, Rq, Rq, Rq, Rq, Rq, Rq, Rq, zeros(4)); %R
+            Am = [Aq; Aq^2; Aq^3; Aq^4; Aq^5; Aq^6; Aq^7; Aq^8; Aq^9; Aq^10]; %A
+            Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
+            qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
+
+
+            for i  = 1:Hq
+                for j = 1:Hq
+                    if j <= i
+                        S(1+length(Bq(:,1))*(i-1):length(Bq(:,1))*i,1+length(Bq(1,:))*(j-1):length(Bq(1,:))*j) = Aq^(i-j)*Bq;
+                    end
+                end
             end
-            Hdb  = Cdb' * Qdb * Cdb + Rdb;
-            Fdbt = [Adc' * Qdb * Cdb; -Tdb * Cdb];
-            
-            % Calling the optimizer (quadprog)
-            % Cost function in quadprog: min(du)*1/2*du'Hdb*du+f'du
-            ft = [obj.current_state', ref'] * Fdbt;
-        
-            % Call the solver (quadprog)
-            AA   = [];
-            b   = [];
-            Aeq = [];
-            beq = [];
-            lb = [zeros(1, obj.param.H); repmat(obj.param.input_min, 3,obj.param.H)]; % min
-            ub = [10 * ones(1, obj.param.H); repmat(obj.param.input_max, 3,obj.param.H)]; % max
-            x0  = [];
-            options_quad = optimset('Display', 'off');
-            [du, ~] = quadprog(Hdb,ft,AA,b,Aeq,beq,lb,ub,x0,options_quad);
-            uopt = du(1);
-        end
-
-        %------------------------------------------------------
-        %======================================================
-        function [eval] = objective(obj, x)   % obj.~とする
-            U = x;                % 4  * 10 * N
-            X(:, 1) = obj.current_state;
-            for L = 2:obj.param.H
-                X(:,L) = obj.A * X(:,L-1) + obj.B * U(:,L-1);
-            end
-            Z = X;
-
-            tildeUpre = U - obj.input.u;          % agent.input 　前時刻入力との誤差
-            tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
-
-            %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-            stageStateZ = diag(Z(:,1:end-1)'* obj.Weight * Z(:,1:end-1))';
-            stageInputPre = diag(tildeUpre(:,1:end-1)'* obj.WeightRp * tildeUpre(:,1:end-1))';
-            stageInputRef = diag(tildeUref(:,1:end-1)'* obj.WeightR  * tildeUref(:,1:end-1))';
-
-            %-- 状態の終端コストを計算 状態だけの終端コスト
-            terminalState = Z(:, end)' * obj.Weight * Z(:,end);
-
-            %-- 評価値計算
-            eval = sum(stageStateZ+stageInputPre+stageInputRef) + terminalState;  % 全体の評価値
-        end
-
-        function [expandA, expandB] = ExpandState(obj)
-            H = obj.param.H;
-            L = size(obj.A, 1);
-            expandA = zeros(L*H, 12);
-            expandB = zeros(L*H, 4*H);
-            BB = zeros(12, 4*H);
-            for n = 1:H
-                BB(:, 4*(n-1)+1 : 4*n) = obj.A.^(n-1)*obj.B;
-            end
-
-            for n = 1:H
-                expandA(L*(n-1)+1:L*n,:) = obj.A.^n;
-                expandB(L*(n-1)+1:L*n,:) = [BB(:, 1:4*n), zeros(12, (H-n)*4)];
-            end
+            H = S' * Qm * S + Rm;
+            H = (H+H')/2;
+            F = [Am' * Qm * S; -qm * S; -Rm];
+            f = [X', ref', uref'] * F;
         end
     end
 end

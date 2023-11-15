@@ -3,7 +3,7 @@ function Controller = Controller_HLMCMPC(~)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 500; % 100000
+    Controller_param.Maxparticle_num = 1000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
 
@@ -15,7 +15,7 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.input.Maxinput = 1.5;
     Controller_param.input.Constinput = 10;
 
-    Controller_param.input.range = 10;
+    Controller_param.input.range = 50; % 50
     % Controller_param.input.Maxsigma = 5 * [0.01,1,1,1]; % 10
     % Controller_param.input.Minsigma = 0.1 * [0.001,1,1,1];
 
