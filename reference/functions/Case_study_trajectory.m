@@ -15,7 +15,7 @@ syms t real
 x = 0;
 y = 0;
 z = 1;
-yaw = -2*pi*t/5;
+% yaw = -2*pi*t/5;
 
 % %% takeoff
 % T = 10;
@@ -105,7 +105,7 @@ yaw = -2*pi*t/5;
 % b = 3/T^2 * (rz-rz0);
 % z = a*(t)^3+b*(t)^2+rz0;
 
-ref=@(t)[x;y;z;yaw];
-% ref=@(t)[x;y;z;0];
+% ref=@(t)[x;y;z;yaw];
+ref=@(t)[x;y;z;0];
 end
 
