@@ -192,7 +192,10 @@ classdef MY_WAY_POINT_REFERENCE < handle
                         j=1;
                         delta=0.02;
                         end_time=time(end)+1;
-                        % length_time = length(0:delta:end_time);
+                        length_time = length(0:delta:end_time);
+                        xyz = zeros(3,length_time);
+                        vxyz = zeros(3,length_time);
+                        axyz = zeros(3,length_time);
                         for t_f = 0:delta:end_time
                         
                             t_ref= t_f - t_ref0;%目標地点が定められた時間からの経過時間
@@ -212,11 +215,9 @@ classdef MY_WAY_POINT_REFERENCE < handle
                                     t_ref=0;
                                 end
                             end
-                            % for k = 1:3
-                                xyz(:,j) = coefficients.(names{1})(:,:,i)*t_powers.(names{1})(t_ref);
-                                vxyz(:,j) = coefficients.(names{2})(:,:,i)*t_powers.(names{2})(t_ref);
-                                axyz(:,j) = coefficients.(names{3})(:,:,i)*t_powers.(names{3})(t_ref);
-                            % end
+                            xyz(:,j) = coefficients.(names{1})(:,:,i)*t_powers.(names{1})(t_ref);
+                            vxyz(:,j) = coefficients.(names{2})(:,:,i)*t_powers.(names{2})(t_ref);
+                            axyz(:,j) = coefficients.(names{3})(:,:,i)*t_powers.(names{3})(t_ref);
                             j=j+1;
                         end
             ref.xyz=xyz;
@@ -302,7 +303,6 @@ classdef MY_WAY_POINT_REFERENCE < handle
                             ylabel('$a$ (m/$\mathrm{s^2}$)','FontSize',18,'Interpreter','latex')
                             legend({"$x$","$y$","$z$","$|a|$"},"Interpreter","latex")
                             set(gca,"TickLabelInterpreter","latex","FontSize",18)
-                            i=i+1;
             
                             fprintf("If you confirmed trajectory, push the Enter key.");
                             input("");

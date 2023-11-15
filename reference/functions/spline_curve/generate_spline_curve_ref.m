@@ -1,4 +1,3 @@
-% function ref = generate_spline_curve_ref(loadedRef)
 function ref = generate_spline_curve_ref(loadedRef,fcmd)
 %% スプライン曲線
     while 1
@@ -33,7 +32,6 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
         % n = 5;%スプライン曲線の次数(寄関数の方がいいよ)
         % dt = 3;%各点の間の移動時間
         % ticksDelta = 0.15; %格子の間隔(m)
-        % t = 0:dt:dt*(pointN-1);
     
         pointN = input("Number of point : ");%点の数
         n = input("Order of spline curve : ");%スプライン曲線の次数(寄関数の方がいいよ)
