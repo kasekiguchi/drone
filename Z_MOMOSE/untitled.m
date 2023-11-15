@@ -415,47 +415,56 @@ Cc2=[0 0];
 dt=0.025;
 [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
 place(Ad1,Bd1,[-0.05,-1])
-%%
+%% スプライン曲線
 close all
 clear 
-pn =15;%点の数
-n = 5;
-dt = 3;
-t = 0:dt:dt*(pn-1);
+pointN = 3;%点の数
+n = 5;%スプライン曲線の次数(寄関数の方がいいよ)
+dt = 3;%各点の間の移動時間
+ticksDelta = 0.15; %格子の間隔(m)
+t = 0:dt:dt*(pointN-1);
 
+%x-y平面を描画
 i=1;
 f(i)=figure(i);
 f(i).WindowState = 'maximized';
 grid on
-xticks(-1.5:0.1:1.5)
-yticks(-1.5:0.1:1.5)
+xticks(-1.5:ticksDelta:1.5)
+yticks(-1.5:ticksDelta :1.5)
 xlim([-1.5 1.5])
 ylim([-1.5 1.5])
 xline(0);
 yline(0);
-xlabel('x')
-ylabel('y')
+xlabel('x','Interpreter','latex')
+ylabel('y','Interpreter','latex')
 daspect([1 1 1]);
+% gca()
 hold on
-posi = zeros(pn,3);
-for j = 1:pn
+posi = zeros(pointN,3);
+for j = 1:pointN
     [gx,gy] = ginput(1);
     gx=max(min(gx,1.5),-1.5);
     gy=max(min(gy,1.5),-1.5);
-    posi(j,1:2) = round([gx,gy],1);
+    gxy = [gx,gy];
+    %どちらの隣の格子点に判別して最も近い格子点に配置
+    qb = ticksDelta*fix(gxy./ticksDelta);%商を求める
+    r = gxy - qb;%余りを求める
+    posi(j,1:2) = qb + ticksDelta*round(r./ticksDelta);%余りをticksDeltaで割って四捨五入し，ticksDelta倍したものを商に加える
+
+    % posi(j,1:2) = round([gx,gy],1);
     plot(posi(j,1),posi(j,2),'Marker','.','MarkerSize',12);
     str = ['  p',num2str(j),' (',num2str(posi(j,1)),', ',num2str(posi(j,2)),')'];
     text(posi(j,1),posi(j,2),str)
 end
 i=i+1;
 
-rx=way_point_ref([t',posi],n,1,0);
+rxy=MY_WAY_POINT_REFERENCE.way_point_ref([t',posi],n,1,0);
 
 f(i)=figure(i);
 f(i).WindowState = 'maximized';
 tiledlayout("horizontal")
 nexttile
-plot(rx.xyz(1,:),rx.xyz(2,:))
+plot(rxy.xyz(1,:),rxy.xyz(2,:))
 xlabel('x')
 ylabel('y')
 daspect([1,1,1])
@@ -464,7 +473,7 @@ hold on
 plot(posi(:,1),posi(:,2),'Marker','o','LineStyle','none')
 grid on
 nexttile
-plot(rx.xyz(1,:),rx.xyz(3,:))
+plot(rxy.xyz(1,:),rxy.xyz(3,:))
 xlabel('x')
 ylabel('z')
 daspect([1,1,1])
@@ -473,7 +482,7 @@ hold on
 plot(posi(:,1),posi(:,3),'Marker','o','LineStyle','none')
 grid on
 nexttile
-plot(rx.xyz(2,:),rx.xyz(3,:))
+plot(rxy.xyz(2,:),rxy.xyz(3,:))
 xlabel('y')
 ylabel('z')
 daspect([1,1,1])
@@ -491,36 +500,38 @@ end
 f(i)=figure(i);
 f(i).WindowState = 'maximized';
 grid on
-xticks(-1.5:0.1:1.5)
-yticks(-0.1:0.1:2)
+xticks(-1.5:ticksDelta:1.5)
+yticks(-0.1:ticksDelta:2)
 xlim([-1.5 1.5])
 ylim([-0.1 2])
 xline(0);
 yline(0);
 if k==1
-    xlabel('x')
+    xlabel('x','Interpreter','latex')
 else
-    xlabel('y')
+    xlabel('y','Interpreter','latex')
 end
-ylabel('z')
+ylabel('z','Interpreter','latex')
 daspect([1 1 1]);
 hold on
-plot(posi(:,k),zeros(pn,k),'Marker','.','MarkerSize',12,'LineStyle','none');
-for j = 1:pn
-    str = ['  px',num2str(j),' (',num2str(posi(j,k)),')'];
-    text(posi(j,k),0,str)
-end
-for j = 1:pn
-    [~,gy] = ginput(1);
-    gy=max(min(gy,2),0);
-    posi(j,3) = round(gy,1);
+plot(posi(:,k),zeros(pointN,k),'Marker','.','MarkerSize',12,'LineStyle','none');
+str = "  px" + num2str((1:pointN)') + " (" + num2str(posi(:,k)) + ")";
+text(posi(:,k),zeros(pointN,1),str)
+for j = 1:pointN
+    [~,gz] = ginput(1);
+    gz=max(min(gz,2),0);
+    %どちらの隣の格子点に判別して最も近い格子点に配置
+    qb = ticksDelta*fix(gz./ticksDelta);%商を求める
+    r = gz - qb;%余りを求める
+    posi(j,3) = qb + ticksDelta*round(r./ticksDelta);%余りをticksDeltaで割って四捨五入し，ticksDelta倍したものを商に加える
+
     plot(posi(j,k),posi(j,3),'Marker','.','MarkerSize',12);
     str = ['  p',num2str(j),' (',num2str(posi(j,k)),', ',num2str(posi(j,3)),')'];
     text(posi(j,k),posi(j,3),str)
 end
 fprintf("If you confirmed points, push the Enter key.");
 input("");
-rz=way_point_ref([t',posi],n,1);
+ref=MY_WAY_POINT_REFERENCE.way_point_ref([t',posi],n,1);
 
 % f(i)=figure(i);
 % plot3(rz.xyz(1,:),rz.xyz(2,:),rz.xyz(3,:));

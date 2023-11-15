@@ -30,7 +30,8 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[2;2;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[0.2;-0.2;0.8],"k",[0;0;1],"m",[-2;2;3]),10});%縦ベクトルで書く,
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[2;1;1.2],"h",[-0.2;-0.8;0.5]),10});%縦ベクトルで書く,
-agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));
+% agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),1));%コマンドでシートを選びたいときは位置2を1にする
 
 fApprox_FTxy = 0;%approximate x,y directional FTC input : 1
 fNewParam = 0;%新しく更新する場合 : 1

@@ -5,7 +5,7 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 
@@ -44,8 +44,8 @@ endTime = 1E3;
                 % log_FT_Zservo_gain_n1,...
                 % log_FT2_servo
                 % log_HLFT
-                log_LS15,...
-                log_FT15
+                log_HLLS,...
+                log_HLFT
                 % log_
 
 
@@ -68,7 +68,8 @@ endTime = 1E3;
      % n=[1:16,18 20:24];
      % n = [1:17,24];
      % n = [1:11];
-     n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     % n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     n=["t_errx","t_erry","t_errz","three_D"];
      % n=["t_p","input","u","Trs","attitude","velocity","angular_velocity"];
      % n = "inner_input";
      % n=1;
@@ -277,9 +278,9 @@ end
 %変更========================================================
 % subfolder='sim';%sim or exp
 subfolder='sample';%sim or exp
-ExpSimName='ELhover';%実験,シミュレーション名
+ExpSimName='demo';%実験,シミュレーション名
 % contents='FT_apx_max';%実験,シミュレーション内容
-contents='ELFTservo';%実験,シミュレーション内容
+contents='comp';%実験,シミュレーション内容
 %==========================================================
 FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
 FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
