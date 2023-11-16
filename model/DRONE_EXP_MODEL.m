@@ -34,6 +34,11 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
           end
           obj.connector=SERIAL_CONNECTOR(param);
           fprintf("Drone %s is ready\n",param.port);
+        case "ros2"
+            param.IP = param.node.ID;
+            obj.id = param.node;
+            obj.connector = ROS2_CONNECTOR(param);
+            fprintf("Whill %d is ready\n", param.IP);
       end
     end
     function do(obj,varargin)

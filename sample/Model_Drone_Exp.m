@@ -18,12 +18,21 @@ Model.id = id;
 Model.type="DRONE_EXP_MODEL"; % class name
 Model.name="lizard"; % print name
 Setting.conn_type = conn_type;
-if strcmp(conn_type,"udp")
-  Setting.num = id;
-elseif strcmp(conn_type,"serial")
-  available_ports=serialportlist("available");
-  disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
-  Setting.port = id;
+switch conn_type
+% if strcmp(conn_type,"udp")
+    case "udp"
+        Setting.num = id;
+% elseif strcmp(conn_type,"serial")
+    case "serial"
+      available_ports=serialportlist("available");
+      disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
+      Setting.port = id;
+    case "ros2"        
+        Setting.param.state_list = ["p"];
+        Setting.param.subName = ["p"];
+        Setting.subTopic(1,:) = {'/rover_odo','geometry_msgs/Twist'};%%%%%%%%%%%%sub topic name
+        Setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%%%pub topic name       
+        Setting.node            = ros2node("/agent_"+string(id),id);%%%%%%%%%%%%%create node
 end
 Model.param = Setting;
 end
