@@ -10,6 +10,7 @@ classdef DRONE < handle
     controller
     input_transform
     id = 1
+    node
   end
 
   methods

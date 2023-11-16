@@ -1,6 +1,6 @@
-clc;
-clearvars -except fExp
-disp("clear node");
+% clc;
+% clearvars -except fExp
+% disp("clear node");
 
 % mega rover
 ts = 0; % initial time
