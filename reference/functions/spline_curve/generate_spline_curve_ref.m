@@ -1,5 +1,13 @@
 function ref = generate_spline_curve_ref(loadedRef,fcmd)
 %% スプライン曲線
+%loadedRef : あらかじめ決めておいたreference
+%fcmd : コマンドでシートを選びたいときは1にする
+%Excelシートに記録しておいたwaypointを使う場合と新しく作成する場合の2パターンに分かれている
+%===新しく作る場合の初期設定の例===
+% pointN = 3;%点の数
+% n = 5;%スプライン曲線の次数(寄関数の方がいいよ)
+% dt = 3;%各点の間の移動時間(point間の移動距離で決める)
+% ticksDelta = 0.15; %プロットに用いる座標の格子の間隔(m)
     while 1
         isUsed = input("Use loaded reference : '1' \nCreat now : '0' \nFill in : ");
         if isempty(isUsed)
@@ -25,7 +33,7 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
             loadedRef = readmatrix("waypoint.xlsx",'Sheet',loadedSheetName);
         end
         n = input("Order of spline curve : ");%スプライン曲線の次数(寄関数の方がいいよ)
-        ref=MY_WAY_POINT_REFERENCE.way_point_ref(loadedRef,n,1,0);
+        ref=MY_WAY_POINT_REFERENCE.way_point_ref(loadedRef,n,1,1);
     else
         %example
         % pointN = 3;%点の数
@@ -35,17 +43,47 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
     
         pointN = input("Number of point : ");%点の数
         n = input("Order of spline curve : ");%スプライン曲線の次数(寄関数の方がいいよ)
-        dt = input("Time between points (s) : ");%各点の間の移動時間
         ticksDelta = input("Grid span (m) : "); %格子の間隔(m)
-        time = (0:dt:dt*(pointN-1))';
+        while 1
+            isSameTime = input("Use same time span '1'\nUse difference time span '0'\nFill in : ");
+           if isempty(isSameTime)
+                isSameTime = 1;
+                disp("1")
+                break
+            elseif isSameTime==0||isSameTime==1
+                break
+            end
+        end
+        if isSameTime
+            dt = input("Time between points (s) : ");%各点の間の移動時間
+            time = (0:dt:dt*(pointN-1))';
+        else
+            while 1
+                fprintf("The number of spans is '%d'\n",pointN - 1)
+                disp("Example (number of span is 5): [2,4,2,3,1] or [2;4;2;3;1]")
+                dt = input("Time spans (s) : ");%各点の間の移動時間
+                if pointN == length(dt) + 1
+                    tmp_t = dt;
+                    time =  zeros(pointN,1);
+                    for i = 1:length(tmp_t)
+                        time(i+1) = time(i) + tmp_t(i);
+                    end
+                    break
+                else 
+                    disp("The number of spans is not correct.")
+                end
+            end
+        end
         
         %x-y平面を描画
         i=1;
         f(i)=figure(i);
         f(i).WindowState = 'maximized';
         grid on
-        xticks(-1.5:ticksDelta:1.5)
-        yticks(-1.5:ticksDelta :1.5)
+        axisPositive = 0:ticksDelta:1.5;
+        axisNegative = -flip(axisPositive(2:end));
+        xticks([axisNegative,axisPositive])
+        yticks([axisNegative,axisPositive])
         xlim([-1.5 1.5])
         ylim([-1.5 1.5])
         xline(0);
@@ -122,8 +160,10 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
         f(i)=figure(i);
         f(i).WindowState = 'maximized';
         grid on
-        xticks(-1.5:ticksDelta:1.5)
-        yticks(-0.1:ticksDelta:2)
+        xticks([axisNegative,axisPositive])
+        axisPositive2 = 0:ticksDelta:2;
+        axisNegative2 = -flip(ticksDelta:ticksDelta:0.1);
+        yticks([axisNegative2,axisPositive2])
         xlim([-1.5 1.5])
         ylim([-0.1 2])
         xline(0);

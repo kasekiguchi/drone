@@ -92,11 +92,15 @@ classdef MY_WAY_POINT_REFERENCE < handle
 
     methods (Static)
         function ref = way_point_ref(val,n,fconfirm,fdrowfig)
+        % val         %時間とwaypoint
+        % n           %多項式次数
+        % fconfirm=1  %確認するか
+        % fdrowfig=1  %図を描画するか
         % time=[0,2,5,12];%time
         % point = [0,4,6,2;0,2,-1,4;0,3,5,2];%way points
         % n=5;%多項式次数
         arguments
-            val
+            val         %時間とwaypoint
             n           %多項式次数
             fconfirm=1    %確認するか
             fdrowfig=1  %図を描画するか
@@ -230,21 +234,13 @@ classdef MY_WAY_POINT_REFERENCE < handle
                             plot3(xyz(1,:),xyz(2,:),xyz(3,:),"LineWidth",2);
                             hold on
                             plot3(point(1,:),point(2,:),point(3,:),"LineStyle","none","Marker","o","LineWidth",2)
+                            text(point(1,1),point(2,1),point(3,1),"\quad start","interpreter","latex",'FontSize',14)
                             grid on
                             xlabel('$x$ (m)','FontSize',18,'Interpreter','latex')
                             ylabel('$y$ (m)','FontSize',18,'Interpreter','latex')
                             zlabel('$z$ (m)','FontSize',18,'Interpreter','latex')
                             set(gca,"TickLabelInterpreter","latex","FontSize",18)
                             hold off
-                            i=i+1;
-            
-                            figure(i)
-                            plot(0:delta:end_time,xyz,"LineWidth",2)
-                            grid on
-                            xlabel('$t$ (s)','FontSize',18,'Interpreter','latex')
-                            ylabel('$p$ (m)','FontSize',18,'Interpreter','latex')
-                            legend({"$x$","$y$","$z$"},'Interpreter','latex')
-                            set(gca,"TickLabelInterpreter","latex","FontSize",18)
                             i=i+1;
             
                             figure(i)
@@ -258,6 +254,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
                             pbaspect( [1,0.78084714548803,0.78084714548803]);
                             hold on
                             plot(point(1,:),point(2,:),'Marker','o','LineStyle','none',"LineWidth",2)
+                            text(point(1,1),point(2,1),"\quad start","interpreter","latex",'FontSize',14)
                             grid on
                             nexttile
                             plot(xyz(1,:),xyz(3,:),"LineWidth",2)
@@ -268,6 +265,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
                             pbaspect( [1,0.78084714548803,0.78084714548803]);
                             hold on
                             plot(point(1,:),point(3,:),'Marker','o','LineStyle','none',"LineWidth",2)
+                            text(point(1,1),point(3,1),"\quad start","interpreter","latex",'FontSize',14)
                             grid on
                             nexttile
                             plot(xyz(2,:),xyz(3,:),"LineWidth",2)
@@ -275,12 +273,22 @@ classdef MY_WAY_POINT_REFERENCE < handle
                             pbaspect( [1,0.78084714548803,0.78084714548803]);
                             hold on
                             plot(point(2,:),point(3,:),'Marker','o','LineStyle','none',"LineWidth",2)
+                            text(point(2,1),point(3,1),"\quad start","interpreter","latex",'FontSize',14)
                             xlabel('$y$ (m)','FontSize',18,'Interpreter','latex')
                             ylabel('$z$ (m)','FontSize',18,'Interpreter','latex')
                             set(gca,"TickLabelInterpreter","latex","FontSize",18)
                             grid on
                             i=i+1;
-            
+                            
+                            figure(i)
+                            plot(0:delta:end_time,xyz,"LineWidth",2)
+                            grid on
+                            xlabel('$t$ (s)','FontSize',18,'Interpreter','latex')
+                            ylabel('$p$ (m)','FontSize',18,'Interpreter','latex')
+                            legend({"$x$","$y$","$z$"},'Interpreter','latex')
+                            set(gca,"TickLabelInterpreter","latex","FontSize",18)
+                            i=i+1;
+
                             figure(i)
                             plot(0:delta:end_time,vxyz,"LineWidth",2)
                             hold on
