@@ -76,14 +76,14 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     %-- main()的な
     function result = do(obj,param)
       % rng(0, "twister");
-      profile on
+      % profile on
       % OB = obj;
       xr = param{2};
       rt = param{3};
 %       obj.input.InputV = param{5};
       obj.state.ref = xr;
       obj.param.t = rt;
-      idx = round(rt/obj.self.model.dt+1);
+      % idx = round(rt/obj.self.model.dt+1);
 
       %% from main ref
       xd = [xr(1:3,1); 0; xr(7:9,1); 0]; % 9次多項式にも対応
@@ -269,15 +269,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.result.variable_N = obj.N; % 追加
       obj.result.Evaluationtra = obj.input.Evaluationtra;
       % obj.result.Evaluationtra_norm = obj.input.normE;
-      % obj.result.eachcost = [
-      %     obj.input.Evaluationtra(BestcostID(1), 1), ...
-      %     obj.input.Evaluationtra(BestcostID(2), 2), ...
-      %     obj.input.Evaluationtra(BestcostID(3), 3), ...
-      %     obj.input.Evaluationtra(BestcostID(4), 4), ...
-      %     obj.input.Evaluationtra(BestcostID(5), 5)]; % all, z, x, y, yaw, 
 
       result = obj.result;
-      profile viewer
+      % profile viewer
     end
     function show(obj)
       obj.result
@@ -355,13 +349,12 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
     %======================================================
     function [MCeval] = objective(obj, ~)   % obj.~とする
       U = obj.input.u(:,:,1:obj.N);                % 4  * 10 * N
+      removeX = [];
+      AP = [];
       %% 実状態との誤差
       Z = obj.state.error_data;
-
-      %% 制約外の軌道に対して値を付加
-      % x:3, y:7
-      [~, removeX, ~] = obj.constraints();
-
+      Zreal = obj.state.real_data;
+        
       %% ホライズンで重み大きく
       k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
       % k = ones(1, obj.param.H);
@@ -369,6 +362,15 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% コスト計算
       tildeUpre = U - obj.input.v;          % agent.input 　前時刻入力との誤差
       tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
+
+      %% 制約外の軌道に対して値を付加
+      % x:3, y:7
+      % [~, removeX, ~] = obj.constraints();
+
+      %% Artificial potential
+      % Xreal = Zreal(3,:,:);
+      % Yreal = Zreal(7,:,:);
+      % AP = obj.param.AP ./(sqrt((Xreal - obj.param.constX).^2) + sqrt((Yreal - obj.param.constY).^2));
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
       % stageStateZ =    k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
@@ -382,8 +384,16 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
 
       %% 軌道ごとに制約を評価
+      if ~isempty(removeX)
       stageStateZ(3, removeX) = stageStateZ(3, removeX) + obj.param.ConstEval;
       stageStateZ(7, removeX) = stageStateZ(7, removeX) + obj.param.ConstEval;
+      end
+
+      %% 人工ポテンシャルをx, yにプラス
+      if ~isempty(AP)
+      stageStateZ(3, :,:) = AP;
+      stageStateZ(7, :,:) = AP;
+      end
 
       %-- 評価値計算
       Eval{1} = sum(stageStateZ,[1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]);  % 全体の評価値

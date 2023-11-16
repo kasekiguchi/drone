@@ -19,10 +19,10 @@ function Controller = Controller_HLMCMPC(~)
     % Controller_param.input.Maxsigma = 5 * [0.01,1,1,1]; % 10
     % Controller_param.input.Minsigma = 0.1 * [0.001,1,1,1];
 
-    Controller_param.ConstEval = 1e8 % / Controller_param.H;
+    Controller_param.ConstEval = 1e8; % / Controller_param.H;
      
-    Controller_param.const.X = -0.5;
-    Controller_param.const.Y = -0.5;
+    Controller_param.constX = 2;
+    Controller_param.constY = 0;
 
     Controller_param.obsX = 3;
     Controller_param.obsY = 0.1;
@@ -51,8 +51,8 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.Yf = Controller_param.Y;
     Controller_param.PHIf = Controller_param.PHI;
 
-    % 
-    % 
+    Controller_param.AP = 1e3;
+
     % Controller_param.Zf = diag([1e6; 1]);
     % Controller_param.Xf = 1e6 * diag([1e5,1e2,1,1]);
     % Controller_param.Yf = diag([1e5,1,1,1]);

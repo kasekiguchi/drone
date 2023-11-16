@@ -148,7 +148,7 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
             [var] = quadprog(H,f,AA,b,Aeq,beq,lb,ub,x0,obj.param.options_fmin);
             
             % var
-            obj.previous_input = var(1:4);
+            obj.previous_input = reshape(var,[4,obj.param.H]);
 
             vf = var(1, 1);     % 最適な入力の取得
             vs = var(2:4, 1);     % 最適な入力の取得
@@ -175,9 +175,10 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
             Rq = obj.R;
             Hq = obj.param.H;
 
-            X = obj.current_state;% + obj.reference.xr(1:12,1); % 実状態化しないといけない
-            ref = ones(12*obj.param.H ,1);
-            % ref = reshape(obj.reference.xr, 12*obj.param.H, []); % 12*10, 1
+            X = obj.current_state + obj.reference.xr(1:12,1); % 実状態化しないといけない
+            % ref = zeros(12*obj.param.H ,1);
+            % ref = ref(:);
+            ref = reshape(obj.reference.xr, 12*obj.param.H, []); % 12*10, 1
             uref = repmat(obj.param.ref_input, obj.param.H, 1); % 4*10,1
 
             CQC = Cq' * Qq * Cq;
@@ -189,7 +190,6 @@ classdef HLMPC_controller_QP <CONTROLLER_CLASS
             Am = [Aq; Aq^2; Aq^3; Aq^4; Aq^5; Aq^6; Aq^7; Aq^8; Aq^9; Aq^10]; %A
             Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
             qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
-
 
             for i  = 1:Hq
                 for j = 1:Hq

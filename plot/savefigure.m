@@ -124,6 +124,9 @@ else
     % legend("Z.cost", "X.cost", "Y.cost", "PHI.cost", "Location", "northeast");
     % xlabel("Time [s]"); ylabel("Cost");
 
+    if ~fMC
+        data.param.Maxparticle_num = 0;
+    end
     title(strcat('N: ', num2str(data.param.Maxparticle_num)));
 
     % set(gcf, "WindowState", "maximized");

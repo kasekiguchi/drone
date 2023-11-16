@@ -40,24 +40,25 @@ idx = 0;
 data.param = agent.controller.(agent.controller.name).param;
 
 % データ保存初期化
-data.xr{idx+1} = 0;
-data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
-data.pathJ{idx+1} = 0;      % - 全サンプルの評価値
-data.sigma(:,idx+1) = zeros(4,1);      % - 標準偏差 
+if fMC == 1
+    data.xr{idx+1} = 0;
+    data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
+    data.pathJ{idx+1} = 0;      % - 全サンプルの評価値
+    data.sigma(:,idx+1) = zeros(4,1);      % - 標準偏差
+    data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
+    data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
+    data.variable_particle_num(idx+1) = 0;  % - 可変サンプル数
+    
+    data.bestx(idx+1, :) = repelem(initial.p(1), data.param.H); % - もっともよい評価の軌道x成分
+    data.besty(idx+1, :) = repelem(initial.p(2), data.param.H); % - もっともよい評価の軌道y成分
+    data.bestz(idx+1, :) = repelem(initial.p(3), data.param.H); % - もっともよい評価の軌道z成分
+end
 
-if fHL == 1
+if fHL && fMC
     data.bestcost(:,idx+1) = zeros(5,1); 
-else
+elseif ~fHL && fMC
     data.bestcost(:,idx+1) = zeros(4,1);
 end   % - 評価値
-
-data.removeF(idx+1) = 0;    % - 棄却されたサンプル数
-data.removeX{idx+1} = 0;    % - 棄却されたサンプル番号
-data.variable_particle_num(idx+1) = 0;  % - 可変サンプル数
-
-data.bestx(idx+1, :) = repelem(initial.p(1), data.param.H); % - もっともよい評価の軌道x成分
-data.besty(idx+1, :) = repelem(initial.p(2), data.param.H); % - もっともよい評価の軌道y成分
-data.bestz(idx+1, :) = repelem(initial.p(3), data.param.H); % - もっともよい評価の軌道z成分
 
 xr = zeros(16, data.param.H);
 
@@ -267,7 +268,7 @@ end
         %%
         
         %% 毎時刻　軌跡描画
-        if fMovie == 1
+        if fMovie == 1 && fMC == 1
             if time.t > MovTime
                 figure(idx+1)
                 pathJN = normalize(data.pathJ{idx}(:,1),'range', [1, data.param.Maxparticle_num]);
@@ -346,7 +347,7 @@ savefigure
 
 %% 動画生成
 % tic
-pathJ = data.pathJ;
+% pathJ = data.pathJ;
 % for m = 1:size(pathJ, 2)-1
 %     pathJN{m} = normalize(pathJ{m}(:,1),'range', [1, data.param.Maxparticle_num]); % 0 ~ サンプル数　までで正規化
 %     % pathJN{m} = normalize(pathJ{m},'range', [1, length(size(data.pathJ{1},2))]);
@@ -362,8 +363,3 @@ pathJ = data.pathJ;
 % % % end
 % % % pathJN = data.pathJ;
 % % % rmdir ('C:/Users/student/Documents/students/komatsu/simdata/20230818/Animation/','s'); % 直前のシミュレーションより短くする場合
-mkdir C:/Users/student/Documents/students/komatsu/simdata/20231108/Animation/;
-Outputdir_mov = 'C:/Users/student/Documents/students/komatsu/simdata/20231108/Animation/';
-Outputdir = 'C:/Users/student/Documents/students/komatsu/simdata/20231108/Animation/';
-% PlotMov_sort
-% toc

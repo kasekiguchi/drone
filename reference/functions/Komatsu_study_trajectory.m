@@ -41,10 +41,10 @@ syms t real
 % yaw = 0;
 
 %%
-x = 1;
-y = 0;
-z = 1;
-yaw = 0;
+% x = 0;
+% y = 0;
+% z = 1;
+% yaw = 0;
 
 %% 
 % x = cos(2*pi*t/30)-1;
@@ -85,10 +85,10 @@ yaw = 0;
 % yaw = 0;
 
 %% Liner
-% x = t/2; % constrains: t/1.7
-% y = 0;
-% z = 1.0;
-% yaw = 0;
+x = t/2; % constrains: t/1.7
+y = 0;
+z = 1.0;
+yaw = 0;
 
 %% Vertical vibration
 % x = 0;
