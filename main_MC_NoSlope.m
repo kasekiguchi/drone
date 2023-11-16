@@ -21,6 +21,13 @@ fMovie = 10;
 fSave = 10;
 MovTime = 0;
 
+%------------------------
+% PC変更時初回はcontroller 途中で止めて
+% Resampling_IS, Us_GUIのmex化
+% codegen Resampling_IS -args {obj.N, obj.param.H, obj.input.EvalNorm, obj.input.u}
+% のような感じで引数を代入してmexファイルを生成する
+%------------------------
+
 run("main1_setting.m");
 run("main2_agent_setup_MC.m");
 %agent.set_model_error("ly",0.02);
