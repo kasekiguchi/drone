@@ -10,8 +10,8 @@ clear all;
 clc;
 
 %% データのインポート
-load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-% load("test.mat")
+% load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
+load("experiment_10_25_P2Py_estimator.mat")
 disp('load finished')
 
 % for i = 1:find(log.Data.t,1,'last')
@@ -33,6 +33,9 @@ for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last
     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
 end
+for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
+    data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
+end
 
 % for i = 1:find(logger.Data.t,1,'last')
 %     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
@@ -43,10 +46,6 @@ end
 %     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
 %     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
 % end
-
-for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
-    data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
-end
 
 %% 特定の範囲のグラフ出力
 

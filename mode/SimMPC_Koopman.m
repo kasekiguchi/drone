@@ -11,9 +11,9 @@ initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
-data = LOGGER("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat");
-initIndex = find(data.Data.phase == 102,1,'first');
-endIndex = find(data.Data.phase == 102,1, 'last');
+% data = LOGGER("experiment_10_25_P2Py_estimator.mat");
+% finitIndex = find(data.Data.phase == 102,1,'first');
+% fendIndex = find(data.Data.phase == 102,1, 'last');
 
 agent = DRONE;
 % agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1)); %総推力のトルク
@@ -25,17 +25,17 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,1,1]
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 
-for i = initIndex:endIndex
-    agent.sensor.result = data.Data.agent.sensor.result{i};
-    agent.estimator.result = data.Data.agent.estimator.result{i};
-    agent.reference.result = data.Data.agent.reference.result{i};
-    agent(1).controller.do(time, 'f')
-    logger.logging(time,'f',agent);
-    time.t = time.t + dt;
-end
-save('test.mat', 'logger')
+% for i = finitIndex:fendIndex
+%     agent.sensor.result = data.Data.agent.sensor.result{i};
+%     agent.estimator.result = data.Data.agent.estimator.result{i};
+%     agent.reference.result = data.Data.agent.reference.result{i};
+%     agent(1).controller.do(time, 'f')
+%     logger.logging(time,'f',agent);
+%     time.t = time.t + dt;
+% end
+% save('quadprog_P2Py.mat', 'logger')
 
-% run("ExpBase");
+run("ExpBase");
 
 function dfunc(app)
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

@@ -17,6 +17,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
         model
         result
         self
+        InputTransform
     end
 
     methods
@@ -41,6 +42,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
 %             obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
             
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
+            obj.InputTransform=THRUST2FORCE_TORQUE(self,1);
 
         end
 
@@ -91,6 +93,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
             obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            obj.result.transformedInput = obj.InputTransform.do(obj.result.input);
 
             %% データ表示用
             obj.input.u = obj.result.input; 

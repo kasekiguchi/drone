@@ -1,7 +1,7 @@
 function Controller = Controller_MPC_Koopman(Agent)
 %UNTITLED この関数の概要をここに記述
 %   各種値
-    Controller_param.dt = 0.07; % MPCステップ幅
+    Controller_param.dt = 0.08; % MPCステップ幅
     Controller_param.H = 10;
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;

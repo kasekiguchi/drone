@@ -28,9 +28,18 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 
-agent.controller = HLC(agent,Controller_HL(dt));
-
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
 run("ExpBase");
+
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    result = controller.hlc.do(varargin);
+    result.mpc = controller.mpc.do(varargin);
+    varargin{5}.controller.result = result;
+end
 
 function post(app)
 

@@ -12,7 +12,7 @@ close all hidden; clear all; clc;
 %%
 clc
 SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","SimMPC","SimMPC_Koopman"];
-ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL"];
+ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL","ExpMPC_Koopman"];
 fExp = 1;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop

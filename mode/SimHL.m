@@ -25,8 +25,24 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
-agent.controller = HLC(agent,Controller_HL(dt));
+% agent.controller = HLC(agent,Controller_HL(dt));
+% % agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+% run("ExpBase");
+
+%mpcと同時
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
 run("ExpBase");
+
+function result = controller_do(varargin)
+controller = varargin{5}.controller;
+result = controller.hlc.do(varargin{1});
+result.mpc = controller.mpc.do(varargin{1});
+% result = merge_result(result,controller.motive.do(varargin));
+varargin{5}.controller.result = result;
+end
 
 function dfunc(app)
 
