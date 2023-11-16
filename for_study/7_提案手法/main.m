@@ -75,7 +75,8 @@ while epoch < numEpochs && ~monitor.Stop
     epoch = epoch + 1; % エポック更新
     iteration = epoch;
     % [loss1,loss2,gradients_rhod,gradients_rho] = dlfeval(@modelLoss,rhod,rho,X,U,Xit,V,V1diff,Ax,Bx,Ay,By,Az,Bz);
-    [loss1,loss2,gradients_rhod,gradients_rho] = dlfeval(@modelLoss2,rhod,rho,X,U,Xit,V,V1diff,Axy,Bxy,Az,Bz);
+    % [loss1,loss2,gradients_rhod,gradients_rho] = dlfeval(@modelLoss2,rhod,rho,X,U,Xit,V,V1diff,Axy,Bxy,Az,Bz);
+    [loss1,loss2,gradients_rhod,gradients_rho] = dlfeval(@modelLoss3,rhod,rho,X,U,Xit,V,V1diff,Axy,Bxy,Az,Bz);
     LossAll1(1,epoch) = loss1;
     LossAll2(1,epoch) = loss2;
 
