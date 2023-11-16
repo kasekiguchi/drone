@@ -16,7 +16,10 @@ agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+% agent.sensor = VL53L1X(agent,Sensor_VL53L1X(30));
+agent.sensor = ROS(agent,Sensor_ROS(struct('DomainID',25)));
 
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"wall_distance_ref",{[0,0,1]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,1,1]},"HL"});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,1,1]},"HL"});
 
