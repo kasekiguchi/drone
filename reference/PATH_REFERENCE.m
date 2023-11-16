@@ -27,9 +27,6 @@ classdef PATH_REFERENCE < handle
             obj.self = self;
             param = varargin{1};
             obj.refv = param{1,1};
-            %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
-            %obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
-            % obj.PreTrack = obj.self.model.state.get();%位置,姿勢,速さ
             obj.PreTrack = obj.self.estimator.model.state.get();%位置,姿勢,速さ
             obj.result.PreTrack = obj.PreTrack;
             % obj.Horizon = param{1,2};
@@ -41,7 +38,7 @@ classdef PATH_REFERENCE < handle
             obj.constant = param;
         end
 
-        function  result= do(obj,param)
+        function  result= do(obj,varargin)
             EstData = obj.self.estimator.result.state.get();
 %             q = quat2eul([obj.self.sensor.result.motive.orientation.w,obj.self.sensor.result.motive.orientation.x,obj.self.sensor.result.motive.orientation.y,obj.self.sensor.result.motive.orientation.z]);
 %             EstData = [obj.self.sensor.result.motive.position.z,obj.self.sensor.result.motive.position.z,q(1,2)];

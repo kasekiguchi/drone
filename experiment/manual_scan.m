@@ -99,9 +99,12 @@ pcshow(mkmap,"MarkerSize",24,"BackgroundColor",[1 1 1]);
 %%
 map = mkmap;
 filepass = "..\environment\pcdmap";
-filename = filepass + "experimentroom_map3.mat";
+filename = filepass + "experimentroom_map5.mat";
 save(filename,"map");
-
+%%
+map = mkmap;
+filename = "experimentroom_map4.mat";
+save(filename,"map");
 %%
 function TF = kaihi(pcd)
     % indices_n = findNeighborsInRadius(pcd,[0 0 0],0.5);

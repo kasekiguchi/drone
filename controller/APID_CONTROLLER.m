@@ -45,6 +45,10 @@ classdef APID_CONTROLLER < handle
                 if isfield(param,'Ki'); obj.Ki=param.Ki; end
                 if isfield(param,'Kd'); obj.Kd=param.Kd; end
                 if isfield(param,'dt'); obj.dt=param.dt; end
+
+                rp = cast(subs(rp,"t",param.t),"double");
+                rq = cast(subs(rq,"t",param.t),"double");
+
             end
             
 %             if isempty(obj.result)
@@ -59,12 +63,12 @@ classdef APID_CONTROLLER < handle
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
             
             obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
-            if length(obj.result.input ) > 1
-                for j = 1:length(obj.result.input)
-                    obj.result.input(j) = subs(obj.result.input(j),"t",param.t);
-                end
-                obj.result.input = cast(obj.result.input,"double");
-            end
+            % if length(obj.result.input ) > 1
+            %     for j = 1:length(obj.result.input)
+            %         obj.result.input(j) = subs(obj.result.input(j),"t",param.t);
+            %     end
+            %     obj.result.input = cast(obj.result.input,"double");
+            % end
 
 %             obj.result.input = [0.1;0];
 
@@ -72,9 +76,9 @@ classdef APID_CONTROLLER < handle
             obj.self.input_transform.result = obj.result.input;
 
             % [theta,rho] = cart2pol(x,y)
-            [theta,rho] =cart2pol(obj.result.input(1,1),obj.result.input(2,1));
+            [rho,theta] =cart2pol(obj.result.input(1,1),obj.result.input(2,1));
 
-            obj.result.input = [theta,rho];
+            obj.result.input = [rho,theta];
 
 
 %             obj.self.input = [1.0;0];

@@ -43,8 +43,11 @@ else
 end
 
 if isempty(opts.Q)
-    EKF_param.Q = diag([1E3, 1E3, 1E3, 1E5, 1E5, 1E5]); %eye(6)*1E3; %*7.058E-5; %diag(ones(n,1))*1e-7; %eye(6)*7.058E-5; %.*[50;50;50;1E04;1E04;1E04]; %1.0e-1; % システムノイズ（Modelクラス由来）
+    % EKF_param.Q = diag([1E3, 1E3, 1E3, 1E5, 1E5, 1E5]); %eye(6)*1E3; %*7.058E-5; %diag(ones(n,1))*1e-7; %eye(6)*7.058E-5; %.*[50;50;50;1E04;1E04;1E04]; %1.0e-1; % システムノイズ（Modelクラス由来）
+    % %         EKF_param.Q = diag([1E3,1E3,1E5]);
+    Estimator.Q = diag([1E3, 1E3, 1E3, 1E5, 1E5, 1E5]); %eye(6)*1E3; %*7.058E-5; %diag(ones(n,1))*1e-7; %eye(6)*7.058E-5; %.*[50;50;50;1E04;1E04;1E04]; %1.0e-1; % システムノイズ（Modelクラス由来）
     %         EKF_param.Q = diag([1E3,1E3,1E5]);
+
 else
     Estimator.Q = opts.Q;
 end
@@ -53,15 +56,31 @@ Estimator.R = opts.R;
 
 if isempty(opts.B)
 
-    if agent.model.state.type == 3 % 姿勢がオイラー角の場合
+    % if agent.model.state.type == 3 % 姿勢がオイラー角の場合
+    %     %        EKF_param.B = [eye(6)*dt^2;eye(6)*dt]; % システムノイズが加わるチャンネル
+    %     EKF_param.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
+    %     %             EKF_param.B = [eye(3)*0.01;eye(3)*0.1];
+    % elseif agent.model.state.type == 4 % 姿勢がオイラーパラメータの場合
+    %     EKF_param.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
+    %     %             EKF_param.B = [eye(3)*dt^2;zeros(1,3);eye(3)*dt];
+    % end
+
+    % if Estimator.model.state.type == 3 % 姿勢がオイラー角の場合
+    %     %        EKF_param.B = [eye(6)*dt^2;eye(6)*dt]; % システムノイズが加わるチャンネル
+    %     EKF_param.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
+    %     %             EKF_param.B = [eye(3)*0.01;eye(3)*0.1];
+    % elseif Estimator.model.state.type == 4 % 姿勢がオイラーパラメータの場合
+    %     EKF_param.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
+    %     %             EKF_param.B = [eye(3)*dt^2;zeros(1,3);eye(3)*dt];
+    % end
+    if Estimator.model.state.type == 3 % 姿勢がオイラー角の場合
         %        EKF_param.B = [eye(6)*dt^2;eye(6)*dt]; % システムノイズが加わるチャンネル
-        EKF_param.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
+        Estimator.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
         %             EKF_param.B = [eye(3)*0.01;eye(3)*0.1];
-    elseif agent.model.state.type == 4 % 姿勢がオイラーパラメータの場合
-        EKF_param.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
+    elseif Estimator.model.state.type == 4 % 姿勢がオイラーパラメータの場合
+        Estimator.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
         %             EKF_param.B = [eye(3)*dt^2;zeros(1,3);eye(3)*dt];
     end
-
 else
     Estimator.B = opts.B;
 end

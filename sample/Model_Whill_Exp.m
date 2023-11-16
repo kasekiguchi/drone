@@ -13,7 +13,7 @@ arguments
     id
 end
 
-setting.id = id;
+% setting.id = id;
 Model.type = "WHILL_EXP_MODEL"; % model name
 Model.name = "whill"; % print name
 setting.conn_type = conn_type;
@@ -34,6 +34,12 @@ switch conn_type
         setting.pubTopicName    = {'/rover_twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub topic name
         setting.subMsgName      = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
         setting.pubMsgName      = {'geometry_msgs/Twist'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%pub 型
+    case "ros2"        
+        setting.param.state_list = ["p"];
+        setting.param.subName = ["p"];
+        setting.subTopic(1,:) = {'/rover_odo','geometry_msgs/Twist'};%%%%%%%%%%%%sub topic name
+        setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%%%pub topic name       
+        setting.node            = ros2node("/agent_"+string(id),id);%%%%%%%%%%%%%create node
 end
 
 Model.param = setting;

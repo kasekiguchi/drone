@@ -33,13 +33,14 @@ classdef NDT < handle
             obj.PCdata_use = obj.self.sensor.result;
             if ~isempty(obj.self.controller.result)
                 for j = 1:3
-                    A(j) = subs(obj.self.controller.e(j),"t",varargin{1}.t);
+                    % A(j) = subs(obj.self.controller.e(j),"t",varargin{1}.t);
+                    A(j) = obj.self.controller.e(j);
                 end
                 A = cast(A,"double");
                 Trans = [A(1:2) 0];
                 Rot = eul2rotm(deg2rad([0 0 A(3)]),'XYZ'); %回転行列(roll,pitch,yaw)
                 obj.initialtform = rigidtform3d(Rot,Trans);
-            end
+            end            
             obj.result.tform = pcregisterndt(obj.PCdata_use,obj.fixedSeg.map,0.5,"InitialTransform",obj.initialtform,"OutlierRatio",0.1,"Tolerance",[0.01 0.1]);%マッチング
             
             % tmpvalue = obj.result.tform.A;

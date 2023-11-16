@@ -1,30 +1,34 @@
-clc;clear
+clc;
+clearvars -except fExp
+disp("clear node");
+
 % mega rover
 ts = 0; % initial time
 dt = 0.25; % sampling period
 te = 200; % termina time
 time = TIME(ts,dt,te);
-in_prog_func = @(app) in_prog(app);   
+in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
+% Expnode = ros2node("/matnode",25);%(node_name,node_id)
+% ros2("topic","list","DomainID",Expnode.ID)%topic check
 initial_state.p = [0.0;0;0];
 initial_state.q = [0;0;0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = WHILL;
-agent.id = 25;
-agent.node = ros2node("/matnode",agent.id);
-agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros", 25));
+% agent.node = ros2node("/matnode",25);
+agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 25));%agentでnodeを所持
+% agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros",25));
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
 % agent.sensor = ROS(agent, Sensor_ROS(struct('DomainID',25)));
-agent.sensor = ROS2_LiDAR_PCD(agent, Sensor_LiDAR_ROS2(["ros" agent.id]));
-%agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+% agent.sensor = ROS2_LiDAR_PCD(agent, Sensor_LiDAR_ROS2(Expnode));
+agent.sensor = ROS2_SENSOR(agent, Sensor_Ros2_multi(agent));
 % agent.estimator = UKF2DSLAM(agent, Estimator_UKF2DSLAM_Vehicle(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
-agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)),'experimentroom_map3'));
+agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)),'experimentroom_map4'));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
-% agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]}});
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 
@@ -43,27 +47,27 @@ clc
 %     time.t = time.t + time.dt;
 %     %pause(1)
 % end
-for i = 1:time.te
+% for i = 1:time.te
 %    if i < 20 || rem(i, 10) == 0, i, end
-    agent.sensor.do(time);
-    agent.estimator.do(time);
-    agent.reference.do(time,'f');
-    agent.controller.do(time,'f');
-    agent.plant.do(time, 'f');
-    logger.logging(time, 'f', agent);
-    time.t = time.t + time.dt;
-    disp(time.t)
-    %pause(1)
-end
+%     agent.sensor.do(time);
+%     agent.estimator.do(time);
+%     agent.reference.do(time,'f');
+%     agent.controller.do(time,'f');
+%     agent.plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     disp(agent.estimator.result.state.p);
+%     pause(1)
+% end
 %%
-
-for j = 1:200
-    px(j) = logger.Data.agent.estimator.result{1,j}.state.p(1,1);
-    py(j) = logger.Data.agent.estimator.result{1,j}.state.p(2,1);
-end
-figure
-plot(px,py,"-*");
-clear px & py
+% 
+% for j = 1:100
+%     px(j) = logger.Data.agent.estimator.result{1,j}.state.p(1,1);
+%     py(j) = logger.Data.agent.estimator.result{1,j}.state.p(2,1);
+% end
+% figure
+% plot(px,py,"-*");
+% clear px & py
 %%
 
 function post(app)

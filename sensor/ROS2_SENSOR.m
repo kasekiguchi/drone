@@ -1,4 +1,4 @@
-classdef ROS2_LiDAR_PCD < handle
+classdef ROS2_SENSOR < handle
 %       self : agent
 properties
     ros
@@ -7,20 +7,22 @@ properties
     self
     fState % subscribeにstate情報を含むか
 
+    % ros2param
 
+    Node
     radius
 end
 
 methods
 
-    function obj = ROS2_LiDAR_PCD(self,param)
-        param.nodename = self.node;
-        subTopicName(1) = {'/scan_front'};
-        subTopicName(2) = {'/scan_back'};
-        param.subMsgName = {'sensor_msgs/LaserScan'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
-        for i = 1:length(subTopicName)
-            param.subTopicName = subTopicName(i);
-            obj.ros{i} = ROS2_CONNECTOR(param);
+    function obj = ROS2_SENSOR(self,param)
+        obj.Node = self.plant.id;
+        topics = param.param;
+        topics.node = obj.Node;
+        subTopics = topics.subTopic;
+        for i = 1:length(subTopics)
+            topics.subTopic = subTopics(i,:);
+            obj.ros{i} = ROS2_CONNECTOR(topics);
         end
         %  このクラスのインスタンスを作成
         obj.self = self;
@@ -44,22 +46,22 @@ methods
     end
         
 
-    function result = do(obj, param)
+    function result = do(obj, varargin)
         % result=sensor.motive.do(motive)
         %   set obj.result.state : State_obj,  p : position, q : quaternion
         %   result :
         % 【入力】motive ：NATNET_CONNECOTR object
         
-        while(1)
-            pause(0.001)
-            data{1} = obj.ros{1}.subtopicdata;
-            data{2} = obj.ros{2}.subtopicdata;
+        while(1)            
+            data{1} = obj.ros{1}.getData;
+            data{2} = obj.ros{2}.getData;
             if isempty(data{1})|isempty(data{2})
                 % break
-                disp("miss")
+                disp("pointcloud lost")
             else
                 break
             end
+            pause(0.05)
         end
         
         for i = 1:length(data)

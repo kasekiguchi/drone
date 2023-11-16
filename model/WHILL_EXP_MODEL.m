@@ -22,7 +22,6 @@ methods
         %% variable set
         obj.phase = 's';
         obj.conn_type = param.conn_type;
-
         switch obj.conn_type
             case "udp"
                 obj.IP = param.num;
@@ -39,7 +38,6 @@ methods
                 obj.connector = SERIAL_CONNECTOR(param);
                 fprintf("Whill %d is ready\n", param.port);
             case "ros"
-
                 obj.IP = param.id;
                 %[~, cmdout] = system("ipconfig");
                 %ipp = regexp(cmdout, "192.168.");
@@ -54,26 +52,27 @@ methods
 
                 obj.connector = ROS2_CONNECTOR(param);
                 fprintf("Whill %d is ready\n", obj.IP);
-                state = obj.connector.result;
+                obj.state = obj.connector.result;
 %                 obj.result.state.p = [state.pose.position.z,state.pose.position.x];
 %                 obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
 %                 obj.result.state.eq = quat2eul(obj.result.state.qq);
                 % obj.state.p = [state.anguluar.z,state.linear.x];
                 % obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
                 % obj.state.eq = quat2eul(obj.state.qq);
+            case "ros2"
+                obj.IP = param.node.ID;
+                obj.id = param.node;
+                obj.connector = ROS2_CONNECTOR(param);
+                fprintf("Whill %d is ready\n", obj.IP);
         end
   end
   
   
 function do(obj,varargin)
     t = varargin{1,1}.t; 
-    u = obj.self.controller.result.input;%%追記11/8%追追記11/9
-    % if length(u) > 1
-    %     for i = 1:length(u)
-    %         u(i) = subs(u(i),"t",t);
-    %     end
-    %     u=cast(u,"double");
-    % end
+    % u = obj.self.controller.result.input;%%追記11/8%追追記11/9
+    u = varargin{5}.input_transform.result;
+    cha = varargin{2};
         % if length(varargin) == 1
 
             % if ~isfield(varargin{1}, 'FH')
@@ -82,9 +81,7 @@ function do(obj,varargin)
             %     FH = varargin{1}.FH; % figure handle
             % end
 
-            % cha = get(FH, 'currentcharacter');
-            cha = varargin{2};%%追記11/8
-
+            % cha = get(FH, 'currentcharacter'); 
             if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
                 cha = obj.phase;
             end
@@ -100,13 +97,6 @@ function do(obj,varargin)
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
                     obj.connector.sendData(obj.msg);
-%                     state = obj.connector.getData();
-%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
-%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.state.eq = quat2eul(obj.state.qq);
                     error("ACSL : quit experiment");
                 case 's' % stop
                     obj.msg.linear.x = 0.0;

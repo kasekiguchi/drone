@@ -49,7 +49,7 @@ classdef TIME_VARYING_REFERENCE < handle
                 obj.t=varargin{1}.t;
                 t = obj.t;
            end           
-           obj.result.state.xd = subs(obj.func(t),t,t); % 目標重心位置（絶対座標）
+           obj.result.state.xd = subs(obj.func(t),"t",t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
             obj.result.state.v = obj.result.state.xd(5:7);
