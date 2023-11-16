@@ -21,3 +21,39 @@ setting.numlist = [3, 3];
 setting.subTopic(1,:) = {'/scan_front','sensor_msgs/LaserScan'};
 setting.subTopic(2,:) = {'/scan_back' ,'sensor_msgs/LaserScan'};
 Sensor.param = setting;
+Sensor.func = str2func("rover_pub");
+%% ローバー自身の点群認識
+    function  ptCloudOut = rover_pub(sensor_data)
+        
+        roi = [0.1 0.35 -0.18 0.16 -0.1 0.1];
+        
+        indices_f = findPointsInROI(sensor_data(1),roi);
+        Df = zeros(size(sensor_data(1).Location));
+        
+        indices_b = findPointsInROI(sensor_data(2),roi);
+        Db = zeros(size(sensor_data(2).Location));
+        
+        Df(indices_f,3) = 5;
+        Db(indices_b,3) = 5;
+        ptCloud_tf = pctransform(sensor_data(1),Df);
+        ptCloud_tb = pctransform(sensor_data(2),Db);
+        % %%%%%%%%%ローバー自身の点群除去%%%%%%%%%%%%%%
+        roi = [-10 10 -10 10 -1 1];%入力点群の x、y および z 座標の範囲内で直方体 ROI を定義
+        
+        
+        indices_f = findPointsInROI(ptCloud_tf,roi);%直方体 ROI 内にある点のインデックスを検出
+        sensor_data(1) = select(ptCloud_tf,indices_f);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納    
+        
+        indices_b = findPointsInROI(ptCloud_tb,roi);%直方体 ROI 内にある点のインデックスを検出
+        sensor_data(2) = select(ptCloud_tb,indices_b);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納
+        %% pcd合成
+        rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
+        T = [0.46 0.023 0]; %並進方向(x,y,z)
+        tform = rigidtform3d(rot,T);
+        
+        moving_pc2_m_b = pctransform(sensor_data(2),tform);
+        
+        ptCloudOut = pcmerge(sensor_data(1), moving_pc2_m_b, 0.001);
+    end
+
+end
