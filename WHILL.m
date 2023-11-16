@@ -1,28 +1,32 @@
-classdef WHILL < ABSTRACT_SYSTEM
+classdef WHILL < handle
 % Drone class
 properties %(Access = private)
     %id = 0;
     fig
+    plant
+    parameter
+    sensor
+    estimator
+    reference
+    controller
+    input_transform
+    % id = 1
+    id
+    node
 end
 
 methods
 
-    function obj = WHILL(args, param)
+    function obj = WHILL(args)
 
         arguments
-            args
-            param
+          args = struct("type","sim");  
         end
-
-        obj = obj@ABSTRACT_SYSTEM(args, param);
-
+        obj.input_transform.do = @(varargin) [];
         if contains(args.type, "EXP")
-            obj.plant = WHILL_EXP_MODEL(args);
+          obj.plant = WHILL_EXP_MODEL(args);
         end
-
-        obj.parameter = param;
     end
-
 end
 
 methods

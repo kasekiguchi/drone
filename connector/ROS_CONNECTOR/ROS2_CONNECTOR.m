@@ -13,14 +13,19 @@ classdef ROS2_CONNECTOR < handle
         publisher
         %- Subscriber topic -%
         subTopicNum
-        subTopic 
+        % subTopic%%%%%%%%%%%%%%%%%%%%%%%%yoshida消
+        nodename%%%%%%%%%%%%%%%%%%%%%%%%%%yoshida増
         subName % 受信msg を格納するresult構造体のフィールド（配列）
         subMsg
         %- Publisher topic -%
         pubTopicNum
         pubTopic
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
+        pubMsg
 %         pubMsg  % 送信msg
+
+
+        subtopicdata
     end
 
     properties(SetAccess=private)
@@ -31,31 +36,50 @@ classdef ROS2_CONNECTOR < handle
     methods
         function obj = ROS2_CONNECTOR(info)
             disp('Preparing connection to robot operating system...');
-            %-- Configulations for ROS
-            obj.subTopic = info.subTopic;
-            obj.subName = info.subTopicName;
-            obj.subTopicNum = length(obj.subTopic);
-            obj.subMsg = info.subMsgName;
+            %-- Configulations for ROS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%旧
+            % setenv("ROS_DOMAIN_ID","30");
+            % obj.subTopic = info.subTopic;
+            % obj.subName = info.subTopicName;
+            % obj.subTopicNum = length(obj.subName);
+            % obj.subMsg = info.subMsgName;            
+            % if isfield(info,'pubTopic')
+            %     obj.pubMsg = info.pubMsgName;
+            %     obj.pubTopic = info.pubTopic;
+            %     obj.pubName = info.pubTopicName;
+            %     obj.pubTopicNum = length(obj.pubTopic);
+            % end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%旧
+            %-- Configulations for ROS2%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%新規
+            obj.nodename = info.node;
+            obj.subName  = info.subTopic{1,1};
+            obj.subMsg   = info.subTopic{1,2};
+
             if isfield(info,'pubTopic')
-                obj.pubTopic = info.pubTopic;
-                obj.pubName = info.pubTopicName;
-                obj.pubTopicNum = length(obj.pubTopic);
+                obj.pubName = info.pubTopic{1,1};
+                obj.pubMsg   = info.subTopic{1,2};
             end
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%新規
+
+
+
             %-- Setting the environment variables to connect to ROS
-            obj.DomainID = info.DomainID;
+            % obj.DomainID = info.nodename.ID;
 
             %ROS2のトピック一覧
-            ros2 topic list;
+            % ros2("topic","list","DomainID",obj.DomainID);%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-            %-- Declaring the node, publishers and subscribers
-            for i = 1:obj.subTopicNum
-                obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
-                    "History","keepall","Reliability","besteffort");
-            end
+            %-- Declaring the topics, publishers and subscribers
+            % for i = 1:obj.subTopicNum
+            %     % obj.subscriber.subtopic(i) = ros2subscriber(obj.nodename,obj.subName{1,i},obj.subMsg{1,i},"History","keepall","Reliability","besteffort");
+            %     obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg, ...
+            %         @obj.getData,"History","keepall","Reliability","besteffort");
+            % end
+            obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
             if isfield(info,'pubTopic')
-                for i = 1: obj.pubTopicNum 
-                    obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{1,i});
-                end
+                % for i = 1: obj.pubTopicNum
+                    % obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1});
+                    obj.publisher.pubTopic = ros2publisher(obj.nodename,obj.pubName,obj.pubMsg);
+                % end
             end
         end
 
@@ -67,10 +91,16 @@ classdef ROS2_CONNECTOR < handle
 %             end
 %             t = rostime('now') - obj.init_time;
 %             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
-            for i = 1:obj.subTopicNum
-                obj.result.(obj.subName(i)) = receive(obj.subscriber.(obj.subName(i)),10);
-            end
-            ret = obj.result;
+
+            % for i = 1:obj.subTopicNum
+            %     % receive(obj.subscriber.subtopic(i));
+            %     obj.result{i} = message;
+            % end
+
+            ret = obj.subtopicdata;
+        end
+        function sub_callback(obj,message)%%%%%callback
+            obj.subtopicdata = message;
         end
 
         function sendData(obj,msg)
@@ -79,15 +109,17 @@ classdef ROS2_CONNECTOR < handle
             % or 
             % msg = struct('topic_name1',value1,'topic_name2',value2,...)
             
-            if isstruct(msg)
+            % if isstruct(msg)
                 for i = 1:obj.pubTopicNum
-                    send(obj.publisher.(obj.pubName(i)), msg.(obj.pubName(i)));
+                    
+                    send(obj.publisher.pubTopic(i), msg);
                 end
-            else
-                for i = 1:obj.pubTopicNum
-                    send(obj.publisher.(obj.pubName(i)), msg{i});
-                end
-            end
+            % else
+            %     for i = 1:obj.pubTopicNum
+            % 
+            %         send(obj.publisher.pubTopic(i), msg);
+            %     end
+            % end
         end
 
         function delete(obj)

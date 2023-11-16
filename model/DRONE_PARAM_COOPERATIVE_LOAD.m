@@ -25,22 +25,26 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             arguments
                 % P = [g m0 j0 rho li mi ji]
                 name % DIATONE
-                N = 4;
+                N = 6;
                 type = "struct";
                 % parameters : 5 + 8*N
                 param.g = 9.81;
-                param.m0 = 1;
-                param.J0 = [0.005;0.005;0.005];
+                param.m0 = 1.45;
+                param.J0 = [0.15;0.15;0.25];
                 param.rho = [];
-                param.li = 0.5*ones(N,1);
-                param.mi = ones(N,1)';
-                param.Ji = 0.005*repmat([1 1 1]',1,N);
+                param.li = 1*ones(N,1);
+                param.mi = 0.755*ones(N,1)';
+                param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
                 param.additional = []; % プロパティに無いパラメータを追加する場合
+            end
+            if contains(type,"zup")
+              rho0 = [0;0;1/4];
+            else
+              rho0 = [0;0;-1/4];
             end
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);
-              %param.rho = [0;0;1/2]+[[1;0;0],cell2mat(cellmatfun(@(A,B) A*B, FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),[1;0;0]))];
-              param.rho = [0;0;1/2]+[[1;0;0],double(cellmatfun(@(A,B) A*B, FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat",[1;0;0]))];
+              param.rho = rho0+[[1;0;0],double(cellmatfun(@(A,~) A*[1;0;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
             obj.N = N;

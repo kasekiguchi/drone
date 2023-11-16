@@ -27,20 +27,21 @@ classdef PATH_REFERENCE < handle
             obj.self = self;
             param = varargin{1};
             obj.refv = param{1,1};
-            %             obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v;param{1,6}.w];
-            %obj.PreTrack = [param{1,6}.p;param{1,6}.q;param{1,6}.v];%pは位置,qは姿勢,vは速さ
-            obj.PreTrack = obj.self.model.state.get();%位置,姿勢,速さ
+            obj.PreTrack = obj.self.estimator.model.state.get();%位置,姿勢,速さ
             obj.result.PreTrack = obj.PreTrack;
-            obj.Horizon = param{1,2};
+            % obj.Horizon = param{1,2};
             obj.step = 3;
-            obj.SensorRange = param{1,3};
-            obj.dt = obj.self.model.dt;
+            % obj.SensorRange = param{1,3};
+            obj.dt = obj.self.estimator.model.dt;
             obj.result.state=STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[4,4,1,1]));%x,y,theta,v
-            obj.constant = param{1,4};
+            % obj.constant = param{1,4};
+            obj.constant = param;
         end
 
-        function  result= do(obj,param)
+        function  result= do(obj,varargin)
             EstData = obj.self.estimator.result.state.get();
+%             q = quat2eul([obj.self.sensor.result.motive.orientation.w,obj.self.sensor.result.motive.orientation.x,obj.self.sensor.result.motive.orientation.y,obj.self.sensor.result.motive.orientation.z]);
+%             EstData = [obj.self.sensor.result.motive.position.z,obj.self.sensor.result.motive.position.z,q(1,2)];
             pe = EstData(1:2);
             the = EstData(3);
             R = [cos(the), -sin(the);sin(the), cos(the)];
@@ -76,7 +77,7 @@ classdef PATH_REFERENCE < handle
             x = 0;
             y = 0;
 
-            ref = zeros(4,obj.Horizon);%set data size[x ;y ;theta;v]
+            ref = zeros(3,obj.Horizon);%set data size[x ;y ;theta]
 
             del = -[a.*c,b.*c]./sqrt(a.^2+b.^2); % 垂線の足
 
@@ -96,9 +97,10 @@ classdef PATH_REFERENCE < handle
             % Current time reference position calced at previous time
             rp = R'*(obj.result.PreTrack(1:2) - pe);
 
-            if abs(prod(a(ids))+prod(b(ids)))<1e-1 % ほぼ直交している場合（傾きの積が-1の式より）
+            if abs(prod(a(ids))+prod(b(ids)))<3e-1 % ほぼ直交している場合（傾きの積が-1の式より）
                 % TODO : 入りと出で同じ幅の通路を前提としてしまっている．
                 % 初期値が垂直二等分線上の場合その場で回転するだけのリファレンスになる．
+                obj.self.model.param.Lx  = 0;
                 if isempty(obj.O)
                     e1=[ds(ids(1),:);de(ids(1),:)];% line1 edge
                     e2=[ds(ids(2),:);de(ids(2),:)];% line2 edge
@@ -153,6 +155,7 @@ classdef PATH_REFERENCE < handle
                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))]; %　相対座標
             else % ほぼ平行な場合
+                obj.self.model.param.Lx  = -0.006;
                 obj.O = []; th = [];
                 if l1(3)*l2(3)<0 % l*[x;y;1]がロボットから見た直線の位置（符号付き）
                     % 相対で見たとき ax+by+c=0 のcの符号が異なる状態で足せば機体側の2等分線になる
@@ -168,10 +171,10 @@ classdef PATH_REFERENCE < handle
                 rl = rl*sign([rl(2),-rl(1)]*[1;0]);%[cos(th);sin(th)]); % 機体の向いている向きが[rl(2),-rl(1)]で正となるように
                 tmpt0 = atan2(-rl(1),rl(2));
                 tmp(:,1) = [tmp0;tmpt0];
-                for i = 2:obj.Horizon
-                    tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
-                    tmp(:,i) = [tmp0;tmpt0];
-                end
+%                 for i = 2:obj.Horizon
+%                     tmp0 = tmp0+obj.step*obj.dt*obj.refv*[rl(2);-rl(1)]/vecnorm(rl(1:2));
+%                     tmp(:,i) = [tmp0;tmpt0];
+%                 end
                 ref = [tmp;obj.refv*ones(1,size(tmp,2))];
             end
 
@@ -190,11 +193,17 @@ classdef PATH_REFERENCE < handle
             obj.result.state.set_state("p",ref);%treat as a colmn vector
             obj.result.state.set_state("q",ref(3,1));%treat as a colmn vector
             obj.result.state.set_state("v",ref(4,1));%treat as a colmn vector
-            if vecnorm(obj.result.PreTrack - ref(:,1))>3
+            
+            if vecnorm(obj.result.PreTrack - ref(1:3,1))>3
                 obj.O;
             end
-            obj.PreTrack = ref(:,1);
-            obj.result.PreTrack = ref(:,1);
+            obj.PreTrack = ref(1:3,1);
+            obj.result.PreTrack = ref(1:3,1);
+%             if vecnorm(obj.result.PreTrack - ref(:,1))>3
+%                 obj.O;
+%             end
+%             obj.PreTrack = ref(:,1);
+%             obj.result.PreTrack = ref(:,1);
             if isempty(obj.O)
                 obj.result.O = pe;
             else
@@ -239,11 +248,13 @@ classdef PATH_REFERENCE < handle
             end
             p_Area = union(tmpenv(:));
             %plantFinalState
-            pstate = agent.plant.state.p(:,end);
-            pstateq = agent.plant.state.q(:,end);
-            pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
-            pstatesquare =  polyshape(pstatesquare');
-            pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
+%             pstate = agent.plant.state.p(:,end);
+%             pstateq = agent.plant.state.q(:,end);
+%             pstate = agent.estimator.result.state.p(:,end);
+%             pstateq = agent.estimator.result.state.q(:,end);
+%             pstatesquare = pstate + 0.5.*[1,1.5,1,-1,-1;1,0,-1,-1,1];
+%             pstatesquare =  polyshape(pstatesquare');
+%             pstatesquare =  rotate(pstatesquare,180 * pstateq / pi, pstate');
 
             %modelFinalState
             estate = agent.estimator.result.state.p(:,end);
@@ -267,14 +278,15 @@ classdef PATH_REFERENCE < handle
             clf(FH)
             grid on
             %axis equal
-            obj.self.show(["sensor","lrf"],"FH",FH,"param",[pstate;pstateq]);
+%             obj.self.show(["sensor","lrf"],"FH",FH,"param",[estate;estateq]);
             hold on
-            plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
-            %    agent.sensor.LiDAR.show();
-            plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+%             plot(pstatesquare,'FaceColor',[0.5020,0.5020,0.5020],'FaceAlpha',0.5);
+%                agent.sensor.LiDAR.show();
+%             plot(estatesquare,'FaceColor',[0.0745,0.6235,1.0000],'FaceAlpha',0.5);
+%             plot(estatesquare,'FaceColor','FaceAlpha',0.5);
 
             plot(RefState(1,:),RefState(2,:),'ro','LineWidth',1);
-            plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
+%             plot(p_Area,'FaceColor','blue','FaceAlpha',0.5);
             plot(Ewallx,Ewally,'r-');
             plot(fWall(:,1),fWall(:,2),'g-','LineWidth',2);
             O = agent.reference.result.O;
@@ -285,11 +297,11 @@ classdef PATH_REFERENCE < handle
                 xmax = max(95,max(Ewallx));
                 ymin = min(-5,min(Ewally));
                 ymax = max(95,max(Ewally));
-                xlim([xmin-5, xmax+5]);
-                ylim([ymin-5,ymax+5]);
+                xlim([xmin-10, xmax+10]);
+                ylim([ymin-10,ymax+10]);
             else
-                xlim([estate(1)-25, estate(1)+25]);
-                ylim([estate(2)-25,estate(2)+25]);
+                xlim([estate(1)-5, estate(1)+5]);
+                ylim([estate(2)-5,estate(2)+5]);
             end
             xlabel("$x$ [m]","Interpreter","latex");
             ylabel("$y$ [m]","Interpreter","latex");
@@ -311,7 +323,7 @@ c1 = l1(3);
 a2 = l2(1);
 b2 = l2(2);
 c2 = l2(3);
-d = (a1*b2 - a2*b1);
+d = (a1*b2 - a2*b1); %2直線が水平ではないかの確認
 if d == 0
     error("ACSL : l1 and l2 are parallel");
 else

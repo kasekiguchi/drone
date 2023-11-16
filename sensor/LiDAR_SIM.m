@@ -13,7 +13,9 @@ end
 
 properties (SetAccess = private) % construct したら変えない．
     radius = 20;
-    pitch = 0.01;
+%     pitch = 0.02512;
+    pitch = 0.0087;
+%     pitch = 0.01;
     angle_range
     dead_zone = 0.2;
     head_dir = nsidedpoly(3, 'Center', [0, 0], 'SideLength', 0.5);
@@ -130,9 +132,9 @@ methods
             R = [cos(q), -sin(q); sin(q), cos(q)];
             %points = (R'*(points'-p))';
             points = (R * points' + p)';
-            pp = pplot([points(:, 1); p(1)], [points(:, 2); p(2)]);
-            set(pp,'EdgeAlpha',0.05);
-            set(pp,'EdgeColor','g');
+            pp = plot([points(:, 1); p(1)], [points(:, 2); p(2)]);
+%             set(pp,'EdgeAlpha',0.05);
+%             set(pp,'EdgeColor','g');
             hold on;
             text(points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
             region = polyshape((R * obj.result.region.Vertices' + p)');

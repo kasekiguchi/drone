@@ -10,7 +10,7 @@ arguments
 end
 A = cov(XY); % 共分散行列
 [ab,~]=eig(A);
-c = -sum(XY,1)*ab(:,1)/size(XY,1);
+c = -sum(XY,1)*ab(:,1)/size(XY,1); 
 if c <= 0
     t = [ab(1),ab(2), c];
 else
