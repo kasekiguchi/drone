@@ -55,6 +55,7 @@ function xr = Reference(params, T, Agent)
         xr(10:12, h+1) = [0; 0; 0];
 
         xr(13:16, h+1) = params.ur;
+%         xr(17:26, h+1) = [0; 0; 0; 0; 0; 0; 0; 0; 0; 0];
     end
         
 end

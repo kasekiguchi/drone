@@ -28,11 +28,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     
 %-- 重み
     %% 円旋回(重みの設定)
-    Params.Weight.P = diag([300.0; 100.0; 100.0]);    % 座標   1000 1000 100
-    Params.Weight.V = diag([200.0; 200.0; 100.0]);    % 速度
+    Params.Weight.P = diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
+    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([100; 200; 100; 100; 100; 100]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角、角速度
     
 %-- data
     data.bestcost(idx+1) = 0;           % - もっともよい評価値

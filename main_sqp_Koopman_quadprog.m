@@ -23,7 +23,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.07; %MPCステップ幅
+    Params.dt = 0.08; %MPCステップ幅
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
@@ -33,11 +33,11 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     %% 重みの設定
     
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([1; 1; 1]);    % 座標   1000 10
+    Params.Weight.P = diag([13; 6; 3]);    % 座標   1000 10
     Params.Weight.V = diag([1; 1; 1]);    % 速度
-    Params.Weight.R = diag([1; 1; 1; 1]); % 入力
+    Params.Weight.R = diag([15; 15; 10; 10]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([8; 3; 10; 1; 1; 5]);  % 姿勢角、角速度
 
     Params.Weight.Pf = diag([1; 1; 1]);
     Params.Weight.QWf = diag([1; 1; 1; 1; 1; 1]); %姿勢角、角速度終端
@@ -305,7 +305,7 @@ set(0, 'defaultTextFontSize', Fontsize);
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2-p3", "e"}, "fig_num",1,"row_col",[2,3]);
 
-figure(2)
+fig = figure(2);
 subplot(2,2,1)
 plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag, 'LineWidth',1.2)
 grid on
@@ -315,6 +315,7 @@ ylabel('exitflag')
 subplot(2,2,2)
 plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),Params.T, 'LineWidth',1.2)
 grid on
+ylim([0, 0.05])
 xlabel('time t [s]')
 ylabel('Simulation time [s]')
 
@@ -323,6 +324,8 @@ plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.bestcost, 'LineWidth',
 grid on
 xlabel('time t [s]')
 ylabel('Best cost')
+
+set(fig, 'Position', [1250, 60, 600, 400])
 
 % save('simulation','logger')
 % Graphplot

@@ -30,21 +30,6 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.PtoP = 0; %1：PtoP制御
 
     %% 重みの設定
-    
-%     Params.Weight.P =  diag([1.0; 1.0; 1.0]);    % 座標   1000 1000 100
-%     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-%     Params.Weight.Q = diag([1.0; 1.0; 1.0]);    % 姿勢角
-%     Params.Weight.W = diag([1.0; 1.0; 1.0]);    % 角速度
-%     Params.Weight.R = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-%     Params.Weight.RP = 0.01 * diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差
-%     Params.Weight.QW = diag([1.0,; 1.0; 1.0; 1.0; 1.0; 1000.0]);  % 姿勢角、角速度
-
-% 離陸
-%     Params.Weight.P = diag([1000.0; 1000.0; 100.0]);    % 座標   1000 1000 100
-%     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-%     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-%     Params.Weight.RP = diag([1.0,; 1.0; 1.0; 1.0]);  % 1ステップ前の入力との差    0*(無効化)
-%     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
     Params.Weight.P = diag([10.0; 5.0; 1.0]);    % 座標   1000 10
@@ -90,12 +75,12 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
-%       load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
-%     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
+    load('EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+%       load('EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
+%     load('EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
+%     load('EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
+%     load('EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
+%     load('EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
@@ -203,11 +188,6 @@ end
                 initial_u2 = initial_u1;
                 initial_u3 = initial_u1;
                 initial_u4 = initial_u1;
-
-%                 initial_u1 = 1.80;   % 初期値
-%                 initial_u2 = 0.84;
-%                 initial_u3 = 2.06;
-%                 initial_u4 = 1.07;
             else
                 initial_u1 = agent.input(1);
                 initial_u2 = agent.input(2);

@@ -48,11 +48,12 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([155.0; 160.0; 15.0]);    % 座標   1000 10
-    Params.Weight.V = diag([10.0; 10.0; 40.0]);    % 速度
-    Params.Weight.R = diag([20.0; 20.0; 5.0; 5.0]); % 入力
+    Params.Weight.P = diag([40.0; 55.0; 25.0]);    % 座標   1000 10
+    Params.Weight.V = diag([4.0; 4.0; 30.0]);    % 速度
+    Params.Weight.R = diag([10.0; 12.0; 5.0; 5.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([1300; 1400; 1000; 15; 15; 30]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([450; 750; 400; 5; 4; 18]);  % 姿勢角、角速度
+%     Params.Weight.A = diag([1; 1; 1; 1; 1; 1; 1; 1; 1; 1]); %観測量の非線型項の評価項
 
     Params.Weight.Pf = diag([1; 1; 1]);
     Params.Weight.Vf = diag([1; 1; 1]);
