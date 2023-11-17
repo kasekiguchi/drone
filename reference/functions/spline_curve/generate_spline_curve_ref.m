@@ -8,6 +8,12 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
 % n = 5;%スプライン曲線の次数(寄関数の方がいいよ)
 % dt = 3;%各点の間の移動時間(point間の移動距離で決める)
 % ticksDelta = 0.15; %プロットに用いる座標の格子の間隔(m)
+%-------------------------------------------------------------------------------------
+% MY_WAY_POINT_REFERENCE.way_point_ref(val,n,fconfirm,fdrowfig)
+% val         %時間とwaypoint
+% n           %多項式次数
+% fconfirm=1  %確認するか
+% fdrowfig=1  %図を描画するか
     while 1
         isUsed = input("Use loaded reference : '1' \nCreat now : '0' \nFill in : ");
         if isempty(isUsed)
@@ -33,7 +39,7 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
             loadedRef = readmatrix("waypoint.xlsx",'Sheet',loadedSheetName);
         end
         n = input("Order of spline curve : ");%スプライン曲線の次数(寄関数の方がいいよ)
-        ref=MY_WAY_POINT_REFERENCE.way_point_ref(loadedRef,n,1,1);
+        ref=MY_WAY_POINT_REFERENCE.way_point_ref(loadedRef,n,1);
     else
         %example
         % pointN = 3;%点の数
@@ -111,7 +117,7 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
         end
         i=i+1;
         
-        rxy=MY_WAY_POINT_REFERENCE.way_point_ref([time,posi],n,1,0);
+        rxy=MY_WAY_POINT_REFERENCE.way_point_ref([time,posi],n,0);
         
         f(i)=figure(i);
         f(i).WindowState = 'maximized';
@@ -162,10 +168,10 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
         grid on
         xticks([axisNegative,axisPositive])
         axisPositive2 = 0:ticksDelta:2;
-        axisNegative2 = -flip(ticksDelta:ticksDelta:0.1);
+        axisNegative2 = -flip(ticksDelta:ticksDelta:0.2);
         yticks([axisNegative2,axisPositive2])
         xlim([-1.5 1.5])
-        ylim([-0.1 2])
+        ylim([-0.2 2])
         xline(0);
         yline(0);
         if k==1
@@ -179,7 +185,7 @@ function ref = generate_spline_curve_ref(loadedRef,fcmd)
         hold on
         plot(posi(:,k),zeros(pointN,k),'Marker','.','MarkerSize',12,'LineStyle','none');
         str = "  px" + num2str((1:pointN)') + " (" + num2str(posi(:,k)) + ")";
-        text(posi(:,k),zeros(pointN,1),str)
+        text(posi(:,k),zeros(pointN,1),str,"Rotation",-90)
         for j = 1:pointN
             [~,gz] = ginput(1);
             gz=max(min(gz,2),0);

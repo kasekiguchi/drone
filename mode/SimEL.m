@@ -32,7 +32,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[1,1
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0.5;0.5],"g",[0.2;0.2;0.5],"h",[0;0.2;1],"j",[0;0;1],"k",[0.1;0.1;0.8]),3});%縦ベクトルで書く,
 % agent.reference = POINT_REFERENCE(agent);
 
-fFT=1;%1:FT, other:LS
+fFT=0;%1:FT, other:LS
 agent.controller = ELC(agent,Controller_EL(dt,fFT));
 run("ExpBase");
 function dfunc(app)
