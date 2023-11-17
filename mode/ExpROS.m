@@ -1,6 +1,6 @@
-% clc;
-% clearvars -except fExp
-% disp("clear node");
+clc;
+clear all
+disp("clear node");
 
 % mega rover
 ts = 0; % initial time
@@ -11,15 +11,12 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-% Expnode = ros2node("/matnode",25);%(node_name,node_id)
-% ros2("topic","list","DomainID",Expnode.ID)%topic check
 initial_state.p = [0.0;0;0];
 initial_state.q = [0;0;0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = WHILL;
-% agent.node = ros2node("/matnode",25);
 agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 25));%agentでnodeを所持
 % agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros",25));
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
@@ -38,7 +35,7 @@ run("ExpBase");
 clc
 % for i = 1:time.te
 % %    if i < 20 || rem(i, 10) == 0, i, end
-%     agent(1).sensor.do(time, 'f');
+    % agent(1).sensor.do(time, 'f');
 %     agent(1).estimator.do(time, 'f');
 %     agent(1).reference.do(time, 'f');
 %     agent(1).controller.do(time, 'f',0,0,agent,1);

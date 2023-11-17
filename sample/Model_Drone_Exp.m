@@ -32,7 +32,7 @@ switch conn_type
         Setting.param.subName = ["p"];
         Setting.subTopic(1,:) = {'/rover_odo','geometry_msgs/Twist'};%%%%%%%%%%%%sub topic name
         Setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%%%pub topic name       
-        Setting.node            = ros2node("/agent_"+string(id),id);%%%%%%%%%%%%%create node
+        Setting.id =id;
 end
 Model.param = Setting;
 end

@@ -4,6 +4,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
     ESPr_num
     connector
     flight_phase % q : quit, s : stop, a : arming, t : take-off, h : hovering, f : flight, l : landing
+    IP
   end
   properties
     msg
@@ -35,10 +36,11 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
           obj.connector=SERIAL_CONNECTOR(param);
           fprintf("Drone %s is ready\n",param.port);
         case "ros2"
-            param.IP = param.node.ID;
-            obj.id = param.node;
+            obj.id = param.id;
+            param.node = ros2node("/agent_"+string(obj.id),obj.id);%%%%%%%%%%%%%create node
+            obj.IP = param.node;
             obj.connector = ROS2_CONNECTOR(param);
-            fprintf("Whill %d is ready\n", param.IP);
+            fprintf("Whill %d is ready\n", param.id);
       end
     end
     function do(obj,varargin)

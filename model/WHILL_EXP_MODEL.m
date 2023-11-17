@@ -60,10 +60,11 @@ methods
                 % obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
                 % obj.state.eq = quat2eul(obj.state.qq);
             case "ros2"
-                obj.IP = param.node.ID;
-                obj.id = param.node;
+                obj.id = param.id;
+                param.node = ros2node("/agent_"+string(obj.id),obj.id);%%%%%%%%%%%%%create node
+                obj.IP = param.node;
                 obj.connector = ROS2_CONNECTOR(param);
-                fprintf("Whill %d is ready\n", obj.IP);
+                fprintf("Whill %d is ready\n", obj.id);
         end
   end
   
