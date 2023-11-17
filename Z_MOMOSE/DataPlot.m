@@ -5,13 +5,13 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=0;%flightのみは１
+fF=1;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
-% endTime = 14.5;
+% endTime = 100;
 startTime = 0;
 endTime = 1E2;
 
@@ -36,12 +36,15 @@ endTime = 1E2;
                 % log_HLaFTC_srv_8s
 
                 % logger_FT_c_09
-
+                log_HLLS
+                log_HLFT
+                % log_HL
                 % gui.logger
         };
     c=[
+        % "ELFTzservo","ELFTzHLservo"
         % "HLLS"
-        % "HLLS","HLFT"
+        "HLLS","HLFT"
            % "HL","EL"
            % "ELft"
         ];
@@ -249,19 +252,18 @@ end
 
 %% make folder
 %変更しない
-%     ExportFolder='C:\Users\Students\Documents\momose';%実験用pcのパス
-        ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
+        % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
         % ExportFolder='Data';
     DataFig='figure';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
     
 %変更========================================================
-% subfolder='sim';%sim or exp
-subfolder='exp';%sim or exp
-ExpSimName='SERVOz_FTCxy';%実験,シミュレーション名
-% contents='FT_apx_max';%実験,シミュレーション内容
-contents='HL_EL_saddle_model_error';%実験,シミュレーション内容
+    subfolder='exp';%sim or exp
+    ExpSimName='demoooo';%実験,シミュレーション名
+    % contents='FT_apx_max';%実験,シミュレーション内容
+    contents='demo';%実験,シミュレーション内容
 %==========================================================
 FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
 FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
