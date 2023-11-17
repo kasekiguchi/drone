@@ -1,6 +1,6 @@
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 25; % terminal time
+te = 1210; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -18,7 +18,9 @@ agent.parameter.set("mass",struct("mass",0.5))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Momose_Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Momose_Case_study_trajectory",{[0,0,0]},"HL"});
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','MyNewSheet'),1));%コマンドでシートを選びたいときは位置2を1にする
+
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
 function dfunc(app)
