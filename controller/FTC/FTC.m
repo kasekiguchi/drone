@@ -112,7 +112,7 @@ methods(Static)
             save(savePath,val);%パラメータを保存 : [パラメータ，FTCとの誤差，近似する区間，制約の大きさ，緩和区間，ゲイン，yyyyyalpha]
             % whos("-file",filename);
         elseif fConfirmFig ==1
-            FTC.confirmParam(txt, valuesb.k, valuesb.p, valuesb.alp);%近似した入力を確認, パラメータが新しく作成される場合は実行されない
+            FTC.confirmParam(txt, k,valuesb.k, valuesb.p, valuesb.alp);%近似した入力を確認, パラメータが新しく作成される場合は実行されない
         end
      end
     %近似パラメータを求めるmethod
@@ -168,7 +168,7 @@ methods(Static)
             close all
     end
     %描画するmethod
-    function confirmParam(txt, k,p,alp)
+    function confirmParam(txt, kk,k,p,alp)
         % 有限整定の近似微分　一層   
             if length(k)==2
                 j=2;%z,yaw方向サブシステムの緩和
@@ -181,9 +181,9 @@ methods(Static)
             end
             for i = 1:j
                 %figureで緩和区間を確認
-                    e = -0.1 : 0.001 : 0.1;
+                    e = -0.1*20 : 0.001 : 0.1;
                     usgnabs = -k(i).*tanh(p(i,1).*e).*sqrt(e.^2 + p(i,2)).^alp(i);
-                    u = -k(i).*sign(e).*abs(e).^alp(i);
+                    u = -kk(i).*sign(e).*abs(e).^alp(i);
                     uk= -k(i).*e;
                     
                     subplot(row,2,i);%1枚ずつ表示する場合はfigure(i)に変更する

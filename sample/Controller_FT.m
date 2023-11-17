@@ -60,6 +60,19 @@ ax =Controller.ax ;
 ay =Controller.ay;
 apsi =Controller.apsi;
 %%
+isDiffrenceCrossPoint =0;
+crossPoint = 2;%線形入力と交わる場所を指定
+if isDiffrenceCrossPoint
+    Controller.F1 = Controller.F1*crossPoint./crossPoint.^az';
+    Controller.F2 = Controller.F2*crossPoint./crossPoint.^ax';
+    Controller.F3 = Controller.F3*crossPoint./crossPoint.^ay';
+    Controller.F4 = Controller.F4*crossPoint./crossPoint.^apsi';
+    vF1 = Controller.F1;
+    vF2 = Controller.F2;
+    vF3 = Controller.F3;
+    vF4 = Controller.F4;
+end
+%%
 %z方向FTCの近似
 pz=FTC.paramSetting("z", r, ar, br, vF1, az',  x0, fNewParam, fConfirmFig);
 %xy方向FTCの近似

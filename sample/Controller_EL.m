@@ -5,7 +5,9 @@ Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 Ac2 = diag(1,1);
 Bc2 = [0;1];
-Controller.F1=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt);
+% Controller.F1=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt);
+Controller.F1=lqrd(Ac4,Bc4,diag([100,10,0.01,1]),[1],dt);
+Controller.F1=[56.8586  101.4052   54.6051   11.0586];%-4.0293 + 3.4920i,-4.0293 - 3.4920i,-2,-1
 Controller.F2=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
 Controller.F3=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
@@ -50,8 +52,8 @@ if fFT ==1
 Cc4 = [1 0 0 0];
 Ac5=[Ac4,zeros(4,1);-Cc4,0];
 Bc5=[Bc4;0];
-Controller.F1s=lqrd(Ac5,Bc5,diag([1000,100,10,10,0.1]),0.01,dt);
-eF1=Controller.F1s(1:4);
+% Controller.F1s=lqrd(Ac5,Bc5,diag([1000,100,10,10,0.01]),0.01,dt);
+% eF1=Controller.F1s(1:4);
 
     Controller.Vep = matlabFunction([-eF1 * (sign(ez1).*abs(ez1).^az); -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1,ez2, ez3, ez4});
 else

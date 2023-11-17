@@ -4,7 +4,7 @@ syms u u1 u2 u3 u4 ddT1 T2 T3 T4  real
 syms m Lx Ly lx ly jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 %% Controller design
 clc
-syms xd1(t) xd2(t) xd3(t) xd4(t) v1(t)
+syms xd1(t) xd2(t) xd3(t) xd4(t)
 syms t real
 xd = [xd1(t),xd2(t),xd3(t),xd4(t)]; % reference を後で決める時はこっち
 %% 
@@ -50,7 +50,7 @@ dddh3 = LieD(ddh3,fep,x)+diff(ddh3,t);
 alpha = [LieD(dddh1,fep,x)+diff(dddh1,t);LieD(dddh2,fep,x)+diff(dddh2,t); LieD(dddh3,fep,x)+diff(dddh3,t); LieD(dh4,fep,x)+diff(dh4,t)];
 beta = [LieD(dddh1,gep,x);LieD(dddh2,gep,x); LieD(dddh3,gep,x); LieD(dh4,gep,x)];
 syms v1 v2 v3 v4
-Uep = inv(beta)*(-alpha+[v1;v2;v3;v4]);  % v2を後で設計する時はこっち
+Uep = beta\(-alpha+[v1;v2;v3;v4]);  % v2を後で設計する時はこっち
 V1234 = alpha+beta*Uep;
 %% Initialize xd as an unspecified function of t
 % % If regenerate Uf, Us or Xd functions, evaluate this section.
