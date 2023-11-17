@@ -92,8 +92,10 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
             % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
-            obj.result.input = var(1:4, 1); % 印加する入力 4入力
-            obj.result.transformedInput = obj.InputTransform.do(obj.result.input);
+            % obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            obj.result.input = obj.InputTransform.do(var(1:4, 1));
+            % obj.result.transformedInput = obj.InputTransform.do(obj.result.input);
+            %実機で飛ばすときは総推力に変換した入力をobj.result.inputに代入する
 
             %% データ表示用
             obj.input.u = obj.result.input; 

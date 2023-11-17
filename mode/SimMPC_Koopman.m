@@ -16,8 +16,8 @@ initial_state.w = [0; 0; 0];
 % fendIndex = find(data.Data.phase == 102,1, 'last');
 
 agent = DRONE;
-% agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1)); %総推力のトルク
-agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); %各ロータの推力
+agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1)); %総推力のトルク
+% agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); %各ロータの推力
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
