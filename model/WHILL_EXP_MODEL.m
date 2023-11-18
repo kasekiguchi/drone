@@ -72,7 +72,7 @@ methods
 function do(obj,varargin)
     t = varargin{1,1}.t; 
     % u = obj.self.controller.result.input;%%追記11/8%追追記11/9
-    u = varargin{5}.input_transform.result;
+    % u = obj.self.input_transform.result;
     cha = varargin{2};
         % if length(varargin) == 1
 
@@ -83,9 +83,9 @@ function do(obj,varargin)
             % end
 
             % cha = get(FH, 'currentcharacter'); 
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
-                cha = obj.phase;
-            end
+            % if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
+            %     cha = obj.phase;
+            % end
 
             obj.phase = cha;
 
@@ -114,12 +114,22 @@ function do(obj,varargin)
 %                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
 %                     obj.state.eq = quat2eul(obj.state.qq);
                 case 'f' % run
+                    u = obj.self.input_transform.result;
                     obj.msg.linear.x = u(1);
                     obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = u(2);
+                case 'a'
+                    obj.self.controller.result.input = 0;
+                    obj.self.input_transform.result = 0;
+                    obj.msg.linear.x = 0.0;
+                    obj.msg.linear.y = 0.0;
+                    obj.msg.linear.z = 0.0;
+                    obj.msg.angular.x = 0.0;
+                    obj.msg.angular.y = 0.0;
+                    obj.msg.angular.z = 0.0;
             end
 
 %         else % 緊急時
@@ -139,8 +149,7 @@ function do(obj,varargin)
 % %             obj.state.eq = quat2eul(obj.state.qq);
 %             return;
 %         end
-        
-        % send
+       
         obj.connector.sendData(obj.msg);
     end
 

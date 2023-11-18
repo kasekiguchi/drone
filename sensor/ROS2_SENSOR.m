@@ -54,7 +54,7 @@ methods
         % 【入力】motive ：NATNET_CONNECOTR object
         
         while(1)            
-            for i = 1:length(varargin)
+            for i = 1:length(obj.ros)
                 data{i} = obj.ros{i}.getData;
             end
             if isempty(data{1})|isempty(data{2})
@@ -109,7 +109,7 @@ methods
         tform = rigidtform3d(rot,T);
         % moving_pcm = pctransform(ptCloudOut,tform);
 
-        obj.result = pctransform(ptCloudOut,tform);
+        obj.result = pctransform(PCdata_use,tform);
         % obj.result = scanpcplot_rov(moving_pc);
         result = obj.result;
     end

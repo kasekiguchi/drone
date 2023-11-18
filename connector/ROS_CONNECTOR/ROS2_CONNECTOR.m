@@ -80,6 +80,7 @@ classdef ROS2_CONNECTOR < handle
             end
             if isfield(info,'pubTopic')
                 obj.publisher.pubTopic = ros2publisher(obj.nodename,obj.pubName,obj.pubMsg);
+                obj.publisher.pubmsg   = ros2message(obj.pubMsg);
             end
         end
 
@@ -110,10 +111,10 @@ classdef ROS2_CONNECTOR < handle
             % msg = struct('topic_name1',value1,'topic_name2',value2,...)
             
             % if isstruct(msg)
-                for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic(i), msg);
-                end
+                % for i = 1:obj.pubTopicNum
+                    obj.publisher.pubmsg = msg;
+                    send(obj.publisher.pubTopic, msg);
+                % end
             % else
             %     for i = 1:obj.pubTopicNum
             % 

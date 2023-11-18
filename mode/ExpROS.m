@@ -1,6 +1,6 @@
-clc;
-clear all
-disp("clear node");
+% clc;
+% clear all
+% disp("clear node");
 
 % mega rover
 ts = 0; % initial time
@@ -17,7 +17,7 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = WHILL;
-agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 25));%agentでnodeを所持
+agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 79));%agentでnodeを所持
 % agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros",25));
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
 % agent.sensor = ROS(agent, Sensor_ROS(struct('DomainID',25)));
@@ -45,7 +45,7 @@ clc
 %     %pause(1)
 % end
 % for i = 1:time.te
-%    if i < 20 || rem(i, 10) == 0, i, end
+%    % if i < 20 || rem(i, 10) == 0, i, end
 %     agent.sensor.do(time);
 %     agent.estimator.do(time);
 %     agent.reference.do(time,'f');
@@ -53,8 +53,8 @@ clc
 %     agent.plant.do(time, 'f');
 %     logger.logging(time, 'f', agent);
 %     time.t = time.t + time.dt;
-%     disp(agent.estimator.result.state.p);
-%     pause(1)
+%     % disp(agent.estimator.result.state.p);
+%     % pause(1)
 % end
 %%
 % 
