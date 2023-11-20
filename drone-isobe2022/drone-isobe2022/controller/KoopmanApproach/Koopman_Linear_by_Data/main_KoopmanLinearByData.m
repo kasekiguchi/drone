@@ -16,7 +16,8 @@ FileName = 'test.mat'; %お試し用
 % loading_filename = 'experiment_10_9_revcircle';  
 % loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
-loading_filename = 'experiment_10_26';
+loading_filename = 'experiment_11_20_P2Pxy';
+% loading_filename = 'experiment_10_26';
 % loading_filename = 'sim_rndP4';
 
 Data.HowmanyDataset = 20; %読み込むデータ数に応じて変更
