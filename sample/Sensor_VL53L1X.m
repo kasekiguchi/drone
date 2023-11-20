@@ -14,8 +14,8 @@ function Sensor = Sensor_VL53L1X(DomainID)
 %     Sensor.param=param;
     Sensor.state_list = ["p"];
     Sensor.num_list = [3,3];
-    Sensor.subTopic = ros2node("/Sensormatlab",25);
-    Sensor.subTopicName = ["/vl53l1x_node"];%ros2 topic listででる
-    Sensor.subMsgName = ["Sensor_msgs/msg/Range"];%ros2 topic list -t で出る
+%     Sensor.subTopic = ros2node("/Sensormatlab",33);
+%     Sensor.subTopicName = ["/vl53l1x/range"];%ros2 topic listででる
+%     Sensor.subMsgName = ["sensor_msgs/Range"];%ros2 topic list -t で出る
     Sensor.DomainID = DomainID; %% check
 end

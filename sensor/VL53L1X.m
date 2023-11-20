@@ -1,7 +1,7 @@
 classdef VL53L1X < handle
     %       self : agent
     properties
-        name      = "VL";
+%         name      = "VL";
         vl53l1x
         result
         state

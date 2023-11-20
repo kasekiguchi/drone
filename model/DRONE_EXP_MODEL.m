@@ -39,6 +39,16 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             obj.id = param.node;
             obj.connector = ROS2_CONNECTOR(param);
             fprintf("Whill %d is ready\n", param.IP);
+        case "t265"
+            param.IP = param.node.ID;
+            obj.id = param.node;
+            obj.connector = ROS2_CONNECTOR(param);
+            fprintf("T265 %d is ready\n", param.IP);
+        case "vl53l1x"
+            param.IP = param.node.ID;
+            obj.id = param.node;
+            obj.connector = ROS2_CONNECTOR(param);
+            fprintf("VL53L1X %d is ready\n", param.IP);
       end
     end
     function do(obj,varargin)
