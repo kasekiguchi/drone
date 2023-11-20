@@ -51,12 +51,13 @@ classdef ROS2_CONNECTOR < handle
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%旧
             %-- Configulations for ROS2%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%新規
             obj.nodename = info.node;
-            obj.subName  = info.subTopic{1,1};
-            obj.subMsg   = info.subTopic{1,2};
-
+            if isfield(info,'subTopic')
+                obj.subName  = info.subTopic{1,1};
+                obj.subMsg   = info.subTopic{1,2};
+            end
             if isfield(info,'pubTopic')
                 obj.pubName = info.pubTopic{1,1};
-                obj.pubMsg   = info.subTopic{1,2};
+                obj.pubMsg  = info.pubTopic{1,2};
             end
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%新規
 
@@ -74,12 +75,12 @@ classdef ROS2_CONNECTOR < handle
             %     obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg, ...
             %         @obj.getData,"History","keepall","Reliability","besteffort");
             % end
-            obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
+            if isfield(info,'subTopic')
+                obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
+            end
             if isfield(info,'pubTopic')
-                % for i = 1: obj.pubTopicNum
-                    % obj.publisher.pubTopic(i) = ros2publisher(obj.pubTopic(i),obj.pubName{i,1});
-                    obj.publisher.pubTopic = ros2publisher(obj.nodename,obj.pubName,obj.pubMsg);
-                % end
+                obj.publisher.pubTopic = ros2publisher(obj.nodename,obj.pubName,obj.pubMsg);
+                obj.publisher.pubmsg   = ros2message(obj.pubMsg);
             end
         end
 
@@ -110,10 +111,10 @@ classdef ROS2_CONNECTOR < handle
             % msg = struct('topic_name1',value1,'topic_name2',value2,...)
             
             % if isstruct(msg)
-                for i = 1:obj.pubTopicNum
-                    
-                    send(obj.publisher.pubTopic(i), msg);
-                end
+                % for i = 1:obj.pubTopicNum
+                    obj.publisher.pubmsg = msg;
+                    send(obj.publisher.pubTopic, msg);
+                % end
             % else
             %     for i = 1:obj.pubTopicNum
             % 

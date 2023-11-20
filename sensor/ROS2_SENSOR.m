@@ -16,7 +16,7 @@ end
 methods
 
     function obj = ROS2_SENSOR(self,param)
-        obj.Node = self.plant.id;
+        obj.Node = self.plant.IP;
         topics = param.param;
         topics.node = obj.Node;
         subTopics = topics.subTopic;
@@ -43,7 +43,7 @@ methods
 
         % data = obj.ros.getData;
         % data = obj.ros{1}.getData;
-        obj.prosesssfunc = param.func;%使わない場合はsampleで0を入れる
+        obj.prosesssfunc = param.pfunc;%使わない場合はsampleで0を入れる
     end
         
 
@@ -54,8 +54,9 @@ methods
         % 【入力】motive ：NATNET_CONNECOTR object
         
         while(1)            
-            data{1} = obj.ros{1}.getData;
-            data{2} = obj.ros{2}.getData;
+            for i = 1:length(obj.ros)
+                data{i} = obj.ros{i}.getData;
+            end
             if isempty(data{1})|isempty(data{2})
                 % break
                 disp("pointcloud lost")
@@ -65,10 +66,10 @@ methods
             pause(0.05)
         end
         
-        for i = 1:length(data)
-            data2pcd = rosReadCartesian(data{i});
-            moving_pc(i) = pointCloud([data2pcd zeros(size(data2pcd,1),1)]); % moving:m*3           
-        end
+        % for i = 1:length(data)
+        %     data2pcd = rosReadCartesian(data{i});
+        %     moving_pc(i) = pointCloud([data2pcd zeros(size(data2pcd,1),1)]); % moving:m*3           
+        % end
 
     % %% ローバー自身の点群認識
     %     roi = [0.1 0.35 -0.18 0.16 -0.1 0.1];
@@ -101,14 +102,14 @@ methods
     % 
     %     ptCloudOut = pcmerge(moving_pc(1), moving_pc2_m_b, 0.001);
         % ptCloudOut = pcmerge(moving_pc.f, moving_pc2_m, 0.001);
-        PCdata_use = prosesssfunc(moving_pc);
+        PCdata_use = obj.prosesssfunc(data);
         
         rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
         T = [0.17 0 0]; %並進方向(x,y,z)
         tform = rigidtform3d(rot,T);
         % moving_pcm = pctransform(ptCloudOut,tform);
 
-        obj.result = pctransform(ptCloudOut,tform);
+        obj.result = pctransform(PCdata_use,tform);
         % obj.result = scanpcplot_rov(moving_pc);
         result = obj.result;
     end

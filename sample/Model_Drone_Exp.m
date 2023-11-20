@@ -7,7 +7,6 @@ function Model= Model_Drone_Exp(dt,~,conn_type,id)
 %    address "192.168.50.124", "...125", "...127" respectively.
 %    if conn_type is "serial", id = [5, 7] means two drones connected at
 %    "COM5" and "COM7"
-%  nodeとpublisherを立てる
 arguments
   dt
   ~
@@ -33,19 +32,7 @@ switch conn_type
         Setting.param.subName = ["p"];
         Setting.subTopic(1,:) = {'/rover_odo','geometry_msgs/Twist'};%%%%%%%%%%%%sub topic name
         Setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%%%pub topic name       
-        Setting.node            = ros2node("/agent_"+string(id),id);%%%%%%%%%%%%%create node
-    case "t265"        
-        Setting.param.state_list = ["p"];
-        Setting.param.subName = ["p"];
-        Setting.subTopic(1,:) = {'/camera/pose/sampl','nav_msgs/Odometry'};%%%%%%%%%%%%sub topic name
-%         Setting.pubTopic(1,:) = {''};%%%%%%%%%%%%pub topic name       
-        Setting.node            = ros2node("/agent_"+string(id),id);%%%%%%%%%%%%%create node
-    case "vl53l1x"
-        Setting.param.state_list = ["p"];
-        Setting.param.subName = ["p"];
-        Setting.subTopic(1,:) = {'/vl53l1x/range','sensor_msgs/Range'};%%%%%%%%%%%%sub topic name
-%         Setting.pubTopic(1,:) = {''};%%%%%%%%%%%%pub topic name       
-        Setting.node            = ros2node("/agent_"+string(id),id);%%%%%%%%%%%%%create node
+        Setting.id =id;
 end
 Model.param = Setting;
 end
