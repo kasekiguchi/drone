@@ -12,14 +12,14 @@ folderName = '10_27';
 
 %% select file to load (max number of file:5)
 
-loadfilename{1} = 'EstimationResult_12state_11_13_data=cirandrevsadP2Pxy_cir=cir_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-loadfilename{2} = 'EstimationResult_12state_11_12_data=cirandrevsadP2Pxy_cir=cir_est=P2Pshape_Incon.mat';
-loadfilename{3} = 'EstimationResult_12state_11_13_data=cirandrevsadP2Pxy_cir=cir_est=P2Pshape_Incon_Norma.mat';
+loadfilename{1} = 'EstimationResult_12state_11_20_data=cir_cir=cir_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{2} = 'EstimationResult_12state_11_20_data=cirandrevandsad_cir=cir_est=P2Pshape.mat';
+loadfilename{3} = 'EstimationResult_12state_11_20_data=cirandrevandsadP2Pxy_cir=cir_est=P2Pshape.mat';
 % loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
 
-% loadfilename{1} = 'test2.mat';
-% loadfilename{2} = 'EstimationResult_12state_11_13_data=cirandrevsadP2Pxy_cir=cir_est=cir_Norma.mat';
-% loadfilename{3} = 'EstimationResult_12state_11_13_data=cirandrevsadP2Pxy_cir=cir_est=P2Pshape_Incon_Norma.mat';
+% loadfilename{1} = 'test.mat';
+% loadfilename{2} = 'test2.mat';
+% loadfilename{3} = 'test3.mat';
 % loadfilename{4} = 'test2.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
@@ -36,9 +36,9 @@ if stepnum == 0
         xlimHold = [0,0.5];
     end
 elseif stepnum == 1
-    stepN = 55;
+    stepN = 80;
     if flg.xlimHold == 1
-        xlimHold = [0,0.8];
+        xlimHold = [0,1.2];
     end
 elseif stepnum == 2
     stepN = 91;

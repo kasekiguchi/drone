@@ -11,7 +11,7 @@ clc;
 
 %% データのインポート
 % load("sim_7_20_circle_estimatordata.mat") %読み込むデータファイルの設定
-load("experiment_11_8_P2Pshape_estimator.mat")
+load("experiment_9_5_saddle_estimatordata.mat")
 disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
@@ -24,6 +24,7 @@ for i = 1:find(log.Data.t,1,'last')
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
 
+%旧共通プログラム用
 % for i = 1:find(logger.Data.t,1,'last')
 %     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
 %     data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
