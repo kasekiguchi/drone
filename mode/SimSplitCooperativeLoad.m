@@ -3,7 +3,7 @@ clear
 N = 6;
 ts = 0; %機体数
 dt = 0.025;
-te = 1000;
+te = 100;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -51,7 +51,10 @@ agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, init
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
+% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
+% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
+
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.do = @controller_do;
@@ -77,7 +80,7 @@ for i = 2:N+1
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
-    agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[]},"Split",N},agent(1));
+    agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[]},"Split2",N},agent(1));
 %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
     agent(i).controller.load = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
@@ -104,31 +107,91 @@ end
 
 %%
 close all
-DataA= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
-Data2= logger.data(2,"reference.result.state.p","p");
-Data3= logger.data(3,"reference.result.state.p","p");
-Data4= logger.data(4,"reference.result.state.p","p");
-Data5= logger.data(5,"reference.result.state.p","p");
-Data6= logger.data(6,"reference.result.state.p","p");
-Data7= logger.data(7,"reference.result.state.p","p");
+% DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+DataB = logger.data(2,"reference.result.m","p");
+DataC = logger.data(2,"reference.result.Muid","p");
+DataD = logger.data(2,"reference.result.state.xd","p");
 t=logger.data(0,'t',[]);
+%%
 figure(101)
 hold on
-plot(Data2(:,1),Data2(:,2))
-plot(Data3(:,1),Data3(:,2))
-plot(Data4(:,1),Data4(:,2))
-plot(Data5(:,1),Data5(:,2))
-plot(Data6(:,1),Data6(:,2))
-plot(Data7(:,1),Data7(:,2))
-% plot(cccc(:,1),cccc(:,2))
+plot(t,DataA(:,3))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
-% xlabel("X [m]")
-ylabel("Y [m]")
+xlabel("t [s]")
+ylabel("X [m]")
 % legend("Payload","UAV")
 ax = gca;
 ax.FontSize = 13;
 hold off
+
+%%
+figure(102)
+hold on
+plot(t,DataB(:,1))
+% xlim([-1.5 1.5])
+% ylim([-1.5 1.5])
+xlabel("t [s]")
+ylabel("m [kg]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 13;
+hold off
+
+%%
+figure(103)
+hold on
+plot(t,DataC(:,3))
+% xlim([-1.5 1.5])
+% ylim([-1.5 1.5])
+xlabel("t [s]")
+ylabel("Mu [N]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 13;
+hold off
+
+%%
+figure(104)
+hold on
+plot(t,DataD(:,9))
+% xlim([-1.5 1.5])
+% ylim([-1.5 1.5])
+xlabel("t [s]")
+ylabel("acceleration [m/s^2]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 13;
+hold off
+%%
+% close all
+% DataA= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+% Data2= logger.data(2,"reference.result.state.p","p");
+% Data3= logger.data(3,"reference.result.state.p","p");
+% Data4= logger.data(4,"reference.result.state.p","p");
+% Data5= logger.data(5,"reference.result.state.p","p");
+% Data6= logger.data(6,"reference.result.state.p","p");
+% Data7= logger.data(7,"reference.result.state.p","p");
+% t=logger.data(0,'t',[]);
+% 
+% figure(101)
+% hold on
+% plot(Data2(:,1),Data2(:,2))
+% plot(Data3(:,1),Data3(:,2))
+% plot(Data4(:,1),Data4(:,2))
+% plot(Data5(:,1),Data5(:,2))
+% plot(Data6(:,1),Data6(:,2))
+% plot(Data7(:,1),Data7(:,2))
+% % plot(cccc(:,1),cccc(:,2))
+% % xlim([-1.5 1.5])
+% % ylim([-1.5 1.5])
+% % xlabel("X [m]")
+% ylabel("Y [m]")
+% % legend("Payload","UAV")
+% ax = gca;
+% ax.FontSize = 13;
+% hold off
 
 % figure(102)
 % hold on
