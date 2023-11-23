@@ -81,7 +81,7 @@ classdef MPC_controller_case_Komatu <handle
 
             problem.x0		  = [obj.previous_state; obj.previous_input];                 % 状態，入力を初期値とする                                    % 現在状態
 
-            problem.objective = @(x) Objective(obj,x); 
+            problem.objective = @(x) obj.objective(x); 
             problem.nonlcon   = @(x) obj.constraints(x);
             [var, ~, exitflag, ~, ~, ~, ~] = fmincon(problem);
 
@@ -158,20 +158,20 @@ classdef MPC_controller_case_Komatu <handle
             % ホバリング　±１
         end
 
-%         function [eval] = objective(obj,x)   % obj.~とする
-%             X = x(1:12,:);
-%             U = x(13:16,:);
-%             tildeX = X - obj.state.ref(1:12,:);
-%             tildeUpre = U - obj.input.u;
-%             tildeUref = U - obj.state.ref(13:16,:);
-% 
-%             stageState = tildeX(:,end-1)' * obj.param.Weight    * tildeX(:,end-1);
-%             stageInputPre  = tildeUpre(:,end-1)' * obj.param.RP * tildeUpre(:,end-1);
-%             stageInputRef  = tildeUref(:,end-1)' * obj.param.R  * tildeUref(:,end-1);
-%             terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
-% 
-%             eval = stageState + stageInputPre + stageInputRef + terminalState;
-%         end
+        function [eval] = objective(obj,x)   % obj.~とする
+            X = x(1:12,:);
+            U = x(13:16,:);
+            tildeX = X - obj.state.ref(1:12,:);
+            tildeUpre = U - obj.input.u;
+            tildeUref = U - obj.state.ref(13:16,:);
+
+            stageState = tildeX(:,end-1)' * obj.param.Weight    * tildeX(:,end-1);
+            stageInputPre  = tildeUpre(:,end-1)' * obj.param.RP * tildeUpre(:,end-1);
+            stageInputRef  = tildeUref(:,end-1)' * obj.param.R  * tildeUref(:,end-1);
+            terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
+
+            eval = stageState + stageInputPre + stageInputRef + terminalState;
+        end
 
         function [xr] = Reference(obj, T)
             % パラメータ取得
