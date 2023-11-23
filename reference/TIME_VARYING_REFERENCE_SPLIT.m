@@ -23,7 +23,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_time
         base_state
         ts
-        te = 10;
+        te = 1;
         zd = 1; % goal altitude
         
 
