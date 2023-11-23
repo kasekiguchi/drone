@@ -223,9 +223,14 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                id = obj.self.id;
 
-               Muid = obj.Muid_method(x,qi,R0,R0d,xd,obj.K,obj.P,obj.Pdagger); %3xN
-               muid_myagent = Muid(:,id-1); %3x1
-               obj.result.Muid = Muid(:,id-1)';
+%                Muid = obj.Muid_method(x,qi,R0,R0d,xd,obj.K,obj.P,obj.Pdagger); %3xN
+%                muid_myagent = Muid(:,id-1); %3x1
+%                obj.result.Muid = Muid(:,id-1)';
+
+               Muid = obj.agent1.controller.result.mui; %3xN
+               muid_myagent = Muid(4:6,id-1); %3x1
+               obj.result.Muid = muid_myagent';
+               
 
                obj.result.state.xd = obj.agent1.reference.result.state.xd; % 目標重心位置（絶対座標）
                obj.result.state.p = obj.result.state.xd(1:3);

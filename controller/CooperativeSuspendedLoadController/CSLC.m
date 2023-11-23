@@ -9,6 +9,7 @@ classdef CSLC < handle
     gains
     Pdagger
     gen_input
+    gen_muid
     N
     toR
     dqid
@@ -27,6 +28,8 @@ classdef CSLC < handle
       obj.gains = param.gains; %
       %[kx0' kr0 kdx0' ko0 kqi kwi kri koi epsilon]
       obj.gen_input = str2func(param.method);
+      obj.gen_muid= str2func(param.method2);
+      obj.result.mui = zeros(6,obj.N);
       if self.estimator.model.state.type ==3
         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
       else
@@ -50,6 +53,7 @@ classdef CSLC < handle
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
       %[obj.result.input,obj.dqid,obj.ddqid] = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger,obj.dqid,obj.ddqid);
       obj.result.input = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger);
+      obj.result.mui = obj.gen_muid(x,qi,R0,R0d,xd,obj.gains,obj.P,obj.Pdagger);
       result = obj.result;
     end
   end
