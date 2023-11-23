@@ -55,7 +55,7 @@ methods
             % if cha == 'f'
             %     gain=70
             % end
-            gain = obj.param.gain(4)
+            gain = obj.param.gain(4);
             % apply gain to (thrust - hovering_thrust)
             % uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
             uthr = max(0, gain * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 

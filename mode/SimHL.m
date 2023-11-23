@@ -25,25 +25,25 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),1));%コマンドでシートを選びたいときは位置2を1にする
 %スプラインカーブは5が良い
 
-agent.controller = HLC(agent,Controller_HL(dt));
+% agent.controller = HLC(agent,Controller_HL(dt));
 
 % run("ExpBase");
 %% mpcと同時
 
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
-% agent.controller.result.input = [0;0;0;0];
-% agent.controller.do = @controller_do;
-% run("ExpBase");
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
+run("ExpBase");
+
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    result = controller.hlc.do(varargin{1});
+    result.mpc = controller.mpc.do(varargin{1});
+    varargin{5}.controller.result = result;
+end
 % 
-% function result = controller_do(varargin)
-%     controller = varargin{5}.controller;
-%     result = controller.hlc.do(varargin{1});
-%     result.mpc = controller.mpc.do(varargin{1});
-%     varargin{5}.controller.result = result;
-% end
-% 
-% function dfunc(app)
+function dfunc(app)
 
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "p1-p2-p3", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
