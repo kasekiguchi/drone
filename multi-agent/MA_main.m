@@ -37,8 +37,10 @@ meas = maptrue/100; % 縮尺換算用の関数
 nx_app = 100; % 見かけ上のx辺
 ny_app = 100; % 見かけ上のy辺
 map_extra = nx * ny - nx_app * ny_app ;     %見えない部分の総セル数
-mapd = 16;  % map difference マップ差異（風向の対応関係がマップごとに異なるため、その補正項）
-build = 0;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し
+mapd = 180;  % map difference マップ差異（風向の対応関係がマップごとに異なるため、その補正項）
+build = 0;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し、3で延焼調整モード（飛び火OFF）
+windreal = 0;     %0で定数、1で細分化（エクセル使用）
+mapslope = 12;      %マップの北に対する傾き角度（例：右上が北の場合1~90）
 
 %% environment definition
 % % Wの生成に数時間かかるため、make_grid_graphからWのみ独立
@@ -47,7 +49,7 @@ build = 0;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無�
 %% 風向配列生成
 winddata = readtable('data_ito.csv');   % csvの読み込み
 
-ke = 300;   % シミュレーションステップ数
+ke = 240;   % シミュレーションステップ数
 firstime = 1;   % 1でExcelデータの一番上
 timestage = ke/20;
 csvnorm = 3;    % 使うcsv(気象情報)の何行目に風速や風向の情報が入っているかによって可変
@@ -64,33 +66,47 @@ for i = 1:timestage
     for j = 1:32
         wcheck = strcmp(wdata,wbase(j));
         if wcheck == 1
-            wind(1,i) = rem(j,32);  % 風向の設定
+            wind(1,i) = rem(j,32)*360/32;  % 風向の設定
             break
         end
     end
     clear wdata
 end
-wind(1,:) = wind(1,:) + 1;    % 手動糸魚川の場合は真上が北北西で少し角度がズレているのでここをON
-%% 風情報
-wind1 = 31;  %風向 [1つ前:15]
-wind2 = 9;  %風速x[m/s] 無風は0.01とかに
-E0 = 0;
-Ee = 0;
-[E,ES,EF,E2] = make_fire_graph(nx,ny,meas,W,wind1,wind2,mapd,maxv);
-% % 0:南 2:南南西 4:南西 6:西南西 8:西 10:西北西 12:北西 14:北北西 
-% % 16:北 18:北北東 20:北東 22:東北東 24:東 26:東南東 28:南東 30:南南東
 
-% % 風情報の細分化&リアルタイム参照で使用
-% for i = 1:timestage
-%     clear wind1 wind2 E E2 ES EF Ee
-%     wind1 = wind(1,i)
-%     wind2 = wind(2,i)
-%     [E,ES,EF,E2] = make_fire_graph(nx,ny,meas,W,wind1,wind2,mapd,maxv);
-%     Ee(1,i) = {E};
-%     Ee(2,i) = {EF};
-% %     Ee2(i) = {E2};
-%     E0 = 1;
-% end
+wind(1,:) = wind(1,:) + mapslope;    % マップの傾きを補正
+
+%% 風情報
+if windreal == 0
+    for i = 1:timestage
+        if wind(1,i) <= 180
+            wind(1,i) = wind(1,i) + 360;
+        end
+    end
+    wind1 = mean(wind(1,1:timestage)); % 平均風向
+    wind2 = mean(wind(2,1:timestage));  %風速x[m/s] 無風は0.01とかに
+    if build == 3
+        wind1 = 0;
+        wind2 = 10;
+    end
+    E0 = 0;
+    Ee = 0;
+    [E,ES,EF,E2] = make_fire_graph(nx,ny,meas,build,W,wind1,wind2,mapd,maxv);
+    % % 0:南 45:南西 90:西 135:北西 180:北 225:北東 270:東 315:南東
+elseif windreal == 1
+    % 風情報の細分化&リアルタイム参照で使用
+    clear wind1 wind2 E E2 ES EF Ee
+    for i = 1:timestage
+        wind1 = wind(1,i);
+        wind2 = wind(2,i);
+        [E,ES,EF,E2] = make_fire_graph(nx,ny,meas,build,W,wind1,wind2,mapd,maxv);
+        Ee(1,i) = {ES};
+        Ee(2,i) = {EF};
+    %     Ee2(i) = {E2};
+    end
+    E0 = 1;
+end
+
+
 %%
 
  %[i,j,v]=find(E);
@@ -103,19 +119,11 @@ else
     disp("OK");
 end
 
-%% 自然延焼
-fFPosition = 6; % flag fire position
-% 7:GIS糸魚川, 13:世田谷500m北東下, 14:世田谷300m北東下
-h = 0; % extinction probability
-W_vec = reshape(W,N,1);
-map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);
-map.draw_state(nx,ny,W);    % model_init実行後でないとマップは生成できない(正確には、その中のmap = SIR_model(N,Il,h)を実行した後でないとパスが無い)
-
 %% 情報保存
-savefile = '230920_糸魚川_E(風一定).mat';
+savefile = '231121_糸魚川_E(細分化).mat';
 save(savefile);
 %% 情報読み込み
-loadfile = '230919_糸魚川_E(風一定).mat';
+loadfile = '231121_糸魚川_E(細分化).mat';
 load(loadfile);
 %% Page-RankやAlt-Page-Rankを用いるのに利用する(つまり単純なWeightでは使わない)
    L = speye(size(E)) - E/eigs(E,1);
@@ -124,14 +132,13 @@ load(loadfile);
     %[V2,Eig2,Flag2]=eigs(E'/eigs(E,1),1,'largestreal','Tolerance',1e-20);
     %map.draw_state(nx,ny,reshape(V,[nx,ny]));% V2だとAPRが負になることがある．Vの方が数値的に安定そう．符号自由度についてはVの方が悪そうなのになぜだろう？
 
-%% 手動入力飛び火(卒論で私用)
-clear logger
-logger.k=zeros(1,ken);
-logger.S(:,1) = map.S(:);
-logger.I(:,1) = map.I(:);
-logger.R(:,1) = map.R(:);
-logger.U(:,1) = map.U(:);
-
+%% 手動入力飛び火(卒論で利用)
+% clear logger
+% logger.k=zeros(1,ken);
+% logger.S(:,1) = map.S(:);
+% logger.I(:,1) = map.I(:);
+% logger.R(:,1) = map.R(:);
+% logger.U(:,1) = map.U(:);
 for k = 1:ken
     map.next_step_func(0,E);% map 更新
     % log
@@ -210,10 +217,11 @@ end
 
 %% Monte-Carlo simulation
 % 90min =~ 30step
-unum = 0; % 初期の消火点の数（10機のUAV）
-addFighter = "ON2";
-ke = 300; % シミュレーションステップ
-kn = 2;% number of Monte-Carlo simulation
+unum = 6; % 初期の消火点の数（10機のUAV）
+addFirePoint = "Regular";   % Regularで手動糸魚川，testでチューニング
+addFighter = "ON3"; % OFFは増援0，ON1はざっくり上昇，ON2は糸魚川時のポンプ数に対応
+% ke = 300; % シミュレーションステップ
+kn = 500;% number of Monte-Carlo simulation
 % 手法選択
 % fMethod = "WAPR"; % Weighted Alt Page Rank
 % fMethod = "APR"; % Alt Page Rank
@@ -221,9 +229,25 @@ fMethod = "Weight"; % 重み行列
 % fDynamics = "Astar"; % 消火方法：A star or Direct
 fDynamics = "Direct"; % 消火方法：A star or Direct
 vi = 5; % 消火の必要がない部分を飛ばす距離
+if build == 3
+    ke = 40;
+    h = 0;
+    addFirePoint = "test";
+else
+    h = 0.1 * (3/meas); % extinction probability　消火確率は0.1で設定
+end
 %map.draw_state(nx,ny,map.loggerk(logger,ke));
-fFPosition = 6;
-h = 0.1 * (3/meas); % extinction probability
+if addFirePoint == "test"
+    fFPosition = 0;
+elseif addFirePoint == "Manual"
+    prompt1 = "初期出火点(fFPosition)のx座標を設定せよ!!!";
+    init_fx=input(prompt1);
+    prompt2 = "初期出火点(fFPosition)をy座標を設定せよ!!!";
+    init_fy=input(prompt2);
+    fFPosition(1) = init_fx; fFPosition(2) = init_fy;
+elseif addFirePoint == "Regular"
+    fFPosition = 6;
+end
 W_vec = reshape(W,N,1);
 clear Logger
 
@@ -261,12 +285,14 @@ elseif addFighter == "ON1"
     FF = 1;
 elseif addFighter == "ON2"
     FF = 2;
+elseif addFighter == "ON3"
+    FF = 3;
 else
     disp("Unum Error");
 end
-w2 = 1/((XM-Xm)/max(nx,ny))
-model_init(N,Il,h,nx,ny,fFPosition,W_vec);
-map.draw_state(nx,ny,W);
+w2 = 1/((XM-Xm)/max(nx,ny));
+map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);
+map.draw_state(nx,ny,W)
 % V_mat = reshape(V,[nx,ny]);     %重みAPRグラフ表示のための正方行列化
 % map.draw_state(nx,ny,V_mat);    %重みAPRのグラフ表示
 % map.draw_state(nx,ny,reshape(V,[nx,ny]))
@@ -278,31 +304,29 @@ for k = 1:kn
     K(k);
 end
 %% %%% 違法増築1 Logデータの保存
-map.save('230728_Log100[400s]_手動糸魚川_W_Direct_8st_h0.1_糸魚川300風一定(32).mat',Logger);
+map.save('231122_Log500[240s]風一定Tuning_M糸_Regular_ON3_W_Direct_h0.1.mat',Logger);
 % map.save('K_Feb22_WAPR_Direct_unum15_vi5_h0.1_Log2.mat',K);
 %% %%% 違法増築2 動画の生成と保存
 % 事前必用準備：plot 2の実行
-i = 34;
-final_step(i)
+i = 2;
+stepP = 20;%final_step(i)
 figure('Position', [0 -500 1100 1000]);
 % Logger2=map.load('Logger_APR_Astar_100_30_09_004_10_5.mat');
 % K2 = map.load('K_APR_Astar_100_30_09_004_10_5.mat');
-md = map.draw_state(nx,ny,map.loggerk(Logger(i),final_step(i)));    %nステップ目を画像出力
+md = map.draw_state(nx,ny,map.loggerk(Logger(i),stepP));    %nステップ目を画像出力
 % M = map.draw_movie(Logger(1),nx,ny,0);    %動画を出力
 % M=map.draw_movie(Logger(53),nx,ny,1,"230725_風情報細分化シミュレーション");  %名前を付けて動画を出力
 %% %%% 違法増築3 Logデータの読み込み
-Logger=map.load('230508_Log100[300s]_W_Direct_5st_h0.1_糸魚川M.mat');
-%% plot 2　いろいろな統計データの出力項
+Logger=map.load('231121_Log100[300s]風細分化_M糸_Regular_ON3_W_Direct_h0.1.mat');
+%% plot 1　いろいろな統計データの出力項
 % 消失セル数の算出
 clear xi
-damage_ave = 0;
-for xi = 1:100
+for xi = 1:kn
     kre = size(Logger(xi).I);
     kre = kre(1,2);  %シミュレーションの最終ステップ数
     tmpS2 = 0;
     tmpI2 = 0;
     tmpR2 = 0;
-    tmp2=[];
     I2.I = logical (Logger(xi).I);
     for i = 1:kre
 %         if kre > 200
@@ -316,12 +340,21 @@ for xi = 1:100
     damage_all(xi,1) = tmpR2(kre)+tmpI2(kre);
 %     figure('Position', [0 -500 1100 1000]);
 %     md = map.draw_state(nx,ny,map.loggerk(Logger(xi),final_step(xi)));
-    damage_ave = damage_ave + damage_all(xi,1);
 end
-damage_ave = round(damage_ave/kn)
+damage_ave = round(mean(damage_all))
+
+%% plot2
+% 総被害グリッド数を計測
+clear i xi
+
+figure('Position', [0 -500 1100 1000]);
+hold on
+yline(damage_ave,'-r','LineWidth',3)
+bar(damage_all);
+hold off
 %% plot3
 % 特定のLOGのS,I,R遷移を出力
-xi =   34   %Logの番号
+xi =   3   %Logの番号
 kre2 = size(Logger(xi).I); kre2 = kre2(1,2);  %シミュレーションの最終ステップ数
 tmpS3 = 0;
 tmpI3 = 0;
@@ -360,7 +393,6 @@ for xi = 1:kn
     kre = size(Logger(xi).I);
     kre = kre(1,2);  %シミュレーションの最終ステップ数
     tmpR4 = 0;
-    tmp2=[];
     I2.I = logical (Logger(xi).I);
     for i = 1:kre
         tmpR4(i)=sum(Logger(xi).R(:,i)); %logger(i)内にあるRの200s時(ke)の値の合計
@@ -369,8 +401,8 @@ for xi = 1:kn
 %     md = map.draw_state(nx,ny,map.loggerk(Logger(xi),final_step(xi)));
 
 end
-Ftime = [10 20 40 60 80 100 120 200];
-Fdame = [33 52 121 628 901 1105 1413 1841];
+Ftime = [10 25 35 70 85 100 120 200];
+Fdame = [30 70 140 720 900 1105 1413 1841];
 % Fpf = polyfit(Ftime,Fdame,4);
 % x2 = 0:.1:200;
 % y2 = polyval(Fpf,x2);
@@ -385,80 +417,156 @@ ylim([0 3000]);
 hold off
 
 %% plot5
+% 飛び火の数を計測
+% Logger(i).UFで(飛び火したグリッド,何ステップ目)が分かる
+% [Q,R] = quorem(sym(7589),sym(130)) でQに商，Rに余り  座標(x, y) = (Q + 1, R)
+% InitExting 初期消火が成功した場合の足切り
+clear i xi flyP flyP1 flyP2
+xi = 1; InitExting = 20;
+for i = 1:kn
+    flyP(i) = nnz(Logger(i).UF);
+    flyP1(i,1) = flyP(i);
+    if size(Logger(i).R,2) >= InitExting
+        flyP2(xi,1) = flyP(i);
+        flyP2(xi,2) = i;
+        xi = xi + 1;
+    end
+end
+flyPave = mean(flyP2(:,1))
+
+figure('Position', [0 -500 1100 1000]);
+hold on
+% yline(flyPave,'-r','LineWidth',3)
+bar(damage_all,'FaceColor',"#EDB120");
+colororder({'k'})
+yyaxis right
+plot(flyP,"red",'LineWidth',1.5);
+hold off
+
+%% plot6
 % 重み合計
 % 事前必用準備：plot 2の実行
 clear xi kre
-BurnResult = 0;
+InitExting = 20;    % 初期消火が成功した場合の足切り
+BurnResult = 0; BurnResult2 = 0; BurnResultw = 0; BurnResult2w = 0;
 for xi = 1:kn
+    clear Rsigma
+    Rsigma = Logger(xi).R;
     for sumW = 1:final_step(xi)-1
-        Logger(xi).R(:,1) = [];
+        Rsigma(:,1) = [];
     end
-    BurnResult =  BurnResult + reshape((Logger(xi).R),[nx,ny]);
+    if size(Logger(xi).R,2) >= InitExting
+        BurnResultw =  BurnResultw + reshape((Rsigma),[nx,ny]);
+    end
+    BurnResult =  BurnResult + reshape((Rsigma),[nx,ny]);
 end
 
+clear xi kre i j
+for xi = 1:kn
+    clear Isigma Isigma2
+    Isigma = logical(Logger(xi).I);
+    for sumW = 1:final_step(xi)-1
+        Isigma(:,1) = [];
+    end
+    if size(Logger(xi).I,2) >= InitExting
+        BurnResult2w =  BurnResult2w + reshape((Isigma),[nx,ny]);
+    end
+    BurnResult2 =  BurnResult2 + reshape((Isigma),[nx,ny]);
+end
+
+BR0 = BurnResult + BurnResult2;
+for i = 1:size(BR0,1)
+    for j = 1:size(BR0,2)
+        if BR0(i,j) == 0
+                BR0(i,j) = BR0(i,j) - kn/5;
+        end
+    end
+end
+
+BR = BurnResultw + BurnResult2w;
+max(BR,[],"all")
+for i = 1:size(BR,1)
+    for j = 1:size(BR,2)
+        if BR(i,j) == 0
+            BR(i,j) = BR(i,j) - kn/5;
+        elseif BR(i,j) <= 0    % 特定の頻度以下を省く場合にON
+            BR(i,j) = 0 - kn/5;
+        end
+    end
+end
+
+% figure('Position', [0 -500 1100 1000]);
+% map.draw_state(nx,ny,BurnResult)
+% figure('Position', [0 -500 1100 1000]);
+% map.draw_state(nx,ny,BR0)
 figure('Position', [0 -500 1100 1000]);
-map.draw_state(nx,ny,BurnResult)
+hold on
+map.draw_state(nx,ny,BR)
+
+c = colorbar;
+c.TicksMode = "manual";
+w = c.Ticks;
+k = 10;
+c.Ticks(1,1) = 1;
+for i = 2:kn/k
+    c.Ticks(1,i) = k * (i-1);
+end
+
+hold off
+
+
 
 %% END
-%　ここまでが卒論mainプログラム
 %
 %%
 %% local functions
 %% model init
 function map= model_init(N,Il,h,nx,ny,fFPosition,W_vec)
 % fFPositionに応じてmap 中心から見て４象限に火災エリアの初期値配置
-switch fFPosition
-    case 0
-        init_fx=(floor(nx/2)-5:floor(nx/2)+5)';
-        init_fy=floor(ny/2)-0:floor(ny/2)+5;
-    case 1
-        init_fx=(floor(nx/2)+20:floor(nx/2)+30)';
-        init_fy=floor(ny/2)+20:floor(ny/2)+25;
-    case 2
-        init_fx=(floor(nx/2)-30:floor(nx/2)-20)';
-        init_fy=floor(ny/2)+20:floor(ny/2)+25;
-    case 3
-        init_fx=(floor(nx/2)-30:floor(nx/2)-20)';
-        init_fy=floor(ny/2)-25:floor(ny/2)-20;
-    case 4
-        init_fx=(floor(nx/2)+20:floor(nx/2)+30)';
-        init_fy=floor(ny/2)-25:floor(ny/2)-20;
-    case 5
-        init_fx=(floor(nx/2):floor(nx/2)+4)';
-        init_fy=floor(1):floor(1)+2;
-    case 6 % 手動糸魚川
-        init_fx=50;
-        init_fy=11;
-    case 7
-        init_fx=41;
-        init_fy=11;
-    case 8
-        init_fx=28;
-        init_fy=8;
-    case 9 % 世田谷500m南西
-        init_fx=17;
-        init_fy=3;
-    case 10 % 世田谷500m南東
-        init_fx=71;
-        init_fy=2;
-    case 11 % 世田谷500m北東
-        init_fx=91;
-        init_fy=92;
-    case 12 % 世田谷500m北東中
-        init_fx=66;
-        init_fy=86;
-    case 13 % 世田谷500m北東下
-        init_fx=62;
-        init_fy=66;
-    case 14 % 世田谷300m北東下
-        init_fx=35;
-        init_fy=42;
-    case 15 % 世田谷300m北東
-        init_fx=85;
-        init_fy=85;
-    case 16 % 世田谷300m北東中
-        init_fx=42;
-        init_fy=77;
+if numel(fFPosition) == 1
+    switch fFPosition
+        case 0  % build=3の場合に使用　延焼確認
+            init_fx=50;
+            init_fy=1;
+        case 6 % 手動糸魚川
+            init_fx=50;
+            init_fy=11;
+        case 7
+            init_fx=41;
+            init_fy=11;
+        case 8
+            init_fx=28;
+            init_fy=8;
+        case 9 % 世田谷500m南西
+            init_fx=17;
+            init_fy=3;
+        case 10 % 世田谷500m南東
+            init_fx=71;
+            init_fy=2;
+        case 11 % 世田谷500m北東
+            init_fx=91;
+            init_fy=92;
+        case 12 % 世田谷500m北東中
+            init_fx=66;
+            init_fy=86;
+        case 13 % 世田谷500m北東下
+            init_fx=62;
+            init_fy=66;
+        case 14 % 世田谷300m北東下
+            init_fx=35;
+            init_fy=42;
+        case 15 % 世田谷300m北東
+            init_fx=85;
+            init_fy=85;
+        case 16 % 世田谷300m北東中
+            init_fx=42;
+            init_fy=77;
+    end
+elseif numel(fFPosition) == 2
+    init_fx = fFPosition(1);
+    init_fy = fFPosition(2);
+else
+    disp("初期出火点が不明ですぞ!");
 end
 init_I = sparse(N,1);
 % r=randi(20,numel(init_fx),numel(init_fy))-10;
@@ -577,45 +685,45 @@ while (k <= ke) && sum(find(map.I))
 
     if E0 ~= 0
         if k <= 20 && k > 0
-            map.next_step_func(U,Ee{Eenum});% map 更新
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});% map 更新
         elseif k <= 40 && k >= 21
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 60 && k >= 41
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 80 && k >= 61
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 100 && k >= 81
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 120 && k >= 101
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 140 && k >= 121
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 160 && k >= 141
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 180 && k >= 161
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 200 && k >= 181
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 220 && k >= 201
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 240 && k >= 221
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 260 && k >= 241
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 280 && k >= 261
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 300 && k >= 281
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 320 && k >= 301
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 340 && k >= 321
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 360 && k >= 341
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 380 && k >= 361
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         elseif k <= 400 && k >= 381
-            map.next_step_func(U,Ee{Eenum});
+            map.next_step_func(U,Ee{1,Eenum},Ee{2,Eenum});
         end
     elseif Ee == 0
 %         map.next_step_func(U,E);% map 更新
@@ -658,6 +766,20 @@ while (k <= ke) && sum(find(map.I))
             unum = unum + 15;
         elseif  k == 120
             unum = unum + 15;
+        end
+    elseif FF ==3       % 糸魚川火災の詳細Ver3.0
+        if k == 9
+            unum = unum + 16;
+        elseif k == 25
+            unum = unum + 7;
+        elseif k == 33
+            unum = unum + 19;
+        elseif  k == 42
+            unum = unum + 4;
+        elseif  k == 69
+            unum = unum + 3;
+        elseif  k == 120
+            unum = unum + 12;
         end
     end
 end

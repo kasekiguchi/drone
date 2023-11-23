@@ -32,7 +32,7 @@ if build == 0
     gen=0.01;
     A = zeros(nx,ny);
 %     A = A + 0.00001;
-    Wm = gen*10; Wmp = gen*10; Sm = gen*2; RCm = gen*0.5;
+    Wm = gen*10; Wmp = gen*10; Sm = gen*2; RCm = gen*0.4;
     %糸魚川市模擬マップ(3段階)
     %A area
     A(4:8,54)=Wm;A(5:8,55:56)=Wm;A(9,53:55)=Wm;A(10,49:55)=Wm;A(11,49:56)=Wm;A(12:18,49:55)=Wm;A(12,53)=0;A(19:20,52:54)=Wm;A(19:20,49:51)=Sm;A(21:27,49:54)=Wm;A(25:26,51)=0;A(28,49:50)=Wm;A(29:30,50)=Wm;A(28:30,52:54)=Wm;
@@ -91,7 +91,7 @@ if build == 0
         W = (maxv*W/maxW);
     end
     return
-    elseif build == 1
+elseif build == 1
     addpath('C:\Users\tobit\OneDrive - 東京都市大学 Tokyo City University\高機能研2023\修士研究_2023\プログラム_2023(継続)\基本プログラム\multi-agent\shape_share20221014')
     S = shaperead('building_13112.shp');
     % wooden_flaが1で木造、0で非木造と判定
@@ -108,10 +108,18 @@ if build == 0
     end
     xxm = min(xx);
     yym = min(yy);
-    elseif build == 2
+elseif build == 2
         addpath('C:\Users\tobit\OneDrive - 東京都市大学 Tokyo City University\高機能研2023\修士研究_2023\プログラム_2023(継続)\分析\周作\20160401')
         S = shaperead('20160401-建築物の外周線.shp');
-    else
+elseif build == 3
+    W = sparse(zeros(nx,ny));
+    W(1:100,1:100) = 1;
+    maxW = max(W,[],'all');
+    if maxW > 1 | maxv~=1
+        W = (maxv*W/maxW);
+    end
+    return
+else
     disp("buildの設定が不適切です")
 end
 

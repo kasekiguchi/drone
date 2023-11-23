@@ -198,6 +198,12 @@ classdef SIR_model < handle
             else
                 figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
 %               set(gca,'Zscale','log')
+
+                jetCmap = hot;      % ここから下4行(colormapまで)でマップの色を変更
+                jetCmap = flipud(jetCmap);
+                newCmap = jetCmap(1:end,:);
+                colormap(newCmap);
+
                 colorbar;
             end
             view(2)
