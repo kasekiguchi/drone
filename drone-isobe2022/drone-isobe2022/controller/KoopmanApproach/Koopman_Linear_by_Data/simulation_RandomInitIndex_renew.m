@@ -21,10 +21,10 @@ FolderName = 'RandomInitialIndexTest';
 
 %データ保存先ファイル名
 % 'FileName'_'シミュレーション番号'.mat
-FileName = '11_7_filename=10_30_cirrevsadP2Pxy_est=cir_Inputandconst';
+FileName = 'test';
 
 % 読み込むデータファイル名
-loading_filename = 'EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst';
+loading_filename = 'test';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 1;
