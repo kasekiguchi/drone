@@ -1,6 +1,6 @@
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 20; % terminal time
+te = 10; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -11,13 +11,13 @@ initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
-% data = LOGGER("experiment_10_25_P2Py_estimator.mat");
+% data = LOGGER("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat");
 % finitIndex = find(data.Data.phase == 102,1,'first');
 % fendIndex = find(data.Data.phase == 102,1, 'last');
 
 agent = DRONE;
-agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1)); %総推力のトルク
-% agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); %各ロータの推力
+% agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1)); %総推力のトルク
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); %各ロータの推力
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -33,7 +33,7 @@ agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(
 %     logger.logging(time,'f',agent);
 %     time.t = time.t + dt;
 % end
-% save('quadprog_P2Py.mat', 'logger')
+% save('quadprog_test.mat', 'logger')
 
 run("ExpBase");
 
@@ -41,7 +41,7 @@ function dfunc(app)
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
 end

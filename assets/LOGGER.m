@@ -528,11 +528,13 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
               else
                 xlim(ax,[min(tmpx), max(tmpx)]);
               end
-              ylim(ax,[min(tmpy,[],'all'), max(tmpy,[],'all')+0.01]);
+              if att == "e" %追加
+                ylim(ax,[min(tmpy,[],'all')-0.01, max(tmpy,[],'all')+0.01]);
+              end
             end
 
             hold(ax, "on");
-            grid(ax, "on");
+            grid(ax, "on"); %追加
 
             switch length(ps)
               case 3
@@ -580,7 +582,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                   plegend = [plegend, att];
               end
 
-              % daspect(ax,[1 1 1]);
+              % daspect(ax,[1 1 1]); %削除
             else
 
               if isempty(vrange)

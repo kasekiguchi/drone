@@ -76,7 +76,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
 
-            [H, f] = Change_equation(Param);
+            [H, f] = change_equation(Param);
             A = [];
             b = [];
             Aeq = [];
@@ -92,8 +92,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
             % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
 
-            % obj.result.input = var(1:4, 1); % 印加する入力 4入力
-            obj.result.input = obj.InputTransform.do(var(1:4, 1)); %4入力を総推力に変換
+            obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            % obj.result.input = obj.InputTransform.do(var(1:4, 1)); %4入力を総推力に変換
             % obj.result.transformedInput = obj.InputTransform.do(obj.result.input);
             %実機で飛ばすときは総推力に変換した入力をobj.result.inputに代入する
 
@@ -111,11 +111,13 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                    state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi, state_monte.w(1)*180/pi, state_monte.w(2)*180/pi, state_monte.w(3)*180/pi);       % s:state 現在状態
+                    state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi, ...
+                    state_monte.w(1)*180/pi, state_monte.w(2)*180/pi, state_monte.w(3)*180/pi);       % s:state 現在状態
             fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \t wr: %f %f %f \n", ...
                     obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
                     obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-                    obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi, obj.state.ref(10,1)*180/pi, obj.state.ref(11,1)*180/pi, obj.state.ref(12,1)*180/pi)  % r:reference 目標状態
+                    obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi, ...
+                    obj.state.ref(10,1)*180/pi, obj.state.ref(11,1)*180/pi, obj.state.ref(12,1)*180/pi)  % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
 %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")

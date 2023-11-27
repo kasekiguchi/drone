@@ -8,31 +8,34 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden;
 clear all;
 clc;
+pdf = 1; %1:pdfでグラフを保存
+name = 'report_saddle';
+folderName = 'report_saddle';
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("mpc_experiment.mat")
+load("report_saddle.mat")
 disp('load finished')
 
-% for i = 1:find(log.Data.t,1,'last')
-%     data.t(1,i) = log.Data.t(i,1);                                      %時間t
-%     data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
-% end
-
-for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
-    data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+for i = 1:find(log.Data.t,1,'last')
+    data.t(1,i) = log.Data.t(i,1);                                      %時間t
+    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
+
+% for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
+%     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
+%     data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+%     data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+%     data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+%     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+% end
 % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
 %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 % end
@@ -90,7 +93,7 @@ plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
 lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax = gca;
@@ -105,7 +108,7 @@ xlabel('Time [s]');
 ylabel('q');
 grid on
 lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(2) = gca;
 title('Attitude q of agent1','FontSize',12);
@@ -118,7 +121,7 @@ xlabel('Time [s]');
 ylabel('v');
 grid on
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(3) = gca;
 title('Velocity v of agent1','FontSize',12);
@@ -131,7 +134,7 @@ xlabel('Time [s]');
 ylabel('w');
 grid on
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(4) = gca;
 title('Angular velocity w of agent1','FontSize',12);
@@ -151,6 +154,9 @@ ax(5) = gca;
 figure(6)
 plot3(data.p(1,:),data.p(2,:),data.p(3,:));
 grid on
+xlabel('x');
+ylabel('y');
+zlabel('z');
 zlim([0 max(data.p(3,:))])
 ax(6) = gca;
 
@@ -161,7 +167,7 @@ xlabel('Time [s]');
 ylabel('u');
 grid on
 lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
-lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax(7) = gca;
@@ -390,3 +396,30 @@ end
 % 
 % fontSize = 14; %軸の文字の大きさの設定
 % set(ax,'FontSize',fontSize); 
+
+
+%% pdfで保存
+if pdf == 1
+    mkdir(folderName);
+    movefile(folderName,'Graph')
+    exportgraphics(figure(1),strcat('Position_',name,'.pdf'))
+    movefile(strcat('Position_',name,'.pdf'),fullfile('Graph',folderName))
+  
+    exportgraphics(figure(2),strcat('Attitude_',name,'.pdf'))
+    movefile(strcat('Attitude_',name,'.pdf'),fullfile('Graph',folderName))
+    
+    exportgraphics(figure(3),strcat('velocity_',name,'.pdf'))
+    movefile(strcat('velocity_',name,'.pdf'),fullfile('Graph',folderName))
+    
+    exportgraphics(figure(4),strcat('Angular velocity_',name,'.pdf'))
+    movefile(strcat('Angular velocity_',name,'.pdf'),fullfile('Graph',folderName))
+
+    exportgraphics(figure(5),strcat('x-y_',name,'.pdf'))
+    movefile(strcat('x-y_',name,'.pdf'),fullfile('Graph',folderName))
+
+    exportgraphics(figure(6),strcat('x-y-z_',name,'.pdf'))
+    movefile(strcat('x-y-z_',name,'.pdf'),fullfile('Graph',folderName))
+
+    exportgraphics(figure(7),strcat('input_',name,'.pdf'))
+    movefile(strcat('input_',name,'.pdf'),fullfile('Graph',folderName))
+end
