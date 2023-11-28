@@ -33,6 +33,12 @@ switch conn_type
         Setting.subTopic(1,:) = {'/rover_odo','geometry_msgs/Twist'};%%%%%%%%%%%%sub topic name
         Setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%%%pub topic name       
         Setting.id =id;
+    case "vl53l1x"        
+        Setting.param.state_list = ["p"];
+        Setting.param.subName = ["p"];
+%         Setting.subTopic(1,:) = {'/vl53l1x/range','sensor_msgs/Range'};%%%%%%%%%%%%sub topic name
+%         Setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%%%pub topic name       
+        Setting.id =id;
 end
 Model.param = Setting;
 end

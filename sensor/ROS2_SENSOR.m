@@ -20,10 +20,12 @@ methods
         topics = param.param;
         topics.node = obj.Node;
         subTopics = topics.subTopic;
-        for i = 1:length(subTopics)
-            topics.subTopic = subTopics(i,:);
-            obj.ros{i} = ROS2_CONNECTOR(topics);
-        end
+%         for i = 1:length(subTopics)
+%             topics.subTopic = subTopics(i,:);
+%             obj.ros{i} = ROS2_CONNECTOR(topics);
+%         end
+        topics.subTopic = subTopics(1,:);
+        obj.ros{1} = ROS2_CONNECTOR(topics);
         %  このクラスのインスタンスを作成
         obj.self = self;
 
@@ -57,7 +59,7 @@ methods
             for i = 1:length(obj.ros)
                 data{i} = obj.ros{i}.getData;
             end
-            if isempty(data{1})|isempty(data{2})
+            if isempty(data{1})
                 % break
                 disp("pointcloud lost")
             else
@@ -71,45 +73,7 @@ methods
         %     moving_pc(i) = pointCloud([data2pcd zeros(size(data2pcd,1),1)]); % moving:m*3           
         % end
 
-    % %% ローバー自身の点群認識
-    %     roi = [0.1 0.35 -0.18 0.16 -0.1 0.1];
-    % 
-    %     indices_f = findPointsInROI(moving_pc(1),roi);
-    %     Df = zeros(size(moving_pc(1).Location));
-    % 
-    %     indices_b = findPointsInROI(moving_pc(2),roi);
-    %     Db = zeros(size(moving_pc(2).Location));
-    % 
-    %     Df(indices_f,3) = 5;
-    %     Db(indices_b,3) = 5;
-    %     ptCloud_tf = pctransform(moving_pc(1),Df);
-    %     ptCloud_tb = pctransform(moving_pc(2),Db);
-    %     % %%%%%%%%%ローバー自身の点群除去%%%%%%%%%%%%%%
-    %     roi = [-10 10 -10 10 -1 1];%入力点群の x、y および z 座標の範囲内で直方体 ROI を定義
-    % 
-    % 
-    %     indices_f = findPointsInROI(ptCloud_tf,roi);%直方体 ROI 内にある点のインデックスを検出
-    %     moving_pc(1) = select(ptCloud_tf,indices_f);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納    
-    % 
-    %     indices_b = findPointsInROI(ptCloud_tb,roi);%直方体 ROI 内にある点のインデックスを検出
-    %     moving_pc(2) = select(ptCloud_tb,indices_b);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納
-    %     %% pcd合成
-    %     rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
-    %     T = [0.46 0.023 0]; %並進方向(x,y,z)
-    %     tform = rigidtform3d(rot,T);
-    % 
-    %     moving_pc2_m_b = pctransform(moving_pc(2),tform);
-    % 
-    %     ptCloudOut = pcmerge(moving_pc(1), moving_pc2_m_b, 0.001);
-        % ptCloudOut = pcmerge(moving_pc.f, moving_pc2_m, 0.001);
-        PCdata_use = obj.prosesssfunc(data);
-        
-        rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
-        T = [0.17 0 0]; %並進方向(x,y,z)
-        tform = rigidtform3d(rot,T);
-        % moving_pcm = pctransform(ptCloudOut,tform);
-
-        obj.result = pctransform(PCdata_use,tform);
+       obj.result = obj.ros{1}.getData;
         % obj.result = scanpcplot_rov(moving_pc);
         result = obj.result;
     end

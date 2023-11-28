@@ -16,7 +16,7 @@ agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.sensor = VL53L1X(agent,Sensor_VL53L1X(33));
+% agent.sensor = ROS2_SENSOR(agent,Sensor_VL53L1X(33));
 % agent.sensor = ROS(agent,Sensor_ROS(struct('DomainID',25)));
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"wall_distance_ref",{[0,0,1]},"HL"});
@@ -28,6 +28,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,1,1]
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
+
 function dfunc(app)
 
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
