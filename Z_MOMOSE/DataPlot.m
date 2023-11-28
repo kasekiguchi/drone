@@ -1,4 +1,15 @@
-%%　DataPlot
+%　DataPlot
+%% set path
+cf = pwd;
+if contains(mfilename('fullpath'),"mainGUI")
+  cd(fileparts(mfilename('fullpath')));
+else
+  tmp = matlab.desktop.editor.getActive; 
+  cd(fileparts(tmp.Filename));
+end
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+%%
 close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %import
@@ -23,8 +34,8 @@ endTime = 1E3;
                 % log_cricle,log_circle_FTxy2
                 % log_saddle,log_sadlle_FTxy
                 % log_HL_saddle
-                % log_EL_saddle
-                % log_HL_saddle
+                log_HL_saddle
+                log_EL_saddle
                 % log_LS15d3
                 % log_FT15d3
                 % log_EKF_B_0
@@ -44,15 +55,15 @@ endTime = 1E3;
                 % log_FT_Zservo_gain_n1,...
                 % log_FT2_servo
                 % log_HLFT
-                log_HLLS,...
-                log_HLFT
+                % log_HLLS,...
+                % log_HLFT
                 % log_
 
 
                 % gui.logger
         };
     c=[
-        "LS","FT"
+        "HL","IOL"
         % "FTservoZ","FTservoZn1"
         % "HLLS"
         % "HLFTservo"
@@ -65,6 +76,7 @@ endTime = 1E3;
 %              11:"three_D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma" a
 %               20:"pp" 21:"pv" 22:"pq" 23:"pw" 24:"Trs"];
 %========================================================================
+%singleFigure
      % n=[1:16,18 20:24];
      % n = [1:17,24];
      % n = [1:11];
@@ -75,9 +87,10 @@ endTime = 1E3;
      % n=1;
 %========================================================================
 % multiFigure
-% nM = {[1,9,8,10,7],[13,14,15,16,12]};%複数まとめる
-% nM = {[3:5 6 2 11],[9,8,10,7,12,18],13:16,[1,8,9,10]};%複数まとめる
-% nM = {[1 9 8 10 24 11],[7 24 2 3:5],13:16,[7 17 12 24]};%複数まとめる
+
+nM = {["three_D","t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
+multiFigure.layout = {[2,2]};
+multiFigure.title = ["position_error"];%[" state", " subsystem"];%title name
 
 % nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
 % multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
@@ -87,9 +100,9 @@ endTime = 1E3;
 % multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
 % multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
 
-nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
-multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
-multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
+% nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
+% multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
+% multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
 
 % nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","three_D","x_y","x_z","y_z"]};%比較するとき複数まとめる
 % multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
@@ -568,7 +581,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
         allData.t_wyaw = {struct('x',{time},'y',{wyaw}), struct('x','time [s]','y','$w_{yaw}$ [rad]/s'),CC,add_option([],option,addingContents)};
         allData.three_D = {struct('x',{[refx,estx]},'y',{[refy,esty]},'z',{[refz,estz]}), struct('x','$x$ [m]','y','$y$ [m]','z','$z$ [m]'), Rc,add_option(["aspect","camposition"],option,addingContents)};
         allData.uHL = { struct('x',{time},'y',{uHL}), struct('x','time [s]','y','inputHL'), LgndCrt(["$z$ ","$x$ ","$y$ ","$\psi$"],c),add_option([],option,addingContents)};
-        allData.Trs = {struct('x',{time},'y',{Trs}), struct('x','time [s]','y','Tr [N] dTr [N/s]'), LgndCrt(["$Tr$","$dTr$"],c),add_option([],option,addingContents)};
+        allData.Trs = {struct('x',{time},'y',{Trs}), struct('x','time [s]','y','Tr [N] dTr [N/s] ddTr [N/$\rm{s^2}$]'), LgndCrt(["$Tr$","$dTr$"],c),add_option([],option,addingContents)};
         if fexpandS
             allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
         else

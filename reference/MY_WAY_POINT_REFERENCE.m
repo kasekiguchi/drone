@@ -110,7 +110,6 @@ classdef MY_WAY_POINT_REFERENCE < handle
             arguments
                 val         %時間とwaypoint
                 n           %多項式次数
-                % fconfirm=1    %確認するか
                 fdrowfig=1  %図を描画するか
             end
             time = val(:,1)';
@@ -160,7 +159,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
             for j=1:n-1
                     poweT(j,j+1:end) = power_dtime(end,1:end-j) ;
             end
-            
+            %端点の制約
             for i = 1:n-2
                 dr3=(i-1)*2;
                 % X(add+1+dr3,1+i) = 1;%4関数でさいしょの端点で激しくなるか，最後収束しないかでインデックス1,2をへんこう
@@ -232,10 +231,12 @@ classdef MY_WAY_POINT_REFERENCE < handle
                 axyz(:,j) = coefficients.(names{3})(:,:,i)*t_powers.(names{3})(t_ref);
                 j=j+1;
             end
+            %返り値に格納
             ref.xyz=xyz;
             ref.vxyz=vxyz;
             ref.axyz=axyz;
-            %グラフを表示
+
+            % グラフを表示
             if fdrowfig
                 close all
                 i=1;
@@ -265,6 +266,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
                 plot(point(1,:),point(2,:),'Marker','o','LineStyle','none',"LineWidth",2)
                 text(point(1,1),point(2,1),"\quad start","interpreter","latex",'FontSize',14)
                 grid on
+
                 nexttile
                 plot(xyz(1,:),xyz(3,:),"LineWidth",2)
                 xlabel('$x$ (m)','FontSize',18,'Interpreter','latex')
@@ -276,6 +278,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
                 plot(point(1,:),point(3,:),'Marker','o','LineStyle','none',"LineWidth",2)
                 text(point(1,1),point(3,1),"\quad start","interpreter","latex",'FontSize',14)
                 grid on
+
                 nexttile
                 plot(xyz(2,:),xyz(3,:),"LineWidth",2)
                 daspect([1,1,1])
