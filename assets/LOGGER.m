@@ -190,7 +190,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       if isempty(name)
         tmpname = strrep(strrep(strcat('Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
       else
-        tmpname = strrep(strrep(strcat('', name, '_Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
+%         tmpname = strrep(strrep(strcat('', name, '_Log(', datestr(datetime('now')), ')'), ':', '_'), ' ', '_');
+        tmpname = strcat('', name);
       end
 
       if opt.separate

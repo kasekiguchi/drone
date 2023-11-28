@@ -1,31 +1,21 @@
-function ref = Case_study_trajectory(param)
-%UNTITLED この関数の概要をここに記述
-%   詳細説明をここに記述
-arguments
-    param.freq = 10% 周期
-    param.orig = [0 0 0]
-    param.size = [1 1 0]% 各軸の振幅
-    param.phase = -pi
-end
+function ref = Case_study_trajectory(~)
 
-T = param.freq;
-
+% T = param.freq;
+% T = 20;
+% r = 1;
 syms t real
 % x_0 = X0(1);
 % y_0 = X0(2);
 % z_0 = X0(3);
 
-% T = t
-% 
-% if T < 50
-%     x = sin(2*pi*t/8)
-%     y = cos(2*pi*t/8);
-%     z = 1;
-% else
-%     x = sin(2*pi*t/8);
-%     y = 1;
-%     z = cos(2*pi*t/8);
-% end
+%% 
+% x = x_0;
+% y = y_0;
+% z = z_0;
+x = 0;
+y = 0;
+z = 1;
+% yaw = -2*pi*t/5;
 
 % %% takeoff
 % T = 10;
@@ -56,9 +46,18 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 % 円旋回
-x = sin(2*pi*t/T);
-y = cos(2*pi*t/T);
-z = 1;
+% x = sin(2*pi*t/T);
+% y = cos(2*pi*t/T);
+% z = 1;
+
+%逆円旋回
+% x = cos(2*pi*t/T);
+% y = sin(2*pi*t/T);
+% z = 1;
+
+% x = 1;
+% y = 1;
+% z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/T);
@@ -67,8 +66,8 @@ z = 1;
 % yaw = 2*pi*t/5;
 
 %八の字
-% x = sin(2*t/8);
-% y = sin(t/8);
+% x = sin(2*t/T);
+% y = sin(t/T);
 % z = 1;
 
 % s = 8;
