@@ -42,14 +42,25 @@ classdef TIME_VARYING_REFERENCE < handle
         end
         function result = do(obj, varargin)  
            %Param={time,FH}
+           flag1 = 0;
+           flag2 = 0;
+           flag3 = 0;
+           flag4 = 0;
            obj.cha = varargin{2};
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
                 t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
            else
                 obj.t=varargin{1}.t;
                 t = obj.t;
-           end           
-           obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           end          
+           if flag1 == 0
+             if obj.self.estimator.result.state.p(1) > 3
+                   obj.result.state.xd(1) = 5;
+                   flag1 = 1;
+
+           else
+               obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           end
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
             obj.result.state.v = obj.result.state.xd(5:7);

@@ -12,7 +12,7 @@ syms t real
 % x = x_0;
 % y = y_0;
 % z = z_0;
-x = 0;
+x = 8;
 y = 0;
 z = 1;
 % yaw = -2*pi*t/5;
