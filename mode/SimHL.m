@@ -17,8 +17,8 @@ agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
-% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1;0;1]),5});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1;0;1]),5});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1;0;1],"h",[1;0;1],"j",[-1;0;1]),20});
 % agent.reference = POINT_REFERENCE(agent,{"PtoP",{[0,0,0]},"HL"});
 

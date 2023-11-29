@@ -43,9 +43,6 @@ classdef TIME_VARYING_REFERENCE < handle
         function result = do(obj, varargin)  
            %Param={time,FH}
            flag1 = 0;
-           flag2 = 0;
-           flag3 = 0;
-           flag4 = 0;
            obj.cha = varargin{2};
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
                 t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
@@ -54,12 +51,28 @@ classdef TIME_VARYING_REFERENCE < handle
                 t = obj.t;
            end          
            if flag1 == 0
-             if obj.self.estimator.result.state.p(1) > 3
-                   obj.result.state.xd(1) = 5;
+               obj.result.state.xd = obj.func(t);
+           end
+           if obj.self.estimator.result.state.p(1) > 1.5
+                   obj.result.state.xd(1) = 2;
+                   obj.result.state.xd(2) = -1.5;
+                   obj.result.state.xd(3) = 1;
                    flag1 = 1;
-
-           else
-               obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           end
+           if obj.self.estimator.result.state.p(2) < -1
+                   obj.result.state.xd(1) = -2;
+                   obj.result.state.xd(2) = -1.5;
+                   obj.result.state.xd(3) = 1;
+           end
+           if obj.self.estimator.result.state.p(1) < -1.5
+                   obj.result.state.xd(1) = -2;
+                   obj.result.state.xd(2) = 1.5;
+                   obj.result.state.xd(3) = 1;
+           end
+           if obj.self.estimator.result.state.p(2) > 1
+                   obj.result.state.xd(1) = 2;
+                   obj.result.state.xd(2) = 1.5;
+                   obj.result.state.xd(3) = 1;
            end
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
