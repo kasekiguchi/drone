@@ -21,6 +21,7 @@ classdef ROS2_CONNECTOR < handle
         pubTopic
         pubName % 送信msgを格納するpubMsg構造体のフィールド名配列
 %         pubMsg  % 送信msg
+        subtopicdata
     end
 
     properties(SetAccess=private)
@@ -47,9 +48,10 @@ classdef ROS2_CONNECTOR < handle
             %ROS2のトピック一覧
             ros2 topic list;
             
+            obj.subtopicdata = [];
             %-- Declaring the node, publishers and subscribers
             for i = 1:obj.subTopicNum
-                obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},...
+                obj.subscriber.subTopic(i) = ros2subscriber(obj.subTopic(i),obj.subName{1,i},obj.subMsg{1,i},{@ROS2Callback,obj},...
                     "History","keepall","Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
@@ -73,6 +75,10 @@ classdef ROS2_CONNECTOR < handle
             ret = obj.result;
         end
 
+%         function sub_callback(obj,message)%%%%%callback
+%             obj.subtopicdata = message;
+%         end
+
         function sendData(obj,msg)
             % send msg : msg is allowed to be following two forms
             % msg = {msg1, msg2, ...} : order corresponding to pubTopic
@@ -88,6 +94,10 @@ classdef ROS2_CONNECTOR < handle
                     send(obj.publisher.(obj.pubName(i)), msg{i});
                 end
             end
+        end
+
+        function ROS2Callback(obj,message)%コールバック用の謎関数
+            obj.subtopicdata = message.subscriber.subtopic.LatestMessage;
         end
 
         function delete(obj)
