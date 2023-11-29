@@ -258,10 +258,10 @@ classdef PATH_REFERENCE < handle
       % end
       opts = struct(varargin{:});
       Env = opts.Env;
-      FH = opts.FH;
       if ~isfield(opts,'ax') || isempty(opts.ax)
+        FH = opts.FH;
         fh = figure(opts.FH);
-       % fh.WindowState = 'maximized';
+        % fh.WindowState = 'maximized';
       else
         ax = opts.ax;
       end
@@ -269,17 +269,26 @@ classdef PATH_REFERENCE < handle
       flag = opts.flag;
       agent = obj.self;
       if isa(Env,'triangulation')
-        trimesh(Env);
+        h = trimesh(Env);
+        if isfield(opts,'ax')
+          fhtmp = h.Parent.Parent;
+          h.Parent = ax;
+          close(fhtmp);
+        else
+          ax = gca;
+        end
       else
         MapIdx = size(Env.param.Vertices,3);
         for ei = 1:MapIdx
           tmpenv(ei) = polyshape(Env.param.Vertices(:,:,ei));
         end
         p_Area = union(tmpenv(:));
-        plot(p_Area,'FaceColor','blue','FaceAlpha',0.5); % true environment
+        if isfield(opts,'ax')
+          plot(ax,p_Area,'FaceColor','blue','FaceAlpha',0.5); % true environment
+        else
+          plot(p_Area,'FaceColor','blue','FaceAlpha',0.5); % true environment
+        end
       end
-      ax = gca;
-      view(ax,[0;0;1]);
       daspect(ax,[1 1 1]);
       pstate = agent.plant.state;
       pstatesquare = vehicle_outline(pstate);
@@ -298,7 +307,11 @@ classdef PATH_REFERENCE < handle
       RefState = obj.result.state.xd;
       fWall = agent.reference.result.focusedLine;
 
-      inputs_for_show = [{'ax'},{ax},varargin(:)'];
+      if isfield(opts,'ax')
+        inputs_for_show = varargin(:)';
+      else
+        inputs_for_show = [{'ax'},{ax},varargin(:)'];
+      end
       obj.self.show(["sensor","lrf"],inputs_for_show{:});
       view(ax,[0 0 1]);
       hold(ax,'on')
