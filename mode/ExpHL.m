@@ -16,11 +16,12 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
+% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "vl53l1x", 33));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.sensor = VL53L1X(agent,Sensor_VL53L1X())
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.sensor = VL53L1X(agent,Sensor_VL53L1X(agent));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});

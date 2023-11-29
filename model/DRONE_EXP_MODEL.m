@@ -34,6 +34,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
           end
           obj.connector=SERIAL_CONNECTOR(param);
           fprintf("Drone %s is ready\n",param.port);
+          case "vl53l1x"
+              
       end
     end
     function do(obj,varargin)
