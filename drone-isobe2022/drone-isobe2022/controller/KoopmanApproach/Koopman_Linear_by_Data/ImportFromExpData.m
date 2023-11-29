@@ -65,9 +65,9 @@ else
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
-    for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
-        data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
-    end
+%     for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
+%         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
+%     end
 end
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合

@@ -9,7 +9,7 @@ Normalize = 0; %1：正規化
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_11_29_GUIsimdata.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'EstimationResult_12state_11_29_GUIsimdata_input=torque.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 % FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)

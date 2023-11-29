@@ -12,8 +12,8 @@ folderName = '10_27';
 
 %% select file to load (max number of file:5)
 
-loadfilename{1} = 'EstimationResult_12state_11_29_GUIsimdata.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{2} = 'EstimationResult_12state_11_20_data=cirandrevandsad_cir=cir_est=P2Pshape.mat';
+loadfilename{1} = 'EstimationResult_12state_11_29_GUIsimdata_input=torque.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{2} = 'EstimationResult_12state_11_29_GUIsimdata.mat';
 % loadfilename{3} = 'EstimationResult_12state_11_20_data=cirandrevandsadP2Pxy_cir=cir_est=P2Pshape.mat';
 % loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
 
@@ -36,9 +36,9 @@ if stepnum == 0
         xlimHold = [0,0.5];
     end
 elseif stepnum == 1
-    stepN = 80;
+    stepN = 55;
     if flg.xlimHold == 1
-        xlimHold = [0,1.2];
+        xlimHold = [0,0.8];
     end
 elseif stepnum == 2
     stepN = 91;
