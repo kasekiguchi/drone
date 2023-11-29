@@ -31,6 +31,14 @@ switch type
     Setting.dim = [3, 3, 0];
     Setting.state_list = ["p"];
     Setting.num_list = [3];
+  case "Koopman"
+    dsys.A = [zeros(3)];
+    dsys.B = eye(3); % x.p = u; 次の時刻にu の位置に行くモデル
+    dsys.C = eye(3);
+    Setting.dim = [3, 3, 0];
+    Setting.state_list = ["p"];
+    Setting.num_list = [3];
+
 end
 %% 共通設定
 Setting.param.A = dsys.A;

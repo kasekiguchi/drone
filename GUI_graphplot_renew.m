@@ -8,13 +8,13 @@ cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden;
 clear all;
 clc;
-pdf = 1; %1:pdfでグラフを保存
+pdf = 0; %1:pdfでグラフを保存
 name = 'report_saddle';
 folderName = 'report_saddle';
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("report_saddle.mat")
+load("11_29_circle.mat")
 disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
@@ -36,9 +36,9 @@ end
 %     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
 %     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
 % end
-% for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
-%     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
-% end
+for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
+    data.u2(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
+end
 
 % for i = 1:find(logger.Data.t,1,'last')
 %     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
@@ -165,6 +165,7 @@ figure(7)
 plot(data.t,data.u(:,:),'LineWidth',1);
 xlabel('Time [s]');
 ylabel('u');
+hold on
 grid on
 lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
