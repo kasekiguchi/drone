@@ -26,7 +26,7 @@ data.uN = 4; %入力の個数
 % 状態毎に分割して保存
 % XYに結合する際の都合で↓時系列,→状態
 %drone_phase 115:stop 97:arming 116:take off 102:flight 108:landing
-if logger.fExp==1
+if logger.fExp==1 %fExp:1 実機データ
 %--------------------time----------------------
     data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))'; 
 %     data.startIndex = find(data.est.p(:,3)>0.5,1,'first'); %0.4m以上になった部分からデータの取得開始
@@ -65,6 +65,9 @@ else
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
+    for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
+        data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
+    end
 end
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合

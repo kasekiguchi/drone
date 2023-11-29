@@ -4,23 +4,24 @@
 % フラグ管理
 clear all
 flg.bilinear = 0; %1:双線形モデルへの切り替え
-Normalize = 1; %1：正規化
+Normalize = 0; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-% FileName = 'EstimationResult_12state_11_20_data=cirandrevandsadP2Pxy_cir=cir_est=P2Pshape.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
-FileName = 'test.mat'; %お試し用
+FileName = 'EstimationResult_12state_11_29_GUIsimdata.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+% FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'experiment_10_9_revcircle';  
 % loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
 % loading_filename = 'experiment_11_20_P2Pxy';
-loading_filename = 'experiment_10_26';
+% loading_filename = 'experiment_10_26';
+loading_filename = 'GUIsim_11_29';
 % loading_filename = 'sim_rndP4';
 
-Data.HowmanyDataset = 50; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 5; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -30,8 +31,8 @@ targetpath=append(nowFolder,'\',FileName);
 %% Defining Koopman Operator
 
 %<使用している観測量>
-F = @(x) [x;1]; % 状態変数+定数項1
-% F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
+% F = @(x) [x;1]; % 状態変数+定数項1
+F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
 
 % load data h 
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
@@ -93,14 +94,14 @@ disp('Estimated')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
-% simResult.reference = ImportFromExpData('TestData3.mat');
+simResult.reference = ImportFromExpData('GUIsim_11_29_3.mat');
 % simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
 % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
 % simResult.reference = ImportFromExpData_estimation('sim_7_20_circle_estimatordata'); %sim
 % simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
-simResult.reference = ImportFromExpData_estimation('事例研_かじ');
+% simResult.reference = ImportFromExpData_estimation('事例研_かじ');
 
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
