@@ -88,8 +88,6 @@ classdef LiDAR3D_SIM < handle
       ip1 = sum(rp .* obj.fn, 2) < 0; % 「内積が負の壁」が見える向きの壁面
       Pi = obj.inverse_matrices(p, ip1);
       e = R * obj.E;
-      %ip2 = rp*e > 0; % 「内積が正の壁」がレーザー方向にある壁
-      ids = ip1;                      % & ip2;
 
       %% cell array形式 : for よりは早い
       d = cell2mat(arrayfun(@(i) obj.cross_point(e(:, i), Pi), 1:size(e, 2), 'UniformOutput', false));
@@ -115,6 +113,7 @@ classdef LiDAR3D_SIM < handle
       result.Color = [];
       result.Normal = [];
       result.Intensity = uint8(255 * (1 - result.length / obj.radius)); % 距離に応じて減衰するというモデル
+      result.angle = obj.phi_range;
       obj.result = result;
     end
 
@@ -134,14 +133,14 @@ classdef LiDAR3D_SIM < handle
       %   opt.param = [];
       % end
       opt = struct(varargin{:});
-      if isempty(opt.ax)
+      if ~isfield(opt,'ax') || isempty(opt.ax)
         fh = figure(opt.FH);
         ax = fh.CurrentAxes;
-        fh.WindowState = 'maximized';
+       % fh.WindowState = 'maximized';
       else
         ax = opt.ax;
       end
-      if ~isempty(opt.logger)
+      if isfield(opt,'logger') && ~isempty(opt.logger)
         logger = opt.logger;
         p = logger.Data.agent.plant.result{opt.k}.state.p;
         R = logger.Data.agent.plant.result{opt.k}.state.q;
@@ -149,7 +148,7 @@ classdef LiDAR3D_SIM < handle
         if isfield(opt.param, "fField")
           opt.fField = opt.param.fField;
         end
-        opt.fLocal = true;
+        %opt.fLocal = true;
       else
         p = opt.p;
         R = opt.R;
@@ -165,7 +164,10 @@ classdef LiDAR3D_SIM < handle
         case 4
           R = rotmat(quaternion(R(:)'), 'point');
         case 3
-          R = rotmat(quaternion(R(:)', 'euler', 'ZYX', 'frame'), 'point');
+          %R = rotmat(quaternion(R(:)', 'euler', 'ZYX', 'frame'), 'point');
+          R = rotmat(quaternion(R(:)', 'euler', 'XYZ', 'frame'), 'point');
+        case 1
+          R = [cos(R),-sin(R),0;sin(R),cos(R),0;0,0,1];
       end
       cla(ax);
       hold(ax,"on");
@@ -196,16 +198,16 @@ classdef LiDAR3D_SIM < handle
         %campos(p +10*[-1;-0.2;0.2]);
         %camtarget(p);
       end
-      campos(ax,p +10*[0;5;0]);
-      camtarget(ax,p);
-      quiver3(ax,p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
+      %campos(ax,p +10*[0;5;0]);
+      %camtarget(ax,p);
+      %quiver3(ax,p(1), p(2), p(3), bx(1), bx(2), bx(3)); % 前
       plot3(ax,p(1), p(2), p(3), 'bx');
       plot3(ax,po(1, :), po(2, :), po(3, :), "ro", 'MarkerSize', 1);
-      ps = p + R*obj.p0;
-      quiver3(ax,ps(1), ps(2), ps(3), po(1,:)-ps(1),po(2,:)-ps(2),po(3,:)-ps(3)); % 前
-      xlim(ax,[p(1) - 10, p(1) + 10]);
-      ylim(ax,[p(2) - 10, p(2) + 10]);
-      zlim(ax,[p(3) - 10, p(3) + 10]);
+      ps = repmat(p + R*obj.p0,1,size(po,2));
+      %quiver3(ax,ps(1,:), ps(2,:), ps(3,:), po(1,:)-ps(1),po(2,:)-ps(2),po(3,:)-ps(3)); % 前
+      % xlim(ax,[p(1) - 10, p(1) + 10]);
+      % ylim(ax,[p(2) - 10, p(2) + 10]);
+      % zlim(ax,[p(3) - 10, p(3) + 10]);
     end
     function Qpi = inverse_matrices(obj, p, ids)
       % Qpi : inv(Q-p) = [r1;r2;r3] に対して 各行が [r1,r2,r3] となっている．
