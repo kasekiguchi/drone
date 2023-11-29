@@ -4,6 +4,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
     ESPr_num
     connector
     flight_phase % q : quit, s : stop, a : arming, t : take-off, h : hovering, f : flight, l : landing
+    IP
   end
   properties
     msg

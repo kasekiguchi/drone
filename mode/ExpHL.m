@@ -6,12 +6,12 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-motive = Connector_Natnet('192.168.1.2'); % connect to Motive
-motive.getData([], []); % get data from Motive
-rigid_ids = [1]; % rigid-body number on Motive
-sstate = motive.result.rigid(rigid_ids);
-initial_state.p = sstate.p;
-initial_state.q = sstate.q;
+% motive = Connector_Natnet('192.168.1.2'); % connect to Motive
+% motive.getData([], []); % get data from Motive
+% rigid_ids = [1]; % rigid-body number on Motive
+% sstate = motive.result.rigid(rigid_ids);
+% initial_state.p = sstate.p;
+% initial_state.q = sstate.q;
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
