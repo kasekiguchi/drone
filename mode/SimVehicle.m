@@ -28,6 +28,7 @@ motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion ca
 fExp = 0;
 logger = LOGGER(1, size(ts:dt:te, 2), fExp, [],[]);
 
+clear initial_state
 initial_state.p = [-1;-1;0];
 initial_state.q = [0;0;0];
 
@@ -45,6 +46,7 @@ agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 run("ExpBase");
 
 %%
+if ~exist("app",'var')
 clc
 FH = figure;
 for i = 1:time.te
@@ -63,7 +65,7 @@ for i = 1:time.te
     time.t = time.t + time.dt;
     pause(0.01)
 end
-
+end
 
 function result = sensor_do(varargin)
 sensor = varargin{5}(varargin{6}).sensor;
@@ -81,5 +83,6 @@ app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
 end
 function in_prog(app)
-app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
+  app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
+  app.agent.reference.FHPlot('Env',app.env,'ax',app.UIAxes,'flag',0,'logger',app.logger,'param',struct('fLocal',false,'fField',true),'k',app.time.k);
 end
