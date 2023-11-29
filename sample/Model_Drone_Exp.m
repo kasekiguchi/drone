@@ -24,6 +24,8 @@ elseif strcmp(conn_type,"serial")
   available_ports=serialportlist("available");
   disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
   Setting.port = id;
+elseif strcmp(conn_type,"vl53l1x")
+  Setting.num = id;
 end
 Model.param = Setting;
 end
