@@ -14,7 +14,7 @@ folderName = 'report_saddle';
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("11_29_circle.mat")
+load("11_29_hovering.mat")
 disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
@@ -37,7 +37,7 @@ end
 %     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
 % end
 for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
-    data.u2(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
+    data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 end
 
 % for i = 1:find(logger.Data.t,1,'last')
