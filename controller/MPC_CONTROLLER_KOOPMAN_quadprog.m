@@ -58,7 +58,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
 
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
-            obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+            % obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+            obj.current_state = obj.self.plant.state.get();
             Param = obj.param;
             Param.current = obj.current_state;
             Param.ref = obj.state.ref;
@@ -107,6 +108,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
 
             %% 情報表示
             state_monte = obj.self.estimator.result.state;
+            state_monte2 = obj.self.plant.state;
             fprintf("==================================================================\n")
             fprintf("==================================================================\n")
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
