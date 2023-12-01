@@ -38,7 +38,7 @@
 % T : time.t そのステップの現在時刻
 
 %元のやつ
-function xr = Reference(params, T, Agent)
+function xr = Reference(params, T, te, Agent, logHL)
     % timevaryingをホライズンごとのreferenceに変換する
     % params.dt = 0.1;
     xr = zeros(params.total_size, params.H);    % initialize
@@ -46,15 +46,39 @@ function xr = Reference(params, T, Agent)
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     for h = 0:params.H-1
         t = T + params.dt * h; % reference生成時の時刻をずらす
+        idx = round(t / 0.025) + 1;
         Ref = RefTime(t);
-        % 追従項
-        xr(1:3, h+1) = Ref(1:3);
-        xr(7:9, h+1) = Ref(5:7);
-        % 抑制項
-        xr(4:6, h+1) =   [0; 0; 0];
-        xr(10:12, h+1) = [0; 0; 0];
 
-        xr(13:16, h+1) = params.ur;
+        % if idx == 0
+        %     xr(1:3, h+1) = Ref(1:3);
+        %     xr(7:9, h+1) = Ref(5:7);
+        %     xr(4:6, h+1) =   [0; 0; 0];
+        %     xr(10:12, h+1) = [0; 0; 0];
+        %     xr(13:16, h+1) = params.ur;
+        % else
+            if ~isempty(logHL)
+                if idx > te/0.025; idx = te/0.025; end
+                xr(1:3, h+1) = logHL.PHL(:, idx);
+                xr(7:9, h+1) = logHL.VHL(:, idx);
+                xr(4:6, h+1) =   logHL.QHL(:, idx);
+                xr(10:12, h+1) = logHL.WHL(:, idx);
+                xr(13:16, h+1) = logHL.InputHL(:, idx);
+                % xr(13:16, h+1) = params.ur;
+            else
+                xr(1:3, h+1) = Ref(1:3);
+                xr(7:9, h+1) = Ref(5:7);
+                xr(4:6, h+1) =   [0; 0; 0];
+                xr(10:12, h+1) = [0; 0; 0];
+                xr(13:16, h+1) = params.ur;
+            end
+        % end
+        
+        %% HLから入力目標値持ってくる
+        % if idx >= te/0.025
+        %     xr(13:16,h+1) = params.ur(:,end);
+        % else
+        %     xr(13:16, h+1) = params.ur(:, idx);
+        % end
     end
         
 end

@@ -58,14 +58,33 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.Pf = diag([55; 45; 10]);
 %     Params.Weight.QWf = diag([4800; 3500; 3000; 1; 1; 1]); %姿勢角、角速度終端
 
-    Params.Weight.P = diag([5.0; 3.0; 1.0]);    % 座標   1000 10
-    Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
-    Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
-    Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2300; 2500; 1200; 1; 1; 1]);  % 姿勢角、角速度
+%% いいやつ
+    % Params.Weight.P = diag([5.0; 3.0; 1.0]);    % 座標   1000 10
+    % Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
+    % Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
+    % Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
+    % Params.Weight.QW = diag([2300; 2500; 1200; 1; 1; 1]);  % 姿勢角、角速度
+    % 
+    % Params.Weight.Pf = diag([10; 10; 1]);
+    % Params.Weight.QWf = diag([3300; 3300; 1200; 1; 1; 1]); %姿勢角、角速度終端
 
-    Params.Weight.Pf = diag([10; 10; 1]);
-    Params.Weight.QWf = diag([3300; 3300; 1200; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.P = 1e0 * diag([1e0; 1e0; 1e0]);
+    Params.Weight.V = 1e0 * diag([1e0; 1e0; 1e0]);  
+    Params.Weight.R = 1e4 * diag([1; 1; 1; 1]);
+    Params.Weight.RP = 0 * diag([1; 1; 1; 1]);
+    Params.Weight.QW = 1e0 * diag([1e1; 1e1; 1e1; 1e1; 1e1; 1e1]);
+    % Params.Weight.Pf = diag([1e4; 1e4; 1e2]);
+    % Params.Weight.Vf = diag([1e2; 1e2; 1e3]);
+    % Params.Weight.QWf = diag([1e1; 1e1; 1; 1; 1; 1]);
+    Params.Weight.Pf = Params.Weight.P;
+    Params.Weight.Vf = Params.Weight.V;
+    Params.Weight.QWf = Params.Weight.QW;
+
+    min_input = 0;
+    max_input = 2;
+
+    min_state = -10;
+    max_state = 10;
     %% 
 %     fprintf("%f秒\n", totalT)
 %     Fontsize = 15;  timeMax = 100;
@@ -110,7 +129,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     end
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+    load('drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
@@ -125,6 +144,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     previous_state  = zeros(Params.state_size + Params.input_size, Params.H);
 
     xr = zeros(Params.state_size+Params.input_size, Params.H);
+    load('drone\Data\HL_log.mat');
 
     %-- パラメータ確認
     Params
@@ -191,7 +211,7 @@ end
                     param(i).reference.point = {FH, [1;-1;1], time.t};
                 end
             else
-                xr = Reference(Params, time.t, agent); %TimeVarying
+                xr = Reference(Params, time.t, te, agent); %TimeVarying
                 param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
 %                 Params.i = Params.i + 1;
             end
@@ -245,23 +265,25 @@ end
             problem.x0		  = previous_state;       % 状態，入力を初期値とする   % 現在状態
 %             problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
 %             problem.nonlcon   = @(x) Constraints(idx, x, Params, agent, time);    % 制約条件
-            problem.objective = @(x) Objective_mex(x, Params);
-            problem.nonlcon   = @(x) Constraints_mex(x, Params);
+            problem.objective = @(x) Objective(x, Params);
+            problem.nonlcon   = @(x) Constraints(x, Params);
+            problem.lb = [min_state * ones(12, Params.H); min_input * ones(4, Params.H)];
+            problem.ub = [max_state * ones(12, Params.H); max_input * ones(4, Params.H)];
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             data.exitflag(idx) = exitflag;
             % 制御入力の決定
-            previous_state = var   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
+            previous_state = var;   % 初期値の書き換え(最適化計算で求めたホライズン数分の値)
 
-            fprintf("\tfval : %f\n", fval)
+            % fprintf("\tfval : %f\n", fval)
 %         TODO: 1列目のvarが一切変動しない問題に対処
             if var(Params.state_size+1:Params.total_size, end) > 1.0
                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
             end
-            
-            fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
-                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
-                ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
+            % 
+            % fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
+            %     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+            %     agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
+            %     ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
 
             agent.input = var(Params.state_size+1:Params.total_size, 2);    % 2なら飛んだ(ホライズンの一番はじめの入力のみを代入)
     
@@ -306,13 +328,27 @@ end
             if (fOffline)
                 time.t
             else
-                time.t = time.t + dt % for sim 時刻の更新
+                time.t = time.t + dt; % for sim 時刻の更新
             end
 
         end
-        calT = toc % 1ステップ（25ms）にかかる計算時間
+        calT = toc; % 1ステップ（25ms）にかかる計算時間
         totalT = totalT + calT; %すべての計算を終えるまでにかかった時間
-        
+
+        fprintf("==================================================================\n");
+        fprintf("==================================================================\n");
+        fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+                state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+                state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+                state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi); % s:state 現在状態
+        fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+                xr(1,1), xr(2,1), xr(3,1),...
+                xr(7,1), xr(8,1), xr(9,1),...
+                xr(4,1)*180/pi, xr(5,1)*180/pi, xr(6,1)*180/pi)     
+        fprintf("t: %f calT: %f \t fval: %f \n", ...
+        time.t, calT, fval);
+        fprintf("input: %f %f %f %f\n", agent.input(1), agent.input(2), agent.input(3), agent.input(4));
+        fprintf("\n")
         %% 逐次プロット
 %         figure(10);
 %         clf

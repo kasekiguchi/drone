@@ -16,10 +16,15 @@ function [eval] = Objective(x, params) % x : p q v w input
     stageStateQW = tildeXqw(:, 1:params.H-1)'*params.Weight.QW*tildeXqw(:, 1:params.H-1);
     stageInputR = tildeUref(:, 1:params.H-1)'*params.Weight.R*tildeUref(:, 1:params.H-1);
     
-    stageStateP = diag(stageStateP);
-    stageStateV = diag(stageStateV);
-    stageStateQW = diag(stageStateQW);
-    stageInputR = diag(stageInputR);
+    % stageStateP = diag(stageStateP);
+    % stageStateV = diag(stageStateV);
+    % stageStateQW = diag(stageStateQW);
+    % stageInputR = diag(stageInputR);
+    
+    stageStateP = sum(stageStateP);
+    stageStateV = sum(stageStateV);
+    stageStateQW = sum(stageStateQW);
+    stageInputR = sum(stageInputR);
     
     stageState = stageStateP' + stageStateV' + stageStateQW' + stageInputR'; %ステージコスト
 

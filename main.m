@@ -5,7 +5,10 @@ activeFile = matlab.desktop.editor.getActive;
 cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
-close all hidden; clear all; clc;
+close all hidden; 
+% clear all; 
+clear initial logger data logHL param
+clc;
 userpath('clear');
 % warning('off', 'all');
 run("main1_setting.m");
@@ -162,18 +165,20 @@ clc
 
 
 Fontsize = 15;  timeMax = te;
-logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
-logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
-logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
-logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
-logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
-agent(1).reference.timeVarying.show(logger)
+% logger.plot({1,"p", "er"},  "fig_num",1); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference");
+% logger.plot({1,"v", "e"},   "fig_num",2); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Velocity [m/s]"); legend("x.vel", "y.vel", "z.vel");
+% logger.plot({1,"q", "p"},   "fig_num",3); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw");
+% logger.plot({1,"w", "p"},   "fig_num",4); %set(gca,'FontSize',Fontsize);  grid on; title(""); ylabel("Angular velocity [rad/s]"); legend("roll.vel", "pitch.vel", "yaw.vel");
+% logger.plot({1,"input", ""},"fig_num",5); %set(gca,'FontSize',Fontsize);  grid on; title("");
+% agent(1).reference.timeVarying.show(logger)
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-agent(1).animation(logger,"target",1);
+% agent(1).animation(logger,"target",1);
 %%
 % logger.save();
-QHL = logger.data(1,"q","p");
-WHL = logger.data(1,"w","p");
-PHL = logger.data(1,"p","e");
-VHL = logger.data(1,"v","e");
+logHL.QHL = logger.data(1,"q","p")';
+logHL.WHL = logger.data(1,"w","p")';
+logHL.PHL = logger.data(1,"p","e")';
+logHL.VHL = logger.data(1,"v","e")';
+logHL.InputHL = logger.data(1, "input", "")';
+save("Data\HL_log.mat", "logHL");

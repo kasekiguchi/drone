@@ -1,4 +1,4 @@
-function [ref] = Trajectory(~)
+function [ref] = Trajectory(te)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -7,7 +7,7 @@ syms t real
 % yg = X(2);
 % zg = X(3);
 % T = X(4);   % 目標到達までの時間 T=10
-% T = 60;
+% 
 %% takeoff
 % T = 10;
 % rz0 = 0;
@@ -19,11 +19,18 @@ syms t real
 % x = 0;
 % y = 0;
 
+%%
+% x = 0.5/(1+exp(-t+ te/2));
+% y = 0;
+% z = 1;
+
+%%
 x = 0;
 y = 0;
 z = 1;
 
-% x = t/5;
+%% Linear
+% x = t/10;
 % y = 0;
 % z = 1;
 
@@ -33,7 +40,8 @@ z = 1;
 % z = 1;
 
 % %% circle2
-% x = sin(2*pi*t/T);
+% T = 30;
+% x = sin(2*pi*t/T)-1;
 % y = cos(2*pi*t/T);
 % z = 1;
 
