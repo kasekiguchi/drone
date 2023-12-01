@@ -14,7 +14,10 @@ classdef EKF < handle
         dt
         B
         n
-        y
+        sensor % function to get sensor value
+        sensor_param
+        output_func % function of state
+        output_param
         self
         model
         timer= [];
@@ -31,12 +34,16 @@ classdef EKF < handle
                 obj.JacobianF=str2func(ELfile);
             end
             obj.result.state= state_copy(obj.model.state);
-            obj.y= state_copy(obj.model.state);
-            if isfield(param,'list')
-                obj.y.list = param.list;
-            else
-                obj.y.list = [];
-            end
+            obj.sensor = param.sensor_func; % output function handle : function of obj.self
+            obj.sensor_param = param.sensor_param;
+            obj.output_func = param.output_func;
+            obj.output_param = param.output_param;
+            % obj.y= state_copy(obj.model.state);
+            % if isfield(param,'list')
+            %     obj.y.list = param.list;
+            % else
+            %     obj.y.list = [];
+            % end
             obj.JacobianH = param.JacobianH;
             obj.n = length(obj.model.state.get());
             obj.Q = param.Q;% 分散
@@ -56,32 +63,25 @@ classdef EKF < handle
           else
             dt = obj.dt;
           end
-            sensor = obj.self.sensor.result;
-            state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
+          if varargin{1}.t ~= 0
+            y = obj.sensor(obj.self,obj.sensor_param); % sensor output
             x = obj.result.state.get(); % estimated state at previous step
-            % Pre-estimation
-            obj.model.do(varargin{:});
-            if norm(obj.y.q(3)-obj.model.state.q(3)) > pi
-                if obj.y.q(3) > 0
-                    obj.model.state.set_state("q",obj.model.state.q+[0;0;2*pi]);
-                else
-                    obj.model.state.set_state("q",obj.model.state.q-[0;0;2*pi]);
-                end
-            end
-            xh_pre = obj.model.state.get(); % 
-
-            p = obj.self.parameter.get();
+            obj.model.do(varargin{:}); % update state
+            xh_pre = obj.model.state.get(); % Pre-estimation
+            yh = obj.output_func(xh_pre,obj.output_param); % output estimation
+            p = obj.self.parameter.get(); 
             A = eye(obj.n)+obj.JacobianF(x,p)*dt; % Euler approximation
             C = obj.JacobianH(x,p);
             P_pre  = A*obj.result.P*A' + obj.B*obj.Q*obj.B';       % Predicted covariance
             G = (P_pre*C')/(C*P_pre*C'+obj.R); % Kalman gain
             P = (eye(obj.n)-G*C)*P_pre;	% Update covariance
-            tmpvalue = xh_pre + G*(obj.y.get()-C*xh_pre);	% Update state estimate
+            tmpvalue = xh_pre + G*(y-yh);	% Update state estimate
             tmpvalue = obj.model.projection(tmpvalue);
             obj.result.state.set_state(tmpvalue);
             obj.model.state.set_state(tmpvalue);
             obj.result.G = G;
             obj.result.P = P;
+          end
             result=obj.result;
             obj.timer = tic;
         end
