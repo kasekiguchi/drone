@@ -28,6 +28,8 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 % agent.controller = HLC(agent,Controller_HL(dt));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.controller = HLC(agent,Controller_HL(dt));
+% run("ExpBase");
+%% 2つ同時にコントローラ回すとき
 
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
 agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
