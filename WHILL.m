@@ -1,32 +1,28 @@
-classdef WHILL < handle
+classdef WHILL < ABSTRACT_SYSTEM
 % Drone class
 properties %(Access = private)
     %id = 0;
     fig
-    plant
-    parameter
-    sensor
-    estimator
-    reference
-    controller
-    input_transform
-    % id = 1
-    id
-    node
 end
 
 methods
 
-    function obj = WHILL(args)
+    function obj = WHILL(args, param)
 
         arguments
-          args = struct("type","sim");  
+            args
+            param
         end
-        obj.input_transform.do = @(varargin) [];
+
+        obj = obj@ABSTRACT_SYSTEM(args, param);
+
         if contains(args.type, "EXP")
-          obj.plant = WHILL_EXP_MODEL(args);
+            obj.plant = WHILL_EXP_MODEL(args);
         end
+
+        obj.parameter = param;
     end
+
 end
 
 methods
@@ -48,17 +44,6 @@ methods
         data.q = logger.data(param.target, "q", "e");
         vehicle = DRAW_WHILL(data.p);
         vehicle.animation(data)
-    end
-    function ax=show(obj,str,varargin)
-      % str : list of target class
-      %  example ["sensor","lidar";"estimator","ekf"]
-      tmp = obj;
-      for j = 1:size(str,1)
-        for i = str(j,:)
-          tmp = tmp.(i);
-        end
-        ax = tmp.show(varargin{:});
-      end
     end
 
 end

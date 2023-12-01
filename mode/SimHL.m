@@ -1,14 +1,3 @@
-tmp = matlab.desktop.editor.getActive;
-dir = fileparts(tmp.Filename);
-if ~contains(path,dir)
-    cd(erase(dir,'\mode'));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-close all hidden; clear ; clc;
-userpath('clear');
-end
-
-%%
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10; % terminal time
@@ -24,12 +13,19 @@ initial_state.w = [0; 0; 0];
 
 %------Modelがroll_pitch_yaw_thrust_force_physical_parameter_modelか確認-------------------
 agent = DRONE;
-agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
 agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
-agent.parameter.set("mass",struct("mass",0.5))
+agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,1,1]},"HL"});
+% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;1;1],"g",[1;-1;1])});
+% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0;1;1],"g",[0;-1;1],"h",[0;1;1],"j",[0;-1;1]),5});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
+% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),1));%コマンドでシートを選びたいときは位置2を1にする
+%スプラインカーブは5が良い
+
 agent.controller = HLC(agent,Controller_HL(dt));
 
 run("ExpBase");

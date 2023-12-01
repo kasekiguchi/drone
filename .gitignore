@@ -1047,5 +1047,3 @@ Log*
 *.prj
 /codegen/
 assemblypath.txt
-
-*.gif

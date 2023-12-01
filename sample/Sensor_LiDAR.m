@@ -2,9 +2,7 @@ function Sensor = Sensor_LiDAR(id,param)
 arguments
     id
     param.radius = 20;
-%     param.angle_range = -pi:0.02512:pi;
-    param.angle_range = -pi:0.0087:pi;
-%     param.angle_range = -pi:0.01:pi;
+    param.angle_range = -pi:0.01:pi;
     param.seed = 0;
     param.noise = 0;
 end

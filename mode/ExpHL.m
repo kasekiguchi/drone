@@ -22,9 +22,19 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
-agent.controller = HLC(agent,Controller_HL(dt));
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.25]},"HL"});
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
+% agent.controller = HLC(agent,Controller_HL(dt));
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.controller = HLC(agent,Controller_HL(dt));
+% run("ExpBase");
+%% 2つ同時にコントローラ回すとき
 
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
 run("ExpBase");
 
 function result = controller_do(varargin)

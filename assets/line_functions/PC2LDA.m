@@ -62,10 +62,10 @@ for i = 1:length(Lc)
     e = Lc(i); % s0 + e = e0 % 以降eは固定
 
     %while s+1.5*d <= e
-    while s+d <= e %外れ値がある場合繰り返す
+    while s+d <= e
         %s = s + floor(d/2);
-        t = linefit(XY(s:s+d,:)); % tmp line %t = [a, b, c];
-        f = abs(t(1).*XY(s+d+1:end,1) + t(2).*XY(s+d+1:end,2) + t(3)); % 直線までの射影距離 %linefitで用いた座標以外を用いる
+        t = linefit(XY(s:s+d,:)); % tmp line
+        f = abs(t(1).*XY(s+d+1:end,1) + t(2).*XY(s+d+1:end,2) + t(3)); % 直線までの射影距離
         tid = find(f > C.LineThreshold,1); % ラインから外れている点の id = s + d + tid
         ns = s+d;
         if isempty(tid) % ラインから外れている点が無くなればクラスタの最後までの点を使って直線を導出
@@ -83,9 +83,9 @@ for i = 1:length(Lc)
                 end
             end
         end
-        l(k,:) = t;%k個目のline parameterを格納
-        lc(k) = i;%クラスタの番号を振る
-        perp = projection(l(k,:),[XY(s,:);XY(ns,:)]);%最初と最後の座標を用いて点 XY から線 l への投影点を返す．
+        l(k,:) = t;
+        lc(k) = i;
+        perp = projection(l(k,:),[XY(s,:);XY(ns,:)]);
         X(k,:) = perp(:,1)';%[XY(s,1),XY(ns,1)];
         Y(k,:) = perp(:,2)';%[XY(s,2),XY(ns,2)];
         id(k,:) = [s0+s,s0+ns];

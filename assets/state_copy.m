@@ -15,7 +15,7 @@ function state=state_copy(orgstate,targetstate)
                     targetstate.num_list = [targetstate.num_list, length(orgstate.(F{i}))];
                 end
                 targetstate.set_state(F{i},orgstate.(F{i})); % qの場合をケアするためにset_stateを使う
-            elseif ~strcmp(F{i},'list') && ~strcmp(F{i},'num_list') && ~strcmp(F{i},'type') && ~strcmp(F{i},'qlist')
+            elseif ~strcmp(F{i},'list') && ~strcmp(F{i},'num_list') && ~strcmp(F{i},'type')
                 addprop(state,F{i});
                 state.set_state(F{i},orgstate.(F{i}));
             end

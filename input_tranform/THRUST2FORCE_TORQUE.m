@@ -1,7 +1,7 @@
 classdef THRUST2FORCE_TORQUE < handle
-    % Convert thrust input T = [T1 T2 T3 T4]' to total thrust and torque input
-    % U = [sum(T) taux tauy tauz]'
-    % direction : 1 : T to U,  0 : U to T
+    % 階層型線形化入力を算出するクラス
+    % 別のコントローラでone step 分予測したものをリファレンスとしてHL入力を求めるので，移動速度が遅過ぎて使えない．
+    
     properties
         result
         dir
@@ -10,7 +10,7 @@ classdef THRUST2FORCE_TORQUE < handle
     end
     
     methods
-      function obj = THRUST2FORCE_TORQUE(self,direction)
+        function obj = THRUST2FORCE_TORQUE(self,param)
             Lx = self.parameter.Lx;
             Ly = self.parameter.Ly;
             lx = self.parameter.lx;
@@ -21,8 +21,9 @@ classdef THRUST2FORCE_TORQUE < handle
             km4 = self.parameter.km4;           
             obj.IT = [1 1 1 1;-ly, -ly, (Ly - ly), (Ly - ly); lx, -(Lx-lx), lx, -(Lx-lx); km1, -km2, -km3, km4];
             obj.IIT = inv(obj.IT);
-            obj.dir = direction;
+            obj.dir = param;
         end
+        
         function u = do(obj,input,~)
             if obj.dir == 1
                 u = obj.IT*input;
@@ -33,3 +34,4 @@ classdef THRUST2FORCE_TORQUE < handle
         end
     end
 end
+
