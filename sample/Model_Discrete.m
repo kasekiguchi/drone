@@ -43,8 +43,7 @@ switch type
     end
     Setting.dim = [size(dsys.A,1),size(dsys.B,2),0];
     Setting.state_list = fn;
-    Setting.num_list = nlist;  
-    % Setting.num_list = [3, 3, 3, 3];
+    Setting.num_list = nlist;    
 end
 %% 共通設定
 Setting.param.A = dsys.A;

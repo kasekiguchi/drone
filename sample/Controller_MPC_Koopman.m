@@ -9,8 +9,8 @@ function Controller = Controller_MPC_Koopman(Agent)
 
     %% Koopman
     % load("EstimationResult_12state_7_19_circle=circle_estimation=circle.mat",'est');
-    load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
-    % load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
+    % load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
+    load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
     % load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est') %シミュクープマンモデル，総推力で学習
     Controller_param.A = est.A;
     Controller_param.B = est.B;

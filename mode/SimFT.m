@@ -1,14 +1,3 @@
-tmp = matlab.desktop.editor.getActive;
-dir = fileparts(tmp.Filename);
-if ~contains(path,dir)
-    cd(erase(dir,'\mode'));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-close all hidden; clear ; clc;
-userpath('clear');
-end
-
-%%
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 25; % terminal time
@@ -23,13 +12,19 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
-agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
-agent.parameter.set("mass",struct("mass",0.5))
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
+%外乱を与える==========
+% agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
+% agent.input_transform = THRUST_DST_DRONE(agent,InputTransform_Dst_drone(time)); % 外乱付与
+%=====================
+agent.parameter = DRONE_PARAM("DIATONE"); 
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-agent.controller = HLC(agent,Controller_HL(dt));
+fApprox_FTxy = 0;%approximate x,y directional FTC input : 1
+fNewParam = 0;%新しく更新する場合 : 1
+fConfirmFig =0;%近似入力のfigureを確認する場合 : 1
+agent.controller = FTC(agent,Controller_FT(dt, fApprox_FTxy, fNewParam, fConfirmFig));
 run("ExpBase");
 function dfunc(app)
 app.logger.plot({1, "p", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
