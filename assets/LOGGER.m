@@ -17,7 +17,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
     fExp
     overwrite_target = ["all"];
   end
-
+%194, 531行目消す
   methods
 
     function obj = LOGGER(target, number, fExp, items, agent_items, option)
@@ -534,7 +534,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
 
             hold(ax, "on");
-            grid(ax, "on"); %追加
+            grid(ax, "on");
 
             switch length(ps)
               case 3
@@ -582,7 +582,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
                   plegend = [plegend, att];
               end
 
-              % daspect(ax,[1 1 1]); %削除
+              daspect(ax,[1 1 1]);
             else
 
               if isempty(vrange)
