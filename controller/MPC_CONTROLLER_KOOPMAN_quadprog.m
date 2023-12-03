@@ -62,8 +62,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % obj.current_state = obj.self.plant.state.get();
             Param = obj.param;
             Param.current = obj.current_state;
-            Param.ref = obj.state.ref;
-            obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
+            Param.ref = obj.state.ref;            obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
 
             % MPC設定(problem)
             %-- fmincon 設定
@@ -108,7 +107,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
 
             %% 情報表示
             state_monte = obj.self.estimator.result.state;
-            % state_monte2 = obj.self.plant.state;
+            % state_monte = obj.self.plant.state;
             fprintf("==================================================================\n")
             fprintf("==================================================================\n")
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
