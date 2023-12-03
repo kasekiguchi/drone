@@ -17,7 +17,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
     fExp
     overwrite_target = ["all"];
   end
-%194, 531行目消す
+%194行目消す
   methods
 
     function obj = LOGGER(target, number, fExp, items, agent_items, option)
@@ -528,9 +528,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
               else
                 xlim(ax,[min(tmpx), max(tmpx)]);
               end
-              if att == "e" %追加
-                ylim(ax,[min(tmpy,[],'all')-0.01, max(tmpy,[],'all')+0.01]);
-              end
+                ylim(ax,[min(tmpy,[],'all'), max(tmpy,[],'all')+0.01]);
             end
 
             hold(ax, "on");
