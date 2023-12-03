@@ -36,13 +36,13 @@ classdef DRONE_PARAM < PARAMETER_CLASS
     methods
         function obj = DRONE_PARAM(name,type,param)
             arguments
-                name % EACHINE
+                name % DIATONE
                 type = "row";
-                param.mass = 0.5884; %変更
-                param.Lx = 0.16; %変更
-                param.Ly = 0.16; %変更
-                param.lx = 0.16/2;%0.05; %変更
-                param.ly = 0.16/2;%0.05; %変更
+                param.mass = 0.5884;
+                param.Lx = 0.16;
+                param.Ly = 0.16;
+                param.lx = 0.16/2;%0.05;
+                param.ly = 0.16/2;%0.05;
                 param.jx = 0.06;
                 param.jy = 0.06;
                 param.jz = 0.06;
