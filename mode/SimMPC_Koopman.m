@@ -13,32 +13,34 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 %-------Modelがroll_pitch_yaw_thrust_force_physical_parameter_modelか確認--------------------
-% agent = DRONE;
-% % agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1)); %総推力のトルク
-% agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); %各ロータの推力
-% agent.parameter = DRONE_PARAM("DIATONE");
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
-% % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
-% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
-
-%% 
-% %plantに設定するクープマンモデルの設定
-% load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
-load("EstimationResult_12state_11_29_GUIsimdata.mat",'est')
-
-A = est.A;
-B = est.B;
-C = est.C;
 agent = DRONE;
-agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
-agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent));
+% agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1)); %総推力のトルク
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)); %各ロータの推力
+agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+
+%% 
+% %plantに設定するクープマンモデルの設定
+% load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
+% load("EstimationResult_12state_11_29_GUIsimdata.mat",'est')
+% 
+% A = est.A;
+% B = est.B;
+% C = est.C;
+% agent = DRONE;
+% agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
+% agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent));
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+% % agent.estimator = KF(agent, Estimator_KF(agent,dt,MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)),["p"],"Q",1e-3*eye(2),"R",1e-2,"P",eye(2),"B",1));
+% % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)),["p", "q"]));
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+% % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 
 %% 実機データを用いてMPC回すとき
 
@@ -59,11 +61,13 @@ agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(
 run("ExpBase");
 
 function dfunc(app)
-Graphplot(app)
+
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
+
+Graphplot(app)
 end

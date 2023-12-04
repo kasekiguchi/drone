@@ -186,7 +186,7 @@ close all
 newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
              0.4660 0.6740 0.1880];
-colororder(newcolors)
+
 columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 12; %凡例の大きさ調整
 size = figure;
@@ -194,6 +194,7 @@ size.WindowState = 'maximized'; %表示するグラフを最大化
 num = 3;
 
 subplot(2, num, 1);
+colororder(newcolors)
 p1 = plot(data.t, data.p(:,:),'LineWidth',1);
 xlabel('Time [s]');
 ylabel('p');
