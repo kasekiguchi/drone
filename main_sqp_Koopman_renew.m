@@ -7,9 +7,12 @@ cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden; %clear all; clc;
-
-Wi = 1;
-if Wi == 1; run('main.m'); end
+% 
+fHL = 0;
+if fHL == 1
+    Wi = 1;
+    if Wi == 1; run('main.m'); end
+end
 clear initial logger data logHL param
 %%
 userpath('clear');
@@ -95,7 +98,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     options.Display = 'none';   % 計算結果の表示
     %Koopman
     % load('')
-    load('drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est') %円(順逆)+サドル+P2P(x,y),観測量：状態+非線形項
+    % load('drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est') %円(順逆)+サドル+P2P(x,y),観測量：状態+非線形項
+    load('drone\Koopman_data\EstimationResult_12state_11_29_GUIsimdata.mat')
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
@@ -105,8 +109,10 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     xr = zeros(Params.state_size+Params.input_size, Params.H);
     initial_input = Params.ur;
     
-    load('drone\Data\HL_log.mat'); % estimator, inputの読み込み
-    Params.logHL = logHL;
+    if fHL == 1
+        load('drone\Data\HL_log.mat'); % estimator, inputの読み込み
+        Params.logHL = logHL;
+    end
 
     %-- パラメータ確認
     Params
@@ -323,7 +329,7 @@ Rdata = data.xr(:,1:end-1);
 % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
 figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
 ylabel("Position /m")
-legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "Location","northwest");
+legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "Location","southeast");
 % yyaxis right
 % plot(logt, Eachcost(8,:)); 
 % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
@@ -332,7 +338,7 @@ grid on; xlim([0 xmax]); %ylim([0 5000]);
 
 % atiitude 0.2915 rad = 16.69 deg
 figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
-xlabel("Time /s"); ylabel("Attitude /rad"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest");
+xlabel("Time /s"); ylabel("Attitude /rad"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","southeast");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 
 % figure(2); plot(Edata(1,:), Edata(2,:)); hold on; plot(Rdata(1,:), Rdata(2,:), '--'); hold off;
@@ -343,14 +349,30 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 
 % velocity
 figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
-xlabel("Time /s"); ylabel("Velocity / m/s"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref",  "Location","southwest");
+xlabel("Time /s"); ylabel("Velocity / m/s"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref",  "Location","southeast");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
 % input
 figure(4); 
 plot(logt, Idata, "LineWidth", 1.5); hold on; hold off;
-xlabel("Time /s"); ylabel("Input /N"); legend("rotor1", "rotor2", "rotor3", "rotor4","Location","northwest");
+xlabel("Time /s"); ylabel("Input /N"); legend("rotor1", "rotor2", "rotor3", "rotor4","Location","southeast");
 grid on; xlim([0 xmax]); ylim([-inf inf]);
-ytickformat('%.1f')
+ytickformat('%.4f')
+
+figure(5);
+plot(Edata(1,:), Edata(2,:), "LineWidth", 1.5);
+xlabel("x /m"); ylabel("y /m");
+grid on; xlim([-inf inf]); ylim([-inf inf]);
+daspect([1,1,1])
+
+%% error
+% figure(10)
+error = Edata - Rdata(1:3,:);
+% plot(logt, error);
+% legend("x-xd", "y-yd", "z-zd", "Location","southeast");
+err_abs = abs(error);
+[max_x] = max(err_abs(1,:))
+max_y = max(err_abs(2,:))
+max_z = max(err_abs(3,:))
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)

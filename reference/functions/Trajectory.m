@@ -25,9 +25,9 @@ syms t real
 % z = 1;
 
 %%
-x = 0;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
 
 %% Linear
 % x = t/10;
@@ -39,11 +39,11 @@ z = 1;
 % y = 2*cos(2*pi*t/T);
 % z = 1;
 
-% %% circle2
-% T = 30;
-% x = sin(2*pi*t/T)-1;
-% y = cos(2*pi*t/T);
-% z = 1;
+%% circle2
+T = 60;
+x = cos(2*pi*t/T)-1;
+y = sin(2*pi*t/T);
+z = 1;
 
 % x = cos(t);
 % y = sin(t);
