@@ -289,9 +289,18 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % constY = find(x_real(3,5,1:obj.N) > -0.5);
       % constX = find(x_real(3,5,1:obj.N) < -1.5 | x_real(7,5,1:obj.N) > 0.5);
 
+      x = x_real(3,:,1:obj.N);
+      y = x_real(7,:,1:obj.N);
       %% Any horizon
-      constX = find(x_real(3,:,1:obj.N) < -1.5 | x_real(7,:,1:obj.N) > 0.5); % Any horizon
-      constX = unique(constX);
+      % constX = find(x_real(3,:,1:obj.N) < -1.5 | x_real(7,:,1:obj.N) > 0.5); % Any horizon
+      % constX = unique(constX);
+
+      const1 = find(2 < x & x < 4 & -0.1 < y & y < 0.2);
+      % const2 = find(6 < x & x < 7 & -0.5 < y & y < 0.5);
+      constX = unique([const1]);
+
+      %% 台形の禁止領域作り
+      % const_pos = const_gen(obj);
       %% 進路上に物体
       % 四角
       % InputIdx = obj.param.H;
@@ -365,12 +374,15 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %% 制約外の軌道に対して値を付加
       % x:3, y:7
-      % [~, removeX, ~] = obj.constraints();
+      [~, removeX, ~] = obj.constraints();
 
       %% Artificial potential
       % Xreal = Zreal(3,:,:);
       % Yreal = Zreal(7,:,:);
+      % z_real = Zreal(1,:,:);
       % AP = obj.param.AP ./(sqrt((Xreal - obj.param.constX).^2) + sqrt((Yreal - obj.param.constY).^2));
+      % AP2 = obj.param.AP ./(sqrt((Xreal - obj.param.constX2).^2) + sqrt((Yreal - obj.param.constY2).^2));
+      % AP = obj.param.AP ./(sqrt((Xreal - obj.param.constX).^2) + sqrt((Yreal - obj.param.constY).^2) + sqrt((z_real - obj.param.constZ).^2));
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
       % stageStateZ =    k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
@@ -391,8 +403,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %% 人工ポテンシャルをx, yにプラス
       if ~isempty(AP)
-      stageStateZ(3, :,:) = AP;
-      stageStateZ(7, :,:) = AP;
+      stageStateZ(3, :,:) = stageStateZ(3, :,:) + AP;% + AP2;
+      stageStateZ(7, :,:) = stageStateZ(7, :,:) + AP;% + AP2;
       end
 
       %-- 評価値計算

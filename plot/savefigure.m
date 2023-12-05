@@ -2,7 +2,7 @@
 SigmaData = zeros(4, te/dt);
 close all
 fprintf("%f秒\n", totalT)
-Fontsize = 15;  xmax = time.t;
+Fontsize = 15;  xmax = 15;
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
@@ -33,7 +33,6 @@ close all
 m = 3; n = 2;
 
 % Bestcost = data.bestcost(:,1:length(logt));
-fsave = 0;
 if fsave == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
@@ -46,9 +45,15 @@ if fsave == 1
     grid on; xlim([0 xmax]); %ylim([0 5000]);
 
     % atiitude 0.2915 rad = 16.69 deg
-    figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
-    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northwest");
-    grid on; xlim([0 xmax]); ylim([-0.6 0.6]);
+    % figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
+    % xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northwest");
+    % grid on; xlim([0 xmax]); ylim([-0.6 0.6]);
+
+    figure(2); plot(Edata(1,:), Edata(2,:)); hold on; plot(Rdata(1,:), Rdata(2,:), '--'); hold off;
+    xlim([0 10])
+    daspect([1 1 1]);
+    legend("Estimate", "Reference");
+    xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
 
     % velocity
     figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
@@ -88,10 +93,11 @@ else
     xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
 
-    subplot(m,n,2); plot(Edata(1,:), Edata(2,:)); hold on; plot(Rdata(1,:), Rdata(2,:), '--'); hold off;
+    subplot(m,n,2); plot3(Edata(1,:), Edata(2,:), Edata(3,:)); hold on; plot3(Rdata(1,:), Rdata(2,:), Rdata(3,:), '--'); hold off;
     daspect([1 1 1]);
     legend("Estimate", "Reference");
     xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
+    view(2)
 
     % velocity
     subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
@@ -157,13 +163,14 @@ end
 % set(gca,'FontSize',Fontsize);  grid on; title("");
 % xlabel("Time [s]");
 
-
+% 
 % figure(6)
 % % average
-% Average = sum(data.calT(2:end-1,1)) / length(data.calT(2:end-1,1))
+% Average = sum(data.calT(6:end-1,1)) / length(data.calT(6:end-1,1))
 % AverageCal = repmat(Average, length(data.calT(1:end-1)),1);  
-% plot(logt, data.calT(1:end-1,1), logt, AverageCal);
-% xlabel("Time [s]"); ylabel("Calculation time [s]");
+% plot(logt(6:end), data.calT(6:end-1,1), logt, AverageCal);
+% xlabel("Time /s"); ylabel("Calculation time /s");
+% ylim([0.018 0.026])
 
 % set(gcf, "WindowState", "maximized");
 % set(gcf, "Position", [960 0 960 1000])

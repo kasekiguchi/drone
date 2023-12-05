@@ -1,4 +1,4 @@
-function [ref] = Komatsu_study_trajectory(~)
+function [ref] = Komatsu_study_trajectory(X0)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -7,6 +7,19 @@ syms t real
 % yg = X(2);
 % zg = X(3);
 % T = X(4);   % 目標到達までの時間 T=10
+
+te = X0{1,2};
+
+%% landing X0(3):初期高度
+% x = 0;
+% y = 0;
+% z = -1/(1+exp(-t+ te/2))+1;
+% yaw = 0;
+
+%% takeoff
+% x = 0;
+% y = 0;
+% z = 1/(1+exp(-t+te/2));
 
 %% 楕円　斜面着陸
 % T = -2.8;

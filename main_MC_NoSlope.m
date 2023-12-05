@@ -16,10 +16,12 @@ userpath('clear');
 fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
 fHL = 1;
 fMC = 1;
-
+% movie
 fMovie = 10;
 fSave = 10;
 MovTime = 0;
+% figure
+fsave = 0;
 
 %------------------------
 % PC変更時初回はcontroller 途中で止めて

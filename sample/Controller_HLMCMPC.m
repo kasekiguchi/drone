@@ -2,7 +2,7 @@ function Controller = Controller_HLMCMPC(~)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
-    Controller_param.H = 10;
+    Controller_param.H = 15;
     Controller_param.Maxparticle_num = 1000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
@@ -23,6 +23,11 @@ function Controller = Controller_HLMCMPC(~)
      
     Controller_param.constX = 2;
     Controller_param.constY = 0;
+    Controller_param.constZ = 0;
+
+    % Controller_param.constX2 = 8;
+    % Controller_param.constY2 = -1;
+    % Controller_param.constZ2 = 0;
 
     Controller_param.obsX = 3;
     Controller_param.obsY = 0.1;
@@ -31,19 +36,10 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
 
-    %% sekiguchi
-    % z, x, y, yaw : 誤差、誤差の変化量、微分、微分、、、 
-%     Controller_param.P = diag([10000;100]);   
-%     Controller_param.V = diag([1,1,1,1,1,1,1,1])*100;   
-%     Controller_param.QW = diag([1000 1]); 
-%     Controller_param.Pf = diag([10000;100]);   
-%     Controller_param.Vf = diag([1,1,1,1,1,1,1,1])*100;   
-%     Controller_param.QWf = diag([1000 1]);  
-
     %% sekiguchi-komatsu new
     Controller_param.Z = diag([100; 1000]) * 1e3; %2
-    Controller_param.X = diag([100,100,1,1]) * 1e0;%4
-    Controller_param.Y = diag([100,100,1,1]) * 1e0;
+    Controller_param.X = diag([100,100,1,1]) * 1e3;%4
+    Controller_param.Y = diag([100,100,1,1]) * 1e3;
     Controller_param.PHI = diag([10000; 100]);
 
     Controller_param.Zf = Controller_param.Z;
@@ -51,7 +47,7 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.Yf = Controller_param.Y;
     Controller_param.PHIf = Controller_param.PHI;
 
-    Controller_param.AP = 1e3;
+    Controller_param.AP = 1e3; % どれくらい距離をとる必要があるか
 
     % Controller_param.Zf = diag([1e6; 1]);
     % Controller_param.Xf = 1e6 * diag([1e5,1e2,1,1]);
