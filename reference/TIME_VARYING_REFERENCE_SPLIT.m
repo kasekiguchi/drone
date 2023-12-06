@@ -5,7 +5,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         param
         func % 時間関数のハンドル
         self
-        agent1 % cooprative情報
+%         agent1 % cooprative情報
         ref_set
         t=[];
         cha='s';
@@ -41,7 +41,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 agent1
             end            
             obj.self = self;   
-            obj.agent1 = agent1;
+%             obj.agent1 = agent1;
             obj.N = args{4};
             gen_func_name = str2func(args{1});
             param_for_gen_func = args{2};
@@ -75,12 +75,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.P = self.parameter.get("all","row");
                     P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],agent1.parameter.rho));
                     obj.Pdagger = pinv(P);
-                    obj.K =obj.agent1.controller.gains;
+%                     obj.K =obj.agent1.controller.gains;
+                    obj.K =agent1.controller.gains;
                     obj.Muid_method = str2func(agent1.controller.Param.method2);
                     obj.result.m = [];
                     obj.result.Muid = [];
 
-                    if obj.agent1.estimator.model.state.type ==3
+                    if agent1.estimator.model.state.type ==3
                         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
                     else
                         obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
@@ -92,9 +93,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));                    
                 end
                 if strcmp(args{3}, "Split")
-                    initial_loadref = obj.agent1.reference.result.state.xd;
-                    rho = obj.agent1.parameter.rho(:,obj.self.id-1);
-                    R_load = obj.agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
+                    initial_loadref = agent1.reference.result.state.xd;
+                    rho = agent1.parameter.rho(:,obj.self.id-1);
+                    R_load = agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
                     Qrho = initial_loadref(1:3,1)+R_load*rho;
 
                     gen_func_name = str2func(agent1.reference.ref_set.method);
@@ -112,10 +113,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.P = self.parameter.get("all","row");
                     P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],agent1.parameter.rho));
                     obj.Pdagger = pinv(P);
-                    obj.K =obj.agent1.controller.gains;
+                    obj.K =agent1.controller.gains;
                     obj.Muid_method = str2func(agent1.controller.Param.method2);
 
-                    if obj.agent1.estimator.model.state.type ==3
+                    if agent1.estimator.model.state.type ==3
                         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
                     else
                         obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
@@ -204,13 +205,14 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                m=inv(a'*a)*a'*(m0*g+muid_myagent);
 
            elseif strcmp(obj.com, "Split2")
-               initial_loadref = obj.agent1.reference.result.state.xd;
-               rho = obj.agent1.parameter.rho(:,obj.self.id-1);
-               R_load = obj.agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
+               agent1 = varargin{3};
+               initial_loadref = agent1.reference.result.state.xd;
+               rho = agent1.parameter.rho(:,obj.self.id-1);
+               R_load = agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
                Qrho = initial_loadref(1:3,1)+R_load*rho;
 
-               model = obj.agent1.estimator.result.state;
-               ref = obj.agent1.reference.result.state; 
+               model = agent1.estimator.result.state;
+               ref = agent1.reference.result.state; 
                ref.xd(1:3)=ref.xd(1:3)+Qrho;
                ref.p=ref.p+Qrho;
                x = model.get(["p"  "Q" "v"    "O"    "qi"    "wi"  "Qi"  "Oi"]);
@@ -227,15 +229,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 %                muid_myagent = Muid(:,id-1); %3x1
 %                obj.result.Muid = Muid(:,id-1)';
 
-               Muid = obj.agent1.controller.result.mui; %3xN
+               Muid = agent1.controller.result.mui; %3xN
                muid_myagent = Muid(4:6,id-1); %3x1
                obj.result.Muid = muid_myagent';
                
 
-               obj.result.state.xd = obj.agent1.reference.result.state.xd; % 目標重心位置（絶対座標）
+               obj.result.state.xd = agent1.reference.result.state.xd; % 目標重心位置（絶対座標）
                obj.result.state.p = obj.result.state.xd(1:3);
                a = obj.result.state.xd(7:9);
-               g = [0;0;-1]*obj.agent1.parameter.g;
+               g = [0;0;-1]*agent1.parameter.g;
 
                A=a-g;
                obj.result.m=inv(A'*A)*A'*muid_myagent;
@@ -251,7 +253,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            obj.result.state.p = obj.result.state.xd(1:3,1);
            obj.result.state.v = obj.result.state.xd(4:6,1);
 %                obj.self.input_transform.param.th_offset = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
-           result = obj.result;       
+%            result = obj.result;       
            else
                obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
                obj.result.state.p = obj.result.state.xd(1:3);
