@@ -50,9 +50,9 @@ agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
-agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
+% agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
-% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
 
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
@@ -128,7 +128,8 @@ Data4 = logger.data(5,"reference.result.m","p");
 Data5 = logger.data(6,"reference.result.m","p");
 Data6 = logger.data(7,"reference.result.m","p");
 DataM = Data1+Data2+Data3+Data4+Data5+Data6;
-DataI = reshape(logger.data(5,"controller.result.input","p"),[4,length(logger.data(5,"controller.result.input","p"))/4]);
+ij=7;
+DataI = reshape(logger.data(ij,"controller.result.input","p"),[4,length(logger.data(ij,"controller.result.input","p"))/4]);
 t=logger.data(0,'t',[]);
 %%
 figure(101)
@@ -172,7 +173,7 @@ hold off
 
 figure(104)
 hold on
-plot(t,DataD(:,1))
+plot(t,DataD(:,3))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
 xlabel("t [s]")

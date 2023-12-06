@@ -51,13 +51,20 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     temp = gen_func_name(param_for_gen_func{:});
                     obj.func = gen_ref_for_HL(temp);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [20, 3, 3, 3]));                    
-                end
-                if strcmp(args{3}, "Cooperative")
+                
+                elseif strcmp(args{3}, "Cooperative")
                     obj.ref_set.method = args{1};
                     obj.ref_set.orig = param_for_gen_func;
                     temp = gen_func_name(param_for_gen_func{:});
                     obj.func = gen_ref_for_HL_Cooperative_Load(temp);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3]));
+
+                    obj.result.state.set_state("xd",obj.func(0));
+                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
+                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                    obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
+
                 elseif strcmp(args{3}, "Take_off")
                     obj.ref_set.method = args{1};
                     obj.com = args{3};
@@ -67,6 +74,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.func = gen_ref_for_HL_Cooperative_Load(temp);
 %                   
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3])); 
+
+                    obj.result.state.set_state("xd",obj.func(0));
+                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
+                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                    obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
 
                 elseif strcmp(args{3}, "Split2")
                     obj.com = args{3};
@@ -86,80 +99,28 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     else
                         obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
                     end
-                end
-                if strcmp(args{3}, "Suspended")
+
+                    obj.result.state.set_state("xd",zeros(24,1));
+                
+                elseif strcmp(args{3}, "Suspended")
                     temp = gen_func_name(param_for_gen_func{:});
                     obj.func = gen_ref_for_HL(temp);
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));                    
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3])); 
+
+                    obj.result.state.set_state("xd",obj.func(0));
+                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                else
+                    obj.result.state.set_state("xd",obj.func(0));
+                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
+                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
                 end
-                if strcmp(args{3}, "Split")
-                    initial_loadref = agent1.reference.result.state.xd;
-                    rho = agent1.parameter.rho(:,obj.self.id-1);
-                    R_load = agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
-                    Qrho = initial_loadref(1:3,1)+R_load*rho;
-
-                    gen_func_name = str2func(agent1.reference.ref_set.method);
-%                     obj.func = gen_func_name(param_for_gen_func{:});
-                    agent1.reference.ref_set.orig{4} = Qrho;
-%                     set_orig = {"freq",100,"orig",Qrho,"size",1*[4,4,0]};
-%                     temp = gen_func_name(set_orig{:});
-                    temp = gen_func_name(agent1.reference.ref_set.orig{:});
-                    obj.com = args{3};
-%                     obj.func = gen_ref_for_HL(obj.agent1.reference.func);
-                    obj.func = gen_ref_for_HL_Cooperative_Load(temp);
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));  
-
-
-                    obj.P = self.parameter.get("all","row");
-                    P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],agent1.parameter.rho));
-                    obj.Pdagger = pinv(P);
-                    obj.K =agent1.controller.gains;
-                    obj.Muid_method = str2func(agent1.controller.Param.method2);
-
-                    if agent1.estimator.model.state.type ==3
-                        obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));
-                    else
-                        obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
-                    end
-                end
-            else
-                obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
             end
+               
             
-            if strcmp(args{3}, "Cooperative")
-                obj.result.state.set_state("xd",obj.func(0));
-                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
-                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-                obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
-
-            elseif strcmp(args{3}, "Suspended")
-                obj.result.state.set_state("xd",obj.func(0));
-                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-            elseif strcmp(args{3}, "Take_off")
-                obj.result.state.set_state("xd",obj.func(0));
-                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
-                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-                obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
-            elseif strcmp(args{3}, "Split2")
-                obj.result.state.set_state("xd",zeros(24,1));
-%                 obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-%                 obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
-%                 obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-%                 obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
-
             
-            else
-                obj.result.state.set_state("xd",obj.func(0));
-                obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
-                obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-            end            
-            %syms t real
-            %obj.dfunc = matlabFunction(diff(obj.func,t),"Vars",t);
         end
         function result = do(obj, varargin)
            %Param={time,FH}
@@ -212,15 +173,18 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                Qrho = initial_loadref(1:3,1)+R_load*rho;
 
                model = agent1.estimator.result.state;
-               ref = agent1.reference.result.state; 
-               ref.xd(1:3)=ref.xd(1:3)+Qrho;
-               ref.p=ref.p+Qrho;
+               ref = agent1.reference.result.state;
+               xd = ref.xd;
+               xd(1:3)=xd(1:3)+Qrho;
+%                p=ref.p+Qrho;
+%                ref.xd(1:3)=ref.xd(1:3)+Qrho;
+%                ref.p=ref.p+Qrho;
                x = model.get(["p"  "Q" "v"    "O"    "qi"    "wi"  "Qi"  "Oi"]);
                qi = reshape(model.qi,3,obj.N);
                Ri = obj.toR(model.Qi);
                R0 = obj.toR(model.Q);               
                %xd = 0*ref.xd;
-               xd = ref.xd;
+%                xd = ref.xd;
                R0d = reshape(xd(end-8:end),3,3);
 
                id = obj.self.id;
@@ -240,7 +204,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                g = [0;0;-1]*agent1.parameter.g;
 
                A=a-g;
-               obj.result.m=inv(A'*A)*A'*muid_myagent;
+               obj.result.m = inv(A'*A)*A'*muid_myagent;
 %                obj.result.m = m;
            elseif strcmp(obj.com, "Take_off")
                if isempty( obj.base_state ) % first take
