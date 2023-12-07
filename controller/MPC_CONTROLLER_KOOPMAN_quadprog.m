@@ -18,6 +18,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
         result
         self
         InputTransform
+        time
     end
 
     methods
@@ -43,27 +44,32 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
             obj.InputTransform=THRUST2FORCE_TORQUE(self,1);
+            obj.time = [];
 
         end
 
         %-- main()的な
         function result = do(obj,varargin)
+            % calT = tic;
             tic
-            
+            var = varargin{1};
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-            obj.param.t = varargin{1}.t;
-            rt = obj.param.t; %時間
-            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
+            % obj.param.t = var{1}.t;
+            % rt = obj.param.t; %時間
+            % idx = round(rt/var{1}.dt+1); %プログラムの周回数
 
+            obj.param.t = var{1}.t;
+            rt = obj.param.t; %時間
+            idx = round(rt/var{1}.dt+1); %プログラムの周回数
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
             obj.current_state = obj.self.estimator.result.state.get(); %現在状態
             % obj.current_state = obj.self.plant.state.get();
             Param = obj.param;
             Param.current = obj.current_state;
-            Param.ref = obj.state.ref;            obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
-
+            Param.ref = obj.state.ref;        
+            obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
             % MPC設定(problem)
             %-- fmincon 設定
             options = optimoptions('quadprog');
@@ -71,7 +77,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
             options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
             options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
-            
+
             %-- quadprog設定
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
@@ -84,9 +90,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             lb = [];
             ub = [];
             x0 = [obj.previous_input];
-
+  
             [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
-
+      
             %%
             obj.previous_input = var;
             % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
@@ -129,6 +135,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             if obj.self.estimator.result.state < 0
                 warning("墜落しました")
             end
+            % toc(calT)
             calT = toc
             
         end

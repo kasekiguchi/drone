@@ -12,7 +12,7 @@ function ref = Case_study_trajectory(~)
 
 % r = 1;
 syms t real
-T = 10;
+% T = 10;
 % x_0 = X0(1);
 % y_0 = X0(2);
 % z_0 = X0(3);
@@ -60,9 +60,9 @@ T = 10;
 % y = sin(2*pi*t/T);
 % z = 1;
 
-% x = 0;
-% y = 0;
-% z = 1;
+x = 0;
+y = 0;
+z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/T);
@@ -71,9 +71,9 @@ T = 10;
 % yaw = 2*pi*t/5;
 
 %八の字
-x = sin(2*t/T);
-y = sin(t/T);
-z = 1;
+% x = sin(2*t/T);
+% y = sin(t/T);
+% z = 1;
 
 % s = 8;
 % x = t/s;

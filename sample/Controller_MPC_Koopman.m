@@ -18,7 +18,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     Controller_param.C = est.C;
 
     %% 重み
-    Controller_param.weight.P = diag([5000; 2000; 100]);    % 座標   1000 1000 10000
+    Controller_param.weight.P = diag([3000; 2000; 100]);    % 座標   1000 1000 10000
     Controller_param.weight.V = diag([2000; 2000; 100]);    % 速度
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)

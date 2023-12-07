@@ -26,25 +26,25 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.25]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 % agent.controller = HLC(agent,Controller_HL(dt));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
-% agent.controller = HLC(agent,Controller_HL(dt));
-% run("ExpBase");
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+agent.controller = HLC(agent,Controller_HL(dt));
+run("ExpBase");
 %% 2つ同時にコントローラ回すとき
 
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
-agent.controller.result.input = [0;0;0;0];
-agent.controller.do = @controller_do;
-run("ExpBase");
-
-function result = controller_do(varargin)
-    controller = varargin{5}.controller;
-    result = controller.hlc.do(varargin);
-    if varargin{2} == 'f'
-        result.mpc = controller.mpc.do(varargin{1});
-    end
-    varargin{5}.controller.result = result;
-end
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+% agent.controller.result.input = [0;0;0;0];
+% agent.controller.do = @controller_do;
+% run("ExpBase");
+% 
+% function result = controller_do(varargin)
+%     controller = varargin{5}.controller;
+%     result = controller.hlc.do(varargin);
+%     if varargin{2} == 'f'
+%         result.mpc = controller.mpc.do(varargin{1});
+%     end
+%     varargin{5}.controller.result = result;
+% end
 
 function post(app)
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
