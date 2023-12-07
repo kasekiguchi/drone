@@ -12,15 +12,15 @@ folderName = '10_27';
 
 %% select file to load (max number of file:5)
 
-loadfilename{1} = 'EstimationResult_12state_11_29_GUIsimdata_input=torque.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-loadfilename{2} = 'EstimationResult_12state_11_29_GUIsimdata.mat';
+% loadfilename{1} = 'EstimationResult_12state_12_6_Expalldata_input=torque.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{2} = 'EstimationResult_12state_10_30_data=cirandrevsadP2Px_cir=cir_est=cir_Inputandconst.mat';
 % loadfilename{3} = 'EstimationResult_12state_11_20_data=cirandrevandsadP2Pxy_cir=cir_est=P2Pshape.mat';
 % loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
 
-% loadfilename{1} = 'test.mat';
-% loadfilename{2} = 'test2.mat';
+loadfilename{1} = 'test.mat';
+loadfilename{2} = 'test2.mat';
 % loadfilename{3} = 'test3.mat';
-% loadfilename{4} = 'test2.mat';
+% loadfilename{4} = 'test4.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
