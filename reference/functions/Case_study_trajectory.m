@@ -12,7 +12,7 @@ function ref = Case_study_trajectory(~)
 
 % r = 1;
 syms t real
-% T = 60;
+T = 10;
 % x_0 = X0(1);
 % y_0 = X0(2);
 % z_0 = X0(3);
@@ -24,14 +24,14 @@ syms t real
 %% 
 
 % %% takeoff
-% T = 10;
+% T = 60;
 % rz0 = 0;
 % rz = 1; %rz = 1;
 % 
 % a = -2/T^3 * (rz-rz0);
 % b = 3/T^2 * (rz-rz0);
 % z = a*(t)^3+b*(t)^2+rz0;
-% x = t-10;
+% x = 0;
 % y = 0;
 
 % s = 4; % s = 2 → period = 4*pi (12 sec)ハート1周
@@ -60,9 +60,9 @@ syms t real
 % y = sin(2*pi*t/T);
 % z = 1;
 
-x = 0;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/T);
@@ -71,9 +71,9 @@ z = 1;
 % yaw = 2*pi*t/5;
 
 %八の字
-% x = sin(2*t/T);
-% y = sin(t/T);
-% z = 1;
+x = sin(2*t/T);
+y = sin(t/T);
+z = 1;
 
 % s = 8;
 % x = t/s;

@@ -37,7 +37,7 @@ function [] = Graphplot(app)
     
     subplot(2, num, 1);
     colororder(newcolors)
-    plot(data.t, data.pp(:,:),'LineWidth',1.2);
+    plot(data.t, data.p(:,:),'LineWidth',1.2);
     xlabel('Time [s]');
     ylabel('p');
     hold on
@@ -45,7 +45,7 @@ function [] = Graphplot(app)
     plot(data.t,data.pr(:,:),'LineWidth',1.2,'LineStyle','--');
     % plot(data.t,data.pp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$x_p$','$y_p$','$z_p$','$x_r$','$y_r$','$z_r$'};
+    lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax = gca;
@@ -54,14 +54,14 @@ function [] = Graphplot(app)
     
     % 姿勢角
     subplot(2, num, 2);
-    plot(data.t, data.qp(:,:),'LineWidth',1.2);
+    plot(data.t, data.q(:,:),'LineWidth',1.2);
     hold on
     % plot(data.t, data.qp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
     ylabel('q');
     grid on
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$\phi_p$','$\theta_p$','$\psi_p$'};
+    lgdtmp = {'$\phi_e$','$\theta_e$','$\psi_e$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax(2) = gca;
@@ -69,14 +69,14 @@ function [] = Graphplot(app)
     
     % 速度
     subplot(2, num, 3);
-    plot(data.t, data.vp(:,:),'LineWidth',1.2);
+    plot(data.t, data.v(:,:),'LineWidth',1.2);
     hold on
     plot(data.t, data.vr(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
     ylabel('v');
     grid on
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$v_{xp}$','$v_{yp}$','$v_{zp}$','$v_{xr}$','$v_{yr}$','$v_{zr}$'};
+    lgdtmp = {'$v_{xe}$','$v_{ye}$','$v_{ze}$','$v_{xr}$','$v_{yr}$','$v_{zr}$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax(3) = gca;
@@ -84,14 +84,14 @@ function [] = Graphplot(app)
     
     % 角速度
     subplot(2, num, 4);
-    plot(data.t, data.wp(:,:),'LineWidth',1.2);
+    plot(data.t, data.w(:,:),'LineWidth',1.2);
     hold on
     % plot(data.t, data.wp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
     ylabel('w');
     grid on
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$\omega_{1 p}$','$\omega_{2 p}$','$\omega_{3 p}$'};
+    lgdtmp = {'$\omega_{1 e}$','$\omega_{2 e}$','$\omega_{3 e}$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax(4) = gca;
