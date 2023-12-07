@@ -10,22 +10,27 @@ function Controller = Controller_MPC_Koopman(Agent)
     %% Koopman
     % load("EstimationResult_12state_7_19_circle=circle_estimation=circle.mat",'est');
     % load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
-    load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
+    % load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
     % load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est') %シミュクープマンモデル，総推力で学習
+    load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est') %実機モデル，総推力
     Controller_param.A = est.A;
     Controller_param.B = est.B;
     Controller_param.C = est.C;
 
     %% 重み
-    Controller_param.weight.P = diag([1; 1; 1]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([1; 1; 1]);    % 速度
+    Controller_param.weight.P = diag([4000; 500; 100]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([1000; 1; 100]);    % 速度
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
+    Controller_param.weight.QW = diag([1000; 2000; 1000; 100; 100; 1000]);  % 姿勢角，角速度
 
-    Controller_param.weight.Pf = diag([1; 1; 1]); % 6
-    Controller_param.weight.Vf = diag([1; 1; 1]);
-    Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
+    Controller_param.weight.Pf = Controller_param.weight.P; % 6
+    Controller_param.weight.Vf = Controller_param.weight.V;
+    Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
+
+    % Controller_param.weight.Pf = diag([1; 1; 1]); % 6
+    % Controller_param.weight.Vf = diag([1; 1; 1]);
+    % Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
 
     % Controller_param.weight.P = diag([20; 20; 10]);    % 座標   1000 1000 10000
     % Controller_param.weight.V = diag([350; 300; 300]);    % 速度
@@ -38,8 +43,8 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
 
     %% 4inputs
-    Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
-    % Controller_param.input.u = [Agent.parameter.mass * 9.81;0;0;0]; % 4総推力，トルク
+    % Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
+    Controller_param.input.u = [Agent.parameter.mass * 9.81;0;0;0]; % 4総推力，トルク
 %     Controller_param.torque_TH = 0;
 
     %% 以下は変更なし

@@ -11,10 +11,12 @@ function [] = Graphplot(app)
         data.q(:,i) = app.logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角_estimator
         data.qp(:,i) = app.logger.Data.agent.plant.result{i}.state.q(:,1);         %姿勢角_plant
         data.v(:,i) = app.logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度_estimator
+        data.vr(:,i) = app.logger.Data.agent.reference.result{i}.state.v(:,1);      %速度_reference
         data.vp(:,i) = app.logger.Data.agent.plant.result{i}.state.v(:,1);         %速度_plant
         data.w(:,i) = app.logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度_estimator
         data.wp(:,i) = app.logger.Data.agent.plant.result{i}.state.w(:,1);         %角速度_plant
         data.u(:,i) = app.logger.Data.agent.input{i}(:,1);                         %入力
+        % data.u2(:,i) = app.logger.Data.agent.controller.result{i}.transformedInput(:,1);
     end
     
     % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
@@ -35,15 +37,15 @@ function [] = Graphplot(app)
     
     subplot(2, num, 1);
     colororder(newcolors)
-    plot(data.t, data.p(:,:),'LineWidth',1.2);
+    plot(data.t, data.pp(:,:),'LineWidth',1.2);
     xlabel('Time [s]');
     ylabel('p');
     hold on
     grid on
     plot(data.t,data.pr(:,:),'LineWidth',1.2,'LineStyle','--');
-    plot(data.t,data.pp(:,:),'LineWidth',1.2,'LineStyle','-.');
+    % plot(data.t,data.pp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$','$x_p$','$y_p$','$z_p$'};
+    lgdtmp = {'$x_p$','$y_p$','$z_p$','$x_r$','$y_r$','$z_r$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax = gca;
@@ -52,14 +54,14 @@ function [] = Graphplot(app)
     
     % 姿勢角
     subplot(2, num, 2);
-    plot(data.t, data.q(:,:),'LineWidth',1.2);
+    plot(data.t, data.qp(:,:),'LineWidth',1.2);
     hold on
-    plot(data.t, data.qp(:,:),'LineWidth',1.2,'LineStyle','-.');
+    % plot(data.t, data.qp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
     ylabel('q');
     grid on
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$\phi_e$','$\theta_e$','$\psi_e$','$\phi_p$','$\theta_p$','$\psi_p$'};
+    lgdtmp = {'$\phi_p$','$\theta_p$','$\psi_p$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax(2) = gca;
@@ -67,14 +69,14 @@ function [] = Graphplot(app)
     
     % 速度
     subplot(2, num, 3);
-    plot(data.t, data.v(:,:),'LineWidth',1.2);
+    plot(data.t, data.vp(:,:),'LineWidth',1.2);
     hold on
-    plot(data.t, data.vp(:,:),'LineWidth',1.2,'LineStyle','-.');
+    plot(data.t, data.vr(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
     ylabel('v');
     grid on
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$v_{xe}$','$v_{ye}$','$v_{ze}$','$v_{xp}$','$v_{yp}$','$v_{zp}$'};
+    lgdtmp = {'$v_{xp}$','$v_{yp}$','$v_{zp}$','$v_{xr}$','$v_{yr}$','$v_{zr}$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax(3) = gca;
@@ -82,20 +84,20 @@ function [] = Graphplot(app)
     
     % 角速度
     subplot(2, num, 4);
-    plot(data.t, data.w(:,:),'LineWidth',1.2);
+    plot(data.t, data.wp(:,:),'LineWidth',1.2);
     hold on
-    plot(data.t, data.wp(:,:),'LineWidth',1.2,'LineStyle','-.');
+    % plot(data.t, data.wp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
     ylabel('w');
     grid on
     xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$\omega_{1 e}$','$\omega_{2 e}$','$\omega_{3 e}$','$\omega_{1 p}$','$\omega_{2 p}$','$\omega_{3 p}$'};
+    lgdtmp = {'$\omega_{1 p}$','$\omega_{2 p}$','$\omega_{3 p}$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax(4) = gca;
     title('Angular velocity w of agent1');
     
-    % 入力
+    % 入力(4入力)
     subplot(2,num,5);
     plot(data.t,data.u(:,:),'LineWidth',1.2);
     xlabel('Time [s]');
@@ -107,6 +109,19 @@ function [] = Graphplot(app)
     xlim([data.t(1) data.t(end)])
     ax(5) = gca;
     title('Input u of agent1');
+
+    %入力(総推力)
+    % subplot(2,num,6);
+    % plot(data.t,data.u2(:,:),'LineWidth',1.2);
+    % xlabel('Time [s]');
+    % ylabel('u');
+    % grid on
+    % lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    % lgd.NumColumns = columnomber;
+    % xlim([data.t(1) data.t(end)])
+    % ax(5) = gca;
+    % title('Thrust torque u of agent1');
     
     % 軌道(2次元，3次元)
     choice = 0;
