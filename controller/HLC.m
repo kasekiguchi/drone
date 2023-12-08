@@ -18,13 +18,15 @@ classdef HLC < handle
     end
 
     function result = do(obj,varargin)
-        var = varargin{1};
-      if isempty(obj.inifTime) && var{2} =='f'
-          obj.inifTime = var{1}.t;
-          obj.result.fTime = 0;
-      elseif var{2} =='f'
-          obj.result.fTime = var{1}.t - obj.inifTime;
-      end
+        %実機でMPCを飛ばすときに必要
+        % var = varargin{1};
+      % if isempty(obj.inifTime) && var{2} =='f'
+      %     obj.inifTime = var{1}.t;
+      %     obj.result.fTime = 0;
+      % elseif var{2} =='f'
+      %     obj.result.fTime = var{1}.t - obj.inifTime;
+      % end
+      
       model = obj.self.estimator.result;
       ref = obj.self.reference.result;
       xd = ref.state.xd;
