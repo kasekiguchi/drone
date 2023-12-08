@@ -15,7 +15,7 @@ folderName = 'report_P2Pshape'; %フォルダ名
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("experiment_11_8_P2Pshape_estimator.mat")
+load("GUIsim_11_29_5.mat")
 disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
@@ -186,7 +186,7 @@ close all
 newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
              0.4660 0.6740 0.1880];
-colororder(newcolors)
+
 columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 12; %凡例の大きさ調整
 size = figure;
@@ -194,6 +194,7 @@ size.WindowState = 'maximized'; %表示するグラフを最大化
 num = 3;
 
 subplot(2, num, 1);
+colororder(newcolors)
 p1 = plot(data.t, data.p(:,:),'LineWidth',1);
 xlabel('Time [s]');
 ylabel('p');
@@ -430,5 +431,7 @@ if pdf == 1
 
     exportgraphics(figure(7),strcat('input_',name,'.pdf'))
     movefile(strcat('input_',name,'.pdf'),fullfile('Graph',folderName))
+
+    disp('保存が完了しました')
 end
-disp('保存が完了しました')
+

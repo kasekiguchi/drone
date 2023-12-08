@@ -9,11 +9,11 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 
-loadfilename{1} = 'EstimationResult_12state_6_26_circle=circle_estimation=circle.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-loadfilename{2} = 'EstimationResult_12state_9_6_saddle=flight_estimation=saddle.mat';
+loadfilename{1} = 'EstimationResult_12state_12_8_Simcirandrevdata_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{2} = 'EstimationResult_12state_9_6_saddle=flight_estimation=saddle.mat';
 % loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
-% loadfilename{1} = 'test1.mat';
+% loadfilename{1} = 'test.mat';
 % loadfilename{1} = 'test2.mat';
 % loadfilename{3} = 'test3.mat';
 
@@ -26,7 +26,7 @@ WhichRef = 1; % どのファイルをリファレンスに使うか
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 2; %ステップ数，xの範囲を設定
+stepnum = 1; %ステップ数，xの範囲を設定
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1
