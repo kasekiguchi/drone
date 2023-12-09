@@ -175,7 +175,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                model = agent1.estimator.result.state;
                ref = agent1.reference.result.state;
                xd = ref.xd;
-               xd(1:3)=xd(1:3)+Qrho;
+               xd(1:3)=Qrho;
 %                p=ref.p+Qrho;
 %                ref.xd(1:3)=ref.xd(1:3)+Qrho;
 %                ref.p=ref.p+Qrho;
@@ -198,8 +198,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.Muid = muid_myagent';
                
 
-               obj.result.state.xd = agent1.reference.result.state.xd; % 目標重心位置（絶対座標）
-               obj.result.state.p = obj.result.state.xd(1:3);
+%                obj.result.state.xd = agent1.reference.result.state.xd; % 目標重心位置（絶対座標）
+%                obj.result.state.p = obj.result.state.xd(1:3);
+               obj.result.state.xd = xd; % 目標重心位置（絶対座標）
+               obj.result.state.p = xd(1:3);
                a = obj.result.state.xd(7:9);
                g = [0;0;-1]*agent1.parameter.g;
 
@@ -212,7 +214,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.base_state = obj.self.estimator.result.state.p;
                obj.result.state.xd = [obj.base_state;obj.result.state.xd(4:27,1)];
 %                  
-           end
+               end
            obj.result.state.xd(1:12,1) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
            obj.result.state.p = obj.result.state.xd(1:3,1);
            obj.result.state.v = obj.result.state.xd(4:6,1);

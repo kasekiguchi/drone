@@ -26,7 +26,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 xd = ref.state.get();
             end
             Param= obj.param;
-            %P = Param.P;
+%             P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
             P(15) = obj.self.reference.result.m;
 

@@ -93,7 +93,7 @@ end
 clc
 for j = 1:te
     if j < 20 || rem(j, 2) == 0, j, end
-        for i = 1:N+1,i
+        for i = 1:N+1
             agent(i).sensor.do(time, 'f');
             agent(i).estimator.do(time, 'f');
             agent(i).reference.do(time, 'f',agent(1));
@@ -113,7 +113,7 @@ end
 
 %%
 close all
-DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+DataA= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 % DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 DataB = logger.data(5,"reference.result.m","p");
 DataC = logger.data(5,"reference.result.Muid","p");
@@ -121,15 +121,20 @@ DataD = logger.data(5,"reference.result.state.xd","p");
 t=logger.data(0,'t',[]);
 %%
 
-Data1 = logger.data(2,"reference.result.m","p");
+Data1 = logger.data(2,"reference.result.state.p","p");
 Data2 = logger.data(3,"reference.result.m","p");
 Data3 = logger.data(4,"reference.result.m","p");
 Data4 = logger.data(5,"reference.result.m","p");
 Data5 = logger.data(6,"reference.result.m","p");
 Data6 = logger.data(7,"reference.result.m","p");
 DataM = Data1+Data2+Data3+Data4+Data5+Data6;
-ij=7;
-DataI = reshape(logger.data(ij,"controller.result.input","p"),[4,length(logger.data(ij,"controller.result.input","p"))/4]);
+ij=4;
+if ij >=2
+    DataI = reshape(logger.data(ij,"controller.result.input","p"),[4,length(logger.data(ij,"controller.result.input","p"))/4])';
+else
+    Data_cooperative = reshape(logger.data(ij,"controller.result.input","p"),[4,length(logger.data(ij,"controller.result.input","p"))/4])';
+    DataI = Data_cooperative(1:6:end,1);
+end
 t=logger.data(0,'t',[]);
 %%
 figure(101)
@@ -147,11 +152,11 @@ hold off
 
 figure(102)
 hold on
-plot(t,DataM(:,1))
+plot(t,Data1(:,3))
 % xlim([-1.5 1.5])
 % ylim([0 1.5])
 xlabel("t [s]")
-ylabel("m [kg]")
+ylabel("Z [m]")
 % legend("Payload","UAV")
 ax = gca;
 ax.FontSize = 22;
@@ -185,7 +190,7 @@ hold off
 
 figure(105)
 hold on
-plot(t,DataI(1,:))
+plot(t,DataI(:,1))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
 xlabel("t [s]")
