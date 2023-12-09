@@ -13,11 +13,11 @@ n = 4;
 m = 2;
 dt = 0.1;     % sampling time
 Td = 0.1;      % prediction step size
-Te = 10;	                            % end time
+Te = 5;	                            % end time
 x = [0; zeros(n/2-1,1);1; zeros(n/2-1,1)];                          % initial state
 u = [0; 0];                          % initial input
 H = 25;
-vr = ones(H,1)*0.5;
+vr = ones(H,1)*1;
 ur = repmat([0;0],H,1);                          % input reference
 Xo = [1;0];                             % obstacle position
 
@@ -38,8 +38,11 @@ while idx*dt <= Te
   y = agent.model.Cd*x;
 
   % gen reference
-  xr = Reference(n, agent.controller.H, vr, y, Td);
-  
+  % xr = Reference(n, agent.controller.H, vr, y, Td);
+  % xr(find(xr(1:4:end,1)>2.5)+1,1) = 1;
+   xr = [[y(1);0] + [vr';0*vr'].*(Td:Td:agent.controller.H*Td);vr';0*vr'];
+   xr(2,(xr(1,:) > 2.5)) = 1; % change the reference at x = 2.5
+   xr = reshape([xr(1,:);vr';xr(2,:);vr'*0],[],1);
   %% model predictive control
   agent.estimator.result.state.p = x;
   %agent.reference.result.state.xd = xr; %CBFMPC
@@ -49,7 +52,6 @@ while idx*dt <= Te
   % extract current input
   u = var(n*H+1:n*H+m); % MPC
   %u = var(1:m); % CBFMPC
-
   % logging
   %logger.log(idx,idx * dt,[x',u',xr(1:n,1)',ur(1:m,1)'],var, fval, exitflag, output, lambda, grad, hessian)
   logger.log(idx,idx * dt,[x',u',xr(1:n,1)',ur(1:m,1)'],var, fval, exitflag, output, lambda,0,0);

@@ -75,10 +75,10 @@ classdef MPC < handle
       % sqp 
       obj.problem.beq = obj.gen_beq(x);
       obj.problem.x0 = [obj.var(obj.n+1:obj.n*obj.H,1);obj.var(obj.n*(obj.H-1)+1:end,1)];
-      %      obj.problem.x0		  = [repmat(x,obj.H,1);zeros(obj.m*obj.H,1)];
+      % obj.problem.x0 = [repmat(x,obj.H,1);zeros(obj.m*obj.H,1)];
       obj.problem.objective = @(x) obj.Objective(x, obj.Weight,varr,xo);              % objective function
       [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(obj.problem);
-      
+      % 
       % qp
       % obj.qpproblem.beq = obj.gen_beq(x);
       % obj.qpproblem.f = obj.gen_f(varr);
