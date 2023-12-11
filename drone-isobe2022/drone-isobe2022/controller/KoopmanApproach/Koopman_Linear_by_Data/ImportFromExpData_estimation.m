@@ -20,6 +20,7 @@ clear data % 読み込んだファイル内のdataと同名の変数を初期化
 %データの個数をチェック
 data.N = find(logger.Data.t,1,'last');
 data.uN = 4; %入力の個数
+data.fExp = logger.fExp;
 % data.uN = find(logger.Data.agent.input{1},1,'last');
 
 %% Get data

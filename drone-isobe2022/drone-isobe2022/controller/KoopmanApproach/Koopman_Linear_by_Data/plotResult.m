@@ -3,21 +3,29 @@ clear all
 close all
 
 %% flag
-flg.calcFile1RMSE = 0; % file{1}に読み込んだデータのRMSEを求める
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 
-loadfilename{1} = 'EstimationResult_12state_12_8_Simcirandrevdata_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{1} = 'EstimationResult_12state_12_8_Simcirdata_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_9_6_saddle=flight_estimation=saddle.mat';
 % loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
-% loadfilename{1} = 'test.mat';
-% loadfilename{1} = 'test2.mat';
+loadfilename{1} = 'test.mat';
+loadfilename{2} = 'EstimationResult_12state_12_8_SimcirrevsadP2Pxydata_est=P2Pshape.mat';
 % loadfilename{3} = 'test3.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
+
+%% グラフの保存
+save_fig = 0;
+
+if save_fig == 1
+    name = 'data_cir'; %ファイル名
+    folderName = 'data_cir'; %フォルダ名
+    mkdir(folderName) %新規フォルダ作成
+end
 
 %% plot range
 %何ステップまで表示するか
@@ -175,16 +183,10 @@ set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Position [m]','FontSize',Fsize.label);
 hold off
-% flg. calcFile1RMSE==trueならば rmseを算出
-if flg.calcFile1RMSE
-    RMSE.P.eachStep = (file{1}.simResult.state.p(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)').^2;
-    RMSE.P.all  = rms(file{1}.simResult.state.p(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)','all');
-    haven = rms(file{1}.simResult.state.p(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)',2);
-    RMSE.P.x = haven(1,:);
-    RMSE.P.y = haven(2,:);
-    RMSE.P.z = haven(3,:);
-    disp('RMSE.P =')
-    disp(RMSE.P)
+
+if save_fig == 1
+    cd(folderName)
+    savefig(strcat('Position_',name));
 end
 
 %% Q
@@ -231,18 +233,10 @@ lgd.NumColumns = columnomber;
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Attitude [rad]','FontSize',Fsize.label);
-
 hold off
-% rmseの算出
-if flg.calcFile1RMSE
-    RMSE.Q.eachStep = (file{1}.simResult.state.q(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)').^2;
-    RMSE.Q.all  = rms(file{1}.simResult.state.q(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)','all');
-    haven = rms(file{1}.simResult.state.q(:,1:stepN)-file{1}.simResult.reference.est.p(1:stepN,:)',2);
-    RMSE.Q.x = haven(1,:);
-    RMSE.Q.y = haven(2,:);
-    RMSE.Q.z = haven(3,:);
-    disp('RMSE.Q =')
-    disp(RMSE.Q)
+
+if save_fig == 1
+    savefig(strcat('Attitude_',name));
 end
 
 %% V
@@ -285,18 +279,10 @@ set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Velocity [[m/s]','FontSize',Fsize.label);
 lgd.NumColumns = columnomber;
-
 hold off
-% rmseの算出
-if flg.calcFile1RMSE
-    RMSE.V.eachStep = (file{1}.simResult.state.v(:,1:stepN)-file{1}.simResult.reference.est.v(1:stepN,:)').^2;
-    RMSE.V.all  = rms(file{1}.simResult.state.v(:,1:stepN)-file{1}.simResult.reference.est.v(1:stepN,:)','all');
-    haven = rms(file{1}.simResult.state.v(:,1:stepN)-file{1}.simResult.reference.est.v(1:stepN,:)',2);
-    RMSE.V.x = haven(1,:);
-    RMSE.V.y = haven(2,:);
-    RMSE.V.z = haven(3,:);
-    disp('RMSE.V =')
-    disp(RMSE.V)
+
+if save_fig == 1
+    savefig(strcat('Velocity_',name));
 end
 
 %% W
@@ -340,60 +326,8 @@ xlabel('time [sec]','FontSize',Fsize.label);
 ylabel('Angular Velocity [rad/s]','FontSize',Fsize.label);
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
-
 hold off
 
-% rmseの算出
-if flg.calcFile1RMSE
-    RMSE.W.eachStep = (file{1}.simResult.state.w(:,1:stepN)-file{1}.simResult.reference.est.w(1:stepN,:)').^2;
-    RMSE.W.all  = rms(file{1}.simResult.state.w(:,1:stepN)-file{1}.simResult.reference.est.w(1:stepN,:)','all');
-    haven = rms(file{1}.simResult.state.w(:,1:stepN)-file{1}.simResult.reference.est.w(1:stepN,:)',2);
-    RMSE.W.x = haven(1,:);
-    RMSE.W.y = haven(2,:);
-    RMSE.W.z = haven(3,:);
-    disp('RMSE.W =')
-    disp(RMSE.W)
+if save_fig == 1
+    savefig(strcat('Angular velocity_',name));
 end
-
-%% RSE 各ステップにおける誤差二乗のプロット
-% if flg.calcFile1RMSE
-%     figure(5)
-%     p1 = plot(0:stepN-1,RMSE.P.eachStep','.','MarkerSize',15);
-%     set(gca,'FontSize',Fsize.luler);
-%     xlim([0, stepN-1])
-%     ylim([0, RMSE.Posylim])
-%     grid on
-%     xlabel('Step','FontSize',Fsize.label);
-%     ylabel('Position RSME','FontSize',Fsize.label);
-%     lgd = legend('$(\hat{x}-x_d)^2$','$(\hat{y}-y_d)^2$','$(\hat{z}-z_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-% 
-%     figure(6)
-%     p1 = plot(0:stepN-1,RMSE.Q.eachStep','.','MarkerSize',15);
-%     set(gca,'FontSize',Fsize.luler);
-%     xlim([0, stepN-1])
-%     ylim([0, RMSE.Atiylim])
-%     grid on
-%     xlabel('Step','FontSize',Fsize.label);
-%     ylabel('Atitiude RSE','FontSize',Fsize.label);
-%     lgd = legend('$(\hat{\phi}-\phi_d)^2$','$(\hat{\theta}-\theta_d)^2$','$(\hat{\psi}-\psi_d)^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-% 
-%     figure(7)
-%     p1 = plot(0:stepN-1,RMSE.V.eachStep','.','MarkerSize',15);
-%     set(gca,'FontSize',Fsize.luler);
-%     xlim([0, stepN-1])
-%     ylim([0, RMSE.Posylim])
-%     grid on
-%     xlabel('Step','FontSize',Fsize.label);
-%     ylabel('Velocity RSE','FontSize',Fsize.label);
-%     lgd = legend('$(\hat{v_x}-v_{xd})^2$','$(\hat{v_y}-v_{yd})^2$','$(\hat{v_z}-v_{zd})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-% 
-%     figure(8)
-%     p1 = plot(0:stepN-1,RMSE.W.eachStep','-','MarkerSize',15);
-%     set(gca,'FontSize',Fsize.luler);
-%     xlim([0, stepN-1])
-%     ylim([0, RMSE.Atiylim])
-%     grid on
-%     xlabel('Step','FontSize',Fsize.label);
-%     ylabel('Angular Velocity RSE','FontSize',Fsize.label);
-%     lgd = legend('($\hat{\omega}_\theta-\omega_{\theta d})^2$','$(\hat{\omega}_\phi-\omega_{\phi d})^2$','$(\hat{\omega}_\psi-\omega_{\psi d})^2$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-% end
