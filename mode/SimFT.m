@@ -16,22 +16,25 @@ agent.parameter = DRONE_PARAM("DIATONE");
 % agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.9);
 % agent.parameter = DRONE_PARAM("DIATONE","row");
 fmodel_error=0;
-agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1),fmodel_error);
+% agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1),fmodel_error);
 %外乱を与える=============
-% agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
-% agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
+agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
 %モデル誤差用使いません=============
 % agent.input_transform = THRUST2FORCE_TORQUE_FOR_MODEL_ERROR(agent); % modelerror用
 %=====================
 % agent.parameter.set("mass",struct("mass",0.5884))
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.estimator =DIRECT_ESTIMATOR(agent,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)));
+agent.sensor = DIRECT_SENSOR(agent);
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",15,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{0*[0.1,0.1,0.1]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[2;2;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[0.2;-0.2;0.8],"k",[0;0;1],"m",[-2;2;3]),10});%縦ベクトルで書く,
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[2;1;1.2],"h",[-0.2;-0.8;0.5]),10});%縦ベクトルで書く,
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));
-agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
+% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
 fApprox_FTxy = 0;%approximate x,y directional FTC input : 1
 fNewParam = 0;%新しく更新する場合 : 1
 fConfirmFig =0;%近似入力のfigureを確認する場合 : 1

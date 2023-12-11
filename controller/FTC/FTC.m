@@ -71,6 +71,10 @@ methods
         z3 = Z3(x, xd', vf, P); %y方向
         z4 = Z4(x, xd', vf, P); %yaw
         vs = obj.Vs(z2,z3,z4);%FTC or approx.FTC
+        obj.result.F1z1 = -obj.param.F1'.*(sign(z1).*abs(z1).^obj.param.az);
+        obj.result.F2z2 = -obj.param.F2'.*(sign(z2).*abs(z2).^obj.param.ax);
+        obj.result.F3z3 = -obj.param.F3'.*(sign(z3).*abs(z3).^obj.param.ay);
+        obj.result.F4z4 = -obj.param.F4'.*(sign(z4).*abs(z4).^obj.param.apsi);
         %検証用
 %      vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
         % vs(3) = -F4 * z4; %yaw:LS
@@ -193,6 +197,40 @@ methods(Static)
                     plot(e,u, 'LineWidth', 2.5);
                     plot(e,uk, 'LineWidth', 2.5);
                     legend("Approximation","Finite time settling","Linear state FB");
+                    fosi=15;%defolt 9
+                    set(gca,'FontSize',fosi)
+                    xlabel(name(i),'FontSize',fosi);
+                    ylabel('input','FontSize',fosi);
+                    hold off
+            end
+            fprintf("If you confirmed paramaters of "+txt+", push the Enter key.");
+            input("");
+            close all
+    end
+    function confirmParam2(vF,lF,alp)
+        txt = '';
+        % 有限整定の近似微分　一層   
+            if length(lF)==2
+                j=2;%z,yaw方向サブシステムの緩和
+                name =[txt,"d"+txt];
+                row=1;
+            else
+                j=4;%x,y方向サブシステムの緩和
+                name = [txt,"d"+txt,"dd"+txt,"ddd"+txt];
+                row=2;
+            end
+            for i = 1:j
+                %figureで緩和区間を確認
+                    e = -2 : 0.001 : 2;
+                    u = -vF(i).*sign(e).*abs(e).^alp(i);
+                    uk= -lF(i).*e;
+                    
+                    subplot(row,2,i);%1枚ずつ表示する場合はfigure(i)に変更する
+                    hold on
+                    grid on
+                    plot(e,u, 'LineWidth', 2.5);
+                    plot(e,uk, 'LineWidth', 2.5);
+                    legend("Finite time settling","Linear state FB");
                     fosi=15;%defolt 9
                     set(gca,'FontSize',fosi)
                     xlabel(name(i),'FontSize',fosi);

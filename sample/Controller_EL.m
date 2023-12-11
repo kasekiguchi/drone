@@ -63,20 +63,20 @@ else
     Controller.Vep = matlabFunction([-eF1*ez1;-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
 end
 %servo
-syms z
-Cc4 = [1 0 0 0];
-% [Ad4,Bd4,~,~] = ssdata(c2d(ss(Ac4,Bc4,Cc4,0),dt));
-% Ad
-Ac5=[Ac4,zeros(4,1);-Cc4,0];
-Bc5=[Bc4;0];
-Controller.F1s=lqrd(Ac5,Bc5,diag([1000,10,10,10,0.1]),0.01,dt);
-eF1s=Controller.F1s;
-eF1s(5)=-1;
-Controller.Vep = matlabFunction([-eF1s*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
-% Controller.Vep = matlabFunction([-eF1s *[ez1;z]; -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1, ez2, ez3, ez4, z});
-% [Ad5,Bd5,~,~] = ssdata(c2d(ss(Ac5,Bc5,[-Cc4,0],0),dt));
-% eig(Ad5 - Bd5 * eF1s)
-eig(Ac5 - Bc5 * eF1s)
+% syms z
+% Cc4 = [1 0 0 0];
+% % [Ad4,Bd4,~,~] = ssdata(c2d(ss(Ac4,Bc4,Cc4,0),dt));
+% % Ad
+% Ac5=[Ac4,zeros(4,1);-Cc4,0];
+% Bc5=[Bc4;0];
+% Controller.F1s=lqrd(Ac5,Bc5,diag([1000,10,10,10,0.1]),0.01,dt);
+% eF1s=Controller.F1s;
+% % eF1s(5)=-1;
+% Controller.Vep = matlabFunction([-eF1s*[ez1;z];-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4,z});
+% % Controller.Vep = matlabFunction([-eF1s *[ez1;z]; -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1, ez2, ez3, ez4, z});
+% % [Ad5,Bd5,~,~] = ssdata(c2d(ss(Ac5,Bc5,[-Cc4,0],0),dt));
+% % eig(Ad5 - Bd5 * eF1s)
+% eig(Ac5 - Bc5 * eF1s)
 
 Controller.dt = dt;
 Controller.type = "ELC";

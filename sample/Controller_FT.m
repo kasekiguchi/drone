@@ -3,7 +3,8 @@ function Controller = Controller_FT(dt, fApprox_FTxy, fNewParam, fConfirmFig)
             % fApproxXY xy方向を近似する: 1 
             % fNewParam 新しく更新する場合: 1
             % fConfirmFig 近似入力のfigureを確認するか: 1
-            alp = [0.9,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            % alp = [0.9,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            alp = [0.8,0.82,0.82,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
 
             %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
             %zを近似する
@@ -28,7 +29,7 @@ Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
 Bc4 = [0; 0; 0;1];
-Controller.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt);
+Controller.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt);% zdiag([100,1])
 Controller.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
 Controller.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
 Controller.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
@@ -37,6 +38,10 @@ vF1 = Controller.F1;
 vF2 = Controller.F2;
 vF3 = Controller.F3;
 vF4 = Controller.F4;
+lF1 = Controller.F1;
+lF2 = Controller.F2;
+lF3 = Controller.F3;
+lF4 = Controller.F4;
 %% FTCの同次性のパラメータalphaを計算
 anum = 4; %最大の変数の個数
 alpha = zeros(anum + 1, 4);
@@ -51,26 +56,60 @@ Controller.ax = alpha(1:4,2);
 Controller.ay = alpha(1:4,3);
 Controller.apsi = alpha(1:2, 4);
 %各サブシステムでalpを変える場合
-% Controller.az = alpha(3:4, 1);
-% Controller.ax = alpha(1:4,2);
-% Controller.ay = alpha(1:4,3);
-% Controller.apsi = alpha(3:4, 4);
+Controller.az = alpha(3:4, 1);
+Controller.ax = alpha(1:4,2);
+Controller.ay = alpha(1:4,3);
+Controller.apsi = alpha(3:4, 4);
 az =Controller.az ;
 ax =Controller.ax ;
 ay =Controller.ay;
 apsi =Controller.apsi;
 %%
-isDiffrenceCrossPoint =0;
-crossPoint = 2;%線形入力と交わる場所を指定
+isDiffrenceCrossPoint = 10;
+%0.2m 位置のみ数倍している
+% crossPoint1 = [0.2*5    0.4919];%線形入力と交わる場所を指定
+% crossPoint2 = [0.2000*1.1    0.1425    0.2222    0.8192];%線形入力と交わる場所を指定
+% crossPoint3 = [0.2000*1.1   0.1425    0.2222    0.8192];%線形入力と交わる場所を指定
+% crossPoint4 = 1.0e-04 *[0.0823    0.6698];%線形入力と交わる場所を指定
+%0.2m
+% crossPoint1 = [0.2 0.1];%線形入力と交わる場所を指定
+% crossPoint2 = [0.2000    0.1    0.2    0.1];%線形入力と交わる場所を指定
+% crossPoint3 = [0.2000    0.1    0.2    0.1];%線形入力と交わる場所を指定
+% crossPoint4 = 1.0e-04 *[0.0823    0.6698];%線形入力と交わる場所を指定
+% %1m
+% crossPoint1 = [0.9978    2.1631];%線形入力と交わる場所を指定
+% crossPoint2 = [1.0000    0.8459    1.5447    5.5188];%線形入力と交わる場所を指定
+% crossPoint3 = [1.0000    0.8458    1.5438    5.5177];%線形入力と交わる場所を指定
+% crossPoint4 = [0.0006    0.0062];%線形入力と交わる場所を指定
+%1m
+% crossPoint1 = [0.9978*1    2.1631];%線形入力と交わる場所を指定
+% crossPoint2 = [1.0000*1.5    0.8459    1.5447    5.5188];%線形入力と交わる場所を指定
+% crossPoint3 = [1.0000*1.5    0.8458    1.5438    5.5177];%線形入力と交わる場所を指定
+% crossPoint4 = [0.0006*2    0.0062];%線形入力と交わる場所を指定
+%1.5m
+% crossPoint1 = [1.5    3];%線形入力と交わる場所を指定
+% crossPoint2 = [1.5000    1.7136    3.9338   17.3780];%線形入力と交わる場所を指定
+% crossPoint3 = [1.5000    1.7136    3.9338   17.3780];%線形入力と交わる場所を指定
+% crossPoint4 = [0.0065    0.0598];%線形入力と交わる場所を指定
+%1.5m
+crossPoint1 = 1.5*ones(1,2);%線形入力と交わる場所を指定
+crossPoint2 = 1.5*ones(1,4);%線形入力と交わる場所を指定
+crossPoint3 = 1.5*ones(1,4);%線形入力と交わる場所を指定
+crossPoint4 = 1.5*ones(1,2);%線形入力と交わる場所を指定
 if isDiffrenceCrossPoint
-    Controller.F1 = Controller.F1*crossPoint./crossPoint.^az';
-    Controller.F2 = Controller.F2*crossPoint./crossPoint.^ax';
-    Controller.F3 = Controller.F3*crossPoint./crossPoint.^ay';
-    Controller.F4 = Controller.F4*crossPoint./crossPoint.^apsi';
+    Controller.F1 = Controller.F1.*crossPoint1./diag(crossPoint1.^az)';
+    Controller.F2 = Controller.F2.*crossPoint2./diag(crossPoint2.^ax)';
+    Controller.F3 = Controller.F3.*crossPoint3./diag(crossPoint3.^ay)';
+    Controller.F4 = Controller.F4.*crossPoint4./diag(crossPoint4.^apsi)';
     vF1 = Controller.F1;
     vF2 = Controller.F2;
     vF3 = Controller.F3;
     vF4 = Controller.F4;
+
+    FTC.confirmParam2(vF1,lF1,Controller.az)
+    FTC.confirmParam2(vF2,lF2,Controller.ax)
+    FTC.confirmParam2(vF3,lF3,Controller.ay)
+    FTC.confirmParam2(vF4,lF4,Controller.apsi)
 end
 %%
 %z方向FTCの近似
@@ -86,15 +125,15 @@ end
 %servoの時
 %バッテリーのヘリを考慮したさあーぼのゲインを作る
 %lqrとサーボの部分を置き換え
-Cc2 = [1 0];
-[Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
-Controller.F1s=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([1000,10,1]),0.1,dt);
-syms z real % Model_EulerAngle_Servoを使う前提
-syms sz1 [2 1] real
-Ad1 = [Ad1,zeros(2,1);-Cc2,1];
-Bd1 = [Bd1;0];
-vF1s = Controller.F1s;
-Controller.Vf = matlabFunction([-vF1s*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^2*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^3*[sz1;z]],"Vars",{sz1,z});
+% Cc2 = [1 0];
+% [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,Cc2,0),dt));
+% Controller.F1s=lqrd([Ac2,zeros(2,1);-Cc2,0],[Bc2;0],diag([1000,10,1]),0.1,dt);
+% syms z real % Model_EulerAngle_Servoを使う前提
+% syms sz1 [2 1] real
+% Ad1 = [Ad1,zeros(2,1);-Cc2,1];
+% Bd1 = [Bd1;0];
+% vF1s = Controller.F1s;
+% Controller.Vf = matlabFunction([-vF1s*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^2*[sz1;z], -vF1s*(Ad1-Bd1*vF1s)^3*[sz1;z]],"Vars",{sz1,z});
 
 %% 二層
 syms sz2 [4 1] real

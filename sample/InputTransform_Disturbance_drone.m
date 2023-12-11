@@ -18,9 +18,13 @@ function dst =InputTransform_Disturbance_drone(varargin)
                       %z, roll, pitchの加速度, 角加速度に外乱を付与
                       % dst(:,3) = [0.5;0.5*ones(c/4,1);-0.5*ones(c/4,1);0.5*ones(c/4,1);-0.5*ones(c/4,1)];
                       % dst(:,3) = 0.3*sin(2*pi/20*[0:dt:te]');
-                      aa=0:dt:te;
-                      dst(:,3) = 0.02*aa;
-                      % dst(:,3) = 0.05*ones(c,1);
+                      % aa=0:dt:te;
+                      % dst(:,3) = 0.02*aa;
+                      % dst(:,1) = 3*ones(c,1);
+                      % dst(:,2) = 3*ones(c,1);
+                      dst(:,3) = 0*ones(c,1);
+                      dst(:,4) = 1.5*ones(c,1);
+                      dst(:,5) = 0*ones(c,1);
                       
                       %入力用
                       % dst(:,3) = 0.1*pdst(:,1);

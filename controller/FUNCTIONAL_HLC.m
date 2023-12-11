@@ -47,9 +47,22 @@ methods
         z3 = Z3(x, xd', vf, P);%y
         z4 = Z4(x, xd', vf, P);%yaw
         vs = obj.Vs(z2, z3, z4, F2, F3, F4);
+        
+        %v1を埋め込み済み
+        % z1 = Z1v(x, xd');%z
+        % z2 = Z2v(x, xd', P, F1);%x
+        % z3 = Z3v(x, xd', P, F1);%y
+        % z4 = Z4v(x, xd', P, F1);%yaw
+        % vf = -F1*z1;
+        % vs = [-F2*z2;-F3*z3;-F4*z4];
 
+        obj.result.F1z1 = -obj.param.F1'.*z1;
+        obj.result.F2z2 = -obj.param.F2'.*z2;
+        obj.result.F3z3 = -obj.param.F3'.*z3;
+        obj.result.F4z4 = -obj.param.F4'.*z4;
         %% calc actual input
        tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
+       % tmp = Ufv(x, xd', P, F1) + Usv(x, xd', vs, P, F1);
         %%input of subsystems
         obj.result.uHL = [vf(1); vs];
         %differential virtual input first layer
@@ -60,6 +73,7 @@ methods
         obj.result.z3 = z3;
         obj.result.z4 = z4;
         obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+        % obj.result.input = tmp;
         result = obj.result;
     end
 

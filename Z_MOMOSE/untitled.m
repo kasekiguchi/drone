@@ -163,3 +163,81 @@ surf(rx1,rx2,double(fh),'FaceColor',"g", 'FaceAlpha',0.1)
 surf(rx1,rx2,double(fLfh),'FaceColor',"r",'FaceAlpha',0.2)
 plot3(SXx,SXy,fhsx,"LineWidth",2,"color","m")
 legend("ベクトル場","h","Lfh")
+%%
+syms t positive
+syms x(t) [4 1] 
+syms k [1 4] real
+syms alp real
+anum = 4; %最大の変数の個数
+% alpha = zeros(anum + 1, 1);
+alpha(anum,:) = 0.8; %alphaの初期値
+alpha(anum + 1,:) = 1;
+for a = anum-1 :-1:1
+    alpha(a,:) = (alpha(a + 2,:) .* alpha(a + 1,:)) ./ (2 .* alpha(a + 2,:) - alpha(a + 1,:));
+end
+
+% k = [3,1];
+A = [0,1;0,0];
+B = [0;1];
+% u = -k*x(t);
+u = -k'.*x(t).^alpha(1:4,1);
+double(subs(u,[x(t),k'],[ones(4,1),[1,2,3,4]']))
+% dequ = diff(x) == A*x(t) + B*u;
+% S = dsolve(dequ);
+% S = simplify([S.x1;S.x2]);
+% S = double([S.x1;S.x2]);
+%% 角加速度外乱
+syms t real
+% syms g a
+
+g = 9.81;
+a = 1.5;
+w = 1.5;
+
+th = a*t^2/2;
+d2x = g*tan(th)
+d3x = simplify(diff(d2x,t))
+d4x = simplify(diff(d3x,t))
+d2z = -(g - g*cos(th))
+
+i=1;
+figure(i)
+fplot(d2x,[-1,1])
+hold on
+fplot(d3x,[-1,1])
+fplot(d4x,[-1,1])
+% fplot(d2z,[-1,1])
+hold off
+legend("d2x","d3x","d4x","d2z")
+i=i+1;
+
+d2x = g*sin(th)
+d3x = simplify(diff(d2x,t))
+d4x = simplify(diff(d3x,t))
+% d2z = -(g - g*cos(th))
+
+figure(i)
+fplot(d2x,[-1,1])
+hold on
+fplot(d3x,[-1,1])
+fplot(d4x,[-1,1])
+% fplot(d2z,[-1,1])
+hold off
+legend("d2x","d3x","d4x","d2z")
+i=i+1;
+
+th = w*t;
+d2x = g*sin(th)
+d3x = simplify(diff(d2x,t))
+d4x = simplify(diff(d3x,t))
+d2z = -(g - g*cos(th))
+
+figure(i)
+fplot(d2x,[-1,1])
+hold on
+fplot(d3x,[-1,1])
+fplot(d4x,[-1,1])
+% fplot(d2z,[-1,1])
+hold off
+legend("d2x","d3x","d4x","d2z")
+i=i+1;
