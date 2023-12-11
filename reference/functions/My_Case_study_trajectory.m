@@ -12,22 +12,22 @@ z_0 = X0(3);
 % z = z_0-0.0;
 
 %PtoP
-% x = x_0;
-% y = y_0;
-% z = z_0;
+x = x_0;
+y = y_0;
+z = z_0;
 
-% T=10;
-% x=sin(2*pi*t/T);
-% y=cos(2*pi*t/T);
-% z=1;
+T=10;
+x=sin(2*pi*t/T);
+y=cos(2*pi*t/T);
+z=1;
 
-h = 0.3;
-k = 0.3;
-r = 1;
-T = 12;
-x= h + r*cos(2*pi*t/T);
-y= k + r*sin(2*pi*t/T);
-z=1.3;
+% h = 0.3;
+% k = 0.3;
+% r = 1;
+% T = 12;
+% x= h + r*cos(2*pi*t/T);
+% y= k + r*sin(2*pi*t/T);
+% z=1.3;
 
 % 
 % r=1;
