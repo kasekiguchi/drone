@@ -56,13 +56,13 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-            % obj.param.t = var{1}.t;
+            obj.param.t = var.t;
             % rt = obj.param.t; %時間
             % idx = round(rt/var{1}.dt+1); %プログラムの周回数
 
-            obj.param.t = var{1}.t;
+            % obj.param.t = var{1}.t; %実機のときコメントイン
             rt = obj.param.t; %時間
-            idx = round(rt/var{1}.dt+1); %プログラムの周回数
+            % idx = round(rt/var{1}.dt+1); %プログラムの周回数
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
             obj.current_state = obj.self.estimator.result.state.get(); %現在状態
             % obj.current_state = obj.self.plant.state.get();
@@ -70,6 +70,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             Param.current = obj.current_state;
             Param.ref = obj.state.ref;        
             obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
+            
             % MPC設定(problem)
             %-- fmincon 設定
             options = optimoptions('quadprog');

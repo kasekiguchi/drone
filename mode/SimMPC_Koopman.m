@@ -23,8 +23,10 @@ initial_state.w = [0; 0; 0];
 % % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 % agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 
-%% 
-% %plantに設定するクープマンモデルの設定
+% run("ExpBase");
+
+%% クープマンモデルをプラントに設定する場合
+
 % load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
 % load("EstimationResult_12state_11_29_GUIsimdata.mat",'est')
 load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est')
@@ -44,7 +46,9 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 
-%% 実機データを用いてMPC回すとき
+run("ExpBase");
+
+%% 実機データを用いてMPC回す場合
 
 % data = LOGGER("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat");
 % finitIndex = find(data.Data.phase == 102,1,'first');
