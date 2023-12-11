@@ -4,7 +4,6 @@ cf = pwd;
 if contains(mfilename('fullpath'),"mainGUI")
   cd(fileparts(mfilename('fullpath')));
 else
-    
   tmp = matlab.desktop.editor.getActive; 
   cd(fileparts(tmp.Filename));
 end
@@ -14,7 +13,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 %%
 clc
-SimBaseMode = ["SimVoronoi","SimHL","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL"];
+SimBaseMode = ["SimHL","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL","SimVoronoi"];
 ExpBaseMode = ["ExpTestMotiveConnection","ExpHL","ExpFHL","ExpFHL_Servo","ExpFT","ExpEL"];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function

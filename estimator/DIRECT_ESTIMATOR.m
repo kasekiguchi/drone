@@ -10,7 +10,8 @@ classdef DIRECT_ESTIMATOR < handle
     methods
         function obj = DIRECT_ESTIMATOR(self,param)
             obj.self = self;
-            obj.model = param.model;
+            % obj.model = param.model;
+            obj.model = param;
             obj.result.state=state_copy(obj.model.state); % STATE_CLASSとしてコピー
         end
         function result=do(obj,varargin)

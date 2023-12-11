@@ -54,7 +54,7 @@ methods
         z4 = Zep4(x, xd', P);
         
         %subsystem controller
-        vep = obj.Vep(z1, z2, z3, z4);
+        vep = obj.Vep(z1, z2, z3, z4);%serevoなし
         %servo
         % if varargin{1}.t > 8
         %         obj.z = obj.z + xd(3)-x(7);

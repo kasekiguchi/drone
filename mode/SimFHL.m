@@ -20,8 +20,10 @@ agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1),0);
 %=====================
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",1,"orig",[0;0;1],"size",[0,0,0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{0*[1.5,1.5,1.5]},"HL"});%[0.2,0.2,0.2]
+agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0.2,0.2,0.2]},"HL"});%[0.2,0.2,0.2]
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",15,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",1,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.2;0.2;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[-0.2;0.2;0.8],"k",[0;0;1]),7});%縦ベクトルで書く,
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),1));%コマンドでシートを選びたいときは位置2を1にする
 
