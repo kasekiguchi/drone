@@ -16,9 +16,9 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
+fF=10;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
@@ -34,8 +34,8 @@ endTime = 1E3;
                 % log_cricle,log_circle_FTxy2
                 % log_saddle,log_sadlle_FTxy
                 % log_HL_saddle
-                log_HL_saddle
-                log_EL_saddle
+                % log_HL_saddle
+                % log_EL_saddle
                 % log_LS15d3
                 % log_FT15d3
                 % log_EKF_B_0
@@ -60,10 +60,10 @@ endTime = 1E3;
                 % log_
 
 
-                % gui.logger
+                gui.logger
         };
     c=[
-        "HL","IOL"
+        % "HL","IOL"
         % "FTservoZ","FTservoZn1"
         % "HLLS"
         % "HLFTservo"
@@ -80,17 +80,17 @@ endTime = 1E3;
      % n=[1:16,18 20:24];
      % n = [1:17,24];
      % n = [1:11];
-     % n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
-     n=["t_errx","t_erry","t_errz","three_D"];
+     nM=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     % n=["t_errx","t_erry","t_errz","three_D"];
      % n=["t_p","input","u","Trs","attitude","velocity","angular_velocity"];
      % n = "inner_input";
      % n=1;
 %========================================================================
 % multiFigure
 
-nM = {["three_D","t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
-multiFigure.layout = {[2,2]};
-multiFigure.title = ["position_error"];%[" state", " subsystem"];%title name
+% nM = {["three_D","t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
+% multiFigure.layout = {[2,2]};
+% multiFigure.title = ["position_error"];%[" state", " subsystem"];%title name
 
 % nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
 % multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
@@ -289,7 +289,7 @@ end
     
 %変更========================================================
     subfolder='exp';%sim or exp
-    ExpSimName='demoooo';%実験,シミュレーション名
+    ExpSimName='sakura2023';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
     contents='demo';%実験,シミュレーション内容
 %==========================================================
@@ -309,7 +309,7 @@ if fMul==1
     % nn=string(1:length(nM));
     nn=multiFigure.title ;
 else
-    nn=n;
+    nn=nM;
 end
 nf=length(nn);
 SaveTitle=strings(1,nf);
@@ -317,8 +317,8 @@ SaveTitle=strings(1,nf);
 for i=1:nf
 %     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',figName(n(i)));
     SaveTitle(i)=strcat(contents,'_',nn(i));
-%     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'jpg');
-    saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
+    saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'jpg');
+    % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
 %     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'eps');
 end
 
