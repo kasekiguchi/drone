@@ -5,7 +5,6 @@ classdef HLC < handle
     result
     param
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
-    inifTime
   end
 
   methods
@@ -14,18 +13,9 @@ classdef HLC < handle
       obj.param = param;
       obj.param.P = self.parameter.get(obj.parameter_name);
       obj.result.input = zeros(self.estimator.model.dim(2),1);
-      obj.inifTime =[];
     end
 
     function result = do(obj,varargin)
-        %実機でMPCを飛ばすときに必要
-        % var = varargin{1};
-      % if isempty(obj.inifTime) && var{2} =='f'
-      %     obj.inifTime = var{1}.t;
-      %     obj.result.fTime = 0;
-      % elseif var{2} =='f'
-      %     obj.result.fTime = var{1}.t - obj.inifTime;
-      % end
       
       model = obj.self.estimator.result;
       ref = obj.self.reference.result;

@@ -41,7 +41,7 @@ function result = controller_do(varargin)
     if varargin{2} == 'f'
         result.hlc = controller.hlc.do(varargin);
         result.mpc = controller.mpc.do(varargin);
-        if result.hlc.fTime > 5 
+        if result.mpc.fTime > 10 
             result = result.mpc;
         else
             result = result.hlc;
