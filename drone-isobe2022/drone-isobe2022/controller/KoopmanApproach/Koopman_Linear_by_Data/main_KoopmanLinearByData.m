@@ -4,13 +4,13 @@
 % フラグ管理
 clear all
 flg.bilinear = 0; %1:双線形モデルへの切り替え
-Normalize = 1; %1：正規化
+Normalize = 0; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
 % delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-% FileName = 'EstimationResult_12state_12_8_Simcirdata_est=P2Pshape.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
-FileName = 'test.mat'; %お試し用
+FileName = 'EstimationResult_12state_12_12_SimcirsadP2Pxydata_est=sad.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+% FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
 % loading_filename = 'experiment_10_9_revcircle';  
@@ -18,10 +18,10 @@ FileName = 'test.mat'; %お試し用
 % loading_filename = 'experiment_6_20_circle';
 % loading_filename = 'experiment_11_20_P2Pxy';
 % loading_filename = 'experiment_10_26';
-% loading_filename = 'GUIsim_circle';
-loading_filename = 'Sim_5data_12_11';
+% loading_filename = 'GUIsim_saddle';
+loading_filename = 'Sim_4data_12_11';
 
-Data.HowmanyDataset = 5; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 4; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -94,7 +94,7 @@ disp('Estimated')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
-simResult.reference = ImportFromExpData('12_8_P2Pshape.mat');
+simResult.reference = ImportFromExpData('GUIsim_saddle.mat');
 % simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
 % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');

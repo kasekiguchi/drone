@@ -13,7 +13,7 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 % loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
 loadfilename{1} = 'test.mat';
-loadfilename{2} = 'EstimationResult_12state_12_8_SimcirrevsadP2Pxydata_est=P2Pshape.mat';
+% loadfilename{2} = 'EstimationResult_12state_12_8_SimcirrevsadP2Pxydata_est=P2Pshape.mat';
 % loadfilename{3} = 'test3.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
@@ -34,7 +34,7 @@ end
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 1; %ステップ数，xの範囲を設定
+stepnum = 2; %ステップ数，xの範囲を設定
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1
