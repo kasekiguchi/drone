@@ -55,10 +55,10 @@ T = 60;
 % x = sin(2*pi*t/T);
 % y = cos(2*pi*t/T);
 % z = 1;
-
-x = cos(2*pi*t/T) - cos(pi*t/T);
-y = sin(2*pi*t/T);
-z = 1;
+% 
+% x = cos(2*pi*t/T) - cos(pi*t/T);
+% y = sin(2*pi*t/T);
+% z = 1;
 
 % x = 0;
 % y = 0;
@@ -69,6 +69,10 @@ z = 1;
 % y = 0;
 % z = 0.5*cos(2*pi*t/T)+1; %1:オフセットを入れる必要あり
 % yaw = 2*pi*t/5;
+
+x = 0;
+y = sin(2*pi*t/T);
+z = cos(2*pi*t/T); %1:オフセットを入れる必要あり
 
 %八の字
 % x = sin(2*t/T);
