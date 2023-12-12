@@ -11,9 +11,10 @@ function Controller = Controller_MPC_Koopman(Agent)
     %% Koopman
     % load("EstimationResult_12state_7_19_circle=circle_estimation=circle.mat",'est');
     % load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
-    load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
+    % load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
     % load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est') %シミュクープマンモデル，総推力で学習
     % load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est') %実機モデル，総推力
+    load("EstimationResult_12state_12_12_SimcirsadP2Pxydata_est=sad.mat",'est') %シミュレーションモデル，4入力，case5(12/12)
     Controller_param.A = est.A;
     Controller_param.B = est.B;
     Controller_param.C = est.C;
@@ -33,26 +34,26 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.Vf = diag([1; 1; 1]);
     % Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
 
-    Controller_param.weight.P = diag([70; 30; 70]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([200; 200; 600]);    % 速度
-    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([100; 60; 20; 1; 1; 1]);  % 姿勢角，角速度
-
-    Controller_param.weight.Pf = diag([80; 40; 100]); % 6
-    Controller_param.weight.Vf = diag([300; 300; 1000]);
-    Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8q
-
-    %シミュレーション時確認用
-    % Controller_param.weight.P = diag([10; 10; 10]);    % 座標   1000 1000 10000
-    % Controller_param.weight.V = diag([100; 100; 10]);    % 速度
+    % Controller_param.weight.P = diag([70; 30; 70]);    % 座標   1000 1000 10000
+    % Controller_param.weight.V = diag([200; 200; 600]);    % 速度
     % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    % Controller_param.weight.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角，角速度
+    % Controller_param.weight.QW = diag([100; 60; 20; 1; 1; 1]);  % 姿勢角，角速度
     % 
-    % Controller_param.weight.Pf = diag([10; 10; 10]); % 6
-    % Controller_param.weight.Vf = diag([100; 100; 10]);
-    % Controller_param.weight.QWf = diag([1000; 1000; 1000; 1; 1; 1]); % 7,8
+    % Controller_param.weight.Pf = diag([80; 40; 100]); % 6
+    % Controller_param.weight.Vf = diag([300; 300; 1000]);
+    % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8q
+
+    %シミュレーション時確認用
+    Controller_param.weight.P = diag([1; 1; 1]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([1; 1; 1]);    % 速度
+    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
+
+    Controller_param.weight.Pf = diag([1; 1; 1]); % 6
+    Controller_param.weight.Vf = diag([1; 1; 1]);
+    Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
 
     %% 4inputs
     if torque == 1
