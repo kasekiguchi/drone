@@ -12,14 +12,14 @@
 % [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 % cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 % cd(cf); close all hidden; clear all; userpath('clear');
-
-close all;
+% 
+% close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/AMC_1_USE.mat');
-O_func = @(x,u) On3_1(x,u);
+log = LOGGER('./Data/u_plain1212_1.mat');
+O_func = @(x,u) On3_1_new(x,u);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
-f_png=0;
+f_png=1;
 f_eps=0;
 f_offset = 1;
 f_O = 0;
@@ -61,7 +61,7 @@ if f_offset == 1
 ps  = zeros(size(log.Data.agent.estimator.result{1,1}.state.ps,1),len);
 qs  = zeros(size(log.Data.agent.estimator.result{1,1}.state.qs,1),len);
 % l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
-u  = zeros(size(log.Data.agent.input{1,1},1),len);
+u  = zeros(size(log.Data.agent.controller.result{1,1}.input,1),len);
 param = log.Data.agent.estimator.result{1,2}.param;
 % l  = zeros(size(log.Data.agent.estimator.result{1,1}.state.l,1),len);
 for i=1:len
@@ -69,7 +69,7 @@ for i=1:len
     qs(:,i) = log.Data.agent.estimator.result{1,i}.state.qs;
     % l(:,i) = log.Data.agent.estimator.result{1,i}.state.l;
     P(:,:,i)  = log.Data.agent.estimator.result{1,i}.P;
-    u(:,i) = log.Data.agent.input{1,i};
+    u(:,i) = log.Data.agent.controller.result{1,i}.input;
 end
 
 for i=2:len
@@ -456,16 +456,16 @@ if illustration == 1
     hold off;
     fig17=figure(17);
     fig17.Color = 'white';
-    plot(time,S(15,:),'LineWidth', 2);
-    hold on;
-    plot(time,S(16,:),'LineWidth', 2);
-    plot(time,S(17,:),'LineWidth', 2);
+%     plot(time,S(15,:),'LineWidth', 2);
+%     hold on;
+%     plot(time,S(16,:),'LineWidth', 2);
+%     plot(time,S(17,:),'LineWidth', 2);
     plot(time,S(18,:),'LineWidth', 2);
     xlabel('time [s]','FontSize', 16)
     ylabel('Value','FontSize', 16);
     xlim([0, maxt]);
-    legend('15','16','17','18','Location', 'Best');
-    hold off;
+    legend('18','Location', 'Best');
+%     hold off;
     fig1 = figure(1);
     fig1.Color = 'white';
     hold on;

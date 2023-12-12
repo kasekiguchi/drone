@@ -1,6 +1,6 @@
 ts = 0;
 dt = 0.01;
-te = 60;
+te = 30;
 time = TIME(ts,dt,te);
 % in_prog_func = @(app) in_prog(app);
 % post_func = @(app) post(app);
@@ -86,17 +86,21 @@ agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.do = @sensor_do;
 
 %AMC ref
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.3]}});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.4]}});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
 
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[2,2,2,0.35]}});
 
+%AMCref
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
+% コントローラー
+% agent.controller = HLC(agent,Controller_HL(dt));
 
-agent.controller = HLC(agent,Controller_HL(dt));
-
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-1,"On3_1_new"));
+agent.controller.do = @controller_do;
 
 %% Direct model
 % agent = DRONE;
@@ -122,12 +126,19 @@ agent.controller = HLC(agent,Controller_HL(dt));
 % end
 
 function result = sensor_do(varargin)
-sensor = varargin{5}.sensor;
-result = sensor.lidar.do(varargin);
-result = merge_result(result,sensor.motive.do(varargin));
-varargin{5}.sensor.result = result;
+    sensor = varargin{5}.sensor;
+    result = sensor.lidar.do(varargin);
+    result = merge_result(result,sensor.motive.do(varargin));
+    varargin{5}.sensor.result = result;
 end
 
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    result.hlc = controller.hlc.do(varargin);
+    result.correct = controller.correct.do(varargin);
+    arargin{5}.controller.result.input_c = result.correct.input;
+    varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
+end
 % function in_prog(app)
 % app.agent.show(["sensor", "lidar"], "ax", app.UIAxes,"k",app.time.k,"logger",app.logger, "param",struct("fLocal", false,"fField",true));
 % end
