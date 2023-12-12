@@ -8,18 +8,18 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 
-% loadfilename{1} = 'EstimationResult_12state_12_8_Simcirdata_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = 'EstimationResult_12state_12_12_Simcirdata_est=sad.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_9_6_saddle=flight_estimation=saddle.mat';
 % loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
 
-loadfilename{1} = 'test.mat';
+% loadfilename{1} = 'test.mat';
 % loadfilename{2} = 'EstimationResult_12state_12_8_SimcirrevsadP2Pxydata_est=P2Pshape.mat';
 % loadfilename{3} = 'test3.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
 %% グラフの保存
-save_fig = 0;
+save_fig = 1;
 
 if save_fig == 1
     name = 'data_cir'; %ファイル名
