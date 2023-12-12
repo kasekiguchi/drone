@@ -24,7 +24,7 @@ FolderName = 'RandomInitialIndexTest';
 FileName = 'test';
 
 % 読み込むデータファイル名
-loading_filename = 'test';
+loading_filename = 'test.mat';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 1;
