@@ -26,13 +26,23 @@
 % Params.Weight.Vf = diag([96; 80; 257]);
 % Params.Weight.QWf = diag([367; 1777; 420; 2; 1; 133]); %姿勢角、角速度終端
 
-Params.Weight.P = diag([1000.0; 1000.0; 1000]);    % 座標   1000 10
-Params.Weight.V = diag([100; 100; 10]);    % 速度
+
+Params.Weight.P = diag([1000.0; 1000.0; 10]);    % 座標   1000 10
+Params.Weight.V = diag([1000; 1000; 100]);    % 速度
 Params.Weight.R = diag([1.0; 1.0; 1.0; 1.0]); % 入力
 Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
 Params.Weight.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 Params.Weight.Pf = Params.Weight.P;
 Params.Weight.Vf = Params.Weight.V;
 Params.Weight.QWf = Params.Weight.QW; %姿勢角、角速度終端
+
+% Params.Weight.P = diag([1000.0; 1000.0; 1000]);    % 座標   1000 10
+% Params.Weight.V = diag([100; 100; 10]);    % 速度
+% Params.Weight.R = diag([1.0; 1.0; 1.0; 1.0]); % 入力
+% Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
+% Params.Weight.QW = diag([1000; 1000; 1000; 1; 1; 1]);  % 姿勢角、角速度
+% Params.Weight.Pf = Params.Weight.P;
+% Params.Weight.Vf = Params.Weight.V;
+% Params.Weight.QWf = Params.Weight.QW; %姿勢角、角速度終端
 
 

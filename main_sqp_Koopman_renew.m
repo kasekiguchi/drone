@@ -32,7 +32,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.07; %MPCステップ幅 0.07
+    Params.dt = 0.0525; %MPCステップ幅 0.07
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
@@ -99,7 +99,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     %Koopman
     % load('')
     % load('drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est') %円(順逆)+サドル+P2P(x,y),観測量：状態+非線形項
-    load('drone\Koopman_data\EstimationResult_12state_11_29_GUIsimdata.mat')
+    % load('drone\Koopman_data\EstimationResult_12state_11_29_GUIsimdata.mat')
+    load('drone\Koopman_data\case5.mat');
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;

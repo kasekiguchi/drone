@@ -40,7 +40,7 @@ syms t real
 % z = 1;
 
 %% circle2
-T = 60;
+T = 30;
 x = cos(2*pi*t/T)-1;
 y = sin(2*pi*t/T);
 z = 1;
