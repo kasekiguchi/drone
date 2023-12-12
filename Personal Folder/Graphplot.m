@@ -36,7 +36,7 @@ function [] = Graphplot(app)
     num = 3;
     
     subplot(2, num, 1);
-    colororder(newcolors)
+    % colororder(newcolors)
     plot(data.t, data.p(:,:),'LineWidth',1.2);
     xlabel('Time [s]');
     ylabel('p');
@@ -128,6 +128,7 @@ function [] = Graphplot(app)
     subplot(2,num,6);
     if choice == 0
         plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
+        daspect([1,1,1])
         grid on
         xlabel('Position x [m]');
         ylabel('Position y [m]');
