@@ -53,18 +53,18 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
         %-- main()的な
         function result = do(obj,varargin)
             %実機でMPCを飛ばすときに必要-----------------------
-          % var = varargin{1};
-          % if isempty(obj.inifTime) && var{2} =='f'
-          %     obj.inifTime = var{1}.t;
-          %     obj.result.fTime = 0;
-          % elseif var{2} =='f'
-          %     obj.result.fTime = var{1}.t - obj.inifTime;
-          % end
-          % obj.param.t = var{1}.t; %実機のときコメントイン
+          var = varargin{1};
+          if isempty(obj.inifTime) && var{2} =='f'
+              obj.inifTime = var{1}.t;
+              obj.result.fTime = 0;
+          elseif var{2} =='f'
+              obj.result.fTime = var{1}.t - obj.inifTime;
+          end
+          obj.param.t = var{1}.t; %実機のときコメントイン
       %--------------------------------------------------
             % calT = tic;
             tic
-            var = varargin{1};
+            % var = varargin{1};
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
@@ -72,7 +72,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % rt = obj.param.t; %時間
             % idx = round(rt/var{1}.dt+1); %プログラムの周回数
 
-            obj.param.t = varargin{1}.t;
+            % obj.param.t = varargin{1}.t;
             rt = obj.param.t; %時間
             % idx = round(rt/var{1}.dt+1); %プログラムの周回数
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
