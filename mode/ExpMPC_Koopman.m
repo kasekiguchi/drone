@@ -22,7 +22,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 % agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 
@@ -36,6 +36,7 @@ agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 run("ExpBase");
 
+%fでコントローラを切り替え-------------------------
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
     if varargin{2} == 'f'
@@ -51,6 +52,23 @@ function result = controller_do(varargin)
    end
     varargin{5}.controller.result = result;
 end
+%--------------------------------------------------
+
+%tからMPC回す--------------------------------------
+% function result = controller_do(varargin)
+%     controller = varargin{5}.controller;
+%     if varargin{2} == 't'
+%         result.hlc = controller.hlc.do(varargin);
+%         result.mpc = controller.mpc.do(varargin);
+%         result = result.hlc;
+%     elseif varargin{2} == 'f'
+%         result = controller.mpc.do(varargin);
+%     else
+%         result = controller.hlc.do(varargin);
+%    end
+%     varargin{5}.controller.result = result;
+% end
+%--------------------------------------------------
 
 function post(app)
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
