@@ -16,9 +16,9 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
+fF=10;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
@@ -58,12 +58,10 @@ endTime = 1E3;
                 % log_HLLS,...
                 % log_HLFT
                 % log_FTonly
-                % log_FT
-                log_HLc,log_ELh
-                % log_HLEL
+                log_FT
 
 
-                % gui.logger
+                gui.logger
         };
     c=[
         % "HL","IOL"
@@ -71,7 +69,8 @@ endTime = 1E3;
         % "HLLS"
         % "HLFTservo"
         %,"ELFT","ELLS","ELFT"
-           "HL","EL"
+           % "HLft"%
+           "ELft"
            % "ELft"
         ];
 %========================================================================
@@ -83,7 +82,7 @@ endTime = 1E3;
      % n=[1:16,18 20:24];
      % n = [1:17,24];
      % n = [1:11];
-     % nM=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     nM=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
      % n=["t_errx","t_erry","t_errz","three_D"];
      % n=["t_p","input","u","Trs","attitude","velocity","angular_velocity"];
      % n = "inner_input";
@@ -376,10 +375,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                 t{i} = loggers{i}.Data.t';
                 k(i)=loggers{i}.k;
                 ti{i}=t{i}(1:k(i));
-                kf(i)=find(loggers{i}.Data.phase == 102,1,'first')+1;
-                ke(i)=find(loggers{i}.Data.phase == 102,1,'last');
-                % kf(i)=find(loggers{i}.Data.phase == 116,1,'first')+1;
-                % ke(i)=find(loggers{i}.Data.phase == 116,1,'last');
+                % kf(i)=find(loggers{i}.Data.phase == 102,1,'first')+1;
+                % ke(i)=find(loggers{i}.Data.phase == 102,1,'last');
+                kf(i)=find(loggers{i}.Data.phase == 116,1,'first')+1;
+                ke(i)=find(loggers{i}.Data.phase == 116,1,'last');
         
                 sTime(i) = ti{i}(kf(i)) + startTime;
                 eTime(i) = ti{i}(kf(i)) + endTime;
