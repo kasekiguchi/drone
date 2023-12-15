@@ -37,37 +37,37 @@ agent.controller.do = @controller_do;
 run("ExpBase");
 
 %fでコントローラを切り替え-------------------------
-function result = controller_do(varargin)
-    controller = varargin{5}.controller;
-    if varargin{2} == 'f'
-        result.hlc = controller.hlc.do(varargin);
-        result.mpc = controller.mpc.do(varargin);
-        if result.mpc.fTime > 10 
-            result = result.mpc;
-        else
-            result = result.hlc;
-        end
-   else
-        result = controller.hlc.do(varargin);
-   end
-    varargin{5}.controller.result = result;
-end
-%--------------------------------------------------
-
-%tからMPC回す--------------------------------------
 % function result = controller_do(varargin)
 %     controller = varargin{5}.controller;
-%     if varargin{2} == 't'
+%     if varargin{2} == 'f'
 %         result.hlc = controller.hlc.do(varargin);
 %         result.mpc = controller.mpc.do(varargin);
-%         result = result.hlc;
-%     elseif varargin{2} == 'f'
-%         result = controller.mpc.do(varargin);
-%     else
+%         if result.mpc.fTime > 10 
+%             result = result.mpc;
+%         else
+%             result = result.hlc;
+%         end
+%    else
 %         result = controller.hlc.do(varargin);
 %    end
 %     varargin{5}.controller.result = result;
 % end
+%--------------------------------------------------
+
+%tからMPC回す--------------------------------------
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    if varargin{2} == 't'
+        result.hlc = controller.hlc.do(varargin);
+        result.mpc = controller.mpc.do(varargin);
+        result = result.hlc;
+    elseif varargin{2} == 'f'
+        result = controller.mpc.do(varargin);
+    else
+        result = controller.hlc.do(varargin);
+   end
+    varargin{5}.controller.result = result;
+end
 %--------------------------------------------------
 
 function post(app)

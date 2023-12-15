@@ -52,30 +52,37 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
 
         %-- main()的な
         function result = do(obj,varargin)
-      %実機でMPCを飛ばすときに必要-----------------------
-          var = varargin{1};
-          if isempty(obj.inifTime) && var{2} =='f'
-              obj.inifTime = var{1}.t;
-              obj.result.fTime = 0;
-          elseif var{2} =='f'
-              obj.result.fTime = var{1}.t - obj.inifTime;
-          end
-          obj.param.t = var{1}.t; %実機のときコメントイン
-      %--------------------------------------------------
+          %実機でMPCを飛ばすときに必要(fから回すとき)-----------------------
+          % var = varargin{1};
+          % if isempty(obj.inifTime) && var{2} =='f'
+          %     obj.inifTime = var{1}.t;
+          %     obj.result.fTime = 0;
+          % elseif var{2} =='f'
+          %     obj.result.fTime = var{1}.t - obj.inifTime;
+          % end
+          % obj.param.t = var{1}.t; %実機のときコメントイン
+          %--------------------------------------------------
            
             tic
-            % var = varargin{1};
-            % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-            % obj.param.t = var.t;
-            % rt = obj.param.t; %時間
-            % idx = round(rt/var{1}.dt+1); %プログラムの周回数
 
-            % obj.param.t = varargin{1}.t; %実機のときコメントアウト
+            %シミュレーション時コメントイン--------------------------------
+            obj.param.t = varargin{1}.t;
             rt = obj.param.t; %時間
             % idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            %-------------------------------------------------------------
+
+            %実機のときコメントイン-----------------------------------------
+            % var = varargin;
+            % if var{2} == 't'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref.input],1,obj.param.H);
+            % else
+            %     obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            % end
+            %--------------------------------------------------------------
+            
             obj.current_state = obj.self.estimator.result.state.get(); %現在状態
             % obj.current_state = obj.self.plant.state.get();
             Param = obj.param;
@@ -89,7 +96,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             %     options = optimoptions(options,'Diagnostics','off');
             %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
             options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
-            options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
+            options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
 
             %-- quadprog設定
             options.Display = 'none';   % 計算結果の表示
@@ -148,7 +155,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             if obj.self.estimator.result.state < 0
                 warning("墜落しました")
             end
-            % toc(calT)
+            
             calT = toc
             
         end
