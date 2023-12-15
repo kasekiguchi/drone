@@ -17,8 +17,9 @@ function [] = Graphplot(app)
         % data.wp(:,i) = app.logger.Data.agent.plant.result{i}.state.w(:,1);         %角速度_plant
         data.u(:,i) = app.logger.Data.agent.input{i}(:,1);                         %入力
         % data.u2(:,i) = app.logger.Data.agent.controller.result{i}.transformedInput(:,1);
+        % data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
     end
-    
+  
     % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
     %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
     % end
@@ -126,6 +127,15 @@ function [] = Graphplot(app)
     % 軌道(2次元，3次元)
     choice = 0;
     subplot(2,num,6);
+
+    % plot(data.idx,data.te,'LineWidth',1.2)
+    % xlabel('Time [s]');
+    % ylabel('CalT time [s]');
+    % grid on
+    % xlim([data.t(1) data.t(end)])
+    % ax(6) = gca;
+    % title('CalT time')
+
     if choice == 0
         plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
         daspect([1,1,1])
