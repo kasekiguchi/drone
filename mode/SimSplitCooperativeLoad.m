@@ -3,7 +3,7 @@ clear
 N = 6;
 ts = 0; %機体数
 dt = 0.025;
-te = 35;
+te = 50;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -92,18 +92,53 @@ end
 
 clc
 for j = 1:te
-    if j < 20 || rem(j, 2) == 0, j, end
+    if j < 20 || rem(j, 5) == 0, j, end
         for i = 1:N+1
-            agent(i).sensor.do(time, 'f');
-            agent(i).estimator.do(time, 'f');
+            
+            if i >= 2
+                load = agent(1).estimator.result.state;
+                p_load = load.p;
+                R_load = RodriguesQuaternion(load.Q);
+                dR_load = R_load*Skew(load.O);
+                wi_load = load.wi(3*(i-1)-2:3*(i-1),1);
+                pL_agent = p_load + R_load * rho(:,i-1);
+                vL_agent = load.v + dR_load * rho(:,i-1);
+                pT_agent = load.qi(3*(i-1)-2:3*(i-1),1);
+                dpT_agent = Skew(wi_load)*pT_agent;
+                p_agent = p_load + R_load * rho(:,i-1) - agent(1).parameter.li(i-1)*pT_agent;
+                v_agent = load.v + dR_load * rho(:,i-1)- agent(1).parameter.li(i-1)*dpT_agent;
+                q_agent = Quat2Eul(load.Qi(4*(i-1)-3:4*(i-1),1));
+                w_agent = load.Oi(3*(i-1)-2:3*(i-1),1);
+
+                agent(i).estimator.result.state.pL = pL_agent;
+                agent(i).estimator.result.state.vL = vL_agent;
+                agent(i).estimator.result.state.wL = load.O;
+                agent(i).estimator.result.state.pT = pT_agent;
+                
+                agent(i).estimator.result.state.p = p_agent;
+                agent(i).estimator.result.state.v = v_agent;
+                agent(i).estimator.result.state.q = q_agent;
+                agent(i).estimator.result.state.w = w_agent;
+            else
+                agent(1).sensor.do(time, 'f');
+                agent(1).estimator.do(time, 'f');
+            end
+%             agent(i).estimator.state_set =;
             agent(i).reference.do(time, 'f',agent(1));
 %             agent(i).controller.do(time, 'f',0,0,agent,i); 
             agent(i).controller.do(time, 'f',0,0,agent(i),i);
-            if i >= 2
-            agent(i).plant.do(time, 'f');
-            end
+%             if i >= 2
+%             agent(i).controller.result.input = [(agent(i).parameter.loadmass+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
+%             end
 
         end
+        input = zeros(4*N,1);
+        for i = 2:N+1
+            input(4*(i-1)-3:4*(i-1),1) = agent(i).controller.result.input;
+        end
+%         [(agent(i).parameter.loadmass+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
+
+        agent(1).controller.result.input = input;
 %         agent(2).reference.result.m+agent(3).reference.result.m+agent(4).reference.result.m+agent(5).reference.result.m+agent(6).reference.result.m+agent(7).reference.result.m
         agent(1).plant.do(time, 'f');
         logger.logging(time, 'f', agent);
@@ -113,7 +148,7 @@ end
 
 %%
 close all
-DataA= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 % DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 DataB = logger.data(5,"reference.result.m","p");
 DataC = logger.data(5,"reference.result.Muid","p");
@@ -121,7 +156,8 @@ DataD = logger.data(5,"reference.result.state.xd","p");
 t=logger.data(0,'t',[]);
 %%
 
-Data1 = logger.data(2,"reference.result.state.p","p");
+Data1 = logger.data(1,"reference.result.state.p","p");
+% Data1 = logger.data(2,"reference.result.m","p");
 Data2 = logger.data(3,"reference.result.m","p");
 Data3 = logger.data(4,"reference.result.m","p");
 Data4 = logger.data(5,"reference.result.m","p");
@@ -190,11 +226,11 @@ hold off
 
 figure(105)
 hold on
-plot(t,DataI(:,1))
+plot(t,DataM(:,1))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
 xlabel("t [s]")
-ylabel("input [N]")
+ylabel("m [kg]")
 % legend("Payload","UAV")
 ax = gca;
 ax.FontSize = 22;

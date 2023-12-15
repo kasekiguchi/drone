@@ -29,11 +29,11 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 type = "struct";
                 % parameters : 5 + 8*N
                 param.g = 9.81;
-                param.m0 = 1.45;
+                param.m0 = 1.200;
                 param.J0 = [0.15;0.15;0.25];
                 param.rho = [];
                 param.li = 1*ones(N,1);
-                param.mi = 0.755*ones(N,1)';
+                param.mi = 0.800*ones(N,1)';
                 param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
