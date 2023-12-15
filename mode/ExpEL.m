@@ -23,12 +23,12 @@ agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1
 % agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.0]},"HL"});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0,0,0]},"HL"});
+% % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.0]},"HL"});
+% % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});
-% agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));
-% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0.5;0.6],"g",[2;-0.5;1.3]),30});%縦ベクトルで書く,
-fFT=0;%z directional controller flag 1:FT, other:LS
+% % agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));
+% % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0.5;0.6],"g",[2;-0.5;1.3]),30});%縦ベクトルで書く,
+% fFT=0;%z directional controller flag 1:FT, other:LS
 % agent.controller = ELC(agent,Controller_EL(dt,fFT));
 run("ExpBase");
 
@@ -36,9 +36,9 @@ run("ExpBase");
 %estimator
 agent.estimator.hlc = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.estimator.elc = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
-% agent.estimator.result.el = agent.estimator.elc.result;
-% agent.estimator.result.hl = agent.estimator.hlc.result;
 agent.estimator.result= agent.estimator.hlc.result;
+agent.estimator.result.elc = agent.estimator.elc.result;
+agent.estimator.result.hlc = agent.estimator.hlc.result;
 agent.estimator.do = @estimator_do;
 %senser
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -50,9 +50,9 @@ agent.estimator.model = agent.estimator.elc.model;
 agent.controller.elc = ELC(agent,Controller_EL(dt,fFT));
 agent.estimator.model = agent.estimator.hlc.model;
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.result.el = agent.controller.elc.result;
-% agent.controller.result.hl = agent.controller.hlc.result;
 agent.controller.result = agent.controller.hlc.result;
+agent.controller.result.elc = agent.controller.elc.result;
+agent.controller.result.hlc = agent.controller.hlc.result;
 agent.controller.do = @controller_do;
 %input
 tmp.estimator = agent.estimator;
@@ -67,56 +67,33 @@ agent.input_transform.do = @input_transform_do;
 run("ExpBase");
 function result = estimator_do(varargin)
     estimator = varargin{5}.estimator;
-    % varargin{5}.estimator.result =  estimator.elc.result.el;
-    % result.el = estimator.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    % varargin{5}.estimator.result =  estimator.hlc.result.hl;
-    % result.hl = estimator.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    % if varargin{2} == 'f'
-    %     result = result.el;
-    % else
-    %     result = result.hl;
-    % end
+    controller = varargin{5}.controller;
+    varargin{5}.controller.result =  controller.result.elc;
+    varargin{5}.estimator.result =  estimator.result.elc;
+    result_elc = estimator.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+    varargin{5}.controller.result =  controller.result.hlc;
+    varargin{5}.estimator.result =  estimator.result.hlc;
+    result_hlc = estimator.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     if varargin{2} == 'f'
-        if ~isfield(varargin{5}.controller.result,"u")
-            varargin{5}.controller.result.u = [0;varargin{5}.controller.result.input(2:4)];
-            T = varargin{5}.controller.result.input(1);
-            result = estimator.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-            result.state.Trs(1) = T; 
-        else
-            result = estimator.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-        end
+        result = result_elc;
     else
-        result = estimator.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+        result = result_hlc;
     end
+    result.hlc = result_hlc;
+    result.elc = result_elc;
     varargin{5}.estimator.result = result;
+    varargin{5}.controller = controller;
 end
 
 function result = input_transform_do(varargin)
     input_transform = varargin{5}.input_transform;
-    % controller = varargin{5}.controller;
-    % if varargin{2} ~= 'f'
-    %     varargin{5}.estimator.model = varargin{5}.estimator.elc.model;
-    % end
-    % result_el = input_transform.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    % if varargin{2} ~= 'f'
-    %     varargin{5}.estimator.model = varargin{5}.estimator.hlc.model;
-    % end
-    % result_hl = input_transform.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    % 
-    % if varargin{2} == 'f'
-    %     result = result_el;
-    % else
-    %     result = result_hl;
-    % end
     if varargin{2} == 'f'
         varargin{5}.estimator.model = varargin{5}.estimator.elc.model;
-        % varargin{5}.controller.result = controller.result.el;
         result = input_transform.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     else
         if isfield(varargin{5}.estimator,"elc")
             varargin{5}.estimator.model = varargin{5}.estimator.hlc.model;
         end
-        % varargin{5}.controller.result = controller.result.hl;
         result = input_transform.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
    end
     varargin{5}.input_transform.result = result;
@@ -124,24 +101,19 @@ end
 
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
-    % estimator = varargin{5}.estimator;
-    % varargin{5}.controller.result =  controller.elc.result;
-    % varargin{5}.estimator.result =  estimator.elc.result;
-    % result.el = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    % varargin{5}.controller.result =  controller.hlc.result;
-    % varargin{5}.estimator.result =  estimator.hlc.result;
-    % result.hl = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    % if varargin{2} == 'f'
-    %     result = result.el;
-    % else
-    %     result = result.hl;
-    % end
-
+    estimator = varargin{5}.estimator;
+    varargin{5}.estimator.result =  estimator.result.elc;
+    result_elc = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+    varargin{5}.estimator.result =  estimator.result.hlc;
+    result_hlc = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     if varargin{2} == 'f'
-        result = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+        result = result_elc;
     else
-        result = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+        result = result_hlc;
     end
+    result.hlc = result_hlc;
+    result.elc = result_elc;
+    varargin{5}.estimator = estimator;
     varargin{5}.controller.result = result;
 end
 
