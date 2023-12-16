@@ -1,6 +1,14 @@
 function [] = Graphplot(app)
     opengl software
     
+    %フライトフェーズ-------------
+    % 115 : stop
+    %  97 : arming
+    % 116 : take off
+    % 102 : flight
+    % 108 : landing
+    %-----------------------------
+
     %% データのインポート
     
     for i = 1:find(app.logger.Data.t,1,'last')
@@ -8,17 +16,17 @@ function [] = Graphplot(app)
         data.phase(1,i) = app.logger.Data.phase(i,1);                              %フェーズ
         data.p(:,i) = app.logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p_estimator
         data.pr(:,i) = app.logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-        % data.pp(:,i) = app.logger.Data.agent.plant.result{i}.state.p(:,1);         %位置p_plant
         data.q(:,i) = app.logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角_estimator
-        % data.qp(:,i) = app.logger.Data.agent.plant.result{i}.state.q(:,1);         %姿勢角_plant
         data.v(:,i) = app.logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度_estimator
         data.vr(:,i) = app.logger.Data.agent.reference.result{i}.state.v(:,1);      %速度_reference
-        % data.vp(:,i) = app.logger.Data.agent.plant.result{i}.state.v(:,1);         %速度_plant
-        data.w(:,i) = app.logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度_estimator
-        % data.wp(:,i) = app.logger.Data.agent.plant.result{i}.state.w(:,1);         %角速度_plant
+        data.w(:,i) = app.logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度_estimat
         data.u(:,i) = app.logger.Data.agent.input{i}(:,1);                         %入力
-        % data.u2(:,i) = app.logger.Data.agent.controller.result{i}.transformedInput(:,1);
         data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
+
+        % data.pp(:,i) = app.logger.Data.agent.plant.result{i}.state.p(:,1);         %位置p_plant
+        % data.qp(:,i) = app.logger.Data.agent.plant.result{i}.state.q(:,1);         %姿勢角_plant
+        % data.vp(:,i) = app.logger.Data.agent.plant.result{i}.state.v(:,1);         %速度_plant
+        % data.wp(:,i) = app.logger.Data.agent.plant.result{i}.state.w(:,1);         %角速度_plant
     end
   
     % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
@@ -40,15 +48,18 @@ function [] = Graphplot(app)
     subplot(2, num, 1);
     % colororder(newcolors)
     plot(data.t, data.p(:,:),'LineWidth',1.2);
-    if ismember(102, data.phase)
-        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); %グラフの背面を塗る
+    if ismember(116, data.phase)
+        Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+    elseif ismember(102, data.phase)
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
+    elseif ismember(108, data.phase)
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     end
     xlabel('Time [s]');
     ylabel('p');
     hold on
     grid on
     plot(data.t,data.pr(:,:),'LineWidth',1.2,'LineStyle','--');
-    
     % plot(data.t,data.pp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlim([data.t(1) data.t(end)])
     lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
@@ -61,10 +72,17 @@ function [] = Graphplot(app)
     % 姿勢角
     subplot(2, num, 2);
     plot(data.t, data.q(:,:),'LineWidth',1.2);
-    hold on
+    if ismember(116, data.phase)
+        Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+    elseif ismember(102, data.phase)
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
+    elseif ismember(108, data.phase)
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    end
     % plot(data.t, data.qp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
     ylabel('q');
+    hold on
     grid on
     xlim([data.t(1) data.t(end)])
     lgdtmp = {'$\phi_e$','$\theta_e$','$\psi_e$'};
@@ -76,6 +94,13 @@ function [] = Graphplot(app)
     % 速度
     subplot(2, num, 3);
     plot(data.t, data.v(:,:),'LineWidth',1.2);
+    if ismember(116, data.phase)
+        Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+    elseif ismember(102, data.phase)
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
+    elseif ismember(108, data.phase)
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    end
     hold on
     plot(data.t, data.vr(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
@@ -91,6 +116,13 @@ function [] = Graphplot(app)
     % 角速度
     subplot(2, num, 4);
     plot(data.t, data.w(:,:),'LineWidth',1.2);
+    if ismember(116, data.phase)
+        Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+    elseif ismember(102, data.phase)
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
+    elseif ismember(108, data.phase)
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    end
     hold on
     % plot(data.t, data.wp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlabel('Time [s]');
@@ -106,6 +138,13 @@ function [] = Graphplot(app)
     % 入力(4入力)
     subplot(2,num,5);
     plot(data.t,data.u(:,:),'LineWidth',1.2);
+    if ismember(116, data.phase)
+        Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+    elseif ismember(102, data.phase)
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
+    elseif ismember(108, data.phase)
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    end
     xlabel('Time [s]');
     ylabel('u');
     grid on
@@ -130,40 +169,42 @@ function [] = Graphplot(app)
     % title('Thrust torque u of agent1');
     
     % 軌道(2次元，3次元)
-    choice = 0;
+    choice = 2; % 0:x-yグラフ，1:x-y-zグラフ, 2:計算コスト
     subplot(2,num,6);
 
-    plot(data.t,data.te,'LineWidth',1.2)
-    xlabel('Time [s]');
-    ylabel('CalT time [s]');
-    grid on
-    xlim([data.t(1) data.t(end)])
-    ax(6) = gca;
-    title('CalT time')
-
-    % if choice == 0
-    %     plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
-    %     daspect([1,1,1])
-    %     grid on
-    %     xlabel('Position x [m]');
-    %     ylabel('Position y [m]');
-    %     hold on
-    %     ax(6) = gca;
-    % %     plot(data.pr(1,:),data.pr(2,:));
-    % %     plot(0,1,'o','MarkerFaceColor','red','Color','red');
-    % %     plot(1,1,'o','MarkerFaceColor','red','Color','red');
-    % %     plot(1,-1,'o','MarkerFaceColor','red','Color','red');
-    % %     legend('Estimated trajectory','Target position')
-    % %     xlim([-0.5 0.5])
-    % %     ylim([-0.5 0.5])
-    % else
-    %     plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
-    %     grid on
-    %     xlabel('x');
-    %     ylabel('y');
-    %     zlabel('z');
-    %     ax(6) = gca;
-    % end
+    if choice == 0
+        plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
+        daspect([1,1,1])
+        grid on
+        xlabel('Position x [m]');
+        ylabel('Position y [m]');
+        hold on
+        ax(6) = gca;
+    %     plot(data.pr(1,:),data.pr(2,:));
+    %     plot(0,1,'o','MarkerFaceColor','red','Color','red');
+    %     plot(1,1,'o','MarkerFaceColor','red','Color','red');
+    %     plot(1,-1,'o','MarkerFaceColor','red','Color','red');
+    %     legend('Estimated trajectory','Target position')
+    %     xlim([-0.5 0.5])
+    %     ylim([-0.5 0.5])
+    elseif choice == 1
+        plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
+        grid on
+        xlabel('x');
+        ylabel('y');
+        zlabel('z');
+        ax(6) = gca;
+    else
+        %シミュレーションのみ-------------------
+        plot(data.t,data.te,'LineWidth',1.2)
+        xlabel('Time [s]');
+        ylabel('CalT time [s]');
+        grid on
+        xlim([data.t(1) data.t(end)])
+        ax(6) = gca;
+        title('CalT time')
+        %---------------------------------------
+    end
     
     fontSize = 16; %軸の文字の大きさの設定
     set(ax,'FontSize',fontSize);

@@ -1,8 +1,8 @@
 function Controller = Controller_MPC_case_Komatu(Agent)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
-    Controller_param.dt = 0.25; % MPCステップ幅
-    Controller_param.H = 5;
+    Controller_param.dt = 0.1; % MPCステップ幅
+    Controller_param.H = 10;
 
     Controller_param.ConstEval = 100000;
 

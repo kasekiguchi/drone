@@ -54,6 +54,7 @@ classdef MPC_controller_case_Komatu <handle
 
         %-- main()的な
         function result = do(obj,varargin)
+            tic
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
@@ -97,6 +98,8 @@ classdef MPC_controller_case_Komatu <handle
 
             %% データ表示用
             obj.input.u = obj.result.input; 
+            calT = toc
+            obj.result.t(1,idx) = calT;
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存

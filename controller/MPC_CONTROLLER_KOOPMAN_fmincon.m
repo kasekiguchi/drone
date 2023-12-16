@@ -94,7 +94,9 @@ classdef MPC_CONTROLLER_KOOPMAN_fmincon < handle
             obj.result.input = var(:, 1); % 印加する入力 4入力
 
             %% データ表示用
-            obj.input.u = obj.result.input; 
+            obj.input.u = obj.result.input;
+            calT = toc
+            obj.result.t(1,idx) = calT;
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
@@ -121,7 +123,6 @@ classdef MPC_CONTROLLER_KOOPMAN_fmincon < handle
             if obj.self.estimator.result.state < 0
                 warning("墜落しました")
             end
-            calT = toc
             
         end
         function show(obj)
