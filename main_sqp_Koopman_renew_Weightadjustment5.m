@@ -123,14 +123,14 @@ while true
     end
     %重みの自動生成
     Params.Weight.P = diag([randi(100); randi(100); randi(100)]);                            % 座標   
-    Params.Weight.V = diag([randi(30); randi(30); randi(30)]);                            % 速度
-    Params.Weight.R = diag([randi(30); randi(30); randi(30); randi(30)]);                 % 入力
+    Params.Weight.V = diag([randi(100); randi(100); randi(100)]);                            % 速度
+    Params.Weight.R = diag([randi(1); randi(1); randi(1); randi(1)]);                 % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([randi(4000);randi(4000); randi(4000); randi(50); randi(50); randi(100)]);   % 姿勢角、角速度
+    Params.Weight.QW = diag([randi(2000);randi(2000); randi(1000); randi(20); randi(20); randi(100)]);   % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([randi(1); randi(1); randi(1)]);                           % 座標終端
-    Params.Weight.Vf = diag([randi(1); randi(1); randi(1)]);                           %速度終端
-    Params.Weight.QWf = diag([randi(1); randi(1); randi(1); randi(1); randi(1); randi(1)]); % 姿勢角終端
+    Params.Weight.Pf = diag([randi(100); randi(100); randi(100)]);                           % 座標終端
+    Params.Weight.Vf = diag([randi(100); randi(100); randi(100)]);                           %速度終端
+    Params.Weight.QWf = diag([randi(2500); randi(2500); randi(2000); randi(20); randi(20); randi(150)]); % 姿勢角終端
     try
         while round(time.t, 5) <= te
             tic

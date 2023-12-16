@@ -7,7 +7,7 @@ syms t real
 % yg = X(2);
 % zg = X(3);
 % T = X(4);   % 目標到達までの時間 T=10
-% T = 60;
+% T = 10;
 %% takeoff
 % T = 10;
 % rz0 = 0;

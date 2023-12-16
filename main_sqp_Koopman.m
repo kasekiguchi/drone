@@ -29,17 +29,18 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     Params.flag = 0; %PtoP
     Params.PtoP = 0; %1：PtoP制御
 %     Params.i = 0;
+    Params.T = 0; %1ステップにかかる時間
     
 
     %% 重みの設定
-    Params.Weight.P = diag([5.0; 3.0; 1.0]);    % 座標   1000 10
+    Params.Weight.P = diag([10.0; 1.0; 1.0]);    % 座標   1000 10
     Params.Weight.V = diag([1.0; 1.0; 1.0]);    % 速度
     Params.Weight.R = diag([1.0,; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([2300; 2500; 1200; 1; 1; 1]);  % 姿勢角、角速度
+    Params.Weight.QW = diag([5000; 5000; 1000; 1; 1; 1]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([10; 10; 1]);
-    Params.Weight.QWf = diag([3300; 3300; 1200; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([10; 1; 1]);
+    Params.Weight.QWf = diag([5000; 5000; 1000; 1; 1; 1]); %姿勢角、角速度終端
     
     %% 
     
@@ -73,7 +74,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 
     %Koopman
 %     load('EstimationResult_12state_6_26_circle.mat','est') %観測量:状態のみ 入力:GUI
-    load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
+    load('EstimationResult_12state_7_19_circle=circle_estimation=circle.mat','est'); %観測量:状態のみ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_26_circle=takeoff_estimation=circle.mat','est'); %take offをデータセットに含む，入力：4プロペラ
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_7_circle=takeoff_estimation=takeoff.mat','est'); %take offをデータセットに含む，入力：GUI
 %     load('drone\MCMPC_Koopman\drone\koopman_data\EstimationResult_12state_7_19_circle=circle_estimation=circle_InputandConst.mat','est'); %観測量:状態+非線形項
@@ -197,8 +198,8 @@ end
             
             % MPC設定(problem)
             problem.x0		  = previous_state;       % 状態，入力を初期値とする   % 現在状態
-            problem.objective = @(x) Objective(x, Params, agent);            % 評価関数
-            problem.nonlcon   = @(x) Constraints(idx, x, Params, agent, time);    % 制約条件
+            problem.objective = @(x) Objective(x, Params);            % 評価関数
+            problem.nonlcon   = @(x) Constraints(x, Params);    % 制約条件
             [var, fval, exitflag, output, lambda, grad, hessian] = fmincon(problem); %最適化計算
             data.exitflag(idx) = exitflag;
             % 制御入力の決定
@@ -219,7 +220,7 @@ end
     
         end   
         %-- データ保存
-            data.bestcost = fval; %もっともよい評価値を保存
+            data.bestcost(idx) = fval; %もっともよい評価値を保存
 
 %             data.bestcost(idx) = output.bestfeasible.fval; 
 %             data.pathJ{idx} = output.bestfeasible.fval; % - 全サンプルの評価値
@@ -263,6 +264,7 @@ end
 
         end
         calT = toc % 1ステップ（25ms）にかかる計算時間
+        Params.T(idx) = calT;
         totalT = totalT + calT; %すべての計算を終えるまでにかかった時間
         
         %%
@@ -308,6 +310,28 @@ set(0, 'defaultTextFontSize', Fontsize);
 logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
 % figure
 % plot(data.exitflag)
+
+fig = figure(2);
+subplot(2,2,1)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.exitflag, 'LineWidth',1.2)
+grid on
+xlabel('time t [s]')
+ylabel('exitflag')
+
+subplot(2,2,2)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),Params.T, 'LineWidth',1.2)
+grid on
+ylim([0 0.3])
+xlabel('time t [s]')
+ylabel('Simulation time [s]')
+
+subplot(2,2,3)
+plot(logger.Data.t(1:find(logger.Data.t,1,'last'),:),data.bestcost, 'LineWidth',1.2)
+grid on
+xlabel('time t [s]')
+ylabel('Best cost')
+
+set(fig, 'Position', [1250, 60, 600, 400])
 
 % save('simulation','logger')
 % Graphplot

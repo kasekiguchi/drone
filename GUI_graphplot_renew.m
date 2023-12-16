@@ -11,7 +11,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle_estimaterdata.mat") %読み込むデータファイルの設定
-load("Koopman_ホバリング_重み調整済み.mat")
+load("Weight_55.075.mat")
 disp('load finished')
 
 for i = 1:find(logger.Data.t,1,'last')

@@ -5,7 +5,7 @@ function [H, f] = Change_equation(params)
 
     Q = blkdiag(params.Weight.P, params.Weight.V, params.Weight.QW);
     R = params.Weight.R;
-    Qf = blkdiag(params.Weight.Pf, params.Weight.V, params.Weight.QWf);
+    Qf = blkdiag(params.Weight.Pf, params.Weight.Vf, params.Weight.QWf);
     Horizon = params.H;
 
     Xc = quaternions(params.X0); %現在状態,観測量：状態+非線形項

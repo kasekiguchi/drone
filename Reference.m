@@ -55,6 +55,11 @@ function xr = Reference(params, T, Agent)
         xr(10:12, h+1) = [0; 0; 0];
 
         xr(13:16, h+1) = params.ur;
+
+        %観測量の追加項を評価関数に入れる場合
+%         Xr = xr(1:12,1);
+%         zr = quaternions(Xr);
+%         xr(17:30, h+1) = zr(13:end);
 %         xr(17:26, h+1) = [0; 0; 0; 0; 0; 0; 0; 0; 0; 0];
     end
         

@@ -48,20 +48,29 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     Params.Weight.QW = diag([10; 10; 10; 0.01; 0.01; 100.0]);  % 姿勢角、角速度
 
     % 円旋回(重みの設定)
-    Params.Weight.P = diag([40.0; 55.0; 25.0]);    % 座標   1000 10
-    Params.Weight.V = diag([4.0; 4.0; 30.0]);    % 速度
-    Params.Weight.R = diag([10.0; 12.0; 5.0; 5.0]); % 入力
+    Params.Weight.P = diag([77.0; 37.0; 0]);    % 座標   1000 10
+    Params.Weight.V = diag([15.0; 22.0; 1]);    % 速度
+    Params.Weight.R = diag([1.0; 1.0; 1.0; 1.0]); % 入力
     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
-    Params.Weight.QW = diag([450; 750; 400; 5; 4; 18]);  % 姿勢角、角速度
-%     Params.Weight.A = diag([1; 1; 1; 1; 1; 1; 1; 1; 1; 1]); %観測量の非線型項の評価項
+    Params.Weight.QW = diag([984; 797; 561; 9; 1; 70]);  % 姿勢角、角速度
 
-    Params.Weight.Pf = diag([1; 1; 1]);
-    Params.Weight.Vf = diag([1; 1; 1]);
-    Params.Weight.QWf = diag([1; 1; 1; 1; 1; 1]); %姿勢角、角速度終端
+    Params.Weight.Pf = diag([73; 209; 0]);
+    Params.Weight.Vf = diag([96; 80; 257]);
+    Params.Weight.QWf = diag([367; 1777; 420; 2; 1; 133]); %姿勢角、角速度終端
 
+%     Params.Weight.P = diag([5; 25; 10]);    % 座標   1000 10
+%     Params.Weight.V = diag([1; 10; 30]);    % 速度
+%     Params.Weight.R = diag([15; 15; 15; 15]); % 入力
+%     Params.Weight.RP = diag([0; 0; 0; 0]);  % 1ステップ前の入力との差    0*(無効化)
+%     Params.Weight.QW = diag([200; 700; 1000; 1; 1; 10]);  % 姿勢角、角速度
+%     Params.Weight.A = diag([100; 100; 100; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1]); %観測量の非線型項の評価項
+% 
+%     Params.Weight.Pf = diag([30; 60; 30]);
+%     Params.Weight.Vf = diag([1; 1; 1]);
+%     Params.Weight.QWf = diag([1200; 1200; 2000; 1; 1; 30]);
     
       %% 
-% graph(logger)
+% graph(logger) 
     %% 
     
 %-- data
@@ -84,7 +93,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     options = optimoptions(options,'Diagnostics','off');
 %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
     options = optimoptions(options,'MaxIterations',      1.e+9);     % 最大反復回数
-    options = optimoptions(options,'ConstraintTolerance',1.e-4);%制約違反に対する許容誤差
+    options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
 %     options = optimoptions(options,'ConstraintTolerance',1.e-6);%制約違反に対する許容誤差
     
     %-- fmincon設定
@@ -104,7 +113,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %     load('drone\koopman_data\EstimationResult_12state_7_20_simulation_circle_InputandConst.mat','est') %観測量:状態+非線形項、シミュレーションモデル
 %     load('drone\koopman_data\EstimationResult_12state_7_20_simulation_circle.mat','est') %観測量:状態のみ、シミュレーションモデル
 %     load('drone\koopman_data\EstimationResult_12state_10_9_reverse_circle=reverse_circle_estimation=revcircle.mat','est') %逆円旋回モデル
-    load('drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est') %円(順逆)+サドル+P2P(x,y),観測量：状態+非線形項
+    load('EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est') %円(順逆)+サドル+P2P(x,y),観測量：状態+非線形項
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
@@ -174,12 +183,13 @@ end
                     Params.flag = 0;
                 end
                 if Params.flag == 1
-                    param(i).reference.point = {FH, [1;1;1;], time.t};
+                    param(i).reference.point = {FH, [1;1;1], time.t};
                 else
                     param(i).reference.point = {FH, [1;-1;1], time.t};
                 end
             else
                 xr = Reference(Params, time.t, agent); %TimeVarying
+%                 xr = Ref();
                 param(i).reference.point = {FH, [0;1;1], time.t};  % 目標値[x, y, z]
             end
             
@@ -249,7 +259,7 @@ end
 %                 var(Params.state_size+1:Params.total_size, end) = 1.0 * ones(4, 1);
 %             end
             
-            fprintf("pos: %f %f %f \t u: %f %f %f %f \t ref: %f %f %f \t flag: %d",...
+            fprintf(" pos: %f %f %f \t u: %f %f %f %f \n ref: %f %f %f \t flag: %d",...
                 state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                 agent.input(1), agent.input(2), agent.input(3), agent.input(4),...
                 ref_monte.p(1), ref_monte.p(2), ref_monte.p(3), exitflag);
