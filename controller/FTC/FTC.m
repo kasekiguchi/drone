@@ -51,19 +51,6 @@ methods
         else
             dt = obj.param.dt;
         end
-    %線形入力
-        % vf = Vfd(dt,x,xd',P,obj.param.F1);
-    %servo
-       %  if varargin{1}.t > 10
-       %          obj.z = obj.z + xd(3)-x(7);
-       % end
-        % vf = obj.Vf(z1,obj.z);
-    %近似FTC+servo
-        % Kzz= -2*0.5*0.03/(0.3*10^2);
-        % Kzz= -0.588*4/1000;
-        % Kzz=-1;
-        % vf = Vzft_srv(obj.approx_z,[z1;obj.z],Kzz);
-        % vf = Vzft_srv(obj.approx_z,[z1;obj.z],obj.param.F1s(3));
     %近似FTC
         vf = Vzft(obj.approx_z,z1);
         %x,y,psiの状態変数の値
@@ -75,9 +62,6 @@ methods
         obj.result.F2z2 = -obj.param.F2'.*(sign(z2).*abs(z2).^obj.param.ax);
         obj.result.F3z3 = -obj.param.F3'.*(sign(z3).*abs(z3).^obj.param.ay);
         obj.result.F4z4 = -obj.param.F4'.*(sign(z4).*abs(z4).^obj.param.apsi);
-        %検証用
-%      vf(1)=-F1*(sign(z1).*abs(z1).^az(1:2));%z近似なし
-        % vs(3) = -F4 * z4; %yaw:LS
         tmp = Uf(x, xd', vf, P) + Us(x, xd', vf, vs, P);
         %input of subsystems
         obj.result.uHL = [vf(1); vs];
