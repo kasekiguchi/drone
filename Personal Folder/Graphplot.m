@@ -5,6 +5,7 @@ function [] = Graphplot(app)
     
     for i = 1:find(app.logger.Data.t,1,'last')
         data.t(1,i) = app.logger.Data.t(i,1);                                      %時間t_estimator
+        data.phase(1,i) = app.logger.Data.phase(i,1);                              %フェーズ
         data.p(:,i) = app.logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p_estimator
         data.pr(:,i) = app.logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
         % data.pp(:,i) = app.logger.Data.agent.plant.result{i}.state.p(:,1);         %位置p_plant
@@ -17,7 +18,7 @@ function [] = Graphplot(app)
         % data.wp(:,i) = app.logger.Data.agent.plant.result{i}.state.w(:,1);         %角速度_plant
         data.u(:,i) = app.logger.Data.agent.input{i}(:,1);                         %入力
         % data.u2(:,i) = app.logger.Data.agent.controller.result{i}.transformedInput(:,1);
-        % data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
+        data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
     end
   
     % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
@@ -39,11 +40,15 @@ function [] = Graphplot(app)
     subplot(2, num, 1);
     % colororder(newcolors)
     plot(data.t, data.p(:,:),'LineWidth',1.2);
+    if ismember(102, data.phase)
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); %グラフの背面を塗る
+    end
     xlabel('Time [s]');
     ylabel('p');
     hold on
     grid on
     plot(data.t,data.pr(:,:),'LineWidth',1.2,'LineStyle','--');
+    
     % plot(data.t,data.pp(:,:),'LineWidth',1.2,'LineStyle','-.');
     xlim([data.t(1) data.t(end)])
     lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
@@ -128,37 +133,37 @@ function [] = Graphplot(app)
     choice = 0;
     subplot(2,num,6);
 
-    % plot(data.idx,data.te,'LineWidth',1.2)
-    % xlabel('Time [s]');
-    % ylabel('CalT time [s]');
-    % grid on
-    % xlim([data.t(1) data.t(end)])
-    % ax(6) = gca;
-    % title('CalT time')
+    plot(data.t,data.te,'LineWidth',1.2)
+    xlabel('Time [s]');
+    ylabel('CalT time [s]');
+    grid on
+    xlim([data.t(1) data.t(end)])
+    ax(6) = gca;
+    title('CalT time')
 
-    if choice == 0
-        plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
-        daspect([1,1,1])
-        grid on
-        xlabel('Position x [m]');
-        ylabel('Position y [m]');
-        hold on
-        ax(6) = gca;
-    %     plot(data.pr(1,:),data.pr(2,:));
-    %     plot(0,1,'o','MarkerFaceColor','red','Color','red');
-    %     plot(1,1,'o','MarkerFaceColor','red','Color','red');
-    %     plot(1,-1,'o','MarkerFaceColor','red','Color','red');
-    %     legend('Estimated trajectory','Target position')
-    %     xlim([-0.5 0.5])
-    %     ylim([-0.5 0.5])
-    else
-        plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
-        grid on
-        xlabel('x');
-        ylabel('y');
-        zlabel('z');
-        ax(6) = gca;
-    end
+    % if choice == 0
+    %     plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
+    %     daspect([1,1,1])
+    %     grid on
+    %     xlabel('Position x [m]');
+    %     ylabel('Position y [m]');
+    %     hold on
+    %     ax(6) = gca;
+    % %     plot(data.pr(1,:),data.pr(2,:));
+    % %     plot(0,1,'o','MarkerFaceColor','red','Color','red');
+    % %     plot(1,1,'o','MarkerFaceColor','red','Color','red');
+    % %     plot(1,-1,'o','MarkerFaceColor','red','Color','red');
+    % %     legend('Estimated trajectory','Target position')
+    % %     xlim([-0.5 0.5])
+    % %     ylim([-0.5 0.5])
+    % else
+    %     plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
+    %     grid on
+    %     xlabel('x');
+    %     ylabel('y');
+    %     zlabel('z');
+    %     ax(6) = gca;
+    % end
     
     fontSize = 16; %軸の文字の大きさの設定
     set(ax,'FontSize',fontSize);

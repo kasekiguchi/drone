@@ -32,7 +32,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     Controller_param.weight.V = diag([300; 300; 1]);    % 速度
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([500; 500; 1000; 1000; 1000; 1500]);  % 姿勢角，角速度
+    Controller_param.weight.QW = diag([100; 100; 1000; 100; 100; 1500]);  % 姿勢角，角速度
 
     Controller_param.weight.Pf = Controller_param.weight.P; % 6
     Controller_param.weight.Vf = Controller_param.weight.V;

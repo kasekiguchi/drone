@@ -69,33 +69,33 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
             %シミュレーション時コメントイン--------------------------------
-            % obj.param.t = varargin{1}.t;
-            % rt = obj.param.t; %時間
-            % idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
-            % obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            obj.param.t = varargin{1}.t;
+            rt = obj.param.t; %時間
+            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
+            obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             %-------------------------------------------------------------
 
             %実機のときコメントイン(aから回す)-----------------------------------------
-            vara = varargin{1};
-            obj.param.t = vara{1}.t;
-            rt = obj.param.t; %時間
-            % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
-            
-            if vara{2} == 'a'
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-            elseif vara{2} == 't'
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-                fprintf('take off')
-            elseif vara{2} == 'f'
-                obj.state.ref = obj.Reference(rt); %リファレンスの更新
-                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-                % fprintf('flight')
-            end
+            % vara = varargin{1};
+            % obj.param.t = vara{1}.t;
+            % rt = obj.param.t; %時間
+            % % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
+            % 
+            % if vara{2} == 'a'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+            % elseif vara{2} == 't'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+            %     fprintf('take off')
+            % elseif vara{2} == 'f'
+            %     obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            %     obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+            %     % fprintf('flight')
+            % end
             %-------------------------------------------------------------------------
 
-            % obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             Param = obj.param;
             Param.current = obj.current_state;
             Param.ref = obj.state.ref;        
@@ -130,14 +130,14 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
             
             % 実機のときコメントイン--------------------------------------------
-            if vara{2} == 'a'
-                obj.result.input = [0;0;0;0];
-            else
-                obj.result.input = var(1:4, 1); % 印加する入力 4入力
-            end
+            % if vara{2} == 'a'
+            %     obj.result.input = [0;0;0;0];
+            % else
+            %     obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            % end
             %------------------------------------------------------------------
 
-            % obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            obj.result.input = var(1:4, 1); % 印加する入力 4入力
             % obj.result.transformedInput = obj.InputTransform.do(obj.result.input); %4入力を総推力に変換
 
 %-----------------実機で飛ばすときは総推力に変換した入力をobj.result.inputに代入する----------------------
@@ -146,7 +146,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             %% データ表示用
             obj.input.u = obj.result.input; 
             calT = toc
-            % obj.result.t(1,idx) = calT;
+            obj.result.t(1,idx) = calT;
 
             % if vara{2} == 'f'
             %     obj.result.t = calT;
@@ -164,13 +164,13 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                    state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi, ...
-                    state_monte.w(1)*180/pi, state_monte.w(2)*180/pi, state_monte.w(3)*180/pi);       % s:state 現在状態
+                    state_monte.q(1), state_monte.q(2), state_monte.q(3), ...
+                    state_monte.w(1), state_monte.w(2), state_monte.w(3));       % s:state 現在状態
             fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \t wr: %f %f %f \n", ...
                     obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
                     obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-                    obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi, ...
-                    obj.state.ref(10,1)*180/pi, obj.state.ref(11,1)*180/pi, obj.state.ref(12,1)*180/pi)  % r:reference 目標状態
+                    obj.state.ref(4,1), obj.state.ref(5,1), obj.state.ref(6,1), ...
+                    obj.state.ref(10,1), obj.state.ref(11,1), obj.state.ref(12,1))  % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
 %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
