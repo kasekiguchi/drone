@@ -47,7 +47,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             obj.InputTransform=THRUST2FORCE_TORQUE(self,1);
             obj.time = [];
             obj.inifTime =[];
-            obj.result.idx = 0;
 
         end
 
@@ -126,8 +125,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
       
             %%
             obj.previous_input = var;
-            % obj.previous_input = repmat(var(13:16,1), 1, obj.param.H);
-            % obj.previous_input = repmat(obj.param.ref_input, 1, obj.param.H);
             
             % 実機のときコメントイン--------------------------------------------
             % if vara{2} == 'a'

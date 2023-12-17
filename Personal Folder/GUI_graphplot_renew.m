@@ -12,31 +12,59 @@ pdf = 0; %1:pdfでグラフを保存
 name = 'report_saddle';
 folderName = 'report_saddle';
 
+%% 
+% oldmpc = load("1216_hov_oldmpc.mat","log");
+% newmpc = load("1216_hov_newmpc.mat","log");
+% 
+% for i = 1:find(oldmpc.log.Data.t,1,'last')
+%     data.t(1,i) = oldmpc.log.Data.t(i,1);
+%     data.teold(:,i) = oldmpc.log.Data.agent.controller.result{i}.t(1,i);
+%     data.tenew(:,i) = newmpc.log.Data.agent.controller.result{i}.t(1,i);
+% end
+% 
+% aveold = mean(data.teold)
+% avenew = mean(data.tenew)
+% 
+% plot(data.t,data.teold,'Color','blue','LineWidth',1.2)
+% xlabel('Time [s]');
+% ylabel('Calculation time [s]');
+% hold on
+% grid on
+% plot(data.t,data.tenew,'Color','red','LineWidth',1.2)
+% xlim([data.t(1) data.t(end)])
+% legend('改良前','改良後')
+% ax(1) = gca;
+% % title('Calculation time')
+% 
+% fontSize = 14; %軸の文字の大きさの設定
+% set(ax,'FontSize',fontSize); 
+
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("experiment_11_15_hovering.mat")
+load("12_17_hov_12月報告会用.mat")
 disp('load finished')
 
-% for i = 1:find(log.Data.t,1,'last')
-%     data.t(1,i) = log.Data.t(i,1);                                      %時間t
-%     data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
-% end
-
-for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
-    data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    % data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
-    data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
+for i = 1:find(log.Data.t,1,'last')
+    data.t(1,i) = log.Data.t(i,1);                                      %時間t
+    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
+    data.te(:,i) = log.Data.agent.controller.result{i}.t(1,i);  %計算時間、シミュレーションのみ
 end
+
+% for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
+%     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
+%     data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+%     data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+%     data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+%     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+%     % data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
+% end
 % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
 %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 % end
@@ -84,9 +112,8 @@ box on %グラフの枠線が出ないときに使用
 figure(1)
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase == 102,1,'last')]),[1.0 0.9 1.0]); %グラフの背面を塗る
 xlabel('Time [s]');
-ylabel('p');
+ylabel('Position [m]');
 % xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
 % xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','red','LineWidth',2)
 hold on
@@ -107,7 +134,7 @@ figure(2)
 colororder(newcolors)
 plot(data.t,data.q(:,:),'LineWidth',1);
 xlabel('Time [s]');
-ylabel('q');
+ylabel('Attitude [rad]');
 grid on
 lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
@@ -120,7 +147,7 @@ figure(3)
 colororder(newcolors)
 plot(data.t,data.v(:,:),'LineWidth',1);
 xlabel('Time [s]');
-ylabel('v');
+ylabel('Velocity [m/s]');
 grid on
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
@@ -133,7 +160,7 @@ figure(4)
 colororder(newcolors)
 plot(data.t,data.w(:,:),'LineWidth',1);
 xlabel('Time [s]');
-ylabel('w');
+ylabel('Angular velocity [rad/s]');
 grid on
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
@@ -167,7 +194,7 @@ ax(6) = gca;
 figure(7)
 plot(data.t,data.u(:,:),'LineWidth',1);
 xlabel('Time [s]');
-ylabel('u');
+ylabel('Input');
 hold on
 grid on
 lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
@@ -177,7 +204,21 @@ xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Input u of agent1','FontSize',12);
 
-fontSize = 12; %軸の文字の大きさの設定
+figure(8)
+plot(data.t,data.te,'LineWidth',1.2)
+xlabel('Time [s]');
+ylabel('Calculation time [s]');
+yline(0.025,'Color','red','LineWidth',1.2)
+grid on
+xlim([data.t(1) data.t(end)])
+ylim([0.005 0.030])
+legend('ソルバー変更後の計算時間', '制御周期')
+ax(6) = gca;
+% title('CalT time')
+
+ave = mean(data.te)
+
+fontSize = 14; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
 
 else

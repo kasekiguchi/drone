@@ -17,13 +17,13 @@ function Controller = Controller_MPC_case_Komatu(Agent)
     Controller_param.V = diag([1; 1; 1]);    % 速度
     Controller_param.R = diag([1.0; 1; 1; 1]); % 入力
     Controller_param.RP = 0 * diag([1.0; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.Q = diag([1; 1; 1]);  % 姿勢角
-    Controller_param.W = diag([1; 1; 1]);  % 角速度
+    Controller_param.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角
+    % Controller_param.W = diag([1; 1; 1]);  % 角速度
 
     Controller_param.Pf = diag([1; 1; 1]); % 6
     Controller_param.Vf = diag([1; 1; 1]); % 6
-    Controller_param.Qf = diag([1; 1; 1]); % 7,8
-    Controller_param.Wf = diag([1; 1; 1]);
+    Controller_param.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
+    % Controller_param.Wf = diag([1; 1; 1]);
     
     %% torqeu
     % Controller_param.input.u = Agent.parameter.mass*9.81 * [1;0;0;0];  % 総推力トルク

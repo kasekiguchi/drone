@@ -43,8 +43,8 @@ classdef MPC_controller_case_Komatu <handle
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
 
             %% 重み　統合
-            obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
-            obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
+            % obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
+            % obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
             
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
 
@@ -162,18 +162,34 @@ classdef MPC_controller_case_Komatu <handle
         end
 
         function [eval] = objective(obj,x)   % obj.~とする
-            X = x(1:12,:);
-            U = x(13:16,:);
-            tildeX = X - obj.state.ref(1:12,:);
+            Xp = x(1:3, :);
+            Xq = x(4:6, :);
+            Xv = x(7:9, :);  
+            Xw = x(10:12, :);
+            U = x(13:16, :);
+
+            %-- 状態及び入力に対する目標状態や目標入力との誤差を計算
+            tildeXp = Xp - obj.state.ref(1:3, :);  % 位置
+            tildeXq = Xq - obj.state.ref(4:6, :);
+            tildeXv = Xv - obj.state.ref(7:9, :);  % 速度
+            tildeXw = Xw - obj.state.ref(10:12,:);
+            tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
             tildeUpre = U - obj.input.u;
             tildeUref = U - obj.state.ref(13:16,:);
 
-            stageState = tildeX(:,end-1)' * obj.param.Weight    * tildeX(:,end-1);
-            stageInputPre  = tildeUpre(:,end-1)' * obj.param.RP * tildeUpre(:,end-1);
-            stageInputRef  = tildeUref(:,end-1)' * obj.param.R  * tildeUref(:,end-1);
-            terminalState = tildeX(:,end)' * obj.param.Weightf * tildeX(:,end);
+            %-- 状態及び入力のステージコストを計算 長くなるから分割
+            stageStateP  = arrayfun(@(L) tildeXp(:, L)'   * obj.param.P         * tildeXp(:, L),   1:obj.param.H-1);
+            stageStateV  = arrayfun(@(L) tildeXv(:, L)'   * obj.param.V         * tildeXv(:, L),   1:obj.param.H-1);
+            stageStateQW = arrayfun(@(L) tildeXqw(:, L)'  * obj.param.QW        * tildeXqw(:, L),  1:obj.param.H-1);
+            stageInputP  = arrayfun(@(L) tildeUpre(:, L)' * obj.param.RP        * tildeUpre(:, L), 1:obj.param.H-1);
+            stageInputR  = arrayfun(@(L) tildeUref(:, L)' * obj.param.R         * tildeUref(:, L), 1:obj.param.H-1);
+            stageState = stageStateP + stageStateV +  stageStateQW + stageInputP + stageInputR; % ステージコスト
 
-            eval = stageState + stageInputPre + stageInputRef + terminalState;
+            terminalState =  tildeXp(:, end)'   * obj.param.Pf   * tildeXp(:, end)...
+                            +tildeXv(:, end)'   * obj.param.Vf   * tildeXv(:, end)...
+                            +tildeXqw(:, end)'  * obj.param.QWf  * tildeXqw(:, end);
+
+            eval = sum(stageState) + terminalState;
         end
 
         function [xr] = Reference(obj, T)
