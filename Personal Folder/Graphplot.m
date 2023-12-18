@@ -199,14 +199,17 @@ function [] = Graphplot(app)
         plot(data.t,data.te,'LineWidth',1.2)
         xlabel('Time [s]');
         ylabel('CalT time [s]');
+        hold on
         grid on
+        yline(0.025,'Color','red','LineWidth',1.2)
         xlim([data.t(1) data.t(end)])
+        legend('計算時間', '制御周期')
         ax(6) = gca;
         title('CalT time')
         %---------------------------------------
     end
     
-    fontSize = 16; %軸の文字の大きさの設定
+    fontSize = 14; %軸の文字の大きさの設定
     set(ax,'FontSize',fontSize);
 end
 
