@@ -6,15 +6,15 @@ close all
 flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求める
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
-pdf = 0; %1:pdfでグラフを保存
-name = '10_27';
-folderName = '10_27';
+pdf = 1; %1:pdfでグラフを保存
+name = '12_17_報告会資料_case23';
+folderName = '12_17_報告会資料_case23';
 
 %% select file to load (max number of file:5)
 
-loadfilename{1} = 'EstimationResult_12state_11_20_data=cir_cir=cir_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-loadfilename{2} = 'EstimationResult_12state_11_20_data=cirandrevandsad_cir=cir_est=P2Pshape.mat';
-loadfilename{3} = 'EstimationResult_12state_11_20_data=cirandrevandsadP2Pxy_cir=cir_est=P2Pshape.mat';
+loadfilename{1} = 'EstimationResult_12state_12_17_Expcirdata_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{2} = 'EstimationResult_12state_12_17_Expcirrevsaddata_est=P2Pshape.mat';
+loadfilename{3} = 'EstimationResult_12state_12_17_ExpcirrevsadP2Pxydata_est=P2Pshape.mat';
 % loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
 
 % loadfilename{1} = 'test.mat';
@@ -110,16 +110,16 @@ newcolors = [0 0.4470 0.7410
 
 for graph_num = 1:3 %1 = x,2 = y,3 = z
     figure(graph_num)
-    colororder(newcolors)
+%     colororder(newcolors)
     plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,graph_num)','LineWidth',2);
     hold on
     grid on
-    for i = 1:HowmanyFile
+    for i = 2:HowmanyFile
         if graph_num == 1
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -137,7 +137,7 @@ for graph_num = 1:3 %1 = x,2 = y,3 = z
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -155,7 +155,7 @@ for graph_num = 1:3 %1 = x,2 = y,3 = z
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -201,12 +201,12 @@ for graph_num = 1:3
     plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.q(tlength,graph_num)','LineWidth',2);
     hold on
     grid on
-    for i = 1:HowmanyFile
+    for i = 2:HowmanyFile
         if graph_num == 1
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -224,7 +224,7 @@ for graph_num = 1:3
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -242,7 +242,7 @@ for graph_num = 1:3
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.q(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -287,12 +287,12 @@ for graph_num = 1:3
     plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.v(tlength,graph_num)','LineWidth',2);
     hold on
     grid on
-    for i = 1:HowmanyFile
+    for i = 2:HowmanyFile
         if graph_num == 1
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -310,7 +310,7 @@ for graph_num = 1:3
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -328,7 +328,7 @@ for graph_num = 1:3
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.v(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -373,12 +373,12 @@ for graph_num = 1:3
     plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.w(tlength,graph_num)','LineWidth',2);
     hold on
     grid on
-    for i = 1:HowmanyFile
+    for i = 2:HowmanyFile
         if graph_num == 1
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -396,7 +396,7 @@ for graph_num = 1:3
             if i == 1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -414,7 +414,7 @@ for graph_num = 1:3
             if i ==1
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','--');
             elseif i == 2
-                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':');
+                plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',3,'LineStyle',':','Color',[0 0.6 0.4]);
             elseif i == 3
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.w(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','-.','Color',[0.9290 0.6940 0.1250]);
             elseif i == 4
@@ -449,30 +449,36 @@ for graph_num = 1:3
 end
 %% pdfで保存
 if pdf == 1
+    clc
+    fprintf('Enterで保存します')
+    pause
+end
+
+if pdf == 1
     mkdir(folderName);
-    movefile(folderName,'drone-isobe2022\Graph')
+    movefile(folderName,'Graph')
     exportgraphics(figure(1),strcat('Position_x_',name,'.pdf'))
-    movefile(strcat('Position_x_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('Position_x_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('Position_y_',name,'.pdf'))
-    movefile(strcat('Position_y_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('Position_y_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('Position_z_',name,'.pdf'))
-    movefile(strcat('Position_z_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('Position_z_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('phi_',name,'.pdf'))
-    movefile(strcat('phi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('phi_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('theta_',name,'.pdf'))
-    movefile(strcat('theta_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('theta_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('psi_',name,'.pdf'))
-    movefile(strcat('psi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('psi_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('velocity_x_',name,'.pdf'))
-    movefile(strcat('velocity_x_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('velocity_x_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('velocity_y_',name,'.pdf'))
-    movefile(strcat('velocity_y_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('velocity_y_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('velocity_z_',name,'.pdf'))
-    movefile(strcat('velocity_z_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('velocity_z_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('omega_phi_',name,'.pdf'))
-    movefile(strcat('omega_phi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('omega_phi_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('omega_theta_',name,'.pdf'))
-    movefile(strcat('omega_theta_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('omega_theta_',name,'.pdf'),fullfile('Graph',folderName))
     exportgraphics(figure(1),strcat('omega_psi_',name,'.pdf'))
-    movefile(strcat('omega_psi_',name,'.pdf'),fullfile('drone-isobe2022\Graph',folderName))
+    movefile(strcat('omega_psi_',name,'.pdf'),fullfile('Graph',folderName))
 end
