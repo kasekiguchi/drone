@@ -21,7 +21,7 @@ function [] = Graphplot(app)
         data.vr(:,i) = app.logger.Data.agent.reference.result{i}.state.v(:,1);      %速度_reference
         data.w(:,i) = app.logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度_estimat
         data.u(:,i) = app.logger.Data.agent.input{i}(:,1);                         %入力
-        data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
+        % data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
 
         % data.pp(:,i) = app.logger.Data.agent.plant.result{i}.state.p(:,1);         %位置p_plant
         % data.qp(:,i) = app.logger.Data.agent.plant.result{i}.state.q(:,1);         %姿勢角_plant
@@ -50,6 +50,8 @@ function [] = Graphplot(app)
     plot(data.t, data.p(:,:),'LineWidth',1.2);
     if ismember(116, data.phase)
         Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     elseif ismember(102, data.phase)
         Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
     elseif ismember(108, data.phase)
@@ -74,6 +76,8 @@ function [] = Graphplot(app)
     plot(data.t, data.q(:,:),'LineWidth',1.2);
     if ismember(116, data.phase)
         Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     elseif ismember(102, data.phase)
         Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
     elseif ismember(108, data.phase)
@@ -96,6 +100,8 @@ function [] = Graphplot(app)
     plot(data.t, data.v(:,:),'LineWidth',1.2);
     if ismember(116, data.phase)
         Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     elseif ismember(102, data.phase)
         Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
     elseif ismember(108, data.phase)
@@ -118,6 +124,8 @@ function [] = Graphplot(app)
     plot(data.t, data.w(:,:),'LineWidth',1.2);
     if ismember(116, data.phase)
         Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     elseif ismember(102, data.phase)
         Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
     elseif ismember(108, data.phase)
@@ -140,6 +148,8 @@ function [] = Graphplot(app)
     plot(data.t,data.u(:,:),'LineWidth',1.2);
     if ismember(116, data.phase)
         Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     elseif ismember(102, data.phase)
         Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
     elseif ismember(108, data.phase)
@@ -169,7 +179,7 @@ function [] = Graphplot(app)
     % title('Thrust torque u of agent1');
     
     % 軌道(2次元，3次元)
-    choice = 2; % 0:x-yグラフ，1:x-y-zグラフ, 2:計算コスト
+    choice = 0; % 0:x-yグラフ，1:x-y-zグラフ, 2:計算コスト
     subplot(2,num,6);
 
     if choice == 0
