@@ -193,7 +193,7 @@ syms t real
 g = 9.81;
 a = 1.5;
 w = 1.5;
-
+%tan
 th = a*t^2/2;
 d2x = g*tan(th)
 d3x = simplify(diff(d2x,t))
@@ -211,6 +211,7 @@ hold off
 legend("d2x","d3x","d4x","d2z")
 i=i+1;
 
+%sin
 d2x = g*sin(th)
 d3x = simplify(diff(d2x,t))
 d4x = simplify(diff(d3x,t))
@@ -226,6 +227,7 @@ hold off
 legend("d2x","d3x","d4x","d2z")
 i=i+1;
 
+%sin 角速度外乱
 th = w*t;
 d2x = g*sin(th)
 d3x = simplify(diff(d2x,t))

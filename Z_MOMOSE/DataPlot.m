@@ -1,14 +1,4 @@
 %　DataPlot
-%% set path
-cf = pwd;
-if contains(mfilename('fullpath'),"mainGUI")
-  cd(fileparts(mfilename('fullpath')));
-else
-  tmp = matlab.desktop.editor.getActive; 
-  cd(fileparts(tmp.Filename));
-end
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %%
 close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
@@ -16,7 +6,7 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fLSorFT=3;%LS:1,FT:2,No:>=3
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
 
@@ -58,7 +48,7 @@ endTime = 1E3;
                 % log_HLLS,...
                 % log_HLFT
                 % log_FTonly
-                log_FT
+                % log_FT
 
 
                 gui.logger
@@ -70,7 +60,7 @@ endTime = 1E3;
         % "HLFTservo"
         %,"ELFT","ELLS","ELFT"
            % "HLft"%
-           "ELft"
+           % "ELft"
            % "ELft"
         ];
 %========================================================================
@@ -82,7 +72,7 @@ endTime = 1E3;
      % n=[1:16,18 20:24];
      % n = [1:17,24];
      % n = [1:11];
-     nM=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
      % n=["t_errx","t_erry","t_errz","three_D"];
      % n=["t_p","input","u","Trs","attitude","velocity","angular_velocity"];
      % n = "inner_input";
@@ -94,13 +84,13 @@ endTime = 1E3;
 % multiFigure.layout = {[2,2]};
 % multiFigure.title = ["position_error"];%[" state", " subsystem"];%title name
 
-% nM = {["z1","z2","z3","z4"],["F1z1","F2z2","F3z3","F4z4","uHL"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,2],[2,3]};
-% multiFigure.title = [" subsystem","vinput poly"];%[" state", " subsystem"];%title name
+nM = {["z1","z2","z3","z4"],["F1z1","F2z2","F3z3","F4z4","uHL"]};%比較するとき複数まとめる
+multiFigure.layout = {[2,2],[2,3]};
+multiFigure.title = [" subsystem","vinput poly"];%[" state", " subsystem"];%title name
 
-nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
-multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
-multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
+% nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
+% multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
+% multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
 
 % nM = {["t_x" ,"t_y" ,"t_z","t_vx" ,"t_vy" ,"t_vz"],["t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"],["t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
 % multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
@@ -490,10 +480,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                                 z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z2;
                                 z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z3;
                                 z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z4;
-                                % F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
-                                % F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
-                                % F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
-                                % F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
+                                F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
+                                F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
+                                F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
+                                F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
                                 j=j+1;
                             end
                         else 
@@ -503,10 +493,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                                 z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, j}.z2;
                                 z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, j}.z3;
                                 z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, j}.z4;
-                                % F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
-                                % F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
-                                % F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
-                                % F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
+                                F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
+                                F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
+                                F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
+                                F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
                             end
                         end
                         
@@ -526,7 +516,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                     vel{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.v(1:3);
                     w{i}(:,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.w(1:3);
                     uHL{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.uHL;
-                    u{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.u;
+                    % u{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.u;
                     % u{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.input;
                     z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z1;
                     z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z2;
@@ -628,10 +618,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
         allData.Trs = {struct('x',{time},'y',{Trs}), struct('x','time [s]','y','Tr [N] dTr [N/s] ddTr [N/$\rm{s^2}$]'), LgndCrt(["$Tr$","$dTr$"],c),add_option([],option,addingContents)};
         if fexpandS
             allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
-            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
+            allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
         else
             allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
-            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
+            allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
         end
         allData.z2 = {struct('x',{time},'y',{z2}), struct('x','time [s]','y','z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
         allData.z3 = {struct('x',{time},'y',{z3}), struct('x','time [s]','y','z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};

@@ -54,7 +54,7 @@ agent.controller.result = agent.controller.hlc.result;
 agent.controller.result.elc = agent.controller.elc.result;
 agent.controller.result.hlc = agent.controller.hlc.result;
 agent.controller.do = @controller_do;
-ftime_0 = 0;
+% ftime_0 = 0;
 %input
 tmp.estimator = agent.estimator;
 agent.estimator = tmp.estimator.elc;
@@ -70,7 +70,7 @@ function result = estimator_do(varargin)
     estimator = varargin{5}.estimator;
     controller = varargin{5}.controller;
     if varargin{2} == 'f'
-        ftime= controller.result.elc.ftime;
+        ftime = controller.result.elc.ftime;
     end
     varargin{5}.controller.result =  controller.result.elc;
     varargin{5}.estimator.result =  estimator.result.elc;
@@ -78,7 +78,7 @@ function result = estimator_do(varargin)
     varargin{5}.controller.result =  controller.result.hlc;
     varargin{5}.estimator.result =  estimator.result.hlc;
     result_hlc = estimator.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    if varargin{2} == 'f' && ftime > ftime_0
+    if varargin{2} == 'f' && ftime > 0
         result = result_elc;
     else
         result = result_hlc;
@@ -94,7 +94,7 @@ function result = input_transform_do(varargin)
     if varargin{2} == 'f'
         ftime = varargin{5}.controller.result.elc.ftime;
     end
-    if varargin{2} == 'f'&& ftime > ftime_0
+    if varargin{2} == 'f'&& ftime > 0
         varargin{5}.estimator.model = varargin{5}.estimator.elc.model;
         result = input_transform.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     else
@@ -110,11 +110,13 @@ function result = controller_do(varargin)
     controller = varargin{5}.controller;
     estimator = varargin{5}.estimator;
     varargin{5}.estimator.result =  estimator.result.elc;
-    result_elc = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+    % result_elc = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+    result_elc = controller.elc.do(varargin{1},varargin{2});
     ftime = result_elc.ftime;
     varargin{5}.estimator.result =  estimator.result.hlc;
-    result_hlc = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    if varargin{2} == 'f'&& ftime > ftime_0
+    % result_hlc = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+    result_hlc = controller.hlc.do(varargin{1},varargin{2});
+    if varargin{2} == 'f'&& ftime > 0
         result = result_elc;
     else
         result = result_hlc;
@@ -124,6 +126,7 @@ function result = controller_do(varargin)
     varargin{5}.estimator = estimator;
     varargin{5}.controller.result = result;
 end
+
 
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
