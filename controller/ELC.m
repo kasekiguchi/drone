@@ -26,13 +26,20 @@ methods
         obj.z=0;
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.result.u = zeros(self.estimator.model.dim(2),1);
-        % obj.tf=0;
+        obj.tf=0;
     end
 
     function result = do(obj ,varargin)
         % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
-        % if obj.tf==0
-        % end
+        if varargin{2}=="f"
+            if obj.tf==0
+                obj.tf = varargin{1}.t;
+            end
+            obj.result.ftime = varargin{1}.t - obj.tf;
+        else
+            obj.result.ftime = 0;
+        end
+
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
         xd = ref.state.xd;
