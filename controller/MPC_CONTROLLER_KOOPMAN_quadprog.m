@@ -68,31 +68,31 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
             %シミュレーション時コメントイン--------------------------------
-            obj.param.t = varargin{1}.t;
-            rt = obj.param.t; %時間
-            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
-            obj.state.ref = obj.Reference(rt); %リファレンスの更新
-            obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
+            % obj.param.t = varargin{1}.t;
+            % rt = obj.param.t; %時間
+            % idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
+            % obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            % obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             %-------------------------------------------------------------
 
             %実機のときコメントイン(aから回す)-----------------------------------------
-            % vara = varargin{1};
-            % obj.param.t = vara{1}.t;
-            % rt = obj.param.t; %時間
-            % % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
-            % 
-            % if vara{2} == 'a'
-            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-            % elseif vara{2} == 't'
-            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-            %     fprintf('take off')
-            % elseif vara{2} == 'f'
-            %     obj.state.ref = obj.Reference(rt); %リファレンスの更新
-            %     obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-            %     % fprintf('flight')
-            % end
+            vara = varargin{1};
+            obj.param.t = vara{1}.t;
+            rt = obj.param.t; %時間
+            % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
+
+            if vara{2} == 'a'
+                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+            elseif vara{2} == 't'
+                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+                fprintf('take off')
+            elseif vara{2} == 'f'
+                obj.state.ref = obj.Reference(rt); %リファレンスの更新
+                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+                fprintf('flight')
+            end
             %-------------------------------------------------------------------------
 
             Param = obj.param;
@@ -127,15 +127,17 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             obj.previous_input = var;
             
             % 実機のときコメントイン--------------------------------------------
-            % if vara{2} == 'a'
-            %     obj.result.input = [0;0;0;0];
-            % else
-            %     obj.result.input = var(1:4, 1); % 印加する入力 4入力
-            % end
+            if vara{2} == 'a'
+                obj.result.input = [0;0;0;0];
+            else
+                obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            end
             %------------------------------------------------------------------
 
-            obj.result.input = var(1:4, 1); % 印加する入力 4入力,シミュレーション時コメントイン
-            % obj.result.transformedInput = obj.InputTransform.do(obj.result.input); %4入力を総推力に変換
+            %シミュレーション時コメントイン--------------------------------------------
+            % obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            % obj.result.transformedInput = obj.InputTransform.do(obj.result.input); %4入力を総推力に変換(必要に応じて)
+            %---------------------------------------------------------------------------
 
 %-----------------実機で飛ばすときは総推力に変換した入力をobj.result.inputに代入する----------------------
             % obj.result.input = obj.InputTransform.do(var(1:4, 1)); %4入力を総推力に変換
