@@ -33,13 +33,14 @@ if logger.fExp==1 %fExp:1 実機データ
 %     data.startIndex = find(data.est.p(:,3)>0.5,1,'first'); %0.4m以上になった部分からデータの取得開始
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
-%     data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
-    data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
+    data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
+%     data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
 %     data.startIndex = find(data.phase==102,1,'first') + 200; %逆円旋回
 %     data.startIndex = find(data.phase == 102, 1, 'first') + 150; %完全にサドル起動になった部分のデータのみを使用
 %     data.phase = logger.Data.phase;
+    data.endIndex = find(data.phase == 102,1,'last');
 %     data.endIndex = find(data.phase == 108,1,'last'); %ランディングまで全部
-    data.endIndex = find(data.phase==108,1,'first'); %ランディングする前にデータの取得をやめる
+%     data.endIndex = find(data.phase==108,1,'first'); %ランディングする前にデータの取得をやめる
     data.N = data.endIndex - data.startIndex + 1;
     data.t = logger.Data.t(data.startIndex:data.endIndex);
 %-------------------estimator----------------------
