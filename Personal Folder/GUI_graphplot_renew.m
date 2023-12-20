@@ -41,7 +41,7 @@ folderName = 'report_saddle';
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("experiment_11_15_hovering.mat")
+load("12_20_P2P_旧MPC_12月報告会.mat")
 disp('load finished')
 
 % for i = 1:find(log.Data.t,1,'last')
@@ -169,16 +169,18 @@ ax(4) = gca;
 title('Angular velocity w of agent1','FontSize',12);
 
 figure(5)
-plot(data.p(1,:),data.p(2,:));
+plot(data.p(1,:),data.p(2,:),'LineWidth',1);
 xlabel('Position x [m]');
 ylabel('Position y [m]');
 grid on
 hold on
 % plot(data.pr(1,:),data.pr(2,:));
-plot(1,1,'o','MarkerFaceColor','red','Color','red');
-plot(0,0,'o','MarkerFaceColor','black','Color','black');
+plot(0,0,'o','MarkerFaceColor','red','Color','red');
+plot(1,1,'o','MarkerFaceColor','black','Color','black');
+xlim([-0.2 1.2])
+ylim([-0.2 1.2])
 % legend('Estimated trajectory','Trajectory','Initial position')
-legend('Estimated trajectory','Initial position','Target position')
+legend('Estimated trajectory','Target position','Initial position')
 ax(5) = gca;
 
 figure(6)
@@ -204,19 +206,19 @@ xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Input u of agent1','FontSize',12);
 
-figure(8)
-plot(data.t,data.te,'LineWidth',1.2)
-xlabel('Time [s]');
-ylabel('Calculation time [s]');
-yline(0.025,'Color','red','LineWidth',1.2)
-grid on
-xlim([data.t(1) data.t(end)])
-ylim([0.005 0.030])
-legend('ソルバー変更後の計算時間', '制御周期')
-ax(6) = gca;
-% title('CalT time')
-
-ave = mean(data.te)
+% figure(8)
+% plot(data.t,data.te,'LineWidth',1.2)
+% xlabel('Time [s]');
+% ylabel('Calculation time [s]');
+% yline(0.025,'Color','red','LineWidth',1.2)
+% grid on
+% xlim([data.t(1) data.t(end)])
+% ylim([0.005 0.030])
+% legend('ソルバー変更後の計算時間', '制御周期')
+% ax(6) = gca;
+% % title('CalT time')
+% 
+% ave = mean(data.te)
 
 fontSize = 14; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 

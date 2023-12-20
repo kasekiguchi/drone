@@ -1,3 +1,4 @@
+clc
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10; % terminal time
@@ -6,7 +7,7 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([1, 1], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
 initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
