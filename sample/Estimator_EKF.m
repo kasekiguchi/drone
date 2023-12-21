@@ -13,6 +13,7 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         opts.P = []
         opts.Q = []
         opts.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
+        % opts.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3),1e-5,1e5]);
     end
     Estimator.model = model;
     p = length(model.state.get(output)); % number of output

@@ -37,7 +37,8 @@ run("ExpBase");
 %コントローラのTをELの状態に入れる
 %estimator
 agent.estimator.hlc = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-agent.estimator.elc = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
+agent.estimator.elc = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q","Trs"],"R",diag([1e-5*ones(1,3), 1e-8*ones(1,3),1e-5,1e5])));
+% agent.estimator.elc = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
 agent.estimator.result= agent.estimator.hlc.result;
 agent.estimator.result.elc = agent.estimator.elc.result;
 agent.estimator.result.hlc = agent.estimator.hlc.result;
