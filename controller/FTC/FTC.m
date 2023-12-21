@@ -207,8 +207,8 @@ methods(Static)
             input("");
             close all
     end
-    function confirmParam2(vF,lF,alp)
-        txt = '';
+    function confirmParam2(vF,lF,alp,txt)
+        % txt = '';
         % 有限整定の近似微分　一層   
             if length(lF)==2
                 j=2;%z,yaw方向サブシステムの緩和
@@ -221,7 +221,7 @@ methods(Static)
             end
             for i = 1:j
                 %figureで緩和区間を確認
-                    e = -2 : 0.001 : 2;
+                    e = -2 : 0.0001 : 2;
                     u = -vF(i).*sign(e).*abs(e).^alp(i);
                     uk= -lF(i).*e;
                     

@@ -106,10 +106,10 @@ if isDiffrenceCrossPoint
     vF3 = Controller.F3;
     vF4 = Controller.F4;
 
-    FTC.confirmParam2(vF1,lF1,Controller.az)
-    FTC.confirmParam2(vF2,lF2,Controller.ax)
-    FTC.confirmParam2(vF3,lF3,Controller.ay)
-    FTC.confirmParam2(vF4,lF4,Controller.apsi)
+    FTC.confirmParam2(vF1,lF1,Controller.az,'z')
+    FTC.confirmParam2(vF2,lF2,Controller.ax,'x')
+    FTC.confirmParam2(vF3,lF3,Controller.ay,'y')
+    FTC.confirmParam2(vF4,lF4,Controller.apsi,'yaw')
 end
 %%
 %z方向FTCの近似
