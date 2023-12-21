@@ -74,6 +74,20 @@ xr = zeros(16, data.param.H);
 InputVdata = 0;
 fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
 
+%% reference 9th order polynomial
+% teref = 2; % かける時間
+% z0 = 2; % z初期値
+% ze = 0.1; % z収束値
+% v0 = 0; % 初期速度
+% ve = 0; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか -0.5
+% t = 0:0.025:3;
+% data.ref.refZ = curve_interpolation_9order(t',teref,z0,v0,ze,ve);
+% x0 = -1; % -1
+% xe = 0;
+% ve = 0;
+% delay = 0;
+% data.ref.refX = curve_interpolation_9order(t'-delay,teref,x0,v0,xe,ve);
+
 %%
 datestr(datetime('now'), 'yyyy / mm / dd HH:MM')
 
@@ -158,7 +172,7 @@ end
             end
             Gp = initial.p;
             Gq = [0; 0.2975; 0];
-            [xr] = Reference(data, Time, agent, Gq, Gp, 0, fRef, 0);    % 1:斜面 0:それ以外(TimeVarying)
+            [xr] = Reference(data, Time, agent, Gq, Gp, 0, fRef, 2);    % 1:斜面 0:それ以外(TimeVarying)
             param(i).controller.(agent(i).controller.name) = {idx, xr, time.t, 0};
 % 
             for j = 1:length(agent(i).controller.name)

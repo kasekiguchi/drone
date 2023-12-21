@@ -2,7 +2,7 @@ function Controller = Controller_HLMCMPC(~)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
-    Controller_param.H = 15;
+    Controller_param.H = 10;
     Controller_param.Maxparticle_num = 1000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
@@ -37,9 +37,9 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.input_size = 4;
 
     %% sekiguchi-komatsu new
-    Controller_param.Z = diag([100; 1000]) * 1e3; %2
-    Controller_param.X = diag([100,100,1,1]) * 1e3;%4
-    Controller_param.Y = diag([100,100,1,1]) * 1e3;
+    Controller_param.Z = diag([100; 1000]);% * 1e3; %2
+    Controller_param.X = diag([100,100,1,1]);% * 1e3;%4
+    Controller_param.Y = diag([100,100,1,1]);% * 1e3;
     Controller_param.PHI = diag([10000; 100]);
 
     Controller_param.Zf = Controller_param.Z;

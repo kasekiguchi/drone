@@ -93,9 +93,9 @@ else
     xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
 
-    subplot(m,n,2); plot3(Edata(1,:), Edata(2,:), Edata(3,:)); hold on; plot3(Rdata(1,:), Rdata(2,:), Rdata(3,:), '--'); hold off;
+    subplot(m,n,2); plot3(Edata(1,:), Edata(2,:), Edata(3,:)); hold on; plot3(Rdata(1,:), Rdata(2,:), Rdata(3,:), '--'); plot(initial.p(1), initial.p(2), 'h'); hold off;
     daspect([1 1 1]);
-    legend("Estimate", "Reference");
+    legend("Estimate", "Reference", "Initial pos");
     xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
     view(2)
 

@@ -133,31 +133,31 @@
 % end
 
 % %% SICE 斜面 
-% function [xr] = Reference(params, T, Agent, ~, ~, phase, ~, Zdis)
+% function [xr] = Reference(Data, T, Agent, ~, ~, ~, ~, phase)
 %     % パラメータ取得
 %     % timevaryingをホライズンごとのreferenceに変換する
 %     % params.dt = 0.1;
 %     % phasex = phase + 0.5;
-%     xr = zeros(16, params.H);    % initialize
-%     for h = 0:params.H-1
-%         t = T.t + params.dt * h; % reference生成の時刻をずらす
+%     xr = zeros(16, Data.param.H);    % initialize
+%     for h = 0:Data.param.H-1
+%         t = T.t + Data.param.dt * h; % reference生成の時刻をずらす
 %         % それぞれの関数 % z方向目標値時
 %         ind = round((t-phase)/0.025) + 1; 
 %         if t < phase % zとxの開始時間を変える
 %             tz = 2; tvz = 0;
 %         elseif t > 4
-%             tz = params.refZ(end,1); tvz = params.refZ(end,2);
+%             tz = Data.ref.refZ(end,1); tvz = Data.ref.refZ(end,2);
 %         else % 斜面開始
-%             tz = params.refZ(ind,1); % 9次補完のリファレンスから値だけ持ってくる
-%             tvz = params.refZ(ind,2);
+%             tz = Data.ref.refZ(ind,1); % 9次補完のリファレンスから値だけ持ってくる
+%             tvz = Data.ref.refZ(ind,2);
 %         end
 % 
 %         if t < phase
 %             tx = -1; tvx = 0; 
 %         elseif t > 4
-%             tx = params.refX(end,1); tvx = params.refX(end,2);
+%             tx = Data.ref.refX(end,1); tvx = Data.ref.refX(end,2);
 %         else
-%             tx = params.refX(ind,1); tvx = params.refX(ind,2); 
+%             tx = Data.ref.refX(ind,1); tvx = Data.ref.refX(ind,2); 
 %         end
 % 
 %         %% 重み可変
@@ -170,8 +170,8 @@
 %         %% 重み変えない
 %         if T.ind == 0 || T.ind == 1
 %             pitch = 0;
-%         elseif  Zdis(round(T.ind-1)) > params.soft_z
-%             pitch = 0;
+%         % elseif  Zdis(round(T.ind-1)) > params.soft_z
+%         %     pitch = 0;
 %         else    
 %             pitch = 0;
 %             if h == 10
@@ -185,7 +185,7 @@
 %         xr(7:9, h+1) = [tvx; 0.0; tvz];
 %         xr(4:6, h+1) =   [0;pitch;0]; % 姿勢角
 %         xr(10:12, h+1) = [0;0;0];
-%         xr(13:16, h+1) = params.ur; % MC -> 0.6597,   HL -> 0
+%         xr(13:16, h+1) = Data.param.ref_input; % MC -> 0.6597,   HL -> 0
 %     end
 % end
 
@@ -212,7 +212,7 @@ function [xr] = Reference(Data, T, Agent, ~, ~, ~, ~, ~)
     RefTime = Agent.reference.timeVarying.func;    % 時間関数の取得
     % TimeVarying
 
-    
+
     for h = 0:Data.param.H-1
         t = T.t + Data.param.dt * h;
         Ref = RefTime(t); % x(1) y(2) z(3) yaw(4) vx(5) vy(6) vz(7) vyaw(8) ax(9) ay(10) az(11) ayaw(12)
@@ -221,6 +221,9 @@ function [xr] = Reference(Data, T, Agent, ~, ~, ~, ~, ~)
         xr(4:6, h+1) =   [0;0;Ref(4)]; % 姿勢角
         xr(10:12, h+1) = [0;0;0];
         xr(13:16, h+1) = Data.param.ref_input;
+
+        %% 加速度
+        xr(17:19,h+1) = Ref(9:11);
 
         %% 加速度から姿勢角目標値の算出 
         % acc = Ref(9:11);

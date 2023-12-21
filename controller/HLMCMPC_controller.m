@@ -109,7 +109,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% Referenceの取得、ホライズンごと
       % xrを仮想状態目標値に変換 ホライズン分の変換
       % xyz yaw v_{xyz yaw} a_{xyz yaw}
-      obj.reference.xd_imagine = [xr(1:3,:); zeros(1,obj.param.H); xr(7:9,:); zeros(1,obj.param.H);zeros(24, obj.param.H)]; % 実状態を仮想状態に合わせた形で抜き取る
+      obj.reference.xd_imagine = [xr(1:3,:); zeros(1,obj.param.H); xr(7:9,:); zeros(1,obj.param.H); xr(17:19,:); zeros(21, obj.param.H)]; % 実状態を仮想状態に合わせた形で抜き取る
       % xr_imagine = 
       % yaw入力時にHL用に目標値が切り替わるように　Rb0をかけるようにする
       xr_imagine(1:3,:)=Rb0'*obj.reference.xd_imagine(1:3,:);
@@ -170,6 +170,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % [obj.state.state_data] = predict(Objpredict);
       % [obj.state.state_data] = predict_mex(Objpredict); % N=5000のみ対応
 
+      %% 12状態＋加速度3状態
       [obj.state.state_data] = predict_gpu(obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B);
       % [obj.state.state_data] = obj.predict();
 
@@ -178,6 +179,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       Xreal = Xd + obj.state.state_data; % + or -
       obj.state.error_data = Xd - Xreal;
       obj.state.real_data = Xreal;
+
 
       %-- 評価値計算 
       obj.input.Evaluationtra =  obj.objective();
@@ -363,6 +365,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       %% 実状態との誤差
       Z = obj.state.error_data;
       Zreal = obj.state.real_data;
+
+      %% 加速度
+      % Za = 
         
       %% ホライズンで重み大きく
       k = linspace(1,1.2, obj.param.H); % これにより制約はいるとき滑らかになる
@@ -374,7 +379,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %% 制約外の軌道に対して値を付加
       % x:3, y:7
-      [~, removeX, ~] = obj.constraints();
+      % [~, removeX, ~] = obj.constraints();
 
       %% Artificial potential
       % Xreal = Zreal(3,:,:);
@@ -430,7 +435,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       pw = exp(-pw);
       sumw = sum(pw);
       if sumw~=0
-        pw = pw/sum(pw);%正規化
+        pw = (pw/sum(pw))';%正規化
       else
         pw = zeros(1,NP)+1/NP;
       end

@@ -70,11 +70,11 @@ te = X0{1,2};
 % z = sin(2*pi*t/2.5)*0.02+sin(2*pi*t/2.5)*0.01-sin(2*pi*t/25)*0.005 + 2;
 
 %% circle
-% T = 40; % 20 でもいける
-% x = cos(2*pi*t/T)-1;
-% y = sin(2*pi*t/T);
-% z = 1;
-% yaw = 0;
+T = 10; % 20 でもいける
+x = cos(2*pi*t/T)-1;
+y = sin(2*pi*t/T);
+z = 1;
+yaw = 0;
 
 %% bara
 % A = 8/6;
@@ -98,10 +98,10 @@ te = X0{1,2};
 % yaw = 0;
 
 %% Liner
-x = t/2; % constrains: t/1.7
-y = 0;
-z = 1.0;
-yaw = 0;
+% x = 0; % constrains: t/1.7
+% y = 0;
+% z = 2 * t + 1;
+% yaw = 0;
 
 %% Vertical vibration
 % x = 0;
