@@ -69,7 +69,8 @@ agent.parameter = DRONE_PARAM("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1*ones(1,3),200*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.000005*ones(1,3),0.00001*ones(1,3)])));
 
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1*ones(1,3),100*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1*(1e-8)*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0000001*ones(1,3),0.0000005*ones(1,3)])));
-%AMC_1
+
+%AMC_1  これ！！！！！！！！！！
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18(x,wall_param,p),"output_func",@(x,p) H_18(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1000*ones(1,3),1000*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),5*1e-8*ones(1,1)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.00002*ones(1,3),0.00002*ones(1,3)])));
 
 % オフセットと壁面パラを状態として追加
@@ -80,6 +81,9 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 %PDAF
 % agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),10*ones(1,3),200*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0001ones(1,3),0.0005*ones(1,3)])));
 % agent.estimator = PDAF(agent, Estimator_PDAF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"],"B",eye(12),"R",diag([1e-6*ones(1,3), 1e-6*ones(1,3)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
+%SEKF
+% agent.estimator = SEKF(agent, Estimator_SEKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18(x,wall_param,p),"output_func",@(x,p) H_18(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1000*ones(1,3),1000*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),5*1e-8*ones(1,1)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.00002*ones(1,3),0.00002*ones(1,3)])));
+
 
 agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/2),'p0',[0.01;0.01;0.01],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.000001, 'seed', 0));
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -87,19 +91,19 @@ agent.sensor.do = @sensor_do;
 
 %AMC ref
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.4]}});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1.5],"size",[1,1,1,0.35]}});
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[2,2,2,0.35]}});
 
 %AMCref
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
 
 % コントローラー
 % agent.controller = HLC(agent,Controller_HL(dt));
 
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-1,"On3_1_new"));
+agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1e-1,"On3_1_new"));
 agent.controller.do = @controller_do;
 
 %% Direct model
@@ -136,7 +140,6 @@ function result = controller_do(varargin)
     controller = varargin{5}.controller;
     result.hlc = controller.hlc.do(varargin);
     result.correct = controller.correct.do(varargin);
-    arargin{5}.controller.result.input_c = result.correct.input;
     varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
 end
 % function in_prog(app)
