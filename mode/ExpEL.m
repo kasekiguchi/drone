@@ -41,6 +41,8 @@ agent.estimator.elc = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent
 agent.estimator.result= agent.estimator.hlc.result;
 agent.estimator.result.elc = agent.estimator.elc.result;
 agent.estimator.result.hlc = agent.estimator.hlc.result;
+agent.estimator.flag = 0;
+agent.estimator.flag2 = 0;
 agent.estimator.do = @estimator_do;
 %senser
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -80,9 +82,20 @@ function result = estimator_do(varargin)
     varargin{5}.controller.result =  controller.result.hlc;
     varargin{5}.estimator.result =  estimator.result.hlc;
     result_hlc = estimator.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    if varargin{2} == 'f' && ftime > 0
+    if varargin{2} == 'f' && ftime > 3
+        varargin{5}.estimator.flag=1;
+        % if ~varargin{5}.estimator.flag2
+        %     result_elc.state.Trs = [controller.result.hlc.input(1);0];
+        %     result_elc.state.p = result_hlc.state.p;
+        %     result_elc.state.q = result_hlc.state.q;
+        %     result_elc.state.v= result_hlc.state.v;
+        %     result_elc.state.w = result_hlc.state.w;
+        %     varargin{5}.estimator.flag2=1;
+        % end
         result = result_elc;
     else
+        varargin{5}.estimator.flag=0;
+        varargin{5}.estimator.flag2=0;
         result = result_hlc;
     end
     result.hlc = result_hlc;
@@ -93,10 +106,7 @@ end
 
 function result = input_transform_do(varargin)
     input_transform = varargin{5}.input_transform;
-    if varargin{2} == 'f'
-        ftime = varargin{5}.controller.result.elc.ftime;
-    end
-    if varargin{2} == 'f'&& ftime > 0
+    if varargin{2} == 'f'&& varargin{5}.estimator.flag%ftime > 3
         varargin{5}.estimator.model = varargin{5}.estimator.elc.model;
         result = input_transform.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     else
@@ -112,13 +122,10 @@ function result = controller_do(varargin)
     controller = varargin{5}.controller;
     estimator = varargin{5}.estimator;
     varargin{5}.estimator.result =  estimator.result.elc;
-    % result_elc = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    result_elc = controller.elc.do(varargin{1},varargin{2});
-    ftime = result_elc.ftime;
+    result_elc = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     varargin{5}.estimator.result =  estimator.result.hlc;
-    % result_hlc = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    result_hlc = controller.hlc.do(varargin{1},varargin{2});
-    if varargin{2} == 'f'&& ftime > 0
+    result_hlc = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
+    if varargin{2} == 'f'&& estimator.flag%ftime > 3
         result = result_elc;
     else
         result = result_hlc;
