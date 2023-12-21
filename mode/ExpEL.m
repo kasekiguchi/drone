@@ -82,14 +82,14 @@ function result = estimator_do(varargin)
     result_hlc = estimator.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     if varargin{2} == 'f' && ftime > 3
         varargin{5}.estimator.flag=1;
-        if ~varargin{5}.estimator.flag2
-            result_elc.state.Trs = [controller.result.hlc.input(1);0];
-            result_elc.state.p = result_hlc.state.p;
-            result_elc.state.q = result_hlc.state.q;
-            result_elc.state.v= result_hlc.state.v;
-            result_elc.state.w = result_hlc.state.w;
-            varargin{5}.estimator.flag2=1;
-        end
+        % if ~varargin{5}.estimator.flag2
+        %     result_elc.state.Trs = [controller.result.hlc.input(1);0];
+        %     result_elc.state.p = result_hlc.state.p;
+        %     result_elc.state.q = result_hlc.state.q;
+        %     result_elc.state.v= result_hlc.state.v;
+        %     result_elc.state.w = result_hlc.state.w;
+        %     varargin{5}.estimator.flag2=1;
+        % end
         result = result_elc;
     else
         varargin{5}.estimator.flag=0;
@@ -104,9 +104,6 @@ end
 
 function result = input_transform_do(varargin)
     input_transform = varargin{5}.input_transform;
-    % if varargin{2} == 'f'
-    %     ftime = varargin{5}.controller.result.elc.ftime;
-    % end
     if varargin{2} == 'f'&& varargin{5}.estimator.flag%ftime > 3
         varargin{5}.estimator.model = varargin{5}.estimator.elc.model;
         result = input_transform.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
@@ -123,12 +120,9 @@ function result = controller_do(varargin)
     controller = varargin{5}.controller;
     estimator = varargin{5}.estimator;
     varargin{5}.estimator.result =  estimator.result.elc;
-    % result_elc = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    result_elc = controller.elc.do(varargin{1},varargin{2});
-    % ftime = result_elc.ftime;
+    result_elc = controller.elc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     varargin{5}.estimator.result =  estimator.result.hlc;
-    % result_hlc = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
-    result_hlc = controller.hlc.do(varargin{1},varargin{2});
+    result_hlc = controller.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     if varargin{2} == 'f'&& estimator.flag%ftime > 3
         result = result_elc;
     else
