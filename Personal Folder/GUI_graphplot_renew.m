@@ -9,8 +9,8 @@ opengl software
 clear all;
 clc;
 pdf = 0; %1:pdfでグラフを保存
-name = 'report_saddle';
-folderName = 'report_saddle';
+name = '12_23_report_hov';
+folderName = '12_23_report_hov';
 
 %% 
 % oldmpc = load("1216_hov_oldmpc.mat","log");
@@ -41,7 +41,7 @@ folderName = 'report_saddle';
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("12_20_P2P_旧MPC_12月報告会.mat")
+load("12_23_hov_報告書用.mat")
 disp('load finished')
 
 % for i = 1:find(log.Data.t,1,'last')
@@ -447,6 +447,8 @@ end
 
 
 %% pdfで保存
+fprintf('Enterで保存')
+pause
 if pdf == 1
     mkdir(folderName);
     movefile(folderName,'Graph')

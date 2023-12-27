@@ -54,26 +54,30 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
 
     %シミュレーション時確認用-------------------------------------------------------
-    % Controller_param.weight.P = diag([600; 300; 200]);    % 座標   1000 1000 10000
-    % Controller_param.weight.V = diag([500; 600; 300]);    % 速度
-    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    % Controller_param.weight.QW = diag([600; 15; 1; 300; 100; 1]);  % 姿勢角，角速度
-    % 
+    Controller_param.weight.P = diag([3500; 1500; 50]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([500; 600; 300]);    % 速度
+    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.weight.QW = diag([2300; 2500; 1200; 140; 120; 100]);  % 姿勢角，角速度
+
     % Controller_param.weight.Pf = diag([1000; 500; 200]); % 6
     % Controller_param.weight.Vf = Controller_param.weight.V;
     % Controller_param.weight.QWf = diag([1000; 1; 2000; 300; 100; 1]); % 7,8
 
-    %初見確認用重み--------------------------------------------------------------
-    Controller_param.weight.P = diag([20; 20; 1]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([10; 10; 1]);    % 速度
-    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
-
     Controller_param.weight.Pf = Controller_param.weight.P; % 6
     Controller_param.weight.Vf = Controller_param.weight.V;
     Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
+
+    %初見確認用重み--------------------------------------------------------------
+    % Controller_param.weight.P = diag([20; 20; 1]);    % 座標   1000 1000 10000
+    % Controller_param.weight.V = diag([10; 10; 1]);    % 速度
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    % Controller_param.weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
+    % 
+    % Controller_param.weight.Pf = Controller_param.weight.P; % 6
+    % Controller_param.weight.Vf = Controller_param.weight.V;
+    % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
 
     % Controller_param.weight.Pf = diag([1; 1; 1]); % 6
     % Controller_param.weight.Vf = diag([1; 1; 1]);
