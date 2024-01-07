@@ -76,23 +76,24 @@ classdef ROS2_CONNECTOR < handle
             %         @obj.getData,"History","keepall","Reliability","besteffort");
             % end
             if isfield(info,'subTopic')
-                obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
+                obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"Reliability","besteffort");
             end
             if isfield(info,'pubTopic')
                 obj.publisher.pubTopic = ros2publisher(obj.nodename,obj.pubName,obj.pubMsg);
                 obj.publisher.pubmsg   = ros2message(obj.pubMsg);
             end
+
+            obj.subtopicdata = 1;
         end
 
         function [ret] = getData(obj)
-            %
-            %   詳細説明をここに記述
-%             if isempty(obj.init_time)
-%                 obj.init_time = rostime('now');
-%             end
-%             t = rostime('now') - obj.init_time;
-%             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
-
+            % 詳細説明をここに記述
+            % if isempty(obj.init_time)
+            %     obj.init_time = rostime('now');
+            % end
+            % t = rostime('now') - obj.init_time;
+            % obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
+            % 
             % for i = 1:obj.subTopicNum
             %     % receive(obj.subscriber.subtopic(i));
             %     obj.result{i} = message;

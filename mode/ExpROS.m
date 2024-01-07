@@ -22,9 +22,10 @@ agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 7
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
 % agent.sensor = ROS(agent, Sensor_ROS(struct('DomainID',25)));
 % agent.sensor = ROS2_LiDAR_PCD(agent, Sensor_LiDAR_ROS2(Expnode));
-agent.sensor = ROS2_SENSOR(agent, Sensor_Ros2_multi(agent));
-% agent.estimator = UKF2DSLAM(agent, Estimator_UKF2DSLAM_Vehicle(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
-agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)),'experimentroom_map4'));
+% agent.sensor = ROS2_SENSOR(agent, Sensor_Ros2_multi(agent));
+agent.sensor = ROS2_SENSOR(agent, Sensor_ROS(agent));
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1))));
+% agent.estimator = NDT(agent, Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)),'experimentroom_map4'));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]}});
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
@@ -32,7 +33,7 @@ agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 run("ExpBase");
 
 %%
-clc
+% clc
 % for i = 1:time.te
 % %    if i < 20 || rem(i, 10) == 0, i, end
     % agent(1).sensor.do(time, 'f');

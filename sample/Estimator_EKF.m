@@ -73,7 +73,7 @@ if isempty(opts.B)
     %     EKF_param.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
     %     %             EKF_param.B = [eye(3)*dt^2;zeros(1,3);eye(3)*dt];
     % end
-    if Estimator.model.state.type == 3 % 姿勢がオイラー角の場合
+    if Estimator.model.state.type == 1 % 姿勢がオイラー角の場合
         %        EKF_param.B = [eye(6)*dt^2;eye(6)*dt]; % システムノイズが加わるチャンネル
         Estimator.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
         %             EKF_param.B = [eye(3)*0.01;eye(3)*0.1];
@@ -105,6 +105,7 @@ if contains(Estimator.model.name, "cable_suspended_rigid_body")
 end
 
 Estimator.list = output;
+
 end
 
 function mat = zeroone(row, col, idx)
