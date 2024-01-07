@@ -187,8 +187,9 @@ classdef SIR_model < handle
                 if isfield(W,"P")||isprop(W(1),"P")
                     PU = W.P.*~W.U;
                     V = (V.* ~PU) + 1*PU;
-                    cmin=1;
-                    colorbar('Ticks',[1,2,3,4,5],'TickLabels',{'Path','Not burn','Extinct','Extincting','Burning'})
+                    cmin=2; % Pathを使うときは1
+                    colorbar('Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
+%                     colorbar('Ticks',[1,2,3,4,5],'TickLabels',{'Path','Not burn','Extinct','Extincting','Burning'})
                 end
                 figure=surf(X,Y,[reshape(V,[nx,ny]),2*ones(ny,1);2*ones(1,nx+1)]);hold on;
                 mycmap=[1 1 0; 0 1 0;0.5 0.5 0.5;0 0 1;1 0 0]; %[Blue;Green;Gray;Cyan;Red];
@@ -199,10 +200,10 @@ classdef SIR_model < handle
                 figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
 %               set(gca,'Zscale','log')
 
-                jetCmap = hot;      % ここから下4行(colormapまで)でマップの色を変更
-                jetCmap = flipud(jetCmap);
-                newCmap = jetCmap(1:end,:);
-                colormap(newCmap);
+%                 jetCmap = hot;      % ここから下4行(colormapまで)でマップの色を変更
+%                 jetCmap = flipud(jetCmap);
+%                 newCmap = jetCmap(1:end,:);
+%                 colormap(newCmap);
 
                 colorbar;
             end

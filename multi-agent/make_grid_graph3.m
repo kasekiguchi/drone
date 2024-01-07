@@ -255,9 +255,9 @@ if build == 1
     if xslide + mapdiameter > max(x) || yslide + mapdiameter > max(y)
         disp("slide量またはnxが大きすぎます");
     end
-elseif build == 0
-    xslide = 700;   %700
-    yslide = 235;   %150
+elseif build == 2
+    xslide = 670;   %700
+    yslide = 230;   %150
     if xslide + nx > max(x) || yslide + ny > max(y)
         disp("slide量またはnxが大きすぎます");
     end

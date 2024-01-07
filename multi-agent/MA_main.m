@@ -32,22 +32,27 @@ ny = 130; % y axis grid number
 N = nx*ny; % total grid number
 Il = 30; % length of I
 maxv = 0.04;    % 確率の上限，シミュレーションの進行に関係するパラメータであり、適当な値を入力
-maptrue = 300;   % マップ直径m
+maptrue = 100;   % マップ直径m
 meas = maptrue/100; % 縮尺換算用の関数
 nx_app = 100; % 見かけ上のx辺
 ny_app = 100; % 見かけ上のy辺
 map_extra = nx * ny - nx_app * ny_app ;     %見えない部分の総セル数
 mapd = 180;  % map difference マップ差異（風向の対応関係がマップごとに異なるため、その補正項）
-build = 0;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し、3で延焼調整モード（飛び火OFF）
+build = 1;  %0で手動糸魚川、1で重み分類世田谷（秋山）、2で重み一定自動糸魚川、3で延焼調整モード（飛び火OFF）
 windreal = 0;     %0で定数、1で細分化（エクセル使用）
-mapslope = 12;      %マップの北に対する傾き角度（例：右上が北の場合1~90）
+
+if build == 0
+    mapslope = 12;      %マップの北に対する傾き角度（例：右上が北の場合1~90）
+else
+    mapslope = 0;
+end
 
 %% environment definition
 % % Wの生成に数時間かかるため、make_grid_graphからWのみ独立
 [W] = make_grid_graph3(nx,ny,meas,build,maxv); % 推定2時間以上
 
 %% 風向配列生成
-winddata = readtable('data_ito.csv');   % csvの読み込み
+winddata = readtable('data_ito2.csv');   % csvの読み込み
 
 ke = 240;   % シミュレーションステップ数
 firstime = 1;   % 1でExcelデータの一番上
@@ -120,7 +125,7 @@ else
 end
 
 %% 情報保存
-savefile = '231121_糸魚川_E(細分化).mat';
+savefile = '240101_世田谷100m.mat';
 save(savefile);
 %% 情報読み込み
 loadfile = '231121_糸魚川_E(細分化).mat';
@@ -218,7 +223,7 @@ end
 %% Monte-Carlo simulation
 % 90min =~ 30step
 unum = 6; % 初期の消火点の数（10機のUAV）
-addFirePoint = "Regular";   % Regularで手動糸魚川，testでチューニング
+addFirePoint = "RegularAuto";   % Regularで手動糸魚川，testでチューニング
 addFighter = "ON3"; % OFFは増援0，ON1はざっくり上昇，ON2は糸魚川時のポンプ数に対応
 % ke = 300; % シミュレーションステップ
 kn = 500;% number of Monte-Carlo simulation
@@ -245,8 +250,10 @@ elseif addFirePoint == "Manual"
     prompt2 = "初期出火点(fFPosition)をy座標を設定せよ!!!";
     init_fy=input(prompt2);
     fFPosition(1) = init_fx; fFPosition(2) = init_fy;
-elseif addFirePoint == "Regular"
+elseif addFirePoint == "Regular"    %手動糸魚川の初期出火点
     fFPosition = 6;
+elseif addFirePoint == "RegularAuto"    %重み一定
+    fFPosition = 7;
 end
 W_vec = reshape(W,N,1);
 clear Logger
@@ -292,6 +299,7 @@ else
 end
 w2 = 1/((XM-Xm)/max(nx,ny));
 map = model_init(N,Il,h,nx,ny,fFPosition,W_vec);
+figure('Position', [0 -500 1100 1000]);
 map.draw_state(nx,ny,W)
 % V_mat = reshape(V,[nx,ny]);     %重みAPRグラフ表示のための正方行列化
 % map.draw_state(nx,ny,V_mat);    %重みAPRのグラフ表示
@@ -304,20 +312,20 @@ for k = 1:kn
     K(k);
 end
 %% %%% 違法増築1 Logデータの保存
-map.save('231122_Log500[240s]風一定Tuning_M糸_Regular_ON3_W_Direct_h0.1.mat',Logger);
+% map.save('231204_Log500[240s]風細分化_M糸_Regular_ON3_W_Direct_h0.1.mat',Logger);
 % map.save('K_Feb22_WAPR_Direct_unum15_vi5_h0.1_Log2.mat',K);
 %% %%% 違法増築2 動画の生成と保存
 % 事前必用準備：plot 2の実行
-i = 2;
+i = 277;
 stepP = 20;%final_step(i)
-figure('Position', [0 -500 1100 1000]);
+figure('Position', [0 -500 900 1000]);
 % Logger2=map.load('Logger_APR_Astar_100_30_09_004_10_5.mat');
 % K2 = map.load('K_APR_Astar_100_30_09_004_10_5.mat');
 md = map.draw_state(nx,ny,map.loggerk(Logger(i),stepP));    %nステップ目を画像出力
 % M = map.draw_movie(Logger(1),nx,ny,0);    %動画を出力
 % M=map.draw_movie(Logger(53),nx,ny,1,"230725_風情報細分化シミュレーション");  %名前を付けて動画を出力
 %% %%% 違法増築3 Logデータの読み込み
-Logger=map.load('231121_Log100[300s]風細分化_M糸_Regular_ON3_W_Direct_h0.1.mat');
+Logger=map.load('230728_Log200[400s]_手動糸魚川_W_Direct_8st_h0.1_糸魚川300風細分化(32).mat');
 %% plot 1　いろいろな統計データの出力項
 % 消失セル数の算出
 clear xi
@@ -389,7 +397,7 @@ disp('Plot ended')
 figure('Position', [0 -500 1100 1000]);
 hold on 
 clear xi kre
-for xi = 1:kn
+for xi = 1:kn   % nx:nx とすれば特定の回のみを見ることが出来る
     kre = size(Logger(xi).I);
     kre = kre(1,2);  %シミュレーションの最終ステップ数
     tmpR4 = 0;
@@ -506,7 +514,7 @@ map.draw_state(nx,ny,BR)
 c = colorbar;
 c.TicksMode = "manual";
 w = c.Ticks;
-k = 10;
+k = 25;
 c.Ticks(1,1) = 1;
 for i = 2:kn/k
     c.Ticks(1,i) = k * (i-1);
@@ -532,8 +540,8 @@ if numel(fFPosition) == 1
             init_fx=50;
             init_fy=11;
         case 7
-            init_fx=41;
-            init_fy=11;
+            init_fx=54;
+            init_fy=10;
         case 8
             init_fx=28;
             init_fy=8;
