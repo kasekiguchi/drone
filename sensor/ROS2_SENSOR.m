@@ -30,17 +30,17 @@ classdef ROS2_SENSOR < handle
             %  このクラスのインスタンスを作成
             obj.self = self;
 
-            if isfield(param, 'state_list')
+            if isfield(topics, 'state_list')
                 obj.fState = 1;
 
                 if obj.fState
-                    obj.result.state = STATE_CLASS(struct('state_list', param.state_list, "num_list", param.num_list));
+                    obj.result.state = STATE_CLASS(struct('state_list', topics.state_list, "num_list", topics.num_list));
                 end
 
-                if sum(contains(self.model.state.list, "q")) == 1 && sum(contains(param.state_list, "q")) == 1
-                    obj.result.state.num_list(contains(param.state_list, "q")) = length(self.model.state.q); % modelと合わせる
-                    obj.result.state.type = length(self.model.state.q);
-                end
+                % if sum(contains(self.model.state.list, "q")) == 1 && sum(contains(topics.state_list, "q")) == 1
+                %     obj.result.state.num_list(contains(topics.state_list, "q")) = length(self.model.state.q); % modelと合わせる
+                %     obj.result.state.type = length(self.model.state.q);
+                % end
 
             end
 

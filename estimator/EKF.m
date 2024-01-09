@@ -68,6 +68,7 @@ methods
 
         else
             dt = obj.dt;
+            
         end
 
         if varargin{1}.t ~= 0

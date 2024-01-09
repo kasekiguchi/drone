@@ -95,7 +95,7 @@ classdef STATE_CLASS < matlab.mixin.SetGetExactNames & dynamicprops & matlab.mix
       if isempty(varargin) % ①
         output = cell2mat(arrayfun(@(t) obj.(t)',string(obj.list),'UniformOutput',false))';
       else % ②，③ 情報を指定して取り出す場合
-        if strcmp(varargin{1},"state")
+        if strcmp(varargin{1}(1),"p")
           F = fieldnames(obj);
           for i = 1:length(F)
             if ~strcmp(F{i},'list') && ~strcmp(F{i},'num_list') && ~strcmp(F{i},'type')
