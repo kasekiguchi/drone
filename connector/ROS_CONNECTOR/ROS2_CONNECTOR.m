@@ -24,7 +24,7 @@ classdef ROS2_CONNECTOR < handle
         pubMsg
 %         pubMsg  % 送信msg
 
-
+        Hz=10
         subtopicdata
     end
 
@@ -75,6 +75,10 @@ classdef ROS2_CONNECTOR < handle
             %     obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg, ...
             %         @obj.getData,"History","keepall","Reliability","besteffort");
             % end
+
+            if isfield(info,"Hz")
+                obj.Hz = info.Hz;
+            end
             if isfield(info,'subTopic')
                 obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
             end
@@ -86,26 +90,27 @@ classdef ROS2_CONNECTOR < handle
 
         function [ret] = getData(obj)
             %   詳細説明をここに記述
-            if isempty(obj.init_time)
-                % [obj.init_time_sec,obj.init_time_nsec] = ros2time(obj.nodename,'now');
-                obj.init_time = ros2time(obj.nodename,'now');                
-            end
-            time = ros2time(obj.nodename,'now');
-            t.Sec  = time.sec - obj.init_time.sec;
-            t.Nsec = time.nanosec - obj.init_time.nanosec;
-            obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
-
-            % for i = 1:obj.subTopicNum
-            %     % receive(obj.subscriber.subtopic(i));
-            %     obj.result{i} = message;
+            % if isempty(obj.init_time)
+            %     % [obj.init_time_sec,obj.init_time_nsec] = ros2time(obj.nodename,'now');
+            %     obj.init_time = ros2time(obj.nodename,'now');                
             % end
+            % time = ros2time(obj.nodename,'now');
+            % t.Sec  = time.sec - obj.init_time.sec;
+            % t.Nsec = time.nanosec - obj.init_time.nanosec;
+            % obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
+            % 
+            % % for i = 1:obj.subTopicNum
+            % %     % receive(obj.subscriber.subtopic(i));
+            % %     obj.result{i} = message;
+            % % end
+
             i=1;
             while(1)
-                pause(0.5)
+                pause(1/obj.Hz)
                 ret = obj.subtopicdata;
                 if ~isempty(ret) break; end
                 str = "toipic data " + string(i) + " lost";
-                disp(str)
+                disp(str)   
             end
         end
         function sub_callback(obj,message)%%%%%callback
