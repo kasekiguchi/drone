@@ -47,6 +47,7 @@ methods
 
         obj.ros.subtopicdata.pose.pose.position.x = 0;
         obj.ros.subtopicdata.pose.pose.position.y = 0;
+        obj.ros.subtopicdata.pose.pose.position.z = 0;
         obj.ros.subtopicdata.pose.pose.orientation.x = 0;
         obj.ros.subtopicdata.pose.pose.orientation.y = 0;
         obj.ros.subtopicdata.pose.pose.orientation.z = 0;
