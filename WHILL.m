@@ -12,7 +12,6 @@ properties %(Access = private)
     input_transform
     % id = 1
     id
-    node
 end
 
 methods

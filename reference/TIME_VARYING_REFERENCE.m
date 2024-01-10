@@ -31,7 +31,8 @@ classdef TIME_VARYING_REFERENCE < handle
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [22, 3, 3, 3]));                    
                 end
             else
-                obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
+                % obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [length(obj.func(0)), 3, 3, 3]));
+                obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q"], 'num_list', [length(obj.func(0)), 3, 3]));
             end
             obj.result.state.set_state("xd",obj.func(0));
             obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
@@ -49,14 +50,15 @@ classdef TIME_VARYING_REFERENCE < handle
                 obj.t=varargin{1}.t;
                 t = obj.t;
            end           
-           obj.result.state.xd = subs(obj.func(t),"t",t); % 目標重心位置（絶対座標）
+           % obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
+           obj.result.state.xd = subs(obj.func,"t",t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
             obj.result.state.v = obj.result.state.xd(5:7);
            else
-            obj.result.state.v = [0;0;0];
+            % obj.result.state.v = [0;0;0];
            end
-           obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
+           % obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            result = obj.result;
         end
         function show(obj, logger)

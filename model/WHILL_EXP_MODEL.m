@@ -70,10 +70,15 @@ methods
   
   
 function do(obj,varargin)
-    t = varargin{1,1}.t; 
-    % u = obj.self.controller.result.input;%%追記11/8%追追記11/9
+    t = varargin{1}.t; 
+    % u = obj.self.controller.result.input;
+    u = double(obj.self.controller.result.input);%%追記11/8%追追記11/9%追記11/27
+    % [theta,rho] = cart2pol(p(1),p(2));
+    % u = [theta,rho];
     % u = obj.self.input_transform.result;
     cha = varargin{2};
+    % u = obj.self..input_transform.result;
+    % u = varargin{5}.controller.result.input;
         % if length(varargin) == 1
 
             % if ~isfield(varargin{1}, 'FH')
@@ -86,7 +91,9 @@ function do(obj,varargin)
             % if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
             %     cha = obj.phase;
             % end
-
+            if u(1) > abs(1.7)
+               cha = 'q';                
+            end
             obj.phase = cha;
 
             switch cha
@@ -106,30 +113,21 @@ function do(obj,varargin)
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
-%                     state = obj.connector.getData();
-%                     obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.result.state.eq = quat2eul(obj.result.state.qq);
-%                     obj.state.p = [state.pose.position.z,state.pose.position.x];
-%                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-%                     obj.state.eq = quat2eul(obj.state.qq);
-                case 'f' % run
-                    u = obj.self.input_transform.result;
-                    obj.msg.linear.x = u(1);
-                    obj.msg.linear.y = 0.0;
-                    obj.msg.linear.z = 0.0;
-                    obj.msg.angular.x = 0.0;
-                    obj.msg.angular.y = 0.0;
-                    obj.msg.angular.z = u(2);
-                case 'a'
-                    obj.self.controller.result.input = 0;
-                    obj.self.input_transform.result = 0;
+                case 'a' % stop
                     obj.msg.linear.x = 0.0;
                     obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
+                case 'f' % run                    
+                    obj.msg.linear.x = u(1);
+                    obj.msg.linear.y = 0.0;
+                    obj.msg.linear.z = 0.0;
+                    obj.msg.angular.x = 0.0;
+                    obj.msg.angular.y = 0.0;
+                    obj.msg.angular.z = u(2);
+
             end
 
 %         else % 緊急時
@@ -149,12 +147,16 @@ function do(obj,varargin)
 % %             obj.state.eq = quat2eul(obj.state.qq);
 %             return;
 %         end
-       
+        % obj.self.input_transform = u;
         obj.connector.sendData(obj.msg);
     end
 
+
     function set_param(obj, param)
         obj.offset = param;
+    end
+    function arming(obj)
+      % obj.connector.sendData(gen_msg(obj.arming_msg));
     end
 
 end

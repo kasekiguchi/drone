@@ -85,20 +85,28 @@ classdef ROS2_CONNECTOR < handle
         end
 
         function [ret] = getData(obj)
-            %
             %   詳細説明をここに記述
-%             if isempty(obj.init_time)
-%                 obj.init_time = rostime('now');
-%             end
-%             t = rostime('now') - obj.init_time;
-%             obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
+            if isempty(obj.init_time)
+                % [obj.init_time_sec,obj.init_time_nsec] = ros2time(obj.nodename,'now');
+                obj.init_time = ros2time(obj.nodename,'now');                
+            end
+            time = ros2time(obj.nodename,'now');
+            t.Sec  = time.sec - obj.init_time.sec;
+            t.Nsec = time.nanosec - obj.init_time.nanosec;
+            obj.result.time = double(t.Sec)+double(t.Nsec)*10^-9;
 
             % for i = 1:obj.subTopicNum
             %     % receive(obj.subscriber.subtopic(i));
             %     obj.result{i} = message;
             % end
-
-            ret = obj.subtopicdata;
+            i=1;
+            while(1)
+                pause(0.5)
+                ret = obj.subtopicdata;
+                if ~isempty(ret) break; end
+                str = "toipic data " + string(i) + " lost";
+                disp(str)
+            end
         end
         function sub_callback(obj,message)%%%%%callback
             obj.subtopicdata = message;

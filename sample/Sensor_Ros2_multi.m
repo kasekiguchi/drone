@@ -23,8 +23,9 @@ setting.subTopic(2,:) = {'/scan_back' ,'sensor_msgs/LaserScan'};
 Sensor.param = setting;
 % Sensor.pfunc = str2func("rover_pub");
 Sensor.pfunc = @rover_pub;
-%% ローバー自身の点群認識
-    function  ptCloudOut = rover_pub(sensor_data)
+% Sensor.pfunc = [];
+
+function  ptCloudOut = rover_pub(sensor_data)
     for i = 1:length(sensor_data)
         data2pcd = rosReadCartesian(sensor_data{i});
         moving_pc(i) = pointCloud([data2pcd zeros(size(data2pcd,1),1)]); % moving:m*3           
@@ -56,9 +57,11 @@ Sensor.pfunc = @rover_pub;
         T = [0.46 0.023 0]; %並進方向(x,y,z)
         tform = rigidtform3d(rot,T);
         
-        moving_pc2_m_b = pctransform(moving_pc(2),tform);
+        moving_pc2_m_b = pctransform(moving_pc(2),tform);        
         
-        ptCloudOut = pcmerge(moving_pc(1), moving_pc2_m_b, 0.001);
+        pcd = pcmerge(moving_pc(1), moving_pc2_m_b, 0.001);
+        T = [0 0 0];tform = rigidtform3d(rot,T);
+        ptCloudOut = pctransform(pcd,tform);
     end
 
 end

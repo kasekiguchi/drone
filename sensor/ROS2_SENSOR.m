@@ -10,7 +10,7 @@ properties
     % ros2param
     prosesssfunc
     Node
-    radius
+    radius=0;
 end
 
 methods
@@ -20,7 +20,7 @@ methods
         topics = param.param;
         topics.node = obj.Node;
         subTopics = topics.subTopic;
-        for i = 1:length(subTopics)
+        for i = 1:length(subTopics(:,1))
             topics.subTopic = subTopics(i,:);
             obj.ros{i} = ROS2_CONNECTOR(topics);
         end
@@ -38,7 +38,6 @@ methods
                 obj.result.state.num_list(contains(param.state_list, "q")) = length(self.model.state.q); % modelと合わせる
                 obj.result.state.type = length(self.model.state.q);
             end
-
         end
 
         % data = obj.ros.getData;
@@ -52,74 +51,31 @@ methods
         %   set obj.result.state : State_obj,  p : position, q : quaternion
         %   result :
         % 【入力】motive ：NATNET_CONNECOTR object
-        
-        while(1)            
-            for i = 1:length(obj.ros)
-                data{i} = obj.ros{i}.getData;
-            end
-            if isempty(data{1})|isempty(data{2})
-                % break
-                disp("pointcloud lost")
-            else
-                break
-            end
-            pause(0.05)
-        end
-        
-        % for i = 1:length(data)
-        %     data2pcd = rosReadCartesian(data{i});
-        %     moving_pc(i) = pointCloud([data2pcd zeros(size(data2pcd,1),1)]); % moving:m*3           
-        % end
 
-    % %% ローバー自身の点群認識
-    %     roi = [0.1 0.35 -0.18 0.16 -0.1 0.1];
-    % 
-    %     indices_f = findPointsInROI(moving_pc(1),roi);
-    %     Df = zeros(size(moving_pc(1).Location));
-    % 
-    %     indices_b = findPointsInROI(moving_pc(2),roi);
-    %     Db = zeros(size(moving_pc(2).Location));
-    % 
-    %     Df(indices_f,3) = 5;
-    %     Db(indices_b,3) = 5;
-    %     ptCloud_tf = pctransform(moving_pc(1),Df);
-    %     ptCloud_tb = pctransform(moving_pc(2),Db);
-    %     % %%%%%%%%%ローバー自身の点群除去%%%%%%%%%%%%%%
-    %     roi = [-10 10 -10 10 -1 1];%入力点群の x、y および z 座標の範囲内で直方体 ROI を定義
-    % 
-    % 
-    %     indices_f = findPointsInROI(ptCloud_tf,roi);%直方体 ROI 内にある点のインデックスを検出
-    %     moving_pc(1) = select(ptCloud_tf,indices_f);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納    
-    % 
-    %     indices_b = findPointsInROI(ptCloud_tb,roi);%直方体 ROI 内にある点のインデックスを検出
-    %     moving_pc(2) = select(ptCloud_tb,indices_b);%直方体 ROI 内にある点を選択して、点群オブジェクトとして格納
-    %     %% pcd合成
-    %     rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
-    %     T = [0.46 0.023 0]; %並進方向(x,y,z)
-    %     tform = rigidtform3d(rot,T);
-    % 
-    %     moving_pc2_m_b = pctransform(moving_pc(2),tform);
-    % 
-    %     ptCloudOut = pcmerge(moving_pc(1), moving_pc2_m_b, 0.001);
-        % ptCloudOut = pcmerge(moving_pc.f, moving_pc2_m, 0.001);
+        for i = 1:length(obj.ros)
+            data{i} = obj.ros{i}.getData;
+        end              
+
         PCdata_use = obj.prosesssfunc(data);
         
-        rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
+        rot = eul2rotm(deg2rad([0 0 0]),'XYZ'); %回転行列(roll,pitch,yaw)
         T = [0.17 0 0]; %並進方向(x,y,z)
         tform = rigidtform3d(rot,T);
-        % moving_pcm = pctransform(ptCloudOut,tform);
-
-        obj.result = pctransform(PCdata_use,tform);
-        % obj.result = scanpcplot_rov(moving_pc);
+        % moving_pcm = pctransform(ptCloudOut,tform);        
+        obj.result{1} = pctransform(PCdata_use,tform);
+        %%%%%for PC2LDA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % tic
+        theta=zeros(1,length(PCdata_use.Count));rho=theta;
+        for i=1:PCdata_use.Count
+            [theta(i),rho(i)] = cart2pol(PCdata_use.Location(i,1),PCdata_use.Location(i,2));            
+        end
+        % toc
+        obj.result{2}.angle= theta;
+        obj.result{2}.length=rho;
+        %%%%%for PC2LDA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
         result = obj.result;
     end
 
-    %         function show(obj,varargin)
-    %             if ~isempty(obj.result)
-    %             else
-    %                 disp("do measure first.");
-    %             end
-    %         end
     function show(obj, pq, q)
 
         % arguments
