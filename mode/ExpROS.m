@@ -17,7 +17,7 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = WHILL;
-agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 24));%agentでnodeを所持
+agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 23));%agentでnodeを所持
 % agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros",25));
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
 % agent.sensor = ROS(agent, Sensor_ROS(struct('DomainID',25)));

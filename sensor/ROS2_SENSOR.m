@@ -45,7 +45,12 @@ methods
 
         end
 
-        obj.ros.subtopicdata = 1;
+        obj.ros.subtopicdata.pose.pose.position.x = 0;
+        obj.ros.subtopicdata.pose.pose.position.y = 0;
+        obj.ros.subtopicdata.pose.pose.orientation.x = 0;
+        obj.ros.subtopicdata.pose.pose.orientation.y = 0;
+        obj.ros.subtopicdata.pose.pose.orientation.z = 0;
+        obj.ros.subtopicdata.pose.pose.orientation.w = 1;
 
         % data = obj.ros.getData;
         % data = obj.ros{1}.getData;
@@ -80,7 +85,7 @@ methods
             else
                 break
             end
-            pause(0.05)
+            pause(0.5)
         end
 
         result = data;

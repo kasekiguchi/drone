@@ -83,8 +83,8 @@ if isempty(opts.B)
     end
 
     if Estimator.model.state.type == 1 % 姿勢がオイラー角の場合
-        % EKF_param.B = [eye(6)*dt^2;eye(6)*dt]; % システムノイズが加わるチャンネル
-        Estimator.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
+        % Estimator.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
+        Estimator.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
     end
 else
     Estimator.B = opts.B;

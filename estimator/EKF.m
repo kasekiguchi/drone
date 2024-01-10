@@ -60,14 +60,14 @@ methods
     function [result] = do(obj, varargin)
 
         if ~isempty(obj.timer)
-            dt = toc(obj.timer);
+            obj.dt = toc(obj.timer);
 
-            if dt > obj.dt
-                dt = obj.dt;
+            if obj.dt > obj.dt
+                obj.dt = obj.dt;
             end
 
         else
-            dt = obj.dt;
+            obj.dt = obj.dt;
         end
 
         if varargin{1}.t ~= 0
@@ -77,7 +77,7 @@ methods
             xh_pre = obj.model.state.get(); % Pre-estimation
             yh = obj.output_func(xh_pre, obj.output_param); % output estimation
             p = obj.self.parameter.get();
-            A = eye(obj.n) + obj.JacobianF(x, p) * dt; % Euler approximation
+            A = eye(obj.n) + obj.JacobianF(x, p) * obj.dt; % Euler approximation
             C = obj.JacobianH(x, p);
             P_pre = A * obj.result.P * A' + obj.B * obj.Q * obj.B'; % Predicted covariance
             G = (P_pre * C') / (C * P_pre * C' + obj.R); % Kalman gain
