@@ -18,7 +18,7 @@ ts = 0;
 if fExp
     te = 10000; %こちらは実機
 else
-    te = 60; % default: 10 シミュレーション用時間
+    te = 80; % default: 10 シミュレーション用時間
 end
 
 %% generate environment(シミュレーション環境の構築)
@@ -60,7 +60,7 @@ if fExp
             initial(i).v = [0; 0; 0];
             initial(i).w = [0; 0; 0];
         else % とりあえず用
-            arranged_pos = arranged_position([1, 0], N, 1, 1);
+            arranged_pos = arranged_position([0, 0], N, 1, 1);
             initial(i).p = arranged_pos(:, i);
             initial(i).q = [1; 0; 0; 0];
             initial(i).v = [0; 0; 0];

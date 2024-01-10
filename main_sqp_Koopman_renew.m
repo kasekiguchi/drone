@@ -32,7 +32,7 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
 %-- MPC関連 変数定義 
     Params.H = 10;  % 10
 %     Params.dt = 0.25; %MPCステップ幅
-    Params.dt = 0.0525; %MPCステップ幅 0.07
+    Params.dt = 0.07; %MPCステップ幅 0.07
     idx = 0; %プログラムの周回数
     totalT = 0;
     Params.flag = 0; %1：PtoPでのリファレンスの入れ替え
@@ -95,12 +95,18 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), fExp, LogData, LogAgentData);
     
     %-- fmincon設定
     options.Algorithm = 'sqp';  % 逐次二次計画法
+    % options.Algorithm = 'interior-point';
     options.Display = 'none';   % 計算結果の表示
     %Koopman
+    filename = 'drone\Koopman_data\EstimationResult_12state_11_29_GUIsimdata.mat';
+    % filename = 'drone\Koopman_data\case5.mat';
+    % filename = 'drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat';
+    
     % load('')
     % load('drone\koopman_data\EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat','est') %円(順逆)+サドル+P2P(x,y),観測量：状態+非線形項
     % load('drone\Koopman_data\EstimationResult_12state_11_29_GUIsimdata.mat')
-    load('drone\Koopman_data\case5.mat');
+    % load('drone\Koopman_data\case5.mat');
+    load(filename, 'est');
     Params.A = est.A;
     Params.B = est.B;
     Params.C = est.C;
@@ -293,7 +299,7 @@ fprintf("%f秒\n", totalT)
 Fontsize = 15;  timeMax = 100;
 set(0, 'defaultAxesFontSize', Fontsize);
 set(0, 'defaultTextFontSize', Fontsize);
-logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2", "e"}, "fig_num",1,"row_col",[2,3]);
+logger.plot({1,"p","er"},{1,"v","e"},{1,"q","e"},{1,"w","e"},{1,"input",""},{1, "p1-p2","er"}, "fig_num",1,"row_col",[2,3]);
 set(gca, "Position", [960 0 960 1000])
 
 Est = [logger.data(1, "p", "e")'; logger.data(1, "q", "e")'; logger.data(1, "v" ,"e")'];
@@ -349,21 +355,43 @@ grid on; xlim([0 xmax]); ylim([-inf inf]);
 % xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
 
 % velocity
-figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
-xlabel("Time /s"); ylabel("Velocity / m/s"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref",  "Location","southeast");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
+% figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
+% xlabel("Time /s"); ylabel("Velocity / m/s"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref",  "Location","southeast");
+% grid on; xlim([0 xmax]); ylim([-inf inf]);
 % input
 figure(4); 
 plot(logt, Idata, "LineWidth", 1.5); hold on; hold off;
-xlabel("Time /s"); ylabel("Input /N"); legend("rotor1", "rotor2", "rotor3", "rotor4","Location","southeast");
-grid on; xlim([0 xmax]); ylim([-inf inf]);
+xlabel("Time /s"); ylabel("Input /N"); legend("rotor1", "rotor2", "rotor3", "rotor4","Location","northeast");
+grid on; xlim([0 xmax]); ylim([1.4425 1.444]);
 ytickformat('%.4f')
 
-figure(5);
+% figure(5);
+% plot(Edata(1,:), Edata(2,:), "LineWidth", 1.5);
+% xlabel("x /m"); ylabel("y /m");
+% grid on; xlim([-inf inf]); ylim([-inf inf]);
+% daspect([1,1,1])
+
+%%
+figure(10);
+subplot(1,2,1);
+plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
+ylabel("Position /m")
+legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "Location","southeast");
+xlabel("Time /s");  
+grid on; xlim([0 xmax]); %ylim([0 5000]);
+
+subplot(1,2,2);
 plot(Edata(1,:), Edata(2,:), "LineWidth", 1.5);
 xlabel("x /m"); ylabel("y /m");
 grid on; xlim([-inf inf]); ylim([-inf inf]);
-daspect([1,1,1])
+daspect([1,1,1]);
+f = gcf;
+f.Position = [300 300 1100 400];
+
+%
+x_min = min(Edata(1,:)); x_max = max(Edata(1,:));
+y_min = min(Edata(2,:)); y_max = max(Edata(2,:));
+range = [abs(x_max - x_min); abs(y_max - y_min)]
 
 %% error
 % figure(10)
@@ -371,9 +399,10 @@ error = Edata - Rdata(1:3,:);
 % plot(logt, error);
 % legend("x-xd", "y-yd", "z-zd", "Location","southeast");
 err_abs = abs(error);
-[max_x] = max(err_abs(1,:))
-max_y = max(err_abs(2,:))
-max_z = max(err_abs(3,:))
+max_x = max(err_abs(1,:));
+max_y = max(err_abs(2,:));
+max_z = max(err_abs(3,:));
+xyz_max = [max_x; max_y; max_z]
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
