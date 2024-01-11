@@ -1,22 +1,22 @@
 %% GUI projectの情報を用いたパラメータ解析
 % EKFによるパラメータ推定の結果確認
 %% Initialize settings
-% clear
-% cf = pwd;
-% if contains(mfilename('fullpath'),"mainGUI")
-%   cd(fileparts(mfilename('fullpath')));
-% else
-%   tmp = matlab.desktop.editor.getActive; 
-%   cd(fileparts(tmp.Filename));
-% end
-% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-% cd(cf); close all hidden; clear all; userpath('clear');
-% 
-% close all;
+clear
+cf = pwd;
+if contains(mfilename('fullpath'),"mainGUI")
+  cd(fileparts(mfilename('fullpath')));
+else
+  tmp = matlab.desktop.editor.getActive; 
+  cd(fileparts(tmp.Filename));
+end
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+cd(cf); close all hidden; clear all; userpath('clear');
+
+close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/u_correct1212_1.mat');
+log = LOGGER('./Data/u_plain1212_1.mat');
 O_func = @(x,u) On3_1_new(x,u);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
 f_png=0;
@@ -499,6 +499,37 @@ if illustration == 1
     ylabel('Condition number \it{D}','FontSize', 16);
     xlim([0, maxt]);
 
+
+    fig41=figure(41);
+    fig41.Color = 'white';
+    plot(time,ref_p(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,ref_p(2,:),'LineWidth', 2);
+    plot(time,ref_p(3,:),'LineWidth', 2);
+    plot(time,robot_p(1,:),'LineWidth', 2);
+    plot(time,robot_p(2,:),'LineWidth', 2);
+    plot(time,robot_p(3,:),'LineWidth', 2);
+    lgd=legend('\it{x_r}','\it{y_r}','\it{z_r}','\it{x}','\it{y}','\it{z}','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    hold off;
+    xlabel('time [s]','FontSize', 16)
+    ylabel('position \it{p} [m]','FontSize', 16);
+    grid on;
+    fig42=figure(42);
+    fig42.Color = 'white';
+    plot(time,ref_q(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,ref_q(2,:),'LineWidth', 2);
+    plot(time,ref_q(3,:),'LineWidth', 2);
+    plot(time,robot_q(1,:),'LineWidth', 2);
+    plot(time,robot_q(2,:),'LineWidth', 2);
+    plot(time,robot_q(3,:),'LineWidth', 2);
+    lgd=legend('\phi_{r}','\theta_{r}','\psi_{r}','\phi','\theta','\psi','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    hold off;
+    xlabel('time [s]','FontSize', 16);
+    ylabel('orientation \it{q} [rad]','FontSize', 16);
+    grid on;
 end
 if f_png==1
 %     pass2 = 'C:\Users\yuika\Desktop\修士\中間発表\ppt';
@@ -554,24 +585,27 @@ if f_png==1
 %     end   
 end
 if f_eps==1
-    pass2 = 'C:\Users\student\Desktop\Nozaki\unormal';
-    saveas(fig7, fullfile(pass2, 'EKF_posu.eps'), 'epsc');
-    saveas(fig8, fullfile(pass2, 'EKF_angu.eps'), 'epsc');
-    saveas(fig18, fullfile(pass2, 'EKF_posAllu.eps'), 'epsc');
-    saveas(fig2, fullfile(pass2, 'EKF_angAllu.eps'), 'epsc');
-    saveas(fig11, fullfile(pass2, 'EKF_vu.eps'), 'epsc');
-    saveas(fig13, fullfile(pass2, 'EKF_wu.eps'), 'epsc');
-    saveas(fig14, fullfile(pass2, 'rankOu.eps'), 'epsc');
-    saveas(fig15, fullfile(pass2, 'minSu.eps'), 'epsc');
-    saveas(fig16, fullfile(pass2, 'Singular_Valueu.eps'), 'epsc');
-    saveas(fig17, fullfile(pass2, 'S_15_18u.eps'), 'epsc');
-    saveas(fig31, fullfile(pass2, 'condNu.eps'), 'epsc');
-    if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psbu.eps'), 'epsc');
-        saveas(fig10, fullfile(pass2, 'EKF_qsu.eps'), 'epsc');
-        saveas(fig12, fullfile(pass2, 'EKF_instu.eps'), 'epsc');
-    end   
-
+    pass2 = '\Users\yuika\Desktop\修士\bachelor\修士論文\fig';
+    % pass2 = 'C:\Users\student\Desktop\Nozaki\unormal';
+    % saveas(fig7, fullfile(pass2, 'EKF_posu.eps'), 'epsc');
+    % saveas(fig8, fullfile(pass2, 'EKF_angu.eps'), 'epsc');
+    % saveas(fig18, fullfile(pass2, 'EKF_posAllu.eps'), 'epsc');
+    % saveas(fig2, fullfile(pass2, 'EKF_angAllu.eps'), 'epsc');
+    % saveas(fig11, fullfile(pass2, 'EKF_vu.eps'), 'epsc');
+    % saveas(fig13, fullfile(pass2, 'EKF_wu.eps'), 'epsc');
+    % saveas(fig14, fullfile(pass2, 'rankOu.eps'), 'epsc');
+    % saveas(fig15, fullfile(pass2, 'minSu.eps'), 'epsc');
+    % saveas(fig16, fullfile(pass2, 'Singular_Valueu.eps'), 'epsc');
+    % saveas(fig17, fullfile(pass2, 'S_15_18u.eps'), 'epsc');
+    % saveas(fig31, fullfile(pass2, 'condNu.eps'), 'epsc');
+    % if f_offset == 1
+    %     saveas(fig9, fullfile(pass2, 'EKF_psbu.eps'), 'epsc');
+    %     saveas(fig10, fullfile(pass2, 'EKF_qsu.eps'), 'epsc');
+    %     saveas(fig12, fullfile(pass2, 'EKF_instu.eps'), 'epsc');
+    % end   
+    saveas(fig1, fullfile(pass2, 'input_non.eps'), 'epsc');
+    saveas(fig41, fullfile(pass2, 'refand_non.eps'), 'epsc');
+    saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
 
 %     pass2 = 'C:\Users\student\Desktop\Nozaki\bad'; %P:192.168.100.20 PC
 %     saveas(fig7, fullfile(pass2, 'EKF_pos_b.eps'), 'epsc');
