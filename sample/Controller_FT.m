@@ -65,7 +65,7 @@ ax =Controller.ax ;
 ay =Controller.ay;
 apsi =Controller.apsi;
 %%
-isDiffrenceCrossPoint = 10;
+isDiffrenceCrossPoint = 1;
 %0.2m 位置のみ数倍している
 % crossPoint1 = [0.2*5    0.4919];%線形入力と交わる場所を指定
 % crossPoint2 = [0.2000*1.1    0.1425    0.2222    0.8192];%線形入力と交わる場所を指定
@@ -92,10 +92,15 @@ isDiffrenceCrossPoint = 10;
 % crossPoint3 = [1.5000    1.7136    3.9338   17.3780];%線形入力と交わる場所を指定
 % crossPoint4 = [0.0065    0.0598];%線形入力と交わる場所を指定
 %1.5m
-crossPoint1 = 1.5*ones(1,2);%線形入力と交わる場所を指定
-crossPoint2 = 1.5*ones(1,4);%線形入力と交わる場所を指定
-crossPoint3 = 1.5*ones(1,4);%線形入力と交わる場所を指定
-crossPoint4 = 1.5*ones(1,2);%線形入力と交わる場所を指定
+% crossPoint1 = 1.5*ones(1,2);%線形入力と交わる場所を指定
+% crossPoint2 = 1.5*ones(1,4);%線形入力と交わる場所を指定
+% crossPoint3 = 1.5*ones(1,4);%線形入力と交わる場所を指定
+% crossPoint4 = 1.5*ones(1,2);%線形入力と交わる場所を指定
+crossPoint1 = 1*ones(1,2);%線形入力と交わる場所を指定
+crossPoint2 = 1*ones(1,4);%線形入力と交わる場所を指定
+crossPoint3 = 1*ones(1,4);%線形入力と交わる場所を指定
+crossPoint4 = 1*ones(1,2);%線形入力と交わる場所を指定
+
 if isDiffrenceCrossPoint
     Controller.F1 = Controller.F1.*crossPoint1./diag(crossPoint1.^az)';
     Controller.F2 = Controller.F2.*crossPoint2./diag(crossPoint2.^ax)';
@@ -106,10 +111,10 @@ if isDiffrenceCrossPoint
     vF3 = Controller.F3;
     vF4 = Controller.F4;
 
-    FTC.confirmParam2(vF1,lF1,Controller.az,'z')
-    FTC.confirmParam2(vF2,lF2,Controller.ax,'x')
-    FTC.confirmParam2(vF3,lF3,Controller.ay,'y')
-    FTC.confirmParam2(vF4,lF4,Controller.apsi,'yaw')
+    % FTC.confirmParam2(vF1,lF1,Controller.az,'z')
+    % FTC.confirmParam2(vF2,lF2,Controller.ax,'x')
+    % FTC.confirmParam2(vF3,lF3,Controller.ay,'y')
+    % FTC.confirmParam2(vF4,lF4,Controller.apsi,'yaw')
 end
 %%
 %z方向FTCの近似

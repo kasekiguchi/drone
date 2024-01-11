@@ -23,8 +23,8 @@ function dst =InputTransform_Disturbance_drone(varargin)
                       % dst(:,1) = 3*ones(c,1);
                       % dst(:,2) = 3*ones(c,1);
                       dst(:,3) = 0*ones(c,1);
-                      dst(:,4) = 1.5*ones(c,1);
-                      dst(:,5) = 0*ones(c,1);
+                      dst(:,4) = 0*ones(c,1);
+                      dst(:,5) = 1.2*ones(c,1);
                       
                       %入力用
                       % dst(:,3) = 0.1*pdst(:,1);

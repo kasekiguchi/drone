@@ -49,9 +49,10 @@ endTime = 1E3;
                 % log_HLFT
                 % log_FTonly
                 % log_FT
+                log_second
 
 
-                gui.logger
+                % gui.logger
         };
     c=[
         % "HL","IOL"
@@ -84,13 +85,13 @@ endTime = 1E3;
 % multiFigure.layout = {[2,2]};
 % multiFigure.title = ["position_error"];%[" state", " subsystem"];%title name
 
-nM = {["z1","z2","z3","z4"],["F1z1","F2z2","F3z3","F4z4","uHL"]};%比較するとき複数まとめる
-multiFigure.layout = {[2,2],[2,3]};
-multiFigure.title = [" subsystem","vinput poly"];%[" state", " subsystem"];%title name
+% nM = {["z1","z2","z3","z4"],["F1z1","F2z2","F3z3","F4z4","uHL"]};%比較するとき複数まとめる
+% multiFigure.layout = {[2,2],[2,3]};
+% multiFigure.title = [" subsystem","vinput poly"];%[" state", " subsystem"];%title name
 
-% nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
-% multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
-% multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
+nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
+multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
+multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
 
 % nM = {["t_x" ,"t_y" ,"t_z","t_vx" ,"t_vy" ,"t_vz"],["t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"],["t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
 % multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
@@ -365,10 +366,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                 t{i} = loggers{i}.Data.t';
                 k(i)=loggers{i}.k;
                 ti{i}=t{i}(1:k(i));
-                % kf(i)=find(loggers{i}.Data.phase == 102,1,'first')+1;
-                % ke(i)=find(loggers{i}.Data.phase == 102,1,'last');
-                kf(i)=find(loggers{i}.Data.phase == 116,1,'first')+1;
-                ke(i)=find(loggers{i}.Data.phase == 116,1,'last');
+                kf(i)=find(loggers{i}.Data.phase == 102,1,'first')+1;
+                ke(i)=find(loggers{i}.Data.phase == 102,1,'last');
+                % kf(i)=find(loggers{i}.Data.phase == 116,1,'first')+1;
+                % ke(i)=find(loggers{i}.Data.phase == 116,1,'last');
         
                 sTime(i) = ti{i}(kf(i)) + startTime;
                 eTime(i) = ti{i}(kf(i)) + endTime;
@@ -621,14 +622,14 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
             allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
         else
             allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
-            allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
+            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
         end
         allData.z2 = {struct('x',{time},'y',{z2}), struct('x','time [s]','y','z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
         allData.z3 = {struct('x',{time},'y',{z3}), struct('x','time [s]','y','z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
         allData.z4 = {struct('x',{time},'y',{z4}), struct('x','time [s]','y','z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
-        allData.F2z2 = {struct('x',{time},'y',{F2z2}), struct('x','time [s]','y','F2z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
-        allData.F3z3 = {struct('x',{time},'y',{F3z3}), struct('x','time [s]','y','F3z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
-        allData.F4z4 = {struct('x',{time},'y',{F4z4}), struct('x','time [s]','y','F4z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
+        % allData.F2z2 = {struct('x',{time},'y',{F2z2}), struct('x','time [s]','y','F2z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
+        % allData.F3z3 = {struct('x',{time},'y',{F3z3}), struct('x','time [s]','y','F3z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
+        % allData.F4z4 = {struct('x',{time},'y',{F4z4}), struct('x','time [s]','y','F4z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
         allData.vf = {struct('x',{time},'y',{vf}), struct('x','time [s]','y','vrtual input of first layer'), LgndCrt(["$vf$","$dvf$","$ddvf$","$dddvf$"],c),add_option([],option,addingContents)};         
         allData.pp = {struct('x',{time},'y',{[est,pp]}), struct('x','time [s]','y','position [m]'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
         allData.pv = {struct('x',{time},'y',{[vel,pv]}), struct('x','time [s]','y','velocity [m/s]'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
