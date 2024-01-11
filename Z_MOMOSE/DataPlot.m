@@ -785,6 +785,13 @@ function plot_data_single(~, ~, branchData)
                 end
             end
     end
+
+    function newLog = changeResult(log,controllerName)
+        k=log.k;
+        for i = 1:k
+            
+        end
+    end
     %         logger,...
 %         logger_ft_lx_001,...
 %         logger_ls_lx_001,...

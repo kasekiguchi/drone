@@ -82,9 +82,9 @@ end
 Controller.dt = dt;
 Controller.type = "ELC";
 % eig(Ac4 - Bc4 * eF1)
-eig(Ac4 - Bc4 * eF2)
-eig(Ac4 - Bc4 * eF3)
-eig(Ac2 - Bc2 * eF4)
+% eig(Ac4 - Bc4 * eF2)
+% eig(Ac4 - Bc4 * eF3)
+% eig(Ac2 - Bc2 * eF4)
 %% 線形システムにMCMPCコントローラを適用する場合
 % H : horizon
 % A2 = [0 1;0 0]; B2 = [0;1];

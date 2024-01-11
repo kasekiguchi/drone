@@ -17,7 +17,7 @@ initial_state.p = sstate.p;
 initial_state.q = sstate.q;
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
-initial_state.Trs = [agent.parameter.mass*agent.parameter.gravity; 0];%重力を打ち消すため最初はTr=m*g
+initial_state.Trs = 0.01*[agent.parameter.mass*agent.parameter.gravity; 0];%重力を打ち消すため最初はTr=m*g
 % initial_state.Trs=[0;0];
 agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
 % agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
