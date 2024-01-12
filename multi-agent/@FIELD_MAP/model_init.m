@@ -56,8 +56,7 @@ init_I = sparse(N,1);
 % r=randi(20,numel(init_fx),numel(init_fy))-10;
 r=randi(1,numel(init_fx),numel(init_fy));
 W_vec2 = logical(mod(W_vec,0));     %W_vecを0と1のみのlogical値に変換．これをしないと初期引火点が何時までも消火しない
-% init_I(ny*(init_fx-1)+init_fy+r) = 1;   %Advice:Wを10000の行列に変換し、1にかければいいのでは？
-% init_I(ny*(init_fx-1)+init_fy+r) = 1.*W_vec2(ny*(init_fx-1)+init_fy+r);   %Wを100*100の行列に変換し、1にかけてる
+
 init_I(ny*(init_fx-1)+init_fy) = 1.*W_vec2(ny*(init_fx-1)+init_fy);
 init_R = sparse(N,1);
 obj.initialize_each_grid(init_I,init_R);

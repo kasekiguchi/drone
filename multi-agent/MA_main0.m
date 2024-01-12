@@ -26,8 +26,16 @@ close all hidden; clear all; clc;
 userpath('clear');
 % warning('off', 'all');
 %%
+close all
+% TODO 
+% gen_grid_weight のマップ欠損の補間
+% model_init の出火点設定
 % 延焼パラメータ
 % 60-70 m/hour となるようにチューニング
+% time_scale step/hour
+% prob grid/step
+% map_scale m/grid
+% map_scale*time_scale*prob = 60-70
 
 % 飛び火パラメータ
 % 発生確率 ：糸魚川市のデータで初期消火無しでMCシミュレーションをやり、9-12回発生する程度の頻度
@@ -38,12 +46,21 @@ userpath('clear');
 % S = shaperead('building_15216.dbf');
 flag.wind_average = 1;
 flag.debug = 1;
+flag.ns = [0.07,0.3,2.4];
+flag.nf = [0.075,1.2,1.5];
+
+% north_dir = 0; % rad
+% start_point = [0,0]; % マップ左下から見た位置 [m,m]
+% map_size = [1,1000]; % north_dir で回転した後の start_pointからの領域 [m m]
+% M = FIELD_MAP('data_ito.csv','flat_shape.shp',flag,[],struct("start_point",start_point,"map_size",map_size,"data_type","m","north_dir",north_dir));
+
 north_dir = -12*(pi/180); % rad
 start_point = [670,230]; % マップ左下から見た位置 [m,m]
 map_size = [300,300]; % north_dir で回転した後の start_pointからの領域 [m m]
-M = FIELD_MAP(240,'data_ito.csv','20160401/20160401-建築物の外周線.shp',flag,[],struct("start_point",start_point,"map_size",map_size,"data_type","m","north_dir",north_dir));
+M = FIELD_MAP('data_ito.csv','20160401/20160401-建築物の外周線.shp',flag,[],struct("start_point",start_point,"map_size",map_size,"data_type","m","north_dir",north_dir));
+
 % load("W_building_13112.mat");
-% M = FIELD_MAP(240,'data_ito.csv','shape_share20221014/building_13112.shp',flag,W);
+% M = FIELD_MAP('data_ito.csv','shape_share20221014/building_13112.shp',flag,W);
 %%
 %W = M.W;
 %save("W_building_13112.mat","W");
@@ -61,7 +78,7 @@ fMethod = "Weight"; % 重み行列
 % fDynamics = "Astar"; % 消火方法：A star or Direct
 fDynamics = "Direct"; % 消火方法：A star or Direct
 vi = 5; % 消火の必要がない部分を飛ばす距離
-h = 0; %0.1 * (3/M.map_scale); % extinction probability　消火確率は0.1で設定
+h = 0.1; %0.1 * (3/M.map_scale); % extinction probability　消火確率は0.1で設定
 %map.draw_state(nx,ny,map.loggerk(logger,ke));
 if addFirePoint == "test"
     fFPosition = 0;
@@ -74,7 +91,6 @@ elseif addFirePoint == "Manual"
 elseif addFirePoint == "Regular"
     fFPosition = 6;
 end
-W_vec = reshape(M.W,M.N,1);
 clear Logger
 
 if fMethod=="WAPR"
@@ -117,10 +133,10 @@ else
     disp("Unum Error");
 end
 w2 = 1/((XM-Xm)/max(M.nx,M.ny));
-M.model_init(fFPosition,W_vec);
-M.draw_state()
 
 %% monte carlo simulation
+W_vec = reshape(M.W,M.N,1);
+ke = 240; % simulation step length
 for k = 1:kn
     k
     M.model_init(fFPosition,W_vec);% initialize

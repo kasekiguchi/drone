@@ -25,21 +25,30 @@ wind2 = wind(:,2); % m/s
 th = (pi()/180) * wind1 + pi;  % wind direction : to cancel meshgrid effect, pi is added.
 %% spreading fire
 spread = 3; % classification on spreading magnitude
-sigmaWS = [68.27,(95.45-68.27),(100-95.45)]; % weight for spreading area 
+sigmaWS = [68.27,(95.45-68.27),(100-95.45)]; % weight for spreading area
 % area k has k-sigma weight
 
-n4 = 1.2;   % 延焼倍率（0.01刻みで適当な定数で調整，卒論再現の正円の場合は0.99，ジャーナルは1.2）
-nx0 = obj.nx/2; ny0 = obj.ny/2; % 中心
-t2 = -pi:0.1:pi; %
+% spreading region
+nx0 = obj.nx/2; ny0 = obj.ny/2; % center
+s_th = -pi:0.1:pi; %
 WS = sparse(N,N);
 
+ns1 = flag.ns(1);
+ns2 = flag.ns(2);
+ns3 = flag.ns(3);
+wind_s = (ns1*wind2 + ns2);
+
 for k = 1:spread
-  r = k * n4 * (1.1 + 1/k^2) * sqrt(wind2/10); % TODO : 半径 意味
-  %     xv3 = r * sin(t2);  %正円Verのx（卒論）
-  %     yv3 = -r * cos(t2); %正円Verのy（卒論）
-  xv = r * cos(t2./4).*sin(t2);    %卵型Verのx
-  yv = -r * cos(t2) + r/6;         %卵型Verのy
-  % 回転項
+  r = (k+ns3)*wind_s;
+
+  % circle（卒論）
+  %     xv3 = r * sin(s_th);
+  %     yv3 = -r * cos(s_th);
+
+  % egg shape
+  xv = r * cos(s_th./4).*sin(s_th);
+  yv = -r * cos(s_th) + r/6;
+
   cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
   xv = cyc(1,:) + nx0;
   yv = cyc(2,:) + ny0;
@@ -48,70 +57,67 @@ for k = 1:spread
   WS = WS + gen_E(xv,yv,obj.nx,obj.ny,xq,yq,sigmaWS(spread));
 end
 if flag.debug
-WW=reshape(WS(:,floor(1.01*N/2)),obj.nx,obj.ny);
-[xq,yq] = meshgrid(1:obj.nx);
-surf(xq,yq,WW);
-legend("x","y","z");
-view(2);daspect([1 1 1]);
-disp("延焼の隣接行列が生成完了しました");
+  WW=reshape(WS(:,floor(1.01*N/2)),obj.nx,obj.ny);
+  [xq,yq] = meshgrid(1:obj.nx);
+  surf(xq,yq,WW);
+  legend("x","y","z");
+  view(2);daspect([1 1 1]);
+  disp("延焼の隣接行列が生成完了しました");
 end
-%% 飛び火用隣接行列
-windv = round(obj.nx/obj.map_scale) * (0.075 * wind2); % TODO : 要確認 grid/s ?
+%% flying fire
+nf1 = flag.nf(1);
+nf2 = flag.nf(2);
+nf3 = flag.nf(3);
+
+windv = round(obj.nx/obj.map_scale) * (nf1 * wind2); % TODO : 要確認 grid/s ?
 
 % base rhombus
 x1 = 0; x2 = 1.5; x3 = -x2;
 y1 = 0; y2 = 0.5; y3 = 2*y2;
 
-n1 = wind2 * 1.2;
-xv = n1*[x1 x2 x1 x3 x1];
-yv = n1*[y1 y2 y3 y2 y1];
+xv = nf2*wind2*[x1 x2 x1 x3 x1];
+yv = nf2*wind2*[y1 y2 y3 y2 y1];
 
 cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
 xv = cyc(1,:) + nx0 + windv*sin(th);
 yv = cyc(2,:) + ny0 + windv*cos(th);
 
-[xq,yq] = meshgrid(1:1:obj.nx);
-WF = gen_E(xv,yv,obj.nx,obj.ny,xq,yq,1);
+[xq,yq] = meshgrid(1:obj.nx);
+WF = nf3*gen_E(xv,yv,obj.nx,obj.ny,xq,yq,1);
 if flag.debug
-WW=reshape(WF(:,floor(1.01*N/2)),obj.nx,obj.ny);
-surf(xq,yq,WW);
-legend("x","y","z");
-view(2);daspect([1 1 1]);
-disp("飛び火の隣接行列が生成完了しました");
+  WW=reshape(WF(:,floor(1.01*N/2)),obj.nx,obj.ny);
+  surf(xq,yq,WW);
+  legend("x","y","z");
+  view(2);daspect([1 1 1]);
+  disp("飛び火の隣接行列が生成完了しました");
 end
-
-FlyTune = 1.5;   % (手動糸魚川の場合：風一定1.5，風細分化:1.0)
 
 % 火災警報（消防法第２２条気象状況の通報及び警報の発令）の発令条件より
 % https://www.fdma.go.jp/singi_kento/kento/items/kento187_46_shiryo6-1.pdf
-if wind2 >= 7 % 
-  WS = sqrt(wind2/10) .* WS;
-  WF = sqrt(wind2/10) .* WF * FlyTune;
+if wind2 >= 7 %
+  WS = wind_s.*WS;
+  WF = wind_s.*WF;
 elseif wind2 < 7 && wind2 > 0
-  WS = (wind2/10) .* WS;
-  WF = (wind2/10)^2 .* WF * FlyTune;
+  WS = (wind2/10).*WS;
+  WF = (wind2/10)^2.*WF;
 else
   disp("wind speed should be 0 or larger.");
 end
 
 W = reshape(obj.W,[],1); % grid weight
-ES = WS .* W; 
-EF = WF .* W;
+maxW = max(W);
+ES = obj.maxv*WS.*W/maxW;
+EF = obj.maxv*WF.*W/maxW;
 ES = sparse(ES);
 EF = sparse(EF);
 
-maxW = max(W);
-if maxW > 1 | obj.maxv~=1
-  ES = (obj.maxv*ES/maxW);
-  EF = (obj.maxv*EF/maxW);
-end
 if flag.debug
-WW=reshape(ES(:,floor(1.01*N/2)),obj.nx,obj.ny);
-surf(xq,yq,WW);
-surf(xq,yq,obj.W);
-legend("x","y","z");
-view(2);daspect([1 1 1]);
-disp("complete generating ES EF");
+  WW=reshape(ES(:,floor(1.01*N/2)),obj.nx,obj.ny);
+  surf(xq,yq,WW);
+  surf(xq,yq,obj.W);
+  legend("x","y","z");
+  view(2);daspect([1 1 1]);
+  disp("complete generating ES EF");
 end
 end
 

@@ -34,8 +34,8 @@ ym = min(y);
 if flag.debug
   figure(99);
   plot(polyshape(x,y));
-  xlim([xm,xm+1500]);
-  ylim([ym,ym+700]);
+  xlim([xm,max(x)]);
+  ylim([ym,max(y)]);
   daspect([1 1 1]);
 end
 switch opts.data_type

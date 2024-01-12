@@ -15,7 +15,6 @@ classdef FIELD_MAP < handle
     windreal = 0;     %0で定数、1で細分化（エクセル使用）
     north_dir      % north direction from vertical line : rad : >0  = CCW
     W % weight matrix : nx-ny size matrix
-    ke
   end
   properties
     wind % [dir,speed] dir 0:南 45:南西 90:西 135:北西 180:北 225:北東 270:東 315:南東
@@ -52,9 +51,8 @@ classdef FIELD_MAP < handle
   end
 
   methods
-    function obj = FIELD_MAP(ke,wind_file,shape_file,flag,W,shape_opts)
+    function obj = FIELD_MAP(wind_file,shape_file,flag,W,shape_opts)
       arguments
-        ke
         wind_file
         shape_file
         flag
@@ -62,7 +60,6 @@ classdef FIELD_MAP < handle
         shape_opts = struct("start_point",[6000,500],"map_size",[300,300],"data_type","geo","north_dir",0); % "geo","km","m"
       end
       obj.map_meter_size = shape_opts.map_size;
-      obj.ke = ke; % simulation step length
       obj.N  = obj.nx*obj.ny; % total grid number
       obj.map_scale = obj.map_meter_size(1)/obj.nx; % meter/grid
       obj.north_dir = shape_opts.north_dir;
