@@ -5,7 +5,7 @@ classdef FIELD_MAP < handle
     ny = 100; % y axis grid number
     N  % total number of grid
     maxv = 0.04;    % 確率の上限，シミュレーションの進行に関係するパラメータであり、適当な値を入力
-    map_meter_size = 300;   % マップ幅 m
+    map_meter_size  % マップ幅 m
     map_scale % meter/grid
     time_scale = 20; % step/hour
     nx_app = 100; % 見かけ上のx辺
@@ -13,7 +13,7 @@ classdef FIELD_MAP < handle
     map_extra
     build = 1;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し、3で延焼調整モード（飛び火OFF）
     windreal = 0;     %0で定数、1で細分化（エクセル使用）
-    mapslope = 12;      %マップの北に対する傾き角度（例：右上が北の場合1~90）
+    north_dir      % north direction from vertical line : rad : >0  = CCW
     W % weight matrix : nx-ny size matrix
     ke
   end
@@ -59,11 +59,13 @@ classdef FIELD_MAP < handle
         shape_file
         flag
         W = []
-        shape_opts = struct("start_point",[6,0.5],"map_size",[0.3,0.3],"data_type","geo"); % "geo","km","m"
+        shape_opts = struct("start_point",[6000,500],"map_size",[300,300],"data_type","geo","north_dir",0); % "geo","km","m"
       end
+      obj.map_meter_size = shape_opts.map_size;
       obj.ke = ke; % simulation step length
       obj.N  = obj.nx*obj.ny; % total grid number
-      obj.map_scale = obj.map_meter_size/obj.nx; % meter/grid
+      obj.map_scale = obj.map_meter_size(1)/obj.nx; % meter/grid
+      obj.north_dir = shape_opts.north_dir;
       if isempty(W)
         obj.W = obj.gen_grid_weight(shape_file,flag,shape_opts);
         disp("generated weighted graph");

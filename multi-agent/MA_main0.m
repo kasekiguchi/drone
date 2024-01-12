@@ -38,7 +38,10 @@ userpath('clear');
 % S = shaperead('building_15216.dbf');
 flag.wind_average = 1;
 flag.debug = 1;
-M = FIELD_MAP(240,'data_ito.csv','20160401/20160401-建築物の外周線.shp',flag,[],struct("start_point",[0.67,0.23],"map_size",[0.5,0.5],"data_type","m"));
+north_dir = -12*(pi/180); % rad
+start_point = [670,230]; % マップ左下から見た位置 [m,m]
+map_size = [300,300]; % north_dir で回転した後の start_pointからの領域 [m m]
+M = FIELD_MAP(240,'data_ito.csv','20160401/20160401-建築物の外周線.shp',flag,[],struct("start_point",start_point,"map_size",map_size,"data_type","m","north_dir",north_dir));
 % load("W_building_13112.mat");
 % M = FIELD_MAP(240,'data_ito.csv','shape_share20221014/building_13112.shp',flag,W);
 %%
@@ -136,3 +139,5 @@ i = 1;
 stepP = 20;%final_step(i)
 figure('Position', [0 -500 1100 1000]);
 M.draw_movie(Logger(1),0);% 1,"230725_風情報細分化シミュレーション");  % output movie file
+%%
+M.draw_state(M.loggerk(Logger,1));% 1,"230725_風情報細分化シミュレーション");  % output movie file

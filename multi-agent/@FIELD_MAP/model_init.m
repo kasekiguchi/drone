@@ -13,6 +13,8 @@ if numel(fFPosition) == 1
         case 6 % 手動糸魚川
             init_fx=50;
             init_fy=11;
+            init_fx=54;
+            init_fy=8;
         case 7
             init_fx=41;
             init_fy=11;

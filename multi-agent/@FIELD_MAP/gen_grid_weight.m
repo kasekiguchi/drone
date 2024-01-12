@@ -18,9 +18,10 @@ arguments
   opts = [];
 end
 if isempty(opts)
-  opts.start_point = [6,0.5]; % [x0,y0] position in shape_file data [km]
-  opts.map_size = [0.3,0.3]; % [x,y] size [km]
+  opts.start_point = [6000,500]; % [x0,y0] position in shape_file data [km]
+  opts.map_size = [300,300]; % [x,y] size [km]
   opts.data_type = "geo";
+  opts.north_dir = 0;
 end
 
 % shape read version
@@ -30,46 +31,54 @@ x = [S.X];
 y = [S.Y];
 xm = min(x);
 ym = min(y);
+if flag.debug
+  figure(99);
+  plot(polyshape(x,y));
+  xlim([xm,xm+1500]);
+  ylim([ym,ym+700]);
+  daspect([1 1 1]);
+end
 switch opts.data_type
   case "geo"
     % 経度(横・x軸方向) 1㎞ = 0.010966404715491394度
     % 緯度(縦・y軸方向) 1㎞ = 0.0090133729745762度
-    tx = 0.010966404715491394; % S.X [°] => S.X/tx [km]
-    ty = 0.0090133729745762;
+    tx = 10.966404715491394; % S.X [°] => S.X/tx [m]
+    ty = 9.0133729745762;
   case "km"
-    tx = 1;
-    ty = 1;
+    tx = 1000; % S.X [km] => S.X/tx [m]
+    ty = 1000;
   case "m"
-    tx = 1000;
-    ty = 1000; % S.X [m] => S.X/tx [km]
+    tx = 1;
+    ty = 1; 
 end
-marginx = 0.015*tx;
-marginy = 0.015*ty;
-Amin = [xm,ym] + opts.start_point.*[tx,ty];
-Amax = Amin + opts.map_size.*[tx,ty];
-minXids = cellfun(@min,{S.X}) >= Amin(1) - marginx;
-minYids = cellfun(@min,{S.Y}) >= Amin(2) - marginy;
-maxXids = cellfun(@max,{S.X}) <= Amax(1) + marginx;
-maxYids = cellfun(@max,{S.Y}) <= Amax(2) + marginy;
+cn = cos(-opts.north_dir);
+sn = sin(-opts.north_dir);
+ex = [cn;sn];
+ey = [-sn;cn];
+O = (opts.start_point.*[tx,ty])';
+minXids = cellfun(@(x,y) min(ex'*[x-xm;y-ym]),{S.X},{S.Y}) >= ex'*O;
+minYids = cellfun(@(x,y) min(ey'*[x-xm;y-ym]),{S.X},{S.Y}) >= ey'*O;
+maxXids = cellfun(@(x,y) max(ex'*[x-xm;y-ym]),{S.X},{S.Y}) <= ex'*O + opts.map_size(1)*tx;
+maxYids = cellfun(@(x,y) max(ey'*[x-xm;y-ym]),{S.X},{S.Y}) <= ey'*O + opts.map_size(2)*ty;
 S = S(minXids & minYids & maxXids & maxYids);
-mapshow(S)
 x = [S.X];
 y = [S.Y];
-xm = min(x);
-ym = min(y);
-
-% wooden_flaが1で木造、0で非木造と判定
-if isfield(S,'wooden_fla')
-  IDS = [S.wooden_fla]==0;
-  xx = S(IDS).X;
-  yy = S(IDS).Y;
+xm = xm + opts.start_point(1)*tx;
+ym = ym + opts.start_point(2)*ty;
+if flag.debug
+  figure(98);
+  plot(polyshape(x-xm,y-ym));
+  daspect([1 1 1]);
+  xlim([0,max([S.X])-xm]);
+  ylim([0,max([S.Y])-ym]);
 end
-
-% 改良部分 探索項
 % 建物誤認識の解決策
 % 同一値を探索し合体する
 % [1 2 3 NaN],[3 4 NaN] => [1 2 3 4 NaN]
 % ここではデータ群の頭としっぽが繋がるデータを探査
+sx = {S.X};
+sx = cellfun(@(x) x(1),sx);
+
 clear a b zero
 zero = 0;
 for i = 1:length(S)
@@ -119,8 +128,9 @@ if  point ~= 0
     num = 0;    %Sの中で消されたデータの数
     for i = 1:length(a)
         if S(a(i)).X(1) == xm && length(S(a(i)).X) == 2
-            S(a(i)).X = [];
-            S(a(i)).Y = [];
+            % S(a(i)).X = [];
+            % S(a(i)).Y = [];
+            S(a(i)) = [];
             num = num + 1;
         end
     end
@@ -131,27 +141,23 @@ end
 
 
 % 範囲調整したマップの出力項
-x = [S.X] - xm;
-y = [S.Y] - ym;
-
-% 行列生成 範囲絞り機能付きVer
-% NaNは区切りを意味する。値が入ってない
-x = (1000 * x)/tx;   % 経度のm変換
-y = (1000 * y)/ty;  % 緯度のm変換
-
-%disp("マップのベクトル化が完了しました");
+x = (cn*([S.X]-xm)+sn*([S.Y]-ym))/tx;
+y = (cn*([S.Y]-ym)-sn*([S.X]-xm))/ty;
+ 
+% wooden_flaが1で木造、0で非木造と判定
+if isfield(S,'wooden_fla')
+  IDS = [S.wooden_fla]==0;
+  xx = (cn*(S(IDS).X-xm)+sn*(S(IDS).Y-ym))/tx;
+  yy = (cn*(S(IDS).Y-ym)-sn*(S(IDS).X-xm))/ty;
+end
 
 % 建物のラベリング
 %label = [cellfun(@min,{S.X})*1000/tx;cellfun(@min,{S.Y})*1000/ty;1:length(S)]';
 
-[xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale);
+[xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
 in = inpolygon(xq,yq,x,y);
 in = logical(in);
 if exist('xx','var')
-  xx = xx - xm;
-  yy = yy - ym;
-  xx = (1000 * xx)/tx;   % のm変換
-  yy = (1000 * yy)/ty;  % 緯度のm変換
   in2 = inpolygon(xq,yq,xx,yy);
   in2 = logical(in2);
   W = sparse(in - in2*(4/5));
@@ -160,16 +166,17 @@ else
 end
 if flag.debug
   figure(100);
-  plot(polyshape(x-xm,y-ym));
+  plot(polyshape(x,y));
   daspect([1 1 1]);
+  xlim([0,500]);
+  ylim([0,500]);  
 end
 if flag.debug
-figure(101);
-  [xq,yq] = meshgrid(1:1:obj.nx);
-surf(xq,yq,W);
-legend("x","y","z");
-view(2);daspect([1 1 1]);
-disp("complete generating W");
+  figure(101);
+  surf(xq,yq,W);
+  legend("x","y","z");
+  view(2);daspect([1 1 1]);
+  disp("complete generating W");
 end
 
 %% W の正規化
