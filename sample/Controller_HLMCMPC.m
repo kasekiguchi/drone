@@ -37,10 +37,16 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.input_size = 4;
 
     %% sekiguchi-komatsu new
-    Controller_param.Z = diag([100; 1000]);% * 1e3; %2
-    Controller_param.X = diag([100,100,1,1]);% * 1e3;%4
-    Controller_param.Y = diag([100,100,1,1]);% * 1e3;
-    Controller_param.PHI = diag([10000; 100]);
+    % Controller_param.Z = 1 * diag([100; 1000]);% * 1e3; %2
+    % Controller_param.X = 1e2 * diag([100,100,1,1]);% * 1e3;%4
+    % Controller_param.Y = Controller_param.X;% * 1e3;
+    % Controller_param.PHI = 1e-1 * diag([10000; 100]);
+
+    % 最新 1/11　時点いい重み
+    Controller_param.Z = 1 * diag([10; 10]);% * 1e3; %2
+    Controller_param.X = 1e2 * diag([1000,10000,1,1]);% * 1e3;%4
+    Controller_param.Y = Controller_param.X;% * 1e3;
+    Controller_param.PHI = 1* diag([100; 1]);
 
     Controller_param.Zf = Controller_param.Z;
     Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000

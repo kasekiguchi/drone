@@ -206,7 +206,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vs(1,1) = obj.input.u(2, 1, BestcostID(3));      % こちらは確実に飛ぶが良くない
         vs(2,1) = obj.input.u(3, 1, BestcostID(4));      % 時間延ばすと収束・高速な軌道だと追いつかない
         vs(3,1) = obj.input.u(4, 1, BestcostID(5));      % 2,3,4,5 だと個別の評価値に対する入力
-        % 
+        
+        % vf = 0;
+        vs = zeros(3,1);  % 推力以外0
         % input_ind = BestcostID(1); % 
         % vf      = obj.input.u(1, 1, input_ind);     
         % vs(1,1) = obj.input.u(2, 1, input_ind);     

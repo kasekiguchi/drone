@@ -2,7 +2,7 @@
 SigmaData = zeros(4, te/dt);
 close all
 fprintf("%f秒\n", totalT)
-Fontsize = 15;  xmax = 15;
+Fontsize = 15;  xmax = time.t;
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
@@ -30,14 +30,14 @@ Diff = Edata - Rdata(1:3, :);
 cutT = 0;
 close all
 
-m = 3; n = 2;
+m = 4; n = 2;
 
 % Bestcost = data.bestcost(:,1:length(logt));
 if fsave == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
     ylabel("Position [m]")
-    legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest");
+    if flegend == 1; legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest"); end
     % yyaxis right
     % plot(logt, Eachcost(8,:)); 
     % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
@@ -52,23 +52,26 @@ if fsave == 1
     figure(2); plot(Edata(1,:), Edata(2,:)); hold on; plot(Rdata(1,:), Rdata(2,:), '--'); hold off;
     xlim([0 10])
     daspect([1 1 1]);
-    legend("Estimate", "Reference");
+    if flegend == 1; legend("Estimate", "Reference"); end
     xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
 
     % velocity
     figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","southwest");
+    xlabel("Time [s]"); ylabel("Velocity [m/s]"); 
+    if flegend == 1; legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","southwest"); end
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % input
     figure(4); 
     plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northwest");
+    xlabel("Time [s]"); ylabel("Input [N]"); 
+    if flegend == 1; legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northwest"); end
     grid on; xlim([0 xmax]); ylim([-inf 5.5]);
     ytickformat('%.1f')
     
     if ~isempty(data.input_v)
         IV = data.input_v(:, 1:length(logt));
-        figure(7); plot(logt, IV); legend("input1", "input2", "input3", "input4");
+        figure(7); plot(logt, IV); 
+        if flegend == 1; legend("input1", "input2", "input3", "input4"); end
         xlabel("Time [s]"); ylabel("input.V");
         grid on; xlim([0 xmax]); ylim([-inf inf]);
     % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
@@ -82,44 +85,51 @@ else
     figure(100)
     subplot(m,n,1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
     ylabel("Position [m]")
-    legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northeast");
+    if flegend == 1; legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northeast"); end
     % yyaxis right
     % plot(logt, Eachcost(8,:)); 
     % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
     xlabel("Time [s]");  
     grid on; xlim([0 xmax]); %ylim([0 5000]);
     % 
-    subplot(m,n,4); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
-    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast");
+    subplot(m,n,6); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2);  hold off;
+    xlabel("Time [s]"); ylabel("Attitude [rad]"); 
+    if flegend == 1; legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast"); end
     grid on; xlim([0 xmax]); ylim([-inf inf]);
 
-    subplot(m,n,2); plot3(Edata(1,:), Edata(2,:), Edata(3,:)); hold on; plot3(Rdata(1,:), Rdata(2,:), Rdata(3,:), '--'); plot(initial.p(1), initial.p(2), 'h'); hold off;
+    subplot(m,n,[2,4]); plot3(Edata(1,:), Edata(2,:), Edata(3,:)); hold on; plot3(Rdata(1,:), Rdata(2,:), Rdata(3,:), '--'); plot(initial.p(1), initial.p(2), 'h'); hold off;
     daspect([1 1 1]);
-    legend("Estimate", "Reference", "Initial pos");
+    if flegend == 1; legend("Estimate", "Reference", "Initial pos"); end
     xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
-    view(2)
+    % view(2)
 
     % velocity
     subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","northeast");
+    xlabel("Time [s]"); ylabel("Velocity [m/s]"); 
+    if flegend == 1; legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","northeast"); end
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % input
-    subplot(m,n,6); 
+    subplot(m,n,8); 
     plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
-    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northeast");
+    xlabel("Time [s]"); ylabel("Input [N]"); 
+    if flegend == 1; legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northeast"); end
     grid on; xlim([0 xmax]); ylim([-inf 5.5]);
     ytickformat('%.1f')
 
-    % % error
-    % subplot(m,m,4)
-    % error = Edata(1:3, :) - Rdata(1:3, :);
-    % plot(logt, error);
-    % xlim([0 xmax]);
-    % xlabel("Time [s]"); ylabel("Error [m]");
+    % error
+    subplot(m,n,5)
+    error = Edata(1:3, :) - Rdata(1:3, :);
+    plot(logt, error); grid on; grid minor;
+    xlim([0 xmax]);
+
+    % ylim([-inf if])
+    xlabel("Time [s]"); ylabel("Error [m]");
+    if flegend == 1; legend("error.x", "error.y", "error.z"); end
     
     if ~isempty(data.input_v)
         IV = data.input_v(:, 1:length(logt));
-        subplot(m,n,5); plot(logt, IV); legend("input1", "input2", "input3", "input4","Location","northeast");
+        subplot(m,n,7); plot(logt, IV); 
+        if flegend == 1; legend("input1", "input2", "input3", "input4","Location","northeast"); end
         xlabel("Time [s]"); ylabel("input.V");
         grid on; xlim([0 xmax]); ylim([-inf inf]);
     % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
@@ -185,6 +195,9 @@ dataRMSE = rmse(Est, Ref, 2)';
 disp(dataRMSE);
 data.rmse = dataRMSE;
 
+%% 円に近い度
+XYminmax = [max(Edata(1,:)) - min(Edata(1,:)); max(Edata(2,:)) - min(Edata(2,:))]
+
 %% Animation video
 % close all;
 % agent(1).animation(logger,"target",1); 
@@ -197,5 +210,5 @@ data_now = datestr(datetime('now'), 'yyyymmdd');
 % Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 mkdir(strcat('../../students/komatsu/simdata/', data_now, '/'));
 
-% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/HLMCMPC-N-1000_constraints_circle.mat'), "agent", "data", "logger", "-v7.3")
+% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/HLMCMPC-Vertical_vibration_4s_Good.mat'), "agent", "data", "logger", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")

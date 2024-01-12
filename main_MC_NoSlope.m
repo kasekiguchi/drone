@@ -17,11 +17,11 @@ fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
 fHL = 1;
 fMC = 1;
 % movie
-fMovie = 10;
-fSave = 10;
+fMovie = 10; % 動画出力
+fSave = 10; % 動画 の保存 
 MovTime = 0;
 % figure
-fsave = 0;
+fsave = 0; % figure の保存
 
 %------------------------
 % PC変更時初回はcontroller 途中で止めて
@@ -366,6 +366,7 @@ if fSave == 1
 end
 
 %% figure.m
+flegend = 0;
 savefigure
 
 %% 動画生成

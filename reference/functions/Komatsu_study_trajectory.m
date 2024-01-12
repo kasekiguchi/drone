@@ -19,7 +19,8 @@ te = X0{1,2};
 %% takeoff
 % x = 0;
 % y = 0;
-% z = 1/(1+exp(-t+te/2));
+% z = 1/(1+exp(-t+te/2)) + 1;
+% yaw = 0;
 
 %% 楕円　斜面着陸
 % T = -2.8;
@@ -36,8 +37,8 @@ te = X0{1,2};
 % yaw = 0;
 
 %% 
-% x = 2*sin(t/5)+cos(t/5)+1/2*sin(t/10);
-% y = 3*cos(t/5)+2*cos(t/5)+cos(t/10);
+% x = 2*sin(t/10);
+% y = 2*sin(t/10);
 % z = 1;
 % yaw = 0;
 
@@ -69,12 +70,12 @@ te = X0{1,2};
 % y = 0;
 % z = sin(2*pi*t/2.5)*0.02+sin(2*pi*t/2.5)*0.01-sin(2*pi*t/25)*0.005 + 2;
 
-%% circle
-T = 10; % 20 でもいける
-x = cos(2*pi*t/T)-1;
-y = sin(2*pi*t/T);
-z = 1;
-yaw = 0;
+%% circle 30s: 0.2m/s
+% T = 10; % 20 でもいける
+% x = 1 * cos(2*pi*t/T)-1;
+% y = 1 * sin(2*pi*t/T);
+% z = 1;
+% yaw = 0;
 
 %% bara
 % A = 8/6;
@@ -98,16 +99,32 @@ yaw = 0;
 % yaw = 0;
 
 %% Liner
-% x = 0; % constrains: t/1.7
-% y = 0;
-% z = 2 * t + 1;
+% x = 2*t; % constrains: t/1.7
+% y = 3*t;
+% z = 1;
+% yaw = 0;
+
+%% よくわからん
+% x = 1.5 * exp(cos(t/10));
+% y = 1.5 * exp(sin(t/10));
+
+% x = 2 * (t - te/2) ^ 2;
+% y = - (t-te/2)^2;
+% z = 1;
+% yaw = 0;
+
+%%
+% x = (1+2 * cos(t/ 10)) * cos(t/10);
+% y = (1+2 * cos(t/ 10)) * sin(t/10);
+% z = 1;
 % yaw = 0;
 
 %% Vertical vibration
-% x = 0;
-% y = 0;
-% z = 1/2 * sin(2*pi*t/5)+1;
-% yaw = 0;
+T = 4;
+x = 0;
+y = 0;
+z = 1/2 * sin(2*pi*t/T) + 1;
+yaw = 0;
 % z = 1/2 * sin(2*t)+1 + 1/5 * cos(t);
 % z = 1/2 * sin(2*t)+1 - 1/10 + 1/5*cos(3*t)+sin(t)+1;
 
@@ -147,7 +164,7 @@ yaw = 0;
 % y = 0;
 
 %% slope P2P
-% x = -0.2;
+% x = 0;
 % y = 0;
 % z = 0.1;
 % yaw = 0;
