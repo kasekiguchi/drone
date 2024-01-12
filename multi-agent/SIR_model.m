@@ -9,8 +9,8 @@ classdef SIR_model < handle
         Ri % vector of R state
         U
         v
-        v1
-        v2
+        vs
+        vf
         map
         N % number of agent
         n % number of state
@@ -66,36 +66,16 @@ classdef SIR_model < handle
             obj.x = sparse((obj.x & kron(~R,ones(obj.n,1))) + kron(R,obj.Ri));
             obj.U = sparse(obj.N,1);
         end
-%         function calc_v(obj,E)
-%             % E : edge matrix
-%             % eij : (i,j) element of E
-%             % eij > 0 if edge exists from j to i else eij = 0
-%             % 重いので分解して適宜sparse化することで高速化した
-%             sIt = (obj.I>0)';
-%             Tsi = obj.S*sIt;% 向き注意！eij の感染の向きに従うように．具体的な数値で確認せよ
-%             aa=E.*Tsi;% Iの拡散edge重み = Iの拡散確率行列
-%             aaa = spones(aa)-aa; % I が拡散しないスパース確率行列
-%             [i,~,v]=find(aaa);   % (非ゼロを探すfind)aaaの行の添え字をiに、要素の値をvに返す処理
-%             [ui,~,ic] = unique(i,'stable');     % uiの値を、iと同じ順序にするための処理
-%             bb = ones(size(ui));
-%             for k = 1:length(v)
-%                 bb(ic(k),1) = bb(ic(k),1)*v(k);
-%             end
-%             dd = rand(length(ui),1); % [0,1]乱数
-%             cc = spones(bb)-bb; % Iになる確率
-%             kk = sparse(size(aa,1),1);  % aaと同じ行数の0スパースベクトルを生成
-%             kk(ui)=dd <= cc;
-%             obj.v=kk;
-%         end
-        function calc_v1(obj,ES)
+        function v = calc_v(obj,E)
             % E : edge matrix
             % eij : (i,j) element of E
             % eij > 0 if edge exists from j to i else eij = 0
+            % 重いので分解して適宜sparse化することで高速化した
             sIt = (obj.I>0)';
             Tsi = obj.S*sIt;% 向き注意！eij の感染の向きに従うように．具体的な数値で確認せよ
-            aa = ES.*Tsi;% Iの拡散edge重み = Iの拡散確率行列
+            aa=E.*Tsi;% Iの拡散edge重み = Iの拡散確率行列
             aaa = spones(aa)-aa; % I が拡散しないスパース確率行列
-            [i,~,v] = find(aaa); % (非ゼロを探すfind)aaaの行の添え字をiに、要素の値をvに返す処理
+            [i,~,v]=find(aaa);   % (非ゼロを探すfind)aaaの行の添え字をiに、要素の値をvに返す処理
             [ui,~,ic] = unique(i,'stable');     % uiの値を、iと同じ順序にするための処理
             bb = ones(size(ui));
             for k = 1:length(v)
@@ -104,28 +84,8 @@ classdef SIR_model < handle
             dd = rand(length(ui),1); % [0,1]乱数
             cc = spones(bb)-bb; % Iになる確率
             kk = sparse(size(aa,1),1);  % aaと同じ行数の0スパースベクトルを生成
-            kk(ui)=dd <= cc;    % dd(乱数)<=cc(延焼確率)の時にkkにロジカル1、不成立の時にロジカル0
-            obj.v1=kk;
-        end
-        function calc_v2(obj,EF)
-            % E : edge matrix
-            % eij : (i,j) element of E
-            % eij > 0 if edge exists from j to i else eij = 0
-            sIt = (obj.I>0)';
-            Tsi = obj.S*sIt;% 向き注意！eij の感染の向きに従うように．具体的な数値で確認せよ
-            aa=EF.*Tsi;% Iの拡散edge重み = Iの拡散確率行列
-            aaa = spones(aa)-aa; % I が拡散しないスパース確率行列
-            [i,~,v] = find(aaa); % (非ゼロを探すfind)aaaの行の添え字をiに、要素の値をvに返す処理
-            [ui,~,ic] = unique(i,'stable');     % uiの値を、iと同じ順序にするための処理
-            bb = ones(size(ui));
-            for k = 1:length(v)
-                bb(ic(k),1) = bb(ic(k),1)*v(k);
-            end
-            dd = rand(length(ui),1); % [0,1]乱数
-            cc = spones(bb)-bb; % Iになる確率
-            kk = sparse(size(aa,1),1);
             kk(ui)=dd <= cc;
-            obj.v2=kk;  % ここが1の場合に飛び火の発生を意味する
+            obj.v=kk;
         end
         function transition_to_R(obj,U)
             % U = [u1; u2; ... ; uN];
@@ -140,31 +100,17 @@ classdef SIR_model < handle
             obj.R=obj.R | R;% update R agents
             obj.U = U;
         end
-%         function next_step_func(obj,U,E)
-%             %   next_step_func : function to calculate next state
-%             %       [usage]
-%             %          next_step_func(U, E);
-%             %       where U : inputs, E : edge matrix
-%             obj.transition_to_R(U);% h 以下の確率でUのある燃えているセルを消火（Rに遷移）
-%             obj.calc_v(E);
-%             obj.R(obj.I == obj.ti)=1;
-%             obj.I(obj.I == obj.ti)=0;
-%             obj.x = obj.A*obj.x+obj.B*obj.v;
-%             obj.I = obj.I + (obj.I>0);% 火災の進行具合を1-tiの整数で表現
-%             i=find(obj.v);
-%             obj.S(i) = 0;
-%             obj.I(i) = 1;
-%         end
         function next_step_func(obj,U,ES,EF)
-            %   next_step_func : function to calculate next state
+            % next_step_func : function to calculate next state
             obj.transition_to_R(U);% h 以下の確率でUのある燃えているセルを消火（Rに遷移）
-            obj.calc_v1(ES);
-            obj.calc_v2(EF);
+            obj.vs = obj.calc_v(ES);
+            obj.vf = obj.calc_v(EF);
+            obj.v = obj.vs+obj.vf;
             obj.R(obj.I == obj.ti)=1;
             obj.I(obj.I == obj.ti)=0;
-            obj.x = obj.A*obj.x+obj.B*(obj.v1+obj.v2);
+            obj.x = obj.A*obj.x+obj.B*obj.v;
             obj.I = obj.I + (obj.I>0);% 火災の進行具合を1-tiの整数で表現
-            i=find(obj.v1+obj.v2);
+            i=find(obj.v);
             obj.S(i) = 0;
             obj.I(i) = 1;
         end
@@ -172,7 +118,6 @@ classdef SIR_model < handle
     methods (Static)
         function figure=draw_state(nx,ny,W)
             arguments
-%                obj SIR_model
                 nx {mustBeInteger}
                 ny {mustBeInteger}
                 W = obj
