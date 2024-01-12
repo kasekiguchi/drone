@@ -32,7 +32,8 @@ classdef APID_CONTROLLER < handle
             obj.adaptive = param.adaptive;
         end
 
-        function u = do(obj,param,~)
+        function u = do(obj,varargin)
+            param = [];
             % u = do(obj,param,~)
             % param (optional) :
 %             plant.state.p = [obj.self.sensor.result.motive.position.z;obj.self.sensor.result.motive.position.x];
@@ -48,7 +49,6 @@ classdef APID_CONTROLLER < handle
 
                 rp = cast(subs(rp,"t",param.t),"double");
                 rq = cast(subs(rq,"t",param.t),"double");
-
             end
             
 %             if isempty(obj.result)
@@ -59,10 +59,18 @@ classdef APID_CONTROLLER < handle
 %             end
             obj.e = [p-rp;q-rq];
             obj.ed = [obj.K*(p-rp)-rv;w-rw];
+
+            q = 0;
+            rq = 0;
+            if isempty(v); v = 0; end
+            if isempty(w); w = 0; end
+            if isempty(rv); rv = 0; end
+            if isempty(rw); rw = 0; end
             
             [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
             
             obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
+            % disp(obj.result.input)
             % if length(obj.result.input ) > 1
             %     for j = 1:length(obj.result.input)
             %         obj.result.input(j) = subs(obj.result.input(j),"t",param.t);
@@ -76,9 +84,9 @@ classdef APID_CONTROLLER < handle
             obj.self.input_transform.result = obj.result.input;
 
             % [theta,rho] = cart2pol(x,y)
-            [rho,theta] =cart2pol(obj.result.input(1,1),obj.result.input(2,1));
+            % [rho,theta] =cart2pol(obj.result.input(1,1),obj.result.input(2,1));
 
-            obj.result.input = [rho,theta];
+            % obj.result.input = [rho,theta];
 
 
 %             obj.self.input = [1.0;0];

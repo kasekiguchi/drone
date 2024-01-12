@@ -23,7 +23,9 @@ methods
           args = struct("type","sim");  
         end
         obj.input_transform.do = @(varargin) [];
-        if contains(args.type, "EXP")
+        % obj.input_transform.do = @(varargin) obj.controller.do(varargin);
+        
+         if contains(args.type, "EXP")
           obj.plant = WHILL_EXP_MODEL(args);
         end
     end

@@ -82,10 +82,10 @@ if isempty(opts.B)
         %             EKF_param.B = [eye(3)*dt^2;zeros(1,3);eye(3)*dt];
     end
 
-    if Estimator.model.state.type == 1 % 姿勢がオイラー角の場合
-        % Estimator.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
-        Estimator.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
-    end
+    % if Estimator.model.state.type == 1 % 姿勢がオイラー角の場合
+    %     % Estimator.B = [eye(6) * 0.01; eye(6) * 0.1]; % システムノイズが加わるチャンネル
+    %     Estimator.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
+    % end
 else
     Estimator.B = opts.B;
 end
@@ -111,7 +111,11 @@ end
 
 if contains(Estimator.model.name, "vehicle3")
     Estimator.A = eye(3);
+    % Estimator.B = [1,0; 1,0; 0,0; 0,0; 0,0; 0,1];
+    Estimator.B = [1,0; 1,0; 0,1];
     Estimator.C = eye(3);
+    Estimator.Q = diag([1E3,1E3,1E3]);
+    Estimator.R = diag([1E-3,1E-3,1E-3]);
 end
 
 Estimator.list = output;

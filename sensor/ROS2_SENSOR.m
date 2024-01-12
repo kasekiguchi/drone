@@ -58,7 +58,6 @@ methods
         obj.prosesssfunc = param.pfunc;%使わない場合はsampleで0を入れる
     end
         
-
     function result = do(obj, varargin)
         % result=sensor.motive.do(motive)
         %   set obj.result.state : State_obj,  p : position, q : quaternion
@@ -84,12 +83,15 @@ methods
                 disp("pointcloud lost")
                 break
             else
+                % disp("get sensor data")
                 break
             end
             pause(0.5)
         end
 
-        result = data;
+        result = obj.prosesssfunc(obj.self);
+        % disp(result);
+        obj.result.state.set_state(result)
         
         % % for i = 1:length(data)
         % %     data2pcd = rosReadCartesian(data{i});

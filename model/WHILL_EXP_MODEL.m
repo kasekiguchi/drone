@@ -64,6 +64,7 @@ methods
                 param.node = ros2node("/agent_"+string(obj.id),obj.id);%%%%%%%%%%%%%create node
                 obj.IP = param.node;
                 obj.connector = ROS2_CONNECTOR(param);
+                obj.state = obj.connector.result;
                 fprintf("Whill %d is ready\n", obj.id);
         end
   end
@@ -101,7 +102,7 @@ function do(obj,varargin)
                     error("ACSL : quit experiment");
                 case 's' % stop
                     obj.msg.linear.x = 0.0;
-                    obj.msg.linear.y = 0.0;
+                    obj.msg.linearf.y = 0.0;
                     obj.msg.linear.z = 0.0;
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
@@ -114,7 +115,8 @@ function do(obj,varargin)
 %                     obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
 %                     obj.state.eq = quat2eul(obj.state.qq);
                 case 'f' % run
-                    u = obj.self.input_transform.result;
+                    u = obj.self.controller.result.input;
+                    % obj.self.input_transform.do(obj.self)
                     obj.msg.linear.x = u(1);
                     obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
@@ -122,7 +124,7 @@ function do(obj,varargin)
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = u(2);
                 case 'a'
-                    obj.self.controller.result.input = 0;
+                    obj.self.controller.result.input = [0;0];
                     obj.self.input_transform.result = 0;
                     obj.msg.linear.x = 0.0;
                     obj.msg.linear.y = 0.0;

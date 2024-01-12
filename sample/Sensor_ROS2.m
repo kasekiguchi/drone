@@ -27,11 +27,20 @@ Sensor.pfunc = @data_t265;
 % Sensor.pfunc = [];
 
     % t265用の処理
-    function result = data_t265(data)
+    function result = data_t265(self)
+        data = self.sensor.ros.getData;
         x = data.pose.pose.position.x;
         y = data.pose.pose.position.y;
         z = data.pose.pose.position.z;
-        result = [x;y;z];
+        qx = data.pose.pose.orientation.x;
+        qy = data.pose.pose.orientation.y;
+        qz = data.pose.pose.orientation.z;
+        qw = data.pose.pose.orientation.w;
+        eul = quat2eul([qw,qx,qy,qz],'XYZ');
+        % result.state.p = [x;y;z];
+        % result.state.q = eul';
+        % result = [x; y; z; eul'];
+        result = [x; y; eul(3)];
     end
 
     % ローバー自身の点群認識
