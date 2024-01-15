@@ -42,6 +42,11 @@ agent.estimator.elc = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent
 agent.estimator.result= agent.estimator.hlc.result;
 agent.estimator.result.elc = agent.estimator.elc.result;
 agent.estimator.result.hlc = agent.estimator.hlc.result;
+result_hlc= agent.estimator.hlc.result;
+result_elc= agent.estimator.elc.result;
+agent.estimator.result.result_hlc = struct("p",result_hlc.state.p,"q",result_hlc.state.q,"v",result_hlc.state.v,"w",result_hlc.state.w);
+agent.estimator.result.result_elc = struct("p",result_elc.state.p,"q",result_elc.state.q,"v",result_elc.state.v,"w",result_elc.state.w,"Trs",result_elc.state.Trs);
+    
 agent.estimator.flag = 0;
 agent.estimator.flag2 = 0;
 agent.estimator.do = @estimator_do;

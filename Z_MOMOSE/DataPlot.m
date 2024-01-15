@@ -15,8 +15,8 @@ fF=10;%flightのみは１
 % endTime = 100;
 startTime = 0;
 endTime = 1E3;
-log1=changeResult(log_addingTtoEL,"hlc");
-log2=changeResult(log_addingTtoEL, "elc");
+log1=changeResult(log_addingTtoEL3,"hlc");
+log2=changeResult(log_addingTtoEL3, "elc");
     loggers = {
                 % log_saddle,...
                 % log_sadlle_FTxy

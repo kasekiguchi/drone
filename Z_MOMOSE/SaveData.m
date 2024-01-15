@@ -1,7 +1,7 @@
 %% make folder&save
     %変更しない
-    % ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
-    ExportFolder='C:\Users\Students\Documents\work2023\momose';%実験用pcのパス
+    ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
+    % ExportFolder='C:\Users\Students\Documents\work2023\momose';%実験用pcのパス
     % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     % ExportFolder='C:\Users\81809\OneDrive\ドキュメント\GitHub\drone\Data';
     % ExportFolder='Data';%github内
@@ -10,9 +10,9 @@
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
     subfolder='exp';%sim or exp
-    ExpSimName='ELHLchange';%実験,シミュレーション名
+    ExpSimName='ELHLchange_CanSaveEst';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='addingTtoEL';%実験,シミュレーション内容
+    contents='addingTtoEL3';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
