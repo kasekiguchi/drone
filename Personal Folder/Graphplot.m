@@ -9,7 +9,10 @@ function [] = Graphplot(app)
     % 108 : landing
     %-----------------------------
 
-    choice = 0; % 0:x-yグラフ，1:x-y-zグラフ, 2:計算コスト(シミュレーションのみ)
+    %------------------------------------------------------------------------------
+     choice = 0; % 0:x-yグラフ，1:x-y-zグラフ, 2:計算コスト(シミュレーションのみ)
+     error = 0; %1:目標値との誤差のグラフを表示
+    %------------------------------------------------------------------------------
     %% データのインポート
     
     for i = 1:find(app.logger.Data.t,1,'last')
@@ -230,17 +233,19 @@ function [] = Graphplot(app)
     end
 
     %error
-    figure(7)
-    plot(data.t,data.error(:,:),'LineWidth',1.2)
-    xlabel('Time [s]');
-    ylabel('Error');
-    grid on
-    lgdtmp = {'error.x','error.y','error.z'};
-    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    lgd.NumColumns = columnomber;
-    xlim([data.t(1) data.t(end)])
-    ax(7) = gca;
-    title('Error of agent1','FontSize',12);
+    if error == 1
+        figure(7)
+        plot(data.t,data.error(:,:),'LineWidth',1.2)
+        xlabel('Time [s]');
+        ylabel('Error');
+        grid on
+        lgdtmp = {'error.x','error.y','error.z'};
+        lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+        lgd.NumColumns = columnomber;
+        xlim([data.t(1) data.t(end)])
+        ax(7) = gca;
+        title('Error of agent1','FontSize',12);
+    end
     
     fontSize = 14; %軸の文字の大きさの設定
     set(ax,'FontSize',fontSize);

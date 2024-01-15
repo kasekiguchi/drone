@@ -55,7 +55,7 @@ run("ExpBase");
 % end
 %--------------------------------------------------
 
-%tからMPC回す--------------------------------------
+%tからMPC回すバージョン--------------------------------------
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
     if varargin{2} == 'a'
