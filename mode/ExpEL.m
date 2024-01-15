@@ -101,6 +101,9 @@ function result = estimator_do(varargin)
     end
     result.hlc = result_hlc;
     result.elc = result_elc;
+    %保存用
+    result.result_hlc = struct("p",result_hlc.state.p,"q",result_hlc.state.q,"v",result_hlc.state.v,"w",result_hlc.state.w);
+    result.result_elc = struct("p",result_elc.state.p,"q",result_elc.state.q,"v",result_elc.state.v,"w",result_elc.state.w,"Trs",result_elc.state.Trs);
     varargin{5}.estimator.result = result;
     varargin{5}.controller = controller;
 end

@@ -15,7 +15,8 @@ fF=10;%flightのみは１
 % endTime = 100;
 startTime = 0;
 endTime = 1E3;
-
+log1=changeResult(log_addingTtoEL,"hlc");
+log2=changeResult(log_addingTtoEL, "elc");
     loggers = {
                 % log_saddle,...
                 % log_sadlle_FTxy
@@ -49,15 +50,17 @@ endTime = 1E3;
                 % log_HLFT
                 % log_FTonly
                 % log_FT
-                log_second
+                % log_second
+                log1,log2
+                % log_addingTtoEL
 
 
                 % gui.logger
         };
     c=[
-        % "HL","IOL"
+        "HL","IOL"
         % "FTservoZ","FTservoZn1"
-        % "HLLS"
+        % "HLLS"l
         % "HLFTservo"
         %,"ELFT","ELLS","ELFT"
            % "HLft"%
@@ -89,13 +92,13 @@ endTime = 1E3;
 % multiFigure.layout = {[2,2],[2,3]};
 % multiFigure.title = [" subsystem","vinput poly"];%[" state", " subsystem"];%title name
 
-nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
-multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
-multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
+% nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
+% multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
+% multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
 
-% nM = {["t_x" ,"t_y" ,"t_z","t_vx" ,"t_vy" ,"t_vz"],["t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"],["t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
-% multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
+nM = {["t_x" ,"t_y" ,"t_z","t_vx" ,"t_vy" ,"t_vz"],["t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"],["t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
+multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
+multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
 
 % nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
 % multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
@@ -296,6 +299,8 @@ end
 
 
 %% make folder
+isSaved = 0;%input("Save figure : '1' \nNot now : '0' \nFill in : ");
+if isSaved
 %変更しない
     ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
         % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
@@ -357,7 +362,7 @@ SaveTitle=strings(1,1);
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jng');
     saveas(f(i), fullfile(FolderNameF, SaveTitle(i) ),'fig');
 %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
-
+end
 %% functions
 function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime)
         if fF==1
@@ -481,10 +486,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                                 z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z2;
                                 z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z3;
                                 z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z4;
-                                F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
-                                F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
-                                F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
-                                F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
+                                % F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
+                                % F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
+                                % F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
+                                % F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
                                 j=j+1;
                             end
                         else 
@@ -494,10 +499,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                                 z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, j}.z2;
                                 z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, j}.z3;
                                 z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, j}.z4;
-                                F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
-                                F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
-                                F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
-                                F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
+                                % F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
+                                % F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
+                                % F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
+                                % F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
                             end
                         end
                         
@@ -534,7 +539,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
             if isprop(loggers{i}.Data.agent.estimator.result{1, 1}.state,'Trs')
                 for i2=kf(i):1:ke(i)
                     Trs{i}(1:2,j)=loggers{i}.Data.agent.estimator.result{1,i2}.state.Trs(1:2);
-                    Trs{i}(3,j)=loggers{i}.Data.agent.controller.result{1, i2}.u(1);
+                    % Trs{i}(3,j)=loggers{i}.Data.agent.controller.result{1, i2}.u(1);
                     j=j+1;
                 end
             else
@@ -619,7 +624,7 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
         allData.Trs = {struct('x',{time},'y',{Trs}), struct('x','time [s]','y','Tr [N] dTr [N/s] ddTr [N/$\rm{s^2}$]'), LgndCrt(["$Tr$","$dTr$"],c),add_option([],option,addingContents)};
         if fexpandS
             allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
-            allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
+            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
         else
             allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
             % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
@@ -786,11 +791,20 @@ function plot_data_single(~, ~, branchData)
             end
     end
 
-    function newLog = changeResult(log,controllerName)
-        k=log.k;
-        for i = 1:k
-            
+    function newlog = changeResult(log,controllerName)
+        controllerName2 = "result_" + controllerName;
+        newlog.k = log.k;
+        newlog.fExp = log.fExp;
+        newlog.Data.t = log.Data.t;
+        newlog.Data.phase = log.Data.phase;
+        for i = 1:newlog.k
+            % newlog.Data.agent.estimator.result{1, i}.state = log.Data.agent.estimator.result{1, i}.(controllerName).state;
+            newlog.Data.agent.estimator.result{1, i}.state = log.Data.agent.estimator.result{1, i}.(controllerName2);
+            newlog.Data.agent.reference.result{1, i}.state = log.Data.agent.reference.result{1, i}.state;
+            newlog.Data.agent.controller.result{1, i} = log.Data.agent.controller.result{1, i}.(controllerName);
+            newlog.Data.agent.input{1, i} = log.Data.agent.controller.result{1, i}.(controllerName).input;
         end
+        newlog.Data.agent.inner_input = log.Data.agent.inner_input;  
     end
     %         logger,...
 %         logger_ft_lx_001,...
