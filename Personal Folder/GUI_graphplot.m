@@ -10,7 +10,7 @@ close all hidden;
 clc;
 
 %% データのインポート
-% load("experiment_7_11_circle_radius=0.7_Log(11-Jul-2023_14_30_38).mat") %読み込むデータファイルの設定
+load("1_5_NMPC_立体.mat") %読み込むデータファイルの設定
 % load("9_4_test.mat")
 
 for i = 1:find(log.Data.t,1,'last')
@@ -24,9 +24,9 @@ for i = 1:find(log.Data.t,1,'last')
     data.error(:,i) = data.pr(:,i) - data.p(:,i);                       %error
 end
 
-for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
-    data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
-end
+% for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
+%     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
+% end
 
 disp('load finished')
 %% グラフ出力
@@ -38,8 +38,8 @@ newcolors = [0 0.4470 0.7410
 columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
-name = 'すぎやま'; %ファイル名
-folderName = '2023_1003_全体実験_すぎやま'; %フォルダ名
+name = '1_5_NMPC'; %ファイル名
+folderName = '1_5_NPC'; %フォルダ名
 mkdir(folderName) %新規フォルダ作成
 
 %位置p
@@ -111,7 +111,7 @@ plot(data.p(1,:),data.p(2,:),'LineWidth', 2);
 xlabel('Position x [m]');
 ylabel('Position y [m]');
 hold on
-plot(data.pr(1,:), data.pr(2,:),'LineWidth',2)
+plot(data.pr(1,:), data.pr(2,:),'LineWidth',2,'LineStyle','--')
 grid on
 hold off
 lgdtmp = {'estimator', 'reference'};
@@ -119,8 +119,22 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 ax(5) = gca;
 savefig(strcat('x-y_',name))
 
-%入力
 figure(6)
+plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth', 2);
+xlabel('Position x [m]');
+ylabel('Position y [m]');
+zlabel('Position z [m]');
+hold on
+plot3(data.pr(1,:), data.pr(2,:),data.pr(3,:),'LineWidth',2,'LineStyle','--')
+grid on
+hold off
+lgdtmp = {'estimator', 'reference'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+ax(6) = gca;
+savefig(strcat('x-y_',name))
+
+%入力
+figure(7)
 plot(data.t,data.u(:,:),'LineWidth',1);
 xlabel('Time [s]');
 ylabel('u');
@@ -129,12 +143,12 @@ lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
-ax(6) = gca;
+ax(7) = gca;
 title('Input u of agent1','FontSize',12);
 savefig(strcat('Input_',name))
 
-% %error
-figure(7)
+%error
+figure(8)
 plot(data.t,data.error(:,:),'LineWidth',1)
 xlabel('Time [s]');
 ylabel('Error');
@@ -143,7 +157,7 @@ lgdtmp = {'error.x','error.y','error.z'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
-ax(7) = gca;
+ax(8) = gca;
 title('Error of agent1','FontSize',12);
 savefig(strcat('Error_',name))
 
