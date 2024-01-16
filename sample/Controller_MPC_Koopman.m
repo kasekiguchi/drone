@@ -28,21 +28,21 @@ function Controller = Controller_MPC_Koopman(Agent)
 
     %% 重み
     %実機重み--------------------------------------------------------------------------
-    % Controller_param.weight.P = diag([400; 400; 250]);    % 座標   1000 1000 10000
-    % Controller_param.weight.V = diag([100; 100; 50]);    % 速度
-    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    % Controller_param.weight.QW = diag([130; 300; 1; 5; 5; 1]);  % 姿勢角，角速度
-    % 
-    % Controller_param.weight.Pf = Controller_param.weight.P; % 6
-    % Controller_param.weight.Vf = Controller_param.weight.V;
-    % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
+    Controller_param.weight.P = diag([100; 100; 300]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([100; 100; 0]);    % 速度
+    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.weight.QW = diag([100; 100; 1; 5; 5; 1]);  % 姿勢角，角速度
+
+    Controller_param.weight.Pf = Controller_param.weight.P; % 6
+    Controller_param.weight.Vf = Controller_param.weight.V;
+    Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
     %----------------------------------------------------------------------------------
 
     % Controller_param.weight.Pf = diag([1; 1; 1]); % 6
     % Controller_param.weight.Vf = diag([1; 1; 1]);
     % Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
-
+    % 
     % Controller_param.weight.P = diag([1; 1; 1]);    % 座標   1000 1000 10000
     % Controller_param.weight.V = diag([1; 1; 1]);    % 速度
     % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
@@ -54,7 +54,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
 
     %シミュレーション時確認用-------------------------------------------------------
-    % Controller_param.weight.P = diag([290; 240; 150]);    % 座標   1000 1000 10000
+    % Controller_param.weight.P = diag([290; 240; 50]);    % 座標   1000 1000 10000
     % Controller_param.weight.V = diag([60; 70; 20]);    % 速度
     % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
@@ -63,21 +63,21 @@ function Controller = Controller_MPC_Koopman(Agent)
     % % Controller_param.weight.Pf = diag([1000; 500; 200]); % 6
     % % Controller_param.weight.Vf = Controller_param.weight.V;
     % % Controller_param.weight.QWf = diag([1000; 1; 2000; 300; 100; 1]); % 7,8
-    % 
+    % % 
     % Controller_param.weight.Pf = Controller_param.weight.P; % 6
     % Controller_param.weight.Vf = Controller_param.weight.V;
     % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
 
     %初見確認用重み--------------------------------------------------------------
-    Controller_param.weight.P = diag([20; 20; 5]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([30; 30; 50]);    % 速度
-    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([5; 5; 1; 5; 5; 1]);  % 姿勢角，角速度
-
-    Controller_param.weight.Pf = Controller_param.weight.P; % 6
-    Controller_param.weight.Vf = Controller_param.weight.V;
-    Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
+    % Controller_param.weight.P = diag([20; 20; 5]);    % 座標   1000 1000 10000
+    % Controller_param.weight.V = diag([30; 30; 50]);    % 速度
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    % Controller_param.weight.QW = diag([5; 5; 1; 5; 5; 1]);  % 姿勢角，角速度
+    % 
+    % Controller_param.weight.Pf = Controller_param.weight.P; % 6
+    % Controller_param.weight.Vf = Controller_param.weight.V;
+    % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
 
     % Controller_param.weight.Pf = diag([1; 1; 1]); % 6
     % Controller_param.weight.Vf = diag([1; 1; 1]);
@@ -85,7 +85,7 @@ function Controller = Controller_MPC_Koopman(Agent)
 
     %% 4inputs
     if torque == 1
-        Controller_param.input.u = [Agent.parameter.mass * 9.81;0;0;0]; % 4総推力，トルク
+        Controller_param.input.u = [Agent.parameter.mass * 9.81;0;0;0]; % 総推力，トルク
     else
         Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
     end
