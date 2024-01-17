@@ -20,6 +20,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
         InputTransform
         time
         inifTime
+        flag
+        changeflag
     end
 
     methods
@@ -47,6 +49,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             obj.InputTransform=THRUST2FORCE_TORQUE(self,1);
             obj.time = [];
             obj.inifTime =[];
+            obj.flag = 0; %1:P2P
 
         end
 
@@ -71,8 +74,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             obj.param.t = varargin{1}.t;
             rt = obj.param.t; %時間
             idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
-            obj.state.ref = obj.Reference(rt); %リファレンスの更新
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
+            obj.state.ref = obj.Reference(rt); %リファレンスの更新
             %-------------------------------------------------------------
 
             %実機のときコメントイン(aから回す)-----------------------------------------
@@ -187,16 +190,39 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
             xr = zeros(obj.param.total_size, obj.param.H);    % initialize
+            if obj.flag == 0
             % 時間関数の取得→時間を代入してリファレンス生成
-            RefTime = obj.self.reference.func;    % 時間関数の取得
-            for h = 0:obj.param.H-1
-                t = T + obj.param.dt * h; % reference生成の時刻をずらす
-                ref = RefTime(t);
-                xr(1:3, h+1) = ref(1:3);
-                xr(7:9, h+1) = ref(5:7);
-                xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-                xr(10:12, h+1) = [0;0;0];
-                xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+                RefTime = obj.self.reference.func;    % 時間関数の取得
+                for h = 0:obj.param.H-1
+                    t = T + obj.param.dt * h; % reference生成の時刻をずらす
+                    ref = RefTime(t);
+                    xr(1:3, h+1) = ref(1:3);
+                    xr(7:9, h+1) = ref(5:7);
+                    xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                    xr(10:12, h+1) = [0;0;0];
+                    xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+                end
+            else
+                for h = 0:obj.param.H-1
+                    if obj.current_state(3) <= 0.75 && obj.current_state(1) <= 0
+                        obj.changeflag = 1;
+                    elseif obj.current_state(3) >= 0.95 && obj.current_state(1) >= 0.5
+                        obj.changeflag = 0;
+                    end
+                    if obj.changeflag == 1
+                        xr(1:3, h+1) = [0.5,0,1];
+                        xr(7:9, h+1) = [0,0,0];
+                        xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                        xr(10:12, h+1) = [0;0;0];
+                        xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+                    else
+                        xr(1:3, h+1) = [0,0,0.7];
+                        xr(7:9, h+1) = [0,0,0];
+                        xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                        xr(10:12, h+1) = [0;0;0];
+                        xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+                    end
+                end
             end
         end
     end

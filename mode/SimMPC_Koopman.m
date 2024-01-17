@@ -1,14 +1,14 @@
 clc
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 10; % terminal time
+te = 20; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
 %位置，姿勢角初期値固定------------------------------------------------------------
-initial_state.p = arranged_position([0, 0], 1, 1, 2.5); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
 % initial_state.q = [1; 0; 0; 0];
 initial_state.q = [0; 0; 0];
 %----------------------------------------------------------------------------------
@@ -27,7 +27,8 @@ initial_state.w = [0; 0; 0];
 % agent.parameter = DRONE_PARAM("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0;0;0],"g",[0;0;1],"h",[0;0;0],"j",[0;0;1]),5});
 % % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",60,"orig",[0;0;1],"size",[1,1,1]},"HL"});
 % % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 % agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
@@ -38,8 +39,8 @@ initial_state.w = [0; 0; 0];
 % load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
 % load("EstimationResult_12state_11_29_GUIsimdata.mat",'est')
 load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est')
-% load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est')
-% % 
+% % load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est')
+% % % 
 A = est.A;
 B = est.B;
 C = est.C;
@@ -49,8 +50,9 @@ agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1.5]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1.5]},"HL"});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",20,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
+agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;0.7],"g",[0;0;1],"h",[0.5;0;0.7],"j",[0;0;1]),5});
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 
@@ -58,10 +60,10 @@ run("ExpBase");
 
 %% 実機データを用いてMPC回す場合
 
-% data = LOGGER("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat");
+% data = LOGGER("1_17_P2P_z.mat");
 % finitIndex = find(data.Data.phase == 102,1,'first');
 % fendIndex = find(data.Data.phase == 102,1, 'last');
-
+% 
 % for i = finitIndex:fendIndex
 %     agent.sensor.result = data.Data.agent.sensor.result{i};
 %     agent.estimator.result = data.Data.agent.estimator.result{i};
@@ -71,9 +73,9 @@ run("ExpBase");
 %     time.t = time.t + dt;
 % end
 % save('quadprog_test.mat', 'logger')
-
+% 
 % run("ExpBase");
-
+% 
 function dfunc(app)
 
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
