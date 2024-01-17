@@ -16,11 +16,11 @@ cd(cf); close all hidden; clear all; userpath('clear');
 close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/AMC_1_USE.mat');
+log = LOGGER('./Data/u_plain1212_1.mat');
 O_func = @(x,u) On3_1_new(x,u);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
 f_png=0;
-f_eps=0;
+f_eps=1;
 f_offset = 1;
 f_O = 0;
 f_wall = 0;
@@ -489,8 +489,16 @@ if illustration == 1
 %     hold off;
     fig1 = figure(1);
     fig1.Color = 'white';
+    plot(time,u(1,:),'LineWidth', 2)
     hold on;
-    log.plot({1, "input", ""});
+    plot(time,u(2,:),'LineWidth', 2)
+    plot(time,u(3,:),'LineWidth', 2)
+    plot(time,u(4,:),'LineWidth', 2)
+    xlabel('time [s]','FontSize', 16);
+    ylabel('\it{w} [rad/s]','FontSize', 16);
+    lgd1=legend('\it{T_1}','\it{T_2}','\it{T_3}','\it{T_4}','FontSize', 16,'Location', 'Best');
+    lgd1.NumColumns = 1;
+    xlim([0, maxt]);
     set(gca,'FontSize',14);
     fig31 = figure(31);
     fig31.Color = 'white';
@@ -531,6 +539,128 @@ if illustration == 1
     ylabel('orientation \it{q} [rad]','FontSize', 16);
     grid on;
     set(gca,'FontSize',14);
+
+    %推定値と真値のグラフを分けたもの
+    fig50=figure(50);
+    fig50.Color = 'white';
+    plot(time,robot_p(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_p(2,:),'LineWidth', 2);
+    plot(time,robot_p(3,:),'LineWidth', 2);
+%     plot(time,robot_pe(1,:),'LineWidth', 2);
+%     plot(time,robot_pe(2,:),'LineWidth', 2);
+%     plot(time,robot_pe(3,:),'LineWidth', 2);
+    lgd=legend('\it{x}','\it{y}','\it{z}','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    hold off;
+    xlabel('time [s]','FontSize', 16)
+    ylabel('position \it{p} [m]','FontSize', 16);
+    xlim([0, maxt]);
+    grid on;
+    set(gca,'FontSize',14);
+    fig51=figure(51);
+    fig51.Color = 'white';
+%     plot(time,robot_p(1,:),'LineWidth', 2);
+%     plot(time,robot_p(2,:),'LineWidth', 2);
+%     plot(time,robot_p(3,:),'LineWidth', 2);
+    plot(time,robot_pe(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_pe(2,:),'LineWidth', 2);
+    plot(time,robot_pe(3,:),'LineWidth', 2);
+    lgd=legend('\it{x_e}','\it{y_e}','\it{z_e}','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    hold off;
+    xlabel('time [s]','FontSize', 16)
+    ylabel('position \it{p} [m]','FontSize', 16);
+    xlim([0, maxt]);
+    grid on;
+    set(gca,'FontSize',14);
+
+    fig52=figure(52);
+    fig52.Color = 'white';
+    plot(time,robot_q(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_q(2,:),'LineWidth', 2);
+    plot(time,robot_q(3,:),'LineWidth', 2);
+    lgd=legend('\phi','\theta','\psi','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    hold off;
+    xlabel('time [s]','FontSize', 16);
+    ylabel('orientation \it{q} [rad]','FontSize', 16);
+    xlim([0, maxt]);
+    ylim([-1 1]);
+    grid on;
+    set(gca,'FontSize',14);
+    fig53=figure(53);
+    fig53.Color = 'white';
+    plot(time,robot_qe(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_qe(2,:),'LineWidth', 2);
+    plot(time,robot_qe(3,:),'LineWidth', 2);
+    lgd=legend('\phi_{e}','\theta_{e}','\psi_{e}','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    hold off;
+    xlabel('time [s]','FontSize', 16);
+    ylabel('orientation \it{q} [rad]','FontSize', 16);
+    xlim([0, maxt]);
+    ylim([-1 1]);
+    grid on;
+    set(gca,'FontSize',14);
+
+    fig54=figure(54);
+    fig54.Color = 'white';
+    plot(time,robot_v(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_v(2,:),'LineWidth', 2);
+    plot(time,robot_v(3,:),'LineWidth', 2);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('\it{v} [m/s]','FontSize', 16);
+    lgd=legend('\it{v_x}','\it{v_y}','\it{v_z}','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    xlim([0, maxt]);
+    set(gca,'FontSize',14);
+    hold off;
+    fig55=figure(55);
+    fig54.Color = 'white';
+    plot(time,robot_ve(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_ve(2,:),'LineWidth', 2);
+    plot(time,robot_ve(3,:),'LineWidth', 2);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('\it{v} [m/s]','FontSize', 16);
+    lgd=legend('\it{v_{xe}}','\it{v_{ye}}','\it{v_{ze}}','FontSize', 16,'Location', 'Best');
+    lgd.NumColumns = 2;
+    xlim([0, maxt]);
+    set(gca,'FontSize',14);
+    hold off;
+
+    fig56=figure(56);
+    fig56.Color = 'white';
+    plot(time,robot_w(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_w(2,:),'LineWidth', 2);
+    plot(time,robot_w(3,:),'LineWidth', 2);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('\it{w} [rad/s]','FontSize', 16);
+    lgd13=legend('\it{w_{\phi}}','\it{w_{\theta}}','\it{w_{\psi}}','FontSize', 18,'Location', 'Best');
+    lgd13.NumColumns = 2;
+    xlim([0, maxt]);
+    set(gca,'FontSize',14);
+    hold off;
+    fig57=figure(57);
+    fig57.Color = 'white';
+    plot(time,robot_we(1,:),'LineWidth', 2);
+    hold on;
+    plot(time,robot_we(2,:),'LineWidth', 2);
+    plot(time,robot_we(3,:),'LineWidth', 2);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('\it{w} [rad/s]','FontSize', 16);
+    lgd13=legend('\it{w_{\phi e}}','\it{w_{\theta e}}','\it{w_{\psi e}}','FontSize', 18,'Location', 'Best');
+    lgd13.NumColumns = 2;
+    xlim([0, maxt]);
+    set(gca,'FontSize',14);
+    hold off;
+
 end
 if f_png==1
 %     pass2 = 'C:\Users\yuika\Desktop\修士\中間発表\ppt';
@@ -587,7 +717,7 @@ pass2 = 'C:\Users\student\Desktop\Nozaki\bad'; %P:192.168.100.20 PC
 end
 if f_eps==1
 %     pass2 = '\Users\yuika\Desktop\修士\bachelor\修士論文\fig';
-    pass2 = 'C:\Users\student\Desktop\Nozaki\bad';
+%     pass2 = 'C:\Users\student\Desktop\Nozaki\good';
 %     saveas(fig7, fullfile(pass2, 'EKF_pos.eps'), 'epsc');
 %     saveas(fig8, fullfile(pass2, 'EKF_ang.eps'), 'epsc');
 %     saveas(fig18, fullfile(pass2, 'EKF_posAll.eps'), 'epsc');
@@ -628,23 +758,40 @@ if f_eps==1
 %     saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
 
 %     pass2 = 'C:\Users\student\Desktop\Nozaki\bad'; %P:192.168.100.20 PC
-    saveas(fig7, fullfile(pass2, 'EKF_pos_b.eps'), 'epsc');
-    saveas(fig8, fullfile(pass2, 'EKF_ang_b.eps'), 'epsc');
-    saveas(fig18, fullfile(pass2, 'EKF_posAll_b.eps'), 'epsc');
-    saveas(fig2, fullfile(pass2, 'EKF_angAll_b.eps'), 'epsc');
-    saveas(fig11, fullfile(pass2, 'EKF_v_b.eps'), 'epsc');
-    saveas(fig13, fullfile(pass2, 'EKF_w_b.eps'), 'epsc');
-    saveas(fig14, fullfile(pass2, 'rankO_b.eps'), 'epsc');
-    saveas(fig15, fullfile(pass2, 'minS_b.eps'), 'epsc');
-    saveas(fig16, fullfile(pass2, 'Singular_Value_b.eps'), 'epsc');
-    saveas(fig17, fullfile(pass2, 'S_15_18_b.eps'), 'epsc');
-    saveas(fig31, fullfile(pass2, 'condN_b.eps'), 'epsc');
-    if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psb_b.eps'), 'epsc');
-        saveas(fig10, fullfile(pass2, 'EKF_qs_b.eps'), 'epsc');
-        saveas(fig12, fullfile(pass2, 'EKF_inst_b.eps'), 'epsc');
-    end   
+%     saveas(fig7, fullfile(pass2, 'EKF_pos_b.eps'), 'epsc');
+%     saveas(fig8, fullfile(pass2, 'EKF_ang_b.eps'), 'epsc');
+%     saveas(fig18, fullfile(pass2, 'EKF_posAll_b.eps'), 'epsc');
+%     saveas(fig2, fullfile(pass2, 'EKF_angAll_b.eps'), 'epsc');
+%     saveas(fig11, fullfile(pass2, 'EKF_v_b.eps'), 'epsc');
+%     saveas(fig13, fullfile(pass2, 'EKF_w_b.eps'), 'epsc');
+%     saveas(fig14, fullfile(pass2, 'rankO_b.eps'), 'epsc');
+%     saveas(fig15, fullfile(pass2, 'minS_b.eps'), 'epsc');
+%     saveas(fig16, fullfile(pass2, 'Singular_Value_b.eps'), 'epsc');
+%     saveas(fig17, fullfile(pass2, 'S_15_18_b.eps'), 'epsc');
+%     saveas(fig31, fullfile(pass2, 'condN_b.eps'), 'epsc');
+%     if f_offset == 1
+%         saveas(fig9, fullfile(pass2, 'EKF_psb_b.eps'), 'epsc');
+%         saveas(fig10, fullfile(pass2, 'EKF_qs_b.eps'), 'epsc');
+%         saveas(fig12, fullfile(pass2, 'EKF_inst_b.eps'), 'epsc');
+%     end 
+pass2 = 'C:\Users\student\Desktop\Nozaki\inputs'; %P:192.168.100.20 PC
+% saveas(fig50, fullfile(pass2, 'P1.eps'), 'epsc');
+% saveas(fig51, fullfile(pass2, 'PE1.eps'), 'epsc');
+% saveas(fig52, fullfile(pass2, 'Q1.eps'), 'epsc');
+% saveas(fig53, fullfile(pass2, 'QE1.eps'), 'epsc');
+% saveas(fig54, fullfile(pass2, 'V1.eps'), 'epsc');
+% saveas(fig55, fullfile(pass2, 'VE1.eps'), 'epsc');
+% saveas(fig56, fullfile(pass2, 'W1.eps'), 'epsc');
+% saveas(fig57, fullfile(pass2, 'WE1.eps'), 'epsc');
+saveas(fig1, fullfile(pass2, 'input_non.eps'), 'epsc');
 end
+
+
+
+
+
+
+
 
 function rounded_radians = roundpi(radians)
     % ラジアンを-piからpiの範囲に丸める関数
