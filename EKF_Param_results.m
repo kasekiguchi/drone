@@ -489,16 +489,25 @@ if illustration == 1
 %     hold off;
     fig1 = figure(1);
     fig1.Color = 'white';
-    plot(time,u(1,:),'LineWidth', 2)
-    hold on;
-    plot(time,u(2,:),'LineWidth', 2)
-    plot(time,u(3,:),'LineWidth', 2)
-    plot(time,u(4,:),'LineWidth', 2)
+    plot(time,u(1,:),'LineWidth', 2);
     xlabel('time [s]','FontSize', 16);
-    ylabel('\it{w} [rad/s]','FontSize', 16);
-    lgd1=legend('\it{T_1}','\it{T_2}','\it{T_3}','\it{T_4}','FontSize', 16,'Location', 'Best');
+    ylabel('inputs [N]','FontSize', 16);
+    lgd1=legend('\it{T_1}','FontSize', 16,'Location', 'Best');
     lgd1.NumColumns = 1;
     xlim([0, maxt]);
+    set(gca,'FontSize',14);
+    fig81 = figure(81);
+    fig81.Color = 'white';
+    plot(time,u(2,:),'LineWidth', 2);
+    hold on;
+    plot(time,u(3,:),'LineWidth', 2);
+    plot(time,u(4,:),'LineWidth', 2);
+    xlabel('time [s]','FontSize', 16);
+    ylabel('inputs [Nm]','FontSize', 16);
+    lgd1=legend('\it{T_2}','\it{T_3}','\it{T_4}','FontSize', 16,'Location', 'Best');
+    lgd1.NumColumns = 1;
+    xlim([0, maxt]);
+    ylim([-2 2]);
     set(gca,'FontSize',14);
     fig31 = figure(31);
     fig31.Color = 'white';
@@ -784,6 +793,7 @@ pass2 = 'C:\Users\student\Desktop\Nozaki\inputs'; %P:192.168.100.20 PC
 % saveas(fig56, fullfile(pass2, 'W1.eps'), 'epsc');
 % saveas(fig57, fullfile(pass2, 'WE1.eps'), 'epsc');
 saveas(fig1, fullfile(pass2, 'input_non.eps'), 'epsc');
+saveas(fig81, fullfile(pass2, 'input2_non.eps'), 'epsc');
 end
 
 
