@@ -8,7 +8,7 @@ properties
     fState % subscribeにstate情報を含むか
 
     % ros2param
-    prosesssfunc
+    % prosesssfunc
     Node
     radius=0;
 end
@@ -42,7 +42,7 @@ methods
 
         % data = obj.ros.getData;
         % data = obj.ros{1}.getData;
-        obj.prosesssfunc = param.pfunc;%使わない場合はsampleで0を入れる
+        % obj.prosesssfunc = param.pfunc;%使わない場合はsampleで0を入れる
     end
         
 
@@ -51,27 +51,6 @@ methods
         %   set obj.result.state : State_obj,  p : position, q : quaternion
         %   result :
         % 【入力】motive ：NATNET_CONNECOTR object
-
-        for i = 1:length(obj.ros)
-            data{i} = obj.ros{i}.getData;
-        end              
-
-        PCdata_use = obj.prosesssfunc(data);
-        
-        rot = eul2rotm(deg2rad([0 0 0]),'XYZ'); %回転行列(roll,pitch,yaw)
-        T = [0.17 0 0]; %並進方向(x,y,z)
-        tform = rigidtform3d(rot,T);
-        % moving_pcm = pctransform(ptCloudOut,tform);        
-        obj.result{1} = pctransform(PCdata_use,tform);
-        %%%%%for PC2LDA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % tic
-        theta=zeros(1,length(PCdata_use.Count));rho=theta;
-        for i=1:PCdata_use.Count
-            [theta(i),rho(i)] = cart2pol(PCdata_use.Location(i,1),PCdata_use.Location(i,2));            
-        end
-        % toc
-        obj.result{2}.angle= theta;
-        obj.result{2}.length=rho;
         %%%%%for PC2LDA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
         result = obj.result;
     end
