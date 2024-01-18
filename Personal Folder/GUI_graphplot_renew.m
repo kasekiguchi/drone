@@ -8,9 +8,11 @@ opengl software
 % close all hidden;
 clear all;
 clc;
-pdf = 0; %1:pdfでグラフを保存
-name = '12_23_report_hov';
-folderName = '12_23_report_hov';
+
+%pdfで保存する際のファイル名----------
+    name = '1_18_report_sad_第4章';
+    folderName = '1_18_report_sad_第4章';
+%-------------------------------------
 
 %% 
 % oldmpc = load("1216_hov_oldmpc.mat","log");
@@ -41,19 +43,19 @@ folderName = '12_23_report_hov';
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("quadprog_test.mat")
+load("report_saddle.mat")
 disp('load finished')
 
-% for i = 1:find(log.Data.t,1,'last')
-%     data.t(1,i) = log.Data.t(i,1);                                      %時間t
-%     data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
-%     % data.te(:,i) = log.Data.agent.controller.result{i}.t(1,i);  %計算時間、シミュレーションのみ
-% end
+for i = 1:find(log.Data.t,1,'last')
+    data.t(1,i) = log.Data.t(i,1);                                      %時間t
+    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
+    % data.te(:,i) = log.Data.agent.controller.result{i}.t(1,i);  %計算時間、シミュレーションのみ
+end
 
 % for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
 %     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
@@ -69,15 +71,15 @@ disp('load finished')
 %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 % end
 
-for i = 1:find(logger.Data.t,1,'last')
-    data.t(1,i) = logger.Data.t(i,1);                                      %時間t
-    data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
-end
+% for i = 1:find(logger.Data.t,1,'last')
+%     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
+%     data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+%     data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+%     data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+%     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+%     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
+% end
 
 
 %% 特定の範囲のグラフ出力
@@ -110,15 +112,16 @@ Fsize.lgd = 16; %凡例の大きさ調整
 %位置p
 box on %グラフの枠線が出ないときに使用
 figure(1)
+hold on
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('Position [m]');
-% xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','red','LineWidth',2)
-hold on
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+250),'LineStyle','--','Color','red','LineWidth',2)
 grid on
 plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
+Square_coloring2(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+250]),[1.0 0.9 1.0]);
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
 lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
@@ -447,8 +450,9 @@ end
 
 
 %% pdfで保存
-fprintf('Enterで保存')
-pause
+Num = input('グラフをpdfで保存しますか (保存しない : 0 / 保存する : 1)：','s'); %0:各グラフで出力,1:いっぺんに出力
+pdf = str2double(Num); %文字列を数値に変換
+
 if pdf == 1
     mkdir(folderName);
     movefile(folderName,'Graph')

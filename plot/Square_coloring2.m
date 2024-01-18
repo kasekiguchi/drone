@@ -10,7 +10,7 @@
 % Bace : Filled up above this value
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function Square_coloring(PX, color, PY, Bace )
+function Square_coloring2(PX, color, PY, Bace )
 hold on;
 
 xlimit = get(gca, 'XLim');                                                  % デフォルトXレンジ設定
