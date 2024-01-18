@@ -8,15 +8,16 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 fLSorFT=3;%LS:1,FT:2,No:>=3
 fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=10;%flightのみは１
+fF=1;%flightのみは１
 
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
 % endTime = 100;
 startTime = 0;
 endTime = 1E3;
-log1=changeResult(log_addingTtoEL3,"hlc");
-log2=changeResult(log_addingTtoEL3, "elc");
+%HLとELの切り換える関数
+    log1=changeResult(log_addingTtoEL3,"hlc");
+    log2=changeResult(log_addingTtoEL3, "elc");
     loggers = {
                 % log_saddle,...
                 % log_sadlle_FTxy
@@ -298,9 +299,9 @@ end
 %             'AxesLimits', [ALmin(fN)*ones(1,lAL); ALmax(fN)*ones(1,lAL)],...
 
 
-%% make folder
 isSaved = 0;%input("Save figure : '1' \nNot now : '0' \nFill in : ");
 if isSaved
+%% make folder
 %変更しない
     ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
         % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
@@ -798,7 +799,6 @@ function plot_data_single(~, ~, branchData)
         newlog.Data.t = log.Data.t;
         newlog.Data.phase = log.Data.phase;
         for i = 1:newlog.k
-            % newlog.Data.agent.estimator.result{1, i}.state = log.Data.agent.estimator.result{1, i}.(controllerName).state;
             newlog.Data.agent.estimator.result{1, i}.state = log.Data.agent.estimator.result{1, i}.(controllerName2);
             newlog.Data.agent.reference.result{1, i}.state = log.Data.agent.reference.result{1, i}.state;
             newlog.Data.agent.controller.result{1, i} = log.Data.agent.controller.result{1, i}.(controllerName);

@@ -90,14 +90,6 @@ function result = estimator_do(varargin)
     result_hlc = estimator.hlc.do(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     if varargin{2} == 'f' && ftime > 3
         varargin{5}.estimator.flag=1;
-        % if ~varargin{5}.estimator.flag2
-        %     result_elc.state.Trs = [controller.result.hlc.input(1);0];
-        %     result_elc.state.p = result_hlc.state.p;
-        %     result_elc.state.q = result_hlc.state.q;
-        %     result_elc.state.v= result_hlc.state.v;
-        %     result_elc.state.w = result_hlc.state.w;
-        %     varargin{5}.estimator.flag2=1;
-        % end
         result = result_elc;
     else
         varargin{5}.estimator.flag=0;

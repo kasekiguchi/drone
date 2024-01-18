@@ -43,7 +43,6 @@ methods
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
         xd = ref.state.xd;
-        xd0 =xd;
         P = obj.param.P;
         xd = [xd; zeros(20 - size(xd, 1), 1)]; % 足りない分は０で埋める．
 
