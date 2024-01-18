@@ -151,7 +151,7 @@ function do(obj,varargin)
 % %             obj.state.eq = quat2eul(obj.state.qq);
 %             return;
 %         end
-       
+
         obj.connector.sendData(obj.msg);
     end
 
