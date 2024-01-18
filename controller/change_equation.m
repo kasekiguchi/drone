@@ -9,7 +9,7 @@ function [H, f] = change_equation(Param)
     Horizon = Param.H;
 
     Xc = quaternions(Param.current); %現在状態,観測量：状態+非線形項
-%     Xc = [Param.current;1];
+    % Xc = [Param.current;1];
     r  = Param.ref(1:12,:);
     r = r(:); %目標値、列ベクトルに変換
     ur = Param.ref(13:end,:);

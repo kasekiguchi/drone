@@ -49,20 +49,21 @@ methods
 
             %1_18:MPCのゲインとオフセットを変更するために追加
             if cha == 'f'
-                obj.param.gain(1) = 650;
-                obj.param.gain(2) = 650;
-                obj.param.gain(3) = 650;
-                obj.param.gain(4) = 20;
+                obj.param.gain2(1) = 550;
+                obj.param.gain2(2) = 550;
+                obj.param.gain2(3) = 550;
+                obj.param.gain2(4) = 400;
+                obj.param.th_offset2 = 370;
                 fprintf('オフセット変更→MPC \n')
 
                 T_thr = input(1); % thrust, torque input 
 
-                uroll = obj.param.gain(1) * (whn(1) - wh(1));
-                upitch = obj.param.gain(2) * (whn(2) - wh(2));
+                uroll = obj.param.gain2(1) * (whn(1) - wh(1));
+                upitch = obj.param.gain2(2) * (whn(2) - wh(2));
                 
                 % apply gain to (thrust - hovering_thrust)
-                uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
-                uyaw = obj.param.gain(3) * (whn(3) - wh(3));
+                uthr = max(0, obj.param.gain2(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset2); 
+                uyaw = obj.param.gain2(3) * (whn(3) - wh(3));
                 uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
                 upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
