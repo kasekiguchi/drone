@@ -49,27 +49,34 @@ flag.debug = 1;
 flag.ns = [0.07,0.3,2.4];
 flag.nf = [0.075,1.2,1.5];
 
-% north_dir = 0; % rad
-% start_point = [0,0]; % マップ左下から見た位置 [m,m]
-% map_size = [1,1000]; % north_dir で回転した後の start_pointからの領域 [m m]
+% shape_opts.start_point = [0,0]; % マップ左下から見た位置 [m,m]
+% shape_opts.map_size = [1,1000]; % north_dir で回転した後の start_pointからの領域 [m m]
+% shape_opts.data_type = "m";
+% shape_opts.north_dir = 0; % rad
 % M = FIELD_MAP('data_ito.csv','flat_shape.shp',flag,[],struct("start_point",start_point,"map_size",map_size,"data_type","m","north_dir",north_dir));
 
-north_dir = -12*(pi/180); % rad
-start_point = [670,230]; % マップ左下から見た位置 [m,m]
-map_size = [300,300]; % north_dir で回転した後の start_pointからの領域 [m m]
-M = FIELD_MAP('data_ito.csv','20160401/20160401-建築物の外周線.shp',flag,[],struct("start_point",start_point,"map_size",map_size,"data_type","m","north_dir",north_dir));
+shape_file = '20160401/20160401-建築物の外周線.shp';
+wind_data = 'data_ito.csv';
+unum = 1; % 初期の消火点の数（10機のUAV）
+step_end = 240; % シミュレーションステップ
+shape_opts.start_point = [670,230]; % マップ左下から見た位置 [m,m]
+shape_opts.map_size = [300,300]; % north_dir で回転した後の start_pointからの領域 [m m]
+shape_opts.data_type = "m";
+shape_opts.north_dir = -12*(pi/180); % rad
 
-% load("W_building_13112.mat");
+M = FIELD_MAP(flag,shape_file,shape_opts,[]);
+M.set_target();
+M.setup_wind(wind_data);
+M.set_gridcell_model();
+% W_data = "W_building_13112.mat";
 % M = FIELD_MAP('data_ito.csv','shape_share20221014/building_13112.shp',flag,W);
 %%
 %W = M.W;
 %save("W_building_13112.mat","W");
 %% Monte-Carlo simulation
 % 90min =~ 30step
-unum = 0; % 初期の消火点の数（10機のUAV）
 addFirePoint = "Regular";   % Regularで手動糸魚川，testでチューニング
 addFighter = "ON3"; % OFFは増援0，ON1はざっくり上昇，ON2は糸魚川時のポンプ数に対応
-ke = 240; % シミュレーションステップ
 kn = 1;% number of Monte-Carlo simulation
 % 手法選択
 % fMethod = "WAPR"; % Weighted Alt Page Rank
@@ -79,7 +86,7 @@ fMethod = "Weight"; % 重み行列
 fDynamics = "Direct"; % 消火方法：A star or Direct
 vi = 5; % 消火の必要がない部分を飛ばす距離
 h = 0.1; %0.1 * (3/M.map_scale); % extinction probability　消火確率は0.1で設定
-%map.draw_state(nx,ny,map.loggerk(logger,ke));
+%map.draw_state(nx,ny,map.loggerk(logger,step_end));
 if addFirePoint == "test"
     fFPosition = 0;
 elseif addFirePoint == "Manual"
@@ -136,12 +143,12 @@ w2 = 1/((XM-Xm)/max(M.nx,M.ny));
 
 %% monte carlo simulation
 W_vec = reshape(M.W,M.N,1);
-ke = 240; % simulation step length
+step_end = 240; % simulation step length
 for k = 1:kn
     k
     M.model_init(fFPosition,W_vec);% initialize
     M.I
-    [K(k),Logger(k)] = M.Astar_SIR(ke,h,unum,FF,X,Xm,vi,1,w2,fDynamics); % simulation
+    [K(k),Logger(k)] = M.Astar_SIR(step_end,h,unum,X,Xm,vi,1,w2); % simulation
     K(k);
 end
 %%

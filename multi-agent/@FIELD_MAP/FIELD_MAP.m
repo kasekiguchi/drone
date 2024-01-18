@@ -15,8 +15,12 @@ classdef FIELD_MAP < handle
     windreal = 0;     %0で定数、1で細分化（エクセル使用）
     north_dir      % north direction from vertical line : rad : >0  = CCW
     W % weight matrix : nx-ny size matrix
+    shape_data
+    shape_opts
+    flag
   end
   properties
+    wind_data
     wind % [dir,speed] dir 0:南 45:南西 90:西 135:北西 180:北 225:北東 270:東 315:南東
     wind_time
     map
@@ -51,43 +55,61 @@ classdef FIELD_MAP < handle
   end
 
   methods
-    function obj = FIELD_MAP(wind_file,shape_file,flag,W,shape_opts)
+    function obj = FIELD_MAP(flag,shape_data,shape_opts,W)
       arguments
-        wind_file
-        shape_file
         flag
+        shape_data
+        shape_opts
         W = []
-        shape_opts = struct("start_point",[6000,500],"map_size",[300,300],"data_type","geo","north_dir",0); % "geo","km","m"
       end
-      obj.map_meter_size = shape_opts.map_size;
+      if isempty(W)
+        obj.S = shaperead(shape_data);
+        disp("shape file loaded ");
+      else
+        load(W_file,"W","shape_data");
+      end
+      obj.W = W;
+      obj.shape_data = shape_data;
+      obj.flag = flag;
+      obj.shape_opts = shape_opts;
+      disp("generated weighted graph");
+    end
+    function set_target(obj)
+      arguments
+        obj
+      end
+      obj.map_meter_size = obj.shape_opts.map_size;
       obj.N  = obj.nx*obj.ny; % total grid number
       obj.map_scale = obj.map_meter_size(1)/obj.nx; % meter/grid
-      obj.north_dir = shape_opts.north_dir;
-      if isempty(W)
-        obj.W = obj.gen_grid_weight(shape_file,flag,shape_opts);
-        disp("generated weighted graph");
-      else
-        obj.W = W;
+      obj.north_dir = obj.shape_opts.north_dir;
+      obj.W = obj.gen_grid_weight(obj.shape_opts);
+    end
+    function setup_wind(obj,wind_data)
+      arguments
+        obj
+        wind_data
       end
       %% wind infomation
-      [obj.wind,obj.wind_time] = obj.gen_wind_effect(wind_file);
+      obj.wind_data = wind_data;
+      [obj.wind,obj.wind_time] = obj.gen_wind_effect(wind_data);
       disp("generated wind ")
-      if flag.wind_average % average wind during time 
+      if obj.flag.wind_average % average wind during time 
         th = obj.wind(:,1);
         wind1 = atan2(mean(sin(th)),mean(cos(th))); % average wind direction
         wind2 = mean(obj.wind(:,2));  % average wind speed
-        [ES,EF] = obj.gen_edge([wind1,wind2],flag);
+        [ES,EF] = obj.gen_edge([wind1,wind2]);
         obj.ES{1} =ES;
         obj.EF{1} =EF;
       else
         for i = 1:length(obj.wind(:,1))
-          [ES,EF] = obj.gen_edge(obj.wind(i,:),flag);
+          [ES,EF] = obj.gen_edge(obj.wind(i,:));
           obj.ES{i} =ES;
           obj.EF{i} =EF;
         end
       end
+    end
 
-
+    function set_gridcell_model(obj)
       %% SIR model
       %   N : number of agents
       %   ti : length of infected time step = number of "I" state
@@ -120,7 +142,6 @@ classdef FIELD_MAP < handle
       obj.n = obj.ti+2;% number of state
       obj.U = zeros(obj.N,1);
     end
-
 
     function initialize_each_grid(obj,I,R)
       obj.I = I;
@@ -190,10 +211,11 @@ classdef FIELD_MAP < handle
 
   %% figure 
   methods
-    function figure=draw_state(obj,W)
+    function figure=draw_state(obj,W,ax)
       arguments
         obj
         W = [];
+        ax = []
       end
       if isempty(W)
         W = obj.W;
@@ -214,13 +236,25 @@ classdef FIELD_MAP < handle
           colorbar('Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
           %                     colorbar('Ticks',[1,2,3,4,5],'TickLabels',{'Path','Not burn','Extinct','Extincting','Burning'})
         end
+        if isempty(ax)
         figure=surf(X,Y,[reshape(V,[nx,ny]),2*ones(ny,1);2*ones(1,nx+1)]);hold on;
+      set(gca,'FontSize',20);
+      ax = gca;
+        else
+        figure=surf(ax,X,Y,[reshape(V,[nx,ny]),2*ones(ny,1);2*ones(1,nx+1)]);hold on;
+        end
         mycmap=[1 1 0; 0 1 0;0.5 0.5 0.5;0 0 1;1 0 0]; %[Blue;Green;Gray;Cyan;Red];
         cmax=5;
-        caxis([cmin cmax]);
-        colormap(mycmap(cmin:cmax,:));
+        clim(ax,[cmin cmax]);
+        colormap(ax,mycmap(cmin:cmax,:));
       else
-        figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
+        if isempty(ax)
+          figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
+      set(gca,'FontSize',20);
+      ax = gca;
+        else
+          figure=surf(ax,X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
+        end
         %               set(gca,'Zscale','log')
 
         %                 jetCmap = hot;      % ここから下4行(colormapまで)でマップの色を変更
@@ -230,14 +264,12 @@ classdef FIELD_MAP < handle
 
         colorbar;
       end
-      view(2)
+      view(ax,2)
       % マップ範囲を決めている
-      xlabel('\sl x','FontSize',25);
-      ylabel('\sl y','FontSize',25);
-      xlim([1,101]);  %nx+1
-      ylim([1,101]);  %ny+1
-      set(gca,'FontSize',20);
-      ax = gca;
+      xlabel(ax,'\sl x','FontSize',25);
+      ylabel(ax,'\sl y','FontSize',25);
+      xlim(ax,[1,101]);  %nx+1
+      ylim(ax,[1,101]);  %ny+1
       ax.Box = 'on';
       ax.GridColor = 'k';
       ax.GridAlpha = 0.4;
@@ -294,6 +326,13 @@ classdef FIELD_MAP < handle
           end
         end
       end
+    end
+    function plot_W(obj)
+      [xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
+      surf(xq,yq,obj.W);
+      legend("x","y","z");
+      view(2);daspect([1 1 1]);
+      disp("complete generating W");
     end
   end
 

@@ -52,6 +52,9 @@ elseif numel(fFPosition) == 2
 else
     disp("初期出火点が不明ですぞ!");
 end
+            init_fx=54;
+            init_fy=8;
+
 init_I = sparse(N,1);
 % r=randi(20,numel(init_fx),numel(init_fy))-10;
 r=randi(1,numel(init_fx),numel(init_fy));

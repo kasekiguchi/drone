@@ -1,5 +1,5 @@
 %% Astar_SIR
-function [k,logger] = Astar_SIR(obj,ke,h,unum,FF,X,Xm,vi,w1,w2,fDynamics)
+function [k,logger] = Astar_SIR(obj,ke,h,unum,X,Xm,vi,w1,w2)
 % simulate
 % [input]
 % N : number of node = nx*ny
@@ -32,14 +32,12 @@ p = (p(1,:)'-1)*ny + p(2,:)';% init position indices
 pt = zeros(unum,1);
 k = 1;
 while (k <= ke) && sum(find(obj.I))
-  k
-  %wi = obj.wind_time(k);
   wi = obj.wind_time(1);
   E = obj.EF{wi} + obj.ES{wi};
     Eenum = ceil(k/20);
     E1 = E>0;
     fi= find(obj.I);% 燃えているマップのインデックス
-    if fDynamics=="Direct"
+    if 1%fDynamics=="Direct"
         tmpX = X(fi)+(Il-obj.I(fi));% 燃えているマップの重要度：X = V, Wどちらでも縦ベクトルになる．
         
         % target point t 選択：重要度の高い順にtunum個選択
@@ -120,35 +118,6 @@ while (k <= ke) && sum(find(obj.I))
     logger.UF(:,k) = obj.vf(:); % 飛び火の発生回数の保存 Logger(i).UFで確認
     k = k+1;
 
-    if FF == 0
-        unum = 0;
-    elseif FF ==1       % 糸魚川火災の詳細Ver
-        if k == 20
-            unum = unum + 10;
-        elseif  k == 40
-            unum = unum + 10;
-        elseif  k == 60
-            unum = unum + 10;
-        elseif  k == 120
-            unum = unum + 5;
-        end
-    elseif FF ==2       % 糸魚川火災の詳細Ver2.0
-        if k == 3
-            unum = unum + 5;
-        elseif k == 10
-            unum = unum + 5;
-        elseif k == 20
-            unum = unum + 10;
-        elseif  k == 30
-            unum = unum + 10;
-        elseif  k == 40
-            unum = unum + 15;
-        elseif  k == 60
-            unum = unum + 15;
-        elseif  k == 120
-            unum = unum + 15;
-        end
-    elseif FF ==3       % 糸魚川火災の詳細Ver3.0
         if k == 9
             unum = unum + 16;
         elseif k == 25
@@ -162,6 +131,5 @@ while (k <= ke) && sum(find(obj.I))
         elseif  k == 120
             unum = unum + 12;
         end
-    end
 end
 end
