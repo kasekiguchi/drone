@@ -327,12 +327,12 @@ classdef FIELD_MAP < handle
         end
       end
     end
-    function plot_W(obj)
+    function plot_W(obj,ax)
       [xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
-      surf(xq,yq,obj.W);
-      legend("x","y","z");
-      view(2);daspect([1 1 1]);
-      disp("complete generating W");
+      surf(ax,xq,yq,obj.W(1:obj.ny,1:obj.nx));
+      legend(ax,"x","y","z");
+      view(ax,2);daspect(ax,[1 1 1]);
+      %disp("complete generating W");
     end
   end
 
