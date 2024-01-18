@@ -14,7 +14,7 @@ classdef NDT < handle
         tform
         initialtform
         PCdata_use
-        matching_mode = "mapmatching"%slam or mapmatching
+        matching_mode = "slam"%slam or mapmatching
         gridstep = 1.0;
     end
     
@@ -134,6 +134,8 @@ classdef NDT < handle
 
 
         function show(obj,logger)
+            %コマンド
+            %agent.estimator.show(logger)
             num_lim = logger.k - 1;
             mkmap = pctransform(logger.Data.agent.estimator.result{1,1}.ndtPCdata, ...
                 logger.Data.agent.estimator.result{1,1}.tform);

@@ -72,9 +72,7 @@ methods
 function do(obj,varargin)
     t = varargin{1}.t; 
     % u = obj.self.controller.result.input;
-    u = double(obj.self.controller.result.input);%%追記11/8%追追記11/9%追記11/27
-    % [theta,rho] = cart2pol(p(1),p(2));
-    % u = [theta,rho];
+    % u = double(obj.self.controller.result.input);%%追記11/8%追追記11/9%追記11/27
     % u = obj.self.input_transform.result;
     cha = varargin{2};
     % u = obj.self..input_transform.result;
@@ -91,9 +89,9 @@ function do(obj,varargin)
             % if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
             %     cha = obj.phase;
             % end
-            if u(1) > abs(1.7)
-               cha = 'q';                
-            end
+            % if u(1) > abs(1.7)
+            %    cha = 'q';                
+            % end
             obj.phase = cha;
 
             switch cha
@@ -114,6 +112,7 @@ function do(obj,varargin)
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
                 case 'a' % stop
+                    obj.self.controller.result.input = [0;0];
                     obj.msg.linear.x = 0.0;
                     obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
@@ -121,6 +120,7 @@ function do(obj,varargin)
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
                 case 'f' % run                    
+                    u = obj.self.controller.result.input;
                     obj.msg.linear.x = u(1);
                     obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
