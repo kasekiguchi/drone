@@ -71,31 +71,31 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
             %シミュレーション時コメントイン--------------------------------
-            obj.param.t = varargin{1}.t;
-            rt = obj.param.t; %時間
-            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
-            obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
-            obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            % obj.param.t = varargin{1}.t;
+            % rt = obj.param.t; %時間
+            % idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
+            % obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
+            % obj.state.ref = obj.Reference(rt); %リファレンスの更新
             %-------------------------------------------------------------
 
             %実機のときコメントイン(aから回す)-----------------------------------------
-            % vara = varargin{1};
-            % obj.param.t = vara{1}.t;
-            % rt = obj.param.t; %時間
-            % % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
-            % 
-            % if vara{2} == 'a'
-            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-            % elseif vara{2} == 't'
-            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-            %     fprintf('take off')
-            % elseif vara{2} == 'f'
-            %     obj.state.ref = obj.Reference(rt); %リファレンスの更新
-            %     obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-            %     fprintf('flight')
-            % end
+            vara = varargin{1};
+            obj.param.t = vara{1}.t;
+            rt = obj.param.t; %時間
+            % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
+
+            if vara{2} == 'a'
+                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+            elseif vara{2} == 't'
+                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+                fprintf('take off')
+            elseif vara{2} == 'f'
+                obj.state.ref = obj.Reference(rt); %リファレンスの更新
+                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+                fprintf('flight')
+            end
             %-------------------------------------------------------------------------
 
             Param = obj.param;
@@ -130,15 +130,15 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             obj.previous_input = var;
             
             % 実機のときコメントイン--------------------------------------------
-            % if vara{2} == 'a'
-            %     obj.result.input = [0;0;0;0];
-            % else
-            %     obj.result.input = var(1:4, 1); % 印加する入力 4入力
-            % end
+            if vara{2} == 'a'
+                obj.result.input = [0;0;0;0];
+            else
+                obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            end
             %------------------------------------------------------------------
 
             %シミュレーション時コメントイン--------------------------------------------
-            obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            % obj.result.input = var(1:4, 1); % 印加する入力 4入力
             % obj.result.transformedInput = obj.InputTransform.do(obj.result.input); %4入力を総推力に変換(必要に応じて)
             %---------------------------------------------------------------------------
 
@@ -190,40 +190,52 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
             xr = zeros(obj.param.total_size, obj.param.H);    % initialize
-            if obj.flag == 0
             % 時間関数の取得→時間を代入してリファレンス生成
-                RefTime = obj.self.reference.func;    % 時間関数の取得
-                for h = 0:obj.param.H-1
-                    t = T + obj.param.dt * h; % reference生成の時刻をずらす
-                    ref = RefTime(t);
-                    xr(1:3, h+1) = ref(1:3);
-                    xr(7:9, h+1) = ref(5:7);
-                    xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-                    xr(10:12, h+1) = [0;0;0];
-                    xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
-                end
-            else
-                for h = 0:obj.param.H-1
-                    if obj.current_state(3) <= 0.75 && obj.current_state(1) <= 0
-                        obj.changeflag = 1;
-                    elseif obj.current_state(3) >= 0.95 && obj.current_state(1) >= 0.5
-                        obj.changeflag = 0;
-                    end
-                    if obj.changeflag == 1
-                        xr(1:3, h+1) = [0.5,0,1];
-                        xr(7:9, h+1) = [0,0,0];
-                        xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-                        xr(10:12, h+1) = [0;0;0];
-                        xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
-                    else
-                        xr(1:3, h+1) = [0,0,0.7];
-                        xr(7:9, h+1) = [0,0,0];
-                        xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-                        xr(10:12, h+1) = [0;0;0];
-                        xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
-                    end
-                end
+            RefTime = obj.self.reference.func;    % 時間関数の取得
+            for h = 0:obj.param.H-1
+                t = T + obj.param.dt * h; % reference生成の時刻をずらす
+                ref = RefTime(t);
+                xr(1:3, h+1) = ref(1:3);
+                xr(7:9, h+1) = ref(5:7);
+                xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                xr(10:12, h+1) = [0;0;0];
+                xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
             end
+
+            % if obj.flag == 0
+            % % 時間関数の取得→時間を代入してリファレンス生成
+            %     RefTime = obj.self.reference.func;    % 時間関数の取得
+            %     for h = 0:obj.param.H-1
+            %         t = T + obj.param.dt * h; % reference生成の時刻をずらす
+            %         ref = RefTime(t);
+            %         xr(1:3, h+1) = ref(1:3);
+            %         xr(7:9, h+1) = ref(5:7);
+            %         xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+            %         xr(10:12, h+1) = [0;0;0];
+            %         xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+            %     end
+            % else
+            %     for h = 0:obj.param.H-1
+            %         if obj.current_state(3) <= 0.75 && obj.current_state(1) <= 0
+            %             obj.changeflag = 1;
+            %         elseif obj.current_state(3) >= 0.95 && obj.current_state(1) >= 0.5
+            %             obj.changeflag = 0;
+            %         end
+            %         if obj.changeflag == 1
+            %             xr(1:3, h+1) = [0.5,0,1];
+            %             xr(7:9, h+1) = [0,0,0];
+            %             xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+            %             xr(10:12, h+1) = [0;0;0];
+            %             xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+            %         else
+            %             xr(1:3, h+1) = [0,0,0.7];
+            %             xr(7:9, h+1) = [0,0,0];
+            %             xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+            %             xr(10:12, h+1) = [0;0;0];
+            %             xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+            %         end
+            %     end
+            % end
         end
     end
 end
