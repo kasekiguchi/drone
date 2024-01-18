@@ -33,8 +33,8 @@ if logger.fExp==1 %fExp:1 実機データ
 %     data.startIndex = find(data.est.p(:,3)>0.5,1,'first'); %0.4m以上になった部分からデータの取得開始
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
-    data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
-%     data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
+%     data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
+    data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
 %     data.startIndex = find(data.phase==102,1,'first') + 200; %逆円旋回
 %     data.startIndex = find(data.phase == 102, 1, 'first') + 150; %完全にサドル起動になった部分のデータのみを使用
 %     data.phase = logger.Data.phase;
@@ -50,9 +50,9 @@ if logger.fExp==1 %fExp:1 実機データ
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
-    for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
-        data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
-    end
+%     for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
+%         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
+%     end
 %     plot(logger.Data.t(data.startIndex:data.endIndex),data.input) %入力の確認
 
 else
