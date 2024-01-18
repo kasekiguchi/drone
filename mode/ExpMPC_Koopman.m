@@ -21,7 +21,7 @@ agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
@@ -36,9 +36,9 @@ agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koop
 agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 
-agent.input_transform.hlc = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone());
-agent.input_transform.mpc = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone_MPC());
-agent.input_transform.do = @input_transform_do;
+% agent.input_transform.hlc = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone());
+% agent.input_transform.mpc = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone_MPC());
+% agent.input_transform.do = @input_transform_do;
 
 run("ExpBase");
 
@@ -78,15 +78,15 @@ function result = controller_do(varargin)
     varargin{5}.controller.result = result;
 end
 
-function u = input_transform_do(varargin)
-    input_transform = varargin{5}.input_transform;
-    if varargin{2} == 'f'
-        u = input_transform.mpc(varargin);
-    else
-        u = iniput_transform.hlc(varargin);
-    end
-    varargin{5}.input_transform.result = u;
-end
+% function result = input_transform_do(varargin)
+%     input_transform = varargin{5}.input_transform;
+%     if varargin{2} == 'f'
+%         result = input_transform.mpc;
+%     else
+%         result = input_transform.hlc;
+%     end
+%     varargin{5}.input_transform.result = result;
+% end
 %--------------------------------------------------
 
 function post(app)
