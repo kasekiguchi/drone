@@ -65,7 +65,7 @@ methods
                 obj.IP = param.node;
                 obj.connector = ROS2_CONNECTOR(param);
                 fprintf("Whill %d is ready\n", obj.id);
-        end
+        end        
   end
   
   
@@ -113,12 +113,24 @@ function do(obj,varargin)
                     obj.msg.angular.z = 0.0;
                 case 'a' % stop
                     obj.self.controller.result.input = [0;0];
+                    obj.self.input_transform.result = [];
                     obj.msg.linear.x = 0.0;
                     obj.msg.linear.y = 0.0;
                     obj.msg.linear.z = 0.0;
                     obj.msg.angular.x = 0.0;
                     obj.msg.angular.y = 0.0;
                     obj.msg.angular.z = 0.0;
+                    pause(0.5)
+                case 't' % stop
+                    obj.self.controller.result.input = [0;0];
+                    obj.self.input_transform.result = [];
+                    obj.msg.linear.x = 0.0;
+                    obj.msg.linear.y = 0.0;
+                    obj.msg.linear.z = 0.0;
+                    obj.msg.angular.x = 0.0;
+                    obj.msg.angular.y = 0.0;
+                    obj.msg.angular.z = 0.0;
+                    pause(0.25)
                 case 'f' % run                    
                     u = obj.self.controller.result.input;
                     obj.msg.linear.x = u(1);

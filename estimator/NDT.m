@@ -137,10 +137,10 @@ classdef NDT < handle
             %コマンド
             %agent.estimator.show(logger)
             num_lim = logger.k - 1;
-            mkmap = pctransform(logger.Data.agent.estimator.result{1,1}.ndtPCdata, ...
-                logger.Data.agent.estimator.result{1,1}.tform);
+            mkmap = pctransform(logger.Data.agent.estimator.result{1,7}.ndtPCdata, ...
+                logger.Data.agent.estimator.result{1,7}.tform);
             hold on
-            for j=2:num_lim
+            for j=8:num_lim
                 ndtPCdata = pctransform(logger.Data.agent.estimator.result{1,j}.ndtPCdata, ...
                     logger.Data.agent.estimator.result{1,j}.tform);    
                 mkmap = pcmerge(mkmap,ndtPCdata, 0.001);
@@ -151,7 +151,7 @@ classdef NDT < handle
             xlabel('X');ylabel('Y');
 
             figure
-            for j=1:num_lim
+            for j=8:num_lim
                 X(j) = logger.Data.agent.estimator.result{1,j}.tform.A(1,4) ;%+ 1;
                 Y(j) = logger.Data.agent.estimator.result{1,j}.tform.A(2,4);
                 ndtx(j) = logger.Data.agent.estimator.result{1,j}.state.p(1,1);%+ 1;
