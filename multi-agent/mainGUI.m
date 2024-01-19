@@ -26,4 +26,5 @@ shape_opts.start_point = [670,230]; % マップ左下から見た位置 [m,m]
 shape_opts.map_size = [300,300]; % north_dir で回転した後の start_pointからの領域 [m m]
 shape_opts.data_type = "m";
 shape_opts.north_dir = -12*(pi/180); % rad
+shape_opts.fire_point = [54;   8];
 gui = FireSimulation(flag,shape_data,shape_opts,W_data,unum,step_end,wind_data);
