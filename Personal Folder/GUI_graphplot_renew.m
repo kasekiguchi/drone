@@ -43,8 +43,10 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("report_saddle.mat")
+load("1_19_P2P_y=1_4.mat")
 disp('load finished')
+
+time = 0; %1:計算時間のグラフ、0:inner_input
 
 for i = 1:find(log.Data.t,1,'last')
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
@@ -54,6 +56,7 @@ for i = 1:find(log.Data.t,1,'last')
     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
+    data.inner(:,i) = log.Data.agent.inner_input{i}(1,:)';              %inner_input
     % data.te(:,i) = log.Data.agent.controller.result{i}.t(1,i);  %計算時間、シミュレーションのみ
 end
 
@@ -117,11 +120,11 @@ colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('Position [m]');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+250),'LineStyle','--','Color','red','LineWidth',2)
+% xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+250),'LineStyle','--','Color','red','LineWidth',2) %第4章reference用
 grid on
 plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
-Square_coloring2(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+250]),[1.0 0.9 1.0]);
+% Square_coloring2(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+250]),[1.0 0.9 1.0]);
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
 lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
@@ -209,17 +212,29 @@ xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Input u of agent1','FontSize',12);
 
-% figure(8)
-% plot(data.t,data.te,'LineWidth',1.2)
-% xlabel('Time [s]');
-% ylabel('Calculation time [s]');
-% yline(0.025,'Color','red','LineWidth',1.2)
-% grid on
-% xlim([data.t(1) data.t(end)])
-% ylim([0.005 0.030])
-% legend('ソルバー変更後の計算時間', '制御周期')
-% ax(6) = gca;
-% % title('CalT time')
+figure(8)
+if time == 1
+    plot(data.t,data.te,'LineWidth',1.2)
+    xlabel('Time [s]');
+    ylabel('Calculation time [s]');
+    yline(0.025,'Color','red','LineWidth',1.2)
+    grid on
+    xlim([data.t(1) data.t(end)])
+    ylim([0.005 0.030])
+    legend('ソルバー変更後の計算時間', '制御周期')
+    ax(6) = gca;
+    title('CalT time')
+else
+    plot(data.t,data.inner,'LineWidth',1.2)
+    xlabel('Time [s]')
+    ylabel('inner_input')
+    grid on
+    xlim([data.t(1) data.t(end)])
+    legend('1','2','3','4','5','6','7','8')
+    ax(6) = gca;
+    title('Inner_input')
+end
+
 % 
 % ave = mean(data.te)
 

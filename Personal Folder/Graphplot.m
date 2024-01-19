@@ -249,5 +249,8 @@ function [] = Graphplot(app)
     
     fontSize = 14; %軸の文字の大きさの設定
     set(ax,'FontSize',fontSize);
+
+    %これでもっと簡単に書ける
+    % gui.logger.plot({1,"inner_input",""})
 end
 
