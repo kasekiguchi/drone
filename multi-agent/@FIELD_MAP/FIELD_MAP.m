@@ -59,19 +59,23 @@ classdef FIELD_MAP < handle
       arguments
         flag
         shape_data
-        shape_opts
+        shape_opts % 
         W = []
       end
       if isempty(W)
         obj.S = shaperead(shape_data);
         disp("shape file loaded ");
-      else
-        load(W_file,"W","shape_data");
+      elseif isstring(W)
+        load(W,"W");
       end
       obj.W = W;
       obj.shape_data = shape_data;
       obj.flag = flag;
       obj.shape_opts = shape_opts;
+      if isfield(shape_opts,"nx")
+        obj.nx = shape_opts.nx;
+        obj.ny = shape_opts.ny;
+      end
       disp("generated weighted graph");
     end
     function set_target(obj)
