@@ -237,22 +237,21 @@ classdef FIELD_MAP < handle
       if isfield(W,"S")||isprop(W(1),"S")%(length(W)==1)
         V = 2*W.S+5*(W.I>0)+3*(W.R.*~W.U)+4*W.U;
         cmin=2;
-        colorbar('Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
+        colorbar(ax,'Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
         if isfield(W,"P")||isprop(W(1),"P")
           PU = W.P.*~W.U;
           V = (V.* ~PU) + 1*PU;
           cmin=2; % Pathを使うときは1
-          colorbar('Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
+          colorbar(ax,'Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
           %                     colorbar('Ticks',[1,2,3,4,5],'TickLabels',{'Path','Not burn','Extinct','Extincting','Burning'})
         end
         if isempty(ax)
-          %figure=surf(obj.xq,obj.yq,[reshape(V,[obj.nx,obj.ny]),2*ones(obj.ny,1);2*ones(1,obj.nx+1)]);hold on;
           figure=surf(obj.xq,obj.yq,reshape(V,[obj.nx,obj.ny]));hold on;
           set(gca,'FontSize',20);
           ax = gca;
         else
-          %figure=surf(ax,obj.xq,obj.yq,[reshape(V,[obj.nx,obj.ny]),2*ones(obj.ny,1);2*ones(1,obj.nx+1)]);hold on;
-          figure=surf(ax,obj.xq,obj.yq,reshape(V,[obj.nx,obj.ny]));hold on;
+          figure=surf(ax,obj.xq,obj.yq,reshape(V,[obj.nx,obj.ny]));
+          hold(ax,'on');
         end
         mycmap=[1 1 0; 0 1 0;0.5 0.5 0.5;0 0 1;1 0 0]; %[Blue;Green;Gray;Cyan;Red];
         cmax=5;
@@ -260,34 +259,25 @@ classdef FIELD_MAP < handle
         colormap(ax,mycmap(cmin:cmax,:));
       else
         if isempty(ax)
-          %figure=surf(obj.xq,obj.yq,[W,0*ones(obj.ny,1);0*ones(1,obj.nx+1)]);hold on;
           figure=surf(obj.xq,obj.yq,W);hold on;
           set(gca,'FontSize',20);
           ax = gca;
         else
-          %figure=surf(ax,obj.xq,obj.yq,[W,0*ones(obj.ny,1);0*ones(1,obj.nx+1)]);hold on;
           figure=surf(ax,obj.xq,obj.yq,W);hold on;
         end
-        %               set(gca,'Zscale','log')
-
-        %                 jetCmap = hot;      % ここから下4行(colormapまで)でマップの色を変更
-        %                 jetCmap = flipud(jetCmap);
-        %                 newCmap = jetCmap(1:end,:);
-        %                 colormap(newCmap);
-
-        colorbar;
+        colorbar(ax);
       end
       view(ax,2)
       % マップ範囲を決めている
       xlabel(ax,'\sl x','FontSize',25);
       ylabel(ax,'\sl y','FontSize',25);
-      xlim(ax,[1,obj.nx*obj.map_scale]);  %nx+1
-      ylim(ax,[1,obj.ny*obj.map_scale]);  %ny+1
+      xlim(ax,[1,obj.nx*obj.map_scale]);
+      ylim(ax,[1,obj.ny*obj.map_scale]);
       ax.Box = 'on';
       ax.GridColor = 'k';
       ax.GridAlpha = 0.4;
-      axis square
-      hold off
+      %axis square
+      hold(ax,'off');
     end
     function F=draw_movie(obj,logger,output,filename)
       % draw/generate movie

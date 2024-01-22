@@ -8,8 +8,6 @@ if strcmp(value,"Start")
   step_end = app.step_end;
   N = nx*ny;
 
-  % init_fx=54;
-  % init_fy=9;
   init_fx = app.outbreak(:,1);
   init_fy = app.outbreak(:,2);
   init_I = sparse(N,1);
@@ -37,12 +35,14 @@ if strcmp(value,"Start")
     app.TimeSliderLabel.Text = "k : " + k;
     wi = app.map.wind_time(k);
     app.map.draw_state(app.map,app.UIAxes);
-    delete(app.NorthWindDir.Children(1));
-    vx = app.map.wind(wi,2)*cos(app.map.wind(wi,1));
-    vy = app.map.wind(wi,2)*sin(app.map.wind(wi,1));
+    delete(app.NorthWindDir.Children);
+    vx = [app.map.wind(wi,2)*cos(app.map.wind(wi,1));10*cos(app.map.shape_opts.north_dir)];
+    vy = [app.map.wind(wi,2)*sin(app.map.wind(wi,1));10*sin(app.map.shape_opts.north_dir)];
     compass(app.NorthWindDir,vx,vy);
     app.NorthWindDir.Children(1).LineWidth = 2;
     app.NorthWindDir.Children(1).Color = 'b';
+    app.NorthWindDir.Children(2).LineWidth = 2;
+    app.NorthWindDir.Children(2).Color = 'r';
     view(app.NorthWindDir,-90,90);
     pause(0.001);
     E = app.map.EF{wi} + app.map.ES{wi};
