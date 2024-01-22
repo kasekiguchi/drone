@@ -3,7 +3,7 @@ clear
 N = 6;
 ts = 0; %機体数
 dt = 0.025;
-te = 3000;
+te = 2000;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -162,7 +162,8 @@ end
 
 %%
 close all
-DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+% DataA = logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+DataA = logger.data(2,"plant.result.state.pL","p")
 % DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 DataB = logger.data(5,"reference.result.m","p");
 DataC = logger.data(7,"reference.result.Muid","p");
@@ -210,12 +211,12 @@ hold off
 
 figure(102)
 hold on
-% plot(t,DataA(:,1),'DisplayName','X')
-% plot(t,DataA(:,2),'DisplayName','Y')
+plot(t,DataA(:,1),'DisplayName','X')
+plot(t,DataA(:,2),'DisplayName','Y')
 plot(t,DataA(:,3),'DisplayName','Z')
 % plot(t,DataR(:,1),'DisplayName','Ref X')
 % plot(t,DataR(:,2),'DisplayName','Ref Y')
-plot(t,DataR(:,3),'DisplayName','Ref Z')
+% plot(t,DataR(:,3),'DisplayName','Ref Z')
 % xlim([-1.5 1.5])
 % ylim([0 1.5])
 xlabel("t [s]")
