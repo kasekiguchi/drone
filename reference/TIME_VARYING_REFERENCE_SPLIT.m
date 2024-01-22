@@ -23,7 +23,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         base_time
         base_state
         ts
-        te = 1;
+        te = 4;
         zd = 1; % goal altitude
         
 
@@ -168,14 +168,19 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            elseif strcmp(obj.com, "Split2")
                agent1 = varargin{3};
                initial_loadref = agent1.reference.result.state.xd;
+               omega_load = agent1.reference.result.state.o;
                rho = agent1.parameter.rho(:,obj.self.id-1);
                R_load = agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
                Qrho = initial_loadref(1:3,1)+R_load*rho;
+               dR_load = R_load*Skew(omega_load);
+               vrho = initial_loadref(4:6,1)+ dR_load*rho;
+
 
                model = agent1.estimator.result.state;
                ref = agent1.reference.result.state;
                xd = ref.xd;
                xd(1:3)=Qrho;
+               xd(4:6)=vrho;
 %                p=ref.p+Qrho;
 %                ref.xd(1:3)=ref.xd(1:3)+Qrho;
 %                ref.p=ref.p+Qrho;

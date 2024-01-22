@@ -34,7 +34,8 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 param.rho = [];
                 param.li = 1*ones(N,1);
                 param.mi = 0.800*ones(N,1)';
-                param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
+%                 param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
+                param.Ji = repmat([0.082 0.082 0.1377]',1,N);
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
             if contains(type,"zup")

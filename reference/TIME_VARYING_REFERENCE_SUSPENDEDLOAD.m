@@ -35,7 +35,8 @@ classdef TIME_VARYING_REFERENCE_SUSPENDEDLOAD < handle
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3]));                    
                 end
                 if strcmp(args{3}, "Suspended")
-                    obj.func = gen_ref_for_HL(obj.func);
+                    obj.func = gen_ref_for_HL_Suspended_Load(obj.func);
+%                     obj.func = gen_ref_for_HL(obj.func);
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));                    
                 end
             else

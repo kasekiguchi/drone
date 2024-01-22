@@ -16,7 +16,7 @@ initial_state.w = [0; 0; 0];
 initial_state.vL = [0; 0; 0];
 initial_state.pT = [0; 0; -1];
 initial_state.wL = [0; 0; 0];
-initial_state.p = [0;0;1.46];
+initial_state.p = [0;0;2.00];
 
 agent = DRONE;
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
@@ -46,18 +46,19 @@ end
 %%
 close all
 aaaa= logger.data(1,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
-bbbb= logger.data(1,"reference.result.state.p","p");
+bbbb= logger.data(1,"controller.result.input","p");
+Data_cooperative = reshape(logger.data(1,"controller.result.input","p"),[4,length(logger.data(1,"controller.result.input","p"))/4])';
 cccc= logger.data(1,"plant.result.state.p","p");
 t=logger.data(0,'t',[]);
 figure(101)
 hold on
 % plot(aaaa(:,1),aaaa(:,2))
-plot(bbbb(:,1),bbbb(:,2))
+plot(t,Data_cooperative(:,4))
 % plot(cccc(:,1),cccc(:,2))
-xlim([-1.5 1.5])
-ylim([-1.5 1.5])
-xlabel("X [m]")
-ylabel("Y [m]")
+% xlim([-1.5 1.5])
+% ylim([-1.5 1.5])
+xlabel("t [s]")
+ylabel("Torque [Nm]")
 % legend("Payload","UAV")
 ax = gca;
 ax.FontSize = 13;

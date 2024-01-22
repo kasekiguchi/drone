@@ -62,7 +62,7 @@ run("ExpBase");
 
 
 clc
-for i = 1:100
+for i = 1:5000
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -91,14 +91,27 @@ logger.plot({1, "plant.result.state.Qi", "p"})
 % plot(t,aaaa)
 % legend("Roll","Pitch","Yaw")
 %%
-clc
-aaaa= logger.data(1,"plant.result.state.Qi","e");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+close all
+aaaa= logger.data(1,"plant.result.state.Q","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+% bbbb= logger.data(1,"reference.result.state.Q","p");
 t=logger.data(0,'t',[]);
 % Euldata=Quat2Eul(aaaa(:,1:4)');
-Euldata=Quat2Eul(aaaa(:,1:4)');
+% Euldata2=Quat2Eul(bbbb(:,1:4)');
 figure(101)
-plot(t,Euldata(3,:))
-legend("Roll","Pitch","Yaw")
+% plot(t,Euldata(3,:))
+plot(t,aaaa(:,1))
+
+% plot(t,aaaa(:,2))
+% hold on
+% plot(t,aaaa(:,3))
+% plot(t,bbbb(:,1))
+% plot(t,bbbb(:,2))
+% plot(t,bbbb(:,3))
+% legend("X","Y","Z","ref X","ref Y","ref Z")
+ylim([-1.5,1.5]);
+legend("Yaw")
+% legend("Roll","Pitch","Yaw")
+hold off
 %%
 %close all
 % mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);

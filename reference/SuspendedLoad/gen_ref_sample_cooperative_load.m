@@ -1,6 +1,6 @@
 function ref = gen_ref_sample_cooperative_load(param)
 arguments
-    param.freq = 10% 周期
+    param.freq = 1% 周期
     param.orig = [0 0 1]% サドルの中心
     param.size = [1 1 0] % 各軸の振幅
     param.phase = -pi % 位相    

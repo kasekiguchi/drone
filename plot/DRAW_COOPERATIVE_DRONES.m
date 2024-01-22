@@ -29,6 +29,9 @@ classdef DRAW_COOPERATIVE_DRONES
       param = struct(varargin{:});
       obj.target = param.target;
       obj.N = length(param.target);
+      if  length(param.self)==length(param.target)+1
+          param.self=param.self(1);
+      end
       obj.rho = param.self.parameter.rho;
       obj.li = param.self.parameter.li;
       data = logger.data(1,"p","e");
