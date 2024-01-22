@@ -389,7 +389,7 @@ set(fig, 'Position', [1250, 60, 600, 400])
 
 %% animation
 %VORONOI_BARYCENTER.draw_movie(logger, N, Env,1:N)
-% agent(1).animation(logger,"target",1);
+agent(1).animation(logger,"target",1);
 % agent(1).animation(logger,"mp4",1);
 % agent(1).animation(logger,"gif", 1);
 
