@@ -1,6 +1,5 @@
 function Controller = Controller_TS(dt)
-% Adaptive PIDコントローラ設計用
-%% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
+
 Controller_param.vr = 0.2;
 Controller_param.f1 = 0.5;
 Controller_param.f2 = 3;
