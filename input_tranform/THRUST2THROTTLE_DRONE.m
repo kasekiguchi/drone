@@ -49,10 +49,10 @@ methods
 
             %1_18:MPCのゲインとオフセットを変更するために追加
             if cha == 'f'
-                obj.param.gain2(1) = 550;
+                obj.param.gain2(1) = 600;
                 obj.param.gain2(2) = 650;
-                obj.param.gain2(3) = 550;
-                obj.param.gain2(4) = 400;
+                obj.param.gain2(3) = 500;
+                obj.param.gain2(4) = 350;
                 obj.param.th_offset2 = 350;
                 % fprintf('オフセット変更→MPC \n')
 

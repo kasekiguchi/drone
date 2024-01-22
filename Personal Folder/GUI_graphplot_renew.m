@@ -43,7 +43,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("11_30_simKoopman_circle_軽く重み調整.mat")
+load("experiment_10_25_P2Py_estimator.mat")
 disp('load finished')
 
 time = 0; %1:計算時間のグラフ、0:inner_input
