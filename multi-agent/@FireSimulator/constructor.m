@@ -53,8 +53,7 @@ if isempty(app.map.W) % set region from shape file
   app.MaprotationCCWEditField.Value = string(shape_opts.north_dir*180/pi);
   %app.MaprotationCCWEditFieldValueChanged(0);
   map_rotation_CCW(app,0);
-  app.NorthdirectionGauge.Value = -shape_opts.north_dir; % rad
-  app.original_data_ax.HandleVisibility = 'off';
+  %app.NorthdirectionGauge.Value = -shape_opts.north_dir; % rad
 else
   if isstring(W) | ischar(W)
     sp0 = split(erase(W,".mat"),"_");
@@ -74,12 +73,14 @@ else
   end
   app.SettingTab.HandleVisibility = 'off';
   app.TabGroup.SelectedTab = app.SimulationTab;
+  app.original_data_ax.HandleVisibility = 'off';
   app.map.nx = size(app.map.W,2);
   app.map.ny = size(app.map.W,1);
   app.map.N = app.map.nx*app.map.ny;
   app.map.map_scale = app.map.shape_opts.map_size(1)/app.map.nx;
   app.nxEditField.Value = app.map.nx;
   app.nyEditField.Value = app.map.ny;
+  [app.map.xq,app.map.yq] = meshgrid(1:app.map.map_scale:app.map.nx*app.map.map_scale,1:app.map.map_scale:app.map.ny*app.map.map_scale);
   app.map.plot_W(app.UIAxes);
 end
 end

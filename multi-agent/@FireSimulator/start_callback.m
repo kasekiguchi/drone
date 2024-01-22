@@ -8,8 +8,10 @@ if strcmp(value,"Start")
   step_end = app.step_end;
   N = nx*ny;
 
-  init_fx=54;
-  init_fy=9;
+  % init_fx=54;
+  % init_fy=9;
+  init_fx = app.outbreak(:,1);
+  init_fy = app.outbreak(:,2);
   init_I = sparse(N,1);
   r=randi(1,numel(init_fx),numel(init_fy));
   W_vec = reshape(app.map.W,N,1);
@@ -33,8 +35,16 @@ if strcmp(value,"Start")
   while (k <= step_end) && sum(find(app.map.I))
     app.TimeSlider.Value = k;
     app.TimeSliderLabel.Text = "k : " + k;
+    wi = app.map.wind_time(k);
     app.map.draw_state(app.map,app.UIAxes);
-    wi = app.map.wind_time(1);
+    delete(app.NorthWindDir.Children(1));
+    vx = app.map.wind(wi,2)*cos(app.map.wind(wi,1));
+    vy = app.map.wind(wi,2)*sin(app.map.wind(wi,1));
+    compass(app.NorthWindDir,vx,vy);
+    app.NorthWindDir.Children(1).LineWidth = 2;
+    app.NorthWindDir.Children(1).Color = 'b';
+    view(app.NorthWindDir,-90,90);
+    pause(0.001);
     E = app.map.EF{wi} + app.map.ES{wi};
     fi= find(app.map.I);% 燃えているマップのインデックス
     tmpX = X(fi)+(Il-app.map.I(fi));% 燃えているマップの重要度：X = V, Wどちらでも縦ベクトルになる．

@@ -13,11 +13,13 @@ classdef FIELD_MAP < handle
     map_extra
     build = 1;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し、3で延焼調整モード（飛び火OFF）
     windreal = 0;     %0で定数、1で細分化（エクセル使用）
-%    north_dir      % north direction from vertical line : rad : >0  = CCW
+    %    north_dir      % north direction from vertical line : rad : >0  = CCW
     W % weight matrix : nx-ny size matrix
     shape_data
     shape_opts
     flag
+    xq
+    yq
   end
   properties
     wind_data
@@ -61,7 +63,7 @@ classdef FIELD_MAP < handle
       arguments
         flag
         shape_data
-        shape_opts % 
+        shape_opts %
         W = []
       end
       if isempty(W)
@@ -87,7 +89,7 @@ classdef FIELD_MAP < handle
       obj.map_meter_size = obj.shape_opts.map_size;
       obj.N  = obj.nx*obj.ny; % total grid number
       obj.map_scale = obj.map_meter_size(1)/obj.nx; % meter/grid
-      %obj.north_dir = obj.shape_opts.north_dir;
+      [obj.xq,obj.yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
       obj.W = obj.gen_grid_weight(obj.shape_opts);
     end
     function setup_wind(obj,wind_data)
@@ -99,7 +101,7 @@ classdef FIELD_MAP < handle
       obj.wind_data = wind_data;
       [obj.wind,obj.wind_time] = obj.gen_wind_effect(wind_data);
       disp("generated wind ")
-      if obj.flag.wind_average % average wind during time 
+      if obj.flag.wind_average % average wind during time
         th = obj.wind(:,1);
         wind1 = atan2(mean(sin(th)),mean(cos(th))); % average wind direction
         wind2 = mean(obj.wind(:,2));  % average wind speed
@@ -143,9 +145,9 @@ classdef FIELD_MAP < handle
       Bi = [-1;1;zeros(obj.ti,1)];
       obj.A = kron(speye(obj.N),sparse(Ai));
       obj.B = kron(speye(obj.N),sparse(Bi));
-      obj.S = ones(obj.N,1);  
-      obj.I = zeros(obj.N,1); 
-      obj.R = zeros(obj.N,1); 
+      obj.S = ones(obj.N,1);
+      obj.I = zeros(obj.N,1);
+      obj.R = zeros(obj.N,1);
       obj.Si = [1;zeros(obj.ti+1,1)];
       obj.Ii = [0;1;zeros(obj.ti,1)];
       obj.Ri = [zeros(obj.ti+1,1);1];
@@ -219,7 +221,7 @@ classdef FIELD_MAP < handle
     end
   end
 
-  %% figure 
+  %% figure
   methods
     function figure=draw_state(obj,W,ax)
       arguments
@@ -230,11 +232,8 @@ classdef FIELD_MAP < handle
       if isempty(W)
         W = obj.W;
       end
-      nx = obj.nx;
-      ny = obj.ny;
-      clf
-      hold on
-      [X,Y]=meshgrid(1:nx+1,1:ny+1);
+      %clf
+      %hold on
       if isfield(W,"S")||isprop(W(1),"S")%(length(W)==1)
         V = 2*W.S+5*(W.I>0)+3*(W.R.*~W.U)+4*W.U;
         cmin=2;
@@ -247,11 +246,13 @@ classdef FIELD_MAP < handle
           %                     colorbar('Ticks',[1,2,3,4,5],'TickLabels',{'Path','Not burn','Extinct','Extincting','Burning'})
         end
         if isempty(ax)
-        figure=surf(X,Y,[reshape(V,[nx,ny]),2*ones(ny,1);2*ones(1,nx+1)]);hold on;
-      set(gca,'FontSize',20);
-      ax = gca;
+          %figure=surf(obj.xq,obj.yq,[reshape(V,[obj.nx,obj.ny]),2*ones(obj.ny,1);2*ones(1,obj.nx+1)]);hold on;
+          figure=surf(obj.xq,obj.yq,reshape(V,[obj.nx,obj.ny]));hold on;
+          set(gca,'FontSize',20);
+          ax = gca;
         else
-        figure=surf(ax,X,Y,[reshape(V,[nx,ny]),2*ones(ny,1);2*ones(1,nx+1)]);hold on;
+          %figure=surf(ax,obj.xq,obj.yq,[reshape(V,[obj.nx,obj.ny]),2*ones(obj.ny,1);2*ones(1,obj.nx+1)]);hold on;
+          figure=surf(ax,obj.xq,obj.yq,reshape(V,[obj.nx,obj.ny]));hold on;
         end
         mycmap=[1 1 0; 0 1 0;0.5 0.5 0.5;0 0 1;1 0 0]; %[Blue;Green;Gray;Cyan;Red];
         cmax=5;
@@ -259,11 +260,13 @@ classdef FIELD_MAP < handle
         colormap(ax,mycmap(cmin:cmax,:));
       else
         if isempty(ax)
-          figure=surf(X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
-      set(gca,'FontSize',20);
-      ax = gca;
+          %figure=surf(obj.xq,obj.yq,[W,0*ones(obj.ny,1);0*ones(1,obj.nx+1)]);hold on;
+          figure=surf(obj.xq,obj.yq,W);hold on;
+          set(gca,'FontSize',20);
+          ax = gca;
         else
-          figure=surf(ax,X,Y,[W,0*ones(ny,1);0*ones(1,nx+1)]);hold on;
+          %figure=surf(ax,obj.xq,obj.yq,[W,0*ones(obj.ny,1);0*ones(1,obj.nx+1)]);hold on;
+          figure=surf(ax,obj.xq,obj.yq,W);hold on;
         end
         %               set(gca,'Zscale','log')
 
@@ -278,8 +281,8 @@ classdef FIELD_MAP < handle
       % マップ範囲を決めている
       xlabel(ax,'\sl x','FontSize',25);
       ylabel(ax,'\sl y','FontSize',25);
-      xlim(ax,[1,101]);  %nx+1
-      ylim(ax,[1,101]);  %ny+1
+      xlim(ax,[1,obj.nx*obj.map_scale]);  %nx+1
+      ylim(ax,[1,obj.ny*obj.map_scale]);  %ny+1
       ax.Box = 'on';
       ax.GridColor = 'k';
       ax.GridAlpha = 0.4;
@@ -338,16 +341,14 @@ classdef FIELD_MAP < handle
       end
     end
     function plot_W(obj,ax)
-      [xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
-      surf(ax,xq,yq,obj.W(1:obj.ny,1:obj.nx));
+      surf(ax,obj.xq,obj.yq,obj.W(1:obj.ny,1:obj.nx));
       %legend(ax,"x","y","z");
       view(ax,2);daspect(ax,[1 1 1]);
       %disp("complete generating W");
     end
     function plot_E(obj,ax,E)
-      [xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
       WW=reshape(E(:,floor(1.01*obj.N/2)),obj.nx,obj.ny);
-      surf(ax,xq,yq,WW);
+      surf(ax,obj.xq,obj.yq,WW);
       %legend(ax,"x","y");
       view(ax,2);daspect(ax,[1 1 1]);
     end

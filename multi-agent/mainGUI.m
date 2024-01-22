@@ -14,13 +14,13 @@ userpath('clear');
 %%
 clc
 if exist("gui","var")
-  delete(gui);
+  delete("gui");
 end
 wind_data = 'data_ito.csv';
 shape_data = '20160401/20160401-建築物の外周線.shp';
-W_data = './LOG/W_20160401--20160401-建築物の外周線.shp_670,230,152.0426,396.0846,-0.2094395.mat';
+W_data = './LOG/W_20160401--20160401-建築物の外周線.shp_670,230,300,300,0.2094395';
 %W_data = [];
-flag.wind_average = 1;
+flag.wind_average = 0;
 flag.debug = 0;
 flag.ns = [0.07,0.3,2.4]; % gains for speading fire
 flag.nf = [0.075,1.2,1.5]; % gains for flying fire

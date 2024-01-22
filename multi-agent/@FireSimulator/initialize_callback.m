@@ -1,10 +1,6 @@
 function initialize_callback(app,event)
 app.InitializefirstLampLabel.Text = "Initializing";
 app.InitializefirstLamp.Color = [1 0 0];
-flag.wind_average = app.windaverageCheckBox.Value;
-flag.debug = 0;
-flag.ns = app.SpreadingEditField_2.Value;
-flag.nf = app.FlyingEditField_2.Value;
 
 app.step_end = app.SimstepEditField.Value; % Description
 app.unum = app.FirefightersEditField.Value;
@@ -20,6 +16,23 @@ app.step_end = app.SimstepEditField.Value;
 app.TimeSlider.Limits = [0,app.SimstepEditField.Value];
 app.InitializefirstLampLabel.Text = "Ready";
 app.InitializefirstLamp.Color = [0 1 0];
-compass(app.NorthWindDr,1,0);
-view(app.NorthWindDr,-90,90);
+
+% wind and north directions
+vx = [app.map.wind(1,2)*cos(app.map.wind(1,1));10*cos(app.map.shape_opts.north_dir)];
+vy = [app.map.wind(1,2)*sin(app.map.wind(1,1));10*sin(app.map.shape_opts.north_dir)];
+c = compass(app.NorthWindDir,vx,vy);
+c(2).LineWidth = 2;
+c(2).Color = 'r';
+c(1).LineWidth = 2;
+c(1).Color = 'b';
+view(app.NorthWindDir,-90,90);
+
+% fire outbreak points
+if isfield(app.map.shape_opts,"outbreak")
+  app.outbreak = app.map.shape_opts.outbreak;
+else
+  app.outbreak = [floor(1.01*app.map.nx/2)+kron([-1;0;1],[1;1;1]),1 + repmat([1;2;3],3,1)];
+end
+app.map.model_init(app.outbreak);
+app.map.draw_state(app.map,app.UIAxes);
 end
