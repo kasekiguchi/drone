@@ -13,7 +13,7 @@ classdef FIELD_MAP < handle
     map_extra
     build = 1;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し、3で延焼調整モード（飛び火OFF）
     windreal = 0;     %0で定数、1で細分化（エクセル使用）
-    north_dir      % north direction from vertical line : rad : >0  = CCW
+%    north_dir      % north direction from vertical line : rad : >0  = CCW
     W % weight matrix : nx-ny size matrix
     shape_data
     shape_opts
@@ -29,6 +29,8 @@ classdef FIELD_MAP < handle
     E
     ES
     EF
+    WS
+    WF
     X
     Xm
     vi1
@@ -85,7 +87,7 @@ classdef FIELD_MAP < handle
       obj.map_meter_size = obj.shape_opts.map_size;
       obj.N  = obj.nx*obj.ny; % total grid number
       obj.map_scale = obj.map_meter_size(1)/obj.nx; % meter/grid
-      obj.north_dir = obj.shape_opts.north_dir;
+      %obj.north_dir = obj.shape_opts.north_dir;
       obj.W = obj.gen_grid_weight(obj.shape_opts);
     end
     function setup_wind(obj,wind_data)
@@ -101,14 +103,18 @@ classdef FIELD_MAP < handle
         th = obj.wind(:,1);
         wind1 = atan2(mean(sin(th)),mean(cos(th))); % average wind direction
         wind2 = mean(obj.wind(:,2));  % average wind speed
-        [ES,EF] = obj.gen_edge([wind1,wind2]);
+        [ES,EF,WS,WF] = obj.gen_edge([wind1,wind2]);
         obj.ES{1} =ES;
         obj.EF{1} =EF;
+        obj.WS{1} =WS;
+        obj.WF{1} =WF;
       else
         for i = 1:length(obj.wind(:,1))
-          [ES,EF] = obj.gen_edge(obj.wind(i,:));
+          [ES,EF,WS,WF] = obj.gen_edge(obj.wind(i,:));
           obj.ES{i} =ES;
           obj.EF{i} =EF;
+          obj.WS{i} =WS;
+          obj.WF{i} =WF;
         end
       end
     end
@@ -334,9 +340,16 @@ classdef FIELD_MAP < handle
     function plot_W(obj,ax)
       [xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
       surf(ax,xq,yq,obj.W(1:obj.ny,1:obj.nx));
-      legend(ax,"x","y","z");
+      %legend(ax,"x","y","z");
       view(ax,2);daspect(ax,[1 1 1]);
       %disp("complete generating W");
+    end
+    function plot_E(obj,ax,E)
+      [xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
+      WW=reshape(E(:,floor(1.01*obj.N/2)),obj.nx,obj.ny);
+      surf(ax,xq,yq,WW);
+      %legend(ax,"x","y");
+      view(ax,2);daspect(ax,[1 1 1]);
     end
   end
 

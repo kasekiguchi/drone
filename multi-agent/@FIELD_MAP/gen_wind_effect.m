@@ -18,7 +18,7 @@ wdir = string(table2cell(winddata(5:end,wdir_col))); % wind direction data
 wind(:,2) = table2array(winddata(5:end,wspeed_col));
 wdir_base= ["南微西","南南西","南西微南","南西","南西微西","西南西","西微南","西","西微北","西北西","北西微西","北西","北西微北","北北西","北微西","北","北微東","北北東","北東微北","北東","北東微東","東北東","東微北","東","東微南","東南東","南東微東","南東","南東微南","南南東","南微東","南"];
 for i = 1:length(wdir_base)
-  wind(wdir == wdir_base(i),1) = (pi/180)*rem(i,32)*360/32 - obj.north_dir; % wind direction : 0 = 'south', 90 = 'west'
+  wind(wdir == wdir_base(i),1) = (pi/180)*rem(i,32)*360/32 - obj.shape_opts.north_dir; % wind direction : 0 = 'south', 90 = 'west'
 end
 
 wind_time = kron((1:size(wind,1))',ones(hours(table2array(winddata(end,1)-winddata(end-1,1)))*obj.time_scale,1));

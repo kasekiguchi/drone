@@ -18,8 +18,7 @@ if exist("gui","var")
 end
 wind_data = 'data_ito.csv';
 shape_data = '20160401/20160401-建築物の外周線.shp';
-W_data = './LOG/W_20160401--20160401-建築物の外周線.shp_670-230-152.0426-396.0846--0.2094395';
-%W_data = './LOG/W_20160401--20160401-建築物の外周線.shp_670-230-300-300-0.2094395.mat';
+W_data = './LOG/W_20160401--20160401-建築物の外周線.shp_670,230,152.0426,396.0846,-0.2094395.mat';
 %W_data = [];
 flag.wind_average = 1;
 flag.debug = 0;
@@ -32,4 +31,4 @@ shape_opts.map_size = [300,300]; % north_dir で回転した後の start_point�
 shape_opts.data_type = "m";
 shape_opts.north_dir = -12*(pi/180); % rad
 %shape_opts.fire_point = [54;   8];
-gui = FireSimulation(flag,shape_data,shape_opts,W_data,unum,step_end,wind_data);
+gui = FireSimulator(flag,shape_data,shape_opts,W_data,unum,step_end,wind_data);

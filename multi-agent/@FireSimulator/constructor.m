@@ -58,7 +58,7 @@ if isempty(app.map.W) % set region from shape file
 else
   if isstring(W) | ischar(W)
     sp0 = split(erase(W,".mat"),"_");
-    sp1 = double(string(split(sp0{end},"-")));
+    sp1 = double(string(split(sp0{end},",")));
     app.map.shape_opts.start_point = sp1(1:2)';
     app.map.shape_opts.map_size = sp1(3:4)';
     tmp = sp1(5:end);
@@ -72,9 +72,11 @@ else
   else
     app.map.W = W;
   end
+  app.SettingTab.HandleVisibility = 'off';
   app.TabGroup.SelectedTab = app.SimulationTab;
   app.map.nx = size(app.map.W,2);
   app.map.ny = size(app.map.W,1);
+  app.map.N = app.map.nx*app.map.ny;
   app.map.map_scale = app.map.shape_opts.map_size(1)/app.map.nx;
   app.nxEditField.Value = app.map.nx;
   app.nyEditField.Value = app.map.ny;
