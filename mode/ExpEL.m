@@ -17,9 +17,9 @@ initial_state.p = sstate.p;
 initial_state.q = sstate.q;
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
-initial_state.Trs = 0.01*[agent.parameter.mass*agent.parameter.gravity; 0];%重力を打ち消すため最初はTr=m*g
-% initial_state.Trs=[0;0];
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
+initial_state.Trs = [agent.parameter.mass*agent.parameter.gravity; 0];%重力を打ち消すため最初はTr=m*g
+% % initial_state.Trs=[0;0];
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));%251 or 252
 % agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
@@ -30,7 +30,7 @@ agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1
 % % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0.5;0.6],"g",[2;-0.5;1.3]),30});%縦ベクトルで書く,
 % fFT=0;%z directional controller flag 1:FT, other:LS
 % agent.controller = ELC(agent,Controller_EL(dt,fFT));
-run("ExpBase");
+% run("ExpBase");
 
 %% コントローラー切換
 %システムノイズを大きくする
@@ -46,7 +46,7 @@ result_hlc= agent.estimator.hlc.result;
 result_elc= agent.estimator.elc.result;
 agent.estimator.result.result_hlc = struct("p",result_hlc.state.p,"q",result_hlc.state.q,"v",result_hlc.state.v,"w",result_hlc.state.w);
 agent.estimator.result.result_elc = struct("p",result_elc.state.p,"q",result_elc.state.q,"v",result_elc.state.v,"w",result_elc.state.w,"Trs",result_elc.state.Trs);
-    
+
 agent.estimator.flag = 0;
 agent.estimator.flag2 = 0;
 agent.estimator.do = @estimator_do;

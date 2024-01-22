@@ -66,6 +66,7 @@ classdef EKF_EXPAND < handle
             if sensor.state.Trs(1) < obj.mglim
                 sensor.state.Trs = [obj.mglim;0];
             end
+            
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             x = obj.result.state.get(); % estimated state at previous step
             % Pre-estimation
