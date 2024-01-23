@@ -21,6 +21,7 @@ wind_data = 'data_ito.csv';
 shape_data = '20160401/20160401-建築物の外周線.shp';
 W_data = './LOG/W_20160401--20160401-建築物の外周線.shp_670,230,300,300,0.2094395';
 %W_data = [];
+W_data = ones(100,100);
 flag.wind_average = 0;
 flag.debug = 0;
 % flag.ns = [0.07,0.3,2.4]; % gains for speading fire
