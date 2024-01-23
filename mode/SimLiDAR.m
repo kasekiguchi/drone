@@ -58,7 +58,7 @@ agent.parameter = DRONE_PARAM("DIATONE");
 % パラメータ既知
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_kiti(x,wall_param,psb,qs,p),"output_func",@(x,p) H_12_kiti(x,wall_param,psb,qs,p),"R",diag([1e-6*ones(1,3), 1e-7*ones(1,3),1e-3*ones(1,1)])));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_2(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"output_func",@(x,p) H_12_2(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"B",eye(12),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_1(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"output_func",@(x,p) H_12_1(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"B",eye(12),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,1)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),@(x,p) JacobH_12_1(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"output_func",@(x,p) H_12_1(x,wall_param,[0.01;0.01;0.01],[0;0;pi/2],p),"B",eye(12),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-9*ones(1,1)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6)])));
 
 % オフセット類を状態として追加
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18(x,wall_param,p),"output_func",@(x,p) H_18(x,wall_param,p),"B",[eye(6)*dt^2;eye(6)*dt;zeros(6,6)],"P",diag([ones(1,12),10*ones(1,6)]),"R",diag([1e-8*ones(1,3), 1e-8*ones(1,3),1e-6*ones(1,1)]),"Q",diag([10*ones(1,3),100*ones(1,3)])));
@@ -88,6 +88,8 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor.lidar = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', combinedEnv, 'R0', Rodrigues([0,0,1],pi/2),'p0',[0.01;0.01;0.01],'theta_range', pi/2, 'phi_range', 0:pi/180:10*pi/180, 'noise',0.000001, 'seed', 0));
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.do = @sensor_do;
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",20,"orig",[0;0;1.5],"size",[1,1,1,0.]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0.5,0.5,0.5,0.]}});
 
 %AMC ref
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[0.5,0.5,0.5,0.4]}});
@@ -98,12 +100,13 @@ agent.sensor.do = @sensor_do;
 %AMCref
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
-
+% 
 % コントローラー
 % agent.controller = HLC(agent,Controller_HL(dt));
 
+% コントローラー補正
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1e-1,"On3_1_new"));
+% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1e-1,"On3_1_new"));
 agent.controller.do = @controller_do;
 
 %% Direct model
@@ -129,6 +132,9 @@ agent.controller.do = @controller_do;
 %     sharedpq = 42;
 % end
 
+% ただノイズを入れた場合の入力補正
+
+
 function result = sensor_do(varargin)
     sensor = varargin{5}.sensor;
     result = sensor.lidar.do(varargin);
@@ -136,12 +142,25 @@ function result = sensor_do(varargin)
     varargin{5}.sensor.result = result;
 end
 
+
+
+% ノイズを入れた場合の入力補正
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
     result.hlc = controller.hlc.do(varargin);
-    result.correct = controller.correct.do(varargin);
-    varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
+    varargin{5}.controller.result.input = result.hlc.input + 0.4 * randn(4,1);
 end
+
+
+% 可観測性に基づく入力補正用
+% function result = controller_do(varargin)
+%     controller = varargin{5}.controller;
+%     result.hlc = controller.hlc.do(varargin);
+%     result.correct = controller.correct.do(varargin);
+%     varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
+% end
+
+
 % function in_prog(app)
 % app.agent.show(["sensor", "lidar"], "ax", app.UIAxes,"k",app.time.k,"logger",app.logger, "param",struct("fLocal", false,"fField",true));
 % end
