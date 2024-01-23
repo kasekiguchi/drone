@@ -3,7 +3,7 @@ clear
 N = 6;
 ts = 0; %機体数
 dt = 0.025;
-te = 3000;
+te = 2000;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -53,7 +53,7 @@ end
 % q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
 % rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
 % initial_state(1).pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));
-ref_orig = [4;0;0]; %目標軌道原点
+ref_orig = [1;0;0]; %目標軌道原点
 
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
@@ -61,8 +61,8 @@ agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant positio
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
-% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",50,"orig",[1;0;0],"size",1*[1,1,0]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
+% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",50,"orig",[1;0;1],"size",1*[1,1,0]},"Cooperative",N},agent(1));
 
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
@@ -163,12 +163,25 @@ end
 %%
 close all
 DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+% DataA = logger.data(2,"reference.result.state.p","p");
+DataA1 = logger.data(2,"estimator.result.state.pL","p");
+DataA2 = logger.data(3,"estimator.result.state.pL","p");
+DataA3 = logger.data(4,"estimator.result.state.pL","p");
+DataA4 = logger.data(5,"estimator.result.state.pL","p");
+DataA5 = logger.data(6,"estimator.result.state.pL","p");
+DataA6 = logger.data(7,"estimator.result.state.pL","p");
+DataR1 = logger.data(2,"reference.result.state.p","p");
+DataR2 = logger.data(3,"reference.result.state.p","p");
+DataR3 = logger.data(4,"reference.result.state.p","p");
+DataR4 = logger.data(5,"reference.result.state.p","p");
+DataR5 = logger.data(6,"reference.result.state.p","p");
+DataR6 = logger.data(7,"reference.result.state.p","p");
 % DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 DataB = logger.data(5,"reference.result.m","p");
 DataC = logger.data(7,"reference.result.Muid","p");
 DataD = logger.data(5,"reference.result.state.xd","p");
 t=logger.data(0,'t',[]);
-%%
+
 
 DataR = logger.data(1,"reference.result.state.p","p");
 Data1 = logger.data(2,"reference.result.m","p");
@@ -193,6 +206,56 @@ else
 end
 t=logger.data(0,'t',[]);
 %%
+figure(1)
+hold on
+plot(t,DataA1(:,1),'DisplayName','Agent1')
+plot(t,DataA2(:,1),'DisplayName','Agent2')
+plot(t,DataA3(:,1),'DisplayName','Agent3')
+plot(t,DataA4(:,1),'DisplayName','Agent4')
+plot(t,DataA5(:,1),'DisplayName','Agent5')
+plot(t,DataA6(:,1),'DisplayName','Agent6')
+plot(t,DataR1(:,1),'DisplayName','Agent1')
+plot(t,DataR2(:,1),'DisplayName','Agent2')
+plot(t,DataR3(:,1),'DisplayName','Agent3')
+plot(t,DataR4(:,1),'DisplayName','Agent4')
+plot(t,DataR5(:,1),'DisplayName','Agent5')
+plot(t,DataR6(:,1),'DisplayName','Agent6')
+% plot(t,Log2(:,1),'DisplayName','Roll')
+% plot(t,Log2(:,2),'DisplayName','Pitch')
+% plot(t,Log2(:,3),'DisplayName','Yaw')
+% plot(t,Log2(:,4))
+% xlim([-1.5 1.5])
+% ylim([0 1.5])
+xlabel("t [s]")
+% ylabel("Position [m]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 14;
+lgd = legend;
+hold off
+
+figure(2)
+hold on
+plot(t,DataA1(:,3),'DisplayName','Agent1')
+plot(t,DataA2(:,3),'DisplayName','Agent2')
+plot(t,DataA3(:,3),'DisplayName','Agent3')
+plot(t,DataA4(:,3),'DisplayName','Agent4')
+plot(t,DataA5(:,3),'DisplayName','Agent5')
+plot(t,DataA6(:,3),'DisplayName','Agent6')
+% plot(t,Log5(:,1),'DisplayName','Roll')
+% plot(t,Log5(:,2),'DisplayName','Pitch')
+% plot(t,Log5(:,3),'DisplayName','Yaw')
+% plot(t,Log2(:,4))
+% xlim([-1.5 1.5])
+% ylim([0 1.5])
+xlabel("t [s]")
+ylabel("Position [m]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 14;
+lgd = legend;
+hold off
+
 figure(101)
 hold on
 plot(DataA(:,1),DataA(:,2),'DisplayName','Estimator')
@@ -210,12 +273,12 @@ hold off
 
 figure(102)
 hold on
-% plot(t,DataA(:,1),'DisplayName','X')
-% plot(t,DataA(:,2),'DisplayName','Y')
-plot(t,DataA(:,3),'DisplayName','Z')
-% plot(t,DataR(:,1),'DisplayName','Ref X')
-% plot(t,DataR(:,2),'DisplayName','Ref Y')
-plot(t,DataR(:,3),'DisplayName','Ref Z')
+plot(t,DataA(:,1),'DisplayName','X')
+plot(t,DataA(:,2),'DisplayName','Y')
+% plot(t,DataA(:,3),'DisplayName','Z')
+plot(t,DataR(:,1),'DisplayName','Ref X')
+plot(t,DataR(:,2),'DisplayName','Ref Y')
+% plot(t,DataR(:,3),'DisplayName','Ref Z')
 % xlim([-1.5 1.5])
 % ylim([0 1.5])
 xlabel("t [s]")

@@ -178,9 +178,59 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                model = agent1.estimator.result.state;
                ref = agent1.reference.result.state;
-               xd = ref.xd;
+               xd = 0*ref.xd;
                xd(1:3)=Qrho;
-               xd(4:6)=vrho;
+               xd(5:7)=vrho;
+%                p=ref.p+Qrho;
+%                ref.xd(1:3)=ref.xd(1:3)+Qrho;
+%                ref.p=ref.p+Qrho;
+               x = model.get(["p"  "Q" "v"    "O"    "qi"    "wi"  "Qi"  "Oi"]);
+               qi = reshape(model.qi,3,obj.N);
+               Ri = obj.toR(model.Qi);
+               R0 = obj.toR(model.Q);               
+               %xd = 0*ref.xd;
+%                xd = ref.xd;
+               R0d = reshape(xd(end-8:end),3,3);
+
+               id = obj.self.id;
+
+%                Muid = obj.Muid_method(x,qi,R0,R0d,xd,obj.K,obj.P,obj.Pdagger); %3xN
+%                muid_myagent = Muid(:,id-1); %3x1
+%                obj.result.Muid = Muid(:,id-1)';
+
+               Muid = agent1.controller.result.mui; %3xN
+               muid_myagent = Muid(4:6,id-1); %3x1
+               obj.result.Muid = muid_myagent';
+               
+
+%                obj.result.state.xd = agent1.reference.result.state.xd; % 目標重心位置（絶対座標）
+%                obj.result.state.p = obj.result.state.xd(1:3);
+               obj.result.state.xd = xd; % 目標重心位置（絶対座標）
+               obj.result.state.p = xd(1:3);
+               a = obj.result.state.xd(9:11);
+               g = [0;0;-1]*agent1.parameter.g;
+
+               A=a-g;
+               obj.result.m = inv(A'*A)*A'*muid_myagent;
+%                obj.result.m = m;
+
+elseif strcmp(obj.com, "Split3")
+    % ref = matlabFunction([xd;dxd;ddxd;dddxd;o0d;do0d;reshape(R0d,[],1)],'vars',t);
+               agent1 = varargin{3};
+               initial_loadref = agent1.reference.result.state.xd;
+               omega_load = agent1.reference.result.state.o;
+               rho = agent1.parameter.rho(:,obj.self.id-1);
+               R_load = agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
+               Qrho = initial_loadref(1:3,1)+R_load*rho;
+               dR_load = R_load*Skew(omega_load);
+               vrho = initial_loadref(4:6,1)+ dR_load*rho;
+
+
+               model = agent1.estimator.result.state;
+               ref = agent1.reference.result.state;
+               xd = 0*ref.xd;
+               xd(1:3)=Qrho;
+               xd(5:7)=vrho;
 %                p=ref.p+Qrho;
 %                ref.xd(1:3)=ref.xd(1:3)+Qrho;
 %                ref.p=ref.p+Qrho;
@@ -221,6 +271,23 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 %                  
                end
            obj.result.state.xd(1:12,1) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
+           obj.result.state.p = obj.result.state.xd(1:3,1);
+           obj.result.state.v = obj.result.state.xd(4:6,1);
+%                obj.self.input_transform.param.th_offset = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+%            result = obj.result;       
+           elseif strcmp(obj.com, "Take_off2")
+               if isempty( obj.base_state ) % first take
+               obj.base_time=varargin{1}.t;
+               obj.base_state = obj.self.estimator.result.state.p;
+               obj.result.state.xd = [obj.base_state;obj.result.state.xd(4:27,1)];
+%                  
+               end
+           obj.result.state.xd(1:12,1) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
+           temp = obj.func(t);
+           obj.result.state.xd(1:2,1) = temp(1:2,1);
+           obj.result.state.xd(4:5,1) = temp(4:5,1);
+           obj.result.state.xd(7:8,1) = temp(7:8,1);
+           obj.result.state.xd(10:11,1) = temp(10:11,1);
            obj.result.state.p = obj.result.state.xd(1:3,1);
            obj.result.state.v = obj.result.state.xd(4:6,1);
 %                obj.self.input_transform.param.th_offset = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;

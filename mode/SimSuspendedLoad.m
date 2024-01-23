@@ -10,20 +10,20 @@ motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion ca
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
 initial_state.p = arranged_position([0, 0], 1, 1, 0);
-initial_state.q = [0; 0; 0];
+initial_state.q = [0; 0.03; 0];
 initial_state.v = [0; 0; 0];
-initial_state.w = [0; 0; 0];
+initial_state.w = [0; 0.006; 0];
 initial_state.vL = [0; 0; 0];
-initial_state.pT = [0; 0; -1];
-initial_state.wL = [0; 0; 0];
-initial_state.p = [0;0;2.00];
+initial_state.pT = [-0.1587; 0; -0.9873];
+initial_state.wL = [0; 0.02; 0];
+initial_state.p = [1.5;0.866;1.2547];
 
 agent = DRONE;
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state,1,agent));%id,dt,type,initial,varargin
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
 agent.sensor = DIRECT_SENSOR(agent, 0.0);
-agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;2]},"Suspended"});
+agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[1.5;0.866;0.25]},"Suspended"});
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
 agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
 agent.controller.do = @controller_do;
@@ -66,15 +66,15 @@ hold off
 %%
 figure(102)
 hold on
-plot(t,aaaa(:,1:2))
-plot(t,bbbb(:,1:2))
+plot(t,aaaa(:,1:2:3))
+plot(t,bbbb(:,1:2:3))
 ylim([-1.5 1.5])
 xlabel("X [m]")
 ylabel("t [s]")
 legend("x","y")
 hold off
 %%
-logger.plot({1,"plant.result.state.pL","p"})
+logger.plot({3,"plant.result.state.pL","p"})
 % logger.plot({1,"p","pr"})
 hold on
 ylim([-1.1 2.1])
