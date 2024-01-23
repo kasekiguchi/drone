@@ -38,7 +38,7 @@ ns3 = obj.flag.ns(3);
 wind_s = (ns1*wind2 + ns2);
 
 for k = 1:spread
-  r = (k+ns3)*wind_s;
+  r = (k)*wind_s;
 
   % circle（卒論）
   %     xv3 = r * sin(s_th);
@@ -68,7 +68,7 @@ nf1 = obj.flag.nf(1);
 nf2 = obj.flag.nf(2);
 nf3 = obj.flag.nf(3);
 
-windv = round(obj.nx/obj.map_scale) * (nf1 * wind2); % TODO : 要確認 grid/s ?
+windv = nf1 * (1/obj.map_scale)*wind2; % TODO : 要確認 grid/s ?
 
 % base rhombus
 x1 = 0; x2 = 1.5; x3 = -x2;
@@ -81,8 +81,8 @@ cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
 xv = cyc(1,:) + nx0 + windv*sin(th);
 yv = cyc(2,:) + ny0 + windv*cos(th);
 
-[xq,yq] = meshgrid(1:obj.nx);
-WF = nf3*gen_E(xv,yv,obj.nx,obj.ny,xq,yq,1);
+[xq,yq] = meshgrid(1:obj.nx,1:obj.ny);
+WF = gen_E(xv,yv,obj.nx,obj.ny,xq,yq,1);
 if obj.flag.debug
   WW=reshape(WF(:,floor(1.01*N/2)),obj.nx,obj.ny);
   surf(xq,yq,WW);
@@ -102,6 +102,9 @@ elseif wind2 < 7 && wind2 > 0
 else
   disp("wind speed should be 0 or larger.");
 end
+% WS, WFの正規化
+WS = ns3*WS/max(WS,[],'all');
+WF = nf3*WF/max(WF,[],'all');
 
 W = reshape(obj.W,[],1); % grid weight
 maxW = max(W);

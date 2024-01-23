@@ -17,14 +17,6 @@ app.TimeSlider.Limits = [0,app.SimstepEditField.Value];
 app.InitializefirstLampLabel.Text = "Ready";
 app.InitializefirstLamp.Color = [0 1 0];
 
-% wind and north directions
-% vx = [app.map.wind(1,2)*cos(app.map.wind(1,1));10*cos(app.map.shape_opts.north_dir)];
-% vy = [app.map.wind(1,2)*sin(app.map.wind(1,1));10*sin(app.map.shape_opts.north_dir)];
-% c = compass(app.NorthWindDir,vx,vy);
-% c(2).LineWidth = 2;
-% c(2).Color = 'r';
-% c(1).LineWidth = 2;
-% c(1).Color = 'b';
 app.plot_wind_north_dir();
 % fire outbreak points
 if isfield(app.map.shape_opts,"outbreak")

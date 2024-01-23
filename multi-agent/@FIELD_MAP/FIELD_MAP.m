@@ -237,7 +237,7 @@ classdef FIELD_MAP < handle
       if isfield(W,"S")||isprop(W(1),"S")%(length(W)==1)
         V = 2*W.S+5*(W.I>0)+3*(W.R.*~W.U)+4*W.U;
         cmin=2;
-        colorbar(ax,'Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
+        %colorbar(ax,'Ticks',[2,3,4,5],'TickLabels',{'Not burn','Extinct','Extincting','Burning'})
         if isfield(W,"P")||isprop(W(1),"P")
           PU = W.P.*~W.U;
           V = (V.* ~PU) + 1*PU;
@@ -269,14 +269,14 @@ classdef FIELD_MAP < handle
       end
       view(ax,2)
       % マップ範囲を決めている
-      xlabel(ax,'\sl x','FontSize',25);
-      ylabel(ax,'\sl y','FontSize',25);
+      % xlabel(ax,'\sl x','FontSize',25);
+      % ylabel(ax,'\sl y','FontSize',25);
       xlim(ax,[1,obj.nx*obj.map_scale]);
       ylim(ax,[1,obj.ny*obj.map_scale]);
       ax.Box = 'on';
       ax.GridColor = 'k';
       ax.GridAlpha = 0.4;
-      %axis square
+      axis(ax,'square');
       hold(ax,'off');
     end
     function F=draw_movie(obj,logger,output,filename)
@@ -331,12 +331,16 @@ classdef FIELD_MAP < handle
       end
     end
     function plot_W(obj,ax)
-      surf(ax,obj.xq,obj.yq,obj.W(1:obj.ny,1:obj.nx));
+      delete(ax.Children);
+      %surf(ax,obj.xq,obj.yq,obj.W(1:obj.ny,1:obj.nx));
+      surf(ax,obj.xq,obj.yq,obj.W);
       %legend(ax,"x","y","z");
+      %colormap(ax,'default');
       view(ax,2);daspect(ax,[1 1 1]);
       %disp("complete generating W");
     end
     function plot_E(obj,ax,E)
+      delete(ax.Children);
       WW=reshape(E(:,floor(1.01*obj.N/2)),obj.nx,obj.ny);
       surf(ax,obj.xq,obj.yq,WW);
       %legend(ax,"x","y");
