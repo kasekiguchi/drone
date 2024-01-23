@@ -10,11 +10,11 @@ close all hidden;
 clc;
 
 %% データのインポート
-load("MCMPC_coswave_case3.mat") %読み込むデータファイルの設定
+load("MPC_coswave_case3_Log(22-Jan-2024_00_14_22).mat") %読み込むデータファイルの設定
 % load("9_4_test.mat")
 
 save = 1; %1:figureを保存
-change_torque = 0; %1:4入力を総推力+トルクに変換
+change_torque = 1; %1:4入力を総推力+トルクに変換
 
 for i = 1:find(log.Data.t,1,'last')
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
