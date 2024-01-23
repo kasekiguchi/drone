@@ -11,10 +11,11 @@ end
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 close all hidden; clear ; clc;
 userpath('clear');
+warning('off','MATLAB:table:ModifiedAndSavedVarnames');
 %%
 clc
 if exist("gui","var")
-  delete("gui");
+  delete(gui);
 end
 wind_data = 'data_ito.csv';
 shape_data = '20160401/20160401-建築物の外周線.shp';

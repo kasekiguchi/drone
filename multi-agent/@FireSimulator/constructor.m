@@ -2,7 +2,9 @@ function constructor(app, flag, shape_data, shape_opts, W, unum, step_end, wind_
 % north_dir = 0; % rad
 % start_point = [0,0]; % マップ左下から見た位置 [m,m]
 % map_size = [1,1000]; % north_dir で回転した後の start_pointからの領域 [m m]
-app.NorthdirectionGauge.Visible = 'off';
+app.NorthWindDir.XAxis.Visible = 'off';
+app.NorthWindDir.YAxis.Visible = 'off';
+app.NorthWindDir.Color = 0.95*[1 1 1];
 app.map = FIELD_MAP(flag,shape_data,shape_opts,W);
 app.ShapefileLabel.Text = string(app.ShapefileLabel.Text) + app.map.shape_data;
 app.mapsizeLabel.Text = string(app.mapsizeLabel.Text) + join(string(shape_opts.map_size)," x ");
@@ -53,19 +55,12 @@ if isempty(app.map.W) % set region from shape file
   app.MaprotationCCWEditField.Value = string(shape_opts.north_dir*180/pi);
   %app.MaprotationCCWEditFieldValueChanged(0);
   map_rotation_CCW(app,0);
-  %app.NorthdirectionGauge.Value = -shape_opts.north_dir; % rad
 else
   if isstring(W) | ischar(W)
     sp0 = split(erase(W,".mat"),"_");
     sp1 = double(string(split(sp0{end},",")));
     app.map.shape_opts.start_point = sp1(1:2)';
     app.map.shape_opts.map_size = sp1(3:4)';
-    tmp = sp1(5:end);
-    if isnan(tmp(1))
-      app.NorthdirectionGauge.Value = -tmp(2);
-    else
-      app.NorthdirectionGauge.Value = tmp;
-    end
     load(W);
     app.map.W = W;
   else
@@ -81,6 +76,6 @@ else
   app.nxEditField.Value = app.map.nx;
   app.nyEditField.Value = app.map.ny;
   [app.map.xq,app.map.yq] = meshgrid(1:app.map.map_scale:app.map.nx*app.map.map_scale,1:app.map.map_scale:app.map.ny*app.map.map_scale);
-  app.map.plot_W(app.UIAxes);
+  app.map.plot_W(app.Grid_ax);
 end
 end

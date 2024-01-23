@@ -10,8 +10,8 @@ end
 wind_data = app.WinddataEditField.Value;
 app.map.setup_wind(wind_data);
 app.map.set_gridcell_model();
-app.map.plot_E(app.UIAxes2,app.map.WF{1});
-app.map.plot_E(app.UIAxes3,app.map.WS{1});
+app.map.plot_E(app.Flying_ax,app.map.WF{1});
+app.map.plot_E(app.Spread_ax,app.map.WS{1});
 app.step_end = app.SimstepEditField.Value;
 app.TimeSlider.Limits = [0,app.SimstepEditField.Value];
 app.InitializefirstLampLabel.Text = "Ready";
@@ -33,5 +33,5 @@ else
   app.outbreak = [floor(1.01*app.map.nx/2)+kron([-1;0;1],[1;1;1]),1 + repmat([1;2;3],3,1)];
 end
 app.map.model_init(app.outbreak);
-app.map.draw_state(app.map,app.UIAxes);
+app.map.draw_state(app.map,app.Grid_ax);
 end

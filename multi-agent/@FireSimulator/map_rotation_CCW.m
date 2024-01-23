@@ -2,7 +2,6 @@ function map_rotation_CCW(app,event)
       value = double(string(app.MaprotationCCWEditField.Value));
       view(app.original_data_ax,atan(tan(-value*pi/180)*app.shape_ratio)*180/pi,90);
       north_dir = value*pi/180; % rad
-      app.NorthdirectionGauge.Value = -north_dir;
       dlist = [];
       for i = 1:length(app.original_data_ax.Children)
         if strcmp(class(app.original_data_ax.Children(i)),'matlab.graphics.primitive.Patch')

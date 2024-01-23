@@ -89,7 +89,7 @@ classdef FIELD_MAP < handle
       obj.map_meter_size = obj.shape_opts.map_size;
       obj.N  = obj.nx*obj.ny; % total grid number
       obj.map_scale = obj.map_meter_size(1)/obj.nx; % meter/grid
-      [obj.xq,obj.yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
+      [obj.xq,obj.yq] = meshgrid(0:obj.map_scale:obj.nx*obj.map_scale,0:obj.map_scale:obj.ny*obj.map_scale);
       obj.W = obj.gen_grid_weight(obj.shape_opts);
     end
     function setup_wind(obj,wind_data)

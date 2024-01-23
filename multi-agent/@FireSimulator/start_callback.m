@@ -34,16 +34,10 @@ if strcmp(value,"Start")
     app.TimeSlider.Value = k;
     app.TimeSliderLabel.Text = "k : " + k;
     wi = app.map.wind_time(k);
-    app.map.draw_state(app.map,app.UIAxes);
-    delete(app.NorthWindDir.Children);
-    vx = [app.map.wind(wi,2)*cos(app.map.wind(wi,1));10*cos(app.map.shape_opts.north_dir)];
-    vy = [app.map.wind(wi,2)*sin(app.map.wind(wi,1));10*sin(app.map.shape_opts.north_dir)];
-    compass(app.NorthWindDir,vx,vy);
-    app.NorthWindDir.Children(1).LineWidth = 2;
-    app.NorthWindDir.Children(1).Color = 'b';
-    app.NorthWindDir.Children(2).LineWidth = 2;
-    app.NorthWindDir.Children(2).Color = 'r';
-    view(app.NorthWindDir,-90,90);
+    app.map.draw_state(app.map,app.Grid_ax);
+    app.plot_wind_north_dir(wi);
+    app.map.plot_E(app.Flying_ax,app.map.WF{wi});
+    app.map.plot_E(app.Spread_ax,app.map.WS{wi});
     pause(0.001);
     E = app.map.EF{wi} + app.map.ES{wi};
     fi= find(app.map.I);% 燃えているマップのインデックス
