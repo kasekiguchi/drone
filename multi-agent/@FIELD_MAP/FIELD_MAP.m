@@ -1,5 +1,12 @@
 classdef FIELD_MAP < handle
-
+  properties(Constant)
+    sm = 12; % [m] : spread fire possible distance under 10 m/s wind
+    ss = 80/3.6; % [m/s] : spread fire speed under 10 m/s wind
+    % grid/step = m/s *(meter/grid)^-1*(step/second)^-1
+    % = ss*(1/mperg)*(1/(step/s)) = ss*(1/mperg)*(1/(3600*step/h))
+    % = ss/(map_scale*time_scale*3600)
+    % 
+  end
   properties
     nx = 100; % x axis grid number
     ny = 100; % y axis grid number
