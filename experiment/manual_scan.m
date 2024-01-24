@@ -1,8 +1,8 @@
 clc;clear;close all;
 %% ros2設定
-matlabnode = ros2node("/testnode",25);
+matlabnode = ros2node("/testnode",70);
 j=1;
-ros2("topic","list","DomainID",25)
+ros2("topic","list","DomainID",70)
 while(1)    
     try
         %megarover
@@ -91,8 +91,15 @@ mkmap = savedata(1).ndtPCdata;
 for j=2:num_lim
     mkmap = pcmerge(mkmap,savedata(j).ndtPCdata, 0.001);
 end
+%%
+rot = eul2rotm(deg2rad([0 0 180]),'XYZ'); %回転行列(roll,pitch,yaw)
+T = [0 0 0]; %並進方向(x,y,z)
+tform = rigidtform3d(rot,T);
+map = pctransform(mkmap,tform);
+%%
 figure
-pcshow(mkmap,"MarkerSize",24,"BackgroundColor",[1 1 1]);
+pcshow(map,"MarkerSize",24,"BackgroundColor",[1 1 1]);
+xlabel(texlabel("X"));ylabel(texlabel("Y"));zlabel(texlabel('Z'))
 
 % pcshowpair(savedata(9).ndtPCdata,fixedSeg,"MarkerSize",12,"BackgroundColor",[1 1 1])
 % pcwrite(mkmap,'fixedmap_room_1.pcd','Encoding','ascii');
@@ -102,8 +109,8 @@ filepass = "..\environment\pcdmap";
 filename = filepass + "experimentroom_map5.mat";
 save(filename,"map");
 %%
-map = mkmap;
-filename = "experimentroom_map4.mat";
+% map = mkmap;
+filename = "experimentroom_map5.mat";
 save(filename,"map");
 %%
 function TF = kaihi(pcd)

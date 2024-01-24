@@ -40,12 +40,13 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             param.node = ros2node("/agent_"+string(obj.id),obj.id);%%%%%%%%%%%%%create node
             obj.IP = param.node;
             obj.connector = ROS2_CONNECTOR(param);
-            fprintf("Whill %d is ready\n", param.id);
+            fprintf("Drone %d is ready\n", param.id);
       end
     end
     function do(obj,varargin)
       %%u = gen_msg(varargin{5}.inner_input.result');
-      u = varargin{5}.input_transform.result;
+      % u = varargin{5}.input_transform.result;
+      u = obj.self.input_transform.result;
       cha = varargin{2};
       obj.flight_phase=cha;
       switch cha

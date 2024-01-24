@@ -37,8 +37,9 @@ switch conn_type
     case "ros2"        
         setting.param.state_list = ["p"];
         setting.param.subName = ["p"];
-        setting.subTopic(1,:) = {'/rover_odo','geometry_msgs/Twist'};%%%%%%%%%%%%sub topic name
-        setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%pub topic name       
+        setting.subTopic(1,:) = {'/rover_odo','geometry_msgs/Twist',5000};%%%%%%%%%%%%sub topic name
+        % setting.subTopic(1,:) = {'/tf','tf2_msgs/TFMessage'};%%%%%%%%%%%%sub topic name
+        setting.pubTopic(1,:) = {'/rover_twist','geometry_msgs/Twist'};%%%%%%%%%%pub topic name
         setting.id = id;
 end
 
