@@ -6,7 +6,7 @@ function W = gen_grid_weight(obj,opts)
 %   a matrix.
 % model area start from 'start_point' to 'start_point'+'map_size'
 % maxv : max probability, 300m尺度で0.04が目安
-% map_scale : map scale, map_scale=dなら1セルd m
+% m_per_grid : map scale, m_per_grid=dなら1セルd m
 % E : edge matrix : N-N size matrix where N = nx*ny
 % eij : (i,j) element of E
 % eij > 0 if edge exists from j to i else eij = 0
@@ -154,7 +154,7 @@ end
 % 建物のラベリング
 %label = [cellfun(@min,{obj.S.X})*1000/tx;cellfun(@min,{obj.S.Y})*1000/ty;1:length(obj.S)]';
 
-[xq,yq] = meshgrid(1:obj.map_scale:obj.nx*obj.map_scale,1:obj.map_scale:obj.ny*obj.map_scale);
+[xq,yq] = meshgrid(1:obj.m_per_grid:obj.nx*obj.m_per_grid,1:obj.m_per_grid:obj.ny*obj.m_per_grid);
 in = inpolygon(xq,yq,x,y);
 in = logical(in);
 if exist('xx','var')

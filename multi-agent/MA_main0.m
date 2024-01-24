@@ -32,10 +32,10 @@ close all
 % model_init の出火点設定
 % 延焼パラメータ
 % 60-70 m/hour となるようにチューニング
-% time_scale step/hour
+% step_per_h step/hour
 % prob grid/step
-% map_scale m/grid
-% map_scale*time_scale*prob = 60-70
+% m_per_grid m/grid
+% m_per_grid*step_per_h*prob = 60-70
 
 % 飛び火パラメータ
 % 発生確率 ：糸魚川市のデータで初期消火無しでMCシミュレーションをやり、9-12回発生する程度の頻度
@@ -85,7 +85,7 @@ fMethod = "Weight"; % 重み行列
 % fDynamics = "Astar"; % 消火方法：A star or Direct
 fDynamics = "Direct"; % 消火方法：A star or Direct
 vi = 5; % 消火の必要がない部分を飛ばす距離
-h = 0.1; %0.1 * (3/M.map_scale); % extinction probability　消火確率は0.1で設定
+h = 0.1; %0.1 * (3/M.m_per_grid); % extinction probability　消火確率は0.1で設定
 %map.draw_state(nx,ny,map.loggerk(logger,step_end));
 if addFirePoint == "test"
     fFPosition = 0;

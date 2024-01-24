@@ -21,6 +21,6 @@ for i = 1:length(wdir_base)
   wind(wdir == wdir_base(i),1) = (pi/180)*rem(i,32)*360/32 - obj.shape_opts.north_dir; % wind direction : 0 = 'south', 90 = 'west'
 end
 
-wind_time = kron((1:size(wind,1))',ones(hours(table2array(winddata(end,1)-winddata(end-1,1)))*obj.time_scale,1));
+wind_time = kron((1:size(wind,1))',ones(hours(table2array(winddata(end,1)-winddata(end-1,1)))*obj.step_per_h,1));
 
 end

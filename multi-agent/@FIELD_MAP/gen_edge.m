@@ -5,7 +5,7 @@ function [ES,EF,WS,WF] = gen_edge(obj,wind)
 %   gen must work with matrix arguments,that is x or y possible to choose as
 %   a matrix.
 % maxv : max probability, 300m尺度で0.04が目安
-% obj.map_scale : map scale, obj.map_scale=dなら1セルd m
+% obj.m_per_grid : map scale, obj.m_per_grid=dなら1セルd m
 % ES : edge matrix for spreading fire
 % EF : edge matrix for flying fire
 % E = ES+EF : edge matrix : N-N size matrix where N = nx*ny
@@ -23,8 +23,9 @@ wind1 = wind(:,1);
 wind2 = wind(:,2); % m/s
 th = (pi()/180) * wind1 + pi;  % wind direction : to cancel meshgrid effect, pi is added.
 %% spreading fire
-spread = 3; % classification on spreading magnitude
-sigmaWS = [68.27,(95.45-68.27),(100-95.45)]; % weight for spreading area
+sigmaWS = [1/3,2/3,1]; % area for spreading fire
+probWS = [0.6827,0.9545,1]
+weightWS = [68.27,(95.45-68.27),(100-95.45)]; % weight for spreading area
 % area k has k-sigma weight
 
 % spreading region
@@ -37,7 +38,7 @@ ns2 = obj.flag.ns(2);
 ns3 = obj.flag.ns(3);
 wind_s = (ns1*wind2 + ns2);
 
-for k = 1:spread
+for k = 1:3 % classification on spreading magnitude
   r = (k)*wind_s;
 
   % circle（卒論）
@@ -45,15 +46,15 @@ for k = 1:spread
   %     yv3 = -r * cos(s_th);
 
   % egg shape
-  xv = r * cos(s_th./4).*sin(s_th);
-  yv = -r * cos(s_th) + r/6;
-
+  % xv = r * cos(s_th./4).*sin(s_th);
+  % yv = -r * cos(s_th) + r/6;
+  [xv,yv] = egg_shape(r,th,sigmaWS*k);
   cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
   xv = cyc(1,:) + nx0;
   yv = cyc(2,:) + ny0;
 
   [xq,yq] = meshgrid(1:1:obj.nx);
-  WS = WS + gen_E(xv,yv,obj.nx,obj.ny,xq,yq,sigmaWS(spread));
+  WS = WS + gen_E(xv,yv,obj.nx,obj.ny,xq,yq,weightWS(k));
 end
 if obj.flag.debug
   WW=reshape(WS(:,floor(1.01*N/2)),obj.nx,obj.ny);
@@ -68,7 +69,7 @@ nf1 = obj.flag.nf(1);
 nf2 = obj.flag.nf(2);
 nf3 = obj.flag.nf(3);
 
-windv = nf1 * (1/obj.map_scale)*wind2; % TODO : 要確認 grid/s ?
+windv = nf1 * (1/obj.m_per_grid)*wind2; % TODO : 要確認 grid/s ?
 
 % base rhombus
 x1 = 0; x2 = 1.5; x3 = -x2;
@@ -143,4 +144,12 @@ Wr(isnan(Wc)) = [];
 Wc(isnan(Wc)) = [];
 Wv = weight*ones(size(Wc));
 W = sparse(Wr,Wc,Wv,N,N);
+end
+function [x,y] = egg_shape(r,th,w)
+% egg shape
+% https://nyjp07.com/index_egg.html
+  a = w*r;
+  b = a*0.5;
+  x = (b*(1-cos(th))/4-a/2).*sin(th);
+  y = (b*(1-cos(th))/4-a/2).*(1+cos(th)) + 0.6*a;
 end

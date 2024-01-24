@@ -1,11 +1,12 @@
 classdef FIELD_MAP < handle
   properties(Constant)
     sm = 12; % [m] : spread fire possible distance under 10 m/s wind
-    ss = 80/3.6; % [m/s] : spread fire speed under 10 m/s wind
-    % grid/step = m/s *(meter/grid)^-1*(step/second)^-1
-    % = ss*(1/mperg)*(1/(step/s)) = ss*(1/mperg)*(1/(3600*step/h))
-    % = ss/(map_scale*time_scale*3600)
-    % 
+    ss = 80/3600; % [m/s] : spread fire speed under 10 m/s wind
+    % grid/step = m/s * grid/m * s/step = m/s *(meter/grid)^-1*(step/second)^-1
+    % = ss*(1/mperg)*(1/(step/s)) = ss*(1/mperg)*(3600/(step/h))
+    % = 3600*ss/(m_per_grid*step_per_h)
+    % = sum_d (p[d]*d) % wind direction
+    % where p[d] is the probability of spreading to d step ahead.
   end
   properties
     nx = 100; % x axis grid number
@@ -13,8 +14,8 @@ classdef FIELD_MAP < handle
     N  % total number of grid
     maxv = 0.04;    % 確率の上限，シミュレーションの進行に関係するパラメータであり、適当な値を入力
     map_meter_size  % マップ幅 m
-    map_scale % meter/grid
-    time_scale = 20; % step/hour
+    m_per_grid % meter/grid
+    step_per_h = 20; % step/hour
     nx_app = 100; % 見かけ上のx辺
     ny_app = 100; % 見かけ上のy辺
     map_extra
@@ -95,8 +96,8 @@ classdef FIELD_MAP < handle
       end
       obj.map_meter_size = obj.shape_opts.map_size;
       obj.N  = obj.nx*obj.ny; % total grid number
-      obj.map_scale = obj.map_meter_size(1)/obj.nx; % meter/grid
-      [obj.xq,obj.yq] = meshgrid(0:obj.map_scale:obj.nx*obj.map_scale,0:obj.map_scale:obj.ny*obj.map_scale);
+      obj.m_per_grid = obj.map_meter_size(1)/obj.nx; % meter/grid
+      [obj.xq,obj.yq] = meshgrid(0:obj.m_per_grid:obj.nx*obj.m_per_grid,0:obj.m_per_grid:obj.ny*obj.m_per_grid);
       obj.W = obj.gen_grid_weight(obj.shape_opts);
     end
     function setup_wind(obj,wind_data)
@@ -278,8 +279,8 @@ classdef FIELD_MAP < handle
       % マップ範囲を決めている
       % xlabel(ax,'\sl x','FontSize',25);
       % ylabel(ax,'\sl y','FontSize',25);
-      xlim(ax,[1,obj.nx*obj.map_scale]);
-      ylim(ax,[1,obj.ny*obj.map_scale]);
+      xlim(ax,[1,obj.nx*obj.m_per_grid]);
+      ylim(ax,[1,obj.ny*obj.m_per_grid]);
       ax.Box = 'on';
       ax.GridColor = 'k';
       ax.GridAlpha = 0.4;

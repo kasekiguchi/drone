@@ -16,6 +16,11 @@ app.WinddataEditField.Value = wind_data;
 app.ShapefileLabel.Text = app.map.shape_data;
 app.SimstepEditField.Value = step_end;
 app.FirefightersEditField.Value = unum;
+
+if isfield(flag,'nf')
+app.FlyingEditField_2.Value = join(string(flag.nf));
+app.SpreadingEditField_2.Value = join(string(flag.ns));
+end
 if isempty(app.map.W) % set region from shape file
   mapshow(app.original_data_ax,app.map.S);
   daspect(app.original_data_ax,[1,1,1]);
@@ -72,10 +77,10 @@ else
   app.map.nx = size(app.map.W,2);
   app.map.ny = size(app.map.W,1);
   app.map.N = app.map.nx*app.map.ny;
-  app.map.map_scale = app.map.shape_opts.map_size(1)/app.map.nx;
+  app.map.m_per_grid = app.map.shape_opts.map_size(1)/app.map.nx;
   app.nxEditField.Value = app.map.nx;
   app.nyEditField.Value = app.map.ny;
-  [app.map.xq,app.map.yq] = meshgrid(1:app.map.map_scale:app.map.nx*app.map.map_scale,1:app.map.map_scale:app.map.ny*app.map.map_scale);
+  [app.map.xq,app.map.yq] = meshgrid(1:app.map.m_per_grid:app.map.nx*app.map.m_per_grid,1:app.map.m_per_grid:app.map.ny*app.map.m_per_grid);
   app.map.plot_W(app.Grid_ax);
 end
 end
