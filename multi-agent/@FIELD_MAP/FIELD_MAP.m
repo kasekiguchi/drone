@@ -2,6 +2,7 @@ classdef FIELD_MAP < handle
   properties(Constant)
     sm = 12; % [m] : spread fire possible distance under 10 m/s wind
     ss = 80/3600; % [m/s] : spread fire speed under 10 m/s wind
+    g_per_step
     % grid/step = m/s * grid/m * s/step = m/s *(meter/grid)^-1*(step/second)^-1
     % = ss*(1/mperg)*(1/(step/s)) = ss*(1/mperg)*(3600/(step/h))
     % = 3600*ss/(m_per_grid*step_per_h)
@@ -88,7 +89,9 @@ classdef FIELD_MAP < handle
         obj.nx = shape_opts.nx;
         obj.ny = shape_opts.ny;
       end
-      disp("generated weighted graph");
+      if isfield(shape_opts,"step_per_h")
+        obj.step_per_h = shape_opts.step_per_h;
+      end
     end
     function set_target(obj)
       arguments
@@ -97,6 +100,7 @@ classdef FIELD_MAP < handle
       obj.map_meter_size = obj.shape_opts.map_size;
       obj.N  = obj.nx*obj.ny; % total grid number
       obj.m_per_grid = obj.map_meter_size(1)/obj.nx; % meter/grid
+      obj.g_per_step = 3600*obj.ss/(obj.m_per_grid*obj.step_per_h); % grid/step
       [obj.xq,obj.yq] = meshgrid(0:obj.m_per_grid:obj.nx*obj.m_per_grid,0:obj.m_per_grid:obj.ny*obj.m_per_grid);
       obj.W = obj.gen_grid_weight(obj.shape_opts);
     end
