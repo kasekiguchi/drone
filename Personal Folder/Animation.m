@@ -1,11 +1,15 @@
 clc
 clear all
+close all
 
-D = load('11_30_simKoopman_circle_軽く重み調整.mat'); %描画したいアニメーションのデータを読み込む
+D = load('1_15_Exp_kmpc_hov_ちょっと頑張った.mat'); %描画したいアニメーションのデータを読み込む
+% D = load('1_5_NMPC_立体.mat');
 param = DRONE_PARAM("DIATONE"); %DRONEのパラメータ読み込み
 target = 1; %機体数
-realtime = 1; %実時間
+realtime = 0; %実時間
 %% ドローンの機体作成
+num = input('＜出力するグラフを選択してください＞ \n[x-y : 0]  [x-z : 1]  [y-z : 2]  [x-y-z : 3] ：','s'); %0:各グラフで出力,1:いっぺんに出力
+num = str2double(num); %文字列を数値に変換
 
 data = datachange(D,target,"p","e");
 tM = max(data);
@@ -20,7 +24,16 @@ ylabel(ax,"y [m]");
 zlabel(ax,"z [m]");
 obj.fig = ax;
 
-view(3)
+if num == 0
+    view(2)
+elseif num == 1
+    view(0,0)
+elseif num == 2
+    view(90,0)
+else
+    view(3)
+end
+
 grid on
 daspect([1 1 1]);
 hold on
@@ -94,7 +107,7 @@ t = D.log.Data.t;
 tRealtime = tic;
 for i = 1:length(t)-1
     for n = 1:length(target)
-        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k');
+        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k','LineStyle','--','LineWidth',1.2);
         draw(obj.frame(target(n)),obj.thrust(target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
     end
     if realtime
@@ -117,7 +130,10 @@ function [data, vrange] = datachange(D, target, variable, attribute, option)
         variable string = "p"
         attribute string = "e"
         option.time (1, 2) double = [0 D.log.Data.t(size(D.log.Data.t,1)-1)]
-    end  
+    end 
+    if D.log.fExp == 1
+        option.time = [0 D.log.Data.t(find(D.log.Data.t,1,'last')-1)];
+    end
     data = cell2mat(arrayfun(@(i) data_org(D, i, variable, attribute,"time",option.time), target, 'UniformOutput', false));
     [~, vrange] = full_var_name(variable, attribute);
 end
