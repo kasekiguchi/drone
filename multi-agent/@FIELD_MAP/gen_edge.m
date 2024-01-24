@@ -24,8 +24,9 @@ wind2 = wind(:,2); % m/s
 th = (pi()/180) * wind1 + pi;  % wind direction : to cancel meshgrid effect, pi is added.
 %% spreading fire
 sigmaWS = [1/3,2/3,1]; % area for spreading fire
-probWS = [0.6827,0.9545,1]
-weightWS = [68.27,(95.45-68.27),(100-95.45)]; % weight for spreading area
+%probWS = [0.6827,0.9545,1]
+%weightWS = [68.27,(95.45-68.27),(100-95.45)]; % weight for spreading area
+weightWS = [8.5074    1.1734    0.1467];
 % area k has k-sigma weight
 
 % spreading region
@@ -40,7 +41,6 @@ wind_s = (ns1*wind2 + ns2);
 
 for k = 1:3 % classification on spreading magnitude
   r = (k)*wind_s;
-
   % circle（卒論）
   %     xv3 = r * sin(s_th);
   %     yv3 = -r * cos(s_th);
@@ -48,7 +48,7 @@ for k = 1:3 % classification on spreading magnitude
   % egg shape
   % xv = r * cos(s_th./4).*sin(s_th);
   % yv = -r * cos(s_th) + r/6;
-  [xv,yv] = egg_shape(r,th,sigmaWS*k);
+  [xv,yv] = egg_shape(r*sigmaWS(k),th,r/3);
   cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
   xv = cyc(1,:) + nx0;
   yv = cyc(2,:) + ny0;
