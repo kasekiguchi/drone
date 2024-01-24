@@ -2,14 +2,24 @@ clc
 clear all
 close all
 
-D = load('1_15_Exp_kmpc_hov_ちょっと頑張った.mat'); %描画したいアニメーションのデータを読み込む
+D = load('1_24_test2.mat'); %描画したいアニメーションのデータを読み込む
 % D = load('1_5_NMPC_立体.mat');
 param = DRONE_PARAM("DIATONE"); %DRONEのパラメータ読み込み
 target = 1; %機体数
 realtime = 0; %実時間
-%% ドローンの機体作成
-num = input('＜出力するグラフを選択してください＞ \n[x-y : 0]  [x-z : 1]  [y-z : 2]  [x-y-z : 3] ：','s'); %0:各グラフで出力,1:いっぺんに出力
+
+%% 動画保存
+% save_mp4 = 0; %1:動画をmp4で保存
+videoFile = 'test.mp4';
+writerObj = VideoWriter(videoFile, 'MPEG-4');
+writerObj.FrameRate = 30; % フレームレートの設定
+
+num = input('＜出力するグラフを選択してください＞ \n[x-y : 0]  [x-z : 1]  [y-z : 2]  [x-y-z : 3]：','s'); %0:各グラフで出力,1:いっぺんに出力
 num = str2double(num); %文字列を数値に変換
+mp4 = input('\n＜動画を保存しますか＞ 0:保存しない，1:保存する ：','s');
+save_mp4 = str2double(mp4);
+
+%% ドローンの機体作成
 
 data = datachange(D,target,"p","e");
 tM = max(data);
@@ -105,20 +115,47 @@ end
 
 t = D.log.Data.t;
 tRealtime = tic;
-for i = 1:length(t)-1
-    for n = 1:length(target)
-        plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k','LineStyle','--','LineWidth',1.2);
-        draw(obj.frame(target(n)),obj.thrust(target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
-    end
-    if realtime
-        delta = toc(tRealtime);
-        if t(i+1)-t(i) > delta
-            pause(t(i+1)-t(i) - delta);
+if save_mp4 == 1
+    open(writerObj);
+    for i = 1:size(p,1)
+        for n = 1:length(target)
+            plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k','LineStyle','--','LineWidth',1.2);
+            draw(obj.frame(target(n)),obj.thrust(target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
         end
-        tRealtime = tic;
-    else
-        pause(0.01);
+        if realtime
+            delta = toc(tRealtime);
+            if t(i+1)-t(i) > delta
+                pause(t(i+1)-t(i) - delta);
+            end
+            tRealtime = tic;
+        else
+            pause(0.01);
+        end
+        currentFrame = getframe(gcf);
+        writeVideo(writerObj, currentFrame);
     end
+else
+    for i = 1:size(p,1)
+        for n = 1:length(target)
+            plot3(r(:,1,n),r(:,2,n),r(:,3,n),'k','LineStyle','--','LineWidth',1.2);
+            draw(obj.frame(target(n)),obj.thrust(target(n),:),p(i,:,n),Q(i,:,n),u(i,:,n));
+        end
+        if realtime
+            delta = toc(tRealtime);
+            if t(i+1)-t(i) > delta
+                pause(t(i+1)-t(i) - delta);
+            end
+            tRealtime = tic;
+        else
+            pause(0.01);
+        end
+    end
+end
+
+if save_mp4 == 1
+    close(writerObj);
+    movefile(videoFile,'Graph/Video')
+    disp('＜動画の保存・ファイルの移動が完了しました＞');
 end
 
 %% 関数
