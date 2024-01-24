@@ -18,11 +18,20 @@ function ref = generate_spline_curve_ref(loadedRef,order,fcmd)
 %手動で値を設定するとき(使わないときコメントアウトする)
 isManualSetting = 1;%手動でwaypointを作るとき1
 pointN = 5; %waypointの数
-dt = 3;%waypoint間の時間
+dt = 4;%waypoint間の時間
 time =  (0:dt:dt*(pointN-1))';
 % wp = [0,0,0;0.5*round(1*randn(pointN-1,3),3)];%waypointの設定初めは初期値0
-wp = round(0.5*randn(pointN,3),3);%waypointの設定
-waypoints = [time, wp];
+% wp = round(0.5*randn(pointN,3),3);%waypointの設定
+
+min_z = 0.6;
+max_z = 1.3;
+min_xy = -0.8;
+max_xy = 1.2;
+wp_xy = round((max_xy-min_xy).*rand(pointN,2) + min_xy,2);%waypointの設定
+wp_z = round((max_z-min_z).*rand(pointN,1) + min_z,1);%waypointの設定
+wp_xy(1,1:2) = 0;
+wp_z(1,1) = 1;
+waypoints = [time, wp_xy, wp_z];
 
     while 1
         if isManualSetting
@@ -219,18 +228,18 @@ waypoints = [time, wp];
             input("");
             ref=MY_WAY_POINT_REFERENCE.way_point_ref([time,posi],order,1);
         end
-        while 1
-            isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
-            if isSaved==0||isempty(isSaved)
-                disp("No save")
-                break
-            elseif isSaved==1
-                T = table(time,posi);
-                filename = fullfile(pwd,"reference\functions\spline_curve\waypoint.xlsx");
-                sheetname = input("White sheet name : ","s");
-                writetable(T,filename,'Sheet',sheetname);
-                break
-            end
-        end
+        % while 1
+        %     isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
+        %     if isSaved==0||isempty(isSaved)
+        %         disp("No save")
+        %         break
+        %     elseif isSaved==1
+        %         T = table(time,posi);
+        %         filename = fullfile(pwd,"reference\functions\spline_curve\waypoint.xlsx");
+        %         sheetname = input("White sheet name : ","s");
+        %         writetable(T,filename,'Sheet',sheetname);
+        %         break
+        %     end
+        % end
     end
 end

@@ -62,7 +62,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
       end
       obj.connector.sendData(gen_msg(msg));
       obj.msg=msg;
-      msg
+      msg;
     end
     function arming(obj)
       obj.connector.sendData(gen_msg(obj.arming_msg));

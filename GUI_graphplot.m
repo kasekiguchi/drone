@@ -9,8 +9,9 @@ close all hidden;
 clear all;
 clc;
 
+
 %% データのインポート
-load("事例研_すぎやま.mat") %読み込むデータファイルの設定
+load("1_24_sprine_7.mat") %読み込むデータファイルの設定
 % load("9_4_test.mat")
 
 for i = 1:find(log.Data.t,1,'last')
@@ -24,9 +25,9 @@ for i = 1:find(log.Data.t,1,'last')
     data.error(:,i) = data.pr(:,i) - data.p(:,i);                       %error
 end
 
-for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
-    data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
-end
+% for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
+%     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
+% end
 
 disp('load finished')
 %% グラフ出力
@@ -38,9 +39,9 @@ newcolors = [0 0.4470 0.7410
 columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
-name = 'すぎやま'; %ファイル名
-folderName = '2023_1003_全体実験_すぎやま'; %フォルダ名
-mkdir(folderName) %新規フォルダ作成
+% name = 'すぎやま'; %ファイル名
+% folderName = '2023_1003_全体実験_すぎやま'; %フォルダ名
+% mkdir(folderName) %新規フォルダ作成
 
 %位置p
 box on %グラフの枠線が出ないときに使用
@@ -61,8 +62,8 @@ xlim([data.t(1) data.t(end)])
 ax = gca;
 hold off
 title('Position p of agent1','FontSize',12);
-cd(folderName)
-savefig(strcat('Position_',name));
+% cd(folderName)
+% savefig(strcat('Position_',name));
 
 %姿勢角q
 figure(2)
@@ -76,7 +77,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 xlim([data.t(1) data.t(end)])
 ax(2) = gca;
 title('Attitude q of agent1','FontSize',12);
-savefig(strcat('Attitude_',name));
+% savefig(strcat('Attitude_',name));
 
 %速度v
 figure(3)
@@ -90,7 +91,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 xlim([data.t(1) data.t(end)])
 ax(3) = gca;
 title('Velocity v of agent1','FontSize',12);
-savefig(strcat('Velocity_',name));
+% savefig(strcat('Velocity_',name));
 
 %角速度w
 figure(4)
@@ -104,7 +105,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 xlim([data.t(1) data.t(end)])
 ax(4) = gca;
 title('Angular velocity w of agent1','FontSize',12);
-savefig(strcat('Angular velocity_',name));
+% savefig(strcat('Angular velocity_',name));
 
 figure(5)
 plot(data.p(1,:),data.p(2,:),'LineWidth', 2);
@@ -117,7 +118,7 @@ hold off
 lgdtmp = {'estimator', 'reference'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
 ax(5) = gca;
-savefig(strcat('x-y_',name))
+% savefig(strcat('x-y_',name))
 
 %入力
 figure(6)
@@ -131,7 +132,7 @@ lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax(6) = gca;
 title('Input u of agent1','FontSize',12);
-savefig(strcat('Input_',name))
+% savefig(strcat('Input_',name))
 
 % %error
 figure(7)
@@ -145,7 +146,7 @@ lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Error of agent1','FontSize',12);
-savefig(strcat('Error_',name))
+% savefig(strcat('Error_',name))
 
 fontSize = 12; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 

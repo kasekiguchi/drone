@@ -1,3 +1,4 @@
+clc;
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10000; % termina time
