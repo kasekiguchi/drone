@@ -39,7 +39,7 @@ ns2 = obj.flag.ns(2);
 ns3 = obj.flag.ns(3);
 wind_s = (ns1*wind2 + ns2);
 r0 = obj.sm/0.6; % 0.6 is a default egg shape length
-r = r0*wind_s;
+r = r0*wind_s*0.1; % 0.1 is a tunned value to be 80 m /h under 10 m/s wind
 for k = 1:3 % classification on spreading magnitude
   % circle（卒論）
   %     xv3 = r * sin(s_th);
