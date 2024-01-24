@@ -154,11 +154,10 @@ end
 % 建物のラベリング
 %label = [cellfun(@min,{obj.S.X})*1000/tx;cellfun(@min,{obj.S.Y})*1000/ty;1:length(obj.S)]';
 
-[xq,yq] = meshgrid(1:obj.m_per_grid:obj.nx*obj.m_per_grid,1:obj.m_per_grid:obj.ny*obj.m_per_grid);
-in = inpolygon(xq,yq,x,y);
+in = inpolygon(obj.xq,obj.yq,x,y);
 in = logical(in);
 if exist('xx','var')
-  in2 = inpolygon(xq,yq,xx,yy);
+  in2 = inpolygon(obj.xq,obj.yq,xx,yy);
   in2 = logical(in2);
   W = sparse(in - in2*(4/5));
 else
@@ -173,7 +172,7 @@ if obj.flag.debug
 end
 if obj.flag.debug
   figure(101);
-  surf(xq,yq,W);
+  surf(obj.xq,obj.yq,W);
   legend("x","y","z");
   view(2);daspect([1 1 1]);
   disp("complete generating W");

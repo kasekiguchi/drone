@@ -2,14 +2,14 @@ classdef FIELD_MAP < handle
   properties(Constant)
     sm = 12; % [m] : spread fire possible distance under 10 m/s wind
     ss = 80/3600; % [m/s] : spread fire speed under 10 m/s wind
+  end
+  properties
     g_per_step
     % grid/step = m/s * grid/m * s/step = m/s *(meter/grid)^-1*(step/second)^-1
     % = ss*(1/mperg)*(1/(step/s)) = ss*(1/mperg)*(3600/(step/h))
     % = 3600*ss/(m_per_grid*step_per_h)
     % = sum_d (p[d]*d) % wind direction
     % where p[d] is the probability of spreading to d step ahead.
-  end
-  properties
     nx = 100; % x axis grid number
     ny = 100; % y axis grid number
     N  % total number of grid
@@ -17,23 +17,17 @@ classdef FIELD_MAP < handle
     map_meter_size  % マップ幅 m
     m_per_grid % meter/grid
     step_per_h = 20; % step/hour
-    nx_app = 100; % 見かけ上のx辺
-    ny_app = 100; % 見かけ上のy辺
-    map_extra
-    build = 1;  %0で手動糸魚川、1で重み分類（秋山）、2で分類無し、3で延焼調整モード（飛び火OFF）
-    windreal = 0;     %0で定数、1で細分化（エクセル使用）
-    %    north_dir      % north direction from vertical line : rad : >0  = CCW
     W % weight matrix : nx-ny size matrix
     shape_data
-    shape_opts
+    shape_opts % TODO : flag と整理
     flag
-    xq
-    yq
+    xq % meshgrid : grid size nx x ny : range = nx*m_per_grid
+    yq % meshgrid : grid size nx x ny : 
   end
   properties
     wind_data
     wind % [dir,speed] dir 0:南 45:南西 90:西 135:北西 180:北 225:北東 270:東 315:南東
-    wind_time
+    wind_time % wi = wind_time(i); wind(wi,:) is wind info at time step i 
     map
     unum
     FF

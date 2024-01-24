@@ -31,16 +31,16 @@ weightWS = [8.5074    1.1734    0.1467];
 
 % spreading region
 nx0 = obj.nx/2; ny0 = obj.ny/2; % center
-s_th = -pi:0.1:pi; %
+s_th = -pi:0.1:pi; % spreading fire angle : shape = egg shape
 WS = sparse(N,N);
 
 ns1 = obj.flag.ns(1);
 ns2 = obj.flag.ns(2);
 ns3 = obj.flag.ns(3);
 wind_s = (ns1*wind2 + ns2);
-
+r0 = obj.sm/0.6; % 0.6 is a default egg shape length
+r = r0*wind_s;
 for k = 1:3 % classification on spreading magnitude
-  r = (k)*wind_s;
   % circle（卒論）
   %     xv3 = r * sin(s_th);
   %     yv3 = -r * cos(s_th);
@@ -48,18 +48,16 @@ for k = 1:3 % classification on spreading magnitude
   % egg shape
   % xv = r * cos(s_th./4).*sin(s_th);
   % yv = -r * cos(s_th) + r/6;
-  [xv,yv] = egg_shape(r*sigmaWS(k),th,r/3);
+  [xv,yv] = egg_shape(r*sigmaWS(k),s_th,r/3);
   cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
   xv = cyc(1,:) + nx0;
   yv = cyc(2,:) + ny0;
 
-  [xq,yq] = meshgrid(1:1:obj.nx);
-  WS = WS + gen_E(xv,yv,obj.nx,obj.ny,xq,yq,weightWS(k));
+  WS = WS + gen_E(xv,yv,obj.nx,obj.ny,obj.xq,obj.yq,weightWS(k));
 end
 if obj.flag.debug
   WW=reshape(WS(:,floor(1.01*N/2)),obj.nx,obj.ny);
-  [xq,yq] = meshgrid(1:obj.nx);
-  surf(xq,yq,WW);
+  surf(obj.xq,obj.yq,WW);
   legend("x","y","z");
   view(2);daspect([1 1 1]);
   disp("延焼の隣接行列が生成完了しました");
@@ -82,11 +80,10 @@ cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
 xv = cyc(1,:) + nx0 + windv*sin(th);
 yv = cyc(2,:) + ny0 + windv*cos(th);
 
-[xq,yq] = meshgrid(1:obj.nx,1:obj.ny);
-WF = gen_E(xv,yv,obj.nx,obj.ny,xq,yq,1);
+WF = gen_E(xv,yv,obj.nx,obj.ny,obj.xq,obj.yq,1);
 if obj.flag.debug
   WW=reshape(WF(:,floor(1.01*N/2)),obj.nx,obj.ny);
-  surf(xq,yq,WW);
+  surf(obj.xq,obj.yq,WW);
   legend("x","y","z");
   view(2);daspect([1 1 1]);
   disp("飛び火の隣接行列が生成完了しました");
