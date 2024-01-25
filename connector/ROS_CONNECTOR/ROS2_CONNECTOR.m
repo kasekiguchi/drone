@@ -35,6 +35,11 @@ classdef ROS2_CONNECTOR < handle
 
     methods
         function obj = ROS2_CONNECTOR(info)
+            %ros2のコネクタークラス
+            %以下のように引き数を入れてください．subとpubは1つずつ入れてください
+            %セットするnode        　　　:info.node
+            %subscriveするトピックデータ：info.subTopic.{\topicname,messagetype,Hz}
+            %publishするトピックデータ  ：info.pubTopic.{\topicname,messagetype}
             disp('Preparing connection to robot operating system...');
             %-- Configulations for ROS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%旧
             % setenv("ROS_DOMAIN_ID","30");

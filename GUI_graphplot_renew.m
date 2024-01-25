@@ -307,42 +307,42 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','north
 ax(2) = gca;
 title('Attitude q of agent1');
 
-% % 速度
-% subplot(2, num, 3);
-% p4 = plot(data.t, data.v(:,:),'LineWidth',1);
-% xlabel('Time [s]');
-% ylabel('v');
-% grid on
-% xlim([data.t(1) data.t(end)])
-% lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-% ax(3) = gca;
-% title('Velocity v of agent1');
+% 速度
+subplot(2, num, 3);
+p4 = plot(data.t, data.v(:,:),'LineWidth',1);
+xlabel('Time [s]');
+ylabel('v');
+grid on
+xlim([data.t(1) data.t(end)])
+lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+ax(3) = gca;
+title('Velocity v of agent1');
 
-% % 角速度
-% subplot(2, num, 4);
-% p5 = plot(data.t, data.w(:,:),'LineWidth',1);
-% xlabel('Time [s]');
-% ylabel('w');
-% grid on
-% xlim([data.t(1) data.t(end)])
-% lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-% ax(4) = gca;
-% title('Angular velocity w of agent1');
+% 角速度
+subplot(2, num, 4);
+p5 = plot(data.t, data.w(:,:),'LineWidth',1);
+xlabel('Time [s]');
+ylabel('w');
+grid on
+xlim([data.t(1) data.t(end)])
+lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+ax(4) = gca;
+title('Angular velocity w of agent1');
 
-% % 入力
-% subplot(2,num,5);
-% plot(data.t,data.u(:,:),'LineWidth',1);
-% xlabel('Time [s]');
-% ylabel('u');
-% grid on
-% lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-% lgd.NumColumns = columnomber;
-% xlim([data.t(1) data.t(end)])
-% ax(5) = gca;
-% title('Input u of agent1');
+% 入力
+subplot(2,num,5);
+plot(data.t,data.u(:,:),'LineWidth',1);
+xlabel('Time [s]');
+ylabel('u');
+grid on
+lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
+lgd.NumColumns = columnomber;
+xlim([data.t(1) data.t(end)])
+ax(5) = gca;
+title('Input u of agent1');
 
 % 軌道(2次元，3次元)
 choice = 0;

@@ -22,6 +22,9 @@ classdef NDT < handle
     methods
         function obj = NDT(self,param)% constractor
             %ROS2でsubscriveするLiDAR点群用のEstimatorクラス
+            if (param=="plot")
+                obj.result = self.Data.agent.estimator.result;                
+            else
             obj.self = self; % agent that 
             model = param.model;
             obj.model = model;
@@ -32,6 +35,7 @@ classdef NDT < handle
             obj.initialtform = obj.initial_matching(rigidtform3d(eul2rotm(deg2rad(param(:,2)'),"XYZ"),param(:,1)));
             % obj.fixedSeg = param.fixedSeg;            
             obj.result.state=state_copy(obj.model.state);
+            end
         end
 
 
@@ -145,12 +149,20 @@ classdef NDT < handle
         function show(obj,logger)
             %実機を動かした後，推定値をplot
             %コマンド
-            %agent.estimator.show(logger)
+            %agent.estimator.show(logger)            
             num_lim = logger.k - 1;
-            mkmap = pctransform(logger.Data.agent.estimator.result{1,7}.ndtPCdata, ...
-                logger.Data.agent.estimator.result{1,7}.tform);
+            i=1;
+            while(1)
+                if isfield(obj.result{1,i},"tform")
+                    break;
+                end
+                i = i + 1;
+                % obj.result{1,1} = obj.result{1,i}
+            end            
+            mkmap = pctransform(logger.Data.agent.estimator.result{1,i}.ndtPCdata, ...
+                logger.Data.agent.estimator.result{1,i}.tform);
             hold on
-            for j=8:num_lim
+            for j=i:num_lim
                 ndtPCdata = pctransform(logger.Data.agent.estimator.result{1,j}.ndtPCdata, ...
                     logger.Data.agent.estimator.result{1,j}.tform);    
                 mkmap = pcmerge(mkmap,ndtPCdata, 0.001);
@@ -161,19 +173,23 @@ classdef NDT < handle
             xlabel('X');ylabel('Y');
 
             figure
-            for j=8:num_lim
+            for j=i:num_lim
                 X(j) = logger.Data.agent.estimator.result{1,j}.tform.A(1,4) ;%+ 1;
                 Y(j) = logger.Data.agent.estimator.result{1,j}.tform.A(2,4);
-                ndtx(j) = logger.Data.agent.estimator.result{1,j}.state.p(1,1);%+ 1;
-                ndty(j) = logger.Data.agent.estimator.result{1,j}.state.p(2,1);
+                % ndtx(j) = logger.Data.agent.estimator.result{1,j}.state.p(1,1);%+ 1;
+                % ndty(j) = logger.Data.agent.estimator.result{1,j}.state.p(2,1);
             end
             % figure
-            plot(ndtx,ndty,'*-');
+            % plot(ndtx,ndty,'*-');
             hold on
             plot(X,Y,'o-')
             grid on
             xlabel(texlabel('X'));ylabel(texlabel('Y'));
-            pcshow(obj.fixedSeg,BackgroundColor=[1 1 1],MarkerSize=12,ViewPlane="XY")
+            if ~isfield(obj,"fixedSeg")                
+                obj.fixedSeg = mkmap;
+            end
+            % pcshow(obj.fixedSeg,BackgroundColor=[1 1 1],MarkerSize=12,ViewPlane="XY")
+            scatter(obj.fixedSeg.Location(:,1),obj.fixedSeg.Location(:,2),2,"filled");
         end
         
         % function result=do(obj,varargin)
