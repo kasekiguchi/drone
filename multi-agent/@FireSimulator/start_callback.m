@@ -31,9 +31,13 @@ if strcmp(value,"Start")
   Xm = min(app.map.W,[],'all');
   XM = max(app.map.W,[],'all');
   while (k <= step_end) && sum(find(app.map.I))
-    app.TimeSlider.Value = k;
-    app.TimeSliderLabel.Text = "k : " + k;
-    wi = app.map.wind_time(k);
+    app.steptimeSlider.Value = k;
+    app.steptimeLabel.Text = "step : " + k + "      " + "time[h] : " + k/app.map.step_per_h;
+    if isempty(app.map.wind_time)
+      wi = 1;
+    else
+      wi = app.map.wind_time(k);
+    end
     app.map.draw_state(app.map,app.Grid_ax);
     app.plot_wind_north_dir(wi);
     app.map.plot_E(app.Flying_ax,app.map.WF{wi});

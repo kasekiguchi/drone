@@ -13,7 +13,8 @@ app.map.set_gridcell_model();
 app.map.plot_E(app.Flying_ax,app.map.WF{1});
 app.map.plot_E(app.Spread_ax,app.map.WS{1});
 app.step_end = app.SimstepEditField.Value;
-app.TimeSlider.Limits = [0,app.SimstepEditField.Value];
+app.steptimeSlider.Limits = [0,app.SimstepEditField.Value];
+app.steptimeLabel.HorizontalAlignment = 'left';
 app.InitializefirstLampLabel.Text = "Ready";
 app.InitializefirstLamp.Color = [0 1 0];
 

@@ -21,7 +21,8 @@ end
 N = obj.N;
 wind1 = wind(:,1);
 wind2 = wind(:,2); % m/s
-th = (pi()/180) * wind1 + pi;  % wind direction : to cancel meshgrid effect, pi is added.
+th = (pi/180) * wind1 + pi;  % wind direction : to cancel meshgrid effect, pi is added.
+Rth = [cos(th), sin(th);-sin(th),cos(th)];
 %% spreading fire
 sigmaWS = [1/3,2/3,1]; % area for spreading fire
 %probWS = [0.6827,0.9545,1]
@@ -30,16 +31,13 @@ weightWS = [8.5074    1.1734    0.1467];
 % area k has k-sigma weight
 
 % spreading region
-nx0 = obj.nx/2; ny0 = obj.ny/2; % center
+cx = obj.nx*obj.m_per_grid/2; cy = obj.ny*obj.m_per_grid/2; % center
 s_th = -pi:0.1:pi; % spreading fire angle : shape = egg shape
 WS = sparse(N,N);
 
-ns1 = obj.flag.ns(1);
-ns2 = obj.flag.ns(2);
-ns3 = obj.flag.ns(3);
-wind_s = (ns1*wind2 + ns2);
+ns = obj.flag.ns;
 r0 = obj.sm/0.6; % 0.6 is a default egg shape length
-r = r0*wind_s*0.1; % 0.1 is a tunned value to be 80 m /h under 10 m/s wind
+r = (obj.m_per_grid/obj.sm)*r0*wind2;
 for k = 1:3 % classification on spreading magnitude
   % circle（卒論）
   %     xv3 = r * sin(s_th);
@@ -48,10 +46,10 @@ for k = 1:3 % classification on spreading magnitude
   % egg shape
   % xv = r * cos(s_th./4).*sin(s_th);
   % yv = -r * cos(s_th) + r/6;
-  [xv,yv] = egg_shape(r*sigmaWS(k),s_th,r/3);
-  cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
-  xv = cyc(1,:) + nx0;
-  yv = cyc(2,:) + ny0;
+  [xv,yv] = egg_shape(r*sigmaWS(k),s_th,1);
+  cyc = Rth*[xv;yv]; % CW rotation
+  xv = cyc(1,:) + cx - obj.m_per_grid/2; % the last term cancels discretization as grid 
+  yv = cyc(2,:) + cy;
 
   WS = WS + gen_E(xv,yv,obj.nx,obj.ny,obj.xq,obj.yq,weightWS(k));
 end
@@ -76,9 +74,9 @@ y1 = 0; y2 = 0.5; y3 = 2*y2;
 xv = nf2*wind2*[x1 x2 x1 x3 x1];
 yv = nf2*wind2*[y1 y2 y3 y2 y1];
 
-cyc = [cos(th), sin(th);-sin(th),cos(th)]*[xv;yv]; % CW rotation
-xv = cyc(1,:) + nx0 + windv*sin(th);
-yv = cyc(2,:) + ny0 + windv*cos(th);
+cyc = Rth*[xv;yv]; % CW rotation
+xv = cyc(1,:) + cx + windv*sin(th);
+yv = cyc(2,:) + cy + windv*cos(th);
 
 WF = gen_E(xv,yv,obj.nx,obj.ny,obj.xq,obj.yq,1);
 if obj.flag.debug
@@ -92,8 +90,8 @@ end
 % 火災警報（消防法第２２条気象状況の通報及び警報の発令）の発令条件より
 % https://www.fdma.go.jp/singi_kento/kento/items/kento187_46_shiryo6-1.pdf
 if wind2 >= 7 % % TODO : wind speedに対して連続性を担保すべき
-  WS = wind_s.*WS;
-  WF = wind_s.*WF;
+  WS = wind2.*WS;
+  WF = wind2.*WF;
 elseif wind2 < 7 && wind2 > 0
   WS = (wind2/10).*WS;
   WF = (wind2/10)^2.*WF;
@@ -101,13 +99,13 @@ else
   disp("wind speed should be 0 or larger.");
 end
 % WS, WFの正規化
-WS = ns3*WS/max(WS,[],'all');
+WS = ns*0.02*WS/max(WS,[],'all');% 0.02 is a tunned value to be 80 m /h under 10 m/s wind
 WF = nf3*WF/max(WF,[],'all');
 
 W = reshape(obj.W,[],1); % grid weight
 maxW = max(W);
-ES = obj.maxv*WS.*W/maxW;
-EF = obj.maxv*WF.*W/maxW;
+ES = WS.*W/maxW;
+EF = WF.*W/maxW;
 ES = sparse(ES);
 EF = sparse(EF);
 
