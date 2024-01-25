@@ -11,8 +11,7 @@ app.mapsizeLabel.Text = string(app.mapsizeLabel.Text) + join(string(shape_opts.m
 app.map.unum = unum;
 app.step_end = step_end;
 app.wind_data = wind_data;
-
-app.WinddataEditField.Value = wind_data;
+app.WinddataEditField.Value= join(string(wind_data));
 app.ShapefileLabel.Text = app.map.shape_data;
 app.SimstepEditField.Value = step_end;
 app.FirefightersEditField.Value = unum;

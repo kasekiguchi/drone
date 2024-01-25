@@ -7,7 +7,7 @@ app.unum = app.FirefightersEditField.Value;
 if isempty(app.map.W)
   app.map.set_target();
 end
-wind_data = app.WinddataEditField.Value;
+wind_data = app.wind_data;
 app.map.setup_wind(wind_data);
 app.map.set_gridcell_model();
 app.map.plot_E(app.Flying_ax,app.map.WF{1});
