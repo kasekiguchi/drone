@@ -29,8 +29,9 @@ min_xy = -0.8;
 max_xy = 1.2;
 wp_xy = round((max_xy-min_xy).*rand(pointN,2) + min_xy,2);%waypointの設定
 wp_z = round((max_z-min_z).*rand(pointN,1) + min_z,1);%waypointの設定
-wp_xy(1,1:2) = 0;
-wp_z(1,1) = 1;
+% wp_z = ones(5,1);
+wp_xy(1,1:2) = 0; %初期値の固定
+wp_z(1,1) = 1; %初期値の固定
 waypoints = [time, wp_xy, wp_z];
 
     while 1
