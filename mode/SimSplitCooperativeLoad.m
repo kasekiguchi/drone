@@ -3,7 +3,7 @@ clear
 N = 6;
 ts = 0; %機体数
 dt = 0.025;
-te = 2000;
+te = 400;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -242,6 +242,12 @@ plot(t,DataA3(:,3),'DisplayName','Agent3')
 plot(t,DataA4(:,3),'DisplayName','Agent4')
 plot(t,DataA5(:,3),'DisplayName','Agent5')
 plot(t,DataA6(:,3),'DisplayName','Agent6')
+plot(t,DataR1(:,3),'DisplayName','Reference Agent1')
+plot(t,DataR2(:,3),'DisplayName','Reference Agent2')
+plot(t,DataR3(:,3),'DisplayName','Reference Agent3')
+plot(t,DataR4(:,3),'DisplayName','Reference Agent4')
+plot(t,DataR5(:,3),'DisplayName','Reference Agent5')
+plot(t,DataR6(:,3),'DisplayName','Reference Agent6')
 % plot(t,Log5(:,1),'DisplayName','Roll')
 % plot(t,Log5(:,2),'DisplayName','Pitch')
 % plot(t,Log5(:,3),'DisplayName','Yaw')
@@ -273,16 +279,16 @@ hold off
 
 figure(102)
 hold on
-plot(t,DataA(:,1),'DisplayName','X')
-plot(t,DataA(:,2),'DisplayName','Y')
-% plot(t,DataA(:,3),'DisplayName','Z')
-plot(t,DataR(:,1),'DisplayName','Ref X')
-plot(t,DataR(:,2),'DisplayName','Ref Y')
-% plot(t,DataR(:,3),'DisplayName','Ref Z')
+% plot(t,DataA(:,1),'DisplayName','X')
+% plot(t,DataA(:,2),'DisplayName','Y')
+plot(t,DataA(:,3),'DisplayName','Estimator')
+% plot(t,DataR(:,1),'DisplayName','Ref X')
+% plot(t,DataR(:,2),'DisplayName','Ref Y')
+plot(t,DataR(:,3),'DisplayName','Reference')
 % xlim([-1.5 1.5])
 % ylim([0 1.5])
 xlabel("t [s]")
-ylabel("Position [m]")
+ylabel("Load Position [m]")
 % legend("Payload","UAV")
 ax = gca;
 ax.FontSize = 14;
@@ -340,12 +346,13 @@ hold off
 
 figure(106) 
 hold on
-plot(t,Data1(:,1),'LineWidth',1,'DisplayName','agent1')
-plot(t,Data2(:,1),'LineWidth',1,'DisplayName','agent2')
-plot(t,Data3(:,1),'LineWidth',1,'DisplayName','agent3')
-plot(t,Data4(:,1),'LineWidth',1,'DisplayName','agent4')
-plot(t,Data5(:,1),'LineWidth',1,'DisplayName','agent5')
-plot(t,Data6(:,1),'LineWidth',1,'DisplayName','agent6')
+% plot(t,Data1(:,1),'LineWidth',1,'DisplayName','agent1')
+% plot(t,Data2(:,1),'LineWidth',1,'DisplayName','agent2')
+% plot(t,Data3(:,1),'LineWidth',1,'DisplayName','agent3')
+% plot(t,Data4(:,1),'LineWidth',1,'DisplayName','agent4')
+% plot(t,Data5(:,1),'LineWidth',1,'DisplayName','agent5')
+% plot(t,Data6(:,1),'LineWidth',1,'DisplayName','agent6')
+plot(t,DataM(:,1))
 
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
@@ -353,7 +360,7 @@ xlabel("t [s]")
 ylabel("Mass [kg]")
 % legend("Payload","UAV")
 ax = gca;
-ax.FontSize = 22;
+ax.FontSize = 14;
 lgd = legend;
 hold off
 %%
