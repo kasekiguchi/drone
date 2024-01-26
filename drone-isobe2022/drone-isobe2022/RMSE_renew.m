@@ -3,8 +3,8 @@ close all hidden;
 clear all;
 clc;
 %% 読み込み
-loadfilename{1} = 'EstimationResult_12state_12_17_Expcirrevsaddata_est=P2Pshape.mat';
-loadfilename{2} = 'EstimationResult_12state_12_17_ExpcirrevsadP2Pxydata_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = 'EstimationResult_12state_1_18_Exp_sprine_est=cir_torque_incon.mat';
+% loadfilename{2} = 'EstimationResult_12state_12_17_ExpcirrevsadP2Pxydata_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{3} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
 % loadfilename{1} = 'test.mat';

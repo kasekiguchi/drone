@@ -24,7 +24,7 @@ FolderName = 'RandomInitialIndexTest';
 FileName = 'test';
 
 % 読み込むデータファイル名
-loading_filename = 'test.mat';
+loading_filename = 'EstimationResult_12state_1_18_Exp_sprine_est=cir_torque_incon.mat';
 
 % シミュレーション実行回数
 HowmanySimulationRunning = 1;
