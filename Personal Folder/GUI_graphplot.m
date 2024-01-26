@@ -5,16 +5,18 @@ opengl software
 % cd(fileparts(activeFile.Filename));
 % [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 % cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
-close all hidden;
-% clear all;
+close all;
+clear all;
 clc;
 
 %% データのインポート
-load("MPC_coswave_case3_Log(22-Jan-2024_00_14_22).mat") %読み込むデータファイルの設定
+load("MPC_takeoff_0125.mat") %読み込むデータファイルの設定
 % load("9_4_test.mat")
 
+%-----------------------------------------------
 save = 1; %1:figureを保存
 change_torque = 1; %1:4入力を総推力+トルクに変換
+%-----------------------------------------------
 
 for i = 1:find(log.Data.t,1,'last')
     data.t(1,i) = log.Data.t(i,1);                                      %時間t
@@ -48,8 +50,8 @@ columnomber = 3; %凡例の並べ方調整
 Fsize.lgd = 16; %凡例の大きさ調整
 
 if save == 1
-    name = 'MPC_coswave_case3'; %ファイル名
-    folderName = 'MPC_coswave_case3'; %フォルダ名
+    name = 'MPC_takeoff'; %ファイル名
+    folderName = 'MPC_takeoff'; %フォルダ名
     mkdir(folderName) %新規フォルダ作成
 end
 
@@ -57,15 +59,19 @@ end
 box on %グラフの枠線が出ないときに使用
 figure(1)
 % colororder(newcolors)
-plot(data.t,data.p(:,:),'LineWidth',2.5,'LineStyle','-');
+plot(data.t,data.p(1,:),'LineWidth',2.5,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('Position [m]');
 hold on
 grid on
-plot(data.t,data.pr(:,:),'LineWidth',2.5,'LineStyle','--');
+plot(data.t,data.pr(1,:),'LineWidth',2.5,'LineStyle','--');
+plot(data.t,data.p(2,:),'LineWidth',2.5,'LineStyle','-');
+plot(data.t,data.pr(2,:),'LineWidth',2.5,'LineStyle','--');
+plot(data.t,data.p(3,:),'LineWidth',2.5,'LineStyle','-');
+plot(data.t,data.pr(3,:),'LineWidth',2.5,'LineStyle','--');
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
-lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+lgdtmp = {'$x_e$','$x_r$','$y_e$','$y_r$','$z_e$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
@@ -132,6 +138,9 @@ ylabel('Position y [m]');
 hold on
 plot(data.pr(1,:), data.pr(2,:),'LineWidth',2.5,'LineStyle','--')
 grid on
+daspect([1 1 1])
+xlim([min(data.p(1,:))-0.1 max(data.p(1,:))+0.1])
+ylim([min(data.p(2,:))-0.1 max(data.p(2,:))+0.1])
 hold off
 lgdtmp = {'estimator', 'reference'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');

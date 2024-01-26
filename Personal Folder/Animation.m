@@ -2,24 +2,32 @@ clc
 clear all
 close all
 
-D = load('1_24_test2.mat'); %描画したいアニメーションのデータを読み込む
+D = load('1_25_立体_そこそこよい.mat'); %描画したいアニメーションのデータを読み込む
 % D = load('1_5_NMPC_立体.mat');
 param = DRONE_PARAM("DIATONE"); %DRONEのパラメータ読み込み
 target = 1; %機体数
 realtime = 0; %実時間
+change_torque = 0; %1:総推力に変換
 
 %% 動画保存
 % save_mp4 = 0; %1:動画をmp4で保存
-videoFile = 'test.mp4';
+videoFile = '1_25_立体_そこそこよい.mp4';
 writerObj = VideoWriter(videoFile, 'MPEG-4');
 writerObj.FrameRate = 30; % フレームレートの設定
 
 num = input('＜出力するグラフを選択してください＞ \n[x-y : 0]  [x-z : 1]  [y-z : 2]  [x-y-z : 3]：','s'); %0:各グラフで出力,1:いっぺんに出力
 num = str2double(num); %文字列を数値に変換
-mp4 = input('\n＜動画を保存しますか＞ 0:保存しない，1:保存する ：','s');
+mp4 = input('\n＜動画を保存しますか＞ \n0:保存しない，1:保存する ：','s');
 save_mp4 = str2double(mp4);
 
 %% ドローンの機体作成
+
+%4入力を総推力に変換
+if change_torque == 1
+    for i = 1:find(D.log.Data.t,1,'last')
+        D.log.Data.agent.input{i}(:,1) = Change_torque(param,D.log.Data.agent.input{i}(:,1));
+    end
+end
 
 data = datachange(D,target,"p","e");
 tM = max(data);
@@ -27,7 +35,7 @@ tm = min(data);
 M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
 m = [min(tm(1:3:end)),min(tm(2:3:end)),min(tm(3:3:end))];
 L = [param.Lx,param.Ly];
-figure();   disp("Press Enter key to start video");   pause();
+figure();   fprintf("\n＜Enterキーで動画の作成を開始します＞\n");   pause();
 ax = axes('XLim',[m(1)-L(1) M(1)+L(1)],'YLim',[m(2)-L(2) M(2)+L(2)],'ZLim',[0 M(3)+1]);
 xlabel(ax,"x [m]");
 ylabel(ax,"y [m]");
@@ -86,8 +94,7 @@ end
 obj.frame = t;
 obj.thrust = tt;
 
-%描画
-
+%% 描画
 p = datachange(D,target,"p","e");
 q = datachange(D,target,"q","e");
 u = datachange(D,target,"input");
@@ -159,7 +166,6 @@ if save_mp4 == 1
 end
 
 %% 関数
-
 function [data, vrange] = datachange(D, target, variable, attribute, option)
     arguments
         D

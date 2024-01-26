@@ -5,13 +5,13 @@ opengl software
 % cd(fileparts(activeFile.Filename));
 % [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 % cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
-% close all hidden;
-clear all;
+close all 
+clear all
 clc;
 
 %pdfで保存する際のファイル名----------
-    name = '1_18_report_sad_第4章';
-    folderName = '1_18_report_sad_第4章';
+    name = '1_25_circle_概要集';
+    folderName = '1_25_circle_概要集';
 %-------------------------------------
 
 %% 
@@ -43,7 +43,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("experiment_10_25_P2Py_estimator.mat")
+load("1_25_circle_概要集.mat")
 disp('load finished')
 
 time = 0; %1:計算時間のグラフ、0:inner_input
@@ -69,6 +69,7 @@ for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last
     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
     % data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
+    data.error(:,i) = data.pr(:,i) - data.p(:,i);                                                               %error
     if log.fExp
         data.inner(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.inner_input{i}(1,:)';              %inner_input
     end
@@ -113,30 +114,35 @@ newcolors = [0 0.4470 0.7410
              0.4660 0.6740 0.1880];
 
 columnomber = 3; %凡例の並べ方調整
-Fsize.lgd = 16; %凡例の大きさ調整
+Fsize.lgd = 18; %凡例の大きさ調整
 
 %位置p
 box on %グラフの枠線が出ないときに使用
 figure(1)
 hold on
-colororder(newcolors)
-plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
+% colororder(newcolors)
+plot(data.t,data.p(1,:),'LineWidth',2.3,'LineStyle','-','Color',[0 0.4470 0.7410]);
 xlabel('Time [s]');
 ylabel('Position [m]');
 % xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
 % xline(data.t(1,find(log.Data.phase == 102,1,'first')+250),'LineStyle','--','Color','red','LineWidth',2) %第4章reference用
 grid on
-plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
+plot(data.t,data.pr(1,:),'LineWidth',2,'LineStyle','--','Color',[0 0.4470 0.7410]);
+plot(data.t,data.p(2,:),'LineWidth',2.3,'LineStyle','-','Color',[0.8500 0.3250 0.0980]);
+plot(data.t,data.pr(2,:),'LineWidth',2,'LineStyle','--','Color',[0.8500 0.3250 0.0980]);
+plot(data.t,data.p(3,:),'LineWidth',2.3,'LineStyle','-','Color',[0.4660 0.6740 0.1880]);
+plot(data.t,data.pr(3,:),'LineWidth',2,'LineStyle','--','Color',[0.4660 0.6740 0.1880]);
 % Square_coloring2(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+250]),[1.0 0.9 1.0]);
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
-lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+% lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+lgdtmp = {'$x_e$','$x_r$','$y_e$','$y_r$','$z_e$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax = gca;
 hold off
-title('Position p of agent1','FontSize',12);
+% title('Position p of agent1','FontSize',12);
 
 %姿勢角q
 figure(2)
@@ -230,9 +236,36 @@ xlim([data.t(1) data.t(end)])
 ax(8) = gca;
 title('Input torque of agent1','FontSize',12);
 
+figure(9)
+plot(data.t,data.u(:,:),'LineWidth',1);
+xlabel('Time [s]');
+ylabel('Input');
+hold on
+grid on
+lgdtmp = {'$Input_1$','$Input_2$','$Input_3$','$Input_4$'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd.NumColumns = columnomber;
+xlim([data.t(1) data.t(end)])
+ax(9) = gca;
+title('Input of agent1','FontSize',12);
+
+%error
+figure(10)
+colororder(newcolors)
+plot(data.t,data.error(:,:),'LineWidth',2.3)
+xlabel('Time [s]');
+ylabel('Error');
+grid on
+lgdtmp = {'Error.x','Error.y','Error.z'};
+lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+lgd.NumColumns = columnomber;
+xlim([data.t(1) data.t(end)])
+ax(10) = gca;
+% title('Error of agent1','FontSize',12);
+
 
 if time == 1
-    figure(9)
+    figure(11)
     plot(data.t,data.te,'LineWidth',1.2)
     xlabel('Time [s]');
     ylabel('Calculation time [s]');
@@ -241,12 +274,10 @@ if time == 1
     xlim([data.t(1) data.t(end)])
     ylim([0.005 0.030])
     legend('ソルバー変更後の計算時間', '制御周期')
-    ax(9) = gca;
+    ax(11) = gca;
     title('CalT time')
-end
-
-if log.fExp
-    figure(10)
+elseif log.fExp
+    figure(11)
     plot(data.t,data.inner,'LineWidth',1.2)
     xlabel('Time [s]')
     ylabel('inner_input')
@@ -255,14 +286,25 @@ if log.fExp
     lgdtmp = {'1','2','3','4','5','6','7','8'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = 4;
-    ax(10) = gca;
+    ax(11) = gca;
+    title('Inner_input')
+elseif time == 1 && log.fExp
+    figure(12)
+    plot(data.t,data.inner,'LineWidth',1.2)
+    xlabel('Time [s]')
+    ylabel('inner_input')
+    grid on
+    xlim([data.t(1) data.t(end)])
+    lgdtmp = {'1','2','3','4','5','6','7','8'};
+    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    lgd.NumColumns = 4;
+    ax(12) = gca;
     title('Inner_input')
 end
 
-% 
 % ave = mean(data.te)
 
-fontSize = 14; %軸の文字の大きさの設定
+fontSize = 18; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
 
 else
@@ -489,10 +531,14 @@ end
 
 
 %% pdfで保存
-Num = input('グラフをpdfで保存しますか (保存しない : 0 / 保存する : 1)：','s'); %0:各グラフで出力,1:いっぺんに出力
-pdf = str2double(Num); %文字列を数値に変換
+if selection == 0
+    Num = input('\nグラフをpdfで保存しますか (保存しない : 0 / 保存する : 1)：','s'); %0:各グラフで出力,1:いっぺんに出力
+    pdf = str2double(Num); %文字列を数値に変換
+end
 
 if pdf == 1
+    fprintf('\n凡例の位置などを調整し終わったらEnterを押してください');
+    pause();
     mkdir(folderName);
     movefile(folderName,'Graph')
     exportgraphics(figure(1),strcat('Position_',name,'.pdf'))
@@ -513,6 +559,17 @@ if pdf == 1
     exportgraphics(figure(6),strcat('x-y-z_',name,'.pdf'))
     movefile(strcat('x-y-z_',name,'.pdf'),fullfile('Graph',folderName))
 
-    exportgraphics(figure(7),strcat('input_',name,'.pdf'))
+    exportgraphics(figure(7),strcat('thrust_',name,'.pdf'))
+    movefile(strcat('thrust_',name,'.pdf'),fullfile('Graph',folderName))
+
+    exportgraphics(figure(8),strcat('torque_',name,'.pdf'))
+    movefile(strcat('torque_',name,'.pdf'),fullfile('Graph',folderName))
+
+    exportgraphics(figure(9),strcat('input_',name,'.pdf'))
     movefile(strcat('input_',name,'.pdf'),fullfile('Graph',folderName))
+
+    exportgraphics(figure(10),strcat('error_',name,'.pdf'))
+    movefile(strcat('error_',name,'.pdf'),fullfile('Graph',folderName))
+
+    fprintf('保存が完了しました\n')
 end
