@@ -11,7 +11,7 @@ function [] = Graphplot(app)
 
     %------------------------------------------------------------------------------
      choice = 1; % 0:x-yグラフ，1:x-y-zグラフ, 2:計算コスト(シミュレーションのみ)
-     error = 1; %1:目標値との誤差のグラフを表示
+     error = 0; %1:目標値との誤差のグラフを表示
     %------------------------------------------------------------------------------
     %% データのインポート
     
@@ -152,7 +152,7 @@ function [] = Graphplot(app)
     hold off
     title('Angular velocity w of agent1');
     
-    % 入力(4入力)
+    % % 入力(4入力)
     subplot(2,num,5);
     plot(data.t,data.u(:,:),'LineWidth',1.2);
     xlabel('Time [s]');
@@ -243,6 +243,7 @@ function [] = Graphplot(app)
         xlabel('Position x [m]');
         ylabel('Position y [m]');
         hold on
+        daspect([1 1 1])
         ax(6) = gca;
     %     plot(data.pr(1,:),data.pr(2,:));
     %     plot(0,1,'o','MarkerFaceColor','red','Color','red');
@@ -260,6 +261,7 @@ function [] = Graphplot(app)
         xlabel('x');
         ylabel('y');
         zlabel('z');
+        daspect([1 1 1])
         zlim([0 max((data.p(3,:)))+0.1]);
         ax(6) = gca;
         hold off
