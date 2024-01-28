@@ -57,11 +57,11 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
 %             tmp(2);tmp(3);
 %             tmp(4)];
             
-            if xd(7)==0
-                xd(7)=0.00001;
-            end
-            if xd(11)==0
-                xd(11)=0.00001;
+            % if xd(7)==0
+            %     xd(7)=0.00001;
+            % end
+            if xd(11)==0 && xd(7)==0
+                xd(11)=1e-10;
             end
             if isfield(Param,'dt')
                 dt = Param.dt;

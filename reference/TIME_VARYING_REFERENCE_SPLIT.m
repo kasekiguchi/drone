@@ -39,7 +39,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 self   
                 args
                 agent1
-            end            
+            end           
+
             obj.self = self;   
 %             obj.agent1 = agent1;
             obj.N = args{4};
@@ -60,10 +61,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3]));
 
                     obj.result.state.set_state("xd",obj.func(0));
-                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
-                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
-                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
-                    obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
+                    % obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    % obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
+                    % obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                    %obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
+                    obj.result.state.set_state("o",[0;0;0]);
+                    obj.result.state.set_state("q",[1;0;0;0]);
 
                 elseif strcmp(args{3}, "Take_off")
                     obj.ref_set.method = args{1};

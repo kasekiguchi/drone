@@ -1,9 +1,14 @@
-clc
+%%
+%logger0 = LOGGER("./Data/Log(27-Jan-2024_21_53_17).mat");
+%logger0 = LOGGER("./Data/Log(28-Jan-2024_11_03_31).mat");
 clear
+%%
+%clc
+%clear
 N = 6;
 ts = 0; %機体数
 dt = 0.025;
-te = 400;
+te = 37;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -61,8 +66,8 @@ agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant positio
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
-% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",50,"orig",[1;0;1],"size",1*[1,1,0]},"Cooperative",N},agent(1));
+%agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
+ agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;1;1],"size",1*[1,1,0]},"Cooperative",N},agent(1));
 
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
@@ -100,15 +105,26 @@ end
 % run("ExpBase");
 
 clc
-for j = 1:te
+% %%
+% ttt = 15;
+% logger0.overwrite("plant",ttt,agent,1);
+% logger0.overwrite("estimator",ttt,agent,2);
+% logger0.overwrite("estimator",ttt,agent,3);
+% logger0.overwrite("estimator",ttt,agent,4);
+% logger0.overwrite("estimator",ttt,agent,5);
+% logger0.overwrite("estimator",ttt,agent,6);
+% agent(2).plant = [];
+% agent(2).sensor = [];
+% agent(2).plant.state = [];
+% agent(2).plant.result.state = [];
+% agent(2).sensor.result = [];
+
+%%
+for j = 1:te/dt
     if j < 20 || rem(j, 5) == 0, j, end
         for i = 1:N+1
             
             if i >= 2
-                load = agent(1).estimator.result.state;
-                p_load = load.p;
-                R_load = RodriguesQuaternion(load.Q);
-                dR_load = R_load*Skew(load.O);
                 wi_load = load.wi(3*(i-1)-2:3*(i-1),1);
                 pL_agent = p_load + R_load * rho(:,i-1);
                 vL_agent = load.v + dR_load * rho(:,i-1);
@@ -119,23 +135,17 @@ for j = 1:te
                 q_agent = Quat2Eul(load.Qi(4*(i-1)-3:4*(i-1),1));
                 w_agent = load.Oi(3*(i-1)-2:3*(i-1),1);
 
-                %agent(i).estimator.result.state.set_stateを使った方が正しい？
                 agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
                 agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
                 agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
                 agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
-%                 agent(i).estimator.result.state.pL = pL_agent;
-%                 agent(i).estimator.result.state.vL = vL_agent;
-%                 agent(i).estimator.result.state.wL = wi_load;
-%                 agent(i).estimator.result.state.pT = pT_agent;
-                
-%                 agent(i).estimator.result.state.p = p_agent;
-%                 agent(i).estimator.result.state.v = v_agent;
-%                 agent(i).estimator.result.state.q = q_agent;
-%                 agent(i).estimator.result.state.w = w_agent;
             else
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
+                load = agent(1).estimator.result.state;
+                p_load = load.p+1e-3*randn(3,1);
+                R_load = RodriguesQuaternion(load.Q);
+                dR_load = R_load*Skew(load.O);
             end
 %             agent(i).estimator.state_set =;
             agent(i).reference.do(time, 'f',agent(1));
@@ -159,6 +169,13 @@ for j = 1:te
         time.t = time.t + time.dt;
     %pause(1)
 end
+%%
+logger.plot({1,"p","er"},{2,"p","er"},{3,"p","er"},{4,"p","er"})
+%logger.plot({2,"estimator.result.state.pL","er"})
+%logger.plot({1,"estimator.result.state.Q","e"})
+%logger.plot({1,"q","r"})
+%%
+logger.save()
 
 %%
 close all
@@ -422,7 +439,7 @@ hold off
 % logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
 % %%
 % logger.plot({1, "plant.result.state.Qi", "p"})
-% %%
+%%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
 mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-2 10;-6 6;-1 4],"ntimes",5);
