@@ -41,7 +41,11 @@ methods
             obj.fixedSeg = pcmerge(obj.fixedSeg, ndt_PCdata, 0.01);
         end
 
-        obj.tform_add_odom
+        if isfield(obj.self.sensor.result,'odom_data')
+          obj.tform_add_odom(obj.self.sensor.result.odom_data);
+        else
+          obj.tform_add_odom(struct('linear',struct('x',obj.self.controller.result.input(1)),'angular',struct('z',obj.self.controller.result.input(2))));
+        end
         obj.result.tform = obj.tform;
         obj.result.ndtPCdata = obj.PCdata_use;
         disp(obj.tform)
@@ -58,11 +62,8 @@ methods
         if obj.matching_mode == "slam"
             % savedata(1).initialtform = initialtform;
             % obj.fixedSeg = pctransform(obj.scanpcplot_rov(ros{3},ros{2}),obj.initialtform);        %slam map
-            % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{1,2},obj.self.sensor.ros{1,1});
-            data.ros{2} = obj.self.sensor.ros{1, 2};
-            data.ros{1} = obj.self.sensor.ros{1, 1};
             % obj.PCdata_use = obj.self.sensor.getData();
-            obj.PCdata_use = obj.self.sensor.result;
+            obj.PCdata_use = obj.self.sensor.result.pc;
             % obj.fixedSeg = pointCloud(obj.tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
             obj.fixedSeg = pointCloud((initialtform.R * obj.PCdata_use.Location' + initialtform.Translation')');
             initform = initialtform;
@@ -82,9 +83,9 @@ methods
         obj.model.state.q = rad2deg(rotm2eul(initform.R, "XYZ"))';
     end
 
-    function tform_add_odom(obj)
+    function tform_add_odom(obj,odom_data)
         %ローバーの加速度，角速度をuに入れてモデルの状態をする．
-        odom_data = obj.self.sensor.result.odom_data; %plant.connector.getData;
+        %odom_data = obj.self.sensor.result.odom_data; %plant.connector.getData;
         u = [odom_data.linear.x, odom_data.angular.z]'; %u
         zini = obj.model.state.get;
         B = [cos(zini(6)), 0; sin(zini(6)), 0; 0, 1] * obj.model.dt;

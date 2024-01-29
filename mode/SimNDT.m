@@ -14,7 +14,8 @@ te = 120; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
-logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
+fExp = 0;
+logger = LOGGER(1, size(ts:dt:te, 2), fExp, [],[]);
 
 env=FLOOR_MAP(1,Env_FloorMapSquare); % for 2D lidar
 
@@ -36,6 +37,7 @@ agent.sensor.do(time, 'f',0,env,agent,1);
 agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1))));
 agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.radius));
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
+agent(1).controller.do(time, 'f',0,0,agent,1);
 
 run("ExpBase");
 

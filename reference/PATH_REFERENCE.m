@@ -43,7 +43,7 @@ methods
         R = [cos(the), -sin(the); sin(the), cos(the)];
 
         % ここから相対座標上での議論
-        sensor = obj.self.sensor.result{2}; %cell化←極座変換した点群データを入れるため
+        sensor = obj.self.sensor.result; %cell化←極座変換した点群データを入れるため
         % 相対座標でのline parameterを算出
         LP = PC2LDA(sensor.length, sensor.angle, [0; 0; 0], obj.constant);
         % 以降ではline parameter = (a, b, c) として [a b]の大きさ１、c < 0 を前提とする。
@@ -289,6 +289,7 @@ methods
         if ~isfield(opts, 'ax') || isempty(opts.ax)
             FH = opts.FH;
             fh = figure(opts.FH);
+            ax = gca;
             % fh.WindowState = 'maximized';
         else
             ax = opts.ax;
@@ -350,7 +351,7 @@ methods
             inputs_for_show = [{'ax'}, {ax}, varargin(:)'];
         end
 
-        obj.self.show(["sensor", "lrf"], inputs_for_show{:});
+        obj.self.show("sensor", inputs_for_show{:});
         view(ax, [0 0 1]);
         hold(ax, 'on')
         plot(ax, pstatesquare, 'FaceColor', [0.5020, 0.5020, 0.5020], 'FaceAlpha', 0.5);
