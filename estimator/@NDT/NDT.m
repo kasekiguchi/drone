@@ -154,7 +154,7 @@ classdef NDT < handle
             num_lim = logger.k - 1;
             i=1;
             while(1)
-                if isfield(obj.result{1,i},"tform")
+                if isfield(logger.Data.agent.estimator.result{1,i},"tform")
                     break;
                 end
                 i = i + 1;

@@ -135,7 +135,7 @@ moving_pc.b = obj.Pointcloud_manual_delete_roi(moving_pc.b,delete_roi);
 rot = eul2rotm(deg2rad([0 0 180]),'XYZ');
 % translational vector
 Tb = [0.2900    0.0230         0]; % TODO : measure from back lidar to the vehicle's origin
-Tf = [0.17 0 0]; % TODO : measure from front lidar to the vehicle's origin
+Tf = [0.7 0 0]; % TODO : measure from front lidar to the vehicle's origin
 %moving_pc2_m_b = tform_manual(moving_pc.b,rot,T);
 moving_pc2_m_f = (rot*moving_pc.f' + Tf')'; % N x 3
 moving_pc2_m_b = (moving_pc.b' + Tb')'; % N x 3
