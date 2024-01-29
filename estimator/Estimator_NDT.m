@@ -1,4 +1,4 @@
-function Estimator = Estimator_NDT(agent, dt, model)%,mapname)
+function Estimator = Estimator_NDT(agent, dt, model) %,mapname)
 % function param = Estimator_NDT(agent,dt,initial_state,mapname)
 % arguments
 %     agent
@@ -14,7 +14,6 @@ arguments
 end
 
 Estimator.model = model;
-
 
 % the constant value for estimating of the map
 %初期位置set

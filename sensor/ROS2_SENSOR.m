@@ -40,7 +40,8 @@ classdef ROS2_SENSOR < handle
           obj.result.state.type = length(self.model.state.q);
         end
       end
-      obj.getData = param.getData;
+      % obj.getData = param.param.getData; 
+      obj.getData = @getData_two_lidar_combine;
       % data = obj.ros.getData;
       % data = obj.ros{1}.getData;
       % obj.prosesssfunc = param.pfunc;%使わない場合はsampleで0を入れる
@@ -50,8 +51,8 @@ classdef ROS2_SENSOR < handle
     function result = do(obj, varargin)
       %   result : point cloud data
       %%%%%for PC2LDA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      result = obj.getData();
-%      result = obj.result;
+      result = obj.getData_two_lidar_combine;
+      obj.result = result;
     end
 
     function show(obj, pq, q)
@@ -90,6 +91,57 @@ classdef ROS2_SENSOR < handle
       end
 
     end
+
+    function pointcloud_out_roi = Pointcloud_manual_delete_roi(obj,pd,roi)
+% extract data from pd within ROI
+% ids = roi(1) < pd(inc,1) && pd(inc,1) < roi(2) && roi(3) < pd(inc,2) && pd(inc,2) < roi(4);
+% pd(ids,:) = [];
+% pointcloud_out_roi = pd;
+    for inc = 1:length(pd)
+        if roi(1) < pd(inc,1) && pd(inc,1) < roi(2)
+            if roi(3) < pd(inc,2) && pd(inc,2) < roi(4)
+                pd(inc,1) = nan;
+                pd(inc,2) = nan;
+                pd(inc,3) = nan;
+            end
+        end
+    end
+    R = rmmissing(pd);
+    pd_B = R;
+    pointcloud_out_roi = pd_B;
+    end
+
+    function pcdata = getData_two_lidar_combine(obj)
+data1 = obj.ros{2};
+data2 = obj.ros{1};
+% ２つのLiDARデータを結合しポイントクラウドデータに変換
+% get Laser scan message
+scanlidardata_b = data1.getData;
+scanlidardata_f = data2.getData;
+% trans n–by–2 matrix [m]
+moving_f = rosReadCartesian(scanlidardata_f);
+moving_b = rosReadCartesian(scanlidardata_b);
+% add z axis data
+moving_pc.f = [moving_f zeros(size(moving_f,1),1)];
+moving_pc.b = [moving_b zeros(size(moving_b,1),1)];
+% region of interest to be deleted
+delete_roi = [0.1 0.35 -0.18 0.16 -0.1 0.1]; % TODO : region to be deleted due to the vehicle direction
+% delete points in delete_roi
+moving_pc.f = obj.Pointcloud_manual_delete_roi(moving_pc.f,delete_roi);
+moving_pc.b = obj.Pointcloud_manual_delete_roi(moving_pc.b,delete_roi);
+
+% transform back lidar data into front lidar coordinate
+% Yaw axis rotation
+rot = eul2rotm(deg2rad([0 0 180]),'XYZ');
+% translational vector
+Tb = [0.2900    0.0230         0]; % TODO : measure from back lidar to the vehicle's origin
+Tf = [0.17 0 0]; % TODO : measure from front lidar to the vehicle's origin
+%moving_pc2_m_b = tform_manual(moving_pc.b,rot,T);
+moving_pc2_m_f = (rot*moving_pc.f' + Tf')'; % N x 3
+moving_pc2_m_b = (moving_pc.b' + Tb')'; % N x 3
+% merge and transform to point cloud data
+pcdata = pointCloud([moving_pc2_m_f;moving_pc2_m_b]);
+end
 
   end
 
