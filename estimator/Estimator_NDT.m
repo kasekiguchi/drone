@@ -28,5 +28,4 @@ Estimator.model = model;
 % NDT_param.fixedSeg = pcread(mapname);
 % Estimator.param = NDT_param;
 Estimator.param = [model.state.p model.state.q];
-Estimator.func = @scanpcplot_rov;
 end

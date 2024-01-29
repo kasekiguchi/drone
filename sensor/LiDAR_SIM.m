@@ -19,6 +19,7 @@ classdef LiDAR_SIM < handle
     angle_range
     dead_zone = 0.2;
     head_dir = nsidedpoly(3, 'Center', [0, 0], 'SideLength', 0.5);
+    gen_pc = @pointCloud;
   end
 
   methods
@@ -34,6 +35,7 @@ classdef LiDAR_SIM < handle
       obj.head_dir.Vertices = ([0 1; -1 0] * obj.head_dir.Vertices')';
       if isfield(param, 'noise'); obj.noise = param.noise; end
       if isfield(param, 'seed'); obj.seed = param.seed; end
+      if isfield(param, 'post_func'); obj.gen_pc = param.gen_pc; end
     end
 
     function result = do(obj, varargin)
@@ -43,7 +45,7 @@ classdef LiDAR_SIM < handle
       %   angle_range で規定される方向の距離を並べたベクトル：単相LiDARの出力を模擬
       % 【入力】param = {Env}        Plant ：制御対象， Env：環境真値
       Plant = obj.self.plant;
-      Env = varargin{1}{4};
+      Env = varargin{1,4};
       pos = Plant.state.p; % 実状態
 
       if isprop(Plant.state, "q")
@@ -106,6 +108,7 @@ classdef LiDAR_SIM < handle
       result.length(del_ids) = 0;
       result.sensor_points(del_ids, :) = zeros(length(del_ids), 2);
       result.angle(del_ids) = 0;
+      result.pc = obj.gen_pc([result.sensor_points,zeros(size(result.sensor_points,1),1)]);
       obj.result = result;
     end
 

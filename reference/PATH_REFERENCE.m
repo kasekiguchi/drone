@@ -21,11 +21,6 @@ end
 methods
 
     function obj = PATH_REFERENCE(self, varargin)
-        % 【Input】 map_param ,
-        %  目標点の行列を受け取る．それに対応した目標速度を受け取る．
-        %　目標点と速度に応じて参照軌道を作成，estimatorの値から収束判定をする．
-        %  we make target of new section by convergence judgement
-        %paramはReference.param
         obj.self = self;
         param = varargin{1};
         obj.refv = param{1, 1};
@@ -44,8 +39,7 @@ methods
     function result = do(obj, varargin)
         estate = obj.self.estimator.result.state;
         pe = estate.p(1:2);
-        % the = estate.q(3);
-        the = estate.q(1);
+        the = estate.q(obj.constant.yaw_id);
         R = [cos(the), -sin(the); sin(the), cos(the)];
 
         % ここから相対座標上での議論
