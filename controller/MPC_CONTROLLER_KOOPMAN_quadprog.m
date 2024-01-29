@@ -56,14 +56,14 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
         %-- main()的な
         function result = do(obj,varargin)
           %実機でMPCを飛ばすときに必要(fから回すとき)-----------------------
-          % var = varargin{1};
+          var = varargin{1};
           % if isempty(obj.inifTime) && var{2} =='f'
           %     obj.inifTime = var{1}.t;
           %     obj.result.fTime = 0;
           % elseif var{2} =='f'
           %     obj.result.fTime = var{1}.t - obj.inifTime;
           % end
-          % obj.param.t = var{1}.t; %実機のときコメントイン
+          obj.param.t = var.t; %実機のときコメントイン
           %--------------------------------------------------
            
             tic
@@ -72,30 +72,30 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
 
             %シミュレーション時コメントイン--------------------------------
             % obj.param.t = varargin{1}.t;
-            % rt = obj.param.t; %時間
+            rt = obj.param.t; %時間
             % idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
-            % obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
-            % obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
+            obj.state.ref = obj.Reference(rt); %リファレンスの更新
             %-------------------------------------------------------------
 
             %実機のときコメントイン(aから回す)-----------------------------------------
-            vara = varargin{1};
-            obj.param.t = vara{1}.t;
-            rt = obj.param.t; %時間
-            % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
-
-            if vara{2} == 'a'
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-            elseif vara{2} == 't'
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-                obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-                fprintf('take off')
-            elseif vara{2} == 'f'
-                obj.state.ref = obj.Reference(rt); %リファレンスの更新
-                obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-                fprintf('flight')
-            end
+            % vara = varargin{1};
+            % obj.param.t = vara{1}.t;
+            % rt = obj.param.t; %時間
+            % % idx = round(rt/vara{1}.dt+1); %プログラムの周回数
+            % 
+            % if vara{2} == 'a'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+            % elseif vara{2} == 't'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
+            %     fprintf('take off')
+            % elseif vara{2} == 'f'
+            %     obj.state.ref = obj.Reference(rt); %リファレンスの更新
+            %     obj.current_state = obj.self.estimator.result.state.get(); %現在状態
+            %     fprintf('flight')
+            % end
             %-------------------------------------------------------------------------
 
             Param = obj.param;
@@ -128,18 +128,17 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
       
             %%
             obj.previous_input = var;
-            var;
             
             % 実機のときコメントイン--------------------------------------------
-            if vara{2} == 'a'
-                obj.result.input = [0;0;0;0];
-            else
-                obj.result.input = var(1:4, 1); % 印加する入力 4入力
-            end
+            % if vara{2} == 'a'
+            %     obj.result.input = [0;0;0;0];
+            % else
+            %     obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            % end
             %------------------------------------------------------------------
 
             %シミュレーション時コメントイン--------------------------------------------
-            % obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            obj.result.input = var(1:4, 1); % 印加する入力 4入力
             % obj.result.transformedInput = obj.InputTransform.do(obj.result.input); %4入力を総推力に変換(必要に応じて)
             %---------------------------------------------------------------------------
 

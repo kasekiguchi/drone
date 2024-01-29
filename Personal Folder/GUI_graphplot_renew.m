@@ -43,7 +43,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("1_25_circle_概要集.mat")
+load("test.mat")
 disp('load finished')
 
 time = 0; %1:計算時間のグラフ、0:inner_input
@@ -67,9 +67,9 @@ for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last
     data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
     data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    % data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
-    data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
-    data.error(:,i) = data.pr(:,i) - data.p(:,i);                                                               %error
+    data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+    % data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
+    % data.error(:,i) = data.pr(:,i) - data.p(:,i);                                                               %error
     if log.fExp
         data.inner(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.inner_input{i}(1,:)';              %inner_input
     end
@@ -214,6 +214,7 @@ xlabel('Time [s]');
 ylabel('Input_{thrust}');
 % ylabel('Input');
 hold on
+plot(data.t,data.u(5,:),'LineWidth',1);
 grid on
 % lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
 lgdtmp = {'$thrust$'};
@@ -224,10 +225,11 @@ ax(7) = gca;
 title('Input u of agent1','FontSize',12);
 
 figure(8)
-plot(data.t,data.u(2:end,:),'LineWidth',1);
+plot(data.t,data.u(2:4,:),'LineWidth',1);
 xlabel('Time [s]');
 ylabel('Input_{torque}');
 hold on
+plot(data.t,data.u(6:8,:),'LineWidth',1);
 grid on
 lgdtmp = {'$torque_{roll}$','$torque_{pitch}$','$torque_{yaw}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');

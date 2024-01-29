@@ -36,10 +36,6 @@ agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koop
 agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 
-% agent.input_transform.hlc = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone());
-% agent.input_transform.mpc = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone_MPC());
-% agent.input_transform.do = @input_transform_do;
-
 run("ExpBase");
 
 %fでコントローラを切り替え-------------------------
@@ -64,14 +60,17 @@ run("ExpBase");
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
     if varargin{2} == 'a'
-        result.hlc = controller.hlc.do(varargin);
+        % result.hlc = controller.hlc.do(varargin);
         result = controller.mpc.do(varargin);
     elseif varargin{2} == 't'
         result.hlc = controller.hlc.do(varargin);
         result.mpc = controller.mpc.do(varargin);
         result = result.hlc;
     elseif varargin{2} == 'f'
-        result = controller.mpc.do(varargin);
+        result.hlc = controller.hlc.do(varargin);
+        result.mpc = controller.mpc.do(varargin);
+        result = result.hlc;
+        % result = controller.mpc.do(varargin);
     else
         result = controller.hlc.do(varargin);
    end

@@ -48,56 +48,56 @@ methods
             obj.self.estimator.model.state.set_state(obj.self.estimator.result.state.get); % restore estimator.model
 
             %1_18:MPCのゲインとオフセットを変更するために追加
-            if cha == 'f'
-                obj.param.gain2(1) = 600;
-                obj.param.gain2(2) = 600;
-                obj.param.gain2(3) = 600;
-                obj.param.gain2(4) = 1000;
-                obj.param.th_offset2 = 345;
-                % fprintf('オフセット変更→MPC \n')
-
-                T_thr = input(1); % thrust, torque input 
-
-                uroll = obj.param.gain2(1) * (whn(1) - wh(1));
-                upitch = obj.param.gain2(2) * (whn(2) - wh(2));
-                
-                % apply gain to (thrust - hovering_thrust)
-                uthr = max(0, obj.param.gain2(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset2); 
-                uyaw = obj.param.gain2(3) * (whn(3) - wh(3));
-                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
-                upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
-                uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
-                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
-            else
-                %T_thr = sum(input); % each motor's thrust force input
-                T_thr = input(1); % thrust, torque input 
-    
-                uroll = obj.param.gain(1) * (whn(1) - wh(1));
-                upitch = obj.param.gain(2) * (whn(2) - wh(2));
-                
-                % apply gain to (thrust - hovering_thrust)
-                uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
-                uyaw = obj.param.gain(3) * (whn(3) - wh(3));
-                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
-                upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
-                uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
-                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
-            end
+            % if cha == 'f'
+            %     obj.param.gain2(1) = 600;
+            %     obj.param.gain2(2) = 600;
+            %     obj.param.gain2(3) = 600;
+            %     obj.param.gain2(4) = 1200;
+            %     obj.param.th_offset2 = 360;
+            %     % fprintf('オフセット変更→MPC \n')
+            % 
+            %     T_thr = input(1); % thrust, torque input 
+            % 
+            %     uroll = obj.param.gain2(1) * (whn(1) - wh(1));
+            %     upitch = obj.param.gain2(2) * (whn(2) - wh(2));
+            % 
+            %     % apply gain to (thrust - hovering_thrust)
+            %     uthr = max(0, obj.param.gain2(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset2); 
+            %     uyaw = obj.param.gain2(3) * (whn(3) - wh(3));
+            %     uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
+            %     upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
+            %     uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
+            %     obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
+            % else
+            %     %T_thr = sum(input); % each motor's thrust force input
+            %     T_thr = input(1); % thrust, torque input 
+            % 
+            %     uroll = obj.param.gain(1) * (whn(1) - wh(1));
+            %     upitch = obj.param.gain(2) * (whn(2) - wh(2));
+            % 
+            %     % apply gain to (thrust - hovering_thrust)
+            %     uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
+            %     uyaw = obj.param.gain(3) * (whn(3) - wh(3));
+            %     uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
+            %     upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
+            %     uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
+            %     obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
+            % end
             %----------------------------------------------
 
-            % %T_thr = sum(input); % each motor's thrust force input
-            % T_thr = input(1); % thrust, torque input 
-            % 
-            % uroll = obj.param.gain(1) * (whn(1) - wh(1));
-            % upitch = obj.param.gain(2) * (whn(2) - wh(2));
-            % 
-            % % apply gain to (thrust - hovering_thrust)
-            % uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
-            % uyaw = obj.param.gain(3) * (whn(3) - wh(3));
-            % uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
-            % upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
-            % uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
-            % obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
+            %T_thr = sum(input); % each motor's thrust force input
+            T_thr = input(1); % thrust, torque input 
+
+            uroll = obj.param.gain(1) * (whn(1) - wh(1));
+            upitch = obj.param.gain(2) * (whn(2) - wh(2));
+
+            % apply gain to (thrust - hovering_thrust)
+            uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
+            uyaw = obj.param.gain(3) * (whn(3) - wh(3));
+            uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
+            upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
+            uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
+            obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
         else
             obj.result = [obj.param.roll_offset, obj.param.pitch_offset, 0, obj.param.yaw_offset, 1000, 0, 0, 0];
         end

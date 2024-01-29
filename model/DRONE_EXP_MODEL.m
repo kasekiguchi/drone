@@ -41,6 +41,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
       u = varargin{5}.input_transform.result;
       cha = varargin{2};
       obj.flight_phase=cha;
+                msg(1,1:8) = obj.stop_msg;
       switch cha
         case 'q'  % quit
           obj.connector.sendData(gen_msg(obj.stop_msg));
