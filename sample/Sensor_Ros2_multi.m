@@ -20,7 +20,7 @@ setting.numlist = [3, 3];
 % setting.subMsgName      = {'sensor_msgs/LaserScan'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
 setting.subTopic(1,:) = {'/scan_front','sensor_msgs/LaserScan',5000};
 setting.subTopic(2,:) = {'/scan_behind' ,'sensor_msgs/LaserScan',5000};
-setting.getData = @getData_two_lidar_combine;
+% setting.getData = @getData_two_lidar_combine;
 Sensor.param = setting;
 % Sensor.pfunc = str2func("rover_pub");
 
@@ -42,8 +42,8 @@ moving_pc.b = [moving_b zeros(size(moving_b,1),1)];
 % region of interest to be deleted
 delete_roi = [0.1 0.35 -0.18 0.16 -0.1 0.1]; % TODO : region to be deleted due to the vehicle direction
 % delete points in delete_roi
-moving_pc.f = Pointcloud_manual_delete_roi(moving_pc.f,delete_roi);
-moving_pc.b = Pointcloud_manual_delete_roi(moving_pc.b,delete_roi);
+moving_pc.f = obj.Pointcloud_manual_delete_roi(moving_pc.f,delete_roi);
+moving_pc.b = obj.Pointcloud_manual_delete_roi(moving_pc.b,delete_roi);
 
 % transform back lidar data into front lidar coordinate
 % Yaw axis rotation

@@ -14,34 +14,31 @@ classdef NDT < handle
         tform                        %pcregisterndtから出てくる推定値(rigidform3d)
         initialtform                 %pcregisterndtに使用するマッチング探索位置，姿勢(rigidform3d)
         PCdata_use                   %pcregisterndtに使用するスキャンデータ(PointCloud)
-        matching_mode = "mapmatching"%slam or mapmatching
+        matching_mode = "slam"%slam or mapmatching
         gridstep = 1.0;              %pcregisterndtに使用するボクセルのグリッドサイズ(メートル)
-        func                         %前後のLiDAR点群を合成する関数.LiDARが一つの場合はいらない
+        % combine_pc                         %前後のLiDAR点群を合成する関数.LiDARが一つの場合はいらない
     end
     
     methods
         function obj = NDT(self,param)% constractor
             %ROS2でsubscriveするLiDAR点群用のEstimatorクラス
-            if (param=="plot")
-                obj.result = self.Data.agent.estimator.result;                
-            else
             obj.self = self; % agent that 
             obj.model = param.model;
-            obj.combine_pc = param.combine_pc;
+            % obj.combine_pc = self.sensor.getData;
             param = param.param;
             
 
             obj.initialtform = obj.initial_matching(rigidtform3d(eul2rotm(deg2rad(param(:,2)'),"XYZ"),param(:,1)));
             % obj.fixedSeg = param.fixedSeg;            
             obj.result.state=state_copy(obj.model.state);
-            end
+            % end
         end
 
 
         function [result] = do(obj,varargin)
             % obj.PCdata_use = obj.self.sensor.result{1};
-            % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{2},obj.self.sensor.ros{1});    
-            %obj.PCdata_use = obj.combine_pc(obj.self.sensor.ros{2},obj.self.sensor.ros{1});    
+            % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
+            %obj.PCdata_use = obj.combine_pc(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
             obj.PCdata_use = obj.self.sensor.result;
             obj.tform = pcregisterndt(obj.PCdata_use,obj.fixedSeg,0.5,"InitialTransform",obj.initialtform,"OutlierRatio",0.1,"Tolerance",[0.01 0.1]);%マッチング
             if (obj.matching_mode == "slam")
@@ -112,8 +109,12 @@ classdef NDT < handle
                 % savedata(1).initialtform = initialtform;
                 % obj.fixedSeg = pctransform(obj.scanpcplot_rov(ros{3},ros{2}),obj.initialtform);        %slam map
                 % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{1,2},obj.self.sensor.ros{1,1});
-                obj.PCdata_use = obj.combine_pc(obj.self.sensor.ros{1,2},obj.self.sensor.ros{1,1});
-                obj.fixedSeg = pointCloud(obj.tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
+                data.ros{2} = obj.self.sensor.ros{1,2};
+                data.ros{1} = obj.self.sensor.ros{1,1};
+                % obj.PCdata_use = obj.self.sensor.getData();
+                obj.PCdata_use = obj.self.sensor.result;
+                % obj.fixedSeg = pointCloud(obj.tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
+                obj.fixedSeg = pointCloud((initialtform.R*obj.PCdata_use.Location'+initialtform.Translation')');
                 initform = initialtform;
             else
                 % fixedSeg = pcread("fixmap_room_1.pcd"); %room map
@@ -122,7 +123,7 @@ classdef NDT < handle
                 obj.fixedSeg = fixedSeg;
                 %初期位置探索
                 % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
-                obj.PCdata_use = obj.combine_pc(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
+                obj.PCdata_use = obj.self.sensor.getData(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
                 initform = pcregisterndt(obj.PCdata_use,obj.fixedSeg,obj.gridstep, ...
                         "InitialTransform",initialtform,"OutlierRatio",0.1,"Tolerance",[0.01 0.1]);%マッチング
             end
