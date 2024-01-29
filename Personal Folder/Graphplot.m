@@ -152,11 +152,34 @@ function [] = Graphplot(app)
     hold off
     title('Angular velocity w of agent1');
     
-    % % 入力(4入力)
+    % % % 入力(4入力)
+    % subplot(2,num,5);
+    % plot(data.t,data.u(:,:),'LineWidth',1.2);
+    % xlabel('Time [s]');
+    % ylabel('u');
+    % grid on
+    % if ismember(116, data.phase)
+    %     Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+    %     Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
+    %     Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    % elseif ismember(102, data.phase)
+    %     Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
+    % elseif ismember(108, data.phase)
+    %     Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    % end
+    % lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    % lgd.NumColumns = columnomber;
+    % xlim([data.t(1) data.t(end)])
+    % ax(5) = gca;
+    % title('Input u of agent1');
+
     subplot(2,num,5);
-    plot(data.t,data.u(:,:),'LineWidth',1.2);
+    plot(data.t(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),data.u(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),'LineWidth',1);
     xlabel('Time [s]');
-    ylabel('u');
+    ylabel('Input_{thrust}');
+    % ylabel('Input');
+    hold on
     grid on
     if ismember(116, data.phase)
         Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
@@ -167,58 +190,35 @@ function [] = Graphplot(app)
     elseif ismember(108, data.phase)
         Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     end
-    lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+    % lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+    lgdtmp = {'$thrust$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
-    xlim([data.t(1) data.t(end)])
+    % xlim([data.t(1) data.t(end)])
     ax(5) = gca;
-    title('Input u of agent1');
+    title('Input u of agent1','FontSize',12);
 
-    % subplot(2,num,5);
-    % plot(data.t,data.u(1,:),'LineWidth',1);
-    % xlabel('Time [s]');
-    % ylabel('Input_{thrust}');
-    % % ylabel('Input');
-    % hold on
-    % grid on
-    % if ismember(116, data.phase)
-    %     Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
-    %     Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
-    %     Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
-    % elseif ismember(102, data.phase)
-    %     Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
-    % elseif ismember(108, data.phase)
-    %     Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
-    % end
-    % % lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
-    % lgdtmp = {'$thrust$'};
-    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    % lgd.NumColumns = columnomber;
+    subplot(2,num,6);
+    plot(data.t(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),data.u(2:end,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),'LineWidth',1);
+    xlabel('Time [s]');
+    ylabel('Input_{torque}');
+    hold on
+    grid on
+    if ismember(116, data.phase)
+        Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    elseif ismember(102, data.phase)
+        Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
+    elseif ismember(108, data.phase)
+        Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
+    end
+    lgdtmp = {'$torque_{roll}$','$torque_{pitch}$','$torque_{yaw}$'};
+    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    lgd.NumColumns = columnomber;
     % xlim([data.t(1) data.t(end)])
-    % ax(5) = gca;
-    % title('Input u of agent1','FontSize',12);
-    % 
-    % subplot(2,num,6);
-    % plot(data.t,data.u(2:end,:),'LineWidth',1);
-    % xlabel('Time [s]');
-    % ylabel('Input_{torque}');
-    % hold on
-    % grid on
-    % if ismember(116, data.phase)
-    %     Square_coloring2(data.t([find(data.phase == 116,1,'first'),find(data.phase == 116,1,'last')]),[1.0 1.0 0.9]);
-    %     Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]);
-    %     Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
-    % elseif ismember(102, data.phase)
-    %     Square_coloring2(data.t([find(data.phase == 102,1,'first'),find(data.phase == 102,1,'last')]),[0.9 1.0 1.0]); 
-    % elseif ismember(108, data.phase)
-    %     Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
-    % end
-    % lgdtmp = {'$torque_{roll}$','$torque_{pitch}$','$torque_{yaw}$'};
-    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    % lgd.NumColumns = columnomber;
-    % xlim([data.t(1) data.t(end)])
-    % ax(6) = gca;
-    % title('Input torque of agent1','FontSize',12);
+    ax(6) = gca;
+    title('Input torque of agent1','FontSize',12);
 
     %入力(総推力)
     % subplot(2,num,6);
@@ -234,52 +234,52 @@ function [] = Graphplot(app)
     % title('Thrust torque u of agent1');
     
     % 軌道(2次元，3次元)
-    subplot(2,num,6);
-
-    if choice == 0
-        plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
-        daspect([1,1,1])
-        grid on
-        xlabel('Position x [m]');
-        ylabel('Position y [m]');
-        hold on
-        daspect([1 1 1])
-        ax(6) = gca;
-    %     plot(data.pr(1,:),data.pr(2,:));
-    %     plot(0,1,'o','MarkerFaceColor','red','Color','red');
-    %     plot(1,1,'o','MarkerFaceColor','red','Color','red');
-    %     plot(1,-1,'o','MarkerFaceColor','red','Color','red');
-    %     legend('Estimated trajectory','Target position')
-    %     xlim([-0.5 0.5])
-    %     ylim([-0.5 0.5])
-        hold off
-    elseif choice == 1
-        plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
-        hold on
-        grid on
-        plot3(data.pr(1,:),data.pr(2,:),data.pr(3,:),'LineWidth',1.2, 'LineStyle','--')
-        xlabel('x');
-        ylabel('y');
-        zlabel('z');
-        daspect([1 1 1])
-        zlim([0 max((data.p(3,:)))+0.1]);
-        ax(6) = gca;
-        hold off
-    else
-        %シミュレーションのみ-------------------
-        plot(data.t,data.te,'LineWidth',1.2)
-        xlabel('Time [s]');
-        ylabel('CalT time [s]');
-        hold on
-        grid on
-        yline(0.025,'Color','red','LineWidth',1.2)
-        xlim([data.t(1) data.t(end)])
-        legend('計算時間', '制御周期')
-        ax(6) = gca;
-        hold off
-        title('CalT time')
-        %---------------------------------------
-    end
+    % subplot(2,num,6);
+    % 
+    % if choice == 0
+    %     plot(data.p(1,:),data.p(2,:),'LineWidth',1.2);
+    %     daspect([1,1,1])
+    %     grid on
+    %     xlabel('Position x [m]');
+    %     ylabel('Position y [m]');
+    %     hold on
+    %     daspect([1 1 1])
+    %     ax(6) = gca;
+    % %     plot(data.pr(1,:),data.pr(2,:));
+    % %     plot(0,1,'o','MarkerFaceColor','red','Color','red');
+    % %     plot(1,1,'o','MarkerFaceColor','red','Color','red');
+    % %     plot(1,-1,'o','MarkerFaceColor','red','Color','red');
+    % %     legend('Estimated trajectory','Target position')
+    % %     xlim([-0.5 0.5])
+    % %     ylim([-0.5 0.5])
+    %     hold off
+    % elseif choice == 1
+    %     plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
+    %     hold on
+    %     grid on
+    %     plot3(data.pr(1,:),data.pr(2,:),data.pr(3,:),'LineWidth',1.2, 'LineStyle','--')
+    %     xlabel('x');
+    %     ylabel('y');
+    %     zlabel('z');
+    %     daspect([1 1 1])
+    %     zlim([0 max((data.p(3,:)))+0.1]);
+    %     ax(6) = gca;
+    %     hold off
+    % else
+    %     %シミュレーションのみ-------------------
+    %     plot(data.t,data.te,'LineWidth',1.2)
+    %     xlabel('Time [s]');
+    %     ylabel('CalT time [s]');
+    %     hold on
+    %     grid on
+    %     yline(0.025,'Color','red','LineWidth',1.2)
+    %     xlim([data.t(1) data.t(end)])
+    %     legend('計算時間', '制御周期')
+    %     ax(6) = gca;
+    %     hold off
+    %     title('CalT time')
+    %     %---------------------------------------
+    % end
 
     %error
     if error == 1

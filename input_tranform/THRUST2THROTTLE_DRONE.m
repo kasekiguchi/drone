@@ -50,10 +50,10 @@ methods
             %1_18:MPCのゲインとオフセットを変更するために追加
             if cha == 'f'
                 obj.param.gain2(1) = 600;
-                obj.param.gain2(2) = 650;
-                obj.param.gain2(3) = 500;
-                obj.param.gain2(4) = 350;
-                obj.param.th_offset2 = 350;
+                obj.param.gain2(2) = 600;
+                obj.param.gain2(3) = 600;
+                obj.param.gain2(4) = 1000;
+                obj.param.th_offset2 = 345;
                 % fprintf('オフセット変更→MPC \n')
 
                 T_thr = input(1); % thrust, torque input 

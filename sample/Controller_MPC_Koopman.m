@@ -14,7 +14,9 @@ function Controller = Controller_MPC_Koopman(Agent)
     % load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est') %シミュクープマンモデル，総推力で学習
 
     % load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est') %実機モデル，総推力
-    load("EstimationResult_12state_1_18_Exp_sprine_est=cir_torque_incon.mat",'est') %sprineモデル
+    % load("EstimationResult_12state_1_18_Exp_sprine_est=cir_torque_incon.mat",'est') %sprineモデル
+    load("EstimationResult_12state_1_29_Exp_sprineandhov_est=cir_torque_incon.mat",'est') %sprine+hoveringデータ
+    % load("EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat",'est') %sprine+今までの飛行データ
 
     % load("EstimationResult_12state_12_12_SimcirsadP2Pxydata_est=sad.mat",'est') %シミュレーションモデル，4入力，case5(12/12)
     % load("EstimationResult_12state_12_12_SimcirrevsadP2Pzdata_est=sad.mat",'est') %シミュレーションモデル，4入力，上のやつに逆円データ追加S
@@ -47,12 +49,12 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.Vf = diag([1; 1; 1]);
     % Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
 
-    Controller_param.weight.P = diag([10; 10; 15]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([100; 100; 1]);    % 速度
+    Controller_param.weight.P = diag([1; 1; 1]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([1; 1; 1]);    % 速度
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([5; 5; 1; 1; 1; 1]);  % 姿勢角，角速度
-    % 
+    Controller_param.weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
+    % % 
     Controller_param.weight.Pf = Controller_param.weight.P; % 6
     Controller_param.weight.Vf = Controller_param.weight.V;
     Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
