@@ -1,22 +1,22 @@
 %% GUI projectの情報を用いたパラメータ解析
 % EKFによるパラメータ推定の結果確認
 %% Initialize settings
-clear
-cf = pwd;
-if contains(mfilename('fullpath'),"mainGUI")
-  cd(fileparts(mfilename('fullpath')));
-else
-  tmp = matlab.desktop.editor.getActive; 
-  cd(fileparts(tmp.Filename));
-end
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
-cd(cf); close all hidden; clear all; userpath('clear');
+% clear
+% cf = pwd;
+% if contains(mfilename('fullpath'),"mainGUI")
+%   cd(fileparts(mfilename('fullpath')));
+% else
+%   tmp = matlab.desktop.editor.getActive; 
+%   cd(fileparts(tmp.Filename));
+% end
+% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+% cd(cf); close all hidden; clear all; userpath('clear');
 
 % close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/u_noise0122.mat');
+log = LOGGER('./Data/Log(24-Jan-2024_16_19_18).mat');
 O_func = @(x,u) On3_1_new(x,u);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
 f_png=1;
@@ -185,7 +185,7 @@ ylabel('Distance of the lidar [m]','FontSize', 16);
 legend('true','estimate','FontSize', 16,'Location', 'Best');
 grid on;
 end
-%% 可観測性
+%% 可観測性（線形）
 % 可観測性行列 O を計算する(線形のやつで)
 Ob = [];
 n=18;
@@ -203,72 +203,26 @@ end
 Ol = obsv(A(:,:,2),C(:,:,2));
 rank(Ol)
 %% 非線形システムの可観測性
-if f_O == 1
-tmpmethod = str2func(get_model_name("RPY 12"));
-% fmethod = @(t,x,p) [tmpmethod(t,x,p); zeros(6,1)];
-fmethod = @(t,x,p) [tmpmethod(t,x,p); zeros(6,1)];
-wall_param = [0,1,0,-9];
-% hmethod = @(x,p) H_18_2(x,wall_param,p);
-hmethod = @(x,p) H_18(x,wall_param,p);
-% x = sym('x',[18,1]);
-x = sym('x',[18,1]);
-u = sym('u',[4,1]);
-syms x [18 1]
-syms u [4 1]
-f=fmethod(x,u,param);
-h = hmethod(x,param);
-syms q [21 1]
-for i=1:3
-    if i == 1
-        Lfh = h;
-        q(1:7*i) = Lfh;
-    else
-        Lfh = jacobian(Lfh,x)*f;
-        q(1+7*(i-1):7*i)= Lfh;
-        i
-    end
-end
-On = jacobian(q,x());
-matlabFunction(On,'File','O_func','vars',{x,u})
-end
 Rank = zeros(1,len);
 minS = zeros(1,len);
 maxS = zeros(1,len);
 D = zeros(1,len);
-if f_wall == 1
-    S = zeros(22,len);
-    x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1);l(:,1)];
-    On = zeros(size(On3_w(x,u(:,1)),1),size(On3_w(x,u(:,1)),2),len);
-    for i=1:len
+x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1)];
+On = zeros(size(O_func(x,u(:,1)),1),size(O_func(x,u(:,1)),2),len);
+U = zeros(size(On,1),size(On,1),len);
+V = zeros(18,18,len);
+S = zeros(18,len); 
+for i=1:len
 %     x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
-        x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i);l(:,i)];
-        On(:,:,i) = O_func(x,u(:,i));
-        Rank(i) = rank(On3_w(x,u(:,i)));
-        S(:,i) = svd(On(:,:,i));
-        minS(i) = min(S(:,i));
-        maxS(i) = max(S(:,i));
-        D(i) = 1/(maxS(i)/minS(i));
-    end
-else
-    x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1)];
-    On = zeros(size(O_func(x,u(:,1)),1),size(O_func(x,u(:,1)),2),len);
-    U = zeros(size(On,1),size(On,1),len);
-    V = zeros(18,18,len);
-    S = zeros(18,len);
-   
-    for i=1:len
-%     x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
-        x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
-        On(:,:,i) = O_func(x,u(:,i));
-        Rank(i) = rank(O_func(x,u(:,i)),0);
-        S(:,i) = svd(On(:,:,i));
-        [U(:,:,i),~,V(:,:,i)] = svd(On(:,:,i));
-        minS(i) = min(S(:,i));
-        maxS(i) = max(S(:,i));
-        D(i) = 1/(maxS(i)/minS(i));
-    end
-end
- 
+    x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
+    On(:,:,i) = O_func(x,u(:,i));
+    Rank(i) = rank(O_func(x,u(:,i)),0);
+    S(:,i) = svd(On(:,:,i));
+    [U(:,:,i),~,V(:,:,i)] = svd(On(:,:,i));
+    minS(i) = min(S(:,i));
+    maxS(i) = max(S(:,i));
+    D(i) = 1/(maxS(i)/minS(i));
+end 
 %% 図示
 if illustration == 1
     fig18=figure(18);
@@ -528,7 +482,7 @@ if illustration == 1
     lgd=legend('\it{x_r}','\it{y_r}','\it{z_r}','\it{x}','\it{y}','\it{z}','FontSize', 16,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
-    ylim([-0.5 2])
+%     ylim([-0.5 2])
     xlabel('time [s]','FontSize', 16)
     ylabel('position \it{p} [m]','FontSize', 16);
     grid on;
@@ -545,7 +499,7 @@ if illustration == 1
     lgd=legend('\phi_{r}','\theta_{r}','\psi_{r}','\phi','\theta','\psi','FontSize', 16,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
-    ylim([-0.2 0.2])
+%     ylim([-0.2 0.2])
     xlabel('time [s]','FontSize', 16);
     ylabel('orientation \it{q} [rad]','FontSize', 16);
     grid on;

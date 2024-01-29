@@ -98,15 +98,15 @@ agent.sensor.do = @sensor_do;
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[2,2,2,0.35]}});
 
 %AMCref
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
 % 
 % コントローラー
 % agent.controller = HLC(agent,Controller_HL(dt));
 
 % コントローラー補正
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1e-1,"On3_1_new"));
+agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.1,"On3_1_new"));
 agent.controller.do = @controller_do;
 
 %% Direct model
@@ -145,20 +145,24 @@ end
 
 
 % ノイズを入れた場合の入力補正
-function result = controller_do(varargin)
-    controller = varargin{5}.controller;
-    result.hlc = controller.hlc.do(varargin);
-    varargin{5}.controller.result.input = result.hlc.input + 0.4 * randn(4,1);
-end
-
-
-% 可観測性に基づく入力補正用
 % function result = controller_do(varargin)
 %     controller = varargin{5}.controller;
 %     result.hlc = controller.hlc.do(varargin);
-%     result.correct = controller.correct.do(varargin);
-%     varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
+%     varargin{5}.controller.result.input = result.hlc.input + 0.4 * randn(4,1);
 % end
+
+
+% 可観測性に基づく入力補正用
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    result.hlc = controller.hlc.do(varargin);
+    result.correct = controller.correct.do(varargin);
+%     varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
+    varargin{5}.controller.result.input = result.hlc.input + dot(result.hlc.input,result.correct.input)/norm(result.hlc.input);
+end
+
+
+% 
 
 
 % function in_prog(app)
