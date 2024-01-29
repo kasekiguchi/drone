@@ -1,9 +1,9 @@
 function Controller = Controller_APID(dt)
 % Adaptive PIDコントローラ設計用
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
-Controller.Kp = [0, 0, 0; 1, 5, 10];
+Controller.Kp = [0, 0, 0; 1, 5, 10]*0.025/dt;
 Controller.Ki = [0 0 0; 0 0 0];
-Controller.Kd = [2; 0.1];
+Controller.Kd = [2; 0.1]*0.025/dt;
 Controller.dt = dt;
 Controller.adaptive = str2func("adaptive_gain");
 Controller.gen_error = str2func("gen_e_2110");

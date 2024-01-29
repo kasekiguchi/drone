@@ -9,7 +9,7 @@ userpath('clear');
 end
 %% 
 ts = 0; % initial time
-dt = 0.5; % sampling period
+dt = 0.025; % sampling period
 te = 120; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);

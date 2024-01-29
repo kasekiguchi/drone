@@ -47,8 +47,7 @@ methods
           obj.tform_add_odom(struct('linear',struct('x',obj.self.controller.result.input(1)),'angular',struct('z',obj.self.controller.result.input(2))));
         end
         obj.result.tform = obj.tform;
-        obj.result.ndtPCdata = obj.PCdata_use;
-        disp(obj.tform)
+        obj.result.ndtPCdata = obj.PCdata_use;       
         tmpvalue.p = obj.tform.Translation';
         tmpvalue.q = rotm2eul(obj.tform.R, "XYZ")';
         % tmpvalue = obj.result.tform.Translation';
