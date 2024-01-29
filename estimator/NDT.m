@@ -14,34 +14,33 @@ classdef NDT < handle
         tform                        %pcregisterndtから出てくる推定値(rigidform3d)
         initialtform                 %pcregisterndtに使用するマッチング探索位置，姿勢(rigidform3d)
         PCdata_use                   %pcregisterndtに使用するスキャンデータ(PointCloud)
-        matching_mode = "mapmatching"%slam or mapmatching
+        matching_mode                %slam or mapmatching
+        mapname                      %mapmatchingの時ロードするmatファイル名.中身がfixedSeg(PointCloud)である必要がある
         gridstep = 1.0;              %pcregisterndtに使用するボクセルのグリッドサイズ(メートル)
         func                         %前後のLiDAR点群を合成する関数.LiDARが一つの場合はいらない
     end
     
     methods
-        function obj = NDT(self,param)% constractor
+        function obj = NDT(self,sample_param)% constractor
             %ROS2でsubscriveするLiDAR点群用のEstimatorクラス
-            if (param=="plot")
-                obj.result = self.Data.agent.estimator.result;                
-            else
             obj.self = self; % agent that 
-            model = param.model;
-            obj.model = model;
-            obj.func = param.func;
-            param = param.param;
-            
+            obj.model = sample_param.model;
 
+            obj.func = sample_param.ndt.func;
+            obj.matching_mode = sample_param.ndt.matching_mode;
+            obj.mapname = sample_param.ndt.mapname;
+
+            param = sample_param.param;          
             obj.initialtform = obj.initial_matching(rigidtform3d(eul2rotm(deg2rad(param(:,2)'),"XYZ"),param(:,1)));
-            % obj.fixedSeg = param.fixedSeg;            
+            % obj.fixedSeg = param.fixedSeg;
             obj.result.state=state_copy(obj.model.state);
-            end
+            % end
         end
 
 
         function [result] = do(obj,varargin)
             % obj.PCdata_use = obj.self.sensor.result{1};
-            % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{2},obj.self.sensor.ros{1});    
+            % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
             obj.PCdata_use = obj.func(obj.self.sensor.ros{2},obj.self.sensor.ros{1});    
             obj.tform = pcregisterndt(obj.PCdata_use,obj.fixedSeg,0.5,"InitialTransform",obj.initialtform,"OutlierRatio",0.1,"Tolerance",[0.01 0.1]);%マッチング
             if (obj.matching_mode == "slam")
@@ -107,18 +106,17 @@ classdef NDT < handle
 
         function initform=initial_matching(obj,initialtform)
             %コンストラクタでロボット初期位置の探索を行う
-            %mat
             if obj.matching_mode == "slam"
                 % savedata(1).initialtform = initialtform;
                 % obj.fixedSeg = pctransform(obj.scanpcplot_rov(ros{3},ros{2}),obj.initialtform);        %slam map
                 % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{1,2},obj.self.sensor.ros{1,1});
                 obj.PCdata_use = obj.func(obj.self.sensor.ros{1,2},obj.self.sensor.ros{1,1});
-                obj.fixedSeg = pointCloud(obj.tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
+                obj.fixedSeg = pointCloud(tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
                 initform = initialtform;
             else
                 % fixedSeg = pcread("fixmap_room_1.pcd"); %room map
                 % fixedSeg = pcread("fixmapv6.pcd")%廊下 map
-                load("fixmapv6.mat");
+                load(obj.mapname);
                 obj.fixedSeg = fixedSeg;
                 %初期位置探索
                 % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
@@ -150,10 +148,10 @@ classdef NDT < handle
             %実機を動かした後，推定値をplot
             %コマンド
             %agent.estimator.show(logger)            
-            num_lim = logger.k - 1;
+            num_lim = logger.k - 1;            
             i=1;
             while(1)
-                if isfield(obj.result{1,i},"tform")
+                if isfield(logger.Data.agent.estimator.result{1,i},"tform")
                     break;
                 end
                 i = i + 1;
