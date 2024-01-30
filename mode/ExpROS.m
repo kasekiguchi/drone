@@ -1,6 +1,6 @@
-clc;
-clear all
-disp("clear node");
+% clc;
+% clear all
+% disp("clear node");
 
 % mega rover
 ts = 0; % initial time
@@ -11,7 +11,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-motive = Connector_Natnet('192.168.100.131'); % connect to Motive
+motive = Connector_Natnet('192.168.100.39'); % connect to Motive
 motive.getData([], []); % get data from Motive
 
 % initial position in point cloud map
@@ -22,21 +22,18 @@ initial_state.w = [0; 0; 0];
 
 agent = WHILL;
 agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 87));%agentでnodeを所持
-% agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros",25));
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
-% agent.sensor = ROS(agent, Sensor_ROS(struct('DomainID',25)));
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.ros = ROS2_SENSOR(agent, Sensor_Ros2_multi(agent));
 agent.sensor.do = @sensor_do; % synthesis of sensors
- agent.sensor.do(time);
+agent.sensor.do(time);
 % agent.estimator = UKF2DSLAM(agent, Estimator_UKF2DSLAM_Vehicle(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
 % agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1))));
 agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1))));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
-% agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(40));
-agent.reference = POINT_REFERENCE(agent,[2.0;0.0;0],[0;0;0],[0;0;0]);
-agent(1).reference.do(time, 'f');
+% agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(40));agent.reference.do(time, 'f');
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]}});
+agent.reference = POINT_REFERENCE(agent,[2.0;2.0;0],[0;0;0],[0;0;0]);
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 
 run("ExpBase");
@@ -45,10 +42,10 @@ run("ExpBase");
 % clc
 % for i = 1:time.te
 % %    if i < 20 || rem(i, 10) == 0, i, end
-    agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
-    agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f',0,0,agent,1);
+    % agent(1).sensor.do(time, 'f');
+    % agent(1).estimator.do(time, 'f');
+    % agent(1).reference.do(time, 'f');
+    % agent(1).controller.do(time, 'f',0,0,agent,1);
     % agent(1).plant.do(time, 'f');
     % logger.logging(time, 'f', agent);
 %     time.t = time.t + time.dt;
