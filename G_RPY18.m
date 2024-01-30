@@ -1,4 +1,4 @@
-function gp = G_RPY12(in1,in2)
+function gp = G_RPY18(in1,in2)
 %FORM_U
 %    GP = FORM_U(IN1,IN2)
 

@@ -65,12 +65,7 @@ agent.parameter = DRONE_PARAM("DIATONE");
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),100*ones(1,6)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.00001*ones(1,6)])));
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1*ones(1,6)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.00001*ones(1,6)])));
 
-% AMCオフセット推定
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1*ones(1,3),200*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1e-8*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.000005*ones(1,3),0.00001*ones(1,3)])));
-
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18_2(x,wall_param,p),"output_func",@(x,p) H_18_2(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1*ones(1,3),100*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),1*(1e-8)*ones(1,2)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.0000001*ones(1,3),0.0000005*ones(1,3)])));
-
-%AMC_1  これ！！！！！！！！！！
+%AMC＆修論  これ！！！！！！！！！！
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_18(dt, initial_state, 1)),@(x,p) JacobH_18(x,wall_param,p),"output_func",@(x,p) H_18(x,wall_param,p),"B",eye(18),"P",diag([ones(1,12),1000*ones(1,3),1000*ones(1,3)]),"R",diag([1e-3*ones(1,3), 1e-3*ones(1,3),5*1e-8*ones(1,1)]),"Q",diag([0.01*ones(1,6),0.01*ones(1,6),0.00002*ones(1,3),0.00002*ones(1,3)])));
 
 % オフセットと壁面パラを状態として追加
@@ -98,16 +93,16 @@ agent.sensor.do = @sensor_do;
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[2,2,2,0.35]}});
 
 %AMCref
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
 % 
 % コントローラー
-% agent.controller = HLC(agent,Controller_HL(dt));
+agent.controller = HLC(agent,Controller_HL(dt));
 
 % コントローラー補正
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.1,"On3_1_new"));
-agent.controller.do = @controller_do;
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.3,"On3_1_new"));
+% agent.controller.do = @controller_do;
 
 %% Direct model
 % agent = DRONE;
@@ -158,11 +153,16 @@ function result = controller_do(varargin)
     result.hlc = controller.hlc.do(varargin);
     result.correct = controller.correct.do(varargin);
 %     varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
-    varargin{5}.controller.result.input = result.hlc.input + dot(result.hlc.input,result.correct.input)/norm(result.hlc.input);
+    [correct,parallel]= vector_decomposition(result.hlc.input,result.correct.input);
+    varargin{5}.controller.result.input = result.hlc.input + correct;
 end
 
 
-% 
+% ベクトルの分解
+function [vertical,parallel] = vector_decomposition(A,B)
+    parallel = dot(A,B)/norm(A)^2 * A;
+    vertical = B - parallel; 
+end
 
 
 % function in_prog(app)
