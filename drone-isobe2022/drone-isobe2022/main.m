@@ -6,7 +6,7 @@ cd(fileparts(activeFile.Filename));
 [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 close all hidden;
-% clear all; %シミュレーションデータを取得する場合はコメントオフ
+clear all; %シミュレーションデータを取得する場合はコメントオフ
 clc;
 
 % 20230129 磯部 main.m内で初期値をランダムに変化させるフラグ(シミュレーションで使用)

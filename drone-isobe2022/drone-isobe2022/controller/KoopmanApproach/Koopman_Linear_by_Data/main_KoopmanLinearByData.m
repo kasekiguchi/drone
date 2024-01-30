@@ -3,17 +3,22 @@
 % initialize
 % フラグ管理
 clear all
+clc
+%---------------------------------------------
 flg.bilinear = 0; %1:双線形モデルへの切り替え
 Normalize = 0; %1：正規化
+%---------------------------------------------
 
 %% 
 %データ保存先ファイル名(逐次変更する)
-% delete controller\KoopmanApproach\Koopman_Linear_by_Data\EstimationResult_12state_6_26_circle=circle_estimation=circle.mat; %同じファイル名を使うときはコメントイン
-FileName = 'EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = input('保存するファイル名を入力してください(※～.matを付ける): ', 's');
+% FileName = 'EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 % FileName = 'test.mat'; %お試し用
 
-% 読み込むデータファイル名(run_mainManyTime.mのファイル名と一致させる,ここで読み込むデータファイル名を識別してる)
-loading_filename = 'Exp_alldata_1_29';  
+% 読み込むデータファイル名
+loading_filename = input('\n読み込むデータファイル名を入力してください(※.matは含まない):','s');
+
+% loading_filename = 'Exp_alldata_1_29';  
 % loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
 % loading_filename = 'Exp_cirrevsaddata_12_19';

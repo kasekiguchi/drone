@@ -1,8 +1,20 @@
-clear all;
-clc;
-test1=ros2node("\test1",30);
+% コマンドウィンドウにメッセージを表示し、ファイル名を入力させる
+fileName = input('ファイル名を入力してください: ', 's');
 
-scandala_Sub=ros2subscriber(test1,"/scan","History","keepall","Reliability","besteffort");
-scandala=receive(scandata_Sub,2);
-movingPC = rosReadCartesian(scandala);
-pcshow(movingPC,"MarkerSize",12,"BackgroundColor",[1 1 1]);
+% 入力が空の場合の処理
+if isempty(fileName)
+    disp('ファイル名が入力されませんでした。');
+else
+    % 入力されたファイル名を表示
+    disp(['入力されたファイル名: ', fileName]);
+    
+    % 入力されたファイル名を使用して、ファイルを読み込む処理を追加
+    % 例: テキストファイルの読み込み
+    % try
+    %     fileContent = fileread(fileName);
+    %     disp('ファイルの内容:');
+    %     disp(fileContent);
+    % catch
+    %     disp('ファイルの読み込みに失敗しました。');
+    % end
+end
