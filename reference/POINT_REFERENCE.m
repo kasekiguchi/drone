@@ -10,7 +10,7 @@ classdef POINT_REFERENCE < handle
             % 参照
             obj.self = self;
             % obj.result.state = STATE_CLASS(struct('state_list',["p","v"],'num_list',[3,3]));
-            obj.result.state = STATE_CLASS(struct('state_list',["p","q","v"],'num_list',[3,3]));
+            obj.result.state = STATE_CLASS(struct('state_list',["xd","p","q","v"],'num_list',[9,3,3,3]));
             obj.param = varargin;
         end
         function  result= do(obj,varargin)
@@ -18,6 +18,7 @@ classdef POINT_REFERENCE < handle
             obj.result.state.p = obj.param{1};
             obj.result.state.q = obj.param{2};
             obj.result.state.v = obj.param{3};
+            obj.result.state.xd = vertcat(obj.param{:});
 
             result=obj.result;
         end
