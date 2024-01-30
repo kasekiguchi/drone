@@ -8,6 +8,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 end
 %% 
+close all
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 120; % termina time
@@ -35,7 +36,9 @@ agent.plant = MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1));
 agent.sensor = LiDAR_SIM(agent,Sensor_LiDAR(1,'angle_range', -pi: 0.0068:pi,'radius',40)); % 2D lidar : rplidar 0.0068, 40
 agent.sensor.do(time, 'f',0,env,agent,1);
 agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1))));
-agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.radius));
+%agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.radius));
+agent.reference = POINT_REFERENCE(agent,[2.0;-0.5;0],[0;0;0],[0;0;0]);
+    agent(1).reference.do(time, 'f');
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 agent(1).controller.do(time, 'f',0,0,agent,1);
 
@@ -50,12 +53,12 @@ for i = 1:time.te
     if i >=30
       i ;
     end
-    agent(1).sensor.do(time, 'f',0,env,agent,1);
+    agent(1).sensor.do(time, 'f',0,env,agent,1);   
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
     agent(1).controller.do(time, 'f',0,0,agent,1);
     logger.logging(time, 'f', agent);
-    agent.reference.FHPlot('Env',env,'FH',FH,'flag',0,'logger',logger,'param',struct('fLocal',false,'fField',true),'k',i);
+    PATH_REFERENCE.FHPlot('agent',agent,'Env',env,'FH',FH,'flag',0,'logger',logger,'param',struct('fLocal',false,'fField',true),'k',i);
     agent(1).plant.do(time, 'f');
     time.t = time.t + time.dt;
     pause(0.01)
