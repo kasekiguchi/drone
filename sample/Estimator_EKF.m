@@ -12,7 +12,7 @@ arguments
     opts.B = []
     opts.P = []
     opts.Q = []
-    opts.R = diag([1e-5 * ones(1, 2), 1e-8 * ones(1, 1)]);
+    opts.R = diag([1e-5 * ones(1, 3), 1e-8 * ones(1, 3)]);
 end
 
 Estimator.model = model;
@@ -81,6 +81,7 @@ if isempty(opts.B)
         Estimator.B = [eye(6) * dt ^ 2; zeros(1, 6); eye(6) * dt]; % システムノイズが加わるチャンネル
         %             EKF_param.B = [eye(3)*dt^2;zeros(1,3);eye(3)*dt];
     end
+
 else
     Estimator.B = opts.B;
 end

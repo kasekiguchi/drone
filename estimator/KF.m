@@ -23,7 +23,6 @@ classdef KF < handle
         function obj = KF(self,param)
             obj.self= self;
             obj.model = param.model;
-            % obj.self.input = zeros(obj.model.dim(2),1);
             obj.result.state= state_copy(obj.model.state);
             obj.y= state_copy(obj.model.state);
             if isfield(param,'list')
@@ -41,13 +40,11 @@ classdef KF < handle
             obj.result.P = param.P;
         end
         
-        function [result]=do(obj,param,sensor)
+        function [result]=do(obj,varargin)
+          %(obj,param,sensor)
             %   param : optional
-            if ~isempty(param) obj.dt = param; end
             model=obj.model;
-            if nargin == 2
-                sensor = obj.self.sensor.result;
-            end
+            sensor = obj.self.sensor.result;
             x = obj.result.state.get(); % 前回時刻推定値
             xh_pre = model.state.get(); % 事前推定 ：入力ありの場合 （modelが更新されている前提）
             if isempty(obj.y.list)

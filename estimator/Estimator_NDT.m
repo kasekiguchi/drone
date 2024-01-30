@@ -1,4 +1,4 @@
-function Estimator = Estimator_NDT(agent, dt, model)%,mapname)
+function Estimator = Estimator_NDT(agent, dt, model) %,mapname)
 % function param = Estimator_NDT(agent,dt,initial_state,mapname)
 % arguments
 %     agent
@@ -15,7 +15,6 @@ end
 
 Estimator.model = model;
 
-
 % the constant value for estimating of the map
 %初期位置set
 % initial_state.rot = eul2rotm(model.state.q','XYZ');%回転行列(roll,pitch,yaw)
@@ -28,5 +27,4 @@ Estimator.model = model;
 % NDT_param.fixedSeg = pcread(mapname);
 % Estimator.param = NDT_param;
 Estimator.param = [model.state.p model.state.q];
-% Estimator.func = @scanpcplot_rov;
 end

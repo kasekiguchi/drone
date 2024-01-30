@@ -15,4 +15,5 @@ Sensor.angle_range = param.angle_range;
 Sensor.seed = param.seed;
 Sensor.noise = param.noise;
 Sensor.id = id;
+Sensor.gen_pc = @pointCloud;
 end
