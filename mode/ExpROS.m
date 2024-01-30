@@ -11,7 +11,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-motive = Connector_Natnet('192.168.100.39'); % connect to Motive
+motive = Connector_Natnet('192.168.1.2'); % connect to Motive
 motive.getData([], []); % get data from Motive
 
 % initial position in point cloud map
@@ -26,7 +26,7 @@ agent.parameter = VEHICLE_PARAM("VEHICLE3");
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.ros = ROS2_SENSOR(agent, Sensor_Ros2_multi(agent));
 agent.sensor.do = @sensor_do; % synthesis of sensors
-agent.sensor.do(time);
+agent.sensor.do([],[],[],[],agent,1);
 % agent.estimator = UKF2DSLAM(agent, Estimator_UKF2DSLAM_Vehicle(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
 % agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1))));
 agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1))));
