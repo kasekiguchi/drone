@@ -57,7 +57,6 @@ methods
 
     function initform = initial_matching(obj, initialtform)
         %コンストラクタでロボット初期位置の探索を行う
-        %mat
         if obj.matching_mode == "slam"
             % savedata(1).initialtform = initialtform;
             % obj.fixedSeg = pctransform(obj.scanpcplot_rov(ros{3},ros{2}),obj.initialtform);        %slam map

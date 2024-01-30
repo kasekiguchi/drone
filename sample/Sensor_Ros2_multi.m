@@ -20,6 +20,7 @@ setting.numlist = [3, 3];
 % setting.subMsgName      = {'sensor_msgs/LaserScan'};%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%sub 型
 setting.subTopic(1,:) = {'/scan_front','sensor_msgs/LaserScan',5000};
 setting.subTopic(2,:) = {'/scan_behind' ,'sensor_msgs/LaserScan',5000};
+setting.subTopic(3, :) = {'/rover_odo', 'geometry_msgs/Twist', 5000}; % sub topic name
 % setting.getData = @getData_two_lidar_combine;
 Sensor.param = setting;
 % Sensor.pfunc = str2func("rover_pub");

@@ -64,7 +64,7 @@ methods
         Xe = LP.x(:, 2);
         Ys = LP.y(:, 1);
         Ye = LP.y(:, 2);
-        lineids = abs(Xe - Xs) + abs(Ye - Ys) > 1; % lineと認識する長さ：1m 以上ないとlineとみなさないようにする．TODO : チューニングできるようにする
+        lineids = abs(Xe - Xs) + abs(Ye - Ys) > 0.5; % lineと認識する長さ：1m 以上ないとlineとみなさないようにする．TODO : チューニングできるようにする
         a = a(lineids);
         b = b(lineids);
         c = c(lineids);

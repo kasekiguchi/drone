@@ -12,6 +12,8 @@ classdef ROS2_SENSOR < handle
     Node
     radius=0;
     getData
+
+    front_get
   end
 
   methods
@@ -41,7 +43,7 @@ classdef ROS2_SENSOR < handle
         end
       end
       % obj.getData = param.param.getData; 
-      obj.getData = @getData_two_lidar_combine;
+      obj.getData = @getData_two_lidar_combine;      
       % data = obj.ros.getData;
       % data = obj.ros{1}.getData;
       % obj.prosesssfunc = param.pfunc;%使わない場合はsampleで0を入れる
@@ -51,7 +53,10 @@ classdef ROS2_SENSOR < handle
     function result = do(obj, varargin)
       %   result : point cloud data
       %%%%%for PC2LDA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % result = obj.front_get;
       result = obj.getData_two_lidar_combine;
+      
+      
       obj.result = result;
     end
 
@@ -111,13 +116,17 @@ classdef ROS2_SENSOR < handle
     pointcloud_out_roi = pd_B;
     end
 
-    function pcdata = getData_two_lidar_combine(obj)
+    function result = getData_two_lidar_combine(obj)
 data1 = obj.ros{2};
 data2 = obj.ros{1};
 % ２つのLiDARデータを結合しポイントクラウドデータに変換
 % get Laser scan message
 scanlidardata_b = data1.getData;
 scanlidardata_f = data2.getData;
+result = scanlidardata_f;                %前のlidarデータをobjにそのまま保存
+result.odom_data = obj.ros{3}.getData;
+result.angle = result.angle_min:result.angle_increment:result.angle_max;
+result.length = result.ranges;
 % trans n–by–2 matrix [m]
 moving_f = rosReadCartesian(scanlidardata_f);
 moving_b = rosReadCartesian(scanlidardata_b);
@@ -140,7 +149,7 @@ Tf = [0.7 0 0]; % TODO : measure from front lidar to the vehicle's origin
 moving_pc2_m_f = (rot*moving_pc.f' + Tf')'; % N x 3
 moving_pc2_m_b = (moving_pc.b' + Tb')'; % N x 3
 % merge and transform to point cloud data
-pcdata = pointCloud([moving_pc2_m_f;moving_pc2_m_b]);
+result.pc = pointCloud([moving_pc2_m_f;moving_pc2_m_b]);
 end
 
   end

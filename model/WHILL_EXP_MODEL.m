@@ -13,10 +13,9 @@ end
 
 methods
 
-    function obj = WHILL_EXP_MODEL(args)
-        obj@MODEL_CLASS([], []);
-        param = args;
-        obj.dt = 0.025; % check
+    function obj = WHILL_EXP_MODEL(varargin)        
+        obj@MODEL_CLASS(varargin{:});
+        param = varargin{2}.param; 
         %% variable set
         obj.phase = 's';
         obj.conn_type = param.conn_type;
