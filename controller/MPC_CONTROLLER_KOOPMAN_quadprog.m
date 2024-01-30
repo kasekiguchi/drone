@@ -20,8 +20,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
         InputTransform
         time
         inifTime
-        flag
-        changeflag
     end
 
     methods
@@ -35,35 +33,31 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             obj.input = obj.param.input;
             % obj.const = param.const;
             % obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-%             obj.param.H = obj.param.H + 1; %なぜ？
+%             obj.param.H = obj.param.H + 1;
             obj.model = self.plant;
             
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
 
-            %% 重み　統合
-%             obj.param.Weight = blkdiag(obj.param.P, obj.param.Q, obj.param.V, obj.param.W);
-%             obj.param.Weightf = blkdiag(obj.param.P, obj.param.Qf, obj.param.Vf, obj.param.Wf);
-            
+            %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
             obj.InputTransform=THRUST2FORCE_TORQUE(self,1);
             obj.time = [];
             obj.inifTime =[];
-            obj.flag = 0; %1:P2P
 
         end
 
         %-- main()的な
         function result = do(obj,varargin)
           %実機でMPCを飛ばすときに必要(fから回すとき)-----------------------
-          var = varargin{1};
-          % if isempty(obj.inifTime) && var{2} =='f'
-          %     obj.inifTime = var{1}.t;
-          %     obj.result.fTime = 0;
-          % elseif var{2} =='f'
-          %     obj.result.fTime = var{1}.t - obj.inifTime;
-          % end
-          obj.param.t = var.t; %実機のときコメントイン
+          % var = varargin{1};
+          % % if isempty(obj.inifTime) && var{2} =='f'
+          % %     obj.inifTime = var{1}.t;
+          % %     obj.result.fTime = 0;
+          % % elseif var{2} =='f'
+          % %     obj.result.fTime = var{1}.t - obj.inifTime;
+          % % end
+          % obj.param.t = var.t; %実機のときコメントイン
           %--------------------------------------------------
            
             tic
@@ -71,9 +65,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
             %シミュレーション時コメントイン--------------------------------
-            % obj.param.t = varargin{1}.t;
+            obj.param.t = varargin{1}.t;
             rt = obj.param.t; %時間
-            % idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
+            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             obj.state.ref = obj.Reference(rt); %リファレンスの更新
             %-------------------------------------------------------------
@@ -105,6 +99,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             
             % MPC設定(problem)
             %-- fmincon 設定
+            % options = optimoptions('quadprog','Algorithm','active-set');
             options = optimoptions('quadprog');
             %     options = optimoptions(options,'Diagnostics','off');
             %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
@@ -123,11 +118,12 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             lb = [];
             ub = [];
             x0 = [obj.previous_input(:)];
-  
+              
             [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
       
             %%
             obj.previous_input = var;
+            var;
             
             % 実機のときコメントイン--------------------------------------------
             % if vara{2} == 'a'

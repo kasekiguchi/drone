@@ -191,6 +191,7 @@ function [] = Graphplot(app)
     %     Square_coloring2(data.t([find(data.phase == 108,1,'first'),find(data.phase == 108,1,'last')]),[1.0 0.9 1.0]);
     % end
     % lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
+    yline(0.5884*9.81,'Color','red','LineWidth',1.2)
     lgdtmp = {'$thrust$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
