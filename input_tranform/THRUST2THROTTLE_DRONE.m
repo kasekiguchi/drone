@@ -49,10 +49,10 @@ methods
 
             %1_18:MPCのゲインとオフセットを変更するために追加----------------------------------------------------------
             if cha == 'f'
-                obj.param.gain2(1) = 600;
-                obj.param.gain2(2) = 600;
-                obj.param.gain2(3) = 600;
-                obj.param.gain2(4) = 1200;
+                obj.param.gain2(1) = 700;
+                obj.param.gain2(2) = 700;
+                obj.param.gain2(3) = 700;
+                obj.param.gain2(4) = 1800;
                 obj.param.th_offset2 = 360;
                 % fprintf('オフセット変更→MPC \n')
 
@@ -84,7 +84,7 @@ methods
                 obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
             end
             %-------------------------------------------------------------------------------------------------------
-            
+
 
             %T_thr = sum(input); % each motor's thrust force input
             T_thr = input(1); % thrust, torque input 

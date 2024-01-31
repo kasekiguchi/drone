@@ -67,26 +67,12 @@ function result = controller_do(varargin)
         result.mpc = controller.mpc.do(varargin);
         result = result.hlc;
     elseif varargin{2} == 'f'
-        result.hlc = controller.hlc.do(varargin);
-        result.mpc = controller.mpc.do(varargin);
-        result = result.hlc;
-        % result = controller.mpc.do(varargin);
+        result = controller.mpc.do(varargin);
     else
         result = controller.hlc.do(varargin);
    end
     varargin{5}.controller.result = result;
 end
-
-% function result = input_transform_do(varargin)
-%     input_transform = varargin{5}.input_transform;
-%     if varargin{2} == 'f'
-%         result = input_transform.mpc;
-%     else
-%         result = input_transform.hlc;
-%     end
-%     varargin{5}.input_transform.result = result;
-% end
-%--------------------------------------------------
 
 function post(app)
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

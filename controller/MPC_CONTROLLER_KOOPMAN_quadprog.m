@@ -149,7 +149,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             %% 保存するデータ
             obj.result.weight = Param.weight;
             result = obj.result; % controllerの値の保存
-            % profile viewer
 
             %% 情報表示
             state_monte = obj.self.estimator.result.state;
