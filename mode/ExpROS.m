@@ -5,7 +5,7 @@ disp("clear node");
 % mega rover
 ts = 0; % initial time
 dt = 0.5; % sampling period
-te = 10; % termina time
+te = 20; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
@@ -35,7 +35,8 @@ agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(40));agent.reference.do(time, 'f');
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]}});
-agent.reference = POINT_REFERENCE(agent,[2.0;0;0],[0;0;0],[0;0;0]);
+% agent.reference = POINT_REFERENCE(agent,[2.0;0;0],[0;0;0],[0;0;0]);
+agent.reference = POINT_REFERENCE(agent,Reference_Point);
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 
 run("ExpBase");

@@ -141,8 +141,9 @@ classdef NDT < handle
             if ~isfield(obj,"fixedSeg")
                 obj.fixedSeg = mkmap;
             end            
-            scatter(obj.fixedSeg.Location(:,1),obj.fixedSeg.Location(:,2),2,"filled");
-            legend("NDTestimate","prime","pcmap")
+            pcshow(mkmap)
+            % scatter(obj.fixedSeg.Location(:,1),obj.fixedSeg.Location(:,2),2,"filled");
+            legend("NDTestimate","pcmap")
             hold off
             % figure;ax_rmse_x = gca;ax_rmse_x.FontSize = 12;
             % bar(logger.Data.t(1:logger.k - i),rmse_x,0.75);xlabel(texlabel('time [sec]'));ylabel(texlabel('RMSE of X'));

@@ -1,7 +1,7 @@
 function Controller = Controller_APID(dt)
 % Adaptive PIDコントローラ設計用
 %% dt = 0.025 くらいの時に有効（これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
-Controller.Kp = [2, 2, 3; 0,0, 3] * 0.1;
+Controller.Kp = [2.5, 2, 0; 0,0,2] * 0.1;
 Controller.Ki = [0 0 0; 0 0 0];
 Controller.Kd = [2; 0.1] * 1;
 Controller.K = [1, 1] * 0.1;
