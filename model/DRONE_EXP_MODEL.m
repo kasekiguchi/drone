@@ -28,7 +28,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
           fprintf("Drone %s is ready\n",param.IP);
         case "serial"
           if isnumeric(param.port)
-            param.port = strcat("COM",string(param.port));
+            % param.port = strcat("COM",string(param.port));
+            param.port = string(param.port);
           else
             param.port = char(param.port);
           end

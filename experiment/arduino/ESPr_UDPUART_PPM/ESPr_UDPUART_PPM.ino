@@ -9,9 +9,10 @@
 #include <WiFiUDP.h>
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 #include <math.h>
-
+#define SIGNAL_TIMEOUT 200000 //[us] Matlabと通信が切断されてから信号がリセットされるまでの時間
 uint8_t i;
 unsigned int droneNumber = 252; //機体番号を入力
+
 
 /////////////////// WiFi関係 ////////////////////
 // ESPrのIPアドレスの設定
@@ -32,7 +33,7 @@ IPAddress subnet(255, 255, 255, 0);
 WiFiUDP udp;
 
 boolean connected = false;
-
+volatile unsigned long last_received_time;
 /////////////////// PPM関係 ////////////////////
 char packetBuffer[255];
 #define TOTAL_INPUT 4 // number of input channels
@@ -109,8 +110,8 @@ void setupPPM() // ---------- setup ppm signal configuration
 void receive() // ---------- loop function : receive signal by UDP
 {
   // ch : 0 - 1000 is converted to 1000 - 2000 throttle on FC
-  // for UDP
   int len = 0;
+  // for UDP
   int packetSize = udp.parsePacket();
   if (packetSize){
     len = udp.read(packetBuffer, packetSize);
@@ -122,6 +123,7 @@ void receive() // ---------- loop function : receive signal by UDP
 
   // Common
   if (len > 0){
+    last_received_time = micros();
     TOTAL_CH_W = 0;
     for (i = 0; i < TOTAL_CH; i++)
     {
@@ -143,6 +145,16 @@ void receive() // ---------- loop function : receive signal by UDP
     }
 
     start_H = PPM_PERIOD - TOTAL_CH_W - 8 * CH_OFFSET - 9 * TIME_LOW; // 9 times LOW time in each PPM period
+  }else if (micros() - last_received_time >= SIGNAL_TIMEOUT){
+      pw[0] = CH_NEUTRAL; // roll
+      pw[1] = CH_NEUTRAL; // pitch
+      pw[2] = CH_MIN;     // throttle
+      pw[3] = CH_NEUTRAL; // yaw
+      pw[4] = CH_MIN;     // AUX1
+      pw[5] = CH_MIN;     // AUX2
+      pw[6] = CH_MIN;     // AUX3
+      pw[7] = CH_MIN;     // AUX4
+      start_H = PPM_PERIOD - 8 * CH_OFFSET - 3 * CH_NEUTRAL - 9 * TIME_LOW;
   }
 }
 
@@ -187,9 +199,10 @@ void setup()
 
   /////////////////// PPM関係 ////////////////////
   setupPPM();
+  last_received_time = micros();
 }
 
 void loop()
 {
-  receiveUDP();
+  receive();
 }
