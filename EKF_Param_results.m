@@ -1,6 +1,6 @@
 %% GUI projectの情報を用いたパラメータ解析
 % EKFによるパラメータ推定の結果確認
-%% Initialize settings
+% %% Initialize settings
 % clear
 % cf = pwd;
 % if contains(mfilename('fullpath'),"mainGUI")
@@ -12,22 +12,22 @@
 % [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 % cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 % cd(cf); close all hidden; clear all; userpath('clear');
-
+% 
 % close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/Log(24-Jan-2024_16_19_18).mat');
+log = LOGGER('./Data/修論初版/u_plain1212_1.mat');
 O_func = @(x,u) On3_1_new(x,u);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
-f_png=1;
-f_eps=1;
+f_png=0;
+f_eps=0;
 f_offset = 1;
 f_O = 0;
 f_wall = 0;
 f_PDAF = 0;
 %% ログ
 tspan = [0 ,100];
-maxt = 30;
+maxt = 20;
 dt = 0.01;
 % tspan = [0 99];xlim([0, maxt]);
 robot_p  = log.data(1,"p","p")';
@@ -343,6 +343,7 @@ if illustration == 1
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
+    ylim([-20 20]);
     lgd=legend('\it{psb_{xe}}','\it{psb_{ye}}','\it{psb_{ze}}','\it{psb_{x}}','\it{psb_{y}}','\it{psb_{z}}','FontSize', 18,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
@@ -469,6 +470,7 @@ if illustration == 1
     xlabel('time [s]','FontSize', 16);
     ylabel('Condition number \it{D}','FontSize', 16);
     xlim([0, maxt]);
+    ylim([0 1.8*10^(-18)])
     set(gca,'FontSize',14);
     fig41=figure(41);
     fig41.Color = 'white';
@@ -479,6 +481,7 @@ if illustration == 1
     plot(time,robot_p(1,:),'LineWidth', 2);
     plot(time,robot_p(2,:),'LineWidth', 2);
     plot(time,robot_p(3,:),'LineWidth', 2);
+    ylim([-1 2])
     lgd=legend('\it{x_r}','\it{y_r}','\it{z_r}','\it{x}','\it{y}','\it{z}','FontSize', 16,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
@@ -662,22 +665,22 @@ if f_png==1
 %         saveas(fig10, fullfile(pass2, 'EKF_qsu.png'));
 %         saveas(fig12, fullfile(pass2, 'EKF_instu.png'));
 %     end 
-pass2 = 'C:\Users\student\Desktop\Nozaki\noise'; %P:192.168.100.20 PC
-    saveas(fig7, fullfile(pass2, 'EKF_pos_n.png'));
-    saveas(fig8, fullfile(pass2, 'EKF_ang_n.png'));
-    saveas(fig18, fullfile(pass2, 'EKF_posAll_n.png'));
-    saveas(fig2, fullfile(pass2, 'EKF_angAll_n.png'));
-    saveas(fig11, fullfile(pass2, 'EKF_v_n.png'));
-    saveas(fig13, fullfile(pass2, 'EKF_w_n.png'));
-    saveas(fig14, fullfile(pass2, 'rankO_n.png'));
-    saveas(fig15, fullfile(pass2, 'minS_n.png'));
-    saveas(fig16, fullfile(pass2, 'Singular_Value_n.png'));
-    saveas(fig17, fullfile(pass2, 'S_15_18_n.png'));
-    saveas(fig31, fullfile(pass2, 'condN_n.png'));
+pass2 = 'C:\Users\student\Desktop\Nozaki\gaiyou'; %P:192.168.100.20 PC
+    saveas(fig7, fullfile(pass2, 'EKF_posu.png'));
+    saveas(fig8, fullfile(pass2, 'EKF_angu.png'));
+    saveas(fig18, fullfile(pass2, 'EKF_posAllu.png'));
+    saveas(fig2, fullfile(pass2, 'EKF_angAllu.png'));
+    saveas(fig11, fullfile(pass2, 'EKF_vu.png'));
+    saveas(fig13, fullfile(pass2, 'EKF_wu.png'));
+    saveas(fig14, fullfile(pass2, 'rankOu.png'));
+    saveas(fig15, fullfile(pass2, 'minSu.png'));
+    saveas(fig16, fullfile(pass2, 'Singular_Valueu.png'));
+    saveas(fig17, fullfile(pass2, 'S_15_18u.png'));
+    saveas(fig31, fullfile(pass2, 'condNu.png'));
     if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psb_n.png'));
-        saveas(fig10, fullfile(pass2, 'EKF_qs_n.png'));
-        saveas(fig12, fullfile(pass2, 'EKF_inst_n.png'));
+        saveas(fig9, fullfile(pass2, 'EKF_psbu.png'));
+        saveas(fig10, fullfile(pass2, 'EKF_qsu.png'));
+        saveas(fig12, fullfile(pass2, 'EKF_instu.png'));
     end   
 end
 if f_eps==1
@@ -722,35 +725,35 @@ if f_eps==1
 %     saveas(fig41, fullfile(pass2, 'refand_non.eps'), 'epsc');
 %     saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
 
-    pass2 = 'C:\Users\student\Desktop\Nozaki\noise'; %P:192.168.100.20 PC
-    saveas(fig7, fullfile(pass2, 'EKF_pos_n.eps'), 'epsc');
-    saveas(fig8, fullfile(pass2, 'EKF_ang_n.eps'), 'epsc');
-    saveas(fig18, fullfile(pass2, 'EKF_posAll_n.eps'), 'epsc');
-    saveas(fig2, fullfile(pass2, 'EKF_angAll_n.eps'), 'epsc');
-    saveas(fig11, fullfile(pass2, 'EKF_v_n.eps'), 'epsc');
-    saveas(fig13, fullfile(pass2, 'EKF_w_n.eps'), 'epsc');
-    saveas(fig14, fullfile(pass2, 'rankO_n.eps'), 'epsc');
-    saveas(fig15, fullfile(pass2, 'minS_n.eps'), 'epsc');
-    saveas(fig16, fullfile(pass2, 'Singular_Value_n.eps'), 'epsc');
-    saveas(fig17, fullfile(pass2, 'S_15_18_n.eps'), 'epsc');
-    saveas(fig31, fullfile(pass2, 'condN_n.eps'), 'epsc');
+    pass2 = 'C:\Users\student\Desktop\Nozaki\gaiyou'; %P:192.168.100.20 PC
+    saveas(fig7, fullfile(pass2, 'EKF_posu.eps'), 'epsc');
+    saveas(fig8, fullfile(pass2, 'EKF_angu.eps'), 'epsc');
+    saveas(fig18, fullfile(pass2, 'EKF_posAllu.eps'), 'epsc');
+    saveas(fig2, fullfile(pass2, 'EKF_angAllu.eps'), 'epsc');
+    saveas(fig11, fullfile(pass2, 'EKF_vu.eps'), 'epsc');
+    saveas(fig13, fullfile(pass2, 'EKF_wu.eps'), 'epsc');
+    saveas(fig14, fullfile(pass2, 'rankOu.eps'), 'epsc');
+    saveas(fig15, fullfile(pass2, 'minSu.eps'), 'epsc');
+    saveas(fig16, fullfile(pass2, 'Singular_Valueu.eps'), 'epsc');
+    saveas(fig17, fullfile(pass2, 'S_15_18u.eps'), 'epsc');
+    saveas(fig31, fullfile(pass2, 'condNu.eps'), 'epsc');
     if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psb_n.eps'), 'epsc');
-        saveas(fig10, fullfile(pass2, 'EKF_qs_n.eps'), 'epsc');
-        saveas(fig12, fullfile(pass2, 'EKF_inst_n.eps'), 'epsc');
+        saveas(fig9, fullfile(pass2, 'EKF_psbu.eps'), 'epsc');
+        saveas(fig10, fullfile(pass2, 'EKF_qsu.eps'), 'epsc');
+        saveas(fig12, fullfile(pass2, 'EKF_instu.eps'), 'epsc');
     end 
-    saveas(fig1, fullfile(pass2, 'input_n.eps'), 'epsc');
-    saveas(fig81, fullfile(pass2, 'input2_n.eps'), 'epsc');
-    saveas(fig41, fullfile(pass2, 'refand_n.eps'), 'epsc');
-    saveas(fig42, fullfile(pass2, 'refqand_n.eps'), 'epsc');
-    saveas(fig50, fullfile(pass2, 'P1_n.eps'), 'epsc');
-    saveas(fig51, fullfile(pass2, 'PE1_n.eps'), 'epsc');
-    saveas(fig52, fullfile(pass2, 'Q1_n.eps'), 'epsc');
-    saveas(fig53, fullfile(pass2, 'QE1_n.eps'), 'epsc');
-    saveas(fig54, fullfile(pass2, 'V1_n.eps'), 'epsc');
-    saveas(fig55, fullfile(pass2, 'VE1_n.eps'), 'epsc');
-    saveas(fig56, fullfile(pass2, 'W1_n.eps'), 'epsc');
-    saveas(fig57, fullfile(pass2, 'WE1_n.eps'), 'epsc');
+    saveas(fig1, fullfile(pass2, 'inputu.eps'), 'epsc');
+    saveas(fig81, fullfile(pass2, 'input2u.eps'), 'epsc');
+    saveas(fig41, fullfile(pass2, 'refand_non.eps'), 'epsc');
+    saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
+    saveas(fig50, fullfile(pass2, 'P1u.eps'), 'epsc');
+    saveas(fig51, fullfile(pass2, 'PE1u.eps'), 'epsc');
+    saveas(fig52, fullfile(pass2, 'Q1u.eps'), 'epsc');
+    saveas(fig53, fullfile(pass2, 'QE1u.eps'), 'epsc');
+    saveas(fig54, fullfile(pass2, 'V1u.eps'), 'epsc');
+    saveas(fig55, fullfile(pass2, 'VE1u.eps'), 'epsc');
+    saveas(fig56, fullfile(pass2, 'W1u.eps'), 'epsc');
+    saveas(fig57, fullfile(pass2, 'WE1u.eps'), 'epsc');
 % pass2 = 'C:\Users\student\Desktop\Nozaki\inputs'; %P:192.168.100.20 PC
 % % saveas(fig50, fullfile(pass2, 'P1.eps'), 'epsc');
 % % saveas(fig51, fullfile(pass2, 'PE1.eps'), 'epsc');

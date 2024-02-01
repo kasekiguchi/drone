@@ -97,12 +97,12 @@ agent.sensor.do = @sensor_do;
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
 % 
 % コントローラー
-agent.controller = HLC(agent,Controller_HL(dt));
+% agent.controller = HLC(agent,Controller_HL(dt));
 
 % コントローラー補正
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.3,"On3_1_new"));
-% agent.controller.do = @controller_do;
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.5,"On3_1_new"));
+agent.controller.do = @controller_do;
 
 %% Direct model
 % agent = DRONE;

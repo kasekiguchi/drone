@@ -33,11 +33,15 @@ function Lghn = CalculateLghn(file_name,est,name)
     O = O_func(x,u);
     g = G_RPY18(x,p);
     dhndx = zeros(size(O));
+    flag = 'Calc start'
     for i=1:n
         A = jacobian(O(:,i),x);
         dhndx = dhndx + (A * Vn(i));
+        i
     end
+    flag = 'Lghn start'
     Lghn = dhndx * g;
+    flag = 'function start'
     matlabFunction(Lghn,'File',strcat(file_name,".m"),'Vars',{x,u,p,Vn});
     Lghn=str2func('file_name');
 end
