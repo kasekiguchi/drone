@@ -11,7 +11,7 @@ clc;
 
 
 %% データのインポート
-load("1_24_sprine_7.mat") %読み込むデータファイルの設定
+load("1_24_sprine_91.mat") %読み込むデータファイルの設定
 % load("9_4_test.mat")
 
 for i = 1:find(log.Data.t,1,'last')

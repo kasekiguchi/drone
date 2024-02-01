@@ -18,20 +18,22 @@ function ref = generate_spline_curve_ref(loadedRef,order,fcmd)
 %手動で値を設定するとき(使わないときコメントアウトする)
 isManualSetting = 1;%手動でwaypointを作るとき1
 pointN = 5; %waypointの数
-dt = 4;%waypoint間の時間
+dt = 2;%waypoint間の時間
 time =  (0:dt:dt*(pointN-1))';
 % wp = [0,0,0;0.5*round(1*randn(pointN-1,3),3)];%waypointの設定初めは初期値0
 % wp = round(0.5*randn(pointN,3),3);%waypointの設定
 
-min_z = 0.6;
-max_z = 1.3;
-min_xy = -0.8;
-max_xy = 1.2;
+min_z = 0.5;
+max_z = 1.5;
+min_xy = -0.5;
+max_xy = 0.5;
 wp_xy = round((max_xy-min_xy).*rand(pointN,2) + min_xy,2);%waypointの設定
 wp_z = round((max_z-min_z).*rand(pointN,1) + min_z,1);%waypointの設定
 % wp_z = ones(5,1);
 wp_xy(1,1:2) = 0; %初期値の固定
-wp_z(1,1) = 1; %初期値の固定
+max_z1 = 1.2;
+min_z1 = 0.8;
+wp_z(1,1) = round((max_z1 - min_z1).*rand + min_z1,2); %初期値の固定
 waypoints = [time, wp_xy, wp_z];
 
     while 1
