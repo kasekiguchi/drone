@@ -68,11 +68,11 @@ methods
         %subsystem controller
         vep = obj.Vep(z1, z2, z3, z4);%serevoなし
         %servo
-        % if varargin{1}.t > 10
+        % if varargin{1}.t > 20
         %         obj.z = obj.z + xd(3)-x(7);
         % end
         % vep = obj.Vep(z1, z2, z3, z4,obj.z);
-        %z FTC+servo
+        % z FTC+servo
         % vep(1) = vep(1) - obj.param.F1s(5)*obj.z;
         %% calc actual input
         tmp = Uep(x, xd', vep, P);
