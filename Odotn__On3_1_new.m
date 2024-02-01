@@ -1,4 +1,4 @@
-function dhdx = sdotn__On3_1_new(in1,in2,in3,in4)
+function dhdx = Odotn__On3_1_new(in1,in2,in3,in4)
 %sdotn__On3_1_new
 %    DHDX = sdotn__On3_1_new(IN1,IN2,IN3,IN4)
 

@@ -1,4 +1,4 @@
-function sigmadotn = Calculate_sigmadotn(file_name,est,name)
+function Odotn = Calculate_Odotn(file_name,est,name)
 % Correct Obserbavility 用　Lghn計算
 % file_name 保存するファイル名
 % est 推定モデル
@@ -19,5 +19,5 @@ function sigmadotn = Calculate_sigmadotn(file_name,est,name)
     dhdx = Un * Odot * Vn;
     'function start'
     matlabFunction(dhdx,'File',strcat(file_name,".m"),'Vars',{x,u,Un,Vn});
-    sigmadotn=str2func('file_name');
+    Odotn=str2func('file_name');
 end

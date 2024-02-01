@@ -101,7 +101,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,
 
 % コントローラー補正
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.5,"On3_1_new"));
+agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.1,"F_RPY18","G_RPY18","On3_1_new"));
 agent.controller.do = @controller_do;
 
 %% Direct model

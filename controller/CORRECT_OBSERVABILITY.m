@@ -64,6 +64,8 @@ classdef CORRECT_OBSERVABILITY < handle
     dhdx
     eps
     K
+    F
+    G
     Obs
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
   end
@@ -74,12 +76,14 @@ classdef CORRECT_OBSERVABILITY < handle
       obj.est = self.estimator;
       obj.param = param;
       obj.dt = param.dt;
+      obj.F = param.F_func; % Lieによる可観測性行列の関数：引数(状態，入力)
+      obj.G = param.G_func; % Lieによる可観測性行列の関数：引数(状態，入力)
       obj.Obs = param.Obs_func; % Lieによる可観測性行列の関数：引数(状態，入力)
       obj.eps = param.eps; % 最少特異値の閾値
       obj.K = param.K; % チューニングパラメータK
-      ELfile=strcat("sdotn_",'_',param.funcname); % 推定モデルと可観測性行列の組み合わせから計算時利用するLghnの関数を作成するかの分岐
+      ELfile=strcat("Odotn_",'_',param.funcname3); % 推定モデルと可観測性行列の組み合わせから計算時利用するLghnの関数を作成するかの分岐
         if ~exist(ELfile,"file")
-            obj.dhdx=Calculate_sigmadotn(ELfile,obj.est,param.funcname);
+            obj.dhdx=Calculate_Odotn(ELfile,obj.est,param.funcname3);
         else
             obj.dhdx=str2func(ELfile);
         end
@@ -92,15 +96,13 @@ classdef CORRECT_OBSERVABILITY < handle
       x = [state.p;state.q;state.v;state.w;state.ps;state.qs];
       p = obj.self.parameter.get(); 
       u = obj.result.input;
-      [~,S,Vo] = svd(obj.Obs(x,u));
+      un = obj.self.controller.hlc.result.input;
+      [Uo,S,Vo] = svd(obj.Obs(x,u));
       if S(length(x)) < obj.eps % 可観測性行列の最小と閾値を比較して補正するか判定
-          D = obj.Lghn(x,u,p,Vo(:,length(x))); %
-          [~,~,Vd] = svd(D);
-          en = Vd(:,1); %誘導ノルムの性質よりD*enを最大にするenを右特異ベクトルより算出
-          De = D * en;
-          norm_De = norm(De, 2);
-          epsn = obj.K/(obj.dt * norm_De); % 係数行列の算出
-          obj.result.input = epsn * en;
+          Odotn = obj.dhdx(x,u,Uo(:,length(x),:)',Vo(:,length(x)));
+          LfOdotn = Odotn * obj.F(x,p);
+          LgOdotn = Odotn * obj.G(x,p);
+          en = pinv(LgOdotn) * [- obj.eps;- LfOdotn * obj.dt ; -LgOdotn*un];
           obj.result.input = obj.K * en;
       else
           obj.result.input = zeros(obj.self.estimator.model.dim(2),1);
