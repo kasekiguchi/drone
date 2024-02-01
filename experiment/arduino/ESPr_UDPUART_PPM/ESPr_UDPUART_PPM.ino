@@ -86,7 +86,6 @@ void connectToWiFi() // ---- setup connection to wifi
 
 void setupPPM() // ---------- setup ppm signal configuration
 {
-
   pinMode(OUTPUT_PIN, OUTPUT);
   digitalWrite(OUTPUT_PIN, LOW);
   pw[0] = CH_NEUTRAL; // roll
@@ -106,37 +105,44 @@ void setupPPM() // ---------- setup ppm signal configuration
   interrupts();
 }
 
-void receiveUDP() // ---------- loop function : receive signal by UDP
+
+void receive() // ---------- loop function : receive signal by UDP
 {
   // ch : 0 - 1000 is converted to 1000 - 2000 throttle on FC
+  // for UDP
+  int len = 0;
   int packetSize = udp.parsePacket();
-  if (packetSize)
-  {
-    int len = udp.read(packetBuffer, packetSize);
-    if (len > 0)
-    {
-      TOTAL_CH_W = 0;
-      for (i = 0; i < TOTAL_CH; i++)
-      {
-        pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]);
-        if (pw[i] < CH_MIN)
-        {
-          pw[i] = CH_MIN;
-        }
-        else if (pw[i] > CH_MAX)
-        {
-          pw[i] = CH_MAX;
-        }
+  if (packetSize){
+    len = udp.read(packetBuffer, packetSize);
+  }
+  else if (Serial.available() > 0) 
+  { // for UART
+    len = Serial.readBytes(packetBuffer, 2 * TOTAL_CH);
+  }
 
-        TOTAL_CH_W += pw[i];
-        /*Serial.print("pw[ ");
-        Serial.print(i);
-        Serial.print(" ]");
-        Serial.println(pw[i]);*/
+  // Common
+  if (len > 0){
+    TOTAL_CH_W = 0;
+    for (i = 0; i < TOTAL_CH; i++)
+    {
+      pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]);
+      if (pw[i] < CH_MIN)
+      {
+        pw[i] = CH_MIN;
+      }
+      else if (pw[i] > CH_MAX)
+      {
+        pw[i] = CH_MAX;
       }
 
-      start_H = PPM_PERIOD - TOTAL_CH_W - 8 * CH_OFFSET - 9 * TIME_LOW; // 9 times LOW time in each PPM period
+      TOTAL_CH_W += pw[i];
+      /*Serial.print("pw[ ");
+      Serial.print(i);
+      Serial.print(" ]");
+      Serial.println(pw[i]);*/
     }
+
+    start_H = PPM_PERIOD - TOTAL_CH_W - 8 * CH_OFFSET - 9 * TIME_LOW; // 9 times LOW time in each PPM period
   }
 }
 
