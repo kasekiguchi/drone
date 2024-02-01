@@ -1,7 +1,7 @@
 classdef NDT < handle
 % classdef NDT < MODEL_CLASS
     
-    properties
+    properties%eitimator class common
         result
         self
         model
@@ -9,7 +9,7 @@ classdef NDT < handle
         state
     end
 
-    properties
+    properties%for ndt calculation
         fixedSeg                     %pcregisterndtに使用する事前地図(PointCloud)
         tform                        %pcregisterndtから出てくる推定値(rigidform3d)
         initialtform                 %pcregisterndtに使用するマッチング探索位置，姿勢(rigidform3d)
@@ -62,14 +62,15 @@ classdef NDT < handle
             %コンストラクタでロボット初期位置の探索を行う
             if obj.matching_mode == "slam"                
                 obj.PCdata_use = obj.self.sensor.result.pc;
-                obj.fixedSeg = pointCloud(tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
+                % obj.fixedSeg = pointCloud(tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
+                obj.fixedSeg = pointCloud((initialtform.R*obj.PCdata_use.Location' + initialtform.Translation')') ;
                 initform = initialtform;
             else
                 % fixedSeg = pcread("fixmap_room_1.pcd"); %room map
                 % fixedSeg = pcread("fixmapv6.pcd")%廊下 map
                 load(obj.mapname);
                 obj.fixedSeg = fixedSeg;
-                %初期位置探索                
+                %初期位置探索
                 obj.PCdata_use = obj.self.sensor.result.pc;
                 initform = pcregisterndt(obj.PCdata_use,obj.fixedSeg,obj.gridstep, ...
                         "InitialTransform",initialtform,"OutlierRatio",0.1,"Tolerance",[0.01 0.1]);%マッチング
@@ -80,7 +81,7 @@ classdef NDT < handle
 
         function tform_add_odom(obj)
             %ローバーの加速度，角速度をuに入れてモデルの状態をする．
-            odom_data = obj.self.plant.connector.getData;
+            odom_data = obj.self.sensor.result.odom_data;
             u = [odom_data.linear.x,odom_data.angular.z]';%u
             zini = obj.model.state.get;
             B = [cos(zini(6)),0;sin(zini(6)),0;0,1]*obj.model.dt;
@@ -94,11 +95,18 @@ classdef NDT < handle
         end
 
 
-        function show(obj,logger)
-            %実機を動かした後，推定値をplot
-            %コマンド
-            %agent.estimator.show(logger)            
-            num_lim = logger.k - 1;            
+        function plot(obj,logger,save)
+            %推定値をplot
+            %logger=logger=LOGGER("filename.mat")%matデータからloggerを抽出
+            %mommand：
+            %agent.estimator.plot(logger,savemode)
+            %[savemode]
+            % 0:don't save to pdf
+            % 1:map_vs_trajectory save to pdf
+            % 2:RMSE save to pdf
+            % 1:map_vs_trajectory and RMSE save to pdf
+            ax = gca;ax.FontSize = 12;
+            num_lim = logger.k - 1;
             i=1;
             while(1)
                 if isfield(logger.Data.agent.estimator.result{1,i},"tform")
@@ -109,35 +117,48 @@ classdef NDT < handle
             end            
             mkmap = pctransform(logger.Data.agent.estimator.result{1,i}.ndtPCdata, ...
                 logger.Data.agent.estimator.result{1,i}.tform);
-            hold on
+            % hold on
             for j=i:num_lim
                 ndtPCdata = pctransform(logger.Data.agent.estimator.result{1,j}.ndtPCdata, ...
                     logger.Data.agent.estimator.result{1,j}.tform);    
-                mkmap = pcmerge(mkmap,ndtPCdata, 0.001);
+                mkmap = pcmerge(mkmap,ndtPCdata, 0.01);
             end
-            hold off
-            % figure
-            scatter(mkmap.Location(:,1),mkmap.Location(:,2),1);
-            xlabel('X');ylabel('Y');
-
-            figure
+            
             for j=i:num_lim
                 X(j) = logger.Data.agent.estimator.result{1,j}.tform.A(1,4) ;%+ 1;
                 Y(j) = logger.Data.agent.estimator.result{1,j}.tform.A(2,4);
-                % ndtx(j) = logger.Data.agent.estimator.result{1,j}.state.p(1,1);%+ 1;
-                % ndty(j) = logger.Data.agent.estimator.result{1,j}.state.p(2,1);
+                % prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) - logger.Data.agent.sensor.result{1,1}.state.p(1,1);
+                % prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) - logger.Data.agent.sensor.result{1,1}.state.p(2,1);
+                % rmse_x(j) = sqrt((X(j) - prime_x(j))^2);
+                % rmse_y(j) = sqrt((Y(j) - prime_y(j))^2);
             end
-            % figure
-            % plot(ndtx,ndty,'*-');
-            hold on
+            
             plot(X,Y,'o-')
+            hold on
+            % plot(prime_x,prime_y,'*-')
             grid on
-            xlabel(texlabel('X'));ylabel(texlabel('Y'));
-            if ~isfield(obj,"fixedSeg")                
+            xlabel(texlabel('x [m]'));ylabel(texlabel('y [m]'));
+            if ~isfield(obj,"fixedSeg")
                 obj.fixedSeg = mkmap;
-            end
-            % pcshow(obj.fixedSeg,BackgroundColor=[1 1 1],MarkerSize=12,ViewPlane="XY")
+            end            
             scatter(obj.fixedSeg.Location(:,1),obj.fixedSeg.Location(:,2),2,"filled");
+            legend("NDTestimate","prime","pcmap")
+            hold off
+            % figure;ax_rmse_x = gca;ax_rmse_x.FontSize = 12;
+            % bar(logger.Data.t(1:logger.k - i),rmse_x,0.75);xlabel(texlabel('time [sec]'));ylabel(texlabel('RMSE of X'));
+            % figure;ax_rmse_y = gca;ax_rmse_y.FontSize = 12;
+            % bar(logger.Data.t(1:logger.k - i),rmse_y,0.75);xlabel(texlabel('time [sec]'));ylabel(texlabel('RMSE of Y'));
+            switch save
+                case 1
+                    exportgraphics(ax,'exroom_0131_take3.pdf','ContentType','vector')
+                case 2
+                    exportgraphics(ax_rmse_x,'RMSE_X.pdf','ContentType','vector')
+                    exportgraphics(ax_rmse_y,'RMSE_Y.pdf','ContentType','vector')
+                case 3
+                    exportgraphics(ax,'map_vs_trajectory.pdf','ContentType','vector')
+                    exportgraphics(ax_rmse_x,'RMSE_X.pdf','ContentType','vector')
+                    exportgraphics(ax_rmse_y,'RMSE_Y.pdf','ContentType','vector')
+            end
         end
         
         % function result=do(obj,varargin)
