@@ -68,7 +68,7 @@ function result = controller_do(varargin)
         result = result.hlc;
     elseif varargin{2} == 'f'
         result = controller.mpc.do(varargin);
-    else
+    elseif varargin{2} == 'l'
         result = controller.hlc.do(varargin);
    end
     varargin{5}.controller.result = result;

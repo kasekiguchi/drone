@@ -123,7 +123,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
       
             %%
             obj.previous_input = var;
-            var;
+            var
             
             % 実機のときコメントイン--------------------------------------------
             if vara{2} == 'a'
@@ -147,7 +147,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             % obj.result.t(1,idx) = calT; %計算時間保存したいときコメントイン
 
             %% 保存するデータ
-            obj.result.weight = Param.weight;
+            % obj.result.weight = Param.weight;
             result = obj.result; % controllerの値の保存
 
             %% 情報表示
@@ -197,41 +197,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
                 xr(10:12, h+1) = [0;0;0];
                 xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
             end
-
-            % if obj.flag == 0
-            % % 時間関数の取得→時間を代入してリファレンス生成
-            %     RefTime = obj.self.reference.func;    % 時間関数の取得
-            %     for h = 0:obj.param.H-1
-            %         t = T + obj.param.dt * h; % reference生成の時刻をずらす
-            %         ref = RefTime(t);
-            %         xr(1:3, h+1) = ref(1:3);
-            %         xr(7:9, h+1) = ref(5:7);
-            %         xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-            %         xr(10:12, h+1) = [0;0;0];
-            %         xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
-            %     end
-            % else
-            %     for h = 0:obj.param.H-1
-            %         if obj.current_state(3) <= 0.75 && obj.current_state(1) <= 0
-            %             obj.changeflag = 1;
-            %         elseif obj.current_state(3) >= 0.95 && obj.current_state(1) >= 0.5
-            %             obj.changeflag = 0;
-            %         end
-            %         if obj.changeflag == 1
-            %             xr(1:3, h+1) = [0.5,0,1];
-            %             xr(7:9, h+1) = [0,0,0];
-            %             xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-            %             xr(10:12, h+1) = [0;0;0];
-            %             xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
-            %         else
-            %             xr(1:3, h+1) = [0,0,0.7];
-            %             xr(7:9, h+1) = [0,0,0];
-            %             xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-            %             xr(10:12, h+1) = [0;0;0];
-            %             xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
-            %         end
-            %     end
-            % end
         end
     end
 end

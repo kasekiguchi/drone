@@ -21,17 +21,17 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 %-------Modelがroll_pitch_yaw_thrust_force_physical_parameter_modelか確認--------------------
-% agent = DRONE;
-% agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
-% agent.parameter = DRONE_PARAM("DIATONE");
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
-% % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0;0;0],"g",[0;0;1],"h",[0;0;0],"j",[0;0;1]),5});
-% % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",60,"orig",[0;0;1],"size",[1,1,1]},"HL"});
-% % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
-% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
-% run("ExpBase");
+agent = DRONE;
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
+agent.parameter = DRONE_PARAM("DIATONE");
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0;0;0],"g",[0;0;1],"h",[0;0;0],"j",[0;0;1]),5});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",60,"orig",[0;0;1],"size",[1,1,1]},"HL"});
+% agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+run("ExpBase");
 
 %% クープマンモデルをプラントに設定する場合
 
@@ -40,26 +40,28 @@ initial_state.w = [0; 0; 0];
 % load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est') %実機モデル
 % % load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est')
 % load("EstimationResult_12state_1_18_Exp_sprine_est=cir_torque_incon.mat",'est') %sprineモデル
-load("EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat",'est') %sprine+今までの飛行データ
+% load("EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat",'est') %sprine+今までの飛行データ
 % load("EstimationResult_12state_1_31_Exp_sprineandhov_est=P2Pshape_torque_incon_Norm.mat",'est') %sprine、正規化
-% % % % 
-A = est.A;
-B = est.B;
-C = est.C;
-agent = DRONE;
-agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
-agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent));
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)),["p", "q"]));
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",20,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
-% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;0.7],"g",[0;0;1],"h",[0.5;0;0.7],"j",[0;0;1]),5});
-%fminconは4入力モデルで計算しないと遅い
-% agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
-agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
-
-run("ExpBase");
+% load("EstimationResult_12state_2_1_Exp_sprine100__torque_incon.mat",'est')
+% 
+% % % % % 
+% A = est.A;
+% B = est.B;
+% C = est.C;
+% agent = DRONE;
+% agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
+% agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent));
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+% % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)),["p", "q"]));
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+% % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",20,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
+% % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;0.7],"g",[0;0;1],"h",[0.5;0;0.7],"j",[0;0;1]),5});
+% %fminconは4入力モデルで計算しないと遅い
+% % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+% 
+% run("ExpBase");
 
 %% 実機データを用いてMPC回す場合
 

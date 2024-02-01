@@ -15,23 +15,37 @@ function [] = Graphplot(app)
     %------------------------------------------------------------------------------
     %% データのインポート
     
-    for i = 1:find(app.logger.Data.t,1,'last')
-        data.t(1,i) = app.logger.Data.t(i,1);                                      %時間t_estimator
-        data.phase(1,i) = app.logger.Data.phase(i,1);                              %フェーズ
-        data.p(:,i) = app.logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p_estimator
-        data.pr(:,i) = app.logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-        data.q(:,i) = app.logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角_estimator
-        data.v(:,i) = app.logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度_estimator
-        data.vr(:,i) = app.logger.Data.agent.reference.result{i}.state.v(:,1);     %速度_reference
-        data.w(:,i) = app.logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度_estimat
-        data.u(:,i) = app.logger.Data.agent.input{i}(:,1);                         %入力
-        data.error(:,i) = data.pr(:,i) - data.p(:,i);                              %error
-        % data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
+    % for i = 1:find(app.logger.Data.t,1,'last')
+    %     data.t(1,i) = app.logger.Data.t(i,1);                                      %時間t_estimator
+    %     data.phase(1,i) = app.logger.Data.phase(i,1);                              %フェーズ
+    %     data.p(:,i) = app.logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p_estimator
+    %     data.pr(:,i) = app.logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    %     data.q(:,i) = app.logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角_estimator
+    %     data.v(:,i) = app.logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度_estimator
+    %     data.vr(:,i) = app.logger.Data.agent.reference.result{i}.state.v(:,1);     %速度_reference
+    %     data.w(:,i) = app.logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度_estimat
+    %     data.u(:,i) = app.logger.Data.agent.input{i}(:,1);                         %入力
+    %     data.error(:,i) = data.pr(:,i) - data.p(:,i);                              %error
+    %     % data.te(:,i) = app.agent.controller.result.t(1,i);  %計算時間、シミュレーションのみ
+    % 
+    %     % data.pp(:,i) = app.logger.Data.agent.plant.result{i}.state.p(:,1);         %位置p_plant
+    %     % data.qp(:,i) = app.logger.Data.agent.plant.result{i}.state.q(:,1);         %姿勢角_plant
+    %     % data.vp(:,i) = app.logger.Data.agent.plant.result{i}.state.v(:,1);         %速度_plant
+    %     % data.wp(:,i) = app.logger.Data.agent.plant.result{i}.state.w(:,1);         %角速度_plant
+    % end
 
-        % data.pp(:,i) = app.logger.Data.agent.plant.result{i}.state.p(:,1);         %位置p_plant
-        % data.qp(:,i) = app.logger.Data.agent.plant.result{i}.state.q(:,1);         %姿勢角_plant
-        % data.vp(:,i) = app.logger.Data.agent.plant.result{i}.state.v(:,1);         %速度_plant
-        % data.wp(:,i) = app.logger.Data.agent.plant.result{i}.state.w(:,1);         %角速度_plant
+    for i = find(app.logger.Data.phase == 102,1,'first'):find(app.logger.Data.phase == 102,1,'last')
+        data.t(1,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.t(i,1);                                      %時間t
+        data.phase(1,i) = app.logger.Data.phase(i,1);                                                               %フェーズ
+        data.p(:,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+        data.pr(:,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+        data.q(:,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+        data.v(:,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+        data.vr(:,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.agent.reference.result{i}.state.v(:,1);     %速度_reference
+        data.w(:,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+        % data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+        data.u(:,i-find(app.logger.Data.phase == 102,1,'first')+1) = app.logger.Data.agent.input{i}(:,1);                         %入力
+        % data.error(:,i-find(log.Data.phase == 102,1,'first')+1) = data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) - data.p(:,i-find(log.Data.phase == 102,1,'first')+1);                                                               %error
     end
   
     % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
@@ -175,7 +189,8 @@ function [] = Graphplot(app)
     % title('Input u of agent1');
 
     subplot(2,num,5);
-    plot(data.t(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),data.u(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),'LineWidth',1);
+    % plot(data.t(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),data.u(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),'LineWidth',1);
+    plot(data.t,data.u(1,:),'LineWidth',1)
     xlabel('Time [s]');
     ylabel('Input_{thrust}');
     % ylabel('Input');
@@ -200,7 +215,8 @@ function [] = Graphplot(app)
     title('Input u of agent1','FontSize',12);
 
     subplot(2,num,6);
-    plot(data.t(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),data.u(2:end,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),'LineWidth',1);
+    % plot(data.t(1,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),data.u(2:end,find(data.phase == 102,1,'first'):find(data.phase == 102,1,'last')),'LineWidth',1);
+    plot(data.t,data.u(2:4,:),'LineWidth',1)
     xlabel('Time [s]');
     ylabel('Input_{torque}');
     hold on
