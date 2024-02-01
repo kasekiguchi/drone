@@ -5,16 +5,21 @@ Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
 Ac2 = diag(1,1);
 Bc2 = [0;1];
-Controller.F1=lqrd(Ac4,Bc4,diag([1000,100,10,1]),[0.01],dt);
-Controller.F1=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+
 % Controller.F1=lqrd(Ac4,Bc4,diag([100,10,0.01,1]),[1],dt);
 % Controller.F1=[56.8586  101.4052   54.6051   11.0586];%-4.0293 + 3.4920i,-4.0293 - 3.4920i,-2,-1
 % Controller.F1=[300  220.7778   82.2737   15.0030];%-4.0293 + 3.4920i,-4.0293 - 3.4920i,-2,-1
-Controller.F2=lqrd(Ac4,Bc4,diag([1000,100,10,1]),[0.01],dt);
-Controller.F3=lqrd(Ac4,Bc4,diag([1000,100,10,1]),[0.01],dt);
+% Controller.F1=lqrd(Ac4,Bc4,diag([100,100,10,1]),[0.01],dt);
+% Controller.F2=lqrd(Ac4,Bc4,diag([1000,100,10,1]),[0.01],dt);
+% Controller.F3=lqrd(Ac4,Bc4,diag([1000,100,10,1]),[0.01],dt);
+% Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
+
+Controller.F1=lqrd(Ac4,Bc4,diag([1000,10,10,1]),[0.01],dt);
+Controller.F2=lqrd(Ac4,Bc4,diag([500,10,10,1]),[0.01],dt);
+Controller.F3=lqrd(Ac4,Bc4,diag([500,10,10,1]),[0.01],dt);
 Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角 
+
 eF1=Controller.F1;
-% eF1(1)= 5*eF1(1);
 eF2=Controller.F2;
 eF3=Controller.F3;
 eF4=Controller.F4;
@@ -81,7 +86,7 @@ end
 
 Controller.dt = dt;
 Controller.type = "ELC";
-% eig(Ac4 - Bc4 * eF1)
+eig(Ac4 - Bc4 * eF1)
 % eig(Ac4 - Bc4 * eF2)
 % eig(Ac4 - Bc4 * eF3)
 % eig(Ac2 - Bc2 * eF4)

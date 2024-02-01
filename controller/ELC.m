@@ -7,6 +7,7 @@ properties
     Vep%線形化したシステムの仮想入力を生成する関数
     z
     tf
+    modelErrorInput
 end
 
 methods
@@ -27,18 +28,19 @@ methods
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.result.u = zeros(self.estimator.model.dim(2),1);
         obj.tf=0;
+        obj.modelErrorInput = THRUST2FORCE_TORQUE_FOR_MODEL_ERROR(self); % modelerror用
     end
 
     function result = do(obj ,varargin)
         % param (optional) : 構造体：物理パラメータP，ゲインF1-F4
-        if varargin{2}=="f"
-            if obj.tf==0
-                obj.tf = varargin{1}.t;
-            end
-            obj.result.ftime = varargin{1}.t - obj.tf;
-        else
-            obj.result.ftime = 0;
-        end
+        % if varargin{2}=="f"
+        %     if obj.tf==0
+        %         obj.tf = varargin{1}.t;
+        %     end
+        %     obj.result.ftime = varargin{1}.t - obj.tf;
+        % else
+        %     obj.result.ftime = 0;
+        % end
 
         model = obj.self.estimator.result;
         ref = obj.self.reference.result;
@@ -83,7 +85,10 @@ methods
         obj.result.z3 = z3;
         obj.result.z4 = z4;
         % max,min are applied for the safty
-        obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
+        tmp(1) = x(14);
+        tmp = obj.modelErrorInput.do([],[],[],[],tmp,[]);
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
+        % obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
         result = obj.result;
     end
 

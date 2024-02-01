@@ -25,11 +25,14 @@ classdef THRUST2FORCE_TORQUE_FOR_MODEL_ERROR < handle
             end
             IT = [1 1 1 1;-p.ly, -p.ly, (p.Ly - p.ly), (p.Ly - p.ly); p.lx, -(p.Lx-p.lx), p.lx, -(p.Lx-p.lx); p.km1, -p.km2, -p.km3, p.km4];
             IT_m = [1 1 1 1;-m.ly, -m.ly, (m.Ly - m.ly), (m.Ly - m.ly); m.lx, -(m.Lx-m.lx), m.lx, -(m.Lx-m.lx); m.km1, -m.km2, -m.km3, m.km4];
+            obj.IT=IT;
+            obj.IT_m=IT_m;
             obj.T2T2T=IT_m/IT;
         end
         
         function u = do(obj,~,~,~,~,self,~)
-            input = self.controller.result.input;
+            % input = self.controller.result.input;
+            input = self;
             u=obj.T2T2T*input;
             obj.result = u;
         end

@@ -1,18 +1,21 @@
 %% make folder&save
+%TODO------------------------
+%plotに必要なところだけ抜き取ったファイルを作成するプログラムを追加する．
+%------------------------
     %変更しない
-    ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
+    % ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
     % ExportFolder='C:\Users\Students\Documents\work2023\momose';%実験用pcのパス
-    % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+    ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
     % ExportFolder='C:\Users\81809\OneDrive\ドキュメント\GitHub\drone\Data';
     % ExportFolder='Data';%github内
     DataFig='data';%データか図か
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
-    subfolder='exp';%sim or exp
-    ExpSimName='ELHLchange_CanSaveEst';%実験,シミュレーション名
+    subfolder='sim';%sim or exp
+    ExpSimName='23TADR_sim';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='addingTtoEL3';%実験,シミュレーション内容
+    contents='LS_EL_pdst_hover';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
@@ -22,16 +25,21 @@
         mkdir(FolderNamef);
         addpath(genpath(ExportFolder));
     
-    % save logger and agent
-        logger_contents=strcat('log_',contents);
-        SaveTitle=strcat(date,'_',logger_contents);    
-        eval([logger_contents '= gui.logger;']);%loggerの名前をlogger_contentsに変更
-        save(fullfile(FolderNamed, SaveTitle),logger_contents);
-      
-        agent_contents=strcat('agent_',contents);
-        SaveTitle2=strcat(date,'_',agent_contents);
-        eval([agent_contents '=gui.agent;']);%agentの名前をagent_contentsに変更
-        save(fullfile(FolderNamed, SaveTitle2),agent_contents);
+    % save logger, simple logger and agent
+        agentContents=strcat('agent_',contents);
+        SaveTitle2=strcat(date,'_',agentContents);
+        eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
+        save(fullfile(FolderNamed, SaveTitle2),agentContents);
+
+        loggerContents=strcat('log_',contents);
+        SaveTitle=strcat(date,'_',loggerContents);    
+        eval([loggerContents '= gui.logger;']);%loggerの名前をlogger_contentsに変更
+        save(fullfile(FolderNamed, SaveTitle),loggerContents);
+        
+        simpleLoggerContents = strcat('simple_',loggerContents);
+        simpleSaveTitle=strcat(date,'_',simpleLoggerContents);    
+        eval([simpleLoggerContents,'= simplifyLogger(',loggerContents,');']);
+        save(fullfile(FolderNamed, simpleSaveTitle),simpleLoggerContents);
 
     %savefig
 %     SaveTitle=strcat(date,'_',ExpSimName);

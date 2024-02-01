@@ -4,15 +4,18 @@ function Controller = Controller_FT(dt, fApprox_FTxy, fNewParam, fConfirmFig)
             % fNewParam 新しく更新する場合: 1
             % fConfirmFig 近似入力のfigureを確認するか: 1
             % alp = [0.9,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
-            alp = [0.8,0.82,0.82,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
+            alp = [0.85,0.85,0.85,0.85];%alphaの値 0.85より大きくないと吹っ飛ぶ恐れがある.
 
             %1.近似範囲を決める2.a,bで調整(bの大きさを大きくするとFTからはがれにくくなる．aも同様だがFT,LSの近似範囲を見て調整)
             %zを近似する
             x0 = [50, 0.01];%最小化の初期値
-            r=0.05;%緩和区間
+            r=0.01;%緩和区間
             ar = [1, 1];%近似に使う区間
             % br=[1.8,1.6];%制約の大きさ, 最小は0(a=0.88)
-            br=[1.2,1];%制約の大きさ, 最小は0
+            br=[5,3];%制約の大きさ, 最小は0
+            % % 実機
+            % r = 0.05;
+            % br=[1.2,1];%制約の大きさ, 最小は0
 
             %xyを近似する場合
             %x方向
@@ -29,9 +32,9 @@ Ac2 = [0, 1; 0, 0];
 Bc2 = [0; 1];
 Ac4 = diag([1, 1, 1], 1);
 Bc4 = [0; 0; 0;1];
-Controller.F1 = lqrd(Ac2, Bc2, diag([100, 1]), [0.1], dt);% zdiag([100,1])
-Controller.F2 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
-Controller.F3 = lqrd(Ac4, Bc4, diag([100, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
+Controller.F1 = lqrd(Ac2, Bc2, diag([1000, 1]), [0.1], dt);% zdiag([100,1])
+Controller.F2 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % xdiag([100,10,10,1])
+Controller.F3 = lqrd(Ac4, Bc4, diag([500, 10, 10, 1]), [0.01], dt); % ydiag([100,10,10,1])
 Controller.F4 = lqrd(Ac2, Bc2, diag([100, 10]), [0.1], dt); % ヨー角
 
 vF1 = Controller.F1;
@@ -56,10 +59,10 @@ Controller.ax = alpha(1:4,2);
 Controller.ay = alpha(1:4,3);
 Controller.apsi = alpha(1:2, 4);
 %各サブシステムでalpを変える場合
-Controller.az = alpha(3:4, 1);
-Controller.ax = alpha(1:4,2);
-Controller.ay = alpha(1:4,3);
-Controller.apsi = alpha(3:4, 4);
+% Controller.az = alpha(3:4, 1);
+% Controller.ax = alpha(1:4,2);
+% Controller.ay = alpha(1:4,3);
+% Controller.apsi = alpha(3:4, 4);
 az =Controller.az ;
 ax =Controller.ax ;
 ay =Controller.ay;

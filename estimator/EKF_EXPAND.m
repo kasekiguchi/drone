@@ -58,14 +58,16 @@ classdef EKF_EXPAND < handle
           else
             dt = obj.dt;
           end
-            if ~isprop(obj.self.sensor.result.state,"Trs")
-                addprop(obj.self.sensor.result.state,"Trs");
-            end
+            % コントローラを同時に回すとき
+            % if ~isprop(obj.self.sensor.result.state,"Trs")
+            %     addprop(obj.self.sensor.result.state,"Trs");
+            % end
             sensor = obj.self.sensor.result;
-            sensor.state.Trs = [obj.self.controller.hlc.result.input(1);0];
-            if sensor.state.Trs(1) < obj.mglim
-                sensor.state.Trs = [obj.mglim;0];
-            end
+            % sensor.state.Trs = [obj.self.controller.hlc.result.input(1);0];
+            % if sensor.state.Trs(1) < obj.mglim
+            %     sensor.state.Trs = [obj.mglim;0];
+            % end
+
             state_convert(sensor.state,obj.y);% sensorの値をy形式に変換
             x = obj.result.state.get(); % estimated state at previous step
             % Pre-estimation

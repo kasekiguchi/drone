@@ -7,6 +7,7 @@ properties
     parameter_name = ["mass", "Lx", "Ly", "lx", "ly", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4"];
     Vf
     Vs
+    modelErrorInput
 end
 
 methods
@@ -18,6 +19,7 @@ methods
         obj.result.input = zeros(self.estimator.model.dim(2),1);
         obj.Vf = obj.param.Vf; % 階層１の入力を生成する関数ハンドル
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
+        obj.modelErrorInput = THRUST2FORCE_TORQUE_FOR_MODEL_ERROR(self); % modelerror用
     end
 
     function result = do(obj,varargin)
@@ -72,6 +74,7 @@ methods
         obj.result.z2 = z2;
         obj.result.z3 = z3;
         obj.result.z4 = z4;
+        tmp = obj.modelErrorInput.do([],[],[],[],tmp,[]);
         obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         % obj.result.input = tmp;
         result = obj.result;

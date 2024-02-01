@@ -13,11 +13,11 @@ fF=1;%flightのみは１
 %どの時間の範囲を描画するか指定   
 % startTime = 0;
 % endTime = 100;
-startTime = 0;
+startTime = 10;
 endTime = 1E3;
 %HLとELの切り換える関数
-    log1=changeResult(log_addingTtoEL3,"hlc");
-    log2=changeResult(log_addingTtoEL3, "elc");
+    % log1=changeResult(log_addingTtoEL3,"hlc");
+    % log2=changeResult(log_addingTtoEL3, "elc");
     loggers = {
                 % log_saddle,...
                 % log_sadlle_FTxy
@@ -52,14 +52,26 @@ endTime = 1E3;
                 % log_FTonly
                 % log_FT
                 % log_second
-                log1,log2
+                % log1,log2
                 % log_addingTtoEL
+                % log_LS_ME_lx10_ly30_mass50,log_FT_ME_lx10_ly30_mass50,...
+                % log_LS3_EL_ME_lx10_ly30_mass50,log_FT3_EL_ME_lx10_ly30_mass50
 
-
+                % log_LS_HL_pdst,log_FT_HL_pdst,...
+                % log_LS_EL_pdst,log_FT_EL_pdst
+                % simple_log_LS_HL_pdst,simple_log_FT_HL_pdst,...
+                % simple_log_LS_EL_pdst,simple_log_FT_EL_pdst
+                % log_LS_EL_pdst_hover,log_FT_EL_pdst_hover
+                % log_LS_HL_pdst_hover,log_FT_HL_pdst_hover
+                simple_log_LS_HL_pdst_hover,simple_log_FT_HL_pdst_hover,simple_log_LS_EL_pdst_hover,simple_log_FT_EL_pdst_hover
+               % 
+                % simple_log_LS_EL_pdst_hover,simple_log_FT_EL_pdst_hover
+                % simple_log_FT_EL_pdst_hover
                 % gui.logger
         };
     c=[
-        "HL","IOL"
+        % "HL","IOL"
+        "HLLS","HLFT","ELLS","ELFT"
         % "FTservoZ","FTservoZn1"
         % "HLLS"l
         % "HLFTservo"
@@ -77,7 +89,10 @@ endTime = 1E3;
      % n=[1:16,18 20:24];
      % n = [1:17,24];
      % n = [1:11];
-     n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     % n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
+     % n=["t_p","t_x","t_y","t_z","error","t_errx","t_erry","t_errz","input","Trs","attitude","velocity","angular_velocity","x_y" ,"three_D","z1","z2","z3","z4","uHL"];%,"F1z1","F2z2","F3z3","F4z4"];
+     % n = ["error","xrmse","yrmse","zrmse","rmse","inputsum","inputsumT","inputsumTq"];
+     n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"];
      % n=["t_errx","t_erry","t_errz","three_D"];
      % n=["t_p","input","u","Trs","attitude","velocity","angular_velocity"];
      % n = "inner_input";
@@ -93,13 +108,17 @@ endTime = 1E3;
 % multiFigure.layout = {[2,2],[2,3]};
 % multiFigure.title = [" subsystem","vinput poly"];%[" state", " subsystem"];%title name
 
+nM = {["t_p","xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"]};%比較するとき複数まとめる
+multiFigure.layout = {[2,4]};
+multiFigure.title = ["bars"];%[" state", " subsystem"];%title name
+
 % nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
 % multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
 % multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
 
-nM = {["t_x" ,"t_y" ,"t_z","t_vx" ,"t_vy" ,"t_vz"],["t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"],["t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
-multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
-multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
+% nM = {["t_x" ,"t_y" ,"t_z","t_vx" ,"t_vy" ,"t_vz"],["t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"],["t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
+% multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
+% multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
 
 % nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
 % multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
@@ -119,7 +138,7 @@ multiFigure.f = fMul;
 
 option.lineWidth = 2;%linewidth
 option.fontSize = 18;%デフォルト9，フォントサイズ変更
-option.legendColumns = 2;
+option.legendColumns = 4;
 option.aspect = [];
 option.camposition = [];
 % option.fExp = fExp;
@@ -141,7 +160,12 @@ addingContents.camposition = [-45,-45,60];
 %data setting
 %図:[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
 figName=["t_p" "x_y" "t_x" "t_y" "t_z" "error" "input" "attitude" "velocity" "angular_velocity" "three_D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma" "pp" "pv" "pq" "pw" "Trs"];
-[allData,RMSE] = dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime);
+if isa(loggers{1},'LOGGER')
+    [allData,RMSE] = dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime);
+else
+    [allData,RMSE] = dataSummarize2(loggers, c, option, addingContents, fF, startTime, endTime);
+end
+% 
 % for i =1:2
 %     zm1(i)=max(abs(allData.z1{1, 1}.y{1, 1}(i,:)));
 %     zm4(i)=max(abs(allData.z4{1, 1}.y{1, 1}(i,:)));
@@ -172,6 +196,7 @@ figName=["t_p" "x_y" "t_x" "t_y" "t_z" "error" "input" "attitude" "velocity" "an
 %=====================================================
 
 %plot
+tic
 if multiFigure.f == 1 && fspider ~=1%multiFigure
     for mfn = 1: multiFigure.num
         f(mfn)=figure('name',multiFigure.title(mfn));
@@ -181,12 +206,9 @@ if multiFigure.f == 1 && fspider ~=1%multiFigure
         tpolt.TileSpacing = multiFigure.tileSpacing;%tight';%  'compact';
         % nMT = nM{mfn}';    
         for fN = 1:length(nM{mfn}) 
-                nexttile
-                % plot_data_multi(allData.(figName(nM{mfn}(fN))), multiFigure);
-                plot_data_multi(allData.(nM{mfn}(fN)), multiFigure);
-                % plot_data_multi(allData.(nMT(fN)), multiFigure);
+            nexttile
+            plot_data_multi(allData.(nM{mfn}(fN)), multiFigure);
         end
-        % copygraphics(f(mfn))
         if ~isempty(LSorFT)
             title(tpolt,option.titleName+ multiFigure.title(1,mfn));
             option.titleName = LSorFT;
@@ -194,12 +216,8 @@ if multiFigure.f == 1 && fspider ~=1%multiFigure
     end
 elseif multiFigure.f ~= 1&&fspider ~=1 %singleFigure
      for fN = 1:length(n) 
-         % f(n(fN))  = figure('Name',figName(n(fN)));
-          % plot_data_single(fN, figName(n(fN)), allData.(figName(n(fN))));
-          % f(n(fN))  = figure('Name',n(fN));
           f(fN)  = figure('Name',n(fN));
           plot_data_single(fN, n(fN), allData.(n(fN)));
-          % plot_data_single(fN, figName(n(fN)), allData.(n(fN)));
      end
 elseif fspider ==1
     %x,dx,ddx,dddx,rmse
@@ -209,17 +227,17 @@ elseif fspider ==1
 %     figName = ["angle_angleVel","angle_vel","pv","input","qw_RMSE","pv_RMSE"];%%
     %legend
     AL={{'$x$', '$dx$', '$ddx$', '$dddx$'},...
-         {'$\theta_{roll}$ [rad]', '$\theta_{pitch}$ [rad]', '$\theta_{yaw}$ [rad]','$w_{roll}$ [rad/s]', '$w_{pitch}$ [rad/s]', '$w_{yaw}$ [rad/s]'},...
-         {'$w_{roll}$ [rad/s]', '$w_{pitch}$ [rad/s]', '$w_{yaw}$ [rad/s]'},...
-         {'$error_x$ [m]','$error_y$ [m]','$error_z$ [m]','$x$ RMSE [m]','$y$ RMSE [m]','$z$ RMSE [m]'},...
-         {'$x$ [m]','$y$ [m]','$z$ [m]'}, ...
-         {'$v_x$ [m/s]','$v_y$ [m/s]','$v_z$ [m/s]'}, ...
-         {'$x$ [m]','$y$ [m]','$z$ [m]','$v_x$ [m/s]','$v_y$ [m/s]','$v_z$ [m/s]'},...
+         {'$\theta_{roll}$ (rad)', '$\theta_{pitch}$ (rad)', '$\theta_{yaw}$ (rad)','$w_{roll}$ (rad/s)', '$w_{pitch}$ (rad/s)', '$w_{yaw}$ (rad/s)'},...
+         {'$w_{roll}$ (rad/s)', '$w_{pitch}$ (rad/s)', '$w_{yaw}$ (rad/s)'},...
+         {'$error_x$ (m)','$error_y$ (m)','$error_z$ (m)','$x$ RMSE (m)','$y$ RMSE (m)','$z$ RMSE (m)'},...
+         {'$x$ (m)','$y$ (m)','$z$ (m)'}, ...
+         {'$v_x$ (m/s)','$v_y$ (m/s)','$v_z$ (m/s)'}, ...
+         {'$x$ (m)','$y$ (m)','$z$ (m)','$v_x$ (m/s)','$v_y$ (m/s)','$v_z$ (m/s)'},...
          {'$y$', '$dy$', '$ddy$', '$dddy$'},...
          {'$z$', '$x$', '$y$', '$yaw$'},...
-         {'rotor$1$ [N]', 'rotor$2$ [N]', 'rotor$3$ [N]', 'rotor$4$ [N]'},...
-         {'$\theta_{roll}$  [rad]','$\theta_{pitch}$  [rad]','$\theta_{yaw}$  [rad]'},...%          {'$\theta_{roll}$  [rad]','$\theta_{pitch}$  [rad]','$\theta_{yaw}$  [rad]','$w_{roll}$  [rad/s]','$w_{pitch}$  [rad/s]','$w_{yaw}$  [rad/s]'},...
-         {'$x$  [m]','$y$  [m]','$z$  [m]'}};%{'$x$  [m]','$y$  [m]','$z$  [m]','$v_x$  [m/s]','$v_y$  [m/s]','$v_z$  [m/s]'}
+         {'rotor$1$ (N)', 'rotor$2$ (N)', 'rotor$3$ (N)', 'rotor$4$ (N)'},...
+         {'$\theta_{roll}$  (rad)','$\theta_{pitch}$  (rad)','$\theta_{yaw}$  (rad)'},...%          {'$\theta_{roll}$  (rad)','$\theta_{pitch}$  (rad)','$\theta_{yaw}$  (rad)','$w_{roll}$  (rad/s)','$w_{pitch}$  (rad/s)','$w_{yaw}$  (rad/s)'},...
+         {'$x$  (m)','$y$  (m)','$z$  (m)'}};%{'$x$  (m)','$y$  (m)','$z$  (m)','$v_x$  (m/s)','$v_y$  (m/s)','$v_z$  (m/s)'}
     legend_str = c;
     lengthFN=length(figName);
     P =cell(1,lengthFN);
@@ -295,7 +313,7 @@ elseif fspider ==1
             set(gca,'FontSize',FS)
      end
 end
-
+toc
 %             'AxesLimits', [ALmin(fN)*ones(1,lAL); ALmax(fN)*ones(1,lAL)],...
 
 
@@ -366,7 +384,8 @@ SaveTitle=strings(1,1);
 end
 %% functions
 function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime)
-        if fF==1
+    tic  
+    if fF==1
             logNum = length(loggers);
             for i = 1:logNum
                 t{i} = loggers{i}.Data.t';
@@ -529,10 +548,10 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
                     z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z2;
                     z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z3;
                     z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.z4;
-                    F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
-                    F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
-                    F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
-                    F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
+                    % F1z1{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F1z1;
+                    % F2z2{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F2z2;
+                    % F3z3{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F3z3;
+                    % F4z4{i}(:,j)=loggers{i}.Data.agent.controller.result{1, i2}.F4z4;
                     j=j+1;
                     end
             end
@@ -589,58 +608,58 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
         % Rc = mat2cell(Rc,1,ones(1,length(Rc)));
         Rc = num2cell(Rc);
         CC = num2cell(c);
-        allData.t_p = {struct('x',{[time{1},time]},'y',{[ref,est]}), struct('x','time [s]','y','position [m]'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
-        allData.x_y = {struct('x',{[refx,estx]},'y',{[refy,esty]}), struct('x','$x$ [m]','y','$y$ [m]'),Rc,add_option(["aspect"],option,addingContents)};
-        allData.x_z = {struct('x',{[refx,estx]},'y',{[refz,estz]}), struct('x','$x$ [m]','y','$z$ [m]'),Rc,add_option(["aspect"],option,addingContents)};
-        allData.y_z = {struct('x',{[refy,esty]},'y',{[refz,estz]}), struct('x','$x$ [m]','y','$z$ [m]'),Rc,add_option(["aspect"],option,addingContents)};
-        allData.t_x = {struct('x',{[time{1},time]},'y',{[refx,estx]}), struct('x','time [s]','y','$x$ [m]'),Rc,add_option([],option,addingContents)};
-        allData.t_y = {struct('x',{[time{1},time]},'y',{[refy,esty]}), struct('x','time [s]','y','$y$ [m]'),Rc,add_option([],option,addingContents)};
-        allData.t_z = {struct('x',{[time{1},time]},'y',{[refz,estz]}), struct('x','time [s]','y','$z$ [m]'),Rc,add_option([],option,addingContents)};
-        allData.error = { struct('x',{time},'y',{err}), struct('x','time [s]','y','error [m]'), LgndCrt(["$x$","$y$","$z$"],c),add_option([],option,addingContents)};
-        allData.t_errx = {struct('x',{time},'y',{errx}), struct('x','time [s]','y','error $x$ [m]'),CC,add_option([],option,addingContents)};
-        allData.t_erry = {struct('x',{time},'y',{erry}), struct('x','time [s]','y','error $y$ [m]'),CC,add_option([],option,addingContents)};
-        allData.t_errz = {struct('x',{time},'y',{errz}), struct('x','time [s]','y','error $z$ [m]'),CC,add_option([],option,addingContents)};
+        allData.t_p = {struct('x',{[time{1},time]},'y',{[ref,est]}), struct('x','time (s)','y','position (m)'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
+        allData.x_y = {struct('x',{[refx,estx]},'y',{[refy,esty]}), struct('x','$x$ (m)','y','$y$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.x_z = {struct('x',{[refx,estx]},'y',{[refz,estz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.y_z = {struct('x',{[refy,esty]},'y',{[refz,estz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.t_x = {struct('x',{[time{1},time]},'y',{[refx,estx]}), struct('x','time (s)','y','$x$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.t_y = {struct('x',{[time{1},time]},'y',{[refy,esty]}), struct('x','time (s)','y','$y$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.t_z = {struct('x',{[time{1},time]},'y',{[refz,estz]}), struct('x','time (s)','y','$z$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.error = { struct('x',{time},'y',{err}), struct('x','time (s)','y','error (m)'), LgndCrt(["$x$","$y$","$z$"],c),add_option([],option,addingContents)};
+        allData.t_errx = {struct('x',{time},'y',{errx}), struct('x','time (s)','y','error $x$ (m)'),CC,add_option([],option,addingContents)};
+        allData.t_erry = {struct('x',{time},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),CC,add_option([],option,addingContents)};
+        allData.t_errz = {struct('x',{time},'y',{errz}), struct('x','time (s)','y','error $z$ (m)'),CC,add_option([],option,addingContents)};
       
          % if fExp ==1
-            allData.input = { struct('x',{time},'y',{inp}), struct('x','time [s]','y','input [N]'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
-            allData.u = { struct('x',{time},'y',{u}), struct('x','time [s]','y','input [N]'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
+            allData.input = { struct('x',{time},'y',{inp}), struct('x','time (s)','y','input (N)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
+            allData.u = { struct('x',{time},'y',{u}), struct('x','time (s)','y','input (N)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
         % else
-        %     allData.input = { struct('x',{time},'y',{inp}), struct('x','time [s]','y','input [N]'), LgndCrt(["1 ","2 ","3 ","4","dst"],c),add_option([],option,addingContents)};
+        %     allData.input = { struct('x',{time},'y',{inp}), struct('x','time (s)','y','input (N)'), LgndCrt(["1 ","2 ","3 ","4","dst"],c),add_option([],option,addingContents)};
         % end
-        allData.inner_input = { struct('x',{time},'y',{ininp}), struct('x','time [s]','y','inner input'), LgndCrt(["roll", "pitch", "thrst", "yaw", "5", "6", "7", "8"],c),add_option([],option,addingContents)};
-        allData.attitude = {struct('x',{time},'y',{att}), struct('x','time [s]','y','attitude [rad]'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};
-        allData.t_qroll = {struct('x',{time},'y',{qroll}), struct('x','time [s]','y','$q_{roll}$ [rad]'),CC,add_option([],option,addingContents)};
-        allData.t_qpitch = {struct('x',{time},'y',{qpitch}), struct('x','time [s]','y','$q_{pitch}$ [rad]'),CC,add_option([],option,addingContents)};
-        allData.t_qyaw = {struct('x',{time},'y',{qyaw}), struct('x','time [s]','y','$q_{yaw}$ [rad]'),CC,add_option([],option,addingContents)};
-        allData.velocity = {struct('x',{time},'y',{vel}), struct('x','time [s]','y','velocity[m/s]'), LgndCrt(["$x$","$y$","$z$"],c),add_option([],option,addingContents)};
-        allData.t_vx = {struct('x',{time},'y',{vx}), struct('x','time [s]','y','$v_x$ [m/s]'),CC,add_option([],option,addingContents)};
-        allData.t_vy = {struct('x',{time},'y',{vy}), struct('x','time [s]','y','$v_y$ [m/s]'),CC,add_option([],option,addingContents)};
-        allData.t_vz = {struct('x',{time},'y',{vz}), struct('x','time [s]','y','$v_z$ [m/s]'),CC,add_option([],option,addingContents)};
-        allData.angular_velocity = { struct('x',{time},'y',{w}), struct('x','time [s]','y','angular velocity[rad/s]'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};
-        allData.t_wroll = {struct('x',{time},'y',{wroll}), struct('x','time [s]','y','$w_{roll}$ [rad/s]'),CC,add_option([],option,addingContents)};
-        allData.t_wpitch = {struct('x',{time},'y',{wpitch}), struct('x','time [s]','y','$w_{pitch}$ [rad/s]'),CC,add_option([],option,addingContents)};
-        allData.t_wyaw = {struct('x',{time},'y',{wyaw}), struct('x','time [s]','y','$w_{yaw}$ [rad]/s'),CC,add_option([],option,addingContents)};
-        allData.three_D = {struct('x',{[refx,estx]},'y',{[refy,esty]},'z',{[refz,estz]}), struct('x','$x$ [m]','y','$y$ [m]','z','$z$ [m]'), Rc,add_option(["aspect","camposition"],option,addingContents)};
-        allData.uHL = { struct('x',{time},'y',{uHL}), struct('x','time [s]','y','inputHL'), LgndCrt(["$z$ ","$x$ ","$y$ ","$\psi$"],c),add_option([],option,addingContents)};
-        allData.Trs = {struct('x',{time},'y',{Trs}), struct('x','time [s]','y','Tr [N] dTr [N/s] ddTr [N/$\rm{s^2}$]'), LgndCrt(["$Tr$","$dTr$"],c),add_option([],option,addingContents)};
+        allData.inner_input = { struct('x',{time},'y',{ininp}), struct('x','time (s)','y','inner input'), LgndCrt(["roll", "pitch", "thrst", "yaw", "5", "6", "7", "8"],c),add_option([],option,addingContents)};
+        allData.attitude = {struct('x',{time},'y',{att}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};
+        allData.t_qroll = {struct('x',{time},'y',{qroll}), struct('x','time (s)','y','$q_{roll}$ (rad)'),CC,add_option([],option,addingContents)};
+        allData.t_qpitch = {struct('x',{time},'y',{qpitch}), struct('x','time (s)','y','$q_{pitch}$ (rad)'),CC,add_option([],option,addingContents)};
+        allData.t_qyaw = {struct('x',{time},'y',{qyaw}), struct('x','time (s)','y','$q_{yaw}$ (rad)'),CC,add_option([],option,addingContents)};
+        allData.velocity = {struct('x',{time},'y',{vel}), struct('x','time (s)','y','velocity(m/s)'), LgndCrt(["$x$","$y$","$z$"],c),add_option([],option,addingContents)};
+        allData.t_vx = {struct('x',{time},'y',{vx}), struct('x','time (s)','y','$v_x$ (m/s)'),CC,add_option([],option,addingContents)};
+        allData.t_vy = {struct('x',{time},'y',{vy}), struct('x','time (s)','y','$v_y$ (m/s)'),CC,add_option([],option,addingContents)};
+        allData.t_vz = {struct('x',{time},'y',{vz}), struct('x','time (s)','y','$v_z$ (m/s)'),CC,add_option([],option,addingContents)};
+        allData.angular_velocity = { struct('x',{time},'y',{w}), struct('x','time (s)','y','angular velocity(rad/s)'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};
+        allData.t_wroll = {struct('x',{time},'y',{wroll}), struct('x','time (s)','y','$w_{roll}$ (rad/s)'),CC,add_option([],option,addingContents)};
+        allData.t_wpitch = {struct('x',{time},'y',{wpitch}), struct('x','time (s)','y','$w_{pitch}$ (rad/s)'),CC,add_option([],option,addingContents)};
+        allData.t_wyaw = {struct('x',{time},'y',{wyaw}), struct('x','time (s)','y','$w_{yaw}$ (rad)/s'),CC,add_option([],option,addingContents)};
+        allData.three_D = {struct('x',{[refx,estx]},'y',{[refy,esty]},'z',{[refz,estz]}), struct('x','$x$ (m)','y','$y$ (m)','z','$z$ (m)'), Rc,add_option(["aspect","camposition"],option,addingContents)};
+        allData.uHL = { struct('x',{time},'y',{uHL}), struct('x','time (s)','y','inputHL'), LgndCrt(["$z$ ","$x$ ","$y$ ","$\psi$"],c),add_option([],option,addingContents)};
+        allData.Trs = {struct('x',{time},'y',{Trs}), struct('x','time (s)','y','Tr (N) dTr [N/s] ddTr [N/$\rm{s^2}$]'), LgndCrt(["$Tr$","$dTr$"],c),add_option([],option,addingContents)};
         if fexpandS
-            allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
-            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
+            allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time (s)','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
+            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time (s)','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
         else
-            allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time [s]','y','z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
-            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time [s]','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
+            allData.z1 = {struct('x',{time},'y',{z1}), struct('x','time (s)','y','z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
+            % allData.F1z1 = {struct('x',{time},'y',{F1z1}), struct('x','time (s)','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
         end
-        allData.z2 = {struct('x',{time},'y',{z2}), struct('x','time [s]','y','z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
-        allData.z3 = {struct('x',{time},'y',{z3}), struct('x','time [s]','y','z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
-        allData.z4 = {struct('x',{time},'y',{z4}), struct('x','time [s]','y','z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
-        % allData.F2z2 = {struct('x',{time},'y',{F2z2}), struct('x','time [s]','y','F2z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
-        % allData.F3z3 = {struct('x',{time},'y',{F3z3}), struct('x','time [s]','y','F3z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
-        % allData.F4z4 = {struct('x',{time},'y',{F4z4}), struct('x','time [s]','y','F4z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
-        allData.vf = {struct('x',{time},'y',{vf}), struct('x','time [s]','y','vrtual input of first layer'), LgndCrt(["$vf$","$dvf$","$ddvf$","$dddvf$"],c),add_option([],option,addingContents)};         
-        allData.pp = {struct('x',{time},'y',{[est,pp]}), struct('x','time [s]','y','position [m]'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
-        allData.pv = {struct('x',{time},'y',{[vel,pv]}), struct('x','time [s]','y','velocity [m/s]'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
-        allData.pq = {struct('x',{time},'y',{[att,pq]}), struct('x','time [s]','y','attitude [rad]'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],c),add_option([],option,addingContents)};
-        allData.pw = {struct('x',{time},'y',{[w,pw]}), struct('x','time [s]','y','angular velocity [rad/s]'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],c),add_option([],option,addingContents)};
+        allData.z2 = {struct('x',{time},'y',{z2}), struct('x','time (s)','y','z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
+        allData.z3 = {struct('x',{time},'y',{z3}), struct('x','time (s)','y','z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
+        allData.z4 = {struct('x',{time},'y',{z4}), struct('x','time (s)','y','z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
+        % allData.F2z2 = {struct('x',{time},'y',{F2z2}), struct('x','time (s)','y','F2z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
+        % allData.F3z3 = {struct('x',{time},'y',{F3z3}), struct('x','time (s)','y','F3z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
+        % allData.F4z4 = {struct('x',{time},'y',{F4z4}), struct('x','time (s)','y','F4z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
+        allData.vf = {struct('x',{time},'y',{vf}), struct('x','time (s)','y','vrtual input of first layer'), LgndCrt(["$vf$","$dvf$","$ddvf$","$dddvf$"],c),add_option([],option,addingContents)};         
+        allData.pp = {struct('x',{time},'y',{[est,pp]}), struct('x','time (s)','y','position (m)'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
+        allData.pv = {struct('x',{time},'y',{[vel,pv]}), struct('x','time (s)','y','velocity (m/s)'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
+        allData.pq = {struct('x',{time},'y',{[att,pq]}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],c),add_option([],option,addingContents)};
+        allData.pw = {struct('x',{time},'y',{[w,pw]}), struct('x','time (s)','y','angular velocity (rad/s)'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],c),add_option([],option,addingContents)};
     
         %二乗誤差平均
         if isempty(c)
@@ -659,26 +678,210 @@ function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF,
             fprintf('  %.4f    %.4f    %.4f \n',RMSElog(i+1,2:4));
         
         end
+        toc
     end
 
-    function option = add_option(add,option,contents)
-        if ~isempty(add)
-            for i = 1:length(add)
-                if add(i) == "aspect"
-                    option.aspect = contents.aspect;
-                elseif add(i) == "camposition"
-                    option.camposition = contents.camposition;
+function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF, startTime, endTime)
+    tic 
+    if fF==1
+        logNum = length(loggers);
+        for i = 1:logNum
+            t{i} = loggers{i}.t';
+            kf(i)=find(loggers{i}.phase == 102,1,'first');
+            ke(i)=find(loggers{i}.phase == 102,1,'last');
+            % kf(i)=find(loggers{i}.Data.phase == 116,1,'first')+1;
+            % ke(i)=find(loggers{i}.Data.phase == 116,1,'last');
+            sTime(i) = t{i}(kf(i)) + startTime;
+            eTime(i) = t{i}(kf(i)) + endTime;
+            t{i} = t{i}(kf(i):ke(i));
+            spanIndex{i} = find(t{i} <= eTime(i) & t{i} >= sTime(i) );
+            mni(i) = min(spanIndex{i});
+            mxi(i) = max(spanIndex{i});
+            ts{i} = t{i}(mni(i):mxi(i));
+            tt(i)=t{i}(kf(i));
+            flightSpan(i)=mxi(i)-mni(i);
+        end
+        %表示する時間を最小のものに合わせる
+        minSpan = min(flightSpan);
+        for i = 1:logNum
+            mxi(i) = mni(i) + minSpan;
+        end
+    else 
+        %flite のみでない場合
+        logNum = length(loggers);
+        for i = 1:logNum
+            t{i} = loggers{i}.t';
+            spanIndex{i} = find(t{i} <= eTime(i) & t{i} >= sTime(i) );
+            mni(i) = min(spanIndex{i});
+            mxi(i) = max(spanIndex{i});
+            tt(i)=0;
+        end
+    end
+        for i = 1:logNum
+            lt(i) = length(mni(i):mxi(i));
+            %初期値設定
+            ev{i}=[];eq{i}=[];ew{i}=[];            
+            zero4=zeros(4,lt(i));
+            cF2z2{i}=zero4;cF3z3{i}=zero4;cF4z4{i}=zero4;
+            cinput{i}=zero4;cu{i}=zero4;cuHL{i}=zero4;inner_input{i}=zeros(8,lt(i));
+            cvf{i}=zero4;cz2{i}=zero4;cz3{i}=zero4;cz4{i}=zero4;
+            Trs{i} = zeros(2,lt(i));
+            fExpand = isfield(loggers{i}.controller,"Trs");
+            if fExpand
+                cF1z1{i}=zero4;
+                cz1{i}=zero4;
+            else
+                cF1z1{i}=zeros(2,lt(i));
+                cz1{i}=cF1z1{i};
+            end
+            %変数に代入
+            fieldLog = fieldnames(loggers{i});
+            if loggers{i}.fExp
+                fieldLog = fieldLog(5:end-1);
+                inner_input{i} = log.inner_input;
+            else
+                fieldLog = fieldLog(5:end);
+            end
+            for j = 1:length(fieldLog)
+                fieldVar = fieldnames(loggers{i}.(fieldLog{j}));
+                for j2 = 1:length(fieldVar)
+                    F = fieldLog{j}(1);
+                    eval([F,fieldVar{j2},'{i}= loggers{i}.',fieldLog{j},'.',fieldVar{j2},'(:,mni(i):mxi(i));']);
                 end
+            end
+            time{i}=ts{i}-tt(i);
+            err{i}=ep{i}-rp{i};%誤差
+
+            estx{i} = ep{i}(1,:);
+            esty{i} = ep{i}(2,:);
+            estz{i} = ep{i}(3,:);
+            errx{i} = err{i}(1,:);
+            erry{i} = err{i}(2,:);
+            errz{i} = err{i}(3,:);
+            vx{i} = ev{i}(1,:);
+            vy{i} = ev{i}(2,:);
+            vz{i} = ev{i}(3,:);
+            qroll{i} = eq{i}(1,:);
+            qpitch{i} = eq{i}(2,:);
+            qyaw{i} = eq{i}(3,:);
+            wroll{i} = ew{i}(1,:);
+            wpitch{i} = ew{i}(2,:);
+            wyaw{i} = ew{i}(3,:);
+            inputsum(:,i) = sqrt(sum((cinput{i}(1:4,:)).^2,2)/lt(i));
+            % [rmse(rr,cinput{i}),rmse(refs,ev{1,i}),rmse(refs,eq{1,i}),rmse(refs,ew{1,i})];
+        end
+        % inputsum{}
+        %plotする為の構造体を作成する
+        % allData.figName : (data, label, legendLabels, option)   
+        %option : titleName, lineWidth, fontSize, legend, aspect, campositon
+        %=====================================================
+        % allData.example = {struct('x',{{time1,time2}},'y',{{data1,data2,data3}}),...
+        %                                 struct('x','xlabel [dim]','y','ylabel [dim]','z','zlabel [dim]'),...
+        %                                 {'$xleg$','$yleg$','$zleg$'},...
+        %                                 add_option(["aspect","camposition"],option,addingContents)};
+        %=====================================================
+        refx = rp{1}(1,:);
+        refy = rp{1}(2,:);
+        refz = rp{1}(3,:);
+        if isempty(c)
+            c = string(1:logNum);
+        end
+        if length(c)==1
+            Rc = ["Reference","Estimator"]; 
+        else
+            Rc = ["Reference",c];
+        end
+        % Rc = mat2cell(Rc,1,ones(1,length(Rc)));
+        Rc = num2cell(Rc);
+        CC = num2cell(c);
+        allData.t_p = {struct('x',{[time{1},time]},'y',{[rp,ep]}), struct('x','time (s)','y','position (m)'), {'$x$ Refence','$y$ Refence','$z$ Refence','$x$ Estimator','$y$ Estimator','$z$ Estimator'},add_option([],option,addingContents)};
+        allData.x_y = {struct('x',{[refx,estx]},'y',{[refy,esty]}), struct('x','$x$ (m)','y','$y$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.x_z = {struct('x',{[refx,estx]},'y',{[refz,estz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.y_z = {struct('x',{[refy,esty]},'y',{[refz,estz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
+        allData.t_x = {struct('x',{[time{1},time]},'y',{[refx,estx]}), struct('x','time (s)','y','$x$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.t_y = {struct('x',{[time{1},time]},'y',{[refy,esty]}), struct('x','time (s)','y','$y$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.t_z = {struct('x',{[time{1},time]},'y',{[refz,estz]}), struct('x','time (s)','y','$z$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.error = { struct('x',{time},'y',{err}), struct('x','time (s)','y','error (m)'), LgndCrt(["$x$","$y$","$z$"],c),add_option([],option,addingContents)};
+        allData.t_errx = {struct('x',{time},'y',{errx}), struct('x','time (s)','y','error $x$ (m)'),CC,add_option([],option,addingContents)};
+        allData.t_erry = {struct('x',{time},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),CC,add_option([],option,addingContents)};
+        allData.t_errz = {struct('x',{time},'y',{errz}), struct('x','time (s)','y','error $z$ (m)'),CC,add_option([],option,addingContents)};
+        allData.input = { struct('x',{time},'y',{cinput}), struct('x','time (s)','y','input (N)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
+        allData.u = { struct('x',{time},'y',{cu}), struct('x','time (s)','y','input (N)'), LgndCrt(["1","2 ","3 ","4"],c),add_option([],option,addingContents)};
+        allData.inner_input = { struct('x',{time},'y',{inner_input}), struct('x','time (s)','y','inner input'), LgndCrt(["roll", "pitch", "thrst", "yaw", "5", "6", "7", "8"],c),add_option([],option,addingContents)};
+        allData.attitude = {struct('x',{time},'y',{eq}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};
+        allData.t_qroll = {struct('x',{time},'y',{qroll}), struct('x','time (s)','y','$q_{roll}$ (rad)'),CC,add_option([],option,addingContents)};
+        allData.t_qpitch = {struct('x',{time},'y',{qpitch}), struct('x','time (s)','y','$q_{pitch}$ (rad)'),CC,add_option([],option,addingContents)};
+        allData.t_qyaw = {struct('x',{time},'y',{qyaw}), struct('x','time (s)','y','$q_{yaw}$ (rad)'),CC,add_option([],option,addingContents)};
+        allData.velocity = {struct('x',{time},'y',{ev}), struct('x','time (s)','y','velocity(m/s)'), LgndCrt(["$x$","$y$","$z$"],c),add_option([],option,addingContents)};
+        allData.t_vx = {struct('x',{time},'y',{vx}), struct('x','time (s)','y','$v_x$ (m/s)'),CC,add_option([],option,addingContents)};
+        allData.t_vy = {struct('x',{time},'y',{vy}), struct('x','time (s)','y','$v_y$ (m/s)'),CC,add_option([],option,addingContents)};
+        allData.t_vz = {struct('x',{time},'y',{vz}), struct('x','time (s)','y','$v_z$ (m/s)'),CC,add_option([],option,addingContents)};
+        allData.angular_velocity = { struct('x',{time},'y',{ew}), struct('x','time (s)','y','angular velocity(rad/s)'), LgndCrt(["$roll$","$pitch$","$yaw$"],c),add_option([],option,addingContents)};
+        allData.t_wroll = {struct('x',{time},'y',{wroll}), struct('x','time (s)','y','$w_{roll}$ (rad/s)'),CC,add_option([],option,addingContents)};
+        allData.t_wpitch = {struct('x',{time},'y',{wpitch}), struct('x','time (s)','y','$w_{pitch}$ (rad/s)'),CC,add_option([],option,addingContents)};
+        allData.t_wyaw = {struct('x',{time},'y',{wyaw}), struct('x','time (s)','y','$w_{yaw}$ (rad)/s'),CC,add_option([],option,addingContents)};
+        allData.three_D = {struct('x',{[refx,estx]},'y',{[refy,esty]},'z',{[refz,estz]}), struct('x','$x$ (m)','y','$y$ (m)','z','$z$ (m)'), Rc,add_option(["aspect","camposition"],option,addingContents)};
+        allData.uHL = { struct('x',{time},'y',{cuHL}), struct('x','time (s)','y','inputHL'), LgndCrt(["$z$ ","$x$ ","$y$ ","$\psi$"],c),add_option([],option,addingContents)};
+        allData.Trs = {struct('x',{time},'y',{Trs}), struct('x','time (s)','y','Tr (N) dTr [N/s] ddTr [N/$\rm{s^2}$]'), LgndCrt(["$Tr$","$dTr$"],c),add_option([],option,addingContents)};
+        if fExpand
+            allData.z1 = {struct('x',{time},'y',{cz1}), struct('x','time (s)','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
+            allData.F1z1 = {struct('x',{time},'y',{cF1z1}), struct('x','time (s)','y','z1'), LgndCrt(["$z$","$dz$","$ddz$","$dddz$"],c),add_option([],option,addingContents)};
+        else
+            allData.z1 = {struct('x',{time},'y',{cz1}), struct('x','time (s)','y','z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
+            allData.F1z1 = {struct('x',{time},'y',{cF1z1}), struct('x','time (s)','y','F1z1'), LgndCrt(["$z$","$dz$"],c),add_option([],option,addingContents)};
+        end
+        allData.z2 = {struct('x',{time},'y',{cz2}), struct('x','time (s)','y','z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
+        allData.z3 = {struct('x',{time},'y',{cz3}), struct('x','time (s)','y','z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
+        allData.z4 = {struct('x',{time},'y',{cz4}), struct('x','time (s)','y','z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
+        allData.F2z2 = {struct('x',{time},'y',{cF2z2}), struct('x','time (s)','y','F2z2'), LgndCrt(["$x$","$dx$","$ddx$","$dddx$"],c),add_option([],option,addingContents)};
+        allData.F3z3 = {struct('x',{time},'y',{cF3z3}), struct('x','time (s)','y','F3z3'), LgndCrt(["$y$","$dy$","$ddy$","$dddy$"],c),add_option([],option,addingContents)};
+        allData.F4z4 = {struct('x',{time},'y',{cF4z4}), struct('x','time (s)','y','F4z4'), LgndCrt(["$\psi$","d$\psi$"],c),add_option([],option,addingContents)};
+        allData.vf = {struct('x',{time},'y',{cvf}), struct('x','time (s)','y','vrtual input of first layer'), LgndCrt(["$vf$","$dvf$","$ddvf$","$dddvf$"],c),add_option([],option,addingContents)};         
+        allData.pp = {struct('x',{time},'y',{[ep,pp]}), struct('x','time (s)','y','position (m)'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
+        allData.pv = {struct('x',{time},'y',{[ev,pv]}), struct('x','time (s)','y','velocity (m/s)'), LgndCrt(["$x$ est","$y$ est","$z$ est","$x$ plant","$y$ plant","$z$ plant"],c),add_option([],option,addingContents)};
+        allData.pq = {struct('x',{time},'y',{[eq,pq]}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],c),add_option([],option,addingContents)};
+        allData.pw = {struct('x',{time},'y',{[ew,pw]}), struct('x','time (s)','y','angular velocity (rad/s)'), LgndCrt(["$roll$ est","$pitch$ est","$yaw$ est","$roll$ plant","$pitch$ plant","$yaw$ plant"],c),add_option([],option,addingContents)};
+        allData.inputsum = {struct('x',{{["Thrust","roll","pitch","yaw"]}},'y',{{inputsum}}), struct('x',[],'y','Value'), c,add_option([],option,addingContents)};
+        allData.inputsumT = {struct('x',{{["~"]}},'y',{{inputsum(1,:)}}), struct('x',[],'y','Thrust (N)'), c,add_option([],option,addingContents)};
+        allData.inputsumTq = {struct('x',{{["roll","pitch","yaw"]}},'y',{{inputsum(2:4,:)}}), struct('x',[],'y','Torque (Nm)'), c,add_option([],option,addingContents)};
+        %二乗誤差平均
+        RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
+        RMSE = zeros(logNum,12);
+        for i =1:logNum
+            refs = zeros(3,lt(i));%kはtimeの長さ
+            RMSE(i,1:12) = [rmse(rp{1,i},ep{1,i}),rmse(refs,ev{1,i}),rmse(refs,eq{1,i}),rmse(refs,ew{1,i})];
+            RMSElog(i+1,1:13) = [c(i),RMSE(i,1:12)];
+            fprintf('#%s RMSE\n',c(i));
+            % fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');
+            % fprintf('  %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f |    %.4f    %.4f    %.4f \n',RMSElog(i+1,2:13));
+            fprintf('  x\t y\t z\t \n');
+            fprintf('  %.4f    %.4f    %.4f \n',RMSElog(i+1,2:4));
+        end
+        allData.rmse = {struct('x',{{["$x$","$y$","$z$"]}},'y',{{RMSE(:,1:3)}}), struct('x',[],'y','RMSE  (m)'),c,add_option([],option,addingContents)};         
+        allData.xrmse = {struct('x',{{"$x$"}},'y',{{RMSE(:,1)}}), struct('x',[],'y','RMSE  (m)'),c,add_option([],option,addingContents)};         
+        allData.yrmse = {struct('x',{{"$y$"}},'y',{{RMSE(:,2)}}), struct('x',[],'y','RMSE  (m)'),c,add_option([],option,addingContents)};         
+        allData.zrmse = {struct('x',{{"$z$"}},'y',{{RMSE(:,3)}}), struct('x',[],'y','RMSE  (m)'),c,add_option([],option,addingContents)};         
+        toc
+end
+
+function option = add_option(add,option,contents)
+    if ~isempty(add)
+        for i = 1:length(add)
+            if add(i) == "aspect"
+                option.aspect = contents.aspect;
+            elseif add(i) == "camposition"
+                option.camposition = contents.camposition;
             end
         end
     end
+end
 
-    function RMSE = rmse(ref,est)
-        RMSE_x=sqrt(sum(((ref(1,:)-est(1,:)).^2)));
-        RMSE_y=sqrt(sum(((ref(2,:)-est(2,:)).^2)));
-        RMSE_z=sqrt(sum(((ref(3,:)-est(3,:)).^2)));
-        RMSE = [RMSE_x RMSE_y RMSE_z];
-    end
+function RMSE = rmse(ref,est)
+    RMSE_x=sqrt(sum(((ref(1,:)-est(1,:)).^2)/size(ref,2)));
+    RMSE_y=sqrt(sum(((ref(2,:)-est(2,:)).^2)/size(ref,2)));
+    RMSE_z=sqrt(sum(((ref(3,:)-est(3,:)).^2)/size(ref,2)));
+    RMSE = [RMSE_x RMSE_y RMSE_z];
+end
 
 %     function f =plot_data_single(figureNumber, figName, branchData)
 function plot_data_single(~, ~, branchData)
@@ -694,10 +897,20 @@ function plot_data_single(~, ~, branchData)
                     for i = 1:plotNum 
                         plot(data.x{1}, data.y{1,i}, 'LineWidth', option.lineWidth)
                     end
-                else
+                elseif ~isstring(data.x{1})
                     for i = 1:plotNum 
                         plot(data.x{1,i}, data.y{1,i}, 'LineWidth', option.lineWidth)
                     end
+                else
+                    X = categorical(data.x{1});
+                    X = reordercats(X,data.x{1});
+                    b = bar(X, data.y{1});
+                    % for i = 1:length(b)
+                    %     xtips1 = round(b(i).XEndPoints,2,"significant");
+                    %     ytips1 = round(b(i).YEndPoints,2,"significant");
+                    %     labels1 = string(round(b(i).YData,2,"significant"));
+                    %     text(xtips1,ytips1,labels1,'HorizontalAlignment','center','VerticalAlignment','bottom')
+                    % end
                 end
                 xlabel(label.x,'Interpreter','latex')
                 ylabel(label.y,'Interpreter','latex')
@@ -709,7 +922,6 @@ function plot_data_single(~, ~, branchData)
                 set(gca,'FontSize',option.fontSize,"TickLabelInterpreter","latex")
                 grid on
                 hold off
-
         else
 %                 f(figureNumber) = figure('Name',figName);
                 hold on
@@ -741,10 +953,14 @@ function plot_data_single(~, ~, branchData)
                     for i = 1:plotNum 
                         plot(data.x{1}, data.y{1,i}, 'LineWidth', option.lineWidth)
                     end
-                else
+                elseif ~isstring(data.x{1})
                     for i = 1:plotNum 
                         plot(data.x{1,i}, data.y{1,i}, 'LineWidth', option.lineWidth)
                     end
+                else
+                    X = categorical(data.x{1});
+                    X = reordercats(X,data.x{1});
+                    bar(X, data.y{1});
                 end
                 xlabel(label.x,'Interpreter','latex')
                 ylabel(label.y,'Interpreter','latex')
