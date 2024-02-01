@@ -16,8 +16,8 @@
 % close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/修論初版/u_plain1212_1.mat');
-O_func = @(x,u) On3_1_new(x,u);
+log = LOGGER('./Data/AMC/AMC_1_BAD.mat');
+O_func = @(x,p) Onew(x,p);
 % log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
 f_png=0;
 f_eps=0;
@@ -208,15 +208,15 @@ minS = zeros(1,len);
 maxS = zeros(1,len);
 D = zeros(1,len);
 x = [robot_pe(:,1);robot_qe(:,1);robot_ve(:,1);robot_we(:,1);ps(:,1);qs(:,1)];
-On = zeros(size(O_func(x,u(:,1)),1),size(O_func(x,u(:,1)),2),len);
+On = zeros(size(O_func(x,param(:,1:17)),1),size(O_func(x,param(:,1:17)),2),len);
 U = zeros(size(On,1),size(On,1),len);
 V = zeros(18,18,len);
 S = zeros(18,len); 
 for i=1:len
 %     x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
     x = [robot_pe(:,i);robot_qe(:,i);robot_ve(:,i);robot_we(:,i);ps(:,i);qs(:,i)];
-    On(:,:,i) = O_func(x,u(:,i));
-    Rank(i) = rank(O_func(x,u(:,i)),0);
+    On(:,:,i) = O_func(x,param(:,1:17));
+    Rank(i) = rank(O_func(x,param(:,1:17)),0);
     S(:,i) = svd(On(:,:,i));
     [U(:,:,i),~,V(:,:,i)] = svd(On(:,:,i));
     minS(i) = min(S(:,i));
