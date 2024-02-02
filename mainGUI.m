@@ -15,7 +15,7 @@ userpath('clear');
 clc
 SimBaseMode = ["SimHL","SimFT"];
 ExpBaseMode = ["ExpHL","ExpFT"];
-fExp = 0;
+fExp = 1;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);
