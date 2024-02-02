@@ -11,7 +11,7 @@ Normalize = 0; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
-FileName = 'EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 % FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名
@@ -184,17 +184,17 @@ if change_reference == 1
     clear all
     close all
     opengl software
-    % simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_5'); %sim
+    simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_5'); %sim
 
     % simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
     % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
-    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
+    % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
     % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
     % simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
     % simResult.reference = ImportFromExpData_estimation('1_24_sprine_53');
 
 
-    model = load("test.mat",'est');
+    model = load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat",'est');
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
