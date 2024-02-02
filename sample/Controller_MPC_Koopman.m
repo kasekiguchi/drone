@@ -12,6 +12,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     % load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
     % load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
     load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est') %シミュクープマンモデル，総推力で学習
+    % load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon.mat",'est')
 
     % load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est') %実機モデル，総推力
     % load("EstimationResult_12state_1_18_Exp_sprine_est=cir_torque_incon.mat",'est') %sprineモデル
