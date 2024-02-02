@@ -15,7 +15,7 @@ folderName = 'report_P2Pshape'; %フォルダ名
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("MPC_takeoff_0125.mat")
+load("1_24_sprine_53.mat")
 disp('load finished')
 
 % for i = 1:find(log.Data.t,1,'last')
@@ -50,6 +50,9 @@ end
 %     data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
 %     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
 %     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
+% end
+% for i = 1:700-1
+%     data.te(1,i) = data.t(1,i+1)-data.t(1,i);
 % end
 
 

@@ -27,9 +27,10 @@ data.fExp = logger.fExp;
 % 状態毎に分割して保存
 % XYに結合する際の都合で↓時系列,→状態
 %drone_phase 115:stop 97:arming 116:take off 102:flight 108:landing
+
 if logger.fExp==1 %fExp:1 実機データ
 %--------------------time----------------------
-    data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))'; 
+    % data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))'; 
 %     data.startIndex = find(data.est.p(:,3)>0.5,1,'first'); %0.4m以上になった部分からデータの取得開始
     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
@@ -47,8 +48,29 @@ if logger.fExp==1 %fExp:1 実機データ
     data.est.q = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.q,data.startIndex:data.endIndex,'UniformOutput',false))';
     data.est.v = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.v,data.startIndex:data.endIndex,'UniformOutput',false))';
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
+
+    % figure(1)
+    % plot(data.t,data.est.p)
+    % grid on
+    % 
+    % figure(2)
+    % plot(data.t,data.est.q)
+    % grid on
+    % 
+    % figure(3)
+    % plot(data.t,data.est.v)
+    % grid on
+    % 
+    % figure(4)
+    % plot(data.t,data.est.w)
+    % grid on
 %-----------------------input----------------------
-    data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
+    data.input = cell2mat(arrayfun(@(N)logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
+    % for i = data.startIndex:data.endIndex
+    %     data.inner_input(i-data.startIndex+1,:) = logger.Data.agent.inner_input{i}(1:4);
+    % end
+    % data.input = data.inner_input;
+
 %     for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
 %         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
 %     end
@@ -79,6 +101,13 @@ for i=1:data.N-1
     data.U(:,i) = [data.input(i,:)'];
     data.T(:,i) = [data.t(i,:)];
 end
+
+% for i=1:data.N-6
+%     data.X(:,i) = [data.est.p(i+5,:)';data.est.q(i+5,:)';data.est.v(i+5,:)';data.est.w(i+5,:)'];
+%     data.Y(:,i) = [data.est.p(i+6,:)';data.est.q(i+6,:)';data.est.v(i+6,:)';data.est.w(i+6,:)'];
+%     data.U(:,i) = [data.input(i,:)'];
+%     data.T(:,i) = [data.t(i,:)];
+% end
 
 end
 

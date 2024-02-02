@@ -11,22 +11,19 @@ Normalize = 0; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
-FileName = input('保存するファイル名を入力してください(※～.matを付ける): ', 's');
-% FileName = 'EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 % FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名
-loading_filename = input('\n読み込むデータファイル名を入力してください(※.matは含まない):','s');
-
 % loading_filename = 'Exp_alldata_1_29';  
 % loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
 % loading_filename = 'Exp_cirrevsaddata_12_19';
-% loading_filename = '1_24_sprine';
-% loading_filename = 'GUIsim_saddle';r
+% loading_filename = 'Exp_sprine100_2_1';
+loading_filename = 'GUIsim_11_29';
 % loading_filename = 'Sim_5data_12_11';
 
-Data.HowmanyDataset = 103; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 5; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -104,8 +101,8 @@ disp('Estimated')
 % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
-% simResult.reference = ImportFromExpData_estimation('sim_7_20_circle_estimatordata'); %sim
-simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
+simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_1'); %sim
+% simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
@@ -117,22 +114,10 @@ if simResult.reference.fExp == 1
     simResult.reference.T = simResult.reference.T - simResult.reference.T(1);
     simResult.reference.N = simResult.reference.N - takeoff_idx;
 end
-
 simResult.Z(:,1) = F(simResult.reference.X(:,1));
 simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
-
-% if Normalize == 1 %推定精度検証用データの正規化(改善前)
-%     Data2.X = simResult.reference.X;
-%     Data2.Y = zeros(size(Data2.X,1),size(Data2.X,2));
-%     Data2.U = simResult.reference.U;
-%     Ndata2 = Normalization(Data2);
-%     for i  = 1:12
-%         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata2.meanValue.x(i))/Ndata2.stdValue.x(i);
-%     end
-%     simResult.U(:,:) = Ndata2.u;
-% end
 
 if Normalize == 1 %推定精度検証用データの正規化(改善後)
     for i  = 1:12
@@ -189,4 +174,162 @@ disp(targetpath)
 % F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用(動作確認済み) <こちらが最新の観測量>
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
+
+%% 作成済みモデルで，推定する軌道を変更
+clc
+num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
+change_reference = str2double(num);
+
+if change_reference == 1
+    clear all
+    close all
+    opengl software
+    % simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_5'); %sim
+
+    % simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
+    % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
+    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
+    % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
+    % simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
+    % simResult.reference = ImportFromExpData_estimation('1_24_sprine_53');
+
+
+    model = load("test.mat",'est');
+    est.A = model.est.A;
+    est.B = model.est.B;
+    est.C = model.est.C;
+    F = model.est.observable;
+
+    if simResult.reference.fExp == 1
+        takeoff_idx = find(simResult.reference.T,1,'first');
+        simResult.reference.X = simResult.reference.X(:,takeoff_idx:end);
+        simResult.reference.Y = simResult.reference.Y(:,takeoff_idx:end);
+        simResult.reference.U = simResult.reference.U(:,takeoff_idx:end);
+        simResult.reference.T = simResult.reference.T(takeoff_idx:end);
+        simResult.reference.T = simResult.reference.T - simResult.reference.T(1);
+        simResult.reference.N = simResult.reference.N - takeoff_idx;
+    end
+    simResult.Z(:,1) = F(simResult.reference.X(:,1));
+    simResult.Xhat(:,1) = simResult.reference.X(:,1);
+    simResult.U = simResult.reference.U(:,1:end);
+    simResult.T = simResult.reference.T(1:end);
+    N1 = 1;
+    N2 = 56;
+    length = N2 - N1;
+    j = 1;
+    while(1)
+        clc
+        if N2 > simResult.reference.N
+            fprintf('各方向のRMSEの変位，最大誤差を表示します')
+            size = figure;
+            size.WindowState = 'maximized'; %表示するグラフを最大化
+            for i = 1:3
+                subplot(2,3,i)
+                if i == 1
+                    plot(1:j-1,x,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0 0.4470 0.7410])
+                    grid on
+                    ylabel('RMSE x','FontSize',14)
+                elseif i == 2
+                    plot(1:j-1,y,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0.4660 0.6740 0.1880])
+                    grid on
+                    ylabel('RMSE y','FontSize',14)
+                else
+                    plot(1:j-1,z,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0.9290 0.6940 0.1250])
+                    grid on
+                    ylabel('RMSE z','FontSize',14)
+                end
+            end
+            
+            for i = 4:6
+                subplot(2,3,i)
+                if i == 4
+                    plot(1:j-1,xerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0 0.4470 0.7410])
+                    grid on
+                    ylabel('Max error x','FontSize',14)
+                elseif i == 5
+                    plot(1:j-1,yerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0.4660 0.6740 0.1880])
+                    grid on
+                    ylabel('Max error y','FontSize',14)
+                elseif i == 6
+                    plot(1:j-1,zerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0.9290 0.6940 0.1250])
+                    grid on
+                    ylabel('Max error z','FontSize',14)
+                end
+            end
+            % set(gcf, 'Position', [160, 200, 1200, 500]);
+            
+            break
+        end
+        for i = N1:N2-1
+            simResult.Z(:,i-N1+2) = est.A * simResult.Z(:,i-N1+1) + est.B * simResult.U(:,i); %状態方程式 z[k+1] = Az[k]+BU
+        end
+        simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
+        fprintf('\n%d～%dstep間の推定結果を表示します\n', N1, N2)
+        size = figure;
+        size.WindowState = 'maximized'; %表示するグラフを最大化
+        for i = 1:3
+            subplot(2,3,i)
+            plot(simResult.T(:,N1:N2),simResult.Xhat(i,:),'LineWidth',1.2)
+            hold on
+            grid on
+            plot(simResult.T(:,N1:N2),simResult.reference.X(i,N1:N2),'LineWidth',1.2,'LineStyle','--','Color','red')
+            legend('estimator','reference','Location','best')
+            if i == 1
+                xlabel('Time [s]','FontSize',16);
+                ylabel('x','FontSize',16);
+            elseif i == 2
+                xlabel('Time [s]','FontSize',16);
+                ylabel('y','FontSize',16);
+            else
+                xlabel('Time [s]','FontSize',16);
+                ylabel('z','FontSize',16);
+            end
+            hold off
+            if i == 1
+                x(1,j) = sqrt(sum((simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:)).^2)/length);
+                xerror = simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:);
+                xerror_max(1,j) = max(simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:));
+            elseif i == 2
+                y(1,j) = sqrt(sum((simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:)).^2)/length);
+                yerror = simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:);
+                yerror_max(1,j) = max(simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:));
+            else
+                z(1,j) = sqrt(sum((simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:)).^2)/length);
+                zerror = simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:);
+                zerror_max(1,j) = max(simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:));
+            end
+        end
+        error = [xerror;yerror;zerror];
+        subplot(2,3,4)
+        plot(simResult.T(:,N1:N2),simResult.reference.U(1,N1:N2),'LineWidth',1.2)
+        yline(0.5884*9.81,'Color','r')
+        grid on
+        xlabel('Time [s]','FontSize',16);
+        ylabel('thrust','FontSize',16);
+
+        subplot(2,3,5)
+        plot(simResult.T(:,N1:N2),simResult.reference.U(2:end,N1:N2),'LineWidth',1.2)
+        grid on
+        xlabel('Time [s]','FontSize',16);
+        ylabel('torque','FontSize',16);
+        legend('roll','pitch','yaw','Location','best')
+
+        subplot(2,3,6)
+        plot(simResult.T(:,N1:N2),error,'LineWidth',1.2)
+        grid on
+        xlabel('Time [s]','FontSize',16);
+        ylabel('reference - estimator','FontSize',16);
+        legend('error_x','error_y','error_z','Location','best')
+        
+
+        % set(gcf, 'Position', [160, 200, 1200, 500]);
+        N1 = N1 + 55;
+        N2 = N2 + 55;
+        simResult.Z(:,1) = F(simResult.reference.X(:,N1));
+        simResult.Xhat(:,1) = simResult.reference.X(:,N1);
+        j = j + 1;
+        
+        pause(6)
+    end
+end
 
