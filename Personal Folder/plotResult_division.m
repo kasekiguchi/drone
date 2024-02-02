@@ -1,7 +1,7 @@
 %% plotResultの各グラフをそれぞれに分割して表示
 clear all
 close all
-
+clc
 %% flag
 flg.calcFile1RMSE = 1; % file{1}に読み込んだデータのRMSEを求める
 flg.ylimHold = 0; % 指定した値にylimを固定
@@ -12,12 +12,12 @@ folderName = '10_27';
 
 %% select file to load (max number of file:5)
 
-% loadfilename{1} = 'EstimationResult_12state_11_20_data=cir_cir=cir_est=P2Pshape.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = 'EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_11_20_data=cirandrevandsad_cir=cir_est=P2Pshape.mat';
 % loadfilename{3} = 'EstimationResult_12state_11_20_data=cirandrevandsadP2Pxy_cir=cir_est=P2Pshape.mat';
 % loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
 
-loadfilename{1} = 'test.mat';
+% loadfilename{1} = 'test.mat';
 % loadfilename{2} = 'test2.mat';
 % loadfilename{3} = 'test3.mat';
 % loadfilename{4} = 'test2.mat';

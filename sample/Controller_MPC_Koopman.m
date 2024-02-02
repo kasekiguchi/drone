@@ -11,7 +11,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     % load("EstimationResult_12state_7_19_circle=circle_estimation=circle.mat",'est');
     % load("EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat",'est');
     % load("EstimationResult_12state_11_29_GUIsimdata.mat",'est') %シミュレーションデータで構築したクープマンモデル
-    load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est') %シミュクープマンモデル，総推力で学習
+    % load("EstimationResult_12state_11_29_GUIsimdata_input=torque.mat",'est') %シミュクープマンモデル，総推力で学習
     % load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon.mat",'est')
 
     % load("EstimationResult_12state_12_6_Expalldata_input=torque.mat",'est') %実機モデル，総推力
@@ -24,7 +24,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     % load("EstimationResult_12state_12_12_SimcirsadP2Pxydata_est=sad.mat",'est') %シミュレーションモデル，4入力，case5(12/12)
     % load("EstimationResult_12state_12_12_SimcirrevsadP2Pzdata_est=sad.mat",'est') %シミュレーションモデル，4入力，上のやつに逆円データ追加S
     % load("EstimationResult_12state_1_18_ExpcirrevsadP2Pxydata_est=cir_torque",'est')
-    % load("EstimationResult_12state_2_1_Sim_cirsadP2P__torque_incon_無駄時間あり",'est')
+    load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat",'est')
     
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -49,11 +49,11 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
     %----------------------------------------------------------------------------------
 
-    Controller_param.weight.P = diag([1; 1; 1]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([1; 1; 1]);    % 速度
+    Controller_param.weight.P = diag([1; 1; 10]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([100; 100; 100]);    % 速度
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
+    Controller_param.weight.QW = diag([100; 100; 1; 1; 1; 1]);  % 姿勢角，角速度
 
     Controller_param.weight.Pf = diag([1; 1; 1]); % 6
     Controller_param.weight.Vf = diag([1; 1; 1]);
