@@ -3,27 +3,28 @@
 % initialize
 % フラグ管理
 clear all
+close all
 clc
 %---------------------------------------------
 flg.bilinear = 0; %1:双線形モデルへの切り替え
 Normalize = 0; %1：正規化
-%---------------------------------------------
+%---------------------------------------------u
 
 %% 
 %データ保存先ファイル名(逐次変更する)
-FileName = 'EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
-% FileName = 'test.mat'; %お試し用
+% FileName = 'EstimationResult_12state_2_2_Exp_sprine+cirrevsadP2Pxy_torque_incon_14step分ずらして学習.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名
-% loading_filename = 'Exp_alldata_1_29';  
+% loading_filename = 'Exp_alldata_2_1';  
 % loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
 % loading_filename = 'experiment_6_20_circle';
 % loading_filename = 'Exp_cirrevsaddata_12_19';
 % loading_filename = 'Exp_sprine100_2_1';
-loading_filename = 'GUIsim_11_29';
-% loading_filename = 'Sim_5data_12_11';
+% loading_filename = 'GUIsim_11_29';
+loading_filename = 'Exp_sprine+P2Pz_2_3';
 
-Data.HowmanyDataset = 5; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 110; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -97,11 +98,11 @@ disp('Estimated')
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
 % simResult.reference = ImportFromExpData('GUIsim_saddle.mat');
-% simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
+simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
 % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
-simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_1'); %sim
+% simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_1'); %sim
 % simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
@@ -184,17 +185,17 @@ if change_reference == 1
     clear all
     close all
     opengl software
-    simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_5'); %sim
+    % simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_5'); %sim
 
     % simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
     % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
-    % simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
+    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
     % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
     % simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
     % simResult.reference = ImportFromExpData_estimation('1_24_sprine_53');
 
 
-    model = load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat",'est');
+    model = load("test.mat",'est');
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;

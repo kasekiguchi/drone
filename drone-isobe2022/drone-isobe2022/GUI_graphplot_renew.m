@@ -15,7 +15,11 @@ folderName = 'report_P2Pshape'; %フォルダ名
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("1_24_sprine_53.mat")
+clear all
+clc
+close all
+
+load("sim_rndP4_2.mat")
 disp('load finished')
 
 % for i = 1:find(log.Data.t,1,'last')
@@ -28,33 +32,35 @@ disp('load finished')
 %     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 % end
 
-for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
-    data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
-%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
-end
+% for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
+%     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
+%     data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+%     data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+%     data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+%     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
+% %     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+% end
 % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
 %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 % end
 
-% for i = 1:find(logger.Data.t,1,'last')
-%     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
-%     data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
-% end
-% for i = 1:700-1
+for i = 1:find(logger.Data.t,1,'last')
+    data.t(1,i) = logger.Data.t(i,1);                                      %時間t
+    data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
+end
+% t = find(data.t,1,'last')-1;
+% for i = 1:t
 %     data.te(1,i) = data.t(1,i+1)-data.t(1,i);
 % end
-
+% plot(1:t,data.te)
+% grid on
 
 %% 特定の範囲のグラフ出力
 
@@ -263,7 +269,7 @@ ax(5) = gca;
 title('Input u of agent1');
 
 % 軌道(2次元，3次元)
-choice = 0;
+choice = 1;
 subplot(2,num,6);
 if choice == 0
     plot(data.p(1,:),data.p(2,:));

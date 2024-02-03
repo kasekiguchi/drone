@@ -55,9 +55,9 @@ if logger.fExp==1 %fExp:1 実機データ
     % end
     % data.input = data.inner_input;
 
-%     for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
-%         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
-%     end
+    % for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
+    %     data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
+    % end
 %     plot(logger.Data.t(data.startIndex:data.endIndex),data.input) %入力の確認
 
 else
@@ -79,19 +79,19 @@ end
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合
 % ↓状態,→時系列
-% for i=1:data.N-1
-%     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
-%     data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
-%     data.U(:,i) = [data.input(i,:)'];
-%     data.T(:,i) = [data.t(i,:)];
-% end
-
-for i=1:data.N-5
-    data.X(:,i) = [data.est.p(i+4,:)';data.est.q(i+4,:)';data.est.v(i+4,:)';data.est.w(i+4,:)'];
-    data.Y(:,i) = [data.est.p(i+5,:)';data.est.q(i+5,:)';data.est.v(i+5,:)';data.est.w(i+5,:)'];
+for i=1:data.N-1
+    data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
+    data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
     data.U(:,i) = [data.input(i,:)'];
     data.T(:,i) = [data.t(i,:)];
 end
+
+% for i=1:data.N-2
+%     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
+%     data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.p(i+2,3)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
+%     data.U(:,i) = [data.input(i,:)'];
+%     data.T(:,i) = [data.t(i,:)];
+% end
 
 end
 
