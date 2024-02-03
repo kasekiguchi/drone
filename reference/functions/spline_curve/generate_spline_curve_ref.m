@@ -17,16 +17,16 @@ function ref = generate_spline_curve_ref(loadedRef,order,fcmd)
 
 %手動で値を設定するとき(使わないときコメントアウトする)
 isManualSetting = 1;%手動でwaypointを作るとき1
-pointN = 5; %waypointの数
+pointN = 25; %waypointの数
 dt = 2;%waypoint間の時間
 time =  (0:dt:dt*(pointN-1))';
 % wp = [0,0,0;0.5*round(1*randn(pointN-1,3),3)];%waypointの設定初めは初期値0
 % wp = round(0.5*randn(pointN,3),3);%waypointの設定
 
 min_z = 0.5;
-max_z = 1.5;
-min_xy = -0.5;
-max_xy = 0.5;
+max_z = 1.7;
+min_xy = 0;
+max_xy = 0;
 wp_xy = round((max_xy-min_xy).*rand(pointN,2) + min_xy,2);%waypointの設定
 wp_z = round((max_z-min_z).*rand(pointN,1) + min_z,1);%waypointの設定
 % wp_z = ones(5,1);
