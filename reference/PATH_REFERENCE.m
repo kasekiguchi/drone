@@ -64,7 +64,7 @@ classdef PATH_REFERENCE < handle
         Xe = LP.x(:, 2);
         Ys = LP.y(:, 1);
         Ye = LP.y(:, 2);
-        lineids = abs(Xe - Xs) + abs(Ye - Ys) > 0.5; % lineと認識する長さ：1m 以上ないとlineとみなさないようにする．TODO : チューニングできるようにする
+        lineids = abs(Xe - Xs) + abs(Ye - Ys) > 0.2; % lineと認識する長さ：1m 以上ないとlineとみなさないようにする．TODO : チューニングできるようにする
         a = a(lineids);
         b = b(lineids);
         c = c(lineids);
@@ -89,7 +89,9 @@ classdef PATH_REFERENCE < handle
       aperp = abs(a) < 0.35; % 進行方向との内積が直角に近い壁
       aperp = intersect(find(aperp), mincid); % 近くて進行方向に平行な壁
 
-      if length(aperp) == 2 % 進行方向との内積が直角に近い左右の壁が存在
+      if length(aperp) >= 2 % 進行方向との内積が直角に近い左右の壁が存在
+        [~,Im]=maxk(ip(aperp),2); % 長い壁に注目
+
         insec = intersect(ids, aperp);
 
         if length(insec) == 1

@@ -132,14 +132,20 @@ classdef LiDAR_SIM < handle
 
       if ~isempty(obj.result)
         cla(ax);
-        points(1:2:2 * size(obj.result.sensor_points, 1), :) = obj.result.sensor_points;
+        if isfield(obj.result,'sensor_points')
+          points(1:2:2 * size(obj.result.sensor_points, 1), :) = obj.result.sensor_points;
+        else
+          points(1:2:2 * size(obj.result.length, 1), :) = obj.result.length.*[cos(obj.result.angle),sin(obj.result.angle)];
+        end
         R = [cos(q), -sin(q); sin(q), cos(q)];
         points = (R * points' + p)';
         pp = plot(ax,[points(:, 1); p(1)], [points(:, 2); p(2)]);
         hold on;
         text(ax,points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
+        if isfield(obj.result,'region')
         region = polyshape((R * obj.result.region.Vertices' + p)');
         plot(ax,region);
+        end
         head_dir = polyshape((R * obj.head_dir.Vertices' + p)');
         plot(ax,head_dir);
         axis equal;

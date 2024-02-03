@@ -8,6 +8,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 end
 %% 
+clc
 close all
 ts = 0; % initial time
 dt = 0.025; % sampling period
@@ -36,8 +37,8 @@ agent.plant = MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1));
 agent.sensor = LiDAR_SIM(agent,Sensor_LiDAR(1,'angle_range', -pi: 0.0068:pi,'radius',40)); % 2D lidar : rplidar 0.0068, 40
 agent.sensor.do(time, 'f',0,env,agent,1);
 agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1))));
-%agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.radius));
-agent.reference = POINT_REFERENCE(agent,[2.0;-0.5;0],[0;0;0],[0;0;0]);
+agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.radius));
+%agent.reference = POINT_REFERENCE(agent,[2.0;-0.5;0],[0;0;0],[0;0;0]);
     agent(1).reference.do(time, 'f');
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 agent(1).controller.do(time, 'f',0,0,agent,1);
@@ -54,6 +55,9 @@ for i = 1:time.te
       i ;
     end
     agent(1).sensor.do(time, 'f',0,env,agent,1);   
+    sensor_result.angle = sensor_result.angle(:);
+    agent(1).sensor.result = sensor_result;
+    
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
     agent(1).controller.do(time, 'f',0,0,agent,1);
