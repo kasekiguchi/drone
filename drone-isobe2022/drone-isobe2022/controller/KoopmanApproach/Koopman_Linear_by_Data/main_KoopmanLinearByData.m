@@ -12,8 +12,8 @@ Normalize = 0; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
-% FileName = 'EstimationResult_12state_2_2_Exp_sprine+cirrevsadP2Pxy_torque_incon_14step分ずらして学習.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
-FileName = 'test.mat'; %お試し用
+FileName = 'EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+% FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名
 % loading_filename = 'Exp_alldata_2_1';  
@@ -22,9 +22,9 @@ FileName = 'test.mat'; %お試し用
 % loading_filename = 'Exp_cirrevsaddata_12_19';
 % loading_filename = 'Exp_sprine100_2_1';
 % loading_filename = 'GUIsim_11_29';
-loading_filename = 'Exp_sprine+P2Pz_2_3';
+loading_filename = 'Exp_2_3';
 
-Data.HowmanyDataset = 110; %読み込むデータ数に応じて変更
+Data.HowmanyDataset =139; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;

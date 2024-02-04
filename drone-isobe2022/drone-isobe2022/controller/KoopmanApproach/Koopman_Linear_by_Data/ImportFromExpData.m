@@ -59,6 +59,22 @@ if logger.fExp==1 %fExp:1 実機データ
     %     data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
     % end
 %     plot(logger.Data.t(data.startIndex:data.endIndex),data.input) %入力の確認
+    data.est.z(1,1) = data.est.p(1,3);
+    for i = 1:data.N-1
+        data.est.z(1,i+1) = data.est.z(1,i) + data.est.v(i,3)*(data.t(i+1,:)-data.t(i,:));
+    end
+
+    % size = figure;
+    % size.WindowState = 'maximized'; %表示するグラフを最大化
+    % plot(data.t',data.est.p(:,3)','LineWidth',1.2)
+    % grid on
+    % hold on
+    % plot(data.t',data.est.z,'LineWidth',1.2)
+    % hold off
+    % xlabel('Time')
+    % ylabel('position z')
+    % legend('z','cal z')
+    % pause(1)
 
 else
     data.startIndex = 1;
@@ -79,19 +95,19 @@ end
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合
 % ↓状態,→時系列
-for i=1:data.N-1
-    data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
-    data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
-    data.U(:,i) = [data.input(i,:)'];
-    data.T(:,i) = [data.t(i,:)];
-end
-
-% for i=1:data.N-2
+% for i=1:data.N-1
 %     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
-%     data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.p(i+2,3)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
+%     data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
 %     data.U(:,i) = [data.input(i,:)'];
 %     data.T(:,i) = [data.t(i,:)];
 % end
+
+for i=1:data.N-1
+    data.X(:,i) = [data.est.p(i,1:2)';data.est.z(:,i);data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
+    data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.z(:,i+1);data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
+    data.U(:,i) = [data.input(i,:)'];
+    data.T(:,i) = [data.t(i,:)];
+end
 
 end
 
