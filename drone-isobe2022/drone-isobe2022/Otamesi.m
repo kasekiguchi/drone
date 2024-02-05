@@ -1,17 +1,17 @@
 clc
 clear all
 close all
-exp1 = load("EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat",'est');
+exp2 = load("EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat",'est');
 % exp2 = load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon.mat",'est');
 % exp1 = load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat",'est');
 % exp1 = load("EstimationResult_12state_2_1_Exp_sprine100__torque_incon.mat",'est');
 % exp1 = load("EstimationResult_12state_12_17_ExpcirrevsadP2Pxydata_est=P2Pshape.mat",'est');
-% exp1 = load("test.mat");
+exp1 = load("test.mat");
 % exp1 = load("EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat");
 %% 
 
 m = 0.5884;
-g = 9.81-100;
+g = 9.81;
 u1 = m*g;
 u2 = 0;
 u3 = 0;

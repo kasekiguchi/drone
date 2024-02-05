@@ -14,12 +14,12 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load (max number of file:5)
 
-loadfilename{1} = 'EstimationResult_12state_2_1_Exp_sprine100__torque_incon.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{1} = 'EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_1_29_Exp_sprineandhov_est=P2Pshape_torque_incon.mat';
 % loadfilename{2} = 'EstimationResult_12state_12_17_ExpcirrevsadP2Pxydata_est=P2Pshape.mat';
 % loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
 
-% loadfilename{1} = 'test.mat';
+loadfilename{1} = 'test2.mat';
 % loadfilename{2} = 'test2.mat';
 % loadfilename{3} = 'test3.mat';
 % loadfilename{4} = 'test4.mat';
