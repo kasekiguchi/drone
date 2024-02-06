@@ -51,11 +51,11 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
     %----------------------------------------------------------------------------------
 
-    Controller_param.weight.P = diag([1; 1; 1]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([1; 1; 1]);    % 速度
+    Controller_param.weight.P = diag([10; 1; 30]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([10; 1; 1]);    % 速度
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([1; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
+    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
 
     Controller_param.weight.Pf = diag([1; 1; 1]); % 6
     Controller_param.weight.Vf = diag([1; 1; 1]);

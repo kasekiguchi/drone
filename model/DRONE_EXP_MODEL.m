@@ -28,7 +28,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
           fprintf("Drone %s is ready\n",param.IP);
         case "serial"
           if isnumeric(param.port)
-            param.port = strcat("COM",string(param.port));
+            % param.port = strcat("COM",string(param.port));
+            param.port = string(param.port);
           else
             param.port = char(param.port);
           end
@@ -41,7 +42,6 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
       u = varargin{5}.input_transform.result;
       cha = varargin{2};
       obj.flight_phase=cha;
-                msg(1,1:8) = obj.stop_msg;
       switch cha
         case 'q'  % quit
           obj.connector.sendData(gen_msg(obj.stop_msg));
