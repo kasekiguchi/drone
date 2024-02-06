@@ -26,6 +26,7 @@ agent.sensor = ROS2_SENSOR(agent, Sensor_Ros2_multi(agent));
 agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;0]}});
+agent.reference = POINT_REFERENCE(agent,[2.0;2;0],[0;0;0],[0;0;0]);
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 
 run("ExpBase");
@@ -44,18 +45,22 @@ run("ExpBase");
 %     %pause(1)
 % end
 
-% for i = 1:time.te
-%    % if i < 20 || rem(i, 10) == 0, i, end
-%     % agent.sensor.do(time);
-%     agent.estimator.do(time);
-%     % agent.reference.do(time,'f');
-%     % agent.controller.do(time,'f');
-%     % agent.plant.do(time, 'f');
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     % disp(agent.estimator.result.state.p);
-%     pause(dt)
-% end
+while (time.t < time.te)
+    tStart = tic;
+    agent.sensor.do(time,'f',0,0,agent,1);
+    % motive.getData(agent);
+    agent.estimator.do(time);
+    agent.reference.do(time,'f');
+    agent.controller.do(time,'f');
+    agent.plant.do(time, 'f');
+    logger.logging(time, 'f', agent);
+    time.k = logger.k;
+    % time.dt = toc(tStart);
+    pause(time.dt - toc(tStart));
+    time.t = time.t + time.dt;
+    disp(time.t)
+end
+agent.plant.do(time, 's');
 
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
