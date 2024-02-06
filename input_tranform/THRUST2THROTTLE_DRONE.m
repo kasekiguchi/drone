@@ -52,7 +52,7 @@ methods
                 obj.param.gain2(1) = 600;
                 obj.param.gain2(2) = 600;
                 obj.param.gain2(3) = 600;
-                obj.param.gain2(4) = 10;
+                obj.param.gain2(4) = 1000;
                 obj.param.th_offset2 = 345;
                 % fprintf('オフセット変更→MPC \n')
 

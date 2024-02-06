@@ -25,7 +25,8 @@ function Controller = Controller_MPC_Koopman(Agent)
     % load("EstimationResult_12state_12_12_SimcirrevsadP2Pzdata_est=sad.mat",'est') %シミュレーションモデル，4入力，上のやつに逆円データ追加S
     % load("EstimationResult_12state_1_18_ExpcirrevsadP2Pxydata_est=cir_torque",'est')
     % load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat",'est')
-    load("EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat",'est')
+
+    load("EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat",'est') %vzから算出したzで学習、総推力
     
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
