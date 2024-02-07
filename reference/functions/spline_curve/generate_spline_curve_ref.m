@@ -24,7 +24,7 @@ time =  (0:dt:dt*(pointN-1))';
 % wp = round(0.5*randn(pointN,3),3);%waypointの設定
 
 min_z = 0.5;
-max_z = 1.7;
+max_z = 1.5;
 min_xy = 0;
 max_xy = 0;
 wp_xy = round((max_xy-min_xy).*rand(pointN,2) + min_xy,2);%waypointの設定
