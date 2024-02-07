@@ -1,8 +1,8 @@
 clc
 clear
 ts = 0;
-dt = 0.1;
-te = 25;
+dt = 0.025;
+te = 70;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -62,7 +62,7 @@ run("ExpBase");
 
 
 clc
-for i = 1:5000
+for i = 1:te/dt
     if i < 20 || rem(i, 10) == 0, i, end
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
@@ -83,6 +83,94 @@ logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "p
 %%
 logger.plot({1, "plant.result.state.Qi", "p"})
 %%
+t=logger.data(0,'t',[]);
+DataA = logger.data(1,"plant.result.state.p","p");
+DataAx = DataA(:,1);
+DataAy = DataA(:,2);
+DataAz = DataA(:,3);
+DataR = logger.data(1,"reference.result.state.p","p");
+DataRx = DataR(:,1);
+DataRy = DataR(:,2);
+DataRz = DataR(:,3);
+
+Data_Link = logger.data(1,"plant.result.state.qi","p");
+Data_Link1 = Data_Link(:,1:3);
+Data_Link2 = Data_Link(:,4:6);
+Data_Link3 = Data_Link(:,7:9);
+Data_Link4 = Data_Link(:,10:12);
+Data_Link5 = Data_Link(:,13:15);
+Data_Link6 = Data_Link(:,16:18);
+
+Data_Q = logger.data(1,"plant.result.state.Q","p")
+
+
+%%
+close all
+figure(1)
+hold on
+% plot(DataA(:,1),DataA(:,2),'DisplayName','Estimater')
+plot(t,DataAx,'DisplayName','Estimater')
+plot(t,DataAy,'DisplayName','Estimater')
+plot(t,DataAz,'DisplayName','Estimater')
+plot(t,DataRx,'--','DisplayName','Reference')
+plot(t,DataRy,'--','DisplayName','Reference')
+plot(t,DataRz,'--','DisplayName','Reference')
+
+% plot(t,Log2(:,1),'DisplayName','Roll')
+% plot(t,Log2(:,2),'DisplayName','Pitch')
+% plot(t,Log2(:,3),'DisplayName','Yaw')
+% plot(t,Log2(:,4))
+% xlim([-1.5 1.5])
+% ylim([-2 4])
+xlabel("t [s]")
+% ylabel("Position [m]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 14;
+lgd = legend;
+lgd.Orientation ='horizontal';
+lgd.NumColumns = 3;
+lgd.FontSize = 9;
+
+hold off
+
+figure(2)
+hold on
+plot(t,Data_Link1(:,1),'DisplayName','Agent1')
+% plot(t,Data_Link2(:,1),'DisplayName','Agent2')
+% plot(t,Data_Link3(:,1),'DisplayName','Agent3')
+% plot(t,Data_Link4(:,1),'DisplayName','Agent4')
+% plot(t,Data_Link5(:,1),'DisplayName','Agent5')
+% plot(t,Data_Link6(:,1),'DisplayName','Agent6')
+
+% plot(t,Data_Link1(:,2),'DisplayName','Agent1')
+% plot(t,Data_Link2(:,2),'DisplayName','Agent2')
+% plot(t,Data_Link3(:,2),'DisplayName','Agent3')
+% plot(t,Data_Link4(:,2),'DisplayName','Agent4')
+% plot(t,Data_Link5(:,2),'DisplayName','Agent5')
+% plot(t,Data_Link6(:,2),'DisplayName','Agent6')
+% 
+% plot(t,Data_Link1(:,3),'DisplayName','Agent1')
+% plot(t,Data_Link2(:,3),'DisplayName','Agent2')
+% plot(t,Data_Link3(:,3),'DisplayName','Agent3')
+% plot(t,Data_Link4(:,3),'DisplayName','Agent4')
+% plot(t,Data_Link5(:,3),'DisplayName','Agent5')
+% plot(t,Data_Link6(:,3),'DisplayName','Agent6')
+
+% xlim([-1.5 1.5])
+% ylim([-2 4])
+xlabel("t [s]")
+% ylabel("Position [m]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 14;
+lgd = legend;
+lgd.Orientation ='horizontal';
+lgd.NumColumns = 3;
+lgd.FontSize = 9;
+
+hold off
+%%
 % clc
 % aaaa= logger.data(1,"p","e");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 % t=logger.data(0,'t',[]);
@@ -91,7 +179,7 @@ logger.plot({1, "plant.result.state.Qi", "p"})
 % plot(t,aaaa)
 % legend("Roll","Pitch","Yaw")
 %%
-close all
+% close all
 aaaa= logger.data(1,"plant.result.state.Q","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 % bbbb= logger.data(1,"reference.result.state.Q","p");
 t=logger.data(0,'t',[]);
@@ -114,11 +202,11 @@ legend("Yaw")
 hold off
 %%
 %close all
-% mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-10 10;-10 10;-10 10],"ntimes",10);
+mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
+mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-4 8;-5.5 6.5;-1 3],"ntimes",10);
 
 %%
-logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
+% logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
 function dfunc(app)
 app.logger.plot({1, "p", "er"}, "ax", app.UIAxes, "xrange", [app.time.ts, app.time.t]);

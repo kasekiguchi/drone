@@ -67,7 +67,7 @@ agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agen
 % agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
 %agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
- agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",20,"orig",[0;1;1],"size",1*[1,1,0]},"Cooperative",N},agent(1));
+ agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",20,"orig",[0;1;1],"size",1*[1,1,1]},"Cooperative",N},agent(1));
 
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
@@ -180,6 +180,9 @@ logger.save()
 %%
 close all
 DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+DataQq = logger.data(1,"plant.result.state.Q","p")';
+DataQ = Quat2Eul(DataQq)';
+
 % DataA = logger.data(2,"reference.result.state.p","p");
 DataA1 = logger.data(2,"estimator.result.state.pL","p");
 DataA2 = logger.data(3,"estimator.result.state.pL","p");
@@ -232,18 +235,18 @@ t=logger.data(0,'t',[]);
 %%
 figure(1)
 hold on
-plot(t,DataA1(:,2),'DisplayName','Agent1')
-plot(t,DataA2(:,2),'DisplayName','Agent2')
-plot(t,DataA3(:,2),'DisplayName','Agent3')
-plot(t,DataA4(:,2),'DisplayName','Agent4')
-plot(t,DataA5(:,2),'DisplayName','Agent5')
-plot(t,DataA6(:,2),'DisplayName','Agent6')
-plot(t,DataR1(:,2),'DisplayName','Reference Agent1')
-plot(t,DataR2(:,2),'DisplayName','Reference Agent2')
-plot(t,DataR3(:,2),'DisplayName','Reference Agent3')
-plot(t,DataR4(:,2),'DisplayName','Reference Agent4')
-plot(t,DataR5(:,2),'DisplayName','Reference Agent5')
-plot(t,DataR6(:,2),'DisplayName','Reference Agent6')
+plot(t,DataA1(:,1),'DisplayName','Agent1')
+% plot(t,DataA2(:,2),'DisplayName','Agent2')
+plot(t,DataA3(:,1),'DisplayName','Agent3')
+% plot(t,DataA4(:,2),'DisplayName','Agent4')
+plot(t,DataA5(:,1),'DisplayName','Agent5')
+% plot(t,DataA6(:,2),'DisplayName','Agent6')
+plot(t,DataR1(:,1),'--','DisplayName','Reference Agent1')
+% plot(t,DataR2(:,2),'--','DisplayName','Reference Agent2')
+plot(t,DataR3(:,1),'--','DisplayName','Reference Agent3')
+% plot(t,DataR4(:,2),'--','DisplayName','Reference Agent4')
+plot(t,DataR5(:,1),'--','DisplayName','Reference Agent5')
+% plot(t,DataR6(:,2),'DisplayName','Reference Agent6')
 % plot(t,Log2(:,1),'DisplayName','Roll')
 % plot(t,Log2(:,2),'DisplayName','Pitch')
 % plot(t,Log2(:,3),'DisplayName','Yaw')
@@ -258,7 +261,7 @@ ax.FontSize = 14;
 lgd = legend;
 lgd.Orientation ='horizontal';
 lgd.NumColumns = 3;
-lgd.FontSize = 8;
+lgd.FontSize = 9;
 
 hold off
 
@@ -267,17 +270,17 @@ hold off
 figure(2)
 hold on
 plot(t,DataA1(:,3),'DisplayName','Agent1')
-plot(t,DataA2(:,3),'DisplayName','Agent2')
+% plot(t,DataA2(:,3),'DisplayName','Agent2')
 plot(t,DataA3(:,3),'DisplayName','Agent3')
-plot(t,DataA4(:,3),'DisplayName','Agent4')
+% plot(t,DataA4(:,3),'DisplayName','Agent4')
 plot(t,DataA5(:,3),'DisplayName','Agent5')
-plot(t,DataA6(:,3),'DisplayName','Agent6')
-plot(t,DataR1(:,3),'DisplayName','Reference Agent1')
-plot(t,DataR2(:,3),'DisplayName','Reference Agent2')
-plot(t,DataR3(:,3),'DisplayName','Reference Agent3')
-plot(t,DataR4(:,3),'DisplayName','Reference Agent4')
-plot(t,DataR5(:,3),'DisplayName','Reference Agent5')
-plot(t,DataR6(:,3),'DisplayName','Reference Agent6')
+% plot(t,DataA6(:,3),'DisplayName','Agent6')
+plot(t,DataR1(:,3),'--','DisplayName','Reference Agent1')
+% plot(t,DataR2(:,3),'--','DisplayName','Reference Agent2')
+plot(t,DataR3(:,3),'--','DisplayName','Reference Agent3')
+% plot(t,DataR4(:,3),'--','DisplayName','Reference Agent4')
+plot(t,DataR5(:,3),'--','DisplayName','Reference Agent5')
+% plot(t,DataR6(:,3),'--','DisplayName','Reference Agent6')
 % plot(t,Log5(:,1),'DisplayName','Roll')
 % plot(t,Log5(:,2),'DisplayName','Pitch')
 % plot(t,Log5(:,3),'DisplayName','Yaw')
@@ -328,6 +331,8 @@ xlabel("t [s]")
 ax = gca;
 ax.FontSize = 14;
 lgd = legend;
+lgd.Orientation ='horizontal';
+lgd.NumColumns = 3;
 hold off
 
 figure(5)
@@ -343,6 +348,22 @@ plot(t,Data_Link6(:,3),'DisplayName','Agent6')
 % ylim([0 1.5])
 xlabel("t [s]")
 % ylabel("Position [m]")
+% legend("Payload","UAV")
+ax = gca;
+ax.FontSize = 14;
+lgd = legend;
+hold off
+
+figure(6)
+hold on
+plot(t,DataQ(:,1),'DisplayName','Roll')
+plot(t,DataQ(:,2),'DisplayName','Pitch')
+plot(t,DataQ(:,3),'DisplayName','Yaw')
+
+% xlim([-1.5 1.5])
+% ylim([0 1.5])
+xlabel("t [s]")
+% ylabel("Radian [rad]")
 % legend("Payload","UAV")
 ax = gca;
 ax.FontSize = 14;
@@ -386,30 +407,30 @@ lgd.FontSize = 9;
 hold off
 
 
-figure(103)
-hold on
-plot(t,DataC(:,3))
-% xlim([-1.5 1.5])
-% ylim([-1.5 1.5])
-xlabel("t [s]")
-ylabel("Mu [N]")
-% legend("Payload","UAV")
-ax = gca;
-ax.FontSize = 22;
-hold off
-
-
-figure(104)
-hold on
-plot(t,DataD(:,3))
-% xlim([-1.5 1.5])
-% ylim([-1.5 1.5])
-xlabel("t [s]")
-ylabel("acceleration [m/s^2]")
-% legend("Payload","UAV")
-ax = gca;
-ax.FontSize = 22;
-hold off
+% figure(103)
+% hold on
+% plot(t,DataC(:,3))
+% % xlim([-1.5 1.5])
+% % ylim([-1.5 1.5])
+% xlabel("t [s]")
+% ylabel("Mu [N]")
+% % legend("Payload","UAV")
+% ax = gca;
+% ax.FontSize = 22;
+% hold off
+% 
+% 
+% figure(104)
+% hold on
+% plot(t,DataD(:,3))
+% % xlim([-1.5 1.5])
+% % ylim([-1.5 1.5])
+% xlabel("t [s]")
+% ylabel("acceleration [m/s^2]")
+% % legend("Payload","UAV")
+% ax = gca;
+% ax.FontSize = 22;
+% hold off
 
 k=1;
 figure(105) 
@@ -436,13 +457,13 @@ hold off
 
 figure(106) 
 hold on
-% plot(t,Data1(:,1),'LineWidth',1,'DisplayName','agent1')
-% plot(t,Data2(:,1),'LineWidth',1,'DisplayName','agent2')
-% plot(t,Data3(:,1),'LineWidth',1,'DisplayName','agent3')
-% plot(t,Data4(:,1),'LineWidth',1,'DisplayName','agent4')
-% plot(t,Data5(:,1),'LineWidth',1,'DisplayName','agent5')
-% plot(t,Data6(:,1),'LineWidth',1,'DisplayName','agent6')
-plot(t,DataM(:,1))
+plot(t,Data1(:,1),'LineWidth',1,'DisplayName','agent1')
+plot(t,Data2(:,1),'LineWidth',1,'DisplayName','agent2')
+plot(t,Data3(:,1),'LineWidth',1,'DisplayName','agent3')
+plot(t,Data4(:,1),'LineWidth',1,'DisplayName','agent4')
+plot(t,Data5(:,1),'LineWidth',1,'DisplayName','agent5')
+plot(t,Data6(:,1),'LineWidth',1,'DisplayName','agent6')
+% plot(t,DataM(:,1))
 
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
@@ -514,8 +535,8 @@ hold off
 % logger.plot({1, "plant.result.state.Qi", "p"})
 %%
 % close all
-% mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-2 10;-6 6;-1 4],"ntimes",5);
+mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
+mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-2 4;-1 3],"ntimes",5);
 % 
 % %%
 % logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
