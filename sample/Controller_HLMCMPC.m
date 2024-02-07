@@ -11,7 +11,7 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.input.Initsigma = 1*[2,1,1,1];
     Controller_param.input.Constsigma = 100 * [0.01, 1,1,1];
     Controller_param.input.Maxsigma = 10 * [0.1,1,1,1]; % 10 0.3452
-    Controller_param.input.Minsigma = 5 * [0.1,1,1,1];
+    Controller_param.input.Minsigma = 0.5 * [0.1,1,1,1];
     Controller_param.input.Maxinput = 1.5;
     Controller_param.input.Constinput = 10;
 
@@ -37,28 +37,39 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.input_size = 4;
 
     %% sekiguchi-komatsu new
-    % Controller_param.Z = 1 * diag([100; 1000]);% * 1e3; %2
-    % Controller_param.X = 1e2 * diag([100,100,1,1]);% * 1e3;%4
+    % Controller_param.Z = 1 * diag([100; 10]);% * 1e3; %2
+    % Controller_param.X = 1e3 * diag([10000,1,1,1]);% * 1e3;%4
     % Controller_param.Y = Controller_param.X;% * 1e3;
     % Controller_param.PHI = 1e-1 * diag([10000; 100]);
+    % Controller_param.Zf = Controller_param.Z;
+    % Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000
+    % Controller_param.Yf = Controller_param.X;
+    % Controller_param.PHIf = Controller_param.PHI;
 
-    % 最新 1/11　時点いい重み
+    % 最新 1/11　時点いい重み 
     Controller_param.Z = 1 * diag([10; 10]);% * 1e3; %2
-    Controller_param.X = 1e2 * diag([1000,10000,1,1]);% * 1e3;%4
+    Controller_param.X = 1e3 * diag([1000,10000,1,1]);% 1e2でも結構いい感じ
     Controller_param.Y = Controller_param.X;% * 1e3;
     Controller_param.PHI = 1* diag([100; 1]);
 
-    Controller_param.Zf = Controller_param.Z;
+    Controller_param.Zf = 1e3 * diag([1000; 100]);
     Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000
-    Controller_param.Yf = Controller_param.Y;
+    Controller_param.Yf = Controller_param.X;
     Controller_param.PHIf = Controller_param.PHI;
 
-    Controller_param.AP = 1e3; % どれくらい距離をとる必要があるか
+    %% 着陸
+    % Controller_param.Z = 1e2 * diag([1000; 1000]);% * 1e3; %2
+    % Controller_param.X = 1e5 * diag([1000,100,1,1]);% 1e2でも結構いい感じ
+    % Controller_param.Y = Controller_param.X;% * 1e3;
+    % Controller_param.PHI = 1* diag([100; 1]);
+    % 
+    % Controller_param.Zf = 1e3 * diag([1000; 100]);
+    % Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000
+    % Controller_param.Yf = Controller_param.X;
+    % Controller_param.PHIf = Controller_param.PHI;
 
-    % Controller_param.Zf = diag([1e6; 1]);
-    % Controller_param.Xf = 1e6 * diag([1e5,1e2,1,1]);
-    % Controller_param.Yf = diag([1e5,1,1,1]);
-    % Controller_param.PHIf = diag([1; 1]);
+
+    Controller_param.AP = 1e3; % どれくらい距離をとる必要があるか
 
     Controller_param.R = 1e-5 * diag([1.0; 1*[1.0; 1.0; 1.0]]);
     Controller_param.RP = 1e-1 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 

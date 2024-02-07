@@ -39,6 +39,7 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       obj.input = param.input;
       obj.const = param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
+      obj.input.input_TH = obj.param.input.range; % 最大最小入力
       % obj.model = self.model;
       obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
@@ -123,11 +124,17 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       % mu = zeros(4, obj.param.H, obj.N); % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
       mu = obj.input.Resampling_mu; % Importance Sampling / Low Variance Sampling
+      % mu = repmat(obj.input.u, 1, obj.param.H, obj.N);
 
       % 標準偏差，サンプル数の更新
       obj.input.sigma = obj.input.nextsigma;
       obj.N = obj.param.nextparticle_num;
-      input_TH = obj.param.input.range; % 最大最小入力
+
+      %% 特定の入力なし
+      obj.input.sigma(1) = 0;
+      obj.input.sigma(4) = 0;
+      mu(4,:,:) = zeros(1, obj.param.H, obj.N); 
+      mu(1,:,:) = zeros(1, obj.param.H, obj.N); 
 
       % 全棄却時のケア
       if obj.input.AllRemove == 1
@@ -137,19 +144,19 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       end
 
       %% ホライズンにかけて分散大きく
-      ksigma_max = 0.01 * obj.param.H;
-      ksigma = linspace(1,1 + ksigma_max,obj.param.H);
+      ksigma_max = 0.1 * obj.param.H;
+      ksigma = linspace(1,1+ksigma_max,obj.param.H);
       inputSigma = ksigma .* obj.input.sigma';
-      obj.input.u1 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
-      obj.input.u2 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
-      obj.input.u3 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
-      obj.input.u4 = max(-input_TH, min(input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
+      obj.input.u1 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
+      obj.input.u2 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
+      obj.input.u3 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
+      obj.input.u4 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
 
       %% 正規分布ふつう
-      % obj.input.u1 = max(-input_TH, min(input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1,1))); 
-      % obj.input.u2 = max(-input_TH, min(input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1,1))); 
-      % obj.input.u3 = max(-input_TH, min(input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1,1))); 
-      % obj.input.u4 = max(-input_TH, min(input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1,1))); 
+      % obj.input.u1 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1,1))); 
+      % obj.input.u2 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1,1))); 
+      % obj.input.u3 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1,1))); 
+      % obj.input.u4 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1,1))); 
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
@@ -190,8 +197,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       % 平均のリサンプリング
 
-      % [obj.input.Resampling_mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
-      [obj.input.Resampling_mu, ~] = Resampling_IS_mex(obj.N, obj.param.H, obj.input.EvalNorm, obj.input.u); % ImportanceSampling
+      [obj.input.Resampling_mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
+      % [obj.input.Resampling_mu, ~] = Resampling_IS_mex(obj.N, obj.param.H, obj.input.EvalNorm, obj.input.u); % ImportanceSampling
 
       %-- 制約条件
       removeF = 0; removeX = []; survive = obj.N;
@@ -208,7 +215,8 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
         vs(3,1) = obj.input.u(4, 1, BestcostID(5));      % 2,3,4,5 だと個別の評価値に対する入力
         
         % vf = 0;
-        vs = zeros(3,1);  % 推力以外0
+        % vs = zeros(3,1);  % 推力以外0
+
         % input_ind = BestcostID(1); % 
         % vf      = obj.input.u(1, 1, input_ind);     
         % vs(1,1) = obj.input.u(2, 1, input_ind);     
@@ -293,14 +301,17 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % constY = find(x_real(3,5,1:obj.N) > -0.5);
       % constX = find(x_real(3,5,1:obj.N) < -1.5 | x_real(7,5,1:obj.N) > 0.5);
 
-      x = x_real(3,:,1:obj.N);
-      y = x_real(7,:,1:obj.N);
+      % x = x_real(3,:,1:obj.N);
+      % y = x_real(7,:,1:obj.N);
+      vz = x_real(2,:,1:obj.N);
       %% Any horizon
       % constX = find(x_real(3,:,1:obj.N) < -1.5 | x_real(7,:,1:obj.N) > 0.5); % Any horizon
       % constX = unique(constX);
 
-      const1 = find(2 < x & x < 4 & -0.1 < y & y < 0.2);
+      % const1 = find(2 < x & x < 4 & -0.1 < y & y < 0.2);
       % const2 = find(6 < x & x < 7 & -0.5 < y & y < 0.5);
+
+      const1 = find(vz < -0.5);
       constX = unique([const1]);
 
       %% 台形の禁止領域作り
@@ -381,7 +392,9 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
 
       %% 制約外の軌道に対して値を付加
       % x:3, y:7
-      % [~, removeX, ~] = obj.constraints();
+      % if obj.param.t > 2
+      %   [~, removeX, ~] = obj.constraints();
+      % end
 
       %% Artificial potential
       % Xreal = Zreal(3,:,:);
@@ -392,20 +405,28 @@ classdef HLMCMPC_controller <CONTROLLER_CLASS
       % AP = obj.param.AP ./(sqrt((Xreal - obj.param.constX).^2) + sqrt((Yreal - obj.param.constY).^2) + sqrt((z_real - obj.param.constZ).^2));
 
       %-- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-      % stageStateZ =    k .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
-      % stageInputPre  = k .* tildeUpre(:,1:end-1,:).*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre(:,1:end-1,:));
-      % stageInputRef  = k .* tildeUref(:,1:end-1,:).*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref(:,1:end-1,:));
-
-      %-- 状態の終端コストを計算 状態だけの終端コスト
-      % terminalState = sum(k .* Z(:,end,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,end,:)), [1,2]);
-      stageStateZ =    k .* Z.*pagemtimes(obj.Weight(:,:,1:obj.N),Z);
+      % stageStateZ = k(1:end-1) .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
+      % %-- 状態の終端コストを計算 状態だけの終端コスト
+      % if obj.param.t > 2
+      %     terminalState = k(end) .* Z(:,end,:).*pagemtimes(obj.WeightF(:,:,1:obj.N),Z(:,end,:));
+      % else
+      %     terminalState = 0;
+      % end
+      %-- 入力 これは常にオン
       stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre);
       stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
 
+      %% まとめて計算
+      stageStateZ =    k .* Z.*pagemtimes(obj.Weight(:,:,1:obj.N),Z);
+      terminalState = 0;
+
+      %% 変数そろえ
+      stageStateZ = stageStateZ + terminalState;
       %% 軌道ごとに制約を評価
       if ~isempty(removeX)
-      stageStateZ(3, removeX) = stageStateZ(3, removeX) + obj.param.ConstEval;
-      stageStateZ(7, removeX) = stageStateZ(7, removeX) + obj.param.ConstEval;
+      % stageStateZ(3:6, removeX) = stageStateZ(3:6, removeX) + obj.param.ConstEval;
+      % stageStateZ(7:10, removeX) = stageStateZ(7:10, removeX) + obj.param.ConstEval;
+      stageStateZ(1:2, removeX) = stageStateZ(1:2, removeX) + obj.param.ConstEval;
       end
 
       %% 人工ポテンシャルをx, yにプラス

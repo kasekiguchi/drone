@@ -37,7 +37,7 @@ if fsave == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Edata); hold on; plot(logt, Rdata(1:3, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
     ylabel("Position [m]")
-    if flegend == 1; legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest"); end
+    legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference", "landing time", "Location","northwest");
     % yyaxis right
     % plot(logt, Eachcost(8,:)); 
     % plot(logt, data.survive(1,end-1)', '.', 'MarkerSize', 2)
@@ -52,26 +52,26 @@ if fsave == 1
     figure(2); plot(Edata(1,:), Edata(2,:)); hold on; plot(Rdata(1,:), Rdata(2,:), '--'); hold off;
     xlim([0 10])
     daspect([1 1 1]);
-    if flegend == 1; legend("Estimate", "Reference"); end
+    legend("Estimate", "Reference");
     xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
 
     % velocity
     figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
     xlabel("Time [s]"); ylabel("Velocity [m/s]"); 
-    if flegend == 1; legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","southwest"); end
+    legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "landing time", "Location","southwest"); 
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % input
     figure(4); 
     plot(logt, Idata, "LineWidth", 1.5); hold on; xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
     xlabel("Time [s]"); ylabel("Input [N]"); 
-    if flegend == 1; legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northwest"); end
+    legend("input.total", "input.roll", "input.pitch", "input.yaw", "landing time", "Location","northwest");
     grid on; xlim([0 xmax]); ylim([-inf 5.5]);
     ytickformat('%.1f')
     
     if ~isempty(data.input_v)
         IV = data.input_v(:, 1:length(logt));
         figure(7); plot(logt, IV); 
-        if flegend == 1; legend("input1", "input2", "input3", "input4"); end
+        legend("input1", "input2", "input3", "input4");
         xlabel("Time [s]"); ylabel("input.V");
         grid on; xlim([0 xmax]); ylim([-inf inf]);
     % saveas(5, "../../Komatsu/MCMPC/InputV", "png");
@@ -97,11 +97,11 @@ else
     if flegend == 1; legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "landing time", "Location","northeast"); end
     grid on; xlim([0 xmax]); ylim([-inf inf]);
 
-    subplot(m,n,[2,4]); plot3(Edata(1,:), Edata(2,:), Edata(3,:)); hold on; plot3(Rdata(1,:), Rdata(2,:), Rdata(3,:), '--'); plot(initial.p(1), initial.p(2), 'h'); hold off;
+    subplot(m,n,[2,4]); plot3(Edata(1,:), Edata(2,:), Edata(3,:)); hold on; plot3(Rdata(1,:), Rdata(2,:), Rdata(3,:), '--'); plot3(initial.p(1), initial.p(2), initial.p(3), 'h'); hold off;
     daspect([1 1 1]);
     if flegend == 1; legend("Estimate", "Reference", "Initial pos"); end
     xlabel("$$X$$", "Interpreter", "latex"); ylabel("$$Y$$", "Interpreter", "latex")
-    % view(2)
+    view(2)
 
     % velocity
     subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--');  xline(cutT, ':', 'Color', 'blue', 'LineWidth', 2); hold off;
@@ -121,7 +121,6 @@ else
     error = Edata(1:3, :) - Rdata(1:3, :);
     plot(logt, error); grid on; grid minor;
     xlim([0 xmax]);
-
     % ylim([-inf if])
     xlabel("Time [s]"); ylabel("Error [m]");
     if flegend == 1; legend("error.x", "error.y", "error.z"); end
@@ -146,7 +145,8 @@ else
     title(strcat('N: ', num2str(data.param.Maxparticle_num)));
 
     % set(gcf, "WindowState", "maximized");
-    set(gcf, "Position", [960 0 960 1000])
+    set(gcf, "Position", [960 0 960 1000]); % 右半分 横モニタ
+    % set(gcf, "Position", [20 20 800 900]); % 縦モニタ
 
     %%
     % savename = 'HLMCMPC-linear-compare-good'
@@ -196,7 +196,7 @@ disp(dataRMSE);
 data.rmse = dataRMSE;
 
 %% 円に近い度
-XYminmax = [max(Edata(1,:)) - min(Edata(1,:)); max(Edata(2,:)) - min(Edata(2,:))]
+% XYminmax = [max(Edata(1,:)) - min(Edata(1,:)); max(Edata(2,:)) - min(Edata(2,:))]
 
 %% Animation video
 % close all;
@@ -210,5 +210,5 @@ data_now = datestr(datetime('now'), 'yyyymmdd');
 % Outputdir = strcat('../../students/komatsu/simdata/', data_now, '/');
 mkdir(strcat('../../students/komatsu/simdata/', data_now, '/'));
 
-% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/HLMCMPC-Vertical_vibration_4s_Good.mat'), "agent", "data", "logger", "-v7.3")
+% save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/HLMCMPC-landing.mat'), "agent", "data", "logger", "-v7.3")
 % save(strcat('C:/Users/student/Documents/students/komatsu/simdata/',data_now, '/', Title, ".mat"), "agent","data","initial","logger","Params","totalT", "time", "-v7.3")

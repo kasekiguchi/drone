@@ -41,8 +41,8 @@ classdef DRAW_DRONE_MOTION
             obj.zlim = [0 M(3)+1];
             obj=obj.gen_frame("frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,param.fig_num);
             
-            view(3)
-            % view(360,0)
+            % view(3)
+            view(360,0)
             grid on
             daspect([1 1 1]);
 
@@ -51,7 +51,7 @@ classdef DRAW_DRONE_MOTION
             % yy = zeros(1, size(xx, 2));
             % zz = 3/10 * (xx)+0.1;
             % plot3(xx, yy, zz);
-            % pause();
+            pause();
         end
         function obj=gen_frame(obj,param)
             arguments

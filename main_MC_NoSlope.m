@@ -13,16 +13,21 @@ userpath('clear');
 % run("main.m"); % 目標入力生成
 % close all hidden; clear all; clc;
 % userpath('clear');
-fRef = 0; %% 斜面着陸かどうか 1:斜面 2:逆時間 3:HL 0:TimeVarying
-fHL = 1;
-fMC = 1;
+%% いろんなフラグ
+fRef = 1; %% 初期値？
+fHL = 1; % 手法、パラメータ用
+fMC = 1; % 手法、パラメータ用
+fref = 1;
+% 1:timevarying, 2:SICE, 3:polynomial, 4:SICE_HL, 5:spline
 % movie
-fMovie = 10; % 動画出力
+fMovie = 10; % 動画に使うもじゃもじゃを表示するかどうか
 fSave = 10; % 動画 の保存 
-MovTime = 0;
+MovTime = 0; % ○○秒から動画生成
 % figure
-fsave = 0; % figure の保存
+fsave = 10; % figureをばらばらに出すか
+flegend = 10; % 判例をつけるかどうか : fsave ~= 1
 
+%%
 %------------------------
 % PC変更時初回はcontroller 途中で止めて
 % Resampling_IS, Us_GUIのmex化
@@ -47,8 +52,11 @@ totalT = 0;
 idx = 0;
 %-- 初期設定 controller.mと同期させる
 data.param = agent.controller.(agent.controller.name).param;
-
-% データ保存初期化
+%% reference 9次多項式
+polynomial;
+%% spline
+spline_generate;
+%% データ保存初期化
 if fMC == 1
     data.xr{idx+1} = 0;
     data.path{idx+1} = 0;       % - 全サンプル全ホライズンの値
@@ -73,20 +81,6 @@ xr = zeros(16, data.param.H);
 
 InputVdata = 0;
 fprintf("Initial Position: %4.2f %4.2f %4.2f\n", initial.p);
-
-%% reference 9th order polynomial
-% teref = 2; % かける時間
-% z0 = 2; % z初期値
-% ze = 0.1; % z収束値
-% v0 = 0; % 初期速度
-% ve = 0; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1とか -0.5
-% t = 0:0.025:3;
-% data.ref.refZ = curve_interpolation_9order(t',teref,z0,v0,ze,ve);
-% x0 = -1; % -1
-% xe = 0;
-% ve = 0;
-% delay = 0;
-% data.ref.refX = curve_interpolation_9order(t'-delay,teref,x0,v0,xe,ve);
 
 %%
 datestr(datetime('now'), 'yyyy / mm / dd HH:MM')
@@ -170,9 +164,9 @@ end
             else 
                 Time.ind = Time.ind; 
             end
-            Gp = initial.p;
+            ini_state = initial;
             Gq = [0; 0.2975; 0];
-            [xr] = Reference(data, Time, agent, Gq, Gp, 0, fRef, 2);    % 1:斜面 0:それ以外(TimeVarying)
+            [xr] = Reference(data, Time, agent, Gq, ini_state, 0, fref, te);    % 1:斜面 0:それ以外(TimeVarying)
             param(i).controller.(agent(i).controller.name) = {idx, xr, time.t, 0};
 % 
             for j = 1:length(agent(i).controller.name)
@@ -183,15 +177,15 @@ end
 
         %%
         if fMC == 1
-            data.bestcostID(:,idx) =  agent.controller.result.bestcostID;
-            data.bestcost(:,idx)=     agent.controller.result.bestcost;
-            data.path{idx} =          agent.controller.result.path;
-            data.pathJ{idx} =         agent.controller.result.Evaluationtra; % - 全サンプルの評価値
-            data.sigma(:,idx) =       agent.controller.result.sigma;
-            data.removeF(idx) =       agent.controller.result.removeF;   % - 棄却されたサンプル数
-            data.removeX{idx} =       agent.controller.result.removeX;
-            data.variable_particle_num(idx) = agent.controller.result.variable_N;
-            data.survive(idx) = agent.controller.result.survive;
+            data.bestcostID(:,idx) =            agent.controller.result.bestcostID;
+            data.bestcost(:,idx)=               agent.controller.result.bestcost;
+            data.path{idx} =                    agent.controller.result.path;
+            data.pathJ{idx} =                   agent.controller.result.Evaluationtra; % - 全サンプルの評価値
+            data.sigma(:,idx) =                 agent.controller.result.sigma;
+            data.removeF(idx) =                 agent.controller.result.removeF;   % - 棄却されたサンプル数
+            data.removeX{idx} =                 agent.controller.result.removeX;
+            data.variable_particle_num(idx) =   agent.controller.result.variable_N;
+            data.survive(idx) =                 agent.controller.result.survive;
             % data.eachcost(:, idx) =    agent.controller.result.eachcost;
 
             if data.removeF(idx) ~= data.param.particle_num
@@ -257,7 +251,6 @@ end
         % data.totalT = data.totalT + calT;
 
         fprintf("==================================================================\n");
-        % fprintf("t: %f\n", time.t);
         fprintf("==================================================================\n");
         
         fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
@@ -292,7 +285,11 @@ end
         
         %% 毎時刻　軌跡描画
         if fMovie == 1 && fMC == 1
+            tt = 0:0.1:10;
+            trajectory_x = initial.p(1) + cos(tt) - 1;
+            trajectory_y = initial.p(2) + sin(tt);
             if time.t > MovTime
+            % while(time.t > MovTime)
                 figure(idx+1)
                 pathJN = normalize(data.pathJ{idx}(:,1),'range', [1, data.param.Maxparticle_num]);
                 Color_map = (169/255)*ones(data.variable_particle_num(idx),3);                         % 灰色のカラーマップの作成
@@ -318,16 +315,18 @@ end
                 end
                 plot(state_monte.p(1), state_monte.p(2), '.', 'MarkerSize', 20, 'Color', 'red');    % 現在位置
 		        plot(data.bestx(idx,:),data.besty(idx,:),'--','Color',[255,94,25]/255,'LineWidth',2);
+
+                plot(trajectory_x, trajectory_y, '-.', 'LineWidth', 0.5, 'Color', '#800080');
                 % 障害物
                 % radius = 0.2;
                 % pos = [data.param.obsX-radius, data.param.obsY-radius, 2*radius, 2*radius];
                 % rectangle('Position',pos,'Curvature',[1 1]);
     
 		        str = ['$$t$$= ',num2str(time.t,'%.3f'),' s'];
-		        text(0.5,2,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
+		        text(-0.5,2,str,'FontSize',20,'Interpreter', 'Latex','BackgroundColor',[1 1 1],'EdgeColor',[0 0 0])
 		        grid on
 		        ax.YLim = [-2 2];
-		        ax.XLim = [-3 1];
+		        ax.XLim = [-4 0];
                 % ax.YLim = [-1 1];
 		        % ax.XLim = [2 te];
 		        fig.Units = 'normalized';
@@ -366,7 +365,6 @@ if fSave == 1
 end
 
 %% figure.m
-flegend = 0;
 savefigure
 
 %% 動画生成

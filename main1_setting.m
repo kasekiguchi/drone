@@ -17,7 +17,11 @@ ts = 0;
 if fExp
     te = 10000;
 else
-    te = 20; % default: 10
+    if fref == 1
+        te = 20;
+    else
+        te = 3.5; % default: 10/// 3.2 == Time.delay + 0.5
+    end
 end
 
 %% generate environment
