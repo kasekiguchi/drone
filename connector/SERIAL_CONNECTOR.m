@@ -16,9 +16,7 @@ methods
 
     function obj = SERIAL_CONNECTOR(param)
         % 通信する対象毎にインスタンスを作成する．
-        % param.port : COM num
-        % 必要に応じてMac, Linuxに対応させる．
-        % obj.port = strcat("COM", string(param.port));
+        % param.port : デバイスのパス(COMxx or /dev/xxx)
         obj.port = string(param.port);
         obj.serial = serialport(obj.port, obj.baudrate, 'Timeout', 1);
         configureTerminator(obj.serial, "CR/LF");
