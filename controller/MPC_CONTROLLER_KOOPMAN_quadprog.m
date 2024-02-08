@@ -88,7 +88,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog < handle
             elseif vara{2} == 'f'
                 obj.state.ref = obj.Reference(rt); %リファレンスの更新
                 obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-                fprintf('flight, ref:%f',obj.state.ref(1:3,1))
+                fprintf('flight')
             end
             %-------------------------------------------------------------------------
 
