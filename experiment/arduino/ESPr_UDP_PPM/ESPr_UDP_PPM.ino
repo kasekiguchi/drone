@@ -17,12 +17,8 @@ unsigned int droneNumber = 252; //機体番号を入力
 // ESPrのIPアドレスの設定
 // const char *ssid = "ACSLexperimentWiFi";
 // const char *password = "wifi-acsl-mse";
-// const char *ssid = "ACSL-Drone-Hotspot";
-// const char *password = "1qaz2wsx";
 const char *ssid = "aterm-b3cabe-g";
 const char *password = "1ddd2634b2f3e";
-// const char *ssid = "aterm-c84bf6-g";
-// const char *password = "4156d5f179db2";
 IPAddress myIP(192, 168, 1, droneNumber); // 機体により下番号変更
 
 IPAddress gateway(192, 168, 1, 1); // PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）

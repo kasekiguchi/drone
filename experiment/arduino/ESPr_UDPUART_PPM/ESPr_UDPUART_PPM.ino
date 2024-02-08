@@ -1,3 +1,4 @@
+// Wi-Fi または UART を利用して ESPWROOM にプロポ信号を送信し
 // ESPWROOM から　FUTABA T10J にトレーナーコード経由でPPMを送るためのプログラム
 // arduino の設定は
 // http://trac.switch-science.com/wiki/esp_dev_arduino_ide
@@ -9,21 +10,16 @@
 #include <WiFiUDP.h>
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 #include <math.h>
-#define SIGNAL_TIMEOUT 200000 //[us] Matlabと通信が切断されてから信号がリセットされるまでの時間
 uint8_t i;
 unsigned int droneNumber = 252; //機体番号を入力
-
+#define SIGNAL_TIMEOUT 200000 //[us] Matlabと通信が切断されてから信号がリセットされるまでの時間
 
 /////////////////// WiFi関係 ////////////////////
 // ESPrのIPアドレスの設定
 // const char *ssid = "ACSLexperimentWiFi";
 // const char *password = "wifi-acsl-mse";
-// const char *ssid = "ACSL-Drone-Hotspot";
-// const char *password = "1qaz2wsx";
 const char *ssid = "aterm-b3cabe-g";
 const char *password = "1ddd2634b2f3e";
-// const char *ssid = "aterm-c84bf6-g";
-// const char *password = "4156d5f179db2";
 IPAddress myIP(192, 168, 1, droneNumber); // 機体により下番号変更
 
 IPAddress gateway(192, 168, 1, 1); // PCが接続されているネットワークのゲートウェイのIPアドレスを入力する（MATLABのPCのIP）
@@ -33,7 +29,7 @@ IPAddress subnet(255, 255, 255, 0);
 WiFiUDP udp;
 
 boolean connected = false;
-volatile unsigned long last_received_time;
+volatile unsigned long last_received_time; // 最後に信号を受信した時間[us]を格納
 /////////////////// PPM関係 ////////////////////
 char packetBuffer[255];
 #define TOTAL_INPUT 4 // number of input channels
@@ -49,6 +45,7 @@ char packetBuffer[255];
 #define CH_MAX 1000    // PPM幅の最大 [us]
 
 #define CH_OFFSET 600 // 共通オフセット値
+
 
 //（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
 volatile uint16_t TOTAL_CH_OFFSET = 0; // CH_OFFSETの合計
@@ -85,10 +82,8 @@ void connectToWiFi() // ---- setup connection to wifi
   Serial.println(WiFi.localIP());
 }
 
-void setupPPM() // ---------- setup ppm signal configuration
-{
-  pinMode(OUTPUT_PIN, OUTPUT);
-  digitalWrite(OUTPUT_PIN, LOW);
+// 信号値をデフォルトに戻す関数
+void setDefaultPulseWidth(){
   pw[0] = CH_NEUTRAL; // roll
   pw[1] = CH_NEUTRAL; // pitch
   pw[2] = CH_MIN;     // throttle
@@ -98,6 +93,13 @@ void setupPPM() // ---------- setup ppm signal configuration
   pw[6] = CH_MIN;     // AUX3
   pw[7] = CH_MIN;     // AUX4
   start_H = PPM_PERIOD - 8 * CH_OFFSET - 3 * CH_NEUTRAL - 9 * TIME_LOW;
+}
+
+void setupPPM() // ---------- setup ppm signal configuration
+{
+  pinMode(OUTPUT_PIN, OUTPUT);
+  digitalWrite(OUTPUT_PIN, LOW);
+  setDefaultPulseWidth();
   // CPUのクロック周波数でPPM信号を制御
   noInterrupts();
   timer0_isr_init();
@@ -111,17 +113,17 @@ void receive() // ---------- loop function : receive signal by UDP
 {
   // ch : 0 - 1000 is converted to 1000 - 2000 throttle on FC
   int len = 0;
-  // for UDP
+  /////////////////// for UDP ////////////////////
   int packetSize = udp.parsePacket();
   if (packetSize){
     len = udp.read(packetBuffer, packetSize);
   }
+  /////////////////// for UART ////////////////////
   else if (Serial.available() > 0) 
-  { // for UART
+  { 
     len = Serial.readBytes(packetBuffer, 2 * TOTAL_CH);
   }
-
-  // Common
+  /////////////////// COMMON 信号値の格納 ////////////////////
   if (len > 0){
     last_received_time = micros();
     TOTAL_CH_W = 0;
@@ -145,16 +147,9 @@ void receive() // ---------- loop function : receive signal by UDP
     }
 
     start_H = PPM_PERIOD - TOTAL_CH_W - 8 * CH_OFFSET - 9 * TIME_LOW; // 9 times LOW time in each PPM period
+  /////////////////// for Failsafe ////////////////////
   }else if (micros() - last_received_time >= SIGNAL_TIMEOUT){
-      pw[0] = CH_NEUTRAL; // roll
-      pw[1] = CH_NEUTRAL; // pitch
-      pw[2] = CH_MIN;     // throttle
-      pw[3] = CH_NEUTRAL; // yaw
-      pw[4] = CH_MIN;     // AUX1
-      pw[5] = CH_MIN;     // AUX2
-      pw[6] = CH_MIN;     // AUX3
-      pw[7] = CH_MIN;     // AUX4
-      start_H = PPM_PERIOD - 8 * CH_OFFSET - 3 * CH_NEUTRAL - 9 * TIME_LOW;
+    setDefaultPulseWidth()
   }
 }
 
