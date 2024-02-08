@@ -8,7 +8,7 @@ clc;
 % loadfilename{3} = 'EstimationResult_12state_6_26_circle=flight_estimation=circle.mat';
 
 loadfilename{1} = 'test.mat';
-loadfilename{2} = 'test2.mat';
+% loadfilename{2} = 'test2.mat';
 % loadfilename{3} = 'test3.mat';
 % loadfilename{4} = 'EstimationResult_12state_10_30_data=cirandrevsadP2Pxy_cir=cir_est=cir_Inputandconst.mat';
 

@@ -1,32 +1,44 @@
 %% Koopman Linear by Data %%
-% 先に main.m の Initialize settings を実行すること
-% initialize
-% フラグ管理
+clc
+%--------------------------------------------------------------
+% 先に main.m の Initialize settings を実行すること(※必ず行う)
+%--------------------------------------------------------------
+initialize = input('＜main.mのInitialize settingsを実行しましたか？＞\n はい:1，いいえ:0：','s');
+initialize = str2double(initialize);
+if initialize == 0
+    error('main.m の Initialize settings を実行してください')
+end
 clear all
 clc
 %---------------------------------------------
 flg.bilinear = 0; %1:双線形モデルへの切り替え
-Normalize = 0; %1：正規化
+setting = 0; %この値はいじらない
 %---------------------------------------------
 
 %% 
-%データ保存先ファイル名(逐次変更する)
-FileName = input('保存するファイル名を入力してください(※～.matを付ける): ', 's');
-% FileName = 'EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
-% FileName = 'test.mat'; %お試し用
+%データ保存先ファイル名(逐次変更しないと，上書きされる)
+FileName = input('保存するファイル名を入力してください(※ ～.matを付ける): ', 's');
 
-% 読み込むデータファイル名
-loading_filename = input('\n読み込むデータファイル名を入力してください(※.matは含まない):','s');
+folderPath = 'データセット'; %データセットに使用するデータはDataフォルダ内のデータセットフォルダに保存
+fileList = dir(fullfile(folderPath,'*.mat')); %対象のファイルを取得
+fprintf('\n＜データセットに使用するファイル名の統一を行います＞\n')
 
-% loading_filename = 'Exp_alldata_1_29';  
-% loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
-% loading_filename = 'experiment_6_20_circle';
-% loading_filename = 'Exp_cirrevsaddata_12_19';
-% loading_filename = '1_24_sprine';
-% loading_filename = 'GUIsim_saddle';r
-% loading_filename = 'Sim_5data_12_11';
+% 読み込むデータファイル名は同じにする必要がある
+loading_filename = input('\n統一するファイル名を入力してください(※ .matは含まない):','s');
 
-Data.HowmanyDataset = 103; %読み込むデータ数に応じて変更
+for i = 1:length(fileList)
+    oldFileName = fullfile(folderPath,fileList(i).name);
+    newFileName = fullfile(folderPath,[append(loading_filename,'_',num2str(i),'.mat')]);
+    movefile(oldFileName, newFileName); %名前の変更
+end
+
+Data.HowmanyDataset = numel(fileList); %読み込むデータ数に応じて変更
+if Data.HowmanyDataset > 0
+    fprintf('\n＜ファイル名の統一が完了しました＞\n')
+    fprintf('\n読み込むファイル数：%d\n',Data.HowmanyDataset)
+else
+    error('フォルダ内にファイルが存在しません')
+end
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -34,10 +46,10 @@ nowFolder = fileparts(activeFile.Filename);
 targetpath=append(nowFolder,'\',FileName);
 
 %% Defining Koopman Operator
-
 %<使用している観測量>
 % F = @(x) [x;1]; % 状態変数+定数項1
 F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
+fprintf('\n選択されている観測量：%s\n',func2str(F))
 
 % load data h 
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
@@ -45,15 +57,25 @@ F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角�
 % Data.U 対象への入力
 % Data.Y 入力後の対象の状態
 
-% 使用するデータセットの数を指定
-% 23/01/26 run_mainManyTime.m で得たデータを合成
-disp('now loading data set')
+fprintf('\n＜データセットの結合を行います＞\n')
 
-for i= 1: Data.HowmanyDataset
+for i = 1:Data.HowmanyDataset
     if contains(loading_filename,'.mat')
-        Dataset = ImportFromExpData(loading_filename);
+        Dataset = ImportFromExpData_tutorial(loading_filename);
     else
-        Dataset = ImportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
+        if i == 1
+            setting = 1;
+            Dataset = ImportFromExpData_tutorial(append(loading_filename,'_',num2str(i),'.mat'),setting);
+            datarange = Dataset.datarange;
+            range = Dataset.range;
+            IDX = Dataset.IDX;
+            phase2 = Dataset.phase2;
+            vz_z = Dataset.vz_z;
+            fprintf('\n')
+        else
+            setting = 0;
+            Dataset = ImportFromExpData_tutorial(append(loading_filename,'_',num2str(i),'.mat'),setting,datarange,range,IDX,phase2,vz_z);
+        end
     end
     if i==1
         Data.X = [Dataset.X];
@@ -66,8 +88,9 @@ for i= 1: Data.HowmanyDataset
     end
     disp(append('loading data number: ',num2str(i),', now data:',num2str(Dataset.N),', all data: ',num2str(size(Data.X,2))))
 end
-disp('loaded')
+fprintf('\n＜データセットの結合が完了しました＞\n')
 
+Normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
 if Normalize == 1 %正規化
     Ndata = Normalization(Data);
     Data.X = Ndata.x;
@@ -87,7 +110,7 @@ end
 
 %% Koopman linear
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
-disp('now estimating')
+fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
@@ -95,7 +118,7 @@ else
 end
 
 est.observable = F;
-disp('Estimated')
+fprintf('\n＜クープマン線形化が完了しました＞\n')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
@@ -122,17 +145,6 @@ simResult.Z(:,1) = F(simResult.reference.X(:,1));
 simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
-
-% if Normalize == 1 %推定精度検証用データの正規化(改善前)
-%     Data2.X = simResult.reference.X;
-%     Data2.Y = zeros(size(Data2.X,1),size(Data2.X,2));
-%     Data2.U = simResult.reference.U;
-%     Ndata2 = Normalization(Data2);
-%     for i  = 1:12
-%         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata2.meanValue.x(i))/Ndata2.stdValue.x(i);
-%     end
-%     simResult.U(:,:) = Ndata2.u;
-% end
 
 if Normalize == 1 %推定精度検証用データの正規化(改善後)
     for i  = 1:12

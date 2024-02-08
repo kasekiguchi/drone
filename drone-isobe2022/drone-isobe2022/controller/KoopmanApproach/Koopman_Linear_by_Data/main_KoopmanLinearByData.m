@@ -12,7 +12,7 @@ Normalize = 0; %1：正規化
 
 %% 
 %データ保存先ファイル名(逐次変更する)
-% FileName = 'EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+% FileName = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名
@@ -24,7 +24,7 @@ FileName = 'test.mat'; %お試し用
 % loading_filename = 'GUIsim_11_29';
 loading_filename = 'Exp_2_4';
 
-Data.HowmanyDataset =278; %読み込むデータ数に応じて変更
+Data.HowmanyDataset =150; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -100,10 +100,10 @@ disp('Estimated')
 % simResult.reference = ImportFromExpData('GUIsim_saddle.mat');
 % simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
 % simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
-% simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
+simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
 % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
 % simResult.reference = ImportFromExpData_estimation('GUIsim_11_29_1'); %sim
-simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
+% simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1

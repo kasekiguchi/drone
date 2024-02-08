@@ -10,9 +10,6 @@ function data = ImportFromExpData(expData_Filename)
 
 
 % 実験データ読み込み
-% 読み込むファイル名を指定
-% expData_Filename = 'TestData1.mat'
-
 logger = load(expData_Filename);
 logger = logger.(string(fieldnames(logger)));
 clear data % 読み込んだファイル内のdataと同名の変数を初期化
@@ -21,12 +18,11 @@ clear data % 読み込んだファイル内のdataと同名の変数を初期化
 data.N = find(logger.Data.t,1,'last');
 data.uN = 4; %入力の個数
 data.fExp = logger.fExp;
-% data.uN = find(logger.Data.agent.input{1},1,'last');
 
 %% Get data
 % 状態毎に分割して保存
 % XYに結合する際の都合で↓時系列,→状態
-%drone_phase 115:stop 97:arming 116:take off 102:flight 108:landing
+%drone_phase  115:stop  97:arming  116:take off  102:flight  108:landing
 
 if logger.fExp==1 %fExp:1 実機データ
 %--------------------time----------------------
@@ -50,19 +46,18 @@ if logger.fExp==1 %fExp:1 実機データ
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N)logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
-    % for i = data.startIndex:data.endIndex
-    %     data.inner_input(i-data.startIndex+1,:) = logger.Data.agent.inner_input{i}(1:4);
-    % end
-    % data.input = data.inner_input;
-
-    % for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
+    
+    %総推力+トルク入力 → 各プロペラの推力に分解するときはコメントイン------------------------------
+    % for i = 1:size(data.input,1) 
     %     data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
     % end
-%     plot(logger.Data.t(data.startIndex:data.endIndex),data.input) %入力の確認
-    data.est.z(1,1) = data.est.p(1,3);
-    for i = 1:data.N-1
-        data.est.z(1,i+1) = data.est.z(1,i) + data.est.v(i,3)*(data.t(i+1,:)-data.t(i,:));
-    end
+    % plot(logger.Data.t(data.startIndex:data.endIndex),data.input) %入力の確認
+    %---------------------------------------------------------------------------------------------
+
+    % data.est.z(1,1) = data.est.p(1,3);
+    % for i = 1:data.N-1
+    %     data.est.z(1,i+1) = data.est.z(1,i) + data.est.v(i,3)*(data.t(i+1,:)-data.t(i,:));
+    % end
 
     % size = figure;
     % size.WindowState = 'maximized'; %表示するグラフを最大化
@@ -88,26 +83,30 @@ else
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
-    % for i = 1:size(data.input,1) %GUIの入力を各プロペラの推力に分解
+    
+    %総推力+トルク入力 → 各プロペラの推力に分解するときはコメントイン------------------------------
+    % for i = 1:size(data.input,1) 
     %     data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
     % end
+    % plot(logger.Data.t(data.startIndex:data.endIndex),data.input) %入力の確認
+    %---------------------------------------------------------------------------------------------
 end
 %% Set Dataset and Input
 % クープマン線形化のためのデータセットに結合
 % ↓状態,→時系列
-% for i=1:data.N-1
-%     data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
-%     data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
-%     data.U(:,i) = [data.input(i,:)'];
-%     data.T(:,i) = [data.t(i,:)];
-% end
-
 for i=1:data.N-1
-    data.X(:,i) = [data.est.p(i,1:2)';data.est.z(:,i);data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
-    data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.z(:,i+1);data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
+    data.X(:,i) = [data.est.p(i,:)';data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
+    data.Y(:,i) = [data.est.p(i+1,:)';data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
     data.U(:,i) = [data.input(i,:)'];
     data.T(:,i) = [data.t(i,:)];
 end
+
+% for i=1:data.N-1
+%     data.X(:,i) = [data.est.p(i,1:2)';data.est.z(:,i);data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
+%     data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.z(:,i+1);data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
+%     data.U(:,i) = [data.input(i,:)'];
+%     data.T(:,i) = [data.t(i,:)];
+% end
 
 end
 

@@ -10,8 +10,8 @@ clear all;
 clc;
 
 %pdfの設定
-name = 'report_P2Pshape'; %ファイル名
-folderName = 'report_P2Pshape'; %フォルダ名
+% name = 'report_sim_saddle'; %ファイル名
+% folderName = 'report_sim_saddle'; %フォルダ名
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
@@ -19,7 +19,7 @@ clear all
 clc
 close all
 
-load("sim_rndP4_2.mat")
+load("experiment_9_5_saddle_estimatordata.mat")
 disp('load finished')
 
 % for i = 1:find(log.Data.t,1,'last')
@@ -32,29 +32,29 @@ disp('load finished')
 %     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 % end
 
-% for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
-%     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
-%     data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
-% %     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
-% end
+for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
+    data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
+    data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
+%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+end
 % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
 %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 % end
 
-for i = 1:find(logger.Data.t,1,'last')
-    data.t(1,i) = logger.Data.t(i,1);                                      %時間t
-    data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
-end
+% for i = 1:find(logger.Data.t,1,'last')
+%     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
+%     data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+%     data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+%     data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+%     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+%     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
+% end
 % t = find(data.t,1,'last')-1;
 % for i = 1:t
 %     data.te(1,i) = data.t(1,i+1)-data.t(1,i);
@@ -95,10 +95,10 @@ figure(1)
 colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 xlabel('Time [s]');
-ylabel('p');
+ylabel('Position [m]');
 xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase == 102,1,'first')+50]),[1.0 0.9 1.0]); %グラフの背面を塗る
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+50),'LineStyle','--','Color','red','LineWidth',2)
+Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase == 102,1,'first')+60]),[1.0 0.9 1.0]); %グラフの背面を塗る
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+60),'LineStyle','--','Color','red','LineWidth',2)
 hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
@@ -110,46 +110,46 @@ lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax = gca;
 hold off
-title('Position p of agent1','FontSize',12);
+% title('Position p of agent1','FontSize',12);
 
 %姿勢角q
 figure(2)
 colororder(newcolors)
 plot(data.t,data.q(:,:),'LineWidth',1);
 xlabel('Time [s]');
-ylabel('q');
+ylabel('Attitude [rad]');
 grid on
 lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(2) = gca;
-title('Attitude q of agent1','FontSize',12);
+% title('Attitude q of agent1','FontSize',12);
 
 %速度v
 figure(3)
 colororder(newcolors)
 plot(data.t,data.v(:,:),'LineWidth',1);
 xlabel('Time [s]');
-ylabel('v');
+ylabel('Velocity [m/s]');
 grid on
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(3) = gca;
-title('Velocity v of agent1','FontSize',12);
+% title('Velocity v of agent1','FontSize',12);
 
 %角速度w
 figure(4)
 colororder(newcolors)
 plot(data.t,data.w(:,:),'LineWidth',1);
 xlabel('Time [s]');
-ylabel('w');
+ylabel('Angular velocity [rad/s]');
 grid on
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(4) = gca;
-title('Angular velocity w of agent1','FontSize',12);
+% title('Angular velocity w of agent1','FontSize',12);
 
 figure(5)
 plot(data.p(1,:),data.p(2,:));
@@ -165,12 +165,16 @@ legend('Estimated trajectory','Target position')
 ax(5) = gca;
 
 figure(6)
-plot3(data.p(1,:),data.p(2,:),data.p(3,:));
+plot3(data.p(1,220:275),data.p(2,220:275),data.p(3,220:275),'LineWidth',3,'Color','r');
+hold on
 grid on
-xlabel('x');
-ylabel('y');
-zlabel('z');
+plot3(data.p(1,275:end),data.p(2,275:end),data.p(3,275:end),'LineWidth',0.8,'Color',[0 0.4470 0.7410],'LineStyle','--');
+xlabel('x [m]');
+ylabel('y [m]');
+zlabel('z [m]');
 zlim([0 max(data.p(3,:))])
+% daspect([1 1 0.5])
+legend('推定範囲','FontSize',20)
 ax(6) = gca;
 
 %入力
@@ -186,7 +190,7 @@ xlim([data.t(1) data.t(end)])
 ax(7) = gca;
 title('Input u of agent1','FontSize',12);
 
-fontSize = 12; %軸の文字の大きさの設定
+fontSize = 16; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
 
 else
@@ -297,7 +301,7 @@ set(ax,'FontSize',fontSize);
 % size = 'maximized';
 % set(gcf,"Position",get(0,'Screensize')
 end
-disp('凡例などの調整を行ってください (調整が終了した場合はEnterを押してください)')
+fprintf('\n凡例などの調整を行ってください (調整が終了した場合はEnterを押してください)')
 pause;
 
 %% グラフの背景に色あり
@@ -415,10 +419,16 @@ pause;
 
 
 %% pdfで保存
-Num = input('pdfで保存しますか (しない : 0 / する : 1)：','s'); %0:各グラフで出力,1:いっぺんに出力
-pdf = str2double(Num); %文字列を数値に変換
+if selection == 0
+    Num = input('\n pdfで保存しますか (しない : 0 / する : 1)：','s'); 
+    pdf = str2double(Num); %文字列を数値に変換
+else
+    pdf = 0;
+end
 
 if pdf == 1
+    folderName = input('\n pdfを保存するフォルダ名を入力してください：','s');
+    name = input('\n pdfのファイル名を入力してください：','s');
     mkdir(folderName);
     movefile(folderName,'Graph')
     exportgraphics(figure(1),strcat('Position_',name,'.pdf'))
@@ -442,6 +452,6 @@ if pdf == 1
     exportgraphics(figure(7),strcat('input_',name,'.pdf'))
     movefile(strcat('input_',name,'.pdf'),fullfile('Graph',folderName))
 
-    disp('保存が完了しました')
+    fprintf('\n保存が完了しました')
 end
 
