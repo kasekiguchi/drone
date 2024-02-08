@@ -119,7 +119,7 @@ void receive() // ---------- loop function : receive signal by UDP
     len = udp.read(packetBuffer, packetSize);
   }
   /////////////////// for UART ////////////////////
-  else if (Serial.available() > 0) 
+  else if (Serial.available() >= 2 * TOTAL_CH) 
   { 
     len = Serial.readBytes(packetBuffer, 2 * TOTAL_CH);
   }
@@ -149,7 +149,7 @@ void receive() // ---------- loop function : receive signal by UDP
     start_H = PPM_PERIOD - TOTAL_CH_W - 8 * CH_OFFSET - 9 * TIME_LOW; // 9 times LOW time in each PPM period
   /////////////////// for Failsafe ////////////////////
   }else if (micros() - last_received_time >= SIGNAL_TIMEOUT){
-    setDefaultPulseWidth()
+    setDefaultPulseWidth();
   }
 }
 
