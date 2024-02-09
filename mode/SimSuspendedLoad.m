@@ -44,7 +44,7 @@ for i = 1:time.te
 end
 
 %%
-logger.plot({1,"plant.result.state.pL","p"})
+logger.plot({1,"plant.result.state.pL","p"},{1,"input",""})
 %%
 function result = controller_do(varargin)
 controller = varargin{5}.controller;
