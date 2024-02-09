@@ -19,7 +19,7 @@ origin = param.orig;
 scale = param.size;
 phase = param.phase;
 syms t real
-syms lx ly real
+% syms lx ly lz real
 lx = scale(1); % 4
 lx_offset = origin(1); %4;
 ly = scale(2); %3.5;
@@ -29,13 +29,13 @@ lz_offset=origin(3);% 1;
 %w = 0.2; % T秒で一周
 w = 2*pi/T; % T秒で一周
 
-ref=@(t)[lx*cos(w*t + phase)+lx_offset; % x
-ly*sin(w*t + phase)+ly_offset; % y
-lz*sin(2*w*t + phase/2)+lz_offset]; % z
-
-% ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
+% ref=@(t)[lx*cos(w*t + phase)+lx_offset; % x
 % ly*sin(w*t + phase)+ly_offset; % y
-% lz_offset]; % z
+% lz*sin(w*t + phase)+lz_offset]; % z
+
+ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
+ly*sin(w*t + phase)+ly_offset; % y
+lz_offset]; % z
 % dx = diff(ref,t,1);
 
 % ref=@(t) [lx_offset;  % x
