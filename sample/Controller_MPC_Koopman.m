@@ -26,8 +26,8 @@ function Controller = Controller_MPC_Koopman(Agent)
     % load("EstimationResult_12state_1_18_ExpcirrevsadP2Pxydata_est=cir_torque",'est')
     % load("EstimationResult_12state_2_2_Sim_cirrevsadP2Pxy_torque_incon_無駄時間あり.mat",'est')
 
-    load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat",'est')
+    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+    load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat",'est')
     
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -41,30 +41,31 @@ function Controller = Controller_MPC_Koopman(Agent)
 
     %% 重み
     %実機重み--------------------------------------------------------------------------
-    %  Controller_param.weight.P = diag([350; 150; 250]);    % 座標   1000 1000 10000
-    % Controller_param.weight.V = diag([100; 300; 200]);    % 速度
-    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    % Controller_param.weight.QW = diag([250; 170; 1; 1; 1; 100]);  % 姿勢角，角速度
-    % 
-    % Controller_param.weight.Pf = Controller_param.weight.P; % 6
-    % Controller_param.weight.Vf = Controller_param.weight.V;
-    % Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
+    Controller_param.weight.P = diag([30; 60; 200]);    % 座標   1000 1000 10000
+    Controller_param.weight.V = diag([150; 200; 300]);    % 速度
+    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    Controller_param.weight.QW = diag([20; 10; 1; 1; 1; 1]);  % 姿勢角，角速度
+
+    Controller_param.weight.Pf = Controller_param.weight.P; % 6
+    Controller_param.weight.Vf = Controller_param.weight.V;
+    Controller_param.weight.QWf = Controller_param.weight.QW; % 7,8
     %----------------------------------------------------------------------------------
 
     %実機でmpc飛んだやつ---------------------------------------------------------------
-    Controller_param.weight.P = diag([20; 1; 30]);    % 座標   1000 1000 10000
-    Controller_param.weight.V = diag([30; 20; 1]);    % 速度
-    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
-
-    Controller_param.weight.Pf = diag([1; 1; 1]); % 6
-    Controller_param.weight.Vf = diag([1; 1; 1]);
-    Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
+    % Controller_param.weight.P = diag([20; 1; 30]);    % 座標   1000 1000 10000
+    % Controller_param.weight.V = diag([30; 20; 1]);    % 速度
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+    % Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度
+    % 
+    % Controller_param.weight.Pf = diag([1; 1; 1]); % 6
+    % Controller_param.weight.Vf = diag([1; 1; 1]);
+    % Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
     %実機：よー角に重み付けると計算破綻
     %---------------------------------------------------------------------------------
 
+    %報告会用重み(動画1はzの重み1,動画2はzの重み10)-------------------------------------
     % Controller_param.weight.P = diag([1; 1; 10]);    % 座標   1000 1000 10000
     % Controller_param.weight.V = diag([1; 1; 1]);    % 速度
     % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
@@ -74,6 +75,7 @@ function Controller = Controller_MPC_Koopman(Agent)
     % Controller_param.weight.Pf = diag([1; 1; 1]); % 6
     % Controller_param.weight.Vf = diag([1; 1; 1]);
     % Controller_param.weight.QWf = diag([1; 1; 1; 1; 1; 1]); % 7,8
+    %----------------------------------------------------------------------------
 
     % % 
     % Controller_param.weight.Pf = Controller_param.weight.P; % 6

@@ -202,14 +202,21 @@ ylim([-0.2 1.2])
 legend('Estimated trajectory','Target position','Initial position')
 ax(5) = gca;
 
+
+%% 
 figure(6)
-plot3(data.p(1,:),data.p(2,:),data.p(3,:));
+plot3(0,1,1.5,'o','MarkerFaceColor','black','MarkerSize',8)
+hold on
+plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2,'Color',[0 0.4470 0.7410]);
 grid on
-xlabel('x');
-ylabel('y');
-zlabel('z');
+plot3(data.pr(1,:),data.pr(2,:),data.pr(3,:),'LineWidth',1.2,'Color','r','LineStyle','--');
+xlabel('x [m]');
+ylabel('y [m]');
+zlabel('z [m]');
 zlim([0 max(data.p(3,:))])
+legend('Initial position','FontSize',18)
 ax(6) = gca;
+%% 
 
 %入力
 figure(7)

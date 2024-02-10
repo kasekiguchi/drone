@@ -1,14 +1,14 @@
 clc
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 30; % terminal time
+te = 60; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
 %位置，姿勢角初期値固定------------------------------------------------------------
-initial_state.p = arranged_position([0, 0], 1, 1, 1); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([0, 1], 1, 1, 1.5); % [x, y], 機数，1, z (初期位置)
 % initial_state.q = [1; 0; 0; 0];
 initial_state.q = [0; 0; 0];
 %----------------------------------------------------------------------------------
@@ -43,8 +43,8 @@ initial_state.w = [0; 0; 0];
 % load("EstimationResult_12state_1_29_Exp_sprineandall_est=P2Pshape_torque_incon.mat",'est') %sprine+今までの飛行データ
 % load("EstimationResult_12state_1_31_Exp_sprineandhov_est=P2Pshape_torque_incon_Norm.mat",'est') %sprine、正規化
 % load("EstimationResult_12state_2_1_Exp_sprine100__torque_incon.mat",'est')
-load("EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat",'est')
-
+% load("EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat",'est')
+load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat",'est')
 
 % % % % 
 A = est.A;
@@ -61,7 +61,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;0.7],"g",[0;0;1],"h",[0.5;0;0.7],"j",[0;0;1]),5});
 %fminconは4入力モデルで計算しないと遅い
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
-agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
 
 run("ExpBase");
 

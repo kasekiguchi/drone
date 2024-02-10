@@ -2,7 +2,7 @@ clc
 clear all
 close all
 
-D = load('1_25_立体_そこそこよい.mat'); %描画したいアニメーションのデータを読み込む
+D = load('2_8_mpc_立体_発表資料.mat'); %描画したいアニメーションのデータを読み込む
 % D = load('1_5_NMPC_立体.mat');
 param = DRONE_PARAM("DIATONE"); %DRONEのパラメータ読み込み
 target = 1; %機体数
@@ -11,7 +11,7 @@ change_torque = 0; %1:総推力に変換
 
 %% 動画保存
 % save_mp4 = 0; %1:動画をmp4で保存
-videoFile = '1_25_立体_そこそこよい.mp4';
+videoFile = strcat('2_8_mpc_立体_発表資料.mp4');
 writerObj = VideoWriter(videoFile, 'MPEG-4');
 writerObj.FrameRate = 30; % フレームレートの設定
 
