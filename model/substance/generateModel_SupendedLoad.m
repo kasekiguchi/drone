@@ -1,9 +1,7 @@
 %% Initialize
-% do initialize first in main.m
-clear all
+% do initialize first in mainGUI.m
+%clear all
 %clc
-%tmp = matlab.desktop.editor.getActive;
-%cd(fileparts(tmp.Filename));
 %% Define variables
 syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
 syms u u1 u2 u3 u4 T1 T2 T3 T4 real
@@ -12,6 +10,7 @@ syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
 syms mL Length real % 
 syms pl1 pl2 pl3 dpl1 dpl2 dpl3 ol1 ol2 ol3 real
 syms pT1 pT2 pT3 real
+% parameter sample
 param.mass = 0.2;
 param.length = 0.1;% モーター間の距離：正方形を仮定している
 param.jx = 0.002237568;
@@ -33,9 +32,12 @@ ol  = [ ol1; ol2; ol3];             % Load angular velocity
 pT  = [ pT1; pT2; pT3];             % String position
 [Rb0,L] = RodriguesQuaternion(q);   % Rotation matrix
 T = [T1;T2;T3;T4];                  % Thrust force ：正がzb 向き
+% Thrust torque: T1 : 合計推力，T2：roll トルク，T3：pitch トルク，T4：yaw トルク
+% Thrust force ：正がzb 向き
 % 前：ｘ軸，　左：y軸，　上：ｚ軸
 % motor configuration 
-% T1 : 右後，T2：右前，T3：左後，T4：左前（x-y平面の象限順）
+% beta flight のdefault の場合
+% T1 : 右後，T2：右前，T3：左後，T4：左前
 % T2, T3 の回転方向は軸 zb,  T1, T4 : -zb      [1,0,0,1] で 正のyaw回転
 %tau = [sqrt(2)*l*(T3+T4-T1-T2)/2; sqrt(2)*l*(T1+T3-T2-T4)/2; km1*T1-km2*T2-km3*T3+km4*T4]; % Torque for body
 % IT=inv([1, 1, 1, 1;simplify(mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),tau,'UniformOutput',false)),1:3,1:4))]);
@@ -68,7 +70,7 @@ clc
 % matlabFunction(f,'file','F.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
 % matlabFunction(g,'file','G.m','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 %%
-nonlinearModel = subs(f+g*[u1;u2;u3;u4], physicalParam, physicalParamV);
+% nonlinearModel = subs(f+g*[u1;u2;u3;u4], physicalParam, physicalParamV);
 % matlabFunction(nonlinearModel,'file','euler_parameter_thrust_force_model','vars',{x u},'outputs',{'dx'});
 % matlabFunction(f+g*[u1;u2;u3;u4],'file','euler_parameter_thrust_force_physical_parameter_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 
@@ -91,18 +93,6 @@ der = simplify([dER.droll;dER.dpitch;dER.dyaw]);
 ddpg = ERb0*[0;0;(T1+T2+T3+T4)/m];
 ddpG = simplify(Mtake(cell2sym(arrayfun(@(A) fliplr(coeffs(A, T)),ddpg,'UniformOutput',false)),1:3,1:4));%*IT;
 % ddpg=ddpG*T
-%% SS equation
-% % Usage: dx=f+g*u
-xp = [p;er;dp;ob];            % 13 states
-fp = [dp;der;ddpf;dobf];
-%fp = [dp;ob;ddpf;dobf];
-gp = [zeros(3,4);zeros(3,4);ddpG;dobg];
-u = [u1;u2;u3;u4];
-% matlabFunction(fp+gp*[u1;u2;u3;u4],'file','roll_pitch_yaw_thrust_force_physical_parameter_model','vars',{xp u cell2sym(physicalParam)},'outputs',{'dx'});
-
-%% Calculate Jacobian matrix
-%jacobianA = jacobian(nonlinearModel,x);
-% matlabFunction(jacobianA,'file','JacobiA.m','vars',{x u},'outputs',{'a'});
 
 %% With load model
 syms Lx Ly lx ly lz rotor_r cableL real
