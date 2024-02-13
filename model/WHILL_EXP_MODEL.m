@@ -101,8 +101,20 @@ methods
         % if u(1) > abs(1.7)
         %    cha = 'q';
         % end
-        obj.phase = cha;
 
+       
+       
+        u = obj.self.controller.result.input;
+        if abs(u(1))>2 || abs(u(2))>2
+            cha = 'q';
+        end
+        % if u(1) < -0.1
+        %     cha = 't'
+        %     u
+        %     obj.self.controller.e
+        % 
+        % end
+         obj.phase = cha;
         switch cha
             case 'q' % quit
                 obj.msg.linear.x = 0.0;
@@ -120,8 +132,9 @@ methods
                 obj.msg.angular.x = 0.0;
                 obj.msg.angular.y = 0.0;
                 obj.msg.angular.z = 0.0;
+                hold off
             case 'a' % stop
-                obj.self.controller.result.input = [0; 0];
+                % obj.self.controller.result.input = [0; 0];
                 obj.self.input_transform.result = [];
                 obj.msg.linear.x = 0.0;
                 obj.msg.linear.y = 0.0;
@@ -131,7 +144,7 @@ methods
                 obj.msg.angular.z = 0.0;
                 pause(0.5)
             case 't' % stop
-                obj.self.controller.result.input = [0; 0];
+                % obj.self.controller.result.input = [0; 0];
                 obj.self.input_transform.result = [];
                 obj.msg.linear.x = 0.0;
                 obj.msg.linear.y = 0.0;
@@ -139,9 +152,9 @@ methods
                 obj.msg.angular.x = 0.0;
                 obj.msg.angular.y = 0.0;
                 obj.msg.angular.z = 0.0;
-                pause(0.25)
+                % pause(0.25)
             case 'f' % run
-                u = obj.self.controller.result.input;
+                % u = obj.self.controller.result.input;
                 obj.msg.linear.x = u(1);
                 obj.msg.linear.y = 0.0;
                 obj.msg.linear.z = 0.0;
@@ -151,25 +164,11 @@ methods
 
         end
 
-        %         else % 緊急時
-        %             obj.msg.linear.x = 0.0;
-        %             obj.msg.linear.y = 0.0;
-        %             obj.msg.linear.z = 0.0;
-        %             obj.msg.angular.x = 0.0;
-        %             obj.msg.angular.y = 0.0;
-        %             obj.msg.angular.z = 0.0;
-        %             obj.connector.sendData(obj.msg);
-        % %             state = obj.connector.getData();
-        % %             obj.result.state.p = [state.pose.position.z,state.pose.position.x];
-        % %             obj.result.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-        % %             obj.result.state.eq = quat2eul(obj.result.state.qq);
-        % %             obj.state.p = [state.pose.position.z,state.pose.position.x];
-        % %             obj.state.qq = [state.pose.orientation.w,state.pose.orientation.x,state.pose.orientation.y,state.pose.orientation.z];
-        % %             obj.state.eq = quat2eul(obj.state.qq);
-        %             return;
-        %         end
-        % obj.self.input_transform = u;
+
         obj.connector.sendData(obj.msg);
+        if cha =='t'
+            warning("input x is back")
+        end
     end
 
     function set_param(obj, param)

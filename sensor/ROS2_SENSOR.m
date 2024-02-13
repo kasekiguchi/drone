@@ -69,6 +69,7 @@ methods
 
         p = pq(1:2);
 
+
         if length(pq) > 2
             q = pq(end);
         end
@@ -96,28 +97,61 @@ methods
 
     end
 
-    function pointcloud_out_roi = Pointcloud_manual_delete_roi(obj, pd, roi)
-        % extract data from pd within ROI
-        % ids = roi(1) < pd(inc,1) && pd(inc,1) < roi(2) && roi(3) < pd(inc,2) && pd(inc,2) < roi(4);
-        % pd(ids,:) = [];
-        % pointcloud_out_roi = pd;
-        for inc = 1:length(pd)
+%     function pointcloud_out_roi = Pointcloud_manual_delete_roi(obj, pd, roi)
+%         % extract data from pd within ROI
+%         % ids = roi(1) < pd(inc,1) && pd(inc,1) < roi(2) && roi(3) < pd(inc,2) && pd(inc,2) < roi(4);
+%         % pd(ids,:) = [];
+%         % pointcloud_out_roi = pd;
+%         for inc = 1:length(pd)
+% 
+%             if roi(1) < pd(inc, 1) && pd(inc, 1) < roi(2)
+% 
+%                 if roi(3) < pd(inc, 2) && pd(inc, 2) < roi(4)
+%                     pd(inc, 1) = nan;
+%                     pd(inc, 2) = nan;
+%                     pd(inc, 3) = nan;
+%                 end
+% 
+%             end
+% 
+%         end
+% 
+%         R = rmmissing(pd);
+%         pd_B = R;
+%         pointcloud_out_roi = pd_B;
+% =======
+%       if length(pq) > 2
+%         q = pq(end);
+%       end
+% 
+%       if ~isempty(obj.result)
+%         points(1:2:2 * size(obj.result.sensor_points, 1), :) = obj.result.sensor_points;
+%         R = [cos(q), -sin(q); sin(q), cos(q)];
+%         %             points = (R'*(points'-p))';
+%         %             points = (R * points' + p)';
+%         points = (points' - p)';
+%         points = (points' + p)';
+%         pp = plot([points(:, 1); p(1)], [points(:, 2); p(2)]);
+%         %             set(pp,'EdgeAlpha',0.05);
+%         %             set(pp,'EdgeColor','g');
+%         hold on;
+%         text(points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
+%         %             region = polyshape((R * obj.result.region.Vertices' + p)');
+%         %             plot(region);%132,133 coment out
+%         %             head_dir = polyshape((R * obj.head_dir.Vertices' + p)');
+%         %             plot(head_dir);
+%         axis equal;
+%       else
+%         disp("do measure first.");
+%       end
+% 
+%     end
 
-            if roi(1) < pd(inc, 1) && pd(inc, 1) < roi(2)
-
-                if roi(3) < pd(inc, 2) && pd(inc, 2) < roi(4)
-                    pd(inc, 1) = nan;
-                    pd(inc, 2) = nan;
-                    pd(inc, 3) = nan;
-                end
-
-            end
-
-        end
-
-        R = rmmissing(pd);
-        pd_B = R;
-        pointcloud_out_roi = pd_B;
+function pointcloud_out_roi = Pointcloud_manual_delete_roi(obj,pd,roi)
+% extract data from pd within ROI
+ids = roi(1) < pd(:,1) & pd(:,1) < roi(2) & roi(3) < pd(:,2) & pd(:,2) < roi(4);
+pd(ids,:) = [];
+pointcloud_out_roi = pd;
     end
 
     function result = getData_two_lidar_combine(obj)
@@ -157,13 +191,17 @@ methods
         % Yaw axis rotation
         rot = eul2rotm(deg2rad([0 0 180]), 'XYZ');
         % translational vector
-        Tb = [0.2900 0.0230 0]; % TODO : measure from back lidar to the vehicle's origin
-        Tf = [0.7 0 0]; % TODO : measure from front lidar to the vehicle's origin
+        % Tb = [0.2900 0.0230 0]; % TODO : measure from back lidar to the vehicle's origin
+        % Tf = [0.7 0 0]; % TODO : measure from front lidar to the vehicle's origin
+        zure=0.01;
+        Tf = [0.7+zure 0 0];
+        Tb = [0.2900+zure 0 0];
         %moving_pc2_m_b = tform_manual(moving_pc.b,rot,T);
         moving_pc2_m_f = (rot * moving_pc.f' + Tf')'; % N x 3
         moving_pc2_m_b = (moving_pc.b' + Tb')'; % N x 3
         % merge and transform to point cloud data
         result.pc = pointCloud([moving_pc2_m_f; moving_pc2_m_b]);
+        % pcshow(result.pc)
     end
 
 end

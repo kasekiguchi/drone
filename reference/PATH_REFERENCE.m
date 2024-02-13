@@ -353,6 +353,7 @@ classdef PATH_REFERENCE < handle
       end
 
       agent.show("sensor", inputs_for_show{:});
+      % obj.self.show(["sensor","lrf"],inputs_for_show{:});
       view(ax, [0 0 1]);
       hold(ax, 'on')
       plot(ax, pstatesquare, 'FaceColor', [0.5020, 0.5020, 0.5020], 'FaceAlpha', 0.5);

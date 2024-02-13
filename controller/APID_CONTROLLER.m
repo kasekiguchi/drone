@@ -35,13 +35,13 @@ classdef APID_CONTROLLER < handle
             [e,ed] = obj.gen_error(model.state,ref.state);
             %%%%%%%%%%%%%%%%%%%%%%
             [p,q,v,w]=obj.trans(obj.self.estimator.result.state);       % （グローバル座標）推定状態 (state object)
-            [rp,rq,rv,rw]=obj.trans(obj.self.reference.result.state);   % （ボディ座標）目標状態 (state object)
+            % [rp,rq,rv,rw]=obj.trans(obj.self.reference.result.state);   % （ボディ座標）目標状態 (state object)
             %%%%%%%%%%%%%%%%%%%%%%
             obj.e = e;
             obj.ed = ed;
            
             % [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,model.state,ref.state);
-            [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q;v;w],[rp;rq;rv;rw]);
+            [Kp,Ki,Kd] = obj.adaptive(obj.Kp,obj.Ki,obj.Kd,[p;q]);%;v;w],[rp;rq;rv;rw]);
             if isempty(obj.ed)
               obj.ed = 0;
             end
@@ -49,6 +49,10 @@ classdef APID_CONTROLLER < handle
             obj.self.input_transform.result = obj.result.input;
             u = obj.result;
             obj.ei = obj.ei + obj.e*obj.dt;
+
+
+            % Kp
+            % e
         end
         function show(obj)
             obj.result;
