@@ -1,6 +1,6 @@
 %% GUI projectの情報を用いたパラメータ解析
 % EKFによるパラメータ推定の結果確認
-% %% Initialize settings
+%% Initialize settings
 % clear
 % cf = pwd;
 % if contains(mfilename('fullpath'),"mainGUI")
@@ -16,9 +16,10 @@
 % close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/AMC/AMC_1_BAD.mat');
+log = LOGGER('./Data/AMC/AMC_1_noise.mat');
+% log = LOGGER('./Data/修論初版/u_plain1212_1.mat');
+% log = LOGGER('./Data/u_correct_onlyy240202.mat');
 O_func = @(x,p) Onew(x,p);
-% log = LOGGER('./Data/Log(17-Oct-2023_00_40_58).mat');
 f_png=0;
 f_eps=0;
 f_offset = 1;
@@ -27,7 +28,7 @@ f_wall = 0;
 f_PDAF = 0;
 %% ログ
 tspan = [0 ,100];
-maxt = 20;
+maxt = 30;
 dt = 0.01;
 % tspan = [0 99];xlim([0, maxt]);
 robot_p  = log.data(1,"p","p")';
@@ -41,7 +42,7 @@ robot_v  = log.data(1,"v","p")';
 robot_ve  = log.data(1,"v","e")';
 robot_w  = log.data(1,"w","p")';
 robot_we  = log.data(1,"w","e")';
-%% RMSE
+%% RMSE修論Bad
 RMSE_P=sqrt(mse(robot_p,robot_pe));
 RMSE_Q=sqrt(mse(robot_q,robot_qe));
 RMSE_V=sqrt(mse(robot_v,robot_ve));
@@ -52,6 +53,7 @@ RMSE_Q=sqrt(mse(robot_q(:,((maxt/dt)-500):end),robot_qe(:,((maxt/dt)-500):end)))
 RMSE_V=sqrt(mse(robot_v(:,((maxt/dt)-500):end),robot_ve(:,((maxt/dt)-500):end)));
 RMSE_W=sqrt(mse(robot_w(:,((maxt/dt)-500):end),robot_we(:,((maxt/dt)-500):end)));
 RMSE_end = [RMSE_P;RMSE_Q;RMSE_V;RMSE_W]
+
 %% 
 last=length(robot_pe);
 len = length(log.Data.agent.sensor.result);
@@ -104,6 +106,16 @@ stdx = [std(robot_pe,0,2);std(robot_qe,0,2);std(robot_ve,0,2);std(robot_we,0,2);
 x=[robot_pe;robot_qe;robot_ve;robot_we;ps;qs;];
 nx=(x-meanx)./stdx;
 
+pst = zeros(3, 501);
+pst(1, :) = 0.01;
+pst(2, :) = 0.02;
+pst(3, :) = 0.03;
+qst = zeros(3, 501);
+qst(1, :) = 0;
+qst(2, :) = 0;
+qst(3, :) = pi/2;
+rmse_p = sqrt(mse(ps(:,((maxt/dt)-500):end),pst))
+rmse_q = sqrt(mse(qs(:,((maxt/dt)-500):end),qst))
 %%
  fig9=figure(9);
     fig9.Color = 'white';
@@ -131,7 +143,7 @@ nx=(x-meanx)./stdx;
     plot(time,qs(3,:),'LineWidth', 3);
      plot(time,0*ones(size(time)),'LineWidth', 3);
     plot(time,0*ones(size(time)),'LineWidth', 3);
-    plot(time,(pi/2)*ones(size(time)),'LineWidth', 3);
+    plot(time,(pi/2)*ones(size(time)),'LineWidth',3);
     xlim([0, maxt]);
            grid on;
 %     ylim([-1 2]);
@@ -350,7 +362,6 @@ if illustration == 1
     xlim([0, maxt]);
     xlabel('time [s]','FontSize', 16);
     ylabel('\it{p}_{SB} [m]','FontSize', 16);
-%     ylim([-1, 1]);
     grid on;
     set(gca,'FontSize',14);
     fig10=figure(10);
@@ -363,7 +374,7 @@ if illustration == 1
     plot(time,0*ones(size(time)),'LineWidth', 3);
     plot(time,(pi/2)*ones(size(time)),'LineWidth', 3);
     xlim([0, maxt]);
-%     ylim([-1 2]);
+    ylim([-1 2]);
     lgd = legend('qs_{\phi e}','qs_{\theta e}','qs_{\psi e}','qs_{\phi}','qs_{\theta}','qs_{\psi}','FontSize', 18,'Location', 'Best');
     lgd.NumColumns = 2;
     xlabel('time [s]','FontSize', 16);
@@ -436,6 +447,7 @@ if illustration == 1
 %     plot(time,S(16,:),'LineWidth', 2);
 %     plot(time,S(17,:),'LineWidth', 2);
     plot(time,S(18,:),'LineWidth', 2);
+%     ylim([0, 5.0*10^(-17)]);
     xlabel('time [s]','FontSize', 16)
     ylabel('Value','FontSize', 16);
     xlim([0, maxt]);
@@ -468,9 +480,9 @@ if illustration == 1
     fig31.Color = 'white';
     plot(time,D,'LineWidth', 3);
     xlabel('time [s]','FontSize', 16);
-    ylabel('Condition number \it{D}','FontSize', 16);
+    ylabel('Degree of observabiliity \it{D}','FontSize', 16);
     xlim([0, maxt]);
-    ylim([0 1.8*10^(-18)])
+    ylim([0 1.0*10^(-17)])
     set(gca,'FontSize',14);
     fig41=figure(41);
     fig41.Color = 'white';
@@ -481,7 +493,7 @@ if illustration == 1
     plot(time,robot_p(1,:),'LineWidth', 2);
     plot(time,robot_p(2,:),'LineWidth', 2);
     plot(time,robot_p(3,:),'LineWidth', 2);
-    ylim([-1 2])
+%     ylim([-1 2])
     lgd=legend('\it{x_r}','\it{y_r}','\it{z_r}','\it{x}','\it{y}','\it{z}','FontSize', 16,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
@@ -556,7 +568,7 @@ if illustration == 1
     xlabel('time [s]','FontSize', 16);
     ylabel('orientation \it{q} [rad]','FontSize', 16);
     xlim([0, maxt]);
-    ylim([-1 1]);
+%     ylim([-1 1]);
     grid on;
     set(gca,'FontSize',14);
     fig53=figure(53);
@@ -571,7 +583,7 @@ if illustration == 1
     xlabel('time [s]','FontSize', 16);
     ylabel('orientation \it{q} [rad]','FontSize', 16);
     xlim([0, maxt]);
-    ylim([-1 1]);
+%     ylim([-1 1]);
     grid on;
     set(gca,'FontSize',14);
 
@@ -665,23 +677,27 @@ if f_png==1
 %         saveas(fig10, fullfile(pass2, 'EKF_qsu.png'));
 %         saveas(fig12, fullfile(pass2, 'EKF_instu.png'));
 %     end 
-pass2 = 'C:\Users\student\Desktop\Nozaki\gaiyou'; %P:192.168.100.20 PC
-    saveas(fig7, fullfile(pass2, 'EKF_posu.png'));
-    saveas(fig8, fullfile(pass2, 'EKF_angu.png'));
-    saveas(fig18, fullfile(pass2, 'EKF_posAllu.png'));
-    saveas(fig2, fullfile(pass2, 'EKF_angAllu.png'));
-    saveas(fig11, fullfile(pass2, 'EKF_vu.png'));
-    saveas(fig13, fullfile(pass2, 'EKF_wu.png'));
-    saveas(fig14, fullfile(pass2, 'rankOu.png'));
-    saveas(fig15, fullfile(pass2, 'minSu.png'));
-    saveas(fig16, fullfile(pass2, 'Singular_Valueu.png'));
-    saveas(fig17, fullfile(pass2, 'S_15_18u.png'));
-    saveas(fig31, fullfile(pass2, 'condNu.png'));
+pass2 = 'C:\Users\student\Desktop\Nozaki\修論Bad'; %P:192.168.100.20 PC
+    saveas(fig7, fullfile(pass2, 'EKF_pos.png'));
+    saveas(fig8, fullfile(pass2, 'EKF_ang.png'));
+    saveas(fig18, fullfile(pass2, 'EKF_posAll.png'));
+    saveas(fig2, fullfile(pass2, 'EKF_angAll.png'));
+    saveas(fig11, fullfile(pass2, 'EKF_v.png'));
+    saveas(fig13, fullfile(pass2, 'EKF_w.png'));
+    saveas(fig14, fullfile(pass2, 'rankO.png'));
+    saveas(fig15, fullfile(pass2, 'minS.png'));
+    saveas(fig16, fullfile(pass2, 'Singular_Value.png'));
+    saveas(fig17, fullfile(pass2, 'S_15_18.png'));
+    saveas(fig31, fullfile(pass2, 'condN.png'));
     if f_offset == 1
         saveas(fig9, fullfile(pass2, 'EKF_psbu.png'));
         saveas(fig10, fullfile(pass2, 'EKF_qsu.png'));
         saveas(fig12, fullfile(pass2, 'EKF_instu.png'));
-    end   
+    end
+   saveas(fig1, fullfile(pass2, 'input.png'));
+    saveas(fig81, fullfile(pass2, 'input2.png'));
+    saveas(fig41, fullfile(pass2, 'refand_non.png'));
+    saveas(fig42, fullfile(pass2, 'refqand_non.png'));
 end
 if f_eps==1
 %     pass2 = '\Users\yuika\Desktop\修士\bachelor\修士論文\fig';
@@ -725,35 +741,35 @@ if f_eps==1
 %     saveas(fig41, fullfile(pass2, 'refand_non.eps'), 'epsc');
 %     saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
 
-    pass2 = 'C:\Users\student\Desktop\Nozaki\gaiyou'; %P:192.168.100.20 PC
-    saveas(fig7, fullfile(pass2, 'EKF_posu.eps'), 'epsc');
-    saveas(fig8, fullfile(pass2, 'EKF_angu.eps'), 'epsc');
-    saveas(fig18, fullfile(pass2, 'EKF_posAllu.eps'), 'epsc');
-    saveas(fig2, fullfile(pass2, 'EKF_angAllu.eps'), 'epsc');
-    saveas(fig11, fullfile(pass2, 'EKF_vu.eps'), 'epsc');
-    saveas(fig13, fullfile(pass2, 'EKF_wu.eps'), 'epsc');
-    saveas(fig14, fullfile(pass2, 'rankOu.eps'), 'epsc');
-    saveas(fig15, fullfile(pass2, 'minSu.eps'), 'epsc');
-    saveas(fig16, fullfile(pass2, 'Singular_Valueu.eps'), 'epsc');
-    saveas(fig17, fullfile(pass2, 'S_15_18u.eps'), 'epsc');
-    saveas(fig31, fullfile(pass2, 'condNu.eps'), 'epsc');
+    pass2 = 'C:\Users\student\Desktop\Nozaki\修論Bad'; %P:192.168.100.20 PC
+    saveas(fig7, fullfile(pass2, 'EKF_pos.eps'), 'epsc');
+    saveas(fig8, fullfile(pass2, 'EKF_ang.eps'), 'epsc');
+    saveas(fig18, fullfile(pass2, 'EKF_posAll.eps'), 'epsc');
+    saveas(fig2, fullfile(pass2, 'EKF_angAll.eps'), 'epsc');
+    saveas(fig11, fullfile(pass2, 'EKF_v.eps'), 'epsc');
+    saveas(fig13, fullfile(pass2, 'EKF_w.eps'), 'epsc');
+    saveas(fig14, fullfile(pass2, 'rankO.eps'), 'epsc');
+    saveas(fig15, fullfile(pass2, 'minS.eps'), 'epsc');
+    saveas(fig16, fullfile(pass2, 'Singular_Value.eps'), 'epsc');
+    saveas(fig17, fullfile(pass2, 'S_15_18.eps'), 'epsc');
+    saveas(fig31, fullfile(pass2, 'condN.eps'), 'epsc');
     if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psbu.eps'), 'epsc');
-        saveas(fig10, fullfile(pass2, 'EKF_qsu.eps'), 'epsc');
-        saveas(fig12, fullfile(pass2, 'EKF_instu.eps'), 'epsc');
+        saveas(fig9, fullfile(pass2, 'EKF_psb.eps'), 'epsc');
+        saveas(fig10, fullfile(pass2, 'EKF_qs.eps'), 'epsc');
+        saveas(fig12, fullfile(pass2, 'EKF_inst.eps'), 'epsc');
     end 
-    saveas(fig1, fullfile(pass2, 'inputu.eps'), 'epsc');
-    saveas(fig81, fullfile(pass2, 'input2u.eps'), 'epsc');
+    saveas(fig1, fullfile(pass2, 'input.eps'), 'epsc');
+    saveas(fig81, fullfile(pass2, 'input2.eps'), 'epsc');
     saveas(fig41, fullfile(pass2, 'refand_non.eps'), 'epsc');
     saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
-    saveas(fig50, fullfile(pass2, 'P1u.eps'), 'epsc');
-    saveas(fig51, fullfile(pass2, 'PE1u.eps'), 'epsc');
-    saveas(fig52, fullfile(pass2, 'Q1u.eps'), 'epsc');
-    saveas(fig53, fullfile(pass2, 'QE1u.eps'), 'epsc');
-    saveas(fig54, fullfile(pass2, 'V1u.eps'), 'epsc');
-    saveas(fig55, fullfile(pass2, 'VE1u.eps'), 'epsc');
-    saveas(fig56, fullfile(pass2, 'W1u.eps'), 'epsc');
-    saveas(fig57, fullfile(pass2, 'WE1u.eps'), 'epsc');
+    saveas(fig50, fullfile(pass2, 'P1.eps'), 'epsc');
+    saveas(fig51, fullfile(pass2, 'PE1.eps'), 'epsc');
+    saveas(fig52, fullfile(pass2, 'Q1.eps'), 'epsc');
+    saveas(fig53, fullfile(pass2, 'QE1.eps'), 'epsc');
+    saveas(fig54, fullfile(pass2, 'V1.eps'), 'epsc');
+    saveas(fig55, fullfile(pass2, 'VE1.eps'), 'epsc');
+    saveas(fig56, fullfile(pass2, 'W1.eps'), 'epsc');
+    saveas(fig57, fullfile(pass2, 'WE1.eps'), 'epsc');
 % pass2 = 'C:\Users\student\Desktop\Nozaki\inputs'; %P:192.168.100.20 PC
 % % saveas(fig50, fullfile(pass2, 'P1.eps'), 'epsc');
 % % saveas(fig51, fullfile(pass2, 'PE1.eps'), 'epsc');
