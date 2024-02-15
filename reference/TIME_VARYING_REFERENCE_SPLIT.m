@@ -68,7 +68,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state.set_state("o",[0;0;0]);
                     obj.result.state.set_state("q",[1;0;0;0]);
 
-                elseif strcmp(args{3}, "Take_off")
+                elseif strcmp(args{3}, "Take_off2")
                     obj.ref_set.method = args{1};
                     obj.com = args{3};
 %                     obj.ref_set.method = "gen_ref_sample_take_off";

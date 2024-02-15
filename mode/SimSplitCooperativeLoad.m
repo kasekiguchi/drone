@@ -6,9 +6,9 @@ clear
 %clc
 %clear
 N = 6;
-ts = 0; %機体数
+ts = 0;
 dt = 0.025;
-te = 100;
+te = 10;
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -66,8 +66,8 @@ agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant positio
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
-%agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
- agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",20,"orig",[0;1;1],"size",1*[1,1,1]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off2",N},agent(1));
+%  agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",20,"orig",[0;1;1],"size",1*[1,1,0]},"Cooperative",N},agent(1));
 
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
@@ -104,7 +104,7 @@ for i = 2:N+1
 end
 % run("ExpBase");
 
-clc
+% clc
 % %%
 % ttt = 15;
 % logger0.overwrite("plant",ttt,agent,1);

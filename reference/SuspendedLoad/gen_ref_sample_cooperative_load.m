@@ -29,13 +29,13 @@ lz_offset=origin(3);% 1;
 %w = 0.2; % T秒で一周
 w = 2*pi/T; % T秒で一周
 
-% ref=@(t)[lx*cos(w*t + phase)+lx_offset; % x
-% ly*sin(w*t + phase)+ly_offset; % y
-% lz*sin(w*t + phase)+lz_offset]; % z
-
-ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
+ref=@(t)[lx*cos(w*t + phase)+lx_offset; % x
 ly*sin(w*t + phase)+ly_offset; % y
-lz_offset]; % z
+0.1*t^2+0*lz*sin(w*t + phase)+lz_offset]; % z
+
+% ref=@(t) [lx*cos(w*t + phase)+lx_offset; % x
+% ly*sin(w*t + phase)+ly_offset; % y
+% lz_offset]; % z
 % dx = diff(ref,t,1);
 
 % ref=@(t) [lx_offset;  % x

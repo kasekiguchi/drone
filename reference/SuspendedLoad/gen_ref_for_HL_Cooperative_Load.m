@@ -24,8 +24,9 @@ dR0d = diff(R0d,t);
 
 % R0d = [1,0,0;0,1,0;0,0,1];
 % dR0d = [0,0,0;0,0,0;0,0,0];
-o0d = Vee(R0d'*dR0d);
-do0d = simplify(diff(o0d,t));
+% o0d = Vee(R0d'*dR0d);
+% do0d = simplify(diff(o0d,t));
+% do0d = diff(o0d,t);
 %do0d = [0;0;(18*pi^2*cos((pi*t)/10)*sin((pi*t)/10))/(5*(9*cos((t*pi)/10)^2 + 16)^2)];
 %R0d2quat = R2q(R0d);
 % w_q = simplify(sqrt(R0d(1,1)+R0d(2,2)+R0d(3,3)+1)/2);
@@ -38,8 +39,8 @@ do0d = simplify(diff(o0d,t));
 
 % qd = [w_q;(R0d(3,2)-R0d(2,3))/Ele;(R0d(1,3)-R0d(3,1))/Ele;(R0d(2,1)-R0d(1,2))/Ele];
 %qd = R0d2quat;
-% o0d = [0;0;0];
-% do0d = [0;0;0];
+o0d = [0;0;0];
+do0d = [0;0;0];
 % r0d = [1;0;0;0];
 
 
