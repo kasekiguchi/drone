@@ -19,7 +19,7 @@ setting = 0; %この値はいじらない
 %データ保存先ファイル名(逐次変更しないと，上書きされる)
 FileName = input('保存するファイル名を入力してください(※ ～.matを付ける): ', 's');
 
-folderPath = 'データセット'; %データセットに使用するデータはDataフォルダ内のデータセットフォルダに保存
+folderPath = 'データセット'; %データセットに使用するデータはデータセットフォルダにいれておく
 fileList = dir(fullfile(folderPath,'*.mat')); %対象のファイルを取得
 fprintf('\n＜データセットに使用するファイル名の統一を行います＞\n')
 
@@ -32,12 +32,12 @@ for i = 1:length(fileList)
     movefile(oldFileName, newFileName); %名前の変更
 end
 
-Data.HowmanyDataset = numel(fileList); %読み込むデータ数に応じて変更
+Data.HowmanyDataset = numel(fileList); %読み込むデータ数
 if Data.HowmanyDataset > 0
     fprintf('\n＜ファイル名の統一が完了しました＞\n')
     fprintf('\n読み込むファイル数：%d\n',Data.HowmanyDataset)
 else
-    error('データセットフォルダ内にファイルが存在しません')
+    error('データセットフォルダ内にファイルが存在しません') %データセットフォルダ内にファイルがない場合はエラー
 end
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
@@ -51,7 +51,7 @@ targetpath=append(nowFolder,'\',FileName);
 F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角パラメータ用
 fprintf('\n選択されている観測量：%s\n',func2str(F))
 
-% load data h 
+% load data
 % 実験データから必要なものを抜き出す処理,↓状態,→データ番号(同一番号のデータが対応関係にある)
 % Data.X 入力前の対象の状態
 % Data.U 対象への入力
@@ -61,9 +61,9 @@ fprintf('\n＜データセットの結合を行います＞\n')
 
 for i = 1:Data.HowmanyDataset
     if contains(loading_filename,'.mat')
-        Dataset = ImportFromExpData_tutorial(loading_filename);
+        Dataset = ImportFromExpData_tutorial(loading_filename); %ImportFromExpData_tutorial:データセットをくっつけるための関数
     else
-        if i == 1
+        if i == 1 %66 ~ 78はコマンドウィンドウから入力するのに必要(クープマン線形化には関係ない)
             setting = 1;
             Dataset = ImportFromExpData_tutorial(append(loading_filename,'_',num2str(i),'.mat'),setting);
             datarange = Dataset.datarange;
@@ -91,7 +91,7 @@ end
 fprintf('\n＜データセットの結合が完了しました＞\n')
 
 Normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
-if Normalize == 1 %正規化
+if Normalize == 1 %正規化を行うか(正規化については自分で調べて！)
     Ndata = Normalization(Data);
     Data.X = Ndata.x;
     Data.Y = Ndata.y;
@@ -99,11 +99,10 @@ if Normalize == 1 %正規化
     disp('Normalization is complete')
 end
 
-
 %% クォータニオンのノルムをチェック(クォータニオンのノルムは1にならなければいけないという制約がある)
 % 閾値を下回った or 上回った場合注意文を提示
 % attitude_norm 各時間におけるクォータニオンのノルム
-if size(Data.X,1)==13
+if size(Data.X,1)==13 %特に気にしなくていい
     thre = 0.01;
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
@@ -114,7 +113,7 @@ fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    est = KL(Data.X,Data.U,Data.Y,F);
+    est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
 end
 
 est.observable = F;
@@ -122,6 +121,7 @@ fprintf('\n＜クープマン線形化が完了しました＞\n')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
+%構築したクープマンモデルがどの程度正確かを確認する部分
 verification_data = input('\n推定精度検証用データに設定するファイル名を入力してください：','s');
 simResult.reference = ImportFromExpData_estimation(verification_data);
 
@@ -141,7 +141,7 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-if Normalize == 1 %推定精度検証用データの正規化(改善後)
+if Normalize == 1 %推定精度検証用データの正規化
     for i  = 1:12
         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata.meanValue.x(i))/Ndata.stdValue.x(i);
     end
@@ -150,6 +150,7 @@ if Normalize == 1 %推定精度検証用データの正規化(改善後)
     end
 end
 
+%方程式を用いて計算を行う部分
 if flg.bilinear == 1  %　flg.bilinear == 1:双線形
     for i = 1:1:simResult.reference.N-2
         simResult.Z(:,i+1) = est.ABE'*[simResult.Z(:,i);simResult.U(:,i);reshape(kron(simResult.Z(:,i),simResult.U(:,i)),[],1)];
@@ -161,6 +162,7 @@ else
 end
 simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
 
+%正規化した場合には逆変換を行う必要がある
 if Normalize == 1 %逆変換
     for i = 1:size(simResult.Xhat,1)
         simResult.Xhat(i,:) = (simResult.Xhat(i,:) * Ndata.stdValue.x(i)) + Ndata.meanValue.x(i);

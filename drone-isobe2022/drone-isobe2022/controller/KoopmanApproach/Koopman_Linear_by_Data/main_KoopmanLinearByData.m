@@ -8,20 +8,14 @@ clc
 %---------------------------------------------
 flg.bilinear = 0; %1:双線形モデルへの切り替え
 Normalize = 0; %1：正規化
-%---------------------------------------------u
+%---------------------------------------------
 
 %% 
 %データ保存先ファイル名(逐次変更する)
 % FileName = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
 FileName = 'test.mat'; %お試し用
 
-% 読み込むデータファイル名
-% loading_filename = 'Exp_alldata_2_1';  
-% loading_filename = 'experiment_10_11_test';  %matは含まないように注意！
-% loading_filename = 'experiment_10_26';
-% loading_filename = 'Exp_cirrevsaddata_12_19';
-% loading_filename = 'Exp_sprine100_2_1';
-% loading_filename = 'GUIsim_11_29';
+% 読み込むデータファイル名(データセットに使うファイルをまとめたフォルダを作るとよい，ファイル名は統一)
 loading_filename = 'Exp_2_4';
 
 Data.HowmanyDataset =150; %読み込むデータ数に応じて変更
@@ -43,13 +37,12 @@ F = @quaternions; % 状態+クォータニオンの1乗2乗3乗 オイラー角�
 % Data.U 対象への入力
 % Data.Y 入力後の対象の状態
 
-% 使用するデータセットの数を指定
-% 23/01/26 run_mainManyTime.m で得たデータを合成
+% データの結合を行う部分
 disp('now loading data set')
 
 for i= 1: Data.HowmanyDataset
     if contains(loading_filename,'.mat')
-        Dataset = ImportFromExpData(loading_filename);
+        Dataset = ImportFromExpData(loading_filename); %ImportFromExpData:読み込むデータ範囲の設定や配列の変形を行う関数
     else
         Dataset = ImportFromExpData(append(loading_filename,'_',num2str(i),'.mat'));
     end
@@ -89,7 +82,7 @@ disp('now estimating')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    est = KL(Data.X,Data.U,Data.Y,F);
+    est = KL(Data.X,Data.U,Data.Y,F); %KL:クープマン線形化の計算を行う関数
 end
 
 est.observable = F;
@@ -176,7 +169,7 @@ disp(targetpath)
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
 
-%% 作成済みモデルで，推定する軌道を変更
+%% 作成済みモデルで，推定する軌道を変更(全時刻に対する推定検証を行う)
 clc
 num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
 change_reference = str2double(num);
@@ -193,7 +186,6 @@ if change_reference == 1
     % simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
     % simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
     % simResult.reference = ImportFromExpData_estimation('1_24_sprine_53');
-
 
     model = load("test2.mat",'est');
     est.A = model.est.A;
