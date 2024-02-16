@@ -37,7 +37,7 @@ if Data.HowmanyDataset > 0
     fprintf('\n＜ファイル名の統一が完了しました＞\n')
     fprintf('\n読み込むファイル数：%d\n',Data.HowmanyDataset)
 else
-    error('フォルダ内にファイルが存在しません')
+    error('データセットフォルダ内にファイルが存在しません')
 end
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
@@ -122,13 +122,8 @@ fprintf('\n＜クープマン線形化が完了しました＞\n')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
-% simResult.reference = ImportFromExpData('GUIsim_saddle.mat');
-% simResult.reference = ImportFromExpData_estimation('experiment_6_20_circle_estimaterdata'); %推定精度検証用データの設定
-% simResult.reference = ImportFromExpData_estimation('experiment_10_9_revcircle_estimatordata');
-% simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata');
-% simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator');
-% simResult.reference = ImportFromExpData_estimation('sim_7_20_circle_estimatordata'); %sim
-simResult.reference = ImportFromExpData_estimation('experiment_11_8_P2Pshape_estimator');
+verification_data = input('\n推定精度検証用データに設定するファイル名を入力してください：','s');
+simResult.reference = ImportFromExpData_estimation(verification_data);
 
 % 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
@@ -173,6 +168,8 @@ if Normalize == 1 %逆変換
     simResult.Xhat = cat(2,simResult.reference.X(:,1),simResult.Xhat);
 end
 
+fprintf('\n\n＜推定精度検証が完了しました＞\n')
+
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
     simResult.state.p = simResult.Xhat(1:3,:);
@@ -191,6 +188,21 @@ save(targetpath,'est','Data','simResult')
 disp('Saved to')
 disp(targetpath)
 
+%% データセット内のファイルの移動
+parentFolderPath = 'Data';
+newFolderName = input('データセットフォルダ内のファイルを移動します．\n移動先のフォルダ名を入力してください：','s');
+newFolderPath = fullfile(parentFolderPath,newFolderName);
+mkdir(newFolderPath)
+
+sourceFolderPath = 'データセット';
+destinationFolderPath = newFolderPath;
+files = dir(fullfile(sourceFolderPath,'*.mat'));
+for i = 1:length(files)
+    filePath = fullfile(sourceFolderPath,files(i).name);
+    movefile(filePath,destinationFolderPath);
+end
+
+fprintf('\n\n＜ファイルの移動が完了しました＞\n')
 %% 先輩が今まで作られた観測量
 
 % F = @(x) [x;1]; % 状態そのまま
