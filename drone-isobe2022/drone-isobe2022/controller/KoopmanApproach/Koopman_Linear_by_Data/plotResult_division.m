@@ -8,18 +8,18 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %pdf保存するときの名前-----------------------
- name = '12_17_報告会資料_case23';
- folderName = '12_17_報告会資料_case23';
+ name = '2_16_卒論資料_実機モデル';
+ folderName = '2_16_卒論資料_実機モデル';
 %------------------------------------------
 
 %% select file to load (max number of file:5)
 
-loadfilename{1} = 'EstimationResult_12state_12_12_Simcirdata_est=sad.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = 'EstimationResult_12state_1_29_Exp_sprineandhov_est=P2Pshape_torque_incon.mat';
 % loadfilename{2} = 'EstimationResult_12state_12_17_ExpcirrevsadP2Pxydata_est=P2Pshape.mat';
 % loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
 
-% loadfilename{1} = 'test.mat';
+loadfilename{1} = 'test.mat';
 % loadfilename{2} = 'test2.mat';
 % loadfilename{3} = 'test3.mat';
 % loadfilename{4} = 'test4.mat';
@@ -129,7 +129,7 @@ for graph_num = 1:3 %1 = x,2 = y,3 = z
             else
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',8,'LineWidth',2,'LineStyle','-.','Color',[1 0 1]);
             end
-            lgdtmp = {'$x_{true}$','$\hat{x}_{estimate}$','$\hat{x}_{\rm case2}$','$\hat{x}_{\rm case3}$','$\hat{x}_{\rm case4}$','$\hat{x}_{\rm case5}$'};
+            lgdtmp = {'$x_{d}$','$\hat{x}_{case1}$','$\hat{x}_{\rm case2}$','$\hat{x}_{\rm case3}$','$\hat{x}_{\rm case4}$','$\hat{x}_{\rm case5}$'};
             lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
             lgd.NumColumns = columnomber;
             set(gca,'FontSize',Fsize.luler);
@@ -147,7 +147,7 @@ for graph_num = 1:3 %1 = x,2 = y,3 = z
             else
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',10,'LineWidth',2,'LineStyle','-.','Color',[1 0 1]);
             end
-            lgdtmp = {'$y_{true}$','$\hat{y}_{estimate}$','$\hat{y}_{\rm case2}$','$\hat{y}_{\rm case3}$','$\hat{y}_{\rm case4}$','$\hat{y}_{\rm case5}$'};
+            lgdtmp = {'$y_{d}$','$\hat{y}_{case1}$','$\hat{y}_{\rm case2}$','$\hat{y}_{\rm case3}$','$\hat{y}_{\rm case4}$','$\hat{y}_{\rm case5}$'};
             lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
             lgd.NumColumns = columnomber;
             set(gca,'FontSize',Fsize.luler);
@@ -165,7 +165,7 @@ for graph_num = 1:3 %1 = x,2 = y,3 = z
             else
                 plot(file{i}.simResult.T(1:stepN) , file{i}.simResult.state.p(graph_num,1:stepN),file{i}.markerSty,'MarkerSize',12,'LineWidth',2,'LineStyle','-.','Color',[1 0 1]);
             end
-            lgdtmp = {'$z_{true}$','$\hat{z}_{estimate}$','$\hat{z}_{\rm case2}$','$\hat{z}_{\rm case3}$','$\hat{z}_{\rm case4}$','$\hat{z}_{\rm case5}$'};
+            lgdtmp = {'$z_{d}$','$\hat{z}_{case1}$','$\hat{z}_{\rm case2}$','$\hat{z}_{\rm case3}$','$\hat{z}_{\rm case4}$','$\hat{z}_{\rm case5}$'};
             lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
             lgd.NumColumns = columnomber;
             set(gca,'FontSize',Fsize.luler);

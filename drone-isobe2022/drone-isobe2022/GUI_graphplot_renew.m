@@ -19,29 +19,29 @@ clear all
 clc
 close all
 
-load("EstimationResult_12state_12_12_Simcirdata_est=sad.mat")
+load("experiment_9_5_saddle_estimatordata.mat")
 disp('load finished')
 
-% for i = 1:find(log.Data.t,1,'last')
-%     data.t(1,i) = log.Data.t(i,1);                                      %時間t
-%     data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
-% end
-
-for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
-    data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
-    data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-    data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-    data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-    data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-    data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-    data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
-%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+for i = 1:find(log.Data.t,1,'last')
+    data.t(1,i) = log.Data.t(i,1);                                      %時間t
+    data.p(:,i) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+    data.pr(:,i) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+    data.q(:,i) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+    data.v(:,i) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+    data.w(:,i) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+    data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
+
+% for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
+%     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
+%     data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
+%     data.pr(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
+%     data.q(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
+%     data.v(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.v(:,1);      %速度
+%     data.w(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
+%     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);                         %入力
+% %     data.u(:,i-find(log.Data.phase == 102,1,'first')+1) = [log.Data.agent.input{i}(:,1);log.Data.agent.controller.result{1, i}.mpc.input];                         %入力
+% end
 % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
 %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 % end
@@ -96,9 +96,9 @@ colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('Position [m]');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(log.Data.phase == 102,1,'first')+60]),[1.0 0.9 1.0]); %グラフの背面を塗る
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+60),'LineStyle','--','Color','red','LineWidth',2)
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
+Square_coloring(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+275]),[1.0 0.9 1.0]); %グラフの背面を塗る
+xline(data.t(1,find(log.Data.phase == 102,1,'first')+275),'LineStyle','--','Color','red','LineWidth',2)
 hold on
 grid on
 % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
@@ -165,16 +165,17 @@ legend('Estimated trajectory','Target position')
 ax(5) = gca;
 
 figure(6)
-plot3(data.p(1,220:275),data.p(2,220:275),data.p(3,220:275),'LineWidth',3,'Color','r');
+% plot3(data.p(1,220:275),data.p(2,220:275),data.p(3,220:275),'LineWidth',3,'Color','r');
+plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
 hold on
 grid on
-plot3(data.p(1,275:end),data.p(2,275:end),data.p(3,275:end),'LineWidth',0.8,'Color',[0 0.4470 0.7410],'LineStyle','--');
+% plot3(data.p(1,275:end),data.p(2,275:end),data.p(3,275:end),'LineWidth',0.8,'Color',[0 0.4470 0.7410],'LineStyle','--');
 xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 zlim([0 max(data.p(3,:))])
 % daspect([1 1 0.5])
-legend('推定範囲','FontSize',20)
+% legend('推定範囲','FontSize',20)
 ax(6) = gca;
 
 %入力
