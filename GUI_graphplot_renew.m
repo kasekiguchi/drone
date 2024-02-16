@@ -6,7 +6,7 @@ opengl software
 % [~, activeFile] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 % cellfun(@(xx) addpath(xx), activeFile, 'UniformOutput', false);
 % close all hidden;
-clear all;
+% clear all;
 clc;
 
 %pdfで保存する際のファイル名----------
@@ -43,7 +43,7 @@ clc;
 
 %% データのインポート
 % load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-load("exroom_take2_Log(19-Jan-2024_15_30_16).mat")
+% load("exroom_take2_Log(19-Jan-2024_15_30_16).mat")
 disp('load finished')
 
 time = 0; %1:計算時間のグラフ、0:inner_input
@@ -59,7 +59,7 @@ time = 0; %1:計算時間のグラフ、0:inner_input
 %     data.inner(:,i) = log.Data.agent.inner_input{i}(1,:)';              %inner_input
 %     % data.te(:,i) = log.Data.agent.controller.result{i}.t(1,i);  %計算時間、シミュレーションのみ
 % end
-
+log=logger
 for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
     data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p

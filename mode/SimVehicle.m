@@ -40,6 +40,7 @@ agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.sensor.lrf = LiDAR3D_SIM(agent,Sensor_LiDAR3D(1, 'env', env, 'theta_range', pi / 2, 'phi_range', -pi:0.01:pi,'noise',0.04)); % 2D lidar
 %agent.sensor.lrf = LiDAR_SIM(agent,Sensor_LiDAR(1,'angle_range', -pi:0.1:pi)); % 2D lidar
 agent.sensor.do = @sensor_do; % synthesis of sensors
+agent.sensor.show = @sensor_show;
 agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 
@@ -60,10 +61,10 @@ for i = 1:time.te
     agent(1).reference.do(time, 'f');
     agent(1).controller.do(time, 'f',0,0,agent,1);
     logger.logging(time, 'f', agent);
-    agent.reference.FHPlot('Env',env,'FH',FH,'flag',0,'logger',logger,'param',struct('fLocal',false,'fField',true),'k',i);
+    agent.reference.FHPlot('agent',agent,'Env',env,'FH',FH,'flag',0,'logger',logger,'param',struct('fLocal',false,'fField',true),'k',i);
     agent(1).plant.do(time, 'f');
     time.t = time.t + time.dt;
-    pause(0.01)
+    % pause(0.01)
 end
 end
 
@@ -71,6 +72,12 @@ function result = sensor_do(varargin)
 sensor = varargin{5}(varargin{6}).sensor;
 result = sensor.motive.do(varargin);
 result = merge_result(result,sensor.lrf.do(varargin));
+varargin{5}(varargin{6}).sensor.result = result;
+end
+function result = sensor_show(varargin)
+sensor = varargin{5}(varargin{6}).sensor;
+result = sensor.motive.show(varargin);
+result = merge_result(result,sensor.lrf.show(varargin));
 varargin{5}(varargin{6}).sensor.result = result;
 end
 

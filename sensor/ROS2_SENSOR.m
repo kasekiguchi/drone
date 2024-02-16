@@ -7,8 +7,6 @@ properties
     self
     fState % subscribeにstate情報を含むか
 
-    % ros2param
-    % prosesssfunc
     Node
     radius = 0;
     getData
@@ -45,8 +43,8 @@ methods
 
         end
 
-        % obj.getData = param.param.getData;
-        obj.getData = @getData_two_lidar_combine;
+        obj.getData = param.param.getData;
+        % obj.getData = @getData_two_lidar_combine;
         % data = obj.ros.getData;
         % data = obj.ros{1}.getData;
     end
@@ -162,7 +160,7 @@ pointcloud_out_roi = pd;
         % get Laser scan message
         scanlidardata_b = data1.getData;
         scanlidardata_f = data2.getData;
-        result = scanlidardata_f; %前のlidarデータをobjにそのまま保存
+        % result = scanlidardata_f; %前のlidarデータをobjにそのまま保存
         result.odom_data = obj.ros{3}.getData;
         f.angle = (scanlidardata_f.angle_min:scanlidardata_f.angle_increment:scanlidardata_f.angle_max)';
         f.length = scanlidardata_f.ranges;

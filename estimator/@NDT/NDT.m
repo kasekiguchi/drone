@@ -133,8 +133,10 @@ end
             X(j) = logger.Data.agent.estimator.result{1, j}.tform.A(1, 4);
             Y(j) = logger.Data.agent.estimator.result{1, j}.tform.A(2, 4);
             
-            prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) - logger.Data.agent.sensor.result{1,1}.state.p(1,1);
-            prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) - logger.Data.agent.sensor.result{1,1}.state.p(2,1);
+            prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) - logger.Data.agent.sensor.result{1,1}.state.p(1,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(1, 4);
+            prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) - logger.Data.agent.sensor.result{1,1}.state.p(2,1) +logger.Data.agent.estimator.result{1, 1}.tform.A(2, 4);
+            % prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(1, 4);
+            % prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(2, 4);
 
             pr_x(j) = logger.Data.agent.reference.result{1,j}.state.p(1,1);
             pr_y(j) = logger.Data.agent.reference.result{1,j}.state.p(2,1);
@@ -147,9 +149,9 @@ end
         plot(pr_x,pr_y,"pentagram","MarkerSize",20)
         grid on
         xlabel(texlabel('x [m]')); ylabel(texlabel('y [m]'));
-        if ~isfield(obj, "fixedSeg")
-            obj.fixedSeg = mkmap;
-        end
+        % if ~isfield(obj, "fixedSeg")
+        %     obj.fixedSeg = mkmap;
+        % end
         % pcshow(obj.fixedSeg,"ViewPlane","XY","BackgroundColor",[1 1 1])
         scatter(obj.fixedSeg.Location(:,1),obj.fixedSeg.Location(:,2),6,"filled");
         legend("NDTestimate","prime", "refernce Point","pcmap",'Location','northoutside')
@@ -170,7 +172,7 @@ end
                 exportgraphics(ax_rmse_y, 'RMSE_Y.pdf', 'ContentType', 'vector')
             case 4
                 for j = 1:num_lim
-                    filename = 'view2.mp4'; % ファイル名
+                    filename = 'view2_0213.mp4'; % ファイル名
                     % fig(j) = scatter(obj.fixedSeg.Location(1,:),obj.fixedSeg.Location(2,:));
                     fig(j) = pcshowpair(obj.fixedSeg,ndtPCdata(j),"ViewPlane","XY","BackgroundColor",[1 1 1]);
                     text(-4,5,"t = " + num2str(logger.Data.t(j)))

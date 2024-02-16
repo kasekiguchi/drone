@@ -1,27 +1,41 @@
 function Reference = Reference_Point(agent,pmun)
     %pmun:任意の目標値の数 
-    [p(1,:),p(2,:),ax] = mause_point(agent,pmun);
-    p(3,:)=0;
+    [p,ax] = mause_point(agent,pmun);
+    % p(3,:)=0;
     % point(1).p = [1.5;0;0];
+    % for inc = 1:pmun
+    %     point(inc).p = p(:,inc);
+    %     % point(inc).q = point_q(inc);
+    %     point(inc).q = point_q(p(:,inc));
+    % end
+    % point.p=p;
+    % calq=[agent.estimator.initialtform.Translation;p(1:end-1,:)];
+    % qq=[p-calq];
+    calq = p - [agent.estimator.initialtform.Translation;p(1:end-1,:)];
+    % q = calq(:,1)/calq(:,2)
     for inc = 1:pmun
-        point(inc).p = p(:,inc);
+        point(inc).p = p(inc,:)';
+        % point(inc).q=[0, 0, -atan(qq(inc,2)/qq(inc,1))]'
         % point(inc).q = point_q(inc);
-        point(inc).q = point_q(p(:,inc));
+        point(inc).q = [0;0;atan(calq(inc,2)/calq(inc,1))];
     end
+    
+    % point=struct("p",p,"q",[0 0 q]');
+
     Reference.point = point;
     Reference.num = pmun;
     Reference.threshold = 0.5;
     Reference.ax = ax;
 end
-% function q = point_q(num)
-function q = point_q(prev_p)
-% prompt = "point "+num2str(num)+"' yaw (deg):";
-% yaw = input(prompt);
-yaw = atan(prev_p(2)/prev_p(1))
+function q = point_q(num)
+% function q = point_q(prev_p)
+prompt = "point "+num2str(num)+"' yaw (deg):";
+yaw = input(prompt);
+% yaw = atan(prev_p(2)/prev_p(1))
 q = [0;0;deg2rad(yaw)];
 end
 
-function [Xp, Yp,ax] = mause_point(agent,pmun)
+function [p,ax] = mause_point(agent,pmun)
     figure
     ax = gca;
     map = agent.estimator.fixedSeg;
@@ -46,4 +60,5 @@ function [Xp, Yp,ax] = mause_point(agent,pmun)
         ht = text(Xp(1,d),Yp(1,d),str,'Clipping','off');
     end
     % hold off
+    p=[Xp;Yp]';p(:,3)=0;
 end

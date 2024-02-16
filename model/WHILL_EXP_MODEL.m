@@ -1,10 +1,11 @@
 classdef WHILL_EXP_MODEL < MODEL_CLASS
-% Whill 実験用モデル
+% Whill 実験用モデル->MODEL_CLASSをスーパークラスにもつ
+% plantクラス：resultは持たない
 properties % (Access=private)
-    IP
-    connector
-    phase % q : quit, s : stop, r : run
-    conn_type
+    IP          %実機の持つ固定数値
+    connector   %コネクタークラスの実体
+    phase       %操作段階 % q : quit, s : stop, r : run
+    conn_type   %実機との接続方法の指定
 end
 
 properties
@@ -13,8 +14,8 @@ end
 
 methods
 
-    function obj = WHILL_EXP_MODEL(varargin)        
-        obj@MODEL_CLASS(varargin{:});
+    function obj = WHILL_EXP_MODEL(varargin)
+        obj@MODEL_CLASS(varargin{:});%スーパークラスのコンストラクタを呼び出し
         param = varargin{2}.param; 
         %% variable set
         obj.phase = 's';
@@ -73,6 +74,7 @@ methods
                 param.node = ros2node("/agent_"+string(obj.id), obj.id); % % % % % % % % % % % % %create node
                 obj.IP = param.node;
                 obj.connector = ROS2_CONNECTOR(param);
+                obj.msg = obj.connector.publisher.pubmsg;
                 fprintf("Whill %d is ready\n", obj.id);
         end
 
@@ -80,86 +82,38 @@ methods
 
     function do(obj, varargin)
         t = varargin{1}.t;
-        % u = obj.self.controller.result.input;
-        % u = double(obj.self.controller.result.input);%%追記11/8%追追記11/9%追記11/27
-        % u = obj.self.input_transform.result;
-        cha = varargin{2};
-        % u = obj.self..input_transform.result;
-        % u = varargin{5}.controller.result.input;
-        % if length(varargin) == 1
-
-        % if ~isfield(varargin{1}, 'FH')
-        %     error("ACSL : require figure window");
-        % else
-        %     FH = varargin{1}.FH; % figure handle
-        % end
-
-        % cha = get(FH, 'currentcharacter');
-        % if (cha ~= 'q' && cha ~= 's' && cha ~= 'f')
-        %     cha = obj.phase;
-        % end
-        % if u(1) > abs(1.7)
-        %    cha = 'q';
-        % end
-
+        cha = varargin{2};       
        
-       
-        u = obj.self.controller.result.input;
+        u = obj.self.controller.result.input;%コントローラで生成した入力を持ってくる
         if abs(u(1))>2 || abs(u(2))>2
             cha = 'q';
         end
-        % if u(1) < -0.1
-        %     cha = 't'
-        %     u
-        %     obj.self.controller.e
-        % 
-        % end
+
          obj.phase = cha;
         switch cha
             case 'q' % quit
                 obj.msg.linear.x = 0.0;
-                obj.msg.linear.y = 0.0;
-                obj.msg.linear.z = 0.0;
-                obj.msg.angular.x = 0.0;
-                obj.msg.angular.y = 0.0;
                 obj.msg.angular.z = 0.0;
                 obj.connector.sendData(obj.msg);
                 error("ACSL : quit experiment");
             case 's' % stop
                 obj.msg.linear.x = 0.0;
-                obj.msg.linear.y = 0.0;
-                obj.msg.linear.z = 0.0;
-                obj.msg.angular.x = 0.0;
-                obj.msg.angular.y = 0.0;
                 obj.msg.angular.z = 0.0;
                 hold off
             case 'a' % stop
                 % obj.self.controller.result.input = [0; 0];
                 obj.self.input_transform.result = [];
                 obj.msg.linear.x = 0.0;
-                obj.msg.linear.y = 0.0;
-                obj.msg.linear.z = 0.0;
-                obj.msg.angular.x = 0.0;
-                obj.msg.angular.y = 0.0;
                 obj.msg.angular.z = 0.0;
                 pause(0.5)
             case 't' % stop
                 % obj.self.controller.result.input = [0; 0];
                 obj.self.input_transform.result = [];
                 obj.msg.linear.x = 0.0;
-                obj.msg.linear.y = 0.0;
-                obj.msg.linear.z = 0.0;
-                obj.msg.angular.x = 0.0;
-                obj.msg.angular.y = 0.0;
                 obj.msg.angular.z = 0.0;
                 % pause(0.25)
             case 'f' % run
-                % u = obj.self.controller.result.input;
                 obj.msg.linear.x = u(1);
-                obj.msg.linear.y = 0.0;
-                obj.msg.linear.z = 0.0;
-                obj.msg.angular.x = 0.0;
-                obj.msg.angular.y = 0.0;
                 obj.msg.angular.z = u(2);
 
         end
