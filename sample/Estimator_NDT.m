@@ -15,7 +15,7 @@ end
 Estimator.model = model;
 Estimator.param = [model.state.p model.state.q];
 
-Estimator.ndt.matching_mode = "mapmatching";           %slam or mapmatching
+Estimator.ndt.matching_mode = "slam";           %slam or mapmatching
 Estimator.ndt.mapname = "floor10_2d_1.mat";         %mapmatchingの時に使う固定マップ※中身はfixedSeg(PointCloud)である必要がある
 % Estimator.ndt.func = @scanpcplot_rov;
 

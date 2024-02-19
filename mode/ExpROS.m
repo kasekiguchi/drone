@@ -14,7 +14,7 @@ logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
 % initial position in point cloud map
 initial_state.p = [0;0;0];
-initial_state.q = [0;0;90];
+initial_state.q = [0;0;0];
 % initial_state.v = [0; 0; 0];
 % initial_state.w = [0; 0; 0];
 

@@ -1,16 +1,6 @@
 function Reference = Reference_Point(agent,pmun)
     %pmun:任意の目標値の数 
     [p,ax] = mause_point(agent,pmun);
-    % p(3,:)=0;
-    % point(1).p = [1.5;0;0];
-    % for inc = 1:pmun
-    %     point(inc).p = p(:,inc);
-    %     % point(inc).q = point_q(inc);
-    %     point(inc).q = point_q(p(:,inc));
-    % end
-    % point.p=p;
-    % calq=[agent.estimator.initialtform.Translation;p(1:end-1,:)];
-    % qq=[p-calq];
     calq = p - [agent.estimator.initialtform.Translation;p(1:end-1,:)];
     % q = calq(:,1)/calq(:,2)
     for inc = 1:pmun
@@ -28,10 +18,8 @@ function Reference = Reference_Point(agent,pmun)
     Reference.ax = ax;
 end
 function q = point_q(num)
-% function q = point_q(prev_p)
 prompt = "point "+num2str(num)+"' yaw (deg):";
 yaw = input(prompt);
-% yaw = atan(prev_p(2)/prev_p(1))
 q = [0;0;deg2rad(yaw)];
 end
 
