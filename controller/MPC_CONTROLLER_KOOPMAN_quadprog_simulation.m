@@ -29,9 +29,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
 
             %%
             obj.input = obj.param.input;
-            % obj.const = param.const;
-            % obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-%             obj.param.H = obj.param.H + 1;
             obj.model = self.plant;
             
             %% 入力
@@ -60,11 +57,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
             
             % MPC設定(problem)
-            %-- fmincon 設定
-            % options = optimoptions('quadprog','Algorithm','active-set');
             options = optimoptions('quadprog');
-            %     options = optimoptions(options,'Diagnostics','off');
-            %     options = optimoptions(options,'MaxFunctionEvaluations',1.e+12);     % 評価関数の最大値
             options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
             options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
 
@@ -100,8 +93,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
 
             %% 情報表示
             state_monte = obj.self.estimator.result.state;
-            % obj.input.u = T2T(obj.input.u(1,:),obj.input.u(2,:),obj.input.u(3,:),obj.input.u(4,:)); %総推力を4入力に変換して表示
-            % state_monte = obj.self.plant.state;
             fprintf("==================================================================\n")
             fprintf("==================================================================\n")
             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
@@ -116,7 +107,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
                     obj.state.ref(10,1), obj.state.ref(11,1), obj.state.ref(12,1))  % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
-%             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             fprintf("\n");
 
             %% z < 0で終了
