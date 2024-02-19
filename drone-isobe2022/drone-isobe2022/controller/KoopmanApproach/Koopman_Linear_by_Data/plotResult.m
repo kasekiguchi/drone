@@ -1,4 +1,6 @@
 %% initialize
+%位置，姿勢角，速度，角速度の推定結果を表示するためのプログラム
+%一つのグラフにまとめて表示される(例：位置x,y,zが一つのfigureに表示)
 clear all
 close all
 
@@ -7,19 +9,15 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
+%出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
+% loadfilename{1} = '.mat' ;
+% loadfilename{2} = '.mat';
+% loadfilename{3} = '.mat';
 
-% loadfilename{1} = 'EstimationResult_12state_12_12_SimsadP2Pzdata_est=sad.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{2} = 'EstimationResult_12state_9_6_saddle=flight_estimation=saddle.mat';
-% loadfilename{3} = 'EstimationResult_12state_7_12_circle=takeoff_estimation=circle_datanum=20.mat';
-
-% loadfilename{1} = 'test.mat';
-loadfilename{1} = 'EstimationResult_12state_12_12_SimcirsadP2Pxydata_est=sad.mat';
-% loadfilename{3} = 'test3.mat';
-
-WhichRef = 1; % どのファイルをリファレンスに使うか
+WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
 
 %% グラフの保存
-save_fig = 0;
+save_fig = 0; %1：出力したグラフをfigで保存する
 
 if save_fig == 1
     name = 'data2_sadP2Pz'; %ファイル名
@@ -34,7 +32,7 @@ end
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 2; %ステップ数，xの範囲を設定
+stepnum = 1; %ステップ数，xの範囲を設定
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1
@@ -64,17 +62,13 @@ if flg.ylimHold == 1
     ylimHold.v = [-3, 4];
     ylimHold.w = [-1.5, 2];
 end
-% if flg.xlimHold == 1
-% %     xlimHold = [0, 0.5];
-%     xlimHold = [0,2];
-% end
 
-%% Font size
+%% Font size(グラフの軸ラベルや凡例の大きさを調整できる)
 Fsize.label = 18;
 Fsize.lgd = 18;
 Fsize.luler = 18;
 
-%% load
+%% load(基本いじる必要は無い)
 HowmanyFile = size(loadfilename,2);
 for i = 1:HowmanyFile
     file{i} = load(loadfilename{i});
@@ -101,14 +95,6 @@ end
 
 %%
 % 凡例に特別な名前をつける時はここで指定, ない時は勝手に番号をふります
-
-% file{1}.lgdname.p = {'$\hat{x}$','$\hat{y}$','$\hat{z}$'};
-% file{1}.lgdname.q = {'$\hat{\phi}$','$\hat{\theta}$','$\hat{\psi}$'};
-% file{1}.lgdname.v = {'$\hat{v_x}$','$\hat{v_y}$','$\hat{v_z}$'};
-% file{1}.lgdname.w = {'$\hat{\omega_1}$','$\hat{\omega_2}$','$\hat{\omega_3}$'};
-
-% file{1}.lgdname.q = {'$q_0$','$q_1$','$q_2$','$q_3$'};
-
 file{1}.lgdname.p = {'$\hat{x}_{\rm case1}$','$\hat{y}_{\rm case1}$','$\hat{z}_{\rm case1}$'};
 file{1}.lgdname.q = {'$\hat{\phi}_{\rm case1}$','$\hat{\theta}_{\rm case1}$','$\hat{\psi}_{\rm case1}$'};
 file{1}.lgdname.v = {'$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{z,{\rm case1}}$'};
@@ -133,7 +119,7 @@ tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1;
 
 newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
-             0.4660 0.6740 0.1880];
+             0.4660 0.6740 0.1880]; %グラフの色指定
 %% P
 figure(1)
 % Referenceをplot

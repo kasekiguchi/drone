@@ -1,4 +1,9 @@
 %% Koopman Linear by Data %%
+%--------------------------------------------------------------------------------
+%初心者用のクープマン線形化プログラム
+%コマンドウィンドウの案内に従えばできるようになっているはず．．．
+%慣れてきたら，main_KoopmanLinearByDataのほうでやるといいかも(設定を自分でできる)
+%--------------------------------------------------------------------------------
 clc
 %--------------------------------------------------------------
 % 先に main.m の Initialize settings を実行すること(※必ず行う)
@@ -122,10 +127,13 @@ fprintf('\n＜クープマン線形化が完了しました＞\n')
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
 %構築したクープマンモデルがどの程度正確かを確認する部分
-verification_data = input('\n推定精度検証用データに設定するファイル名を入力してください：','s');
-simResult.reference = ImportFromExpData_estimation(verification_data);
+fprintf('＜推定精度検証用データに設定するファイル名を選択してください＞\n')
+[fileName, filePath] = uigetfile('*.mat');
+verification_data = fileName;
+% verification_data = input('\n推定精度検証用データに設定するファイル名を入力してください：','s');
+simResult.reference = ImportFromExpData_estimation(verification_data); %検証用データを格納
 
-% 2023/06/12 アーミングphaseの実験データがうまく取れていないのを強引に解消
+%arming時の実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
     takeoff_idx = find(simResult.reference.T,1,'first');
     simResult.reference.X = simResult.reference.X(:,takeoff_idx:end);
@@ -136,17 +144,17 @@ if simResult.reference.fExp == 1
     simResult.reference.N = simResult.reference.N - takeoff_idx;
 end
 
-simResult.Z(:,1) = F(simResult.reference.X(:,1));
+simResult.Z(:,1) = F(simResult.reference.X(:,1)); %検証用データの初期値を観測量に通して次元を合わせてる
 simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
 if Normalize == 1 %推定精度検証用データの正規化
     for i  = 1:12
-        simResult.Z(i,1) = (simResult.Z(i,1)-Ndata.meanValue.x(i))/Ndata.stdValue.x(i);
+        simResult.Z(i,1) = (simResult.Z(i,1)-Ndata.meanValue.x(i))/Ndata.stdValue.x(i); %状態の正規化
     end
     for i = 1:4
-        simResult.U(i,:) = (simResult.U(i,:)-Ndata.meanValue.u(i))/Ndata.stdValue.u(i);
+        simResult.U(i,:) = (simResult.U(i,:)-Ndata.meanValue.u(i))/Ndata.stdValue.u(i); %入力の正規化
     end
 end
 
@@ -160,7 +168,7 @@ else
         simResult.Z(:,i+1) = est.A * simResult.Z(:,i) + est.B * simResult.U(:,i); %状態方程式 z[k+1] = Az[k]+BU
     end
 end
-simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
+simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]，次元を元の12状態に戻してる
 
 %正規化した場合には逆変換を行う必要がある
 if Normalize == 1 %逆変換
@@ -170,7 +178,7 @@ if Normalize == 1 %逆変換
     simResult.Xhat = cat(2,simResult.reference.X(:,1),simResult.Xhat);
 end
 
-fprintf('\n\n＜推定精度検証が完了しました＞\n')
+fprintf('\n＜推定精度検証が完了しました＞\n')
 
 %% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
