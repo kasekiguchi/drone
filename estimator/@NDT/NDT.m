@@ -1,6 +1,4 @@
 classdef NDT < handle
-% classdef NDT < MODEL_CLASS
-
 properties %eitimator class common
     result
     self
@@ -36,25 +34,23 @@ end
         end
 
     function [result] = do(obj, varargin)
-        % obj.PCdata_use = obj.self.sensor.result{1};
-        % obj.PCdata_use = obj.scanpcplot_rov(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
-        % obj.PCdata_use = obj.func(obj.self.sensor.ros{2},obj.self.sensor.ros{1});
         obj.PCdata_use = obj.self.sensor.result.pc;
         obj.tform = pcregisterndt(obj.PCdata_use, obj.fixedSeg,obj.gridstep, ...
-            "InitialTransform", obj.initialtform, "OutlierRatio", 0.1, "Tolerance", [0.01 0.1]); %NDTマッチング
+            "InitialTransform", obj.initialtform, "OutlierRatio", 0.1, "Tolerance", [0.5 0.5], ...
+            "MaxIterations",5); %NDTマッチング
 
         if (obj.matching_mode == "slam")
             ndt_PCdata = pctransform(obj.PCdata_use, obj.tform);
             obj.fixedSeg = pcmerge(obj.fixedSeg, ndt_PCdata, 0.01);
         end
 
-        if isfield(obj.self.sensor.result, 'odom_data')
-            obj.tform_add_odom(obj.self.sensor.result.odom_data);
+        if isfield(obj.self.sensor.result, "rover_odo")
+            obj.tform_add_odom(obj.self.sensor.result.rover_odo);
         else
             obj.tform_add_odom(struct('linear', struct('x', obj.self.controller.result.input(1)), 'angular', struct('z', obj.self.controller.result.input(2))));
         end
 
-        obj.result.tform = obj.tform;%disp(obj.tform);
+        obj.result.tform = obj.tform;disp(obj.tform);
         obj.result.ndtPCdata = obj.PCdata_use;
         tmpvalue.p = obj.tform.Translation';
         tmpvalue.q = rotm2eul(obj.tform.R, "XYZ")';
@@ -67,13 +63,9 @@ end
         %コンストラクタでロボット初期位置の探索を行う
         if obj.matching_mode == "slam"
             obj.PCdata_use = obj.self.sensor.result.pc;
-
-            obj.fixedSeg = pointCloud((initialtform.R * obj.PCdata_use.Location' + initialtform.Translation')');
-            %obj.fixedSeg = pointCloud(tform_manual(obj.PCdata_use.Location,initialtform.R,initialtform.Translation));
+            obj.fixedSeg = pointCloud((initialtform.R * obj.PCdata_use.Location' + initialtform.Translation')');            
             initform = initialtform;
         else
-            % fixedSeg = pcread("fixmap_room_1.pcd"); %room map
-            % fixedSeg = pcread("fixmapv6.pcd")%廊下 map
             load(obj.mapname);
             obj.fixedSeg = fixedSeg;
             %初期位置探索
@@ -87,17 +79,18 @@ end
     end
 
     function tform_add_odom(obj, odom_data)
-        %ローバーの加速度，角速度をuに入れてモデルの状態をする．
-        odom_data = obj.self.sensor.result.odom_data;
-        u = [odom_data.linear.x, odom_data.angular.z]'; %u
-        zini = obj.model.state.get;
-        B = [cos(zini(6)), 0; sin(zini(6)), 0; 0, 1] * obj.model.dt;
-        A = [1 0 0; 0 1 0; 0 0 1];
+        %ローバーの加速度，角速度をuに入れてモデルの状態を更新．
+        % odom_data = obj.self.sensor.result.odom_data;
+        u = [odom_data.linear.x, odom_data.angular.z]' * obj.model.dt; %u
+        % zini = obj.model.state.get;
+        % B = [cos(zini(6)), 0; sin(zini(6)), 0; 0, 1] ;
+        x_yaw = rotm2eul(obj.tform.R,"XYZ");
+        B = [cos(x_yaw(3)), 0; sin(x_yaw(3)), 0; 0, 1] ;
         x_yaw = rotm2eul(obj.tform.R, "XYZ");
-        X_hat = [obj.tform.Translation(1:2), x_yaw(3)]';
-        X = A * X_hat + (B * u);
-        initialtform_T = X(1:2);
-        initialtform_rot = eul2rotm([0 0 X(3)], "XYZ");
+        X_k = [obj.tform.Translation(1:2), x_yaw(3)]';
+        X_kk = X_k + (B * u);
+        initialtform_T = X_kk(1:2);
+        initialtform_rot = eul2rotm([0 0 X_kk(3)], "XYZ");
         obj.initialtform = rigidtform3d(initialtform_rot, [initialtform_T; 0]);
     end
 
@@ -133,20 +126,20 @@ end
             X(j) = logger.Data.agent.estimator.result{1, j}.tform.A(1, 4);
             Y(j) = logger.Data.agent.estimator.result{1, j}.tform.A(2, 4);
             
-            prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) - logger.Data.agent.sensor.result{1,1}.state.p(1,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(1, 4);
-            prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) - logger.Data.agent.sensor.result{1,1}.state.p(2,1) +logger.Data.agent.estimator.result{1, 1}.tform.A(2, 4);
+            % prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) - logger.Data.agent.sensor.result{1,1}.state.p(1,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(1, 4);
+            % prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) - logger.Data.agent.sensor.result{1,1}.state.p(2,1) +logger.Data.agent.estimator.result{1, 1}.tform.A(2, 4);
             % prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(1, 4);
             % prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(2, 4);
 
-            pr_x(j) = logger.Data.agent.reference.result{1,j}.state.p(1,1);
-            pr_y(j) = logger.Data.agent.reference.result{1,j}.state.p(2,1);
+            % pr_x(j) = logger.Data.agent.reference.result{1,j}.state.p(1,1);
+            % pr_y(j) = logger.Data.agent.reference.result{1,j}.state.p(2,1);
             % rmse_x(j) = sqrt((X(j) - prime_x(j))^2);
             % rmse_y(j) = sqrt((Y(j) - prime_y(j))^2);
         end
         plot(X, Y, 'o-',"MarkerSize",3);
         hold on
-        plot(prime_x,prime_y,'*-',"MarkerSize",3)
-        plot(pr_x,pr_y,"pentagram","MarkerSize",20)
+        % plot(prime_x,prime_y,'*-',"MarkerSize",3)
+        % plot(pr_x,pr_y,"pentagram","MarkerSize",20)
         grid on
         xlabel(texlabel('x [m]')); ylabel(texlabel('y [m]'));
         % if ~isfield(obj, "fixedSeg")
@@ -154,7 +147,7 @@ end
         % end
         % pcshow(obj.fixedSeg,"ViewPlane","XY","BackgroundColor",[1 1 1])
         scatter(obj.fixedSeg.Location(:,1),obj.fixedSeg.Location(:,2),6,"filled");
-        legend("NDTestimate","prime", "refernce Point","pcmap",'Location','northoutside')
+        % legend("NDTestimate","prime", "refernce Point","pcmap",'Location','northoutside')
         hold off
         % figure;ax_rmse_x = gca;ax_rmse_x.FontSize = 12;
         % bar(logger.Data.t(1:logger.k - i),rmse_x,0.75);xlabel(texlabel('time [sec]'));ylabel(texlabel('RMSE of X'));

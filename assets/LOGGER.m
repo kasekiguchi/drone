@@ -153,19 +153,18 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
           obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
           obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
-          obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
-          obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
+          % obj.Data.agent(n).reference.result{obj.k} = agent(n).controller.result;
 
           if isfield(agent(n).sensor.result, "state")
             obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
           end
 
           obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
-          obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
-          obj.Data.agent(n).input{obj.k} = agent(n).controller.result.input;
+          % obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
+          % obj.Data.agent(n).input{obj.k} = agent(n).controller.result.input;
 
           if obj.fExp
-            obj.Data.agent(n).inner_input{obj.k} = agent(n).input_transform.result;
+            % obj.Data.agent(n).inner_input{obj.k} = agent(n).input_transform.result;
           else
             obj.Data.agent(n).plant.result{obj.k}.state = state_copy(agent(n).plant.state);
           end
