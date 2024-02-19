@@ -7,20 +7,12 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-%位置，姿勢角初期値固定------------------------------------------------------------
-initial_state.p = arranged_position([0, 1], 1, 1, 1.5); % [x, y], 機数，1, z (初期位置)
+initial_state.p = arranged_position([0, 0], 1, 1, 0); % [x, y], 機数，1, z (初期位置)
 % initial_state.q = [1; 0; 0; 0];
 initial_state.q = [0; 0; 0];
-%----------------------------------------------------------------------------------
-%位置，姿勢角初期値ランダム--------------------------------------------------------
-% initial_state.p = arranged_position([randi([-1,2])*0.1-rand*0.2, randi([-1,2])*0.1-rand*0.2], 1, 1, 1-(randi([-1,2])*0.1-rand*0.2)); % [x, y], 機数，1, z (初期位置ランダム)
-% fprintf('Initial state random\t \n x: %f y: %f z: %f\n',initial_state.p(1,:), initial_state.p(2,:), initial_state.p(3,:))
-% initial_state.q = [rand*0.05; rand*0.05; 0];
-%---------------------------------------------------------------------------------
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
-%-------Modelがroll_pitch_yaw_thrust_force_physical_parameter_modelか確認--------------------
 % agent = DRONE;
 % agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 % agent.parameter = DRONE_PARAM("DIATONE");
@@ -35,7 +27,7 @@ initial_state.w = [0; 0; 0];
 
 %% クープマンモデルをプラントに設定する場合
 
-load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat",'est') %速度vzから算出したデータで学習したモデル
+load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
 
 A = est.A;
 B = est.B;
