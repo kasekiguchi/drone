@@ -1,6 +1,6 @@
 clc
 clear all
-% close all
+close all
 % exp1 = load("EstimationResult_12state_2_4_Exp_sprine+zsprine+P2Pz_torque_incon.mat",'est');
 % exp1 = load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est');
 % exp1 = load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat",'est');
@@ -12,12 +12,12 @@ exp1 = load("test.mat");
 
 m = 0.5884;
 g = 9.81;
-u1 = m*g+100;
+u1 = m*g+10;
 u2 = 0;
 u3 = 0;
 u4 = 0;
 F = @quaternions;
-t = 20;
+t = 10;
 
 x0 = [0;0;1;0;0;0;0;0;0;0;0;0];
 u = repmat([u1;u2;u3;u4],1,t);
@@ -73,7 +73,13 @@ plot(1:t,X(9,:),'LineWidth',1.2)
 grid on
 xlabel('z速度')
 
-% subplot(2,3,6)
-% plot(1:t,U(:,:),'LineWidth',1.2)
+subplot(2,3,6)
+plot3(X(1,:),X(2,:),X(3,:),'LineWidth',1.2)
+xlabel('x')
+ylabel('y')
+zlabel('z')
+grid on
+xlim([-0.01 0.01])
+ylim([-0.01 0.01])
 % grid on
 % xlabel('入力の計算')

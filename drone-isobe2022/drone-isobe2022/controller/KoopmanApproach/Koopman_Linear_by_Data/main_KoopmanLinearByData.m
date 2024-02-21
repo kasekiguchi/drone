@@ -17,9 +17,9 @@ FileName = 'test.mat'; %お試し用
 
 % 読み込むデータファイル名(データセットに使うファイルをまとめたフォルダを作るとよい，ファイル名は統一)
 % ※name_change.m使うと簡単に統一できるよ
-loading_filename = 'Exp_2_4';
+loading_filename = 'Exp_2_20';
 
-Data.HowmanyDataset =150; %読み込むデータ数に応じて変更
+Data.HowmanyDataset =30; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -177,7 +177,7 @@ if change_reference == 1
    
     simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
 
-    model = load("test2.mat",'est');
+    model = load("test.mat",'est');
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
