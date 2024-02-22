@@ -71,7 +71,7 @@ methods
                 % obj.state.eq = quat2eul(obj.state.qq);
             case "ros2"
                 obj.id = param.id;
-                param.node = ros2node("/agent_"+string(obj.id), obj.id); % % % % % % % % % % % % %create node
+                param.node = ros2node("/agent_"+string(obj.id), obj.id);%create node
                 obj.IP = param.node;
                 obj.connector = ROS2_CONNECTOR(param);
                 obj.msg = obj.connector.publisher.pubmsg;
@@ -82,14 +82,11 @@ methods
 
     function do(obj, varargin)
         t = varargin{1}.t;
-        cha = varargin{2};       
-       
+        cha = varargin{2};
         u = obj.self.controller.result.input;%コントローラで生成した入力を持ってくる
-        if abs(u(1))>2 || abs(u(2))>2
-            cha = 'q';
-        end
+        [cha,u] = obj.input(u,cha);
 
-         obj.phase = cha;
+        obj.phase = cha;
         switch cha
             case 'q' % quit
                 obj.msg.linear.x = 0.0;
@@ -99,30 +96,27 @@ methods
             case 's' % stop
                 obj.msg.linear.x = 0.0;
                 obj.msg.angular.z = 0.0;
-                hold off
+                % hold off
             case 'a' % stop
-                % obj.self.controller.result.input = [0; 0];
+                obj.self.controller.result.input = u;
                 obj.self.input_transform.result = [];
-                obj.msg.linear.x = 0.0;
-                obj.msg.angular.z = 0.0;
+                % obj.msg.linear.x = 0.0;
+                % obj.msg.angular.z = 0.0;
                 pause(0.5)
             case 't' % stop
                 % obj.self.controller.result.input = [0; 0];
                 obj.self.input_transform.result = [];
                 obj.msg.linear.x = 0.0;
                 obj.msg.angular.z = 0.0;
-                % pause(0.25)
-            case 'f' % run
+                pause(0.5)
+            case 'f' % run                
+                if norm(size(varargin))>5
+                    pause(0.05)
+                end
                 obj.msg.linear.x = u(1);
                 obj.msg.angular.z = u(2);
-
         end
-
-
         obj.connector.sendData(obj.msg);
-        if cha =='t'
-            warning("input x is back")
-        end
     end
 
     function set_param(obj, param)
@@ -132,7 +126,27 @@ methods
     function arming(obj)
         % obj.connector.sendData(gen_msg(obj.arming_msg));
     end
-
+    function [cha,u] = input(obj,u,cha)
+        if u(1) > 1 %目標が大きいときの簡易速度抑制
+            u(1) = u(1)*0.1;
+        end
+        if abs(u(1))>2 || abs(u(2))>2%速度 or 角速度が大きすぎる時，エラーをスロー
+            cha = 'q';
+            
+            u
+        end
+        if isfield(obj.self.sensor.result,"detection") %前方に点群があるとき，停止
+            dsize = size(obj.self.sensor.result.detection);
+            if dsize(1)>10
+                cha = "s";
+            end
+        end
+        if isfield(obj.self.sensor.result,"rover_sensor")%バンパーが当たったら停止
+            if obj.self.sensor.result.rover_sensor.data(1) ~=0
+                cha ="s";
+            end
+        end
+    end
 end
 
 end

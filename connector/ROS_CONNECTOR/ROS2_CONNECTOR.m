@@ -46,7 +46,7 @@ classdef ROS2_CONNECTOR < handle
                     obj.Hz       = info.subTopic{1,3}; 
                 end
             end
-            if isfield(info,'pubTopic')
+            if isfield(info,'pubTopic')                
                 obj.pubName = info.pubTopic{1,1};
                 obj.pubMsg  = info.pubTopic{1,2};
             end

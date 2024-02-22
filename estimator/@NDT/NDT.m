@@ -38,19 +38,16 @@ end
         obj.tform = pcregisterndt(obj.PCdata_use, obj.fixedSeg,obj.gridstep, ...
             "InitialTransform", obj.initialtform, "OutlierRatio", 0.1, "Tolerance", [0.5 0.5], ...
             "MaxIterations",5); %NDTマッチング
-
         if (obj.matching_mode == "slam")
             ndt_PCdata = pctransform(obj.PCdata_use, obj.tform);
             obj.fixedSeg = pcmerge(obj.fixedSeg, ndt_PCdata, 0.01);
         end
-
         if isfield(obj.self.sensor.result, "rover_odo")
             obj.tform_add_odom(obj.self.sensor.result.rover_odo);
         else
             obj.tform_add_odom(struct('linear', struct('x', obj.self.controller.result.input(1)), 'angular', struct('z', obj.self.controller.result.input(2))));
         end
-
-        obj.result.tform = obj.tform;disp(obj.tform);
+        obj.result.tform = obj.tform;%disp(obj.tform);
         obj.result.ndtPCdata = obj.PCdata_use;
         tmpvalue.p = obj.tform.Translation';
         tmpvalue.q = rotm2eul(obj.tform.R, "XYZ")';
@@ -71,11 +68,11 @@ end
             %初期位置探索
             obj.PCdata_use = obj.self.sensor.result.pc;
             initform = pcregisterndt(obj.PCdata_use, obj.fixedSeg, obj.gridstep, ...
-                "InitialTransform", initialtform, "OutlierRatio", 0.1, "Tolerance", [0.01 0.1]); %NDTマッチング
+                "InitialTransform", initialtform, "OutlierRatio", 0.2, "Tolerance", [0.05 0.1]); %NDTマッチング
         end
 
         obj.model.state.p = initform.Translation';
-        obj.model.state.q = rad2deg(rotm2eul(initform.R, "XYZ"))';
+        obj.model.state.q = (rotm2eul(initform.R, "XYZ"))';
     end
 
     function tform_add_odom(obj, odom_data)

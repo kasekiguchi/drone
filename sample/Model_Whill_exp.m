@@ -36,10 +36,9 @@ switch conn_type
         setting.pubMsgName = {'geometry_msgs/Twist'}; % pub 型
     case "ros2"
         setting.param.state_list = ["p"];
-        setting.param.subName = ["p"];
-        % setting.subTopic(1, :) = {'/rover_odo', 'geometry_msgs/Twist', 5000}; % sub topic name
-        % setting.subTopic(1,:) = {'/tf','tf2_msgs/TFMessage'};% sub topic name
+        setting.param.subName = ["p"];        
         setting.pubTopic(1, :) = {'/rover_twist', 'geometry_msgs/Twist'}; % pub topic name
+        
         setting.id = id;
 end
 

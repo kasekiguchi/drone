@@ -19,13 +19,14 @@ classdef TAKEOFF_REFERENCE < handle
             obj.result.state = STATE_CLASS(struct('state_list',["xd","p","v"],'num_list',[20,3,3]));
         end
         function  result= do(obj,varargin)
-            if obj.self.estimator.model.name == "vehicle3"
-                obj.result.state = STATE_CLASS(struct('state_list',["p","q","v"],'num_list',[3,3]));
+            if obj.self.estimator.model.name == "vehicle"
+                obj.result.state = STATE_CLASS(struct('state_list',["p","q"],'num_list',[3,3]));
                 obj.result.state.p = [0; 0; 0];
                 obj.result.state.q = [0; 0; 0];
-                obj.result.state.v = [0; 0; 0];
+                % obj.result.state.v = [0; 0; 0];
+                obj.self.input_transform.param.th_offset =[];
                 result = obj.result;
-                % disp("rover takeoff reference");
+                disp("rover takeoff reference");
             else
 
                 % [Input] time,cha,logger,env

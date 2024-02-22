@@ -14,40 +14,44 @@ properties
     datatreat
 end
 methods
-    function obj = ROS2_SENSOR(self, param)
+    function obj = ROS2_SENSOR(self, set_param)
         obj.self = self;
         obj.Node = self.plant.IP;
-        topics = param.param;
-        topics.node = obj.Node;
-        subTopics = topics.subTopic;
-        for i = 1:length(subTopics(:, 1))
-            topics.subTopic = subTopics(i, :);
-            obj.ros{i} = ROS2_CONNECTOR(topics);
-        end        
-        if isfield(param, 'pfunc')
-            obj.datatreat = param.pfunc;
-        end
-        if isfield(param, 'state_list')
-            obj.fState = 1;
-            if obj.fState
-                obj.result.state = STATE_CLASS(struct('state_list', param.state_list, "num_list", param.num_list));
+        % param = set_param;
+        Topics = set_param.topics;
+        topic.node = obj.Node;%CONNECTORに持っていく用
+        for i = 1:length(Topics.subTopic)%sub,pubの生成
+            topic.subTopic = Topics.subTopic(i, :);
+            if isfield(Topics,"pubTopic")
+                if isempty(Topics.pubTopic(i, :))
+                    topic.pubTopic = Topics.pubTopic(i, :);
+                end
             end
-            if sum(contains(self.model.state.list, "q")) == 1 && sum(contains(param.state_list, "q")) == 1
-                obj.result.state.num_list(contains(param.state_list, "q")) = length(self.model.state.q); % modelと合わせる
-                obj.result.state.type = length(self.model.state.q);
-            end
+            obj.ros{i} = ROS2_CONNECTOR(topic);
         end
+        if isfield(set_param, 'pfunc')%生データの処理
+            obj.datatreat = set_param.pfunc;
+        end
+        % if isfield(param, 'state_list')%motive,T265のとき有効
+        %     obj.fState = 1;
+        %     if obj.fState
+        %         obj.result.state = STATE_CLASS(struct('state_list', param.state_list, "num_list", param.num_list));
+        %     end
+        %     if sum(contains(self.model.state.list, "q")) == 1 && sum(contains(param.state_list, "q")) == 1
+        %         obj.result.state.num_list(contains(param.state_list, "q")) = length(self.model.state.q); % modelと合わせる
+        %         obj.result.state.type = length(self.model.state.q);
+        %     end
+        % end
     end
 
     function result = do(obj, varargin) 
         result.state = obj.state;
         for i = 1:length(obj.ros)
-            % result.data{i} = obj.ros{i}.getData;
             data = obj.ros{i}.getData;
             result.(matlab.lang.makeValidName(obj.ros{i}.subName,'ReplacementStyle','delete')) = data;            
         end
         if ~isempty(obj.datatreat)
-            result.pc = obj.datatreat(result.scan_behind,result.scan_front);
+            [result.pc, result.detection] = obj.datatreat(result.scan_behind,result.scan_front);
         end
         obj.result = result;
     end

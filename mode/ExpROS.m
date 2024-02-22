@@ -1,8 +1,9 @@
+close all
 str="mainGUI";
-if exist('app')==7;clc;clear;close all;str="mode file only";end
+if exist('app')==7;clc;clear;str="mode file only";end
 disp("run mode:"+str)
 ts = 0; % initial time
-dt = 0.5; % sampling period
+dt = 0.3; % sampling period
 te = 180; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
@@ -14,9 +15,7 @@ logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
 % initial position in point cloud map
 initial_state.p = [0;0;0];
-initial_state.q = [0;0;0];
-% initial_state.v = [0; 0; 0];
-% initial_state.w = [0; 0; 0];
+initial_state.q = [0;0;90];
 
 agent = WHILL;
 agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 87));%agentでnodeを所持 
@@ -33,7 +32,7 @@ agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(40));agent.reference.do(time, 'f');
 % agent.reference = POINT_REFERENCE(agent,[2.0;0;0],[0;0;0],[0;0;0]);
-agent.reference = POINT_REFERENCE(agent,Reference_Point(agent,2));
+agent.reference = POINT_REFERENCE(agent,Reference_Point(agent,4));
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 run("ExpBase");
 %% main loop of running modefile only
@@ -47,17 +46,16 @@ while (time.t < time.te)
     agent.reference.do(time,'f');
     agent.controller.do(time,'f');
     agent.plant.do(time, 'f');
-    logger.logging(time, 'f', agent);    
+    logger.logging(time, 'f', agent);
+
+    x(time.k) = agent.estimator.result.state.p(1);
+    y(time.k) = agent.estimator.result.state.p(2);
+    plot(agent.reference.param.ax,x,y,"o");
     time.k = logger.k;
 
-    % x(i) = agent.estimator.result.state.p(1);
-    % y(i) = agent.estimator.result.state.p(2);
-    % plot(agent.reference.param.ax,x,y,"o");
-
-    % i=i+1;
-    pause(time.dt - toc(tStart));
-    time.t = time.t + time.dt;
     disp(time.t)
+    pause(time.dt - toc(tStart));
+    time.t = time.t + time.dt;    
 end
 agent.plant.do(time, 's');
 end

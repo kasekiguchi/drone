@@ -50,9 +50,6 @@ classdef APID_CONTROLLER < handle
             u = obj.result;
             obj.ei = obj.ei + obj.e*obj.dt;
 
-
-            % Kp
-            % e
         end
         function show(obj)
             obj.result;
