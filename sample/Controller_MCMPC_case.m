@@ -3,9 +3,9 @@ function Controller = Controller_MCMPC_case(Agent)
 %   詳細説明をここに記述
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 5000;
+    Controller_param.Maxparticle_num = 1000;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
-    Controller_param.Minparticle_num = 1000;
+    Controller_param.Minparticle_num = 500;
     Controller_param.input.Initsigma = 0.01*[1;0.1;0.1;0.1];
     Controller_param.input.Constsigma = 5.0*[1;1;1;1];
     Controller_param.input.Maxsigma = 1.0 * [1.5;1.5;1.5;1.5];
@@ -20,8 +20,8 @@ function Controller = Controller_MCMPC_case(Agent)
 
     %% normal
 %     Controller_param.P = diag([1e4; 1e4; 1e3]);    % 座標   1000 1000 10000
-    Controller_param.P = diag([1e6; 1e6; 1e6]);    % 座標   1000 1000 10000
-    Controller_param.V = diag([1e2; 1e2; 1e4]);    % 速度
+    Controller_param.P = diag([1e6; 1e6; 1e2]);    % 座標   1000 1000 10000
+    Controller_param.V = diag([1e4; 1e4; 1e2]);    % 速度
     Controller_param.R = 0.1*diag([1.0; 1e3; 1e3; 1e3]); % 入力
     Controller_param.RP = 0 * diag([1.0,; 1e3; 1e3; 1e3]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.Q = diag([1e1; 1e1; 1e1]);
