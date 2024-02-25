@@ -1,4 +1,4 @@
-classdef drone_controller < matlab.System
+classdef CONTROLLER_SYSTEM < matlab.System
   % untitled Add summary here
   %
   % This template includes the minimum set of functions required
@@ -6,6 +6,7 @@ classdef drone_controller < matlab.System
 
   % Public, tunable properties
   properties
+    setting_name
     self
     result
     param
@@ -17,13 +18,11 @@ classdef drone_controller < matlab.System
 
   end
 methods
-  function obj = drone_controller(varargin)
+  function obj = CONTROLLER_SYSTEM(varargin)
       % obj.self = self;
       % obj.param = param;
       % Perform one-time calculations, such as computing constants
       setProperties(obj,nargin,varargin{:})
-      %obj.param.P = self.parameter.get(obj.parameter_name);
-      obj.param.P = obj.self.get("P");
       obj.result.input = zeros(4,1);
     end
 end
