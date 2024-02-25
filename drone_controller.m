@@ -6,23 +6,34 @@ classdef drone_controller < matlab.System
 
   % Public, tunable properties
   properties
-
+    self
+    result
+    param
+    parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
   end
 
   % Pre-computed constants or internal states
   properties (Access = private)
 
   end
-
-  methods (Access = protected)
-    function setupImpl(obj)
+methods
+  function obj = drone_controller(varargin)
+      % obj.self = self;
+      % obj.param = param;
       % Perform one-time calculations, such as computing constants
+      setProperties(obj,nargin,varargin{:})
+      %obj.param.P = self.parameter.get(obj.parameter_name);
+      obj.param.P = obj.self.get("P");
+      obj.result.input = zeros(4,1);
     end
+end
+  methods (Access = protected)
 
+    function setupImpl(obj)
+    end
     function result = stepImpl(obj,x,xd)
       % Implement algorithm. Calculate y as a function of input u and
       % internal states.
-      xd0 =xd;
       P = obj.param.P;
       F1 = obj.param.F1;
       F2 = obj.param.F2;
