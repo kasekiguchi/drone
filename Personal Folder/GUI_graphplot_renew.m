@@ -5,8 +5,8 @@ clear all
 clc;
 
 %pdfで保存する際のファイル名----------
-    name = '1_25_circle_概要集';
-    folderName = '1_25_circle_概要集';
+    name = '2_21_卒論_実機_P2P';
+    folderName = '2_21_卒論_実機_P2P';
 %-------------------------------------
 
 %% 
@@ -125,17 +125,17 @@ box on %グラフの枠線が出ないときに使用
 figure(1)
 hold on
 % colororder(newcolors)
-plot(data.t,data.p(1,:),'LineWidth',2.3,'LineStyle','-','Color',[0 0.4470 0.7410]);
+plot(data.t,data.p(3,:),'LineWidth',2.3,'LineStyle','-','Color',[0 0.4470 0.7410]);
 xlabel('Time [s]');
 ylabel('Position [m]');
 % xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
 % xline(data.t(1,find(log.Data.phase == 102,1,'first')+250),'LineStyle','--','Color','red','LineWidth',2) %第4章reference用
 grid on
-plot(data.t,data.pr(1,:),'LineWidth',2,'LineStyle','--','Color',[0 0.4470 0.7410]);
-plot(data.t,data.p(2,:),'LineWidth',2.3,'LineStyle','-','Color',[0.8500 0.3250 0.0980]);
-plot(data.t,data.pr(2,:),'LineWidth',2,'LineStyle','--','Color',[0.8500 0.3250 0.0980]);
-plot(data.t,data.p(3,:),'LineWidth',2.3,'LineStyle','-','Color',[0.4660 0.6740 0.1880]);
-plot(data.t,data.pr(3,:),'LineWidth',2,'LineStyle','--','Color',[0.4660 0.6740 0.1880]);
+plot(data.t,data.pr(3,:),'LineWidth',2,'LineStyle','--','Color',[0 0.4470 0.7410]);
+% plot(data.t,data.p(2,:),'LineWidth',2.3,'LineStyle','-','Color',[0.8500 0.3250 0.0980]);
+% plot(data.t,data.pr(2,:),'LineWidth',2,'LineStyle','--','Color',[0.8500 0.3250 0.0980]);
+% plot(data.t,data.p(3,:),'LineWidth',2.3,'LineStyle','-','Color',[0.4660 0.6740 0.1880]);
+% plot(data.t,data.pr(3,:),'LineWidth',2,'LineStyle','--','Color',[0.4660 0.6740 0.1880]);
 % Square_coloring2(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+250]),[1.0 0.9 1.0]);
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
@@ -151,41 +151,41 @@ hold off
 %姿勢角q
 figure(2)
 colororder(newcolors)
-plot(data.t,data.q(:,:),'LineWidth',1);
+plot(data.t,data.q(:,:),'LineWidth',2.3);
 xlabel('Time [s]');
 ylabel('Attitude [rad]');
 grid on
-lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
+lgdtmp = {'$\phi_e$','$\theta_e$','$\psi_e$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(2) = gca;
-title('Attitude q of agent1','FontSize',12);
+% title('Attitude q of agent1','FontSize',12);
 
 %速度v
 figure(3)
 colororder(newcolors)
-plot(data.t,data.v(:,:),'LineWidth',1);
+plot(data.t,data.v(:,:),'LineWidth',2.3);
 xlabel('Time [s]');
 ylabel('Velocity [m/s]');
 grid on
-lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
+lgdtmp = {'$v_{xe}$','$v_{ye}$','$v_{ze}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(3) = gca;
-title('Velocity v of agent1','FontSize',12);
+% title('Velocity v of agent1','FontSize',12);
 
 %角速度w
 figure(4)
 colororder(newcolors)
-plot(data.t,data.w(:,:),'LineWidth',1);
+plot(data.t,data.w(:,:),'LineWidth',2.3);
 xlabel('Time [s]');
 ylabel('Angular velocity [rad/s]');
 grid on
-lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
+lgdtmp = {'$\omega_{1 e}$','$\omega_{2 e}$','$\omega_{3 e}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(4) = gca;
-title('Angular velocity w of agent1','FontSize',12);
+% title('Angular velocity w of agent1','FontSize',12);
 
 figure(5)
 plot(data.p(1,:),data.p(2,:),'LineWidth',1);
@@ -220,7 +220,7 @@ ax(6) = gca;
 
 %入力
 figure(7)
-plot(data.t,data.u(1,:),'LineWidth',1);
+plot(data.t,data.u(1,:),'LineWidth',1.5);
 xlabel('Time [s]');
 ylabel('Input_{thrust}');
 % ylabel('Input');
@@ -233,7 +233,7 @@ lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best'
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax(7) = gca;
-title('Input u of agent1','FontSize',12);
+% title('Input u of agent1','FontSize',12);
 
 figure(8)
 plot(data.t,data.u(2:4,:),'LineWidth',1);
@@ -316,7 +316,7 @@ end
 
 % ave = mean(data.te)
 
-fontSize = 18; %軸の文字の大きさの設定
+fontSize = 16; %軸の文字の大きさの設定
 set(ax,'FontSize',fontSize); 
 
 else
@@ -491,7 +491,7 @@ else
 end
 
 if pdf == 1
-    fprintf('\n凡例の位置などを調整し終わったらEnterを押してください');
+    fprintf('\n凡例の位置などを調整し終わったらEnterを押してください\n');
     pause();
     mkdir(folderName);
     movefile(folderName,'Graph')
