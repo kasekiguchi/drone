@@ -5,8 +5,8 @@ clear all
 clc;
 
 %pdfで保存する際のファイル名----------
-    name = '2_21_卒論_実機_P2P';
-    folderName = '2_21_卒論_実機_P2P';
+    name = '2_26_卒論_実機_hov_f2';
+    folderName = '2_21_卒論_hov_f2';
 %-------------------------------------
 
 %% 
@@ -125,22 +125,22 @@ box on %グラフの枠線が出ないときに使用
 figure(1)
 hold on
 % colororder(newcolors)
-plot(data.t,data.p(3,:),'LineWidth',2.3,'LineStyle','-','Color',[0 0.4470 0.7410]);
+% plot(data.t,data.p(1,:),'LineWidth',2.3,'LineStyle','-','Color',[0 0.4470 0.7410]);
 xlabel('Time [s]');
-ylabel('Position [m]');
+ylabel('Position z [m]');
 % xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
 % xline(data.t(1,find(log.Data.phase == 102,1,'first')+250),'LineStyle','--','Color','red','LineWidth',2) %第4章reference用
 grid on
-plot(data.t,data.pr(3,:),'LineWidth',2,'LineStyle','--','Color',[0 0.4470 0.7410]);
+% plot(data.t,data.pr(1,:),'LineWidth',2,'LineStyle','--','Color',[0 0.4470 0.7410]);
 % plot(data.t,data.p(2,:),'LineWidth',2.3,'LineStyle','-','Color',[0.8500 0.3250 0.0980]);
 % plot(data.t,data.pr(2,:),'LineWidth',2,'LineStyle','--','Color',[0.8500 0.3250 0.0980]);
-% plot(data.t,data.p(3,:),'LineWidth',2.3,'LineStyle','-','Color',[0.4660 0.6740 0.1880]);
-% plot(data.t,data.pr(3,:),'LineWidth',2,'LineStyle','--','Color',[0.4660 0.6740 0.1880]);
+plot(data.t,data.p(3,:),'LineWidth',2.3,'LineStyle','-','Color',[0.4660 0.6740 0.1880]);
+plot(data.t,data.pr(3,:),'LineWidth',2,'LineStyle','--','Color',[0.4660 0.6740 0.1880]);
 % Square_coloring2(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+250]),[1.0 0.9 1.0]);
 % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
 % lgdtmp = {'$x_e$','$y_e$','$z_e$'};
 % lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
-lgdtmp = {'$x_e$','$x_r$','$y_e$','$y_r$','$z_e$','$z_r$'};
+lgdtmp = {'$z_e$','$z_r$','$y_e$','$y_r$','$z_e$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
@@ -525,7 +525,7 @@ if pdf == 1
     exportgraphics(figure(10),strcat('error_',name,'.pdf'))
     movefile(strcat('error_',name,'.pdf'),fullfile('Graph',folderName))
 
-    fprintf('保存が完了しました\n')
+    fprintf('\n保存が完了しました\n')
 end
 
 %% グラフの背景に色あり
