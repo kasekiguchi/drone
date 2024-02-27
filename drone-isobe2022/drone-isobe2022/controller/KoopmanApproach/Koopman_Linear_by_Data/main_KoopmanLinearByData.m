@@ -11,15 +11,15 @@ Normalize = 0; %1：正規化
 %---------------------------------------------
 
 %% 
-%データ保存先ファイル名(逐次変更する)
-% FileName = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
-FileName = 'test.mat'; %お試し用
+%データ保存先ファイル名(.matを付ける．逐次変更しないと中身が上書きされる)
+FileName = '.mat';
+
 
 % 読み込むデータファイル名(データセットに使うファイルをまとめたフォルダを作るとよい，ファイル名は統一)
 % ※name_change.m使うと簡単に統一できるよ
-loading_filename = 'Exp_2_20';
+loading_filename = '';
 
-Data.HowmanyDataset =30; %読み込むデータ数に応じて変更
+Data.HowmanyDataset = 0; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -91,7 +91,7 @@ disp('Estimated')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
-simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
+simResult.reference = ImportFromExpData_estimation(''); %推定精度検証用データの設定
 
 % アーミングphaseの実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
@@ -165,7 +165,10 @@ disp(targetpath)
 % F = @eulerAngleParameter_withoutP;
 
 %% 作成済みモデルで，推定する軌道を変更(全時刻に対する推定検証を行う)
-%推定する領域をずらしながら推定検証を行う．
+%---------------------------------------------------------
+%推定する領域をずらしながら推定検証を行います．
+%出力されるグラフ：位置，姿勢角，各時刻のRMSE，最大誤差
+%---------------------------------------------------------
 clc
 num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
 change_reference = str2double(num);
@@ -175,7 +178,7 @@ if change_reference == 1
     close all
     opengl software
    
-    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
+    simResult.reference = ImportFromExpData_estimation(''); %推定精度検証用データの設定
 
     model = load("test.mat",'est');
     est.A = model.est.A;

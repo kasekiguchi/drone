@@ -29,20 +29,9 @@ data.fExp = logger.fExp;
 if logger.fExp==1 %実機データの場合
 %--------------------time----------------------
     data.est.p = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.p,1:data.N,'UniformOutput',false))'; 
-%     data.startIndex = find(data.est.p(:,3)>0.4,1,'first'); %0.4m以上になった部分からデータの取得開始
-%     data.t = logger.Data.t;
     data.phase = logger.Data.phase;
-    % data.startIndex = find(data.phase == 108,1,'first');
-%     data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
-    data.startIndex = find(data.phase==102,1,'first') + 220; %完全に目標軌道になった部分のデータのみを使用
-%     data.startIndex = find(data.phase==102,1,'first') + 10; %P2P斜め
-%     data.startIndex = find(data.phase == 102, 1, 'first') + 200; %逆円旋回
-%     data.startIndex = find(data.phase == 102, 1, 'first') + 150; %完全にサドル起動になった部分のデータのみを使用
-    % data.startIndex = find(data.t > 18,1,'first');
-%     data.phase = logger.Data.phase;
+    data.startIndex = find(data.phase==102,1,'first'); %flight部分のみをデータとして使用
     data.endIndex = find(data.phase == 102,1,'last'); %ランディングする前にデータの取得をやめる
-%     data.endIndex = find(data.phase == 102,1,'first')+200;　%P2P斜め
-    % data.endIndex = find(data.phase==116,1,'last'); 
     data.N = data.endIndex - data.startIndex + 1;
     data.t = logger.Data.t(data.startIndex:data.endIndex);
 %-------------------estimator----------------------
@@ -52,13 +41,6 @@ if logger.fExp==1 %実機データの場合
     data.est.w = cell2mat(arrayfun(@(N) logger.Data.agent.estimator.result{N}.state.w,data.startIndex:data.endIndex,'UniformOutput',false))';
 %-----------------------input----------------------
     data.input = cell2mat(arrayfun(@(N) logger.Data.agent.input{N}(1:data.uN),data.startIndex:data.endIndex,'UniformOutput',false))';
-    % for i = data.startIndex:data.endIndex
-    %     data.inner_input(i-data.startIndex+1,:) = logger.Data.agent.inner_input{i}(1:4);
-    % end
-    % data.input = data.inner_input;
-%     for i = 1:size(data.input,1)
-%         data.input(i,:) = T2T(data.input(i,1),data.input(i,2),data.input(i,3),data.input(i,4));
-%     end
 else
     data.startIndex = 1;
     data.endIndex = data.N;
