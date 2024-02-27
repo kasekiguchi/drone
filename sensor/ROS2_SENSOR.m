@@ -20,11 +20,19 @@ methods
         % param = set_param;
         Topics = set_param.topics;
         topic.node = obj.Node;%CONNECTORに持っていく用
-        for i = 1:length(Topics.subTopic)%sub,pubの生成
-            topic.subTopic = Topics.subTopic(i, :);
+        for i = 1:set_param.num%sub,pubの生成
+            if isfield(Topics,"subTopic")
+                if i <= length(Topics.subTopic)
+                    if ~isempty(Topics.subTopic(i,1))
+                        topic.subTopic = Topics.subTopic(i, :);
+                    end
+                end
+            end
             if isfield(Topics,"pubTopic")
-                if isempty(Topics.pubTopic(i, :))
-                    topic.pubTopic = Topics.pubTopic(i, :);
+                if i <= length(Topics.pubTopic)
+                    if ~isempty(Topics.pubTopic(i))
+                        topic.pubTopic = Topics.pubTopic(i, :);
+                    end
                 end
             end
             obj.ros{i} = ROS2_CONNECTOR(topic);

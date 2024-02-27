@@ -10,10 +10,13 @@ Sensor.name = ["RPLiDAR-S1" "RPLiADR-S1"];
 topics.subTopic(1,:) = {'/scan_front','sensor_msgs/LaserScan',1e6};
 topics.subTopic(2,:) = {'/scan_behind' ,'sensor_msgs/LaserScan',1e6};
 topics.subTopic(3, :) = {'/rover_odo', 'geometry_msgs/Twist', 1e6};
-topics.subTopic(4, :) = {'/rover_sensor', 'std_msgs/Int16MultiArray', 1e6};
+% topics.subTopic(4, :) = {'/rover_sensor', 'std_msgs/Int16MultiArray', 1e6};
 % topics.subTopic(5, :) = {'/elevator_status', 'std_msgs/String', 1e6};
-% topics.pubTopic(5, :) = {'/robot_status', 'std_msgs/String', 1e6};
+% topics.pubTopic(5, :) = {'/robot_status', 'std_m\sgs/String', 1e6};
+topics.pubTopic(5, :) = {'/target_floor_to_elevator', 'std_msgs/Int8', 1e6};
+% topics.subTopic(1, :) = {[]};
 Sensor.topics = topics;
+Sensor.num=5;
 Sensor.pfunc = @getData_two_lidar_combine;
 end
 function [pcdata,detection] = getData_two_lidar_combine(data1,data2)

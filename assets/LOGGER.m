@@ -153,7 +153,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
           obj.Data.agent(n).sensor.result{obj.k} = agent(n).sensor.result;
           obj.Data.agent(n).estimator.result{obj.k} = agent(n).estimator.result;
-          obj.Data.agent(n).reference.result{obj.k} = agent(n).controller.result;
+          obj.Data.agent(n).controller.result{obj.k} = agent(n).controller.result;
+          obj.Data.agent(n).reference.result{obj.k} = agent(n).reference.result;
 
           if isfield(agent(n).sensor.result, "state")
             obj.Data.agent(n).sensor.result{obj.k}.state = state_copy(agent(n).sensor.result.state);
@@ -161,6 +162,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
           obj.Data.agent(n).estimator.result{obj.k}.state = state_copy(agent(n).estimator.result.state);
           obj.Data.agent(n).reference.result{obj.k}.state = state_copy(agent(n).reference.result.state);
+         % obj.Data.agent(n).controller.result{obj.k}.state = state_copy(agent(n).controller.result.state);
           obj.Data.agent(n).input{obj.k} = agent(n).controller.result.input;
 
           if obj.fExp

@@ -127,9 +127,12 @@ methods
         % obj.connector.sendData(gen_msg(obj.arming_msg));
     end
     function [cha,u] = input(obj,u,cha)
-        if u(1) > 1 %目標が大きいときの簡易速度抑制
-            u(1) = u(1)*0.1;
+        if u(1) > 0.6 %目標が大きいときの簡易速度抑制
+            u(1) = 0.6;
         end
+        if abs(u(2)) > 0.6 %目標が大きいときの簡易速度抑制
+            u(2) = 0.6*sign(u(2));
+        end        
         if abs(u(1))>2 || abs(u(2))>2%速度 or 角速度が大きすぎる時，エラーをスロー
             cha = 'q';
             
@@ -144,6 +147,13 @@ methods
         if isfield(obj.self.sensor.result,"rover_sensor")%バンパーが当たったら停止
             if obj.self.sensor.result.rover_sensor.data(1) ~=0
                 cha ="s";
+            end
+        end
+        if isfield(obj.self.sensor.result,"robot_status")%スイッチボットに司令送る
+            if agent.reference.pointflag == agent.reference.param.num
+                cha ="s";
+                elevetor_msg="";
+                obj.self.sensor.result.robot_status.sendData(elevetor_msg)
             end
         end
     end

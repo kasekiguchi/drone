@@ -47,6 +47,8 @@ classdef APID_CONTROLLER < handle
             end
             obj.result.input = -Kp*obj.e - Ki*obj.ei - Kd*obj.ed;
             obj.self.input_transform.result = obj.result.input;
+            obj.result.e = obj.e;
+            obj.result.ed = obj.ed;
             u = obj.result;
             obj.ei = obj.ei + obj.e*obj.dt;
 

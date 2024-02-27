@@ -16,9 +16,11 @@ logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 % initial position in point cloud map
 initial_state.p = [0;0;0];
 initial_state.q = [0;0;90];
+% initial_state.p = [30;6.2;0];
+% initial_state.q = [0;0;rad2deg(0)];
 
 agent = WHILL;
-agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_Exp(dt, initial_state, "ros2", 87));%agentでnodeを所持 
+agent.plant = WHILL_EXP_MODEL(agent,Model_Whill_exp(dt, initial_state, "ros2", 87));%agentでnodeを所持 
 agent.parameter = VEHICLE_PARAM("VEHICLE3");
 % agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.sensor.ros = ROS2_SENSOR(agent, Sensor_Ros2_multi(agent));
@@ -26,13 +28,15 @@ agent.parameter = VEHICLE_PARAM("VEHICLE3");
 % agent.sensor.do([],[],[],[],agent,1);
 agent.sensor = ROS2_SENSOR(agent,Sensor_Ros2_bos_rover(agent));%ROS2_SENSOR単体の時
 agent.sensor.do();%ROS2_SENSOR単体の時
+% msg=agent.sensor.ros{5}.publisher.pubmsg;msg.data=int8(4);agent.sensor.ros{5}.sendData(msg);
+%%
 % agent.estimator = UKF2DSLAM(agent, Estimator_UKF2DSLAM_Vehicle(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1)), ["p", "q"]));
 % agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Vehicle45(dt, initial_state, 1))));%, ["p", "q"]));
 agent.estimator = NDT(agent,Estimator_NDT(agent,dt,MODEL_CLASS(agent,Model_Three_Vehicle(dt, initial_state,1))));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(agent.sensor.lrf.radius));
 % agent.reference = PATH_REFERENCE(agent,Reference_PathCenter(40));agent.reference.do(time, 'f');
 % agent.reference = POINT_REFERENCE(agent,[2.0;0;0],[0;0;0],[0;0;0]);
-agent.reference = POINT_REFERENCE(agent,Reference_Point(agent,4));
+agent.reference = POINT_REFERENCE(agent,Reference_Point(agent,7));
 agent.controller = APID_CONTROLLER(agent,Controller_APID(dt));
 run("ExpBase");
 %% main loop of running modefile only

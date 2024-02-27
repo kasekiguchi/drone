@@ -40,24 +40,31 @@ classdef ROS2_CONNECTOR < handle
             %-- Configulations for ROS2 --%
             obj.nodename = info.node;
             if isfield(info,'subTopic')
+                if ~isempty(info.subTopic{1})
                 obj.subName  = info.subTopic{1,1};
                 obj.subMsg   = info.subTopic{1,2};
                 if length(info.subTopic) > 2
-                    obj.Hz       = info.subTopic{1,3}; 
+                    obj.Hz  = info.subTopic{1,3}; 
+                end
+                obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
                 end
             end
-            if isfield(info,'pubTopic')                
+            if isfield(info,'pubTopic')
+                if ~isempty(info.pubTopic{1})
                 obj.pubName = info.pubTopic{1,1};
                 obj.pubMsg  = info.pubTopic{1,2};
-            end
-
-            if isfield(info,'subTopic')
-                obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
-            end
-            if isfield(info,'pubTopic')
                 obj.publisher.pubTopic = ros2publisher(obj.nodename,obj.pubName,obj.pubMsg);
                 obj.publisher.pubmsg   = ros2message(obj.pubMsg);
+                end
             end
+
+            % if isfield(info,'subTopic')
+            %     obj.subscriber.subtopic = ros2subscriber(obj.nodename,obj.subName,obj.subMsg,@obj.sub_callback,"History","keepall","Reliability","besteffort");
+            % end
+            % if isfield(info,'pubTopic')
+            %     obj.publisher.pubTopic = ros2publisher(obj.nodename,obj.pubName,obj.pubMsg);
+            %     obj.publisher.pubmsg   = ros2message(obj.pubMsg);
+            % end
         end
 
         function [ret] = getData(obj)

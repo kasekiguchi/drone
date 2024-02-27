@@ -1,7 +1,7 @@
 function Controller = Controller_APID(dt)
 % Adaptive PIDコントローラ設計用
 %% dt = 0.025 くらいの時に有効（ これより粗いdtの時はZOH誤差を無視しているためもっと穏やかなゲインの方が良い）
-Controller.Kp = [6, 3, 0; 0, 5, 5]*0.025/dt;
+Controller.Kp = [3, 0, 0; 0, 1, 3]*0.025/dt;
 % Controller.Kp = [5, 0, 0; 1, 5,5]*0.025/dt;
 % Controller.Kp = [2,0,0;0,2,0;0,0,2]*0.25;
 Controller.Ki = [0 0 0; 0 0 0];
@@ -146,5 +146,6 @@ function [e,ed] = gen_e_2110(model,ref)
 R = [cos(q),-sin(q);sin(q),cos(q)];
 e = [-R'*(rp - p);q-rq];
 % e = [-(rp - p);q-rq];
-ed = [v-rv;w-rw];
+
+ed = [v-0.5;w-rw];
 end
