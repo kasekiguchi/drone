@@ -30,6 +30,8 @@ switch Id
         q = [(R(1,3)-R(3,1))/Ele;(R(1,2)+R(2,1))/Ele;yp;(R(2,3)+R(3,2))/Ele];
     case 4
         q = [(R(2,1)-R(1,2))/Ele;(R(3,1)+R(1,3))/Ele;(R(2,3)+R(3,2))/Ele;zp];
+  otherwise
+    q = [1;0;0;0];
 end
 
 end

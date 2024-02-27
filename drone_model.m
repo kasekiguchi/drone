@@ -33,7 +33,7 @@ end
 
   % Pre-computed constants or internal states
   properties (Constant)
-    initial_state = [0;0;-1;1;0;0;0;0;0;0;0;0;0];
+    initial_state = [1;0;0;0;0;0;-1;0;0;0;0;0;0];
   end
 
   methods
@@ -49,18 +49,20 @@ end
 
   methods (Access = protected)
     %% Common functions
-    function setupImpl(obj,x0,A,dt)
+    function setupImpl(obj,a)
       arguments
         obj        
-        x0
-        A 
-        dt = 0.01;
+        a
+        % x0
+        % A 
+        % dt = 0.01;
         %B = [0;1];
       end
-      obj.dt = dt;
+%      disp(a);
+      obj.dt = 0.01;
       tmp = coder.load("testp.mat");
       obj.P = tmp.P;
-      obj.controller = drone_controller("self",obj,"param",Controller_HL(dt));
+      %obj.controller = drone_controller("self",obj,"param",Controller_HL(dt));
 %        x0 (13,1) {mustBeNumeric}=[0;0;-1;1;0;0;0;0;0;0;0;0;0]; 
         % A = [1.0000,0.0100;0,1.0000];
         % B = [0.0001;0.0100];
@@ -74,7 +76,7 @@ end
       % obj.B = [0.0001;0.0100];
     end
 
-    function [next_state,u] = stepImpl(obj,u,state)
+    function next_state = stepImpl(obj,u)
       % Implement algorithm. Calculate y as a function of input u and
       % internal or discrete states.
        %obj.state = obj.A*obj.state(1:2,1) + obj.B*u(1);
@@ -83,13 +85,13 @@ end
       arguments
         obj
         u (4,1) {mustBeNumeric}
-        state (13,1) {mustBeNumeric}
       end
        %[~,X] = ode45(@(t,x)obj.A*x + obj.B*u,[0,obj.dt],state);
-       [~,X] = ode45(@(t,x)euler_parameter_thrust_torque_physical_parameter_model(x,u,obj.P),[0,obj.dt],state);
-       obj.state = X(end,:)';
-       next_state = obj.state;
+       [~,X] = ode15s(@(t,x)euler_parameter_thrust_torque_physical_parameter_model(x,u,obj.P),[0,obj.dt],obj.state);
        
+       %[~,X] = ode15s(@(t,x) roll_pitch_yaw_thrust_torque_physical_parameter_model(x,u,obj.P),[0,obj.dt],obj.state);
+       obj.state = X(end,:)';
+       next_state = obj.state;     
     end
 
     function resetImpl(obj)
@@ -111,35 +113,36 @@ end
       % icon = matlab.system.display.Icon("myicon.jpg"); % Example: image file icon
     end
 
-    function [out1,out2] = getOutputDataTypeImpl(obj)
+    function out1 = getOutputDataTypeImpl(obj)
       % Return data type for each output port
       out1 = "double";
-      out2 = "double";
+      %out2 = "double";
       % Example: inherit data type from first input port
       % out1 = propagatedInputDataType(obj,1);
       % out2 = propagatedInputDataType(obj,2);
     end
 
-    function [out1,out2] = isOutputComplexImpl(obj)
+    function out1 = isOutputComplexImpl(obj)
       % Return true for each output port with complex data
       out1 = false;
-      out2 = false;
+      %out2 = false;
       % Example: inherit complexity from first input port
       % out1 = propagatedInputComplexity(obj,1);
       % out2 = propagatedInputComplexity(obj,2);
     end
 
-    function [out1,out2] = isOutputFixedSizeImpl(obj)
+    %function [out1,out2] = isOutputFixedSizeImpl(obj)
+    function out1 = isOutputFixedSizeImpl(obj)
       % Return true for each output port with fixed size
       out1 = true;
-      out2 = true;
+      %out2 = true;
 
       % Example: inherit fixed-size status from first input port
       %out1 = propagatedInputFixedSize(obj,1);
       %out2 = propagatedInputFixedSize(obj,2);
     end
    function num = getNumInputsImpl(~)
-      num = 2;
+      num = 1;
    end
    function [sz,dt,cp] = getDiscreteStateSpecificationImpl(~,state)
       sz = [13 1];
