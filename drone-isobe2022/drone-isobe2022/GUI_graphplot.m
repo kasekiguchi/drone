@@ -9,17 +9,8 @@ close all hidden;
 clear all;
 clc;
 
-%pdfの設定
-% name = 'report_sim_saddle'; %ファイル名
-% folderName = 'report_sim_saddle'; %フォルダ名
-
 %% データのインポート
-% load("experiment_6_20_circle1_Log(20-Jun-2023_16_26_34).mat") %読み込むデータファイルの設定
-clear all
-clc
-close all
-
-load("experiment_9_5_saddle_estimatordata.mat")
+load("experiment_9_5_saddle_estimatordata.mat") %出力するデータの設定
 disp('load finished')
 
 for i = 1:find(log.Data.t,1,'last')
@@ -32,6 +23,7 @@ for i = 1:find(log.Data.t,1,'last')
     data.u(:,i) = log.Data.agent.input{i}(:,1);                         %入力
 end
 
+%特定の範囲でグラフ出力したい場合--------------------------------------------------------------------------------------
 % for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 102,1,'last')
 %     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                      %時間t
 %     data.p(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
@@ -45,35 +37,7 @@ end
 % for i = 1:size(data.u,2) %GUIの入力を各プロペラの推力に分解
 %     data.u(:,i) = T2T(data.u(1,i),data.u(2,i),data.u(3,i),data.u(4,i));
 % end
-
-% for i = 1:find(logger.Data.t,1,'last')
-%     data.t(1,i) = logger.Data.t(i,1);                                      %時間t
-%     data.p(:,i) = logger.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.pr(:,i) = logger.Data.agent.reference.result{i}.state.p(:,1);     %位置p_reference
-%     data.q(:,i) = logger.Data.agent.estimator.result{i}.state.q(:,1);      %姿勢角
-%     data.v(:,i) = logger.Data.agent.estimator.result{i}.state.v(:,1);      %速度
-%     data.w(:,i) = logger.Data.agent.estimator.result{i}.state.w(:,1);      %角速度
-%     data.u(:,i) = logger.Data.agent.input{i}(:,1);                         %入力
-% end
-% t = find(data.t,1,'last')-1;
-% for i = 1:t
-%     data.te(1,i) = data.t(1,i+1)-data.t(1,i);
-% end
-% plot(1:t,data.te)
-% grid on
-
-%% 特定の範囲のグラフ出力
-
-% for i = find(log.Data.phase == 102,1,'first'):find(log.Data.phase == 108,1,'first')
-%     data.t(1,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.t(i,1);                                     
-%     data.u1(:,i-find(log.Data.phase == 102,1,'first')+1) = log.Data.agent.input{i}(:,1);
-% end
-% 
-% for i = find(log.Data.t > 18,1,'first'):find(log.Data.phase == 108,1,'first')
-%     data.t1(1,i-find(log.Data.t > 18,1,'first')+1) = log.Data.t(i,1);         
-%     data.p(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.estimator.result{i}.state.p(:,1);      %位置p
-%     data.u2(:,i-find(log.Data.t > 18,1,'first')+1) = log.Data.agent.input{i}(:,1);
-% end
+%--------------------------------------------------------------------------------------------------------------------
 
 %% 各グラフで出力
 num = input('出力するグラフ形態を選択してください (各グラフで出力 : 0 / いっぺんに出力 : 1)：','s'); %0:各グラフで出力,1:いっぺんに出力
@@ -96,21 +60,16 @@ colororder(newcolors)
 plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
 xlabel('Time [s]');
 ylabel('Position [m]');
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+220),'LineStyle','--','Color','red','LineWidth',2) %特定の位置に縦線を引く
-Square_coloring(data.t([find(log.Data.phase == 102,1,'first')+220,find(log.Data.phase == 102,1,'first')+275]),[1.0 0.9 1.0]); %グラフの背面を塗る
-xline(data.t(1,find(log.Data.phase == 102,1,'first')+275),'LineStyle','--','Color','red','LineWidth',2)
 hold on
 grid on
-% plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
-% lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
-lgdtmp = {'$x_e$','$y_e$','$z_e$'};
-% lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
+plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
+lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 lgd.NumColumns = columnomber;
 xlim([data.t(1) data.t(end)])
 ax = gca;
 hold off
-% title('Position p of agent1','FontSize',12);
+title('Position p of agent1','FontSize',12);
 
 %姿勢角q
 figure(2)
@@ -123,7 +82,7 @@ lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(2) = gca;
-% title('Attitude q of agent1','FontSize',12);
+title('Attitude q of agent1','FontSize',12);
 
 %速度v
 figure(3)
@@ -136,7 +95,7 @@ lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(3) = gca;
-% title('Velocity v of agent1','FontSize',12);
+title('Velocity v of agent1','FontSize',12);
 
 %角速度w
 figure(4)
@@ -149,7 +108,7 @@ lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 xlim([data.t(1) data.t(end)])
 ax(4) = gca;
-% title('Angular velocity w of agent1','FontSize',12);
+title('Angular velocity w of agent1','FontSize',12);
 
 figure(5)
 plot(data.p(1,:),data.p(2,:));
@@ -157,25 +116,20 @@ xlabel('Position x [m]');
 ylabel('Position y [m]');
 grid on
 hold on
-% plot(data.pr(1,:),data.pr(2,:));
+plot(data.pr(1,:),data.pr(2,:));
 plot(0,0,'o','MarkerFaceColor','red','Color','red');
 plot(1,1,'o','MarkerFaceColor','red','Color','red');
-% legend('Estimated trajectory','Trajectory','Initial position')
-legend('Estimated trajectory','Target position')
+legend('Estimated trajectory','Trajectory','Initial position')
 ax(5) = gca;
 
 figure(6)
-% plot3(data.p(1,220:275),data.p(2,220:275),data.p(3,220:275),'LineWidth',3,'Color','r');
 plot3(data.p(1,:),data.p(2,:),data.p(3,:),'LineWidth',1.2);
 hold on
 grid on
-% plot3(data.p(1,275:end),data.p(2,275:end),data.p(3,275:end),'LineWidth',0.8,'Color',[0 0.4470 0.7410],'LineStyle','--');
 xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 zlim([0 max(data.p(3,:))])
-% daspect([1 1 0.5])
-% legend('推定範囲','FontSize',20)
 ax(6) = gca;
 
 %入力
@@ -302,127 +256,13 @@ set(ax,'FontSize',fontSize);
 % size = 'maximized';
 % set(gcf,"Position",get(0,'Screensize')
 end
-fprintf('\n凡例などの調整を行ってください (調整が終了した場合はEnterを押してください)')
-pause;
-
-%% グラフの背景に色あり
-
-% %位置p
-% box on %グラフの枠線が出ないときに使用
-% figure(1)
-% hold on
-% colororder(newcolors)
-% plot(data.t,data.p(:,:),'LineWidth',1,'LineStyle','-');
-% Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); %グラフの背面を塗る
-% Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
-% xlabel('Time [s]');
-% ylabel('p');
-% xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% % hold on
-% grid on
-% % plot(data.t,data.pr(:,:),'LineWidth',1,'LineStyle','--');
-% % lgdtmp = {'$x_r$','$y_r$','$z_r$'}; %リファレンスのみ凡例
-% lgdtmp = {'$x_e$','$y_e$','$z_e$'};
-% % lgdtmp = {'$x_e$','$y_e$','$z_e$','$x_r$','$y_r$','$z_r$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','southwest');
-% lgd.NumColumns = columnomber;
-% xlim([data.t(1) data.t(end)])
-% ax = gca;
-% hold off
-% title('Position p of agent1','FontSize',12);
-% 
-% %姿勢角q
-% figure(2)
-% colororder(newcolors)
-% plot(data.t,data.q(:,:),'LineWidth',1);
-% Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]);
-% Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
-% xlabel('Time [s]');
-% ylabel('q');
-% xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% grid on
-% lgdtmp = {'$\phi_d$','$\theta_d$','$\psi_d$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-% xlim([data.t(1) data.t(end)])
-% ax(2) = gca;
-% title('Attitude q of agent1','FontSize',12);
-% 
-% %速度v
-% figure(3)
-% colororder(newcolors)
-% plot(data.t,data.v(:,:),'LineWidth',1);
-% Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); 
-% Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
-% xlabel('Time [s]');
-% ylabel('v');
-% xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% grid on
-% lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-% xlim([data.t(1) data.t(end)])
-% ax(3) = gca;
-% title('Velocity v of agent1','FontSize',12);
-% 
-% %角速度w
-% figure(4)
-% colororder(newcolors)
-% plot(data.t,data.w(:,:),'LineWidth',1);
-% Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); 
-% Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
-% xlabel('Time [s]');
-% ylabel('w');
-% xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% grid on
-% lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-% xlim([data.t(1) data.t(end)])
-% ax(4) = gca;
-% title('Angular velocity w of agent1','FontSize',12);
-% 
-% figure(5)
-% plot(data.p(1,:),data.p(2,:));
-% grid on
-% ax(5) = gca;
-% 
-% figure(6)
-% plot3(data.p(1,:),data.p(2,:),data.p(3,:));
-% grid on
-% ax(6) = gca;
-% 
-% %入力
-% figure(7)
-% plot(data.t,data.u(:,:),'LineWidth',1);
-% Square_coloring(data.t([find(log.Data.phase == 102,1,'first'),find(data.t > 18,1,'first')]),[1.0 0.9 1.0]); 
-% Square_coloring(data.t([find(data.t > 18,1,'first'),find(log.Data.phase == 108,1,'first')]));
-% xlabel('Time [s]');
-% ylabel('u');
-% xline(data.t(1,find(log.Data.phase == 102,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(data.t > 18,1,'first')),'LineStyle','--','Color','red','LineWidth',1)
-% xline(data.t(1,find(log.Data.phase == 108,1,'first')),'LineStyle','--','Color','black','LineWidth',1)
-% grid on
-% lgdtmp = {'$u_1$','$u_2$','$u_3$','$u_4$'};
-% lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','northwest');
-% lgd.NumColumns = columnomber;
-% xlim([data.t(1) data.t(end)])
-% ax(7) = gca;
-% title('Input u of agent1','FontSize',12);
-% 
-% fontSize = 14; %軸の文字の大きさの設定
-% set(ax,'FontSize',fontSize); 
-
 
 %% pdfで保存
 if selection == 0
     Num = input('\n pdfで保存しますか (しない : 0 / する : 1)：','s'); 
     pdf = str2double(Num); %文字列を数値に変換
+    fprintf('\n凡例などの調整を行ってください (調整が終了した場合はEnterを押してください)')
+    pause;
 else
     pdf = 0;
 end

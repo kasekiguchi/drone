@@ -1,4 +1,5 @@
 %% plotResultの各グラフをそれぞれに分割して表示
+%例）位置のグラフなら，x,y,zそれぞれを別のグラフとして出力
 clear all
 close all
 clc
@@ -8,21 +9,16 @@ flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %pdf保存するときの名前-----------------------
- name = '2_16_卒論資料_実機モデル';
- folderName = '2_16_卒論資料_実機モデル';
+ name = '';
+ folderName = '';
 %------------------------------------------
 
 %% select file to load (max number of file:5)
 
-% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat' ;%mainで書き込んだファイルの名前に逐次変更する
-% loadfilename{2} = 'EstimationResult_12state_1_29_Exp_sprineandhov_est=P2Pshape_torque_incon.mat';
-% loadfilename{2} = 'EstimationResult_12state_12_17_ExpcirrevsadP2Pxydata_est=P2Pshape.mat';
-% loadfilename{2} = 'EstimationResult_12state_11_4_data=cirandrevsadP2Pxy_cir=cir_est=cir.mat';
-
-loadfilename{1} = 'test.mat';
-% loadfilename{2} = 'test2.mat';
-% loadfilename{3} = 'test3.mat';
-% loadfilename{4} = 'test4.mat';
+% loadfilename{1} = '.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+% loadfilename{2} = '.mat';
+% loadfilename{3} = '.mat';
+% loadfilename{4} = '.mat';
 
 WhichRef = 1; % どのファイルをリファレンスに使うか
 
@@ -67,7 +63,7 @@ if flg.ylimHold == 1
     ylimHold.w = [-1.5, 2];
 end
 
-%% Font size
+%% Font size(凡例や軸ラベルの大きさの設定)
 Fsize.label = 18;
 Fsize.lgd = 20;
 Fsize.luler = 18;

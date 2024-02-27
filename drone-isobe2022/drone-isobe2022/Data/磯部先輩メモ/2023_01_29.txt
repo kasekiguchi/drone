@@ -1,0 +1,21 @@
+2023/01/29
+
+run_mainManyTime.m で複数回main.mを実行する際，
+シミュレーションを始めるときのキー操作があまりにも煩雑になるため，
+以下の部分を変更してKey操作無しで'f'phaseでシミュレーションを回すように
+・POINT_REFERENCE_FH.m 29行目
+・MODEL_CLASS.m 78行目
+・LOGGER.m 59行目
+
+controller\KoopmanApproach\Koopman_Linear_by_Data\plotResult.mを更新
+main_KoopmanLinearByDataの変数を整理したのに合わせて各変数を修正
+
+入力u の初期状態を0~0.1の範囲の標準乱数で設定して１ｓ飛行させるシミュレーションを10^3回行い
+これらの結果を学習データとしてKoopman線形化を実行
+
+求めた線形システムで行ったシミュレーション結果から，
+それなりの精度が出た．
+
+確認するためには，Koopman_Linear_by_Dataフォルダ内のEstimationResult.matを読み込んでから
+同フォルダ内のplotResult.mを実行すること
+

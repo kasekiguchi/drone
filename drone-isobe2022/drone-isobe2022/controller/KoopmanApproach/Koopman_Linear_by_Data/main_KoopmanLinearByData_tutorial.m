@@ -127,10 +127,9 @@ fprintf('\n＜クープマン線形化が完了しました＞\n')
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
 %構築したクープマンモデルがどの程度正確かを確認する部分
-fprintf('＜推定精度検証用データに設定するファイル名を選択してください＞\n')
+fprintf('\n＜推定精度検証用データに設定するファイル名を選択してください＞\n')
 [fileName, filePath] = uigetfile('*.mat');
 verification_data = fileName;
-% verification_data = input('\n推定精度検証用データに設定するファイル名を入力してください：','s');
 simResult.reference = ImportFromExpData_estimation(verification_data); %検証用データを格納
 
 %arming時の実験データがうまく取れていないのを強引に解消
@@ -212,7 +211,7 @@ for i = 1:length(files)
     movefile(filePath,destinationFolderPath);
 end
 
-fprintf('\n\n＜ファイルの移動が完了しました＞\n')
+fprintf('\n＜ファイルの移動が完了しました＞\n')
 %% 先輩が今まで作られた観測量
 
 % F = @(x) [x;1]; % 状態そのまま
