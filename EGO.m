@@ -9,7 +9,7 @@ classdef (StrictDefaults) EGO < matlab.System
 
   % Public, tunable properties
   properties (Access='public')
-    % controller
+    controller
     % estimator
     % reference
     % sensor
@@ -27,6 +27,8 @@ classdef (StrictDefaults) EGO < matlab.System
     % eresult
     % rresult
     % cresult
+    control_signal
+    publish_message
   end
 
   % Pre-computed constants or internal states
@@ -39,7 +41,7 @@ classdef (StrictDefaults) EGO < matlab.System
     function obj = EGO(varargin)
       % Support name-value pair arguments when constructing object
       setProperties(obj,nargin,varargin{:})
-      obj.setupImpl();
+      %obj.setupImpl();
     end
   end
 
@@ -48,22 +50,28 @@ classdef (StrictDefaults) EGO < matlab.System
     function setupImpl(obj)
       setting = coder.load("setting.mat");
       params = setting.agent;
+      obj.control_signal = [0;0;0;0];
+      obj.publish_message = "stop";
       %obj.parameter = PARAMETER_SYSTEM;%("self",obj,"param",params.parameter);
       %%obj.parameter.setupImpl(params.parameter);
       %obj.sensor = SENSOR_SYSTEM("self",obj,"param",params.sensor);
       %obj.estimator = ESTIMATOR_SYSTEM("self",obj,"param",params.estimator);
       %obj.reference = REFERENCE_SYSTEM("self",obj,"param",params.reference);
-      %%obj.controller = CONTROLLER_SYSTEM("self",obj,"param",params.controller.param);
+      obj.controller = CONTROLLER_SYSTEM();
     end
 
-    function y = stepImpl(obj,u)
+    function [u,pub] = stepImpl(obj,state)
       % Implement algorithm. Calculate y as a function of input u and
       % internal or discrete states.
-      y = u;
+      obj.control_signal = obj.controller.stepImpl(state,zeros(20,1));
+      u = obj.control_signal;
+      pub = obj.publish_message;
     end
 
     function resetImpl(obj)
       % Initialize / reset internal or discrete properties
+      obj.control_signal = [0;0;0;0];
+      obj.publish_message = "stop";
     end
 
     %% Backup/restore functions
