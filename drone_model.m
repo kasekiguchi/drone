@@ -92,6 +92,10 @@ end
        %[~,X] = ode15s(@(t,x) roll_pitch_yaw_thrust_torque_physical_parameter_model(x,u,obj.P),[0,obj.dt],obj.state);
        obj.state = X(end,:)';
        next_state = obj.state;     
+       % next_state.p = obj.state(5:7);
+       % next_state.q = obj.state(1:4);
+       % next_state.v = obj.state(8:10);
+       % next_state.w = obj.state(11:13);
     end
 
     function resetImpl(obj)
@@ -113,7 +117,7 @@ end
       % icon = matlab.system.display.Icon("myicon.jpg"); % Example: image file icon
     end
 
-    function out1 = getOutputDataTypeImpl(obj)
+      function out1 = getOutputDataTypeImpl(obj)
       % Return data type for each output port
       out1 = "double";
       %out2 = "double";
@@ -144,7 +148,7 @@ end
    function num = getNumInputsImpl(~)
       num = 1;
    end
-   function [sz,dt,cp] = getDiscreteStateSpecificationImpl(~,state)
+   function [sz,dt,cp] = getDiscreteStateSpecificationImpl(~,~)
       sz = [13 1];
       dt = "double";
       cp = false;
@@ -156,12 +160,8 @@ end
       % Define header panel for System block dialog
       header = matlab.system.display.Header(mfilename("class"));
     end  
-    function [out1,out2] = getOutputSizeImpl(obj) 
-      out1 = [13,1] ;
-      out2 = [4,1] ;
-      %sz_1 = propagatedInputSize(obj,1); 
-      % sz_2 = propagatedInputSize(obj,2); 
-      
-   end
+    function sz_1 = getOutputSizeImpl(obj)
+      sz_1 = [13 1];
+   end 
   end
 end

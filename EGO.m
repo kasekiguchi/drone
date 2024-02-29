@@ -8,10 +8,10 @@ classdef (StrictDefaults) EGO < matlab.System
   % and methods that you can implement for a System object in Simulink.
 
   % Public, tunable properties
-  properties (Access='public')
+  properties (Access='private')
     controller
-    % estimator
-    % reference
+    estimator
+    reference
     % sensor
     %parameter
   end
@@ -23,17 +23,19 @@ classdef (StrictDefaults) EGO < matlab.System
 
   % Discrete state properties
   properties (DiscreteState)
-    % sresult
-    % eresult
-    % rresult
-    % cresult
     control_signal
     publish_message
+  end
+  properties (Constant)
+    initial_control_signal = [0;0;0;0];
   end
 
   % Pre-computed constants or internal states
   properties (Access = private)
-
+    sresult
+    eresult
+    rresult
+    cresult
   end
 
   methods
@@ -41,37 +43,50 @@ classdef (StrictDefaults) EGO < matlab.System
     function obj = EGO(varargin)
       % Support name-value pair arguments when constructing object
       setProperties(obj,nargin,varargin{:})
-      %obj.setupImpl();
     end
   end
 
   methods (Access = protected)
     %% Common functions
     function setupImpl(obj)
-      setting = coder.load("setting.mat");
-      params = setting.agent;
-      obj.control_signal = [0;0;0;0];
-      obj.publish_message = "stop";
+      %setting = coder.load("setting.mat");
+      %params = setting.agent;
+      obj.control_signal = obj.initial_control_signal;
+      obj.publish_message = 0;
       %obj.parameter = PARAMETER_SYSTEM;%("self",obj,"param",params.parameter);
       %%obj.parameter.setupImpl(params.parameter);
       %obj.sensor = SENSOR_SYSTEM("self",obj,"param",params.sensor);
-      %obj.estimator = ESTIMATOR_SYSTEM("self",obj,"param",params.estimator);
-      %obj.reference = REFERENCE_SYSTEM("self",obj,"param",params.reference);
+      obj.estimator = ESTIMATOR_SYSTEM();
       obj.controller = CONTROLLER_SYSTEM();
+      obj.reference = REFERENCE_SYSTEM();
+      setup(obj.estimator);
+      setup(obj.controller);
+      setup(obj.reference);
     end
 
-    function [u,pub] = stepImpl(obj,state)
+    function [u,pub] = stepImpl(obj,state,t)
       % Implement algorithm. Calculate y as a function of input u and
       % internal or discrete states.
-      obj.control_signal = obj.controller.stepImpl(state,zeros(20,1));
-      u = obj.control_signal;
-      pub = obj.publish_message;
+      disp(t)
+      sstate.p = state(5:7,1);
+      sstate.q = state(1:4,1);
+      sstate.v = state(8:10,1);
+      sstate.w = state(11:13,1);
+      y = [sstate.p;Quat2Eul(sstate.q)];      
+      obj.eresult = obj.estimator.stepImpl(t,y,obj.control_signal);
+      obj.rresult = obj.reference.stepImpl(t);
+      ex = obj.eresult.state;
+      x = [Eul2Quat(ex(4:6,1));ex(1:3,1);ex(7:9,1);ex(10:12,1)];
+      x = state;
+      obj.control_signal = obj.controller.stepImpl(x,obj.rresult.state.xd);
+      u = obj.control_signal;    
+      pub = [sstate.p;ex(1:3)];%obj.rresult.state.xd(1:4);%obj.publish_message;
     end
 
     function resetImpl(obj)
       % Initialize / reset internal or discrete properties
       obj.control_signal = [0;0;0;0];
-      obj.publish_message = "stop";
+      obj.publish_message = 0;
     end
 
     %% Backup/restore functions
@@ -96,24 +111,6 @@ classdef (StrictDefaults) EGO < matlab.System
     end
 
     %% Simulink functions
-    function ds = getDiscreteStateImpl(obj)
-      % Return structure of properties with DiscreteState attribute
-      ds = struct([]);
-    end
-
-    function flag = isInputSizeMutableImpl(obj,index)
-      % Return false if input size cannot change
-      % between calls to the System object
-      flag = false;
-    end
-
-    function out = getOutputSizeImpl(obj)
-      % Return size for each output port
-      out = [1 1];
-
-      % Example: inherit size from first input port
-      % out = propagatedInputSize(obj,1);
-    end
 
     function icon = getIconImpl(obj)
       % Define icon for System block
