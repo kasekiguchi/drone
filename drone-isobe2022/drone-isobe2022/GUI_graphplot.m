@@ -1,4 +1,5 @@
-%% GUIデータ用グラフプロット
+%% GUIデータ用グラフプロット 
+% 実機データの再プロット
 opengl software
 % パスの設定
 activeFile = matlab.desktop.editor.getActive;

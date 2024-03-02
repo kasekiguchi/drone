@@ -6,18 +6,18 @@ clear all
 close all
 clc
 %---------------------------------------------
-flg.bilinear = 0; %1:双線形モデルへの切り替え
-Normalize = 0; %1：正規化
+flg.bilinear = 0; %1:双線形モデルへの切り替え : 実機だとうまくいかない
+Normalize = 0; %1：正規化 : 学習データの正規化
 %---------------------------------------------
 
 %% 
 %データ保存先ファイル名(.matを付ける．逐次変更しないと中身が上書きされる)
-FileName = '.mat';
+FileName = '.mat'; % 線形化後のデータ保存
 
-
+% 学習データ
 % 読み込むデータファイル名(データセットに使うファイルをまとめたフォルダを作るとよい，ファイル名は統一)
 % ※name_change.m使うと簡単に統一できるよ
-loading_filename = '';
+loading_filename = ''; % experiment_6_20_circleまで。_1 とか _2とかはいらない
 
 Data.HowmanyDataset = 0; %読み込むデータ数に応じて変更
 
@@ -92,7 +92,7 @@ disp('Estimated')
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
 simResult.reference = ImportFromExpData_estimation(''); %推定精度検証用データの設定
-
+% simResult.referenceは.matなしのファイル名
 % アーミングphaseの実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
     takeoff_idx = find(simResult.reference.T,1,'first');
@@ -128,7 +128,7 @@ else
 end
 simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
 
-if Normalize == 1 %逆変換
+if Normalize == 1 %逆変換　：正規化⇒元の状態
     for i = 1:size(simResult.Xhat,1)
         simResult.Xhat(i,:) = (simResult.Xhat(i,:) * Ndata.stdValue.x(i)) + Ndata.meanValue.x(i);
     end

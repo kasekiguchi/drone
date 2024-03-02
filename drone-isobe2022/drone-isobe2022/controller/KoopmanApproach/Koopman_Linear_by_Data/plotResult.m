@@ -19,7 +19,7 @@ WhichRef = 1; % 出力するデータの中で，どのファイルをリファ�
 %% グラフの保存
 save_fig = 0; %1：出力したグラフをfigで保存する
 
-if save_fig == 1
+if save_fig == 1 % Graphフォルダ内に保存 .figで保存
     name = 'data2_sadP2Pz'; %ファイル名
     folderName = 'data2_sadP2Pz'; %フォルダ名
     mkdir(folderName) %新規フォルダ作成

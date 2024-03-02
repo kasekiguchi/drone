@@ -28,7 +28,7 @@ folderPath = 'データセット'; %データセットに使用するデータ�
 fileList = dir(fullfile(folderPath,'*.mat')); %対象のファイルを取得
 fprintf('\n＜データセットに使用するファイル名の統一を行います＞\n')
 
-% 読み込むデータファイル名は同じにする必要がある
+% 読み込むデータファイル名は同じにする必要がある：学習データ
 loading_filename = input('\n統一するファイル名を入力してください(※ .matは含まない):','s');
 
 for i = 1:length(fileList)

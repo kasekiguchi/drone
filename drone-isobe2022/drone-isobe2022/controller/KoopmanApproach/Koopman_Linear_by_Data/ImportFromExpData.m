@@ -48,7 +48,7 @@ if logger.fExp==1 %fExp:1 実機データ
     %---------------------------------------------------------------------------------------------
 
     data.est.z(1,1) = data.est.p(1,3);
-    for i = 1:data.N-1
+    for i = 1:data.N-1 % 高度を速度から算出した
         data.est.z(1,i+1) = data.est.z(1,i) + data.est.v(i,3)*(data.t(i+1,:)-data.t(i,:));
     end
 
