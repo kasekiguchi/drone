@@ -27,6 +27,14 @@ methods
         P = self.parameter.get;
         obj.hover_thrust_force = P(1) * P(9);
         obj.state = state_copy(self.estimator.result.state);
+
+        %MPC用のゲインとオフセットの設定-------
+        obj.param.gain2(1) = 1000;
+        obj.param.gain2(2) = 1000;
+        obj.param.gain2(3) = 1000;
+        obj.param.gain2(4) = 1000;
+        obj.param.th_offset2 = 350;
+        %--------------------------------------
     end
 
     function u = do(obj, varargin)
@@ -49,13 +57,6 @@ methods
 
             %1_18:MPCのゲインとオフセットを変更するために追加----------------------------------------------------------
             if cha == 'f'
-                obj.param.gain2(1) = 1000;
-                obj.param.gain2(2) = 1000;
-                obj.param.gain2(3) = 1000;
-                obj.param.gain2(4) = 1000;
-                obj.param.th_offset2 = 350;
-                % fprintf('オフセット変更→MPC \n')
-
                 T_thr = input(1); % thrust, torque input 
 
                 uroll = obj.param.gain2(1) * (whn(1) - wh(1));

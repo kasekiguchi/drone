@@ -1,3 +1,5 @@
+%4入力を総推力+トルクに変換する関数
+
 function torque = Change_torque(param, u)
     Lx = param.Lx;
     Ly = param.Ly;

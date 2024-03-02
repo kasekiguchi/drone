@@ -17,7 +17,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
         model
         result
         self
-        InputTransform
     end
 
     methods
@@ -36,7 +35,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
-            obj.InputTransform=THRUST2FORCE_TORQUE(self,1);
         end
 
         %-- main()的な
@@ -93,7 +91,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             %%
             obj.previous_input = var;
             if vara{2} == 'a'
-                obj.result.input = [0;0;0;0];
+                obj.result.input = [0;0;0;0]; %arming時には入力0で固定
             else
                 obj.result.input = var(1:4, 1); % 印加する入力 4入力
             end

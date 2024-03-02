@@ -17,7 +17,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
         model
         result
         self
-        InputTransform
     end
 
     methods
@@ -36,8 +35,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
-            obj.InputTransform = THRUST2FORCE_TORQUE(self,1);
-
         end
 
         %-- main()的な
@@ -79,8 +76,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             %%
             obj.previous_input = var;
             obj.result.input = var(1:4, 1); % 印加する入力 4入力
-            % obj.result.transformedInput = obj.InputTransform.do(obj.result.input); %4入力を総推力に変換(必要に応じて)
-            % obj.result.input = obj.InputTransform.do(var(1:4, 1)); %4入力を総推力に変換
 
             %% データ表示用
             obj.input.u = obj.result.input; 
@@ -88,7 +83,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             % obj.result.t(1,idx) = calT; %計算時間保存したいときコメントイン
 
             %% 保存するデータ
-            obj.result.weight = Param.weight;
+            obj.result.weight = Param.weight; %重みの保存
             result = obj.result; % controllerの値の保存
 
             %% 情報表示

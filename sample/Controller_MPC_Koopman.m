@@ -1,8 +1,9 @@
-function Controller = Controller_MPC_Koopman(Agent)
+function Controller = Controller_MPC_Koopman(~)
 %UNTITLED この関数の概要をここに記述
 %   各種値
+    Controller_param.m = 0.5884; %ドローンの質量
     Controller_param.dt = 0.08; % MPCステップ幅
-    Controller_param.H = 10;
+    Controller_param.H = 10; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
@@ -34,9 +35,9 @@ function Controller = Controller_MPC_Koopman(Agent)
 
     %% 4inputs
     if torque == 1
-        Controller_param.input.u = [Agent.parameter.mass * 9.81;0;0;0]; % 総推力，トルク
+        Controller_param.input.u = [Controller_param.m * 9.81;0;0;0]; % 総推力，トルク
     else
-        Controller_param.input.u = Agent.parameter.mass * 9.81 / 4 * [1;1;1;1]; % 4入力
+        Controller_param.input.u = Controller_param.m * 9.81 / 4 * [1;1;1;1]; % 4入力
     end
     
 %     Controller_param.torque_TH = 0;
