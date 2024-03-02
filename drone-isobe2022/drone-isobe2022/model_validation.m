@@ -1,11 +1,11 @@
 %クープマンモデルを用いて状態更新を行うプログラム
+%設定した入力を印加した際に各状態が初期値からどのように変化するかを確認
 
 clc
 clear all
 close all
-exp1 = load();
+exp1 = load(); %確認するクープマンモデルを設定
 
-pdf = 1;
 %% 
 %各値の設定-------------------------------------------
 m = 0.5884;
@@ -28,36 +28,6 @@ for i = 1:t-1
 end
 X = exp1.est.C*x;
 %-----------------------------------------------------
-
-% figure(1)
-% plot(1:t,X(3,:),'LineWidth',1.8)
-% grid on
-% xlabel('Number of Steps','FontSize',16)
-% ylabel('Position z [m]','FontSize',18)
-% 
-% figure(2)
-% plot(1:t,X(9,:),'LineWidth',1.8, 'Color',[0.4660 0.6740 0.1880])
-% grid on
-% xlabel('Number of Steps','FontSize',16)
-% ylabel('Velocity vz [m/s]','FontSize',18)
-% 
-% if pdf == 1
-%     folderName = '2_26_model_th=-100_改';
-%     name = '2_26_model_th=-100_改';
-% 
-%     mkdir(folderName);
-%     movefile(folderName,'Graph')
-%     exportgraphics(figure(1),strcat('Position_z_',name,'.pdf'))
-%     movefile(strcat('Position_z_',name,'.pdf'),fullfile('Graph',folderName))
-%     exportgraphics(figure(2),strcat('Velocity_vz_',name,'.pdf'))
-%     movefile(strcat('Velocity_vz_',name,'.pdf'),fullfile('Graph',folderName))
-% end
-
-% xlim([1 t])
-% ax = gca;
-% 
-% fontSize = 12; %軸の文字の大きさの設定
-% set(ax,'FontSize',fontSize); 
 
 size = figure;
 size.WindowState = 'maximized'; %表示するグラフを最大化
