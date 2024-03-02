@@ -14,6 +14,7 @@ classdef CONTROLLER_SYSTEM < matlab.System
   % Pre-computed constants or internal states
   properties (Access = private)
     param
+    dt
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
   end
 methods
@@ -22,20 +23,18 @@ methods
       % obj.param = param;
       % Perform one-time calculations, such as computing constants
       setProperties(obj,nargin,varargin{:})
-      %obj.result.input = zeros(4,1);
-    end
+  end
 end
   methods (Access = protected)
 
-    function setupImpl(obj)
-        tmp=coder.load("cparam.mat");
-        obj.param = tmp.param;
-%        obj.input = [0;0;0;0];
+    function setupImpl(obj,dt,cparam)
+      obj.param = cparam;
+      obj.dt = dt;
     end
     function u = stepImpl(obj,x,xd)
       % Implement algorithm. Calculate y as a function of input u and
       % internal states.
-      dt = 0.01;
+      dt = obj.dt;
       P = obj.param.P;
       F1 = obj.param.F1;
       F2 = obj.param.F2;
@@ -74,5 +73,8 @@ end
         obj.input = [0;0;0;0];
       % Initialize / reset internal properties
     end
+  function num = getNumInputsImpl(~)
+      num = 2;
+  end    
   end
 end

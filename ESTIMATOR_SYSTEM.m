@@ -28,7 +28,7 @@ classdef ESTIMATOR_SYSTEM < matlab.System
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
     t0
     result = struct("P",eye(12),"G",zeros(12,6),"state",zeros(12,1));%struct("p",zeros(3,1),"v",zeros(3,1),"q",zeros(3,1),"w",zeros(3,1)));
-    state = zeros(12,1);
+    state
   end
   methods
     function obj = ESTIMATOR_SYSTEM(varargin)
@@ -41,24 +41,22 @@ classdef ESTIMATOR_SYSTEM < matlab.System
   end
   methods (Access = protected)
 
-    function setupImpl(obj)
-      % tmp=coder.load("rparam.mat");
-      % obj.param = tmp.param;
-      %obj.func = tmp.func;
-      %obj.result = tmp.result;
-      obj.t0 = 0;
-    %  obj.param = [ 0.5000    0.1600    0.1600    0.0800    0.0800    0.0600    0.0600    0.0600    9.8100    0.0301    0.0301    0.0301    0.0301    0.0000    0.0000    0.0000    0.0000    0.0392];
-      obj.dt = 0.01;
-      obj.n = 12;
-      obj.B = [eye(6)*0.01;eye(6)*0.1];
+    function setupImpl(obj,dt,state,P,eparam)
+      obj.n = eparam.n;
+      obj.B = eparam.B;
+      obj.Q = eparam.Q;
+      obj.R = eparam.R;
+      if isfield(eparam,'dt')
+        obj.dt = eparam.dt;
+      else
+        obj.dt = dt;
+      end
       obj.result.P = eye(obj.n);
-      tmp = coder.load("testp.mat");
-      obj.param = tmp.P;
-      obj.Q = blkdiag(eye(3),100*eye(3));
-      obj.R = diag([1e-5*ones(1,3), 1e-8*ones(1,3)]);
-      % obj.state = zeros(12,1);
+      obj.param = P;
+      obj.Q = eparam.Q;
+      obj.R = eparam.R;
+      obj.state = state;
     end
-    %function result = stepImpl(obj,time,y,u)
     function result = stepImpl(obj,time,y,u)
       arguments
         obj
@@ -87,7 +85,7 @@ classdef ESTIMATOR_SYSTEM < matlab.System
       %  y = obj.sensor(obj.self,obj.sensor_param); % sensor output
         % x = obj.result.state.get(); % estimated state at previous step
         % obj.model.do(varargin{:}); % update state
-      [~,X] = ode15s(@(t,x) roll_pitch_yaw_thrust_torque_physical_parameter_model(x,u,obj.param),[0:0.001:obj.dt],obj.state);
+      [~,X] = ode15s(@(t,x) roll_pitch_yaw_thrust_torque_physical_parameter_model(x,u,obj.param),[0:obj.dt/100:obj.dt],obj.state);
       xh_pre = X(end,:)';
         C = [eye(6),zeros(6)];
         yh = C*xh_pre; % output estimation
@@ -98,8 +96,7 @@ classdef ESTIMATOR_SYSTEM < matlab.System
         tmpvalue = xh_pre + G*(y-yh);	% Update state estimate
         %tmpvalue = obj.model.projection(tmpvalue);
         obj.result.state = tmpvalue;
-      %   % obj.result.state.set_state(tmpvalue);
-      %   % obj.model.state.set_state(tmpvalue);
+        obj.state = tmpvalue;
          obj.result.G = G;
          obj.result.P = P;
        %end
@@ -108,12 +105,11 @@ classdef ESTIMATOR_SYSTEM < matlab.System
       %obj.timer = tic;
     end
   
-  function resetImpl(obj)
-    obj.input = [0;0;0;0];
+  function resetImpl(obj)   
     % Initialize / reset internal properties
   end
   function num = getNumInputsImpl(~)
-      num = 0;
+      num = 4;
   end
 end
 end

@@ -27,14 +27,13 @@ methods
 end
   methods (Access = protected)
 
-    function setupImpl(obj)
-        % tmp=coder.load("rparam.mat");
-        % obj.param = tmp.param;
+    function setupImpl(obj,rparam)
+        obj.param = rparam;
         %obj.func = tmp.func;
         %obj.result = tmp.result;
         obj.t0 = 0;
     end
-    function result = stepImpl(obj,time)
+    function result = stepImpl(obj,time,state)
       % Implement algorithm. Calculate y as a function of input u and
       % internal states.
            %obj.cha = varargin{2};
@@ -45,7 +44,7 @@ end
            %      t = obj.t0;
            % end
            t = time-obj.t0; 
-           obj.result.state.xd = test_func(t); % 目標重心位置（絶対座標）
+           obj.result.state.xd = gen_reference(t,state);
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
             obj.result.state.v = obj.result.state.xd(5:7);

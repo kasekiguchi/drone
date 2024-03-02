@@ -12,8 +12,8 @@ classdef (StrictDefaults) EGO < matlab.System
     controller
     estimator
     reference
-    % sensor
-    %parameter
+    sensor
+    parameter = struct("raw",struct(),"values",[]);
   end
 
   % Public, non-tunable properties
@@ -27,7 +27,7 @@ classdef (StrictDefaults) EGO < matlab.System
     publish_message
   end
   properties (Constant)
-    initial_control_signal = [0;0;0;0];
+    initial_control_signal = [5.7722;0;0;0];
   end
 
   % Pre-computed constants or internal states
@@ -36,6 +36,8 @@ classdef (StrictDefaults) EGO < matlab.System
     eresult
     rresult
     cresult
+    dt
+    state
   end
 
   methods
@@ -49,43 +51,52 @@ classdef (StrictDefaults) EGO < matlab.System
   methods (Access = protected)
     %% Common functions
     function setupImpl(obj)
-      %setting = coder.load("setting.mat");
-      %params = setting.agent;
-      obj.control_signal = obj.initial_control_signal;
+      setting = coder.load("setting.mat");
+      obj.dt = setting.dt;
+      obj.state = setting.x0;
+      obj.parameter.values = setting.parameter.values;
+      raw = setting.parameter.raw;
+      %obj.initial_control_signal = [raw.gravity*raw.mass;0;0;0];
+      obj.control_signal = [raw.gravity*raw.mass;0;0;0];%obj.initial_control_signal;
       obj.publish_message = 0;
-      %obj.parameter = PARAMETER_SYSTEM;%("self",obj,"param",params.parameter);
-      %%obj.parameter.setupImpl(params.parameter);
-      %obj.sensor = SENSOR_SYSTEM("self",obj,"param",params.sensor);
+
       obj.estimator = ESTIMATOR_SYSTEM();
       obj.controller = CONTROLLER_SYSTEM();
       obj.reference = REFERENCE_SYSTEM();
-      setup(obj.estimator);
-      setup(obj.controller);
-      setup(obj.reference);
+      initial_state_eul = [obj.state(5:7);Quat2Eul(obj.state(1:4));obj.state(8:13)];
+      setup(obj.estimator,obj.dt,initial_state_eul,obj.parameter.values,setting.eparam);
+      setup(obj.reference,obj.dt,setting.rparam);
+      setup(obj.controller,obj.dt,setting.cparam);
     end
 
     function [u,pub] = stepImpl(obj,state,t)
       % Implement algorithm. Calculate y as a function of input u and
       % internal or discrete states.
       disp(t)
-      sstate.p = state(5:7,1);
-      sstate.q = state(1:4,1);
-      sstate.v = state(8:10,1);
-      sstate.w = state(11:13,1);
+      %obj.state = state;
+      sstate.p = obj.state(5:7,1);
+      sstate.q = obj.state(1:4,1);
+      sstate.v = obj.state(8:10,1);
+      sstate.w = obj.state(11:13,1);
       y = [sstate.p;Quat2Eul(sstate.q)];      
       obj.eresult = obj.estimator.stepImpl(t,y,obj.control_signal);
-      obj.rresult = obj.reference.stepImpl(t);
       ex = obj.eresult.state;
       x = [Eul2Quat(ex(4:6,1));ex(1:3,1);ex(7:9,1);ex(10:12,1)];
-      x = state;
+      %x = state;
+      obj.rresult = obj.reference.stepImpl(t,x);
       obj.control_signal = obj.controller.stepImpl(x,obj.rresult.state.xd);
+      obj.state = state;
       u = obj.control_signal;    
-      pub = [sstate.p;ex(1:3)];%obj.rresult.state.xd(1:4);%obj.publish_message;
+      pub = [y(1:3);ex(1:3)];%obj.rresult.state.xd(1:3)];%;ex(1:3)];%obj.rresult.state.xd(1:4);%obj.publish_message;
     end
 
     function resetImpl(obj)
       % Initialize / reset internal or discrete properties
-      obj.control_signal = [0;0;0;0];
+      setting = coder.load("setting.mat");
+      obj.parameter.values = setting.parameter.values;
+      raw = setting.parameter.raw;
+      obj.control_signal = [raw.gravity*raw.mass;0;0;0];%obj.initial_control_signal;
+
       obj.publish_message = 0;
     end
 
