@@ -83,6 +83,7 @@ end
       %[~,X] = ode15s(@(t,x) roll_pitch_yaw_thrust_torque_physical_parameter_model(x,u,obj.P),[0,obj.dt],obj.state);
       obj.state = X(end,:)';
       next_state = obj.state;
+      [obj.state(7),u(1)]
       % next_state.p = obj.state(5:7);
       % next_state.q = obj.state(1:4);
       % next_state.v = obj.state(8:10);

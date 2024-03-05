@@ -18,11 +18,7 @@ classdef REFERENCE_SYSTEM < matlab.System
   end
 methods
   function obj = REFERENCE_SYSTEM(varargin)
-      % obj.self = self;
-      % obj.param = param;
-      % Perform one-time calculations, such as computing constants
-      setProperties(obj,nargin,varargin{:})
-      %obj.result.input = zeros(4,1);
+      setProperties(obj,nargin,varargin{:})      
     end
 end
   methods (Access = protected)

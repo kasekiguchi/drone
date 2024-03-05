@@ -27,7 +27,6 @@ classdef HLC < handle
       F4 = obj.param.F4;
       xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
 
-      xd = zeros(20,1);
       % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
       % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
       Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));

@@ -27,16 +27,12 @@ classdef ESTIMATOR_SYSTEM < matlab.System
     param% =  [ 0.5000    0.1600    0.1600    0.0800    0.0800    0.0600    0.0600    0.0600    9.8100    0.0301    0.0301    0.0301    0.0301    0.0000    0.0000    0.0000    0.0000    0.0392];
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
     t0
-    result = struct("P",eye(12),"G",zeros(12,6),"state",zeros(12,1));%struct("p",zeros(3,1),"v",zeros(3,1),"q",zeros(3,1),"w",zeros(3,1)));
+    result = struct("state",zeros(12,1),"P",eye(12),"G",zeros(12,6));%struct("p",zeros(3,1),"v",zeros(3,1),"q",zeros(3,1),"w",zeros(3,1)));
     state
   end
   methods
     function obj = ESTIMATOR_SYSTEM(varargin)
-      % obj.self = self;
-      % obj.param = param;
-      % Perform one-time calculations, such as computing constants
       setProperties(obj,nargin,varargin{:})
-      %obj.result.input = zeros(4,1);
     end
   end
   methods (Access = protected)
@@ -97,8 +93,8 @@ classdef ESTIMATOR_SYSTEM < matlab.System
         %tmpvalue = obj.model.projection(tmpvalue);
         obj.result.state = tmpvalue;
         obj.state = tmpvalue;
-         obj.result.G = G;
          obj.result.P = P;
+         obj.result.G = G;
        %end
        result=obj.result;
       %result = 1;

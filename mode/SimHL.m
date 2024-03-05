@@ -22,7 +22,7 @@ initial_state.q = [1; 0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
-initial_state.p = [0;0;0];
+initial_state.p = [0;0;1];
 
 agent = DRONE;
 agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5);
