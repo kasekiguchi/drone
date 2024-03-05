@@ -53,8 +53,8 @@ eparam.R = agent.estimator.R;
 
 %% reference
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-syms t x f real
-matlabFunction(@(t,x,f) agent.reference.func(t),"File","gen_reference.m","Vars",[t,x,f]);
+syms t x f dummy real % 将来的な拡張用に 時間、状態、その他を引数にできるようにしておく。
+matlabFunction(@(t,x,f) agent.reference.func(t),"File","@REFERENCE_SYSTEM/gen_reference.m","Vars",[dummy,t,x,f]);% dummy はクラスメソッドにするため
 rparam = [];
 %% controller
 agent.controller = HLC(agent,Controller_HL(dt));
@@ -122,4 +122,4 @@ myOutBus.Elements = [el1 el2 el3];
 save("setting.mat","x0","u0","dt","eparam","rparam","cparam","parameter");
 
 %% 
-open_system("untitled.slx");
+open_system("MS_test.slx");

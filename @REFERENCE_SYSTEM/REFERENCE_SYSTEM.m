@@ -40,7 +40,7 @@ end
            %      t = obj.t0;
            % end
            t = time-obj.t0; 
-           obj.result.state.xd = gen_reference(t,state);
+           obj.result.state.xd = obj.gen_reference(t,state);
            obj.result.state.p = obj.result.state.xd(1:3);
            if length(obj.result.state.xd)>4
             obj.result.state.v = obj.result.state.xd(5:7);
