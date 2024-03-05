@@ -85,6 +85,7 @@ classdef (StrictDefaults) EGO < matlab.System
       x = [Eul2Quat(ex(4:6,1));ex(1:3,1);ex(7:9,1);ex(10:12,1)];
       %x = state;
       obj.rresult = obj.reference.stepImpl(t,x);
+      %obj.rresult.state.xd = zeros(20,1);
       obj.cresult = obj.controller.stepImpl(x,obj.rresult.state.xd);
       obj.state = state;
       obj.control_signal = obj.cresult.input;

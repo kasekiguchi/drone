@@ -21,7 +21,7 @@ Flag.Exe.Mode = "Sim";
 %%
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 25; % terminal time
+te = 300; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 
 motive = Connector_Natnet_sim(1, dt, 0); % imitation of Motive camera (motion capture system)
@@ -48,8 +48,8 @@ save("plant_setting.mat","x0","dt","parameter");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 eparam.n = agent.estimator.n;
 eparam.B = agent.estimator.B;
-eparam.Q = agent.estimator.R;
-eparam.R = agent.estimator.Q;
+eparam.Q = agent.estimator.Q;
+eparam.R = agent.estimator.R;
 
 %% reference
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
@@ -58,7 +58,7 @@ matlabFunction(@(t,x,f) agent.reference.func(t),"File","gen_reference.m","Vars",
 rparam = [];
 %% controller
 agent.controller = HLC(agent,Controller_HL(dt));
-cparam.F1 = lqrd([0,1;0,0],[0;1],diag([1,1]),1,dt);
+cparam.F1 = lqrd([0,1;0,0],[0;1],diag([100,1]),0.1,dt);
 cparam.F2 = lqrd(diag([1,1,1],1),[0;0;0;1],eye(4),1,dt);
 cparam.F3 = cparam.F2;
 cparam.F4 = lqrd([0,1;0,0],[0;1],eye(2),1,dt);

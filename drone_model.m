@@ -52,19 +52,9 @@ end
       setting = coder.load("plant_setting.mat");
       obj.dt = setting.dt;
       obj.P = setting.parameter.values;
-      %obj.controller = drone_controller("self",obj,"param",Controller_HL(dt));
-      %        x0 (13,1) {mustBeNumeric}=[0;0;-1;1;0;0;0;0;0;0;0;0;0];
-      % A = [1.0000,0.0100;0,1.0000];
-      % B = [0.0001;0.0100];
       % Perform one-time calculations, such as computing constants
       obj.initial_state = setting.x0;
       obj.state = obj.initial_state;
-      %obj.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
-      % obj.A = A;
-      % obj.B = B;
-      %obj.P = obj.parameter.get();
-      % obj.A = [1.0000,0.0100;0,1.0000];
-      % obj.B = [0.0001;0.0100];
     end
 
     function next_state = stepImpl(obj,u)
@@ -77,17 +67,9 @@ end
         obj
         u (4,1) {mustBeNumeric}
       end
-      %[~,X] = ode45(@(t,x)obj.A*x + obj.B*u,[0,obj.dt],state);
       [~,X] = ode15s(@(t,x)euler_parameter_thrust_torque_physical_parameter_model(x,u,obj.P),[0,obj.dt],obj.state);
-
-      %[~,X] = ode15s(@(t,x) roll_pitch_yaw_thrust_torque_physical_parameter_model(x,u,obj.P),[0,obj.dt],obj.state);
       obj.state = X(end,:)';
       next_state = obj.state;
-      [obj.state(7),u(1)]
-      % next_state.p = obj.state(5:7);
-      % next_state.q = obj.state(1:4);
-      % next_state.v = obj.state(8:10);
-      % next_state.w = obj.state(11:13);
     end
 
     function resetImpl(obj)
