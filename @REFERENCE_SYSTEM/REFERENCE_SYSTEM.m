@@ -14,6 +14,7 @@ classdef REFERENCE_SYSTEM < matlab.System
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
     t0 
     %func
+    type
     result = struct("state",struct("xd",zeros(20,1),"p",zeros(3,1),"v",zeros(3,1),"q",zeros(3,1)));
   end
 methods
@@ -23,8 +24,9 @@ methods
 end
   methods (Access = protected)
 
-    function setupImpl(obj,rparam)
+    function setupImpl(obj,dt,rparam)
         obj.param = rparam;
+        obj.type = rparam.type;
         %obj.func = tmp.func;
         %obj.result = tmp.result;
         obj.t0 = 0;
