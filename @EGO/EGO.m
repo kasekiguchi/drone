@@ -81,9 +81,8 @@ classdef (StrictDefaults) EGO < matlab.System
       sstate.w = obj.state(11:13,1);
       y = [sstate.p;Quat2Eul(sstate.q)];      
       obj.eresult = obj.estimator.stepImpl(t,y,obj.control_signal);
-      ex = obj.eresult.state;
-      x = [Eul2Quat(ex(4:6,1));ex(1:3,1);ex(7:9,1);ex(10:12,1)];
-      x = state;
+      %ex = obj.eresult.state;
+      x = translate_state(obj.eresult.state,obj.estimator.type,obj.controller.type);
       obj.rresult = obj.reference.stepImpl(t,x);
       %obj.rresult.state.xd = zeros(20,1);
       obj.cresult = obj.controller.stepImpl(x,obj.rresult.state.xd);
@@ -91,7 +90,9 @@ classdef (StrictDefaults) EGO < matlab.System
       obj.control_signal = obj.cresult.input;
       u = obj.control_signal;    
       pub.rresult = obj.rresult;
-      pub.eresult = obj.eresult;
+      pub.eresult.state = obj.eresult.state;
+      pub.eresult.P = obj.eresult.P;
+    %  pub.eresult.G = obj.eresult.G;
       pub.cresult = obj.cresult;
     %  pub = [y(1:3);ex(1:3);obj.rresult.state.xd(1:3)];%;ex(1:3)];%obj.rresult.state.xd(1:4);%obj.publish_message;
     

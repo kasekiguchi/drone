@@ -50,7 +50,8 @@ eparam.n = agent.estimator.n;
 eparam.B = agent.estimator.B;
 eparam.Q = agent.estimator.Q;
 eparam.R = agent.estimator.R;
-
+eparam.type = "euler_angle_pqvw";
+eparam.result = struct("state",agent.estimator.model.state.get(),"P",eye(eparam.n));
 %% reference
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 syms t x f dummy real % 将来的な拡張用に 時間、状態、その他を引数にできるようにしておく。
@@ -63,6 +64,7 @@ cparam.F2 = lqrd(diag([1,1,1],1),[0;0;0;1],eye(4),1,dt);
 cparam.F3 = cparam.F2;
 cparam.F4 = lqrd([0,1;0,0],[0;1],eye(2),1,dt);
 cparam.P = agent.parameter.parameter;
+cparam.type = "euler_parameter_qpvw";
 u0 = [cparam.P(1)*9.81;0;0;0]; %  [mg;0;0;0]
 gen_controller_entity_func();
 %% Bus
@@ -84,10 +86,10 @@ eel1.Dimensions = [12 1];
 eel2 = Simulink.BusElement;
 eel2.Name = 'P';
 eel2.Dimensions = [12 12];
-eel3 = Simulink.BusElement;
-eel3.Name = 'G';
-eel3.Dimensions = [12 6];
-eresult.Elements = [eel1 eel2 eel3];
+% eel3 = Simulink.BusElement;
+% eel3.Name = 'G';
+% eel3.Dimensions = [12 6];
+eresult.Elements = [eel1 eel2];% eel3];
 
 cresult = Simulink.Bus;
 cel0 = Simulink.BusElement;
