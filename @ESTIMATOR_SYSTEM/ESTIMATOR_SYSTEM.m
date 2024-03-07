@@ -16,11 +16,12 @@ classdef ESTIMATOR_SYSTEM < matlab.System
     R
     dt
     B
-    n
+    n = 12;
     sensor % function to get sensor value
     sensor_param
     output_func % function of state
     output_param
+    type
   end
   % Pre-computed constants or internal states
   properties (Access = private)
@@ -38,7 +39,8 @@ classdef ESTIMATOR_SYSTEM < matlab.System
   methods (Access = protected)
 
     function setupImpl(obj,dt,state,P,eparam)
-      obj.n = eparam.n;
+      %obj.n = eparam.n;
+      %obj.n = 12;
       obj.B = eparam.B;
       obj.Q = eparam.Q;
       obj.R = eparam.R;
@@ -52,6 +54,7 @@ classdef ESTIMATOR_SYSTEM < matlab.System
       obj.Q = eparam.Q;
       obj.R = eparam.R;
       obj.state = state;
+      obj.type = "euler_angle";
     end
     function result = stepImpl(obj,time,y,u)
       arguments
@@ -93,7 +96,7 @@ classdef ESTIMATOR_SYSTEM < matlab.System
         %tmpvalue = obj.model.projection(tmpvalue);
         obj.result.state = tmpvalue;
         obj.state = tmpvalue;
-         obj.result.P = P;
+         obj.result.P = P(1:obj.n,1:obj.n);
          obj.result.G = G;
        %end
        result=obj.result;

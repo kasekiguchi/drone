@@ -1,5 +1,7 @@
 # Setup
 
+Pixhawk 6X はtype C 接続なのでThunderbolt 3 対応ケーブルを用意
+
 ## ハードウェアのセットアップ
 
 ![alt text](image.png)
