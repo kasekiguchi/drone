@@ -14,7 +14,7 @@ function Sensor = Sensor_Ros2_multi(topic_number)
 Sensor.num = topic_number;
 Sensor.type = mfilename;
 Sensor.name = ["RPLiDAR-S1","robot"];
-setting.subTopic(1,:) = {'/scan','sensor_msgs/LaserScan',10*exp(5)};
-setting.subTopic(2,:) = {'/rover_odo', 'geometry_msgs/Twist', 10*exp(5)};
+topics.subTopic(1,:) = {'/scan','sensor_msgs/LaserScan',10*exp(5)};
+topics.subTopic(2,:) = {'/rover_odo', 'geometry_msgs/Twist', 10*exp(5)};
 Sensor.topics = topics;
 end
