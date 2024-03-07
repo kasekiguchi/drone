@@ -7,13 +7,10 @@ properties % (Access=private)
     phase       %操作段階 % q : quit, s : stop, r : run
     conn_type   %実機との接続方法の指定
 end
-
 properties
     msg
 end
-
 methods
-
     function obj = WHILL_EXP_MODEL(varargin)
         obj@MODEL_CLASS(varargin{:});%スーパークラスのコンストラクタを呼び出し
         param = varargin{2}.param; 
@@ -132,10 +129,9 @@ methods
         end
         if abs(u(2)) > 0.6 %目標が大きいときの簡易速度抑制
             u(2) = 0.6*sign(u(2));
-        end        
+        end
         if abs(u(1))>2 || abs(u(2))>2%速度 or 角速度が大きすぎる時，エラーをスロー
-            cha = 'q';
-            
+            cha = 'q';            
             u
         end
         if isfield(obj.self.sensor.result,"detection") %前方に点群があるとき，停止
@@ -160,3 +156,4 @@ methods
 end
 
 end
+% msg=agent.sensor.ros{5}.publisher.pubmsg;msg.data=int8(4);agent.sensor.ros{5}.sendData(msg);%

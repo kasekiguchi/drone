@@ -1,6 +1,6 @@
 classdef ROS2_SENSOR < handle
-%seonsor class file for ros2
-%have multi sensor topic data
+%seonsor class for ros2
+%This have multi sensor topic data
 properties%common
     self    % agentを格納
     state   % have state
@@ -10,7 +10,6 @@ properties
     ros        
     fState  % topicのstate分岐用フラグ（状態の計測データが送られてくるときに有効）
     Node    % ros2nodeを格納
-    % radius = 0;
     datatreat
 end
 methods
@@ -30,7 +29,7 @@ methods
             end
             if isfield(Topics,"pubTopic")
                 if i <= length(Topics.pubTopic)
-                    if ~isempty(Topics.pubTopic(i))
+                    if ~isempty(Topics.pubTopic(i,1))
                         topic.pubTopic = Topics.pubTopic(i, :);
                     end
                 end
@@ -40,7 +39,7 @@ methods
         if isfield(set_param, 'pfunc')%生データの処理
             obj.datatreat = set_param.pfunc;
         end
-        % if isfield(param, 'state_list')%motive,T265のとき有効
+        % if isfield(param, 'state_list')%T265のとき有効
         %     obj.fState = 1;
         %     if obj.fState
         %         obj.result.state = STATE_CLASS(struct('state_list', param.state_list, "num_list", param.num_list));
@@ -64,41 +63,7 @@ methods
         obj.result = result;
     end
 
-    function show(obj, pq, q)
-
-        % arguments
-        %     % obj
-        %     % pq
-        %     % q = 0;
-        % end
-
-        p = pq(1:2);
-
-
-        if length(pq) > 2
-            q = pq(end);
-        end
-
-        if ~isempty(obj.result)
-            points(1:2:2 * size(obj.result.sensor_points, 1), :) = obj.result.sensor_points;
-            R = [cos(q), -sin(q); sin(q), cos(q)];
-            %             points = (R'*(points'-p))';
-            %             points = (R * points' + p)';
-            points = (points' - p)';
-            points = (points' + p)';
-            pp = plot([points(:, 1); p(1)], [points(:, 2); p(2)]);
-            %             set(pp,'EdgeAlpha',0.05);
-            %             set(pp,'EdgeColor','g');
-            hold on;
-            text(points(1, 1), points(1, 2), '1', 'Color', 'b', 'FontSize', 10);
-            %             region = polyshape((R * obj.result.region.Vertices' + p)');
-            %             plot(region);%132,133 coment out
-            %             head_dir = polyshape((R * obj.head_dir.Vertices' + p)');
-            %             plot(head_dir);
-            axis equal;
-        else
-            disp("do measure first.");
-        end
+    function show(obj)
     end
 end
 end

@@ -1,20 +1,20 @@
-function Sensor = Sensor_Ros2_multi(param)
+function Sensor = Sensor_Ros2_multi(topic_number)
 % sensor sample file for ros2
+% topic_numberとセットするトピックの数を合わせる．
+%[input]
+% topic end number
+%[output]
+% Sensor:setting ros2 topics
 % ↓ How to set topics.
 % setting.subTopic(n,:) = {topic name, topic msg type, Hz};
-% topic name     : ほしいトピックの名前(char or string)
-% topic msg type : ほしいトピックのメッセージタイプ(char or string)
+% setting.pubTopic(n,:) = {topic name, topic msg type};
+% topic name     : トピックの名前(char or string)
+% topic msg type : トピックのメッセージタイプ(char or string)
 % Hz             : トピックを受け取る周期[hz]
-arguments
-  param
-end
-param = param.plant;
-Sensor.type = "ROS2_SENSOR_multi";
-Sensor.name = ["RPLiDAR-S1"];%複数を想定
-setting.conn_type = "ros2";
-setting.state_list = ["p","q"];
-setting.numlist = [3, 3];
+Sensor.num = topic_number;
+Sensor.type = mfilename;
+Sensor.name = ["RPLiDAR-S1","robot"];
 setting.subTopic(1,:) = {'/scan','sensor_msgs/LaserScan',10*exp(5)};
-setting.subTopic(3, :) = {'/rover_odo', 'geometry_msgs/Twist', 10*exp(5)};
-Sensor.param = setting;
+setting.subTopic(2,:) = {'/rover_odo', 'geometry_msgs/Twist', 10*exp(5)};
+Sensor.topics = topics;
 end

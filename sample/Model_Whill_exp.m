@@ -38,7 +38,6 @@ switch conn_type
         setting.param.state_list = ["p"];
         setting.param.subName = ["p"];        
         setting.pubTopic(1, :) = {'/rover_twist', 'geometry_msgs/Twist'}; % pub topic name
-        
         setting.id = id;
 end
 

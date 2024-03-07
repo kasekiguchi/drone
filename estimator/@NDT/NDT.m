@@ -3,7 +3,6 @@ properties %eitimator class common
     result
     self
     model
-
     state
 end
     properties%for ndt calculation
@@ -50,8 +49,7 @@ end
         obj.result.tform = obj.tform;%disp(obj.tform);
         obj.result.ndtPCdata = obj.PCdata_use;
         tmpvalue.p = obj.tform.Translation';
-        tmpvalue.q = rotm2eul(obj.tform.R, "XYZ")';
-        % tmpvalue = obj.result.tform.Translation';
+        tmpvalue.q = rotm2eul(obj.tform.R, "XYZ")';        
         obj.result.state.set_state(tmpvalue); % % % % %推定結果
         obj.model.state.set_state(tmpvalue); % % % % % %モデルの更新
     end
@@ -70,7 +68,6 @@ end
             initform = pcregisterndt(obj.PCdata_use, obj.fixedSeg, obj.gridstep, ...
                 "InitialTransform", initialtform, "OutlierRatio", 0.2, "Tolerance", [0.05 0.1]); %NDTマッチング
         end
-
         obj.model.state.p = initform.Translation';
         obj.model.state.q = (rotm2eul(initform.R, "XYZ"))';
     end
@@ -128,15 +125,15 @@ end
             % prime_x(j) = logger.Data.agent.sensor.result{1,j}.state.p(1,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(1, 4);
             % prime_y(j) = logger.Data.agent.sensor.result{1,j}.state.p(2,1) + logger.Data.agent.estimator.result{1, 1}.tform.A(2, 4);
 
-            % pr_x(j) = logger.Data.agent.reference.result{1,j}.state.p(1,1);
-            % pr_y(j) = logger.Data.agent.reference.result{1,j}.state.p(2,1);
+            pr_x(j) = logger.Data.agent.reference.result{1,j}.state.p(1,1);
+            pr_y(j) = logger.Data.agent.reference.result{1,j}.state.p(2,1);
             % rmse_x(j) = sqrt((X(j) - prime_x(j))^2);
             % rmse_y(j) = sqrt((Y(j) - prime_y(j))^2);
         end
         plot(X, Y, 'o-',"MarkerSize",3);
         hold on
         % plot(prime_x,prime_y,'*-',"MarkerSize",3)
-        % plot(pr_x,pr_y,"pentagram","MarkerSize",20)
+        plot(pr_x,pr_y,"pentagram","MarkerSize",5)
         grid on
         xlabel(texlabel('x [m]')); ylabel(texlabel('y [m]'));
         % if ~isfield(obj, "fixedSeg")

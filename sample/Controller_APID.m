@@ -101,7 +101,6 @@ p = state.p(1:2);
 % end
 if isprop(state, "q")
     q = state.q(:, end);
-
     switch length(q)
         case 3
             q = q(3);
@@ -109,36 +108,28 @@ if isprop(state, "q")
             q = state.getq('3');
             q = q(3);
     end
-
 else
     q = [];
 end
-
 if isprop(state, "v")
     v = state.v(:, end);
-
     switch length(v)
         case 3
             v = v(3);
     end
-
 else
     v = [];
 end
-
 if isprop(state, "w")
     w = state.w(:, end);
-
     switch length(w)
         case 3
             w = w(3);
     end
-
 else
     w = [];
 end
 end
-
 function [e,ed] = gen_e_2110(model,ref)
 % 慣性座標目標値を相対座標目標値に変換し相対座標形状でのerror を算出する。
 [p,q,v,w] = strans_2110(model);
@@ -147,5 +138,5 @@ R = [cos(q),-sin(q);sin(q),cos(q)];
 e = [-R'*(rp - p);q-rq];
 % e = [-(rp - p);q-rq];
 
-ed = [v-0.5;w-rw];
+ed = [v-rv;w-rw];
 end

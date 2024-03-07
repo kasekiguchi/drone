@@ -11,8 +11,8 @@ Model.id = id;
 Setting.dt = dt;
 Setting.method = "three_state_vehicle_model"; % model dynamicsの実体名
 Setting.dim = [6,2,1];
-Setting.state_list = ["p","q"]; % [x;y;z;roll;pitch;yaw];
-Setting.num_list = [3,3];
+Setting.state_list = ["p","q","v"]; % [x;y;z;roll;pitch;yaw];
+Setting.num_list = [3,3,1];
 Setting.projection = @q_projection;
 
 Setting.initial = initial;%struct('p',[0;0;0],'v',[0;0;0]);

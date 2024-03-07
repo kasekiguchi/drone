@@ -14,7 +14,6 @@ classdef APID_CONTROLLER < handle
         gen_error
         trans
     end
-
     methods
         function obj = APID_CONTROLLER(self,param)
             obj.self = self;

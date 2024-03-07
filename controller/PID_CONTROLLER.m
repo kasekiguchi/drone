@@ -41,8 +41,7 @@ methods
     function u = do(obj, varargin)
         % u = do(obj,param,~)
         % param (optional) :
-        if length(varargin)>6,        param = struct(varargin{7});else param = [];end
-
+        if length(varargin)>6,param = struct(varargin{7});else param = [];end
         if ~isempty(param)
             if isfield(param, 'Kp'); obj.Kp = param.Kp; end
             if isfield(param, 'Ki'); obj.Ki = param.Ki; end
