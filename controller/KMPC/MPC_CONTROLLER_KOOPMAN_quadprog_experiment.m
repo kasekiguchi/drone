@@ -17,7 +17,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
         model
         result
         self
-        InputTransform
     end
 
     methods
@@ -36,7 +35,6 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
-            obj.InputTransform=THRUST2FORCE_TORQUE(self,1);
         end
 
         %-- main()的な

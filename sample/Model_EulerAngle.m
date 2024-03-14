@@ -18,6 +18,9 @@ Setting.state_list = ["p", "q", "v", "w"];
 Setting.initial = initial;                 % struct('p', [0; 0; 0], 'q', [0; 0; 0], 'v', [0; 0; 0], 'w', [0; 0; 0]);
 Setting.num_list = [3, 3, 3, 3];
 Setting.dt = dt;
-Model.param = Setting;
 Model.parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","rotor_r"];
+parameter = DRONE_PARAM("x");
+Setting.param = parameter.get(Model.parameter_name);
+Model.param = Setting;
 end
+

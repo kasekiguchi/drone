@@ -1,4 +1,4 @@
-function z = quaternions(x)
+function z = observables_quaternion_base(x)
 %EULERANGLEPARAMETER_QUATERNIONS 物理定数とオイラー角をパラメータとして含む観測量
 %   Z = quartanionParameter(X)
 %   X : [位置P; クォータニオンq or オイラー角 Q; 速度V; 角速度W]を持つ状態量
