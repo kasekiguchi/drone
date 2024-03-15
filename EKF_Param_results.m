@@ -16,7 +16,7 @@
 % close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/AMC/AMC_1_noise.mat');
+log = LOGGER('./Data/Log(15-Mar-2024_10_00_47).mat');
 % log = LOGGER('./Data/修論初版/u_plain1212_1.mat');
 % log = LOGGER('./Data/u_correct_onlyy240202.mat');
 O_func = @(x,p) Onew(x,p);
@@ -42,7 +42,7 @@ robot_v  = log.data(1,"v","p")';
 robot_ve  = log.data(1,"v","e")';
 robot_w  = log.data(1,"w","p")';
 robot_we  = log.data(1,"w","e")';
-%% RMSE修論Bad
+%% RMSE修論noise
 RMSE_P=sqrt(mse(robot_p,robot_pe));
 RMSE_Q=sqrt(mse(robot_q,robot_qe));
 RMSE_V=sqrt(mse(robot_v,robot_ve));
@@ -355,7 +355,7 @@ if illustration == 1
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
     plot(time,0.01*ones(size(time)),'LineWidth', 3);
-    ylim([-20 20]);
+    ylim([-25 5]);
     lgd=legend('\it{psb_{xe}}','\it{psb_{ye}}','\it{psb_{ze}}','\it{psb_{x}}','\it{psb_{y}}','\it{psb_{z}}','FontSize', 18,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
@@ -462,6 +462,7 @@ if illustration == 1
     lgd1=legend('\it{T_1}','FontSize', 16,'Location', 'Best');
     lgd1.NumColumns = 1;
     xlim([0, maxt]);
+    ylim([-2 12])
     set(gca,'FontSize',14);
     fig81 = figure(81);
     fig81.Color = 'white';
@@ -514,7 +515,7 @@ if illustration == 1
     lgd=legend('\phi_{r}','\theta_{r}','\psi_{r}','\phi','\theta','\psi','FontSize', 16,'Location', 'Best');
     lgd.NumColumns = 2;
     hold off;
-%     ylim([-0.2 0.2])
+    ylim([-0.15 0.1])
     xlabel('time [s]','FontSize', 16);
     ylabel('orientation \it{q} [rad]','FontSize', 16);
     grid on;
@@ -677,7 +678,7 @@ if f_png==1
 %         saveas(fig10, fullfile(pass2, 'EKF_qsu.png'));
 %         saveas(fig12, fullfile(pass2, 'EKF_instu.png'));
 %     end 
-pass2 = 'C:\Users\student\Desktop\Nozaki\修論Bad'; %P:192.168.100.20 PC
+pass2 = 'C:\Users\student\Desktop\Nozaki\BadS'; %P:192.168.100.20 PC
     saveas(fig7, fullfile(pass2, 'EKF_pos.png'));
     saveas(fig8, fullfile(pass2, 'EKF_ang.png'));
     saveas(fig18, fullfile(pass2, 'EKF_posAll.png'));
@@ -690,14 +691,14 @@ pass2 = 'C:\Users\student\Desktop\Nozaki\修論Bad'; %P:192.168.100.20 PC
     saveas(fig17, fullfile(pass2, 'S_15_18.png'));
     saveas(fig31, fullfile(pass2, 'condN.png'));
     if f_offset == 1
-        saveas(fig9, fullfile(pass2, 'EKF_psbu.png'));
-        saveas(fig10, fullfile(pass2, 'EKF_qsu.png'));
-        saveas(fig12, fullfile(pass2, 'EKF_instu.png'));
+        saveas(fig9, fullfile(pass2, 'EKF_psb.png'));
+        saveas(fig10, fullfile(pass2, 'EKF_qs.png'));
+        saveas(fig12, fullfile(pass2, 'EKF_inst.png'));
     end
    saveas(fig1, fullfile(pass2, 'input.png'));
     saveas(fig81, fullfile(pass2, 'input2.png'));
-    saveas(fig41, fullfile(pass2, 'refand_non.png'));
-    saveas(fig42, fullfile(pass2, 'refqand_non.png'));
+    saveas(fig41, fullfile(pass2, 'refand.png'));
+    saveas(fig42, fullfile(pass2, 'refqand.png'));
 end
 if f_eps==1
 %     pass2 = '\Users\yuika\Desktop\修士\bachelor\修士論文\fig';
@@ -741,7 +742,7 @@ if f_eps==1
 %     saveas(fig41, fullfile(pass2, 'refand_non.eps'), 'epsc');
 %     saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
 
-    pass2 = 'C:\Users\student\Desktop\Nozaki\修論Bad'; %P:192.168.100.20 PC
+    pass2 = 'C:\Users\student\Desktop\Nozaki\BadS'; %P:192.168.100.20 PC
     saveas(fig7, fullfile(pass2, 'EKF_pos.eps'), 'epsc');
     saveas(fig8, fullfile(pass2, 'EKF_ang.eps'), 'epsc');
     saveas(fig18, fullfile(pass2, 'EKF_posAll.eps'), 'epsc');
@@ -760,8 +761,8 @@ if f_eps==1
     end 
     saveas(fig1, fullfile(pass2, 'input.eps'), 'epsc');
     saveas(fig81, fullfile(pass2, 'input2.eps'), 'epsc');
-    saveas(fig41, fullfile(pass2, 'refand_non.eps'), 'epsc');
-    saveas(fig42, fullfile(pass2, 'refqand_non.eps'), 'epsc');
+    saveas(fig41, fullfile(pass2, 'refand.eps'), 'epsc');
+    saveas(fig42, fullfile(pass2, 'refqand.eps'), 'epsc');
     saveas(fig50, fullfile(pass2, 'P1.eps'), 'epsc');
     saveas(fig51, fullfile(pass2, 'PE1.eps'), 'epsc');
     saveas(fig52, fullfile(pass2, 'Q1.eps'), 'epsc');

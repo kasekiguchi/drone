@@ -40,8 +40,8 @@ initial_state.w = [0; 0; 0];
 % パラメータ推定時オン
 % initial_state.ps = [0.1;0.1;0.1];
 % initial_state.qs = [0; 0;1];
-initial_state.ps = [0.01;0.02;0.03];
-initial_state.qs = [0; 0;1.3];
+initial_state.ps = [0.01;0.01;0.01];
+initial_state.qs = [0; 0;1.0];
 % initial_state.l = [1;1;1;1];
 
 % 野崎設定
@@ -95,18 +95,22 @@ agent.sensor.do = @sensor_do;
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1.5],"size",[2,2,2,0.35]}});
 
 %AMC＆修論ref
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",10,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",5,"orig",[0;0;1],"size",[1.5,1.5,1.5,0.45]}});
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,1,0.,0.]}});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,0.,0.,0.]}});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,"orig",[0;0;1.5],"size",[0,1,0.,0.]}});
 % 
 % コントローラー
 % agent.controller = HLC(agent,Controller_HL(dt));
 
 % コントローラー補正
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,1.5,"F_RPY18","G_RPY18","Onew"));
+agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,1.5,"F_RPY18","G_RPY18","Onew"));
 agent.controller.do = @controller_do;
+
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-17,0.1,"F_RPY18","G_RPY18","Onew","Odot"));
+% agent.controller.do = @controller_do;
 
 %% Direct model
 % agent = DRONE;
@@ -144,22 +148,22 @@ end
 
 
 % ノイズを入れた場合の入力補正
-function result = controller_do(varargin)
-    controller = varargin{5}.controller;
-    result.hlc = controller.hlc.do(varargin);
-    varargin{5}.controller.result.input = result.hlc.input + 0.4 * randn(4,1);
-end
-
-
-% % 可観測性に基づく入力補正用
 % function result = controller_do(varargin)
 %     controller = varargin{5}.controller;
 %     result.hlc = controller.hlc.do(varargin);
-%     result.correct = controller.correct.do(varargin);
-% %     varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
-%     [correct,parallel]= vector_decomposition(result.hlc.input,result.correct.input);
-%     varargin{5}.controller.result.input = result.hlc.input + correct;
+%     varargin{5}.controller.result.input = result.hlc.input + 0.4 * randn(4,1);
 % end
+
+
+% % 可観測性に基づく入力補正用
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    result.hlc = controller.hlc.do(varargin);
+    result.correct = controller.correct.do(varargin);
+%     varargin{5}.controller.result.input = result.hlc.input + result.correct.input;
+    [correct,parallel]= vector_decomposition(result.hlc.input,result.correct.input);
+    varargin{5}.controller.result.input = result.hlc.input + correct;
+end
 
 
 % ベクトルの分解
