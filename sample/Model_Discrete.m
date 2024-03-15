@@ -1,10 +1,11 @@
-function [Model,Param]= Model_Discrete(dt,initial,id,type)
+function [Model,Param]= Model_Discrete(dt,initial,id,type,agent)
 % Point mass model
 arguments
   dt
   initial
   id
   type
+  agent = []
 end
 Model.type = type;
 Model.name = "discrete";
@@ -31,15 +32,18 @@ switch type
     Setting.dim = [3, 3, 0];
     Setting.state_list = ["p"];
     Setting.num_list = [3];
-case "PVQ0" % point-mass (force,angular-vel)-input model
-    dsys.A = zeros(9);
-    dsys.B = [eye(3),zeros(3,6);
-              zeros(6,3),eye(6)];
-    dsys.C = eye(9);
-    dsys.D = zeros(9);
-    Setting.dim = [9,9,2];
-    Setting.state_list = ["p","v","q"];
-    Setting.num_list = [3,3,3];
+  case "FREE"
+    dsys.A = agent.parameter.A;
+    dsys.B = agent.parameter.B;
+    dsys.C = agent.parameter.C;
+    fn = string(fieldnames(initial))';
+    nlist = [];
+    for i = fn
+      nlist = [nlist, length(initial.(i))];
+    end
+    Setting.dim = [size(dsys.A,1),size(dsys.B,2),0];
+    Setting.state_list = fn;
+    Setting.num_list = nlist;    
 end
 %% 共通設定
 Setting.param.A = dsys.A;
@@ -47,6 +51,6 @@ Setting.param.B =dsys.B;
 Setting.param.C =dsys.C;
 Setting.initial = initial;%struct('p',[0;0;0],'v',[0;0;0]);
 Model.param = Setting;
-Model.parameter_name = ["A","B","C"];
+Model.parameter_name = ["A","B"];
 Param = POINT_MASS_PARAM("point","A",dsys.A,"B",dsys.B,"C",dsys.C);
 end

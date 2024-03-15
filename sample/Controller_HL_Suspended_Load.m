@@ -1,7 +1,7 @@
-function Controller = Controller_HL_Suspended_Load(dt)
+function Controller = Controller_HL_Suspended_Load(dt,agent)
 %% controller class demo (1) : construct
 % controller property をController classのインスタンス配列として定義
-Controller.P=getParameter_withload();
+Controller.P=agent.parameter.get();
 Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,10]),[1],dt);
 Controller.F2=lqrd([0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0],[0;0;0;0;0;1],diag([100000,1000,100,10,10,10]),[0.1],dt);
 Controller.F3=lqrd([0 1 0 0 0 0;0 0 1 0 0 0;0 0 0 1 0 0;0 0 0 0 1 0;0 0 0 0 0 1; 0 0 0 0 0 0],[0;0;0;0;0;1],diag([100000,1000,100,10,10,10]),[0.1],dt);

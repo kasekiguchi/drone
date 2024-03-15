@@ -177,7 +177,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
     function save(obj, name, opt)
       % save log.Data keeping its structure as a file Data/Log(datetime).mat
-      % retrieve it by logger = LOGGER.load("file.mat");
+      % retrieve it by logger = LOGGER("./Data/file.mat");
       arguments
         obj
         name = []
@@ -248,7 +248,6 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         end
 
         save(list, 'log');
-%         save(list, 'log',"-v7.3");
       end
 
     end
