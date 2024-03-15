@@ -52,6 +52,9 @@ classdef EKF < handle
             obj.B = param.B;
             obj.result.P = param.P;
             obj.result.G = zeros(obj.n,size(obj.R,2));
+            obj.result.A = zeros(obj.n,size(obj.R,2));
+            obj.result.C = zeros(obj.n,size(obj.R,2));
+            obj.result.param = zeros(1,18);
         end
         
         function [result]=do(obj,varargin)
@@ -81,6 +84,9 @@ classdef EKF < handle
             obj.model.state.set_state(tmpvalue);
             obj.result.G = G;
             obj.result.P = P;
+            obj.result.A = A;
+            obj.result.C = C;
+            obj.result.param = p;
           end
             result=obj.result;
             obj.timer = tic;

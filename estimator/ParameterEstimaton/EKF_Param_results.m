@@ -16,7 +16,7 @@
 % close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/Log(15-Mar-2024_11_44_59).mat');
+log = LOGGER('./Data/Log(15-Mar-2024_14_03_02).mat');
 % log = LOGGER('./Data/修論初版/u_plain1212_1.mat');
 % log = LOGGER('./Data/u_correct_onlyy240202.mat');
 O_func = @(x,p) Onew(x,p);
