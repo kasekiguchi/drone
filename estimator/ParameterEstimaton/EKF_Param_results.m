@@ -1,4 +1,5 @@
-%% EKFによるパラメータ推定の結果の描画
+%% GUI projectの情報を用いたパラメータ解析
+% EKFによるパラメータ推定の結果確認
 %% Initialize settings
 % clear
 % cf = pwd;
@@ -15,12 +16,12 @@
 % close all;
 %% フラグ設定
 illustration= 1; %1で図示，0で非表示
-log = LOGGER('./Data/final_bad.mat');
+log = LOGGER('./Data/Log(15-Mar-2024_11_44_59).mat');
 % log = LOGGER('./Data/修論初版/u_plain1212_1.mat');
 % log = LOGGER('./Data/u_correct_onlyy240202.mat');
 O_func = @(x,p) Onew(x,p);
-f_png=1;
-f_eps=1;
+f_png=0;
+f_eps=0;
 f_offset = 1;
 f_O = 0;
 f_wall = 0;

@@ -1,5 +1,5 @@
 function Controller= Controller_CORRECT_OBSERVABILITY(dt,eps,K,name1,name2,name3)
-% 可観測性による入力補正用
+% 可観測性による入力補正用　(ΣVに着目)
 Controller.eps = eps; %特異値のスレッショルドε
 Controller.K = K; % 係数行列のチューニングパラメータK
 
@@ -24,7 +24,7 @@ end
 
 
 % function Controller= Controller_CORRECT_OBSERVABILITY(dt,eps,K,name1,name2,name3,name4)
-% % 可観測性による入力補正用
+% % 可観測性による入力補正用　(Lfσ+Lgσ)
 % Controller.eps = eps; %特異値のスレッショルドε
 % Controller.K = K; % 係数行列のチューニングパラメータK
 % 
