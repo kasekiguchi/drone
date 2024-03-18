@@ -53,18 +53,18 @@ methods
                 gain = obj.param.gain_tl;
                 th_offset = obj.param.th_offset_tl;
             end
-                T_thr = input(1); % thrust, torque input 
+            T_thr = input(1); % thrust, torque input 
 
-                uroll = gain(1) * (whn(1) - wh(1));
-                upitch = gain(2) * (whn(2) - wh(2));
+            uroll = gain(1) * (whn(1) - wh(1));
+            upitch = gain(2) * (whn(2) - wh(2));
 
-                % apply gain to (thrust - hovering_thrust)
-                uthr = max(0, gain(4) * (T_thr - obj.hover_thrust_force) + th_offset); 
-                uyaw = gain(3) * (whn(3) - wh(3));
-                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
-                upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
-                uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
-                obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
+            % apply gain to (thrust - hovering_thrust)
+            uthr = max(0, gain(4) * (T_thr - obj.hover_thrust_force) + th_offset); 
+            uyaw = gain(3) * (whn(3) - wh(3));
+            uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
+            upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
+            uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
+            obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 
         else
             obj.result = [obj.param.roll_offset, obj.param.pitch_offset, 0, obj.param.yaw_offset, 1000, 0, 0, 0];
         end
