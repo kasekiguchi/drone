@@ -13,8 +13,8 @@ classdef POINT_MASS_PARAM < PARAMETER_CLASS
             arguments
                 name
                 type = "struct";            
-                param.additional = [];
-                param.A = [zeros(3) eye(3);zeros(3,6)];
+                param.additional = []; % プロパティに無いパラメータを追加する場合
+                param.A = [zeros(3) eye(3);zeros(3,6)]; % 次の時刻に入力の位置に行くモデル
                 param.B = [zeros(3);eye(3)];
                 param.C = [eye(3),zeros(3)];
                 param.D = zeros(3);
