@@ -10,5 +10,7 @@ function X = discrete_linear_model(x,u,P)
     else
         error("This model requires A and B fields on param.");
     end
+    x = observables_quaternion_base(x);
     X = A*x+B*u;
+    X = P.C*X;
 end
