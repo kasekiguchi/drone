@@ -68,6 +68,22 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                 elseif strcmp(args{3}, "Take_off")
                     obj.ref_set.method = args{1};
                     obj.com = args{3};
+                    obj.ref_set.method = "gen_ref_sample_take_off";
+                    obj.ref_set.orig = param_for_gen_func;
+                    temp = gen_func_name(param_for_gen_func{:});
+                    obj.func = gen_ref_for_HL_Cooperative_Load(temp);
+%                   
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3])); 
+
+                    obj.result.state.set_state("xd",obj.func(0));
+                    obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
+                    obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
+                    obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
+                    obj.result.state.set_state("o",obj.self.estimator.result.state.get("O"));
+
+                elseif strcmp(args{3}, "Take_off2")
+                    obj.ref_set.method = args{1};
+                    obj.com = args{3};
 %                     obj.ref_set.method = "gen_ref_sample_take_off";
                     obj.ref_set.orig = param_for_gen_func;
                     temp = gen_func_name(param_for_gen_func{:});
@@ -209,6 +225,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.state.p = xd(1:3);
                a = obj.result.state.xd(9:11);
                g = [0;0;-1]*agent1.parameter.g;
+               if t == 0
+               obj.result.state.xd(18,1) =0;
+
+               end
 
                A=a-g;
                obj.result.m = inv(A'*A)*A'*muid_myagent;
@@ -271,6 +291,7 @@ elseif strcmp(obj.com, "Split3")
 %                  
                end
            obj.result.state.xd(1:12,1) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
+           obj.result.state.xd(18,1) =0;
            obj.result.state.p = obj.result.state.xd(1:3,1);
            obj.result.state.v = obj.result.state.xd(4:6,1);
 %                obj.self.input_transform.param.th_offset = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
@@ -288,6 +309,12 @@ elseif strcmp(obj.com, "Split3")
            obj.result.state.xd(4:5,1) = temp(4:5,1);
            obj.result.state.xd(7:8,1) = temp(7:8,1);
            obj.result.state.xd(10:11,1) = temp(10:11,1);
+           if t == 0
+               obj.result.state.xd(18,1) =0;
+
+           end
+
+
            obj.result.state.p = obj.result.state.xd(1:3,1);
            obj.result.state.v = obj.result.state.xd(4:6,1);
 %                obj.self.input_transform.param.th_offset = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
