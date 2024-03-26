@@ -25,17 +25,17 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             arguments
                 % P = [g m0 j0 rho li mi ji]
                 name % DIATONE
-                N = 6;
+                N = 6;%修正必要modeの値と同じにする
                 type = "struct";
                 % parameters : 5 + 8*N
                 param.g = 9.81;
-                param.m0 = 1.200;
-                param.J0 = [0.15;0.15;0.25];
-                param.rho = [];
-                param.li = 1*ones(N,1);
-                param.mi = 0.800*ones(N,1)';
+                param.m0 = 1.200;%分割前のペイロード
+                param.J0 = [0.15;0.15;0.25];%分割前慣性モーメント
+                param.rho = [];%分割前の重心位置から紐がついてるところ前での距離
+                param.li = 1*ones(N,1);%紐の長さ
+                param.mi = 0.800*ones(N,1)';%ドローンの重さ
 %                 param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
-                param.Ji = repmat([0.082 0.082 0.1377]',1,N);
+                param.Ji = repmat([0.082 0.082 0.1377]',1,N);%ドローンの慣性モーメント
                 param.additional = []; % プロパティに無いパラメータを追加する場合
             end
             if contains(type,"zup")

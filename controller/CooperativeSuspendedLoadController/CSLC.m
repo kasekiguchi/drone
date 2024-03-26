@@ -27,8 +27,8 @@ classdef CSLC < handle
       obj.Param = param;
       obj.gains = param.gains; %
       %[kx0' kr0 kdx0' ko0 kqi kwi kri koi epsilon]
-      obj.gen_input = str2func(param.method);
-      obj.gen_muid= str2func(param.method2);
+      obj.gen_input = str2func(param.method);%ドローンの入力(35)
+      obj.gen_muid= str2func(param.method2);%紐の張力を求める(27)
       obj.result.mui = zeros(6,obj.N);
       if self.estimator.model.state.type ==3
         obj.toR= @(r) RodriguesQuaternion(Eul2Quat(reshape(r,3,[])));

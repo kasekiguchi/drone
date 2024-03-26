@@ -8,51 +8,38 @@ time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
-logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);
+logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);%分割前1,分割後N個
 
 
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
-qtype = "zup"; % "eul":euler angle, "":euler parameter
+qtype = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
 
 agent(1) = DRONE;
-agent(1).id = 1;
+agent(1).id = 1;%元のシステム
 %Payload_Initial_State
-initial_state(1).p = [0; 0; 0];
-initial_state(1).v = [0; 0; 0];
-initial_state(1).O = [0; 0; 0];
-initial_state(1).wi = repmat([0; 0; 0], N, 1);
-initial_state(1).Oi = repmat([0; 0; 0], N, 1);
+initial_state(1).p = [0; 0; 0];%ペイロード
+initial_state(1).v = [0; 0; 0];%ペイロード
+initial_state(1).O = [0; 0; 0];%ペイロードの角速度
+initial_state(1).wi = repmat([0; 0; 0], N, 1);%リンクの角速度
+initial_state(1).Oi = repmat([0; 0; 0], N, 1);%ドローンの角速度
 
 if contains(qtype, "zup")
-    initial_state(1).qi = -1 * repmat([0; 0; 1], N, 1);
+    initial_state(1).qi = -1 * repmat([0; 0; 1], N, 1);%リンクの方向ベクトル
 else
     initial_state(1).qi = 1 * repmat([0; 0; 1], N, 1);
 end
 
 if contains(qtype, "eul")
-    initial_state(1).Q = [0; 0; 0];
+    initial_state(1).Q = [0; 0; 0];%ペイロードの姿勢
     %initial_state.Qi = repmat([0; pi / 180; 0], N, 1);
-    initial_state(1).Qi = repmat([0;0;0],N,1);
+    initial_state(1).Qi = repmat([0;0;0],N,1);%ドローンの姿勢
 else
     initial_state(1).Q = [1; 0; 0; 0];
     initial_state(1).Qi = repmat([1; 0; 0; 0], N, 1);
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
-% Q1 = [0.9987; 0.0027; -0.0034; -0.0002];
-% Q2 = [0.9987; -0.0001;  -0.0051; -0.0002];
-% Q3 = [0.9987; -0.0031;  -0.0015; -0.0003];
-% Q4 = [0.9986; -0.0030;  0.0053; -0.0003];
-% Q5 = [0.9987; 0.0027;  0.0019; -0.0003];
-% Q6 = [0.9987; 0.0021;  -0.0003; -0.0003];
-% initial_state(1).Qi = [Q1;Q2;Q3;Q4;Q5;Q6];
-
-
-% Qrho = cell2mat(arrayfun(@(i) quat_times_vec(Q',obj.rho(:,i))',1:length(obj.target),'UniformOutput',false));
-% q = repmat(p,1,length(obj.target))+Qrho; % ケーブル付け根位置（牽引物側）
-% rho = reshape(q,size(q,1),size(q,2)/length(obj.target),length(obj.target)); % attachment point 
-% initial_state(1).pi = rho - qi.*reshape(repmat(obj.li,3,1),1,[],length(obj.target));
 ref_orig = [1;0;0]; %目標軌道原点
 
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
@@ -106,14 +93,17 @@ for j = 1:te
             
             if i >= 2
                 load = agent(1).estimator.result.state;
+                %分割前ペイロード
                 p_load = load.p;
-                R_load = RodriguesQuaternion(load.Q);
-                dR_load = R_load*Skew(load.O);
-                wi_load = load.wi(3*(i-1)-2:3*(i-1),1);
-                pL_agent = p_load + R_load * rho(:,i-1);
-                vL_agent = load.v + dR_load * rho(:,i-1);
-                pT_agent = load.qi(3*(i-1)-2:3*(i-1),1);
-                dpT_agent = Skew(wi_load)*pT_agent;
+                R_load = RodriguesQuaternion(load.Q);%回転行列
+                dR_load = R_load*Skew(load.O);%回転行列の微分
+                wi_load = load.wi(3*(i-1)-2:3*(i-1),1);%分割前のagent(i)の紐の角速度ベクトル
+                %分割後ペイロード
+                pL_agent = p_load + R_load * rho(:,i-1);%分割後の質量重心位置
+                vL_agent = load.v + dR_load * rho(:,i-1);%分割後の質量重心速度
+                pT_agent = load.qi(3*(i-1)-2:3*(i-1),1);%分割後の紐の方向ベクトル
+                dpT_agent = Skew(wi_load)*pT_agent;%分割後の紐の速度ベクトル
+                %ドローン
                 p_agent = p_load + R_load * rho(:,i-1) - agent(1).parameter.li(i-1)*pT_agent;
                 v_agent = load.v + dR_load * rho(:,i-1)- agent(1).parameter.li(i-1)*dpT_agent;
                 q_agent = Quat2Eul(load.Qi(4*(i-1)-3:4*(i-1),1));
@@ -124,26 +114,12 @@ for j = 1:te
                 agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
                 agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
                 agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
-%                 agent(i).estimator.result.state.pL = pL_agent;
-%                 agent(i).estimator.result.state.vL = vL_agent;
-%                 agent(i).estimator.result.state.wL = wi_load;
-%                 agent(i).estimator.result.state.pT = pT_agent;
-                
-%                 agent(i).estimator.result.state.p = p_agent;
-%                 agent(i).estimator.result.state.v = v_agent;
-%                 agent(i).estimator.result.state.q = q_agent;
-%                 agent(i).estimator.result.state.w = w_agent;
             else
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
             end
-%             agent(i).estimator.state_set =;
             agent(i).reference.do(time, 'f',agent(1));
-%             agent(i).controller.do(time, 'f',0,0,agent,i); 
             agent(i).controller.do(time, 'f',0,0,agent(i),i);
-%             if i >= 2
-%             agent(i).controller.result.input = [(agent(i).parameter.loadmass+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
-%             end
 
         end
         input = zeros(4*N,1);

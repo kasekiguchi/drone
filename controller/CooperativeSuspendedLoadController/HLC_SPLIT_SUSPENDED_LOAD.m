@@ -27,8 +27,8 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             end
             Param= obj.param;
 %             P = Param.P;
-            P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-            P(15) = obj.self.reference.result.m;
+            P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "loadmass", "cableL"]);
+            P(7) = obj.self.reference.result.m;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
 
             F1 = Param.F1;
             F2 = Param.F2;
@@ -71,7 +71,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             end
             vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
             uf = Uf_SuspendedLoad(x,xd',vf,P);
-            
+            %入力関数何とかする
             h234 = H234_SuspendedLoad(x,xd',vf,vs',P);
             invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
             a = v_SuspendedLoad(x,xd',vf,vs',P);
