@@ -16,7 +16,7 @@ function ref = generate_spline_curve_ref(loadedRef,order,fcmd)
 % fdrowfig=1  %図を描画するか
 
 %手動で値を設定するとき(使わないときコメントアウトする)
-isManualSetting = 1;%手動でwaypointを作るとき1
+isManualSetting = 0;%手動でwaypointを作るとき1
 pointN = 5; %waypointの数
 dt = 3;%waypoint間の時間
 time =  (0:dt:dt*(pointN-1))';

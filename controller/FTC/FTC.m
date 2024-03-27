@@ -25,7 +25,7 @@ methods
         obj.z=0; %z方向にサーボを適用するときの初期値
         obj.Vs = obj.param.Vs; % 階層２の入力を生成する関数ハンドル
         obj.approx_z = obj.param.approx_z; %zサブシステムのゲイン，近似パラメータ，alpha
-        obj.modelErrorInput = THRUST2FORCE_TORQUE_FOR_MODEL_ERROR(self); % modelerror用
+        % obj.modelErrorInput = THRUST2FORCE_TORQUE_FOR_MODEL_ERROR(self); % modelerror用
     end
 
     function result = do(obj,varargin)
@@ -91,7 +91,7 @@ methods
         obj.result.z3 = z3;
         obj.result.z4 = z4;
       % max,min are applied for the safty
-        tmp = obj.modelErrorInput.do([],[],[],[],tmp,[]);
+        % tmp = obj.modelErrorInput.do([],[],[],[],tmp,[]);
         obj.result.input =[max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];%外乱用
         result = obj.result;
     end

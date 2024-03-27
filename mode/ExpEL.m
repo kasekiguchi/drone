@@ -6,7 +6,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-motive = Connector_Natnet('192.168.1.2'); % connect to Motive
+motive = Connector_Natnet('192.168.1.4'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
@@ -20,19 +20,20 @@ initial_state.w = [0; 0; 0];
 initial_state.Trs = [agent.parameter.mass*agent.parameter.gravity; 0];%重力を打ち消すため最初はTr=m*g
 % % initial_state.Trs=[0;0];
 agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));%251 or 252
-% agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
-% % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.0]},"HL"});
+agent.estimator = EKF_EXPAND(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle_Expand(dt, initial_state, 1)),["p", "q"]));
+agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
 % % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});
 % % agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));
 % % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0.5;0.6],"g",[2;-0.5;1.3]),30});%縦ベクトルで書く,
-% fFT=0;%z directional controller flag 1:FT, other:LS
-% agent.controller = ELC(agent,Controller_EL(dt,fFT));
-% run("ExpBase");
+fFT=0;%z directional controller flag 1:FT, other:LS
+agent.controller = ELC(agent,Controller_EL(dt,fFT));
+run("ExpBase");
 
 %% コントローラー切換
+if 0
 %システムノイズを大きくする
 %コントローラのTをELの状態に入れる
 %estimator
@@ -76,6 +77,7 @@ agent.input_transform.param = agent.input_transform.hlc.param;
 agent.input_transform.do = @input_transform_do;
 
 run("ExpBase");
+end
 function result = estimator_do(varargin)
     estimator = varargin{5}.estimator;
     controller = varargin{5}.controller;

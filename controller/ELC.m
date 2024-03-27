@@ -66,13 +66,13 @@ methods
         z4 = Zep4(x, xd', P);
         
         %subsystem controller
-        vep = obj.Vep(z1, z2, z3, z4);%serevoなし
+        % vep = obj.Vep(z1, z2, z3, z4);%serevoなし
         %servo
-        % if varargin{1}.t > 20
-        %         obj.z = obj.z + xd(3)-x(7);
-        % end
-        % vep = obj.Vep(z1, z2, z3, z4,obj.z);
-        % z FTC+servo
+        if varargin{1}.t > 5
+                obj.z = obj.z + xd(3)-x(7);
+        end
+        vep = obj.Vep(z1, z2, z3, z4,obj.z);
+        % % z FTC+servo
         % vep(1) = vep(1) - obj.param.F1s(5)*obj.z;
         %% calc actual input
         tmp = Uep(x, xd', vep, P);
@@ -86,7 +86,7 @@ methods
         obj.result.z4 = z4;
         % max,min are applied for the safty
         tmp(1) = x(14);
-        tmp = obj.modelErrorInput.do([],[],[],[],tmp,[]);
+        % tmp = obj.modelErrorInput.do([],[],[],[],tmp,[]);
         % obj.result.u(2:4) = tmp(2:4);
         obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
         % obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
