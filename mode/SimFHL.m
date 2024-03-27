@@ -13,25 +13,25 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-agent.parameter = DRONE_PARAM("DIATONE");
+% agent.parameter = DRONE_PARAM("DIATONE");
 %モデル誤差=============
 %controller でモデル誤差用の入力に変換する
-% agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884*1.5,"lx",0.08*1.1,"ly",0.08*1.3);
+agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884*1.5,"lx",0.08*1.3,"ly",0.08*1.3);
 %=====================
-% agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1),0);
+agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1),0);
 %外乱を与える==========
-agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
-agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
+% agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
+% agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
 %=====================
 %モデル誤差元に戻す=============
-% agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884,"lx",0.08,"ly",0.08);
+agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884,"lx",0.08,"ly",0.08);
 %=====================
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});%[0.2,0.2,0.2]
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});%[0.2,0.2,0.2]
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0.2,0.2,0.2]},"HL"});%[0.2,0.2,0.2]
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",15,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1.2],"size",[1,1,0.8]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1.2],"size",[1,1,0.8]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.2;0.2;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[-0.2;0.2;0.8],"k",[0;0;1]),7});%縦ベクトルで書く,
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),1));%コマンドでシートを選びたいときは位置2を1にする
 

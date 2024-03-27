@@ -159,8 +159,8 @@ Controller.approx_z = [Controller.F1', pz, az];%近似パラメータ
 Controller.dt = dt;
 eig(diag(1, 1) - [0; 1] * Controller.F1)
 eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F2)
-eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F3)
-eig(diag(1, 1) - [0; 1] * Controller.F4)
+% eig(diag([1, 1, 1], 1) - [0; 0; 0; 1] * Controller.F3)
+% eig(diag(1, 1) - [0; 1] * Controller.F4)
 Controller.type = "FTC";
 % Controller.name = "hlc";
 

@@ -87,7 +87,8 @@ methods
         % max,min are applied for the safty
         tmp(1) = x(14);
         tmp = obj.modelErrorInput.do([],[],[],[],tmp,[]);
-        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
+        % obj.result.u(2:4) = tmp(2:4);
+        obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
         % obj.result.input = [max(0,min(10,x(14)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];           
         result = obj.result;
     end

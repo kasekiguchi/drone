@@ -56,16 +56,44 @@ syms ez3 [4 1] real
 syms ez4 [2 1] real
 if fFT ==1
     %FT
-
-Cc4 = [1 0 0 0];
-Ac5=[Ac4,zeros(4,1);-Cc4,0];
-Bc5=[Bc4;0];
-% Controller.F1s=lqrd(Ac5,Bc5,diag([1000,100,10,10,0.01]),0.01,dt);
-% eF1=Controller.F1s(1:4);
-
+    crossPoint1 = 2.5*ones(1,4);%線形入力と交わる場所を指定
+    crossPoint2 = 1*ones(1,4);%線形入力と交わる場所を指定
+    crossPoint3 = 1*ones(1,4);%線形入力と交わる場所を指定
+    crossPoint4 = 1*ones(1,2);%線形入力と交わる場所を指定
+    isDiffrenceCrossPoint=1;
+    if isDiffrenceCrossPoint
+        Controller.F1 = Controller.F1.*crossPoint1./diag(crossPoint1.^az)';
+        Controller.F2 = Controller.F2.*crossPoint2./diag(crossPoint2.^ax)';
+        Controller.F3 = Controller.F3.*crossPoint3./diag(crossPoint3.^ay)';
+        Controller.F4 = Controller.F4.*crossPoint4./diag(crossPoint4.^apsi)';
+        eF1 = Controller.F1;
+        eF2 = Controller.F2;
+        eF3 = Controller.F3;
+        eF4 = Controller.F4;
+    end
     Controller.Vep = matlabFunction([-eF1 * (sign(ez1).*abs(ez1).^az); -eF2 * (sign(ez2).*abs(ez2).^ax); -eF3 * (sign(ez3).*abs(ez3).^ay); -eF4 * (sign(ez4).*abs(ez4).^apsi)], "Vars", {ez1,ez2, ez3, ez4});
 else
     %LS
+    crossPoint1 = 2.5*ones(1,4);%線形入力と交わる場所を指定
+    crossPoint2 = 1*ones(1,4);%線形入力と交わる場所を指定
+    crossPoint3 = 1*ones(1,4);%線形入力と交わる場所を指定
+    crossPoint4 = 1*ones(1,2);%線形入力と交わる場所を指定
+    isDiffrenceCrossPoint=1;
+    if isDiffrenceCrossPoint
+        Controller.F1 = Controller.F1.*crossPoint1./diag(crossPoint1.^az)';
+        Controller.F2 = Controller.F2.*crossPoint2./diag(crossPoint2.^ax)';
+        Controller.F3 = Controller.F3.*crossPoint3./diag(crossPoint3.^ay)';
+        Controller.F4 = Controller.F4.*crossPoint4./diag(crossPoint4.^apsi)';
+        eF1 = Controller.F1;
+        eF2 = Controller.F2;
+        eF3 = Controller.F3;
+        eF4 = Controller.F4;
+    
+        % FTC.confirmParam2(vF1,lF1,Controller.az,'z')
+        % FTC.confirmParam2(vF2,lF2,Controller.ax,'x')
+        % FTC.confirmParam2(vF3,lF3,Controller.ay,'y')
+        % FTC.confirmParam2(vF4,lF4,Controller.apsi,'yaw')
+    end
     Controller.Vep = matlabFunction([-eF1*ez1;-eF2*ez2;-eF3*ez3;-eF4*ez4],"Vars",{ez1,ez2,ez3,ez4});
 end
 % %servo
@@ -87,7 +115,7 @@ end
 Controller.dt = dt;
 Controller.type = "ELC";
 eig(Ac4 - Bc4 * eF1)
-% eig(Ac4 - Bc4 * eF2)
+eig(Ac4 - Bc4 * eF2)
 % eig(Ac4 - Bc4 * eF3)
 % eig(Ac2 - Bc2 * eF4)
 %% 線形システムにMCMPCコントローラを適用する場合
