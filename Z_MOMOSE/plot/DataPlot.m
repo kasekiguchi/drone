@@ -13,12 +13,12 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 1;%現在の結果を描画する
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fnowData = 10;%現在の結果を描画する
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=10;%flightのみは１
+fF=1;%flightのみは１
 startTime = 0;
-endTime = 1E3;
+endTime = 80;%1E3;
 %どの時間の範囲を描画するか指定   
 
 % startTime = [10,10,10,80];%モデル誤差用
@@ -29,6 +29,9 @@ endTime = 1E3;
 % endTime = [30,100];
 % startTime = [10,10,10,10];%外乱用
 % endTime = [30,30,30,30];
+
+% startTime = [10,10];%外乱用
+% endTime = [100,100];
 
 
 %HLとELの切り換える関数
@@ -46,11 +49,21 @@ endTime = 1E3;
                 
                 % simple_log_LS_HL_pdst, simple_log_FT_HL_pdst, simple_log_LS_EL_pdst, simple_log_FT_EL_pdst
                 % simple_log_LS_HL_pdst_hover, simple_log_FT_HL_pdst_hover, simple_log_LS_EL_pdst_hover, simple_log_FT_EL_pdst_hover
+
+                %ジャーナル実験
+                % simple_log_spHLLS, simple_log_spHLFT
+                simple_log_sdHLLS, simple_log_sdHLFT
+                % newLog
+                 % simple_log_sdHLFT
                 %実験
                 % simplify_log_HL_saddle,simplify_log_EL_saddle
+
                 % simplify_
         };
     c=[
+        "HLLS","HLFT"
+        % "LS","FT"
+        % "FT"
         % "HL","IOL"
         % "HLLS","HLFT","ELLS","ELFT"
         % "ELLS","ELFT"
@@ -62,7 +75,7 @@ endTime = 1E3;
            % "ELft"
            % "ELft"
         ];
-    if fnowData
+    if fnowData==1
         loggers = { simplifyLogger(gui.logger) };
         c = [];
     end
@@ -79,51 +92,17 @@ endTime = 1E3;
 % "pp", "pv", "pq", "pw", 
 %========================================================================
 %singleFigure
-     % n=["t_p" ,"x_y" ,"t_x","t_y","t_z","error","input","Trs","attitude","velocity","angular_velocity" ,"three_D"];
      % n=["t_p","t_x","t_y","t_z","error","t_errx","t_erry","t_errz","input","Trs","attitude","velocity","angular_velocity","x_y" ,"three_D","z1","z2","z3","z4","uHL"];%,"F1z1","F2z2","F3z3","F4z4"];
-     % n = ["error","xrmse","yrmse","zrmse","rmse","inputsum","inputsumT","inputsumTq"];
-     % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"];
-     n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","x_y" ,"t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"];
-     % n=["t_errx","t_erry","t_errz","three_D","x_y"];
-     % n=["t_p","input","u","Trs","attitude","velocity","angular_velocity"];
-     % n=["Trs","u","input"];%%%%%%%%%%%
-     % n=["inputRoll","inputPitch","inputYaw"];
-     % n = "inner_input";
-     % n=1;
+     % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","x_y" ,"t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"];
+     n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
+     % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
+     n = "input";
 %========================================================================
 % multiFigure
 
- nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D"]};%比較するとき複数まとめる
+nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D"]};%比較するとき複数まとめる
 multiFigure.layout = {[2,3],[2,3],[3,3],[2,3]};
 multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
-
-% nM = {["three_D","t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,2]};
-% multiFigure.title = ["position_error"];%[" state", " subsystem"];%title name
-
-% nM = {["z1","z2","z3","z4"],["F1z1","F2z2","F3z3","F4z4","uHL"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,2],[2,3]};
-% multiFigure.title = [" subsystem","vinput poly"];%[" state", " subsystem"];%title name
-
-% nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["x_y" ,"t_x" ,"t_y" ,"t_z"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,3],[2,2],[2,3],[3,3]};
-% multiFigure.title = ["bars","posi","err","state"];%[" state", " subsystem"];%title name
-
-% nM = {["t_p", "velocity", "attitude","angular_velocity","Trs", "three_D"],["input", "Trs","x_y" ,"t_x" ,"t_y" ,"t_z"],["z1","z2","z3","z4"],["input","inner_input","uHL","Trs"]};%複数まとめる
-% multiFigure.layout = {[2,3],[2,3],[2,2],[2,2]};%{[2,3],[2,3]}
-% multiFigure.title = [" state1", " state2 and input", " subsystem","input2"];%[" state", " subsystem"];%title name
-
-% nM = {["t_x" ,"t_y" ,"t_z","t_vx" ,"t_vy" ,"t_vz"],["t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","inner_input","Trs","x_y","three_D"],["t_errx","t_erry","t_errz"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,3],[2,3],[2,3],[1,3]};%{[2,3],[2,3]}
-% multiFigure.title = [" position_velocity", "attitude_angulerVelocity", "input_3D","error"];%[" state", " subsystem"];%title name
-
-% nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","x_y","three_D","inner_input"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
-% multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
-
-% nM = {["t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["input","Trs","three_D","x_y","x_z","y_z"]};%比較するとき複数まとめる
-% multiFigure.layout = {[2,3],[3,3],[2,3]};%{[2,3],[2,3]}
-% multiFigure.title = [" position_error", "v_q_w", "input_3D"];%[" state", " subsystem"];%title name
 
 if fnowData
     nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D"]};%比較するとき複数まとめる
@@ -378,6 +357,28 @@ if isSaved
     %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'jng');
         saveas(f(i), fullfile(FolderNameF, SaveTitle(i) ),'fig');
     %     saveas(f(i), fullfile(FolderName, SaveTitle(i) ),'eps');
+    %% save
+    FolderNameF="C:\Users\81809\OneDrive\デスクトップ\results\exp\2024_0327_23TADR_saddle_modelerror\figure"
+    SaveTitle = "sd_me_input"
+    i =1;
+    mkdir(FolderNameF);
+    saveas(f(i), fullfile(FolderNameF, SaveTitle ),'fig');
+    % saveas(f(i), fullfile(FolderNameF, SaveTitle ),'epsc');
+    %% グラフ上下入換え
+    h = get(gca,'Children'); % 軸オブジェクトの子オブジェクトを取得(複数の場合はベクトル)
+    formerLegend = "1";
+    hg = findobj(h,'displayName',formerLegend); % 青色のlineオブジェクトを検出
+    % オブジェクトの順番の入れ替え
+    % 青色ラインの要素を取得
+    ind = (h == hg); % h において hg であるかどうかを論理値で出力
+    % 青色ラインのハンドルを一番上に設定
+    newh = [h(ind); h(~ind)]; % h(ind)：青色ラインのハンドル、h(~ind)：それ以外のハンドル
+    for i = 1:length(h)
+        DN(i) = string(newh(i).DisplayName);
+    end
+    legend([newh(1),newh(2:end)],DN);
+    % legend([newh(1),newh(2)],h(1).DisplayName,h(2).DisplayName);
+    set(gca,'children',newh) % Childrenプロパティ値の再設定(順番の入れ替え)
 end
 %% functions
 function [allData,RMSElog]=dataSummarize(loggers, c, option, addingContents, fF, startTime, endTime)
@@ -686,51 +687,52 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         endTime = endTime*ones(1,logNum);
     end
     if fF==1
-        % logNum = length(loggers);
-        % if length(startTime)<logNum
-        %     startTime = startTime*ones(1,logNum);
-        %     endTime = endTime*ones(1,logNum);
-        % end
         for i = 1:logNum
             t{i} = loggers{i}.t';
-            kf(i)=find(loggers{i}.phase == 102,1,'first');
-            ke(i)=find(loggers{i}.phase == 102,1,'last');
-            % kf(i)=find(loggers{i}.Data.phase == 116,1,'first')+1;
-            % ke(i)=find(loggers{i}.Data.phase == 116,1,'last');
+            %flightのインデックス
+            kl = find(loggers{i}.phase == 102);
+            kf(i)= kl(1);
+            ke(i)= kl(end);
+            %時間表示に使用するインデックス
             sTime(i) = t{i}(kf(i)) + startTime(i);
             eTime(i) = t{i}(kf(i)) + endTime(i);
-            t{i} = t{i}(kf(i):ke(i));
             spanIndex{i} = find(t{i} <= eTime(i) & t{i} >= sTime(i) );
-            mni(i) = min(spanIndex{i});
-            mxi(i) = max(spanIndex{i});
+            kf(i) = spanIndex{i}(2);
+            ke(i) = min(ke(i), spanIndex{i}(end));%flightのindex数以下になる
+            lt(i) = ke(i)-kf(i)+1;%flightのindex数以下になる
             %ジャーナル用ELFTmodelerror
-            if i~=2
-                mxi(i)=mxi(i)-1;
-            end
+            % if i~=2
+            %     mxi(i)=mxi(i)-1;
+            % end
             % ts{i} = t{i}(mni(i):mxi(i));
             % tr(i)=t{i}(spanIndex{i}(1));
-            flightSpan(i)=mxi(i)-mni(i);
+            ts{i} = t{i}(kf(i):ke(i));
+            t0(i) = t{i}(kf(i));
         end
         %表示する時間を最小のものに合わせる
-        minSpan = min(flightSpan);
+        % minSpan = min(mxi);
+        [mlt,mi] = min(lt);
+        minte = t{mi}(mlt);
         for i = 1:logNum
-            mxi(i) = mni(i) + minSpan;
-            ts{i} = t{i}(mni(i):mxi(i));
-            tr(i)=t{i}(spanIndex{i}(1));
+            ke(i) = kf(i) + find(t{i}<minte,1,"last") - 1;
+            ts{i} = t{i}(kf(i):ke(i));
+            lt(i) = length(ts{i});
         end
     else 
         %flite のみでない場合
         for i = 1:logNum
             t{i} = loggers{i}.t';
             spanIndex{i} = find(t{i} <= endTime(i) & t{i} >= startTime(i) );
-            mni(i) = min(spanIndex{i});
-            mxi(i) = max(spanIndex{i});
-            ts{i} = t{i}(mni(i):mxi(i));
-            tr(i)=0;
+            % kf(i) = min(spanIndex{i});
+            % ke(i) = max(spanIndex{i});
+            lt(i) = length(spanIndex{i});%flightのindex数以下になる
+            kf(i) = spanIndex{i}(1);
+            ke(i) = spanIndex{i}(end);
+            ts{i} = t{i}(kf(i):ke(i));
+            t0(i)=0;
         end
     end
         for i = 1:logNum
-            lt(i) = length(mni(i):mxi(i));
             %初期値設定
             ev{i}=[];eq{i}=[];ew{i}=[];eTrs{i} = zeros(2,lt(i));            
             zero4=zeros(4,lt(i));
@@ -762,11 +764,11 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
                 fieldVar = fieldnames(loggers{i}.(fieldLog{j}));
                 for j2 = 1:length(fieldVar)
                     F = fieldLog{j}(1);
-                    eval([F,fieldVar{j2},'{i}= loggers{i}.',fieldLog{j},'.',fieldVar{j2},'(:,mni(i):mxi(i));']);
+                    eval([F,fieldVar{j2},'{i}= loggers{i}.',fieldLog{j},'.',fieldVar{j2},'(:,kf(i):ke(i));']);
                 end
             end
-            time{i}=ts{i}-tr(i);
-            err{i}=ep{i}-rp{i};%誤差
+            time{i} = ts{i}-t0(i);
+            err{i} = ep{i}-rp{i};%誤差
 
             estx{i} = ep{i}(1,:);
             esty{i} = ep{i}(2,:);
@@ -810,7 +812,7 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         if isempty(c)
             c = string(1:logNum);
         end
-        if length(c)==1
+        if length(c)<2
             Rc = ["Estimator","Reference"]; 
         else
             Rc = [c,"Reference"];
@@ -822,9 +824,9 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         allData.x_y = {struct('x',{[estx,refx]},'y',{[esty,refy]}), struct('x','$x$ (m)','y','$y$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
         allData.x_z = {struct('x',{[estx,refx]},'y',{[estz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
         allData.y_z = {struct('x',{[esty,refy]},'y',{[estz,refz]}), struct('x','$x$ (m)','y','$z$ (m)'),Rc,add_option(["aspect"],option,addingContents)};
-        allData.t_x = {struct('x',{[time{1},time]},'y',{[estx,refx]}), struct('x','time (s)','y','$x$ (m)'),Rc,add_option([],option,addingContents)};
-        allData.t_y = {struct('x',{[time{1},time]},'y',{[esty,refy]}), struct('x','time (s)','y','$y$ (m)'),Rc,add_option([],option,addingContents)};
-        allData.t_z = {struct('x',{[time{1},time]},'y',{[estz,refz]}), struct('x','time (s)','y','$z$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.t_x = {struct('x',{[time,time{1}]},'y',{[estx,refx]}), struct('x','time (s)','y','$x$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.t_y = {struct('x',{[time,time{1}]},'y',{[esty,refy]}), struct('x','time (s)','y','$y$ (m)'),Rc,add_option([],option,addingContents)};
+        allData.t_z = {struct('x',{[time,time{1}]},'y',{[estz,refz]}), struct('x','time (s)','y','$z$ (m)'),Rc,add_option([],option,addingContents)};
         allData.error = { struct('x',{time},'y',{err}), struct('x','time (s)','y','error (m)'), LgndCrt(["$x$","$y$","$z$"],c),add_option([],option,addingContents)};
         allData.t_errx = {struct('x',{time},'y',{errx}), struct('x','time (s)','y','error $x$ (m)'),CC,add_option([],option,addingContents)};
         allData.t_erry = {struct('x',{time},'y',{erry}), struct('x','time (s)','y','error $y$ (m)'),CC,add_option([],option,addingContents)};
@@ -876,6 +878,7 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         %二乗誤差平均
         RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];
         RMSE = zeros(logNum,12);
+
         for i =1:logNum
             refs = zeros(3,lt(i));%kはtimeの長さ
             RMSE(i,1:12) = [rmse(rp{1,i},ep{1,i}),rmse(refs,ev{1,i}),rmse(refs,eq{1,i}),rmse(refs,ew{1,i})];
@@ -922,7 +925,6 @@ function plot_data_single(~, ~, branchData)
         option = branchData{1,4};
         plotNum = length(data.y);
         if ~isfield(data, 'z')
-%                 f(figureNumber) = figure('Name',figName);
                 hold on
                 if length(data.x) ~= length(data.y)
                     for i = 1:plotNum 
@@ -957,7 +959,6 @@ function plot_data_single(~, ~, branchData)
                 grid on
                 hold off
         else
-%                 f(figureNumber) = figure('Name',figName);
                 hold on
                 for i = 1:plotNum 
                     plot3(data.x{1,i}, data.y{1,i}, data.z{1,i}, 'LineWidth', option.lineWidth)
@@ -968,7 +969,7 @@ function plot_data_single(~, ~, branchData)
                 legend(legendLabels,'NumColumns',option.legendColumns,'Interpreter','latex')
                 daspect(option.aspect)
                 campos(option.camposition)
-                title(option.titleName)
+                % title(option.titleName)
                 set(gca,'FontSize',option.fontSize,"TickLabelInterpreter","latex")
                 grid on
                 hold off

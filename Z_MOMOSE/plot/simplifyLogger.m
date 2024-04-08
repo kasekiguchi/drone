@@ -28,11 +28,11 @@ function newLog = simplifyLogger(log)
             end
         end
         %入力の格納
-        fieldcell2 = fieldnames(log.Data.agent.controller.result{1, 1});
-        for j = 1:length(fieldcell2)
-            S = fieldcell2{j};%State
-            for j2 = 1:newLog.k
-                newLog.controller.(S)(:,j2) = log.Data.agent.controller.result{1, j2}.(S);
+        for j = 1:newLog.k
+            fieldcell2 = fieldnames(log.Data.agent.controller.result{1, j});
+            for j2 = 1:length(fieldcell2)
+                S = fieldcell2{j2};%State         
+                    newLog.controller.(S)(:,j) = log.Data.agent.controller.result{1, j}.(S);
             end
         end
         if log.fExp
