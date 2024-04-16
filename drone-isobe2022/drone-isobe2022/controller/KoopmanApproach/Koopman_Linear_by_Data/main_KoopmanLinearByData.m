@@ -178,9 +178,9 @@ if change_reference == 1
     close all
     opengl software
    
-    simResult.reference = ImportFromExpData_estimation(''); %推定精度検証用データの設定
+    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata.mat'); %推定精度検証用データの設定
 
-    model = load("test.mat",'est');
+    model = load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est');
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
@@ -199,8 +199,8 @@ if change_reference == 1
     simResult.Xhat(:,1) = simResult.reference.X(:,1);
     simResult.U = simResult.reference.U(:,1:end);
     simResult.T = simResult.reference.T(1:end);
-    N1 = 1;
-    N2 = 56;
+    N1 = 14; % 
+    N2 = 20; %56
     length = N2 - N1;
     j = 1;
     while(1)
