@@ -72,6 +72,7 @@ classdef HLMCMPC_controller < handle
       [obj.param.expand_A, obj.param.expand_B] = EXPAND_STATE(obj);
 
       obj.input.Resampling_mu = zeros(4, obj.param.H, obj.N);
+      obj.reference.polynomial = obj.param.reference.polynomial;
 
       % Initialize input
       obj.result.input = zeros(self.estimator.model.dim(2),1);
@@ -83,8 +84,11 @@ classdef HLMCMPC_controller < handle
       % profile on
       % OB = obj;
       obj.param.t = varargin{1,1}.t;
-      obj.state.ref = obj.Reference(); % controller内でリファレンス生成
-
+      obj.param.te = varargin{1,1}.te;
+      % controller内でリファレンス生成, 
+      % arg:trajectory type, 1:timevarying,
+      % 2:polynomial
+      obj.state.ref = obj.Reference(2); 
       %% from main ref
       xd = [obj.state.ref(1:3,1); 0; obj.state.ref(7:9,1); 0]; % 9次多項式にも対応
       xd = [xd; zeros(24, 1)];
@@ -130,10 +134,10 @@ classdef HLMCMPC_controller < handle
       obj.N = obj.param.nextparticle_num;
 
       %% 特定の入力なし
-      obj.input.sigma(1) = 0;
-      obj.input.sigma(4) = 0;
-      mu(4,:,:) = zeros(1, obj.param.H, obj.N); 
-      mu(1,:,:) = zeros(1, obj.param.H, obj.N); 
+      % obj.input.sigma(1) = 0;
+      % obj.input.sigma(4) = 0;
+      % mu(4,:,:) = zeros(1, obj.param.H, obj.N); 
+      % mu(1,:,:) = zeros(1, obj.param.H, obj.N); 
 
       % 全棄却時のケア
       if obj.input.AllRemove == 1
@@ -201,7 +205,7 @@ classdef HLMCMPC_controller < handle
 
         % vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
-        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
+        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
         % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
@@ -248,6 +252,7 @@ classdef HLMCMPC_controller < handle
       obj.result.sigma = obj.input.sigma;
       obj.result.variable_N = obj.N; % 追加
       obj.result.Evaluationtra = obj.input.Evaluationtra;
+      obj.result.xr = obj.state.ref;
       % obj.result.Evaluationtra_norm = obj.input.normE;
 
       result = obj.result;
@@ -452,23 +457,54 @@ classdef HLMCMPC_controller < handle
         resampling_u(1, 1:H, 1:NP) = u1;
     end
 
-    function [xr] = Reference(obj, ~)
-        % パラメータ取得
-        % timevaryingをホライズンごとのreferenceに変換する
-        % params.dt = 0.1;
-        xr = zeros(16, obj.param.H);    % initialize
-        % 時間関数の取得→時間を代入してリファレンス生成
-        RefTime = obj.self.reference.func;    % 時間関数の取得
-        for h = 0:obj.param.H-1
-            t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
-            ref = RefTime(t);
-            xr(1:3, h+1) = ref(1:3);
-            xr(7:9, h+1) = ref(5:7);
-            xr(17:19, h+1) = ref(9:11);
-            xr(4:6, h+1) =   [0;0;0]; % 姿勢角
-            xr(10:12, h+1) = [0;0;0];
-            xr(13:16, h+1) = 0.544*9.81/4 * [1;1;1;1]; % MC -> 0.6597,   HL -> 0
+    function [xr] = Reference(obj, refFlag)
+        if refFlag == 1 % timevarying
+            xr = zeros(16, obj.param.H);    % initialize
+            % 時間関数の取得→時間を代入してリファレンス生成
+            RefTime = obj.self.reference.func;    % 時間関数の取得
+            for h = 0:obj.param.H-1
+                t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
+                ref = RefTime(t);
+                xr(1:3, h+1) = ref(1:3);
+                xr(7:9, h+1) = ref(5:7);
+                xr(17:19, h+1) = ref(9:11);
+                xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                xr(10:12, h+1) = [0;0;0];
+                xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+            end
+        elseif refFlag == 2 % polynomial
+            xr = zeros(16, obj.param.H);    % initialize
+            for h = 0:obj.param.H-1
+                t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
+                ind = round(t/0.025) + 1; 
+                if ind > (obj.param.te/0.025 + 1); ind = obj.param.te/0.025 + 1; end
+                xr(1:3, h+1) = [obj.reference.polynomial.X(ind,1); obj.reference.polynomial.Y(ind,1); obj.reference.polynomial.Z(ind,1)];
+                xr(7:9, h+1) = [obj.reference.polynomial.X(ind,2); obj.reference.polynomial.Y(ind,2); obj.reference.polynomial.Z(ind,2)];
+                xr(17:19, h+1) = [obj.reference.polynomial.X(ind,3); obj.reference.polynomial.Y(ind,3); obj.reference.polynomial.Z(ind,3)];
+                xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                xr(10:12, h+1) = [0;0;0];
+                xr(13:16, h+1) = obj.param.ref_input;
+            end
         end
     end
+
+    %% -- Generate Reference
+    % %% caseによる改造
+    % function [xr] = Reference(obj, refFlag)
+    %     switch refFlag 
+    %         case 1
+    %             [xr] = Reference_timevarying(obj);
+    %         % case 2
+    %         %     [xr] = Reference_SICE(params, T, Agent, Gq, ini, phase, refFlag, te);
+    %         % case 3
+    %         %     [xr] = Reference_polynomial(params, T, Agent, Gq, ini, phase, refFlag, te);
+    %         % case 4
+    %         %     [xr] = Reference_SICE_HL(params, T, Agent, Gq, ini, phase, refFlag, te);
+    %         % case 5
+    %         %     [xr] = Reference_spline(params, T, Agent, Gq, ini, phase, refFlag, te);
+    %         otherwise
+    %             error("Not generate reference");
+    %     end
+    % end
   end
 end

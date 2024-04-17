@@ -1,4 +1,4 @@
-function Controller = Controller_HLMCMPC(~)
+function Controller = Controller_HLMCMPC(agent)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
@@ -14,6 +14,30 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.input.Minsigma = 0.5 * [0.1,1,1,1];
     Controller_param.input.Maxinput = 1.5;
     Controller_param.input.Constinput = 10;
+
+    %% polynomial#############################
+    z0 = agent.estimator.result.state.p(3); % z初期値
+    ze = 0; % z収束値 -0.5
+    v0 = 0; % 初期速度
+    ve = 0; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1
+    
+    delayTime = 10; % かける時間 : 2sで落下＋移動
+    t = 0:0.025:delayTime+1;
+    Controller_param.reference.polynomial.Z = curve_interpolation_9order(t',delayTime,z0,v0,ze,ve);
+    
+    x0 = agent.estimator.result.state.p(1); % -1
+    xe = 0;
+    v0 = 0;
+    ve = 0;
+    % teref = 1.5;
+    delay = 0;
+    Controller_param.reference.polynomial.X = curve_interpolation_9order(t'-delay,delayTime,x0,v0,xe,ve);
+    
+    v0 = 0;
+    y0 = agent.estimator.result.state.p(2);
+    ye = 0;
+    Controller_param.reference.polynomial.Y = curve_interpolation_9order(t',delayTime,y0,v0,ye,ve);
+    %#########################################
 
     Controller_param.input.range = 50; % 50
     % Controller_param.input.Maxsigma = 5 * [0.01,1,1,1]; % 10
@@ -74,8 +98,8 @@ function Controller = Controller_HLMCMPC(~)
     Controller_param.R = 1e-5 * diag([1.0; 1*[1.0; 1.0; 1.0]]);
     Controller_param.RP = 1e-1 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
     
-    Controller_param.input.u = 0.269 * 9.81 * [0;0;0;0]; %  sekiguchi 
-    Controller_param.ref_input = 0.269 * 9.81 * [0;0;0;0];
+    Controller_param.input.u = agent.parameter.mass * 9.81 * [0;0;0;0]; %  sekiguchi 
+    Controller_param.ref_input = agent.parameter.mass * 9.81 * [0;0;0;0];
 
     Controller_param.const = 1e6;
 
