@@ -50,7 +50,7 @@ classdef (StrictDefaults) EGO < matlab.System
 
   methods (Access = protected)
     %% Common functions
-    function setupImpl(obj)
+    function setupImpl(obj) % 初期化
       setting = coder.load("setting.mat");
       obj.dt = setting.dt;
       obj.state = setting.x0;
@@ -67,7 +67,7 @@ classdef (StrictDefaults) EGO < matlab.System
       setup(obj.controller,obj.dt,setting.cparam);
     end
 
-    function [u,pub] = stepImpl(obj,state,t)
+    function [u,pub] = stepImpl(obj,state,t) % 各時刻実行
       % Implement algorithm. Calculate y as a function of input u and
       % internal or discrete states.
       disp(t)
@@ -98,7 +98,7 @@ classdef (StrictDefaults) EGO < matlab.System
     
     end
 
-    function resetImpl(obj)
+    function resetImpl(obj) % リセット
       % Initialize / reset internal or discrete properties
       setting = coder.load("setting.mat");
       obj.parameter.values = setting.parameter.values;

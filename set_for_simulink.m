@@ -125,3 +125,4 @@ save("setting.mat","x0","u0","dt","eparam","rparam","cparam","parameter");
 
 %% 
 open_system("MS_test.slx");
+out = sim("MS_test.slx");

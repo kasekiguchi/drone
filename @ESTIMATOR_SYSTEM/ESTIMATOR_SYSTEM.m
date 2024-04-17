@@ -99,7 +99,7 @@ end
         %tmpvalue = obj.model.projection(tmpvalue);
         obj.result.state = tmpvalue;
         obj.state = tmpvalue;
-         obj.result.P = P;
+        obj.result.P = P;
        result=obj.result;
     end
   
