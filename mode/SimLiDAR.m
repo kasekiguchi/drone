@@ -64,15 +64,15 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle_yaw",{"freq",20,
 % agent.controller = HLC(agent,Controller_HL(dt));
 
 % コントローラー補正(ΣVに着目)
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,1.5,"F_RPY18","G_RPY18","Onew"));
-agent.controller.do = @controller_do;
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,1.5,"F_RPY18","G_RPY18","Onew"));
+% agent.controller.do = @controller_do;
 
 % コントローラー補正(Lfσ+Lgσ)
-%%これを利用する場合はController_CORRECT_OBSERVABILITY，CORRECT_OBSERVABILITYのコメントアウト部分変更
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-17,0.1,"F_RPY18","G_RPY18","Onew","Odot"));
-% agent.controller.do = @controller_do;
+%これを利用する場合はController_CORRECT_OBSERVABILITY，CORRECT_OBSERVABILITYのコメントアウト部分変更
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.correct = CORRECT_OBSERVABILITY(agent,Controller_CORRECT_OBSERVABILITY(dt,1.0E-9,0.001,"F_RPY18","G_RPY18","Onew","Odot"));
+agent.controller.do = @controller_do;
 
 %% Direct model
 % agent = DRONE;

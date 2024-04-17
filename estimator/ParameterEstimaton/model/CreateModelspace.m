@@ -1,4 +1,4 @@
-%% F + Gu の F，Gそれぞれを関数化
+  %% F + Gu の F，Gそれぞれを関数化
 % Initialize
 % do initialize first in main.m
 %clc
