@@ -1047,5 +1047,3 @@ Log*
 *.prj
 /codegen/
 assemblypath.txt
-drone-isobe2022/drone-isobe2022/controller/KoopmanApproach/Koopman_Linear_by_Data/クープマンモデル_Kiyama/EstimationResult_12state_10_12_data=revcirandcirandsaddle_circle=circle_estimation=circle_Inputandconst.mat
-drone-isobe2022/drone-isobe2022/controller/KoopmanApproach/Koopman_Linear_by_Data/クープマンモデル_Kiyama/EstimationResult_12state_10_30_data=cirandrevandsaddle_circle=circle_estimation=saddle_Inputandconst.mat
