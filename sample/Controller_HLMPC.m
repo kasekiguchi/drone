@@ -18,11 +18,17 @@ function Controller = Controller_HLMPC(~)
 
     Controller_param.Zf = diag([1; 1]);
     Controller_param.Xf = diag([1,1,1,1]);
-    Controller_param.Yf = diag([10000,10000,1,1]);
+    Controller_param.Yf = diag([1,1,1,1]);
     Controller_param.PHIf = diag([1; 1]);
 
     Controller_param.R = diag([1.0; 1*[1.0; 1.0; 1.0]]);
     Controller_param.RP = 1e2 * diag([1.0; 1*[1.0; 1.0; 1.0]]); 
+
+    Controller_param.input.u = [0;0;0;0];  % 仮想入力
+    input_th = 30;
+    Controller_param.input_max = [ input_th; input_th; input_th; input_th];
+    Controller_param.input_min = [-input_th;-input_th;-input_th;-input_th];
+    % Controller_param.torque_TH = 2;
     
     Controller_param.input.u = [0;0;0;0]; %  sekiguchi 
     Controller_param.ref_input = [0;0;0;0];

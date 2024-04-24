@@ -70,20 +70,9 @@ function Controller = Controller_HLMCMPC(agent)
     % Controller_param.Yf = Controller_param.X;
     % Controller_param.PHIf = Controller_param.PHI;
 
-    % 最新 1/11　時点いい重み 
-    Controller_param.Z = 1 * diag([10; 10]);% * 1e3; %2
-    Controller_param.X = 1e3 * diag([1000,10000,1,1]);% 1e2でも結構いい感じ
-    Controller_param.Y = Controller_param.X;% * 1e3;
-    Controller_param.PHI = 1* diag([100; 1]);
-
-    Controller_param.Zf = 1e3 * diag([1000; 100]);
-    Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000
-    Controller_param.Yf = Controller_param.X;
-    Controller_param.PHIf = Controller_param.PHI;
-
-    %% 着陸
-    % Controller_param.Z = 1e2 * diag([1000; 1000]);% * 1e3; %2
-    % Controller_param.X = 1e5 * diag([1000,100,1,1]);% 1e2でも結構いい感じ
+    % 最新 2024/1/11　時点いい重み 
+    % Controller_param.Z = 1 * diag([10; 10]);% * 1e3; %2
+    % Controller_param.X = 1e3 * diag([1000,10000,1,1]);% 1e2でも結構いい感じ
     % Controller_param.Y = Controller_param.X;% * 1e3;
     % Controller_param.PHI = 1* diag([100; 1]);
     % 
@@ -91,6 +80,17 @@ function Controller = Controller_HLMCMPC(agent)
     % Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000
     % Controller_param.Yf = Controller_param.X;
     % Controller_param.PHIf = Controller_param.PHI;
+
+    %% 
+    Controller_param.Z = 1e2 * diag([1000; 10]);% * 1e3; %2
+    Controller_param.X = 1e5 * diag([1000;10;1;1]);% 1e2でも結構いい感じ
+    Controller_param.Y = Controller_param.X;% * 1e3;
+    Controller_param.PHI = 1* diag([100; 1]);
+
+    Controller_param.Zf = 1e3 * diag([1000; 100]);
+    Controller_param.Xf = Controller_param.X; % 制約時のみ * 1000
+    Controller_param.Yf = Controller_param.X;
+    Controller_param.PHIf = Controller_param.PHI;
 
 
     Controller_param.AP = 1e3; % どれくらい距離をとる必要があるか

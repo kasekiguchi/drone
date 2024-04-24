@@ -33,14 +33,12 @@ classdef HLMCMPC_controller < handle
       obj.self = self;
       %---MPCパラメータ設定---%
       obj.param = param.param;
-      % obj.modelf = obj.self.model.method;
       obj.modelp = obj.self.parameter.get();
       %%  
       obj.input = obj.param.input;
       obj.const = obj.param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
       obj.input.input_TH = obj.param.input.range; % 最大最小入力
-      % obj.model = self.model;
       obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = obj.param.input.Initsigma;  % 初期化
@@ -86,9 +84,8 @@ classdef HLMCMPC_controller < handle
       obj.param.t = varargin{1,1}.t;
       obj.param.te = varargin{1,1}.te;
       % controller内でリファレンス生成, 
-      % arg:trajectory type, 1:timevarying,
-      % 2:polynomial
-      obj.state.ref = obj.Reference(2); 
+      % arg:trajectory type, 1:timevarying,  2:polynomial
+      obj.state.ref = obj.Reference(1); 
       %% from main ref
       xd = [obj.state.ref(1:3,1); 0; obj.state.ref(7:9,1); 0]; % 9次多項式にも対応
       xd = [xd; zeros(24, 1)];
@@ -113,8 +110,7 @@ classdef HLMCMPC_controller < handle
       %% Referenceの取得、ホライズンごと
       % xrを仮想状態目標値に変換 ホライズン分の変換
       % xyz yaw v_{xyz yaw} a_{xyz yaw}
-      obj.reference.xd_imagine = [obj.state.ref(1:3,:); zeros(1,obj.param.H); obj.state.ref(7:9,:); zeros(1,obj.param.H); obj.state.ref(17:19,:); zeros(21, obj.param.H)]; % 実状態を仮想状態に合わせた形で抜き取る
-      % xr_imagine = 
+      obj.reference.xd_imagine = [obj.state.ref(1:3,:); zeros(1,obj.param.H); obj.state.ref(7:9,:); zeros(1,obj.param.H); obj.state.ref(17:19,:); zeros(21, obj.param.H)]; % 実状態目標値=Rb0をかけるために合わせる
       % yaw入力時にHL用に目標値が切り替わるように　Rb0をかけるようにする
       xr_imagine(1:3,:)=Rb0'*obj.reference.xd_imagine(1:3,:);
       xr_imagine(4,:) = zeros(1,obj.param.H);
@@ -122,10 +118,11 @@ classdef HLMCMPC_controller < handle
       xr_imagine(9:11,:)=Rb0'*obj.reference.xd_imagine(9:11,:);
       xr_imagine(13:15,:)=Rb0'*obj.reference.xd_imagine(13:15,:);
       xr_imagine(17:19,:)=Rb0'*obj.reference.xd_imagine(17:19,:);
+      % 仮想状態の目標値
       obj.reference.xr_org = [xr_imagine(3,:);xr_imagine(7,:);xr_imagine(1,:);xr_imagine(5,:);xr_imagine(9,:);xr_imagine(13,:);xr_imagine(2,:);xr_imagine(6,:);xr_imagine(10,:);xr_imagine(14,:);xr_imagine(4,:);xr_imagine(8,:)];
+      % 仮想状態の目標値。Objectiveで使用。　現在地から目標値（座標）への誤差
       obj.reference.xr = obj.reference.xr_org(:,1) - obj.reference.xr_org; 
 
-      % mu = zeros(4, obj.param.H, obj.N); % トルク入力モデルだと基本は0であってほしいことから平均値を0に固定
       mu = obj.input.Resampling_mu; % Importance Sampling / Low Variance Sampling
       % mu = repmat(obj.input.u, 1, obj.param.H, obj.N); % 前の入力を平均値
 
@@ -255,6 +252,25 @@ classdef HLMCMPC_controller < handle
       obj.result.xr = obj.state.ref;
       % obj.result.Evaluationtra_norm = obj.input.normE;
 
+      %% 情報表示
+      if exist("exitflag") ~= 1
+          exitflag = NaN;
+      end
+      est_print = obj.self.estimator.result.state;
+      fprintf("==================================================================\n")
+      fprintf("==================================================================\n")
+      fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+          est_print.p(1), est_print.p(2), est_print.p(3),...
+          est_print.v(1), est_print.v(2), est_print.v(3),...
+          est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
+      fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+          obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
+          obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
+          obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
+      fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
+          obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+      fprintf("\n");
+      
       result = obj.result;
       % profile viewer
     end

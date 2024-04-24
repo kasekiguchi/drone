@@ -59,10 +59,10 @@ classdef MCMPC_controller_org < handle
 %             ref_MC = [ref_p; ref_q; ref_v; ref_w; ref_input];
 %             xr = repmat(ref_MC, 1, obj.param.H);
             %%
-            xr = obj.Reference(); % mainでできなくなったのでcnotroller内で計算
+            % xr = obj.Reference(); % mainでできなくなったのでcnotroller内で計算
             
             %%
-            obj.state.ref = xr; % 関数の受け渡し用
+            obj.state.ref = obj.Reference(); % 関数の受け渡し用
             
             mu(1) = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
             mu(2) = obj.input.u(2);    % 初期値はparamで定義
@@ -168,6 +168,25 @@ classdef MCMPC_controller_org < handle
             obj.result.Evaluationtra = obj.input.Evaluationtra;
             obj.result.Evaluationtra_norm = obj.input.normE;
             obj.result.eachcost = eachCost(BestcostID, :);
+            
+            %% 情報表示
+            if exist("exitflag") ~= 1
+                exitflag = NaN;
+            end
+            est_print = obj.self.estimator.result.state;
+            fprintf("==================================================================\n")
+            fprintf("==================================================================\n")
+            fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+                    est_print.p(1), est_print.p(2), est_print.p(3),...
+                    est_print.v(1), est_print.v(2), est_print.v(3),...
+                    est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
+            fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+                    obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
+                    obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
+                    obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
+            fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
+                obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+            fprintf("\n");
             
             result = obj.result;  
 %             profile viewer

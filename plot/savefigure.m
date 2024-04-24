@@ -1,6 +1,6 @@
 %%
 % SigmaData = zeros(4, te/dt);
-te = 10;
+% te = 10;
 close all
 % fprintf("%f秒\n", totalT)
 Fontsize = 15;  
@@ -12,7 +12,7 @@ set(0,'defaultLineMarkerSize',15);
 %% Importing data
 if exist("app") ~= 7
     logt = app.logger.Data.t;
-    xmax = 10;
+    xmax = app.time.t-app.time.dt;
     for i = 1:length(app.logger.Data.t) -1
         Data(:,i) = app.logger.Data.agent.estimator.result{i}.state.get();
         RData(:,i) = app.logger.Data.agent.controller.result{i}.xr(:,1);
@@ -21,7 +21,7 @@ if exist("app") ~= 7
     end
 else
     logt = gui.logger.Data.t;
-    xmax = gui.time.te;
+    xmax = gui.time.t-gui.time.dt;
     for i = 1:length(gui.logger.Data.t) -1
         Data(:,i) = gui.logger.Data.agent.estimator.result{i}.state.get();
         RData(:,i) = gui.logger.Data.agent.controller.result{i}.xr(:,1);
@@ -93,6 +93,8 @@ elseif figtype == 2
     ytickformat('%.1f');
     % virtual input
     subplot(m,n,5); plot(logt, InputV); legend("Z", "X", "Y", "YAW");
+    xlabel("Time [s]"); ylabel("Imaginary input");
+    grid on; xlim([0 xmax]); ylim([-inf inf]);
 end
 %%
 set(gca,'FontSize',Fontsize);  grid on; title("");
