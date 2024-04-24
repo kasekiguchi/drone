@@ -25,6 +25,7 @@ classdef HLMPC_controller <handle
         WeightRp
         A
         B
+        C
         mpc
     end
 
@@ -39,7 +40,7 @@ classdef HLMPC_controller <handle
 
             %%
             obj.input = obj.param.input;
-            obj.param.H = obj.param.H + 1;
+            % obj.param.H = obj.param.H + 1;
             obj.model = self.plant;
             obj.param.fRemove = 0;
 
@@ -54,9 +55,11 @@ classdef HLMPC_controller <handle
             % z, x, y, yawの順番
             A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
             B = blkdiag([0;1],[0;0;0;1],[0;0;0;1],[0;1]);
+            
             sysd = c2d(ss(A,B,eye(12),0),param.param.dt); % 離散化
             obj.A = sysd.A;
             obj.B = sysd.B;
+            obj.C = eye(12); 
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1);
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H); 
@@ -103,22 +106,44 @@ classdef HLMPC_controller <handle
             xr_imag = [xr_real(3,:);xr_real(7,:);xr_real(1,:);xr_real(5,:);xr_real(9,:);xr_real(13,:);xr_real(2,:);xr_real(6,:);xr_real(10,:);xr_real(14,:);xr_real(4,:);xr_real(8,:)];
             obj.reference.xr = [xr_imag(:,1) - xr_imag; xr_real(13:end,:)];
 
-            %% MPC_controllerと同様に変更中
-            %-- fmincon 設定
-            options = optimoptions('fmincon');
-            options = optimoptions(options,'MaxIterations',         1.e+12); % 最大反復回数
-            options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
-            
-            options.Algorithm = 'sqp';  % 逐次二次計画法
+            %% fmincon
+            % %-- fmincon 設定
+            % options = optimoptions('fmincon');
+            % options = optimoptions(options,'MaxIterations',         1.e+12); % 最大反復回数
+            % options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
+            % 
+            % options.Algorithm = 'sqp';  % 逐次二次計画法
+            % options.Display = 'none';   % 計算結果の表示
+            % %% conditions
+            % fun = @obj.objective;
+            % x0 = obj.previous_input;
+            % A = []; b = []; Aeq = []; beq = []; 
+            % lb = repmat(obj.param.input_min, 1,obj.param.H); % min
+            % ub = repmat(obj.param.input_max, 1,obj.param.H); % max
+            % nonlcon = [];
+            % [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
+
+            %% quadprog
+            % MPC設定(problem)
+            options = optimoptions('quadprog');
+            options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
+            options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
+
+            %-- quadprog設定
             options.Display = 'none';   % 計算結果の表示
-            %% conditions
-            fun = @obj.objective;
-            x0 = obj.previous_input;
-            A = []; b = []; Aeq = []; beq = []; 
-            lb = repmat(obj.param.input_min, 1,obj.param.H); % min
-            ub = repmat(obj.param.input_max, 1,obj.param.H); % max
-            nonlcon = [];
-            [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
+            problem.solver = 'quadprog'; % solver
+
+            [H, f] = obj.change_equation();
+            A = [];
+            b = [];
+            Aeq = [];
+            beq = [];
+            lb = [];
+            ub = [];
+            x0 = [obj.previous_input(:)];
+              
+            [var, ~, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
+
             obj.previous_input = var; % 最適化の初期値
 
             vf = var(1, 1);     % 最適な入力の取得
@@ -180,6 +205,46 @@ classdef HLMPC_controller <handle
 
             %-- 評価値計算
             eval = sum(stageStateZ + stageInputPre + stageInputRef) + terminalState;  % 全体の評価値
+        end
+
+        function [H, f] = change_equation(obj)
+            obj.A;
+            obj.B;
+            obj.C;
+        
+            Q = obj.Weight;
+            R = obj.WeightR;
+            Qf = obj.WeightF;
+
+            Xc = obj.current_state; % 現在状態
+
+            r  = obj.reference.xr(1:12,:);
+            r = r(:); %目標値、列ベクトルに変換
+            ur = obj.reference.xr(13:16,:);
+            ur = ur(:); %目標入力、列ベクトルに変換
+        
+            CQC = obj.C' * Q * obj.C;
+            CQfC = obj.C' * Qf * obj.C;
+            QC = Q * obj.C;
+            QfC = Qf * obj.C;
+            
+            Rm = blkdiag(R, R, R, R, R, R, R, R, R, zeros(4)); %R
+            Am = [obj.A; obj.A^2; obj.A^3; obj.A^4; obj.A^5; obj.A^6; obj.A^7; obj.A^8; obj.A^9; obj.A^10]; %A
+            Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
+            qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
+        
+            for i  = 1:obj.param.H
+                for j = 1:obj.param.H
+                    if j <= i
+                        S(1+length(obj.B(:,1))*(i-1):length(obj.B(:,1))*i,1+length(obj.B(1,:))*(j-1):length(obj.B(1,:))*j) = obj.A^(i-j)*obj.B;
+                    end
+                end
+            end
+            
+            H = S' * Qm * S + Rm;
+            H = (H+H')/2;
+            F = [Am' * Qm * S; -qm * S; -Rm];
+            f = [Xc', r', ur'] * F;
         end
 
         function [xr] = Reference(obj, ~)

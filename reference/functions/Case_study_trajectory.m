@@ -22,8 +22,8 @@ z_0 = X0(3);
 % z = 1;
 
 %% circle
-x = cos(t/2) -1;
-y = sin(t/2);
+x = cos(t/5) -1;
+y = sin(t/5);
 z = 1;
 %%
 % x = 1/(1+exp(-t + te/2));
