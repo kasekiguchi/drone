@@ -12,12 +12,12 @@ Normalize = 0; %1：正規化 : 学習データの正規化
 
 %% 
 %データ保存先ファイル名(.matを付ける．逐次変更しないと中身が上書きされる)
-FileName = '.mat'; % 線形化後のデータ保存
+FileName = 'test_20240424.mat'; % 線形化後のデータ保存
 
 % 学習データ
 % 読み込むデータファイル名(データセットに使うファイルをまとめたフォルダを作るとよい，ファイル名は統一)
 % ※name_change.m使うと簡単に統一できるよ
-loading_filename = ''; % experiment_6_20_circleまで。_1 とか _2とかはいらない
+loading_filename = 'experiment_6_20_circle'; % experiment_6_20_circleまで。_1 とか _2とかはいらない
 
 Data.HowmanyDataset = 0; %読み込むデータ数に応じて変更
 
