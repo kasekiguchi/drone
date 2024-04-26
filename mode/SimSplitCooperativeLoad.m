@@ -1,9 +1,11 @@
 clc
 clear
-N = 6;
-ts = 0; %機体数
+close all
+N = 6;%機体数
+ts = 0; 
 dt = 0.025;
-te = 400;
+te = 100;
+tn = length(1:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -46,10 +48,9 @@ agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
-% agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
+agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
-% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",50,"orig",[1;0;1],"size",1*[1,1,0]},"Cooperative",N},agent(1));
+% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
 
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 % agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
@@ -87,10 +88,10 @@ end
 % run("ExpBase");
 
 clc
-for j = 1:te
-    if j < 20 || rem(j, 5) == 0, j, end
+% for j = 1:te
+for j = 1:tn
+    % if j < 20 || rem(j, 5) == 0, j, end
         for i = 1:N+1
-            
             if i >= 2
                 load = agent(1).estimator.result.state;
                 %分割前ペイロード
@@ -126,6 +127,7 @@ for j = 1:te
         for i = 2:N+1
             input(4*(i-1)-3:4*(i-1),1) = agent(i).controller.result.input;
         end
+
 %         [(agent(i).parameter.loadmass+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 
         agent(1).controller.result.input = input;
@@ -133,6 +135,7 @@ for j = 1:te
         agent(1).plant.do(time, 'f');
         logger.logging(time, 'f', agent);
         time.t = time.t + time.dt;
+        j = time.t
     %pause(1)
 end
 

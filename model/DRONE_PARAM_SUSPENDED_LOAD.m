@@ -20,7 +20,15 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
         jx 
         jy 
         jz 
-        gravity 
+        gravity
+        km1    
+        km2    
+        km3    
+        km4    
+        k1    
+        k2
+        k3    
+        k4
         Length
         loadmass
         cableL
@@ -48,6 +56,14 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 param.jy = 0.0820;
                 param.jz = 0.1377;
                 param.gravity = 9.81;
+                param.km1 = 0.0301; % ロータ定数
+                param.km2 = 0.0301; % ロータ定数
+                param.km3 = 0.0301; % ロータ定数
+                param.km4 = 0.0301; % ロータ定数
+                param.k1 = 0.000008;          % 推力定数
+                param.k2 = 0.000008;          % 推力定数
+                param.k3 = 0.000008;          % 推力定数
+                param.k4 = 0.000008;          % 推力定数
                 param.Length = 0.075;
                 param.loadmass = 0.200;
                 param.cableL = 1;
@@ -65,6 +81,14 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
         obj.jy = param.jy;
         obj.jz = param.jz;
         obj.gravity = param.gravity;
+        obj.km1 = param.km1;
+        obj.km2 = param.km2;    
+        obj.km3 = param.km3;    
+        obj.km4 = param.km4;
+        obj.k1 = param.k1;
+        obj.k2 = param.k2;
+        obj.k3 = param.k3;
+        obj.k4 = param.k4;
         obj.Length = param.Length;
         obj.loadmass = param.loadmass;
         obj.cableL = param.cableL;

@@ -21,12 +21,11 @@ classdef CSLC < handle
       obj.self = self;
       obj.P = self.parameter.get("all","row");
       obj.result.input = zeros(self.estimator.model.dim(2),1);
-      P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho));
+      P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho));%張力の仮想入力を求めるための行列P
       obj.Pdagger = pinv(P);
       obj.N = size(P,2)/3;
       obj.Param = param;
-      obj.gains = param.gains; %
-      %[kx0' kr0 kdx0' ko0 kqi kwi kri koi epsilon]
+      obj.gains = param.gains; %[kx0' kr0 kdx0' ko0 kqi kwi kri koi epsilon]
       obj.gen_input = str2func(param.method);%ドローンの入力(35)
       obj.gen_muid= str2func(param.method2);%紐の張力を求める(27)
       obj.result.mui = zeros(6,obj.N);

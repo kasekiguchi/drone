@@ -1,6 +1,5 @@
 %% Initialize settings
 % set path
-clear all
 cf = pwd;
 if contains(mfilename('fullpath'),"mainGUI")
   cd(fileparts(mfilename('fullpath')));
@@ -11,7 +10,7 @@ end
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %cd(cf); 
-close all hidden; clear all; userpath('clear');
+close all hidden; clear; userpath('clear');
 %%
 clc
 

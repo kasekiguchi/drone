@@ -30,7 +30,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % parameters : 5 + 8*N
                 param.g = 9.81;
                 param.m0 = 1.200;%分割前のペイロード
-                param.J0 = [0.15;0.15;0.25];%分割前慣性モーメント
+                param.J0 = [0.15;0.15;0.25];%分割前ペイロード慣性モーメント
                 param.rho = [];%分割前の重心位置から紐がついてるところ前での距離
                 param.li = 1*ones(N,1);%紐の長さ
                 param.mi = 0.800*ones(N,1)';%ドローンの重さ
@@ -44,7 +44,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
               rho0 = [0;0;-1/4];
             end
             if isempty(param.rho)
-              R = Rodrigues([0;0;1],2*pi/N);
+              R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める
               param.rho = rho0+[[1;0;0],double(cellmatfun(@(A,~) A*[1;0;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
             end
             obj = obj@PARAMETER_CLASS(name,type,param);

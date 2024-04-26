@@ -3,7 +3,7 @@ arguments
   dt
   initial
   id = 0
-  N = 4
+  N = 6
   type = "eul"
 end
 Model.id = id;
