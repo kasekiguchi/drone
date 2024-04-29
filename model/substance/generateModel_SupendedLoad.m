@@ -1,6 +1,6 @@
 %% Initialize
 % do initialize first in main.m
-clear all
+clear 
 %clc
 %tmp = matlab.desktop.editor.getActive;
 %cd(fileparts(tmp.Filename));
@@ -106,7 +106,8 @@ u = [u1;u2;u3;u4];
 
 %% With load model
 syms Lx Ly lx ly lz rotor_r cableL real
-physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, Length, mL, cableL};
+% physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, Length, mL, cableL};
+physicalParam = {m, jx, jy, jz, gravity, mL, cableL};
 
 e3=[0;0;1];
 dol  = cross(-pT,u1*Rb0*e3)/(m*cableL); % ケーブル角加速度
@@ -122,9 +123,12 @@ U = [u1;u2;u3;u4];
 Fl= subs(f,U,[0;0;0;0]);
 Gl =  [subs(subs(f,[u2;u3;u4],[0;0;0]),u1,1)-Fl, subs(subs(f,[u1;u3;u4],[0;0;0]),u2,1)-Fl, subs(subs(f,[u2;u1;u4],[0;0;0]),u3,1)-Fl, subs(subs(f,[u2;u3;u1],[0;0;0]),u4,1)-Fl];    
 simplify(f - (Fl+Gl*U))
-matlabFunction(Fl,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
-matlabFunction(Gl,'file','GL','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
-matlabFunction(f,'file','with_load_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
+% matlabFunction(Fl,'file','FL','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+% matlabFunction(Gl,'file','GL','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
+% matlabFunction(f,'file','with_load_model','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
+matlabFunction(Fl,'file','FL2','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
+matlabFunction(Gl,'file','GL2','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
+matlabFunction(f,'file','with_load_model2','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
 %%
 dol  = cross(-pT,u1*Rb0*e3)/(m*cableL);
 dpT  = cross(ol,pT);
