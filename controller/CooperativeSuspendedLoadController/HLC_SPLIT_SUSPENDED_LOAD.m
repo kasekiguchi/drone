@@ -35,27 +35,6 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             F3 = Param.F3;
             F4 = Param.F4;
             xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
-
-%             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-%             x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-%             xd(1:3)=Rb0'*xd(1:3);
-%             xd(4) = 0;
-%             xd(5:7)=Rb0'*xd(5:7);
-%             xd(9:11)=Rb0'*xd(9:11);
-%             xd(13:15)=Rb0'*xd(13:15);
-%             xd(17:19)=Rb0'*xd(17:19);
-% 
-%             if isfield(Param,'dt')
-%                 dt = Param.dt;
-%                 vf = Vfd(dt,x,xd',P,F1);
-%             else
-%                 vf = Vf(x,xd',P,F1);
-%             end
-%             vs = Vs(x,xd',vf,P,F2,F3,F4);
-%             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-%             obj.result.input = [tmp(1);
-%             tmp(2);tmp(3);
-%             tmp(4)];
             
             if xd(7)==0
                 xd(7)=0.00001;
@@ -70,17 +49,21 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 vf = Vf_SupendedLoad(x,xd',P,F1);
             end
             vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
+            obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
+            obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
+            obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
+
             uf = Uf_SuspendedLoad(x,xd',vf,P);
-            %入力関数何とかする
-            h234 = H234_SuspendedLoad(x,xd',vf,vs',P);
+            % h234 = H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
             invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-            a = v_SuspendedLoad(x,xd',vf,vs',P);
-            us = h234*invbeta2*a;
-           cha = obj.self.reference.cha;
-           tmpHL = obj.self.controller.hlc.result.input;
-           obj.result.input = tmpHL;
-           if strcmp(cha,'f')
-                obj.result.input = uf +[0;us(2:4)];
+            vs_alhpa = v_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
+            us = [0;invbeta2*vs_alhpa];%h234*invbeta2*a;
+            cha = obj.self.reference.cha;
+            tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
+            obj.result.input = tmpHL;
+            if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
+                obj.result.input = uf + us;
             end
             
             obj.self.controller.result.input = obj.result.input; 
