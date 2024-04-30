@@ -106,9 +106,6 @@ function Controller = Controller_HLMCMPC(agent)
     %%  
 
     Controller.name = "mcmpc"; % HLでもMCだから
-    Controller.type = "HLMCMPC_controller"; % file
-    % Controller.type = "HLMCMPC_controller_mex"; % 1000万回計算用
-    % Controller.type = "HLMCMPC_controller_gpu";
-    % Controller.type = "HLMCMPC_controller_change"; % 複数回入力算出
+    Controller.type = "HLMCMPC_CONTROLLER"; % file
     Controller.param = Controller_param;
 end

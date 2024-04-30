@@ -1,4 +1,4 @@
-classdef HLMCMPC_controller < handle
+classdef HLMCMPC_CONTROLLER < handle
   % MCMPC_CONTROLLER MCMPCのコントローラー
 
   properties
@@ -28,7 +28,7 @@ classdef HLMCMPC_controller < handle
   end
 
   methods
-    function obj = HLMCMPC_controller(self, param)
+    function obj = HLMCMPC_CONTROLLER(self, param)
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
@@ -78,14 +78,10 @@ classdef HLMCMPC_controller < handle
 
     %-- main()的な
     function result = do(obj,varargin)
-      % rng(0, "twister");
-      % profile on
-      % OB = obj;
-      obj.param.t = varargin{1,1}.t;
-      obj.param.te = varargin{1,1}.te;
-      % controller内でリファレンス生成, 
+      obj.param.t = varargin{1,1}.t; % 現在時刻
+      obj.param.te = varargin{1,1}.te; % 終了時間(default : 10s)
       % arg:trajectory type, 1:timevarying,  2:polynomial
-      obj.state.ref = obj.Reference(1); 
+      obj.state.ref = obj.Reference(1); % controller内でリファレンス生成
       %% from main ref
       xd = [obj.state.ref(1:3,1); 0; obj.state.ref(7:9,1); 0]; % 9次多項式にも対応
       xd = [xd; zeros(24, 1)];
@@ -286,7 +282,7 @@ classdef HLMCMPC_controller < handle
       %% 制約 状態＝目標値との誤差
       % HLstate = x_real - ref
       x_real = obj.state.real_data;
-      % constX = find(x_real(3,5,1:obj.N) > 2); % 1:obj.N 大事
+      % constX = find(x_real(3,5,1:obj.N) > 2); % 1:obj.N
       % constY = find(x_real(3,5,1:obj.N) > -0.5);
       % constX = find(x_real(3,5,1:obj.N) < -1.5 | x_real(7,5,1:obj.N) > 0.5);
 
@@ -355,37 +351,29 @@ classdef HLMCMPC_controller < handle
       % [~, removeX, ~] = obj.constraints();
 
       %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
-      % stageStateZ = k(1:end-1) .* Z(:,1:end-1,:).*pagemtimes(obj.Weight(:,:,1:obj.N),Z(:,1:end-1,:));
-      % %-- 状態の終端コストを計算 状態だけの終端コスト
-      % if obj.param.t > 2
-      %     terminalState = k(end) .* Z(:,end,:).*pagemtimes(obj.WeightF(:,:,1:obj.N),Z(:,end,:));
-      % else
-      %     terminalState = 0;
-      % end
-      %-- 入力 これは常にオン
+      %-- 入力
       stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre);
       stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
 
-      %% まとめて計算
       stageStateZ =    k .* Z.*pagemtimes(obj.Weight(:,:,1:obj.N),Z);
       terminalState = 0;
 
-      %% 変数そろえ
+      %% ステージコストとターミナルコストを合計
       stageStateZ = stageStateZ + terminalState;
       %% 軌道ごとに制約を評価
       if ~isempty(removeX)
-      % stageStateZ(3:6, removeX) = stageStateZ(3:6, removeX) + obj.param.ConstEval;
-      % stageStateZ(7:10, removeX) = stageStateZ(7:10, removeX) + obj.param.ConstEval;
-      stageStateZ(1:2, removeX) = stageStateZ(1:2, removeX) + obj.param.ConstEval;
+          % stageStateZ(3:6, removeX) = stageStateZ(3:6, removeX) + obj.param.ConstEval;
+          % stageStateZ(7:10, removeX) = stageStateZ(7:10, removeX) + obj.param.ConstEval;
+          stageStateZ(1:2, removeX) = stageStateZ(1:2, removeX) + obj.param.ConstEval;
       end
 
       %% 人工ポテンシャルをx, yにプラス
       if ~isempty(AP)
-      stageStateZ(3, :,:) = stageStateZ(3, :,:) + AP;% + AP2;
-      stageStateZ(7, :,:) = stageStateZ(7, :,:) + AP;% + AP2;
+          stageStateZ(3, :,:) = stageStateZ(3, :,:) + AP;% + AP2;
+          stageStateZ(7, :,:) = stageStateZ(7, :,:) + AP;% + AP2;
       end
 
-      %-- 評価値計算
+      %-- 評価値計算 方向ごとに入力決定のために評価値を分けて保存
       Eval{1} = sum(stageStateZ,[1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]);  % 全体の評価値
       Eval{2} = sum(stageStateZ(1:2,:,:),  [1,2]);   % Z
       Eval{3} = sum(stageStateZ(3:6,:,:),  [1,2]);   % X
@@ -503,24 +491,5 @@ classdef HLMCMPC_controller < handle
             end
         end
     end
-
-    %% -- Generate Reference
-    % %% caseによる改造
-    % function [xr] = Reference(obj, refFlag)
-    %     switch refFlag 
-    %         case 1
-    %             [xr] = Reference_timevarying(obj);
-    %         % case 2
-    %         %     [xr] = Reference_SICE(params, T, Agent, Gq, ini, phase, refFlag, te);
-    %         % case 3
-    %         %     [xr] = Reference_polynomial(params, T, Agent, Gq, ini, phase, refFlag, te);
-    %         % case 4
-    %         %     [xr] = Reference_SICE_HL(params, T, Agent, Gq, ini, phase, refFlag, te);
-    %         % case 5
-    %         %     [xr] = Reference_spline(params, T, Agent, Gq, ini, phase, refFlag, te);
-    %         otherwise
-    %             error("Not generate reference");
-    %     end
-    % end
   end
 end

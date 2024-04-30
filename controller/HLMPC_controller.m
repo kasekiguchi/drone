@@ -1,4 +1,4 @@
-classdef HLMPC_controller <handle
+classdef HLMPC_CONTROLLER <handle
     % MCMPC_CONTROLLER MCMPCのコントローラー
 
     properties
@@ -30,7 +30,7 @@ classdef HLMPC_controller <handle
     end
 
     methods
-        function obj = HLMPC_controller(self, param)
+        function obj = HLMPC_CONTROLLER(self, param)
             %-- 変数定義
             obj.self = self;
             %---MPCパラメータ設定---%
@@ -106,12 +106,11 @@ classdef HLMPC_controller <handle
             xr_imag = [xr_real(3,:);xr_real(7,:);xr_real(1,:);xr_real(5,:);xr_real(9,:);xr_real(13,:);xr_real(2,:);xr_real(6,:);xr_real(10,:);xr_real(14,:);xr_real(4,:);xr_real(8,:)];
             obj.reference.xr = [xr_imag(:,1) - xr_imag; xr_real(13:end,:)];
 
-            %% fmincon
-            % %-- fmincon 設定
+            %% OPTIMIZATION
+            %% fmincon 逐次二次計画法 非線形制約も行けるが遅い
             % options = optimoptions('fmincon');
             % options = optimoptions(options,'MaxIterations',         1.e+12); % 最大反復回数
             % options = optimoptions(options,'ConstraintTolerance',1.e-4);     % 制約違反に対する許容誤差
-            % 
             % options.Algorithm = 'sqp';  % 逐次二次計画法
             % options.Display = 'none';   % 計算結果の表示
             % %% conditions
@@ -123,16 +122,13 @@ classdef HLMPC_controller <handle
             % nonlcon = [];
             % [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
 
-            %% quadprog
+            %% quadprog 二次計画法 線形制約しか扱えないが高速
             % MPC設定(problem)
             options = optimoptions('quadprog');
             options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
             options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
-
-            %-- quadprog設定
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
-
             [H, f] = obj.change_equation();
             A = [];
             b = [];
@@ -140,9 +136,9 @@ classdef HLMPC_controller <handle
             beq = [];
             lb = [];
             ub = [];
-            x0 = [obj.previous_input(:)];
-              
+            x0 = [obj.previous_input(:)];   
             [var, ~, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
+            %%--
 
             obj.previous_input = var; % 最適化の初期値
 
@@ -207,11 +203,7 @@ classdef HLMPC_controller <handle
             eval = sum(stageStateZ + stageInputPre + stageInputRef) + terminalState;  % 全体の評価値
         end
 
-        function [H, f] = change_equation(obj)
-            obj.A;
-            obj.B;
-            obj.C;
-        
+        function [H, f] = change_equation(obj)      
             Q = obj.Weight;
             R = obj.WeightR;
             Qf = obj.WeightF;
