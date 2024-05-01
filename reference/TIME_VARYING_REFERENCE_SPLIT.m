@@ -122,7 +122,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
             
             
         end
-        function result = do(obj, varargin)
+        function result = do(obj, varargin)%chaによって単機のtakeoffやlandingに切り換えられるようにする．普通のTIME_VARYING_REFERENCEを参考にする
            %Param={time,FH}
            obj.cha = varargin{2};
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始

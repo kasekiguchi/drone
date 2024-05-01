@@ -45,6 +45,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             end
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める
+              %ペイロードの重心位置からリンクまでの距離
               param.rho = rho0+[[1;0;0],double(cellmatfun(@(A,~) A*[1;0;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
