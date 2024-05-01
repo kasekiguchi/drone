@@ -23,10 +23,10 @@ end
 % C = X*pinv(Xlift);
 
 % A,Bをまとめて計算するデータ数が多い場合のやりかた
-G = [Xlift ; U]*[Xlift ; U]';
-V = Ylift*[Xlift ; U]';
-M = V * pinv(G);
-output.A = M(1:numX, 1:numX);
-output.B = M(1:numX, numX+1:numX+numU);
-output.C = X*pinv(Xlift); % C: Z->X の厳密な求め方
+G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
+V = Ylift*[Xlift ; U]';       % size(V) = (numX,      numX+numU)
+M = V * pinv(G);              % size(M) = (numX,      numX+numU)
+output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
+output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
+output.C = X*pinv(Xlift); % C: Z->X の厳密な求め方 pinv: Moore-Penrose疑似逆行列  size(.C) = (size(X), numX)
 end

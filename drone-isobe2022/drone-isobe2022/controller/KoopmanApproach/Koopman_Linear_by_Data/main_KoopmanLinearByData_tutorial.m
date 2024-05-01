@@ -113,7 +113,7 @@ if size(Data.X,1)==13 %特に気にしなくていい
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
-%% Koopman linear
+%% Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
 fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
