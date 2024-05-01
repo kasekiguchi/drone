@@ -32,9 +32,8 @@ classdef HLMCMPC_CONTROLLER < handle
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
-      obj.param = param.param;
-      obj.modelp = obj.self.parameter.get();
-      %%  
+      obj.param = param.param; % obj.param = Controller_HLMCMPC.mで設定したパラメーター
+      %%  入力や制約などのパラメータ
       obj.input = obj.param.input;
       obj.const = obj.param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
@@ -43,7 +42,7 @@ classdef HLMCMPC_CONTROLLER < handle
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = obj.param.input.Initsigma;  % 初期化
       obj.param.nextparticle_num = obj.param.Maxparticle_num;   % 初期化
-      obj.input.Bestcost_now = [1e1, 1e-5, 1e-5, 1e-5, 1e-5];% 十分大きい値にする  初期周期での比較用
+      obj.input.Bestcost_now = [1e1, 1e-5, 1e-5, 1e-5, 1e-5];% 初期周期での比較用
       %% HL
       obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,obj.param.dt);
       obj.N = obj.param.particle_num;
@@ -66,8 +65,6 @@ classdef HLMCMPC_CONTROLLER < handle
       obj.result.bestx(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.besty(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
       obj.result.bestz(1, :) = repmat(obj.input.Bestcost_now(1), obj.param.H, 1); % - 制約外は前の評価値を引き継ぐ
-
-      [obj.param.expand_A, obj.param.expand_B] = EXPAND_STATE(obj);
 
       obj.input.Resampling_mu = zeros(4, obj.param.H, obj.N);
       obj.reference.polynomial = obj.param.reference.polynomial;
@@ -95,7 +92,7 @@ classdef HLMCMPC_CONTROLLER < handle
       xd(9:11)=Rb0'*xd(9:11);
       xd(13:15)=Rb0'*xd(13:15);
       xd(17:19)=Rb0'*xd(17:19);
-      P = obj.modelp;
+      P = obj.self.parameter.get();
       vfn = Vf(xn,xd',P,obj.F1); %v1
       z1n = Z1(xn,xd',P);
       z2n = Z2(xn,xd',vfn,P);

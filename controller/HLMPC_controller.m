@@ -33,18 +33,10 @@ classdef HLMPC_CONTROLLER <handle
         function obj = HLMPC_CONTROLLER(self, param)
             %-- 変数定義
             obj.self = self;
-            %---MPCパラメータ設定---%
             obj.param = param.param;
-            obj.modelf = obj.self.plant.method;
-            obj.modelp = obj.self.parameter.get();
+            obj.input = obj.param.input; % obj.param = Controller_HLMPC.mで設定したパラメーター
 
-            %%
-            obj.input = obj.param.input;
-            % obj.param.H = obj.param.H + 1;
-            obj.model = self.plant;
-            obj.param.fRemove = 0;
-
-            %% HL
+            %% HL関連
             obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,param.param.dt);
             % 重みの配列サイズ変換
             obj.Weight = blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI);
@@ -55,14 +47,13 @@ classdef HLMPC_CONTROLLER <handle
             % z, x, y, yawの順番
             A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
             B = blkdiag([0;1],[0;0;0;1],[0;0;0;1],[0;1]);
-            
             sysd = c2d(ss(A,B,eye(12),0),param.param.dt); % 離散化
             obj.A = sysd.A;
             obj.B = sysd.B;
             obj.C = eye(12); 
             %% 入力
-            obj.result.input = zeros(self.estimator.model.dim(2),1);
-            obj.previous_input = repmat(obj.input.u, 1, obj.param.H); 
+            obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力事前定義(これがないと初期化で失敗する)
+            obj.previous_input = repmat(obj.input.u, 1, obj.param.H); % MPC用の初期入力
         end
 
         %-- main()的な
@@ -91,7 +82,7 @@ classdef HLMPC_CONTROLLER <handle
             xd(9:11)=Rb0'*xd(9:11);
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
-            P = obj.modelp;
+            P = obj.self.parameter.get();
             vfn = Vf(xn,xd',P,obj.F1); %v1
             z1n = Z1(xn,xd',P);
             z2n = Z2(xn,xd',vfn,P);
@@ -103,8 +94,11 @@ classdef HLMPC_CONTROLLER <handle
             % 実状態の目標値
             xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
             % 実状態の目標値を仮想状態的に並び替え
-            xr_imag = [xr_real(3,:);xr_real(7,:);xr_real(1,:);xr_real(5,:);xr_real(9,:);xr_real(13,:);xr_real(2,:);xr_real(6,:);xr_real(10,:);xr_real(14,:);xr_real(4,:);xr_real(8,:)];
-            obj.reference.xr = [xr_imag(:,1) - xr_imag; xr_real(13:end,:)];
+            xr_imag = [xr_real(3,:);xr_real(7,:);
+                        xr_real(1,:);xr_real(5,:);xr_real(9,:);xr_real(13,:);
+                        xr_real(2,:);xr_real(6,:);xr_real(10,:);xr_real(14,:);
+                        xr_real(4,:);xr_real(8,:)];
+            obj.reference.xr = [xr_imag(:,1) - xr_imag; xr_real(13:end,:)]; % 仮想状態に合わせて現在状態からの目標値に変換する
 
             %% OPTIMIZATION
             %% fmincon 逐次二次計画法 非線形制約も行けるが遅い
