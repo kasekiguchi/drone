@@ -20,10 +20,10 @@ syms t real
 % z = z_0;
 
 %z方向も回転する軌道
-T = 20;
-x = sin(2*pi*t/T);
-y = cos(2*pi*t/T);
-z = 0.5*cos(3*pi*t/T)+1;
+% T = 20;
+% x = sin(2*pi*t/T);
+% y = cos(2*pi*t/T);
+% z = 0.5*cos(3*pi*t/T)+1;
 
 % x = 0.5*sin(3*pi*t/T);
 % y = 0.5*cos(3*pi*t/T);
@@ -38,9 +38,9 @@ z = 0.5*cos(3*pi*t/T)+1;
 % y = sin(2*pi*t/T);
 % z = 1;
 
-% x = 0;
-% y = 1;
-% z = 1;
+x = 0;
+y = t/5;
+z = 1;
 
 %縦円旋回
 % x = 0.5*sin(2*pi*t/T);
