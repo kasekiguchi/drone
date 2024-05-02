@@ -10,7 +10,8 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-loadfilename{1} = 'EstimationResult_komatsu.mat' ;
+% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1' ;
 % loadfilename{2} = '.mat';
 % loadfilename{3} = '.mat';
 
@@ -32,7 +33,7 @@ end
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 1; %ステップ数，xの範囲を設定
+stepnum = 1; %ステップ数，xの範囲を設定 default: 1
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1
@@ -116,7 +117,8 @@ file{2}.markerSty = ':square';
 file{3}.markerSty = ':x';
 
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
-tlength = file{1}.simResult.initTindex:file{1}.simResult.initTindex+stepN-1;
+startTime = 0;
+tlength = file{1}.simResult.initTindex + startTime:file{1}.simResult.initTindex+stepN-1 + startTime;
 
 newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980

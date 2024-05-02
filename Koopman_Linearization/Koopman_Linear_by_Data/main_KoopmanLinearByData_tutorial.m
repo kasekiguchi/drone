@@ -17,6 +17,7 @@ clear all
 clc
 %---------------------------------------------
 flg.bilinear = 0; %1:双線形モデルへの切り替え 木山は実機のデータではうまくいかなかった
+flg.normalize = 0;
 setting = 0; %この値はいじらない
 %---------------------------------------------
 
@@ -95,10 +96,11 @@ for i = 1:Data.HowmanyDataset
     end
     disp(append('loading data number: ',num2str(i),', now data:',num2str(Dataset.N),', all data: ',num2str(size(Data.X,2))))
 end
+
 fprintf('\n＜データセットの結合が完了しました＞\n')
 
-Normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
-if Normalize == 1 %正規化を行うか(正規化については自分で調べて！)
+flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
+if flg.normalize == 1 %正規化を行うか(正規化については自分で調べて！)
     Ndata = Normalization(Data);
     Data.X = Ndata.x;
     Data.Y = Ndata.y;
@@ -113,6 +115,19 @@ if size(Data.X,1)==13 %特に気にしなくていい
     thre = 0.01;
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
+
+%% ここから始めるとき
+clear; clc;
+flg.bilinear = 0;
+flg.normalize = 0;
+F = @quaternions_all; % 改造用
+FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_');
+FileName = strcat(FileName_common, 'Exp_Kiyama_code00_1');
+activeFile = matlab.desktop.editor.getActive;
+nowFolder = fileparts(activeFile.Filename);
+% targetpath=append(nowFolder,'\',FileName);
+targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
 
 %% Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
@@ -150,7 +165,7 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-if Normalize == 1 %推定精度検証用データの正規化
+if flg.normalize == 1 %推定精度検証用データの正規化
     for i  = 1:12
         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata.meanValue.x(i))/Ndata.stdValue.x(i); %状態の正規化
     end
@@ -172,7 +187,7 @@ end
 simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]，次元を元の12状態に戻してる
 
 %正規化した場合には逆変換を行う必要がある
-if Normalize == 1 %逆変換
+if flg.normalize == 1 %逆変換
     for i = 1:size(simResult.Xhat,1)
         simResult.Xhat(i,:) = (simResult.Xhat(i,:) * Ndata.stdValue.x(i)) + Ndata.meanValue.x(i);
     end

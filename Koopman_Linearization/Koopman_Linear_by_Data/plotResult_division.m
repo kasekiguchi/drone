@@ -15,7 +15,7 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 
 %% select file to load (max number of file:5)
 
-% loadfilename{1} = '.mat' ;%mainで書き込んだファイルの名前に逐次変更する
+loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1.mat' ;%mainで書き込んだファイルの名前に逐次変更する
 % loadfilename{2} = '.mat';
 % loadfilename{3} = '.mat';
 % loadfilename{4} = '.mat';

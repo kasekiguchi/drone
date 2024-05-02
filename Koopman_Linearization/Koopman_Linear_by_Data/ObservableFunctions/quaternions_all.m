@@ -1,5 +1,5 @@
 function z = quaternions_all(x)
-%EULERANGLEPARAMETER_QUATERNIONS 物理定数とオイラー角をパラメータとして含む観測量
+% F(x)およびG(x)の全ての項を観測量とする
 %   Z = quartanionParameter(X)
 %   X : [位置P; クォータニオンq or オイラー角 Q; 速度V; 角速度W]を持つ状態量
 %   Z : [X(クォータニオンを含まない); (クォータニオン); (クォータニオンの2乗); (クォータニオンの3乗) ]
@@ -58,48 +58,72 @@ elseif size(x,1) ==12
     q2 = cos(Q1/2)*sin(Q2/2)*cos(Q3/2)+sin(Q1/2)*cos(Q2/2)*sin(Q3/2);
     q3 = cos(Q1/2)*cos(Q2/2)*sin(Q3/2)-sin(Q1/2)*sin(Q2/2)*cos(Q3/2);
 end
- 
-% z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
-%      q0;q1;q2;q3;           % クォータニオン
-%      q0^2;q1^2;q2^2;q3^2;   % クォータニオンの2乗
-%      q0^3;q1^3;q2^3;q3^3;   % クォータニオンの3乗
-%      ];
-
-% z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
-%      q0*q1;q0*q2;q0*q3;q1*q2;q2*q3;q3*q1;     % クォータニオン*クォータニオン
-%      q0^2;q1^2;q2^2;q3^2;                     % クォータニオンの2乗
-%      1;
-%      ];
 
 %回転行列の一部
 R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
 R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
-R33 =  (cos(Q2).*cos(Q1));
-% z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
-%     R13;
-%     R23;
-%     R33;
-%     1;
-%     ];
+R33 = (cos(Q2).*cos(Q1));
 
-isobe_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
-    R13;
-    R23;
-    R33;
-    1;
-    W1*W2;
-    W2*W3;
-    W3*W1;
-    W2*cos(Q1);
-    W3*sin(Q1);
-    W1*cos(Q2)/cos(Q1);
-    W2*sin(Q1)/cos(Q2);
-    W3*cos(Q1)/cos(Q2);
-    W2*sin(Q1)*sin(Q2)/cos(Q1);
-    W3*cos(Q1)*sin(Q2)/cos(Q1)
-    ];
-komatsu_z = [V1;V2;V3;
-            W1*c];
-z = [isobe_z; komatsu_z];
+common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
+            R13;
+            R23;
+            R33;
+            1];
+
+%% 磯部先輩観測量 code = 00
+% isobe_z = [W1*W2;
+%     W2*W3;
+%     W3*W1;
+%     W2*cos(Q1);
+%     W3*sin(Q1);
+%     W1*cos(Q2)/cos(Q1);
+%     W2*sin(Q1)/cos(Q2);
+%     W3*cos(Q1)/cos(Q2);
+%     W2*sin(Q1)*sin(Q2)/cos(Q1);
+%     W3*cos(Q1)*sin(Q2)/cos(Q1)
+%     ];
+% z = [common_z; isobe_z];
+
+%% F(x), G(x)の各項をそのまま観測量にする code = 01
+% F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
+%     W2*cos(Q1) - W3*sin(Q1);
+%     (W3*cos(Q1) + W2*sin(Q1)) / cos(Q2);
+%      (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
+%     -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
+%      (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
+%      ];
+% G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2)) + 2*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)))/const.m;
+%     -(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)) - 2*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2)))/const.m;
+%     ((cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 - (cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 + (cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))^2 - (cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2))^2)/const.m;
+%     1/const.jx;
+%     1/const.jy;
+%     1/const.jz
+%     ];
+% z = [common_z; F_z; G_z];
+
+%% F(x), G(x)の各項を分解して観測量にする code = 02
+% F_z = [W1*cos(Q2);
+%     W3*cos(Q1)*sin(Q2);
+%     W2*sin(Q2)*sin(Q1) /cos(Q2);
+%     W2*cos(Q1) - W3*sin(Q1);
+%     W3*cos(Q1) / cos(Q2); 
+%     W2*sin(Q1) / cos(Q2);
+%      (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
+%     -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
+%      (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
+%     ];
+% G_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
+%     sin(Q2/2)*sin(Q1/2)*sin(Q3/2);
+%     cos(Q1/2)*cos(Q3/2)*sin(Q2/2);
+%     cos(Q2/2)*sin(Q1/2)*sin(Q3/2);
+%     cos(Q2/2)*cos(Q1/2)*sin(Q3/2);
+%     cos(Q3/2)*sin(Q2/2)*sin(Q1/2);
+%     cos(Q2/2)*cos(Q3/2)*sin(Q1/2);
+%     cos(Q1/2)*sin(Q2/2)*sin(Q3/2);
+%     1/const.jx;
+%     1/const.jy;
+%     1/const.jz
+%     ];
+% z = [common_z; F_z; G_z];
 end
 

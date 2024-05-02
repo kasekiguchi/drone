@@ -7,7 +7,7 @@ close all
 clc
 %---------------------------------------------
 flg.bilinear = 0; %1:双線形モデルへの切り替え : 実機だとうまくいかない
-Normalize = 0; %1：正規化 : 学習データの正規化
+flg.normalize = 0; %1：正規化 : 学習データの正規化
 %---------------------------------------------
 
 %% 
@@ -60,7 +60,7 @@ for i= 1: Data.HowmanyDataset
 end
 disp('loaded')
 
-if Normalize == 1 %正規化
+if flg.normalize == 1 %正規化
     Ndata = Normalization(Data);
     Data.X = Ndata.x;
     Data.Y = Ndata.y;
@@ -76,6 +76,16 @@ if size(Data.X,1)==13
     thre = 0.01;
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
+
+%% ここから始めるとき
+flg.bilinear = 0;
+F = @quaternions;
+FileName_common = 'Estimation_Result_';
+FileName = strcat(FileName_common, '0502_test1');
+activeFile = matlab.desktop.editor.getActive;
+nowFolder = fileparts(activeFile.Filename);
+targetpath=append(nowFolder,'\',FileName);
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
 
 %% Koopman linear
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
@@ -108,7 +118,7 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-if Normalize == 1 %推定精度検証用データの正規化
+if flg.normalize == 1 %推定精度検証用データの正規化
     for i  = 1:12
         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata.meanValue.x(i))/Ndata.stdValue.x(i);
     end
@@ -128,7 +138,7 @@ else
 end
 simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
 
-if Normalize == 1 %逆変換　：正規化⇒元の状態
+if flg.normalize == 1 %逆変換　：正規化⇒元の状態
     for i = 1:size(simResult.Xhat,1)
         simResult.Xhat(i,:) = (simResult.Xhat(i,:) * Ndata.stdValue.x(i)) + Ndata.meanValue.x(i);
     end
