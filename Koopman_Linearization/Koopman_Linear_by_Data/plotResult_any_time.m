@@ -11,9 +11,9 @@ startTime = 0;
 
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 % loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1' ;
-loadfilename{1} = 'EstimationResult_Exp_Kiyama_code01';
+% loadfilename{1} = 'EstimationResult_Exp_Kiyama_code01';
 % loadfilename{2} = '.mat';
 % loadfilename{3} = '.mat';
 
@@ -81,9 +81,7 @@ for i = 1:HowmanyFile
     file{i}.lgdname.v = {append('$data',num2str(i),'_{vx}$'),append('$data',num2str(i),'_{vy}$'),append('$data',num2str(i),'_{vz}$')};
     file{i}.lgdname.w = {append('$data',num2str(i),'_{w1}$'),append('$data',num2str(i),'_{w2}$'),append('$data',num2str(i),'_{w3}$')};
     
-    if isfield(file{i}.simResult,'initTindex')
-    
-    else
+    if ~isfield(file{i}.simResult,'initTindex')
         file{i}.simResult.initTindex = 1;
     end
 

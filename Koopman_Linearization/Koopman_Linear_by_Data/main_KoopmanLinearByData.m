@@ -6,20 +6,20 @@ clear all
 close all
 clc
 %---------------------------------------------
-flg.bilinear = 0; %1:双線形モデルへの切り替え : 実機だとうまくいかない
-flg.normalize = 0; %1：正規化 : 学習データの正規化
+flg.bilinear = 0; %1:双線形モデルへの切り替え
+Normalize = 0; %1：正規化
 %---------------------------------------------
 
 %% 
-%データ保存先ファイル名(.matを付ける．逐次変更しないと中身が上書きされる)
-FileName = 'test_20240501.mat'; % 線形化後のデータ保存
+%データ保存先ファイル名(逐次変更する)
+% FileName = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data.mat';  %plotResultの方も変更するように，変更しないとどんどん上書きされる
+FileName = 'test_0503.mat'; %お試し用
 
-% 学習データ
 % 読み込むデータファイル名(データセットに使うファイルをまとめたフォルダを作るとよい，ファイル名は統一)
 % ※name_change.m使うと簡単に統一できるよ
-loading_filename = 'sim_0501'; % experiment_6_20_circleまで。_1 とか _2とかはいらない
+loading_filename = 'Exp_2_4';
 
-Data.HowmanyDataset = 0; %読み込むデータ数に応じて変更
+Data.HowmanyDataset =150; %読み込むデータ数に応じて変更
 
 %データ保存用,現在のファイルパスを取得,保存先を指定
 activeFile = matlab.desktop.editor.getActive;
@@ -60,7 +60,7 @@ for i= 1: Data.HowmanyDataset
 end
 disp('loaded')
 
-if flg.normalize == 1 %正規化
+if Normalize == 1 %正規化
     Ndata = Normalization(Data);
     Data.X = Ndata.x;
     Data.Y = Ndata.y;
@@ -77,16 +77,6 @@ if size(Data.X,1)==13
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
-%% ここから始めるとき
-flg.bilinear = 0;
-F = @quaternions;
-FileName_common = 'Estimation_Result_';
-FileName = strcat(FileName_common, '0502_test1');
-activeFile = matlab.desktop.editor.getActive;
-nowFolder = fileparts(activeFile.Filename);
-targetpath=append(nowFolder,'\',FileName);
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
-
 %% Koopman linear
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
 disp('now estimating')
@@ -101,8 +91,8 @@ disp('Estimated')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
-simResult.reference = ImportFromExpData_estimation(''); %推定精度検証用データの設定
-% simResult.referenceは.matなしのファイル名
+simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
+
 % アーミングphaseの実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
     takeoff_idx = find(simResult.reference.T,1,'first');
@@ -118,7 +108,7 @@ simResult.Xhat(:,1) = simResult.reference.X(:,1);
 simResult.U = simResult.reference.U(:,1:end);
 simResult.T = simResult.reference.T(1:end);
 
-if flg.normalize == 1 %推定精度検証用データの正規化
+if Normalize == 1 %推定精度検証用データの正規化
     for i  = 1:12
         simResult.Z(i,1) = (simResult.Z(i,1)-Ndata.meanValue.x(i))/Ndata.stdValue.x(i);
     end
@@ -138,7 +128,7 @@ else
 end
 simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
 
-if flg.normalize == 1 %逆変換　：正規化⇒元の状態
+if Normalize == 1 %逆変換
     for i = 1:size(simResult.Xhat,1)
         simResult.Xhat(i,:) = (simResult.Xhat(i,:) * Ndata.stdValue.x(i)) + Ndata.meanValue.x(i);
     end
@@ -175,10 +165,7 @@ disp(targetpath)
 % F = @eulerAngleParameter_withoutP;
 
 %% 作成済みモデルで，推定する軌道を変更(全時刻に対する推定検証を行う)
-%---------------------------------------------------------
-%推定する領域をずらしながら推定検証を行います．
-%出力されるグラフ：位置，姿勢角，各時刻のRMSE，最大誤差
-%---------------------------------------------------------
+%推定する領域をずらしながら推定検証を行う．
 clc
 num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
 change_reference = str2double(num);
@@ -188,9 +175,9 @@ if change_reference == 1
     close all
     opengl software
    
-    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata.mat'); %推定精度検証用データの設定
+    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
 
-    model = load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est');
+    model = load("test_0503.mat",'est');
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
@@ -209,8 +196,8 @@ if change_reference == 1
     simResult.Xhat(:,1) = simResult.reference.X(:,1);
     simResult.U = simResult.reference.U(:,1:end);
     simResult.T = simResult.reference.T(1:end);
-    N1 = 14; % 
-    N2 = 20; %56
+    N1 = 1;
+    N2 = 56;
     length = N2 - N1;
     j = 1;
     while(1)
