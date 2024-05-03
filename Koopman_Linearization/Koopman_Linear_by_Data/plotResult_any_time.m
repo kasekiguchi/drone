@@ -6,13 +6,13 @@ close all
 
 %% flag
 flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 1; % 指定した値にxlimを固定
-startTime = 0;
+flg.xlimHold = 0; % 指定した値にxlimを固定
+startTime = 11;
 
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
-% loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1' ;
+% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+loadfilename{1} = 'EstimationResult_2024-05-03_Exp_Kiyama_code03_2' ;
 % loadfilename{1} = 'EstimationResult_Exp_Kiyama_code01';
 % loadfilename{2} = '.mat';
 % loadfilename{3} = '.mat';
@@ -20,11 +20,11 @@ loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_i
 WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
 
 %% グラフの保存
-save_fig = 0; %1：出力したグラフをfigで保存する
+save_fig = 1; %1：出力したグラフをfigで保存する
 
 if save_fig == 1 % Graphフォルダ内に保存 .figで保存
-    name = 'data2_sadP2Pz'; %ファイル名
-    folderName = 'data2_sadP2Pz'; %フォルダ名
+    name = 'data_exp_kiyama_code03_11s'; %ファイル名
+    folderName = 'data_exp_kiyama_code03_11s'; %フォルダ名
     mkdir(folderName) %新規フォルダ作成
 end
 
@@ -72,25 +72,47 @@ Fsize.lgd = 18;
 Fsize.luler = 18;
 
 %% load(基本いじる必要は無い)
+i = 1;
 HowmanyFile = size(loadfilename,2);
-for i = 1:HowmanyFile
-    file{i} = load(loadfilename{i});
-    file{i}.name = loadfilename{i};
-    file{i}.lgdname.p = {append('$data',num2str(i),'_x$'),append('$data',num2str(i),'_y$'),append('$data',num2str(i),'_z$')};
-    file{i}.lgdname.q = {append('$data',num2str(i),'_{roll}$'),append('$data',num2str(i),'_{pitch}$'),append('$data',num2str(i),'_{yaw}$')};
-    file{i}.lgdname.v = {append('$data',num2str(i),'_{vx}$'),append('$data',num2str(i),'_{vy}$'),append('$data',num2str(i),'_{vz}$')};
-    file{i}.lgdname.w = {append('$data',num2str(i),'_{w1}$'),append('$data',num2str(i),'_{w2}$'),append('$data',num2str(i),'_{w3}$')};
-    
-    if ~isfield(file{i}.simResult,'initTindex')
-        file{i}.simResult.initTindex = 1;
-    end
+file{i} = load(loadfilename{i});
+file{i}.name = loadfilename{i};
+file{i}.lgdname.p = {append('$data',num2str(i),'_x$'),append('$data',num2str(i),'_y$'),append('$data',num2str(i),'_z$')};
+file{i}.lgdname.q = {append('$data',num2str(i),'_{roll}$'),append('$data',num2str(i),'_{pitch}$'),append('$data',num2str(i),'_{yaw}$')};
+file{i}.lgdname.v = {append('$data',num2str(i),'_{vx}$'),append('$data',num2str(i),'_{vy}$'),append('$data',num2str(i),'_{vz}$')};
+file{i}.lgdname.w = {append('$data',num2str(i),'_{w1}$'),append('$data',num2str(i),'_{w2}$'),append('$data',num2str(i),'_{w3}$')};
 
-    if i == 1
-        indexcheck = file{i}.simResult.initTindex
-    elseif indexcheck ~= file{i}.simResult.initTindex
-            disp('Caution!! 読み込んだファイルの初期状態が異なっています!!')
-            dammy = input('Enterで無視して続行します');
-    end
+if ~isfield(file{i}.simResult,'initTindex')
+    file{i}.simResult.initTindex = 1;
+end
+
+if i == 1
+    indexcheck = file{i}.simResult.initTindex
+elseif indexcheck ~= file{i}.simResult.initTindex
+        disp('Caution!! 読み込んだファイルの初期状態が異なっています!!')
+        dammy = input('Enterで無視して続行します');
+end
+
+%% 任意の時間からの推定を行う
+F = @quaternions_all; % 読み込んだデータと観測量を合わせる
+dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
+startIdx = round(startTime / dt);
+simResult.Z(:,startIdx) = F(file{WhichRef}.simResult.reference.X(:,startIdx)); %検証用データの初期値を観測量に通して次元を合わせてる
+simResult.Xhat(:,startIdx) = file{WhichRef}.simResult.reference.X(:,startIdx);
+for j = startIdx:startIdx+stepN
+    %状態方程式 z[k+1] = Az[k]+BU
+    simResult.Z(:,j+1) = file{1}.est.A * simResult.Z(:,j) + file{1}.est.B * file{WhichRef}.simResult.U(:,j); 
+end
+simResult.Xhat = file{1}.est.C * simResult.Z;
+if size(file{WhichRef}.Data.X,1)==13
+    file{1}.simResult.state.p = simResult.Xhat(1:3,:);
+    file{1}.simResult.state.q = simResult.Xhat(4:7,:);
+    file{1}.simResult.state.v = simResult.Xhat(8:10,:);
+    file{1}.simResult.state.w = simResult.Xhat(11:13,:);
+else
+    file{1}.simResult.state.p = simResult.Xhat(1:3,:);
+    file{1}.simResult.state.q = simResult.Xhat(4:6,:);
+    file{1}.simResult.state.v = simResult.Xhat(7:9,:);
+    file{1}.simResult.state.w = simResult.Xhat(10:12,:);
 end
 
 %%
@@ -99,25 +121,15 @@ file{1}.lgdname.p = {'$\hat{x}_{\rm case1}$','$\hat{y}_{\rm case1}$','$\hat{z}_{
 file{1}.lgdname.q = {'$\hat{\phi}_{\rm case1}$','$\hat{\theta}_{\rm case1}$','$\hat{\psi}_{\rm case1}$'};
 file{1}.lgdname.v = {'$\hat{v}_{x,{\rm case1}}$','$\hat{v}_{y,{\rm case1}}$','$\hat{v}_{z,{\rm case1}}$'};
 file{1}.lgdname.w = {'$\hat{\omega}_{1,{\rm case1}}$','$\hat{\omega}_{2,{\rm case1}}$','$\hat{\omega}_{3,{\rm case1}}$'};
-file{2}.lgdname.p = {'$\hat{x}_{\rm case2}$','$\hat{y}_{\rm case2}$','$\hat{z}_{\rm case2}$'};
-file{2}.lgdname.q = {'$\hat{\phi}_{\rm case2}$','$\hat{\theta}_{\rm case2}$','$\hat{\psi}_{\rm case2}$'};
-file{2}.lgdname.v = {'$\hat{v}_{x,{\rm case2}}$','$\hat{v}_{y,{\rm case2}}$','$\hat{v}_{z,{\rm case2}}$'};
-file{2}.lgdname.w = {'$\hat{\omega}_{1,{\rm case2}}$','$\hat{\omega}_{2,{\rm case2}}$','$\hat{\omega}_{3,{\rm case2}}$'};
-file{3}.lgdname.p = {'$\hat{x}_{\rm case3}$','$\hat{y}_{\rm case3}$','$\hat{z}_{\rm case3}$'};
-file{3}.lgdname.q = {'$\hat{\phi}_{\rm case3}$','$\hat{\theta}_{\rm case3}$','$\hat{\psi}_{\rm case3}$'};
-file{3}.lgdname.v = {'$\hat{v}_{x,{\rm case3}}$','$\hat{v}_{y,{\rm case3}}$','$\hat{v}_{z,{\rm case3}}$'};
-file{3}.lgdname.w = {'$\hat{\omega}_{1,{\rm case3}}$','$\hat{\omega}_{2,{\rm case3}}$','$\hat{\omega}_{3,{\rm case3}}$'};
 
 columnomber = size(file,2)+1;
 
 % マーカーに特別なものをつける時はここで指定
 file{1}.markerSty = ':o'; % 点線と丸印
-file{2}.markerSty = ':square';
-file{3}.markerSty = ':x';
 
-dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
-startInd = round(startTime / dt); % 何ステップから使用するか
-tlength = file{1}.simResult.initTindex + startInd:file{1}.simResult.initTindex+stepN-1 + startInd;
+% dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
+% startInd = round(startTime / dt); % 何ステップから使用するか
+tlength = file{1}.simResult.initTindex + startIdx:file{1}.simResult.initTindex+stepN-1 + startIdx;
 
 newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
@@ -133,21 +145,12 @@ hold on
 grid on
 % 推定したA, B, Cを使った状態推定の結果
 % 入力されたファイル数分ループ
-for i = 1:HowmanyFile
-    % i番目のファイルをplot
-    if i == 1
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.p(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
-    elseif i == 2
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.p(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle',':');
-    elseif i == 3
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.p(:,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
-    end
-    % file{i}に凡例が保存されている場合実行
-    if isfield(file{i},'lgdname')
-        if isfield(file{i}.lgdname,'p')
-            % file{i}の凡例名をtmpに保存
-            lgdtmp = [lgdtmp,file{i}.lgdname.p];
-        end
+plot(file{1}.simResult.T(tlength) , file{1}.simResult.state.p(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+% file{i}に凡例が保存されている場合実行
+if isfield(file{1},'lgdname')
+    if isfield(file{1}.lgdname,'p')
+        % file{i}の凡例名をtmpに保存
+        lgdtmp = [lgdtmp,file{1}.lgdname.p];
     end
 end
 % xlim, ylimの設定
@@ -189,20 +192,15 @@ elseif size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 4
 end
 hold on
 grid on
-for i = 1:HowmanyFile
-    if i == 1
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.q(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
-    elseif i == 2
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.q(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle',':');
-    elseif i == 3
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.q(:,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
-    end
-    if isfield(file{i},'lgdname')
-        if isfield(file{i}.lgdname,'q')
-            lgdtmp = [lgdtmp,file{i}.lgdname.q];
-        end
+
+plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.q(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+
+if isfield(file{i},'lgdname')
+    if isfield(file{i}.lgdname,'q')
+        lgdtmp = [lgdtmp,file{i}.lgdname.q];
     end
 end
+
 if flg.xlimHold == 1
     if ~isfield(xlimHold,'q')
         xlim(xlimHold);
@@ -235,20 +233,15 @@ plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.refe
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
 hold on
 grid on
-for i = 1:HowmanyFile
-    if i == 1
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.v(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
-    elseif i == 2
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.v(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle',':');
-    elseif i == 3
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.v(:,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
-    end
-    if isfield(file{i},'lgdname')
-        if isfield(file{i}.lgdname,'v')
-            lgdtmp = [lgdtmp,file{i}.lgdname.v];
-        end
+
+plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.v(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+
+if isfield(file{i},'lgdname')
+    if isfield(file{i}.lgdname,'v')
+        lgdtmp = [lgdtmp,file{i}.lgdname.v];
     end
 end
+
 if flg.xlimHold == 1
     if ~isfield(xlimHold,'v')
         xlim(xlimHold);
@@ -282,20 +275,15 @@ plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.refe
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 hold on
 grid on
-for i = 1:HowmanyFile
-    if i == 1
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.w(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
-    elseif i == 2
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.w(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle',':');
-    elseif i == 3
-        plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.w(:,tlength),file{i}.markerSty,'MarkerSize',12,'LineWidth',1,'LineStyle','-.');
-    end
-    if isfield(file{i},'lgdname')
-        if isfield(file{i}.lgdname,'w')
-            lgdtmp = [lgdtmp,file{i}.lgdname.w];
-        end
+
+plot(file{i}.simResult.T(tlength) , file{i}.simResult.state.w(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
+
+if isfield(file{i},'lgdname')
+    if isfield(file{i}.lgdname,'w')
+        lgdtmp = [lgdtmp,file{i}.lgdname.w];
     end
 end
+
 if flg.xlimHold == 1
     if ~isfield(xlimHold,'w')
         xlim(xlimHold);

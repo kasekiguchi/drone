@@ -122,7 +122,7 @@ flg.bilinear = 0;
 flg.normalize = 0;
 F = @quaternions_all; % 改造用
 FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_');
-FileName = strcat(FileName_common, 'Exp_Kiyama_code00_1');
+FileName = strcat(FileName_common, 'Exp_Kiyama_code03_2');
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -210,7 +210,7 @@ else
 end
 simResult.state.N = simResult.reference.N-1;
 
-save(targetpath,'est','Data','simResult')
+save(targetpath,'est','Data','simResult','F')
 disp('Saved to')
 disp(targetpath)
 

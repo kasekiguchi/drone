@@ -177,7 +177,7 @@ if change_reference == 1
    
     simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
 
-    model = load("test_0503.mat",'est');
+    model = load("test_0503.mat",'est'); % 推定したモデル
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;

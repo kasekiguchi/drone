@@ -71,17 +71,17 @@ common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             1];
 
 %% 磯部先輩観測量 code = 00
-% isobe_z = [W1*W2;
-%     W2*W3;
-%     W3*W1;
-%     W2*cos(Q1);
-%     W3*sin(Q1);
-%     W1*cos(Q2)/cos(Q1);
-%     W2*sin(Q1)/cos(Q2);
-%     W3*cos(Q1)/cos(Q2);
-%     W2*sin(Q1)*sin(Q2)/cos(Q1);
-%     W3*cos(Q1)*sin(Q2)/cos(Q1)
-%     ];
+isobe_z = [W1*W2;
+            W2*W3;
+            W3*W1;
+            W2*cos(Q1);
+            W3*sin(Q1);
+            W1*cos(Q2)/cos(Q1);
+            W2*sin(Q1)/cos(Q2);
+            W3*cos(Q1)/cos(Q2);
+            W2*sin(Q1)*sin(Q2)/cos(Q1);
+            W3*cos(Q1)*sin(Q2)/cos(Q1)
+            ];
 % z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
@@ -125,5 +125,30 @@ common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
 %     1/const.jz
 %     ];
 % z = [common_z; F_z; G_z];
+
+%% F(x), G(x)の各項を分解して全組み合わせを観測量にする code = 03
+F_z = [W1*cos(Q2);
+    W3*cos(Q1)*sin(Q2);
+    W2*sin(Q2)*sin(Q1) /cos(Q2);
+    W2*cos(Q1) - W3*sin(Q1);
+    W3*cos(Q1) / cos(Q2); 
+    W2*sin(Q1) / cos(Q2);
+     (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
+    -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
+     (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
+    ];
+G_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
+    sin(Q2/2)*sin(Q1/2)*sin(Q3/2);
+    cos(Q1/2)*cos(Q3/2)*sin(Q2/2);
+    cos(Q2/2)*sin(Q1/2)*sin(Q3/2);
+    cos(Q2/2)*cos(Q1/2)*sin(Q3/2);
+    cos(Q3/2)*sin(Q2/2)*sin(Q1/2);
+    cos(Q2/2)*cos(Q3/2)*sin(Q1/2);
+    cos(Q1/2)*sin(Q2/2)*sin(Q3/2);
+    1/const.jx;
+    1/const.jy;
+    1/const.jz
+    ];
+z = [common_z; F_z; G_z; isobe_z];
 end
 

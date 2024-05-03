@@ -11,7 +11,7 @@ flg.xlimHold = 1; % 指定した値にxlimを固定
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
 % loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
-loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1' ;
+loadfilename{1} = 'EstimationResult_2024-05-03_Exp_Kiyama_code03_1' ;
 % loadfilename{2} = '.mat';
 % loadfilename{3} = '.mat';
 
