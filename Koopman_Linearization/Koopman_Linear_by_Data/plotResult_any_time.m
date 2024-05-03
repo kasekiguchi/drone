@@ -11,17 +11,16 @@ startTime = 11;
 
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
-loadfilename{1} = 'EstimationResult_2024-05-03_Exp_Kiyama_code03_2' ;
-% loadfilename{1} = 'EstimationResult_Exp_Kiyama_code01';
-% loadfilename{2} = '.mat';
-% loadfilename{3} = '.mat';
+loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
+% loadfilename{1} = 'EstimationResult_2024-05-03_Exp_Kiyama_code03_2' ;
+% loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
 WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
 
 %% グラフの保存
-save_fig = 1; %1：出力したグラフをfigで保存する
-
+save_fig = 0; %1：出力したグラフをfigで保存する
+% save_fig : 1 => figureをそれぞれ出力
+% save_fig : 0 => subplotで出力
 if save_fig == 1 % Graphフォルダ内に保存 .figで保存
     name = 'data_exp_kiyama_code03_11s'; %ファイル名
     folderName = 'data_exp_kiyama_code03_11s'; %フォルダ名
@@ -135,7 +134,8 @@ newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
              0.4660 0.6740 0.1880]; %グラフの色指定
 %% P
-figure(1)
+if save_fig == 1; figure(1);
+else; fig = figure(1); sgtitle(strrep(loadfilename{1},'_',' ')); subplot(2,2,1); end
 % Referenceをplot
 colororder(newcolors)
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',2); % 精度検証用データ
@@ -182,7 +182,8 @@ if save_fig == 1
 end
 
 %% Q
-figure(2)
+if save_fig == 1; figure(2);
+else; subplot(2,2,2); end
 colororder(newcolors)
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.q(tlength,:)','LineWidth',2);
 if size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 3
@@ -227,7 +228,8 @@ if save_fig == 1
 end
 
 %% V
-figure(3)
+if save_fig == 1; figure(3);
+else; subplot(2,2,3); end
 colororder(newcolors)
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.v(tlength,:)','LineWidth',2);
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
@@ -268,7 +270,8 @@ if save_fig == 1
 end
 
 %% W
-figure(4)
+if save_fig == 1; figure(4);
+else; subplot(2,2,4); end
 colororder(newcolors)
 % lgd = ('$\omega_{\phi d}$','$\omega_{\theta d}$','$\omega_{\psi d}$','$\hat{\omega}_\phi$','$\hat{\omega}_\theta$','$\hat{\omega}_\psi$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 plot(file{WhichRef}.simResult.reference.T(tlength),file{WhichRef}.simResult.reference.est.w(tlength,:)','LineWidth',2);
@@ -308,3 +311,5 @@ hold off
 if save_fig == 1
     savefig(strcat('Angular velocity_',name));
 end
+
+if save_fig ~= 1; fig.WindowState = 'maximized'; end

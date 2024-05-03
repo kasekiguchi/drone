@@ -177,7 +177,7 @@ if change_reference == 1
    
     simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
 
-    model = load("test_0503.mat",'est'); % 推定したモデル
+    model = load("EstimationResult_Kiyama_reproduction.mat",'est'); % 推定したモデル
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
@@ -200,49 +200,8 @@ if change_reference == 1
     N2 = 56;
     length = N2 - N1;
     j = 1;
-    while(1)
+    while(N2 <= simResult.reference.N)
         clc
-        if N2 > simResult.reference.N
-            fprintf('各方向のRMSEの変位，最大誤差を表示します')
-            size = figure;
-            size.WindowState = 'maximized'; %表示するグラフを最大化
-            for i = 1:3
-                subplot(2,3,i)
-                if i == 1
-                    plot(1:j-1,x,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0 0.4470 0.7410])
-                    grid on
-                    ylabel('RMSE x','FontSize',14)
-                elseif i == 2
-                    plot(1:j-1,y,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0.4660 0.6740 0.1880])
-                    grid on
-                    ylabel('RMSE y','FontSize',14)
-                else
-                    plot(1:j-1,z,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0.9290 0.6940 0.1250])
-                    grid on
-                    ylabel('RMSE z','FontSize',14)
-                end
-            end
-            
-            for i = 4:6
-                subplot(2,3,i)
-                if i == 4
-                    plot(1:j-1,xerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0 0.4470 0.7410])
-                    grid on
-                    ylabel('Max error x','FontSize',14)
-                elseif i == 5
-                    plot(1:j-1,yerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0.4660 0.6740 0.1880])
-                    grid on
-                    ylabel('Max error y','FontSize',14)
-                elseif i == 6
-                    plot(1:j-1,zerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0.9290 0.6940 0.1250])
-                    grid on
-                    ylabel('Max error z','FontSize',14)
-                end
-            end
-            % set(gcf, 'Position', [160, 200, 1200, 500]);
-            
-            break
-        end
         for i = N1:N2-1
             simResult.Z(:,i-N1+2) = est.A * simResult.Z(:,i-N1+1) + est.B * simResult.U(:,i); %状態方程式 z[k+1] = Az[k]+BU
         end
@@ -251,12 +210,12 @@ if change_reference == 1
         size = figure;
         size.WindowState = 'maximized'; %表示するグラフを最大化
         for i = 1:3
-            subplot(2,3,i)
-            plot(simResult.T(:,N1:N2),simResult.Xhat(i,:),'LineWidth',1.2)
-            hold on
-            grid on
-            plot(simResult.T(:,N1:N2),simResult.reference.X(i,N1:N2),'LineWidth',1.2,'LineStyle','--','Color','red')
-            legend('estimator','reference','Location','best')
+%             subplot(2,3,i)
+%             plot(simResult.T(:,N1:N2),simResult.Xhat(i,:),'LineWidth',1.2)
+%             hold on
+%             grid on
+%             plot(simResult.T(:,N1:N2),simResult.reference.X(i,N1:N2),'LineWidth',1.2,'LineStyle','--','Color','red')
+%             legend('estimator','reference','Location','best')
             if i == 1
                 xlabel('Time [s]','FontSize',16);
                 ylabel('x','FontSize',16);
@@ -282,37 +241,77 @@ if change_reference == 1
                 zerror_max(1,j) = max(simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:));
             end
         end
-        error = [xerror;yerror;zerror];
-        subplot(2,3,4)
-        plot(simResult.T(:,N1:N2),simResult.reference.U(1,N1:N2),'LineWidth',1.2)
-        yline(0.5884*9.81,'Color','r')
-        grid on
-        xlabel('Time [s]','FontSize',16);
-        ylabel('thrust','FontSize',16);
+%         error = [xerror;yerror;zerror];
+%         subplot(2,3,4)
+%         plot(simResult.T(:,N1:N2),simResult.reference.U(1,N1:N2),'LineWidth',1.2)
+%         yline(0.5884*9.81,'Color','r')
+%         grid on
+%         xlabel('Time [s]','FontSize',16);
+%         ylabel('thrust','FontSize',16);
+% 
+%         subplot(2,3,5)
+%         plot(simResult.T(:,N1:N2),simResult.reference.U(2:end,N1:N2),'LineWidth',1.2)
+%         grid on
+%         xlabel('Time [s]','FontSize',16);
+%         ylabel('torque','FontSize',16);
+%         legend('roll','pitch','yaw','Location','best')
+% 
+%         subplot(2,3,6)
+%         plot(simResult.T(:,N1:N2),error,'LineWidth',1.2)
+%         grid on
+%         xlabel('Time [s]','FontSize',16);
+%         ylabel('reference - estimator','FontSize',16);
+%         legend('error_x','error_y','error_z','Location','best')
+%         
 
-        subplot(2,3,5)
-        plot(simResult.T(:,N1:N2),simResult.reference.U(2:end,N1:N2),'LineWidth',1.2)
-        grid on
-        xlabel('Time [s]','FontSize',16);
-        ylabel('torque','FontSize',16);
-        legend('roll','pitch','yaw','Location','best')
-
-        subplot(2,3,6)
-        plot(simResult.T(:,N1:N2),error,'LineWidth',1.2)
-        grid on
-        xlabel('Time [s]','FontSize',16);
-        ylabel('reference - estimator','FontSize',16);
-        legend('error_x','error_y','error_z','Location','best')
-        
-
-        % set(gcf, 'Position', [160, 200, 1200, 500]);
         N1 = N1 + 55;
         N2 = N2 + 55;
         simResult.Z(:,1) = F(simResult.reference.X(:,N1));
         simResult.Xhat(:,1) = simResult.reference.X(:,N1);
         j = j + 1;
         
-        pause(6)
+%         pause(6)
     end
+
+    fprintf('各方向のRMSEの変位，最大誤差を表示します\n')
+    size = figure;
+    size.WindowState = 'maximized'; %表示するグラフを最大化
+    for i = 1:3
+        subplot(2,3,i)
+        if i == 1
+            plot(1:j-1,x,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0 0.4470 0.7410])
+            grid on
+            ylabel('RMSE x','FontSize',14)
+        elseif i == 2
+            plot(1:j-1,y,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0.4660 0.6740 0.1880])
+            grid on
+            ylabel('RMSE y','FontSize',14)
+        else
+            plot(1:j-1,z,'LineWidth',1.2,'Marker','o','MarkerFaceColor','red','LineStyle','--','Color',[0.9290 0.6940 0.1250])
+            grid on
+            ylabel('RMSE z','FontSize',14)
+        end
+    end
+    
+    for i = 4:6
+        subplot(2,3,i)
+        if i == 4
+            plot(1:j-1,xerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0 0.4470 0.7410])
+            grid on
+            ylabel('Max error x','FontSize',14)
+        elseif i == 5
+            plot(1:j-1,yerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0.4660 0.6740 0.1880])
+            grid on
+            ylabel('Max error y','FontSize',14)
+        elseif i == 6
+            plot(1:j-1,zerror_max,'LineWidth',1.2,'Marker','diamond','MarkerFaceColor','m','LineStyle','-.','Color',[0.9290 0.6940 0.1250])
+            grid on
+            ylabel('Max error z','FontSize',14)
+        end
+    end
+
+    %--------------------------
+    fprintf('SUM RMSE : x = %.4f, y = %.4f, z = %.4f \n', sum(x), sum(y), sum(z));
+    fprintf('SUM ERROR: x = %.4f, y = %.4f, z = %.4f \n', sum(xerror_max), sum(yerror_max), sum(zerror_max));
 end
 
