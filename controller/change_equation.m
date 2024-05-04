@@ -24,7 +24,7 @@ function [H, f] = change_equation(Param)
     Horizon = Param.H;
 
     %使用した観測量に応じて変更------------------------------------------
-    Xc = quaternions(Param.current); %現在状態,観測量：状態+非線形項
+    Xc = quaternions_all(Param.current); %現在状態,観測量：状態+非線形項
     % Xc = [Param.current;1];]
     %-------------------------------------------------------------------
     r  = Param.ref(1:12,:);
