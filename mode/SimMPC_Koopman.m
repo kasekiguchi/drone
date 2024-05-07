@@ -27,8 +27,8 @@ initial_state.w = [0; 0; 0];
 % run("ExpBase");
 
 %% クープマンモデルをプラントに設定する場合
-% load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat",'est')
+ load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+ %load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat",'est')
 A = est.A;
 B = est.B;
 C = est.C;
