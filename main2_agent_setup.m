@@ -2,7 +2,7 @@ for i = 1:N
     %% generate Drone instance
     % DRONE classのobjectをinstance化する．制御対象を表すplant property（Model classのインスタンス）をコンストラクタで定義する．
     if fExp
-        agent(i) = DRONE(Model_Drone_Exp(dt,initial(i),"udp",[25]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
+        agent(i) = DRONE(Model_Drone_Exp(dt,initial(i),"udp",[252]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial(i), "serial", COMs(i)),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = DRONE(Model_Drone_Exp(dt,initial(i), "serial", "COM31"),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ArduinoのCOM番号）
         %agent(i) = Whill(Model_Whill_Exp(dt,initial(i),"ros",[21]),DRONE_PARAM("DIATONE")); % for exp % 機体番号（ESPrのIP）

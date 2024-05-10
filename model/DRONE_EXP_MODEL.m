@@ -20,13 +20,13 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
             obj.flight_phase        = 's';
             switch param.conn_type
                 case "udp"
-                    obj.arming_msg = [1100 1100 0 1100 1000 0 0 0];
+                    obj.arming_msg = [500 500 0 500 1000 0 0 0];
                     obj.ESPr_num = param.num;
                     [~,cmdout] = system("ipconfig");
                     ipp=regexp(cmdout,"192.168.");
                     cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
-                    param.IP=strcat('192.168.50','.',string(100+obj.ESPr_num));
-                    param.port=8000+obj.ESPr_num;
+                    param.IP=strcat('192.168.1','.',string(obj.ESPr_num));
+                    param.port=8000;
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);
                 case "serial"
@@ -48,7 +48,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                     FH = varargin{1}.FH;% figure handle
                 end
                 cha = get(FH, 'currentcharacter');
-                if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't')
+                if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f'&& cha ~= 'l' && cha ~= 't' && cha ~= 'h')
                     cha   = obj.flight_phase;
                 end
                 obj.flight_phase=cha;
@@ -70,6 +70,8 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                         msg(1,1:8) = u;
                     case 't' % take off
                         msg(1,1:8) = u;
+                    case 'h' % take off
+                        msg(1,1:8) = u;
                 end
             else % 緊急時 プロペラストップ
                 obj.msg=[500 500 0 500 0 0 0 0];
@@ -88,4 +90,3 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
         end
     end
 end
-

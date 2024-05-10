@@ -46,13 +46,13 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
 
             cha = get(FH, 'currentcharacter');
 
-            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')
+            if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't' && cha ~= 'h')
                 cha = obj.flight_phase;
             end
 
             obj.flight_phase = cha;
 
-            if cha == 't' || cha == 'f' || cha == 'l'
+            if cha == 't' || cha == 'f' || cha == 'l' || cha == 'h'
                 throttle_offset = obj.param.th_offset;
                 %wh = obj.self.model.state.w;
                 wh = obj.self.estimator.result.state.w;
@@ -79,7 +79,7 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                 if obj.self.model.name == "load"
                     throttle_offset_SuspendedLoad = obj.param.th_offset_SuspendedLoad;
                     T_thr = input(1);
-                    if cha == 'f'
+                    if cha == 'f' || cha == 'h'
                         uroll = obj.param.gain_SuspendedLoad(1) * (whn(1) - wh(1));
                         upitch = obj.param.gain_SuspendedLoad(2) * (whn(2) - wh(2));
                         uthr = max(0,obj.param.gain_SuspendedLoad(4) * (T_thr - obj.hover_thrust_force_SuspendedLoad) + throttle_offset_SuspendedLoad); % hovering からの偏差をゲイン倍する
@@ -87,7 +87,7 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                     elseif cha == 'l'
                         uroll = obj.param.gain(1) * (whn(1) - wh(1));
                         upitch = obj.param.gain(2) * (whn(2) - wh(2));
-                        uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset_SuspendedLoad); % hovering からの偏差をゲイン倍する
+                        uthr = max(0,obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + throttle_offset); % hovering からの偏差をゲイン倍する
                         uyaw = obj.param.gain(3) * (whn(3) - wh(3));
                     else
                         uroll = obj.param.gain(1) * (whn(1) - wh(1));
@@ -96,9 +96,9 @@ classdef THRUST2THROTTLE_DRONE < INPUT_TRANSFORM_CLASS
                         uyaw = obj.param.gain(3) * (whn(3) - wh(3));
                     end
                 end
-                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset; % offset = 500
-                upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset; % offset = 500
-                uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
+                uroll = sign(uroll) * min(abs(uroll), 50) + obj.param.roll_offset; % offset = 500
+                upitch = sign(upitch) * min(abs(upitch), 50) + obj.param.pitch_offset; % offset = 500
+                uyaw = -sign(uyaw) * min(abs(uyaw), 50) + obj.param.yaw_offset; % マイナスは必須 betaflightでは正入力で時計回り
                 % uthr =uthr + u_throttle_offset ;%sign(uthr)*min(abs(uthr),100)+ u_throttle_offset;
                 obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 は自作ドローンの設定で自律飛行モードに必要
             else

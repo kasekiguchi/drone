@@ -153,7 +153,8 @@ end
 close all
 clc
 % plot 
-logger.plot({1,"p","er"},{1,"v","e"},{1,"q","se"},{1,"w1:2","e"},{1,"state.pL","ser"},{1,"state.vL","e"},{1,"state.pT","se"},{1,"state.wL","e"},{1,"input",""});
+% logger.plot({1,"p","er"},{1,"v","e"},{1,"q","se"},{1,"w1:2","e"},{1,"state.pL","ser"},{1,"state.vL","e"},{1,"state.pT","se"},{1,"state.wL","e"},{1,"input",""});
+logger.plot({1,"p","er"},{1,"v","e"},{1,"q","se"},{1,"w1:2","e"},{1,"input",""});
 % agent(1).reference.timeVarying.show(logger)
 
 %% animation
