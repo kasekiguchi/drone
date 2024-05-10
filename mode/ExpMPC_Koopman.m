@@ -42,7 +42,7 @@ function result = controller_do(varargin)
     elseif varargin{2} == 't'
         result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
-        result = result.hlc; % hlc:hlcでcontrol
+        result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
     elseif varargin{2} == 'f'
         result = controller.mpc.do(varargin); % flight: KMPC
     elseif varargin{2} == 'l'

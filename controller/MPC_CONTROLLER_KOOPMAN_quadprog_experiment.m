@@ -39,7 +39,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
 
         %-- main()的な
         function result = do(obj,varargin)
-            tic
+            % tic
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
             vara = varargin{1};
@@ -91,32 +91,32 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             %%
             obj.previous_input = var;
             if vara{2} == 'a'
-                obj.result.input = [0;0;0;0]; %arming時には入力0で固定
+                obj.result.input = [0;0;0;0]; % arming時には入力0で固定
             else
                 obj.result.input = var(1:4, 1); % 印加する入力 4入力
             end
 
             %% データ表示用
             obj.input.u = obj.result.input; 
-            calT = toc
+            % calT = toc
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
 
             %% 情報表示
-            state_monte = obj.self.estimator.result.state;
-            fprintf("==================================================================\n")
-            fprintf("==================================================================\n")
-            fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
-                    state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-                    state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-                    state_monte.q(1), state_monte.q(2), state_monte.q(3), ...
-                    state_monte.w(1), state_monte.w(2), state_monte.w(3));       % s:state 現在状態
-            fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \t wr: %f %f %f \n", ...
-                    obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
-                    obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-                    obj.state.ref(4,1), obj.state.ref(5,1), obj.state.ref(6,1), ...
-                    obj.state.ref(10,1), obj.state.ref(11,1), obj.state.ref(12,1))  % r:reference 目標状態
+            % state_monte = obj.self.estimator.result.state;
+            % fprintf("==================================================================\n")
+            % fprintf("==================================================================\n")
+            % fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
+            %         state_monte.p(1), state_monte.p(2), state_monte.p(3),...
+            %         state_monte.v(1), state_monte.v(2), state_monte.v(3),...
+            %         state_monte.q(1), state_monte.q(2), state_monte.q(3), ...
+            %         state_monte.w(1), state_monte.w(2), state_monte.w(3));       % s:state 現在状態
+            % fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \t wr: %f %f %f \n", ...
+            %         obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
+            %         obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
+            %         obj.state.ref(4,1), obj.state.ref(5,1), obj.state.ref(6,1), ...
+            %         obj.state.ref(10,1), obj.state.ref(11,1), obj.state.ref(12,1))  % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
             fprintf("\n");
