@@ -10,12 +10,12 @@ function Controller = Controller_MPC_Koopman(~)
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-%     load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-    load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
+    load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+%     load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
 
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     torque = 1; % 1:クープマンモデルが総推力のとき
+     torque = 1; % 1:クープマンモデルが総推力トルクのとき
     %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     %--------------------------------------------------------------------
 
@@ -24,8 +24,8 @@ function Controller = Controller_MPC_Koopman(~)
     Controller_param.C = est.C;
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み
-    Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み
+    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み
@@ -44,7 +44,7 @@ function Controller = Controller_MPC_Koopman(~)
 %     Controller_param.torque_TH = 0;
 
     %% 以下は変更なし
-    fprintf("勾配MPC controller\n")
+    fprintf("Koopman MPC controller\n")
 
     Controller_param.ref_input = Controller_param.input.u; %入力の目標値
 

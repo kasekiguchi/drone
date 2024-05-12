@@ -63,6 +63,7 @@ app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time
 Graphplot(app)
 end
 
+% GUI上に現在位置（推定値）を表示する
 function in_prog(app)
 app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
 end
