@@ -52,17 +52,6 @@ classdef HLC < handle
       tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
       % max,min are applied for the safty
       obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-%       state_monte = obj.self.estimator.result.state;
-% %             % state_monte = obj.self.plant.state;
-%             fprintf("==================================================================\n")
-%             fprintf("==================================================================\n")
-%             fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \t ws: %f %f %f \n",...
-%                     state_monte.p(1), state_monte.p(2), state_monte.p(3),...
-%                     state_monte.v(1), state_monte.v(2), state_monte.v(3),...
-%                     state_monte.q(1)*180/pi, state_monte.q(2)*180/pi, state_monte.q(3)*180/pi, ...
-%                     state_monte.w(1)*180/pi, state_monte.w(2)*180/pi, state_monte.w(3)*180/pi);       % s:state 現在状態
-% %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-%             fprintf("\n");
       result = obj.result;
     end
   end

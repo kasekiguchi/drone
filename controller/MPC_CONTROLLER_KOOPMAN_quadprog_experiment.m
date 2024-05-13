@@ -82,8 +82,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             b = [];
             Aeq = [];
             beq = [];
-            lb = [];
-            ub = [];
+            lb = repmat(obj.param.input.lb, obj.param.H, 1); % 下限制約 不要なら空の配列
+            ub = repmat(obj.param.input.ub, obj.param.H, 1); % 上限制約 入力制約はHLとそろえた
             x0 = [obj.previous_input(:)];
               
             [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算

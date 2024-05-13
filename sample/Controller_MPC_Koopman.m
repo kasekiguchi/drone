@@ -40,6 +40,9 @@ function Controller = Controller_MPC_Koopman(~)
     else
         Controller_param.input.u = Controller_param.m * 9.81 / 4 * [1;1;1;1]; % 4入力
     end
+    Controller_param.input.lb = [0; -1; -1; -1];
+    Controller_param.input.ub = [10; 1;  1;  1];
+    
     
 %     Controller_param.torque_TH = 0;
 
