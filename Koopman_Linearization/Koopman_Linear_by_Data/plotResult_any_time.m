@@ -6,9 +6,10 @@ close all
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../../')); % drone/のこと
 %% flag
 flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
+flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 flg.division = 0; % plotResult_division仕様にするか
+% 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 
 startTime = 3.39; % flight後何秒からの推定精度検証を行うか
@@ -16,7 +17,7 @@ startTime = 3.39; % flight後何秒からの推定精度検証を行うか
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
 % loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
-loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code01';
+loadfilename{1} = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
 WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
@@ -41,7 +42,7 @@ end
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 1; %ステップ数，xの範囲を設定 default: 1
+stepnum = 2; %ステップ数，xの範囲を設定 default: 1
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1

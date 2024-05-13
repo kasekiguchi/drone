@@ -82,7 +82,7 @@ isobe_z = [W1*W2;
             W2*sin(Q1)*sin(Q2)/cos(Q1);
             W3*cos(Q1)*sin(Q2)/cos(Q1)
             ];
-z = [common_z; isobe_z];
+% z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
 % F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
@@ -150,5 +150,26 @@ z = [common_z; isobe_z];
 %     1/const.jz
 %     ];
 % z = [common_z; F_z; G_z; isobe_z];
+
+%% f(x, u, param)からdf/dparam したときの項 code = 04
+roll = Q1; pitch = Q2; yaw = Q3;
+jx = const.jx; jy = const.jy; jz = const.jz;
+o1 = W1; o2 = W2; o3 = W3;
+m = const.m;
+u1 = 0; u2 = 0; u3 = 0; u4 = 0;
+diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
+            (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
+            -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
+            - u2/jx^2 - (jy*o2*o3 - jz*o2*o3)/jx^2;
+                                      -(o1*o3)/jy;
+                                       (o1*o2)/jz;
+                                       (o2*o3)/jx;
+             (jx*o1*o3 - jz*o1*o3)/jy^2 - u3/jy^2;
+                                      -(o1*o2)/jz;
+                                      -(o2*o3)/jx;
+                                       (o1*o3)/jy;
+           - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
+                                               -1];
+z = [common_z; isobe_z; diff_param_z];
 end
 
