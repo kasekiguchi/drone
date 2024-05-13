@@ -30,21 +30,21 @@ agent.controller.result.input = [(agent.parameter.loadmass+agent.parameter.mass)
 
 run("ExpBase");
 %%
-clc
-for i = 1:time.te
-    if i < 20 || rem(i, 10) == 0, i, end
-    agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
-    agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f',0,0,agent,1);
-    agent(1).plant.do(time, 'f');
-    logger.logging(time, 'f', agent);
-    time.t = time.t + time.dt;
-    %pause(1)
-end
+% clc
+% for i = 1:time.te
+%     if i < 20 || rem(i, 10) == 0, i, end
+%     agent(1).sensor.do(time, 'f');
+%     agent(1).estimator.do(time, 'f');
+%     agent(1).reference.do(time, 'f');
+%     agent(1).controller.do(time, 'f',0,0,agent,1);
+%     agent(1).plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     %pause(1)
+% end
 
 %%
-logger.plot({1,"plant.result.state.pL","p"})
+% logger.plot({1,"plant.result.state.pL","p"})
 %%
 function result = controller_do(varargin)
 controller = varargin{5}.controller;
