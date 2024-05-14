@@ -25,7 +25,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
                     [~,cmdout] = system("ipconfig");
                     ipp=regexp(cmdout,"192.168.");
                     cmdout2=cmdout(ipp(1)+8:ipp(1)+11);
-                    param.IP=strcat('192.168.100','.',string(obj.ESPr_num));
+                    param.IP=strcat('192.168.1','.',string(obj.ESPr_num));
                     param.port=8000;
                     obj.connector=UDP_CONNECTOR(param);
                     fprintf("Drone %s is ready\n",param.IP);

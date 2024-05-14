@@ -117,7 +117,7 @@ classdef (Abstract) ABSTRACT_SYSTEM < dynamicprops
             % 推定値でmodelの状態を上書きした上でmodelのdo method を実行
             if obj.model.state.list == obj.estimator.result.state.list % TODO　１回目の時に右辺が定義されていないのでは？
                 obj.model.state.set_state(obj.estimator.result.state.get());
-                obj.model.dt = obj.estimator.result.dt;
+                %obj.model.dt = obj.estimator.result.dt;
             else
 
                 for i = 1:length(obj.model.state.list)
