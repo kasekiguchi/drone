@@ -62,6 +62,7 @@ classdef MPC_CONTROLLER_HL <handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
             obj.param.t = varargin{1}.t;
+            vara = varargin{1};
 
             ref = obj.self.reference.result;
             xd = ref.state.get();
@@ -88,11 +89,29 @@ classdef MPC_CONTROLLER_HL <handle
             z2n = Z2(xn,xd',vfn,P);
             z3n = Z3(xn,xd',vfn,P);
             z4n = Z4(xn,xd',vfn,P);
-            obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
-            %% Referenceの取得、ホライズンごと
+            %% Referenceの取得、ホライズンごと  For Simulation
             % 実状態の目標値
             xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+            obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+
+            %各phaseでのリファレンスと現在状態の更新  For Experiment -------------------
+            % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
+            % if vara{2} == 'a'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+            % elseif vara{2} == 't'
+            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+            %     fprintf('take off')
+            % elseif vara{2} == 'f'
+            %     % 実状態の目標値
+            %     xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+            %     obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+            %     fprintf('flight')
+            % end
+            %---------------------------------------------------------------------------------------
+
             % 実状態の目標値を仮想状態的に並び替え
             xr_imag = [xr_real(3,:);xr_real(7,:);
                         xr_real(1,:);xr_real(5,:);xr_real(9,:);xr_real(13,:);
@@ -148,7 +167,7 @@ classdef MPC_CONTROLLER_HL <handle
             obj.result.input_v = [vf; vs]; % 仮想入力の保存
             obj.result.xr = xr_real;
 
-            %% 情報表示
+            %% 情報表示 Exp時はコメントアウト
             if exist("exitflag") ~= 1
                 exitflag = NaN;
             end
