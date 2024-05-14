@@ -10,26 +10,27 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
 %% Importing data
-if exist("app") ~= 7
+if exist("app") ~= 7        % GUI実行中
     logt = app.logger.Data.t;
     xmax = app.time.t-app.time.dt;
-    for i = 1:length(app.logger.Data.t) -1
-        Data(:,i) = app.logger.Data.agent.estimator.result{i}.state.get();
-        RData(:,i) = app.logger.Data.agent.controller.result{i}.xr(:,1);
-        Idata(:,i) = app.logger.Data.agent.input{i};
-        InputV(:,i) = app.logger.Data.agent.controller.result{i}.input_v;
-    end
-else
+    logAgent = app.logger.Data.agent;
+% elseif exist("log") == 1    % matを読み込んだ
+%     flg = 1;
+%     logt = log.Data.t(1:find(log.Data.t(2:end)==0, 1, 'first'));
+%     xmax = log.Data.t(find(log.Data.t(2:end)==0, 1, 'first'));
+%     logAgent = log.Data.agent;
+else                        % GUIを閉じた
     logt = gui.logger.Data.t;
     xmax = gui.time.t-gui.time.dt;
-    for i = 1:length(gui.logger.Data.t) -1
-        Data(:,i) = gui.logger.Data.agent.estimator.result{i}.state.get();
-        RData(:,i) = gui.logger.Data.agent.controller.result{i}.xr(:,1);
-        Idata(:,i) = gui.logger.Data.agent.input{i};
-        InputV(:,i) = gui.logger.Data.agent.controller.result{i}.input_v;
-    end
+    logAgent = gui.logger.Data.agent;
 end
 
+for i = 1:length(logt)
+    Data(:,i) = logAgent.estimator.result{i}.state.get();
+    RData(:,i) = logAgent.controller.result{i}.xr(:,1);
+    Idata(:,i) = logAgent.input{i};
+    InputV(:,i) = logAgent.controller.result{i}.input_v;
+end
 
 logt = logt(1:end-1); % time
 Pdata = Data(1:3,:); % position
