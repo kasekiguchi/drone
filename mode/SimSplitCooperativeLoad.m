@@ -1,6 +1,4 @@
-clc
-clear
-close all
+clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
@@ -127,8 +125,6 @@ for j = 1:tn
         for i = 2:N+1
             input(4*(i-1)-3:4*(i-1),1) = agent(i).controller.result.input;
         end
-
-%         [(agent(i).parameter.loadmass+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 
         agent(1).controller.result.input = input;
 %         agent(2).reference.result.m+agent(3).reference.result.m+agent(4).reference.result.m+agent(5).reference.result.m+agent(6).reference.result.m+agent(7).reference.result.m

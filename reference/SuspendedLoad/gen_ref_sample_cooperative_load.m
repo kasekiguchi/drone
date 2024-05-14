@@ -36,8 +36,6 @@ ref=@(t)[lx*cos(w*t)+lx_offset; % x
 %           ly_offset;  % y
 %           lz_offset]; % z
 
-% ref=@(t)[1.2*sin(2*w*pi*t);4.2*cos(w*pi*t);2];
-
 % fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));
 
 % r0x = [(4*2^(1/2)*w*cos(2*pi*t*w))/(abs(w)*(16*cos(4*t*w*pi) - 49*cos(2*t*w*pi) + 65)^(1/2)) -(7*2^(1/2)*w*sin(pi*t*w))/(abs(w)*(16*cos(4*t*w*pi) - 49*cos(2*t*w*pi) + 65)^(1/2)) 0]';

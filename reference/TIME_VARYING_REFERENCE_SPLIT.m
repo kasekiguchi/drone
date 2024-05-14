@@ -133,10 +133,10 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            end
            if strcmp(obj.com, "Split2")
                agent1 = varargin{3};
-               initial_loadref = agent1.reference.result.state.xd;%分割前のペイロード目標軌道
+               initial_loadref = agent1.reference.result.state.xd;%分割前のペイロード目標軌道など
                omega_load = agent1.reference.result.state.o;%分割前のペイロード角速度
                rho = agent1.parameter.rho(:,obj.self.id-1);%中心位置からリンクまでの距離
-               R_load = agent1.reference.result.state.getq("rotm"); %ペイロードの回転行列
+               R_load = agent1.reference.result.state.getq("rotm"); %分割前ペイロードの回転行列
                Qrho = initial_loadref(1:3,1)+R_load*rho;%分割後のペイロードの位置目標軌道
                dR_load = R_load*Skew(omega_load);
                vrho = initial_loadref(4:6,1)+ dR_load*rho;%分割後のペイロードの速度目標軌道
@@ -192,27 +192,6 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
                obj.result.state.p = obj.result.state.xd(1:3);
            end
-
-%            if strcmp(obj.com, "Take_off")
-%                if isempty( obj.base_state ) % first take
-%                    obj.base_time=varargin{1}.t;
-%                    obj.base_state = obj.self.estimator.result.state.p;
-%                    obj.result.state.xd = [obj.base_state;obj.result.state.xd(4:27,1)];
-% %                  
-%                end
-%                obj.result.state.xd(1:12,1) = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
-%                obj.result.state.p = obj.result.state.xd(1:3,1);
-%                obj.result.state.v = obj.result.state.xd(4:6,1);
-% %                obj.self.input_transform.param.th_offset = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
-%                result = obj.result;
-%            end
-           
-           % if length(obj.result.state.xd)>4
-           %  obj.result.state.v = obj.result.state.xd(5:7);
-           % else
-           %  obj.result.state.v = [0;0;0];
-           % end
-           % obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
            result = obj.result;
         end
 

@@ -49,10 +49,10 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
                 vf = Vf_SupendedLoad(x,xd',P,F1);
             end
             vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
-            obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
-            obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
-            obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
-            obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
             % h234 = H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい

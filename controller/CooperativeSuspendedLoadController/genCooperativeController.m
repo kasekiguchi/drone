@@ -85,7 +85,7 @@ Fd0 = m0*(-kx0'.*ex0- kdx0'.*dex0 + ddx0d + g*e3);
 Md0 = -kr0'.*eR0 - ko0'.*eo0 + Skew(R0'*R0d*o0d)*J0*R0'*R0d*o0d + J0*R0'*R0d*do0d;
 matlabFunction([R0'*Fd0;Md0],"file",dir+"CSLC_"+N+"_R0TFdMd.m","vars",{X,Xd,R0,R0d,physicalParam,Gains},...
   "Comments","[R0'*Fd;Md] for (26)")
-%%
+%% (30)-(32), dqid, dwid
 %dwi = cross(qi,ai)./li - cross(qi,uip1)./(mi.*li);
  %syms dqid [3 N] real
  %syms ddqid [3 N] real
@@ -97,7 +97,7 @@ dwid(:,i) = cross(qid(:,i),ddqid(:,i));
 eqi(:,i) = cross(qid(:,i),qi(:,i)); % 3xN
 ewi(:,i) = wi(:,i) + Qi{i}^2*wid(:,i);
 end
-%% ui
+%% ui (1) (16) (19)のために(25)(27)を使う (33)
 % for i = 1:N
 %   RhoR0Tmu(:,i) = Rho{i}*R0'*mui(:,i);
 % end
@@ -131,7 +131,7 @@ syms b3 [3 N] real
 syms si [1 N] real
 syms ci [1 N] real
 
-%%
+%% (36)-(40)
 db3 = zeros(size(b3));
 for i = 1:N
 b3ddx0d(:,i) = cross(b3(:,i),ddx0d);
