@@ -1,13 +1,14 @@
 実験前に確認すること
 
 ・Motiveと実験用PCのIPの確認
-Motive : Simファイル：Connector_Natnet('☆');
+Motive : modeファイル：Connector_Natnet('☆');
 実験用 : Connector_Natnet内のClientIP
 
 ・プロポのIP確認
-251 or 252
+251 or 252 : modeファイル
 
 ・リファレンスの確認
+・THRUST2THROTTLE_DRONEにMPCのgain設定あり
 
 
 Controller別の設定
@@ -15,12 +16,18 @@ Controller別の設定
 〇MPC_HL
 ・controllerのリファレンス設定のコメントアウト/イン（95行目あたり）
 
-
-
-
 〇MPC_Koopman
 ・観測量が読み込むモデルと同一か確認
 Controller_MPC_Koopmanで読み込み
 
 ・入力制約を確認
 なくしてもいいかもしれない
+
+
+実験時
+トリガーで接続確認
+
+実験
+s, a, t, f, l, q
+
+緊急時：q
