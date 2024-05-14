@@ -15,8 +15,9 @@ r = 0.1;
 % y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);%r*cos(t/s);%
 % z = z_0;
 % 円旋回
-x = sin(t/2);
-y = cos(t/2);
+T=10;
+x = sin(2*pi*t/T);
+y = cos(2*pi*t/T);
 z = z_0;
 
 ref=@(t)[x;y;z;0];
