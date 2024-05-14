@@ -40,7 +40,7 @@ syms t real
 
 %% hovering
 x = 0;
-y = 0;
+y = 1;
 z = 1;
 
 %% 縦円旋回
