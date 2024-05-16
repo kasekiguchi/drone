@@ -78,7 +78,7 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.Ly = 0.16;
                 param.lx = 0.16/2;%0.05;
                 param.ly = 0.16/2;%0.05;
-                param.jx = 0.02985236;
+                param.jx = 0.02985236;%慣性モーメント
                 param.jy = 0.02985236;
                 param.jz = 0.0480374;
                 param.gravity = 9.81;
@@ -90,13 +90,13 @@ classdef DRONE_PARAM < matlab.mixin.SetGetExactNames
                 param.k2 = 0.000008;          % 推力定数
                 param.k3 = 0.000008;          % 推力定数
                 param.k4 = 0.000008;          % 推力定数
-                param.rotor_r = 0.0392;
-                param.Length = 0.075;
+                param.rotor_r = 0.0392; %シミュレーションでは少なくともアニメーションに使ってる
+                param.Length = 0.16/2;%シミュレーションでは関係なさそう
                 param.loadmass = 0.0695;
                 param.cableL = 0.49;
                 % param.ex = 0.0735417984963207;
-                % param.ey = 0.0628671906594029;
-                param.ex = 0.0;
+                %param.ey = 0.0628671906594029;
+                param.ex = 0.0;%何かシミュレーション結果変わる
                 param.ey = 0.0;
                 param.ez = 0.037;
                 param.model_error = [];
