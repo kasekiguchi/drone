@@ -62,7 +62,7 @@ classdef MPC_CONTROLLER_HL <handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
             obj.param.t = varargin{1}.t;
-            vara = varargin{1};
+            vara = varargin{1}; % 実験はvarargin違う？
 
             ref = obj.self.reference.result;
             xd = ref.state.get();
@@ -97,19 +97,19 @@ classdef MPC_CONTROLLER_HL <handle
 
             %各phaseでのリファレンスと現在状態の更新  For Experiment -------------------
             % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
-            % if vara{2} == 'a'
-            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-            % elseif vara{2} == 't'
-            %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-            %     fprintf('take off')
-            % elseif vara{2} == 'f'
-            %     % 実状態の目標値
-            %     xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
-            %     obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
-            %     fprintf('flight')
-            % end
+            if vara{2} == 'a'
+                xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+            elseif vara{2} == 't'
+                xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+                fprintf('take off')
+            elseif vara{2} == 'f'
+                % 実状態の目標値
+                xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+                obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+                fprintf('flight')
+            end
             %---------------------------------------------------------------------------------------
 
             % 実状態の目標値を仮想状態的に並び替え
