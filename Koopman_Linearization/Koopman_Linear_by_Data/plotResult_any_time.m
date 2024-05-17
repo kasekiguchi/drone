@@ -6,7 +6,7 @@ close all
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../../')); % drone/のこと
 %% flag
 flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
+flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 flg.division = 0; % plotResult_division仕様にするか
 % 要注意 基本は"0"
@@ -16,8 +16,8 @@ startTime = 3.39; % flight後何秒からの推定精度検証を行うか
 
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-% loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
-loadfilename{1} = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1';
+loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
+% loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code01';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
 WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
@@ -42,7 +42,7 @@ end
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 2; %ステップ数，xの範囲を設定 default: 1
+stepnum = 1; %ステップ数，xの範囲を設定 default: 1
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1
@@ -104,6 +104,7 @@ elseif indexcheck ~= file{i}.simResult.initTindex
 end
 
 %% 任意の時間からの推定を行う
+try
 F = @quaternions_all; % 読み込んだデータと観測量を合わせる
 % 実験データがreferenceになっている場合、dtは時刻によって様々に変化する
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
@@ -128,7 +129,10 @@ else
     file{1}.simResult.state.v = simResult.Xhat(7:9,:);
     file{1}.simResult.state.w = simResult.Xhat(10:12,:);
 end
-
+catch
+    open("quaternions_all.m");
+    error('Number of observales is different.');
+end
 %% 時間の設定 [0, 0.8]等の time[sec]を設定できるようにする
 if ~flg.xlimHold
     timeRange = file{WhichRef}.simResult.reference.T(tlength);
@@ -198,6 +202,7 @@ hold off
 if save_fig && flg.figtype
     cd(folderName)
     savefig(strcat('Position_',name));
+    saveas(1,strcat('Position_',name,'.jpg'));
 end
 
 %% Q
@@ -244,6 +249,7 @@ hold off
 
 if save_fig && flg.figtype
     savefig(strcat('Attitude_',name));
+    saveas(2,strcat('Attitude_',name,'.jpg'));
 end
 
 %% V
@@ -286,6 +292,7 @@ hold off
 
 if save_fig && flg.figtype
     savefig(strcat('Velocity_',name));
+    saveas(3,strcat('Velocity_',name,'.jpg'));
 end
 
 %% W
@@ -329,6 +336,7 @@ hold off
 
 if save_fig && flg.figtype
     savefig(strcat('Angular velocity_',name));
+    saveas(4,strcat('Angular velocity_',name,'.jpg'));
 end
 
 if ~flg.figtype; fig.WindowState = 'maximized'; end
@@ -533,6 +541,4 @@ for graph_num = 1:3
     end
     hold off
 end
-
-
 end % flg.divisionのif
