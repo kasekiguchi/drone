@@ -2,13 +2,14 @@
 clear;
 close all;
 %% Initial setting
+cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
 Fontsize = 15;  
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("Data/Exp_saigen_20240514_hovering.mat");
+% load("Data/.mat");
 
 %%
 figtype = 2;
