@@ -40,20 +40,21 @@ else
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
-ref_orig = [1;0;0]; %目標軌道原点
-
+%=======PAYLOAD===============================================================================
+% parameter     : DRONE_PARAM_COOPERATIVE_LOAD
+% plant         : MODEL_CLASS / Model_Suspended_Cooperative_Load
+% sensor        : DIRECT_SENSOR
+% estimator     : DIRECT_ESTIMATOR
+% reference     : TIME_VARYING_REFERENCE_SPLIT / gen_ref_sample_cooperative_load Cooperative
+% controller    : CSLC / Controller_Cooperative_Load
+%=============================================================================================
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
-agent(1).reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent(1),{"gen_ref_sample_cooperative_load",{"freq",1000,"orig",[1;1;1],"size",1*[4,4,0]},"Cooperative"});
-% agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",100,"orig",ref_orig,"size",1*[4,4,0]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
-
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",15,"orig",[0;0;1],"size",1*[1,1,0.5]},"Cooperative",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
-% agent(1).controller.cslc = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
-% agent(1).controller.do = @controller_do;
-
 
 for i = 2:N+1
     agent(i) = DRONE;
@@ -88,7 +89,7 @@ end
 clc
 % for j = 1:te
 for j = 1:tn
-    % if j < 20 || rem(j, 5) == 0, j, end
+    if j < 20 || rem(j, 5) == 0, disp(time.t), clc, end
         for i = 1:N+1
             if i >= 2
                 load = agent(1).estimator.result.state;
@@ -131,7 +132,6 @@ for j = 1:tn
         agent(1).plant.do(time, 'f');
         logger.logging(time, 'f', agent);
         time.t = time.t + time.dt;
-        disp(time.t)
     %pause(1)
 end
 
@@ -338,60 +338,6 @@ ax = gca;
 ax.FontSize = 14;
 lgd = legend;
 hold off
-%%
-% close all
-% DataA= logger.data(2,"plant.result.state.pL","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
-% Data2= logger.data(2,"reference.result.state.p","p");
-% Data3= logger.data(3,"reference.result.state.p","p");
-% Data4= logger.data(4,"reference.result.state.p","p");
-% Data5= logger.data(5,"reference.result.state.p","p");
-% Data6= logger.data(6,"reference.result.state.p","p");
-% Data7= logger.data(7,"reference.result.state.p","p");
-% t=logger.data(0,'t',[]);
-% 
-% figure(101)
-% hold on
-% plot(Data2(:,1),Data2(:,2))
-% plot(Data3(:,1),Data3(:,2))
-% plot(Data4(:,1),Data4(:,2))
-% plot(Data5(:,1),Data5(:,2))
-% plot(Data6(:,1),Data6(:,2))
-% plot(Data7(:,1),Data7(:,2))
-% % plot(cccc(:,1),cccc(:,2))
-% % xlim([-1.5 1.5])
-% % ylim([-1.5 1.5])
-% % xlabel("X [m]")
-% ylabel("Y [m]")
-% % legend("Payload","UAV")
-% ax = gca;
-% ax.FontSize = 13;
-% hold off
-
-% figure(102)
-% hold on
-% plot(DataB(:,1),DataB(:,2))
-% % plot(cccc(:,1),cccc(:,2))
-% % xlim([-1.5 1.5])
-% % ylim([-1.5 1.5])
-% % xlabel("X [m]")
-% ylabel("Y [m]")
-% % legend("Payload","UAV")
-% ax = gca;
-% ax.FontSize = 13;
-% hold off
-% 
-% figure(103)
-% hold on
-% plot(DataC(:,1),DataC(:,2))
-% % plot(cccc(:,1),cccc(:,2))
-% % xlim([-1.5 1.5])
-% % ylim([-1.5 1.5])
-% % xlabel("X [m]")
-% ylabel("Y [m]")
-% % legend("Payload","UAV")
-% ax = gca;
-% ax.FontSize = 13;
-% hold off
 
 %%
 % logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
@@ -400,7 +346,7 @@ hold off
 % %%
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-2 10;-6 6;-1 4],"ntimes",5);
+mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 % 
 % %%
 % logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
