@@ -177,7 +177,7 @@ if change_reference == 1
    
     simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
 
-    model = load("EstimationResult_Kiyama_reproduction.mat",'est'); % 推定したモデル
+    model = load("EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat",'est'); % 推定したモデル
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
@@ -210,12 +210,14 @@ if change_reference == 1
         size = figure;
         size.WindowState = 'maximized'; %表示するグラフを最大化
         for i = 1:3
-%             subplot(2,3,i)
-%             plot(simResult.T(:,N1:N2),simResult.Xhat(i,:),'LineWidth',1.2)
-%             hold on
-%             grid on
-%             plot(simResult.T(:,N1:N2),simResult.reference.X(i,N1:N2),'LineWidth',1.2,'LineStyle','--','Color','red')
-%             legend('estimator','reference','Location','best')
+            % RMSEのみならコメントアウト-----------------------------------
+            % subplot(2,3,i)
+            % plot(simResult.T(:,N1:N2),simResult.Xhat(i,:),'LineWidth',1.2)
+            % hold on
+            % grid on
+            % plot(simResult.T(:,N1:N2),simResult.reference.X(i,N1:N2),'LineWidth',1.2,'LineStyle','--','Color','red')
+            % legend('estimator','reference','Location','best')
+            % -------------------------------------------------------------
             if i == 1
                 xlabel('Time [s]','FontSize',16);
                 ylabel('x','FontSize',16);
@@ -241,27 +243,29 @@ if change_reference == 1
                 zerror_max(1,j) = max(simResult.reference.X(i,N1:N2)-simResult.Xhat(i,:));
             end
         end
-%         error = [xerror;yerror;zerror];
-%         subplot(2,3,4)
-%         plot(simResult.T(:,N1:N2),simResult.reference.U(1,N1:N2),'LineWidth',1.2)
-%         yline(0.5884*9.81,'Color','r')
-%         grid on
-%         xlabel('Time [s]','FontSize',16);
-%         ylabel('thrust','FontSize',16);
-% 
-%         subplot(2,3,5)
-%         plot(simResult.T(:,N1:N2),simResult.reference.U(2:end,N1:N2),'LineWidth',1.2)
-%         grid on
-%         xlabel('Time [s]','FontSize',16);
-%         ylabel('torque','FontSize',16);
-%         legend('roll','pitch','yaw','Location','best')
-% 
-%         subplot(2,3,6)
-%         plot(simResult.T(:,N1:N2),error,'LineWidth',1.2)
-%         grid on
-%         xlabel('Time [s]','FontSize',16);
-%         ylabel('reference - estimator','FontSize',16);
-%         legend('error_x','error_y','error_z','Location','best')
+        % RMSEのみならコメントアウト---------------------------------------
+        % error = [xerror;yerror;zerror];
+        % subplot(2,3,4)
+        % plot(simResult.T(:,N1:N2),simResult.reference.U(1,N1:N2),'LineWidth',1.2)
+        % yline(0.5884*9.81,'Color','r')
+        % grid on
+        % xlabel('Time [s]','FontSize',16);
+        % ylabel('thrust','FontSize',16);
+        % 
+        % subplot(2,3,5)
+        % plot(simResult.T(:,N1:N2),simResult.reference.U(2:end,N1:N2),'LineWidth',1.2)
+        % grid on
+        % xlabel('Time [s]','FontSize',16);
+        % ylabel('torque','FontSize',16);
+        % legend('roll','pitch','yaw','Location','best')
+        % 
+        % subplot(2,3,6)
+        % plot(simResult.T(:,N1:N2),error,'LineWidth',1.2)
+        % grid on
+        % xlabel('Time [s]','FontSize',16);
+        % ylabel('reference - estimator','FontSize',16);
+        % legend('error_x','error_y','error_z','Location','best')
+        % -----------------------------------------------------------------
 %         
 
         N1 = N1 + 55;
