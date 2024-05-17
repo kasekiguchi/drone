@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("Data/Exp_saigen_20240514_P2P.mat");
+load("Data/Exp_saigen_20240514_hovering.mat");
 
 %%
 figtype = 2;
@@ -38,7 +38,7 @@ for i = flight_start_idx:flight_finish_idx
     InnerInput(:,i-flight_start_idx+1) = Agent.inner_input{i};
 end
 
-m = 3; n = 2;
+m = 2; n = 2;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3,:), '--'); hold off;
@@ -86,9 +86,9 @@ elseif figtype == 2
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
-    subplot(m,n,5); plot(logt, InnerInput); 
-    xlabel("Time [s]"); ylabel("Inner input");
-    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % subplot(m,n,5); plot(logt, InnerInput); 
+    % xlabel("Time [s]"); ylabel("Inner input");
+    % grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 end
 %%
 set(gca,'FontSize',Fontsize);  grid on; title("");

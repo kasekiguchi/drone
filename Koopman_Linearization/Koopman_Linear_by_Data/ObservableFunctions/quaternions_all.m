@@ -82,24 +82,24 @@ isobe_z = [W1*W2;
             W2*sin(Q1)*sin(Q2)/cos(Q1);
             W3*cos(Q1)*sin(Q2)/cos(Q1)
             ];
-z = [common_z; isobe_z];
+% z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
-% F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
-%     W2*cos(Q1) - W3*sin(Q1);
-%     (W3*cos(Q1) + W2*sin(Q1)) / cos(Q2);
-%      (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
-%     -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
-%      (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
-%      ];
-% G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2)) + 2*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)))/const.m;
-%     -(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)) - 2*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2)))/const.m;
-%     ((cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 - (cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 + (cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))^2 - (cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2))^2)/const.m;
-%     1/const.jx;
-%     1/const.jy;
-%     1/const.jz
-%     ];
-% z = [common_z; F_z; G_z];
+F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
+    W2*cos(Q1) - W3*sin(Q1);
+    (W3*cos(Q1) + W2*sin(Q1)) / cos(Q2);
+     (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
+    -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
+     (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
+     ];
+G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2)) + 2*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)))/const.m;
+    -(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)) - 2*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2)))/const.m;
+    ((cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 - (cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 + (cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))^2 - (cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2))^2)/const.m;
+    1/const.jx;
+    1/const.jy;
+    1/const.jz
+    ];
+z = [common_z; F_z; G_z];
 
 %% F(x), G(x)の各項を分解して観測量にする code = 02
 % F_z = [W1*cos(Q2);
@@ -171,5 +171,8 @@ z = [common_z; isobe_z];
 %            - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
 %                                                -1];
 % z = [common_z; isobe_z; diff_param_z];
+
+%% f(x, u, param)からdf/dparam したときの項のみ code = 05
+% z = [common_z; diff_param_z];
 end
 
