@@ -13,10 +13,10 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-% agent.parameter = DRONE_PARAM("DIATONE");
+agent.parameter = DRONE_PARAM("DIATONE");
 %モデル誤差=============
 %controller でモデル誤差用の入力に変換する
-agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884*1.5,"lx",0.08*1.3,"ly",0.08*1.3);
+% agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884*1.5,"lx",0.08*1.3,"ly",0.08*1.3);
 %=====================
 agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1),0);
 %外乱を与える==========
@@ -24,7 +24,7 @@ agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1),0);
 % agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
 %=====================
 %モデル誤差元に戻す=============
-agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884,"lx",0.08,"ly",0.08);
+% agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.5884,"lx",0.08,"ly",0.08);
 %=====================
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));

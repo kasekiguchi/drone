@@ -13,8 +13,8 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 10;%現在の結果を描画する
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fnowData = 1;%現在の結果を描画する
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
@@ -52,7 +52,7 @@ endTime = 80;%1E3;
 
                 %ジャーナル実験
                 % simple_log_spHLLS, simple_log_spHLFT
-                simple_log_sdHLLS, simple_log_sdHLFT
+                % simple_log_sdHLLS, simple_log_sdHLFT
                 % newLog
                  % simple_log_sdHLFT
                 %実験
@@ -105,7 +105,7 @@ multiFigure.layout = {[2,3],[2,3],[3,3],[2,3]};
 multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
 
 if fnowData
-    nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D"]};%比較するとき複数まとめる
+    nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D","uHL"]};%比較するとき複数まとめる
     multiFigure.layout = {[2,3],[2,3],[3,3],[2,3]};
     multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
 end
