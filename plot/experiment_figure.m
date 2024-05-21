@@ -9,7 +9,7 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
 %load("Data/Eikyu_0514_result/logger_Eikyu2022.mat");
-load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL
+load("Data/Eikyu_0514_result/demo_logger_0517.mat");%単純HL
 log = logger;
 %%
 figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
@@ -44,7 +44,7 @@ m = 3; n = 3;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3,:), '--'); hold off;
-    xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","northwest",'Interpreter','latex');
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("$$x$$.Drone state", "$$y$$.Drone state", "$$z$$.Drone state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % title("Time change of Position"); 
     % attitude
@@ -68,13 +68,13 @@ if figtype == 1
     ytickformat('%.1f');
     %以下三宅整備中1/2
     figure(6); plot(Road_est(1,:), Road_est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
-    xlabel('x [m]','Interpreter','latex'); ylabel("y [m]",'Interpreter','latex'); legend("estimeter", "reference",'Interpreter','latex');
+    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Estimeter", "Reference",'Interpreter','latex');
     grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);
     %ytickformat('%.1f');
     % Title = 
     %荷物のプロット↓
     figure(7); plot(logt, Road_est(1:3,:)); hold on; plot(logt, Ref(1:3,:), '--'); hold off;
-    xlabel("Time [s]",'Interpreter','latex'); ylabel("Load position [m]",'Interpreter','latex'); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","northwest",'Interpreter','latex');
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Load position [m]",'Interpreter','latex'); legend("$$x$$.Load state", "$$y$$.Load state", "$$z$$.Load state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     %機体と荷物のxy重ねて表示↓
     figure(8); plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--'); hold off;
