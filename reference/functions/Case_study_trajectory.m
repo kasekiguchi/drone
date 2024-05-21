@@ -33,14 +33,14 @@ syms t real
 % x = sin(2*pi*t/T);
 % y = cos(2*pi*t/T);
 % z = 1;
-
+% 
 % x = cos(2*pi*t/T) - cos(pi*t/T);
 % y = sin(2*pi*t/T);
 % z = 1;
 
 %% hovering
 x = 0;
-y = 0;
+y = 1;
 z = 1;
 
 %% 縦円旋回
