@@ -8,16 +8,20 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-%load("Data/Eikyu_0514_result/logger_Eikyu2022.mat");
-load("Data/Eikyu_0514_result/demo_logger_0517.mat");%単純HL
-log = logger;
+% load("Data/Eikyu_0514_result/logger_Eikyu2022.mat");
+load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
+% load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
+log = logger;%永久用（↓とどっちかをコメントアウト）
+% log =gui.logger.Data;%gui用
 %%
 figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 flight_start_idx = find(log.Data.phase==102, 1, 'first');
-flight_finish_idx = find(log.Data.phase==102, 1, 'last');
-logt = log.Data.t(flight_start_idx:flight_finish_idx);
+flight_finish_idx = find(log.Data.phase==102, 1, 'last');%)の後に-1000すれば1000フレーム前で切れる
+ logt = log.Data.t(flight_start_idx:flight_finish_idx);
+
+logt=linspace(0,logt(end)-logt(1),flight_finish_idx-flight_start_idx+1);%ここコメントアウトしたら0sからじゃなくなる
 
 % initialize data
 Est = zeros(12, flight_finish_idx-flight_start_idx+1);
@@ -63,7 +67,7 @@ if figtype == 1
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
-    figure(5); plot(logt, InnerInput);legend("z","roll", "pitch", "yaw");%キャプション間違ってるかも
+    figure(5); plot(logt, InnerInput);legend("?z","?roll", "?pitch", "?yaw");%キャプション間違ってるかも
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     %以下三宅整備中1/2
