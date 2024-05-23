@@ -80,6 +80,7 @@ end
             %if (fOffline);exprdata.overwrite("reference",time.t,agent,i);end
 
             % controller
+            tic
             param(i).controller.hlc = {time.t, HLParam};
             HL_LoadParam.dt = agent.estimator.result.dt;
             param(i).controller.hl_load = {time.t, HL_LoadParam};
@@ -89,6 +90,9 @@ end
             end
             agent(i).do_controller(param(i).controller.list);
             %if (fOffline); expudata.overwrite("input",time.t,agent,i);end
+            idx=round(time.t/0.025)+1
+            kari_time(idx)=toc;
+            
         end
 
         %% update state
