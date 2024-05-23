@@ -1,3 +1,6 @@
+%=====================
+%ペイロードの分割モデル
+%=====================
 clc; clear; close all
 N = 6;%機体数
 ts = 0; 
@@ -40,7 +43,7 @@ else
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
-%=======PAYLOAD===============================================================================
+%=PAYLOAD=====================================================================================
 % parameter     : DRONE_PARAM_COOPERATIVE_LOAD
 % plant         : MODEL_CLASS / Model_Suspended_Cooperative_Load
 % sensor        : DIRECT_SENSOR
@@ -57,9 +60,17 @@ agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_coop
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
 for i = 2:N+1
+    %=DRONE=====================================================================================
+    % parameter     : DRONE_PARAM_SUSPENDED_LOAD
+    % plant         : MODEL_CLASS / Model_Suspended_Load
+    % sensor        : DIRECT_SENSOR
+    % estimator     : EKF
+    % reference     : TIME_VARYING_REFERENCE_SPLIT / Case_study_trajectory
+    % controller    : HLC / Controller_HL: take off and landing, CSLC / Controller_Cooperative_Load : fright
+    %=============================================================================================
     agent(i) = DRONE;
     agent(i).id = i;
-    %Drone_Initial_State
+%Drone_Initial_State
     rho = agent(1).parameter.rho; %loadstate_rho
     R_load = RodriguesQuaternion(initial_state(1).Q);
     initial_state(i).p = arranged_position([0, 0], 1, 1, 0);
@@ -72,6 +83,7 @@ for i = 2:N+1
 %     initial_state(i).p = [1;0;1.46];
     initial_state(i).p = initial_state(1).p + R_load*rho(:,i-1) - agent(1).parameter.li(i-1) * initial_state(i).pT;
     initial_state(i).pL = initial_state(1).p + R_load*rho(:,i-1);
+%Generate instance
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
@@ -89,7 +101,7 @@ end
 clc
 % for j = 1:te
 for j = 1:tn
-    if j < 20 || rem(j, 5) == 0, disp(time.t), clc, end
+    % if j < 20 || rem(j, 5) == 0, disp(time.t), clc, end
         for i = 1:N+1
             if i >= 2
                 load = agent(1).estimator.result.state;
@@ -131,10 +143,12 @@ for j = 1:tn
 %         agent(2).reference.result.m+agent(3).reference.result.m+agent(4).reference.result.m+agent(5).reference.result.m+agent(6).reference.result.m+agent(7).reference.result.m
         agent(1).plant.do(time, 'f');
         logger.logging(time, 'f', agent);
+        disp(time.t)
         time.t = time.t + time.dt;
     %pause(1)
 end
-
+clc
+disp(time.t)
 %%
 close all
 DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ

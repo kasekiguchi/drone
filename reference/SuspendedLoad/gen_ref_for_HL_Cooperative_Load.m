@@ -15,7 +15,10 @@ dddxd =diff(ddxd,t);
 if norm(dxd) == 0
   r0x = [1;0;0];%目標軌道がない場合[0.001;0;0]特異点阻止
 else
-  r0x = [dxd(1),dxd(2),0]'/norm(dxd);
+  % norm_dxd = sqrt(dxd(1)^2+dxd(2)^2+dxd(3)^2);%手動でnorm(dxd)
+  norm_dxd = sqrt(dxd'*dxd);%手動でnorm(dxd)
+  r0x = [dxd(1),dxd(2),0]'/norm_dxd;
+  % r0x = [dxd(1),dxd(2),0]'/norm(dxd);%norm(dxd)でabsが出現し，do0dでt=0の時にNaNになる
 end
 r0z = [0;0;1];%z
 r0y = Skew(r0z)*r0x;%y
