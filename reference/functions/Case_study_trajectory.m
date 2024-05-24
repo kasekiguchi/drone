@@ -39,9 +39,9 @@ syms t real
 % z = 1;
 
 %% hovering
-x = 1;
-y = 0;
-z = 1;
+% x = 0;
+% y = 0;
+% z = 1;
 
 %% 縦円旋回
 % x = 0.5*sin(2*pi*t/T);
@@ -71,7 +71,13 @@ z = 1;
 % y = 0;
 % z = 1;
 
-% ref=@(t)[x;y;z;yaw];
+%%
+te = 10;
+x = 0;
+y = 1/(1+exp(-t + te/2));
+z = 1;
+
+timevarying_refrence=[x y z]
 ref=@(t)[x;y;z;0];
 end
 
