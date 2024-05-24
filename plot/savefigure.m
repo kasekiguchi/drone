@@ -2,34 +2,47 @@
 % SigmaData = zeros(4, te/dt);
 % te = 10;
 close all
+clear
 % fprintf("%f秒\n", totalT)
 Fontsize = 15;  
 set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
+figtype = 0;
 
+load("../データセット/Exp_2_4_150.mat");
 %% Importing data
 if exist("app") ~= 7        % GUI実行中
     logt = app.logger.Data.t;
     xmax = app.time.t-app.time.dt;
     logAgent = app.logger.Data.agent;
-% elseif exist("log") == 1    % matを読み込んだ
-%     flg = 1;
-%     logt = log.Data.t(1:find(log.Data.t(2:end)==0, 1, 'first'));
-%     xmax = log.Data.t(find(log.Data.t(2:end)==0, 1, 'first'));
-%     logAgent = log.Data.agent;
+elseif exist("log") == 1    % matを読み込んだ
+    flg = 1;
+    logt = log.Data.t(1:find(log.Data.t(2:end)==0, 1, 'first'));
+    xmax = log.Data.t(find(log.Data.t(2:end)==0, 1, 'first'));
+    logAgent = log.Data.agent;
 else                        % GUIを閉じた
     logt = gui.logger.Data.t;
     xmax = gui.time.t-gui.time.dt;
     logAgent = gui.logger.Data.agent;
 end
 
-for i = 1:length(logt)
+for i = 1:length(logt)-1
     Data(:,i) = logAgent.estimator.result{i}.state.get();
-    RData(:,i) = logAgent.controller.result{i}.xr(:,1);
-    Idata(:,i) = logAgent.input{i};
-    InputV(:,i) = logAgent.controller.result{i}.input_v;
+    if flg
+        RData(:,i) = [logAgent.reference.result{i}.state.p; 
+                    zeros(3,1);
+                    logAgent.reference.result{i}.state.v;
+                    zeros(3,1);
+                    zeros(4,1);
+                    zeros(3,1)];
+        InputV(:,i) = zeros(4,1);
+    else
+        RData(:,i) = logAgent.controller.result{i}.xr(:,1); 
+        InputV(:,i) = logAgent.controller.result{i}.input_v;
+    end
+    Idata(:,i) = logAgent.input{i};  
 end
 
 logt = logt(1:end-1); % time
@@ -71,7 +84,7 @@ if figtype == 1
     ytickformat('%.1f');
     % virtual input
     figure(5); plot(logt, InputV); legend("Z", "X", "Y", "YAW");
-elseif figtype == 2
+elseif figtype ~= 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     subplot(m,n,1); plot(logt, Pdata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
     xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","northwest");
@@ -96,10 +109,17 @@ elseif figtype == 2
     subplot(m,n,5); plot(logt, InputV); legend("Z", "X", "Y", "YAW");
     xlabel("Time [s]"); ylabel("Imaginary input");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
+    % 3D plot
+    subplot(m,n,6); plot3(Pdata(1,:), Pdata(2,:), Pdata(3,:)); hold on;
+    plot3(Pdata(1,1), Pdata(2,1), Pdata(3,1),'+', 'MarkerSize', 15)
+    xlabel("Time [s]"); ylabel("Position [m]"); grid on;
 end
-%%
+%
 set(gca,'FontSize',Fontsize);  grid on; title("");
 xlabel("Time [s]");
 
 set(gcf, "WindowState", "maximized");
 set(gcf, "Position", [960 0 960 1000])
+
+%
+cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
