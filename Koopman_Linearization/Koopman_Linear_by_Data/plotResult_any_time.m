@@ -6,18 +6,22 @@ close all
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../../')); % drone/のこと
 %% flag
 flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
+flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 flg.division = 0; % plotResult_division仕様にするか
+flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 
-startTime = 3.39; % flight後何秒からの推定精度検証を行うか
+startTime = 1; % flight後何秒からの推定精度検証を行うか saddle:3.39
+% if flg.confirm_ref; m = 2; n = 3; % subplotの配列
+% else; m = 2; n = 2; end
 
+m = 2; n = 3;
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
 loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
-% loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code01';
+% loadfilename{1} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
 WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
@@ -157,8 +161,9 @@ newcolors = [0 0.4470 0.7410
 
 if ~flg.division % plotResult
 %% P
+% strrep _を "【空白】"に置換
 if flg.figtype; figure(1);
-else; fig = figure(1); sgtitle(strrep(loadfilename{1},'_',' ')); subplot(2,2,1); end
+else; fig = figure(1); sgtitle(strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==')); subplot(m,n,1); end 
 % Referenceをplot
 colororder(newcolors)
 plot(timeRange, file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',2); % 精度検証用データ
@@ -207,7 +212,7 @@ end
 
 %% Q
 if flg.figtype; figure(2);
-else; subplot(2,2,2); end
+else; subplot(m,n,2); end
 colororder(newcolors)
 plot(timeRange, file{WhichRef}.simResult.reference.est.q(tlength,:)','LineWidth',2);
 if size(file{WhichRef}.simResult.reference.est.q(tlength,:)',1) == 3
@@ -254,7 +259,7 @@ end
 
 %% V
 if flg.figtype; figure(3);
-else; subplot(2,2,3); end
+else; subplot(m,n,3); end
 colororder(newcolors)
 plot(timeRange, file{WhichRef}.simResult.reference.est.v(tlength,:)','LineWidth',2);
 lgdtmp = {'$v_{xd}$','$v_{yd}$','$v_{zd}$'};
@@ -286,7 +291,7 @@ end
 lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 set(gca,'FontSize',Fsize.luler);
 xlabel('time [sec]','FontSize',Fsize.label);
-ylabel('Velocity [[m/s]','FontSize',Fsize.label);
+ylabel('Velocity [m/s]','FontSize',Fsize.label);
 lgd.NumColumns = columnomber;
 hold off
 
@@ -297,14 +302,13 @@ end
 
 %% W
 if flg.figtype; figure(4);
-else; subplot(2,2,4); end
+else; subplot(m,n,4); end
 colororder(newcolors)
 % lgd = ('$\omega_{\phi d}$','$\omega_{\theta d}$','$\omega_{\psi d}$','$\hat{\omega}_\phi$','$\hat{\omega}_\theta$','$\hat{\omega}_\psi$','FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
 plot(timeRange, file{WhichRef}.simResult.reference.est.w(tlength,:)','LineWidth',2);
 lgdtmp = {'$\omega_{1 d}$','$\omega_{2 d}$','$\omega_{3 d}$'};
 hold on
 grid on
-
 plot(timeRange, file{i}.simResult.state.w(:,tlength),file{i}.markerSty,'MarkerSize',7,'LineWidth',1,'LineStyle','--');
 
 if isfield(file{i},'lgdname')
@@ -339,6 +343,40 @@ if save_fig && flg.figtype
     saveas(4,strcat('Angular velocity_',name,'.jpg'));
 end
 
+%% referenceの確認
+if flg.confirm_ref
+    if flg.figtype; figure(5);
+    else; subplot(m, n, 5); end
+    plot(file{1}.simResult.reference.T, file{1}.simResult.reference.X(1:3,:)); hold on;
+    xregion(startTime, startTime + xmax, FaceColor="b",EdgeColor=[0.4 0 0.7]);
+    legend('x', 'y', 'z', 'verification range'); grid on;
+end
+
+%% RMSE, ERROR(MAX, MIN)
+rmse = @(x) sqrt(1/stepN * sum(x.^2, 2));
+% position
+error_p = file{i}.simResult.state.p(:,tlength) - file{WhichRef}.simResult.reference.est.p(tlength,:)';
+result.p.rmse = rmse(error_p); result.p.max = max(error_p,[],2); result.p.min = min(error_p,[],2);
+% velocity
+error_v = file{i}.simResult.state.v(:,tlength) - file{WhichRef}.simResult.reference.est.v(tlength,:)';
+result.v.rmse = rmse(error_v); result.v.max = max(error_v,[],2); result.v.min = min(error_v,[],2);
+% attitude
+error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
+result.q.rmse = rmse(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
+
+if ~flg.figtype; subplot(m,n,6); end
+FS = 12;
+text(0.05,0.9,strcat('RMSE.p = ', num2str(result.p.rmse,3)),'FontSize',FS, 'Units','normalized');
+text(0.05,0.6,strcat('RMSE.v = ', num2str(result.v.rmse,3)),'FontSize',FS, 'Units','normalized');
+text(0.05,0.3,strcat('RMSE.q = ', num2str(result.q.rmse,3)),'FontSize',FS, 'Units','normalized');
+text(0.4, 0.9,strcat('MAX.p = ', num2str(result.p.max,3)),'FontSize',FS, 'Units','normalized');
+text(0.4, 0.6,strcat('MAX.v = ', num2str(result.v.max,3)),'FontSize',FS, 'Units','normalized');
+text(0.4, 0.3,strcat('MAX.q = ', num2str(result.q.max,3)),'FontSize',FS, 'Units','normalized');
+text(0.75, 0.9,strcat('MIN.p = ', num2str(result.p.min,3)),'FontSize',FS, 'Units','normalized');
+text(0.75, 0.6,strcat('MIN.v = ', num2str(result.v.min,3)),'FontSize',FS, 'Units','normalized');
+text(0.75, 0.3,strcat('MIN.q = ', num2str(result.q.min,3)),'FontSize',FS, 'Units','normalized');
+
+%%
 if ~flg.figtype; fig.WindowState = 'maximized'; end
 
 else % plotResult_division

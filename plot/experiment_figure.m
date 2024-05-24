@@ -9,7 +9,8 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-% load("Data/.mat");
+% load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
+load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 
 %%
 figtype = 2;

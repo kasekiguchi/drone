@@ -39,8 +39,8 @@ syms t real
 % z = 1;
 
 %% hovering
-x = 0;
-y = 1;
+x = 1;
+y = 0;
 z = 1;
 
 %% 縦円旋回

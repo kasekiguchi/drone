@@ -123,12 +123,16 @@ flg.bilinear = 0;
 flg.normalize = 0;
 F = @quaternions_all; % 改造用
 FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_');
-FileName = strcat(FileName_common, 'Exp_Kiyama_code05_1');
+FileName = strcat(FileName_common, 'Exp_Kiyama_code00_', 'hovering');
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
+
+if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
+    error('Exist file. Require change filename');
+end
 
 %% Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
