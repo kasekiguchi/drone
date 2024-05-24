@@ -88,7 +88,6 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.P = self.parameter.get("all","row");
                     P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],agent1.parameter.rho));
                     obj.Pdagger = pinv(P);
-%                     obj.K =obj.agent1.controller.gains;
                     obj.K =agent1.controller.gains;%プログラム上作成
                     obj.Muid_method = str2func(agent1.controller.Param.method2);
                     obj.result.m = [];
@@ -153,16 +152,16 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                R0 = obj.toR(model.Q);
                R0d = reshape(xd(end-8:end),3,3);
                id = obj.self.id;
-               Muid = agent1.controller.result.mui; %3xN
-               muid_myagent = Muid(4:6,id-1); %3x1%
-               obj.result.Muid = muid_myagent';
+               Mui = agent1.controller.result.mui; %3xN
+               mui_myagent = Mui(4:6,id-1); %3x1%
+               obj.result.Mui = mui_myagent';
                obj.result.state.xd = xd; % 目標重心位置（絶対座標）
                obj.result.state.p = xd(1:3);
                a = obj.result.state.xd(9:11);
                g = [0;0;-1]*agent1.parameter.g;
 
                A=a-g;
-               obj.result.m = inv(A'*A)*A'*muid_myagent;%分割後質量推定
+               obj.result.m = inv(A'*A)*A'*mui_myagent;%分割後質量推定
            elseif strcmp(obj.com, "Take_off")
                if isempty( obj.base_state ) % first take
                obj.base_time=varargin{1}.t;

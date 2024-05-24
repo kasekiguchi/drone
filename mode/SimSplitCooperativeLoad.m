@@ -5,8 +5,8 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 100;
-tn = length(1:dt:te);
+te = 30;
+tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -169,6 +169,17 @@ DataR6 = logger.data(7,"reference.result.state.p","p");
 DataB = logger.data(5,"reference.result.m","p");
 DataC = logger.data(7,"reference.result.Muid","p");
 DataD = logger.data(5,"reference.result.state.xd","p");
+DataE = logger.data(1,"controller.result.mui","p");
+%mui-z
+reData_muiz=reshape(DataE,6,[]);
+reData_muiz1=reData_muiz(6,:);
+reData_muiz2=reshape(reData_muiz1,6,[]);
+DataE_mui_z=sum(reData_muiz2);
+%mui-z
+reData_muidz=reshape(DataE,6,[]);
+reData_muidz1=reData_muidz(3,:);
+reData_muidz2=reshape(reData_muidz1,6,[]);
+DataE_muid_z=sum(reData_muidz2);
 t=logger.data(0,'t',[]);
 
 
@@ -180,6 +191,11 @@ Data4 = logger.data(5,"reference.result.m","p");
 Data5 = logger.data(6,"reference.result.m","p");
 Data6 = logger.data(7,"reference.result.m","p");
 DataM = Data1+Data2+Data3+Data4+Data5+Data6;
+mg = DataM*9.81;
+ma = DataM.*DataD(:,3);
+muid_ma =DataE_muid_z' - ma;
+mui_ma = DataE_mui_z' - ma;
+
 ij=2;
 if ij <1
     DataI = reshape(logger.data(ij,"controller.result.input","p"),[4,length(logger.data(ij,"controller.result.input","p"))/4])';
@@ -195,6 +211,7 @@ else
 end
 t=logger.data(0,'t',[]);
 %%
+close all
 figure(1)
 hold on
 plot(t,DataA1(:,1),'DisplayName','Agent1')
@@ -351,6 +368,39 @@ ylabel("Mass [kg]")
 ax = gca;
 ax.FontSize = 14;
 lgd = legend;
+hold off
+
+figure(107)
+hold on
+plot(t,DataC(:,3))
+plot(t,DataD(:,3))
+xlabel("t [s]")
+legend("Mu","acceleration")
+ax = gca;
+ax.FontSize = 22;
+hold off
+
+figure(108)
+hold on
+plot(t,DataD(:,3))
+plot(t,ma)
+plot(t,DataE_muid_z)
+plot(t,DataE_mui_z)
+xlabel("t [s]")
+legend("accel","ma","muid","mui")
+ax = gca;
+ax.FontSize = 22;
+hold off
+
+figure(109)
+hold on
+plot(t,mg)
+plot(t,mui_ma)
+plot(t,muid_ma)
+xlabel("t [s]")
+legend("mg","mui_ma","muid_ma")
+ax = gca;
+ax.FontSize = 22;
 hold off
 
 %%
