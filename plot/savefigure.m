@@ -123,3 +123,13 @@ set(gcf, "Position", [960 0 960 1000])
 
 %
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
+
+%% 関数お試し用
+% close all 
+% ttt = 20; % 何秒で移動するか
+% a = 0.3;
+% Ti = 0:0.025:20;
+% x = 0;
+% y = 1./(1+exp(a*(-Ti + ttt./2)));
+% z = 1;
+plot(Ti,  y);

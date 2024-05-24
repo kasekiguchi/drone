@@ -71,11 +71,14 @@ syms t real
 % y = 0;
 % z = 1;
 
-%%
-te = 10;
+%% sigmoid
+te = 20; % 何秒で移動するか
+a = 0.25;
 x = 0;
-y = 1/(1+exp(-t + te/2));
+% y = 1/(1+exp(a*(-t + te/2))); % ゆるやかに移動するようにしたい
 z = 1;
+
+y = 1/(1+exp(-t + te/2));
 
 timevarying_refrence=[x y z]
 ref=@(t)[x;y;z;0];
