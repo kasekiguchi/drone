@@ -16,12 +16,16 @@ function ref = generate_spline_curve_ref(loadedRef,order,fcmd)
 % fdrowfig=1  %図を描画するか
 
 %手動で値を設定するとき(使わないときコメントアウトする)
+% ランダムでの軌道生成はこちら
 isManualSetting = 1;%手動でwaypointを作るとき1
 pointN = 5; %waypointの数
 dt = 3;%waypoint間の時間
 time =  (0:dt:dt*(pointN-1))';
 % wp = [0,0,0;0.5*round(1*randn(pointN-1,3),3)];%waypointの設定初めは初期値0
-wp = round(0.5*randn(pointN,3),3);%waypointの設定
+wp_xy = round(0.5*randn(pointN-1,2),3);%waypointの設定
+wp_z  = round(0.25*randn(pointN-1,1)+0.5,3);%z waypoint 平均値をzのみ設定
+wp = [0, 0, 1;wp_xy, wp_z];
+% round(配列, 何桁まで)
 waypoints = [time, wp];
 
     while 1

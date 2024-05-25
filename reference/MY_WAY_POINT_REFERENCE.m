@@ -254,7 +254,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
                 i=i+1;
     
                 figure(i)
-                tiledlayout("horizontal")
+%                 tiledlayout("horizontal")
                 nexttile
                 plot(xyz(1,:),xyz(2,:),"LineWidth",2)
                 xlabel('$x$ (m)','FontSize',18,'Interpreter','latex')
