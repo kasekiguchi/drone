@@ -39,3 +39,34 @@ s, a, t, f, l, q
 ・壁にぶつかりそうなとき
 ・なんかコマンドが通じないとき
 ・
+
+★★
+・MPCのパラメータは保存されないので注意。スクリーンショット等で保存する。
+
+
+
+新たなブランチで実験するときに編集するファイル
+=====実験自体に関すること=====
+・mode/ExpMPC_Koopman.m
+10行目あたり：motive = Connector_Natnet('粉砕のIP');
+20行目あたり：プロポを無線に設定
+
+・sample/Connector_Natnet.m
+9行目あたり：ClientIP = '実験用PCのIP';
+
+・reference/functions/Case_study_trajectory.m
+目標軌道の変更
+
+=====観測量設定に関すること（木山と同一ファイルを使うなら不必要）=====
+・Koopman_Linearization/Koopman_Linear_by_Data/ObservableFunctions/quaternions_all.m
+観測量を決める
+
+・controller/change_equation.m
+27行目あたり：Xc = quaternions(Param.current) を変更 quaternions -> quaternions_all
+
+・model/substance/discrete_linear_model.m
+14行目あたり：quaternions -> quaternions_all
+
+-----任意-----
+・controller/MPC_CONTROLLER_KOOPMAN_quadprog_experiment.m
+tic/toc、fprintfをコメントアウト　⇒　余計な処理をなくして高速化

@@ -10,7 +10,8 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
-load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
+% load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
+load("Data/Exp_saigen_20240517_P2P_y.mat")
 
 %%
 figtype = 2;

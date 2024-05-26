@@ -116,14 +116,14 @@ if size(Data.X,1)==13 %特に気にしなくていい
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
-%% ここから始めるとき---------------------------------------------------------------------
-%% --------------------------------------------------------------------------------------
+%% ここから始めるとき ====================================================================
+% =========================================================================================
 clear; clc;
 flg.bilinear = 0;
 flg.normalize = 0;
 F = @quaternions_all; % 改造用
 FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_');
-FileName = strcat(FileName_common, 'Exp_Kiyama_code00_', 'hovering');
+FileName = strcat(FileName_common, 'Exp_Kiyama_code01_', 'hovering');
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);

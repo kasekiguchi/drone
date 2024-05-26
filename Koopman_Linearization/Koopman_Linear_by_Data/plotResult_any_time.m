@@ -6,21 +6,23 @@ close all
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../../')); % drone/のこと
 %% flag
 flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
-flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
+flg.rmse = 0; % subplotにRMSE表示
+flg.only_rmse = 1; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
+flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 1; % flight後何秒からの推定精度検証を行うか saddle:3.39
-% if flg.confirm_ref; m = 2; n = 3; % subplotの配列
-% else; m = 2; n = 2; end
+startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
-m = 2; n = 3;
+if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
+else;                             m = 2; n = 3; end
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
+loadfilename{1} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_hovering';
 % loadfilename{1} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
@@ -46,7 +48,7 @@ end
 RMSE.Posylim = 0.1^2;
 RMSE.Atiylim = 0.0175^2;
 
-stepnum = 1; %ステップ数，xの範囲を設定 default: 1
+% stepnum = 3; %ステップ数，xの範囲を設定 default: 1
 if stepnum == 0
     stepN = 31;
     if flg.xlimHold == 1
@@ -159,6 +161,27 @@ newcolors = [0 0.4470 0.7410
              0.8500 0.3250 0.0980
              0.4660 0.6740 0.1880]; %グラフの色指定
 
+%% Calculate RMSE
+rmse = @(x) sqrt(1/stepN * sum(x.^2, 2));
+% position
+error_p = file{i}.simResult.state.p(:,tlength) - file{WhichRef}.simResult.reference.est.p(tlength,:)';
+result.p.rmse = rmse(error_p); result.p.max = max(error_p,[],2); result.p.min = min(error_p,[],2);
+% velocity
+error_v = file{i}.simResult.state.v(:,tlength) - file{WhichRef}.simResult.reference.est.v(tlength,:)';
+result.v.rmse = rmse(error_v); result.v.max = max(error_v,[],2); result.v.min = min(error_v,[],2);
+% attitude
+error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
+result.q.rmse = rmse(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
+
+if flg.only_rmse
+fprintf("file: %s \n", strcat(strrep(loadfilename{1},'EstimationResult_2024-','')));
+fprintf("Number of Observables: %d \n", size(simResult.Z(:,1),1));
+fprintf("Estimation begin time: %.4f \n", startTime);
+fprintf("Estimation time: %.2f \n", xmax);
+fprintf("Position RMSE : x=%.4f, y=%.4f, z=%.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
+fprintf("Velocity RMSE : vx=%.4f, vy=%.4f, vz=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
+fprintf("Attitude RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
+else
 if ~flg.division % plotResult
 %% P
 % strrep _を "【空白】"に置換
@@ -352,19 +375,8 @@ if flg.confirm_ref
     legend('x', 'y', 'z', 'verification range'); grid on;
 end
 
-%% RMSE, ERROR(MAX, MIN)
-rmse = @(x) sqrt(1/stepN * sum(x.^2, 2));
-% position
-error_p = file{i}.simResult.state.p(:,tlength) - file{WhichRef}.simResult.reference.est.p(tlength,:)';
-result.p.rmse = rmse(error_p); result.p.max = max(error_p,[],2); result.p.min = min(error_p,[],2);
-% velocity
-error_v = file{i}.simResult.state.v(:,tlength) - file{WhichRef}.simResult.reference.est.v(tlength,:)';
-result.v.rmse = rmse(error_v); result.v.max = max(error_v,[],2); result.v.min = min(error_v,[],2);
-% attitude
-error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
-result.q.rmse = rmse(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
-
-if ~flg.figtype; subplot(m,n,6); end
+%% RMSE
+if ~flg.figtype && flg.rmse; subplot(m,n,6)
 FS = 12;
 text(0.05,0.9,strcat('RMSE.p = ', num2str(result.p.rmse,3)),'FontSize',FS, 'Units','normalized');
 text(0.05,0.6,strcat('RMSE.v = ', num2str(result.v.rmse,3)),'FontSize',FS, 'Units','normalized');
@@ -375,7 +387,7 @@ text(0.4, 0.3,strcat('MAX.q = ', num2str(result.q.max,3)),'FontSize',FS, 'Units'
 text(0.75, 0.9,strcat('MIN.p = ', num2str(result.p.min,3)),'FontSize',FS, 'Units','normalized');
 text(0.75, 0.6,strcat('MIN.v = ', num2str(result.v.min,3)),'FontSize',FS, 'Units','normalized');
 text(0.75, 0.3,strcat('MIN.q = ', num2str(result.q.min,3)),'FontSize',FS, 'Units','normalized');
-
+end
 %%
 if ~flg.figtype; fig.WindowState = 'maximized'; end
 
@@ -580,3 +592,5 @@ for graph_num = 1:3
     hold off
 end
 end % flg.divisionのif
+
+end % flg.only_rmse
