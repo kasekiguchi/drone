@@ -26,6 +26,7 @@ Controller_MPC_Koopmanで読み込み
 
 実験時
 トリガーで接続確認
+実験室座標系：前＝x方向正，左＝y方向正
 
 実験
 s, a, t, f, l, q

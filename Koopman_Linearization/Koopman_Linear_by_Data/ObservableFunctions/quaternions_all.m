@@ -69,6 +69,7 @@ common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R23;
             R33;
             1];
+common_2z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3]; % code06用
 
 %% 磯部先輩観測量 code = 00
 isobe_z = [W1*W2;
@@ -152,5 +153,8 @@ diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(
 
 %% f(x, u, param)からdf/dparam したときの項のみ code = 05
 % z = [common_z; diff_param_z];
+
+%% 姿勢角速度がprimeで取得できないことから姿勢角速度を除く状態を基本構成 code = 06
+% z = [common_2z; isobe_z];
 end
 

@@ -123,7 +123,8 @@ flg.bilinear = 0;
 flg.normalize = 0;
 F = @quaternions_all; % 改造用
 FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_');
-FileName = strcat(FileName_common, 'Exp_Kiyama_code01_', 'hovering');
+Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
+FileName = strcat(FileName_common, 'Exp_Kiyama_code06_', Exp_tra);
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -134,7 +135,7 @@ if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
 end
 
-%% Koopman linearization
+% Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
 fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
@@ -146,11 +147,25 @@ end
 est.observable = F;
 fprintf('\n＜クープマン線形化が完了しました＞\n')
 
-%% Simulation by Estimated model(構築したモデルでシミュレーション)
+% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
 %構築したクープマンモデルがどの程度正確かを確認する部分
-fprintf('\n＜推定精度検証用データに設定するファイル名を選択してください＞\n')
-[fileName, filePath] = uigetfile('*.mat');
+% fprintf('\n＜推定精度検証用データに設定するファイル名を選択してください＞\n')
+% [fileName, filePath] = uigetfile('*.mat');
+
+%file名を自動で分別
+fprintf('\n＜推定精度検証用データを設定しました＞\n')
+switch Exp_tra
+    case 'P2Py'
+        fileName = 'experiment_10_25_P2Py_estimator.mat';
+    case 'P2Px'
+        fileName = 'experiment_10_20_P2Px_estimator.mat';
+    case 'hovering'
+        fileName = 'experiment_11_15_hovering.mat';
+    case 'saddle'
+        fileName = 'experiment_9_5_saddle_estimatordata.mat';
+end
+
 verification_data = fileName;
 simResult.reference = ImportFromExpData_estimation(verification_data); %検証用データを格納
 
@@ -201,7 +216,7 @@ end
 
 fprintf('\n＜推定精度検証が完了しました(推定したA,B,C行列を用いた状態推定)＞\n')
 
-%% Save Estimation Result(結果保存場所)
+% Save Estimation Result(結果保存場所)
 if size(Data.X,1)==13
     simResult.state.p = simResult.Xhat(1:3,:);
     simResult.state.q = simResult.Xhat(4:7,:);
@@ -234,7 +249,7 @@ disp(targetpath)
 % end
 % 
 % fprintf('\n＜ファイルの移動が完了しました＞\n')
-%% 先輩が今まで作られた観測量
+%% 磯部先輩が作られた観測量
 
 % F = @(x) [x;1]; % 状態そのまま
 % F = @quaternionParameter; % クォータニオンを含む13状態の観測量

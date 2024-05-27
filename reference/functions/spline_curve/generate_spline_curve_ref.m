@@ -18,14 +18,17 @@ function ref = generate_spline_curve_ref(loadedRef,order,fcmd)
 %手動で値を設定するとき(使わないときコメントアウトする)
 % ランダムでの軌道生成はこちら
 isManualSetting = 1;%手動でwaypointを作るとき1
-pointN = 5; %waypointの数
+pointN = 8; %waypointの数 default:5
 dt = 3;%waypoint間の時間
 time =  (0:dt:dt*(pointN-1))';
-% wp = [0,0,0;0.5*round(1*randn(pointN-1,3),3)];%waypointの設定初めは初期値0
 wp_xy = round(0.5*randn(pointN-1,2),3);%waypointの設定
 wp_z  = round(0.25*randn(pointN-1,1)+0.5,3);%z waypoint 平均値をzのみ設定
-wp = [0, 0, 1;wp_xy, wp_z];
 % round(配列, 何桁まで)
+
+% x方向のみ
+wp_xy = [round(0.2*randn(pointN-1,1),3), zeros(pointN-1,1)];
+wp_z  = ones(pointN-1,1);
+wp = [0, 0, 1;wp_xy, wp_z];
 waypoints = [time, wp];
 
     while 1
@@ -224,7 +227,8 @@ waypoints = [time, wp];
             ref=MY_WAY_POINT_REFERENCE.way_point_ref([time,posi],order,1);
         end
         while 1
-            isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
+            % isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
+            isSaved = 0;
             if isSaved==0||isempty(isSaved)
                 disp("No save")
                 break
