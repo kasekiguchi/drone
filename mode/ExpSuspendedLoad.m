@@ -7,7 +7,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
-motive = Connector_Natnet('192.168.1.2'); % connect to Motive
+motive = Connector_Natnet('192.168.1.3'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
@@ -21,7 +21,7 @@ initial_state.wL = [0; 0; 0];
 initial_state.p = [1;0;1.46];
 
 agent = DRONE;
-agent.parameter = DRONE_PARAM_SUSPENDED_LOAD();
+agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("a");
 agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM16"));
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));

@@ -17,6 +17,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         
         function result=do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
+            cha = param{2};
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
@@ -75,7 +76,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             invbeta2 = obj.inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
             a = obj.v_SuspendedLoad(x,xd',vf,vs',P);
             us = h234*invbeta2*a;
-           cha = obj.self.reference.cha;
+           % cha = obj.self.reference.cha;
            tmpHL = obj.self.controller.hlc.result.input;
            obj.result.input = tmpHL;
            if strcmp(cha,'f')
