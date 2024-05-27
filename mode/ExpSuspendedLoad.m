@@ -25,7 +25,10 @@ agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM16"));
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+%ここを要修正or先生と相談orシミュレーションで確認==============================================================================================================
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));%荷物のも取ってこれるはず
+% agent.sensor = Estimator_Suspended_Load([1,2]);%[1,1+N]%for_loadで機体と牽引物の位置、姿勢をstateクラスに格納
+%==============================================================================================================
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;1]},"Suspended"});
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
