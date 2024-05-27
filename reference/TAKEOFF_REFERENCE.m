@@ -24,12 +24,12 @@ classdef TAKEOFF_REFERENCE < handle
         obj.base_time=varargin{1}.t;
         obj.base_state = obj.self.estimator.result.state.p;
         obj.result.state.xd = [obj.base_state;zeros(17,1)];
-        obj.th_offset = obj.self.input_transform.param.th_offset;
+        obj.th_offset = obj.self.input_transform.param.th_offset_tl;
       end
       obj.result.state.xd = obj.gen_ref_for_take_off(varargin{1}.t-obj.base_time);
       obj.result.state.p = obj.result.state.xd(1:3,1);
       obj.result.state.v = obj.result.state.xd(5:7,1);
-      obj.self.input_transform.param.th_offset = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
+      obj.self.input_transform.param.th_offset_tl = obj.th_offset0 + (obj.th_offset-obj.th_offset0)*min(obj.te,varargin{1}.t-obj.base_time)/obj.te;
       result = obj.result;
     end
     function Xd = gen_ref_for_take_off(obj,t)
