@@ -30,9 +30,9 @@ x = lx*cos(w*t)+lx_offset; % x
 y = ly*sin(w*t)+ly_offset; % y
 z = lz*sin(2*w*t - pi/2)+lz_offset; % z
 
-% x = lx_offset;  % x
-% y = ly_offset;  % y
-% z = lz*sin(2*w*t - pi/2)+lz_offset; % z
+x = lx_offset;  % x
+y = ly_offset;  % y
+z = lz*sin(2*w*t - pi/2)+lz_offset; % z
 
 %point
 % x = lx_offset;  % x

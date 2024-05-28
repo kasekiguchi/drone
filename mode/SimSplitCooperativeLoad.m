@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 30;
+te = 60;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -91,7 +91,6 @@ for i = 2:N+1
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[]},"Split2",N},agent(1));
 %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
-%     agent(i).controller.load = HLC_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));%質量が変えられないだけ
     agent(i).controller.load = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
     agent(i).controller.do = @controller_do;
     agent(i).controller.result.input = [(agent(i).parameter.loadmass+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
@@ -167,7 +166,7 @@ DataR5 = logger.data(6,"reference.result.state.p","p");
 DataR6 = logger.data(7,"reference.result.state.p","p");
 % DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 DataB = logger.data(5,"reference.result.m","p");
-DataC = logger.data(7,"reference.result.Muid","p");
+DataC = logger.data(7,"reference.result.Mui","p");
 DataD = logger.data(5,"reference.result.state.xd","p");
 DataE = logger.data(1,"controller.result.mui","p");
 %mui-z
@@ -416,10 +415,14 @@ mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",
 % logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
 function result = controller_do(varargin)
-controller = varargin{5}.controller;
-result = controller.hlc.do(varargin{5});
-result = merge_result(result,controller.load.do(varargin{5}));
-varargin{5}.controller.result = result;
+    controller = varargin{5}.controller;
+    if strcmp(varargin{2},'f')
+        result = controller.load.do(varargin{5});
+    else
+        result = controller.hlc.do(varargin{5});
+    end
+    % result = merge_result(result,controller.load.do(varargin{5}));
+    varargin{5}.controller.result = result;
 end
 
 function dfunc(app)

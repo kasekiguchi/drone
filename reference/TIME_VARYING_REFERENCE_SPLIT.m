@@ -16,6 +16,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         P
         Pdagger
         K
+        vrho_pre
         muid
         m
         toR
@@ -100,6 +101,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     end
 
                     obj.result.state.set_state("xd",zeros(24,1));
+                    obj.vrho_pre = obj.result.state.xd(9:11);
                 
                 elseif strcmp(args{3}, "Suspended")
                     temp = gen_func_name(param_for_gen_func{:});
@@ -123,6 +125,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         end
         function result = do(obj, varargin)%chaによって単機のtakeoffやlandingに切り換えられるようにする．普通のTIME_VARYING_REFERENCEを参考にする
            %Param={time,FH}
+           dt = varargin{1}.dt;
            obj.cha = varargin{2};
            if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
                 t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
@@ -146,22 +149,27 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                xd = 0*ref.xd;
                xd(1:3)=Qrho;
                xd(5:7)=vrho;
-               x = model.get(["p"  "Q" "v"    "O"    "qi"    "wi"  "Qi"  "Oi"]);
-               qi = reshape(model.qi,3,obj.N);
-               Ri = obj.toR(model.Qi);
-               R0 = obj.toR(model.Q);
-               R0d = reshape(xd(end-8:end),3,3);
+               % x = model.get(["p"  "Q" "v"    "O"    "qi"    "wi"  "Qi"  "Oi"]);
+               % qi = reshape(model.qi,3,obj.N);
+               % Ri = obj.toR(model.Qi);
+               % R0 = obj.toR(model.Q);
+               % R0d = reshape(xd(end-8:end),3,3);
                id = obj.self.id;
                Mui = agent1.controller.result.mui; %3xN
                mui_myagent = Mui(4:6,id-1); %3x1%
                obj.result.Mui = mui_myagent';
                obj.result.state.xd = xd; % 目標重心位置（絶対座標）
                obj.result.state.p = xd(1:3);
-               a = obj.result.state.xd(9:11);
                g = [0;0;-1]*agent1.parameter.g;
+               %加速度の算出の仕方を変更========================
+               % a = obj.result.state.xd(9:11);
+               a = (vrho - obj.vrho_pre)/dt;
+               obj.vrho_pre = vrho;
+               % =============================================
 
                A=a-g;
-               obj.result.m = inv(A'*A)*A'*mui_myagent;%分割後質量推定
+               AtA = A'*A;
+               obj.result.m = AtA\A'*mui_myagent;%分割後質量推定
            elseif strcmp(obj.com, "Take_off")
                if isempty( obj.base_state ) % first take
                obj.base_time=varargin{1}.t;

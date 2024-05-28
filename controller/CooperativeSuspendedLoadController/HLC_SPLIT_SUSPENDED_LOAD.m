@@ -59,14 +59,14 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
             vs_alhpa = v_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
             us = [0;invbeta2*vs_alhpa];%h234*invbeta2*a;
-            cha = obj.self.reference.cha;
-            tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
-            obj.result.input = tmpHL;
-            if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
-                obj.result.input = uf + us;
-            end
-            
-            obj.self.controller.result.input = obj.result.input; 
+            % cha = obj.self.reference.cha;
+            % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
+            % obj.result.input = tmpHL;
+            % if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
+            %     obj.result.input = uf + us;
+            % end
+            obj.result.input = uf + us;
+            % obj.self.controller.result.input = obj.result.input; 
 
             result = obj.result;
         end
