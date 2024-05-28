@@ -16,7 +16,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         P
         Pdagger
         K
-        vrho_pre
+        vi_pre
         muid
         m
         toR
@@ -101,7 +101,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     end
 
                     obj.result.state.set_state("xd",zeros(24,1));
-                    obj.vrho_pre = obj.result.state.xd(9:11);
+                    obj.vi_pre = obj.result.state.xd(9:11);
                 
                 elseif strcmp(args{3}, "Suspended")
                     temp = gen_func_name(param_for_gen_func{:});
@@ -143,7 +143,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                dR_load = R_load*Skew(omega_load);
                vrho = initial_loadref(4:6,1)+ dR_load*rho;%分割後のペイロードの速度目標軌道
 
-
+               parameter = agent1.parameter;
                model = agent1.estimator.result.state;
                ref = agent1.reference.result.state;
                xd = 0*ref.xd;
@@ -160,11 +160,16 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.Mui = mui_myagent';
                obj.result.state.xd = xd; % 目標重心位置（絶対座標）
                obj.result.state.p = xd(1:3);
-               g = [0;0;-1]*agent1.parameter.g;
+               g = [0;0;-1]*parameter.g;
                %加速度の算出の仕方を変更========================
                % a = obj.result.state.xd(9:11);
-               a = (vrho - obj.vrho_pre)/dt;
-               obj.vrho_pre = vrho;
+               v0 = model.v;
+               li = parameter.li(id-1);
+               tmp_qi = reshape(model.qi,3,[]);
+               qi = tmp_qi(:,id-1);
+               vi = v0 + dR_load*rho - li*qi;
+               a = (vi - obj.vi_pre)/dt;
+               obj.vi_pre = vi;
                % =============================================
 
                A=a-g;
