@@ -27,8 +27,9 @@ agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
 %ここを要修正or先生と相談orシミュレーションで確認==============================================================================================================
 %generatemodelでwith_load_model,with_load_model_euler_for_HL（永久先輩はこちら用いてる）で何が違うのか確認、なんの物理パラメータを使うか
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));%荷物のも取ってこれるはず
-% agent.sensor = Estimator_Suspended_Load([1,2]);%[1,1+N]%for_loadで機体と牽引物の位置、姿勢をstateクラスに格納
+agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));%荷物のも取ってこれるはず
+agent.sensor.forload = FORLOAD(agent, Estimator_Suspended_Load([1,2]));%[1,1+N]%for_loadで機体と牽引物の位置、姿勢をstateクラスに格納
+agent.sensor.do = @sensor_do;
 %==============================================================================================================
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;1]},"Suspended"});
@@ -55,11 +56,19 @@ run("ExpBase");
 %%
 % logger.plot({1,"plant.result.state.pL","p"})
 %%
+function result = sensor_do(varargin)
+    result_motive = varargin{5}.sensor.motive.do(varargin);
+    result_forload = varargin{5}.sensor.forload.do(varargin);
+    result_motive.state.pL =  result_forload.pL;
+    result_motive.state.pT =  result_forload.pT;
+    varargin{5}.sensor.result = result_motive;
+    result=result_motive;
+end
 function result = controller_do(varargin)
-controller = varargin{5}.controller;
-result = controller.hlc.do(varargin);
-result = merge_result(result,controller.load.do(varargin));
-varargin{5}.controller.result = result;
+    controller = varargin{5}.controller;
+    result = controller.hlc.do(varargin);
+    result = merge_result(result,controller.load.do(varargin));
+    varargin{5}.controller.result = result;
 end
 
 function post(app)
