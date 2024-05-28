@@ -15,21 +15,25 @@ classdef FOR_LOAD < SENSOR_CLASS
                 end
             end
             obj.result.state = STATE_CLASS(struct('state_list',["p","q","pL","pT"],"num_list",[3,4,3,3]));
-            if sum(contains(self.model.state.list,"q"))==1
-                obj.result.state.num_list=[3,length(self.model.state.q),3]; % model‚Æ‡‚í‚¹‚é
-                obj.result.state.type = length(self.model.state.q);
-            end
+            % if sum(contains(self.model.state.list,"q"))==1
+            %     obj.result.state.num_list=[3,length(self.model.state.q),3]; % model‚Æ‡‚í‚¹‚é
+            %     obj.result.state.type = length(self.model.state.q);
+            % end
         end
         
         function [result]=do(obj,~)
             %   param : optional
-            obj.result.state.p = obj.self.sensor.motive.result.rigid(obj.rigid_num(1)).p;
-            obj.result.state.q = obj.self.sensor.motive.result.rigid(obj.rigid_num(1)).q;
-            cha = obj.self.reference.point.flag;
+            % obj.result.state.p = varargin{5}.sensor.motive.result.state.p;;%’¼‚·
+            % obj.result.state.q = varargin{5}.sensor.motive.result.state.q;;%’¼‚·
+
+            % obj.result.state.p = obj.self.sensor.motive.result.rigid(obj.rigid_num(1)).p;%ŒÃ‚¢
+            % obj.result.state.q = obj.self.sensor.motive.result.rigid(obj.rigid_num(1)).q;%ŒÃ‚¢
+            cha = varargin{2};%ŒÃ‚¢
             % obj.result.state.pL = obj.result.state.p + [obj.self.model.param(17);obj.self.model.param(18);-obj.self.model.param(19)] -[0;0;obj.self.model.param(16)];
-            obj.result.state.pL = obj.result.state.p -[0;0;obj.self.model.param(16)];% For:PE-Model
+            % obj.result.state.pL = obj.result.state.p -[0;0;obj.self.model.param(16)];% For:PE-Model
+            obj.result.state.pL = obj.result.state.p -[0;0;Pobj.self.parameter.get("cableL")];% For:PE-Model
             if obj.result.state.pL(3) >= 0.1%strcmp(cha,'f')||strcmp(cha,'l')
-                obj.result.state.pL = obj.self.sensor.motive.result.rigid(obj.rigid_num(2)).p;
+                obj.result.state.pL = obj.self.sensor.motive.result.rigid(obj.rigid_num(2)).p;%’¼‚·
             end
             R = RodriguesQuaternion(obj.result.state.q);
             % obj.result.state.pT = (obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)])/norm(obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)]);

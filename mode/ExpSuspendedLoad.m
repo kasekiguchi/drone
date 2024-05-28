@@ -28,7 +28,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Susp
 %ここを要修正or先生と相談orシミュレーションで確認==============================================================================================================
 %generatemodelでwith_load_model,with_load_model_euler_for_HL（永久先輩はこちら用いてる）で何が違うのか確認、なんの物理パラメータを使うか
 agent.sensor.motive = MOTIVE(agent, Sensor_Motive(1,0, motive));%荷物のも取ってこれるはず
-agent.sensor.forload = FORLOAD(agent, Estimator_Suspended_Load([1,2]));%[1,1+N]%for_loadで機体と牽引物の位置、姿勢をstateクラスに格納
+agent.sensor.forload = FOR_LOAD(agent, Estimator_Suspended_Load([1,2]));%[1,1+N]%for_loadで機体と牽引物の位置、姿勢をstateクラスに格納
 agent.sensor.do = @sensor_do;
 %==============================================================================================================
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
