@@ -102,6 +102,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                     obj.result.state.set_state("xd",zeros(24,1));
                     obj.vi_pre = obj.result.state.xd(9:11);
+                    obj.result.vi_pre = obj.vi_pre;
                 
                 elseif strcmp(args{3}, "Suspended")
                     temp = gen_func_name(param_for_gen_func{:});
@@ -142,10 +143,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                Qrho = initial_loadref(1:3,1)+R_load*rho;%分割後のペイロードの位置目標軌道
                dR_load = R_load*Skew(omega_load);
                vrho = initial_loadref(4:6,1)+ dR_load*rho;%分割後のペイロードの速度目標軌道
+               
+               % ref_alpha = initial_loadref(16:18);%分割前目標角く加速度
+               % arho = initial_loadref(7:9,1)+ (dR_load*Skew(omega_load) +R_load*Skew(ref_alpha))*rho;%分割後のペイロードの加速度目標軌道?
 
                parameter = agent1.parameter;
                model = agent1.estimator.result.state;
-               ref = agent1.reference.result.state;
+               ref = agent1.reference.result.state;%%%%%%必要？initial_loadref でいい？
                xd = 0*ref.xd;
                xd(1:3)=Qrho;
                xd(5:7)=vrho;
@@ -155,26 +159,37 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0 = obj.toR(model.Q);
                % R0d = reshape(xd(end-8:end),3,3);
                id = obj.self.id;
-               Mui = agent1.controller.result.mui; %3xN
-               mui_myagent = Mui(4:6,id-1); %3x1%
-               obj.result.Mui = mui_myagent';
+               muid_mui = agent1.controller.result.mui; %3xN
+               mui = muid_mui(4:6,id-1); %3x1%
+               obj.result.Mui = mui';
                obj.result.state.xd = xd; % 目標重心位置（絶対座標）
                obj.result.state.p = xd(1:3);
                g = [0;0;-1]*parameter.g;
                %加速度の算出の仕方を変更========================
-               % a = obj.result.state.xd(9:11);
+               %referenceをそのまま使うタイプ
+               %------------------------------------------------------
+               % a =obj.result.state.xd(9:11);
+               %ここの加速度はそもそも分割前ペイロードの加速度じゃん,加速度ddxは7:9じゃないん？各リンクの加速度を求めていないの修正が必要
+               %------------------------------------------------------
+               a = arho;%各リンクのreferenceの加速度
+               vi = vrho;
+               a = (vi - obj.vi_pre)/dt;%各リンクのreference速度から差分で加速度を求める．
+               
+               %ペイロードの速度からリンクの速度を求めてそこからリンクの加速度求める
                v0 = model.v;
-               li = parameter.li(id-1);
-               tmp_qi = reshape(model.qi,3,[]);
-               qi = tmp_qi(:,id-1);
-               vi = v0 + dR_load*rho - li*qi;
+               % li = parameter.li(id-1);
+               % tmp_qi = reshape(model.qi,3,[]);
+               % qi = tmp_qi(:,id-1);
+               vi = v0 + dR_load*rho;% - li*qi;
                a = (vi - obj.vi_pre)/dt;
                obj.vi_pre = vi;
+               obj.result.vi_pre = vi;
+               obj.result.a = a;
                % =============================================
 
-               A=a-g;
+               A = a-g;
                AtA = A'*A;
-               obj.result.m = AtA\A'*mui_myagent;%分割後質量推定
+               obj.result.m = AtA\A'*mui;%分割後質量推定
            elseif strcmp(obj.com, "Take_off")
                if isempty( obj.base_state ) % first take
                obj.base_time=varargin{1}.t;

@@ -23,7 +23,7 @@ end
 r0z = [0;0;1];%z
 r0y = Skew(r0z)*r0x;%y
 R0d = [r0x,r0y,r0z];%理想的or目標とするペイロードの姿勢を表す回転行列
-dR0d = diff(R0d,t);%目標速度
+dR0d = diff(R0d,t);%回転行列の時間微分，目標速度
 
 o0d = Vee(R0d'*dR0d);%理想的or目標とするペイロード角速度
 do0d = diff(o0d,t);%理想的or目標とするペイロード角加速度

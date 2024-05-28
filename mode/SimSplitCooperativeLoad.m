@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 60;
+te = 20;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -169,6 +169,7 @@ DataB = logger.data(5,"reference.result.m","p");
 DataC = logger.data(7,"reference.result.Mui","p");
 DataD = logger.data(5,"reference.result.state.xd","p");
 DataE = logger.data(1,"controller.result.mui","p");
+DataF = logger.data(1,"reference.result.a","p");
 %mui-z
 reData_muiz=reshape(DataE,6,[]);
 reData_muiz1=reData_muiz(6,:);
@@ -317,11 +318,12 @@ hold off
 figure(104)
 hold on
 plot(t,DataD(:,3))
+plot(t,DataF(:,3))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
 xlabel("t [s]")
 ylabel("acceleration [m/s^2]")
-% legend("Payload","UAV")
+legend("ref","平均加速")
 ax = gca;
 ax.FontSize = 22;
 hold off
