@@ -167,17 +167,19 @@ disp(targetpath)
 %% 作成済みモデルで，推定する軌道を変更(全時刻に対する推定検証を行う)
 %推定する領域をずらしながら推定検証を行う．
 clc
-num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
-change_reference = str2double(num);
+% num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
+change_reference = 1; %str2double(num);
 
 if change_reference == 1
     clear all
     close all
     opengl software
    
-    simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
+    % experiment_10_25_P2Py_estimator
+    % experiment_9_5_saddle_estimatordata
+    simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator'); %推定精度検証用データの設定
 
-    model = load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat",'est'); % 推定したモデル
+    model = load("EstimationResult_2024-05-02_Exp_Kiyama_code00_1.mat",'est'); % 推定したモデル
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
