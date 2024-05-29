@@ -11,7 +11,7 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 figtype = 0;
 
-load("../データセット/Exp_2_4_150.mat");
+% load("../データセット/Exp_2_4_150.mat");
 %% Importing data
 if exist("app") ~= 7        % GUI実行中
     logt = app.logger.Data.t;
@@ -124,12 +124,20 @@ set(gcf, "Position", [960 0 960 1000])
 %
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
 
-%% 関数お試し用
+%%
 % close all 
-% ttt = 20; % 何秒で移動するか
-% a = 0.3;
-% Ti = 0:0.025:20;
+% syms t
+% a = 0.5;
+% ttt = 20;
+% 
 % x = 0;
-% y = 1./(1+exp(a*(-Ti + ttt./2)));
+% y = 1./(1+exp(a*(-t + ttt./2)));
 % z = 1;
-plot(Ti,  y);
+% 
+% vx = diff(x, t);
+% vy = diff(y, t);
+% vz = diff(z, t);
+% 
+% Ti = 0:0.025:20;
+% subplot(1,2,1); plot(Ti, [subs(x, t, Ti); subs(y, t, Ti); subs(z, t, Ti)]); legend("x", "y", "z");
+% subplot(1,2,2); plot(Ti, [subs(vx, t, Ti); subs(vy, t, Ti); subs(vz, t, Ti)]); legend("vx", "vy", "vz");
