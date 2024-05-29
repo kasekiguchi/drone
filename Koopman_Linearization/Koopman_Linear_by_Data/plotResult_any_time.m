@@ -22,8 +22,8 @@ if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
-% loadfilename{1} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
+% loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
+loadfilename{1} = 'EstimationResult_2024-05-29_Exp_KiyamaX_code00_saddle';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
 WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)

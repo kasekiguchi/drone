@@ -169,15 +169,27 @@ disp(targetpath)
 clc
 % num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
 change_reference = 1; %str2double(num);
+only_rmse = 1;
+Exp_tra = 'P2Py';
+switch Exp_tra
+    case 'P2Py'
+        fileName = 'experiment_10_25_P2Py_estimator';
+    case 'P2Px'
+        fileName = 'experiment_10_20_P2Px_estimator';
+    case 'hovering'
+        fileName = 'experiment_11_15_hovering';
+    case 'saddle'
+        fileName = 'experiment_9_5_saddle_estimatordata';
+end
 
 if change_reference == 1
-    clear all
+    % clear all
     close all
     opengl software
    
     % experiment_10_25_P2Py_estimator
     % experiment_9_5_saddle_estimatordata
-    simResult.reference = ImportFromExpData_estimation('experiment_10_25_P2Py_estimator'); %推定精度検証用データの設定
+    simResult.reference = ImportFromExpData_estimation(fileName); %推定精度検証用データの設定
 
     model = load("EstimationResult_2024-05-02_Exp_Kiyama_code00_1.mat",'est'); % 推定したモデル
     est.A = model.est.A;
@@ -213,12 +225,14 @@ if change_reference == 1
         size.WindowState = 'maximized'; %表示するグラフを最大化
         for i = 1:3
             % RMSEのみならコメントアウト-----------------------------------
-            % subplot(2,3,i)
-            % plot(simResult.T(:,N1:N2),simResult.Xhat(i,:),'LineWidth',1.2)
-            % hold on
-            % grid on
-            % plot(simResult.T(:,N1:N2),simResult.reference.X(i,N1:N2),'LineWidth',1.2,'LineStyle','--','Color','red')
-            % legend('estimator','reference','Location','best')
+            if ~only_rmse
+                subplot(2,3,i)
+                plot(simResult.T(:,N1:N2),simResult.Xhat(i,:),'LineWidth',1.2)
+                hold on
+                grid on
+                plot(simResult.T(:,N1:N2),simResult.reference.X(i,N1:N2),'LineWidth',1.2,'LineStyle','--','Color','red')
+                legend('estimator','reference','Location','best')
+            end
             % -------------------------------------------------------------
             if i == 1
                 xlabel('Time [s]','FontSize',16);
@@ -246,27 +260,29 @@ if change_reference == 1
             end
         end
         % RMSEのみならコメントアウト---------------------------------------
-        % error = [xerror;yerror;zerror];
-        % subplot(2,3,4)
-        % plot(simResult.T(:,N1:N2),simResult.reference.U(1,N1:N2),'LineWidth',1.2)
-        % yline(0.5884*9.81,'Color','r')
-        % grid on
-        % xlabel('Time [s]','FontSize',16);
-        % ylabel('thrust','FontSize',16);
-        % 
-        % subplot(2,3,5)
-        % plot(simResult.T(:,N1:N2),simResult.reference.U(2:end,N1:N2),'LineWidth',1.2)
-        % grid on
-        % xlabel('Time [s]','FontSize',16);
-        % ylabel('torque','FontSize',16);
-        % legend('roll','pitch','yaw','Location','best')
-        % 
-        % subplot(2,3,6)
-        % plot(simResult.T(:,N1:N2),error,'LineWidth',1.2)
-        % grid on
-        % xlabel('Time [s]','FontSize',16);
-        % ylabel('reference - estimator','FontSize',16);
-        % legend('error_x','error_y','error_z','Location','best')
+        if ~only_rmse
+            error = [xerror;yerror;zerror];
+            subplot(2,3,4)
+            plot(simResult.T(:,N1:N2),simResult.reference.U(1,N1:N2),'LineWidth',1.2)
+            yline(0.5884*9.81,'Color','r')
+            grid on
+            xlabel('Time [s]','FontSize',16);
+            ylabel('thrust','FontSize',16);
+    
+            subplot(2,3,5)
+            plot(simResult.T(:,N1:N2),simResult.reference.U(2:end,N1:N2),'LineWidth',1.2)
+            grid on
+            xlabel('Time [s]','FontSize',16);
+            ylabel('torque','FontSize',16);
+            legend('roll','pitch','yaw','Location','best')
+    
+            subplot(2,3,6)
+            plot(simResult.T(:,N1:N2),error,'LineWidth',1.2)
+            grid on
+            xlabel('Time [s]','FontSize',16);
+            ylabel('reference - estimator','FontSize',16);
+            legend('error_x','error_y','error_z','Location','best')
+        end
         % -----------------------------------------------------------------
 %         
 
@@ -319,5 +335,6 @@ if change_reference == 1
     %--------------------------
     fprintf('SUM RMSE : x = %.4f, y = %.4f, z = %.4f \n', sum(x), sum(y), sum(z));
     fprintf('SUM ERROR: x = %.4f, y = %.4f, z = %.4f \n', sum(xerror_max), sum(yerror_max), sum(zerror_max));
+    if only_rmse; close([1:j-1]); end
 end
 

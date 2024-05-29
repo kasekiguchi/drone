@@ -29,9 +29,10 @@ initial_state.w = [0; 0; 0];
 %% クープマンモデルをプラントに設定する場合
 load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
 % load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat", "est");
-A = est.A;
-B = est.B;
-C = est.C;
+sys = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), 0.07); % サンプリングタイムの変更
+A = sys.A; % default: est.A
+B = sys.B;
+C = sys.C;
 agent = DRONE;
 agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
 agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)); 
