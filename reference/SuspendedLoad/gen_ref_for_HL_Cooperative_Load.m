@@ -12,17 +12,38 @@ xd=xdt(t);
 dxd =diff(xd,t);
 ddxd =diff(dxd,t);
 dddxd =diff(ddxd,t);
-if norm(dxd) == 0
-  r0x = [1;0;0];%目標軌道がない場合[0.001;0;0]特異点阻止
+
+norm_dxd = sqrt(dxd'*dxd);%手動でnorm(dxd)
+isdxd1 = find(dxd(1:2) == 0);
+if norm_dxd == 0 ||  isdxd1 == 1
+    R0d = eye(3);
 else
-  % norm_dxd = sqrt(dxd(1)^2+dxd(2)^2+dxd(3)^2);%手動でnorm(dxd)
-  norm_dxd = sqrt(dxd'*dxd);%手動でnorm(dxd)
-  r0x = [dxd(1),dxd(2),0]'/norm_dxd;
-  % r0x = [dxd(1),dxd(2),0]'/norm(dxd);%norm(dxd)でabsが出現し，do0dでt=0の時にNaNになる
+    r0x = [dxd(1);dxd(2);0] / norm_dxd;
+    % r0x = % [dxd(1),dxd(2),0]'/norm(dxd);%norm(dxd)でabsが出現し，do0dでt=0の時にNaNになる．
+    r0z = [0;0;1];%z
+    r0y = cross(r0z,r0x);%y
+    R0d = [r0x,r0y,r0z];%理想的or目標とするペイロードの姿勢を表す回転行列
 end
-r0z = [0;0;1];%z
-r0y = Skew(r0z)*r0x;%y
-R0d = [r0x,r0y,r0z];%理想的or目標とするペイロードの姿勢を表す回転行列
+%x or yが時不変の場合の対処!!!!!!    
+% R0d_zero = (R0d == 0);
+% for i = 1:2
+%     if R0d_zero(:,i) == 3
+%         R0d(i,i) = 1;
+%     end
+% end
+% else
+%     norm_dxd = sqrt(dxd'*dxd);%手動でnorm(dxd)
+%     r0x = dxd / norm_dxd;
+%     % r0y = 
+%     % r0z =
+%     % R = I + sin n + cos n^2
+%     e1 = [1;0;0];
+%     cos = e1'*r0x;
+%     sin = sqrt(1 - cos^2);
+%     n = cross(e1,dxd);
+%     hat_n = Skew(n);
+%     R0d = ones(3) + sin*hat_n + (1 - cos)*hat_n^2;
+% end
 dR0d = diff(R0d,t);%回転行列の時間微分，目標速度
 
 o0d = Vee(R0d'*dR0d);%理想的or目標とするペイロード角速度
