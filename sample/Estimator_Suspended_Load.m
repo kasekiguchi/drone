@@ -5,5 +5,5 @@ function Estimator = Estimator_Suspended_Load(rigid_num)
 % ‚·‚×‚Ä‚Ì‹@‘Ì‚Å“¯ˆêİ’è
 Estimator.name="for_load";
 Estimator.type="FOR_LOAD";
-Estimator.param.rigid_num=rigid_num;
+Estimator.rigid_num=rigid_num;
 end
