@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 20;
+te = 40;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -21,7 +21,7 @@ qtype = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
 agent(1) = DRONE;
 agent(1).id = 1;%元のシステム
 %Payload_Initial_State
-initial_state(1).p = [0; 0; 0];%ペイロード
+initial_state(1).p = [0; 0; 0.2];%ペイロード
 initial_state(1).v = [0; 0; 0];%ペイロード
 initial_state(1).O = [0; 0; 0];%ペイロードの角速度
 initial_state(1).wi = repmat([0; 0; 0], N, 1);%リンクの角速度
@@ -151,6 +151,7 @@ disp(time.t)
 %%
 close all
 DataA= logger.data(1,"plant.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
+DataA_link= logger.data(1,"plant.result.state.qi","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 % DataA = logger.data(2,"reference.result.state.p","p");
 DataA1 = logger.data(2,"estimator.result.state.pL","p");
 DataA2 = logger.data(3,"estimator.result.state.pL","p");
@@ -167,21 +168,29 @@ DataR6 = logger.data(7,"reference.result.state.p","p");
 % DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
 DataB = logger.data(5,"reference.result.m","p");
 DataC = logger.data(7,"reference.result.Mui","p");
-DataD = logger.data(5,"reference.result.state.xd","p");
+DataD = logger.data(2,"reference.result.state.xd","p");%位置を加速度としてグラフに書いていた!!!!!!!!
 DataE = logger.data(1,"controller.result.mui","p");
-DataF = logger.data(1,"reference.result.a","p");
-%mui-z
-reData_muiz=reshape(DataE,6,[]);
-reData_muiz1=reData_muiz(6,:);
-reData_muiz2=reshape(reData_muiz1,6,[]);
-DataE_mui_z=sum(reData_muiz2);
-%mui-z
-reData_muidz=reshape(DataE,6,[]);
-reData_muidz1=reData_muidz(3,:);
-reData_muidz2=reshape(reData_muidz1,6,[]);
-DataE_muid_z=sum(reData_muidz2);
-t=logger.data(0,'t',[]);
+sumE = sum(DataE,2);
+DataE_sum = reshape(sum(DataE,2),N,[]);
+DataE_muid = DataE_sum(1:3,:);
+DataE_mui = DataE_sum(4:6,:);
 
+for i =1:N
+    DataDi = logger.data(i+1,"reference.result.state.xd","p");%位置を加速度としてグラフに書いていた!!!!!!!!
+    DataD_3(:,:,i) = DataDi(:,9:11);
+    
+    DataEi = reshape(DataE(:,i),6,[]);
+    muid = DataEi(1:3,:);
+    muid_norm = sum(sqrt(muid.^2));
+    muid_unit = muid./muid_norm;
+    DataE_muid_unit(:,:,i) = muid_unit;
+
+    linki(:,:,i) = -DataA_link(:,3*N-2:3*N);
+
+    DataF_3(:,:,i) = reshape(logger.data(i+1,"reference.result.a","p"),3,[])';
+end
+DataD_sum = sum(DataD_3,3);
+DataF_sum = sum(DataF_3,3);
 
 DataR = logger.data(1,"reference.result.state.p","p");
 Data1 = logger.data(2,"reference.result.m","p");
@@ -212,7 +221,8 @@ end
 t=logger.data(0,'t',[]);
 %%
 close all
-figure(1)
+k = 1;
+figure(k)
 hold on
 plot(t,DataA1(:,1),'DisplayName','Agent1')
 plot(t,DataA2(:,1),'DisplayName','Agent2')
@@ -239,8 +249,9 @@ ax = gca;
 ax.FontSize = 14;
 lgd = legend;
 hold off
+k = k + 1;
 
-figure(2)
+figure(k)
 hold on
 plot(t,DataA1(:,3),'DisplayName','Agent1')
 plot(t,DataA2(:,3),'DisplayName','Agent2')
@@ -267,8 +278,9 @@ ax = gca;
 ax.FontSize = 14;
 lgd = legend;
 hold off
+k = k + 1;
 
-figure(101)
+figure(k)
 hold on
 plot(DataA(:,1),DataA(:,2),'DisplayName','Estimator')
 plot(DataR(:,1),DataR(:,2),'DisplayName','Reference')
@@ -281,9 +293,9 @@ ax = gca;
 ax.FontSize = 22;
 lgd = legend;
 hold off
+k = k + 1;
 
-
-figure(102)
+figure(k)
 hold on
 % plot(t,DataA(:,1),'DisplayName','X')
 % plot(t,DataA(:,2),'DisplayName','Y')
@@ -300,9 +312,9 @@ ax = gca;
 ax.FontSize = 14;
 lgd = legend;
 hold off
+k = k + 1;
 
-
-figure(103)
+figure(k)
 hold on
 plot(t,DataC(:,3))
 % xlim([-1.5 1.5])
@@ -313,30 +325,31 @@ ylabel("Mu [N]")
 ax = gca;
 ax.FontSize = 22;
 hold off
+k = k + 1;
 
-
-figure(104)
+figure(k)
 hold on
-plot(t,DataD(:,3))
-plot(t,DataF(:,3))
+plot(t,DataD_sum)
+plot(t,DataF_sum,"LineStyle","--")
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
 xlabel("t [s]")
-ylabel("acceleration [m/s^2]")
-legend("ref","平均加速")
+ylabel("合計acceleration [m/s^2]")
+legend("ref","差分加速")
 ax = gca;
 ax.FontSize = 22;
 hold off
+k = k + 1;
 
-k=1;
-figure(105) 
+i2 =1;
+figure(k) 
 hold on
-plot(t,Data_cooperative1(:,k),'LineWidth',1,'DisplayName','agent1')
-plot(t,Data_cooperative2(:,k),'LineWidth',1,'DisplayName','agent2')
-plot(t,Data_cooperative3(:,k),'LineWidth',1,'DisplayName','agent3')
-plot(t,Data_cooperative4(:,k),'LineWidth',1,'DisplayName','agent4')
-plot(t,Data_cooperative5(:,k),'LineWidth',1,'DisplayName','agent5')
-plot(t,Data_cooperative6(:,k),'LineWidth',1,'DisplayName','agent6')
+plot(t,Data_cooperative1(:,i2),'LineWidth',1,'DisplayName','agent1')
+plot(t,Data_cooperative2(:,i2),'LineWidth',1,'DisplayName','agent2')
+plot(t,Data_cooperative3(:,i2),'LineWidth',1,'DisplayName','agent3')
+plot(t,Data_cooperative4(:,i2),'LineWidth',1,'DisplayName','agent4')
+plot(t,Data_cooperative5(:,i2),'LineWidth',1,'DisplayName','agent5')
+plot(t,Data_cooperative6(:,i2),'LineWidth',1,'DisplayName','agent6')
 
 
 
@@ -350,15 +363,16 @@ ax = gca;
 ax.FontSize = 22;
 lgd = legend;
 hold off
+k = k + 1;
 
-figure(106) 
+figure(k) 
 hold on
-% plot(t,Data1(:,1),'LineWidth',1,'DisplayName','agent1')
-% plot(t,Data2(:,1),'LineWidth',1,'DisplayName','agent2')
-% plot(t,Data3(:,1),'LineWidth',1,'DisplayName','agent3')
-% plot(t,Data4(:,1),'LineWidth',1,'DisplayName','agent4')
-% plot(t,Data5(:,1),'LineWidth',1,'DisplayName','agent5')
-% plot(t,Data6(:,1),'LineWidth',1,'DisplayName','agent6')
+plot(t,Data1(:,1),'LineWidth',1,'DisplayName','agent1')
+plot(t,Data2(:,1),'LineWidth',1,'DisplayName','agent2')
+plot(t,Data3(:,1),'LineWidth',1,'DisplayName','agent3')
+plot(t,Data4(:,1),'LineWidth',1,'DisplayName','agent4')
+plot(t,Data5(:,1),'LineWidth',1,'DisplayName','agent5')
+plot(t,Data6(:,1),'LineWidth',1,'DisplayName','agent6')
 plot(t,DataM(:,1))
 
 % xlim([-1.5 1.5])
@@ -370,8 +384,9 @@ ax = gca;
 ax.FontSize = 14;
 lgd = legend;
 hold off
+k = k + 1;
 
-figure(107)
+figure(k)
 hold on
 plot(t,DataC(:,3))
 plot(t,DataD(:,3))
@@ -380,35 +395,76 @@ legend("Mu","acceleration")
 ax = gca;
 ax.FontSize = 22;
 hold off
+k = k + 1;
 
-figure(108)
+figure(k)
 hold on
-plot(t,DataD(:,3))
-plot(t,ma)
-plot(t,DataE_muid_z)
-plot(t,DataE_mui_z)
+plot(t,DataF_sum)
+plot(t,DataM)
+plot(t,DataE_muid,"LineStyle","--")
+plot(t,DataE_mui)
 xlabel("t [s]")
-legend("accel","ma","muid","mui")
+legend("accelx","y","z","muidx","y","z","muix","y","z")
 ax = gca;
 ax.FontSize = 22;
 hold off
+k = k + 1;
 
-figure(109)
+figure(k)
 hold on
-plot(t,mg)
-plot(t,mui_ma)
-plot(t,muid_ma)
+plot(t,DataE_muid,"LineStyle","--")
+plot(t,DataE_mui,"LineStyle","-")
 xlabel("t [s]")
-legend("mg","mui_ma","muid_ma")
+legend("muidx","y","z","muix","y","z")
 ax = gca;
 ax.FontSize = 22;
 hold off
+k = k + 1;
+
+figure(k)
+hold on
+plot(t,DataF_sum,"LineStyle","--")
+plot(t,DataF_sum.*DataM)
+plot(t,DataM,"LineStyle",":")
+plot(t,1.2);
+xlabel("t [s]")
+legend("accelx","y","z","massx","y","z","Mass");
+ax = gca;
+ax.FontSize = 22;
+hold off
+k = k + 1;
+
+figure(k)
+tiledlayout(2,3);
+for i3 = 1:N
+    nexttile
+    hold on
+    plot(t,DataE_muid_unit(:,:,i3),"LineStyle","--")
+    plot(t,linki(:,:,i3))
+    hold off
+    xlabel("t [s]")
+    ylabel("単位ベクトル" + string(i3))
+    legend("muidx","y","z","linkx","y","z");
+    k = k + 1;
+end
+
+% figure(109)
+% hold on
+% plot(t,mg)
+% plot(t,mui_ma)
+% plot(t,muid_ma)
+% xlabel("t [s]")
+% legend("mg","mui_ma","muid_ma")
+% ax = gca;
+% ax.FontSize = 22;
+% hold off
 
 %%
 % logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
 % %%
 % logger.plot({1, "plant.result.state.Qi", "p"})
 % %%
+%理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
 mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);

@@ -61,10 +61,6 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v", "o"], 'num_list', [27, 3, 3, 3,3]));
 
                     obj.result.state.set_state("xd",obj.func(0));
-                    % obj.result.state.set_state("p",obj.self.reference.result.state.get("p"));
-                    % obj.result.state.set_state("q",obj.self.reference.result.state.get("Q"));
-                    % obj.result.state.set_state("v",obj.self.reference.result.state.get("v"));
-                    % obj.result.state.set_state("o",obj.self.reference.result.state.get("O"));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));%!!!!!!
                     obj.result.state.set_state("q",obj.self.estimator.result.state.get("Q"));
                     obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
@@ -142,13 +138,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            if strcmp(obj.com, "Split")
                agent1 = varargin{3};
                %agent1.reference.result.state.xdとp以外が0になっている値が入っていない状況!!!!!!!!!!!!
-                   initial_loadref = agent1.reference.result.state.xd;%分割前のペイロード目標軌道[xd;dxd;ddxd;dddxd;o0d;do0d;reshape(R0d,[],1)]
-                   omega_load = agent1.reference.result.state.o;%分割前のペイロード目標角速度
-                   rho = agent1.parameter.rho(:,obj.self.id-1);%中心位置からリンクまでの距離
-                   R_load = agent1.reference.result.state.getq("rotm"); %分割前ペイロードの回転行列(初期姿勢のままになっている)
-                   ref_pi = initial_loadref(1:3,1) + R_load*rho;%分割後のペイロードの位置目標軌道
-                   dR_load = R_load*Skew(omega_load);%分割前のペイロード回転行列の微分
-                   ref_vi = initial_loadref(4:6,1)+ dR_load*rho;%分割後のペイロードの速度目標軌道
+                   % initial_loadref = agent1.reference.result.state.xd;%分割前のペイロード目標軌道[xd;dxd;ddxd;dddxd;o0d;do0d;reshape(R0d,[],1)]
+                   % omega_load = agent1.reference.result.state.o;%分割前のペイロード目標角速度
+                   % rho = agent1.parameter.rho(:,obj.self.id-1);%中心位置からリンクまでの距離
+                   % R_load = agent1.reference.result.state.getq("rotm"); %分割前ペイロードの回転行列(初期姿勢のままになっている)
+                   % pid = initial_loadref(1:3,1) + R_load*rho;%分割後のペイロードの位置目標軌道
+                   % dR_load = R_load*Skew(omega_load);%分割前のペイロード回転行列の微分
+                   % vid = initial_loadref(4:6,1)+ dR_load*rho;%分割後のペイロードの速度目標軌道
                    % ref_alpha = initial_loadref(16:18);%分割前目標角加速度
                    % arho = initial_loadref(7:9,1)+ (dR_load*Skew(omega_load) +R_load*Skew(ref_alpha))*rho;%分割後のペイロードの加速度目標軌道?
                %agent1.reference.result.state.xdを使うことで修正
@@ -156,18 +152,20 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    o0d = x0d(13:15);%分割前目標角速度
                    do0d = x0d(16:18);%分割前目標角加速度
                    R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
+                   R0d =agent1.reference.result.state.getq("rotm");
                    dR0d = R0d*Skew(o0d);%分割前ペイロードの目標回転行列
                    rho = agent1.parameter.rho(:,obj.self.id-1);%中心位置からリンクまでの距離
-                   ref_pi = x0d(1:3) + R0d*rho;%分割後のペイロードの位置目標軌道
-                   ref_vi = x0d(4:6)+ dR0d*rho;%分割後のペイロードの速度目標軌道
-                   % % arho = x0d(7:9)+ (dR0d*Skew(o0d) +R_load*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道?
+                   pid = x0d(1:3) + R0d*rho;%分割後のペイロードの位置目標軌道
+                   vid = x0d(4:6) + dR0d*rho;%分割後のペイロードの速度目標軌道
+                   aid = x0d(7:9) + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道?
                
                xd = zeros(size(x0d));
-               xd(1:3)=ref_pi;
-               xd(5:7)=ref_vi;
+               xd(1:3)=pid;
+               xd(5:7)=vid;
+               xd(9:11)=aid;
                obj.result.state.xd = xd; % 分割後目標加速度と加速度の微分も必要，yaw角回転する場合はそれも必要!!!!!!!!!
-               obj.result.state.p = ref_pi;
-               obj.result.state.v = ref_vi;
+               obj.result.state.p = pid;
+               obj.result.state.v = vid;
 
                %リンクの実際の速度を求める
                model = agent1.estimator.result.state;% x = model.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi"]);
@@ -184,8 +182,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                %加速度の算出の仕方を変更========================
                %referenceをそのまま使うタイプ
                %------------------------------------------------------
-               % a =obj.result.state.xd(9:11);各リンクの加速度を求めていないので修正が必要,これだとa=0!!!!!!!
-               a =obj.result.state.xd(9:11);
+               % a =obj.result.state.xd(9:11);%各リンクの加速度を求めていないので修正が必要,これだとa=0!!!!!!!
                %------------------------------------------------------
                % a = arho;%各リンクのreferenceの加速度
                % vi = vrho;
@@ -230,9 +227,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
                xd = obj.result.state.xd;
                obj.result.state.p = xd(1:3);
-               % %新しく追加p以外の値も格納するように変更(記録用)!!!!!!!!!
-               % obj.result.state.v = xd(4:6);
-               % %ペイロードの角度変化させないときはコメントアウトでいい!!!!!!
+               %新しく追加p以外の値も格納するように変更(記録用)!!!!!!!!!
+               obj.result.state.v = xd(4:6);
+               %ペイロードの角度変化させないときはコメントアウトでいい!!!!!!
                % R0d = reshape(xd(end-8:end),3,3);
                % obj.result.state.q = Quat2Eul(R2q(R0d));%目標角度を更新軌道が事変しないとき時は現在の角度になるようにする．               
                % obj.result.state.o = xd(13:15);
