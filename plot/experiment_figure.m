@@ -8,8 +8,8 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-% load("Data/Eikyu_0514_result/logger_Eikyu2022.mat");
-load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
+load("Data/Eikyu_0514_result/logger_Eikyu2022.mat");
+% load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
 log = logger;%永久用（↓とどっちかをコメントアウト）
 % log =gui.logger.Data;%gui用
@@ -67,13 +67,13 @@ if figtype == 1
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
-    figure(5); plot(logt, InnerInput);legend("?z","?roll", "?pitch", "?yaw");%キャプション間違ってるかも
+    figure(5); plot(logt, InnerInput);legend("?z","?roll", "?pitch", "?yaw");%キャプション間違ってる．状態数もっと多い．
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     %以下三宅整備中1/2
     figure(6); plot(Road_est(1,:), Road_est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
     xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Estimeter", "Reference",'Interpreter','latex');
-    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);
+    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
     %ytickformat('%.1f');
     % Title = 
     %荷物のプロット↓
@@ -83,11 +83,11 @@ if figtype == 1
     %機体と荷物のxy重ねて表示↓
     figure(8); plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--'); hold off;
     xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Load",'Interpreter','latex');
-    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);
+    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
     %目標軌道と機体と荷物のxy重ねて表示↓
     figure(9); plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
-    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);
+    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
     xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Load","Reference of Load",'Interpreter','latex');
 elseif figtype == 2
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
