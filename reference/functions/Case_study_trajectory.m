@@ -18,17 +18,17 @@ syms t real
 % x = x_0+r*16*sin(t/s)^3;
 % y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
 % z = z_0;
-
+%%
 %z方向も回転する軌道
 % T = 20;
 % x = sin(2*pi*t/T);
 % y = cos(2*pi*t/T);
 % z = 0.5*cos(3*pi*t/T)+1;
-
+%%
 % x = 0.5*sin(3*pi*t/T);
 % y = 0.5*cos(3*pi*t/T);
 % z = 0.5*sin(3*pi*t/T)+1;
-
+%%
 % 円旋回
 % x = sin(2*pi*t/T);
 % y = cos(2*pi*t/T);
@@ -37,38 +37,39 @@ syms t real
 % x = cos(2*pi*t/T) - cos(pi*t/T);
 % y = sin(2*pi*t/T);
 % z = 1;
-
+%%
+%ホバリング
 x = 0;
 y = 0;
 z = 1;
-
+%%
 %縦円旋回
 % x = 0.5*sin(2*pi*t/T);
 % y = 0;
 % z = 0.5*cos(2*pi*t/T)+1; %1:オフセットを入れる必要あり
 % yaw = 2*pi*t/5;
-
+%%
 %八の字
 % x = sin(2*t/T);
 % y = sin(t/T);
 % z = 1;
-
+%%
 % s = 8;
 % x = t/s;
 % y = x^2;
 % z = 1;
-
+%%
 %八の字拡張版
 % s = 8;
 % x = sin(2*t/s);
 % y = cos(3*t/s);
 % z = 1;
-
+%%
 % 直線
 % x = 1;
 % y = 0;
 % z = 1;
-
+%%
 % ref=@(t)[x;y;z;yaw];
 ref=@(t)[x;y;z;0];
 end
