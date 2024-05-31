@@ -61,8 +61,9 @@ classdef MPC_CONTROLLER_HL <handle
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-            obj.param.t = varargin{1}.t;
+            % obj.param.t = varargin{1}.t; % for sim
             vara = varargin{1}; % 実験はvarargin違う？
+            obj.param.t = vara{1}.t;
 
             ref = obj.self.reference.result;
             xd = ref.state.get();
@@ -92,8 +93,8 @@ classdef MPC_CONTROLLER_HL <handle
 
             %% Referenceの取得、ホライズンごと  For Simulation
             % 実状態の目標値
-            xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
-            obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+            % xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+            % obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
             %各phaseでのリファレンスと現在状態の更新  For Experiment -------------------
             % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
@@ -168,23 +169,23 @@ classdef MPC_CONTROLLER_HL <handle
             obj.result.xr = xr_real;
 
             %% 情報表示 Exp時はコメントアウト
-            if exist("exitflag") ~= 1
-                exitflag = NaN;
-            end
-            est_print = obj.self.estimator.result.state;
-            fprintf("==================================================================\n")
-            fprintf("==================================================================\n")
-            fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
-                    est_print.p(1), est_print.p(2), est_print.p(3),...
-                    est_print.v(1), est_print.v(2), est_print.v(3),...
-                    est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
-            fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
-                    xr_real(1,1), xr_real(2,1), xr_real(3,1),...
-                    xr_real(7,1), xr_real(8,1), xr_real(9,1),...
-                    xr_real(4,1)*180/pi, xr_real(5,1)*180/pi, xr_real(6,1)*180/pi)                             % r:reference 目標状態
-            fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-                obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
-            fprintf("\n");
+            % if exist("exitflag") ~= 1
+            %     exitflag = NaN;
+            % end
+            % est_print = obj.self.estimator.result.state;
+            % fprintf("==================================================================\n")
+            % fprintf("==================================================================\n")
+            % fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+            %         est_print.p(1), est_print.p(2), est_print.p(3),...
+            %         est_print.v(1), est_print.v(2), est_print.v(3),...
+            %         est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
+            % fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+            %         xr_real(1,1), xr_real(2,1), xr_real(3,1),...
+            %         xr_real(7,1), xr_real(8,1), xr_real(9,1),...
+            %         xr_real(4,1)*180/pi, xr_real(5,1)*180/pi, xr_real(6,1)*180/pi)                             % r:reference 目標状態
+            % fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
+            %     obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+            % fprintf("\n");
             
             % 結果の保存
             result = obj.result;
