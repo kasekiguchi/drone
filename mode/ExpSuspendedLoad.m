@@ -11,19 +11,22 @@ motive = Connector_Natnet('192.168.1.3'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
-initial_state.p = arranged_position([0, 0], 1, 1, 0);
-initial_state.q = [0; 0; 0];
+initial_state.p = sstate.p;
+initial_state.q = sstate.q;
+% initial_state.p = arranged_position([0, 0], 1, 1, 0);
+% initial_state.q = [0; 0; 0];
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 initial_state.vL = [0; 0; 0];
 initial_state.pT = [0; 0; -1];
 initial_state.wL = [0; 0; 0];
-initial_state.p = [1;0;1.46];
+% initial_state.p = [1;0;1.46];
+% initial_state.p = [0;0;0];
 
 agent = DRONE;
-agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM16"));
+agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
 %todo機体数と牽引物の剛体情報を振り分ける方法を考えるここを要修正or先生と相談orシミュレーションで確認==============================================================================================================
 %generatemodelでwith_load_model,with_load_model_euler_for_HL（永久先輩はこちら用いてる）で何が違うのか確認、なんの物理パラメータを使うか
