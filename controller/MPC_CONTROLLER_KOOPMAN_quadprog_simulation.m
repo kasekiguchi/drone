@@ -80,7 +80,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             %% データ表示用
             obj.input.u = obj.result.input; 
             calT = toc
-            % obj.result.t(1,idx) = calT; %計算時間保存したいときコメントイン
+            obj.result.t(1,idx) = calT; %計算時間保存したいときコメントイン
 
             %% 保存するデータ
             obj.result.weight = Param.weight; %重みの保存

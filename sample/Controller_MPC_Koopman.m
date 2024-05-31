@@ -2,8 +2,8 @@ function Controller = Controller_MPC_Koopman(~)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
-    Controller_param.dt = 0.07; % MPCステップ幅
-    Controller_param.H = 10; %ホライズン数
+    Controller_param.dt = 0.025; % MPCステップ幅
+    Controller_param.H = 30; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
@@ -13,16 +13,16 @@ function Controller = Controller_MPC_Koopman(~)
     load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
 %     load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
 
-    sys = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), Controller_param.dt); % サンプリングタイムの変更
+    args = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), Controller_param.dt); % サンプリングタイムの変更
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      torque = 1; % 1:クープマンモデルが総推力トルクのとき
     %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     %--------------------------------------------------------------------
 
-    Controller_param.A = sys.A; % default: est.A
-    Controller_param.B = sys.B;
-    Controller_param.C = sys.C;
+    Controller_param.A = args.A; % default: est.A
+    Controller_param.B = args.B;
+    Controller_param.C = args.C;
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30

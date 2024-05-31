@@ -10,15 +10,16 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 figtype = 0;
+flg.MPC = 0; % without TIMEVARYING
 
 % load("../データセット/Exp_2_4_150.mat");
+load('Data/KMPC_100s.mat');
 %% Importing data
 if exist("app") ~= 7        % GUI実行中
     logt = app.logger.Data.t;
     xmax = app.time.t-app.time.dt;
     logAgent = app.logger.Data.agent;
 elseif exist("log") == 1    % matを読み込んだ
-    flg = 1;
     logt = log.Data.t(1:find(log.Data.t(2:end)==0, 1, 'first'));
     xmax = log.Data.t(find(log.Data.t(2:end)==0, 1, 'first'));
     logAgent = log.Data.agent;
@@ -28,31 +29,29 @@ else                        % GUIを閉じた
     logAgent = gui.logger.Data.agent;
 end
 
-for i = 1:length(logt)-1
-    Data(:,i) = logAgent.estimator.result{i}.state.get();
-    if flg
-        RData(:,i) = [logAgent.reference.result{i}.state.p; 
-                    zeros(3,1);
-                    logAgent.reference.result{i}.state.v;
-                    zeros(3,1);
-                    zeros(4,1);
-                    zeros(3,1)];
-        InputV(:,i) = zeros(4,1);
-    else
-        RData(:,i) = logAgent.controller.result{i}.xr(:,1); 
-        InputV(:,i) = logAgent.controller.result{i}.input_v;
-    end
-    Idata(:,i) = logAgent.input{i};  
+Data.est = cell2mat(arrayfun(@(N) logAgent.estimator.result{N}.state.get(),1:length(logt)-1,'UniformOutput',false));
+Data.input = cell2mat(arrayfun(@(N) logAgent.input{N},1:length(logt)-1,'UniformOutput',false));
+if ~flg.MPC
+    Data.ref = [cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.p,1:length(logt)-1,'UniformOutput',false));
+                zeros(3, length(logt)-1);
+                cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.v,1:length(logt)-1,'UniformOutput',false));
+                zeros(10, length(logt)-1)];
+    Data.inputv = zeros(4, length(logt)-1);
+else
+    Data.ref = cell2mat(arrayfun(@(N) logAgent.controller.result{N}.xr(:,1),1:length(logt)-1,'UniformOutput',false));
+    Data.inputv = cell2mat(arrayfun(@(N) logAgent.controller.result{N}.input_v,1:length(logt)-1,'UniformOutput',false));
 end
-
+% いずれここなくしたい-------
 logt = logt(1:end-1); % time
-Pdata = Data(1:3,:); % position
-Qdata = Data(4:6,:); % attitude
-Vdata = Data(7:9,:); % velocity
-Wdata = Data(10:12,:); % angular velocity
-Rdata = [RData(1:12,:); RData(17:19, :)]; % X, acceralation
-
+Pdata = Data.est(1:3,:); % position
+Qdata = Data.est(4:6,:); % attitude
+Vdata = Data.est(7:9,:); % velocity
+Wdata = Data.est(10:12,:); % angular velocity
+Rdata = [Data.ref(1:12,:); Data.ref(17:19, :)]; % X, acceralation
+InputV = Data.inputv;
+Idata = Data.input;
 Diff = Pdata - Rdata(1:3, :);
+% ---------------------------
 cutT = 0;
 close all
 
@@ -124,7 +123,7 @@ set(gcf, "Position", [960 0 960 1000])
 %
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
 
-%%
+%% いろいろテストするところ
 % close all 
 % syms t
 % a = 0.5;
@@ -141,3 +140,22 @@ cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % d
 % Ti = 0:0.025:20;
 % subplot(1,2,1); plot(Ti, [subs(x, t, Ti); subs(y, t, Ti); subs(z, t, Ti)]); legend("x", "y", "z");
 % subplot(1,2,2); plot(Ti, [subs(vx, t, Ti); subs(vy, t, Ti); subs(vz, t, Ti)]); legend("vx", "vy", "vz");
+
+%% 目標軌道までスプライン補間
+% close all
+% npts = 2;
+% t = linspace(0,8*pi,npts);
+% z = linspace(-1,1,npts);
+% omz = sqrt(1-z.^2);
+% xyz = [cos(t).*omz; sin(t).*omz; z];
+% plot3(xyz(1,:),xyz(2,:),xyz(3,:),'ro','LineWidth',2);
+% text(xyz(1,:),xyz(2,:),xyz(3,:),[repmat('  ',npts,1), num2str((1:npts)')])
+% ax = gca;
+% ax.XTick = [];
+% ax.YTick = [];
+% ax.ZTick = [];
+% box on
+% 
+% hold on
+% fnplt(cscvn(xyz(:,[1:end 1])),'r',2)
+% hold off

@@ -37,10 +37,22 @@ function [H, f] = change_equation(Param)
     QC = Q * C;
     QfC = Qf * C;
     
-    Rm = blkdiag(R, R, R, R, R, R, R, R, R, zeros(4)); %R
-    Am = [A; A^2; A^3; A^4; A^5; A^6; A^7; A^8; A^9; A^10]; %A
-    Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
-    qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
+    % Rm = blkdiag(R, R, R, R, R, R, R, R, R, zeros(4)); %R
+    % Am = [A; A^2; A^3; A^4; A^5; A^6; A^7; A^8; A^9; A^10]; %A
+    % Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
+    % qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
+
+    % ホライズンの値によらない
+    Am = [];
+    for i = 1:Horizon
+        Rm{i} = R;   %R
+        Qm{i} = CQC; %Q
+        qm{i} = QC;  %Q'
+        Am = [Am; A^i]; %A
+    end
+    Rm = blkdiag(Rm{1:end-1}, zeros(4)); 
+    Qm = blkdiag(Qm{1:end-1}, CQfC);
+    qm = blkdiag(qm{1:end-1}, QfC);
 
     for i  = 1:Horizon
         for j = 1:Horizon
