@@ -37,10 +37,10 @@ function [H, f] = change_equation(Param)
     QC = Q * C;
     QfC = Qf * C;
     
-    Rm = blkdiag(R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, zeros(4)); %R
-    Am = [A; A^2; A^3; A^4; A^5; A^6; A^7; A^8; A^9; A^10; A^11; A^12; A^13; A^14; A^15; A^16; A^17; A^18; A^19; A^20; A^21; A^22; A^23; A^24; A^25; A^26; A^27; A^28]; %A
-    Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
-    qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
+    Rm = blkdiag(R, R, R, R, R, R, R, R, R, zeros(4)); %R
+    Am = [A; A^2; A^3; A^4; A^5; A^6; A^7; A^8; A^9; A^10]; %A
+    Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
+    qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
 
     for i  = 1:Horizon
         for j = 1:Horizon
