@@ -202,8 +202,8 @@ Data6 = logger.data(7,"reference.result.m","p");
 DataM = Data1+Data2+Data3+Data4+Data5+Data6;
 mg = DataM*9.81;
 ma = DataM.*DataD(:,3);
-muid_ma =DataE_muid_z' - ma;
-mui_ma = DataE_mui_z' - ma;
+% muid_ma =DataE_muid_z' - ma;
+% mui_ma = DataE_mui_z' - ma;
 
 ij=2;
 if ij <1

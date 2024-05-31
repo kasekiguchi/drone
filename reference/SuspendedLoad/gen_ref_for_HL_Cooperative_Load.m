@@ -13,7 +13,7 @@ dxd =diff(xd,t);
 ddxd =diff(dxd,t);
 dddxd =diff(ddxd,t);
 
-norm_dxd = sqrt(dxd(1:2)'*dxd(1:2));%dxdはz方向を0にしているのでノルムはx,y方向で作成
+norm_dxd = sqrt(dxd(1:2)'*dxd(1:2));%dxdはz方向を0にしているのでノルムはx,y方向で作成!!!!!!!!!!
 if norm_dxd == 0 || dxd(1) == 0
     R0d = eye(3);
 else

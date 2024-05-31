@@ -137,6 +137,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
            end
            if strcmp(obj.com, "Split")
                agent1 = varargin{3};
+               parameter = agent1.parameter;
+               g = [0;0;parameter.g];
                %agent1.reference.result.state.xdとp以外が0になっている値が入っていない状況!!!!!!!!!!!!
                    % initial_loadref = agent1.reference.result.state.xd;%分割前のペイロード目標軌道[xd;dxd;ddxd;dddxd;o0d;do0d;reshape(R0d,[],1)]
                    % omega_load = agent1.reference.result.state.o;%分割前のペイロード目標角速度
@@ -154,15 +156,15 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                    R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
                    R0d =agent1.reference.result.state.getq("rotm");
                    dR0d = R0d*Skew(o0d);%分割前ペイロードの目標回転行列
-                   rho = agent1.parameter.rho(:,obj.self.id-1);%中心位置からリンクまでの距離
+                   rho = parameter.rho(:,obj.self.id-1);%中心位置からリンクまでの距離
                    pid = x0d(1:3) + R0d*rho;%分割後のペイロードの位置目標軌道
                    vid = x0d(4:6) + dR0d*rho;%分割後のペイロードの速度目標軌道
-                   aid = x0d(7:9) + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道?
-               
+                   % aid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!
+                   %todo
                xd = zeros(size(x0d));
                xd(1:3)=pid;
                xd(5:7)=vid;
-               xd(9:11)=aid;
+               % xd(9:11)=aid;
                obj.result.state.xd = xd; % 分割後目標加速度と加速度の微分も必要，yaw角回転する場合はそれも必要!!!!!!!!!
                obj.result.state.p = pid;
                obj.result.state.v = vid;
@@ -174,11 +176,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                vi = model.v + dR0*rho;%分割後のペイロードの速度
                
                id = obj.self.id;
-               parameter = agent1.parameter;
                muid_mui = agent1.controller.result.mui; %3xN 
                mui = muid_mui(4:6,id-1); %3x1%
                obj.result.Mui = mui';
-               g = [0;0;-1]*parameter.g;
                %加速度の算出の仕方を変更========================
                %referenceをそのまま使うタイプ
                %------------------------------------------------------
@@ -195,7 +195,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.result.a = a;
                % =============================================
 
-               A = a-g;
+               A = a + g;
                AtA = A'*A;
                obj.result.m = AtA\A'*mui;%分割後質量推定
            elseif strcmp(obj.com, "Take_off")

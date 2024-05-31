@@ -1,6 +1,7 @@
 function dX = zup_cable_suspended_rigid_body_with_6_drones(x,u,P)
 R0 = RodriguesQuaternion(x(4:7));
 Ri = RodriguesQuaternion(reshape(x(50:73),4,[]));
+do0 = Addx0do0_6(x,R0,u,P));%%%%%
 ddX = ddx0do0_6(x,R0,Ri,u,P,inv(Addx0do0_6(x,R0,u,P)));
 dX = tmp_cable_suspended_rigid_body_with_6_drones(x,R0,Ri,u,P,ddX);
 end
