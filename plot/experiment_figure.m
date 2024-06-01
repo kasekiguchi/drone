@@ -13,7 +13,8 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-load("Data/20240531_HLMPC_circle30s.mat");
+filename = '20240531_HLMPC_circle30s';
+load(strcat("Data/", filename, ".mat"));
 
 % 115:start
 % 97 :arming
@@ -81,6 +82,7 @@ xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.refer
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
 if flg.figtype; figure(4); else subplot(m,n,4); end
+plotrange = 1.5;
 if flg.plotmode == 1
     plot(logt, InnerInput); 
     xlabel("Time [s]"); ylabel("Inner input"); legend("inner_input.roll", "inner_input.pitch", "inner_input.throttle", "inner_input.yaw","Location","best");
@@ -89,12 +91,12 @@ elseif flg.plotmode == 2
     plot(Est(1,:), Est(2,:)); hold on; plot(Est(1,1), Est(2,1), '*', 'MarkerSize', 10); plot(Est(1,end), Est(2,end), '*', 'MarkerSize', 10); hold off;
     xlabel('$$x$$', 'Interpreter', 'latex'); ylabel('$$y$$', 'Interpreter', 'latex');
     legend('trajectory', 'start.pos', 'finish.pos', 'Location', 'best');
-    grid on; xlim([-inf inf]); ylim([-inf inf]);
+    grid on; xlim([-plotrange plotrange]); ylim([-plotrange plotrange]);
 elseif flg.plotmode == 3
     plot3(Est(1,:), Est(2,:), Est(3,:)); hold on; plot3(Est(1,1), Est(2,1), Est(3,1), '*', 'MarkerSize', 10); plot3(Est(1,end), Est(2,end), Est(3,end), '*', 'MarkerSize', 10); hold off;
     xlabel('$$x$$', 'Interpreter', 'latex'); ylabel('$$y$$', 'Interpreter', 'latex'); zlabel('$$z$$', 'Interpreter', 'latex');
     legend('trajectory', 'start.pos', 'finish.pos', 'Location', 'best');
-    grid on; xlim([-inf inf]); ylim([-inf inf]); zlim([0 inf]);
+    grid on; xlim([-plotrange plotrange]); ylim([-plotrange plotrange]); zlim([0 inf]);
 end
 
 if flg.figtype; figure(5); else subplot(m,n,5); end
@@ -114,3 +116,16 @@ if ~flg.figtype
     set(gcf, "WindowState", "maximized");
     set(gcf, "Position", [960 0 960 1000])
 end
+
+%% RMSE
+clc
+rmse_x = rmse(Est(1:9,:), Ref(1:9,:), 2);
+error = abs(Est(1:9,:) - Ref(1:9,:));
+max_error = max(error, [], 2);
+% disp(filename);
+fprintf('FileName: %s \n', filename);
+fprintf('RMSE: x=%.4f, y=%.4f, z=%.4f \n', rmse_x(1), rmse_x(2), rmse_x(3));
+fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_error(3));
+% csv
+% fprintf('RMSE: %.4f, %.4f, %.4f \n', rmse_x(1), rmse_x(2), rmse_x(3));
+% fprintf('MAX error: %.4f, %.4f, %.4f \n', max_error(1), max_error(2), max_error(3));
