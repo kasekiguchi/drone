@@ -14,7 +14,7 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 filename = '20240531_HLMPC_circle30s';
-load(strcat("Data/", filename, ".mat"));
+load(strcat("Data/HLMPC/", filename, ".mat"));
 
 % 115:start
 % 97 :arming
