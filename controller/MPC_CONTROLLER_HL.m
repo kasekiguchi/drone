@@ -19,10 +19,10 @@ classdef MPC_CONTROLLER_HL <handle
         modelf
         modelp
         F1
-        Weight
-        WeightF
-        WeightR
-        WeightRp
+        weight
+        weightF
+        weightR
+        % weightRp
         A
         B
         C
@@ -39,10 +39,10 @@ classdef MPC_CONTROLLER_HL <handle
             %% HL関連
             obj.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),0.1,param.param.dt);
             % 重みの配列サイズ変換
-            obj.Weight = blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI);
-            obj.WeightF = blkdiag(obj.param.Zf, obj.param.Xf, obj.param.Yf, obj.param.PHIf);
-            obj.WeightR = obj.param.R;  % 目標入力
-            obj.WeightRp = obj.param.RP; % 前ステップとの入力
+            obj.weight = blkdiag(obj.param.Z, obj.param.X, obj.param.Y, obj.param.PHI);
+            obj.weightF = blkdiag(obj.param.Zf, obj.param.Xf, obj.param.Yf, obj.param.PHIf);
+            obj.weightR = obj.param.R;  % 目標入力
+            % obj.weightRp = obj.param.RP; % 前ステップとの入力
             % HL. A, B行列定義
             % z, x, y, yawの順番
             A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
@@ -61,9 +61,11 @@ classdef MPC_CONTROLLER_HL <handle
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
-            % obj.param.t = varargin{1}.t; % for sim
-            vara = varargin{1}; % 実験はvarargin違う？
-            obj.param.t = vara{1}.t;
+
+            obj.param.t = varargin{1}.t; % for sim
+
+            % vara = varargin{1}; % Experiment
+            % obj.param.t = vara{1}.t; % Experiment
 
             ref = obj.self.reference.result;
             xd = ref.state.get();
@@ -93,24 +95,24 @@ classdef MPC_CONTROLLER_HL <handle
 
             %% Referenceの取得、ホライズンごと  For Simulation
             % 実状態の目標値
-            % xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
-            % obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+            xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+            obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
             %各phaseでのリファレンスと現在状態の更新  For Experiment -------------------
             % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
-            if vara{2} == 'a'
-                xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-                obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-            elseif vara{2} == 't'
-                xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
-                obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-                fprintf('take off')
-            elseif vara{2} == 'f'
-                % 実状態の目標値
-                xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
-                obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
-                fprintf('flight')
-            end
+            % if vara{2} == 'a'
+            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+            % elseif vara{2} == 't'
+            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+            %     fprintf('take off')
+            % elseif vara{2} == 'f'
+            %     % 実状態の目標値
+            %     xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+            %     obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+            %     fprintf('flight')
+            % end
             %---------------------------------------------------------------------------------------
 
             % 実状態の目標値を仮想状態的に並び替え
@@ -143,7 +145,8 @@ classdef MPC_CONTROLLER_HL <handle
             options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
-            [H, f] = obj.change_equation();
+            % [H, f] = obj.change_equation();
+            [H, f] = change_equation(obj);
             A = [];
             b = [];
             Aeq = [];
@@ -220,41 +223,41 @@ classdef MPC_CONTROLLER_HL <handle
             eval = sum(stageStateZ + stageInputPre + stageInputRef) + terminalState;  % 全体の評価値
         end
 
-        function [H, f] = change_equation(obj)      
-            Q = obj.Weight;
-            R = obj.WeightR;
-            Qf = obj.WeightF;
-
-            Xc = obj.current_state; % 現在状態
-
-            r  = obj.reference.xr(1:12,:);
-            r = r(:); %目標値、列ベクトルに変換
-            ur = obj.reference.xr(13:16,:);
-            ur = ur(:); %目標入力、列ベクトルに変換
-        
-            CQC = obj.C' * Q * obj.C;
-            CQfC = obj.C' * Qf * obj.C;
-            QC = Q * obj.C;
-            QfC = Qf * obj.C;
-            
-            Rm = blkdiag(R, R, R, R, R, R, R, R, R, zeros(4)); %R
-            Am = [obj.A; obj.A^2; obj.A^3; obj.A^4; obj.A^5; obj.A^6; obj.A^7; obj.A^8; obj.A^9; obj.A^10]; %A
-            Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
-            qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
-        
-            for i  = 1:obj.param.H
-                for j = 1:obj.param.H
-                    if j <= i
-                        S(1+length(obj.B(:,1))*(i-1):length(obj.B(:,1))*i,1+length(obj.B(1,:))*(j-1):length(obj.B(1,:))*j) = obj.A^(i-j)*obj.B;
-                    end
-                end
-            end
-            
-            H = S' * Qm * S + Rm;
-            H = (H+H')/2;
-            F = [Am' * Qm * S; -qm * S; -Rm];
-            f = [Xc', r', ur'] * F;
-        end
+        % function [H, f] = change_equation(obj)      
+        %     Q = obj.Weight;
+        %     R = obj.WeightR;
+        %     Qf = obj.WeightF;
+        % 
+        %     Xc = obj.current_state; % 現在状態
+        % 
+        %     r  = obj.reference.xr(1:12,:);
+        %     r = r(:); %目標値、列ベクトルに変換
+        %     ur = obj.reference.xr(13:16,:);
+        %     ur = ur(:); %目標入力、列ベクトルに変換
+        % 
+        %     CQC = obj.C' * Q * obj.C;
+        %     CQfC = obj.C' * Qf * obj.C;
+        %     QC = Q * obj.C;
+        %     QfC = Qf * obj.C;
+        % 
+        %     Rm = blkdiag(R, R, R, R, R, R, R, R, R, zeros(4)); %R
+        %     Am = [obj.A; obj.A^2; obj.A^3; obj.A^4; obj.A^5; obj.A^6; obj.A^7; obj.A^8; obj.A^9; obj.A^10]; %A
+        %     Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
+        %     qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
+        % 
+        %     for i  = 1:obj.param.H
+        %         for j = 1:obj.param.H
+        %             if j <= i
+        %                 S(1+length(obj.B(:,1))*(i-1):length(obj.B(:,1))*i,1+length(obj.B(1,:))*(j-1):length(obj.B(1,:))*j) = obj.A^(i-j)*obj.B;
+        %             end
+        %         end
+        %     end
+        % 
+        %     H = S' * Qm * S + Rm;
+        %     H = (H+H')/2;
+        %     F = [Am' * Qm * S; -qm * S; -Rm];
+        %     f = [Xc', r', ur'] * F;
+        % end
 
         function [xr] = Reference(obj, ~)
             % パラメータ取得

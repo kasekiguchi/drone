@@ -19,6 +19,15 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
         self
     end
 
+    properties
+        A
+        B
+        C
+        weight
+        weightF
+        weightR
+    end
+
     methods
         function obj = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(self, param)
             %-- 変数定義
@@ -35,6 +44,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
+            obj.weight  = blkdiag(obj.param.weight.P, obj.param.weight.V, obj.param.weight.QW);
+            obj.weightF = blkdiag(obj.param.weight.Pf,obj.param.weight.Vf,obj.param.weight.QWf);
+            obj.weightR = obj.param.weight.R;
         end
 
         %-- main()的な
@@ -50,22 +62,22 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             %各phaseでのリファレンスと現在状態の更新--------------------------------------------------
             % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
             if vara{2} == 'a'
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
             elseif vara{2} == 't'
-                obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
                 fprintf('take off')
             elseif vara{2} == 'f'
-                obj.state.ref = obj.Reference(rt); %リファレンスの更新
+                obj.reference.xr = obj.Reference(rt); %リファレンスの更新
                 obj.current_state = obj.self.estimator.result.state.get(); %現在状態
                 fprintf('flight')
             end
             %---------------------------------------------------------------------------------------
 
-            Param = obj.param;
-            Param.current = obj.current_state;
-            Param.ref = obj.state.ref;        
+            % Param = obj.param;
+            % Param.current = obj.current_state;
+            % Param.ref = obj.reference.xr;        
             obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
             
             % MPC設定(problem)
@@ -77,7 +89,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
 
-            [H, f] = change_equation(Param); %change_equation：評価関数の式変形を行う関数
+            % struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.param.H,'current',obj.current_state,'ref',obj.reference.xr)
+            [H, f] = change_equation(obj); %change_equation：評価関数の式変形を行う関数
             A = [];
             b = [];
             Aeq = [];

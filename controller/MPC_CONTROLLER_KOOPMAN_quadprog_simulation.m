@@ -19,6 +19,15 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
         self
     end
 
+    properties
+        weight
+        weightF
+        weightR
+        A
+        B
+        C
+    end
+
     methods
         function obj = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(self, param)
             %-- 変数定義
@@ -29,12 +38,18 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             %%
             obj.input = obj.param.input;
             obj.model = self.plant;
+            obj.A = obj.param.A;
+            obj.B = obj.param.B;
+            obj.C = obj.param.C;
             
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
+            obj.weight  = blkdiag(obj.param.weight.P, obj.param.weight.V, obj.param.weight.QW);
+            obj.weightF = blkdiag(obj.param.weight.Pf,obj.param.weight.Vf,obj.param.weight.QWf);
+            obj.weightR = obj.param.weight.R;
         end
 
         %-- main()的な
@@ -47,10 +62,11 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             rt = obj.param.t; %時間
             idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
-            obj.state.ref = obj.Reference(rt); %リファレンスの更新
-            Param = obj.param;
-            Param.current = obj.current_state;
-            Param.ref = obj.state.ref;        
+            obj.reference.xr = obj.Reference(rt); %リファレンスの更新
+            % Param = obj.param;
+            % Param.current = obj.current_state;
+            % Param.ref = obj.reference.xr;  
+            % Param.weight = obj.weight;
             obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
             
             % MPC設定(problem)
@@ -62,7 +78,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
 
-            [H, f] = change_equation(Param);
+            % struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.param.H,'current',obj.current_state,'ref',obj.reference.xr)
+            [H, f] = change_equation(obj); % structで送る変数をまとめる必要あり
             A = [];
             b = [];
             Aeq = [];
@@ -83,7 +100,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             obj.result.t(1,idx) = calT; %計算時間保存したいときコメントイン
 
             %% 保存するデータ
-            obj.result.weight = Param.weight; %重みの保存
+            obj.result.weight = obj.param.weight; %重みの保存
             result = obj.result; % controllerの値の保存
 
             %% 情報表示
@@ -96,10 +113,10 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
                     state_monte.q(1), state_monte.q(2), state_monte.q(3), ...
                     state_monte.w(1), state_monte.w(2), state_monte.w(3));       % s:state 現在状態
             fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \t wr: %f %f %f \n", ...
-                    obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
-                    obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-                    obj.state.ref(4,1), obj.state.ref(5,1), obj.state.ref(6,1), ...
-                    obj.state.ref(10,1), obj.state.ref(11,1), obj.state.ref(12,1))  % r:reference 目標状態
+                    obj.reference.xr(1,1), obj.reference.xr(2,1), obj.reference.xr(3,1),...
+                    obj.reference.xr(7,1), obj.reference.xr(8,1), obj.reference.xr(9,1),...
+                    obj.reference.xr(4,1), obj.reference.xr(5,1), obj.reference.xr(6,1), ...
+                    obj.reference.xr(10,1), obj.reference.xr(11,1), obj.reference.xr(12,1))  % r:reference 目標状態
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
 %             fprintf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")

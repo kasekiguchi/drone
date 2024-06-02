@@ -18,18 +18,21 @@ function [H, f] = change_equation(Param)
     B = Param.B;
     C = Param.C;
 
-    Q = blkdiag(Param.weight.P, Param.weight.V, Param.weight.QW);
-    R = Param.weight.R;
-    Qf = blkdiag(Param.weight.Pf, Param.weight.Vf, Param.weight.QWf);
-    Horizon = Param.H;
+    % Q = blkdiag(Param.weight.P, Param.weight.V, Param.weight.QW);
+    Q = Param.weight;
+    R = Param.weightR;
+    % Qf = blkdiag(Param.weight.Pf, Param.weight.Vf, Param.weight.QWf);
+    Qf = Param.weightF;
+    Horizon = Param.param.H;
 
-    %使用した観測量に応じて変更------------------------------------------
-    Xc = quaternions_all(Param.current); %現在状態,観測量：状態+非線形項
-    % Xc = [Param.current;1];]
+    % 使用した観測量に応じて変更-----------------------------------------
+    % Xc = quaternions_all(Param.current_state); %現在状態,観測量：状態+非線形項
+    % クープマン以外のとき-----------------------------------------------
+    Xc = Param.current_state; 
     %-------------------------------------------------------------------
-    r  = Param.ref(1:12,:);
+    r  = Param.reference.xr(1:12,:);
     r = r(:); %目標値、列ベクトルに変換
-    ur = Param.ref(13:end,:);
+    ur = Param.reference.xr(13:16,:);
     ur = ur(:); %目標入力、列ベクトルに変換
 
     CQC = C' * Q * C;
