@@ -23,7 +23,7 @@ function [H, f] = change_equation(Param)
     R = Param.weightR;
     % Qf = blkdiag(Param.weight.Pf, Param.weight.Vf, Param.weight.QWf);
     Qf = Param.weightF;
-    Horizon = Param.param.H;
+    Horizon = Param.H;
 
     % 使用した観測量に応じて変更-----------------------------------------
     % Xc = quaternions_all(Param.current_state); %現在状態,観測量：状態+非線形項

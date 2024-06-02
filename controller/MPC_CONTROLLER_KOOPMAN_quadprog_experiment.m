@@ -23,6 +23,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
         A
         B
         C
+        H
         weight
         weightF
         weightR
@@ -34,6 +35,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             obj.self = self; %agentへの接続
             %---MPCパラメータ設定---%
             obj.param = param.param; %Controller_MPC_Koopmanの値を保存
+            obj.H = obj.param.H;
 
             %%
             obj.input = obj.param.input;
@@ -43,7 +45,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力初期値
 
             %% 重み　統合         
-            obj.previous_input = repmat(obj.input.u, 1, obj.param.H);
+            obj.previous_input = repmat(obj.input.u, 1, obj.H);
             obj.weight  = blkdiag(obj.param.weight.P, obj.param.weight.V, obj.param.weight.QW);
             obj.weightF = blkdiag(obj.param.weight.Pf,obj.param.weight.Vf,obj.param.weight.QWf);
             obj.weightR = obj.param.weight.R;
@@ -62,10 +64,10 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             %各phaseでのリファレンスと現在状態の更新--------------------------------------------------
             % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
             if vara{2} == 'a'
-                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
             elseif vara{2} == 't'
-                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+                obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
                 fprintf('take off')
             elseif vara{2} == 'f'
@@ -78,7 +80,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             % Param = obj.param;
             % Param.current = obj.current_state;
             % Param.ref = obj.reference.xr;        
-            obj.previous_state = repmat(obj.current_state, 1, obj.param.H);
+            obj.previous_state = repmat(obj.current_state, 1, obj.H);
+            obj.current_state = quaternions_all(obj.current_state); % quadprog用に変換
             
             % MPC設定(problem)
             options = optimoptions('quadprog');
@@ -89,14 +92,14 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
 
-            % struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.param.H,'current',obj.current_state,'ref',obj.reference.xr)
+            % Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
             [H, f] = change_equation(obj); %change_equation：評価関数の式変形を行う関数
             A = [];
             b = [];
             Aeq = [];
             beq = [];
-            lb = repmat(obj.param.input.lb, obj.param.H, 1); % 下限制約 不要なら空の配列
-            ub = repmat(obj.param.input.ub, obj.param.H, 1); % 上限制約 入力制約はHLとそろえた
+            lb = repmat(obj.param.input.lb, obj.H, 1); % 下限制約 不要なら空の配列
+            ub = repmat(obj.param.input.ub, obj.H, 1); % 上限制約 入力制約はHLとそろえた
             x0 = [obj.previous_input(:)];
               
             [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
@@ -148,10 +151,10 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
-            xr = zeros(obj.param.total_size, obj.param.H);    % initialize
+            xr = zeros(obj.param.total_size, obj.H);    % initialize
             % 時間関数の取得→時間を代入してリファレンス生成
             RefTime = obj.self.reference.func;    % 時間関数の取得
-            for h = 0:obj.param.H-1
+            for h = 0:obj.H-1
                 t = T + obj.param.dt * h; % reference生成の時刻をずらす
                 ref = RefTime(t);
                 xr(1:3, h+1) = ref(1:3);

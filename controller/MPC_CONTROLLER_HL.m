@@ -26,6 +26,7 @@ classdef MPC_CONTROLLER_HL <handle
         A
         B
         C
+        H
         mpc
     end
 
@@ -43,6 +44,7 @@ classdef MPC_CONTROLLER_HL <handle
             obj.weightF = blkdiag(obj.param.Zf, obj.param.Xf, obj.param.Yf, obj.param.PHIf);
             obj.weightR = obj.param.R;  % 目標入力
             % obj.weightRp = obj.param.RP; % 前ステップとの入力
+            obj.H = obj.param.H;
             % HL. A, B行列定義
             % z, x, y, yawの順番
             A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
@@ -53,7 +55,7 @@ classdef MPC_CONTROLLER_HL <handle
             obj.C = eye(12); 
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力事前定義(これがないと初期化で失敗する)
-            obj.previous_input = repmat(obj.input.u, 1, obj.param.H); % MPC用の初期入力
+            obj.previous_input = repmat(obj.input.u, 1, obj.H); % MPC用の初期入力
         end
 
         %-- main()的な
@@ -96,21 +98,21 @@ classdef MPC_CONTROLLER_HL <handle
 
             %% Referenceの取得、ホライズンごと  For Simulation
             % 実状態の目標値
-            xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+            xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
             obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
             %各phaseでのリファレンスと現在状態の更新  For Experiment -------------------
             % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
             % if vara{2} == 'a'
-            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
             %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
             % elseif vara{2} == 't'
-            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.param.H);
+            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
             %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
             %     fprintf('take off')
             % elseif vara{2} == 'f'
             %     % 実状態の目標値
-            %     xr_real = obj.Reference(); % 12 * obj.param.H 仮想状態 * ホライズン
+            %     xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
             %     obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
             %     fprintf('flight')
             % end
@@ -134,8 +136,8 @@ classdef MPC_CONTROLLER_HL <handle
             % fun = @obj.objective;
             % x0 = obj.previous_input;
             % A = []; b = []; Aeq = []; beq = []; 
-            % lb = repmat(obj.param.input_min, 1,obj.param.H); % min
-            % ub = repmat(obj.param.input_max, 1,obj.param.H); % max
+            % lb = repmat(obj.param.input_min, 1,obj.H); % min
+            % ub = repmat(obj.param.input_max, 1,obj.H); % max
             % nonlcon = [];
             % [var, ~, ~, ~, ~, ~, ~] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
 
@@ -203,7 +205,7 @@ classdef MPC_CONTROLLER_HL <handle
         function [eval] = objective(obj, x)   % obj.~とする
             U = x;
             X(:,1) = obj.current_state;
-            for L = 2:obj.param.H
+            for L = 2:obj.H
                 X(:,L) = obj.A*X(:,L-1) + obj.B*U(:,L-1);
             end
             
@@ -247,8 +249,8 @@ classdef MPC_CONTROLLER_HL <handle
         %     Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
         %     qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
         % 
-        %     for i  = 1:obj.param.H
-        %         for j = 1:obj.param.H
+        %     for i  = 1:obj.H
+        %         for j = 1:obj.H
         %             if j <= i
         %                 S(1+length(obj.B(:,1))*(i-1):length(obj.B(:,1))*i,1+length(obj.B(1,:))*(j-1):length(obj.B(1,:))*j) = obj.A^(i-j)*obj.B;
         %             end
@@ -265,10 +267,10 @@ classdef MPC_CONTROLLER_HL <handle
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
-            xr = zeros(19, obj.param.H);    % initialize
+            xr = zeros(19, obj.H);    % initialize
             % 時間関数の取得→時間を代入してリファレンス生成
             RefTime = obj.self.reference.func;    % 時間関数の取得
-            for h = 0:obj.param.H-1
+            for h = 0:obj.H-1
                 t = obj.param.t + obj.param.dt * h; % reference生成の時刻をずらす
                 ref = RefTime(t);
                 xr(1:3, h+1) = ref(1:3); % 位置
