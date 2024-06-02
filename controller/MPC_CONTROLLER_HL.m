@@ -58,6 +58,7 @@ classdef MPC_CONTROLLER_HL <handle
 
         %-- main()的な
         function result = do(obj,varargin)
+            tic
             % profile on
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
@@ -189,6 +190,7 @@ classdef MPC_CONTROLLER_HL <handle
             % fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
             %     obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
             % fprintf("\n");
+            toc
             
             % 結果の保存
             result = obj.result;
