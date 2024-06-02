@@ -1,11 +1,14 @@
 %% Importing data
 % 結合されたデータを読み込む
+tmp = matlab.desktop.editor.getActive;
+cd(strcat(fileparts(tmp.Filename), '/../'));
+%%
 clear
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddXdirection.mat');
-X = Data.X;
-Y = Data.Y;
-U = Data.U;
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddXdirection.mat');
+% X = Data.X;
+% Y = Data.Y;
+% U = Data.U;
 
 %% データセットがどういう割合のデータなのか算出する
 close all

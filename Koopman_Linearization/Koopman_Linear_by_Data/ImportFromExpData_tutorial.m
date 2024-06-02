@@ -147,6 +147,7 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
     %% Set Dataset and Input
     % クープマン線形化のためのデータセットに結合
     % 行：12状態, 列：時系列
+
     if data.vz_z == 1 %速度vzから位置zを算出してデータセットに使う場合
         for i=1:data.N-1
         data.X(:,i) = [data.est.p(i,1:2)';data.est.z(:,i);data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
