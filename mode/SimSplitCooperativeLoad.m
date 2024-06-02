@@ -13,20 +13,28 @@ post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);%分割前1,分割後N個
 
-
-% qtype = "eul"; % "eul" : euler angle, "" : euler parameter
-qtype = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
+%=PAYLOAD=====================================================================================
+% parameter     : DRONE_PARAM_COOPERATIVE_LOAD
+% plant         : MODEL_CLASS / Model_Suspended_Cooperative_Load
+% sensor        : DIRECT_SENSOR
+% estimator     : DIRECT_ESTIMATOR
+% reference     : TIME_VARYING_REFERENCE_SPLIT / gen_ref_sample_cooperative_load Cooperative
+% controller    : CSLC / Controller_Cooperative_Load
+%=============================================================================================
 % x = [p0 Q0 v0 O0 qi wi Qi Oi]
-
 agent(1) = DRONE;
 agent(1).id = 1;%元のシステム
 %Payload_Initial_State
 initial_state(1).p = [0; 0; 0.2];%ペイロード
 initial_state(1).v = [0; 0; 0];%ペイロード
 initial_state(1).O = [0; 0; 0];%ペイロードの角速度
-initial_state(1).wi = repmat([0; 0; 0], N, 1);%リンクの角速度
+initial_state(1).wi = repmat([0; 0; 0], N, 1);%ドローンの角速度
 initial_state(1).Oi = repmat([0; 0; 0], N, 1);%ドローンの角速度
+initial_state(1).a = [0;0;0];%ペイロード加速度
+initial_state(1).dO = [0;0;0];%ペイロード角加速度
 
+% qtype = "eul"; % "eul" : euler angle, "" : euler parameter
+qtype = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
 if contains(qtype, "zup")
     initial_state(1).qi = -1 * repmat([0; 0; 1], N, 1);%リンクの方向ベクトル
 else
@@ -43,16 +51,8 @@ else
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
-%=PAYLOAD=====================================================================================
-% parameter     : DRONE_PARAM_COOPERATIVE_LOAD
-% plant         : MODEL_CLASS / Model_Suspended_Cooperative_Load
-% sensor        : DIRECT_SENSOR
-% estimator     : DIRECT_ESTIMATOR
-% reference     : TIME_VARYING_REFERENCE_SPLIT / gen_ref_sample_cooperative_load Cooperative
-% controller    : CSLC / Controller_Cooperative_Load
-%=============================================================================================
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
-agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));
+agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",120,"orig",ref_orig,"size",1*[4,4,0]},"Take_off",N},agent(1));
@@ -84,16 +84,16 @@ for i = 2:N+1
     initial_state(i).p = initial_state(1).p + R_load*rho(:,i-1) - agent(1).parameter.li(i-1) * initial_state(i).pT;
     initial_state(i).pL = initial_state(1).p + R_load*rho(:,i-1);
 %Generate instance
-    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
+    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");%ペイロードの重さを機体数で分割するようにする!!!!!!!!!
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
-    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
+    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+    %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[]},"Split",N},agent(1));%軌道は使われない
-%     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
     agent(i).controller.load = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
     agent(i).controller.do = @controller_do;
-    agent(i).controller.result.input = [(agent(i).parameter.loadmass+agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
+    agent(i).controller.result.input = [(agent(i).parameter.loadmass + agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 end
 % run("ExpBase");
 
@@ -166,8 +166,8 @@ DataR4 = logger.data(5,"reference.result.state.p","p");
 DataR5 = logger.data(6,"reference.result.state.p","p");
 DataR6 = logger.data(7,"reference.result.state.p","p");
 % DataA = logger.data(2,"reference.result.state.p","p");%リンクの向きはqi,ドローンの姿勢がQi,ペイロードの姿勢がQ
-DataB = logger.data(5,"reference.result.m","p");
-DataC = logger.data(7,"reference.result.Mui","p");
+DataB = logger.data(5,"reference.result.mLi","p");
+DataC = logger.data(7,"reference.result.mui","p");
 DataD = logger.data(2,"reference.result.state.xd","p");%位置を加速度としてグラフに書いていた!!!!!!!!
 DataE = logger.data(1,"controller.result.mui","p");
 sumE = sum(DataE,2);
@@ -187,18 +187,18 @@ for i =1:N
 
     linki(:,:,i) = -DataA_link(:,3*N-2:3*N);
 
-    DataF_3(:,:,i) = reshape(logger.data(i+1,"reference.result.a","p"),3,[])';
+    DataF_3(:,:,i) = reshape(logger.data(i+1,"reference.result.ai","p"),3,[])';
 end
 DataD_sum = sum(DataD_3,3);
 DataF_sum = sum(DataF_3,3);
 
 DataR = logger.data(1,"reference.result.state.p","p");
-Data1 = logger.data(2,"reference.result.m","p");
-Data2 = logger.data(3,"reference.result.m","p");
-Data3 = logger.data(4,"reference.result.m","p");
-Data4 = logger.data(5,"reference.result.m","p");
-Data5 = logger.data(6,"reference.result.m","p");
-Data6 = logger.data(7,"reference.result.m","p");
+Data1 = logger.data(2,"reference.result.mLi","p");
+Data2 = logger.data(3,"reference.result.mLi","p");
+Data3 = logger.data(4,"reference.result.mLi","p");
+Data4 = logger.data(5,"reference.result.mLi","p");
+Data5 = logger.data(6,"reference.result.mLi","p");
+Data6 = logger.data(7,"reference.result.mLi","p");
 DataM = Data1+Data2+Data3+Data4+Data5+Data6;
 mg = DataM*9.81;
 ma = DataM.*DataD(:,3);
@@ -316,7 +316,7 @@ k = k + 1;
 
 figure(k)
 hold on
-plot(t,DataC(:,3))
+% plot(t,DataC(:,3))
 % xlim([-1.5 1.5])
 % ylim([-1.5 1.5])
 xlabel("t [s]")
@@ -388,7 +388,7 @@ k = k + 1;
 
 figure(k)
 hold on
-plot(t,DataC(:,3))
+% plot(t,DataC(:,3))
 plot(t,DataD(:,3))
 xlabel("t [s]")
 legend("Mu","acceleration")

@@ -10,8 +10,10 @@ syms t real
 %3偕微分
 xd=xdt(t);
 dxd =diff(xd,t);
-ddxd =diff(dxd,t);
-dddxd =diff(ddxd,t);
+d2xd =diff(dxd,t);
+d3xd =diff(d2xd,t);
+d4xd =diff(d3xd,t);
+d5xd =diff(d4xd,t);
 
 norm_dxd = sqrt(dxd(1:2)'*dxd(1:2));%dxdはz方向を0にしているのでノルムはx,y方向で作成!!!!!!!!!!
 if norm_dxd == 0 || dxd(1) == 0
@@ -35,5 +37,5 @@ dR0d = diff(R0d,t);%回転行列の時間微分，目標速度
 
 o0d = Vee(R0d'*dR0d);%理想的or目標とするペイロード角速度
 do0d = diff(o0d,t);%理想的or目標とするペイロード角加速度
-ref = matlabFunction([xd;dxd;ddxd;dddxd;o0d;do0d;reshape(R0d,[],1)],'vars',t);
+ref = matlabFunction([xd;dxd;d2xd;d3xd;d4xd;d5xd;o0d;do0d;reshape(R0d,[],1)],'vars',t);
 end
