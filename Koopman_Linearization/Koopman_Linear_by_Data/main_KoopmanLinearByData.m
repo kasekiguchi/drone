@@ -171,16 +171,7 @@ clc
 change_reference = 1; %str2double(num);
 only_rmse = 1;
 Exp_tra = 'P2Py';
-switch Exp_tra
-    case 'P2Py'
-        fileName = 'experiment_10_25_P2Py_estimator';
-    case 'P2Px'
-        fileName = 'experiment_10_20_P2Px_estimator';
-    case 'hovering'
-        fileName = 'experiment_11_15_hovering';
-    case 'saddle'
-        fileName = 'experiment_9_5_saddle_estimatordata';
-end
+fileName = WhichLoadFile(Exp_tra, 2);
 
 if change_reference == 1
     % clear all

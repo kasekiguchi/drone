@@ -3,7 +3,12 @@
 %一つのグラフにまとめて表示される(例：位置x,y,zが一つのfigureに表示)
 clear all
 close all
-cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../../')); % drone/のこと
+tmp = matlab.desktop.editor.getActive;
+cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダパス
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+
+% cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../../')); % drone/のこと
 %% flag
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
@@ -15,19 +20,32 @@ flg.only_rmse = 0; % コマンドウィンドウに表示
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 4.3; % flight後何秒からの推定精度検証を行うか saddle:3.39
+startTime = 3.9; % flight後何秒からの推定精度検証を行うか saddle:3.39
 stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
 %% select file to load
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
-% loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
-loadfilename{1} = 'EstimationResult_2024-05-29_Exp_KiyamaX_code00_saddle';
+% 木山データ; Exp_Kiyama
+% x方向データの増加; Exp_KiyamaX
+loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
+% loadfilename{1} = 'EstimationResult_2024-05-29_Exp_KiyamaX_code00_saddle';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
-WhichRef = 1; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
+ref_tra = 'saddle';
+% file2 : 別のリファレンス
+ref_tra = 'hovering';
+loadfilename{2} = WhichLoadFile(ref_tra, 1);
+% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
+% loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
+% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code01_hovering';
+% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
+WhichRef = 2; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
+if size(loadfilename,2) == 1 % fileが1つならWhichRefを変更
+    WhichRef = 1;
+end
 %% グラフの保存
 % "現在のフォルダー"をmainGUIの階層したか確認
 if save_fig && flg.figtype % Graphフォルダ内に保存 .figで保存
@@ -89,8 +107,8 @@ Fsize.lgd = 18;
 Fsize.luler = 18;
 
 %% load(基本いじる必要は無い)
-i = 1;
 HowmanyFile = size(loadfilename,2);
+for i = 1:HowmanyFile
 file{i} = load(loadfilename{i});
 file{i}.name = loadfilename{i};
 file{i}.lgdname.p = {append('$data',num2str(i),'_x$'),append('$data',num2str(i),'_y$'),append('$data',num2str(i),'_z$')};
@@ -108,6 +126,7 @@ elseif indexcheck ~= file{i}.simResult.initTindex
         disp('Caution!! 読み込んだファイルの初期状態が異なっています!!')
         dammy = input('Enterで無視して続行します');
 end
+end
 
 %% 任意の時間からの推定を行う
 try
@@ -116,7 +135,7 @@ F = @quaternions_all; % 読み込んだデータと観測量を合わせる
 dt = file{WhichRef}.simResult.reference.T(2)-file{WhichRef}.simResult.reference.T(1);
 % startTimeを超えたインデックスからstepNステップ
 startIdx = find(file{WhichRef}.simResult.reference.T>=startTime, 1, 'first');
-tlength = file{1}.simResult.initTindex + startIdx:file{1}.simResult.initTindex+stepN-1 + startIdx;
+tlength = file{WhichRef}.simResult.initTindex + startIdx:file{WhichRef}.simResult.initTindex+stepN-1 + startIdx;
 simResult.Z(:,startIdx) = F(file{WhichRef}.simResult.reference.X(:,startIdx)); %検証用データの初期値を観測量に通して次元を合わせてる
 simResult.Xhat(:,startIdx) = file{WhichRef}.simResult.reference.X(:,startIdx);
 for j = startIdx:startIdx+stepN
@@ -124,7 +143,7 @@ for j = startIdx:startIdx+stepN
 end
 simResult.Xhat = file{1}.est.C * simResult.Z;
 % 読み込んだ情報(file{i}.simResult.state)の書き換え 
-if size(file{WhichRef}.Data.X,1)==13
+if size(file{1}.Data.X,1)==13
     file{1}.simResult.state.p = simResult.Xhat(1:3,:);
     file{1}.simResult.state.q = simResult.Xhat(4:7,:);
     file{1}.simResult.state.v = simResult.Xhat(8:10,:);
@@ -163,6 +182,7 @@ newcolors = [0 0.4470 0.7410
              0.4660 0.6740 0.1880]; %グラフの色指定
 
 %% Calculate RMSE
+i = 1;
 % rmse関数でも大丈夫．rmse(予測値, 観測値, 2) = [3*1](=x,y,z)
 rmse_func = @(x) sqrt(1/stepN * sum(x.^2, 2));
 % position
@@ -188,10 +208,11 @@ if flg.only_rmse
     fprintf("Excel RMSE.P: %.4f %.4f %.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
 else
 if ~flg.division % plotResult
+i = 1;
 %% P
 % strrep _を "【空白】"に置換
 if flg.figtype; figure(1);
-else; fig = figure(1); sgtitle(strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==')); subplot(m,n,1); end 
+else; fig = figure(1); sgtitle(strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==', ref_tra)); subplot(m,n,1); end 
 % Referenceをplot
 colororder(newcolors)
 plot(timeRange, file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',2); % 精度検証用データ
@@ -375,7 +396,7 @@ end
 if flg.confirm_ref
     if flg.figtype; figure(5);
     else; subplot(m, n, 5); end
-    plot(file{1}.simResult.reference.T, file{1}.simResult.reference.X(1:3,:)); hold on;
+    plot(file{WhichRef}.simResult.reference.T, file{WhichRef}.simResult.reference.X(1:3,:)); hold on;
     xregion(startTime, startTime + xmax, FaceColor="b",EdgeColor=[0.4 0 0.7]);
     legend('x', 'y', 'z', 'verification range'); grid on;
 end

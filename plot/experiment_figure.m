@@ -1,10 +1,15 @@
 %%% 実機実験の結果をplotするファイル
 %% Initial settingclear;
 clear;
-addpath(fileparts(matlab.desktop.editor.getActive().Filename));
-cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
+% addpath(fileparts(matlab.desktop.editor.getActive().Filename));
+% cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
+tmp = matlab.desktop.editor.getActive;
+cd(strcat(fileparts(tmp.Filename), '../../'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+
 Fontsize = 15;  
-set(0, 'defaultAxesFontSize',15);
+set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
@@ -13,8 +18,8 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-filename = '20240531_HLMPC_circle30s';
-load(strcat("Data/HLMPC/", filename, ".mat"));
+filename = 'Exp_saigen_20240517_P2P_y';
+load(strcat("Data/", filename, ".mat"));
 
 % 115:start
 % 97 :arming
@@ -23,13 +28,16 @@ load(strcat("Data/HLMPC/", filename, ".mat"));
 % 108:landing
 % 0:stop or quit
 
+%% save setting
+savename = strcat(filename, '_all');
+savefolder = '\Data\Exp_figure_image\';
 %%
-clc
 close all
 clear Ref
 flg.figtype = 0;
+flg.savefig = 1;
 flg.timerange = 1;
-flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
+flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
 phase = 1; % 1:flight, 2:all
 switch phase
@@ -118,7 +126,6 @@ if ~flg.figtype
 end
 
 %% RMSE
-clc
 rmse_x = rmse(Est(1:9,:), Ref(1:9,:), 2);
 error = abs(Est(1:9,:) - Ref(1:9,:));
 max_error = max(error, [], 2);
@@ -129,3 +136,14 @@ fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_
 % csv
 % fprintf('RMSE: %.4f, %.4f, %.4f \n', rmse_x(1), rmse_x(2), rmse_x(3));
 % fprintf('MAX error: %.4f, %.4f, %.4f \n', max_error(1), max_error(2), max_error(3));
+
+%% save
+if flg.savefig
+    % 上書き防止
+    if isfile(strcat(pwd, savefolder, savename, '.png'))
+        warning('Stop saving figure because exist same name file'); % すでにファイルがある場合は保存をやめる
+    else
+        fprintf('Saving figure. \n');
+        saveas(1, strcat(pwd, savefolder, savename), 'png');
+    end
+end
