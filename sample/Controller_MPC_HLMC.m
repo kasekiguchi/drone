@@ -1,4 +1,4 @@
-function Controller = Controller_HLMCMPC(agent)
+function Controller = Controller_MPC_HLMC(agent)
 %UNTITLED この関数の概要をここに記述
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅

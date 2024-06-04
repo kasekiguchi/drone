@@ -1,4 +1,4 @@
-classdef HLMCMPC_CONTROLLER < handle
+classdef MPC_CONTROLLER_HLMC < handle
   % MCMPC_CONTROLLER MCMPCのコントローラー
 
   properties
@@ -28,7 +28,7 @@ classdef HLMCMPC_CONTROLLER < handle
   end
 
   methods
-    function obj = HLMCMPC_CONTROLLER(self, param)
+    function obj = MPC_CONTROLLER_HLMC(self, param)
       %-- 変数定義
       obj.self = self;
       %---MPCパラメータ設定---%
@@ -195,7 +195,7 @@ classdef HLMCMPC_CONTROLLER < handle
 
         % vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
-        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
+        tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
         % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
