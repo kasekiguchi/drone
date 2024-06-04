@@ -91,7 +91,7 @@ disp('Estimated')
 
 %% Simulation by Estimated model(構築したモデルでシミュレーション)
 %推定精度検証シミュレーション
-simResult.reference = ImportFromExpData_estimation('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
+simResult.reference = ImportFromExpData_verification('experiment_9_5_saddle_estimatordata'); %推定精度検証用データの設定
 
 % アーミングphaseの実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
@@ -180,7 +180,7 @@ if change_reference == 1
    
     % experiment_10_25_P2Py_estimator
     % experiment_9_5_saddle_estimatordata
-    simResult.reference = ImportFromExpData_estimation(fileName); %推定精度検証用データの設定
+    simResult.reference = ImportFromExpData_verification(fileName); %推定精度検証用データの設定
 
     model = load("EstimationResult_2024-05-02_Exp_Kiyama_code00_1.mat",'est'); % 推定したモデル
     est.A = model.est.A;

@@ -5,6 +5,10 @@
 %慣れてきたら，main_KoopmanLinearByDataのほうでやるといいかも(設定を自分でできる)
 %--------------------------------------------------------------------------------
 clc
+tmp = matlab.desktop.editor.getActive;
+cd(strcat(fileparts(tmp.Filename), '../../'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %--------------------------------------------------------------
 % 先に main.m の Initialize settings を実行すること(※必ず行う)
 %--------------------------------------------------------------
@@ -156,19 +160,10 @@ fprintf('\n＜クープマン線形化が完了しました＞\n')
 
 %file名を自動で分別
 fprintf('\n＜推定精度検証用データを設定しました＞\n')
-switch Exp_tra
-    case 'P2Py'
-        fileName = 'experiment_10_25_P2Py_estimator.mat';
-    case 'P2Px'
-        fileName = 'experiment_10_20_P2Px_estimator.mat';
-    case 'hovering'
-        fileName = 'experiment_11_15_hovering.mat';
-    case 'saddle'
-        fileName = 'experiment_9_5_saddle_estimatordata.mat';
-end
+fileName = WhichLoadFile(Exp_tra, 2);
 
 verification_data = fileName;
-simResult.reference = ImportFromExpData_estimation(verification_data); %検証用データを格納
+simResult.reference = ImportFromExpData_verification(verification_data); %検証用データを格納
 
 %arming時の実験データがうまく取れていないのを強引に解消
 if simResult.reference.fExp == 1
