@@ -167,10 +167,14 @@ disp(targetpath)
 %% 作成済みモデルで，推定する軌道を変更(全時刻に対する推定検証を行う)
 %推定する領域をずらしながら推定検証を行う．
 clc
+clear
 % num = input('＜全時刻の推定を行いますか＞\n 1:行う 0:行わない：','s');
 change_reference = 1; %str2double(num);
 only_rmse = 1;
-Exp_tra = 'P2Py';
+% saddle
+% P2Px, P2Py
+% hovering
+Exp_tra = 'saddle';
 fileName = WhichLoadFile(Exp_tra, 2);
 
 if change_reference == 1
@@ -182,7 +186,7 @@ if change_reference == 1
     % experiment_9_5_saddle_estimatordata
     simResult.reference = ImportFromExpData_verification(fileName); %推定精度検証用データの設定
 
-    model = load("EstimationResult_2024-05-02_Exp_Kiyama_code00_1.mat",'est'); % 推定したモデル
+    model = load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle.mat",'est'); % 推定したモデル
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
@@ -212,8 +216,8 @@ if change_reference == 1
         end
         simResult.Xhat = est.C * simResult.Z; %出力方程式 x[k] = Cz[k]
         fprintf('\n%d～%dstep間の推定結果を表示します\n', N1, N2)
-        size = figure;
-        size.WindowState = 'maximized'; %表示するグラフを最大化
+        size_f = figure;
+        size_f.WindowState = 'maximized'; %表示するグラフを最大化
         for i = 1:3
             % RMSEのみならコメントアウト-----------------------------------
             if ~only_rmse
@@ -287,8 +291,8 @@ if change_reference == 1
     end
 
     fprintf('各方向のRMSEの変位，最大誤差を表示します\n')
-    size = figure;
-    size.WindowState = 'maximized'; %表示するグラフを最大化
+    size_f = figure;
+    size_f.WindowState = 'maximized'; %表示するグラフを最大化
     for i = 1:3
         subplot(2,3,i)
         if i == 1

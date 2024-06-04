@@ -123,18 +123,23 @@ end
 %% ここから始めるとき ====================================================================
 % =========================================================================================
 clear; clc;
+clc
+tmp = matlab.desktop.editor.getActive;
+cd(strcat(fileparts(tmp.Filename), '../../../'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 flg.bilinear = 0;
 flg.normalize = 0;
 F = @quaternions_all; % 改造用
 FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-FileName = strcat(FileName_common, 'Exp_KiyamaX_', 'code00_', Exp_tra); % 使ってるデータセット
+FileName = strcat(FileName_common, 'Exp_KiyamaX_20data_', 'code00_', Exp_tra); % 使ってるデータセット
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddXdirection.mat'); % x方向追加
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddXdirection_20data.mat'); % x方向追加
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
