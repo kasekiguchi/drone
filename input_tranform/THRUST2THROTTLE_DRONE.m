@@ -34,7 +34,7 @@ methods
         obj.param.gain2(3) = 1000;
         obj.param.gain2(4) = 1000;
         obj.param.th_offset2 = 350;
-        %-- HL 用？
+        %-- HL 用
         obj.param.gain2 = obj.param.gain;
         obj.param.th_offset2 = obj.param.th_offset;
         %--------------------------------------

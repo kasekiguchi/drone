@@ -36,6 +36,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             %---MPCパラメータ設定---%
             obj.param = param.param; %Controller_MPC_Koopmanの値を保存
             obj.H = obj.param.H;
+            obj.A = obj.param.A;
+            obj.B = obj.param.B;
+            obj.C = obj.param.C;
 
             %%
             obj.input = obj.param.input;
@@ -69,11 +72,11 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             elseif vara{2} == 't'
                 obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-                fprintf('take off')
+                fprintf('take off\n')
             elseif vara{2} == 'f'
                 obj.reference.xr = obj.Reference(rt); %リファレンスの更新
                 obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-                fprintf('flight')
+                fprintf('flight\n')
             end
             %---------------------------------------------------------------------------------------
 
