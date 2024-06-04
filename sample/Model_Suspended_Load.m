@@ -26,7 +26,7 @@ Setting.initial.pT = [0;0;-1];
 Setting.initial.wL = [0;0;0];
 Setting.dt = dt;
 Setting.param = agent.parameter.get; % モデルの物理パラメータ設定
-Setting.initial.pL = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;%+[Setting.param(17);Setting.param(18);-Setting.param(19)];
+Setting.initial.pL = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;%+[Setting.param(17);Setting.param(18);-Setting.param(19)];%22~24
 
 Model.param = Setting;
 Model.parameter_name = ["m","Lx","Ly", "lx", "ly", "lz", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "rotor_r","Length","mL", "cableL"];
