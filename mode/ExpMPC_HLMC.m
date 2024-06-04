@@ -1,5 +1,5 @@
 ts = 0; % initial time
-dt = 0.025; % sampling period
+dt = 0.035; % sampling period
 te = 10000; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
@@ -22,12 +22,35 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
 
-agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
-agent.controller = MPC_controller(agent,Controller_HLMCMPC(dt));
+% agent.controller = MPC_CONTROLLER_HLMC(agent,Controller_MPC_HLMC(dt));
+%2つのコントローラの設定---------------------------------------------------------------------------------------------------
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_HLMC(agent,Controller_MPC_HLMC(agent)); %最適化手法：QP
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
+%------------------------------------------------------------------------------------------------------------------------
 
 run("ExpBase");
+
+function result = controller_do(varargin)
+    controller = varargin{5}.controller;
+    if varargin{2} == 'a'
+        result = controller.mpc.do(varargin); % arming: KMPC 
+    elseif varargin{2} == 't'
+        result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
+        result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
+        result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
+    elseif varargin{2} == 'f'
+        result = controller.mpc.do(varargin); % flight: KMPC
+    elseif varargin{2} == 'l'
+        result = controller.hlc.do(varargin); % landing: HL
+   end
+    varargin{5}.controller.result = result;
+end
 
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

@@ -1,5 +1,5 @@
 ts = 0; % initial time
-dt = 0.025 % sampling period 0.04 までは問題なく飛ぶ
+dt = 0.025; % sampling period 0.04 までは問題なく飛ぶ
 te = 10000; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
