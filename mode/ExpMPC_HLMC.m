@@ -25,7 +25,7 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
-agent.controller = HLMCMPC_controller(agent,Controller_HLMCMPC(dt));
+agent.controller = MPC_controller(agent,Controller_HLMCMPC(dt));
 
 run("ExpBase");
 

@@ -26,7 +26,8 @@ time =  (0:dt:dt*(pointN-1))';
 % round(配列, 何桁まで)
 
 % x方向のみ
-wp_xy = [round(0.5*randn(pointN-1,1),3), zeros(pointN-1,1)];
+% 生成する点を-1.5<point<1.5にする
+wp_xy = max(-1.5, min(1.5, [round(1*randn(pointN-1,1),3), zeros(pointN-1,1)]));
 wp_z  = ones(pointN-1,1);
 wp = [0, 0, 1;wp_xy, wp_z];
 waypoints = [time, wp];

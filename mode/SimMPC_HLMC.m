@@ -1,6 +1,6 @@
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 30 % terminal time
+te = 30; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -25,6 +25,6 @@ app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te
 app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
-figtype = 2; % 1:それぞれ, 2:subplot
-savefigure;
+% figtype = 2; % 1:それぞれ, 2:subplot
+% savefigure;
 end
