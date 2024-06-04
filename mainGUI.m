@@ -21,5 +21,5 @@ SimBaseMode = ["SimHL","SimPointMass", "SimVehicle", "SimSuspendedLoad", "SimVor
 ExpBaseMode = ["ExpTestMotiveConnection", "ExpHL", "ExpFHL", "ExpFHL_Servo", "ExpFT", "ExpEL", "ExpMPC_Koopman","ExpSuspendedLoad"];
 fExp = 0;
 fDebug = 1; % 1: active : for debug function
-PInterval = 0.6; % sec : poling interval for emergency stop
+PInterval = 1000; % sec : poling interval for emergency stop
 gui = SimExp(fExp, fDebug, PInterval);
