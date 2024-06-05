@@ -95,8 +95,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
 
-            % Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
-            [H, f] = change_equation_mex_H10(obj); %change_equation：評価関数の式変形を行う関数
+            Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
+            [H, f] = obj.param.change_equation_func(Param); %change_equation：評価関数の式変形を行う関数
             A = [];
             b = [];
             Aeq = [];

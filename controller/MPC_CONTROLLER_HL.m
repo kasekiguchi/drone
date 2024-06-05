@@ -148,8 +148,9 @@ classdef MPC_CONTROLLER_HL <handle
             options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
-            % [H, f] = obj.change_equation();
-            [H, f] = change_equation(obj);
+            % [H, f] = obj.change_equation(obj);
+            Param = struct('A',obj.A,'B',obj.B,'C',obj.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
+            [H, f] = obj.param.change_equation_func(Param);
             A = [];
             b = [];
             Aeq = [];
