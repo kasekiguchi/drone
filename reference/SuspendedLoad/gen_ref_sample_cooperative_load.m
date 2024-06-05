@@ -35,9 +35,9 @@ z = lz*sin(2*w*t - pi/2)+lz_offset; % z
 % z = lz*sin(2*w*t - pi/2)+lz_offset; % z
 
 %point
-% x = lx_offset;  % x
-% y = ly_offset;  % y
-% z = lz_offset; % z
+x = lx_offset;  % x
+y = ly_offset;  % y
+z = lz_offset; % z
 
 ref = @(t)[x;y;z];
 % fprintf("max ref acceleration = %f\n",subs(ddx(3),t,T/4));

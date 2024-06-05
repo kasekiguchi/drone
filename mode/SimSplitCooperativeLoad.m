@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 40;
+te = 30;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -159,6 +159,7 @@ DataA3 = logger.data(4,"estimator.result.state.pL","p");
 DataA4 = logger.data(5,"estimator.result.state.pL","p");
 DataA5 = logger.data(6,"estimator.result.state.pL","p");
 DataA6 = logger.data(7,"estimator.result.state.pL","p");
+DataA7 = logger.data(1,"estimator.result.state.a","p");
 DataR1 = logger.data(2,"reference.result.state.p","p");
 DataR2 = logger.data(3,"reference.result.state.p","p");
 DataR3 = logger.data(4,"reference.result.state.p","p");
@@ -316,19 +317,6 @@ k = k + 1;
 
 figure(k)
 hold on
-% plot(t,DataC(:,3))
-% xlim([-1.5 1.5])
-% ylim([-1.5 1.5])
-xlabel("t [s]")
-ylabel("Mu [N]")
-% legend("Payload","UAV")
-ax = gca;
-ax.FontSize = 22;
-hold off
-k = k + 1;
-
-figure(k)
-hold on
 plot(t,DataD_sum)
 plot(t,DataF_sum,"LineStyle","--")
 % xlim([-1.5 1.5])
@@ -386,23 +374,22 @@ lgd = legend;
 hold off
 k = k + 1;
 
-figure(k)
-hold on
+% figure(k)
+% hold on
 % plot(t,DataC(:,3))
-plot(t,DataD(:,3))
-xlabel("t [s]")
-legend("Mu","acceleration")
-ax = gca;
-ax.FontSize = 22;
-hold off
-k = k + 1;
+% plot(t,DataD(:,3))
+% xlabel("t [s]")
+% legend("Mu","acceleration")
+% ax = gca;
+% ax.FontSize = 22;
+% hold off
+% k = k + 1;
 
 figure(k)
 hold on
 plot(t,DataF_sum)
-plot(t,DataM)
 plot(t,DataE_muid,"LineStyle","--")
-plot(t,DataE_mui)
+plot(t,DataE_mui,"LineStyle","-.")
 xlabel("t [s]")
 legend("accelx","y","z","muidx","y","z","muix","y","z")
 ax = gca;
@@ -423,12 +410,9 @@ k = k + 1;
 
 figure(k)
 hold on
-plot(t,DataF_sum,"LineStyle","--")
-plot(t,DataF_sum.*DataM)
-plot(t,DataM,"LineStyle",":")
-plot(t,1.2);
+plot(t,DataA7)
 xlabel("t [s]")
-legend("accelx","y","z","massx","y","z","Mass");
+ylabel("a0 [s]")
 ax = gca;
 ax.FontSize = 22;
 hold off

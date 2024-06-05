@@ -85,7 +85,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
 
                 elseif strcmp(args{3}, "Split")%ドローン目標軌道
                     obj.com = args{3};
-                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "q", "v"], 'num_list', [24, 3, 3, 3]));  
+                    obj.result.state = STATE_CLASS(struct('state_list', ["xd", "p", "v", "ai","mui","mLi"], 'num_list', [24, 3, 3, 3]));  
 
                     % obj.P = self.parameter.get("all","row");
                     obj.P = self.parameter.get();
@@ -183,15 +183,16 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                dR0  = R0*Skew(O0);                                          %分割前ペイロードの回転行列の微分
                Ri   = obj.self.estimator.result.state.getq("rotm");         %機体回転行列
                vi   = v0 + dR0*rhoi;                                        %分割後のペイロードの速度
-               ai   = a0 + g + R0*Skew(O0)^2*rhoi - R0*Skew(rhoi)*dO0;      %分割後のペイロードの加速度
+               ai2   = a0 + g + R0*Skew(O0)^2*rhoi - R0*Skew(rhoi)*dO0;      %分割後のペイロードの加速度
+               ai   = a0 + R0*Skew(O0)^2*rhoi - R0*Skew(rhoi)*dO0;      %分割後のペイロードの加速度
                qqTi = qi*qi';
                uli  = qqTi*Ri*[0;0;obj.self.controller.result.input(1)];    %前時刻のもの離散時間なので現在時刻まで同じ入力が入ると仮定
-               mui  = uli - mi*li*(wi'*wi)*qi - mi*qqTi*ai;                 %(15) 実際の張力
+               mui  = uli - mi*li*(wi'*wi)*qi - mi*qqTi*ai2;                 %(15) 実際の張力
            %理想的な張力から張力を求める場合
                % id = obj.self.id;
                % muid_mui = agent1.controller.result.mui; %3xN 
                % mui = muid_mui(4:6,id-1); %3x1%
-               % obj.result.Mui = mui';
+               % obj.result.state.Mui = mui';
            %加速度の算出の仕方を変更========================
                %referenceをそのまま使うタイプ
                %------------------------------------------------------
@@ -211,13 +212,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                AtA  = A'*A;
                mLi  = (AtA\A')*mui;%分割後質量
            %log
-               obj.result.state.xd = refi;
-               obj.result.state.p  = xid;
-               obj.result.state.v  = dxid;
-               obj.result.mui      = mui';
-               obj.result.vi_pre   = vi;
-               obj.result.ai       = ai;
-               obj.result.mLi      = mLi;
+               obj.result.state.xd      = refi;
+               obj.result.state.p       = xid;
+               obj.result.state.v       = dxid;
+               obj.result.state.mui     = mui';
+               % obj.result.state.vi_pre  = vi;
+               obj.result.state.ai      = ai;
+               obj.result.state.mLi     = mLi;
 
            elseif strcmp(obj.com, "Take_off")
                if isempty( obj.base_state ) % first take
