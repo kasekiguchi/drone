@@ -8,6 +8,16 @@ function Controller = Controller_MPC_Koopman(~)
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
 
+    %% change equation 
+    switch Controller_param.H
+        case 10
+            Controller_param.change_equation_func = @change_equation_mex_H10;
+        case 20
+            Controller_param.change_equation_func = @change_equation_mex_H20;
+        otherwise
+            error('No selected change_equation');
+    end
+
     %% Koopman
     % modeファイルとファイル名をそろえる
     load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力

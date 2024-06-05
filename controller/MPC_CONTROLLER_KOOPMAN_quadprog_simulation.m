@@ -83,7 +83,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             problem.solver = 'quadprog'; % solver
 
             Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
-            [H, f] = change_equation_mex_H20(Param); % H=10:_mex_H10
+            [H, f] = obj.param.change_equation_func(Param); % H=10:_mex_H10
+            % codegen change_equation.prj change_equation_mex_H50
             A = [];
             b = [];
             Aeq = [];
