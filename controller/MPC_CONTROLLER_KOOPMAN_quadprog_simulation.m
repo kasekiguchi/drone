@@ -56,6 +56,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
 
         %-- main()的な
         function result = do(obj,varargin)
+            % profile on
             tic
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
@@ -81,8 +82,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             options.Display = 'none';   % 計算結果の表示
             problem.solver = 'quadprog'; % solver
 
-            % Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'reference',obj.reference.xr);
-            [H, f] = change_equation(obj); % structで送る変数をまとめる必要あり
+            Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
+            [H, f] = change_equation_mex(Param); % structで送る変数をまとめる必要あり
             A = [];
             b = [];
             Aeq = [];
@@ -123,6 +124,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
                 rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
             fprintf("\n");
+            % profile viewer
 
             %% z < 0で終了
             if obj.self.estimator.result.state < 0

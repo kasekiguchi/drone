@@ -174,7 +174,7 @@ only_rmse = 1;
 % saddle
 % P2Px, P2Py
 % hovering
-Exp_tra = 'saddle';
+Exp_tra = 'P2Py';
 fileName = WhichLoadFile(Exp_tra, 2);
 
 if change_reference == 1
