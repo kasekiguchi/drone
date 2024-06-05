@@ -19,26 +19,26 @@ const.km = 0.03010685884691849; % ロータ定数
 const.k = 0.000008048;          % 推力定数
 
 % 状態がクォータニオンを用いた13次元の場合
-if size(x,1) == 13
-    P1 = x(1,1);
-    P2 = x(2,1);
-    P3 = x(3,1);
-    q0 = x(4,1);
-    q1 = x(5,1);
-    q2 = x(6,1);
-    q3 = x(7,1);
-    V1 = x(8,1);
-    V2 = x(9,1);
-    V3 = x(10,1);
-    W1 = x(11,1);
-    W2 = x(12,1);
-    W3 = x(13,1);
-    %オイラー角に変換して記録しておく
-    quat = quaternion([q0 q1 q2 q3]);
-    Q = euler(quat,'ZYX','frame');
-    Q1 = Q(1); Q2 = Q(2); Q3 = Q(3);
+% if size(x,1) == 13
+%     P1 = x(1,1);
+%     P2 = x(2,1);
+%     P3 = x(3,1);
+%     q0 = x(4,1);
+%     q1 = x(5,1);
+%     q2 = x(6,1);
+%     q3 = x(7,1);
+%     V1 = x(8,1);
+%     V2 = x(9,1);
+%     V3 = x(10,1);
+%     W1 = x(11,1);
+%     W2 = x(12,1);
+%     W3 = x(13,1);
+%     %オイラー角に変換して記録しておく
+%     quat = quaternion([q0 q1 q2 q3]);
+%     Q = euler(quat,'ZYX','frame');
+%     Q1 = Q(1); Q2 = Q(2); Q3 = Q(3);
 % 状態がオイラー角を用いた12次元の場合
-elseif size(x,1) ==12
+% elseif size(x,1) ==12
     P1 = x(1,1);
     P2 = x(2,1);
     P3 = x(3,1);
@@ -57,7 +57,7 @@ elseif size(x,1) ==12
     q1 = sin(Q1/2)*cos(Q2/2)*cos(Q3/2)-cos(Q1/2)*sin(Q2/2)*sin(Q3/2);
     q2 = cos(Q1/2)*sin(Q2/2)*cos(Q3/2)+sin(Q1/2)*cos(Q2/2)*sin(Q3/2);
     q3 = cos(Q1/2)*cos(Q2/2)*sin(Q3/2)-sin(Q1/2)*sin(Q2/2)*cos(Q3/2);
-end
+% end
 
 %回転行列の一部
 R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
@@ -86,69 +86,69 @@ isobe_z = [W1*W2;
  z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
-F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
-    W2*cos(Q1) - W3*sin(Q1);
-    (W3*cos(Q1) + W2*sin(Q1)) / cos(Q2);
-     (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
-    -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
-     (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
-     ];
-G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2)) + 2*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)))/const.m;
-    -(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)) - 2*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2)))/const.m;
-    ((cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 - (cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 + (cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))^2 - (cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2))^2)/const.m;
-    1/const.jx;
-    1/const.jy;
-    1/const.jz
-    ];
+% F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
+%     W2*cos(Q1) - W3*sin(Q1);
+%     (W3*cos(Q1) + W2*sin(Q1)) / cos(Q2);
+%      (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
+%     -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
+%      (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
+%      ];
+% G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2)) + 2*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)))/const.m;
+%     -(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)) - 2*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2)))/const.m;
+%     ((cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 - (cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 + (cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))^2 - (cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2))^2)/const.m;
+%     1/const.jx;
+%     1/const.jy;
+%     1/const.jz
+%     ];
 % z = [common_z; F_z; G_z];
 
 %% F(x), G(x)の各項を分解して観測量にする code = 02
-Fdisassembly_z = [W1*cos(Q2);
-    W3*cos(Q1)*sin(Q2);
-    W2*sin(Q2)*sin(Q1) /cos(Q2);
-    W2*cos(Q1) - W3*sin(Q1);
-    W3*cos(Q1) / cos(Q2); 
-    W2*sin(Q1) / cos(Q2);
-     (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
-    -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
-     (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
-    ];
-Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
-    sin(Q2/2)*sin(Q1/2)*sin(Q3/2);
-    cos(Q1/2)*cos(Q3/2)*sin(Q2/2);
-    cos(Q2/2)*sin(Q1/2)*sin(Q3/2);
-    cos(Q2/2)*cos(Q1/2)*sin(Q3/2);
-    cos(Q3/2)*sin(Q2/2)*sin(Q1/2);
-    cos(Q2/2)*cos(Q3/2)*sin(Q1/2);
-    cos(Q1/2)*sin(Q2/2)*sin(Q3/2);
-    1/const.jx;
-    1/const.jy;
-    1/const.jz
-    ];
+% Fdisassembly_z = [W1*cos(Q2);
+%     W3*cos(Q1)*sin(Q2);
+%     W2*sin(Q2)*sin(Q1) /cos(Q2);
+%     W2*cos(Q1) - W3*sin(Q1);
+%     W3*cos(Q1) / cos(Q2); 
+%     W2*sin(Q1) / cos(Q2);
+%      (const.jy*W2*W3 - const.jz*W2*W3) / const.jx;
+%     -(const.jx*W1*W3 - const.jz*W1*W3) / const.jx;
+%      (const.jx*W1*W2 - const.jy*W1*W2) / const.jx
+%     ];
+% Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
+%     sin(Q2/2)*sin(Q1/2)*sin(Q3/2);
+%     cos(Q1/2)*cos(Q3/2)*sin(Q2/2);
+%     cos(Q2/2)*sin(Q1/2)*sin(Q3/2);
+%     cos(Q2/2)*cos(Q1/2)*sin(Q3/2);
+%     cos(Q3/2)*sin(Q2/2)*sin(Q1/2);
+%     cos(Q2/2)*cos(Q3/2)*sin(Q1/2);
+%     cos(Q1/2)*sin(Q2/2)*sin(Q3/2);
+%     1/const.jx;
+%     1/const.jy;
+%     1/const.jz
+%     ];
 % z = [common_z; Fdisassembly_z; Gdisassembly_z];
 
 %% F(x), G(x)の各項を分解+磯部先輩 code = 03
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z];
 
 %% f(x, u, param)からdf/dparam したときの項+磯部先輩 code = 04
-roll = Q1; pitch = Q2; yaw = Q3;
-jx = const.jx; jy = const.jy; jz = const.jz;
-o1 = W1; o2 = W2; o3 = W3;
-m = const.m;
-u1 = 0; u2 = 0; u3 = 0; u4 = 0;
-diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
-            (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
-            -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
-            - u2/jx^2 - (jy*o2*o3 - jz*o2*o3)/jx^2;
-                                      -(o1*o3)/jy;
-                                       (o1*o2)/jz;
-                                       (o2*o3)/jx;
-             (jx*o1*o3 - jz*o1*o3)/jy^2 - u3/jy^2;
-                                      -(o1*o2)/jz;
-                                      -(o2*o3)/jx;
-                                       (o1*o3)/jy;
-           - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
-                                               -1];
+% roll = Q1; pitch = Q2; yaw = Q3;
+% jx = const.jx; jy = const.jy; jz = const.jz;
+% o1 = W1; o2 = W2; o3 = W3;
+% m = const.m;
+% u1 = 0; u2 = 0; u3 = 0; u4 = 0;
+% diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
+%             (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
+%             -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
+%             - u2/jx^2 - (jy*o2*o3 - jz*o2*o3)/jx^2;
+%                                       -(o1*o3)/jy;
+%                                        (o1*o2)/jz;
+%                                        (o2*o3)/jx;
+%              (jx*o1*o3 - jz*o1*o3)/jy^2 - u3/jy^2;
+%                                       -(o1*o2)/jz;
+%                                       -(o2*o3)/jx;
+%                                        (o1*o3)/jy;
+%            - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
+%                                                -1];
 % z = [common_z; isobe_z; diff_param_z];
 
 %% f(x, u, param)からdf/dparam したときの項のみ code = 05
