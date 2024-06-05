@@ -83,7 +83,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             problem.solver = 'quadprog'; % solver
 
             Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
-            [H, f] = change_equation_mex(Param); % structで送る変数をまとめる必要あり
+            [H, f] = change_equation_mex_H20(Param); % H=10:_mex_H10
             A = [];
             b = [];
             Aeq = [];
