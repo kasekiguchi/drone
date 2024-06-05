@@ -59,7 +59,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
         case 'l' % landing
           msg(1,1:8) = u;
         case 't' % take off
-          msg(1,1:8) = u
+          msg(1,1:8) = u;
       end
       obj.connector.sendData(gen_msg(msg));
       obj.msg=msg;
