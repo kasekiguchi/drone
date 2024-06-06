@@ -219,6 +219,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % obj.result.state.vi_pre  = vi;
                obj.result.state.ai      = ai;
                obj.result.state.mLi     = mLi;
+               % Qrpy = Quat2Eul(R2q(R0));
+               % agent1.estimator.result.state.Q = Qrpy;
+               % agent1.plant.result.state.Q = Qrpy;
 
            elseif strcmp(obj.com, "Take_off")
                if isempty( obj.base_state ) % first take

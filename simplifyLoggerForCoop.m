@@ -32,9 +32,13 @@ function newLog = simplifyLoggerForCoop(log,agentNum)
         %入力の格納
         for j = 1:newLog.k
             fieldcell2 = fieldnames(agenti.controller.result{1, j});
-            for j2 = 1:1%length(fieldcell2)
-                S = fieldcell2{j2};%State         
+            for j2 = 1:length(fieldcell2)
+                S = fieldcell2{j2};%State
+                if S == "mui"
+                    newLog.controller.(S)(6*j-5:6*j,:) = agenti.controller.result{1, j}.(S);
+                else
                     newLog.controller.(S)(:,j) = agenti.controller.result{1, j}.(S);
+                end
             end
         end
         if log.fExp
