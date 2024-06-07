@@ -6,17 +6,17 @@
 %--------------------------------------------------------------------------------
 clc
 tmp = matlab.desktop.editor.getActive;
-cd(strcat(fileparts(tmp.Filename), '../../'));
+cd(strcat(fileparts(tmp.Filename), '../../../'));
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %--------------------------------------------------------------
 % 先に main.m の Initialize settings を実行すること(※必ず行う)
 %--------------------------------------------------------------
-initialize = input('＜main.mのInitialize settingsを実行しましたか？＞\n はい:1，いいえ:0：','s');
-initialize = str2double(initialize);
-if initialize == 0
-    error('main.m の Initialize settings を実行してください')
-end
+% initialize = input('＜main.mのInitialize settingsを実行しましたか？＞\n はい:1，いいえ:0：','s');
+% initialize = str2double(initialize);
+% if initialize == 0
+%     error('main.m の Initialize settings を実行してください')
+% end
 clear all
 clc
 %---------------------------------------------
@@ -82,11 +82,11 @@ for i = 1:Data.HowmanyDataset
             range = Dataset.range;
             IDX = Dataset.IDX;
             phase2 = Dataset.phase2;
-            vz_z = Dataset.vz_z;
+            vxyz = Dataset.vxyz;
             fprintf('\n')
         else
             setting = 0;
-            Dataset = ImportFromExpData_tutorial(append(loading_filename,'_',num2str(i),'.mat'),setting,datarange,range,IDX,phase2,vz_z);
+            Dataset = ImportFromExpData_tutorial(append(loading_filename,'_',num2str(i),'.mat'),setting,datarange,range,IDX,phase2,vxyz);
         end
     end
     if i==1

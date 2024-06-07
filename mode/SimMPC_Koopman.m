@@ -46,7 +46,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;0.7],"g",[0;0;1],"h",[0.5;0;0.7],"j",[0;0;1]),5}); %P2Pリファレンス
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 %% Sampleクラスもクープマンモデルをセットする
-agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt)); %最適化手法：QP
 
 run("ExpBase");
 
@@ -68,7 +68,10 @@ for i = 1:400
     %pause(1)
     all = toc
 end
- 
+%%
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+
+%%
 % function dfunc(app)
 % % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 % % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

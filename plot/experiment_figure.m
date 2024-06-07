@@ -8,6 +8,7 @@ cd(strcat(fileparts(tmp.Filename), '../../'));
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
+%%
 Fontsize = 15;  
 set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
@@ -18,7 +19,7 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-filename = '0604_HL_P2P_3';
+filename = '0604_HL_P2P_2';
 load(strcat("Data/", filename, ".mat"));
 
 % 115:start
@@ -35,7 +36,7 @@ savefolder = '\Data\Exp_figure_image\';
 close all
 clear Ref
 flg.figtype = 0;
-flg.savefig = 1;
+flg.savefig = 0;
 flg.timerange = 1;
 flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
@@ -60,6 +61,7 @@ end
 % arrayfunで読み込み
 disp('Storing data...');
 Est = cell2mat(arrayfun(@(N) logAgent.estimator.result{N}.state.get(),start_idx:finish_idx,'UniformOutput',false));
+Sen = cell2mat(arrayfun(@(N) logAgent.sensor.result{N}.state.get(),start_idx:finish_idx,'UniformOutput',false));
 Ref(1:3,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.p,start_idx:finish_idx,'UniformOutput',false));
 Ref(7:9,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.v,start_idx:finish_idx,'UniformOutput',false));
 Input = cell2mat(arrayfun(@(N) logAgent.input{N},start_idx:finish_idx,'UniformOutput',false));
@@ -124,6 +126,20 @@ if ~flg.figtype
     set(gcf, "WindowState", "maximized");
     set(gcf, "Position", [960 0 960 1000])
 end
+
+%% sensor
+figure(7);
+sel = 1:3;
+plot(logt, Est(sel,:), '-', 'LineWidth', 1.5); hold on; 
+plot(logt, Sen(sel,:), '--', 'LineWidth', 1.5);
+plot(logt, Ref(sel,:), '-.', 'LineWidth', 1.5); hold off;
+grid on; xlabel('Time [s]'); ylabel('Estimator, Sensor, Reference [m]')
+legend('Est.x', 'Est.y', 'Est.z', 'Sen.x', 'Sen.y', 'Sen.z', 'Ref.x', 'Ref.y', 'Ref.z');
+
+maxerror_x = max(abs(Est(1,:) - Sen(1,:)));
+maxerror_y = max(abs(Est(2,:) - Sen(2,:)));
+maxerror_z = max(abs(Est(3,:) - Sen(3,:)));
+fprintf('Sensor error: %f, %f, %f \n', maxerror_x, maxerror_y, maxerror_z);
 
 %% RMSE
 rmse_x = rmse(Est(1:9,:), Ref(1:9,:), 2);

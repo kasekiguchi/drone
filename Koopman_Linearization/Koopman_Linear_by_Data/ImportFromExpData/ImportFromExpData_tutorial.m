@@ -1,4 +1,4 @@
-function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,range,IDX,phase2,vz_z)
+function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,range,IDX,phase2,vxyz)
 %INPORTFROMEXPDATA ドローンの実験データから入出力を抜き出す関数
 %   expData_Filename : 実験データの保存場所
 %   Data     : 出力変数をまとめる構造体
@@ -7,6 +7,7 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
 %   > Data.Y : 入力後の状態
 %   X, U, Y はデータ数が同じである必要がある
 %   X, Y の状態(Eular Angle) [px py pz roll pitch yaw vx vy vz V_roll V_pitch V_yaw] 順番の確認
+%   setting  : データ結合の際の初期時刻の設定をするかのフラグ
 
     % 実験データ読み込み
     logger = load(expData_Filename);
@@ -111,16 +112,19 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
         % vzからzを計算して学習に使用する場合はコメントイン--------------------------------------------------
         %時間が無くて確認出来なかったが，zからvzを出すのでもよさそう(理解が進んで来たらやってみて！)
         if setting == 1
-            vz_z = input('\n＜zの速度からzを算出して学習に使用しますか？＞\n 0:使用しない 1:使用する：','s');
-            data.vz_z = str2double(vz_z);
+            % vz_z = input('\n＜zの速度からzを算出して学習に使用しますか？＞\n 0:使用しない 1:使用する：','s');
+            % data.vz_z = str2double(vz_z);
+            vxyz = input('\n＜速度からx,y,zを算出して学習に使用しますか？＞\n 0:zのみ 1:x,y,zで使用する：','s');
+            data.vxyz = str2double(vxyz);
         else
-            data.vz_z = vz_z;
+            data.vxyz = vxyz;
         end
-        if data.vz_z == 1
-            data.est.z(1,1) = data.est.p(1,3);
-            for i = 1:data.N-1
-                data.est.z(1,i+1) = data.est.z(1,i) + data.est.v(i,3)*(data.t(i+1,:)-data.t(i,:)); % z[k+1] = z[k] + vz[k]*(t[k+1]-t[k])
-            end
+
+        if data.vxyz == 0; data.est.z(1,1) = data.est.p(1,3); tmpv = data.est.v(:, 3);
+        elseif data.vxyz == 1; data.est.z(1:3,1) = data.est.p(1,1:3); tmpv = data.est.v(:, 1:3);
+        end
+        for i = 1:data.N-1
+            data.est.z(:,i+1) = data.est.z(:,i) + tmpv(i,:)'*(data.t(i+1,:)-data.t(i,:)); % z[k+1] = z[k] + vz[k]*(t[k+1]-t[k])
         end
         %---------------------------------------------------------------------------------------------------
     else
@@ -148,9 +152,16 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
     % クープマン線形化のためのデータセットに結合
     % 行：12状態, 列：時系列
 
-    if data.vz_z == 1 %速度vzから位置zを算出してデータセットに使う場合
+    if data.vxyz == 0 %速度vzから位置zを算出してデータセットに使う場合
         for i=1:data.N-1
         data.X(:,i) = [data.est.p(i,1:2)';data.est.z(:,i);data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
+        data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.z(:,i+1);data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
+        data.U(:,i) = [data.input(i,:)'];
+        data.T(:,i) = [data.t(i,:)];
+        end
+    elseif data.vxyz == 1 % vx, vy, vzから位置を算出する
+        for i=1:data.N-1
+        data.X(:,i) = [data.est.z(:,i);data.est.q(i,:)';data.est.v(i,:)';data.est.w(i,:)'];
         data.Y(:,i) = [data.est.p(i+1,1:2)';data.est.z(:,i+1);data.est.q(i+1,:)';data.est.v(i+1,:)';data.est.w(i+1,:)'];
         data.U(:,i) = [data.input(i,:)'];
         data.T(:,i) = [data.t(i,:)];

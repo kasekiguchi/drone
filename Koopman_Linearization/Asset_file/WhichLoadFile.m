@@ -25,8 +25,8 @@ function file = WhichLoadFile(tra, script, mode)
         % KiyamaX20 = 'KiyamaX20';
         switch mode.code
             case '00'
-                if mode.training_data == 'Kiyama'; file = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
-                elseif mode.training_data == 'KiyamaX20'; file = 'EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle'; end
+                if strcmp(mode.training_data, 'Kiyama'); file = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
+                elseif strcmp(mode.training_data, 'KiyamaX20'); file = 'EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle'; end
             case '01'
                 file = 'EstimationResult_2024-05-02_Exp_Kiyama_code01';
             case '02'

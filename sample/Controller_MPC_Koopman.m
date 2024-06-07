@@ -1,4 +1,4 @@
-function Controller = Controller_MPC_Koopman(~)
+function Controller = Controller_MPC_Koopman(dt)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
@@ -7,7 +7,7 @@ function Controller = Controller_MPC_Koopman(~)
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
-    ssflg = 0;
+    ssflg = 1;
 
     %% change equation 
     switch Controller_param.H
@@ -25,17 +25,17 @@ function Controller = Controller_MPC_Koopman(~)
     load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
 %     load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
 
-    if ssflg == 1
-        args = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), Controller_param.dt); % サンプリングタイムの変更
-        Controller_param.A = args.A; % default: est.A
+    if sslfg == 1
+        ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
+        args = d2d(ssmodel, Controller_param.dt);
+        Controller_param.A = args.A;
         Controller_param.B = args.B;
         Controller_param.C = args.C;
     else
-        Controller_param.A = est.A; % default: est.A
+        Controller_param.A = est.A;
         Controller_param.B = est.B;
         Controller_param.C = est.C;
     end
-
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      torque = 1; % 1:クープマンモデルが総推力トルクのとき

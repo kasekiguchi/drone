@@ -69,7 +69,7 @@ common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R23;
             R33;
             1];
-common_2z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3]; % code06用
+% common_2z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3]; % code06用
 
 %% 磯部先輩観測量 code = 00
 isobe_z = [W1*W2;

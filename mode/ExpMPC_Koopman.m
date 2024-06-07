@@ -29,7 +29,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 
 %2つのコントローラの設定---------------------------------------------------------------------------------------------------
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman(agent)); %最適化手法：QP
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman({agent, dt})); %最適化手法：QP
 agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 %------------------------------------------------------------------------------------------------------------------------
