@@ -174,8 +174,10 @@ only_rmse = 1;
 % saddle
 % P2Px, P2Py
 % hovering
-Exp_tra = 'P2Py';
-fileName = WhichLoadFile(Exp_tra, 2);
+Exp_tra = 'saddle';
+mode.code = '00';
+mode.training_data = 'Kiyama';
+fileName = WhichLoadFile(Exp_tra, 2, []);
 
 if change_reference == 1
     % clear all
@@ -186,7 +188,8 @@ if change_reference == 1
     % experiment_9_5_saddle_estimatordata
     simResult.reference = ImportFromExpData_verification(fileName); %推定精度検証用データの設定
 
-    model = load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle.mat",'est'); % 推定したモデル
+    % model = load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle.mat",'est'); % 推定したモデル
+    model = load(strcat(WhichLoadFile(Exp_tra, 2, mode), '.mat'), 'est');
     est.A = model.est.A;
     est.B = model.est.B;
     est.C = model.est.C;
@@ -331,5 +334,7 @@ if change_reference == 1
     fprintf('SUM RMSE : x = %.4f, y = %.4f, z = %.4f \n', sum(x), sum(y), sum(z));
     fprintf('SUM ERROR: x = %.4f, y = %.4f, z = %.4f \n', sum(xerror_max), sum(yerror_max), sum(zerror_max));
     if only_rmse; close([1:j-1]); end
+
+    disp(WhichLoadFile(Exp_tra, 2, mode));
 end
 
