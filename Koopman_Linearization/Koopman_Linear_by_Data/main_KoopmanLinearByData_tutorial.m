@@ -133,13 +133,13 @@ flg.normalize = 0;
 F = @quaternions_all; % 改造用
 FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
-FileName = strcat(FileName_common, 'Exp_KiyamaX_20data_', 'code00_', Exp_tra); % 使ってるデータセット
+FileName = strcat(FileName_common, 'Exp_KiyamaX_fromVel_', 'code00_', Exp_tra); % 使ってるデータセット
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
-% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddXdirection_20data.mat'); % x方向追加
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromVel.mat'); % x方向追加+xyも速度から算出
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
@@ -165,7 +165,7 @@ fprintf('\n＜クープマン線形化が完了しました＞\n')
 
 %file名を自動で分別
 fprintf('\n＜推定精度検証用データを設定しました＞\n')
-fileName = WhichLoadFile(Exp_tra, 2);
+fileName = WhichLoadFile(Exp_tra, 2, []);
 
 verification_data = fileName;
 simResult.reference = ImportFromExpData_verification(verification_data); %検証用データを格納
