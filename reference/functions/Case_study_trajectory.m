@@ -19,8 +19,8 @@ x = x_0;
 y = y_0;
 z = z_0;
 T=15;
-x = 0.5*sin(2*pi*t/T);
-y = 0.5*cos(2*pi*t/T);
+x = 0.7*sin(2*pi*t/T);
+y = 0.7*cos(2*pi*t/T);
 z = z_0;
 
 ref=@(t)[x;y;z;0];

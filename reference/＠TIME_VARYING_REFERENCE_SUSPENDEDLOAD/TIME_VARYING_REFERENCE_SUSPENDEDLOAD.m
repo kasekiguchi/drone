@@ -44,12 +44,16 @@ classdef TIME_VARYING_REFERENCE_SUSPENDEDLOAD < handle
         function result = do(obj, varargin)  
            %Param={time,FH}
            obj.cha = varargin{2};
-           if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
-                t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
-           else
-                obj.t=varargin{1}.t;
-                t = obj.t;
-           end           
+           % if obj.cha=='f'&& ~isempty(obj.t)    %flightからreferenceの時間を開始
+           %      t = varargin{1}.t-obj.t; % 目標重心位置（絶対座標）
+           % else
+           %      obj.t=varargin{1}.t;
+           %      t = obj.t;
+           % end           
+           if obj.cha=='f'&& isempty(obj.t)    %flightからreferenceの時間を開始
+                obj.t=varargin{1}.t; % 目標重心位置（絶対座標）
+           end  
+           t = varargin{1}.t-obj.t;
            obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
            obj.result.state.p = obj.result.state.xd(1:3);
            result = obj.result;
