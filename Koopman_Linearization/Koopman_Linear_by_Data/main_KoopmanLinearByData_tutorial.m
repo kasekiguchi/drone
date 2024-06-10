@@ -70,7 +70,11 @@ fprintf('\n選択されている観測量：%s\n',func2str(F))
 % Data.Y 入力後の対象の状態
 
 fprintf('\n＜データセットの結合を行います＞\n')
-
+%%
+if ~exist('FileName')
+    loading_filename = 'Exp_0604'; 
+    Data.HowmanyDataset = 170;
+end% ここだけ実行時
 for i = 1:Data.HowmanyDataset
     if contains(loading_filename,'.mat')
         Dataset = ImportFromExpData_tutorial(loading_filename); %ImportFromExpData_tutorial:データセットをくっつけるための関数
