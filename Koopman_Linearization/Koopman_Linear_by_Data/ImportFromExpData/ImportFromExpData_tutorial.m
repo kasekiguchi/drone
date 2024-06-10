@@ -120,9 +120,14 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
             data.vxyz = vxyz;
         end
 
-        if data.vxyz == 0; data.est.z(1,1) = data.est.p(1,3); tmpv = data.est.v(:, 3);
-        elseif data.vxyz == 1; data.est.z(1:3,1) = data.est.p(1,1:3); tmpv = data.est.v(:, 1:3);
+        if data.vxyz == 0 %zのみ
+            data.est.z(1,1) = data.est.p(1,3); %位置の一時保管場所
+            tmpv = data.est.v(:, 3);
+        elseif data.vxyz == 1 %xyz
+            data.est.z(1:3,1) = data.est.p(1,1:3); 
+            tmpv = data.est.v(:, 1:3)';
         end
+        %速度から算出
         for i = 1:data.N-1
             data.est.z(:,i+1) = data.est.z(:,i) + tmpv(i,:)'*(data.t(i+1,:)-data.t(i,:)); % z[k+1] = z[k] + vz[k]*(t[k+1]-t[k])
         end

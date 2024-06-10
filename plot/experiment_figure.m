@@ -1,8 +1,6 @@
 %%% 実機実験の結果をplotするファイル
 %% Initial settingclear;
 clear;
-% addpath(fileparts(matlab.desktop.editor.getActive().Filename));
-% cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
 tmp = matlab.desktop.editor.getActive;
 cd(strcat(fileparts(tmp.Filename), '../../'));
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
