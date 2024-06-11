@@ -19,10 +19,6 @@ function file = WhichLoadFile(tra, script, mode)
                 elseif script == 2; file = 'experiment_11_15_hovering'; end
         end
     else
-        % mode.code = '00';
-        % mode.training_data = 'Kiyama';
-        % Kiyama = 'Kiyama';
-        % KiyamaX20 = 'KiyamaX20';
         switch mode.code
             case '00'
                 if strcmp(mode.training_data, 'Kiyama'); file = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
@@ -41,6 +37,8 @@ function file = WhichLoadFile(tra, script, mode)
                 file = 'EstimationResult_2024-05-17_Exp_Kiyama_code05_1';
             case '06'
                 file = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
+                if strcmp(mode.training_data, 'KiyamaX20fromVel'); file = 'EstimationResult_2024-06-11_Exp_KiyamaX20_fromVel_code06_saddle';
+                end
             otherwise
                 error('リストにない！！');
         end

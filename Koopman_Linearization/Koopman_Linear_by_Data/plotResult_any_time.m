@@ -29,7 +29,7 @@ else;                             m = 2; n = 3; end
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
 % 木山データ; Kiyama
 % x方向データの増加; KiyamaX20
-mode.code = '00';
+mode.code = '06';
 % mode.training_data = 'Kiyama';
 % mode.training_data = 'KiyamaX20'; 
 mode.training_data = 'KiyamaX20fromVel';
