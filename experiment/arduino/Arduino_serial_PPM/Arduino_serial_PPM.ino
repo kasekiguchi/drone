@@ -25,7 +25,7 @@ char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127まで
 // https://create-it-myself.com/research/study-ppm-spec/
 // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
 #define PPM_PERIOD 22500 // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
-#define TIME_LOW 400     // PPM信号 LOWパルス幅 [us]
+#define TIME_LOW 360     // PPM信号 LOWパルス幅 [us]
 #define CH_MIN 0         // PPM幅の最小 [us] おそらくMATLABから送信される信号の最小を定義
 #define CH_NEUTRAL 500   // PPM幅の中間 [us] おそらくMATLABから送信される信号の中間を定義
 #define CH_MAX 1000      // PPM幅の最大 [us] おそらくMATLABから送信される信号の最大を定義
@@ -33,8 +33,8 @@ char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127まで
 // TIME_LOW + CH_OFFSET = 2000 = 2 [ms]　
 // TIME_LOW + CH_MAX + CH_OFFSET = 1000 = 1 [ms]　計算が合わないこの計算式では3[ms]となるはずである．　400 + 1000 + 1620 = 3020　もしくは，CH_MAXが-となっていることが正しいと考えられる
 // volatile uint16_t CH_OFFSET; // 共通オフセット値 2*CH_MAX - TIME_LOW + 20 = 2000 - 400 + 20 = 1620 ★オフセットとは周波数オフセットを表しているのか確認
-#define CH_OFFSET 1620        // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
-#define TOTAL_CH_OFFSET 12960 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
+#define CH_OFFSET 1655       // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
+#define TOTAL_CH_OFFSET 13240 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
 //（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
 // CH1の値が他のCHの値に比べて不安定なのは上記の動作が原因だと考えられる　transmitterのプログラムで行っている可能性あり AUX5の意味が不明AUX4までしか定義されていないはずである
 // volatile uint16_t TOTAL_CH_OFFSET = 0; // CH_OFFSETの合計
@@ -121,7 +121,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
         pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]); //16bit整数型(-32768~32767)の受信データ * 100 + 16bit整数型(-32768~32767)の受信データ[i+8] 全部で16バイトあるため
         if (i == 0) //チャンネルが始まっていないとき(Start)
         {
-          pw[0] = pw[0] + 5; // pw = ? + 5
+          pw[0] = pw[0]; // pw = ? + 5 
         }
         if (pw[i] < CH_MIN) //受け取った信号が0未満の時
         {
@@ -134,6 +134,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
 
         pw[i] = CH_OFFSET - pw[i]; // transmitter システムの場合必要 1620-pw 1620 - pw ここでは信号が上下限を超えた時を決定している
         REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
+        
 
         /*
     if (i == 4)
@@ -171,6 +172,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       // last_received_time = micros();
       isReceive_Data_Updated = true; //isReceive_Data_Updatedにtrueを代入
       start_H = REMAINING_W - 9 * TIME_LOW; // 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
+      //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] -120 ) - 9 * TIME_LOW;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
     else if (micros() - last_received_time >= 500000) // Stop propellers after 0.5s signal lost. 0.5s信号が送られてこなかったら実行する 停止状態となる信号を送信するためのもの
@@ -184,6 +186,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       pw[6] = CH_OFFSET;              // AUX3 1620
       pw[7] = CH_OFFSET;              // AUX4 1620
       start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
+      //start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
       //        digitalWrite( GLED_PIN, HIGH );
       // digitalWrite( RLED_PIN, LOW );
     }
@@ -232,6 +235,7 @@ void setupPPM() // ---------- setup ppm signal configuration　ppm信号構成�
   pw[6] = CH_OFFSET;              // AUX3 1620
   pw[7] = CH_OFFSET;              // AUX4 1620
   start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; //22500-(12960 - 3*500 - 0) - 9 * 400 = 7440 Startのパルス幅
+  // start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
   // CPUのクロック周波数でPPM信号を制御
   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
   Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
