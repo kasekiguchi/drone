@@ -117,17 +117,17 @@ if size(Data.X,1)==13 %特に気にしなくていい
 end
 
 %% ここから始めるとき
-clear; clc;
-flg.bilinear = 0;
-flg.normalize = 0;
-F = @quaternions_all; % 改造用
-FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_');
-FileName = strcat(FileName_common, 'Exp_Kiyama_code03_2');
-activeFile = matlab.desktop.editor.getActive;
-nowFolder = fileparts(activeFile.Filename);
-% targetpath=append(nowFolder,'\',FileName);
-targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
+% clear; clc;
+% flg.bilinear = 0;
+% flg.normalize = 0;
+% F = @quaternions_all; % 改造用
+% FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_code03_');
+% FileName = strcat(FileName_common, 'Exp_Kiyama_code03_2');
+% activeFile = matlab.desktop.editor.getActive;
+% nowFolder = fileparts(activeFile.Filename);
+% % targetpath=append(nowFolder,'\',FileName);
+% targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
 
 %% Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)

@@ -39,8 +39,8 @@ agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent))
 % 4入力：model_get_name = 4入力モデルに変更
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
-% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",20,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
+%agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+ agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",20,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;0.7],"g",[0;0;1],"h",[0.5;0;0.7],"j",[0;0;1]),5}); %P2Pリファレンス
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 %% Sampleクラスもクープマンモデルをセットする
@@ -55,5 +55,5 @@ app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te
 app.logger.plot({1, "q", "e"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
- Graphplot(app)
+Graphplot(app)
 end
