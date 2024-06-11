@@ -2,21 +2,23 @@
 clear
 close all
 tmp = matlab.desktop.editor.getActive;
-cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダパス
+cd(strcat(fileparts(tmp.Filename), '../../')); % droneまでのフォルダパス
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
-% model load
+%% model load
 tra = 'saddle';
 script = [];
-mode.code = '06';
-mode.training_data = 'Kiyama';
+mode.code = '00';
+% mode.training_data = 'Kiyama';
+mode.training_data = 'Kiyama_fromeVel';
 % mode.training_data = 'KiyamaX20';
 % mode.training_data = 'KiyamaX20fromVel';
 
-filename = WhichLoadFile(tra, script, mode);
+% filename = WhichLoadFile(tra, script, mode);
 % mode.training_data = 'Kiyama_change';
 % filename = 'EstimationResult_2024-06-10_Exp_KiyamaX20_code00_saddle_again';
+filename = 'EstimationResult_2024-06-11_Exp_Kiyama_fromVel_code00_saddle';
 load(strcat(filename, '.mat'), 'est');
 
 % 可制御性

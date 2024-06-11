@@ -83,7 +83,7 @@ isobe_z = [W1*W2;
             W2*sin(Q1)*sin(Q2)/cos(Q1);
             W3*cos(Q1)*sin(Q2)/cos(Q1)
             ];
- % z = [common_z; isobe_z];
+ z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
 % F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
@@ -155,6 +155,6 @@ isobe_z = [W1*W2;
 % z = [common_z; diff_param_z];
 
 %% 姿勢角速度がprimeで取得できないことから姿勢角速度を除く状態を基本構成 code = 06
-z = [common_2z; isobe_z];
+% z = [common_2z; isobe_z];
 end
 

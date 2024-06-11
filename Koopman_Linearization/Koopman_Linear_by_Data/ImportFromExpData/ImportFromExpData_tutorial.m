@@ -129,7 +129,7 @@ function data = ImportFromExpData_tutorial(expData_Filename,setting,datarange,ra
         end
         %速度から算出
         for i = 1:data.N-1
-            data.est.z(:,i+1) = data.est.z(:,i) + tmpv(i,:)'*(data.t(i+1,:)-data.t(i,:)); % z[k+1] = z[k] + vz[k]*(t[k+1]-t[k])
+            data.est.z(:,i+1) = data.est.z(:,i) + (tmpv(:,i)'*(data.t(i+1,:)-data.t(i,:)))'; % z[k+1] = z[k] + vz[k]*(t[k+1]-t[k])
         end
         %---------------------------------------------------------------------------------------------------
     else
