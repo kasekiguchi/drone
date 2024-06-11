@@ -8,18 +8,18 @@ syms t real
 % o0d, do0d ：牽引物の角速度・角加速度
 
 %3偕微分
-xd=xdt(t);
-dxd =diff(xd,t);
-d2xd =diff(dxd,t);
-d3xd =diff(d2xd,t);
-d4xd =diff(d3xd,t);
-d5xd =diff(d4xd,t);
+x0d=xdt(t);
+dx0d =diff(x0d,t);
+d2x0d =diff(dx0d,t);
+d3x0d =diff(d2x0d,t);
+d4x0d =diff(d3x0d,t);
+d5x0d =diff(d4x0d,t);
 
-norm_dxd = sqrt(dxd(1:2)'*dxd(1:2));%dxdはz方向を0にしているのでノルムはx,y方向で作成!!!!!!!!!!
-if norm_dxd == 0 || dxd(1) == 0
+norm_dxd = sqrt(dx0d(1:2)'*dx0d(1:2));%dxdはz方向を0にしているのでノルムはx,y方向で作成!!!!!!!!!!
+if norm_dxd == 0 || dx0d(1) == 0
     R0d = eye(3);
 else
-    r0x = [dxd(1);dxd(2);0] / norm_dxd;
+    r0x = [dx0d(1);dx0d(2);0] / norm_dxd;
     % r0x = % [dxd(1),dxd(2),0]'/norm(dxd);%norm(dxd)でabsが出現し，do0dでt=0の時にNaNになる．
     r0z = [0;0;1];%z
     r0y = cross(r0z,r0x);%y
@@ -37,5 +37,5 @@ dR0d = diff(R0d,t);%回転行列の時間微分，目標速度
 
 o0d = Vee(R0d'*dR0d);%理想的or目標とするペイロード角速度
 do0d = diff(o0d,t);%理想的or目標とするペイロード角加速度
-ref = matlabFunction([xd;dxd;d2xd;d3xd;d4xd;d5xd;o0d;do0d;reshape(R0d,[],1)],'vars',t);
+ref = matlabFunction([x0d;dx0d;d2x0d;d3x0d;d4x0d;d5x0d;o0d;do0d;reshape(R0d,[],1)],'vars',t);
 end

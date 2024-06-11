@@ -65,8 +65,10 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             % if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
             %     obj.result.input = uf + us;
             % end
-            obj.result.input = uf + us;
-            % obj.self.controller.result.input = obj.result.input; 
+            % obj.result.input = uf + us;
+            % obj.self.controller.result.input = obj.result.input;
+            tmp = uf + us;
+            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
 
             result = obj.result;
         end

@@ -43,7 +43,7 @@ lgnd.drone="drone" + droneID;
 % "input"	"u"	"inner_input" 
 % "inputTrust" "inputRoll"	"inputPitch"	"inputYaw"
 % "inputsum"	"inputsumT"	"inputsumTq"	"inputTrust"
-% "mAll" "mL"	"ai"	
+% "mAll" "mL"	"ai"	"mui"
 % "DronePayload1"	"linkDir1" "DronePayload2"	"linkDir2"	"DronePayload3"	"linkDir3"	"DronePayload4"	"linkDir4"	"DronePayload5" "linkDir5"	"DronePayload6"	"linkDir6"
 % ["DronePayload"+logger.target(1:end-1)]
 % "rmse" "xrmse"	"yrmse"	"zrmse"
@@ -59,8 +59,8 @@ lgnd.drone="drone" + droneID;
 
 nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],["attitude0"	"t_qroll0"	"t_qpitch0" "t_qyaw0"],["velocity0"	"t_vx0"	"t_vy0"	"t_vz0"	],["angular_velocity0"	"t_wroll0" "t_wpitch0"	"t_wyaw0"],...
     "three_D0",["t_p" "t_x" "t_y"	"t_z"],["error"	"t_errx"	"t_erry"	"t_errz"],["attitude"	"t_qroll"	"t_qpitch"	"t_qyaw"],["velocity"	"t_vx"	"t_vy" "t_vz"],["angular_velocity"	"t_wroll"	"t_wpitch"	"t_wyaw"],...
-    "three_D",["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"input",["mAll","mL"],"DronePayload"+droneID,"linkDir"+droneID};%比較するとき複数まとめる
-multiFigure.layout = {[2,2],[2,2],[2,2],[2,2],[2,2],[1,1],[2,2],[2,2],[2,2],[2,2],[2,2],[1,1],[2,2],[1,1],[1,2],[2,3],[2,3]};
+    "three_D",["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"input",["mAll","mL"],"DronePayload"+droneID,"linkDir"+droneID,"mui"+droneID,"ai"+droneID};%比較するとき複数まとめる
+multiFigure.layout = {[2,2],[2,2],[2,2],[2,2],[2,2],[1,1],[2,2],[2,2],[2,2],[2,2],[2,2],[1,1],[2,2],[1,1],[1,2],[2,3],[2,3],[2,3],[2,3]};
 % multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
 multiFigure.title = string(zeros(1,length(nM)));%[" state", " subsystem"];%title name
 
@@ -277,7 +277,13 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             fieldVar = fieldnames(loggers{i}.(fieldLog{j}));
             for j2 = 1:length(fieldVar)
                 F = fieldLog{j}(1);
-                eval([F,fieldVar{j2},'{i}= loggers{i}.',fieldLog{j},'.',fieldVar{j2},'(:,kf(i):ke(i));']);
+                if i == 1 
+                    if fieldVar{j2} ~= "mui"
+                       eval([F,fieldVar{j2},'{i}= loggers{i}.',fieldLog{j},'.',fieldVar{j2},'(:,kf(i):ke(i));']);
+                    end
+                else
+                    eval([F,fieldVar{j2},'{i}= loggers{i}.',fieldLog{j},'.',fieldVar{j2},'(:,kf(i):ke(i));']);
+                end
             end
         end
         %=PAYLOAD=================================================
@@ -320,9 +326,12 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             vx0{1} = ev{i}(1,:);
             vy0{1} = ev{i}(2,:);
             vz0{1} = ev{i}(3,:);
-            qroll0{1} = eQ{i}(1,:);
-            qpitch0{1} = eQ{i}(2,:);
-            qyaw0{1} = eQ{i}(3,:);
+            % qroll0{1} = eQ{i}(1,:);
+            % qpitch0{1} = eQ{i}(2,:);
+            % qyaw0{1} = eQ{i}(3,:);
+            qroll0{1} = cQeul{i}(1,:);
+            qpitch0{1} = cQeul{i}(2,:);
+            qyaw0{1} = cQeul{i}(3,:);
             wroll0{1} = eO{i}(1,:);
             wpitch0{1} = eO{i}(2,:);
             wyaw0{1} = eO{i}(3,:);
@@ -368,6 +377,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             mLi{j} = rmLi{i};
             mAll{i} =  rmLi{i};
             ai{j} = rai{i};
+            mui{j} = rmui{i};
         end
     end
         for i = 1:logNum-1
@@ -464,13 +474,15 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         allData.inputPitch = {struct('x',{time2},'y',{cinputP}), struct('x','time (s)','y','$T_{pitch}$ (Nm)'), CDi,add_option([],option,addingContents)};
         allData.inputYaw = {struct('x',{time2},'y',{cinputY}), struct('x','time (s)','y','$T_{yaw}$ (Nm)'), CDi,add_option([],option,addingContents)};
         allData.mL = {struct('x',{time2},'y',{mLi}), struct('x','time (s)','y','mass (kg)'), Ci,add_option([],option,addingContents)};
-        allData.ai = {struct('x',{time2},'y',{ai}), struct('x','time (s)','y','accele (m/s^2)'), Ci,add_option([],option,addingContents)};
+        % allData.ai = {struct('x',{time2},'y',{ai}), struct('x','time (s)','y','accele (m/s^2)'), Ci,add_option([],option,addingContents)};
+        % allData.mui = {struct('x',{time2},'y',{mui}), struct('x','time (s)','y','tension (N)'), Ci,add_option([],option,addingContents)};
         for i = 1:logNum-1
             %ペイロードと機体!!!
-            allData.("DronePayload"+string(i)) = {struct('x',{[time2(i),time2(i)]},'y',{[ep(i),epLi(i)]}), struct('x','time (s)','y','position (m)'), ["$x_{0}$","$y_{0}$","$z_{0}$",combineLgntI(["$x$","$y$","$z$"],i)] ,add_option([],option,addingContents)};
+            allData.("DronePayload"+string(i)) = {struct('x',{[time(1),time2(i)]},'y',{[ep(1),epLi(i)]}), struct('x','time (s)','y','position (m)'), ["$x_{0}$","$y_{0}$","$z_{0}$",combineLgntI(["$x$","$y$","$z$"],i)] ,add_option([],option,addingContents)};
             t2 = {ones(lt(i+1),3).*time2{i}'};
             allData.("linkDir"+string(i)) = {struct('x',{[t2,t2,t2]},'y',{[{muid_units(:,:,i)'},{linki(:,:,i)'},{epTi{i}'}]}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~\mu d$","$y~\mu d$","$z~\mu d$","$x~Link$","$y~Link$","$z~Link$","$x~pT$","$y~pT$","$z~pT$"] ,i),add_option([],option,addingContents)};
-            
+            allData.("mui"+string(i)) = {struct('x',{t2},'y',{{mui{i}'}}), struct('x','time (s)','y','tension (N)'), combineLgntI(["$x~\mu$","$y~\mu$","$z~\mu$"],i),add_option([],option,addingContents)};
+            allData.("ai"+string(i)) = {struct('x',{t2},'y',{{ai{i}'}}), struct('x','time (s)','y','acceleration (N)'), combineLgntI(["$x~a$","$y~a$","$z~a$"],i),add_option([],option,addingContents)};
         end
         %二乗誤差平均
         RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];

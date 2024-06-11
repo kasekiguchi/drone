@@ -40,19 +40,14 @@ classdef CSLC < handle
 
     function result = do(obj,varargin)
       model = obj.self.estimator.result.state;
-      ref = obj.self.reference.result.state;
-      x = model.get(["p"  "Q" "v"    "O"    "qi"    "wi"  "Qi"  "Oi"]);
+      x = model.get(["p","Q","v","O","qi","wi","Qi","Oi"]);
+      ref = obj.self.reference.result.state.xd;%Muid_6の想定：Xd = [x0d;dx0d;ddx0d;dddx0d;o0d;do0d]; % R0d は除いている
+      xd = [ref(1:12);ref(19:24)];%Muid_6に合うように整頓ref=[x0d;dx0d;d2x0d;d3x0d;d4x0d;d5x0d;o0d;do0d;reshape(R0d,[],1)]
       qi = reshape(model.qi,3,obj.N);
-      Ri = obj.toR(model.Qi);
       R0 = obj.toR(model.Q);
-      %xd = 0*ref.xd;
-      xd = ref.xd;
-      R0d = reshape(xd(end-8:end),3,3);
-      %R0d = eye(3);
-      % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
-      %[obj.result.input,obj.dqid,obj.ddqid] = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger,obj.dqid,obj.ddqid);
-      % obj.result.input = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger);
+      R0d = reshape(ref(end-8:end),3,3);
       obj.result.mui = obj.gen_muid(x,qi,R0,R0d,xd,obj.gains,obj.P,obj.Pdagger);%[muid;mui]
+      obj.result.Qeul = Quat2Eul(model.Q);%オイラー角を保存する用
       result = obj.result;
     end
   end
