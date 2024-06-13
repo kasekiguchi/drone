@@ -20,7 +20,7 @@ classdef CSLC < handle
     function obj = CSLC(self,param)
       obj.self = self;
       obj.P = self.parameter.get("all","row");
-      obj.result.input = zeros(self.estimator.model.dim(2),1);
+      % obj.result.input = zeros(self.estimator.model.dim(2),1);
       P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],self.parameter.rho));%張力の仮想入力を求めるための行列P
       obj.Pdagger = pinv(P);
       obj.N = size(P,2)/3;
@@ -36,6 +36,13 @@ classdef CSLC < handle
       end
       obj.dqid = 0;
       obj.ddqid = 0;
+      %初期入力設定
+      parameters = self.parameter;
+      input = zeros(4*obj.N,1);
+        for i = 1:obj.N
+            input(4*i-3) = (parameters.mi(i) + parameters.m0/obj.N)*parameters.g;
+        end
+      obj.result.input = input;
     end
 
     function result = do(obj,varargin)
