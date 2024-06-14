@@ -51,7 +51,7 @@ agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_M
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
-for i = 1:400
+for i = 1:te/dt
     if i < 20 || rem(i, 10) == 0 end
     tic
     agent(1).sensor.do(time, 'f');
