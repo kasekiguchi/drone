@@ -20,9 +20,28 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); % P2Pを複数回行う
 agent.controller = MCMPC_CONTROLLER(agent, Controller_MCMPC(agent));
 run("ExpBase");
-function dfunc(app)
-app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
+
+%% modeファイル内でプログラムを回す
+for i = 1:400
+    if i < 20 || rem(i, 10) == 0; end
+    tic
+    agent(1).sensor.do(time, 'f');
+    agent(1).estimator.do(time, 'f');
+    agent(1).reference.do(time, 'f');
+    agent(1).controller.do(time, 'f');
+    agent(1).plant.do(time, 'f');
+    logger.logging(time, 'f', agent);
+    time.t = time.t + time.dt;
+    %pause(1)
+    all = toc
 end
+%%
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+
+%%
+% function dfunc(app)
+% app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
+% end

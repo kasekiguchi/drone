@@ -47,8 +47,8 @@ methods
         data = obj.motive.result;
 
         if isempty(obj.old_time)
-            obj.old_time = data.time;
-%             obj.old_time = varargin{1,1};
+            % obj.old_time = data.time;
+            obj.old_time = varargin{1,1}; % for sim
         end
 
         id = obj.rigid_num(1);
