@@ -20,15 +20,15 @@ boolean fInitial = true; //変数boolean fInitialにtrueを格納
 /////////////////// PPM関係 ////////////////////
 #define OUTPUT_PIN 2 // ppm output pin　2ピン(D2)をOUTPUT_PINと定義　このピンからPPM信号を出力する
 char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127までの数値として扱われる　受信したデータの格納場所packetBufferを定義している　[255]は一度に受信できる最大のバッファサイズ
-#define TOTAL_INPUT 4 // number of input channels　★MATLABからは8つの値を送信しているはずであるので8となるのではないか
+#define TOTAL_INPUT 4 // number of input channels　使用されていないため考えなくてよい
 #define TOTAL_CH 8    // number of channels 1フレームにおけるチャンネルの数を8と定義
 // https://create-it-myself.com/research/study-ppm-spec/
 // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
 #define PPM_PERIOD 22500 // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
 #define TIME_LOW 360     // PPM信号 LOWパルス幅 [us]
-#define CH_MIN 0         // PPM幅の最小 [us] おそらくMATLABから送信される信号の最小を定義
-#define CH_NEUTRAL 500   // PPM幅の中間 [us] おそらくMATLABから送信される信号の中間を定義
-#define CH_MAX 1000      // PPM幅の最大 [us] おそらくMATLABから送信される信号の最大を定義
+#define CH_MIN 0         // PPM幅の最小 [us] MATLABから送信される信号の最小を定義　オフセットにも関係
+#define CH_NEUTRAL 500   // PPM幅の中間 [us] MATLABから送信される信号の中間を定義　オフセットにも関係
+#define CH_MAX 1000      // PPM幅の最大 [us] MATLABから送信される信号の最大を定義　オフセットにも関係
 // PPM Channelの基本構造
 // TIME_LOW + CH_OFFSET = 2000 = 2 [ms]　
 // TIME_LOW + CH_MAX + CH_OFFSET = 1000 = 1 [ms]　計算が合わないこの計算式では3[ms]となるはずである．　400 + 1000 + 1620 = 3020　もしくは，CH_MAXが-となっていることが正しいと考えられる
@@ -46,7 +46,7 @@ volatile boolean isReceive_Data_Updated = false; //boolean isReceive_Data_Update
 volatile uint16_t start_H = PPM_PERIOD; //16bit整数型(-32768~32767)start_HにPPM_PERIOD(22500)を代入 スタート時のパルス幅
 volatile uint16_t start_Hh = PPM_PERIOD; //16bit整数型(-32768~32767)start_HhにPPM_PERIOD(22500)を代入
 volatile uint16_t REMAINING_W; //16bit整数型(-32768~32767)REMAINING_Wを定義
-
+volatile uint16_t plus = 0;
 //////////// シリアル通信が途絶えたとき用 ////////////////////////////////
 volatile unsigned long last_received_time;
 
@@ -119,10 +119,10 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       for (i = 0; i < TOTAL_CH; i++) //i=0から始めて，i<8まで1ずつ加算して繰り返す　恐らく8チャンネル繰り返せるようにしている
       {
         pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]); //16bit整数型(-32768~32767)の受信データ * 100 + 16bit整数型(-32768~32767)の受信データ[i+8] 全部で16バイトあるため
-        if (i == 0) //チャンネルが始まっていないとき(Start)
-        {
-          pw[0] = pw[0]; // pw = ? + 5 
-        }
+        // if (i == 0) //チャンネルが始まっていないとき(Start)
+        // {
+        //   pw[0] = pw[0]; // pw = ? + 5 
+        // }
         if (pw[i] < CH_MIN) //受け取った信号が0未満の時
         {
           pw[i] = CH_MIN; // pw = 0
@@ -131,7 +131,6 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
         {
           pw[i] = CH_MAX; // pw = 1000
         }
-
         pw[i] = CH_OFFSET - pw[i]; // transmitter システムの場合必要 1620-pw 1620 - pw ここでは信号が上下限を超えた時を決定している
         REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
         
@@ -171,8 +170,13 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       }
       // last_received_time = micros();
       isReceive_Data_Updated = true; //isReceive_Data_Updatedにtrueを代入
-      start_H = REMAINING_W - 9 * TIME_LOW; // 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
-      //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] -120 ) - 9 * TIME_LOW;
+      if (pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] <= 11068)
+        {
+          plus = 694;
+          pw[0] = pw[0] - 6;
+        }
+      start_H = REMAINING_W - 9 * TIME_LOW + plus; // 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
+      //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
     else if (micros() - last_received_time >= 500000) // Stop propellers after 0.5s signal lost. 0.5s信号が送られてこなかったら実行する 停止状態となる信号を送信するためのもの
