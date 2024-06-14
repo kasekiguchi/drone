@@ -77,7 +77,7 @@ function Controller = Controller_MCMPC(~)
 
 
     Controller.name = "mcmpc";
-    Controller.type = "MCMPC_CONTROLLER";
+    Controller.type = "MCMPC_controller";
     Controller.param = Controller_param;
 
 end

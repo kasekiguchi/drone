@@ -1,4 +1,4 @@
-classdef MPC_CONTROLLER <handle
+classdef MPC_controller <handle
     % MCMPC_CONTROLLER MPCのコントローラー
     % Imai Case study 
     % 勾配MPCコントローラー
@@ -24,7 +24,7 @@ classdef MPC_CONTROLLER <handle
     end
 
     methods
-        function obj = MPC_CONTROLLER(self, param)
+        function obj = MPC_controller(self, param)
             %-- 変数定義
             obj.self = self;
             %---MPCパラメータ設定---%

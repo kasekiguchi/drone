@@ -1,3 +1,11 @@
+%% modeファイルから実行時に必要 ====================
+clc
+tmp = matlab.desktop.editor.getActive;
+cd(strcat(fileparts(tmp.Filename), '../../'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+%% ==================================================
+
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 10; % terminal time
@@ -19,7 +27,7 @@ agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Eule
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); % P2Pを複数回行う
-agent.controller = MCMPC_CONTROLLER(agent, Controller_MCMPC(agent));
+agent.controller = MCMPC_controller(agent, Controller_MCMPC(agent));
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
@@ -36,7 +44,7 @@ for i = 1:400
     %pause(1)
     all = toc
 end
-%%
+%% 途中で止めた時もセクション実行でグラフ出せる
 logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 
 %%

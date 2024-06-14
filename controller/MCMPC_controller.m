@@ -1,4 +1,4 @@
-classdef MCMPC_CONTROLLER < handle
+classdef MCMPC_controller < handle
     % MCMPC_CONTROLLER MCMPCのコントローラー
     
     properties
@@ -20,7 +20,7 @@ classdef MCMPC_CONTROLLER < handle
     end
     
     methods
-        function obj = MCMPC_CONTROLLER(self, param)
+        function obj = MCMPC_controller(self, param)
             %-- 変数定義
             obj.self = self;
             %---MPCパラメータ設定---%

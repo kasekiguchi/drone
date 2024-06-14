@@ -38,7 +38,7 @@ function Controller = Controller_MPC(Agent)
 
 %     Controller.name = "mcmpc";
     Controller.name = "mpc";
-    Controller.type = "MPC_controller_org";
+    Controller.type = "MPC_controller";
     Controller.param = Controller_param;
 
 end
