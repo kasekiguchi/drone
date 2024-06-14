@@ -107,6 +107,7 @@ end
 
 fprintf('\n＜データセットの結合が完了しました＞\n')
 
+%% 正規化
 flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
 if flg.normalize == 1 %正規化を行うか(正規化については自分で調べて！)
     Ndata = Normalization(Data);
@@ -139,7 +140,8 @@ FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-d
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 % exp_data = 'Exp_KiyamaX20'; %20データ増やしたzのみ速度から
 % exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
-exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
+% exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
+exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
 FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
@@ -149,7 +151,8 @@ targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromVel.mat'); % x方向追加+xyも速度から算出
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromZvel.mat');
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
