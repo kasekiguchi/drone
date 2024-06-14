@@ -10,13 +10,15 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
+%load("circle0607_load_model_Log(07-Jun-2024_18_00_33).mat");
+%load("circle_0610_kosyounosyunnkann_Log(10-Jun-2024_19_10_49).mat");%これHL
 load("circle_0610_Log(10-Jun-2024_17_50_00).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
 %log = logger;%永久用（↓とどっちかをコメントアウト）
 % log =gui.logger.Data;%gui用
 %%
-figtype = 2;%1でグラフを1タブづつ，2で1タブにグラフを多数．
+figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 % flight_start_idx = find(log.Data.phase==102, 1, 'first');
