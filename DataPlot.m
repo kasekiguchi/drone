@@ -324,7 +324,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             for j =1:logNum-1
                 reMui = reshape(cmui{i}(:,j),6,[]);
                 muid = reMui(1:3,:);
-                muid_norm = sum(sqrt(muid.^2));
+                muid_norm = sqrt(sum(muid.^2));
                 muid_unit = muid./muid_norm;
                 muid_units(:,:,j) = muid_unit;
             
@@ -418,7 +418,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         C = lgnd.payload;
         Rc = [C,"Reference"];
         Rc0 = num2cell([Rc(1),Rc(end)]);
-        C0 = num2cell([C(1),Rc(end)]);
+        C0 = num2cell(C(1));
         Rci = num2cell(Rc(2:end));
         Ci = num2cell(C(2:end));
         CDi = num2cell(lgnd.drone);

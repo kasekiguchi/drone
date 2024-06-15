@@ -202,12 +202,12 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % delta_a0 = v0 - a0
                % delta_ai = vi - ai
            %ペイロードの速度からリンクの速度を求めてそこからリンクの加速度求める
-               % id = obj.self.id;
-               % muid_mui = agent1.controller.result.mui; %3xN 
-               % % muid = muid_mui(1:3,id-1); %3x1%理想の張力
+               id = obj.self.id;
+               muid_mui = agent1.controller.result.mui; %3xN 
+               mui = muid_mui(1:3,id-1); %3x1%理想の張力
                % mui = muid_mui(4:6,id-1); %3x1%現実の張力
-               % ai = (vi - obj.vi_pre)/dt; 
-               % obj.vi_pre = vi;
+               ai = (vi - obj.vi_pre)/dt; 
+               obj.vi_pre = vi;
 
            %分割後質量推定 mLi*ai = mLi*g + mui
                 %muiなんか質量が1/2になるtodo何目線から見るかで加速度の値を変える必要あり？
