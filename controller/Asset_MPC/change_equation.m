@@ -42,26 +42,26 @@ function [H, f] = change_equation(Param)
     S = zeros(Horizon*size(Xc,1), Horizon*length(B(1,:)));
     
     
-    Rm = blkdiag(R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, zeros(4)); %R
-    Am = [A; A^2; A^3; A^4; A^5; A^6; A^7; A^8; A^9; A^10; A^11; A^12; A^13; A^14; A^15; A^16; A^17; A^18; A^19; A^20]; %A
-    Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
-    qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
+    % Rm = blkdiag(R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, zeros(4)); %R
+    % Am = [A; A^2; A^3; A^4; A^5; A^6; A^7; A^8; A^9; A^10; A^11; A^12; A^13; A^14; A^15; A^16; A^17; A^18; A^19; A^20]; %A
+    % Qm = blkdiag(CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQC, CQfC); %Q
+    % qm = blkdiag(QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QC, QfC); %Q'
 
     % ホライズンの値によらない
-%     Rm = cell(1,Horizon);
-%     Qm = cell(1,Horizon);
-%     qm = cell(1,Horizon);
-%     Am = [];
-%     for i = 1:Horizon
-%         Rm{i} = R;   %R
-%         Qm{i} = CQC; %Q
-%         qm{i} = QC;  %Q'
-%         Am = [Am; A^i]; %A
-%     end
-%     endidx = Horizon - 1;
-%     Rm = blkdiag(Rm{1:endidx}, zeros(4)); 
-%     Qm = blkdiag(Qm{1:endidx}, CQfC);
-%     qm = blkdiag(qm{1:endidx}, QfC);
+    Rm = cell(1,Horizon);
+    Qm = cell(1,Horizon);
+    qm = cell(1,Horizon);
+    Am = [];
+    for i = 1:Horizon
+        Rm{i} = R;   %R
+        Qm{i} = CQC; %Q
+        qm{i} = QC;  %Q'
+        Am = [Am; A^i]; %A
+    end
+    endidx = Horizon - 1;
+    Rm = blkdiag(Rm{1:endidx}, zeros(4)); 
+    Qm = blkdiag(Qm{1:endidx}, CQfC);
+    qm = blkdiag(qm{1:endidx}, QfC);
 
     for i  = 1:Horizon
         for j = 1:Horizon

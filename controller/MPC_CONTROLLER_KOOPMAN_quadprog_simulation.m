@@ -27,6 +27,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
         B
         C
         H
+        qpparam
     end
 
     methods
@@ -52,6 +53,12 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             obj.weight  = blkdiag(obj.param.weight.P, obj.param.weight.V, obj.param.weight.QW);
             obj.weightF = blkdiag(obj.param.weight.Pf,obj.param.weight.Vf,obj.param.weight.QWf);
             obj.weightR = obj.param.weight.R;
+
+            %% QP change_equationの共通項をあらかじめ計算
+            Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
+            [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);
+            % H: 変数
+            % F: fを生成するために必要な行列
         end
 
         %-- main()的な
@@ -66,35 +73,15 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             obj.reference.xr = obj.Reference(rt); %リファレンスの更新
-            % Param = obj.param;
-            % Param.current = obj.current_state;
-            % Param.ref = obj.reference.xr;  
-            % Param.weight = obj.weight;
+ 
             obj.previous_state = repmat(obj.current_state, 1, obj.H);
-            obj.current_state = quaternions_all(obj.current_state);
-            
-            % MPC設定(problem)
-            options = optimoptions('quadprog');
-            options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
-            options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
-
-            %-- quadprog設定
-            options.Display = 'none';   % 計算結果の表示
-            problem.solver = 'quadprog'; % solver
-
-            Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
-            [H, f] = obj.param.change_equation_func(Param); % H=10:_mex_H10
-            % codegen change_equation.prj change_equation_mex_H50
-            A = [];
-            b = [];
-            Aeq = [];
-            beq = [];
-            lb = repmat(obj.param.input.lb, obj.H, 1); % 下限制約
-            ub = repmat(obj.param.input.ub, obj.H, 1); % 上限制約
-            x0 = [obj.previous_input(:)];
-              
-            [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
       
+            %% ------------------------------------------------------------
+            % 最適化部分の関数化とmex化
+            Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
+            [var, fval, exitflag] = quad_drone_mex(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
+            % [var, fval, exitflag] = quad_drone(Param);
+                 
             %%
             obj.previous_input = var;
             obj.result.input = var(1:4, 1); % 印加する入力 4入力

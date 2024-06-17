@@ -3,22 +3,11 @@ function Controller = Controller_MPC_Koopman(dt)
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
     Controller_param.dt = 0.07; % MPCステップ幅
-    Controller_param.H = 10; %ホライズン数
+    Controller_param.H = 20; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
     % ssflg = 1;
-
-    %% change equation 
-    switch Controller_param.H
-        case 10
-            Controller_param.change_equation_func = @change_equation_mex_H10;
-        case 20
-            Controller_param.change_equation_func = @change_equation_mex_H20;
-        otherwise
-            error('No selected change_equation');
-    end
-    % Controller_param.change_equation_func = @change_equation;
 
     %% Koopman
     % modeファイルとファイル名をそろえる
@@ -26,15 +15,15 @@ function Controller = Controller_MPC_Koopman(dt)
 %     load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
 
     % if sslfg == 1
-    %     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
-    %     args = d2d(ssmodel, Controller_param.dt);
-    %     Controller_param.A = args.A;
-    %     Controller_param.B = args.B;
-    %     Controller_param.C = args.C;
+        ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
+        args = d2d(ssmodel, Controller_param.dt);
+        Controller_param.A = args.A;
+        Controller_param.B = args.B;
+        Controller_param.C = args.C;
     % else
-        Controller_param.A = est.A;
-        Controller_param.B = est.B;
-        Controller_param.C = est.C;
+        % Controller_param.A = est.A;
+        % Controller_param.B = est.B;
+        % Controller_param.C = est.C;
     % end
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
