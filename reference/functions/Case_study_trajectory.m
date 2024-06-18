@@ -30,7 +30,7 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 %%
 % 円旋回
-T = 20;
+T = 10;
 x = sin(2*pi*t/T);
 y = cos(2*pi*t/T);
 z = 1;
