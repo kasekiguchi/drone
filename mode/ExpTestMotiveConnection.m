@@ -6,7 +6,7 @@ in_prog_func = @(app) [];
 post_func = @(app) [];
 logger = LOGGER(1, size(ts:dt:te, 2), 0, [],[]);
 
-motive = Connector_Natnet('192.168.1.4'); % connect to Motive
+motive = Connector_Natnet('192.168.1.2'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
