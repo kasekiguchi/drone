@@ -17,7 +17,7 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-filename = '0604_HL_P2P_2';
+filename = '0604_HL_P2P_4';
 load(strcat("Data/", filename, ".mat"));
 
 % 115:start
@@ -33,10 +33,10 @@ savefolder = '\Data\Exp_figure_image\';
 %%
 close all
 clear Ref
-flg.figtype = 0;
+flg.figtype = 1;
 flg.savefig = 0;
 flg.timerange = 1;
-flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
+flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
 phase = 1; % 1:flight, 2:all
 switch phase
@@ -126,18 +126,18 @@ if ~flg.figtype
 end
 
 %% sensor
-figure(7);
-sel = 1:3;
-plot(logt, Est(sel,:), '-', 'LineWidth', 1.5); hold on; 
-plot(logt, Sen(sel,:), '--', 'LineWidth', 1.5);
-plot(logt, Ref(sel,:), '-.', 'LineWidth', 1.5); hold off;
-grid on; xlabel('Time [s]'); ylabel('Estimator, Sensor, Reference [m]')
-legend('Est.x', 'Est.y', 'Est.z', 'Sen.x', 'Sen.y', 'Sen.z', 'Ref.x', 'Ref.y', 'Ref.z');
-
-maxerror_x = max(abs(Est(1,:) - Sen(1,:)));
-maxerror_y = max(abs(Est(2,:) - Sen(2,:)));
-maxerror_z = max(abs(Est(3,:) - Sen(3,:)));
-fprintf('Sensor error: %f, %f, %f \n', maxerror_x, maxerror_y, maxerror_z);
+% figure(7);
+% sel = 1:3;
+% plot(logt, Est(sel,:), '-', 'LineWidth', 1.5); hold on; 
+% plot(logt, Sen(sel,:), '--', 'LineWidth', 1.5);
+% plot(logt, Ref(sel,:), '-.', 'LineWidth', 1.5); hold off;
+% grid on; xlabel('Time [s]'); ylabel('Estimator, Sensor, Reference [m]')
+% legend('Est.x', 'Est.y', 'Est.z', 'Sen.x', 'Sen.y', 'Sen.z', 'Ref.x', 'Ref.y', 'Ref.z');
+% 
+% maxerror_x = max(abs(Est(1,:) - Sen(1,:)));
+% maxerror_y = max(abs(Est(2,:) - Sen(2,:)));
+% maxerror_z = max(abs(Est(3,:) - Sen(3,:)));
+% fprintf('Sensor error: %f, %f, %f \n', maxerror_x, maxerror_y, maxerror_z);
 
 %% RMSE
 rmse_x = rmse(Est(1:9,:), Ref(1:9,:), 2);

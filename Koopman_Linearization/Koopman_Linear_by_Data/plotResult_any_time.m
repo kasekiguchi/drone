@@ -20,8 +20,8 @@ flg.only_rmse = 0; % コマンドウィンドウに表示
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
-stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+startTime = 1; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
@@ -29,20 +29,20 @@ else;                             m = 2; n = 3; end
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
 % 木山データ; Kiyama
 % x方向データの増加; KiyamaX20
-mode.code = '06';
-% mode.training_data = 'Kiyama';
+mode.code = '00';
+mode.training_data = 'Kiyama';
 % mode.training_data = 'KiyamaX20'; 
-mode.training_data = 'KiyamaX20fromVel';
+% mode.training_data = 'KiyamaX20fromVel';
 ref_tra = 'saddle'; 
 loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 % loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
 % loadfilename{1} = 'EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle';
-% loadfilename{1} = 'EstimationResult_2024-05-29_Exp_KiyamaX_code00_saddle';
+loadfilename{1} = 'EstimationResult_2024-05-26_Exp_Kiyama_code02_P2Py';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
 % file2 : 別のリファレンス
-% ref_tra = 'P2Py';
-% loadfilename{2} = WhichLoadFile(ref_tra, 1, []);
+ref_tra = 'P2Py';
+loadfilename{2} = WhichLoadFile(ref_tra, 1, []);
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code01_hovering';
@@ -208,6 +208,10 @@ fprintf("Estimation time: %.2f \n", xmax);
 fprintf("Position RMSE : x=%.4f, y=%.4f, z=%.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
 fprintf("Velocity RMSE : vx=%.4f, vy=%.4f, vz=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
 fprintf("Attitude RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
+
+fprintf("====================================\n");
+result.p.mape = mape(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)',2);
+fprintf("Position MAPE : x=%.4f, y=%.4f, z=%.4f \n", result.p.mape(1), result.p.mape(2), result.p.mape(3))
 
 if flg.only_rmse
     % dammy
