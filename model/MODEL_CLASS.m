@@ -135,8 +135,8 @@ classdef MODEL_CLASS < dynamicprops & handle
 
         obj.set_state(obj.projection(tmpx(end, :)'));
       end
-
-      obj.result = obj.state;
+    %     if 
+    %   obj.result = obj.state;%ここをいじればいい
     end
 
     function [] = set_state(obj, varargin)
