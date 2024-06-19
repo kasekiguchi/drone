@@ -3,7 +3,7 @@ function Controller = Controller_MPC_Koopman(dt)
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
     Controller_param.dt = 0.08; % MPCステップ幅 0.07
-    Controller_param.H = 10; %ホライズン数
+    Controller_param.H = 50; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
@@ -11,21 +11,21 @@ function Controller = Controller_MPC_Koopman(dt)
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-    load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-    % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
-    % load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
+    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+    load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
+    % load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
 
-    % if sslfg == 1
+    try
         ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
         args = d2d(ssmodel, Controller_param.dt);
         Controller_param.A = args.A;
         Controller_param.B = args.B;
         Controller_param.C = args.C;
-    % else
-        % Controller_param.A = est.A;
-        % Controller_param.B = est.B;
-        % Controller_param.C = est.C;
-    % end
+    catch
+        Controller_param.A = est.A;
+        Controller_param.B = est.B;
+        Controller_param.C = est.C;
+    end
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      torque = 1; % 1:クープマンモデルが総推力トルクのとき

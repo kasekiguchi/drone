@@ -14,8 +14,11 @@ flg.MPC = 0; % without TIMEVARYING
 
 % load("../データセット/Exp_2_4_150.mat");
 % load('Data/KMPC_100s.mat');
-load('Koopman_Linearization\Sim_P2Py_previous_sigmoid.mat');
+% load('Koopman_Linearization\Sim_P2Py_previous_sigmoid.mat');
 % load('Koopman_Linearization\Sim_P2Py_X20_sigmoid.mat');
+% load('Koopman_Linearization\Sim_P2Py_previous_sigmoid_H20.mat');
+% load('Koopman_Linearization\Sim_P2Py_X20_sigmoid_H10.mat');
+load('Koopman_Linearization\matlab.mat');
 %% Importing data
 if exist("app") ~= 7        % GUI実行中
     logt = app.logger.Data.t;
@@ -126,8 +129,14 @@ elseif figtype ~= 1
 end
 %
 
+%% 誤差のグラフ
+error.p = abs(Rdata(1:3,:) - Pdata(1:3,:));
+figure(10); plot(logt, error.p); grid on; 
+xlabel("Time [s]"); ylabel("Position Error");
+ylim([0 0.4]);
 
-%
+
+%%
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと
 
 %% いろいろテストするところ
@@ -166,3 +175,11 @@ cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % d
 % hold on
 % fnplt(cscvn(xyz(:,[1:end 1])),'r',2)
 % hold off
+
+%% mape テスト
+
+% R = [6, 6, 10, 10];
+% A = [4, 2, 5, 8];
+% fun_ans = mape(A, R)
+% 
+% manu_ans = 100/4 * sum(abs((R - A) ./ R))

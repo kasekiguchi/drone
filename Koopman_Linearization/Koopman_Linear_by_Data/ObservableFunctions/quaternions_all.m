@@ -83,7 +83,7 @@ isobe_z = [W1*W2;
             W2*sin(Q1)*sin(Q2)/cos(Q1);
             W3*cos(Q1)*sin(Q2)/cos(Q1)
             ];
- % z = [common_z; isobe_z];
+ z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
 % F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
@@ -125,7 +125,7 @@ Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
     1/const.jy;
     1/const.jz
     ];
-z = [common_z; Fdisassembly_z; Gdisassembly_z];
+% z = [common_z; Fdisassembly_z; Gdisassembly_z];
 
 %% F(x), G(x)の各項を分解+磯部先輩 code = 03
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z];
