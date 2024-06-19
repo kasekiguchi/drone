@@ -9,11 +9,13 @@ set(0, 'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
-figtype = 0;
+figtype = 1;
 flg.MPC = 0; % without TIMEVARYING
 
 % load("../データセット/Exp_2_4_150.mat");
-load('Data/KMPC_100s.mat');
+% load('Data/KMPC_100s.mat');
+load('Koopman_Linearization\Sim_P2Py_previous_sigmoid.mat');
+% load('Koopman_Linearization\Sim_P2Py_X20_sigmoid.mat');
 %% Importing data
 if exist("app") ~= 7        % GUI実行中
     logt = app.logger.Data.t;
@@ -23,6 +25,10 @@ elseif exist("log") == 1    % matを読み込んだ
     logt = log.Data.t(1:find(log.Data.t(2:end)==0, 1, 'first'));
     xmax = log.Data.t(find(log.Data.t(2:end)==0, 1, 'first'));
     logAgent = log.Data.agent;
+elseif exist("logger") == 1
+    logt = logger.Data.t(1:find(logger.Data.t(2:end)==0, 1, 'first'));
+    xmax = logger.Data.t(find(logger.Data.t(2:end)==0, 1, 'first'));
+    logAgent = logger.Data.agent;
 else                        % GUIを閉じた
     logt = gui.logger.Data.t;
     xmax = gui.time.t-gui.time.dt;
@@ -63,22 +69,22 @@ m = 3; n = 2;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Pdata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","northwest");
+    xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % title("Time change of Position"); 
     % attitude
     figure(2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest");
+    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % title("Time change of Atiitude");
     % velocity
     figure(3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","southwest");
+    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % title("Time change of Velocity"); 
     % input
     figure(4); plot(logt, Idata, "LineWidth", 1.5); hold on;
-    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","northwest");
+    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
@@ -86,22 +92,22 @@ if figtype == 1
 elseif figtype ~= 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     subplot(m,n,1); plot(logt, Pdata); hold on; plot(logt, Rdata(1:3, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","northwest");
+    xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % title("Time change of Position"); 
     % attitude
     subplot(m,n,2); plot(logt, Qdata); hold on; plot(logt, Rdata(4:6, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest");
+    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % title("Time change of Atiitude");
     % velocity
     subplot(m,n,3); plot(logt, Vdata); hold on; plot(logt, Rdata(7:9, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","southwest");
+    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     % title("Time change of Velocity"); 
     % input
     subplot(m,n,4); plot(logt, Idata, "LineWidth", 1.5); hold on;
-    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","northwest");
+    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","best");
     grid on; xlim([0 xmax]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
@@ -112,13 +118,14 @@ elseif figtype ~= 1
     subplot(m,n,6); plot3(Pdata(1,:), Pdata(2,:), Pdata(3,:)); hold on;
     plot3(Pdata(1,1), Pdata(2,1), Pdata(3,1),'+', 'MarkerSize', 15)
     xlabel("Time [s]"); ylabel("Position [m]"); grid on;
+    set(gca,'FontSize',Fontsize);  grid on; title("");
+    xlabel("Time [s]");
+    
+    set(gcf, "WindowState", "maximized");
+    set(gcf, "Position", [960 0 960 1000])
 end
 %
-set(gca,'FontSize',Fontsize);  grid on; title("");
-xlabel("Time [s]");
 
-set(gcf, "WindowState", "maximized");
-set(gcf, "Position", [960 0 960 1000])
 
 %
 cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../')); % drone/のこと

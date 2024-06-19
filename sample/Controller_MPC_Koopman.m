@@ -2,8 +2,8 @@ function Controller = Controller_MPC_Koopman(dt)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
-    Controller_param.dt = 0.07; % MPCステップ幅
-    Controller_param.H = 20; %ホライズン数
+    Controller_param.dt = 0.08; % MPCステップ幅 0.07
+    Controller_param.H = 10; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
@@ -12,7 +12,8 @@ function Controller = Controller_MPC_Koopman(dt)
     %% Koopman
     % modeファイルとファイル名をそろえる
     load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-%     load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
+    % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
+    % load("EstimationResult_2024-05-02_Exp_Kiyama_code01.mat", "est");
 
     % if sslfg == 1
         ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
@@ -32,7 +33,7 @@ function Controller = Controller_MPC_Koopman(dt)
     %--------------------------------------------------------------------
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    Controller_param.weight.P = diag([1; 1; 30]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
     Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)

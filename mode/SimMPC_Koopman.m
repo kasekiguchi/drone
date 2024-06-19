@@ -1,7 +1,8 @@
 clc
+clear
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 100; % terminal time
+te = 20; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -25,6 +26,7 @@ initial_state.w = [0; 0; 0];
 
 %% クープマンモデルをプラントに設定する場合
 load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+% load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle.mat", "est");
 % load("EstimationResult_2024-05-03_Exp_Kiyama_code03_2.mat", "est");
 sys = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), 0.07); % サンプリングタイムの変更
 A = sys.A; % default: est.A
