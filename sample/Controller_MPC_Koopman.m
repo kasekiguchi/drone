@@ -3,7 +3,7 @@ function Controller = Controller_MPC_Koopman(dt)
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
     Controller_param.dt = 0.08; % MPCステップ幅 0.07
-    Controller_param.H = 50; %ホライズン数
+    Controller_param.H = 10; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
