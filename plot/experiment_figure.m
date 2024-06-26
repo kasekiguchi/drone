@@ -17,7 +17,7 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-filename = '0604_HL_P2P_4';
+filename = '20240528_KMPC_P2Px=1';
 load(strcat("Data/", filename, ".mat"));
 
 % 115:start
@@ -33,12 +33,12 @@ savefolder = '\Data\Exp_figure_image\';
 %%
 close all
 clear Ref
-flg.figtype = 1;
+flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
-phase = 1; % 1:flight, 2:all
+phase = 2; % 1:flight, 2:all
 switch phase
     case 1
         start_idx = find(log.Data.phase==102,1,'first');
@@ -120,10 +120,19 @@ grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 ytickformat('%.3f');
 
 %
-if ~flg.figtype
+if ~flg.figtype % subplotなら
     set(gcf, "WindowState", "maximized");
     set(gcf, "Position", [960 0 960 1000])
 end
+
+%% calculation time
+% start_idx = 1;
+% finish_idx = find(log.Data.phase==0,1,'first')-1;
+tData = zeros(2,length(logt)-1);
+tData(1,:) = diff(logt);
+if flg.figtype; figure(7); else figure(2); subplot(2,1,1); end
+plot(logt(1:end-1), tData(1,:)); xlabel("Time [s]"); ylabel("Calculation time [s]");
+xlim([logt(1), logt(end-1)]); ylim([0 0.02]);
 
 %% sensor
 % figure(7);
