@@ -1,7 +1,7 @@
 clc
 ts = 0; % initial time
 % dt = 0.025; % sampling period
-dt = 0.28; % sampling period
+dt = 0.025; % sampling period
 te = 500; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
