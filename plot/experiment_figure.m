@@ -17,7 +17,8 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-filename = '20240528_KMPC_P2Px=1';
+filename = '20240627_KMPC_hovering_H20_mex';
+% filename = '20240627_KMPC_hovering_mex';
 load(strcat("Data/", filename, ".mat"));
 
 % 115:start
@@ -38,7 +39,7 @@ flg.savefig = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
-phase = 2; % 1:flight, 2:all
+phase = 1; % 1:flight, 2:all
 switch phase
     case 1
         start_idx = find(log.Data.phase==102,1,'first');
@@ -126,13 +127,18 @@ if ~flg.figtype % subplotなら
 end
 
 %% calculation time
-% start_idx = 1;
-% finish_idx = find(log.Data.phase==0,1,'first')-1;
-tData = zeros(2,length(logt)-1);
-tData(1,:) = diff(logt);
-if flg.figtype; figure(7); else figure(2); subplot(2,1,1); end
-plot(logt(1:end-1), tData(1,:)); xlabel("Time [s]"); ylabel("Calculation time [s]");
-xlim([logt(1), logt(end-1)]); ylim([0 0.02]);
+figure(100);
+plot(logt(1:end-1), diff(logt), 'LineWidth', 1.5); hold on;
+yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+if phase == 2
+    Square_coloring(log.Data.t([find(log.Data.phase == 116, 1), find(log.Data.phase == 116, 1, 'last')]),[],[],[],gca); % take off phase
+    Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
+    Square_coloring(log.Data.t([find(log.Data.phase == 108, 1), find(log.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); % landing phase
+else
+    Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
+end
+
+xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
 
 %% sensor
 % figure(7);
