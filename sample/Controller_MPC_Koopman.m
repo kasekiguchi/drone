@@ -3,7 +3,7 @@ function Controller = Controller_MPC_Koopman(dt)
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
     Controller_param.dt = 0.08; % MPCステップ幅 0.07
-    Controller_param.H = 10; %ホライズン数
+    Controller_param.H = 20; %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
@@ -11,8 +11,8 @@ function Controller = Controller_MPC_Koopman(dt)
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-    load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
+    load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+    % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
     % load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
 
     try
