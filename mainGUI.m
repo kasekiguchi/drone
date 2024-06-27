@@ -22,4 +22,4 @@ ExpBaseMode = ["","ExpTestMotiveConnection", "ExpHL", "ExpFHL", "ExpFHL_Servo", 
 fExp = 1;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
-gui = SimExp(fExp, fDebug, PInterval);
+gui = SimExp(fExp, fDebug, PInterval); Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み

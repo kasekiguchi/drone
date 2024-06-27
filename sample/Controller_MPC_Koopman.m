@@ -32,7 +32,10 @@ function Controller = Controller_MPC_Koopman(~)
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み
-
+    %Controller_param.weight.QW = diag([10; 1; 1.1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み yawちょっと改善    
+    %Controller_param.weight.QW = diag([10; 1; 0.9; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み よくない
+    %Controller_param.weight.QW = diag([5; 0.5; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    %Controller_param.weight.QW = diag([10; 1; 1.5; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;
     Controller_param.weight.QWf = Controller_param.weight.QW;

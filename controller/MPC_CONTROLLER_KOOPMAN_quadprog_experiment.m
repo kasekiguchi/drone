@@ -82,8 +82,8 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             b = [];
             Aeq = [];
             beq = [];
-            lb = [];
-            ub = [];
+            lb = repmat([0;-1;-1;-1], obj.param.H, 1);
+            ub = repmat([10;1;1;1], obj.param.H, 1);
             x0 = [obj.previous_input(:)];
               
             [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
