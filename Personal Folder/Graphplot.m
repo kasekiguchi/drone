@@ -1,5 +1,6 @@
 function [] = Graphplot(app)
     opengl software
+    % close all
     
     %フライトフェーズ-------------
     % 115 : stop
