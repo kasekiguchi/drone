@@ -18,10 +18,13 @@ z_0 = X0(3);
 x = x_0;
 y = y_0;
 z = z_0;
-T=15;
-x = 0.7*sin(2*pi*t/T);
-y = 0.7*cos(2*pi*t/T);
+T=10;
+x = 1.0*sin(2*pi*t/T);
+y = 1.0*cos(2*pi*t/T);
 z = z_0;
+% x=0;
+% y=0;
+
 
 ref=@(t)[x;y;z;0];
 end

@@ -57,12 +57,12 @@ classdef HLC_SUSPENDED_LOAD < handle
 %             tmp(2);tmp(3);
 %             tmp(4)];
             
-            if xd(7)==0
-                xd(7)=0.00001;
-            end
-            if xd(11)==0
-                xd(11)=0.00001;
-            end
+            % if xd(7)==0
+            %     xd(7)=0.00001;
+            % end
+            % if xd(11)==0
+            %     xd(11)=0.00001;
+            % end
             if isfield(Param,'dt')
                 dt = Param.dt;
                 vf = obj.Vfd_SuspendedLoad(dt,x,xd',P,F1);
@@ -70,11 +70,17 @@ classdef HLC_SUSPENDED_LOAD < handle
                 vf = obj.Vf_SupendedLoad(x,xd',P,F1);
             end
             vs = obj.Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            % uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
+            % 
+            % h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);
+            % invbeta2 = obj.inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
+            % a = obj.v_SuspendedLoad(x,xd',vf,vs',P);
+            % us = h234*invbeta2*a;
             uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
-            
+
             h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);
             invbeta2 = obj.inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-            a = obj.v_SuspendedLoad(x,xd',vf,vs',P);
+            a = obj.vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);
             us = h234*invbeta2*a;
            % cha = obj.self.reference.cha;
            tmpHL = obj.self.controller.hlc.result.input;

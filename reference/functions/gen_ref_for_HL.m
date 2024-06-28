@@ -6,5 +6,7 @@ dxd =diff(xd,t);
 ddxd =diff(dxd,t);
 dddxd =diff(ddxd,t);
 ddddxd =diff(dddxd,t);
-ref = matlabFunction([xd;dxd;ddxd;dddxd;ddddxd],'vars',t);
+dddddxd =diff(ddddxd,t);
+ddddddxd =diff(dddddxd,t);
+ref = matlabFunction([xd;dxd;ddxd;dddxd;ddddxd;dddddxd;ddddddxd],'vars',t);
 end
