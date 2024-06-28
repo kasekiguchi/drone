@@ -24,6 +24,7 @@ for i = 1:length(logger.target)
     loggers{i,1} = simplifyLoggerForCoop(logger,i);
 end
 droneID = logger.target(1:end-1);
+% droneID = 1:6;
 lgnd.payload=["payload","split payload" + droneID];
 lgnd.drone="drone" + droneID;
 %========================================================================

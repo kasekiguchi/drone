@@ -139,11 +139,11 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                g    = [0;0;-obj.P(9)];                       %慣性座標系の重力加速度ベクトル
                rhoi = agent1.parameter.rho(:,obj.self.id-1);%ペイロードの中心位置からリンクまでの距離
                %reference
-               ref0 = agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;o0d;do0d;reshape(R0d,[],1)]
+               ref0 = agent1.reference.result.state.xd;     %分割前のペイロード目標軌道[xd;dxd;d2xd;d3xd;d4xd;d5xd;d6xd;o0d;do0d;reshape(R0d,[],1)]
                x0d  = ref0(1:3);
                dx0d = ref0(4:6);
-               o0d  = ref0(19:21);                          %分割前目標角速度
-               do0d = ref0(22:24);                          %分割前目標角加速度
+               o0d  = ref0(22:24);                          %分割前目標角速度
+               do0d = ref0(25:27);                          %分割前目標角加速度
                %state
                model= agent1.estimator.result.state;        % x = model.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
                Q0   = model.Q;
@@ -173,13 +173,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                dxid = dx0d + dR0d*rhoi;     %分割後のペイロードの速度目標軌道
                % d2xid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!
                %目標軌道を格納：角度変化しない場合なので目標軌道の時間微分のみ(回転方向の微分なし)
-               refi         = zeros(24,1);  %機体のreference
+               refi         = zeros(28,1);  %機体のreference
                refi(1:4)    = [xid;0];      %yaw refernce = 0を代入
-               drefi    = [reshape(ref0(4:18),3,[]);zeros(1,5)];%目標軌道微分
-               refi(5:24)   = reshape(drefi,[],1);
+               drefi    = [reshape(ref0(4:21),3,[]);zeros(1,6)];%目標軌道微分
+               refi(5:end)   = reshape(drefi,[],1);
 
            %実際のリンクと紐の加速度と張力,機体の加速度を求めてから張力を求める           
-               %リンク加速度なんかおかしい速度変化と合わない，速度と同じになっている!!!!!!!!
+               %リンク加速度なんかおかしい速度変と合わない，速度と同じになっている!!!!!!!!
                % ai       = a0 + R0*SKO0^2*rhoi - R0*SKrhoi*dO0;      %分割後のペイロードの加速度
                ai = (vi - obj.vi_pre)/dt; 
                obj.vi_pre = vi;
@@ -188,9 +188,6 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % dO0 = (O0 - obj.O0_pre)/dt; %差分を使うとダメ
                % obj.O0_pre = dO0;
                dwi = (wi - obj.wi_pre)/dt; %紐の角加速度%発散に関係なさそう
-               % if dO0 < 1e-10 %閾値設けた
-               %     dO0 = [0;0;0];
-               % end
                obj.wi_pre = wi;
                %張力を算出
                qqTi     = qi*qi';
@@ -213,7 +210,6 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % obj.vi_pre = vi;
 
            %分割後質量推定 mLi*ai = mLi*g + mui
-                %muiなんか質量が1/2になるtodo何目線から見るかで加速度の値を変える必要あり？
                A    = ai - g;%
                AtA  = A'*A;
                mLi  = (AtA\A')*mui;%分割後質量

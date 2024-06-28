@@ -14,6 +14,7 @@ d2x0d =diff(dx0d,t);
 d3x0d =diff(d2x0d,t);
 d4x0d =diff(d3x0d,t);
 d5x0d =diff(d4x0d,t);
+d6x0d =diff(d5x0d,t);
 
 norm_dxd = sqrt(dx0d(1:2)'*dx0d(1:2));%dxdはz方向を0にしているのでノルムはx,y方向で作成!!!!!!!!!!
 if norm_dxd == 0 || dx0d(1) == 0
@@ -37,5 +38,5 @@ dR0d = diff(R0d,t);%回転行列の時間微分，目標速度
 
 o0d = Vee(R0d'*dR0d);%理想的or目標とするペイロード角速度
 do0d = diff(o0d,t);%理想的or目標とするペイロード角加速度
-ref = matlabFunction([x0d;dx0d;d2x0d;d3x0d;d4x0d;d5x0d;o0d;do0d;reshape(R0d,[],1)],'vars',t);
+ref = matlabFunction([x0d;dx0d;d2x0d;d3x0d;d4x0d;d5x0d;d6x0d;o0d;do0d;reshape(R0d,[],1)],'vars',t);
 end

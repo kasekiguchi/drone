@@ -37,12 +37,12 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
             %目標軌道の時間微分が1階までしかないので追従性が悪くなる!!!!!!!!
             %理由を探る
-            if xd(7)==0
-                xd(7)=0.00001;
-            end
-            if xd(11)==0
-                xd(11)=0.00001;
-            end
+            % if xd(7)==0
+            %     xd(7)=0.00001;
+            % end
+            % if xd(11)==0
+            %     xd(11)=0.00001;
+            % end
             if isfield(Param,'dt')
                 dt = Param.dt;
                 vf = Vfd_SuspendedLoad(dt,x,xd',P,F1);
@@ -56,18 +56,30 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
-            % h234 = H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
-            invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-            vs_alhpa = v_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
-            us = [0;invbeta2*vs_alhpa];%h234*invbeta2*a;
-            % cha = obj.self.reference.cha;
-            % tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
-            % obj.result.input = tmpHL;
-            % if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
-            %     obj.result.input = uf + us;
-            % end
-            % obj.result.input = uf + us;
-            % obj.self.controller.result.input = obj.result.input;
+            
+            %usの計算
+                % h234 = H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
+                invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
+                %invbeta2(vs - alhpa2)の計算の試行錯誤
+                % vs_alhpa = v_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
+                vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
+                us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
+                % alpha21 = alpha21_SuspendedLoad(x,xd',vf,P);
+                % alpha22 = alpha22_SuspendedLoad(x,xd',vf,P);
+                % alpha23 = alpha23_SuspendedLoad(x,xd',vf,P);
+                % alpha2 = [alpha21;alpha22;alpha23];
+                % us = [0;invbeta2*(vs' - alpha2)];%h234*invbeta2*a2;
+            %{
+            cha = obj.self.reference.cha;
+            tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
+            obj.result.input = tmpHL;
+            if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
+                obj.result.input = uf + us;
+            end
+            obj.result.input = uf + us;
+            obj.self.controller.result.input = obj.result.input;
+            %}
+
             tmp = uf + us;
             obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
 

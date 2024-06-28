@@ -1,8 +1,8 @@
 %% Define the nonlinear physical model of a quadrotor
 syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
 syms u u1 u2 u3 u4 T1 T2 T3 T4 real
-syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
-syms mL Length cableL real % LengthとcableLは同じ意味
+syms m Lx Ly lx ly  jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 real
+syms mL l Length cableL rotor_r real % LengthとcableLは同じ意味,lは機体の長さ正方形を仮定
 syms pl1 pl2 pl3 dpl1 dpl2 dpl3 ol1 ol2 ol3 real
 syms pT1 pT2 pT3 real
 
@@ -22,12 +22,12 @@ dpl = [dpl1;dpl2;dpl3];             % Load velocity
 ol  = [ ol1; ol2; ol3];             % Load angular velocity
 pT  = [ pT1; pT2; pT3];             % String position
 x=[q;ob;pl;dpl;pT;ol];
-% physicalParam = [m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,mL,Length];
-% f = FL(x,physicalParam);
-% g = GL(x,physicalParam);
-physicalParam = [m, jx, jy, jz, gravity, mL, cableL];
-f = FL2(x,physicalParam);
-g = GL2(x,physicalParam);
+physicalParam = [m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4, rotor_r, Length, mL, cableL];
+f = FL(x,physicalParam);
+g = GL(x,physicalParam);
+% physicalParam = [m, jx, jy, jz, gravity, mL, cableL];
+% f = FL2(x,physicalParam);
+% g = GL2(x,physicalParam);
 %g= [g1 g2 g3 g4];
 physicalParam = [m, l, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,mL,cableL];
 %% 1st layer
@@ -89,7 +89,7 @@ d5h2 = LieD(d4h2,f1,x)+diff(d4h2,t);
 d5h3 = LieD(d4h3,f1,x)+diff(d4h3,t);
 %% % For check
 	[LieD(h2,g1,x),LieD(h3,g1,x),LieD(h4,g1,x)]
-	simplify([LieD(dh2,g1,x),LieD(dh3,g1,x),LieD(dh4,g1,x)])
+	simplify([LieD(dh2,g1,x),LieD(dh3,g1,x)])
 	simplify([LieD(d2h2,g1,x),LieD(d2h3,g1,x)])
   	simplify([LieD(d3h2,g1,x),LieD(d3h3,g1,x)])
  	simplify([LieD(d4h2,g1,x),LieD(d4h3,g1,x)])
@@ -123,13 +123,14 @@ syms v2(t) v3(t) v4(t)
     d3xd = diff(d2xd,t);
     d4xd = diff(d3xd,t);
     d5xd = diff(d4xd,t);
+    d6xd = diff(d5xd,t);
 %% Set variables for output functions
 %fix
-    syms Xd1 Xd2 Xd3 Xd4 dXd1 dXd2 dXd3 dXd4 d2Xd1 d2Xd2 d2Xd3 d2Xd4 d3Xd1 d3Xd2 d3Xd3 d3Xd4 d4Xd1 d4Xd2 d4Xd3 d4Xd4 d5Xd1 d5Xd2 d5Xd3 d5Xd4 real
+    syms Xd1 Xd2 Xd3 Xd4 dXd1 dXd2 dXd3 dXd4 d2Xd1 d2Xd2 d2Xd3 d2Xd4 d3Xd1 d3Xd2 d3Xd3 d3Xd4 d4Xd1 d4Xd2 d4Xd3 d4Xd4 d5Xd1 d5Xd2 d5Xd3 d5Xd4 d6Xd1 d6Xd2 d6Xd3 d6Xd4 real
     syms V1 V2 V3 V4 dV1 d2V1 d3V1 d4V1 d5V1 real
-    XD = {Xd1 Xd2 Xd3 Xd4 dXd1 dXd2 dXd3 dXd4 d2Xd1 d2Xd2 d2Xd3 d2Xd4 d3Xd1 d3Xd2 d3Xd3 d3Xd4 d4Xd1 d4Xd2 d4Xd3 d4Xd4 d5Xd1 d5Xd2 d5Xd3 d5Xd4};
+    XD = {Xd1 Xd2 Xd3 Xd4 dXd1 dXd2 dXd3 dXd4 d2Xd1 d2Xd2 d2Xd3 d2Xd4 d3Xd1 d3Xd2 d3Xd3 d3Xd4 d4Xd1 d4Xd2 d4Xd3 d4Xd4 d5Xd1 d5Xd2 d5Xd3 d5Xd4 d6Xd1 d6Xd2 d6Xd3 d6Xd4};
     V1v = {V1 dV1 d2V1 d3V1 d4V1 d5V1};
-    xdRef = [xd dxd d2xd d3xd d4xd d5xd];
+    xdRef = [xd dxd d2xd d3xd d4xd d5xd d6xd];
     vInput1 = [v1(t) diff(v1(t),t) diff(v1(t),t,2) diff(v1(t),t,3) diff(v1(t),t,4) diff(v1(t),t,5)];
  %% Make functions of virtual output
 % % If either model, virtual output or parameters is changed, then evaluate this section.
@@ -164,11 +165,17 @@ clc
 %% Make functions of actual inputs taking t, x, xd, v1 and v2 as arguments
 % % If either model, virtual output or parameters is changed, then evaluate this section. It'll take few minutes.
 % % Usage: u = Uf(...) + Us(...)
-    matlabFunction(subs(H(:,1)*(-alpha1+v1(t)), [xdRef vInput1], [XD V1v]),'file','Uf_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'U1'});
+    matlabFunction(subs(H(:,1)*(-alpha1+v1(t)), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','Uf_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'U1'});
     matlabFunction(subs(H(:,2:4), [xdRef vInput1], [XD V1v]),'file','H234_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'H234'});
     %以下二つはとても重い
     matlabFunction(subs(inv(beta2), [xdRef vInput1], [XD V1v]),'file','inv_beta2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'inv_beta2'});
-    matlabFunction(subs((-alpha2+[v2(t);v3(t);v4(t)]), [xdRef vInput1 v2(t) v3(t) v4(t)], [XD V1v [V2 V3 V4]]),'file','vs_alpha2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'vs_alpha2'});
+    % matlabFunction(subs((-alpha2+[v2(t);v3(t);v4(t)]), [flip(xdRef) flip(vInput1) v2(t) v3(t) v4(t)], [flip(XD) flip(V1v) V2 V3 V4]),'file','vs_alpha2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'vs_alpha2'});
+    matlabFunction(subs(alpha2(1), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha21_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha21'});
+    matlabFunction(subs(alpha2(2), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha22_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha22'});
+    matlabFunction(subs(alpha2(3), [flip(xdRef) flip(vInput1)], [flip(XD) flip(V1v)]),'file','alpha23_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'alpha23'});
+
+    a2_v2 = subs((-alpha2+[v2(t);v3(t);v4(t)]), [flip(xdRef) flip(vInput1) v2(t) v3(t) v4(t)], [flip(XD) flip(V1v) V2 V3 V4]);
+    matlabFunction(a2_v2,'file','vs_alpha2_SuspendedLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'vs_alpha2'});
 %理想のfunctionだけどUsが重すぎるので分割している．
     % matlabFunction(subs(H(:,1)*(-alpha1+v1(t)), [xdRef vInput1], [XD V1v]),'file','Uf_SuspededLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) physicalParam},'outputs',{'U1'});
     % matlabFunction(subs(H(:,2:4)*U2, [xdRef vInput1 v2(t) v3(t) v4(t)], [XD V1v [V2 V3 V4]]),'file','Us_SuspededLoad.m','vars',{x cell2sym(XD) cell2sym(V1v) [V2;V3;V4] physicalParam},'outputs',{'U2'});

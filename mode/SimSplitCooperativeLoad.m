@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 70;
+te = 120;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -56,7 +56,7 @@ agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, init
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",15,"orig",[0;0;1],"size",1*[1,1,0.5]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",15,"orig",[0;0;1],"size",[1,1,0.5]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
