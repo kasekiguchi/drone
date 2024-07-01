@@ -185,7 +185,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                obj.vi_pre = vi;
                a0 = (v0 - obj.v0_pre)/dt; 
                obj.v0_pre = v0;
-               % dO0 = (O0 - obj.O0_pre)/dt; %差分を使うとダメ
+               dO0 = (O0 - obj.O0_pre)/dt; %差分を使うとダメ
                % obj.O0_pre = dO0;
                dwi = (wi - obj.wi_pre)/dt; %紐の角加速度%発散に関係なさそう
                obj.wi_pre = wi;

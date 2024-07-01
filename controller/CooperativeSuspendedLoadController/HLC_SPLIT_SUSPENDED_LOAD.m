@@ -18,16 +18,16 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         function result=do(obj,param,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             model = obj.self.estimator.result;
-            ref = obj.self.reference.result;
-            x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            ref   = obj.self.reference.result;
+            x     = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応するよう
             else
                 xd = ref.state.get();
             end
-            Param= obj.param;
+            Param = obj.param;
 %             P = Param.P;
-            P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity","km1","km2","km3","km4","k1","k2","k3","k4", "loadmass", "cableL"]);
+            P     = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity","km1","km2","km3","km4","k1","k2","k3","k4", "loadmass", "cableL"]);
             P(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
 
             F1 = Param.F1;
@@ -74,7 +74,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
 
             tmp = uf + us;
             obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-
+            %複数牽引は慣性モーメントがかかるのでモーメントの反応が遅れる？
             result = obj.result;
         end
         function show(obj)
