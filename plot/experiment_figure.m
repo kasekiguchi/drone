@@ -12,7 +12,7 @@ set(0,'defaultLineMarkerSize',15);
 
 %load("circle0607_load_model_Log(07-Jun-2024_18_00_33).mat");
 %load("circle_0610_kosyounosyunnkann_Log(10-Jun-2024_19_10_49).mat");%これHL
-load("sl_0626_kazenasi_juusinnzure_nasi_Log(26-Jun-2024_17_49_20).mat");
+load("sl_juusin_0628_iikannji_07en_Log(28-Jun-2024_19_44_15).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
 %log = logger;%永久用（↓とどっちかをコメントアウト）
