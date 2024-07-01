@@ -28,6 +28,7 @@ function Controller = Controller_MPC_Koopman(~)
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み
+    %Controller_param.weight.P = diag([5; 10; 30]);    % 位置　10,20刻み
     Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)

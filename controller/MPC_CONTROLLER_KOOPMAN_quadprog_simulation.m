@@ -39,6 +39,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
 
         %-- main()的な
         function result = do(obj,varargin)
+            %profile on 
             tic
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
@@ -109,7 +110,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             if obj.self.estimator.result.state < 0
                 warning("墜落しました")
             end
-            
+            %profile viewer
         end
         function show(obj)
             obj.result
