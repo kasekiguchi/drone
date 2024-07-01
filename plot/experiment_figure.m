@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20240627");
+load("20240627_Exp_P2P_Attitude[10, 1, 1.5].mat");
 
 %%
 figtype = 2;
@@ -106,7 +106,7 @@ xlabel("Time [s]");
 
 set(gcf, "WindowState", "maximized");
 set(gcf, "Position", [960 0 960 1000])
-%% RMSE誤差
- rmse(Ref(1:3,:), Est(1:3,:),2)
-% rmse(Ref(4:6,:), Est(4:6,:),2)
-% rmse(Ref(7:9,:), Est(7:9,:),2)
+%%
+figure(100)
+plot(logt(1:end-1), diff(logt), 'Linewidth', 1.5)
+xlim([52 53])
