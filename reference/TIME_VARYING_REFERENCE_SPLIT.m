@@ -90,7 +90,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     
                     P = cell2mat(arrayfun_col(@(rho) [eye(3);Skew(rho)],agent1.parameter.rho));
                     obj.Pdagger = pinv(P);
-                    obj.Muid_method = str2func(agent1.controller.Param.method2);
+                    % obj.Muid_method = str2func(agent1.controller.Param.method2);
                     obj.result.mLi = [];
                     obj.result.Muid = [];
 
@@ -100,7 +100,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                         obj.toR= @(r) RodriguesQuaternion(reshape(r,4,[]));
                     end
 
-                    obj.result.state.set_state("xd",zeros(24,1));
+                    obj.result.state.set_state("xd",zeros(28,1));
                     % obj.vi_pre = obj.result.state.xd(9:11);
                     obj.vi_pre = zeros(3,1);
                     obj.v0_pre = zeros(3,1);
@@ -168,7 +168,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % R0d = reshape(x0d(end-8:end),3,3);%分割前ペイロードの目標回転行列
                R0d  = agent1.reference.result.state.getq("rotm");%ペイロード角度固定
                %================================================================================
-               dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列
+               dR0d = R0d*Skew(o0d);        %分割前ペイロードの目標回転行列の微分
                xid  = x0d + R0d*rhoi;       %分割後のペイロードの位置目標軌道
                dxid = dx0d + dR0d*rhoi;     %分割後のペイロードの速度目標軌道
                % d2xid = x0d(7:9) - g + (dR0d*Skew(o0d) + R0d*Skew(do0d))*rho;%分割後のペイロードの加速度目標軌道!!!!!!!!!!!!!

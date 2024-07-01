@@ -49,7 +49,7 @@ classdef CSLC < handle
       model = obj.self.estimator.result.state;
       x = model.get(["p","Q","v","O","qi","wi","Qi","Oi"]);
       ref = obj.self.reference.result.state.xd;%Muid_6の想定：Xd = [x0d;dx0d;ddx0d;dddx0d;o0d;do0d]; % R0d は除いている
-      xd = [ref(1:12);ref(19:24)];%Muid_6に合うように整頓ref=[x0d;dx0d;d2x0d;d3x0d;d4x0d;d5x0d;o0d;do0d;reshape(R0d,[],1)]
+      xd = [ref(1:12);ref(22:27)];%Muid_6に合うように整頓ref=[x0d;dx0d;d2x0d;d3x0d;d4x0d;d5x0d;d6x0d;o0d;do0d;reshape(R0d,[],1)]
       qi = reshape(model.qi,3,obj.N);
       R0 = obj.toR(model.Q);
       R0d = reshape(ref(end-8:end),3,3);

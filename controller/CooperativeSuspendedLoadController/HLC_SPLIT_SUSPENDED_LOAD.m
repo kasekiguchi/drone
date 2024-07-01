@@ -35,14 +35,6 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             F3 = Param.F3;
             F4 = Param.F4;
             xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
-            %目標軌道の時間微分が1階までしかないので追従性が悪くなる!!!!!!!!
-            %理由を探る
-            % if xd(7)==0
-            %     xd(7)=0.00001;
-            % end
-            % if xd(11)==0
-            %     xd(11)=0.00001;
-            % end
             if isfield(Param,'dt')
                 dt = Param.dt;
                 vf = Vfd_SuspendedLoad(dt,x,xd',P,F1);
