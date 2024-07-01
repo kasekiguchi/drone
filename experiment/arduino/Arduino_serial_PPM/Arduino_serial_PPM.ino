@@ -25,6 +25,7 @@ char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127まで
 // https://create-it-myself.com/research/study-ppm-spec/
 // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
 #define PPM_PERIOD 22500 // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
+// #define TIME_LOW 400     // PPM信号 LOWパルス幅 [us]
 #define TIME_LOW 360     // PPM信号 LOWパルス幅 [us]
 #define CH_MIN 0         // PPM幅の最小 [us] MATLABから送信される信号の最小を定義　オフセットにも関係
 #define CH_NEUTRAL 500   // PPM幅の中間 [us] MATLABから送信される信号の中間を定義　オフセットにも関係
@@ -33,6 +34,8 @@ char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127まで
 // TIME_LOW + CH_OFFSET = 2000 = 2 [ms]　
 // TIME_LOW + CH_MAX + CH_OFFSET = 1000 = 1 [ms]　計算が合わないこの計算式では3[ms]となるはずである．　400 + 1000 + 1620 = 3020　もしくは，CH_MAXが-となっていることが正しいと考えられる
 // volatile uint16_t CH_OFFSET; // 共通オフセット値 2*CH_MAX - TIME_LOW + 20 = 2000 - 400 + 20 = 1620 ★オフセットとは周波数オフセットを表しているのか確認
+// #define CH_OFFSET 1620       // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
+// #define TOTAL_CH_OFFSET 12960 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
 #define CH_OFFSET 1655       // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
 #define TOTAL_CH_OFFSET 13240 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
 //（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
