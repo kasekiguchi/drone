@@ -23,6 +23,7 @@ disp("Loading data...");
 filename = 'experiment_10_25_P2Py_estimator';
 loadfile = strcat("Data/experiment/", filename, ".mat");
 load(loadfile);
+% logger = LOGGER(loadfile); % loggerの形で収納できる
 
 % 115:start
 % 97 :arming
