@@ -22,11 +22,36 @@ end
 % B = M(1 : numX, numX + 1:numX + numU);
 % C = X*pinv(Xlift);
 
-% A,Bをまとめて計算するデータ数が多い場合のやりかた
-G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
-V = Ylift*[Xlift ; U]';       % size(V) = (numX,      numX+numU)
-M = V * pinv(G);              % size(M) = (numX,      numX+numU)
-output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
-output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
-output.C = X*pinv(Xlift); % C: Z->X の厳密な求め方 pinv: Moore-Penrose疑似逆行列  size(.C) = (size(X), numX)
+%% A,Bをまとめて計算するデータ数が多い場合のやりかた
+% G = [Xlift ; U]*[Xlift ; U]'; % size(G) = (numX+numU, numX+numU)
+% V = Ylift*[Xlift ; U]';       % size(V) = (numX,      numX+numU)
+% M = V * pinv(G);              % size(M) = (numX,      numX+numU)
+% output.A = M(1:numX, 1:numX); % size(.A) = (numX, numX)
+% output.B = M(1:numX, numX+1:numX+numU); % size(.B) = (numX, numU)
+% output.C = X*pinv(Xlift); % C: Z->X の厳密な求め方 pinv: Moore-Penrose疑似逆行列  size(.C) = (size(X), numX)
+
+%% 最適化による算出
+options = optimoptions('fminunc','MaxFunctionEvaluations', 100000);
+% sol,fval,exitflag,output
+tic
+A = optimvar('A', numX, numX);
+B = optimvar('B', numX, numU);
+prob_AB = optimproblem;
+prob_AB.Objective = norm(Ylift - A*Xlift - B*U, "fro") + norm(Xlift,1) + norm(Xlift,2);
+x0_AB.A = eye(numX);
+x0_AB.B = zeros(numX, numU);
+[sol_AB, fval(1,1), ~, output_AB] = solve(prob_AB, x0_AB, 'Options', options);
+ABtime = toc
+
+tic
+C = optimvar('C', 12, numX);
+prob_C = optimproblem;
+prob_C.Objective = norm(X - C*Xlift, "fro") + norm(Xlift,1) + norm(Xlift,2);
+x0_C.C = zeros(12, numX);
+[sol_C, fval(1,2), ~, output_C]  = solve(prob_C, x0_C, 'Options', options);
+Ctime = toc
+
+output.A = sol_AB.A;
+output.B = sol_AB.B;
+output.C = sol_C.C;
 end
