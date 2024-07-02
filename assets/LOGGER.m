@@ -135,7 +135,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       %   end
       % else
         obj.k = obj.k + 1;
-        obj.Data.t(obj.k) = t;
+        obj.Data.t(obj.k, 1) = t;
+        obj.Data.t(obj.k, 2) = time.dt; % 計算時間のつもり
         obj.Data.phase(obj.k) = cha;
 
         for i = 1:length(obj.items)

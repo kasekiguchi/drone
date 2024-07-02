@@ -246,7 +246,7 @@ classdef DRAW_DRONE_MOTION
         if isfield(param,'Motive_ref')
           addpoints(ax,f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
         else
-          plot3(ax,r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
+          plot3(ax,r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k', 'LineWidth', 1.5, 'LineStyle',':'); %reference
         end
         if ~isempty(param.opt_plot)
           param.self.show(param.opt_plot,"logger",logger,"k",i,varargin{:});

@@ -54,6 +54,9 @@ figure(100);
 logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
 plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5);
 xlabel("Time [s]"); ylabel("Calculation time [s]");
+
+% animation
+app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
 end
 
 function in_prog(app)

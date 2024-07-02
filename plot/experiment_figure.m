@@ -7,6 +7,7 @@ cd(strcat(fileparts(tmp.Filename), '../../'));
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %%
+clear
 Fontsize = 15;  
 set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
@@ -18,8 +19,9 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
-filename = '20240528_HL_spline_xyz';
-loadfile = strcat("Data/koma2_HL/", filename, ".mat");
+
+filename = 'HLMPC_test';
+loadfile = strcat("Data/", filename, ".mat");
 load(loadfile);
 
 % 115:start
@@ -37,6 +39,7 @@ close all
 clear Ref
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
+flg.animation_save = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
@@ -188,11 +191,22 @@ if flg.savefig
 end
 
 %% animation
-%make logger
-logger = LOGGER(loadfile)
-%%
-drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]); 
-drone.animation(logger,struct("target",1,"opt_plot",[]));
+% clear logger
+if exist('logger') ~= 1
+    % logger.dataでうまくいかないことへの対処
+    logger.p = Est(1:3,:)';
+    logger.q = Est(4:6,:)';
+    logger.u = Input';
+    logger.r = Ref(1:3,:)';
+    logger.t = logt';
+    drone = DRAW_DRONE_MOTION_No_logger(logger,"target",1,"opt_plot",[]); 
+else
+    drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
+end
+if flg.animation_save == 1; drone.animation(logger,struct("target",1,"opt_plot",[],"mp4",flg.animation_save));
+else; drone.animation(logger,struct("target",1,"opt_plot",[]));
+end
+
 %% 計算時間出すだけ
 % clear gui_t ngui_t
 % gui_t = load('Data\calculation_test_gui.mat'); % guiで保存した方

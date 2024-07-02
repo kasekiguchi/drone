@@ -1,4 +1,4 @@
-classdef DRAW_DRONE_MOTION
+classdef DRAW_DRONE_MOTION_No_logger
   % フレーム付きで動画を作成するためのクラス
   % obj = DRAW_DRONE_MOTION(logger,param)
   % obj.draw(p,q,u) : １スナップを描画
@@ -18,7 +18,7 @@ classdef DRAW_DRONE_MOTION
   end
 
   methods
-    function obj = DRAW_DRONE_MOTION(logger,varargin)
+    function obj = DRAW_DRONE_MOTION_No_logger(logger,varargin)
       % 【usage】 obj = DRAW_DRONE_MOTION(logger,param)
       % logger : LOGGER class instance
       % param.frame_size : drone size [Lx,Ly]
@@ -33,7 +33,8 @@ classdef DRAW_DRONE_MOTION
       % end
       param = struct(varargin{:});
 
-      data = logger.data(param.target,"p","e");
+      % data = logger.data(param.target,"p","e");
+      data = logger.p;
       tM = max(data);
       tm = min(data);
       M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
@@ -56,7 +57,8 @@ classdef DRAW_DRONE_MOTION
       end
       obj=obj.gen_frame(varargin{:});%"frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,param.fig_num);
 
-      view(ax,3)
+      % view(ax,3) % 通常の眺め
+      view(ax,[1 0 0]); % 2:上から
       grid(ax,'on')
       daspect(ax,[1 1 1]);
     end
@@ -193,10 +195,17 @@ classdef DRAW_DRONE_MOTION
       ax = obj.ax;
       %p = logger.data(param.target,"p","e");
       %q = logger.data(param.target,"q","e");
-      p = logger.data(param.target,"p","p");
-      q = logger.data(param.target,"q","p");
-      u = logger.data(param.target,"input");
-      r = logger.data(param.target,"p","r");
+      % p = logger.data(param.target,"p","p");
+      % q = logger.data(param.target,"q","p");
+      % u = logger.data(param.target,"input");
+      % r = logger.data(param.target,"p","r");
+
+      % komatsu original
+      p = logger.p;
+      q = logger.q;
+      u = logger.u;
+      r = logger.r;
+
       p = reshape(p,size(p,1),3,length(param.target));
       q = reshape(q,size(q,1),size(q,2)/length(param.target),length(param.target));
       u = reshape(u,size(u,1),size(u,2),length(param.target));
@@ -235,7 +244,8 @@ classdef DRAW_DRONE_MOTION
         end
       end
 
-      t = logger.data("t");
+      % t = logger.data("t");
+      t = logger.t;
       tRealtime = tic;
       if isfield(param,'Motive_ref')
         for n = 1:length(param.target)

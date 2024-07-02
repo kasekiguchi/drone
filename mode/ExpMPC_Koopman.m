@@ -71,6 +71,9 @@ Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 102, 1), find(a
 Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 108, 1), find(app.logger.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); % landing phase
 xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([app.time.ts logt(end-1)])
 
+% animation
+app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
+
 Graphplot(app)
 end
 
