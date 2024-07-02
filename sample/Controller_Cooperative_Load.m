@@ -26,6 +26,7 @@ Controller.gains = [kx0 kr0 kdx0 ko0 kqi kwi kri koi epsilon];
 % kx0 kr0 kdx0 ko0 = R^3
 % kqi kwi kri koi epsilon = R
 
+% Controller.method = "NewCooperativeSuspendedLoadController_"+N;
 Controller.method = "CooperativeSuspendedLoadController_"+N;
 Controller.method2 = "Muid_"+N;
 % 設定確認

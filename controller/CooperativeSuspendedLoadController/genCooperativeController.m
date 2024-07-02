@@ -128,6 +128,12 @@ syms ui [3 N] real
 syms b1 [3 N] real
 syms b2 [3 N] real
 syms b3 [3 N] real
+syms d1b1 [3 N] real
+syms d1b2 [3 N] real
+syms d1b3 [3 N] real
+syms d2b1 [3 N] real
+syms d2b2 [3 N] real
+syms d2b3 [3 N] real
 syms si [1 N] real
 syms ci [1 N] real
 
@@ -150,12 +156,36 @@ for i = 1:N
   eri(:,i) = Vee(Ric{i}'*Ri(:,:,i)-Ri(:,:,i)'*Ric{i})/2;
   eoi(:,i) = oi(:,i) - Ri(:,:,i)'*Ric{i}*oic(:,i);% 3xN
 end
-%%
 for i = 1:N
 fi(i) = ui(:,i)'*Ri(:,:,i)*e3;
 Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi{i}*Ji{i}*oi(:,i) - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric{i}*oic(:,i)-Ri(:,:,i)*Ric{i}*doic(:,i));% 3xN
 end
 matlabFunction(reshape([fi;Mi],[],1),"file",dir+"CSLC_"+N+"_Uvec.m","Vars",{X,Xd,R0,R0d,physicalParam,Gains,qid,ui,Ri,b1,b2,b3,si,ci})
+%% (36)-(40) 回転行列の微分を指定
+db3 = repmat([0;0;1]);
+for i = 1:N
+% b3ddx0d(:,i) = cross(b3(:,i),ddx0d);
+% db2(:,i) = (b3ddx0d(:,i)-ci(i)*b2(:,i))/si(i);
+% db1(:,i) = -cross(b3(:,i),db2(:,i));
+% ddb3(:,i) = db3(:,i);
+% ddb2(:,i) = (cross(b3(:,i),dddx0d)+(b2(:,i)-ci(i)*b3ddx0d(:,i))/si(i) - ci(i)*db2(:,i))/si(i);
+% ddb1(:,i) = -cross(b3(:,i),ddb2(:,i));
+Ric{i} = [b1(:,i) b2(:,i) b3(:,i)];% 3x3xN
+dRic{i} = [d1b1(:,i) d1b2(:,i) d1b3(:,i)];% 3x3xN
+ddRic{i} = [d2b1(:,i),d2b2(:,i),d2b3(:,i)];% 3x3xN
+oic(:,i) = Vee(Ric{i}'*dRic{i});% 3xN = Vee(hoic)
+doic(:,i) = Vee(Ric{i}'*ddRic{i} - (Ric{i}'*dRic{i})^2);%+ (dRic{i}'*dRic{i}));% 3xN
+end
+for i = 1:N
+  eri(:,i) = Vee(Ric{i}'*Ri(:,:,i)-Ri(:,:,i)'*Ric{i})/2;
+  eoi(:,i) = oi(:,i) - Ri(:,:,i)'*Ric{i}*oic(:,i);% 3xN
+end
+%%
+for i = 1:N
+fi(i) = ui(:,i)'*Ri(:,:,i)*e3;
+Mi(:,i) = - kri*eri(:,i)/(epsilon^2) - koi*eoi(:,i)/epsilon + Oi{i}*Ji{i}*oi(:,i) - Ji{i}*(Oi{i}*Ri(:,:,i)'*Ric{i}*oic(:,i)-Ri(:,:,i)*Ric{i}*doic(:,i));% 3xN
+end
+matlabFunction(reshape([fi;Mi],[],1),"file",dir+"NEW_CSLC_"+N+"_Uvec.m","Vars",{X,XdphysicalParam,Gains,ui,Ri,b1,b2,b3,d1b1,d1b2,d1b3,d2b1,d2b2,d2b3})
 %%
 % X,Xd,R0,R0d,physicalParam,Gains
 fname = "CooperativeSuspendedLoadController_" + N;

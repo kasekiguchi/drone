@@ -3,6 +3,7 @@ clear
 ts = 0;
 dt = 0.1;
 te = 25;
+tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
@@ -20,6 +21,8 @@ initial_state.v = [0; 0; 0];
 initial_state.O = [0; 0; 0];
 initial_state.wi = repmat([0; 0; 0], N, 1);
 initial_state.Oi = repmat([0; 0; 0], N, 1);
+initial_state.a = [0;0;0];%ペイロード加速度
+initial_state.dO = [0;0;0];%ペイロード角加速度
 
 % initial_state.p = [1; 4.8; 1.5];
 % initial_state.v = [0; 0; 0];
@@ -51,19 +54,19 @@ agent.estimator = DIRECT_ESTIMATOR(agent, struct("model", MODEL_CLASS(agent, Mod
 %agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1,N)),["p","Q","v","O","qi","wi","Qi","Oi"]));
 
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % sensor to capture plant position : second arg is noise
-% agent.reference = TIME_VARYING_REFERENCE(agent,Reference_Time_Varying("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
-% agent.reference = POINT_REFERENCE_COOPERATIVE_LOAD(agent,[1,1,1]);
-% agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,Reference_Time_Varying_Cooperative_Load("gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]}));
+% agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",120,"orig",[0;0;0.5],"size",1*[1,1,0]},"Cooperative"});
 agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",70,"orig",[2;0.5;1],"size",1*[4,4,0]},"Cooperative"});
-%agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt));
-agent.controller = CSLC(agent, Controller_Cooperative_Load(dt, N));
+% agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt,N));
+agent.controller = NEW_GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt,N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
 run("ExpBase");
 
 
 clc
-for i = 1:5000
-    if i < 20 || rem(i, 10) == 0, i, end
+% for i = 1:5000
+%     if i < 20 || rem(i, 10) == 0, i, end
+for j = 1:tn
+    disp(time.t)
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
@@ -77,7 +80,7 @@ for i = 1:5000
     time.t = time.t + time.dt;
     %pause(1)
 end
-
+disp(time.t)
 %%
 logger.plot({1,"p","rp"}, {1,"v","rp"},{1, "plant.result.state.Q", "pe"}, {1, "plant.result.state.qi", "p"},{1, "plant.result.state.wi", "p"}, {1, "plant.result.state.Qi", "p"})
 %%
