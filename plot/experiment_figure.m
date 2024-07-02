@@ -18,8 +18,9 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
-filename = 'calculation_test_gui';
-load(strcat("Data/", filename, ".mat"));
+filename = '20240528_HL_spline_xyz';
+loadfile = strcat("Data/koma2_HL/", filename, ".mat");
+load(loadfile);
 
 % 115:start
 % 97 :arming
@@ -39,7 +40,7 @@ flg.savefig = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
-phase = 2; % 1:flight, 2:all
+phase = 1; % 1:flight, 2:all
 switch phase
     case 1
         start_idx = find(log.Data.phase==102,1,'first');
@@ -132,14 +133,20 @@ end
 figure(100);
 plot(logt(1:end-1), diff(calt, 1,1), 'LineWidth', 1.5); hold on;
 yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+txt = {''};
+yoffset = -0.1;
 if phase == 2
-    Square_coloring(log.Data.t([find(log.Data.phase == 116, 1), find(log.Data.phase == 116, 1, 'last')]),[],[],[],gca); % take off phase
+    Square_coloring(log.Data.t([find(log.Data.phase == 116, 1), find(log.Data.phase == 116, 1, 'last')]),[],[],[],gca); 
+    txt = [txt(:)', {'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'}]; % take off phase
+    Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca);
+    txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];   % flight phase
+    Square_coloring(log.Data.t([find(log.Data.phase == 108, 1), find(log.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); 
+    txt = [txt(:)', {'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'}];  % landing phase
+elseif phase == 1
     Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
-    Square_coloring(log.Data.t([find(log.Data.phase == 108, 1), find(log.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); % landing phase
-else
-    Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
+    txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];
 end
-
+text(gca().XLim(2) - (gca().XLim(2) - gca().XLim(1)) * 0.45, gca().YLim(2) + (gca().YLim(2) - gca().YLim(1)) * yoffset, txt);
 xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
 
 %% sensor
@@ -176,24 +183,30 @@ if flg.savefig
     else
         fprintf('Saving figure. \n');
         saveas(1, strcat(pwd, savefolder, savename), 'png');
+        saveas(100, strcat(pwd, savefolder, savename, 'calc'), 'png'); % calc time
     end
 end
 
+%% animation
+%make logger
+logger = LOGGER(loadfile)
+%%
+drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]); 
+drone.animation(logger,struct("target",1,"opt_plot",[]));
 %% 計算時間出すだけ
-clear gui_t ngui_t
-gui_t = load('Data\calculation_test_gui.mat'); % guiで保存した方
-ngui_t = load('Data\calculation_time.mat');    % 時間のみ保存した方
-% logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
-gui_t_flight = gui_t.log.Data.t(1:find(gui_t.log.Data.t(2:end)==0, 1, 'first'));
-ngui_t_flight = ngui_t.logt;
-
-figure(201);
-plot(gui_t_flight(1:end-1), diff(gui_t_flight), 'LineWidth', 1.5); hold on;
+% clear gui_t ngui_t
+% gui_t = load('Data\calculation_test_gui.mat'); % guiで保存した方
+% ngui_t = load('Data\calculation_time.mat');    % 時間のみ保存した方
+% % logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
+% gui_t_flight = gui_t.log.Data.t(1:find(gui_t.log.Data.t(2:end)==0, 1, 'first'));
+% ngui_t_flight = ngui_t.logt;
+% 
+% figure(201);
+% plot(gui_t_flight(1:end-1), diff(gui_t_flight), 'LineWidth', 1.5); hold on;
+% % yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+% % xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
+% 
+% % figure(202);
+% plot(ngui_t_flight(1:end-1), diff(ngui_t_flight),'--', 'LineWidth', 1.5);
 % yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-% xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
-
-% figure(202);
-plot(ngui_t_flight(1:end-1), diff(ngui_t_flight),'--', 'LineWidth', 1.5);
-yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 ngui_t_flight(end-1)])
-
+% xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 ngui_t_flight(end-1)])
