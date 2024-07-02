@@ -17,8 +17,8 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-filename = '20240627_KMPC_hovering_H20_mex';
-% filename = '20240627_KMPC_hovering_mex';
+% filename = '20240627_KMPC_hovering_H20_mex';
+filename = 'HLMPC_test';
 load(strcat("Data/", filename, ".mat"));
 
 % 115:start
@@ -64,7 +64,7 @@ Sen = cell2mat(arrayfun(@(N) logAgent.sensor.result{N}.state.get(),start_idx:fin
 Ref(1:3,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.p,start_idx:finish_idx,'UniformOutput',false));
 Ref(7:9,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.v,start_idx:finish_idx,'UniformOutput',false));
 Input = cell2mat(arrayfun(@(N) logAgent.input{N},start_idx:finish_idx,'UniformOutput',false));
-InnerInput = cell2mat(arrayfun(@(N) logAgent.inner_input{N}(:,1:4)',start_idx:finish_idx,'UniformOutput',false));
+% InnerInput = cell2mat(arrayfun(@(N) logAgent.inner_input{N}(:,1:4)',start_idx:finish_idx,'UniformOutput',false));
 if phase ~= 2 % takeoff 時だけqの目標値がないことへの対応
     Ref(4:6,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,start_idx:finish_idx,'UniformOutput',false));
 else
@@ -93,6 +93,7 @@ grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 if flg.figtype; figure(4); else subplot(m,n,4); end
 plotrange = 1.5;
 if flg.plotmode == 1
+    InnerInput = cell2mat(arrayfun(@(N) logAgent.inner_input{N}(:,1:4)',start_idx:finish_idx,'UniformOutput',false));
     plot(logt, InnerInput); 
     xlabel("Time [s]"); ylabel("Inner input"); legend("inner_input.roll", "inner_input.pitch", "inner_input.throttle", "inner_input.yaw","Location","best");
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);

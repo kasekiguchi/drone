@@ -11,7 +11,7 @@ end
 %%
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 25; % terminal time
+te = 10; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -27,11 +27,37 @@ agent.parameter = DRONE_PARAM("DIATONE","row","mass",0.58);
 agent.plant = MODEL_CLASS(agent,Model_Quat13(dt, initial_state, 1));
 agent.parameter.set("mass",struct("mass",0.5))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
+
+%%
+% for i = 1:te/dt
+%     if i < 20 || rem(i, 10) == 0 end
+%     tic
+%     agent(1).sensor.do(time, 'f');
+%     agent(1).estimator.do(time, 'f');
+%     agent(1).reference.do(time, 'f');
+%     agent(1).controller.do(time, 'f');
+%     %agent(1).controller.result.input = repmat([1.01 + 0.0*cos(time.t*2*pi/3);0.001*[sin(time.t*(pi)/1);0*cos(time.t*(pi)/1);0]],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
+%     %agent(1).controller.result.input = repmat([1;0;0;0],N,1)*sum(agent.parameter.get(["m0","mi"],"row"))*9.81/N;
+%     %agent(1).controller.result.input = agent(1).controller.result.input.*repmat([-1;1;-1;-1],N,1);
+%     %agent(1).controller.result.input(4:4:end) = 0;
+%     agent(1).plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     %pause(1)
+%     all = toc
+% end
+
+%%
+% logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+
+
+%%
 function dfunc(app)
 app.logger.plot({1, "p", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);

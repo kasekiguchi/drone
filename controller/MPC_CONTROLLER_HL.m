@@ -65,10 +65,10 @@ classdef MPC_CONTROLLER_HL <handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
-            % obj.param.t = varargin{1}.t; % for sim
+            obj.param.t = varargin{1}.t; % for sim
 
-            vara = varargin{1}; % Experiment
-            obj.param.t = vara{1}.t; % Experiment
+            % vara = varargin{1}; % Experiment
+            % obj.param.t = vara{1}.t; % Experiment
 
             ref = obj.self.reference.result;
             xd = ref.state.get();
@@ -98,24 +98,24 @@ classdef MPC_CONTROLLER_HL <handle
 
             %% Referenceの取得、ホライズンごと  For Simulation
             % 実状態の目標値
-            % xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
-            % obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+            xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
+            obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
             %% 各phaseでのリファレンスと現在状態の更新  For Experiment -------------------
             % arming，take offではリファレンスと現在状態の値を固定することで計算破綻を防いでいる
-            if vara{2} == 'a'
-                xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
-                obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-            elseif vara{2} == 't'
-                xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
-                obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-                fprintf('take off')
-            elseif vara{2} == 'f'
-                % 実状態の目標値
-                xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
-                obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
-                fprintf('flight')
-            end
+            % if vara{2} == 'a'
+            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
+            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+            % elseif vara{2} == 't'
+            %     xr_real = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
+            %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+            %     fprintf('take off')
+            % elseif vara{2} == 'f'
+            %     % 実状態の目標値
+            %     xr_real = obj.Reference(); % 12 * obj.H 仮想状態 * ホライズン
+            %     obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+            %     fprintf('flight')
+            % end
             %---------------------------------------------------------------------------------------
 
             % 実状態の目標値を仮想状態的に並び替え
@@ -268,7 +268,7 @@ classdef MPC_CONTROLLER_HL <handle
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
-            xr = zeros(19, obj.H);    % initialize
+            xr = zeros(16, obj.H);    % initialize
             % 時間関数の取得→時間を代入してリファレンス生成
             RefTime = obj.self.reference.func;    % 時間関数の取得
             for h = 0:obj.H-1
@@ -279,7 +279,7 @@ classdef MPC_CONTROLLER_HL <handle
                 xr(4:6, h+1) =   [0;0;0]; % 姿勢角
                 xr(10:12, h+1) = [0;0;0]; % 姿勢角速度
                 xr(13:16, h+1) = obj.param.ref_input; % 入力
-                xr(17:19, h+1) = [0;0;0]; % 加速度
+                % xr(17:19, h+1) = [0;0;0]; % 加速度
             end
         end
     end
