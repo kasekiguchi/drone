@@ -18,7 +18,7 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
-filename = 'HLMPC_test';
+filename = 'calculation_test_gui';
 load(strcat("Data/", filename, ".mat"));
 
 % 115:start
@@ -39,7 +39,7 @@ flg.savefig = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
-phase = 1; % 1:flight, 2:all
+phase = 2; % 1:flight, 2:all
 switch phase
     case 1
         start_idx = find(log.Data.phase==102,1,'first');
@@ -51,6 +51,7 @@ switch phase
         takeoff_idx.finish = find(log.Data.phase==116,1,'last');
 end
 logt = log.Data.t(start_idx:finish_idx);
+calt = logt;
 
 % setting time range. flg.timerange == 1なら 0 ~ flight時間に変更
 if flg.timerange
@@ -129,7 +130,7 @@ end
 
 %% calculation time
 figure(100);
-plot(logt(1:end-1), diff(logt), 'LineWidth', 1.5); hold on;
+plot(logt(1:end-1), diff(calt, 1,1), 'LineWidth', 1.5); hold on;
 yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
 if phase == 2
     Square_coloring(log.Data.t([find(log.Data.phase == 116, 1), find(log.Data.phase == 116, 1, 'last')]),[],[],[],gca); % take off phase
@@ -177,3 +178,22 @@ if flg.savefig
         saveas(1, strcat(pwd, savefolder, savename), 'png');
     end
 end
+
+%% 計算時間出すだけ
+clear gui_t ngui_t
+gui_t = load('Data\calculation_test_gui.mat'); % guiで保存した方
+ngui_t = load('Data\calculation_time.mat');    % 時間のみ保存した方
+% logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
+gui_t_flight = gui_t.log.Data.t(1:find(gui_t.log.Data.t(2:end)==0, 1, 'first'));
+ngui_t_flight = ngui_t.logt;
+
+figure(201);
+plot(gui_t_flight(1:end-1), diff(gui_t_flight), 'LineWidth', 1.5); hold on;
+% yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+% xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
+
+% figure(202);
+plot(ngui_t_flight(1:end-1), diff(ngui_t_flight),'--', 'LineWidth', 1.5);
+yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 ngui_t_flight(end-1)])
+
