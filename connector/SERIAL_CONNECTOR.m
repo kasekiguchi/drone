@@ -18,6 +18,7 @@ methods
         % 通信する対象毎にインスタンスを作成する．
         % param.port : デバイスのパス(COMxx or /dev/xxx)
         obj.port = string(param.port);
+        %obj.serial = serialport(obj.port, obj.baudrate, 'Timeout', 1);
         obj.serial = serialport(obj.port, obj.baudrate, 'Timeout', 1);
         configureTerminator(obj.serial, "CR/LF");
     end

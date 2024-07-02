@@ -33,6 +33,7 @@ classdef DRONE_EXP_MODEL < MODEL_CLASS
           else
             param.port = char(param.port);
           end
+          %obj.connector=SERIAL_CONNECTOR(param);
           obj.connector=SERIAL_CONNECTOR(param);
           fprintf("Drone %s is ready\n",param.port);
       end

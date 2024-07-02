@@ -25,7 +25,6 @@ char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127まで
 // https://create-it-myself.com/research/study-ppm-spec/
 // PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
 #define PPM_PERIOD 22500 // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
-// #define TIME_LOW 400     // PPM信号 LOWパルス幅 [us]
 #define TIME_LOW 360     // PPM信号 LOWパルス幅 [us]
 #define CH_MIN 0         // PPM幅の最小 [us] MATLABから送信される信号の最小を定義　オフセットにも関係
 #define CH_NEUTRAL 500   // PPM幅の中間 [us] MATLABから送信される信号の中間を定義　オフセットにも関係
@@ -71,7 +70,7 @@ void setup()
   setupPPM(); // ppm 出力開始
 
   // 緊急停止
-  // attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
+  attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
   while (Serial.available() <= 0) //受信データを受け取っていない時繰り返す　繰り返す中身がないため何もしない．
   {
   }
@@ -81,7 +80,7 @@ void setup()
 void loop()
 {
   receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
-  /*  if (!isEmergency)
+    if (!isEmergency)
     {
       receive_serial();
     }
@@ -104,7 +103,7 @@ void loop()
         software_reset();
       }
     }
-    */
+    
 }
 //*********** local functions  *************************//
 void receive_serial() // ---------- loop function : receive signal by UDP 信号を受信したら実行
@@ -247,7 +246,6 @@ void setupPPM() // ---------- setup ppm signal configuration　ppm信号構成�
   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
   Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
 }
-/*
 void emergency_stop()
 {
   if (!isEmergency)
@@ -276,4 +274,3 @@ void software_reset()
   digitalWrite(RST_PIN, LOW);
   Serial.println("RECOVERY"); // resetするので表示されないのが正しい挙動
 }
-*/
