@@ -20,8 +20,8 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
 
-filename = 'HLMPC_test';
-loadfile = strcat("Data/", filename, ".mat");
+filename = 'experiment_10_25_P2Py_estimator';
+loadfile = strcat("Data/experiment/", filename, ".mat");
 load(loadfile);
 
 % 115:start
@@ -192,17 +192,12 @@ end
 
 %% animation
 % clear logger
-if exist('logger') ~= 1
-    % logger.dataでうまくいかないことへの対処
-    logger.p = Est(1:3,:)';
-    logger.q = Est(4:6,:)';
-    logger.u = Input';
-    logger.r = Ref(1:3,:)';
-    logger.t = logt';
-    drone = DRAW_DRONE_MOTION_No_logger(logger,"target",1,"opt_plot",[]); 
-else
-    drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
-end
+logger.p = Est(1:3,:)';
+logger.q = Est(4:6,:)';
+logger.u = Input';
+logger.r = Ref(1:3,:)';
+logger.t = logt';
+drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
 if flg.animation_save == 1; drone.animation(logger,struct("target",1,"opt_plot",[],"mp4",flg.animation_save));
 else; drone.animation(logger,struct("target",1,"opt_plot",[]));
 end
