@@ -11,8 +11,8 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
 %load("circle0607_load_model_Log(07-Jun-2024_18_00_33).mat");
-%load("circle_0610_kosyounosyunnkann_Log(10-Jun-2024_19_10_49).mat");%これHL
-load("sl400_9_gomi_Log(01-Jul-2024_18_42_22).mat");
+load("sl600_xy_x10_hover_Log(03-Jul-2024_18_55_48).mat");%
+%load("sl800800400_hover_Log(01-Jul-2024_16_48_04).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
 %log = logger;%永久用（↓とどっちかをコメントアウト）
