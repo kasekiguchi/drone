@@ -22,8 +22,8 @@ disp("Loading data...");
 
 filename = 'experiment_10_25_P2Py_estimator';
 loadfile = strcat("Data/experiment/", filename, ".mat");
-load(loadfile);
-% logger = LOGGER(loadfile); % loggerの形で収納できる
+% load(loadfile);
+log = LOGGER(loadfile); % loggerの形で収納できる
 
 % 115:start
 % 97 :arming
@@ -44,7 +44,7 @@ flg.animation_save = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
-phase = 1; % 1:flight, 2:all
+phase = 2; % 1:flight, 2:all
 switch phase
     case 1
         start_idx = find(log.Data.phase==102,1,'first');
@@ -55,45 +55,59 @@ switch phase
         takeoff_idx.start = find(log.Data.phase==116,1,'first');
         takeoff_idx.finish = find(log.Data.phase==116,1,'last');
 end
-logt = log.Data.t(start_idx:finish_idx);
+% tt = log.Data.t(start_idx:finish_idx);
+logt = log.data(0,"t",[],"ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])';
 calt = logt;
 
 % setting time range. flg.timerange == 1なら 0 ~ flight時間に変更
 if flg.timerange
-    logt = linspace(0, log.Data.t(finish_idx)-log.Data.t(start_idx), length(logt));
+    % logt = linspace(0, log.Data.t(finish_idx)-log.Data.t(start_idx), length(logt));
+    logt = logt - logt(1);
 end
 
 % arrayfunで読み込み
 disp('Storing data...');
-Est = cell2mat(arrayfun(@(N) logAgent.estimator.result{N}.state.get(),start_idx:finish_idx,'UniformOutput',false));
-Sen = cell2mat(arrayfun(@(N) logAgent.sensor.result{N}.state.get(),start_idx:finish_idx,'UniformOutput',false));
-Ref(1:3,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.p,start_idx:finish_idx,'UniformOutput',false));
-Ref(7:9,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.v,start_idx:finish_idx,'UniformOutput',false));
-Input = cell2mat(arrayfun(@(N) logAgent.input{N},start_idx:finish_idx,'UniformOutput',false));
-% InnerInput = cell2mat(arrayfun(@(N) logAgent.inner_input{N}(:,1:4)',start_idx:finish_idx,'UniformOutput',false));
-if phase ~= 2 % takeoff 時だけqの目標値がないことへの対応
-    Ref(4:6,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,start_idx:finish_idx,'UniformOutput',false));
-else
-    horzcat(cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,start_idx:takeoff_idx.start-1,'UniformOutput',false)), ...
-        zeros(3, takeoff_idx.finish - takeoff_idx.start), ...
-        cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,takeoff_idx.finish+1:finish_idx,'UniformOutput',false)));
-end
+Est = [log.data(1,"p","e","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])';
+        log.data(1,"q","e","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])';
+        log.data(1,"v","e","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])';
+        log.data(1,"w","e","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])'];
+Sen = [log.data(1,"p","s","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])';
+        log.data(1,"q","s","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])'];
+Input = log.data(1,"input",[],"ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])';
+
+Ref = [log.data(1,"p","r","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])';
+    zeros(size(Est(1:3,:)));
+    log.data(1,"v","r","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])'];
+
+
+% Ref(1:3,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.p,start_idx:finish_idx,'UniformOutput',false));
+% Ref(7:9,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.v,start_idx:finish_idx,'UniformOutput',false));
+% if phase ~= 2 % takeoff 時だけqの目標値がないことへの対応
+%     Ref(4:6,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,start_idx:finish_idx,'UniformOutput',false));
+% else
+%     horzcat(cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,start_idx:takeoff_idx.start-1,'UniformOutput',false)), ...
+%         zeros(3, takeoff_idx.finish - takeoff_idx.start), ...
+%         cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,takeoff_idx.finish+1:finish_idx,'UniformOutput',false)));
+% end
 
 disp('Plotting start...');
 m = 2; n = 3;
 if flg.figtype; figure(1); else subplot(m,n,1); end
 plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
 if flg.figtype; figure(2); else subplot(m,n,2); end
 plot(logt, Est(4:6,:)); hold on; plot(logt, Ref(4:6, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
 if flg.figtype; figure(3); else subplot(m,n,3); end
 plot(logt, Est(7:9,:)); hold on; plot(logt, Ref(7:9, :), '--'); hold off;
 xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
 if flg.figtype; figure(4); else subplot(m,n,4); end
@@ -102,6 +116,7 @@ if flg.plotmode == 1
     InnerInput = cell2mat(arrayfun(@(N) logAgent.inner_input{N}(:,1:4)',start_idx:finish_idx,'UniformOutput',false));
     plot(logt, InnerInput); 
     xlabel("Time [s]"); ylabel("Inner input"); legend("inner_input.roll", "inner_input.pitch", "inner_input.throttle", "inner_input.yaw","Location","best");
+    background_color(phase, -0.1, gca, logt, log.Data.phase); 
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 elseif flg.plotmode == 2
     plot(Est(1,:), Est(2,:)); hold on; plot(Est(1,1), Est(2,1), '*', 'MarkerSize', 10); plot(Est(1,end), Est(2,end), '*', 'MarkerSize', 10); hold off;
@@ -118,12 +133,14 @@ end
 if flg.figtype; figure(5); else subplot(m,n,5); end
 plot(logt, Input(1,:), "LineWidth", 1.5); hold on;
 xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 ytickformat('%.1f');
 
 if flg.figtype; figure(6); else subplot(m,n,6); end
 plot(logt, Input(2:4,:), "LineWidth", 1.5); hold on;
 xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 ytickformat('%.3f');
 
@@ -135,23 +152,9 @@ end
 
 %% calculation time
 figure(100);
-plot(logt(1:end-1), diff(calt, 1,1), 'LineWidth', 1.5); hold on;
+plot(logt(1:end-1), diff(calt), 'LineWidth', 1.5); hold on;
 yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-txt = {''};
-yoffset = -0.1;
-if phase == 2
-    Square_coloring(log.Data.t([find(log.Data.phase == 116, 1), find(log.Data.phase == 116, 1, 'last')]),[],[],[],gca); 
-    txt = [txt(:)', {'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'}]; % take off phase
-    Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca);
-    txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];   % flight phase
-    Square_coloring(log.Data.t([find(log.Data.phase == 108, 1), find(log.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); 
-    txt = [txt(:)', {'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'}];  % landing phase
-elseif phase == 1
-    Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
-    txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];
-end
-text(gca().XLim(2) - (gca().XLim(2) - gca().XLim(1)) * 0.45, gca().YLim(2) + (gca().YLim(2) - gca().YLim(1)) * yoffset, txt);
-xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
 
 %% sensor
 % figure(7);
@@ -203,20 +206,25 @@ if flg.animation_save == 1; drone.animation(logger,struct("target",1,"opt_plot",
 else; drone.animation(logger,struct("target",1,"opt_plot",[]));
 end
 
-%% 計算時間出すだけ
-% clear gui_t ngui_t
-% gui_t = load('Data\calculation_test_gui.mat'); % guiで保存した方
-% ngui_t = load('Data\calculation_time.mat');    % 時間のみ保存した方
-% % logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
-% gui_t_flight = gui_t.log.Data.t(1:find(gui_t.log.Data.t(2:end)==0, 1, 'first'));
-% ngui_t_flight = ngui_t.logt;
-% 
-% figure(201);
-% plot(gui_t_flight(1:end-1), diff(gui_t_flight), 'LineWidth', 1.5); hold on;
-% % yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-% % xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
-% 
-% % figure(202);
-% plot(ngui_t_flight(1:end-1), diff(ngui_t_flight),'--', 'LineWidth', 1.5);
-% yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-% xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 ngui_t_flight(end-1)])
+%% function
+function background_color(phase, yoffset, gca, logt, logphase)
+    txt = {''};
+    font_size = 10;
+    % yoffset = -0.1;
+    switch phase
+        case 1 %flight
+            % Square_coloring(log.Data.t([find(log.Data.phase == 102, 1), find(log.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
+            Square_coloring([logt(1);logt(end)], [0.9 1.0 1.0],[],[],gca); % flight phase
+            txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];
+        case 2 %all time
+            Square_coloring(logt([find(logphase == 116, 1), find(logphase == 116, 1, 'last')]),[],[],[],gca); 
+            txt = [txt(:)', {'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'}]; % take off phase
+            Square_coloring(logt([find(logphase == 102, 1), find(logphase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca);
+            txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];   % flight phase
+            Square_coloring(logt([find(logphase == 108, 1), find(logphase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); 
+            txt = [txt(:)', {'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'}];  % landing phase
+        otherwise
+    end
+    text(gca().XLim(2) - (gca().XLim(2) - gca().XLim(1)) * 0.45, gca().YLim(2) + (gca().YLim(2) - gca().YLim(1)) * yoffset, txt, 'FontSize', font_size);
+    xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
+end
