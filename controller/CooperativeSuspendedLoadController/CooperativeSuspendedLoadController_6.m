@@ -1,4 +1,4 @@
-function U = CooperativeSuspendedLoadController_6(x,qi,R0,Ri,R0d,xd,K,P,Pdagger)
+function U = CooperativeSuspendedLoadController_6(x,qi,R0,Ri,R0d,xd,K,P,Pdagger,doi)
  % x : state
  % qi : subpart of x 3xN
  % xd : reference 18x1 : =[x0d;dx0d;ddx0d;dddx0d;o0d;do0d] 

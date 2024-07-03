@@ -15,6 +15,7 @@ classdef  NEW_GEOMETRIC_CONTROLLER < handle
     toR
     dqid
     ddqid
+    doi_pre
   end
 
   methods
@@ -38,6 +39,7 @@ classdef  NEW_GEOMETRIC_CONTROLLER < handle
       obj.dqid = 0;
       obj.ddqid = 0;
       obj.Ri = zeros(3,3,obj.N);
+      obj.doi_pre = zeros(3,obj.N);
       %初期入力設定
       parameters = self.parameter;
       input = zeros(4*obj.N,1);
@@ -59,9 +61,11 @@ classdef  NEW_GEOMETRIC_CONTROLLER < handle
       for i = 1:obj.N
         obj.Ri(:,:,i) = obj.toR(Qi(:,i));
       end
+      doi = (reshape(model.get("Oi"),3,[]) - obj.doi_pre)/varargin{1}.dt;
+      obj.doi_pre = doi;
 
       %[obj.result.input,obj.dqid,obj.ddqid] = obj.gen_input(x,qi,R0,Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger,obj.dqid,obj.ddqid);
-      obj.result.input = obj.gen_input(x,qi,R0,obj.Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger);
+      obj.result.input = obj.gen_input(x,qi,R0,obj.Ri,R0d,xd,obj.gains,obj.P,obj.Pdagger,doi);
       result = obj.result;
     end
   end

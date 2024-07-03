@@ -54,8 +54,8 @@ agent.estimator = DIRECT_ESTIMATOR(agent, struct("model", MODEL_CLASS(agent, Mod
 %agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Cooperative_Load(dt, initial_state, 1,N)),["p","Q","v","O","qi","wi","Qi","Oi"]));
 
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % sensor to capture plant position : second arg is noise
-% agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",120,"orig",[0;0;0.5],"size",1*[1,1,0]},"Cooperative"});
-agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",70,"orig",[2;0.5;1],"size",1*[4,4,0]},"Cooperative"});
+agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",50,"orig",[0;0;0],"size",1*[1,1,0]},"Cooperative"});
+% agent.reference = TIME_VARYING_REFERENCE_COOPERATIVE(agent,{"gen_ref_sample_cooperative_load",{"freq",70,"orig",[2;0.5;1],"size",1*[4,4,0]},"Cooperative"});
 % agent.controller = GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt,N));
 agent.controller = NEW_GEOMETRIC_CONTROLLER(agent,Controller_Cooperative_Load(dt,N));
 % agent.controller = GEOMETRIC_CONTROLLER_with_3_Drones(agent,Controller_Cooperative_Load(dt));
