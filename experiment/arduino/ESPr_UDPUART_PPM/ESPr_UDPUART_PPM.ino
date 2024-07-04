@@ -11,7 +11,7 @@
 #define CPU_FRE 160 // CPUクロック周波数 [MHz]
 #include <math.h>
 uint8_t i;
-unsigned int droneNumber = 252; //機体番号を入力
+unsigned int droneNumber = 253; //機体番号を入力
 #define SIGNAL_TIMEOUT 200000 //[us] Matlabと通信が切断されてから信号がリセットされるまでの時間
 
 /////////////////// WiFi関係 ////////////////////
