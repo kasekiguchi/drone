@@ -15,17 +15,17 @@ function Controller = Controller_MPC_Koopman(dt)
     % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
     % load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
 
-    % try
-    %     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
-    %     args = d2d(ssmodel, Controller_param.dt);
-    %     Controller_param.A = args.A;
-    %     Controller_param.B = args.B;
-    %     Controller_param.C = args.C;
-    % catch
+    try
+        ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
+        args = d2d(ssmodel, Controller_param.dt);
+        Controller_param.A = args.A;
+        Controller_param.B = args.B;
+        Controller_param.C = args.C;
+    catch
         Controller_param.A = est.A;
         Controller_param.B = est.B;
         Controller_param.C = est.C;
-    % end
+    end
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      torque = 1; % 1:クープマンモデルが総推力トルクのとき
@@ -65,7 +65,7 @@ function Controller = Controller_MPC_Koopman(dt)
     Controller_param.ref_input = Controller_param.input.u; %入力の目標値
 
     Controller.name = "mpc";
-    Controller.type = "MPC_controller_org";
+    Controller.type = "MPC_CONTROLLER_KOOPMAN_quadprog_simulation";
     Controller.param = Controller_param;
 
 end

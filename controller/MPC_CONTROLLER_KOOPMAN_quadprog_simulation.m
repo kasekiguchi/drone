@@ -59,6 +59,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);
             % H: 変数
             % F: fを生成するために必要な行列
+            obj.result.setting.weight = obj.param.weight;
         end
 
         %-- main()的な
@@ -89,10 +90,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             %% データ表示用
             obj.input.u = obj.result.input; 
             calT = toc
-            obj.result.t(1,idx) = calT; %計算時間保存したいときコメントイン
+            obj.result.calt = calT; %計算時間保存したいときコメントイン
 
             %% 保存するデータ
-            obj.result.weight = obj.param.weight; %重みの保存
             result = obj.result; % controllerの値の保存
 
             %% 情報表示

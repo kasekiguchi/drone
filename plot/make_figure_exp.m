@@ -1,30 +1,16 @@
-%%% 実機実験の結果をplotするファイル
-%% Initial settingclear;
-clear;
-tmp = matlab.desktop.editor.getActive;
-cd(strcat(fileparts(tmp.Filename), '../../'));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+function [] = make_figure_exp(app, filename, phase)
+%-- 実機実験の結果をplotするファイル
+% filename : 保存ファイル名
+% phase    : プロットの範囲. 1=flight, 2=all
 
-%%
-clear
 Fontsize = 15;  
 set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-disp("Loading data...");
-% load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
-% load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
-% load("Data/20240528_KMPC_P2Py=1.mat")
-% filename = '20240627_KMPC_hovering_H20_mex';
-
-filename = '0702_KMPC_P2Py_H10_dt004';
-loadfile = strcat("Data/", filename, ".mat");
-% load(loadfile);
-log = LOGGER(loadfile); % loggerの形で収納できる
-
+log = app.logger;
+% flight phase
 % 115:start
 % 97 :arming
 % 116:takeoff q no data
@@ -41,11 +27,11 @@ clear Ref
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
-flg.animation = 1;
+flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
-logAgent = log.Data.agent;
-phase = 1; % 1:flight, 2:all
+logAgent = log.Data.agent; % inner_input用
+% phase = 1; % 1:flight, 2:all
 switch phase
     case 1
         start_idx = find(log.Data.phase==102,1,'first');
@@ -80,18 +66,6 @@ Ref = [log.data(1,"p","r","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx
     zeros(size(Est(1:3,:)));
     log.data(1,"v","r","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx)])'];
 
-
-% Ref(1:3,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.p,start_idx:finish_idx,'UniformOutput',false));
-% Ref(7:9,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.v,start_idx:finish_idx,'UniformOutput',false));
-% if phase ~= 2 % takeoff 時だけqの目標値がないことへの対応
-%     Ref(4:6,:) = cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,start_idx:finish_idx,'UniformOutput',false));
-% else
-%     horzcat(cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,start_idx:takeoff_idx.start-1,'UniformOutput',false)), ...
-%         zeros(3, takeoff_idx.finish - takeoff_idx.start), ...
-%         cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,takeoff_idx.finish+1:finish_idx,'UniformOutput',false)));
-% end
-
-%%
 disp('Plotting start...');
 m = 2; n = 3;
 if flg.figtype; figure(1); else subplot(m,n,1); sgtitle(strcat(strrep(filename,'_','-')));end
@@ -236,4 +210,5 @@ function background_color(phase, yoffset, gca, logt, logphase)
     end
     text(gca().XLim(2) - (gca().XLim(2) - gca().XLim(1)) * 0.45, gca().YLim(2) + (gca().YLim(2) - gca().YLim(1)) * yoffset, txt, 'FontSize', font_size);
     xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 logt(end-1)])
+end
 end
