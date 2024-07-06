@@ -20,8 +20,8 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
 
-filename = 'experiment_10_25_P2Py_estimator';
-loadfile = strcat("Data/experiment/", filename, ".mat");
+filename = '0702_KMPC_hovering_H20_dt0025';
+loadfile = strcat("Data/", filename, ".mat");
 % load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる
 
@@ -41,6 +41,7 @@ clear Ref
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
+flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
@@ -90,33 +91,56 @@ Ref = [log.data(1,"p","r","ranget",[log.Data.t(start_idx), log.Data.t(finish_idx
 %         cell2mat(arrayfun(@(N) logAgent.reference.result{N}.state.q,takeoff_idx.finish+1:finish_idx,'UniformOutput',false)));
 % end
 
+%%
 disp('Plotting start...');
 m = 2; n = 3;
 if flg.figtype; figure(1); else subplot(m,n,1); end
 plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
-xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
 background_color(phase, -0.1, gca, logt, log.Data.phase); 
+xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
 if flg.figtype; figure(2); else subplot(m,n,2); end
 plot(logt, Est(4:6,:)); hold on; plot(logt, Ref(4:6, :), '--'); hold off;
-xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
 background_color(phase, -0.1, gca, logt, log.Data.phase); 
+xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
 if flg.figtype; figure(3); else subplot(m,n,3); end
 plot(logt, Est(7:9,:)); hold on; plot(logt, Ref(7:9, :), '--'); hold off;
-xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
 background_color(phase, -0.1, gca, logt, log.Data.phase); 
+xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
 grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
 if flg.figtype; figure(4); else subplot(m,n,4); end
+plot(logt, Input(1,:), "LineWidth", 1.5);
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
+xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
+grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+ytickformat('%.1f');
+
+if flg.figtype; figure(5); else subplot(m,n,5); end
+plot(logt, Input(2:4,:), "LineWidth", 1.5);
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
+xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
+grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+ytickformat('%.3f');
+
+if flg.figtype; figure(6); else subplot(m,n,6); end
+% calculation time
+plot(logt(1:end-1), diff(calt), 'LineWidth', 1.5);
+background_color(phase, -0.1, gca, logt, log.Data.phase); 
+yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+ytickformat('%.1f');
+
+if m*n > 6
+if flg.figtype; figure(8); else subplot(m,n,8); end
 plotrange = 1.5;
 if flg.plotmode == 1
     InnerInput = cell2mat(arrayfun(@(N) logAgent.inner_input{N}(:,1:4)',start_idx:finish_idx,'UniformOutput',false));
     plot(logt, InnerInput); 
-    xlabel("Time [s]"); ylabel("Inner input"); legend("inner_input.roll", "inner_input.pitch", "inner_input.throttle", "inner_input.yaw","Location","best");
     background_color(phase, -0.1, gca, logt, log.Data.phase); 
+    xlabel("Time [s]"); ylabel("Inner input"); legend("inner_input.roll", "inner_input.pitch", "inner_input.throttle", "inner_input.yaw","Location","best");
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 elseif flg.plotmode == 2
     plot(Est(1,:), Est(2,:)); hold on; plot(Est(1,1), Est(2,1), '*', 'MarkerSize', 10); plot(Est(1,end), Est(2,end), '*', 'MarkerSize', 10); hold off;
@@ -129,32 +153,13 @@ elseif flg.plotmode == 3
     legend('trajectory', 'start.pos', 'finish.pos', 'Location', 'best');
     grid on; xlim([-plotrange plotrange]); ylim([-plotrange plotrange]); zlim([0 inf]);
 end
-
-if flg.figtype; figure(5); else subplot(m,n,5); end
-plot(logt, Input(1,:), "LineWidth", 1.5); hold on;
-xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
-background_color(phase, -0.1, gca, logt, log.Data.phase); 
-grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
-ytickformat('%.1f');
-
-if flg.figtype; figure(6); else subplot(m,n,6); end
-plot(logt, Input(2:4,:), "LineWidth", 1.5); hold on;
-xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
-background_color(phase, -0.1, gca, logt, log.Data.phase); 
-grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
-ytickformat('%.3f');
+end
 
 %
 if ~flg.figtype % subplotなら
     set(gcf, "WindowState", "maximized");
     set(gcf, "Position", [960 0 960 1000])
 end
-
-%% calculation time
-figure(100);
-plot(logt(1:end-1), diff(calt), 'LineWidth', 1.5); hold on;
-yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-background_color(phase, -0.1, gca, logt, log.Data.phase); 
 
 %% sensor
 % figure(7);
@@ -196,14 +201,16 @@ end
 
 %% animation
 % clear logger
-logger.p = Est(1:3,:)';
-logger.q = Est(4:6,:)';
-logger.u = Input';
-logger.r = Ref(1:3,:)';
-logger.t = logt';
-drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
-if flg.animation_save == 1; drone.animation(logger,struct("target",1,"opt_plot",[],"mp4",flg.animation_save));
-else; drone.animation(logger,struct("target",1,"opt_plot",[]));
+if flg.animation == 1
+    logger.p = Est(1:3,:)';
+    logger.q = Est(4:6,:)';
+    logger.u = Input';
+    logger.r = Ref(1:3,:)';
+    logger.t = logt';
+    drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
+    if flg.animation_save == 1; drone.animation(logger,struct("target",1,"opt_plot",[],"mp4",flg.animation_save));
+    else; drone.animation(logger,struct("target",1,"opt_plot",[]));
+    end
 end
 
 %% function
