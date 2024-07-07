@@ -162,11 +162,11 @@ classdef FIGURE_EXP
                 % X, xrは仮装状態用に変換してあるので再変換が必要
                 Xr = reshape(Xr, 12, H, []);
                 xr = zeros(size(Xr));
-                X = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.current,...
+                Xc = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.current,...
                         obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
 
                 for i = 1:idx
-                    Z(:,1) = X(:,i);
+                    Z(:,1) = Xc(:,i);
                     for j = 2:H
                         Z(:,j) = A*Z(:,j-1) + B*U(:,j,i);
                     end
