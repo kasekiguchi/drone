@@ -127,12 +127,8 @@ classdef FIGURE_EXP
             %   X[k+1] = CZ[k+1]
             % obj.agent : agent
 
-            % fval = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.fval,...
-            %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
             U = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
                         obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-            % exitflag = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.exitflag,...
-            %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
             Xr = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.xr(1:12,:),...
                         obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
 
@@ -148,7 +144,6 @@ classdef FIGURE_EXP
             xx = zeros(12, H, idx);
             if strcmp(cont,'Koopman')
                 xr = reshape(Xr, 12, H, []);
-                % X = obj.data.Est;
                 F = @quaternions_all;
                 for i = 1:idx
                     Z(:,1) = F(X(:,i));
@@ -160,27 +155,37 @@ classdef FIGURE_EXP
                 x = xx;
             elseif strcmp(cont,'HL')
                 % X, xrは仮装状態用に変換してあるので再変換が必要
-                Xr = reshape(Xr, 12, H, []);
-                xr = zeros(size(Xr));
                 Xc = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.current,...
+                        obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false)); % 仮想状態現在地
+                Xr = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.xr_img,...
                         obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                Xr = reshape(Xr, 12, H, []); %実状態目標値をサブシステムに並び変えた
+                Xr_real = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.xr_real(1:12,:),...
+                        obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                xr = reshape(Xr_real, 12, H, []); %実状態目標値
+                Z = zeros(12,H,idx);
 
                 for i = 1:idx
-                    Z(:,1) = Xc(:,i);
+                    Z(:,1,i) = Xc(:,i); %仮想状態
                     for j = 2:H
-                        Z(:,j) = A*Z(:,j-1) + B*U(:,j,i);
+                        Z(:,j,i) = A*Z(:,j-1) + B*U(:,j-1,i); % 仮想状態
                     end
-                    xx(:,:,i) = Xr(:,1,i) + Z; % 実状態
-                    xr(:,:,i) = Xr(:,1,i) - Xr(:,:,i);  % 実状態
                 end
+                xx = Xr(:,:,1:idx) + Z; % サブシステムに並んだ実状態
                 x(1,:,:) = xx(3,:,:); x(7,:,:) = xx(4,:,:); x(4:6,:,:) = zeros(3,H,idx);
                 x(2,:,:) = xx(7,:,:); x(8,:,:) = xx(8,:,:); x(10:12,:,:) = zeros(3,H,idx);
                 x(3,:,:) = xx(1,:,:); x(9,:,:) = xx(2,:,:);
+                % x = xx;
             end
 
             %% 確認
-            % figure(11); plot(obj.data.logt(1,1:idx), reshape(xr(1,1,:), 1, []));
-            % figure(12); plot(obj.data.logt(1,1:idx), reshape(xr(2,1,:), 1, []));
+            % for i = 1:100
+            % figure(11); plot(x(1,:,i), x(2,:,i),'o', 'MarkerSize', 5, 'LineWidth', 0.5); hold on;
+            % plot(obj.data.Est(1,i), obj.data.Est(2,i), '*', 'MarkerSize', 5, 'LineWidth', 0.5); hold off;
+            % xlim(plotrange(1,:)); ylim(plotrange(2,:));
+            % pause(0.1);
+            % % figure(12); plot(obj.data.logt(1,i), reshape(xr(2,1,i), 1, []));
+            % end
 
             %-- plot
             % plotrange = 

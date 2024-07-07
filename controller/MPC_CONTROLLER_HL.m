@@ -192,9 +192,11 @@ classdef MPC_CONTROLLER_HL <handle
             obj.result.mpc.fval = fval;
             obj.result.mpc.xr = obj.reference.xr;
             obj.result.mpc.current = obj.current_state;
+            obj.result.mpc.xr_real = xr_real;
+            obj.result.mpc.xr_img = xr_imag;
 
             obj.result.input_v = [vf; vs]; % 仮想入力の保存
-            obj.result.xr = xr_real;
+            % obj.result.xr = xr_real;
 
             %% 情報表示 Exp時はコメントアウト
             % if exist("exitflag") ~= 1

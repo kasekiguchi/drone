@@ -20,7 +20,7 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
 
-filename = 'test_HLMPC_0707_2';
+filename = 'test_HLMPC_0707_7';
 % filename = 'test_data_0707_5';
 loadfile = strcat("Data/", filename, ".mat");
 % load(loadfile);
@@ -48,7 +48,7 @@ phase = 2; % 1:flight, 2:all
 
 fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename));
 % fig.main_figure();
-[x, xr] = fig.main_mpc('HL', [-0.1 0.1; 0 1.1; 0 1.1]);
+[x, xr] = fig.main_mpc('HL', [-1 1; -2 2; 0 1.1]);
 % app = app.logger, app.fExp の構造体を作ればよい
 
 %% save
