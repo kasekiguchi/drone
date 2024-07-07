@@ -28,6 +28,7 @@ classdef MPC_CONTROLLER_HL <handle
         C
         H
         mpc
+        qpparam
     end
 
     methods
@@ -56,6 +57,16 @@ classdef MPC_CONTROLLER_HL <handle
             %% 入力
             obj.result.input = zeros(self.estimator.model.dim(2),1); % 入力事前定義(これがないと初期化で失敗する)
             obj.previous_input = repmat(obj.input.u, 1, obj.H); % MPC用の初期入力
+
+            %% QP change_equationの共通項をあらかじめ計算
+            Param = struct('A',obj.A,'B',obj.B,'C',obj.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
+            [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);
+            % H: 変数
+            % F: fを生成するために必要な行列
+            obj.result.setting.weight = struct('Q',obj.weight,'Qf',obj.weightF,'R',obj.weightR);
+            obj.result.setting.A = obj.A;
+            obj.result.setting.B = obj.B;
+            obj.result.setting.C = obj.C;
         end
 
         %-- main()的な
@@ -143,22 +154,27 @@ classdef MPC_CONTROLLER_HL <handle
 
             %% quadprog 二次計画法 線形制約しか扱えないが高速
             % MPC設定(problem)
-            options = optimoptions('quadprog');
-            options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
-            options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
-            options.Display = 'none';   % 計算結果の表示
-            problem.solver = 'quadprog'; % solver
-            % [H, f] = obj.change_equation(obj);
-            Param = struct('A',obj.A,'B',obj.B,'C',obj.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
-            [H, f] = obj.param.change_equation_func(Param);
-            A = [];
-            b = [];
-            Aeq = [];
-            beq = [];
-            lb = [];
-            ub = [];
-            x0 = [obj.previous_input(:)];   
-            [var, ~, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
+            % options = optimoptions('quadprog');
+            % options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
+            % options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
+            % options.Display = 'none';   % 計算結果の表示
+            % problem.solver = 'quadprog'; % solver
+            % % [H, f] = obj.change_equation(obj);
+            % Param = struct('A',obj.A,'B',obj.B,'C',obj.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H,'current_state',obj.current_state,'ref',obj.reference.xr);
+            % [H, f] = obj.param.change_equation_func(Param);
+            % A = [];
+            % b = [];
+            % Aeq = [];
+            % beq = [];
+            % lb = [];
+            % ub = [];
+            % x0 = [obj.previous_input(:)];   
+            % [var, ~, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
+            %% ------------------------------------------------------------
+            % 最適化部分の関数化とmex化
+            Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
+            % [var, fval, exitflag] = quad_drone_mex(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
+            [var, fval, exitflag] = quad_drone(Param);
             %%--
 
             obj.previous_input = var; % 最適化の初期値
@@ -171,6 +187,11 @@ classdef MPC_CONTROLLER_HL <handle
             % [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             % % HL同様の入力制限
             obj.input.u = obj.result.input; % 入力をcontroller内に保存
+            obj.result.mpc.var = var;
+            obj.result.mpc.exitflag = exitflag;
+            obj.result.mpc.fval = fval;
+            obj.result.mpc.xr = obj.reference.xr;
+            obj.result.mpc.current = obj.current_state;
 
             obj.result.input_v = [vf; vs]; % 仮想入力の保存
             obj.result.xr = xr_real;
@@ -203,30 +224,30 @@ classdef MPC_CONTROLLER_HL <handle
             obj.result
         end
 
-        function [eval] = objective(obj, x)   % obj.~とする
-            U = x;
-            X(:,1) = obj.current_state;
-            for L = 2:obj.H
-                X(:,L) = obj.A*X(:,L-1) + obj.B*U(:,L-1);
-            end
-            
-            Xd = obj.reference.xr; % 目標値
-            Z = X; % 状態
-
-            tildeUpre = U - obj.input.u;          % 前時刻入力との誤差
-            tildeUref = U - Xd(13:16,:);  % 目標入力との誤差
-
-            %-- 状態及び入力のステージコストを計算
-            stageStateZ = diag(Z(:,1:end-1)'* obj.Weight * Z(:,1:end-1))';
-            stageInputPre = diag(tildeUpre(:,1:end-1)'* obj.WeightRp * tildeUpre(:,1:end-1))';
-            stageInputRef = diag(tildeUref(:,1:end-1)'* obj.WeightR  * tildeUref(:,1:end-1))';
-
-            %-- 状態だけの終端コスト
-            terminalState = Z(:, end)' * obj.Weight * Z(:,end);
-
-            %-- 評価値計算
-            eval = sum(stageStateZ + stageInputPre + stageInputRef) + terminalState;  % 全体の評価値
-        end
+        % function [eval] = objective(obj, x)   % obj.~とする
+        %     U = x;
+        %     X(:,1) = obj.current_state;
+        %     for L = 2:obj.H
+        %         X(:,L) = obj.A*X(:,L-1) + obj.B*U(:,L-1);
+        %     end
+        % 
+        %     Xd = obj.reference.xr; % 目標値
+        %     Z = X; % 状態
+        % 
+        %     tildeUpre = U - obj.input.u;          % 前時刻入力との誤差
+        %     tildeUref = U - Xd(13:16,:);  % 目標入力との誤差
+        % 
+        %     %-- 状態及び入力のステージコストを計算
+        %     stageStateZ = diag(Z(:,1:end-1)'* obj.Weight * Z(:,1:end-1))';
+        %     stageInputPre = diag(tildeUpre(:,1:end-1)'* obj.WeightRp * tildeUpre(:,1:end-1))';
+        %     stageInputRef = diag(tildeUref(:,1:end-1)'* obj.WeightR  * tildeUref(:,1:end-1))';
+        % 
+        %     %-- 状態だけの終端コスト
+        %     terminalState = Z(:, end)' * obj.Weight * Z(:,end);
+        % 
+        %     %-- 評価値計算
+        %     eval = sum(stageStateZ + stageInputPre + stageInputRef) + terminalState;  % 全体の評価値
+        % end
 
         % function [H, f] = change_equation(obj)      
         %     Q = obj.Weight;

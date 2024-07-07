@@ -77,6 +77,7 @@ run("ExpBase");
 
 %%
 function dfunc(app)
+close all
 % app.logger.plot({1, "p1-p2", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "w", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
@@ -85,18 +86,16 @@ app.logger.plot({1, "q", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.t
 % app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
 % Graphplot(app)
+% app.agent(1).animation(app.logger,"target",1,"opt_plot",[]);
 
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
-flg.animation = 1;
+flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
 fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename));
 fig.main_figure();
 % app = app.logger, app.fExp の構造体を作ればよい
-
-% fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename));
-% fig.main_animation()
 end

@@ -26,22 +26,22 @@ function Controller = Controller_MPC_HL(~)
 
     Controller_param.input.u = [0;0;0;0];  % 仮想入力
     input_th = 30;
-    Controller_param.input_max = [ input_th; input_th; input_th; input_th];
-    Controller_param.input_min = [-input_th;-input_th;-input_th;-input_th];
+    Controller_param.input.ub = [ input_th; input_th; input_th; input_th];
+    Controller_param.input.lb = [-input_th;-input_th;-input_th;-input_th];
     % Controller_param.torque_TH = 2;
     
     Controller_param.input.u = [0;0;0;0]; %  sekiguchi 
     Controller_param.ref_input = [0;0;0;0];
 
     %% change equation 
-    switch Controller_param.H
-        case 10
-            Controller_param.change_equation_func = @change_equation_mex_H10;
-        case 20
-            Controller_param.change_equation_func = @change_equation_mex_H20;
-        otherwise
-            error('No selected change_equation');
-    end
+    % switch Controller_param.H
+    %     case 10
+    %         Controller_param.change_equation_func = @change_equation_mex_H10;
+    %     case 20
+    %         Controller_param.change_equation_func = @change_equation_mex_H20;
+    %     otherwise
+    %         error('No selected change_equation');
+    % end
 
 %     Controller.name = "mcmpc";
     Controller.name = "hlmpc";

@@ -20,7 +20,7 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
 
-filename = '0702_KMPC_P2Py_H10_dt004';
+filename = 'test_data_0707_5';
 loadfile = strcat("Data/", filename, ".mat");
 % load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる
@@ -41,7 +41,7 @@ clear Ref
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
-flg.animation = 1;
+flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 3; % 1:inner_input, 2:xy, 3:xyz
 logAgent = log.Data.agent;
@@ -214,6 +214,19 @@ if flg.animation == 1
     end
     drone.animation(logger, anipara);
 end
+
+%%
+flg.figtype = 0; % 0:subplot
+flg.savefig = 0;
+flg.animation_save = 0;
+flg.animation = 0;
+flg.timerange = 1;
+flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
+filename = string(datetime('now'), 'yyyy-MM-dd');
+fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',2,'filename',filename));
+plotrange = [-0.1 0.1; 0 1.1; 0 1.1];
+[x, xr] = fig.main_mpc('Koopman', plotrange);
+% app = app.logger, app.fExp の構造体を作ればよい
 
 %% function
 function background_color(phase, yoffset, gca, logt, logphase)

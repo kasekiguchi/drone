@@ -1,6 +1,10 @@
 classdef FIGURE_EXP
-    %UNTITLED このクラスの概要をここに記述
-    %   詳細説明をここに記述
+    %FIGURE_EXP 結果をプロット、アニメーションを描画する
+    %   main_figure() : flgに沿った内容を出力
+    %   main_animation() : アニメーションのみを出力(flg.animationは関係なし)
+    %   main_mpc() : MPCの予測状態を出力
+    %   引数：app = struct(logger, fExp)
+    %         varargin = struct(phase, flg, filename)
 
     properties
         % figtype = 0; % 0:subplot
@@ -14,24 +18,30 @@ classdef FIGURE_EXP
         log
         filename
         data
+        agent
     end
 
     methods
         function obj = FIGURE_EXP(app, varargin)
-            %UNTITLED このクラスのインスタンスを作成
-            %   詳細説明をここに記述
+            %FIGURE_EXP 引数をもとにデータ範囲、データの結合を行う
+            %   コンストラクタ実行さえすれば全ての関数を使用可能
             obj.phase = varargin{1}.phase;
             obj.flg = varargin{1}.flg;
             obj.filename = varargin{1}.filename;
             obj.flg.fExp = app.fExp;
             obj.log = app.logger;
+            obj.agent = app.logger.Data.agent;
+
+            obj = obj.decide_phase();
+            obj = obj.store_data();
         end
 
         function [] = main_figure(obj)
-            %METHOD1 このメソッドの概要をここに記述
-            %   詳細説明をここに記述
-            obj = obj.decide_phase();
-            obj = obj.store_data();
+            %main_figure flgに沿った内容を出力
+            %   引数は不要
+
+            % obj = obj.decide_phase();
+            % obj = obj.store_data();
             calt = obj.data.logt;
             
             disp('Plotting start...');
@@ -79,7 +89,7 @@ classdef FIGURE_EXP
             if obj.flg.figtype; figure(8); else subplot(m,n,8); end
             plotrange = 1.5;
             if obj.flg.plotmode == 1
-                InnerInput = cell2mat(arrayfun(@(N) logAgent.inner_input{N}(:,1:4)',obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                InnerInput = cell2mat(arrayfun(@(N) obj.agent.inner_input{N}(:,1:4)',obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
                 plot(obj.data.logt, InnerInput); 
                 obj.background_color(-0.1, gca, obj.log.Data.phase); 
                 xlabel("Time [s]"); ylabel("Inner input"); legend("inner_input.roll", "inner_input.pitch", "inner_input.throttle", "inner_input.yaw","Location","best");
@@ -107,9 +117,108 @@ classdef FIGURE_EXP
         end
 
         function main_animation(obj)
-            obj = obj.decide_phase();
-            obj = obj.store_data();
             obj.make_animation();
+        end
+
+        function [x, xr] = main_mpc(obj, cont, plotrange)
+            %main_mpc MPCの予測状態をプロットする
+            % var(input)から状態を計算
+            %   Z[k+1] = AZ[k] + BU[k]
+            %   X[k+1] = CZ[k+1]
+            % obj.agent : agent
+
+            % fval = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.fval,...
+            %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            U = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
+                        obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            % exitflag = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.exitflag,...
+            %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            Xr = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.xr(1:12,:),...
+                        obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+
+            A = obj.agent.controller.result{1}.setting.A;
+            B = obj.agent.controller.result{1}.setting.B;
+            C = obj.agent.controller.result{1}.setting.C;
+            H = size(U, 1) /4;
+            U = reshape(U, 4, [], size(U,2));
+
+            X = obj.data.Est;
+            idx = size(U,3) - H;
+
+            xx = zeros(12, H, idx);
+            if strcmp(cont,'Koopman')
+                xr = reshape(Xr, 12, H, []);
+                % X = obj.data.Est;
+                F = @quaternions_all;
+                for i = 1:idx
+                    Z(:,1) = F(X(:,i));
+                    for j = 2:H
+                        Z(:,j) = A*Z(:,j-1) + B*U(:,j,i);
+                    end
+                    xx(:,:,i) = C*Z;
+                end
+                x = xx;
+            elseif strcmp(cont,'HL')
+                % X, xrは仮装状態用に変換してあるので再変換が必要
+                Xr = reshape(Xr, 12, H, []);
+                xr = zeros(size(Xr));
+                X = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.current,...
+                        obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+
+                for i = 1:idx
+                    Z(:,1) = X(:,i);
+                    for j = 2:H
+                        Z(:,j) = A*Z(:,j-1) + B*U(:,j,i);
+                    end
+                    xx(:,:,i) = Xr(:,1,i) + Z; % 実状態
+                    xr(:,:,i) = Xr(:,1,i) - Xr(:,:,i);  % 実状態
+                end
+                x(1,:,:) = xx(3,:,:); x(7,:,:) = xx(4,:,:); x(4:6,:,:) = zeros(3,H,idx);
+                x(2,:,:) = xx(7,:,:); x(8,:,:) = xx(8,:,:); x(10:12,:,:) = zeros(3,H,idx);
+                x(3,:,:) = xx(1,:,:); x(9,:,:) = xx(2,:,:);
+            end
+
+            %% 確認
+            % figure(11); plot(obj.data.logt(1,1:idx), reshape(xr(1,1,:), 1, []));
+            % figure(12); plot(obj.data.logt(1,1:idx), reshape(xr(2,1,:), 1, []));
+
+            %-- plot
+            % plotrange = 
+            figure(100)
+            for i = 1:idx 
+                subplot(2,2,2);
+                plot(x(1,:,i), x(2,:,i), 'o', 'MarkerSize', 5, 'LineWidth', 0.5); hold on;
+                plot(x(1,1,i), x(2,1,i), 'p', 'MarkerSize',10, 'LineWidth', 0.5);
+                plot(xr(1,:,i),xr(2,:,i), '^', 'MarkerSize', 5, 'LineWidth', 0.5); hold off;
+                xlim(plotrange(1,:)); ylim(plotrange(2,:));
+                % xlim([-inf inf]); ylim([-inf inf])
+                xlabel('X [m]'); ylabel('Y [m]'); grid on;
+                legend('Prediction', 'Current', 'Reference', 'Location', 'best');
+
+                txt = strcat('t:', num2str(obj.data.logt(i)));
+                text(-1.05,1.05, txt, 'FontSize', 15, 'Units', 'normalized');
+
+                subplot(2,2,4);
+                plot(x(1,:,i), x(3,:,i), 'o', 'MarkerSize', 5, 'LineWidth', 0.5); hold on;
+                plot(x(1,1,i), x(3,1,i), 'p', 'MarkerSize',10, 'LineWidth', 0.5); 
+                plot(xr(1,:,i),xr(3,:,i), '^', 'MarkerSize', 5, 'LineWidth', 0.5); hold off;
+                xlim(plotrange(1,:)); ylim(plotrange(3,:)); grid on;
+                % xlim([-inf inf]); ylim([-inf inf])
+                xlabel('X [m]'); ylabel('Z [m]');
+                legend('Prediction', 'Current', 'Reference', 'Location', 'best');
+
+                subplot(2,2,[1,3]);
+                plot3(x(1,:,i), x(2,:,i), x(3,:,i), 'o', 'MarkerSize', 5, 'LineWidth', 0.5); hold on;
+                plot3(x(1,1,i), x(2,1,i), x(3,1,i), 'p', 'MarkerSize', 5, 'LineWidth', 0.5); 
+                plot3(xr(1,:,i), xr(2,:,i), xr(3,:,i), '^', 'MarkerSize', 5, 'LineWidth', 0.5); hold off;
+                xlim(plotrange(1,:)); ylim(plotrange(2,:)); zlim(plotrange(3,:)); grid on;
+                xlabel('X [m]'); ylabel('Y [m]'); zlabel('Z [m]');
+                legend('Prediction', 'Current', 'Reference', 'Location', 'best');
+                % view([1 1 0])
+
+                pause(0.001); % なんかないと動かない
+            end
+
         end
 
         function make_animation(obj)
