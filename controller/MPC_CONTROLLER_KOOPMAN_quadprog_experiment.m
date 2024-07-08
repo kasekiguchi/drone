@@ -59,6 +59,10 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);
             % H: 変数
             % F: fを生成するために必要な行列
+            obj.result.setting.weight = struct('Q',obj.weight,'Qf',obj.weightF,'R',obj.weightR);
+            obj.result.setting.A = obj.param.A;
+            obj.result.setting.B = obj.param.B;
+            obj.result.setting.C = obj.param.C;
         end
 
         %-- main()的な
@@ -130,6 +134,11 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
 
             %% データ表示用
             obj.input.u = obj.result.input; 
+            obj.result.calt = calT; %計算時間保存したいときコメントイン
+            obj.result.mpc.var = var;
+            obj.result.mpc.exitflag = exitflag;
+            obj.result.mpc.fval = fval;
+            obj.result.mpc.xr = obj.reference.xr;
             % calT = toc
 
             %% 保存するデータ
