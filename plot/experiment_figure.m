@@ -10,9 +10,9 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-%load("circle0607_load_model_Log(07-Jun-2024_18_00_33).mat");
+%load("sl600_xy_x20_hover_yokunai_Log(03-Jul-2024_20_06_56).mat");
 load("sl600_xy_x10_hover_Log(03-Jul-2024_18_55_48).mat");%
-%load("sl800800400_hover_Log(01-Jul-2024_16_48_04).mat");
+%load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
 %log = logger;%永久用（↓とどっちかをコメントアウト）
