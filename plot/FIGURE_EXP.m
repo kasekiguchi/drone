@@ -47,19 +47,19 @@ classdef FIGURE_EXP
             disp('Plotting start...');
             m = 2; n = 3;
             if obj.flg.figtype; figure(1); else subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));end
-            plot(obj.data.logt, obj.data.Est(1:3,:)); hold on; plot(obj.data.logt, obj.data.Ref(1:3, :), '--'); hold off;
+            plot(obj.data.logt, obj.data.Est(1:3,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(1:3, :), '--', "LineWidth", 1.5); hold off;
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
             
             if obj.flg.figtype; figure(2); else subplot(m,n,2); end
-            plot(obj.data.logt, obj.data.Est(4:6,:)); hold on; plot(obj.data.logt, obj.data.Ref(4:6, :), '--'); hold off;
+            plot(obj.data.logt, obj.data.Est(4:6,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(4:6, :), '--', "LineWidth", 1.5); hold off;
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
             
             if obj.flg.figtype; figure(3); else subplot(m,n,3); end
-            plot(obj.data.logt, obj.data.Est(7:9,:)); hold on; plot(obj.data.logt, obj.data.Ref(7:9, :), '--'); hold off;
+            plot(obj.data.logt, obj.data.Est(7:9,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(7:9, :), '--', "LineWidth", 1.5); hold off;
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
@@ -127,8 +127,7 @@ classdef FIGURE_EXP
             %   X[k+1] = CZ[k+1]
             % obj.agent : agent
 
-            U = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
-                        obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            U = obj.data.var;
             Xr = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.xr(1:12,:),...
                         obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
 
@@ -286,6 +285,18 @@ classdef FIGURE_EXP
                 zeros(size(obj.data.Est(1:3,:)));
                 obj.log.data(1,"v","r","ranget",[obj.log.Data.t(obj.data.start_idx), obj.log.Data.t(obj.data.finish_idx)])'];
             % store_result = obj.data;
+
+            %% var, exitflag
+            if obj.phase == 1
+                obj.data.fval = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.fval,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.data.exitflag = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.exitflag,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.data.var = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            end
         end
 
         function obj = decide_phase(obj)
@@ -301,6 +312,10 @@ classdef FIGURE_EXP
                     % takeoff_start = find(obj.log.Data.phase==116,1,'first');
                     % takeoff_finish = find(obj.log.Data.phase==116,1,'last');
             end
+        end
+
+        function show(obj)
+            obj.data
         end
     end
 end

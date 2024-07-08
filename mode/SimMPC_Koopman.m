@@ -91,11 +91,11 @@ app.logger.plot({1, "q", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.t
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
-flg.animation = 0;
+flg.animation = 1;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename));
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename));
 fig.main_figure();
 % app = app.logger, app.fExp の構造体を作ればよい
 end

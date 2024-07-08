@@ -93,7 +93,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             %% データ表示用
             obj.input.u = obj.result.input; 
             calT = toc
-            obj.result.calt = calT; %計算時間保存したいときコメントイン
+            obj.result.mpc.calt = calT; %計算時間保存したいときコメントイン
             obj.result.mpc.var = var;
             obj.result.mpc.exitflag = exitflag;
             obj.result.mpc.fval = fval;
