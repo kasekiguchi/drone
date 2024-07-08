@@ -67,7 +67,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
 
         %-- main()的な
         function result = do(obj,varargin)
-            % tic
+            tic
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
             vara = varargin{1};
@@ -133,13 +133,13 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             end
 
             %% データ表示用
+            calT = toc
             obj.input.u = obj.result.input; 
             obj.result.calt = calT; %計算時間保存したいときコメントイン
             obj.result.mpc.var = var;
             obj.result.mpc.exitflag = exitflag;
             obj.result.mpc.fval = fval;
             obj.result.mpc.xr = obj.reference.xr;
-            % calT = toc
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存

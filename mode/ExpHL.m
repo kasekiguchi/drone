@@ -6,7 +6,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-motive = Connector_Natnet('192.168.1.2'); % connect to Motive
+motive = Connector_Natnet('192.168.1.4'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
@@ -16,8 +16,8 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-% agent.plant = DRONE_EXP_MODEL_test(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL_test(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
+% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 % "3" or "COM3"
 % agent.platn = DRONE_EXP_MODEL(agent,)
 agent.parameter = DRONE_PARAM("DIATONE");

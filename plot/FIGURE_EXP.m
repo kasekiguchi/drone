@@ -132,9 +132,9 @@ classdef FIGURE_EXP
             Xr = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.xr(1:12,:),...
                         obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
 
-            A = obj.agent.controller.result{1}.setting.A;
-            B = obj.agent.controller.result{1}.setting.B;
-            C = obj.agent.controller.result{1}.setting.C;
+            A = obj.agent.controller.result{obj.data.start_idx}.setting.A;
+            B = obj.agent.controller.result{obj.data.start_idx}.setting.B;
+            C = obj.agent.controller.result{obj.data.start_idx}.setting.C;
             H = size(U, 1) /4;
             U = reshape(U, 4, [], size(U,2));
 
@@ -202,6 +202,9 @@ classdef FIGURE_EXP
 
                 txt = strcat('t:', num2str(obj.data.logt(i)));
                 text(-1.05,1.05, txt, 'FontSize', 15, 'Units', 'normalized');
+
+                txt = strcat('end:', num2str(obj.data.logt(end)), 's');
+                text(-0.5, 1.05, txt, 'FontSize', 15, 'Units', 'normalized');
 
                 subplot(2,2,4);
                 plot(x(1,:,i), x(3,:,i), 'o', 'MarkerSize', 5, 'LineWidth', 0.5); hold on;

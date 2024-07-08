@@ -7,7 +7,7 @@ in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
-motive = Connector_Natnet('192.168.1.2'); % connect to Motive
+motive = Connector_Natnet('192.168.1.4'); % connect to Motive
 motive.getData([], []); % get data from Motive
 rigid_ids = [1]; % rigid-body number on Motive
 sstate = motive.result.rigid(rigid_ids);
@@ -17,8 +17,8 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252])); %プロポ無線
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252])); %プロポ無線
+% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -39,7 +39,7 @@ run("ExpBase");
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
     if varargin{2} == 'a'
-        result = controller.mpc.do(varargin); % arming: KMPC 
+        result = controller.mpc.do(varargin); % arming: KMPC
     elseif varargin{2} == 't'
         result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
@@ -78,12 +78,13 @@ app.logger.plot({1, "w", "e"},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
-flg.animation = 1;
+flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename));
-fig.main_figure();
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename));
+% fig.main_figure();
+fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
 end
 
 % GUI上に現在位置（推定値）を表示する
