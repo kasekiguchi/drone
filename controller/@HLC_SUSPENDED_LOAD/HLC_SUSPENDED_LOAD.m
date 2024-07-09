@@ -6,6 +6,8 @@ classdef HLC_SUSPENDED_LOAD < handle
         param
         Q
         IT
+        u_opt0
+        fmc_options 
     end
     
     methods
@@ -13,6 +15,8 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
+            obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
+            obj.fmc_options = optimoptions(@fmincon,'Display','off');
         end
         
         function result=do(obj,param,~)
@@ -21,6 +25,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            xq    = [model.state.getq('4');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応するよう
             else
@@ -88,6 +93,11 @@ classdef HLC_SUSPENDED_LOAD < handle
            if strcmp(cha,'f')
                 obj.result.input = uf +[0;us(2:4)];
             end
+            % control barrier funciton
+            fun = @(u_opt) (u_opt - obj.result.input)'*(u_opt - obj.result.input);
+            [A,b] = obj.conic_cfb(xq,P,[100;10],10*pi/180);%deg
+            obj.result.input = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
+            obj.u_opt0 = obj.result.input;
             
             obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも->input_transformで解決？
 

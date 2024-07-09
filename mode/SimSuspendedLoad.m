@@ -2,7 +2,7 @@ clc
 ts = 0; % initial time
 % dt = 0.025; % sampling period
 dt = 0.025; % sampling period
-te = 600; % termina time
+te = 10; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
@@ -16,7 +16,7 @@ initial_state.w = [0; 0; 0];
 initial_state.vL = [0; 0; 0];
 initial_state.pT = [0; 0; -1];
 initial_state.wL = [0; 0; 0];
- initial_state.p = [0;0.7;1.46];
+ % initial_state.p = [0;0.7;1.46];
 
 
 agent = DRONE;
