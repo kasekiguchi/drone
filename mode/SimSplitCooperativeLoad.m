@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 120;
+te = 5;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -152,8 +152,8 @@ end
 clc
 disp(time.t)
 %%
-close all
-run("DataPlot.m")
+% close all
+% run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
@@ -161,7 +161,7 @@ mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
 mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 % 
 % %%
-% logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
+logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
 %%
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
