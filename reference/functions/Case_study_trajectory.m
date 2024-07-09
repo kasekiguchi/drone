@@ -29,19 +29,19 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 %% 円旋回
-T = 15;
-x = sin(2*pi*t/T);
-y = cos(2*pi*t/T);
-z = 1.5;
+% T = 15;
+% x = sin(2*pi*t/T);
+% y = cos(2*pi*t/T);
+% z = 1.5;
 
 % x = cos(2*pi*t/T) - cos(pi*t/T);
 % y = sin(2*pi*t/T);
 % z = 1;
 
 %% hovering
-% x = 0;
-% y = 0;
-% z = 1;
+x = 0;
+y = 0;
+z = 1;
 
 %% 縦円旋回
 % x = 0.5*sin(2*pi*t/T);
