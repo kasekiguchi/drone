@@ -16,8 +16,8 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-agent.plant = DRONE_EXP_MODEL_test(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
-% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+% agent.plant = DRONE_EXP_MODEL_test(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 % "3" or "COM3"
 % agent.platn = DRONE_EXP_MODEL(agent,)
 agent.parameter = DRONE_PARAM("DIATONE");
@@ -44,9 +44,9 @@ run("ExpBase");
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "input", ""},"ax",app.UIAxes5,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "q", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
 
 % 計算時間の描画
@@ -56,7 +56,7 @@ plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5);
 xlabel("Time [s]"); ylabel("Calculation time [s]");
 
 % animation
-app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
+% app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
 end
 
 function in_prog(app)

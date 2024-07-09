@@ -74,7 +74,7 @@ classdef FIGURE_EXP
             if obj.flg.figtype; figure(5); else subplot(m,n,5); end
             plot(obj.data.logt, obj.data.Input(2:4,:), "LineWidth", 1.5);
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
-            xlabel("Time [s]"); ylabel("obj.data.Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
+            xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
             ytickformat('%.3f');
             

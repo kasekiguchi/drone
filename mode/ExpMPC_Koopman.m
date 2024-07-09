@@ -17,8 +17,8 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252])); %プロポ無線
-% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -83,8 +83,8 @@ flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
 fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename));
-% fig.main_figure();
-fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
+fig.main_figure();
+% fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
 end
 
 % GUI上に現在位置（推定値）を表示する
