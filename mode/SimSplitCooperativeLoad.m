@@ -36,7 +36,7 @@ initial_state(1).dO = [0;0;0];%ペイロード角加速度
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
 qtype = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
 if contains(qtype, "zup")
-    initial_state(1).qi = -1 * repmat([0; 0; 1], N, 1);%リンクの方向ベクトル
+    initial_state(1).qi = -1 * repmat([0;0;1], N, 1);%リンクの方向ベクトル
 else
     initial_state(1).qi = 1 * repmat([0; 0; 1], N, 1);
 end

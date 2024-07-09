@@ -22,9 +22,12 @@ Setting.num_list = [3,3,3,3,3,3,3,3];
 end
 Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL"];
 Setting.initial = initial; %struct('p',[0;0;0],'q',[1;0;0;0],'v',[0;0;0],'w',[0;0;0],"pL",[0;0;0],"vL",[0;0;0],"pT",[0;0;-1],"wL",[0;0;0]);
-Setting.initial.vL = [0;0;0];
-Setting.initial.pT = [0;0;-1];
-Setting.initial.wL = [0;0;0];
+Setting.initial.vL = initial.vL;
+Setting.initial.pT = initial.pT;
+Setting.initial.wL = initial.wL;
+% Setting.initial.vL = [0;0;0];
+% Setting.initial.pT = [0;0;-1];
+% Setting.initial.wL = [0;0;0];
 Setting.dt = dt;
 Setting.param = agent.parameter.get; % モデルの物理パラメータ設定
 Setting.initial.pL = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;%+[Setting.param(17);Setting.param(18);-Setting.param(19)];

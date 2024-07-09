@@ -6,6 +6,8 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         param
         Q
         IT
+        u_opt0
+        fmc_options 
     end
     
     methods
@@ -13,6 +15,9 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
+            obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
+            % obj.u_opt0 = (self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;
+            obj.fmc_options = optimoptions(@fmincon,'Display','off');
         end
         
         function result=do(obj,param,~)
@@ -20,6 +25,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             model = obj.self.estimator.result;
             ref   = obj.self.reference.result;
             x     = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            xq    = [model.state.getq('4');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応するよう
             else
@@ -73,6 +79,11 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             %}
 
             tmp = uf + us;
+            % control barrier funciton
+            fun = @(u_opt) (u_opt - tmp)'*(u_opt - tmp);
+            [A,b] = conic_cfb(xq,P,[1;1],80*pi/180);%1deg
+            tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
+            obj.u_opt0 = tmp;
             obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             %複数牽引は慣性モーメントがかかるのでモーメントの反応が遅れる？
             result = obj.result;

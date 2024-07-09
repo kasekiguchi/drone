@@ -9,12 +9,18 @@ function U = NewCooperativeSuspendedLoadController_6(x,qi,R0,Ri,R0d,xd,K,P,Pdagg
  % P : physical parameter
  % Pdagger = pinv(P) in (26)
  % U : [f1;M1;f2;M2;...] for zup system
-R0TFdMd = CSLC_6_R0TFdMd(x,xd,R0,R0d,P,K);%(26)の理想入力
-muid = reshape(kron(eye(6),R0)*Pdagger*R0TFdMd,3,6); % 3xN(26)理想張力
-
- %"Muid_6"を使ってみる!!!!!!!!!!!!!!!!!!
-
-mui = sum(muid.*qi,1).*qi; % 3xN(27)
+% R0TFdMd = CSLC_6_R0TFdMd(x,xd,R0,R0d,P,K);%(26)の理想入力
+% muid = reshape(kron(eye(6),R0)*Pdagger*R0TFdMd,3,6); % 3xN(26)理想張力
+% mui = sum(muid.*qi,1).*qi; % 3xN(27)
+if anynan(R0d)
+    R0d = eye(3);
+end
+if anynan(xd(end-5:end))
+    xd(end-5:end) = zeros(6,1);
+end
+muid_mui = Muid_6(x,qi,R0,R0d,xd,K,P,Pdagger);
+muid = muid_mui(1:3,:); 
+mui = muid_mui(4:6,:);
 qid = -muid./vecnorm(muid,2,1); % 3xN(28)
 ui = CSLC_6_ui(x,xd,R0,R0d,P,K,qid,Pdagger,mui,muid);%(35)
 b3_norm = ui./vecnorm(ui,2,1); % 3xN

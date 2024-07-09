@@ -35,6 +35,11 @@ z = lz*sin(2*w*t - pi/2)+lz_offset; % z
 % y = ly*sin(w*t)+ly_offset; % y
 % z = lz_offset; % z
 
+%line
+% x = 0.1*t^4; % x
+% y = 0.2*t^4; % y
+% z = lz_offset; % z
+
 %point
 % x = lx_offset;  % x
 % y = ly_offset;  % y

@@ -6,6 +6,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         param
         Q
         IT
+        fun
     end
     
     methods
@@ -13,6 +14,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.self = self;
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
+            obj.fun = @(u_opt) abs(u_opt - [1;2]);
         end
         
         function result=do(obj,param,~)
@@ -80,8 +82,10 @@ classdef HLC_SUSPENDED_LOAD < handle
            obj.result.input = tmpHL;
            if strcmp(cha,'f')
                 obj.result.input = uf +[0;us(2:4)];
-            end
-            
+           end
+           [A,b] = conic_cfb(model.state.get,P,[5,5],pi/36);%5deg
+            x = fmincon(obj.fun,x0,A,b);
+
             obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも->input_transformで解決？
 
             result = obj.result;
