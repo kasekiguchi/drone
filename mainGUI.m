@@ -19,3 +19,5 @@ fExp = 0;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);
+%ExpHLでrigit_idsを変えてこのPCで制御する機体を決める。
+%mlappの「N」「app.N」で1PCでの複数機制御？
