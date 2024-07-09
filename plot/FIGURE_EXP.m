@@ -287,16 +287,16 @@ classdef FIGURE_EXP
             % store_result = obj.data;
 
             %% var, exitflag
-            if obj.phase == 1
-                obj.data.fval = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.fval,...
-                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-                obj.data.exitflag = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.exitflag,...
-                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-                obj.data.var = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
-                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-                obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
-                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-            end
+            % if obj.phase == 1
+            %     obj.data.fval = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.fval,...
+            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            %     obj.data.exitflag = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.exitflag,...
+            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            %     obj.data.var = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
+            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            %     obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
+            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+            % end
         end
 
         function obj = decide_phase(obj)

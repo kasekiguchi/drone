@@ -23,7 +23,8 @@ if strcmp(conn_type,"udp")
 elseif strcmp(conn_type,"serial")
   available_ports=serialportlist("available");
   disp(strcat("Check available COM ports : ",strjoin(available_ports,',')));
-  Setting.port = id;
+  % Setting.port = id;
+  Setting.port = strjoin(available_ports,',');
 end
 Model.param = Setting;
 end
