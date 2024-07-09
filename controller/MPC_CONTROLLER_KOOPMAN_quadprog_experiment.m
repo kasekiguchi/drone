@@ -133,7 +133,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             end
 
             %% データ表示用
-            calT = toc
+            calT = toc;
             obj.input.u = obj.result.input; 
             obj.result.mpc.calt = calT; %計算時間保存したいときコメントイン
             obj.result.mpc.var = var;

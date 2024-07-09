@@ -7,6 +7,7 @@ cd(strcat(fileparts(tmp.Filename), '../../')); % droneまでのフォルダパ�
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %% model load
+clear
 tra = 'saddle';
 script = [];
 mode.code = '00';
@@ -15,12 +16,12 @@ mode.training_data = 'Kiyama';
 % mode.training_data = 'KiyamaX20';
 % mode.training_data = 'KiyamaX20fromVel';
 
-% filename = WhichLoadFile(tra, script, mode);
+filename = WhichLoadFile(tra, script, mode);
 % mode.training_data = 'Kiyama_change';
 % filename = 'EstimationResult_2024-06-10_Exp_KiyamaX20_code00_saddle_again';
 % filename = 'EstimationResult_2024-06-11_Exp_Kiyama_fromVel_code00_saddle';
 % filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_normalize_code00_saddle';
-filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_code07_saddle';
+% filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_code07_saddle';
 load(strcat(filename, '.mat'), 'est');
 
 % 可制御性
@@ -31,6 +32,15 @@ fprintf(strcat(string(datetime('now'), 'MM-dd_hh:mm:ss'), '\n'));
 fprintf('state num: %d \n', size(est.A,1));
 fprintf('ctrb rank: %d \n', rank(Co));
 fprintf('obsv rank: %d \n', rank(Ob));
+
+%% 不可制御の落ちた状態の時間発展
+n = null(Co);
+% z = nx
+z(:,1) = zeros(size(est.A,1),1);
+for i = 2:100
+    z(:,i) = n * z(:,i-1);
+end
+
 %%
 step_num = 10;
 thrust = 0.5884 * 9.81; % 0.5884 * 9.81 * 1e3
