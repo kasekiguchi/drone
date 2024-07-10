@@ -27,4 +27,13 @@ app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.t
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
 % figtype = 2; % 1:それぞれ, 2:subplot
 % savefigure;
+flg.figtype = 0; % 0:subplot
+flg.savefig = 0;
+flg.animation_save = 0;
+flg.animation = 0;
+flg.timerange = 1;
+flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
+phase = 1; % 1:flight, 2:all
+fig = FIGURE_EXP(struct('logger',app.logger,'fExp',0),struct('flg',flg,'phase',phase,'filename','0710'));
+fig.make_mpc_plot();
 end

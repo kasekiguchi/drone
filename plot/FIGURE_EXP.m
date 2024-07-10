@@ -25,18 +25,21 @@ classdef FIGURE_EXP
         function obj = FIGURE_EXP(app, varargin)
             %FIGURE_EXP 引数をもとにデータ範囲、データの結合を行う
             %   コンストラクタ実行さえすれば全ての関数を使用可能
+            %   obj.data.fignumがあるので出力にはからなずobjを含ませる
             obj.phase = varargin{1}.phase;
             obj.flg = varargin{1}.flg;
             obj.filename = varargin{1}.filename;
             obj.flg.fExp = app.fExp;
+            obj.flg.mpc = 0;
             obj.log = app.logger;
             obj.agent = app.logger.Data.agent;
+            obj.data.fignum = 1;
 
             obj = obj.decide_phase();
             obj = obj.store_data();
         end
 
-        function [] = main_figure(obj)
+        function [obj] = main_figure(obj)
             %main_figure flgに沿った内容を出力
             %   引数は不要
 
@@ -46,47 +49,53 @@ classdef FIGURE_EXP
             
             disp('Plotting start...');
             m = 2; n = 3;
-            if obj.flg.figtype; figure(1); else subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));end
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));end
             plot(obj.data.logt, obj.data.Est(1:3,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(1:3, :), '--', "LineWidth", 1.5); hold off;
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
-            
-            if obj.flg.figtype; figure(2); else subplot(m,n,2); end
+            obj.data.fignum = obj.data.fignum+1;
+
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,2); end
             plot(obj.data.logt, obj.data.Est(4:6,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(4:6, :), '--', "LineWidth", 1.5); hold off;
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+            obj.data.fignum = obj.data.fignum+1;
             
-            if obj.flg.figtype; figure(3); else subplot(m,n,3); end
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,3); end
             plot(obj.data.logt, obj.data.Est(7:9,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(7:9, :), '--', "LineWidth", 1.5); hold off;
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+            obj.data.fignum = obj.data.fignum+1;
             
-            if obj.flg.figtype; figure(4); else subplot(m,n,4); end
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,4); end
             plot(obj.data.logt, obj.data.Input(1,:), "LineWidth", 1.5);
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
             ytickformat('%.1f');
+            obj.data.fignum = obj.data.fignum+1;
             
-            if obj.flg.figtype; figure(5); else subplot(m,n,5); end
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,5); end
             plot(obj.data.logt, obj.data.Input(2:4,:), "LineWidth", 1.5);
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
             ytickformat('%.3f');
+            obj.data.fignum = obj.data.fignum+1;
             
-            if obj.flg.figtype; figure(6); else subplot(m,n,6); end
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,6); end
             % calculation time
             plot(obj.data.logt(1:end-1), diff(calt), 'LineWidth', 1.5);
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-            ytickformat('%.1f');
+            ytickformat('%.3f');
+            obj.data.fignum = obj.data.fignum+1;
             
             if m*n > 6
-            if obj.flg.figtype; figure(8); else subplot(m,n,8); end
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,8); end
             plotrange = 1.5;
             if obj.flg.plotmode == 1
                 InnerInput = cell2mat(arrayfun(@(N) obj.agent.inner_input{N}(:,1:4)',obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
@@ -106,6 +115,7 @@ classdef FIGURE_EXP
                 grid on; xlim([-plotrange plotrange]); ylim([-plotrange plotrange]); zlim([0 inf]);
             end
             end
+            obj.data.fignum = obj.data.fignum+1;
             
             %
             if ~obj.flg.figtype % subplotなら
@@ -120,7 +130,7 @@ classdef FIGURE_EXP
             obj.make_animation();
         end
 
-        function [x, xr] = main_mpc(obj, cont, plotrange)
+        function [x, xr, obj] = main_mpc(obj, cont, plotrange)
             %main_mpc MPCの予測状態をプロットする
             % var(input)から状態を計算
             %   Z[k+1] = AZ[k] + BU[k]
@@ -188,7 +198,7 @@ classdef FIGURE_EXP
 
             %-- plot
             % plotrange = 
-            figure(100)
+            figure(obj.data.fignum)
             for i = 1:idx 
                 subplot(2,2,2);
                 plot(x(1,:,i), x(2,:,i), 'o', 'MarkerSize', 5, 'LineWidth', 0.5); hold on;
@@ -242,6 +252,24 @@ classdef FIGURE_EXP
             drone.animation(logger, anipara);
         end
 
+        function obj = make_mpc_plot(obj)
+            % MPC exitflag, var等の確認をする
+            % obj.data.fval
+            % obj.data.exitflag
+            figure(obj.data.fignum);
+            subplot(1,2,1);
+            plot(obj.data.logt, obj.data.exitflag);
+            xlim([0 inf]);
+            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            ylabel('Exitflag value');
+
+            subplot(1,2,2);
+            plot(obj.data.logt, -obj.data.fval);
+            xlim([0 inf])
+            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            ylabel('Evaluation value')
+        end
+
         function background_color(obj, yoffset, gca, logphase)
             txt = {''};
             font_size = 10;
@@ -252,17 +280,17 @@ classdef FIGURE_EXP
                     Square_coloring([obj.data.logt(1);obj.data.logt(end)], [0.9 1.0 1.0],[],[],gca); % flight phase
                     txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];
                 case 2 %all time
-                    if ~obj.flg.fExp 
-                        Square_coloring([obj.data.logt(1);obj.data.logt(end)], [0.9 1.0 1.0],[],[],gca); % flight phase
-                        txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];
-                    else
+                    % if ~obj.flg.fExp 
+                    % Square_coloring([obj.data.logt(1);obj.data.logt(end)], [0.9 1.0 1.0],[],[],gca); % flight phase
+                    % txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];
+                    % else
                     Square_coloring(obj.data.logt([find(logphase == 116, 1), find(logphase == 116, 1, 'last')]),[],[],[],gca); 
                     txt = [txt(:)', {'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'}]; % take off phase
                     Square_coloring(obj.data.logt([find(logphase == 102, 1), find(logphase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca);
                     txt = [txt(:)', {'{\color[rgb]{0.9,1.0,1.0}■} :Flight phase'}];   % flight phase
                     Square_coloring(obj.data.logt([find(logphase == 108, 1), find(logphase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); 
                     txt = [txt(:)', {'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'}];  % landing phase
-                    end
+                    % end
             end
             text(gca().XLim(2) - (gca().XLim(2) - gca().XLim(1)) * 0.45, gca().YLim(2) + (gca().YLim(2) - gca().YLim(1)) * yoffset, txt, 'FontSize', font_size);
             xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 obj.data.logt(end-1)])
@@ -287,16 +315,17 @@ classdef FIGURE_EXP
             % store_result = obj.data;
 
             %% var, exitflag
-            % if obj.phase == 1
-            %     obj.data.fval = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.fval,...
-            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-            %     obj.data.exitflag = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.exitflag,...
-            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-            %     obj.data.var = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
-            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-            %     obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
-            %                 obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-            % end
+            if obj.phase == 1 && isfield(obj.agent.controller.result{obj.data.start_idx}, 'mpc')
+                obj.data.fval = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.fval,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.data.exitflag = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.exitflag,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.data.var = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                % obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
+                %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.flg.mpc = 1; % MPCかどうかの判別
+            end
         end
 
         function obj = decide_phase(obj)
