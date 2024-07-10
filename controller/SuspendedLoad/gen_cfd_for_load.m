@@ -35,7 +35,7 @@ e3 = [0;0;1];
 h0 = -cos(C) - pT'*e3;
 
 h1 = LieD(h0,fl,x) + LieD(h0,glu,x) + a(1)*h0;
-hEnd =LieD(h1,fl,x) + LieD(h1,glu,x) + a(2)*h1;%hEnd>=0
+hEnd = LieD(h1,fl,x) + LieD(h1,glu,x) + a(2)*h1;%hEnd>=0
 %% 制約の形に変換
 % Au <= B
 A = simplify(LieD(h1,gl,x));

@@ -6,22 +6,25 @@ classdef HLC_SUSPENDED_LOAD < handle
         param
         Q
         IT
-        fun
+        u_opt0
+        fmc_options 
     end
     
     methods
         function obj = HLC_SUSPENDED_LOAD(self,param)
             obj.self = self;
             obj.param = param;
-            obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
-            obj.fun = @(u_opt) abs(u_opt - [1;2]);
+            obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));    
+            obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
+            obj.fmc_options = optimoptions(@fmincon,'Display','off');
         end
         
-        function result=do(obj,param,~)
+        function result=do(obj,~,~)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             model = obj.self.estimator.result;
             ref = obj.self.reference.result;
             x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            xq    = [model.state.getq('4');x(4:end)]; % [q, w ,pL, vL, pT, wL]に並べ替え
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応するよう
             else
@@ -36,34 +39,6 @@ classdef HLC_SUSPENDED_LOAD < handle
             F3 = Param.F3;
             F4 = Param.F4;
             xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
-
-%             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-%             x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-%             xd(1:3)=Rb0'*xd(1:3);
-%             xd(4) = 0;
-%             xd(5:7)=Rb0'*xd(5:7);
-%             xd(9:11)=Rb0'*xd(9:11);
-%             xd(13:15)=Rb0'*xd(13:15);
-%             xd(17:19)=Rb0'*xd(17:19);
-% 
-%             if isfield(Param,'dt')
-%                 dt = Param.dt;
-%                 vf = Vfd(dt,x,xd',P,F1);
-%             else
-%                 vf = Vf(x,xd',P,F1);
-%             end
-%             vs = Vs(x,xd',vf,P,F2,F3,F4);
-%             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-%             obj.result.input = [tmp(1);
-%             tmp(2);tmp(3);
-%             tmp(4)];
-            
-            if xd(7)==0
-                xd(7)=0.00001;
-            end
-            if xd(11)==0
-                xd(11)=0.00001;
-            end
             if isfield(Param,'dt')
                 dt = Param.dt;
                 vf = Vfd_SuspendedLoad(dt,x,xd',P,F1);
@@ -71,23 +46,37 @@ classdef HLC_SUSPENDED_LOAD < handle
                 vf = Vf_SupendedLoad(x,xd',P,F1);
             end
             vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
+
             uf = Uf_SuspendedLoad(x,xd',vf,P);
             
-            h234 = H234_SuspendedLoad(x,xd',vf,vs',P);
-            invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-            a = v_SuspendedLoad(x,xd',vf,vs',P);
-            us = h234*invbeta2*a;
-           cha = obj.self.reference.cha;
-           tmpHL = obj.self.controller.hlc.result.input;
-           obj.result.input = tmpHL;
-           if strcmp(cha,'f')
-                obj.result.input = uf +[0;us(2:4)];
-           end
-           [A,b] = conic_cfb(model.state.get,P,[5,5],pi/36);%5deg
-            x = fmincon(obj.fun,x0,A,b);
+            %usの計算
+                % h234 = H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
+                invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
+                vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
+                us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
+            %{
+            cha = obj.self.reference.cha;
+            tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
+            if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
+                tmp = uf + us;
+            else
+                tmp = tmpHL;
+            end
+            obj.self.controller.result.input = tmp;
+            obj.result.input = tmp;
+            %}
 
-            obj.self.controller.result.input = obj.result.input; %入力とモデルの状態が一致していないかも->input_transformで解決？
-
+            tmp = uf + us;
+            % control barrier funciton
+            fun = @(u_opt) (u_opt - tmp)'*(u_opt - tmp);
+            [A,b] = conic_cfb(xq,P,[10;1],10*pi/180);%deg
+            tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
+            obj.u_opt0 = tmp;
+            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             result = obj.result;
         end
         function show(obj)
