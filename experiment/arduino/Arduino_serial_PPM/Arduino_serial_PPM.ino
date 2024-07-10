@@ -88,7 +88,10 @@ void loop()
     {
       if (digitalRead(EM_PIN) == HIGH && fReset == false)
       {
-        delay(75000); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）ここがCH8が送信できなくなっていた原因delay
+        delay(500000); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
+
+        
+
         if (digitalRead(EM_PIN) == HIGH)
         {
           
@@ -172,14 +175,13 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
     }
 */
       }
-      // last_received_time = micros();
+      last_received_time = micros();
       isReceive_Data_Updated = true; //isReceive_Data_Updatedにtrueを代入
       if (pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] <= 11068)
         {
-          plus = 694;
           pw[0] = pw[0] - 8;
         }
-      start_H = REMAINING_W - 9 * TIME_LOW; //+ plus; // 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
+      start_H = REMAINING_W - 9 * TIME_LOW;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
       //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
