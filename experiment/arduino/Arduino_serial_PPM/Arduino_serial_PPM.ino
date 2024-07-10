@@ -70,7 +70,7 @@ void setup()
   setupPPM(); // ppm 出力開始
 
   // 緊急停止
-  attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
+ attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
   while (Serial.available() <= 0) //受信データを受け取っていない時繰り返す　繰り返す中身がないため何もしない．
   {
   }
@@ -88,13 +88,15 @@ void loop()
     {
       if (digitalRead(EM_PIN) == HIGH && fReset == false)
       {
-        delay(5000); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
+        delay(75000); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）ここがCH8が送信できなくなっていた原因delay
         if (digitalRead(EM_PIN) == HIGH)
         {
+          
           Serial.println("Reset available.");
           digitalWrite(LED_PIN, HIGH);
           digitalWrite(RLED_PIN, HIGH);
           digitalWrite(GLED_PIN, LOW);
+          
           fReset = true;
         }
       }
@@ -175,9 +177,9 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       if (pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] <= 11068)
         {
           plus = 694;
-          pw[0] = pw[0] - 6;
+          pw[0] = pw[0] - 8;
         }
-      start_H = REMAINING_W - 9 * TIME_LOW + plus; // 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
+      start_H = REMAINING_W - 9 * TIME_LOW; //+ plus; // 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
       //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
@@ -269,7 +271,7 @@ void emergency_stop()
 void software_reset()
 {
   Serial.println("Reset!");
-  //delay(500);
+  delay(500);
   pinMode(RST_PIN, OUTPUT);
   digitalWrite(RST_PIN, LOW);
   Serial.println("RECOVERY"); // resetするので表示されないのが正しい挙動
