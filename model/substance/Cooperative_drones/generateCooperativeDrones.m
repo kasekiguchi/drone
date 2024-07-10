@@ -6,7 +6,7 @@ clc
 % 軸の取り方に注意
 % e3 = [0;0;1]; % 鉛直下向き zup : 鉛直上向き
 dir = "model/substance/Cooperative_drones/";
-N = 4; % エージェント数
+N = 1; % エージェント数
 
 %% symbol定義
 % 牽引物に関する変数定義 %%%%%%%%%%%%%%%%%%%%
