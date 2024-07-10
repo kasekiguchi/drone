@@ -1,4 +1,4 @@
-function vs_alpha2 = vs_alpha2_SuspendedLoad(obj,in1,in2,in3,in4,in5)
+function vs_alpha2 = vs_alpha2_SuspendedLoad(in1,in2,in3,in4,in5)
 %vs_alpha2_SuspendedLoad
 %    VS_ALPHA2 = vs_alpha2_SuspendedLoad(IN1,IN2,IN3,IN4,IN5)
 

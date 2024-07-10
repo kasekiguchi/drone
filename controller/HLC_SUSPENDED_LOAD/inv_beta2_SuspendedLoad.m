@@ -1,4 +1,4 @@
-function U2 = inv_beta2_SuspendedLoad(obj,in1,in2,in3,in4,in5)
+function U2 = inv_beta2_SuspendedLoad(in1,in2,in3,in4,in5)
 %INV_BETA2_SUSPENDEDLOAD
 %    U2 = INV_BETA2_SUSPENDEDLOAD(IN1,IN2,IN3,IN4,IN5)
 

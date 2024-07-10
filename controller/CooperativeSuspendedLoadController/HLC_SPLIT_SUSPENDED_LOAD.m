@@ -16,7 +16,6 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.param = param;
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
-            % obj.u_opt0 = (self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
         end
         

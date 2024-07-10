@@ -17,8 +17,8 @@ userpath('clear');
 %%
 % each method's arguments : app.time,app.cha,app.logger,app.env,app.agent,i
 clc
-SimBaseMode = ["SimHL","SimPointMass", "SimVehicle", "SimSuspendedLoad", "SimVoronoi", "SimFHL", "SimFHL_Servo", "SimLiDAR", "SimFT", "SimEL", "SimMPC_Koopman"];
-ExpBaseMode = ["ExpTestMotiveConnection", "ExpHL", "ExpFHL", "ExpFHL_Servo", "ExpFT", "ExpEL", "ExpMPC_Koopman","ExpSuspendedLoad"];
+SimBaseMode = ["","SimHL","SimPointMass", "SimVehicle", "SimSuspendedLoad", "SimSplitCooperativeLoad", "SimVoronoi", "SimFHL", "SimFHL_Servo", "SimLiDAR", "SimFT", "SimEL", "SimMPC_Koopman"];
+ExpBaseMode = ["","ExpTestMotiveConnection", "ExpHL", "ExpFHL", "ExpFHL_Servo", "ExpFT", "ExpEL", "ExpMPC_Koopman","ExpSuspendedLoad"];
 fExp = 0;
 fDebug = 1; % 1: active : for debug function
 PInterval = 3; % sec : poling interval for emergency stop

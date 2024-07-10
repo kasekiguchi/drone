@@ -19,5 +19,4 @@ Controller.F4=lqrd([0 1;0 0],[0;1],diag([100,10]),[0.1],dt);                    
 
 % 設定確認
 Controller.dt = dt;
-eig(diag([1,1,1],1)-[0;0;0;1]*Controller.F2)
 end

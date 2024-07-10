@@ -1,0 +1,87 @@
+classdef HLC_SUSPENDED_LOAD < handle
+    % クアッドコプター用階層型線形化を使った入力算出
+    properties
+        self
+        result
+        param
+        Q
+        IT
+        u_opt0
+        fmc_options 
+    end
+    
+    methods
+        function obj = HLC_SUSPENDED_LOAD(self,param)
+            obj.self = self;
+            obj.param = param;
+            obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));    
+            obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
+            obj.fmc_options = optimoptions(@fmincon,'Display','off');
+        end
+        
+        function result=do(obj,~,~)
+            % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
+            model = obj.self.estimator.result;
+            ref = obj.self.reference.result;
+            x = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            xq    = [model.state.getq('4');x(4:end)]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            if isprop(ref.state,'xd')
+                xd = ref.state.xd; % 20次元の目標値に対応するよう
+            else
+                xd = ref.state.get();
+            end
+            Param= obj.param;
+            %P = Param.P;
+            P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
+
+            F1 = Param.F1;
+            F2 = Param.F2;
+            F3 = Param.F3;
+            F4 = Param.F4;
+            xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
+            if isfield(Param,'dt')
+                dt = Param.dt;
+                vf = obj.Vfd_SuspendedLoad(dt,x,xd',P,F1);
+            else
+                vf = obj.Vf_SupendedLoad(x,xd',P,F1);
+            end
+            vs = obj.Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            % obj.result.Z1 = obj.Z1_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z2 = obj.Z2_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z3 = obj.Z3_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z4 = obj.Z4_SuspendedLoad(x,xd',vf,P);
+
+            uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
+            
+            %usの計算
+                % h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
+                invbeta2 = obj.inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
+                vs_alpha2 = obj.vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
+                us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
+            %{
+            cha = obj.self.reference.cha;
+            tmpHL = obj.self.controller.hlc.result.input;%flight以外は通常のモデルで飛ばす
+            if strcmp(cha,'f')%計算時間的に@do_controllerで分岐させた方がいい
+                tmp = uf + us;
+            else
+                tmp = tmpHL;
+            end
+            obj.self.controller.result.input = tmp;
+            obj.result.input = tmp;
+            %}
+
+            tmp = uf + us;
+            % control barrier funciton
+            % fun = @(u_opt) (u_opt - tmp)'*(u_opt - tmp);
+            % [A,b] = obj.conic_cfb(xq,P,[10;1],10*pi/180);%deg
+            % tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
+            % obj.u_opt0 = tmp;
+
+            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+            result = obj.result;
+        end
+        function show(obj)
+            obj.result
+        end
+    end
+end
