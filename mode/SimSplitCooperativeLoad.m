@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 5;
+te = 20;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -153,7 +153,7 @@ clc
 disp(time.t)
 %%
 % close all
-% run("DataPlot.m")
+run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all

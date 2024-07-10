@@ -20,16 +20,15 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
         jx 
         jy 
         jz 
-        gravity 
-        km1 
-        km2 
-        km3 
-        km4 
-        k1 
+        gravity
+        km1    
+        km2    
+        km3    
+        km4    
+        k1    
         k2
-        k3
+        k3    
         k4
-        rotor_r
         Length
         loadmass
         cableL
@@ -47,41 +46,15 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
             arguments
                 name % DIATONE
                 param.parameter_name = [];
-                % param.mass = 0.5236;
-                % param.Lx = 0.195;
-                % param.Ly = 0.195;
-                % param.lx = 0.195/2;%0.05;
-                % param.ly = 0.195/2;%0.05;
-                % param.jx = 0.02237568;
-                % param.jy = 0.02985236;
-                % param.jz = 0.0480374;
-                % param.gravity = 9.81;
-                % param.km1 = 0.0301; % ロータ定数
-                % param.km2 = 0.0301; % ロータ定数
-                % param.km3 = 0.0301; % ロータ定数
-                % param.km4 = 0.0301; % ロータ定数
-                % param.k1 = 0.000008;          % 推力定数
-                % param.k2 = 0.000008;          % 推力定数
-                % param.k3 = 0.000008;          % 推力定数
-                % param.k4 = 0.000008;          % 推力定数
-                % param.rotor_r = 0.0392;
-                % param.Length = 0.075;
-                % param.loadmass = 0.0556;
-                % param.cableL = 0.46;
-                % % param.ex = 0.0735417984963207;
-                % % param.ey = 0.0628671906594029;
-                % % param.ez = 0.037;
-                % param.model_error = [];
-
-                %% 6セル from momose 
-                param.mass = 0.73;
-                param.Lx = 0.16;
-                param.Ly = 0.16;
-                param.lx = 0.08;%0.05;
-                param.ly = 0.08;%0.05;
-                param.jx = 0.06;
-                param.jy = 0.06;
-                param.jz = 0.06;
+%                 param.mass = 0.5236;
+                param.mass = 0.800;%ドローンの質量
+                param.Lx = 0.195;
+                param.Ly = 0.195;
+                param.lx = 0.195/2;%0.05;
+                param.ly = 0.195/2;%0.05;
+                param.jx = 0.0820;
+                param.jy = 0.0820;
+                param.jz = 0.1377;
                 param.gravity = 9.81;
                 param.km1 = 0.0301; % ロータ定数
                 param.km2 = 0.0301; % ロータ定数
@@ -91,51 +64,13 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 param.k2 = 0.000008;          % 推力定数
                 param.k3 = 0.000008;          % 推力定数
                 param.k4 = 0.000008;          % 推力定数
-                param.rotor_r = 0.0392;
-                param.Length = 0.08;
-                param.loadmass = 0.0725;
-                %param.loadmass = 0.061;
-                %param.cableL = 0.59;
-                param.cableL = 0.54;
+                param.Length = 0.075;
+                param.loadmass = 0.200;
+                param.cableL = 1;
                 % param.ex = 0.0735417984963207;
-                %param.ey = 0.0628671906594029;
-                param.ex = 0.0;%何かシミュレーション結果変わる
-                param.ey = 0.0;
-                param.ez = 0.037;
-                param.additional = []; % プロパティに無いパラメータを追加する場合
-                param.model_error = [];
-
-                %% 4セル from miyake
-                % param.mass = 0.6323;
-                % param.Lx = 0.16;
-                % param.Ly = 0.16;
-                % param.lx = 0.16/2;%0.05;
-                % param.ly = 0.16/2;%0.05;
-                % % param.jx = 0.02985236;%慣性モーメント
-                % % param.jy = 0.02985236;
-                % % param.jz = 0.0480374;
-                % param.jx = 0.06;%慣性モーメント
-                % param.jy = 0.06;
-                % param.jz = 0.06;
-                % param.gravity = 9.81;
-                % param.km1 = 0.0301; % ロータ定数
-                % param.km2 = 0.0301; % ロータ定数
-                % param.km3 = 0.0301; % ロータ定数
-                % param.km4 = 0.0301; % ロータ定数
-                % param.k1 = 0.000008;          % 推力定数
-                % param.k2 = 0.000008;          % 推力定数
-                % param.k3 = 0.000008;          % 推力定数
-                % param.k4 = 0.000008;          % 推力定数
-                % param.rotor_r = 0.0392; %シミュレーションでは少なくともアニメーションに使ってる
-                % param.Length = 0.08;%シミュレーションでは関係なさそう
-                % param.loadmass = 0.0695;
-                % param.cableL = 0.49;
-                % % param.ex = 0.0735417984963207;
-                % % param.ey = 0.0628671906594029;
-                % param.ex = 0.0;%何かシミュレーション結果変わる
-                % param.ey = 0.0;
+                % param.ey = 0.0628671906594029;
                 % param.ez = 0.037;
-                % param.model_error = [];
+                param.model_error = [];
             end
         obj.mass = param.mass;
         obj.Lx = param.Lx;
@@ -147,14 +82,13 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
         obj.jz = param.jz;
         obj.gravity = param.gravity;
         obj.km1 = param.km1;
-        obj.km2 = param.km2;
-        obj.km3 = param.km3;
+        obj.km2 = param.km2;    
+        obj.km3 = param.km3;    
         obj.km4 = param.km4;
         obj.k1 = param.k1;
         obj.k2 = param.k2;
         obj.k3 = param.k3;
         obj.k4 = param.k4;
-        obj.rotor_r = param.rotor_r;
         obj.Length = param.Length;
         obj.loadmass = param.loadmass;
         obj.cableL = param.cableL;

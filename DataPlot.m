@@ -275,7 +275,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
     end
     for i = 1:logNum
         %初期値設定
-        ep{i}=[];ev{i}=[];eq{i}=[];ew{i}=[];pL{i}=[];pT{i}=[];
+        epL{i}=[];ev{i}=[];eq{i}=[];ew{i}=[];pL{i}=[];pT{i}=[];
         zero4=zeros(4,lt(i));
         cinput{i}=zero4;inner_input{i}=zeros(8,lt(i));
 
@@ -319,7 +319,6 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         %controller : "input"
         %=========================================================
         time{i} = ts{i}-t0(i);
-        err{i} = ep{i}-rp{i};%誤差
         if i == 1
             cmui{i} = loggers{1}.controller.mui;  
             for j =1:logNum-1
@@ -331,15 +330,17 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             
                 linki(:,:,j) = -eqi{i}(3*j-2:3*j,:);
             end
+
             refx0{1} = rp{i}(1,:);
             refy0{1} = rp{i}(2,:);
             refz0{1} = rp{i}(3,:);
             ex0{1} = ep{i}(1,:);
             ey0{1} = ep{i}(2,:);
             ez0{1} = ep{i}(3,:);
-            errx0{1} = err{i}(1,:);
-            erry0{1} = err{i}(2,:);
-            errz0{1} = err{i}(3,:);
+            err{1} = ep{1}-rp{1};%誤差
+            errx0{1} = err{1}(1,:);
+            erry0{1} = err{1}(2,:);
+            errz0{1} = err{1}(3,:);
             ev0{1} = ev{i};
             vx0{1} = ev{i}(1,:);
             vy0{1} = ev{i}(2,:);
@@ -353,14 +354,16 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             wroll0{1} = eO{i}(1,:);
             wpitch0{1} = eO{i}(2,:);
             wyaw0{1} = eO{i}(3,:);
+            epL{i} = ep{i};
         else
             j = i - 1;
             refx{j} = rp{i}(1,:);
             refy{j} = rp{i}(2,:);
             refz{j} = rp{i}(3,:);
-            estx{j} = ep{i}(1,:);
-            esty{j} = ep{i}(2,:);
-            estz{j} = ep{i}(3,:);
+            estx{j} = epL{i}(1,:);
+            esty{j} = epL{i}(2,:);
+            estz{j} = epL{i}(3,:);
+            err{i} = epL{i}-rp{i};%誤差
             errx{j} = err{i}(1,:);
             erry{j} = err{i}(2,:);
             errz{j} = err{i}(3,:);
@@ -515,7 +518,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
         RMSE = zeros(logNum,12);
         
         for i =1:logNum
-            RMSE(i,1:3) = rmse(rp{1,i},ep{1,i});
+            RMSE(i,1:3) = rmse(rp{1,i},epL{1,i});
             RMSElog(i+1,1:4) = [C(i),RMSE(i,1:3)];
             fprintf('#%s RMSE\n',C(i));
             % fprintf('  x\t y\t z\t | vx\t vy\t vz\t| roll\t pitch\t yaw\t | wroll\t wpitch\t wyaw \n');

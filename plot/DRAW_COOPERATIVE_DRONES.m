@@ -258,11 +258,11 @@ classdef DRAW_COOPERATIVE_DRONES
         if isfield(param,'gif')
           im = frame2im(getframe(obj.ax));
           [imind,cm] = rgb2ind(im,sizen);
-          if i==1
-            imwrite(imind,cm,filename,'gif', 'Loopcount',inf,'DelayTime',delaytime);
-          else
-            imwrite(imind,cm,filename,'gif','WriteMode','append','DelayTime',delaytime);
-          end
+          % if i==1
+          %   imwrite(imind,cm,filename,'gif', 'Loopcount',inf,'DelayTime',delaytime);
+          % else
+          %   imwrite(imind,cm,filename,'gif','WriteMode','append','DelayTime',delaytime);
+          % end
         end
         if isfield(param,'mp4')
           framev = getframe(obj.ax);
