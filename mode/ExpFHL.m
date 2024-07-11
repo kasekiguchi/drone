@@ -27,6 +27,7 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"ori
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;1;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[0.2;-0.2;0.8],"k",[0;0;1],"m",[-1;1;1.2]),10});%縦ベクトルで書く,
+agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[2;1.5;1],"g",[1;1.5;1],"h",[0;1.5;1],"j",[-1;1.5;1],"k",[-1.5;1.5;1],"m",[-1.5;0;1]),0});%縦ベクトルで書く,
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0.5;0.6],"g",[2;-0.5;1.3]),30});%縦ベクトルで書く,
 agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt));
 
