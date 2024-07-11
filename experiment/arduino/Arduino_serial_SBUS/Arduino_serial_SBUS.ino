@@ -212,6 +212,12 @@ volatile uint16_t plus = 0;
 //////////// シリアル通信が途絶えたとき用 ////////////////////////////////
 volatile unsigned long last_received_time;
 
+SoftwareSerial mySerial(4, 2); // 4番ピンはダミーのRX、2番ピンはTX
+
+// SBUS信号のヘッダとフッタ
+const uint8_t SBUS_HEADER = 0x0F;
+const uint8_t SBUS_FOOTER = 0x00;
+
 // ==================================================================
 void setup()
 {
