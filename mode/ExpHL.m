@@ -8,7 +8,8 @@ logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]);
 
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive
 motive.getData([], []); % get data from Motive
-rigid_ids = [1]; % rigid-body number on Motive
+% rigid_ids = [1]; % rigid-body number on Motive
+rigid_ids = [3]; % rigid-body number on Motive☆彡
 sstate = motive.result.rigid(rigid_ids);
 initial_state.p = sstate.p;
 initial_state.q = sstate.q;

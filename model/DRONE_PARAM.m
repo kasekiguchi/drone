@@ -46,7 +46,8 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 % param.jx = 0.03;
                 % param.jy = 0.03;
                 % param.jz = 0.03;
-                param.mass = 0.699;
+                % param.mass = 0.699;
+                param.mass = 0.730;
                 param.Lx = 0.16;
                 param.Ly = 0.16;
                 param.lx = 0.16/2;%0.05;
