@@ -25,7 +25,7 @@ methods
         obj.param.P = self.parameter.get();
         obj.flight_phase = 's';
         P = self.parameter.get;
-        obj.hover_thrust_force = P(1) * P(9);
+        obj.hover_thrust_force = P(1) * P(9); % mg 重力に釣り合う入力
         obj.state = state_copy(self.estimator.result.state);
 
         %MPC用のゲインとオフセットの設定-------
@@ -62,8 +62,8 @@ methods
             if cha == 'f'
                 T_thr = input(1); % thrust, torque input 
 
-                uroll = obj.param.gain2(1) * (whn(1) - wh(1));
-                upitch = obj.param.gain2(2) * (whn(2) - wh(2));
+                uroll = obj.param.gain2(1) * (whn(1) - wh(1)); % 角速度
+                upitch = obj.param.gain2(2) * (whn(2) - wh(2)); % 角速度
 
                 % apply gain to (thrust - hovering_thrust)
                 uthr = max(0, obj.param.gain2(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset2); 
@@ -81,8 +81,9 @@ methods
 
                 % apply gain to (thrust - hovering_thrust)
                 uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
-                uyaw = obj.param.gain(3) * (whn(3) - wh(3));
-                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
+                uyaw = obj.param.gain(3) * (whn(3) - wh(3)); 
+                % ここまでが事前計算の部分 sign:符号関数 -> output:-1 or 0 or 1
+                uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset; % 500が最小値
                 upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
                 uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight
                 obj.result = [uroll, upitch, uthr, uyaw, 1000, 0, 0, 1000]; % CH8 = 1000 required for autonomous flight 

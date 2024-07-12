@@ -22,7 +22,8 @@ mode.training_data = 'Kiyama';
 % filename = 'EstimationResult_2024-06-11_Exp_Kiyama_fromVel_code00_saddle';
 % filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_normalize_code00_saddle';
 % filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_code07_saddle';
-filename = 'EstimationResult_2024-07-12_Exp_Kiyama_code08_optim_x0_estsaddle';
+% filename = 'EstimationResult_2024-07-12_Exp_Kiyama_code08_optim_x0_estsaddle';
+filename = '2024-07-12_Exp_Kiyama_code08_5times_saddle';
 % filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 load(strcat(filename, '.mat'), 'est');
 

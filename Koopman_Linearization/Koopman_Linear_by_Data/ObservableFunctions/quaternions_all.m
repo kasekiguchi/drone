@@ -159,6 +159,6 @@ diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(
 % z = [isobe_z; common_z];
 
 %% いままでの全てをいれたやつ code = 08. 01~07　重複は無視
-z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z];
+% z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z];
 end
 

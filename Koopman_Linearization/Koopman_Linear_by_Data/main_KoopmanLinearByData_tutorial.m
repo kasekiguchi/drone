@@ -144,7 +144,7 @@ Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
-FileName = strcat(FileName_common, exp_data, '_', 'code08_2times', Exp_tra); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code00_5times_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -155,6 +155,8 @@ load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以�
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromZvel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
+
+Data = data_increased(Data, 0.0001);
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
@@ -171,8 +173,8 @@ fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    % est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
-    est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算
+    est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
+    % est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算
     % est = KL_opt_MC(Data.X,Data.U,Data.Y,F,900000);
 end
 
