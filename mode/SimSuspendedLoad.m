@@ -2,7 +2,7 @@ clc
 ts = 0; % initial time
 % dt = 0.025; % sampling period
 dt = 0.025; % sampling period
-te = 5; % termina time
+te = 15; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
@@ -47,8 +47,8 @@ run("ExpBase");
 
 %%
 % logger.plot({1,"plant.result.state.pL","p"})
-mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
+% mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
+% mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 %%
 function result = controller_do(varargin)
 controller = varargin{5}.controller;

@@ -41,22 +41,22 @@ classdef HLC_SUSPENDED_LOAD < handle
             xd=[xd;zeros(28-size(xd,1),1)];% 足りない分は０で埋める．
             if isfield(Param,'dt')
                 dt = Param.dt;
-                vf = obj.Vfd_SuspendedLoad(dt,x,xd',P,F1);
+                vf = Vfd_SuspendedLoad(dt,x,xd',P,F1);
             else
-                vf = obj.Vf_SupendedLoad(x,xd',P,F1);
+                vf = Vf_SupendedLoad(x,xd',P,F1);
             end
-            vs = obj.Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
-            % obj.result.Z1 = obj.Z1_SuspendedLoad(x,xd',vf,P);
-            % obj.result.Z2 = obj.Z2_SuspendedLoad(x,xd',vf,P);
-            % obj.result.Z3 = obj.Z3_SuspendedLoad(x,xd',vf,P);
-            % obj.result.Z4 = obj.Z4_SuspendedLoad(x,xd',vf,P);
+            vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
 
-            uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
+            uf = Uf_SuspendedLoad(x,xd',vf,P);
             
             %usの計算
                 % h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);%ただの単位行列なのでなくてもいい
-                invbeta2 = obj.inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
-                vs_alpha2 = obj.vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
+                invbeta2 = inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
+                vs_alpha2 = vs_alpha2_SuspendedLoad(x,xd',vf,vs',P);%vs - alpha
                 us = [0;invbeta2*vs_alpha2];%h234*invbeta2*a2;
             %{
             cha = obj.self.reference.cha;
@@ -76,8 +76,8 @@ classdef HLC_SUSPENDED_LOAD < handle
             % [A,b] = obj.conic_cfb(xq,P,[10;1],10*pi/180);%deg
             % tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
             % obj.u_opt0 = tmp;
-
-            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+            obj.result.input = tmp;
+            % obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             result = obj.result;
         end
         function show(obj)
