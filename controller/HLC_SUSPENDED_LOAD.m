@@ -72,10 +72,10 @@ classdef HLC_SUSPENDED_LOAD < handle
 
             tmp = uf + us;
             % control barrier funciton
-            fun = @(u_opt) (u_opt - tmp)'*(u_opt - tmp);
-            [A,b] = conic_cfb(xq,P,[10;1],10*pi/180);%deg
-            tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
-            obj.u_opt0 = tmp;
+            % fun = @(u_opt) (u_opt - tmp)'*(u_opt - tmp);
+            % [A,b] = conic_cfb(xq,P,[10;1],10*pi/180);%deg
+            % tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
+            % obj.u_opt0 = tmp;
             obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             result = obj.result;
         end

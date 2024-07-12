@@ -15,13 +15,13 @@ r = 1;
 % y = y_0+r*(13*cos(t/s)-5*cos(2*t/s)-2*cos(3*t/s)-cos(4*t/s)-y_offset);
 % z = z_0;
 
-% x = x_0+r*sin(t/s);
-% y = y_0+r*cos(t/s);
-% z = z_0;
-
-x = x_0;
-y = y_0;
+x = x_0+r*sin(t/s);
+y = y_0+r*cos(t/s);
 z = z_0;
+
+% x = x_0;
+% y = y_0;
+% z = z_0;
 
 ref=@(t)[x;y;z;0];
 end
