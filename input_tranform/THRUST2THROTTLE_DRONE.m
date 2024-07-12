@@ -29,11 +29,11 @@ methods
         obj.state = state_copy(self.estimator.result.state);
 
         %MPC用のゲインとオフセットの設定-------
-        obj.param.gain2(1) = 1000;
-        obj.param.gain2(2) = 1000;
-        obj.param.gain2(3) = 1000;
-        obj.param.gain2(4) = 1000;
-        obj.param.th_offset2 = 350;
+        % obj.param.gain2(1) = 1000;
+        % obj.param.gain2(2) = 1000;
+        % obj.param.gain2(3) = 1000;
+        % obj.param.gain2(4) = 900;
+        % obj.param.th_offset2 = 350;
 
         % obj.param.gain2 = obj.param.gain;
         % obj.param.th_offset2 = obj.param.th_offset;
