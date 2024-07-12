@@ -86,20 +86,20 @@ isobe_z = [W1*W2;
  z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
-% F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
-%     W2*cos(Q1) - W3*sin(Q1);
-%     (W3*cos(Q1) + W2*sin(Q1)) / cos(Q2);
-%      (jy*W2*W3 - jz*W2*W3) / jx;
-%     -(jx*W1*W3 - jz*W1*W3) / jx;
-%      (jx*W1*W2 - jy*W1*W2) / jx
-%      ];
-% G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2)) + 2*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)))/m;
-%     -(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)) - 2*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2)))/m;
-%     ((cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 - (cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 + (cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))^2 - (cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2))^2)/m;
-%     1/jx;
-%     1/jy;
-%     1/jz
-%     ];
+F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
+    W2*cos(Q1) - W3*sin(Q1);
+    (W3*cos(Q1) + W2*sin(Q1)) / cos(Q2);
+     (jy*W2*W3 - jz*W2*W3) / jx;
+    -(jx*W1*W3 - jz*W1*W3) / jx;
+     (jx*W1*W2 - jy*W1*W2) / jx
+     ];
+G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2)) + 2*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)))/m;
+    -(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2)) - 2*(cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2)))/m;
+    ((cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 - (cos(Q1/2)*cos(Q3/2)*sin(Q2/2) + cos(Q2/2)*sin(Q1/2)*sin(Q3/2))^2 + (cos(Q2/2)*cos(Q1/2)*sin(Q3/2) - cos(Q3/2)*sin(Q2/2)*sin(Q1/2))^2 - (cos(Q2/2)*cos(Q3/2)*sin(Q1/2) - cos(Q1/2)*sin(Q2/2)*sin(Q3/2))^2)/m;
+    1/jx;
+    1/jy;
+    1/jz
+    ];
 % z = [common_z; F_z; G_z];
 
 %% F(x), G(x)の各項を分解して観測量にする code = 02
@@ -131,24 +131,22 @@ Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z];
 
 %% f(x, u, param)からdf/dparam したときの項+磯部先輩 code = 04
-% roll = Q1; pitch = Q2; yaw = Q3;
-% jx = jx; jy = jy; jz = jz;
-% o1 = W1; o2 = W2; o3 = W3;
-% m = m;
-% u1 = 0; u2 = 0; u3 = 0; u4 = 0;
-% diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
-%             (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
-%             -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
-%             - u2/jx^2 - (jy*o2*o3 - jz*o2*o3)/jx^2;
-%                                       -(o1*o3)/jy;
-%                                        (o1*o2)/jz;
-%                                        (o2*o3)/jx;
-%              (jx*o1*o3 - jz*o1*o3)/jy^2 - u3/jy^2;
-%                                       -(o1*o2)/jz;
-%                                       -(o2*o3)/jx;
-%                                        (o1*o3)/jy;
-%            - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
-%                                                -1];
+roll = Q1; pitch = Q2; yaw = Q3;
+o1 = W1; o2 = W2; o3 = W3;
+u1 = 1; u2 = 1; u3 = 1; u4 = 1;
+diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
+            (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
+            -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
+            - u2/jx^2 - (jy*o2*o3 - jz*o2*o3)/jx^2;
+                                      -(o1*o3)/jy;
+                                       (o1*o2)/jz;
+                                       (o2*o3)/jx;
+             (jx*o1*o3 - jz*o1*o3)/jy^2 - u3/jy^2;
+                                      -(o1*o2)/jz;
+                                      -(o2*o3)/jx;
+                                       (o1*o3)/jy;
+           - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
+                                               -1];
 % z = [common_z; isobe_z; diff_param_z];
 
 %% f(x, u, param)からdf/dparam したときの項のみ code = 05
@@ -158,6 +156,9 @@ Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
 % z = [common_2z; isobe_z];
 
 %% 磯部先輩観測量を並び替える code = 07
- % z = [isobe_z; common_z];
+% z = [isobe_z; common_z];
+
+%% いままでの全てをいれたやつ code = 08. 01~07　重複は無視
+z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z];
 end
 

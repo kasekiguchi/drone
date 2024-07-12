@@ -13,8 +13,13 @@ function state = input_state(param)
     X = zeros(12,1);
     Z = quaternions_all(X);
 
-    for i = 1:step
-        Z(:,i+1) = A * Z(:,i) + B * U(:,i);
+    try
+        for i = 1:step
+            Z(:,i+1) = A * Z(:,i) + B * U(:,i);
+        end
+        state = C * Z; 
+    catch
+        open('quaternions_all.m');
+        error('観測量の次元が一致しません');
     end
-    state = C * Z; 
 end

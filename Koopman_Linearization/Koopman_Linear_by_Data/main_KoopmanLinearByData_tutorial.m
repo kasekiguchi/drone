@@ -133,25 +133,27 @@ tmp = matlab.desktop.editor.getActive;
 cd(strcat(fileparts(tmp.Filename), '../../../'));
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+%%
+clear; clc;
 flg.bilinear = 0;
 flg.normalize = 0;
 F = @quaternions_all; % 改造用
-FileName_common = strcat('EstimationResult_', string(datetime('now'), 'yyyy-MM-dd'), '_'); 
+FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 % exp_data = 'Exp_KiyamaX20'; %20データ増やしたzのみ速度から
-% exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
-exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
+exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
+% exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
-FileName = strcat(FileName_common, exp_data, '_', 'code00_optim_1_', Exp_tra); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code08_2times', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 
-% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromVel.mat'); % x方向追加+xyも速度から算出
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromZvel.mat');
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
@@ -169,7 +171,9 @@ fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
+    % est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
+    est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算
+    % est = KL_opt_MC(Data.X,Data.U,Data.Y,F,900000);
 end
 
 est.observable = F;
