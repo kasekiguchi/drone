@@ -79,7 +79,7 @@ void setup()
 
 void loop()
 {
-  receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
+  //receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
     if (!isEmergency)
     {
       receive_serial();
@@ -182,21 +182,21 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
-    else if (micros() - last_received_time >= 500000) // Stop propellers after 0.5s signal lost. 0.5s信号が送られてこなかったら実行する 停止状態となる信号を送信するためのもの
-    {
-      pw[0] = CH_OFFSET - CH_NEUTRAL; // roll 1620 - 500 =1120
-      pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch 1620 - 500 =1120
-      pw[2] = CH_OFFSET - CH_MIN;     // throttle 1620 - 0 =1620
-      pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw 1620 - 500 =1120
-      pw[4] = CH_OFFSET;              // AUX1 1620
-      pw[5] = CH_OFFSET;              // AUX2 1620
-      pw[6] = CH_OFFSET;              // AUX3 1620
-      pw[7] = CH_OFFSET;              // AUX4 1620
-      start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
-      //start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
-      //        digitalWrite( GLED_PIN, HIGH );
-      // digitalWrite( RLED_PIN, LOW );
-    }
+  }
+  else if (micros() - last_received_time >= 500000) // Stop propellers after 0.5s signal lost. 0.5s信号が送られてこなかったら実行する 停止状態となる信号を送信するためのもの
+  {
+    pw[0] = CH_OFFSET - CH_NEUTRAL; // roll 1620 - 500 =1120
+    pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch 1620 - 500 =1120
+    pw[2] = CH_OFFSET - CH_MIN;     // throttle 1620 - 0 =1620
+    pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw 1620 - 500 =1120
+    pw[4] = CH_OFFSET;              // AUX1 1620
+    pw[5] = CH_OFFSET;              // AUX2 1620
+    pw[6] = CH_OFFSET;              // AUX3 1620
+    pw[7] = CH_OFFSET;              // AUX4 1620
+    start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
+    //start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
+    //        digitalWrite( GLED_PIN, HIGH );
+    // digitalWrite( RLED_PIN, LOW );
   }
 }
 
@@ -270,7 +270,7 @@ void emergency_stop()
 void software_reset()
 {
   Serial.println("Reset!");
-  delay(500);
+  //delay(500);
   pinMode(RST_PIN, OUTPUT);
   digitalWrite(RST_PIN, LOW);
   Serial.println("RECOVERY"); // resetするので表示されないのが正しい挙動
