@@ -225,6 +225,52 @@ if isSaved
     % legend([newh(1),newh(2)],h(1).DisplayName,h(2).DisplayName);
     set(gca,'children',newh) % Childrenプロパティ値の再設定(順番の入れ替え)
 end
+%%
+syms x
+% fe = 0.5*(exp(-x) - 1);
+fe = 100*(1/(exp(-5*x) + 1) - 0.5);
+fplot(fe)
+xlim([-1,1])
+grid on
+%%
+i=1;
+figure("name",string(i));
+% figure(i);
+plot(t,theta);
+grid on
+hold on
+plot(t,C);
+xlabel("t")
+ylabel("theta[deg]")
+hold off
+i=i+1;
+
+figure("name",string(i));
+plot(h0,dh0)
+grid on
+hold on
+% plot(xlimit0,xlimit0*-100)
+plot(h0,-ah0)
+xlim(xlimit0)
+ylim(ylimit0)
+% daspect([1 1 1])
+xlabel("h0")
+ylabel("dh0")
+hold off
+i=i+1;
+
+figure("name",string(i));
+plot(h1,dh1)
+grid on
+hold on
+plot(h1,-ah1)
+xlim(xlimit1)
+ylim(ylimit1)
+% daspect([1 1 1])
+xlabel("h1")
+ylabel("dh1")
+hold off
+i = i+1;
 %% functions
 function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, fF, startTime, endTime)
     tic 

@@ -78,34 +78,43 @@ classdef HLC_SUSPENDED_LOAD < handle
             tmp = uf + us;
             % control barrier funciton
                 fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
-                a=[100;10];
-                C=11;%deg
-                [A,b] = conic_cfb(x,P,a,C*pi/180);
+                a=[10;1];
+                k = 5;
+                C=12;%deg
+                % [A,b] = conic_cfb(x,P,a,C*pi/180);
+                [A,b] = conic_cfb_sigmoid(x,P,a,k,C*pi/180);
                 tmp_opt = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
-    
-                % fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
-                % [A,b] = conic_cfb_eul(x,P,[10;10],2*pi/180)%deg
-                % tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
-    
                 obj.u_opt0 = tmp_opt;
-    
-                % obj.result.input = tmp_opt;
                 tmp = tmp_opt;
+                
+                %チェック用
+                pT = model.state.pT;
+                % wL = model.state.wL
+                % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0;
+                % [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
+                [h1,h2]=conic_cfb_sigumoid_h1h2(x,tmp_opt,P,a,k,C*pi/180);
+                theta = acos(-[0,0,1]*pT)*180/pi;
+                h0=-pT(3)-cos(C*pi/180);
+                a_h0 = a(1)*h0;
+                dh0 = h1 - a_h0;
+                % a_h1 = a(2)*h1;
+                a_h1 = a(2)*(1/(exp(-k*h1) + 1) - 0.5);
+                dh1 = h2 - a_h1;
+                
+                fprintf("theta:%-3.3f[deg] \t h0:%1.3f \t dh0:%1.3f \t h1:%1.3f \t dh1:%1.3f \n\n", theta,h0,dh0,h1,dh1)
+                obj.result.C = C;
+                obj.result.theta = theta;
+                obj.result.h0 = h0;
+                obj.result.ah0 = a_h0;
+                obj.result.dh0 = dh0;
+                obj.result.h1 = h1;
+                obj.result.ah1 = a_h1;
+                obj.result.dh1 =dh1;
 
             % obj.result.input = tmp;
             obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             result = obj.result;
-
-            %チェック用
-            pT = model.state.pT;
-            % wL = model.state.wL
-            theta = acos(-[0,0,1]*pT)*180/pi
-            % h0=-pT(3)-cos(C*pi/180)
-            % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0
-            [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180)
-            % h1
-            % dh1 = h2 - h1/a(2)
-            % h2
+            
             
         end
         function show(obj)
