@@ -233,6 +233,34 @@ fplot(fe)
 xlim([-1,1])
 grid on
 %%
+log = simplifyLoggerForCoop(gui.logger,1);
+
+q = log.estimator.q;
+pT = log.estimator.pT;
+wL = log.estimator.wL;
+
+t = log.t;
+theta = log.controller.theta';
+C = log.controller.C';
+
+h0 = log.controller.h0';
+ah0 = log.controller.ah0';
+dh0 = log.controller.dh0';
+xlimit0=[min(h0),max(h0)];
+ylimit0=[min(dh0),max(dh0)];
+% xlimit0=[-max(h0),max(h0)];
+% ylimit0=[-max(dh0),max(dh0)];
+
+
+h1 = log.controller.h1';
+ah1 = log.controller.ah1';
+dh1 = log.controller.dh1';
+xlimit1=[min(h1),max(h1)];
+ylimit1=[min(dh1),max(dh1)];
+% xlimit1=[-max(h1),max(h1)];
+% ylimit1=[-max(dh1),max(dh1)];
+
+close all
 i=1;
 figure("name",string(i));
 % figure(i);
@@ -269,6 +297,38 @@ ylim(ylimit1)
 % daspect([1 1 1])
 xlabel("h1")
 ylabel("dh1")
+hold off
+i = i+1;
+
+
+figure("name",string(i));
+plot(t,[h0,dh0])
+grid on
+hold on
+xlabel("t")
+ylabel("h0dh0")
+legend("h0","dh0")
+hold off
+i = i+1;
+
+figure("name",string(i));
+plot(t,[h1,dh1])
+grid on
+hold on
+xlabel("t")
+ylabel("h1dh1")
+legend("h1","dh1")
+hold off
+i = i+1;
+
+figure("name",string(i));
+plot(t,pT)
+grid on
+hold on
+plot(t,wL,"LineStyle","--")
+plot(t,q,"LineStyle",":")
+xlabel("t")
+ylabel("h1dh1")
 hold off
 i = i+1;
 %% functions
