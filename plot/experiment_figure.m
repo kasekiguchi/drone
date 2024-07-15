@@ -106,7 +106,9 @@ xlabel("Time [s]");
 
 set(gcf, "WindowState", "maximized");
 set(gcf, "Position", [960 0 960 1000])
+
+
 %%
 figure(100)
 plot(logt(1:end-1), diff(logt), 'Linewidth', 1.5)
-xlim([52 53])
+xlim([-inf inf])

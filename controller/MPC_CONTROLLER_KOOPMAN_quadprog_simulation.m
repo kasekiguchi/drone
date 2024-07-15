@@ -3,7 +3,7 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
     % Imai Case study 
     % 勾配MPCコントローラー
 
-    properties
+    properties % 特性
 %         options
         param
         current_state
@@ -71,9 +71,79 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             lb = [];
             ub = [];
             x0 = [obj.previous_input(:)];
-              
+
             [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
-      
+             %%
+%       BEGIN_ACADO;                                % 常に "BEGIN_ACADO "で始める。Always start with "BEGIN_ACADO". 
+% 
+%     acadoSet('problemname', 'QP_optimization');     % 問題名を設定します。これを省略すると、すべてのファイルの名前は "myAcadoProblem" になります。
+%                                                     % Set your problemname. If you skip this, all files will be named "myAcadoProblem"                                            
+% 
+%     % DifferentialState       x;              % 微分状態　The differential states
+%     % Control                 u;              % 制御　The controls
+%     % Disturbance             w;              % ノイズ　The disturbances
+%     % Parameter               p q;            % 自由パラメータ　The free parameters
+% 
+%                 %% MPC設定(problem)
+%             options = optimoptions('quadprog');
+%             options = optimoptions(options,'MaxIterations',      1.e+9); % 最大反復回数
+%             options = optimoptions(options,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
+% 
+%             %-- quadprog設定
+%             options.Display = 'none';   % 計算結果の表示
+%             problem.solver = 'quadprog'; % solver
+% 
+%             [H, f] = change_equation(Param);
+%             A = [];
+%             b = [];
+%             Aeq = [];
+%             beq = [];
+%             lb = [];
+%             ub = [];
+%             x0 = [obj.previous_input(:)];
+% 
+%             [var, fval, exitflag, ~, ~] = quadprog(H, f, A, b, Aeq, beq, lb, ub, x0, options, problem); %最適化計算
+%     %% Differential Equation　微分方程式
+%     f = acado.DifferentialEquation();       % 微分方程式オブジェクトを設定するSet the differential equation object
+% 
+%     %f.add(dot(x) == -x*x + p + u*u + w);    % ODEを書き出してください。複数の状態がある場合、f.add()で複数のODEを追加することができます。ODEを画面に表示するには、f.differentialList{1}.toStringを使います。
+%                                             % Write down your ODE. You can add multiple ODE's with f.add() when you have multiple states. To print an ODE to the screen, use　f.differentialList{1}.toString
+% 
+% 
+%     %% Optimal Control Problem　最適制御問題
+%     ocp = acado.OCP(0.0, 1.0, 20);          % 最適制御問題（OCP）の設定 Set up the Optimal Control Problem (OCP)
+%                                             % 0秒でスタート、20秒でコントロール Start at 0s, control in 20
+%                                             % 最大1秒間隔 intervals upto 1s
+% 
+%     %ocp.minimizeMayerTerm(x - p*p + q^2);   % メイヤー項の最小化 Minimize a Mayer term
+% 
+%     ocp.subjectTo( f );                     % OCPは常に微分方程式に従う。
+%                                             % Your OCP is always subject to your differential equation
+% 
+%     % ocp.subjectTo( 'AT_START', x == 1.0 );  % 初期状態　Initial condition
+%     % ocp.subjectTo(  0.1 <= p <= 2.0 );      % 限度　Bounds
+%     % ocp.subjectTo(  0.1 <= u <= 2.0 );
+%     % ocp.subjectTo( -0.1 <= w <= 2.1 );
+% 
+% 
+%     %% Optimization Algorithm　最適化アルゴリズム
+%     algo = acado.OptimizationAlgorithm(ocp); % 最適化アルゴリズムの設定　Set up the optimization algorithm
+% 
+%     algo.set('INTEGRATOR_TOLERANCE', 1e-5 ); % アルゴリズムのパラメーターを設定する　Set some parameters for the algorithm
+% 
+% 
+% END_ACADO;           % 常に "END_ACADO "で終わる。Always end with "END_ACADO".
+%                      % これでproblemname_ACADO.mが生成される。This will generate a file problemname_ACADO.m. 
+%                      % このファイルを実行して結果を得る。Run this file to get your results. 
+%                      % ファイルproblemname_ACADO.mは何度でも実行できる。を何度でも実行することができる。
+%                      % You can run the file problemname_ACADO.m as many times as you want without having to compile again.
+% 
+% 
+% 
+% out = QP_optimization_RUN();                % テストを実行する。RUNファイルの名前はproblemname_RUNなので、この場合はget_started_RUNとなる。
+%                                             % Run the test. The name of the RUN file is problemname_RUN, so in this case getting_started_RUN
+% 
+% %draw;
             %%
             obj.previous_input = var;
             obj.result.input = var(1:4, 1); % 印加する入力 4入力

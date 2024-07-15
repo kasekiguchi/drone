@@ -1,4 +1,4 @@
-function Controller = Controller_MPC_Koopman(~)
+function Controller = Controller_MPC_Koopman(~) %%#codegen
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一

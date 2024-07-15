@@ -33,10 +33,12 @@ function [] = Graphplot(app)
     Fsize.lgd = 12; %凡例の大きさ調整
     size = figure;
     size.WindowState = 'maximized'; %表示するグラフを最大化
-    num = 3;
+    row = 3;
+    line = 3;
     colororder(newcolors)
     
-    subplot(2, num, 1);
+    % 位置
+    subplot(row, line, 1);
     colororder(newcolors)
     plot(data.t, data.p(:,:),'LineWidth',1.2);
     xlabel('Time [s]');
@@ -53,7 +55,7 @@ function [] = Graphplot(app)
     title('Position p of agent1');
     
     % 姿勢角
-    subplot(2, num, 2);
+    subplot(row, line, 2);
     plot(data.t, data.q(:,:),'LineWidth',1.2);
     xlabel('Time [s]');
     ylabel('q');
@@ -68,7 +70,7 @@ function [] = Graphplot(app)
     title('Attitude q of agent1');
     
     % 速度
-    subplot(2, num, 3);
+    subplot(row, line, 3);
     plot(data.t, data.v(:,:),'LineWidth',1.2);
     hold on
     plot(data.t, data.vr(:,:),'LineWidth',1.2,'LineStyle','-.');
@@ -84,7 +86,7 @@ function [] = Graphplot(app)
     title('Velocity v of agent1');
     
     % 角速度
-    subplot(2, num, 4);
+    subplot(row, line, 4);
     plot(data.t, data.w(:,:),'LineWidth',1.2);
     hold on
     xlabel('Time [s]');
@@ -98,7 +100,8 @@ function [] = Graphplot(app)
     hold off
     title('Angular velocity w of agent1');
 
-    subplot(2,num,5);
+    % 総入力
+    subplot(row,line,5);
     plot(data.t,data.u(1,:),'LineWidth',1)
     xlabel('Time [s]');
     ylabel('Input_{thrust}');
@@ -111,7 +114,8 @@ function [] = Graphplot(app)
     ax(5) = gca;
     title('Input u of agent1','FontSize',12);
 
-    subplot(2,num,6);
+    % 各トルク
+    subplot(row,line,6);
     plot(data.t,data.u(2:4,:),'LineWidth',1)
     xlabel('Time [s]');
     ylabel('Input_{torque}');
@@ -122,6 +126,33 @@ function [] = Graphplot(app)
     lgd.NumColumns = columnomber;
     ax(6) = gca;
     title('Input torque of agent1','FontSize',12);
+
+    % x-y
+    subplot(row,line,7);
+    plot(data.p(1,:),data.p(2,:),'LineWidth',1); hold on; plot(data.pr(1,:), data.pr(2,:), '--'); hold off;
+    xlabel('x');
+    ylabel('y');
+    hold on
+    grid on
+    lgdtmp = {'$Estimator$','$Reference$'};
+    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    lgd.NumColumns = columnomber;
+    ax(6) = gca;
+    title('x-y of agent1','FontSize',12);
+
+    % x-y-z
+    subplot(row,line,8);
+    plot3(data.p(1,:), data.p(2,:), data.p(3,:),'LineWidth',1); hold on; plot3(data.pr(1,:), data.pr(2,:), data.pr(3,:), '--'); hold off;
+    xlabel('x');
+    ylabel('y');
+    zlabel('z');
+    hold on
+    grid on
+    lgdtmp = {'$Estimator$','$Reference$'};
+    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    lgd.NumColumns = columnomber;
+    ax(6) = gca;
+    title('x-y-z of agent1','FontSize',12);
     
     fontSize = 14; %軸の文字の大きさの設定
     set(ax,'FontSize',fontSize);
