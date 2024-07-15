@@ -83,7 +83,7 @@ isobe_z = [W1*W2;
             W2*sin(Q1)*sin(Q2)/cos(Q1);
             W3*cos(Q1)*sin(Q2)/cos(Q1)
             ];
- z = [common_z; isobe_z];
+z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
 F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
@@ -159,6 +159,6 @@ diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(
 % z = [isobe_z; common_z];
 
 %% いままでの全てをいれたやつ code = 08. 01~07　重複は無視
-% z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z];
+z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z];
 end
 

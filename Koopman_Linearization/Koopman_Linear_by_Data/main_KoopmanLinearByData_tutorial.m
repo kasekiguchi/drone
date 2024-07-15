@@ -107,16 +107,6 @@ end
 
 fprintf('\n＜データセットの結合が完了しました＞\n')
 
-%% 正規化
-flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
-if flg.normalize == 1 %正規化を行うか(正規化については自分で調べて！)
-    Ndata = Normalization(Data);
-    Data.X = Ndata.x;
-    Data.Y = Ndata.y;
-    Data.U = Ndata.u;
-    disp('Normalization is complete')
-end
-
 %% クォータニオンのノルムをチェック(クォータニオンのノルムは1にならなければいけないという制約がある)
 % 閾値を下回った or 上回った場合注意文を提示
 % attitude_norm 各時間におけるクォータニオンのノルム
@@ -144,22 +134,36 @@ Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
-FileName = strcat(FileName_common, exp_data, '_', 'code00_5times_', Exp_tra); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code08_opt_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 
 load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_true.mat'); % 以前+xyz速度から
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_45k_Zdecreased.mat'); % z方向45000データ減少
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromVel.mat'); % x方向追加+xyも速度から算出
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromZvel.mat'); % x方向増加
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromZvel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
 
-Data = data_increased(Data, 0.0001);
-
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
+end
+
+% データのかさまし
+% Data = data_increased(Data, 0.001, 20);
+
+% 正規化
+% flg.normalize = input('\n＜正規化を行いますか＞\n はい:1，いいえ:0：','s');
+if flg.normalize == 1 %正規化を行うか(正規化については自分で調べて！)
+    Ndata = Normalization(Data);
+    Data.X = Ndata.x;
+    Data.Y = Ndata.y;
+    Data.U = Ndata.u;
+    disp('Normalization is complete')
 end
 
 if size(Data.X,1)==13 %特に気にしなくていい
@@ -167,14 +171,16 @@ if size(Data.X,1)==13 %特に気にしなくていい
     attitude_norm = checkQuaternionNorm(Dataset.est.q',thre);
 end
 
+disp(FileName);
+
 %% Koopman linearization
 % 12/12 関数化(双線形であるかどかの切り替え，flg.bilinear==1:双線形)
 fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
-    % est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算
+    % est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
+    est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算
     % est = KL_opt_MC(Data.X,Data.U,Data.Y,F,900000);
 end
 

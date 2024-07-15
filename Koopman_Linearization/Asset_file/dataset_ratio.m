@@ -4,28 +4,55 @@ tmp = matlab.desktop.editor.getActive;
 cd(strcat(fileparts(tmp.Filename), '/../'));
 %%
 clear
-% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromZvel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddXdirection.mat');
-% X = Data.X;
-% Y = Data.Y;
-% U = Data.U;
+Data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_true.mat', 'Data');
+Data2 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
+% X = Data1.X;
+% Y = Data1.Y;
+% U = Data1.U;
+
+Data = Data1.Data;
+Data2 = Data2.Data;
+
+%%
+% decread_data = 15000;
+% Data.X = Data.X(:,decread_data:end);
+% Data.Y = Data.Y(:,decread_data:end);
+% Data.U = Data.U(:,decread_data:end);
 
 %% データセットがどういう割合のデータなのか算出する
 close all
-% T = 1:size(Data.X,2);
+T = 1:size(Data.X,2);
 
-% figure(1);
-% subplot(2,2,1); plot(T, Data.X(1:3,:), 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("Datasets position", 'FontSize', 15)
-% legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15)
-% 
-% subplot(2,2,2); plot(T, Data.X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5])
-% subplot(2,2,3); plot(T, Data.X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15)
-% subplot(2,2,4); plot(T, Data.X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
-% xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
+figure(1);
+sgtitle('Kiyama Exp Dataset fromVel_true')
+subplot(2,2,1); plot(T, Data.X(1:3,:), 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Datasets position", 'FontSize', 15)
+legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15)
 
+subplot(2,2,2); plot(T, Data.X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5])
+subplot(2,2,3); plot(T, Data.X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15)
+subplot(2,2,4); plot(T, Data.X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
+
+
+figure(2);
+sgtitle('Kiyama Exp Dataset')
+subplot(2,2,1); plot(T, Data2.X(1:3,:), 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Datasets position", 'FontSize', 15)
+legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15)
+
+subplot(2,2,2); plot(T, Data2.X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5])
+subplot(2,2,3); plot(T, Data2.X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15)
+subplot(2,2,4); plot(T, Data2.X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
+xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
+
+%%
 % figure(2);
 % subplot(1,3,1); histogram(X(1,:)); ylabel('X');
 % subplot(1,3,2); histogram(X(2,:)); ylabel('Y');

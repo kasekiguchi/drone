@@ -29,13 +29,13 @@ else;                             m = 2; n = 3; end
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
 % 木山データ; Kiyama
 % x方向データの増加; KiyamaX20
-mode.code = '00';
+mode.code = '08';
 mode.training_data = 'Kiyama';
 % mode.training_data = 'KiyamaX20'; 
 % mode.training_data = 'KiyamaX20fromVel';
 ref_tra = 'saddle'; 
-loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
-% loadfilename{1} = 'EstimationResult_2024-05-02_Exp_Kiyama_code00_1';
+% loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
+loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_fromVel_10_normalize_opt_saddle';
 % loadfilename{1} = 'EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle';
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_2_saddle_10k'; %10000回
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
@@ -43,6 +43,7 @@ loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 % loadfilename{1} = 'EstimationResult_2024-07-10_Exp_Kiyama_code00_optim_L1norm_saddle'; %90万回 L1ノルムのみ
 % loadfilename{1} = 'EstimationResult_2024-07-02_Exp_Kiyama_fromVel_code00_optim_1_saddle_100k'; %100k
 % loadfilename{1} = '2024-07-12_Exp_Kiyama_code00_5times_saddle';
+% loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_normalize_saddle';
 % loadfilename{1} = 'EstimationResult_Kiyama_reproduction';
 
 % file2 : 別のリファレンス
@@ -198,16 +199,24 @@ i = 1;
 rmse_func = @(x) sqrt(1/stepN * sum(x.^2, 2));
 % position
 error_p = file{i}.simResult.state.p(:,tlength) - file{WhichRef}.simResult.reference.est.p(tlength,:)';
-result.p.rmse = rmse_func(error_p); result.p.max = max(error_p,[],2); result.p.min = min(error_p,[],2);
+% result.p.rmse = rmse_func(error_p); result.p.max = max(error_p,[],2); result.p.min = min(error_p,[],2);
+result.p.rmse = rmse(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)', 2);
 % velocity
 error_v = file{i}.simResult.state.v(:,tlength) - file{WhichRef}.simResult.reference.est.v(tlength,:)';
-result.v.rmse = rmse_func(error_v); result.v.max = max(error_v,[],2); result.v.min = min(error_v,[],2);
+% result.v.rmse = rmse_func(error_v); result.v.max = max(error_v,[],2); result.v.min = min(error_v,[],2);
+result.v.rmse = rmse(file{i}.simResult.state.v(:,tlength), file{WhichRef}.simResult.reference.est.v(tlength,:)',2);
 % attitude
 error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
-result.q.rmse = rmse_func(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
-
+% result.q.rmse = rmse_func(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
+result.q.rmse = rmse(file{i}.simResult.state.q(:,tlength), file{WhichRef}.simResult.reference.est.q(tlength,:)',2);
+%%
+plot(timeRange, error_p);
+%%
+Co = ctrb(file{1}.est.A,file{1}.est.B);
+Ob = obsv(file{1}.est.A,file{1}.est.C);
 fprintf("file: %s \n", strcat(strrep(loadfilename{1},'EstimationResult_2024-','')));
 fprintf("Number of Observables: %d \n", size(simResult.Z(:,1),1));
+fprintf("Number of Control rank: %d \n", rank(Co));
 fprintf("Estimation begin time: %.4f \n", startTime);
 fprintf("Estimation time: %.2f \n", xmax);
 fprintf("Position RMSE : x=%.4f, y=%.4f, z=%.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
