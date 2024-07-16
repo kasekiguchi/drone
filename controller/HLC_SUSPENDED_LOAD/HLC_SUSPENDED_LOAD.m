@@ -80,15 +80,16 @@ classdef HLC_SUSPENDED_LOAD < handle
                 fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
                 a=[100;10];
                 k = 5;
-                C=3;%deg
-                % [A,b] = conic_cfb(x,P,a,C*pi/180);
-                x = [model.state.q;model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
-                [A,b] = conic_cfb_eul(x,P,a,C*pi/180);
+                C=10;%deg
+                [A,b] = conic_cfb(x,P,a,C*pi/180);
+                % x = [model.state.q;model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+                % [A,b] = conic_cfb_eul(x,P,a,C*pi/180);
                 % [A,b] = conic_cfb_sigmoid(x,P,a,k,C*pi/180);
                 % [A,b] = conic_cfb_log(x,P,a,C*pi/180);
                 tmp_opt = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
+                % obj.u_opt0 = 10;
                 obj.u_opt0 = tmp_opt;
-                if agent{1}.t >5
+                if agent{1}.t >0
                     tmp = tmp_opt;
                 end
                 
@@ -96,8 +97,8 @@ classdef HLC_SUSPENDED_LOAD < handle
                 pT = model.state.pT;
                 % wL = model.state.wL
                 % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0;
-                % [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
-                [h1,h2]=conic_cfb_eul_h1h2(x,tmp_opt,P,a,C*pi/180);
+                [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
+                % [h1,h2]=conic_cfb_eul_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_sigumoid_h1h2(x,tmp_opt,P,a,k,C*pi/180);
                 % [h1,h2]=conic_cfb_log_h1h2(x,tmp_opt,P,a,C*pi/180);
                 theta = acos(-[0,0,1]*pT)*180/pi;
@@ -109,7 +110,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % a_h1 = a(2)*log(h1 +1);
                 dh1 = h2 - a_h1;
                 
-                fprintf("theta:%-3.3f[deg] \t h0:%1.3f \t dh0:%1.3f \t h1:%1.3f \t dh1:%1.3f \n\n", theta,h0,dh0,h1,dh1)
+                fprintf("t:%3.3f[s] \t  theta:%3.3f[deg] \t h0:%1.3f \t dh0:%1.3f \t h1:%1.3f \t dh1:%1.3f \t A:%1.3f \t  B:%1.3f \t b/A:%1.3f \n\n", agent{1}.t,theta,h0,dh0,h1,dh1, A(1),b, b/A(1))
                 obj.result.C = C;
                 obj.result.theta = theta;
                 obj.result.h0 = h0;

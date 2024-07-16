@@ -327,6 +327,7 @@ grid on
 hold on
 plot(t,wL,"LineStyle","--")
 plot(t,q,"LineStyle",":")
+legend()
 xlabel("t")
 ylabel("h1dh1")
 hold off
