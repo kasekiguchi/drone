@@ -37,6 +37,7 @@ classdef FIGURE_EXP
 
             obj = obj.decide_phase();
             obj = obj.store_data();
+            % obj = obj.store_data_takeoff();
         end
 
         function [obj] = main_figure(obj)
@@ -291,6 +292,9 @@ classdef FIGURE_EXP
                     Square_coloring(obj.data.logt([find(logphase == 108, 1), find(logphase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); 
                     txt = [txt(:)', {'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'}];  % landing phase
                     % end
+                case 3 %takeoff
+                    Square_coloring(obj.data.logt([find(logphase == 116, 1), find(logphase == 116, 1, 'last')]),[],[],[],gca); 
+                    txt = [txt(:)', {'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'}]; % take off phase
             end
             text(gca().XLim(2) - (gca().XLim(2) - gca().XLim(1)) * 0.45, gca().YLim(2) + (gca().YLim(2) - gca().YLim(1)) * yoffset, txt, 'FontSize', font_size);
             xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 obj.data.logt(end-1)])
@@ -325,10 +329,12 @@ classdef FIGURE_EXP
                 % obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
                 %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
                 obj.flg.mpc = 1; % MPCかどうかの判別
-            elseif obj.phase==2
-                obj.data.calt =  cell2mat(arrayfun(@(N) app.logger.Data.agent.controller.result{N}.mpc.calt,...
-                            find(app.logger.Data.phase(2:end)==97,1,'first')+1:find(app.logger.Data.phase(2:end)==97, 1, 'last')+1,'UniformOutput',false));
             end
+        end
+
+        function obj = store_data_takeoff(obj)
+            obj.data.calt =  cell2mat(arrayfun(@(N) obj.log.Data.agent.controller.result{N}.mpc.calt,...
+                            find(obj.log.Data.phase(2:end)==116,1,'first')+1:find(obj.log.Data.phase(2:end)==116, 1, 'last')+1,'UniformOutput',false));
         end
 
         function obj = decide_phase(obj)

@@ -89,12 +89,12 @@ fig.main_figure();
 
 
 %% controller calculation time
-figure(101);
-logt = app.logger.Data.t(find(app.logger.Data.phase(2:end)==97,1,'first'):find(app.logger.Data.phase(2:end)==97, 1, 'last'));
-% controller_time = arrayfun(@(x) app.logger.Data.aegnt.controller.result
-controller_time = cell2mat(arrayfun(@(N) app.logger.Data.agent.controller.result{N}.mpc.calt,...
-                            find(app.logger.Data.phase(2:end)==97,1,'first')+1:find(app.logger.Data.phase(2:end)==97, 1, 'last')+1,'UniformOutput',false));
-plot(logt, controller_time);
+% figure(101);
+% logt = app.logger.Data.t(find(app.logger.Data.phase(2:end)==97,1,'first'):find(app.logger.Data.phase(2:end)==97, 1, 'last'));
+% % controller_time = arrayfun(@(x) app.logger.Data.aegnt.controller.result
+% controller_time = cell2mat(arrayfun(@(N) app.logger.Data.agent.controller.result{N}.mpc.calt,...
+%                             find(app.logger.Data.phase(2:end)==97,1,'first')+1:find(app.logger.Data.phase(2:end)==97, 1, 'last')+1,'UniformOutput',false));
+% plot(logt, controller_time);
 end
 
 % GUI上に現在位置（推定値）を表示する

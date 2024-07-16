@@ -49,6 +49,7 @@ phase = 2; % 1:flight, 2:all
 fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename));
 % fig = fig.main_figure();
 % fig = fig.make_mpc_plot();
+
 % [x, xr] = fig.main_mpc('HL', [-1 1; -2 2; 0 1.1]);
 % app = app.logger, app.fExp の構造体を作ればよい
 
@@ -91,4 +92,10 @@ fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_
 % fprintf('RMSE: %.4f, %.4f, %.4f \n', rmse_x(1), rmse_x(2), rmse_x(3));
 % fprintf('MAX error: %.4f, %.4f, %.4f \n', max_error(1), max_error(2), max_error(3));
 
-%%
+%% Controller
+% close all
+% figure(101);
+% tt = fig.log.Data.t(find(fig.log.Data.phase(2:end)==116,1):find(fig.log.Data.phase(2:end)==116,1,'last'));
+% plot(tt, fig.data.calt);
+% fig.phase = 3;
+% fig.background_color(-0.1,gca,fig.log.Data.phase);
