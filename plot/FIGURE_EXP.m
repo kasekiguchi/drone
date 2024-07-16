@@ -325,6 +325,9 @@ classdef FIGURE_EXP
                 % obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
                 %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
                 obj.flg.mpc = 1; % MPCかどうかの判別
+            elseif obj.phase==2
+                obj.data.calt =  cell2mat(arrayfun(@(N) app.logger.Data.agent.controller.result{N}.mpc.calt,...
+                            find(app.logger.Data.phase(2:end)==97,1,'first')+1:find(app.logger.Data.phase(2:end)==97, 1, 'last')+1,'UniformOutput',false));
             end
         end
 
