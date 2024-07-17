@@ -51,7 +51,8 @@ kari_logt=[0;logt(1:end-1)];
     Step_time= logt-kari_logt;
     %InnerInput(:,i-flight_start_idx+1) = Agent.inner_input{i};
 end
-
+count_gross_over_0025=length( find( Step_time >= 0.025 ) )
+count_persentage_over_0025=length( find( Step_time >= 0.025 ) )/length(Step_time)
 m = 3; n = 3;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
