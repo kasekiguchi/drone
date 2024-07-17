@@ -13,12 +13,12 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
-flg.confirm_ref = 0; % リファレンスに設定した軌道の確認
+flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
-flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
 startTime = 3.9; % flight後何秒からの推定精度検証を行うか saddle:3.39
 stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
@@ -29,15 +29,17 @@ else;                             m = 2; n = 3; end
 %出力するグラフを選択(最大で3つのデータを同一のグラフに重ねることが可能)
 % 木山データ; Kiyama
 % x方向データの増加; KiyamaX20
-mode.code = '08';
+mode.code = '00';
 mode.training_data = 'Kiyama';
 % mode.training_data = 'KiyamaX20'; 
 % mode.training_data = 'KiyamaX20fromVel';
 ref_tra = 'saddle'; 
-% loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
-loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_fromVel_10_normalize_opt_saddle';
-% loadfilename{1} = 'EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle';
-% loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_2_saddle_10k'; %10000回
+loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
+
+% loadfilename{1} = '2024-07-14_Exp_Kiyama_code00_20times_saddle';
+% loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_20times_saddle';
+% loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_fromVel_10saddle';
+
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
 % loadfilename{1} = 'EstimationResult_2024-07-10_Exp_Kiyama_code08_optim_2_saddle'; %90万回
 % loadfilename{1} = 'EstimationResult_2024-07-10_Exp_Kiyama_code00_optim_L1norm_saddle'; %90万回 L1ノルムのみ
@@ -58,6 +60,7 @@ WhichRef = 2; % 出力するデータの中で，どのファイルをリファ�
 if size(loadfilename,2) == 1 % fileが1つならWhichRefを変更
     WhichRef = 1;
 end
+disp(loadfilename{1});
 %% グラフの保存
 % "現在のフォルダー"をmainGUIの階層したか確認
 if save_fig && flg.figtype % Graphフォルダ内に保存 .figで保存
@@ -210,7 +213,7 @@ error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.refere
 % result.q.rmse = rmse_func(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
 result.q.rmse = rmse(file{i}.simResult.state.q(:,tlength), file{WhichRef}.simResult.reference.est.q(tlength,:)',2);
 %%
-plot(timeRange, error_p);
+% plot(timeRange, error_p);
 %%
 Co = ctrb(file{1}.est.A,file{1}.est.B);
 Ob = obsv(file{1}.est.A,file{1}.est.C);
@@ -420,9 +423,25 @@ end
 if flg.confirm_ref
     if flg.figtype; figure(5);
     else; subplot(m, n, 5); end
-    plot(file{WhichRef}.simResult.reference.T, file{WhichRef}.simResult.reference.X(1:3,:)); hold on;
+    plot(file{WhichRef}.simResult.reference.T, file{WhichRef}.simResult.reference.X(1:3,:), 'LineWidth', 2); hold on;
     xregion(startTime, startTime + xmax, FaceColor="b",EdgeColor=[0.4 0 0.7]);
-    legend('x', 'y', 'z', 'verification range'); grid on;
+    legend('x', 'y', 'z', 'verification range', 'Location', 'best', 'FontSize', 12); grid on;
+    xlabel('Time [s]', 'FontSize', 15);
+    ylabel('Position [m]', 'FontSize', 15);
+
+    figure(10);
+    plot3(file{WhichRef}.simResult.reference.X(1,:), file{WhichRef}.simResult.reference.X(2,:), file{WhichRef}.simResult.reference.X(3,:), 'LineWidth', 2);
+    xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
+    ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
+    zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
+    grid on;
+
+    figure(11);
+    plot3(file{WhichRef}.simResult.reference.X(1,tlength), file{WhichRef}.simResult.reference.X(2,tlength), file{WhichRef}.simResult.reference.X(3,tlength), 'LineWidth', 2);
+    xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
+    ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
+    zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
+    grid on;
 end
 
 %% RMSE
