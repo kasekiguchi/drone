@@ -257,18 +257,32 @@ classdef FIGURE_EXP
             % MPC exitflag, var等の確認をする
             % obj.data.fval
             % obj.data.exitflag
+            if obj.phase == 1; m = 2; n = 2;
+            elseif obj.phase == 2; m = 1; n = 2;
+            end
+            
             figure(obj.data.fignum);
-            subplot(1,2,1);
-            plot(obj.data.logt, obj.data.exitflag);
+            subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));
+            plot(obj.data.logt, obj.data.exitflag); grid on;
             xlim([0 inf]);
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             ylabel('Exitflag value');
 
-            subplot(1,2,2);
-            plot(obj.data.logt, -obj.data.fval);
+            subplot(m,n,2);
+            plot(obj.data.logt, -obj.data.fval); grid on;
             xlim([0 inf])
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
-            ylabel('Evaluation value')
+            ylabel('Evaluation value');
+
+            if obj.phase == 1
+            subplot(m,n,3);
+            plot(obj.data.logt, obj.data.calt); grid on;
+            xlim([0 inf]); ylim([0 0.0157531]);
+            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % ytickformat('%.3f');
+            ylabel('Calculation time [s]');
+            end
+
         end
 
         function background_color(obj, yoffset, gca, logphase)
@@ -326,8 +340,8 @@ classdef FIGURE_EXP
                             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
                 obj.data.var = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
                             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-                % obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
-                %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
                 obj.flg.mpc = 1; % MPCかどうかの判別
             end
         end
