@@ -52,7 +52,8 @@ app.logger.plot({1, "q", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te
 % 計算時間の描画
 figure(100);
 logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
-plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5);
+plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5); hold on;
+yline(0.025, '-.', 'LineWidth', 1.5, 'Color', 'red'); hold off; xlim([0 logt(end-1)]);
 xlabel("Time [s]"); ylabel("Calculation time [s]");
 
 % animation
