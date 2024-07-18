@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 10;
+te = 100;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);

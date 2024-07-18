@@ -20,11 +20,11 @@ endTime = 1000;%1E3;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
-% for i = 1:length(logger.target)
-%     loggers{i,1} = simplifyLoggerForCoop(logger,i);
-% end
-% droneID = logger.target(1:end-1);
-droneID = 1:6;
+for i = 1:length(logger.target)
+    loggers{i,1} = simplifyLoggerForCoop(logger,i);
+end
+droneID = logger.target(1:end-1);
+% droneID = 1:6;
 lgnd.payload=["payload","split payload" + droneID];
 lgnd.drone="drone" + droneID;
 %========================================================================
