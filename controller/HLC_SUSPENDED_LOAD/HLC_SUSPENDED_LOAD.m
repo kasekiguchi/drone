@@ -78,14 +78,30 @@ classdef HLC_SUSPENDED_LOAD < handle
             tmp = uf + us;
             % control barrier funciton
                 fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
-                a=[100;10];
+                a=[100;100];
                 k = 5;
                 C=10;%deg
-                [A,b] = conic_cfb(x,P,a,C*pi/180);
+                Cq =5;%機体角度
+                % [A,b] = conic_q_cfb(x,P,a,C*pi/180,Cq*pi/180);
+                % [A,b] = conic_cfb(x,P,a,C*pi/180);
+               
+                % [A,b] = conic_cfb_x3(x,P,a,C*pi/180);
                 % x = [model.state.q;model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
                 % [A,b] = conic_cfb_eul(x,P,a,C*pi/180);
                 % [A,b] = conic_cfb_sigmoid(x,P,a,k,C*pi/180);
                 % [A,b] = conic_cfb_log(x,P,a,C*pi/180);
+                [h1,h2]=conic_cfb_h1h2(x,obj.u_opt0,P,a,C*pi/180);
+                
+                
+                if h2 < 0
+                    am=[100;100];
+                    [A,b] = conic_cfb(x,P,am,C*pi/180);
+                else
+                    aM=[100;100];
+                    [A,b] = conic_cfb(x,P,aM,C*pi/180);
+
+                % [A,b] = conic_cfb_sigmoid(x,P,aM,k,C*pi/180);
+                end
                 tmp_opt = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
                 % obj.u_opt0 = 10;
                 obj.u_opt0 = tmp_opt;
@@ -97,20 +113,35 @@ classdef HLC_SUSPENDED_LOAD < handle
                 pT = model.state.pT;
                 % wL = model.state.wL
                 % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0;
-                [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
+                % [h1,h2] = conic_q_cfb_h1h2(x,tmp_opt,P,a,C*pi/180,Cq*pi/180);
+                % [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
+                % [h1,h2]=conic_cfb_x3_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_eul_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_sigumoid_h1h2(x,tmp_opt,P,a,k,C*pi/180);
                 % [h1,h2]=conic_cfb_log_h1h2(x,tmp_opt,P,a,C*pi/180);
                 theta = acos(-[0,0,1]*pT)*180/pi;
+
+                % [ERb0,EL] = RodriguesQuaternion(model.state.getq('4')); 
+                % h0=-pT(3)-cos(C*pi/180)+(ERb0*[0;0;1])'*[0;0;1] - cos(Cq*pi/180);
                 h0=-pT(3)-cos(C*pi/180);
-                a_h0 = a(1)*h0;
+                if h2<0
+                    a_h0 = am(1)*h0;
+                else
+                    a_h0 = aM(1)*h0;
+                end
                 dh0 = h1 - a_h0;
-                a_h1 = a(2)*h1;
+                if h2<0
+                    a_h1 = am(2)*h1;
+                else
+                    a_h1 = aM(2)*h1;
+                end
+                % a_h1 = a(2)*h1;
+                % a_h1 = a(2)*h1^3;
                 % a_h1 = a(2)*(1/(exp(-k*h1) + 1) - 0.5);
                 % a_h1 = a(2)*log(h1 +1);
                 dh1 = h2 - a_h1;
                 
-                fprintf("t:%3.3f[s] \t  theta:%3.3f[deg] \t h0:%1.3f \t dh0:%1.3f \t h1:%1.3f \t dh1:%1.3f \t A:%1.3f \t  B:%1.3f \t b/A:%1.3f \n\n", agent{1}.t,theta,h0,dh0,h1,dh1, A(1),b, b/A(1))
+                fprintf("t:%3.3f[s] \t  theta:%3.3f[deg] \t h0:%1.3f \t dh0:%1.3f \t h1:%1.3f \t dh1:%1.3f \t h2:%1.3f \t A:%1.3f \t  B:%1.3f \t b/A:%1.3f \n\n", agent{1}.t,theta,h0,dh0,h1,dh1,h2, A(1),b, b/A(1))
                 obj.result.C = C;
                 obj.result.theta = theta;
                 obj.result.h0 = h0;
@@ -120,8 +151,9 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.result.ah1 = a_h1;
                 obj.result.dh1 =dh1;
 
-            % obj.result.input = tmp;
-            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+                
+            obj.result.input = tmp;
+            % obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
             result = obj.result;
             
             
