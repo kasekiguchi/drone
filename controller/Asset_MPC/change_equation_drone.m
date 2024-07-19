@@ -23,6 +23,9 @@ function [H, F] = change_equation_drone(Param)
     Qf = Param.weightF;
     Horizon = Param.H;
 
+    % Qrep = repmat(Q, 1, Horizon);
+    % Q = Qrep .* linspace(1, 0.5, Horizon);
+
     CQC = C' * Q * C;
     CQfC = C' * Qf * C;
     QC = Q * C;
