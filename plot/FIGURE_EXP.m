@@ -37,6 +37,7 @@ classdef FIGURE_EXP
 
             obj = obj.decide_phase();
             obj = obj.store_data();
+            % obj = obj.store_data_takeoff();
         end
 
         function [obj] = main_figure(obj)
@@ -256,18 +257,32 @@ classdef FIGURE_EXP
             % MPC exitflag, var等の確認をする
             % obj.data.fval
             % obj.data.exitflag
+            if obj.phase == 1; m = 2; n = 2;
+            elseif obj.phase == 2; m = 1; n = 2;
+            end
+            
             figure(obj.data.fignum);
-            subplot(1,2,1);
-            plot(obj.data.logt, obj.data.exitflag);
+            subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));
+            plot(obj.data.logt, obj.data.exitflag); grid on;
             xlim([0 inf]);
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             ylabel('Exitflag value');
 
-            subplot(1,2,2);
-            plot(obj.data.logt, -obj.data.fval);
+            subplot(m,n,2);
+            plot(obj.data.logt, -obj.data.fval); grid on;
             xlim([0 inf])
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
-            ylabel('Evaluation value')
+            ylabel('Evaluation value');
+
+            if obj.phase == 1
+            subplot(m,n,3);
+            plot(obj.data.logt, obj.data.calt); grid on;
+            xlim([0 inf]); ylim([0 0.0157531]);
+            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % ytickformat('%.3f');
+            ylabel('Calculation time [s]');
+            end
+
         end
 
         function background_color(obj, yoffset, gca, logphase)
@@ -291,6 +306,9 @@ classdef FIGURE_EXP
                     Square_coloring(obj.data.logt([find(logphase == 108, 1), find(logphase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); 
                     txt = [txt(:)', {'{\color[rgb]{1.0,0.9,1.0}■} :Landing phase'}];  % landing phase
                     % end
+                case 3 %takeoff
+                    Square_coloring(obj.data.logt([find(logphase == 116, 1), find(logphase == 116, 1, 'last')]),[],[],[],gca); 
+                    txt = [txt(:)', {'{\color[rgb]{1.0,1.0,0.9}■} :Take off phase'}]; % take off phase
             end
             text(gca().XLim(2) - (gca().XLim(2) - gca().XLim(1)) * 0.45, gca().YLim(2) + (gca().YLim(2) - gca().YLim(1)) * yoffset, txt, 'FontSize', font_size);
             xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([0 obj.data.logt(end-1)])
@@ -322,10 +340,15 @@ classdef FIGURE_EXP
                             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
                 obj.data.var = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.var,...
                             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
-                % obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
-                %             obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
+                obj.data.calt = cell2mat(arrayfun(@(N) obj.agent.controller.result{N}.mpc.calt,...
+                            obj.data.start_idx:obj.data.finish_idx,'UniformOutput',false));
                 obj.flg.mpc = 1; % MPCかどうかの判別
             end
+        end
+
+        function obj = store_data_takeoff(obj)
+            obj.data.calt =  cell2mat(arrayfun(@(N) obj.log.Data.agent.controller.result{N}.mpc.calt,...
+                            find(obj.log.Data.phase(2:end)==116,1,'first')+1:find(obj.log.Data.phase(2:end)==116, 1, 'last')+1,'UniformOutput',false));
         end
 
         function obj = decide_phase(obj)

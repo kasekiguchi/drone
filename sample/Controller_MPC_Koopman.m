@@ -2,7 +2,7 @@ function Controller = Controller_MPC_Koopman(dt)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
-    Controller_param.dt = 0.08; % MPCステップ幅 0.07
+    Controller_param.dt = 0.04; % MPCステップ幅 0.07
     Controller_param.H = 10 %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
@@ -37,7 +37,7 @@ function Controller = Controller_MPC_Koopman(dt)
     Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み
+    Controller_param.weight.QW = diag([15; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;

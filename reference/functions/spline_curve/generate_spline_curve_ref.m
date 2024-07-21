@@ -1,4 +1,4 @@
-function ref = generate_spline_curve_ref(loadedRef,order,fcmd)
+function ref = generate_spline_curve_ref(te, loadedRef,order,fcmd)
 %% スプライン曲線
 %loadedRef : あらかじめ決めておいたreference
 %fcmd : 入力引数にいれたシートを使うときは1,コマンドでシートを選びたいときは0にする
@@ -27,11 +27,44 @@ time =  (0:dt:dt*(pointN-1))';
 
 % x方向のみ
 % 生成する点を-1.5<point<1.5にする
-wp_xy = max(-1.5, min(1.5, [round(1*randn(pointN-1,1),3), zeros(pointN-1,1)]));
-wp_z  = ones(pointN-1,1);
-wp = [0, 0, 1;wp_xy, wp_z];
+% wp_xy = max(-1.5, min(1.5, [round(1*randn(pointN-1,1),3), zeros(pointN-1,1)]));
+% wp_z  = ones(pointN-1,1);
+% wp = [0, 0, 1;wp_xy, wp_z];
+% waypoints = [time, wp];
+
+%% 円旋回を原点から開始する
+tt = 0:0.1:te;
+pointN = length(tt);
+dt = 0.1;
+% initnum = 3;
+% inittime = 0:1:initnum;
+time =  (0:dt:dt*(pointN-1))';
+T = 20;
+tra = [cos(2*pi*(tt-0.5)'/T), sin(2*pi*(tt-0.5)'/T), 0 * tt' + 1];
+% middle_wp = [0, -0.5, 1;
+%             0.2, -0.75, 1;
+%             0.75, -0.5, 1;
+%             ];
+
+%% マウスによる入力
+figure
+figt = 0:0.1:50;
+x = cos(2*pi*figt/T);
+y = sin(2*pi*figt/T);  
+scatter(x,y); hold on;
+scatter(tra(1,1), tra(1,2), '*');
+daspect([1 1 1]);
+[x1,y1] = ginput;
+middle_wp = [x1, y1, ones(size(x1,1),1)];
+%%
+wp = [0, 0, 1; 
+      middle_wp;
+      tra(1:end-size(middle_wp,1)-1,:)];
 waypoints = [time, wp];
 
+
+
+%% ここから処理開始
     while 1
         if isManualSetting
             isUsed = 0;
@@ -229,15 +262,18 @@ waypoints = [time, wp];
         end
         while 1
             % isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
-            isSaved = 0;
+            isSaved = 1;
             if isSaved==0||isempty(isSaved)
                 disp("No save")
                 break
             elseif isSaved==1
-                T = table(time,posi);
-                filename = fullfile(pwd,"reference\functions\spline_curve\waypoint.xlsx");
-                sheetname = input("White sheet name : ","s");
-                writetable(T,filename,'Sheet',sheetname);
+                % T = table(time,posi);
+                % filename = fullfile(pwd,"reference\functions\spline_curve\waypoint.xlsx");
+                % sheetname = input("White sheet name : ","s");
+                % writetable(T,filename,'Sheet',sheetname);
+
+                
+                save('../Data/reference/exp_ref.mat', 'waypoints');
                 break
             end
         end
