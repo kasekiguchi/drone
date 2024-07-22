@@ -127,32 +127,32 @@ function [] = Graphplot(app)
     ax(6) = gca;
     title('Input torque of agent1','FontSize',12);
 
-    % x-y
-    subplot(row,line,7);
-    plot(data.p(1,:),data.p(2,:),'LineWidth',1); hold on; plot(data.pr(1,:), data.pr(2,:), '--'); hold off;
-    xlabel('x');
-    ylabel('y');
-    hold on
-    grid on
-    lgdtmp = {'$Estimator$','$Reference$'};
-    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    lgd.NumColumns = columnomber;
-    ax(6) = gca;
-    title('x-y of agent1','FontSize',12);
-
-    % x-y-z
-    subplot(row,line,8);
-    plot3(data.p(1,:), data.p(2,:), data.p(3,:),'LineWidth',1); hold on; plot3(data.pr(1,:), data.pr(2,:), data.pr(3,:), '--'); hold off;
-    xlabel('x');
-    ylabel('y');
-    zlabel('z');
-    hold on
-    grid on
-    lgdtmp = {'$Estimator$','$Reference$'};
-    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    lgd.NumColumns = columnomber;
-    ax(6) = gca;
-    title('x-y-z of agent1','FontSize',12);
+    % % x-y
+    % subplot(row,line,7);
+    % plot(data.p(1,:),data.p(2,:),'LineWidth',1); hold on; plot(data.pr(1,:), data.pr(2,:), '--'); hold off;
+    % xlabel('x');
+    % ylabel('y');
+    % hold on
+    % grid on
+    % lgdtmp = {'$Estimator$','$Reference$'};
+    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    % lgd.NumColumns = columnomber;
+    % ax(6) = gca;
+    % title('x-y of agent1','FontSize',12);
+    % 
+    % % x-y-z
+    % subplot(row,line,8);
+    % plot3(data.p(1,:), data.p(2,:), data.p(3,:),'LineWidth',1); hold on; plot3(data.pr(1,:), data.pr(2,:), data.pr(3,:), '--'); hold off;
+    % xlabel('x');
+    % ylabel('y');
+    % zlabel('z');
+    % hold on
+    % grid on
+    % lgdtmp = {'$Estimator$','$Reference$'};
+    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    % lgd.NumColumns = columnomber;
+    % ax(6) = gca;
+    % title('x-y-z of agent1','FontSize',12);
     
     fontSize = 14; %軸の文字の大きさの設定
     set(ax,'FontSize',fontSize);
