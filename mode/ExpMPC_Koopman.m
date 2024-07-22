@@ -83,9 +83,9 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename));
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename));
 fig.main_figure();
-fig.make_mpc_plot();
+% fig.make_mpc_plot();
 % fig.main_animation();
 % fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
 
