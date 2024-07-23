@@ -53,6 +53,7 @@ function result = controller_do(varargin)
 end
 
 function post(app)
+close all;
 % app.logger.plot({1, "p1-p2-p3", "e"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
@@ -82,8 +83,9 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename));
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename));
 fig.main_figure();
+% fig.make_mpc_plot();
 % fig.main_animation();
 % fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
 

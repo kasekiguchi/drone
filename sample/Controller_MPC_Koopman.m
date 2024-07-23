@@ -14,6 +14,7 @@ function Controller = Controller_MPC_Koopman(dt)
     load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
     % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
     % load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
+    % load("2024-07-14_Exp_KiyamaX20_code00_saddle.mat", "est"); % X方向に20個データ増やした版
 
     try
         ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
@@ -37,7 +38,7 @@ function Controller = Controller_MPC_Koopman(dt)
     Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([10; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み
+    Controller_param.weight.QW = diag([15; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;

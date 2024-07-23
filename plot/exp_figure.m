@@ -47,8 +47,9 @@ flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
 phase = 1; % 1:flight, 2:all
 
 fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename));
+% fig = fig.main_animation();
 % fig = fig.main_figure();
-fig = fig.make_mpc_plot();
+% fig = fig.make_mpc_plot();
 
 % [x, xr] = fig.main_mpc('HL', [-1 1; -2 2; 0 1.1]);
 % app = app.logger, app.fExp の構造体を作ればよい

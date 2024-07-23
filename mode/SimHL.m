@@ -33,7 +33,7 @@ agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
 
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか)
-agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,0));
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1));
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
 
