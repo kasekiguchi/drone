@@ -1,5 +1,5 @@
 %%
-% clear
+clear
 %%
 clc
 ts = 0; % initial time
@@ -47,33 +47,33 @@ agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent))
 % model_discrete: クープマンモデルを使用するうえでA,B行列の設定をする、discrete_linear_modelの観測量
 % 4入力：model_get_name = 4入力モデルに変更
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
-% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",20,"orig",[0;0;1],"size",[1,1,0.5]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;0.7],"g",[0;0;1],"h",[0.5;0;0.7],"j",[0;0;1]),5}); %P2Pリファレンス
 % agent.controller = MPC_CONTROLLER_KOOPMAN_fmincon(agent,Controller_MPC_Koopman(agent)); %最適化手法：SQP
 %% Sampleクラスもクープマンモデルをセットする
-agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt)); %最適化手法：QP
-
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt)); %最適化手法：QP
+agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
-% for i = 1:te/dt
-%     if i < 20 || rem(i, 10) == 0 end
-%     tic
-%     agent(1).sensor.do(time, 'f');
-%     agent(1).estimator.do(time, 'f');
-%     agent(1).reference.do(time, 'f');
-%     agent(1).controller.do(time, 'f');
-%     agent(1).plant.do(time, 'f');
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     %pause(1)
-%     all = toc
-% end
-% %%
-% logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+for i = 1:te/dt
+    if i < 20 || rem(i, 10) == 0 end
+    tic
+    agent(1).sensor.do(time, 'f');
+    agent(1).estimator.do(time, 'f');
+    agent(1).reference.do(time, 'f');
+    agent(1).controller.do(time, 'f');
+    agent(1).plant.do(time, 'f');
+    logger.logging(time, 'f', agent);
+    time.t = time.t + time.dt;
+    %pause(1)
+    all = toc
+end
+%%
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 
 %%
 function dfunc(app)
