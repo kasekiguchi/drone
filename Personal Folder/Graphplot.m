@@ -33,7 +33,7 @@ function [] = Graphplot(app)
     Fsize.lgd = 12; %凡例の大きさ調整
     size = figure;
     size.WindowState = 'maximized'; %表示するグラフを最大化
-    row = 3;
+    row = 2;
     line = 3;
     colororder(newcolors)
     
