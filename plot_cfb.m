@@ -18,8 +18,8 @@ ah0 = log.controller.ah0';
 dh0 = log.controller.dh0';
 % xlimit0=[min(h0),max(h0)];
 % ylimit0=[min(dh0),max(dh0)];
-xlimit0=[0,0.3/a(1)];
-ylimit0=[-0.2/a(1),0.3/a(1)];
+xlimit0=[0,0.3];
+ylimit0=[-0.3,0.3];
 
 
 h1 = log.controller.h1';
@@ -27,8 +27,8 @@ ah1 = log.controller.ah1';
 dh1 = log.controller.dh1';
 % xlimit1=[min(h1),max(h1)];
 % ylimit1=[min(dh1),max(dh1)];
-xlimit1=[0,0.3/a(2)];
-ylimit1=[-0.2/a(2),0.3/a(2)];
+xlimit1=[0,0.3];
+ylimit1=[-0.3,0.3];
 
 close all
 tiledlayout(2,3);
@@ -105,17 +105,17 @@ hold on
 xlabel("t")
 ylabel("input")
 legend("f","M1","M2","M3")
-ylim([-10,20])
+% ylim([-10,20])
 hold off
 
-figure("name",string(i));
-plot(t,pT)
-grid on
-hold on
-plot(t,wL,"LineStyle","--")
-plot(t,q,"LineStyle",":")
-legend(["pT1","pT2","pT3","wL1","wL2","wL3","q1","q2","q3"])
-xlabel("t")
-ylabel("h1dh1")
-hold off
-i = i+1;
+% figure("name",string(i));
+% plot(t,pT)
+% grid on
+% hold on
+% plot(t,wL,"LineStyle","--")
+% plot(t,q,"LineStyle",":")
+% legend(["pT1","pT2","pT3","wL1","wL2","wL3","q1","q2","q3"])
+% xlabel("t")
+% ylabel("h1dh1")
+% hold off
+% i = i+1;

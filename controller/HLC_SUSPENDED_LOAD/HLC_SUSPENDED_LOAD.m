@@ -78,9 +78,9 @@ classdef HLC_SUSPENDED_LOAD < handle
             tmp = uf + us;
             % control barrier funciton
                 fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
-                a=[5;10];
+                a=[10;4.8];
                 k = 5;
-                C=10;%deg
+                C=5;%deg
                 Cq =5;%機体角度
                 % [A,b] = conic_q_cfb(x,P,a,C*pi/180,Cq*pi/180);
                 % [A,b] = conic_cfb(x,P,a,C*pi/180);
