@@ -226,6 +226,7 @@ if isSaved
     set(gca,'children',newh) % Childrenプロパティ値の再設定(順番の入れ替え)
 end
 %%
+%{
 syms x
 % fe = 0.5*(exp(-x) - 1);
 fe = 100*(1/(exp(-5*x) + 1) - 0.5);
@@ -332,6 +333,7 @@ xlabel("t")
 ylabel("h1dh1")
 hold off
 i = i+1;
+%}
 %% functions
 function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, fF, startTime, endTime)
     tic 
