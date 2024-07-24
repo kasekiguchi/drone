@@ -34,6 +34,7 @@ classdef FIGURE_EXP
             obj.log = app.logger;
             obj.agent = app.logger.Data.agent;
             obj.data.fignum = 1;
+            obj.data.time_idx = varargin{1}.time_idx;
 
             obj = obj.decide_phase();
             obj = obj.store_data();
@@ -363,6 +364,12 @@ classdef FIGURE_EXP
                     obj.data.finish_idx = find(obj.log.Data.phase==0,1,'first')-1;
                     % takeoff_start = find(obj.log.Data.phase==116,1,'first');
                     % takeoff_finish = find(obj.log.Data.phase==116,1,'last');
+                case 3 % flight後任意の時間で切る
+                    obj.data.start_idx = find(obj.log.Data.phase==102,1,'first');
+                    obj.data.finish_idx = obj.data.start_idx+obj.data.time_idx;
+                    if obj.data.finish_idx > find(obj.log.Data.phase==102,1,'last')-1
+                        obj.data.finish_idx = find(obj.log.Data.phase==102,1,'last')-1;
+                    end
             end
         end
 
