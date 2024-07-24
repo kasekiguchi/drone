@@ -78,7 +78,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             tmp = uf + us;
             % control barrier funciton
                 fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
-                a=[100;100];
+                a=[5;10];
                 k = 5;
                 C=10;%deg
                 Cq =5;%機体角度
@@ -90,18 +90,19 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % [A,b] = conic_cfb_eul(x,P,a,C*pi/180);
                 % [A,b] = conic_cfb_sigmoid(x,P,a,k,C*pi/180);
                 % [A,b] = conic_cfb_log(x,P,a,C*pi/180);
-                [h1,h2]=conic_cfb_h1h2(x,obj.u_opt0,P,a,C*pi/180);
+                % [h1,h2]=conic_cfb_h1h2(x,obj.u_opt0,P,a,C*pi/180);
                 
                 
-                if h2 < 0
-                    am=[100;100];
-                    [A,b] = conic_cfb(x,P,am,C*pi/180);
-                else
-                    aM=[100;100];
-                    [A,b] = conic_cfb(x,P,aM,C*pi/180);
-
-                % [A,b] = conic_cfb_sigmoid(x,P,aM,k,C*pi/180);
-                end
+                % if h2 < 0
+                %     am=[100;10];
+                %     [A,b] = conic_cfb(x,P,am,C*pi/180);
+                % else
+                %     aM=[100;10];
+                %     [A,b] = conic_cfb(x,P,aM,C*pi/180);
+                % 
+                % % [A,b] = conic_cfb_sigmoid(x,P,aM,k,C*pi/180);
+                % end
+                [A,b] = conic_cfb(x,P,a,C*pi/180);
                 tmp_opt = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
                 % obj.u_opt0 = 10;
                 obj.u_opt0 = tmp_opt;
@@ -114,7 +115,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % wL = model.state.wL
                 % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0;
                 % [h1,h2] = conic_q_cfb_h1h2(x,tmp_opt,P,a,C*pi/180,Cq*pi/180);
-                % [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
+                [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_x3_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_eul_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_sigumoid_h1h2(x,tmp_opt,P,a,k,C*pi/180);
@@ -124,18 +125,22 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % [ERb0,EL] = RodriguesQuaternion(model.state.getq('4')); 
                 % h0=-pT(3)-cos(C*pi/180)+(ERb0*[0;0;1])'*[0;0;1] - cos(Cq*pi/180);
                 h0=-pT(3)-cos(C*pi/180);
-                if h2<0
-                    a_h0 = am(1)*h0;
-                else
-                    a_h0 = aM(1)*h0;
-                end
+
+                % if h2<0
+                %     a_h0 = am(1)*h0;
+                % else
+                %     a_h0 = aM(1)*h0;
+                % end
+                % dh0 = h1 - a_h0;
+                % if h2<0
+                %     a_h1 = am(2)*h1;
+                % else
+                %     a_h1 = aM(2)*h1;
+                % end
+                
+                a_h0 = a(1)*h0;
                 dh0 = h1 - a_h0;
-                if h2<0
-                    a_h1 = am(2)*h1;
-                else
-                    a_h1 = aM(2)*h1;
-                end
-                % a_h1 = a(2)*h1;
+                a_h1 = a(2)*h1;
                 % a_h1 = a(2)*h1^3;
                 % a_h1 = a(2)*(1/(exp(-k*h1) + 1) - 0.5);
                 % a_h1 = a(2)*log(h1 +1);
@@ -150,6 +155,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.result.h1 = h1;
                 obj.result.ah1 = a_h1;
                 obj.result.dh1 =dh1;
+                obj.result.a =a;
 
                 
             obj.result.input = tmp;

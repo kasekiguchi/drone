@@ -20,11 +20,11 @@ endTime = 1000;%1E3;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
-for i = 1:length(logger.target)
-    loggers{i,1} = simplifyLoggerForCoop(logger,i);
-end
-droneID = logger.target(1:end-1);
-% droneID = 1:6;
+% for i = 1:length(logger.target)
+%     loggers{i,1} = simplifyLoggerForCoop(logger,i);
+% end
+% droneID = logger.target(1:end-1);
+droneID = 1:length(loggers)-1;
 lgnd.payload=["payload","split payload" + droneID];
 lgnd.drone="drone" + droneID;
 %========================================================================
@@ -59,7 +59,7 @@ lgnd.drone="drone" + droneID;
 % multiFigure
 
 nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],["attitude0"	"t_qroll0"	"t_qpitch0" "t_qyaw0"],["velocity0"	"t_vx0"	"t_vy0"	"t_vz0"	],["angular_velocity0"	"t_wroll0" "t_wpitch0"	"t_wyaw0"],...
-    "three_D0",["t_p" "t_x" "t_y"	"t_z"],["error"	"t_errx"	"t_erry"	"t_errz"],["attitude"	"t_qroll"	"t_qpitch"	"t_qyaw"],["velocity"	"t_vx"	"t_vy" "t_vz"],["angular_velocity"	"t_wroll"	"t_wpitch"	"t_wyaw"],...
+    "three_D0",["t_p" "t_x" "t_y"	"t_z"],["error"	"t_errx"	"t_erry"	"t_errz"],["attitude"	"t_qroll"	"t_qpitch"	"t_qyaw"],"attitude"+droneID,["velocity"	"t_vx"	"t_vy" "t_vz"],["angular_velocity"	"t_wroll"	"t_wpitch"	"t_wyaw"],...
     "three_D",["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"input",["mAll","mL"],"DronePayload"+droneID,"linkDir"+droneID,"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
 multiFigure.layout = cell(1,length(nM));
 for i = 1:length(nM)
@@ -225,115 +225,6 @@ if isSaved
     % legend([newh(1),newh(2)],h(1).DisplayName,h(2).DisplayName);
     set(gca,'children',newh) % Childrenプロパティ値の再設定(順番の入れ替え)
 end
-%%
-%{
-syms x
-% fe = 0.5*(exp(-x) - 1);
-fe = 100*(1/(exp(-5*x) + 1) - 0.5);
-fplot(fe)
-xlim([-1,1])
-grid on
-%%
-log = simplifyLoggerForCoop(gui.logger,1);
-
-q = log.estimator.q;
-pT = log.estimator.pT;
-wL = log.estimator.wL;
-
-t = log.t;
-theta = log.controller.theta';
-C = log.controller.C';
-
-h0 = log.controller.h0';
-ah0 = log.controller.ah0';
-dh0 = log.controller.dh0';
-xlimit0=[min(h0),max(h0)];
-ylimit0=[min(dh0),max(dh0)];
-% xlimit0=[-max(h0),max(h0)];
-% ylimit0=[-max(dh0),max(dh0)];
-
-
-h1 = log.controller.h1';
-ah1 = log.controller.ah1';
-dh1 = log.controller.dh1';
-xlimit1=[min(h1),max(h1)];
-ylimit1=[min(dh1),max(dh1)];
-% xlimit1=[-max(h1),max(h1)];
-% ylimit1=[-max(dh1),max(dh1)];
-
-close all
-i=1;
-figure("name",string(i));
-% figure(i);
-plot(t,theta);
-grid on
-hold on
-plot(t,C);
-xlabel("t")
-ylabel("theta[deg]")
-hold off
-i=i+1;
-
-figure("name",string(i));
-plot(h0,dh0)
-grid on
-hold on
-% plot(xlimit0,xlimit0*-100)
-plot(h0,-ah0)
-xlim(xlimit0)
-ylim(ylimit0)
-% daspect([1 1 1])
-xlabel("h0")
-ylabel("dh0")
-hold off
-i=i+1;
-
-figure("name",string(i));
-plot(h1,dh1)
-grid on
-hold on
-plot(h1,-ah1)
-xlim(xlimit1)
-ylim(ylimit1)
-% daspect([1 1 1])
-xlabel("h1")
-ylabel("dh1")
-hold off
-i = i+1;
-
-
-figure("name",string(i));
-plot(t,[h0,dh0])
-grid on
-hold on
-xlabel("t")
-ylabel("h0dh0")
-legend("h0","dh0")
-hold off
-i = i+1;
-
-figure("name",string(i));
-plot(t,[h1,dh1])
-grid on
-hold on
-xlabel("t")
-ylabel("h1dh1")
-legend("h1","dh1")
-hold off
-i = i+1;
-
-figure("name",string(i));
-plot(t,pT)
-grid on
-hold on
-plot(t,wL,"LineStyle","--")
-plot(t,q,"LineStyle",":")
-legend(["pT1","pT2","pT3","wL1","wL2","wL3","q1","q2","q3"])
-xlabel("t")
-ylabel("h1dh1")
-hold off
-i = i+1;
-%}
 %% functions
 function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, fF, startTime, endTime)
     tic 
@@ -618,6 +509,9 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             allData.("linkDir"+string(i)) = {struct('x',{t2},'y',{{linki(:,:,i)'}}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~Link$","$y~Link$","$z~Link$"] ,i),add_option([],option,addingContents)};
             % allData.("linkDir"+string(i)) = {struct('x',{[t2,t2,t2]},'y',{[{muid_units(:,:,i)'},{linki(:,:,i)'},{epTi{i}'}]}), struct('x','time (s)','y','Unit vector'),combineLgntI(["$x~\mu d$","$y~\mu d$","$z~\mu d$","$x~Link$","$y~Link$","$z~Link$","$x~pT$","$y~pT$","$z~pT$"] ,i),add_option([],option,addingContents)};
             allData.("mui"+string(i)) = {struct('x',{t2},'y',{{mui{i}'}}), struct('x','time (s)','y','payload'+string(i)+' tension (N)'),["$x$","$y$","$z$"],add_option([],option,addingContents)};
+            
+            % allData.attitude = {struct('x',{time2},'y',{eqi}), struct('x','time (s)','y','attitude (rad)'), LgndCrt(["$roll$","$pitch$","$yaw$"],Ci),add_option([],option,addingContents)};
+            allData.("attitude"+string(i)) = {struct('x',{t2},'y',{{eqi{i}'}}), struct('x','time (s)','y','drone'+string(i) +' attitude (rad)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
             allData.("ai"+string(i)) = {struct('x',{t2},'y',{{ai{i}'}}), struct('x','time (s)','y','payload'+string(i) +' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("aidrn"+string(i)) = {struct('x',{t2},'y',{{aidrn{i}'}}), struct('x','time (s)','y','drone'+string(i)+' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("dwi"+string(i)) = {struct('x',{{time2{i}'}},'y',{{dwi{i}'}}), struct('x','time (s)','y','link'+string(i)+' angular acceleration (rad/$\mathrm{s^2}$)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
