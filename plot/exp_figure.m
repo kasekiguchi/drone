@@ -20,8 +20,8 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '20240627_KMPC_hovering_H20_mex';
 
-filename = '0717_KMPC_hovering_H20_gain400_pretty_good';
-% filename = 'test_HLMPC_0707_7';
+filename = '0722_KMPC_X20_hovering_H10_dt008';
+% filename = '0722_KMPC_hovering_H10_dt008_comparison';
 loadfile = strcat("Data/", filename, ".mat");
 % load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる
@@ -40,14 +40,14 @@ savefolder = '\Data\Exp_figure_image\';
 close all
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
-flg.animation_save = 0;
-flg.animation = 0;
+flg.animation_save = 1;
+flg.animation = 1;
 flg.timerange = 1;
 flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
 phase = 1; % 1:flight, 2:all
 
 fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename));
-% fig = fig.main_animation();
+fig.main_animation();
 % fig = fig.main_figure();
 % fig = fig.make_mpc_plot();
 

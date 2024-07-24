@@ -247,8 +247,8 @@ classdef FIGURE_EXP
             logger.r = obj.data.Ref(1:3,:)';
             logger.t = obj.data.logt';
             drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
-            if obj.flg.animation_save; anipara = struct("target",1,"opt_plot",[],"mp4",obj.flg.animation_save);
-            else;                      anipara = struct("target",1,"opt_plot",[]);
+            if obj.flg.animation_save; anipara = struct("target",1,"opt_plot",[],"realtime",1,"gif",obj.flg.animation_save);
+            else;                      anipara = struct("target",1,"opt_plot",[],"realtime",1);
             end
             drone.animation(logger, anipara);
         end

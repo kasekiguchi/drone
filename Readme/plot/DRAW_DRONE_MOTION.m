@@ -265,6 +265,9 @@ classdef DRAW_DRONE_MOTION
         if ~isvalid(obj.frame)
           obj=obj.gen_frame("target",param.target,"ax" ,ax);
         end
+        % 時間
+        if i > 1; delete(f1); end
+        f1 = text(ax, 0, 0.9, 1, strcat('t:',num2str(t(i), 5)), 'Units', 'normalized');
         obj.draw(param.target,p(i,:,param.target),Q(i,:,param.target),u(i,:,param.target));
         if isfield(param,'realtime')
           delta = toc(tRealtime);
