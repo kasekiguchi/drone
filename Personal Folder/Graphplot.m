@@ -85,20 +85,35 @@ function [] = Graphplot(app)
     hold off
     title('Velocity v of agent1');
     
-    % 角速度
-    subplot(row, line, 4);
-    plot(data.t, data.w(:,:),'LineWidth',1.2);
+    % % 角速度
+    % subplot(row, line, 4);
+    % plot(data.t, data.w(:,:),'LineWidth',1.2);
+    % hold on
+    % xlabel('Time [s]');
+    % ylabel('w');
+    % grid on
+    % xlim([data.t(1) data.t(end)])
+    % lgdtmp = {'$\omega_{1 e}$','$\omega_{2 e}$','$\omega_{3 e}$'};
+    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    % lgd.NumColumns = columnomber;
+    % ax(4) = gca;
+    % hold off
+    % title('Angular velocity w of agent1');
+
+        % x-y
+    subplot(row,line,4);
+    plot(data.p(1,:),data.p(2,:),'LineWidth',1); hold on; plot(data.pr(1,:), data.pr(2,:), '--'); hold off;
+    xlabel('x');
+    ylabel('y');
+    xlim([-3.0,3.0]);
+    ylim([-3.0,3.0]);
     hold on
-    xlabel('Time [s]');
-    ylabel('w');
     grid on
-    xlim([data.t(1) data.t(end)])
-    lgdtmp = {'$\omega_{1 e}$','$\omega_{2 e}$','$\omega_{3 e}$'};
+    lgdtmp = {'$Estimator$','$Reference$'};
     lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     lgd.NumColumns = columnomber;
     ax(4) = gca;
-    hold off
-    title('Angular velocity w of agent1');
+    title('x-y of agent1','FontSize',12);
 
     % 総入力
     subplot(row,line,5);
@@ -137,9 +152,9 @@ function [] = Graphplot(app)
     % lgdtmp = {'$Estimator$','$Reference$'};
     % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     % lgd.NumColumns = columnomber;
-    % ax(6) = gca;
+    % ax(7) = gca;
     % title('x-y of agent1','FontSize',12);
-    % 
+    
     % % x-y-z
     % subplot(row,line,8);
     % plot3(data.p(1,:), data.p(2,:), data.p(3,:),'LineWidth',1); hold on; plot3(data.pr(1,:), data.pr(2,:), data.pr(3,:), '--'); hold off;
@@ -151,7 +166,7 @@ function [] = Graphplot(app)
     % lgdtmp = {'$Estimator$','$Reference$'};
     % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
     % lgd.NumColumns = columnomber;
-    % ax(6) = gca;
+    % ax(8) = gca;
     % title('x-y-z of agent1','FontSize',12);
     
     fontSize = 14; %軸の文字の大きさの設定
