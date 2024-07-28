@@ -3,11 +3,11 @@
 % resultPath = "C:\Users\81809\OneDrive\デスクトップ\results";
 % winopen(resultPath)
 %filelist.nameでファイルのリストを表示
-% filelist = dir('C:\Users\81809\OneDrive\デスクトップ\results\sim\2024_0201_23TADR_sim_modelError\loggers\*.mat');
-% if ~exist(resultPath,"dir")
-%     addpath(genpath(resultPath))
-%     cd(resultPath)
-% end
+filelist = dir('C:\Users\81809\OneDrive\デスクトップ\results\sim\2024_0201_23TADR_sim_modelError\loggers\*.mat');
+if ~exist(resultPath,"dir")
+    addpath(genpath(resultPath))
+    cd(resultPath)
+end
 %%
 close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
