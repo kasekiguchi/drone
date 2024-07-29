@@ -11,7 +11,7 @@ set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
 %load("sl600_xy_x20_hover_yokunai_Log(03-Jul-2024_20_06_56).mat");
-load("sl0708_600_253daen_Log(08-Jul-2024_19_11_22).mat");%
+load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
@@ -40,9 +40,9 @@ for i = flight_start_idx:flight_finish_idx
                 Agent.estimator.result{i}.state.q;
                 Agent.estimator.result{i}.state.v;
                 Agent.estimator.result{i}.state.w];
-    Road_est(:,i-flight_start_idx+1) = [Agent.estimator.result{i}.state.pL;
-                Agent.estimator.result{i}.state.vL;
-                Agent.estimator.result{i}.state.wL];
+    % Road_est(:,i-flight_start_idx+1) = [Agent.estimator.result{i}.state.pL;
+    %             Agent.estimator.result{i}.state.vL;
+    %             Agent.estimator.result{i}.state.wL];
     Ref(:,i-flight_start_idx+1) = [Agent.reference.result{i}.state.p];
 
     Input(:,i-flight_start_idx+1) = Agent.input{i};
