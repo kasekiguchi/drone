@@ -1,0 +1,46 @@
+# Produced by CVXGEN, 2024-07-23 04:29:25 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  n = 26 # states
+  m = 4  # inputs
+  state_n = 12 # drone state
+  H = 10 # horizon
+end
+
+parameters
+  ref (state_n)
+  A (state_n,state_n)
+  B1 (state_n,1)
+  B2 (state_n, 3)
+  C (state_n,state_n)
+  Q (state_n,state_n) psd
+  Q_f (state_n,state_n) psd
+  R1 (1,1) psd
+  R2 (3,3) psd
+  x[0] (state_n)
+end
+
+variables
+  x[t] (state_n), t=1..H+1
+  u_th[t] (1), t=0..H
+  u_tr[t] (3), t=0..H
+  #u[t] (m), t=0..H
+end
+
+minimize
+  #sum[t=0..H](quad(x[t]-ref, Q) + quad(u[t], R))
+  #sum[t=0..H](quad(x[t], Q) + quad(u[t], R))
+  sum[t=0..H](quad(x[t], Q) + quad(u_th[t], R1) + quad(u_tr[t], R2))
+subject to
+  #x[t+1] == A*x[t]+B*u[t], t=0..H
+  x[t+1] == A*x[t]+B1*u_th[t]+B2*u_tr[t], t=0..H
+  0 < u_th[t] < 10, t=0..H
+  -1 < u_tr[t] < 1, t=0..H
+end

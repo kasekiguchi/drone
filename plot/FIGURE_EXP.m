@@ -34,6 +34,8 @@ classdef FIGURE_EXP
             obj.log = app.logger;
             obj.agent = app.logger.Data.agent;
             obj.data.fignum = 1;
+            obj.data.time_idx = varargin{1}.time_idx;
+            obj.data.yrange = varargin{1}.yrange;
 
             obj = obj.decide_phase();
             obj = obj.store_data();
@@ -52,47 +54,53 @@ classdef FIGURE_EXP
             m = 2; n = 3;
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));end
             plot(obj.data.logt, obj.data.Est(1:3,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(1:3, :), '--', "LineWidth", 1.5); hold off;
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
-            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); 
+            ylim([-2 1.2])
             obj.data.fignum = obj.data.fignum+1;
 
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,2); end
             plot(obj.data.logt, obj.data.Est(4:6,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(4:6, :), '--', "LineWidth", 1.5); hold off;
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
-            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]);
+            ylim([-0.3 0.12])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end 
             obj.data.fignum = obj.data.fignum+1;
             
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,3); end
             plot(obj.data.logt, obj.data.Est(7:9,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(7:9, :), '--', "LineWidth", 1.5); hold off;
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.reference", "vy.reference", "vz.reference", "Location","best");
-            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); 
+            ylim([-0.5 0.2])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             obj.data.fignum = obj.data.fignum+1;
             
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,4); end
             plot(obj.data.logt, obj.data.Input(1,:), "LineWidth", 1.5);
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
-            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]);
+            ylim([5.7 5.9])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             ytickformat('%.1f');
             obj.data.fignum = obj.data.fignum+1;
             
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,5); end
             plot(obj.data.logt, obj.data.Input(2:4,:), "LineWidth", 1.5);
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Input (Torque)[N]"); legend("torque.roll", "torque.pitch", "torque.yaw","Location","best");
-            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+            grid on; xlim([obj.data.logt(1), obj.data.logt(end)]);
+            ylim([-0.1 0.1])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             ytickformat('%.3f');
             obj.data.fignum = obj.data.fignum+1;
             
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,6); end
             % calculation time
             plot(obj.data.logt(1:end-1), diff(calt), 'LineWidth', 1.5);
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-            ytickformat('%.3f');
+            ytickformat('%.3f'); xlim([0 inf]); grid on;
+            ylim([0 0.04])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             obj.data.fignum = obj.data.fignum+1;
             
             if m*n > 6
@@ -103,7 +111,8 @@ classdef FIGURE_EXP
                 plot(obj.data.logt, InnerInput); 
                 obj.background_color(-0.1, gca, obj.log.Data.phase); 
                 xlabel("Time [s]"); ylabel("Inner input"); legend("inner_input.roll", "inner_input.pitch", "inner_input.throttle", "inner_input.yaw","Location","best");
-                grid on; xlim([obj.data.logt(1), obj.data.logt(end)]); ylim([-inf inf]);
+                grid on; xlim([obj.data.logt(1), obj.data.logt(end)]);
+                ylim([-inf inf])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             elseif obj.flg.plotmode == 2
                 plot(obj.data.Est(1,:), obj.data.Est(2,:)); hold on; plot(obj.data.Est(1,1), obj.data.Est(2,1), '*', 'MarkerSize', 10); plot(obj.data.Est(1,end), obj.data.Est(2,end), '*', 'MarkerSize', 10); hold off;
                 xlabel('$$x$$', 'Interpreter', 'latex'); ylabel('$$y$$', 'Interpreter', 'latex');
@@ -247,8 +256,8 @@ classdef FIGURE_EXP
             logger.r = obj.data.Ref(1:3,:)';
             logger.t = obj.data.logt';
             drone = DRAW_DRONE_MOTION(logger,"target",1,"opt_plot",[]);
-            if obj.flg.animation_save; anipara = struct("target",1,"opt_plot",[],"mp4",obj.flg.animation_save);
-            else;                      anipara = struct("target",1,"opt_plot",[]);
+            if obj.flg.animation_save; anipara = struct("target",1,"opt_plot",[],"realtime",1,"gif",obj.flg.animation_save);
+            else;                      anipara = struct("target",1,"opt_plot",[],"realtime",1);
             end
             drone.animation(logger, anipara);
         end
@@ -265,20 +274,20 @@ classdef FIGURE_EXP
             subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));
             plot(obj.data.logt, obj.data.exitflag); grid on;
             xlim([0 inf]);
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             ylabel('Exitflag value');
 
             subplot(m,n,2);
             plot(obj.data.logt, -obj.data.fval); grid on;
             xlim([0 inf])
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             ylabel('Evaluation value');
 
             if obj.phase == 1
             subplot(m,n,3);
             plot(obj.data.logt, obj.data.calt); grid on;
             xlim([0 inf]); ylim([0 0.0157531]);
-            obj.background_color(-0.1, gca, obj.log.Data.phase); 
+            % obj.background_color(-0.1, gca, obj.log.Data.phase); 
             % ytickformat('%.3f');
             ylabel('Calculation time [s]');
             end
@@ -363,6 +372,12 @@ classdef FIGURE_EXP
                     obj.data.finish_idx = find(obj.log.Data.phase==0,1,'first')-1;
                     % takeoff_start = find(obj.log.Data.phase==116,1,'first');
                     % takeoff_finish = find(obj.log.Data.phase==116,1,'last');
+                case 3 % flight後任意の時間で切る
+                    obj.data.start_idx = find(obj.log.Data.phase==102,1,'first');
+                    obj.data.finish_idx = obj.data.start_idx+obj.data.time_idx;
+                    if obj.data.finish_idx > find(obj.log.Data.phase==102,1,'last')-1
+                        obj.data.finish_idx = find(obj.log.Data.phase==102,1,'last')-1;
+                    end
             end
         end
 
