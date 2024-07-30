@@ -11,8 +11,8 @@ function [var, fval, exitflag] = quad_drone(param)
     % opts = optimoptions(opts,'ConstraintTolerance',1.e-5);     % 制約違反に対する許容誤差
     
     % Calculate the coefficient matrix of QP
-    % Xc = quaternions_all(param.current_state); % for Koopman
-    Xc = param.current_state; % for HL
+    Xc = quaternions_all(param.current_state); % for Koopman
+    % Xc = param.current_state; % for HL
 
     r  = param.ref(1:12,:);
     r = r(:); %目標値、列ベクトルに変換

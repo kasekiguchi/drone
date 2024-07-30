@@ -2,7 +2,7 @@ function Controller = Controller_MPC_Koopman(dt)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
-    Controller_param.dt = 0.08; % MPCステップ幅 0.07
+    Controller_param.dt = 0.04; % MPCステップ幅 0.07
     Controller_param.H = 10 %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
@@ -11,11 +11,13 @@ function Controller = Controller_MPC_Koopman(dt)
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
     % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
     % load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
-    % load('2024-07-14_Exp_KiyamaX20_code00_saddle.mat', 'est');
-    load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est');
+
+    %% 今はこっちの検証
+    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+    % load('2024-07-14_Exp_KiyamaX20_code00_saddle.mat', 'est'); % x方向増加データ
+    % load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
     try
         ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
         args = d2d(ssmodel, Controller_param.dt);

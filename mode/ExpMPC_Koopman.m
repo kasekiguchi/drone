@@ -36,6 +36,7 @@ agent.controller.do = @controller_do;
 
 run("ExpBase");
 
+%% function
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
     if varargin{2} == 'a'
@@ -83,7 +84,8 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename));
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename,'time_idx',[],'yrange',[]));
+% struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange)
 fig.main_figure();
 % fig.make_mpc_plot();
 % fig.main_animation();
@@ -97,6 +99,13 @@ fig.main_figure();
 % controller_time = cell2mat(arrayfun(@(N) app.logger.Data.agent.controller.result{N}.mpc.calt,...
 %                             find(app.logger.Data.phase(2:end)==97,1,'first')+1:find(app.logger.Data.phase(2:end)==97, 1, 'last')+1,'UniformOutput',false));
 % plot(logt, controller_time);
+
+%% other parts
+disp(['P  ',num2str(diag(app.agent.controller.mpc.weight(1:3,1:3))')])
+disp(['Q  ',num2str(diag(app.agent.controller.mpc.weight(4:6,4:6))')])
+disp(['V  ',num2str(diag(app.agent.controller.mpc.weight(7:9,7:9))')])
+disp(['W  ',num2str(diag(app.agent.controller.mpc.weight(10:12,10:12))')])
+disp(['R  ',num2str(diag(app.agent.controller.mpc.weightR)')])
 end
 
 % GUI上に現在位置（推定値）を表示する
