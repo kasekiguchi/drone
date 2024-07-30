@@ -11,10 +11,11 @@ function Controller = Controller_MPC_Koopman(dt)
 
     %% Koopman
     % modeファイルとファイル名をそろえる
-    load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
+    % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
     % load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle","est");
     % load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
-
+    % load('2024-07-14_Exp_KiyamaX20_code00_saddle.mat', 'est');
+    load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est');
     try
         ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
         args = d2d(ssmodel, Controller_param.dt);

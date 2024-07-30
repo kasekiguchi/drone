@@ -13,12 +13,12 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
-flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
+flg.confirm_ref = 0; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
-flg.figtype = 1;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
+flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
 startTime = 3.9; % flight後何秒からの推定精度検証を行うか saddle:3.39
 stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
@@ -36,7 +36,7 @@ mode.training_data = 'Kiyama';
 ref_tra = 'saddle'; 
 loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 
-% loadfilename{1} = '2024-07-14_Exp_Kiyama_code00_20times_saddle';
+loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_saddle';
 % loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_20times_saddle';
 % loadfilename{1} = '2024-07-14_Exp_Kiyama_code08_fromVel_10saddle';
 

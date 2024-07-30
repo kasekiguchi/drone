@@ -169,7 +169,7 @@ z = [common_z; isobe_z]; % 00
 % z = [common_z; diff_param_z]; % 05
 % z = [common_2z; isobe_z]; % 06
 % z = [isobe_z; common_z]; % 07
-% z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z]; % 08
+z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z]; % 08
 
 
 end
