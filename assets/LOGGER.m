@@ -389,7 +389,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
         if strcmp(variable(j), 'state')
 
           for k = 1:length(data)
-            ndata(k, :, :) = data(k).(variable(j + 1))(1:data(k).num_list(strcmp(data(k).list, variable(j + 1))), :);
+            ndata(k, :, :) = data(k).(variable(j + 1));
           end
 
           data = ndata;
