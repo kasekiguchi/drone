@@ -21,7 +21,7 @@ disp("Loading data...");
 % filename = '20240627_KMPC_hovering_H20_mex';
 
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
-filename = '0722_KMPC_hovering_H10_dt008_comparison';
+filename = '0722_KMPC_X20_hovering_H10_dt008';
 loadfile = strcat("Data/", filename, ".mat");
 % load(loadfile);
 log = LOGGER(loadfile); % loggerの形で収納できる
@@ -38,18 +38,21 @@ savename = strcat(filename, '_all');
 savefolder = '\Data\Exp_figure_image\';
 %%
 close all
+clear fig
 flg.figtype = 0; % 0:subplot
+% flg.ylim = 1;
 flg.savefig = 0;
-flg.animation_save = 1;
-flg.animation = 1;
+flg.animation_save = 0;
+flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
-phase = 3; % 1:flight, 2:all, 3:flight後何ステップで切るか
+phase = 1; % 1:flight, 2:all, 3:flight後何ステップで切るか
 time_idx = 1500;
-fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx));
-fig.main_animation();
-% fig = fig.main_figure();
-% fig = fig.make_mpc_plot();
+yrange = [-2 1];
+fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange));
+% fig.main_animation();
+fig = fig.main_figure();
+fig = fig.make_mpc_plot();
 
 % [x, xr] = fig.main_mpc('HL', [-1 1; -2 2; 0 1.1]);
 % app = app.logger, app.fExp の構造体を作ればよい
