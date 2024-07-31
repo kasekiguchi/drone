@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 100;
+te = 80;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -53,11 +53,19 @@ end
 
 agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
 agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
+
+% agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
+agent(1).estimator = EKF(agent(1), Estimator_EKF(agent(1),dt,MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype+"eul")), ["p","Q","qi","Qi"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
-agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
+%実機実験の時
+% agent(1).sensor = MOTIVE(agent(1), Sensor_Motive(1,0, motive));
+% agent(1).sensor.forload = FOR_LOAD(agent, Estimator_Suspended_Load([1,2]));%[1,1+N]%実機用for_loadで機体と牽引物の位置、姿勢をstateクラスに格納
+
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
 agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",8,"orig",[0;0;1],"size",[1,1,0.5]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
+
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
 for i = 2:N+1
@@ -123,7 +131,7 @@ for j = 1:tn
                 w_agent = load.Oi(3*i-5:3*i-3,1);
 
                 %agent(i).estimator.result.state.set_stateを使った方が正しい？
-                %プラントをそのまま使っている
+                %プラントをそのまま使っている複数モデルの状態推定する
                 agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
                 agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
                 agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
@@ -157,10 +165,10 @@ run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
-% mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
-mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
-mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
+mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
+mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
+% mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
+% mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 
 % 
 % %%

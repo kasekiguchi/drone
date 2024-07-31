@@ -78,12 +78,16 @@ classdef HLC_SUSPENDED_LOAD < handle
             tmp = uf + us;
             % control barrier funciton
                 fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
-                a=[10;4.8];
+                a=[10;1];
                 k = 5;
                 C=5;%deg
-                Cq =5;%機体角度
-                % [A,b] = conic_q_cfb(x,P,a,C*pi/180,Cq*pi/180);
-                % [A,b] = conic_cfb(x,P,a,C*pi/180);
+                e3 = [0;0;1];
+                
+                % [ERb0,~] = RodriguesQuaternion(model.state.getq('4'));
+                % deltaTheta = acos((ERb0*e3)'*e3)*180/pi
+                % C = C - deltaTheta;
+                % [A,b] = conic_q_cfb(x,P,a,C*pi/180);
+                [A,b] = conic_cfb(x,P,a,C*pi/180);
                
                 % [A,b] = conic_cfb_x3(x,P,a,C*pi/180);
                 % x = [model.state.q;model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
@@ -102,7 +106,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % 
                 % % [A,b] = conic_cfb_sigmoid(x,P,aM,k,C*pi/180);
                 % end
-                [A,b] = conic_cfb(x,P,a,C*pi/180);
+                % [A,b] = conic_cfb(x,P,a,C*pi/180);
                 tmp_opt = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
                 % obj.u_opt0 = 10;
                 obj.u_opt0 = tmp_opt;
@@ -114,7 +118,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 pT = model.state.pT;
                 % wL = model.state.wL
                 % h1 = wL(2)*pT(1)-wL(1)*pT(2)+1*h0;
-                % [h1,h2] = conic_q_cfb_h1h2(x,tmp_opt,P,a,C*pi/180,Cq*pi/180);
+                % [h1,h2] = conic_q_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
                 [h1,h2]=conic_cfb_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_x3_h1h2(x,tmp_opt,P,a,C*pi/180);
                 % [h1,h2]=conic_cfb_eul_h1h2(x,tmp_opt,P,a,C*pi/180);
@@ -122,8 +126,8 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % [h1,h2]=conic_cfb_log_h1h2(x,tmp_opt,P,a,C*pi/180);
                 theta = acos(-[0,0,1]*pT)*180/pi;
 
-                % [ERb0,EL] = RodriguesQuaternion(model.state.getq('4')); 
-                % h0=-pT(3)-cos(C*pi/180)+(ERb0*[0;0;1])'*[0;0;1] - cos(Cq*pi/180);
+                % [ERb0,~] = RodriguesQuaternion(model.state.getq('4')); 
+                % h0=-pT'*(ERb0*e3) - cos(C*pi/180);
                 h0=-pT(3)-cos(C*pi/180);
 
                 % if h2<0

@@ -5,13 +5,15 @@ log = simplifyLoggerForCoop(gui.logger,1);
 q = log.estimator.q;
 pT = log.estimator.pT;
 wL = log.estimator.wL;
+v = log.estimator.vL;
+p = log.estimator.pL;
 
 t = log.t;
 theta = log.controller.theta';
 C = log.controller.C';
 u = log.controller.input;
 a = log.controller.a(:,1);
-ax = -10:10;
+ax = -1:0.001:1;
 
 h0 = log.controller.h0';
 ah0 = log.controller.ah0';
@@ -65,7 +67,7 @@ nexttile
 plot(h1,dh1)
 grid on
 hold on
-% plot(h1,-ah1)
+% plot(ax,-a(2)*ax.^3)
 plot(ax,-a(2)*ax)
 xlim(xlimit1)
 ylim(ylimit1)
@@ -108,14 +110,25 @@ legend("f","M1","M2","M3")
 % ylim([-10,20])
 hold off
 
-% figure("name",string(i));
-% plot(t,pT)
-% grid on
-% hold on
-% plot(t,wL,"LineStyle","--")
-% plot(t,q,"LineStyle",":")
-% legend(["pT1","pT2","pT3","wL1","wL2","wL3","q1","q2","q3"])
-% xlabel("t")
-% ylabel("h1dh1")
-% hold off
-% i = i+1;
+figure("name",string(i));
+plot(t,pT)
+grid on
+hold on
+plot(t,wL,"LineStyle","--")
+plot(t,q,"LineStyle",":")
+legend(["pT1","pT2","pT3","wL1","wL2","wL3","q1","q2","q3"])
+xlabel("t")
+ylabel("h1dh1")
+hold off
+i = i+1;
+
+figure("name",string(i));
+plot(t,p)
+grid on
+hold on
+plot(t,v,"LineStyle","--")
+legend(["p1","p2","p3","v1","v2","v3"])
+xlabel("t")
+ylabel("p,v")
+hold off
+i = i+1;
