@@ -50,8 +50,12 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.H);
-            obj.weight  = blkdiag(obj.param.weight.P, obj.param.weight.V, obj.param.weight.QW);
-            obj.weightF = blkdiag(obj.param.weight.Pf,obj.param.weight.Vf,obj.param.weight.QWf);
+            % obj.weight  = blkdiag(obj.param.weight.P, obj.param.weight.V, obj.param.weight.QW);
+            % obj.weightF = blkdiag(obj.param.weight.Pf,obj.param.weight.Vf,obj.param.weight.QWf);
+
+            obj.weight = blkdiag(obj.param.weight.P, obj.param.weight.Q, obj.param.weight.V, obj.param.weight.W);
+            obj.weightF = blkdiag(obj.param.weight.Pf, obj.param.weight.Qf, obj.param.weight.Vf, obj.param.weight.Wf);
+
             obj.weightR = obj.param.weight.R;
 
             %% QP change_equationの共通項をあらかじめ計算

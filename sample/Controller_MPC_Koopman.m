@@ -17,7 +17,7 @@ function Controller = Controller_MPC_Koopman(dt)
     %% 今はこっちの検証
     % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
     % load('2024-07-14_Exp_KiyamaX20_code00_saddle.mat', 'est'); % x方向増加データ
-    % load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
+    load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
     try
         ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
         args = d2d(ssmodel, Controller_param.dt);
@@ -37,14 +37,16 @@ function Controller = Controller_MPC_Koopman(dt)
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
-    Controller_param.weight.V = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
     % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
-    Controller_param.weight.QW = diag([15; 1; 1; 1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    Controller_param.weight.V = diag([15; 1; 1]); % 15良い気がする
+    Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;
-    Controller_param.weight.QWf = Controller_param.weight.QW;
+    Controller_param.weight.Qf = Controller_param.weight.Q;
+    Controller_param.weight.Wf = Controller_param.weight.W;
 
     %% 4inputs
     if torque == 1
