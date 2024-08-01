@@ -14,6 +14,8 @@ if contains(type,"eul")
   Setting.method = get_model_name("Cooperative_Load_eul",N); % model dynamicsの実体名
   % Setting.num_list = [3,3,3,3,3*N,3*N,3*N,3*N,3,3];
   Setting.num_list = [3,3,3,3,3*N,3*N,3*N,3*N];
+  initial.Q = Quat2Eul(initial.Q);
+  initial.Qi = reshape(cell2mat(arrayfun(@(i) Quat2Eul(initial.Qi(4*i-3:4*i)),1:N,'UniformOutput',false)),[],1);
   %Setting.projection = @(x) [x(1:12);x(13:15)/vecnorm(x(13:15));x(16:end)];
 else
   Setting.dim=[13*(N+1),4*N,42];

@@ -149,8 +149,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                Q0   = model.Q;
                O0   = model.O;
                v0   = model.v;
-               a0   = model.a;%要チェック論文も!!!!!!!!!!!!!!
-               dO0  = model.dO;
+               % a0   = model.a;%要チェック論文も!!!!!!!!!!!!!!
+               % dO0  = model.dO;
                qi   = model.qi(3*id-2:3*id);
                wi   = model.wi(3*id-2:3*id);
                R0       = obj.toR(Q0);                                          %分割前ペイロードの回転行列
@@ -255,13 +255,13 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % obj.result.state.q = Quat2Eul(R2q(R0d));%目標角度を更新軌道が事変しないとき時は現在の角度になるようにする．               
                % obj.result.state.o = xd(13:15);
                % 牽引物の加速度と角加速度を求める
-                   x = obj.self.estimator.result.state.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
-                   R0 = RodriguesQuaternion(x(4:7));
-                   Ri = RodriguesQuaternion(reshape(x(50:73),4,[]));
-                   u = obj.self.controller.result.input;
-                   ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
-                   obj.self.estimator.result.state.a   = ddX0(1:3);
-                   obj.self.estimator.result.state.dO  = ddX0(4:6);
+                   % x = obj.self.estimator.result.state.get(["p"  "Q" "v" "O" "qi" "wi"  "Qi"  "Oi" "a" "dO"]);
+                   % R0 = RodriguesQuaternion(x(4:7));
+                   % Ri = RodriguesQuaternion(reshape(x(50:73),4,[]));
+                   % u = obj.self.controller.result.input;
+                   % ddX0 = ddx0do0_6(x,R0,Ri,u,obj.P,inv(Addx0do0_6(x,R0,u,obj.P)));
+                   % obj.self.estimator.result.state.a   = ddX0(1:3);
+                   % obj.self.estimator.result.state.dO  = ddX0(4:6);
            end
            result = obj.result;
         end

@@ -76,7 +76,7 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
     if contains(Estimator.model.name,"eul_cable_suspended_rigid_body_with")
         %TODO
         % extendedlinearizationのためにオイラー角モデルを作成
-
+        Estimator.sensor_func = @get_coop_load_sensor; % function to get sensor value: sometimes some conversion will be done
         % ["p","Q","v","O","qi","wi","Qi","Oi"]
         %ノイズ設定では状態の順番に注意
         %推定する状態["v","O""wi","Oi"]
@@ -98,5 +98,19 @@ function mat = zeroone(row,col,idx)
         mat = eye(row);
     else
         error("ACSL : invalid size");
+    end
+end
+
+function senserRsults = get_coop_load_sensor(self,param)
+    if contains(self.plant.name,"eul")
+        senserRsults = self.sensor.result.state.get(param);
+    else
+        state = self.plant.state;
+        N = self.plant.dim(2)/4;
+        p = state.p;
+        Q = Quat2Eul(state.Q);
+        qi = state.qi;
+        Qi = reshape(cell2mat(arrayfun(@(i) Quat2Eul(state.Qi(4*i-3:4*i)),1:N,'UniformOutput',false)),[],1);
+        senserRsults = [p;Q;qi;Qi];
     end
 end

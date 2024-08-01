@@ -96,8 +96,8 @@ for i = 2:N+1
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");%ペイロードの重さを機体数で分割するようにする!!!!!!!!!
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
-    %牽引ドローンの推定は完成していないので改良が必要（miyake from masterから持ってくるといいかも）
-    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+    % agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+    agent(i).estimator = DIRECT_ESTIMATOR(agent(i), struct("model", MODEL_CLASS(agent(i), Model_Suspended_Load(dt, initial_state(i), 1,agent(i))))); % estimator.result.state = sensor.result.state
     %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
@@ -116,7 +116,8 @@ for j = 1:tn
                 load = agent(1).estimator.result.state;%推定をしていない
                 %分割前ペイロード
                 p_load = load.p;
-                R_load = RodriguesQuaternion(load.Q);%回転行列
+                % R_load = RodriguesQuaternion(load.Q);%回転行列quat
+                R_load = eul2rotm(load.Q');%回転行列euler
                 dR_load = R_load*Skew(load.O);%回転行列の微分
                 wi_load = load.wi(3*i-5:3*i-3,1);%分割前のagent(i)の紐の角速度ベクトル
                 %分割後ペイロード
@@ -127,7 +128,8 @@ for j = 1:tn
                 %ドローン
                 p_agent = p_load + R_load * rho(:,i-1) - agent(1).parameter.li(i-1)*pT_agent;
                 v_agent = load.v + dR_load * rho(:,i-1)- agent(1).parameter.li(i-1)*dpT_agent;
-                q_agent = Quat2Eul(load.Qi(4*i-7:4*i-4,1));
+                % q_agent = Quat2Eul(load.Qi(4*i-7:4*i-4,1));%quat
+                q_agent = load.Qi(3*i-5:3*i-3,1);%eul
                 w_agent = load.Oi(3*i-5:3*i-3,1);
 
                 %agent(i).estimator.result.state.set_stateを使った方が正しい？
