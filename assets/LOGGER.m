@@ -44,7 +44,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
       if isstring(target) || ischar(target) % save で保存されたデータを呼び出す場合
 
-        if contains(target, "Data.mat") | ~contains(target, ".mat") % separate で保存された場合
+        if ~contains(target, ".mat") % separate で保存された場合
 
           if contains(target, "Data.mat")
             target = erase(target, "/Data.mat");
