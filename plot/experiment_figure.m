@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20240627_Exp_P2P_Attitude[10, 1, 1.5].mat");
+load("20240614_Sim_P2Py=1_horizon40_sampling0.07.mat");
 
 %%
 figtype = 2;
@@ -17,6 +17,7 @@ Agent = log.Data.agent;
 flight_start_idx = find(log.Data.phase==102, 1, 'first');
 flight_finish_idx = find(log.Data.phase==102, 1, 'last');
 logt = log.Data.t(flight_start_idx:flight_finish_idx);
+logt = logt - logt(1);
 
 % initialize data
 Est = zeros(12, flight_finish_idx-flight_start_idx+1);
@@ -43,6 +44,7 @@ for i = flight_start_idx:flight_finish_idx
 end
 
 m = 2; n = 3;
+a = 2; b = 2;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3,:), '--'); hold off;
@@ -85,10 +87,23 @@ elseif figtype == 2
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % title("Time change of Velocity"); 
     % input
-    subplot(m,n,4); plot(logt, Input, "LineWidth", 1.5); hold on;
-    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","best");
+    subplot(m,n,4); plot(logt, Input(1,:), "LineWidth", 1.5); hold on;
+    xlabel("Time [s]"); ylabel("Input [N]"); legend("total thrust", "Location","best");
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    %ytickformat('%.1f');
+    subplot(m,n,5); plot(logt, Input(2:4,:), "LineWidth", 1.5); hold on;
+    xlabel("Time [s]"); ylabel("Input [N]"); legend('torque roll','torque pitch','torque yaw',"Location","best");
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
+    subplot(m,n,6); plot(Est(1,:), Est(2,:), "LineWidth", 1.5); hold on; plot(Ref(1,:), Ref(2,:)); hold off;
+    xlabel("x [m]"); ylabel("y [m]"); legend("Estimate", "Reference","Location","best");
+    grid on; xlim([-3, 3]); ylim([-3, 3]);
+    % subplot(m,n,6); plot3(Est(1,:), Est(2,:), Est(3,:), "LineWidth", 1.5); hold on; plot(Ref(1,:), Ref(2,:),Ref(3,:), "LineWidth", 1.5); hold off;
+    % xlabel("x [m]"); ylabel("y [m]"); zlabel("z [m]"); legend("Estimate", "Reference","Location","best");
+    % grid on; xlim([-3, 3]); ylim([-3, 3]); zlim([-3, 3]);
+    % subplot(m,n,6); plot3(logt, Input, "LineWidth", 1.5); hold on;
+    % xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","best");
+    % grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % virtual input
     % subplot(m,n,5); plot(logt, InnerInput); 
     % xlabel("Time [s]"); ylabel("Inner input");
@@ -99,15 +114,42 @@ elseif figtype == 2
     % subplot(m,n,6); plot(logt, Sen(1:3,:), "LineWidth", 1.5); hold on;
     % xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","northwest");
     % grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+elseif figtype == 3
+    % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+    subplot(a,b,1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
+    xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % title("Time change of Position"); 
+    % attitude
+    subplot(a,b,2); plot(logt, Est(4:6,:)); hold on; plot(logt, Ref(4:6, :), '--'); hold off;
+    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","best");
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % title("Time change of Atiitude");
+    % velocity
+    subplot(a,b,3); plot(logt, Est(7:9,:)); hold on; plot(logt, Ref(7:9, :), '--'); hold off;
+    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","best");
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % title("Time change of Velocity"); 
+    subplot(a,b,4); plot(Est(1,:), Est(2,:), "LineWidth", 1.5); hold on; plot(Ref(1,:), Ref(2,:)); hold off;
+    xlabel("x [m]"); ylabel("y [m]"); legend("Estimate", "Reference","Location","best");
+    grid on; xlim([-3, 3]); ylim([-3, 3]);
 end
 %%
 set(gca,'FontSize',Fontsize);  grid on; title("");
-xlabel("Time [s]");
+% xlabel("Time [s]");
 
 set(gcf, "WindowState", "maximized");
 set(gcf, "Position", [960 0 960 1000])
-
-
+%% RMSE誤差
+rmse(Ref(1,:),Est(1,:)) %位置x
+rmse(Ref(2,:),Est(2,:))
+rmse(Ref(3,:),Est(3,:))
+rmse(Ref(4,:),Est(4,:)) %速度vx
+rmse(Ref(5,:),Est(5,:))
+rmse(Ref(6,:),Est(6,:))
+rmse(Ref(7,:),Est(7,:)) %姿勢角roll
+rmse(Ref(8,:),Est(8,:))
+rmse(Ref(9,:),Est(9,:))
 %%
 figure(100)
 plot(logt(1:end-1), diff(logt), 'Linewidth', 1.5)
