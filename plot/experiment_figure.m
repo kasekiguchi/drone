@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("20240614_Sim_P2Py=1_horizon40_sampling0.07.mat");
+load("circle[700,700,700,300],332.5,T=20.mat");
 
 %%
 figtype = 2;
@@ -141,15 +141,15 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 set(gcf, "WindowState", "maximized");
 set(gcf, "Position", [960 0 960 1000])
 %% RMSE誤差
-rmse(Ref(1,:),Est(1,:)) %位置x
-rmse(Ref(2,:),Est(2,:))
-rmse(Ref(3,:),Est(3,:))
-rmse(Ref(4,:),Est(4,:)) %速度vx
-rmse(Ref(5,:),Est(5,:))
-rmse(Ref(6,:),Est(6,:))
-rmse(Ref(7,:),Est(7,:)) %姿勢角roll
-rmse(Ref(8,:),Est(8,:))
-rmse(Ref(9,:),Est(9,:))
+x = rmse(Ref(1,:),Est(1,:)) %位置x
+y = rmse(Ref(2,:),Est(2,:))
+z = rmse(Ref(3,:),Est(3,:))
+vx = rmse(Ref(4,:),Est(4,:)) %速度vx
+vy = rmse(Ref(5,:),Est(5,:))
+vz = rmse(Ref(6,:),Est(6,:))
+roll = rmse(Ref(7,:),Est(7,:)) %姿勢角roll
+pitch = rmse(Ref(8,:),Est(8,:))
+yaw = rmse(Ref(9,:),Est(9,:))
 %%
 figure(100)
 plot(logt(1:end-1), diff(logt), 'Linewidth', 1.5)
