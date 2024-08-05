@@ -11,7 +11,7 @@ end
 %%
 ts = 0; % initial time
 dt = 0.025; % sampling period
-te = 10; % terminal time
+te = 60; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -72,5 +72,5 @@ plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5);
 xlabel("Time [s]"); ylabel("Calculation time [s]");
 
 % animation
-app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
+% app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
 end

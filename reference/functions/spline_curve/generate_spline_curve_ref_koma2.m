@@ -3,31 +3,36 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
 % isManualSetting = 1のときにここでwaypointを設定する
 % 保存したmatファイルからway_point_refを呼び出す
 
+% te: 実行時間
+% filename: 読み込む目標軌道
+% order: 何次までのスプラインか(default:5)
+% isManualSetting: 手動で設定するか、読み込むか
+
 %% ここから処理開始
     if ~isManualSetting 
         disp('Loading reference data from mat');
         % load(strcat('../Data/reference/', filename));
         load(strcat('Data/reference/', filename)); % for exp
-        fshowfig = 0;
+        fshowfig = 0; % 読み込んだ時はグラフは描画しない
     else
-        % pointN = 8; %waypointの数 default:5
-        % dt = 3;%waypoint間の時間
-        % time =  (0:dt:dt*(pointN-1))';
+        pointN = 7; %waypointの数 default:5
+        dt = 5;%waypoint間の時間
+        time =  (0:dt:dt*(pointN-1))';
 
         %% x方向のみ
         % 生成する点を-1.5<point<1.5にする
-        % wp_xy = max(-1.5, min(1.5, [round(1*randn(pointN-1,1),3), zeros(pointN-1,1)]));
-        % wp_z  = ones(pointN-1,1);
-        % wp = [0, 0, 1;wp_xy, wp_z];
-        % waypoints = [time, wp];
+        wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), round(1*randn(pointN-2,1),3)]));
+        wp_z  = ones(pointN-2,1);
+        wp = [0, 0, 1;wp_xy, wp_z; 0, 0, 1];
+        waypoints = [time, wp];
         
         %% 円旋回を原点から開始する
-        dt = 1;
-        tt = 0:0.1:te;
-        pointN = length(tt);
-        time =  (0:dt:dt*(pointN-1))';
-        T = 20;
-        tra = [cos(2*pi*(tt-0.5)'/T), sin(2*pi*(tt-0.5)'/T), 0 * tt' + 1];
+        % dt = 1;
+        % tt = 0:0.1:te;
+        % pointN = length(tt);
+        % time =  (0:dt:dt*(pointN-1))';
+        % T = 20;
+        % tra = [cos(2*pi*(tt-0.5)'/T), sin(2*pi*(tt-0.5)'/T), 0 * tt' + 1];
         
         %% マウスによる入力
         % figure
@@ -52,17 +57,17 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         %     0.5, -0.6, 1;
         %     0.75, -0.5, 1;
         %     ];
-        middle_wp = [0, -0.05, 1;
-                    0.2, -0.3, 1;
-                    0.5, -0.6, 1;
-                    0.75, -0.5, 1;];
-        disp('Direct midpoint inserted.')
+        % middle_wp = [0, -0.05, 1;
+        %             0.2, -0.3, 1;
+        %             0.5, -0.6, 1;
+        %             0.75, -0.5, 1;];
+        % disp('Direct midpoint inserted.')
 
         %% 円旋回へのスプライン補間のつもり
-        wp = [0, 0, 1; 
-              middle_wp;
-              tra(1:end-size(middle_wp,1)-1,:)];
-        waypoints = [time, wp];
+        % wp = [0, 0, 1; 
+        %       middle_wp;
+        %       tra(1:end-size(middle_wp,1)-1,:)];
+        % waypoints = [time, wp];
 
         fshowfig = 1;
         % ref = MY_WAY_POINT_REFERENCE.way_point_ref(waypoints,order,1); %手動で設定したときはここで軌道が生成される         
@@ -70,8 +75,8 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
     ref=MY_WAY_POINT_REFERENCE.way_point_ref(waypoints,order,fshowfig);
 
     if isManualSetting
-        isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
-        % isSaved = 1;
+        % isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
+        isSaved = 0; % fixed
         if isSaved==0||isempty(isSaved)
             disp("No save")
         elseif isSaved==1
