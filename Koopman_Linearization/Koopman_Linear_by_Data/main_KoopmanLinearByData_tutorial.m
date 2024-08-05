@@ -72,8 +72,8 @@ fprintf('\n選択されている観測量：%s\n',func2str(F))
 fprintf('\n＜データセットの結合を行います＞\n')
 %
 if ~exist('FileName')
-    loading_filename = 'Exp_2_4'; 
-    Data.HowmanyDataset = 150;
+    loading_filename = '0805_HL_spline_y'; 
+    Data.HowmanyDataset = 20;
 end% ここだけ実行時
 for i = 1:Data.HowmanyDataset
     if contains(loading_filename,'.mat')
