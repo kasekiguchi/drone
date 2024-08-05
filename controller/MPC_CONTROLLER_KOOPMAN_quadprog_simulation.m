@@ -50,9 +50,15 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
 
             %% 重み　統合         
             obj.previous_input = repmat(obj.input.u, 1, obj.H);
-            obj.weight  = blkdiag(obj.param.weight.P, obj.param.weight.V, obj.param.weight.QW);
-            obj.weightF = blkdiag(obj.param.weight.Pf,obj.param.weight.Vf,obj.param.weight.QWf);
+            obj.weight = blkdiag(obj.param.weight.P, obj.param.weight.Q, obj.param.weight.V, obj.param.weight.W);
+            obj.weightF = blkdiag(obj.param.weight.Pf, obj.param.weight.Qf, obj.param.weight.Vf, obj.param.weight.Wf);
             obj.weightR = obj.param.weight.R;
+
+            %% 重みを観測量分まで拡張する C行列が12状態にするやつだからこれは不可能
+            % zで評価関数を解こうとしたけど無理だああ
+            % weight_obs = eye(size(obj.A,1)-12);
+            % obj.weight = blkdiag(obj.weight, weight_obs);
+            % obj.weightF = blkdiag(obj.weightF, weight_obs);
 
             %% QP change_equationの共通項をあらかじめ計算
             Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
@@ -83,8 +89,10 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             %% ------------------------------------------------------------
             % 最適化部分の関数化とmex化
             Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
-            [var, fval, exitflag] = quad_drone_mex(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
+            % [var, fval, exitflag] = quad_drone_mex(Param); %code00用 自PCでcontroller:0.6ms, 全体:2.7ms
+            % [var, fval, exitflag] = quad_drone_code08_mex(Param); %code08用
             % [var, fval, exitflag] = quad_drone(Param);
+            [var, fval, exitflag] = obj.param.quad_drone(Param);
                  
             %%
             obj.previous_input = var;

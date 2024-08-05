@@ -1,4 +1,4 @@
-function Controller = Controller_MPC_Koopman(dt)
+function Controller = Controller_MPC_Koopman(dt, model)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
@@ -16,8 +16,10 @@ function Controller = Controller_MPC_Koopman(dt)
 
     %% 今はこっちの検証
     % load("EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat",'est') %vzから算出したzで学習、総推力
-    load('2024-07-14_Exp_KiyamaX20_code00_saddle.mat', 'est'); % x方向増加データ
+    % load('2024-07-14_Exp_KiyamaX20_code00_saddle.mat', 'est'); % x方向増加データ
+    % load('EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat', 'est');
     % load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
+    load(model, 'est');
     try
         ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
         args = d2d(ssmodel, Controller_param.dt);
@@ -34,6 +36,16 @@ function Controller = Controller_MPC_Koopman(dt)
      torque = 1; % 1:クープマンモデルが総推力トルクのとき
     %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     %--------------------------------------------------------------------
+
+    %% quadprogを実行するmexファイルを選択
+    % 観測量によってファイルが異なる
+    if size(Controller_param.A,1) == 26
+        Controller_param.quad_drone = @quad_drone_code00_mex;
+    elseif size(Controller_param.A,1) == 39
+        Controller_param.quad_drone = @quad_drone_code04_mex;
+    elseif size(Controller_param.A,1) == 71
+        Controller_param.quad_drone = @quad_drone_code08_mex;
+    end
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     Controller_param.weight.P = diag([30; 1; 30]);    % 位置　10,20刻み  20;1;30

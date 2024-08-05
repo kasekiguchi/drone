@@ -27,9 +27,14 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 % 
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 
-%2つのコントローラの設定---------------------------------------------------------------------------------------------------
+%% ##############################################################
+% model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+% model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
+model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
+
+%% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman({agent, dt})); %最適化手法：QP
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_quadprog_experiment(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
 agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 %------------------------------------------------------------------------------------------------------------------------
