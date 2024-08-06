@@ -22,8 +22,10 @@ figtype = 2;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 % arming_start_idx = find(log.Data.phase==102, 1, 'first');%フライト開始からのグラフにできる．↓と切り替え
-arming_start_idx = find(log.Data.phase==115, 1, 'first');%アーミング開始↑と切り替え
+arming_start_idx = find(log.Data.phase==115, 1, 'first');%プログラム開始からのグラフ，↑と切り替え
+takeoff_start_idx = find(log.Data.phase==116, 1, 'first');%テイクオフ開始
 flight_start_idx = find(log.Data.phase==102, 1, 'first');%フライト開始
+takeoff_finish_idx = find(log.Data.phase==116, 1, 'last');
 flight_finish_idx = find(log.Data.phase==102, 1, 'last');%)の後に-1000すれば1000フレーム前で切れる．ランディングおす1フレーム前
  logt = log.Data.t(arming_start_idx:flight_finish_idx);
 
@@ -58,6 +60,97 @@ count_gross_over_0025=length( find( Step_time >= 0.025 ) )
 count_persentage_over_0025=length( find( Step_time >= 0.025 ) )/length(Step_time)
 Flight_step_time=Step_time(flight_start_idx:flight_finish_idx);
 Flight_step_time_average=mean(Flight_step_time)
+%%
+%↓RMSE計算試作
+
+% Parameters
+A = 1; % フライト開始からの秒数 (例: 5秒後)
+B = 2; % フライト開始からの秒数後以降の期間 (例: 10秒)
+C = 1; % テイクオフからの秒数 (例: 2秒後)
+D = 2; % テイクオフからの秒数後以降の期間 (例: 6秒)
+
+% Calculate RMSE for flight only
+flight_times = logt - logt(flight_start_idx); % フライト開始からの時間
+RMSE_x_flight_only = 0;
+RMSE_y_flight_only = 0;
+RMSE_z_flight_only = 0;
+
+for i = flight_start_idx:flight_finish_idx
+    RMSE_x_flight_only = RMSE_x_flight_only + (Est(1, i-arming_start_idx+1) - Ref(1, i-arming_start_idx+1))^2;
+    RMSE_y_flight_only = RMSE_y_flight_only + (Est(2, i-arming_start_idx+1) - Ref(2, i-arming_start_idx+1))^2;
+    RMSE_z_flight_only = RMSE_z_flight_only + (Est(3, i-arming_start_idx+1) - Ref(3, i-arming_start_idx+1))^2;
+end
+num_samples_flight_only = flight_finish_idx - flight_start_idx + 1;
+RMSE_x_flight_only = sqrt(RMSE_x_flight_only / num_samples_flight_only);
+RMSE_y_flight_only = sqrt(RMSE_y_flight_only / num_samples_flight_only);
+RMSE_z_flight_only = sqrt(RMSE_z_flight_only / num_samples_flight_only);
+
+% Calculate RMSE for flight start + A seconds, B seconds period
+idx_A_seconds = find(flight_times >= A, 1, 'first');
+if isempty(idx_A_seconds)
+    idx_A_seconds = length(flight_times); % A秒後のデータが存在しない場合は最後のデータを使う
+end
+idx_B_end = find(flight_times >= A + B, 1, 'first');
+if isempty(idx_B_end)||B==0
+    idx_B_end = flight_finish_idx; % B秒後のデータが存在しない場合or=0はフライト終了時のデータを使う
+end
+
+RMSE_x_after_A_B = 0;
+RMSE_y_after_A_B = 0;
+RMSE_z_after_A_B = 0;
+
+for i = idx_A_seconds:idx_B_end
+    RMSE_x_after_A_B = RMSE_x_after_A_B + (Est(1, i-arming_start_idx+1) - Ref(1, i-arming_start_idx+1))^2;
+    RMSE_y_after_A_B = RMSE_y_after_A_B + (Est(2, i-arming_start_idx+1) - Ref(2, i-arming_start_idx+1))^2;
+    RMSE_z_after_A_B = RMSE_z_after_A_B + (Est(3, i-arming_start_idx+1) - Ref(3, i-arming_start_idx+1))^2;
+end
+num_samples_after_A_B = idx_B_end - idx_A_seconds + 1;
+RMSE_x_after_A_B = sqrt(RMSE_x_after_A_B / num_samples_after_A_B);
+RMSE_y_after_A_B = sqrt(RMSE_y_after_A_B / num_samples_after_A_B);
+RMSE_z_after_A_B = sqrt(RMSE_z_after_A_B / num_samples_after_A_B);
+
+% Calculate RMSE for takeoff start + C seconds, D seconds period
+takeoff_times = logt - logt(takeoff_start_idx); % テイクオフからの時間
+takeoff_times = takeoff_times(1:takeoff_finish_idx); % テイクオフからの時間
+idx_C_seconds = find(takeoff_times >= C, 1, 'first');
+if isempty(idx_C_seconds)
+    idx_C_seconds = length(takeoff_times); % C秒後のデータが存在しない場合は最後のデータを使う
+end
+idx_D_end = find(takeoff_times >= C + D, 1, 'first');
+if isempty(idx_D_end)||D==0
+    idx_D_end = takeoff_finish_idx; % D秒後のデータが存在しないor=0の場合はテイクオフ終了時のデータを使う
+end
+
+RMSE_x_after_C_D = 0;
+RMSE_y_after_C_D = 0;
+RMSE_z_after_C_D = 0;
+
+for i = idx_C_seconds:idx_D_end
+    RMSE_x_after_C_D = RMSE_x_after_C_D + (Est(1, i-arming_start_idx+1) - Ref(1, i-arming_start_idx+1))^2;
+    RMSE_y_after_C_D = RMSE_y_after_C_D + (Est(2, i-arming_start_idx+1) - Ref(2, i-arming_start_idx+1))^2;
+    RMSE_z_after_C_D = RMSE_z_after_C_D + (Est(3, i-arming_start_idx+1) - Ref(3, i-arming_start_idx+1))^2;
+end
+num_samples_after_C_D = idx_D_end - idx_C_seconds + 1;
+RMSE_x_after_C_D = sqrt(RMSE_x_after_C_D / num_samples_after_C_D);
+RMSE_y_after_C_D = sqrt(RMSE_y_after_C_D / num_samples_after_C_D);
+RMSE_z_after_C_D = sqrt(RMSE_z_after_C_D / num_samples_after_C_D);
+
+% Display results
+fprintf('Flight-only RMSE for x direction: %.4f [m]\n', RMSE_x_flight_only);
+fprintf('Flight-only RMSE for y direction: %.4f [m]\n', RMSE_y_flight_only);
+fprintf('Flight-only RMSE for z direction: %.4f [m]\n', RMSE_z_flight_only);
+
+fprintf('RMSE for x direction after %d seconds from flight start for %d seconds: %.4f [m]\n', A, B, RMSE_x_after_A_B);
+fprintf('RMSE for y direction after %d seconds from flight start for %d seconds: %.4f [m]\n', A, B, RMSE_y_after_A_B);
+fprintf('RMSE for z direction after %d seconds from flight start for %d seconds: %.4f [m]\n', A, B, RMSE_z_after_A_B);
+
+fprintf('RMSE for x direction after %d seconds from takeoff for %d seconds: %.4f [m]\n', C, D, RMSE_x_after_C_D);
+fprintf('RMSE for y direction after %d seconds from takeoff for %d seconds: %.4f [m]\n', C, D, RMSE_y_after_C_D);
+fprintf('RMSE for z direction after %d seconds from takeoff for %d seconds: %.4f [m]\n', C, D, RMSE_z_after_C_D);
+
+
+%↑RMSE計算試作
+%%
 m = 2; n = 3;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
@@ -67,22 +160,22 @@ if figtype == 1
     % title("Time change of Position"); 
     % attitude
     figure(2); plot(logt, Est(4:6,:)); %hold on; plot(logt, Ref(4:6, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest");
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Attitude [rad]",'Interpreter','latex'); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % title("Time change of Atiitude");
     % velocity
     figure(3); plot(logt, Est(7:9,:)); %hold on; plot(logt, Ref(7:9, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","southwest");
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Velocity [m/s]",'Interpreter','latex'); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","southwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % title("Time change of Velocity"); 
     % input
     figure(4); plot(logt, Input, "LineWidth", 1.5); hold on;
-    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","northwest");
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Input [N]",'Interpreter','latex'); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
-    figure(5); plot(logt, InnerInput);legend("1","2", "3", "4","5","6", "7", "8");
-    xlabel("Time [s]"); ylabel("Inner Input"); 
+    figure(5); plot(logt, InnerInput);legend("1","2", "3", "4","5","6", "7", "8",'Interpreter','latex');
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner Input",'Interpreter','latex'); 
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     %以下三宅整備中1/2
@@ -112,32 +205,32 @@ if figtype == 1
         %各ステップにおける計算時間表示↓
     figure(11);  plot(logt, Step_time); 
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
-     xlabel("Time [s]",'Interpreter','latex'); ylabel("step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
+     xlabel("Time [s]",'Interpreter','latex'); ylabel("Step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 elseif figtype == 2
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     subplot(m,n,1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","northwest");
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("$$x$$.Drone state", "$$y$$.Drone state", "$$z$$.Drone state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % title("Time change of Position"); 
     % attitude
     subplot(m,n,2); plot(logt, Est(4:6,:)); %hold on; plot(logt, Ref(4:6, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Attitude [rad]"); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest");
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Attitude [rad]",'Interpreter','latex'); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % title("Time change of Atiitude");
     % velocity
     subplot(m,n,3); plot(logt, Est(7:9,:)); %hold on; plot(logt, Ref(7:9, :), '--'); hold off;
-    xlabel("Time [s]"); ylabel("Velocity [m/s]"); legend("vx", "vy", "vz", "vx.ref", "vy.ref", "vz.ref", "Location","southwest");
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Velocity [m/s]",'Interpreter','latex'); legend("$$vx$$", "$$vy$$", "$$vz$$", "$$vx.ref$$", "$$vy.ref$$", "$$vz.ref$$", "Location","southwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     % title("Time change of Velocity"); 
     % input
     subplot(m,n,4); plot(logt, Input, "LineWidth", 1.5); hold on;
-    xlabel("Time [s]"); ylabel("Input [N]"); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","northwest");
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Input [N]",'Interpreter','latex'); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
     subplot(m,n,5); plot(logt, InnerInput); 
-    xlabel("Time [s]"); ylabel("Inner input");legend("1","2", "3", "4","5","6", "7", "8");%キャプション間違ってるかも
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner input",'Interpreter','latex');legend("1","2", "3", "4","5","6", "7", "8",'Interpreter','latex');%キャプション間違ってるかも
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     %↓三宅整備中2/2ドローン上から
     % subplot(m,n,5); plot(Est(1,:), Est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
@@ -158,7 +251,7 @@ elseif figtype == 2
 
     figure(7);  plot(logt, Step_time); 
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
-     xlabel("Time [s]",'Interpreter','latex'); ylabel("step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
+     xlabel("Time [s]",'Interpreter','latex'); ylabel("Step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 end
 %%
