@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl0729_2kiseigyo_nabu_02_tonda_Log(29-Jul-2024_19_35_26).mat");
+load("sl0729_2kiseigyo_miyati_rig3_02_Log(29-Jul-2024_19_34_04).mat");
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
@@ -65,9 +65,9 @@ Flight_step_time_average=mean(Flight_step_time)
 
 % Parameters
 A = 12; % フライト開始からの秒数 (例: 12秒後)
-B = 0; % フライト開始からの秒数後以降の期間 (例: 10秒)=0でフライト最後まで
+B = 0; % AからB秒間で計算 (例: 10秒)=0でフライト最後まで
 C = 16; % テイクオフからの秒数 (例: 16秒後)
-D = 0; % テイクオフからの秒数後以降の期間 (例: 6秒)=0でテイクオフ最後まで
+D = 17.339; % CからのD秒間で計算 (例: 6秒)=0でテイクオフ最後まで
 
 % Calculate RMSE for flight only
 flight_times = logt - logt(flight_start_idx); % フライト開始からの時間
@@ -178,7 +178,7 @@ if figtype == 1
     ytickformat('%.1f');
     % virtual input
     figure(5); plot(logt, InnerInput);legend("1","2", "3", "4","5","6", "7", "8",'Interpreter','latex');
-    xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner Input",'Interpreter','latex'); 
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner input",'Interpreter','latex'); 
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     %以下三宅整備中1/2
