@@ -131,16 +131,17 @@ F = @quaternions_all; % 改造用
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 % exp_data = 'Exp_KiyamaX20'; %20データ増やしたzのみ速度から
-exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
+% exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
+exp_data = 'Exp_KiyamaY20';
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
-FileName = strcat(FileName_common, exp_data, '_', 'code00_opt_1_', Exp_tra); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code08_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
 targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
+% load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以前のもの
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_true.mat'); % 以前+xyz速度から
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_45k_Zdecreased.mat'); % z方向45000データ減少
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromVel.mat'); % x方向追加+xyも速度から算出
@@ -148,6 +149,7 @@ load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat'); % 以�
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromZvel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Koma2_y20.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
@@ -179,8 +181,8 @@ fprintf('\n＜クープマン線形化を実行＞\n')
 if flg.bilinear == 1
     est = KL_biLinear(Data.X,Data.U,Data.Y,F);
 else
-    % est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
-    est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算
+    est = KL(Data.X,Data.U,Data.Y,F); %クープマン線形化の具体的な計算をしてる部分
+    % est = KL_opt(Data.X,Data.U,Data.Y,F,900000); % 最適化による計算
     % est = KL_opt_MC(Data.X,Data.U,Data.Y,F,900000);
 end
 
@@ -291,3 +293,10 @@ disp(targetpath)
 % F = @quaternions_13state; % 状態+クォータニオンの1乗2乗3乗 クォータニオンパラメータ用
 % F = @eulerAngleParameter_withoutP;
 
+%% Integration datasetsの結合
+% data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
+% data2 = load('Koopman_Linearization\Integration_Dataset\Koma2_Exp_YDataset_20data.mat');
+% Data.HowmanyDataset = data1.Data.HowmanyDataset + data2.Data.HowmanyDataset;
+% Data.X = [data1.Data.X, data2.Data.X];
+% Data.Y = [data1.Data.Y, data2.Data.Y];
+% Data.U = [data1.Data.U, data2.Data.U];
