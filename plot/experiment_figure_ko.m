@@ -4,13 +4,13 @@
 clear;
 close all;
 %% Initial setting
-Fontsize = 15;  
-set(0, 'defaultAxesFontSize',15);
-set(0,'defaultTextFontsize',15);
+Fontsize = 16;  
+set(0, 'defaultAxesFontSize',16);
+set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("0723engood_Log(23-Jul-2024_12_50_27).mat");
+load("sl0729_2kiseigyo_nabu_02_tonda_Log(29-Jul-2024_19_35_26).mat");
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
@@ -18,7 +18,7 @@ load("0723engood_Log(23-Jul-2024_12_50_27).mat");
 %log = logger;%永久用（↓とどっちかをコメントアウト）
 % log =gui.logger.Data;%gui用
 %%
-figtype = 2;%1でグラフを1タブづつ，2で1タブにグラフを多数．
+figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 % arming_start_idx = find(log.Data.phase==102, 1, 'first');%フライト開始からのグラフにできる．↓と切り替え
@@ -150,6 +150,9 @@ fprintf('RMSE for z direction after %d seconds from takeoff for %d seconds: %.4f
 
 
 %↑RMSE計算試作
+takeoff_start_time=logt(takeoff_start_idx);
+flight_start_time=logt(flight_start_idx);
+fprintf('Takeoff start time = %.4f [s] Flight start time = %.4f [s]\n', takeoff_start_time, flight_start_time);
 %%
 m = 2; n = 3;
 if figtype == 1
@@ -181,7 +184,7 @@ if figtype == 1
     %以下三宅整備中1/2
     figure(6); plot(Road_est(1,:), Road_est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
     xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Estimeter", "Reference",'Interpreter','latex');
-    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
+    grid on;xticks(-2:0.5:2);yticks(-2:0.5:2); xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
     %ytickformat('%.1f');
     % Title = 
     %荷物のプロット↓
@@ -191,11 +194,11 @@ if figtype == 1
     %機体と荷物のxy重ねて表示↓
     figure(8); plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--'); hold off;
     xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Load",'Interpreter','latex');
-    grid on; xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
+    grid on;xticks(-2:0.5:2);yticks(-2:0.5:2); xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
     %目標軌道と機体と荷物のxy重ねて表示↓
     figure(9); plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
-    grid on; xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
+    grid on;xticks(-2:0.5:2);yticks(-2:0.5:2); xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
     xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Reference",'Interpreter','latex');
     %目標軌道と機体と荷物のxyz重ねて表示↓
     figure(10);  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:));, hold off;
