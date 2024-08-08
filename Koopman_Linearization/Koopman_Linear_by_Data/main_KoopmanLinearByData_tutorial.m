@@ -132,10 +132,10 @@ FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_');
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 % exp_data = 'Exp_KiyamaX20'; %20データ増やしたzのみ速度から
 % exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
-exp_data = 'Exp_KiyamaY20';
+exp_data = 'Exp_KiyamaY20_Zdecreased20k';
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
-FileName = strcat(FileName_common, exp_data, '_', 'code08_', Exp_tra); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);
@@ -149,7 +149,7 @@ targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromZvel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Koma2_y20.mat');
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Koma2_y20_Zdecreased30k.mat');
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');

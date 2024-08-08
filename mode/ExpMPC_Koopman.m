@@ -17,8 +17,8 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
-% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -28,9 +28,12 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 
 %% ##############################################################
-model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+% model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
+% model_file = "2024-08-06_Exp_KiyamaY20_code00_saddle.mat"; % y方向増加
+% model_file = "2024-07-14_Exp_KiyamaX20_code00_saddle.mat"; % x方向増加
+model_file = "2024-08-08_Exp_KiyamaY20_Zdecreased20k_code00_saddle.mat"; %y方向増加＋z方向減少
 
 %% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
@@ -39,6 +42,7 @@ agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 %------------------------------------------------------------------------------------------------------------------------
 
+disp(['Select model confirm: ' + model_file]);
 run("ExpBase");
 
 %% function
@@ -89,7 +93,7 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',2,'filename',filename,'time_idx',[],'yrange',[]));
+fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[]));
 % struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange)
 fig.main_figure();
 % fig.make_mpc_plot();
