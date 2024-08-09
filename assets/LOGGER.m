@@ -44,7 +44,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
       if isstring(target) || ischar(target) % save で保存されたデータを呼び出す場合
 
-        if contains(target, "Data.mat") | ~contains(target, ".mat") % separate で保存された場合
+        if ~contains(target, ".mat") % separate で保存された場合
 
           if contains(target, "Data.mat")
             target = erase(target, "/Data.mat");
@@ -53,6 +53,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
           tmp = load(target + "/Data.mat");
           fn = fieldnames(obj);
 
+          
+          
           for i = fn'
             obj.(i{1}) = tmp.log.(i{1});
           end
@@ -382,14 +384,16 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
     function data = return_state_prop(obj, variable, data)
       % function for data_org
+      fn = fieldnames(data); % フィールド名に数字を含む場合のケア
       for j = 1:length(variable)
         %data = [data.(variable(j))];
-        data = vertcat(data.(variable(j)));
+        data = vertcat(data.(fn{contains(fn,variable(j))}));
 
         if strcmp(variable(j), 'state')
 
           for k = 1:length(data)
-            ndata(k, :, :) = data(k).(variable(j + 1))(1:data(k).num_list(strcmp(data(k).list, variable(j + 1))), :);
+            %ndata(k, :, :) = data(k).(variable(j + 1))(1:data(k).num_list(strcmp(data(k).list, variable(j + 1))), :);
+            ndata(k, :, :) = data(k).(variable(j + 1));
           end
 
           data = ndata;
@@ -651,7 +655,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
       if ~isempty(vrange)
         vrange = str2num(strjoin(vrange));
       end
-
+      % variable = var;
+      % vrange = [];
       switch variable
         case 'p'
           name = strcat(name, ".state.p");
