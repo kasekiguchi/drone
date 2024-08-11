@@ -177,14 +177,15 @@ if figtype == 1
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
-    figure(5); plot(logt, InnerInput);legend("1","2", "3", "4","5","6", "7", "8",'Interpreter','latex');
+    figure(5); plot(logt, InnerInput(1:4,:));legend("lever.roll","lever.pitch", "lever.thorottle", "lever.yaw",'Interpreter','latex');
+%    figure(5); plot(logt, InnerInput);legend("1","2", "3", "4","5","6", "7", "8",'Interpreter','latex');
     xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner input",'Interpreter','latex'); 
-    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    grid on; xlim([logt(1), logt(end)]); ylim([0 1000]);
     ytickformat('%.1f');
     %以下三宅整備中1/2
-    figure(6); plot(Road_est(1,:), Road_est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
-    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Estimeter", "Reference",'Interpreter','latex');
-    grid on;xticks(-2:0.5:2);yticks(-2:0.5:2); xlim([-3.0, 3.0]); ylim([-3.0, 3.0]);pbaspect([1 1 1]);
+    figure(6); plot(Est(1,:), Est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
+    grid on;xticks(-2:0.5:2);yticks(-2:0.5:2); xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
+    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Reference",'Interpreter','latex');
     %ytickformat('%.1f');
     % Title = 
     %荷物のプロット↓
