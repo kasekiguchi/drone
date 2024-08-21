@@ -82,7 +82,7 @@ classdef FIGURE_EXP
             xlabel("Time [s]"); ylabel("Input (Thrust)[N]"); legend("thrust.total","Location","best");
             grid on; xlim([obj.data.logt(1), obj.data.logt(end)]);
             ylim([-inf inf])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
-            ytickformat('%.1f');
+            ytickformat('%.3f');
             obj.data.fignum = obj.data.fignum+1;
             
             if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,5); end
@@ -99,8 +99,8 @@ classdef FIGURE_EXP
             plot(obj.data.logt(1:end-1), diff(calt), 'LineWidth', 1.5);
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-            ytickformat('%.3f'); xlim([0 inf]); grid on;
-            ylim([-inf inf])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
+            ytickformat('%.3f'); xlim([0 19.1246]); grid on;
+            ylim([-inf 0.025])% if isempty(obj.data.yrange); ylim([-inf inf]); else; ylim(obj.data.yrange,:); end
             obj.data.fignum = obj.data.fignum+1;
             
             if m*n > 6

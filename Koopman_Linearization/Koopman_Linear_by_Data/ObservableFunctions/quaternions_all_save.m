@@ -112,27 +112,27 @@ Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
 % z = [common_z; Fdisassembly_z; Gdisassembly_z];
 
 %% F(x), G(x)の各項を分解+磯部先輩 code = 03
-% z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z];
+z = [common_z; isobe_z; Fdisassembly_z; Gdisassembly_z];
 
 %% f(x, u, param)からdf/dparam したときの項+磯部先輩 code = 04
-% roll = Q1; pitch = Q2; yaw = Q3;
-% jx = jx; jy = jy; jz = jz;
-% o1 = W1; o2 = W2; o3 = W3;
-% m = m;
-% u1 = 0; u2 = 0; u3 = 0; u4 = 0;
-% diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
-%             (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
-%             -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
-%             - u2/jx^2 - (jy*o2*o3 - jz*o2*o3)/jx^2;
-%                                       -(o1*o3)/jy;
-%                                        (o1*o2)/jz;
-%                                        (o2*o3)/jx;
-%              (jx*o1*o3 - jz*o1*o3)/jy^2 - u3/jy^2;
-%                                       -(o1*o2)/jz;
-%                                       -(o2*o3)/jx;
-%                                        (o1*o3)/jy;
-%            - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
-%                                                -1];
+roll = Q1; pitch = Q2; yaw = Q3;
+jx = jx; jy = jy; jz = jz;
+o1 = W1; o2 = W2; o3 = W3;
+m = m;
+u1 = 0.5884*9.81; u2 = 0; u3 = 0; u4 = 0;
+diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2)) + 2*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))))/m^2;
+            (u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2)) - 2*(cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))*(cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))))/m^2;
+            -(u1*((cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(roll/2)*sin(yaw/2))^2 - (cos(roll/2)*cos(yaw/2)*sin(pitch/2) + cos(pitch/2)*sin(roll/2)*sin(yaw/2))^2 + (cos(pitch/2)*cos(roll/2)*sin(yaw/2) - cos(yaw/2)*sin(pitch/2)*sin(roll/2))^2 - (cos(pitch/2)*cos(yaw/2)*sin(roll/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2))^2))/m^2;
+            - u2/jx^2 - (jy*o2*o3 - jz*o2*o3)/jx^2;
+                                      -(o1*o3)/jy;
+                                       (o1*o2)/jz;
+                                       (o2*o3)/jx;
+             (jx*o1*o3 - jz*o1*o3)/jy^2 - u3/jy^2;
+                                      -(o1*o2)/jz;
+                                      -(o2*o3)/jx;
+                                       (o1*o3)/jy;
+           - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
+                                               -1];
 % z = [common_z; isobe_z; diff_param_z];
 
 %% f(x, u, param)からdf/dparam したときの項のみ code = 05
@@ -143,5 +143,6 @@ Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
 
 %% 磯部先輩観測量を並び替える code = 07
  % z = [isobe_z; common_z];
+
 end
 

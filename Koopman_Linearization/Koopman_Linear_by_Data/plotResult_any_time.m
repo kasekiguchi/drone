@@ -11,17 +11,17 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 % cd(strcat(fileparts(matlab.desktop.editor.getActive().Filename), '../../../')); % drone/のこと
 %% flag
 flg.ylimHold = 0; % 指定した値にylimを固定
-flg.xlimHold = 0; % 指定した値にxlimを固定 0~0.8などに固定
+flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 0; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
-flg.only_rmse = 0; % コマンドウィンドウに表示
+flg.only_rmse = 1; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 3.9; % flight後何秒からの推定精度検証を行うか saddle:3.39
-stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
@@ -231,6 +231,9 @@ fprintf("====================================\n");
 result.p.mape = mape(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)',2);
 fprintf("Position MAPE : x=%.4f, y=%.4f, z=%.4f \n", result.p.mape(1), result.p.mape(2), result.p.mape(3))
 
+disp(["p_max: "+ num2str(round(max(error_p, [], 2)',5))]);
+disp(["v_max: "+ num2str(round(max(error_v, [], 2)',5))]);
+disp(["q_max: "+ num2str(round(max(error_q, [], 2)',5))]);
 if flg.only_rmse
     % dammy
     fprintf("Excel RMSE.P: %.4f %.4f %.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
@@ -239,8 +242,10 @@ if ~flg.division % plotResult
 i = 1;
 %% P
 % strrep _を "【空白】"に置換
+fig_title = strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==', ref_tra);
+fig_title = '';
 if flg.figtype; figure(1);
-else; fig = figure(1); sgtitle(strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==', ref_tra)); subplot(m,n,1); end 
+else; fig = figure(1); sgtitle(fig_title); subplot(m,n,1); end 
 % Referenceをplot
 colororder(newcolors)
 plot(timeRange, file{WhichRef}.simResult.reference.est.p(tlength,:)','LineWidth',2); % 精度検証用データ
