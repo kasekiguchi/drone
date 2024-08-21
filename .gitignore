@@ -1041,6 +1041,7 @@ Temporary Items
 .apdisk
 
 # matlab
+*.mat
 Log*
 !assets/Logger.m
 !connector/NATNET_CONNECTOR/*.dll
