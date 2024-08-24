@@ -15,14 +15,21 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         load(strcat('Data/reference/', filename)); % for exp
         fshowfig = 0; % 読み込んだ時はグラフは描画しない
     else
-        pointN = 7; %waypointの数 default:5
+        pointN = 5; %waypointの数 default:5, y方向のみの時は7
         dt = 5;%waypoint間の時間
         time =  (0:dt:dt*(pointN-1))';
 
-        %% x方向のみ
+        %% 特定方向のみ
         % 生成する点を-1.5<point<1.5にする
+        %% only x-directional
         wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), round(1*randn(pointN-2,1),3)]));
         wp_z  = ones(pointN-2,1);
+        %% only z-directional
+        % wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), zeros(pointN-2,1)]));
+        % wp_z  = max(0.5, min(1.5, round(1*randn(pointN-2,1),3)));
+        %% xyz-directional
+        % wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), round(1*randn(pointN-2,1),3)]));
+        % wp_z  = max(0.5, min(1.5, round(1*randn(pointN-2,1),3)));
         wp = [0, 0, 1;wp_xy, wp_z; 0, 0, 1];
         waypoints = [time, wp];
         

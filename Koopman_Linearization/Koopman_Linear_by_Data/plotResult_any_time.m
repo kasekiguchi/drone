@@ -13,15 +13,15 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
-flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
+flg.confirm_ref = 0; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 15; % flight後何秒からの推定精度検証を行うか saddle:3.39
-stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
@@ -38,7 +38,7 @@ loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 
 % loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
-% loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
+loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
 % loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
@@ -213,6 +213,9 @@ result.v.rmse = rmse(file{i}.simResult.state.v(:,tlength), file{WhichRef}.simRes
 error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
 % result.q.rmse = rmse_func(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
 result.q.rmse = rmse(file{i}.simResult.state.q(:,tlength), file{WhichRef}.simResult.reference.est.q(tlength,:)',2);
+
+error_w = file{i}.simResult.state.w(:,tlength) - file{WhichRef}.simResult.reference.est.w(tlength,:)';
+result.w.rmse = rmse(file{i}.simResult.state.w(:,tlength), file{WhichRef}.simResult.reference.est.w(tlength,:)',2);
 %%
 % plot(timeRange, error_p);
 %%
@@ -226,6 +229,7 @@ fprintf("Estimation time: %.2f \n", xmax);
 fprintf("Position RMSE : x=%.4f, y=%.4f, z=%.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
 fprintf("Velocity RMSE : vx=%.4f, vy=%.4f, vz=%.4f \n", result.v.rmse(1), result.v.rmse(2), result.v.rmse(3));
 fprintf("Attitude RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.q.rmse(1), result.q.rmse(2), result.q.rmse(3));
+fprintf("Attitude angular vel. RMSE : roll=%.4f, pitch=%.4f, yaw=%.4f \n", result.w.rmse(1), result.w.rmse(2), result.w.rmse(3));
 
 fprintf("====================================\n");
 result.p.mape = mape(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)',2);
@@ -234,6 +238,7 @@ fprintf("Position MAPE : x=%.4f, y=%.4f, z=%.4f \n", result.p.mape(1), result.p.
 disp(["p_max: "+ num2str(round(max(error_p, [], 2)',5))]);
 disp(["v_max: "+ num2str(round(max(error_v, [], 2)',5))]);
 disp(["q_max: "+ num2str(round(max(error_q, [], 2)',5))]);
+disp(["w_max: "+ num2str(round(max(error_w, [], 2)',5))]);
 if flg.only_rmse
     % dammy
     fprintf("Excel RMSE.P: %.4f %.4f %.4f \n", result.p.rmse(1), result.p.rmse(2), result.p.rmse(3));
@@ -436,18 +441,18 @@ if flg.confirm_ref
     ylabel('Position [m]', 'FontSize', 15);
 
     figure(10);
-    plot3(file{WhichRef}.simResult.reference.X(1,:), file{WhichRef}.simResult.reference.X(2,:), file{WhichRef}.simResult.reference.X(3,:), 'LineWidth', 2);
+    plot3(file{WhichRef}.simResult.reference.X(1,:), file{WhichRef}.simResult.reference.X(2,:), file{WhichRef}.simResult.reference.X(3,:), '--', 'LineWidth', 2);
     xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
     ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
     zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
-    grid on;
+    grid on; hold on;
 
-    figure(11);
-    plot3(file{WhichRef}.simResult.reference.X(1,tlength), file{WhichRef}.simResult.reference.X(2,tlength), file{WhichRef}.simResult.reference.X(3,tlength), 'LineWidth', 2);
+    % figure(11);
+    plot3(file{WhichRef}.simResult.reference.X(1,tlength), file{WhichRef}.simResult.reference.X(2,tlength), file{WhichRef}.simResult.reference.X(3,tlength), 'LineWidth', 2, 'Color', 'red');
     xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
     ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
     zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
-    grid on;
+    hold off;
 end
 
 %% RMSE
