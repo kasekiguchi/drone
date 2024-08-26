@@ -13,15 +13,15 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
-flg.confirm_ref = 0; % リファレンスに設定した軌道の確認
+flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 3.39; % flight後何秒からの推定精度検証を行うか saddle:3.39
-stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+startTime = 5; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
@@ -38,8 +38,8 @@ loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 
 % loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
-loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
-% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
+loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
 % loadfilename{1} = 'EstimationResult_2024-07-10_Exp_Kiyama_code08_optim_2_saddle'; %90万回
@@ -439,13 +439,15 @@ if flg.confirm_ref
     legend('x', 'y', 'z', 'verification range', 'Location', 'best', 'FontSize', 12); grid on;
     xlabel('Time [s]', 'FontSize', 15);
     ylabel('Position [m]', 'FontSize', 15);
+    % daspect([1 1 1]);
 
-    figure(10);
+    subplot(m, n, 6);
     plot3(file{WhichRef}.simResult.reference.X(1,:), file{WhichRef}.simResult.reference.X(2,:), file{WhichRef}.simResult.reference.X(3,:), '--', 'LineWidth', 2);
     xlabel('$$x$$', 'Interpreter', 'latex', 'FontSize', 25);
     ylabel('$$y$$', 'Interpreter', 'latex', 'FontSize', 25);
     zlabel('$$z$$', 'Interpreter', 'latex', 'FontSize', 25);
     grid on; hold on;
+    % daspect([1 1 1]);
 
     % figure(11);
     plot3(file{WhichRef}.simResult.reference.X(1,tlength), file{WhichRef}.simResult.reference.X(2,tlength), file{WhichRef}.simResult.reference.X(3,tlength), 'LineWidth', 2, 'Color', 'red');
