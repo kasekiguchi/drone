@@ -164,7 +164,7 @@ function [x19, x19NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % ONNX__GEMM_0
 %			- Input(s) to the ONNX network.
 %			  The input size(s) expected by the ONNX file are:
-%				  ONNX__GEMM_0:		[1, 9]				Type: DOUBLE
+%				  ONNX__GEMM_0:		[1, 13]				Type: DOUBLE
 %			  By default, the function will try to permute the input(s)
 %			  into this dimension ordering. If the default is incorrect,
 %			  use the 'InputDataPermutation' argument to control the
@@ -179,7 +179,7 @@ function [x19, x19NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % X19
 %			- Output(s) of the ONNX network.
 %			  Without permutation, the size(s) of the outputs are:
-%				  X19:		[1, 1]				Type: DOUBLE
+%				  X19:		[1, 12]				Type: DOUBLE
 %			  By default, the function will try to permute the output(s)
 %			  from this dimension ordering into a conventional MATLAB
 %			  ordering. If the default is incorrect, use the

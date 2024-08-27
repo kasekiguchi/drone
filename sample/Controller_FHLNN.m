@@ -5,54 +5,42 @@ Ac2 = [0,1;0,0];
 Bc2 = [0;1];
 Ac4 = diag([1,1,1],1);
 Bc4 = [0;0;0;1];
-Controller.F1=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt);                                % 
-Controller.F2=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-Controller.F3=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
-Controller.F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角
-Controller.F = blkdiag(Controller.F1,Controller.F2,Controller.F3,Controller.F4);
+F1=lqrd(Ac2,Bc2,diag([100,1]),[0.1],dt);                                % 
+F2=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+F3=lqrd(Ac4,Bc4,diag([100,10,10,1]),[0.01],dt); % ydiag([100,10,10,1])
+F4=lqrd(Ac2,Bc2,diag([100,10]),[0.1],dt);                       % ヨー角
+Controller.F = blkdiag(F1,F2,F3,F4);
 
 HLNN1 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp1.onnx");
 HLNN1.Initialized
 HLNN2 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp2.onnx");
 HLNN2.Initialized
-HLNN3 = importNetworkFromONNX("C:\Users\nakat\Documents\GitHub\VarietyPack\Takano\HLNN\Result\HLNN_model_tmp3.onnx");
-HLNN3.Initialized
-
 load("./Data/Ad_Bd_F.mat")
 Controller.Ad = Ad;
 Controller.Bd = Bd;
 
-% layer =inputLayer([13 1], "SC");
+% layer =inputLayer([12 1], "SC");
 % Controller.HLNN1 = addInputLayer(HLNN1,layer);
-% layer =inputLayer([53 1], "SC");
+% layer =inputLayer([40 1], "SC");
 % Controller.HLNN2 = addInputLayer(HLNN2,layer);
 
 layer =inputLayer([13 1], "SC");
 Controller.HLNN1 = addInputLayer(HLNN1,layer);
-layer =inputLayer([19 1], "SC");
-Controller.HLNN2 = addInputLayer(HLNN2,layer);
 layer =inputLayer([53 1], "SC");
-Controller.HLNN3 = addInputLayer(HLNN3,layer);
+Controller.HLNN2 = addInputLayer(HLNN2,layer);
 
-% layer =inputLayer([9 1], "SC");
-% Controller.HLNN1 = addInputLayer(HLNN1,layer);
-% layer =inputLayer([18 1], "SC");
-% Controller.HLNN2 = addInputLayer(HLNN2,layer);
-% layer =inputLayer([52 1], "SC");
-% Controller.HLNN3 = addInputLayer(HLNN3,layer);
-
-syms sz1 [2 1] real
-syms sF1 [1 2] real
-[Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,[1,0],[0]),dt));
-Controller.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
-
-syms sz2 [4 1] real
-syms sF2 [1 4] real
-syms sz3 [4 1] real
-syms sF3 [1 4] real
-syms sz4 [2 1] real
-syms sF4 [1 2] real
-Controller.Vs = matlabFunction([-sF2*sz2;-sF3*sz3;-sF4*sz4],"Vars",{sz2,sz3,sz4,sF2,sF3,sF4});
+% syms sz1 [2 1] real
+% syms sF1 [1 2] real
+% [Ad1,Bd1,~,~] = ssdata(c2d(ss(Ac2,Bc2,[1,0],[0]),dt));
+% Controller.Vf = matlabFunction([-sF1*sz1, -sF1*(Ad1-Bd1*sF1)*sz1, -sF1*(Ad1-Bd1*sF1)^2*sz1, -sF1*(Ad1-Bd1*sF1)^3*sz1],"Vars",{sz1,sF1});
+% 
+% syms sz2 [4 1] real
+% syms sF2 [1 4] real
+% syms sz3 [4 1] real
+% syms sF3 [1 4] real
+% syms sz4 [2 1] real
+% syms sF4 [1 2] real
+% Controller.Vs = matlabFunction([-sF2*sz2;-sF3*sz3;-sF4*sz4],"Vars",{sz2,sz3,sz4,sF2,sF3,sF4});
 Controller.dt = dt;
 
 %% 線形システムにMCMPCコントローラを適用する場合
