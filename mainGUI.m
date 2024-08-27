@@ -1,4 +1,4 @@
-%% Initialize settings
+ %% Initialize settings
 % set path
 cf = pwd;
 if contains(mfilename('fullpath'),"mainGUI")
@@ -13,7 +13,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 %%
 clc
-SimBaseMode = ["SimHL","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL","SimVoronoi"];
+SimBaseMode = ["SimHL","SimVoronoi","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL"];
 ExpBaseMode = ["ExpTestMotiveConnection","ExpHL","ExpFHL","ExpFHL_Servo","ExpFT","ExpEL"];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function

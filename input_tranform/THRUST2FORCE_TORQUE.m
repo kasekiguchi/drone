@@ -18,7 +18,7 @@ classdef THRUST2FORCE_TORQUE < handle
             km1 = self.parameter.km1;           
             km2 = self.parameter.km2;           
             km3 = self.parameter.km3;           
-            km4 = self.parameter.km4;    
+            km4 = self.parameter.km4;           
             obj.IT = [1 1 1 1;-ly, -ly, (Ly - ly), (Ly - ly); lx, -(Lx-lx), lx, -(Lx-lx); km1, -km2, -km3, km4];
             obj.IIT = inv(obj.IT);
             obj.dir = param;

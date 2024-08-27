@@ -7,7 +7,7 @@ classdef LANDING_REFERENCE < handle
     result
     base_state
     base_time
-    te = 10
+    te = 3
     th_offset
     th_offset0 = 200;
   end

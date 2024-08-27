@@ -25,7 +25,7 @@ methods
         obj.param.P = self.parameter.get();
         obj.flight_phase = 's';
         P = self.parameter.get;
-        obj.hover_thrust_force =P(1) * P(9);
+        obj.hover_thrust_force = P(1) * P(9);
         obj.state = state_copy(self.estimator.result.state);
     end
 

@@ -5,7 +5,6 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
         parameter % 制御モデル用パラメータ : 値ベクトル
         parameter_name % 物理パラメータの名前
         type
-        model_error
     end
 
     methods
@@ -21,23 +20,11 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
                 fn(fn=="type") = [];
                 fn(fn=="parameter") = [];
                 fn(fn=="parameter_name") = [];     
-                fn(fn=="additional") = [];
-                fn(fn=="model_error") = [];
+                fn(fn=="additional") = [];  
                 obj.parameter_name = string(fn);
-                % if isfield(param,"model_error")%モデル誤差のfieldがあるか
-                %     for i = 1:length(fn)
-                %         obj.(fn{i}) = param.(fn{i});
-                %             if ~isfield(param.model_error,(fn{i}))%そのモデル誤差を与えているか
-                %                 obj.model_error(i)=obj.(fn{i});
-                %             else
-                %                 obj.model_error(i)=obj.(fn{i})+param.model_error.(fn{i});%モデルとの値の差を加える
-                %             end
-                %     end
-                % else
-                    for i = 1:length(fn)
-                            obj.(fn{i}) = param.(fn{i});
-                    end
-                % end
+                for i = 1:length(fn)
+                    obj.(fn{i}) = param.(fn{i});
+                end
             end
             if ~isempty(param.additional) % propertyに無いパラメータを設定する場合
                 fn = fieldnames(param.additional);
@@ -51,19 +38,14 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
         end
     end
     methods
-        function v = get(obj,p,type,fmodelError)
+        function v = get(obj,p,type)
             arguments
                 obj
                 p = "all";
                 type = obj.type;
-                fmodelError=0;
             end
             if strcmp(p,"all")
-                if fmodelError==0
-                    v = obj.parameter;
-                else
-                    v = obj.model_error;%モデル誤差あり
-                end
+                v = obj.parameter;
             else
                 for i = 1:length(p)
                     if strcmp(type,"row")
@@ -90,7 +72,7 @@ classdef (Abstract) PARAMETER_CLASS < matlab.mixin.SetGetExactNames& dynamicprop
             obj.update_parameter();
         end
         function update_parameter(obj)
-            obj.parameter=[];
+          obj.parameter=[];
             for i = 1:length(obj.parameter_name)
                 if isprop(obj,obj.parameter_name(i))
                     % if strcmp(obj.type,"row")

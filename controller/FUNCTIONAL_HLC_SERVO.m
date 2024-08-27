@@ -8,7 +8,6 @@ classdef FUNCTIONAL_HLC_SERVO < handle
         Vf
         Vs
         z
-        zz
     end
     
     methods
@@ -20,7 +19,6 @@ classdef FUNCTIONAL_HLC_SERVO < handle
             obj.Vf = param.Vf; % 階層１の入力を生成する関数ハンドル
             obj.Vs = param.Vs; % 階層２の入力を生成する関数ハンドル 
             obj.z = [0;0;0];
-            obj.zz = 0;
         end
         
         function result = do(obj,varargin)
@@ -48,17 +46,12 @@ classdef FUNCTIONAL_HLC_SERVO < handle
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
             
-            if t > 0
-                % obj.z = obj.z + xd(1:3)-x(5:7);
-                obj.z = obj.z + [zeros(2,1);xd(3)]-[zeros(2,1);x(7)];
-                obj.zz = obj.zz + obj.z(3);
+            if t > 5
+                obj.z = obj.z + xd(1:3)-x(5:7);
             end
             %% calc Z
             z1 = Z1(x,xd',P);
-            % F1(3) = -0.02/0.5;
-            % F1(4) = -0.01;
-            vf = obj.Vf(z1,F1,[obj.z;obj.zz]);
-            % vf = obj.Vf(z1,F1,obj.z);
+            vf = obj.Vf(z1,F1,obj.z);
             z2 = Z2(x,xd',vf,P);
             z3 = Z3(x,xd',vf,P);
             z4 = Z4(x,xd',vf,P);
