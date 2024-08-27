@@ -15,6 +15,7 @@ classdef DRAW_DRONE_MOTION
     L
     frame_size = [0.1170, 0.0932];
     rotor_r= 0.0392;
+    flg_logger
   end
 
   methods
@@ -32,8 +33,10 @@ classdef DRAW_DRONE_MOTION
       %     param.mp4 = 0;
       % end
       param = struct(varargin{:});
-
-      data = logger.data(param.target,"p","e");
+      param.frame_size = [10, 10];
+      try data = logger.data(param.target,"p","e");
+      catch; data = logger.p; obj.flg_logger = 1;
+      end
       tM = max(data);
       tm = min(data);
       M = [max(tM(1:3:end)),max(tM(2:3:end)),max(tM(3:3:end))];
@@ -46,7 +49,11 @@ classdef DRAW_DRONE_MOTION
       obj.L = L;
       obj.xlim = [m(1)-L(1) M(1)+L(1)];
       obj.ylim = [m(2)-L(2) M(2)+L(2)];
-      obj.zlim = [0 M(3)+1];
+      obj.zlim = [0 M(3)+5];
+
+      obj.xlim = [0 40];
+      obj.ylim = [0 40];
+      obj.zlim = [0 30];
       if isfield(param,'ax')
         ax = param.ax;
       else
@@ -55,8 +62,13 @@ classdef DRAW_DRONE_MOTION
         varargin = {varargin{:},'ax',ax};
       end
       obj=obj.gen_frame(varargin{:});%"frame_size",param.frame_size,"rotor_r",param.rotor_r, "target",param.target,"fig_num" ,param.fig_num);
-
-      view(ax,3)
+      
+      %%%%%%%%%%%%%%%%%%%%%%%
+      %視点を変える
+      % view(ax,3) %default
+      view(ax,[1,1,1])
+      view(0,90) % 方位角, 仰角
+      %%%%%%%%%%%%%%%%%%%%%%%
       grid(ax,'on')
       daspect(ax,[1 1 1]);
     end
@@ -193,10 +205,17 @@ classdef DRAW_DRONE_MOTION
       ax = obj.ax;
       %p = logger.data(param.target,"p","e");
       %q = logger.data(param.target,"q","e");
-      p = logger.data(param.target,"p","p");
-      q = logger.data(param.target,"q","p");
-      u = logger.data(param.target,"input");
-      r = logger.data(param.target,"p","r");
+      if obj.flg_logger 
+          p = logger.p;
+          q = logger.q;
+          u = logger.u;
+          r = logger.r;
+      else
+          p = logger.data(param.target,"p","p");
+          q = logger.data(param.target,"q","p");
+          u = logger.data(param.target,"input");
+          r = logger.data(param.target,"p","r");
+      end
       p = reshape(p,size(p,1),3,length(param.target));
       q = reshape(q,size(q,1),size(q,2)/length(param.target),length(param.target));
       u = reshape(u,size(u,1),size(u,2),length(param.target));
@@ -235,7 +254,9 @@ classdef DRAW_DRONE_MOTION
         end
       end
 
-      t = logger.data("t");
+      if obj.flg_logger; t = logger.t;
+      else; t = logger.data("t");
+      end
       tRealtime = tic;
       if isfield(param,'Motive_ref')
         for n = 1:length(param.target)
@@ -246,7 +267,7 @@ classdef DRAW_DRONE_MOTION
         if isfield(param,'Motive_ref')
           addpoints(ax,f(n),r(i,1,param.target),r(i,2,param.target),r(i,3,param.target));
         else
-          plot3(ax,r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k');
+          plot3(ax,r(:,1,param.target),r(:,2,param.target),r(:,3,param.target),'k', 'LineWidth', 1.5, 'LineStyle',':'); %reference
         end
         if ~isempty(param.opt_plot)
           param.self.show(param.opt_plot,"logger",logger,"k",i,varargin{:});

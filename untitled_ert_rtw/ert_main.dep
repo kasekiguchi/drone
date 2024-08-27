@@ -1,0 +1,41 @@
+ert_main.o: \
+ C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/ert_main.c \
+ C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/untitled.h \
+ C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/rtwtypes.h \
+ C:/PROGRA~1/MATLAB/R2024a/simulink/include/rtw_continuous.h \
+ C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/rtwtypes.h \
+ C:/PROGRA~1/MATLAB/R2024a/simulink/include/rtw_solver.h \
+ C:/PROGRA~1/MATLAB/R2024a/simulink/include/rtw_continuous.h \
+ C:/PROGRA~3/MATLAB/SupportPackages/R2024a/toolbox/target/supportpackages/arduinobase/include/MW_arduino_digitalio.h \
+ C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/untitled_types.h \
+ C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/MW_target_hardware_resources.h \
+ C:/PROGRA~3/MATLAB/SupportPackages/R2024a/toolbox/target/supportpackages/arduinotarget/scheduler/include/arduinoAVRScheduler.h \
+ C:/ProgramData/MATLAB/SupportPackages/R2024a/aCLI/data/packages/arduino/hardware/avr/1.8.3/cores/arduino/Arduino.h \
+ C:/ProgramData/MATLAB/SupportPackages/R2024a/aCLI/data/packages/arduino/hardware/avr/1.8.3/cores/arduino/binary.h \
+ C:/ProgramData/MATLAB/SupportPackages/R2024a/aCLI/data/packages/arduino/hardware/avr/1.8.3/variants/standard/pins_arduino.h
+
+C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/untitled.h:
+
+C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/rtwtypes.h:
+
+C:/PROGRA~1/MATLAB/R2024a/simulink/include/rtw_continuous.h:
+
+C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/rtwtypes.h:
+
+C:/PROGRA~1/MATLAB/R2024a/simulink/include/rtw_solver.h:
+
+C:/PROGRA~1/MATLAB/R2024a/simulink/include/rtw_continuous.h:
+
+C:/PROGRA~3/MATLAB/SupportPackages/R2024a/toolbox/target/supportpackages/arduinobase/include/MW_arduino_digitalio.h:
+
+C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/untitled_types.h:
+
+C:/Users/nakat/Documents/GitHub/drone/untitled_ert_rtw/MW_target_hardware_resources.h:
+
+C:/PROGRA~3/MATLAB/SupportPackages/R2024a/toolbox/target/supportpackages/arduinotarget/scheduler/include/arduinoAVRScheduler.h:
+
+C:/ProgramData/MATLAB/SupportPackages/R2024a/aCLI/data/packages/arduino/hardware/avr/1.8.3/cores/arduino/Arduino.h:
+
+C:/ProgramData/MATLAB/SupportPackages/R2024a/aCLI/data/packages/arduino/hardware/avr/1.8.3/cores/arduino/binary.h:
+
+C:/ProgramData/MATLAB/SupportPackages/R2024a/aCLI/data/packages/arduino/hardware/avr/1.8.3/variants/standard/pins_arduino.h:
