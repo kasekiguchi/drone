@@ -5,11 +5,12 @@ classdef TAKEOFF_REFERENCE < handle
     base_time
     base_state
     ts
-    te = 5;
-    zd = 1; % goal altitude
+    te = 15;
+    zd = 1.5; % goal altitude
     result
     th_offset
-    th_offset0 = 200;
+    % th_offset0 = 235;%ifight用
+    th_offset0 = 150;%エーシン
   end
 
   methods

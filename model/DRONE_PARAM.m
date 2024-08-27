@@ -38,14 +38,30 @@ classdef DRONE_PARAM < PARAMETER_CLASS
             arguments
                 name % DIATONE
                 type = "row";
-                param.mass = 0.5884;
-                param.Lx = 0.16;
-                param.Ly = 0.16;
-                param.lx = 0.16/2;%0.05;
-                param.ly = 0.16/2;%0.05;
-                param.jx = 0.06;
-                param.jy = 0.06;
-                param.jz = 0.06;
+                % param.mass = 0.256;
+                % param.Lx = 0.09;
+                % param.Ly = 0.09;
+                % param.lx = 0.09/2;%0.05;
+                % param.ly = 0.09/2;%0.05;
+                % param.jx = 0.03;
+                % param.jy = 0.03;
+                % param.jz = 0.03;
+                param.mass = 0.699;%エーシン
+                % param.mass = 0.730;%iflight
+                param.Lx = 0.16;%エーシン
+                param.Ly = 0.16;%エーシン
+                param.lx = 0.16/2;%0.05;%エーシン
+                param.ly = 0.16/2;%0.05;%エーシン
+                % param.Lx = 0.175;%iflight
+                % param.Ly = 0.175;%iflight
+                % param.lx = 0.175/2;%0.05;%iflight
+                % param.ly = 0.175/2;%0.05;%iflight
+                % param.jx = 0.085;
+                % param.jy = 0.085;
+                % param.jz = 0.085;
+                param.jx = 1.838*1e-5;
+                param.jy = 2.538*1e-5;
+                param.jz = 2.762*1e-5;
                 param.gravity = 9.81;
                 param.km1 = 0.0301; % ロータ定数
                 param.km2 = 0.0301; % ロータ定数
@@ -57,6 +73,8 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
                 param.additional = []; % プロパティに無いパラメータを追加する場合
+                param.model_error = [];
+             
             end
             obj = obj@PARAMETER_CLASS(name,type,param);
         end
