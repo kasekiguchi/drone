@@ -384,8 +384,8 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
 
     function data = return_state_prop(obj, variable, data)
       % function for data_org
-      fn = fieldnames(data); % フィールド名に数字を含む場合のケア
       for j = 1:length(variable)
+        fn = fieldnames(data); % フィールド名に数字を含む場合のケア
         %data = [data.(variable(j))];
         data = vertcat(data.(fn{contains(fn,variable(j))}));
 
