@@ -13,15 +13,15 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 flg.ylimHold = 0; % 指定した値にylimを固定
 flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
-flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
+flg.confirm_ref = 0; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
-flg.only_rmse = 0; % コマンドウィンドウに表示
+flg.only_rmse = 1; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 5; % flight後何秒からの推定精度検証を行うか saddle:3.39
-stepnum = 1; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+startTime = 3.9; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
@@ -36,10 +36,10 @@ mode.training_data = 'Kiyama';
 ref_tra = 'saddle'; 
 loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 
-% loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
+loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
 % loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
-loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
 % loadfilename{1} = 'EstimationResult_2024-07-10_Exp_Kiyama_code08_optim_2_saddle'; %90万回
@@ -55,7 +55,7 @@ loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_i
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code01_hovering';
-loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
+% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
 WhichRef = 2; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
 if size(loadfilename,2) == 1 % fileが1つならWhichRefを変更
@@ -200,22 +200,29 @@ newcolors = [0 0.4470 0.7410
 %% Calculate RMSE
 i = 1;
 % rmse関数でも大丈夫．rmse(予測値, 観測値, 2) = [3*1](=x,y,z)
-rmse_func = @(x) sqrt(1/stepN * sum(x.^2, 2));
+rmse_func = @(x) sqrt(sum(x.^2, 2)/stepN);
 % position
 error_p = file{i}.simResult.state.p(:,tlength) - file{WhichRef}.simResult.reference.est.p(tlength,:)';
-% result.p.rmse = rmse_func(error_p); result.p.max = max(error_p,[],2); result.p.min = min(error_p,[],2);
 result.p.rmse = rmse(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)', 2);
 % velocity
 error_v = file{i}.simResult.state.v(:,tlength) - file{WhichRef}.simResult.reference.est.v(tlength,:)';
-% result.v.rmse = rmse_func(error_v); result.v.max = max(error_v,[],2); result.v.min = min(error_v,[],2);
 result.v.rmse = rmse(file{i}.simResult.state.v(:,tlength), file{WhichRef}.simResult.reference.est.v(tlength,:)',2);
 % attitude
 error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
-% result.q.rmse = rmse_func(error_q); result.q.max = max(error_q,[],2); result.q.min = min(error_q,[],2);
 result.q.rmse = rmse(file{i}.simResult.state.q(:,tlength), file{WhichRef}.simResult.reference.est.q(tlength,:)',2);
-
+% angular velocity
 error_w = file{i}.simResult.state.w(:,tlength) - file{WhichRef}.simResult.reference.est.w(tlength,:)';
 result.w.rmse = rmse(file{i}.simResult.state.w(:,tlength), file{WhichRef}.simResult.reference.est.w(tlength,:)',2);
+
+% result.p.rmse = rmse_func(error_p);
+% result.v.rmse = rmse_func(error_v); 
+% result.q.rmse = rmse_func(error_q);
+% result.w.rmse = rmse_func(error_w);
+
+result_rmse = get_rmse(file{1}, tlength);
+
+% file{1}.simResult.state.p
+% file{WhichRef}.simResult.reference.est.p
 %%
 % plot(timeRange, error_p);
 %%
@@ -248,7 +255,7 @@ i = 1;
 %% P
 % strrep _を "【空白】"に置換
 fig_title = strcat(strrep(loadfilename{1},'_',' '),'==startTime : ',num2str(startTime), 's==', ref_tra);
-fig_title = '';
+% fig_title = '';
 if flg.figtype; figure(1);
 else; fig = figure(1); sgtitle(fig_title); subplot(m,n,1); end 
 % Referenceをplot
@@ -676,3 +683,33 @@ end
 end % flg.divisionのif
 
 end % flg.only_rmse
+
+
+%%
+function result = get_rmse(data, t)
+    state = data.simResult.state;
+    ref = data.simResult.reference.est;
+    rmse_func = @(x) sqrt(sum(x.^2, 2) / size(x, 2));
+
+    for k = 1:3
+        rmse_p(k) = rmse_func(state.p(k, t) - ref.p(t, k)');
+        rmse_q(k) = rmse_func(state.q(k, t) - ref.q(t, k)');
+        rmse_v(k) = rmse_func(state.v(k, t) - ref.v(t, k)');
+        rmse_w(k) = rmse_func(state.w(k, t) - ref.w(t, k)');
+    end
+    
+    result = struct("p", rmse_p);
+% rmse_func = @(x) sqrt(sum(x.^2, 2)/stepN);
+% % position
+% error_p = file{i}.simResult.state.p(:,tlength) - file{WhichRef}.simResult.reference.est.p(tlength,:)';
+% result.p.rmse = rmse(file{i}.simResult.state.p(:,tlength), file{WhichRef}.simResult.reference.est.p(tlength,:)', 2);
+% % velocity
+% error_v = file{i}.simResult.state.v(:,tlength) - file{WhichRef}.simResult.reference.est.v(tlength,:)';
+% result.v.rmse = rmse(file{i}.simResult.state.v(:,tlength), file{WhichRef}.simResult.reference.est.v(tlength,:)',2);
+% % attitude
+% error_q = file{i}.simResult.state.q(:,tlength) - file{WhichRef}.simResult.reference.est.q(tlength,:)';
+% result.q.rmse = rmse(file{i}.simResult.state.q(:,tlength), file{WhichRef}.simResult.reference.est.q(tlength,:)',2);
+% % angular velocity
+% error_w = file{i}.simResult.state.w(:,tlength) - file{WhichRef}.simResult.reference.est.w(tlength,:)';
+% result.w.rmse = rmse(file{i}.simResult.state.w(:,tlength), file{WhichRef}.simResult.reference.est.w(tlength,:)',2);
+end

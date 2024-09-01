@@ -49,10 +49,12 @@ classdef FIGURE_EXP
             % obj = obj.decide_phase();
             % obj = obj.store_data();
             calt = obj.data.logt;
+            % plot_title = strcat(strrep(obj.filename,'_','-'));
+            plot_title = '';
             
             disp('Plotting start...');
             m = 2; n = 3;
-            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,1); sgtitle(strcat(strrep(obj.filename,'_','-')));end
+            if obj.flg.figtype; figure(obj.data.fignum); else subplot(m,n,1); sgtitle(plot_title);end
             plot(obj.data.logt, obj.data.Est(1:3,:), "LineWidth", 1.5); hold on; plot(obj.data.logt, obj.data.Ref(1:3, :), '--', "LineWidth", 1.5); hold off;
             obj.background_color(-0.1, gca, obj.log.Data.phase); 
             xlabel("Time [s]"); ylabel("Position [m]"); legend("x.state", "y.state", "z.state", "x.reference", "y.reference", "z.reference",  "Location","best");

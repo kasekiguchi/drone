@@ -244,6 +244,8 @@ classdef DRAW_DRONE_MOTION
         end
       end
 
+      % v.FrameRate = 1/0.016; 
+
       if obj.flg_logger; t = logger.t;
       else; t = logger.data("t");
       end
