@@ -2,8 +2,8 @@ function Controller = Controller_MPC_Koopman(dt, model)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
-    Controller_param.dt = 0.04; % MPCステップ幅 0.07
-    Controller_param.H = 5 %ホライズン数
+    Controller_param.dt = 0.08; % MPCステップ幅 0.07
+    Controller_param.H = 10 %ホライズン数
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
     Controller_param.total_size = Controller_param.state_size + Controller_param.input_size;
@@ -45,15 +45,17 @@ function Controller = Controller_MPC_Koopman(dt, model)
         Controller_param.quad_drone = @quad_drone_code04_mex;
     elseif size(Controller_param.A,1) == 71
         Controller_param.quad_drone = @quad_drone_code08_mex;
+    else
+        error('観測量に合うコントローラーがありませｎ')
     end
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
     Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
     Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
-    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
     Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;
