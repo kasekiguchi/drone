@@ -50,7 +50,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
             obj.result.state.set_state("q",obj.self.estimator.result.state.get("q"));
             obj.result.state.set_state("v",obj.self.estimator.result.state.get("v"));
         end
-        function  result= do(obj,varargin)
+        function result= do(obj,varargin)
             % 【Input】result = {Xd(optional)}
             if isempty(obj.t0)
                 obj.t0=varargin{1}.t;%目標地点が定められた時刻
@@ -110,7 +110,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
             arguments
                 val         %時間とwaypoint
                 n           %多項式次数
-                fdrowfig=1  %図を描画するか
+                fdrowfig  %図を描画するか
             end
             time = val(:,1)';
             point = val(:,2:end)';
@@ -254,7 +254,7 @@ classdef MY_WAY_POINT_REFERENCE < handle
                 i=i+1;
     
                 figure(i)
-                tiledlayout("horizontal")
+%                 tiledlayout("horizontal")
                 nexttile
                 plot(xyz(1,:),xyz(2,:),"LineWidth",2)
                 xlabel('$x$ (m)','FontSize',18,'Interpreter','latex')
