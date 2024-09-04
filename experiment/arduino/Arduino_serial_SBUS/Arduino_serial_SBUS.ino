@@ -1,442 +1,134 @@
-// #include "sbus.h"
-// #include <SoftwareSerial.h>
+// #include <AltSoftSerial.h>
 
-// // SoftwareSerialの設定 (D2: TX)
-// SoftwareSerial mySerial(4, 2); // 4番ピンはダミーのRX、2番ピンはTX
+// // 定義
+// #define FUTABA_BAUD_RATE 115200
+// #define NUM_CHANNELS 8
 
-// // SBUSクラスのインスタンスを作成
-// SBUS mySbus(mySerial);
-
-// // 8つのチャンネルの値を格納する配列
-// uint16_t channels[16] = {0};
+// AltSoftSerial futabaSerial; // AltSoftSerialインスタンスの作成
 
 // void setup() {
-//   // デバッグ用のシリアルポートを初期化
-//   Serial.begin(115200);
-
-//   // ソフトウェアシリアルポートを初期化
-//   mySerial.begin(100000);
-
-//   // SBUSの初期化
-//   mySbus.begin();
+//   // シリアルポートの初期化
+//   futabaSerial.begin(FUTABA_BAUD_RATE);
 // }
 
 // void loop() {
-//   // シリアルモニターから0から1000の8つの値を読み取る
-//   if (Serial.available() > 0) {
-//     for (int i = 0; i < 8; i++) {
-//       if (Serial.available() > 0) {
-//         int value = Serial.parseInt();
-//         if (value >= 0 && value <= 1000) {
-//           channels[i] = map(value, 0, 1000, 172, 1811); // 0-1000をSBUSの範囲にマッピング
-//         } else {
-//           channels[i] = 992; // デフォルト値（センターポジション）
-//         }
-//       }
-//     }
-
-//     // SBUS信号を送信
-//     mySbus.write(channels);
-
-//     // チャンネルの値をシリアルモニターに出力
-//     for (int i = 0; i < 8; i++) {
-//       Serial.print(channels[i]);
-//       if (i < 7) Serial.print(", ");
-//     }
-//     Serial.println();
+//   // ランダムなチャンネルデータを生成
+//   uint16_t channels[NUM_CHANNELS];
+//   for (int i = 0; i < NUM_CHANNELS; i++) {
+//     channels[i] = random(0, 1001); // 0から1000の範囲のランダムな値
 //   }
 
-//   delay(20); // SBUS信号の送信間隔を20msに設定
+//   // Futabaプロトコルのデータパケットを作成
+//   uint8_t packet[NUM_CHANNELS * 2 + 2];
+//   packet[0] = 0xA2; // ヘッダバイト
+
+//   int packetIndex = 1;
+//   for (int i = 0; i < NUM_CHANNELS; i++) {
+//     packet[packetIndex++] = lowByte(channels[i]);
+//     packet[packetIndex++] = highByte(channels[i]);
+//   }
+
+//   // チェックサムの計算
+//   uint8_t checksum = 0;
+//   for (int i = 0; i < packetIndex; i++) {
+//     checksum ^= packet[i];
+//   }
+//   packet[packetIndex] = checksum;
+
+//   // パケットを送信
+//   futabaSerial.write(packet, NUM_CHANNELS * 2 + 2);
+
+//   // 送信間隔の設定
+//   delay(20); // 20ms間隔で送信（Futabaプロトコルは一般的に50Hzの更新レート）
 // }
 
-// #include "sbus.h" boldernotoki
-// #include <SoftwareSerial.h>
+// #include <AltSoftSerial.h>
 
-// SoftwareSerial mySerial(4, 2);
-// /* SBUS object, reading SBUS */
-// bfs::SbusRx sbus_rx(&Serial);
-// /* SBUS object, writing SBUS */
-// bfs::SbusTx sbus_tx(&Serial);
-// /* SBUS data */
-// bfs::SbusData data;
+// // デジタルピンを使用したシリアル通信の初期化
+// AltSoftSerial altSerial;
+
+// // データ送信間隔（ミリ秒）
+// const int interval = 20;
 
 // void setup() {
-//   /* Serial to display data */
-//   Serial.begin(115200);
-//   while (!Serial) {}
-//   /* Begin the SBUS communication */
-//   sbus_rx.Begin();
-//   sbus_tx.Begin();
+//   // シリアルモニタの初期化
+//   Serial.begin(9600);
+//   // AltSoftSerialの初期化（100,000 bpsに設定）
+//   altSerial.begin(100000);
 // }
 
-// void loop () {
-//   if (sbus_rx.Read()) {
-//     /* Grab the received data */
-//     data = sbus_rx.data();
-//     /* Display the received data */
-//     for (int8_t i = 0; i < data.NUM_CH; i++) {
-//       Serial.print(data.ch[i]);
-//       Serial.print("\t");
+// void loop() {
+//   static unsigned long lastTime = 0;
+//   unsigned long currentTime = millis();
+  
+//   // 20ミリ秒ごとにデータを送信
+//   if (currentTime - lastTime >= interval) {
+//     lastTime = currentTime;
+
+//     // 送信するデータの作成（ここでは例として固定データを使用）
+//     uint8_t data[] = {0xA2, 0x00, 0x1F, 0xD0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    
+//     // データを送信
+//     for (int i = 0; i < sizeof(data); i++) {
+//       altSerial.write(data[i]);
 //     }
-//     /* Display lost frames and failsafe data */
-//     Serial.print(data.lost_frame);
-//     Serial.print("\t");
-//     Serial.println(data.failsafe);
-//     /* Set the SBUS TX data to the received data */
-//     sbus_tx.data(data);
-//     /* Write the data to the servos */
-//     sbus_tx.Write();
+
+//     // シリアルモニタに送信したデータを表示
+//     Serial.print("Sent: ");
+//     for (int i = 0; i < sizeof(data); i++) {
+//       Serial.print(data[i], HEX);
+//       Serial.print(" ");
+//     }
+//     Serial.println();
 //   }
 // }
 
 #include <SoftwareSerial.h>
 
-// SoftwareSerialの設定 (D2: TX)
-SoftwareSerial mySerial(4, 2); // 4番ピンはダミーのRX、2番ピンはTX
+const int txPin = 2;  // D2ピンをTX（送信ピン）として使用
+SoftwareSerial mySerial(txPin, -1); // RXピンは不要なので-1
 
-// SBUS信号のヘッダとフッタ
-const uint8_t SBUS_HEADER = 0x0F;
-const uint8_t SBUS_FOOTER = 0x00;
+// 送信するチャンネルデータの初期化（最大16チャンネル）
+uint16_t channels[16] = {1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024,
+                         1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024};
+
+// CRC8の計算用関数
+uint8_t calculateCRC(uint8_t *data, uint8_t len) {
+  uint8_t crc = 0;
+  for (uint8_t i = 0; i < len; i++) {
+    crc ^= data[i];
+  }
+  return crc;
+}
+
+// CRSFフレームの送信
+void sendCRSF() {
+  uint8_t packetLength = 2 + 16 * 2 + 1; // ヘッダー、チャンネルデータ、CRC
+  uint8_t crsfPacket[packetLength + 2];  // ヘッダー + パケット長 + データ + CRC
+
+  crsfPacket[0] = 0xC8; // CRSFアドレス（TXモジュール宛）
+  crsfPacket[1] = packetLength;
+
+  // チャンネルデータの追加
+  for (uint8_t i = 0; i < 16; i++) {
+    crsfPacket[2 + i * 2] = channels[i] & 0xFF;        // チャンネルデータ（下位バイト）
+    crsfPacket[3 + i * 2] = (channels[i] >> 8) & 0xFF; // チャンネルデータ（上位バイト）
+  }
+
+  // CRCの計算と追加
+  crsfPacket[packetLength + 1] = calculateCRC(crsfPacket, packetLength + 1);
+
+  // パケットの送信
+  for (uint8_t i = 0; i < packetLength + 2; i++) {
+    mySerial.write(crsfPacket[i]);
+  }
+}
 
 void setup() {
-  // デバッグ用のシリアルポートを初期化
-  Serial.begin(115200);
-
-  // ソフトウェアシリアルポートを初期化
-  mySerial.begin(100000);
+  mySerial.begin(115200); // CRSFの通信速度
 }
 
 void loop() {
-  // 8つのチャンネルの値を格納する配列
-  uint16_t channels[16] = {0};
-  // 8つのチャンネルの値をシリアルモニターから読み取る
-  if (Serial.available() > 0) {
-    for (int i = 0; i < 8; i++) {
-      if (Serial.available() > 0) {
-        int value = Serial.parseInt();
-        if (value >= 0 && value <= 1000) {
-          channels[i] = map(value, 0, 1000, 172, 1811); // 0-1000をSBUSの範囲にマッピング
-        } else {
-          channels[i] = 992; // デフォルト値（センターポジション）
-        }
-      }
-    }
-
-    // SBUS信号を生成
-    uint8_t sbus_packet[25] = {0};
-    sbus_packet[0] = SBUS_HEADER;
-
-    // チャンネルデータをSBUS信号にエンコード
-    int byteIndex = 1;
-    int bitIndex = 0;
-    for (int i = 0; i < 16; i++) {
-      for (int bit = 0; bit < 11; bit++) {
-        if (channels[i] & (1 << bit)) {
-          sbus_packet[byteIndex] |= (1 << bitIndex);
-        }
-        bitIndex++;
-        if (bitIndex == 8) {
-          bitIndex = 0;
-          byteIndex++;
-        }
-      }
-    }
-
-    sbus_packet[23] = 0x00; // フラグ
-    sbus_packet[24] = SBUS_FOOTER;
-
-    // SBUS信号を送信
-    mySerial.write(sbus_packet, 25);
-
-    // チャンネルの値をシリアルモニターに出力
-    for (int i = 0; i < 8; i++) {
-      Serial.print(channels[i]);
-      if (i < 7) Serial.print(", ");
-    }
-    Serial.println();
-  }
-
-  delay(20); // SBUS信号の送信間隔を20msに設定
+  sendCRSF();  // CRSFフレームの送信
+  delay(14);   // 通常70Hzでの送信レート
 }
-
-//--------------------ここから下がプログラム作成
-
-// SBUS
-#include <SoftwareSerial.h> //Serialクラスのシリアルポート以外のデジタルピンでシリアル通信を可能にするライブラリ
-
-uint8_t i; //符号なし8bit整数型(0~255)のi 何かの処理を行う時のためにとっておく
-#define LED_PIN 13 //13ピン(D13)をLED_PINと定義
-// [ Green Red ] : HIGHで消灯、LOWで点滅
-// 飛行可能（初期状態）： [ LOW HIGH ]
-// Arming           :  [ LOW LOW  ]
-// Emergence        :  [ HIGH LOW ]
-#define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義
-#define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義
-#define EM_PIN 3    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義　これから緊急停止ボタンの短絡・開放を読み取ることになる
-#define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義
-volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数boolean isEmergencyにfalseを格納
-boolean fReset = false; //変数boolean fResetにfalseを格納
-boolean fInitial = true; //変数boolean fInitialにtrueを格納
-/////////////////// SBUS関係 ////////////////////
-#define OUTPUT_PIN 2 // ppm output pin　2ピン(D2)をOUTPUT_PINと定義　このピンからSBUS信号を出力する
-char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127までの数値として扱われる　受信したデータの格納場所packetBufferを定義している　[255]は一度に受信できる最大のバッファサイズ
-#define TOTAL_INPUT 4 // number of input channels　使用されていないため考えなくてよい
-#define TOTAL_CH 8    // number of channels 1フレームにおけるチャンネルの数を8と定義
-// https://create-it-myself.com/research/study-ppm-spec/
-// PPM信号の周期  [us] = 22.5 [ms] // オシロスコープでプロポ信号を計測した結果：上のリンク情報とも合致
-#define PPM_PERIOD 22500 // PPMの周期判定はHIGHの時間が一定時間続いたら新しい周期の始まりと認知すると予想できるので、22.5より多少短くても問題無い＝＞これにより信号が安定した
-#define TIME_LOW 360     // PPM信号 LOWパルス幅 [us]
-#define CH_MIN 0         // PPM幅の最小 [us] MATLABから送信される信号の最小を定義　オフセットにも関係
-#define CH_NEUTRAL 500   // PPM幅の中間 [us] MATLABから送信される信号の中間を定義　オフセットにも関係
-#define CH_MAX 1000      // PPM幅の最大 [us] MATLABから送信される信号の最大を定義　オフセットにも関係
-// PPM Channelの基本構造
-// TIME_LOW + CH_OFFSET = 2000 = 2 [ms]　
-// TIME_LOW + CH_MAX + CH_OFFSET = 1000 = 1 [ms]　計算が合わないこの計算式では3[ms]となるはずである．　400 + 1000 + 1620 = 3020　もしくは，CH_MAXが-となっていることが正しいと考えられる
-// volatile uint16_t CH_OFFSET; // 共通オフセット値 2*CH_MAX - TIME_LOW + 20 = 2000 - 400 + 20 = 1620 ★オフセットとは周波数オフセットを表しているのか確認
-// #define CH_OFFSET 1620       // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
-// #define TOTAL_CH_OFFSET 12960 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
-#define CH_OFFSET 1655       // transmitterシステムでは20が必要　★オフセットには20が追加されているが何故必要であるのかが不明
-#define TOTAL_CH_OFFSET 13240 //  8*CH_OFFSET 1フレーム分の合計オフセットを定義
-//（特にroll入力が他の値が増加することで必要なoffset値が一度変化するので、AUX5をMAX値にしておくことで変化した後の値で一定にした。）
-// CH1の値が他のCHの値に比べて不安定なのは上記の動作が原因だと考えられる　transmitterのプログラムで行っている可能性あり AUX5の意味が不明AUX4までしか定義されていないはずである
-// volatile uint16_t TOTAL_CH_OFFSET = 0; // CH_OFFSETの合計
-volatile uint8_t n_ch = TOTAL_CH; // 現在の chを保存　符号なし8bit整数型(0~255)n_chに1フレームにおけるチャンネルの数8を代入
-volatile uint16_t t_sum = 0;      // us単位  1周期中の現在の使用時間　16bit整数型(-32768~32767)t_sumに1周期の始まりである0を代入
-volatile uint16_t pw[TOTAL_CH];   // ch毎のパルス幅を保存　16bit整数型(-32768~32767)pwはch毎のパルス幅を記録して，その上限は8である
-volatile uint16_t phw[TOTAL_CH];  // PPM周期を保つため、Pulse_control内のみで使用
-volatile boolean isReceive_Data_Updated = false; //boolean isReceive_Data_Updatedにfalseを代入
-volatile uint16_t start_H = PPM_PERIOD; //16bit整数型(-32768~32767)start_HにPPM_PERIOD(22500)を代入 スタート時のパルス幅
-volatile uint16_t start_Hh = PPM_PERIOD; //16bit整数型(-32768~32767)start_HhにPPM_PERIOD(22500)を代入
-volatile uint16_t REMAINING_W; //16bit整数型(-32768~32767)REMAINING_Wを定義
-volatile uint16_t plus = 0;
-//////////// シリアル通信が途絶えたとき用 ////////////////////////////////
-volatile unsigned long last_received_time;
-
-SoftwareSerial mySerial(4, 2); // 4番ピンはダミーのRX、2番ピンはTX
-
-// SBUS信号のヘッダとフッタ
-const uint8_t SBUS_HEADER = 0x0F;
-const uint8_t SBUS_FOOTER = 0x00;
-
-// ==================================================================
-void setup()
-{
-  Serial.begin(115200); // MATLABの設定と合わせる　パソコンとマイコンの通信速度を合わせている
-  // Serial.setTimeout(10); //
-  Serial.println("Start"); //シリアル通信でメッセージ(Start)をPCに送信
-  pinMode(LED_PIN, OUTPUT); //pinMode:ピンの動作を入力か出力に設定　13ピンが出力
-  digitalWrite(LED_PIN, HIGH); //digitalWrite:指定したピンにHIGH(UNOは5V)もしくはLOW(0V)を出力　13ピンから5V出力
-  pinMode(GLED_PIN, OUTPUT); //15(A1)ピンを出力に設定
-  digitalWrite(GLED_PIN, LOW); //15(A1)ピンから0V出力
-  pinMode(RLED_PIN, OUTPUT); //14(A0)ピンを出力に設定
-  digitalWrite(RLED_PIN, HIGH); //14(A0)ピンから5V出力
-  pinMode(EM_PIN, INPUT_PULLUP); // emergency_stop を割り当てるピン 3ピンを入力に設定でプルアップ抵抗を有効
-  pinMode(RST_PIN, INPUT_PULLUP); //A4ピンを入力に設定でプルアップ抵抗を有効
-
-  setupPPM(); // ppm 出力開始
-
-  // 緊急停止
-  attachInterrupt(digitalPinToInterrupt(EM_PIN), emergency_stop, RISING); // 緊急停止用　値の変化で対応（短絡から5V）
-  while (Serial.available() <= 0) //受信データを受け取っていない時繰り返す　繰り返す中身がないため何もしない．
-  {
-  }
-  last_received_time = micros(); //micros():Arduinoボードがプログラムの実行を開始した時から現在までの時間をマイクロ秒単位で返す約70分で0に戻る　最後に受信されたメッセージが読み取られた時刻をast_received_timeに格納
-}
-
-void loop()
-{
-  receive_serial(); //ここは半透明となっているため動かない　信号を受信した場合
-    // if (!isEmergency)
-    // {
-    //   receive_serial();
-    // }
-    // else
-    // {
-    //   if (digitalRead(EM_PIN) == HIGH && fReset == false)
-    //   {
-    //     delay(5000); // delay 前後で非常停止ボタンが押された状態ならreset可能に（チャタリング防止）
-    //     if (digitalRead(EM_PIN) == HIGH)
-    //     {
-    //       Serial.println("Reset available.");
-    //       digitalWrite(LED_PIN, HIGH);
-    //       digitalWrite(RLED_PIN, HIGH);
-    //       digitalWrite(GLED_PIN, LOW);
-    //       fReset = true;
-    //     }
-    //   }
-    //   else if (fReset == true && digitalRead(EM_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
-    //   {
-    //     software_reset();
-    //   }
-    // }
-    
-}
-//*********** local functions  *************************//
-void receive_serial() // ---------- loop function : receive signal by UDP 信号を受信したら実行
-{
-  // ch : 0 - 1000 is converted to 1000 - 2000 throttle on FC
-  if (Serial.available() > 0) //信号を受信したら実行する
-  {
-    last_received_time = micros(); //最後に信号を受け取った時間を更新している
-    Serial.println("received"); //シリアル通信でメッセージ(received)をPCに送信 信号が受信できたことを通知
-    Serial.readBytes(packetBuffer, 2 * TOTAL_CH); //2 * TOTAL_CH(8) = 16バイトの数値をシリアル通信で受信してpacketBufferに保存
-    Serial.println(micros() - last_received_time); //シリアル通信でメッセージをPCに送信　現在時間から最後に信号を受け取った時間を引いている
-    if (packetBuffer) //もしpacketBufferならとはどういう意味？
-    {
-      REMAINING_W = PPM_PERIOD; //REMAINING_WにPPM_PERIOD(22500)を代入
-      for (i = 0; i < TOTAL_CH; i++) //i=0から始めて，i<8まで1ずつ加算して繰り返す　恐らく8チャンネル繰り返せるようにしている
-      {
-        pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]); //16bit整数型(-32768~32767)の受信データ * 100 + 16bit整数型(-32768~32767)の受信データ[i+8] 全部で16バイトあるため
-        // if (i == 0) //チャンネルが始まっていないとき(Start)
-        // {
-        //   pw[0] = pw[0]; // pw = ? + 5 
-        // }
-        if (pw[i] < CH_MIN) //受け取った信号が0未満の時
-        {
-          pw[i] = CH_MIN; // pw = 0
-        }
-        else if (pw[i] > CH_MAX) //1000より大きいとき
-        {
-          pw[i] = CH_MAX; // pw = 1000
-        }
-        pw[i] = CH_OFFSET - pw[i]; // transmitter システムの場合必要 1620-pw 1620 - pw ここでは信号が上下限を超えた時を決定している
-        REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
-        
-
-        /*
-    if (i == 4)
-    {
-      if(pw[i] < CH_OFFSET - CH_NEUTRAL){// arming 時
-        if (fInitial == true){
-        //Serial.println("Deactivate arming");
-        digitalWrite( GLED_PIN, HIGH );
-        digitalWrite( RLED_PIN, LOW );
-        }else{
-        //Serial.println("Arming");
-        digitalWrite( GLED_PIN, LOW );
-        digitalWrite( RLED_PIN, LOW );
-        }
-        else
-        {
-          Serial.println("Arming");
-          digitalWrite(GLED_PIN, LOW);
-          digitalWrite(RLED_PIN, LOW);
-        }
-      }
-      else
-      {
-        if (fInitial == true)
-        {
-          fInitial = false;
-        }
-        //Serial.println("Ready");
-        digitalWrite( GLED_PIN, LOW );
-        digitalWrite( RLED_PIN, HIGH );
-      }
-    }
-*/
-      }
-      // last_received_time = micros();
-      isReceive_Data_Updated = true; //isReceive_Data_Updatedにtrueを代入
-      if (pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] <= 11068)
-        {
-          //plus = 694;
-          pw[0] = pw[0] - 6;
-        }
-      start_H = REMAINING_W - 9 * TIME_LOW;// + plus; // 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
-      //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
-      Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
-    }
-    else if (micros() - last_received_time >= 500000) // Stop propellers after 0.5s signal lost. 0.5s信号が送られてこなかったら実行する 停止状態となる信号を送信するためのもの
-    {
-      pw[0] = CH_OFFSET - CH_NEUTRAL; // roll 1620 - 500 =1120
-      pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch 1620 - 500 =1120
-      pw[2] = CH_OFFSET - CH_MIN;     // throttle 1620 - 0 =1620
-      pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw 1620 - 500 =1120
-      pw[4] = CH_OFFSET;              // AUX1 1620
-      pw[5] = CH_OFFSET;              // AUX2 1620
-      pw[6] = CH_OFFSET;              // AUX3 1620
-      pw[7] = CH_OFFSET;              // AUX4 1620
-      start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
-      //start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
-      //        digitalWrite( GLED_PIN, HIGH );
-      // digitalWrite( RLED_PIN, LOW );
-    }
-  }
-}
-
-void Pulse_control() //★パルスの制御
-{
-  if (digitalRead(OUTPUT_PIN) == HIGH) //2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
-  {
-    Timer1.setPeriod(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
-    digitalWrite(OUTPUT_PIN, LOW); // PPM -> LOW　2ピンからの出力を0にする
-  }
-  else if (n_ch == TOTAL_CH) //2ピンの出力が5Vでなく，n_chが8に等しいとき(1フレームが終了した時)
-  {
-    n_ch = 0; //n_chを0に戻す
-    start_Hh = start_H; //スタート時のパルス幅をstart_Hhに代入
-    //    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
-    for (i = 0; i < TOTAL_CH; i++) // PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない i = 0からi < 8 が成り立つ間iを1ずつ増やして繰り返す
-    {
-      phw[i] = pw[i]; //チャンネルiのHighパルス幅をphw[i]に代入
-    }
-    Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
-  }
-  else //上記2つのどちらでもないとき
-  {
-    Timer1.setPeriod(phw[n_ch]);    // 時間を指定 Highパルス幅分次の操作を実行する
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
-    n_ch++; //チャンネルを進める
-  }
-}
-
-void setupPPM() // ---------- setup ppm signal configuration　ppm信号構成のセットアップ これは何も信号を送信していないときのPPM信号の出力設定だと思う
-{
-  pinMode(OUTPUT_PIN, OUTPUT); //2ピンを出力に設定
-  digitalWrite(OUTPUT_PIN, LOW); //2ピンが0Vを出力
-  // CH_OFFSET = 2*CH_MAX - TIME_LOW + 20;// commom offset
-  // TOTAL_CH_OFFSET = 8*CH_OFFSET;
-  pw[0] = CH_OFFSET - CH_NEUTRAL; // roll 1620-500=1120
-  pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch 1620-500=1120
-  pw[2] = CH_OFFSET - CH_MIN;     // throttle 1620- 0=1620
-  pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw 1620-500=1120
-  pw[4] = CH_OFFSET;              // AUX1 1620
-  pw[5] = CH_OFFSET;              // AUX2 1620
-  pw[6] = CH_OFFSET;              // AUX3 1620
-  pw[7] = CH_OFFSET;              // AUX4 1620
-  start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; //22500-(12960 - 3*500 - 0) - 9 * 400 = 7440 Startのパルス幅
-  // start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
-  // CPUのクロック周波数でPPM信号を制御
-  Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
-  Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
-}
-// void emergency_stop()
-// {
-//   if (!isEmergency)
-//   {
-//     pw[0] = CH_OFFSET - CH_NEUTRAL; // roll
-//     pw[1] = CH_OFFSET - CH_NEUTRAL; // pitch
-//     pw[2] = CH_OFFSET - CH_MIN;     // throttle
-//     pw[3] = CH_OFFSET - CH_NEUTRAL; // yaw
-//     pw[4] = CH_OFFSET;              // AUX1
-//     pw[5] = CH_OFFSET;              // AUX2
-//     pw[6] = CH_OFFSET;              // AUX3
-//     pw[7] = CH_OFFSET;              // AUX4
-//     start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW;
-//     isEmergency = true;
-//     digitalWrite(LED_PIN, LOW);
-//     digitalWrite(RLED_PIN, LOW);
-//     digitalWrite(GLED_PIN, HIGH);
-//     Serial.println("EMERGENCY !! ");
-//   }
-// }
-// void software_reset()
-// {
-//   Serial.println("Reset!");
-//   //delay(500);
-//   pinMode(RST_PIN, OUTPUT);
-//   digitalWrite(RST_PIN, LOW);
-//   Serial.println("RECOVERY"); // resetするので表示されないのが正しい挙動
-// }
