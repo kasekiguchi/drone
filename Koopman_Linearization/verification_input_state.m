@@ -23,15 +23,18 @@ mode.training_data = 'Kiyama';
 % filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_normalize_code00_saddle';
 % filename = 'EstimationResult_2024-06-14_Exp_Kiyama_fromVel_code07_saddle';
 % filename = 'EstimationResult_2024-07-12_Exp_Kiyama_code08_optim_x0_estsaddle';
-filename = '2024-07-14_Exp_KiyamaX20_code00_saddle';
-% filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
+% filename = '2024-07-14_Exp_KiyamaX20_code00_saddle';
+% filename = '2024-08-06_Exp_KiyamaY20_code00_saddle';
+filename = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 load(strcat(filename, '.mat'), 'est');
 
-Input_file = 'Input_X20_result.mat';
-% Input_file = 'Input_Kiyama_result.mat';
+% Input_file = 'Input_X20_result.mat';
+Input_file = 'Input_Kiyama_result.mat';
+% Input_file = 'Input_Y20_result.mat';
 
-Est_file = 'Est_X20_result.mat';
-% Est_file = 'Est_Kiyama_result.mat';
+% Est_file = 'Est_X20_result.mat';
+Est_file = 'Est_Kiyama_result.mat';
+% Est_file = 'Est_Y20_result.mat';
 
 load(Input_file);
 load(Est_file);
@@ -48,7 +51,7 @@ count = 0;
 f = figure(10);
 for i = 1:size(input_result,2)-200
     N = round((size(input_result,2)-200) / 200);
-    m = 3; n = 3;
+    m = 6; n = 6;
     if rem(i-1, 200) == 0
         count = count + 1;
         start_num = i;

@@ -18,9 +18,9 @@ disp("Loading data...");
 % load("Data/experiment/experiment_10_20_P2Px_estimator.mat");
 % load("Data/experiment/experiment_10_25_P2Py_estimator.mat");
 % load("Data/20240528_KMPC_P2Py=1.mat")
-filename = '0731_KMPC_saigen_hovering_code00';
+% filename = '0731_KMPC_saigen_hovering_code00';
 
-% filename = '0722_KMPC_X20_hovering_H10_dt008';
+filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
@@ -56,10 +56,10 @@ time_idx = 1500;
 yrange = [-2 1];
 fig = FIGURE_EXP(struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange));
 % fig.main_animation();
-% fig = fig.main_figure();
+fig = fig.main_figure();
 % fig = fig.make_mpc_plot();
 
-[x, xr] = fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
+% [x, xr] = fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);
 % app = app.logger, app.fExp の構造体を作ればよい
 
 %% save
