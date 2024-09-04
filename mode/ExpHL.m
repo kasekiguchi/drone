@@ -40,7 +40,10 @@ dt = diff(app.logger.Data.t(1:find(app.logger.Data.phase==0,1,'first')-1));
 t = app.logger.data(0,'t',[]);
 figure(100)
 plot(t(1:end-1),dt);
+
+Graphplot(app)
 end
+
 function in_prog(app)
 app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
 end
