@@ -27,7 +27,7 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 agent.controller = HLC(agent,Controller_HL(dt));
 % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか)
-agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1));
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(te,"exp_ref.mat",5,1));
 run("ExpBase");
 
 function post(app)

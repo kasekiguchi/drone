@@ -15,8 +15,8 @@ function ref = generate_spline_curve_ref(te,filename,order,isManualSetting)
         load(strcat('Data/reference/', filename)); % for exp
         fshowfig = 0; % 読み込んだ時はグラフは描画しない
     else
-        pointN = 5; %waypointの数 default:5, y方向のみの時は7
-        dt = 5;%waypoint間の時間
+        pointN = 7; %waypointの数 default:5, y方向のみの時は7
+        dt = 6;%waypoint間の時間
         time =  (0:dt:dt*(pointN-1))';
 
         %% ランダムな軌道の生成
