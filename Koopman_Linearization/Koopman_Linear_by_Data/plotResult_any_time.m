@@ -15,7 +15,7 @@ flg.xlimHold = 1; % 指定した値にxlimを固定 0~0.8などに固定
 flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 0; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
-flg.only_rmse = 1; % コマンドウィンドウに表示
+flg.only_rmse = 0; % コマンドウィンドウに表示
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
@@ -36,9 +36,10 @@ mode.training_data = 'Kiyama';
 ref_tra = 'saddle'; 
 loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 
-loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
+% loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
 % loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';
+loadfilename{1} = '2024-09-03_Exp_Kiyama_XY_20data_code00_saddle';
 % loadfilename{1} = 'EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出';
 
 % loadfilename{1} = 'EstimationResult_2024-07-01_Exp_Kiyama_code00_optim_3_saddle_100k'; %100000回
@@ -55,7 +56,7 @@ loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Px';
 % loadfilename{2} = 'EstimationResult_2024-05-24_Exp_Kiyama_code00_P2Py';
 % loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code01_hovering';
-% loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
+loadfilename{2} = 'EstimationResult_2024-05-27_Exp_Kiyama_code06_saddle';
 
 WhichRef = 2; % 出力するデータの中で，どのファイルをリファレンスに使うか(基本変更しなくてよい)
 if size(loadfilename,2) == 1 % fileが1つならWhichRefを変更

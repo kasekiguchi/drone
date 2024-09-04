@@ -4,14 +4,18 @@ function state = input_state(param)
     thrust = param{5};
     torque = param{6};
     step = param{4};
-    U = repmat([thrust; torque], 1, step);
+    % U = repmat([thrust; torque], 1, step);
+    U = [thrust; torque];
 
     A = param{1};
     B = param{2};
     C = param{3};
 
-    X = zeros(12,1);
-    Z = quaternions_all(X);
+    % X = zeros(12,1);
+    % Z = quaternions_all(X);
+
+    pos = param{7};
+    Z = quaternions_all(pos(:, param{8})); % ある区間の始めの状態
 
     try
         for i = 1:step
