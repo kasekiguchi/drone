@@ -93,9 +93,9 @@ void loop()
         {
           
           Serial.println("Reset available.");
-          digitalWrite(LED_PIN, HIGH);
-          digitalWrite(RLED_PIN, HIGH);
-          digitalWrite(GLED_PIN, LOW);
+          digitalWrite(LED_PIN, LOW);
+          digitalWrite(RLED_PIN, LOW);
+          digitalWrite(GLED_PIN, HIGH);
           
           fReset = true;
         }
