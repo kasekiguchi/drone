@@ -10,16 +10,18 @@
 % end
 %%
 close all
-clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
+clear multiFigure option addingContents f
 %選択
 fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
-endTime = 1000;%1E3;
+endTime = 100;%1E3;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
+
+% clear allData
 for i = 1:length(logger.target)
     loggers{i,1} = simplifyLoggerForCoop(logger,i);
 end
@@ -52,16 +54,19 @@ lgnd.drone="drone" + droneID;
 %singleFigure
      % n=["t_p","t_x","t_y","t_z","error","t_errx","t_erry","t_errz","input","Trs","attitude","velocity","angular_velocity","x_y" ,"three_D","z1","z2","z3","z4","uHL"];%,"F1z1","F2z2","F3z3","F4z4"];
      % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","x_y" ,"t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"];
-     n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
+     % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
-     n = "input";
+     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
 %========================================================================
 % multiFigure
-
-nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],["attitude0"	"t_qroll0"	"t_qpitch0" "t_qyaw0"],["velocity0"	"t_vx0"	"t_vy0"	"t_vz0"	],["angular_velocity0"	"t_wroll0" "t_wpitch0"	"t_wyaw0"],...
-    "three_D0",["t_p" "t_x" "t_y"	"t_z"],["error"	"t_errx"	"t_erry"	"t_errz"],["attitude"	"t_qroll"	"t_qpitch"	"t_qyaw"],"attitude"+droneID,["velocity"	"t_vx"	"t_vy" "t_vz"],["angular_velocity"	"t_wroll"	"t_wpitch"	"t_wyaw"],...
-    "three_D",["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"input",["mAll","mL"],"DronePayload"+droneID,"linkDir"+droneID,"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
+% nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],["attitude0"	"t_qroll0"	"t_qpitch0" "t_qyaw0"],["velocity0"	"t_vx0"	"t_vy0"	"t_vz0"	],["angular_velocity0"	"t_wroll0" "t_wpitch0"	"t_wyaw0"],...
+%     "three_D0",["t_p" "t_x" "t_y"	"t_z"],["error"	"t_errx"	"t_erry"	"t_errz"],["attitude"	"t_qroll"	"t_qpitch"	"t_qyaw"],"attitude"+droneID,["velocity"	"t_vx"	"t_vy" "t_vz"],["angular_velocity"	"t_wroll"	"t_wpitch"	"t_wyaw"],...
+%     "three_D",["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"input",["mAll","mL"],"DronePayload"+droneID,"linkDir"+droneID,"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
+nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0",["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID};%比較するとき複数まとめる
+% nM = {"mui"+droneID};%比較するとき複数まとめる
 multiFigure.layout = cell(1,length(nM));
+
+%tile layoutの行列数を作成
 for i = 1:length(nM)
    nMiLength = length(nM{i});
    tile = [1, factor(nMiLength)];
@@ -78,12 +83,12 @@ for i = 1:length(nM)
        end
    end
    multiFigure.layout{i} = sortedTile;
+   multiFigure.title(i) = join(nM{i},"_");
 end
 % multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
-multiFigure.title = string(zeros(1,length(nM)));%[" state", " subsystem"];%title name
-
+% multiFigure.title = string(zeros(1,length(nM)));%[" state", " subsystem"];%title name
 multiFigure.num = length(nM);%figの数
-multiFigure.fontSize = 14;
+multiFigure.fontSize = 16;
 multiFigure.pba = [1,0.78084714548803,0.78084714548803];%各図の縦横比
 multiFigure.padding = 'tight';
 multiFigure.tileSpacing = 'tight';
@@ -98,19 +103,18 @@ option.camposition = [];
 
 %figごとに追加する場合のもの
 addingContents.aspect = [1,1,1];
-addingContents.camposition = [-45,-45,60];
+addingContents.camposition = [-45,-45,45];
 
-%==================================================================================
 %data setting
-%図:[1:"t-p" 2:"x-y" 3:"t-x" 4:"t-y" 5:"t-z" 6:"error" 7:"input" 8:"attitude" 9:"velocity" 10:"angular_velocity" 11:"3D" 12:"uHL" 13:"z1" 14:"z2" 15:"z3" 16:"z4" 17:"inner_input" 18:"vf" 19:"sigma"]
-figName=["t_p" "x_y" "t_x" "t_y" "t_z" "error" "input" "attitude" "velocity" "angular_velocity" "three_D" "uHL" "z1" "z2" "z3" "z4" "inner_input" "vf" "sigma" "pp" "pv" "pq" "pw" "Trs"];
-[allData,RMSE] = dataSummarize(loggers, lgnd, option, addingContents, fF, startTime, endTime);
-% aaa=fieldnames(allData);
-% for i = 1:84
-%   aaaa(i) = string(aaa{i});
-% end
-% bbb=reshape(aaaa,[],12)
-
+if ~exist("oldStartTime","var") ||~exist("oldEndTime ","var")
+    oldStartTime = -1;
+    oldEndTime = -1;
+end
+if ~exist("allData","var") || oldStartTime - startTime ~= 0 || oldEndTime - endTime ~=0
+    [allData,RMSE] = dataSummarize(loggers, lgnd, option, addingContents, fF, startTime, endTime);
+    oldStartTime = startTime;
+    oldEndTime = endTime;
+end
 %% plot
 tic
 if multiFigure.f == 1 && fspider ~=1%multiFigure
@@ -127,7 +131,7 @@ if multiFigure.f == 1 && fspider ~=1%multiFigure
         end
     end
 else %singleFigure
-    f = zeros(n,1);
+    % f = zeros(length(n),1);
      for fN = 1:length(n) 
           f(fN)  = figure('Name',n(fN));
           plot_data_single(fN, n(fN), allData.(n(fN)));
@@ -138,18 +142,18 @@ isSaved = 0;%input("Save figure : '1' \nNot now : '0' \nFill in : ");
 if isSaved
     %% make folder
     %変更しない
-        ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
-            % ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
+        % ExportFolder='W:\workspace\Work2023\momose';%実験用pcのパス
+            ExportFolder='C:\Users\81809\OneDrive\デスクトップ\results';%自分のパス
             % ExportFolder='Data';
         DataFig='figure';%データか図か
         date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
         date2=string(datetime('now','Format','yyyy_MMdd'));%日付
         
     %変更========================================================
-        subfolder='exp';%sim or exp
-        ExpSimName='sakura2023';%実験,シミュレーション名
+        subfolder='sim';%sim or exp
+        ExpSimName='coopSaddle100';%実験,シミュレーション名
         % contents='FT_apx_max';%実験,シミュレーション内容
-        contents='demo';%実験,シミュレーション内容
+        contents='sim';%実験,シミュレーション内容
     %==========================================================
     FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
@@ -167,11 +171,15 @@ if isSaved
     %     rmpath(genpath(ExportFolder))
     %% save 
     % n=[2,7,10,11];%spider
-    if fMul==1
+    fself = 10;
+    if fMul==1 && fself ~=1
         % nn=string(1:length(nM));
         nn=multiFigure.title ;
+    elseif fself ~=1
+        nn=n;
     else
-        nn=nM;
+        %自分で指定する場合
+        nn = "mui1_mui2_mui3_mui4_mui5_mui6";
     end
     nf=length(nn);
     SaveTitle=strings(1,nf);
@@ -179,9 +187,15 @@ if isSaved
     for i=1:nf
     %     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',figName(n(i)));
         SaveTitle(i)=strcat(contents,'_',nn(i));
-        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'jpg');
-        % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
-    %     saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'eps');
+        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
+        %見切れないようにする
+        f(i).Units = 'centimeters';
+        f(i).PaperUnits = f(i).Units;
+        f(i).PaperPosition = [0, 0, f(i).Position(3:4)];
+        f(i).PaperSize = f(i).Position(3:4);
+        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'pdf');
+        % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'jpg');
+        % saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'eps');
     end
     %%
     %RMSEの保存
@@ -607,6 +621,7 @@ function plot_data_single(~, ~, branchData)
                 % title(option.titleName)
                 set(gca,'FontSize',option.fontSize,"TickLabelInterpreter","latex")
                 grid on
+                grid minor
                 hold off
         else
                 hold on
@@ -622,6 +637,7 @@ function plot_data_single(~, ~, branchData)
                 % title(option.titleName)
                 set(gca,'FontSize',option.fontSize,"TickLabelInterpreter","latex")
                 grid on
+                grid minor
                 hold off
         end
     end
@@ -656,6 +672,7 @@ function plot_data_single(~, ~, branchData)
                 set(gca,'FontSize',multi.fontSize,"TickLabelInterpreter","latex")
                 pbaspect(multi.pba)  
                 grid on
+                grid minor
                 hold off
         else
                 hold on
@@ -671,6 +688,7 @@ function plot_data_single(~, ~, branchData)
                 set(gca,'FontSize',multi.fontSize,"TickLabelInterpreter","latex")
                 pbaspect(multi.pba)  
                 grid on
+                grid minor
                 hold off
         end
     end

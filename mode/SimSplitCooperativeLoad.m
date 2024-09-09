@@ -5,13 +5,18 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 20;
+te = 3;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
 post_func = @(app) dfunc(app);
 motive = Connector_Natnet_sim(1, dt, 0); % 3rd arg is a flag for noise (1 : active )
 logger = LOGGER(1:N+1, size(ts:dt:te, 2), 0, [], []);%分割前1,分割後N個
+
+%=TODO=====================================================================================
+% 複数機体のモデルを使わないでできるようにする．
+% 単機牽引モデルの状態を用いて全て計算
+%=============================================================================================
 
 %=PAYLOAD=====================================================================================
 % parameter     : DRONE_PARAM_COOPERATIVE_LOAD
@@ -74,7 +79,7 @@ for i = 2:N+1
 %Drone_Initial_Stat
     rho = agent(1).parameter.rho; %loadstate_rho
     R_load = RodriguesQuaternion(initial_state(1).Q);
-    initial_state(i).p = arranged_position([0, 0], 1, 1, 0);
+    % initial_state(i).p = arranged_position([0, 0], 1, 1, 0);
     initial_state(i).q = [0; 0; 0];
     initial_state(i).v = [0; 0; 0];
     initial_state(i).w = [0; 0; 0];
@@ -89,7 +94,7 @@ for i = 2:N+1
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
     %牽引ドローンの推定は完成していないので改良が必要（miyake from masterから持ってくるといいかも）
-    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q", "pL", "pT"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5)));%expの流用
     %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
@@ -122,28 +127,46 @@ for j = 1:tn
                 q_agent = Quat2Eul(load.Qi(4*i-7:4*i-4,1));
                 w_agent = load.Oi(3*i-5:3*i-3,1);
 
+                sensor1 = agent(1).sensor.result.state;%複数機モデルから機体と接続点の位置を計測
+                %分割前ペイロード
+                sp = sensor1.p;
+                sR = RodriguesQuaternion(sensor1.Q);%回転行列
+                %分割後ペイロード
+                spL = sp + sR * rho(:,i-1);%分割後の質量重心位置
+                spT = sensor1.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
+                %ドローン
+                spDrone = sp + sR * rho(:,i-1) - agent(1).parameter.li(i-1)*spT;
+                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1));
+
                 %agent(i).estimator.result.state.set_stateを使った方が正しい？
-                %プラントをそのまま使っている
-                agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
-                agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
-                agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
-                agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
+                %単機牽引のモデルで推定する
+                agent(i).sensor.do(time, 'f');
+                agent(i).sensor.result.state.set_state("p",spDrone,"q",sqDrone,"pL",spL,"pT",spT);
+                agent(i).estimator.do(time, 'f');
+                %複数牽引モデルの状態をそのまま単機牽引モデルに入れる
+                % agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
+                % agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
+                % agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
+                % agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
             else
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
             end
             agent(i).reference.do(time, 'f',agent(1));
             agent(i).controller.do(time, 'f',0,0,agent(i),i);
-
         end
         input = zeros(4*N,1);
         for i = 2:N+1
             input(4*(i-1)-3:4*(i-1),1) = agent(i).controller.result.input;
         end
-
         agent(1).controller.result.input = input;
-%         agent(2).reference.result.m+agent(3).reference.result.m+agent(4).reference.result.m+agent(5).reference.result.m+agent(6).reference.result.m+agent(7).reference.result.m
+        
+        %複数牽引モデルの状態をそのまま単機牽引モデルに入れる場合
         agent(1).plant.do(time, 'f');
+        %単機牽引のモデルで推定する
+        % for i = 2:N
+        %     agent(i).plant.do(time, 'f');
+        % end
         logger.logging(time, 'f', agent);
         disp(time.t)
         time.t = time.t + time.dt;

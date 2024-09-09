@@ -21,6 +21,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
         O0_pre 
         wi_pre
         ui_pre
+        vdro_pre
+        vL_pre
         muid
         m
         toR
@@ -107,6 +109,9 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                     obj.O0_pre = zeros(3,1);
                     obj.wi_pre = zeros(3,1);
                     obj.result.vi_pre = obj.vi_pre;
+
+                    obj.vdro_pre = zeros(3,1);
+                    obj.vL_pre = zeros(3,1);
                 else
                     obj.result.state.set_state("xd",obj.func(0));
                     obj.result.state.set_state("p",obj.self.estimator.result.state.get("p"));
@@ -151,6 +156,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                v0   = model.v;
                a0   = model.a;%要チェック論文も!!!!!!!!!!!!!!
                dO0  = model.dO;
+               Qi   = model.Qi(4*id-3:4*id);
                qi   = model.qi(3*id-2:3*id);
                wi   = model.wi(3*id-2:3*id);
                R0       = obj.toR(Q0);                                          %分割前ペイロードの回転行列
@@ -159,7 +165,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                SKrhoi   = Skew(rhoi);
                SKqi     = Skew(qi);
                SKwi     = Skew(wi);
-               Ri       = obj.self.estimator.result.state.getq("rotm");         %機体回転行列
+               % Ri       = obj.self.estimator.result.state.getq("rotm");         %機体回転行列
+               Ri       = obj.toR(Qi);                                          %機体回転行列
                vi       = v0 + dR0*rhoi;                                        %分割後のペイロードの速度
 
            %紐接合部の目標軌道を算出
@@ -179,7 +186,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                refi(5:end)   = reshape(drefi,[],1);
 
            %実際のリンクと紐の加速度と張力,機体の加速度を求めてから張力を求める           
-               %リンク加速度なんかおかしい速度変と合わない，速度と同じになっている!!!!!!!!
+           %方針：計測した値を用いて各単機モデルで推定する．
                % ai       = a0 + R0*SKO0^2*rhoi - R0*SKrhoi*dO0;      %分割後のペイロードの加速度
                ai = (vi - obj.vi_pre)/dt; 
                obj.vi_pre = vi;
@@ -190,12 +197,23 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                dwi = (wi - obj.wi_pre)/dt; %紐の角加速度%発散に関係なさそう
                obj.wi_pre = wi;
                %張力を算出
-               qqTi     = qi*qi';
+               % qqTi     = qi*qi';
                ui       = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-               uvi      = (eye(3) - qqTi)*ui;                               %uの垂直成分
-               aig      = a0 + g + R0*SKO0^2*rhoi - R0*SKrhoi*dO0;      %紐の角加速度算出に用いる加速度
+               % uvi      = (eye(3) - qqTi)*ui;                               %uの垂直成分
+               % aig      = a0 + g + R0*SKO0^2*rhoi - R0*SKrhoi*dO0;      %紐の角加速度算出に用いる加速度
                % dwi      = (SKqi*aig - SKqi*uvi/mi)/li;              %(8)
                aidrn    = a0 + R0*SKO0^2*rhoi - R0*SKrhoi*dO0 + li*SKqi*dwi - li*SKwi^2*qi;      %分割後のペイロードの加速度
+               mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
+               mui      = -mui;%分割後の牽引物系から張力
+                
+               %単機牽引モデルで推定した機体速度，牽引物速度を用いて後退差分によりそれぞれの加速度を算出
+               ui       = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
+               vdro = obj.self.estimator.result.state.v;
+               adro = (vdro - obj.vdro_pre)/dt; %機体加速度
+               obj.vdro_pre = vdro;
+               vL = obj.self.estimator.result.state.vL;
+               aL = (vL - obj.vL_pre)/dt;%牽引物加速度
+               obj.vL_pre = vL;
                mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
                mui      = -mui;%分割後の牽引物系から張力
 
