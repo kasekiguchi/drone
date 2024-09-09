@@ -160,7 +160,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                SKqi     = Skew(qi);
                SKwi     = Skew(wi);
                Ri       = obj.self.estimator.result.state.getq("rotm");         %機体回転行列
-               vi       = v0 + dR0*rhoi;                                        %分割後のペイロードの速度
+               vi       = v0 + dR0*rhoi;%機体速度でも可能かも                                       %分割後のペイロードの速度
 
            %紐接合部の目標軌道を算出
            %todo:ペイロードの姿勢も考慮する場合は角度の5階微分まで求める必要がある

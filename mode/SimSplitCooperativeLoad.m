@@ -34,14 +34,14 @@ initial_state(1).a = [0;0;0];%ペイロード加速度
 initial_state(1).dO = [0;0;0];%ペイロード角加速度
 
 % qtype = "eul"; % "eul" : euler angle, "" : euler parameter
-qtype = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
-if contains(qtype, "zup")
+type = "zup"; % "eul":euler angle, "":euler parameter%元の論文がzdown
+if contains(type, "zup")
     initial_state(1).qi = -1 * repmat([0;0;1], N, 1);%リンクの方向ベクトル
 else
     initial_state(1).qi = 1 * repmat([0; 0; 1], N, 1);
 end
 
-if contains(qtype, "eul")
+if contains(type, "eul")
     initial_state(1).Q = [0; 0; 0];%ペイロードの姿勢
     %initial_state.Qi = repmat([0; pi / 180; 0], N, 1);
     initial_state(1).Qi = repmat([0;0;0],N,1);%ドローンの姿勢
@@ -51,11 +51,11 @@ else
     %initial_state.Qi = repmat(Eul2Quat([pi/180;0;0]),N,1);
 end
 
-agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, qtype);
-agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype));%ドローンによって質量を変えられるようにする
+agent(1).parameter = DRONE_PARAM_COOPERATIVE_LOAD("DIATONE", N, type);
+agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, type));%ドローンによって質量を変えられるようにする
 
-% agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
-agent(1).estimator = EKF(agent(1), Estimator_EKF(agent(1),dt,MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype+"eul")), ["p","Q","qi","Qi"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
+agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, type+"eul")))); % estimator.result.state = sensor.result.state
+% agent(1).estimator = EKF(agent(1), Estimator_EKF(agent(1),dt,MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, type+"eul")), ["p","Q","qi","Qi"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[zeros(3,3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8)));
 
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 %実機実験の時
