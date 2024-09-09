@@ -17,6 +17,7 @@ uint8_t i; //符号なし8bit整数型(0~255)のi
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
 boolean fReset = false; //変数boolean fResetにfalseを格納
 boolean fInitial = true; //変数boolean fInitialにtrueを格納
+boolean fstarthalf = false; //変数boolean fInitialにtrueを格納
 /////////////////// PPM関係 ////////////////////
 #define OUTPUT_PIN 2 // ppm output pin　2ピン(D2)をOUTPUT_PINと定義　このピンからPPM信号を出力する
 char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127までの数値として扱われる　受信したデータの格納場所packetBufferを定義している　[255]は一度に受信できる最大のバッファサイズ
@@ -174,12 +175,12 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       }
       last_received_time = micros();
       isReceive_Data_Updated = true; //isReceive_Data_Updatedにtrueを代入
-      if (pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] <= 11068)
-        {
-          pw[0] = pw[0] - 8;
-        }
+      // if (pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] <= 11068)
+      //   {
+      //     pw[0] = pw[0] - 8;
+      //   }
       //start_H = REMAINING_W - 9 * TIME_LOW + 680;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
-      start_H = REMAINING_W - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW +670;
+      start_H = REMAINING_W - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
   }
@@ -202,7 +203,13 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
 
 void Pulse_control() //★パルスの制御
 {
-  if (digitalRead(OUTPUT_PIN) == HIGH) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
+  if(fstarthalf == true)
+  {
+    fstarthalf = false;
+    Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
+    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
+  }
+  else if (digitalRead(OUTPUT_PIN) == HIGH) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
   {
     Timer1.setPeriod(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
     digitalWrite(OUTPUT_PIN, LOW); // PPM -> LOW　D2ピンからの出力を0にする
@@ -210,12 +217,13 @@ void Pulse_control() //★パルスの制御
   else if (n_ch == TOTAL_CH) //2ピンの出力が5Vでなく，n_chが8に等しいとき(1フレームが終了した時)
   {
     n_ch = 0; //n_chを0に戻す
-    start_Hh = start_H; //スタート時のパルス幅をstart_Hhに代入
+    start_Hh = start_H / 2; //スタート時のパルス幅をstart_Hhに代入
     //    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
     for (i = 0; i < TOTAL_CH; i++) // PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない i = 0からi < 8 が成り立つ間iを1ずつ増やして繰り返す
     {
       phw[i] = pw[i]; //チャンネルiのHighパルス幅をphw[i]に代入
     }
+    fstarthalf == true;
     Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
     digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
   }
