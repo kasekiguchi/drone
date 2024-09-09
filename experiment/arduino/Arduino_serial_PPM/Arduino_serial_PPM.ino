@@ -137,7 +137,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
           pw[i] = CH_MAX; // pw = 1000
         }
         pw[i] = CH_OFFSET - pw[i]; // transmitter システムの場合必要 1620-pw 1620 - pw ここでは信号が上下限を超えた時を決定している
-        // REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
+        REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
         
 
         /*
@@ -179,8 +179,8 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
       //   {
       //     pw[0] = pw[0] - 8;
       //   }
-      //start_H = REMAINING_W - 9 * TIME_LOW + 680;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
-      start_H = REMAINING_W - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
+      start_H = REMAINING_W - 9 * TIME_LOW;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
+      //start_H = REMAINING_W - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
   }
@@ -223,7 +223,7 @@ void Pulse_control() //★パルスの制御
     {
       phw[i] = pw[i]; //チャンネルiのHighパルス幅をphw[i]に代入
     }
-    fstarthalf == true;
+    fstarthalf = true;
     Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
     digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
   }
@@ -278,7 +278,7 @@ void emergency_stop()
 void software_reset()
 {
   Serial.println("Reset!");
-  //delay(500);
+  delay(500);
   pinMode(RST_PIN, OUTPUT);
   digitalWrite(RST_PIN, LOW);
   Serial.println("RECOVERY"); // resetするので表示されないのが正しい挙動
