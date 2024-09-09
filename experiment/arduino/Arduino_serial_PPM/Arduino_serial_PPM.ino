@@ -125,7 +125,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
         pw[i] = uint16_t(packetBuffer[i]) * 100 + uint16_t(packetBuffer[i + TOTAL_CH]); //16bit整数型(-32768~32767)の受信データ * 100 + 16bit整数型(-32768~32767)の受信データ[i+8] 全部で16バイトあるため
         // if (i == 0) //チャンネルが始まっていないとき(Start)
         // {
-        //   pw[0] = pw[0]; // pw = ? + 5 
+        //   pw[0] = pw[0] +8; // pw = ? + 5 
         // }
         if (pw[i] < CH_MIN) //受け取った信号が0未満の時
         {
@@ -136,7 +136,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
           pw[i] = CH_MAX; // pw = 1000
         }
         pw[i] = CH_OFFSET - pw[i]; // transmitter システムの場合必要 1620-pw 1620 - pw ここでは信号が上下限を超えた時を決定している
-        REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
+        // REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
         
 
         /*
@@ -178,8 +178,8 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
         {
           pw[0] = pw[0] - 8;
         }
-      start_H = REMAINING_W - 9 * TIME_LOW;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
-      //start_H = PPM_PERIOD - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW;
+      //start_H = REMAINING_W - 9 * TIME_LOW + 680;// 9 times LOW time in each PPM period 1フレームから8つのHigh幅を引いた残り - 1フレーム分のLowパルス幅 = Start時のパルス幅
+      start_H = REMAINING_W - ( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] ) - 9 * TIME_LOW +670;
       Serial.println(micros() - last_received_time); //最後に信号を受け取ってからどれくらい進行したか
     }
   }
