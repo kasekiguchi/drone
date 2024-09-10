@@ -107,6 +107,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       if isempty(obj.param)
         obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
+      %複数牽引物用
       if obj.self.plant.name == "load" && isprop(obj.self.reference.result.state,"mLi")
          obj.param(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
       end
