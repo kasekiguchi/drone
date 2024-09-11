@@ -39,7 +39,7 @@ function Controller = Controller_MPC_Koopman(dt, model)
 
     %% quadprogを実行するmexファイルを選択
     % 観測量によってファイルが異なる
-    if size(Controller_param.A,1) == 26
+    if size(Controller_param.A,1) == 26 || size(Controller_param.A,1) == 23
         Controller_param.quad_drone = @quad_drone_code00_mex;
     elseif size(Controller_param.A,1) == 39
         Controller_param.quad_drone = @quad_drone_code04_mex;

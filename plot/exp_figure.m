@@ -108,3 +108,19 @@ fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_
 % plot(tt, fig.data.calt);
 % fig.phase = 3;
 % fig.background_color(-0.1,gca,fig.log.Data.phase);
+
+%%
+clear
+load('g_partial.mat');
+%%
+simplify_sum = simplify(sum_copy);
+subexpr_sum = subexpr(sum_copy);
+comat_1 = cos(pitch/2)*cos(roll/2)*cos(sigma);
+comat_2 = sin(pitch/2)*sin(roll/2)*sin(sigma);
+(cos(roll/2)*sin(pitch/2)*cos(sigma) + cos(pitch/2)*sin(roll/2)*sin(sigma))
+
+comat_3 = cos(pitch/2)*cos(roll/2)*sin(sigma) * 
+(cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))
+
+comat_4 = sin(pitch/2)*sin(roll/2)*cos(sigma) * 
+(cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))

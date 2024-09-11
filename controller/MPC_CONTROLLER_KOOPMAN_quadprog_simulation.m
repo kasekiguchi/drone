@@ -60,6 +60,13 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_simulation < handle
             % obj.weight = blkdiag(obj.weight, weight_obs);
             % obj.weightF = blkdiag(obj.weightF, weight_obs);
 
+            %% A行列にxyzの位置を加えた拡張係数行列とする
+            A_1 = [eye(3), zeros(3), eye(3)*obj.param.dt, zeros(3, size(obj.A,1)-6)];
+            A_2 = [zeros(size(obj.A,2), 3), obj.A];
+            obj.param.A = [A_1; A_2];
+            obj.param.B = [zeros(3, 4); obj.B];
+            obj.param.C = blkdiag(eye(3), obj.C);
+
             %% QP change_equationの共通項をあらかじめ計算
             Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
             [obj.qpparam.H, obj.qpparam.F] = change_equation_drone(Param);

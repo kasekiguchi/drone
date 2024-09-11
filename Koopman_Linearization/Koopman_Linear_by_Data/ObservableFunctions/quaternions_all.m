@@ -19,26 +19,21 @@ km = 0.03010685884691849; % ロータ定数
 k = 0.000008048;          % 推力定数
 
 % 状態がクォータニオンを用いた13次元の場合
-% if size(x,1) == 13
-%     P1 = x(1,1);
-%     P2 = x(2,1);
-%     P3 = x(3,1);
-%     q0 = x(4,1);
-%     q1 = x(5,1);
-%     q2 = x(6,1);
-%     q3 = x(7,1);
-%     V1 = x(8,1);
-%     V2 = x(9,1);
-%     V3 = x(10,1);
-%     W1 = x(11,1);
-%     W2 = x(12,1);
-%     W3 = x(13,1);
-%     %オイラー角に変換して記録しておく
-%     quat = quaternion([q0 q1 q2 q3]);
-%     Q = euler(quat,'ZYX','frame');
-%     Q1 = Q(1); Q2 = Q(2); Q3 = Q(3);
-% 状態がオイラー角を用いた12次元の場合
-% elseif size(x,1) ==12
+if size(x,1) == 9
+    % P1 = 0;
+    % P2 = 0;
+    % P3 = 0;
+    Q1 = x(1,1); % roll
+    Q2 = x(2,1); % pitch
+    Q3 = x(3,1); % yaw
+    V1 = x(4,1);
+    V2 = x(5,1);
+    V3 = x(6,1);
+    W1 = x(7,1);
+    W2 = x(8,1);
+    W3 = x(9,1);
+%状態がオイラー角を用いた12次元の場合
+elseif size(x,1) ==12
     P1 = x(1,1);
     P2 = x(2,1);
     P3 = x(3,1);
@@ -57,19 +52,25 @@ k = 0.000008048;          % 推力定数
     q1 = sin(Q1/2)*cos(Q2/2)*cos(Q3/2)-cos(Q1/2)*sin(Q2/2)*sin(Q3/2);
     q2 = cos(Q1/2)*sin(Q2/2)*cos(Q3/2)+sin(Q1/2)*cos(Q2/2)*sin(Q3/2);
     q3 = cos(Q1/2)*cos(Q2/2)*sin(Q3/2)-sin(Q1/2)*sin(Q2/2)*cos(Q3/2);
-% end
+end
 
 %回転行列の一部
 R13 = ( 2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)) + 2.*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)));
 R23 = (-2.*(cos(Q2/2).*cos(Q1/2).*cos(Q3/2) + sin(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q3/2).*sin(Q1/2) - cos(Q1/2).*sin(Q2/2).*sin(Q3/2)) - 2.*(cos(Q1/2).*cos(Q3/2).*sin(Q2/2) + cos(Q2/2).*sin(Q1/2).*sin(Q3/2)).*(cos(Q2/2).*cos(Q1/2).*sin(Q3/2) - cos(Q3/2).*sin(Q2/2).*sin(Q1/2)));
 R33 = (cos(Q2).*cos(Q1));
-
+if size(x,1) == 12
 common_z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
             R13;
             R23;
             R33;
             1];
 common_2z = [P1;P2;P3;Q1;Q2;Q3;V1;V2;V3]; % code06用
+end
+common_except_pos_z = [Q1;Q2;Q3;V1;V2;V3;W1;W2;W3;
+            R13;
+            R23;
+            R33;
+            1]; % 位置を除いたcommon_z
 
 %% 磯部先輩観測量 code = 00
 isobe_z = [W1*W2;
@@ -125,10 +126,6 @@ Gdisassembly_z = [cos(Q2/2)*cos(Q1/2)*cos(Q3/2);
     1/jy;
     1/jz
     ];
-% z = [common_z; Fdisassembly_z; Gdisassembly_z];
-
-%% F(x), G(x)の各項を分解+磯部先輩 code = 03
-% z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z];
 
 %% f(x, u, param)からdf/dparam したときの項+磯部先輩 code = 04
 roll = Q1; pitch = Q2; yaw = Q3;
@@ -147,22 +144,31 @@ diff_param_z = [-(u1*(2*(cos(pitch/2)*cos(roll/2)*cos(yaw/2) + sin(pitch/2)*sin(
                                        (o1*o3)/jy;
            - u4/jz^2 - (jx*o1*o2 - jy*o1*o2)/jz^2;
                                                -1];
-% z = [common_z; isobe_z; diff_param_z];
 
-%% f(x, u, param)からdf/dparam したときの項のみ code = 05
-% z = [common_z; diff_param_z];
-
-%% 姿勢角速度がprimeで取得できないことから姿勢角速度を除く状態を基本構成 code = 06
-% z = [common_2z; isobe_z];
-
-%% 磯部先輩観測量を並び替える code = 07
-% z = [isobe_z; common_z];
-
-%% いままでの全てをいれたやつ code = 08. 01~07　重複は無視
-% z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z];
+%% f(x, u, param)からdf/dparam を用いて code = 09
+% 係数 2/m^2を除く
+roll = Q1; pitch = Q2; yaw = Q3;
+sigma = yaw/2;
+comat_1 = cos(pitch/2)*cos(roll/2)*cos(sigma);
+comat_2 = sin(pitch/2)*sin(roll/2)*sin(sigma);
+comat_3 = cos(pitch/2)*cos(roll/2)*sin(sigma);
+comat_4 = sin(pitch/2)*sin(roll/2)*cos(sigma);
+comat_12_1 = cos(roll/2)*sin(pitch/2)*cos(sigma);
+comat_12_2 = cos(pitch/2)*sin(roll/2)*sin(sigma);
+comat_34_1 = cos(pitch/2)*sin(roll/2)*cos(sigma);
+comat_34_2 = cos(roll/2)*sin(pitch/2)*sin(sigma);
+partial_param_z_1 = [comat_1 * comat_12_1; comat_1 * comat_12_2; comat_2 * comat_12_1;
+                    comat_2 * comat_12_2; comat_3 * comat_34_1; comat_3 * comat_34_2;
+                    comat_4 * comat_34_1; comat_4 * comat_34_2]; % (7,1)
+partial_param_z_2 = [comat_1 * comat_34_1; comat_1 * comat_34_2; comat_2 * comat_34_1;
+                    comat_2 * comat_34_2; comat_34_1 * comat_3; comat_34_1 * comat_4;
+                    comat_12_2 * comat_3; comat_12_2 * comat_4]; % (8,1)
+partial_param_z_3 = [comat_1; comat_2; comat_12_1; comat_12_2;
+                comat_3; comat_4; comat_34_1; comat_34_2]; % (9,1)
+partial_param_z = [partial_param_z_1; partial_param_z_2; partial_param_z_3];
 
 %% まとめ
-z = [common_z; isobe_z]; % 00
+% z = [common_z; isobe_z]; % 00
 % z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
@@ -170,7 +176,8 @@ z = [common_z; isobe_z]; % 00
 % z = [common_2z; isobe_z]; % 06
 % z = [isobe_z; common_z]; % 07
 % z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z]; % 08
-
+% z = [common_except_pos_z; isobe_z; partial_param_z]; % 09
+z = [common_except_pos_z; isobe_z]; % 10
 
 end
 

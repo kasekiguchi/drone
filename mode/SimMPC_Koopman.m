@@ -30,12 +30,8 @@ initial_state.w = [0; 0; 0];
 % model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
-model_file = '2024-08-06_Exp_KiyamaY20_code00_saddle';
+model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
 load(model_file,'est') %vzから算出したzで学習、総推力
-% load("EstimationResult_2024-06-04_Exp_KiyamaX_20data_code00_saddle.mat", "est");
-% load("EstimationResult_2024-05-02_Exp_Kiyama_code02.mat", "est");
-% load('EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat', 'est');
-% load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
 try
     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
     args = d2d(ssmodel, Controller_param.dt);
