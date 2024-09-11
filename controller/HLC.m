@@ -4,6 +4,8 @@ classdef HLC < handle
     self
     result
     param
+    AdBd
+    gainFunc
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
   end
 
@@ -12,6 +14,11 @@ classdef HLC < handle
       obj.self = self;
       obj.param = param;
       obj.param.P = self.parameter.get(obj.parameter_name);
+      % obj.AdBd = param.AdBd; 
+      % p2 = param.p2;
+      % p4 = param.p4;
+      % obj.gainFunc = @(sA2d, sB2d, sA4d, sB4d) deal(place(sA2d, sB2d,p2),place(sA4d,sB4d,p4),place(sA4d,sB4d,p4),place(sA2d,sB2d,p2));%意図した極（p2,p4）になるようにゲインを計算。
+      obj.gainFunc = param.gainFunc;%意図した極（p2,p4）になるようにゲインを計算。
       obj.result.input = zeros(self.estimator.model.dim(2),1);
     end
 
@@ -21,10 +28,7 @@ classdef HLC < handle
       xd = ref.state.xd;
       xd0 =xd;
       P = obj.param.P;
-      F1 = obj.param.F1;
-      F2 = obj.param.F2;
-      F3 = obj.param.F3;
-      F4 = obj.param.F4;
+
       xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
 
       % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
@@ -40,8 +44,19 @@ classdef HLC < handle
       %if isfield(obj.param,'dt')
       if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
         dt = varargin{1}.dt;
+        [F1,F2,F3,F4]=obj.gainFunc(dt);
+        % [A2d,B2d,A4d,B4d]=obj.AdBd(dt);
+        % [F1,F2,F3,F4]=obj.gainFunc(A2d,B2d,A4d,B4d)
+         % F1 = obj.param.F1;
+         % F2 = obj.param.F2;
+         % F3 = obj.param.F3;
+         % F4 = obj.param.F4;
       else
         dt = obj.param.dt;
+        F1 = obj.param.F1;
+         F2 = obj.param.F2;
+         F3 = obj.param.F3;
+         F4 = obj.param.F4;
         % vf = Vf(x,xd',P,F1);
         % vs = Vs(x,xd',vf,P,F2,F3,F4);
       end
