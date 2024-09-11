@@ -92,7 +92,7 @@ for i = 2:N+1
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");%ペイロードの重さを機体数で分割するようにする!!!!!!!!!
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
-    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q", "pL", "pT"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5)));%expの流用
+    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q", "pL", "pT"]));%expの流用
     %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
@@ -107,20 +107,20 @@ clc
 for j = 1:tn
         for i = 1:N+1
             if i >= 2
-                % sensor1 = agent(1).sensor.result.state;%複数機モデルから機体と接続点の位置を計測
-                % %分割前ペイロード
-                % sp = sensor1.p;
-                % sR = RodriguesQuaternion(sensor1.Q);%回転行列
-                % %分割後ペイロード
-                % spL = sp + sR * rho(:,i-1);%分割後の質量重心位置
-                % spT = sensor1.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
-                % %ドローン
-                % spDrone = spL - agent(1).parameter.li(i-1)*spT;
-                % sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1));
+                sensor1 = agent(1).sensor.result.state;%複数機モデルから機体と接続点の位置を計測
+                %分割前ペイロード
+                sp = sensor1.p;
+                sR = RodriguesQuaternion(sensor1.Q);%回転行列
+                %分割後ペイロード
+                spL = sp + sR * rho(:,i-1);%分割後の質量重心位置
+                spT = sensor1.qi(3*i-5:3*i-3,1);%分割後の紐の方向ベクトル
+                %ドローン
+                spDrone = spL - agent(1).parameter.li(i-1)*spT;
+                sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1));
 
-                %単機牽引のモデルで推定する
-                % agent(i).sensor.do(time, 'f');
-                % agent(i).sensor.result.state.set_state("p",spDrone,"q",sqDrone,"pL",spL,"pT",spT);
+                % 単機牽引のモデルで推定する
+                agent(i).sensor.do(time, 'f');
+                agent(i).sensor.result.state.set_state("p",spDrone,"q",sqDrone,"pL",spL,"pT",spT);
 
 
                 load = agent(1).estimator.result.state;%推定をしていない
@@ -141,12 +141,14 @@ for j = 1:tn
                 w_agent = load.Oi(3*i-5:3*i-3,1);
                 
                 %単機牽引モデルの状態を推定する
-                % agent(i).estimator.do(time, 'f');
+                agent(i).estimator.do(time, 'f');
+                % agent(i).estimator.result.state.wL
+                % wi_load
                 %複数牽引モデルの状態をそのまま単機牽引モデルに入れる
-                agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
+                % agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
                 agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
-                agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
-                agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
+                % agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
+                % agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
             else
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');

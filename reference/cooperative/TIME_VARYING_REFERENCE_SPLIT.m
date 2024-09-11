@@ -202,20 +202,20 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                % uvi      = (eye(3) - qqTi)*ui;                               %uの垂直成分
                % aig      = a0 + g + R0*SKO0^2*rhoi - R0*SKrhoi*dO0;      %紐の角加速度算出に用いる加速度
                % dwi      = (SKqi*aig - SKqi*uvi/mi)/li;              %(8)
-               aidrn    = a0 + R0*SKO0^2*rhoi - R0*SKrhoi*dO0 + li*SKqi*dwi - li*SKwi^2*qi;      %分割後のペイロードの加速度
+               aidrn    = a0 + R0*SKO0^2*rhoi - R0*SKrhoi*dO0 + li*SKqi*dwi - li*SKwi^2*qi;      %分割後の機体の加速度
                mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
                mui      = -mui;%分割後の牽引物系から張力
                 
                %単機牽引モデルで推定した機体速度，牽引物速度を用いて後退差分によりそれぞれの加速度を算出
-               % ui       = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-               % vdro = obj.self.estimator.result.state.v;
-               % aidrn = (vdro - obj.vdro_pre)/dt; %機体加速度
-               % obj.vdro_pre = vdro;
-               % vL = obj.self.estimator.result.state.vL;
-               % ai = (vL - obj.vL_pre)/dt;%牽引物加速度
-               % obj.vL_pre = vL;
-               % mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
-               % mui      = -mui;%分割後の牽引物系から張力
+               ui       = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
+               vdro = obj.self.estimator.result.state.v;
+               aidrn = (vdro - obj.vdro_pre)/dt; %機体加速度
+               obj.vdro_pre = vdro;
+               vL = obj.self.estimator.result.state.vL;
+               ai = (vL - obj.vL_pre)/dt;%牽引物加速度
+               obj.vL_pre = vL;
+               mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
+               mui      = -mui;%分割後の牽引物系から張力
 
                % delta_a0 = v0 - a0
                % delta_ai = vi - ai
