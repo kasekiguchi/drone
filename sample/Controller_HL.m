@@ -7,10 +7,10 @@ B2 = [0; 1];
 B4 = [0;0;0;1];
 
 Controller.F1=lqrd(A2,B2,diag([100,1]),[0.1],dt);                                % z 
-% Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([350,450,200,1]),[0.002],dt); % ifight xdiag([400,450,150,1]),good([350,450,200,1]),0.01
-% Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([350,450,200,1]),[0.002],dt); % iflight ydiag([400,450,150,1])
- Controller.F2=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])エーシン
- Controller.F3=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])エーシン
+ Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,200,10,1]),[0.01],dt); % ifight xdiag([400,450,150,1]),good([350,450,200,1]),0.01
+ Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,200,10,1]),[0.01],dt); % iflight ydiag([400,450,150,1])
+ % Controller.F2=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])エーシン
+ % Controller.F3=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])エーシン
 Controller.F4=lqrd(A2,B2,diag([100,10]),[0.1],dt);                       % ヨー角 
 
 % % dt = 0.2 くらいの時用
