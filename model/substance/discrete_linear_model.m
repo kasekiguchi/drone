@@ -11,8 +11,11 @@ function X = discrete_linear_model(x,u,P)
         error("This model requires A and B fields on param.");
     end
     %使用した観測量に応じて変更---
-    x = quaternions_all(x);
+    z = quaternions_all(x);
     %----------------------------
-    X = A*x+B*u;
-    X = P.C*X;
+    % X(1:3) = x()
+    Z = A*z+B*u;
+    X = P.C*Z;
+    %% without position observables
+    X = [x(1:3) + 0.025 * X(1:3); X];
 end
