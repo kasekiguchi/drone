@@ -17,8 +17,8 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 agent = DRONE;
-% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253])); %プロポ無線
+% agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)), ["p", "q"]));
 agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
@@ -33,7 +33,8 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = "2024-08-06_Exp_KiyamaY20_code00_saddle.mat"; % y方向増加
 % model_file = "2024-07-14_Exp_KiyamaX20_code00_saddle.mat"; % x方向増加
-model_file = "2024-08-08_Exp_KiyamaY20_Zdecreased20k_code00_saddle.mat"; %y方向増加＋z方向減少
+% model_file = "2024-08-08_Exp_KiyamaY20_Zdecreased20k_code00_saddle.mat"; %y方向増加＋z方向減少
+model_file = "2024-09-11_Exp_Kiyama_code10_saddle.mat";
 
 %% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
@@ -42,7 +43,7 @@ agent.controller.result.input = [0;0;0;0];
 agent.controller.do = @controller_do;
 %------------------------------------------------------------------------------------------------------------------------
 
-disp(['Select model confirm: ' + model_file]);
+disp(['Select model confirmation: ' + model_file]); % dispはダブルクォーテーションのみ対応
 run("ExpBase");
 
 %% function
