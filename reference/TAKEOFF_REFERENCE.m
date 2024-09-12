@@ -9,7 +9,7 @@ classdef TAKEOFF_REFERENCE < handle
     zd = 1.0; % goal altitude
     result
     th_offset
-     th_offset0 = 235;%ifight用
+     th_offset0 = 250;%ifight用
     % th_offset0 = 150;%エーシン
   end
 

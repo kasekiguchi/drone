@@ -44,14 +44,15 @@ classdef HLC < handle
       %if isfield(obj.param,'dt')
     
       % if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-        dt = varargin{1}.dt;
+        % dt = varargin{1}.dt;
+        dt = 0.015;
         [F1,F2,F3,F4]=obj.gainFunc(dt);
         % [A2d,B2d,A4d,B4d]=obj.AdBd(dt);
         % [F1,F2,F3,F4]=obj.gainFunc(A2d,B2d,A4d,B4d)
-         % F1 = obj.param.F1;
-         % F2 = obj.param.F2;
-         % F3 = obj.param.F3;
-         % F4 = obj.param.F4;
+             F1 = obj.param.F1;
+          % F2 = obj.param.F2;
+          % F3 = obj.param.F3;
+            % F4 = obj.param.F4;
          gainmode=1;
       % else
       %   dt = obj.param.dt;

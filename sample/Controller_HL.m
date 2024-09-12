@@ -7,7 +7,7 @@ B2 = [0; 1];
 B4 = [0;0;0;1];
 
 Controller.F1=lqrd(A2,B2,diag([100,1]),[0.1],dt);                                % z 
- Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,200,10,1]),[0.01],dt); % ifight xdiag([400,450,150,1]),good([350,450,200,1]),0.01
+ Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,200,10,1]),[0.01],dt); % ifight xdiag([400,450,150,1]),good([350,450,200,1]),0.002
  Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,200,10,1]),[0.01],dt); % iflight ydiag([400,450,150,1])
  % Controller.F2=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])エーシン
  % Controller.F3=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])エーシン
@@ -37,7 +37,7 @@ Controller.F4=lqrd(A2,B2,diag([100,10]),[0.1],dt);                       % ヨ�
 [pA2d,pB2d]=c2d(A2,B2,dt);
 [pA4d,pB4d]=c2d(A4,B4,dt);
 p2=eig(pA2d-pB2d*Controller.F1);%F1,F4用の極→HLCで使う
-p4=eig(pA4d-pB4d*Controller.F2);
+p4=eig(pA4d-pB4d*Controller.F2);%F2,F3用の極→HLCで使う
 Controller.gainFunc = @(tt) deal(place([1,tt;0,1], [tt^2/2;tt],p2),...
     place([1,tt,tt^2/2, tt^3/6;0,1,tt,tt^2/2;0,0, 1,tt;0,0, 0,1],[tt^4/24;tt^3/6;tt^2/2;tt],p4),...
     place([1,tt,tt^2/2, tt^3/6;0,1,tt,tt^2/2;0,0, 1,tt;0,0, 0,1],[tt^4/24;tt^3/6;tt^2/2;tt],p4),...
