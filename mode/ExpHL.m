@@ -14,10 +14,10 @@ initial_state.p = sstate.p;
 initial_state.q = sstate.q;
 initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
-
+% delete(gui.agent.plant.connector.serial);
 agent = DRONE;
 % agent.plant = DRONE_EXP_MODEL_test(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5")); %プロポ有線 
 % "3" or "COM3"
 % agent.platn = DRONE_EXP_MODEL(agent,)
 agent.parameter = DRONE_PARAM("DIATONE");

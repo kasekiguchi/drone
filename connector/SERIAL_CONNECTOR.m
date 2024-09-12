@@ -19,6 +19,7 @@ methods
         % param.port : COM num
         % 必要に応じてMac, Linuxに対応させる．
         % obj.port = strcat("COM", string(param.port));
+        % delete(obj.serial);
         obj.port = string(param.port);
         obj.serial = serialport(obj.port, obj.baudrate, 'Timeout', 1);
         configureTerminator(obj.serial, "CR/LF");
