@@ -7,6 +7,6 @@ end
 hostname = string(strtrim(hostname));
 ClientIP = resolvehost(hostname,"address"); % client ip
   ClientIP = '192.168.1.5';%なぶちゃん
- %ClientIP = '192.168.1.6';%粉砕
+ % ClientIP = '192.168.1.2';%粉砕
 motive=NATNET_CONNECTOR("HostIP",HostIP,"ClientIP",ClientIP);
 end

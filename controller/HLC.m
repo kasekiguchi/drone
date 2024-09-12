@@ -42,7 +42,8 @@ classdef HLC < handle
       xd(13:15)=Rb0'*xd(13:15);
       xd(17:19)=Rb0'*xd(17:19);
       %if isfield(obj.param,'dt')
-      if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
+    
+      % if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
         dt = varargin{1}.dt;
         [F1,F2,F3,F4]=obj.gainFunc(dt);
         % [A2d,B2d,A4d,B4d]=obj.AdBd(dt);
@@ -51,15 +52,20 @@ classdef HLC < handle
          % F2 = obj.param.F2;
          % F3 = obj.param.F3;
          % F4 = obj.param.F4;
-      else
-        dt = obj.param.dt;
-        F1 = obj.param.F1;
-         F2 = obj.param.F2;
-         F3 = obj.param.F3;
-         F4 = obj.param.F4;
-        % vf = Vf(x,xd',P,F1);
-        % vs = Vs(x,xd',vf,P,F2,F3,F4);
-      end
+         gainmode=1;
+      % else
+      %   dt = obj.param.dt;
+      %   F1 = obj.param.F1;
+      %    F2 = obj.param.F2;
+      %    F3 = obj.param.F3;
+      %    F4 = obj.param.F4;
+      %   % vf = Vf(x,xd',P,F1);
+      %   % vs = Vs(x,xd',vf,P,F2,F3,F4);
+      %   gainmode=2;
+      % end
+       % fprintf('dt = %.4f [s] ,t=%.4f [s],F1=%.4f,F2=%.4f ,gainmode=%d\n', dt,varargin{1}.t,F1,F2,gainmode);
+       ddd = ['dt = ', num2str(dt),' [s], t=',num2str(varargin{1}.t),'[s],F1=',num2str(F1),'F2=',num2str(F2),'gainmode=',num2str(gainmode)];
+       disp(ddd)
         vf = Vfd(dt,x,xd',P,F1);
         vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
       %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
