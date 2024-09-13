@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 15;
+te = 25;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -146,9 +146,13 @@ for j = 1:tn
                 % wi_load
                 %複数牽引モデルの状態をそのまま単機牽引モデルに入れる
                 % agent(i).estimator.result.state.set_state("pL",pL_agent,"vL",vL_agent);
-                agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
+                % agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
                 % agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
                 % agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
+                agent(i).plant.state.set_state("pL",pL_agent,"vL",vL_agent);
+                agent(i).plant.state.set_state("pT",pT_agent,"wL",wi_load);
+                agent(i).plant.state.set_state("p",p_agent,"v",v_agent);
+                agent(i).plant.state.set_state("q",q_agent,"w",w_agent);
             else
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');

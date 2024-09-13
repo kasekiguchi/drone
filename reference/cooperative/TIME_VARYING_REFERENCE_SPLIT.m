@@ -209,7 +209,7 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                %単機牽引モデルで推定した機体速度，牽引物速度を用いて後退差分によりそれぞれの加速度を算出
                ui       = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
                vdro = obj.self.estimator.result.state.v;
-               aidrn = (vdro - obj.vdro_pre)/dt; %機体加速度
+               aidrn = (vdro - obj.vdro_pre)/dt; %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
                obj.vdro_pre = vdro;
                vL = obj.self.estimator.result.state.vL;
                ai = (vL - obj.vL_pre)/dt;%牽引物加速度
