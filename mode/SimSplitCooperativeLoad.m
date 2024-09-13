@@ -119,7 +119,7 @@ for j = 1:tn
                 sqDrone = Quat2Eul(sensor1.Qi(4*i-7:4*i-4,1));
 
                 % 単機牽引のモデルで推定する
-                agent(i).sensor.do(time, 'f');
+                % agent(i).sensor.do(time, 'f');
                 agent(i).sensor.result.state.set_state("p",spDrone,"q",sqDrone,"pL",spL,"pT",spT);
 
 
