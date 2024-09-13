@@ -52,7 +52,7 @@ close all
 % set(0,'DefaultAxesFontSize',18);
 set(0,'DefaultTextFontSize', 18);
 variable = {'x', 'y', 'z', 'q_r', 'q_p', 'q_y', 'v_x', 'v_y', 'v_z', 'omega_r', 'omega_p', 'omega_y'};
-flg.savefig = 1;
+flg.savefig = 0;
 
 % all x
 % figure(1); sgtitle(strcat('$$', variable(1), '$$'), 'Interpreter','latex', 'FontSize', 20);

@@ -17,5 +17,5 @@ function X = discrete_linear_model(x,u,P)
     Z = A*z+B*u;
     X = P.C*Z;
     %% without position observables
-    X = [x(1:3) + 0.025 * X(1:3); X];
+    % X = [x(1:3) + 0.025 * X(1:3); X];
 end

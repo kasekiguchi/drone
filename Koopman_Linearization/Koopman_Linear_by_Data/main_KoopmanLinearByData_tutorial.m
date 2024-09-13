@@ -127,7 +127,7 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 clear; clc;
 flg.bilinear = 0;
 flg.normalize = 0;
-flg.without_pos = 1;
+flg.without_pos = 0;
 F = @quaternions_all; % 改造用
 FileName_common = strcat(string(datetime('now'), 'yyyy-MM-dd'), '_'); 
 Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
@@ -137,7 +137,7 @@ exp_data = 'Exp_Kiyama';    %既存データzのみ速度から
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
 % exp_data = 'Exp_Kiyama_XY_20data';
-FileName = strcat(FileName_common, exp_data, '_', 'code10_', Exp_tra); % 保存先
+FileName = strcat(FileName_common, exp_data, '_', 'code11_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
 % targetpath=append(nowFolder,'\',FileName);

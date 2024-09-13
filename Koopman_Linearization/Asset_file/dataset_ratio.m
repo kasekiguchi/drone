@@ -7,19 +7,20 @@ clear
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromZvel.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddXdirection.mat');
 % Data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_true.mat', 'Data');
-% Data2 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
+Data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
 
-Data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Koma2_y20.mat');
-% X = Data1.X;
-% Y = Data1.Y;
-% U = Data1.U;
-
+% ただのload
 Data = Data1.Data;
+X = Data.X;
+Y = Data.Y;
+U = Data.U;
+
+% Data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Koma2_y20.mat');
 % Data2 = Data2.Data;
 
-Data.X = Data1.Data.X(:, 30000:end);
-Data.Y = Data1.Data.Y(:, 30000:end);
-Data.U = Data1.Data.U(:, 30000:end);
+% Data.X = Data1.Data.X(:, 30000:end);
+% Data.Y = Data1.Data.Y(:, 30000:end);
+% Data.U = Data1.Data.U(:, 30000:end);
 
 
 %%
@@ -28,21 +29,40 @@ Data.U = Data1.Data.U(:, 30000:end);
 % Data.Y = Data.Y(:,decread_data:end);
 % Data.U = Data.U(:,decread_data:end);
 
+%% XXきざみにデータをプロット
+% trange = 1:10000;
+% Data = Data1.Data;
+% X = Data.X(:, trange);
+% Y = Data.Y(:, trange);
+% U = Data.U(:, trange);
+close all
+N = 1000;
+% checking_num = round(size(X, 2) / N)-1 
+% num = checking_num / 2;
+forrange = 1:64;
+for i = forrange
+    T = (i-1)*N+1:i*N;
+    A = X(1:2,T);
+    D = diff(X(1:2, T));
+    figure(100); subplot(8, 8, i); plot(T,A); ylim(1 * [-1, 1]);
+    figure(101); subplot(8, 8, i); plot(T,D);ylim(0.1 * [-1, 1]);
+end
+
 %% データセットがどういう割合のデータなのか算出する
 close all
-T = 1:size(Data.X,2);
+T = 1:size(X,2);
 
 figure(1);
 % sgtitle('Kiyama Exp Dataset fromVel_true')
-subplot(2,2,1); plot(T, Data.X(1:3,:), 'LineWidth', 1.5); 
+subplot(2,2,1); plot(T, X(1:3,:), 'LineWidth', 1.5); 
 xlabel('Dataset', 'FontSize', 15); ylabel("Datasets position", 'FontSize', 15)
 legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15)
 
-subplot(2,2,2); plot(T, Data.X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
+subplot(2,2,2); plot(T, X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
 xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5])
-subplot(2,2,3); plot(T, Data.X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
+subplot(2,2,3); plot(T, X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
 xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15)
-subplot(2,2,4); plot(T, Data.X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
+subplot(2,2,4); plot(T, X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
 xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
 
 

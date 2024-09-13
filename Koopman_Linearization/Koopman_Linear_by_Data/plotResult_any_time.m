@@ -16,13 +16,13 @@ flg.division = 0; % plotResult_division仕様にするか
 flg.confirm_ref = 1; % リファレンスに設定した軌道の確認
 flg.rmse = 0; % subplotにRMSE表示
 flg.only_rmse = 0; % コマンドウィンドウに表示
-flg.without_pos = 1; % 観測量に位置が含まれているかどうか 
+flg.without_pos = 0; % 観測量に位置が含まれているかどうか 
 % 要注意 基本は"0"
 save_fig = 0;     % 1：出力したグラフをfigで保存する
 flg.figtype = 0;  % 1 => figureをそれぞれ出力 / 0 => subplotで出力
 
-startTime = 3.9; % flight後何秒からの推定精度検証を行うか saddle:3.39
-stepnum = 3; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
+startTime = 8; % flight後何秒からの推定精度検証を行うか saddle:3.39
+stepnum = 0; % 0:0.5s, 1:0.8s, 2:1.5s, 3:2.0s
 
 if ~flg.rmse && ~flg.confirm_ref; m = 2; n = 2;
 else;                             m = 2; n = 3; end
@@ -37,7 +37,7 @@ mode.training_data = 'Kiyama';
 ref_tra = 'saddle'; 
 loadfilename{1} = WhichLoadFile(ref_tra, 1, mode);
 
-loadfilename{1} = '2024-09-11_Exp_Kiyama_code10_saddle';
+loadfilename{1} = '2024-09-12_Exp_Kiyama_code11_saddle';
 % loadfilename{1} = '2024-08-06_Exp_KiyamaY20_code00_saddle';
 % loadfilename{1} = '2024-08-07_Exp_KiyamaY20_code08_saddle';
 % % loadfilename{1} = '2024-07-14_Exp_KiyamaX20_code00_saddle';

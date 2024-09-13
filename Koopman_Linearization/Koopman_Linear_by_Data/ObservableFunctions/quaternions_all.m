@@ -84,7 +84,6 @@ isobe_z = [W1*W2;
             W2*sin(Q1)*sin(Q2)/cos(Q1);
             W3*cos(Q1)*sin(Q2)/cos(Q1)
             ];
-% z = [common_z; isobe_z];
 
 %% F(x), G(x)の各項をそのまま観測量にする code = 01
 F_z = [(W1*cos(Q2) + W3*cos(Q1)*sin(Q2) + W2*sin(Q2)*sin(Q1)) /cos(Q2);
@@ -101,7 +100,6 @@ G_z = [(2*(cos(Q2/2)*cos(Q1/2)*cos(Q3/2) + sin(Q2/2)*sin(Q1/2)*sin(Q3/2))*(cos(Q
     1/jy;
     1/jz
     ];
-% z = [common_z; F_z; G_z];
 
 %% F(x), G(x)の各項を分解して観測量にする code = 02
 Fdisassembly_z = [W1*cos(Q2);
@@ -168,7 +166,7 @@ partial_param_z_3 = [comat_1; comat_2; comat_12_1; comat_12_2;
 partial_param_z = [partial_param_z_1; partial_param_z_2; partial_param_z_3];
 
 %% まとめ
-% z = [common_z; isobe_z]; % 00
+z = [common_z; isobe_z]; % 00
 % z = [common_z; Fdisassembly_z; Gdisassembly_z]; % 02
 % z = [common_z; Fdisassembly_z; Gdisassembly_z; isobe_z]; % 03
 % z = [common_z; isobe_z; diff_param_z]; % 04
@@ -176,8 +174,9 @@ partial_param_z = [partial_param_z_1; partial_param_z_2; partial_param_z_3];
 % z = [common_2z; isobe_z]; % 06
 % z = [isobe_z; common_z]; % 07
 % z = [common_z; isobe_z; F_z; G_z; Fdisassembly_z; Gdisassembly_z; diff_param_z]; % 08
-% z = [common_except_pos_z; isobe_z; partial_param_z]; % 09
-z = [common_except_pos_z; isobe_z]; % 10
+% z = [common_except_pos_z; isobe_z; partial_param_z]; % 09  11の位置を含まない版
+% z = [common_except_pos_z; isobe_z];                  % 10  00の位置を含まない版
+% z = [common_z; isobe_z; partial_param_z]; % 11
 
 end
 

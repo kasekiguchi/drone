@@ -31,6 +31,9 @@ function Controller = Controller_MPC_Koopman(dt, model)
         Controller_param.B = est.B;
         Controller_param.C = est.C;
     end
+    % Controller_param.A = model{1};
+    % Controller_param.B = model{2};
+    % Controller_param.C = model{3};
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      torque = 1; % 1:クープマンモデルが総推力トルクのとき
