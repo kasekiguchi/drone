@@ -74,11 +74,11 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 % param.model_error = [];
 
                 %% 6セル from momose 
-                param.mass = 0.72;%0.73
-                param.Lx = 0.16;
-                param.Ly = 0.16;
-                param.lx = 0.08;%0.05;
-                param.ly = 0.08;%0.05;
+                param.mass = 0.73;%0.73
+                param.Lx = 0.175;
+                param.Ly = 0.175;
+                param.lx = 0.0175/2;%0.05;
+                param.ly = 0.0175/2;%0.05;
                 param.jx = 0.06;
                 param.jy = 0.06;
                 param.jz = 0.06;
