@@ -303,16 +303,37 @@ hold off
 %%
 %xyの軌道と目標軌道の比較:flightのみ抜き出し
 aa = 1;
-ba = height(phase);
+ba = height(t);
+x_est_sel = [];
+y_est_sel = [];
+x_ref_sel = [];
+y_ref_sel = [];
 while aa <= ba
     if phase(aa,1) == 102
-        x_est_sel = x_est(1:aa);
-        y_est_sel = y_est(1:aa);
-        x_ref_sel = x_ref(1:aa);
-        y_ref_sel = y_ref(1:aa);
+        x_est_sel = [x_est_sel,x_est(1,aa)];
+        y_est_sel = [y_est_sel,y_est(1,aa)];
+        x_ref_sel = [x_ref_sel,x_ref(1,aa)];
+        y_ref_sel = [y_ref_sel,y_ref(1,aa)];
     end
     aa = aa + 1;
 end
+
+aa2 = 1;
+ba2 = height(t2);
+x_est2_sel = [];
+y_est2_sel = [];
+x_ref2_sel = [];
+y_ref2_sel = [];
+while aa2 <= ba2
+    if phase(aa2,1) == 102
+        x_est2_sel = [x_est2_sel,x_est2(1,aa2)];
+        y_est2_sel = [y_est2_sel,y_est2(1,aa2)];
+        x_ref2_sel = [x_ref2_sel,x_ref2(1,aa2)];
+        y_ref2_sel = [y_ref2_sel,y_ref2(1,aa2)];
+    end
+    aa2 = aa2 + 1;
+end
+
 figure;
 plot(x_est_sel, y_est_sel, '-','LineWidth',2);
 grid on
@@ -328,23 +349,23 @@ plot(x_ref_sel, y_ref_sel, '--','LineWidth',2);
 legend('Estimater','Reference','fontsize',12)
 hold off
 
-% figure;
-% plot(x_est2, y_est2, '-','LineWidth',2);
-% grid on
-% xlabel('X[m]') 
-% ylabel('Y[m]')
-% set(gca().XAxis, 'Fontsize', 12)
-% set(gca().YAxis, 'Fontsize', 12)
-% daspect([1 1 1])
-% xlim([-1.5 1.5])
-% ylim([-1.5 1.5])
-% hold on
-% plot(x_ref2, y_ref2, '--','LineWidth',2);
-% legend('Estimater','Reference','fontsize',12)
-% hold off
+figure;
+plot(x_est2_sel, y_est2_sel, '-','LineWidth',2);
+grid on
+xlabel('X[m]') 
+ylabel('Y[m]')
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+daspect([1 1 1])
+xlim([-1.5 1.5])
+ylim([-1.5 1.5])
+hold on
+plot(x_ref2_sel, y_ref2_sel, '--','LineWidth',2);
+legend('Estimater','Reference','fontsize',12)
+hold off
 
 %%
-%xyzの時間変化による目標軌道との比較
+%xyzの時間変化による目標軌道との比較 フライト時のみ
 aa = 1;
 ba = height(t);
 x_est_sel = [];
@@ -386,55 +407,50 @@ legend('X-estimator','Y-estimator','Z-estimator', ...
     'southwest','fontsize',8,'NumColumns',2)
 hold off
 
-% aa2 = 1;
-% ba2 = height(t);
-% x_est2_sel = [];
-% y_est2_sel = [];
-% z_est2_sel = [];
-% x_ref2_sel = [];
-% y_ref2_sel = [];
-% z_ref2_sel = [];
-% t2_sel = [];
-% 
-% figure;
-% plot(t2_sel, x_est2_sel, '-','LineWidth',2);
-% grid on
-% xlabel('Time[s]','FontSize',12) 
-% ylabel('Trajectory[m]','FontSize',12)
-% set(gca().XAxis, 'Fontsize', 12)
-% set(gca().YAxis, 'Fontsize', 12)
-% xlim([0 inf])
-% hold on
-% plot(t2_sel, y_est2_sel, '-','LineWidth',2);
-% plot(t2_sel, z_est2_sel, '-','LineWidth',2);
-% plot(t2_sel, x_ref2_sel, '--','LineWidth',2);
-% plot(t2_sel, y_ref2_sel, '--','LineWidth',2);
-% plot(t2_sel, z_ref2_sel, '--','LineWidth',2);
-% legend('X-estimator','Y-estimator','Z-estimator', ...
-%     'X-reference','Y-reference','Z-reference','Location', ...
-%     'southwest','fontsize',12)
-% hold off
-% 
-a = 1;
+aa2 = 1;
+ba2 = height(t);
+x_est2_sel = [];
+y_est2_sel = [];
+z_est2_sel = [];
+x_ref2_sel = [];
+y_ref2_sel = [];
+z_ref2_sel = [];
+t2_sel = [];
+
+figure;
+plot(t2_sel, x_est2_sel, '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Trajectory[m]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([0 inf])
+hold on
+plot(t2_sel, y_est2_sel, '-','LineWidth',2);
+plot(t2_sel, z_est2_sel, '-','LineWidth',2);
+plot(t2_sel, x_ref2_sel, '--','LineWidth',2);
+plot(t2_sel, y_ref2_sel, '--','LineWidth',2);
+plot(t2_sel, z_ref2_sel, '--','LineWidth',2);
+legend('X-estimator','Y-estimator','Z-estimator', ...
+    'X-reference','Y-reference','Z-reference','Location', ...
+    'southwest','fontsize',12)
+hold off
+
 x_error_sel = [];
 y_error_sel = [];
 z_error_sel = [];
-while a <= size(t_sel)
-    x_error_sel = x_est_sel(1,a) - x_ref_sel(1,a);
-    y_error_sel = y_est_sel(1,a) - y_ref_sel(1,a);
-    z_error_sel = z_est_sel(1,a) - z_ref_sel(1,a);
-    a = a + 1;
-end
-% 
-% b = 1;
-% 
-% while b <= size(t2_sel)
-%     x_error2_sel(1,b) = x_est2_sel(1,b) - x_ref2_sel(1,b);
-%     y_error2_sel(1,b) = y_est2_sel(1,b) - y_ref2_sel(1,b);
-%     z_error2_sel(1,b) = z_est2_sel(1,b) - z_ref2_sel(1,b);
-%     b = b + 1;
-% end
-% 
+    x_error_sel = x_est_sel - x_ref_sel;
+    y_error_sel = y_est_sel - y_ref_sel;
+    z_error_sel = z_est_sel - z_ref_sel;
+
+x_error2_sel = [];
+y_error2_sel = [];
+z_error2_sel = [];
+
+    x_error2_sel = x_est2_sel - x_ref2_sel;
+    y_error2_sel = y_est2_sel - y_ref2_sel;
+    z_error2_sel = z_est2_sel - z_ref2_sel;
+
 figure;
 plot(t_sel, x_error_sel, '-','LineWidth',2);
 grid on
@@ -449,18 +465,128 @@ plot(t_sel, z_error_sel, '-','LineWidth',2);
 legend('X-error','Y-error','Z-error','Location', ...
     'southwest','fontsize',8)
 hold off
-% 
-% figure;
-% plot(t2_sel, x_error2_sel, '-','LineWidth',2);
-% grid on
-% xlabel('Time[s]','FontSize',12) 
-% ylabel('Trajectory[m]','FontSize',12)
-% set(gca().XAxis, 'Fontsize', 12)
-% set(gca().YAxis, 'Fontsize', 12)
-% xlim([0 inf])
-% hold on
-% plot(t2_sel, y_error2_sel, '-','LineWidth',2);
-% plot(t2_sel, z_error2_sel, '-','LineWidth',2);
-% legend('X-error','Y-error','Z-error','Location', ...
-%     'southwest','fontsize',12)
-% hold off
+
+figure;
+plot(t2_sel, x_error2_sel, '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Trajectory[m]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([t2_sel(1,1) inf])
+hold on
+plot(t2_sel, y_error2_sel, '-','LineWidth',2);
+plot(t2_sel, z_error2_sel, '-','LineWidth',2);
+legend('X-error','Y-error','Z-error','Location', ...
+    'southwest','fontsize',8)
+hold off
+
+%%
+%vの時間変化による目標速度との比較 フライト中のみ
+aa = 1;
+ba = height(t);
+vx_est_sel = [];
+vy_est_sel = [];
+vz_est_sel = [];
+vx_ref_sel = [];
+vy_ref_sel = [];
+vz_ref_sel = [];
+t_sel = [];
+while aa <= ba
+    if phase(aa,1) == 102
+        vx_est_sel = [vx_est_sel,vx_est(1,aa)];
+        vy_est_sel = [vy_est_sel,vy_est(1,aa)];
+        vz_est_sel = [vz_est_sel,vz_est(1,aa)];
+        vx_ref_sel = [vx_ref_sel,vx_ref(1,aa)];
+        vy_ref_sel = [vy_ref_sel,vy_ref(1,aa)];
+        vz_ref_sel = [vz_ref_sel,vz_ref(1,aa)];
+        t_sel = [t_sel,t(aa,1)];
+    end
+    aa = aa + 1;
+end
+
+
+figure;
+plot(t, vx_est_sel, '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Velocity[m/s]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([0 inf])
+hold on
+plot(t, vy_est_sel, '-','LineWidth',2);
+plot(t, vz_est_sel, '-','LineWidth',2);
+plot(t, vx_ref_sel, '--','LineWidth',2);
+plot(t, vy_ref_sel, '--','LineWidth',2);
+plot(t, vz_ref_sel, '--','LineWidth',2);
+legend('VX-estimator','VY-estimator','VZ-estimator', ...
+    'VX-reference','VY-reference','VZ-reference','Location', ...
+    'southwest','fontsize',12)
+hold off
+
+figure;
+plot(t2, vx_est2, '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Velocity[m/s]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([0 inf])
+hold on
+plot(t2, vy_est2, '-','LineWidth',2);
+plot(t2, vz_est2, '-','LineWidth',2);
+plot(t2, vx_ref2, '--','LineWidth',2);
+plot(t2, vy_ref2, '--','LineWidth',2);
+plot(t2, vz_ref2, '--','LineWidth',2);
+legend('VX-sensor','VY-sensor','VZ-sensor', ...
+    'VX-estimator','VY-estimator','VZ-estimator','Location', ...
+    'southwest','fontsize',12)
+hold off
+
+vx_error_sel = [];
+vy_error_sel = [];
+vz_error_sel = [];
+    vx_error_sel = vx_est_sel - vx_ref_sel;
+    vy_error_sel = vy_est_sel - vy_ref_sel;
+    vz_error_sel = vz_est_sel - vz_ref_sel;
+
+
+while b <= k2
+    vx_error2(1,b) = vx_est2(1,b) - vx_ref2(1,b);
+    vy_error2(1,b) = vy_est2(1,b) - vy_ref2(1,b);
+    vz_error2(1,b) = vz_est2(1,b) - vz_ref2(1,b);
+    b = b + 1;
+end
+
+figure;
+plot(t_sel, vx_error_sel, '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Velocity[m/s]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([t_sel(1,1) inf])
+ylim([-1 1])
+hold on
+plot(t_sel, vy_error_sel, '-','LineWidth',2);
+plot(t_sel, vz_error_sel, '-','LineWidth',2);
+legend('VX-error','VY-error','VZ-error','Location', ...
+    'southwest','fontsize',8)
+hold off
+
+figure;
+plot(t2, vx_error2, '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Velocity[m/s]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([0 inf])
+ylim([-1 1])
+hold on
+plot(t2, vy_error2, '-','LineWidth',2);
+plot(t2, vz_error2, '-','LineWidth',2);
+legend('VX-error','VY-error','VZ-error','Location', ...
+    'southwest','fontsize',12)
+hold off
