@@ -63,7 +63,8 @@ lgnd.drone="drone" + droneID;
 %     "three_D0",["t_p" "t_x" "t_y"	"t_z"],["error"	"t_errx"	"t_erry"	"t_errz"],["attitude"	"t_qroll"	"t_qpitch"	"t_qyaw"],"attitude"+droneID,["velocity"	"t_vx"	"t_vy" "t_vz"],["angular_velocity"	"t_wroll"	"t_wpitch"	"t_wyaw"],...
 %     "three_D",["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"],"input",["mAll","mL"],"DronePayload"+droneID,"linkDir"+droneID,"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
 % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0",["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID};%比較するとき複数まとめる
-nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,"vi"+droneID,"wi"+droneID,"vLi"+droneID,"wLi"+droneID,["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
+% nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,"vi"+droneID,"wi"+droneID,"vLi"+droneID,"wLi"+droneID,["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
+nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
 % nM = {"mui"+droneID};%比較するとき複数まとめる
 multiFigure.layout = cell(1,length(nM));
 
