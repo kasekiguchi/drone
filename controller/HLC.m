@@ -44,15 +44,41 @@ classdef HLC < handle
       %if isfield(obj.param,'dt')
     
       % if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-        % dt = varargin{1}.dt;
-        dt = 0.015;
-        [F1,F2,F3,F4]=obj.gainFunc(dt);
+         %dt = varargin{1}.dt;
+        dt = 0.020;
+
+% 初期設定
+window_size = 100; % 平均を計算するウィンドウのサイズ
+dt_values = zeros(1, window_size); % dtの値を格納する配列
+index = 1; % 配列のインデックス
+count = 0; % 追加された値のカウント
+
+% dtの新しい値を取得
+dt = varargin{1}.dt;
+
+% dtの値を配列に追加
+dt_values(index) = dt;
+
+% インデックスを更新
+index = mod(index, window_size) + 1;
+
+% 追加された値のカウントを更新
+count = min(count + 1, window_size);
+
+% 最新の100個の平均を計算
+if count == window_size
+    average_dt = mean(dt_values);
+    fprintf('最新の100個の平均: %f\n', average_dt);
+end
+
+        
+        [F1,F2,F3,F4]=obj.gainFunc(average_dt);
         % [A2d,B2d,A4d,B4d]=obj.AdBd(dt);
         % [F1,F2,F3,F4]=obj.gainFunc(A2d,B2d,A4d,B4d)
-             F1 = obj.param.F1;
+            F1 = obj.param.F1;
           % F2 = obj.param.F2;
           % F3 = obj.param.F3;
-            % F4 = obj.param.F4;
+            F4 = obj.param.F4;
          gainmode=1;
       % else
       %   dt = obj.param.dt;

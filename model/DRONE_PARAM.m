@@ -46,8 +46,8 @@ classdef DRONE_PARAM < PARAMETER_CLASS
                 % param.jx = 0.03;
                 % param.jy = 0.03;
                 % param.jz = 0.03;
-                param.mass = 0.699;%エーシン
-                % param.mass = 0.730;%iflight
+                %param.mass = 0.699;%エーシン
+                 param.mass = 0.730;%iflight
                 param.Lx = 0.16;%エーシン
                 param.Ly = 0.16;%エーシン
                 param.lx = 0.16/2;%0.05;%エーシン
