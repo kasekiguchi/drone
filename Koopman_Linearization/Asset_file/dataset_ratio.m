@@ -1,7 +1,11 @@
 %% Importing data
 % 結合されたデータを読み込む
+clear; clc;
+clc
 tmp = matlab.desktop.editor.getActive;
-cd(strcat(fileparts(tmp.Filename), '/../'));
+cd(strcat(fileparts(tmp.Filename), '../../../'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %%
 clear
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_AddX_fromZvel.mat');
@@ -42,11 +46,13 @@ N = 1000;
 forrange = 1:64;
 for i = forrange
     T = (i-1)*N+1:i*N;
-    A = X(1:2,T);
-    D = diff(X(1:2, T));
-    figure(100); subplot(8, 8, i); plot(T,A); ylim(1 * [-1, 1]);
-    figure(101); subplot(8, 8, i); plot(T,D);ylim(0.1 * [-1, 1]);
+    Td = (i-1)*N+1:i*N+1;
+    A = X(1,T);
+    D = diff(X(1, Td));
+    figure(100); subplot(8, 8, i); plot(T,A); ylim(0.1 * [-1, 1]);
+    figure(101); sgtitle('diff'); subplot(8, 8, i); plot(T,D);ylim(0.0001 * [-1, 1]);
 end
+
 
 %% データセットがどういう割合のデータなのか算出する
 close all
