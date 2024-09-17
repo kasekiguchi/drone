@@ -44,41 +44,43 @@ classdef HLC < handle
       %if isfield(obj.param,'dt')
     
       % if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-         %dt = varargin{1}.dt;
-        dt = 0.020;
-
+         %dt = varargin{1}.dt;%実際の制御周期を使う場合はこっち
+        dt = 0.020;%仮定して実験する場合はこっち
+%% 
+%dt100個の平均をとってdtとする場合はここのセクションを使う．(doの中に書く必要ないのも含まれているので注意
+%obj.gainhuuncてきなの作ったほうがよさそう
 % 初期設定
-window_size = 100; % 平均を計算するウィンドウのサイズ
+window_size = 100; % 平均を計算するウィンドウのサイズ，10ぐらいのほうが反応良いかも．
 dt_values = zeros(1, window_size); % dtの値を格納する配列
-index = 1; % 配列のインデックス
-count = 0; % 追加された値のカウント
-
+dt_count_index = 1; % 配列のインデックス
+dt_plus_count = 0; % 追加された値のカウント
+%↑ここまで初期設定
 % dtの新しい値を取得
 dt = varargin{1}.dt;
 
 % dtの値を配列に追加
-dt_values(index) = dt;
+dt_values(dt_count_index) = dt;
 
 % インデックスを更新
-index = mod(index, window_size) + 1;
+dt_count_index = mod(dt_count_index, window_size) + 1;
 
 % 追加された値のカウントを更新
-count = min(count + 1, window_size);
+dt_plus_count = min(dt_plus_count + 1, window_size);
+% 最新の100個or100以下の今までの個数の平均を計算
+ average_dt = mean(dt_values(1:dt_plus_count));
+ fprintf('最新の100個の平均: %f\n', average_dt);
 
-% 最新の100個の平均を計算
-if count == window_size
-    average_dt = mean(dt_values);
-    fprintf('最新の100個の平均: %f\n', average_dt);
-end
+
+%% 
 
         
-        [F1,F2,F3,F4]=obj.gainFunc(average_dt);
+        [F1,F2,F3,F4]=obj.gainFunc(average_dt);%ゲイン可変3/3ここをオンにしておけば可変ゲインを計算してくれる．
         % [A2d,B2d,A4d,B4d]=obj.AdBd(dt);
         % [F1,F2,F3,F4]=obj.gainFunc(A2d,B2d,A4d,B4d)
-            F1 = obj.param.F1;
-          % F2 = obj.param.F2;
-          % F3 = obj.param.F3;
-            F4 = obj.param.F4;
+            F1 = obj.param.F1;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
+          % F2 = obj.param.F2;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
+          % F3 = obj.param.F3;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
+            F4 = obj.param.F4;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
          gainmode=1;
       % else
       %   dt = obj.param.dt;
