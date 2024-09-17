@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 25;
+te = 100;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -98,7 +98,7 @@ for i = 2:N+1
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
     agent(i).controller.load = HLC_SPLIT_SUSPENDED_LOAD(agent(i),Controller_HL_Suspended_Load(dt,agent(i)));
     agent(i).controller.do = @controller_do;
-    agent(i).controller.result.input = [(agent(i).parameter.loadmass + agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
+    agent(i).controller.result.input = [(agent(i).parameter.loadmass*0 + agent(i).parameter.mass)*agent(i).parameter.gravity;0;0;0];
 end
 % run("ExpBase");
 
