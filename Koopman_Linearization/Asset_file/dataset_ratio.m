@@ -33,7 +33,7 @@ U = Data.U;
 % Data.Y = Data.Y(:,decread_data:end);
 % Data.U = Data.U(:,decread_data:end);
 
-%% XXきざみにデータをプロット
+%% **きざみにデータをプロット
 % trange = 1:10000;
 % Data = Data1.Data;
 % X = Data.X(:, trange);
@@ -43,6 +43,7 @@ close all
 N = 1000;
 % checking_num = round(size(X, 2) / N)-1 
 % num = checking_num / 2;
+
 forrange = 1:64;
 for i = forrange
     T = (i-1)*N+1:i*N;
@@ -53,23 +54,43 @@ for i = forrange
     figure(101); sgtitle('diff'); subplot(8, 8, i); plot(T,D);ylim(0.0001 * [-1, 1]);
 end
 
+%% 変化が小さい部分を抽出する
+% clear A B C idx
+% A = [1 2 7 3 2 9 8 1 10]
+% idx = find(A < 5)
+% B = A(idx)
+% C = A(idx+1)
+
+%%
+Dx = diff(X(1,:));
+idx = find(Dx <= 0.0001);
+Data.X = X(1,idx);
+Data.Y = Y(1,idx+1);
+Data.U = U(:,idx);
+% data.X = NaN(size(X));
+% for i = 1:12
+%     Dx = diff(X(i,:));
+%     Dy = diff(Y(i,:));
+%     data.X(i, :) = [X(i,find(Dx <= 0.0001)), NaN(1, size(X,2)-size(find(Dx <= 0.0001),2))];
+%     data.Y(i, :) = [Y(i,find(Dy <= 0.0001)), NaN(1, size(X,2)-size(find(Dy <= 0.0001),2))];
+% end
+% data.U = U(:,find(Dx <= 0.0001));
 
 %% データセットがどういう割合のデータなのか算出する
-close all
-T = 1:size(X,2);
+% close all
+% T = 1:size(X,2);
 
-figure(1);
-% sgtitle('Kiyama Exp Dataset fromVel_true')
-subplot(2,2,1); plot(T, X(1:3,:), 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("Datasets position", 'FontSize', 15)
-legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15)
-
-subplot(2,2,2); plot(T, X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5])
-subplot(2,2,3); plot(T, X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15)
-subplot(2,2,4); plot(T, X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
-xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
+% figure(1);
+% subplot(2,2,1); plot(T, X(1:3,:), 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("Datasets position", 'FontSize', 15)
+% legend("$$x$$", "$$y$$", "$$z$$", "Interpreter", "latex",'FontSize', 15)
+% 
+% subplot(2,2,2); plot(T, X(1,:), 'Color', "#0072BD", 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("X", 'FontSize', 15); ylim([-1.5 1.5])
+% subplot(2,2,3); plot(T, X(2,:), 'Color', "#D95319", 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("Y", 'FontSize', 15)
+% subplot(2,2,4); plot(T, X(3,:), 'Color', "#EDB120", 'LineWidth', 1.5); 
+% xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
 
 
 % figure(2);
@@ -91,36 +112,36 @@ xlabel('Dataset', 'FontSize', 15); ylabel("Z", 'FontSize', 15)
 % subplot(1,3,2); histogram(X(2,:)); ylabel('Y');
 % subplot(1,3,3); histogram(X(3,:)); ylabel('Z');
 
-figure(3);
-pd = fitdist(X(1,:)', 'Normal');
-subplot(1,3,1); histfit(X(1,:), 100); ylabel('X'); hold on; 
-text(0.6, 0.8, strcat('mu=', num2str(pd.mu)), 'Units', 'normalized');
-text(0.6, 0.75, strcat('sigma=', num2str(pd.sigma)), 'Units', 'normalized')
-xline(pd.mu, 'Color', 'green'); 
-xline(pd.mu+pd.sigma*3,'Color','red'); xline(pd.mu-pd.sigma*3,'Color','red');
-xline(pd.mu+pd.sigma*2,'Color','red'); xline(pd.mu-pd.sigma*2,'Color','red');
-xline(pd.mu+pd.sigma*1,'Color','red'); xline(pd.mu-pd.sigma*1,'Color','red');
-PD.x = pd;
-
-pd = fitdist(X(2,:)', 'Normal');
-subplot(1,3,2); histfit(X(2,:), 100); ylabel('Y');
-text(0.6, 0.8, strcat('mu=', num2str(pd.mu)), 'Units', 'normalized');
-text(0.6, 0.75, strcat('sigma=', num2str(pd.sigma)), 'Units', 'normalized')
-xline(pd.mu, 'Color', 'green'); 
-xline(pd.mu+pd.sigma*3,'Color','red'); xline(pd.mu-pd.sigma*3,'Color','red');
-xline(pd.mu+pd.sigma*2,'Color','red'); xline(pd.mu-pd.sigma*2,'Color','red');
-xline(pd.mu+pd.sigma*1,'Color','red'); xline(pd.mu-pd.sigma*1,'Color','red');
-PD.y = pd;
-
-pd = fitdist(X(3,:)', 'Normal');
-subplot(1,3,3); histfit(X(3,:), 100); ylabel('Z');
-text(0.6, 0.8, strcat('mu=', num2str(pd.mu)), 'Units', 'normalized');
-text(0.6, 0.75, strcat('sigma=', num2str(pd.sigma)), 'Units', 'normalized')
-xline(pd.mu, 'Color', 'green'); 
-xline(pd.mu+pd.sigma*3,'Color','red'); xline(pd.mu-pd.sigma*3,'Color','red');
-xline(pd.mu+pd.sigma*2,'Color','red'); xline(pd.mu-pd.sigma*2,'Color','red');
-xline(pd.mu+pd.sigma*1,'Color','red'); xline(pd.mu-pd.sigma*1,'Color','red');
-PD.z = pd;
+% figure(3);
+% pd = fitdist(X(1,:)', 'Normal');
+% subplot(1,3,1); histfit(X(1,:), 100); ylabel('X'); hold on; 
+% text(0.6, 0.8, strcat('mu=', num2str(pd.mu)), 'Units', 'normalized');
+% text(0.6, 0.75, strcat('sigma=', num2str(pd.sigma)), 'Units', 'normalized')
+% xline(pd.mu, 'Color', 'green'); 
+% xline(pd.mu+pd.sigma*3,'Color','red'); xline(pd.mu-pd.sigma*3,'Color','red');
+% xline(pd.mu+pd.sigma*2,'Color','red'); xline(pd.mu-pd.sigma*2,'Color','red');
+% xline(pd.mu+pd.sigma*1,'Color','red'); xline(pd.mu-pd.sigma*1,'Color','red');
+% PD.x = pd;
+% 
+% pd = fitdist(X(2,:)', 'Normal');
+% subplot(1,3,2); histfit(X(2,:), 100); ylabel('Y');
+% text(0.6, 0.8, strcat('mu=', num2str(pd.mu)), 'Units', 'normalized');
+% text(0.6, 0.75, strcat('sigma=', num2str(pd.sigma)), 'Units', 'normalized')
+% xline(pd.mu, 'Color', 'green'); 
+% xline(pd.mu+pd.sigma*3,'Color','red'); xline(pd.mu-pd.sigma*3,'Color','red');
+% xline(pd.mu+pd.sigma*2,'Color','red'); xline(pd.mu-pd.sigma*2,'Color','red');
+% xline(pd.mu+pd.sigma*1,'Color','red'); xline(pd.mu-pd.sigma*1,'Color','red');
+% PD.y = pd;
+% 
+% pd = fitdist(X(3,:)', 'Normal');
+% subplot(1,3,3); histfit(X(3,:), 100); ylabel('Z');
+% text(0.6, 0.8, strcat('mu=', num2str(pd.mu)), 'Units', 'normalized');
+% text(0.6, 0.75, strcat('sigma=', num2str(pd.sigma)), 'Units', 'normalized')
+% xline(pd.mu, 'Color', 'green'); 
+% xline(pd.mu+pd.sigma*3,'Color','red'); xline(pd.mu-pd.sigma*3,'Color','red');
+% xline(pd.mu+pd.sigma*2,'Color','red'); xline(pd.mu-pd.sigma*2,'Color','red');
+% xline(pd.mu+pd.sigma*1,'Color','red'); xline(pd.mu-pd.sigma*1,'Color','red');
+% PD.z = pd;
 
 %% 正負に分割　⇒　中央値を求める
 % Xplus_idx = find(X(1,:)>=0); Xminus_idx = find(X(1,:)<0);
@@ -136,13 +157,12 @@ PD.z = pd;
 % all_dis = sum(error,2)'
 
 %%
-% close(3)
-[xds, yds] = datastats(X(1,:)', Y(2,:)'); % なんかの統計データ
-normalization_data = zscore(X, [], 2);
-
-T = 1:size(Data.X,2);
-
-figure(10);
-subplot(1,3,1); histogram(normalization_data(1,:))
-subplot(1,3,2); histogram(normalization_data(2,:))
-subplot(1,3,3); histogram(normalization_data(3,:))
+% [xds, yds] = datastats(X(1,:)', Y(2,:)'); % なんかの統計データ
+% normalization_data = zscore(X, [], 2);
+% 
+% T = 1:size(Data.X,2);
+% 
+% figure(10);
+% subplot(1,3,1); histogram(normalization_data(1,:))
+% subplot(1,3,2); histogram(normalization_data(2,:))
+% subplot(1,3,3); histogram(normalization_data(3,:))

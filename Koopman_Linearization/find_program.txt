@@ -1,0 +1,29 @@
+%%%%　簡単な処理をするコードがどこの部分に記述されているかまとめる %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+・データの一部を抜き出す
+Asset_file/dataset_ratio
+
+・データセットを結合する
+Koopman_Linearization/main_KoopmanLInearByData_tutorialの最後
+
+・データセットにノイズを加えて増加させる
+Asset_file/data_increased
+
+・任意の入力をKmodelに入れたときの時間発展を計算するためのmainファイル
+このファイル内にinput_state()がある
+Asset_file/verification_input_state
+
+・可制御性を出力
+Asset_file/verification_input_stateの一部
+
+・学習データを正規分布近似したときの標準偏差と平均を算出, 保存(->Figure_outputに保存)
+Asset_file/dataset_each_analys
+
+
+
+## 関数たち ##
+・任意の入力をKmodelに入れたときの時間発展の計算
+Asset_file/input_state
+
+・フラグから学習データを選択する
+Asset_file/WhichLoadFile

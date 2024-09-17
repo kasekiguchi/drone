@@ -14,8 +14,7 @@ function state = input_state(param)
     % X = zeros(12,1);
     % Z = quaternions_all(X);
 
-    pos = param{7};
-    Z = quaternions_all(pos(:, param{8})); % ある区間の始めの状態
+    Z = quaternions_all(param{7}); % ある区間の始めの状態
 
     try
         for i = 1:step

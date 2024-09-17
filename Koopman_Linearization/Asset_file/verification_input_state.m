@@ -2,7 +2,7 @@
 clear
 close all
 tmp = matlab.desktop.editor.getActive;
-cd(strcat(fileparts(tmp.Filename), '../../')); % droneまでのフォルダパス
+cd(strcat(fileparts(tmp.Filename), '../../../')); % droneまでのフォルダパス
 [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
@@ -39,7 +39,10 @@ Est_file = 'Est_Kiyama_result.mat';
 load(Input_file);
 load(Est_file);
 
-%%
+%input_state({A, B, C, step数, thrust, torque, 初期状態に使う配列, 初期状態のインデックス});
+%% Nおきに入力(input_result)を入れたときの時間発展を計算する
+% 1, 0などの簡単な入力以外で試すときに使う
+% 修士論文中間発表資料に出力した図あり
 Fontsize = 15;  
 set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
@@ -48,17 +51,18 @@ set(0,'defaultLineMarkerSize',15);
 ylimsetting = [-inf inf];
 close all
 count = 0;
+N = 200;
 f = figure(10);
-for i = 1:size(input_result,2)-200
-    N = round((size(input_result,2)-200) / 200);
+for i = 1:size(input_result,2)-N
+    N = round((size(input_result,2)-N) / N);
     m = 6; n = 6;
-    if rem(i-1, 200) == 0
+    if rem(i-1, N) == 0
         count = count + 1;
         start_num = i;
-        step_num = start_num + 200;
+        step_num = start_num + N;
         thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
         torque = input_result(2:4,start_num:step_num);
-        X = input_state({est.A, est.B, est.C, step_num-start_num+1, thrust, torque, Est_result, start_num});
+        X = input_state({est.A, est.B, est.C, step_num-start_num+1, thrust, torque, Est_result(:,start_num)});
 
         subplot(m,n,count);
         % title(strcat(num2str(start_num), "~~", num2str(step_num)));
@@ -72,16 +76,22 @@ subplot(m,n,m*n); plot(0:10, 0.1*[0:10], 0:10, 0.1*[0:10], 0:10, 0.1*[0:10]); le
 sgtitle(strcat(strrep(filename, '_', ' '), "--", strrep(Input_file, '_', ' ')))
 f.WindowState = "maximized";
 
-%%
+%% 普通に使いたいとき
+% thrust，torqueの値を設定する
+% thrust = ones(1, xx);
+% torque = zeros(3, xx);
 clear X
-start_num = 1200;
-step_num = start_num + 200;
-thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
-torque = input_result(2:4,start_num:step_num);
-X = input_state({est.A, est.B, est.C, step_num-start_num+1, thrust, torque});
+N = 100;
+start_num = 101; % 単体で利用時はステップ数
+step_num = start_num + N;
+thrust = zeros(1, step_num);
+torque = zeros(3, step_num);
+% thrust = input_result(1, start_num:step_num); % 0.5884 * 9.81 * 1e3
+% torque = input_result(2:4,start_num:step_num);
+X = input_state({est.A, est.B, est.C, step_num, thrust, torque, Est_result(:, start_num)});
 
 % plot
-step_num = step_num-start_num+1;
+% step_num = step_num-start_num+1;
 Fontsize = 15;  
 set(0,'defaultAxesFontSize',15);
 set(0,'defaultTextFontsize',15);
