@@ -22,6 +22,9 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         %% 特定方向のみ
         % 生成する点を-1.5<point<1.5にする
         %% only x-directional
+        % wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), zeros(pointN-2,1)]));
+        % wp_z  = ones(pointN-2,1);
+        %% only y-directional
         wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), round(1*randn(pointN-2,1),3)]));
         wp_z  = ones(pointN-2,1);
         %% only z-directional
@@ -29,7 +32,7 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         % wp_z  = max(0.5, min(1.5, round(1*randn(pointN-2,1),3)));
         %% xyz-directional
         % wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), round(1*randn(pointN-2,1),3)]));
-        % wp_z  = max(0.5, min(1.5, round(1*randn(pointN-2,1),3)));
+        % wp_z  = max( 0.5, min(1.5, round(0.1*randn(pointN-2,1)+1.0,3)));
         wp = [0, 0, 1;wp_xy, wp_z; 0, 0, 1];
         waypoints = [time, wp];
         
@@ -83,7 +86,7 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
 
     if isManualSetting
         % isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
-        isSaved = 0; % fixed
+        isSaved = 1; % fixed
         if isSaved==0||isempty(isSaved)
             disp("No save")
         elseif isSaved==1
