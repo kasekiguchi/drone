@@ -9,6 +9,13 @@ classdef HLC < handle
     parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4"];
   end
 
+  properties
+  window_size
+  dt_values
+  dt_count_index
+  dt_plus_count
+  end
+
   methods
     function obj = HLC(self,param)
       obj.self = self;
@@ -20,6 +27,12 @@ classdef HLC < handle
       % obj.gainFunc = @(sA2d, sB2d, sA4d, sB4d) deal(place(sA2d, sB2d,p2),place(sA4d,sB4d,p4),place(sA4d,sB4d,p4),place(sA2d,sB2d,p2));%意図した極（p2,p4）になるようにゲインを計算。
       obj.gainFunc = param.gainFunc;%意図した極（p2,p4）になるようにゲインを計算。
       obj.result.input = zeros(self.estimator.model.dim(2),1);
+      % 初期設定
+obj.window_size = 10; % 平均を計算するウィンドウのサイズ，10ぐらいのほうが反応良いかも．
+obj.dt_values = zeros(1, obj.window_size); % dtの値を格納する配列
+obj.dt_count_index = 1; % 配列のインデックス
+obj.dt_plus_count = 0; % 追加された値のカウント
+%↑ここまで初期設定
     end
 
     function result = do(obj,varargin)
@@ -44,30 +57,30 @@ classdef HLC < handle
       %if isfield(obj.param,'dt')
     
       % if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-         %dt = varargin{1}.dt;%実際の制御周期を使う場合はこっち
-        dt = 0.020;%仮定して実験する場合はこっち
+        %   dt = varargin{1}.dt;%実際の制御周期を使う場合はこっち
+        % average_dt = 0.0055;%仮定して実験する場合はこっち
 %% 
 %dt100個の平均をとってdtとする場合はここのセクションを使う．(doの中に書く必要ないのも含まれているので注意
 %obj.gainhuuncてきなの作ったほうがよさそう
-% 初期設定
-window_size = 100; % 平均を計算するウィンドウのサイズ，10ぐらいのほうが反応良いかも．
-dt_values = zeros(1, window_size); % dtの値を格納する配列
-dt_count_index = 1; % 配列のインデックス
-dt_plus_count = 0; % 追加された値のカウント
-%↑ここまで初期設定
+% % 初期設定
+% window_size = 100; % 平均を計算するウィンドウのサイズ，10ぐらいのほうが反応良いかも．
+% dt_values = zeros(1, window_size); % dtの値を格納する配列
+% dt_count_index = 1; % 配列のインデックス
+% dt_plus_count = 0; % 追加された値のカウント
+% %↑ここまで初期設定
 % dtの新しい値を取得
 dt = varargin{1}.dt;
 
 % dtの値を配列に追加
-dt_values(dt_count_index) = dt;
+obj.dt_values(obj.dt_count_index) = dt;
 
 % インデックスを更新
-dt_count_index = mod(dt_count_index, window_size) + 1;
+obj.dt_count_index = mod(obj.dt_count_index, obj.window_size) + 1;
 
 % 追加された値のカウントを更新
-dt_plus_count = min(dt_plus_count + 1, window_size);
+obj.dt_plus_count = min(obj.dt_plus_count + 1, obj.window_size);
 % 最新の100個or100以下の今までの個数の平均を計算
- average_dt = mean(dt_values(1:dt_plus_count));
+ average_dt = mean(obj.dt_values(1:obj.dt_plus_count));
  fprintf('最新の100個の平均: %f\n', average_dt);
 
 
@@ -78,8 +91,8 @@ dt_plus_count = min(dt_plus_count + 1, window_size);
         % [A2d,B2d,A4d,B4d]=obj.AdBd(dt);
         % [F1,F2,F3,F4]=obj.gainFunc(A2d,B2d,A4d,B4d)
             F1 = obj.param.F1;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
-          % F2 = obj.param.F2;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
-          % F3 = obj.param.F3;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
+           F2 = obj.param.F2;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
+           F3 = obj.param.F3;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
             F4 = obj.param.F4;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
          gainmode=1;
       % else
