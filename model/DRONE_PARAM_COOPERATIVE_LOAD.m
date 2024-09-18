@@ -30,7 +30,10 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % parameters : 5 + 8*N
                 param.g = 9.81;
                 param.m0 = 1.200;%分割前のペイロード
-                param.J0 = [0.15;0.15;0.25];%分割前ペイロード慣性モーメント
+                % param.J0 = [0.15;0.15;0.25];%分割前ペイロード慣性モーメント
+                % param.J0 = [0.2262;0.3434;0.4735];%非対称牽引物
+                % param.J0 = [0.2262;0.3434;0.4735];%非対称牽引物
+                param.J0 = [0.35;0.47;0.45];%非対称牽引物
                 param.rho = [];%分割前の重心位置から紐がついてるところ前での距離
                 param.li = 1*ones(N,1);%紐の長さ
                 param.mi = 0.800*ones(N,1)';%ドローンの重さ
@@ -40,9 +43,21 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
             end
             if contains(type,"zup")
               rho0 = [0;0;1/4];
+              rho0 = [0;0;1/2];
             else
               rho0 = [0;0;-1/4];
             end
+            %非対称牽引物
+                % x1 = [-1 -1 0 1 1 0];
+                % y1 = [-1 1/2 1 1/2 -1/2 -1];
+                x1 = [-2 -1.5 0 1.5 1 0];
+                y1 = [-1 0.5 1 0.5 -0.5 -1];
+                z1 = ones(1,6);
+                p = [x1;y1;z1];
+                polyin = polyshape(x1,y1);
+                [x,y] = centroid(polyin);
+                G = [x;y;0.5];
+                param.rho = p-G;
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める
               %ペイロードの重心位置からリンクまでの距離

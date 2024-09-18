@@ -233,6 +233,8 @@ classdef TIME_VARYING_REFERENCE_SPLIT < handle
                mLi  = (AtA\A')*mui;%分割後質量
                % mLi  = mLi;
            %log
+               obj.result.x0d     = x0d;
+               obj.result.R0d     = R0d;
                obj.result.state.xd      = refi;
                obj.result.state.p       = xid;
                obj.result.state.v       = dxid;

@@ -19,14 +19,15 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
         end
         
-        function result=do(obj,param,~)
+        function result=do(obj,param)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             model = obj.self.estimator.result;
             ref   = obj.self.reference.result;
             x     = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
             xq    = [model.state.getq('4');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
             if isprop(ref.state,'xd')
-                xd = ref.state.xd; % 20次元の目標値に対応するよう
+                xd = ref.state.xd; % 20次元の目標値に対応する用
+                xd(1:3) = ref.x0d + ref.R0d*ref.rho;%質量と牽引物と紐との接続点から計算した目標軌道
             else
                 xd = ref.state.get();
             end

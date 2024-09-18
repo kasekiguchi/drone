@@ -125,9 +125,28 @@ classdef DRAW_COOPERATIVE_DRONES
       ax = obj.ax;
       [x,y,z] = cylinder(ax,1,obj.N);
       z = z*param.cube(3)-param.cube(3)/2;
-      h(1) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,:),x(2,:)],[y(1,:),y(2,:)],[z(1,:),z(2,:)],'FaceColor',"cyan");
-      h(2) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,1),x(1,2:end)/5,x(2,1),x(2,2:end)/5],[y(1,1),y(1,2:end)/5,y(2,1),y(2,2:end)/5],[z(1,:)+0.001,z(2,:)],'FaceColor',"red");
+
+      xp=[-2 -1.5 0 1.5 1 0];
+      yp=[-1 0.5 1 0.5 -0.5 -1];
+      polyin = polyshape(xp,yp);
+      [xg,yg] = centroid(polyin);
+      xm = xp-xg;
+      ym = yp-yg;
+      zm = -0.5*ones(1,6);
+      xM = xp-xg;
+      yM = yp-yg;
+      zM = 0.5*ones(1,6);
+      x = [xm,xm(1);xM,xM(1)];
+      y = [ym,ym(1);yM,yM(1)];
+      z = [zm,zm(1);zM,zM(1)];
+      h(1) = fill3(xm,ym,zm,"cyan");
+      h(2) = fill3(xM,yM,zM,"cyan");
+      % h(3) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,1),x(1,2:end)/5,x(2,1),x(2,2:end)/5],[y(1,1),y(1,2:end)/5,y(2,1),y(2,2:end)/5],[z(1,:)+0.001,z(2,:)],'FaceColor',"red");
       h(3) = surf(x,y,z);
+
+      % h(1) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,:),x(2,:)],[y(1,:),y(2,:)],[z(1,:),z(2,:)],'FaceColor',"cyan");
+      % h(2) = trisurf([1:obj.N;(1:obj.N)+obj.N+1],[x(1,1),x(1,2:end)/5,x(2,1),x(2,2:end)/5],[y(1,1),y(1,2:end)/5,y(2,1),y(2,2:end)/5],[z(1,:)+0.001,z(2,:)],'FaceColor',"red");
+      % h(3) = surf(x,y,z);
       ttt = hgtransform('Parent',ax); set(h,'Parent',ttt); % 推力を慣性座標と紐づけ
       obj.load = ttt;
     end

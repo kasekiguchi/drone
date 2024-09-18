@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 100;
+te = 10;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -105,6 +105,7 @@ end
 clc
 % for j = 1:te
 for j = 1:tn
+    mL =0;mx = 0;
         for i = 1:N+1
             if i >= 2
                 sensor1 = agent(1).sensor.result.state;%複数機モデルから機体と接続点の位置を計測
@@ -121,7 +122,6 @@ for j = 1:tn
                 % 単機牽引のモデルで推定する
                 % agent(i).sensor.do(time, 'f');
                 agent(i).sensor.result.state.set_state("p",spDrone,"q",sqDrone,"pL",spL,"pT",spT);
-
 
                 load = agent(1).estimator.result.state;%推定をしていない
                 %分割前ペイロード
@@ -149,15 +149,34 @@ for j = 1:tn
                 % agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
                 % agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
                 % agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
-                agent(i).plant.state.set_state("pL",pL_agent,"vL",vL_agent);
-                agent(i).plant.state.set_state("pT",pT_agent,"wL",wi_load);
-                agent(i).plant.state.set_state("p",p_agent,"v",v_agent);
-                agent(i).plant.state.set_state("q",q_agent,"w",w_agent);
+
+                % agent(i).plant.state.set_state("pL",pL_agent,"vL",vL_agent);
+                % agent(i).plant.state.set_state("pT",pT_agent,"wL",wi_load);
+                % agent(i).plant.state.set_state("p",p_agent,"v",v_agent);
+                % agent(i).plant.state.set_state("q",q_agent,"w",w_agent);
+                agent(i).reference.do(time, 'f',agent(1)); 
+                mLi = agent(i).reference.result.state.mLi;
+                mL = mL + mLi;
+                mx = mx + mLi*spL;
+                spLs(:,i-1) = spL;
+                % agent(i).controller.do(time, 'f',0,0,agent(i),i);
             else
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
+                agent(1).reference.do(time, 'f',agent(1)); 
+                agent(1).controller.do(time, 'f',0,0,agent(i),i);
             end
-            agent(i).reference.do(time, 'f',agent(1));
+            % agent(i).controller.do(time, 'f',0,0,agent(i),i);
+        end
+        G = mx/mL
+        rhos = spLs - G%紐の接続点にかかる力から求めた重心から紐までの距離（z方向は真値とずれる）
+        errorRhos = rhos - agent(1).parameter.rho
+        for i = 2:N+1
+            if j >1 
+                agent(i).reference.result.rho = rhos(:,i-1);
+            else
+                agent(i).reference.result.rho = rho(:,i-1);
+            end
             agent(i).controller.do(time, 'f',0,0,agent(i),i);
         end
         input = zeros(4*N,1);
@@ -177,7 +196,7 @@ for j = 1:tn
         time.t = time.t + time.dt;
     %pause(1)
 end
-clc
+% clc
 disp(time.t)
 %%
 % close all
