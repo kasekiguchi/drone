@@ -88,7 +88,8 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
             disp("No save")
         elseif isSaved==1
             % save('../Data/reference/exp_ref.mat', 'waypoints');
-            save('Data\reference\exp_ref.mat', 'waypoints');
+            save(strcat('Data\reference\exp_ref', string(datetime('now'), 'yyyy-MM-dd_hh-mm-ss'), '.mat'), 'waypoints'); % 日付をファイル名に入れて区別する
+            % writematrix(M2,'M.xls','WriteMode','append')
         end
     end
 end
