@@ -32,7 +32,7 @@ classdef FOR_LOAD < SENSOR_CLASS
             % obj.result.state.pL = obj.result.state.p + [obj.self.model.param(17);obj.self.model.param(18);-obj.self.model.param(19)] -[0;0;obj.self.model.param(16)];
             % obj.result.state.pL = obj.result.state.p -[0;0;obj.self.model.param(16)];% For:PE-Model
             obj.result.state.pL = obj.result.state.p -[0;0;obj.self.parameter.get("cableL")];% For:PE-Model
-            if obj.result.state.pL(3) >= 0.1%strcmp(cha,'f')||strcmp(cha,'l')
+            if obj.result.state.pL(3) >= 0.2%strcmp(cha,'f')||strcmp(cha,'l')
                 obj.result.state.pL = obj.self.sensor.motive.result.rigid(2).p;%
             end
             % obj.result.state.pT = (obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)])/norm(obj.result.state.pL-obj.result.state.p-R*[obj.self.model.param(17);obj.self.model.param(18);obj.self.model.param(19)]);

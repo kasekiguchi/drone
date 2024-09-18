@@ -59,7 +59,7 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
 
     if strcmp(Estimator.model.name,"load")
         Estimator.sensor_param = ["p", "q", "pL", "pT"]; % parameter for sensor_func
-        Estimator.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E0); % システムノイズ（Modelクラス由来）
+        Estimator.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5); % システムノイズ（Modelクラス由来）
         Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);
         Estimator.R = blkdiag(eye(3)*1e-10, eye(3)*1e-8,eye(3)*1e-10,eye(3)*1e-8);
         % Estimator.Q = blkdiag(eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-3,eye(3)*1E-8); % システムノイズ（Modelクラス由来）
