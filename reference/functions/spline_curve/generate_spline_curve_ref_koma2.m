@@ -1,4 +1,4 @@
-function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting)
+function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting,fshowfig)
 %% この関数でやりたい処理
 % isManualSetting = 1のときにここでwaypointを設定する
 % 保存したmatファイルからway_point_refを呼び出す
@@ -15,7 +15,7 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         load(strcat('Data/reference/', filename)); % for exp
         fshowfig = 0; % 読み込んだ時はグラフは描画しない
     else
-        pointN = 5; %waypointの数 default:5, y方向のみの時は7
+        pointN = 7; %waypointの数 default:5, y方向のみの時は7
         dt = 5;%waypoint間の時間
         time =  (0:dt:dt*(pointN-1))';
 
@@ -76,7 +76,7 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         %       tra(1:end-size(middle_wp,1)-1,:)];
         % waypoints = [time, wp];
 
-        fshowfig = 1;
+        % fshowfig = 1;
         % ref = MY_WAY_POINT_REFERENCE.way_point_ref(waypoints,order,1); %手動で設定したときはここで軌道が生成される         
     end
     ref=MY_WAY_POINT_REFERENCE.way_point_ref(waypoints,order,fshowfig);
