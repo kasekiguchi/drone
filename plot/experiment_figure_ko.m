@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl600_xy_x20_hover_yokunai_Log(03-Jul-2024_20_06_56).mat");
+load("sl0919hover_good_Log(19-Sep-2024_19_38_27).mat");
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
@@ -44,9 +44,9 @@ for i = arming_start_idx:flight_finish_idx
                 Agent.estimator.result{i}.state.q;
                 Agent.estimator.result{i}.state.v;
                 Agent.estimator.result{i}.state.w];
-    % Road_est(:,i-arming_start_idx+1) = [Agent.estimator.result{i}.state.pL;
-    %             Agent.estimator.result{i}.state.vL;
-    %             Agent.estimator.result{i}.state.wL];
+     Road_est(:,i-arming_start_idx+1) = [Agent.estimator.result{i}.state.pL;
+                 Agent.estimator.result{i}.state.vL;
+                 Agent.estimator.result{i}.state.wL];
     Ref(:,i-arming_start_idx+1) = [Agent.reference.result{i}.state.p];
 
     Input(:,i-arming_start_idx+1) = Agent.input{i};
@@ -54,7 +54,7 @@ for i = arming_start_idx:flight_finish_idx
 kari_logt=[0;logt(1:end-1)];
     Step_time= logt-kari_logt;
     
-    % InnerInput(:,i-arming_start_idx+1) = Agent.inner_input{i};
+     InnerInput(:,i-arming_start_idx+1) = Agent.inner_input{i};
 end
 count_gross_over_0025=length( find( Step_time >= 0.025 ) )
 count_persentage_over_0025=length( find( Step_time >= 0.025 ) )/length(Step_time)
@@ -213,7 +213,7 @@ if figtype == 1
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 elseif figtype == 2
 %牽引物あり↓
-
+ plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
       subplot(m,n,1);  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
      xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("$$x$$.Load state", "$$y$$.Load state", "$$z$$.Load state","$$x$$.Drone state", "$$y$$.Drone state", "$$z$$.Drone state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
       grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
