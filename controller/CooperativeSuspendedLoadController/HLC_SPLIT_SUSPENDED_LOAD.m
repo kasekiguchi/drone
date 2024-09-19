@@ -24,10 +24,11 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             model = obj.self.estimator.result;
             ref   = obj.self.reference.result;
             x     = [model.state.getq('compact');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
-            xq    = [model.state.getq('4');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
+            % xq    = [model.state.getq('4');model.state.w;model.state.pL;model.state.vL;model.state.pT;model.state.wL]; % [q, w ,pL, vL, pT, wL]に並べ替え
             if isprop(ref.state,'xd')
                 xd = ref.state.xd; % 20次元の目標値に対応する用
-                xd(1:3) = ref.x0d + ref.R0d*ref.rho;%質量と牽引物と紐との接続点から計算した目標軌道
+                % xd(1:3) = ref.x0d + ref.R0d*ref.rho;%質量と牽引物と紐との接続点から計算した目標軌道
+                % xd(1:3) = ref.x0d;%牽引物重心の目標軌道と同様
             else
                 xd = ref.state.get();
             end
@@ -35,6 +36,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
 %             P = Param.P;
             P     = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity","km1","km2","km3","km4","k1","k2","k3","k4", "loadmass", "cableL"]);
             P(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
+            obj.result.mLi = P(15);
 
             F1 = Param.F1;
             F2 = Param.F2;

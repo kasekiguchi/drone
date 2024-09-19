@@ -46,6 +46,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       if isempty(regexp(args.type, "EXP", 'once'))
         param = args.param;
         name = args.name;
+        obj.id = args.id;
         obj.state = STATE_CLASS(param);
 
         if isfield(param, 'initial')
@@ -108,8 +109,9 @@ classdef MODEL_CLASS < dynamicprops & handle
         obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
       %複数牽引物用
-      if obj.self.plant.name == "load" && isprop(obj.self.reference.result.state,"mLi")
-         obj.param(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
+      if obj.id == 11
+         % obj.param(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
+         obj.param(20) = obj.self.controller.result.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
       end
       % if isfield(opts, 'param')
       %     obj.param = opts.param;

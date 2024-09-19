@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 10;
+te = 25;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -89,7 +89,12 @@ for i = 2:N+1
     initial_state(i).p = initial_state(1).p + R_load*rho(:,i-1) - agent(1).parameter.li(i-1) * initial_state(i).pT;
     initial_state(i).pL = initial_state(1).p + R_load*rho(:,i-1);
 %Generate instance
-    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");%ペイロードの重さを機体数で分割するようにする!!!!!!!!!
+    li = agent(1).parameter.li(i-1);
+    mi = agent(1).parameter.mi(i-1);
+    jx = agent(1).parameter.Ji(1,i-1);
+    jy = agent(1).parameter.Ji(2,i-1);
+    jz = agent(1).parameter.Ji(3,i-1);
+    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"jx",jx,"jy",jy,"jz",jz);%複数モデルの機体と同じパラメータに設定
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q", "pL", "pT"]));%expの流用
@@ -102,6 +107,16 @@ for i = 2:N+1
 end
 % run("ExpBase");
 
+% R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める
+% rhos = [0;0;1/2]+[[-2;-1;0],double(cellmatfun(@(A,~) A*[-2;-1;0], FoldList(@(A,B) A*B,cellrepmat(R,1,N-1),{eye(3)},"mat"),"mat"))];
+x1 = [-2 -1.5 0 1.5 1 0]*2;
+y1 = [-1 0.5 1 0.5 -0.5 -1]*2;%+[0 0 0.3 0.1 0 -0.5];
+z1 = ones(1,6);
+p = [x1;y1;z1];
+polyin = polyshape(x1,y1);
+[x,y] = centroid(polyin);
+G = [x;y;0.5];
+rhos = p-G;
 clc
 % for j = 1:te
 for j = 1:tn
@@ -149,17 +164,18 @@ for j = 1:tn
                 % agent(i).estimator.result.state.set_state("pT",pT_agent,"wL",wi_load);
                 % agent(i).estimator.result.state.set_state("p",p_agent,"v",v_agent);
                 % agent(i).estimator.result.state.set_state("q",q_agent,"w",w_agent);
+                %単機牽引の真値
+                agent(i).plant.state.set_state("pL",pL_agent,"vL",vL_agent);
+                agent(i).plant.state.set_state("pT",pT_agent,"wL",wi_load);
+                agent(i).plant.state.set_state("p",p_agent,"v",v_agent);
+                agent(i).plant.state.set_state("q",q_agent,"w",w_agent);
 
-                % agent(i).plant.state.set_state("pL",pL_agent,"vL",vL_agent);
-                % agent(i).plant.state.set_state("pT",pT_agent,"wL",wi_load);
-                % agent(i).plant.state.set_state("p",p_agent,"v",v_agent);
-                % agent(i).plant.state.set_state("q",q_agent,"w",w_agent);
                 agent(i).reference.do(time, 'f',agent(1)); 
-                mLi = agent(i).reference.result.state.mLi;
-                mL = mL + mLi;
-                mx = mx + mLi*spL;
-                spLs(:,i-1) = spL;
-                % agent(i).controller.do(time, 'f',0,0,agent(i),i);
+                % mLi = agent(i).reference.result.state.mLi;
+                % mL = mL + mLi;
+                % mx = mx + mLi*spL;
+                % spLs(:,i-1) = spL;
+                agent(i).controller.do(time, 'f',0,0,agent(i),i);
             else
                 agent(1).sensor.do(time, 'f');
                 agent(1).estimator.do(time, 'f');
@@ -168,17 +184,18 @@ for j = 1:tn
             end
             % agent(i).controller.do(time, 'f',0,0,agent(i),i);
         end
-        G = mx/mL
-        rhos = spLs - G%紐の接続点にかかる力から求めた重心から紐までの距離（z方向は真値とずれる）
-        errorRhos = rhos - agent(1).parameter.rho
-        for i = 2:N+1
-            if j >1 
-                agent(i).reference.result.rho = rhos(:,i-1);
-            else
-                agent(i).reference.result.rho = rho(:,i-1);
-            end
-            agent(i).controller.do(time, 'f',0,0,agent(i),i);
-        end
+        % G = mx/mL
+        % rhos = spLs - G%紐の接続点にかかる力から求めた重心から紐までの距離（z方向は真値とずれる）
+        % errorRhos = rhos - agent(1).parameter.rho
+        % for i = 2:N+1
+        %     agent(i).reference.result.rho = rhos(:,i-1);%目標軌道を牽引物より広く取る場合
+        %     % if j >1 
+        %     %     agent(i).reference.result.rho = rhos(:,i-1);
+        %     % else
+        %     %     agent(i).reference.result.rho = rho(:,i-1);
+        %     % end
+        %     agent(i).controller.do(time, 'f',0,0,agent(i),i);
+        % end
         input = zeros(4*N,1);
         for i = 2:N+1
             input(4*(i-1)-3:4*(i-1),1) = agent(i).controller.result.input;
@@ -205,7 +222,7 @@ run("DataPlot.m")
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
+mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-5 5;-5 5;0 8],"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 

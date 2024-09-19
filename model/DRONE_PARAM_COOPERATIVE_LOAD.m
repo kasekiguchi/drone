@@ -35,7 +35,7 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 % param.J0 = [0.2262;0.3434;0.4735];%非対称牽引物
                 param.J0 = [0.35;0.47;0.45];%非対称牽引物
                 param.rho = [];%分割前の重心位置から紐がついてるところ前での距離
-                param.li = 1*ones(N,1);%紐の長さ
+                param.li = 2*ones(N,1);%紐の長さ
                 param.mi = 0.800*ones(N,1)';%ドローンの重さ
 %                 param.Ji = repmat([0.082 0.0845 0.1377]',1,N);
                 param.Ji = repmat([0.082 0.082 0.1377]',1,N);%ドローンの慣性モーメント
