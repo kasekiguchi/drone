@@ -203,16 +203,21 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
 
 void Pulse_control() //★パルスの制御
 {
-  
-  if (digitalRead(OUTPUT_PIN) == LOW) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
+  if(fstarthalf == true)
+  {
+    fstarthalf = false;
+    Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
+    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
+  }
+  else if (digitalRead(OUTPUT_PIN) == HIGH) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
   {
     Timer1.setPeriod(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> LOW　D2ピンからの出力を0にする
+    digitalWrite(OUTPUT_PIN, LOW); // PPM -> LOW　D2ピンからの出力を0にする
   }
   else if (n_ch == TOTAL_CH) //2ピンの出力が5Vでなく，n_chが8に等しいとき(1フレームが終了した時)
   {
     n_ch = 0; //n_chを0に戻す
-    start_Hh = start_H; //スタート時のパルス幅をstart_Hhに代入
+    start_Hh = start_H / 2; //スタート時のパルス幅をstart_Hhに代入
     //    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
     for (i = 0; i < TOTAL_CH; i++) // PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない i = 0からi < 8 が成り立つ間iを1ずつ増やして繰り返す
     {
@@ -220,12 +225,12 @@ void Pulse_control() //★パルスの制御
     }
     fstarthalf = true;
     Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
-    digitalWrite(OUTPUT_PIN, LOW); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
+    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
   }
   else //上記2つのどちらでもないとき
   {
     Timer1.setPeriod(phw[n_ch]);    // 時間を指定 Highパルス幅分次の操作を実行する
-    digitalWrite(OUTPUT_PIN, LOW); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
+    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
     n_ch++; //チャンネルを進める
   }
 }
