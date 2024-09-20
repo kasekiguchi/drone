@@ -13,8 +13,9 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         disp('Loading reference data from mat');
         % load(strcat('../Data/reference/', filename));
         load(strcat('Data/reference/', filename)); % for exp
-        fshowfig = 0; % 読み込んだ時はグラフは描画しない
+        % fshowfig = 1; % 読み込んだ時はグラフは描画しない
     else
+        isSaved = 1; % fixed
         pointN = 7; %waypointの数 default:5, y方向のみの時は7
         dt = 5;%waypoint間の時間
         time =  (0:dt:dt*(pointN-1))';
@@ -86,7 +87,7 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
 
     if isManualSetting
         % isSaved = input("Save spline curve : '1'\nNo save : '0'\nFill in : ");
-        isSaved = 1; % fixed
+        
         if isSaved==0||isempty(isSaved)
             disp("No save")
         elseif isSaved==1

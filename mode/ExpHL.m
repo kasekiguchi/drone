@@ -17,7 +17,7 @@ initial_state.w = [0; 0; 0];
 % delete(gui.agent.plant.connector.serial);
 agent = DRONE;
 % agent.plant = DRONE_EXP_MODEL_test(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 252]));
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5")); %プロポ有線 
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM3")); %プロポ有線 
 % "3" or "COM3"
 % agent.platn = DRONE_EXP_MODEL(agent,)
 agent.parameter = DRONE_PARAM("DIATONE");
@@ -27,11 +27,12 @@ agent.input_transform = THRUST2THROTTLE_DRONE(agent,InputTransform_Thrust2Thrott
 
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15'),5,1));%引数に指定しているシートを使うときは位置3を1にする
- agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
+ % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 
-% (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか)
-% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1));
+% (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, fshowfig, num)
+refnum = 11
+agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,strcat("exp_ref_", num2str(refnum), ".mat"),5,0,1,1));
 agent.controller = HLC(agent,Controller_HL(dt));
 
 run("ExpBase");
@@ -53,11 +54,11 @@ app.logger.plot({1, "q", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
 
 % 計算時間の描画
-figure(100);
-logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
-plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5); hold on;
-yline(0.025, '-.', 'LineWidth', 1.5, 'Color', 'red'); hold off; xlim([0 logt(end-1)]);
-xlabel("Time [s]"); ylabel("Calculation time [s]");
+% figure(100);
+% logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
+% plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5); hold on;
+% yline(0.025, '-.', 'LineWidth', 1.5, 'Color', 'red'); hold off; xlim([0 logt(end-1)]);
+% xlabel("Time [s]"); ylabel("Calculation time [s]");
 
 % animation
 % app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
