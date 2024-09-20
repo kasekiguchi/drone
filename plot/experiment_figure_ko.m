@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl0919hover_good_Log(19-Sep-2024_19_38_27).mat");
+load("sl0920nabu_dame_Log(20-Sep-2024_12_31_15).mat");
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
@@ -18,7 +18,7 @@ load("sl0919hover_good_Log(19-Sep-2024_19_38_27).mat");
 %log = logger;%永久用（↓とどっちかをコメントアウト）
 % log =gui.logger.Data;%gui用
 %%
-figtype = 2;%1でグラフを1タブづつ，2で1タブにグラフを多数．
+figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 % arming_start_idx = find(log.Data.phase==102, 1, 'first');%フライト開始からのグラフにできる．↓と切り替え
