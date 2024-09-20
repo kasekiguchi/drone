@@ -42,8 +42,21 @@ classdef HLC_SUSPENDED_LOAD < handle
             Param= obj.param;
             %P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-            if agent{1}.t < 0
-                P(15) = 1;
+            if model.state.p(3) <= 1
+                P(15) = 0;
+                g = [0;0;-P(6)];
+                mi   = P(1);
+                Ri = model.state.getq("rotm");
+                vdro = model.state.v;
+                
+                ui  = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
+                aidrn = (vdro - obj.vdro_pre)/Param.dt; %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
+                mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
+                mui      = -mui;%分割後の牽引物系から張力
+
+                tmpload = mui;
+
+                obj.vL_pre = model.state.v;
             else
             %張力算出
                 g = [0;0;-P(6)];
@@ -66,6 +79,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 mLi  = (AtA\A')*mui;%分割後質量
                
                 P(15) = mLi;
+                tmpload = 0;
             end
             aaa = P(15) 
             obj.result.mLi=P(15);
@@ -106,7 +120,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.result.input = tmp;
             %}
 
-            tmp = uf + us;
+            tmp = uf + us + [tmpload;0;0;0];
             % control barrier funciton
                 % fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
                 % a=[10;4.8];

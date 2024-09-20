@@ -67,7 +67,7 @@ classdef DRONE_PARAM_SUSPENDED_LOAD < matlab.mixin.SetGetExactNames
                 param.k4 = 0.000008;          % 推力定数
                 param.rotor_r = 0.0392;
                 param.Length = 1;%cableLと同じ
-                param.loadmass = 0.200;
+                param.loadmass = 0.500;
                 param.cableL = 1;
                 
                 
