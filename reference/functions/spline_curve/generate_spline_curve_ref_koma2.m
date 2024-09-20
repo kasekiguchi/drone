@@ -1,4 +1,4 @@
-function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting,fshowfig)
+function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting,fshowfig,num)
 %% この関数でやりたい処理
 % isManualSetting = 1のときにここでwaypointを設定する
 % 保存したmatファイルからway_point_refを呼び出す
@@ -91,7 +91,8 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
             disp("No save")
         elseif isSaved==1
             % save('../Data/reference/exp_ref.mat', 'waypoints');
-            save(strcat('Data\reference\exp_ref', string(datetime('now'), 'yyyy-MM-dd_hh-mm-ss'), '.mat'), 'waypoints'); % 日付をファイル名に入れて区別する
+            % save(strcat('Data\reference\exp_ref', string(datetime('now'), 'yyyy-MM-dd_hh-mm-ss'), '.mat'), 'waypoints'); % 日付をファイル名に入れて区別する
+            save(strcat('Data\reference\exp_ref', '_', num2str(num), '.mat'), 'waypoints');
             % writematrix(M2,'M.xls','WriteMode','append')
         end
     end

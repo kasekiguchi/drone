@@ -55,8 +55,8 @@ agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% controller and reference and sensor (common)
-% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
-agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
+% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
 agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
