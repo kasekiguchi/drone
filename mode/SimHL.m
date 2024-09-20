@@ -56,6 +56,7 @@ for j = 1:50
         %pause(1)
         all = toc;
     end
+    % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
     log = logger;
     save(strcat('Data\HLsim\HL_', num2str(j), '.mat'), 'log');
 end
