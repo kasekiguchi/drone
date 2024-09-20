@@ -25,14 +25,14 @@ function ref = generate_spline_curve_ref_koma2(te,filename,order,isManualSetting
         % wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), zeros(pointN-2,1)]));
         % wp_z  = ones(pointN-2,1);
         %% only y-directional
-        wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), round(1*randn(pointN-2,1),3)]));
-        wp_z  = ones(pointN-2,1);
+        % wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), round(1*randn(pointN-2,1),3)]));
+        % wp_z  = ones(pointN-2,1);
         %% only z-directional
         % wp_xy = max(-1.2, min(1.2, [zeros(pointN-2,1), zeros(pointN-2,1)]));
         % wp_z  = max(0.5, min(1.5, round(1*randn(pointN-2,1),3)));
         %% xyz-directional
-        % wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), round(1*randn(pointN-2,1),3)]));
-        % wp_z  = max( 0.5, min(1.5, round(0.1*randn(pointN-2,1)+1.0,3)));
+        wp_xy = max(-1.2, min(1.2, [round(1*randn(pointN-2,1),3), round(1*randn(pointN-2,1),3)]));
+        wp_z  = max( 0.5, min(1.5, round(0.1*randn(pointN-2,1)+1.0,3)));
         wp = [0, 0, 1;wp_xy, wp_z; 0, 0, 1];
         waypoints = [time, wp];
         
