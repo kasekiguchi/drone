@@ -11,11 +11,11 @@ end
 
 %% 20回まとめてシミュレーションする
 clear; close all;
-for j = 1:50
+for j = 1:150
     fprintf('Simulation start...'); pause(1);
     ts = 0; % initial time
     dt = 0.025; % sampling period
-    te = 30; % terminal time
+    te = 15; % terminal time
     time = TIME(ts,dt,te); % instance of time class
     in_prog_func = @(app) dfunc(app); % in progress plot
     post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -38,7 +38,11 @@ for j = 1:50
     % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 
     % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
-    agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+    % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+
+    num = j;
+    reference_file = strcat("Exp_2_4_", num2str(num));
+    agent.reference = REFERENCE_FROM_MAT(agent,reference_file);
     agent.controller = HLC(agent,Controller_HL(dt));
     run("ExpBase");
 
@@ -52,13 +56,14 @@ for j = 1:50
         agent(1).plant.do(time, 'f');
         logger.logging(time, 'f', agent);
         time.t = time.t + time.dt;
-        disp(['N:', num2str(j), '___','t:', num2str(time.t)]);
+        % disp(['N:', num2str(j), '___','t:', num2str(time.t)]);
         %pause(1)
         all = toc;
     end
     % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+    disp(['N: ', num2str(j)]);
     log = logger;
-    save(strcat('Data\HLsim\HL_', num2str(j), '.mat'), 'log');
+    save(strcat('Data\HLsim\HL_exp_', num2str(j), '.mat'), 'log');
 end
 
 %%
@@ -87,8 +92,13 @@ end
 % % agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]},"HL"});
 % 
 % % (te, reference保存したファイル名, スプライン補間の次元, ポイントを設定するか, 図を表示するか)
-% agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0));
-% agent.controller = HLC(agent,Controller_HL(dt));
+% % agent.reference = MY_WAY_POINT_REFERENCE(agent,generate_spline_curve_ref_koma2(te,"exp_ref.mat",5,1,0,j));
+% 
+% reference_file = "Exp_2_4_108";
+% agent.reference = REFERENCE_FROM_MAT(agent,reference_file);
+% 
+% agent.controller = HLC(agent,Controller_HL(dt)); % HL
+% % agent.controller = FUNCTIONAL_HLC(agent,Controller_FHL(dt)); %FHL
 % run("ExpBase");
 % 
 % %%
