@@ -11,7 +11,7 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 agent = DRONE;
 %agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM22"));
-agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM13"));
+agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "serial", "COM5"));
 % COM：機体番号（ArduinoのCOM番号）
     %pause(1.45)
     % % 途中で一時停止しないとArduinoが信号を送信しない，原因:前の文章でCOMを指定しているので，それが読み込めないうちに進むと信号が送れない
@@ -41,7 +41,7 @@ pause(1.45)
     sy = 0;
     while Command <= 1000000
         pause(0.005)
-        msg=gen_msg([500,500,551,500,70,50,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
+        msg=gen_msg([500,500,0,500,0,0,0,0]); %([Roll,Pitch,Throttle,Yaw,arming])
         agent.plant.connector.sendData(msg)
 
         Command = Command + 1;
