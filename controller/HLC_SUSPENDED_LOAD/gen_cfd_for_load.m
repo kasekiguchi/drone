@@ -36,6 +36,50 @@ h0 = -cos(C) - pT'*e3;
 
 h1 = LieD(h0,fl,x) + LieD(h0,glu,x) + a(1)*h0;
 hEnd = LieD(h1,fl,x) + LieD(h1,glu,x) + a(2)*h1;%hEnd>=0
+%% 線形化後に対して制約
+clear h
+syms C real
+syms a [6,1] real
+syms xQ yQ yL real
+syms xL [6,1] real
+syms v real
+f = [xL(2:end);v];
+% h = num2sym(zeros(7,1));
+h(1) = C^2 - (xQ-xL(1))^2 -(yQ-yL)^2;%X^2+Y^2<C^2
+for i = 2:6
+    h(i,1) = LieD(h(i-1),f,xL) + a(i-1)*h(i-1);
+end
+i = i+1;
+A = LieD(h(i-1),[0*f(1:5);1],xL);
+B = LieD(h(i-1),[f(1:5);0],xL) + a(i-1)*h(i-1);
+% Au+B>=0を-Au <= B;に変換
+% matlabFunction(-A,B,'file','conic_cfb_HL.m','vars',{xL,yL,xQ yQ,a,C},'outputs',{'A','B'});
+%% 線形化後に対して制約xiは目標軌道との誤差
+clear h
+syms C real
+syms a [6,1] real
+syms xQ yQ real
+syms xL [6,1] real
+syms yL [6,1] real
+syms refx [6,1] real
+syms refy [6,1] real
+syms xix [6,1] real
+syms xiy [6,1] real
+syms v real
+
+f = [xi(2:end);v];
+% h = num2sym(zeros(7,1));
+h(1) = C^2 - (xQ-xL)^2 -(yQ-yL)^2;%X^2+Y^2<C^2
+for i = 2:6
+    h(i,1) = LieD(h(i-1),f,xi) + a(i-1)*h(i-1);
+end
+i = i+1;
+A = LieD(h(i-1),[0*f(1:5);1],xi);
+A = subs(A,[xL,yL],[xix+refx,xiy+refy]);
+B = LieD(h(i-1),[f(1:5);0],xi) + a(i-1)*h(i-1);
+B = subs(B,[xL,yL],[xix+refx,xiy+refy]);
+% Au+B>=0を-Au <= B;に変換
+% matlabFunction(-A,B,'file','conic_cfb_HL.m','vars',{xL,yL,xQ yQ,a,C},'outputs',{'A','B'});
 %% 制約の形に変換
 % Au <= B
 A = simplify(LieD(h1,gl,x));

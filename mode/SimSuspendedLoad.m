@@ -2,7 +2,7 @@ clc
 ts = 0; % initial time
 % dt = 0.025; % sampling period
 dt = 0.025; % sampling period
-te = 15; % termina time
+te = 25; % termina time
 time = TIME(ts,dt,te);
 in_prog_func = @(app) in_prog(app);
 post_func = @(app) post(app);
@@ -20,14 +20,13 @@ initial_state.wL = [0; 0; 0];
 
 agent = DRONE;
 agent.parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE");
-% agent.parameter.set_model_error("loadmass",0.5);
 agent.plant = MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state,1,agent));%id,dt,type,initial,varargin
-agent.parameter.set("loadmass",0.01)
-% agent.parametet.set_model_error("loadmass",0.5);
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 11,agent)), ["p", "q", "pL", "pT"]));%expの流用
+agent.parameter.set("loadmass",0.4);
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q", "pL", "pT"]));%expの流用
 % agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_Suspended_Load(dt, initial_state, 1,agent)), ["p", "q", "pL", "pT"],"B",blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]),"Q",blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-5)));%expの流用
 agent.sensor = DIRECT_SENSOR(agent, 0.0);
-agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;1]},"Suspended"});
+% agent.reference = TIME_VARYING_REFERENCE_SUSPENDEDLOAD(agent,{"Case_study_trajectory",{[0;0;1]},"Suspended"});
+agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 agent.controller.hlc = HLC(agent,Controller_HL(dt));
 agent.controller.load = HLC_SUSPENDED_LOAD(agent,Controller_HL_Suspended_Load(dt,agent));
 agent.controller.do = @controller_do;

@@ -153,10 +153,10 @@ if isSaved
         date2=string(datetime('now','Format','yyyy_MMdd'));%日付
         
     %変更========================================================
-        subfolder='sim';%sim or exp
-        ExpSimName='coopSaddle100';%実験,シミュレーション名
-        % contents='FT_apx_max';%実験,シミュレーション内容
-        contents='sim';%実験,シミュレーション内容
+       subfolder='sim';%sim or exp
+    ExpSimName='estimateLoadMass';%実験,シミュレーション名
+    % contents='FT_apx_max';%実験,シミュレーション内容
+    contents='Estimate';%実験,シミュレーション内容
     %==========================================================
     FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath

@@ -111,7 +111,11 @@ classdef MODEL_CLASS < dynamicprops & handle
         obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
       %複数牽引物用
-      obj.param(20) = obj.loadmass;
+      if obj.self.plant.state.p(3) < 1
+          obj.param(20) = 0;
+      else
+          obj.param(20) = obj.loadmass;
+      end
       % if obj.id == 11
       %    % obj.param(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
       %    obj.param(20) = obj.self.controller.result.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる

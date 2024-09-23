@@ -42,21 +42,11 @@ classdef HLC_SUSPENDED_LOAD < handle
             Param= obj.param;
             %P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-            if model.state.p(3) <= 1
-                P(15) = 0;
-                g = [0;0;-P(6)];
-                mi   = P(1);
-                Ri = model.state.getq("rotm");
-                vdro = model.state.v;
-                
-                ui  = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-                aidrn = (vdro - obj.vdro_pre)/Param.dt; %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
-                mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
-                mui      = -mui;%分割後の牽引物系から張力
+            if model.state.p(3) < 1
+                P(15) =0;% obj.self.estimater.model.loadmass;
 
-                tmpload = mui;
-
-                obj.vL_pre = model.state.v;
+                obj.vL_pre = model.state.vL;
+                obj.vdro_pre = model.state.v;
             else
             %張力算出
                 g = [0;0;-P(6)];
@@ -78,10 +68,12 @@ classdef HLC_SUSPENDED_LOAD < handle
                 AtA  = A'*A;
                 mLi  = (AtA\A')*mui;%分割後質量
                
-                P(15) = mLi;
-                tmpload = 0;
+                % P(15) = mLi;
+                % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,4)+" ai: "+num2str(ai,4))
             end
-            aaa = P(15) 
+            % aaa = P(15) 
+            % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
+            disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
             obj.result.mLi=P(15);
 
             F1 = Param.F1;
@@ -95,11 +87,31 @@ classdef HLC_SUSPENDED_LOAD < handle
             else
                 vf = Vf_SupendedLoad(x,xd',P,F1);
             end
-            vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
             % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
+            vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            
+            %subsystemでcfbを用いる
+            % z2z3=[obj.result.Z2, obj.result.Z3];
+            % pL = model.state.pL;
+            % p = model.state.p;
+            % a = [1E5;1E4;1E3;1E2;1E1;1E0]*1e-2;
+            % a = [1e2;1e-1;1e-1;1e-1;1e-2;1e-2];
+            % C = 1;
+            % if model.state.p(3) > 0
+            %     vs(1:2)
+            %     j = [2,1];
+            %     for i = 1:2
+            %         fun = @(u_opt) sqrt((u_opt - vs(i))'*(u_opt - vs(i)));
+            %         [A,b] = conic_cfb_HL(z2z3(:,i), pL(j(i)),p(i),p(j(i)),a,C);
+            %         vs(i) = fmincon(fun,0,A,b,[],[],[],[],[],obj.fmc_options);
+            %     end
+            %     vs(1:2)
+            %     % theta = acos(-[0,0,1]*model.state.pT)*180/pi
+            %     sqrt(sum((p(1:2)-pL(1:2)).^2))
+            % end
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
             
@@ -120,7 +132,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.result.input = tmp;
             %}
 
-            tmp = uf + us + [tmpload;0;0;0];
+            tmp = uf + us;
             % control barrier funciton
                 % fun = @(u_opt) sqrt((u_opt - tmp)'*(u_opt - tmp));
                 % a=[10;4.8];
