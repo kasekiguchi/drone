@@ -90,6 +90,7 @@ obj.dt_plus_count = min(obj.dt_plus_count + 1, obj.window_size);
         [F1,F2,F3,F4]=obj.gainFunc(average_dt);%ゲイン可変3/3ここをオンにしておけば可変ゲインを計算してくれる．
         % [A2d,B2d,A4d,B4d]=obj.AdBd(dt);
         % [F1,F2,F3,F4]=obj.gainFunc(A2d,B2d,A4d,B4d)
+        %↓でゲインを上書きするのでゲインは可変にならない
             F1 = obj.param.F1;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
            F2 = obj.param.F2;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
            F3 = obj.param.F3;%ゲインを可変にしたくない(Controller_HLで計算したゲインを使いたい)場合はここをコメントアウト
