@@ -81,7 +81,7 @@ obj.dt_count_index = mod(obj.dt_count_index, obj.window_size) + 1;
 obj.dt_plus_count = min(obj.dt_plus_count + 1, obj.window_size);
 % 最新の100個or100以下の今までの個数の平均を計算
  average_dt = mean(obj.dt_values(1:obj.dt_plus_count));
- fprintf('最新の100個の平均: %f\n', average_dt);
+ fprintf('最新の10個の平均: %f\n', average_dt);
 
 
 %% 

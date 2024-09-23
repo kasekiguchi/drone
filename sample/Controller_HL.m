@@ -8,8 +8,9 @@ B4 = [0;0;0;1];
 %↓ゲイン可変用1/3(Controller_HL内で2か所，HLCで1か所ある．
 dtt=dt;%0.0055;%実際の平均周期%ゲイン可変用いらなかったら消す．
 Controller.F1=lqrd(A2,B2,diag([100,1]),[0.1],dtt);                                % z 
- Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([350,450,200,1]),[0.002],dtt); % ifight xdiag([400,450,150,1]),good([350,450,200,1]),0.002,←な部ちゃん,,→粉砕,[300,200,10,1],0.01
- Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([350,450,200,1]),[0.002],dtt); % iflight ydiag([400,450,150,1])
+ % Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([350,450,200,1]),[0.002],dtt); % ifight xdiag([400,450,150,1]),good([350,450,200,1]),0.002,←な部ちゃん,,→粉砕,[300,200,10,1],0.01
+ Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,200,10,1]),[0.01],dtt);
+ Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([300,200,10,1]),[0.01],dtt); % iflight ydiag([400,450,150,1])
  % Controller.F2=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % xdiag([100,10,10,1])エーシン
  % Controller.F3=lqrd(A4,B4,diag([300,100,10,1]),[0.01],dt); % ydiag([100,10,10,1])エーシン
 Controller.F4=lqrd(A2,B2,diag([100,10]),[0.1],dtt);                       % ヨー角 
