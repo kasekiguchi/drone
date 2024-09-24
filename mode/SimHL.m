@@ -12,10 +12,10 @@ end
 %% 20回まとめてシミュレーションする
 clear; close all;
 for j = 1:150
-    fprintf('Simulation start...'); pause(1);
+    fprintf('Simulation start...');
     ts = 0; % initial time
     dt = 0.025; % sampling period
-    te = 15; % terminal time
+    te = 40; % terminal time
     time = TIME(ts,dt,te); % instance of time class
     in_prog_func = @(app) dfunc(app); % in progress plot
     post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
