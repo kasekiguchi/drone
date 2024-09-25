@@ -2,8 +2,8 @@
 // 各チャンネルは H (= CH_OFFSET - pw)と　L (= TIME_LOW)からなる
 // REMAINING_W = sum(H[i]+L[i])
 // PPM 1周期は start_H + TOTAL_CH_H + TIME_LOW からなる
-//#include <TimerOne.h>
-IntervalTimer  myTimer ;
+#include <TimerOne.h>
+
 uint8_t i; //符号なし8bit整数型(0~255)のi
 #define LED_PIN 13 //13ピン(D10)をLED_PINと定義 現在結線されておらず，動作に関係していない．プログラム中には何度も登場するため確認が必要
 // [ Green Red ] : HIGHで消灯、LOWで点滅
@@ -12,7 +12,7 @@ uint8_t i; //符号なし8bit整数型(0~255)のi
 // Emergence        :  [ HIGH LOW ]
 #define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義　警告灯に接続
 #define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義　警告灯に接続
-#define EM_PIN 3    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
+#define EM_PIN 5    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
 #define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義　プログラムのリセットに関係
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
 boolean fReset = false; //変数boolean fResetにfalseを格納
@@ -103,7 +103,8 @@ void loop()
       }
       else if (fReset == true && digitalRead(EM_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
       {
-        software_reset();
+        //software_reset();
+        SCB_AIRCR = 0x05FA0004; //Teensy
       }
     }
     
@@ -203,34 +204,34 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
 
 void Pulse_control() //★パルスの制御
 {
-  if(fstarthalf == true)
+  // if(fstarthalf == true)
+  // {
+  //   fstarthalf = false;
+  //   Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
+  //   digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
+  // }
+  if (digitalRead(OUTPUT_PIN) == LOW) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
   {
-    fstarthalf = false;
-    myTimer.update(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
-  }
-  else if (digitalRead(OUTPUT_PIN) == HIGH) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
-  {
-    myTimer.update(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
-    digitalWrite(OUTPUT_PIN, LOW); // PPM -> LOW　D2ピンからの出力を0にする
+    Timer1.setPeriod(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
+    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> LOW　D2ピンからの出力を0にする
   }
   else if (n_ch == TOTAL_CH) //2ピンの出力が5Vでなく，n_chが8に等しいとき(1フレームが終了した時)
   {
     n_ch = 0; //n_chを0に戻す
-    start_Hh = start_H / 2; //スタート時のパルス幅をstart_Hhに代入
+    start_Hh = start_H; //スタート時のパルス幅をstart_Hhに代入
     //    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
     for (i = 0; i < TOTAL_CH; i++) // PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない i = 0からi < 8 が成り立つ間iを1ずつ増やして繰り返す
     {
       phw[i] = pw[i]; //チャンネルiのHighパルス幅をphw[i]に代入
     }
     fstarthalf = true;
-    myTimer.update(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
+    Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
+    digitalWrite(OUTPUT_PIN, LOW); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
   }
   else //上記2つのどちらでもないとき
   {
-    myTimer.update(phw[n_ch]);    // 時間を指定 Highパルス幅分次の操作を実行する
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
+    Timer1.setPeriod(phw[n_ch]);    // 時間を指定 Highパルス幅分次の操作を実行する
+    digitalWrite(OUTPUT_PIN, LOW); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
     n_ch++; //チャンネルを進める
   }
 }
@@ -252,9 +253,8 @@ void setupPPM() // ---------- setup ppm signal configuration　ppm信号構成�
   start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; //22500-(12960 - 3*500 - 0) - 9 * 400 = 7440 Startのパルス幅
   // start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
   // CPUのクロック周波数でPPM信号を制御
-//   Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
-//   Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
-myTimer.begin (Pulse_control,PPM_PERIOD);
+  Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
+  Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
 }
 void emergency_stop()
 {
