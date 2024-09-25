@@ -12,7 +12,7 @@ uint8_t i; //符号なし8bit整数型(0~255)のi
 // Emergence        :  [ HIGH LOW ]
 #define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義　警告灯に接続
 #define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義　警告灯に接続
-#define EM_PIN 3    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
+#define EM_PIN 5    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
 #define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義　プログラムのリセットに関係
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
 boolean fReset = false; //変数boolean fResetにfalseを格納
@@ -210,14 +210,14 @@ void Pulse_control() //★パルスの制御
   //   Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
   //   digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
   // }
-  if (digitalRead(OUTPUT_PIN) == HIGH) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
+  if (digitalRead(OUTPUT_PIN) == LOW) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
   {
     Timer1.setPeriod(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
-    digitalWrite(OUTPUT_PIN, LOW); // PPM -> LOW　D2ピンからの出力を0にする
+    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> LOW　D2ピンからの出力を0にする
   }
   else if (n_ch == TOTAL_CH) //2ピンの出力が5Vでなく，n_chが8に等しいとき(1フレームが終了した時)
   {
-    //n_ch = 0; //n_chを0に戻す
+    n_ch = 0; //n_chを0に戻す
     start_Hh = start_H; //スタート時のパルス幅をstart_Hhに代入
     //    memcpy(phw, pw, sizeof(pw));// PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない
     for (i = 0; i < TOTAL_CH; i++) // PPM 1周期を22.5 msに保つため、途中で変更されたものには対応しない i = 0からi < 8 が成り立つ間iを1ずつ増やして繰り返す
@@ -226,12 +226,12 @@ void Pulse_control() //★パルスの制御
     }
     fstarthalf = true;
     Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
+    digitalWrite(OUTPUT_PIN, LOW); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
   }
   else //上記2つのどちらでもないとき
   {
     Timer1.setPeriod(phw[n_ch]);    // 時間を指定 Highパルス幅分次の操作を実行する
-    digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
+    digitalWrite(OUTPUT_PIN, LOW); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
     n_ch++; //チャンネルを進める
   }
 }
