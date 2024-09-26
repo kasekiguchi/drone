@@ -88,14 +88,25 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             %% HLによる入力計算
             u_HL = obj.calculateHL(varargin);
-      
-            %% ------------------------------------------------------------
-            % 最適化部分の関数化とmex化
-            Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
-            % [var, fval, exitflag] = quad_drone_mex(Param); %code00用 自PCでcontroller:0.6ms, 全体:2.7ms
-            % [var, fval, exitflag] = quad_drone_code08_mex(Param); %code08用
-            % [var, fval, exitflag] = quad_drone(Param);
-            [var, fval, exitflag] = obj.param.quad_drone(Param);
+
+            %% HLとの状態比較を初期値としたクープマンMPCの計算
+            %-- fmincon 設定
+            options = optimoptions('fmincon');
+            options = optimoptions(options,'MaxIterations',      1.e+12); % 最大反復回数
+            options = optimoptions(options,'ConstraintTolerance',1.e-4);  % 制約違反に対する許容誤差
+            
+            %-- fmincon設定
+            options.Algorithm = 'sqp';  % 逐次二次計画法
+            options.Display = 'none';   % 計算結果の表示
+            problem.solver = 'fmincon'; % solver
+            problem.options = options;  %
+            % problem.x0		  = [obj.previous_state; obj.previous_input];
+            problem.x0        = [obj.previous_input];
+
+            %-- fmincon
+            problem.objective = @(x) obj.objective(x); 
+            % problem.nonlcon   = @(x) obj.constraints(x);
+            [var, ~, exitflag, ~, ~, ~, ~] = fmincon(problem);
                  
             %%
             obj.previous_input = var;
@@ -144,6 +155,47 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
         function show(obj)
             obj.result
         end
+
+        function eval = objective(obj,u)
+            %-- initialize
+            z0 = quaternions_all(obj.current_state);
+            Z = [z0, zeros(size(z0,1),obj.H-1)];
+            for i = 1:obj.H
+                Z(:,i+1) = obj.A*Z(:,i) + obj.B*u(:,i);
+            end
+            X = [obj.current_state,Z(1:12,:)]; % x[k] = Cz[k]
+        
+            tildeXp = X(1:3, :) - obj.reference.xr(1:3, :);  % 位置
+            tildeXq = X(4:6, :) - obj.reference.xr(4:6, :);
+            tildeXv = X(7:9, :) - obj.reference.xr(7:9, :);  % 速度
+            tildeXw = X(10:12, :) - obj.reference.xr(10:12,:);
+            tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
+            tildeUref = u(:, :) - obj.reference.xr(13:16,:);
+            
+        %-- 状態及び入力のステージコストを計算 長くなるから分割
+            stagestateP = tildeXp(:, 1:obj.H-1)'*obj.param.weight.P*tildeXp(:, 1:obj.H-1);
+            stagestateV = tildeXv(:, 1:obj.H-1)'*obj.param.weight.V*tildeXv(:, 1:obj.H-1);
+            stagestateQW = tildeXqw(:, 1:obj.H-1)'*obj.param.weight.QW*tildeXqw(:, 1:obj.H-1);
+            stageinputR = tildeUref(:, 1:obj.H-1)'*obj.param.weight.R*tildeUref(:, 1:obj.H-1);
+            
+            stagestateP = diag(stagestateP);
+            stagestateV = diag(stagestateV);
+            stagestateQW = diag(stagestateQW);
+            stageinputR = diag(stageinputR);
+            
+            stagestate = stagestateP' + stagestateV' + stagestateQW' + stageinputR'; %ステージコスト
+            
+        %-- 状態の終端コストを計算
+            terminalstate =  tildeXp(:, end)'   * obj.param.weight.Pf   * tildeXp(:, end)...
+                            +tildeXv(:, end)'   * obj.param.weight.Vf   * tildeXv(:, end)...
+                            +tildeXqw(:, end)'  * obj.param.weight.QWf  * tildeXqw(:, end);
+        
+        %-- 評価値計算
+            eval = sum(stagestate) + terminalstate;
+        end
+
+        % function constraints(obj)
+        % end
 
         function u_HL = calculateHL(obj, varargin)
             model = obj.self.estimator.result;

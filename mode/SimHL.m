@@ -11,7 +11,7 @@ end
 
 %% 20回まとめてシミュレーションする
 clear; close all;
-for j = 1:150
+for j = 106:106
     fprintf('Simulation start...');
     ts = 0; % initial time
     dt = 0.025; % sampling period
@@ -60,10 +60,10 @@ for j = 1:150
         %pause(1)
         all = toc;
     end
-    % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+    logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
     disp(['N: ', num2str(j)]);
     log = logger;
-    save(strcat('Data\HLsim\HL_exp_', num2str(j), '.mat'), 'log');
+    % save(strcat('Data\HLsim\HL_exp_', num2str(j), '.mat'), 'log');
 end
 
 %%
