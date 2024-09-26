@@ -344,13 +344,13 @@ if isSaved
     for i=1:nf
     %     SaveTitle(i)=strcat(date,'_',ExpSimName,'_',contents,'_',figName(n(i)));
         SaveTitle(i)=strcat(contents,'_',nn(i));
-        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
+        % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'fig');
         %見切れないようにする
         f(i).Units = 'centimeters';
         f(i).PaperUnits = f(i).Units;
         f(i).PaperPosition = [0, 0, f(i).Position(3:4)];
         f(i).PaperSize = f(i).Position(3:4);
-        % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'pdf');
+        saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'pdf');
         % saveas(f(i), fullfile(FolderNameF, SaveTitle(i)),'jpg');
         % saveas(f(na(i)), fullfile(FolderName, SaveTitle(i) ),'eps');
     end

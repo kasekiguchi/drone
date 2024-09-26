@@ -62,7 +62,7 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         % x=[p;q;dp;ob;pl;dpl;pT;ol]状態の並び
         % f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL];一階微分の並び
         % 複数牽引の時は紐についてのシステムノイズは大きくする必要がある．現在はシステムノイズ1E0，観測ノイズ1E-10
-        Estimator.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-1); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
+        % Estimator.Q = blkdiag(eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-4,eye(3)*1E-1); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
         Estimator.Q = blkdiag(eye(3)*1E-1,eye(3)*1E-1,eye(3)*1E-1,eye(3)*1E1); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
         Estimator.B = blkdiag([0.5*dt^2*eye(6);dt*eye(6)],[0.5*dt^2*eye(3);dt*eye(3)],[0.5*dt^2*eye(3);dt*eye(3)]);% システムノイズ（Modelクラス由来）
         Estimator.R = blkdiag(eye(3)*1e-10, eye(3)*1e-8,eye(3)*1e-10,eye(3)*1e-10);%観測ノイズ
