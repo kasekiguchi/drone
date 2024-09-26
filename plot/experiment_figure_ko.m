@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl0925hun_sokosokotonnda_Log(25-Sep-2024_13_26_09).mat");
+load("sl0926dame_inner150_Log(26-Sep-2024_19_53_28).mat");
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
@@ -64,7 +64,7 @@ Flight_step_time_average=mean(Flight_step_time)
 %↓RMSE計算試作
 
 % Parameters
-A = 12; % フライト開始からの秒数 (例: 12秒後)
+A = 0; % フライト開始からの秒数 (例: 12秒後)
 B = 0; % AからB秒間で計算 (例: 10秒)=0でフライト最後まで
 C = 16; % テイクオフからの秒数 (例: 16秒後)
 D = 17.339; % CからのD秒間で計算 (例: 6秒)=0でテイクオフ最後まで
