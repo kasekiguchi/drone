@@ -5,7 +5,7 @@ clc; clear; close all
 N = 6;%機体数
 ts = 0; 
 dt = 0.025;
-te = 15;
+te = 45;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -222,7 +222,7 @@ run("DataPlot.m")
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-5 5;-5 5;0 8],"ntimes",5);
+mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-5 5;-5 5;0 5],"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 

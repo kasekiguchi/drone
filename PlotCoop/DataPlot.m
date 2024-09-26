@@ -12,11 +12,11 @@
 close all
 clear multiFigure option addingContents f
 %選択
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
-startTime = 0;
-endTime = 100;%1E3;
+startTime = 5;
+endTime = 45;%1E3;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
