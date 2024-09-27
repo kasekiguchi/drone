@@ -51,6 +51,7 @@ Setting.param.B =dsys.B;
 Setting.param.C =dsys.C;
 Setting.initial = initial;%struct('p',[0;0;0],'v',[0;0;0]);
 Model.param = Setting;
-Model.parameter_name = ["A","B"];
+Model.parameter_name = ["A","B"]; % default
+% Model.parameter_name = ["mass","Lx","Ly","lx","ly","jx","jy","jz","gravity","km1","km2","km3","km4","k1","k2","k3","k4","rotor_r"];
 Param = POINT_MASS_PARAM("point","A",dsys.A,"B",dsys.B,"C",dsys.C);
 end

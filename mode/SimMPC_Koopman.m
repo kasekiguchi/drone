@@ -1,5 +1,5 @@
 %%
-% clear gui
+clear gui
 %%
 clc
 ts = 0; % initial time
@@ -52,34 +52,67 @@ end
 agent = DRONE;
 agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
 agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)); 
+% agent.parameter.set("mass",struct("mass",0.5))
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% controller and reference and sensor (common)
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
-% agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
-agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
+% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file));
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
+
+%% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file));
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
 
 %%
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
-% for i = 1:te/dt
-%     if i < 20 || rem(i, 10) == 0 end
-%     tic
-%     agent(1).sensor.do(time, 'f');
-%     agent(1).estimator.do(time, 'f');
-%     agent(1).reference.do(time, 'f');
-%     agent(1).controller.do(time, 'f');
-%     agent(1).plant.do(time, 'f');
-%     logger.logging(time, 'f', agent);
-%     time.t = time.t + time.dt;
-%     %pause(1)
-%     all = toc
+for i = 1:te/dt
+    if i < 20 || rem(i, 10) == 0 end
+    tic
+    agent(1).sensor.do(time, 'f', agent);
+    agent(1).estimator.do(time, 'f', agent);
+    agent(1).reference.do(time, 'f', agent);
+    agent(1).controller.do(time, 'f', agent);
+    agent(1).plant.do(time, 'f', agent);
+    logger.logging(time, 'f', agent);
+    time.t = time.t + time.dt;
+    %pause(1)
+    all = toc;
+end
+%%
+logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+
+%% function
+function result = controller_do(varargin)
+    controller = varargin{3}.controller;
+    result.hlc = controller.hlc.do(varargin);
+    result.mpc = controller.mpc.do(varargin);
+    result = result.mpc;
+    varargin{5}.controller.result = result;
+end
+
+% function result = controller_do(varargin)
+%     controller = varargin{5}.controller;
+%     if varargin{2} == 'a'
+%         result = controller.mpc.do(varargin); % arming: KMPC
+%     elseif varargin{2} == 't'
+%         result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
+%         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
+%         result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
+%     elseif varargin{2} == 'f'
+%         result = controller.mpc.do(varargin); % flight: KMPC
+%     elseif varargin{2} == 'l'
+%         result = controller.hlc.do(varargin); % landing: HL
+%    end
+%     varargin{5}.controller.result = result;
 % end
-% %%
-% logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 
 %%
 function dfunc(app)

@@ -68,7 +68,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.result.setting.B = obj.param.B;
             obj.result.setting.C = obj.param.C;
 
-            obj.param.P = self.parameter.get(obj.parameter_name);
+            obj.param.P = [0.5 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
+            % obj.param.P = self.parameter.get(obj.parameter_name);
         end
 
         %-- main()的な
@@ -78,16 +79,16 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
-            obj.param.t = varargin{1}.t;
+            obj.param.t = varargin{1}{1}.t;
             rt = obj.param.t; %時間
             idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
-            obj.reference.xr = obj.Reference(rt); %リファレンスの更新
+            [obj.reference.xr, obj.reference.xr_HL] = obj.Reference(rt); %リファレンスの更新
  
             obj.previous_state = repmat(obj.current_state, 1, obj.H);
 
             %% HLによる入力計算
-            u_HL = obj.calculateHL(varargin);
+            obj.input.u_HL = obj.calculateHL(varargin);
 
             %% HLとの状態比較を初期値としたクープマンMPCの計算
             %-- fmincon 設定
@@ -106,7 +107,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             %-- fmincon
             problem.objective = @(x) obj.objective(x); 
             % problem.nonlcon   = @(x) obj.constraints(x);
-            [var, ~, exitflag, ~, ~, ~, ~] = fmincon(problem);
+            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(problem);
                  
             %%
             obj.previous_input = var;
@@ -160,35 +161,39 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             %-- initialize
             z0 = quaternions_all(obj.current_state);
             Z = [z0, zeros(size(z0,1),obj.H-1)];
-            for i = 1:obj.H
+            for i = 1:obj.H-2
                 Z(:,i+1) = obj.A*Z(:,i) + obj.B*u(:,i);
             end
-            X = [obj.current_state,Z(1:12,:)]; % x[k] = Cz[k]
+            X = [obj.current_state,obj.C*Z]; % x[k] = Cz[k]
         
-            tildeXp = X(1:3, :) - obj.reference.xr(1:3, :);  % 位置
-            tildeXq = X(4:6, :) - obj.reference.xr(4:6, :);
-            tildeXv = X(7:9, :) - obj.reference.xr(7:9, :);  % 速度
-            tildeXw = X(10:12, :) - obj.reference.xr(10:12,:);
-            tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-            tildeUref = u(:, :) - obj.reference.xr(13:16,:);
+            tildeXp = X(1:3, :) - obj.reference.xr_HL(1:3, :);  % 位置
+            tildeXq = X(4:6, :) - [0;0;0];
+            tildeXv = X(7:9, :) - obj.reference.xr_HL(5:7, :);  % 速度
+            tildeXw = X(10:12, :) - [0;0;0];
+            % tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
+            tildeUref = u(:, :) - [0;0;0;0];
             
         %-- 状態及び入力のステージコストを計算 長くなるから分割
             stagestateP = tildeXp(:, 1:obj.H-1)'*obj.param.weight.P*tildeXp(:, 1:obj.H-1);
             stagestateV = tildeXv(:, 1:obj.H-1)'*obj.param.weight.V*tildeXv(:, 1:obj.H-1);
-            stagestateQW = tildeXqw(:, 1:obj.H-1)'*obj.param.weight.QW*tildeXqw(:, 1:obj.H-1);
+            stagestateQ = tildeXq(:, 1:obj.H-1)'*obj.param.weight.Q*tildeXq(:, 1:obj.H-1);
+            stagestateW = tildeXw(:, 1:obj.H-1)'*obj.param.weight.W*tildeXw(:, 1:obj.H-1);
             stageinputR = tildeUref(:, 1:obj.H-1)'*obj.param.weight.R*tildeUref(:, 1:obj.H-1);
             
             stagestateP = diag(stagestateP);
             stagestateV = diag(stagestateV);
-            stagestateQW = diag(stagestateQW);
+            stagestateQ = diag(stagestateQ);
+            stagestateW = diag(stagestateW);
+            stagestateX = stagestateP' + stagestateV' + stagestateQ' + stagestateW';
             stageinputR = diag(stageinputR);
             
-            stagestate = stagestateP' + stagestateV' + stagestateQW' + stageinputR'; %ステージコスト
+            stagestate = stagestateX + stageinputR'; %ステージコスト
             
         %-- 状態の終端コストを計算
-            terminalstate =  tildeXp(:, end)'   * obj.param.weight.Pf   * tildeXp(:, end)...
-                            +tildeXv(:, end)'   * obj.param.weight.Vf   * tildeXv(:, end)...
-                            +tildeXqw(:, end)'  * obj.param.weight.QWf  * tildeXqw(:, end);
+            terminalstate =  tildeXp(:, end)' * obj.param.weight.Pf * tildeXp(:, end)...
+                            +tildeXv(:, end)' * obj.param.weight.Vf * tildeXv(:, end)...
+                            +tildeXq(:, end)' * obj.param.weight.Qf * tildeXq(:, end)...
+                            +tildeXw(:, end)' * obj.param.weight.Wf * tildeXw(:, end); 
         
         %-- 評価値計算
             eval = sum(stagestate) + terminalstate;
@@ -233,7 +238,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
             tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
             % max,min are applied for the safty
-            obj.input.u_HL = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+            u_HL = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         end
 
         % function xr_HL = Reference_HL(obj, T)
@@ -243,12 +248,12 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
         %     %% これを転用できるならすばらしい．
         % end
 
-        function [xr] = Reference(obj, T)
+        function [xr, xr_HL] = Reference(obj, T)
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
             xr = zeros(obj.param.total_size, obj.H);    % initialize
-            xr_HL = zeros(16, obj.H);
+            xr_HL = zeros(16, 1);
             % 時間関数の取得→時間を代入してリファレンス生成
             RefTime = obj.self.reference.func;    % 時間関数の取得
             for h = 0:obj.H-1
@@ -259,8 +264,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
                 xr(4:6, h+1) =   [0;0;0]; % 姿勢角
                 xr(10:12, h+1) = [0;0;0];
                 xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
-                xr_HL(1:16, h+1) = ref(1:16);
             end
+            xr_HL(1:16, 1) = ref(1:16);
         end
     end
 end
