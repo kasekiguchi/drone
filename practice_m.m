@@ -5,7 +5,7 @@ cd(strcat(fileparts(tmp.Filename), './'));
 cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %%
 clear; clc
-N = 106
+N = 29
 exp = load(strcat('Exp_2_4_', num2str(N), '.mat'));
 sim = load(strcat('HL_exp_', num2str(N), '.mat'));
 edata_idx = find(exp.log.Data.phase == 102, 1, "first"):find(exp.log.Data.phase==102, 1, "last");
@@ -38,17 +38,24 @@ Data.X = [];
 Data.Y = [];
 Data.U = [];
 Data.HowManyDataset = 150;
-for i = 1:3
-    disp(['Extracting: ', num2str(i)])
-    exp = load(strcat('Exp_2_4_', num2str(i), '.mat'));
-    sim = load(strcat('HL_exp_', num2str(i), '.mat'));
-    edata_idx = find(exp.log.Data.phase == 102, 1, "first"):find(exp.log.Data.phase==102, 1, "last")+1;
-    sdata_idx = 1:size(edata_idx,2);
-    edata = cell2mat(arrayfun(@(N) exp.log.Data.agent.estimator.result{N}.state.get(),edata_idx,'UniformOutput',false));
-    sdata = cell2mat(arrayfun(@(N) sim.log.Data.agent.estimator.result{N}.state.get(),sdata_idx,'UniformOutput',false));
-    Data.X = [Data.X, edata(:,1:end-1)-sdata(:,1:end-1)];
-    Data.Y = [Data.Y, edata(:,2:end)-sdata(:,2:end)];
-    edata = cell2mat(arrayfun(@(N) exp.log.Data.agent.controller.result{N}.input,edata_idx(1:end-1),'UniformOutput',false));
-    sdata = cell2mat(arrayfun(@(N) sim.log.Data.agent.controller.result{N}.input,sdata_idx(1:end-1),'UniformOutput',false));
-    Data.U = [Data.U, edata-sdata];
+for i = 1:150
+    disp(['Extracting: ', num2str(i),' /150'])
+    try
+        exp = load(strcat('Exp_2_4_', num2str(i), '.mat'));
+        sim = load(strcat('HL_exp_', num2str(i), '.mat'));
+        idx1 = find(exp.log.Data.phase == 102, 1, "first");
+        idx2 = min(2400, find(exp.log.Data.phase==102, 1, "last")+1);
+        edata_idx = idx1:idx2;
+        sdata_idx = 1:size(edata_idx,2);
+        edata = cell2mat(arrayfun(@(N) exp.log.Data.agent.estimator.result{N}.state.get(),edata_idx,'UniformOutput',false));
+        sdata = cell2mat(arrayfun(@(N) sim.log.Data.agent.estimator.result{N}.state.get(),sdata_idx,'UniformOutput',false));
+        Data.X = [Data.X, edata(:,1:end-1)-sdata(:,1:end-1)];
+        Data.Y = [Data.Y, edata(:,2:end)-sdata(:,2:end)];
+        edata = cell2mat(arrayfun(@(N) exp.log.Data.agent.controller.result{N}.input,edata_idx(1:end-1),'UniformOutput',false));
+        sdata = cell2mat(arrayfun(@(N) sim.log.Data.agent.controller.result{N}.input,sdata_idx(1:end-1),'UniformOutput',false));
+        Data.U = [Data.U, edata-sdata];
+    catch
+        % save('Koopman_Linearization\Integration_Dataset\Error_Data.mat', 'Data');
+        disp('warning!!')
+    end
 end
