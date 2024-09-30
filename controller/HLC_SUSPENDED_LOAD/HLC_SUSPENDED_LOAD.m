@@ -49,14 +49,15 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.vdro_pre = model.state.v;
             else
             %張力算出
+            %MODELクラスのインスタンスでloadmassの代入とdoメソッドで質量の代入を確認する
                 g = [0;0;-P(6)];
                 mi   = P(1);
                 Ri = model.state.getq("rotm");
                 vdro = model.state.v;
                 vL = model.state.vL;
                 
-                ui  = Ri*[0;0;obj.self.controller.result.input(1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-                aidrn = (vdro - obj.vdro_pre)/Param.dt; %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
+                ui  = Ri*[0;0;obj.self.controller.result.input(1) + normrnd(0,0.1)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
+                aidrn = (vdro - obj.vdro_pre)/Param.dt + normrnd(0,0.1,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
                 ai = (vL - obj.vL_pre)/Param.dt;%牽引物加速度
                 mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
                 mui      = -mui;%分割後の牽引物系から張力
@@ -68,7 +69,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 AtA  = A'*A;
                 mLi  = (AtA\A')*mui;%分割後質量
                
-                % P(15) = mLi;
+                P(15) = mLi;
                 % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,4)+" ai: "+num2str(ai,4))
             end
             % aaa = P(15) 
