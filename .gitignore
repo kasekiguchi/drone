@@ -51,6 +51,11 @@ latex.out/
 *.alg
 *.loa
 
+#########################
+/Data/OriginalData/
+#########################
+
+
 # achemso
 acs-*.bib
 

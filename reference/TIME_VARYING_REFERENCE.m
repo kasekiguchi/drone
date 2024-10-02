@@ -56,7 +56,9 @@ classdef TIME_VARYING_REFERENCE < handle
            else
             obj.result.state.v = [0;0;0];
            end
-           obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));
+           obj.result.state.q(3,1) = atan2(obj.result.state.v(2),obj.result.state.v(1));%元のやつ
+           obj.result.state.q(3,1) = 0;
+           % disp(atan2(obj.result.state.v(2),obj.result.state.v(1)))
            result = obj.result;
         end
         function show(obj, logger)

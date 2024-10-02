@@ -1,4 +1,4 @@
-classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
+classdef Gemm_To_GemmLayer1026 < nnet.layer.Layer & nnet.layer.Formattable
     % A custom layer auto-generated while importing an ONNX network.
     
     %#codegen
@@ -25,7 +25,7 @@ classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
     end
     
     methods
-        function this = Gemm_To_GemmLayer1023(name, onnxParams)
+        function this = Gemm_To_GemmLayer1026(name, onnxParams)
             this.Name = name;
             this.NumInputs = 2;
             this.OutputNames = {'x19'};
@@ -62,8 +62,8 @@ classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
                 'InputDataPermutation', {['as-is'], ['as-is']}, ...
                 'OutputDataPermutation', {['as-is'], ['as-is']});
             if any(cellfun(@(A)~isnumeric(A) && ~islogical(A), {x19}))
-                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1023');
-                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1023'));
+                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1026');
+                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1026'));
             end
             x19 = dlarray(single(x19), repmat('U', 1, max(2, x19NumDims)));
             if ~coder.target('MATLAB')
@@ -91,8 +91,8 @@ classdef Gemm_To_GemmLayer1023 < nnet.layer.Layer & nnet.layer.Formattable
                 'InputDataPermutation', {['as-is'], ['as-is']}, ...
                 'OutputDataPermutation', {['as-is'], ['as-is']});
             if any(cellfun(@(A)~isnumeric(A) && ~islogical(A), {x19}))
-                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1023');
-                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1023'));
+                fprintf('Runtime error in network. At least one output of custom layer ''%s'' is a non-numeric, non-logical value.\n', 'Gemm_To_GemmLayer1026');
+                error(message('nnet_cnn_onnx:onnx:BadCustomLayerRuntimeOutput', 'Gemm_To_GemmLayer1026'));
             end
             x19 = dlarray(single(x19), repmat('U', 1, max(2, x19NumDims)));
             if ~coder.target('MATLAB')
@@ -164,7 +164,7 @@ function [x19, x19NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % ONNX__GEMM_0
 %			- Input(s) to the ONNX network.
 %			  The input size(s) expected by the ONNX file are:
-%				  ONNX__GEMM_0:		[1, 19]				Type: DOUBLE
+%				  ONNX__GEMM_0:		[1, 13]				Type: DOUBLE
 %			  By default, the function will try to permute the input(s)
 %			  into this dimension ordering. If the default is incorrect,
 %			  use the 'InputDataPermutation' argument to control the
@@ -179,7 +179,7 @@ function [x19, x19NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % X19
 %			- Output(s) of the ONNX network.
 %			  Without permutation, the size(s) of the outputs are:
-%				  X19:		[1, 10]				Type: DOUBLE
+%				  X19:		[1, 2]				Type: DOUBLE
 %			  By default, the function will try to permute the output(s)
 %			  from this dimension ordering into a conventional MATLAB
 %			  ordering. If the default is incorrect, use the
@@ -196,20 +196,20 @@ function [x19, x19NumDims, state] = Gemm_To_GemmFcn(onnx__Gemm_0, onnx__Gemm_0Nu
 % Put all variables into a single struct to implement dynamic scoping:
 [Vars, NumDims] = packageVariables(params, {'onnx__Gemm_0'}, {onnx__Gemm_0}, [onnx__Gemm_0NumDims]);
 % Call the top-level graph function:
-[x19, x19NumDims, state] = Gemm_To_GemmGraph1010(onnx__Gemm_0, NumDims.onnx__Gemm_0, Vars, NumDims, Training, params.State);
+[x19, x19NumDims, state] = Gemm_To_GemmGraph1013(onnx__Gemm_0, NumDims.onnx__Gemm_0, Vars, NumDims, Training, params.State);
 % Postprocess the output data
 [x19] = postprocessOutput(x19, outputDataPerms, anyDlarrayInputs, Training, varargin{:});
 end
 
-function [x19, x19NumDims1022, state] = Gemm_To_GemmGraph1010(onnx__Gemm_0, onnx__Gemm_0NumDims1021, Vars, NumDims, Training, state)
-% Function implementing the graph 'Gemm_To_GemmGraph1010'
+function [x19, x19NumDims1025, state] = Gemm_To_GemmGraph1013(onnx__Gemm_0, onnx__Gemm_0NumDims1024, Vars, NumDims, Training, state)
+% Function implementing the graph 'Gemm_To_GemmGraph1013'
 % Update Vars and NumDims from the graph's formal input parameters. Note that state variables are already in Vars.
 Vars.onnx__Gemm_0 = onnx__Gemm_0;
-NumDims.onnx__Gemm_0 = onnx__Gemm_0NumDims1021;
+NumDims.onnx__Gemm_0 = onnx__Gemm_0NumDims1024;
 
 % Execute the operators:
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_0_Gemm_out] = prepareGemmArgs(Vars.onnx__Gemm_0, Vars.linears_0_weight, Vars.linears_0_bias, Vars.Gemmalpha1011, Vars.Gemmbeta1012, 0, 1, NumDims.linears_0_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_0_Gemm_out] = prepareGemmArgs(Vars.onnx__Gemm_0, Vars.linears_0_weight, Vars.linears_0_bias, Vars.Gemmalpha1014, Vars.Gemmbeta1015, 0, 1, NumDims.linears_0_bias);
 Vars.x_linears_0_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -217,7 +217,7 @@ Vars.x_activation_Tanh_ou = tanh(Vars.x_linears_0_Gemm_out);
 NumDims.x_activation_Tanh_ou = NumDims.x_linears_0_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_1_Gemm_out] = prepareGemmArgs(Vars.x_activation_Tanh_ou, Vars.linears_1_weight, Vars.linears_1_bias, Vars.Gemmalpha1013, Vars.Gemmbeta1014, 0, 1, NumDims.linears_1_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_1_Gemm_out] = prepareGemmArgs(Vars.x_activation_Tanh_ou, Vars.linears_1_weight, Vars.linears_1_bias, Vars.Gemmalpha1016, Vars.Gemmbeta1017, 0, 1, NumDims.linears_1_bias);
 Vars.x_linears_1_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -225,7 +225,7 @@ Vars.x_activation_1_Tanh_ = tanh(Vars.x_linears_1_Gemm_out);
 NumDims.x_activation_1_Tanh_ = NumDims.x_linears_1_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_2_Gemm_out] = prepareGemmArgs(Vars.x_activation_1_Tanh_, Vars.linears_2_weight, Vars.linears_2_bias, Vars.Gemmalpha1015, Vars.Gemmbeta1016, 0, 1, NumDims.linears_2_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_2_Gemm_out] = prepareGemmArgs(Vars.x_activation_1_Tanh_, Vars.linears_2_weight, Vars.linears_2_bias, Vars.Gemmalpha1018, Vars.Gemmbeta1019, 0, 1, NumDims.linears_2_bias);
 Vars.x_linears_2_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -233,7 +233,7 @@ Vars.x_activation_2_Tanh_ = tanh(Vars.x_linears_2_Gemm_out);
 NumDims.x_activation_2_Tanh_ = NumDims.x_linears_2_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x_linears_3_Gemm_out] = prepareGemmArgs(Vars.x_activation_2_Tanh_, Vars.linears_3_weight, Vars.linears_3_bias, Vars.Gemmalpha1017, Vars.Gemmbeta1018, 0, 1, NumDims.linears_3_bias);
+[A, B, C, alpha, beta, NumDims.x_linears_3_Gemm_out] = prepareGemmArgs(Vars.x_activation_2_Tanh_, Vars.linears_3_weight, Vars.linears_3_bias, Vars.Gemmalpha1020, Vars.Gemmbeta1021, 0, 1, NumDims.linears_3_bias);
 Vars.x_linears_3_Gemm_out = alpha*B*A + beta*C;
 
 % Tanh:
@@ -241,12 +241,12 @@ Vars.x_activation_3_Tanh_ = tanh(Vars.x_linears_3_Gemm_out);
 NumDims.x_activation_3_Tanh_ = NumDims.x_linears_3_Gemm_out;
 
 % Gemm:
-[A, B, C, alpha, beta, NumDims.x19] = prepareGemmArgs(Vars.x_activation_3_Tanh_, Vars.linears_4_weight, Vars.linears_4_bias, Vars.Gemmalpha1019, Vars.Gemmbeta1020, 0, 1, NumDims.linears_4_bias);
+[A, B, C, alpha, beta, NumDims.x19] = prepareGemmArgs(Vars.x_activation_3_Tanh_, Vars.linears_4_weight, Vars.linears_4_bias, Vars.Gemmalpha1022, Vars.Gemmbeta1023, 0, 1, NumDims.linears_4_bias);
 Vars.x19 = alpha*B*A + beta*C;
 
 % Set graph output arguments from Vars and NumDims:
 x19 = Vars.x19;
-x19NumDims1022 = NumDims.x19;
+x19NumDims1025 = NumDims.x19;
 % Set output state from Vars:
 state = updateStruct(state, Vars);
 end
