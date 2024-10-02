@@ -19,6 +19,7 @@ else
   Setting.dim=[24,4,21];
   Setting.num_list = [3,3,3,3,3,3,3,3];
 end
+Setting.method%デバッグ用なのでいらなくなったら削除
 Setting.state_list =  ["p","q","v","w","pL","vL","pT","wL"];
 Setting.initial = initial;
 Setting.initial.vL = [0;0;0];
