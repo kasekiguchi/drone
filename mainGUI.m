@@ -13,7 +13,7 @@ close all hidden; clear ; clc;
 userpath('clear');
 %%
 clc
-SimBaseMode = ["SimHL","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL","SimVoronoi"]; %シミュレーションの種類
+SimBaseMode = ["SimHL","SimFHL","SimFHL_Servo","SimLiDAR","SimFT","SimEL","SimVoronoi","SimHL_Multi"]; %シミュレーションの種類
 ExpBaseMode = ["ExpTestMotiveConnection","ExpHL","ExpFHL","ExpFHL_Servo","ExpFT","ExpEL"]; %実機実験の種類
 fExp = 0; %fEXpとは何？
 fDebug = 0; % 1: active : for debug function　デバッグファンクションとは何？
