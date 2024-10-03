@@ -2,7 +2,7 @@
 // 各チャンネルは H (= CH_OFFSET - pw)と　L (= TIME_LOW)からなる
 // REMAINING_W = sum(H[i]+L[i])
 // PPM 1周期は start_H + TOTAL_CH_H + TIME_LOW からなる
-//#include <TimerOne.h>
+#include <TimerOne.h>
 
 uint8_t i; //符号なし8bit整数型(0~255)のi
 #define LED_PIN 13 //13ピン(D10)をLED_PINと定義 現在結線されておらず，動作に関係していない．プログラム中には何度も登場するため確認が必要
@@ -12,14 +12,14 @@ uint8_t i; //符号なし8bit整数型(0~255)のi
 // Emergence        :  [ HIGH LOW ]
 #define GLED_PIN 15 // A1　15ピン(A1)をGLED_PINと定義　警告灯に接続
 #define RLED_PIN 14 // A0　14ピン(A0)をRLED_PINと定義　警告灯に接続
-#define EM_PIN 34    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
+#define EM_PIN 2    // 2 or 3のみ　ここでは3ピン(D3)をEM_PINと定義 緊急停止に関連
 #define RST_PIN 18  // A4　18ピン(A4)をRST_PINと定義　プログラムのリセットに関係
 volatile boolean isEmergency = false; //volatile:変数をレジスタではなくRAMからロードするよう,コンパイラに指示(割り込み関係のコードが関係)　変数isEmergencyにfalseを格納
 boolean fReset = false; //変数boolean fResetにfalseを格納
 boolean fInitial = true; //変数boolean fInitialにtrueを格納
 boolean fstarthalf = false; //変数boolean fInitialにtrueを格納
 /////////////////// PPM関係 ////////////////////
-#define OUTPUT_PIN 2 // ppm output pin　2ピン(D2)をOUTPUT_PINと定義　このピンからPPM信号を出力する
+#define OUTPUT_PIN 3 // ppm output pin　2ピン(D2)をOUTPUT_PINと定義　このピンからPPM信号を出力する
 char packetBuffer[255]; //char:符号付きの型(signed)で,-128から127までの数値として扱われる　受信したデータの格納場所packetBufferを定義している　[255]は一度に受信できる最大のバッファサイズ
 #define TOTAL_INPUT 4 // number of input channels　使用されていないため考えなくてよい
 #define TOTAL_CH 8    // number of channels 1フレームにおけるチャンネルの数を8と定義
@@ -52,7 +52,7 @@ volatile uint16_t REMAINING_W; //16bit整数型(-32768~32767)REMAINING_Wを定�
 volatile uint16_t plus = 0;
 //////////// シリアル通信が途絶えたとき用 ////////////////////////////////
 volatile unsigned long last_received_time;
-hw_timer_t *timer = NULL;
+
 // ==================================================================
 void setup()
 {
@@ -67,7 +67,7 @@ void setup()
   digitalWrite(RLED_PIN, HIGH); //14(A0)ピンから5V出力
   pinMode(EM_PIN, INPUT_PULLUP); // emergency_stop を割り当てるピン D3ピンを入力に設定でプルアップ抵抗を有効
   pinMode(RST_PIN, INPUT_PULLUP); //A4ピンを入力に設定でプルアップ抵抗を有効
- // timer = timerBegin(0, 80);
+
   setupPPM(); // ppm 出力開始
 
   // 緊急停止
@@ -103,8 +103,7 @@ void loop()
       }
       else if (fReset == true && digitalRead(EM_PIN) == false) // reset可能の状態で非常停止ボタンを戻したらリセット
       {
-        //software_reset();
-        esp_restart();
+        software_reset();
       }
     }
     
@@ -138,8 +137,7 @@ void receive_serial() // ---------- loop function : receive signal by UDP 信号
           pw[i] = CH_MAX; // pw = 1000
         }
         pw[i] = CH_OFFSET - pw[i]; // transmitter システムの場合必要 1620-pw 1620 - pw ここでは信号が上下限を超えた時を決定している
-        //REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
-        REMAINING_W = REMAINING_W -  pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
+        REMAINING_W -= pw[i]; //REMAINING_W - pw[i] 1フレームの内現在の残りから，使用したパルス幅を引いている
         
 
         /*
@@ -208,14 +206,12 @@ void Pulse_control() //★パルスの制御
   if(fstarthalf == true)
   {
     fstarthalf = false;
-    //Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
-    timerWrite(timer, start_Hh);
+    Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
     digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH 2ピンから出力されている出力を5Vにする
   }
   else if (digitalRead(OUTPUT_PIN) == HIGH) //D2ピンから出力されている出力が5Vの時実行 Lowパルスの制御
   {
-    //Timer1.setPeriod(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
-    timerWrite(timer, TIME_LOW);
+    Timer1.setPeriod(TIME_LOW);    // 次の割込み時間を指定　Timer1.setPeriod:ライブラリが初期化された後に新しい期間を設定 次の操作を400us行う
     digitalWrite(OUTPUT_PIN, LOW); // PPM -> LOW　D2ピンからの出力を0にする
   }
   else if (n_ch == TOTAL_CH) //2ピンの出力が5Vでなく，n_chが8に等しいとき(1フレームが終了した時)
@@ -228,16 +224,14 @@ void Pulse_control() //★パルスの制御
       phw[i] = pw[i]; //チャンネルiのHighパルス幅をphw[i]に代入
     }
     fstarthalf = true;
-    //Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
-    timerWrite(timer, start_Hh);
+    Timer1.setPeriod(start_Hh);     // start 判定の H 時間待つ Start時のパルス幅分次の操作を行う
     digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
   }
   else //上記2つのどちらでもないとき
   {
-    //Timer1.setPeriod(phw[n_ch]);    // 時間を指定 Highパルス幅分次の操作を実行する
-    timerWrite(timer, phw[n_ch]);
+    Timer1.setPeriod(phw[n_ch]);    // 時間を指定 Highパルス幅分次の操作を実行する
     digitalWrite(OUTPUT_PIN, HIGH); // PPM -> HIGH D2ピンから出力されている出力を5Vにする
-    n_ch = n_ch + 1; //チャンネルを進める
+    n_ch++; //チャンネルを進める
   }
 }
 
@@ -258,11 +252,8 @@ void setupPPM() // ---------- setup ppm signal configuration　ppm信号構成�
   start_H = PPM_PERIOD - (TOTAL_CH_OFFSET - 3 * CH_NEUTRAL - CH_MIN) - 9 * TIME_LOW; //22500-(12960 - 3*500 - 0) - 9 * 400 = 7440 Startのパルス幅
   // start_H = PPM_PERIOD - (( pw[0] + pw[1] + pw[2] + pw[3] + pw[4] + pw[5] + pw[6] + pw[7] + pw[8])) - 9 * TIME_LOW; // 22500 - (12960 - 3 * 500 - 0) - 9 * 400 = 7440 Startのパルス幅
   // CPUのクロック周波数でPPM信号を制御
-  //Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
-  timer = timerBegin(80); 
-  //Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
-  timerAttachInterrupt(timer, Pulse_control);
-  //timerAlarmEnable(Pulse_control);
+  Timer1.initialize(PPM_PERIOD); //マイクロ秒単位で設定 initialize(microseconds): Timer1の初期化とマイクロ秒単位でのタイマー時間指定　フレーム幅が終わったらタイマーを初期化
+  Timer1.attachInterrupt(Pulse_control); //attachInterrupt(func): タイマー終了時に呼び出す関数の指定 タイマーが終了したら1つ前のvoidのPulse_controlを読み込んでいる？
 }
 void emergency_stop()
 {
