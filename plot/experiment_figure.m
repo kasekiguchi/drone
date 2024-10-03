@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("circle[700,700,700,300],332.5,T=20.mat");
+load("20241003_Exp_HL_p2py=1_[600,600,600,20],330_[350,500,200,1],0.002.mat");
 
 %%
 figtype = 2;

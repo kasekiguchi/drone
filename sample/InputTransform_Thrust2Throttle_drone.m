@@ -13,7 +13,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     % u_trans_param.th_offset = 450; 
 
     % 6cell
-    u_trans_param.gain =[700;700;700;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
+    u_trans_param.gain =[500;500;500;20]; % gain : [roll pitch yaw throttle]' %不明[850;850;600;600] 4s[700;700;600;400] 複数機[700;700;600;200] 発掘[800;800;800;400]
     u_trans_param.th_offset = 330; 
 
     u_trans_param.gain2 =u_trans_param.gain;
