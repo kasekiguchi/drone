@@ -79,16 +79,30 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
-            obj.param.t = varargin{1}{1}.t;
+            var = varargin{1};
+            phase = var{2};
+            agent = obj.self;
+            obj.param.t = var{1}.t;
+            
             rt = obj.param.t; %時間
-            idx = round(rt/varargin{1}.dt+1); %プログラムの周回数
+            idx = round(rt/var{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             [obj.reference.xr, obj.reference.xr_HL] = obj.Reference(rt); %リファレンスの更新
  
             obj.previous_state = repmat(obj.current_state, 1, obj.H);
 
             %% HLによる入力計算
-            obj.input.u_HL = obj.calculateHL(varargin);
+            % obj.input.u_HL = obj.calculateHL(varargin); % controllerで同時計算
+            obj.input.u_HL = obj.self.controller.hlc.result.input;
+
+            % 次時刻状態の計算
+            x = obj.current_state;
+            u = obj.input.u_HL;
+            P = obj.param.P;
+            tspan = [0 0.025];
+            x0 = x;
+            [~,tmpx]=ode15s(@(t,x) obj.self.plant.method(x, u,P),tspan, x0); % 非線形モデル
+            obj.state.HL = tmpx(end, :);
 
             %% HLとの状態比較を初期値としたクープマンMPCの計算
             %-- fmincon 設定
@@ -106,16 +120,16 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             %-- fmincon
             problem.objective = @(x) obj.objective(x); 
-            % problem.nonlcon   = @(x) obj.constraints(x);
+            problem.nonlcon   = @(x) obj.constraints(x);
             [var, fval, exitflag, ~, ~, ~, ~] = fmincon(problem);
                  
             %%
             obj.previous_input = var;
-            obj.result.input = var(1:4, 1); % 印加する入力 4入力
+            obj.result.input = var(1:4, 1) + obj.input.u_HL; % 印加する入力 4入力
 
             %% データ表示用
             obj.input.u = obj.result.input; 
-            calT = toc
+            calT = toc;
             obj.result.mpc.calt = calT; %計算時間保存したいときコメントイン
             obj.result.mpc.var = var;
             obj.result.mpc.exitflag = exitflag;
@@ -142,8 +156,10 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
                     obj.reference.xr(7,1), obj.reference.xr(8,1), obj.reference.xr(9,1),...
                     obj.reference.xr(4,1), obj.reference.xr(5,1), obj.reference.xr(6,1), ...
                     obj.reference.xr(10,1), obj.reference.xr(11,1), obj.reference.xr(12,1))  % r:reference 目標状態
-            fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
-                rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
+            % fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
+            %     rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
+            fprintf("t: %f \t calT: %f \t fval: %f \t flag: %d \n", rt, calT, fval, exitflag);
+            fprintf("u: %f %f %f %f \t diff_u: %f %f %f %f", obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), var(1,1), var(2,1), var(3,1), var(4,1));
             fprintf("\n");
             % profile viewer
 
@@ -157,21 +173,39 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.result
         end
 
+        function [c, ceq] = constraints(obj, U)
+            % c = [U(1:4,:)-10; -U(1:4,:)+0; -X(3,:)];
+            c = [U(1,:)-10; -U(1,:); U(2:4,:)-1; -(U(2:4,:)+1)];
+            ceq = [];
+        end
+
         function eval = objective(obj,u)
             %-- initialize
-            z0 = quaternions_all(obj.current_state);
+            error_HL = obj.current_state - obj.state.HL'; % obj.state.HLにするとほぼHLでまわる
+            z0 = quaternions_all(error_HL);
             Z = [z0, zeros(size(z0,1),obj.H-1)];
             for i = 1:obj.H-2
                 Z(:,i+1) = obj.A*Z(:,i) + obj.B*u(:,i);
             end
-            X = [obj.current_state,obj.C*Z]; % x[k] = Cz[k]
+            x = obj.C*Z; % x[k] = Cz[k]
+
+            X = obj.state.HL' + x;
+            Utmp = obj.input.u_HL + u;
+            U = [max(0,min(10,Utmp(1,:))); max(-1,min(1,Utmp(2:4,:)))];
+            ref = obj.reference.xr(1:12,:);
+
+            % X = [error_HL, x];
+            % U = u;
+            % ref = obj.reference.xr(1:12,1) - obj.current_state; % 現在状態と目標状態の誤差
+ 
+            % ref = obj.reference.xr(1:12,1) - obj.state.HL'; % 目標状態とHLの時間発展の誤差
         
-            tildeXp = X(1:3, :) - obj.reference.xr_HL(1:3, :);  % 位置
-            tildeXq = X(4:6, :) - [0;0;0];
-            tildeXv = X(7:9, :) - obj.reference.xr_HL(5:7, :);  % 速度
-            tildeXw = X(10:12, :) - [0;0;0];
+            tildeXp = X(1:3, :) - ref(1:3,:);  % 位置
+            tildeXq = X(4:6, :) - ref(4:6,:);
+            tildeXv = X(7:9, :) - ref(7:9,:);  % 速度
+            tildeXw = X(10:12, :) - ref(10:12,:);
             % tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-            tildeUref = u(:, :) - [0;0;0;0];
+            tildeUref = U(:, :);
             
         %-- 状態及び入力のステージコストを計算 長くなるから分割
             stagestateP = tildeXp(:, 1:obj.H-1)'*obj.param.weight.P*tildeXp(:, 1:obj.H-1);
@@ -198,9 +232,6 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
         %-- 評価値計算
             eval = sum(stagestate) + terminalstate;
         end
-
-        % function constraints(obj)
-        % end
 
         function u_HL = calculateHL(obj, varargin)
             model = obj.self.estimator.result;
@@ -241,22 +272,18 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             u_HL = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         end
 
-        % function xr_HL = Reference_HL(obj, T)
-        %     ref = obj.reference.xr;
-        %     xr_HL = [ref(1:3); 0; ref(7:9); 0;];
-        %     %% ReferenceでのRefTimeはHLで必要なreferenceの構成になっているのでは？
-        %     %% これを転用できるならすばらしい．
-        % end
-
         function [xr, xr_HL] = Reference(obj, T)
             % パラメータ取得
             % timevaryingをホライズンごとのreferenceに変換する
             % params.dt = 0.1;
             xr = zeros(obj.param.total_size, obj.H);    % initialize
             xr_HL = zeros(16, 1);
+            classlist = ["TIME_VARYING_REFERENCE", "MY_POINT_REFERENCE", "MY_REFERENCE_KOMA2"];
+            classname = class(obj.self.reference);
             % 時間関数の取得→時間を代入してリファレンス生成
-            RefTime = obj.self.reference.func;    % 時間関数の取得
-            for h = 0:obj.H-1
+            if find(strcmp(classname, classlist)) == 1 % TIMEVARYINGの判別
+                RefTime = obj.self.reference.func;    % 時間関数の取得
+                for h = 0:obj.H-1
                 t = T + obj.param.dt * h; % reference生成の時刻をずらす
                 ref = RefTime(t);
                 xr(1:3, h+1) = ref(1:3);
@@ -264,8 +291,21 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
                 xr(4:6, h+1) =   [0;0;0]; % 姿勢角
                 xr(10:12, h+1) = [0;0;0];
                 xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+                end
+            elseif find(strcmp(classname, classlist)) == 2
+                ref = repmat(obj.self.reference.result.state.get(),1,obj.H);
+                xr(1:3,:) = ref(12:14,:);
+                xr(4:6,:) = ref(15:17,:);
+                xr(7:9,:) = ref( 9:11,:);
+                xr(10:12,:)=zeros(3,obj.H);
+                xr(13:16,:)=repmat(obj.param.ref_input,1,obj.H);
+            elseif find(strcmp(classname, classlist)) == 3
+                ref = repmat(obj.self.reference.result.state.get(),1,obj.H);
+                xr(1:9,:) = ref(1:9,:);
+                xr(10:12,:)=zeros(3,obj.H);
+                xr(13:16,:)=repmat(obj.param.ref_input,1,obj.H);
             end
-            xr_HL(1:16, 1) = ref(1:16);
+            xr_HL(1:16, 1) = xr(1:16, 1);
         end
     end
 end

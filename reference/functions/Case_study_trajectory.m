@@ -29,10 +29,10 @@ syms t real
 % z = 0.5*sin(3*pi*t/T)+1;
 
 %% 円旋回
-T = 10;
-x = cos(2*pi*t/T);
-y = sin(2*pi*t/T);
-z = 1;
+% T = 10;
+% x = cos(2*pi*t/T);
+% y = sin(2*pi*t/T);
+% z = 1;
 
 % x = cos(2*pi*t/T) - cos(pi*t/T);
 % y = sin(2*pi*t/T);
@@ -67,9 +67,9 @@ z = 1;
 % z = 1;
 
 %% 直線
-% x = 0;
-% y = 5;
-% z = 1;
+x = 0.5;
+y = 1;
+z = 1;
 
 %% sigmoid
 % te = 10; % 何秒で移動するか

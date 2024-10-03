@@ -1,8 +1,19 @@
 %%
+%% Initialize
+tmp = matlab.desktop.editor.getActive;
+dir = fileparts(tmp.Filename);
+if ~contains(path,dir)
+    cd(erase(dir,'\mode'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+close all hidden; clear ; clc;
+userpath('clear');
+end
+
 clear gui
 %%
 clc
-ts = 0; % initial time
+ts = 0; % initial timefghj
 dt = 0.025; % sampling period
 te = 20; % terminal time
 time = TIME(ts,dt,te); % instance of time class
@@ -16,10 +27,11 @@ initial_state.v = [0; 0; 0];
 initial_state.w = [0; 0; 0];
 
 %% クープマンモデルの設定
-model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
+% model_file = "EstimationResult_12state_2_7_Exp_sprine+zsprine+P2Pz_torque_incon_150data_vzからz算出.mat";
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
+model_file = "2024-09-27_Exp_Kiyama_Error_code00_saddle";
 load(model_file,'est') %vzから算出したzで学習、総推力
 try
     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
@@ -42,23 +54,27 @@ end
 % C = blkdiag(eye(3), C);
 % end
 %% 非線形モデルをプラントに設定する場合
-% agent = DRONE;
-% agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
-% agent.parameter = DRONE_PARAM("DIATONE");
-% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+agent = DRONE;
+agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
+agent.parameter = DRONE_PARAM("DIATONE");
+agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% クープマンモデルをプラントに設定する場合
 % model_discrete: クープマンモデルを使用するうえでA,B行列の設定をする、discrete_linear_modelの観測量
-agent = DRONE;
-agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
-agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)); 
-% agent.parameter.set("mass",struct("mass",0.5))
-agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
+% agent = DRONE;
+% agent.parameter = POINT_MASS_PARAM("rigid","row","A",A,"B",B,"C",C,"D",0);
+% agent.plant = MODEL_CLASS(agent,Model_Discrete(dt,initial_state,1,"FREE",agent)); 
+% agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
 
 %% controller and reference and sensor (common)
 % agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive)); % GUIで回すとき
 agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
+
+% agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]},"HL"});
+% agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
+% agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
+
 % agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
 % agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file));
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
@@ -76,18 +92,22 @@ run("ExpBase");
 for i = 1:te/dt
     if i < 20 || rem(i, 10) == 0 end
     tic
-    agent(1).sensor.do(time, 'f', agent);
-    agent(1).estimator.do(time, 'f', agent);
-    agent(1).reference.do(time, 'f', agent);
+    agent(1).sensor.do(time, 'f');
+    agent(1).estimator.do(time, 'f');
+    agent(1).reference.do(time, 'f');
     agent(1).controller.do(time, 'f', agent);
-    agent(1).plant.do(time, 'f', agent);
+    agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
     %pause(1)
     all = toc;
 end
 %%
-logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+logger.plot({1, "p", "er"}, {1, "p1-p2", "er"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+
+%%
+% app.logger = logger;
+% result_plot(app);
 
 %% function
 function result = controller_do(varargin)
@@ -97,22 +117,6 @@ function result = controller_do(varargin)
     result = result.mpc;
     varargin{5}.controller.result = result;
 end
-
-% function result = controller_do(varargin)
-%     controller = varargin{5}.controller;
-%     if varargin{2} == 'a'
-%         result = controller.mpc.do(varargin); % arming: KMPC
-%     elseif varargin{2} == 't'
-%         result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
-%         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
-%         result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
-%     elseif varargin{2} == 'f'
-%         result = controller.mpc.do(varargin); % flight: KMPC
-%     elseif varargin{2} == 'l'
-%         result = controller.hlc.do(varargin); % landing: HL
-%    end
-%     varargin{5}.controller.result = result;
-% end
 
 %%
 function dfunc(app)
@@ -130,11 +134,24 @@ app.logger.plot({1, "q", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.t
 flg.figtype = 0; % 0:subplot
 flg.savefig = 0;
 flg.animation_save = 0;
-flg.animation = 1;
+flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
 fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename));
 fig.main_figure();
 % app = app.logger, app.fExp の構造体を作ればよい
+end
+
+function result_plot(app)
+    app.fExp = 1;
+    flg.figtype = 0; % 0:subplot
+    flg.savefig = 0;
+    flg.animation_save = 0;
+    flg.animation = 0;
+    flg.timerange = 0;
+    flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
+    filename = string(datetime('now'), 'yyyy-MM-dd');
+    fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[]));
+    fig.main_figure();
 end

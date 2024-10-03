@@ -53,7 +53,7 @@ function Controller = Controller_MPC_Koopman(dt, model)
     end
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    Controller_param.weight.P = diag([20; 1; 30]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.P = diag([20; 1; 100]);    % 位置　10,20刻み  20;1;30
     Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
     Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
     Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
@@ -83,8 +83,8 @@ function Controller = Controller_MPC_Koopman(dt, model)
 
     %% HL param
     Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-    Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,200,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-    Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,200,10,1]),[0.01],dt); % ydiag([100,10,10,1])
+    Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,1,1]),[0.01],dt); % xdiag([100,10,10,1])
+    Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,1,1]),[0.01],dt); % ydiag([100,10,10,1])
     Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([200,10]),[0.1],dt); 
 
     %% 以下は変更なし
