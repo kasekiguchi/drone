@@ -10,6 +10,9 @@ classdef HLC_SUSPENDED_LOAD < handle
         fmc_options 
         vdro_pre
         vL_pre
+        aidrns
+        ais
+        ms
     end
     
     methods
@@ -21,6 +24,10 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
             obj.vdro_pre = 0;
             obj.vL_pre = 0;
+            obj.aidrns=zeros(3,20);
+            obj.ais =zeros(3,20);
+            obj.ms = ones(1,10)*0.4;
+            %移動平均に使うデータの長さをもっと長くする．
         end
         
         function result=do(obj,agent,~)
@@ -49,6 +56,20 @@ classdef HLC_SUSPENDED_LOAD < handle
                 obj.vdro_pre = model.state.v;
                 ai=0;
                 aidrn=0;
+                %filt
+                % vdro = model.state.v;
+                % vL = model.state.vL;
+                % aidrn = (vdro - obj.vdro_pre)/Param.dt + normrnd(0,0.01,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
+                % ai = (vL - obj.vL_pre)/Param.dt + normrnd(0,0.01,[3,1]);%牽引物加速度
+                % obj.aidrns = [obj.aidrns(:,2:end),aidrn];
+                % obj.ais = [obj.ais(:,2:end),ai];
+                % windowSize =10;
+                % b = (1/windowSize)*ones(1,windowSize);
+                % faidrn = filter(b,1,obj.aidrns);
+                % fai = filter(b,1,obj.ais);
+                % obj.aidrns(:,end) = faidrn(:,end);
+                % obj.ais(:,end) = fai(:,end);
+
             else
             %張力算出
             %MODELクラスのインスタンスでloadmassの代入とdoメソッドで質量の代入を確認する
@@ -61,21 +82,40 @@ classdef HLC_SUSPENDED_LOAD < handle
                 ui  = Ri*[0;0;obj.self.controller.result.input(1) + normrnd(0,0.5)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
                 aidrn = (vdro - obj.vdro_pre)/Param.dt + normrnd(0,0.01,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
                 ai = (vL - obj.vL_pre)/Param.dt + normrnd(0,0.01,[3,1]);%牽引物加速度
+                
+                % obj.aidrns = [obj.aidrns(:,2:end),aidrn];%filt
+                % obj.ais = [obj.ais(:,2:end),ai];%filt
+                % windowSize =20;%filt
+                % b = (1/windowSize)*ones(1,windowSize);%filt
+                % faidrn = filter(b,1,obj.aidrns);%filt
+                % fai = filter(b,1,obj.ais);%filt
+                % mui      = mi*faidrn(:,end) - mi*g - ui;%filt                 %ドローン座標系からの張力
+                % mui      = -mui;%filt%分割後の牽引物系から張力
 
                 % aidrn = (vdro - obj.vdro_pre)/Param.dt; %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
                 % ai = (vL - obj.vL_pre)/Param.dt;%牽引物加速度
-
                 mui      = mi*aidrn - mi*g - ui;                 %ドローン座標系からの張力
                 mui      = -mui;%分割後の牽引物系から張力
                 
                 obj.vL_pre = vL;
                 obj.vdro_pre = vdro;
             %分割後質量推定 mLi*ai = mLi*g + mui
-                A    = ai - g;%
+                A    = ai - g;
+                % A    = fai(:,end) - g;%filt
                 AtA  = A'*A;
                 mLi  = (AtA\A')*mui;%分割後質量
-               
-                P(15) = mLi;
+                
+                obj.ms = [obj.ms(:,2:end),mLi];%filt
+                windowSize =10;%filt
+                b = (1/windowSize)*ones(1,windowSize);%filt
+                fms = filter(b,1,obj.ms);%filt
+                % fms = obj.ms/windowSize;
+                P(15) = fms(end);
+
+                % P(15) = mLi;
+
+                % obj.aidrns(:,end) = faidrn(:,end);%filt
+                % obj.ais(:,end) = fai(:,end);%filt
                 % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,4)+" ai: "+num2str(ai,4))
             end
             % aaa = P(15) 
@@ -95,38 +135,39 @@ classdef HLC_SUSPENDED_LOAD < handle
                 vf = Vf_SupendedLoad(x,xd',P,F1);
             end
             % obj.result.Z1 = Z1_SuspendedLoad(x,xd',vf,P);
-            obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
-            obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z2 = Z2_SuspendedLoad(x,xd',vf,P);
+            % obj.result.Z3 = Z3_SuspendedLoad(x,xd',vf,P);
             % obj.result.Z4 = Z4_SuspendedLoad(x,xd',vf,P);
             vs = Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
             
             %subsystemでcfbを用いる
-            z2 = obj.result.Z2;
-            z3 =  obj.result.Z3;
-            ref = reshape(xd,4,[])';
-            refx = ref(:,1);
-            refy = ref(:,2);
-            pL = model.state.pL;
-            p = model.state.p;
-            a = [1E5;1E4;1E3;1E2;1E1;1E0]*1e-2;
-            a = [1e2;1e-1;1e-1;1e-1;1e-2;1e-2];
-            C = 1;
-            if model.state.p(3) > 0
-                vs(1:2)
-                j = [2,1];
-                    % fun = @(u_opt) sqrt((u_opt - vs(1:2))*(u_opt - vs(1:2)'));
-                    fun =  @(u_opt)sqrt(([u_opt(1),u_opt(2)]-vs(1:2))*([u_opt(1),u_opt(2)]-vs(1:2))');
-                    [A,b] = conic_cfb_HL(refx, refy, z2, z3, p(1), p(2), a,C);%{refx, refy, xix, xiy, sxQ, syQ, a,C}
-                    vs(1:2) = fmincon(fun,[0;0],A,b,[],[],[],[],[],obj.fmc_options);
-                % for i = 1:2
-                %     fun = @(u_opt) sqrt((u_opt - vs(i))'*(u_opt - vs(i)));
-                %     [A,b] = conic_cfb_HL(z2z3(:,i), pL(j(i)),p(i),p(j(i)),a,C);
-                %     vs(i) = fmincon(fun,0,A,b,[],[],[],[],[],obj.fmc_options);
-                % end
-                vs(1:2)
-                % theta = acos(-[0,0,1]*model.state.pT)*180/pi
-                sqrt(sum((p(1:2)-pL(1:2)).^2))
-            end
+            % z2 = obj.result.Z2;
+            % z3 =  obj.result.Z3;
+            % ref = reshape(xd,4,[])';
+            % refx = ref(:,1);
+            % refy = ref(:,2);
+            % pL = model.state.pL;
+            % p = model.state.p;
+            % a = [1E5;1E4;1E3;1E2;1E1;1E0]*1e-2;
+            % a = [1e2;1e-1;1e-1;1e-1;1e-2;1e-2];
+            % C = 1;
+            % if model.state.p(3) > 1
+            %     vs(1:2)
+            %     j = [2,1];
+            %         % fun = @(u_opt) sqrt((u_opt - vs(1:2))*(u_opt - vs(1:2)'));
+            %         fun =  @(u_opt)sqrt(([u_opt(1),u_opt(2)]-vs(1:2))*([u_opt(1),u_opt(2)]-vs(1:2))');
+            %         % [A,b] = conic_cfb_HL(refx, refy, z2, z3, p(1), p(2), a,C);%{refx, refy, xix, xiy, sxQ, syQ, a,C}
+            %         [A,b] = conic_cfb_HL2(refx(1), refy(1), z2, z3, p(1), p(2), a,C);%{refx, refy, xix, xiy, sxQ, syQ, a,C}
+            %         vs(1:2) = fmincon(fun,[0;0],A,b,[],[],[],[],[],obj.fmc_options);
+            %     % for i = 1:2
+            %     %     fun = @(u_opt) sqrt((u_opt - vs(i))'*(u_opt - vs(i)));
+            %     %     [A,b] = conic_cfb_HL(z2z3(:,i), pL(j(i)),p(i),p(j(i)),a,C);
+            %     %     vs(i) = fmincon(fun,0,A,b,[],[],[],[],[],obj.fmc_options);
+            %     % end
+            %     vs(1:2)
+            %     % theta = acos(-[0,0,1]*model.state.pT)*180/pi
+            %     sqrt(sum((p(1:2)-pL(1:2)).^2))
+            % end
 
             uf = Uf_SuspendedLoad(x,xd',vf,P);
             

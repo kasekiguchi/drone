@@ -30,7 +30,7 @@ physicalParam = [m, Lx, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,
 %% 円錐型
 syms C real
 syms a [2,1] real
-
+%このモデルでは無理，推力の一階微分が入力になるシステムに拡張すればできる
 e3 = [0;0;1];
 h0 = -cos(C) - pT'*e3;
 
@@ -54,6 +54,13 @@ A = LieD(h(i-1),[0*f(1:5);1],xL);
 B = LieD(h(i-1),[f(1:5);0],xL) + a(i-1)*h(i-1);
 % Au+B>=0を-Au <= B;に変換
 % matlabFunction(-A,B,'file','conic_cfb_HL.m','vars',{xL,yL,xQ yQ,a,C},'outputs',{'A','B'});
+%% 制約の形に変換
+% Au <= B
+A = simplify(LieD(h1,gl,x));
+B = simplify(hEnd - A*u);
+simplify(subs(hEnd,u,zeros(4,1))-B)
+
+matlabFunction(-A,B,'file','conic_cfb.m','vars',{x,physicalParam,a,C},'outputs',{'A','B'});
 %% 線形化後に対して制約xiは目標軌道との誤差
 clear h A B 
 syms C real
@@ -93,26 +100,36 @@ A = -[d7hInputCoVx(1), d7hInputCoVx(1)];
 B = d7hState;
 matlabFunction(A,B,'file','conic_cfb_HL.m','vars',{refx, refy, xix, xiy, sxQ, syQ, a,C},'outputs',{'A','B'});
 
+%% 線形化後に対して制約xiは目標軌道との誤差
+clear h A B 
+syms C real
+syms a [6,1] real
+syms xQ yQ refx refy real
+syms xix [6,1] real
+syms xiy [6,1] real
+syms vx vy real
 
-% f = [xix(2:end);vx;xiy(2:end);vy];
-% for i = 2:6
-%     h(i,1) = LieD(h(i-1),f,xi) + a(i-1)*h(i-1);
-% end
-% i = i+1;
-% A = LieD(h(i-1),[0*f(1:5);1],xi);
-% A = subs(A,[xL,yL],[xix+refx,xiy+refy]);
-% B = LieD(h(i-1),[f(1:5);0],xi) + a(i-1)*h(i-1);
-% B = subs(B,[xL,yL],[xix+refx,xiy+refy]);
+%xQrel,yQrel目標値からの機体の位置，xix,xiy目標値からの牽引物のx,y位置
+xi = [xix;xiy];
+f = [xix(2:end);0;xiy(2:end);0];
+zero61 = zeros(6,1);
+zero51 = zeros(5,1);
+g = reshape([zero51;1;zero61;zero61;zero51;1],12,[]);
+v = [vx;vy];
+
+xQrel = xQ-refx;
+yQrel = yQ-refy;
+h(1) = C^2 - (xQrel-xix(1))^2 -(yQrel-xiy(1))^2;%X^2+Y^2<C^2
+for i = 2:6
+    h(i,1) = LieD(h(i-1),f,xi) + LieD(h(i-1),g,xi)*v + a(i-1)*h(i-1);
+end
+i = i+1;
+A = -LieD(h(i-1),g,xi);
+B = LieD(h(i-1),f,xi) + a(i-1)*h(i-1);
+
 % Au+B>=0を-Au <= B;に変換
-% matlabFunction(-A,B,'file','conic_cfb_HL.m','vars',{xL,yL,xQ yQ,a,C},'outputs',{'A','B'});
+matlabFunction(A,B,'file','conic_cfb_HL2.m','vars',{refx, refy, xix, xiy, xQ, yQ, a,C},'outputs',{'A','B'});
 
-%% 制約の形に変換
-% Au <= B
-A = simplify(LieD(h1,gl,x));
-B = simplify(hEnd - A*u);
-simplify(subs(hEnd,u,zeros(4,1))-B)
-
-matlabFunction(-A,B,'file','conic_cfb.m','vars',{x,physicalParam,a,C},'outputs',{'A','B'});
 %%
 function pd = pdiff(flist, vars)
 % % flistをvarsで微分したもののシンボリック配列を返す？

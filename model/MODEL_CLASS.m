@@ -43,7 +43,7 @@ classdef MODEL_CLASS < dynamicprops & handle
       obj.self = self;
       if ~isempty(self.parameter)
          obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
-         obj.loadmass = obj.self.parameter.loadmass;
+         % obj.loadmass = obj.self.parameter.loadmass;
       end
       if isempty(regexp(args.type, "EXP", 'once'))
         param = args.param;
@@ -110,12 +110,13 @@ classdef MODEL_CLASS < dynamicprops & handle
       if isempty(obj.param)
         obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
-      %複数牽引物用
-      if obj.self.plant.state.p(3) < 1
-          obj.param(20) = 0;
-      else
-          obj.param(20) = obj.loadmass;
-      end
+      %複数牽引物用========================================
+      % if obj.self.plant.state.p(3) < 1
+      %     obj.param(20) = 0;
+      % else
+      %     obj.param(20) = obj.loadmass;
+      % end
+      %========================================
       % if isfield(opts, 'param')
       %     obj.param = opts.param;
       % end
