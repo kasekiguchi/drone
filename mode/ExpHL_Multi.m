@@ -15,11 +15,17 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめてい�
 % initial_state.q = sstate.q; %初期角度の取得
 % initial_state.v = [0; 0; 0]; %初期速度の取得
 % initial_state.w = [0; 0; 0]; %初期角加速度の取得
+motive = Connector_Natnet('192.168.1.4'); % connect to Motive　モーションキャプチャのIP
+motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
+rigid_ids(1) = [1];
+rigid_ids(2) = [2];
 for i = 1:N
-motive(i) = Connector_Natnet('192.168.1.4'); % connect to Motive　モーションキャプチャのIP
-motive(i).getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
-rigid_ids(i) = [i]; % rigid-body number on Motive　モーションキャプチャの剛体番号
-sstate(i) = motive.result.rigid(rigid_ids(i)); %状態の取得？
+    if i==1
+
+sstate(1) = motive.result.rigid(rigid_ids(1)); %状態の取得？
+    else
+        sstate(2) = motive.result.rigid(rigid_ids(2));
+    end
 initial_state(i).p = sstate(i).p; %初期位置の取得
 initial_state(i).q = sstate(i).q; %初期角度の取得
 initial_state(i).v = [0; 0; 0]; %初期速度の取得
@@ -30,7 +36,7 @@ if i == 1
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253]));
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "5")); %プロポ有線　プロポとの接続
 else
-agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "8"));
+agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "3"));
 end
 agent(i).parameter = DRONE_PARAM("DIATONE");
 agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_EulerAngle(dt, initial_state(i), i)), ["p", "q"]));
@@ -40,10 +46,10 @@ agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",12,"orig",[0;0;1],"size",[1,1,0.2]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;1;1],"g",[0.8;0.7;1],"h",[0.2;0.2;1],"j",[-0.5;0;1],"k",[0.1;-0.2;1],"m",[0.3;-0.4;1]),6});%縦ベクトルで書く,
 % agent.reference = MY_WAY_POINT_REFERENCE(agent,way_point_ref(readmatrix("waypoint.xlsx",'Sheet','Sheet1_15d3'),5,1));
-if i == 0
- agent(i).reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[0,0,1]},"HL"});
+if i == 1
+ agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory",{[0,0,1]},"HL"});
 else
- agent(i).reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory_2p",{[0,0,1]},"HL"});
+ agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory_2p",{[0,0,1]},"HL"}); %HL変えるかも
 end
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
  agent(i).controller = HLC(agent(i),Controller_HL(dt));
