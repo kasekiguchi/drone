@@ -103,8 +103,42 @@ u = [u1;u2;u3;u4];
 %% Calculate Jacobian matrix
 %jacobianA = jacobian(nonlinearModel,x);
 % matlabFunction(jacobianA,'file','JacobiA.m','vars',{x u},'outputs',{'a'});
-
-%% With load model
+%% 単機牽引用の変数
+clear
+syms p1 p2 p3 dp1 dp2 dp3 ddp1 ddp2 ddp3 q0 q1 q2 q3 o1 o2 o3 real
+syms u u1 u2 u3 u4 T1 T2 T3 T4 real
+syms R real
+syms m l jx jy jz gravity km1 km2 km3 km4 k1 k2 k3 k4 Lx Ly lx ly lz rotor_r cableL real
+syms mL Length real % 
+syms pl1 pl2 pl3 dpl1 dpl2 dpl3 ol1 ol2 ol3 real
+syms pT1 pT2 pT3 real
+e3=[0;0;1];                         % z directional unit vector
+p	= [  p1;  p2;  p3];             % Position　：xb : 進行方向，zb ：ホバリング時に上向き
+dp	= [ dp1; dp2; dp3];             % Velocity
+ddp	= [ddp1;ddp2;ddp3];             % Accelaletion
+q	= [  q0;  q1;  q2;  q3];        % Quaternion
+ob	= [  o1;  o2;  o3];             % Angular velocity
+pl  = [ pl1; pl2; pl3];             % Load position
+dpl = [dpl1;dpl2;dpl3];             % Load velocity
+ol  = [ ol1; ol2; ol3];             % Load angular velocity
+pT  = [ pT1; pT2; pT3];             % String position
+[Rb0,L] = RodriguesQuaternion(q);   % Rotation matrix
+U = [u1;u2;u3;u4];                  % Thrust force ：正がzb 向き
+%オイラー角をクオータニオンに変換
+syms roll pitch yaw droll dpitch dyaw real
+Eq0 = cos(roll/2)*cos(pitch/2)*cos(yaw/2) + sin(roll/2)*sin(pitch/2)*sin(yaw/2);
+Eq1 = sin(roll/2)*cos(pitch/2)*cos(yaw/2) - cos(roll/2)*sin(pitch/2)*sin(yaw/2);
+Eq2 = cos(roll/2)*sin(pitch/2)*cos(yaw/2) + sin(roll/2)*cos(pitch/2)*sin(yaw/2);
+Eq3 = cos(roll/2)*cos(pitch/2)*sin(yaw/2) - sin(roll/2)*sin(pitch/2)*cos(yaw/2);
+Eq = [Eq0;Eq1;Eq2;Eq3];
+[ERb0,EL] = RodriguesQuaternion(Eq) ;
+er = [roll;pitch;yaw];
+dP=jacobian(Eq,er);
+dER=solve(dP*[droll;dpitch;dyaw]==EL'*ob/2,[droll dpitch dyaw]);
+der = simplify([dER.droll;dER.dpitch;dER.dyaw]);
+Ib = diag([jx,jy,jz]);
+dq = L'*ob/2;
+%% With load model 階層型線形化用論文通りのモデル
 syms Lx Ly lx ly lz rotor_r cableL real
 % physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, Length, mL, cableL};
 physicalParam = {m, jx, jy, jz, gravity, mL, cableL};
@@ -129,7 +163,7 @@ simplify(f - (Fl+Gl*U))
 matlabFunction(Fl,'file','FL2','vars',{x cell2sym(physicalParam)},'outputs',{'dxf'});
 matlabFunction(Gl,'file','GL2','vars',{x cell2sym(physicalParam)},'outputs',{'dxg'});
 matlabFunction(f,'file','with_load_model2','vars',{x u cell2sym(physicalParam)},'outputs',{'dx'});
-%%
+%% plant用ドローンの位置と速度も計測できるようになっている
 dol  = cross(-pT,u1*Rb0*e3)/(m*cableL);
 dpT  = cross(ol,pT);
 ddpT = cross(dol,pT)+cross(ol,dpT);
@@ -140,7 +174,7 @@ dq   = L'*ob/2;
 x=[p;q;dp;ob;pl;dpl;pT;ol];
 f=[dp;dq;ddp;dob;dpl;ddpl;dpT;dol];
 matlabFunction(f,'file','with_load_model_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
-%%
+%% estimate用ドローンの位置と速度も計測できるようになっている
 ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
 dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
 ddPT = cross(dOL,pT)+cross(ol,dpT);
@@ -148,6 +182,19 @@ ddP  = ddPL-cableL*ddPT;
 x=[p;er;dp;ob;pl;dpl;pT;ol];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL];
 matlabFunction(f,'file','with_load_model_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+%% 質量推定も可能
+% a*mL = mL*g + mu
+syms mLDummy
+physicalParam = {m, Lx, Ly lx ly, jx, jy, jz, gravity, km1, km2, km3, km4, k1, k2, k3, k4,rotor_r, Length, mLDummy, cableL};
+dOL = cross(-pT,u1*ERb0*e3)/(m*cableL);
+dpT  = cross(ol,pT);
+ddPT = cross(dOL,pT)+cross(ol,dpT);
+ddPL = [0;0;-gravity]+(dot(pT,u1*ERb0*e3)-m*cableL*dot(dpT,dpT))*pT/(m+mL);
+ddP  = ddPL-cableL*ddPT;
+dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
+x=[p;er;dp;ob;pl;dpl;pT;ol;mL];
+f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0];
+matlabFunction(f,'file','with_load_model_mL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Local functions
 function m = Mtake(mat,m,n)

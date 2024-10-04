@@ -49,7 +49,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             Param= obj.param;
             %P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-            if model.state.p(3) < 1
+            if model.state.p(3) < 2
                 P(15) =0;% obj.self.estimater.model.loadmass;
 
                 obj.vL_pre = model.state.vL;
@@ -105,19 +105,21 @@ classdef HLC_SUSPENDED_LOAD < handle
                 AtA  = A'*A;
                 mLi  = (AtA\A')*mui;%分割後質量
                 
-                obj.ms = [obj.ms(:,2:end),mLi];%filt
-                windowSize =10;%filt
-                b = (1/windowSize)*ones(1,windowSize);%filt
-                fms = filter(b,1,obj.ms);%filt
-                % fms = obj.ms/windowSize;
-                P(15) = fms(end);
+                % obj.ms = [obj.ms(:,2:end),mLi];%filt
+                % windowSize =10;%filt
+                % b = (1/windowSize)*ones(1,windowSize);%filt
+                % fms = filter(b,1,obj.ms);%filt
+                % fms = obj.ms/windowSize;%filt
+                % P(15) = fms(end);%filt
 
-                % P(15) = mLi;
+                P(15) = mLi;
+                
 
                 % obj.aidrns(:,end) = faidrn(:,end);%filt
                 % obj.ais(:,end) = fai(:,end);%filt
                 % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,4)+" ai: "+num2str(ai,4))
             end
+            P(15) = model.state.mL;
             % aaa = P(15) 
             % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
             disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,3)+" ai: "+num2str(ai,3))
