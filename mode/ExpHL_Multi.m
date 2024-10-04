@@ -47,8 +47,8 @@ else
 end
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
  agent(i).controller = HLC(agent(i),Controller_HL(dt));
-end
 run("ExpBase");
+end
 
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
