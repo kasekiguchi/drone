@@ -17,9 +17,9 @@ y = y_0;
 z = z_0;
 
 T=10;
-x=sin(2*pi*t/T)+0.5;
-y=cos(2*pi*t/T)+0.5;
-z=0.3;
+x=sin(4*pi*t/T);
+y=cos(4*pi*t/T);
+z=1;
 
 % h = 0.3;
 % k = 0.3;

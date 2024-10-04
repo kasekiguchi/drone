@@ -26,6 +26,12 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"My_Case_study_trajectory",{[1,1
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.2;0.2;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[0.2;-0.2;0.8],"k",[0;0;1],"m",[-2;2;3]),0});%縦ベクトルで書く,
 agent.controller = HLC(agent,Controller_HL(dt));
 run("ExpBase");
+% function dfunc(app)
+% app.logger.plot({1, "p", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
+% end
 function dfunc(app)
 app.logger.plot({1, "p", "pre"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
