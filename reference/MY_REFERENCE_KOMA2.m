@@ -6,6 +6,7 @@ classdef MY_REFERENCE_KOMA2 < handle
 
   properties
       ref
+      est
       t
   end
 
@@ -33,6 +34,7 @@ classdef MY_REFERENCE_KOMA2 < handle
               obj.ref.q = cell2mat(arrayfun(@(N) log.Data.agent.reference.result{N}.state.q,startIDX:endIDX,'UniformOutput',false));
               obj.ref.v = cell2mat(arrayfun(@(N) log.Data.agent.reference.result{N}.state.v,startIDX:endIDX,'UniformOutput',false));
               obj.ref.xd = cell2mat(arrayfun(@(N) log.Data.agent.reference.result{N}.state.xd,startIDX:endIDX,'UniformOutput',false));
+              obj.est = cell2mat(arrayfun(@(N) log.Data.agent.estimator.result{N}.state.get(),startIDX:endIDX,'UniformOutput',false));
               obj.t.startidx = startIDX;
               obj.t.endidx = endIDX;
           elseif var{2} == 2 % spline補間-9次
