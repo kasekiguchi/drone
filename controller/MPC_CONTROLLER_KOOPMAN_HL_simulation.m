@@ -70,6 +70,10 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             obj.param.P = [0.5 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
             % obj.param.P = self.parameter.get(obj.parameter_name);
+
+            classlist = ["TIME_VARYING_REFERENCE", "MY_POINT_REFERENCE", "MY_REFERENCE_KOMA2"];
+            classname = class(obj.self.reference);
+            obj.reference.classnum = find(strcmp(classname, classlist));
         end
 
         %-- main()的な
@@ -174,8 +178,9 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
         end
 
         function [c, ceq] = constraints(obj, U)
-            % c = [U(1:4,:)-10; -U(1:4,:)+0; -X(3,:)];
+            % 不等式制約 c < 0
             c = [U(1,:)-10; -U(1,:); U(2:4,:)-1; -(U(2:4,:)+1)];
+            % 等式制約  ceq = 0
             ceq = [];
         end
 
@@ -189,12 +194,12 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             end
             x = obj.C*Z; % x[k] = Cz[k]
 
-            X = obj.state.HL' + x;
+            X = obj.state.HL' + x; % ここの4つだとなんかKMPCが入る
             Utmp = obj.input.u_HL + u;
             U = [max(0,min(10,Utmp(1,:))); max(-1,min(1,Utmp(2:4,:)))];
             ref = obj.reference.xr(1:12,:);
 
-            % X = [error_HL, x];
+            % X = [error_HL, x]; % ここの三つだとほぼHL
             % U = u;
             % ref = obj.reference.xr(1:12,1) - obj.current_state; % 現在状態と目標状態の誤差
  
@@ -278,28 +283,31 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % params.dt = 0.1;
             xr = zeros(obj.param.total_size, obj.H);    % initialize
             xr_HL = zeros(16, 1);
-            classlist = ["TIME_VARYING_REFERENCE", "MY_POINT_REFERENCE", "MY_REFERENCE_KOMA2"];
-            classname = class(obj.self.reference);
+       
             % 時間関数の取得→時間を代入してリファレンス生成
-            if find(strcmp(classname, classlist)) == 1 % TIMEVARYINGの判別
-                RefTime = obj.self.reference.func;    % 時間関数の取得
+            % P2P等は値を持ってきてホライズン分拡張
+            % 1:timevarying
+            % 2:P2P
+            % 3:9-order polynomial
+            if obj.reference.classnum == 1 % time varying
+                RefTime = obj.self.reference.func;
                 for h = 0:obj.H-1
-                t = T + obj.param.dt * h; % reference生成の時刻をずらす
+                t = T + obj.param.dt * h;
                 ref = RefTime(t);
                 xr(1:3, h+1) = ref(1:3);
                 xr(7:9, h+1) = ref(5:7);
-                xr(4:6, h+1) =   [0;0;0]; % 姿勢角
+                xr(4:6, h+1) =   [0;0;0];
                 xr(10:12, h+1) = [0;0;0];
-                xr(13:16, h+1) = obj.param.ref_input; % MC -> 0.6597,   HL -> 0
+                xr(13:16, h+1) = obj.param.ref_input;
                 end
-            elseif find(strcmp(classname, classlist)) == 2
+            elseif obj.reference.classnum == 2 % P2P
                 ref = repmat(obj.self.reference.result.state.get(),1,obj.H);
                 xr(1:3,:) = ref(12:14,:);
                 xr(4:6,:) = ref(15:17,:);
                 xr(7:9,:) = ref( 9:11,:);
                 xr(10:12,:)=zeros(3,obj.H);
                 xr(13:16,:)=repmat(obj.param.ref_input,1,obj.H);
-            elseif find(strcmp(classname, classlist)) == 3
+            elseif obj.reference.classnum == 3 % 9-order polynomial
                 ref = repmat(obj.self.reference.result.state.get(),1,obj.H);
                 xr(1:9,:) = ref(1:9,:);
                 xr(10:12,:)=zeros(3,obj.H);

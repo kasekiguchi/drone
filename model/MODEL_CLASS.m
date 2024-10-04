@@ -103,8 +103,8 @@ classdef MODEL_CLASS < dynamicprops & handle
       if (cha == 'q' || cha == 's' || cha == 'a')
         return
       end
-      % u = obj.self.controller.result.input;
-      u = obj.self.controller.mpc.result.input;
+      u = obj.self.controller.result.input;
+      % u = obj.self.controller.mpc.result.input; %2controllerのとき
       if isempty(obj.param)
         obj.param = obj.self.parameter.get("all","row");%varargin{5}.parameter.get();
       end
