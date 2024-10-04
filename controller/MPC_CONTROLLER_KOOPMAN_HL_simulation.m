@@ -125,7 +125,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
                  
             %%
             obj.previous_input = var;
-            obj.result.input = var(1:4, 1) + obj.input.u_HL; % 印加する入力 4入力
+            obj.result.input = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
+            % obj.result.input = var(1:4,1);
 
             %% データ表示用
             obj.input.u = obj.result.input; 
@@ -173,7 +174,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.result
         end
 
-        function [c, ceq] = constraints(obj, U)
+        function [c, ceq] = constraints(~, U)
             % c = [U(1:4,:)-10; -U(1:4,:)+0; -X(3,:)];
             c = [U(1,:)-10; -U(1,:); U(2:4,:)-1; -(U(2:4,:)+1)];
             ceq = [];
@@ -192,7 +193,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             X = obj.state.HL' + x;
             Utmp = obj.input.u_HL + u;
             U = [max(0,min(10,Utmp(1,:))); max(-1,min(1,Utmp(2:4,:)))];
-            ref = obj.reference.xr(1:12,:);
+            ref = obj.reference.xr(1:16,:);
 
             % X = [error_HL, x];
             % U = u;
@@ -205,7 +206,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             tildeXv = X(7:9, :) - ref(7:9,:);  % 速度
             tildeXw = X(10:12, :) - ref(10:12,:);
             % tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
-            tildeUref = U(:, :);
+            tildeUref = U(:, :) - ref(13:16,:);
             
         %-- 状態及び入力のステージコストを計算 長くなるから分割
             stagestateP = tildeXp(:, 1:obj.H-1)'*obj.param.weight.P*tildeXp(:, 1:obj.H-1);
