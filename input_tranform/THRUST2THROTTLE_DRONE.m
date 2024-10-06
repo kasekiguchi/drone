@@ -46,16 +46,21 @@ methods
             obj.self.estimator.model.do(varargin{:}); % one step prediction using current input
             whn = obj.self.estimator.model.state.w; % predicted state
             obj.self.estimator.model.state.set_state(obj.self.estimator.result.state.get); % restore estimator.model
-
-            %T_thr = sum(input); % each motor's thrust force input
+            if cha == 'f'
+                gain = obj.param.gain_f;
+                th_offset = obj.param.th_offset_f;
+            else
+                gain = obj.param.gain_tl;
+                th_offset = obj.param.th_offset_tl;
+            end
             T_thr = input(1); % thrust, torque input 
 
-            uroll = obj.param.gain(1) * (whn(1) - wh(1));
-            upitch = obj.param.gain(2) * (whn(2) - wh(2));
-            
+            uroll = gain(1) * (whn(1) - wh(1));
+            upitch = gain(2) * (whn(2) - wh(2));
+
             % apply gain to (thrust - hovering_thrust)
-            uthr = max(0, obj.param.gain(4) * (T_thr - obj.hover_thrust_force) + obj.param.th_offset); 
-            uyaw = obj.param.gain(3) * (whn(3) - wh(3));
+            uthr = max(0, gain(4) * (T_thr - obj.hover_thrust_force) + th_offset); 
+            uyaw = gain(3) * (whn(3) - wh(3));
             uroll = sign(uroll) * min(abs(uroll), 500) + obj.param.roll_offset;
             upitch = sign(upitch) * min(abs(upitch), 500) + obj.param.pitch_offset;
             uyaw = -sign(uyaw) * min(abs(uyaw), 300) + obj.param.yaw_offset; % Need minus : positive rotation is clockwise in betaflight

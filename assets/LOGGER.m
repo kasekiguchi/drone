@@ -535,6 +535,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
 
             hold(ax, "on");
+            grid(ax, "on");
 
             switch length(ps)
               case 3
@@ -595,7 +596,7 @@ classdef LOGGER < handle % handleクラスにしないとmethodの中で値を�
             end
 
             ylabel(ax, ps(2));
-            if length(ps) == 3; zlabel(ps(3)); end
+            if length(ps) == 3; zlabel(ax, ps(3)); end
           end
 
         end
