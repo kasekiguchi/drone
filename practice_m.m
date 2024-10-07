@@ -67,11 +67,11 @@ load(strcat('Exp_2_4_', num2str(N), '.mat')); exp = log;
 load(strcat('HL_exp_1004_', num2str(N), '.mat')); sim = log;
 %%
 clear; clc; close all;
-% load("Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat");
-% DataNum = size(Data.X,2); clear Data;
-DataSum = 0; DataNum = 0;
+load("Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat");
+DataNum = size(Data.X,2); clear Data;
+DataSum = 0; %DataNum = 0;
 Data.X = []; Data.Y = []; Data.U = [];
-for i = 129:129
+for i = 1:150
     load(strcat('Exp_2_4_', num2str(i), '.mat')); exp = log;
     load(strcat('HL_exp_1007_', num2str(i), '.mat')); sim = data;
     idx = 1:size(sim.plant,2);
