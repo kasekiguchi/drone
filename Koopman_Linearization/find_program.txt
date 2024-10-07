@@ -19,6 +19,9 @@ Asset_file/verification_input_stateの一部
 ・学習データを正規分布近似したときの標準偏差と平均を算出, 保存(->Figure_outputに保存)
 Asset_file/dataset_each_analys
 
+・誤差計算をしてデータセットにする
+main/practice_m.m
+
 
 
 ## 関数たち ##
