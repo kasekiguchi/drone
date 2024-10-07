@@ -12,7 +12,8 @@ end
 %% 20回まとめてシミュレーションする
 clear; close all; clc;
 for j = 1:150
-    fprintf('Simulation start... N:%d \n', j);
+    fprintf('Initializing... N:%d \n', j);
+    clear data
     ts = 0; % initial time
     dt = 0.025; % sampling period
     te = 60; % terminal time

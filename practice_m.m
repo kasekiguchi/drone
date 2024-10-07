@@ -72,11 +72,13 @@ DataNum = size(Data.X,2); clear Data;
 DataSum = 0; %DataNum = 0;
 Data.X = []; Data.Y = []; Data.U = [];
 for i = 1:150
+    clear idx idx_start idx_end
     load(strcat('Exp_2_4_', num2str(i), '.mat')); exp = log;
     load(strcat('HL_exp_1007_', num2str(i), '.mat')); sim = data;
     idx = 1:size(sim.plant,2);
     idx_start = find(exp.Data.phase == 102, 1, "first");
     idx_end   = idx_start + idx(end);
+    fLast = find(exp.Data.phase == 102, 1, "last");
     expd = cell2mat(arrayfun(@(N) exp.Data.agent.estimator.result{N}.state.get(),idx_start:idx_end-1,'UniformOutput',false));
     simd = sim.plant;
     
