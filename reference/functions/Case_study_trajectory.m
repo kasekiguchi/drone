@@ -39,9 +39,9 @@ syms t real
 % z = 1;
 
 %% hovering
-% x = 0;
-% y = 0;
-% z = 1;
+x = 0;
+y = 1;
+z = 1;
 
 %% 縦円旋回
 % x = 0.5*sin(2*pi*t/T);
@@ -68,7 +68,7 @@ syms t real
 
 %% 直線
 x = 0;
-y = 0;
+y = 1;
 z = 1;
 
 %% sigmoid

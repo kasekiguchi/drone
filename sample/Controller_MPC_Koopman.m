@@ -20,18 +20,18 @@ function Controller = Controller_MPC_Koopman(dt, model)
     % load('EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat', 'est');
     % load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
     load(model, 'est');
-    % try
-    %     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
-    %     args = d2d(ssmodel, Controller_param.dt);
-    %     Controller_param.A = args.A;
-    %     Controller_param.B = args.B;
-    %     Controller_param.C = args.C;
-    % catch
+    try
+        ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
+        args = d2d(ssmodel, Controller_param.dt);
+        Controller_param.A = args.A;
+        Controller_param.B = args.B;
+        Controller_param.C = args.C;
+    catch
         Controller_param.A = est.A;
         Controller_param.B = est.B;
         Controller_param.C = est.C;
-    % end
-    
+    end
+
     % Controller_param.A = model{1};
     % Controller_param.B = model{2};
     % Controller_param.C = model{3};

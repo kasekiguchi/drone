@@ -194,18 +194,23 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             for i = 1:obj.H-2
                 Z(:,i+1) = obj.A*Z(:,i) + obj.B*u(:,i);
             end
-            x = obj.C*Z; % x[k] = Cz[k]
-            % x = 
+            x = obj.C*Z; % x[k] = Cz[k] 
 
-            X = obj.state.HL' + x; % ここの4つだとなんかKMPCが入る
-            Utmp = obj.input.u_HL + u;
-            U = [max(0,min(10,Utmp(1,:))); max(-1,min(1,Utmp(2:4,:)))];
-            ref = obj.reference.xr(1:16,:);
+            % そのままのリファレンスで評価
+            % X = obj.state.HL' + x; % ここの4つだとなんかKMPCが入る
+            % Utmp = obj.input.u_HL + u;
+            % U = [max(0,min(10,Utmp(1,:))); max(-1,min(1,Utmp(2:4,:)))];
+            % ref = obj.reference.xr(1:16,:);
+
+            % 誤差モデルのまま評価
+            X = x;
+            U = [max(0,min(10,u(1,:))); max(-1,min(1,u(2:4,:)))];
+            ref(1:12,:) = obj.reference.xr(1:12,:) - obj.state.HL';
+            ref(13:16,:) = obj.reference.xr(13:16,:);
 
             % X = [error_HL, x]; % ここの三つだとほぼHL
             % U = u;
             % ref = obj.reference.xr(1:12,1) - obj.current_state; % 現在状態と目標状態の誤差
- 
             % ref = obj.reference.xr(1:12,1) - obj.state.HL'; % 目標状態とHLの時間発展の誤差
         
             tildeXp = X(1:3, :) - ref(1:3,:);  % 位置
