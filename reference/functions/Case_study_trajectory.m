@@ -67,8 +67,8 @@ syms t real
 % z = 1;
 
 %% 直線
-x = 0.5;
-y = 1;
+x = 0;
+y = 0;
 z = 1;
 
 %% sigmoid

@@ -132,6 +132,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.result.input = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
             % obj.result.input = var(1:4,1);
 
+
             %% データ表示用
             obj.input.u = obj.result.input; 
             calT = toc;
@@ -194,6 +195,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
                 Z(:,i+1) = obj.A*Z(:,i) + obj.B*u(:,i);
             end
             x = obj.C*Z; % x[k] = Cz[k]
+            % x = 
 
             X = obj.state.HL' + x; % ここの4つだとなんかKMPCが入る
             Utmp = obj.input.u_HL + u;
@@ -210,8 +212,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             tildeXq = X(4:6, :) - ref(4:6,:);
             tildeXv = X(7:9, :) - ref(7:9,:);  % 速度
             tildeXw = X(10:12, :) - ref(10:12,:);
-            % tildeXqw = [tildeXq; tildeXw];     % 原点との差分ととらえる
             tildeUref = U(:, :) - ref(13:16,:);
+            % tildeUref = U;
             
         %-- 状態及び入力のステージコストを計算 長くなるから分割
             stagestateP = tildeXp(:, 1:obj.H-1)'*obj.param.weight.P*tildeXp(:, 1:obj.H-1);
@@ -239,44 +241,44 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             eval = sum(stagestate) + terminalstate;
         end
 
-        function u_HL = calculateHL(obj, varargin)
-            model = obj.self.estimator.result;
-            % ref = obj.self.reference.result;
-            % xd = ref.state.xd;
-            xd = obj.reference.xr_HL;
-            xd0 =xd;
-            P = obj.param.P;
-            F1 = obj.param.F1;
-            F2 = obj.param.F2;
-            F3 = obj.param.F3;
-            F4 = obj.param.F4;
-            xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
-
-            % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
-            % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
-            Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-            x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
-            xd(1:3)=Rb0'*xd(1:3);
-            xd(4) = 0;
-            xd(5:7)=Rb0'*xd(5:7);
-            xd(9:11)=Rb0'*xd(9:11);
-            xd(13:15)=Rb0'*xd(13:15);
-            xd(17:19)=Rb0'*xd(17:19);
-            %if isfield(obj.param,'dt')
-            if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-                dt = varargin{1}.dt;
-            else
-                dt = obj.param.dt;
-                % vf = Vf(x,xd',P,F1);
-                % vs = Vs(x,xd',vf,P,F2,F3,F4);
-            end
-            vf = Vfd(dt,x,xd',P,F1);
-            vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
-            %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
-            tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
-            % max,min are applied for the safty
-            u_HL = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
-        end
+        % function u_HL = calculateHL(obj, varargin)
+        %     model = obj.self.estimator.result;
+        %     % ref = obj.self.reference.result;
+        %     % xd = ref.state.xd;
+        %     xd = obj.reference.xr_HL;
+        %     xd0 =xd;
+        %     P = obj.param.P;
+        %     F1 = obj.param.F1;
+        %     F2 = obj.param.F2;
+        %     F3 = obj.param.F3;
+        %     F4 = obj.param.F4;
+        %     xd=[xd;zeros(20-size(xd,1),1)];% 足りない分は０で埋める．
+        % 
+        %     % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
+        %     % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
+        %     Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
+        %     x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
+        %     xd(1:3)=Rb0'*xd(1:3);
+        %     xd(4) = 0;
+        %     xd(5:7)=Rb0'*xd(5:7);
+        %     xd(9:11)=Rb0'*xd(9:11);
+        %     xd(13:15)=Rb0'*xd(13:15);
+        %     xd(17:19)=Rb0'*xd(17:19);
+        %     %if isfield(obj.param,'dt')
+        %     if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
+        %         dt = varargin{1}.dt;
+        %     else
+        %         dt = obj.param.dt;
+        %         % vf = Vf(x,xd',P,F1);
+        %         % vs = Vs(x,xd',vf,P,F2,F3,F4);
+        %     end
+        %     vf = Vfd(dt,x,xd',P,F1);
+        %     vs = Vsd(dt,x,xd',vf,P,F2,F3,F4);
+        %     %disp([xd(1:3)',x(5:7)',xd(1:3)'-xd0(1:3)']);
+        %     tmp = Uf(x,xd',vf,P) + Us(x,xd',vf,vs',P);
+        %     % max,min are applied for the safty
+        %     u_HL = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+        % end
 
         function [xr, xr_HL] = Reference(obj, T)
             % パラメータ取得

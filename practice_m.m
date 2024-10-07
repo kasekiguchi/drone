@@ -67,21 +67,21 @@ load(strcat('Exp_2_4_', num2str(N), '.mat')); exp = log;
 load(strcat('HL_exp_1004_', num2str(N), '.mat')); sim = log;
 %%
 clear; clc; close all;
-load("Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat");
-DataNum = size(Data.X,2); clear Data;
-DataSum = 0;
+% load("Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat");
+% DataNum = size(Data.X,2); clear Data;
+DataSum = 0; DataNum = 0;
 Data.X = []; Data.Y = []; Data.U = [];
-for i = 1:150
+for i = 129:129
     load(strcat('Exp_2_4_', num2str(i), '.mat')); exp = log;
-    load(strcat('HL_exp_1004_', num2str(i), '.mat')); sim = log;
-    idx = 1:sim.k;
+    load(strcat('HL_exp_1007_', num2str(i), '.mat')); sim = data;
+    idx = 1:size(sim.plant,2);
     idx_start = find(exp.Data.phase == 102, 1, "first");
-    idx_end   = idx_start + sim.k;
+    idx_end   = idx_start + idx(end);
     expd = cell2mat(arrayfun(@(N) exp.Data.agent.estimator.result{N}.state.get(),idx_start:idx_end-1,'UniformOutput',false));
-    simd = cell2mat(arrayfun(@(N) sim.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
+    simd = sim.plant;
     
     expu = cell2mat(arrayfun(@(N) exp.Data.agent.controller.result{N}.input,idx_start:idx_end-1,'UniformOutput',false));
-    simu = cell2mat(arrayfun(@(N) sim.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
+    simu = sim.input;
     
     % Data.X = [Data.X,];
     Data.X = [Data.X, expd(:,1:end-1) - simd(:,1:end-1)];
@@ -100,6 +100,9 @@ subplot(3,1,3); plot(idx ,expu(2:4,:), '-', idx, simu(2:4,:), '--'); legend('exp
 
 
 %% 変更したよー
+A = find(any(Data.X));
+B = find(any(Data.Y));
+C = find(any(Data.U));
 
 
 

@@ -45,12 +45,12 @@ for j = 129:129
     timeidx = endIDX - startIDX + 1;
 
     for i = 1:timeidx
-        if i < 20 || rem(i, 10) == 0 end
+        % if i < 20 || rem(i, 10) == 0 end
         tic
         agent(1).sensor.do(time, 'f');
         agent(1).estimator.do(time, 'f');
 
-        tmpvalue = agent.reference.est(:,i);
+        tmpvalue = agent.reference.est(:,i); % 読み込んだ時刻iの状態（初期値みたいな感じ）
         agent(1).estimator.result.state.set_state(tmpvalue);
         agent(1).plant.state.set_state(tmpvalue); % estimatorの書き換え
 
@@ -62,10 +62,13 @@ for j = 129:129
         % disp(['N:', num2str(j), '___','t:', num2str(time.t)]);
         %pause(1)
         all = toc;
+        % 値の保存
+        data.plant(:,i) = agent(1).plant.state.get();
+        data.input(:,i) = agent(1).controller.result.input;
     end
-    logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+    % logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
     % log = logger;
-    % save(strcat('Data\HLsim\HL_exp_1004_', num2str(j), '.mat'), 'log');
+    save(strcat('Data\HLsim\HL_exp_1007_', num2str(j), '.mat'), 'data');
 end
 
 %%

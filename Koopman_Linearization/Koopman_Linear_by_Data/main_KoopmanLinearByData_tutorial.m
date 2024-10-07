@@ -137,7 +137,7 @@ Exp_tra = 'saddle'; % リファレンスデータを特定するための変数
 % exp_data = 'Exp_Kiyama_fromVel'; %20データ増やしたxyz速度から
 % exp_data = 'Exp_Kiyama_fromVel_normalize'; %20データ増やしたxyz速度から＋正規化
 % exp_data = 'Exp_Kiyama_XY_20data';
-exp_data = 'Exp_Kiyama_Error';
+exp_data = 'Exp_Kiyama_Error_2';
 FileName = strcat(FileName_common, exp_data, '_', 'code00_', Exp_tra); % 保存先
 activeFile = matlab.desktop.editor.getActive;
 nowFolder = fileparts(activeFile.Filename);
@@ -154,7 +154,7 @@ targetpath=append(nowFolder,'\..\EstimationResult\',FileName);
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_fromVel_normalize.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Koma2_y20_Zdecreased30k.mat');
 % load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_Add_X_Y_20data.mat');
-load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error.mat')
+load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential.mat')
 
 if isfile(strcat('Koopman_Linearization\EstimationResult\', FileName, '.mat'))
     error('Exist file. Require change filename');
@@ -311,9 +311,10 @@ disp(targetpath)
 % F = @eulerAngleParameter_withoutP;
 
 %% Integration datasetsの結合
-% data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset.mat');
+% data1 = load('Koopman_Linearization\Integration_Dataset\Kiyama_Exp_Dataset_HL_simulation_error_sequential.mat');
 % data2 = load('Koopman_Linearization\Integration_Dataset\Koma2_Exp_YDataset_20data.mat');
 % Data.HowmanyDataset = data1.Data.HowmanyDataset + data2.Data.HowmanyDataset;
 % Data.X = [data1.Data.X, data2.Data.X];
 % Data.Y = [data1.Data.Y, data2.Data.Y];
 % Data.U = [data1.Data.U, data2.Data.U];
+

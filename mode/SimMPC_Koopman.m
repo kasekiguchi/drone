@@ -31,19 +31,19 @@ initial_state.w = [0; 0; 0];
 % model_file = 'EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat';
 % model_file = '2024-07-14_Exp_Kiyama_code08_saddle.mat';
 % model_file = '2024-09-11_Exp_Kiyama_code10_saddle.mat';
-model_file = "2024-09-27_Exp_Kiyama_Error_code00_saddle";
+model_file = "2024-10-07_Exp_Kiyama_Error_2_code00_saddle";
 load(model_file,'est') %vzから算出したzで学習、総推力
-try
-    ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
-    args = d2d(ssmodel, Controller_param.dt);
-    A = args.A;
-    B = args.B;
-    C = args.C;
-catch
+% try
+%     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
+%     args = d2d(ssmodel, Controller_param.dt);
+%     A = args.A;
+%     B = args.B;
+%     C = args.C;
+% catch
     A = est.A;
     B = est.B;
     C = est.C;
-end
+% end
 %% 位置を含まないモデルの場合，速度から算出する行列に変更
 % なんか上手くいかない部分ができちゃったから封印
 % if model_file == '2024-09-11_Exp_Kiyama_code10_saddle.mat'
@@ -103,8 +103,8 @@ for i = 1:te/dt
     all = toc;
 end
 %%
-logger.plot({1, "p", "er"}, {1, "p1-p2", "er"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-
+% logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+logger.plot({1,"p","er"}, {1,"v","er"},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[1 2]);
 %%
 % app.logger = logger;
 % result_plot(app);

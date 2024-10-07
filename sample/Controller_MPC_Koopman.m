@@ -20,17 +20,18 @@ function Controller = Controller_MPC_Koopman(dt, model)
     % load('EstimationResult_2024-05-13_Exp_Kiyama_code04_1.mat', 'est');
     % load('2024-07-14_Exp_Kiyama_code08_saddle.mat', 'est'); % 観測量を変えただけのやつ 71次元
     load(model, 'est');
-    try
-        ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
-        args = d2d(ssmodel, Controller_param.dt);
-        Controller_param.A = args.A;
-        Controller_param.B = args.B;
-        Controller_param.C = args.C;
-    catch
+    % try
+    %     ssmodel = ss(est.A, est.B, est.C, zeros(size(est.C,1), size(est.B,2)), dt); % サンプリングタイムの変更
+    %     args = d2d(ssmodel, Controller_param.dt);
+    %     Controller_param.A = args.A;
+    %     Controller_param.B = args.B;
+    %     Controller_param.C = args.C;
+    % catch
         Controller_param.A = est.A;
         Controller_param.B = est.B;
         Controller_param.C = est.C;
-    end
+    % end
+    
     % Controller_param.A = model{1};
     % Controller_param.B = model{2};
     % Controller_param.C = model{3};
@@ -53,12 +54,19 @@ function Controller = Controller_MPC_Koopman(dt, model)
     end
 
     %% 重み MCとは感覚ちがう。yawの重み付けない方が良い
-    Controller_param.weight.P = diag([20; 1; 100]);    % 位置　10,20刻み  20;1;30
-    Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
-    Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller_param.weight.P = diag([20; 1; 100]);    % 位置　10,20刻み  20;1;30
+    % Controller_param.weight.Q = diag([30; 20; 10]);    % 速度  10,20刻み  30;20;10
+    % Controller_param.weight.V = diag([10; 1; 1]); % 15良い気がする
+    % Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
+    % Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
+
+    %% 
+    Controller_param.weight.P = diag([100; 100; 1]);    % 位置　10,20刻み  20;1;30
+    Controller_param.weight.Q = diag([1; 1; 1]);    % 速度  10,20刻み  30;20;10
+    Controller_param.weight.V = diag([10; 10; 1]); % 15良い気がする
     Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
     Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
-    % Controller_param.weight.RP = 0 * diag([1; 1; 1; 1]);  % 1ステップ前の入力との差    0*(無効化)
 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;
@@ -91,6 +99,7 @@ function Controller = Controller_MPC_Koopman(dt, model)
     fprintf("Koopman MPC controller\n")
 
     Controller_param.ref_input = Controller_param.input.u; %入力の目標値
+    Controller_param.ref_input = [0; 0; 0; 0];
 
     Controller.name = "mpc";
     Controller.type = "MPC_CONTROLLER_KOOPMAN_quadprog_simulation";
