@@ -13,6 +13,7 @@ classdef HLC_SUSPENDED_LOAD < handle
         aidrns
         ais
         ms
+        estimate_load_mass
     end
     
     methods
@@ -28,6 +29,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.ais =zeros(3,20);
             obj.ms = ones(1,10)*0.4;
             %移動平均に使うデータの長さをもっと長くする．
+            obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
         end
         
         function result=do(obj,agent,~)
@@ -49,7 +51,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             Param= obj.param;
             %P = Param.P;
             P = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity", "km1", "km2", "km3", "km4", "k1", "k2", "k3", "k4", "loadmass", "cableL"]);
-            if model.state.p(3) < 2
+            if model.state.p(3) < 1
                 P(15) =0;% obj.self.estimater.model.loadmass;
 
                 obj.vL_pre = model.state.vL;
@@ -80,8 +82,8 @@ classdef HLC_SUSPENDED_LOAD < handle
                 vL = model.state.vL;
                 
                 ui  = Ri*[0;0;obj.self.controller.result.input(1) + normrnd(0,0.5)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-                aidrn = (vdro - obj.vdro_pre)/Param.dt + normrnd(0,0.01,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
-                ai = (vL - obj.vL_pre)/Param.dt + normrnd(0,0.01,[3,1]);%牽引物加速度
+                aidrn = (vdro - obj.vdro_pre)/Param.dt + normrnd(0,0.1,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
+                ai = (vL - obj.vL_pre)/Param.dt + normrnd(0,0.1,[3,1]);%牽引物加速度
                 
                 % obj.aidrns = [obj.aidrns(:,2:end),aidrn];%filt
                 % obj.ais = [obj.ais(:,2:end),ai];%filt
@@ -112,19 +114,23 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % fms = obj.ms/windowSize;%filt
                 % P(15) = fms(end);%filt
 
-                P(15) = mLi;
-                
+                % P(15) = mLi
+                obj.result.mLi =mLi;
 
                 % obj.aidrns(:,end) = faidrn(:,end);%filt
                 % obj.ais(:,end) = fai(:,end);%filt
                 % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,4)+" ai: "+num2str(ai,4))
+
+                elm = obj.estimate_load_mass.estimate([agent,mLi,mui]);
+                obj.result.xh_pre = elm.xh_pre;
+                obj.result.mL = elm.mL;
+                P(15) = elm.mL;
             end
-            P(15) = model.state.mL;
+            % P(15) = model.state.mL;
             % aaa = P(15) 
             % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
-            disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,3)+" ai: "+num2str(ai,3))
-            obj.result.mLi=P(15);
-
+            % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(norm(aidrn),3)+" ai: "+num2str(norm(ai),3))
+            % obj.result.mLi=P(15);
             F1 = Param.F1;
             F2 = Param.F2;
             F3 = Param.F3;

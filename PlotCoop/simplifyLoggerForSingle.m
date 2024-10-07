@@ -1,4 +1,4 @@
-function newLog = simplifyLogger(log)
+function newLog = simplifyLoggerForSingle(log)
         % name = ['new_', inputname(1)];
         newLog.t = log.Data.t(1:log.k);    
         newLog.phase = log.Data.phase;
