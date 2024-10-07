@@ -66,20 +66,27 @@ N = 129;
 load(strcat('Exp_2_4_', num2str(N), '.mat')); exp = log;
 load(strcat('HL_exp_1004_', num2str(N), '.mat')); sim = log;
 %%
-Data.X = [];
-idx = 1:sim.k;
-idx_start = find(exp.Data.phase == 102, 1, "first");
-idx_end   = idx_start + sim.k;
-expd = cell2mat(arrayfun(@(N) exp.Data.agent.estimator.result{N}.state.get(),idx_start:idx_end-1,'UniformOutput',false));
-simd = cell2mat(arrayfun(@(N) sim.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
+clear; clc; close all;
+Data.X = []; Data.Y = []; Data.U = [];
+for i = 1:150
+    load(strcat('Exp_2_4_', num2str(i), '.mat')); exp = log;
+    load(strcat('HL_exp_1004_', num2str(i), '.mat')); sim = log;
+    idx = 1:sim.k;
+    idx_start = find(exp.Data.phase == 102, 1, "first");
+    idx_end   = idx_start + sim.k;
+    expd = cell2mat(arrayfun(@(N) exp.Data.agent.estimator.result{N}.state.get(),idx_start:idx_end-1,'UniformOutput',false));
+    simd = cell2mat(arrayfun(@(N) sim.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
+    
+    expu = cell2mat(arrayfun(@(N) exp.Data.agent.controller.result{N}.input,idx_start:idx_end-1,'UniformOutput',false));
+    simu = cell2mat(arrayfun(@(N) sim.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
+    
+    % Data.X = [Data.X,];
+    Data.X = [Data.X, expd(:,1:end-1) - simd(:,1:end-1)];
+    Data.Y = [Data.Y, expd(:,2:end)   - simd(:,2:end)  ];
+    Data.U = [Data.U, expu(:,1:end-1) - simu(:,1:end-1)];
 
-expu = cell2mat(arrayfun(@(N) exp.Data.agent.controller.result{N}.input,idx_start:idx_end-1,'UniformOutput',false));
-simu = cell2mat(arrayfun(@(N) sim.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
-
-% Data.X = [Data.X,];
-Data.X = [Data.X, expd(1:end-1) - simd(1:end-1)];
-Data.Y = [Data.Y, expd(2:end) - simd(2:end)];
-Data.U = [Data.U ,expu - simu];
+    fprintf('Finished ... i=%d \n', i);
+end
 %%
 close all;
 figure(1);
