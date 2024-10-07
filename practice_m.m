@@ -77,10 +77,18 @@ expu = cell2mat(arrayfun(@(N) exp.Data.agent.controller.result{N}.input,idx_star
 simu = cell2mat(arrayfun(@(N) sim.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
 
 % Data.X = [Data.X,];
+Data.X = [Data.X, expd(1:end-1) - simd(1:end-1)];
+Data.Y = [Data.Y, expd(2:end) - simd(2:end)];
+Data.U = [Data.U ,expu - simu];
 %%
 close all;
 figure(1);
-plot(idx, expd(1:3,:), '-', idx, simd(1:3,:), '--');
+subplot(3,1,1); plot(idx, expd(1:3,:), '-', idx, simd(1:3,:), '--'); legend('expx', 'expy', 'expz', 'simx', 'simy', 'simz');
+subplot(3,1,2); plot(idx, expu(1,:), '-', idx, simu(1,:), '--'); legend('exp.th', 'sim.th');
+subplot(3,1,3); plot(idx ,expu(2:4,:), '-', idx, simu(2:4,:), '--'); legend('exp.tr1', 'exp.tr2', 'exp.tr3', 'sim.tr1', 'sim.tr2', 'sim.tr3')
+
+
+%% 変更したよー
 
 
 
