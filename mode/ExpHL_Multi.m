@@ -5,7 +5,7 @@ time = TIME(ts,dt,te); %上の3つの時間をまとめる．
 in_prog_func = @(app) in_prog(app); %43行目にある
 post_func = @(app) post(app); %35行目にある
 N = 2;
-logger = LOGGER(1:N, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
+logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); %データをまとめている？
 
 % motive = Connector_Natnet('192.168.1.4'); % connect to Motive　モーションキャプチャのIP
 % motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
@@ -32,13 +32,13 @@ initial_state(i).v = [0; 0; 0]; %初期速度の取得
 initial_state(i).w = [0; 0; 0]; %初期角加速度の取得
 
 agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
+agent(i).parameter = DRONE_PARAM("DIATONE");
 if i == 1
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253]));
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "5")); %プロポ有線　プロポとの接続
 else
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "3"));
 end
-agent(i).parameter = DRONE_PARAM("DIATONE");
 agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_EulerAngle(dt, initial_state(i), i)), ["p", "q"]));
 agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i,0, motive));
 agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2Throttle_drone()); % 推力からスロットルに変換
