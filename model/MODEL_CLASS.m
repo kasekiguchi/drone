@@ -112,8 +112,8 @@ classdef MODEL_CLASS < dynamicprops & handle
       end
       %複数牽引物用========================================
       if obj.self.plant.state.p(3) < 1
-          % obj.param(20) = 0;
-          obj.param(20) = obj.loadmass;
+          obj.param(20) = 0;
+          % obj.param(20) = obj.loadmass;
       else
           obj.param(20) = obj.loadmass;
       end

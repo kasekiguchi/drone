@@ -36,9 +36,10 @@ classdef ESTIMATE_LOAD_MASS < handle
             end
             obj.JacobianH = eye(7);
             obj.n = model.dim(1);
-            obj.Q = blkdiag(eye(3)*1E0, eye(3)*1E0, 0*1e0);                     % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
+            obj.Q = blkdiag(eye(3)*1E1, eye(3)*1E1, 0*1e0);                     % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
             obj.B = blkdiag(0.5*obj.dt^2*eye(3), obj.dt*eye(3), 0*0.5*obj.dt^2);% システムノイズ（Modelクラス由来）
-            obj.R = blkdiag(eye(3)*1e-10, eye(3)*1e-10, 1e0);                   %観測ノイズ
+            obj.R = blkdiag(eye(3)*1e-2, eye(3)*1e-2, 1e0);                   %観測ノイズ
+            obj.R = blkdiag(eye(3)*1e-8, eye(3)*1e-8, 1e-8);                   %観測ノイズ
             obj.result.P        = eye(obj.n);
             obj.result.G        = zeros(obj.n, size(obj.R,2));
             obj.result.xh_pre   = [];
@@ -59,7 +60,7 @@ classdef ESTIMATE_LOAD_MASS < handle
             est     = obj.self.estimator.result.state;
             mL      = agent{end-1};
             mu      = agent{end};
-            y       = [est.pL;est.vL;mL];                       % sensor output
+            y       = [est.pL;est.vL;mL];%+[normrnd(0,0.1,[6,1]);0];                       % sensor output
             x       = obj.result.xh_pre;                        % estimated state at previous step
             xh_pre  = obj.update_state(x,mu);                   % Pre-estimation
             yh      = xh_pre;                                   % output estimation
@@ -79,7 +80,7 @@ classdef ESTIMATE_LOAD_MASS < handle
               obj.result.xh_pre = [est.pL;est.vL;obj.self.parameter.loadmass];
               obj.result.mL     = obj.self.parameter.loadmass;
           end
-            result      =obj.result;
+            result      = obj.result;
             obj.timer   = tic;
         end
         

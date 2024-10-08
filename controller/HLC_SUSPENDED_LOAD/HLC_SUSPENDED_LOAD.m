@@ -81,9 +81,9 @@ classdef HLC_SUSPENDED_LOAD < handle
                 vdro = model.state.v;
                 vL = model.state.vL;
                 
-                ui  = Ri*[0;0;obj.self.controller.result.input(1) + normrnd(0,0.5)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
-                aidrn = (vdro - obj.vdro_pre)/Param.dt + normrnd(0,0.1,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
-                ai = (vL - obj.vL_pre)/Param.dt + normrnd(0,0.1,[3,1]);%牽引物加速度
+                ui  = Ri*[0;0;obj.self.controller.result.input(1) + 0*normrnd(0,0.5)];%推力,離散時間なので現在時刻まで同じ入力が入ると仮定
+                aidrn = (vdro - obj.vdro_pre)/Param.dt + 0*normrnd(0,0.1,[3,1]); %機体加速度%前時刻の運動方程式から加速度求めてもいいかも
+                ai = (vL - obj.vL_pre)/Param.dt + 0*normrnd(0,0.1,[3,1]);%牽引物加速度
                 
                 % obj.aidrns = [obj.aidrns(:,2:end),aidrn];%filt
                 % obj.ais = [obj.ais(:,2:end),ai];%filt
@@ -129,7 +129,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             % P(15) = model.state.mL;
             % aaa = P(15) 
             % disp("time: "+ num2str(agent{1}.t,2)+" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4))
-            % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(norm(aidrn),3)+" ai: "+num2str(norm(ai),3))
+            disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(norm(aidrn),3)+" ai: "+num2str(norm(ai),3))
             % obj.result.mLi=P(15);
             F1 = Param.F1;
             F2 = Param.F2;

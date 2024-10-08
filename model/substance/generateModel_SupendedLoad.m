@@ -194,7 +194,7 @@ ddP  = ddPL-cableL*ddPT;
 dob = inv(Ib)*cross(-ob,Ib*ob)+inv(Ib)*[u2;u3;u4];
 x=[p;er;dp;ob;pl;dpl;pT;ol;mL];
 f=[dp;der;ddP;dob;dpl;ddPL;dpT;dOL;0];
-matlabFunction(f,'file','with_load_model_mL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
+% matlabFunction(f,'file','with_load_model_mL_euler_for_HL','vars',{x U cell2sym(physicalParam)},'outputs',{'dx'});
 
 %% Local functions
 function m = Mtake(mat,m,n)

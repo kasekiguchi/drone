@@ -12,10 +12,11 @@
     date=string(datetime('now','Format','yyyy_MMdd_HHmm'));%日付
     date2=string(datetime('now','Format','yyyy_MMdd'));%日付
 %変更==============================================================================
+    % date2 = "2024_1007";%日付が変わってしまった場合は自分で変更
     subfolder='sim';%sim or exp
     ExpSimName='estimateLoadMass';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='EKF';%実験,シミュレーション内容
+    contents='EKF_load_model_mL';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
