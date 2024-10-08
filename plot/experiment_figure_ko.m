@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1004hun_diag([200000,10000,100,10,10,10]),[0.005]_Log(04-Oct-2024_17_04_52).mat");
+load("sl1008hun_diag([10000,10,10,1,1,1]),[0.1]_Log(08-Oct-2024_12_14_56).mat");
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
