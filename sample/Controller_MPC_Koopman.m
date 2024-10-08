@@ -1,4 +1,4 @@
-function Controller = Controller_MPC_Koopman(dt, model)
+function Controller = Controller_MPC_Koopman(dt, model, agent)
 %UNTITLED この関数の概要をここに記述
 %   各種値
     Controller_param.m = 0.5884; %ドローンの質量、質量は統一
@@ -37,7 +37,9 @@ function Controller = Controller_MPC_Koopman(dt, model)
     % Controller_param.C = model{3};
     %--------------------------------------------------------------------
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     torque = 1; % 1:クープマンモデルが総推力トルクのとき
+    % torqueモデルなら1をとるように．ifを使わない方法で実装してみた
+    torque_mat = [0 1];
+    torque = torque_mat(strcmp(func2str(agent.plant.method), 'roll_pitch_yaw_thrust_torque_physical_parameter_model') + 1);
     %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     %--------------------------------------------------------------------
 
@@ -63,10 +65,10 @@ function Controller = Controller_MPC_Koopman(dt, model)
 
     %% 
     Controller_param.weight.P = diag([100; 100; 1]);    % 位置　10,20刻み  20;1;30
-    Controller_param.weight.Q = diag([1; 1; 1]);    % 速度  10,20刻み  30;20;10
-    Controller_param.weight.V = diag([10; 10; 1]); % 15良い気がする
-    Controller_param.weight.W = diag([1; 1; 1]);  % 姿勢角，角速度　1,2刻み 
-    Controller_param.weight.R = diag([1; 1; 1; 1]); % 入力
+    Controller_param.weight.Q = diag([1; 1; 1]);        % 速度  10,20刻み  30;20;10
+    Controller_param.weight.V = diag([10; 10; 1]);      % 15良い気がする
+    Controller_param.weight.W = diag([1; 1; 1]);        % 姿勢角，角速度　1,2刻み 
+    Controller_param.weight.R = diag([1; 1; 1; 1]);     % 入力
 
     Controller_param.weight.Pf = Controller_param.weight.P;
     Controller_param.weight.Vf = Controller_param.weight.V;
@@ -91,8 +93,8 @@ function Controller = Controller_MPC_Koopman(dt, model)
 
     %% HL param
     Controller_param.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-    Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,1,1]),[0.01],dt); % xdiag([100,10,10,1])
-    Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([100,100,1,1]),[0.01],dt); % ydiag([100,10,10,1])
+    Controller_param.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,400,1,1]),[0.01],dt); % xdiag([100,10,10,1])
+    Controller_param.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,400,1,1]),[0.01],dt); % ydiag([100,10,10,1])
     Controller_param.F4=lqrd([0 1;0 0],[0;1],diag([200,10]),[0.1],dt); 
 
     %% 以下は変更なし
