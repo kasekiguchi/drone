@@ -39,6 +39,7 @@ Input = zeros(4,flight_finish_idx-arming_start_idx+1);
 InnerInput = zeros(8, flight_finish_idx-arming_start_idx+1);
 Step_time=zeros(flight_finish_idx-arming_start_idx+1,1);%アーミングからフライト
 Flight_step_time=zeros(flight_finish_idx-flight_start_idx+1,1);%フライトステップのみ
+Z_14=zeros(4,flight_finish_idx-arming_start_idx+1);
 for i = arming_start_idx:flight_finish_idx
     Est(:,i-arming_start_idx+1) = [Agent.estimator.result{i}.state.p;
                 Agent.estimator.result{i}.state.q;
@@ -55,6 +56,12 @@ kari_logt=[0;logt(1:end-1)];
     Step_time= logt-kari_logt;
     
      InnerInput(:,i-arming_start_idx+1) = Agent.inner_input{i};
+     if agent.Z1 ==1
+     Z_14(:,i-arming_start_idx+1)=[Agent.Z1{i};
+         Agent.Z2{i};
+         Agent.Z3{i};
+         Agent.Z4{i}];
+     end
 end
 count_gross_over_0025=length( find( Step_time >= 0.025 ) )
 count_persentage_over_0025=length( find( Step_time >= 0.025 ) )/length(Step_time)
@@ -211,6 +218,12 @@ if figtype == 1
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
      xlabel("Time [s]",'Interpreter','latex'); ylabel("Step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+if z_14==1
+figure(12);  plot(logt, Z_14); 
+    % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+     xlabel("Time [s]",'Interpreter','latex'); ylabel("nyuuryoku [s]",'Interpreter','latex'); legend("Z1","Z2","Z3","Z4",  "Location","northwest",'Interpreter','latex');
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+end
 elseif figtype == 2
 %牽引物あり↓
  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
