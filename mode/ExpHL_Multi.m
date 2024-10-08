@@ -67,4 +67,5 @@ app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time
 end
 function in_prog(app)
 app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];
+% app.Label_2_2p.Text = ["estimator : " + app.agent(2).estimator.result.state.get()];
 end
