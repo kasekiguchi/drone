@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1008hun_diag([10000,10,10,1,1,1]),[0.1]_Log(08-Oct-2024_12_14_56).mat");
+load("sl1009hun_momose_exp_Log(09-Oct-2024_17_09_47).mat");
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
@@ -56,7 +56,7 @@ kari_logt=[0;logt(1:end-1)];
     Step_time= logt-kari_logt;
     
      InnerInput(:,i-arming_start_idx+1) = Agent.inner_input{i};
-     if agent.Z1 ==1
+     if agent.controller.result.Z1 ==1
      Z_14(:,i-arming_start_idx+1)=[Agent.Z1{i};
          Agent.Z2{i};
          Agent.Z3{i};

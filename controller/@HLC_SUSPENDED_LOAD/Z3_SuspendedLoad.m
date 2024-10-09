@@ -1,4 +1,4 @@
-function cZ3 = Z3_SuspendedLoad(in1,in2,in3,in4)
+function cZ3 = Z3_SuspendedLoad(obj,in1,in2,in3,in4)
 %Z3_SuspendedLoad
 %    cZ3 = Z3_SuspendedLoad(IN1,IN2,IN3,IN4)
 
