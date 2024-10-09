@@ -1,9 +1,9 @@
 %% modeファイルから実行時に必要 ====================
-clc
-tmp = matlab.desktop.editor.getActive;
-cd(strcat(fileparts(tmp.Filename), '../../'));
-[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
-cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+% clc
+% tmp = matlab.desktop.editor.getActive;
+% cd(strcat(fileparts(tmp.Filename), '../../'));
+% [~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+% cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 %% ==================================================
 
 ts = 0; % initial time
@@ -31,26 +31,26 @@ agent.controller = MCMPC_controller(agent, Controller_MCMPC(agent));
 run("ExpBase");
 
 %% modeファイル内でプログラムを回す
-for i = 1:400
-    if i < 20 || rem(i, 10) == 0; end
-    tic
-    agent(1).sensor.do(time, 'f');
-    agent(1).estimator.do(time, 'f');
-    agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f');
-    agent(1).plant.do(time, 'f');
-    logger.logging(time, 'f', agent);
-    time.t = time.t + time.dt;
-    %pause(1)
-    all = toc
-end
+% for i = 1:400
+%     if i < 20 || rem(i, 10) == 0; end
+%     tic
+%     agent(1).sensor.do(time, 'f');
+%     agent(1).estimator.do(time, 'f');
+%     agent(1).reference.do(time, 'f');
+%     agent(1).controller.do(time, 'f');
+%     agent(1).plant.do(time, 'f');
+%     logger.logging(time, 'f', agent);
+%     time.t = time.t + time.dt;
+%     %pause(1)
+%     all = toc
+% end
 %% 途中で止めた時もセクション実行でグラフ出せる
-logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
+% logger.plot({1, "p", "er"}, {1, "q", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 
 %%
-% function dfunc(app)
-% app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
-% app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
-% end
+function dfunc(app)
+app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "v", "er"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te]);
+app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.t]);
+end

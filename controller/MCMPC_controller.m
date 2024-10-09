@@ -63,11 +63,9 @@ classdef MCMPC_controller < handle
             
             %%
             obj.state.ref = obj.Reference(); % 関数の受け渡し用
-            
-            mu(1) = obj.input.u(1);    % リサンプリングとして前の入力を平均値とする
-            mu(2) = obj.input.u(2);    % 初期値はparamで定義
-            mu(3) = obj.input.u(3);
-            mu(4) = obj.input.u(4);
+
+            % 平均の設定
+            mu = obj.input.u;
             
             % mu(1) = 0.269*9.81/4;    % ホバリング入力を平均
             % mu(2) = 0.269*9.81/4;    % 初期値はparamで定義
