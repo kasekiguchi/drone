@@ -6,7 +6,8 @@ in_prog_func = @(app) in_prog(app); %43行目にある
 post_func = @(app) post(app); %35行目にある
 logger = LOGGER(1, size(ts:dt:te, 2), 1, [],[]); %データをまとめている？
 
-motive = Connector_Natnet('192.168.120.4'); % connect to Motive　モーションキャプチャのIP
+motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
+% motive = Connector_Natnet('192.168.120.4'); % connect to Motive総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_ids = [1]; % rigid-body number on Motive　モーションキャプチャの剛体番号
 sstate = motive.result.rigid(rigid_ids); %状態の取得？

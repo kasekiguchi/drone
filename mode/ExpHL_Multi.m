@@ -15,7 +15,8 @@ logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); %データをまとめてい�
 % initial_state.q = sstate.q; %初期角度の取得
 % initial_state.v = [0; 0; 0]; %初期速度の取得
 % initial_state.w = [0; 0; 0]; %初期角加速度の取得
-motive = Connector_Natnet('192.168.120.4'); % connect to Motive　モーションキャプチャのIP
+motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
+% motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
 rigid_ids(1) = [1];
 rigid_ids(2) = [2];
