@@ -8,8 +8,8 @@ function Controller= Controller_HL(dt)
 % 普段の実験で使うパラメータ
 
 Controller.F1=lqrd([0 1;0 0],[0;1],diag([100,1]),[0.1],dt);                                % z 
-Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,400,10,1]),[0.01],dt); % xdiag([100,10,10,1])
-Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,400,10,1]),[0.01],dt); % ydiag([100,10,10,1])
+Controller.F2=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,200,10,1]),[0.01],dt); % xdiag([100,10,10,1])
+Controller.F3=lqrd(diag([1,1,1],1),[0;0;0;1],diag([400,200,10,1]),[0.01],dt); % ydiag([100,10,10,1])
 Controller.F4=lqrd([0 1;0 0],[0;1],diag([200,10]),[0.1],dt); 
 
 %% dt = 0.05までがんばりたい用

@@ -101,8 +101,9 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 
 %% シミュレーションの比較
 clear; close all;
-load('Data\HL_sim_test_1008_2.mat'); sim1 = log;
-load('Data\KMPC_sim_test_1008_2.mat'); sim2 = log;
+j = 'sigmoid';
+load(strcat('Data\HL_sim_test_1008_', j, '.mat')); sim1 = log;
+load(strcat('Data\KMPC_sim_test_1008_', j, '.mat')); sim2 = log;
 idx = 1:find(sim1.Data.phase == 102, 1, 'last');
 data1.x = cell2mat(arrayfun(@(N) sim1.Data.agent.estimator.result{N}.state.get(),idx,'UniformOutput',false));
 data1.u = cell2mat(arrayfun(@(N) sim1.Data.agent.controller.result{N}.input,idx,'UniformOutput',false));
@@ -113,7 +114,7 @@ r = [cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.p,idx,'Uni
     cell2mat(arrayfun(@(N) sim1.Data.agent.reference.result{N}.state.v,idx,'UniformOutput',false))];
 %%
 close all;
-set(0,'defaultAxesFontSize',17)
+set(0,'defaultAxesFontSize',12)
 set(0, 'DefaultLineLineWidth', 1.5);
 % leg = {'1x', '1y', '1z', '2x', '2y', '2z'};
 % leg_th = {'1th', '2th'};

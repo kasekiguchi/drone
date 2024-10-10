@@ -74,6 +74,9 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             classlist = ["TIME_VARYING_REFERENCE", "MY_POINT_REFERENCE", "MY_REFERENCE_KOMA2"];
             classname = class(obj.self.reference);
             obj.reference.classnum = find(strcmp(classname, classlist));
+
+            % 1ステップ前の状態の保存
+            obj.state.previous = [0;0;1;zeros(9,1)];
         end
 
         %-- main()的な
@@ -83,13 +86,13 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
-            % var = varargin{1};
-            % phase = var{2};
-            % agent = obj.self;
+            %% 2コン
+            var = varargin{1};
 
-            var = varargin;
+            %% 1コン
+            % var = varargin;
+
             obj.param.t = var{1}.t;
-            
             rt = obj.param.t; %時間
             idx = round(rt/var{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
@@ -98,8 +101,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.previous_state = repmat(obj.current_state, 1, obj.H);
 
             %% HLによる入力計算
-            obj.input.u_HL = obj.calculateHL(varargin); % controllerで同時計算
-            % obj.input.u_HL = obj.self.controller.hlc.result.input;
+            % obj.input.u_HL = obj.calculateHL(varargin); % controllerで同時計算
+            obj.input.u_HL = obj.self.controller.hlc.result.input; % 2コン
 
             % 次時刻状態の計算
             x = obj.current_state;
@@ -131,9 +134,11 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
                  
             %%
             obj.previous_input = var;
-            obj.result.input = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
-            % obj.result.input = var(1:4,1);
+            u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
+            % u = var(1:4,1);
 
+            %% 入力の封じ込め
+            obj.result.input = [max(0, min(10, u(1)));max(-1, min(1, u(2:4)))];
 
             %% データ表示用
             obj.input.u = obj.result.input; 
@@ -146,6 +151,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
+            obj.self.input  = obj.result.input;
 
             %% 情報表示
             % state_monte = obj.self.estimator.result.state;

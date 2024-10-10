@@ -75,16 +75,17 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
+%% 1コンのとき
 % agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
-agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
+% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
 
 %% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
-% agent.controller.result.input = [0;0;0;0];
-% agent.controller.do = @controller_do;
-
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
+% 2コンとき 116行目もコメントイン
 %%
 run("ExpBase");
 
@@ -106,19 +107,19 @@ end
 % logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
 logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
 log = logger;
-save(strcat('Data\KMPC_sim_test_1008_2', '.mat'), 'log');
+% save(strcat('Data\KMPC_sim_test_1008_sigmoid', '.mat'), 'log');
 %%
 % app.logger = logger;
 % result_plot(app);
 
-%% function
-% function result = controller_do(varargin)
-%     controller = varargin{3}.controller;
-%     result.hlc = controller.hlc.do(varargin);
-%     result.mpc = controller.mpc.do(varargin);
-%     result = result.mpc;
-%     varargin{5}.controller.result = result;
-% end
+%% function 2コンとき
+function result = controller_do(varargin)
+    controller = varargin{3}.controller;
+    result.hlc = controller.hlc.do(varargin);
+    result.mpc = controller.mpc.do(varargin);
+    result = result.mpc;
+    varargin{5}.controller.result = result;
+end
 
 %%
 function dfunc(app)
