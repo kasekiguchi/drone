@@ -3,7 +3,7 @@ function Controller = Controller_MCMPC(~)
 %   詳細説明をここに記述
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 10;
-    Controller_param.Maxparticle_num = 5000;
+    Controller_param.Maxparticle_num = 500;
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = 200;
     Controller_param.input.Initsigma = 0.01;

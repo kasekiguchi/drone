@@ -20,12 +20,12 @@ PInterval = 0.6; % sec : poling interval for emergency stop
 gui = SimExp(fExp,fDebug,PInterval);
 
 %% trajectory test
-syms t real
-x = cos(t/5) -1;
-y = sin(t/5);
-% z = cos(t/5) +1;
-z = cos(t) +1;
-az = diff(z, 2);
-tt = 0:0.1:100;
-plot(tt, subs(az, tt));
+% syms t real
+% x = cos(t/5) -1;
+% y = sin(t/5);
+% % z = cos(t/5) +1;
+% z = cos(t) +1;
+% az = diff(z, 2);
+% tt = 0:0.1:100;
+% plot(tt, subs(az, tt));
 % max(subs(az, tt))

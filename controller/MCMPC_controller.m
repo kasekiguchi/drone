@@ -136,7 +136,8 @@ classdef MCMPC_controller < handle
 %                     obj.input.AllRemove = 1;
                 else
                     obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now./obj.input.Bestcost_pre)));
-                    obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now/obj.input.Bestcost_pre))));
+                    % obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now/obj.input.Bestcost_pre))));
+                    obj.param.nextparticle_num = obj.param.Maxparticle_num;
                 end
 
             elseif removeF == obj.N    % 全棄却
