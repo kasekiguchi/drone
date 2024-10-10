@@ -12,7 +12,7 @@
 close all
 clear multiFigure option addingContents f
 %選択
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
@@ -22,11 +22,12 @@ endTime = 45;%1E3;
 % endTime = [30,30,30,100];
 
 % clear allData
-for i = 1:length(logger.target)
-    loggers{i,1} = simplifyLoggerForCoop(logger,i);
-end
-droneID = logger.target(1:end-1);
-% droneID = 1:length(loggers)-1;
+% for i = 1:length(logger.target)
+%     loggers{i,1} = simplifyLoggerForCoop(logger,i);
+% end
+loggers = simple_log_backwardDifference;
+droneID = 1:length(loggers)-1;
+% droneID = logger.target(1:end-1);
 lgnd.payload=["payload","split payload" + droneID];
 lgnd.drone="drone" + droneID;
 %========================================================================

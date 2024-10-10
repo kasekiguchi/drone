@@ -14,9 +14,9 @@
 %変更==============================================================================
     % date2 = "2024_1007";%日付が変わってしまった場合は自分で変更
     subfolder='sim';%sim or exp
-    ExpSimName='estimateLoadMass';%実験,シミュレーション名
+    ExpSimName='coop4drone';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='EKF_load_model_mL';%実験,シミュレーション内容
+    contents='EKF';%実験,シミュレーション内容
 %======================================================================================
     FolderNamed=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNamef=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'figure');%保存先のpath
@@ -28,32 +28,33 @@
         mkdir(FolderNamel);
         addpath(genpath(ExportFolder));
     end
-    
-    % save logger, simple logger and agent
-        agentContents=strcat('agent_',contents);
-        SaveTitle2=strcat(date,'_',agentContents);
-        % eval([agentContents '=agent;']);%agentの名前をagent_contentsに変更
+    % agent name
+    agentContents=strcat('agent_',contents);
+    SaveTitle2=strcat(date,'_',agentContents);
+    % logger name
+    loggerContents=strcat('log_',contents);
+    SaveTitle=strcat(date,'_',loggerContents);    
+    % simple logger name
+    simpleLoggerContents = strcat('simple_',loggerContents);
+    simpleSaveTitle=strcat(date,'_',simpleLoggerContents);
+
+    if exist("logger","var")
+    % multiple var : save logger, simple logger and agent
+        eval([agentContents '=agent;']);%agentの名前をagent_contentsに変更
+        eval([loggerContents '= logger;']);%loggerの名前をlogger_contentsに変更
+        for i = 1:length(logger.target)
+            loggers{i,1} = simplifyLoggerForCoop(logger,i);
+        end
+        eval([simpleLoggerContents,'= loggers;']);
+    else
+    % single var : save logger, simple logger and agent
         eval([agentContents '=gui.agent;']);%agentの名前をagent_contentsに変更
-        save(fullfile(FolderNamed, SaveTitle2),agentContents);
-
-        loggerContents=strcat('log_',contents);
-        SaveTitle=strcat(date,'_',loggerContents);    
-        % eval([loggerContents '= logger;']);%loggerの名前をlogger_contentsに変更
         eval([loggerContents '= gui.logger;']);%loggerの名前をlogger_contentsに変更
-        save(fullfile(FolderNamed, SaveTitle),loggerContents);
-        
-        simpleLoggerContents = strcat('simple_',loggerContents);
-        simpleSaveTitle=strcat(date,'_',simpleLoggerContents);
-        
-        % for i = 1:length(logger.target)
-        %     loggers{i,1} = simplifyLoggerForCoop(logger,i);
-        % end
-        % eval([simpleLoggerContents,'= loggers;']);
-        % eval([simpleLoggerContents,'= simplifyLogger(',loggerContents,');']);
-
         eval([simpleLoggerContents,'= simplifyLoggerForSingle(gui.logger);']);
-        save(fullfile(FolderNamel, simpleSaveTitle),simpleLoggerContents);
-
+    end
+save(fullfile(FolderNamed, SaveTitle2),agentContents);
+save(fullfile(FolderNamed, SaveTitle),loggerContents);
+save(fullfile(FolderNamel, simpleSaveTitle),simpleLoggerContents);
     %savefig
 %     SaveTitle=strcat(date,'_',ExpSimName);
 %         saveas(1, fullfile(FolderName, SaveTitle ),'jpg');

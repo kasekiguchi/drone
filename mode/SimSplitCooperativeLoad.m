@@ -5,7 +5,7 @@ clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 5;
+te = 30;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -61,7 +61,7 @@ agent(1).plant = MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, init
 agent(1).sensor = DIRECT_SENSOR(agent(1),0.0); % sensor to capture plant position : second arg is noise
 agent(1).estimator = DIRECT_ESTIMATOR(agent(1), struct("model", MODEL_CLASS(agent(1), Model_Suspended_Cooperative_Load(dt, initial_state(1), 1, N, qtype)))); % estimator.result.state = sensor.result.state
 % agent(1).reference = MY_WAY_POINT_REFERENCE(agent(1),generate_spline_curve_ref(readmatrix("waypoint.xlsx",'Sheet','takeOff_0to1m'),7,1));
-agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",0*[2,2,0.5]},"Cooperative",N},agent(1));
+agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"gen_ref_sample_cooperative_load",{"freq",10,"orig",[0;0;1],"size",[2,2,0.5]},"Cooperative",N},agent(1));
 % agent(1).reference = TIME_VARYING_REFERENCE_SPLIT(agent(1),{"dammy",[],"TakeOff",N},agent(1));
 agent(1).controller = CSLC(agent(1), Controller_Cooperative_Load(dt, N));
 
@@ -96,8 +96,8 @@ for i = 2:N+1
     jz = agent(1).parameter.Ji(3,i-1);
     agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"jx",jx,"jy",jy,"jz",jz);%複数モデルの機体と同じパラメータに設定
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
-    agent(i).sensor = DIRECT_SENSOR(agent(i),0.0); % sensor to capture plant position : second arg is noise
-    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i))), ["p", "q", "pL", "pT"]));%expの流用
+    agent(i).sensor = DIRECT_SENSOR(agent(i),0.01); % sensor to capture plant position : second arg is noise
+    agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),1)), ["p", "q", "pL", "pT"]));%expの流用
     %     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"Case_study_trajectory",{[0;0;2]},"Split",N},agent(1));
     agent(i).reference = TIME_VARYING_REFERENCE_SPLIT(agent(i),{"dammy",[],"Split",N},agent(1));%軌道は使われない
     agent(i).controller.hlc = HLC(agent(i),Controller_HL(dt));
@@ -222,13 +222,18 @@ run("DataPlot.m")
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-mov.animation(logger, 'target', 1:N, "gif",true,"lims",[-5 5;-5 5;0 5],"ntimes",5);
+% mov.animation(logger, 'target', 1:N, "gif",ture,"lims",[-5 5;-5 5;0 5],"ntimes",5);
+mov.animation(logger, 'target', 1:N,"lims",[-5 5;-5 5;0 5],"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 
 % 
 % %%
 % logger.plot({1,"plant.result.state.qi","p"},{1,"p","er"},{1, "v", "p"},{1, "input", "p"},{1, "plant.result.state.Qi","p"})
+%%
+if 0
+    run("saveDataCoop.m")
+end
 %%
 function result = controller_do(varargin)
     controller = varargin{5}.controller;

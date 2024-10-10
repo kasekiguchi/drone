@@ -57,7 +57,9 @@ classdef DRONE_PARAM_COOPERATIVE_LOAD < PARAMETER_CLASS
                 polyin = polyshape(x1,y1);
                 [x,y] = centroid(polyin);
                 G = [x;y;0.5];
-                param.rho = p-G;%ここが機体数に対応していません!!!!!!!!!!!!!!!!!!!!
+                rho = p-G;
+                param.rho = rho(:,1:N);
+                
             if isempty(param.rho)
               R = Rodrigues([0;0;1],2*pi/N);%回転行列を求める
               %ペイロードの重心位置からリンクまでの距離

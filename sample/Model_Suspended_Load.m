@@ -1,9 +1,10 @@
-function Model = Model_Suspended_Load(dt,initial,id,agent)
+function Model = Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass)
 arguments
   dt
   initial
   id
   agent = ""
+  isEstLoadMass = 0 %牽引物質量を推定するか
 end
 Model.id = id;
 Model.name="load"; % print name
@@ -33,7 +34,7 @@ Setting.dt = dt;
 Setting.param = agent.parameter.get; % モデルの物理パラメータ設定
 Setting.initial.pL = Setting.initial.p+agent.parameter.cableL*Setting.initial.pT;%+[Setting.param(17);Setting.param(18);-Setting.param(19)];%22~24
 
-if ~isempty(agent.plant) && 0
+if ~isempty(agent.plant) && isEstLoadMass
   Model.name="load_mL_HL"; % print name
   Setting.method = get_model_name("Load_mL_HL"); % model dynamicsの実体名
   Setting.dim=[25,4,21];
