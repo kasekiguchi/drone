@@ -34,7 +34,7 @@ methods
         % [Input] varargin : time, cha, logger, env, agent, i
 
         cha = varargin{2};
-        input = varargin{5}(varargin{6}).controller.result.input;
+        input = varargin{5}.controller.result.input;
         if (cha ~= 'q' && cha ~= 's' && cha ~= 'a' && cha ~= 'f' && cha ~= 'l' && cha ~= 't')
             cha = obj.flight_phase;
         end

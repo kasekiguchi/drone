@@ -36,7 +36,7 @@ agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
 agent(i).parameter = DRONE_PARAM("DIATONE");
 if i == 1
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253]));
-agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "5")); %プロポ有線　プロポとの接続
+agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "6")); %プロポ有線　プロポとの接続
 else
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "3"));
 end
