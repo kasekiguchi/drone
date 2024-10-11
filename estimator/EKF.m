@@ -57,6 +57,7 @@ classdef EKF < handle
         function [result]=do(obj,varargin)
           if ~isempty(obj.timer)
             dt = toc(obj.timer);
+            dt = varargin{1}.dt;%offline用
             if dt > obj.dt
               dt = obj.dt;
             end
