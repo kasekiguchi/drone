@@ -76,7 +76,11 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             obj.reference.classnum = find(strcmp(classname, classlist));
 
             % 1ステップ前の状態の保存
-            obj.state.previous = [0;0;1;zeros(9,1)];
+            % state = obj.self.estimator.result.state.get();
+            % q p v w
+            % value=Eul2Quat(state(4:6));
+            % obj.state.previous.q = RodriguesQuaternion(Eul2Quat(state(4:6)));
+            % obj.state.previous.pvw = [state(1:3);state(7:9);state(10:12)];
         end
 
         %-- main()的な
@@ -86,23 +90,30 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % varargin 
             % 1:TIME,  2:flight phase,  3:LOGGER,  4:?,  5:agent,  6:1?
 
-            %% 2コン
-            var = varargin{1};
-
-            %% 1コン
-            % var = varargin;
+            if size(varargin, 2) ~= 4
+                %% 2コン l.109
+                var = varargin{1};
+            else 
+                %% 1コン l.108
+                var = varargin;
+            end
 
             obj.param.t = var{1}.t;
             rt = obj.param.t; %時間
             idx = round(rt/var{1}.dt+1); %プログラムの周回数
             obj.current_state = obj.self.estimator.result.state.get(); %実機のときコメントアウト
             [obj.reference.xr, obj.reference.xr_HL] = obj.Reference(rt); %リファレンスの更新
- 
-            obj.previous_state = repmat(obj.current_state, 1, obj.H);
 
             %% HLによる入力計算
-            % obj.input.u_HL = obj.calculateHL(varargin); % controllerで同時計算
-            obj.input.u_HL = obj.self.controller.hlc.result.input; % 2コン
+            if size(varargin, 2) ~= 4
+                obj.input.u_HL = obj.self.controller.hlc.result.input; % 2コン
+                % obj.input.u_HL = obj.self.controller.result.input; % 前の入力の取得 controller.resultに保存されてないからできない
+                % obj.input.u_HL = var{3}.controller.hlc.result.input;
+            else
+                % state.p = obj.current_state(1:3); state.v = obj.current_state(7:9);
+                % state.q = obj.current_state(4:6); state.w = obj.current_state(10:12);
+                obj.input.u_HL = obj.calculateHL(var); % controllerで同時計算
+            end
 
             % 次時刻状態の計算
             x = obj.current_state;
@@ -110,10 +121,11 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             P = obj.param.P;
             tspan = [0 0.025];
             x0 = x;
-            [~,tmpx]=ode15s(@(t,x) obj.self.plant.method(x, u,P),tspan, x0); % 非線形モデル
+            [~,tmpx]=ode15s(@(t,x) obj.self.plant.method(x,u,P),tspan, x0); % 非線形モデル
             obj.state.HL = tmpx(end, :);
 
             %% HLとの状態比較を初期値としたクープマンMPCの計算
+            obj.previous_state = repmat(obj.current_state, 1, obj.H);
             %-- fmincon 設定
             options = optimoptions('fmincon');
             options = optimoptions(options,'MaxIterations',      1.e+12); % 最大反復回数
@@ -151,7 +163,7 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
 
             %% 保存するデータ
             result = obj.result; % controllerの値の保存
-            obj.self.input  = obj.result.input;
+            % obj.self.input  = obj.result.input;
 
             %% 情報表示
             % state_monte = obj.self.estimator.result.state;
@@ -254,8 +266,11 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             eval = sum(stagestate) + terminalstate;
         end
 
-        function u_HL = calculateHL(obj, varargin)
-            model = obj.self.estimator.result;
+        function u_HL = calculateHL(obj, var)
+            % model = obj.self.estimator.result;
+            model.q = RodriguesQuaternion(Eul2Quat(var{4}.state.get("q")));
+            model.pvw = var{4}.state.get(["p","v","q"]); 
+            % m:1時刻前のestimator
             % ref = obj.self.reference.result;
             % xd = ref.state.xd;
             xd = obj.reference.xr_HL;
@@ -270,7 +285,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % yaw 角についてボディ座標に合わせることで目標姿勢と現在姿勢の間の2pi問題を緩和
             % TODO : 本質的にはx-xdを受け付ける関数にして，x-xdの状態で2pi問題を解決すれば良い．
             Rb0 = RodriguesQuaternion(Eul2Quat([0;0;xd(4)]));
-            x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
+            x = [R2q(Rb0'*model.q);Rb0'*model.pvw(1:3);Rb0'*model.pvw(4:6);model.pvw(7:9)];
+            % x = [R2q(Rb0'*model.state.getq("rotmat"));Rb0'*model.state.p;Rb0'*model.state.v;model.state.w]; % [q, p, v, w]に並べ替え
             xd(1:3)=Rb0'*xd(1:3);
             xd(4) = 0;
             xd(5:7)=Rb0'*xd(5:7);
@@ -278,8 +294,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             xd(13:15)=Rb0'*xd(13:15);
             xd(17:19)=Rb0'*xd(17:19);
             %if isfield(obj.param,'dt')
-            if isfield(varargin{1},'dt') && varargin{1}.dt <= obj.param.dt
-                dt = varargin{1}.dt;
+            if isfield(var{1},'dt') && var{1}.dt <= obj.param.dt
+                dt = var{1}.dt;
             else
                 dt = obj.param.dt;
                 % vf = Vf(x,xd',P,F1);

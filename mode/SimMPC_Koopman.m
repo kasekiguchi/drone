@@ -75,17 +75,19 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[1;0;1],"g",[-1.5;0;1],"h",[0;0;1],"j",[-1;0;1]),7});
 % agent.reference = MY_REFERENCE_KOMA2(agent,{"",2,te}); % 1:from mat, 2:9-order polynomial
 
-%% 1コンのとき
-% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
-% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
 % agent.controller = MPC_KOOPMAN_CVXGEN(agent, Controller_MPC_Koopman(dt));
+% agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
 
-%% 2つのコントローラの設定---------------------------------------------------------------------------------------------------
-agent.controller.hlc = HLC(agent,Controller_HL(dt));
-agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
-agent.controller.result.input = [0;0;0;0];
-agent.controller.do = @controller_do;
-% 2コンとき 116行目もコメントイン
+%% 1コンのとき  100行目もコメントイン
+agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
+conmode = 1;
+%% 2つのコントローラの設定  101行目もコメントイン
+% agent.controller.hlc = HLC(agent,Controller_HL(dt));
+% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
+% agent.controller.result.input = [0;0;0;0];
+% agent.controller.do = @controller_do;
+% conmode = 2;
+
 %%
 run("ExpBase");
 
@@ -93,10 +95,13 @@ run("ExpBase");
 for i = 1:te/dt
     % if i < 20 || rem(i, 10) == 0 end
     tic
+    pre_est = agent.estimator.result;
     agent(1).sensor.do(time, 'f');
     agent(1).estimator.do(time, 'f');
     agent(1).reference.do(time, 'f');
-    agent(1).controller.do(time, 'f', agent);
+    if conmode == 1; agent(1).controller.do(time, 'f', agent, pre_est);
+    else; agent(1).controller.do(time, 'f', agent);
+    end
     agent(1).plant.do(time, 'f');
     logger.logging(time, 'f', agent);
     time.t = time.t + time.dt;
