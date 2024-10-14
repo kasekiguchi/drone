@@ -29,7 +29,7 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.ais =zeros(3,20);
             obj.ms = ones(1,10)*0.4;
             %移動平均に使うデータの長さをもっと長くする．
-            obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
+            % obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
         end
         
         function result=do(obj,agent,~)
@@ -121,10 +121,10 @@ classdef HLC_SUSPENDED_LOAD < handle
                 % obj.ais(:,end) = fai(:,end);%filt
                 % disp(" z position of drone: "+num2str(model.state.p(3),3)+" estimated load mass: "+num2str(P(15),4)+" aidrn: "+num2str(aidrn,4)+" ai: "+num2str(ai,4))
 
-                elm = obj.estimate_load_mass.estimate([agent,mLi,mui]);
-                obj.result.xh_pre = elm.xh_pre;
-                obj.result.mL = elm.mL;
-                P(15) = elm.mL;
+                % elm = obj.estimate_load_mass.estimate([agent,mLi,mui]);
+                % obj.result.xh_pre = elm.xh_pre;
+                % obj.result.mL = elm.mL;
+                % P(15) = elm.mL;
             end
             P(15) = model.state.mL;
             % aaa = P(15) 

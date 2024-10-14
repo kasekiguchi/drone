@@ -13,11 +13,11 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 1;%現在の結果を描画する
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fnowData = 10;%現在の結果を描画する
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
-fF=1;%flightのみは１
-startTime = 0;
+fF=10;%flightのみは１
+startTime = 31;
 endTime = 80;%1E3;
 %どの時間の範囲を描画するか指定   
 
@@ -39,6 +39,8 @@ endTime = 80;%1E3;
     % log2=changeResult(log_addingTtoEL3, "elc");
  %simplifyLogger
     loggers = {
+        offlineLogger
+        % simple_log
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
@@ -757,6 +759,8 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
             cF2z2{i}=zero4;cF3z3{i}=zero4;cF4z4{i}=zero4;
             cinput{i}=zero4;cu{i}=zero4;cuHL{i}=zero4;inner_input{i}=zeros(8,lt(i));
             cvf{i}=zero4;cz2{i}=zero4;cz3{i}=zero4;cz4{i}=zero4;
+            mLi{i} = zero4(1,:);
+            emL{i} = zero4(1,:);
 
             fExpand = isfield(loggers{i}.estimator,"Trs");
             if fExpand
@@ -814,7 +818,8 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
             vxL{i} = evL{i}(1,:);
             vyL{i} = evL{i}(2,:);
             vzL{i} = evL{i}(3,:);
-            mLi{i} = cmLi{i};
+            % mLi{i} = cmLi{i};
+            mLi{i} = emL{i};
 
             cinputT{i} = cinput{i}(1,:);
             cinputR{i} = cinput{i}(2,:);
