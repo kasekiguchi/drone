@@ -10,7 +10,8 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1009hun_momose_exp_Log(09-Oct-2024_17_09_47).mat");
+load("sl1009hun_momose2_Log(09-Oct-2024_17_14_01).mat");
+z_ari=0;%zを求める場合は1に
 
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 %load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
@@ -57,12 +58,12 @@ kari_logt=[0;logt(1:end-1)];
     Step_time= logt-kari_logt;
     
      InnerInput(:,i-arming_start_idx+1) = Agent.inner_input{i};
-     if agent.controller.result.Z1 ==1
-     Z_14(:,i-arming_start_idx+1)=[Agent.Z1{i};
-         Agent.Z2{i};
-         Agent.Z3{i};
-         Agent.Z4{i}];
-     end
+      if z_ari ==1
+     % Z_14(:,i-arming_start_idx+1)=[Agent.Z1{i};
+     %     Agent.Z2{i};
+     %     Agent.Z3{i};
+     %     Agent.Z4{i}];
+     % end
 end
 count_gross_over_0025=length( find( Step_time >= 0.025 ) )
 count_persentage_over_0025=length( find( Step_time >= 0.025 ) )/length(Step_time)
@@ -219,12 +220,12 @@ if figtype == 1
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
      xlabel("Time [s]",'Interpreter','latex'); ylabel("Step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
-if z_14==1
-figure(12);  plot(logt, Z_14); 
-    % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
-     xlabel("Time [s]",'Interpreter','latex'); ylabel("nyuuryoku [s]",'Interpreter','latex'); legend("Z1","Z2","Z3","Z4",  "Location","northwest",'Interpreter','latex');
-    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
-end
+% if z_14==1
+% figure(12);  plot(logt, Z_14); 
+%     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+%      xlabel("Time [s]",'Interpreter','latex'); ylabel("nyuuryoku [s]",'Interpreter','latex'); legend("Z1","Z2","Z3","Z4",  "Location","northwest",'Interpreter','latex');
+%     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+% end
 elseif figtype == 2
 %牽引物あり↓
  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
