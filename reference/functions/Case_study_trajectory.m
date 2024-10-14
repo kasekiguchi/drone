@@ -24,7 +24,7 @@ z_0 = X0(3);
 %% circle
 x = cos(t) -1;
 y = sin(t);
-z = cos(t) +1;
+z = 1;
 %%
 % x = 1/(1+exp(-t + te/2));
 % y = 0;

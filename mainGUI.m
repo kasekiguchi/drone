@@ -12,8 +12,9 @@ cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
 cd(cf); close all hidden; clear all; userpath('clear');
 %%
 clc
-SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","SimMCMPC","SimMPC","SimHLMCMPC","SimHLMPC"];
-ExpBaseMode = ["","ExpTestMotiveConnection","ExpHL","ExpMPC_HLMC"];
+% SimBaseMode = ["SimVoronoi","SimHL","SimLiDAR","SimMCMPC","SimMPC","SimHLMCMPC","SimHLMPC"];
+SimBaseMode = ["SimMCMPC"];
+ExpBaseMode = [""];
 fExp = 0;
 fDebug = 0; % 1: active : for debug function
 PInterval = 0.6; % sec : poling interval for emergency stop
