@@ -20,7 +20,7 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '0731_KMPC_saigen_hovering_code00';
 
-filename = '0722_KMPC_X20_hovering_H10_dt008';
+filename = 'sim_KMPC_test_1014';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
