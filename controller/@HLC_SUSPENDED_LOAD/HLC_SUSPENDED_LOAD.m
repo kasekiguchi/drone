@@ -76,6 +76,19 @@ classdef HLC_SUSPENDED_LOAD < handle
             % invbeta2 = obj.inv_beta2_SuspendedLoad(x,xd',vf,vs',P);
             % a = obj.v_SuspendedLoad(x,xd',vf,vs',P);
             % us = h234*invbeta2*a;
+
+            % x=[Agent.estimator.result{1,i}.state.q(1:3);Agent.estimator.result{1,i}.state.w(1:3);Agent.estimator.result{1,i}.state.pL(1:3);Agent.estimator.result{1,i}.state.vL(1:3);Agent.estimator.result{1,i}.state.pT(1:3);Agent.estimator.result{1,i}.state.wL(1:3)];
+           % xd=Agent.reference.result{1,i}.state.xd;
+            % P=([0.73, 0.175, 0.175/2, 0.175/2, 0.175/2, 9.81, 0.0301, 0.0301, 0.0301, 0.0301, 0.000008, 0.000008, 0.000008, 0.000008, 0.084, 0.046]);            
+            % obj.result.Z1 = Z1_SuspendedLoad(x,xd',0,P);
+           
+            obj.result.Z1 = obj.Z1_SuspendedLoad(x,xd',0);
+              % vf=-F1*obj.result.Z1;
+
+             obj.result.Z2 = obj.Z2_SuspendedLoad(x,xd',vf,P);
+             obj.result.Z3 = obj.Z3_SuspendedLoad(x,xd',vf,P);
+             obj.result.Z4 = obj.Z4_SuspendedLoad(x,xd',vf,P);
+           
             uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
 
             h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);
