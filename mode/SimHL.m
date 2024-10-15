@@ -34,10 +34,10 @@ app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time
 %自動表示↓
 
 
-dt = diff(app.logger.Data.t(1:find(app.logger.Data.phase==0,1,'first')-1));
-t = app.logger.data(0,'t',[]);
-figure(100)
-plot(t(1:end-1),dt);
+% dt = diff(app.logger.Data.t(1:find(app.logger.Data.phase==0,1,'first')-1));
+% t = app.logger.data(0,'t',[]);
+% figure(100)
+% plot(t(1:end-1),dt);
 
 Graphplot(app)
 

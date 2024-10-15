@@ -56,7 +56,7 @@ Controller.gainFunc = @(tt) deal(place([1,tt;0,1], [tt^2/2;tt],p2),...
     place([1,tt;0,1], [tt^2/2;tt],p2));%意図した極（p2,p4）になるようにゲインを計算。
 %↑ゲイン可変用2/3
 
-
+                                
 
 %離散時間係数行列
 % A2d = 
