@@ -14,11 +14,11 @@ clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att 
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
 fnowData = 10;%現在の結果を描画する
-fMul =10;%複数まとめるかレーダーチャートの時は無視される
+fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-startTime = 31;
-endTime = 80;%1E3;
+startTime = 46;
+endTime = 103;%1E3;
 %どの時間の範囲を描画するか指定   
 
 % startTime = [10,10,10,80];%モデル誤差用
@@ -39,8 +39,8 @@ endTime = 80;%1E3;
     % log2=changeResult(log_addingTtoEL3, "elc");
  %simplifyLogger
     loggers = {
-        offlineLogger
-        % simple_log
+        % offlineLogger
+        simple_log
                 % simple_log_noEstimate
                 % simple_log_Estimate
                 %ジャーナル用
@@ -65,6 +65,8 @@ endTime = 80;%1E3;
                 % simplify_
         };
     c=[
+        % "offline",
+        "exp"
         % "HLLS","HLFT"
         % "LS","FT"
         % "FT"
@@ -102,7 +104,7 @@ endTime = 80;%1E3;
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
      n = "input";
      n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D","uHL","t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","t_vxL" ,"t_vyL" ,"t_vzL"];%比較するとき複数まとめる
-     n = ["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi"];%比較するとき複数まとめる
+     % n = ["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","input"];%比較するとき複数まとめる
 %========================================================================
 % multiFigure
 
@@ -895,7 +897,7 @@ function [allData,RMSElog]=dataSummarize2(loggers, c, option, addingContents, fF
         allData.t_vyL = {struct('x',{time},'y',{vyL}), struct('x','time (s)','y','$v_y$ (m/s)'),CC,add_option([],option,addingContents)};
         allData.t_vzL = {struct('x',{time},'y',{vzL}), struct('x','time (s)','y','$v_z$ (m/s)'),CC,add_option([],option,addingContents)};
         allData.three_DL = {struct('x',{[estxL,refx]},'y',{[estyL,refy]},'z',{[estzL,refz]}), struct('x','$x$ (m)','y','$y$ (m)','z','$z$ (m)'), Rc,add_option(["aspect","camposition"],option,addingContents)};
-        allData.mLi = {struct('x',{time},'y',{mLi}), struct('x','time (s)','y','mass (kg)'),Rc,add_option([],option,addingContents)};
+        allData.mLi = {struct('x',{time},'y',{mLi}), struct('x','time (s)','y','mass (kg)'),CC,add_option([],option,addingContents)};
 
         allData.uHL = { struct('x',{time},'y',{cuHL}), struct('x','time (s)','y','inputHL'), LgndCrt(["$z$ ","$x$ ","$y$ ","$\psi$"],c),add_option([],option,addingContents)};
         allData.Trs = {struct('x',{time},'y',{eTrs}), struct('x','time (s)','y','Tr (N) dTr [N/s] ddTr [N/$\rm{s^2}$]'), LgndCrt(["$Tr$","$dTr$","$ddTr$"],c),add_option([],option,addingContents)};
