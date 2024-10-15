@@ -34,7 +34,7 @@ function [] = Graphplot(app)
     size = figure;
     size.WindowState = 'maximized'; %表示するグラフを最大化
     row = 2;
-    line = 3;
+    line = 4;
     colororder(newcolors)
     
     % 位置
@@ -85,24 +85,25 @@ function [] = Graphplot(app)
     hold off
     title('Velocity v of agent1');
     
-    % % 角速度
-    % subplot(row, line, 4);
-    % plot(data.t, data.w(:,:),'LineWidth',1.2);
-    % hold on
-    % xlabel('Time [s]');
-    % ylabel('w');
-    % grid on
-    % xlim([data.t(1) data.t(end)])
-    % lgdtmp = {'$\omega_{1 e}$','$\omega_{2 e}$','$\omega_{3 e}$'};
-    % lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
-    % lgd.NumColumns = columnomber;
-    % ax(4) = gca;
-    % hold off
-    % title('Angular velocity w of agent1');
+    % 角速度
+    subplot(row, line, 4);
+    plot(data.t, data.w(:,:),'LineWidth',1.2);
+    hold on
+    xlabel('Time [s]');
+    ylabel('w');
+    grid on
+    xlim([data.t(1) data.t(end)])
+    lgdtmp = {'$\omega_{1 e}$','$\omega_{2 e}$','$\omega_{3 e}$'};
+    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    lgd.NumColumns = columnomber;
+    ax(4) = gca;
+    hold off
+    title('Angular velocity w of agent1');
 
         % x-y
-    subplot(row,line,4);
+    subplot(row,line,5);
     plot(data.p(1,:),data.p(2,:),'LineWidth',1); hold on; plot(data.pr(1,:), data.pr(2,:), '--'); hold off;
+    daspect([1 1 1])
     xlabel('x');
     ylabel('y');
     xlim([-3.0,3.0]);
@@ -116,7 +117,7 @@ function [] = Graphplot(app)
     title('x-y of agent1','FontSize',12);
 
     % 総入力
-    subplot(row,line,5);
+    subplot(row,line,6);
     plot(data.t,data.u(1,:),'LineWidth',1)
     xlabel('Time [s]');
     ylabel('Input_{thrust}');
@@ -130,7 +131,7 @@ function [] = Graphplot(app)
     title('Input u of agent1','FontSize',12);
 
     % 各トルク
-    subplot(row,line,6);
+    subplot(row,line,7);
     plot(data.t,data.u(2:4,:),'LineWidth',1)
     xlabel('Time [s]');
     ylabel('Input_{torque}');
@@ -141,6 +142,23 @@ function [] = Graphplot(app)
     lgd.NumColumns = columnomber;
     ax(6) = gca;
     title('Input torque of agent1','FontSize',12);
+
+    % 位置の誤差
+    subplot(row, line, 8);
+    colororder(newcolors)
+    plot(data.t, data.pr(:,:) - data.p(:,:),'LineWidth',1.2);
+    xlabel('Time [s]');
+    ylabel('error');
+    %hold on
+    grid on
+    %plot(data.t,data.pr(:,:),'LineWidth',1.2,'LineStyle','--');
+    xlim([data.t(1) data.t(end)])
+    lgdtmp = {'$x$','$y$','$z$'};
+    lgd = legend(lgdtmp,'FontSize',Fsize.lgd,'Interpreter','latex','Location','best');
+    lgd.NumColumns = columnomber;
+    ax = gca;
+    %hold off
+    title('Error of agent1');
 
     % % x-y
     % subplot(row,line,7);
