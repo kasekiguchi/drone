@@ -10,11 +10,10 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1009hun_momose2_Log(09-Oct-2024_17_14_01).mat");
-z_ari=0;%zを求める場合は1に
+load("sl1009hun_momose_exp_Log(09-Oct-2024_17_09_47).mat");
 
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
-%load("sl800_hovering_Log(01-Jul-2024_16_33_08).mat");
+% load("sl1004hun_diag([200000,10000,100,10,10,10]),[0.005]_Log(04-Oct-2024_17_04_52).mat");
 % load("Data/Eikyu_0514_result/demo_logger_0517.mat");%2回目の実験
 % load("Data/Eikyu_0514_result/momoseHL_miyake_0514.mat");%単純HL@momose
 %log = logger;%永久用（↓とどっちかをコメントアウト）
@@ -41,7 +40,11 @@ Input = zeros(4,flight_finish_idx-arming_start_idx+1);
 InnerInput = zeros(8, flight_finish_idx-arming_start_idx+1);
 Step_time=zeros(flight_finish_idx-arming_start_idx+1,1);%アーミングからフライト
 Flight_step_time=zeros(flight_finish_idx-flight_start_idx+1,1);%フライトステップのみ
-Z_14=zeros(4,flight_finish_idx-arming_start_idx+1);
+
+Z_1=zeros(2,flight_finish_idx-arming_start_idx+1);
+Z_2=zeros(6,flight_finish_idx-arming_start_idx+1);
+Z_3=zeros(6,flight_finish_idx-arming_start_idx+1);
+Z_4=zeros(2,flight_finish_idx-arming_start_idx+1);
 for i = arming_start_idx:flight_finish_idx
     Est(:,i-arming_start_idx+1) = [Agent.estimator.result{i}.state.p;
                 Agent.estimator.result{i}.state.q;
@@ -58,12 +61,17 @@ kari_logt=[0;logt(1:end-1)];
     Step_time= logt-kari_logt;
     
      InnerInput(:,i-arming_start_idx+1) = Agent.inner_input{i};
-      if z_ari ==1
-     % Z_14(:,i-arming_start_idx+1)=[Agent.Z1{i};
-     %     Agent.Z2{i};
-     %     Agent.Z3{i};
-     %     Agent.Z4{i}];
-     % end
+     if isfield(Agent.controller.result{flight_start_idx}, 'Z1')%Agent.controller.result{flight_start_idx}.Z1 ~= 0
+z_ari=1;%zを求める場合は1になる．
+    else 
+    z_ari=0;
+    end
+      if z_ari ==1 && i >=flight_start_idx
+      Z_1(:,i-arming_start_idx+1)=[Agent.controller.result{i}.Z1];
+      Z_2(:,i-arming_start_idx+1)=[Agent.controller.result{i}.Z2];
+      Z_3(:,i-arming_start_idx+1)=[Agent.controller.result{i}.Z3];
+      Z_4(:,i-arming_start_idx+1)=[Agent.controller.result{i}.Z4];
+      end
 end
 count_gross_over_0025=length( find( Step_time >= 0.025 ) )
 count_persentage_over_0025=length( find( Step_time >= 0.025 ) )/length(Step_time)
@@ -163,7 +171,7 @@ takeoff_start_time=logt(takeoff_start_idx);
 flight_start_time=logt(flight_start_idx);
 fprintf('Takeoff start time = %.4f [s] Flight start time = %.4f [s]\n', takeoff_start_time, flight_start_time);
 %%
-m = 2; n = 3;
+% m = 2; n = 3;
 if figtype == 1
     % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
     figure(1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3,:), '--'); hold off;
@@ -220,14 +228,32 @@ if figtype == 1
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
      xlabel("Time [s]",'Interpreter','latex'); ylabel("Step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
-% if z_14==1
-% figure(12);  plot(logt, Z_14); 
-%     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
-%      xlabel("Time [s]",'Interpreter','latex'); ylabel("nyuuryoku [s]",'Interpreter','latex'); legend("Z1","Z2","Z3","Z4",  "Location","northwest",'Interpreter','latex');
-%     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
-% end
+ if z_ari==1
+ figure(12);  plot(logt, Z_1); 
+     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+      xlabel("Time [s]",'Interpreter','latex'); ylabel("$$\xi_1$$",'Interpreter','latex'); legend("$$\xi_1.1$$","$$\xi_1.2$$",  "Location","northwest",'Interpreter','latex');
+     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+
+     figure(13);  plot(logt, Z_2); 
+     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+      xlabel("Time [s]",'Interpreter','latex'); ylabel("$$\xi_2$$",'Interpreter','latex'); legend("$$\xi_2.1$$","$$\xi_2.2$$","$$\xi_2.3$$","$$\xi_2.4$$","$$\xi_2.5$$","$$\xi_2.6$$",  "Location","northwest",'Interpreter','latex');
+     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+
+     figure(14);  plot(logt, Z_3); 
+     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+      xlabel("Time [s]",'Interpreter','latex'); ylabel("$$\xi~3$$",'Interpreter','latex'); legend("$$\xi_3.1$$","$$\xi_3.2$$","$$\xi_3.3$$","$$\xi_3.4$$","$$\xi_3.5$$","$$\xi_3.6$$",  "Location","northwest",'Interpreter','latex');
+     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+ 
+     figure(15);  plot(logt, Z_4); 
+     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+      xlabel("Time [s]",'Interpreter','latex'); ylabel("$$\xi_4$$",'Interpreter','latex'); legend("$$\xi_4.1$$","$$\xi_4.2$$",  "Location","northwest",'Interpreter','latex');
+     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+
+ end
 elseif figtype == 2
-%牽引物あり↓
+%牽引物あり↓かつｚなし
+if z_ari==0
+    m = 2; n = 3;
  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
       subplot(m,n,1);  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
      xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("$$x$$.Load state", "$$y$$.Load state", "$$z$$.Load state","$$x$$.Drone state", "$$y$$.Drone state", "$$z$$.Drone state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
@@ -256,8 +282,59 @@ elseif figtype == 2
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     ytickformat('%.1f');
     % virtual input
-    subplot(m,n,5); plot(logt, InnerInput); 
-    xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner input",'Interpreter','latex');legend("1","2", "3", "4","5","6", "7", "8",'Interpreter','latex');%キャプション間違ってるかも
+        subplot(m,n,5); plot(logt, InnerInput(1:4,:));
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner input",'Interpreter','latex');legend("lever.roll","lever.pitch", "lever.thorottle", "lever.yaw",'Interpreter','latex');
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+
+    %↓三宅整備中2/2ドローン上から
+    % subplot(m,n,5); plot(Est(1,:), Est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
+    % xlabel("x [m]"); ylabel("y [m]"); %legend("x.state", "y.state");
+    % grid on; xlim([-inf, inf]); ylim([-inf inf]);
+    % subplot(m,n,5);
+    % plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
+    % grid on; xlim([-inf, inf]); ylim([-inf inf]);pbaspect([1 1 1]);
+    % xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Load","Reference of Load",'Interpreter','latex');
+    % title("Position x-y"); 
+    %ドローンの牽引物ｘｙ
+    subplot(m,n,6);
+    plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
+    % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+    grid on; xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
+    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Load", "Reference",'Interpreter','latex');
+    
+else
+%z_ari
+m = 3; n = 3;
+plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
+      subplot(m,n,1);  plot(logt, Road_est(1:3,:), '--'); hold on; plot(logt, Est(1:3,:), '--');plot(logt, Ref(1:3,:)), hold off;
+     xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("$$x$$.Load state", "$$y$$.Load state", "$$z$$.Load state","$$x$$.Drone state", "$$y$$.Drone state", "$$z$$.Drone state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
+      grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % title("Time change of Position"); 
+
+    % Title = strcat('LandingFreeFall', '-N', num2str(data.param.Maxparticle_num), '-', num2str(te), 's-', datestr(datetime('now'), 'HHMMSS'));
+    %牽引物なし↓
+    % subplot(m,n,1); plot(logt, Est(1:3,:)); hold on; plot(logt, Ref(1:3, :), '--'); hold off;
+    %  xlabel("Time [s]",'Interpreter','latex'); ylabel("Position [m]",'Interpreter','latex'); legend("$$x$$.Drone state", "$$y$$.Drone state", "$$z$$.Drone state", "$$x$$.Reference", "$$y$$.Reference", "$$z$$.Reference",  "Location","northwest",'Interpreter','latex');
+    %  grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % title("Time change of Position"); 
+    % attitude
+    subplot(m,n,2); plot(logt, Est(4:6,:)); %hold on; plot(logt, Ref(4:6, :), '--'); hold off;
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Attitude [rad]",'Interpreter','latex'); legend("roll", "pitch", "yaw", "roll.reference", "pitch.reference", "yaw.reference", "Location","northwest",'Interpreter','latex');
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % title("Time change of Atiitude");
+    % velocity
+    subplot(m,n,3); plot(logt, Est(7:9,:)); %hold on; plot(logt, Ref(7:9, :), '--'); hold off;
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Velocity [m/s]",'Interpreter','latex'); legend("$$vx$$", "$$vy$$", "$$vz$$", "$$vx.ref$$", "$$vy.ref$$", "$$vz.ref$$", "Location","southwest",'Interpreter','latex');
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    % title("Time change of Velocity"); 
+    % input
+    subplot(m,n,4); plot(logt, Input, "LineWidth", 1.5); hold on;
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Input [N]",'Interpreter','latex'); legend("input.total", "input.roll", "input.pitch", "input.yaw","Location","northwest",'Interpreter','latex');
+    grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+    ytickformat('%.1f');
+    % virtual input
+    subplot(m,n,5); plot(logt, InnerInput(1:4,:));
+    xlabel("Time [s]",'Interpreter','latex'); ylabel("Inner input",'Interpreter','latex');legend("lever.roll","lever.pitch", "lever.thorottle", "lever.yaw",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
     %↓三宅整備中2/2ドローン上から
     % subplot(m,n,5); plot(Est(1,:), Est(2,:)); hold on; plot(Ref(1,:), Ref(2,:), '--'); hold off;
@@ -268,15 +345,29 @@ elseif figtype == 2
     % grid on; xlim([-inf, inf]); ylim([-inf inf]);pbaspect([1 1 1]);
     % xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Load","Reference of Load",'Interpreter','latex');
     % title("Position x-y"); 
-    %ドローンｘｙ
+    %ドローンの牽引物ｘｙ
     subplot(m,n,6);
     plot(Est(1,:), Est(2,:)); hold on; plot(Road_est(1,:), Road_est(2,:), '--');plot(Ref(1,:), Ref(2,:), '--'), hold off;
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
     grid on; xlim([-2.0, 2.0]); ylim([-2.0, 2.0]);pbaspect([1 1 1]);
-    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Drone", "Reference",'Interpreter','latex');
-    subplot(m,n,6); 
+    xlabel('$$x$$ [m]','Interpreter','latex'); ylabel("$$y$$ [m]",'Interpreter','latex'); legend("Load", "Reference",'Interpreter','latex');
+    
+subplot(m,n,7);plot(logt, Z_1); 
+     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+      xlabel("Time [s]",'Interpreter','latex'); ylabel("$$\xi~1$$~($$z$$ direction)",'Interpreter','latex'); legend("$$\xi1.1$$","$$\xi1.2$$",  "Location","northwest",'Interpreter','latex');
+     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
 
-    figure(7);  plot(logt, Step_time); 
+    subplot(m,n,8);  plot(logt, Z_2); 
+     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");$
+      xlabel("Time [s]",'Interpreter','latex'); ylabel("$$\xi~2$$~($$x$$ direction)",'Interpreter','latex'); legend("$$\xi2.1$$","$$\xi2.2$$","$$\xi2.3$$","$$\xi2.4$$","$$\xi2.5$$","$$\xi2.6$$",  "Location","northwest",'Interpreter','latex');
+     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+
+     subplot(m,n,9);  plot(logt, Z_3); 
+     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
+      xlabel("Time [s]",'Interpreter','latex'); ylabel("$$\xi~3$$~($$y$$ direction)",'Interpreter','latex'); legend("$$\xi3.1$$","$$\xi3.2$$","$$\xi3.3$$","$$\xi3.4$$","$$\xi3.5$$","$$\xi3.6$$",  "Location","northwest",'Interpreter','latex');
+     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
+end
+    figure(10);  plot(logt, Step_time); 
     % xlabel("x [m]"); ylabel("y [m]"); legend("Drone", "Load","Reference of Load");
      xlabel("Time [s]",'Interpreter','latex'); ylabel("Step time [s]",'Interpreter','latex'); legend("step time",  "Location","northwest",'Interpreter','latex');
     grid on; xlim([logt(1), logt(end)]); ylim([-inf inf]);
