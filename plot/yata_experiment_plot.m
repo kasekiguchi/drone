@@ -64,33 +64,33 @@ vx_ref = v_r(1, :);
 vy_ref = v_r(2, :);
 vz_ref = v_r(3, :);
 
-roll_s2 = rpy2(1, :);
-pitch_s2 = rpy2(2, :);
-yaw_s2 = rpy2(3, :);
-x_s2 = xyz2(1, :);
-y_s2 = xyz2(2, :);
-z_s2 = xyz2(3, :);
-roll_est2 = rpy_est2(1, :);
-pitch_est2 = rpy_est2(2, :);
-yaw_est2 = rpy_est2(3, :);
-x_est2 = xyz_est2(1, :);
-y_est2 = xyz_est2(2, :);
-z_est2 = xyz_est2(3, :);
-vx_est2 = v_est2(1, :);
-vy_est2 = v_est2(2, :);
-vz_est2 = v_est2(3, :);
-wx_est2 = w_est2(1, :);
-wy_est2 = w_est2(2, :);
-wz_est2 = w_est2(3, :);
-roll_ref2 = rpy_r2(1, :);
-pitch_ref2 = rpy_r2(2, :);
-yaw_ref2 = rpy_r2(3, :);
-x_ref2 = xyz_r2(1, :);
-y_ref2 = xyz_r2(2, :);
-z_ref2 = xyz_r2(3, :);
-vx_ref2 = v_r2(1, :);
-vy_ref2 = v_r2(2, :);
-vz_ref2 = v_r2(3, :);
+% roll_s2 = rpy2(1, :);
+% pitch_s2 = rpy2(2, :);
+% yaw_s2 = rpy2(3, :);
+% x_s2 = xyz2(1, :);
+% y_s2 = xyz2(2, :);
+% z_s2 = xyz2(3, :);
+% roll_est2 = rpy_est2(1, :);
+% pitch_est2 = rpy_est2(2, :);
+% yaw_est2 = rpy_est2(3, :);
+% x_est2 = xyz_est2(1, :);
+% y_est2 = xyz_est2(2, :);
+% z_est2 = xyz_est2(3, :);
+% vx_est2 = v_est2(1, :);
+% vy_est2 = v_est2(2, :);
+% vz_est2 = v_est2(3, :);
+% wx_est2 = w_est2(1, :);
+% wy_est2 = w_est2(2, :);
+% wz_est2 = w_est2(3, :);
+% roll_ref2 = rpy_r2(1, :);
+% pitch_ref2 = rpy_r2(2, :);
+% yaw_ref2 = rpy_r2(3, :);
+% x_ref2 = xyz_r2(1, :);
+% y_ref2 = xyz_r2(2, :);
+% z_ref2 = xyz_r2(3, :);
+% vx_ref2 = v_r2(1, :);
+% vy_ref2 = v_r2(2, :);
+% vz_ref2 = v_r2(3, :);
 
 %%
 %計算の下準備　現在位置と速度あり
@@ -187,13 +187,13 @@ end
 %誤差評価 目標軌道全体
 % MSEの計算　平均二乗誤差
 %位置
-mse_x_1 = mean((x_est_sel - x_ref_sel).^2)
-mse_y_1 = mean((y_est_sel - y_ref_sel).^2)
-mse_z_1 = mean((z_est_sel - z_ref_sel).^2)
+mse_x_1 = mean((x_est_sel - x_ref_sel).^2);
+mse_y_1 = mean((y_est_sel - y_ref_sel).^2);
+mse_z_1 = mean((z_est_sel - z_ref_sel).^2);
 %速度
-mse_vx_1 = mean((vx_est_sel - vx_ref_sel).^2)
-mse_vy_1 = mean((vy_est_sel - vy_ref_sel).^2)
-mse_vz_1 = mean((vz_est_sel - vz_ref_sel).^2)
+mse_vx_1 = mean((vx_est_sel - vx_ref_sel).^2);
+mse_vy_1 = mean((vy_est_sel - vy_ref_sel).^2);
+mse_vz_1 = mean((vz_est_sel - vz_ref_sel).^2);
 
 % mse_x_2 = mean((x_est2_sel - x_ref2_sel).^2)
 % mse_y_2 = mean((y_est2_sel - y_ref2_sel).^2)
@@ -205,13 +205,13 @@ mse_vz_1 = mean((vz_est_sel - vz_ref_sel).^2)
 
 % MAEの計算　平均絶対誤差
 %位置
-mae_x_1 = mean(abs(x_est_sel - x_ref_sel))
-mae_y_1 = mean(abs(y_est_sel - y_ref_sel))
-mae_z_1 = mean(abs(z_est_sel - z_ref_sel))
+mae_x_1 = mean(abs(x_est_sel - x_ref_sel));
+mae_y_1 = mean(abs(y_est_sel - y_ref_sel));
+mae_z_1 = mean(abs(z_est_sel - z_ref_sel));
 %速度
-mae_vx_1 = mean(abs(vx_est_sel - vx_ref_sel))
-mae_vy_1 = mean(abs(vy_est_sel - vy_ref_sel))
-mae_vz_1 = mean(abs(vz_est_sel - vz_ref_sel))
+mae_vx_1 = mean(abs(vx_est_sel - vx_ref_sel));
+mae_vy_1 = mean(abs(vy_est_sel - vy_ref_sel));
+mae_vz_1 = mean(abs(vz_est_sel - vz_ref_sel));
 
 % %位置
 % mae_x_2 = mean(abs(x_est_sel - x_ref_sel))
@@ -224,13 +224,13 @@ mae_vz_1 = mean(abs(vz_est_sel - vz_ref_sel))
 
 % 最大誤差の計算
 %位置
-max_error_x_1 = max(abs(x_est_sel - x_ref_sel))
-max_error_y_1 = max(abs(y_est_sel - y_ref_sel))
-max_error_z_1 = max(abs(z_est_sel - z_ref_sel))
+max_error_x_1 = max(abs(x_est_sel - x_ref_sel));
+max_error_y_1 = max(abs(y_est_sel - y_ref_sel));
+max_error_z_1 = max(abs(z_est_sel - z_ref_sel));
 %速度
-max_error_vx_1 = max(abs(vx_est_sel - vx_ref_sel))
-max_error_vy_1 = max(abs(vy_est_sel - vy_ref_sel))
-max_error_vz_1 = max(abs(vz_est_sel - vz_ref_sel))
+max_error_vx_1 = max(abs(vx_est_sel - vx_ref_sel));
+max_error_vy_1 = max(abs(vy_est_sel - vy_ref_sel));
+max_error_vz_1 = max(abs(vz_est_sel - vz_ref_sel));
 
 % %位置
 % max_error_x_2 = max(abs(x_est2_sel - x_ref2_sel))
@@ -241,6 +241,25 @@ max_error_vz_1 = max(abs(vz_est_sel - vz_ref_sel))
 % max_error_y_2 = max(abs(vy_est2_sel - vy_ref2_sel))
 % max_error_z_2 = max(abs(vz_est2_sel - vz_ref2_sel))
 
+fprintf('軌道x_1の位置MSE: %f\n', mse_x_1);
+fprintf('軌道y_1の置MSE: %f\n', mse_y_1);
+fprintf('軌道z_1の位置MSE: %f\n', mse_z_1);
+fprintf('軌道x_1の位置MAE: %f\n', mae_x_1);
+fprintf('軌道y_1の位置MAE: %f\n', mae_y_1);
+fprintf('軌道z_1の位置MAE: %f\n', mae_z_1);
+fprintf('軌道x_1の位置最大誤差: %f\n', max_error_x_1);
+fprintf('軌道y_1の収位置最大誤差: %f\n', max_error_y_1);
+fprintf('軌道z_1の位置最大誤差: %f\n', max_error_z_1);
+fprintf('軌道x_1の速度MSE: %f\n', mse_vx_1);
+fprintf('軌道y_1の速度MSE: %f\n', mse_vy_1);
+fprintf('軌道z_1の速度MSE: %f\n', mse_vz_1);
+fprintf('軌道x_1の速度MAE: %f\n', mae_vx_1);
+fprintf('軌道y_1の速度MAE: %f\n', mae_vy_1);
+fprintf('軌道z_1の速度MAE: %f\n', mae_vz_1);
+fprintf('軌道x_1の速度最大誤差: %f\n', max_error_vx_1);
+fprintf('軌道y_1の速度最大誤差: %f\n', max_error_vy_1);
+fprintf('軌道z_1の速度最大誤差: %f\n', max_error_vz_1);
+
 %% 誤差評価　収束後　位置
 
 % 誤差の計算
@@ -249,7 +268,7 @@ error_y_1 = abs(y_est_sel - y_ref_sel);
 error_z_1 = abs(z_est_sel - z_ref_sel);
 
 % 収束閾値を設定（例：0.01）
-threshold = 0.0001;
+threshold = 0.1;
 
 % 各軌道が収束する最初の時刻を見つける
 % convergence_time_index_x_1 = time(find(error_x_1 < threshold, 1));
@@ -450,7 +469,7 @@ error_vy_1 = abs(vy_est_sel - vy_ref_sel);
 error_vz_1 = abs(vz_est_sel - vz_ref_sel);
 
 % 収束閾値を設定（例：0.01）
-threshold = 0.0001;
+threshold = 0.1;
 
 % 各軌道が収束する最初の時刻を見つける
 convergence_time_index_vx_1 = find(error_vx_1 < threshold, 1);
