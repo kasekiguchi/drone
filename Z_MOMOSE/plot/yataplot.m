@@ -640,7 +640,7 @@ set(gca().YAxis, 'Fontsize', 12)
 set(gca().ZAxis, 'Fontsize', 12)
 xlim([-1.5 1.5])
 ylim([-1.5 1.5])
-zlim([0 3])
+zlim([0 2])
 hold on
 plot3(x_ref_sel, y_ref_sel, z_ref_sel, '--', 'LineWidth', 2)
 legend('Estimator','Reference','Location', ...
@@ -866,3 +866,17 @@ hold on
 legend('Reference','Location', ...
     'southwest','fontsize',8)
 hold off
+
+% plot(x_ref_sel, y_ref_sel,  '-','LineWidth', 2);  % 軌道の太さを指定
+% grid on                         % グリッドを表示
+% xlabel('X[m]','FontSize',12) 
+% ylabel('Y[m]','FontSize',12)
+% zlabel('Z[m]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([-1.5 1.5])
+% ylim([-1.5 1.5])
+% hold on
+% legend('Reference','Location', ...
+%     'southwest','fontsize',8)
+% hold off

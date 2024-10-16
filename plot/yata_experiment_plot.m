@@ -228,9 +228,9 @@ max_error_x_1 = max(abs(x_est_sel - x_ref_sel))
 max_error_y_1 = max(abs(y_est_sel - y_ref_sel))
 max_error_z_1 = max(abs(z_est_sel - z_ref_sel))
 %速度
-max_error_x_1 = max(abs(vx_est_sel - vx_ref_sel))
-max_error_y_1 = max(abs(vy_est_sel - vy_ref_sel))
-max_error_z_1 = max(abs(vz_est_sel - vz_ref_sel))
+max_error_vx_1 = max(abs(vx_est_sel - vx_ref_sel))
+max_error_vy_1 = max(abs(vy_est_sel - vy_ref_sel))
+max_error_vz_1 = max(abs(vz_est_sel - vz_ref_sel))
 
 % %位置
 % max_error_x_2 = max(abs(x_est2_sel - x_ref2_sel))
@@ -247,9 +247,401 @@ max_error_z_1 = max(abs(vz_est_sel - vz_ref_sel))
 error_x_1 = abs(x_est_sel - x_ref_sel);
 error_y_1 = abs(y_est_sel - y_ref_sel);
 error_z_1 = abs(z_est_sel - z_ref_sel);
-error_x_2 = abs(x_est2_sel - x_ref2_sel);
-error_y_2 = abs(y_est2_sel - y_ref2_sel);
-error_z_2 = abs(z_est2_sel - z_ref2_sel);
+
+% 収束閾値を設定（例：0.01）
+threshold = 0.0001;
+
+% 各軌道が収束する最初の時刻を見つける
+% convergence_time_index_x_1 = time(find(error_x_1 < threshold, 1));
+% convergence_time_index_y_1 = time(find(error_y_1 < threshold, 1));
+% convergence_time_index_z_1 = time(find(error_z_1 < threshold, 1));
+% convergence_time_x = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+
+convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
+convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
+convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
+convergence_time_xyz = [convergence_time_index_x_1 convergence_time_index_y_1 convergence_time_index_z_1];
+
+% どれか遅い方の収束時刻を選ぶ
+% convergence_time_index = max(convergence_time_index_x_1, convergence_time_index_y_1, ...
+%     convergence_time_index_z_1);
+convergence_time_index = max(convergence_time_xyz);
+% convergence_time = time(convergence_time_index); % 収束時刻
+convergence_time = t_sel(1:convergence_time_index); % 収束時刻
+
+% 収束時刻以降のデータ
+trajectory_x_1_post_convergence = x_est_sel(convergence_time_index:end);
+trajectory_y_1_post_convergence = y_est_sel(convergence_time_index:end);
+trajectory_z_1_post_convergence = z_est_sel(convergence_time_index:end);
+t_1_post_convergence = t_sel(convergence_time_index:end);
+
+reference_x_1_post_convergence = x_ref_sel(convergence_time_index:end);
+reference_y_1_post_convergence = y_ref_sel(convergence_time_index:end);
+reference_z_1_post_convergence = z_ref_sel(convergence_time_index:end);
+
+% MSEの計算
+%位置
+mse_x_1 = mean((trajectory_x_1_post_convergence - reference_x_1_post_convergence).^2)
+mse_y_1 = mean((trajectory_y_1_post_convergence - reference_y_1_post_convergence).^2)
+mse_z_1 = mean((trajectory_z_1_post_convergence - reference_z_1_post_convergence).^2)
+
+% MAEの計算
+%位置
+mae_x_1 = mean(abs(trajectory_x_1_post_convergence - reference_x_1_post_convergence));
+mae_y_1 = mean(abs(trajectory_y_1_post_convergence - reference_y_1_post_convergence));
+mae_z_1 = mean(abs(trajectory_z_1_post_convergence - reference_z_1_post_convergence));
+
+%最大誤差
+max_error_x_1 = max(abs(x_est_sel(convergence_time_index:end) - x_ref_sel(convergence_time_index:end)));
+max_error_y_1 = max(abs(y_est_sel(convergence_time_index:end) - y_ref_sel(convergence_time_index:end)));
+max_error_z_1 = max(abs(z_est_sel(convergence_time_index:end) - z_ref_sel(convergence_time_index:end)));
+
+% 結果を表示
+fprintf('軌道x_1の収束後の位置MSE: %f\n', mse_x_1);
+fprintf('軌道y_1の収束後の位置MSE: %f\n', mse_y_1);
+fprintf('軌道z_1の収束後の位置MSE: %f\n', mse_z_1);
+fprintf('軌道x_1の収束後の位置MAE: %f\n', mae_x_1);
+fprintf('軌道y_1の収束後の位置MAE: %f\n', mae_y_1);
+fprintf('軌道z_1の収束後の位置MAE: %f\n', mae_z_1);
+fprintf('軌道x_1の収束後の位置最大誤差: %f\n', max_error_x_1);
+fprintf('軌道y_1の収束後の位置最大誤差: %f\n', max_error_y_1);
+fprintf('軌道z_1の収束後の位置最大誤差: %f\n', max_error_z_1);
+
+figure;
+plot(t_1_post_convergence,x_est_sel(convergence_time_index:end), '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Trajectory[m]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([t_1_post_convergence(1,1) inf])
+ylim([-1.5 1.5])
+hold on
+plot(t_1_post_convergence,y_est_sel(convergence_time_index:end), '-','LineWidth',2);
+plot(t_1_post_convergence,z_est_sel(convergence_time_index:end), '-','LineWidth',2);
+plot(t_1_post_convergence,x_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence,y_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence,z_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+legend('X-estimator','Y-estimator','Z-estimator', ...
+    'X-reference','Y-reference','Z-reference','Location', ...
+    'southwest','fontsize',8,'NumColumns',2)
+hold off
+
+%% 誤差評価　収束後　位置
+
+% % 誤差の計算
+% error_x_1 = abs(x_est_sel - x_ref_sel);
+% error_y_1 = abs(y_est_sel - y_ref_sel);
+% error_z_1 = abs(z_est_sel - z_ref_sel);
+% error_x_2 = abs(x_est2_sel - x_ref2_sel);
+% error_y_2 = abs(y_est2_sel - y_ref2_sel);
+% error_z_2 = abs(z_est2_sel - z_ref2_sel);
+% 
+% % 収束閾値を設定（例：0.01）
+% threshold = 0.01;
+% 
+% % 各軌道が収束する最初の時刻を見つける
+% convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
+% convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
+% convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
+% convergence_time_index_x_2 = find(error_x_2 < threshold, 1);
+% convergence_time_index_y_2 = find(error_y_2 < threshold, 1);
+% convergence_time_index_z_2 = find(error_z_2 < threshold, 1);
+% 
+% % どれか遅い方の収束時刻を選ぶ
+% convergence_time_index = max(convergence_time_index_x_1, convergence_time_index_y_1, ...
+%     convergence_time_index_z_1,convergence_time_index_x_2,convergence_time_index_y_2,convergence_time_index_z_2);
+% convergence_time = time(convergence_time_index); % 収束時刻
+% 
+% % 収束時刻以降のデータ
+% trajectory_x_1_post_convergence = x_est_sel(convergence_time_index:end);
+% trajectory_y_1_post_convergence = y_est_sel(convergence_time_index:end);
+% trajectory_z_1_post_convergence = z_est_sel(convergence_time_index:end);
+% trajectory_x_2_post_convergence = x_est2_sel(convergence_time_index:end);
+% trajectory_y_2_post_convergence = y_est2_sel(convergence_time_index:end);
+% trajectory_z_2_post_convergence = z_est2_sel(convergence_time_index:end);
+% t_1_post_convergence = t(convergence_time_index:end);
+% t_2_post_convergence = t2(convergence_time_index:end);
+% 
+% reference_x_1_post_convergence = x_ref_sel(convergence_time_index:end);
+% reference_y_1_post_convergence = y_ref_sel(convergence_time_index:end);
+% reference_z_1_post_convergence = z_ref_sel(convergence_time_index:end);
+% reference_x_2_post_convergence = x_ref2_sel(convergence_time_index:end);
+% reference_y_2_post_convergence = y_ref2_sel(convergence_time_index:end);
+% reference_z_2_post_convergence = z_ref2_sel(convergence_time_index:end);
+% 
+% % MSEの計算
+% %位置
+% mse_x_1 = mean((trajectory_x_1_post_convergence - reference_x_1_post_convergence).^2)
+% mse_y_1 = mean((trajectory_y_1_post_convergence - reference_y_1_post_convergence).^2)
+% mse_z_1 = mean((trajectory_z_1_post_convergence - reference_z_1_post_convergence).^2)
+% mse_x_2 = mean((trajectory_x_2_post_convergence - reference_x_2_post_convergence).^2)
+% mse_y_2 = mean((trajectory_y_2_post_convergence - reference_y_2_post_convergence).^2)
+% mse_z_2 = mean((trajectory_z_2_post_convergence - reference_z_2_post_convergence).^2)
+% 
+% % MAEの計算
+% %位置
+% mae_x_1 = mean(abs(trajectory_x_1_post_convergence - reference_x_1_post_convergence));
+% mae_y_1 = mean(abs(trajectory_y_1_post_convergence - reference_y_1_post_convergence));
+% mae_z_1 = mean(abs(trajectory_z_1_post_convergence - reference_z_1_post_convergence));
+% mae_x_2 = mean(abs(trajectory_x_2_post_convergence - reference_x_2_post_convergence));
+% mae_y_2 = mean(abs(trajectory_y_2_post_convergence - reference_y_2_post_convergence));
+% mae_z_2 = mean(abs(trajectory_z_2_post_convergence - reference_z_2_post_convergence));
+% 
+% % 結果を表示
+% fprintf('軌道x_1の収束後の位置MSE: %f\n', mse_x_1);
+% fprintf('軌道y_1の収束後の位置MSE: %f\n', mse_y_1);
+% fprintf('軌道z_1の収束後の位置MSE: %f\n', mse_z_1);
+% fprintf('軌道x_2の収束後の位置MSE: %f\n', mse_x_2);
+% fprintf('軌道y_2の収束後の位置MSE: %f\n', mse_y_2);
+% fprintf('軌道z_2の収束後の位置MSE: %f\n', mse_z_2);
+% fprintf('軌道x_1の収束後の位置MAE: %f\n', mae_x_1);
+% fprintf('軌道y_1の収束後の位置MAE: %f\n', mae_y_1);
+% fprintf('軌道z_1の収束後の位置MAE: %f\n', mae_z_1);
+% fprintf('軌道x_2の収束後の位置MAE: %f\n', mae_x_2);
+% fprintf('軌道y_2の収束後の位置MAE: %f\n', mae_y_2);
+% fprintf('軌道z_2の収束後の位置MAE: %f\n', mae_z_2);
+% 
+% figure;
+% plot(t_1_post_convergence, trajectory_x_1_post_convergence, '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Trajectory[m]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_1_post_convergence(1,1) inf])
+% ylim([-1.5 1.5])
+% hold on
+% plot(t_1_post_convergence, trajectory_y_1_post_convergence, '-','LineWidth',2);
+% plot(t_1_post_convergence, trajectory_z_1_post_convergence, '-','LineWidth',2);
+% plot(t_1_post_convergence, reference_x_1_post_convergence, '--','LineWidth',2);
+% plot(t_1_post_convergence, reference_y_1_post_convergence, '--','LineWidth',2);
+% plot(t_1_post_convergence, reference_z_1_post_convergence, '--','LineWidth',2);
+% legend('X-estimator','Y-estimator','Z-estimator', ...
+%     'X-reference','Y-reference','Z-reference','Location', ...
+%     'southwest','fontsize',8,'NumColumns',2)
+% hold off
+% 
+% figure;
+% plot(t_2_post_convergence, trajectory_x_2_post_convergence, '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Trajectory[m]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_2_post_convergence(1,1) inf])
+% ylim([-1.5 1.5])
+% hold on
+% plot(t_2_post_convergence, trajectory_y_2_post_convergence, '-','LineWidth',2);
+% plot(t_2_post_convergence, trajectory_z_2_post_convergence, '-','LineWidth',2);
+% plot(t_2_post_convergence, reference_x_2_post_convergence, '--','LineWidth',2);
+% plot(t_2_post_convergence, reference_y_2_post_convergence, '--','LineWidth',2);
+% plot(t_2_post_convergence, reference_z_2_post_convergence, '--','LineWidth',2);
+% legend('X-estimator','Y-estimator','Z-estimator', ...
+%     'X-reference','Y-reference','Z-reference','Location', ...
+%     'southwest','fontsize',8,'NumColumns',2)
+% hold off
+
+%% 誤差評価　収束後　速度
+
+% 誤差の計算
+error_vx_1 = abs(vx_est_sel - vx_ref_sel);
+error_vy_1 = abs(vy_est_sel - vy_ref_sel);
+error_vz_1 = abs(vz_est_sel - vz_ref_sel);
+
+% 収束閾値を設定（例：0.01）
+threshold = 0.0001;
+
+% 各軌道が収束する最初の時刻を見つける
+convergence_time_index_vx_1 = find(error_vx_1 < threshold, 1);
+convergence_time_index_vy_1 = find(error_vy_1 < threshold, 1);
+convergence_time_index_vz_1 = find(error_vz_1 < threshold, 1);
+convergence_time_vxyz = [convergence_time_index_vx_1 convergence_time_index_vy_1 convergence_time_index_vz_1];
+
+% どれか遅い方の収束時刻を選ぶ
+convergence_time_index = max(convergence_time_vxyz);
+convergence_time = t_sel(1:convergence_time_index); % 収束時刻
+
+% 収束時刻以降のデータ
+trajectory_vx_1_post_convergence = vx_est_sel(convergence_time_index:end);
+trajectory_vy_1_post_convergence = vy_est_sel(convergence_time_index:end);
+trajectory_vz_1_post_convergence = vz_est_sel(convergence_time_index:end);
+t_1_post_convergence = t_sel(convergence_time_index:end);
+
+reference_vx_1_post_convergence = vx_ref_sel(convergence_time_index:end);
+reference_vy_1_post_convergence = vy_ref_sel(convergence_time_index:end);
+reference_vz_1_post_convergence = vz_ref_sel(convergence_time_index:end);
+
+% MSEの計算
+%速度
+mse_vx_1 = mean((trajectory_vx_1_post_convergence - reference_vx_1_post_convergence).^2)
+mse_vy_1 = mean((trajectory_vy_1_post_convergence - reference_vy_1_post_convergence).^2)
+mse_vz_1 = mean((trajectory_vz_1_post_convergence - reference_vz_1_post_convergence).^2)
+
+% MAEの計算
+%速度
+mae_vx_1 = mean(abs(trajectory_vx_1_post_convergence - reference_vx_1_post_convergence));
+mae_vy_1 = mean(abs(trajectory_vy_1_post_convergence - reference_vy_1_post_convergence));
+mae_vz_1 = mean(abs(trajectory_vz_1_post_convergence - reference_vz_1_post_convergence));
+
+%最大誤差
+max_error_vx_1 = max(abs(vx_est_sel(convergence_time_index:end) - vx_ref_sel(convergence_time_index:end)));
+max_error_vy_1 = max(abs(vy_est_sel(convergence_time_index:end) - vy_ref_sel(convergence_time_index:end)));
+max_error_vz_1 = max(abs(vz_est_sel(convergence_time_index:end) - vz_ref_sel(convergence_time_index:end)));
+
+% 結果を表示
+fprintf('軌道x_1の収束後の速度MSE: %f\n', mse_vx_1);
+fprintf('軌道y_1の収束後の速度MSE: %f\n', mse_vy_1);
+fprintf('軌道z_1の収束後の速度MSE: %f\n', mse_vz_1);
+fprintf('軌道x_1の収束後の速度MAE: %f\n', mae_vx_1);
+fprintf('軌道y_1の収束後の速度MAE: %f\n', mae_vy_1);
+fprintf('軌道z_1の収束後の速度MAE: %f\n', mae_vz_1);
+fprintf('軌道x_1の収束後の速度最大誤差: %f\n', max_error_vx_1);
+fprintf('軌道y_1の収束後の速度最大誤差: %f\n', max_error_vy_1);
+fprintf('軌道z_1の収束後の速度最大誤差: %f\n', max_error_vz_1);
+
+figure;
+plot(t_1_post_convergence, vx_est_sel(convergence_time_index:end), '-','LineWidth',2);
+grid on
+xlabel('Time[s]','FontSize',12) 
+ylabel('Trajectory[m]','FontSize',12)
+set(gca().XAxis, 'Fontsize', 12)
+set(gca().YAxis, 'Fontsize', 12)
+xlim([t_1_post_convergence(1,1) inf])
+ylim([-1.5 1.5])
+hold on
+plot(t_1_post_convergence, vy_est_sel(convergence_time_index:end), '-','LineWidth',2);
+plot(t_1_post_convergence, vz_est_sel(convergence_time_index:end), '-','LineWidth',2);
+plot(t_1_post_convergence, vx_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence, vy_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+plot(t_1_post_convergence, vz_ref_sel(convergence_time_index:end), '--','LineWidth',2);
+legend('X-estimator','Y-estimator','Z-estimator', ...
+    'X-reference','Y-reference','Z-reference','Location', ...
+    'southwest','fontsize',8,'NumColumns',2)
+hold off
+
+
+%% 誤差評価　収束後　速度
+
+% % 誤差の計算
+% error_vx_1 = abs(vx_est_sel - vx_ref_sel);
+% error_vy_1 = abs(vy_est_sel - vy_ref_sel);
+% error_vz_1 = abs(vz_est_sel - vz_ref_sel);
+% error_vx_2 = abs(vx_est2_sel - vx_ref2_sel);
+% error_vy_2 = abs(vy_est2_sel - vy_ref2_sel);
+% error_vz_2 = abs(vz_est2_sel - vz_ref2_sel);
+% 
+% % 収束閾値を設定（例：0.01）
+% threshold = 0.01;
+% 
+% % 各軌道が収束する最初の時刻を見つける
+% convergence_time_index_vx_1 = find(error_vx_1 < threshold, 1);
+% convergence_time_index_vy_1 = find(error_vy_1 < threshold, 1);
+% convergence_time_index_vz_1 = find(error_vz_1 < threshold, 1);
+% convergence_time_index_vx_2 = find(error_vx_2 < threshold, 1);
+% convergence_time_index_vy_2 = find(error_vy_2 < threshold, 1);
+% convergence_time_index_vz_2 = find(error_vz_2 < threshold, 1);
+% 
+% % どれか遅い方の収束時刻を選ぶ
+% convergence_time_index = max(convergence_time_index_vx_1, convergence_time_index_vy_1, ...
+%     convergence_time_index_vz_1,convergence_time_index_vx_2,convergence_time_index_vy_2,convergence_time_index_vz_2);
+% convergence_time = time(convergence_time_index); % 収束時刻
+% 
+% % 収束時刻以降のデータ
+% trajectory_vx_1_post_convergence = vx_est_sel(convergence_time_index:end);
+% trajectory_vy_1_post_convergence = vy_est_sel(convergence_time_index:end);
+% trajectory_vz_1_post_convergence = vz_est_sel(convergence_time_index:end);
+% trajectory_vx_2_post_convergence = vx_est2_sel(convergence_time_index:end);
+% trajectory_vy_2_post_convergence = vy_est2_sel(convergence_time_index:end);
+% trajectory_vz_2_post_convergence = vz_est2_sel(convergence_time_index:end);
+% t_1_post_convergence = t_sel(convergence_time_index:end);
+% t_2_post_convergence = t2_sel(convergence_time_index:end);
+% 
+% reference_vx_1_post_convergence = vx_ref_sel(convergence_time_index:end);
+% reference_vy_1_post_convergence = vy_ref_sel(convergence_time_index:end);
+% reference_vz_1_post_convergence = vz_ref_sel(convergence_time_index:end);
+% reference_vx_2_post_convergence = vx_ref2_sel(convergence_time_index:end);
+% reference_vy_2_post_convergence = vy_ref2_sel(convergence_time_index:end);
+% reference_vz_2_post_convergence = vz_ref2_sel(convergence_time_index:end);
+% 
+% % MSEの計算
+% %速度
+% mse_vx_1 = mean((trajectory_vx_1_post_convergence - reference_vx_1_post_convergence).^2)
+% mse_vy_1 = mean((trajectory_vy_1_post_convergence - reference_vy_1_post_convergence).^2)
+% mse_vz_1 = mean((trajectory_vz_1_post_convergence - reference_vz_1_post_convergence).^2)
+% mse_vx_2 = mean((trajectory_vx_2_post_convergence - reference_vx_2_post_convergence).^2)
+% mse_vy_2 = mean((trajectory_vy_2_post_convergence - reference_vy_2_post_convergence).^2)
+% mse_vz_2 = mean((trajectory_vz_2_post_convergence - reference_vz_2_post_convergence).^2)
+% 
+% % MAEの計算
+% %速度
+% mae_vx_1 = mean(abs(trajectory_vx_1_post_convergence - reference_vx_1_post_convergence));
+% mae_vy_1 = mean(abs(trajectory_vy_1_post_convergence - reference_vy_1_post_convergence));
+% mae_vz_1 = mean(abs(trajectory_vz_1_post_convergence - reference_vz_1_post_convergence));
+% mae_vx_2 = mean(abs(trajectory_vx_2_post_convergence - reference_vx_2_post_convergence));
+% mae_vy_2 = mean(abs(trajectory_vy_2_post_convergence - reference_vy_2_post_convergence));
+% mae_vz_2 = mean(abs(trajectory_vz_2_post_convergence - reference_vz_2_post_convergence));
+% 
+% % 結果を表示
+% fprintf('軌道x_1の収束後の速度MSE: %f\n', mse_vx_1);
+% fprintf('軌道y_1の収束後の速度MSE: %f\n', mse_vy_1);
+% fprintf('軌道z_1の収束後の速度MSE: %f\n', mse_vz_1);
+% fprintf('軌道x_2の収束後の速度MSE: %f\n', mse_vx_2);
+% fprintf('軌道y_2の収束後の速度MSE: %f\n', mse_vy_2);
+% fprintf('軌道z_2の収束後の速度MSE: %f\n', mse_vz_2);
+% fprintf('軌道x_1の収束後の速度MAE: %f\n', mae_vx_1);
+% fprintf('軌道y_1の収束後の速度MAE: %f\n', mae_vy_1);
+% fprintf('軌道z_1の収束後の速度MAE: %f\n', mae_vz_1);
+% fprintf('軌道x_2の収束後の速度MAE: %f\n', mae_vx_2);
+% fprintf('軌道y_2の収束後の速度MAE: %f\n', mae_vy_2);
+% fprintf('軌道z_2の収束後の速度MAE: %f\n', mae_vz_2);
+% 
+% figure;
+% plot(t_1_post_convergence, trajectory_vx_1_post_convergence, '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Trajectory[m]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_1_post_convergence(1,1) inf])
+% ylim([-1.5 1.5])
+% hold on
+% plot(t_1_post_convergence, trajectory_vy_1_post_convergence, '-','LineWidth',2);
+% plot(t_1_post_convergence, trajectory_vz_1_post_convergence, '-','LineWidth',2);
+% plot(t_1_post_convergence, reference_vx_1_post_convergence, '--','LineWidth',2);
+% plot(t_1_post_convergence, reference_vy_1_post_convergence, '--','LineWidth',2);
+% plot(t_1_post_convergence, reference_vz_1_post_convergence, '--','LineWidth',2);
+% legend('X-estimator','Y-estimator','Z-estimator', ...
+%     'X-reference','Y-reference','Z-reference','Location', ...
+%     'southwest','fontsize',8,'NumColumns',2)
+% hold off
+% 
+% figure;
+% plot(t_2_post_convergence, trajectory_vx_2_post_convergence, '-','LineWidth',2);
+% grid on
+% xlabel('Time[s]','FontSize',12) 
+% ylabel('Trajectory[m]','FontSize',12)
+% set(gca().XAxis, 'Fontsize', 12)
+% set(gca().YAxis, 'Fontsize', 12)
+% xlim([t_2_post_convergence(1,1) inf])
+% ylim([-1.5 1.5])
+% hold on
+% plot(t_2_post_convergence, trajectory_vy_2_post_convergence, '-','LineWidth',2);
+% plot(t_2_post_convergence, trajectory_vz_2_post_convergence, '-','LineWidth',2);
+% plot(t_2_post_convergence, reference_vx_2_post_convergence, '--','LineWidth',2);
+% plot(t_2_post_convergence, reference_vy_2_post_convergence, '--','LineWidth',2);
+% plot(t_2_post_convergence, reference_vz_2_post_convergence, '--','LineWidth',2);
+% legend('X-estimator','Y-estimator','Z-estimator', ...
+%     'X-reference','Y-reference','Z-reference','Location', ...
+%     'southwest','fontsize',8,'NumColumns',2)
+% hold off
+
+%% 収束性
+%位置
+% 誤差の計算
+error_x_1 = abs(x_est_sel - x_ref_sel);
+error_y_1 = abs(y_est_sel - y_ref_sel);
+error_z_1 = abs(z_est_sel - z_ref_sel);
 
 % 収束閾値を設定（例：0.01）
 threshold = 0.01;
@@ -258,113 +650,15 @@ threshold = 0.01;
 convergence_time_index_x_1 = find(error_x_1 < threshold, 1);
 convergence_time_index_y_1 = find(error_y_1 < threshold, 1);
 convergence_time_index_z_1 = find(error_z_1 < threshold, 1);
-convergence_time_index_x_2 = find(error_x_2 < threshold, 1);
-convergence_time_index_y_2 = find(error_y_2 < threshold, 1);
-convergence_time_index_z_2 = find(error_z_2 < threshold, 1);
+convergence_time_x_1 = time(convergence_time_index_x_1 - t_sel(1,1)); % time は時間軸
+convergence_time_y_1 = time(convergence_time_index_y_1 - t_sel(1,1));
+convergence_time_z_1 = time(convergence_time_index_z_1 - t_sel(1,1));
 
-% どれか遅い方の収束時刻を選ぶ
-convergence_time_index = max(convergence_time_index_x_1, convergence_time_index_y_1, ...
-    convergence_time_index_z_1,convergence_time_index_x_2,convergence_time_index_y_2,convergence_time_index_z_2);
-convergence_time = time(convergence_time_index); % 収束時刻
-
-% 収束時刻以降のデータ
-trajectory_x_1_post_convergence = x_est_sel(convergence_time_index:end);
-trajectory_y_1_post_convergence = y_est_sel(convergence_time_index:end);
-trajectory_z_1_post_convergence = z_est_sel(convergence_time_index:end);
-trajectory_x_2_post_convergence = x_est2_sel(convergence_time_index:end);
-trajectory_y_2_post_convergence = y_est2_sel(convergence_time_index:end);
-trajectory_z_2_post_convergence = z_est2_sel(convergence_time_index:end);
-t_1_post_convergence = t(convergence_time_index:end);
-t_2_post_convergence = t2(convergence_time_index:end);
-
-reference_x_1_post_convergence = x_ref_sel(convergence_time_index:end);
-reference_y_1_post_convergence = y_ref_sel(convergence_time_index:end);
-reference_z_1_post_convergence = z_ref_sel(convergence_time_index:end);
-reference_x_2_post_convergence = x_ref2_sel(convergence_time_index:end);
-reference_y_2_post_convergence = y_ref2_sel(convergence_time_index:end);
-reference_z_2_post_convergence = z_ref2_sel(convergence_time_index:end);
-
-% MSEの計算
-%位置
-mse_x_1 = mean((trajectory_x_1_post_convergence - reference_x_1_post_convergence).^2)
-mse_y_1 = mean((trajectory_y_1_post_convergence - reference_y_1_post_convergence).^2)
-mse_z_1 = mean((trajectory_z_1_post_convergence - reference_z_1_post_convergence).^2)
-mse_x_2 = mean((trajectory_x_2_post_convergence - reference_x_2_post_convergence).^2)
-mse_y_2 = mean((trajectory_y_2_post_convergence - reference_y_2_post_convergence).^2)
-mse_z_2 = mean((trajectory_z_2_post_convergence - reference_z_2_post_convergence).^2)
-
-% MAEの計算
-%位置
-mae_x_1 = mean(abs(trajectory_x_1_post_convergence - reference_x_1_post_convergence));
-mae_y_1 = mean(abs(trajectory_y_1_post_convergence - reference_y_1_post_convergence));
-mae_z_1 = mean(abs(trajectory_z_1_post_convergence - reference_z_1_post_convergence));
-mae_x_2 = mean(abs(trajectory_x_2_post_convergence - reference_x_2_post_convergence));
-mae_y_2 = mean(abs(trajectory_y_2_post_convergence - reference_y_2_post_convergence));
-mae_z_2 = mean(abs(trajectory_z_2_post_convergence - reference_z_2_post_convergence));
-
-% 結果を表示
-fprintf('軌道x_1の収束後の位置MSE: %f\n', mse_x_1);
-fprintf('軌道y_1の収束後の位置MSE: %f\n', mse_y_1);
-fprintf('軌道z_1の収束後の位置MSE: %f\n', mse_z_1);
-fprintf('軌道x_2の収束後の位置MSE: %f\n', mse_x_2);
-fprintf('軌道y_2の収束後の位置MSE: %f\n', mse_y_2);
-fprintf('軌道z_2の収束後の位置MSE: %f\n', mse_z_2);
-fprintf('軌道x_1の収束後の位置MAE: %f\n', mae_x_1);
-fprintf('軌道y_1の収束後の位置MAE: %f\n', mae_y_1);
-fprintf('軌道z_1の収束後の位置MAE: %f\n', mae_z_1);
-fprintf('軌道x_2の収束後の位置MAE: %f\n', mae_x_2);
-fprintf('軌道y_2の収束後の位置MAE: %f\n', mae_y_2);
-fprintf('軌道z_2の収束後の位置MAE: %f\n', mae_z_2);
-
-figure;
-plot(t_1_post_convergence, trajectory_x_1_post_convergence, '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_1_post_convergence(1,1) inf])
-ylim([-1.5 1.5])
-hold on
-plot(t_1_post_convergence, trajectory_y_1_post_convergence, '-','LineWidth',2);
-plot(t_1_post_convergence, trajectory_z_1_post_convergence, '-','LineWidth',2);
-plot(t_1_post_convergence, reference_x_1_post_convergence, '--','LineWidth',2);
-plot(t_1_post_convergence, reference_y_1_post_convergence, '--','LineWidth',2);
-plot(t_1_post_convergence, reference_z_1_post_convergence, '--','LineWidth',2);
-legend('X-estimator','Y-estimator','Z-estimator', ...
-    'X-reference','Y-reference','Z-reference','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
-
-figure;
-plot(t_2_post_convergence, trajectory_x_2_post_convergence, '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_2_post_convergence(1,1) inf])
-ylim([-1.5 1.5])
-hold on
-plot(t_2_post_convergence, trajectory_y_2_post_convergence, '-','LineWidth',2);
-plot(t_2_post_convergence, trajectory_z_2_post_convergence, '-','LineWidth',2);
-plot(t_2_post_convergence, reference_x_2_post_convergence, '--','LineWidth',2);
-plot(t_2_post_convergence, reference_y_2_post_convergence, '--','LineWidth',2);
-plot(t_2_post_convergence, reference_z_2_post_convergence, '--','LineWidth',2);
-legend('X-estimator','Y-estimator','Z-estimator', ...
-    'X-reference','Y-reference','Z-reference','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
-
-%% 誤差評価　収束後　速度
-
+%速度
 % 誤差の計算
 error_vx_1 = abs(vx_est_sel - vx_ref_sel);
 error_vy_1 = abs(vy_est_sel - vy_ref_sel);
 error_vz_1 = abs(vz_est_sel - vz_ref_sel);
-error_vx_2 = abs(vx_est2_sel - vx_ref2_sel);
-error_vy_2 = abs(vy_est2_sel - vy_ref2_sel);
-error_vz_2 = abs(vz_est2_sel - vz_ref2_sel);
 
 % 収束閾値を設定（例：0.01）
 threshold = 0.01;
@@ -373,103 +667,10 @@ threshold = 0.01;
 convergence_time_index_vx_1 = find(error_vx_1 < threshold, 1);
 convergence_time_index_vy_1 = find(error_vy_1 < threshold, 1);
 convergence_time_index_vz_1 = find(error_vz_1 < threshold, 1);
-convergence_time_index_vx_2 = find(error_vx_2 < threshold, 1);
-convergence_time_index_vy_2 = find(error_vy_2 < threshold, 1);
-convergence_time_index_vz_2 = find(error_vz_2 < threshold, 1);
+convergence_time_vx_1 = time(convergence_time_index_vx_1 - t_sel(1,1)); % time は時間軸
+convergence_time_vy_1 = time(convergence_time_index_vy_1 - t_sel(1,1));
+convergence_time_vz_1 = time(convergence_time_index_vz_1 - t_sel(1,1));
 
-% どれか遅い方の収束時刻を選ぶ
-convergence_time_index = max(convergence_time_index_vx_1, convergence_time_index_vy_1, ...
-    convergence_time_index_vz_1,convergence_time_index_vx_2,convergence_time_index_vy_2,convergence_time_index_vz_2);
-convergence_time = time(convergence_time_index); % 収束時刻
-
-% 収束時刻以降のデータ
-trajectory_vx_1_post_convergence = vx_est_sel(convergence_time_index:end);
-trajectory_vy_1_post_convergence = vy_est_sel(convergence_time_index:end);
-trajectory_vz_1_post_convergence = vz_est_sel(convergence_time_index:end);
-trajectory_vx_2_post_convergence = vx_est2_sel(convergence_time_index:end);
-trajectory_vy_2_post_convergence = vy_est2_sel(convergence_time_index:end);
-trajectory_vz_2_post_convergence = vz_est2_sel(convergence_time_index:end);
-t_1_post_convergence = t_sel(convergence_time_index:end);
-t_2_post_convergence = t2_sel(convergence_time_index:end);
-
-reference_vx_1_post_convergence = vx_ref_sel(convergence_time_index:end);
-reference_vy_1_post_convergence = vy_ref_sel(convergence_time_index:end);
-reference_vz_1_post_convergence = vz_ref_sel(convergence_time_index:end);
-reference_vx_2_post_convergence = vx_ref2_sel(convergence_time_index:end);
-reference_vy_2_post_convergence = vy_ref2_sel(convergence_time_index:end);
-reference_vz_2_post_convergence = vz_ref2_sel(convergence_time_index:end);
-
-% MSEの計算
-%速度
-mse_vx_1 = mean((trajectory_vx_1_post_convergence - reference_vx_1_post_convergence).^2)
-mse_vy_1 = mean((trajectory_vy_1_post_convergence - reference_vy_1_post_convergence).^2)
-mse_vz_1 = mean((trajectory_vz_1_post_convergence - reference_vz_1_post_convergence).^2)
-mse_vx_2 = mean((trajectory_vx_2_post_convergence - reference_vx_2_post_convergence).^2)
-mse_vy_2 = mean((trajectory_vy_2_post_convergence - reference_vy_2_post_convergence).^2)
-mse_vz_2 = mean((trajectory_vz_2_post_convergence - reference_vz_2_post_convergence).^2)
-
-% MAEの計算
-%速度
-mae_vx_1 = mean(abs(trajectory_vx_1_post_convergence - reference_vx_1_post_convergence));
-mae_vy_1 = mean(abs(trajectory_vy_1_post_convergence - reference_vy_1_post_convergence));
-mae_vz_1 = mean(abs(trajectory_vz_1_post_convergence - reference_vz_1_post_convergence));
-mae_vx_2 = mean(abs(trajectory_vx_2_post_convergence - reference_vx_2_post_convergence));
-mae_vy_2 = mean(abs(trajectory_vy_2_post_convergence - reference_vy_2_post_convergence));
-mae_vz_2 = mean(abs(trajectory_vz_2_post_convergence - reference_vz_2_post_convergence));
-
-% 結果を表示
-fprintf('軌道x_1の収束後の速度MSE: %f\n', mse_vx_1);
-fprintf('軌道y_1の収束後の速度MSE: %f\n', mse_vy_1);
-fprintf('軌道z_1の収束後の速度MSE: %f\n', mse_vz_1);
-fprintf('軌道x_2の収束後の速度MSE: %f\n', mse_vx_2);
-fprintf('軌道y_2の収束後の速度MSE: %f\n', mse_vy_2);
-fprintf('軌道z_2の収束後の速度MSE: %f\n', mse_vz_2);
-fprintf('軌道x_1の収束後の速度MAE: %f\n', mae_vx_1);
-fprintf('軌道y_1の収束後の速度MAE: %f\n', mae_vy_1);
-fprintf('軌道z_1の収束後の速度MAE: %f\n', mae_vz_1);
-fprintf('軌道x_2の収束後の速度MAE: %f\n', mae_vx_2);
-fprintf('軌道y_2の収束後の速度MAE: %f\n', mae_vy_2);
-fprintf('軌道z_2の収束後の速度MAE: %f\n', mae_vz_2);
-
-figure;
-plot(t_1_post_convergence, trajectory_vx_1_post_convergence, '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_1_post_convergence(1,1) inf])
-ylim([-1.5 1.5])
-hold on
-plot(t_1_post_convergence, trajectory_vy_1_post_convergence, '-','LineWidth',2);
-plot(t_1_post_convergence, trajectory_vz_1_post_convergence, '-','LineWidth',2);
-plot(t_1_post_convergence, reference_vx_1_post_convergence, '--','LineWidth',2);
-plot(t_1_post_convergence, reference_vy_1_post_convergence, '--','LineWidth',2);
-plot(t_1_post_convergence, reference_vz_1_post_convergence, '--','LineWidth',2);
-legend('X-estimator','Y-estimator','Z-estimator', ...
-    'X-reference','Y-reference','Z-reference','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
-
-figure;
-plot(t_2_post_convergence, trajectory_vx_2_post_convergence, '-','LineWidth',2);
-grid on
-xlabel('Time[s]','FontSize',12) 
-ylabel('Trajectory[m]','FontSize',12)
-set(gca().XAxis, 'Fontsize', 12)
-set(gca().YAxis, 'Fontsize', 12)
-xlim([t_2_post_convergence(1,1) inf])
-ylim([-1.5 1.5])
-hold on
-plot(t_2_post_convergence, trajectory_vy_2_post_convergence, '-','LineWidth',2);
-plot(t_2_post_convergence, trajectory_vz_2_post_convergence, '-','LineWidth',2);
-plot(t_2_post_convergence, reference_vx_2_post_convergence, '--','LineWidth',2);
-plot(t_2_post_convergence, reference_vy_2_post_convergence, '--','LineWidth',2);
-plot(t_2_post_convergence, reference_vz_2_post_convergence, '--','LineWidth',2);
-legend('X-estimator','Y-estimator','Z-estimator', ...
-    'X-reference','Y-reference','Z-reference','Location', ...
-    'southwest','fontsize',8,'NumColumns',2)
-hold off
 
 %% 収束性
 %位置
