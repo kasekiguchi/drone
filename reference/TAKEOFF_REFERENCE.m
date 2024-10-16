@@ -5,7 +5,7 @@ classdef TAKEOFF_REFERENCE < handle
     base_time
     base_state
     ts
-    te = 5;
+    te = 10;
     zd = 1; % goal altitude
     result
     th_offset
