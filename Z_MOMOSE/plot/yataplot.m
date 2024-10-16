@@ -1,36 +1,38 @@
 %まずは現在のフォルダからパスが通っているかを確認
 %%
 newLog1 = simplifyLogger(log);
+% newLog1 = log.Data.agent(1:end);
+% newLog1 = log.Data.agent(2:end);
 t = newLog1.t; %t:時間
 phase = newLog1.phase;%phase:アーミングやフライトなどの状態
 k = newLog1.k;%データ数
-rpy = newLog1.sensor.q;%Attitude上からroll,pitch,yawの実測値
-xyz = newLog1.sensor.p;%Position上からz,y,zの実測値
-rpy_est = newLog1.estimator.q;%上からz,y,zの推定値
-xyz_est = newLog1.estimator.p;%上からroll,pitch,yawの推定値
-v_est = newLog1.estimator.v;%速度の推定値
-w_est = newLog1.estimator.w;%角速度の推定値
-rpy_r = newLog1.reference.q;%上からz,y,zの指令値
-xyz_r = newLog1.reference.p;%上からroll,pitch,yawの指令値
-v_r = newLog1.reference.v;%速度の指令値
-input = newLog1.controller.input;%入力
-transmitter_input = newLog1.inner_input;%プロポからの指令
+rpy = newLog1.sensor(1:end).q;%Attitude上からroll,pitch,yawの実測値
+xyz = newLog1.sensor(1:end).p;%Position上からz,y,zの実測値
+rpy_est = newLog1.estimator(1:end).q;%上からz,y,zの推定値
+xyz_est = newLog1.estimator(1:end).p;%上からroll,pitch,yawの推定値
+v_est = newLog1.estimator(1:end).v;%速度の推定値
+w_est = newLog1.estimator(1:end).w;%角速度の推定値
+rpy_r = newLog1.reference(1:end).q;%上からz,y,zの指令値
+xyz_r = newLog1.reference(1:end).p;%上からroll,pitch,yawの指令値
+v_r = newLog1.reference(1:end).v;%速度の指令値
+input = newLog1.controller.input(1:end);%入力
+transmitter_input = newLog1.inner_input(1:end);%プロポからの指令
 %%
-newLog2 = simplifyLogger(log);
-t2 = newLog2.t; %t:時間
-phase2 = newLog2.phase;%phase:アーミングやフライトなどの状態
-k2 = newLog2.k;%データ数
-rpy2 = newLog2.sensor.q;%Attitude上からroll,pitch,yawの実測値
-xyz2 = newLog2.sensor.p;%Position上からz,y,zの実測値
-rpy_est2 = newLog2.estimator.q;%上からz,y,zの推定値
-xyz_est2 = newLog2.estimator.p;%上からroll,pitch,yawの推定値
-v_est2 = newLog2.estimator.v;%速度の推定値
-w_est2 = newLog2.estimator.w;%角速度の推定値
-rpy_r2 = newLog2.reference.q;%上からz,y,zの指令値(目標)
-xyz_r2 = newLog2.reference.p;%上からroll,pitch,yawの指令値
-v_r2 = newLog2.reference.v;%速度の指令値
-input2 = newLog2.controller.input;%入力
-transmitter_input2 = newLog2.inner_input;%プロポからの指令
+% newLog2 = simplifyLogger(log);
+% t2 = newLog2.t; %t:時間
+% phase2 = newLog2.phase;%phase:アーミングやフライトなどの状態
+% k2 = newLog2.k;%データ数
+% rpy2 = newLog2.sensor.q;%Attitude上からroll,pitch,yawの実測値
+% xyz2 = newLog2.sensor.p;%Position上からz,y,zの実測値
+% rpy_est2 = newLog2.estimator.q;%上からz,y,zの推定値
+% xyz_est2 = newLog2.estimator.p;%上からroll,pitch,yawの推定値
+% v_est2 = newLog2.estimator.v;%速度の推定値
+% w_est2 = newLog2.estimator.w;%角速度の推定値
+% rpy_r2 = newLog2.reference.q;%上からz,y,zの指令値(目標)
+% xyz_r2 = newLog2.reference.p;%上からroll,pitch,yawの指令値
+% v_r2 = newLog2.reference.v;%速度の指令値
+% input2 = newLog2.controller.input;%入力
+% transmitter_input2 = newLog2.inner_input;%プロポからの指令
 
 %%
 %それぞれのlogのデータの詳しい抜き出し
@@ -132,6 +134,7 @@ ylabel('Trajectory[m]','FontSize',12)
 set(gca().XAxis, 'Fontsize', 12)
 set(gca().YAxis, 'Fontsize', 12)
 xlim([0 inf])
+ylim([-0.5 3.5])
 hold on
 plot(t, y_est, '-','LineWidth',2);
 plot(t, z_est, '-','LineWidth',2);
@@ -140,7 +143,7 @@ plot(t, y_ref, '--','LineWidth',2);
 plot(t, z_ref, '--','LineWidth',2);
 legend('X-estimator','Y-estimator','Z-estimator', ...
     'X-reference','Y-reference','Z-reference','Location', ...
-    'southwest','fontsize',12)
+    'southwest','fontsize',12,'NumColumns',2)
 hold off
 
 figure;
@@ -590,3 +593,19 @@ plot(t2, vz_error2, '-','LineWidth',2);
 legend('VX-error','VY-error','VZ-error','Location', ...
     'southwest','fontsize',12)
 hold off
+
+%%
+% a=log.Data.t(1:end);
+% b=log.Data.agent(1).estimator.result;
+% c=log.Data.agent(1).reference.result;
+% d=log.Data.agent(2).estimator.result;
+% e=log.Data.agent(2).reference.result;
+% 
+% fields = fieldnames(b);
+% 
+% % 各フィールドの値をワークスペースに展開
+% for i = 1:length(fields)
+%     assignin('base', fields{i}, b.(fields{i}));
+% end
+% 
+% plot(a,b, '-','LineWidth',2);

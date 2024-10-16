@@ -41,7 +41,8 @@ for i = 1:N
     % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"Case_study_trajectory",{[1,1,1]},"HL"});
     % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.2;0.2;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[0.2;-0.2;0.8],"k",[0;0;1],"m",[-2;2;3]),0});%縦ベクトルで書く,
     else
-    agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory_2p",{[1,1,1]},"HL"});
+    % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory_2p",{[1,1,1]},"HL"});
+    agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"});
     end
     agent(i).controller = HLC(agent(i),Controller_HL(dt));
 end
