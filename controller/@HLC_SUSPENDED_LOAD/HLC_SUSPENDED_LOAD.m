@@ -70,6 +70,7 @@ classdef HLC_SUSPENDED_LOAD < handle
                 vf = obj.Vf_SupendedLoad(x,xd',P,F1);
             end
             vs = obj.Vs_SuspendedLoad(x,xd',vf,P,F2,F3,F4);
+            obj.result.v_real=[vf(1),vs]';
             % uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
             % 
             % h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);
@@ -82,13 +83,18 @@ classdef HLC_SUSPENDED_LOAD < handle
             % P=([0.73, 0.175, 0.175/2, 0.175/2, 0.175/2, 9.81, 0.0301, 0.0301, 0.0301, 0.0301, 0.000008, 0.000008, 0.000008, 0.000008, 0.084, 0.046]);            
             % obj.result.Z1 = Z1_SuspendedLoad(x,xd',0,P);
            
-            obj.result.Z1 = obj.Z1_SuspendedLoad(x,xd',0);
-              % vf=-F1*obj.result.Z1;
-
+           obj.result.Z1 = obj.Z1_SuspendedLoad(x,xd',0);
              obj.result.Z2 = obj.Z2_SuspendedLoad(x,xd',vf,P);
              obj.result.Z3 = obj.Z3_SuspendedLoad(x,xd',vf,P);
              obj.result.Z4 = obj.Z4_SuspendedLoad(x,xd',vf,P);
-           
+            vz = -F1*obj.result.Z1;
+            vx=-F2*obj.result.Z2;
+            vy=-F3*obj.result.Z3;
+            vyaw=-F4*obj.result.Z4;
+            obj.result.v_re=[vz,vx,vy,vyaw]';
+
+            vs=[vx,vy,vyaw];%消し忘れない。再計算したreを代入している。
+                       
             uf = obj.Uf_SuspendedLoad(x,xd',vf,P);
 
             h234 = obj.H234_SuspendedLoad(x,xd',vf,vs',P);

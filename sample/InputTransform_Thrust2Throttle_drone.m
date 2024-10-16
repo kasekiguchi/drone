@@ -8,7 +8,7 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     % u_trans_param.th_offset_tl = 245;         % offset 3s[1021] 4s[900]　発掘[926]
      u_trans_param.th_offset_tl = 346;%252  %ここ変えるとテークオフとランディング中の釣り合うスロットル変わる。
     % u_trans_param.gain_f =[600;600;600;20];  
-     u_trans_param.gain_f =[160;160;160;20];%good150.150.100.20
+     u_trans_param.gain_f =[150;150;150;20];%good150.150.100.20
     % u_trans_param.th_offset_f = 260;%牽引物込み
     u_trans_param.th_offset_f = 330;%330;%牽引物込み267 フライトしたときに326+20で346ぐらいの値になる+20ぐらいされる理由は謎。
 

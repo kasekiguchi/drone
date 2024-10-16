@@ -53,11 +53,11 @@ classdef TIME_VARYING_REFERENCE_SUSPENDEDLOAD < handle
            % end           
            if obj.cha=='f'&& isempty(obj.t)    %flightからreferenceの時間を開始
                 obj.t=varargin{1}.t; % 目標重心位置（絶対座標）
-                obj.nowhover=obj.self.estimator.result.state.pL;%(1:2);obj.result.state.p(3)];ケシワスレナイ
+                % obj.nowhover=obj.self.estimator.result.state.pL;%(1:2);obj.result.state.p(3)];ケシワスレナイ
            end  
            t = varargin{1}.t-obj.t;
            obj.result.state.xd = obj.func(t); % 目標重心位置（絶対座標）
-           obj.result.state.xd(1:3)=obj.nowhover;%消し忘れない
+           % obj.result.state.xd(1:3)=obj.nowhover;%消し忘れない
            obj.result.state.p = obj.result.state.xd(1:3);
            result = obj.result;
         end

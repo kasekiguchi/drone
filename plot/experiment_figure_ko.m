@@ -10,7 +10,7 @@ set(0,'defaultTextFontsize',16);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("sl1009hun_momose_exp_Log(09-Oct-2024_17_09_47).mat");
+load("sl1016hun_seki0_035_Log(16-Oct-2024_20_04_07).mat");
 
 % load("hl0729_rig3_miyatipc_no-sindou_Log(29-Jul-2024_18_41_45).mat");%
 % load("sl1004hun_diag([200000,10000,100,10,10,10]),[0.005]_Log(04-Oct-2024_17_04_52).mat");
@@ -19,7 +19,7 @@ load("sl1009hun_momose_exp_Log(09-Oct-2024_17_09_47).mat");
 %log = logger;%永久用（↓とどっちかをコメントアウト）
 % log =gui.logger.Data;%gui用
 %%
-figtype = 1;%1でグラフを1タブづつ，2で1タブにグラフを多数．
+figtype = 2;%1でグラフを1タブづつ，2で1タブにグラフを多数．
 Agent = log.Data.agent;
 
 % arming_start_idx = find(log.Data.phase==102, 1, 'first');%フライト開始からのグラフにできる．↓と切り替え
