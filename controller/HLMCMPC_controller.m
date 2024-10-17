@@ -71,6 +71,11 @@ classdef HLMCMPC_CONTROLLER < handle
 
       % Initialize input
       obj.result.input = zeros(self.estimator.model.dim(2),1);
+
+      % Extended Coefficient Matrix
+      obj.model = ExtendedCoefficientMatrix({sysd.A,sysd.B,obj.param.H,obj.param.state_size});
+      obj.A = repmat(obj.model.A, 1, 1, obj.N);
+      obj.B = repmat(obj.model.B, 1, 1, obj.N);
     end
 
     %-- main()的な
@@ -158,7 +163,8 @@ classdef HLMCMPC_CONTROLLER < handle
 
       %% 12状態＋加速度3状態
       % [obj.state.state_data] = predict_gpu(obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B);
-      [obj.state.state_data] = obj.predict_gpu();
+      % [obj.state.state_data] = obj.predict_gpu();
+      obj.predict(); % output:obj.state.state_data
 
       %% 実状態変換
       Xd = repmat(obj.reference.xr_org, 1,1,obj.N);
@@ -322,6 +328,19 @@ classdef HLMCMPC_CONTROLLER < handle
         % state_acc(:,i+1,1:N) = (v - v_pre) ./ dt;
       end
       predict_state = obj.state.state_data;
+    end
+
+    function predict(obj)
+      obj.state.state_data = pagemtimes(obj.A, obj.state.state_data(:,1,:)) + pagemtimes(obj.B, reshape(obj.input.u, [], 1, obj.N));
+      obj.state.state_data = reshape(obj.state.state_data, obj.param.state_size, [], obj.N);
+
+      % 1ホライズンでの計算 (12*H, 1)
+      % state(:,1) = obj.current_state;
+      % A = reshape(obj.A(:,:,1), [], obj.param.state_size);
+      % B = reshape(obj.B(:,:,1), [], 4*obj.param.H);
+      % U = reshape(obj.input.u(:,:,1), [], 1);
+      % state = A * state(:,1) + B * U;
+    
     end
 
     %------------------------------------------------------
