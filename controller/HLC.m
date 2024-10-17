@@ -13,7 +13,8 @@ classdef HLC < handle
       obj.param = param;
       % obj.param.P = self.parameter.get(obj.parameter_name);
       obj.param.P = [0.5 0.16	0.16 0.08 0.08 0.06	0.06 0.06 9.81 0.0301 0.0301 0.0301	0.0301 8.0e-06 8.0e-06 8.0e-06 8.0e-06];
-      obj.result.input = zeros(self.estimator.model.dim(2),1);
+      % obj.result.input = zeros(self.estimator.model.dim(2),1);
+      obj.result.input = [obj.self.parameter.mass*obj.self.parameter.gravity; 0;0;0];
     end
 
     function result = do(obj,varargin)

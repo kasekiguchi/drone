@@ -79,14 +79,14 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,1]
 % agent.controller = MPC_CONTROLLER_KOOPMAN_quadprog_simulation(agent,Controller_MPC_Koopman(dt, model_file)); %最適化手法：QP
 
 %% 1コンのとき  100行目もコメントイン
-agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
-conmode = 1;
+% agent.controller = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file,agent));
+% conmode = 1;
 %% 2つのコントローラの設定  101行目もコメントイン
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
-% agent.controller.result.input = [0;0;0;0];
-% agent.controller.do = @controller_do;
-% conmode = 2;
+agent.controller.hlc = HLC(agent,Controller_HL(dt));
+agent.controller.mpc = MPC_CONTROLLER_KOOPMAN_HL_simulation(agent,Controller_MPC_Koopman(dt, model_file, agent));
+agent.controller.result.input = [0;0;0;0];
+agent.controller.do = @controller_do;
+conmode = 2;
 
 %%
 run("ExpBase");
@@ -110,8 +110,7 @@ for i = 1:te/dt
 end
 %%
 % logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
-log = logger;
+logger.plot({1,"p","er"}, {1,"v","er"}, {1,"p1-p2","e"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
 % save(strcat('Data\KMPC_sim_test_1008_sigmoid', '.mat'), 'log');
 %%
 % app.logger = logger;
@@ -120,8 +119,8 @@ log = logger;
 %% function 2コンとき
 function result = controller_do(varargin)
     controller = varargin{3}.controller;
-    result.hlc = controller.hlc.do(varargin);
     result.mpc = controller.mpc.do(varargin);
+    result.hlc = controller.hlc.do(varargin);
     result = result.mpc;
     varargin{5}.controller.result = result;
 end
