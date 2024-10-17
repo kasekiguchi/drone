@@ -38,17 +38,19 @@ classdef ESTIMATE_LOAD_MASS < handle
             obj.n = model.dim(1);
             obj.Q = blkdiag(eye(3)*1E1, eye(3)*1E1, 0*1e0);                     % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
             obj.B = blkdiag(0.5*obj.dt^2*eye(3), obj.dt*eye(3), 0*0.5*obj.dt^2);% システムノイズ（Modelクラス由来）
-            obj.R = blkdiag(eye(3)*1e-2, eye(3)*1e-2, 1e0);                   %観測ノイズ
-            obj.R = blkdiag(eye(3)*1e-8, eye(3)*1e-8, 1e-8);                   %観測ノイズ
+            % obj.R = blkdiag(eye(3)*1e-4, eye(3)*1e-4, 1e-4);                   %観測ノイズ
+            obj.R = blkdiag(eye(3)*1e-8, eye(3)*1e-8, 1e-4);                   %観測ノイズ
+            % obj.R = blkdiag(eye(3)*1e-8, eye(3)*1e-8, 1e-8);                   %観測ノイズ
             obj.result.P        = eye(obj.n);
             obj.result.G        = zeros(obj.n, size(obj.R,2));
             obj.result.xh_pre   = [];
         end
 
-        function result = estimate(obj,agent)%現在時刻と状態必要
+        function result = estimate(obj,varargin)%現在時刻と状態必要
           %刻み時間 
           if ~isempty(obj.timer)
             dtNow = toc(obj.timer);
+            dtNow = varargin{1}.dt;%offline用
             if dtNow > obj.dt
               dtNow = obj.dt;
             end
@@ -58,8 +60,8 @@ classdef ESTIMATE_LOAD_MASS < handle
           %カルマンフィルタの計算
           if ~isempty(obj.result.xh_pre)
             est     = obj.self.estimator.result.state;
-            mL      = agent{end-1};
-            mu      = agent{end};
+            mL      = varargin{end-1};
+            mu      = varargin{end};
             y       = [est.pL;est.vL;mL];%+[normrnd(0,0.1,[6,1]);0];                       % sensor output
             x       = obj.result.xh_pre;                        % estimated state at previous step
             xh_pre  = obj.update_state(x,mu);                   % Pre-estimation
@@ -78,7 +80,7 @@ classdef ESTIMATE_LOAD_MASS < handle
               %一周目は初期値を代入
               est = obj.self.estimator.result.state;
               obj.result.xh_pre = [est.pL;est.vL;obj.self.parameter.loadmass];
-              obj.result.mL     = obj.self.parameter.loadmass;
+              obj.result.mL     = obj.self.parameter.loadmass*0+0;
           end
             result      = obj.result;
             obj.timer   = tic;

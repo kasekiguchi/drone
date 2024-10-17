@@ -13,12 +13,12 @@ close all
 clear t ti k spanIndex tt flightSpan time ref est pp pv pq pw err inp ininp att vel w uHL z1 z2 z3 z4 Trs vf allData
 %選択
 % fLogN=3;%loggerの数が一つの時１ 2つの時:2, other:3
-fnowData = 10;%現在の結果を描画する
+fnowData = 0;%現在の結果を描画する
 fMul =1;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=10;%flightのみは１
-startTime = 46;
-endTime = 103;%1E3;
+startTime = 38;
+endTime = 65;%1E3;
 %どの時間の範囲を描画するか指定   
 
 % startTime = [10,10,10,80];%モデル誤差用
@@ -39,7 +39,7 @@ endTime = 103;%1E3;
     % log2=changeResult(log_addingTtoEL3, "elc");
  %simplifyLogger
     loggers = {
-        % offlineLogger
+        offlineLogger
         simple_log
                 % simple_log_noEstimate
                 % simple_log_Estimate
@@ -65,8 +65,7 @@ endTime = 103;%1E3;
                 % simplify_
         };
     c=[
-        % "offline",
-        "exp"
+        "offline","exp"
         % "HLLS","HLFT"
         % "LS","FT"
         % "FT"
@@ -104,12 +103,14 @@ endTime = 103;%1E3;
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
      n = "input";
      n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D","uHL","t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","t_vxL" ,"t_vyL" ,"t_vzL"];%比較するとき複数まとめる
-     % n = ["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","input"];%比較するとき複数まとめる
+     n = ["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","input"];%比較するとき複数まとめる
 %========================================================================
 % multiFigure
 
-nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D"]};%比較するとき複数まとめる
-multiFigure.layout = {[2,3],[2,3],[3,3],[2,3]};
+% nM = {["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq"],["t_errx","t_erry","t_errz","input","uHL","uHLsum"],["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_x" ,"t_y" ,"t_z","x_y","three_D"]};%比較するとき複数まとめる
+nM = {["t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"],["t_xL" ,"t_yL" ,"t_zL","three_DL","mLi","input"]};%比較するとき複数まとめる
+multiFigure.layout = {[3,3],[2,3]};
+% multiFigure.layout = {[2,3],[2,3],[3,3],[2,3]};
 multiFigure.title = ["bars","err_inp","vqw","position"];%[" state", " subsystem"];%title name
 
 if fnowData
