@@ -8,7 +8,7 @@ set(0,'defaultTextFontsize',15);
 set(0,'defaultLineLineWidth',1.5);
 set(0,'defaultLineMarkerSize',15);
 
-load("circle[700,700,700,300],332.5,T=20.mat");
+load("20241016_Exp_HL_circleT=12x=1_[300,500,300,20],350_[400,500,100,1],0.002_good_y+35.mat");
 
 %%
 figtype = 2;
@@ -97,6 +97,7 @@ elseif figtype == 2
     ytickformat('%.1f');
     subplot(m,n,6); plot(Est(1,:), Est(2,:), "LineWidth", 1.5); hold on; plot(Ref(1,:), Ref(2,:)); hold off;
     xlabel("x [m]"); ylabel("y [m]"); legend("Estimate", "Reference","Location","best");
+    % daspect([1 1 1]);
     grid on; xlim([-3, 3]); ylim([-3, 3]);
     % subplot(m,n,6); plot3(Est(1,:), Est(2,:), Est(3,:), "LineWidth", 1.5); hold on; plot(Ref(1,:), Ref(2,:),Ref(3,:), "LineWidth", 1.5); hold off;
     % xlabel("x [m]"); ylabel("y [m]"); zlabel("z [m]"); legend("Estimate", "Reference","Location","best");
@@ -141,15 +142,15 @@ set(gca,'FontSize',Fontsize);  grid on; title("");
 set(gcf, "WindowState", "maximized");
 set(gcf, "Position", [960 0 960 1000])
 %% RMSE誤差
-x = rmse(Ref(1,:),Est(1,:)) %位置x
+x = rmse(Ref(1,:),Est(1,:)) %位置
 y = rmse(Ref(2,:),Est(2,:))
 z = rmse(Ref(3,:),Est(3,:))
-vx = rmse(Ref(4,:),Est(4,:)) %速度vx
-vy = rmse(Ref(5,:),Est(5,:))
-vz = rmse(Ref(6,:),Est(6,:))
-roll = rmse(Ref(7,:),Est(7,:)) %姿勢角roll
-pitch = rmse(Ref(8,:),Est(8,:))
-yaw = rmse(Ref(9,:),Est(9,:))
+roll = rmse(Ref(4,:),Est(4,:)) %姿勢角
+pitch = rmse(Ref(5,:),Est(5,:))
+yaw = rmse(Ref(6,:),Est(6,:))
+vx = rmse(Ref(7,:),Est(7,:)) %速度
+vy = rmse(Ref(8,:),Est(8,:))
+vz = rmse(Ref(9,:),Est(9,:))
 %%
 figure(100)
 plot(logt(1:end-1), diff(logt), 'Linewidth', 1.5)
