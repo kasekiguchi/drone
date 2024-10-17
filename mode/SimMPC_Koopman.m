@@ -15,7 +15,7 @@ clear gui
 clc
 ts = 0; % initial timefghj
 dt = 0.025; % sampling period
-te = 20; % terminal time
+te = 10; % terminal time
 time = TIME(ts,dt,te); % instance of time class
 in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
@@ -110,7 +110,9 @@ for i = 1:te/dt
 end
 %%
 % logger.plot({1, "p", "er"}, {1, "p1-p2", "e"}, {1, "v", "er"}, {1, "input", ""},"xrange",[time.ts,time.t],"fig_num",1,"row_col",[2 2]);
-logger.plot({1,"p","er"}, {1,"v","er"}, {1,"p1-p2","e"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
+logger.plot({1,"p","er"}, {1,"v","er"}, {1, "input",""},"xrange", [time.ts, time.t],"fig_num",1,"row_col",[2 2]);
+% logger.save("sim_KMPC_test_1014");
+% log = logger;
 % save(strcat('Data\KMPC_sim_test_1008_sigmoid', '.mat'), 'log');
 %%
 % app.logger = logger;
