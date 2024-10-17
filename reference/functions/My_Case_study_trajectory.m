@@ -3,18 +3,18 @@ function [ref] = My_Case_study_trajectory(X0)
 %   詳細説明をここに記述
 
 syms t real
-x_0 = X0(1);
-y_0 = X0(2);
-z_0 = X0(3);
+% x_0 = X0(1);
+% y_0 = X0(2);
+% z_0 = X0(3);
 
 % x = x_0+0.15*t*0;
 % y = y_0+0;
 % z = z_0-0.0;
 
 %PtoP
-x = x_0;
-y = y_0;
-z = z_0;
+% x = x_0;
+% y = y_0;
+% z = z_0;
 
 T=10;
 x=sin(2*pi*t/T);
