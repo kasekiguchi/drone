@@ -12,7 +12,7 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
     %% MPC
     Controller.dt = 0.1; % MPCステップ幅
     Controller.H = 5;
-    Controller.Maxparticle_num = 1000; % 100000
+    Controller.Maxparticle_num = 2500; % 100000
     Controller.particle_num = Controller.Maxparticle_num;
     Controller.Minparticle_num = Controller.Maxparticle_num; % 2000でも動く　怪しい
 

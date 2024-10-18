@@ -75,32 +75,32 @@ classdef MPC_CONTROLLER_HLMC < handle
 
     %-- main()的な
     function result = do(obj,varargin)
-      % obj.param.t = varargin{1,1}.t; % 現在時刻
-      % obj.param.te = varargin{1,1}.te; % 終了時間(default : 10s)
+      obj.param.t = varargin{1,1}.t; % 現在時刻
+      obj.param.te = varargin{1,1}.te; % 終了時間(default : 10s)
 
       % arg:trajectory type, 1:timevarying,  2:polynomial % reference
 
-      vara = varargin{1}; % Experiment
-      obj.param.t = vara.t; % Experiment
-      obj.param.te = vara.te;
+      % vara = varargin{1}; % Experiment
+      % obj.param.t = vara.t; % Experiment
+      % obj.param.te = vara.te;
 
       %% for sim
-      % obj.state.ref = obj.Reference(1); % controller内でリファレンス生成 For sim
+      obj.state.ref = obj.Reference(1); % controller内でリファレンス生成 For sim
 
       %% for exp
-      if vara{2} == 'a'
-          obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
-          % obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-      elseif vara{2} == 't'
-          obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
-          % obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-          fprintf('take off\n')
-      elseif vara{2} == 'f'
-          % 実状態の目標値
-          obj.state.ref = obj.Reference(1); % 12 * obj.H 仮想状態 * ホライズン
-          % obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
-          fprintf('flight\n')
-      end
+      % if vara{2} == 'a'
+      %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
+      %     % obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+      % elseif vara{2} == 't'
+      %     obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
+      %     % obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+      %     fprintf('take off\n')
+      % elseif vara{2} == 'f'
+      %     % 実状態の目標値
+      %     obj.state.ref = obj.Reference(1); % 12 * obj.H 仮想状態 * ホライズン
+      %     % obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+      %     fprintf('flight\n')
+      % end
       %% from main ref
       xd = [obj.state.ref(1:3,1); 0; obj.state.ref(7:9,1); 0]; % 9次多項式にも対応
       xd = [xd; zeros(24, 1)];
@@ -122,17 +122,17 @@ classdef MPC_CONTROLLER_HLMC < handle
       z4n = Z4(xn,xd',vfn,P);
 
       %% for sim
-      % obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+      obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
 
       %% for exp
-      if vara{2} == 'a'
-          obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-      elseif vara{2} == 't'
-          obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
-          % fprintf('take off\n')
-      elseif vara{2} == 'f'
-          obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
-      end
+      % if vara{2} == 'a'
+      %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+      % elseif vara{2} == 't'
+      %     obj.current_state = [0;0;0;0;0;0;0;0;0;0;0;0];
+      %     % fprintf('take off\n')
+      % elseif vara{2} == 'f'
+      %     obj.current_state = [z1n(1:2);z2n(1:4);z3n(1:4);z4n(1:2)];
+      % end
       % -------------------------------------------------------------------------------------------------------------------------------------
       %% Referenceの取得、ホライズンごと
       % xrを仮想状態目標値に変換 ホライズン分の変換
@@ -280,23 +280,25 @@ classdef MPC_CONTROLLER_HLMC < handle
       % obj.result.Evaluationtra_norm = obj.input.normE;
 
       %% 情報表示 expでは表示しない
-      % if exist("exitflag") ~= 1
-      %     exitflag = NaN;
-      % end
-      % est_print = obj.self.estimator.result.state;
-      % fprintf("==================================================================\n")
-      % fprintf("==================================================================\n")
-      % fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
-      %     est_print.p(1), est_print.p(2), est_print.p(3),...
-      %     est_print.v(1), est_print.v(2), est_print.v(3),...
-      %     est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
-      % fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
-      %     obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
-      %     obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
-      %     obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
-      % fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-      %     obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
-      % fprintf("\n");
+      if exist("exitflag") ~= 1
+          exitflag = NaN;
+      end
+      est_print = obj.self.estimator.result.state;
+      fprintf("==================================================================\n")
+      fprintf("==================================================================\n")
+      fprintf("ps: %f %f %f \t vs: %f %f %f \t qs: %f %f %f \n",...
+          est_print.p(1), est_print.p(2), est_print.p(3),...
+          est_print.v(1), est_print.v(2), est_print.v(3),...
+          est_print.q(1)*180/pi, est_print.q(2)*180/pi, est_print.q(3)*180/pi); % s:state 現在状態
+      fprintf("pr: %f %f %f \t vr: %f %f %f \t qr: %f %f %f \n", ...
+          obj.state.ref(1,1), obj.state.ref(2,1), obj.state.ref(3,1),...
+          obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
+          obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
+      fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
+          obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+      fprintf("\n");
+
+      %% obj.input.uを初期値としたQP
       
       result = obj.result;
       % profile viewer

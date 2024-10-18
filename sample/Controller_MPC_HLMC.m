@@ -3,7 +3,7 @@ function Controller = Controller_MPC_HLMC(agent)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 5;
-    Controller_param.Maxparticle_num = 1000; % 100000
+    Controller_param.Maxparticle_num = 5000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
 

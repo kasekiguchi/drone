@@ -71,19 +71,20 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
         %%initialize
         time = varargin{1};
         phase = varargin{2};
+        obj.param.t = time.t;
         %% phaseによるcontrollerの選択
         % result: controllerで算出された入力
         if phase == 'a'
             obj.state.ref = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input;0;0;0],1,obj.param.H);
             result = obj.controller_HLMC(varargin);
-            disp('controller: MC');
+            disp('controller: MC,  phase: a');
         elseif phase == 't' || phase == 'l'
             result = obj.controller_HL(varargin);
-            disp('controller: HL');
+            disp('controller: HL  phase: t or l');
         elseif phase == 'f'
             obj.state.ref = obj.generate_reference();
             result = obj.controller_HLMC(varargin);
-            disp('controller: MC');
+            disp('controller: MC  phase: f');
         end 
         toc
     end
@@ -141,7 +142,7 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
         xd(13:15)=Rb0'*xd(13:15);
         xd(17:19)=Rb0'*xd(17:19);
         P = obj.self.parameter.get();
-        vfn = Vf(xn,xd',P,obj.F1); %v1
+        vfn = Vf(xn,xd',P,obj.param.F1); %v1
         z1n = Z1(xn,xd',P);
         z2n = Z2(xn,xd',vfn,P);
         z3n = Z3(xn,xd',vfn,P);
@@ -235,6 +236,7 @@ classdef MPC_CONTROLLER_HLMC_HL < handle
 
     function predict_gpu(obj)
       obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
+      %% ベクトル化
       for i = 1:obj.param.H-1
         obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),obj.input.u(:,i,1:obj.N));
       end
