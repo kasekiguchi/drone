@@ -3,7 +3,7 @@ function Controller = Controller_MPC_HLMC(agent)
 %   HLをモデルとしたMCMPC
     Controller_param.dt = 0.1; % MPCステップ幅
     Controller_param.H = 5;
-    Controller_param.Maxparticle_num = 500; % 100000
+    Controller_param.Maxparticle_num = 1000; % 100000
     Controller_param.particle_num = Controller_param.Maxparticle_num;
     Controller_param.Minparticle_num = Controller_param.Maxparticle_num; % 2000でも動く　怪しい
 
@@ -20,11 +20,11 @@ function Controller = Controller_MPC_HLMC(agent)
     ze = 0; % z収束値 -0.5
     v0 = 0; % 初期速度
     ve = 0; % 終端速度 収束させるなら０；　速度持ったまま落下なら-1
-    
+
     delayTime = 10; % かける時間 : 2sで落下＋移動
     t = 0:0.025:delayTime+1;
     Controller_param.reference.polynomial.Z = curve_interpolation_9order(t',delayTime,z0,v0,ze,ve);
-    
+
     x0 = agent.estimator.result.state.p(1); % -1
     xe = 0;
     v0 = 0;
@@ -32,7 +32,7 @@ function Controller = Controller_MPC_HLMC(agent)
     % teref = 1.5;
     delay = 0;
     Controller_param.reference.polynomial.X = curve_interpolation_9order(t'-delay,delayTime,x0,v0,xe,ve);
-    
+
     v0 = 0;
     y0 = agent.estimator.result.state.p(2);
     ye = 0;

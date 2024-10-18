@@ -27,31 +27,9 @@ agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0,0,0]
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",10,"orig",[0;0;1],"size",[1,1,0]},"HL"});
 %agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
 
-agent.controller = MPC_CONTROLLER_HLMC(agent,Controller_MPC_HLMC(agent));
-%2つのコントローラの設定---------------------------------------------------------------------------------------------------
-% agent.controller.hlc = HLC(agent,Controller_HL(dt));
-% agent.controller.mpc = MPC_CONTROLLER_HLMC(agent,Controller_MPC_HLMC(agent)); %最適化手法：QP
-% agent.controller.result.input = [0;0;0;0];
-% agent.controller.do = @controller_do;
-%------------------------------------------------------------------------------------------------------------------------
+agent.controller = MPC_CONTROLLER_HLMC_HL(agent,Controller_MPC_HLMC_HL(dt, agent));
 
 run("ExpBase");
-
-% function result = controller_do(varargin)
-%     controller = varargin{5}.controller;
-%     if varargin{2} == 'a'
-%         result = controller.mpc.do(varargin); % arming: KMPC 
-%     elseif varargin{2} == 't'
-%         result.hlc = controller.hlc.do(varargin); % takeoff: HLとKMPCをどちらも回す
-%         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
-%         result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
-%     elseif varargin{2} == 'f'
-%         result = controller.mpc.do(varargin); % flight: KMPC
-%     elseif varargin{2} == 'l'
-%         result = controller.hlc.do(varargin); % landing: HL
-%    end
-%     varargin{5}.controller.result = result;
-% end
 
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);

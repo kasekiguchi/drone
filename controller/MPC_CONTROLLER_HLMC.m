@@ -81,8 +81,8 @@ classdef MPC_CONTROLLER_HLMC < handle
       % arg:trajectory type, 1:timevarying,  2:polynomial % reference
 
       vara = varargin{1}; % Experiment
-      obj.param.t = vara{1}.t; % Experiment
-      obj.param.te = vara{1}.te;
+      obj.param.t = vara.t; % Experiment
+      obj.param.te = vara.te;
 
       %% for sim
       % obj.state.ref = obj.Reference(1); % controller内でリファレンス生成 For sim

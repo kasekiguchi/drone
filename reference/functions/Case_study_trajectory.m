@@ -81,7 +81,7 @@ z = 1;
 % x = 1/(1+exp(-t + te/2));
 y = 1/(1+exp(-t + te/2));
 
-% timevarying_refrence=[x y z]
+timevarying_refrence=[x y z]
 ref=@(t)[x;y;z;0];
 end
 
