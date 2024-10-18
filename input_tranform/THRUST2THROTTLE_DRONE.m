@@ -19,9 +19,9 @@ methods
     function obj = THRUST2THROTTLE_DRONE(self, param)
         obj.self = self;
         obj.param = param;
-        obj.param.roll_offset = self.plant.arming_msg(1);
-        obj.param.pitch_offset = self.plant.arming_msg(2);
-        obj.param.yaw_offset = self.plant.arming_msg(4);
+        % obj.param.roll_offset = self.plant.arming_msg(1);
+        % obj.param.pitch_offset = self.plant.arming_msg(2);
+        % obj.param.yaw_offset = self.plant.arming_msg(4);
         obj.param.P = self.parameter.get();
         obj.flight_phase = 's';
         P = self.parameter.get;
