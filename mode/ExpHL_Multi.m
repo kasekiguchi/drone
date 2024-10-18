@@ -23,7 +23,7 @@ rigid_ids(2) = [2];
 for i = 1:N
     if i==1
 
-sstate(1) = motive.result.rigid(rigid_ids(1)); %状態の取得？
+        sstate(1) = motive.result.rigid(rigid_ids(1)); %状態の取得？
     else
         sstate(2) = motive.result.rigid(rigid_ids(2));
     end
@@ -36,7 +36,7 @@ agent(i) = DRONE; %対象をドローンにしている？ DRONE.m
 agent(i).parameter = DRONE_PARAM("DIATONE");
 if i == 1
 % agent.plant = DRONE_EXP_MODEL(agent,Model_Drone_Exp(dt, initial_state, "udp", [1, 253]));
-agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "6")); %プロポ有線　プロポとの接続
+agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "10")); %プロポ有線　プロポとの接続
 else
 agent(i).plant = DRONE_EXP_MODEL(agent(i),Model_Drone_Exp(dt, initial_state(i), "serial", "3"));
 end
@@ -50,7 +50,7 @@ agent(i).input_transform = THRUST2THROTTLE_DRONE(agent(i),InputTransform_Thrust2
 if i == 1
  agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory",{[0,0,1]},"HL"});
 else
- agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory_2p",{[0,0,1]},"HL"}); %HL変えるかも
+ agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory_2p",{[1,1,1]},"HL"}); %HL変えるかも
 end
 % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
  agent(i).controller = HLC(agent(i),Controller_HL(dt));
