@@ -306,23 +306,19 @@ classdef MPC_CONTROLLER_HLMC < handle
           obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
           obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
       fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-          obj.param.t, obj.input.U(1), obj.input.U(2), obj.input.U(3), obj.input.U(4), exitflag);
+          obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
       fprintf("\n");
 
       %% obj.input.uを初期値としたQP
       obj.previous_input = repmat([vf;vs], 1, obj.param.H);
       obj.reference.qp = [obj.reference.xr; repmat(obj.param.ref_input, 1, obj.param.H)]; 
       Param = struct('current_state',obj.current_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.param.H);
-      [var, fval, exitflag] = qp_HLMCMPC(Param);
+      var = qp_HLMCMPC(Param);
 
-      tmp = Uf(xn,xd',var(1,1),P) + Us_GUI_mex(xn,xd',[var(1,1),0,0],var(2:4,1),P); % Us_GUIも17% 計算時間
-      % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
+      tmp = Uf(xn,xd',var(1,1),P) + Us_GUI_mex(xn,xd',[var(1,1),0,0],var(2:4,1),P);
 
       obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
       obj.input.u = [vf; vs];
-      obj.input.U = obj.result.input;
-      % obj.input.u = obj.result.input;
-
 
       result = obj.result;
       % profile viewer
