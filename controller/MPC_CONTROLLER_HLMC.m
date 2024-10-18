@@ -313,13 +313,14 @@ classdef MPC_CONTROLLER_HLMC < handle
       obj.previous_input = repmat([vf;vs], 1, obj.param.H);
       obj.reference.qp = [obj.reference.xr; repmat(obj.param.ref_input, 1, obj.param.H)]; 
       Param = struct('current_state',obj.current_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.param.H);
-      var = qp_HLMCMPC(Param);
+      var = qp_HLMCMPC_mex(Param);
 
       tmp = Uf(xn,xd',var(1,1),P) + Us_GUI_mex(xn,xd',[var(1,1),0,0],var(2:4,1),P);
 
       obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
       obj.input.u = [vf; vs];
 
+      %%
       result = obj.result;
       % profile viewer
     end

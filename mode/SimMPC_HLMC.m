@@ -1,3 +1,14 @@
+%% Initialize
+tmp = matlab.desktop.editor.getActive;
+dir = fileparts(tmp.Filename);
+if ~contains(path,dir)
+    cd(erase(dir,'\mode'));
+[~, tmp] = regexp(genpath('.'), '\.\\\.git.*?;', 'match', 'split');
+cellfun(@(xx) addpath(xx), tmp, 'UniformOutput', false);
+close all hidden; clear ; clc;
+userpath('clear');
+end
+%%
 ts = 0; % initial time
 dt = 0.025; % sampling period
 te = 30; % terminal time
@@ -15,11 +26,28 @@ agent = DRONE;
 agent.plant = MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1));
 agent.parameter = DRONE_PARAM("DIATONE");
 agent.estimator = EKF(agent, Estimator_EKF(agent,dt,MODEL_CLASS(agent,Model_EulerAngle(dt, initial_state, 1)),["p", "q"]));
-agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+% agent.sensor = MOTIVE(agent, Sensor_Motive(1,0, motive));
+agent.sensor = DIRECT_SENSOR(agent, 0.0); % modeファイル内で回すとき
 agent.reference = TIME_VARYING_REFERENCE(agent,{"Case_study_trajectory",{[0;0;1]},"HL"});
 % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.5;0;1],"g",[1;0.5;1]),2}); 百瀬ref
 agent.controller = MPC_CONTROLLER_HLMC(agent, Controller_MPC_HLMC(agent));
 run("ExpBase");
+%%
+for i = 1:te/dt
+    if i < 20 || rem(i, 10) == 0 end
+    tic
+    agent(1).sensor.do(time, 'f');
+    agent(1).estimator.do(time, 'f');
+    agent(1).reference.do(time, 'f');
+    agent(1).controller.do(time, 'f');
+    agent(1).plant.do(time, 'f');
+    logger.logging(time, 'f', agent);
+    time.t = time.t + time.dt;
+    %pause(1)
+    all = toc;
+    disp([num2str(time.t)])
+end
+%%
 function dfunc(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "q", "s"},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
