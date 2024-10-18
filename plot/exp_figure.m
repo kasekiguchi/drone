@@ -20,7 +20,7 @@ disp("Loading data...");
 % load("Data/20240528_KMPC_P2Py=1.mat")
 % filename = '0731_KMPC_saigen_hovering_code00';
 
-filename = 'sim_KMPC_test_1014';
+filename = '0731_KMPC_saigen_hovering_code00';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0722_KMPC_X20_hovering_H10_dt008';
 % filename = '0808_KMPC_Y20_hovering_pretty_good_17_35';
@@ -39,8 +39,8 @@ log = LOGGER(loadfile); % loggerの形で収納できる
 % 0:stop or quit
 
 %% save setting
-savename = strcat(filename, '_all');
-savefolder = '\Data\Exp_figure_image\';
+% savename = strcat(filename, '_all');
+% savefolder = '\Data\Exp_figure_image\';
 %%
 close all
 clear fig
@@ -50,7 +50,7 @@ flg.savefig = 0;
 flg.animation_save = 0;
 flg.animation = 0;
 flg.timerange = 1;
-flg.plotmode = 2; % 1:inner_input, 2:xy, 3:xyz
+flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 phase = 1; % 1:flight, 2:all, 3:flight後何ステップで切るか
 time_idx = 1500;
 yrange = [-2 1];
@@ -110,17 +110,17 @@ fprintf('MAX error: x=%.4f, y=%.4f, z=%.4f \n', max_error(1), max_error(2), max_
 % fig.background_color(-0.1,gca,fig.log.Data.phase);
 
 %%
-clear
-load('g_partial.mat');
+% clear
+% load('g_partial.mat');
 %%
-simplify_sum = simplify(sum_copy);
-subexpr_sum = subexpr(sum_copy);
-comat_1 = cos(pitch/2)*cos(roll/2)*cos(sigma);
-comat_2 = sin(pitch/2)*sin(roll/2)*sin(sigma);
-(cos(roll/2)*sin(pitch/2)*cos(sigma) + cos(pitch/2)*sin(roll/2)*sin(sigma))
-
-comat_3 = cos(pitch/2)*cos(roll/2)*sin(sigma) * 
-(cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))
-
-comat_4 = sin(pitch/2)*sin(roll/2)*cos(sigma) * 
-(cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))
+% simplify_sum = simplify(sum_copy);
+% subexpr_sum = subexpr(sum_copy);
+% comat_1 = cos(pitch/2)*cos(roll/2)*cos(sigma);
+% comat_2 = sin(pitch/2)*sin(roll/2)*sin(sigma);
+% (cos(roll/2)*sin(pitch/2)*cos(sigma) + cos(pitch/2)*sin(roll/2)*sin(sigma))
+% 
+% comat_3 = cos(pitch/2)*cos(roll/2)*sin(sigma) * 
+% (cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))
+% 
+% comat_4 = sin(pitch/2)*sin(roll/2)*cos(sigma) * 
+% (cos(pitch/2)*sin(roll/2)*cos(sigma) - cos(roll/2)*sin(pitch/2)*sin(sigma))
