@@ -73,13 +73,14 @@ classdef HLMCMPC_CONTROLLER < handle
       obj.result.input = zeros(self.estimator.model.dim(2),1);
 
       % Extended Coefficient Matrix
-      obj.model = ExtendedCoefficientMatrix({sysd.A,sysd.B,obj.param.H,obj.param.state_size});
-      obj.A = repmat(obj.model.A, 1, 1, obj.N);
-      obj.B = repmat(obj.model.B, 1, 1, obj.N);
+      % obj.model = ExtendedCoefficientMatrix({sysd.A,sysd.B,obj.param.H,obj.param.state_size});
+      % obj.A = repmat(obj.model.A, 1, 1, obj.N);
+      % obj.B = repmat(obj.model.B, 1, 1, obj.N);
     end
 
     %-- main()的な
     function result = do(obj,varargin)
+        % profile on
       obj.param.t = varargin{1,1}.t; % 現在時刻
       obj.param.te = varargin{1,1}.te; % 終了時間(default : 10s)
       % arg:trajectory type, 1:timevarying,  2:polynomial
@@ -163,8 +164,8 @@ classdef HLMCMPC_CONTROLLER < handle
 
       %% 12状態＋加速度3状態
       % [obj.state.state_data] = predict_gpu(obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B);
-      % [obj.state.state_data] = obj.predict_gpu();
-      obj.predict(); % output:obj.state.state_data
+      obj.predict_gpu();
+      % obj.predict(); % output:obj.state.state_data
 
       %% 実状態変換
       Xd = repmat(obj.reference.xr_org, 1,1,obj.N);
@@ -201,7 +202,7 @@ classdef HLMCMPC_CONTROLLER < handle
 
         % vs = vs';
         % GUI共通プログラムから トルク入力の変換のつもり
-        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
+        tmp = Uf_GUI(xn,xd',vf,P) + Us_GUI_mex(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
         % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
         obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
@@ -317,7 +318,7 @@ classdef HLMCMPC_CONTROLLER < handle
     %%-- 離散：階層型線形化
     % obj.param.expand_A 
     % (obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B
-    function [predict_state] = predict_gpu(obj)
+    function predict_gpu(obj)
       obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
       for i = 1:obj.param.H-1
         obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),obj.input.u(:,i,1:obj.N));
@@ -327,7 +328,6 @@ classdef HLMCMPC_CONTROLLER < handle
         % v = [state(4,i+1,:); state(8,i+1,:)];
         % state_acc(:,i+1,1:N) = (v - v_pre) ./ dt;
       end
-      predict_state = obj.state.state_data;
     end
 
     function predict(obj)
