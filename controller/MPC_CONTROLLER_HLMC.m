@@ -25,6 +25,8 @@ classdef MPC_CONTROLLER_HLMC < handle
     WeightRp
     A
     B
+    qpparam
+    previous_input
   end
 
   methods
@@ -58,6 +60,7 @@ classdef MPC_CONTROLLER_HLMC < handle
       % z, x, y, yawの順番
       A = blkdiag([0,1;0,0],diag([1,1,1],1),diag([1,1,1],1),[0,1;0,0]);
       B = blkdiag([0;1],[0;0;0;1],[0;0;0;1],[0;1]);
+      C = eye(size(A,1));
       sysd = c2d(ss(A,B,eye(12),0),obj.param.dt); % 離散化
       obj.A = repmat(sysd.A,1,1,obj.N); % サンプル分同時に計算のためobj.N分のA行列を用意
       obj.B = repmat(sysd.B,1,1,obj.N);
@@ -71,6 +74,14 @@ classdef MPC_CONTROLLER_HLMC < handle
 
       % Initialize input
       obj.result.input = zeros(self.estimator.model.dim(2),1);
+      obj.input.U = zeros(self.estimator.model.dim(2),1);
+
+      %% QP change equation
+      Q = reshape(obj.Weight(:,:,1), obj.param.state_size, []);
+      Qf = reshape(obj.WeightF(:,:,1), obj.param.state_size, []);
+      R = reshape(obj.WeightR(:,:,1), obj.param.input_size, []);
+      Param = struct('A',A,'B',B,'C',C,'weight',Q,'weightF',Qf,'weightR',R,'H',obj.param.H);
+      [obj.qpparam.H, obj.qpparam.F] = change_equation_HLMCMPC(Param);
     end
 
     %-- main()的な
@@ -295,11 +306,24 @@ classdef MPC_CONTROLLER_HLMC < handle
           obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
           obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
       fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-          obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+          obj.param.t, obj.input.U(1), obj.input.U(2), obj.input.U(3), obj.input.U(4), exitflag);
       fprintf("\n");
 
       %% obj.input.uを初期値としたQP
-      
+      obj.previous_input = repmat([vf;vs], 1, obj.param.H);
+      obj.reference.qp = [obj.reference.xr; repmat(obj.param.ref_input, 1, obj.param.H)]; 
+      Param = struct('current_state',obj.current_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.param.H);
+      [var, fval, exitflag] = qp_HLMCMPC(Param);
+
+      tmp = Uf(xn,xd',var(1,1),P) + Us_GUI_mex(xn,xd',[var(1,1),0,0],var(2:4,1),P); % Us_GUIも17% 計算時間
+      % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
+
+      obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
+      obj.input.u = [vf; vs];
+      obj.input.U = obj.result.input;
+      % obj.input.u = obj.result.input;
+
+
       result = obj.result;
       % profile viewer
     end
@@ -377,7 +401,7 @@ classdef MPC_CONTROLLER_HLMC < handle
       % k = ones(1, obj.param.H);
 
       %% コスト計算
-      tildeUpre = U - obj.input.v;          % agent.input 　前時刻入力との誤差
+      % tildeUpre = U - obj.input.v;          % agent.input 　前時刻入力との誤差
       tildeUref = U - obj.param.ref_input;  % 目標入力との誤差 0　との誤差
 
       %% 制約外の軌道に対して値を付加
@@ -385,7 +409,7 @@ classdef MPC_CONTROLLER_HLMC < handle
 
       %% -- 状態及び入力のステージコストを計算 pagemtimes サンプルごとの行列計算
       %-- 入力
-      stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre);
+      % stageInputPre  = k .* tildeUpre.*pagemtimes(obj.WeightR(:,:,1:obj.N),tildeUpre);
       stageInputRef  = k .* tildeUref.*pagemtimes(obj.WeightRp(:,:,1:obj.N),tildeUref);
 
       stageStateZ =    k .* Z.*pagemtimes(obj.Weight(:,:,1:obj.N),Z);
@@ -407,7 +431,8 @@ classdef MPC_CONTROLLER_HLMC < handle
       end
 
       %-- 評価値計算 方向ごとに入力決定のために評価値を分けて保存
-      Eval{1} = sum(stageStateZ,[1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]);  % 全体の評価値
+      % Eval{1} = sum(stageStateZ,[1,2]) + sum(stageInputPre,[1,2]) + sum(stageInputRef,[1,2]);  % 全体の評価値
+      Eval{1} = sum(stageStateZ,[1,2]) + sum(stageInputRef,[1,2]);
       Eval{2} = sum(stageStateZ(1:2,:,:),  [1,2]);   % Z
       Eval{3} = sum(stageStateZ(3:6,:,:),  [1,2]);   % X
       Eval{4} = sum(stageStateZ(7:10,:,:), [1,2]);   % Y

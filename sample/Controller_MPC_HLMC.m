@@ -60,6 +60,9 @@ function Controller = Controller_MPC_HLMC(agent)
     Controller_param.state_size = 12;
     Controller_param.input_size = 4;
 
+    Controller_param.input.lb = [0; -1; -1; -1];
+    Controller_param.input.ub = [10; 1;  1;  1];
+
     %% sekiguchi-komatsu new
     % Controller_param.Z = 1 * diag([100; 10]);% * 1e3; %2
     % Controller_param.X = 1e3 * diag([10000,1,1,1]);% * 1e3;%4
