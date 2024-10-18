@@ -6,44 +6,26 @@ in_prog_func = @(app) dfunc(app); % in progress plot
 post_func = @(app) dfunc(app); % function working at the "draw button" pushed.
 N = 2;
 motive = Connector_Natnet_sim(N, dt, 0); % imitation of Motive camera (motion capture system)
-
 logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); % instance of LOOGER class for data logging
-%env = DENSITY_MAP(Env_2DCoverage);
-% arranged_pos(1) = arranged_position([0, 0], 1, 1, 0); %arranged_position.mで関数定義
-% arranged_pos(2) = arranged_position([3, 3], 2, 1, 0); %arranged_position.mで関数定義
+%初期値を各機体ごとに設定
+initial_position = {[0,0,0],[2,2,0]};
+%目標軌道を各機体ごとに設定（機体同士がぶつからないように中心などずらせるように入力引数を設定するとよい）
+refName = {
+            {"My_Case_study_trajectory",{[1,1,1]},"HL"},...
+            {"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"}
+            };
 for i = 1:N
-    %initial_state(i).p = arranged_pos(:, i); % set initial position
-    %初期位置は完成　しっかりそれぞれの初期位置を変更できた
-    if i == 1
-        initial_state(i).p = arranged_position([0, 0], 1, 1, 0);
-    else
-        initial_state(i).p = arranged_position([2, 2], 1, 1, 0);
-    end
-    %
+    initial_state(i).p = arranged_position(initial_position{i}(1:2), 1, 1, initial_position{i}(3));
     initial_state(i).q = [1; 0; 0; 0];
     initial_state(i).v = [0; 0; 0];
     initial_state(i).w = [0; 0; 0];
-    %[M,P] = Model_Discrete(dt,initial_state(i),1,"PV") %これ居るかわからん
     agent(i) = DRONE; %ドローンの描画に関するもの？DRONE.mで関数定義
     agent(i).id = i;
     agent(i).parameter = DRONE_PARAM("DIATONE"); %ドローンの物理パラメータ DRONE_PARAM.mで関数定義
     agent(i).plant = MODEL_CLASS(agent(i),Model_Quat13(dt, initial_state(i), i)); %ドローンの状態を更新している MODEL_CLASS.mで定義
-%外乱を与える==========
-% agent.plant = MODEL_CLASS(agent,Model_EulerAngle_With_Disturbance(dt, initial_state, 1));%外乱用モデル
-% agent.input_transform = ADDING_DISTURBANCE(agent,InputTransform_Disturbance_drone(time)); % 外乱付与
-%=====================
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_EulerAngle(dt, initial_state(i), i)),["p", "q"]));
     agent(i).sensor = MOTIVE(agent(i), Sensor_Motive(i,0, motive));
-    % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"gen_ref_saddle",{"freq",5,"orig",[0;0;1],"size",[2,2,0.5]},"HL"});
-    % agent.reference = TIME_VARYING_REFERENCE(agent,{"gen_ref_saddle",{"freq",0,"orig",[0;0;1],"size",[0,0,0]},"HL"});
-    if i == 1
-    agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory",{[1,1,1]},"HL"});
-    % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"Case_study_trajectory",{[1,1,1]},"HL"});
-    % agent.reference = MY_POINT_REFERENCE(agent,{struct("f",[0.2;0.2;1.2],"g",[-0.2;0.2;0.8],"h",[-0.2;-0.2;1.2],"j",[0.2;-0.2;0.8],"k",[0;0;1],"m",[-2;2;3]),0});%縦ベクトルで書く,
-    else
-    % agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"My_Case_study_trajectory_2p",{[1,1,1]},"HL"});
-    agent(i).reference = TIME_VARYING_REFERENCE(agent(i),{"gen_ref_saddle",{"freq",13,"orig",[2;2;1],"size",[1,1,0.2]},"HL"});
-    end
+    agent(i).reference = TIME_VARYING_REFERENCE(agent(i),refName{i});
     agent(i).controller = HLC(agent(i),Controller_HL(dt));
 end
 run("ExpBase");

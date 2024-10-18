@@ -7,14 +7,6 @@ post_func = @(app) post(app); %35行目にある
 N = 2;
 logger = LOGGER(1:N, size(ts:dt:te, 2), 0, [],[]); %データをまとめている？
 
-% motive = Connector_Natnet('192.168.1.4'); % connect to Motive　モーションキャプチャのIP
-% motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
-% rigid_ids = [1]; % rigid-body number on Motive　モーションキャプチャの剛体番号
-% sstate = motive.result.rigid(rigid_ids); %状態の取得？
-% initial_state.p = sstate.p; %初期位置の取得
-% initial_state.q = sstate.q; %初期角度の取得
-% initial_state.v = [0; 0; 0]; %初期速度の取得
-% initial_state.w = [0; 0; 0]; %初期角加速度の取得
 motive = Connector_Natnet('192.168.1.4'); % connect to Motive　実験室モーションキャプチャのIP
 % motive = Connector_Natnet('192.168.120.4'); % connect to Motive　総研モーションキャプチャのIP
 motive.getData([], []); % get data from Motive モーションキャプチャからのデータを入手する
