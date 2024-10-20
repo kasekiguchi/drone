@@ -39,7 +39,7 @@ classdef MPC_CONTROLLER_HLMC < handle
       obj.input = obj.param.input;
       obj.const = obj.param.const;
       obj.input.v = obj.input.u;   % 前ステップ入力の取得，評価計算用
-      obj.input.input_TH = obj.param.input.range; % 最大最小入力
+      obj.input.input_TH = obj.param.input.range(:,1); % 最初は最大値を適用
       obj.param.fRemove = 0;
       obj.input.AllRemove = 0; % 全棄却フラグ
       obj.input.nextsigma = obj.param.input.Initsigma;  % 初期化
@@ -159,7 +159,13 @@ classdef MPC_CONTROLLER_HLMC < handle
       % 仮想状態の目標値
       obj.reference.xr_org = [xr_imagine(3,:);xr_imagine(7,:);xr_imagine(1,:);xr_imagine(5,:);xr_imagine(9,:);xr_imagine(13,:);xr_imagine(2,:);xr_imagine(6,:);xr_imagine(10,:);xr_imagine(14,:);xr_imagine(4,:);xr_imagine(8,:)];
       % 仮想状態の目標値。Objectiveで使用。　現在地から目標値（座標）への誤差
-      obj.reference.xr = obj.reference.xr_org(:,1) - obj.reference.xr_org; 
+      % obj.reference.xr = obj.reference.xr_org(:,1) - obj.reference.xr_org; 
+      % obj.reference.xr = -obj.current_state; % Hを考慮できていない
+      
+      % current
+      act = model_HL.state.get();
+      img = [act(3); act(9); act(1); act(7); 0;0; act(2); act(8); 0;0; act(6); act(12)];
+      obj.reference.xr = img - obj.reference.xr_org;
 
       mu = obj.input.Resampling_mu; % Importance Sampling / Low Variance Sampling
       % mu = repmat(obj.input.u, 1, obj.param.H, obj.N); % 前の入力を平均値
@@ -181,20 +187,27 @@ classdef MPC_CONTROLLER_HLMC < handle
         obj.input.AllRemove = 0;
       end
 
+      %% 入力制約の計算
+      % obj.input.input_TH: 倍率，obj.param.input.range(z x y yaw): 最大最小
+      % 目標値との距離 x 最大倍率
+      % ref_xyzyaw = [obj.reference.xr(1); obj.reference.xr(3); obj.reference.xr(7); obj.reference.xr(11)];
+      % obj.input.input_TH = max(obj.param.input.range(:,2),min(obj.param.input.range(:,1), ref_xyzyaw .* obj.param.input.range(:,1)));
+
+      rng("shuffle");
       %% ホライズンにかけて分散大きく
       ksigma_max = 0.1 * obj.param.H;
       ksigma = linspace(1,1+ksigma_max,obj.param.H);
       inputSigma = ksigma .* obj.input.sigma';
-      obj.input.u1 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
-      obj.input.u2 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
-      obj.input.u3 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
-      obj.input.u4 = max(-obj.input.input_TH, min(obj.input.input_TH, normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
+      obj.input.u1 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), normrnd(zeros(obj.param.H,obj.N), inputSigma(1)) + reshape(mu(1,:,:), obj.param.H, obj.N)));
+      obj.input.u2 = max(-obj.input.input_TH(2), min(obj.input.input_TH(2), normrnd(zeros(obj.param.H,obj.N), inputSigma(2)) + reshape(mu(2,:,:), obj.param.H, obj.N)));
+      obj.input.u3 = max(-obj.input.input_TH(3), min(obj.input.input_TH(3), normrnd(zeros(obj.param.H,obj.N), inputSigma(3)) + reshape(mu(3,:,:), obj.param.H, obj.N)));
+      obj.input.u4 = max(-obj.input.input_TH(4), min(obj.input.input_TH(4), normrnd(zeros(obj.param.H,obj.N), inputSigma(4)) + reshape(mu(4,:,:), obj.param.H, obj.N)));
 
       %% 正規分布ふつう
-      % obj.input.u1 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1,1))); 
-      % obj.input.u2 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1,1))); 
-      % obj.input.u3 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1,1))); 
-      % obj.input.u4 = max(-obj.input.input_TH, min(obj.input.input_TH, obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1,1))); 
+      % obj.input.u1 = max(-obj.input.input_TH(1), min(obj.input.input_TH(1), obj.input.sigma(1).*randn(obj.param.H, obj.N) + mu(1,1,1))); 
+      % obj.input.u2 = max(-obj.input.input_TH(2), min(obj.input.input_TH(2), obj.input.sigma(2).*randn(obj.param.H, obj.N) + mu(2,1,1))); 
+      % obj.input.u3 = max(-obj.input.input_TH(3), min(obj.input.input_TH(3), obj.input.sigma(3).*randn(obj.param.H, obj.N) + mu(3,1,1))); 
+      % obj.input.u4 = max(-obj.input.input_TH(4), min(obj.input.input_TH(4), obj.input.sigma(4).*randn(obj.param.H, obj.N) + mu(4,1,1))); 
 
       obj.input.u(4, 1:obj.param.H, 1:obj.N) = obj.input.u4;   % reshape
       obj.input.u(3, 1:obj.param.H, 1:obj.N) = obj.input.u3;
@@ -220,7 +233,6 @@ classdef MPC_CONTROLLER_HLMC < handle
       obj.input.EvalNorm = obj.Normalize();
 
       % 平均のリサンプリング
-
       [obj.input.Resampling_mu, ~] = obj.Resampling_LVS(); % LowVarianceSampling
       % [obj.input.Resampling_mu, ~] = obj.Resampling_IS(); % ImportanceSampling
 
@@ -243,7 +255,8 @@ classdef MPC_CONTROLLER_HLMC < handle
         tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % Us_GUIも17% 計算時間
         % tmp = Uf(xn,xd',vf,P) + Us(xn,xd',[vf,0,0],vs(:),P); % force
 
-        obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
+        % obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
+        obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
         obj.input.u = [vf; vs];
 
         %-- 前時刻と現時刻の評価値を比較して，評価が悪くなったら標準偏差を広げて，
@@ -259,6 +272,7 @@ classdef MPC_CONTROLLER_HLMC < handle
         else
           obj.input.nextsigma = min(obj.input.Maxsigma,max( obj.input.Minsigma, obj.input.sigma .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))));
           % obj.param.nextparticle_num = min(obj.param.Maxparticle_num,max(obj.param.Minparticle_num,ceil(obj.N * (obj.input.Bestcost_now(1)/obj.input.Bestcost_pre(1)))));
+          obj.input.input_TH = max(-obj.param.input.range(:,1), min(obj.param.input.range(:,1), obj.input.input_TH .* (obj.input.Bestcost_now(2:5)./obj.input.Bestcost_pre(2:5))'));
         end
 
       elseif removeF == obj.N    % 全棄却
@@ -274,6 +288,19 @@ classdef MPC_CONTROLLER_HLMC < handle
         obj.input.u = obj.self.input;
       end
 
+      %% obj.input.uを初期値としたQP
+      % obj.previous_input = repmat([vf;vs], 1, obj.param.H);
+      % obj.reference.qp = [obj.reference.xr; repmat(obj.param.ref_input, 1, obj.param.H)]; 
+      % Param = struct('current_state',obj.current_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.param.H);
+      % var = qp_HLMCMPC_mex(Param); %QP
+      % tmp = Uf(xn,xd',var(1,1),P) + Us_GUI_mex(xn,xd',[var(1,1),0,0],var(2:4,1),P);
+      % % 
+      % 
+      % % obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
+      % obj.result.input = [max(0,min(10,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+      % obj.input.u = var(1:4,1);
+
+      %% save value
       obj.result.removeF = removeF;
       obj.result.removeX = removeX;
       obj.result.survive = survive;
@@ -306,19 +333,8 @@ classdef MPC_CONTROLLER_HLMC < handle
           obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
           obj.state.ref(4,1)*180/pi, obj.state.ref(5,1)*180/pi, obj.state.ref(6,1)*180/pi)                             % r:reference 目標状態
       fprintf("t: %f \t input: %f %f %f %f \t flag: %d", ...
-          obj.param.t, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), exitflag);
+          obj.param.t, obj.result.input(1), obj.result.input(2), obj.result.input(3), obj.result.input(4), exitflag);
       fprintf("\n");
-
-      %% obj.input.uを初期値としたQP
-      obj.previous_input = repmat([vf;vs], 1, obj.param.H);
-      obj.reference.qp = [obj.reference.xr; repmat(obj.param.ref_input, 1, obj.param.H)]; 
-      Param = struct('current_state',obj.current_state,'ref',obj.reference.qp,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.param.H);
-      var = qp_HLMCMPC_mex(Param);
-
-      tmp = Uf(xn,xd',var(1,1),P) + Us_GUI_mex(xn,xd',[var(1,1),0,0],var(2:4,1),P);
-
-      obj.result.input = [tmp(1); tmp(2); tmp(3); tmp(4)]; % トルク入力への変換
-      obj.input.u = [vf; vs];
 
       %%
       result = obj.result;
