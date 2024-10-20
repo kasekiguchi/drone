@@ -82,10 +82,16 @@ classdef MPC_CONTROLLER_HLMC < handle
       R = reshape(obj.WeightR(:,:,1), obj.param.input_size, []);
       Param = struct('A',A,'B',B,'C',C,'weight',Q,'weightF',Qf,'weightR',R,'H',obj.param.H);
       [obj.qpparam.H, obj.qpparam.F] = change_equation_HLMCMPC(Param);
+
+      % Extended Coefficient Matrix
+      obj.model = ExtendedCoefficientMatrix({sysd.A,sysd.B,obj.param.H,obj.param.state_size});
+      obj.param.A = repmat(obj.model.A, 1, 1, obj.N);
+      obj.param.B = repmat(obj.model.B, 1, 1, obj.N);
     end
 
     %-- main()的な
     function result = do(obj,varargin)
+        tic
       obj.param.t = varargin{1,1}.t; % 現在時刻
       obj.param.te = varargin{1,1}.te; % 終了時間(default : 10s)
 
@@ -216,18 +222,20 @@ classdef MPC_CONTROLLER_HLMC < handle
 
       %% 12状態＋加速度3状態
       % [obj.state.state_data] = predict_gpu(obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B);
-      [obj.state.state_data] = obj.predict_gpu();
+      % obj.predict_gpu();
+      obj.predict();
 
       %% 実状態変換
       Xd = repmat(obj.reference.xr_org, 1,1,obj.N);
       Xreal = Xd + obj.state.state_data; % + or -
-      obj.state.error_data = Xd - Xreal;
+      obj.state.error_data = Xd - Xreal; % error_data = state_data
       obj.state.real_data = Xreal;
 
 
       %-- 評価値計算 
       obj.input.Evaluationtra =  obj.objective();
       % obj.input.Evaluationtra = objective(Objobj);  
+   
 
       % 評価値の正規化
       obj.input.EvalNorm = obj.Normalize();
@@ -339,6 +347,7 @@ classdef MPC_CONTROLLER_HLMC < handle
       %%
       result = obj.result;
       % profile viewer
+      toc
     end
     function show(obj)
       obj.result
@@ -384,17 +393,16 @@ classdef MPC_CONTROLLER_HLMC < handle
     %%-- 離散：階層型線形化
     % obj.param.expand_A 
     % (obj.input.u, obj.state.state_data, obj.current_state, obj.N, obj.param.H, obj.A, obj.B
-    function [predict_state] = predict_gpu(obj)
+    function predict_gpu(obj)
       obj.state.state_data(:,1,1:obj.N) = repmat(obj.current_state,1,1,obj.N);  % サンプル数分初期値を作成
       for i = 1:obj.param.H-1
         obj.state.state_data(:,i+1,1:obj.N) = pagemtimes(obj.A(:,:,1:obj.N),obj.state.state_data(:,i,1:obj.N)) + pagemtimes(obj.B(:,:,1:obj.N),obj.input.u(:,i,1:obj.N));
-    
-        %% 加速度
-        % v_pre = [state(4,i,:); state(8,i,:)];
-        % v = [state(4,i+1,:); state(8,i+1,:)];
-        % state_acc(:,i+1,1:N) = (v - v_pre) ./ dt;
       end
-      predict_state = obj.state.state_data;
+    end
+
+    function predict(obj)
+      obj.state.state_data = pagemtimes(obj.param.A, obj.current_state) + pagemtimes(obj.param.B, reshape(obj.input.u, [], 1, obj.N)); % 予測計算 12*Hx1xN
+      obj.state.state_data = [repmat(obj.current_state,1,1,obj.N), reshape(obj.state.state_data(1:end-obj.param.state_size,:,:), obj.param.state_size, [], obj.N)];
     end
 
     %------------------------------------------------------
