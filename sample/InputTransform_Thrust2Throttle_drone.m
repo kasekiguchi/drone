@@ -9,8 +9,8 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone(varargin)
     % 600 600 600 20
     % 340
 
-    u_trans_param.gain2 = u_trans_param.gain;
-    u_trans_param.th_offset2 = u_trans_param.th_offset;
+    u_trans_param.gain2 = [650;650;650;20];
+    u_trans_param.th_offset2 = 325;
     
     % u_trans_param.gain =[500;500;500;50];
     % u_trans_param.th_offset = 340;

@@ -31,6 +31,10 @@ agent.controller = MPC_CONTROLLER_HLMC_HL(agent,Controller_MPC_HLMC_HL(dt, agent
 
 run("ExpBase");
 
+%% 保存 v7.3
+log = gui.logger;
+save("Data\1021_HLMCMPC_y1m_good_result.mat", "log", "-v7.3");
+%%
 function post(app)
 app.logger.plot({1, "p", "er"},"ax",app.UIAxes,"xrange",[app.time.ts,app.time.te]);
 app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes2,"xrange",[app.time.ts,app.time.te]);
@@ -38,6 +42,8 @@ app.logger.plot({1, "v", "e"},"ax",app.UIAxes3,"xrange",[app.time.ts,app.time.te
 app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "input", ""},"ax",app.UIAxes5,"xrange",[app.time.ts,app.time.te]);
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
+
+
 end
 function in_prog(app)
 app.Label_2.Text = ["estimator : " + app.agent(1).estimator.result.state.get()];

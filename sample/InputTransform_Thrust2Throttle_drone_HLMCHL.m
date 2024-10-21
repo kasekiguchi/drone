@@ -9,8 +9,9 @@ function u_trans_param = InputTransform_Thrust2Throttle_drone_HLMCHL(varargin)
     % 600 600 600 20
     % 340
 
-    u_trans_param.gain2 = [500;500;500;15];
-    u_trans_param.th_offset2 = 318;
+    g2 = 550;
+    u_trans_param.gain2 = [ones(3,1)*g2;50];
+    u_trans_param.th_offset2 = 330;
     
     % u_trans_param.gain =[500;500;500;50];
     % u_trans_param.th_offset = 340;
