@@ -28,7 +28,6 @@ classdef HLC_SUSPENDED_LOAD < handle
             obj.aidrns=zeros(3,20);
             obj.ais =zeros(3,20);
             obj.ms = ones(1,10)*0.4;
-            %移動平均に使うデータの長さをもっと長くする．
             % obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
         end
         

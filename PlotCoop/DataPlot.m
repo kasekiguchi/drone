@@ -12,22 +12,28 @@
 close all
 clear multiFigure option addingContents f
 %選択
-fMul =1;%複数まとめるかレーダーチャートの時は無視される
+fMul =10;%複数まとめるかレーダーチャートの時は無視される
 fspider=10;%レーダーチャート1
 fF=1;%flightのみは１
 startTime = 0;
-endTime = 45;%1E3;
+endTime = 1e2;%1E3;
+fnowdata = 10;
 %どの時間の範囲を描画するか指定   
 % startTime = [10,10,10,80];%モデル誤差用
 % endTime = [30,30,30,100];
 
 % clear allData
-% for i = 1:length(logger.target)
-%     loggers{i,1} = simplifyLoggerForCoop(logger,i);
-% end
-loggers = simple_log_backwardDifference;
-droneID = 1:length(loggers)-1;
-% droneID = logger.target(1:end-1);
+if fnowdata==1
+    if ~exist("loggers","var")
+        for i = 1:length(logger.target)
+            loggers{i,1} = simplifyLoggerForCoop(logger,i);
+        end
+    end
+    droneID = logger.target(1:end-1);
+else 
+    loggers = simple_log_epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_;
+    droneID = 1:length(loggers)-1;
+end
 lgnd.payload=["payload","split payload" + droneID];
 lgnd.drone="drone" + droneID;
 %========================================================================
@@ -57,7 +63,9 @@ lgnd.drone="drone" + droneID;
      % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","x_y" ,"t_x" ,"t_y" ,"t_z","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw"];
      % n = ["xrmse","yrmse","zrmse","rmse","inputsumT","inputsumTq","t_errx","t_erry","t_errz","input","uHL","uHLsum","t_vx" ,"t_vy" ,"t_vz","t_qroll" ,"t_qpitch" ,"t_qyaw","t_wroll" ,"t_wpitch" ,"t_wyaw","t_x" ,"t_y" ,"t_z","x_y","three_D"];
      % n = ["t_x" ,"t_y" ,"t_z","x_y","three_D"];
-     n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
+     % n = ["t_p0","t_x0","t_y0","t_z0","t_errx0","t_erry0","t_errz0","three_D0","mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
+     % n = ["mAll","mL"];%,"ai"+droneID,"aidrn"+droneID];
+     n = ["three_D0"];%,"ai"+droneID,"aidrn"+droneID];
 %========================================================================
 % multiFigure
 % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],["attitude0"	"t_qroll0"	"t_qpitch0" "t_qyaw0"],["velocity0"	"t_vx0"	"t_vy0"	"t_vz0"	],["angular_velocity0"	"t_wroll0" "t_wpitch0"	"t_wyaw0"],...
@@ -66,7 +74,7 @@ lgnd.drone="drone" + droneID;
 % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0",["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID};%比較するとき複数まとめる
 % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,"vi"+droneID,"wi"+droneID,"vLi"+droneID,"wLi"+droneID,["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
 % nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],"mui"+droneID,"ai"+droneID,"aidrn"+droneID,"dwi"+droneID,["a" "dO"]};%比較するとき複数まとめる
-nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"]};%比較するとき複数まとめる
+nM = {["t_p0" "t_x0" "t_y0" "t_z0"],["error0"	"t_errx0"	"t_erry0"	"t_errz0"],"three_D0","attitude"+droneID,"pevi"+droneID,"pewi"+droneID,"pevLi"+droneID,"pewLi"+droneID,["mAll","mL"],["inputTrust" "inputRoll"	"inputPitch"	"inputYaw"]};%比較するとき複数まとめる
 % nM = {"mui"+droneID};%比較するとき複数まとめる
 multiFigure.layout = cell(1,length(nM));
 
@@ -107,7 +115,7 @@ option.camposition = [];
 
 %figごとに追加する場合のもの
 addingContents.aspect = [1,1,1];
-addingContents.camposition = [-45,-45,45];
+addingContents.camposition = [-45,-45,20];
 
 %data setting
 if ~exist("oldStartTime","var") ||~exist("oldEndTime ","var")
@@ -154,10 +162,11 @@ if isSaved
         date2=string(datetime('now','Format','yyyy_MMdd'));%日付
         
     %変更========================================================
-       subfolder='sim';%sim or exp
-    ExpSimName='estimateLoadMass';%実験,シミュレーション名
+       date2 = "2024_1010";%日付が変わってしまった場合は自分で変更
+    subfolder='sim';%sim or exp
+    ExpSimName='coop4drone';%実験,シミュレーション名
     % contents='FT_apx_max';%実験,シミュレーション内容
-    contents='Estimate';%実験,シミュレーション内容
+    contents='epandAndLoadSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001';%実験,シミュレーション内容64文字以内
     %==========================================================
     FolderNameD=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName),'data');%保存先のpath
     FolderNameR=fullfile(ExportFolder,subfolder,strcat(date2,'_',ExpSimName));%保存先のpath
@@ -207,9 +216,9 @@ if isSaved
     filenameRMSE=strcat(fullfile(FolderNameR, 'RMSEs'),'.txt');
     fExist=exist(filenameRMSE,'file');
     if fExist
-        writematrix([strings(1,4);"<"+contents+">",strings(1,3);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
+        writematrix([strings(1,4);"<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab','WriteMode','append')
     else
-        writematrix(["<"+contents+">",strings(1,3);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
+        writematrix(["<"+contents+">",strings(1,3);"time (s)",string(startTime)+"-"+string(endTime),strings(1,2);RMSE(:,1:4)],strcat(fullfile(FolderNameR, 'RMSEs'),'.txt'),'Delimiter','tab')
     end
     
     %% single save
@@ -419,10 +428,8 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             cinputP{j} = cinput{i}(3,:);
             cinputY{j} = cinput{i}(4,:);
             inputsum(:,j) = sqrt(sum((cinput{i}(1:4,:)).^2,2)/lt(i));
-            mLi{j} = rmLi{i};
-            mAll{j} =  rmLi{i};
-            % mLi{i} = cmLi{i};
-            mLi{i} = emL{i};
+            mAll{j} =  cmLi{i};
+            mLi{j} = cmLi{i};
             ai{j} = rai{i};
             mui{j} = rmui{i};
             dwi{j} = rdwi{i};
@@ -554,6 +561,7 @@ function [allData,RMSElog]=dataSummarize(loggers, lgnd, option, addingContents, 
             allData.("ai"+string(i)) = {struct('x',{t2},'y',{{ai{i}'}}), struct('x','time (s)','y','payload'+string(i) +' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("aidrn"+string(i)) = {struct('x',{t2},'y',{{aidrn{i}'}}), struct('x','time (s)','y','drone'+string(i)+' acceleration (m/$\mathrm{s^2}$)'), ["$x$","$y$","$z$"],add_option([],option,addingContents)};
             allData.("dwi"+string(i)) = {struct('x',{{time2{i}'}},'y',{{dwi{i}'}}), struct('x','time (s)','y','link'+string(i)+' angular acceleration (rad/$\mathrm{s^2}$)'), ["$roll$","$pitch$","$yaw$"],add_option([],option,addingContents)};
+            % allData.("inputsum"+string(i)) = {struct('x',{{["Thrust","roll","pitch","yaw"]}},'y',{{inputsum}}), struct('x',[],'y','Value'), CDi,add_option([],option,addingContents)};
         end
         %二乗誤差平均
         RMSElog(1,1:13) = ["RMSE","x","y","z","vx","vy","vz","roll","pitch","yaw","wroll","wpitch","wyaw"];

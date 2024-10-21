@@ -80,7 +80,7 @@ classdef ESTIMATE_LOAD_MASS < handle
               %一周目は初期値を代入
               est = obj.self.estimator.result.state;
               obj.result.xh_pre = [est.pL;est.vL;obj.self.parameter.loadmass];
-              obj.result.mL     = obj.self.parameter.loadmass*0+0.1;
+              obj.result.mL     = obj.self.parameter.loadmass*0+0;
           end
             result      = obj.result;
             obj.timer   = tic;

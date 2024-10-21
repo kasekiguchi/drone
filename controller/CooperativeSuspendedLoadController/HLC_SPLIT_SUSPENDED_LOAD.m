@@ -8,6 +8,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
         IT
         u_opt0
         fmc_options 
+        estimate_load_mass 
     end
     
     methods
@@ -17,9 +18,10 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             obj.Q = STATE_CLASS(struct('state_list',["q"],'num_list',[4]));
             obj.u_opt0 = [(self.parameter.mass + self.parameter.loadmass)*self.parameter.gravity;0;0;0];
             obj.fmc_options = optimoptions(@fmincon,'Display','off');
+            obj.estimate_load_mass = ESTIMATE_LOAD_MASS(self);
         end
         
-        function result=do(obj,param)
+        function result=do(obj,varargin)
             % param (optional) : 構造体：物理パラメータP，ゲインF1-F4 
             model = obj.self.estimator.result;
             ref   = obj.self.reference.result;
@@ -37,10 +39,19 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             P     = obj.self.parameter.get(["mass", "Lx", "jx", "jy", "jz", "gravity","km1","km2","km3","km4","k1","k2","k3","k4", "loadmass", "cableL"]);
             P(15) = obj.self.reference.result.state.mLi;%均等分割(コメントアウト)か推定して分割したモデル化を変えられる
             
-            if isprop(model.state,"mL") %ekfで牽引物の質量を求める場合
+            %拡張質量システムのekfで牽引物の質量を求める場合
+            if isprop(model.state,"mL")
                 P(15) = obj.self.estimator.result.state.mL;
             end
-            obj.result.mLi = P(15);
+            %牽引物システムの質量推定
+            mui = obj.self.reference.result.state.mui;
+            mLi = P(15);
+            elm = obj.estimate_load_mass.estimate(varargin{1},mLi,mui');
+            obj.result.xh_pre = elm.xh_pre;
+            obj.result.mL = elm.mL;
+            P(15) = elm.mL;
+
+            obj.result.mLi = P(15);%質量はコントローラに格納
 
             F1 = Param.F1;
             F2 = Param.F2;
@@ -91,7 +102,7 @@ classdef HLC_SPLIT_SUSPENDED_LOAD < handle
             % tmp = fmincon(fun,obj.u_opt0,A,b,[],[],[],[],[],obj.fmc_options);
             % obj.u_opt0 = tmp;
 
-            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))];
+            obj.result.input = [max(0,min(20,tmp(1)));max(-1,min(1,tmp(2)));max(-1,min(1,tmp(3)));max(-1,min(1,tmp(4)))]+[normrnd(0,0.01,1);normrnd(0,0.001,[3,1])];
             %複数牽引は慣性モーメントがかかるのでモーメントの反応が遅れる？
             result = obj.result;
         end

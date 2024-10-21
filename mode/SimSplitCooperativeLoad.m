@@ -5,7 +5,7 @@ clc; clear; close all
 N = 4;%機体数
 ts = 0; 
 dt = 0.025;
-te = 30;
+te = 100;
 tn = length(ts:dt:te);
 time = TIME(ts, dt, te);
 in_prog_func = @(app) dfunc(app);
@@ -74,6 +74,14 @@ for i = 2:N+1
     % reference     : TIME_VARYING_REFERENCE_SPLIT / Case_study_trajectory
     % controller    : HLC / Controller_HL: take off and landing, CSLC / Controller_Cooperative_Load : fright
     %=============================================================================================
+    %=推定方法を変える場合==========================================================================
+    %-拡張質量システム：
+    % Model_Suspended_Load(dt,initial,id,agent,isEstLoadMass):isEstLoadMass=1
+    %-牽引物システム：
+    % "loadmass"=0にする．HLC_SPLIT_SUSPENDED_LOADをコメント外す
+    %-拡張質量システム+牽引物システム：
+    % 上記の両方を行う
+    %=============================================================================================
     agent(i) = DRONE;
     agent(i).id = i;
 %Drone_Initial_Stat
@@ -94,7 +102,7 @@ for i = 2:N+1
     jx = agent(1).parameter.Ji(1,i-1);
     jy = agent(1).parameter.Ji(2,i-1);
     jz = agent(1).parameter.Ji(3,i-1);
-    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"jx",jx,"jy",jy,"jz",jz);%複数モデルの機体と同じパラメータに設定
+    agent(i).parameter = DRONE_PARAM_SUSPENDED_LOAD("DIATONE","cableL",li,"mass",mi,"loadmass",0,"jx",jx,"jy",jy,"jz",jz);%複数モデルの機体と同じパラメータに設定
     agent(i).plant = MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i),1,agent(i)));%id,dt,type,initial,varargin
     agent(i).sensor = DIRECT_SENSOR(agent(i),0.01); % sensor to capture plant position : second arg is noise
     agent(i).estimator = EKF(agent(i), Estimator_EKF(agent(i),dt,MODEL_CLASS(agent(i),Model_Suspended_Load(dt, initial_state(i), 1,agent(i),1)), ["p", "q", "pL", "pT"]));%expの流用
@@ -221,9 +229,12 @@ run("DataPlot.m")
 %%
 %理想的な張力の方向を描画できるようにする!!!!!!!!!!!!!!!!!
 % close all
+N=4;
+% agent=agent_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
+% logger=log_expandSysEKFsensorNoize0_01inputNoizeT0_01Tq0_001;
 mov = DRAW_COOPERATIVE_DRONES(logger, "self", agent, "target", 1:N);
-% mov.animation(logger, 'target', 1:N, "gif",ture,"lims",[-5 5;-5 5;0 5],"ntimes",5);
-mov.animation(logger, 'target', 1:N,"lims",[-5 5;-5 5;0 5],"ntimes",5);
+mov.animation(logger, 'target', 1:N, "gif",1,"lims",[-5 5;-5 5;0 5],"ntimes",10);
+% mov.animation(logger, 'target', 1:N,"lims",[-5 5;-5 5;0 5],"ntimes",5);
 % mov = DRAW_COOPERATIVE_DRONES(log_T8, "self", agent_T8, "target", 1:6);
 % mov.animation(log_T8, 'target', 1:6, "gif",true,"lims",[-3 3;-3 3;0 4],"ntimes",5);
 
@@ -238,9 +249,9 @@ end
 function result = controller_do(varargin)
     controller = varargin{5}.controller;
     if strcmp(varargin{2},'f')
-        result = controller.load.do(varargin{5});
+        result = controller.load.do(varargin{1},varargin{5});
     else
-        result = controller.hlc.do(varargin{5});
+        result = controller.hlc.do(varargin{1},varargin{5});
     end
     % result = merge_result(result,controller.load.do(varargin{5}));
     varargin{5}.controller.result = result;

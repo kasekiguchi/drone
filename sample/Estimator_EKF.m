@@ -86,14 +86,14 @@ function Estimator = Estimator_EKF(agent,dt,model,output,opts)
         % Estimator.Q = blkdiag(eye(3)*0.6*1E2,eye(3)*0.6*1E2,eye(3)*0.6*1E2,eye(3)*0.6*1E2,0); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
         % Estimator.R = blkdiag(eye(3)*1e-2, eye(3)*1e-3,eye(3)*1e-2,eye(3)*1e-2);%観測ノイズ
         % 標準偏差=0.001
-        Estimator.Q = blkdiag(eye(3)*1E1,eye(3)*1E1,eye(3)*1E1,eye(3)*1E1,0); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
-        Estimator.R = blkdiag(eye(3)*1e-3, eye(3)*1e-3,eye(3)*1e-3,eye(3)*1e-3);%観測ノイズ
+        % Estimator.Q = blkdiag(eye(3)*1E1,eye(3)*1E1,eye(3)*1E1,eye(3)*1E1,0); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
+        % Estimator.R = blkdiag(eye(3)*1e-3, eye(3)*1e-3,eye(3)*1e-3,eye(3)*1e-3);%観測ノイズ
         % 標準偏差=0
         % Estimator.Q = blkdiag(eye(3)*1E0,eye(3)*1E0,eye(3)*1E0,eye(3)*1E0,0); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
         % Estimator.R = blkdiag(eye(3)*1e-8, eye(3)*1e-8,eye(3)*1e-8,eye(3)*1e-8);%観測ノイズ
         % 標準偏差:複数牽引用
-        % Estimator.Q = blkdiag(eye(3)*1E0,eye(3)*1E0,eye(3)*1E0,eye(3)*1E0,0); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
-        % Estimator.R = blkdiag(eye(3)*1e-7, eye(3)*1e-7,eye(3)*1e-7,eye(3)*1e-7);%観測ノイズ
+        Estimator.Q = blkdiag(eye(3)*1E0,eye(3)*1E0,eye(3)*1E0,eye(3)*1E0,0); % システムノイズ（Modelクラス由来）B*Q*B'(Bは単位の次元を状態に合わせる，Qは標準偏差の二乗(分散))
+        Estimator.R = blkdiag(eye(3)*1e-7, eye(3)*1e-7,eye(3)*1e-7,eye(3)*1e-7);%観測ノイズ
     end
 
     if strcmp(Estimator.model.name,"Expand")
