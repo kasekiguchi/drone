@@ -150,7 +150,8 @@ classdef MPC_CONTROLLER_KOOPMAN_HL_simulation < handle
             % u = var(1:4,1);
 
             %% 入力の封じ込め
-            obj.result.input = [max(0, min(10, u(1)));max(-1, min(1, u(2:4)))];
+            % obj.result.input = [max(0, min(10, u(1)));max(-1, min(1, u(2:4)))];
+            obj.result.input = u;
 
             %% データ表示用
             obj.input.u = obj.result.input; 

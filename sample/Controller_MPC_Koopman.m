@@ -39,7 +39,12 @@ function Controller = Controller_MPC_Koopman(dt, model, agent)
     % 要チェック!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     % torqueモデルなら1をとるように．ifを使わない方法で実装してみた
     torque_mat = [0 1];
-    torque = torque_mat(strcmp(func2str(agent.plant.method), 'roll_pitch_yaw_thrust_torque_physical_parameter_model') + 1);
+    if strcmp(class(agent.plant), 'DRONE_EXP_MODEL')
+        torque = 1;
+    else
+        torque = torque_mat(strcmp(func2str(agent.plant.method), 'roll_pitch_yaw_thrust_torque_physical_parameter_model') + 1);
+    end
+
     %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     %--------------------------------------------------------------------
 

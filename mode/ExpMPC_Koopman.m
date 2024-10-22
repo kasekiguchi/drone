@@ -49,6 +49,7 @@ run("ExpBase");
 
 %% function
 function result = controller_do(varargin)
+tic
     controller = varargin{5}.controller;
     if varargin{2} == 'a'
         result = controller.mpc.do(varargin); % arming: KMPC
@@ -57,11 +58,14 @@ function result = controller_do(varargin)
         result.mpc = controller.mpc.do(varargin); % 空で回るだけ．takeoffを実際にするのはHL
         result = result.hlc; % resultに入れる値がhlcだからHLで入力がはいる
     elseif varargin{2} == 'f'
-        result = controller.mpc.do(varargin); % flight: KMPC
+        result.hlc = controller.hlc.do(varargin);
+        result.mpc = controller.mpc.do(varargin); % flight: KMPC
+        result = result.mpc;
     elseif varargin{2} == 'l'
         result = controller.hlc.do(varargin); % landing: HL
    end
     varargin{5}.controller.result = result;
+    toc
 end
 
 function post(app)
@@ -75,14 +79,14 @@ app.logger.plot({1, "input", ""},"ax",app.UIAxes4,"xrange",[app.time.ts,app.time
 % app.logger.plot({1, "inner_input", ""},"ax",app.UIAxes6,"xrange",[app.time.ts,app.time.te]);
 
 % 計算時間の描画
-% figure(100);
-% logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
-% plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5); hold on;
-% yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
-% Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 116, 1), find(app.logger.Data.phase == 116, 1, 'last')]),[],[],[],gca); % take off phase
-% Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 102, 1), find(app.logger.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
-% Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 108, 1), find(app.logger.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); % landing phase
-% xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([app.time.ts logt(end-1)])
+figure(100);
+logt = app.logger.Data.t(1:find(app.logger.Data.t(2:end)==0, 1, 'first'));
+plot(logt(1:end-1), diff(app.logger.Data.t(1:length(logt))), 'LineWidth', 1.5); hold on;
+yline(0.025, 'Color', 'red', 'LineWidth', 1.5); hold off;
+Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 116, 1), find(app.logger.Data.phase == 116, 1, 'last')]),[],[],[],gca); % take off phase
+Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 102, 1), find(app.logger.Data.phase == 102, 1, 'last')]), [0.9 1.0 1.0],[],[],gca); % flight phase
+Square_coloring(app.logger.Data.t([find(app.logger.Data.phase == 108, 1), find(app.logger.Data.phase == 108, 1, 'last')]), [1.0 0.9 1.0],[],[],gca); % landing phase
+xlabel("Time [s]"); ylabel("Calculation time [s]"); xlim([app.time.ts logt(end-1)])
 
 % animation
 % app.agent(1).animation(app.logger,"target",1,"opt_plot",[]); 
@@ -95,9 +99,9 @@ flg.animation = 0;
 flg.timerange = 1;
 flg.plotmode = 1; % 1:inner_input, 2:xy, 3:xyz
 filename = string(datetime('now'), 'yyyy-MM-dd');
-fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[]));
+% fig = FIGURE_EXP(app,struct('flg',flg,'phase',1,'filename',filename,'time_idx',[],'yrange',[]));
 % struct('logger',log,'fExp',0),struct('flg',flg,'phase',phase,'filename',filename,'time_idx',time_idx,'yrange',yrange)
-fig.main_figure();
+% fig.main_figure();
 % fig.make_mpc_plot();
 % fig.main_animation();
 % fig.main_mpc('Koopman', [-1 1; -2 2; 0 1.1]);

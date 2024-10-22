@@ -59,11 +59,11 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             obj.weightR = obj.param.weight.R;
 
             %% A行列にxyzの位置を加えた拡張係数行列とする
-            A_1 = [eye(3), zeros(3), eye(3)*obj.param.dt, zeros(3, size(obj.A,1)-6)];
-            A_2 = [zeros(size(obj.A,2), 3), obj.A];
-            obj.param.A = [A_1; A_2];
-            obj.param.B = [zeros(3, 4); obj.B];
-            obj.param.C = blkdiag(eye(3), obj.C);
+            % A_1 = [eye(3), zeros(3), eye(3)*obj.param.dt, zeros(3, size(obj.A,1)-6)];
+            % A_2 = [zeros(size(obj.A,2), 3), obj.A];
+            % obj.param.A = [A_1; A_2];
+            % obj.param.B = [zeros(3, 4); obj.B];
+            % obj.param.C = blkdiag(eye(3), obj.C);
 
             %% QP change_equationの共通項をあらかじめ計算
             Param = struct('A',obj.param.A,'B',obj.param.B,'C',obj.param.C,'weight',obj.weight,'weightF',obj.weightF,'weightR',obj.weightR,'H',obj.H);
@@ -81,6 +81,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             classlist = ["TIME_VARYING_REFERENCE", "MY_POINT_REFERENCE", "MY_REFERENCE_KOMA2"];
             classname = class(obj.self.reference);
             obj.reference.classnum = find(strcmp(classname, classlist));
+
+            % 誤差モデル
+            obj.param.plant = @roll_pitch_yaw_thrust_torque_physical_parameter_model;
         end
 
         %-- main()的な
@@ -101,27 +104,63 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             elseif vara{2} == 't'
                 obj.reference.xr = repmat([0;0;1;0;0;0;0;0;0;0;0;0;obj.param.ref_input],1,obj.H);
                 obj.current_state = [0;0;1;0;0;0;0;0;0;0;0;0];
-                fprintf('take off\n')
+                % fprintf('take off\n')
             elseif vara{2} == 'f'
                 obj.reference.xr = obj.Reference(rt); %リファレンスの更新
                 obj.current_state = obj.self.estimator.result.state.get(); %現在状態
-                fprintf('flight\n')
+                % fprintf('flight\n')
             end
-            %---------------------------------------------------------------------------------------      
+
+            %% ------------------------------------------------------------  
+            % obj.previous_state = repmat(obj.current_state, 1, obj.H);
+            % 
+            % % 最適化部分の関数化とmex化
+            % Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
+            % [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
+            % % [var, fval, exitflag] = quad_drone(Param);
+            % u = var(1:4,1);
+
+            %% 誤差モデル
+            % 次時刻状態の計算
+            obj.input.u_HL = obj.self.controller.hlc.result.input; % 2コン
+            x = obj.current_state;
+            u = obj.input.u_HL;
+            P = obj.param.P;
+            tspan = [0 0.025];
+            x0 = x;
+            [~,tmpx]=ode15s(@(t,x) obj.param.plant(x,u,P),tspan, x0); % 非線形モデル
+            obj.state.HL = tmpx(end, :);
+
+            % HLとの状態比較を初期値としたクープマンMPCの計算
             obj.previous_state = repmat(obj.current_state, 1, obj.H);
-            
-            %% ------------------------------------------------------------
-            % 最適化部分の関数化とmex化
-            Param = struct('current_state',obj.current_state,'ref',obj.reference.xr,'qpH', obj.qpparam.H, 'qpF', obj.qpparam.F,'lb',obj.param.input.lb,'ub',obj.param.input.ub,'previous_input',obj.previous_input,'H',obj.H);
-            [var, fval, exitflag] = obj.param.quad_drone(Param); %自PCでcontroller:0.6ms, 全体:2.7ms
-            % [var, fval, exitflag] = quad_drone(Param);
+            %-- fmincon 設定
+            options = optimoptions('fmincon');
+            options = optimoptions(options,'MaxIterations',      1.e+12); % 最大反復回数
+            options = optimoptions(options,'ConstraintTolerance',1.e-4);  % 制約違反に対する許容誤差
+
+            %-- fmincon設定
+            options.Algorithm = 'sqp';  % 逐次二次計画法
+            options.Display = 'none';   % 計算結果の表示
+            problem.solver = 'fmincon'; % solver
+            problem.options = options;  %
+            % problem.x0		  = [obj.previous_state; obj.previous_input];
+            problem.x0        = [obj.previous_input];
+
+            %-- fmincon
+            problem.objective = @(x) obj.objective(x); 
+            problem.nonlcon   = @(x) obj.constraints(x);
+            [var, fval, exitflag, ~, ~, ~, ~] = fmincon(problem);
+
+            %
+            obj.previous_input = var;
+            u = var(1:4,1) + obj.input.u_HL; % 印加する入力 4入力
       
             %%
             obj.previous_input = var;
             if vara{2} == 'a'
                 obj.result.input = [0;0;0;0]; % arming時には入力0で固定
             else
-                obj.result.input = var(1:4, 1); % 印加する入力 4入力
+                obj.result.input = u; % 印加する入力 4入力
             end
 
             %% データ表示用
@@ -150,9 +189,9 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
             %         obj.state.ref(7,1), obj.state.ref(8,1), obj.state.ref(9,1),...
             %         obj.state.ref(4,1), obj.state.ref(5,1), obj.state.ref(6,1), ...
             %         obj.state.ref(10,1), obj.state.ref(11,1), obj.state.ref(12,1))  % r:reference 目標状態
-            fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
-                rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
-            fprintf("\n");
+            % fprintf("t: %f \t input: %f %f %f %f \t fval: %f \t flag: %d", ...
+            %     rt, obj.input.u(1), obj.input.u(2), obj.input.u(3), obj.input.u(4), fval, exitflag);
+            % fprintf("\n");
 
             %% z < 0で終了
             if obj.self.estimator.result.state < 0
@@ -162,6 +201,83 @@ classdef MPC_CONTROLLER_KOOPMAN_quadprog_experiment < handle
         end
         function show(obj)
             obj.result
+        end
+
+        function [c, ceq] = constraints(obj, U)
+            uhl = obj.input.u_HL; % HLの入力
+            % umin = obj.input.lb; 
+            umax = obj.input.ub; % 最大最小
+            % 最適化可能な入力の範囲を計算する
+            able = umax - uhl; % 4x1
+            % U < able
+            c = [U-able];
+
+            %defalut
+            % % 不等式制約 c < 0
+            % c = [U(1,:)-10; -U(1,:); U(2:4,:)-1; -(U(2:4,:)+1)];
+            % 等式制約  ceq = 0
+            ceq = [];
+        end
+
+        function eval = objective(obj,u)
+            %-- initialize
+            error_HL = obj.current_state - obj.state.HL'; % obj.state.HLにするとほぼHLでまわる
+            z0 = quaternions_all(error_HL);
+            Z = [z0, zeros(size(z0,1),obj.H-1)];
+            for i = 1:obj.H-2
+                Z(:,i+1) = obj.A*Z(:,i) + obj.B*u(:,i);
+            end
+            x = obj.C*Z; % x[k] = Cz[k] 
+
+            % そのままのリファレンスで評価
+            % X = obj.state.HL' + x; % ここの4つだとなんかKMPCが入る
+            % Utmp = obj.input.u_HL + u;
+            % U = [max(0,min(10,Utmp(1,:))); max(-1,min(1,Utmp(2:4,:)))];
+            % ref = obj.reference.xr(1:16,:);
+
+            % 誤差モデルのまま評価
+            X = x;
+            % U = [max(0,min(10,u(1,:))); max(-1,min(1,u(2:4,:)))];
+            U = u;
+            ref(1:12,:) = obj.reference.xr(1:12,:) - obj.state.HL';
+            ref(13:16,:) = obj.reference.xr(13:16,:);
+
+            % X = [error_HL, x]; % ここの三つだとほぼHL
+            % U = u;
+            % ref = obj.reference.xr(1:12,1) - obj.current_state; % 現在状態と目標状態の誤差
+            % ref = obj.reference.xr(1:12,1) - obj.state.HL'; % 目標状態とHLの時間発展の誤差
+        
+            tildeXp = X(1:3, :) - ref(1:3,:);  % 位置
+            tildeXq = X(4:6, :) - ref(4:6,:);
+            tildeXv = X(7:9, :) - ref(7:9,:);  % 速度
+            tildeXw = X(10:12, :) - ref(10:12,:);
+            tildeUref = U(:, :) - ref(13:16,:);
+            % tildeUref = U;
+            
+        %-- 状態及び入力のステージコストを計算 長くなるから分割
+            stagestateP = tildeXp(:, 1:obj.H-1)'*obj.param.weight.P*tildeXp(:, 1:obj.H-1);
+            stagestateV = tildeXv(:, 1:obj.H-1)'*obj.param.weight.V*tildeXv(:, 1:obj.H-1);
+            stagestateQ = tildeXq(:, 1:obj.H-1)'*obj.param.weight.Q*tildeXq(:, 1:obj.H-1);
+            stagestateW = tildeXw(:, 1:obj.H-1)'*obj.param.weight.W*tildeXw(:, 1:obj.H-1);
+            stageinputR = tildeUref(:, 1:obj.H-1)'*obj.param.weight.R*tildeUref(:, 1:obj.H-1);
+            
+            stagestateP = diag(stagestateP);
+            stagestateV = diag(stagestateV);
+            stagestateQ = diag(stagestateQ);
+            stagestateW = diag(stagestateW);
+            stagestateX = stagestateP' + stagestateV' + stagestateQ' + stagestateW';
+            stageinputR = diag(stageinputR);
+            
+            stagestate = stagestateX + stageinputR'; %ステージコスト
+            
+        %-- 状態の終端コストを計算
+            terminalstate =  tildeXp(:, end)' * obj.param.weight.Pf * tildeXp(:, end)...
+                            +tildeXv(:, end)' * obj.param.weight.Vf * tildeXv(:, end)...
+                            +tildeXq(:, end)' * obj.param.weight.Qf * tildeXq(:, end)...
+                            +tildeXw(:, end)' * obj.param.weight.Wf * tildeXw(:, end); 
+        
+        %-- 評価値計算
+            eval = sum(stagestate) + terminalstate;
         end
 
         function [xr] = Reference(obj, T)

@@ -11,8 +11,8 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
 
     %% MPC
     Controller.dt = 0.1; % MPCステップ幅
-    Controller.H = 5;
-    Controller.Maxparticle_num = 2000; % 100000
+    Controller.H = 10;
+    Controller.Maxparticle_num = 1000; % 100000
     Controller.particle_num = Controller.Maxparticle_num;
     Controller.Minparticle_num = Controller.Maxparticle_num; % 2000でも動く　怪しい
 
@@ -99,7 +99,7 @@ function Controller = Controller_MPC_HLMC_HL(dt,agent)
 
     %% 
     Controller.Z = 1e2 * diag([100; 10]);% * 1e3; %2 %1e3 10
-    Controller.X = 1e5 * diag([100;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
+    Controller.X = 1e5 * diag([1000;10;1;1]);% 1e2でも結構いい感じ %1e3 1e1
     Controller.Y = Controller.X;% * 1e3;
     Controller.PHI = 1* diag([100; 1]);
 
